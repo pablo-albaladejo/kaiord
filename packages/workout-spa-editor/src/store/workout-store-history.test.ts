@@ -7,6 +7,8 @@ import type { UndoHistory } from "./workout-state.types";
 import { useWorkoutStore } from "./workout-store";
 import { pushHistorySnapshot } from "./workout-store-history";
 
+const HISTORY_TRIM_LIMIT = 50;
+
 const makeUI = (marker: string): UIWorkout =>
   ({
     version: "1.0",
@@ -78,7 +80,7 @@ describe("pushHistorySnapshot", () => {
   it("should trim at MAX_HISTORY_SIZE (50), keeping the most recent tail", () => {
     // Arrange
     let state = { undoHistory: [] as UndoHistory, historyIndex: -1 };
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < HISTORY_TRIM_LIMIT; i++) {
       state = pushHistorySnapshot(state, {
         workout: makeUI(`u${i}`),
         selection: null,
@@ -88,7 +90,7 @@ describe("pushHistorySnapshot", () => {
       workout: makeUI("overflow"),
       selection: null,
     });
-    expect(trimmed.undoHistory.length).toBe(50);
+    expect(trimmed.undoHistory.length).toBe(HISTORY_TRIM_LIMIT);
     const tail = trimmed.undoHistory.at(-1)!.workout as KRD;
 
     // Act

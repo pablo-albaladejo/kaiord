@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { sendBridgeMessage } from "./bridge-transport";
 
+const TRANSPORT_TIMEOUT_TICK_MS = 1_000;
+
 describe("sendBridgeMessage", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -108,8 +110,12 @@ describe("sendBridgeMessage", () => {
         lastError: undefined,
       },
     } as unknown as typeof chrome;
-    const promise = sendBridgeMessage("ext-123", { type: "ping" }, 1000);
-    vi.advanceTimersByTime(1000);
+    const promise = sendBridgeMessage(
+      "ext-123",
+      { type: "ping" },
+      TRANSPORT_TIMEOUT_TICK_MS
+    );
+    vi.advanceTimersByTime(TRANSPORT_TIMEOUT_TICK_MS);
 
     // Act
     const result = await promise;

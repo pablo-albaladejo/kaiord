@@ -10,6 +10,17 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { KRD } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { reorderStepAction } from "./reorder-step-action";
+import {
+  LARGE_WORKOUT_FIRST_NEW_STEP_INDEX,
+  LARGE_WORKOUT_LAST_INDEX,
+  LARGE_WORKOUT_LENGTH,
+  REORDER_FIVE_STEPS_NON_SEQUENTIAL_INDEX,
+  REORDER_OVER_INDEX_THREE,
+  REORDER_TEN_STEP_INDEX,
+  REORDER_THREE_STEP_INDEX,
+  STEP_COUNT_FOUR,
+  STEP_COUNT_THREE,
+} from "./reorder-step-action.test-fixtures";
 
 describe("reorderStepAction", () => {
   let mockKrd: KRD;
@@ -86,7 +97,7 @@ describe("reorderStepAction", () => {
       const workout = result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(3);
+      expect(workout?.steps).toHaveLength(STEP_COUNT_THREE);
       expect(workout?.steps[2].duration).toEqual({
         type: "time",
         seconds: 300,
@@ -116,7 +127,7 @@ describe("reorderStepAction", () => {
       const workout = result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(3);
+      expect(workout?.steps).toHaveLength(STEP_COUNT_THREE);
       expect(workout?.steps[0].duration).toEqual({ type: "open" });
       expect(workout?.steps[0].stepIndex).toBe(2);
       expect(workout?.steps[1].duration).toEqual({
@@ -146,7 +157,7 @@ describe("reorderStepAction", () => {
       const workout = result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(3);
+      expect(workout?.steps).toHaveLength(STEP_COUNT_THREE);
       expect(workout?.steps[0].duration).toEqual({
         type: "distance",
         meters: 1000,
@@ -299,7 +310,7 @@ describe("reorderStepAction", () => {
       const result = reorderStepAction(mockKrd, 0, 1, stateWithHistory);
 
       // Assert
-      expect(result.undoHistory).toHaveLength(3);
+      expect(result.undoHistory).toHaveLength(STEP_COUNT_THREE);
       expect(result.historyIndex).toBe(2);
     });
   });
@@ -398,7 +409,7 @@ describe("reorderStepAction", () => {
       const workout = result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(3);
+      expect(workout?.steps).toHaveLength(STEP_COUNT_THREE);
       expect(workout?.steps[0]).toHaveProperty("repeatCount");
       expect(workout?.steps[1].duration).toEqual({ type: "open" });
       expect(workout?.steps[1].stepIndex).toBe(1);
@@ -474,10 +485,12 @@ describe("reorderStepAction", () => {
       const workout = result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(3);
-      expect(workout?.steps[0].stepIndex).toBe(10);
-      expect(workout?.steps[1].stepIndex).toBe(3);
-      expect(workout?.steps[2].stepIndex).toBe(5);
+      expect(workout?.steps).toHaveLength(STEP_COUNT_THREE);
+      expect(workout?.steps[0].stepIndex).toBe(REORDER_TEN_STEP_INDEX);
+      expect(workout?.steps[1].stepIndex).toBe(REORDER_THREE_STEP_INDEX);
+      expect(workout?.steps[2].stepIndex).toBe(
+        REORDER_FIVE_STEPS_NON_SEQUENTIAL_INDEX
+      );
     });
 
     it("should maintain stable stepIndex for workouts with repetition blocks", () => {
@@ -540,13 +553,18 @@ describe("reorderStepAction", () => {
           },
         },
       };
-      const result = reorderStepAction(krdWithMixedItems, 1, 3, mockState);
+      const result = reorderStepAction(
+        krdWithMixedItems,
+        1,
+        REORDER_OVER_INDEX_THREE,
+        mockState
+      );
 
       // Act
       const workout = result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(4);
+      expect(workout?.steps).toHaveLength(STEP_COUNT_FOUR);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[1].stepIndex).toBe(1);
       expect(workout?.steps[2].stepIndex).toBe(2);
@@ -614,11 +632,16 @@ describe("reorderStepAction", () => {
       expect(workout!.steps[0].stepIndex).toBe(1);
       expect(workout!.steps[1].stepIndex).toBe(2);
       expect(workout!.steps[2].stepIndex).toBe(0);
-      expect(workout!.steps[3].stepIndex).toBe(3);
-      const result2 = reorderStepAction(krd1, 3, 0, mockState);
+      expect(workout!.steps[3].stepIndex).toBe(REORDER_THREE_STEP_INDEX);
+      const result2 = reorderStepAction(
+        krd1,
+        REORDER_THREE_STEP_INDEX,
+        0,
+        mockState
+      );
       const krd2 = result2.currentWorkout!;
       workout = krd2.extensions?.structured_workout;
-      expect(workout!.steps[0].stepIndex).toBe(3);
+      expect(workout!.steps[0].stepIndex).toBe(REORDER_THREE_STEP_INDEX);
       expect(workout!.steps[1].stepIndex).toBe(1);
       expect(workout!.steps[2].stepIndex).toBe(2);
       expect(workout!.steps[3].stepIndex).toBe(0);
@@ -629,8 +652,8 @@ describe("reorderStepAction", () => {
       workout = krd3.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(4);
-      expect(workout!.steps[0].stepIndex).toBe(3);
+      expect(workout?.steps).toHaveLength(STEP_COUNT_FOUR);
+      expect(workout!.steps[0].stepIndex).toBe(REORDER_THREE_STEP_INDEX);
       expect(workout!.steps[1].stepIndex).toBe(2);
       expect(workout!.steps[2].stepIndex).toBe(1);
       expect(workout!.steps[3].stepIndex).toBe(0);
@@ -674,16 +697,19 @@ describe("reorderStepAction", () => {
 
     it("should preserve stable stepIndex for large workouts", () => {
       // Arrange
-      const largeWorkoutSteps = Array.from({ length: 20 }, (_, i) => ({
-        stepIndex: i * 5, // Non-sequential initial values
-        durationType: "time" as const,
-        duration: { type: "time" as const, seconds: 300 },
-        targetType: "power" as const,
-        target: {
-          type: "power" as const,
-          value: { unit: "watts" as const, value: 200 },
-        },
-      }));
+      const largeWorkoutSteps = Array.from(
+        { length: LARGE_WORKOUT_LENGTH },
+        (_, i) => ({
+          stepIndex: i * LARGE_WORKOUT_FIRST_NEW_STEP_INDEX, // Non-sequential initial values
+          durationType: "time" as const,
+          duration: { type: "time" as const, seconds: 300 },
+          targetType: "power" as const,
+          target: {
+            type: "power" as const,
+            value: { unit: "watts" as const, value: 200 },
+          },
+        })
+      );
       const largeKrd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -699,15 +725,22 @@ describe("reorderStepAction", () => {
           },
         },
       };
-      const result = reorderStepAction(largeKrd, 0, 19, mockState);
+      const result = reorderStepAction(
+        largeKrd,
+        0,
+        LARGE_WORKOUT_LAST_INDEX,
+        mockState
+      );
 
       // Act
       const workout = result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(workout?.steps).toHaveLength(20);
-      expect(workout!.steps[0].stepIndex).toBe(5);
-      expect(workout!.steps[19].stepIndex).toBe(0);
+      expect(workout?.steps).toHaveLength(LARGE_WORKOUT_LENGTH);
+      expect(workout!.steps[0].stepIndex).toBe(
+        LARGE_WORKOUT_FIRST_NEW_STEP_INDEX
+      );
+      expect(workout!.steps[LARGE_WORKOUT_LAST_INDEX].stepIndex).toBe(0);
     });
   });
 });

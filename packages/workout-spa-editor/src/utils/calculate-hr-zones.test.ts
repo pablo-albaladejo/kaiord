@@ -2,17 +2,21 @@ import { describe, expect, it } from "vitest";
 
 import { calculateHrZones } from "./calculate-hr-zones";
 
+const LTHR_170 = 170;
+const LTHR_180 = 180;
+const EXPECTED_ZONE_COUNT = 5;
+
 describe("calculateHrZones", () => {
   it("should calculate 5 zones from LTHR=170", () => {
     // Arrange
 
     // Act
 
-    const zones = calculateHrZones(170);
+    const zones = calculateHrZones(LTHR_170);
 
     // Assert
 
-    expect(zones).toHaveLength(5);
+    expect(zones).toHaveLength(EXPECTED_ZONE_COUNT);
     expect(zones[0]).toEqual({
       zone: 1,
       name: "Recovery",
@@ -50,7 +54,7 @@ describe("calculateHrZones", () => {
 
     // Act
 
-    const zones = calculateHrZones(180);
+    const zones = calculateHrZones(LTHR_180);
 
     // Assert
 
@@ -61,7 +65,7 @@ describe("calculateHrZones", () => {
   it("should return zone names in correct order", () => {
     // Arrange
 
-    const zones = calculateHrZones(170);
+    const zones = calculateHrZones(LTHR_170);
 
     // Act
 

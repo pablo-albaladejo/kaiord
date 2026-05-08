@@ -1,6 +1,9 @@
 import { expect, test } from "./fixtures/base";
 import { expandFileUpload } from "./helpers/expand-file-upload";
 
+const EXPECTED_STEP_CARDS_AFTER_DUPLICATE = 3;
+const IMMEDIATE_DELETION_GRACE_MS = 300;
+
 /**
  * Critical Path: Step Management (Create, Delete, Duplicate)
  *
@@ -74,7 +77,9 @@ test.describe("Step Management Flow", () => {
     // Verify step was duplicated (should now have 3 steps)
     // Check for the third step card first, then verify the text
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(3, { timeout: 5000 });
+    await expect(stepCards).toHaveCount(EXPECTED_STEP_CARDS_AFTER_DUPLICATE, {
+      timeout: 5000,
+    });
 
     // Verify the third step exists by checking its content
     // The third step should have stepIndex 2, so displayIndex + 1 = 3
@@ -90,7 +95,7 @@ test.describe("Step Management Flow", () => {
 
     // Requirement 1.1: Deletion is immediate without confirmation modal
     // Wait for immediate deletion
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(IMMEDIATE_DELETION_GRACE_MS);
 
     // Verify step was deleted (should only have 2 steps now)
     await expect(page.getByText("Step 2")).toBeVisible();

@@ -13,6 +13,10 @@ import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { ungroupRepetitionBlockAction } from "./ungroup-repetition-block-action";
 
+const STEPS_AFTER_UNGROUP_3 = 3;
+const STEPS_AFTER_UNGROUP_4 = 4;
+const FOURTH_STEP_INDEX = 3;
+
 describe("ungroupRepetitionBlockAction", () => {
   const createMockState = (): WorkoutState => ({
     currentWorkout: null,
@@ -73,7 +77,7 @@ describe("ungroupRepetitionBlockAction", () => {
       expect(result.currentWorkout).toBeDefined();
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
-      expect(updatedWorkout?.steps).toHaveLength(3);
+      expect(updatedWorkout?.steps).toHaveLength(STEPS_AFTER_UNGROUP_3);
       expect(updatedWorkout?.steps[0]).toEqual({ ...step1, stepIndex: 0 });
       expect(updatedWorkout?.steps[1]).toEqual({ ...step2, stepIndex: 1 });
       expect(updatedWorkout?.steps[2]).toEqual({ ...step3, stepIndex: 2 });
@@ -90,7 +94,7 @@ describe("ungroupRepetitionBlockAction", () => {
         steps: [step1, step2],
       };
       const step3 = createMockStep(2);
-      const step4 = createMockStep(3);
+      const step4 = createMockStep(FOURTH_STEP_INDEX);
 
       const krd = createMockKRD([step3, repetitionBlock, step4]);
       const state = createMockState();
@@ -101,7 +105,7 @@ describe("ungroupRepetitionBlockAction", () => {
       // Assert
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
-      expect(updatedWorkout?.steps).toHaveLength(4);
+      expect(updatedWorkout?.steps).toHaveLength(STEPS_AFTER_UNGROUP_4);
       expect(updatedWorkout?.steps[0]).toMatchObject({ stepIndex: 0 });
       expect(updatedWorkout?.steps[1]).toMatchObject({ stepIndex: 1 });
       expect(updatedWorkout?.steps[2]).toMatchObject({ stepIndex: 2 });
@@ -263,7 +267,7 @@ describe("ungroupRepetitionBlockAction", () => {
       // Assert
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
-      expect(updatedWorkout?.steps).toHaveLength(3);
+      expect(updatedWorkout?.steps).toHaveLength(STEPS_AFTER_UNGROUP_3);
       expect(updatedWorkout?.steps[0]).toMatchObject({ stepIndex: 0 });
       expect(updatedWorkout?.steps[1]).toMatchObject({ stepIndex: 1 });
       expect(updatedWorkout?.steps[2]).toMatchObject({ stepIndex: 2 });

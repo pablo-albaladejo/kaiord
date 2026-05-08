@@ -6,6 +6,11 @@ import {
   positiveSnapshotFixtures,
 } from "../test-utils/profile-snapshot-fixtures";
 import {
+  PROFILE_OVERSIZED_PAYLOAD_REPEAT,
+  PROFILE_SAMPLE_LTHR_RUNNING,
+  PROFILE_STALE_SNAPSHOT_DAYS,
+} from "../test-utils/tolerance-constants";
+import {
   fingerprintSnapshot,
   type ProfileSnapshot,
   profileSnapshotSchema,
@@ -19,7 +24,7 @@ describe("STALE_SNAPSHOT_THRESHOLD_DAYS", () => {
     // Act
 
     // Assert
-    expect(STALE_SNAPSHOT_THRESHOLD_DAYS).toBe(7);
+    expect(STALE_SNAPSHOT_THRESHOLD_DAYS).toBe(PROFILE_STALE_SNAPSHOT_DAYS);
   });
 });
 
@@ -57,7 +62,9 @@ describe("profileSnapshotSchema — positive fixtures", () => {
       expect(
         result.data.thresholds?.running?.thresholdPaceSecPerKm
       ).toBeUndefined();
-      expect(result.data.thresholds?.running?.lthr).toBe(170);
+      expect(result.data.thresholds?.running?.lthr).toBe(
+        PROFILE_SAMPLE_LTHR_RUNNING
+      );
       expect(result.data.heartRate?.lthr).toBeUndefined();
     }
   });
@@ -121,7 +128,7 @@ describe("profileSnapshotSchema — negative fixtures", () => {
     // Arrange
     const oversized = {
       schemaVersion: 1 as const,
-      profile: { name: "x".repeat(9000) },
+      profile: { name: "x".repeat(PROFILE_OVERSIZED_PAYLOAD_REPEAT) },
       thresholds: {},
       heartRate: {},
       generatedAt: "2026-05-01T00:00:00.000Z",

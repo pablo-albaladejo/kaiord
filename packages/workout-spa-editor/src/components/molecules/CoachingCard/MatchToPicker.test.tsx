@@ -9,6 +9,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { MatchToPicker } from "./MatchToPicker";
+import {
+  NINETY_MINUTES_SECONDS,
+  ONE_HOUR_SECONDS,
+} from "./MatchToPicker.test-fixtures";
 
 const makeWorkout = (
   id: string,
@@ -53,8 +57,8 @@ describe("MatchToPicker — keyboard navigation", () => {
     const onSelect = vi.fn();
     const onClose = vi.fn();
     const workouts = [
-      makeWorkout("w1", "cycling", 60 * 60),
-      makeWorkout("w2", "cycling", 90 * 60),
+      makeWorkout("w1", "cycling", ONE_HOUR_SECONDS),
+      makeWorkout("w2", "cycling", NINETY_MINUTES_SECONDS),
       makeWorkout("w3", "cycling"),
     ];
     render(

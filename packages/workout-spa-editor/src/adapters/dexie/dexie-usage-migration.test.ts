@@ -15,6 +15,10 @@ import Dexie from "dexie";
 import { describe, expect, it } from "vitest";
 
 import { backfillUsageRow, KaiordDatabase } from "./dexie-database";
+import {
+  LEGACY_USAGE_LARGE_TOKEN_TOTAL,
+  LEGACY_USAGE_SMALL_TOKEN_TOTAL,
+} from "./dexie-usage-migration.test-fixtures";
 
 describe("backfillUsageRow (unit)", () => {
   it("should fill inputTokens from totalTokens and set outputTokens=0, legacy=true", () => {
@@ -40,9 +44,15 @@ describe("backfillUsageRow (unit)", () => {
     // Arrange
     const row: Record<string, unknown> = {
       yearMonth: "2026-03",
-      totalTokens: 80,
+      totalTokens: LEGACY_USAGE_SMALL_TOKEN_TOTAL,
       totalCost: 0.001,
-      entries: [{ date: "2026-03-12", tokens: 80, cost: 0.001 }],
+      entries: [
+        {
+          date: "2026-03-12",
+          tokens: LEGACY_USAGE_SMALL_TOKEN_TOTAL,
+          cost: 0.001,
+        },
+      ],
     };
     backfillUsageRow(row);
 
@@ -50,9 +60,9 @@ describe("backfillUsageRow (unit)", () => {
     const entry = (row.entries as Array<Record<string, unknown>>)[0];
 
     // Assert
-    expect(entry.inputTokens).toBe(80);
+    expect(entry.inputTokens).toBe(LEGACY_USAGE_SMALL_TOKEN_TOTAL);
     expect(entry.outputTokens).toBe(0);
-    expect(entry.tokens).toBe(80);
+    expect(entry.tokens).toBe(LEGACY_USAGE_SMALL_TOKEN_TOTAL);
   });
 
   it("should be idempotent — rows already carrying inputTokens are untouched", () => {
@@ -110,9 +120,15 @@ describe("Dexie v2 → v3 upgrade (integration)", () => {
     await v2.open();
     await v2.table("usage").put({
       yearMonth: "2026-03",
-      totalTokens: 750,
+      totalTokens: LEGACY_USAGE_LARGE_TOKEN_TOTAL,
       totalCost: 0.015,
-      entries: [{ date: "2026-03-12", tokens: 750, cost: 0.015 }],
+      entries: [
+        {
+          date: "2026-03-12",
+          tokens: LEGACY_USAGE_LARGE_TOKEN_TOTAL,
+          cost: 0.015,
+        },
+      ],
     });
     v2.close();
     const v3 = new KaiordDatabase(dbName);
@@ -128,11 +144,13 @@ describe("Dexie v2 → v3 upgrade (integration)", () => {
       }>("usage")
       .get("2026-03");
     expect(migrated).toBeDefined();
-    expect(migrated!.inputTokens).toBe(750);
+    expect(migrated!.inputTokens).toBe(LEGACY_USAGE_LARGE_TOKEN_TOTAL);
     expect(migrated!.outputTokens).toBe(0);
-    expect(migrated!.totalTokens).toBe(750);
+    expect(migrated!.totalTokens).toBe(LEGACY_USAGE_LARGE_TOKEN_TOTAL);
     expect(migrated!.legacy).toBe(true);
-    expect(migrated!.entries[0].inputTokens).toBe(750);
+    expect(migrated!.entries[0].inputTokens).toBe(
+      LEGACY_USAGE_LARGE_TOKEN_TOTAL
+    );
     expect(migrated!.entries[0].outputTokens).toBe(0);
 
     // Act

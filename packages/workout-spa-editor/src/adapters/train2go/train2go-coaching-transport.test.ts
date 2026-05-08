@@ -204,6 +204,9 @@ describe("createTrain2GoCoachingTransport", () => {
 
   it("should return a parsed ZonesPayload on success via readZones()", async () => {
     // Arrange
+    const WEIGHT_KG = 83;
+    const PACE_Z4_UPPER = 268;
+    const HR_Z4_UPPER = 160;
     (globalThis as Record<string, unknown>).chrome = {
       runtime: {
         lastError: null,
@@ -213,9 +216,9 @@ describe("createTrain2GoCoachingTransport", () => {
               ok: true,
               protocolVersion: 1,
               data: {
-                physiological: { weight: 83, bpmMax: 187 },
-                paces: { cycling: { z4Upper: 268, z5Lower: 270 } },
-                hrZones: { cycling: { z4Upper: 160 } },
+                physiological: { weight: WEIGHT_KG, bpmMax: 187 },
+                paces: { cycling: { z4Upper: PACE_Z4_UPPER, z5Lower: 270 } },
+                hrZones: { cycling: { z4Upper: HR_Z4_UPPER } },
               },
             });
           }
@@ -228,9 +231,9 @@ describe("createTrain2GoCoachingTransport", () => {
     const result = await t.readZones?.("99999");
 
     // Assert
-    expect(result?.physiological?.weight).toBe(83);
-    expect(result?.paces?.cycling?.z4Upper).toBe(268);
-    expect(result?.hrZones?.cycling?.z4Upper).toBe(160);
+    expect(result?.physiological?.weight).toBe(WEIGHT_KG);
+    expect(result?.paces?.cycling?.z4Upper).toBe(PACE_Z4_UPPER);
+    expect(result?.hrZones?.cycling?.z4Upper).toBe(HR_Z4_UPPER);
   });
 
   it("should return null when payload fails the Zod allowlist via readZones()", async () => {

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { KeyboardHandlerDeps } from "./build-keyboard-handlers";
 import { buildKeyboardHandlers } from "./build-keyboard-handlers";
+import { THREE_STEP_WORKOUT_SIZE } from "./build-keyboard-handlers.test-fixtures";
 
 vi.mock("../store/clipboard-store", () => ({
   hasClipboardContent: vi.fn(() => false),
@@ -106,7 +107,10 @@ describe("buildKeyboardHandlers return values", () => {
       // Act
 
       const h = buildKeyboardHandlers(
-        mockDeps({ stepIndex: () => 0, workout: makeWorkout(3) })
+        mockDeps({
+          stepIndex: () => 0,
+          workout: makeWorkout(THREE_STEP_WORKOUT_SIZE),
+        })
       );
 
       // Assert
@@ -120,7 +124,10 @@ describe("buildKeyboardHandlers return values", () => {
       // Act
 
       const h = buildKeyboardHandlers(
-        mockDeps({ stepIndex: () => 1, workout: makeWorkout(3) })
+        mockDeps({
+          stepIndex: () => 1,
+          workout: makeWorkout(THREE_STEP_WORKOUT_SIZE),
+        })
       );
 
       // Assert
@@ -148,7 +155,10 @@ describe("buildKeyboardHandlers return values", () => {
       // Act
 
       const h = buildKeyboardHandlers(
-        mockDeps({ stepIndex: () => 2, workout: makeWorkout(3) })
+        mockDeps({
+          stepIndex: () => 2,
+          workout: makeWorkout(THREE_STEP_WORKOUT_SIZE),
+        })
       );
 
       // Assert
@@ -162,7 +172,10 @@ describe("buildKeyboardHandlers return values", () => {
       // Act
 
       const h = buildKeyboardHandlers(
-        mockDeps({ stepIndex: () => 0, workout: makeWorkout(3) })
+        mockDeps({
+          stepIndex: () => 0,
+          workout: makeWorkout(THREE_STEP_WORKOUT_SIZE),
+        })
       );
 
       // Assert
@@ -220,7 +233,7 @@ describe("buildKeyboardHandlers return values", () => {
       const h = buildKeyboardHandlers(
         mockDeps({
           stepIndex: () => 0,
-          workout: makeWorkout(3),
+          workout: makeWorkout(THREE_STEP_WORKOUT_SIZE),
           selectedStepIds: ["step-0", "step-1"],
         })
       );
@@ -479,7 +492,9 @@ describe("buildKeyboardHandlers return values", () => {
 
       // Act
 
-      const h = buildKeyboardHandlers(mockDeps({ workout: makeWorkout(3) }));
+      const h = buildKeyboardHandlers(
+        mockDeps({ workout: makeWorkout(THREE_STEP_WORKOUT_SIZE) })
+      );
 
       // Assert
 

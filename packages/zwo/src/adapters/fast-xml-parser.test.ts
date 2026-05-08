@@ -1,6 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
+import { PARSER_NUMERICS } from "../test-utils";
 import type { ZwiftValidator } from "../types";
 import {
   createFastXmlZwiftReader,
@@ -242,7 +243,9 @@ describe("createFastXmlZwiftReader", () => {
       const result = await reader(xmlWithThreshold);
 
       // Assert
-      expect(result.extensions?.zwift?.thresholdSecPerKm).toBe(240);
+      expect(result.extensions?.zwift?.thresholdSecPerKm).toBe(
+        PARSER_NUMERICS.THRESHOLD_SEC_PER_KM
+      );
     });
 
     it("should map bike sportType to cycling", async () => {

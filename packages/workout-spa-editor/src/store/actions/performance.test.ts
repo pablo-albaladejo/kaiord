@@ -21,6 +21,39 @@ import type { WorkoutState } from "../workout-actions";
 import { deleteRepetitionBlockAction } from "./delete-repetition-block-action";
 import { createUndoAction } from "./history-actions";
 
+// Workout-step factory base values
+const DEFAULT_DURATION_BASE_SEC = 300;
+const DURATION_INCREMENT_SEC = 10;
+const DEFAULT_POWER_BASE_W = 200;
+
+// Random-id radix scaffolding (Math.random().toString(36).substr(2, 9))
+const RANDOM_ID_RADIX = 36;
+const RANDOM_ID_OFFSET = 2;
+const RANDOM_ID_LEN = 9;
+
+// Block-scaffold sizes
+const BLOCK_SCAFFOLD_NESTED_STEPS = 10;
+const BLOCK_SCAFFOLD_NESTED_REPS = 3;
+const BLOCK_SCAFFOLD_LARGE_STEPS = 50;
+const BLOCK_SCAFFOLD_LARGE_REPS = 5;
+const BLOCK_SCAFFOLD_MEDIUM_STEPS = 20;
+const BLOCK_SCAFFOLD_MEDIUM_REPS = 3;
+const BLOCK_SCAFFOLD_DELETE_INDEX_STEPS = 30;
+const BLOCK_SCAFFOLD_DELETE_INDEX_REPS = 2;
+const BLOCK_SCAFFOLD_UNDO_LARGE_STEPS = 30;
+const BLOCK_SCAFFOLD_UNDO_LARGE_REPS = 3;
+
+// Workout-scaffold list sizes
+const MANY_STEPS_COUNT = 50;
+const INDICES_TEST_INSERT_INDEX = 50;
+const PRE_DELETE_LIST_LENGTH = 100;
+const HISTORY_DEPTH = 50;
+const HISTORY_LAST_INDEX = 49;
+const UNDO_BATCH_COUNT = 10;
+const MODAL_BATCH_COUNT = 10;
+const NESTED_BLOCKS_COUNT = 5;
+const NESTED_DELETE_LOOP_COUNT = 3;
+
 describe("Performance Tests", () => {
   const createMockKrd = (steps: Array<WorkoutStep | RepetitionBlock>): KRD => ({
     version: "1.0",
@@ -41,16 +74,24 @@ describe("Performance Tests", () => {
   const createWorkoutStep = (index: number): WorkoutStep => ({
     stepIndex: index,
     durationType: "time",
-    duration: { type: "time", seconds: 300 + index * 10 },
+    duration: {
+      type: "time",
+      seconds: DEFAULT_DURATION_BASE_SEC + index * DURATION_INCREMENT_SEC,
+    },
     targetType: "power",
-    target: { type: "power", value: { unit: "watts", value: 200 + index } },
+    target: {
+      type: "power",
+      value: { unit: "watts", value: DEFAULT_POWER_BASE_W + index },
+    },
   });
 
   const createRepetitionBlock = (
     stepCount: number,
     repeatCount: number
   ): RepetitionBlock => ({
-    id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: `block-${Date.now()}-${Math.random()
+      .toString(RANDOM_ID_RADIX)
+      .substr(RANDOM_ID_OFFSET, RANDOM_ID_LEN)}`,
     repeatCount,
     steps: Array.from({ length: stepCount }, (_, i) => createWorkoutStep(i)),
   });
@@ -67,7 +108,10 @@ describe("Performance Tests", () => {
   describe("block deletion performance", () => {
     it("should delete small block within 100ms", () => {
       // Arrange
-      const block = createRepetitionBlock(10, 3);
+      const block = createRepetitionBlock(
+        BLOCK_SCAFFOLD_NESTED_STEPS,
+        BLOCK_SCAFFOLD_NESTED_REPS
+      );
       const krd = createMockKrd([
         createWorkoutStep(0),
         block,
@@ -88,7 +132,10 @@ describe("Performance Tests", () => {
 
     it("should delete large block within 100ms", () => {
       // Arrange
-      const largeBlock = createRepetitionBlock(50, 5);
+      const largeBlock = createRepetitionBlock(
+        BLOCK_SCAFFOLD_LARGE_STEPS,
+        BLOCK_SCAFFOLD_LARGE_REPS
+      );
       const krd = createMockKrd([
         createWorkoutStep(0),
         largeBlock,
@@ -110,12 +157,15 @@ describe("Performance Tests", () => {
     it("should delete block from workout with many steps within 100ms", () => {
       // Arrange
       const steps: Array<WorkoutStep | RepetitionBlock> = [];
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < MANY_STEPS_COUNT; i++) {
         steps.push(createWorkoutStep(i));
       }
-      const blockToDelete = createRepetitionBlock(20, 3);
+      const blockToDelete = createRepetitionBlock(
+        BLOCK_SCAFFOLD_MEDIUM_STEPS,
+        BLOCK_SCAFFOLD_MEDIUM_REPS
+      );
       steps.push(blockToDelete);
-      for (let i = 50; i < 100; i++) {
+      for (let i = INDICES_TEST_INSERT_INDEX; i < PRE_DELETE_LIST_LENGTH; i++) {
         steps.push(createWorkoutStep(i));
       }
       const krd = createMockKrd(steps);
@@ -135,9 +185,12 @@ describe("Performance Tests", () => {
     it("should recalculate indices efficiently after deletion", () => {
       // Arrange
       const steps: Array<WorkoutStep | RepetitionBlock> = [];
-      const blockToDelete = createRepetitionBlock(30, 2);
+      const blockToDelete = createRepetitionBlock(
+        BLOCK_SCAFFOLD_DELETE_INDEX_STEPS,
+        BLOCK_SCAFFOLD_DELETE_INDEX_REPS
+      );
       steps.push(blockToDelete);
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < PRE_DELETE_LIST_LENGTH; i++) {
         steps.push(createWorkoutStep(i));
       }
       const krd = createMockKrd(steps);
@@ -205,9 +258,17 @@ describe("Performance Tests", () => {
 
     it("should undo with large workout within 100ms", () => {
       // Arrange
-      const steps1 = Array.from({ length: 50 }, (_, i) => createWorkoutStep(i));
-      const steps2 = [...steps1, createRepetitionBlock(30, 3)];
-      const steps3 = [...steps2, createWorkoutStep(50)];
+      const steps1 = Array.from({ length: MANY_STEPS_COUNT }, (_, i) =>
+        createWorkoutStep(i)
+      );
+      const steps2 = [
+        ...steps1,
+        createRepetitionBlock(
+          BLOCK_SCAFFOLD_UNDO_LARGE_STEPS,
+          BLOCK_SCAFFOLD_UNDO_LARGE_REPS
+        ),
+      ];
+      const steps3 = [...steps2, createWorkoutStep(MANY_STEPS_COUNT)];
       const krd1 = createMockKrd(steps1);
       const krd2 = createMockKrd(steps2);
       const krd3 = createMockKrd(steps3);
@@ -239,22 +300,22 @@ describe("Performance Tests", () => {
     it("should undo multiple times efficiently", () => {
       // Arrange
       const history: Array<KRD> = [];
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < HISTORY_DEPTH; i++) {
         const steps = Array.from({ length: i + 1 }, (_, j) =>
           createWorkoutStep(j)
         );
         history.push(createMockKrd(steps));
       }
       let state: WorkoutState = {
-        currentWorkout: history[49],
+        currentWorkout: history[HISTORY_LAST_INDEX],
         undoHistory: history.map((workout) => ({ workout, selection: null })),
-        historyIndex: 49,
+        historyIndex: HISTORY_LAST_INDEX,
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
       };
       const startTime = performance.now();
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < UNDO_BATCH_COUNT; i++) {
         const result = createUndoAction(state);
         state = {
           ...state,
@@ -268,6 +329,7 @@ describe("Performance Tests", () => {
       const duration = endTime - startTime;
 
       // Assert
+      // eslint-disable-next-line no-magic-numbers -- post-undo invariant: HISTORY_LAST_INDEX (49) - UNDO_BATCH_COUNT (10) = 39, mechanical derivation
       expect(state.historyIndex).toBe(39);
       expect(duration).toBeLessThan(100);
     });
@@ -362,7 +424,7 @@ describe("Performance Tests", () => {
       const hideModal = () => {
         isModalOpen = false;
       };
-      const configs = Array.from({ length: 10 }, (_, i) => ({
+      const configs = Array.from({ length: MODAL_BATCH_COUNT }, (_, i) => ({
         title: `Modal ${i}`,
         message: `Message ${i}`,
         confirmLabel: "OK",
@@ -387,7 +449,10 @@ describe("Performance Tests", () => {
 
     it("should handle modal with complex callbacks within 200ms", () => {
       // Arrange
-      const largeBlock = createRepetitionBlock(50, 5);
+      const largeBlock = createRepetitionBlock(
+        BLOCK_SCAFFOLD_LARGE_STEPS,
+        BLOCK_SCAFFOLD_LARGE_REPS
+      );
       const krd = createMockKrd([largeBlock]);
       const state = createMockState(krd);
       const onConfirm = () => {
@@ -423,7 +488,10 @@ describe("Performance Tests", () => {
   describe("combined operations performance", () => {
     it("should handle delete + undo cycle within 200ms", () => {
       // Arrange
-      const block = createRepetitionBlock(30, 3);
+      const block = createRepetitionBlock(
+        BLOCK_SCAFFOLD_UNDO_LARGE_STEPS,
+        BLOCK_SCAFFOLD_UNDO_LARGE_REPS
+      );
       const krd = createMockKrd([
         createWorkoutStep(0),
         block,
@@ -454,13 +522,13 @@ describe("Performance Tests", () => {
 
     it("should handle multiple operations efficiently", () => {
       // Arrange
-      const blocks = Array.from({ length: 5 }, (_, i) =>
-        createRepetitionBlock(10, 2 + i)
+      const blocks = Array.from({ length: NESTED_BLOCKS_COUNT }, (_, i) =>
+        createRepetitionBlock(BLOCK_SCAFFOLD_NESTED_STEPS, 2 + i)
       );
       const krd = createMockKrd(blocks);
       let state = createMockState(krd);
       const startTime = performance.now();
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < NESTED_DELETE_LOOP_COUNT; i++) {
         // Get the first block's ID from the current workout
         const workout = state.currentWorkout?.extensions
           ?.structured_workout as Workout;
@@ -496,6 +564,7 @@ describe("Performance Tests", () => {
       if (workout) {
         expect(workout.steps).toHaveLength(2);
       }
+      // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary upper-bound budget, not domain-modeled
       expect(duration).toBeLessThan(300);
     });
   });

@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import type { RepetitionBlock, WorkoutStep } from "./krd";
 import { isRepetitionBlock, isWorkoutStep } from "./krd";
+import { REPEAT_COUNT_3 } from "./krd.test-fixtures";
 
 describe("Type Guards", () => {
   describe("isWorkoutStep", () => {
@@ -153,7 +154,7 @@ describe("Type Guards", () => {
 
       // TypeScript should infer correct types
       expect(steps[0].stepIndex).toBe(0);
-      expect(blocks[0].repeatCount).toBe(3);
+      expect(blocks[0].repeatCount).toBe(REPEAT_COUNT_3);
     });
   });
 });

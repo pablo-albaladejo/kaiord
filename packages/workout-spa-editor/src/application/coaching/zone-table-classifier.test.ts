@@ -85,13 +85,15 @@ const allZeroPace = () => [
   },
 ];
 
+const POWER_ZONE_COUNT = 5;
+
 const snapshotFor = (cyclingHrZones: unknown): LastSyncedZonesSnapshot =>
   ({
     syncedAt: NOW,
     cyclingHr: cyclingHrZones,
     runningHr: t2gHr(),
     swimmingHr: t2gHr(),
-    cyclingPower: calculatePowerZones("coggan-7").slice(0, 5),
+    cyclingPower: calculatePowerZones("coggan-7").slice(0, POWER_ZONE_COUNT),
     runningPace: allZeroPace(),
     swimmingPace: allZeroPace(),
   }) as LastSyncedZonesSnapshot;

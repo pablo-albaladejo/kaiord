@@ -4,6 +4,9 @@ import type { GenerateFn, ProcessorParams } from "./ai-workout-processor";
 import { processWorkoutWithAi } from "./ai-workout-processor";
 import { makeValidKrd, makeWorkoutRecord } from "./test-helpers";
 
+const ONE_HOUR_SECONDS = 3600;
+const SANITY_PASS_STEP_COUNT = 3;
+
 function makeParams(overrides: Partial<ProcessorParams> = {}): ProcessorParams {
   return {
     workout: makeWorkoutRecord(),
@@ -86,8 +89,8 @@ describe("processWorkoutWithAi", () => {
 
   it("should retry when sanity check fails", async () => {
     // Arrange
-    const badKrd = makeValidKrd(0, 3600);
-    const goodKrd = makeValidKrd(3, 3600);
+    const badKrd = makeValidKrd(0, ONE_HOUR_SECONDS);
+    const goodKrd = makeValidKrd(SANITY_PASS_STEP_COUNT, ONE_HOUR_SECONDS);
     const generateFn = vi
       .fn<GenerateFn>()
       .mockResolvedValueOnce(badKrd)

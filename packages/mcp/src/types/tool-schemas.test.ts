@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { INVALID_NUMERIC_FORMAT } from "../test-utils/constants";
 import { BINARY_FORMATS, formatSchema, isBinaryFormat } from "./tool-schemas";
 
 describe("formatSchema", () => {
@@ -23,7 +24,7 @@ describe("formatSchema", () => {
     // Assert
     expect(() => formatSchema.parse("invalid")).toThrow();
     expect(() => formatSchema.parse("")).toThrow();
-    expect(() => formatSchema.parse(123)).toThrow();
+    expect(() => formatSchema.parse(INVALID_NUMERIC_FORMAT)).toThrow();
   });
 });
 

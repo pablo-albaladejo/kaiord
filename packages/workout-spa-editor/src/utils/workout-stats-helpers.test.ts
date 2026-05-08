@@ -11,6 +11,14 @@ import {
   calculateRepetitionStats,
   calculateStepStats,
 } from "./workout-stats-helpers";
+import {
+  STATS_DISTANCE_METERS as DISTANCE,
+  STATS_HEART_RATE_BPM as HR,
+  STATS_PACE_MIN_PER_KM as PACE,
+  STATS_POWER_WATTS as POWER,
+  STATS_REPEAT_COUNTS as REPEATS,
+  STATS_TIME_SECONDS as TIME,
+} from "./workout-stats-helpers.test-fixtures";
 
 describe("workout-stats-helpers", () => {
   describe("calculateStepStats", () => {
@@ -19,16 +27,19 @@ describe("workout-stats-helpers", () => {
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
-        duration: { type: "time", seconds: 300 },
+        duration: { type: "time", seconds: TIME.threeHundred },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 200 } },
+        target: {
+          type: "power",
+          value: { unit: "watts", value: POWER.twoHundred },
+        },
       };
 
       // Act
       const result = calculateStepStats(step);
 
       // Assert
-      expect(result.totalDuration).toBe(300);
+      expect(result.totalDuration).toBe(TIME.threeHundred);
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
     });
@@ -38,9 +49,12 @@ describe("workout-stats-helpers", () => {
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "distance",
-        duration: { type: "distance", meters: 1000 },
+        duration: { type: "distance", meters: DISTANCE.oneThousand },
         targetType: "pace",
-        target: { type: "pace", value: { unit: "min_per_km", value: 5 } },
+        target: {
+          type: "pace",
+          value: { unit: "min_per_km", value: PACE.five },
+        },
       };
 
       // Act
@@ -48,7 +62,7 @@ describe("workout-stats-helpers", () => {
 
       // Assert
       expect(result.totalDuration).toBeNull();
-      expect(result.totalDistance).toBe(1000);
+      expect(result.totalDistance).toBe(DISTANCE.oneThousand);
       expect(result.hasOpenSteps).toBe(false);
     });
 
@@ -76,9 +90,12 @@ describe("workout-stats-helpers", () => {
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "heart_rate_less_than",
-        duration: { type: "heart_rate_less_than", bpm: 140 },
+        duration: { type: "heart_rate_less_than", bpm: HR.oneForty },
         targetType: "heart_rate",
-        target: { type: "heart_rate", value: { unit: "bpm", value: 150 } },
+        target: {
+          type: "heart_rate",
+          value: { unit: "bpm", value: HR.oneFifty },
+        },
       };
 
       // Act
@@ -95,21 +112,27 @@ describe("workout-stats-helpers", () => {
     it("should calculate stats for repetition block with time steps", () => {
       // Arrange
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: REPEATS.three,
         steps: [
           {
             stepIndex: 0,
             durationType: "time",
-            duration: { type: "time", seconds: 60 },
+            duration: { type: "time", seconds: TIME.sixty },
             targetType: "power",
-            target: { type: "power", value: { unit: "watts", value: 250 } },
+            target: {
+              type: "power",
+              value: { unit: "watts", value: POWER.twoFifty },
+            },
           },
           {
             stepIndex: 1,
             durationType: "time",
-            duration: { type: "time", seconds: 120 },
+            duration: { type: "time", seconds: TIME.oneHundredTwenty },
             targetType: "power",
-            target: { type: "power", value: { unit: "watts", value: 150 } },
+            target: {
+              type: "power",
+              value: { unit: "watts", value: POWER.oneFifty },
+            },
           },
         ],
       };
@@ -118,7 +141,9 @@ describe("workout-stats-helpers", () => {
       const result = calculateRepetitionStats(block);
 
       // Assert
-      expect(result.totalDuration).toBe((60 + 120) * 3);
+      expect(result.totalDuration).toBe(
+        (TIME.sixty + TIME.oneHundredTwenty) * REPEATS.three
+      );
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
     });
@@ -126,21 +151,27 @@ describe("workout-stats-helpers", () => {
     it("should calculate stats for repetition block with distance steps", () => {
       // Arrange
       const block: RepetitionBlock = {
-        repeatCount: 5,
+        repeatCount: REPEATS.five,
         steps: [
           {
             stepIndex: 0,
             durationType: "distance",
-            duration: { type: "distance", meters: 400 },
+            duration: { type: "distance", meters: DISTANCE.fourHundred },
             targetType: "pace",
-            target: { type: "pace", value: { unit: "min_per_km", value: 4 } },
+            target: {
+              type: "pace",
+              value: { unit: "min_per_km", value: PACE.four },
+            },
           },
           {
             stepIndex: 1,
             durationType: "distance",
-            duration: { type: "distance", meters: 200 },
+            duration: { type: "distance", meters: DISTANCE.twoHundred },
             targetType: "pace",
-            target: { type: "pace", value: { unit: "min_per_km", value: 6 } },
+            target: {
+              type: "pace",
+              value: { unit: "min_per_km", value: PACE.six },
+            },
           },
         ],
       };
@@ -150,28 +181,36 @@ describe("workout-stats-helpers", () => {
 
       // Assert
       expect(result.totalDuration).toBeNull();
-      expect(result.totalDistance).toBe((400 + 200) * 5);
+      expect(result.totalDistance).toBe(
+        (DISTANCE.fourHundred + DISTANCE.twoHundred) * REPEATS.five
+      );
       expect(result.hasOpenSteps).toBe(false);
     });
 
     it("should handle mixed duration types in repetition block", () => {
       // Arrange
       const block: RepetitionBlock = {
-        repeatCount: 2,
+        repeatCount: REPEATS.two,
         steps: [
           {
             stepIndex: 0,
             durationType: "time",
-            duration: { type: "time", seconds: 300 },
+            duration: { type: "time", seconds: TIME.threeHundred },
             targetType: "power",
-            target: { type: "power", value: { unit: "watts", value: 200 } },
+            target: {
+              type: "power",
+              value: { unit: "watts", value: POWER.twoHundred },
+            },
           },
           {
             stepIndex: 1,
             durationType: "distance",
-            duration: { type: "distance", meters: 1000 },
+            duration: { type: "distance", meters: DISTANCE.oneThousand },
             targetType: "pace",
-            target: { type: "pace", value: { unit: "min_per_km", value: 5 } },
+            target: {
+              type: "pace",
+              value: { unit: "min_per_km", value: PACE.five },
+            },
           },
         ],
       };
@@ -188,14 +227,17 @@ describe("workout-stats-helpers", () => {
     it("should mark repetition block with open steps", () => {
       // Arrange
       const block: RepetitionBlock = {
-        repeatCount: 4,
+        repeatCount: REPEATS.four,
         steps: [
           {
             stepIndex: 0,
             durationType: "time",
-            duration: { type: "time", seconds: 180 },
+            duration: { type: "time", seconds: TIME.oneHundredEighty },
             targetType: "power",
-            target: { type: "power", value: { unit: "watts", value: 220 } },
+            target: {
+              type: "power",
+              value: { unit: "watts", value: POWER.twoTwenty },
+            },
           },
           {
             stepIndex: 1,
@@ -219,14 +261,17 @@ describe("workout-stats-helpers", () => {
     it("should handle single step in repetition block", () => {
       // Arrange
       const block: RepetitionBlock = {
-        repeatCount: 10,
+        repeatCount: REPEATS.ten,
         steps: [
           {
             stepIndex: 0,
             durationType: "time",
-            duration: { type: "time", seconds: 30 },
+            duration: { type: "time", seconds: TIME.thirty },
             targetType: "power",
-            target: { type: "power", value: { unit: "watts", value: 300 } },
+            target: {
+              type: "power",
+              value: { unit: "watts", value: POWER.threeHundred },
+            },
           },
         ],
       };
@@ -235,7 +280,7 @@ describe("workout-stats-helpers", () => {
       const result = calculateRepetitionStats(block);
 
       // Assert
-      expect(result.totalDuration).toBe(30 * 10);
+      expect(result.totalDuration).toBe(TIME.thirty * REPEATS.ten);
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
     });
@@ -243,14 +288,17 @@ describe("workout-stats-helpers", () => {
     it("should handle zero repeat count", () => {
       // Arrange
       const block: RepetitionBlock = {
-        repeatCount: 0,
+        repeatCount: REPEATS.zero,
         steps: [
           {
             stepIndex: 0,
             durationType: "time",
-            duration: { type: "time", seconds: 60 },
+            duration: { type: "time", seconds: TIME.sixty },
             targetType: "power",
-            target: { type: "power", value: { unit: "watts", value: 200 } },
+            target: {
+              type: "power",
+              value: { unit: "watts", value: POWER.twoHundred },
+            },
           },
         ],
       };

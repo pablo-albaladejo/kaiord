@@ -399,6 +399,7 @@ describe("Block ID Stability", () => {
               { length: numBlocks },
               (_, i) =>
                 createRepetitionBlock(
+                  // eslint-disable-next-line no-magic-numbers -- Math.random().toString(36).substr(2, 9): radix 36 and length 9 are stdlib API arguments, not domain values
                   `block-${i}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                   2,
                   2

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  RECORD_BATCH_SAMPLE_SIZE,
+  SAMPLE_EVENT_DATA,
+  SAMPLE_TIMESTAMP_2024_01_01_SEC,
+  TIME_TOLERANCE_MS,
+} from "../../test-utils/constants";
 import { convertFitToKrdEvent } from "./fit-to-krd-event.converter";
 import {
   convertKrdToFitEvent,
@@ -18,7 +24,7 @@ describe("convertKrdToFitEvent", () => {
     const result = convertKrdToFitEvent(krdEvent);
 
     // Assert
-    expect(result.timestamp).toBe(1704067200);
+    expect(result.timestamp).toBe(SAMPLE_TIMESTAMP_2024_01_01_SEC);
     expect(result.event).toBe("timer");
     expect(result.eventType).toBe("start");
   });
@@ -112,7 +118,7 @@ describe("convertKrdToFitEvent", () => {
 
     // Assert
     expect(result.eventGroup).toBe(1);
-    expect(result.data).toBe(42);
+    expect(result.data).toBe(SAMPLE_EVENT_DATA);
   });
 
   it("should throw error for invalid KRD event", () => {
@@ -142,7 +148,7 @@ describe("convertKrdToFitEvents", () => {
     const results = convertKrdToFitEvents(krdEvents);
 
     // Assert
-    expect(results).toHaveLength(3);
+    expect(results).toHaveLength(RECORD_BATCH_SAMPLE_SIZE);
     expect(results[0].eventType).toBe("start");
     expect(results[1].event).toBe("lap");
     expect(results[2].eventType).toBe("stop");
@@ -177,7 +183,7 @@ describe("round-trip conversion", () => {
       const originalTime = new Date(originalKrd.timestamp).getTime();
       const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
       expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
-        1000
+        TIME_TOLERANCE_MS
       );
 
       expect(roundTrippedKrd.eventType).toBe(eventType);
@@ -201,7 +207,9 @@ describe("round-trip conversion", () => {
     const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
 
     // Assert
-    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
+      TIME_TOLERANCE_MS
+    );
     expect(roundTrippedKrd.eventType).toBe("event_start");
   });
 });

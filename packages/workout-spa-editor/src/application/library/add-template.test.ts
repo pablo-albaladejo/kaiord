@@ -7,19 +7,24 @@ import { makeKrd } from "./test-fixtures";
 describe("addTemplate", () => {
   it("should persist a new template with the supplied fields", async () => {
     // Arrange
+    const TEMPLATE_DURATION_MIN = 60;
     const persistence = createInMemoryPersistence();
     const template = await addTemplate(
       persistence,
       "Tempo Ride",
       "cycling",
       makeKrd(),
-      { tags: ["base", "endurance"], difficulty: "intermediate", duration: 60 }
+      {
+        tags: ["base", "endurance"],
+        difficulty: "intermediate",
+        duration: TEMPLATE_DURATION_MIN,
+      }
     );
     expect(template.name).toBe("Tempo Ride");
     expect(template.sport).toBe("cycling");
     expect(template.tags).toEqual(["base", "endurance"]);
     expect(template.difficulty).toBe("intermediate");
-    expect(template.duration).toBe(60);
+    expect(template.duration).toBe(TEMPLATE_DURATION_MIN);
 
     // Act
     const stored = await persistence.templates.getById(template.id);

@@ -7,6 +7,11 @@
 import { describe, expect, it } from "vitest";
 
 import type { Duration } from "../types/krd";
+
+const FIVE_MIN_SECONDS = 300;
+const TEN_MIN_SECONDS = 600;
+const ONE_KM_METERS = 1000;
+const FIVE_KM_METERS = 5000;
 import {
   calculateStepDistance,
   calculateStepDuration,
@@ -17,24 +22,27 @@ describe("workout-stats-duration", () => {
   describe("calculateStepDuration", () => {
     it("should calculate duration for time-based steps", () => {
       // Arrange
-      const duration: Duration = { type: "time", seconds: 300 };
+      const duration: Duration = { type: "time", seconds: FIVE_MIN_SECONDS };
 
       // Act
       const result = calculateStepDuration(duration);
 
       // Assert
-      expect(result).toBe(300);
+      expect(result).toBe(FIVE_MIN_SECONDS);
     });
 
     it("should calculate duration for repeat_until_time", () => {
       // Arrange
-      const duration: Duration = { type: "repeat_until_time", seconds: 600 };
+      const duration: Duration = {
+        type: "repeat_until_time",
+        seconds: TEN_MIN_SECONDS,
+      };
 
       // Act
       const result = calculateStepDuration(duration);
 
       // Assert
-      expect(result).toBe(600);
+      expect(result).toBe(TEN_MIN_SECONDS);
     });
 
     it("should return null for open duration", () => {
@@ -96,27 +104,27 @@ describe("workout-stats-duration", () => {
   describe("calculateStepDistance", () => {
     it("should calculate distance for distance-based steps", () => {
       // Arrange
-      const duration: Duration = { type: "distance", meters: 1000 };
+      const duration: Duration = { type: "distance", meters: ONE_KM_METERS };
 
       // Act
       const result = calculateStepDistance(duration);
 
       // Assert
-      expect(result).toBe(1000);
+      expect(result).toBe(ONE_KM_METERS);
     });
 
     it("should calculate distance for repeat_until_distance", () => {
       // Arrange
       const duration: Duration = {
         type: "repeat_until_distance",
-        meters: 5000,
+        meters: FIVE_KM_METERS,
       };
 
       // Act
       const result = calculateStepDistance(duration);
 
       // Assert
-      expect(result).toBe(5000);
+      expect(result).toBe(FIVE_KM_METERS);
     });
 
     it("should return null for time-based duration", () => {

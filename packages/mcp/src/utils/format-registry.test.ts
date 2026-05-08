@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { FORMAT_COUNT_FIVE } from "../test-utils/constants";
 import { detectFormatFromPath, FORMAT_REGISTRY } from "./format-registry";
 
 describe("FORMAT_REGISTRY", () => {
@@ -15,7 +16,7 @@ describe("FORMAT_REGISTRY", () => {
     expect(keys).toContain("zwo");
     expect(keys).toContain("gcn");
     expect(keys).toContain("krd");
-    expect(keys).toHaveLength(5);
+    expect(keys).toHaveLength(FORMAT_COUNT_FIVE);
   });
 
   it("should mark FIT as binary", () => {

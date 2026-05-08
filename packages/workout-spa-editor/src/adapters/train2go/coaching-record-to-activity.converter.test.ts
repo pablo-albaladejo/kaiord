@@ -6,6 +6,8 @@ import {
 } from "../../types/coaching-activity-record";
 import { toCoachingActivity } from "./coaching-record-to-activity.converter";
 
+const SAMPLE_INTENSITY = 3;
+
 const baseRecord: CoachingActivityRecord = {
   id: buildCoachingActivityId("p1", "train2go", "12345"),
   profileId: "p1",
@@ -16,7 +18,7 @@ const baseRecord: CoachingActivityRecord = {
   title: "Z2 60'",
   duration: "01:00:00",
   workload: 4,
-  intensity: 3,
+  intensity: SAMPLE_INTENSITY,
   status: "pending",
   fetchedAt: "2026-04-28T10:00:00.000Z",
 };
@@ -62,7 +64,7 @@ describe("toCoachingActivity (record → view-model)", () => {
     // Assert
     expect(result.duration).toBe("01:00:00");
     expect(result.status).toBe("pending");
-    expect(result.effort).toBe(3);
+    expect(result.effort).toBe(SAMPLE_INTENSITY);
   });
 
   it("should omit empty duration", () => {

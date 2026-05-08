@@ -24,6 +24,8 @@ import type { GenerateWorkoutOptions } from "./generate-workout";
 import { generateWorkoutKrd } from "./generate-workout";
 import { createLanguageModel } from "./provider-factory";
 
+const OVER_LIMIT_PROMPT_LENGTH = 600;
+
 const baseOptions: GenerateWorkoutOptions = {
   text: "30 minute endurance ride",
   provider: {
@@ -126,7 +128,7 @@ describe("generateWorkoutKrd", () => {
 
   it("should truncate custom prompt to 500 characters", async () => {
     // Arrange
-    const longPrompt = "a".repeat(600);
+    const longPrompt = "a".repeat(OVER_LIMIT_PROMPT_LENGTH);
     await generateWorkoutKrd({
       ...baseOptions,
       customPrompt: longPrompt,

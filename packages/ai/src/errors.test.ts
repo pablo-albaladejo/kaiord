@@ -1,19 +1,25 @@
 import { describe, it, expect } from "vitest";
 import { AiParsingError, createAiParsingError } from "./errors";
+import { ATTEMPTS_THREE } from "./test-utils/constants";
 
 describe("AiParsingError", () => {
   it("should set all fields correctly", () => {
     // Arrange
 
     // Act
-    const error = new AiParsingError("msg", "input text", 3, "last err");
+    const error = new AiParsingError(
+      "msg",
+      "input text",
+      ATTEMPTS_THREE,
+      "last err"
+    );
 
     // Assert
     expect(error.message).toBe("msg");
     expect(error.name).toBe("AiParsingError");
     expect(error.code).toBe("AI_PARSING_ERROR");
     expect(error.inputText).toBe("input text");
-    expect(error.attempts).toBe(3);
+    expect(error.attempts).toBe(ATTEMPTS_THREE);
     expect(error.lastError).toBe("last err");
     expect(error).toBeInstanceOf(Error);
   });

@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
 
+import { TARGET_PACE_RANGE_GAP_0_5 } from "../../../test-utils/tolerance-constants";
+
 type PaceTarget = {
   type: "pace";
   value:
@@ -29,7 +31,7 @@ export const buildPaceRangeTarget = new Factory<PaceTarget>()
     const min = faker.number.float({ max: 3.0, min: 2.0, fractionDigits: 2 });
     const max = faker.number.float({
       max: 6.0,
-      min: min + 0.5,
+      min: min + TARGET_PACE_RANGE_GAP_0_5,
       fractionDigits: 2,
     });
     return { unit: "range" as const, min, max };

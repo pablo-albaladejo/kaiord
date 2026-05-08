@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { KrdValidationError } from "../domain/types/errors.js";
 import type { BinaryReader, TextReader } from "../ports/format-strategy";
+import { SAMPLE_BUFFER_BYTES } from "../test-utils/tolerance-constants";
 import { buildKRD } from "../tests/fixtures/krd/krd.fixtures.js";
 import { createMockLogger } from "../tests/helpers/test-utils.js";
 import { fromBinary, fromText } from "./from-format.js";
@@ -9,7 +10,7 @@ import { fromBinary, fromText } from "./from-format.js";
 describe("fromBinary", () => {
   it("should convert binary data to validated KRD", async () => {
     // Arrange
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(SAMPLE_BUFFER_BYTES);
     const expectedKrd = buildKRD.build();
     const reader = vi.fn<BinaryReader>().mockResolvedValue(expectedKrd);
 
@@ -23,7 +24,7 @@ describe("fromBinary", () => {
 
   it("should throw KrdValidationError for invalid KRD", async () => {
     // Arrange
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(SAMPLE_BUFFER_BYTES);
 
     // Act
     const reader = vi
@@ -38,7 +39,7 @@ describe("fromBinary", () => {
 
   it("should propagate reader errors", async () => {
     // Arrange
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(SAMPLE_BUFFER_BYTES);
     const error = new Error("Read failed");
 
     // Act
@@ -50,7 +51,7 @@ describe("fromBinary", () => {
 
   it("should log when logger is provided", async () => {
     // Arrange
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(SAMPLE_BUFFER_BYTES);
     const expectedKrd = buildKRD.build();
     const reader = vi.fn<BinaryReader>().mockResolvedValue(expectedKrd);
     const logger = createMockLogger();
@@ -66,7 +67,7 @@ describe("fromBinary", () => {
 
   it("should work without logger", async () => {
     // Arrange
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(SAMPLE_BUFFER_BYTES);
     const expectedKrd = buildKRD.build();
     const reader = vi.fn<BinaryReader>().mockResolvedValue(expectedKrd);
 

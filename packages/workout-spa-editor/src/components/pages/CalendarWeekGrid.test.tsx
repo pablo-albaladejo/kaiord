@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
+import { DAYS_IN_WEEK } from "./CalendarWeekGrid.test-fixtures";
 
 const DAYS = [
   "2026-04-06",
@@ -56,7 +57,7 @@ describe("CalendarWeekGrid", () => {
     // Assert
 
     expect(screen.getByTestId("calendar-week-grid")).toBeInTheDocument();
-    expect(screen.getAllByTestId(/^day-column-/)).toHaveLength(7);
+    expect(screen.getAllByTestId(/^day-column-/)).toHaveLength(DAYS_IN_WEEK);
   });
 
   it("should render workout cards in correct day", () => {
@@ -171,6 +172,6 @@ describe("CalendarWeekGrid", () => {
 
     // Assert
 
-    expect(screen.getAllByTestId(/^empty-day-/)).toHaveLength(7);
+    expect(screen.getAllByTestId(/^empty-day-/)).toHaveLength(DAYS_IN_WEEK);
   });
 });

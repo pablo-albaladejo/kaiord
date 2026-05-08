@@ -2,6 +2,8 @@
 // instead of our fixture that disables the tutorial
 import { expect, test } from "@playwright/test";
 
+const TOOLTIP_HOVER_DEBOUNCE_MS = 300;
+
 /**
  * E2E Tests: Onboarding and Help System
  *
@@ -251,7 +253,7 @@ test.describe("Tooltips", () => {
       // Hover and move away to verify element remains interactive
       await themeToggle.hover();
       await page.mouse.move(0, 0);
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(TOOLTIP_HOVER_DEBOUNCE_MS);
 
       // Element should still be visible after mouse leaves
       await expect(themeToggle).toBeVisible();

@@ -10,6 +10,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { KRD } from "../../../types/krd";
 import { ExportFormatSelector } from "./ExportFormatSelector";
+import {
+  EXPORT_FORMAT_OPTION_COUNT,
+  GARMIN_CONNECT_FORMAT_COUNT,
+} from "./ExportFormatSelector.test-fixtures";
 
 describe("ExportFormatSelector", () => {
   const mockWorkout: KRD = {
@@ -86,7 +90,7 @@ describe("ExportFormatSelector", () => {
       });
 
       const options = screen.getAllByRole("menuitem");
-      expect(options).toHaveLength(5);
+      expect(options).toHaveLength(EXPORT_FORMAT_OPTION_COUNT);
 
       expect(screen.getAllByText("FIT")).toHaveLength(1);
       expect(screen.getAllByText("TCX")).toHaveLength(1);
@@ -173,7 +177,9 @@ describe("ExportFormatSelector", () => {
         expect(screen.getAllByText("Garmin devices")).toHaveLength(2); // FIT and GCN
       });
 
-      expect(screen.getAllByText("Garmin Connect")).toHaveLength(3); // FIT, TCX, and GCN
+      expect(screen.getAllByText("Garmin Connect")).toHaveLength(
+        GARMIN_CONNECT_FORMAT_COUNT
+      ); // FIT, TCX, and GCN
       expect(screen.getAllByText("TrainingPeaks")).toHaveLength(2); // FIT and TCX
       expect(screen.getByText("Zwift")).toBeInTheDocument();
     });

@@ -6,6 +6,7 @@ import {
   bridgeManifestSchema,
   syncStateSchema,
 } from "./bridge-schemas";
+import { MULTI_CAPABILITIES_COUNT } from "./bridge-schemas.test-fixtures";
 
 describe("bridgeCapabilitySchema", () => {
   it("should accept all valid capabilities", () => {
@@ -69,7 +70,9 @@ describe("bridgeManifestSchema", () => {
 
     // Assert
 
-    expect(bridgeManifestSchema.parse(manifest).capabilities).toHaveLength(3);
+    expect(bridgeManifestSchema.parse(manifest).capabilities).toHaveLength(
+      MULTI_CAPABILITIES_COUNT
+    );
   });
 
   it("should reject non-integer protocolVersion", () => {

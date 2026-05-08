@@ -1,6 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
+import { MILLISECONDS_PER_SECOND } from "../../test-utils/constants";
 import { exchangeOAuth2, getOAuth1Token } from "./sso-oauth";
 import type { OAuthConsumer } from "./types";
 
@@ -103,7 +104,9 @@ describe("exchangeOAuth2", () => {
 
     // Assert
     expect(result.access_token).toBe("bearer");
-    expect(result.expires_at).toBeGreaterThan(Math.floor(Date.now() / 1000));
+    expect(result.expires_at).toBeGreaterThan(
+      Math.floor(Date.now() / MILLISECONDS_PER_SECOND)
+    );
   });
 
   it("should throw when response is not ok", async () => {

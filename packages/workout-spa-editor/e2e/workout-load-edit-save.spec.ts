@@ -3,6 +3,9 @@ import { readFileSync } from "fs";
 import { expect, test } from "./fixtures/base";
 import { expandFileUpload } from "./helpers/expand-file-upload";
 
+const EDITED_DURATION_SECONDS = 420;
+const EDITED_POWER_WATTS = 220;
+
 /**
  * Critical Path: Load Workout → View → Edit Step → Save
  *
@@ -132,10 +135,10 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
 
       expect(
         savedWorkout.extensions.structured_workout.steps[0].duration.seconds
-      ).toBe(420);
+      ).toBe(EDITED_DURATION_SECONDS);
       expect(
         savedWorkout.extensions.structured_workout.steps[0].target.value.value
-      ).toBe(220);
+      ).toBe(EDITED_POWER_WATTS);
     }
   });
 

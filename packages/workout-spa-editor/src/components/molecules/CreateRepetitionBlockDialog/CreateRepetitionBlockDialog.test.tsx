@@ -10,6 +10,11 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { CreateRepetitionBlockDialog } from "./CreateRepetitionBlockDialog";
+import {
+  FIVE_REPEATS,
+  TEN_REPEATS,
+  THREE_REPEATS,
+} from "./CreateRepetitionBlockDialog.test-fixtures";
 
 describe("CreateRepetitionBlockDialog", () => {
   describe("rendering", () => {
@@ -318,7 +323,7 @@ describe("CreateRepetitionBlockDialog", () => {
 
       // Assert
 
-      expect(handleConfirm).toHaveBeenCalledWith(5);
+      expect(handleConfirm).toHaveBeenCalledWith(FIVE_REPEATS);
     });
 
     it("should clear error when user types valid value", async () => {
@@ -391,7 +396,7 @@ describe("CreateRepetitionBlockDialog", () => {
 
       // Assert
 
-      expect(handleConfirm).toHaveBeenCalledWith(3);
+      expect(handleConfirm).toHaveBeenCalledWith(THREE_REPEATS);
       expect(handleConfirm).toHaveBeenCalledOnce();
     });
 
@@ -475,7 +480,7 @@ describe("CreateRepetitionBlockDialog", () => {
 
       // Assert
 
-      expect(input).toHaveValue(10);
+      expect(input).toHaveValue(TEN_REPEATS);
     });
   });
 
@@ -507,7 +512,7 @@ describe("CreateRepetitionBlockDialog", () => {
 
       // Assert
 
-      expect(handleConfirm).toHaveBeenCalledWith(3);
+      expect(handleConfirm).toHaveBeenCalledWith(THREE_REPEATS);
     });
 
     it("should call onCancel when Escape is pressed in input", async () => {

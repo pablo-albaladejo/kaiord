@@ -9,6 +9,10 @@ import {
   coachingActivityRecordSchema,
   namespaceSourceId,
 } from "./coaching-activity-record";
+import {
+  SAMPLE_WORKLOAD_7,
+  VALID_INTENSITIES,
+} from "./coaching-activity-record.test-fixtures";
 
 const valid = {
   id: "p1:train2go:12345",
@@ -44,7 +48,7 @@ describe("coachingActivityRecordSchema", () => {
 
     // Assert
 
-    expect(record.workload).toBe(7);
+    expect(record.workload).toBe(SAMPLE_WORKLOAD_7);
   });
 
   it("should accept intensity in 1..5", () => {
@@ -54,7 +58,7 @@ describe("coachingActivityRecordSchema", () => {
 
     // Assert
 
-    for (const intensity of [1, 2, 3, 4, 5] as const) {
+    for (const intensity of VALID_INTENSITIES) {
       expect(() =>
         coachingActivityRecordSchema.parse({ ...valid, intensity })
       ).not.toThrow();

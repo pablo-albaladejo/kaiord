@@ -8,6 +8,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import type { KRD } from "../../types/krd";
 import { useWorkoutStore } from "../workout-store";
+import {
+  DUPLICATED_LENGTH_THREE_PLUS_ONE,
+  DUPLICATED_LENGTH_TWO_PLUS_ONE,
+  FOURTH_STEP_INDEX_VALUE,
+  NON_EXISTENT_STEP_INDEX,
+} from "./duplicate-step-action.test-fixtures";
 
 describe("duplicateStep", () => {
   // Reset store before each test
@@ -67,7 +73,7 @@ describe("duplicateStep", () => {
     const workout = state.currentWorkout?.extensions?.structured_workout;
 
     // Assert
-    expect(workout?.steps).toHaveLength(3);
+    expect(workout?.steps).toHaveLength(DUPLICATED_LENGTH_TWO_PLUS_ONE);
     expect(workout?.steps[0].stepIndex).toBe(0);
     expect(workout?.steps[0].duration).toEqual({ type: "time", seconds: 300 });
     expect(workout?.steps[1].stepIndex).toBe(1);
@@ -184,7 +190,7 @@ describe("duplicateStep", () => {
     const workout = state.currentWorkout?.extensions?.structured_workout;
 
     // Assert
-    expect(workout?.steps).toHaveLength(4);
+    expect(workout?.steps).toHaveLength(DUPLICATED_LENGTH_THREE_PLUS_ONE);
     expect(workout?.steps[0].stepIndex).toBe(0);
     expect(workout?.steps[0].duration).toEqual({
       type: "distance",
@@ -200,7 +206,7 @@ describe("duplicateStep", () => {
       type: "distance",
       meters: 1000,
     });
-    expect(workout?.steps[3].stepIndex).toBe(3);
+    expect(workout?.steps[3].stepIndex).toBe(FOURTH_STEP_INDEX_VALUE);
     expect(workout?.steps[3].duration).toEqual({
       type: "distance",
       meters: 1500,
@@ -287,7 +293,7 @@ describe("duplicateStep", () => {
       },
     };
     useWorkoutStore.getState().loadWorkout(mockKrd);
-    useWorkoutStore.getState().duplicateStep(5);
+    useWorkoutStore.getState().duplicateStep(NON_EXISTENT_STEP_INDEX);
     const state = useWorkoutStore.getState();
 
     // Act
@@ -343,7 +349,7 @@ describe("duplicateStep", () => {
     const workout = state.currentWorkout?.extensions?.structured_workout;
 
     // Assert
-    expect(workout?.steps).toHaveLength(3);
+    expect(workout?.steps).toHaveLength(DUPLICATED_LENGTH_TWO_PLUS_ONE);
     expect(workout?.steps[0].stepIndex).toBe(0);
     expect(workout?.steps[1].stepIndex).toBe(1);
     expect(workout?.steps[2].stepIndex).toBe(2);

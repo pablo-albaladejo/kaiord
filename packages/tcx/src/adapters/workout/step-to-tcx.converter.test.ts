@@ -1,6 +1,7 @@
 import type { Logger, WorkoutStep } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
+import { STEP_ID_FIVE, STEP_INDEX_FOUR } from "../../test-utils/constants";
 import { convertStepToTcx } from "./step-to-tcx.converter";
 
 const createMockLogger = (): Logger => ({
@@ -46,10 +47,10 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep();
 
     // Act
-    const result = convertStepToTcx(step, 4, logger);
+    const result = convertStepToTcx(step, STEP_INDEX_FOUR, logger);
 
     // Assert
-    expect(result.StepId).toBe(5);
+    expect(result.StepId).toBe(STEP_ID_FIVE);
   });
 
   it("should include step name when present", () => {

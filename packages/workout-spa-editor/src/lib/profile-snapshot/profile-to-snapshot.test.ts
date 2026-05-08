@@ -2,21 +2,33 @@ import { describe, expect, it } from "vitest";
 
 import type { Profile } from "../../types/profile";
 import { profileToSnapshot } from "./profile-to-snapshot";
+import {
+  BASELINE_BODY_WEIGHT_KG,
+  CYCLING_FTP_W,
+  CYCLING_LTHR_BPM,
+  RUNNING_LTHR_BPM,
+  RUNNING_PACE_SEC_PER_KM,
+  SWIMMING_PACE_SEC_PER_100M,
+} from "./profile-to-snapshot.test-fixtures";
 
 const FIXED_NOW = new Date("2026-05-01T08:30:00.000Z");
 
 const baseProfile: Profile = {
   id: "11111111-1111-4111-8111-111111111111",
   name: "Pablo",
-  bodyWeight: 72,
+  bodyWeight: BASELINE_BODY_WEIGHT_KG,
   sportZones: {
     cycling: {
-      thresholds: { ftp: 270, lthr: 168 },
+      thresholds: { ftp: CYCLING_FTP_W, lthr: CYCLING_LTHR_BPM },
       heartRateZones: { method: "manual", zones: [] },
       powerZones: { method: "manual", zones: [] },
     },
     running: {
-      thresholds: { lthr: 170, thresholdPace: 4.25, paceUnit: "min_per_km" },
+      thresholds: {
+        lthr: RUNNING_LTHR_BPM,
+        thresholdPace: 4.25,
+        paceUnit: "min_per_km",
+      },
       heartRateZones: { method: "manual", zones: [] },
       paceZones: { method: "manual", zones: [] },
     },
@@ -41,10 +53,10 @@ describe("profileToSnapshot", () => {
     // Assert
     expect(snapshot.schemaVersion).toBe(1);
     expect(snapshot.profile.name).toBe("Pablo");
-    expect(snapshot.profile.bodyWeight).toBe(72);
+    expect(snapshot.profile.bodyWeight).toBe(BASELINE_BODY_WEIGHT_KG);
     expect(snapshot.activeSport).toBe("cycling");
-    expect(snapshot.thresholds.cycling?.ftp).toBe(270);
-    expect(snapshot.heartRate?.lthr).toBe(168);
+    expect(snapshot.thresholds.cycling?.ftp).toBe(CYCLING_FTP_W);
+    expect(snapshot.heartRate?.lthr).toBe(CYCLING_LTHR_BPM);
     expect(snapshot.generatedAt).toBe(FIXED_NOW.toISOString());
   });
 
@@ -55,9 +67,11 @@ describe("profileToSnapshot", () => {
     const snapshot = profileToSnapshot(baseProfile, "running", FIXED_NOW);
 
     // Assert
-    expect(snapshot.thresholds.running?.thresholdPaceSecPerKm).toBe(255);
-    expect(snapshot.thresholds.running?.lthr).toBe(170);
-    expect(snapshot.heartRate?.lthr).toBe(170);
+    expect(snapshot.thresholds.running?.thresholdPaceSecPerKm).toBe(
+      RUNNING_PACE_SEC_PER_KM
+    );
+    expect(snapshot.thresholds.running?.lthr).toBe(RUNNING_LTHR_BPM);
+    expect(snapshot.heartRate?.lthr).toBe(RUNNING_LTHR_BPM);
   });
 
   it("should convert swimming pace from min/100m to seconds/100m", () => {
@@ -67,7 +81,9 @@ describe("profileToSnapshot", () => {
     const snapshot = profileToSnapshot(baseProfile, "swimming", FIXED_NOW);
 
     // Assert
-    expect(snapshot.thresholds.swimming?.cssPaceSecPer100m).toBe(87);
+    expect(snapshot.thresholds.swimming?.cssPaceSecPer100m).toBe(
+      SWIMMING_PACE_SEC_PER_100M
+    );
     expect(snapshot.activeSport).toBe("swimming");
   });
 

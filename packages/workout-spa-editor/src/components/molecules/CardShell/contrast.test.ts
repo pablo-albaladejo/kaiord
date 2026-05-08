@@ -10,6 +10,15 @@
 
 import { describe, expect, it } from "vitest";
 
+import {
+  CHANNEL_MAX,
+  CONTRAST_OFFSET,
+  HEX_PARSE,
+  LUMINANCE_WEIGHTS,
+  SRGB_LINEARIZATION,
+  WCAG_NON_TEXT_MIN_RATIO,
+} from "./test-fixtures";
+
 const WHITE = "#ffffff";
 
 // Tailwind v3 reference values for the tokens used by status-tokens.ts
@@ -24,27 +33,36 @@ const PALETTE = {
 const hexToRgb = (hex: string): [number, number, number] => {
   const h = hex.replace("#", "");
   return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
+    parseInt(h.slice(HEX_PARSE.rOffset, HEX_PARSE.rEnd), HEX_PARSE.radix),
+    parseInt(h.slice(HEX_PARSE.rEnd, HEX_PARSE.gEnd), HEX_PARSE.radix),
+    parseInt(h.slice(HEX_PARSE.gEnd, HEX_PARSE.bEnd), HEX_PARSE.radix),
   ];
 };
 
 const linearize = (channel: number): number => {
-  const c = channel / 255;
-  return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  const c = channel / CHANNEL_MAX;
+  return c <= SRGB_LINEARIZATION.threshold
+    ? c / SRGB_LINEARIZATION.lowSlope
+    : Math.pow(
+        (c + SRGB_LINEARIZATION.offset) / SRGB_LINEARIZATION.scale,
+        SRGB_LINEARIZATION.exponent
+      );
 };
 
 const relativeLuminance = (hex: string): number => {
   const [r, g, b] = hexToRgb(hex);
-  return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+  return (
+    LUMINANCE_WEIGHTS.red * linearize(r) +
+    LUMINANCE_WEIGHTS.green * linearize(g) +
+    LUMINANCE_WEIGHTS.blue * linearize(b)
+  );
 };
 
 const contrastRatio = (a: string, b: string): number => {
   const la = relativeLuminance(a);
   const lb = relativeLuminance(b);
   const [light, dark] = la > lb ? [la, lb] : [lb, la];
-  return (light + 0.05) / (dark + 0.05);
+  return (light + CONTRAST_OFFSET) / (dark + CONTRAST_OFFSET);
 };
 
 describe("WCAG 1.4.11 contrast against white card body", () => {
@@ -56,7 +74,9 @@ describe("WCAG 1.4.11 contrast against white card body", () => {
       // Act
 
       // Assert
-      expect(contrastRatio(hex, WHITE)).toBeGreaterThanOrEqual(3);
+      expect(contrastRatio(hex, WHITE)).toBeGreaterThanOrEqual(
+        WCAG_NON_TEXT_MIN_RATIO
+      );
     }
   );
 });

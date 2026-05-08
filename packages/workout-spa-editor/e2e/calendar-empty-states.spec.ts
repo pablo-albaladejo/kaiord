@@ -13,6 +13,8 @@ import {
   seedWorkouts,
 } from "./helpers/seed-dexie";
 
+const TWO_WEEKS_AGO = -2;
+
 test.describe("Calendar Empty States", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/calendar");
@@ -67,7 +69,7 @@ test.describe("Calendar Empty States", () => {
     page,
   }) => {
     // Seed a workout in a different week (2 weeks ago)
-    const otherWeekDates = getWeekDates(-2);
+    const otherWeekDates = getWeekDates(TWO_WEEKS_AGO);
     await seedWorkouts(page, [
       makeWorkout({ date: otherWeekDates[0], state: "structured" }),
     ]);
@@ -82,7 +84,7 @@ test.describe("Calendar Empty States", () => {
   test('EmptyWeekState "Go to latest" navigates to correct week', async ({
     page,
   }) => {
-    const otherWeekDates = getWeekDates(-2);
+    const otherWeekDates = getWeekDates(TWO_WEEKS_AGO);
     const expectedWeekId = getWeekId(otherWeekDates[0]);
 
     await seedWorkouts(page, [
@@ -98,7 +100,7 @@ test.describe("Calendar Empty States", () => {
   test('EmptyWeekState "Add workout" navigates to /workout/new', async ({
     page,
   }) => {
-    const otherWeekDates = getWeekDates(-2);
+    const otherWeekDates = getWeekDates(TWO_WEEKS_AGO);
     await seedWorkouts(page, [
       makeWorkout({ date: otherWeekDates[0], state: "structured" }),
     ]);

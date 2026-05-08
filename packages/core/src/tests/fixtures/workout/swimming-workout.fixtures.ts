@@ -2,6 +2,10 @@ import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
 
 import type { Workout } from "../../../domain/schemas/workout";
+import {
+  POOL_LENGTH_25,
+  POOL_LENGTH_50,
+} from "../../../test-utils/tolerance-constants";
 import { buildWorkoutStep } from "./workout-step.fixtures";
 
 export const buildSwimmingWorkout = new Factory<Workout>()
@@ -10,6 +14,8 @@ export const buildSwimmingWorkout = new Factory<Workout>()
   .attr("subSport", () =>
     faker.helpers.arrayElement(["open_water", "lap_swimming"] as const)
   )
-  .attr("poolLength", () => faker.helpers.arrayElement([25, 50]))
+  .attr("poolLength", () =>
+    faker.helpers.arrayElement([POOL_LENGTH_25, POOL_LENGTH_50])
+  )
   .attr("poolLengthUnit", () => "meters" as const)
   .attr("steps", () => [buildWorkoutStep.build(), buildWorkoutStep.build()]);

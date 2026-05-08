@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  NOTES_MAX_LENGTH,
+  NOTES_OVERSIZED_INPUT_LENGTH,
+  STEP_INDEX,
+} from "../../test-utils/constants";
 import type { ParsedExecutableStep } from "../schemas/garmin-workout-parse.schema";
 import { mapExecutableStep } from "./executable-step.converter";
 
@@ -403,15 +408,15 @@ describe("mapExecutableStep", () => {
 
     it("should truncate description to 256 characters", () => {
       // Arrange
-      const longDescription = "A".repeat(300);
+      const longDescription = "A".repeat(NOTES_OVERSIZED_INPUT_LENGTH);
       const step = buildStep({ description: longDescription });
 
       // Act
       const result = mapExecutableStep(step, 0);
 
       // Assert
-      expect(result.notes).toHaveLength(256);
-      expect(result.notes).toBe("A".repeat(256));
+      expect(result.notes).toHaveLength(NOTES_MAX_LENGTH);
+      expect(result.notes).toBe("A".repeat(NOTES_MAX_LENGTH));
     });
   });
 
@@ -421,10 +426,10 @@ describe("mapExecutableStep", () => {
       const step = buildStep();
 
       // Act
-      const result = mapExecutableStep(step, 5);
+      const result = mapExecutableStep(step, STEP_INDEX.FIVE);
 
       // Assert
-      expect(result.stepIndex).toBe(5);
+      expect(result.stepIndex).toBe(STEP_INDEX.FIVE);
     });
   });
 });

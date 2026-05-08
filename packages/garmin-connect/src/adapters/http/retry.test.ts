@@ -3,7 +3,35 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { withRetry } from "./retry";
 
+const HTTP_STATUS = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_SERVER_ERROR: 500,
+  SERVICE_UNAVAILABLE: 503,
+} as const;
+
+const RETRY_TIMING_MS = {
+  BASE_DELAY: 100,
+  BASE_DELAY_LARGE: 1000,
+  MAX_DELAY: 10000,
+  JITTERED_DELAY_50: 50,
+  JITTERED_DELAY_500: 500,
+} as const;
+
+const RETRY_LIMITS = {
+  MAX_RETRIES: 3,
+  EXPECTED_CALLS_AFTER_ONE_RETRY: 2,
+  EXPECTED_CALLS_AFTER_TWO_RETRIES: 3,
+  EXPECTED_CALLS_AT_MAX: 4,
+  JITTER_FACTOR: 0.5,
+} as const;
+
 const mockResponse = (status: number): Response =>
+  // eslint-disable-next-line no-magic-numbers -- HTTP success-range boundary, RFC 9110 well-known constant
   ({ status, ok: status >= 200 && status < 300 }) as Response;
 
 const createLogger = (): Logger => ({
@@ -23,15 +51,19 @@ describe("withRetry", () => {
   });
 
   describe("retryable status codes", () => {
-    it.each([429, 500, 503])("should retry on HTTP %i", async (status) => {
+    it.each([
+      HTTP_STATUS.TOO_MANY_REQUESTS,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      HTTP_STATUS.SERVICE_UNAVAILABLE,
+    ])("should retry on HTTP %i", async (status) => {
       // Arrange
       const fetchFn = vi
         .fn<typeof globalThis.fetch>()
         .mockResolvedValueOnce(mockResponse(status))
-        .mockResolvedValueOnce(mockResponse(200));
+        .mockResolvedValueOnce(mockResponse(HTTP_STATUS.OK));
       const retryFetch = withRetry(fetchFn, {
-        randomFn: () => 0.5,
-        baseDelay: 100,
+        randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+        baseDelay: RETRY_TIMING_MS.BASE_DELAY,
       });
       const promise = retryFetch("https://example.com");
       await vi.advanceTimersByTimeAsync(200);
@@ -40,29 +72,35 @@ describe("withRetry", () => {
       const response = await promise;
 
       // Assert
-      expect(response.status).toBe(200);
-      expect(fetchFn).toHaveBeenCalledTimes(2);
+      expect(response.status).toBe(HTTP_STATUS.OK);
+      expect(fetchFn).toHaveBeenCalledTimes(
+        RETRY_LIMITS.EXPECTED_CALLS_AFTER_ONE_RETRY
+      );
     });
   });
 
   describe("non-retryable status codes", () => {
-    it.each([400, 401, 403, 404])(
-      "should not retry on HTTP %i",
-      async (status) => {
-        // Arrange
-        const fetchFn = vi
-          .fn<typeof globalThis.fetch>()
-          .mockResolvedValue(mockResponse(status));
-        const retryFetch = withRetry(fetchFn, { randomFn: () => 0.5 });
+    it.each([
+      HTTP_STATUS.BAD_REQUEST,
+      HTTP_STATUS.UNAUTHORIZED,
+      HTTP_STATUS.FORBIDDEN,
+      HTTP_STATUS.NOT_FOUND,
+    ])("should not retry on HTTP %i", async (status) => {
+      // Arrange
+      const fetchFn = vi
+        .fn<typeof globalThis.fetch>()
+        .mockResolvedValue(mockResponse(status));
+      const retryFetch = withRetry(fetchFn, {
+        randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+      });
 
-        // Act
-        const response = await retryFetch("https://example.com");
+      // Act
+      const response = await retryFetch("https://example.com");
 
-        // Assert
-        expect(response.status).toBe(status);
-        expect(fetchFn).toHaveBeenCalledTimes(1);
-      }
-    );
+      // Assert
+      expect(response.status).toBe(status);
+      expect(fetchFn).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("should retry on TypeError (network error)", async () => {
@@ -70,10 +108,10 @@ describe("withRetry", () => {
     const fetchFn = vi
       .fn<typeof globalThis.fetch>()
       .mockRejectedValueOnce(new TypeError("Failed to fetch"))
-      .mockResolvedValueOnce(mockResponse(200));
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.OK));
     const retryFetch = withRetry(fetchFn, {
-      randomFn: () => 0.5,
-      baseDelay: 100,
+      randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+      baseDelay: RETRY_TIMING_MS.BASE_DELAY,
     });
     const promise = retryFetch("https://example.com");
     await vi.advanceTimersByTimeAsync(200);
@@ -82,8 +120,10 @@ describe("withRetry", () => {
     const response = await promise;
 
     // Assert
-    expect(response.status).toBe(200);
-    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(response.status).toBe(HTTP_STATUS.OK);
+    expect(fetchFn).toHaveBeenCalledTimes(
+      RETRY_LIMITS.EXPECTED_CALLS_AFTER_ONE_RETRY
+    );
   });
 
   it("should not retry on non-TypeError exceptions", async () => {
@@ -93,7 +133,9 @@ describe("withRetry", () => {
       .mockRejectedValueOnce(new Error("Some other error"));
 
     // Act
-    const retryFetch = withRetry(fetchFn, { randomFn: () => 0.5 });
+    const retryFetch = withRetry(fetchFn, {
+      randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+    });
 
     // Assert
     await expect(retryFetch("https://example.com")).rejects.toThrow(
@@ -106,30 +148,31 @@ describe("withRetry", () => {
     // Arrange
     const fetchFn = vi
       .fn<typeof globalThis.fetch>()
-      .mockResolvedValue(mockResponse(500));
+      .mockResolvedValue(mockResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR));
     const retryFetch = withRetry(fetchFn, {
-      maxRetries: 3,
-      randomFn: () => 0.5,
-      baseDelay: 100,
+      maxRetries: RETRY_LIMITS.MAX_RETRIES,
+      randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+      baseDelay: RETRY_TIMING_MS.BASE_DELAY,
     });
     const promise = retryFetch("https://example.com");
+    // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary advance budget, not domain-modeled
     await vi.advanceTimersByTimeAsync(50000);
 
     // Act
     const response = await promise;
 
     // Assert
-    expect(response.status).toBe(500);
-    expect(fetchFn).toHaveBeenCalledTimes(4);
+    expect(response.status).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    expect(fetchFn).toHaveBeenCalledTimes(RETRY_LIMITS.EXPECTED_CALLS_AT_MAX);
   });
 
   it("should calculate delay with full jitter formula", async () => {
     // Arrange
     const fetchFn = vi
       .fn<typeof globalThis.fetch>()
-      .mockResolvedValueOnce(mockResponse(500))
-      .mockResolvedValueOnce(mockResponse(500))
-      .mockResolvedValueOnce(mockResponse(200));
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR))
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR))
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.OK));
     const delays: number[] = [];
     const originalSetTimeout = globalThis.setTimeout;
     vi.spyOn(globalThis, "setTimeout").mockImplementation(((
@@ -140,15 +183,16 @@ describe("withRetry", () => {
       return originalSetTimeout(fn, ms);
     }) as typeof setTimeout);
     const retryFetch = withRetry(fetchFn, {
-      randomFn: () => 0.5,
-      baseDelay: 1000,
-      maxDelay: 10000,
+      randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+      baseDelay: RETRY_TIMING_MS.BASE_DELAY_LARGE,
+      maxDelay: RETRY_TIMING_MS.MAX_DELAY,
     });
     const promise = retryFetch("https://example.com");
+    // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary advance budget, not domain-modeled
     await vi.advanceTimersByTimeAsync(50000);
     await promise;
-    expect(delays[0]).toBe(500);
-    expect(delays[1]).toBe(1000);
+    expect(delays[0]).toBe(RETRY_TIMING_MS.JITTERED_DELAY_500);
+    expect(delays[1]).toBe(RETRY_TIMING_MS.BASE_DELAY_LARGE);
 
     // Act
     vi.mocked(globalThis.setTimeout).mockRestore();
@@ -161,11 +205,11 @@ describe("withRetry", () => {
     const logger = createLogger();
     const fetchFn = vi
       .fn<typeof globalThis.fetch>()
-      .mockResolvedValueOnce(mockResponse(503))
-      .mockResolvedValueOnce(mockResponse(200));
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.SERVICE_UNAVAILABLE))
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.OK));
     const retryFetch = withRetry(fetchFn, {
-      randomFn: () => 0.5,
-      baseDelay: 100,
+      randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+      baseDelay: RETRY_TIMING_MS.BASE_DELAY,
       logger,
     });
     const promise = retryFetch("https://example.com");
@@ -178,8 +222,8 @@ describe("withRetry", () => {
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith("Retrying request", {
       attempt: 1,
-      delay: 50,
-      status: 503,
+      delay: RETRY_TIMING_MS.JITTERED_DELAY_50,
+      status: HTTP_STATUS.SERVICE_UNAVAILABLE,
     });
   });
 
@@ -189,10 +233,10 @@ describe("withRetry", () => {
     const fetchFn = vi
       .fn<typeof globalThis.fetch>()
       .mockRejectedValueOnce(new TypeError("Failed to fetch"))
-      .mockResolvedValueOnce(mockResponse(200));
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.OK));
     const retryFetch = withRetry(fetchFn, {
-      randomFn: () => 0.5,
-      baseDelay: 100,
+      randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+      baseDelay: RETRY_TIMING_MS.BASE_DELAY,
       logger,
     });
     const promise = retryFetch("https://example.com");
@@ -207,7 +251,7 @@ describe("withRetry", () => {
       "Retrying request after network error",
       {
         attempt: 1,
-        delay: 50,
+        delay: RETRY_TIMING_MS.JITTERED_DELAY_50,
         error: "Failed to fetch",
       }
     );
@@ -217,36 +261,39 @@ describe("withRetry", () => {
     // Arrange
     const fetchFn = vi
       .fn<typeof globalThis.fetch>()
-      .mockResolvedValueOnce(mockResponse(500))
-      .mockResolvedValueOnce(mockResponse(429))
-      .mockResolvedValueOnce(mockResponse(200));
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR))
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.TOO_MANY_REQUESTS))
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.OK));
     const retryFetch = withRetry(fetchFn, {
-      randomFn: () => 0.5,
-      baseDelay: 100,
+      randomFn: () => RETRY_LIMITS.JITTER_FACTOR,
+      baseDelay: RETRY_TIMING_MS.BASE_DELAY,
     });
     const promise = retryFetch("https://example.com");
+    // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary advance budget, not domain-modeled
     await vi.advanceTimersByTimeAsync(50000);
 
     // Act
     const response = await promise;
 
     // Assert
-    expect(response.status).toBe(200);
-    expect(fetchFn).toHaveBeenCalledTimes(3);
+    expect(response.status).toBe(HTTP_STATUS.OK);
+    expect(fetchFn).toHaveBeenCalledTimes(
+      RETRY_LIMITS.EXPECTED_CALLS_AFTER_TWO_RETRIES
+    );
   });
 
   it("should use default options when none provided", async () => {
     // Arrange
     const fetchFn = vi
       .fn<typeof globalThis.fetch>()
-      .mockResolvedValueOnce(mockResponse(200));
+      .mockResolvedValueOnce(mockResponse(HTTP_STATUS.OK));
     const retryFetch = withRetry(fetchFn);
 
     // Act
     const response = await retryFetch("https://example.com");
 
     // Assert
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS.OK);
     expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 });

@@ -18,6 +18,8 @@ import {
   getFormatName,
 } from "./file-format-metadata";
 
+const NON_STRING_FILENAME_SENTINEL = 123;
+
 describe("file-format-detector", () => {
   describe("detectFormat", () => {
     it("should detect FIT format", () => {
@@ -241,7 +243,7 @@ describe("file-format-detector", () => {
 
     it("should return error for non-string filename", () => {
       // Arrange
-      const filename = 123 as unknown as string;
+      const filename = NON_STRING_FILENAME_SENTINEL as unknown as string;
 
       // Act
       const result = detectFormat(filename);

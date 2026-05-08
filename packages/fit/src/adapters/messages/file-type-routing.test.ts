@@ -5,6 +5,10 @@ import { buildKRDMetadata } from "@kaiord/core/test-utils";
 import { createMockLogger } from "@kaiord/core/test-utils";
 import { describe, expect, it } from "vitest";
 
+import {
+  FIT_FILE_TYPE_ACTIVITY,
+  FIT_FILE_TYPE_COURSE,
+} from "../../test-utils/constants";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { createFitMessages } from "./messages.mapper";
 
@@ -162,7 +166,7 @@ describe("File type routing", () => {
 
       // Assert
       expect(fileId.type).toBe(FIT_FILE_TYPE_TO_NUMBER.activity);
-      expect(fileId.type).toBe(4);
+      expect(fileId.type).toBe(FIT_FILE_TYPE_ACTIVITY);
     });
 
     it("should create FILE_ID with correct type for course", () => {
@@ -181,7 +185,7 @@ describe("File type routing", () => {
 
       // Assert
       expect(fileId.type).toBe(FIT_FILE_TYPE_TO_NUMBER.course);
-      expect(fileId.type).toBe(6);
+      expect(fileId.type).toBe(FIT_FILE_TYPE_COURSE);
     });
   });
 

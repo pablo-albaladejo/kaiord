@@ -1,6 +1,11 @@
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkoutWithBlocks } from "./helpers/load-test-workout-with-blocks";
 
+const WCAG_MIN_TOUCH_TARGET_PX = 44;
+const MOBILE_VIEWPORT_WIDTH_PX = 375;
+const TABLET_VIEWPORT_WIDTH_PX = 768;
+const CENTERING_TOLERANCE_DIGITS = 50;
+
 /**
  * E2E Tests: Modal Interactions
  *
@@ -300,7 +305,8 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     // Verify modal fits within viewport (allow tolerance for rendering
     // differences across mobile emulators — Mobile Chrome with device
     // emulation can report a wider bounding box due to scaling)
-    const viewportWidth = page.viewportSize()?.width ?? 375;
+    const viewportWidth =
+      page.viewportSize()?.width ?? MOBILE_VIEWPORT_WIDTH_PX;
     const modalBox = await modal.boundingBox();
     expect(modalBox).not.toBeNull();
     if (modalBox) {
@@ -324,8 +330,10 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
 
     if (cancelBox && confirmBox) {
       // WCAG 2.1 AA recommends 44x44px minimum touch targets
-      expect(cancelBox.height).toBeGreaterThanOrEqual(44);
-      expect(confirmBox.height).toBeGreaterThanOrEqual(44);
+      expect(cancelBox.height).toBeGreaterThanOrEqual(WCAG_MIN_TOUCH_TARGET_PX);
+      expect(confirmBox.height).toBeGreaterThanOrEqual(
+        WCAG_MIN_TOUCH_TARGET_PX
+      );
     }
 
     // Test interaction on mobile
@@ -373,14 +381,18 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     expect(modalBox).not.toBeNull();
     if (modalBox) {
       // Modal should be centered and not full width on tablet
-      expect(modalBox.width).toBeLessThan(768);
+      expect(modalBox.width).toBeLessThan(TABLET_VIEWPORT_WIDTH_PX);
+
       expect(modalBox.width).toBeGreaterThan(400); // Reasonable modal width
     }
 
     // Verify modal is centered
     if (modalBox) {
       const centerX = modalBox.x + modalBox.width / 2;
-      expect(centerX).toBeCloseTo(768 / 2, 50); // Centered horizontally
+      expect(centerX).toBeCloseTo(
+        TABLET_VIEWPORT_WIDTH_PX / 2,
+        CENTERING_TOLERANCE_DIGITS
+      ); // Centered horizontally
     }
   });
 });

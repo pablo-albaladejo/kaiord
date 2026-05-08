@@ -7,6 +7,10 @@ import { useWorkoutStore } from "./store/workout-store";
 import { renderWithProviders, screen } from "./test-utils";
 import type { KRD, Workout, WorkoutStep } from "./types/krd";
 
+const STEP3_POWER_WATTS = 300;
+const TUTORIAL_TOTAL_STEPS = 6;
+const TUTORIAL_LAST_INDEX = 5;
+
 describe("App", () => {
   beforeEach(() => {
     // Reset store state before each test
@@ -198,16 +202,16 @@ describe("App", () => {
 
       // Act - Navigate through all steps and complete
       // Click through all 6 steps (0-5)
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < TUTORIAL_TOTAL_STEPS; i++) {
         // On the last step, the button says "Finish", otherwise "Next"
-        const buttonName = i === 5 ? /finish/i : /next/i;
+        const buttonName = i === TUTORIAL_LAST_INDEX ? /finish/i : /next/i;
         const button = screen.getByRole("button", {
           name: buttonName,
         });
         await user.click(button);
 
         // Wait a bit for the state to update between clicks
-        if (i < 5) {
+        if (i < TUTORIAL_LAST_INDEX) {
           await waitFor(() => {
             expect(screen.getByText(`Step ${i + 2} of 6`)).toBeInTheDocument();
           });
@@ -270,7 +274,7 @@ describe("App", () => {
 
       const step1 = createMockStep(0, 100); // 100W
       const step2 = createMockStep(1, 200); // 200W
-      const step3 = createMockStep(2, 300); // 300W
+      const step3 = createMockStep(2, STEP3_POWER_WATTS); // 300W
       const workout = createMockWorkout([step1, step2, step3]);
       const krd = createMockKRD(workout);
 
@@ -334,7 +338,7 @@ describe("App", () => {
 
       const step1 = createMockStep(0, 100); // 100W
       const step2 = createMockStep(1, 200); // 200W
-      const step3 = createMockStep(2, 300); // 300W
+      const step3 = createMockStep(2, STEP3_POWER_WATTS); // 300W
       const workout = createMockWorkout([step1, step2, step3]);
       const krd = createMockKRD(workout);
 
@@ -379,7 +383,7 @@ describe("App", () => {
       // Assert
 
       expect(updatedStep1.target.value?.value).toBe(initialStep2Power);
-      expect(updatedStep1.target.value?.value).toBe(300);
+      expect(updatedStep1.target.value?.value).toBe(STEP3_POWER_WATTS);
 
       // Verify that the step that was at index 1 is now at index 2
       expect(updatedStep2.target.value?.value).toBe(initialStep1Power);

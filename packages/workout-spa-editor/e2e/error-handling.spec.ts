@@ -10,6 +10,9 @@
 import { expect, test } from "./fixtures/base";
 import { expandFileUpload } from "./helpers/expand-file-upload";
 
+const ERROR_DISPLAY_BUDGET_MS = 2000;
+const ERROR_REPETITION_COUNT = 5;
+
 test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new");
@@ -469,7 +472,7 @@ test.describe("Error Handling - Performance", () => {
     const errorDisplayTime = endTime - startTime;
 
     // Assert - Error displayed within reasonable time (< 2 seconds)
-    expect(errorDisplayTime).toBeLessThan(2000);
+    expect(errorDisplayTime).toBeLessThan(ERROR_DISPLAY_BUDGET_MS);
   });
 
   test("should handle multiple errors without memory leaks", async ({
@@ -485,7 +488,7 @@ test.describe("Error Handling - Performance", () => {
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Trigger multiple errors
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < ERROR_REPETITION_COUNT; i++) {
       await fileInput.setInputFiles({
         name: `invalid-${i}.krd`,
         mimeType: "application/json",

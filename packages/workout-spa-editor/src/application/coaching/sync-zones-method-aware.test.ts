@@ -252,9 +252,12 @@ describe("commitConflictResolution method-aware — mixed accept/reject (3.4f)",
     expect(persisted?.sportZones.cycling?.heartRateZones?.method).toBe("user");
     // Accepted bands took T2G value; rejected bands kept pre-sync.
     const zones = persisted?.sportZones.cycling?.heartRateZones?.zones;
-    expect(zones?.[0].minBpm).toBe(107); // accepted
-    expect(zones?.[3].maxBpm).toBe(170); // rejected → pre-sync
-    expect(zones?.[4].minBpm).toBe(171); // rejected → pre-sync
+    const ACCEPTED_Z1_MIN = 107;
+    const PRESYNC_Z4_MAX = 170;
+    const PRESYNC_Z5_MIN = 171;
+    expect(zones?.[0].minBpm).toBe(ACCEPTED_Z1_MIN); // accepted
+    expect(zones?.[3].maxBpm).toBe(PRESYNC_Z4_MAX); // rejected → pre-sync
+    expect(zones?.[4].minBpm).toBe(PRESYNC_Z5_MIN); // rejected → pre-sync
   });
 });
 

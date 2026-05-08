@@ -1,6 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
+import { POWER_WATTS_250 } from "../../test-utils/constants";
 import {
   extractExtensions,
   extractIntensity,
@@ -118,7 +119,7 @@ describe("extractPowerFromExtensions", () => {
     const result = extractPowerFromExtensions(extensions, logger);
 
     // Assert
-    expect(result).toBe(250);
+    expect(result).toBe(POWER_WATTS_250);
     expect(logger.debug).toHaveBeenCalledWith(
       "Found power data in TCX extensions",
       { watts: 250 }
@@ -201,7 +202,7 @@ describe("extractPowerFromExtensions", () => {
     const result = extractPowerFromExtensions(extensions, logger);
 
     // Assert
-    expect(result).toBe(250);
+    expect(result).toBe(POWER_WATTS_250);
   });
 });
 

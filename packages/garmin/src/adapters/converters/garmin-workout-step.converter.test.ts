@@ -1,6 +1,7 @@
 import type { WorkoutStep } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import { PACE_M_PER_S } from "../../test-utils/constants";
 import type { PaceZoneTable } from "../mappers/target.converter";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";
 
@@ -32,8 +33,8 @@ describe("mapWorkoutStep", () => {
       const result = mapWorkoutStep(step, { value: 1 }, { paceZones });
 
       // Assert
-      expect(result.targetValueOne).toBe(3.08);
-      expect(result.targetValueTwo).toBe(3.51);
+      expect(result.targetValueOne).toBe(PACE_M_PER_S.Z3_MIN);
+      expect(result.targetValueTwo).toBe(PACE_M_PER_S.Z3_MAX);
       expect(result.zoneNumber).toBeNull();
     });
 

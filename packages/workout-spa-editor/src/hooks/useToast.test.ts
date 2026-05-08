@@ -65,7 +65,8 @@ describe("useToast", () => {
       });
 
       // Assert
-      expect(result.current.toasts).toHaveLength(3);
+      const TOAST_COUNT = 3;
+      expect(result.current.toasts).toHaveLength(TOAST_COUNT);
       expect(result.current.toasts[0].title).toBe("Toast 1");
       expect(result.current.toasts[1].title).toBe("Toast 2");
       expect(result.current.toasts[2].title).toBe("Toast 3");
@@ -260,15 +261,16 @@ describe("useToast", () => {
   describe("toast options", () => {
     it("should support custom duration", () => {
       // Arrange
+      const CUSTOM_DURATION_MS = 3000;
       const { result } = renderHook(() => useToast());
 
       // Act
       act(() => {
-        result.current.toast({ title: "Test", duration: 3000 });
+        result.current.toast({ title: "Test", duration: CUSTOM_DURATION_MS });
       });
 
       // Assert
-      expect(result.current.toasts[0].duration).toBe(3000);
+      expect(result.current.toasts[0].duration).toBe(CUSTOM_DURATION_MS);
     });
 
     it("should support custom action", () => {
@@ -287,6 +289,7 @@ describe("useToast", () => {
 
     it("should support all options together", () => {
       // Arrange
+      const LONG_DURATION_MS = 10000;
       const { result } = renderHook(() => useToast());
       const action = "custom-action";
       act(() => {
@@ -295,7 +298,7 @@ describe("useToast", () => {
           description: "With all options",
           variant: "success",
           action,
-          duration: 10000,
+          duration: LONG_DURATION_MS,
         });
       });
 
@@ -307,7 +310,7 @@ describe("useToast", () => {
       expect(toast.description).toBe("With all options");
       expect(toast.variant).toBe("success");
       expect(toast.action).toBe(action);
-      expect(toast.duration).toBe(10000);
+      expect(toast.duration).toBe(LONG_DURATION_MS);
     });
   });
 });

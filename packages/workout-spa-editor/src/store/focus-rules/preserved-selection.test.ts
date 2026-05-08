@@ -19,6 +19,8 @@ const workoutWith = (ids: Array<string>): Workout =>
     steps: ids.map((id, i) => makeStep(id, i)),
   }) as unknown as Workout;
 
+const OUT_OF_RANGE_FALLBACK_INDEX = 5;
+
 describe("preservedSelectionTarget", () => {
   it("should return the prior selection when it is still present", () => {
     // Arrange
@@ -58,7 +60,11 @@ describe("preservedSelectionTarget", () => {
     const workout = workoutWith(["a"]);
 
     // Act
-    const target = preservedSelectionTarget(workout, asItemId("ghost"), 5);
+    const target = preservedSelectionTarget(
+      workout,
+      asItemId("ghost"),
+      OUT_OF_RANGE_FALLBACK_INDEX
+    );
 
     // Assert
     expect(target).toEqual({ kind: "empty-state" });

@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { MatchSuggestion } from "../../../application/match-suggestion";
 import { AutoMatchBanner } from "./AutoMatchBanner";
+import { EXPANDED_SUGGESTION_COUNT } from "./AutoMatchBanner.test-fixtures";
 
 const sug = (overrides: Partial<MatchSuggestion> = {}): MatchSuggestion => ({
   activityId: "p1:train2go:1",
@@ -72,7 +73,9 @@ describe("AutoMatchBanner", () => {
 
     // Assert
 
-    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+    expect(screen.getAllByRole("listitem")).toHaveLength(
+      EXPANDED_SUGGESTION_COUNT
+    );
     expect(screen.getByText("Collapse")).toBeInTheDocument();
   });
 

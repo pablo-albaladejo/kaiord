@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import type { ValidationError } from "../../types/krd";
 import { formatValidationErrors, formatZodError } from "./formatters";
+import { MIXED_ARRAY_FIXTURE } from "./formatters.test-fixtures";
 
 describe("validation formatters", () => {
   describe("formatZodError", () => {
@@ -82,7 +83,7 @@ describe("validation formatters", () => {
       const schema = z.object({
         items: z.array(z.number()),
       });
-      const result = schema.safeParse({ items: [1, "invalid", 3] });
+      const result = schema.safeParse({ items: MIXED_ARRAY_FIXTURE });
 
       // Act
       if (!result.success) {

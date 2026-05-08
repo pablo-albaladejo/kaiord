@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
 
+import { TARGET_RANGE_WIDTH_10 } from "../../../test-utils/tolerance-constants";
+
 type CadenceTarget = {
   type: "cadence";
   value:
@@ -19,6 +21,9 @@ export const buildCadenceRangeTarget = new Factory<CadenceTarget>()
   .attr("type", () => "cadence" as const)
   .attr("value", () => {
     const min = faker.number.int({ max: 80, min: 60 });
-    const max = faker.number.int({ max: 120, min: min + 10 });
+    const max = faker.number.int({
+      max: 120,
+      min: min + TARGET_RANGE_WIDTH_10,
+    });
     return { unit: "range" as const, min, max };
   });

@@ -15,6 +15,7 @@ import { useProfileByIdLive } from "./use-profile-by-id-live";
 
 const PROFILE_UUID_1 = "00000000-0000-4000-8000-0000000000b1";
 const PROFILE_UUID_MISSING = "00000000-0000-4000-8000-0000000000b9";
+const SETTLE_DELAY_MS = 50;
 
 const makeProfile = (id: string, name: string): Profile => ({
   id,
@@ -52,7 +53,7 @@ describe("useProfileByIdLive", () => {
     );
 
     // Act
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, SETTLE_DELAY_MS));
 
     // Assert
     expect(result.current).toBeUndefined();
@@ -63,7 +64,7 @@ describe("useProfileByIdLive", () => {
     const { result } = renderHook(() => useProfileByIdLive(null));
 
     // Act
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, SETTLE_DELAY_MS));
 
     // Assert
     expect(result.current).toBeUndefined();

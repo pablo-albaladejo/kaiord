@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Workout } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
+import {
+  LARGE_RENDER_BUDGET_MS,
+  LARGE_WORKOUT_STEP_COUNT,
+  TOTAL_WORKOUTS_FIXTURE,
+} from "./WorkoutList.integration.test-fixtures";
 
 /**
  * Integration tests for WorkoutList drag-and-drop functionality
@@ -30,7 +35,7 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     // Arrange
     // Arrange
 
-    const workout = createMockWorkout(3);
+    const workout = createMockWorkout(TOTAL_WORKOUTS_FIXTURE);
 
     // Act
 
@@ -54,7 +59,7 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     // Arrange
     // Arrange
 
-    const workout = createMockWorkout(3);
+    const workout = createMockWorkout(TOTAL_WORKOUTS_FIXTURE);
     const onStepReorder = vi.fn();
 
     // Act
@@ -79,7 +84,7 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     // Arrange
     // Arrange
 
-    const workout = createMockWorkout(3);
+    const workout = createMockWorkout(TOTAL_WORKOUTS_FIXTURE);
 
     // Act
     const { container } = render(<WorkoutList workout={workout} />);
@@ -92,7 +97,7 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
     // Assert
 
-    expect(stepCards.length).toBe(3);
+    expect(stepCards.length).toBe(TOTAL_WORKOUTS_FIXTURE);
   });
 
   it("should handle empty workout", () => {
@@ -178,7 +183,7 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     // Arrange
     // Arrange
 
-    const workout = createMockWorkout(3);
+    const workout = createMockWorkout(TOTAL_WORKOUTS_FIXTURE);
 
     // Act
     render(<WorkoutList workout={workout} />);
@@ -202,7 +207,7 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     // Arrange
     // Arrange
 
-    const workout = createMockWorkout(50);
+    const workout = createMockWorkout(LARGE_WORKOUT_STEP_COUNT);
 
     // Act
     const startTime = performance.now();
@@ -219,7 +224,7 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
     // Assert
 
-    expect(endTime - startTime).toBeLessThan(5000); // 5 seconds max
+    expect(endTime - startTime).toBeLessThan(LARGE_RENDER_BUDGET_MS); // 5 seconds max
     expect(screen.getByText("Step 1")).toBeInTheDocument();
     expect(screen.getByText("Step 50")).toBeInTheDocument();
   });

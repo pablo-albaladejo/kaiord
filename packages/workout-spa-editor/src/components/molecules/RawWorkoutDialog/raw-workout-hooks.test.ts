@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { WorkoutComment } from "../../../types/calendar-fragments";
 import { getPreSelectedComments } from "./raw-workout-hooks";
+import { POST_NOON_COMMENT_INDEX } from "./raw-workout-hooks.test-fixtures";
 
 describe("getPreSelectedComments", () => {
   const workoutDate = "2026-04-06";
@@ -82,7 +83,7 @@ describe("getPreSelectedComments", () => {
     expect(selected.has(1)).toBe(true);
     // Exactly noon and after are NOT pre-selected
     expect(selected.has(2)).toBe(false);
-    expect(selected.has(3)).toBe(false);
+    expect(selected.has(POST_NOON_COMMENT_INDEX)).toBe(false);
     expect(selected.size).toBe(2);
   });
 

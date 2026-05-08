@@ -13,6 +13,15 @@ import { expandFileUpload } from "./helpers/expand-file-upload";
  * Tests the complete user flow for step selection with unique hierarchical IDs
  * to ensure steps with the same stepIndex in different contexts are independently selectable.
  */
+
+const STEPS_IN_MAIN_WORKOUT_PLUS_ONE_BLOCK = 4;
+const STEPS_IN_MAIN_WORKOUT_PLUS_BLOCK_OF_TWO = 3;
+const STEPS_IN_MAIN_WORKOUT_PLUS_TWO_BLOCKS = 5;
+const SECOND_BLOCK_FIRST_STEP_INDEX = 3;
+const SECOND_BLOCK_SECOND_STEP_INDEX = 4;
+const CTRL_CLICK_SETTLE_MS = 150;
+const CTRL_CLICK_FINAL_SETTLE_MS = 300;
+
 test.describe("Step Selection - Unique IDs", () => {
   test("should select only the clicked step in main workout", async ({
     page,
@@ -102,7 +111,10 @@ test.describe("Step Selection - Unique IDs", () => {
 
     // Get all step cards (2 in main workout + 2 in block = 4 total)
     const allStepCards = page.locator('[data-testid="step-card"]');
-    await expect(allStepCards).toHaveCount(4, { timeout: 5000 });
+    await expect(allStepCards).toHaveCount(
+      STEPS_IN_MAIN_WORKOUT_PLUS_ONE_BLOCK,
+      { timeout: 5000 }
+    );
 
     // Click on the first step in main workout (stepIndex: 0)
     const mainWorkoutStep1 = allStepCards.nth(0);
@@ -201,7 +213,10 @@ test.describe("Step Selection - Unique IDs", () => {
 
     // Get all step cards
     const allStepCards = page.locator('[data-testid="step-card"]');
-    await expect(allStepCards).toHaveCount(3, { timeout: 5000 });
+    await expect(allStepCards).toHaveCount(
+      STEPS_IN_MAIN_WORKOUT_PLUS_BLOCK_OF_TWO,
+      { timeout: 5000 }
+    );
 
     // Click on the first step inside the repetition block (stepIndex: 0)
     const blockStep1 = allStepCards.nth(1);
@@ -332,12 +347,15 @@ test.describe("Step Selection - Unique IDs", () => {
 
     // Get all step cards (1 main + 2 in block1 + 2 in block2 = 5 total)
     const allStepCards = page.locator('[data-testid="step-card"]');
-    await expect(allStepCards).toHaveCount(5, { timeout: 5000 });
+    await expect(allStepCards).toHaveCount(
+      STEPS_IN_MAIN_WORKOUT_PLUS_TWO_BLOCKS,
+      { timeout: 5000 }
+    );
 
     // Multi-select: main workout step + step from first block + step from second block
     const mainStep = allStepCards.nth(0);
     const block1Step = allStepCards.nth(1);
-    const block2Step = allStepCards.nth(3);
+    const block2Step = allStepCards.nth(SECOND_BLOCK_FIRST_STEP_INDEX);
 
     // Use evaluate to dispatch click events with Control modifier for cross-browser compatibility
     await mainStep.evaluate((el) => {
@@ -349,7 +367,7 @@ test.describe("Step Selection - Unique IDs", () => {
       });
       el.dispatchEvent(event);
     });
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(CTRL_CLICK_SETTLE_MS);
 
     await block1Step.evaluate((el) => {
       const event = new MouseEvent("click", {
@@ -360,7 +378,7 @@ test.describe("Step Selection - Unique IDs", () => {
       });
       el.dispatchEvent(event);
     });
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(CTRL_CLICK_SETTLE_MS);
 
     await block2Step.evaluate((el) => {
       const event = new MouseEvent("click", {
@@ -371,7 +389,7 @@ test.describe("Step Selection - Unique IDs", () => {
       });
       el.dispatchEvent(event);
     });
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(CTRL_CLICK_FINAL_SETTLE_MS);
 
     // The three toggles crossed parents twice (main→block1, block1→block2),
     // so the selection was replaced each time. Only the last-toggled step
@@ -384,7 +402,7 @@ test.describe("Step Selection - Unique IDs", () => {
 
     // And no other steps are selected either.
     const block1Step2 = allStepCards.nth(2);
-    const block2Step2 = allStepCards.nth(4);
+    const block2Step2 = allStepCards.nth(SECOND_BLOCK_SECOND_STEP_INDEX);
     await expect(block1Step2).toHaveAttribute("data-selected", "false");
     await expect(block2Step2).toHaveAttribute("data-selected", "false");
 
@@ -499,7 +517,10 @@ test.describe("Step Selection - Unique IDs", () => {
 
     // Get all step cards
     const allStepCards = page.locator('[data-testid="step-card"]');
-    await expect(allStepCards).toHaveCount(5, { timeout: 5000 });
+    await expect(allStepCards).toHaveCount(
+      STEPS_IN_MAIN_WORKOUT_PLUS_TWO_BLOCKS,
+      { timeout: 5000 }
+    );
 
     // Click on main workout step with stepIndex: 1 (second step)
     const mainStepIndex1 = allStepCards.nth(1);
@@ -511,8 +532,8 @@ test.describe("Step Selection - Unique IDs", () => {
     });
 
     // Verify other steps with stepIndex: 1 in different contexts are NOT selected
-    const block1StepIndex1 = allStepCards.nth(3); // Second step in first block
-    const block2StepIndex1 = allStepCards.nth(4); // First step in second block
+    const block1StepIndex1 = allStepCards.nth(SECOND_BLOCK_FIRST_STEP_INDEX); // Second step in first block
+    const block2StepIndex1 = allStepCards.nth(SECOND_BLOCK_SECOND_STEP_INDEX); // First step in second block
     await expect(block1StepIndex1).toHaveAttribute("data-selected", "false");
     await expect(block2StepIndex1).toHaveAttribute("data-selected", "false");
 
@@ -637,7 +658,10 @@ test.describe("Step Selection - Unique IDs", () => {
 
     // Get all step cards
     const allStepCards = page.locator('[data-testid="step-card"]');
-    await expect(allStepCards).toHaveCount(5, { timeout: 5000 });
+    await expect(allStepCards).toHaveCount(
+      STEPS_IN_MAIN_WORKOUT_PLUS_TWO_BLOCKS,
+      { timeout: 5000 }
+    );
 
     // Test: Select main workout step with stepIndex 0
     const mainStep0 = allStepCards.nth(0);
@@ -648,7 +672,7 @@ test.describe("Step Selection - Unique IDs", () => {
 
     // Verify block steps with same stepIndex are NOT selected
     const block1Step0 = allStepCards.nth(2);
-    const block2Step0 = allStepCards.nth(4);
+    const block2Step0 = allStepCards.nth(SECOND_BLOCK_SECOND_STEP_INDEX);
     await expect(block1Step0).toHaveAttribute("data-selected", "false");
     await expect(block2Step0).toHaveAttribute("data-selected", "false");
 
@@ -663,7 +687,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await expect(mainStep0).toHaveAttribute("data-selected", "false");
 
     // Verify block step with same stepIndex is NOT selected
-    const block1Step1 = allStepCards.nth(3);
+    const block1Step1 = allStepCards.nth(SECOND_BLOCK_FIRST_STEP_INDEX);
     await expect(block1Step1).toHaveAttribute("data-selected", "false");
 
     // Verify only one step is selected at a time

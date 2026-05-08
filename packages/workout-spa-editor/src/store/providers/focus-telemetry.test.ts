@@ -11,26 +11,34 @@ import {
   unresolvedTargetFallbackEvent,
   wiringCanaryEvent,
 } from "./focus-telemetry";
+import {
+  FOCUS_TELEMETRY_DEFERRED_BUCKETS as BUCKETS,
+  FOCUS_TELEMETRY_DEFERRED_INPUT_BATCH as DEFERRED_BATCH,
+  FOCUS_TELEMETRY_DEFERRED_MS as MS,
+  FOCUS_TELEMETRY_ERRORS as ERRORS,
+  FOCUS_TELEMETRY_EVENT_TYPES as TYPES,
+  FOCUS_TELEMETRY_TARGETS as TARGETS,
+} from "./focus-telemetry.test-fixtures";
 
 // Task 1.1.a — Exhaustive switch coverage via `never` assertion.
 // If a new variant is added to FocusTelemetryEvent without updating the
 // switch, TypeScript will error here at compile time.
 const assertExhaustive = (event: never): never => {
-  throw new Error(`Unhandled event type: ${JSON.stringify(event)}`);
+  throw new Error(`${ERRORS.unhandledEventPrefix}${JSON.stringify(event)}`);
 };
 
 const handleEvent = (event: FocusTelemetryEvent): string => {
   switch (event.type) {
-    case "wiring-canary":
-      return "wiring-canary";
-    case "unresolved-target-fallback":
-      return "unresolved-target-fallback";
-    case "form-field-short-circuit":
-      return "form-field-short-circuit";
-    case "overlay-deferred-apply":
-      return "overlay-deferred-apply";
-    case "focus-error":
-      return "focus-error";
+    case TYPES.wiringCanary:
+      return TYPES.wiringCanary;
+    case TYPES.unresolvedTargetFallback:
+      return TYPES.unresolvedTargetFallback;
+    case TYPES.formFieldShortCircuit:
+      return TYPES.formFieldShortCircuit;
+    case TYPES.overlayDeferredApply:
+      return TYPES.overlayDeferredApply;
+    case TYPES.focusError:
+      return TYPES.focusError;
     default:
       return assertExhaustive(event);
   }
@@ -43,10 +51,13 @@ describe("FocusTelemetryEvent discriminated union", () => {
     // Act
     const events: FocusTelemetryEvent[] = [
       wiringCanaryEvent(),
-      unresolvedTargetFallbackEvent("item", "first-item"),
+      unresolvedTargetFallbackEvent(
+        TARGETS.itemKind,
+        TARGETS.firstItemFallback
+      ),
       formFieldShortCircuitEvent(),
-      overlayDeferredApplyEvent(250),
-      focusErrorEvent("focus"),
+      overlayDeferredApplyEvent(MS.twoHundredFifty),
+      focusErrorEvent(TARGETS.focusPhase),
     ];
 
     // Assert
@@ -65,7 +76,12 @@ describe("defaultFocusTelemetry", () => {
     // Assert
     expect(() => defaultFocusTelemetry(wiringCanaryEvent())).not.toThrow();
     expect(() =>
-      defaultFocusTelemetry(unresolvedTargetFallbackEvent("item", "first-item"))
+      defaultFocusTelemetry(
+        unresolvedTargetFallbackEvent(
+          TARGETS.itemKind,
+          TARGETS.firstItemFallback
+        )
+      )
     ).not.toThrow();
   });
 });
@@ -90,7 +106,7 @@ describe("safeEmit", () => {
 
     // Act
     const throwing: FocusTelemetry = () => {
-      throw new Error("telemetry down");
+      throw new Error(ERRORS.telemetryDown);
     };
 
     // Assert
@@ -100,7 +116,7 @@ describe("safeEmit", () => {
   it("should emit a console.warn when the telemetry function throws (dev-only path)", () => {
     // Arrange
     const throwing: FocusTelemetry = () => {
-      throw new Error("telemetry down");
+      throw new Error(ERRORS.telemetryDown);
     };
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     safeEmit(throwing, wiringCanaryEvent());
@@ -123,22 +139,25 @@ describe("event payload shape — no PII, no ItemId", () => {
 
     // Assert
     expect(Object.keys(event)).toEqual(["type"]);
-    expect(event.type).toBe("wiring-canary");
+    expect(event.type).toBe(TYPES.wiringCanary);
   });
 
   it("should expose only type, targetKind, fallback on unresolvedTargetFallbackEvent", () => {
     // Arrange
 
     // Act
-    const event = unresolvedTargetFallbackEvent("item", "first-item");
+    const event = unresolvedTargetFallbackEvent(
+      TARGETS.itemKind,
+      TARGETS.firstItemFallback
+    );
 
     // Assert
     expect(Object.keys(event).sort()).toEqual(
       ["fallback", "targetKind", "type"].sort()
     );
-    expect(event.type).toBe("unresolved-target-fallback");
-    expect(event.targetKind).toBe("item");
-    expect(event.fallback).toBe("first-item");
+    expect(event.type).toBe(TYPES.unresolvedTargetFallback);
+    expect(event.targetKind).toBe(TARGETS.itemKind);
+    expect(event.fallback).toBe(TARGETS.firstItemFallback);
   });
 
   it("should expose only the type field on formFieldShortCircuitEvent", () => {
@@ -149,30 +168,30 @@ describe("event payload shape — no PII, no ItemId", () => {
 
     // Assert
     expect(Object.keys(event)).toEqual(["type"]);
-    expect(event.type).toBe("form-field-short-circuit");
+    expect(event.type).toBe(TYPES.formFieldShortCircuit);
   });
 
   it("should expose only type and deferredForMs on overlayDeferredApplyEvent", () => {
     // Arrange
 
     // Act
-    const event = overlayDeferredApplyEvent(250);
+    const event = overlayDeferredApplyEvent(MS.twoHundredFifty);
 
     // Assert
     expect(Object.keys(event).sort()).toEqual(["deferredForMs", "type"].sort());
-    expect(event.type).toBe("overlay-deferred-apply");
+    expect(event.type).toBe(TYPES.overlayDeferredApply);
   });
 
   it("should expose only type and phase on focusErrorEvent", () => {
     // Arrange
 
     // Act
-    const event = focusErrorEvent("focus");
+    const event = focusErrorEvent(TARGETS.focusPhase);
 
     // Assert
     expect(Object.keys(event).sort()).toEqual(["phase", "type"].sort());
-    expect(event.type).toBe("focus-error");
-    expect(event.phase).toBe("focus");
+    expect(event.type).toBe(TYPES.focusError);
+    expect(event.phase).toBe(TARGETS.focusPhase);
   });
 
   it("should quantize deferredForMs to 100ms buckets via overlayDeferredApplyEvent", () => {
@@ -181,19 +200,29 @@ describe("event payload shape — no PII, no ItemId", () => {
     // Act
 
     // Assert
-    expect(overlayDeferredApplyEvent(0).deferredForMs).toBe(0);
-    expect(overlayDeferredApplyEvent(50).deferredForMs).toBe(100);
-    expect(overlayDeferredApplyEvent(149).deferredForMs).toBe(100);
-    expect(overlayDeferredApplyEvent(150).deferredForMs).toBe(200);
-    expect(overlayDeferredApplyEvent(250).deferredForMs).toBe(300);
-    expect(overlayDeferredApplyEvent(-10).deferredForMs).toBe(0);
+    expect(overlayDeferredApplyEvent(MS.zero).deferredForMs).toBe(BUCKETS.zero);
+    expect(overlayDeferredApplyEvent(MS.fifty).deferredForMs).toBe(
+      BUCKETS.oneHundred
+    );
+    expect(
+      overlayDeferredApplyEvent(MS.oneHundredFortyNine).deferredForMs
+    ).toBe(BUCKETS.oneHundred);
+    expect(overlayDeferredApplyEvent(MS.oneHundredFifty).deferredForMs).toBe(
+      BUCKETS.twoHundred
+    );
+    expect(overlayDeferredApplyEvent(MS.twoHundredFifty).deferredForMs).toBe(
+      BUCKETS.threeHundred
+    );
+    expect(overlayDeferredApplyEvent(MS.negativeTen).deferredForMs).toBe(
+      BUCKETS.zero
+    );
   });
 
   it("should always make overlayDeferredApplyEvent.deferredForMs a non-negative integer", () => {
     // Arrange
 
     // Act
-    const values = [0, 50, 99, 150, 500, 1234];
+    const values = DEFERRED_BATCH;
 
     // Assert
     for (const ms of values) {

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { formatDuration, getStateIndicator } from "./workout-card-utils";
+import {
+  ONE_HOUR_THIRTY_MINUTES_SECONDS,
+  THIRTY_MINUTES_SECONDS,
+} from "./workout-card-utils.test-fixtures";
 
 describe("getStateIndicator", () => {
   it("should return orange indicator for stale", () => {
@@ -60,7 +64,7 @@ describe("formatDuration", () => {
     // Act
 
     // Assert
-    expect(formatDuration(1800)).toBe("30m");
+    expect(formatDuration(THIRTY_MINUTES_SECONDS)).toBe("30m");
   });
 
   it("should format hours and minutes", () => {
@@ -69,7 +73,7 @@ describe("formatDuration", () => {
     // Act
 
     // Assert
-    expect(formatDuration(5400)).toBe("1h 30m");
+    expect(formatDuration(ONE_HOUR_THIRTY_MINUTES_SECONDS)).toBe("1h 30m");
   });
 
   it("should format zero minutes", () => {

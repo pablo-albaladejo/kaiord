@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createReport, formatReport } from "./reporter";
 import type { EvalResult } from "./types";
+import { PASS_RATE_FIFTY } from "../test-utils/constants";
 
 const passingResult: EvalResult = {
   id: "cycling-en-001",
@@ -34,7 +35,7 @@ describe("createReport", () => {
     expect(report.total).toBe(2);
     expect(report.passed).toBe(1);
     expect(report.failed).toBe(1);
-    expect(report.passRate).toBe(50);
+    expect(report.passRate).toBe(PASS_RATE_FIFTY);
     expect(report.results).toStrictEqual(results);
   });
 

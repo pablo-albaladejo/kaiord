@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { FILE_BYTES_1234, FILE_BYTES_5678 } from "../test-utils/constants";
 import {
   readFileAsBuffer,
   readFileAsText,
@@ -95,14 +96,14 @@ describe("file read/write operations", () => {
   it("should read file as buffer", async () => {
     // Arrange
     const filePath = join(tempDir, "test.bin");
-    const data = new Uint8Array([1, 2, 3, 4]);
+    const data = new Uint8Array(FILE_BYTES_1234);
     await writeFile(filePath, data);
 
     // Act
     const result = await readFileAsBuffer(filePath);
 
     // Assert
-    expect(result).toEqual(new Uint8Array([1, 2, 3, 4]));
+    expect(result).toEqual(new Uint8Array(FILE_BYTES_1234));
   });
 
   it("should throw for non-existent files", async () => {
@@ -131,14 +132,14 @@ describe("file read/write operations", () => {
   it("should write binary output file", async () => {
     // Arrange
     const filePath = join(tempDir, "output.bin");
-    const data = new Uint8Array([5, 6, 7, 8]);
+    const data = new Uint8Array(FILE_BYTES_5678);
     await writeOutputFile(filePath, data);
 
     // Act
     const content = await readFileAsBuffer(filePath);
 
     // Assert
-    expect(content).toEqual(new Uint8Array([5, 6, 7, 8]));
+    expect(content).toEqual(new Uint8Array(FILE_BYTES_5678));
   });
 
   it("should create nested directories for output", async () => {

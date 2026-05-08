@@ -1,6 +1,10 @@
 import type { Duration } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import {
+  NUMERIC_DURATION_TYPE_SAMPLE,
+  SECONDS_PER_MINUTE_SAMPLE,
+} from "../../test-utils/constants";
 import { buildFitDurationData } from "../../tests/fixtures/fit-duration.fixtures";
 import { convertFitDuration } from "../duration/duration.converter";
 
@@ -256,7 +260,7 @@ describe("convertFitDuration", () => {
     it("should return open duration for numeric duration type", () => {
       // Arrange
       const data = {
-        durationType: 123 as unknown as string,
+        durationType: NUMERIC_DURATION_TYPE_SAMPLE as unknown as string,
         durationTime: 300,
       };
 
@@ -361,7 +365,7 @@ describe("convertFitDuration", () => {
       // Arrange
       const data = buildFitDurationData.build({
         durationType: "time",
-        durationTime: 60,
+        durationTime: SECONDS_PER_MINUTE_SAMPLE,
       });
 
       // Act
@@ -370,7 +374,7 @@ describe("convertFitDuration", () => {
       // Assert
       expect(result.type).toBe("time");
       if (result.type === "time") {
-        expect(result.seconds).toBe(60);
+        expect(result.seconds).toBe(SECONDS_PER_MINUTE_SAMPLE);
       }
     });
 

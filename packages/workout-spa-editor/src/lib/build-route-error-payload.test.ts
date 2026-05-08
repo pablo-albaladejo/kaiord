@@ -1,6 +1,12 @@
 import type { ErrorInfo } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+const MESSAGE_INPUT_LENGTH = 600;
+const MESSAGE_MAX_LENGTH = 500;
+const STACK_INPUT_LENGTH = 1100;
+const STACK_MAX_LENGTH = 1000;
+const STACK_LINE_COUNT = 4;
+
 import { buildRouteErrorPayload } from "./build-route-error-payload";
 import { scrubAnalyticsString } from "./scrub-analytics-string";
 
@@ -123,13 +129,13 @@ describe("buildRouteErrorPayload", () => {
 
       // Act
       const out = buildRouteErrorPayload(
-        new Error(".".repeat(600)),
+        new Error(".".repeat(MESSAGE_INPUT_LENGTH)),
         { componentStack: "" },
         scrubAnalyticsString
       );
 
       // Assert
-      expect(out.message.length).toBe(500);
+      expect(out.message.length).toBe(MESSAGE_MAX_LENGTH);
     });
   });
 
@@ -152,7 +158,7 @@ describe("buildRouteErrorPayload", () => {
 
       // Assert
       expect(out.componentStack).toContain("<uuid>");
-      expect(out.componentStack.split("\n")).toHaveLength(4);
+      expect(out.componentStack.split("\n")).toHaveLength(STACK_LINE_COUNT);
     });
 
     it("should fall back to empty string when componentStack is undefined", () => {
@@ -175,12 +181,12 @@ describe("buildRouteErrorPayload", () => {
       // Act
       const out = buildRouteErrorPayload(
         new Error("x"),
-        { componentStack: ".".repeat(1100) },
+        { componentStack: ".".repeat(STACK_INPUT_LENGTH) },
         scrubAnalyticsString
       );
 
       // Assert
-      expect(out.componentStack.length).toBe(1000);
+      expect(out.componentStack.length).toBe(STACK_MAX_LENGTH);
     });
   });
 

@@ -11,6 +11,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { RepetitionBlock } from "../../../types/krd";
 import { RepetitionBlockCard } from "./RepetitionBlockCard";
+import { DEFAULT_REPEAT_COUNT_VALUE } from "./RepetitionBlockCard.test-fixtures";
 
 describe("RepetitionBlockCard - Context Menu Integration", () => {
   const mockBlock: RepetitionBlock = {
@@ -201,7 +202,7 @@ describe("RepetitionBlockCard - Context Menu Integration", () => {
       // Assert
 
       expect(input).toBeInTheDocument();
-      expect(input).toHaveValue(3);
+      expect(input).toHaveValue(DEFAULT_REPEAT_COUNT_VALUE);
     });
   });
 

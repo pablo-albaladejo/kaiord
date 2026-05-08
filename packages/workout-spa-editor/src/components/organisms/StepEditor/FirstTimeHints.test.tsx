@@ -13,6 +13,7 @@ import {
   hasCompletedFirstWorkout,
   resetFirstWorkoutState,
 } from "./FirstTimeHints";
+import { HINT_DOT_COUNT } from "./FirstTimeHints.test-fixtures";
 
 describe("FirstTimeHints", () => {
   const TEST_STORAGE_KEY = "test-first-workout-hints";
@@ -91,7 +92,7 @@ describe("FirstTimeHints", () => {
 
       // Assert
 
-      expect(dots).toHaveLength(3);
+      expect(dots).toHaveLength(HINT_DOT_COUNT);
     });
 
     it("should highlight current hint dot", () => {
@@ -228,7 +229,7 @@ describe("FirstTimeHints", () => {
 
       // Assert
 
-      expect(dots).toHaveLength(3);
+      expect(dots).toHaveLength(HINT_DOT_COUNT);
       expect(dots[0]).toHaveAttribute("aria-label", "Hint 1 of 3 (current)");
       expect(dots[1]).toHaveAttribute("aria-label", "Hint 2 of 3");
       expect(dots[2]).toHaveAttribute("aria-label", "Hint 3 of 3");

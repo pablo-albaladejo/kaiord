@@ -22,19 +22,25 @@ import { ProfileNotFoundError } from "../profile/errors";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { commitConflictResolution } from "./commit-conflict-resolution";
 import { syncZones } from "./sync-zones";
+import {
+  SYNC_ZONES_FIELDS as FIELDS,
+  SYNC_ZONES_IDS as IDS,
+  SYNC_ZONES_REASONS as REASONS,
+  SYNC_ZONES_VALUES as VALUES,
+} from "./sync-zones.test-fixtures";
 
-const PROFILE_ID = "00000000-0000-0000-0000-000000000001";
-const NOW = "2026-04-28T10:00:00.000Z";
+const PROFILE_ID = IDS.profileId;
+const NOW = IDS.now;
 
 const makeProfile = (overrides: Partial<Profile> = {}): Profile => ({
   id: PROFILE_ID,
-  name: "Pablo",
+  name: IDS.externalUserName,
   sportZones: {},
   linkedAccounts: [
     {
-      source: "train2go",
-      externalUserId: "99999",
-      externalUserName: "Pablo",
+      source: IDS.source,
+      externalUserId: IDS.externalUserId,
+      externalUserName: IDS.externalUserName,
       linkedAt: NOW,
       syncZones: true,
     },
@@ -47,11 +53,11 @@ const makeProfile = (overrides: Partial<Profile> = {}): Profile => ({
 const makeTransport = (
   readZones?: CoachingTransport["readZones"]
 ): CoachingTransport => ({
-  source: "train2go",
+  source: IDS.source,
   ping: vi.fn(async () => ({
     sessionActive: true,
-    externalUserId: "99999",
-    externalUserName: "Pablo",
+    externalUserId: IDS.externalUserId,
+    externalUserName: IDS.externalUserName,
   })),
   openExternal: vi.fn(async () => undefined),
   readWeek: vi.fn(async () => []),
@@ -60,38 +66,58 @@ const makeTransport = (
 });
 
 const PAYLOAD_FULL: ZonesPayload = {
-  physiological: { weight: 83, bpmMax: 187 },
+  physiological: { weight: VALUES.weight, bpmMax: VALUES.bpmMax },
   paces: {
-    cycling: { z4Upper: 268, z5Lower: 270 },
-    running: { z4Upper: { min: 4, sec: 0 } },
-    swimming: { z4Upper: { min: 1, sec: 30 } },
+    cycling: {
+      z4Upper: VALUES.cyclingZ4Upper,
+      z5Lower: VALUES.cyclingZ5Lower,
+    },
+    running: {
+      z4Upper: {
+        min: VALUES.runningPaceZ4UpperMin,
+        sec: VALUES.runningPaceZ4UpperSec,
+      },
+    },
+    swimming: {
+      z4Upper: {
+        min: VALUES.swimmingPaceZ4UpperMin,
+        sec: VALUES.swimmingPaceZ4UpperSec,
+      },
+    },
   },
   hrZones: {
-    cycling: { z4Upper: 160 },
-    running: { z4Upper: 168 },
+    cycling: { z4Upper: VALUES.cyclingHrZ4Upper },
+    running: { z4Upper: VALUES.runningHrZ4Upper },
   },
 };
 
 describe("syncZones — silent fills and conflicts", () => {
   it("should write every incoming value silently when profile is empty (empty-fill)", async () => {
     // Arrange
+    const MIN_APPLIED_COUNT = 7;
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_FULL);
     const result = await syncZones(PROFILE_ID, transport, repo);
     if (!result.ok) throw new Error("expected ok");
     expect(result.conflicts).toEqual([]);
-    expect(result.applied.length).toBeGreaterThanOrEqual(7);
+    expect(result.applied.length).toBeGreaterThanOrEqual(MIN_APPLIED_COUNT);
 
     // Act
     const after = await repo.getById(PROFILE_ID);
 
     // Assert
-    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(268);
-    expect(after?.sportZones.cycling?.thresholds.lthr).toBe(160);
-    expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
-    expect(after?.bodyWeight).toBe(83);
-    expect(after?.maxHeartRate).toBe(187);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ4Upper
+    );
+    expect(after?.sportZones.cycling?.thresholds.lthr).toBe(
+      VALUES.cyclingHrZ4Upper
+    );
+    expect(after?.sportZones.running?.thresholds.lthr).toBe(
+      VALUES.runningHrZ4Upper
+    );
+    expect(after?.bodyWeight).toBe(VALUES.weight);
+    expect(after?.maxHeartRate).toBe(VALUES.bpmMax);
   });
 
   it("should produce no applied or conflicts when incoming === current (no-op)", async () => {
@@ -99,19 +125,25 @@ describe("syncZones — silent fills and conflicts", () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
-        bodyWeight: 83,
-        maxHeartRate: 187,
+        bodyWeight: VALUES.weight,
+        maxHeartRate: VALUES.bpmMax,
         sportZones: {
           cycling: {
-            thresholds: { ftp: 268, lthr: 160 },
+            thresholds: {
+              ftp: VALUES.cyclingZ4Upper,
+              lthr: VALUES.cyclingHrZ4Upper,
+            },
             heartRateZones: { method: "manual", zones: [] },
           },
           running: {
-            thresholds: { lthr: 168, thresholdPace: 240 },
+            thresholds: {
+              lthr: VALUES.runningHrZ4Upper,
+              thresholdPace: VALUES.runningThresholdPace,
+            },
             heartRateZones: { method: "manual", zones: [] },
           },
           swimming: {
-            thresholds: { thresholdPace: 90 },
+            thresholds: { thresholdPace: VALUES.swimmingThresholdPace },
             heartRateZones: { method: "manual", zones: [] },
           },
         },
@@ -135,26 +167,32 @@ describe("syncZones — silent fills and conflicts", () => {
       makeProfile({
         sportZones: {
           cycling: {
-            thresholds: { ftp: 200 },
+            thresholds: { ftp: VALUES.cyclingZ4UpperLow },
             heartRateZones: { method: "manual", zones: [] },
           },
         },
       })
     );
     const transport = makeTransport(async () => ({
-      paces: { cycling: { z4Upper: 270 } },
+      paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },
     }));
     const result = await syncZones(PROFILE_ID, transport, repo);
     if (!result.ok) throw new Error("expected ok");
     expect(result.conflicts).toEqual([
-      { field: "cycling.thresholds.ftp", current: 200, incoming: 270 },
+      {
+        field: FIELDS.cyclingFtp,
+        current: VALUES.cyclingZ4UpperLow,
+        incoming: VALUES.cyclingZ5Lower,
+      },
     ]);
 
     // Act
     const after = await repo.getById(PROFILE_ID);
 
     // Assert
-    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ4UpperLow
+    );
   });
 
   it("should return per-sport LTHR conflict rows (multi-conflict)", async () => {
@@ -164,11 +202,11 @@ describe("syncZones — silent fills and conflicts", () => {
       makeProfile({
         sportZones: {
           cycling: {
-            thresholds: { lthr: 150 },
+            thresholds: { lthr: VALUES.cyclingHrLthrLow },
             heartRateZones: { method: "manual", zones: [] },
           },
           running: {
-            thresholds: { lthr: 155 },
+            thresholds: { lthr: VALUES.runningHrLthrLow },
             heartRateZones: { method: "manual", zones: [] },
           },
         },
@@ -176,8 +214,8 @@ describe("syncZones — silent fills and conflicts", () => {
     );
     const transport = makeTransport(async () => ({
       hrZones: {
-        cycling: { z4Upper: 160 },
-        running: { z4Upper: 168 },
+        cycling: { z4Upper: VALUES.cyclingHrZ4Upper },
+        running: { z4Upper: VALUES.runningHrZ4Upper },
       },
     }));
     const result = await syncZones(PROFILE_ID, transport, repo);
@@ -187,10 +225,7 @@ describe("syncZones — silent fills and conflicts", () => {
     const fields = result.conflicts.map((c) => c.field).sort();
 
     // Assert
-    expect(fields).toEqual([
-      "cycling.thresholds.lthr",
-      "running.thresholds.lthr",
-    ]);
+    expect(fields).toEqual([FIELDS.cyclingLthr, FIELDS.runningLthr]);
   });
 
   it("should fill empty bodyWeight and return a conflict for manual FTP (mixed-fill-and-conflict)", async () => {
@@ -200,29 +235,37 @@ describe("syncZones — silent fills and conflicts", () => {
       makeProfile({
         sportZones: {
           cycling: {
-            thresholds: { ftp: 200 },
+            thresholds: { ftp: VALUES.cyclingZ4UpperLow },
             heartRateZones: { method: "manual", zones: [] },
           },
         },
       })
     );
     const transport = makeTransport(async () => ({
-      physiological: { weight: 72 },
-      paces: { cycling: { z4Upper: 270 } },
+      physiological: { weight: VALUES.bodyWeightLow },
+      paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },
     }));
     const result = await syncZones(PROFILE_ID, transport, repo);
     if (!result.ok) throw new Error("expected ok");
-    expect(result.applied).toEqual([{ field: "bodyWeight", value: 72 }]);
+    expect(result.applied).toEqual([
+      { field: FIELDS.bodyWeight, value: VALUES.bodyWeightLow },
+    ]);
     expect(result.conflicts).toEqual([
-      { field: "cycling.thresholds.ftp", current: 200, incoming: 270 },
+      {
+        field: FIELDS.cyclingFtp,
+        current: VALUES.cyclingZ4UpperLow,
+        incoming: VALUES.cyclingZ5Lower,
+      },
     ]);
 
     // Act
     const after = await repo.getById(PROFILE_ID);
 
     // Assert
-    expect(after?.bodyWeight).toBe(72);
-    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
+    expect(after?.bodyWeight).toBe(VALUES.bodyWeightLow);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ4UpperLow
+    );
   });
 
   it("should use z5Lower when z4Upper is undefined (ftp-fallback-absent)", async () => {
@@ -230,7 +273,7 @@ describe("syncZones — silent fills and conflicts", () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
-      paces: { cycling: { z5Lower: 270 } },
+      paces: { cycling: { z5Lower: VALUES.cyclingZ5Lower } },
     }));
     const result = await syncZones(PROFILE_ID, transport, repo);
 
@@ -239,8 +282,8 @@ describe("syncZones — silent fills and conflicts", () => {
 
     // Assert
     expect(result.applied).toContainEqual({
-      field: "cycling.thresholds.ftp",
-      value: 270,
+      field: FIELDS.cyclingFtp,
+      value: VALUES.cyclingZ5Lower,
     });
   });
 
@@ -249,7 +292,12 @@ describe("syncZones — silent fills and conflicts", () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
-      paces: { cycling: { z4Upper: 0, z5Lower: 270 } },
+      paces: {
+        cycling: {
+          z4Upper: VALUES.zeroValue,
+          z5Lower: VALUES.cyclingZ5Lower,
+        },
+      },
     }));
     const result = await syncZones(PROFILE_ID, transport, repo);
 
@@ -258,8 +306,8 @@ describe("syncZones — silent fills and conflicts", () => {
 
     // Assert
     expect(result.applied).toContainEqual({
-      field: "cycling.thresholds.ftp",
-      value: 270,
+      field: FIELDS.cyclingFtp,
+      value: VALUES.cyclingZ5Lower,
     });
   });
 
@@ -268,7 +316,7 @@ describe("syncZones — silent fills and conflicts", () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => {
-      throw new Error("Bridge unavailable");
+      throw new Error(REASONS.bridgeUnavailable);
     });
     const result = await syncZones(PROFILE_ID, transport, repo);
     expect(result.ok).toBe(false);
@@ -277,8 +325,8 @@ describe("syncZones — silent fills and conflicts", () => {
     if (result.ok) throw new Error("unreachable");
 
     // Assert
-    expect(result.reason).toBe("transport-error");
-    expect(result.error).toBe("Bridge unavailable");
+    expect(result.reason).toBe(REASONS.transportError);
+    expect(result.error).toBe(REASONS.bridgeUnavailable);
   });
 
   it("should surface { ok: false, reason: 'shape-mismatch' } when payload is null (shape-mismatch)", async () => {
@@ -293,7 +341,7 @@ describe("syncZones — silent fills and conflicts", () => {
     if (result.ok) throw new Error("unreachable");
 
     // Assert
-    expect(result.reason).toBe("shape-mismatch");
+    expect(result.reason).toBe(REASONS.shapeMismatch);
   });
 
   it("should return { ok: false, reason: 'unsupported' } when readZones is absent (unsupported-transport)", async () => {
@@ -308,7 +356,7 @@ describe("syncZones — silent fills and conflicts", () => {
     if (result.ok) throw new Error("unreachable");
 
     // Assert
-    expect(result.reason).toBe("unsupported");
+    expect(result.reason).toBe(REASONS.unsupported);
   });
 
   it("should return { ok: false, reason: 'profile-deleted' } when profile is missing mid-sync", async () => {
@@ -322,14 +370,14 @@ describe("syncZones — silent fills and conflicts", () => {
     if (result.ok) throw new Error("unreachable");
 
     // Assert
-    expect(result.reason).toBe("profile-deleted");
+    expect(result.reason).toBe(REASONS.profileDeleted);
   });
 });
 
 describe("commitConflictResolution", () => {
   const conflictPayload: ZonesPayload = {
-    paces: { cycling: { z4Upper: 270 } },
-    hrZones: { running: { z4Upper: 168 } },
+    paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },
+    hrZones: { running: { z4Upper: VALUES.runningHrZ4Upper } },
   };
 
   const seedConflictedProfile = async (): Promise<{
@@ -340,11 +388,11 @@ describe("commitConflictResolution", () => {
       makeProfile({
         sportZones: {
           cycling: {
-            thresholds: { ftp: 200 },
+            thresholds: { ftp: VALUES.cyclingZ4UpperLow },
             heartRateZones: { method: "manual", zones: [] },
           },
           running: {
-            thresholds: { lthr: 150 },
+            thresholds: { lthr: VALUES.cyclingHrLthrLow },
             heartRateZones: { method: "manual", zones: [] },
           },
         },
@@ -357,8 +405,8 @@ describe("commitConflictResolution", () => {
     // Arrange
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
-      "cycling.thresholds.ftp": "accept",
-      "running.thresholds.lthr": "accept",
+      [FIELDS.cyclingFtp]: "accept",
+      [FIELDS.runningLthr]: "accept",
     } as Record<FieldKey, ConflictDecision>;
     await commitConflictResolution(
       PROFILE_ID,
@@ -371,16 +419,20 @@ describe("commitConflictResolution", () => {
     const after = await repo.getById(PROFILE_ID);
 
     // Assert
-    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(270);
-    expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ5Lower
+    );
+    expect(after?.sportZones.running?.thresholds.lthr).toBe(
+      VALUES.runningHrZ4Upper
+    );
   });
 
   it("should leave the profile untouched (all-reject)", async () => {
     // Arrange
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
-      "cycling.thresholds.ftp": "reject",
-      "running.thresholds.lthr": "reject",
+      [FIELDS.cyclingFtp]: "reject",
+      [FIELDS.runningLthr]: "reject",
     } as Record<FieldKey, ConflictDecision>;
     await commitConflictResolution(
       PROFILE_ID,
@@ -393,16 +445,20 @@ describe("commitConflictResolution", () => {
     const after = await repo.getById(PROFILE_ID);
 
     // Assert
-    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
-    expect(after?.sportZones.running?.thresholds.lthr).toBe(150);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ4UpperLow
+    );
+    expect(after?.sportZones.running?.thresholds.lthr).toBe(
+      VALUES.cyclingHrLthrLow
+    );
   });
 
   it("should accept some and reject others, idempotent on second call (mixed)", async () => {
     // Arrange
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
-      "cycling.thresholds.ftp": "reject",
-      "running.thresholds.lthr": "accept",
+      [FIELDS.cyclingFtp]: "reject",
+      [FIELDS.runningLthr]: "accept",
     } as Record<FieldKey, ConflictDecision>;
     await commitConflictResolution(
       PROFILE_ID,
@@ -421,8 +477,12 @@ describe("commitConflictResolution", () => {
     const after = await repo.getById(PROFILE_ID);
 
     // Assert
-    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
-    expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ4UpperLow
+    );
+    expect(after?.sportZones.running?.thresholds.lthr).toBe(
+      VALUES.runningHrZ4Upper
+    );
   });
 
   it("should throw ProfileNotFoundError when profile deleted mid-commit", async () => {
@@ -431,7 +491,7 @@ describe("commitConflictResolution", () => {
 
     // Act
     const decisions: Record<FieldKey, ConflictDecision> = {
-      "cycling.thresholds.ftp": "accept",
+      [FIELDS.cyclingFtp]: "accept",
     } as Record<FieldKey, ConflictDecision>;
 
     // Assert

@@ -38,10 +38,12 @@ const createTestWorkout = (stepCount: number) => ({
       steps: Array.from({ length: stepCount }, (_, i) => ({
         stepIndex: i,
         durationType: "time",
+        // eslint-disable-next-line no-magic-numbers -- Playwright fixture duration arithmetic, not domain-modeled
         duration: { type: "time", seconds: 300 + i * 60 },
         targetType: "power",
         target: {
           type: "power",
+          // eslint-disable-next-line no-magic-numbers -- Playwright fixture power arithmetic, not domain-modeled
           value: { unit: "watts", value: 200 + i * 10 },
         },
         intensity: i === 0 ? "warmup" : "active",
@@ -92,6 +94,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -131,6 +134,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -172,6 +176,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -213,6 +218,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -254,6 +260,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -402,13 +409,16 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
 
     // Verify block actually moved (position changed)
     const positionDelta = newBox.y - originalBox.y;
+    // eslint-disable-next-line no-magic-numbers -- pixel threshold floor for layout assertion, no semantic name
     expect(Math.abs(positionDelta)).toBeGreaterThan(50); // Block moved at least 50px
 
     // Verify dimensions are maintained (within 10% tolerance)
     const widthDiff = Math.abs(newBox.width - originalBox.width);
     const heightDiff = Math.abs(newBox.height - originalBox.height);
 
+    // eslint-disable-next-line no-magic-numbers -- bounding-box tolerance ratio, test-local
     expect(widthDiff).toBeLessThan(originalBox.width * 0.1);
+    // eslint-disable-next-line no-magic-numbers -- bounding-box tolerance ratio, test-local
     expect(heightDiff).toBeLessThan(originalBox.height * 0.1);
 
     // Verify the block is still properly rendered
@@ -461,6 +471,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -485,6 +496,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     await expect(reorderedSteps.nth(1)).toContainText("5 min");
 
     // Verify all steps have full opacity after drag completes
+    // eslint-disable-next-line no-magic-numbers -- iteration count over fixture, not domain-modeled
     for (let i = 0; i < 3; i++) {
       const opacity = await reorderedSteps.nth(i).evaluate((el) => {
         return window.getComputedStyle(el).opacity;
@@ -505,6 +517,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -513,6 +526,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     const stepCards = page.locator('[data-testid="step-card"]');
 
     // Assert - Verify drag handles are present on all step cards
+    // eslint-disable-next-line no-magic-numbers -- iteration count over fixture, not domain-modeled
     for (let i = 0; i < 3; i++) {
       const stepCard = stepCards.nth(i);
 
@@ -544,6 +558,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -597,6 +612,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -622,7 +638,9 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
 
     // Verify there's gap between steps (from gap-4 class = 1rem = 16px)
     const gap = secondBox.y - (firstBox.y + firstBox.height);
+    // eslint-disable-next-line no-magic-numbers -- pixel threshold floor for layout assertion, no semantic name
     expect(gap).toBeGreaterThan(10); // At least 10px gap
+    // eslint-disable-next-line no-magic-numbers -- pixel threshold ceiling for layout assertion, no semantic name
     expect(gap).toBeLessThan(30); // But not too large
   });
 
@@ -649,6 +667,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -711,6 +730,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
     });
 
@@ -726,6 +746,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     );
 
     // Assert - E2E performance budget: 4000ms (includes all overhead + CI/CD slowness)
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test perf budget (ms), not domain-modeled
     expect(duration).toBeLessThan(4000);
     console.log(`Drag operation completed in ${duration}ms`);
 
@@ -750,15 +771,18 @@ test.describe("Mobile Touch Drag - Performance", () => {
     await fileInput.setInputFiles({
       name: "large-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(50))),
     });
 
     await expect(page.getByText("Test Workout")).toBeVisible();
 
     const stepCards = page.locator('[data-testid="step-card"]');
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion count matches fixture size, not domain-modeled
     await expect(stepCards).toHaveCount(50);
 
     // Scroll to middle step to ensure it's visible
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     const middleStep = stepCards.nth(25);
     await middleStep.scrollIntoViewIfNeeded();
 
@@ -766,10 +790,12 @@ test.describe("Mobile Touch Drag - Performance", () => {
     const { duration } = await measureDragPerformance(
       page,
       middleStep,
+      // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
       stepCards.nth(26)
     );
 
     // Assert - E2E performance budget: 5000ms for large workouts (CI/CD is slower)
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test perf budget (ms), not domain-modeled
     expect(duration).toBeLessThan(5000);
     console.log(
       `Large workout touch drag completed in ${duration}ms (50 steps)`
@@ -795,6 +821,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
+      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
       buffer: Buffer.from(JSON.stringify(createTestWorkout(5))),
     });
 
@@ -805,6 +832,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     // Act - Perform 3 consecutive drag operations using touch
     const results = [];
 
+    // eslint-disable-next-line no-magic-numbers -- iteration count over fixture, not domain-modeled
     for (let i = 0; i < 3; i++) {
       const { duration } = await measureDragPerformance(
         page,
@@ -819,6 +847,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
 
     // Assert - All operations complete within 3500ms (E2E budget for CI/CD)
     for (const duration of results) {
+      // eslint-disable-next-line no-magic-numbers -- Playwright per-test perf budget (ms), not domain-modeled
       expect(duration).toBeLessThan(3500);
     }
 

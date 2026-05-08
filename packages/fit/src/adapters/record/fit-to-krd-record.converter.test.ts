@@ -1,5 +1,22 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  COORD_BARCELONA,
+  COORD_PRECISION_5,
+  LAT_INVALID_DEG,
+  PERF_RECORD_BATCH_SIZE,
+  PERF_RECORD_BUDGET_MS,
+  RECORD_BATCH_SAMPLE_SIZE,
+  SAMPLE_CADENCE,
+  SAMPLE_DISTANCE_M,
+  SAMPLE_ELEVATION,
+  SAMPLE_HR,
+  SAMPLE_POWER,
+  SAMPLE_RUN_DYNAMICS,
+  SAMPLE_SPEED,
+  SAMPLE_TEMPERATURE_C,
+  SAMPLE_TIMESTAMP_2024_01_01_SEC,
+} from "../../test-utils/constants";
 import { degreesToSemicircles } from "../shared/coordinate.converter";
 import {
   convertFitToKrdRecord,
@@ -22,8 +39,8 @@ describe("convertFitToKrdRecord", () => {
 
   it("should convert FIT record with GPS coordinates", () => {
     // Arrange
-    const barcelonaLat = 41.3851;
-    const barcelonaLon = 2.1734;
+    const barcelonaLat = COORD_BARCELONA.LAT;
+    const barcelonaLon = COORD_BARCELONA.LON;
     const fitRecord = {
       timestamp: 1704067200,
       positionLat: degreesToSemicircles(barcelonaLat),
@@ -35,8 +52,8 @@ describe("convertFitToKrdRecord", () => {
 
     // Assert
     expect(result.position).toBeDefined();
-    expect(result.position?.lat).toBeCloseTo(barcelonaLat, 5);
-    expect(result.position?.lon).toBeCloseTo(barcelonaLon, 5);
+    expect(result.position?.lat).toBeCloseTo(barcelonaLat, COORD_PRECISION_5);
+    expect(result.position?.lon).toBeCloseTo(barcelonaLon, COORD_PRECISION_5);
   });
 
   it("should prefer enhanced altitude over regular", () => {
@@ -51,7 +68,7 @@ describe("convertFitToKrdRecord", () => {
     const result = convertFitToKrdRecord(fitRecord);
 
     // Assert
-    expect(result.altitude).toBe(105.5);
+    expect(result.altitude).toBe(SAMPLE_ELEVATION.ALT_ENHANCED_M);
   });
 
   it("should prefer enhanced speed over regular", () => {
@@ -66,7 +83,7 @@ describe("convertFitToKrdRecord", () => {
     const result = convertFitToKrdRecord(fitRecord);
 
     // Assert
-    expect(result.speed).toBe(3.5);
+    expect(result.speed).toBe(SAMPLE_SPEED.RECORD);
   });
 
   it("should convert all metric fields", () => {
@@ -84,11 +101,11 @@ describe("convertFitToKrdRecord", () => {
     const result = convertFitToKrdRecord(fitRecord);
 
     // Assert
-    expect(result.heartRate).toBe(145);
-    expect(result.cadence).toBe(90);
-    expect(result.power).toBe(250);
-    expect(result.distance).toBe(5000);
-    expect(result.temperature).toBe(22);
+    expect(result.heartRate).toBe(SAMPLE_HR.AVG);
+    expect(result.cadence).toBe(SAMPLE_CADENCE.AVG);
+    expect(result.power).toBe(SAMPLE_POWER.RECORD);
+    expect(result.distance).toBe(SAMPLE_DISTANCE_M);
+    expect(result.temperature).toBe(SAMPLE_TEMPERATURE_C);
   });
 
   it("should combine cadence with fractional cadence", () => {
@@ -103,7 +120,7 @@ describe("convertFitToKrdRecord", () => {
     const result = convertFitToKrdRecord(fitRecord);
 
     // Assert
-    expect(result.cadence).toBe(90.5);
+    expect(result.cadence).toBe(SAMPLE_CADENCE.AVG_FRACTIONAL);
   });
 
   it("should convert running dynamics", () => {
@@ -119,9 +136,9 @@ describe("convertFitToKrdRecord", () => {
     const result = convertFitToKrdRecord(fitRecord);
 
     // Assert
-    expect(result.verticalOscillation).toBe(8.5);
-    expect(result.stanceTime).toBe(250);
-    expect(result.stepLength).toBe(1.2);
+    expect(result.verticalOscillation).toBe(SAMPLE_RUN_DYNAMICS.VERT_OSC);
+    expect(result.stanceTime).toBe(SAMPLE_RUN_DYNAMICS.STANCE_TIME);
+    expect(result.stepLength).toBe(SAMPLE_RUN_DYNAMICS.STEP_LENGTH);
   });
 
   it("should throw error for out-of-range coordinates", () => {
@@ -130,7 +147,7 @@ describe("convertFitToKrdRecord", () => {
     // Act
     const fitRecord = {
       timestamp: 1704067200,
-      positionLat: degreesToSemicircles(91), // Invalid: > 90
+      positionLat: degreesToSemicircles(LAT_INVALID_DEG), // Invalid: > 90
       positionLong: degreesToSemicircles(0),
     };
 
@@ -168,7 +185,7 @@ describe("convertFitToKrdRecords", () => {
     const results = convertFitToKrdRecords(fitRecords);
 
     // Assert
-    expect(results).toHaveLength(3);
+    expect(results).toHaveLength(RECORD_BATCH_SAMPLE_SIZE);
     expect(results[0].timestamp).toBe("2024-01-01T00:00:00.000Z");
     expect(results[1].timestamp).toBe("2024-01-01T00:00:01.000Z");
     expect(results[2].timestamp).toBe("2024-01-01T00:00:02.000Z");
@@ -178,12 +195,15 @@ describe("convertFitToKrdRecords", () => {
 describe("performance", () => {
   it("should process 10000 records in under 500ms", () => {
     // Arrange
-    const fitRecords = Array.from({ length: 10000 }, (_, i) => ({
-      timestamp: 1704067200 + i,
-      heartRate: 145,
-      cadence: 90,
-      power: 250,
-    }));
+    const fitRecords = Array.from(
+      { length: PERF_RECORD_BATCH_SIZE },
+      (_, i) => ({
+        timestamp: SAMPLE_TIMESTAMP_2024_01_01_SEC + i,
+        heartRate: 145,
+        cadence: 90,
+        power: 250,
+      })
+    );
     const start = performance.now();
     const results = convertFitToKrdRecords(fitRecords);
 
@@ -191,7 +211,7 @@ describe("performance", () => {
     const duration = performance.now() - start;
 
     // Assert
-    expect(results).toHaveLength(10000);
-    expect(duration).toBeLessThan(500);
+    expect(results).toHaveLength(PERF_RECORD_BATCH_SIZE);
+    expect(duration).toBeLessThan(PERF_RECORD_BUDGET_MS);
   });
 });

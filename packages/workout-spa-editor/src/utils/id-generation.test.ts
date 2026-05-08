@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { generateBlockId } from "./id-generation";
 
+const ID_PARTS_COUNT = 3;
+const RAPID_CALL_COUNT = 10;
+const RAPID_UNIQUENESS_CALL_COUNT = 50;
+
 describe("generateBlockId", () => {
   describe("ID format consistency", () => {
     it("should generate ID with correct format", () => {
@@ -48,7 +52,7 @@ describe("generateBlockId", () => {
 
       // Assert
 
-      expect(parts).toHaveLength(3);
+      expect(parts).toHaveLength(ID_PARTS_COUNT);
       expect(parts[0]).toBe("block");
       expect(Number(parts[1])).toBeGreaterThan(0);
     });
@@ -67,7 +71,7 @@ describe("generateBlockId", () => {
 
       // Assert
 
-      expect(parts).toHaveLength(3);
+      expect(parts).toHaveLength(ID_PARTS_COUNT);
       expect(parts[2]).toMatch(/^[a-z0-9]+$/);
       expect(parts[2].length).toBeGreaterThan(0);
     });
@@ -119,7 +123,9 @@ describe("generateBlockId", () => {
       // Generate multiple IDs in quick succession (likely same timestamp)
       // Arrange
 
-      const ids = Array.from({ length: 10 }, () => generateBlockId());
+      const ids = Array.from({ length: RAPID_CALL_COUNT }, () =>
+        generateBlockId()
+      );
 
       // Assert
       // Even if timestamps are the same, random parts should differ
@@ -130,7 +136,7 @@ describe("generateBlockId", () => {
 
       // Assert
 
-      expect(uniqueIds.size).toBe(10);
+      expect(uniqueIds.size).toBe(RAPID_CALL_COUNT);
     });
   });
 
@@ -192,7 +198,7 @@ describe("generateBlockId", () => {
       // Arrange
 
       const ids: string[] = [];
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < RAPID_UNIQUENESS_CALL_COUNT; i++) {
         ids.push(generateBlockId());
       }
 
@@ -204,7 +210,7 @@ describe("generateBlockId", () => {
 
       // Assert
 
-      expect(uniqueIds.size).toBe(50);
+      expect(uniqueIds.size).toBe(RAPID_UNIQUENESS_CALL_COUNT);
     });
 
     it("should generate valid IDs without special characters", () => {

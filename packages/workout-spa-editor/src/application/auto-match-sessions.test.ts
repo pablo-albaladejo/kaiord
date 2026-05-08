@@ -72,6 +72,7 @@ const noWriteRepo = (): SessionMatchRepository =>
 describe("autoMatchSessions", () => {
   it("should return one obvious pair (same day, same family, ≤20% duration variance)", async () => {
     // Arrange
+    const HIGH_CONFIDENCE_FLOOR = 0.9;
 
     // Act
     const result = await autoMatchSessions(
@@ -93,7 +94,7 @@ describe("autoMatchSessions", () => {
       activityId: "a1",
       workoutId: "w1",
     });
-    expect(result[0]!.score!).toBeGreaterThanOrEqual(0.9);
+    expect(result[0]!.score!).toBeGreaterThanOrEqual(HIGH_CONFIDENCE_FLOOR);
     expect(result[0]!.reasons[0]).toEqual({
       code: "sport-family-match",
       family: "swimming",

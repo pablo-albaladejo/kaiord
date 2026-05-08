@@ -2,6 +2,11 @@ import { describe, it, expect } from "vitest";
 import { evaluateBenchmark } from "./assertions";
 import type { Benchmark } from "./types";
 import type { Workout } from "@kaiord/core";
+import {
+  EVAL_DURATION_MS_DEFAULT,
+  EVAL_DURATION_MS_PASS,
+  EXPECTED_STEP_COUNT_THREE,
+} from "../test-utils/constants";
 
 const createWorkout = (overrides: Partial<Workout> = {}): Workout => ({
   name: "Test Workout",
@@ -54,15 +59,19 @@ describe("evaluateBenchmark", () => {
     const workout = createWorkout();
 
     // Act
-    const result = evaluateBenchmark(baseBenchmark, workout, 1500);
+    const result = evaluateBenchmark(
+      baseBenchmark,
+      workout,
+      EVAL_DURATION_MS_PASS
+    );
 
     // Assert
     expect(result.pass).toBe(true);
     expect(result.errors).toHaveLength(0);
     expect(result.id).toBe("cycling-en-001");
-    expect(result.durationMs).toBe(1500);
+    expect(result.durationMs).toBe(EVAL_DURATION_MS_PASS);
     expect(result.sport).toBe("cycling");
-    expect(result.stepCount).toBe(3);
+    expect(result.stepCount).toBe(EXPECTED_STEP_COUNT_THREE);
   });
 
   it("should fail when sport does not match expected", () => {
@@ -70,7 +79,11 @@ describe("evaluateBenchmark", () => {
     const workout = createWorkout({ sport: "running" });
 
     // Act
-    const result = evaluateBenchmark(baseBenchmark, workout, 1000);
+    const result = evaluateBenchmark(
+      baseBenchmark,
+      workout,
+      EVAL_DURATION_MS_DEFAULT
+    );
 
     // Assert
     expect(result.pass).toBe(false);
@@ -85,7 +98,11 @@ describe("evaluateBenchmark", () => {
     const workout = createWorkout();
 
     // Act
-    const result = evaluateBenchmark(benchmark, workout, 1000);
+    const result = evaluateBenchmark(
+      benchmark,
+      workout,
+      EVAL_DURATION_MS_DEFAULT
+    );
 
     // Assert
     expect(result.pass).toBe(false);
@@ -98,7 +115,11 @@ describe("evaluateBenchmark", () => {
     const workout = createWorkout();
 
     // Act
-    const result = evaluateBenchmark(benchmark, workout, 1000);
+    const result = evaluateBenchmark(
+      benchmark,
+      workout,
+      EVAL_DURATION_MS_DEFAULT
+    );
 
     // Assert
     expect(result.pass).toBe(false);
@@ -139,11 +160,11 @@ describe("evaluateBenchmark", () => {
     const result = evaluateBenchmark(
       { ...baseBenchmark, minSteps: 3, maxSteps: 3 },
       workout,
-      1000
+      EVAL_DURATION_MS_DEFAULT
     );
 
     // Assert
-    expect(result.stepCount).toBe(3);
+    expect(result.stepCount).toBe(EXPECTED_STEP_COUNT_THREE);
     expect(result.pass).toBe(true);
   });
 
@@ -168,7 +189,11 @@ describe("evaluateBenchmark", () => {
     const workout = createWorkout({ sport: "running" });
 
     // Act
-    const result = evaluateBenchmark(benchmark, workout, 1000);
+    const result = evaluateBenchmark(
+      benchmark,
+      workout,
+      EVAL_DURATION_MS_DEFAULT
+    );
 
     // Assert
     expect(result.errors.every((e) => !e.includes("Sport mismatch"))).toBe(
@@ -189,7 +214,11 @@ describe("evaluateBenchmark", () => {
       const workout = createWorkout();
 
       // Act
-      const result = evaluateBenchmark(benchmark, workout, 1000);
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
 
       // Assert
       expect(result.pass).toBe(false);
@@ -208,7 +237,11 @@ describe("evaluateBenchmark", () => {
       const workout = createWorkout();
 
       // Act
-      const result = evaluateBenchmark(benchmark, workout, 1000);
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
 
       // Assert
       expect(result.pass).toBe(false);
@@ -228,7 +261,11 @@ describe("evaluateBenchmark", () => {
       const workout = createWorkout();
 
       // Act
-      const result = evaluateBenchmark(benchmark, workout, 1000);
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
 
       // Assert
       expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);
@@ -246,7 +283,11 @@ describe("evaluateBenchmark", () => {
       const workout = createWorkout();
 
       // Act
-      const result = evaluateBenchmark(benchmark, workout, 1000);
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
 
       // Assert
       expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);

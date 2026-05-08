@@ -9,6 +9,8 @@ import type { WorkoutRecord } from "../types/calendar-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import { useAutoMatchSuggestions } from "./use-auto-match-suggestions";
 
+const ONE_HOUR_SECONDS = 3600;
+
 const seedActivity = (
   date: string,
   duration = "60 min"
@@ -74,7 +76,7 @@ describe("useAutoMatchSuggestions", () => {
   it("should return suggestions when candidates exist and not dismissed", async () => {
     // Arrange
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
-    await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
+    await db.table("workouts").put(seedWorkout("2026-04-29", ONE_HOUR_SECONDS));
 
     // Act
     const { result } = renderHook(() =>
@@ -91,7 +93,7 @@ describe("useAutoMatchSuggestions", () => {
   it("should hide only the dismissed pair; other candidates remain visible", async () => {
     // Arrange
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
-    await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
+    await db.table("workouts").put(seedWorkout("2026-04-29", ONE_HOUR_SECONDS));
     const dismissedRow: AutoMatchDismissal = {
       profileId: "p1",
       weekStart: "2026-04-27",
@@ -117,7 +119,7 @@ describe("useAutoMatchSuggestions", () => {
   it("should re-evaluate when the dismissal entry is removed", async () => {
     // Arrange
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
-    await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
+    await db.table("workouts").put(seedWorkout("2026-04-29", ONE_HOUR_SECONDS));
     await db.table("autoMatchDismissals").put({
       profileId: "p1",
       weekStart: "2026-04-27",

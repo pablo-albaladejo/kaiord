@@ -1,54 +1,62 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  LENGTH_DECIMAL_METERS,
+  LENGTH_UNIT_YARDS_25_AS_METERS,
+  LENGTH_UNIT_YARDS_27_5_AS_METERS,
+  LENGTH_UNIT_YARDS_50_AS_METERS,
+  POOL_LENGTH_25,
+  POOL_LENGTH_50,
+} from "../../test-utils/tolerance-constants";
 import { convertLengthToMeters } from "./length-unit.converter";
 
 describe("convertLengthToMeters", () => {
   it("should return length unchanged when unit is meters", () => {
     // Arrange
-    const length = 25;
+    const length = POOL_LENGTH_25;
     const unit = "meters" as const;
 
     // Act
     const result = convertLengthToMeters(length, unit);
 
     // Assert
-    expect(result).toBe(25);
+    expect(result).toBe(POOL_LENGTH_25);
   });
 
   it("should convert yards to meters", () => {
     // Arrange
-    const length = 25;
+    const length = POOL_LENGTH_25;
     const unit = "yards" as const;
 
     // Act
     const result = convertLengthToMeters(length, unit);
 
     // Assert
-    expect(result).toBeCloseTo(22.86, 2);
+    expect(result).toBeCloseTo(LENGTH_UNIT_YARDS_25_AS_METERS, 2);
   });
 
   it("should convert 50 yards to meters", () => {
     // Arrange
-    const length = 50;
+    const length = POOL_LENGTH_50;
     const unit = "yards" as const;
 
     // Act
     const result = convertLengthToMeters(length, unit);
 
     // Assert
-    expect(result).toBeCloseTo(45.72, 2);
+    expect(result).toBeCloseTo(LENGTH_UNIT_YARDS_50_AS_METERS, 2);
   });
 
   it("should handle decimal lengths in meters", () => {
     // Arrange
-    const length = 33.33;
+    const length = LENGTH_DECIMAL_METERS;
     const unit = "meters" as const;
 
     // Act
     const result = convertLengthToMeters(length, unit);
 
     // Assert
-    expect(result).toBe(33.33);
+    expect(result).toBe(LENGTH_DECIMAL_METERS);
   });
 
   it("should handle decimal lengths in yards", () => {
@@ -60,6 +68,6 @@ describe("convertLengthToMeters", () => {
     const result = convertLengthToMeters(length, unit);
 
     // Assert
-    expect(result).toBeCloseTo(25.146, 2);
+    expect(result).toBeCloseTo(LENGTH_UNIT_YARDS_27_5_AS_METERS, 2);
   });
 });

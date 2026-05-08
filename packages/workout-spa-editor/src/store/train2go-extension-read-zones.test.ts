@@ -10,6 +10,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createOperationQueue } from "../adapters/bridge/operation-queue";
 import { readZones } from "./train2go-extension-read-zones";
 
+const ONE_SECOND_MS = 1000;
+const RATE_LIMIT_BELOW_HOURLY = 59;
+const RATE_LIMIT_AT_HOURLY = 60;
+
 const setupChrome = (
   cb: (msg: unknown, cb: (r: unknown) => void) => void
 ): void => {
@@ -102,7 +106,10 @@ describe("readZones", () => {
     // Arrange
     const queue = createOperationQueue(0);
     const now = Date.now();
-    const arr = Array.from({ length: 59 }, (_, i) => now - 1000 - i);
+    const arr = Array.from(
+      { length: RATE_LIMIT_BELOW_HOURLY },
+      (_, i) => now - ONE_SECOND_MS - i
+    );
     queue._timestamps.set("ext-id", arr);
 
     // Act
@@ -110,14 +117,17 @@ describe("readZones", () => {
 
     // Assert
     expect(res.ok).toBe(true);
-    expect(queue.getHourlyCount("ext-id")).toBe(60);
+    expect(queue.getHourlyCount("ext-id")).toBe(RATE_LIMIT_AT_HOURLY);
   });
 
   it("should reject the 61st op within the rolling hour", async () => {
     // Arrange
     const queue = createOperationQueue(0);
     const now = Date.now();
-    const arr = Array.from({ length: 60 }, (_, i) => now - 1000 - i);
+    const arr = Array.from(
+      { length: RATE_LIMIT_AT_HOURLY },
+      (_, i) => now - ONE_SECOND_MS - i
+    );
 
     // Act
     queue._timestamps.set("ext-id", arr);

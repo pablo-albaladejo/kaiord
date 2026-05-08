@@ -1,6 +1,7 @@
 import type { Target } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import { PACE_M_PER_S, ZONE } from "../../test-utils/constants";
 import type { PaceZoneTable } from "./target.converter";
 import { mapKrdTargetToGarmin } from "./target.converter";
 
@@ -26,8 +27,8 @@ describe("mapKrdTargetToGarmin", () => {
 
       // Assert
       expect(result.zoneNumber).toBeNull();
-      expect(result.targetValueOne).toBe(3.08);
-      expect(result.targetValueTwo).toBe(3.51);
+      expect(result.targetValueOne).toBe(PACE_M_PER_S.Z3_MIN);
+      expect(result.targetValueTwo).toBe(PACE_M_PER_S.Z3_MAX);
       expect(result.targetType.workoutTargetTypeKey).toBe("pace.zone");
     });
 
@@ -72,8 +73,8 @@ describe("mapKrdTargetToGarmin", () => {
       const result = mapKrdTargetToGarmin(target);
 
       // Assert
-      expect(result.targetValueOne).toBe(3.5);
-      expect(result.targetValueTwo).toBe(4.0);
+      expect(result.targetValueOne).toBe(PACE_M_PER_S.RANGE_LOW);
+      expect(result.targetValueTwo).toBe(PACE_M_PER_S.RANGE_HIGH);
       expect(result.zoneNumber).toBeNull();
     });
   });
@@ -90,7 +91,7 @@ describe("mapKrdTargetToGarmin", () => {
       const result = mapKrdTargetToGarmin(target);
 
       // Assert
-      expect(result.zoneNumber).toBe(3);
+      expect(result.zoneNumber).toBe(ZONE.Z3);
       expect(result.targetValueOne).toBeNull();
       expect(result.targetValueTwo).toBeNull();
     });
@@ -108,7 +109,7 @@ describe("mapKrdTargetToGarmin", () => {
       const result = mapKrdTargetToGarmin(target);
 
       // Assert
-      expect(result.zoneNumber).toBe(4);
+      expect(result.zoneNumber).toBe(ZONE.Z4);
       expect(result.targetValueOne).toBeNull();
       expect(result.targetValueTwo).toBeNull();
     });

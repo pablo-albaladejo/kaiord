@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  FIT_SESSION_AVG_HR,
+  FIT_SESSION_AVG_SPEED_BASE,
+  FIT_SESSION_AVG_SPEED_ENHANCED,
+  FIT_SESSION_INTENSITY_FACTOR,
+  FIT_SESSION_MAX_HR,
+  FIT_SESSION_MAX_POWER,
+  FIT_SESSION_MAX_SPEED_BASE,
+  FIT_SESSION_MAX_SPEED_ENHANCED,
+  FIT_SESSION_NORMALIZED_POWER,
+  FIT_SESSION_TOTAL_DESCENT,
+  FIT_SESSION_TOTAL_ELAPSED_SEC,
+  FIT_SESSION_TOTAL_TIMER_SEC,
+  FIT_SESSION_TSS,
+} from "../../test-utils/constants";
 import { convertFitToKrdSession } from "./fit-to-krd-session.converter";
 
 describe("convertFitToKrdSession", () => {
@@ -19,8 +34,8 @@ describe("convertFitToKrdSession", () => {
 
     // Assert
     expect(result.startTime).toBe("2024-01-01T00:00:00.000Z");
-    expect(result.totalElapsedTime).toBe(3600);
-    expect(result.totalTimerTime).toBe(3500);
+    expect(result.totalElapsedTime).toBe(FIT_SESSION_TOTAL_ELAPSED_SEC);
+    expect(result.totalTimerTime).toBe(FIT_SESSION_TOTAL_TIMER_SEC);
     expect(result.sport).toBe("cycling");
     expect(result.subSport).toBe("indoor_cycling");
   });
@@ -46,13 +61,13 @@ describe("convertFitToKrdSession", () => {
     const result = convertFitToKrdSession(fitSession);
 
     // Assert
-    expect(result.avgHeartRate).toBe(145);
-    expect(result.maxHeartRate).toBe(175);
+    expect(result.avgHeartRate).toBe(FIT_SESSION_AVG_HR);
+    expect(result.maxHeartRate).toBe(FIT_SESSION_MAX_HR);
     expect(result.avgPower).toBe(200);
-    expect(result.maxPower).toBe(350);
-    expect(result.normalizedPower).toBe(210);
-    expect(result.trainingStressScore).toBe(75.5);
-    expect(result.intensityFactor).toBe(0.85);
+    expect(result.maxPower).toBe(FIT_SESSION_MAX_POWER);
+    expect(result.normalizedPower).toBe(FIT_SESSION_NORMALIZED_POWER);
+    expect(result.trainingStressScore).toBe(FIT_SESSION_TSS);
+    expect(result.intensityFactor).toBe(FIT_SESSION_INTENSITY_FACTOR);
   });
 
   it("should prefer enhanced speed fields over regular speed", () => {
@@ -73,8 +88,8 @@ describe("convertFitToKrdSession", () => {
     const result = convertFitToKrdSession(fitSession);
 
     // Assert
-    expect(result.avgSpeed).toBe(3.5);
-    expect(result.maxSpeed).toBe(4.5);
+    expect(result.avgSpeed).toBe(FIT_SESSION_AVG_SPEED_ENHANCED);
+    expect(result.maxSpeed).toBe(FIT_SESSION_MAX_SPEED_ENHANCED);
   });
 
   it("should fall back to regular speed when enhanced not available", () => {
@@ -93,8 +108,8 @@ describe("convertFitToKrdSession", () => {
     const result = convertFitToKrdSession(fitSession);
 
     // Assert
-    expect(result.avgSpeed).toBe(3.0);
-    expect(result.maxSpeed).toBe(4.0);
+    expect(result.avgSpeed).toBe(FIT_SESSION_AVG_SPEED_BASE);
+    expect(result.maxSpeed).toBe(FIT_SESSION_MAX_SPEED_BASE);
   });
 
   it("should convert elevation data", () => {
@@ -114,7 +129,7 @@ describe("convertFitToKrdSession", () => {
 
     // Assert
     expect(result.totalAscent).toBe(500);
-    expect(result.totalDescent).toBe(450);
+    expect(result.totalDescent).toBe(FIT_SESSION_TOTAL_DESCENT);
   });
 
   it("should throw error for invalid FIT session", () => {

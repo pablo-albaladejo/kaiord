@@ -3,6 +3,12 @@ import { describe, expect, it } from "vitest";
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import type { WorkoutState } from "../workout-store";
 import { reorderStepsInBlockAction } from "./reorder-steps-in-block-action";
+import {
+  OUT_OF_BOUNDS_OVER_INDEX,
+  REORDERED_BLOCK_STEP_COUNT,
+  SECONDS_LONG_INTERVAL,
+  SECONDS_SHORT_INTERVAL,
+} from "./reorder-steps-in-block-action.test-fixtures";
 
 describe("reorderStepsInBlockAction", () => {
   const createMockKRD = (workout: Workout): KRD => ({
@@ -84,10 +90,10 @@ describe("reorderStepsInBlockAction", () => {
     const updatedBlock = updatedWorkout.steps[0] as RepetitionBlock;
 
     // Assert
-    expect(updatedBlock.steps).toHaveLength(3);
-    expect(updatedBlock.steps[0].duration.seconds).toBe(600);
-    expect(updatedBlock.steps[1].duration.seconds).toBe(300);
-    expect(updatedBlock.steps[2].duration.seconds).toBe(300);
+    expect(updatedBlock.steps).toHaveLength(REORDERED_BLOCK_STEP_COUNT);
+    expect(updatedBlock.steps[0].duration.seconds).toBe(SECONDS_LONG_INTERVAL);
+    expect(updatedBlock.steps[1].duration.seconds).toBe(SECONDS_SHORT_INTERVAL);
+    expect(updatedBlock.steps[2].duration.seconds).toBe(SECONDS_SHORT_INTERVAL);
     expect(updatedBlock.steps[0].stepIndex).toBe(1);
     expect(updatedBlock.steps[1].stepIndex).toBe(2);
     expect(updatedBlock.steps[2].stepIndex).toBe(0);
@@ -178,7 +184,13 @@ describe("reorderStepsInBlockAction", () => {
     const state = createMockState();
 
     // Act
-    const result = reorderStepsInBlockAction(krd, "block-test-3", 0, 5, state);
+    const result = reorderStepsInBlockAction(
+      krd,
+      "block-test-3",
+      0,
+      OUT_OF_BOUNDS_OVER_INDEX,
+      state
+    );
 
     // Assert
     expect(result).toEqual({});

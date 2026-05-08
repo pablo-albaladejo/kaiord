@@ -16,13 +16,19 @@ import {
   KaiordDatabase,
   makeBackfillAiProviderCreatedAt,
 } from "./dexie-database";
+import {
+  CANONICAL_EPOCH_MS_2023_11,
+  DEXIE_V7_VERSION,
+  EXISTING_CREATED_AT_SENTINEL,
+  ONE_MINUTE_MS,
+} from "./dexie-v8-migration.test-fixtures";
 
 const dbName = (suffix: string) => `kaiord-test-v8-${suffix}-${Date.now()}`;
 
 const seedV7 = async (name: string): Promise<void> => {
   const v7 = new Dexie(name);
   v7.version(1).stores({ aiProviders: "id" });
-  v7.version(7).stores({ aiProviders: "id" });
+  v7.version(DEXIE_V7_VERSION).stores({ aiProviders: "id" });
   await v7.open();
   await v7.table("aiProviders").bulkPut([
     {
@@ -107,7 +113,7 @@ describe("Dexie v7 → v8 migration", () => {
       model: "gemini-2.0",
       label: "Fresh",
       isDefault: false,
-      createdAt: Date.now() + 60_000,
+      createdAt: Date.now() + ONE_MINUTE_MS,
     });
     const ordered = await v8
       .table("aiProviders")
@@ -128,20 +134,23 @@ describe("makeBackfillAiProviderCreatedAt", () => {
     const row: Record<string, unknown> = { id: "p1" };
 
     // Act
-    makeBackfillAiProviderCreatedAt(1_700_000_000_000)(row);
+    makeBackfillAiProviderCreatedAt(CANONICAL_EPOCH_MS_2023_11)(row);
 
     // Assert
-    expect(row.createdAt).toBe(1_700_000_000_000);
+    expect(row.createdAt).toBe(CANONICAL_EPOCH_MS_2023_11);
   });
 
   it("should preserve an existing numeric createdAt", () => {
     // Arrange
-    const row: Record<string, unknown> = { id: "p1", createdAt: 42 };
+    const row: Record<string, unknown> = {
+      id: "p1",
+      createdAt: EXISTING_CREATED_AT_SENTINEL,
+    };
 
     // Act
-    makeBackfillAiProviderCreatedAt(1_700_000_000_000)(row);
+    makeBackfillAiProviderCreatedAt(CANONICAL_EPOCH_MS_2023_11)(row);
 
     // Assert
-    expect(row.createdAt).toBe(42);
+    expect(row.createdAt).toBe(EXISTING_CREATED_AT_SENTINEL);
   });
 });

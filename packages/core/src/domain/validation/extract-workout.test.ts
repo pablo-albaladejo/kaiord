@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  POOL_LENGTH_25,
+  SAMPLE_BUFFER_BYTES,
+} from "../../test-utils/tolerance-constants";
 import type { KRD } from "../schemas/krd";
 import { KrdValidationError } from "../types/errors";
 import { extractWorkout } from "./extract-workout";
@@ -111,7 +115,7 @@ describe("extractWorkout", () => {
     // Act
     const krd: KRD = {
       ...validKrd,
-      extensions: { structured_workout: [1, 2, 3] },
+      extensions: { structured_workout: [...SAMPLE_BUFFER_BYTES] },
     };
 
     // Assert
@@ -149,6 +153,6 @@ describe("extractWorkout", () => {
 
     // Assert
     expect(workout.subSport).toBe("indoor_cycling");
-    expect(workout.poolLength).toBe(25);
+    expect(workout.poolLength).toBe(POOL_LENGTH_25);
   });
 });

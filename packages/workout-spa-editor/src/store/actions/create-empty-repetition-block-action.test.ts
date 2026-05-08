@@ -210,6 +210,7 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
               (_, i) => ({
                 stepIndex: i,
                 durationType: "time" as const,
+                // eslint-disable-next-line no-magic-numbers -- fast-check generator step seconds, no domain meaning
                 duration: { type: "time" as const, seconds: 60 * (i + 1) },
                 targetType: "open" as const,
                 target: { type: "open" as const },
@@ -256,6 +257,7 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
                 expect(step.stepIndex).toBe(index);
                 expect(step.duration).toEqual({
                   type: "time",
+                  // eslint-disable-next-line no-magic-numbers -- fast-check generator step seconds, no domain meaning
                   seconds: 60 * (index + 1),
                 });
               });
@@ -285,10 +287,12 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
               (_, i) => ({
                 stepIndex: i,
                 durationType: "distance" as const,
+                // eslint-disable-next-line no-magic-numbers -- fast-check generator step meters, no domain meaning
                 duration: { type: "distance" as const, meters: 1000 * (i + 1) },
                 targetType: "power" as const,
                 target: {
                   type: "power" as const,
+                  // eslint-disable-next-line no-magic-numbers -- fast-check generator step watts, no domain meaning
                   value: { unit: "watts" as const, value: 200 + i * 10 },
                 },
               })

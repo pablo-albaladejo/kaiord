@@ -12,9 +12,11 @@ import { describe, expect, it } from "vitest";
 
 import { KaiordDatabase } from "./dexie-database";
 
+const DEXIE_V3 = 3;
+
 const seedV3 = async (dbName: string) => {
   const v3 = new Dexie(dbName);
-  v3.version(3).stores({
+  v3.version(DEXIE_V3).stores({
     workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
     templates: "id, sport, *tags",
     profiles: "id",
@@ -168,7 +170,7 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     });
     v4.close();
     const v3Again = new Dexie(dbName);
-    v3Again.version(3).stores({
+    v3Again.version(DEXIE_V3).stores({
       workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
       templates: "id, sport, *tags",
       profiles: "id",

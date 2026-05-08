@@ -1,6 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
+import { REPETITION, STEP_COUNT } from "../../test-utils/constants";
 import type {
   ParsedExecutableStep,
   ParsedRepeatGroup,
@@ -143,7 +144,7 @@ describe("flattenSegmentsToSteps", () => {
                 buildExecutableStep({ endConditionValue: 60 }),
                 buildExecutableStep({ endConditionValue: 120 }),
               ],
-              5
+              REPETITION.COUNT_5
             ),
           ],
         },
@@ -157,7 +158,7 @@ describe("flattenSegmentsToSteps", () => {
       // Assert
       expect("repeatCount" in block).toBe(true);
       if ("repeatCount" in block) {
-        expect(block.repeatCount).toBe(5);
+        expect(block.repeatCount).toBe(REPETITION.COUNT_5);
         expect(block.steps).toHaveLength(2);
       }
     });
@@ -173,7 +174,7 @@ describe("flattenSegmentsToSteps", () => {
                 buildExecutableStep({ endConditionValue: 60 }),
                 buildExecutableStep({ endConditionValue: 120 }),
               ],
-              3
+              REPETITION.COUNT_3
             ),
             buildExecutableStep({ endConditionValue: 300 }),
           ],
@@ -201,7 +202,7 @@ describe("flattenSegmentsToSteps", () => {
         [buildExecutableStep({ endConditionValue: 30 })],
         2
       );
-      const outerGroup = buildRepeatGroup([nestedGroup], 3);
+      const outerGroup = buildRepeatGroup([nestedGroup], REPETITION.COUNT_3);
       const segments: ParsedSegment[] = [
         {
           workoutSteps: [outerGroup],
@@ -219,7 +220,7 @@ describe("flattenSegmentsToSteps", () => {
 
       // Assert
       if ("repeatCount" in block) {
-        expect(block.repeatCount).toBe(3);
+        expect(block.repeatCount).toBe(REPETITION.COUNT_3);
         // Nested group steps should be flattened into outer
         expect(block.steps).toHaveLength(1);
       }
@@ -242,7 +243,7 @@ describe("flattenSegmentsToSteps", () => {
                 buildExecutableStep({ endConditionValue: 60 }),
                 buildExecutableStep({ endConditionValue: 120 }),
               ],
-              4
+              REPETITION.COUNT_4
             ),
             buildExecutableStep({
               stepType: { stepTypeKey: "cooldown" },
@@ -256,7 +257,7 @@ describe("flattenSegmentsToSteps", () => {
       const result = flattenSegmentsToSteps(segments, logger);
 
       // Assert
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(STEP_COUNT.WARMUP_REPEAT_COOLDOWN);
       expect(result[0]).toMatchObject({ stepIndex: 0, intensity: "warmup" });
       expect("repeatCount" in result[1]).toBe(true);
       expect(result[2]).toMatchObject({ stepIndex: 3, intensity: "cooldown" });

@@ -8,6 +8,10 @@ import type { LinkedCoachingAccount } from "../types/coaching-account";
 import type { Profile } from "../types/profile";
 import type { CoachingSyncState } from "./use-coaching-activities";
 import { useCoachingAutoSync } from "./use-coaching-auto-sync";
+import {
+  NO_FIRE_SETTLE_MS,
+  ONE_MINUTE_MS,
+} from "./use-coaching-auto-sync.test-fixtures";
 
 const T2G_LINK: LinkedCoachingAccount = {
   source: "train2go",
@@ -86,7 +90,7 @@ describe("useCoachingAutoSync", () => {
     });
 
     // Act
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r, NO_FIRE_SETTLE_MS));
 
     // Assert
     expect(src.sync).not.toHaveBeenCalled();
@@ -101,7 +105,7 @@ describe("useCoachingAutoSync", () => {
     });
 
     // Act
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r, NO_FIRE_SETTLE_MS));
 
     // Assert
     expect(src.sync).not.toHaveBeenCalled();
@@ -115,7 +119,7 @@ describe("useCoachingAutoSync", () => {
     });
 
     // Act
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r, NO_FIRE_SETTLE_MS));
 
     // Assert
     expect(src.sync).not.toHaveBeenCalled();
@@ -124,7 +128,7 @@ describe("useCoachingAutoSync", () => {
   it("should skip sync when lastSyncedAt is fresh (<10min)", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    const recent = new Date(Date.now() - 60_000).toISOString();
+    const recent = new Date(Date.now() - ONE_MINUTE_MS).toISOString();
     await persistence.coachingSyncState.put({
       source: "train2go",
       profileId: "p1",
@@ -140,7 +144,7 @@ describe("useCoachingAutoSync", () => {
     });
 
     // Act
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r, NO_FIRE_SETTLE_MS));
 
     // Assert
     expect(src.sync).not.toHaveBeenCalled();
@@ -149,7 +153,7 @@ describe("useCoachingAutoSync", () => {
   it("should invalidate staleness on profile switch — A's fresh row does NOT suppress sync for B", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    const recent = new Date(Date.now() - 60_000).toISOString();
+    const recent = new Date(Date.now() - ONE_MINUTE_MS).toISOString();
     await persistence.coachingSyncState.put({
       source: "train2go",
       profileId: "p1", // A's row — must NOT suppress B

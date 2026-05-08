@@ -2,6 +2,7 @@ import { createMockLogger, loadZwoFixture } from "@kaiord/core/test-utils";
 import { XMLParser } from "fast-xml-parser";
 import { describe, expect, it } from "vitest";
 
+import { PARSER_NUMERICS } from "../test-utils";
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
 
 // Characterization tests for convertZwiftToKRD. Capture current parsing
@@ -69,7 +70,7 @@ describe("convertZwiftToKRD (characterization)", () => {
 
     // Assert
     expect(Array.isArray(sw?.steps)).toBe(true);
-    expect(sw?.steps?.length).toBe(4);
+    expect(sw?.steps?.length).toBe(PARSER_NUMERICS.STEP_COUNT_4);
   });
 
   it("should populate the zwift extensions block with author/description/durationType", () => {
@@ -100,7 +101,7 @@ describe("convertZwiftToKRD (characterization)", () => {
 
     // Assert
     expect(krd.metadata.manufacturer).toBe("dynastream");
-    expect(krd.metadata.serialNumber).toBe(1234);
+    expect(krd.metadata.serialNumber).toBe(PARSER_NUMERICS.ID_1234);
     expect(krd.metadata.created).toBe("2009-09-09T20:38:00.000Z");
   });
 

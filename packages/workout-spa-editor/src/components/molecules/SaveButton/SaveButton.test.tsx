@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { KRD } from "../../../types/krd";
 import { ToastProvider } from "../../atoms/Toast";
 import { SaveButton } from "./SaveButton";
+import { MOCK_BUFFER_BYTES_3 } from "./SaveButton.test-fixtures";
 
 // Mock the export-workout utility
 vi.mock("../../../utils/export-workout");
@@ -63,6 +64,12 @@ vi.mock("../ExportFormatSelector/ExportFormatSelector", () => ({
 // Import after mocking
 const { exportWorkout, downloadWorkout } =
   await import("../../../utils/export-workout");
+
+const TOAST_WAIT_MS = 3000;
+const PROGRESS_PERCENT_30 = 30;
+const PROGRESS_PERCENT_60 = 60;
+const EXPECTED_RETRY_CALL_COUNT = 2;
+const MOCK_BUFFER_BYTES = MOCK_BUFFER_BYTES_3;
 
 // Helper to render with ToastProvider
 const renderWithToast = (ui: ReactElement) => {
@@ -180,7 +187,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
 
       // Act
@@ -214,7 +221,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
@@ -230,7 +237,7 @@ describe("SaveButton", () => {
       const title = await screen.findByText(
         "Workout Saved",
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
 
       // Assert
@@ -239,7 +246,7 @@ describe("SaveButton", () => {
       const description = await screen.findByText(
         /"Test Workout" has been saved as KRD/,
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
       expect(description).toBeInTheDocument();
     });
@@ -258,7 +265,7 @@ describe("SaveButton", () => {
           },
         },
       };
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
 
       renderWithToast(<SaveButton workout={workoutWithoutName} />);
@@ -311,7 +318,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
@@ -350,7 +357,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
@@ -389,7 +396,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
@@ -428,7 +435,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
@@ -448,7 +455,7 @@ describe("SaveButton", () => {
       const title = await screen.findByText(
         "Workout Saved",
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
 
       // Assert
@@ -457,7 +464,7 @@ describe("SaveButton", () => {
       const description = await screen.findByText(
         /"Test Workout" has been saved as FIT/,
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
       expect(description).toBeInTheDocument();
     });
@@ -467,7 +474,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
@@ -519,7 +526,7 @@ describe("SaveButton", () => {
       const errorTitle = await screen.findByText(
         "Export Failed",
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
 
       // Assert
@@ -529,7 +536,7 @@ describe("SaveButton", () => {
       const errorMessages = await screen.findAllByText(
         "Export failed",
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
       expect(errorMessages.length).toBeGreaterThan(0);
     });
@@ -539,7 +546,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
 
       let callCount = 0;
       vi.mocked(exportWorkout).mockImplementation(async () => {
@@ -563,7 +570,7 @@ describe("SaveButton", () => {
       const errorTitle = await screen.findByText(
         "Export Failed",
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
 
       // Assert
@@ -576,15 +583,15 @@ describe("SaveButton", () => {
       // Assert - Second save should succeed
       await waitFor(
         () => {
-          expect(callCount).toBe(2);
+          expect(callCount).toBe(EXPECTED_RETRY_CALL_COUNT);
         },
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
 
       const successTitle = await screen.findByText(
         "Workout Saved",
         {},
-        { timeout: 3000 }
+        { timeout: TOAST_WAIT_MS }
       );
       expect(successTitle).toBeInTheDocument();
     });
@@ -617,9 +624,10 @@ describe("SaveButton", () => {
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
-          onProgress?.(30);
+          onProgress?.(PROGRESS_PERCENT_30);
+
           await new Promise((resolve) => setTimeout(resolve, 100));
-          return new Uint8Array([1, 2, 3]);
+          return new Uint8Array(MOCK_BUFFER_BYTES);
         }
       );
 
@@ -655,9 +663,10 @@ describe("SaveButton", () => {
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
-          onProgress?.(30);
+          onProgress?.(PROGRESS_PERCENT_30);
+
           await new Promise((resolve) => setTimeout(resolve, 100));
-          return new Uint8Array([1, 2, 3]);
+          return new Uint8Array(MOCK_BUFFER_BYTES);
         }
       );
 
@@ -692,9 +701,10 @@ describe("SaveButton", () => {
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
-          onProgress?.(30);
+          onProgress?.(PROGRESS_PERCENT_30);
+
           await new Promise((resolve) => setTimeout(resolve, 100));
-          return new Uint8Array([1, 2, 3]);
+          return new Uint8Array(MOCK_BUFFER_BYTES);
         }
       );
 
@@ -730,9 +740,10 @@ describe("SaveButton", () => {
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
-          onProgress?.(30);
+          onProgress?.(PROGRESS_PERCENT_30);
+
           await new Promise((resolve) => setTimeout(resolve, 100));
-          return new Uint8Array([1, 2, 3]);
+          return new Uint8Array(MOCK_BUFFER_BYTES);
         }
       );
 
@@ -770,11 +781,13 @@ describe("SaveButton", () => {
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
-          onProgress?.(30);
+          onProgress?.(PROGRESS_PERCENT_30);
+          // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary tick boundary, not domain-modeled
           await new Promise((resolve) => setTimeout(resolve, 50));
-          onProgress?.(60);
+          onProgress?.(PROGRESS_PERCENT_60);
+          // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary tick boundary, not domain-modeled
           await new Promise((resolve) => setTimeout(resolve, 50));
-          return new Uint8Array([1, 2, 3]);
+          return new Uint8Array(MOCK_BUFFER_BYTES);
         }
       );
 
@@ -810,11 +823,13 @@ describe("SaveButton", () => {
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
-          onProgress?.(30);
+          onProgress?.(PROGRESS_PERCENT_30);
+          // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary tick boundary, not domain-modeled
           await new Promise((resolve) => setTimeout(resolve, 50));
-          onProgress?.(60);
+          onProgress?.(PROGRESS_PERCENT_60);
+          // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary tick boundary, not domain-modeled
           await new Promise((resolve) => setTimeout(resolve, 50));
-          return new Uint8Array([1, 2, 3]);
+          return new Uint8Array(MOCK_BUFFER_BYTES);
         }
       );
 
@@ -868,7 +883,7 @@ describe("SaveButton", () => {
       // Arrange
 
       const user = userEvent.setup();
-      const mockBuffer = new Uint8Array([1, 2, 3]);
+      const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
 
       // Act

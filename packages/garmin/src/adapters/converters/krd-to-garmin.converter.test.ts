@@ -3,6 +3,11 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import {
+  CADENCE_RPM,
+  POOL_LENGTH_METERS,
+  REPETITION,
+} from "../../test-utils/constants";
 import { convertGarminToKRD } from "./garmin-to-krd.converter";
 import { convertKRDToGarmin } from "./krd-to-garmin.converter";
 
@@ -90,8 +95,8 @@ describe("convertKRDToGarmin", () => {
 
       // Assert
       expect(cadenceStep).toBeDefined();
-      expect(cadenceStep.targetValueOne).toBe(95);
-      expect(cadenceStep.targetValueTwo).toBe(105);
+      expect(cadenceStep.targetValueOne).toBe(CADENCE_RPM.LOW);
+      expect(cadenceStep.targetValueTwo).toBe(CADENCE_RPM.HIGH);
     });
   });
 
@@ -106,7 +111,7 @@ describe("convertKRDToGarmin", () => {
       const parsed = JSON.parse(result);
 
       // Assert
-      expect(parsed.poolLength).toBe(25);
+      expect(parsed.poolLength).toBe(POOL_LENGTH_METERS.STANDARD);
       expect(parsed.poolLengthUnit.unitKey).toBe("meter");
     });
   });
@@ -127,7 +132,7 @@ describe("convertKRDToGarmin", () => {
 
       // Assert
       expect(repeatStep).toBeDefined();
-      expect(repeatStep.numberOfIterations).toBe(3);
+      expect(repeatStep.numberOfIterations).toBe(REPETITION.COUNT_3);
     });
   });
 

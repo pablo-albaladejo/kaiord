@@ -5,6 +5,11 @@ import { describe, expect, it, vi } from "vitest";
 import { expectNoReactWarnings } from "../../../test-utils/console-spy";
 import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { RepetitionBlockCard } from "./RepetitionBlockCard";
+import {
+  SAVED_REPEAT_COUNT_FIVE,
+  SAVED_REPEAT_COUNT_FOUR,
+  THREE_STEP_BLOCK_CARD_COUNT,
+} from "./RepetitionBlockCard.test-fixtures";
 
 describe("RepetitionBlockCard", () => {
   const mockStep1: WorkoutStep = {
@@ -290,7 +295,7 @@ describe("RepetitionBlockCard", () => {
 
       // Assert
 
-      expect(onEditRepeatCount).toHaveBeenCalledWith(5);
+      expect(onEditRepeatCount).toHaveBeenCalledWith(SAVED_REPEAT_COUNT_FIVE);
     });
 
     it("should hide input after save", async () => {
@@ -398,7 +403,7 @@ describe("RepetitionBlockCard", () => {
 
       // Assert
 
-      expect(onEditRepeatCount).toHaveBeenCalledWith(4);
+      expect(onEditRepeatCount).toHaveBeenCalledWith(SAVED_REPEAT_COUNT_FOUR);
     });
 
     it("should cancel on Escape key", async () => {
@@ -788,7 +793,7 @@ describe("RepetitionBlockCard", () => {
 
       // Assert
 
-      expect(stepCards).toHaveLength(3);
+      expect(stepCards).toHaveLength(THREE_STEP_BLOCK_CARD_COUNT);
     });
 
     it("should render one step card per block regardless of blockIndex", () => {

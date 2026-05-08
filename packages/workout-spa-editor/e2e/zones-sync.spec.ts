@@ -24,6 +24,19 @@ import {
 const PROFILE_ID = "zones-sync-e2e-profile";
 const NOW_ISO = "2026-04-28T10:00:00.000Z";
 
+// Fixture-derived zone values from FIXTURE_ZONES_PAYLOAD (see
+// helpers/train2go-bridge-stub.ts). Hoisted to named constants so the
+// e2e assertions self-document which threshold the dialog and Dexie
+// row are expected to expose after a successful sync.
+const FIXTURE_CYCLING_FTP = 268;
+const FIXTURE_CYCLING_LTHR_BPM = 174;
+const FIXTURE_RUNNING_LTHR_BPM = 168;
+const FIXTURE_RUNNING_THRESHOLD_PACE_S = 250;
+const FIXTURE_SWIMMING_THRESHOLD_PACE_S = 92;
+const MANUAL_HR_BAND_Z4_MAX_BPM = 180;
+const STABILITY_REREAD_TICK_MS = 50;
+const ORCHESTRATOR_PUT_SETTLE_MS = 150;
+
 type SyncZonesFlag = boolean;
 type CyclingFtp = number | undefined;
 
@@ -192,7 +205,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // is more deterministic than a fixed sleep because the put is
     // sequenced after the readZones promise.
     await page.waitForFunction(
-      ({ profileId }) => {
+      ({ profileId, expectedFtp }) => {
         type Db = {
           table: (n: string) => {
             get: (id: string) => Promise<
@@ -208,9 +221,9 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
         return db
           .table("profiles")
           .get(profileId)
-          .then((p) => p?.sportZones?.cycling?.thresholds?.ftp === 268);
+          .then((p) => p?.sportZones?.cycling?.thresholds?.ftp === expectedFtp);
       },
-      { profileId: PROFILE_ID },
+      { profileId: PROFILE_ID, expectedFtp: FIXTURE_CYCLING_FTP },
       { timeout: 10_000 }
     );
 
@@ -241,12 +254,22 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     expect(profile.maxHeartRate).toBe(
       FIXTURE_ZONES_PAYLOAD.physiological.bpmMax
     );
-    expect(profile.sportZones.cycling?.thresholds.ftp).toBe(268);
-    expect(profile.sportZones.cycling?.thresholds.lthr).toBe(174);
-    expect(profile.sportZones.running?.thresholds.lthr).toBe(168);
+    expect(profile.sportZones.cycling?.thresholds.ftp).toBe(
+      FIXTURE_CYCLING_FTP
+    );
+    expect(profile.sportZones.cycling?.thresholds.lthr).toBe(
+      FIXTURE_CYCLING_LTHR_BPM
+    );
+    expect(profile.sportZones.running?.thresholds.lthr).toBe(
+      FIXTURE_RUNNING_LTHR_BPM
+    );
     // Running pace 4:10 = 250 sec, swim CSS 1:32 = 92 sec.
-    expect(profile.sportZones.running?.thresholds.thresholdPace).toBe(250);
-    expect(profile.sportZones.swimming?.thresholds.thresholdPace).toBe(92);
+    expect(profile.sportZones.running?.thresholds.thresholdPace).toBe(
+      FIXTURE_RUNNING_THRESHOLD_PACE_S
+    );
+    expect(profile.sportZones.swimming?.thresholds.thresholdPace).toBe(
+      FIXTURE_SWIMMING_THRESHOLD_PACE_S
+    );
   });
 
   test("(c) toggle-on with manual FTP — conflict dialog opens", async ({
@@ -497,7 +520,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       { timeout: 10_000 }
     );
     // One extra tick so the orchestrator's repo.put (if any) settles.
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(ORCHESTRATOR_PUT_SETTLE_MS);
 
     // Assert: no dialog (every table classifies as
     // train2go-synced-clean → silent no-op).
@@ -533,12 +556,12 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // to keep the e2e deterministic without driving the Profile
     // Manager UI). Put + read-back happen in a single page.evaluate
     // so they share the same in-page tick.
-    const mid = await editAndReadCyclingHrBand(page, 180);
+    const mid = await editAndReadCyclingHrBand(page, MANUAL_HR_BAND_Z4_MAX_BPM);
 
     // Assert intermediate state: method flipped, value diverges from
     // T2G's payload band so reconcile WILL produce a conflict.
     expect(mid.method).toBe("user");
-    expect(mid.z4MaxBpm).toBe(180);
+    expect(mid.z4MaxBpm).toBe(MANUAL_HR_BAND_Z4_MAX_BPM);
 
     // Act: trigger sync via the manual button.
     await page.getByRole("button", { name: /^sync train2go$/i }).click();
@@ -905,7 +928,7 @@ const waitForCyclingFtp = async (page: Page): Promise<void> => {
   // triggering a second pass — could still overwrite the profile
   // mid-test.
   await page.waitForFunction(
-    async ({ profileId }) => {
+    async ({ profileId, expectedFtp, rereadTickMs }) => {
       type Db = {
         table: (n: string) => {
           get: (id: string) => Promise<
@@ -930,20 +953,24 @@ const waitForCyclingFtp = async (page: Page): Promise<void> => {
         .__KAIORD_DB__ as Db;
       const p1 = await db.table("profiles").get(profileId);
       const ok1 =
-        p1?.sportZones?.cycling?.thresholds?.ftp === 268 &&
+        p1?.sportZones?.cycling?.thresholds?.ftp === expectedFtp &&
         Boolean(p1?.linkedAccounts?.[0]?.lastSyncedZonesSnapshot?.syncedAt) &&
         (p1?.sportZones?.cycling?.heartRateZones?.zones?.[0]?.minBpm ?? 0) > 0;
       if (!ok1) return false;
       // Sleep a tick, re-read, require identical Z1 max as proof
       // that no pending write is in flight.
-      await new Promise((r) => setTimeout(r, 50));
+      await new Promise((r) => setTimeout(r, rereadTickMs));
       const p2 = await db.table("profiles").get(profileId);
       return (
         p1?.sportZones?.cycling?.heartRateZones?.zones?.[0]?.maxBpm ===
         p2?.sportZones?.cycling?.heartRateZones?.zones?.[0]?.maxBpm
       );
     },
-    { profileId: PROFILE_ID },
+    {
+      profileId: PROFILE_ID,
+      expectedFtp: FIXTURE_CYCLING_FTP,
+      rereadTickMs: STABILITY_REREAD_TICK_MS,
+    },
     { timeout: 10_000 }
   );
 };

@@ -8,6 +8,10 @@ import type { KRD } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { downloadWorkout, ExportError, exportWorkout } from "./export-workout";
+import {
+  EXPORT_PROGRESS_STEPS,
+  PLACEHOLDER_BYTES,
+} from "./export-workout.test-fixtures";
 import type { WorkoutFileFormat } from "./file-format-detector";
 
 describe("exportWorkout", () => {
@@ -84,8 +88,8 @@ describe("exportWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
-      expect(onProgress).toHaveBeenCalledWith(50);
+      expect(onProgress).toHaveBeenCalledWith(EXPORT_PROGRESS_STEPS.early);
+      expect(onProgress).toHaveBeenCalledWith(EXPORT_PROGRESS_STEPS.midway);
       expect(onProgress).toHaveBeenCalledWith(100);
     });
   });
@@ -133,7 +137,7 @@ describe("exportWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
+      expect(onProgress).toHaveBeenCalledWith(EXPORT_PROGRESS_STEPS.early);
     });
 
     it("should throw ExportError for invalid KRD", async () => {
@@ -197,8 +201,8 @@ describe("exportWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
-      expect(onProgress).toHaveBeenCalledWith(50);
+      expect(onProgress).toHaveBeenCalledWith(EXPORT_PROGRESS_STEPS.early);
+      expect(onProgress).toHaveBeenCalledWith(EXPORT_PROGRESS_STEPS.midway);
       expect(onProgress).toHaveBeenCalledWith(100);
     });
 
@@ -272,7 +276,7 @@ describe("exportWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
+      expect(onProgress).toHaveBeenCalledWith(EXPORT_PROGRESS_STEPS.early);
     });
 
     it("should throw ExportError for invalid KRD", async () => {
@@ -428,7 +432,7 @@ describe("downloadWorkout", () => {
     // Arrange
     // Arrange
 
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(PLACEHOLDER_BYTES);
     const filename = "workout.fit";
 
     // Mock URL.createObjectURL and URL.revokeObjectURL
@@ -454,7 +458,7 @@ describe("downloadWorkout", () => {
     // Arrange
     // Arrange
 
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(PLACEHOLDER_BYTES);
     const filename = "workout.fit";
 
     const mockUrl = "blob:mock-url";
@@ -481,7 +485,7 @@ describe("downloadWorkout", () => {
     // Arrange
     // Arrange
 
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(PLACEHOLDER_BYTES);
     const filename = "workout.tcx";
 
     const mockUrl = "blob:mock-url";
@@ -508,7 +512,7 @@ describe("downloadWorkout", () => {
     // Arrange
     // Arrange
 
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(PLACEHOLDER_BYTES);
     const filename = "workout.zwo";
 
     const mockUrl = "blob:mock-url";
@@ -535,7 +539,7 @@ describe("downloadWorkout", () => {
     // Arrange
     // Arrange
 
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(PLACEHOLDER_BYTES);
     const filename = "workout.krd";
 
     const mockUrl = "blob:mock-url";
@@ -562,7 +566,7 @@ describe("downloadWorkout", () => {
     // Arrange
     // Arrange
 
-    const buffer = new Uint8Array([1, 2, 3]);
+    const buffer = new Uint8Array(PLACEHOLDER_BYTES);
     const filename = "workout.fit";
 
     const mockUrl = "blob:mock-url";

@@ -3,6 +3,12 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures/base";
 import { expandFileUpload } from "./helpers/expand-file-upload";
 
+const WCAG_MIN_TOUCH_TARGET_PX = 44;
+const MOBILE_STEP_COUNT = 10;
+const TABLET_VIEWPORT_WIDTH_PX = 768;
+const STEP_BASE_WATTS = 200;
+const STEP_WATTS_INCREMENT = 10;
+
 /**
  * Critical Path: Mobile Responsiveness and Touch Interactions
  *
@@ -26,8 +32,12 @@ test.describe("Mobile Responsive Design", () => {
     const boundingBox = await firstButton.boundingBox();
 
     if (boundingBox) {
-      expect(boundingBox.height).toBeGreaterThanOrEqual(44);
-      expect(boundingBox.width).toBeGreaterThanOrEqual(44);
+      expect(boundingBox.height).toBeGreaterThanOrEqual(
+        WCAG_MIN_TOUCH_TARGET_PX
+      );
+      expect(boundingBox.width).toBeGreaterThanOrEqual(
+        WCAG_MIN_TOUCH_TARGET_PX
+      );
     }
   });
 
@@ -103,14 +113,17 @@ test.describe("Mobile Responsive Design", () => {
         structured_workout: {
           name: "Long Workout",
           sport: "cycling",
-          steps: Array.from({ length: 10 }, (_, i) => ({
+          steps: Array.from({ length: MOBILE_STEP_COUNT }, (_, i) => ({
             stepIndex: i,
             durationType: "time",
             duration: { type: "time", seconds: 300 },
             targetType: "power",
             target: {
               type: "power",
-              value: { unit: "watts", value: 200 + i * 10 },
+              value: {
+                unit: "watts",
+                value: STEP_BASE_WATTS + i * STEP_WATTS_INCREMENT,
+              },
             },
             intensity: "active",
           })),
@@ -134,7 +147,7 @@ test.describe("Mobile Responsive Design", () => {
 
     // Verify we have multiple steps
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(10);
+    await expect(stepCards).toHaveCount(MOBILE_STEP_COUNT);
 
     // Verify smooth scroll behavior is applied
     const scrollBehavior = await page.evaluate(() => {
@@ -169,6 +182,7 @@ test.describe("Mobile Responsive Design", () => {
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
 
     // Wait for scroll to complete
+    // eslint-disable-next-line no-magic-numbers -- browser-serialized predicate, constant not in scope
     await page.waitForFunction(() => window.scrollY < 50, undefined, {
       timeout: 5000,
     });
@@ -261,8 +275,12 @@ test.describe("Tablet Responsive Design", () => {
     const boundingBox = await firstButton.boundingBox();
 
     if (boundingBox) {
-      expect(boundingBox.height).toBeGreaterThanOrEqual(44);
-      expect(boundingBox.width).toBeGreaterThanOrEqual(44);
+      expect(boundingBox.height).toBeGreaterThanOrEqual(
+        WCAG_MIN_TOUCH_TARGET_PX
+      );
+      expect(boundingBox.width).toBeGreaterThanOrEqual(
+        WCAG_MIN_TOUCH_TARGET_PX
+      );
     }
 
     // Verify content width is appropriate for tablet
@@ -270,8 +288,9 @@ test.describe("Tablet Responsive Design", () => {
       (el) => (el as HTMLElement).offsetWidth
     );
     // Content should use available space but not be too narrow
+
     expect(workoutSectionWidth).toBeGreaterThan(400);
-    expect(workoutSectionWidth).toBeLessThanOrEqual(768);
+    expect(workoutSectionWidth).toBeLessThanOrEqual(TABLET_VIEWPORT_WIDTH_PX);
   });
 });
 

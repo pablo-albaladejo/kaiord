@@ -14,6 +14,16 @@ import { expandFileUpload } from "./helpers/expand-file-upload";
  * - Touch interactions (mobile)
  */
 
+const BASE_STEP_DURATION_S = 300;
+const STEP_DURATION_INCREMENT_S = 60;
+const BASE_STEP_POWER_W = 200;
+const STEP_POWER_INCREMENT_W = 10;
+const STEP_COUNT_DEFAULT = 3;
+const STEP_COUNT_LARGE = 50;
+const MIDDLE_STEP_INDEX_OF_LARGE_WORKOUT = 25;
+const SECONDS_PER_MINUTE = 60;
+const BLOCK_DRAG_DIMENSION_TOLERANCE_RATIO = 0.1;
+
 test.describe("Drag-and-Drop Step Reordering", () => {
   const createTestWorkout = (stepCount: number) => ({
     version: "1.0",
@@ -29,11 +39,17 @@ test.describe("Drag-and-Drop Step Reordering", () => {
         steps: Array.from({ length: stepCount }, (_, i) => ({
           stepIndex: i,
           durationType: "time",
-          duration: { type: "time", seconds: 300 + i * 60 },
+          duration: {
+            type: "time",
+            seconds: BASE_STEP_DURATION_S + i * STEP_DURATION_INCREMENT_S,
+          },
           targetType: "power",
           target: {
             type: "power",
-            value: { unit: "watts", value: 200 + i * 10 },
+            value: {
+              unit: "watts",
+              value: BASE_STEP_POWER_W + i * STEP_POWER_INCREMENT_W,
+            },
           },
           intensity: i === 0 ? "warmup" : "active",
         })),
@@ -52,7 +68,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -109,7 +127,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -146,7 +166,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -181,7 +203,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -210,7 +234,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -239,7 +265,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -289,7 +317,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "large-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(50))),
+      buffer: Buffer.from(JSON.stringify(createTestWorkout(STEP_COUNT_LARGE))),
     });
 
     // Wait for workout to load
@@ -299,10 +327,10 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
     // Verify all steps are rendered
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(50);
+    await expect(stepCards).toHaveCount(STEP_COUNT_LARGE);
 
     // Select and move a step in the middle
-    const middleStep = stepCards.nth(25);
+    const middleStep = stepCards.nth(MIDDLE_STEP_INDEX_OF_LARGE_WORKOUT);
     await middleStep.scrollIntoViewIfNeeded();
     await middleStep.click();
 
@@ -312,8 +340,12 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await page.keyboard.press("Alt+ArrowDown");
 
     // Verify step moved by checking that position 25 now has step 27's power (460W)
-    await expect(stepCards.nth(25)).toContainText("460W");
-    await expect(stepCards.nth(25)).toContainText("31 min");
+    await expect(
+      stepCards.nth(MIDDLE_STEP_INDEX_OF_LARGE_WORKOUT)
+    ).toContainText("460W");
+    await expect(
+      stepCards.nth(MIDDLE_STEP_INDEX_OF_LARGE_WORKOUT)
+    ).toContainText("31 min");
   });
 
   test("should maintain step data integrity after reordering", async ({
@@ -325,7 +357,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -382,7 +416,9 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(3))),
+      buffer: Buffer.from(
+        JSON.stringify(createTestWorkout(STEP_COUNT_DEFAULT))
+      ),
     });
 
     // Wait for workout to load
@@ -433,7 +469,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     // Load workout with 3 steps
     await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
-    const testWorkout = createTestWorkout(3);
+    const testWorkout = createTestWorkout(STEP_COUNT_DEFAULT);
 
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -463,13 +499,13 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
     // Position 0 should now have step 1's data
     await expect(stepCardsAfter.nth(0)).toContainText(
-      `${Math.floor(step1Duration / 60)} min`
+      `${Math.floor(step1Duration / SECONDS_PER_MINUTE)} min`
     );
     await expect(stepCardsAfter.nth(0)).toContainText(`${step1Power}W`);
 
     // Position 1 should now have step 0's data
     await expect(stepCardsAfter.nth(1)).toContainText(
-      `${Math.floor(step0Duration / 60)} min`
+      `${Math.floor(step0Duration / SECONDS_PER_MINUTE)} min`
     );
     await expect(stepCardsAfter.nth(1)).toContainText(`${step0Power}W`);
 
@@ -600,8 +636,12 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     const widthDiff = Math.abs(finalBox.width - originalBox.width);
     const heightDiff = Math.abs(finalBox.height - originalBox.height);
 
-    expect(widthDiff).toBeLessThan(originalBox.width * 0.1);
-    expect(heightDiff).toBeLessThan(originalBox.height * 0.1);
+    expect(widthDiff).toBeLessThan(
+      originalBox.width * BLOCK_DRAG_DIMENSION_TOLERANCE_RATIO
+    );
+    expect(heightDiff).toBeLessThan(
+      originalBox.height * BLOCK_DRAG_DIMENSION_TOLERANCE_RATIO
+    );
 
     // Verify the block is still properly rendered (not compressed)
     expect(finalBox.width).toBeGreaterThan(200);

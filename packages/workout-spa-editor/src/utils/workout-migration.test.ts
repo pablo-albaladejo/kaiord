@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { RepetitionBlock, Workout } from "../types/krd";
 import { migrateRepetitionBlocks } from "./workout-migration";
 
+const EXPECTED_MIGRATED_STEP_COUNT = 3;
+
 describe("migrateRepetitionBlocks", () => {
   describe("migrating blocks without IDs", () => {
     it("should add IDs to blocks that don't have them", () => {
@@ -274,7 +276,7 @@ describe("migrateRepetitionBlocks", () => {
       const result = migrateRepetitionBlocks(workout);
 
       // Assert
-      expect(result.steps).toHaveLength(3);
+      expect(result.steps).toHaveLength(EXPECTED_MIGRATED_STEP_COUNT);
       const block = result.steps[1] as RepetitionBlock;
       expect(block.id).toBeDefined();
       expect(typeof block.id).toBe("string");

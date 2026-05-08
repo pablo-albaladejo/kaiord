@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  HOUR_AND_HALF_AS_SEC,
+  HOUR_AS_SEC,
+  MINUTES_45_AS_SEC,
+  TWO_HOURS_AS_SEC,
+} from "../test-utils/application-fixtures";
 import { parseCoachingDuration } from "./parse-coaching-duration";
 
 describe("parseCoachingDuration", () => {
@@ -9,10 +15,10 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("45 min")).toBe(2700);
-    expect(parseCoachingDuration("45min")).toBe(2700);
-    expect(parseCoachingDuration("45 minutes")).toBe(2700);
-    expect(parseCoachingDuration("45 m")).toBe(2700);
+    expect(parseCoachingDuration("45 min")).toBe(MINUTES_45_AS_SEC);
+    expect(parseCoachingDuration("45min")).toBe(MINUTES_45_AS_SEC);
+    expect(parseCoachingDuration("45 minutes")).toBe(MINUTES_45_AS_SEC);
+    expect(parseCoachingDuration("45 m")).toBe(MINUTES_45_AS_SEC);
   });
 
   it("should parse bare hours", () => {
@@ -21,10 +27,10 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("1h")).toBe(3600);
-    expect(parseCoachingDuration("1 h")).toBe(3600);
-    expect(parseCoachingDuration("1 hour")).toBe(3600);
-    expect(parseCoachingDuration("2 hours")).toBe(7200);
+    expect(parseCoachingDuration("1h")).toBe(HOUR_AS_SEC);
+    expect(parseCoachingDuration("1 h")).toBe(HOUR_AS_SEC);
+    expect(parseCoachingDuration("1 hour")).toBe(HOUR_AS_SEC);
+    expect(parseCoachingDuration("2 hours")).toBe(TWO_HOURS_AS_SEC);
   });
 
   it("should parse hours-and-minutes (both spellings)", () => {
@@ -33,10 +39,10 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("1h 30")).toBe(5400);
-    expect(parseCoachingDuration("1h30")).toBe(5400);
-    expect(parseCoachingDuration("1h 30m")).toBe(5400);
-    expect(parseCoachingDuration("1 h 30 min")).toBe(5400);
+    expect(parseCoachingDuration("1h 30")).toBe(HOUR_AND_HALF_AS_SEC);
+    expect(parseCoachingDuration("1h30")).toBe(HOUR_AND_HALF_AS_SEC);
+    expect(parseCoachingDuration("1h 30m")).toBe(HOUR_AND_HALF_AS_SEC);
+    expect(parseCoachingDuration("1 h 30 min")).toBe(HOUR_AND_HALF_AS_SEC);
   });
 
   it("should parse cycling apostrophe notation", () => {
@@ -45,9 +51,9 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("45'")).toBe(2700);
-    expect(parseCoachingDuration("90'")).toBe(5400);
-    expect(parseCoachingDuration("1h 30'")).toBe(5400);
+    expect(parseCoachingDuration("45'")).toBe(MINUTES_45_AS_SEC);
+    expect(parseCoachingDuration("90'")).toBe(HOUR_AND_HALF_AS_SEC);
+    expect(parseCoachingDuration("1h 30'")).toBe(HOUR_AND_HALF_AS_SEC);
   });
 
   it("should parse ISO 8601 durations", () => {
@@ -56,9 +62,9 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("PT45M")).toBe(2700);
-    expect(parseCoachingDuration("PT1H")).toBe(3600);
-    expect(parseCoachingDuration("PT1H30M")).toBe(5400);
+    expect(parseCoachingDuration("PT45M")).toBe(MINUTES_45_AS_SEC);
+    expect(parseCoachingDuration("PT1H")).toBe(HOUR_AS_SEC);
+    expect(parseCoachingDuration("PT1H30M")).toBe(HOUR_AND_HALF_AS_SEC);
   });
 
   it("should drop the approximate marker", () => {
@@ -67,8 +73,8 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("~45 min")).toBe(2700);
-    expect(parseCoachingDuration("~1h 30m")).toBe(5400);
+    expect(parseCoachingDuration("~45 min")).toBe(MINUTES_45_AS_SEC);
+    expect(parseCoachingDuration("~1h 30m")).toBe(HOUR_AND_HALF_AS_SEC);
   });
 
   it("should use the lower bound for ranges (minutes)", () => {
@@ -77,8 +83,8 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("45-50 min")).toBe(2700);
-    expect(parseCoachingDuration("60-90min")).toBe(3600);
+    expect(parseCoachingDuration("45-50 min")).toBe(MINUTES_45_AS_SEC);
+    expect(parseCoachingDuration("60-90min")).toBe(HOUR_AS_SEC);
   });
 
   it("should use the lower bound for ranges (hours)", () => {
@@ -87,8 +93,8 @@ describe("parseCoachingDuration", () => {
     // Act
 
     // Assert
-    expect(parseCoachingDuration("1h-1h30")).toBe(3600);
-    expect(parseCoachingDuration("1h - 1h30")).toBe(3600);
+    expect(parseCoachingDuration("1h-1h30")).toBe(HOUR_AS_SEC);
+    expect(parseCoachingDuration("1h - 1h30")).toBe(HOUR_AS_SEC);
   });
 
   it("should return undefined for undefined input", () => {

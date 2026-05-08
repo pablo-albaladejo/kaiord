@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { HTTP_STATUS_FORBIDDEN } from "../../test-utils/constants";
 import type { TokenReader } from "../token/token-manager.types";
 import { authFetch } from "./garmin-auth-fetch";
 
@@ -156,7 +157,7 @@ describe("authFetch", () => {
     // Act
     mockFetch
       .mockResolvedValueOnce(unauthorizedResponse())
-      .mockResolvedValueOnce(errorResponse(403, "Forbidden"));
+      .mockResolvedValueOnce(errorResponse(HTTP_STATUS_FORBIDDEN, "Forbidden"));
 
     // Assert
     await expect(

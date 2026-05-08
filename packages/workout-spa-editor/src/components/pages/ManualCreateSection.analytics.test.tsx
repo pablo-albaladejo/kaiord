@@ -12,6 +12,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnalyticsProvider } from "../../contexts";
 import type { KRD } from "../../types/krd";
 import { ManualCreateSection } from "./ManualCreateSection";
+import {
+  DRAIN_DELAY_MS,
+  FIT_PLACEHOLDER_BYTES,
+} from "./ManualCreateSection.analytics.test-fixtures";
 
 vi.mock("../../utils/import-workout", () => ({
   importWorkout: vi.fn(),
@@ -58,7 +62,7 @@ describe("ManualCreateSection analytics", () => {
   });
 
   afterEach(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, DRAIN_DELAY_MS));
     vi.clearAllTimers();
   });
 
@@ -119,9 +123,13 @@ describe("ManualCreateSection analytics", () => {
     await user.click(getByText(/or create manually/i));
 
     const fileInput = getByLabelText(/upload workout file/i);
-    const file = new File([new Uint8Array([14, 16])], "workout.fit", {
-      type: "application/octet-stream",
-    });
+    const file = new File(
+      [new Uint8Array(FIT_PLACEHOLDER_BYTES)],
+      "workout.fit",
+      {
+        type: "application/octet-stream",
+      }
+    );
 
     // Act
 

@@ -4,6 +4,48 @@ import type {
   ToleranceChecker,
   ToleranceViolation,
 } from "../../domain/validation/tolerance-checker";
+import {
+  CADENCE_ACTUAL,
+  CADENCE_EXPECTED,
+  createFitBufferSample,
+  DEVIATION_CADENCE_5RPM,
+  DEVIATION_DISTANCE_5M,
+  DEVIATION_DISTANCE_10M,
+  DEVIATION_HR_5BPM,
+  DEVIATION_HR_10BPM,
+  DEVIATION_PACE,
+  DEVIATION_POWER_5W,
+  DEVIATION_POWER_10W,
+  DEVIATION_TIME_2SEC,
+  DEVIATION_TIME_5SEC,
+  DISTANCE_ACTUAL_M,
+  DISTANCE_EXPECTED_M,
+  HR_ACTUAL,
+  HR_ACTUAL_HIGH,
+  HR_EXPECTED,
+  LAP_DISTANCE_ACTUAL_M,
+  LAP_DISTANCE_EXPECTED_M,
+  LAP_TIME_ACTUAL_SEC,
+  LAP_TIME_EXPECTED_SEC,
+  POWER_ACTUAL,
+  POWER_ACTUAL_HIGH,
+  POWER_EXPECTED,
+  RECORD_DISTANCE_ACTUAL_M,
+  RECORD_DISTANCE_EXPECTED_M,
+  RECORD_SPEED_ACTUAL_MPS,
+  RECORD_SPEED_EXPECTED_MPS,
+  TIME_ACTUAL_SEC,
+  TIME_EXPECTED_SEC,
+  TOLERANCE_CADENCE_RPM,
+  TOLERANCE_DISTANCE_M,
+  TOLERANCE_HR_BPM,
+  TOLERANCE_PACE_SEC_PER_M,
+  TOLERANCE_POWER_WATTS,
+  TOLERANCE_TIME_SEC,
+  VIOLATION_COUNT_FULL_SESSION,
+  VIOLATION_COUNT_LAP,
+  VIOLATION_COUNT_RECORD,
+} from "../../test-utils/index.js";
 import { buildKRD } from "../fixtures/krd/krd.fixtures.js";
 import { createMockLogger } from "../helpers/test-utils.js";
 import { validateRoundTrip } from "./validate-round-trip.js";
@@ -12,7 +54,7 @@ describe("validateRoundTrip", () => {
   describe("validateFitToKrdToFit", () => {
     it("should return empty violations when round-trip succeeds", async () => {
       // Arrange
-      const originalFit = new Uint8Array([1, 2, 3, 4]);
+      const originalFit = createFitBufferSample();
       const krd = buildKRD.build();
       const mockFitReader = vi.fn().mockResolvedValue(krd);
       const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
@@ -42,15 +84,15 @@ describe("validateRoundTrip", () => {
 
     it("should return violations when tolerance is exceeded", async () => {
       // Arrange
-      const originalFit = new Uint8Array([1, 2, 3, 4]);
+      const originalFit = createFitBufferSample();
       const krd1 = buildKRD.build({
         sessions: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 3600,
-            totalDistance: 10000,
+            totalElapsedTime: TIME_EXPECTED_SEC,
+            totalDistance: DISTANCE_EXPECTED_M,
             sport: "running",
-            avgPower: 250,
+            avgPower: POWER_EXPECTED,
           },
         ],
       });
@@ -58,10 +100,10 @@ describe("validateRoundTrip", () => {
         sessions: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 3600,
-            totalDistance: 10000,
+            totalElapsedTime: TIME_EXPECTED_SEC,
+            totalDistance: DISTANCE_EXPECTED_M,
             sport: "running",
-            avgPower: 255,
+            avgPower: POWER_ACTUAL,
           },
         ],
       });
@@ -72,10 +114,10 @@ describe("validateRoundTrip", () => {
       const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
       const powerViolation: ToleranceViolation = {
         field: "power",
-        expected: 250,
-        actual: 255,
-        deviation: 5,
-        tolerance: 1,
+        expected: POWER_EXPECTED,
+        actual: POWER_ACTUAL,
+        deviation: DEVIATION_POWER_5W,
+        tolerance: TOLERANCE_POWER_WATTS,
       };
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue(null),
@@ -98,13 +140,13 @@ describe("validateRoundTrip", () => {
       // Assert
       expect(result.length).toBeGreaterThan(0);
       expect(result[0].field).toBe("sessions[0].avgPower");
-      expect(result[0].expected).toBe(250);
-      expect(result[0].actual).toBe(255);
+      expect(result[0].expected).toBe(POWER_EXPECTED);
+      expect(result[0].actual).toBe(POWER_ACTUAL);
     });
 
     it("should propagate FitReader errors", async () => {
       // Arrange
-      const originalFit = new Uint8Array([1, 2, 3, 4]);
+      const originalFit = createFitBufferSample();
       const readerError = new Error("Failed to read FIT file");
       const mockFitReader = vi.fn().mockRejectedValue(readerError);
       const mockFitWriter = vi.fn();
@@ -133,7 +175,7 @@ describe("validateRoundTrip", () => {
 
     it("should propagate FitWriter errors", async () => {
       // Arrange
-      const originalFit = new Uint8Array([1, 2, 3, 4]);
+      const originalFit = createFitBufferSample();
       const krd = buildKRD.build();
       const writerError = new Error("Failed to write FIT file");
       const mockFitReader = vi.fn().mockResolvedValue(krd);
@@ -166,7 +208,7 @@ describe("validateRoundTrip", () => {
     it("should return empty violations when round-trip succeeds", async () => {
       // Arrange
       const originalKrd = buildKRD.build();
-      const fitBuffer = new Uint8Array([1, 2, 3, 4]);
+      const fitBuffer = createFitBufferSample();
       const mockFitReader = vi.fn().mockResolvedValue(originalKrd);
       const mockFitWriter = vi.fn().mockResolvedValue(fitBuffer);
       const mockToleranceChecker: ToleranceChecker = {
@@ -200,9 +242,9 @@ describe("validateRoundTrip", () => {
         laps: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 600,
-            totalDistance: 1000,
-            avgHeartRate: 150,
+            totalElapsedTime: LAP_TIME_EXPECTED_SEC,
+            totalDistance: LAP_DISTANCE_EXPECTED_M,
+            avgHeartRate: HR_EXPECTED,
           },
         ],
         records: undefined,
@@ -212,14 +254,14 @@ describe("validateRoundTrip", () => {
         laps: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 600,
-            totalDistance: 1000,
-            avgHeartRate: 155,
+            totalElapsedTime: LAP_TIME_EXPECTED_SEC,
+            totalDistance: LAP_DISTANCE_EXPECTED_M,
+            avgHeartRate: HR_ACTUAL,
           },
         ],
         records: undefined,
       });
-      const fitBuffer = new Uint8Array([1, 2, 3, 4]);
+      const fitBuffer = createFitBufferSample();
       const mockFitReader = vi
         .fn()
         .mockResolvedValueOnce(originalKrd)
@@ -227,10 +269,10 @@ describe("validateRoundTrip", () => {
       const mockFitWriter = vi.fn().mockResolvedValue(fitBuffer);
       const hrViolation: ToleranceViolation = {
         field: "heartRate",
-        expected: 150,
-        actual: 155,
-        deviation: 5,
-        tolerance: 1,
+        expected: HR_EXPECTED,
+        actual: HR_ACTUAL,
+        deviation: DEVIATION_HR_5BPM,
+        tolerance: TOLERANCE_HR_BPM,
       };
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue(null),
@@ -253,8 +295,8 @@ describe("validateRoundTrip", () => {
       // Assert
       expect(result.length).toBeGreaterThan(0);
       expect(result[0].field).toBe("laps[0].avgHeartRate");
-      expect(result[0].expected).toBe(150);
-      expect(result[0].actual).toBe(155);
+      expect(result[0].expected).toBe(HR_EXPECTED);
+      expect(result[0].actual).toBe(HR_ACTUAL);
     });
 
     it("should propagate FitWriter errors", async () => {
@@ -289,7 +331,7 @@ describe("validateRoundTrip", () => {
     it("should propagate FitReader errors", async () => {
       // Arrange
       const originalKrd = buildKRD.build();
-      const fitBuffer = new Uint8Array([1, 2, 3, 4]);
+      const fitBuffer = createFitBufferSample();
       const readerError = new Error("Failed to read FIT file");
       const mockFitReader = vi.fn().mockRejectedValue(readerError);
       const mockFitWriter = vi.fn().mockResolvedValue(fitBuffer);
@@ -320,17 +362,17 @@ describe("validateRoundTrip", () => {
   describe("compareKRDs", () => {
     it("should detect violations in session metrics", async () => {
       // Arrange
-      const originalFit = new Uint8Array([1, 2, 3, 4]);
+      const originalFit = createFitBufferSample();
       const krd1 = buildKRD.build({
         sessions: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 3600,
-            totalDistance: 10000,
+            totalElapsedTime: TIME_EXPECTED_SEC,
+            totalDistance: DISTANCE_EXPECTED_M,
             sport: "running",
-            avgHeartRate: 150,
-            avgCadence: 85,
-            avgPower: 250,
+            avgHeartRate: HR_EXPECTED,
+            avgCadence: CADENCE_EXPECTED,
+            avgPower: POWER_EXPECTED,
           },
         ],
         laps: undefined,
@@ -340,12 +382,12 @@ describe("validateRoundTrip", () => {
         sessions: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 3602,
-            totalDistance: 10005,
+            totalElapsedTime: TIME_ACTUAL_SEC,
+            totalDistance: DISTANCE_ACTUAL_M,
             sport: "running",
-            avgHeartRate: 155,
-            avgCadence: 90,
-            avgPower: 260,
+            avgHeartRate: HR_ACTUAL,
+            avgCadence: CADENCE_ACTUAL,
+            avgPower: POWER_ACTUAL_HIGH,
           },
         ],
         laps: undefined,
@@ -359,38 +401,38 @@ describe("validateRoundTrip", () => {
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue({
           field: "time",
-          expected: 3600,
-          actual: 3602,
-          deviation: 2,
-          tolerance: 1,
+          expected: TIME_EXPECTED_SEC,
+          actual: TIME_ACTUAL_SEC,
+          deviation: DEVIATION_TIME_2SEC,
+          tolerance: TOLERANCE_TIME_SEC,
         }),
         checkDistance: vi.fn().mockReturnValue({
           field: "distance",
-          expected: 10000,
-          actual: 10005,
-          deviation: 5,
-          tolerance: 1,
+          expected: DISTANCE_EXPECTED_M,
+          actual: DISTANCE_ACTUAL_M,
+          deviation: DEVIATION_DISTANCE_5M,
+          tolerance: TOLERANCE_DISTANCE_M,
         }),
         checkPower: vi.fn().mockReturnValue({
           field: "power",
-          expected: 250,
-          actual: 260,
-          deviation: 10,
-          tolerance: 1,
+          expected: POWER_EXPECTED,
+          actual: POWER_ACTUAL_HIGH,
+          deviation: DEVIATION_POWER_10W,
+          tolerance: TOLERANCE_POWER_WATTS,
         }),
         checkHeartRate: vi.fn().mockReturnValue({
           field: "heartRate",
-          expected: 150,
-          actual: 155,
-          deviation: 5,
-          tolerance: 1,
+          expected: HR_EXPECTED,
+          actual: HR_ACTUAL,
+          deviation: DEVIATION_HR_5BPM,
+          tolerance: TOLERANCE_HR_BPM,
         }),
         checkCadence: vi.fn().mockReturnValue({
           field: "cadence",
-          expected: 85,
-          actual: 90,
-          deviation: 5,
-          tolerance: 1,
+          expected: CADENCE_EXPECTED,
+          actual: CADENCE_ACTUAL,
+          deviation: DEVIATION_CADENCE_5RPM,
+          tolerance: TOLERANCE_CADENCE_RPM,
         }),
         checkPace: vi.fn().mockReturnValue(null),
       };
@@ -405,7 +447,7 @@ describe("validateRoundTrip", () => {
       ).validateFitToKrdToFit({ originalFit });
 
       // Assert
-      expect(result.length).toBe(5);
+      expect(result.length).toBe(VIOLATION_COUNT_FULL_SESSION);
       expect(
         result.some((v) => v.field === "sessions[0].totalElapsedTime")
       ).toBe(true);
@@ -423,15 +465,15 @@ describe("validateRoundTrip", () => {
 
     it("should detect violations in lap metrics", async () => {
       // Arrange
-      const originalFit = new Uint8Array([1, 2, 3, 4]);
+      const originalFit = createFitBufferSample();
       const krd1 = buildKRD.build({
         sessions: undefined,
         laps: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 600,
-            totalDistance: 1000,
-            avgHeartRate: 150,
+            totalElapsedTime: LAP_TIME_EXPECTED_SEC,
+            totalDistance: LAP_DISTANCE_EXPECTED_M,
+            avgHeartRate: HR_EXPECTED,
           },
         ],
         records: undefined,
@@ -441,9 +483,9 @@ describe("validateRoundTrip", () => {
         laps: [
           {
             startTime: "2025-01-15T10:30:00Z",
-            totalElapsedTime: 605,
-            totalDistance: 1010,
-            avgHeartRate: 160,
+            totalElapsedTime: LAP_TIME_ACTUAL_SEC,
+            totalDistance: LAP_DISTANCE_ACTUAL_M,
+            avgHeartRate: HR_ACTUAL_HIGH,
           },
         ],
         records: undefined,
@@ -456,25 +498,25 @@ describe("validateRoundTrip", () => {
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue({
           field: "time",
-          expected: 600,
-          actual: 605,
-          deviation: 5,
-          tolerance: 1,
+          expected: LAP_TIME_EXPECTED_SEC,
+          actual: LAP_TIME_ACTUAL_SEC,
+          deviation: DEVIATION_TIME_5SEC,
+          tolerance: TOLERANCE_TIME_SEC,
         }),
         checkDistance: vi.fn().mockReturnValue({
           field: "distance",
-          expected: 1000,
-          actual: 1010,
-          deviation: 10,
-          tolerance: 1,
+          expected: LAP_DISTANCE_EXPECTED_M,
+          actual: LAP_DISTANCE_ACTUAL_M,
+          deviation: DEVIATION_DISTANCE_10M,
+          tolerance: TOLERANCE_DISTANCE_M,
         }),
         checkPower: vi.fn().mockReturnValue(null),
         checkHeartRate: vi.fn().mockReturnValue({
           field: "heartRate",
-          expected: 150,
-          actual: 160,
-          deviation: 10,
-          tolerance: 1,
+          expected: HR_EXPECTED,
+          actual: HR_ACTUAL_HIGH,
+          deviation: DEVIATION_HR_10BPM,
+          tolerance: TOLERANCE_HR_BPM,
         }),
         checkCadence: vi.fn().mockReturnValue(null),
         checkPace: vi.fn().mockReturnValue(null),
@@ -490,7 +532,7 @@ describe("validateRoundTrip", () => {
       ).validateFitToKrdToFit({ originalFit });
 
       // Assert
-      expect(result.length).toBe(3);
+      expect(result.length).toBe(VIOLATION_COUNT_LAP);
       expect(result.some((v) => v.field === "laps[0].totalElapsedTime")).toBe(
         true
       );
@@ -502,18 +544,18 @@ describe("validateRoundTrip", () => {
 
     it("should detect violations in record metrics", async () => {
       // Arrange
-      const originalFit = new Uint8Array([1, 2, 3, 4]);
+      const originalFit = createFitBufferSample();
       const krd1 = buildKRD.build({
         sessions: undefined,
         laps: undefined,
         records: [
           {
             timestamp: "2025-01-15T10:30:00Z",
-            heartRate: 150,
-            cadence: 85,
-            power: 250,
-            speed: 2.78,
-            distance: 100,
+            heartRate: HR_EXPECTED,
+            cadence: CADENCE_EXPECTED,
+            power: POWER_EXPECTED,
+            speed: RECORD_SPEED_EXPECTED_MPS,
+            distance: RECORD_DISTANCE_EXPECTED_M,
           },
         ],
       });
@@ -523,11 +565,11 @@ describe("validateRoundTrip", () => {
         records: [
           {
             timestamp: "2025-01-15T10:30:00Z",
-            heartRate: 155,
-            cadence: 90,
-            power: 260,
-            speed: 2.85,
-            distance: 105,
+            heartRate: HR_ACTUAL,
+            cadence: CADENCE_ACTUAL,
+            power: POWER_ACTUAL_HIGH,
+            speed: RECORD_SPEED_ACTUAL_MPS,
+            distance: RECORD_DISTANCE_ACTUAL_M,
           },
         ],
       });
@@ -540,38 +582,38 @@ describe("validateRoundTrip", () => {
         checkTime: vi.fn().mockReturnValue(null),
         checkDistance: vi.fn().mockReturnValue({
           field: "distance",
-          expected: 100,
-          actual: 105,
-          deviation: 5,
-          tolerance: 1,
+          expected: RECORD_DISTANCE_EXPECTED_M,
+          actual: RECORD_DISTANCE_ACTUAL_M,
+          deviation: DEVIATION_DISTANCE_5M,
+          tolerance: TOLERANCE_DISTANCE_M,
         }),
         checkPower: vi.fn().mockReturnValue({
           field: "power",
-          expected: 250,
-          actual: 260,
-          deviation: 10,
-          tolerance: 1,
+          expected: POWER_EXPECTED,
+          actual: POWER_ACTUAL_HIGH,
+          deviation: DEVIATION_POWER_10W,
+          tolerance: TOLERANCE_POWER_WATTS,
         }),
         checkHeartRate: vi.fn().mockReturnValue({
           field: "heartRate",
-          expected: 150,
-          actual: 155,
-          deviation: 5,
-          tolerance: 1,
+          expected: HR_EXPECTED,
+          actual: HR_ACTUAL,
+          deviation: DEVIATION_HR_5BPM,
+          tolerance: TOLERANCE_HR_BPM,
         }),
         checkCadence: vi.fn().mockReturnValue({
           field: "cadence",
-          expected: 85,
-          actual: 90,
-          deviation: 5,
-          tolerance: 1,
+          expected: CADENCE_EXPECTED,
+          actual: CADENCE_ACTUAL,
+          deviation: DEVIATION_CADENCE_5RPM,
+          tolerance: TOLERANCE_CADENCE_RPM,
         }),
         checkPace: vi.fn().mockReturnValue({
           field: "pace",
-          expected: 2.78,
-          actual: 2.85,
-          deviation: 0.07,
-          tolerance: 0.01,
+          expected: RECORD_SPEED_EXPECTED_MPS,
+          actual: RECORD_SPEED_ACTUAL_MPS,
+          deviation: DEVIATION_PACE,
+          tolerance: TOLERANCE_PACE_SEC_PER_M,
         }),
       };
       const logger = createMockLogger();
@@ -585,7 +627,7 @@ describe("validateRoundTrip", () => {
       ).validateFitToKrdToFit({ originalFit });
 
       // Assert
-      expect(result.length).toBe(5);
+      expect(result.length).toBe(VIOLATION_COUNT_RECORD);
       expect(result.some((v) => v.field === "records[0].heartRate")).toBe(true);
       expect(result.some((v) => v.field === "records[0].cadence")).toBe(true);
       expect(result.some((v) => v.field === "records[0].power")).toBe(true);

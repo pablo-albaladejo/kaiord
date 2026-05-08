@@ -1,6 +1,10 @@
 import { createMockLogger, loadFitFixture } from "@kaiord/core/test-utils";
 import { describe, expect, it } from "vitest";
 
+import {
+  FIT_NOTES_MAX_LENGTH,
+  FIT_NOTES_OVERSIZED_LENGTH,
+} from "../../test-utils/constants";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
@@ -95,7 +99,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-    const longNotes = "a".repeat(300);
+    const longNotes = "a".repeat(FIT_NOTES_OVERSIZED_LENGTH);
     const krd = await reader(originalBuffer);
 
     // Act
@@ -123,7 +127,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-    const maxNotes = "a".repeat(256);
+    const maxNotes = "a".repeat(FIT_NOTES_MAX_LENGTH);
     const krd = await reader(originalBuffer);
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
@@ -151,7 +155,7 @@ describe("Round-trip: Workout step - notes field", () => {
 
     // Assert
     expect(stepMsg?.notes).toBe(maxNotes);
-    expect((stepMsg?.notes as string).length).toBe(256);
+    expect((stepMsg?.notes as string).length).toBe(FIT_NOTES_MAX_LENGTH);
   });
 
   it("should omit notes when undefined in round-trip", async () => {

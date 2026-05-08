@@ -2,6 +2,21 @@ import { describe, expect, it } from "vitest";
 
 import { scrubAnalyticsString } from "./scrub-analytics-string";
 
+const HEX_RUN_THRESHOLD = 32;
+const HEX_RUN_BELOW_THRESHOLD = 31;
+const HEX_RUN_LONG = 60;
+const BASE64URL_RUN_THRESHOLD = 40;
+const BASE64URL_RUN_BELOW_THRESHOLD = 39;
+const ALPHANUMERIC_RUN_OVER_THRESHOLD = 42;
+const COMPONENT_STACK_FRAME_COUNT = 6;
+const TRUNCATION_MAX_LEN = 500;
+const COMPONENT_STACK_MAX_LEN = 1000;
+const TRUNCATION_INPUT_LEN_OVER = 600;
+const COMPONENT_STACK_INPUT_LEN_OVER = 1100;
+const TRUNCATION_BEFORE_LEN = 498;
+const TRUNCATION_BEFORE_LEN_FITS = 100;
+const TRUNCATION_AFTER_LEN_FITS = 50;
+
 describe("scrubAnalyticsString", () => {
   describe("UUID (rule 1)", () => {
     it("should replace a UUID v4 with <uuid>", () => {
@@ -122,14 +137,14 @@ describe("scrubAnalyticsString", () => {
       // Act
 
       // Assert
-      expect(scrubAnalyticsString("a".repeat(32))).toBe("<hex>");
+      expect(scrubAnalyticsString("a".repeat(HEX_RUN_THRESHOLD))).toBe("<hex>");
     });
 
     it("should do NOT replace a 31-char hex run", () => {
       // Arrange
 
       // Act
-      const s = "a".repeat(31);
+      const s = "a".repeat(HEX_RUN_BELOW_THRESHOLD);
 
       // Assert
       expect(scrubAnalyticsString(s)).toBe(s);
@@ -141,7 +156,7 @@ describe("scrubAnalyticsString", () => {
       // Act
 
       // Assert
-      expect(scrubAnalyticsString("a".repeat(60))).toBe("<hex>");
+      expect(scrubAnalyticsString("a".repeat(HEX_RUN_LONG))).toBe("<hex>");
     });
   });
 
@@ -150,7 +165,7 @@ describe("scrubAnalyticsString", () => {
       // Arrange
 
       // Act
-      const s = "X".repeat(40);
+      const s = "X".repeat(BASE64URL_RUN_THRESHOLD);
 
       // Assert
       expect(scrubAnalyticsString(s)).toBe("<token>");
@@ -160,7 +175,7 @@ describe("scrubAnalyticsString", () => {
       // Arrange
 
       // Act
-      const s = "X".repeat(39);
+      const s = "X".repeat(BASE64URL_RUN_BELOW_THRESHOLD);
 
       // Assert
       expect(scrubAnalyticsString(s)).toBe(s);
@@ -195,7 +210,7 @@ describe("scrubAnalyticsString", () => {
       // Arrange
 
       // Act
-      const s = "Z".repeat(42);
+      const s = "Z".repeat(ALPHANUMERIC_RUN_OVER_THRESHOLD);
 
       // Assert
       expect(scrubAnalyticsString(s)).toBe("<token>");
@@ -249,37 +264,39 @@ describe("scrubAnalyticsString", () => {
 
       // Assert
       expect(out).toContain("<uuid>");
-      expect(out.split("\n")).toHaveLength(6);
+      expect(out.split("\n")).toHaveLength(COMPONENT_STACK_FRAME_COUNT);
     });
   });
 
   describe("Truncation", () => {
     it("should truncate AFTER scrubbing — placeholders straddling the cut are excluded entirely (never split mid-token)", () => {
       // Arrange
-      const before = ".".repeat(498);
+      const before = ".".repeat(TRUNCATION_BEFORE_LEN);
       const uuid = "6e3ad6f0-1234-4cdf-9abc-1234567890ab";
-      const after = ".".repeat(600 - 498 - uuid.length);
+      const after = ".".repeat(
+        TRUNCATION_INPUT_LEN_OVER - TRUNCATION_BEFORE_LEN - uuid.length
+      );
       const input = `${before}${uuid}${after}`;
-      expect(input).toHaveLength(600);
+      expect(input).toHaveLength(TRUNCATION_INPUT_LEN_OVER);
 
       // Act
-      const out = scrubAnalyticsString(input, 500);
+      const out = scrubAnalyticsString(input, TRUNCATION_MAX_LEN);
 
       // Assert
-      expect(out.length).toBeLessThanOrEqual(500);
+      expect(out.length).toBeLessThanOrEqual(TRUNCATION_MAX_LEN);
       expect(out).not.toMatch(/<[a-z]+$/);
       expect(out).not.toMatch(/<[a-z]+>[^>]*<[a-z]+$/);
     });
 
     it("should include a placeholder that fits fully within maxLen", () => {
       // Arrange
-      const before = ".".repeat(100);
+      const before = ".".repeat(TRUNCATION_BEFORE_LEN_FITS);
       const uuid = "6e3ad6f0-1234-4cdf-9abc-1234567890ab";
-      const after = ".".repeat(50);
+      const after = ".".repeat(TRUNCATION_AFTER_LEN_FITS);
       const input = `${before}${uuid}${after}`;
 
       // Act
-      const out = scrubAnalyticsString(input, 500);
+      const out = scrubAnalyticsString(input, TRUNCATION_MAX_LEN);
 
       // Assert
       expect(out).toContain("<uuid>");
@@ -287,24 +304,24 @@ describe("scrubAnalyticsString", () => {
 
     it("should truncate a 600-char message with no scrub matches to exactly 500 chars", () => {
       // Arrange
-      const input = ".".repeat(600);
+      const input = ".".repeat(TRUNCATION_INPUT_LEN_OVER);
 
       // Act
-      const out = scrubAnalyticsString(input, 500);
+      const out = scrubAnalyticsString(input, TRUNCATION_MAX_LEN);
 
       // Assert
-      expect(out.length).toBe(500);
+      expect(out.length).toBe(TRUNCATION_MAX_LEN);
     });
 
     it("should truncate a 1100-char componentStack to exactly 1000 chars", () => {
       // Arrange
-      const input = ".".repeat(1100);
+      const input = ".".repeat(COMPONENT_STACK_INPUT_LEN_OVER);
 
       // Act
-      const out = scrubAnalyticsString(input, 1000);
+      const out = scrubAnalyticsString(input, COMPONENT_STACK_MAX_LEN);
 
       // Assert
-      expect(out.length).toBe(1000);
+      expect(out.length).toBe(COMPONENT_STACK_MAX_LEN);
     });
 
     it("should do NOT truncate when input is already under maxLen", () => {
@@ -312,7 +329,7 @@ describe("scrubAnalyticsString", () => {
       const input = "short";
 
       // Act
-      const out = scrubAnalyticsString(input, 500);
+      const out = scrubAnalyticsString(input, TRUNCATION_MAX_LEN);
 
       // Assert
       expect(out).toBe("short");
@@ -328,8 +345,8 @@ describe("scrubAnalyticsString", () => {
         "not found: 6e3ad6f0-1234-4cdf-9abc-1234567890ab",
         "auth: Bearer abc.def.ghi",
         "from user@example.com",
-        "key=" + "a".repeat(32),
-        "raw=" + "X".repeat(40),
+        "key=" + "a".repeat(HEX_RUN_THRESHOLD),
+        "raw=" + "X".repeat(BASE64URL_RUN_THRESHOLD),
       ];
 
       // Assert

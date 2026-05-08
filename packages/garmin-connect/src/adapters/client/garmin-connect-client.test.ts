@@ -1,6 +1,12 @@
 import type { Logger, TokenStore } from "@kaiord/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  MILLISECONDS_PER_SECOND,
+  OAUTH2_EXPIRES_IN_1H_SEC,
+  RETRY_ADVANCE_TIMERS_MS,
+  RETRY_RANDOM_FN_VALUE_0_5,
+} from "../../test-utils/constants";
 import type { OAuth1Token, OAuth2Token } from "../http/types";
 
 vi.mock("../http/cookie-fetch", () => ({
@@ -37,7 +43,8 @@ const OAUTH2: OAuth2Token = {
   token_type: "Bearer",
   expires_in: 3600,
   refresh_token_expires_in: 86400,
-  expires_at: Math.floor(Date.now() / 1000) + 3600,
+  expires_at:
+    Math.floor(Date.now() / MILLISECONDS_PER_SECOND) + OAUTH2_EXPIRES_IN_1H_SEC,
 };
 
 const createLogger = (): Logger => ({
@@ -158,11 +165,15 @@ describe("createGarminConnectClient", () => {
         logger,
         tokenStore: store,
         fetchFn: apiFetch,
-        retry: { maxRetries: 2, randomFn: () => 0.5, baseDelay: 100 },
+        retry: {
+          maxRetries: 2,
+          randomFn: () => RETRY_RANDOM_FN_VALUE_0_5,
+          baseDelay: 100,
+        },
       });
       await client.init();
       const promise = client.service.list();
-      await vi.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(RETRY_ADVANCE_TIMERS_MS);
 
       // Act
       await promise;
@@ -179,7 +190,11 @@ describe("createGarminConnectClient", () => {
       const client = createGarminConnectClient({
         logger,
         fetchFn: rawFetch,
-        retry: { maxRetries: 3, randomFn: () => 0.5, baseDelay: 100 },
+        retry: {
+          maxRetries: 3,
+          randomFn: () => RETRY_RANDOM_FN_VALUE_0_5,
+          baseDelay: 100,
+        },
       });
 
       // Act

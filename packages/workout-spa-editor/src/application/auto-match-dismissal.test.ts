@@ -24,6 +24,7 @@ import {
 
 const NOW_1 = "2026-05-01T10:00:00.000Z";
 const NOW_2 = "2026-05-01T11:00:00.000Z";
+const DISMISSAL_CAP = 256;
 
 const baseInput = {
   profileId: "p1",
@@ -200,7 +201,7 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
   const fillCap = async (
     repo: ReturnType<typeof createInMemoryAutoMatchDismissalRepository>
   ) => {
-    for (let i = 0; i < 256; i++) {
+    for (let i = 0; i < DISMISSAL_CAP; i++) {
       await dismissAutoMatchBanner(
         { ...baseInput, activityId: `a${i}`, workoutId: `w${i}` },
         { repository: repo, clock: () => NOW_1 }
@@ -222,7 +223,7 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
     const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
 
     // Assert
-    expect(stored?.dismissedPairs).toHaveLength(256);
+    expect(stored?.dismissedPairs).toHaveLength(DISMISSAL_CAP);
     expect(stored?.dismissedPairs.some((p) => p.activityId === "a257")).toBe(
       false
     );
@@ -261,7 +262,7 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
       { repository: repo, clock: () => NOW_2 }
     );
     const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
-    expect(stored?.dismissedPairs).toHaveLength(256);
+    expect(stored?.dismissedPairs).toHaveLength(DISMISSAL_CAP);
 
     // Act
     const updated = stored?.dismissedPairs.find((p) => p.activityId === "a0");
