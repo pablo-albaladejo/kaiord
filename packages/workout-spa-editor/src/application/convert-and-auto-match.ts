@@ -64,7 +64,7 @@ export async function convertAndAutoMatch(
     coachingActivityId: activity.id,
     workoutId: conversion.workoutId,
     date: activity.date,
-    source: "auto-conversion",
+    source: "auto-coaching",
     newId: deps.newMatchId,
     clock: deps.clock,
   });

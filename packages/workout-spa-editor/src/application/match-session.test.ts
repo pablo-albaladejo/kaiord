@@ -116,7 +116,7 @@ describe("matchSession", () => {
         profileId: "p1",
         coachingActivityId: activity.id,
         workoutId: workout.id,
-        source: "auto-conversion",
+        source: "auto-coaching",
       },
       {
         clock: fixedClock,
@@ -128,7 +128,7 @@ describe("matchSession", () => {
     );
 
     // Assert
-    expect(result.source).toBe("auto-conversion");
+    expect(result.source).toBe("auto-coaching");
   });
 
   it("should throw CoachingActivityNotFoundError when the activity is missing", async () => {

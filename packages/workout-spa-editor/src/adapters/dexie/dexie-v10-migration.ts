@@ -5,7 +5,7 @@
  * `workouts` table by `(source, namespacedSourceId)`, and writes a fresh
  * `sessionMatches` row for every pair that is missing one. Source =
  * `"auto-coaching-v10-migration"` so analytics can distinguish retro-
- * matched rows from per-call auto-conversions (per design D8).
+ * matched rows from per-call auto-coaching matches (per design D8).
  *
  * Idempotent at the row level: existing matches are never overwritten,
  * existing rows from another `source` are skipped. A re-run produces

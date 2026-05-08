@@ -24,7 +24,7 @@ export const ensureMatchForExisting = async (
     coachingActivityId: activity.id,
     workoutId,
     date: activity.date,
-    source: "auto-conversion",
+    source: "auto-coaching",
     newId: deps.newMatchId,
     clock: deps.clock,
   });

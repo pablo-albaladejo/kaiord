@@ -39,7 +39,7 @@ const persistFreshWorkout = async (
     coachingActivityId: activity.id,
     workoutId: workout.id,
     date: activity.date,
-    source: "auto-conversion",
+    source: "auto-coaching",
     newId: deps.newMatchId,
     clock: deps.clock,
   });

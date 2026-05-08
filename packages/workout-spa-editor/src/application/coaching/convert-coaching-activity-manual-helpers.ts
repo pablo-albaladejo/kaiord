@@ -11,7 +11,7 @@ import type {
 } from "./convert-coaching-activity-manual-types";
 import { ensureSessionMatch } from "./ensure-session-match";
 
-export const manualMatchSource: SessionMatchSource = "auto-conversion";
+export const manualMatchSource: SessionMatchSource = "auto-coaching";
 
 export const handleExistingManualWorkout = async (
   deps: ConvertManualDeps,

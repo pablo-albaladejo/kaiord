@@ -71,7 +71,7 @@ const stubWorkoutRepo = (rows: WorkoutRecord[] = []): WorkoutRepository => {
 const fixedClock = () => "2026-05-01T12:00:00.000Z";
 
 describe("convertAndAutoMatch", () => {
-  it("should create workout AND SessionMatch with source: auto-conversion on first-time conversion", async () => {
+  it("should create workout AND SessionMatch with source: auto-coaching on first-time conversion", async () => {
     // Arrange
     const activity = stubActivity();
     const coaching = stubCoachingRepo([activity]);
@@ -98,7 +98,7 @@ describe("convertAndAutoMatch", () => {
     expect(match).toMatchObject({
       coachingActivityId: activity.id,
       workoutId: "w-new",
-      source: "auto-conversion",
+      source: "auto-coaching",
     });
   });
 
@@ -187,7 +187,7 @@ describe("convertAndAutoMatch", () => {
     expect(healed).toMatchObject({
       coachingActivityId: activity.id,
       workoutId: "w-converted-no-match",
-      source: "auto-conversion",
+      source: "auto-coaching",
     });
   });
 
