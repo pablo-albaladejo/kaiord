@@ -14,7 +14,7 @@ import { z } from "zod";
 export const sessionMatchSourceSchema = z.enum([
   "manual",
   "auto-suggestion",
-  "auto-conversion",
+  "auto-coaching",
   "auto-coaching-v10-migration",
 ]);
 
