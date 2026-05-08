@@ -7,11 +7,12 @@
  * a profile switch does not reroute writes.
  */
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 
 import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { buildCoachingDialogCloseHandler } from "./build-coaching-dialog-close-handler";
 import { CoachingDialogShell } from "./coaching-dialog-shell";
 import { CoachingActivityDialogContent } from "./CoachingActivityDialogContent";
 import { useCoachingDialog } from "./use-coaching-dialog";
@@ -44,11 +45,16 @@ export function CoachingActivityDialog({
       navigate(`/workout/${matchedId}`);
     }
   }, [matchedId, navigate, onClose]);
+  const { cancelAi } = dialog.ai;
+  const handleDialogClose = useMemo(
+    () => buildCoachingDialogCloseHandler(cancelAi, onClose),
+    [cancelAi, onClose]
+  );
 
   if (!activity) return null;
 
   return (
-    <CoachingDialogShell onClose={onClose}>
+    <CoachingDialogShell onClose={handleDialogClose}>
       <CoachingActivityDialogContent
         activity={activity}
         dialogState={dialog.dialogState}
@@ -59,7 +65,7 @@ export function CoachingActivityDialog({
         aiProcessing={dialog.ai.processing}
         aiFailure={dialog.ai.failure}
         manualCreating={dialog.manual.creating}
-        onClose={onClose}
+        onClose={handleDialogClose}
         onAiProcess={dialog.ai.startAi}
         onAiCancel={dialog.ai.cancelAi}
         onEditManually={dialog.manual.startManual}
