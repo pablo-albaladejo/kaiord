@@ -42,6 +42,9 @@ metrics/DASHBOARD.md
 .claude/worktrees/
 .claude/settings.local.json
 
+# oh-my-claudecode runtime (state, sessions, notepad, plans, research, logs)
+.omc/
+
 # GitHub Actions local testing (act)
 .secrets
 .actrc.local
