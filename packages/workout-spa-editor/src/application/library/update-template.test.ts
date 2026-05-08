@@ -17,14 +17,15 @@ describe("updateTemplate", () => {
       makeKrd(),
       { tags: ["old"], duration: 30 }
     );
+    const NEW_DURATION_MIN = 45;
     const updated = await updateTemplate(persistence, original.id, {
       name: "New Name",
       tags: ["new", "fresh"],
-      duration: 45,
+      duration: NEW_DURATION_MIN,
     });
     expect(updated.name).toBe("New Name");
     expect(updated.tags).toEqual(["new", "fresh"]);
-    expect(updated.duration).toBe(45);
+    expect(updated.duration).toBe(NEW_DURATION_MIN);
     expect(updated.updatedAt >= original.updatedAt).toBe(true);
 
     // Act

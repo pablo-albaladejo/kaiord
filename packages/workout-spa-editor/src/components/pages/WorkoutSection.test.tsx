@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useWorkoutStore } from "../../store/workout-store";
 import { renderWithProviders } from "../../test-utils";
 import type { KRD, Workout, WorkoutStep } from "../../types/krd";
+import { STEP_INDEX_3 } from "./WorkoutSection.test-fixtures";
 import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
 /**
@@ -523,7 +524,7 @@ describe("WorkoutSection", () => {
         createMockStep(0),
         createMockStep(1),
         createMockStep(2),
-        createMockStep(3),
+        createMockStep(STEP_INDEX_3),
       ]);
       const krd = createMockKRD(workout);
 

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  PACE_ACTUAL_3_52,
+  PACE_DEVIATION_0_02,
+  PACE_DEVIATION_PRECISION,
+  PACE_EXPECTED_3_5,
+  PACE_TOLERANCE_DEFAULT,
+} from "../../test-utils/tolerance-constants";
+import {
   createToleranceChecker,
   DEFAULT_TOLERANCES,
   type ToleranceConfig,
@@ -249,10 +256,13 @@ describe("createToleranceChecker", () => {
       // Assert
       expect(result).not.toBeNull();
       expect(result?.field).toBe("pace");
-      expect(result?.expected).toBe(3.5);
-      expect(result?.actual).toBe(3.52);
-      expect(result?.deviation).toBeCloseTo(0.02, 10);
-      expect(result?.tolerance).toBe(0.01);
+      expect(result?.expected).toBe(PACE_EXPECTED_3_5);
+      expect(result?.actual).toBe(PACE_ACTUAL_3_52);
+      expect(result?.deviation).toBeCloseTo(
+        PACE_DEVIATION_0_02,
+        PACE_DEVIATION_PRECISION
+      );
+      expect(result?.tolerance).toBe(PACE_TOLERANCE_DEFAULT);
     });
   });
 

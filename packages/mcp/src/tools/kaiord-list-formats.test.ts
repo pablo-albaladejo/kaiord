@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { FORMAT_COUNT_FIVE } from "../test-utils/constants";
 import {
   createTestClient,
   type McpToolResult,
@@ -14,7 +15,7 @@ describe("kaiord_list_formats", () => {
       arguments: {},
     })) as McpToolResult;
     const formats = JSON.parse(result.content[0].text);
-    expect(formats).toHaveLength(5);
+    expect(formats).toHaveLength(FORMAT_COUNT_FIVE);
 
     // Act
     const names = formats.map((f: { format: string }) => f.format);

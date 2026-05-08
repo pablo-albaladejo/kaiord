@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ping, sendMessage } from "./garmin-extension-transport";
 
+const TRANSPORT_TIMEOUT_TICK_MS = 2000;
+
 describe("garmin-extension-transport", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -29,7 +31,11 @@ describe("garmin-extension-transport", () => {
       };
 
       // Act
-      const result = await sendMessage("ext-id", { action: "ping" }, 2000);
+      const result = await sendMessage(
+        "ext-id",
+        { action: "ping" },
+        TRANSPORT_TIMEOUT_TICK_MS
+      );
 
       // Assert
       expect(result).toEqual({ ok: true, data: "test" });
@@ -40,7 +46,11 @@ describe("garmin-extension-transport", () => {
       delete (globalThis as Record<string, unknown>).chrome;
 
       // Act
-      const result = await sendMessage("ext-id", { action: "ping" }, 2000);
+      const result = await sendMessage(
+        "ext-id",
+        { action: "ping" },
+        TRANSPORT_TIMEOUT_TICK_MS
+      );
 
       // Assert
       expect(result).toEqual({
@@ -55,8 +65,12 @@ describe("garmin-extension-transport", () => {
       (globalThis as Record<string, unknown>).chrome = {
         runtime: { lastError: null, sendMessage: mockSend },
       };
-      const promise = sendMessage("ext-id", { action: "ping" }, 2000);
-      vi.advanceTimersByTime(2000);
+      const promise = sendMessage(
+        "ext-id",
+        { action: "ping" },
+        TRANSPORT_TIMEOUT_TICK_MS
+      );
+      vi.advanceTimersByTime(TRANSPORT_TIMEOUT_TICK_MS);
 
       // Act
       const result = await promise;
@@ -85,7 +99,11 @@ describe("garmin-extension-transport", () => {
       };
 
       // Act
-      const result = await sendMessage("ext-id", { action: "ping" }, 2000);
+      const result = await sendMessage(
+        "ext-id",
+        { action: "ping" },
+        TRANSPORT_TIMEOUT_TICK_MS
+      );
 
       // Assert
       expect(result).toEqual({
@@ -104,7 +122,11 @@ describe("garmin-extension-transport", () => {
       };
 
       // Act
-      const result = await sendMessage("ext-id", { action: "ping" }, 2000);
+      const result = await sendMessage(
+        "ext-id",
+        { action: "ping" },
+        TRANSPORT_TIMEOUT_TICK_MS
+      );
 
       // Assert
       expect(result).toEqual({
@@ -145,7 +167,7 @@ describe("garmin-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
       const promise = ping("ext-id");
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(TRANSPORT_TIMEOUT_TICK_MS);
       await vi.advanceTimersByTimeAsync(100);
 
       // Act

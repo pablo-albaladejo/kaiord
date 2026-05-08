@@ -2,6 +2,12 @@ import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  DISTANCE_METERS_1000,
+  DISTANCE_METERS_MILE,
+  TIME_SECONDS_300,
+  TIME_SECONDS_7200,
+} from "../../test-utils/constants";
+import {
   convertTcxDuration,
   mapDistanceDurationToTcx,
   mapOpenDurationToTcx,
@@ -160,7 +166,7 @@ describe("mapTimeDurationToTcx", () => {
     // Arrange
 
     // Act
-    const result = mapTimeDurationToTcx(300);
+    const result = mapTimeDurationToTcx(TIME_SECONDS_300);
 
     // Assert
     expect(result).toStrictEqual({
@@ -173,7 +179,7 @@ describe("mapTimeDurationToTcx", () => {
     // Arrange
 
     // Act
-    const result = mapTimeDurationToTcx(7200);
+    const result = mapTimeDurationToTcx(TIME_SECONDS_7200);
 
     // Assert
     expect(result).toStrictEqual({
@@ -188,7 +194,7 @@ describe("mapDistanceDurationToTcx", () => {
     // Arrange
 
     // Act
-    const result = mapDistanceDurationToTcx(1000);
+    const result = mapDistanceDurationToTcx(DISTANCE_METERS_1000);
 
     // Assert
     expect(result).toStrictEqual({
@@ -201,7 +207,7 @@ describe("mapDistanceDurationToTcx", () => {
     // Arrange
 
     // Act
-    const result = mapDistanceDurationToTcx(1609.34);
+    const result = mapDistanceDurationToTcx(DISTANCE_METERS_MILE);
 
     // Assert
     expect(result).toStrictEqual({

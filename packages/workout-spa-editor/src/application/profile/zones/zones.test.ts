@@ -48,7 +48,10 @@ describe("updateSportThresholds", () => {
 
     // Assert
     expect(updated.sportZones.running?.paceZones?.method).toBe("daniels-5");
-    expect(updated.sportZones.running?.paceZones?.zones).toHaveLength(5);
+    const DANIELS_PACE_ZONE_COUNT = 5;
+    expect(updated.sportZones.running?.paceZones?.zones).toHaveLength(
+      DANIELS_PACE_ZONE_COUNT
+    );
   });
 
   it("should recalculate HR zones when LTHR is set and method is non-custom", async () => {
@@ -62,15 +65,16 @@ describe("updateSportThresholds", () => {
     await seedProfile(persistence, profile);
 
     // Act
+    const LTHR_BPM = 170;
     const updated = await updateSportThresholds(
       persistence,
       profile.id,
       "cycling",
-      { lthr: 170 }
+      { lthr: LTHR_BPM }
     );
 
     // Assert
-    expect(updated.sportZones.cycling?.thresholds.lthr).toBe(170);
+    expect(updated.sportZones.cycling?.thresholds.lthr).toBe(LTHR_BPM);
     expect(
       updated.sportZones.cycling?.heartRateZones.zones.length
     ).toBeGreaterThan(0);
@@ -170,8 +174,9 @@ describe("updateSportZones", () => {
 
     // Assert
     expect(updated.sportZones.cycling?.heartRateZones?.method).toBe("user");
+    const Z2_MAX_BPM = 145;
     expect(updated.sportZones.cycling?.heartRateZones?.zones[1]?.maxBpm).toBe(
-      145
+      Z2_MAX_BPM
     );
   });
 
@@ -360,7 +365,10 @@ describe("addCustomZone", () => {
     );
 
     // Assert
-    expect(updated.sportZones.cycling?.heartRateZones.zones).toHaveLength(10);
+    const ALL_ZONES_LENGTH = 10;
+    expect(updated.sportZones.cycling?.heartRateZones.zones).toHaveLength(
+      ALL_ZONES_LENGTH
+    );
   });
 
   it("should throw ProfileNotFoundError for an unknown id", async () => {
@@ -409,7 +417,9 @@ describe("removeCustomZone", () => {
 
     // Assert
     expect(zones).toHaveLength(2);
-    expect(zones.map((z) => z.zone)).toEqual([1, 3]);
+    const ZONE_INDEX_THIRD = 3;
+    const REMAINING_ZONE_INDICES = [1, ZONE_INDEX_THIRD];
+    expect(zones.map((z) => z.zone)).toEqual(REMAINING_ZONE_INDICES);
   });
 
   it("should be a no-op when only one zone remains", async () => {

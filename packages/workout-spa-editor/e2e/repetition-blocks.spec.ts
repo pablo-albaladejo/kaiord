@@ -105,6 +105,7 @@ test.describe("Repetition Blocks", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(150);
     await step3.evaluate((el) => {
       const event = new MouseEvent("click", {
@@ -115,6 +116,7 @@ test.describe("Repetition Blocks", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify steps are actually selected before waiting for button
@@ -533,6 +535,7 @@ test.describe("Repetition Blocks", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(150);
     await step2.evaluate((el) => {
       const event = new MouseEvent("click", {
@@ -543,6 +546,7 @@ test.describe("Repetition Blocks", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify steps are actually selected before waiting for button
@@ -752,6 +756,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(150);
     await step2.evaluate((el) => {
       const event = new MouseEvent("click", {
@@ -762,6 +767,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify steps are selected
@@ -1013,6 +1019,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(150);
     await step2.evaluate((el) => {
       const event = new MouseEvent("click", {
@@ -1023,6 +1030,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify steps are selected
@@ -1266,6 +1274,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
 
     // Wait a short time for deletion to process
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify block is removed
@@ -1379,6 +1388,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(150);
     await step2.evaluate((el) => {
       const event = new MouseEvent("click", {
@@ -1389,6 +1399,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
       });
       el.dispatchEvent(event);
     });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify steps are selected
@@ -1739,10 +1750,12 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
 
     // Verify all three blocks exist
     const blocks = page.locator('[data-testid="repetition-block-card"]');
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion count matches fixture size, not domain-modeled
     await expect(blocks).toHaveCount(3);
 
     // Focus on the second block directly (not a child element)
     await blocks.nth(1).focus();
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Delete the second block using Delete key
@@ -1873,6 +1886,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
 
     // Wait a short time for deletion to process
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify block is removed
@@ -2006,6 +2020,7 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
 
     // Verify all three blocks exist with their identifiable content
     const blocks = page.locator('[data-testid="repetition-block-card"]');
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion count matches fixture size, not domain-modeled
     await expect(blocks).toHaveCount(3);
 
     // Verify block 1: 2x with 100W
@@ -2038,6 +2053,7 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
 
     // Wait a short time for deletion to process
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify only 2 blocks remain
@@ -2202,6 +2218,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
 
     // Verify all five blocks exist with their identifiable content
     const blocks = page.locator('[data-testid="repetition-block-card"]');
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion count matches fixture size, not domain-modeled
     await expect(blocks).toHaveCount(5);
 
     // Verify initial state - all blocks present with correct content
@@ -2214,10 +2231,14 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks.nth(2).getByText("4x")).toBeVisible();
     await expect(blocks.nth(2).getByText("300W")).toBeVisible();
 
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("5x")).toBeVisible();
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("400W")).toBeVisible();
 
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(4).getByText("6x")).toBeVisible();
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(4).getByText("500W")).toBeVisible();
 
     // Test 1: Delete the FIRST block (2x with 100W)
@@ -2234,9 +2255,11 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
       .getByRole("button", { name: /^delete$/i })
       .click();
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify 4 blocks remain
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion timeout (ms), not domain-modeled
     await expect(blocks).toHaveCount(4, { timeout: 5000 });
 
     // Verify the CORRECT block was deleted by checking remaining content
@@ -2254,7 +2277,9 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks.nth(2).getByText("5x")).toBeVisible();
     await expect(blocks.nth(2).getByText("400W")).toBeVisible();
 
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("6x")).toBeVisible();
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("500W")).toBeVisible();
 
     // Test 2: Delete a MIDDLE block (4x with 300W, now at position 1)
@@ -2271,9 +2296,11 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
       .getByRole("button", { name: /^delete$/i })
       .click();
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify 3 blocks remain
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion timeout (ms), not domain-modeled
     await expect(blocks).toHaveCount(3, { timeout: 5000 });
 
     // Verify the CORRECT block was deleted by checking remaining content
@@ -2305,6 +2332,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
       .getByRole("button", { name: /^delete$/i })
       .click();
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test settle delay (ms), not domain-modeled
     await page.waitForTimeout(300);
 
     // Verify 2 blocks remain
@@ -2328,6 +2356,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await page.waitForTimeout(500);
 
     // Verify 3 blocks now
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion timeout (ms), not domain-modeled
     await expect(blocks).toHaveCount(3, { timeout: 5000 });
 
     // Verify the CORRECT block was restored
@@ -2340,6 +2369,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await page.waitForTimeout(500);
 
     // Verify 4 blocks now
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion timeout (ms), not domain-modeled
     await expect(blocks).toHaveCount(4, { timeout: 5000 });
 
     // Verify the CORRECT block was restored at correct position
@@ -2353,7 +2383,9 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks.nth(2).getByText("5x")).toBeVisible();
     await expect(blocks.nth(2).getByText("400W")).toBeVisible();
 
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("6x")).toBeVisible();
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("500W")).toBeVisible();
 
     // Test 6: Undo the first deletion (restore 2x/100W)
@@ -2362,6 +2394,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await page.waitForTimeout(500);
 
     // Verify all 5 blocks are back
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion timeout (ms), not domain-modeled
     await expect(blocks).toHaveCount(5, { timeout: 5000 });
 
     // Verify ALL blocks are restored in correct order
@@ -2374,10 +2407,14 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks.nth(2).getByText("4x")).toBeVisible();
     await expect(blocks.nth(2).getByText("300W")).toBeVisible();
 
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("5x")).toBeVisible();
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("400W")).toBeVisible();
 
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(4).getByText("6x")).toBeVisible();
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(4).getByText("500W")).toBeVisible();
 
     // Test 7: Redo the first deletion
@@ -2386,6 +2423,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await page.waitForTimeout(500);
 
     // Verify 4 blocks remain
+    // eslint-disable-next-line no-magic-numbers -- Playwright assertion timeout (ms), not domain-modeled
     await expect(blocks).toHaveCount(4, { timeout: 5000 });
 
     // Verify the CORRECT block was deleted again (2x/100W)
@@ -2402,7 +2440,9 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks.nth(2).getByText("5x")).toBeVisible();
     await expect(blocks.nth(2).getByText("400W")).toBeVisible();
 
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("6x")).toBeVisible();
+    // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("500W")).toBeVisible();
   });
 });
@@ -2414,13 +2454,15 @@ test.describe("Repetition Blocks - Performance", () => {
     await page.goto("/workout/new");
 
     // Create a workout with a large repetition block (25 steps)
-    const steps = Array.from({ length: 25 }, (_, i) => ({
+    const LARGE_BLOCK_STEP_COUNT = 25;
+    const steps = Array.from({ length: LARGE_BLOCK_STEP_COUNT }, (_, i) => ({
       stepIndex: i,
       durationType: "time",
       duration: { type: "time", seconds: 30 },
       targetType: "power",
       target: {
         type: "power",
+        // eslint-disable-next-line no-magic-numbers -- Playwright fixture power arithmetic, not domain-modeled
         value: { unit: "watts", value: 200 + i * 10 },
       },
       intensity: "active",
@@ -2470,15 +2512,19 @@ test.describe("Repetition Blocks - Performance", () => {
     const collapseTime = Date.now() - startTime;
 
     // Should complete in under 2 seconds
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test perf budget (ms), not domain-modeled
     expect(collapseTime).toBeLessThan(2000);
 
     // Expand again
     const expandStartTime = Date.now();
     await page.getByTestId("toggle-expand-button").click();
-    await expect(page.locator('[data-testid="step-card"]')).toHaveCount(25);
+    await expect(page.locator('[data-testid="step-card"]')).toHaveCount(
+      LARGE_BLOCK_STEP_COUNT
+    );
     const expandTime = Date.now() - expandStartTime;
 
     // Should complete in under 3 seconds
+    // eslint-disable-next-line no-magic-numbers -- Playwright per-test perf budget (ms), not domain-modeled
     expect(expandTime).toBeLessThan(3000);
   });
 

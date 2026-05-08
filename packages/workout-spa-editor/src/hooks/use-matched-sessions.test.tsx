@@ -9,6 +9,10 @@ import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
 import { useMatchedSessions } from "./use-matched-sessions";
 
+const FIFTY_NINE_MIN_SECONDS = 3540;
+const ONE_HOUR_SECONDS = 3600;
+const EXPECTED_COMPLIANCE = 0.983;
+
 const WEEK = [
   "2026-04-27",
   "2026-04-28",
@@ -97,7 +101,9 @@ describe("useMatchedSessions", () => {
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-29"));
-    await db.table("workouts").put(seedWorkout("w-1", "2026-04-29", 3540));
+    await db
+      .table("workouts")
+      .put(seedWorkout("w-1", "2026-04-29", FIFTY_NINE_MIN_SECONDS));
     await db.table("sessionMatches").put(seedMatch());
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
     await waitFor(() => {
@@ -111,7 +117,7 @@ describe("useMatchedSessions", () => {
     expect(ms.match.id).toBe("M1");
     expect(ms.activity.title).toBe("FTP test");
     expect(ms.workout.id).toBe("w-1");
-    expect(ms.complianceScore).toBeCloseTo(0.983, 2);
+    expect(ms.complianceScore).toBeCloseTo(EXPECTED_COMPLIANCE, 2);
   });
 
   it("should filter out matches outside the week range", async () => {
@@ -119,7 +125,9 @@ describe("useMatchedSessions", () => {
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-20"));
-    await db.table("workouts").put(seedWorkout("w-1", "2026-04-20", 3600));
+    await db
+      .table("workouts")
+      .put(seedWorkout("w-1", "2026-04-20", ONE_HOUR_SECONDS));
     await db.table("sessionMatches").put(seedMatch({ date: "2026-04-20" }));
 
     // Act

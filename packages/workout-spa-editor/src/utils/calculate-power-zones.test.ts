@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { calculatePowerZones } from "./calculate-power-zones";
 
+const COGGAN_ZONE_COUNT = 7;
+
 describe("calculatePowerZones", () => {
   it("should return 7 Coggan power zones", () => {
     // Arrange
@@ -12,7 +14,7 @@ describe("calculatePowerZones", () => {
 
     // Assert
 
-    expect(zones).toHaveLength(7);
+    expect(zones).toHaveLength(COGGAN_ZONE_COUNT);
     expect(zones[0]).toEqual({
       zone: 1,
       name: "Active Recovery",

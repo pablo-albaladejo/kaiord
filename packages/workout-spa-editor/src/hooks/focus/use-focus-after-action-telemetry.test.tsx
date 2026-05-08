@@ -25,6 +25,11 @@ import { useWorkoutStore } from "../../store/workout-store";
 import { useFocusAfterAction } from "./use-focus-after-action";
 import { __resetCanaryForTests } from "./use-focus-telemetry-emitter";
 
+const TELEMETRY_TICK_50_MS = 50;
+const TELEMETRY_TICK_1100_MS = 1_100;
+const TELEMETRY_TICK_250_MS = 250;
+const TELEMETRY_TICK_300_MS = 300;
+
 const resetStore = () => {
   useWorkoutStore.setState({
     currentWorkout: null,
@@ -229,7 +234,7 @@ describe("useFocusAfterAction — telemetry", () => {
             .getState()
             .setPendingFocusTarget(focusItem(asItemId(id)));
         });
-        vi.advanceTimersByTime(50);
+        vi.advanceTimersByTime(TELEMETRY_TICK_50_MS);
       }
       act(() => {
         vi.runAllTimers();
@@ -258,7 +263,7 @@ describe("useFocusAfterAction — telemetry", () => {
           .getState()
           .setPendingFocusTarget(focusItem(asItemId("x")));
       });
-      vi.advanceTimersByTime(1100);
+      vi.advanceTimersByTime(TELEMETRY_TICK_1100_MS);
       act(() => {
         useWorkoutStore
           .getState()
@@ -302,7 +307,7 @@ describe("useFocusAfterAction — telemetry", () => {
         useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
       });
       act(() => {
-        vi.advanceTimersByTime(250);
+        vi.advanceTimersByTime(TELEMETRY_TICK_250_MS);
       });
       await act(async () => {
         dialog.remove();
@@ -318,7 +323,7 @@ describe("useFocusAfterAction — telemetry", () => {
         type: string;
         deferredForMs: number;
       };
-      expect(deferredForMs).toBe(300);
+      expect(deferredForMs).toBe(TELEMETRY_TICK_300_MS);
       expect(deferredForMs % 100).toBe(0);
 
       // Act

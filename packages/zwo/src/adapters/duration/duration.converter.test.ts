@@ -1,6 +1,7 @@
 import { durationTypeSchema } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import { DISTANCE_METERS, DURATION_SECONDS } from "../../test-utils";
 import {
   convertKrdDistanceDurationToZwift,
   convertKrdDurationToZwift,
@@ -13,7 +14,7 @@ import {
 describe("convertZwiftTimeDuration", () => {
   it("should convert positive seconds to time duration", () => {
     // Arrange
-    const seconds = 300;
+    const seconds = DURATION_SECONDS.FIVE_MIN;
 
     // Act
     const result = convertZwiftTimeDuration(seconds);
@@ -21,13 +22,13 @@ describe("convertZwiftTimeDuration", () => {
     // Assert
     expect(result).toStrictEqual({
       type: durationTypeSchema.enum.time,
-      seconds: 300,
+      seconds: DURATION_SECONDS.FIVE_MIN,
     });
   });
 
   it("should convert decimal seconds to time duration", () => {
     // Arrange
-    const seconds = 120.5;
+    const seconds = DURATION_SECONDS.TWO_MIN_DECIMAL;
 
     // Act
     const result = convertZwiftTimeDuration(seconds);
@@ -35,7 +36,7 @@ describe("convertZwiftTimeDuration", () => {
     // Assert
     expect(result).toStrictEqual({
       type: durationTypeSchema.enum.time,
-      seconds: 120.5,
+      seconds: DURATION_SECONDS.TWO_MIN_DECIMAL,
     });
   });
 
@@ -54,7 +55,7 @@ describe("convertZwiftTimeDuration", () => {
 
   it("should return open duration when seconds is negative", () => {
     // Arrange
-    const seconds = -10;
+    const seconds = DURATION_SECONDS.NEG_TEN;
 
     // Act
     const result = convertZwiftTimeDuration(seconds);
@@ -69,7 +70,7 @@ describe("convertZwiftTimeDuration", () => {
 describe("convertZwiftDistanceDuration", () => {
   it("should convert positive meters to distance duration", () => {
     // Arrange
-    const meters = 1000;
+    const meters = DISTANCE_METERS.ONE_KM;
 
     // Act
     const result = convertZwiftDistanceDuration(meters);
@@ -77,13 +78,13 @@ describe("convertZwiftDistanceDuration", () => {
     // Assert
     expect(result).toStrictEqual({
       type: durationTypeSchema.enum.distance,
-      meters: 1000,
+      meters: DISTANCE_METERS.ONE_KM,
     });
   });
 
   it("should convert decimal meters to distance duration", () => {
     // Arrange
-    const meters = 500.5;
+    const meters = DISTANCE_METERS.HALF_KM_DECIMAL;
 
     // Act
     const result = convertZwiftDistanceDuration(meters);
@@ -91,7 +92,7 @@ describe("convertZwiftDistanceDuration", () => {
     // Assert
     expect(result).toStrictEqual({
       type: durationTypeSchema.enum.distance,
-      meters: 500.5,
+      meters: DISTANCE_METERS.HALF_KM_DECIMAL,
     });
   });
 
@@ -110,7 +111,7 @@ describe("convertZwiftDistanceDuration", () => {
 
   it("should return open duration when meters is negative", () => {
     // Arrange
-    const meters = -100;
+    const meters = DISTANCE_METERS.NEG_HUNDRED;
 
     // Act
     const result = convertZwiftDistanceDuration(meters);
@@ -125,7 +126,7 @@ describe("convertZwiftDistanceDuration", () => {
 describe("convertZwiftDuration", () => {
   it("should convert time-based duration when not distance-based", () => {
     // Arrange
-    const durationValue = 600;
+    const durationValue = DURATION_SECONDS.TEN_MIN;
     const isDistanceBased = false;
 
     // Act
@@ -134,13 +135,13 @@ describe("convertZwiftDuration", () => {
     // Assert
     expect(result).toStrictEqual({
       type: durationTypeSchema.enum.time,
-      seconds: 600,
+      seconds: DURATION_SECONDS.TEN_MIN,
     });
   });
 
   it("should convert distance-based duration when distance-based", () => {
     // Arrange
-    const durationValue = 2000;
+    const durationValue = DISTANCE_METERS.TWO_KM;
     const isDistanceBased = true;
 
     // Act
@@ -149,7 +150,7 @@ describe("convertZwiftDuration", () => {
     // Assert
     expect(result).toStrictEqual({
       type: durationTypeSchema.enum.distance,
-      meters: 2000,
+      meters: DISTANCE_METERS.TWO_KM,
     });
   });
 
@@ -183,7 +184,7 @@ describe("convertZwiftDuration", () => {
 
   it("should return open duration when value is negative", () => {
     // Arrange
-    const durationValue = -50;
+    const durationValue = DURATION_SECONDS.NEG_FIFTY;
     const isDistanceBased = true;
 
     // Act
@@ -201,35 +202,35 @@ describe("convertKrdTimeDurationToZwift", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.time,
-      seconds: 300,
+      seconds: DURATION_SECONDS.FIVE_MIN,
     };
 
     // Act
     const result = convertKrdTimeDurationToZwift(duration);
 
     // Assert
-    expect(result).toBe(300);
+    expect(result).toBe(DURATION_SECONDS.FIVE_MIN);
   });
 
   it("should convert decimal seconds", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.time,
-      seconds: 120.5,
+      seconds: DURATION_SECONDS.TWO_MIN_DECIMAL,
     };
 
     // Act
     const result = convertKrdTimeDurationToZwift(duration);
 
     // Assert
-    expect(result).toBe(120.5);
+    expect(result).toBe(DURATION_SECONDS.TWO_MIN_DECIMAL);
   });
 
   it("should return 0 for distance duration", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.distance,
-      meters: 1000,
+      meters: DISTANCE_METERS.ONE_KM,
     };
 
     // Act
@@ -258,35 +259,35 @@ describe("convertKrdDistanceDurationToZwift", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.distance,
-      meters: 1000,
+      meters: DISTANCE_METERS.ONE_KM,
     };
 
     // Act
     const result = convertKrdDistanceDurationToZwift(duration);
 
     // Assert
-    expect(result).toBe(1000);
+    expect(result).toBe(DISTANCE_METERS.ONE_KM);
   });
 
   it("should convert decimal meters", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.distance,
-      meters: 500.5,
+      meters: DISTANCE_METERS.HALF_KM_DECIMAL,
     };
 
     // Act
     const result = convertKrdDistanceDurationToZwift(duration);
 
     // Assert
-    expect(result).toBe(500.5);
+    expect(result).toBe(DISTANCE_METERS.HALF_KM_DECIMAL);
   });
 
   it("should return 0 for time duration", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.time,
-      seconds: 300,
+      seconds: DURATION_SECONDS.FIVE_MIN,
     };
 
     // Act
@@ -315,7 +316,7 @@ describe("convertKrdDurationToZwift", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.time,
-      seconds: 600,
+      seconds: DURATION_SECONDS.TEN_MIN,
     };
     const isDistanceBased = false;
 
@@ -323,14 +324,14 @@ describe("convertKrdDurationToZwift", () => {
     const result = convertKrdDurationToZwift(duration, isDistanceBased);
 
     // Assert
-    expect(result).toBe(600);
+    expect(result).toBe(DURATION_SECONDS.TEN_MIN);
   });
 
   it("should convert distance duration when distance-based", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.distance,
-      meters: 2000,
+      meters: DISTANCE_METERS.TWO_KM,
     };
     const isDistanceBased = true;
 
@@ -338,7 +339,7 @@ describe("convertKrdDurationToZwift", () => {
     const result = convertKrdDurationToZwift(duration, isDistanceBased);
 
     // Assert
-    expect(result).toBe(2000);
+    expect(result).toBe(DISTANCE_METERS.TWO_KM);
   });
 
   it("should return 0 for open duration", () => {
@@ -359,7 +360,7 @@ describe("convertKrdDurationToZwift", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.time,
-      seconds: 300,
+      seconds: DURATION_SECONDS.FIVE_MIN,
     };
     const isDistanceBased = true;
 
@@ -374,7 +375,7 @@ describe("convertKrdDurationToZwift", () => {
     // Arrange
     const duration = {
       type: durationTypeSchema.enum.distance,
-      meters: 1000,
+      meters: DISTANCE_METERS.ONE_KM,
     };
     const isDistanceBased = false;
 

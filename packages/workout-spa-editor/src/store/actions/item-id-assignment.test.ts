@@ -108,8 +108,9 @@ describe("store mutations assign fresh ItemIds", () => {
 
   it("should assign an ItemId to the new block and its default step via createEmptyRepetitionBlock", () => {
     // Arrange
+    const REPETITIONS = 3;
     useWorkoutStore.getState().loadWorkout(buildKrd([baseStep]));
-    useWorkoutStore.getState().createEmptyRepetitionBlock(3);
+    useWorkoutStore.getState().createEmptyRepetitionBlock(REPETITIONS);
     const steps = innerSteps();
 
     // Act

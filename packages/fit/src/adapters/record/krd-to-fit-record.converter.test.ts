@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  COORD_BARCELONA,
+  COORD_PRECISION_5,
+  COORD_ROUNDTRIP_SYDNEY,
+  COORD_ROUNDTRIP_TOKYO,
+  RECORD_BATCH_SAMPLE_SIZE,
+  SAMPLE_CADENCE,
+  SAMPLE_DISTANCE_M,
+  SAMPLE_ELEVATION,
+  SAMPLE_HR,
+  SAMPLE_POWER,
+  SAMPLE_RUN_DYNAMICS,
+  SAMPLE_SPEED,
+  SAMPLE_TEMPERATURE_C,
+  SAMPLE_TIMESTAMP_2024_01_01_PLUS_1S,
+  SAMPLE_TIMESTAMP_2024_01_01_PLUS_2S,
+  SAMPLE_TIMESTAMP_2024_01_01_SEC,
+  TIME_TOLERANCE_MS,
+} from "../../test-utils/constants";
 import { semicirclesToDegrees } from "../shared/coordinate.converter";
 import { convertFitToKrdRecord } from "./fit-to-krd-record.converter";
 import {
@@ -18,13 +37,13 @@ describe("convertKrdToFitRecord", () => {
     const result = convertKrdToFitRecord(krdRecord);
 
     // Assert
-    expect(result.timestamp).toBe(1704067200);
+    expect(result.timestamp).toBe(SAMPLE_TIMESTAMP_2024_01_01_SEC);
   });
 
   it("should convert KRD record with GPS coordinates", () => {
     // Arrange
-    const barcelonaLat = 41.3851;
-    const barcelonaLon = 2.1734;
+    const barcelonaLat = COORD_BARCELONA.LAT;
+    const barcelonaLon = COORD_BARCELONA.LON;
     const krdRecord = {
       timestamp: "2024-01-01T00:00:00.000Z",
       position: {
@@ -41,11 +60,11 @@ describe("convertKrdToFitRecord", () => {
     expect(result.positionLong).toBeDefined();
     expect(semicirclesToDegrees(result.positionLat!)).toBeCloseTo(
       barcelonaLat,
-      5
+      COORD_PRECISION_5
     );
     expect(semicirclesToDegrees(result.positionLong!)).toBeCloseTo(
       barcelonaLon,
-      5
+      COORD_PRECISION_5
     );
   });
 
@@ -66,13 +85,13 @@ describe("convertKrdToFitRecord", () => {
     const result = convertKrdToFitRecord(krdRecord);
 
     // Assert
-    expect(result.heartRate).toBe(145);
-    expect(result.cadence).toBe(90);
-    expect(result.power).toBe(250);
-    expect(result.distance).toBe(5000);
-    expect(result.altitude).toBe(105.5);
-    expect(result.speed).toBe(3.5);
-    expect(result.temperature).toBe(22);
+    expect(result.heartRate).toBe(SAMPLE_HR.AVG);
+    expect(result.cadence).toBe(SAMPLE_CADENCE.AVG);
+    expect(result.power).toBe(SAMPLE_POWER.RECORD);
+    expect(result.distance).toBe(SAMPLE_DISTANCE_M);
+    expect(result.altitude).toBe(SAMPLE_ELEVATION.ALT_ENHANCED_M);
+    expect(result.speed).toBe(SAMPLE_SPEED.RECORD);
+    expect(result.temperature).toBe(SAMPLE_TEMPERATURE_C);
   });
 
   it("should convert running dynamics", () => {
@@ -88,9 +107,9 @@ describe("convertKrdToFitRecord", () => {
     const result = convertKrdToFitRecord(krdRecord);
 
     // Assert
-    expect(result.verticalOscillation).toBe(8.5);
-    expect(result.stanceTime).toBe(250);
-    expect(result.stepLength).toBe(1.2);
+    expect(result.verticalOscillation).toBe(SAMPLE_RUN_DYNAMICS.VERT_OSC);
+    expect(result.stanceTime).toBe(SAMPLE_RUN_DYNAMICS.STANCE_TIME);
+    expect(result.stepLength).toBe(SAMPLE_RUN_DYNAMICS.STEP_LENGTH);
   });
 
   it("should throw error for invalid KRD record", () => {
@@ -120,10 +139,10 @@ describe("convertKrdToFitRecords", () => {
     const results = convertKrdToFitRecords(krdRecords);
 
     // Assert
-    expect(results).toHaveLength(3);
-    expect(results[0].timestamp).toBe(1704067200);
-    expect(results[1].timestamp).toBe(1704067201);
-    expect(results[2].timestamp).toBe(1704067202);
+    expect(results).toHaveLength(RECORD_BATCH_SAMPLE_SIZE);
+    expect(results[0].timestamp).toBe(SAMPLE_TIMESTAMP_2024_01_01_SEC);
+    expect(results[1].timestamp).toBe(SAMPLE_TIMESTAMP_2024_01_01_PLUS_1S);
+    expect(results[2].timestamp).toBe(SAMPLE_TIMESTAMP_2024_01_01_PLUS_2S);
   });
 });
 
@@ -133,9 +152,17 @@ describe("round-trip conversion", () => {
 
     // Act
     const cities = [
-      { name: "Barcelona", lat: 41.3851, lon: 2.1734 },
-      { name: "Tokyo", lat: 35.6895, lon: 139.6917 },
-      { name: "Sydney", lat: -33.8688, lon: 151.2093 },
+      { name: "Barcelona", lat: COORD_BARCELONA.LAT, lon: COORD_BARCELONA.LON },
+      {
+        name: "Tokyo",
+        lat: COORD_ROUNDTRIP_TOKYO.LAT,
+        lon: COORD_ROUNDTRIP_TOKYO.LON,
+      },
+      {
+        name: "Sydney",
+        lat: COORD_ROUNDTRIP_SYDNEY.LAT,
+        lon: COORD_ROUNDTRIP_SYDNEY.LON,
+      },
     ];
 
     // Assert
@@ -148,8 +175,8 @@ describe("round-trip conversion", () => {
       const fitResult = convertKrdToFitRecord(originalKrd);
       const roundTrippedKrd = convertFitToKrdRecord(fitResult);
 
-      expect(roundTrippedKrd.position?.lat).toBeCloseTo(lat, 5);
-      expect(roundTrippedKrd.position?.lon).toBeCloseTo(lon, 5);
+      expect(roundTrippedKrd.position?.lat).toBeCloseTo(lat, COORD_PRECISION_5);
+      expect(roundTrippedKrd.position?.lon).toBeCloseTo(lon, COORD_PRECISION_5);
     });
   });
 
@@ -173,7 +200,9 @@ describe("round-trip conversion", () => {
     const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
 
     // Assert
-    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
+      TIME_TOLERANCE_MS
+    );
     expect(roundTrippedKrd.heartRate).toBe(originalKrd.heartRate);
     expect(roundTrippedKrd.power).toBe(originalKrd.power);
     expect(roundTrippedKrd.cadence).toBeCloseTo(originalKrd.cadence, 1);

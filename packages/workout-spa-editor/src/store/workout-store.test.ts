@@ -9,6 +9,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { KRD } from "../types/krd";
 import { useWorkoutStore } from "./workout-store";
 
+const HISTORY_PUSH_COUNT_OVER_LIMIT = 60;
+const HISTORY_TRIM_LIMIT = 50;
+const HISTORY_TRIM_LAST_INDEX = 49;
+const EXPIRED_DELETE_AGE_MS = 6000;
+const FRESH_DELETE_AGE_MS = 2000;
+
 describe("useWorkoutStore", () => {
   // Reset store before each test
   beforeEach(() => {
@@ -629,7 +635,7 @@ describe("useWorkoutStore", () => {
         },
       };
       useWorkoutStore.getState().loadWorkout(baseKrd);
-      for (let i = 1; i <= 60; i++) {
+      for (let i = 1; i <= HISTORY_PUSH_COUNT_OVER_LIMIT; i++) {
         const updatedKrd: KRD = {
           ...baseKrd,
           extensions: {
@@ -647,8 +653,8 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.undoHistory).toHaveLength(50);
-      expect(state.historyIndex).toBe(49);
+      expect(state.undoHistory).toHaveLength(HISTORY_TRIM_LIMIT);
+      expect(state.historyIndex).toBe(HISTORY_TRIM_LAST_INDEX);
       expect(
         (
           state.undoHistory[0].workout.extensions?.structured_workout as {
@@ -1390,7 +1396,7 @@ describe("useWorkoutStore", () => {
               },
             },
             index: 0,
-            timestamp: now - 6000, // 6 seconds ago (expired)
+            timestamp: now - EXPIRED_DELETE_AGE_MS, // 6 seconds ago (expired)
           },
           {
             step: {
@@ -1404,7 +1410,7 @@ describe("useWorkoutStore", () => {
               },
             },
             index: 1,
-            timestamp: now - 2000, // 2 seconds ago (not expired)
+            timestamp: now - FRESH_DELETE_AGE_MS, // 2 seconds ago (not expired)
           },
         ],
       });

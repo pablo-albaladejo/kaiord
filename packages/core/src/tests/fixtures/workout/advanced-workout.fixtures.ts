@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
 
 import type { Workout, WorkoutStep } from "../../../domain/schemas/workout";
+import { WORKOUT_STEP_NOTES_MAX_LENGTH } from "../../../test-utils/tolerance-constants";
 
 export const buildAdvancedWorkoutStep = new Factory<WorkoutStep>()
   .attr("stepIndex", () => faker.number.int({ max: 50, min: 0 }))
@@ -105,7 +106,11 @@ export const buildAdvancedWorkoutStep = new Factory<WorkoutStep>()
       "interval",
     ] as const)
   )
-  .attr("notes", () => faker.lorem.sentence({ max: 20, min: 3 }).slice(0, 256));
+  .attr("notes", () =>
+    faker.lorem
+      .sentence({ max: 20, min: 3 })
+      .slice(0, WORKOUT_STEP_NOTES_MAX_LENGTH)
+  );
 
 export const buildAdvancedWorkout = new Factory<Workout>()
   .attr("name", () => faker.lorem.words({ max: 5, min: 1 }))

@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ConversionError, FileParsingError, ValidationError } from "./errors";
+import { ERROR_COLUMN, ERROR_LINE } from "./errors.test-fixtures";
 
 describe("FileParsingError", () => {
   it("should create error with message only", () => {
@@ -34,15 +35,15 @@ describe("FileParsingError", () => {
 
     // Act
 
-    const error = new FileParsingError("Test error", 5, 12);
+    const error = new FileParsingError("Test error", ERROR_LINE, ERROR_COLUMN);
 
     // Assert
 
     // Assert
 
     expect(error.message).toBe("Test error");
-    expect(error.line).toBe(5);
-    expect(error.column).toBe(12);
+    expect(error.line).toBe(ERROR_LINE);
+    expect(error.column).toBe(ERROR_COLUMN);
   });
 
   it("should create error with cause", () => {
@@ -55,7 +56,12 @@ describe("FileParsingError", () => {
 
     // Act
 
-    const error = new FileParsingError("Test error", 5, 12, cause);
+    const error = new FileParsingError(
+      "Test error",
+      ERROR_LINE,
+      ERROR_COLUMN,
+      cause
+    );
 
     // Assert
 

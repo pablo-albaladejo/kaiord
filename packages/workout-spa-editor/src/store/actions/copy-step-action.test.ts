@@ -145,7 +145,8 @@ describe("copyStepAction", () => {
       };
 
       // Act
-      const result = await copyStepAction(krd, 5);
+      const OUT_OF_RANGE_INDEX = 5;
+      const result = await copyStepAction(krd, OUT_OF_RANGE_INDEX);
 
       // Assert
       expect(result.success).toBe(false);

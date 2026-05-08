@@ -14,6 +14,9 @@
 import { expect, test } from "./fixtures/base";
 import { openHeaderAction } from "./helpers/mobile-menu";
 
+const PROFILE_SWITCH_TEST_COUNT = 5;
+const PROFILE_LARGE_LIST_COUNT = 20;
+
 test.describe("Profile Management", () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage BEFORE any page JS runs using addInitScript
@@ -355,7 +358,7 @@ test.describe("Profile Performance", () => {
 
     await openHeaderAction(page, /open profile manager/i);
 
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= PROFILE_SWITCH_TEST_COUNT; i++) {
       await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
       await page.getByRole("button", { name: /create profile/i }).click();
       // Wait for the form to clear — the canonical "create succeeded"
@@ -390,7 +393,7 @@ test.describe("Profile Performance", () => {
     const dialog = page.getByRole("dialog");
 
     // Create 20 profiles
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= PROFILE_LARGE_LIST_COUNT; i++) {
       await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
       await page.getByRole("button", { name: /create profile/i }).click();
       // Wait for the form to clear before the next iteration so a late

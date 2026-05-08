@@ -13,6 +13,23 @@ import { describe, expect, it, vi } from "vitest";
 import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { RepetitionBlockCard } from "./RepetitionBlockCard";
 
+const DEFAULT_REPEAT_COUNT = 3;
+const REPEAT_COUNT_TWO = 2;
+const FIXTURE_DURATION_SECONDS = 300;
+const FIXTURE_POWER_WATTS = 200;
+const FIXTURE_HR_BPM = 150;
+const FIXTURE_DISTANCE_METERS = 1000;
+// eslint-disable-next-line no-magic-numbers -- property-test step-count sample bounds, no domain meaning
+const STEP_COUNTS_SAMPLES = [1, 2, 5, 10] as const;
+// eslint-disable-next-line no-magic-numbers -- property-test repeat-count sample bounds, no domain meaning
+const REPEAT_COUNTS_SAMPLES = [1, 2, 5, 10, 20] as const;
+const FOCUS_CONFIG_SAMPLES = [
+  { repeatCount: 1, stepCount: 1 },
+  { repeatCount: 5, stepCount: 3 },
+  { repeatCount: 10, stepCount: 10 },
+] as const;
+const EXPECTED_CLICKS = 3;
+
 describe("RepetitionBlockCard - Property Tests", () => {
   /**
    * Property 8: UI delete triggers actual deletion
@@ -27,7 +44,9 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange - Generate a random repetition block
       // Arrange
 
+      // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
       const randomRepeatCount = Math.floor(Math.random() * 10) + 1;
+      // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
       const randomStepCount = Math.floor(Math.random() * 5) + 1;
 
       const steps: WorkoutStep[] = Array.from(
@@ -37,6 +56,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
           durationType: "time" as const,
           duration: {
             type: "time" as const,
+            // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
             seconds: Math.floor(Math.random() * 600) + 60,
           },
           targetType: "power" as const,
@@ -44,6 +64,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
             type: "power" as const,
             value: {
               unit: "watts" as const,
+              // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
               value: Math.floor(Math.random() * 300) + 100,
             },
           },
@@ -79,14 +100,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -116,7 +137,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
       // Assert
 
-      expect(onDelete).toHaveBeenCalledTimes(3);
+      expect(onDelete).toHaveBeenCalledTimes(EXPECTED_CLICKS);
     });
 
     it("should trigger delete for blocks with varying step counts", async () => {
@@ -127,7 +148,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Assert
 
       // Arrange - Test with different step counts
-      const stepCounts = [1, 2, 5, 10];
+      const stepCounts = STEP_COUNTS_SAMPLES;
 
       for (const stepCount of stepCounts) {
         const steps: WorkoutStep[] = Array.from(
@@ -137,7 +158,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -148,7 +169,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
         );
 
         const block: RepetitionBlock = {
-          repeatCount: 2,
+          repeatCount: REPEAT_COUNT_TWO,
           steps,
         };
 
@@ -178,7 +199,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Assert
 
       // Arrange - Test with different repeat counts
-      const repeatCounts = [1, 2, 5, 10, 20];
+      const repeatCounts = REPEAT_COUNTS_SAMPLES;
 
       for (const repeatCount of repeatCounts) {
         const block: RepetitionBlock = {
@@ -189,7 +210,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
               durationType: "time" as const,
               duration: {
                 type: "time" as const,
-                seconds: 300,
+                seconds: FIXTURE_DURATION_SECONDS,
               },
               targetType: "open" as const,
               target: {
@@ -223,14 +244,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -270,7 +291,9 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange - Generate a random repetition block
       // Arrange
 
+      // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
       const randomRepeatCount = Math.floor(Math.random() * 10) + 1;
+      // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
       const randomStepCount = Math.floor(Math.random() * 5) + 1;
 
       const steps: WorkoutStep[] = Array.from(
@@ -280,6 +303,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
           durationType: "time" as const,
           duration: {
             type: "time" as const,
+            // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
             seconds: Math.floor(Math.random() * 600) + 60,
           },
           targetType: "power" as const,
@@ -287,6 +311,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
             type: "power" as const,
             value: {
               unit: "watts" as const,
+              // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
               value: Math.floor(Math.random() * 300) + 100,
             },
           },
@@ -322,7 +347,9 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange - Generate a random repetition block
       // Arrange
 
+      // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
       const randomRepeatCount = Math.floor(Math.random() * 10) + 1;
+      // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
       const randomStepCount = Math.floor(Math.random() * 5) + 1;
 
       const steps: WorkoutStep[] = Array.from(
@@ -332,6 +359,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
           durationType: "time" as const,
           duration: {
             type: "time" as const,
+            // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
             seconds: Math.floor(Math.random() * 600) + 60,
           },
           targetType: "power" as const,
@@ -339,6 +367,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
             type: "power" as const,
             value: {
               unit: "watts" as const,
+              // eslint-disable-next-line no-magic-numbers -- pseudo-fast-check property-test input domain bound, not domain-modeled
               value: Math.floor(Math.random() * 300) + 100,
             },
           },
@@ -375,21 +404,21 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const createBlock = (): RepetitionBlock => ({
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "power" as const,
             target: {
               type: "power" as const,
               value: {
                 unit: "watts" as const,
-                value: 200,
+                value: FIXTURE_POWER_WATTS,
               },
             },
             intensity: "active" as const,
@@ -399,14 +428,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
             durationType: "distance" as const,
             duration: {
               type: "distance" as const,
-              meters: 1000,
+              meters: FIXTURE_DISTANCE_METERS,
             },
             targetType: "heart_rate" as const,
             target: {
               type: "heart_rate" as const,
               value: {
                 unit: "bpm" as const,
-                value: 150,
+                value: FIXTURE_HR_BPM,
               },
             },
             intensity: "active" as const,
@@ -472,14 +501,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -521,14 +550,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -579,14 +608,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -619,12 +648,15 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
       const blocks: RepetitionBlock[] = [
         {
-          repeatCount: 2,
+          repeatCount: REPEAT_COUNT_TWO,
           steps: [
             {
               stepIndex: 0,
               durationType: "time" as const,
-              duration: { type: "time" as const, seconds: 300 },
+              duration: {
+                type: "time" as const,
+                seconds: FIXTURE_DURATION_SECONDS,
+              },
               targetType: "open" as const,
               target: { type: "open" as const },
               intensity: "active" as const,
@@ -637,11 +669,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
             {
               stepIndex: 0,
               durationType: "distance" as const,
-              duration: { type: "distance" as const, meters: 1000 },
+              duration: {
+                type: "distance" as const,
+                meters: FIXTURE_DISTANCE_METERS,
+              },
               targetType: "power" as const,
               target: {
                 type: "power" as const,
-                value: { unit: "watts" as const, value: 200 },
+                value: { unit: "watts" as const, value: FIXTURE_POWER_WATTS },
               },
               intensity: "active" as const,
             },
@@ -686,14 +721,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -733,14 +768,14 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Arrange
 
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: DEFAULT_REPEAT_COUNT,
         steps: [
           {
             stepIndex: 0,
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {
@@ -783,11 +818,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Assert
 
       // Arrange - Test with different block configurations
-      const configurations = [
-        { repeatCount: 1, stepCount: 1 },
-        { repeatCount: 5, stepCount: 3 },
-        { repeatCount: 10, stepCount: 10 },
-      ];
+      const configurations = FOCUS_CONFIG_SAMPLES;
 
       for (const config of configurations) {
         const steps: WorkoutStep[] = Array.from(
@@ -797,7 +828,7 @@ describe("RepetitionBlockCard - Property Tests", () => {
             durationType: "time" as const,
             duration: {
               type: "time" as const,
-              seconds: 300,
+              seconds: FIXTURE_DURATION_SECONDS,
             },
             targetType: "open" as const,
             target: {

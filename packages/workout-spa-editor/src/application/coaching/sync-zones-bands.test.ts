@@ -10,6 +10,33 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  FTP_DIVISOR_268,
+  HR_GENERIC_BANDS,
+  HR_RUNNING_BANDS,
+  HR_ZONES_LENGTH_5,
+  LTHR_CYCLING_174,
+  LTHR_RUNNING_168,
+  MANUAL_HR_BANDS_PRESYNC,
+  MAP_GET_Z1_MINBPM_107,
+  MAP_GET_Z3_MINBPM_148,
+  MAP_GET_Z4_MAXBPM_174,
+  MAP_GET_Z5_MAXBPM_187,
+  PACE_Z4_MAX_SEC_284,
+  PACE_Z4_MIN_SEC_250,
+  PHYSIOLOGICAL_TRIATHLETE,
+  POWER_BANDS,
+  POWER_ZONES_LENGTH_5,
+  RUN_PACE_BANDS,
+  RUN_PACE_Z4_UPPER,
+  Z1_MAX_PERCENT_56,
+  Z1_MIN_PERCENT_41,
+  Z2_MAXBPM_REJECTED_145,
+  Z4_MAX_PERCENT_100,
+  Z4_MAXBPM_ACCEPTED_174,
+  Z4_MIN_PERCENT_90,
+  Z5_LOWER_269,
+} from "../../test-utils/application-fixtures";
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
 import type {
   ConflictDecision,
@@ -58,54 +85,23 @@ const makeTransport = (
   ...(readZones ? { readZones } : {}),
 });
 
-const HR_GENERIC_BANDS = {
-  z1: { lower: 107, upper: 133 },
-  z2: { lower: 134, upper: 147 },
-  z3: { lower: 148, upper: 160 },
-  z4: { lower: 161, upper: 174 },
-  z5: { lower: 175, upper: 187 },
-};
-
-const HR_RUNNING_BANDS = {
-  z1: { lower: 100, upper: 130 },
-  z2: { lower: 131, upper: 145 },
-  z3: { lower: 146, upper: 157 },
-  z4: { lower: 158, upper: 168 },
-  z5: { lower: 169, upper: 180 },
-};
-
-const POWER_BANDS = {
-  z1: { lower: 111, upper: 149 },
-  z2: { lower: 150, upper: 203 },
-  z3: { lower: 204, upper: 239 },
-  z4: { lower: 240, upper: 268 },
-  z5: { lower: 269, upper: 386 },
-};
-
-const RUN_PACE_BANDS = {
-  z4: {
-    lower: { min: 4, sec: 44 },
-    upper: { min: 4, sec: 10 },
-  },
-};
-
 const PAYLOAD_TRIATHLETE: ZonesPayload = {
-  physiological: { weight: 83, bpmMax: 187, bpmRest: 51 },
+  physiological: PHYSIOLOGICAL_TRIATHLETE,
   paces: {
     cycling: {
       ...POWER_BANDS,
-      z4Upper: 268,
-      z5Lower: 269,
+      z4Upper: FTP_DIVISOR_268,
+      z5Lower: Z5_LOWER_269,
     },
     running: {
       ...RUN_PACE_BANDS,
-      z4Upper: { min: 4, sec: 10 },
+      z4Upper: RUN_PACE_Z4_UPPER,
     },
   },
   hrZones: {
     generic: HR_GENERIC_BANDS,
-    cycling: { ...HR_GENERIC_BANDS, z4Upper: 174 },
-    running: { ...HR_RUNNING_BANDS, z4Upper: 168 },
+    cycling: { ...HR_GENERIC_BANDS, z4Upper: LTHR_CYCLING_174 },
+    running: { ...HR_RUNNING_BANDS, z4Upper: LTHR_RUNNING_168 },
   },
 };
 
@@ -127,20 +123,20 @@ describe("syncZones full-bands — HR fallback chain", () => {
       persisted?.sportZones.cycling?.heartRateZones.zones[3]
     ).toMatchObject({
       minBpm: 161,
-      maxBpm: 174,
+      maxBpm: LTHR_CYCLING_174,
     });
     expect(
       persisted?.sportZones.running?.heartRateZones.zones[3]
     ).toMatchObject({
       minBpm: 158,
-      maxBpm: 168,
+      maxBpm: LTHR_RUNNING_168,
     });
     // Swimming has no Specific block → falls back to Generic.
     expect(
       persisted?.sportZones.swimming?.heartRateZones.zones[3]
     ).toMatchObject({
       minBpm: 161,
-      maxBpm: 174,
+      maxBpm: LTHR_CYCLING_174,
     });
   });
 
@@ -159,9 +155,15 @@ describe("syncZones full-bands — HR fallback chain", () => {
     // sport's own scalar. Swimming has no Specific block, so the
     // fallback chain reads Generic z4Upper (174).
     const persisted = await repo.getById(PROFILE_ID);
-    expect(persisted?.sportZones.cycling?.thresholds.lthr).toBe(174);
-    expect(persisted?.sportZones.running?.thresholds.lthr).toBe(168);
-    expect(persisted?.sportZones.swimming?.thresholds.lthr).toBe(174);
+    expect(persisted?.sportZones.cycling?.thresholds.lthr).toBe(
+      LTHR_CYCLING_174
+    );
+    expect(persisted?.sportZones.running?.thresholds.lthr).toBe(
+      LTHR_RUNNING_168
+    );
+    expect(persisted?.sportZones.swimming?.thresholds.lthr).toBe(
+      LTHR_CYCLING_174
+    );
   });
 
   it("should NOT touch a sport's HR bands when both Specific and Generic are absent (4.7j)", async () => {
@@ -170,7 +172,7 @@ describe("syncZones full-bands — HR fallback chain", () => {
     await repo.put(makeProfile());
     const payload: ZonesPayload = {
       physiological: { weight: 83 },
-      hrZones: { cycling: { z4Upper: 174, ...HR_GENERIC_BANDS } },
+      hrZones: { cycling: { z4Upper: LTHR_CYCLING_174, ...HR_GENERIC_BANDS } },
     };
     const transport = makeTransport(async () => payload);
 
@@ -180,7 +182,9 @@ describe("syncZones full-bands — HR fallback chain", () => {
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
     // Cycling has Specific → present.
-    expect(persisted?.sportZones.cycling?.heartRateZones.zones).toHaveLength(5);
+    expect(persisted?.sportZones.cycling?.heartRateZones.zones).toHaveLength(
+      HR_ZONES_LENGTH_5
+    );
     // Running and swimming have neither Specific nor Generic → untouched.
     expect(persisted?.sportZones.running).toBeUndefined();
     expect(persisted?.sportZones.swimming).toBeUndefined();
@@ -200,12 +204,12 @@ describe("syncZones full-bands — cycling power watts→%FTP", () => {
     // Assert — Z4: 240W..268W with FTP=268 → 90%..100% (exact integer)
     const persisted = await repo.getById(PROFILE_ID);
     const z4 = persisted?.sportZones.cycling?.powerZones?.zones[3];
-    expect(z4?.minPercent).toBe(90);
-    expect(z4?.maxPercent).toBe(100);
+    expect(z4?.minPercent).toBe(Z4_MIN_PERCENT_90);
+    expect(z4?.maxPercent).toBe(Z4_MAX_PERCENT_100);
     // Z1: 111W..149W with FTP=268 → 41%..56%.
     const z1 = persisted?.sportZones.cycling?.powerZones?.zones[0];
-    expect(z1?.minPercent).toBe(41);
-    expect(z1?.maxPercent).toBe(56);
+    expect(z1?.minPercent).toBe(Z1_MIN_PERCENT_41);
+    expect(z1?.maxPercent).toBe(Z1_MAX_PERCENT_56);
   });
 
   it("should skip cycling power band writes when payload.paces.cycling.z4Upper is absent (4.7h)", async () => {
@@ -241,8 +245,8 @@ describe("syncZones full-bands — running pace inversion", () => {
     // Assert — Z4 lower 4:44 (slower) → maxPace 284s; upper 4:10 (faster) → minPace 250s
     const persisted = await repo.getById(PROFILE_ID);
     const z4 = persisted?.sportZones.running?.paceZones?.zones[3];
-    expect(z4?.minPace).toBe(250);
-    expect(z4?.maxPace).toBe(284);
+    expect(z4?.minPace).toBe(PACE_Z4_MIN_SEC_250);
+    expect(z4?.maxPace).toBe(PACE_Z4_MAX_SEC_284);
     expect(z4?.unit).toBe("min_per_km");
     expect(z4!.minPace).toBeLessThanOrEqual(z4!.maxPace);
   });
@@ -302,7 +306,7 @@ describe("syncZones full-bands — power-zone count mismatch", () => {
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
     const zones = persisted?.sportZones.cycling?.powerZones?.zones;
-    expect(zones?.length).toBe(5);
+    expect(zones?.length).toBe(POWER_ZONES_LENGTH_5);
   });
 });
 
@@ -318,13 +322,7 @@ describe("commitConflictResolution full-bands — band-level merge", () => {
             thresholds: {},
             heartRateZones: {
               method: "manual",
-              zones: [
-                { zone: 1, name: "Recovery", minBpm: 107, maxBpm: 133 },
-                { zone: 2, name: "Aerobic", minBpm: 131, maxBpm: 145 },
-                { zone: 3, name: "Tempo", minBpm: 148, maxBpm: 160 },
-                { zone: 4, name: "Threshold", minBpm: 161, maxBpm: 170 },
-                { zone: 5, name: "VO2 Max", minBpm: 175, maxBpm: 187 },
-              ],
+              zones: [...MANUAL_HR_BANDS_PRESYNC],
             },
           },
         },
@@ -346,8 +344,8 @@ describe("commitConflictResolution full-bands — band-level merge", () => {
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
     const zones = persisted?.sportZones.cycling?.heartRateZones.zones;
-    expect(zones?.[3].maxBpm).toBe(174); // accepted
-    expect(zones?.[1].maxBpm).toBe(145); // rejected — pre-sync value
+    expect(zones?.[3].maxBpm).toBe(Z4_MAXBPM_ACCEPTED_174); // accepted
+    expect(zones?.[1].maxBpm).toBe(Z2_MAXBPM_REJECTED_145); // rejected — pre-sync value
   });
 });
 
@@ -377,17 +375,25 @@ describe("mapPayloadToIncoming — direct unit tests for the band paths", () => 
     const map = mapPayloadToIncoming(payload);
 
     // Assert
-    expect(map.get("cycling.heartRateZones.z1.minBpm")).toBe(107);
-    expect(map.get("cycling.heartRateZones.z5.maxBpm")).toBe(187);
-    expect(map.get("running.heartRateZones.z3.minBpm")).toBe(148);
-    expect(map.get("swimming.heartRateZones.z4.maxBpm")).toBe(174);
+    expect(map.get("cycling.heartRateZones.z1.minBpm")).toBe(
+      MAP_GET_Z1_MINBPM_107
+    );
+    expect(map.get("cycling.heartRateZones.z5.maxBpm")).toBe(
+      MAP_GET_Z5_MAXBPM_187
+    );
+    expect(map.get("running.heartRateZones.z3.minBpm")).toBe(
+      MAP_GET_Z3_MINBPM_148
+    );
+    expect(map.get("swimming.heartRateZones.z4.maxBpm")).toBe(
+      MAP_GET_Z4_MAXBPM_174
+    );
   });
 
   it("should compute power-band percentages exactly (no tolerance) using T2G's z4Upper as divisor", () => {
     // Arrange
     const payload: ZonesPayload = {
       paces: {
-        cycling: { ...POWER_BANDS, z4Upper: 268 },
+        cycling: { ...POWER_BANDS, z4Upper: FTP_DIVISOR_268 },
       },
     };
 
@@ -395,8 +401,10 @@ describe("mapPayloadToIncoming — direct unit tests for the band paths", () => 
     const map = mapPayloadToIncoming(payload);
 
     // Assert
-    expect(map.get("cycling.powerZones.z1.minPercent")).toBe(41);
-    expect(map.get("cycling.powerZones.z4.maxPercent")).toBe(100);
+    expect(map.get("cycling.powerZones.z1.minPercent")).toBe(Z1_MIN_PERCENT_41);
+    expect(map.get("cycling.powerZones.z4.maxPercent")).toBe(
+      Z4_MAX_PERCENT_100
+    );
   });
 });
 

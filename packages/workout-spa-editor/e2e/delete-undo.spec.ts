@@ -10,6 +10,11 @@ import { expandFileUpload } from "./helpers/expand-file-upload";
  * - Requirement 39.3.3: Permanently delete step after notification dismisses
  * - Requirement 39.3.4: Show separate notifications for multiple deletions
  */
+
+const TOTAL_STEPS_BEFORE_DELETE = 3;
+const POST_DELETE_PROCESSING_MS = 300;
+const POST_DOUBLE_DELETE_PROCESSING_MS = 1000;
+
 test.describe("Delete with Undo Flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new");
@@ -96,7 +101,7 @@ test.describe("Delete with Undo Flow", () => {
 
     // Verify initial state - 3 steps
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(3);
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE);
 
     // Delete the second step
     const secondStepCard = stepCards.nth(1);
@@ -105,7 +110,7 @@ test.describe("Delete with Undo Flow", () => {
 
     // Requirement 1.1: No confirmation modal - deletion is immediate
     // Wait a short time for deletion to process
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(POST_DELETE_PROCESSING_MS);
 
     // Verify undo notification appears
     const toast = page.getByText(/step deleted/i).first();
@@ -126,7 +131,7 @@ test.describe("Delete with Undo Flow", () => {
     // Requirement 1.3: Clicking undo should restore the step
 
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(3);
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE);
 
     // Get the content of the second step before deletion
     const secondStepCard = stepCards.nth(1);
@@ -137,7 +142,7 @@ test.describe("Delete with Undo Flow", () => {
     await deleteButton.click();
 
     // Wait for immediate deletion
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(POST_DELETE_PROCESSING_MS);
 
     // Verify step was deleted
     await expect(stepCards).toHaveCount(2);
@@ -148,7 +153,9 @@ test.describe("Delete with Undo Flow", () => {
     await undoButton.click();
 
     // Verify step was restored
-    await expect(stepCards).toHaveCount(3, { timeout: 2000 });
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE, {
+      timeout: 2000,
+    });
 
     // Verify the restored step is at the original position (index 1)
     const restoredStep = stepCards.nth(1);
@@ -164,7 +171,7 @@ test.describe("Delete with Undo Flow", () => {
     // Requirement 1.4: Toast auto-dismisses after 5 seconds
 
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(3);
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE);
 
     // Delete the second step
     const secondStepCard = stepCards.nth(1);
@@ -172,7 +179,7 @@ test.describe("Delete with Undo Flow", () => {
     await deleteButton.click();
 
     // Wait for immediate deletion
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(POST_DELETE_PROCESSING_MS);
 
     // Verify notification appears
     const toast = page.getByText(/step deleted/i).first();
@@ -192,7 +199,7 @@ test.describe("Delete with Undo Flow", () => {
     // Requirement 1.5: Show separate undo notifications for each deletion
 
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(3);
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE);
 
     // Delete the first step
     const firstStepCard = stepCards.nth(0);
@@ -200,7 +207,7 @@ test.describe("Delete with Undo Flow", () => {
     await firstDeleteButton.click();
 
     // Wait for immediate deletion
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(POST_DELETE_PROCESSING_MS);
 
     // Verify first notification appears (allow extra time for webkit toast animation)
     await expect(page.getByText(/step deleted/i).first()).toBeVisible({
@@ -214,7 +221,7 @@ test.describe("Delete with Undo Flow", () => {
     await secondDeleteButton.click();
 
     // Wait for both deletions to process
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(POST_DOUBLE_DELETE_PROCESSING_MS);
 
     // Verify only 1 step remains (both deletions completed)
     await expect(stepCards).toHaveCount(1);
@@ -230,7 +237,7 @@ test.describe("Delete with Undo Flow", () => {
     // Test that undo works correctly when step indices change after deletion
 
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(3);
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE);
 
     // Delete the first step (index 0)
     const firstStepCard = stepCards.nth(0);
@@ -238,7 +245,7 @@ test.describe("Delete with Undo Flow", () => {
     await deleteButton.click();
 
     // Wait for immediate deletion
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(POST_DELETE_PROCESSING_MS);
 
     // Verify step was deleted (2 steps remain)
     await expect(stepCards).toHaveCount(2);
@@ -252,7 +259,9 @@ test.describe("Delete with Undo Flow", () => {
     await undoButton.click();
 
     // Verify all 3 steps are restored
-    await expect(stepCards).toHaveCount(3, { timeout: 2000 });
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE, {
+      timeout: 2000,
+    });
 
     // Verify the first step (200W warmup) is back at index 0
     const restoredFirstStep = stepCards.nth(0);
@@ -266,7 +275,7 @@ test.describe("Delete with Undo Flow", () => {
     // Requirement 39.3.5: Keep undo option available when performing other actions
 
     const stepCards = page.locator('[data-testid="step-card"]');
-    await expect(stepCards).toHaveCount(3);
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE);
 
     // Delete a step
     const secondStepCard = stepCards.nth(1);
@@ -274,7 +283,7 @@ test.describe("Delete with Undo Flow", () => {
     await deleteButton.click();
 
     // Wait for immediate deletion
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(POST_DELETE_PROCESSING_MS);
 
     // Verify notification appears (allow extra time for webkit toast animation)
     const toast = page.getByText(/step deleted/i).first();
@@ -293,6 +302,8 @@ test.describe("Delete with Undo Flow", () => {
     await undoButton.click();
 
     // Verify step was restored
-    await expect(stepCards).toHaveCount(3, { timeout: 2000 });
+    await expect(stepCards).toHaveCount(TOTAL_STEPS_BEFORE_DELETE, {
+      timeout: 2000,
+    });
   });
 });

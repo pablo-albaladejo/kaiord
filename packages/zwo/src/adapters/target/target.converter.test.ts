@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CADENCE_RPM,
+  CADENCE_SPM,
+  INTENSITY_RATIO,
+  PACE_SECONDS_PER_KM,
+  PERCENT_FTP,
+  SPEED_MPS,
+} from "../../test-utils";
+import {
   convertKrdCadenceToZwift,
   convertKrdPaceToZwift,
   convertKrdPowerRangeToZwift,
@@ -15,7 +23,7 @@ describe("Zwift to KRD target converters", () => {
   describe("convertZwiftPowerTarget", () => {
     it("should convert Zwift FTP percentage to KRD percent_ftp", () => {
       // Arrange
-      const ftpPercentage = 0.85;
+      const ftpPercentage = INTENSITY_RATIO.EIGHTY_FIVE;
 
       // Act
       const result = convertZwiftPowerTarget(ftpPercentage);
@@ -25,14 +33,14 @@ describe("Zwift to KRD target converters", () => {
         type: "power",
         value: {
           unit: "percent_ftp",
-          value: 85,
+          value: PERCENT_FTP.EIGHTY_FIVE,
         },
       });
     });
 
     it("should handle low power target", () => {
       // Arrange
-      const ftpPercentage = 0.5;
+      const ftpPercentage = INTENSITY_RATIO.HALF;
 
       // Act
       const result = convertZwiftPowerTarget(ftpPercentage);
@@ -42,14 +50,14 @@ describe("Zwift to KRD target converters", () => {
         type: "power",
         value: {
           unit: "percent_ftp",
-          value: 50,
+          value: PERCENT_FTP.FIFTY,
         },
       });
     });
 
     it("should handle high power target", () => {
       // Arrange
-      const ftpPercentage = 1.5;
+      const ftpPercentage = INTENSITY_RATIO.ONE_AND_HALF;
 
       // Act
       const result = convertZwiftPowerTarget(ftpPercentage);
@@ -59,14 +67,14 @@ describe("Zwift to KRD target converters", () => {
         type: "power",
         value: {
           unit: "percent_ftp",
-          value: 150,
+          value: PERCENT_FTP.ONE_FIFTY,
         },
       });
     });
 
     it("should handle maximum power target", () => {
       // Arrange
-      const ftpPercentage = 3.0;
+      const ftpPercentage = INTENSITY_RATIO.TRIPLE;
 
       // Act
       const result = convertZwiftPowerTarget(ftpPercentage);
@@ -76,7 +84,7 @@ describe("Zwift to KRD target converters", () => {
         type: "power",
         value: {
           unit: "percent_ftp",
-          value: 300,
+          value: PERCENT_FTP.THREE_HUNDRED,
         },
       });
     });
@@ -85,8 +93,8 @@ describe("Zwift to KRD target converters", () => {
   describe("convertZwiftPowerRange", () => {
     it("should convert Zwift power range to KRD range target", () => {
       // Arrange
-      const powerLow = 0.6;
-      const powerHigh = 0.8;
+      const powerLow = INTENSITY_RATIO.SIXTY;
+      const powerHigh = INTENSITY_RATIO.EIGHTY;
 
       // Act
       const result = convertZwiftPowerRange(powerLow, powerHigh);
@@ -96,16 +104,16 @@ describe("Zwift to KRD target converters", () => {
         type: "power",
         value: {
           unit: "range",
-          min: 60,
-          max: 80,
+          min: PERCENT_FTP.SIXTY,
+          max: PERCENT_FTP.EIGHTY,
         },
       });
     });
 
     it("should handle warmup power range", () => {
       // Arrange
-      const powerLow = 0.5;
-      const powerHigh = 0.75;
+      const powerLow = INTENSITY_RATIO.HALF;
+      const powerHigh = INTENSITY_RATIO.SEVENTY_FIVE;
 
       // Act
       const result = convertZwiftPowerRange(powerLow, powerHigh);
@@ -115,16 +123,16 @@ describe("Zwift to KRD target converters", () => {
         type: "power",
         value: {
           unit: "range",
-          min: 50,
-          max: 75,
+          min: PERCENT_FTP.FIFTY,
+          max: PERCENT_FTP.SEVENTY_FIVE,
         },
       });
     });
 
     it("should handle cooldown power range", () => {
       // Arrange
-      const powerLow = 0.75;
-      const powerHigh = 0.5;
+      const powerLow = INTENSITY_RATIO.SEVENTY_FIVE;
+      const powerHigh = INTENSITY_RATIO.HALF;
 
       // Act
       const result = convertZwiftPowerRange(powerLow, powerHigh);
@@ -134,8 +142,8 @@ describe("Zwift to KRD target converters", () => {
         type: "power",
         value: {
           unit: "range",
-          min: 75,
-          max: 50,
+          min: PERCENT_FTP.SEVENTY_FIVE,
+          max: PERCENT_FTP.FIFTY,
         },
       });
     });
@@ -144,7 +152,7 @@ describe("Zwift to KRD target converters", () => {
   describe("convertZwiftPaceTarget", () => {
     it("should convert Zwift pace to KRD meters per second", () => {
       // Arrange
-      const secPerKm = 300;
+      const secPerKm = PACE_SECONDS_PER_KM.MODERATE;
 
       // Act
       const result = convertZwiftPaceTarget(secPerKm);
@@ -154,14 +162,14 @@ describe("Zwift to KRD target converters", () => {
         type: "pace",
         value: {
           unit: "mps",
-          value: 3.3333333333333335,
+          value: SPEED_MPS.PACE_3_333,
         },
       });
     });
 
     it("should handle fast pace", () => {
       // Arrange
-      const secPerKm = 240;
+      const secPerKm = PACE_SECONDS_PER_KM.FAST;
 
       // Act
       const result = convertZwiftPaceTarget(secPerKm);
@@ -171,14 +179,14 @@ describe("Zwift to KRD target converters", () => {
         type: "pace",
         value: {
           unit: "mps",
-          value: 4.166666666666667,
+          value: SPEED_MPS.PACE_4_167_FULL,
         },
       });
     });
 
     it("should handle slow pace", () => {
       // Arrange
-      const secPerKm = 360;
+      const secPerKm = PACE_SECONDS_PER_KM.SLOW;
 
       // Act
       const result = convertZwiftPaceTarget(secPerKm);
@@ -188,7 +196,7 @@ describe("Zwift to KRD target converters", () => {
         type: "pace",
         value: {
           unit: "mps",
-          value: 2.7777777777777777,
+          value: SPEED_MPS.PACE_2_778_FULL,
         },
       });
     });
@@ -197,7 +205,7 @@ describe("Zwift to KRD target converters", () => {
   describe("convertZwiftCadenceTarget", () => {
     it("should convert Zwift cadence for cycling", () => {
       // Arrange
-      const cadence = 90;
+      const cadence = CADENCE_RPM.HIGH;
       const isRunning = false;
 
       // Act
@@ -208,14 +216,14 @@ describe("Zwift to KRD target converters", () => {
         type: "cadence",
         value: {
           unit: "rpm",
-          value: 90,
+          value: CADENCE_RPM.HIGH,
         },
       });
     });
 
     it("should convert Zwift cadence for running with spm to rpm conversion", () => {
       // Arrange
-      const cadence = 180;
+      const cadence = CADENCE_SPM.STANDARD;
       const isRunning = true;
 
       // Act
@@ -226,14 +234,14 @@ describe("Zwift to KRD target converters", () => {
         type: "cadence",
         value: {
           unit: "rpm",
-          value: 90,
+          value: CADENCE_RPM.HIGH,
         },
       });
     });
 
     it("should handle low cycling cadence", () => {
       // Arrange
-      const cadence = 60;
+      const cadence = CADENCE_RPM.LOW;
 
       // Act
       const result = convertZwiftCadenceTarget(cadence);
@@ -243,14 +251,14 @@ describe("Zwift to KRD target converters", () => {
         type: "cadence",
         value: {
           unit: "rpm",
-          value: 60,
+          value: CADENCE_RPM.LOW,
         },
       });
     });
 
     it("should handle high cycling cadence", () => {
       // Arrange
-      const cadence = 120;
+      const cadence = CADENCE_RPM.RACE;
 
       // Act
       const result = convertZwiftCadenceTarget(cadence);
@@ -260,14 +268,14 @@ describe("Zwift to KRD target converters", () => {
         type: "cadence",
         value: {
           unit: "rpm",
-          value: 120,
+          value: CADENCE_RPM.RACE,
         },
       });
     });
 
     it("should handle running cadence with default isRunning false", () => {
       // Arrange
-      const cadence = 85;
+      const cadence = CADENCE_RPM.REST;
 
       // Act
       const result = convertZwiftCadenceTarget(cadence);
@@ -277,7 +285,7 @@ describe("Zwift to KRD target converters", () => {
         type: "cadence",
         value: {
           unit: "rpm",
-          value: 85,
+          value: CADENCE_RPM.REST,
         },
       });
     });
@@ -288,178 +296,187 @@ describe("KRD to Zwift target converters", () => {
   describe("convertKrdPowerToZwift", () => {
     it("should convert KRD percent_ftp to Zwift FTP percentage", () => {
       // Arrange
-      const percentFtp = 85;
+      const percentFtp = PERCENT_FTP.EIGHTY_FIVE;
 
       // Act
       const result = convertKrdPowerToZwift(percentFtp);
 
       // Assert
-      expect(result).toBe(0.85);
+      expect(result).toBe(INTENSITY_RATIO.EIGHTY_FIVE);
     });
 
     it("should handle low power", () => {
       // Arrange
-      const percentFtp = 50;
+      const percentFtp = PERCENT_FTP.FIFTY;
 
       // Act
       const result = convertKrdPowerToZwift(percentFtp);
 
       // Assert
-      expect(result).toBe(0.5);
+      expect(result).toBe(INTENSITY_RATIO.HALF);
     });
 
     it("should handle high power", () => {
       // Arrange
-      const percentFtp = 150;
+      const percentFtp = PERCENT_FTP.ONE_FIFTY;
 
       // Act
       const result = convertKrdPowerToZwift(percentFtp);
 
       // Assert
-      expect(result).toBe(1.5);
+      expect(result).toBe(INTENSITY_RATIO.ONE_AND_HALF);
     });
 
     it("should handle maximum power", () => {
       // Arrange
-      const percentFtp = 300;
+      const percentFtp = PERCENT_FTP.THREE_HUNDRED;
 
       // Act
       const result = convertKrdPowerToZwift(percentFtp);
 
       // Assert
-      expect(result).toBe(3.0);
+      expect(result).toBe(INTENSITY_RATIO.TRIPLE);
     });
   });
 
   describe("convertKrdPowerRangeToZwift", () => {
     it("should convert KRD power range to Zwift PowerLow/PowerHigh", () => {
       // Arrange
-      const min = 60;
-      const max = 80;
+      const min = PERCENT_FTP.SIXTY;
+      const max = PERCENT_FTP.EIGHTY;
 
       // Act
       const result = convertKrdPowerRangeToZwift(min, max);
 
       // Assert
-      expect(result).toStrictEqual([0.6, 0.8]);
+      expect(result).toStrictEqual([
+        INTENSITY_RATIO.SIXTY,
+        INTENSITY_RATIO.EIGHTY,
+      ]);
     });
 
     it("should handle warmup range", () => {
       // Arrange
-      const min = 50;
-      const max = 75;
+      const min = PERCENT_FTP.FIFTY;
+      const max = PERCENT_FTP.SEVENTY_FIVE;
 
       // Act
       const result = convertKrdPowerRangeToZwift(min, max);
 
       // Assert
-      expect(result).toStrictEqual([0.5, 0.75]);
+      expect(result).toStrictEqual([
+        INTENSITY_RATIO.HALF,
+        INTENSITY_RATIO.SEVENTY_FIVE,
+      ]);
     });
 
     it("should handle cooldown range", () => {
       // Arrange
-      const min = 75;
-      const max = 50;
+      const min = PERCENT_FTP.SEVENTY_FIVE;
+      const max = PERCENT_FTP.FIFTY;
 
       // Act
       const result = convertKrdPowerRangeToZwift(min, max);
 
       // Assert
-      expect(result).toStrictEqual([0.75, 0.5]);
+      expect(result).toStrictEqual([
+        INTENSITY_RATIO.SEVENTY_FIVE,
+        INTENSITY_RATIO.HALF,
+      ]);
     });
   });
 
   describe("convertKrdPaceToZwift", () => {
     it("should convert KRD meters per second to Zwift seconds per kilometer", () => {
       // Arrange
-      const metersPerSecond = 3.3333333333333335;
+      const metersPerSecond = SPEED_MPS.PACE_3_333;
 
       // Act
       const result = convertKrdPaceToZwift(metersPerSecond);
 
       // Assert
-      expect(result).toBeCloseTo(300, 1);
+      expect(result).toBeCloseTo(PACE_SECONDS_PER_KM.MODERATE, 1);
     });
 
     it("should handle fast pace", () => {
       // Arrange
-      const metersPerSecond = 4.166666666666667;
+      const metersPerSecond = SPEED_MPS.PACE_4_167_FULL;
 
       // Act
       const result = convertKrdPaceToZwift(metersPerSecond);
 
       // Assert
-      expect(result).toBeCloseTo(240, 1);
+      expect(result).toBeCloseTo(PACE_SECONDS_PER_KM.FAST, 1);
     });
 
     it("should handle slow pace", () => {
       // Arrange
-      const metersPerSecond = 2.7777777777777777;
+      const metersPerSecond = SPEED_MPS.PACE_2_778_FULL;
 
       // Act
       const result = convertKrdPaceToZwift(metersPerSecond);
 
       // Assert
-      expect(result).toBeCloseTo(360, 1);
+      expect(result).toBeCloseTo(PACE_SECONDS_PER_KM.SLOW, 1);
     });
   });
 
   describe("convertKrdCadenceToZwift", () => {
     it("should convert KRD cadence for cycling", () => {
       // Arrange
-      const rpm = 90;
+      const rpm = CADENCE_RPM.HIGH;
       const isRunning = false;
 
       // Act
       const result = convertKrdCadenceToZwift(rpm, isRunning);
 
       // Assert
-      expect(result).toBe(90);
+      expect(result).toBe(CADENCE_RPM.HIGH);
     });
 
     it("should convert KRD cadence for running with rpm to spm conversion", () => {
       // Arrange
-      const rpm = 90;
+      const rpm = CADENCE_RPM.HIGH;
       const isRunning = true;
 
       // Act
       const result = convertKrdCadenceToZwift(rpm, isRunning);
 
       // Assert
-      expect(result).toBe(180);
+      expect(result).toBe(CADENCE_SPM.STANDARD);
     });
 
     it("should handle low cycling cadence", () => {
       // Arrange
-      const rpm = 60;
+      const rpm = CADENCE_RPM.LOW;
 
       // Act
       const result = convertKrdCadenceToZwift(rpm);
 
       // Assert
-      expect(result).toBe(60);
+      expect(result).toBe(CADENCE_RPM.LOW);
     });
 
     it("should handle high cycling cadence", () => {
       // Arrange
-      const rpm = 120;
+      const rpm = CADENCE_RPM.RACE;
 
       // Act
       const result = convertKrdCadenceToZwift(rpm);
 
       // Assert
-      expect(result).toBe(120);
+      expect(result).toBe(CADENCE_RPM.RACE);
     });
 
     it("should handle running cadence with default isRunning false", () => {
       // Arrange
-      const rpm = 85;
+      const rpm = CADENCE_RPM.REST;
 
       // Act
       const result = convertKrdCadenceToZwift(rpm);
 
       // Assert
-      expect(result).toBe(85);
+      expect(result).toBe(CADENCE_RPM.REST);
     });
   });
 });

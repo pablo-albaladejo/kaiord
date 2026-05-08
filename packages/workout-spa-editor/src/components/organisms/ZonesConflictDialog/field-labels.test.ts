@@ -11,6 +11,7 @@
 import { describe, expect, it } from "vitest";
 
 import { FIELD_LABELS } from "./field-labels";
+import { FIELD_LABELS_TOTAL } from "./field-labels.test-fixtures";
 
 describe("FIELD_LABELS", () => {
   it("should contain the 8 threshold-scalar labels plus exactly 60 band-level entries (5.1a)", () => {
@@ -20,7 +21,7 @@ describe("FIELD_LABELS", () => {
     const total = Object.keys(FIELD_LABELS).length;
 
     // Assert
-    expect(total).toBe(68);
+    expect(total).toBe(FIELD_LABELS_TOTAL);
   });
 
   it("should never contain T2G-controlled substrings in any label value", () => {

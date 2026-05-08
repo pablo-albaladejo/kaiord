@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { calculateNormalizedHeight } from "./bar-height";
 import { flattenWorkoutSteps } from "./flatten-steps";
+import { PREVIEW_TEST } from "./test-fixtures";
 import { WorkoutPreview } from "./WorkoutPreview";
 
 const makeStep = (
@@ -15,7 +16,10 @@ const makeStep = (
   durationType: "time",
   duration: { type: "time", seconds },
   targetType: "power",
-  target: { type: "power", value: { unit: "zone", value: 3 } },
+  target: {
+    type: "power",
+    value: { unit: "zone", value: PREVIEW_TEST.POWER_ZONE_MID },
+  },
   intensity: "active",
   ...opts,
 });
@@ -33,13 +37,18 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "power", value: { unit: "zone", value: 3 } },
+      {
+        type: "power",
+        value: { unit: "zone", value: PREVIEW_TEST.POWER_ZONE_MID },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(3 / 7);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.POWER_ZONE_MID / PREVIEW_TEST.POWER_ZONE_DENOM
+    );
   });
 
   it("should map power zone 7 to 1.0", () => {
@@ -48,13 +57,16 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "power", value: { unit: "zone", value: 7 } },
+      {
+        type: "power",
+        value: { unit: "zone", value: PREVIEW_TEST.POWER_ZONE_MAX },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBe(1.0);
+    expect(h).toBe(PREVIEW_TEST.MAX_HEIGHT_CLAMP);
   });
 
   it("should map HR zone to height", () => {
@@ -63,13 +75,18 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "heart_rate", value: { unit: "zone", value: 2 } },
+      {
+        type: "heart_rate",
+        value: { unit: "zone", value: PREVIEW_TEST.HR_ZONE_VAL },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(2 / 5);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.HR_ZONE_VAL / PREVIEW_TEST.HR_ZONE_DENOM
+    );
   });
 
   it("should map percent_ftp to height", () => {
@@ -78,13 +95,18 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "power", value: { unit: "percent_ftp", value: 100 } },
+      {
+        type: "power",
+        value: { unit: "percent_ftp", value: PREVIEW_TEST.PERCENT_FTP_VAL },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(100 / 150);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.PERCENT_FTP_VAL / PREVIEW_TEST.PERCENT_FTP_DENOM
+    );
   });
 
   it("should map watts to height", () => {
@@ -93,13 +115,16 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "power", value: { unit: "watts", value: 200 } },
+      {
+        type: "power",
+        value: { unit: "watts", value: PREVIEW_TEST.WATTS_VAL },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(200 / 400);
+    expect(h).toBeCloseTo(PREVIEW_TEST.WATTS_VAL / PREVIEW_TEST.WATTS_DENOM);
   });
 
   it("should map power range to height using midpoint", () => {
@@ -108,13 +133,22 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "power", value: { unit: "range", min: 100, max: 300 } },
+      {
+        type: "power",
+        value: {
+          unit: "range",
+          min: PREVIEW_TEST.WATTS_RANGE_MIN,
+          max: PREVIEW_TEST.WATTS_RANGE_MAX,
+        },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(200 / 400);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.WATTS_RANGE_MID / PREVIEW_TEST.WATTS_DENOM
+    );
   });
 
   it("should clamp to minimum 0.15", () => {
@@ -123,13 +157,16 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "power", value: { unit: "zone", value: 1 } },
+      {
+        type: "power",
+        value: { unit: "zone", value: PREVIEW_TEST.POWER_ZONE_LOW },
+      },
       "rest"
     );
 
     // Assert
 
-    expect(h).toBeGreaterThanOrEqual(0.15);
+    expect(h).toBeGreaterThanOrEqual(PREVIEW_TEST.MIN_HEIGHT_CLAMP);
   });
 
   it("should clamp to maximum 1.0", () => {
@@ -138,13 +175,16 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "power", value: { unit: "watts", value: 800 } },
+      {
+        type: "power",
+        value: { unit: "watts", value: PREVIEW_TEST.WATTS_OVER_MAX },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBe(1.0);
+    expect(h).toBe(PREVIEW_TEST.MAX_HEIGHT_CLAMP);
   });
 
   it("should use intensity fallback for open target", () => {
@@ -159,9 +199,9 @@ describe("calculateNormalizedHeight", () => {
 
     // Assert
 
-    expect(warmup).toBe(0.3);
-    expect(rest).toBe(0.2);
-    expect(active).toBe(0.6);
+    expect(warmup).toBe(PREVIEW_TEST.WARMUP_HEIGHT);
+    expect(rest).toBe(PREVIEW_TEST.REST_HEIGHT);
+    expect(active).toBe(PREVIEW_TEST.ACTIVE_HEIGHT);
   });
 
   it("should return 0.5 for open target with no intensity", () => {
@@ -173,7 +213,7 @@ describe("calculateNormalizedHeight", () => {
 
     // Assert
 
-    expect(h).toBe(0.5);
+    expect(h).toBe(PREVIEW_TEST.OPEN_FALLBACK_HEIGHT);
   });
 
   it("should map pace zone to height", () => {
@@ -182,13 +222,18 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "pace", value: { unit: "zone", value: 3 } },
+      {
+        type: "pace",
+        value: { unit: "zone", value: PREVIEW_TEST.PACE_ZONE_VAL },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(3 / 5);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.PACE_ZONE_VAL / PREVIEW_TEST.PACE_ZONE_DENOM
+    );
   });
 
   it("should map HR bpm to height", () => {
@@ -197,13 +242,16 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "heart_rate", value: { unit: "bpm", value: 150 } },
+      {
+        type: "heart_rate",
+        value: { unit: "bpm", value: PREVIEW_TEST.HR_BPM_VAL },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(150 / 200);
+    expect(h).toBeCloseTo(PREVIEW_TEST.HR_BPM_VAL / PREVIEW_TEST.HR_BPM_DENOM);
   });
 
   it("should map HR percent_max to height", () => {
@@ -212,13 +260,21 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "heart_rate", value: { unit: "percent_max", value: 80 } },
+      {
+        type: "heart_rate",
+        value: {
+          unit: "percent_max",
+          value: PREVIEW_TEST.HR_PERCENT_MAX_VAL,
+        },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(80 / 100);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.HR_PERCENT_MAX_VAL / PREVIEW_TEST.HR_PERCENT_MAX_DENOM
+    );
   });
 
   it("should map HR range to height using midpoint", () => {
@@ -227,13 +283,22 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "heart_rate", value: { unit: "range", min: 120, max: 160 } },
+      {
+        type: "heart_rate",
+        value: {
+          unit: "range",
+          min: PREVIEW_TEST.HR_RANGE_MIN,
+          max: PREVIEW_TEST.HR_RANGE_MAX,
+        },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(140 / 200);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.HR_RANGE_MID / PREVIEW_TEST.HR_BPM_DENOM
+    );
   });
 
   it("should map cadence rpm to height", () => {
@@ -242,13 +307,18 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "cadence", value: { unit: "rpm", value: 90 } },
+      {
+        type: "cadence",
+        value: { unit: "rpm", value: PREVIEW_TEST.CADENCE_RPM_VAL },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(90 / 120);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.CADENCE_RPM_VAL / PREVIEW_TEST.CADENCE_RPM_DENOM
+    );
   });
 
   it("should map cadence range to height using midpoint", () => {
@@ -257,13 +327,22 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "cadence", value: { unit: "range", min: 60, max: 100 } },
+      {
+        type: "cadence",
+        value: {
+          unit: "range",
+          min: PREVIEW_TEST.CADENCE_RANGE_MIN,
+          max: PREVIEW_TEST.CADENCE_RANGE_MAX,
+        },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(80 / 120);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.CADENCE_RANGE_MID / PREVIEW_TEST.CADENCE_RPM_DENOM
+    );
   });
 
   it("should map pace mps to height", () => {
@@ -272,13 +351,18 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "pace", value: { unit: "mps", value: 4 } },
+      {
+        type: "pace",
+        value: { unit: "mps", value: PREVIEW_TEST.PACE_MPS_VAL },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(4 / 6);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.PACE_MPS_VAL / PREVIEW_TEST.PACE_MPS_DENOM
+    );
   });
 
   it("should map pace range to height using midpoint", () => {
@@ -287,13 +371,22 @@ describe("calculateNormalizedHeight", () => {
     // Act
 
     const h = calculateNormalizedHeight(
-      { type: "pace", value: { unit: "range", min: 3, max: 5 } },
+      {
+        type: "pace",
+        value: {
+          unit: "range",
+          min: PREVIEW_TEST.PACE_RANGE_MIN,
+          max: PREVIEW_TEST.PACE_RANGE_MAX,
+        },
+      },
       "active"
     );
 
     // Assert
 
-    expect(h).toBeCloseTo(4 / 6);
+    expect(h).toBeCloseTo(
+      PREVIEW_TEST.PACE_RANGE_MID / PREVIEW_TEST.PACE_MPS_DENOM
+    );
   });
 
   it("should fall back to intensity for stroke_type target", () => {
@@ -308,7 +401,7 @@ describe("calculateNormalizedHeight", () => {
 
     // Assert
 
-    expect(h).toBe(0.6);
+    expect(h).toBe(PREVIEW_TEST.ACTIVE_HEIGHT);
   });
 });
 
@@ -316,7 +409,10 @@ describe("flattenWorkoutSteps", () => {
   it("should produce one bar per step", () => {
     // Arrange
 
-    const workout = makeWorkout([makeStep(0, 300), makeStep(1, 600)]);
+    const workout = makeWorkout([
+      makeStep(0, PREVIEW_TEST.DURATION_DEFAULT),
+      makeStep(1, PREVIEW_TEST.DURATION_LONG),
+    ]);
 
     // Act
 
@@ -324,7 +420,7 @@ describe("flattenWorkoutSteps", () => {
 
     // Assert
 
-    expect(bars).toHaveLength(2);
+    expect(bars).toHaveLength(PREVIEW_TEST.BARS_FROM_TWO_STEPS);
     expect(bars[0].stepId).toBe("step-0");
     expect(bars[1].stepId).toBe("step-1");
   });
@@ -333,8 +429,11 @@ describe("flattenWorkoutSteps", () => {
     // Arrange
 
     const block: RepetitionBlock = {
-      repeatCount: 3,
-      steps: [makeStep(0, 300), makeStep(1, 600)],
+      repeatCount: PREVIEW_TEST.REPEAT_THRICE,
+      steps: [
+        makeStep(0, PREVIEW_TEST.DURATION_DEFAULT),
+        makeStep(1, PREVIEW_TEST.DURATION_LONG),
+      ],
     };
     const workout = makeWorkout([block]);
 
@@ -344,7 +443,7 @@ describe("flattenWorkoutSteps", () => {
 
     // Assert
 
-    expect(bars).toHaveLength(6);
+    expect(bars).toHaveLength(PREVIEW_TEST.BARS_FROM_REPEAT_3X2);
     bars.forEach((bar) => {
       expect(bar.stepId).toBe("block-0");
     });
@@ -354,10 +453,14 @@ describe("flattenWorkoutSteps", () => {
     // Arrange
 
     const block: RepetitionBlock = {
-      repeatCount: 2,
-      steps: [makeStep(0, 300)],
+      repeatCount: PREVIEW_TEST.REPEAT_TWICE,
+      steps: [makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)],
     };
-    const workout = makeWorkout([makeStep(0, 600), block, makeStep(2, 300)]);
+    const workout = makeWorkout([
+      makeStep(0, PREVIEW_TEST.DURATION_LONG),
+      block,
+      makeStep(2, PREVIEW_TEST.DURATION_DEFAULT),
+    ]);
 
     // Act
 
@@ -365,7 +468,7 @@ describe("flattenWorkoutSteps", () => {
 
     // Assert
 
-    expect(bars).toHaveLength(4);
+    expect(bars).toHaveLength(PREVIEW_TEST.BARS_FROM_MIXED);
     expect(bars[0].stepId).toBe("step-0");
     expect(bars[1].stepId).toBe("block-1");
     expect(bars[2].stepId).toBe("block-1");
@@ -388,7 +491,7 @@ describe("flattenWorkoutSteps", () => {
 
     // Assert
 
-    expect(bars[0].durationSeconds).toBe(300);
+    expect(bars[0].durationSeconds).toBe(PREVIEW_TEST.DURATION_DEFAULT);
   });
 
   it("should return empty for empty workout", () => {
@@ -402,15 +505,15 @@ describe("flattenWorkoutSteps", () => {
 
     // Assert
 
-    expect(bars).toHaveLength(0);
+    expect(bars).toHaveLength(PREVIEW_TEST.BARS_EMPTY);
   });
 
   it("should have unique IDs for repeated bars", () => {
     // Arrange
 
     const block: RepetitionBlock = {
-      repeatCount: 3,
-      steps: [makeStep(0, 300)],
+      repeatCount: PREVIEW_TEST.REPEAT_THRICE,
+      steps: [makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)],
     };
     const workout = makeWorkout([block]);
 
@@ -422,7 +525,7 @@ describe("flattenWorkoutSteps", () => {
 
     // Assert
 
-    expect(new Set(ids).size).toBe(3);
+    expect(new Set(ids).size).toBe(PREVIEW_TEST.UNIQUE_IDS_REPEAT_3);
   });
 });
 
@@ -431,7 +534,10 @@ describe("WorkoutPreview", () => {
     // Arrange
     // Arrange
 
-    const workout = makeWorkout([makeStep(0, 300), makeStep(1, 600)]);
+    const workout = makeWorkout([
+      makeStep(0, PREVIEW_TEST.DURATION_DEFAULT),
+      makeStep(1, PREVIEW_TEST.DURATION_LONG),
+    ]);
 
     // Act
     render(<WorkoutPreview workout={workout} />);
@@ -445,7 +551,7 @@ describe("WorkoutPreview", () => {
 
     // Assert
 
-    expect(rects).toHaveLength(2);
+    expect(rects).toHaveLength(PREVIEW_TEST.BARS_FROM_TWO_STEPS);
   });
 
   it("should return null for empty workout", () => {
@@ -471,7 +577,10 @@ describe("WorkoutPreview", () => {
     // Arrange
     // Arrange
 
-    const workout = makeWorkout([makeStep(0, 300), makeStep(1, 600)]);
+    const workout = makeWorkout([
+      makeStep(0, PREVIEW_TEST.DURATION_DEFAULT),
+      makeStep(1, PREVIEW_TEST.DURATION_LONG),
+    ]);
 
     // Act
     render(<WorkoutPreview workout={workout} selectedStepId="step-0" />);
@@ -485,8 +594,10 @@ describe("WorkoutPreview", () => {
 
     // Assert
 
-    expect(rects[0].getAttribute("stroke")).toBe("#2563eb");
-    expect(rects[1].getAttribute("stroke")).toBe("transparent");
+    expect(rects[0].getAttribute("stroke")).toBe(PREVIEW_TEST.SELECTED_STROKE);
+    expect(rects[1].getAttribute("stroke")).toBe(
+      PREVIEW_TEST.UNSELECTED_STROKE
+    );
   });
 
   it("should call onStepSelect when bar is clicked", () => {
@@ -494,7 +605,7 @@ describe("WorkoutPreview", () => {
     // Arrange
 
     const onSelect = vi.fn();
-    const workout = makeWorkout([makeStep(0, 300)]);
+    const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
     render(<WorkoutPreview workout={workout} onStepSelect={onSelect} />);
@@ -517,8 +628,11 @@ describe("WorkoutPreview", () => {
     // Arrange
 
     const block: RepetitionBlock = {
-      repeatCount: 4,
-      steps: [makeStep(0, 60), makeStep(1, 120)],
+      repeatCount: PREVIEW_TEST.REPEAT_FOUR,
+      steps: [
+        makeStep(0, PREVIEW_TEST.DURATION_SHORT),
+        makeStep(1, PREVIEW_TEST.DURATION_MEDIUM),
+      ],
     };
     const workout = makeWorkout([block]);
 
@@ -534,7 +648,7 @@ describe("WorkoutPreview", () => {
 
     // Assert
 
-    expect(rects).toHaveLength(8);
+    expect(rects).toHaveLength(PREVIEW_TEST.BARS_FROM_REPEAT_4X2);
   });
 
   it("should select block when clicking any repeated bar", () => {
@@ -543,8 +657,8 @@ describe("WorkoutPreview", () => {
 
     const onSelect = vi.fn();
     const block: RepetitionBlock = {
-      repeatCount: 2,
-      steps: [makeStep(0, 60)],
+      repeatCount: PREVIEW_TEST.REPEAT_TWICE,
+      steps: [makeStep(0, PREVIEW_TEST.DURATION_SHORT)],
     };
     const workout = makeWorkout([block]);
 
@@ -568,7 +682,7 @@ describe("WorkoutPreview", () => {
     // Arrange
     // Arrange
 
-    const workout = makeWorkout([makeStep(0, 300)]);
+    const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
 
@@ -589,7 +703,7 @@ describe("WorkoutPreview", () => {
     // Arrange
     // Arrange
 
-    const workout = makeWorkout([makeStep(0, 300)]);
+    const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
     render(<WorkoutPreview workout={workout} className="mt-4" />);
@@ -610,7 +724,7 @@ describe("WorkoutPreview", () => {
     // Arrange
 
     const onSelect = vi.fn();
-    const workout = makeWorkout([makeStep(0, 300)]);
+    const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
     render(<WorkoutPreview workout={workout} onStepSelect={onSelect} />);
@@ -632,7 +746,7 @@ describe("WorkoutPreview", () => {
     // Arrange
 
     const onSelect = vi.fn();
-    const workout = makeWorkout([makeStep(0, 300)]);
+    const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
     render(<WorkoutPreview workout={workout} onStepSelect={onSelect} />);
@@ -653,7 +767,7 @@ describe("WorkoutPreview", () => {
     // Arrange
     // Arrange
 
-    const workout = makeWorkout([makeStep(0, 300)]);
+    const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
     render(<WorkoutPreview workout={workout} />);
@@ -674,9 +788,12 @@ describe("WorkoutPreview", () => {
     // Arrange
 
     const workout = makeWorkout([
-      makeStep(0, 300, {
+      makeStep(0, PREVIEW_TEST.DURATION_DEFAULT, {
         targetType: "cadence",
-        target: { type: "cadence", value: { unit: "rpm", value: 90 } },
+        target: {
+          type: "cadence",
+          value: { unit: "rpm", value: PREVIEW_TEST.CADENCE_RPM_VAL },
+        },
       }),
     ]);
 
@@ -693,6 +810,6 @@ describe("WorkoutPreview", () => {
 
     // Assert
 
-    expect(rects).toHaveLength(1);
+    expect(rects).toHaveLength(PREVIEW_TEST.BARS_SINGLE);
   });
 });

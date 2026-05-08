@@ -1,11 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
 
+import { FAKER_SERIAL_NUMBER_DIGITS } from "../../test-utils/tolerance-constants";
+
 export const buildMetadata = new Factory()
   .attr("created", () => faker.date.recent().toISOString())
   .attr("manufacturer", () => faker.company.name().toLowerCase())
   .attr("product", () => faker.commerce.productName())
-  .attr("serialNumber", () => faker.string.numeric(10))
+  .attr("serialNumber", () => faker.string.numeric(FAKER_SERIAL_NUMBER_DIGITS))
   .attr("sport", () =>
     faker.helpers.arrayElement(["running", "cycling", "swimming"])
   )

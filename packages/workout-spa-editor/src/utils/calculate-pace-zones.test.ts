@@ -2,17 +2,21 @@ import { describe, expect, it } from "vitest";
 
 import { calculatePaceZones } from "./calculate-pace-zones";
 
+const THRESHOLD_PACE_SEC_300 = 300;
+const SWIM_THRESHOLD_PACE_SEC_90 = 90;
+const ZONE_COUNT_5 = 5;
+
 describe("calculatePaceZones", () => {
   it("should calculate 5 zones from threshold pace 300s (5:00/km)", () => {
     // Arrange
 
     // Act
 
-    const zones = calculatePaceZones(300, "min_per_km");
+    const zones = calculatePaceZones(THRESHOLD_PACE_SEC_300, "min_per_km");
 
     // Assert
 
-    expect(zones).toHaveLength(5);
+    expect(zones).toHaveLength(ZONE_COUNT_5);
     // Z1 (easy) = slowest: 115-200% of threshold
     expect(zones[0]).toEqual({
       zone: 1,
@@ -44,7 +48,10 @@ describe("calculatePaceZones", () => {
 
     // Act
 
-    const zones = calculatePaceZones(90, "min_per_100m");
+    const zones = calculatePaceZones(
+      SWIM_THRESHOLD_PACE_SEC_90,
+      "min_per_100m"
+    );
 
     // Assert
 
@@ -59,7 +66,7 @@ describe("calculatePaceZones", () => {
   it("should have Z1 as slowest and Z5 as fastest", () => {
     // Arrange
 
-    const zones = calculatePaceZones(300, "min_per_km");
+    const zones = calculatePaceZones(THRESHOLD_PACE_SEC_300, "min_per_km");
 
     // Z1 maxPace (slowest) > Z5 maxPace (fastest)
     const z1 = zones[0];
@@ -76,7 +83,7 @@ describe("calculatePaceZones", () => {
   it("should return zone names in correct order", () => {
     // Arrange
 
-    const zones = calculatePaceZones(300, "min_per_km");
+    const zones = calculatePaceZones(THRESHOLD_PACE_SEC_300, "min_per_km");
 
     // Act
 

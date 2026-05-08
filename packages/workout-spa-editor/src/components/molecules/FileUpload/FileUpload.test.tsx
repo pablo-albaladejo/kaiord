@@ -4,6 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { KRD } from "../../../types/krd";
 import { FileUpload } from "./FileUpload";
+import {
+  CLEANUP_WAIT_MS,
+  FILE_SIZE_REJECT,
+  MOCK_WAIT_MS,
+  PLACEHOLDER_BYTES,
+  PROGRESS_MILESTONES,
+} from "./test-fixtures";
 
 // Mock the import-workout module
 vi.mock("../../../utils/import-workout", () => ({
@@ -44,7 +51,7 @@ describe("FileUpload", () => {
   afterEach(async () => {
     cleanup();
     // Wait for any pending async operations to complete before tearing down
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, CLEANUP_WAIT_MS));
     vi.clearAllTimers();
     vi.useRealTimers();
   });
@@ -364,7 +371,11 @@ describe("FileUpload", () => {
     const fileInput = screen.getByLabelText(/upload workout file/i);
 
     // Create a file larger than 10 MB (11 MB)
-    const largeContent = new ArrayBuffer(11 * 1024 * 1024);
+    const largeContent = new ArrayBuffer(
+      FILE_SIZE_REJECT.megabytes *
+        FILE_SIZE_REJECT.kilobytesPerMegabyte *
+        FILE_SIZE_REJECT.bytesPerKilobyte
+    );
     const file = new File([largeContent], "large-workout.krd", {
       type: "application/json",
     });
@@ -531,7 +542,7 @@ describe("FileUpload", () => {
     render(<FileUpload onFileLoad={vi.fn()} />);
 
     const fileInput = screen.getByLabelText(/upload workout file/i);
-    const file = new File([new Uint8Array([1, 2, 3])], "workout.fit", {
+    const file = new File([new Uint8Array(PLACEHOLDER_BYTES)], "workout.fit", {
       type: "application/octet-stream",
     });
 
@@ -622,11 +633,11 @@ describe("FileUpload", () => {
 
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
-      onProgress?.(30);
+      onProgress?.(PROGRESS_MILESTONES.midway);
       // Simulate delay to keep loading state
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      onProgress?.(60);
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.short));
+      onProgress?.(PROGRESS_MILESTONES.takeoff);
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.short));
       return mockKRD;
     });
 
@@ -662,9 +673,9 @@ describe("FileUpload", () => {
 
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
-      onProgress?.(30);
+      onProgress?.(PROGRESS_MILESTONES.midway);
       // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.medium));
       return mockKRD;
     });
 
@@ -695,8 +706,8 @@ describe("FileUpload", () => {
 
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
-      onProgress?.(30);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      onProgress?.(PROGRESS_MILESTONES.midway);
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.medium));
       return mockKRD;
     });
 
@@ -732,8 +743,8 @@ describe("FileUpload", () => {
 
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
-      onProgress?.(30);
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      onProgress?.(PROGRESS_MILESTONES.midway);
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.long));
       return mockKRD;
     });
 
@@ -772,12 +783,12 @@ describe("FileUpload", () => {
 
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
-      onProgress?.(10);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      onProgress?.(20);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      onProgress?.(30);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      onProgress?.(PROGRESS_MILESTONES.early);
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.medium));
+      onProgress?.(PROGRESS_MILESTONES.rampUp);
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.medium));
+      onProgress?.(PROGRESS_MILESTONES.midway);
+      await new Promise((resolve) => setTimeout(resolve, MOCK_WAIT_MS.medium));
       return mockKRD;
     });
 

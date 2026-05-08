@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  NINE_MIN_FORTY_SEC_MS,
+  SAMPLE_CADENCE,
+  SAMPLE_DISTANCE_M,
+  SAMPLE_ELEVATION,
+  SAMPLE_HR,
+  SAMPLE_POWER,
+  SAMPLE_SPEED,
+  SAMPLE_TIMESTAMP_2024_01_01_PLUS_10MIN_SEC,
+  SAMPLE_TIMESTAMP_2024_01_01_SEC,
+  SAMPLE_WORKOUT_STEP_INDEX,
+  TEN_MIN_MS,
+  TEN_MIN_SEC,
+  TIME_TOLERANCE_MS,
+} from "../../test-utils/constants";
 import { convertFitToKrdLap } from "./fit-to-krd-lap.converter";
 import {
   convertKrdToFitLap,
@@ -19,10 +34,12 @@ describe("convertKrdToFitLap", () => {
     const result = convertKrdToFitLap(krdLap);
 
     // Assert
-    expect(result.startTime).toBe(1704067200);
-    expect(result.totalElapsedTime).toBe(600000);
-    expect(result.totalTimerTime).toBe(580000);
-    expect(result.timestamp).toBe(1704067200 + 600);
+    expect(result.startTime).toBe(SAMPLE_TIMESTAMP_2024_01_01_SEC);
+    expect(result.totalElapsedTime).toBe(TEN_MIN_MS);
+    expect(result.totalTimerTime).toBe(NINE_MIN_FORTY_SEC_MS);
+    expect(result.timestamp).toBe(
+      SAMPLE_TIMESTAMP_2024_01_01_SEC + TEN_MIN_SEC
+    );
   });
 
   it("should default totalTimerTime to totalElapsedTime when undefined", () => {
@@ -36,7 +53,7 @@ describe("convertKrdToFitLap", () => {
     const result = convertKrdToFitLap(krdLap);
 
     // Assert
-    expect(result.totalTimerTime).toBe(600000);
+    expect(result.totalTimerTime).toBe(TEN_MIN_MS);
   });
 
   it("should preserve zero totalTimerTime", () => {
@@ -72,13 +89,13 @@ describe("convertKrdToFitLap", () => {
     const result = convertKrdToFitLap(krdLap);
 
     // Assert
-    expect(result.avgHeartRate).toBe(145);
-    expect(result.maxHeartRate).toBe(165);
-    expect(result.avgCadence).toBe(90);
-    expect(result.maxCadence).toBe(100);
-    expect(result.avgPower).toBe(220);
-    expect(result.maxPower).toBe(350);
-    expect(result.normalizedPower).toBe(230);
+    expect(result.avgHeartRate).toBe(SAMPLE_HR.AVG);
+    expect(result.maxHeartRate).toBe(SAMPLE_HR.MAX);
+    expect(result.avgCadence).toBe(SAMPLE_CADENCE.AVG);
+    expect(result.maxCadence).toBe(SAMPLE_CADENCE.MAX);
+    expect(result.avgPower).toBe(SAMPLE_POWER.AVG);
+    expect(result.maxPower).toBe(SAMPLE_POWER.MAX);
+    expect(result.normalizedPower).toBe(SAMPLE_POWER.NORMALIZED);
   });
 
   it("should convert speed and elevation", () => {
@@ -96,10 +113,10 @@ describe("convertKrdToFitLap", () => {
     const result = convertKrdToFitLap(krdLap);
 
     // Assert
-    expect(result.avgSpeed).toBe(5.5);
-    expect(result.maxSpeed).toBe(7.5);
-    expect(result.totalAscent).toBe(150);
-    expect(result.totalDescent).toBe(80);
+    expect(result.avgSpeed).toBe(SAMPLE_SPEED.AVG_ENHANCED);
+    expect(result.maxSpeed).toBe(SAMPLE_SPEED.MAX_ENHANCED);
+    expect(result.totalAscent).toBe(SAMPLE_ELEVATION.ASCENT_M);
+    expect(result.totalDescent).toBe(SAMPLE_ELEVATION.DESCENT_M);
   });
 
   it("should convert trigger to FIT format", () => {
@@ -144,7 +161,7 @@ describe("convertKrdToFitLap", () => {
     const result = convertKrdToFitLap(krdLap);
 
     // Assert
-    expect(result.wktStepIndex).toBe(3);
+    expect(result.wktStepIndex).toBe(SAMPLE_WORKOUT_STEP_INDEX);
   });
 
   it("should throw error for invalid KRD lap", () => {
@@ -174,8 +191,10 @@ describe("convertKrdToFitLaps", () => {
 
     // Assert
     expect(results).toHaveLength(2);
-    expect(results[0].startTime).toBe(1704067200);
-    expect(results[1].startTime).toBe(1704067800);
+    expect(results[0].startTime).toBe(SAMPLE_TIMESTAMP_2024_01_01_SEC);
+    expect(results[1].startTime).toBe(
+      SAMPLE_TIMESTAMP_2024_01_01_PLUS_10MIN_SEC
+    );
   });
 
   it("should return empty array for empty input", () => {
@@ -203,7 +222,7 @@ describe("convertKrdToFitLaps", () => {
     const results = convertKrdToFitLaps(krdLaps);
 
     // Assert
-    expect(results[0].totalDistance).toBe(5000);
+    expect(results[0].totalDistance).toBe(SAMPLE_DISTANCE_M);
   });
 });
 
@@ -223,7 +242,9 @@ describe("round-trip conversion", () => {
     const roundTrippedTime = new Date(roundTrippedKrd.startTime).getTime();
 
     // Assert
-    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
+      TIME_TOLERANCE_MS
+    );
     expect(
       Math.abs(roundTrippedKrd.totalElapsedTime - originalKrd.totalElapsedTime)
     ).toBeLessThanOrEqual(1);

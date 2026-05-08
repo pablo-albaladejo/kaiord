@@ -14,6 +14,9 @@ import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { deleteRepetitionBlockAction } from "./delete-repetition-block-action";
 
+const BLOCK_POSITION_THIRD = 3;
+const DEFAULT_REPEAT_COUNT_FIXTURE = 3;
+
 /**
  * Helper to create a basic workout step
  */
@@ -225,7 +228,7 @@ describe("findBlockById helper", () => {
       // Assert
       expect(result).not.toBeNull();
       expect(result!.block.id).toBe("block-2");
-      expect(result!.position).toBe(3);
+      expect(result!.position).toBe(BLOCK_POSITION_THIRD);
     });
 
     it("should return null for empty workout", () => {
@@ -281,6 +284,7 @@ describe("deleteRepetitionBlockAction", () => {
             const blocks: Array<RepetitionBlock> = Array.from(
               { length: numBlocks },
               (_, i) => ({
+                // eslint-disable-next-line no-magic-numbers -- Math.random().toString(36).substr(2, 9): radix 36 and length 9 are stdlib API arguments, not domain values
                 id: `block-${i}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 repeatCount: i + 2, // Unique repeat count for identification
                 steps: [createWorkoutStep(0)],
@@ -359,6 +363,7 @@ describe("deleteRepetitionBlockAction", () => {
             const blocks: Array<RepetitionBlock> = Array.from(
               { length: numBlocks },
               (_, i) => ({
+                // eslint-disable-next-line no-magic-numbers -- Math.random().toString(36).substr(2, 9): radix 36 and length 9 are stdlib API arguments, not domain values
                 id: `block-${i}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 repeatCount: i + 2,
                 steps: [createWorkoutStep(0)],
@@ -1013,7 +1018,7 @@ describe("deleteRepetitionBlockAction", () => {
 
     it("should return empty object if block ID does not exist", () => {
       // Arrange
-      const block = createRepetitionBlock(3);
+      const block = createRepetitionBlock(DEFAULT_REPEAT_COUNT_FIXTURE);
       const krd = createKRDWithWorkout([block]);
       const state = createInitialState(krd);
 
@@ -1026,7 +1031,7 @@ describe("deleteRepetitionBlockAction", () => {
 
     it("should handle deletion of the only block in workout", () => {
       // Arrange
-      const block = createRepetitionBlock(3);
+      const block = createRepetitionBlock(DEFAULT_REPEAT_COUNT_FIXTURE);
       const krd = createKRDWithWorkout([block]);
       const state = createInitialState(krd);
       const result = deleteRepetitionBlockAction(krd, block.id!, state);

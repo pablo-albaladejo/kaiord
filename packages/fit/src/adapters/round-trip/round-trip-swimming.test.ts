@@ -1,6 +1,11 @@
 import { createMockLogger, loadFitFixture } from "@kaiord/core/test-utils";
 import { describe, expect, it } from "vitest";
 
+import {
+  FIT_POOL_LENGTH_25,
+  FIT_POOL_LENGTH_33_33,
+  FIT_POOL_LENGTH_50,
+} from "../../test-utils/constants";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
@@ -33,7 +38,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
 
     // Assert
     expect(workoutMsg).toBeDefined();
-    expect(workoutMsg.poolLength).toBe(25);
+    expect(workoutMsg.poolLength).toBe(FIT_POOL_LENGTH_25);
     expect(workoutMsg.poolLengthUnit).toBe(0);
   });
 
@@ -44,7 +49,11 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act
-    const poolLengths = [25, 50, 33.33];
+    const poolLengths = [
+      FIT_POOL_LENGTH_25,
+      FIT_POOL_LENGTH_50,
+      FIT_POOL_LENGTH_33_33,
+    ];
 
     // Assert
     for (const poolLength of poolLengths) {

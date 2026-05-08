@@ -7,6 +7,7 @@ import {
 } from "@kaiord/core/test-utils";
 import { describe, expect, it, vi } from "vitest";
 
+import { FIT_REPEAT_COUNT_3, FIT_STEPS_COUNT_4 } from "../test-utils/constants";
 import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,
@@ -65,7 +66,7 @@ describe("createGarminFitSdkReader", () => {
 
       // Assert
       expect(workout.name).toBe("Example 1");
-      expect(workout.steps).toHaveLength(4);
+      expect(workout.steps).toHaveLength(FIT_STEPS_COUNT_4);
       expect(workout.steps[0]).toMatchObject({
         stepIndex: 0,
         durationType: "time",
@@ -97,7 +98,7 @@ describe("createGarminFitSdkReader", () => {
         steps: Array<unknown>;
       };
       expect(workout.name).toBe("Example 2");
-      expect(workout.steps).toHaveLength(3);
+      expect(workout.steps).toHaveLength(FIT_REPEAT_COUNT_3);
 
       // Act
       const repetitionBlock = workout.steps[1] as {
@@ -106,7 +107,7 @@ describe("createGarminFitSdkReader", () => {
       };
 
       // Assert
-      expect(repetitionBlock.repeatCount).toBe(3);
+      expect(repetitionBlock.repeatCount).toBe(FIT_REPEAT_COUNT_3);
       expect(repetitionBlock.steps).toHaveLength(2);
     });
 

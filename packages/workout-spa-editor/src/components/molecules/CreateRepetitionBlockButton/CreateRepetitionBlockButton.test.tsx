@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { CreateRepetitionBlockButton } from "./CreateRepetitionBlockButton";
+import { EXPECTED_CLICK_COUNT } from "./CreateRepetitionBlockButton.test-fixtures";
 
 describe("CreateRepetitionBlockButton", () => {
   describe("rendering", () => {
@@ -312,7 +313,7 @@ describe("CreateRepetitionBlockButton", () => {
 
       // Assert
 
-      expect(handleClick).toHaveBeenCalledTimes(3);
+      expect(handleClick).toHaveBeenCalledTimes(EXPECTED_CLICK_COUNT);
     });
   });
 

@@ -25,6 +25,9 @@ const assertNoPII = (analytics: Analytics) => {
   }
 };
 
+const SUCCESS_DURATION_MS = 120;
+const FAILURE_DURATION_MS = 99;
+
 describe("emitSyncResult", () => {
   it("should emit coaching.sync.success with profileId, counts, duration on ok", () => {
     // Arrange
@@ -34,14 +37,14 @@ describe("emitSyncResult", () => {
       "train2go",
       "p1",
       { ok: true, activityCount: 5, orphansDeleted: 1 },
-      120
+      SUCCESS_DURATION_MS
     );
     expect(a.event).toHaveBeenCalledWith("coaching.sync.success", {
       source: "train2go",
       profileId: "p1",
       activityCount: 5,
       orphansDeleted: 1,
-      durationMs: 120,
+      durationMs: SUCCESS_DURATION_MS,
     });
 
     // Act
@@ -58,7 +61,7 @@ describe("emitSyncResult", () => {
       "train2go",
       "p1",
       { ok: false, reason: "session-expired" },
-      99
+      FAILURE_DURATION_MS
     );
     expect(a.event).toHaveBeenCalledWith("coaching.sync.failure", {
       source: "train2go",

@@ -15,6 +15,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ValidationError } from "../../../types/krd";
 import { SaveErrorDialog } from "./SaveErrorDialog";
+import { ERROR_DIALOG_BUTTON_COUNT } from "./SaveErrorDialog.test-fixtures";
 
 describe("SaveErrorDialog", () => {
   describe("rendering", () => {
@@ -93,7 +94,7 @@ describe("SaveErrorDialog", () => {
 
       // Assert
       const buttons = screen.getAllByRole("button");
-      expect(buttons).toHaveLength(3); // Header close (X), footer Close, Fix and Retry
+      expect(buttons).toHaveLength(ERROR_DIALOG_BUTTON_COUNT); // Header close (X), footer Close, Fix and Retry
       expect(
         screen.getByRole("button", { name: "Fix and Retry" })
       ).toBeInTheDocument();
@@ -297,7 +298,7 @@ describe("SaveErrorDialog", () => {
 
       // Assert
       const buttons = screen.getAllByRole("button");
-      expect(buttons).toHaveLength(3); // Header close, Close, Fix and Retry
+      expect(buttons).toHaveLength(ERROR_DIALOG_BUTTON_COUNT); // Header close, Close, Fix and Retry
     });
   });
 });

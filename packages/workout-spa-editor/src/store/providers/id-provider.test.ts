@@ -4,6 +4,7 @@ import { defaultIdProvider } from "./id-provider";
 
 const UUID_V4_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UNIQUENESS_SAMPLE_SIZE = 10_000;
 
 describe("defaultIdProvider", () => {
   afterEach(() => {
@@ -25,12 +26,12 @@ describe("defaultIdProvider", () => {
     const ids = new Set<string>();
 
     // Act
-    for (let i = 0; i < 10_000; i++) {
+    for (let i = 0; i < UNIQUENESS_SAMPLE_SIZE; i++) {
       ids.add(defaultIdProvider());
     }
 
     // Assert
-    expect(ids.size).toBe(10_000);
+    expect(ids.size).toBe(UNIQUENESS_SAMPLE_SIZE);
   });
 
   it("should fall back to crypto.getRandomValues when randomUUID is undefined", () => {

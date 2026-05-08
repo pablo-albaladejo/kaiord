@@ -1,12 +1,20 @@
 import { describe, expect, it } from "vitest";
 
 import { validateSanity } from "./sanity-checks";
+import {
+  EXCESSIVE_DURATION_S,
+  ONE_HOUR_SECONDS,
+  OVER_STEP_LIMIT,
+  SHORT_DURATION_S,
+  STEP_COUNT_FIVE,
+  STEP_COUNT_THREE,
+} from "./sanity-checks.test-fixtures";
 import { makeValidKrd } from "./test-helpers";
 
 describe("validateSanity", () => {
   it("should return null for valid KRD", () => {
     // Arrange
-    const krd = makeValidKrd(5, 3600);
+    const krd = makeValidKrd(STEP_COUNT_FIVE, ONE_HOUR_SECONDS);
 
     // Act
     const result = validateSanity(krd);
@@ -17,7 +25,7 @@ describe("validateSanity", () => {
 
   it("should reject zero steps", () => {
     // Arrange
-    const krd = makeValidKrd(0, 3600);
+    const krd = makeValidKrd(0, ONE_HOUR_SECONDS);
 
     // Act
     const result = validateSanity(krd);
@@ -28,7 +36,7 @@ describe("validateSanity", () => {
 
   it("should reject more than 200 steps", () => {
     // Arrange
-    const krd = makeValidKrd(201, 3600);
+    const krd = makeValidKrd(OVER_STEP_LIMIT, ONE_HOUR_SECONDS);
 
     // Act
     const result = validateSanity(krd);
@@ -39,7 +47,7 @@ describe("validateSanity", () => {
 
   it("should reject duration under 1 minute", () => {
     // Arrange
-    const krd = makeValidKrd(3, 30);
+    const krd = makeValidKrd(STEP_COUNT_THREE, SHORT_DURATION_S);
 
     // Act
     const result = validateSanity(krd);
@@ -50,7 +58,7 @@ describe("validateSanity", () => {
 
   it("should reject duration over 8 hours", () => {
     // Arrange
-    const krd = makeValidKrd(3, 30000);
+    const krd = makeValidKrd(STEP_COUNT_THREE, EXCESSIVE_DURATION_S);
 
     // Act
     const result = validateSanity(krd);

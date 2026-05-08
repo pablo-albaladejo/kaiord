@@ -41,32 +41,36 @@ describe("toCoachingActivityRecord", () => {
 
   it("should preserve raw workload unclamped and computes intensity 1..5", () => {
     // Arrange
+    const HIGH_WORKLOAD = 7;
+    const MAX_INTENSITY = 5;
 
     // Act
     const result = toCoachingActivityRecord(
       "p1",
-      { ...base, workload: 7 },
+      { ...base, workload: HIGH_WORKLOAD },
       NOW
     );
 
     // Assert
-    expect(result.workload).toBe(7);
-    expect(result.intensity).toBe(5);
+    expect(result.workload).toBe(HIGH_WORKLOAD);
+    expect(result.intensity).toBe(MAX_INTENSITY);
   });
 
   it("should round non-integer workloads to a literal intensity (no decimals)", () => {
     // Arrange
+    const FRACTIONAL_WORKLOAD = 4.7;
+    const ROUNDED_INTENSITY = 5;
 
     // Act
     const result = toCoachingActivityRecord(
       "p1",
-      { ...base, workload: 4.7 },
+      { ...base, workload: FRACTIONAL_WORKLOAD },
       NOW
     );
 
     // Assert
-    expect(result.workload).toBe(4.7);
-    expect(result.intensity).toBe(5);
+    expect(result.workload).toBe(FRACTIONAL_WORKLOAD);
+    expect(result.intensity).toBe(ROUNDED_INTENSITY);
     expect(Number.isInteger(result.intensity)).toBe(true);
   });
 
@@ -115,16 +119,17 @@ describe("toCoachingActivityRecord", () => {
 
   it("should carry completion → completionPercent", () => {
     // Arrange
+    const COMPLETION_PERCENT = 85;
 
     // Act
     const result = toCoachingActivityRecord(
       "p1",
-      { ...base, completion: 85 },
+      { ...base, completion: COMPLETION_PERCENT },
       NOW
     );
 
     // Assert
-    expect(result.completionPercent).toBe(85);
+    expect(result.completionPercent).toBe(COMPLETION_PERCENT);
   });
 
   it("should guard against drift via STATUS_MAP parity test", () => {

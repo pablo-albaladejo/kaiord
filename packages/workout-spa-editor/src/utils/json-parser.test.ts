@@ -7,6 +7,30 @@ import { describe, expect, it } from "vitest";
 import { FileParsingError } from "../types/errors";
 import { parseJSON } from "./json-parser";
 
+const BYTES_PER_KB = 1024;
+const KB_FIVE = 5;
+const KB_TEN = 10;
+const KB_TWENTY = 20;
+const KB_HUNDRED = 100;
+const KB_THOUSAND = 1024;
+const SIZE_HUNDRED = 100;
+const SIZE_THOUSAND = 1000;
+const SIZE_TEN_THOUSAND = 10_000;
+const ITEM_COUNT_THOUSAND = 1000;
+const ITEM_VALUE_MULTIPLIER = 2;
+const PARSER_BUDGET_FAST_MS = 10;
+const PARSER_BUDGET_RELAXED_MS = 100;
+const ESTIMATED_BYTES_PER_ITEM = 50;
+const FIXTURE_VALUE_42 = 42;
+const FIXTURE_DURATION_300 = 300;
+const FIXTURE_DURATION_360 = 360;
+const FIXTURE_POWER_200 = 200;
+const FIXTURE_POWER_210 = 210;
+const ERROR_MESSAGE_MIN_LENGTH = 10;
+const NON_QUADRATIC_RATIO_THRESHOLD = 100;
+const ARRAY_VALUE_THIRD = 3;
+const FIXTURE_ARRAY_VALUES = [1, 2, ARRAY_VALUE_THIRD] as const;
+
 describe("parseJSON", () => {
   describe("valid JSON", () => {
     it("should parse valid JSON object", () => {
@@ -25,7 +49,7 @@ describe("parseJSON", () => {
 
       // Assert
 
-      expect(result).toStrictEqual({ name: "test", value: 42 });
+      expect(result).toStrictEqual({ name: "test", value: FIXTURE_VALUE_42 });
     });
 
     it("should parse valid JSON array", () => {
@@ -44,7 +68,7 @@ describe("parseJSON", () => {
 
       // Assert
 
-      expect(result).toStrictEqual([1, 2, 3]);
+      expect(result).toStrictEqual(FIXTURE_ARRAY_VALUES);
     });
 
     it("should parse nested JSON", () => {
@@ -244,7 +268,7 @@ describe("parseJSON", () => {
       // Arrange - Generate invalid JSON strings of different sizes
       // Arrange
 
-      const sizes = [100, 1000, 10000];
+      const sizes = [SIZE_HUNDRED, SIZE_THOUSAND, SIZE_TEN_THOUSAND];
       const timings: Array<{ size: number; time: number }> = [];
 
       for (const size of sizes) {
@@ -280,13 +304,13 @@ describe("parseJSON", () => {
 
       // Assert
 
-      expect(ratio1).toBeLessThan(100);
-      expect(ratio2).toBeLessThan(100);
+      expect(ratio1).toBeLessThan(NON_QUADRATIC_RATIO_THRESHOLD);
+      expect(ratio2).toBeLessThan(NON_QUADRATIC_RATIO_THRESHOLD);
 
       // Also verify absolute performance - should be fast even for large inputs
       // All timings should be under 10ms (requirement 7.5 specifies < 10ms for 1MB)
       for (const timing of timings) {
-        expect(timing.time).toBeLessThan(10);
+        expect(timing.time).toBeLessThan(PARSER_BUDGET_FAST_MS);
       }
     });
 
@@ -295,10 +319,10 @@ describe("parseJSON", () => {
       // Arrange
 
       const largeObject = {
-        data: Array.from({ length: 1000 }, (_, i) => ({
+        data: Array.from({ length: ITEM_COUNT_THOUSAND }, (_, i) => ({
           id: i,
           name: `item-${i}`,
-          value: i * 2,
+          value: i * ITEM_VALUE_MULTIPLIER,
         })),
       };
       const json = JSON.stringify(largeObject);
@@ -317,7 +341,7 @@ describe("parseJSON", () => {
       // Assert
 
       expect(result).toStrictEqual(largeObject);
-      expect(duration).toBeLessThan(10); // Should be fast
+      expect(duration).toBeLessThan(PARSER_BUDGET_FAST_MS); // Should be fast
     });
   });
 
@@ -330,8 +354,8 @@ describe("parseJSON", () => {
         structured_workout: {
           name: "Test Workout",
           steps: [
-            { duration: 300, power: 200 },
-            { duration: 360, power: 210 },
+            { duration: FIXTURE_DURATION_300, power: FIXTURE_POWER_200 },
+            { duration: FIXTURE_DURATION_360, power: FIXTURE_POWER_210 },
           ],
           metadata: {
             created: "2025-01-15T10:30:00Z",
@@ -354,8 +378,8 @@ describe("parseJSON", () => {
         structured_workout: {
           name: "Test Workout",
           steps: [
-            { duration: 300, power: 200 },
-            { duration: 360, power: 210 },
+            { duration: FIXTURE_DURATION_300, power: FIXTURE_POWER_200 },
+            { duration: FIXTURE_DURATION_360, power: FIXTURE_POWER_210 },
           ],
           metadata: {
             created: "2025-01-15T10:30:00Z",
@@ -385,7 +409,9 @@ describe("parseJSON", () => {
           expect(error.message).toContain("Invalid JSON");
           expect(error.cause).toBeDefined();
           // Error message should be useful even without line/column
-          expect(error.message.length).toBeGreaterThan(10);
+          expect(error.message.length).toBeGreaterThan(
+            ERROR_MESSAGE_MIN_LENGTH
+          );
         }
       }
     });
@@ -463,7 +489,7 @@ describe("parseJSON", () => {
       // Assert
 
       // Arrange - Large JSON with error at the end
-      const largeData = Array.from({ length: 1000 }, (_, i) => ({
+      const largeData = Array.from({ length: ITEM_COUNT_THOUSAND }, (_, i) => ({
         id: i,
         name: `item-${i}`,
       }));
@@ -511,7 +537,9 @@ describe("parseJSON", () => {
             // All errors should have useful messages
             expect(error.message).toContain("Invalid JSON");
             expect(error.cause).toBeDefined();
-            expect(error.message.length).toBeGreaterThan(10);
+            expect(error.message.length).toBeGreaterThan(
+              ERROR_MESSAGE_MIN_LENGTH
+            );
           }
         }
       }
@@ -547,11 +575,11 @@ describe("parseJSON", () => {
      */
     const generateJSONOfSize = (targetBytes: number): string => {
       // Estimate: each item is roughly 50 bytes
-      const itemCount = Math.floor(targetBytes / 50);
+      const itemCount = Math.floor(targetBytes / ESTIMATED_BYTES_PER_ITEM);
       const data = Array.from({ length: itemCount }, (_, i) => ({
         id: i,
         name: `item-${i}`,
-        value: i * 2,
+        value: i * ITEM_VALUE_MULTIPLIER,
       }));
       return JSON.stringify({ data });
     };
@@ -560,7 +588,7 @@ describe("parseJSON", () => {
       // Arrange
       // Arrange
 
-      const json = generateJSONOfSize(1024); // 1KB
+      const json = generateJSONOfSize(BYTES_PER_KB); // 1KB
 
       // Act
       const start = performance.now();
@@ -576,14 +604,14 @@ describe("parseJSON", () => {
       // Assert
 
       expect(result).toBeDefined();
-      expect(duration).toBeLessThan(10);
+      expect(duration).toBeLessThan(PARSER_BUDGET_FAST_MS);
     });
 
     it("should parse 10KB JSON in under 10ms", () => {
       // Arrange
       // Arrange
 
-      const json = generateJSONOfSize(10 * 1024); // 10KB
+      const json = generateJSONOfSize(KB_TEN * BYTES_PER_KB); // 10KB
 
       // Act
       const start = performance.now();
@@ -599,14 +627,14 @@ describe("parseJSON", () => {
       // Assert
 
       expect(result).toBeDefined();
-      expect(duration).toBeLessThan(10);
+      expect(duration).toBeLessThan(PARSER_BUDGET_FAST_MS);
     });
 
     it("should parse 100KB JSON in reasonable time", () => {
       // Arrange
       // Arrange
 
-      const json = generateJSONOfSize(100 * 1024); // 100KB
+      const json = generateJSONOfSize(KB_HUNDRED * BYTES_PER_KB); // 100KB
 
       // Act
       const start = performance.now();
@@ -623,14 +651,14 @@ describe("parseJSON", () => {
 
       expect(result).toBeDefined();
       // Reasonable time for 100KB: < 50ms (allows for JSON.parse overhead)
-      expect(duration).toBeLessThan(100);
+      expect(duration).toBeLessThan(PARSER_BUDGET_RELAXED_MS);
     });
 
     it("should parse 1MB JSON in reasonable time", () => {
       // Arrange
       // Arrange
 
-      const json = generateJSONOfSize(1024 * 1024); // 1MB
+      const json = generateJSONOfSize(KB_THOUSAND * BYTES_PER_KB); // 1MB
 
       // Act
       const start = performance.now();
@@ -647,7 +675,7 @@ describe("parseJSON", () => {
 
       expect(result).toBeDefined();
       // Reasonable time for 1MB: < 100ms (allows for JSON.parse overhead)
-      expect(duration).toBeLessThan(100);
+      expect(duration).toBeLessThan(PARSER_BUDGET_RELAXED_MS);
     });
 
     it("should parse three increasing input sizes deterministically (fast-path)", () => {
@@ -664,7 +692,11 @@ describe("parseJSON", () => {
       // No timing assertions; no production code change.
 
       // Arrange
-      const sizes = [1024, 5 * 1024, 20 * 1024];
+      const sizes = [
+        BYTES_PER_KB,
+        KB_FIVE * BYTES_PER_KB,
+        KB_TWENTY * BYTES_PER_KB,
+      ];
 
       for (const bytes of sizes) {
         const json = generateJSONOfSize(bytes);

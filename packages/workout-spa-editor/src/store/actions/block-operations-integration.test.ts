@@ -13,6 +13,12 @@ import { describe, expect, it } from "vitest";
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { addStepToRepetitionBlockAction } from "./add-step-to-repetition-block-action";
+import {
+  EDITED_REPEAT_COUNT_TEN,
+  ORIGINAL_REPEAT_COUNT_FIVE,
+  ORIGINAL_REPEAT_COUNT_FOUR,
+  STEP_COUNT_THREE,
+} from "./block-operations-integration.test-fixtures";
 import { editRepetitionBlockAction } from "./edit-repetition-block-action";
 import { ungroupRepetitionBlockAction } from "./ungroup-repetition-block-action";
 
@@ -66,12 +72,17 @@ describe("Block Operations Integration", () => {
       };
       const block2: RepetitionBlock = {
         id: blockId2,
-        repeatCount: 5,
+        repeatCount: ORIGINAL_REPEAT_COUNT_FIVE,
         steps: [step1],
       };
       const krd = createMockKRD([block1, block2]);
       const state = createMockState();
-      const result = editRepetitionBlockAction(krd, blockId1, 10, state);
+      const result = editRepetitionBlockAction(
+        krd,
+        blockId1,
+        EDITED_REPEAT_COUNT_TEN,
+        state
+      );
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(2);
@@ -81,8 +92,8 @@ describe("Block Operations Integration", () => {
       const updatedBlock2 = updatedWorkout?.steps[1] as RepetitionBlock;
 
       // Assert
-      expect(updatedBlock1.repeatCount).toBe(10);
-      expect(updatedBlock2.repeatCount).toBe(5);
+      expect(updatedBlock1.repeatCount).toBe(EDITED_REPEAT_COUNT_TEN);
+      expect(updatedBlock2.repeatCount).toBe(ORIGINAL_REPEAT_COUNT_FIVE);
     });
 
     it("should add step to correct block by ID", () => {
@@ -97,7 +108,7 @@ describe("Block Operations Integration", () => {
       };
       const block2: RepetitionBlock = {
         id: blockId2,
-        repeatCount: 5,
+        repeatCount: ORIGINAL_REPEAT_COUNT_FIVE,
         steps: [step1],
       };
       const krd = createMockKRD([block1, block2]);
@@ -129,7 +140,7 @@ describe("Block Operations Integration", () => {
       };
       const block2: RepetitionBlock = {
         id: blockId2,
-        repeatCount: 5,
+        repeatCount: ORIGINAL_REPEAT_COUNT_FIVE,
         steps: [step2],
       };
       const krd = createMockKRD([block1, block2]);
@@ -159,29 +170,36 @@ describe("Block Operations Integration", () => {
       };
       const block2: RepetitionBlock = {
         id: blockId2,
-        repeatCount: 3,
+        repeatCount: STEP_COUNT_THREE,
         steps: [step1],
       };
       const block3: RepetitionBlock = {
         id: blockId3,
-        repeatCount: 4,
+        repeatCount: ORIGINAL_REPEAT_COUNT_FOUR,
         steps: [step1],
       };
       const krd = createMockKRD([block1, block2, block3]);
       const state = createMockState();
-      const result = editRepetitionBlockAction(krd, blockId2, 10, state);
+      const result = editRepetitionBlockAction(
+        krd,
+        blockId2,
+        EDITED_REPEAT_COUNT_TEN,
+        state
+      );
 
       // Act
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(updatedWorkout?.steps).toHaveLength(3);
+      expect(updatedWorkout?.steps).toHaveLength(STEP_COUNT_THREE);
       expect((updatedWorkout?.steps[0] as RepetitionBlock).repeatCount).toBe(2);
       expect((updatedWorkout?.steps[1] as RepetitionBlock).repeatCount).toBe(
-        10
+        EDITED_REPEAT_COUNT_TEN
       );
-      expect((updatedWorkout?.steps[2] as RepetitionBlock).repeatCount).toBe(4);
+      expect((updatedWorkout?.steps[2] as RepetitionBlock).repeatCount).toBe(
+        ORIGINAL_REPEAT_COUNT_FOUR
+      );
     });
   });
 
@@ -194,7 +212,7 @@ describe("Block Operations Integration", () => {
       const editResult = editRepetitionBlockAction(
         krd,
         "nonexistent-id",
-        10,
+        EDITED_REPEAT_COUNT_TEN,
         state
       );
       const addResult = addStepToRepetitionBlockAction(

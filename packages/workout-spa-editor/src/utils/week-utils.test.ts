@@ -8,6 +8,8 @@ import {
   parseWeekId,
 } from "./week-utils";
 
+const DAYS_PER_WEEK = 7;
+
 describe("parseWeekId", () => {
   it("should parse valid week ID", () => {
     // Arrange
@@ -139,7 +141,7 @@ describe("getWeekDays", () => {
 
     // Assert
 
-    expect(days).toHaveLength(7);
+    expect(days).toHaveLength(DAYS_PER_WEEK);
     expect(days[0]).toBe("2026-04-06");
     expect(days[6]).toBe("2026-04-12");
   });

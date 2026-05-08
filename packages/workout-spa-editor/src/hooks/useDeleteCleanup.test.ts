@@ -10,6 +10,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as store from "../store";
 import { useDeleteCleanup } from "./useDeleteCleanup";
 
+const THREE_INTERVAL_TICKS_MS = 3_000;
+const TWO_INTERVAL_TICKS_MS = 2_000;
+const THREE_INTERVAL_TICKS_COUNT = 3;
+const TWO_INTERVAL_TICKS_COUNT = 2;
+
 vi.mock("../store", () => ({
   useClearExpiredDeletes: vi.fn(),
 }));
@@ -33,10 +38,12 @@ describe("useDeleteCleanup", () => {
     renderHook(() => useDeleteCleanup());
 
     // Act
-    vi.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(THREE_INTERVAL_TICKS_MS);
 
     // Assert
-    expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(3);
+    expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(
+      THREE_INTERVAL_TICKS_COUNT
+    );
   });
 
   it("should cleanup interval on unmount", () => {
@@ -46,14 +53,18 @@ describe("useDeleteCleanup", () => {
       mockClearExpiredDeletes
     );
     const { unmount } = renderHook(() => useDeleteCleanup());
-    vi.advanceTimersByTime(2000);
-    expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(2);
+    vi.advanceTimersByTime(TWO_INTERVAL_TICKS_MS);
+    expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(
+      TWO_INTERVAL_TICKS_COUNT
+    );
     unmount();
 
     // Act
-    vi.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(TWO_INTERVAL_TICKS_MS);
 
     // Assert
-    expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(2);
+    expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(
+      TWO_INTERVAL_TICKS_COUNT
+    );
   });
 });

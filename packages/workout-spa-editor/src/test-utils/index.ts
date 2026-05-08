@@ -21,3 +21,9 @@ export {
   expectNoReactWarnings,
   setupConsoleErrorSpy,
 } from "./console-spy";
+
+// Zone fixtures for ZoneEditor + zone calculator tests
+export * from "./zone-fixtures";
+
+// Application-layer fixtures (compliance, coaching duration, cost estimation, sync-zones bands)
+export * from "./application-fixtures";
