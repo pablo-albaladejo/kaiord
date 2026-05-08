@@ -26,7 +26,7 @@ export type CoachingSidebarData = {
 };
 
 const COACHING_SOURCES: ReadonlyArray<SessionMatch["source"]> = [
-  "auto-conversion",
+  "auto-coaching",
   "auto-coaching-v10-migration",
   "manual",
 ];
