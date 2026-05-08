@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Workout } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
+import { MOCK_WORKOUT_STEP_COUNT } from "./WorkoutList.drag-integration.test-fixtures";
 
 /**
  * Integration test for drag-and-drop functionality
@@ -29,7 +30,7 @@ describe("WorkoutList - Drag Integration", () => {
     // Arrange
     // Arrange
 
-    const workout = createMockWorkout(3);
+    const workout = createMockWorkout(MOCK_WORKOUT_STEP_COUNT);
     const onStepReorder = vi.fn();
 
     // Act
@@ -115,7 +116,7 @@ describe("WorkoutList - Drag Integration", () => {
 
     // Act
 
-    const workout = createMockWorkout(3);
+    const workout = createMockWorkout(MOCK_WORKOUT_STEP_COUNT);
 
     // Act & Assert - should not throw
 

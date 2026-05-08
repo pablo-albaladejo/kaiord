@@ -8,6 +8,21 @@ import { buildWorkout } from "@kaiord/core/test-utils";
 import { createMockLogger } from "@kaiord/core/test-utils";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  FIT_DURATION_CALORIES_10000,
+  FIT_DURATION_POWER_50,
+  FIT_DURATION_POWER_1000,
+  FIT_DURATION_VALUE_1000,
+  FIT_NOTES_MAX_LENGTH,
+  FIT_NOTES_OVERSIZED_LENGTH,
+  FIT_PERCENT_FTP_85,
+  FIT_POOL_LENGTH_25,
+  FIT_REPEATED_MESSAGES_5,
+  FIT_REPEATED_MESSAGES_6,
+  FIT_STEPS_COUNT_4,
+  FIT_TARGET_VALUE_1200,
+  FIT_TARGET_VALUE_1250,
+} from "../../test-utils/constants";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
@@ -211,7 +226,7 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
-      expect(workoutMsg.poolLength).toBe(25);
+      expect(workoutMsg.poolLength).toBe(FIT_POOL_LENGTH_25);
       expect(workoutMsg.poolLengthUnit).toBe(0);
     });
 
@@ -337,7 +352,7 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
-      expect(workoutMsg.numValidSteps).toBe(4);
+      expect(workoutMsg.numValidSteps).toBe(FIT_STEPS_COUNT_4);
     });
   });
 
@@ -381,9 +396,11 @@ describe("convertKRDToMessages", () => {
       expect(stepMsg.messageIndex).toBe(step.stepIndex);
       expect(stepMsg.durationType).toBe(fitDurationTypeSchema.enum.time);
       expect(stepMsg.durationTime).toBe(step.duration.seconds);
-      expect(stepMsg.durationValue).toBe(step.duration.seconds * 1000);
+      expect(stepMsg.durationValue).toBe(
+        step.duration.seconds * FIT_DURATION_VALUE_1000
+      );
       expect(stepMsg.targetType).toBe("power");
-      expect(stepMsg.targetValue).toBe(1200);
+      expect(stepMsg.targetValue).toBe(FIT_TARGET_VALUE_1200);
     });
 
     it("should convert workout step with notes", () => {
@@ -454,7 +471,7 @@ describe("convertKRDToMessages", () => {
     it("should throw on notes exceeding 256 characters due to schema validation", () => {
       // Arrange
       const logger = createMockLogger();
-      const longNotes = "a".repeat(300);
+      const longNotes = "a".repeat(FIT_NOTES_OVERSIZED_LENGTH);
       const workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -486,7 +503,7 @@ describe("convertKRDToMessages", () => {
     it("should accept notes at exactly 256 characters", () => {
       // Arrange
       const logger = createMockLogger();
-      const maxNotes = "a".repeat(256);
+      const maxNotes = "a".repeat(FIT_NOTES_MAX_LENGTH);
       const steps: Array<WorkoutStep> = [
         {
           stepIndex: 0,
@@ -516,7 +533,7 @@ describe("convertKRDToMessages", () => {
       // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.notes).toBe(maxNotes);
-      expect(stepMsg.notes.length).toBe(256);
+      expect(stepMsg.notes.length).toBe(FIT_NOTES_MAX_LENGTH);
     });
 
     it("should convert distance-based duration step", () => {
@@ -680,7 +697,7 @@ describe("convertKRDToMessages", () => {
       // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.targetType).toBe("power");
-      expect(stepMsg.targetValue).toBe(1250);
+      expect(stepMsg.targetValue).toBe(FIT_TARGET_VALUE_1250);
     });
 
     it("should convert power target in percent FTP", () => {
@@ -715,7 +732,7 @@ describe("convertKRDToMessages", () => {
       // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.targetType).toBe("power");
-      expect(stepMsg.targetValue).toBe(85);
+      expect(stepMsg.targetValue).toBe(FIT_PERCENT_FTP_85);
     });
 
     it("should convert power zone target", () => {
@@ -1021,7 +1038,7 @@ describe("convertKRDToMessages", () => {
         extensions: { structured_workout: workout },
       });
       const messages = convertKRDToMessages(krd, logger);
-      expect(messages.length).toBe(5);
+      expect(messages.length).toBe(FIT_REPEATED_MESSAGES_5);
 
       // Act
       const repeatMsg = messages[4] as {
@@ -1083,7 +1100,7 @@ describe("convertKRDToMessages", () => {
         extensions: { structured_workout: workout },
       });
       const messages = convertKRDToMessages(krd, logger);
-      expect(messages.length).toBe(6);
+      expect(messages.length).toBe(FIT_REPEATED_MESSAGES_6);
       const repeat1Msg = messages[3] as Record<string, unknown>;
       expect(repeat1Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(repeat1Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
@@ -1256,7 +1273,7 @@ describe("convertKRDToMessages", () => {
       };
 
       // Assert
-      expect(step2Msg.durationCalories).toBe(10000);
+      expect(step2Msg.durationCalories).toBe(FIT_DURATION_CALORIES_10000);
     });
   });
 
@@ -1448,7 +1465,7 @@ describe("convertKRDToMessages", () => {
         mesgNum: number;
         messageIndex: number;
       };
-      expect(step1Msg.durationPower).toBe(50);
+      expect(step1Msg.durationPower).toBe(FIT_DURATION_POWER_50);
 
       // Act
       const step2Msg = messages[3] as {
@@ -1457,7 +1474,7 @@ describe("convertKRDToMessages", () => {
       };
 
       // Assert
-      expect(step2Msg.durationPower).toBe(1000);
+      expect(step2Msg.durationPower).toBe(FIT_DURATION_POWER_1000);
     });
   });
 
@@ -1650,7 +1667,7 @@ describe("convertKRDToMessages", () => {
         extensions: { structured_workout: workout },
       });
       const messages = convertKRDToMessages(krd, logger);
-      expect(messages.length).toBe(6);
+      expect(messages.length).toBe(FIT_REPEATED_MESSAGES_6);
       const step2Msg = messages[3] as {
         mesgNum: number;
         messageIndex: number;

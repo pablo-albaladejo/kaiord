@@ -13,6 +13,18 @@ import {
   POWER_METHODS,
 } from "./zone-methods";
 
+const POWER_METHODS_COUNT = 6;
+const COGGAN_ZONE_COUNT = 7;
+const FRIEL_ZONE_COUNT = 7;
+const BRITISH_CYCLING_ZONE_COUNT = 6;
+const CUSTOM_POWER_ZONE_COUNT = 5;
+const HR_METHODS_COUNT = 4;
+const KARVONEN_ZONE_COUNT = 5;
+const PACE_METHODS_COUNT = 2;
+const DANIELS_ZONE_COUNT = 5;
+const COGGAN_Z1_MAX_PERCENT = 55;
+const KARVONEN_Z1_MAX_PERCENT = 82;
+
 describe("zone method registries", () => {
   describe("POWER_METHODS", () => {
     it("should have 6 methods", () => {
@@ -21,7 +33,7 @@ describe("zone method registries", () => {
       // Act
 
       // Assert
-      expect(POWER_METHODS).toHaveLength(6);
+      expect(POWER_METHODS).toHaveLength(POWER_METHODS_COUNT);
     });
 
     it("should have 7 zones for Coggan 7-zone", () => {
@@ -31,8 +43,8 @@ describe("zone method registries", () => {
       const coggan = findMethod(POWER_METHODS, "coggan-7");
 
       // Assert
-      expect(coggan?.zoneCount).toBe(7);
-      expect(coggan?.defaults).toHaveLength(7);
+      expect(coggan?.zoneCount).toBe(COGGAN_ZONE_COUNT);
+      expect(coggan?.defaults).toHaveLength(COGGAN_ZONE_COUNT);
     });
 
     it("should have 7 zones for Friel 7-zone", () => {
@@ -42,8 +54,8 @@ describe("zone method registries", () => {
       const friel = findMethod(POWER_METHODS, "friel-7");
 
       // Assert
-      expect(friel?.zoneCount).toBe(7);
-      expect(friel?.defaults).toHaveLength(7);
+      expect(friel?.zoneCount).toBe(FRIEL_ZONE_COUNT);
+      expect(friel?.defaults).toHaveLength(FRIEL_ZONE_COUNT);
     });
 
     it("should have 6 zones for British Cycling", () => {
@@ -53,8 +65,8 @@ describe("zone method registries", () => {
       const bc = findMethod(POWER_METHODS, "british-cycling-6");
 
       // Assert
-      expect(bc?.zoneCount).toBe(6);
-      expect(bc?.defaults).toHaveLength(6);
+      expect(bc?.zoneCount).toBe(BRITISH_CYCLING_ZONE_COUNT);
+      expect(bc?.defaults).toHaveLength(BRITISH_CYCLING_ZONE_COUNT);
     });
 
     it("should have 5 default zones for Custom", () => {
@@ -64,8 +76,8 @@ describe("zone method registries", () => {
       const custom = findMethod(POWER_METHODS, "custom");
 
       // Assert
-      expect(custom?.zoneCount).toBe(5);
-      expect(custom?.defaults).toHaveLength(5);
+      expect(custom?.zoneCount).toBe(CUSTOM_POWER_ZONE_COUNT);
+      expect(custom?.defaults).toHaveLength(CUSTOM_POWER_ZONE_COUNT);
     });
 
     it("should set Coggan Z1 to 0-55%", () => {
@@ -78,7 +90,7 @@ describe("zone method registries", () => {
       expect(coggan.defaults[0]).toEqual({
         name: "Active Recovery",
         minPercent: 0,
-        maxPercent: 55,
+        maxPercent: COGGAN_Z1_MAX_PERCENT,
       });
     });
   });
@@ -90,7 +102,7 @@ describe("zone method registries", () => {
       // Act
 
       // Assert
-      expect(HR_METHODS).toHaveLength(4);
+      expect(HR_METHODS).toHaveLength(HR_METHODS_COUNT);
     });
 
     it("should have 5 zones for Karvonen 5-zone", () => {
@@ -100,8 +112,8 @@ describe("zone method registries", () => {
       const karvonen = findMethod(HR_METHODS, "karvonen-5");
 
       // Assert
-      expect(karvonen?.zoneCount).toBe(5);
-      expect(karvonen?.defaults).toHaveLength(5);
+      expect(karvonen?.zoneCount).toBe(KARVONEN_ZONE_COUNT);
+      expect(karvonen?.defaults).toHaveLength(KARVONEN_ZONE_COUNT);
     });
 
     it("should set Karvonen Z1 to 0-82%", () => {
@@ -114,7 +126,7 @@ describe("zone method registries", () => {
       expect(karvonen.defaults[0]).toEqual({
         name: "Recovery",
         minPercent: 0,
-        maxPercent: 82,
+        maxPercent: KARVONEN_Z1_MAX_PERCENT,
       });
     });
   });
@@ -126,7 +138,7 @@ describe("zone method registries", () => {
       // Act
 
       // Assert
-      expect(PACE_METHODS).toHaveLength(2);
+      expect(PACE_METHODS).toHaveLength(PACE_METHODS_COUNT);
     });
 
     it("should have 5 zones for Daniels 5-zone", () => {
@@ -136,8 +148,8 @@ describe("zone method registries", () => {
       const daniels = findMethod(PACE_METHODS, "daniels-5");
 
       // Assert
-      expect(daniels?.zoneCount).toBe(5);
-      expect(daniels?.defaults).toHaveLength(5);
+      expect(daniels?.zoneCount).toBe(DANIELS_ZONE_COUNT);
+      expect(daniels?.defaults).toHaveLength(DANIELS_ZONE_COUNT);
     });
   });
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { POOL_LENGTH_25 } from "../../test-utils/tolerance-constants";
 import { KrdValidationError } from "../types/errors";
 import { createWorkoutKRD } from "./workout-to-krd.converter";
 
@@ -151,7 +152,7 @@ describe("createWorkoutKRD", () => {
     >;
 
     // Assert
-    expect(workout.poolLength).toBe(25);
+    expect(workout.poolLength).toBe(POOL_LENGTH_25);
     expect(workout.poolLengthUnit).toBe("meters");
   });
 });

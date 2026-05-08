@@ -1,6 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
+import { STEP_INDEX_FIVE } from "../../test-utils/constants";
 import { convertTcxStep } from "./step.converter";
 
 const createMockLogger = (): Logger => ({
@@ -246,7 +247,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    convertTcxStep(tcxStep, 5, logger);
+    convertTcxStep(tcxStep, STEP_INDEX_FIVE, logger);
 
     // Assert
     expect(logger.debug).toHaveBeenCalledWith("Converting TCX step", {

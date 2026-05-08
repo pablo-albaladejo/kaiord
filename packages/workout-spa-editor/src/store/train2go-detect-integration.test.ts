@@ -11,6 +11,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDetectAction } from "./train2go-detect";
 
+const CACHE_TTL_EXPIRED_OFFSET_MS = 30_001;
+
 vi.mock("./train2go-extension-transport", () => ({
   ping: vi.fn(),
 }));
@@ -77,7 +79,7 @@ describe("Train2Go detection cache — integration", () => {
     // Arrange
     await detect();
     state.lastDetectionTimestamp =
-      (state.lastDetectionTimestamp as number) - 30_001;
+      (state.lastDetectionTimestamp as number) - CACHE_TTL_EXPIRED_OFFSET_MS;
 
     // Act
     await detect();

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { KrdValidationError } from "../domain/types/errors.js";
 import type { BinaryWriter, TextWriter } from "../ports/format-strategy";
+import { SAMPLE_BUFFER_BYTES } from "../test-utils/tolerance-constants";
 import { buildKRD } from "../tests/fixtures/krd/krd.fixtures.js";
 import { createMockLogger } from "../tests/helpers/test-utils.js";
 import { toBinary, toText } from "./to-format.js";
@@ -10,7 +11,7 @@ describe("toBinary", () => {
   it("should convert validated KRD to binary output", async () => {
     // Arrange
     const krd = buildKRD.build();
-    const expectedBuffer = new Uint8Array([1, 2, 3]);
+    const expectedBuffer = new Uint8Array(SAMPLE_BUFFER_BYTES);
     const writer = vi.fn<BinaryWriter>().mockResolvedValue(expectedBuffer);
 
     // Act

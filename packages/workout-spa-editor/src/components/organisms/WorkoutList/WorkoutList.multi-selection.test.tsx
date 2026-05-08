@@ -15,6 +15,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
+import {
+  SELECTED_FIVE_COUNT,
+  SELECTED_THREE_COUNT,
+} from "./WorkoutList.multi-selection.test-fixtures";
 
 describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   const createMockStep = (stepIndex: number): WorkoutStep => ({
@@ -199,7 +203,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
       // Assert
 
-      expect(onToggleStepSelection).toHaveBeenCalledTimes(3);
+      expect(onToggleStepSelection).toHaveBeenCalledTimes(SELECTED_THREE_COUNT);
       // Each call should be with the unique hierarchical ID
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(1, "step-0");
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(
@@ -207,7 +211,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
         "block-1-step-0"
       );
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(
-        3,
+        SELECTED_THREE_COUNT,
         "block-2-step-0"
       );
     });
@@ -456,7 +460,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
       // Assert
 
-      expect(onToggleStepSelection).toHaveBeenCalledTimes(3);
+      expect(onToggleStepSelection).toHaveBeenCalledTimes(SELECTED_THREE_COUNT);
       // Each call should be with the unique hierarchical ID
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(1, "step-0");
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(
@@ -464,7 +468,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
         "block-2-step-0"
       );
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(
-        3,
+        SELECTED_THREE_COUNT,
         "block-4-step-0"
       );
     });
@@ -548,7 +552,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
       // Assert
 
-      expect(onToggleStepSelection).toHaveBeenCalledTimes(3);
+      expect(onToggleStepSelection).toHaveBeenCalledTimes(SELECTED_THREE_COUNT);
 
       // Verify the final state shows only Block A step selected
       const mainWorkoutStep = screen.getAllByRole("button", {
@@ -638,7 +642,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       expect(uniqueIds.size).toBe(selectedIds.length);
 
       // Verify no duplicate IDs
-      expect(selectedIds).toHaveLength(5);
+      expect(selectedIds).toHaveLength(SELECTED_FIVE_COUNT);
       selectedIds.forEach((id) => {
         const count = selectedIds.filter(
           (selectedId) => selectedId === id

@@ -3,6 +3,13 @@ import { TcxParsingError } from "@kaiord/core";
 import { createMockLogger } from "@kaiord/core/test-utils";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  DISTANCE_METERS_5000,
+  HEART_RATE_ZONE_THREE,
+  POWER_WATTS_250,
+  STEP_COUNT_THREE,
+  TIME_SECONDS_1800,
+} from "../test-utils/constants";
 import type { TcxValidator } from "../types";
 import {
   createFastXmlTcxReader,
@@ -159,7 +166,7 @@ describe("createFastXmlTcxReader", () => {
       // Assert
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].duration.type).toBe("time");
-      expect(workout.steps[0].duration.seconds).toBe(1800);
+      expect(workout.steps[0].duration.seconds).toBe(TIME_SECONDS_1800);
     });
 
     it("should convert distance-based duration steps", async () => {
@@ -189,7 +196,7 @@ describe("createFastXmlTcxReader", () => {
       // Assert
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].duration.type).toBe("distance");
-      expect(workout.steps[0].duration.meters).toBe(5000);
+      expect(workout.steps[0].duration.meters).toBe(DISTANCE_METERS_5000);
     });
 
     it("should convert heart rate zone targets", async () => {
@@ -226,7 +233,7 @@ describe("createFastXmlTcxReader", () => {
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].target.type).toBe("heart_rate");
       expect(workout.steps[0].target.value?.unit).toBe("zone");
-      expect(workout.steps[0].target.value?.value).toBe(3);
+      expect(workout.steps[0].target.value?.value).toBe(HEART_RATE_ZONE_THREE);
     });
 
     it("should preserve step order", async () => {
@@ -272,7 +279,7 @@ describe("createFastXmlTcxReader", () => {
       };
 
       // Assert
-      expect(workout.steps).toHaveLength(3);
+      expect(workout.steps).toHaveLength(STEP_COUNT_THREE);
       expect(workout.steps[0].stepIndex).toBe(0);
       expect(workout.steps[0].name).toBe("Warmup");
       expect(workout.steps[0].intensity).toBe("warmup");
@@ -356,7 +363,7 @@ describe("createFastXmlTcxReader", () => {
 
       // Assert
       expect(tpx).toBeDefined();
-      expect(tpx.Watts).toBe(250);
+      expect(tpx.Watts).toBe(POWER_WATTS_250);
     });
 
     it("should convert power data from extensions to power target", async () => {
@@ -396,7 +403,7 @@ describe("createFastXmlTcxReader", () => {
       expect(workout.steps[0].targetType).toBe("power");
       expect(workout.steps[0].target.type).toBe("power");
       expect(workout.steps[0].target.value?.unit).toBe("watts");
-      expect(workout.steps[0].target.value?.value).toBe(250);
+      expect(workout.steps[0].target.value?.value).toBe(POWER_WATTS_250);
     });
 
     it("should preserve TCX extensions at workout level", async () => {

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CoachingSyncButton } from "./CoachingSyncButton";
+import { FIVE_MINUTES_MS } from "./CoachingSyncButton.test-fixtures";
 
 const mockMatchMedia = (reduced: boolean) => {
   const listeners = new Set<() => void>();
@@ -124,7 +125,7 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
   it("should surface the relative-time tooltip via the title attribute", () => {
     // Arrange
 
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const fiveMinutesAgo = new Date(Date.now() - FIVE_MINUTES_MS).toISOString();
     render(
       <CoachingSyncButton
         connected={true}

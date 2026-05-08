@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { LinkedWorkoutSection } from "./LinkedWorkoutSection";
+import { ONE_HOUR_SECONDS } from "./LinkedWorkoutSection.test-fixtures";
 
 const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
   ({
@@ -20,7 +21,7 @@ const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
     raw: {
       title: "Sweet spot intervals",
       description: "3x10 at 90% FTP",
-      duration: { value: 60 * 60, unit: "s" },
+      duration: { value: ONE_HOUR_SECONDS, unit: "s" },
     },
     ...overrides,
   }) as unknown as WorkoutRecord;

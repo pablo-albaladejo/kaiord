@@ -41,6 +41,7 @@ import { useAiRuntimeStore } from "../store/ai-runtime-store";
 const baselinePath = resolve(__dirname, "profile-state-baseline.json");
 const shouldUpdate = process.env.UPDATE_BASELINE === "1";
 const REGRESSION_FACTOR = 2;
+const ISO_DATE_LENGTH = 10;
 
 type Baseline = {
   layoutHeader: number;
@@ -155,7 +156,7 @@ const writeBaseline = (b: Baseline): void => {
   const payload = {
     layoutHeader: b.layoutHeader,
     useAiGeneration: b.useAiGeneration,
-    capturedAt: new Date().toISOString().slice(0, 10),
+    capturedAt: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
     capturedAgainstSha:
       process.env.GIT_SHA ?? "unknown — run with GIT_SHA env var",
     methodology:

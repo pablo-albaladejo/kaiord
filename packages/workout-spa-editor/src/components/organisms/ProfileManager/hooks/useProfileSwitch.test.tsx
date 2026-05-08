@@ -6,8 +6,6 @@
  * rejection (toast surfacing). The 3000ms notification-clear timeout
  * is exercised under fake timers in a dedicated test.
  */
-/* eslint-disable no-magic-numbers -- test fixtures use literal values for clarity */
-
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -98,6 +96,7 @@ describe("useProfileSwitch", () => {
       await vi.advanceTimersByTimeAsync(0);
     });
     await act(async () => {
+      // eslint-disable-next-line no-magic-numbers -- fake clock tick matching production debounce, not a domain constant
       await vi.advanceTimersByTimeAsync(3000);
     });
 

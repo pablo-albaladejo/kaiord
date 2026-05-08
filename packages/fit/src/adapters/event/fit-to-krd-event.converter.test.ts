@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  RECORD_BATCH_SAMPLE_SIZE,
+  SAMPLE_EVENT_DATA,
+} from "../../test-utils/constants";
+import {
   convertFitToKrdEvent,
   convertFitToKrdEvents,
 } from "./fit-to-krd-event.converter";
@@ -113,7 +117,7 @@ describe("convertFitToKrdEvent", () => {
 
     // Assert
     expect(result.eventGroup).toBe(1);
-    expect(result.data).toBe(42);
+    expect(result.data).toBe(SAMPLE_EVENT_DATA);
   });
 
   it("should throw error for invalid FIT event", () => {
@@ -143,7 +147,7 @@ describe("convertFitToKrdEvents", () => {
     const results = convertFitToKrdEvents(fitEvents);
 
     // Assert
-    expect(results).toHaveLength(3);
+    expect(results).toHaveLength(RECORD_BATCH_SAMPLE_SIZE);
     expect(results[0].eventType).toBe("event_start");
     expect(results[1].eventType).toBe("event_lap");
     expect(results[2].eventType).toBe("event_stop");

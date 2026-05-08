@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 
 import type { RepetitionBlock, WorkoutStep } from "./krd";
 import { isRepetitionBlock, isWorkoutStep } from "./krd-guards";
+import { REPEAT_COUNT_3 } from "./krd-guards.test-fixtures";
 
 describe("krd-guards", () => {
   describe("isRepetitionBlock", () => {
@@ -164,7 +165,7 @@ describe("krd-guards", () => {
       // Act & Assert
       if (isRepetitionBlock(item)) {
         // TypeScript should know item is RepetitionBlock here
-        expect(item.repeatCount).toBe(3);
+        expect(item.repeatCount).toBe(REPEAT_COUNT_3);
         expect(item.steps).toHaveLength(1);
       } else {
         // Should not reach here
@@ -400,7 +401,7 @@ describe("krd-guards", () => {
       expect(blocks).toHaveLength(1);
       expect(steps[0].stepIndex).toBe(0);
       expect(steps[1].stepIndex).toBe(2);
-      expect(blocks[0].repeatCount).toBe(3);
+      expect(blocks[0].repeatCount).toBe(REPEAT_COUNT_3);
     });
   });
 });

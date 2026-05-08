@@ -46,6 +46,7 @@ describe("useBatchCostEstimate", () => {
     const { result } = renderHook(() => useBatchCostEstimate(workouts, null));
 
     // Assert
+    // eslint-disable-next-line no-magic-numbers -- expected token count from chars/3 heuristic over two 'abc'/'def' fixtures
     expect(result.current.tokens).toBe(1002);
     expect(result.current.costUsd).toBeNull();
     expect(result.current.providerLabel).toBeNull();
@@ -61,7 +62,9 @@ describe("useBatchCostEstimate", () => {
     );
 
     // Assert
+    // eslint-disable-next-line no-magic-numbers -- expected token count from chars/3 heuristic over single 'abc' fixture
     expect(result.current.tokens).toBe(501);
+    // eslint-disable-next-line no-magic-numbers -- blended anthropic billing: 501 tokens * $3 input rate / 1_000_000 (per-million pricing denominator); rounded to 6 decimals
     expect(result.current.costUsd).toBeCloseTo((501 * 3) / 1_000_000, 6);
     expect(result.current.providerLabel).toBe("My Claude");
   });

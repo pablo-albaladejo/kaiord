@@ -14,6 +14,10 @@ import {
   DEFAULT_POWER_ZONES,
 } from "../../../types/profile";
 import { ZoneEditor } from "./ZoneEditor";
+import {
+  HR_MIN_BPM_55,
+  POWER_MIN_PERCENT_10,
+} from "./ZoneEditor.test-fixtures";
 
 // ============================================
 // Test Fixtures
@@ -288,7 +292,7 @@ describe("ZoneEditor - interactions", () => {
 
     expect(handleSave).toHaveBeenCalledOnce();
     const savedZones = handleSave.mock.calls[0][0];
-    expect(savedZones[0].minPercent).toBe(10);
+    expect(savedZones[0].minPercent).toBe(POWER_MIN_PERCENT_10);
   });
 
   it("should update heart rate zone BPM values", async () => {
@@ -317,7 +321,7 @@ describe("ZoneEditor - interactions", () => {
 
     expect(handleSave).toHaveBeenCalledOnce();
     const savedZones = handleSave.mock.calls[0][0];
-    expect(savedZones[0].minBpm).toBe(55);
+    expect(savedZones[0].minBpm).toBe(HR_MIN_BPM_55);
   });
 });
 

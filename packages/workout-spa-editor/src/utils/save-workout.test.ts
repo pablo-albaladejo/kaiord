@@ -9,6 +9,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { KRD } from "../types/krd";
 import { formatSaveErrors, saveWorkout } from "./save-workout";
 
+const FILENAME_MAX_LENGTH = 54; // 50 stem + ".krd"
+
 // Mock URL.createObjectURL and URL.revokeObjectURL
 global.URL.createObjectURL = vi.fn(() => "blob:mock-url");
 global.URL.revokeObjectURL = vi.fn();
@@ -273,7 +275,7 @@ describe("save-workout", () => {
       // Assert
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.filename.length).toBeLessThanOrEqual(54); // 50 + ".krd"
+        expect(result.filename.length).toBeLessThanOrEqual(FILENAME_MAX_LENGTH);
       }
     });
   });

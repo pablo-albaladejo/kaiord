@@ -14,6 +14,28 @@ import {
   hasFieldError,
   mergeValidationErrors,
 } from "./helpers";
+import {
+  DEBOUNCE_BETWEEN_CALLS_MS,
+  DEBOUNCE_CALLBACK_CALLS_ONCE,
+  DEBOUNCE_DEFAULT_POST_DELAY_MS,
+  DEBOUNCE_DEFAULT_PRE_DELAY_MS,
+  DEBOUNCE_DELAY_MEDIUM_MS,
+  DEBOUNCE_DELAY_SHORT_MS,
+  DEBOUNCE_INPUT_VALUE_FIRST,
+  DEBOUNCE_INPUT_VALUE_SECOND,
+  DEBOUNCE_INPUT_VALUE_THIRD,
+  DEBOUNCE_VALIDATOR_CALLS_ONCE,
+  DEBOUNCE_WAIT_AFTER_MEDIUM_MS,
+  DEBOUNCE_WAIT_AFTER_SHORT_MS,
+  MERGED_ERRORS_ONE,
+  MERGED_ERRORS_THREE,
+  MERGED_ERRORS_TWO,
+  NESTED_RESULT_NONE,
+  NESTED_RESULT_ONE,
+  NESTED_RESULT_TWO,
+  STEP_INDEX_FIRST,
+  STEP_INDEX_SECOND,
+} from "./helpers.test-fixtures";
 
 describe("validation helpers", () => {
   describe("getFieldError", () => {
@@ -65,14 +87,21 @@ describe("validation helpers", () => {
       // Arrange
 
       const errors: Array<ValidationError> = [
-        { path: ["steps", 0, "duration"], message: "Invalid duration" },
+        {
+          path: ["steps", STEP_INDEX_FIRST, "duration"],
+          message: "Invalid duration",
+        },
       ];
 
       // Act
 
       // Act
 
-      const result = getFieldError(errors, ["steps", 0, "duration"]);
+      const result = getFieldError(errors, [
+        "steps",
+        STEP_INDEX_FIRST,
+        "duration",
+      ]);
 
       // Assert
 
@@ -149,14 +178,21 @@ describe("validation helpers", () => {
       // Arrange
 
       const errors: Array<ValidationError> = [
-        { path: ["steps", 0, "target"], message: "Invalid target" },
+        {
+          path: ["steps", STEP_INDEX_FIRST, "target"],
+          message: "Invalid target",
+        },
       ];
 
       // Act
 
       // Act
 
-      const result = hasFieldError(errors, ["steps", 0, "target"]);
+      const result = hasFieldError(errors, [
+        "steps",
+        STEP_INDEX_FIRST,
+        "target",
+      ]);
 
       // Assert
 
@@ -191,9 +227,18 @@ describe("validation helpers", () => {
       // Arrange
 
       const errors: Array<ValidationError> = [
-        { path: ["steps", 0, "duration"], message: "Invalid duration" },
-        { path: ["steps", 0, "target"], message: "Invalid target" },
-        { path: ["steps", 1, "duration"], message: "Invalid duration" },
+        {
+          path: ["steps", STEP_INDEX_FIRST, "duration"],
+          message: "Invalid duration",
+        },
+        {
+          path: ["steps", STEP_INDEX_FIRST, "target"],
+          message: "Invalid target",
+        },
+        {
+          path: ["steps", STEP_INDEX_SECOND, "duration"],
+          message: "Invalid duration",
+        },
         { path: ["name"], message: "Required field" },
       ];
 
@@ -201,15 +246,23 @@ describe("validation helpers", () => {
 
       // Act
 
-      const result = getNestedErrors(errors, ["steps", 0]);
+      const result = getNestedErrors(errors, ["steps", STEP_INDEX_FIRST]);
 
       // Assert
 
       // Assert
 
-      expect(result).toHaveLength(2);
-      expect(result[0].path).toEqual(["steps", 0, "duration"]);
-      expect(result[1].path).toEqual(["steps", 0, "target"]);
+      expect(result).toHaveLength(NESTED_RESULT_TWO);
+      expect(result[STEP_INDEX_FIRST].path).toEqual([
+        "steps",
+        STEP_INDEX_FIRST,
+        "duration",
+      ]);
+      expect(result[STEP_INDEX_SECOND].path).toEqual([
+        "steps",
+        STEP_INDEX_FIRST,
+        "target",
+      ]);
     });
 
     it("should return empty array when no nested errors", () => {
@@ -224,13 +277,13 @@ describe("validation helpers", () => {
 
       // Act
 
-      const result = getNestedErrors(errors, ["steps", 0]);
+      const result = getNestedErrors(errors, ["steps", STEP_INDEX_FIRST]);
 
       // Assert
 
       // Assert
 
-      expect(result).toHaveLength(0);
+      expect(result).toHaveLength(NESTED_RESULT_NONE);
     });
 
     it("should not return errors at same level as parent", () => {
@@ -239,7 +292,10 @@ describe("validation helpers", () => {
 
       const errors: Array<ValidationError> = [
         { path: ["steps"], message: "Required field" },
-        { path: ["steps", 0, "duration"], message: "Invalid duration" },
+        {
+          path: ["steps", STEP_INDEX_FIRST, "duration"],
+          message: "Invalid duration",
+        },
       ];
 
       // Act
@@ -252,8 +308,12 @@ describe("validation helpers", () => {
 
       // Assert
 
-      expect(result).toHaveLength(1);
-      expect(result[0].path).toEqual(["steps", 0, "duration"]);
+      expect(result).toHaveLength(NESTED_RESULT_ONE);
+      expect(result[STEP_INDEX_FIRST].path).toEqual([
+        "steps",
+        STEP_INDEX_FIRST,
+        "duration",
+      ]);
     });
 
     it("should handle deep nesting", () => {
@@ -266,7 +326,7 @@ describe("validation helpers", () => {
             "extensions",
             "structured_workout",
             "steps",
-            0,
+            STEP_INDEX_FIRST,
             "duration",
             "seconds",
           ],
@@ -287,8 +347,8 @@ describe("validation helpers", () => {
 
       // Assert
 
-      expect(result).toHaveLength(1);
-      expect(result[0].message).toBe("Must be positive");
+      expect(result).toHaveLength(NESTED_RESULT_ONE);
+      expect(result[STEP_INDEX_FIRST].message).toBe("Must be positive");
     });
   });
 
@@ -314,7 +374,7 @@ describe("validation helpers", () => {
 
       // Assert
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(MERGED_ERRORS_TWO);
     });
 
     it("should remove duplicate errors", () => {
@@ -338,7 +398,7 @@ describe("validation helpers", () => {
 
       // Assert
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(MERGED_ERRORS_ONE);
     });
 
     it("should handle empty arrays", () => {
@@ -360,7 +420,7 @@ describe("validation helpers", () => {
 
       // Assert
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(MERGED_ERRORS_ONE);
     });
 
     it("should merge more than two arrays", () => {
@@ -387,7 +447,7 @@ describe("validation helpers", () => {
 
       // Assert
 
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(MERGED_ERRORS_THREE);
     });
 
     it("should preserve error details when merging", () => {
@@ -411,8 +471,8 @@ describe("validation helpers", () => {
 
       // Assert
 
-      expect(result[0].code).toBe("required");
-      expect(result[1].code).toBe("invalid_enum");
+      expect(result[STEP_INDEX_FIRST].code).toBe("required");
+      expect(result[STEP_INDEX_SECOND].code).toBe("invalid_enum");
     });
   });
 
@@ -427,7 +487,10 @@ describe("validation helpers", () => {
         errors: [],
       }));
       const mockCallback = vi.fn();
-      const debouncedValidator = createDebouncedValidator(mockValidator, 100);
+      const debouncedValidator = createDebouncedValidator(
+        mockValidator,
+        DEBOUNCE_DELAY_SHORT_MS
+      );
 
       // Act
       debouncedValidator({}, mockCallback);
@@ -438,14 +501,18 @@ describe("validation helpers", () => {
 
       // Act
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEBOUNCE_WAIT_AFTER_SHORT_MS)
+      );
 
       // Assert
 
       // Assert
 
-      expect(mockValidator).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledTimes(1);
+      expect(mockValidator).toHaveBeenCalledTimes(
+        DEBOUNCE_VALIDATOR_CALLS_ONCE
+      );
+      expect(mockCallback).toHaveBeenCalledTimes(DEBOUNCE_CALLBACK_CALLS_ONCE);
     });
 
     it("should call callback with validation result", async () => {
@@ -458,7 +525,10 @@ describe("validation helpers", () => {
       };
       const mockValidator = vi.fn(() => validationResult);
       const mockCallback = vi.fn();
-      const debouncedValidator = createDebouncedValidator(mockValidator, 50);
+      const debouncedValidator = createDebouncedValidator(
+        mockValidator,
+        DEBOUNCE_DELAY_MEDIUM_MS
+      );
 
       // Act
       debouncedValidator({ name: "" }, mockCallback);
@@ -467,7 +537,9 @@ describe("validation helpers", () => {
 
       // Act
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEBOUNCE_WAIT_AFTER_MEDIUM_MS)
+      );
 
       // Assert
 
@@ -495,15 +567,19 @@ describe("validation helpers", () => {
 
       // Act
 
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEBOUNCE_DEFAULT_PRE_DELAY_MS)
+      );
 
       // Assert
 
       expect(mockCallback).not.toHaveBeenCalled();
 
       // Check after delay
-      await new Promise((resolve) => setTimeout(resolve, 150));
-      expect(mockCallback).toHaveBeenCalledTimes(1);
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEBOUNCE_DEFAULT_POST_DELAY_MS)
+      );
+      expect(mockCallback).toHaveBeenCalledTimes(DEBOUNCE_CALLBACK_CALLS_ONCE);
     });
 
     it("should cancel previous timeout on new call", async () => {
@@ -516,27 +592,40 @@ describe("validation helpers", () => {
         errors: [],
       }));
       const mockCallback = vi.fn();
-      const debouncedValidator = createDebouncedValidator(mockValidator, 100);
+      const debouncedValidator = createDebouncedValidator(
+        mockValidator,
+        DEBOUNCE_DELAY_SHORT_MS
+      );
 
       // Act
-      debouncedValidator({ value: 1 }, mockCallback);
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      debouncedValidator({ value: 2 }, mockCallback);
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      debouncedValidator({ value: 3 }, mockCallback);
+      debouncedValidator({ value: DEBOUNCE_INPUT_VALUE_FIRST }, mockCallback);
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEBOUNCE_BETWEEN_CALLS_MS)
+      );
+      debouncedValidator({ value: DEBOUNCE_INPUT_VALUE_SECOND }, mockCallback);
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEBOUNCE_BETWEEN_CALLS_MS)
+      );
+      debouncedValidator({ value: DEBOUNCE_INPUT_VALUE_THIRD }, mockCallback);
 
       // Wait for final debounce
 
       // Act
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) =>
+        setTimeout(resolve, DEBOUNCE_WAIT_AFTER_SHORT_MS)
+      );
 
       // Assert
 
       // Assert
 
-      expect(mockValidator).toHaveBeenCalledTimes(1);
-      expect(mockValidator).toHaveBeenCalledWith({ value: 3 });
+      expect(mockValidator).toHaveBeenCalledTimes(
+        DEBOUNCE_VALIDATOR_CALLS_ONCE
+      );
+      expect(mockValidator).toHaveBeenCalledWith({
+        value: DEBOUNCE_INPUT_VALUE_THIRD,
+      });
     });
   });
 });

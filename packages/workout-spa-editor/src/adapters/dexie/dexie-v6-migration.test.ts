@@ -15,10 +15,12 @@ import { backfillBridgeSnapshotState, KaiordDatabase } from "./dexie-database";
 
 const dbName = (suffix: string) => `kaiord-test-v6-${suffix}-${Date.now()}`;
 
+const DEXIE_V5 = 5;
+
 const seedV5 = async (name: string): Promise<void> => {
   const v5 = new Dexie(name);
   v5.version(1).stores({ bridges: "extensionId, status, lastSeen" });
-  v5.version(5).stores({ bridges: "extensionId, status, lastSeen" });
+  v5.version(DEXIE_V5).stores({ bridges: "extensionId, status, lastSeen" });
   await v5.open();
   await v5.table("bridges").bulkPut([
     {

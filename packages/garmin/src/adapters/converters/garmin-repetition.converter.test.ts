@@ -1,6 +1,7 @@
 import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import { REPETITION, STEP_ORDER, STEP_TYPE } from "../../test-utils/constants";
 import { mapRepetitionBlock } from "./garmin-repetition.converter";
 
 // Characterization tests for mapRepetitionBlock. Capture current shape
@@ -32,7 +33,7 @@ describe("mapRepetitionBlock (characterization)", () => {
     expect(result.type).toBe("RepeatGroupDTO");
     expect(result.endCondition.conditionTypeKey).toBe("iterations");
     expect(result.endCondition.displayable).toBe(false);
-    expect(result.endConditionValue).toBe(3);
+    expect(result.endConditionValue).toBe(REPETITION.COUNT_3);
   });
 
   it("should use stepTypeKey 'repeat' with displayOrder 6 in the stepType field", () => {
@@ -48,7 +49,7 @@ describe("mapRepetitionBlock (characterization)", () => {
 
     // Assert
     expect(result.stepType.stepTypeKey).toBe("repeat");
-    expect(result.stepType.displayOrder).toBe(6);
+    expect(result.stepType.displayOrder).toBe(STEP_TYPE.REPEAT_DISPLAY_ORDER);
   });
 
   it("should consume one stepOrder slot from the counter for the repeat itself", () => {
@@ -63,8 +64,8 @@ describe("mapRepetitionBlock (characterization)", () => {
     const result = mapRepetitionBlock(block, counter);
 
     // Assert
-    expect(result.stepOrder).toBe(5);
-    expect(counter.value).toBe(8);
+    expect(result.stepOrder).toBe(STEP_ORDER.COUNTER_FIVE);
+    expect(counter.value).toBe(STEP_ORDER.COUNTER_EIGHT);
   });
 
   it("should map inner steps in order under workoutSteps", () => {
@@ -99,8 +100,8 @@ describe("mapRepetitionBlock (characterization)", () => {
     const result = mapRepetitionBlock(block, counter);
 
     // Assert
-    expect(result.numberOfIterations).toBe(7);
-    expect(result.endConditionValue).toBe(7);
+    expect(result.numberOfIterations).toBe(REPETITION.COUNT_7);
+    expect(result.endConditionValue).toBe(REPETITION.COUNT_7);
   });
 
   it("should emit an empty workoutSteps array when the block contains no steps", () => {

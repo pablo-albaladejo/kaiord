@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createBridgeDiscovery } from "./bridge-discovery";
 import type { BridgeAnnouncement } from "./bridge-discovery-types";
 
+const DISCOVERY_INTERVAL_TICK_MS = 3_000;
+
 const ANNOUNCE_GARMIN: BridgeAnnouncement = {
   type: "KAIORD_BRIDGE_ANNOUNCE",
   bridgeId: "garmin-bridge",
@@ -133,7 +135,7 @@ describe("createBridgeDiscovery", () => {
       }),
     });
     discovery.start();
-    vi.advanceTimersByTime(3_000);
+    vi.advanceTimersByTime(DISCOVERY_INTERVAL_TICK_MS);
     expect(postSpy).toHaveBeenCalledWith(
       { type: "KAIORD_BRIDGE_DISCOVER" },
       "*"
@@ -161,7 +163,7 @@ describe("createBridgeDiscovery", () => {
     emit(ANNOUNCE_GARMIN);
     await vi.runOnlyPendingTimersAsync();
     postSpy.mockClear();
-    vi.advanceTimersByTime(3_000);
+    vi.advanceTimersByTime(DISCOVERY_INTERVAL_TICK_MS);
     expect(postSpy).not.toHaveBeenCalled();
 
     // Act

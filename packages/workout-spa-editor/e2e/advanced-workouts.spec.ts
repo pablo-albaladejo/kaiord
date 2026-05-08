@@ -1,6 +1,9 @@
 import { expect, test } from "./fixtures/base";
 import { expandFileUpload } from "./helpers/expand-file-upload";
 
+const PERF_STEP_COUNT = 50;
+const INTENSITY_CYCLE_COUNT = 3;
+
 /**
  * E2E Tests for Advanced Workout Features
  *
@@ -717,17 +720,23 @@ test.describe("Advanced Workout Features", () => {
       // Arrange
       await page.goto("/workout/new");
 
-      // Create a workout with 50 steps
-      const steps = Array.from({ length: 50 }, (_, i) => ({
+      // Create a workout with PERF_STEP_COUNT steps
+      const steps = Array.from({ length: PERF_STEP_COUNT }, (_, i) => ({
         stepIndex: i,
         durationType: "time",
         duration: { type: "time", seconds: 300 },
         targetType: "power",
         target: {
           type: "power",
+          // eslint-disable-next-line no-magic-numbers -- watt increment per step, no meaningful name
           value: { unit: "watts", value: 200 + i * 5 },
         },
-        intensity: i % 3 === 0 ? "warmup" : i % 3 === 1 ? "active" : "cooldown",
+        intensity:
+          i % INTENSITY_CYCLE_COUNT === 0
+            ? "warmup"
+            : i % INTENSITY_CYCLE_COUNT === 1
+              ? "active"
+              : "cooldown",
       }));
 
       const largeWorkout = {

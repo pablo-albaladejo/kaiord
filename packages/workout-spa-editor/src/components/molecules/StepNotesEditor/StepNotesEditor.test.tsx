@@ -2,6 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { render, screen, userEvent } from "../../../test-utils";
 import { StepNotesEditor } from "./StepNotesEditor";
+import {
+  NOTES_CHARACTER_LIMIT,
+  NOTES_OVER_LIMIT_LENGTH,
+} from "./StepNotesEditor.test-fixtures";
 
 describe("StepNotesEditor", () => {
   describe("rendering", () => {
@@ -158,7 +162,7 @@ describe("StepNotesEditor", () => {
       // Arrange
       // Arrange
 
-      const longText = "a".repeat(260);
+      const longText = "a".repeat(NOTES_OVER_LIMIT_LENGTH);
       const user = userEvent.setup();
       render(<StepNotesEditor value="" onChange={vi.fn()} />);
 
@@ -184,7 +188,7 @@ describe("StepNotesEditor", () => {
       // Arrange
       // Arrange
 
-      const longText = "a".repeat(260);
+      const longText = "a".repeat(NOTES_OVER_LIMIT_LENGTH);
       const user = userEvent.setup();
       render(<StepNotesEditor value="" onChange={vi.fn()} />);
 
@@ -210,7 +214,7 @@ describe("StepNotesEditor", () => {
       // Arrange
       // Arrange
 
-      const exactText = "a".repeat(256);
+      const exactText = "a".repeat(NOTES_CHARACTER_LIMIT);
       const user = userEvent.setup();
       render(<StepNotesEditor value="" onChange={vi.fn()} />);
 
@@ -294,7 +298,7 @@ describe("StepNotesEditor", () => {
       // Arrange
       // Arrange
 
-      const longText = "a".repeat(260);
+      const longText = "a".repeat(NOTES_OVER_LIMIT_LENGTH);
       const user = userEvent.setup();
       render(<StepNotesEditor value="" onChange={vi.fn()} />);
 

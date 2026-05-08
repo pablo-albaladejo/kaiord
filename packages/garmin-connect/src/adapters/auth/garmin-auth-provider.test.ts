@@ -1,6 +1,10 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  MILLISECONDS_PER_SECOND,
+  OAUTH2_EXPIRES_IN_1H_SEC,
+} from "../../test-utils/constants";
 import type { TokenManager } from "../token/token-manager.types";
 import { createGarminAuthProvider } from "./garmin-auth-provider";
 
@@ -13,7 +17,9 @@ vi.mock("../http/garmin-sso", () => ({
       token_type: "Bearer",
       expires_in: 3600,
       refresh_token_expires_in: 86400,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      expires_at:
+        Math.floor(Date.now() / MILLISECONDS_PER_SECOND) +
+        OAUTH2_EXPIRES_IN_1H_SEC,
     },
   })),
 }));
@@ -113,7 +119,9 @@ describe("createGarminAuthProvider", () => {
         token_type: "Bearer",
         expires_in: 3600,
         refresh_token_expires_in: 86400,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        expires_at:
+          Math.floor(Date.now() / MILLISECONDS_PER_SECOND) +
+          OAUTH2_EXPIRES_IN_1H_SEC,
       },
     });
 
@@ -148,7 +156,9 @@ describe("createGarminAuthProvider", () => {
       token_type: "Bearer",
       expires_in: 3600,
       refresh_token_expires_in: 86400,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      expires_at:
+        Math.floor(Date.now() / MILLISECONDS_PER_SECOND) +
+        OAUTH2_EXPIRES_IN_1H_SEC,
     };
     const tm = createMockTokenManager({
       getOAuth1Token: vi.fn(() => ({

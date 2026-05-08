@@ -34,15 +34,17 @@ describe("createProfile", () => {
 
   it("should initialize the default sportZones structure for all 4 sports", async () => {
     // Arrange
+    const BODY_WEIGHT_KG = 70;
+    const POWER_ZONE_COUNT = 7;
     const persistence = createInMemoryPersistence();
 
     // Act
     const profile = await createProfile(persistence, "Athlete", {
-      bodyWeight: 70,
+      bodyWeight: BODY_WEIGHT_KG,
     });
 
     // Assert
-    expect(profile.bodyWeight).toBe(70);
+    expect(profile.bodyWeight).toBe(BODY_WEIGHT_KG);
     expect(profile.sportZones.cycling).toBeDefined();
     expect(profile.sportZones.running).toBeDefined();
     expect(profile.sportZones.swimming).toBeDefined();
@@ -51,7 +53,9 @@ describe("createProfile", () => {
     expect(profile.sportZones.running?.heartRateZones).toBeDefined();
     expect(profile.sportZones.swimming?.heartRateZones).toBeDefined();
     expect(profile.sportZones.generic?.heartRateZones).toBeDefined();
-    expect(profile.sportZones.cycling?.powerZones?.zones).toHaveLength(7);
+    expect(profile.sportZones.cycling?.powerZones?.zones).toHaveLength(
+      POWER_ZONE_COUNT
+    );
     expect(profile.sportZones.cycling?.powerZones?.zones[0]?.name).toBe(
       "Active Recovery"
     );

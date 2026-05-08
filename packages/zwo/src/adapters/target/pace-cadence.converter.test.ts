@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CADENCE_RPM,
+  CADENCE_SPM,
+  PACE_METERS,
+  PACE_SECONDS_PER_KM,
+  SPEED_MPS,
+} from "../../test-utils";
+import {
   convertKrdCadenceToZwift,
   convertKrdPaceToZwift,
   convertZwiftCadenceTarget,
@@ -12,12 +19,15 @@ describe("convertZwiftPaceTarget", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftPaceTarget(300);
+    const result = convertZwiftPaceTarget(PACE_SECONDS_PER_KM.MODERATE);
 
     // Assert
     expect(result).toStrictEqual({
       type: "pace",
-      value: { unit: "mps", value: 1000 / 300 },
+      value: {
+        unit: "mps",
+        value: PACE_METERS.KILOMETER / PACE_SECONDS_PER_KM.MODERATE,
+      },
     });
   });
 
@@ -25,40 +35,40 @@ describe("convertZwiftPaceTarget", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftPaceTarget(240);
+    const result = convertZwiftPaceTarget(PACE_SECONDS_PER_KM.FAST);
 
     // Assert
     expect(result.type).toBe("pace");
-    expect(result.value?.value).toBeCloseTo(4.167, 2);
+    expect(result.value?.value).toBeCloseTo(SPEED_MPS.PACE_4_167, 2);
   });
 
   it("should handle slow pace (6 min/km)", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftPaceTarget(360);
+    const result = convertZwiftPaceTarget(PACE_SECONDS_PER_KM.SLOW);
 
     // Assert
     expect(result.type).toBe("pace");
-    expect(result.value?.value).toBeCloseTo(2.778, 2);
+    expect(result.value?.value).toBeCloseTo(SPEED_MPS.PACE_2_778, 2);
   });
 
   it("should handle very fast pace (3 min/km)", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftPaceTarget(180);
+    const result = convertZwiftPaceTarget(PACE_SECONDS_PER_KM.VERY_FAST);
 
     // Assert
     expect(result.type).toBe("pace");
-    expect(result.value?.value).toBeCloseTo(5.556, 2);
+    expect(result.value?.value).toBeCloseTo(SPEED_MPS.PACE_5_556, 2);
   });
 
   it("should use mps as unit", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftPaceTarget(300);
+    const result = convertZwiftPaceTarget(PACE_SECONDS_PER_KM.MODERATE);
 
     // Assert
     expect(result.value?.unit).toBe("mps");
@@ -70,12 +80,12 @@ describe("convertZwiftCadenceTarget", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftCadenceTarget(90, false);
+    const result = convertZwiftCadenceTarget(CADENCE_RPM.HIGH, false);
 
     // Assert
     expect(result).toStrictEqual({
       type: "cadence",
-      value: { unit: "rpm", value: 90 },
+      value: { unit: "rpm", value: CADENCE_RPM.HIGH },
     });
   });
 
@@ -83,12 +93,12 @@ describe("convertZwiftCadenceTarget", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftCadenceTarget(180, true);
+    const result = convertZwiftCadenceTarget(CADENCE_SPM.STANDARD, true);
 
     // Assert
     expect(result).toStrictEqual({
       type: "cadence",
-      value: { unit: "rpm", value: 90 },
+      value: { unit: "rpm", value: CADENCE_RPM.HIGH },
     });
   });
 
@@ -96,12 +106,12 @@ describe("convertZwiftCadenceTarget", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftCadenceTarget(90);
+    const result = convertZwiftCadenceTarget(CADENCE_RPM.HIGH);
 
     // Assert
     expect(result).toStrictEqual({
       type: "cadence",
-      value: { unit: "rpm", value: 90 },
+      value: { unit: "rpm", value: CADENCE_RPM.HIGH },
     });
   });
 
@@ -109,40 +119,40 @@ describe("convertZwiftCadenceTarget", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftCadenceTarget(60);
+    const result = convertZwiftCadenceTarget(CADENCE_RPM.LOW);
 
     // Assert
-    expect(result.value?.value).toBe(60);
+    expect(result.value?.value).toBe(CADENCE_RPM.LOW);
   });
 
   it("should handle high cycling cadence", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftCadenceTarget(120);
+    const result = convertZwiftCadenceTarget(CADENCE_RPM.RACE);
 
     // Assert
-    expect(result.value?.value).toBe(120);
+    expect(result.value?.value).toBe(CADENCE_RPM.RACE);
   });
 
   it("should handle running cadence of 160 SPM", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftCadenceTarget(160, true);
+    const result = convertZwiftCadenceTarget(CADENCE_RPM.RUN_LOW, true);
 
     // Assert
-    expect(result.value?.value).toBe(80);
+    expect(result.value?.value).toBe(CADENCE_RPM.MED);
   });
 
   it("should handle running cadence of 200 SPM", () => {
     // Arrange
 
     // Act
-    const result = convertZwiftCadenceTarget(200, true);
+    const result = convertZwiftCadenceTarget(CADENCE_RPM.RUN_HIGH, true);
 
     // Assert
-    expect(result.value?.value).toBe(100);
+    expect(result.value?.value).toBe(CADENCE_RPM.RUN_HIGH / 2);
   });
 });
 
@@ -151,30 +161,36 @@ describe("convertKrdPaceToZwift", () => {
     // Arrange
 
     // Act
-    const result = convertKrdPaceToZwift(1000 / 300);
+    const result = convertKrdPaceToZwift(
+      PACE_METERS.KILOMETER / PACE_SECONDS_PER_KM.MODERATE
+    );
 
     // Assert
-    expect(result).toBeCloseTo(300, 1);
+    expect(result).toBeCloseTo(PACE_SECONDS_PER_KM.MODERATE, 1);
   });
 
   it("should handle fast running pace", () => {
     // Arrange
 
     // Act
-    const result = convertKrdPaceToZwift(1000 / 240);
+    const result = convertKrdPaceToZwift(
+      PACE_METERS.KILOMETER / PACE_SECONDS_PER_KM.FAST
+    );
 
     // Assert
-    expect(result).toBeCloseTo(240, 1);
+    expect(result).toBeCloseTo(PACE_SECONDS_PER_KM.FAST, 1);
   });
 
   it("should handle slow walking pace", () => {
     // Arrange
 
     // Act
-    const result = convertKrdPaceToZwift(1000 / 600);
+    const result = convertKrdPaceToZwift(
+      PACE_METERS.KILOMETER / PACE_SECONDS_PER_KM.EASY
+    );
 
     // Assert
-    expect(result).toBeCloseTo(600, 1);
+    expect(result).toBeCloseTo(PACE_SECONDS_PER_KM.EASY, 1);
   });
 });
 
@@ -183,49 +199,49 @@ describe("convertKrdCadenceToZwift", () => {
     // Arrange
 
     // Act
-    const result = convertKrdCadenceToZwift(90, false);
+    const result = convertKrdCadenceToZwift(CADENCE_RPM.HIGH, false);
 
     // Assert
-    expect(result).toBe(90);
+    expect(result).toBe(CADENCE_RPM.HIGH);
   });
 
   it("should convert RPM to SPM for running", () => {
     // Arrange
 
     // Act
-    const result = convertKrdCadenceToZwift(90, true);
+    const result = convertKrdCadenceToZwift(CADENCE_RPM.HIGH, true);
 
     // Assert
-    expect(result).toBe(180);
+    expect(result).toBe(CADENCE_SPM.STANDARD);
   });
 
   it("should default to cycling (isRunning = false)", () => {
     // Arrange
 
     // Act
-    const result = convertKrdCadenceToZwift(90);
+    const result = convertKrdCadenceToZwift(CADENCE_RPM.HIGH);
 
     // Assert
-    expect(result).toBe(90);
+    expect(result).toBe(CADENCE_RPM.HIGH);
   });
 
   it("should handle low RPM for running", () => {
     // Arrange
 
     // Act
-    const result = convertKrdCadenceToZwift(80, true);
+    const result = convertKrdCadenceToZwift(CADENCE_RPM.MED, true);
 
     // Assert
-    expect(result).toBe(160);
+    expect(result).toBe(CADENCE_RPM.RUN_LOW);
   });
 
   it("should handle high RPM for running", () => {
     // Arrange
 
     // Act
-    const result = convertKrdCadenceToZwift(100, true);
+    const result = convertKrdCadenceToZwift(CADENCE_RPM.RUN_HIGH / 2, true);
 
     // Assert
-    expect(result).toBe(200);
+    expect(result).toBe(CADENCE_RPM.RUN_HIGH);
   });
 });

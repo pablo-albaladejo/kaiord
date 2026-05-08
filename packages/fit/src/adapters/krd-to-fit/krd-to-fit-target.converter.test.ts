@@ -1,6 +1,7 @@
 import type { WorkoutStep } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import { FIT_TARGET_POWER_ZONE_3 } from "../../test-utils/constants";
 import { convertTarget } from "./krd-to-fit-target.converter";
 
 // Characterization tests for convertTarget (the dispatcher). The dispatcher
@@ -44,7 +45,7 @@ describe("convertTarget (dispatcher)", () => {
 
     // Assert
     expect(message.targetType).toBe("power");
-    expect(message.targetPowerZone).toBe(3);
+    expect(message.targetPowerZone).toBe(FIT_TARGET_POWER_ZONE_3);
   });
 
   it("should dispatch heart_rate → convertHeartRateTarget", () => {

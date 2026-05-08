@@ -71,9 +71,11 @@ const baseProfile = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const DEXIE_V8 = 8;
+
 const seedV8 = async (name: string, profiles: unknown[]): Promise<void> => {
   const v8 = new Dexie(name);
-  v8.version(8).stores({ profiles: "id", aiProviders: "id, createdAt" });
+  v8.version(DEXIE_V8).stores({ profiles: "id", aiProviders: "id, createdAt" });
   await v8.open();
   await v8.table("profiles").bulkPut(profiles);
   v8.close();

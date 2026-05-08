@@ -10,6 +10,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { KRD, RepetitionBlock } from "../types/krd";
 import { useWorkoutStore } from "./workout-store";
 
+const EXPECTED_MIGRATED_STEP_COUNT = 3;
+
 describe("workout loading integration", () => {
   // Reset store before each test
   beforeEach(() => {
@@ -190,7 +192,7 @@ describe("workout loading integration", () => {
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
       const workout = state.currentWorkout?.extensions?.structured_workout;
-      expect(workout?.steps).toHaveLength(3);
+      expect(workout?.steps).toHaveLength(EXPECTED_MIGRATED_STEP_COUNT);
 
       // Act
       const block = workout?.steps[1] as RepetitionBlock;
@@ -446,7 +448,7 @@ describe("workout loading integration", () => {
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
       const workout = state.currentWorkout?.extensions?.structured_workout;
-      expect(workout?.steps).toHaveLength(3);
+      expect(workout?.steps).toHaveLength(EXPECTED_MIGRATED_STEP_COUNT);
       const blocks = workout?.steps as RepetitionBlock[];
       blocks.forEach((block) => {
         expect(block.id).toBeDefined();

@@ -135,7 +135,8 @@ describe("deleteProfile cascade fan-out (integration)", () => {
   let dbName: string;
 
   beforeEach(async () => {
-    dbName = `kaiord-cascade-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const BASE36 = 36;
+    dbName = `kaiord-cascade-${Date.now()}-${Math.random().toString(BASE36).slice(2)}`;
     database = new KaiordDatabase(dbName);
     await database.open();
     persistence = createDexiePersistence(database);

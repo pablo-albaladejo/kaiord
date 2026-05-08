@@ -10,6 +10,7 @@ import { setZoneMethod } from "../../../application/profile/zones/set-zone-metho
 import { updateSportThresholds } from "../../../application/profile/zones/update-sport-thresholds";
 import type { Target } from "../../../types/krd";
 import { TargetPicker } from "./TargetPicker";
+import { HR_ZONE_3, POWER_WATTS_250 } from "./TargetPicker.test-fixtures";
 
 describe("TargetPicker", () => {
   beforeEach(async () => {
@@ -50,7 +51,7 @@ describe("TargetPicker", () => {
 
     expect(screen.getByLabelText("Select target type")).toHaveValue("power");
     expect(screen.getByLabelText("Select target unit")).toHaveValue("watts");
-    expect(screen.getByLabelText("Power (watts)")).toHaveValue(250);
+    expect(screen.getByLabelText("Power (watts)")).toHaveValue(POWER_WATTS_250);
   });
 
   it("should render heart rate target with zone unit", () => {
@@ -72,7 +73,7 @@ describe("TargetPicker", () => {
       "heart_rate"
     );
     expect(screen.getByLabelText("Select target unit")).toHaveValue("zone");
-    expect(screen.getByLabelText("HR Zone (1-5)")).toHaveValue(3);
+    expect(screen.getByLabelText("HR Zone (1-5)")).toHaveValue(HR_ZONE_3);
   });
 
   it("should render range inputs for range unit", () => {
@@ -91,7 +92,7 @@ describe("TargetPicker", () => {
     // Assert
 
     expect(screen.getByLabelText("Minimum value")).toHaveValue(200);
-    expect(screen.getByLabelText("Maximum value")).toHaveValue(250);
+    expect(screen.getByLabelText("Maximum value")).toHaveValue(POWER_WATTS_250);
   });
 
   it("should call onChange when target type changes", async () => {

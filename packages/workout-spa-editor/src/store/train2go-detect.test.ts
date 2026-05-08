@@ -15,6 +15,8 @@ import { ping } from "./train2go-extension-transport";
 vi.mock("./train2go-extension-transport", () => ({ ping: vi.fn() }));
 const mockPing = vi.mocked(ping);
 
+const CACHE_TTL_EXPIRED_OFFSET_MS = 31_000;
+
 describe("createDetectAction", () => {
   let state: Record<string, unknown>;
   let set: (partial: Record<string, unknown>) => void;
@@ -178,7 +180,7 @@ describe("createDetectAction", () => {
       await detect();
       expect(mockPing).toHaveBeenCalledTimes(1);
       state.lastDetectionTimestamp =
-        (state.lastDetectionTimestamp as number) - 31_000;
+        (state.lastDetectionTimestamp as number) - CACHE_TTL_EXPIRED_OFFSET_MS;
 
       // Act
       await detect();

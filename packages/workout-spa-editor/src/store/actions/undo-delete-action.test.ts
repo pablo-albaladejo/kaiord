@@ -87,7 +87,8 @@ describe("undoDeleteAction", () => {
     // Assert
     expect(result.currentWorkout).toBeDefined();
     const workout = result.currentWorkout?.extensions?.structured_workout;
-    expect(workout?.steps).toHaveLength(3);
+    const STEPS_AFTER_UNDO = 3;
+    expect(workout?.steps).toHaveLength(STEPS_AFTER_UNDO);
     expect(workout?.steps[1]).toEqual({
       ...deletedStep,
       stepIndex: 1,

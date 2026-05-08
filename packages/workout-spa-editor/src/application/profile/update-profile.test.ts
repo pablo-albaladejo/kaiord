@@ -11,12 +11,13 @@ describe("updateProfile", () => {
     const persistence = createInMemoryPersistence();
     const original = makeProfile({ name: "Original", bodyWeight: 70 });
     await seedProfile(persistence, original);
+    const NEW_BODY_WEIGHT = 72;
     const updated = await updateProfile(persistence, original.id, {
       name: "Renamed",
-      bodyWeight: 72,
+      bodyWeight: NEW_BODY_WEIGHT,
     });
     expect(updated.name).toBe("Renamed");
-    expect(updated.bodyWeight).toBe(72);
+    expect(updated.bodyWeight).toBe(NEW_BODY_WEIGHT);
     expect(updated.updatedAt).not.toBe(original.updatedAt);
 
     // Act

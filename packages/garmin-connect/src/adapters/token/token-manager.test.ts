@@ -2,6 +2,11 @@ import type { Logger, TokenStore } from "@kaiord/core";
 import { ServiceApiError } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  MILLISECONDS_PER_SECOND,
+  OAUTH2_EXPIRES_IN_1H_SEC,
+  OAUTH2_EXPIRES_IN_2H_SEC,
+} from "../../test-utils/constants";
 import type { OAuth1Token, OAuth2Token } from "../http/types";
 import { createTokenManager } from "./token-manager";
 import type { RefreshFn } from "./token-manager.types";
@@ -17,19 +22,21 @@ const OAUTH2: OAuth2Token = {
   token_type: "Bearer",
   expires_in: 3600,
   refresh_token_expires_in: 86400,
-  expires_at: Math.floor(Date.now() / 1000) + 3600,
+  expires_at:
+    Math.floor(Date.now() / MILLISECONDS_PER_SECOND) + OAUTH2_EXPIRES_IN_1H_SEC,
 };
 
 const expiredOAuth2 = (): OAuth2Token => ({
   ...OAUTH2,
   access_token: "acc_expired",
-  expires_at: Math.floor(Date.now() / 1000) - 100,
+  expires_at: Math.floor(Date.now() / MILLISECONDS_PER_SECOND) - 100,
 });
 
 const refreshedOAuth2 = (): OAuth2Token => ({
   ...OAUTH2,
   access_token: "acc_refreshed",
-  expires_at: Math.floor(Date.now() / 1000) + 7200,
+  expires_at:
+    Math.floor(Date.now() / MILLISECONDS_PER_SECOND) + OAUTH2_EXPIRES_IN_2H_SEC,
 });
 
 const createLogger = (): Logger => ({

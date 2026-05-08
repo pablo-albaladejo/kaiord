@@ -8,6 +8,13 @@ import { describe, expect, it } from "vitest";
 
 import type { RepetitionBlock, Workout } from "../types/krd";
 import { calculateWorkoutStats } from "./workout-stats";
+import {
+  DISTANCE_STATS_TOTAL_METERS,
+  EXPECTED_STEP_COUNTS,
+  REPEAT_COUNTS,
+  STEP_SECONDS,
+  TIME_STATS_TOTAL_SECONDS,
+} from "./workout-stats.test-fixtures";
 
 describe("workout-stats", () => {
   describe("calculateWorkoutStats", () => {
@@ -90,7 +97,7 @@ describe("workout-stats", () => {
 
       // Assert
 
-      expect(result.totalDuration).toBe(900);
+      expect(result.totalDuration).toBe(TIME_STATS_TOTAL_SECONDS);
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
       expect(result.stepCount).toBe(2);
@@ -132,7 +139,7 @@ describe("workout-stats", () => {
       // Assert
 
       expect(result.totalDuration).toBeNull();
-      expect(result.totalDistance).toBe(3000);
+      expect(result.totalDistance).toBe(DISTANCE_STATS_TOTAL_METERS);
       expect(result.hasOpenSteps).toBe(false);
       expect(result.stepCount).toBe(2);
       expect(result.repetitionCount).toBe(0);
@@ -191,10 +198,14 @@ describe("workout-stats", () => {
 
       // Assert
 
-      expect(result.totalDuration).toBe(300 + (60 + 120) * 3 + 300);
+      expect(result.totalDuration).toBe(
+        STEP_SECONDS.warmup +
+          (STEP_SECONDS.short + STEP_SECONDS.medium) * REPEAT_COUNTS.tripled +
+          STEP_SECONDS.warmup
+      );
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
-      expect(result.stepCount).toBe(8); // 1 + (2 * 3) + 1
+      expect(result.stepCount).toBe(EXPECTED_STEP_COUNTS.complexNested); // 1 + (2 * 3) + 1
       expect(result.repetitionCount).toBe(1);
     });
 
@@ -330,8 +341,11 @@ describe("workout-stats", () => {
 
       // Assert
 
-      expect(result.totalDuration).toBe(60 * 2 + 120 * 3);
-      expect(result.stepCount).toBe(5); // (1 * 2) + (1 * 3)
+      expect(result.totalDuration).toBe(
+        STEP_SECONDS.short * REPEAT_COUNTS.doubled +
+          STEP_SECONDS.medium * REPEAT_COUNTS.tripled
+      );
+      expect(result.stepCount).toBe(EXPECTED_STEP_COUNTS.multipleRepeats); // (1 * 2) + (1 * 3)
       expect(result.repetitionCount).toBe(2);
     });
 
@@ -399,7 +413,7 @@ describe("workout-stats", () => {
       expect(result.totalDuration).toBeNull(); // Has open step
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(true);
-      expect(result.stepCount).toBe(13); // 1 + (2 * 5) + 1 + 1
+      expect(result.stepCount).toBe(EXPECTED_STEP_COUNTS.fullPyramid); // 1 + (2 * 5) + 1 + 1
       expect(result.repetitionCount).toBe(1);
     });
   });

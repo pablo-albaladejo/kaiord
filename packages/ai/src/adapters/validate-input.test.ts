@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { validateInput } from "./validate-input";
 import { AiParsingError } from "../errors";
+import {
+  INPUT_LEN_AT_LIMIT,
+  INPUT_LEN_OVER_LIMIT,
+  INPUT_TEXT_TRUNCATED_MAX_LEN,
+} from "../test-utils/constants";
 
 describe("validateInput", () => {
   it("should return trimmed text for valid input", () => {
@@ -26,7 +31,7 @@ describe("validateInput", () => {
     // Arrange
 
     // Act
-    const longInput = "a".repeat(2001);
+    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
 
     // Assert
     expect(() => validateInput(longInput)).toThrow(AiParsingError);
@@ -56,7 +61,7 @@ describe("validateInput", () => {
     // Arrange
 
     // Act
-    const input = "a".repeat(2000);
+    const input = "a".repeat(INPUT_LEN_AT_LIMIT);
 
     // Assert
     expect(validateInput(input)).toBe(input);
@@ -76,14 +81,14 @@ describe("validateInput", () => {
     // Arrange
 
     // Act
-    const longInput = "a".repeat(2001);
+    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
 
     // Assert
     try {
       validateInput(longInput);
     } catch (error) {
       expect((error as AiParsingError).inputText.length).toBeLessThanOrEqual(
-        203
+        INPUT_TEXT_TRUNCATED_MAX_LEN
       );
     }
   });

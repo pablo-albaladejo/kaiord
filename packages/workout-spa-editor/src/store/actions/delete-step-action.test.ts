@@ -10,6 +10,9 @@ import type { KRD, WorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { deleteStepAction } from "./delete-step-action";
 
+const ONE_SECOND_MS = 1000;
+const OUT_OF_RANGE_INDEX = 999;
+
 describe("deleteStepAction", () => {
   describe("step deletion tracking", () => {
     it("should track deleted step in deletedSteps array", () => {
@@ -142,7 +145,7 @@ describe("deleteStepAction", () => {
           {
             step: existingDeletedStep,
             index: 0,
-            timestamp: Date.now() - 1000,
+            timestamp: Date.now() - ONE_SECOND_MS,
           },
         ],
       };
@@ -247,7 +250,7 @@ describe("deleteStepAction", () => {
       };
 
       // Act
-      const result = deleteStepAction(krd, 999, state);
+      const result = deleteStepAction(krd, OUT_OF_RANGE_INDEX, state);
 
       // Assert
       expect(result.deletedSteps).toEqual([]);

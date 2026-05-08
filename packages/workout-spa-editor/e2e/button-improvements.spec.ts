@@ -14,6 +14,18 @@ import { expandFileUpload } from "./helpers/expand-file-upload";
  * across different viewport sizes.
  */
 
+// Pixel tolerances for responsive button layout assertions. The
+// values intentionally bracket Tailwind's gap-3 (12px) plus browser
+// rendering jitter; they are not domain values.
+const SAME_ROW_Y_TOLERANCE_PX = 60;
+const STACKED_X_ALIGN_TOLERANCE_PX = 10;
+const SAME_ROW_X_ORDER_TOLERANCE_PX = 10;
+const HORIZONTAL_GAP_MIN_PX = 10;
+const HORIZONTAL_GAP_MAX_PX = 16;
+const VERTICAL_GAP_MIN_PX = 8;
+const VERTICAL_GAP_MAX_PX = 20;
+const MOBILE_VIEWPORT_FALLBACK_WIDTH_PX = 375;
+
 /**
  * Helper function to dismiss the tutorial dialog if it appears
  */
@@ -114,10 +126,10 @@ test.describe("Button Improvements - Desktop Layout", () => {
       const yDifference = Math.abs(saveBox.y - libraryBox.y);
       // On desktop (sm breakpoint), these should be on the same row
       // Allow up to 60px difference to account for responsive layout
-      expect(yDifference).toBeLessThan(60);
+      expect(yDifference).toBeLessThan(SAME_ROW_Y_TOLERANCE_PX);
 
       // If they're on the same row, Library should be to the right of Save
-      if (yDifference < 10) {
+      if (yDifference < SAME_ROW_X_ORDER_TOLERANCE_PX) {
         expect(libraryBox.x).toBeGreaterThan(saveBox.x);
       }
     }
@@ -125,7 +137,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     // Discard button should be on the same row as other buttons on desktop
     if (libraryBox && discardBox) {
       const yDifference = Math.abs(discardBox.y - libraryBox.y);
-      expect(yDifference).toBeLessThan(60);
+      expect(yDifference).toBeLessThan(SAME_ROW_Y_TOLERANCE_PX);
     }
   });
 
@@ -195,8 +207,8 @@ test.describe("Button Improvements - Desktop Layout", () => {
     if (saveBox && libraryBox) {
       const horizontalGap = libraryBox.x - (saveBox.x + saveBox.width);
       // Allow some tolerance for browser rendering differences
-      expect(horizontalGap).toBeGreaterThanOrEqual(10);
-      expect(horizontalGap).toBeLessThanOrEqual(16);
+      expect(horizontalGap).toBeGreaterThanOrEqual(HORIZONTAL_GAP_MIN_PX);
+      expect(horizontalGap).toBeLessThanOrEqual(HORIZONTAL_GAP_MAX_PX);
     }
   });
 
@@ -370,8 +382,8 @@ test.describe("Button Improvements - Mobile Layout", () => {
     if (saveBox && libraryBox && discardBox) {
       const xDifference1 = Math.abs(saveBox.x - libraryBox.x);
       const xDifference2 = Math.abs(libraryBox.x - discardBox.x);
-      expect(xDifference1).toBeLessThan(10);
-      expect(xDifference2).toBeLessThan(10);
+      expect(xDifference1).toBeLessThan(STACKED_X_ALIGN_TOLERANCE_PX);
+      expect(xDifference2).toBeLessThan(STACKED_X_ALIGN_TOLERANCE_PX);
     }
   });
 
@@ -443,7 +455,8 @@ test.describe("Button Improvements - Mobile Layout", () => {
     const discardBox = await discardButton.boundingBox();
 
     // Get viewport width
-    const viewportWidth = page.viewportSize()?.width || 375;
+    const viewportWidth =
+      page.viewportSize()?.width || MOBILE_VIEWPORT_FALLBACK_WIDTH_PX;
 
     // Assert - Buttons must fit within the viewport (no horizontal overflow)
     if (saveBox) {
@@ -536,14 +549,14 @@ test.describe("Button Improvements - Mobile Layout", () => {
     // Wider tolerance (8-20px) to account for scroll animation timing on Mobile Safari
     if (saveBox && libraryBox) {
       const verticalGap1 = libraryBox.y - (saveBox.y + saveBox.height);
-      expect(verticalGap1).toBeGreaterThanOrEqual(8);
-      expect(verticalGap1).toBeLessThanOrEqual(20);
+      expect(verticalGap1).toBeGreaterThanOrEqual(VERTICAL_GAP_MIN_PX);
+      expect(verticalGap1).toBeLessThanOrEqual(VERTICAL_GAP_MAX_PX);
     }
 
     if (libraryBox && discardBox) {
       const verticalGap2 = discardBox.y - (libraryBox.y + libraryBox.height);
-      expect(verticalGap2).toBeGreaterThanOrEqual(8);
-      expect(verticalGap2).toBeLessThanOrEqual(20);
+      expect(verticalGap2).toBeGreaterThanOrEqual(VERTICAL_GAP_MIN_PX);
+      expect(verticalGap2).toBeLessThanOrEqual(VERTICAL_GAP_MAX_PX);
     }
   });
 });

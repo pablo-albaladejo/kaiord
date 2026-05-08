@@ -8,6 +8,13 @@ import type { KRD } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { ImportError, importWorkout } from "./import-workout";
+import {
+  ERROR_MESSAGE_MIN_LENGTH,
+  INVALID_FIT_BYTES_4,
+  KRD_PROGRESS_STEPS,
+  NON_KRD_FAILED_PROGRESS_STEPS,
+  PLACEHOLDER_BYTES_3,
+} from "./import-workout.test-fixtures";
 
 /**
  * Creates a mock File object with arrayBuffer support for testing
@@ -146,7 +153,9 @@ describe("importWorkout", () => {
         expect(error).toBeInstanceOf(ImportError);
         // Error message should be useful even without line/column
         expect((error as ImportError).message).toContain("Invalid JSON");
-        expect((error as ImportError).message.length).toBeGreaterThan(20);
+        expect((error as ImportError).message.length).toBeGreaterThan(
+          ERROR_MESSAGE_MIN_LENGTH
+        );
       }
     });
 
@@ -235,11 +244,9 @@ describe("importWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
-      expect(onProgress).toHaveBeenCalledWith(30);
-      expect(onProgress).toHaveBeenCalledWith(40);
-      expect(onProgress).toHaveBeenCalledWith(70);
-      expect(onProgress).toHaveBeenCalledWith(100);
+      for (const step of KRD_PROGRESS_STEPS) {
+        expect(onProgress).toHaveBeenCalledWith(step);
+      }
     });
   });
 
@@ -248,7 +255,7 @@ describe("importWorkout", () => {
       // Arrange
       // Arrange
 
-      const buffer = new Uint8Array([1, 2, 3]);
+      const buffer = new Uint8Array(PLACEHOLDER_BYTES_3);
 
       // Act
 
@@ -268,7 +275,7 @@ describe("importWorkout", () => {
       // Arrange
       // Arrange
 
-      const buffer = new Uint8Array([1, 2, 3]);
+      const buffer = new Uint8Array(PLACEHOLDER_BYTES_3);
 
       // Act
 
@@ -286,7 +293,7 @@ describe("importWorkout", () => {
       // Arrange
       // Arrange
 
-      const buffer = new Uint8Array([1, 2, 3]);
+      const buffer = new Uint8Array(PLACEHOLDER_BYTES_3);
 
       // Act
 
@@ -352,7 +359,7 @@ describe("importWorkout", () => {
       // Arrange
       // Arrange
 
-      const invalidFitData = new Uint8Array([0, 0, 0, 0]);
+      const invalidFitData = new Uint8Array(INVALID_FIT_BYTES_4);
 
       // Act
 
@@ -372,7 +379,7 @@ describe("importWorkout", () => {
       // Arrange
       // Arrange
 
-      const invalidFitData = new Uint8Array([0, 0, 0, 0]);
+      const invalidFitData = new Uint8Array(INVALID_FIT_BYTES_4);
       const file = createMockFile(invalidFitData, "workout.fit");
       const onProgress = vi.fn();
 
@@ -391,9 +398,9 @@ describe("importWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
-      expect(onProgress).toHaveBeenCalledWith(30);
-      expect(onProgress).toHaveBeenCalledWith(50);
+      for (const step of NON_KRD_FAILED_PROGRESS_STEPS) {
+        expect(onProgress).toHaveBeenCalledWith(step);
+      }
     });
   });
 
@@ -441,9 +448,9 @@ describe("importWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
-      expect(onProgress).toHaveBeenCalledWith(30);
-      expect(onProgress).toHaveBeenCalledWith(50);
+      for (const step of NON_KRD_FAILED_PROGRESS_STEPS) {
+        expect(onProgress).toHaveBeenCalledWith(step);
+      }
     });
   });
 
@@ -491,9 +498,9 @@ describe("importWorkout", () => {
       // Assert
 
       expect(onProgress).toHaveBeenCalled();
-      expect(onProgress).toHaveBeenCalledWith(10);
-      expect(onProgress).toHaveBeenCalledWith(30);
-      expect(onProgress).toHaveBeenCalledWith(50);
+      for (const step of NON_KRD_FAILED_PROGRESS_STEPS) {
+        expect(onProgress).toHaveBeenCalledWith(step);
+      }
     });
   });
 

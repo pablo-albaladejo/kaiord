@@ -19,12 +19,17 @@ const block = (id: string, repeatCount: number, children: Array<unknown>) => ({
   steps: children,
 });
 
+const FIXTURE_REPEAT_COUNT = 3;
+
 const buildWorkout = (): Workout =>
   ({
     sport: "cycling",
     steps: [
       step("top-0", 0),
-      block("block-1", 3, [step("inner-0", 0), step("inner-1", 1)]),
+      block("block-1", FIXTURE_REPEAT_COUNT, [
+        step("inner-0", 0),
+        step("inner-1", 1),
+      ]),
       step("top-2", 2),
     ],
   }) as unknown as Workout;

@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  NINE_MIN_FORTY_SEC,
+  SAMPLE_CADENCE,
+  SAMPLE_CALORIES,
+  SAMPLE_DISTANCE_M,
+  SAMPLE_ELEVATION,
+  SAMPLE_HR,
+  SAMPLE_NUM_LENGTHS,
+  SAMPLE_POWER,
+  SAMPLE_SPEED,
+  SAMPLE_WORKOUT_STEP_INDEX,
+  TEN_MIN_SEC,
+} from "../../test-utils/constants";
+import {
   convertFitToKrdLap,
   convertFitToKrdLaps,
 } from "./fit-to-krd-lap.converter";
@@ -20,8 +33,8 @@ describe("convertFitToKrdLap", () => {
 
     // Assert
     expect(result.startTime).toBe("2024-01-01T00:00:00.000Z");
-    expect(result.totalElapsedTime).toBe(600);
-    expect(result.totalTimerTime).toBe(580);
+    expect(result.totalElapsedTime).toBe(TEN_MIN_SEC);
+    expect(result.totalTimerTime).toBe(NINE_MIN_FORTY_SEC);
   });
 
   it("should convert lap with performance metrics (HR, power, cadence)", () => {
@@ -44,13 +57,13 @@ describe("convertFitToKrdLap", () => {
     const result = convertFitToKrdLap(fitLap);
 
     // Assert
-    expect(result.avgHeartRate).toBe(145);
-    expect(result.maxHeartRate).toBe(165);
-    expect(result.avgCadence).toBe(90);
-    expect(result.maxCadence).toBe(100);
-    expect(result.avgPower).toBe(220);
-    expect(result.maxPower).toBe(350);
-    expect(result.normalizedPower).toBe(230);
+    expect(result.avgHeartRate).toBe(SAMPLE_HR.AVG);
+    expect(result.maxHeartRate).toBe(SAMPLE_HR.MAX);
+    expect(result.avgCadence).toBe(SAMPLE_CADENCE.AVG);
+    expect(result.maxCadence).toBe(SAMPLE_CADENCE.MAX);
+    expect(result.avgPower).toBe(SAMPLE_POWER.AVG);
+    expect(result.maxPower).toBe(SAMPLE_POWER.MAX);
+    expect(result.normalizedPower).toBe(SAMPLE_POWER.NORMALIZED);
   });
 
   it("should prefer enhanced speed over regular", () => {
@@ -70,8 +83,8 @@ describe("convertFitToKrdLap", () => {
     const result = convertFitToKrdLap(fitLap);
 
     // Assert
-    expect(result.avgSpeed).toBe(5.5);
-    expect(result.maxSpeed).toBe(7.5);
+    expect(result.avgSpeed).toBe(SAMPLE_SPEED.AVG_ENHANCED);
+    expect(result.maxSpeed).toBe(SAMPLE_SPEED.MAX_ENHANCED);
   });
 
   it("should use regular speed when enhanced not available", () => {
@@ -89,8 +102,8 @@ describe("convertFitToKrdLap", () => {
     const result = convertFitToKrdLap(fitLap);
 
     // Assert
-    expect(result.avgSpeed).toBe(5.0);
-    expect(result.maxSpeed).toBe(7.0);
+    expect(result.avgSpeed).toBe(SAMPLE_SPEED.AVG_BASE);
+    expect(result.maxSpeed).toBe(SAMPLE_SPEED.MAX_BASE);
   });
 
   it("should convert lap with elevation data", () => {
@@ -108,8 +121,8 @@ describe("convertFitToKrdLap", () => {
     const result = convertFitToKrdLap(fitLap);
 
     // Assert
-    expect(result.totalAscent).toBe(150);
-    expect(result.totalDescent).toBe(80);
+    expect(result.totalAscent).toBe(SAMPLE_ELEVATION.ASCENT_M);
+    expect(result.totalDescent).toBe(SAMPLE_ELEVATION.DESCENT_M);
   });
 
   it("should convert lap with calories", () => {
@@ -126,7 +139,7 @@ describe("convertFitToKrdLap", () => {
     const result = convertFitToKrdLap(fitLap);
 
     // Assert
-    expect(result.totalCalories).toBe(250);
+    expect(result.totalCalories).toBe(SAMPLE_CALORIES);
   });
 
   it("should convert lap with manual trigger", () => {
@@ -205,7 +218,7 @@ describe("convertFitToKrdLap", () => {
     const result = convertFitToKrdLap(fitLap);
 
     // Assert
-    expect(result.numLengths).toBe(4);
+    expect(result.numLengths).toBe(SAMPLE_NUM_LENGTHS);
     expect(result.swimStroke).toBe("breaststroke");
   });
 
@@ -223,7 +236,7 @@ describe("convertFitToKrdLap", () => {
     const result = convertFitToKrdLap(fitLap);
 
     // Assert
-    expect(result.workoutStepIndex).toBe(3);
+    expect(result.workoutStepIndex).toBe(SAMPLE_WORKOUT_STEP_INDEX);
   });
 
   it("should convert lap with sport and subSport", () => {
@@ -313,6 +326,6 @@ describe("convertFitToKrdLaps", () => {
     const results = convertFitToKrdLaps(fitLaps);
 
     // Assert
-    expect(results[0].totalDistance).toBe(5000);
+    expect(results[0].totalDistance).toBe(SAMPLE_DISTANCE_M);
   });
 });

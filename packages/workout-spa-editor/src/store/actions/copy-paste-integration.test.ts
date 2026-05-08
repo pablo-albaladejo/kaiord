@@ -12,6 +12,28 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
+import {
+  CLIPBOARD_READ_TRIPLE,
+  CLIPBOARD_WRITE_TRIPLE,
+  COOLDOWN_SECONDS,
+  INTERVAL_SECONDS,
+  RECOVERY_LONG_SECONDS,
+  RECOVERY_SHORT_SECONDS,
+  REPEAT_COUNT_DEFAULT,
+  STEP_INDEX_FIRST,
+  STEP_INDEX_FOURTH,
+  STEP_INDEX_SECOND,
+  STEP_INDEX_THIRD,
+  STEPS_AFTER_SINGLE_PASTE,
+  STEPS_AFTER_TRIPLE_PASTE,
+  STEPS_AFTER_TWO_ITEMS,
+  WARMUP_SECONDS,
+  WATTS_RECOVERY,
+  WATTS_TEMPO,
+  WATTS_TEMPO_PLUS,
+  WATTS_THRESHOLD,
+  WATTS_VO2_MAX,
+} from "./copy-paste-integration.test-fixtures";
 import { copyStepAction } from "./copy-step-action";
 import { pasteStepAction } from "./paste-step-action";
 
@@ -36,18 +58,21 @@ describe("Copy/Paste Integration", () => {
     it("should copy and paste a workout step successfully", async () => {
       // Arrange
       const step1: WorkoutStep = {
-        stepIndex: 0,
+        stepIndex: STEP_INDEX_FIRST,
         durationType: "time",
-        duration: { type: "time", seconds: 300 },
+        duration: { type: "time", seconds: WARMUP_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 200 } },
+        target: { type: "power", value: { unit: "watts", value: WATTS_TEMPO } },
       };
       const step2: WorkoutStep = {
-        stepIndex: 1,
+        stepIndex: STEP_INDEX_SECOND,
         durationType: "time",
-        duration: { type: "time", seconds: 360 },
+        duration: { type: "time", seconds: INTERVAL_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 210 } },
+        target: {
+          type: "power",
+          value: { unit: "watts", value: WATTS_TEMPO_PLUS },
+        },
       };
       const krd = createMockKrd([step1, step2]);
       let clipboardContent = "";
@@ -64,7 +89,7 @@ describe("Copy/Paste Integration", () => {
           readText: mockReadText,
         },
       });
-      const copyResult = await copyStepAction(krd, 0);
+      const copyResult = await copyStepAction(krd, STEP_INDEX_FIRST);
       expect(copyResult.success).toBe(true);
       expect(mockWriteText).toHaveBeenCalledOnce();
       const pasteResult = await pasteStepAction(krd);
@@ -72,41 +97,50 @@ describe("Copy/Paste Integration", () => {
       expect(pasteResult.updatedKrd).toBeDefined();
       expect(
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps
-      ).toHaveLength(3);
+      ).toHaveLength(STEPS_AFTER_SINGLE_PASTE);
       const steps =
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps;
 
       // Act
-      const pastedStep = steps[2] as WorkoutStep;
+      const pastedStep = steps[STEP_INDEX_THIRD] as WorkoutStep;
 
       // Assert
       expect(pastedStep.durationType).toBe("time");
-      expect(pastedStep.duration).toEqual({ type: "time", seconds: 300 });
+      expect(pastedStep.duration).toEqual({
+        type: "time",
+        seconds: WARMUP_SECONDS,
+      });
       expect(pastedStep.targetType).toBe("power");
       expect(pastedStep.target).toEqual({
         type: "power",
-        value: { unit: "watts", value: 200 },
+        value: { unit: "watts", value: WATTS_TEMPO },
       });
     });
 
     it("should copy and paste a repetition block successfully", async () => {
       // Arrange
       const step1: WorkoutStep = {
-        stepIndex: 0,
+        stepIndex: STEP_INDEX_FIRST,
         durationType: "time",
-        duration: { type: "time", seconds: 120 },
+        duration: { type: "time", seconds: RECOVERY_LONG_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 250 } },
+        target: {
+          type: "power",
+          value: { unit: "watts", value: WATTS_VO2_MAX },
+        },
       };
       const step2: WorkoutStep = {
-        stepIndex: 1,
+        stepIndex: STEP_INDEX_SECOND,
         durationType: "time",
-        duration: { type: "time", seconds: 60 },
+        duration: { type: "time", seconds: RECOVERY_SHORT_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 150 } },
+        target: {
+          type: "power",
+          value: { unit: "watts", value: WATTS_RECOVERY },
+        },
       };
       const block: RepetitionBlock = {
-        repeatCount: 3,
+        repeatCount: REPEAT_COUNT_DEFAULT,
         steps: [step1, step2],
       };
       const krd = createMockKrd([block]);
@@ -124,7 +158,7 @@ describe("Copy/Paste Integration", () => {
           readText: mockReadText,
         },
       });
-      const copyResult = await copyStepAction(krd, 0);
+      const copyResult = await copyStepAction(krd, STEP_INDEX_FIRST);
       expect(copyResult.success).toBe(true);
       expect(copyResult.message).toBe("Repetition block copied to clipboard");
       const pasteResult = await pasteStepAction(krd);
@@ -132,39 +166,45 @@ describe("Copy/Paste Integration", () => {
       expect(pasteResult.message).toBe("Repetition block pasted successfully");
       expect(
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps
-      ).toHaveLength(2);
+      ).toHaveLength(STEPS_AFTER_TWO_ITEMS);
 
       // Act
       const pastedBlock = pasteResult.updatedKrd!.extensions!
-        .structured_workout!.steps[1] as RepetitionBlock;
+        .structured_workout!.steps[STEP_INDEX_SECOND] as RepetitionBlock;
 
       // Assert
-      expect(pastedBlock.repeatCount).toBe(3);
-      expect(pastedBlock.steps).toHaveLength(2);
+      expect(pastedBlock.repeatCount).toBe(REPEAT_COUNT_DEFAULT);
+      expect(pastedBlock.steps).toHaveLength(STEPS_AFTER_TWO_ITEMS);
     });
 
     it("should recalculate step indices after paste", async () => {
       // Arrange
       const step1: WorkoutStep = {
-        stepIndex: 0,
+        stepIndex: STEP_INDEX_FIRST,
         durationType: "time",
-        duration: { type: "time", seconds: 300 },
+        duration: { type: "time", seconds: WARMUP_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 200 } },
+        target: { type: "power", value: { unit: "watts", value: WATTS_TEMPO } },
       };
       const step2: WorkoutStep = {
-        stepIndex: 1,
+        stepIndex: STEP_INDEX_SECOND,
         durationType: "time",
-        duration: { type: "time", seconds: 360 },
+        duration: { type: "time", seconds: INTERVAL_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 210 } },
+        target: {
+          type: "power",
+          value: { unit: "watts", value: WATTS_TEMPO_PLUS },
+        },
       };
       const step3: WorkoutStep = {
-        stepIndex: 2,
+        stepIndex: STEP_INDEX_THIRD,
         durationType: "time",
-        duration: { type: "time", seconds: 420 },
+        duration: { type: "time", seconds: COOLDOWN_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 220 } },
+        target: {
+          type: "power",
+          value: { unit: "watts", value: WATTS_THRESHOLD },
+        },
       };
       const krd = createMockKrd([step1, step2, step3]);
       let clipboardContent = "";
@@ -181,29 +221,37 @@ describe("Copy/Paste Integration", () => {
           readText: mockReadText,
         },
       });
-      await copyStepAction(krd, 0);
-      const pasteResult = await pasteStepAction(krd, 1);
+      await copyStepAction(krd, STEP_INDEX_FIRST);
+      const pasteResult = await pasteStepAction(krd, STEP_INDEX_SECOND);
 
       // Act
       const steps =
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps;
 
       // Assert
-      expect(steps).toHaveLength(4);
-      expect((steps[0] as WorkoutStep).stepIndex).toBe(0);
-      expect((steps[1] as WorkoutStep).stepIndex).toBe(1);
-      expect((steps[2] as WorkoutStep).stepIndex).toBe(2);
-      expect((steps[3] as WorkoutStep).stepIndex).toBe(3);
+      expect(steps).toHaveLength(STEPS_AFTER_TRIPLE_PASTE);
+      expect((steps[STEP_INDEX_FIRST] as WorkoutStep).stepIndex).toBe(
+        STEP_INDEX_FIRST
+      );
+      expect((steps[STEP_INDEX_SECOND] as WorkoutStep).stepIndex).toBe(
+        STEP_INDEX_SECOND
+      );
+      expect((steps[STEP_INDEX_THIRD] as WorkoutStep).stepIndex).toBe(
+        STEP_INDEX_THIRD
+      );
+      expect((steps[STEP_INDEX_FOURTH] as WorkoutStep).stepIndex).toBe(
+        STEP_INDEX_FOURTH
+      );
     });
 
     it("should handle multiple copy/paste operations", async () => {
       // Arrange
       const step1: WorkoutStep = {
-        stepIndex: 0,
+        stepIndex: STEP_INDEX_FIRST,
         durationType: "time",
-        duration: { type: "time", seconds: 300 },
+        duration: { type: "time", seconds: WARMUP_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 200 } },
+        target: { type: "power", value: { unit: "watts", value: WATTS_TEMPO } },
       };
       const krd = createMockKrd([step1]);
       let clipboardContent = "";
@@ -220,11 +268,11 @@ describe("Copy/Paste Integration", () => {
           readText: mockReadText,
         },
       });
-      await copyStepAction(krd, 0);
+      await copyStepAction(krd, STEP_INDEX_FIRST);
       const paste1 = await pasteStepAction(krd);
-      await copyStepAction(paste1.updatedKrd!, 0);
+      await copyStepAction(paste1.updatedKrd!, STEP_INDEX_FIRST);
       const paste2 = await pasteStepAction(paste1.updatedKrd!);
-      await copyStepAction(paste2.updatedKrd!, 0);
+      await copyStepAction(paste2.updatedKrd!, STEP_INDEX_FIRST);
 
       // Act
       const paste3 = await pasteStepAction(paste2.updatedKrd!);
@@ -232,9 +280,9 @@ describe("Copy/Paste Integration", () => {
       // Assert
       expect(
         paste3.updatedKrd!.extensions!.structured_workout!.steps
-      ).toHaveLength(4);
-      expect(mockWriteText).toHaveBeenCalledTimes(3);
-      expect(mockReadText).toHaveBeenCalledTimes(3);
+      ).toHaveLength(STEPS_AFTER_TRIPLE_PASTE);
+      expect(mockWriteText).toHaveBeenCalledTimes(CLIPBOARD_WRITE_TRIPLE);
+      expect(mockReadText).toHaveBeenCalledTimes(CLIPBOARD_READ_TRIPLE);
     });
   });
 
@@ -242,11 +290,11 @@ describe("Copy/Paste Integration", () => {
     it("should handle clipboard corruption between copy and paste", async () => {
       // Arrange
       const step: WorkoutStep = {
-        stepIndex: 0,
+        stepIndex: STEP_INDEX_FIRST,
         durationType: "time",
-        duration: { type: "time", seconds: 300 },
+        duration: { type: "time", seconds: WARMUP_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 200 } },
+        target: { type: "power", value: { unit: "watts", value: WATTS_TEMPO } },
       };
       const krd = createMockKrd([step]);
       const mockWriteText = vi.fn().mockResolvedValue(undefined);
@@ -259,7 +307,7 @@ describe("Copy/Paste Integration", () => {
           readText: mockReadText,
         },
       });
-      const copyResult = await copyStepAction(krd, 0);
+      const copyResult = await copyStepAction(krd, STEP_INDEX_FIRST);
 
       // Act
       const pasteResult = await pasteStepAction(krd);
@@ -273,11 +321,11 @@ describe("Copy/Paste Integration", () => {
     it("should handle paste without prior copy", async () => {
       // Arrange
       const step: WorkoutStep = {
-        stepIndex: 0,
+        stepIndex: STEP_INDEX_FIRST,
         durationType: "time",
-        duration: { type: "time", seconds: 300 },
+        duration: { type: "time", seconds: WARMUP_SECONDS },
         targetType: "power",
-        target: { type: "power", value: { unit: "watts", value: 200 } },
+        target: { type: "power", value: { unit: "watts", value: WATTS_TEMPO } },
       };
       const krd = createMockKrd([step]);
       const mockReadText = vi.fn().mockResolvedValue("");

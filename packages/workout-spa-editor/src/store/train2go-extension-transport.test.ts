@@ -7,6 +7,9 @@ import {
   readWeek,
 } from "./train2go-extension-transport";
 
+const TRANSPORT_TIMEOUT_TICK_MS = 2000;
+const TRANSPORT_LONG_TICK_MS = 35_000;
+
 describe("train2go-extension-transport", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -110,7 +113,7 @@ describe("train2go-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
       const promise = ping("ext-id");
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(TRANSPORT_TIMEOUT_TICK_MS);
       await vi.advanceTimersByTimeAsync(100);
 
       // Act
@@ -191,7 +194,7 @@ describe("train2go-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
       const promise = readWeek("ext-id", "2026-04-13", "42");
-      vi.advanceTimersByTime(35_000);
+      vi.advanceTimersByTime(TRANSPORT_LONG_TICK_MS);
 
       // Act
       const result = await promise;

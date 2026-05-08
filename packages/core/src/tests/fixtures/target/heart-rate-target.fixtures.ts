@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
 
+import { TARGET_RANGE_WIDTH_10 } from "../../../test-utils/tolerance-constants";
+
 type HeartRateTarget = {
   type: "heart_rate";
   value:
@@ -35,6 +37,9 @@ export const buildHeartRateRangeTarget = new Factory<HeartRateTarget>()
   .attr("type", () => "heart_rate" as const)
   .attr("value", () => {
     const min = faker.number.int({ max: 150, min: 60 });
-    const max = faker.number.int({ max: 200, min: min + 10 });
+    const max = faker.number.int({
+      max: 200,
+      min: min + TARGET_RANGE_WIDTH_10,
+    });
     return { unit: "range" as const, min, max };
   });

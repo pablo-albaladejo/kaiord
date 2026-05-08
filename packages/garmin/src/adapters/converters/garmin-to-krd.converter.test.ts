@@ -5,6 +5,12 @@ import type { KRD, RepetitionBlock, Workout, WorkoutStep } from "@kaiord/core";
 import { createGarminParsingError, isRepetitionBlock } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import {
+  POOL_LENGTH_METERS,
+  REPETITION,
+  SEGMENT_COUNT,
+  WORKOUT_NAME_MAX_LENGTH,
+} from "../../test-utils/constants";
 import { convertGarminToKRD } from "./garmin-to-krd.converter";
 
 const fixturesDir = join(__dirname, "../../../../../test-fixtures/gcn");
@@ -138,7 +144,7 @@ describe("convertGarminToKRD", () => {
       // Assert
       expect(isRepetitionBlock(outerRepeat)).toBe(true);
       if (isRepetitionBlock(outerRepeat)) {
-        expect(outerRepeat.repeatCount).toBe(3);
+        expect(outerRepeat.repeatCount).toBe(REPETITION.COUNT_3);
         expect(outerRepeat.steps.length).toBeGreaterThan(0);
       }
     });
@@ -248,7 +254,7 @@ describe("convertGarminToKRD", () => {
       const workout = getWorkout(krd);
 
       // Assert
-      expect(workout.poolLength).toBe(25);
+      expect(workout.poolLength).toBe(POOL_LENGTH_METERS.STANDARD);
       expect(workout.poolLengthUnit).toBe("meters");
     });
 
@@ -307,7 +313,7 @@ describe("convertGarminToKRD", () => {
       const krd = convertGarminToKRD(gcn, mockLogger);
       const workout = getWorkout(krd);
       const repeatBlock = workout.steps[1] as RepetitionBlock;
-      expect(repeatBlock.repeatCount).toBe(3);
+      expect(repeatBlock.repeatCount).toBe(REPETITION.COUNT_3);
 
       // Act
       const repsStep = repeatBlock.steps[0];
@@ -327,7 +333,7 @@ describe("convertGarminToKRD", () => {
       const workout = getWorkout(krd);
 
       // Assert
-      expect(workout.name!.length).toBeLessThanOrEqual(255);
+      expect(workout.name!.length).toBeLessThanOrEqual(WORKOUT_NAME_MAX_LENGTH);
     });
 
     it("should handle single-iteration repeat blocks", () => {
@@ -357,7 +363,7 @@ describe("convertGarminToKRD", () => {
       const workout = getWorkout(krd);
 
       // Assert
-      expect(workout.steps.length).toBe(3);
+      expect(workout.steps.length).toBe(SEGMENT_COUNT.TRIATHLON);
     });
   });
 

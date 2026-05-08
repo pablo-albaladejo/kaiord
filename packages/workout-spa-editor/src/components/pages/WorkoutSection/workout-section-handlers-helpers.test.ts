@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Workout, WorkoutStep } from "../../../types/krd";
 import { createUpdatedWorkout } from "./workout-section-handlers-helpers";
+import { BLOCK_B_INNER_1_STEP_INDEX } from "./workout-section-handlers-helpers.test-fixtures";
 
 /**
  * Tests for workout section handler helpers.
@@ -60,7 +61,7 @@ describe("createUpdatedWorkout", () => {
           repeatCount: 2,
           steps: [
             createMockStep(1, BLOCK_B_INNER_0),
-            createMockStep(3, BLOCK_B_INNER_1),
+            createMockStep(BLOCK_B_INNER_1_STEP_INDEX, BLOCK_B_INNER_1),
           ],
         },
       ],

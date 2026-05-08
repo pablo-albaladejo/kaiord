@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 
+const EDITED_POWER_WATTS = 250;
+
 /**
  * E2E Tests: Import/Export Multiple Formats
  *
@@ -247,7 +249,7 @@ test.describe("Import/Export Multiple Formats", () => {
       const savedWorkout = JSON.parse(content);
       expect(
         savedWorkout.extensions.structured_workout.steps[0].target.value.value
-      ).toBe(250);
+      ).toBe(EDITED_POWER_WATTS);
     }
   });
 

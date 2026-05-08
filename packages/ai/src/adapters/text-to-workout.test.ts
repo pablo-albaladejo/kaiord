@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Workout } from "@kaiord/core";
 import { createTextToWorkout } from "./text-to-workout";
 import { AiParsingError } from "../errors";
+import {
+  EXPECTED_STEP_COUNT_THREE,
+  INPUT_LEN_OVER_LIMIT,
+  MAX_OUTPUT_TOKENS_DEFAULT,
+} from "../test-utils/constants";
 
 const RUNNING_WORKOUT: Workout = {
   sport: "running",
@@ -74,7 +79,7 @@ describe("createTextToWorkout", () => {
 
     // Assert
     expect(result.sport).toBe("running");
-    expect(result.steps).toHaveLength(3);
+    expect(result.steps).toHaveLength(EXPECTED_STEP_COUNT_THREE);
     expect(mockGenerateText).toHaveBeenCalledOnce();
   });
 
@@ -271,7 +276,7 @@ describe("createTextToWorkout", () => {
     const parse = createTextToWorkout({ model: mockModel });
 
     // Act
-    const longInput = "a".repeat(2001);
+    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
 
     // Assert
     await expect(parse(longInput)).rejects.toThrow(AiParsingError);
@@ -293,7 +298,7 @@ describe("createTextToWorkout", () => {
     >;
 
     // Assert
-    expect(callArgs.maxOutputTokens).toBe(4096);
+    expect(callArgs.maxOutputTokens).toBe(MAX_OUTPUT_TOKENS_DEFAULT);
     expect(callArgs.temperature).toBe(0);
   });
 

@@ -15,6 +15,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { ConfirmationModal } from "./ConfirmationModal";
+import { FOCUS_TRAP_TAB_ATTEMPTS } from "./ConfirmationModal.accessibility.test-fixtures";
 
 describe("ConfirmationModal - Accessibility", () => {
   const defaultProps = {
@@ -313,7 +314,7 @@ describe("ConfirmationModal - Accessibility", () => {
       );
 
       // Act - Try to tab many times to escape modal
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < FOCUS_TRAP_TAB_ATTEMPTS; i++) {
         await user.tab();
       }
 
@@ -349,7 +350,7 @@ describe("ConfirmationModal - Accessibility", () => {
       );
 
       // Act - Try to shift-tab many times to escape modal
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < FOCUS_TRAP_TAB_ATTEMPTS; i++) {
         await user.keyboard("{Shift>}{Tab}{/Shift}");
       }
 

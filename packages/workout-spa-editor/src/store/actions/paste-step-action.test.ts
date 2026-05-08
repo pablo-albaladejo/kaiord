@@ -10,6 +10,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { pasteStepAction } from "./paste-step-action";
 
+const STEPS_AFTER_PASTE = 3;
+const EXPECTED_REPEAT_COUNT = 3;
+
 describe("pasteStepAction", () => {
   const mockKrd: KRD = {
     version: "1.0",
@@ -100,7 +103,7 @@ describe("pasteStepAction", () => {
       expect(result.updatedKrd).toBeDefined();
       expect(
         result.updatedKrd!.extensions!.structured_workout!.steps
-      ).toHaveLength(3);
+      ).toHaveLength(STEPS_AFTER_PASTE);
 
       // Act
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
@@ -122,7 +125,7 @@ describe("pasteStepAction", () => {
       expect(result.success).toBe(true);
       expect(
         result.updatedKrd!.extensions!.structured_workout!.steps
-      ).toHaveLength(3);
+      ).toHaveLength(STEPS_AFTER_PASTE);
 
       // Act
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
@@ -161,14 +164,14 @@ describe("pasteStepAction", () => {
       expect(result.message).toBe("Repetition block pasted successfully");
       expect(
         result.updatedKrd!.extensions!.structured_workout!.steps
-      ).toHaveLength(3);
+      ).toHaveLength(STEPS_AFTER_PASTE);
 
       // Act
       const lastStep =
         result.updatedKrd!.extensions!.structured_workout!.steps[2];
 
       // Assert
-      expect(lastStep).toHaveProperty("repeatCount", 3);
+      expect(lastStep).toHaveProperty("repeatCount", EXPECTED_REPEAT_COUNT);
     });
   });
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { INVALID_NUMERIC_DURATION_TYPE } from "../../test-utils/constants";
 import {
   convertKrdDurationToTcx,
   convertTcxDuration,
@@ -377,7 +378,7 @@ describe("convertTcxDuration", () => {
     it("should return open duration for numeric duration type", () => {
       // Arrange
       const data = {
-        durationType: 123 as unknown as string,
+        durationType: INVALID_NUMERIC_DURATION_TYPE as unknown as string,
         seconds: 300,
       };
 
