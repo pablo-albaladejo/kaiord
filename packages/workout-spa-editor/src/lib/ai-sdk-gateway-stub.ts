@@ -33,7 +33,6 @@ export const gateway = new Proxy(
 );
 
 export class GatewayAuthenticationError extends Error {
-  static readonly name = "GatewayAuthenticationError";
   constructor(message?: string) {
     super(message ?? "GatewayAuthenticationError");
     this.name = "GatewayAuthenticationError";
