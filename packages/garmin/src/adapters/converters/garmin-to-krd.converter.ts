@@ -39,10 +39,17 @@ export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
   addPoolLength(gcn, workout);
 
   const now = new Date().toISOString();
+  const extensions: Record<string, unknown> = { structured_workout: workout };
+  if (typeof gcn.isSessionTransitionEnabled === "boolean") {
+    extensions.gcn = {
+      isSessionTransitionEnabled: gcn.isSessionTransitionEnabled,
+    };
+  }
+
   return {
     version: "1.0",
     type: "structured_workout",
     metadata: { created: now, sport, manufacturer: "garmin-connect" },
-    extensions: { structured_workout: workout },
+    extensions,
   };
 };

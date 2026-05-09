@@ -21,6 +21,12 @@ export const CADENCE_RPM = {
   HIGH: 105,
 } as const;
 
+// Power sample values (watts) used in target ordering tests.
+export const POWER_W = {
+  RANGE_LOW: 260,
+  RANGE_HIGH: 273,
+} as const;
+
 // Pool length sample (meters).
 export const POOL_LENGTH_METERS = {
   STANDARD: 25,

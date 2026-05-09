@@ -48,9 +48,11 @@ const mapRangeOnly = <T extends "power" | "heart_rate" | "pace" | "cadence">(
   v2: number | null
 ): TargetResult => {
   if (v1 !== null && v2 !== null) {
+    const min = Math.min(v1, v2);
+    const max = Math.max(v1, v2);
     return {
       targetType: type,
-      target: { type, value: { unit: "range", min: v1, max: v2 } } as Target,
+      target: { type, value: { unit: "range", min, max } } as Target,
     };
   }
   return OPEN;

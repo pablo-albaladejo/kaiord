@@ -33,8 +33,9 @@ describe("mapWorkoutStep", () => {
       const result = mapWorkoutStep(step, { value: 1 }, { paceZones });
 
       // Assert
-      expect(result.targetValueOne).toBe(PACE_M_PER_S.Z3_MIN);
-      expect(result.targetValueTwo).toBe(PACE_M_PER_S.Z3_MAX);
+      // Pace ranges encode as (faster m/s, slower m/s) per adapter-contracts spec.
+      expect(result.targetValueOne).toBe(PACE_M_PER_S.Z3_MAX);
+      expect(result.targetValueTwo).toBe(PACE_M_PER_S.Z3_MIN);
       expect(result.zoneNumber).toBeNull();
     });
 

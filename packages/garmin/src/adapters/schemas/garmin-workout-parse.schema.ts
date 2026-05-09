@@ -76,6 +76,7 @@ export const garminWorkoutParseSchema = z.object({
     )
     .optional(),
   poolLength: z.number().nullable().optional(),
+  isSessionTransitionEnabled: z.boolean().nullable().optional(),
 });
 
 export type GarminWorkoutParsed = z.infer<typeof garminWorkoutParseSchema>;

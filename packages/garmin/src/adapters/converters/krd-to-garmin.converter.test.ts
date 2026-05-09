@@ -254,6 +254,76 @@ describe("convertKRDToGarmin", () => {
       expect(() => convertKRDToGarmin(krd, { logger: mockLogger })).toThrow();
     });
   });
+
+  describe("isSessionTransitionEnabled propagation", () => {
+    const baseKrdWithRunningWorkout = (extensions: Record<string, unknown>) =>
+      ({
+        version: "1.0",
+        type: "structured_workout" as const,
+        metadata: {
+          created: new Date().toISOString(),
+          sport: "running",
+        },
+        extensions: {
+          structured_workout: {
+            sport: "running",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "distance",
+                duration: { type: "distance", meters: 400 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+          ...extensions,
+        },
+      }) as Parameters<typeof convertKRDToGarmin>[0];
+
+    it("should emit isSessionTransitionEnabled true when present in extensions.gcn", () => {
+      // Arrange
+      const krd = baseKrdWithRunningWorkout({
+        gcn: { isSessionTransitionEnabled: true },
+      });
+
+      // Act
+      const parsed = JSON.parse(
+        convertKRDToGarmin(krd, { logger: mockLogger })
+      );
+
+      // Assert
+      expect(parsed.isSessionTransitionEnabled).toBe(true);
+    });
+
+    it("should emit isSessionTransitionEnabled false when present in extensions.gcn", () => {
+      // Arrange
+      const krd = baseKrdWithRunningWorkout({
+        gcn: { isSessionTransitionEnabled: false },
+      });
+
+      // Act
+      const parsed = JSON.parse(
+        convertKRDToGarmin(krd, { logger: mockLogger })
+      );
+
+      // Assert
+      expect(parsed.isSessionTransitionEnabled).toBe(false);
+    });
+
+    it("should omit isSessionTransitionEnabled when not present in extensions", () => {
+      // Arrange
+      const krd = baseKrdWithRunningWorkout({});
+
+      // Act
+      const parsed = JSON.parse(
+        convertKRDToGarmin(krd, { logger: mockLogger })
+      );
+
+      // Assert
+      expect("isSessionTransitionEnabled" in parsed).toBe(false);
+    });
+  });
 });
 
 const getAllStepOrders = (steps: Array<Record<string, unknown>>): number[] => {
