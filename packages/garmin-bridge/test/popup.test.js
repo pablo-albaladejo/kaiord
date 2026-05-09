@@ -9,6 +9,8 @@ const PKG = dirname(HERE);
 const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_JS = readFileSync(join(PKG, "popup.js"), "utf8");
 
+const MOCK_NOW_MS = new Date("2026-05-02T10:00:00Z").getTime();
+
 const setupDom = (chromeMock) => {
   const dom = new JSDOM(POPUP_HTML, {
     runScripts: "outside-only",
@@ -16,6 +18,11 @@ const setupDom = (chromeMock) => {
     url: "chrome-extension://fake/popup.html",
   });
   dom.window.chrome = chromeMock;
+  // popup.js runs inside the JSDOM window via `eval`, so it resolves
+  // `Date.now` against `dom.window.Date`, not the outer Node `Date`.
+  // Mock both so the staleness check (Date.now() - snapshot.receivedAt)
+  // sees a deterministic "now" relative to the fixture timestamps.
+  dom.window.Date.now = () => MOCK_NOW_MS;
   // Run the script body so listeners attach.
   dom.window.eval(POPUP_JS);
   return dom;
@@ -46,7 +53,7 @@ describe("Garmin popup", () => {
 
   beforeEach(() => {
     originalNow = Date.now;
-    Date.now = () => new Date("2026-05-02T10:00:00Z").getTime();
+    Date.now = () => MOCK_NOW_MS;
   });
 
   afterEach(() => {

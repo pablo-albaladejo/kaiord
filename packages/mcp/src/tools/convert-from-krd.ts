@@ -32,7 +32,9 @@ const writeBinaryOutput = async (
   if (!outputFile) {
     throw new Error("output_file is required for binary format (FIT)");
   }
-  const writer = FORMAT_REGISTRY[format].createWriter(logger) as BinaryWriter;
+  const writer = (await FORMAT_REGISTRY[format].createWriter(
+    logger
+  )) as BinaryWriter;
   const buffer = await toBinary(krd, writer, logger);
   await writeOutputFile(outputFile, buffer);
   return {
@@ -47,7 +49,9 @@ const writeTextOutput = async (
   outputFile: string | undefined,
   logger: Logger
 ): Promise<ConvertFromKrdResult> => {
-  const writer = FORMAT_REGISTRY[format].createWriter(logger) as TextWriter;
+  const writer = (await FORMAT_REGISTRY[format].createWriter(
+    logger
+  )) as TextWriter;
   const text = await toText(krd, writer, logger);
   if (outputFile) {
     await writeOutputFile(outputFile, text);

@@ -8,7 +8,7 @@ export default defineConfig([
     dts: true,
     clean: true,
     shims: true,
-    splitting: false,
+    splitting: true,
     treeshake: true,
     onSuccess: async () => {
       writeFileSync(
@@ -21,7 +21,7 @@ export default defineConfig([
     entry: { "bin/kaiord-mcp": "src/bin/kaiord-mcp.ts" },
     format: ["esm"],
     shims: true,
-    splitting: false,
+    splitting: true,
     treeshake: true,
     banner: { js: "#!/usr/bin/env node" },
   },

@@ -1,17 +1,19 @@
 import type { KRD, Logger } from "@kaiord/core";
-import {
-  fromBinary,
-  fromText,
-  toBinary,
-  toText,
-  validateKrd,
-} from "@kaiord/core";
-import { createFitReader, createFitWriter } from "@kaiord/fit";
-import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
-import { createTcxReader, createTcxWriter } from "@kaiord/tcx";
-import { createZwiftReader, createZwiftWriter } from "@kaiord/zwo";
+
 import { readFile } from "./file-handler";
 import { detectFormat, type FileFormat } from "./format-detector";
+import {
+  fitToKrd,
+  gcnToKrd,
+  krdToFit,
+  krdToGcn,
+  krdToKrd,
+  krdToTcx,
+  krdToText,
+  krdToZwo,
+  tcxToKrd,
+  zwoToKrd,
+} from "./krd-loaders";
 
 /** Load a file and convert it to KRD format */
 export const loadFileAsKrd = async (
@@ -40,38 +42,12 @@ export const convertToKrd = async (
   logger: Logger
 ): Promise<KRD> => {
   switch (format) {
-    case "fit": {
-      if (!(data instanceof Uint8Array)) {
-        throw new Error("FIT input must be Uint8Array");
-      }
-      return fromBinary(data, createFitReader(logger), logger);
-    }
-    case "tcx": {
-      if (typeof data !== "string") {
-        throw new Error("TCX input must be string");
-      }
-      return fromText(data, createTcxReader(logger), logger);
-    }
-    case "zwo": {
-      if (typeof data !== "string") {
-        throw new Error("ZWO input must be string");
-      }
-      return fromText(data, createZwiftReader(logger), logger);
-    }
-    case "gcn": {
-      if (typeof data !== "string") {
-        throw new Error("GCN input must be string");
-      }
-      return fromText(data, createGarminReader(logger), logger);
-    }
-    case "krd": {
-      if (typeof data !== "string") {
-        throw new Error("KRD input must be string");
-      }
-      return validateKrd(JSON.parse(data));
-    }
-    default:
-      throw new Error(`Unsupported format: ${format}`);
+    case "fit": return fitToKrd(data, logger);
+    case "tcx": return tcxToKrd(data, logger);
+    case "zwo": return zwoToKrd(data, logger);
+    case "gcn": return gcnToKrd(data, logger);
+    case "krd": return krdToKrd(data);
+    default: throw new Error(`Unsupported format: ${format}`);
   }
 };
 
@@ -82,18 +58,11 @@ export const convertFromKrd = async (
   logger: Logger
 ): Promise<Uint8Array | string> => {
   switch (format) {
-    case "fit":
-      return toBinary(krd, createFitWriter(logger), logger);
-    case "tcx":
-      return toText(krd, createTcxWriter(logger), logger);
-    case "zwo":
-      return toText(krd, createZwiftWriter(logger), logger);
-    case "gcn":
-      return toText(krd, createGarminWriter(logger), logger);
-    case "krd":
-      validateKrd(krd);
-      return JSON.stringify(krd, null, 2);
-    default:
-      throw new Error(`Unsupported output format: ${format}`);
+    case "fit": return krdToFit(krd, logger);
+    case "tcx": return krdToTcx(krd, logger);
+    case "zwo": return krdToZwo(krd, logger);
+    case "gcn": return krdToGcn(krd, logger);
+    case "krd": return krdToText(krd);
+    default: throw new Error(`Unsupported output format: ${format}`);
   }
 };

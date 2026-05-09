@@ -9,7 +9,7 @@ export default defineConfig({
   dts: false,
   clean: true,
   shims: true,
-  splitting: false,
+  splitting: true,
   bundle: true,
   banner: {
     js: "#!/usr/bin/env node",

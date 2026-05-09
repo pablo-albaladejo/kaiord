@@ -1,11 +1,14 @@
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { type ReactNode } from "react";
+import { type ReactNode, useId } from "react";
+import { createPortal } from "react-dom";
+
+import { type Align, type Side } from "./compute-position";
+import { useTooltipState } from "./use-tooltip-state";
 
 export type TooltipProps = {
   children: ReactNode;
   content: ReactNode;
-  side?: "top" | "right" | "bottom" | "left";
-  align?: "start" | "center" | "end";
+  side?: Side;
+  align?: Align;
   delayDuration?: number;
   disabled?: boolean;
 };
@@ -18,26 +21,49 @@ export const Tooltip = ({
   delayDuration = 200,
   disabled = false,
 }: TooltipProps) => {
-  if (disabled) {
-    return <>{children}</>;
-  }
+  const id = useId();
+  const tooltipId = `tooltip-${id}`;
+  const { open, position, triggerRef, tooltipRef, handleShow, handleHide } =
+    useTooltipState(delayDuration, side, align);
+
+  if (disabled) return <>{children}</>;
 
   return (
-    <TooltipPrimitive.Provider delayDuration={delayDuration}>
-      <TooltipPrimitive.Root>
-        <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
-        <TooltipPrimitive.Portal>
-          <TooltipPrimitive.Content
-            side={side}
-            align={align}
-            sideOffset={5}
-            className="z-50 overflow-hidden rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:bg-gray-50 dark:text-gray-900"
+    <>
+      <span
+        ref={triggerRef}
+        onMouseEnter={handleShow}
+        onMouseLeave={handleHide}
+        onFocus={handleShow}
+        onBlur={handleHide}
+        aria-describedby={open ? tooltipId : undefined}
+        style={{ display: "contents" }}
+      >
+        {children}
+      </span>
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            id={tooltipId}
+            role="tooltip"
+            data-side={side}
+            data-align={align}
+            style={{
+              position: "absolute",
+              top: position?.top ?? 0,
+              left: position?.left ?? 0,
+              visibility: position ? "visible" : "hidden",
+              pointerEvents: "none",
+              zIndex: 50,
+            }}
+            className="overflow-hidden rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white shadow-md dark:bg-gray-50 dark:text-gray-900"
           >
             {content}
-            <TooltipPrimitive.Arrow className="fill-gray-900 dark:fill-gray-50" />
-          </TooltipPrimitive.Content>
-        </TooltipPrimitive.Portal>
-      </TooltipPrimitive.Root>
-    </TooltipPrimitive.Provider>
+          </div>,
+          document.body
+        )}
+    </>
   );
 };
