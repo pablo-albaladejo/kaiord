@@ -1,9 +1,9 @@
 import type { Target } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import { PACE_M_PER_S, ZONE } from "../../test-utils/constants";
+import { PACE_M_PER_S, POWER_W, ZONE } from "../../test-utils/constants";
 import type { PaceZoneTable } from "./target.converter";
-import { mapKrdTargetToGarmin } from "./target.converter";
+import { mapGarminTargetToKrd, mapKrdTargetToGarmin } from "./target.converter";
 
 describe("mapKrdTargetToGarmin", () => {
   describe("pace zone resolution", () => {
@@ -15,7 +15,7 @@ describe("mapKrdTargetToGarmin", () => {
       { zone: 5, minMps: 4.0, maxMps: 4.76 },
     ];
 
-    it("should resolve pace zone to m/s range when table provided", () => {
+    it("should resolve pace zone to m/s range with faster m/s in targetValueOne", () => {
       // Arrange
       const target: Target = {
         type: "pace",
@@ -26,9 +26,10 @@ describe("mapKrdTargetToGarmin", () => {
       const result = mapKrdTargetToGarmin(target, { paceZones });
 
       // Assert
+      // Garmin stores pace ranges as (faster_m_s, slower_m_s) — see adapter-contracts spec.
       expect(result.zoneNumber).toBeNull();
-      expect(result.targetValueOne).toBe(PACE_M_PER_S.Z3_MIN);
-      expect(result.targetValueTwo).toBe(PACE_M_PER_S.Z3_MAX);
+      expect(result.targetValueOne).toBe(PACE_M_PER_S.Z3_MAX);
+      expect(result.targetValueTwo).toBe(PACE_M_PER_S.Z3_MIN);
       expect(result.targetType.workoutTargetTypeKey).toBe("pace.zone");
     });
 
@@ -62,7 +63,7 @@ describe("mapKrdTargetToGarmin", () => {
       );
     });
 
-    it("should pass pace range through unchanged", () => {
+    it("should encode pace range with faster m/s in targetValueOne", () => {
       // Arrange
       const target: Target = {
         type: "pace",
@@ -73,9 +74,32 @@ describe("mapKrdTargetToGarmin", () => {
       const result = mapKrdTargetToGarmin(target);
 
       // Assert
-      expect(result.targetValueOne).toBe(PACE_M_PER_S.RANGE_LOW);
-      expect(result.targetValueTwo).toBe(PACE_M_PER_S.RANGE_HIGH);
+      // Faster pace = higher m/s -> targetValueOne; slower = lower m/s -> targetValueTwo.
+      expect(result.targetValueOne).toBe(PACE_M_PER_S.RANGE_HIGH);
+      expect(result.targetValueTwo).toBe(PACE_M_PER_S.RANGE_LOW);
       expect(result.zoneNumber).toBeNull();
+    });
+
+    it("should encode power range with higher wattage in targetValueOne", () => {
+      // Arrange
+      const target: Target = {
+        type: "power",
+        value: {
+          unit: "range",
+          min: POWER_W.RANGE_LOW,
+          max: POWER_W.RANGE_HIGH,
+        },
+      };
+
+      // Act
+      const result = mapKrdTargetToGarmin(target);
+
+      // Assert
+      // Higher wattage = higher intensity -> targetValueOne.
+      expect(result.targetValueOne).toBe(POWER_W.RANGE_HIGH);
+      expect(result.targetValueTwo).toBe(POWER_W.RANGE_LOW);
+      expect(result.zoneNumber).toBeNull();
+      expect(result.targetType.workoutTargetTypeKey).toBe("power.zone");
     });
   });
 
@@ -112,6 +136,73 @@ describe("mapKrdTargetToGarmin", () => {
       expect(result.zoneNumber).toBe(ZONE.Z4);
       expect(result.targetValueOne).toBeNull();
       expect(result.targetValueTwo).toBeNull();
+    });
+  });
+});
+
+describe("mapGarminTargetToKrd range normalization", () => {
+  it("should normalize a slower-first pace range into [min, max]", () => {
+    // Arrange
+    const slowerFirstOne = 3.57;
+    const fasterSecondTwo = 3.7;
+
+    // Act
+    const result = mapGarminTargetToKrd(
+      "pace.zone",
+      slowerFirstOne,
+      fasterSecondTwo,
+      null
+    );
+
+    // Assert
+    expect(result.targetType).toBe("pace");
+    expect(result.target).toEqual({
+      type: "pace",
+      value: { unit: "range", min: 3.57, max: 3.7 },
+    });
+  });
+
+  it("should normalize a faster-first pace range into [min, max]", () => {
+    // Arrange
+    const fasterFirstOne = 3.7;
+    const slowerSecondTwo = 3.57;
+
+    // Act
+    const result = mapGarminTargetToKrd(
+      "pace.zone",
+      fasterFirstOne,
+      slowerSecondTwo,
+      null
+    );
+
+    // Assert
+    expect(result.target).toEqual({
+      type: "pace",
+      value: { unit: "range", min: 3.57, max: 3.7 },
+    });
+  });
+
+  it("should normalize a higher-first power range into [min, max]", () => {
+    // Arrange
+    const higherFirstOne = POWER_W.RANGE_HIGH;
+    const lowerSecondTwo = POWER_W.RANGE_LOW;
+
+    // Act
+    const result = mapGarminTargetToKrd(
+      "power.zone",
+      higherFirstOne,
+      lowerSecondTwo,
+      null
+    );
+
+    // Assert
+    expect(result.target).toEqual({
+      type: "power",
+      value: {
+        unit: "range",
+        min: POWER_W.RANGE_LOW,
+        max: POWER_W.RANGE_HIGH,
+      },
     });
   });
 });

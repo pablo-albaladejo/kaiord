@@ -388,4 +388,78 @@ describe("convertGarminToKRD", () => {
       expect(() => convertGarminToKRD('"string"', mockLogger)).toThrow();
     });
   });
+
+  describe("isSessionTransitionEnabled propagation", () => {
+    const minimalGcn = (transition: boolean | undefined) => {
+      const root: Record<string, unknown> = {
+        sportType: { sportTypeId: 1, sportTypeKey: "running" },
+        workoutName: "Test",
+        workoutSegments: [
+          {
+            segmentOrder: 1,
+            sportType: { sportTypeId: 1, sportTypeKey: "running" },
+            workoutSteps: [
+              {
+                type: "ExecutableStepDTO",
+                stepOrder: 1,
+                stepType: { stepTypeId: 3, stepTypeKey: "interval" },
+                endCondition: {
+                  conditionTypeId: 3,
+                  conditionTypeKey: "distance",
+                },
+                endConditionValue: 400,
+                targetType: {
+                  workoutTargetTypeId: 1,
+                  workoutTargetTypeKey: "no.target",
+                },
+              },
+            ],
+          },
+        ],
+      };
+      if (transition !== undefined) {
+        root.isSessionTransitionEnabled = transition;
+      }
+      return JSON.stringify(root);
+    };
+
+    it("should propagate isSessionTransitionEnabled true into extensions.gcn", () => {
+      // Arrange
+      const gcn = minimalGcn(true);
+
+      // Act
+      const krd = convertGarminToKRD(gcn, mockLogger);
+
+      // Assert
+      const gcnExt = krd.extensions?.gcn as
+        | { isSessionTransitionEnabled?: boolean }
+        | undefined;
+      expect(gcnExt?.isSessionTransitionEnabled).toBe(true);
+    });
+
+    it("should propagate isSessionTransitionEnabled false into extensions.gcn", () => {
+      // Arrange
+      const gcn = minimalGcn(false);
+
+      // Act
+      const krd = convertGarminToKRD(gcn, mockLogger);
+
+      // Assert
+      const gcnExt = krd.extensions?.gcn as
+        | { isSessionTransitionEnabled?: boolean }
+        | undefined;
+      expect(gcnExt?.isSessionTransitionEnabled).toBe(false);
+    });
+
+    it("should not create extensions.gcn when isSessionTransitionEnabled is absent", () => {
+      // Arrange
+      const gcn = minimalGcn(undefined);
+
+      // Act
+      const krd = convertGarminToKRD(gcn, mockLogger);
+
+      // Assert
+      expect(krd.extensions?.gcn).toBeUndefined();
+    });
+  });
 });

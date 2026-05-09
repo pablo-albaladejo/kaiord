@@ -2,6 +2,7 @@
   "sportType": {"sportTypeId": 10, "sportTypeKey": "multi_sport", "displayOrder": 4},
   "subSportType": null,
   "workoutName": "MEGA MULTISPORT - Complete Triathlon",
+  "isSessionTransitionEnabled": true,
   "estimatedDistanceUnit": {"unitKey": null},
   "workoutSegments": [
     {

@@ -19,6 +19,8 @@ export const garminWorkoutInputSchema = z.object({
 
   poolLength: z.number().positive().optional(),
   poolLengthUnit: garminUnitInputSchema.optional(),
+
+  isSessionTransitionEnabled: z.boolean().optional(),
 });
 
 export type GarminWorkoutInput = z.infer<typeof garminWorkoutInputSchema>;

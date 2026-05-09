@@ -1,7 +1,7 @@
 import type { Target } from "@kaiord/core";
-import { createGarminParsingError } from "@kaiord/core";
 
 import { TargetTypeId } from "../schemas/common";
+import { buildPaceTargetType, resolvePaceZone } from "./target-pace.mapper";
 import type {
   GarminTargetInfo,
   PaceZoneTable,
@@ -20,19 +20,22 @@ export const mapKrdTargetToGarmin = (
     case "power":
       return mapZoneOrRange(
         buildTargetType(TargetTypeId.POWER_ZONE, "power.zone", 2),
-        target.value
+        target.value,
+        true
       );
     case "heart_rate":
       return mapZoneOrRange(
         buildTargetType(TargetTypeId.HEART_RATE_ZONE, "heart.rate.zone", 4),
-        target.value
+        target.value,
+        false
       );
     case "pace":
       return mapPace(target.value, options?.paceZones);
     case "cadence":
       return mapRangeOrValue(
         buildTargetType(TargetTypeId.CADENCE_ZONE, "cadence", 3),
-        target.value
+        target.value,
+        false
       );
     case "open":
     default:
@@ -46,31 +49,15 @@ export const mapKrdTargetToGarmin = (
 };
 
 const mapPace = (value: Val, paceZones?: PaceZoneTable): GarminTargetInfo => {
-  const tt = buildTargetType(TargetTypeId.PACE_ZONE, "pace.zone", 6);
-  if (value.unit === "zone") {
-    if (!paceZones) {
-      throw createGarminParsingError(
-        "Pace zone references require paceZones configuration. " +
-          "Garmin Connect does not support pace zone numbers natively."
-      );
-    }
-    const entry = paceZones.find((z) => z.zone === (value.value ?? 0));
-    if (!entry) {
-      throw createGarminParsingError(
-        `Pace zone ${value.value} not found in pace zone table`
-      );
-    }
-    return {
-      targetType: tt,
-      targetValueOne: entry.minMps,
-      targetValueTwo: entry.maxMps,
-      zoneNumber: null,
-    };
-  }
-  return mapRangeOrValue(tt, value);
+  if (value.unit === "zone") return resolvePaceZone(value, paceZones);
+  return mapRangeOrValue(buildPaceTargetType(), value, true);
 };
 
-const mapZoneOrRange = (tt: TT, value: Val): GarminTargetInfo => {
+const mapZoneOrRange = (
+  tt: TT,
+  value: Val,
+  fasterFirst: boolean
+): GarminTargetInfo => {
   if (value.unit === "zone") {
     return {
       targetType: tt,
@@ -79,15 +66,23 @@ const mapZoneOrRange = (tt: TT, value: Val): GarminTargetInfo => {
       zoneNumber: value.value ?? null,
     };
   }
-  return mapRangeOrValue(tt, value);
+  return mapRangeOrValue(tt, value, fasterFirst);
 };
 
-const mapRangeOrValue = (tt: TT, value: Val): GarminTargetInfo => {
+const mapRangeOrValue = (
+  tt: TT,
+  value: Val,
+  fasterFirst: boolean
+): GarminTargetInfo => {
   if (value.unit === "range") {
+    const min = value.min ?? null;
+    const max = value.max ?? null;
+    const [one, two] =
+      fasterFirst && min !== null && max !== null ? [max, min] : [min, max];
     return {
       targetType: tt,
-      targetValueOne: value.min ?? null,
-      targetValueTwo: value.max ?? null,
+      targetValueOne: one,
+      targetValueTwo: two,
       zoneNumber: null,
     };
   }

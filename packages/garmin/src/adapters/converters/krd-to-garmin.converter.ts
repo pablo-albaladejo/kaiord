@@ -53,8 +53,20 @@ export const convertKRDToGarmin = (
 
   addPoolInfo(workout, input);
 
+  const transitionFlag = extractTransitionFlag(krd);
+  if (transitionFlag !== undefined) {
+    input.isSessionTransitionEnabled = transitionFlag;
+  }
+
   options.logger.info("KRD to Garmin GCN conversion complete");
   return JSON.stringify(input, null, 2);
+};
+
+const extractTransitionFlag = (krd: KRD): boolean | undefined => {
+  const gcnExt = krd.extensions?.gcn;
+  if (!gcnExt || typeof gcnExt !== "object") return undefined;
+  const flag = (gcnExt as Record<string, unknown>).isSessionTransitionEnabled;
+  return typeof flag === "boolean" ? flag : undefined;
 };
 
 const extractWorkout = (krd: KRD): Workout | undefined => {

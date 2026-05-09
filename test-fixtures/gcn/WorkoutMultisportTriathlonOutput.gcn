@@ -278,6 +278,6 @@
     "factor": null
   },
   "workoutThumbnailUrl": null,
-  "isSessionTransitionEnabled": null,
+  "isSessionTransitionEnabled": true,
   "shared": false
 }
