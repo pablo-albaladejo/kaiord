@@ -16,10 +16,27 @@ export default defineConfig({
       bundleName: "workout-spa-editor",
       uploadToken: process.env.CODECOV_TOKEN ?? "",
     }),
+    // Trim @garmin/fitsdk's profile.js: the SDK ships a 904K static dict
+    // of every FIT message type. KAIORD touches 9 messages; we vendor a
+    // 256K trim and intercept the SDK's internal `import "./profile.js"`
+    // resolutions at resolveId time. See scripts/generate-fitsdk-minimal.mjs.
+    {
+      name: "kaiord-fitsdk-profile-trim",
+      enforce: "pre",
+      async resolveId(source, importer) {
+        if (!source.endsWith("profile.js")) return null;
+        if (!importer || !importer.includes("@garmin")) return null;
+        if (!importer.includes("fitsdk/src/")) return null;
+        return path.resolve(
+          __dirname,
+          "./src/lib/fitsdk-minimal/profile.js"
+        );
+      },
+    },
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
       // Stub zod/v3 to prune the v3 module from the SPA bundle.
       // @ai-sdk/provider-utils statically imports `ZodFirstPartyTypeKind` from
       // `zod/v3` for its v3-to-json-schema parsers. Our schemas are zod v4 only,
@@ -27,18 +44,21 @@ export default defineConfig({
       // it as statically reachable. The stub provides just the named export(s)
       // used at module-load time, allowing the rest of the v3 module to be
       // tree-shaken out of vendor-zod.
-      "zod/v3": path.resolve(__dirname, "./src/lib/zod-v3-stub.ts"),
+      {
+        find: "zod/v3",
+        replacement: path.resolve(__dirname, "./src/lib/zod-v3-stub.ts"),
+      },
       // Stub @ai-sdk/gateway — the `ai` SDK statically imports `createGateway`,
       // `gateway`, and `GatewayAuthenticationError` for its
       // `globalThis.AI_SDK_DEFAULT_PROVIDER ?? gateway` fallback. We always pass
       // a concrete model from provider-factory.ts, so this fallback is
       // unreachable. The stub lets rolldown drop the full gateway package
       // (~60KB raw, includes a multi-thousand-string GatewayModelId catalog).
-      "@ai-sdk/gateway": path.resolve(
-        __dirname,
-        "./src/lib/ai-sdk-gateway-stub.ts"
-      ),
-    },
+      {
+        find: "@ai-sdk/gateway",
+        replacement: path.resolve(__dirname, "./src/lib/ai-sdk-gateway-stub.ts"),
+      },
+    ],
   },
   // GitHub Pages deployment configuration
   base: process.env.VITE_BASE_PATH || "/",
