@@ -120,6 +120,27 @@ describe("Garmin GCN Round-Trip", () => {
     // Assert
     expect(w2.steps.length).toBe(w1.steps.length);
   });
+
+  it("should preserve isSessionTransitionEnabled true through multisport round-trip", () => {
+    // Arrange
+    const original = loadFixture("WorkoutMultisportTriathlonInput.gcn");
+
+    // Act
+    const krd1 = convertGarminToKRD(original, mockLogger);
+    const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
+    const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
+
+    // Assert
+    const ext1 = krd1.extensions?.gcn as
+      | { isSessionTransitionEnabled?: boolean }
+      | undefined;
+    const ext2 = krd2.extensions?.gcn as
+      | { isSessionTransitionEnabled?: boolean }
+      | undefined;
+    expect(ext1?.isSessionTransitionEnabled).toBe(true);
+    expect(ext2?.isSessionTransitionEnabled).toBe(true);
+    expect(JSON.parse(gcnOutput).isSessionTransitionEnabled).toBe(true);
+  });
 });
 
 type ToleranceChecker = ReturnType<typeof createToleranceChecker>;
