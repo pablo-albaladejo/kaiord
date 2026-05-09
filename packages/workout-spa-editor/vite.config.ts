@@ -20,6 +20,24 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Stub zod/v3 to prune the v3 module from the SPA bundle.
+      // @ai-sdk/provider-utils statically imports `ZodFirstPartyTypeKind` from
+      // `zod/v3` for its v3-to-json-schema parsers. Our schemas are zod v4 only,
+      // so the v3 dispatcher is never executed at runtime — but rolldown bundles
+      // it as statically reachable. The stub provides just the named export(s)
+      // used at module-load time, allowing the rest of the v3 module to be
+      // tree-shaken out of vendor-zod.
+      "zod/v3": path.resolve(__dirname, "./src/lib/zod-v3-stub.ts"),
+      // Stub @ai-sdk/gateway — the `ai` SDK statically imports `createGateway`,
+      // `gateway`, and `GatewayAuthenticationError` for its
+      // `globalThis.AI_SDK_DEFAULT_PROVIDER ?? gateway` fallback. We always pass
+      // a concrete model from provider-factory.ts, so this fallback is
+      // unreachable. The stub lets rolldown drop the full gateway package
+      // (~60KB raw, includes a multi-thousand-string GatewayModelId catalog).
+      "@ai-sdk/gateway": path.resolve(
+        __dirname,
+        "./src/lib/ai-sdk-gateway-stub.ts"
+      ),
     },
   },
   // GitHub Pages deployment configuration

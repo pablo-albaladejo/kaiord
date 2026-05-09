@@ -45,7 +45,6 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-toast": "^1.2.15",
-    "@radix-ui/react-tooltip": "^1.2.8",
     "ai": "^6.0.175",
     "dexie": "^4.4.2",
     "dexie-react-hooks": "^4.4.0",

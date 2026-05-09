@@ -44,7 +44,9 @@ const readBinaryInput = async (
   format: FileFormat,
   logger: Logger
 ): Promise<KRD> => {
-  const reader = FORMAT_REGISTRY[format].createReader(logger) as BinaryReader;
+  const reader = (await FORMAT_REGISTRY[format].createReader(
+    logger
+  )) as BinaryReader;
   if (!inputFile && inputContent === undefined) {
     throw new Error("Provide either input_file or input_content");
   }
@@ -60,7 +62,9 @@ const readTextInput = async (
   format: FileFormat,
   logger: Logger
 ): Promise<KRD> => {
-  const reader = FORMAT_REGISTRY[format].createReader(logger) as TextReader;
+  const reader = (await FORMAT_REGISTRY[format].createReader(
+    logger
+  )) as TextReader;
   if (!inputFile && inputContent === undefined) {
     throw new Error("Provide either input_file or input_content");
   }

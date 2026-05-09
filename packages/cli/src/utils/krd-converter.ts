@@ -6,10 +6,7 @@ import {
   toText,
   validateKrd,
 } from "@kaiord/core";
-import { createFitReader, createFitWriter } from "@kaiord/fit";
-import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
-import { createTcxReader, createTcxWriter } from "@kaiord/tcx";
-import { createZwiftReader, createZwiftWriter } from "@kaiord/zwo";
+
 import { readFile } from "./file-handler";
 import { detectFormat, type FileFormat } from "./format-detector";
 
@@ -33,6 +30,35 @@ export const loadFileAsKrd = async (
   return convertToKrd(fileData, detectedFormat, logger);
 };
 
+const fitToKrd = async (data: Uint8Array | string, logger: Logger) => {
+  if (!(data instanceof Uint8Array)) throw new Error("FIT input must be Uint8Array");
+  const { createFitReader } = await import("@kaiord/fit");
+  return fromBinary(data, createFitReader(logger), logger);
+};
+
+const tcxToKrd = async (data: Uint8Array | string, logger: Logger) => {
+  if (typeof data !== "string") throw new Error("TCX input must be string");
+  const { createTcxReader } = await import("@kaiord/tcx");
+  return fromText(data, createTcxReader(logger), logger);
+};
+
+const zwoToKrd = async (data: Uint8Array | string, logger: Logger) => {
+  if (typeof data !== "string") throw new Error("ZWO input must be string");
+  const { createZwiftReader } = await import("@kaiord/zwo");
+  return fromText(data, createZwiftReader(logger), logger);
+};
+
+const gcnToKrd = async (data: Uint8Array | string, logger: Logger) => {
+  if (typeof data !== "string") throw new Error("GCN input must be string");
+  const { createGarminReader } = await import("@kaiord/garmin");
+  return fromText(data, createGarminReader(logger), logger);
+};
+
+const krdToKrd = (data: Uint8Array | string): KRD => {
+  if (typeof data !== "string") throw new Error("KRD input must be string");
+  return validateKrd(JSON.parse(data));
+};
+
 /** Convert raw file data to KRD format */
 export const convertToKrd = async (
   data: Uint8Array | string,
@@ -40,38 +66,12 @@ export const convertToKrd = async (
   logger: Logger
 ): Promise<KRD> => {
   switch (format) {
-    case "fit": {
-      if (!(data instanceof Uint8Array)) {
-        throw new Error("FIT input must be Uint8Array");
-      }
-      return fromBinary(data, createFitReader(logger), logger);
-    }
-    case "tcx": {
-      if (typeof data !== "string") {
-        throw new Error("TCX input must be string");
-      }
-      return fromText(data, createTcxReader(logger), logger);
-    }
-    case "zwo": {
-      if (typeof data !== "string") {
-        throw new Error("ZWO input must be string");
-      }
-      return fromText(data, createZwiftReader(logger), logger);
-    }
-    case "gcn": {
-      if (typeof data !== "string") {
-        throw new Error("GCN input must be string");
-      }
-      return fromText(data, createGarminReader(logger), logger);
-    }
-    case "krd": {
-      if (typeof data !== "string") {
-        throw new Error("KRD input must be string");
-      }
-      return validateKrd(JSON.parse(data));
-    }
-    default:
-      throw new Error(`Unsupported format: ${format}`);
+    case "fit": return fitToKrd(data, logger);
+    case "tcx": return tcxToKrd(data, logger);
+    case "zwo": return zwoToKrd(data, logger);
+    case "gcn": return gcnToKrd(data, logger);
+    case "krd": return krdToKrd(data);
+    default: throw new Error(`Unsupported format: ${format}`);
   }
 };
 
@@ -82,14 +82,22 @@ export const convertFromKrd = async (
   logger: Logger
 ): Promise<Uint8Array | string> => {
   switch (format) {
-    case "fit":
+    case "fit": {
+      const { createFitWriter } = await import("@kaiord/fit");
       return toBinary(krd, createFitWriter(logger), logger);
-    case "tcx":
+    }
+    case "tcx": {
+      const { createTcxWriter } = await import("@kaiord/tcx");
       return toText(krd, createTcxWriter(logger), logger);
-    case "zwo":
+    }
+    case "zwo": {
+      const { createZwiftWriter } = await import("@kaiord/zwo");
       return toText(krd, createZwiftWriter(logger), logger);
-    case "gcn":
+    }
+    case "gcn": {
+      const { createGarminWriter } = await import("@kaiord/garmin");
       return toText(krd, createGarminWriter(logger), logger);
+    }
     case "krd":
       validateKrd(krd);
       return JSON.stringify(krd, null, 2);
