@@ -4,3 +4,7 @@ coverage
 *.lock
 pnpm-lock.yaml
 package-lock.json
+
+# Generated: trimmed copy of @garmin/fitsdk Profile.js. Regenerate via
+# `pnpm --filter @kaiord/workout-spa-editor generate:fitsdk-minimal`.
+src/lib/fitsdk-minimal/
