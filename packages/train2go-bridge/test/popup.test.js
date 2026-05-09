@@ -9,6 +9,8 @@ const PKG = dirname(HERE);
 const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_JS = readFileSync(join(PKG, "popup.js"), "utf8");
 
+const FRESH_NOW = new Date("2026-05-02T10:00:00Z").getTime();
+
 const setupDom = (chromeMock) => {
   const dom = new JSDOM(POPUP_HTML, {
     runScripts: "outside-only",
@@ -16,6 +18,11 @@ const setupDom = (chromeMock) => {
     url: "chrome-extension://fake/popup.html",
   });
   dom.window.chrome = chromeMock;
+  // popup.js runs inside the JSDOM window via eval, so it resolves Date.now
+  // against dom.window.Date — which the outer Node mock never touched. Mock
+  // both so the staleness check (Date.now() - snapshot.receivedAt) sees a
+  // deterministic "now" relative to the fixture timestamps.
+  dom.window.Date.now = () => FRESH_NOW;
   dom.window.eval(POPUP_JS);
   return dom;
 };
@@ -52,8 +59,6 @@ const buildChromeMock = ({
     __store: store,
   };
 };
-
-const FRESH_NOW = new Date("2026-05-02T10:00:00Z").getTime();
 
 describe("Train2Go popup", () => {
   let originalNow;
