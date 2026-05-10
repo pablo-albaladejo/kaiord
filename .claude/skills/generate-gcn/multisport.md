@@ -43,9 +43,9 @@ Forbidden:
 
 ## Segment composition rules (CRITICAL)
 
-Garmin's server silently rewrites multisport segments that violate these rules. Following them is the difference between "the workout you intended" and "a corrupted workout with steps in the wrong segments". The full empirical write-up is in [`packages/garmin/docs/MULTISPORT-TRANSITIONS.md`](../../packages/garmin/docs/MULTISPORT-TRANSITIONS.md). The summary:
+Garmin's server silently rewrites multisport segments that violate these rules. Following them is the difference between "the workout you intended" and "a corrupted workout with steps in the wrong segments". The full empirical write-up is in [`packages/garmin/docs/MULTISPORT-TRANSITIONS.md`](../../../packages/garmin/docs/MULTISPORT-TRANSITIONS.md). The summary:
 
-```
+```text
 ALLOWED in one segment:
   • warmup + repeat        (first segment, "warmup with strides")
   • warmup alone           (first segment)
@@ -63,7 +63,7 @@ FORBIDDEN — server splits / reorders if you ship these:
 
 For an 8x (run + bike) brick, use **17 segments**:
 
-```
+```text
 Seg  1  RUNNING  warmup + repeat 4x(progressive + rest)
 Seg  2  RUNNING  run rep 1 (single interval)
 Seg  3  CYCLING  bike rep 1 (single interval)
@@ -110,7 +110,7 @@ In multisport workouts, `stepOrder` is **global across all segments AND across n
 
 Example for the 17-segment brick above:
 
-```
+```text
 Seg 1: warmup       stepOrder 1
        repeat       stepOrder 2
          progressive   stepOrder 3   ← global, NOT 1
@@ -440,4 +440,4 @@ Below is a known-good 2-rep brick (warmup + 4×100m progressive + 2× (run 400m 
 
 ## Why these rules exist
 
-Every rule above was discovered empirically by spiking against Garmin Connect's authenticated API. The full transcript with workout IDs, before/after server responses, and the corruption modes that motivated each rule lives in [`packages/garmin/docs/MULTISPORT-TRANSITIONS.md`](../../packages/garmin/docs/MULTISPORT-TRANSITIONS.md). When you encounter a multisport edge case this skill doesn't cover, that doc is the source of truth.
+Every rule above was discovered empirically by spiking against Garmin Connect's authenticated API. The full transcript with workout IDs, before/after server responses, and the corruption modes that motivated each rule lives in [`packages/garmin/docs/MULTISPORT-TRANSITIONS.md`](../../../packages/garmin/docs/MULTISPORT-TRANSITIONS.md). When you encounter a multisport edge case this skill doesn't cover, that doc is the source of truth.

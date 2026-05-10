@@ -8,7 +8,7 @@ Garmin Connect supports multisport workouts (triathlon, brick, duathlon) where a
 
 ## TL;DR
 
-```
+```text
 SHALL    sportType.sportTypeId = 10 / sportTypeKey = "multi_sport" at the root.
 SHALL    isSessionTransitionEnabled: true at the root to enable transitions.
 SHALL    Each workoutSegment has its own sportType (running, cycling, swimming, ...).
@@ -94,7 +94,7 @@ In multisport workouts, `stepOrder` is **global across all segments and across n
 
 Example for a multisport with a repeat in segment 1:
 
-```
+```text
 seg 1:
   warmup     stepOrder: 1
   repeat     stepOrder: 2
