@@ -1,3 +1,5 @@
+> Completed: 2026-05-10
+
 ## Why
 
 Garmin Connect multisport workouts (triathlon-style or brick sessions with run/bike/run alternation) are currently unsupported end-to-end in Kaiord. The `@kaiord/garmin` adapter has `multi_sport` (sportTypeId 10) declared in its sport-type schema, but the workout INPUT schema lacks the `isSessionTransitionEnabled` flag required to enable automatic transitions between segments of different sports. As a result, multisport workouts generated through Kaiord either lose the transition flag or rely on undocumented implicit behavior. Empirical testing also revealed Garmin's server silently restructures multisport workouts that violate undocumented composition rules — knowledge that exists nowhere in the repo today, causing both the `generate-gcn` skill and the `@kaiord/garmin` writer to produce malformed multisport JSON.
