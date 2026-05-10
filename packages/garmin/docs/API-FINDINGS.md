@@ -39,6 +39,13 @@ Through systematic testing with 6 comprehensive workouts, we have **completely v
 
 ## Multisport Workouts (NEW)
 
+> **See also** — [MULTISPORT-TRANSITIONS.md](./MULTISPORT-TRANSITIONS.md) for
+> the full empirical rules on segment composition, the `isSessionTransitionEnabled`
+> root flag, the faster-first ordering for `pace.zone` / `power.zone` /
+> `speed.zone` range targets, and the global `stepOrder` rule. The findings
+> below describe the basic multisport shape; the dedicated doc captures the
+> compose / round-trip constraints required to avoid silent server rewrites.
+
 ### Structure
 
 Multisport workouts use `sportTypeId: 10, sportTypeKey: "multi_sport"` and contain multiple `workoutSegments`:
