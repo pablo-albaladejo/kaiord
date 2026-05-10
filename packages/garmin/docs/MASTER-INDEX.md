@@ -19,6 +19,13 @@
    - Implementation guidelines
    - **USE THIS for implementation**
 
+2. **[Multisport Transitions](./MULTISPORT-TRANSITIONS.md)** - Empirical rules
+   - `isSessionTransitionEnabled` root flag (no transition sport type exists)
+   - Segment composition allow-list / deny-list
+   - Faster-first ordering for `pace.zone` / `power.zone` / `speed.zone`
+   - Global `stepOrder` (including inside `RepeatGroupDTO`)
+   - **Read before generating multisport GCN by hand**
+
 ### 📚 Research Phase Documents
 
 2. **[Research Document](./garmin-connect-research.md)** - Initial research

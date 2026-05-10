@@ -344,3 +344,7 @@ Formula: m/s = 1000 / (minutes \* 60 + seconds)
 **Endurance (cycling):** Z2 power, 60-180min continuous
 **Tempo run:** Z3-Z4 HR, 20-40min continuous
 **Track intervals (running):** 400m-1600m repeats at pace target
+
+## Multisport (brick / triathlon / duathlon)
+
+Multisport workouts use a different sport type and have additional segment composition rules. Sport: `sportTypeId: 10`, `sportTypeKey: "multi_sport"`. See **[multisport.md](./multisport.md)** for the full rules (segment composition allow-list / deny-list, `isSessionTransitionEnabled` root flag, faster-first range-target ordering, global `stepOrder`, worked example) — read it before producing multisport JSON; the single-sport templates above will not survive Garmin's server normalization.
