@@ -111,11 +111,18 @@ Fields that appear ONLY in output, never in input:
   workoutNameI18nKey: string | null
   descriptionI18nKey: string | null
   workoutThumbnailUrl: string | null
-  isSessionTransitionEnabled: boolean | null
   shared: boolean
   locale: string | null
 }
 ```
+
+> **Note** — `isSessionTransitionEnabled: boolean | null` was previously listed
+> as output-only. As of 2026-05-09 (see [MULTISPORT-TRANSITIONS.md](./MULTISPORT-TRANSITIONS.md))
+> the field is **bidirectional**: Garmin's API accepts it on input for multisport
+> workouts and echoes it on output. The `@kaiord/garmin` input schema declares
+> it as `z.boolean().optional()` — set it to `true` on multisport (`sportTypeKey:
+"multi_sport"`) workouts to enable lap-button transitions between segments of
+> different sports.
 
 ### Step-Level Fields
 

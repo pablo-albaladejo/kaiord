@@ -46,17 +46,17 @@ PR 2 (docs-and-skill): §6, §7
 
 ## 6. Garmin docs (empirical rules)
 
-- [ ] 6.1 Create `packages/garmin/docs/MULTISPORT-TRANSITIONS.md` containing: allow-list of segment compositions (`warmup+repeat` at start, `interval+cooldown` at end, single `interval` mid-workout), deny-list (`warmup+repeat+interval` mixed), the role of `isSessionTransitionEnabled`, the absence of a `transition` sport type, the target ordering rule, the global `stepOrder` rule (including inside `RepeatGroupDTO`), and an "Empirical findings as of 2026-05-09" footer with the spike workout IDs.
-- [ ] 6.2 Update `packages/garmin/docs/INPUT-VS-OUTPUT.md` line 114 to reflect that `isSessionTransitionEnabled` is bidirectional (input-accepted, output-returned), not output-only.
-- [ ] 6.3 Update `packages/garmin/docs/API-FINDINGS.md`: under the existing "Multisport Workouts (NEW)" section, add a cross-reference to `MULTISPORT-TRANSITIONS.md` for the composition rules.
-- [ ] 6.4 Update `packages/garmin/docs/MASTER-INDEX.md` to list the new doc.
+- [x] 6.1 Create `packages/garmin/docs/MULTISPORT-TRANSITIONS.md` containing: allow-list of segment compositions (`warmup+repeat` at start, `interval+cooldown` at end, single `interval` mid-workout), deny-list (`warmup+repeat+interval` mixed), the role of `isSessionTransitionEnabled`, the absence of a `transition` sport type, the target ordering rule, the global `stepOrder` rule (including inside `RepeatGroupDTO`), and an "Empirical findings as of 2026-05-09" footer with the spike workout IDs.
+- [x] 6.2 Update `packages/garmin/docs/INPUT-VS-OUTPUT.md` line 114 to reflect that `isSessionTransitionEnabled` is bidirectional (input-accepted, output-returned), not output-only.
+- [x] 6.3 Update `packages/garmin/docs/API-FINDINGS.md`: under the existing "Multisport Workouts (NEW)" section, add a cross-reference to `MULTISPORT-TRANSITIONS.md` for the composition rules.
+- [x] 6.4 Update `packages/garmin/docs/MASTER-INDEX.md` to list the new doc.
 
 ## 7. generate-gcn skill
 
-- [ ] 7.1 Create `.claude/skills/generate-gcn/multisport.md` with the composition rules, target ordering rule, transition-flag rule, global `stepOrder` rule, and a complete worked example of an alternating-brick workout (the `brick-8x-400m-run-1km-bike` shape we validated empirically). Include a section "Why these rules exist" linking back to the empirical findings doc.
-- [ ] 7.2 Update `.claude/skills/generate-gcn/SKILL.md` Sport Type table to include the row `Multisport | 10 | "multi_sport"`.
-- [ ] 7.3 Update `.claude/skills/generate-gcn/SKILL.md` with a "Multisport detection" section: trigger words (`brick`, `triathlon`, `duathlon`, `multisport`, `transición`/`transition`) and a pointer to `multisport.md` for rules.
-- [ ] 7.4 Update `.claude/skills/generate-gcn/reference.md` Sport Type table to mention multi_sport (id 10), and add a one-line cross-reference to `multisport.md`.
+- [x] 7.1 Create `.claude/skills/generate-gcn/multisport.md` with the composition rules, target ordering rule, transition-flag rule, global `stepOrder` rule, and a complete worked example of an alternating-brick workout (the `brick-8x-400m-run-1km-bike` shape we validated empirically). Include a section "Why these rules exist" linking back to the empirical findings doc.
+- [x] 7.2 Update `.claude/skills/generate-gcn/SKILL.md` Sport Type table to include the row `Multisport | 10 | "multi_sport"`.
+- [x] 7.3 Update `.claude/skills/generate-gcn/SKILL.md` with a "Multisport detection" section: trigger words (`brick`, `triathlon`, `duathlon`, `multisport`, `transición`/`transition`) and a pointer to `multisport.md` for rules.
+- [x] 7.4 Update `.claude/skills/generate-gcn/reference.md` Sport Type table to mention multi_sport (id 10), and add a one-line cross-reference to `multisport.md`.
 
 ## 8. Cross-cutting verification
 

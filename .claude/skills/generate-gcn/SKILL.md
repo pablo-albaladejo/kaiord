@@ -22,11 +22,16 @@ If the user doesn't specify an output filename, derive one from the workout name
 
 Infer from context. Default to cycling if ambiguous.
 
-| Sport    | sportTypeId | sportTypeKey |
-| -------- | ----------- | ------------ |
-| Running  | 1           | "running"    |
-| Cycling  | 2           | "cycling"    |
-| Swimming | 4           | "swimming"   |
+| Sport      | sportTypeId | sportTypeKey  |
+| ---------- | ----------- | ------------- |
+| Running    | 1           | "running"     |
+| Cycling    | 2           | "cycling"     |
+| Swimming   | 4           | "swimming"    |
+| Multisport | 10          | "multi_sport" |
+
+## Multisport detection
+
+If the user describes any of: `multisport` / `multi-sport`, `brick`, `triathlon` / `triatlón`, `duathlon` / `duatlón`, `aquathlon`, `transitions` / `transiciones`, OR a single workout that alternates between two or more sports — switch to multisport mode and **read [multisport.md](./multisport.md) before generating the JSON**. Multisport has its own segment-composition, target-ordering, and `stepOrder` rules; following the single-sport templates in `reference.md` will produce a workout that Garmin's server silently corrupts.
 
 ## Step Types (Intensity)
 
