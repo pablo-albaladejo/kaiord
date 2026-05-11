@@ -95,26 +95,32 @@ describe("useFocusOnRouteChange", () => {
     });
   });
 
-  it("should warn once and falls back to body when no [data-route-heading] is present", async () => {
-    // Arrange
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const { hook } = memoryLocation({ path: "/calendar" });
-    render(
-      <Router hook={hook}>
-        <Harness initial="/calendar" withHeading={false} />
-      </Router>
-    );
-    await waitFor(
-      () => {
-        expect(warn).toHaveBeenCalled();
-      },
-      { timeout: 6000 }
-    );
+  it(
+    "should warn once and falls back to body when no [data-route-heading] is present",
+    { timeout: 8000 },
+    async () => {
+      // Arrange
+      const warn = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => undefined);
+      const { hook } = memoryLocation({ path: "/calendar" });
+      render(
+        <Router hook={hook}>
+          <Harness initial="/calendar" withHeading={false} />
+        </Router>
+      );
+      await waitFor(
+        () => {
+          expect(warn).toHaveBeenCalled();
+        },
+        { timeout: 6000 }
+      );
 
-    // Act
-    const focused = document.activeElement as HTMLElement | null;
+      // Act
+      const focused = document.activeElement as HTMLElement | null;
 
-    // Assert
-    expect(focused?.hasAttribute(ROUTE_HEADING_ATTR) ?? false).toBe(false);
-  });
+      // Assert
+      expect(focused?.hasAttribute(ROUTE_HEADING_ATTR) ?? false).toBe(false);
+    }
+  );
 });
