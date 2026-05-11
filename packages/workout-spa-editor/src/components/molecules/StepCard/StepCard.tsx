@@ -1,47 +1,38 @@
-import { forwardRef, type HTMLAttributes } from "react";
+import { forwardRef } from "react";
 
 import { useFocusRegistration } from "../../../hooks/focus/use-focus-registration";
 import { mergeRefs } from "../../../lib/merge-refs";
 import { SelectionIndicator } from "../SelectionIndicator";
+import { DragHandle } from "./DragHandle";
+import { deriveStepCardData, extractHtmlProps } from "./step-card-data";
 import type { DragHandleProps, StepCardProps } from "./StepCard.types";
-import { useStepCardData } from "./use-step-card-data";
+import { StepCardActions } from "./StepCardActions";
+import { StepCardFooter } from "./StepCardFooter";
+import { StepDetails } from "./StepDetails";
+import { StepHeader } from "./StepHeader";
 import { useStepCardHandlers } from "./use-step-card-handlers";
 
 export type { DragHandleProps, StepCardProps };
 
-const OWN_PROP_KEYS = new Set([
-  "step",
-  "visualIndex",
-  "isSelected",
-  "isMultiSelected",
-  "onSelect",
-  "onToggleMultiSelect",
-  "onDelete",
-  "onDuplicate",
-  "onCopy",
-  "isDragging",
-  "dragHandleProps",
-  "className",
-]);
-
-function extractHtmlProps(
-  props: StepCardProps
-): HTMLAttributes<HTMLDivElement> {
-  return Object.fromEntries(
-    Object.entries(props).filter(([k]) => !OWN_PROP_KEYS.has(k))
-  ) as HTMLAttributes<HTMLDivElement>;
-}
-
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
   (props, ref) => {
-    const { step, onSelect, onToggleMultiSelect } = props;
-    const { selected, label, classes, content } = useStepCardData(props);
+    const {
+      step,
+      onSelect,
+      onToggleMultiSelect,
+      onDelete,
+      onDuplicate,
+      onCopy,
+      dragHandleProps,
+      isDragging = false,
+    } = props;
+    const { selected, displayIndex, intensity, label, classes } =
+      deriveStepCardData(props);
     const handlers = useStepCardHandlers({
       step,
       onSelect,
       onToggleMultiSelect,
     });
-
     // Self-register with the focus registry (§8.2) so the post-commit
     // `useFocusAfterAction` hook can resolve `step.id → HTMLElement`.
     const registration = useFocusRegistration<HTMLDivElement>(
@@ -64,7 +55,21 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         {...extractHtmlProps(props)}
       >
         <SelectionIndicator selected={selected} />
-        {content}
+        {dragHandleProps && (
+          <DragHandle isDragging={isDragging} {...dragHandleProps} />
+        )}
+        <StepCardActions
+          stepIndex={step.stepIndex}
+          onDelete={onDelete}
+          onDuplicate={onDuplicate}
+          onCopy={onCopy}
+        />
+        <StepHeader
+          stepName={step.name || `Step ${displayIndex + 1}`}
+          intensity={intensity}
+        />
+        <StepDetails step={step} />
+        <StepCardFooter step={step} />
       </div>
     );
   }
