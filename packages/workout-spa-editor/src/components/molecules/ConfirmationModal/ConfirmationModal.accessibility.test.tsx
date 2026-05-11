@@ -15,7 +15,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { ConfirmationModal } from "./ConfirmationModal";
-import { FOCUS_TRAP_TAB_ATTEMPTS } from "./ConfirmationModal.accessibility.test-fixtures";
+
+const FOCUS_TRAP_TAB_ATTEMPTS = 10;
 
 describe("ConfirmationModal - Accessibility", () => {
   const defaultProps = {

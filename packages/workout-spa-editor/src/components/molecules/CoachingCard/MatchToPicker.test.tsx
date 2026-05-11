@@ -9,10 +9,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { MatchToPicker } from "./MatchToPicker";
-import {
-  NINETY_MINUTES_SECONDS,
-  ONE_HOUR_SECONDS,
-} from "./MatchToPicker.test-fixtures";
+
+const ONE_HOUR_SECONDS = 3600;
+
+const NINETY_MINUTES_SECONDS = 5400;
 
 const makeWorkout = (
   id: string,

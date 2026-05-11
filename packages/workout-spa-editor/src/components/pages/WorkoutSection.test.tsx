@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useWorkoutStore } from "../../store/workout-store";
 import { renderWithProviders } from "../../test-utils";
 import type { KRD, Workout, WorkoutStep } from "../../types/krd";
-import { STEP_INDEX_3 } from "./WorkoutSection.test-fixtures";
+
+const STEP_INDEX_3 = 3;
 import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
 /**

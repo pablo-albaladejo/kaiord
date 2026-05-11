@@ -8,10 +8,13 @@ import type { KRD } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { downloadWorkout, ExportError, exportWorkout } from "./export-workout";
-import {
-  EXPORT_PROGRESS_STEPS,
-  PLACEHOLDER_BYTES,
-} from "./export-workout.test-fixtures";
+
+const EXPORT_PROGRESS_STEPS = {
+  early: 10,
+  midway: 50,
+} as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const PLACEHOLDER_BYTES = [1, 2, 3] as const;
 import type { WorkoutFileFormat } from "./file-format-detector";
 
 describe("exportWorkout", () => {

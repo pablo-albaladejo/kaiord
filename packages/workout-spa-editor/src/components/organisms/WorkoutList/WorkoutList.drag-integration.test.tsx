@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Workout } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
-import { MOCK_WORKOUT_STEP_COUNT } from "./WorkoutList.drag-integration.test-fixtures";
+
+const MOCK_WORKOUT_STEP_COUNT = 3;
 
 /**
  * Integration test for drag-and-drop functionality

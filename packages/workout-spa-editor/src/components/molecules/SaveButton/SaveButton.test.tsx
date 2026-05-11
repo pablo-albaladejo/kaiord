@@ -6,7 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { KRD } from "../../../types/krd";
 import { ToastProvider } from "../../atoms/Toast";
 import { SaveButton } from "./SaveButton";
-import { MOCK_BUFFER_BYTES_3 } from "./SaveButton.test-fixtures";
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const MOCK_BUFFER_BYTES_3 = [1, 2, 3] as const;
 
 // Mock the export-workout utility
 vi.mock("../../../utils/export-workout");

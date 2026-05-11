@@ -1,6 +1,7 @@
 import type { KRD, ValidationError } from "../../../types/krd";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
+import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { generateWorkoutFilename } from "./workout-filename";
 
 export function createSaveHandler(
@@ -32,10 +33,7 @@ export function createSaveHandler(
       const filename = generateWorkoutFilename(workout, selectedFormat);
       downloadWorkout(buffer, filename, selectedFormat);
 
-      const workoutData = workout.extensions?.structured_workout as
-        | { name?: string }
-        | undefined;
-      const workoutName = workoutData?.name || "workout";
+      const workoutName = getStructuredWorkout(workout)?.name || "workout";
       const formatLabel = selectedFormat.toUpperCase();
       success(
         "Workout Saved",

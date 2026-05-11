@@ -5,6 +5,7 @@
  */
 
 import type { KRD, Sport, SubSport } from "../../../../types/krd";
+import { getStructuredWorkout } from "../../../../utils/structured-workout";
 
 export function buildUpdatedKrd(
   krd: KRD,
@@ -12,7 +13,7 @@ export function buildUpdatedKrd(
   sport: Sport,
   subSport: SubSport
 ): KRD {
-  const workoutData = krd.extensions?.structured_workout;
+  const structured = getStructuredWorkout(krd);
 
   return {
     ...krd,
@@ -23,20 +24,9 @@ export function buildUpdatedKrd(
     },
     extensions: {
       ...krd.extensions,
-      structured_workout:
-        workoutData && typeof workoutData === "object" && "steps" in workoutData
-          ? {
-              ...(workoutData as Record<string, unknown>),
-              name,
-              sport,
-              subSport,
-            }
-          : {
-              name,
-              sport,
-              subSport,
-              steps: [],
-            },
+      structured_workout: structured
+        ? { ...structured, name, sport, subSport }
+        : { name, sport, subSport, steps: [] },
     },
   };
 }

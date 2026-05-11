@@ -12,10 +12,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnalyticsProvider } from "../../contexts";
 import type { KRD } from "../../types/krd";
 import { ManualCreateSection } from "./ManualCreateSection";
-import {
-  DRAIN_DELAY_MS,
-  FIT_PLACEHOLDER_BYTES,
-} from "./ManualCreateSection.analytics.test-fixtures";
+
+const DRAIN_DELAY_MS = 50;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const FIT_PLACEHOLDER_BYTES = [14, 16] as const;
 
 vi.mock("../../utils/import-workout", () => ({
   importWorkout: vi.fn(),

@@ -15,10 +15,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
-import {
-  SELECTED_FIVE_COUNT,
-  SELECTED_THREE_COUNT,
-} from "./WorkoutList.multi-selection.test-fixtures";
+
+const SELECTED_THREE_COUNT = 3;
+
+const SELECTED_FIVE_COUNT = 5;
 
 describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   const createMockStep = (stepIndex: number): WorkoutStep => ({

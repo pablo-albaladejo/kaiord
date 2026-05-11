@@ -10,7 +10,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { LinkedWorkoutSection } from "./LinkedWorkoutSection";
-import { ONE_HOUR_SECONDS } from "./LinkedWorkoutSection.test-fixtures";
+
+const ONE_HOUR_SECONDS = 3600;
 
 const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
   ({

@@ -8,10 +8,10 @@ import type { LinkedCoachingAccount } from "../types/coaching-account";
 import type { Profile } from "../types/profile";
 import type { CoachingSyncState } from "./use-coaching-activities";
 import { useCoachingAutoSync } from "./use-coaching-auto-sync";
-import {
-  NO_FIRE_SETTLE_MS,
-  ONE_MINUTE_MS,
-} from "./use-coaching-auto-sync.test-fixtures";
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const NO_FIRE_SETTLE_MS = 5 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const ONE_MINUTE_MS = 60_000 as const;
 
 const T2G_LINK: LinkedCoachingAccount = {
   source: "train2go",

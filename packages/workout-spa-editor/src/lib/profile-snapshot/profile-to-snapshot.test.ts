@@ -2,14 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import type { Profile } from "../../types/profile";
 import { profileToSnapshot } from "./profile-to-snapshot";
-import {
-  BASELINE_BODY_WEIGHT_KG,
-  CYCLING_FTP_W,
-  CYCLING_LTHR_BPM,
-  RUNNING_LTHR_BPM,
-  RUNNING_PACE_SEC_PER_KM,
-  SWIMMING_PACE_SEC_PER_100M,
-} from "./profile-to-snapshot.test-fixtures";
+
+const BASELINE_BODY_WEIGHT_KG = 72;
+
+const CYCLING_FTP_W = 270;
+
+const CYCLING_LTHR_BPM = 168;
+
+const RUNNING_PACE_SEC_PER_KM = 255;
+
+const RUNNING_LTHR_BPM = 170;
+
+const SWIMMING_PACE_SEC_PER_100M = 87;
 
 const FIXED_NOW = new Date("2026-05-01T08:30:00.000Z");
 
