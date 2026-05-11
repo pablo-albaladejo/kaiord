@@ -20,7 +20,7 @@ import type { CSSProperties, HTMLAttributes, Ref } from "react";
 
 export type DndCardWrapper = {
   /** Spread onto the wrapper `<div>` to wire up DnD attributes. */
-  wrapperProps: HTMLAttributes<HTMLElement> & { ref: Ref<HTMLElement> };
+  wrapperProps: HTMLAttributes<HTMLDivElement> & { ref: Ref<HTMLDivElement> };
   /** Forward to the inner card's drag handle. */
   dragHandleProps: DraggableSyntheticListeners;
   /** Inline style for the wrapper (transform, transition, opacity). */
@@ -50,7 +50,7 @@ export function useDndCardWrapper(id: string): DndCardWrapper {
   };
 
   return {
-    wrapperProps: { ...restAttributes, ref: setNodeRef as Ref<HTMLElement> },
+    wrapperProps: { ...restAttributes, ref: setNodeRef as Ref<HTMLDivElement> },
     dragHandleProps: listeners,
     style,
     isDragging,
