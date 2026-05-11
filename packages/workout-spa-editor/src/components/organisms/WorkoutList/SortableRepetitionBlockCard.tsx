@@ -1,11 +1,7 @@
-import { useSortable } from "@dnd-kit/sortable";
-
+import { useDndCardWrapper } from "../../../hooks/use-dnd-card-wrapper";
 import { RepetitionBlockCard } from "../../molecules/RepetitionBlockCard/RepetitionBlockCard";
 import { parseSelectedStepIndex } from "./parse-selected-step-index";
-import {
-  buildBlockHandlers,
-  buildSortableStyle,
-} from "./sortable-repetition-block-card.helpers";
+import { buildBlockHandlers } from "./sortable-repetition-block-card.helpers";
 import type { SortableRepetitionBlockCardProps } from "./sortable-repetition-block-card.types";
 
 /** Wraps RepetitionBlockCard with drag-and-drop sorting. */
@@ -27,24 +23,17 @@ export const SortableRepetitionBlockCard = ({
   onReorderSteps,
   parentBlockIndex,
 }: SortableRepetitionBlockCardProps) => {
-  const sortable = useSortable({ id });
-  const style = buildSortableStyle(
-    sortable.transform,
-    sortable.transition,
-    sortable.isDragging
-  );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { role, ...htmlAttributes } = sortable.attributes;
+  const { wrapperProps, dragHandleProps, style, isDragging } =
+    useDndCardWrapper(id);
   const selectedStepIndex = parseSelectedStepIndex(selectedStepId, block);
   const { handleDuplicate, handleReorder } = buildBlockHandlers({
     onStepDuplicate,
     onReorderSteps,
     blockIndex,
   });
-  const wrapperProps = { ...htmlAttributes, "data-step-id": id };
 
   return (
-    <div ref={sortable.setNodeRef} style={style} {...wrapperProps}>
+    <div {...wrapperProps} style={style} data-step-id={id}>
       <RepetitionBlockCard
         block={block}
         selectedStepIndex={selectedStepIndex}
@@ -59,8 +48,8 @@ export const SortableRepetitionBlockCard = ({
         onUngroup={onUngroup}
         onDelete={onDelete}
         onReorderSteps={handleReorder}
-        isDragging={sortable.isDragging}
-        dragHandleProps={sortable.listeners}
+        isDragging={isDragging}
+        dragHandleProps={dragHandleProps}
         blockIndex={parentBlockIndex}
       />
     </div>
