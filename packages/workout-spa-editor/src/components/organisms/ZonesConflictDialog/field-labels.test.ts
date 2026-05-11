@@ -11,7 +11,8 @@
 import { describe, expect, it } from "vitest";
 
 import { FIELD_LABELS } from "./field-labels";
-import { FIELD_LABELS_TOTAL } from "./field-labels.test-fixtures";
+
+const FIELD_LABELS_TOTAL = 68;
 
 describe("FIELD_LABELS", () => {
   it("should contain the 8 threshold-scalar labels plus exactly 60 band-level entries (5.1a)", () => {
@@ -37,8 +38,11 @@ describe("FIELD_LABELS", () => {
       "user_notes",
     ];
 
-    // Act + Assert
-    for (const [field, label] of Object.entries(FIELD_LABELS)) {
+    // Act
+    const entries = Object.entries(FIELD_LABELS);
+
+    // Assert
+    for (const [field, label] of entries) {
       for (const forbidden of FORBIDDEN_SUBSTRINGS) {
         expect(
           label.toLowerCase().includes(forbidden),
@@ -49,9 +53,13 @@ describe("FIELD_LABELS", () => {
   });
 
   it("should map every band-level FieldKey to a non-empty label", () => {
-    // Arrange + Act
-    for (const [field, label] of Object.entries(FIELD_LABELS)) {
-      // Assert
+    // Arrange
+
+    // Act
+    const entries = Object.entries(FIELD_LABELS);
+
+    // Assert
+    for (const [field, label] of entries) {
       expect(label.length, `label for "${field}" is empty`).toBeGreaterThan(0);
     }
   });

@@ -2,16 +2,10 @@
  * KRD UI Helper Types.
  *
  * Stable-id types (`UIWorkout`, `UIWorkoutStep`, `UIRepetitionBlock`, …)
- * live in `./ui-workout`; re-exported here plus legacy `*WithId` aliases.
+ * live in `./ui-workout`; re-exported here for convenience.
  */
 
 import type { Workout, WorkoutStep } from "@kaiord/core";
-
-import type {
-  UIRepetitionBlock,
-  UIWorkoutItem,
-  UIWorkoutStep,
-} from "./ui-workout";
 
 export type {
   UIRepetitionBlock,
@@ -20,15 +14,6 @@ export type {
   UIWorkoutItem,
   UIWorkoutStep,
 } from "./ui-workout";
-
-/** @deprecated Use `UIWorkoutStep`. */
-export type WorkoutStepWithId = UIWorkoutStep;
-
-/** @deprecated Use `UIRepetitionBlock`. */
-export type RepetitionBlockWithId = UIRepetitionBlock;
-
-/** @deprecated Use `UIWorkoutItem`. */
-export type WorkoutItemWithId = UIWorkoutItem;
 
 export type WorkoutEditorState = {
   workout: Workout | null;

@@ -15,7 +15,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ValidationError } from "../../../types/krd";
 import { SaveErrorDialog } from "./SaveErrorDialog";
-import { ERROR_DIALOG_BUTTON_COUNT } from "./SaveErrorDialog.test-fixtures";
+
+const ERROR_DIALOG_BUTTON_COUNT = 3;
 
 describe("SaveErrorDialog", () => {
   describe("rendering", () => {

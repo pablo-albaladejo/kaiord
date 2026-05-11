@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { KeyboardHandlerDeps } from "./build-keyboard-handlers";
 import { buildKeyboardHandlers } from "./build-keyboard-handlers";
-import { THREE_STEP_WORKOUT_SIZE } from "./build-keyboard-handlers.test-fixtures";
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const THREE_STEP_WORKOUT_SIZE = 3 as const;
 
 vi.mock("../store/clipboard-store", () => ({
   hasClipboardContent: vi.fn(() => false),

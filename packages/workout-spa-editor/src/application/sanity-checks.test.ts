@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { validateSanity } from "./sanity-checks";
-import {
-  EXCESSIVE_DURATION_S,
-  ONE_HOUR_SECONDS,
-  OVER_STEP_LIMIT,
-  SHORT_DURATION_S,
-  STEP_COUNT_FIVE,
-  STEP_COUNT_THREE,
-} from "./sanity-checks.test-fixtures";
+
+const ONE_HOUR_SECONDS = 3600;
+
+const STEP_COUNT_FIVE = 5;
+
+const STEP_COUNT_THREE = 3;
+
+const OVER_STEP_LIMIT = 201;
+
+const SHORT_DURATION_S = 30;
+
+const EXCESSIVE_DURATION_S = 30000;
 import { makeValidKrd } from "./test-helpers";
 
 describe("validateSanity", () => {

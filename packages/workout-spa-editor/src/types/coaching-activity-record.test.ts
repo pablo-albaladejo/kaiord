@@ -9,10 +9,10 @@ import {
   coachingActivityRecordSchema,
   namespaceSourceId,
 } from "./coaching-activity-record";
-import {
-  SAMPLE_WORKLOAD_7,
-  VALID_INTENSITIES,
-} from "./coaching-activity-record.test-fixtures";
+
+const SAMPLE_WORKLOAD_7 = 7;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const VALID_INTENSITIES = [1, 2, 3, 4, 5] as const;
 
 const valid = {
   id: "p1:train2go:12345",

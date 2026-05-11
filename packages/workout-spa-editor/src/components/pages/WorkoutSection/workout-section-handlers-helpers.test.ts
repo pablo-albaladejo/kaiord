@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type { Workout, WorkoutStep } from "../../../types/krd";
 import { createUpdatedWorkout } from "./workout-section-handlers-helpers";
-import { BLOCK_B_INNER_1_STEP_INDEX } from "./workout-section-handlers-helpers.test-fixtures";
+
+const BLOCK_B_INNER_1_STEP_INDEX = 3;
 
 /**
  * Tests for workout section handler helpers.

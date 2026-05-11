@@ -4,7 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { MatchSuggestion } from "../../../application/match-suggestion";
 import { AutoMatchBanner } from "./AutoMatchBanner";
-import { EXPANDED_SUGGESTION_COUNT } from "./AutoMatchBanner.test-fixtures";
+
+const EXPANDED_SUGGESTION_COUNT = 3;
 
 const sug = (overrides: Partial<MatchSuggestion> = {}): MatchSuggestion => ({
   activityId: "p1:train2go:1",

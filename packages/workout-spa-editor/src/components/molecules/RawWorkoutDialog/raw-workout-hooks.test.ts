@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type { WorkoutComment } from "../../../types/calendar-fragments";
 import { getPreSelectedComments } from "./raw-workout-hooks";
-import { POST_NOON_COMMENT_INDEX } from "./raw-workout-hooks.test-fixtures";
+
+const POST_NOON_COMMENT_INDEX = 3;
 
 describe("getPreSelectedComments", () => {
   const workoutDate = "2026-04-06";

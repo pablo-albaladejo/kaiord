@@ -10,10 +10,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { KRD } from "../../../types/krd";
 import { ExportFormatSelector } from "./ExportFormatSelector";
-import {
-  EXPORT_FORMAT_OPTION_COUNT,
-  GARMIN_CONNECT_FORMAT_COUNT,
-} from "./ExportFormatSelector.test-fixtures";
+
+const EXPORT_FORMAT_OPTION_COUNT = 5;
+
+const GARMIN_CONNECT_FORMAT_COUNT = 3;
 
 describe("ExportFormatSelector", () => {
   const mockWorkout: KRD = {
