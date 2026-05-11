@@ -16,14 +16,16 @@ export async function expandFileUpload(page: Page) {
   const accordion = page.getByRole("button", {
     name: /create manually.*import/i,
   });
-  await accordion.waitFor({ state: "visible", timeout: 10000 });
+  // webkit (Safari) is slower to hydrate the accordion button — 20 s
+  // covers the worst-case observed on webkit/Mobile Safari in CI.
+  await accordion.waitFor({ state: "visible", timeout: 20000 });
   await accordion.click();
 
   // Retry click if React hadn't hydrated the onClick handler yet
   try {
-    await fileInput.waitFor({ state: "attached", timeout: 3000 });
+    await fileInput.waitFor({ state: "attached", timeout: 5000 });
   } catch {
     await accordion.click();
-    await fileInput.waitFor({ state: "attached", timeout: 5000 });
+    await fileInput.waitFor({ state: "attached", timeout: 8000 });
   }
 }

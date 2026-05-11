@@ -37,19 +37,37 @@ test.describe("Library flows", () => {
   }) => {
     await page.goto("/calendar");
 
-    await page.getByRole("button", { name: /open workout library/i }).click();
+    // Use the mobile-aware helper so the test works on mobile
+    // emulators where the Library button lives behind the hamburger
+    // menu (a plain `getByRole` strict-mode click would time out on
+    // Pixel 5 / iPhone 12 because the desktop button is invisible).
+    await openHeaderAction(page, /open workout library/i);
     await page.waitForURL(/\/library$/);
 
     await expect(page.getByTestId("library-page")).toBeVisible();
     // Heading is focused (data-route-heading) and is an h1.
-    const focusedTag = await page.evaluate(
-      () => document.activeElement?.tagName
-    );
-    expect(focusedTag).toBe("H1");
-    const focusedHasAttr = await page.evaluate(
-      () => document.activeElement?.hasAttribute("data-route-heading") ?? false
-    );
-    expect(focusedHasAttr).toBe(true);
+    // The `useFocusOnRouteChange` hook defers focus to
+    // `requestAnimationFrame` after the route change, and on
+    // lazy-loaded pages a `MutationObserver` may need more frames
+    // until the heading mounts. Poll instead of reading
+    // `document.activeElement` once eagerly (firefox/webkit/mobile
+    // browsers race the eager read).
+    await expect
+      .poll(() => page.evaluate(() => document.activeElement?.tagName), {
+        timeout: 5_000,
+      })
+      .toBe("H1");
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            () =>
+              document.activeElement?.hasAttribute("data-route-heading") ??
+              false
+          ),
+        { timeout: 5_000 }
+      )
+      .toBe(true);
     // No dialog should have mounted as a side-effect of the click.
     await expect(page.getByRole("dialog")).toHaveCount(0);
 
@@ -160,8 +178,9 @@ test.describe("Library flows", () => {
 
     // Use SPA navigation (header button) so the in-memory editor
     // state survives the route transition. `page.goto('/library')`
-    // would force a full reload and drop Zustand.
-    await page.getByRole("button", { name: /open workout library/i }).click();
+    // would force a full reload and drop Zustand. The mobile-aware
+    // helper opens the hamburger menu first on small viewports.
+    await openHeaderAction(page, /open workout library/i);
     await page.waitForURL(/\/library$/);
     await expect(page.getByTestId("library-page")).toBeVisible();
 
