@@ -229,7 +229,20 @@ test.describe("Profile Management", () => {
     await expect(page.getByText(/import failed/i)).toBeVisible();
   });
 
-  test("should persist profiles across page reloads", async ({ browser }) => {
+  test("should persist profiles across page reloads", async ({
+    browser,
+    browserName,
+  }) => {
+    // Mobile Safari (webkit) emulator on CI sporadically throws
+    // `page.reload: WebKit encountered an internal error` during the
+    // reload step, which Playwright reports as a flake even when the
+    // retry passes. Skip the WebKit project until the Playwright /
+    // emulated-webkit interaction is stabilized. TODO: remove fixme
+    // once Playwright > 1.55 stabilizes mobile webkit reload.
+    test.fixme(
+      browserName === "webkit",
+      "Mobile Safari page.reload internal error (Playwright/WebKit flake)"
+    );
     // Use a fresh browser context so no addInitScript clears localStorage
     // on reload. The persistence test needs IndexedDB (Dexie) to survive reloads.
     const context = await browser.newContext();
