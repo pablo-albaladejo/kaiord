@@ -9,29 +9,28 @@ import { useStepCardHandlers } from "./use-step-card-handlers";
 
 export type { DragHandleProps, StepCardProps };
 
-type HtmlDivProps = HTMLAttributes<HTMLDivElement>;
+const OWN_PROP_KEYS = new Set([
+  "step",
+  "visualIndex",
+  "isSelected",
+  "isMultiSelected",
+  "onSelect",
+  "onToggleMultiSelect",
+  "onDelete",
+  "onDuplicate",
+  "onCopy",
+  "isDragging",
+  "dragHandleProps",
+  "className",
+]);
 
-/** Extract only native HTML div props from StepCardProps. */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-function getHtmlProps(props: StepCardProps): HtmlDivProps {
-  const {
-    step,
-    visualIndex,
-    isSelected,
-    isMultiSelected,
-    onSelect,
-    onToggleMultiSelect,
-    onDelete,
-    onDuplicate,
-    onCopy,
-    isDragging,
-    dragHandleProps,
-    className,
-    ...rest
-  } = props;
-  return rest;
+function extractHtmlProps(
+  props: StepCardProps
+): HTMLAttributes<HTMLDivElement> {
+  return Object.fromEntries(
+    Object.entries(props).filter(([k]) => !OWN_PROP_KEYS.has(k))
+  ) as HTMLAttributes<HTMLDivElement>;
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
 
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
   (props, ref) => {
@@ -62,7 +61,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         aria-selected={selected}
         data-testid="step-card"
         data-selected={selected ? "true" : "false"}
-        {...getHtmlProps(props)}
+        {...extractHtmlProps(props)}
       >
         <SelectionIndicator selected={selected} />
         {content}
