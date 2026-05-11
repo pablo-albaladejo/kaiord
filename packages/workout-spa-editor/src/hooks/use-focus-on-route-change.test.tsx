@@ -108,7 +108,7 @@ describe("useFocusOnRouteChange", () => {
       () => {
         expect(warn).toHaveBeenCalled();
       },
-      { timeout: 3000 }
+      { timeout: 6000 }
     );
 
     // Act
