@@ -30,9 +30,12 @@ import { ROUTE_HEADING_SELECTOR } from "../routing/constants";
 
 const FALLBACK_WARN = "useFocusOnRouteChange: no [data-route-heading]";
 // Bound the wait for a route-heading to appear. Long enough to cover
-// a cold lazy-chunk fetch in a typical test/dev environment, short
+// a cold lazy-chunk fetch on mobile webkit / slow CI runners, short
 // enough that a truly missing contract surfaces the warn quickly.
-const OBSERVE_TIMEOUT_MS = 1500;
+// Mobile Safari needed >1500ms for the LibraryPage chunk to land in
+// the original 1500ms budget — bumped to 5000ms to stop the BODY
+// fallback being taken in CI.
+const OBSERVE_TIMEOUT_MS = 5000;
 
 export function useFocusOnRouteChange(): void {
   const [pathname] = useLocation();
