@@ -51,6 +51,17 @@ const SEED = { matched: 10, soloPlans: 10, soloActuals: 10 };
 test.describe("CalendarPage performance budget", () => {
   test.use({ storageState: undefined });
 
+  // Playwright exposes `newCDPSession` on Chromium only — firefox,
+  // webkit and Mobile Safari (WebKit) raise "CDP session is only
+  // available in Chromium" before the test even starts measuring.
+  // Skip on those engines so CI reports green; the calibrated FCP
+  // budget is meaningful only when both the throttle and the
+  // measurement entries come from the same engine.
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "CDP CPU throttle is Chromium-only (newCDPSession is unavailable on firefox/webkit)"
+  );
+
   test("FCP ≤ 200ms and useMatchedSessions ≤ 30ms with 30-card week", async ({
     page,
   }) => {
