@@ -15,10 +15,10 @@ import Dexie from "dexie";
 import { describe, expect, it } from "vitest";
 
 import { backfillUsageRow, KaiordDatabase } from "./dexie-database";
-import {
-  LEGACY_USAGE_LARGE_TOKEN_TOTAL,
-  LEGACY_USAGE_SMALL_TOKEN_TOTAL,
-} from "./dexie-usage-migration.test-fixtures";
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const LEGACY_USAGE_SMALL_TOKEN_TOTAL = 80 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const LEGACY_USAGE_LARGE_TOKEN_TOTAL = 750 as const;
 
 describe("backfillUsageRow (unit)", () => {
   it("should fill inputTokens from totalTokens and set outputTokens=0, legacy=true", () => {

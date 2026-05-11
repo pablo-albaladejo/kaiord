@@ -3,11 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Workout } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
-import {
-  LARGE_RENDER_BUDGET_MS,
-  LARGE_WORKOUT_STEP_COUNT,
-  TOTAL_WORKOUTS_FIXTURE,
-} from "./WorkoutList.integration.test-fixtures";
+
+const TOTAL_WORKOUTS_FIXTURE = 3;
+
+const LARGE_WORKOUT_STEP_COUNT = 50;
+
+const LARGE_RENDER_BUDGET_MS = 5000;
 
 /**
  * Integration tests for WorkoutList drag-and-drop functionality

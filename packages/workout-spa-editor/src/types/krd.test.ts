@@ -8,7 +8,8 @@ import { describe, expect, it } from "vitest";
 
 import type { RepetitionBlock, WorkoutStep } from "./krd";
 import { isRepetitionBlock, isWorkoutStep } from "./krd";
-import { REPEAT_COUNT_3 } from "./krd.test-fixtures";
+
+const REPEAT_COUNT_3 = 3;
 
 describe("Type Guards", () => {
   describe("isWorkoutStep", () => {

@@ -10,7 +10,10 @@ import { setZoneMethod } from "../../../application/profile/zones/set-zone-metho
 import { updateSportThresholds } from "../../../application/profile/zones/update-sport-thresholds";
 import type { Target } from "../../../types/krd";
 import { TargetPicker } from "./TargetPicker";
-import { HR_ZONE_3, POWER_WATTS_250 } from "./TargetPicker.test-fixtures";
+
+const POWER_WATTS_250 = 250;
+
+const HR_ZONE_3 = 3;
 
 describe("TargetPicker", () => {
   beforeEach(async () => {

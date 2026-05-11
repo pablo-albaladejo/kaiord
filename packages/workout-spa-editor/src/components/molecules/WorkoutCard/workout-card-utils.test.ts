@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { formatDuration, getStateIndicator } from "./workout-card-utils";
-import {
-  ONE_HOUR_THIRTY_MINUTES_SECONDS,
-  THIRTY_MINUTES_SECONDS,
-} from "./workout-card-utils.test-fixtures";
+
+const THIRTY_MINUTES_SECONDS = 1800;
+
+const ONE_HOUR_THIRTY_MINUTES_SECONDS = 5400;
 
 describe("getStateIndicator", () => {
   it("should return orange indicator for stale", () => {
