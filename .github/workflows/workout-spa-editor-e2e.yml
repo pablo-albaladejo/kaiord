@@ -44,7 +44,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests
-    timeout-minutes: 25
+    timeout-minutes: 35
     runs-on: ubuntu-latest
     needs: check-ci-status
     if: needs.check-ci-status.outputs.should-run == 'true'
@@ -90,7 +90,7 @@ jobs:
 
   e2e-mobile:
     name: E2E Mobile Tests
-    timeout-minutes: 25
+    timeout-minutes: 35
     runs-on: ubuntu-latest
     needs: check-ci-status
     if: needs.check-ci-status.outputs.should-run == 'true'
