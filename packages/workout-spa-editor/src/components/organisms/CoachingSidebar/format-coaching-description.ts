@@ -70,9 +70,15 @@ export const formatCoachingDescription = (
   raw: string
 ): DescriptionParagraph[] => {
   const paragraphMatches = raw.match(/<p[^>]*>([\s\S]*?)<\/p>/gi);
+  // For plain text input we split on any run of newlines: the
+  // train2go-bridge parser flattens both `<p>` and `<br>` to single
+  // `\n` (see packages/train2go-bridge/parser.js), so splitting only
+  // on `\n{2,}` previously left the entire description as one paragraph.
+  // Empty paragraphs are dropped by the `inlines.length > 0` filter
+  // below, so this also tolerates `\n\n` AI/markdown shapes.
   const paragraphs = paragraphMatches
     ? paragraphMatches.map((p) => p.replace(/^<p[^>]*>|<\/p>$/gi, ""))
-    : raw.split(/\n{2,}/);
+    : raw.split(/\n+/);
   return paragraphs
     .map((p) => ({ inlines: splitInlines(p) }))
     .filter((p) => p.inlines.length > 0);

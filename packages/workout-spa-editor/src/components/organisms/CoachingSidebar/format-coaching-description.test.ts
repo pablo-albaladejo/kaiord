@@ -87,6 +87,33 @@ describe("formatCoachingDescription", () => {
     expect(parte).toBeDefined();
   });
 
+  it("should split on single newlines from train2go-bridge parser output", () => {
+    // Arrange
+    // The train2go-bridge parser flattens <p> and <br> to single "\n"
+    // (see packages/train2go-bridge/parser.js extractDescription), so
+    // descriptions arrive with single newlines, not double. Each line
+    // must render as its own paragraph.
+    const text =
+      "Calentamiento – 15 minutos\n10' rodaje en Z2 baja (130-150w / 120-140 bpm)\n3 progresiones de 1' en Z3 -> Z4:\nBloque principal – 3x4 minutos a ritmo de competición";
+
+    // Act
+    const result = formatCoachingDescription(text);
+
+    // Assert
+    // eslint-disable-next-line no-magic-numbers -- expected paragraph count from 4-line input
+    expect(result).toHaveLength(4);
+    expect(result[0]?.inlines[0]?.value).toBe("Calentamiento – 15 minutos");
+    expect(result[1]?.inlines[0]?.value).toBe(
+      "10' rodaje en Z2 baja (130-150w / 120-140 bpm)"
+    );
+    expect(result[2]?.inlines[0]?.value).toBe(
+      "3 progresiones de 1' en Z3 -> Z4:"
+    );
+    expect(result[3]?.inlines[0]?.value).toBe(
+      "Bloque principal – 3x4 minutos a ritmo de competición"
+    );
+  });
+
   it("should preserve <strong> with attributes", () => {
     // Arrange
     const html = '<p>Effort <strong class="zone-4">Z4</strong></p>';
