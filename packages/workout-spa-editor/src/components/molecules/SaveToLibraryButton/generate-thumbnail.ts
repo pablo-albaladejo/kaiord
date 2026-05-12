@@ -8,6 +8,7 @@
  */
 
 import type { KRD } from "../../../types/krd";
+import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { drawWorkoutBars } from "./thumbnail/bar-renderer";
 import {
   createCanvas,
@@ -36,13 +37,8 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
   drawBackground(ctx, THUMBNAIL_CONFIG.width, THUMBNAIL_CONFIG.height);
 
   // Get workout steps
-  const workoutData = workout.extensions?.structured_workout;
-  if (
-    !workoutData ||
-    typeof workoutData !== "object" ||
-    !("steps" in workoutData) ||
-    !Array.isArray(workoutData.steps)
-  ) {
+  const structured = getStructuredWorkout(workout);
+  if (!structured || structured.steps.length === 0) {
     drawPlaceholder(
       ctx,
       THUMBNAIL_CONFIG.width,
@@ -52,16 +48,7 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
     return canvas.toDataURL("image/png");
   }
 
-  const steps = workoutData.steps;
-  if (steps.length === 0) {
-    drawPlaceholder(
-      ctx,
-      THUMBNAIL_CONFIG.width,
-      THUMBNAIL_CONFIG.height,
-      "Empty Workout"
-    );
-    return canvas.toDataURL("image/png");
-  }
+  const steps = structured.steps;
 
   // Calculate durations
   const { durations, total } = calculateStepDurations(steps);

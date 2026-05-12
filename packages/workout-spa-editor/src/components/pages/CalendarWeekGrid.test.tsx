@@ -4,7 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
-import { DAYS_IN_WEEK } from "./CalendarWeekGrid.test-fixtures";
+
+const DAYS_IN_WEEK = 7;
 
 const DAYS = [
   "2026-04-06",

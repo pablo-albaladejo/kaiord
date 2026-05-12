@@ -10,7 +10,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { CreateRepetitionBlockButton } from "./CreateRepetitionBlockButton";
-import { EXPECTED_CLICK_COUNT } from "./CreateRepetitionBlockButton.test-fixtures";
+
+const EXPECTED_CLICK_COUNT = 3;
 
 describe("CreateRepetitionBlockButton", () => {
   describe("rendering", () => {

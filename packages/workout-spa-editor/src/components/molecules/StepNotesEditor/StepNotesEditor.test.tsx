@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { render, screen, userEvent } from "../../../test-utils";
 import { StepNotesEditor } from "./StepNotesEditor";
-import {
-  NOTES_CHARACTER_LIMIT,
-  NOTES_OVER_LIMIT_LENGTH,
-} from "./StepNotesEditor.test-fixtures";
+
+const NOTES_CHARACTER_LIMIT = 256;
+
+const NOTES_OVER_LIMIT_LENGTH = 260;
 
 describe("StepNotesEditor", () => {
   describe("rendering", () => {

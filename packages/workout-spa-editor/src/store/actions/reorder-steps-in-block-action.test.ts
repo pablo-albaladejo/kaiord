@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import type { WorkoutState } from "../workout-store";
 import { reorderStepsInBlockAction } from "./reorder-steps-in-block-action";
-import {
-  OUT_OF_BOUNDS_OVER_INDEX,
-  REORDERED_BLOCK_STEP_COUNT,
-  SECONDS_LONG_INTERVAL,
-  SECONDS_SHORT_INTERVAL,
-} from "./reorder-steps-in-block-action.test-fixtures";
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const REORDERED_BLOCK_STEP_COUNT = 3 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const SECONDS_LONG_INTERVAL = 600 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const SECONDS_SHORT_INTERVAL = 300 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const OUT_OF_BOUNDS_OVER_INDEX = 5 as const;
 
 describe("reorderStepsInBlockAction", () => {
   const createMockKRD = (workout: Workout): KRD => ({

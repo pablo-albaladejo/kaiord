@@ -13,6 +13,7 @@ import type { KRD, ValidationError } from "../types/krd";
 import { krdSchema } from "../types/schemas";
 import { formatZodError } from "../types/validation";
 import { sanitizeFilename, triggerDownload } from "./save-workout.helpers";
+import { getStructuredWorkout } from "./structured-workout";
 
 export type SaveResult =
   | { success: true; filename: string }
@@ -20,9 +21,7 @@ export type SaveResult =
 
 const resolveFilename = (krd: KRD, override?: string): string => {
   if (override) return override;
-  const workoutName =
-    (krd.extensions?.structured_workout as { name?: string })?.name ||
-    "workout";
+  const workoutName = getStructuredWorkout(krd)?.name || "workout";
   return `${sanitizeFilename(workoutName)}.krd`;
 };
 

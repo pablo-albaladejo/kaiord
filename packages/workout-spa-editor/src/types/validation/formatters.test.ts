@@ -9,7 +9,8 @@ import { z } from "zod";
 
 import type { ValidationError } from "../../types/krd";
 import { formatValidationErrors, formatZodError } from "./formatters";
-import { MIXED_ARRAY_FIXTURE } from "./formatters.test-fixtures";
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const MIXED_ARRAY_FIXTURE = [1, "invalid", 3] as const;
 
 describe("validation formatters", () => {
   describe("formatZodError", () => {

@@ -5,7 +5,10 @@
 import { describe, expect, it } from "vitest";
 
 import { ConversionError, FileParsingError, ValidationError } from "./errors";
-import { ERROR_COLUMN, ERROR_LINE } from "./errors.test-fixtures";
+
+const ERROR_LINE = 5;
+
+const ERROR_COLUMN = 12;
 
 describe("FileParsingError", () => {
   it("should create error with message only", () => {

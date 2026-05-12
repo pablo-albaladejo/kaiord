@@ -1,7 +1,6 @@
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import type { HTMLAttributes } from "react";
 
+import { useDndCardWrapper } from "../../../hooks/use-dnd-card-wrapper";
 import type { WorkoutStep } from "../../../types/krd";
 import { StepCard } from "../../molecules/StepCard/StepCard";
 
@@ -24,7 +23,6 @@ export type SortableStepCardProps = SortableStepCardOwnProps &
   Omit<HTMLAttributes<HTMLDivElement>, keyof SortableStepCardOwnProps>;
 
 export const SortableStepCard = ({
-  // Component-specific props (explicitly destructured)
   id,
   step,
   visualIndex,
@@ -35,36 +33,13 @@ export const SortableStepCard = ({
   onDelete,
   onDuplicate,
   onCopy,
-  // HTML attributes (can be spread to wrapper div)
   ...htmlProps
 }: SortableStepCardProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  // Remove role attribute to prevent conflicts with StepCard's role
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { role, ...dndAttributes } = attributes;
+  const { wrapperProps, dragHandleProps, style, isDragging } =
+    useDndCardWrapper(id);
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...dndAttributes}
-      {...htmlProps}
-      data-step-id={id}
-    >
+    <div {...wrapperProps} style={style} {...htmlProps} data-step-id={id}>
       <StepCard
         step={step}
         visualIndex={visualIndex}
@@ -76,7 +51,7 @@ export const SortableStepCard = ({
         onDuplicate={onDuplicate}
         onCopy={onCopy}
         isDragging={isDragging}
-        dragHandleProps={listeners}
+        dragHandleProps={dragHandleProps}
       />
     </div>
   );

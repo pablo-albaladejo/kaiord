@@ -22,7 +22,6 @@ export type {
   KRDRecord,
   KRDSession,
   RepetitionBlock,
-  RepetitionBlockWithId,
   RepetitionFormData,
   Sport,
   StepEditMode,
@@ -34,10 +33,8 @@ export type {
   ValidationError,
   Workout,
   WorkoutEditorState,
-  WorkoutItemWithId,
   WorkoutMetadata,
   WorkoutStep,
-  WorkoutStepWithId,
 } from "./krd";
 export { isRepetitionBlock, isWorkoutStep } from "./krd";
 

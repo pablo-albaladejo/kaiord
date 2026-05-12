@@ -10,11 +10,12 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { CreateRepetitionBlockDialog } from "./CreateRepetitionBlockDialog";
-import {
-  FIVE_REPEATS,
-  TEN_REPEATS,
-  THREE_REPEATS,
-} from "./CreateRepetitionBlockDialog.test-fixtures";
+
+const FIVE_REPEATS = 5;
+
+const THREE_REPEATS = 3;
+
+const TEN_REPEATS = 10;
 
 describe("CreateRepetitionBlockDialog", () => {
   describe("rendering", () => {
