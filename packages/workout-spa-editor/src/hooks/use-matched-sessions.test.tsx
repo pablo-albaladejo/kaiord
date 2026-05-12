@@ -1,13 +1,22 @@
 import "fake-indexeddb/auto";
 
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
+import { PersistenceProvider } from "../contexts/persistence-context";
+import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
 import { useMatchedSessions } from "./use-matched-sessions";
+
+const wrap = ({ children }: { children: ReactNode }) => (
+  <PersistenceProvider persistence={createInMemoryPersistence()}>
+    {children}
+  </PersistenceProvider>
+);
 
 const FIFTY_NINE_MIN_SECONDS = 3540;
 const ONE_HOUR_SECONDS = 3600;
@@ -80,7 +89,9 @@ describe("useMatchedSessions", () => {
     // Arrange
 
     // Act
-    const { result } = renderHook(() => useMatchedSessions(null, WEEK));
+    const { result } = renderHook(() => useMatchedSessions(null, WEEK), {
+      wrapper: wrap,
+    });
 
     // Assert
     await waitFor(() => expect(result.current).toEqual([]));
@@ -90,7 +101,9 @@ describe("useMatchedSessions", () => {
     // Arrange
 
     // Act
-    const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
 
     // Assert
     await waitFor(() => expect(result.current).toEqual([]));
@@ -105,7 +118,9 @@ describe("useMatchedSessions", () => {
       .table("workouts")
       .put(seedWorkout("w-1", "2026-04-29", FIFTY_NINE_MIN_SECONDS));
     await db.table("sessionMatches").put(seedMatch());
-    const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
     await waitFor(() => {
       expect(result.current).toHaveLength(1);
     });
@@ -131,7 +146,9 @@ describe("useMatchedSessions", () => {
     await db.table("sessionMatches").put(seedMatch({ date: "2026-04-20" }));
 
     // Act
-    const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
 
     // Assert
     await waitFor(() => expect(result.current).toEqual([]));
@@ -153,7 +170,9 @@ describe("useMatchedSessions", () => {
     );
 
     // Act
-    const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
 
     // Assert
     await waitFor(() => expect(result.current).toEqual([]));
@@ -164,7 +183,9 @@ describe("useMatchedSessions", () => {
     await db.table("sessionMatches").put(seedMatch());
 
     // Act
-    const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
 
     // Assert
     await waitFor(() => expect(result.current).toEqual([]));
@@ -176,7 +197,9 @@ describe("useMatchedSessions", () => {
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-29"));
     await db.table("workouts").put(seedWorkout("w-1", "2026-04-29"));
-    const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
     await waitFor(() => expect(result.current).toEqual([]));
 
     // Act

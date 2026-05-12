@@ -13,6 +13,21 @@ import type { SessionMatch } from "../types/session-match";
 
 export type SessionMatchRepository = {
   put: (match: SessionMatch) => Promise<void>;
+  /**
+   * Rewrites the `coachingActivityId` of an existing match row in-place.
+   *
+   * Used by `healSessionMatchIdShape` to migrate legacy SHORT-form rows
+   * (`"${source}:${sourceId}"`) to the canonical COMPOSITE shape
+   * (`"${profileId}:${source}:${sourceId}"`) without churning the row's
+   * primary key — preserves the same `(matchId, workoutId, date)` so the
+   * calendar hydrate join immediately picks the healed row up on next
+   * `useLiveQuery` tick. Throws `SessionAlreadyMatchedError` if the new
+   * id collides with a different row's index slot.
+   */
+  updateCoachingActivityId: (
+    matchId: string,
+    newCoachingActivityId: string
+  ) => Promise<void>;
   /** Direct lookup by primary key. Used by unmatchSession to verify ownership. */
   getById: (id: string) => Promise<SessionMatch | undefined>;
   getByActivityId: (

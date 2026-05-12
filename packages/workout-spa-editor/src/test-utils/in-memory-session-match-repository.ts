@@ -65,6 +65,7 @@ const buildWriters = (
 ): Pick<
   SessionMatchRepository,
   | "put"
+  | "updateCoachingActivityId"
   | "delete"
   | "deleteByActivityId"
   | "deleteByWorkoutId"
@@ -82,6 +83,20 @@ const buildWriters = (
       );
     }
     store.set(match.id, match);
+  },
+  updateCoachingActivityId: async (id, newCoachingActivityId) => {
+    const existing = store.get(id);
+    if (!existing) return;
+    const next: SessionMatch = {
+      ...existing,
+      coachingActivityId: newCoachingActivityId,
+    };
+    if (findActivityConflict(store, next)) {
+      throw new SessionAlreadyMatchedError(
+        `activity ${next.coachingActivityId} already matched in profile ${next.profileId}`
+      );
+    }
+    store.set(id, next);
   },
   delete: async (id) => {
     store.delete(id);
