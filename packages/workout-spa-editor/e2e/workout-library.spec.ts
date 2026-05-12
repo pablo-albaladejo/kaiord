@@ -16,6 +16,7 @@
 
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkout } from "./helpers/load-test-workout";
+import { openHeaderAction } from "./helpers/mobile-menu";
 
 test.describe("Workout Library", () => {
   test.beforeEach(async ({ page }) => {
@@ -95,8 +96,10 @@ test.describe("Workout Library", () => {
 
       // Act — SPA-navigate to the routed Library page via the header
       // button (a `page.goto('/library')` would full-reload and drop
-      // the Zustand current-workout state, hiding the CTA).
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      // the Zustand current-workout state, hiding the CTA). The
+      // mobile-aware helper opens the hamburger menu first on small
+      // viewports (Pixel 5 / iPhone 12 in Playwright).
+      await openHeaderAction(page, /open workout library/i);
       await page.waitForURL(/\/library$/);
       await expect(page.getByTestId("library-page")).toBeVisible();
 

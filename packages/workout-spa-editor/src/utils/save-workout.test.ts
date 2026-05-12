@@ -6,6 +6,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { setupDownloadMock } from "../test-utils/mock-download";
 import type { KRD } from "../types/krd";
 import { formatSaveErrors, saveWorkout } from "./save-workout";
 
@@ -39,21 +40,7 @@ describe("save-workout", () => {
         },
       };
 
-      // Mock DOM methods
-      const mockLink = {
-        href: "",
-        download: "",
-        click: vi.fn(),
-      };
-      const appendChildSpy = vi
-        .spyOn(document.body, "appendChild")
-        .mockImplementation(() => mockLink as unknown as Node);
-      const removeChildSpy = vi
-        .spyOn(document.body, "removeChild")
-        .mockImplementation(() => mockLink as unknown as Node);
-      vi.spyOn(document, "createElement").mockReturnValue(
-        mockLink as unknown as HTMLAnchorElement
-      );
+      const { anchor, appendChildSpy, removeChildSpy } = setupDownloadMock();
 
       // Act
       const result = saveWorkout(mockKrd);
@@ -63,7 +50,7 @@ describe("save-workout", () => {
       if (result.success) {
         expect(result.filename).toBe("test_workout.krd");
       }
-      expect(mockLink.click).toHaveBeenCalled();
+      expect(anchor.click).toHaveBeenCalled();
       expect(appendChildSpy).toHaveBeenCalled();
       expect(removeChildSpy).toHaveBeenCalled();
     });
@@ -85,20 +72,7 @@ describe("save-workout", () => {
         },
       };
 
-      const mockLink = {
-        href: "",
-        download: "",
-        click: vi.fn(),
-      };
-      vi.spyOn(document.body, "appendChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document.body, "removeChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document, "createElement").mockReturnValue(
-        mockLink as unknown as HTMLAnchorElement
-      );
+      setupDownloadMock();
 
       // Act
       const result = saveWorkout(mockKrd, "custom-name.krd");
@@ -128,20 +102,7 @@ describe("save-workout", () => {
         },
       };
 
-      const mockLink = {
-        href: "",
-        download: "",
-        click: vi.fn(),
-      };
-      vi.spyOn(document.body, "appendChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document.body, "removeChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document, "createElement").mockReturnValue(
-        mockLink as unknown as HTMLAnchorElement
-      );
+      setupDownloadMock();
 
       // Act
       const result = saveWorkout(mockKrd);
@@ -170,20 +131,7 @@ describe("save-workout", () => {
         },
       };
 
-      const mockLink = {
-        href: "",
-        download: "",
-        click: vi.fn(),
-      };
-      vi.spyOn(document.body, "appendChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document.body, "removeChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document, "createElement").mockReturnValue(
-        mockLink as unknown as HTMLAnchorElement
-      );
+      setupDownloadMock();
 
       // Act
       const result = saveWorkout(mockKrd);
@@ -254,20 +202,7 @@ describe("save-workout", () => {
         },
       };
 
-      const mockLink = {
-        href: "",
-        download: "",
-        click: vi.fn(),
-      };
-      vi.spyOn(document.body, "appendChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document.body, "removeChild").mockImplementation(
-        () => mockLink as unknown as Node
-      );
-      vi.spyOn(document, "createElement").mockReturnValue(
-        mockLink as unknown as HTMLAnchorElement
-      );
+      setupDownloadMock();
 
       // Act
       const result = saveWorkout(mockKrd);

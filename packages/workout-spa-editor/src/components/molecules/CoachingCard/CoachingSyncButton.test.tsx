@@ -3,7 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CoachingSyncButton } from "./CoachingSyncButton";
-import { FIVE_MINUTES_MS } from "./CoachingSyncButton.test-fixtures";
+
+const FIVE_MINUTES_MS = 300_000;
 
 const mockMatchMedia = (reduced: boolean) => {
   const listeners = new Set<() => void>();

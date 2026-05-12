@@ -13,12 +13,14 @@ import { describe, expect, it } from "vitest";
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { addStepToRepetitionBlockAction } from "./add-step-to-repetition-block-action";
-import {
-  EDITED_REPEAT_COUNT_TEN,
-  ORIGINAL_REPEAT_COUNT_FIVE,
-  ORIGINAL_REPEAT_COUNT_FOUR,
-  STEP_COUNT_THREE,
-} from "./block-operations-integration.test-fixtures";
+
+const EDITED_REPEAT_COUNT_TEN = 10;
+
+const ORIGINAL_REPEAT_COUNT_FIVE = 5;
+
+const ORIGINAL_REPEAT_COUNT_FOUR = 4;
+
+const STEP_COUNT_THREE = 3;
 import { editRepetitionBlockAction } from "./edit-repetition-block-action";
 import { ungroupRepetitionBlockAction } from "./ungroup-repetition-block-action";
 

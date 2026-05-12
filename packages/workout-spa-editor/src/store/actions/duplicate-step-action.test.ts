@@ -8,12 +8,14 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import type { KRD } from "../../types/krd";
 import { useWorkoutStore } from "../workout-store";
-import {
-  DUPLICATED_LENGTH_THREE_PLUS_ONE,
-  DUPLICATED_LENGTH_TWO_PLUS_ONE,
-  FOURTH_STEP_INDEX_VALUE,
-  NON_EXISTENT_STEP_INDEX,
-} from "./duplicate-step-action.test-fixtures";
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const DUPLICATED_LENGTH_TWO_PLUS_ONE = 3 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const DUPLICATED_LENGTH_THREE_PLUS_ONE = 4 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const FOURTH_STEP_INDEX_VALUE = 3 as const;
+// eslint-disable-next-line no-magic-numbers -- test fixtures use literal values for clarity
+const NON_EXISTENT_STEP_INDEX = 5 as const;
 
 describe("duplicateStep", () => {
   // Reset store before each test

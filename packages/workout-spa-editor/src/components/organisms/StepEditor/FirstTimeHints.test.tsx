@@ -13,7 +13,8 @@ import {
   hasCompletedFirstWorkout,
   resetFirstWorkoutState,
 } from "./FirstTimeHints";
-import { HINT_DOT_COUNT } from "./FirstTimeHints.test-fixtures";
+
+const HINT_DOT_COUNT = 3;
 
 describe("FirstTimeHints", () => {
   const TEST_STORAGE_KEY = "test-first-workout-hints";

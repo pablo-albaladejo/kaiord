@@ -7,29 +7,19 @@
 import { useState } from "react";
 
 import type { KRD, Sport, SubSport } from "../../../../types/krd";
+import { getStructuredWorkout } from "../../../../utils/structured-workout";
 
 export function useMetadataForm(krd: KRD) {
-  const workoutData = krd.extensions?.structured_workout;
+  const structured = getStructuredWorkout(krd);
   const workoutName =
-    workoutData &&
-    typeof workoutData === "object" &&
-    "name" in workoutData &&
-    typeof workoutData.name === "string"
-      ? workoutData.name
-      : undefined;
-  const workoutSport =
-    workoutData &&
-    typeof workoutData === "object" &&
-    "sport" in workoutData &&
-    typeof workoutData.sport === "string"
-      ? (workoutData.sport as Sport)
+    typeof structured?.name === "string" ? structured.name : undefined;
+  const workoutSport: Sport =
+    typeof structured?.sport === "string"
+      ? (structured.sport as Sport)
       : "cycling";
-  const workoutSubSport =
-    workoutData &&
-    typeof workoutData === "object" &&
-    "subSport" in workoutData &&
-    typeof workoutData.subSport === "string"
-      ? (workoutData.subSport as SubSport)
+  const workoutSubSport: SubSport =
+    typeof structured?.subSport === "string"
+      ? (structured.subSport as SubSport)
       : "generic";
 
   const [name, setName] = useState(workoutName || "");

@@ -14,10 +14,10 @@ import {
   DEFAULT_POWER_ZONES,
 } from "../../../types/profile";
 import { ZoneEditor } from "./ZoneEditor";
-import {
-  HR_MIN_BPM_55,
-  POWER_MIN_PERCENT_10,
-} from "./ZoneEditor.test-fixtures";
+
+const POWER_MIN_PERCENT_10 = 10;
+
+const HR_MIN_BPM_55 = 55;
 
 // ============================================
 // Test Fixtures

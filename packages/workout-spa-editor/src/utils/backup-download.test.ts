@@ -6,6 +6,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { setupDownloadMock } from "../test-utils/mock-download";
 import type { KRD } from "../types/krd";
 import { downloadBackup, promptBackupDownload } from "./backup-download";
 
@@ -33,30 +34,15 @@ describe("downloadBackup", () => {
         },
       },
     };
-
-    const mockLink = {
-      href: "",
-      download: "",
-      click: vi.fn(),
-    };
-
-    vi.spyOn(document, "createElement").mockReturnValue(
-      mockLink as unknown as HTMLElement
-    );
-    vi.spyOn(document.body, "appendChild").mockImplementation(
-      () => mockLink as unknown as Node
-    );
-    vi.spyOn(document.body, "removeChild").mockImplementation(
-      () => mockLink as unknown as Node
-    );
+    const { anchor } = setupDownloadMock();
 
     // Act
     downloadBackup(mockWorkout);
 
     // Assert
-    expect(mockLink.click).toHaveBeenCalled();
-    expect(mockLink.download).toMatch(/^workout-backup-/);
-    expect(mockLink.download).toMatch(/\.krd$/);
+    expect(anchor.click).toHaveBeenCalled();
+    expect(anchor.download).toMatch(/^workout-backup-/);
+    expect(anchor.download).toMatch(/\.krd$/);
   });
 
   it("should use custom filename when provided", () => {
@@ -76,28 +62,13 @@ describe("downloadBackup", () => {
         },
       },
     };
-
-    const mockLink = {
-      href: "",
-      download: "",
-      click: vi.fn(),
-    };
-
-    vi.spyOn(document, "createElement").mockReturnValue(
-      mockLink as unknown as HTMLElement
-    );
-    vi.spyOn(document.body, "appendChild").mockImplementation(
-      () => mockLink as unknown as Node
-    );
-    vi.spyOn(document.body, "removeChild").mockImplementation(
-      () => mockLink as unknown as Node
-    );
+    const { anchor } = setupDownloadMock();
 
     // Act
     downloadBackup(mockWorkout, "custom-backup.krd");
 
     // Assert
-    expect(mockLink.download).toBe("custom-backup.krd");
+    expect(anchor.download).toBe("custom-backup.krd");
   });
 });
 
@@ -106,22 +77,7 @@ describe("promptBackupDownload", () => {
     // Mock URL APIs
     global.URL.createObjectURL = vi.fn(() => "blob:mock-url");
     global.URL.revokeObjectURL = vi.fn();
-
-    // Mock DOM methods
-    const mockLink = {
-      href: "",
-      download: "",
-      click: vi.fn(),
-    };
-    vi.spyOn(document, "createElement").mockReturnValue(
-      mockLink as unknown as HTMLElement
-    );
-    vi.spyOn(document.body, "appendChild").mockImplementation(
-      () => mockLink as unknown as Node
-    );
-    vi.spyOn(document.body, "removeChild").mockImplementation(
-      () => mockLink as unknown as Node
-    );
+    setupDownloadMock();
 
     // Mock setTimeout to execute immediately
     vi.useFakeTimers();

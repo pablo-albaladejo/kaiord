@@ -16,12 +16,14 @@ import {
   KaiordDatabase,
   makeBackfillAiProviderCreatedAt,
 } from "./dexie-database";
-import {
-  CANONICAL_EPOCH_MS_2023_11,
-  DEXIE_V7_VERSION,
-  EXISTING_CREATED_AT_SENTINEL,
-  ONE_MINUTE_MS,
-} from "./dexie-v8-migration.test-fixtures";
+
+const DEXIE_V7_VERSION = 7;
+
+const ONE_MINUTE_MS = 60_000;
+
+const CANONICAL_EPOCH_MS_2023_11 = 1_700_000_000_000;
+
+const EXISTING_CREATED_AT_SENTINEL = 42;
 
 const dbName = (suffix: string) => `kaiord-test-v8-${suffix}-${Date.now()}`;
 

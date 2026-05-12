@@ -36,7 +36,6 @@ export { isRepetitionBlock, isWorkoutStep } from "./krd-guards";
 // Re-export UI types
 export type {
   DragState,
-  RepetitionBlockWithId,
   RepetitionFormData,
   StepEditMode,
   StepFormData,
@@ -47,7 +46,5 @@ export type {
   UIWorkoutStep,
   ValidationError,
   WorkoutEditorState,
-  WorkoutItemWithId,
   WorkoutMetadata,
-  WorkoutStepWithId,
 } from "./krd-ui";
