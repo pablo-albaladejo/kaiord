@@ -122,7 +122,7 @@
     "husky": "^9.1.7",
     "jscpd": "^4.0.9",
     "knip": "^6.11.0",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.0.4",
     "npm-run-all2": "^8.0.4",
     "prettier": "^3.8.3",
     "sharp": "^0.34.5",
