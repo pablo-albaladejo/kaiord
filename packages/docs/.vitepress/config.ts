@@ -1,7 +1,6 @@
-import { defineConfig } from "vitepress";
 import { transformerTwoslash } from "@shikijs/vitepress-twoslash";
 import llmstxt from "vitepress-plugin-llms";
-import type { HeadConfig } from "vitepress";
+import type { HeadConfig, UserConfig } from "vitepress";
 
 import { buildStaticHead } from "./head-config.mjs";
 
@@ -83,7 +82,7 @@ function buildJsonLd(
   return results;
 }
 
-export default defineConfig({
+const config = {
   lang: "en",
   title: "Kaiord",
   description:
@@ -254,4 +253,6 @@ export default defineConfig({
 
     return head;
   },
-});
+} satisfies UserConfig;
+
+export default config;
