@@ -81,7 +81,7 @@ describe("useCoachingDialogActions — handleSelectWorkout", () => {
 
     expect(mockMatch).toHaveBeenCalledWith({
       profileId: "p1",
-      coachingActivityId: "act-1",
+      coachingActivityId: "p1:act-1",
       workoutId: "w-1",
       source: "manual",
     });

@@ -12,6 +12,7 @@ import type { ActivityMatchState } from "../../../hooks/use-activity-match-state
 import { useMatchSession } from "../../../hooks/use-match-session";
 import { useUnmatchSession } from "../../../hooks/use-unmatch-session";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { toPersistedCoachingActivityId } from "../../../types/coaching-activity-record";
 
 export type UseCoachingDialogActions = {
   matching: boolean;
@@ -42,7 +43,10 @@ export const useCoachingDialogActions = (
       try {
         await matchSession({
           profileId: targetProfileId,
-          coachingActivityId: activity.id,
+          coachingActivityId: toPersistedCoachingActivityId(
+            targetProfileId,
+            activity.id
+          ),
           workoutId,
           source: "manual",
         });
