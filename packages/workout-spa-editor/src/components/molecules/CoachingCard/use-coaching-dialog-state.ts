@@ -19,7 +19,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../../adapters/dexie/dexie-database";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
-import { namespaceSourceId } from "../../../types/coaching-activity-record";
+import {
+  namespaceSourceId,
+  toPersistedCoachingActivityId,
+} from "../../../types/coaching-activity-record";
 import type { SessionMatch } from "../../../types/session-match";
 
 export type CoachingDialogState =
@@ -34,7 +37,7 @@ const resolveState = async (
   const match = await db
     .table<SessionMatch>("sessionMatches")
     .where("[profileId+coachingActivityId]")
-    .equals([profileId, activity.id])
+    .equals([profileId, toPersistedCoachingActivityId(profileId, activity.id)])
     .first();
 
   if (match) {

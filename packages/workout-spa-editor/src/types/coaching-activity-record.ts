@@ -70,6 +70,22 @@ export const buildCoachingActivityId = (
 ): string => `${profileId}:${source}:${sourceId}`;
 
 /**
+ * Composes the canonical persisted `sessionMatches.coachingActivityId`
+ * from a profile id and the in-memory `CoachingActivity.id` view-model
+ * (which is the SHORT form `"${source}:${sourceId}"`).
+ *
+ * This is the SINGLE constructor every writer/reader of
+ * `sessionMatches.coachingActivityId` MUST funnel through to keep the
+ * persisted shape aligned with `coachingActivities.id` (COMPOSITE
+ * `"${profileId}:${source}:${sourceId}"`). See
+ * `.omc/autopilot/bug-trace.md` §H7 for the original divergence.
+ */
+export const toPersistedCoachingActivityId = (
+  profileId: string,
+  activityViewModelId: string
+): string => `${profileId}:${activityViewModelId}`;
+
+/**
  * Namespaces a raw platform sourceId by profile for use as `WorkoutRecord.sourceId`.
  *
  * The `[source+sourceId]` Dexie index on the `workouts` table makes

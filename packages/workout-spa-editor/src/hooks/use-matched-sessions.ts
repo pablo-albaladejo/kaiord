@@ -24,18 +24,18 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { db } from "../adapters/dexie/dexie-database";
-import { toCoachingActivity } from "../adapters/train2go/coaching-record-to-activity.converter";
-import { computeComplianceScore } from "../application/compute-compliance-score";
-import { parseCoachingDuration } from "../application/parse-coaching-duration";
 import type { MatchedSession } from "../components/molecules/MatchedSessionCard/MatchedSessionCard";
-import type { WorkoutRecord } from "../types/calendar-record";
-import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
+import {
+  type DanglingMatch,
+  useMatchedSessionsHeal,
+} from "./use-matched-sessions-heal";
+import { hydrateMatchedSessions } from "./use-matched-sessions-hydrate";
 import {
   markUseMatchedSessionsEnd,
   markUseMatchedSessionsStart,
 } from "./use-matched-sessions-perf";
+import { queryMatchesForWeek } from "./use-matched-sessions-query";
 
 export type MatchedSessionWithMetadata = MatchedSession & {
   match: SessionMatch;
@@ -43,68 +43,30 @@ export type MatchedSessionWithMetadata = MatchedSession & {
 
 export type { MatchedSession };
 
-const lastDayOf = (days: string[]): string =>
-  days.length > 0 ? (days.at(-1) ?? days[0]!) : "";
-const firstDayOf = (days: string[]): string => days[0] ?? "";
-
-const hydrate = async (
-  matches: SessionMatch[]
-): Promise<MatchedSessionWithMetadata[]> => {
-  const [activities, workouts] = await Promise.all([
-    db
-      .table<CoachingActivityRecord>("coachingActivities")
-      .where("id")
-      .anyOf(matches.map((m) => m.coachingActivityId))
-      .toArray(),
-    db
-      .table<WorkoutRecord>("workouts")
-      .where("id")
-      .anyOf(matches.map((m) => m.workoutId))
-      .toArray(),
-  ]);
-  const aById = new Map(activities.map((a) => [a.id, a]));
-  const wById = new Map(workouts.map((w) => [w.id, w]));
-
-  const result: MatchedSessionWithMetadata[] = [];
-  for (const match of matches) {
-    const record = aById.get(match.coachingActivityId);
-    const workout = wById.get(match.workoutId);
-    if (!record || !workout) continue; // dangling-ref tolerance
-    result.push({
-      match,
-      activity: toCoachingActivity(record),
-      workout,
-      complianceScore: computeComplianceScore(
-        parseCoachingDuration(record.duration),
-        workout.raw?.duration?.value
-      ),
-    });
-  }
-  return result;
+type HydrateResult = {
+  matched: MatchedSessionWithMetadata[];
+  dangling: DanglingMatch[];
 };
+
+const EMPTY: HydrateResult = { matched: [], dangling: [] };
 
 export function useMatchedSessions(
   profileId: string | null,
   days: string[]
 ): MatchedSessionWithMetadata[] | undefined {
-  return useLiveQuery<MatchedSessionWithMetadata[]>(async () => {
+  const result = useLiveQuery<HydrateResult>(async () => {
     markUseMatchedSessionsStart();
     try {
-      if (!profileId || days.length === 0) return [];
-      const matches = await db
-        .table<SessionMatch>("sessionMatches")
-        .where("[profileId+date]")
-        .between(
-          [profileId, firstDayOf(days)],
-          [profileId, lastDayOf(days)],
-          true,
-          true
-        )
-        .toArray();
-      if (matches.length === 0) return [];
-      return await hydrate(matches);
+      if (!profileId || days.length === 0) return EMPTY;
+      const matches = await queryMatchesForWeek(profileId, days);
+      if (matches.length === 0) return EMPTY;
+      return await hydrateMatchedSessions(matches);
     } finally {
       markUseMatchedSessionsEnd();
     }
   }, [profileId, days.join(",")]);
+
+  useMatchedSessionsHeal(result?.dangling ?? null);
+
+  return result?.matched;
 }

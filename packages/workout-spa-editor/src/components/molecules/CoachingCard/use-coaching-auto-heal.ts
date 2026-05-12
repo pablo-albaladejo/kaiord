@@ -12,6 +12,7 @@ import { ensureSessionMatch } from "../../../application/coaching/ensure-session
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { usePersistence } from "../../../contexts/persistence-context";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { toPersistedCoachingActivityId } from "../../../types/coaching-activity-record";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
 export const useCoachingAutoHeal = (
@@ -26,13 +27,14 @@ export const useCoachingAutoHeal = (
   useEffect(() => {
     if (!activity || !profileId) return;
     if (dialogState?.kind !== "converted") return;
-    const key = `${profileId}:${activity.id}:${dialogState.workout.id}`;
+    const composite = toPersistedCoachingActivityId(profileId, activity.id);
+    const key = `${composite}:${dialogState.workout.id}`;
     if (healedRef.current === key) return;
     void (async () => {
       try {
         const result = await ensureSessionMatch(persistence.sessionMatch, {
           profileId,
-          coachingActivityId: activity.id,
+          coachingActivityId: composite,
           workoutId: dialogState.workout.id,
           date: activity.date,
           source: "auto-coaching-v10-migration",
