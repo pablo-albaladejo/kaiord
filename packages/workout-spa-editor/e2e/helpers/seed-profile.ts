@@ -27,6 +27,7 @@ export async function seedDefaultProfile(page: Page): Promise<string> {
       {
         id: profileId,
         name: "E2E Default Profile",
+        linkedAccounts: [],
         createdAt: now,
         updatedAt: now,
       },
