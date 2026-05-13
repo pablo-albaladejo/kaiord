@@ -42,12 +42,18 @@ export const convertToKrd = async (
   logger: Logger
 ): Promise<KRD> => {
   switch (format) {
-    case "fit": return fitToKrd(data, logger);
-    case "tcx": return tcxToKrd(data, logger);
-    case "zwo": return zwoToKrd(data, logger);
-    case "gcn": return gcnToKrd(data, logger);
-    case "krd": return krdToKrd(data);
-    default: throw new Error(`Unsupported format: ${format}`);
+    case "fit":
+      return fitToKrd(data, logger);
+    case "tcx":
+      return tcxToKrd(data, logger);
+    case "zwo":
+      return zwoToKrd(data, logger);
+    case "gcn":
+      return gcnToKrd(data, logger);
+    case "krd":
+      return krdToKrd(data);
+    default:
+      throw new Error(`Unsupported format: ${format}`);
   }
 };
 
@@ -58,11 +64,17 @@ export const convertFromKrd = async (
   logger: Logger
 ): Promise<Uint8Array | string> => {
   switch (format) {
-    case "fit": return krdToFit(krd, logger);
-    case "tcx": return krdToTcx(krd, logger);
-    case "zwo": return krdToZwo(krd, logger);
-    case "gcn": return krdToGcn(krd, logger);
-    case "krd": return krdToText(krd);
-    default: throw new Error(`Unsupported output format: ${format}`);
+    case "fit":
+      return krdToFit(krd, logger);
+    case "tcx":
+      return krdToTcx(krd, logger);
+    case "zwo":
+      return krdToZwo(krd, logger);
+    case "gcn":
+      return krdToGcn(krd, logger);
+    case "krd":
+      return krdToText(krd);
+    default:
+      throw new Error(`Unsupported output format: ${format}`);
   }
 };

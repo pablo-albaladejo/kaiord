@@ -27,10 +27,7 @@ export default defineConfig({
         if (!source.endsWith("profile.js")) return null;
         if (!importer || !importer.includes("@garmin")) return null;
         if (!importer.includes("fitsdk/src/")) return null;
-        return path.resolve(
-          __dirname,
-          "./src/lib/fitsdk-minimal/profile.js"
-        );
+        return path.resolve(__dirname, "./src/lib/fitsdk-minimal/profile.js");
       },
     },
   ],
@@ -56,7 +53,10 @@ export default defineConfig({
       // (~60KB raw, includes a multi-thousand-string GatewayModelId catalog).
       {
         find: "@ai-sdk/gateway",
-        replacement: path.resolve(__dirname, "./src/lib/ai-sdk-gateway-stub.ts"),
+        replacement: path.resolve(
+          __dirname,
+          "./src/lib/ai-sdk-gateway-stub.ts"
+        ),
       },
     ],
   },
