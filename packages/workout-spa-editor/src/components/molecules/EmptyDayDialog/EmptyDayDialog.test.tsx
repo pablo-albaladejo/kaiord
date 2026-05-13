@@ -191,6 +191,33 @@ describe("EmptyDayDialog", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("should fire toast.error and not persist when no active profile is set on pick", async () => {
+    // Arrange
+
+    await db.table("meta").clear();
+    const persistence = createDexiePersistence(db);
+    await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={onClose} />);
+
+    // Act
+
+    await user.click(screen.getByText("Add from Library"));
+    await waitFor(() => {
+      expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("Tempo Ride"));
+
+    // Assert
+
+    await waitFor(() => {
+      expect(screen.getByText("No active profile")).toBeInTheDocument();
+    });
+    const workouts = await db.table("workouts").toArray();
+    expect(workouts).toHaveLength(0);
+  });
+
   it("should navigate to new workout with date and closes on Create click", async () => {
     // Arrange
 

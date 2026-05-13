@@ -26,6 +26,9 @@ const TOAST_SCHEDULE_OK_TITLE = "Workout scheduled";
 const TOAST_SCHEDULE_OK_DESC = "Added to your calendar.";
 const TOAST_SCHEDULE_FAIL_TITLE = "Schedule failed";
 const TOAST_SCHEDULE_FAIL_DESC = "Could not add the workout — please retry.";
+const TOAST_NO_PROFILE_TITLE = "No active profile";
+const TOAST_NO_PROFILE_DESC =
+  "Open the profile manager to select or create one.";
 
 export type EmptyDayDialogProps = {
   date: string | null;
@@ -46,7 +49,11 @@ export function EmptyDayDialog({ date, onClose }: EmptyDayDialogProps) {
   };
 
   const handlePick = (templateId: string) => {
-    if (!date || !profileId) return;
+    if (!date) return;
+    if (!profileId) {
+      toast.error(TOAST_NO_PROFILE_TITLE, TOAST_NO_PROFILE_DESC);
+      return;
+    }
     void scheduleTemplate(persistence, { templateId, date, profileId })
       .then(() => {
         toast.success(TOAST_SCHEDULE_OK_TITLE, TOAST_SCHEDULE_OK_DESC);
