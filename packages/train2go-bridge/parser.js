@@ -144,12 +144,23 @@ const extractDescription = (block) => {
   let text = descMatch[1];
   // Remove SVGs and nested elements
   text = text.replace(/<svg[\s\S]*?<\/svg>/g, "");
+  // CAUTION: this strips ANY balanced <div>...</div> block — content
+  // and all — which is intentional for the trailing
+  // `activity-hint-ecos` div but would also eat bullets if Train2Go
+  // ever wrapped them in <div> instead of <ul><li>. Bullets currently
+  // arrive as <ul><li>, so we mirror htmlToPlainText's pattern below
+  // (convert closing block-level tags to "\n" BEFORE strip-all) to
+  // preserve the line break that <li> implies.
   text = text.replace(/<div[\s\S]*?<\/div>/g, "");
   // Preserve bold markers
   text = text.replace(/<strong>([^<]*)<\/strong>/g, "**$1**");
-  // Convert breaks and paragraphs to newlines
-  text = text.replace(/<br\s*\/?>/g, "\n");
-  text = text.replace(/<p>/g, "\n");
+  // Convert breaks and block-level tags to newlines BEFORE stripping
+  // remaining HTML. Without `<li>`/`</li>`/`</p>` conversion the live
+  // single-line T2G shape `<p>title</p><ul><li>a</li><li>b</li></ul>`
+  // collapses to `titleab` after strip-all (user-reported regression).
+  text = text.replace(/<br\s*\/?>/gi, "\n");
+  text = text.replace(/<\/(p|h[1-6]|li|ul|ol)>/gi, "\n");
+  text = text.replace(/<(p|li)\b[^>]*>/gi, "\n");
   // Strip remaining HTML
   text = text.replace(/<[^>]+>/g, "");
   text = decodeEntities(text);
