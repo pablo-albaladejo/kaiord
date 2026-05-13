@@ -28,6 +28,20 @@ export type SessionMatchRepository = {
     matchId: string,
     newCoachingActivityId: string
   ) => Promise<void>;
+  /**
+   * Idempotent set-union append into `executedWorkoutIds`. The
+   * transaction reads the row, dedups the input against the current
+   * array, and writes the merged result. A no-op when the row is
+   * missing — concurrent-delete tolerance matches `delete`.
+   *
+   * Drives the Train2Go three-slot grouping: an executed activity
+   * (e.g., Garmin/FIT) on the same day+sport as a prescribed+structured
+   * match becomes an additional slot in the same `MatchedSessionCard`.
+   */
+  appendExecutedWorkoutIds: (
+    matchId: string,
+    workoutIds: readonly string[]
+  ) => Promise<void>;
   /** Direct lookup by primary key. Used by unmatchSession to verify ownership. */
   getById: (id: string) => Promise<SessionMatch | undefined>;
   getByActivityId: (

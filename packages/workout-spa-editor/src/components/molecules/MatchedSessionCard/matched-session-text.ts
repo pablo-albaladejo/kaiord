@@ -11,6 +11,12 @@ export type MatchedSession = {
   activity: CoachingActivity;
   workout: WorkoutRecord;
   complianceScore: number | null;
+  /**
+   * Executed activities (e.g., Garmin/FIT) auto-linked to the same
+   * `(profileId, date, canonical sport)` slot. 1–N executeds render
+   * as additional rows in the same `MatchedSessionCard`.
+   */
+  executed?: readonly WorkoutRecord[];
 };
 
 export const formatPercent = (score: number | null): string =>

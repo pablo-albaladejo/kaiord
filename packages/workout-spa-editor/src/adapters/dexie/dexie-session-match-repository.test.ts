@@ -15,6 +15,7 @@ const makeMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
   date: overrides.date ?? "2026-04-29",
   createdAt: overrides.createdAt ?? "2026-05-01T12:00:00.000Z",
   source: overrides.source ?? "manual",
+  executedWorkoutIds: overrides.executedWorkoutIds ?? [],
 });
 
 describe("DexieSessionMatchRepository", () => {
@@ -233,6 +234,46 @@ describe("DexieSessionMatchRepository", () => {
     expect(await repo.getByWorkoutId("p1", "w-drop")).toBeUndefined();
     expect((await repo.getByWorkoutId("p1", "w-keep"))?.id).toBe("M2");
     await expect(repo.deleteByWorkoutId("never")).resolves.toBeUndefined();
+  });
+
+  it("should set-union append into executedWorkoutIds idempotently", async () => {
+    // Arrange
+    const repo = createDexieSessionMatchRepository(db);
+    await repo.put(makeMatch({ id: "M1", executedWorkoutIds: ["w-a"] }));
+
+    // Act
+    await repo.appendExecutedWorkoutIds("M1", ["w-a", "w-b", "w-c"]);
+
+    // Assert
+    expect((await repo.getById("M1"))?.executedWorkoutIds.sort()).toEqual([
+      "w-a",
+      "w-b",
+      "w-c",
+    ]);
+  });
+
+  it("should be a no-op when matchId is missing (concurrent-delete tolerance)", async () => {
+    // Arrange
+    const repo = createDexieSessionMatchRepository(db);
+
+    // Act
+
+    // Assert
+    await expect(
+      repo.appendExecutedWorkoutIds("never", ["w-x"])
+    ).resolves.toBeUndefined();
+  });
+
+  it("should be a no-op when workoutIds is empty", async () => {
+    // Arrange
+    const repo = createDexieSessionMatchRepository(db);
+    await repo.put(makeMatch({ id: "M1", executedWorkoutIds: ["w-a"] }));
+
+    // Act
+    await repo.appendExecutedWorkoutIds("M1", []);
+
+    // Assert
+    expect((await repo.getById("M1"))?.executedWorkoutIds).toEqual(["w-a"]);
   });
 
   it("should remove only that profile's rows when deleteByProfile is called", async () => {

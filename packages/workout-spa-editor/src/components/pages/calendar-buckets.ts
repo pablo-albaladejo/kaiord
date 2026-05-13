@@ -21,6 +21,17 @@ export type CalendarBuckets = {
   soloActualsByDay: Record<string, WorkoutRecord[]>;
 };
 
+const collectMatchedWorkoutIds = (
+  matched: PageMatchedSession[]
+): Set<string> => {
+  const out = new Set<string>();
+  for (const m of matched) {
+    out.add(m.workout.id);
+    for (const wid of m.match.executedWorkoutIds) out.add(wid);
+  }
+  return out;
+};
+
 export function buildCalendarBuckets({
   days,
   workoutsByDay,
@@ -28,7 +39,11 @@ export function buildCalendarBuckets({
   matched,
 }: BuildBucketsArgs): CalendarBuckets {
   const matchedActivityIds = new Set(matched.map((m) => m.activity.id));
-  const matchedWorkoutIds = new Set(matched.map((m) => m.workout.id));
+  // Suppress both the structured workout AND any executed workouts the
+  // match has absorbed — otherwise an executed Garmin/FIT recording
+  // would render as solo `WorkoutCard` AND as the executed slot of the
+  // matched card (A5: no 2x card duplicate).
+  const matchedWorkoutIds = collectMatchedWorkoutIds(matched);
   const matchedByDay: Record<string, PageMatchedSession[]> = {};
   const soloPlansByDay: Record<string, CoachingActivity[]> = {};
   const soloActualsByDay: Record<string, WorkoutRecord[]> = {};

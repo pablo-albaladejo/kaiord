@@ -68,6 +68,14 @@ const SKIP_PATH_FRAGMENTS = [
 const READER_RE =
   /sessionMatches\b[\s\S]{0,200}?\.equals\(\s*\[\s*[A-Za-z_$][\w$]*\s*,\s*/g;
 
+// Match every call to `appendExecutedWorkoutIds(<matchId>, ...)`. The
+// matchId MUST come from a `SessionMatch.id` source (a previously read
+// row, a function parameter), never a template literal constructed at
+// the call site. This is the executed-slot analogue of the H7 guard
+// — same shape rule, different write surface.
+const APPEND_EXECUTED_RE =
+  /\bappendExecutedWorkoutIds\s*\(\s*/g;
+
 // Object-literal property assignment of `coachingActivityId:` whose
 // containing surface is one of the three known write call sites
 // (ensureSessionMatch / matchSession / sessionMatches.put). The leading
@@ -268,6 +276,16 @@ export const scanFile = (file, repoRoot = REPO_ROOT) => {
     const expr = extractExpression(source, start);
     if (!isAllowedExpression(expr)) {
       violations.push({ file: rel, expr, kind: "reader" });
+    }
+  }
+  // Executed-slot write surface: `appendExecutedWorkoutIds(<matchId>, ...)`.
+  // The matchId argument MUST be a SessionMatch-shape source — same
+  // canonical rule as the coachingActivityId case.
+  for (const m of source.matchAll(APPEND_EXECUTED_RE)) {
+    const start = m.index + m[0].length;
+    const expr = extractExpression(source, start);
+    if (!isAllowedExpression(expr)) {
+      violations.push({ file: rel, expr, kind: "executed-append" });
     }
   }
   return violations;

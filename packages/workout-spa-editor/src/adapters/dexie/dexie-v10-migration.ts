@@ -67,6 +67,7 @@ const buildPendingMatch = (
   date: activity.date,
   createdAt: now(),
   source: "auto-coaching-v10-migration" as const,
+  executedWorkoutIds: [] as string[],
 });
 
 export type V10MigrationDeps = {

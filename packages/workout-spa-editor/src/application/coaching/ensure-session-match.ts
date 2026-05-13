@@ -49,6 +49,7 @@ export const ensureSessionMatch = async (
     date: input.date,
     createdAt: input.clock(),
     source: input.source,
+    executedWorkoutIds: [],
   };
 
   try {

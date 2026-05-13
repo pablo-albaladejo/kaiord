@@ -126,6 +126,7 @@ describe("convertAndAutoMatch", () => {
       date: activity.date,
       createdAt: "2026-04-30T10:00:00.000Z",
       source: "manual",
+      executedWorkoutIds: [],
     };
     await matches.put(existingMatch);
 

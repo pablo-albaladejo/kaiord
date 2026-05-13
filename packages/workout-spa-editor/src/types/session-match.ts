@@ -34,6 +34,15 @@ export const sessionMatchSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   createdAt: z.iso.datetime(),
   source: sessionMatchSourceSchema,
+  /**
+   * Executed activities (e.g., Garmin/FIT recordings) auto-linked to
+   * the same `(profileId, date, canonical sport)` slot. 1–N executeds
+   * collapse into the same `MatchedSessionCard` as additional slots.
+   *
+   * `.default([])` keeps Dexie v11 rows readable until the v12 upgrade
+   * backfills the field; once backfilled the array is always present.
+   */
+  executedWorkoutIds: z.array(z.string()).default([]),
 });
 
 export type SessionMatch = z.infer<typeof sessionMatchSchema>;

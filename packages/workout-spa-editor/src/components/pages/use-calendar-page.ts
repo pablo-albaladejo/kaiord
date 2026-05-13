@@ -12,8 +12,6 @@
  * id), so the view falls back to a profile-less calendar without crashing.
  */
 
-import { useMemo } from "react";
-
 import type { MatchSuggestion } from "../../application/match-suggestion";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import {
@@ -23,11 +21,13 @@ import {
 import { useAutoMatchSuggestions } from "../../hooks/use-auto-match-suggestions";
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
+import { useExecutedMatchAutoForCalendar } from "../../hooks/use-executed-match-auto";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { useSetCalendarDensity } from "../../hooks/use-set-calendar-density";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
 import type { CoachingActivity } from "../../types/coaching-activity";
-import { buildCalendarBuckets, type CalendarBuckets } from "./calendar-buckets";
+import type { CalendarBuckets } from "./calendar-buckets";
+import { useCalendarBucketsMemo } from "./use-calendar-buckets-memo";
 import { useCalendarState } from "./use-calendar-state";
 import { useSelectedActivity } from "./use-selected-activity";
 
@@ -64,22 +64,19 @@ export function useCalendarPage(): CalendarPageState {
   const profileId = useActiveProfileLive()?.id ?? null;
   const weekStart = s.data.days[0] ?? "";
   const rawMatched = useMatchedSessions(profileId, s.data.days);
+  useExecutedMatchAutoForCalendar(rawMatched, s.data.workoutsByDay);
   const suggestions = useAutoMatchSuggestions(profileId, weekStart);
   const bannerActions = useAutoMatchBannerActions(profileId, weekStart);
   const prefs = useUserPreferences({
     profileId,
     defaultDensity: viewportDefaultDensity(),
   });
-  const buckets = useMemo(
-    () =>
-      buildCalendarBuckets({
-        days: s.data.days,
-        workoutsByDay: s.data.workoutsByDay,
-        coachingByDay: coaching.byDay,
-        matched: rawMatched ?? [],
-      }),
-    [s.data.days, s.data.workoutsByDay, coaching.byDay, rawMatched]
-  );
+  const buckets = useCalendarBucketsMemo({
+    days: s.data.days,
+    workoutsByDay: s.data.workoutsByDay,
+    coachingByDay: coaching.byDay,
+    matched: rawMatched ?? [],
+  });
   const onDensityChange = useSetCalendarDensity(profileId);
 
   if (!s.data.isValidWeek) return { state: "redirect" };

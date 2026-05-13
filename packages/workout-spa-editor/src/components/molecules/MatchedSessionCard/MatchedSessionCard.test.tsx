@@ -168,6 +168,63 @@ describe("MatchedSessionCard", () => {
     expect(screen.getByLabelText(/Matched session.*92%/i)).toBeInTheDocument();
   });
 
+  it("should NOT render the executed slot when no executeds are present", () => {
+    // Arrange
+
+    // Act
+    render(<MatchedSessionCard session={session()} />);
+
+    // Assert
+    expect(
+      screen.queryByTestId("matched-card-executed-group")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should render the executed slot with one row when a single executed is present", () => {
+    // Arrange
+    const executed: WorkoutRecord = {
+      ...baseWorkout,
+      id: "w-exec-1",
+      source: "garmin",
+      raw: { ...baseWorkout.raw!, title: "Garmin recorded ride" },
+    };
+
+    // Act
+    render(<MatchedSessionCard session={session({ executed: [executed] })} />);
+
+    // Assert
+    expect(
+      screen.getByTestId("matched-card-executed-group")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("matched-card-executed-w-exec-1")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Garmin recorded ride")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("matched-card-executed-count")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should render a count badge when more than one executed is present (1-N)", () => {
+    // Arrange
+    const e1: WorkoutRecord = { ...baseWorkout, id: "w-exec-1" };
+    const e2: WorkoutRecord = { ...baseWorkout, id: "w-exec-2" };
+
+    // Act
+    render(<MatchedSessionCard session={session({ executed: [e1, e2] })} />);
+
+    // Assert
+    expect(screen.getByTestId("matched-card-executed-count")).toHaveTextContent(
+      "2"
+    );
+    expect(
+      screen.getByTestId("matched-card-executed-w-exec-1")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("matched-card-executed-w-exec-2")
+    ).toBeInTheDocument();
+  });
+
   it("should call onClick with the activity when clicked", async () => {
     // Arrange
 

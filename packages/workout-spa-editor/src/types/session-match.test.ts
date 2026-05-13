@@ -14,6 +14,7 @@ const baseRow = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
   date: "2026-04-29",
   createdAt: "2026-05-01T12:00:00.000Z",
   source: "manual",
+  executedWorkoutIds: [],
   ...overrides,
 });
 
@@ -117,5 +118,28 @@ describe("sessionMatchSchema", () => {
       // @ts-expect-error — verifying runtime rejection of disallowed literal
       sessionMatchSchema.parse(baseRow({ source: "auto" }))
     ).toThrow();
+  });
+
+  it("should default executedWorkoutIds to [] when omitted (v11 row read tolerance)", () => {
+    // Arrange
+    const { executedWorkoutIds: _omit, ...rowWithoutField } = baseRow();
+    void _omit;
+
+    // Act
+    const parsed = sessionMatchSchema.parse(rowWithoutField);
+
+    // Assert
+    expect(parsed.executedWorkoutIds).toEqual([]);
+  });
+
+  it("should preserve a populated executedWorkoutIds array on parse", () => {
+    // Arrange
+    const row = baseRow({ executedWorkoutIds: ["w-exec-1", "w-exec-2"] });
+
+    // Act
+    const parsed = sessionMatchSchema.parse(row);
+
+    // Assert
+    expect(parsed.executedWorkoutIds).toEqual(["w-exec-1", "w-exec-2"]);
   });
 });

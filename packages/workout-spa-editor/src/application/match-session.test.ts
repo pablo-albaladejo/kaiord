@@ -101,6 +101,7 @@ describe("matchSession", () => {
       date: activity.date,
       createdAt: "2026-05-01T12:00:00.000Z",
       source: "manual",
+      executedWorkoutIds: [],
     });
     expect(await repo.getByActivityId("p1", activity.id)).toEqual(result);
   });
