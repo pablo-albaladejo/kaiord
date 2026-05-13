@@ -158,12 +158,14 @@ describe("parser", () => {
 
       // Assert
       expect(activities).toHaveLength(1);
-      expect(activities[0].description).toContain("Avituallamiento intraentreno");
+      expect(activities[0].description).toContain(
+        "Avituallamiento intraentreno"
+      );
       expect(activities[0].description).toContain("**Calentamiento:**");
       expect(activities[0].description).toContain("3x15' Z3 d/5' Z1");
     });
 
-    it("should not leak the opening tag of the next sibling block into the description (regression: <div class=\" trailing fragment)", () => {
+    it('should not leak the opening tag of the next sibling block into the description (regression: <div class=" trailing fragment)', () => {
       // Arrange
       // The live T2G response has the activity-description block followed
       // by an `activity-hint-ecos` div. The previous lookahead matched the
