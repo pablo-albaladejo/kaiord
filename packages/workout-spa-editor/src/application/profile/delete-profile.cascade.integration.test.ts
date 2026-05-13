@@ -237,7 +237,11 @@ describe("deleteProfile cascade fan-out (integration)", () => {
       .mockImplementationOnce(() =>
         Promise.reject(new Error("simulated mid-cascade failure"))
       );
+
+    // Act
     await expect(performCascadeOrchestration(persistence, A)).rejects.toThrow();
+
+    // Assert
     for (const table of perProfileTables) {
       const countForA = await table
         .filter((row) => (row as { profileId?: string }).profileId === A)
@@ -259,9 +263,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
     expect(profileA).toBeDefined();
     expect(profileB).toBeDefined();
 
-    // Act
+    // Cleanup
     userPrefsSpy.mockRestore();
-
-    // Assert
   });
 });
