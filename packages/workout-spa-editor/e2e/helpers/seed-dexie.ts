@@ -8,6 +8,10 @@
 import type { Page } from "@playwright/test";
 
 export { makeRawWorkout, makeTemplate, makeWorkout } from "./dexie-factories";
+export { E2E_DEFAULT_PROFILE_ID } from "./e2e-defaults";
+export { seedDefaultProfile } from "./seed-profile";
+
+import { seedDefaultProfile } from "./seed-profile";
 
 type DexieDb = {
   table: (n: string) => {
@@ -44,7 +48,13 @@ export async function seedTemplates(
   }, templates);
 }
 
-/** Clear all Dexie tables. */
+/**
+ * Clear all Dexie tables AND seed the e2e default profile so any
+ * subsequent workout-write goes through the post-Dexie-v13 profileId
+ * filter cleanly. Tests that exercise multi-profile flows seed their
+ * own rows on top — the default seed is just a baseline so the
+ * `meta.activeProfileId` is never null after `clearDexie`.
+ */
 export async function clearDexie(page: Page) {
   await page.evaluate(async () => {
     const db = (window as unknown as Record<string, unknown>).__KAIORD_DB__ as
@@ -62,6 +72,7 @@ export async function clearDexie(page: Page) {
     ];
     await Promise.all(tables.map((t) => db.table(t).clear()));
   });
+  await seedDefaultProfile(page);
 }
 
 /** Get ISO date strings (Mon-Sun) for a week offset from now. */
