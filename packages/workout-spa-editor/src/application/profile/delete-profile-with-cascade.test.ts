@@ -20,8 +20,9 @@ import { deleteProfileWithCascade } from "./delete-profile-with-cascade";
 
 const NOW = "2026-04-28T10:00:00.000Z";
 
-const makeWorkout = (id: string): WorkoutRecord => ({
+const makeWorkout = (id: string, profileId: string = "p1"): WorkoutRecord => ({
   id,
+  profileId,
   date: "2026-04-13",
   sport: "cycling",
   source: "train2go",
@@ -59,6 +60,7 @@ const makeRecord = (
 const makeDeps = (
   overrides: Partial<DeleteProfileWithCascadeDeps> = {}
 ): DeleteProfileWithCascadeDeps => ({
+  workouts: overrides.workouts ?? createInMemoryWorkoutRepository(),
   coaching: overrides.coaching ?? createInMemoryCoachingRepository(),
   coachingSyncState:
     overrides.coachingSyncState ?? createInMemoryCoachingSyncStateRepository(),
@@ -127,17 +129,18 @@ describe("deleteProfileWithCascade", () => {
     ).toBeDefined();
   });
 
-  it("should do NOT cascade to converted WorkoutRecord rows (workouts survive)", async () => {
+  it("should cascade delete the deleted profile's workouts and preserve other profiles' workouts", async () => {
     // Arrange
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
     const workouts = createInMemoryWorkoutRepository();
-    await workouts.put(makeWorkout("w1"));
+    await workouts.put(makeWorkout("w1", "p1"));
+    await workouts.put(makeWorkout("w2", "p2"));
     await coaching.upsertMany([makeRecord("p1", "1")]);
 
     // Act
     await deleteProfileWithCascade(
-      makeDeps({ coaching, coachingSyncState }),
+      makeDeps({ coaching, coachingSyncState, workouts }),
       "p1"
     );
 
@@ -145,7 +148,8 @@ describe("deleteProfileWithCascade", () => {
     expect(
       await coaching.getByProfileAndDateRange("p1", "2026-01-01", "2026-12-31")
     ).toHaveLength(0);
-    expect(await workouts.getById("w1")).toBeDefined();
+    expect(await workouts.getById("w1")).toBeUndefined();
+    expect(await workouts.getById("w2")).toBeDefined();
   });
 
   it("should use the supplied id (NOT getActiveId)", async () => {

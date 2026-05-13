@@ -5,22 +5,22 @@
  * compatible with the Dexie schema.
  */
 
-const makeStep = () => ({
+import { E2E_DEFAULT_PROFILE_ID } from "./e2e-defaults";
+
+const STEP = {
   stepIndex: 0,
   durationType: "time",
   duration: { type: "time", seconds: 600 },
   targetType: "power",
   target: { type: "power", value: { unit: "watts", value: 200 } },
   intensity: "active",
-});
+};
 
 const makeKrd = (name: string, sport: string) => ({
   version: "1.0",
   type: "structured_workout",
   metadata: { created: new Date().toISOString(), sport },
-  extensions: {
-    structured_workout: { name, sport, steps: [makeStep()] },
-  },
+  extensions: { structured_workout: { name, sport, steps: [STEP] } },
 });
 
 /** Factory for a minimal WorkoutRecord. */
@@ -28,6 +28,7 @@ export function makeWorkout(overrides: Record<string, unknown> = {}) {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
+    profileId: E2E_DEFAULT_PROFILE_ID,
     date: now.slice(0, 10),
     sport: "running",
     source: "kaiord",

@@ -15,28 +15,31 @@ import type { WorkoutTemplate } from "../../types/workout-library";
 export type ScheduleTemplateInput = {
   templateId: string;
   date: string;
+  profileId: string;
 };
 
 export const scheduleTemplate = async (
   persistence: PersistencePort,
-  { templateId, date }: ScheduleTemplateInput
+  { templateId, date, profileId }: ScheduleTemplateInput
 ): Promise<WorkoutRecord> => {
   const template = await persistence.templates.getById(templateId);
   if (!template) {
     throw new Error(`Template not found: ${templateId}`);
   }
-  const record = createWorkoutFromTemplate(template, date);
+  const record = createWorkoutFromTemplate(template, date, profileId);
   await persistence.workouts.put(record);
   return record;
 };
 
 function createWorkoutFromTemplate(
   template: WorkoutTemplate,
-  date: string
+  date: string,
+  profileId: string
 ): WorkoutRecord {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
+    profileId,
     date,
     sport: template.sport,
     source: "kaiord",

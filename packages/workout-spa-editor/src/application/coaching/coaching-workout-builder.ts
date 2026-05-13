@@ -36,6 +36,7 @@ export const buildStructuredCoachingWorkout = (
   input: StructuredCoachingWorkoutInput
 ): WorkoutRecord => ({
   id: input.id,
+  profileId: input.activity.profileId,
   date: input.activity.date,
   sport: input.activity.sport,
   source: input.activity.source,

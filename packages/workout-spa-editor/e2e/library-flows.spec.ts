@@ -22,6 +22,7 @@ import {
   getWeekId,
   makeTemplate,
   makeWorkout,
+  seedDefaultProfile,
   seedTemplates,
   seedWorkouts,
 } from "./helpers/seed-dexie";
@@ -30,6 +31,7 @@ test.describe("Library flows", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/calendar");
     await clearDexie(page);
+    await seedDefaultProfile(page);
   });
 
   test("Test A: header Library navigates to /library and focuses the page heading", async ({

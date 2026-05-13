@@ -5,6 +5,8 @@ import { addTemplate } from "./add-template";
 import { scheduleTemplate } from "./schedule-template";
 import { makeKrd } from "./test-fixtures";
 
+const PROFILE_ID = "00000000-0000-4000-8000-0000000000aa";
+
 describe("scheduleTemplate", () => {
   it("should create a workout record from the template on the given date", async () => {
     // Arrange
@@ -21,6 +23,7 @@ describe("scheduleTemplate", () => {
     const record = await scheduleTemplate(persistence, {
       templateId: template.id,
       date: "2026-05-04",
+      profileId: PROFILE_ID,
     });
 
     // Assert
@@ -30,6 +33,7 @@ describe("scheduleTemplate", () => {
     expect(record.state).toBe("structured");
     expect(record.krd).toEqual(template.krd);
     expect(record.tags).toEqual(["tempo", "z3"]);
+    expect(record.profileId).toBe(PROFILE_ID);
   });
 
   it("should persist the workout via PersistencePort.workouts.put", async () => {
@@ -44,6 +48,7 @@ describe("scheduleTemplate", () => {
     const record = await scheduleTemplate(persistence, {
       templateId: template.id,
       date: "2026-05-05",
+      profileId: PROFILE_ID,
     });
 
     // Act
@@ -51,6 +56,7 @@ describe("scheduleTemplate", () => {
 
     // Assert
     expect(stored).toEqual(record);
+    expect(stored?.profileId).toBe(PROFILE_ID);
   });
 
   it("should throw when the template id is unknown", async () => {
@@ -64,6 +70,7 @@ describe("scheduleTemplate", () => {
       scheduleTemplate(persistence, {
         templateId: "missing",
         date: "2026-05-04",
+        profileId: PROFILE_ID,
       })
     ).rejects.toThrow(/Template not found/);
   });
@@ -81,6 +88,7 @@ describe("scheduleTemplate", () => {
       scheduleTemplate(persistence, {
         templateId: template.id,
         date: "2026-05-04",
+        profileId: PROFILE_ID,
       })
     ).rejects.toThrow("simulated");
   });

@@ -60,11 +60,24 @@ const ACTIVE_KRD: KRD = {
   },
 };
 
+const PROFILE_ID = "00000000-0000-4000-8000-0000000000d1";
+
 describe("LibraryPage", () => {
   beforeEach(async () => {
     useWorkoutStore.setState({ currentWorkout: null });
     await db.table("templates").clear();
     await db.table("workouts").clear();
+    await db.table("profiles").clear();
+    await db.table("meta").clear();
+    await db.table("profiles").put({
+      id: PROFILE_ID,
+      name: "Tester",
+      sportZones: {},
+      linkedAccounts: [],
+      createdAt: "2026-04-01T00:00:00.000Z",
+      updatedAt: "2026-04-01T00:00:00.000Z",
+    });
+    await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
   });
 
   afterEach(() => {
@@ -205,6 +218,7 @@ describe("LibraryPage", () => {
       expect(workouts[0].source).toBe("kaiord");
       expect(workouts[0].state).toBe("structured");
       expect(workouts[0].krd).not.toBeNull();
+      expect(workouts[0].profileId).toBe(PROFILE_ID);
     });
   });
 

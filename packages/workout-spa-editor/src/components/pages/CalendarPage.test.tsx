@@ -12,9 +12,12 @@ import type { WorkoutRecord } from "../../types/calendar-record";
 import { AppToastProvider } from "../providers/AppToastProvider";
 import CalendarPage from "./CalendarPage";
 
+const PROFILE_ID = "00000000-0000-4000-8000-0000000000c1";
+
 function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   return {
     id: crypto.randomUUID(),
+    profileId: PROFILE_ID,
     date: "2026-04-06",
     sport: "running",
     source: "kaiord",
@@ -68,6 +71,17 @@ function renderCalendar(path = "/calendar/2026-W15") {
 describe("CalendarPage", () => {
   beforeEach(async () => {
     await db.table("workouts").clear();
+    await db.table("profiles").clear();
+    await db.table("meta").clear();
+    await db.table("profiles").put({
+      id: PROFILE_ID,
+      name: "Tester",
+      sportZones: {},
+      linkedAccounts: [],
+      createdAt: "2026-04-01T00:00:00.000Z",
+      updatedAt: "2026-04-01T00:00:00.000Z",
+    });
+    await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
   });
 
   it("should show first-visit state when no workouts exist", async () => {
