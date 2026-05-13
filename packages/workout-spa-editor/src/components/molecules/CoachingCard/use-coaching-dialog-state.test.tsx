@@ -39,6 +39,7 @@ const activity: CoachingActivity = {
 const makeWorkout = (id: string): WorkoutRecord =>
   ({
     id,
+    profileId: PROFILE_ID,
     date: "2026-04-13",
     sport: "cycling",
     source: "train2go",

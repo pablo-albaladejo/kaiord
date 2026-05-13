@@ -47,5 +47,9 @@ export function createDexieWorkoutRepository(
     delete: async (id) => {
       await table().delete(id);
     },
+
+    deleteByProfile: async (profileId) => {
+      await table().where("profileId").equals(profileId).delete();
+    },
   };
 }

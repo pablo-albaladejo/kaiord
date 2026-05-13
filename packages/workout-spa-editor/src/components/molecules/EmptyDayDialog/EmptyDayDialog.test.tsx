@@ -27,10 +27,23 @@ function renderWithRouter(ui: React.ReactNode, path = "/calendar") {
   };
 }
 
+const PROFILE_ID = "00000000-0000-4000-8000-0000000000e1";
+
 describe("EmptyDayDialog", () => {
   beforeEach(async () => {
     await db.table("templates").clear();
     await db.table("workouts").clear();
+    await db.table("profiles").clear();
+    await db.table("meta").clear();
+    await db.table("profiles").put({
+      id: PROFILE_ID,
+      name: "Tester",
+      sportZones: {},
+      linkedAccounts: [],
+      createdAt: "2026-04-01T00:00:00.000Z",
+      updatedAt: "2026-04-01T00:00:00.000Z",
+    });
+    await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
   });
 
   it("should render dialog when date is provided (open)", () => {

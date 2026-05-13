@@ -35,6 +35,7 @@ function makeKrd(): KRD {
 function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   return {
     id: "w-1",
+    profileId: PROFILE_UUID_1,
     date: "2026-04-07",
     sport: "cycling",
     source: "kaiord",

@@ -45,6 +45,7 @@ const buildRawWorkout = (
   now: string
 ): WorkoutRecord => ({
   id,
+  profileId: activity.profileId,
   date: activity.date,
   sport: activity.sport,
   source: activity.source,

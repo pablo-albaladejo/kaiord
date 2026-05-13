@@ -16,6 +16,10 @@ import { krdSchema } from "./schemas";
 
 export const workoutRecordSchema = z.object({
   id: z.uuid(),
+  // profileId scopes each workout to exactly one user profile. Added in
+  // Dexie v13; backfilled from `meta.activeProfileId` for legacy rows.
+  // Every writer MUST set this from the active profile at write time.
+  profileId: z.string().min(1),
   date: z.iso.date(),
   sport: z.string(),
   source: z.string(),

@@ -30,6 +30,7 @@ const seedActivity = (
 const seedWorkout = (date: string, duration = 3600): WorkoutRecord =>
   ({
     id: "w-1",
+    profileId: "p1",
     date,
     sport: "cycling",
     source: "manual",

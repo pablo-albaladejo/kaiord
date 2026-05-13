@@ -33,5 +33,11 @@ export function createInMemoryWorkoutRepository(
     delete: async (id) => {
       store.delete(id);
     },
+
+    deleteByProfile: async (profileId) => {
+      for (const [id, w] of store) {
+        if (w.profileId === profileId) store.delete(id);
+      }
+    },
   };
 }

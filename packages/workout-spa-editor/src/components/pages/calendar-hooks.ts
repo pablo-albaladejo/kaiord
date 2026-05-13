@@ -35,7 +35,7 @@ export type CalendarData = {
   rawCount: number;
 };
 
-export function useCalendarData(): CalendarData {
+export function useCalendarData(profileId: string | null): CalendarData {
   const params = useParams<{ weekId?: string }>();
   const [hydration, setHydration] = useState<HydrationStatus>("pending");
 
@@ -50,12 +50,15 @@ export function useCalendarData(): CalendarData {
   const range = useMemo(() => parseWeekId(weekId), [weekId]);
 
   const workouts = useLiveQuery(async (): Promise<WorkoutRecord[]> => {
-    if (!range) return [];
+    if (!range || !profileId) {
+      setHydration("complete");
+      return [];
+    }
     try {
       const result = await db
         .table<WorkoutRecord>("workouts")
-        .where("date")
-        .between(range.start, range.end, true, true)
+        .where("[profileId+date]")
+        .between([profileId, range.start], [profileId, range.end], true, true)
         .toArray();
       setHydration("complete");
       return result;
@@ -63,11 +66,14 @@ export function useCalendarData(): CalendarData {
       setHydration("failed");
       return [];
     }
-  }, [range?.start, range?.end]);
+  }, [profileId, range?.start, range?.end]);
 
   const totalWorkoutCount = useLiveQuery(
-    () => db.table("workouts").count(),
-    []
+    async () =>
+      profileId
+        ? db.table("workouts").where("profileId").equals(profileId).count()
+        : 0,
+    [profileId]
   );
 
   const workoutsByDay = useMemo(

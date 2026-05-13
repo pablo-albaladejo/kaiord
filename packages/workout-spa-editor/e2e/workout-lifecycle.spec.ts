@@ -11,6 +11,7 @@ import {
   getWeekId,
   makeRawWorkout,
   makeWorkout,
+  seedDefaultProfile,
   seedWorkouts,
 } from "./helpers/seed-dexie";
 
@@ -18,6 +19,7 @@ test.describe("Workout Lifecycle", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/calendar");
     await clearDexie(page);
+    await seedDefaultProfile(page);
   });
 
   test("RAW workout -> open dialog -> Skip -> card shows skipped state", async ({

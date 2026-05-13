@@ -58,10 +58,12 @@ const seedActivity = (date: string): CoachingActivityRecord => ({
 const seedWorkout = (
   date: string,
   durationSeconds: number = ONE_HOUR_SECONDS,
-  id = "w-1"
+  id = "w-1",
+  profileId: string = PROFILE_ID
 ): WorkoutRecord =>
   ({
     id,
+    profileId,
     date,
     sport: "cycling",
     source: "manual",
@@ -165,7 +167,7 @@ describe("useCalendarPage", () => {
     expect(result.current.suggestions[0]!.workoutId).toBe("w-1");
   });
 
-  it("should fall back to a ready state with no suggestions when no profile is active", async () => {
+  it("should fall back to a ready state with no suggestions and an empty calendar when no profile is active", async () => {
     // Arrange
     await setActiveProfile(null);
     await db
@@ -184,6 +186,34 @@ describe("useCalendarPage", () => {
     if (result.current.state !== "ready") throw new Error("not ready");
     expect(result.current.suggestions).toEqual([]);
     expect(result.current.density).toBeUndefined();
-    expect(result.current.buckets.soloActualsByDay[MONDAY]).toHaveLength(1);
+    // No active profile → calendar query is empty (profile-scoped read).
+    expect(result.current.buckets.soloActualsByDay[MONDAY] ?? []).toHaveLength(
+      0
+    );
+  });
+
+  it("should isolate workouts to the active profile (cross-profile leak regression)", async () => {
+    // Arrange
+    const OTHER = "00000000-0000-4000-8000-0000000000b2";
+    await setActiveProfile(makeProfile());
+    await db
+      .table("workouts")
+      .put(seedWorkout(MONDAY, ONE_HOUR_SECONDS, "w-mine", PROFILE_ID));
+    await db
+      .table("workouts")
+      .put(seedWorkout(MONDAY, ONE_HOUR_SECONDS, "w-other", OTHER));
+
+    // Act
+    const { result } = renderHook(() => useCalendarPage(), {
+      wrapper: ({ children }) => wrap(children),
+    });
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current.state).toBe("ready");
+    });
+    if (result.current.state !== "ready") throw new Error("not ready");
+    const mondayCards = result.current.buckets.soloActualsByDay[MONDAY] ?? [];
+    expect(mondayCards.map((w) => w.id)).toEqual(["w-mine"]);
   });
 });

@@ -12,6 +12,7 @@ import {
   getWeekId,
   makeTemplate,
   makeWorkout,
+  seedDefaultProfile,
   seedTemplates,
   seedWorkouts,
 } from "./helpers/seed-dexie";
@@ -20,6 +21,7 @@ test.describe("Library-Calendar Integration", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/calendar");
     await clearDexie(page);
+    await seedDefaultProfile(page);
   });
 
   test("/library route shows library page", async ({ page }) => {

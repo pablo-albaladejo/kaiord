@@ -7,8 +7,6 @@
 
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { SyncState } from "../types/bridge-schemas";
-import type { WorkoutState } from "../types/calendar-enums";
-import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { Profile } from "../types/profile";
 import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
@@ -19,6 +17,7 @@ import type {
 } from "./coaching-repositories";
 import type { SessionMatchRepository } from "./session-match-repository";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
+import type { WorkoutRepository } from "./workout-repository";
 
 export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 export type {
@@ -27,18 +26,7 @@ export type {
 } from "./coaching-repositories";
 export type { SessionMatchRepository } from "./session-match-repository";
 export type { UserPreferencesRepository } from "./user-preferences-repository";
-
-export type WorkoutRepository = {
-  getById: (id: string) => Promise<WorkoutRecord | undefined>;
-  getByDateRange: (start: string, end: string) => Promise<WorkoutRecord[]>;
-  getByState: (state: WorkoutState) => Promise<WorkoutRecord[]>;
-  getBySourceId: (
-    source: string,
-    sourceId: string
-  ) => Promise<WorkoutRecord | undefined>;
-  put: (workout: WorkoutRecord) => Promise<void>;
-  delete: (id: string) => Promise<void>;
-};
+export type { WorkoutRepository } from "./workout-repository";
 
 export type TemplateRepository = {
   getAll: () => Promise<WorkoutTemplate[]>;

@@ -19,6 +19,7 @@ import { backfillLinkedAccounts, SCHEMAS } from "./dexie-schemas";
 import { applyV10Upgrade } from "./dexie-v10-migration";
 import { applyV11Upgrade } from "./dexie-v11-migration";
 import { applyV12Upgrade } from "./dexie-v12-migration";
+import { applyV13Upgrade } from "./dexie-v13-migration";
 
 // Narrowed handle: only `version()` is needed and Dexie's full surface
 // causes "Type instantiation is excessively deep" when passed as a
@@ -91,9 +92,19 @@ const registerV10ToV12 = (db: DexieVersionHost): void => {
   db.version(12).stores(SCHEMAS.v8).upgrade(applyV12Upgrade);
 };
 
+const registerV13 = (db: DexieVersionHost): void => {
+  // v13 — workouts become profile-scoped 1–1. Adds `profileId` +
+  // `[profileId+date]` indexes on the `workouts` store and backfills
+  // every legacy row from `meta.activeProfileId`. The upgrade throws
+  // when workouts exist but no active profile is set — degenerate
+  // state, not a silently-tolerated condition.
+  db.version(13).stores(SCHEMAS.v13).upgrade(applyV13Upgrade);
+};
+
 export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV1ToV3(db);
   registerV4ToV6(db);
   registerV7ToV9(db);
   registerV10ToV12(db);
+  registerV13(db);
 };

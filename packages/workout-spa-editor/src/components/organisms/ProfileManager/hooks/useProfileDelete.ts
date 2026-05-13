@@ -2,9 +2,10 @@
  * useProfileDelete Hook
  *
  * Profile deletion with full cascade fan-out. The cascade clears all
- * profile-scoped persistence (coaching activities, coaching sync state,
- * session matches, auto-match dismissals, user preferences) BEFORE the
- * profile row itself is removed via `deleteProfile`. The whole flow runs
+ * profile-scoped persistence (workouts, coaching activities, coaching
+ * sync state, session matches, auto-match dismissals, user preferences)
+ * BEFORE the profile row itself is removed via `deleteProfile`. The
+ * whole flow runs
  * inside `persistence.transaction(...)` so a mid-cascade crash leaves the
  * database in the pre-delete state. `deletedProfileId` is captured at
  * confirm time — NEVER `getActiveId()` (would race when deleting a
@@ -44,6 +45,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
         await persistence.transaction(async () => {
           await deleteProfileWithCascade(
             {
+              workouts: persistence.workouts,
               coaching: persistence.coaching,
               coachingSyncState: persistence.coachingSyncState,
               sessionMatch: persistence.sessionMatch,
