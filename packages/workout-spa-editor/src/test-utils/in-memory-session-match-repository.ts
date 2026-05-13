@@ -13,53 +13,13 @@ import type { SessionMatchRepository } from "../ports/session-match-repository";
 import { SessionAlreadyMatchedError } from "../types/session-match-errors";
 import type { SessionMatch } from "../types/session-match";
 import { appendExecutedWorkoutIdsInMemory } from "./in-memory-session-match-append-executed";
+import {
+  findActivityConflict,
+  findWorkoutConflict,
+} from "./in-memory-session-match-conflicts";
+import { buildReaders } from "./in-memory-session-match-readers";
 
 type Store = Map<string, SessionMatch>;
-
-const findActivityConflict = (
-  store: Store,
-  match: SessionMatch
-): SessionMatch | undefined =>
-  [...store.values()].find(
-    (m) =>
-      m.id !== match.id &&
-      m.profileId === match.profileId &&
-      m.coachingActivityId === match.coachingActivityId
-  );
-
-const findWorkoutConflict = (
-  store: Store,
-  match: SessionMatch
-): SessionMatch | undefined =>
-  [...store.values()].find(
-    (m) =>
-      m.id !== match.id &&
-      m.profileId === match.profileId &&
-      m.workoutId === match.workoutId
-  );
-
-const buildReaders = (
-  store: Store
-): Pick<
-  SessionMatchRepository,
-  "getById" | "getByActivityId" | "getByWorkoutId" | "listByProfileAndWeek"
-> => ({
-  getById: async (id) => store.get(id),
-  getByActivityId: async (profileId, coachingActivityId) =>
-    [...store.values()].find(
-      (m) =>
-        m.profileId === profileId && m.coachingActivityId === coachingActivityId
-    ),
-  getByWorkoutId: async (profileId, workoutId) =>
-    [...store.values()].find(
-      (m) => m.profileId === profileId && m.workoutId === workoutId
-    ),
-  listByProfileAndWeek: async (profileId, weekStart, weekEnd) =>
-    [...store.values()].filter(
-      (m) =>
-        m.profileId === profileId && m.date >= weekStart && m.date <= weekEnd
-    ),
-});
 
 const buildWriters = (
   store: Store

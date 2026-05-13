@@ -8,7 +8,8 @@ import { useMemo } from "react";
 import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
-import { buildCalendarBuckets, type CalendarBuckets } from "./calendar-buckets";
+import type { CalendarBuckets } from "./calendar-buckets";
+import { buildCalendarBuckets } from "./calendar-buckets";
 
 export type UseCalendarBucketsArgs = {
   days: string[];

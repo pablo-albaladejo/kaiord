@@ -5,9 +5,11 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie, { type Transaction } from "dexie";
+import type { Transaction } from "dexie";
+import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { toPersistedCoachingActivityId } from "../../types/coaching-activity-record";
 import { applyV12Upgrade } from "./dexie-v12-migration";
 
 const dbName = (suffix: string) =>
@@ -16,6 +18,11 @@ const dbName = (suffix: string) =>
 const NOW = "2026-05-08T10:00:00.000Z";
 const SCHEMA_V11 = 11;
 const SCHEMA_V12 = 12;
+const FIXTURE_PROFILE_ID = "p1";
+const FIXTURE_ACTIVITY_ID = toPersistedCoachingActivityId(
+  FIXTURE_PROFILE_ID,
+  "train2go:12345"
+);
 
 const stores = {
   sessionMatches:
@@ -24,8 +31,8 @@ const stores = {
 
 const seedRow = (overrides: Record<string, unknown> = {}) => ({
   id: "M1",
-  profileId: "p1",
-  coachingActivityId: "p1:train2go:12345",
+  profileId: FIXTURE_PROFILE_ID,
+  coachingActivityId: FIXTURE_ACTIVITY_ID,
   workoutId: "w-1",
   date: "2026-04-29",
   createdAt: NOW,
