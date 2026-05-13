@@ -39,6 +39,15 @@ const CORE_V5 = {
 // v8 — AI provider insertion-order index. `createdAt` becomes a Dexie
 // index so the repository's getAll can `orderBy("createdAt")` cheaply.
 const CORE_V8 = { ...CORE_V5, aiProviders: "id, createdAt" };
+// v13 — workouts gain `profileId` so each workout is profile-scoped 1–1.
+// Adds `profileId` and `[profileId+date]` indexes so the calendar's
+// per-profile + date-range query hits an index, and the cascade auto-
+// discovery (`isPerProfileTable`) picks the table up at delete time.
+const CORE_V13 = {
+  ...CORE_V8,
+  workouts:
+    "id, profileId, [profileId+date], date, [date+state], [source+sourceId], sport, *tags",
+};
 
 export const SCHEMAS = {
   v1: CORE_V1,
@@ -46,6 +55,7 @@ export const SCHEMAS = {
   v4: CORE_V4,
   v5: CORE_V5,
   v8: CORE_V8,
+  v13: CORE_V13,
 } as const;
 
 /** Backfills `linkedAccounts: []` on profile rows missing the field. */

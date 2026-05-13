@@ -300,6 +300,7 @@ describe("aiMetaSchema", () => {
 describe("workoutRecordSchema", () => {
   const validRecord = {
     id: "550e8400-e29b-41d4-a716-446655440000",
+    profileId: "550e8400-e29b-41d4-a716-446655440001",
     date: "2025-01-15",
     sport: "running",
     source: "train2go",
@@ -358,6 +359,28 @@ describe("workoutRecordSchema", () => {
     // Assert
     expect(() =>
       workoutRecordSchema.parse({ ...validRecord, state: "archived" })
+    ).toThrow();
+  });
+
+  it("should reject a missing profileId", () => {
+    // Arrange
+    const { profileId: _omit, ...without } = validRecord;
+    void _omit;
+
+    // Act
+
+    // Assert
+    expect(() => workoutRecordSchema.parse(without)).toThrow();
+  });
+
+  it("should reject an empty profileId", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+    expect(() =>
+      workoutRecordSchema.parse({ ...validRecord, profileId: "" })
     ).toThrow();
   });
 
