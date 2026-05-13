@@ -1,36 +1,16 @@
 /**
- * Body renderers for `CoachingActivityDialog`. Split out from the
- * dispatcher so it stays under the per-file line cap.
+ * No-workout body renderer for `CoachingActivityDialog`. The matched-
+ * state body lives in `coaching-dialog-matched-body.tsx`; both reside
+ * in their own files so the dispatcher and each renderer stay under
+ * the per-file line cap.
  */
-import type { WorkoutRecord } from "../../../types/calendar-record";
-import type { CoachingActivity } from "../../../types/coaching-activity";
 import { AiErrorState } from "./AiErrorState";
 import { AiProcessingOverlay } from "./AiProcessingOverlay";
-import { LinkedWorkoutSection } from "./LinkedWorkoutSection";
-import { MatchedActions } from "./MatchedActions";
+import type { CoachingDialogBodyProps } from "./coaching-dialog-body-props";
 import { NoWorkoutActions } from "./NoWorkoutActions";
-import type { AiFailureState } from "./use-coaching-ai-handler";
 
-export type CoachingDialogBodyProps = {
-  activity: CoachingActivity;
-  pickerOpen: boolean;
-  pickerWorkouts: WorkoutRecord[];
-  matching: boolean;
-  splitting: boolean;
-  aiProcessing: boolean;
-  aiFailure: AiFailureState | null;
-  manualCreating: boolean;
-  onClose: () => void;
-  onAiProcess: () => void;
-  onAiCancel: () => void;
-  onEditManually: () => void;
-  onOpenPicker: () => void;
-  onClosePicker: () => void;
-  onSelectWorkout: (workoutId: string) => void;
-  onOpenEditor: () => void;
-  onPushToGarmin: () => void;
-  onSplit: () => void;
-};
+export type { CoachingDialogBodyProps };
+export { renderMatchedBody } from "./coaching-dialog-matched-body";
 
 export const renderNoWorkoutBody = (props: CoachingDialogBodyProps) => {
   if (props.aiProcessing)
@@ -62,25 +42,3 @@ export const renderNoWorkoutBody = (props: CoachingDialogBodyProps) => {
     />
   );
 };
-
-export const renderMatchedBody = (
-  props: CoachingDialogBodyProps,
-  workout: WorkoutRecord
-) => (
-  <>
-    <LinkedWorkoutSection
-      workout={workout}
-      splitting={false}
-      onSplit={() => undefined}
-    />
-    <MatchedActions
-      workout={workout}
-      splitting={props.splitting}
-      onClose={props.onClose}
-      onOpenEditor={props.onOpenEditor}
-      onAiProcess={props.onAiProcess}
-      onPushToGarmin={props.onPushToGarmin}
-      onSplit={props.onSplit}
-    />
-  </>
-);

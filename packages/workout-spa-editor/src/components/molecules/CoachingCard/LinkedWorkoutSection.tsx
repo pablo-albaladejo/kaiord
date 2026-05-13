@@ -6,6 +6,11 @@
  */
 
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import {
+  formatDurationMinutes,
+  sportLabel,
+  workoutTitle,
+} from "./linked-workout-utils";
 
 export type LinkedWorkoutSectionProps = {
   workout: WorkoutRecord;
@@ -13,35 +18,12 @@ export type LinkedWorkoutSectionProps = {
   onSplit: () => void;
 };
 
-const SPORT_LABELS: Record<string, string> = {
-  cycling: "Cycling",
-  running: "Running",
-  swimming: "Swimming",
-  strength: "Strength",
-};
-
-const formatDuration = (seconds: number | undefined): string => {
-  if (!seconds) return "";
-  const min = Math.round(seconds / 60);
-  return `${min}min`;
-};
-
-const sportLabel = (sport: string | null | undefined): string => {
-  if (!sport) return "Workout";
-  return SPORT_LABELS[sport] ?? sport;
-};
-
-const workoutTitle = (workout: WorkoutRecord): string => {
-  const raw = workout.raw as { title?: string; description?: string } | null;
-  return raw?.title || raw?.description?.slice(0, 60) || "Untitled workout";
-};
-
 export function LinkedWorkoutSection({
   workout,
   splitting,
   onSplit,
 }: LinkedWorkoutSectionProps) {
-  const duration = formatDuration(workout.raw?.duration?.value);
+  const duration = formatDurationMinutes(workout.raw?.duration?.value);
   return (
     <div
       data-testid="linked-workout-section"
