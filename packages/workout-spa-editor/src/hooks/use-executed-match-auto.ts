@@ -10,6 +10,7 @@
  * the same pair across re-renders.
  */
 
+import type { MutableRefObject } from "react";
 import { useEffect, useMemo, useRef } from "react";
 
 import { matchExecutedWorkouts } from "../application/coaching/match-executed-workouts";
@@ -19,13 +20,24 @@ import type { WorkoutRecord } from "../types/calendar-record";
 import type { SessionMatch } from "../types/session-match";
 import type { MatchedSessionWithMetadata } from "./use-matched-sessions";
 
+const FAIL_WARN =
+  "[executed-match-auto] append rejected — re-arming dedup keys";
+
 const fireAppend = (
   matchId: string,
-  toAppend: string[],
-  append: (id: string, ids: readonly string[]) => Promise<void>
+  toAppend: readonly string[],
+  append: (id: string, ids: readonly string[]) => Promise<void>,
+  firedRef: MutableRefObject<Set<string>>
 ): void => {
+  // Optimistic dedup: mark fired BEFORE the persist resolves so a
+  // simultaneous re-render does not double-fire the same pair. On
+  // failure we re-arm the keys so the next live-query tick can retry
+  // (otherwise a transient Dexie reject would block the pair forever).
   queueMicrotask(() => {
-    void append(matchId, toAppend);
+    append(matchId, toAppend).catch((err: unknown) => {
+      console.warn(FAIL_WARN, { matchId, toAppend, err });
+      for (const wid of toAppend) firedRef.current.delete(`${matchId}:${wid}`);
+    });
   });
 };
 
@@ -68,7 +80,8 @@ export const useExecutedMatchAuto = (
       fireAppend(
         matchId,
         fresh,
-        persistence.sessionMatch.appendExecutedWorkoutIds
+        persistence.sessionMatch.appendExecutedWorkoutIds,
+        firedRef
       );
     }
   }, [matches, workouts, persistence]);
