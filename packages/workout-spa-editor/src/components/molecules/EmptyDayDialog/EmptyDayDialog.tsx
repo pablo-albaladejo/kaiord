@@ -18,6 +18,7 @@ import { useLocation } from "wouter";
 import { scheduleTemplate } from "../../../application/library/schedule-template";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { TemplatePickerDialog } from "../TemplatePickerDialog";
 import { EmptyDayChoices } from "./EmptyDayChoices";
 
@@ -35,6 +36,7 @@ export function EmptyDayDialog({ date, onClose }: EmptyDayDialogProps) {
   const [, navigate] = useLocation();
   const persistence = usePersistence();
   const toast = useToastContext();
+  const profileId = useActiveProfileLive()?.id ?? null;
   const [pickerOpen, setPickerOpen] = useState(false);
   const isOpen = date !== null;
 
@@ -44,8 +46,8 @@ export function EmptyDayDialog({ date, onClose }: EmptyDayDialogProps) {
   };
 
   const handlePick = (templateId: string) => {
-    if (!date) return;
-    void scheduleTemplate(persistence, { templateId, date })
+    if (!date || !profileId) return;
+    void scheduleTemplate(persistence, { templateId, date, profileId })
       .then(() => {
         toast.success(TOAST_SCHEDULE_OK_TITLE, TOAST_SCHEDULE_OK_DESC);
         setPickerOpen(false);
