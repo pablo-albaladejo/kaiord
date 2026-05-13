@@ -12,6 +12,7 @@ const makeMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
   date: "2026-04-29",
   createdAt: "2026-05-01T12:00:00.000Z",
   source: "manual",
+  executedWorkoutIds: [],
   ...overrides,
 });
 

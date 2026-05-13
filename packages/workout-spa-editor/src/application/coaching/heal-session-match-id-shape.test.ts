@@ -52,6 +52,7 @@ const stubMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
   date: "2026-04-29",
   createdAt: "2026-04-28T10:00:00.000Z",
   source: "auto-coaching",
+  executedWorkoutIds: [],
   ...overrides,
 });
 

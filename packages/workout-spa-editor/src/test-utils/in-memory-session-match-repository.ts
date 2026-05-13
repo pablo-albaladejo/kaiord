@@ -12,6 +12,7 @@
 import type { SessionMatchRepository } from "../ports/session-match-repository";
 import { SessionAlreadyMatchedError } from "../types/session-match-errors";
 import type { SessionMatch } from "../types/session-match";
+import { appendExecutedWorkoutIdsInMemory } from "./in-memory-session-match-append-executed";
 
 type Store = Map<string, SessionMatch>;
 
@@ -66,6 +67,7 @@ const buildWriters = (
   SessionMatchRepository,
   | "put"
   | "updateCoachingActivityId"
+  | "appendExecutedWorkoutIds"
   | "delete"
   | "deleteByActivityId"
   | "deleteByWorkoutId"
@@ -97,6 +99,9 @@ const buildWriters = (
       );
     }
     store.set(id, next);
+  },
+  appendExecutedWorkoutIds: async (id, workoutIds) => {
+    appendExecutedWorkoutIdsInMemory(store, id, workoutIds);
   },
   delete: async (id) => {
     store.delete(id);

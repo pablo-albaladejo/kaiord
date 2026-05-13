@@ -10,6 +10,7 @@ import type { Table } from "dexie";
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { SessionMatch } from "../../types/session-match";
 import type { KaiordDatabase } from "./dexie-database";
+import { appendExecutedWorkoutIdsTx } from "./dexie-session-match-append-executed";
 import { updateCoachingActivityIdTx } from "./dexie-session-match-update";
 import { assertNoSessionMatchConflict } from "./session-match-conflict";
 
@@ -44,6 +45,7 @@ const buildWriters = (
   SessionMatchRepository,
   | "put"
   | "updateCoachingActivityId"
+  | "appendExecutedWorkoutIds"
   | "delete"
   | "deleteByActivityId"
   | "deleteByWorkoutId"
@@ -61,6 +63,8 @@ const buildWriters = (
   },
   updateCoachingActivityId: (id, newCoachingActivityId) =>
     updateCoachingActivityIdTx(db, table, id, newCoachingActivityId),
+  appendExecutedWorkoutIds: (id, workoutIds) =>
+    appendExecutedWorkoutIdsTx(db, table, id, workoutIds),
   delete: async (id) => {
     await table().delete(id);
   },

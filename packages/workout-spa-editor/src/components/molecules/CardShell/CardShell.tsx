@@ -21,6 +21,9 @@ export type CardShellProps = {
   metadataRow: ReactNode;
   /** Optional second row (e.g., MatchedSessionCard's actual data row). */
   secondaryRow?: ReactNode;
+  /** Optional footer block — used to render block-level subgroups like
+   *  MatchedSessionCard's executed-activity list. Renders raw (no wrapper). */
+  footerRow?: ReactNode;
   /** Origin chip text rendered at the bottom-right (`· T2G`, `· TP`). */
   originChip?: string;
 };
@@ -34,6 +37,7 @@ export function CardShell({
   titleRow,
   metadataRow,
   secondaryRow,
+  footerRow,
   originChip,
 }: CardShellProps) {
   return (
@@ -56,6 +60,7 @@ export function CardShell({
           {secondaryRow}
         </div>
       ) : null}
+      {footerRow}
       {originChip ? (
         <div className="mt-1 text-[10px] text-slate-500">· {originChip}</div>
       ) : null}
