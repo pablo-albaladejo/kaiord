@@ -43,7 +43,7 @@ export function CoachingActivityDialogContent(
       </div>
       <DialogDescription activity={activity} />
       {matched
-        ? renderMatchedBody(props, matched.workout)
+        ? renderMatchedBody(props, matched.workout, matched.executed)
         : renderNoWorkoutBody(props)}
     </div>
   );

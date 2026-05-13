@@ -59,6 +59,7 @@ export function CalendarPageView({
         onCloseDay={() => s.setEmptyDayDate(null)}
         onCloseCoaching={() => setSelectedActivity(null)}
         expandActivity={coaching.expandActivity}
+        onOpenExecuted={s.handleWorkoutClick}
       />
     </div>
   );

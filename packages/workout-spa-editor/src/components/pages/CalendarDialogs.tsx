@@ -19,6 +19,7 @@ export type CalendarDialogsProps = {
   onCloseDay: () => void;
   onCloseCoaching?: () => void;
   expandActivity: (activity: CoachingActivity) => void;
+  onOpenExecuted?: (workout: WorkoutRecord) => void;
 };
 
 export function CalendarDialogs({
@@ -29,6 +30,7 @@ export function CalendarDialogs({
   onCloseDay,
   onCloseCoaching = () => {},
   expandActivity,
+  onOpenExecuted,
 }: CalendarDialogsProps) {
   const { handleProcess, handleSkip, handleUnskip, isSubmitting } =
     useDialogHandlers(selectedWorkout, onCloseWorkout);
@@ -48,6 +50,7 @@ export function CalendarDialogs({
         activity={selectedCoachingActivity}
         onClose={onCloseCoaching}
         expandActivity={expandActivity}
+        onOpenExecuted={onOpenExecuted}
       />
     </>
   );

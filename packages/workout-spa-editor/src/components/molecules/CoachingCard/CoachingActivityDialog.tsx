@@ -11,22 +11,26 @@ import { useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 
 import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
+import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { buildCoachingDialogCloseHandler } from "./build-coaching-dialog-close-handler";
 import { CoachingDialogShell } from "./coaching-dialog-shell";
 import { CoachingActivityDialogContent } from "./CoachingActivityDialogContent";
 import { useCoachingDialog } from "./use-coaching-dialog";
+import { useOpenExecutedHandler } from "./use-open-executed-handler";
 
 export type CoachingActivityDialogProps = {
   activity: CoachingActivity | null;
   onClose: () => void;
   expandActivity: (activity: CoachingActivity) => void;
+  onOpenExecuted?: (workout: WorkoutRecord) => void;
 };
 
 export function CoachingActivityDialog({
   activity,
   onClose,
   expandActivity,
+  onOpenExecuted,
 }: CoachingActivityDialogProps) {
   const dialog = useCoachingDialog(activity, onClose, expandActivity);
   const pickable = usePickableWorkouts(
@@ -50,6 +54,7 @@ export function CoachingActivityDialog({
     () => buildCoachingDialogCloseHandler(cancelAi, onClose),
     [cancelAi, onClose]
   );
+  const handleOpenExecuted = useOpenExecutedHandler(onClose, onOpenExecuted);
 
   if (!activity) return null;
 
@@ -73,9 +78,8 @@ export function CoachingActivityDialog({
         onClosePicker={dialog.closePicker}
         onSelectWorkout={dialog.handleSelectWorkout}
         onOpenEditor={onOpenEditor}
-        onPushToGarmin={
-          onOpenEditor /* disabled in MatchedActions until dialog grows a real push handler */
-        }
+        onOpenExecuted={handleOpenExecuted}
+        onPushToGarmin={onOpenEditor}
         onSplit={dialog.handleSplit}
       />
     </CoachingDialogShell>
