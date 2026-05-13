@@ -64,6 +64,7 @@ export async function matchSession(
     date: activity.date,
     createdAt: deps.clock(),
     source: input.source ?? "manual",
+    executedWorkoutIds: [],
   };
 
   await deps.repository.put(match);

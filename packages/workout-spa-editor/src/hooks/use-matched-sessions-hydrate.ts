@@ -18,6 +18,10 @@ import type { WorkoutRecord } from "../types/calendar-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
 import type { DanglingMatch } from "./use-matched-sessions-heal";
+import {
+  collectWorkoutIds,
+  resolveExecuted,
+} from "./use-matched-sessions-hydrate-helpers";
 
 export type MatchedSessionWithMetadata = MatchedSession & {
   match: SessionMatch;
@@ -40,7 +44,7 @@ const fetchById = async (
     db
       .table<WorkoutRecord>("workouts")
       .where("id")
-      .anyOf(matches.map((m) => m.workoutId))
+      .anyOf(collectWorkoutIds(matches))
       .toArray(),
   ]);
   return {
@@ -72,6 +76,7 @@ export const hydrateMatchedSessions = async (
       dangling.push({ match, hadWorkout: Boolean(workout) });
       continue;
     }
+    const executed = resolveExecuted(match, wById);
     matched.push({
       match,
       activity: toCoachingActivity(record),
@@ -80,6 +85,7 @@ export const hydrateMatchedSessions = async (
         parseCoachingDuration(record.duration),
         workout.raw?.duration?.value
       ),
+      executed,
     });
   }
   return { matched, dangling };

@@ -71,6 +71,7 @@ const seedMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
   date: "2026-04-29",
   createdAt: "2026-04-30T10:00:00.000Z",
   source: "manual",
+  executedWorkoutIds: [],
   ...overrides,
 });
 

@@ -18,6 +18,7 @@ import {
 import { backfillLinkedAccounts, SCHEMAS } from "./dexie-schemas";
 import { applyV10Upgrade } from "./dexie-v10-migration";
 import { applyV11Upgrade } from "./dexie-v11-migration";
+import { applyV12Upgrade } from "./dexie-v12-migration";
 
 // Narrowed handle: only `version()` is needed and Dexie's full surface
 // causes "Type instantiation is excessively deep" when passed as a
@@ -74,7 +75,7 @@ const registerV7ToV9 = (db: DexieVersionHost): void => {
   db.version(9).stores(SCHEMAS.v8).upgrade(applyV9Upgrade);
 };
 
-const registerV10ToV11 = (db: DexieVersionHost): void => {
+const registerV10ToV12 = (db: DexieVersionHost): void => {
   // v10 — coaching auto-match retro-fix (per coaching-activity-dialog-
   // redesign / D8). Schema is unchanged from v8; only the data-side
   // upgrade fires, scanning coachingActivities × workouts for pairs
@@ -84,11 +85,15 @@ const registerV10ToV11 = (db: DexieVersionHost): void => {
   // rewritten to the canonical "auto-coaching" value (coaching-activity-
   // dialog-redesign §1.4 follow-up). Schema unchanged from v8; data-only.
   db.version(11).stores(SCHEMAS.v8).upgrade(applyV11Upgrade);
+  // v12 — SessionMatch.executedWorkoutIds backfill (Train2Go three-slot
+  // grouping). Schema unchanged from v8; data-only — every existing row
+  // gets `executedWorkoutIds: []` so the field is always present on read.
+  db.version(12).stores(SCHEMAS.v8).upgrade(applyV12Upgrade);
 };
 
 export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV1ToV3(db);
   registerV4ToV6(db);
   registerV7ToV9(db);
-  registerV10ToV11(db);
+  registerV10ToV12(db);
 };

@@ -114,6 +114,67 @@ await ensureSessionMatch(sessionMatches, {
   }
 });
 
+test("scanFile flags an appendExecutedWorkoutIds call whose matchId is a template literal", () => {
+  const dir = mkdtempSync(join(tmpdir(), "shape-check-"));
+  const file = join(dir, "fixture-bad-append.ts");
+  writeFileSync(
+    file,
+    `
+declare const activity: { id: string };
+declare const sessionMatches: { appendExecutedWorkoutIds: (id: string, ids: string[]) => Promise<void> };
+await sessionMatches.appendExecutedWorkoutIds(\`\${activity.id}\`, ["w-1"]);
+`,
+    "utf8"
+  );
+  try {
+    const violations = scanFile(file, dir);
+    assert.equal(violations.length, 1);
+    assert.equal(violations[0]?.kind, "executed-append");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("scanFile permits an appendExecutedWorkoutIds call whose matchId is match.id (canonical)", () => {
+  const dir = mkdtempSync(join(tmpdir(), "shape-check-"));
+  const file = join(dir, "fixture-good-append.ts");
+  writeFileSync(
+    file,
+    `
+declare const match: { id: string };
+declare const sessionMatches: { appendExecutedWorkoutIds: (id: string, ids: string[]) => Promise<void> };
+await sessionMatches.appendExecutedWorkoutIds(match.id, ["w-1"]);
+`,
+    "utf8"
+  );
+  try {
+    const violations = scanFile(file, dir);
+    assert.deepEqual(violations, []);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("scanFile permits an appendExecutedWorkoutIds call whose matchId is a parameter ending in Id", () => {
+  const dir = mkdtempSync(join(tmpdir(), "shape-check-"));
+  const file = join(dir, "fixture-good-append-param.ts");
+  writeFileSync(
+    file,
+    `
+declare const matchId: string;
+declare const sessionMatches: { appendExecutedWorkoutIds: (id: string, ids: string[]) => Promise<void> };
+await sessionMatches.appendExecutedWorkoutIds(matchId, ["w-1"]);
+`,
+    "utf8"
+  );
+  try {
+    const violations = scanFile(file, dir);
+    assert.deepEqual(violations, []);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("scanFile flags a Dexie reader using the in-memory CoachingActivity.id (SHORT)", () => {
   const dir = mkdtempSync(join(tmpdir(), "shape-check-"));
   const file = join(dir, "fixture-bad-reader.ts");

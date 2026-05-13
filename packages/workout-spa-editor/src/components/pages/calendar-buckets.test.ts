@@ -42,6 +42,7 @@ const match = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
   date: DAY,
   createdAt: "2026-04-28T10:00:00.000Z",
   source: "auto-coaching",
+  executedWorkoutIds: [],
   ...overrides,
 });
 
@@ -138,6 +139,65 @@ describe("buildCalendarBuckets", () => {
     expect(buckets.soloPlansByDay[DAY]?.[0]?.id).toBe("train2go:1");
     expect(buckets.soloActualsByDay[DAY]).toHaveLength(1);
     expect(buckets.soloActualsByDay[DAY]?.[0]?.id).toBe("w-1");
+  });
+
+  it("should suppress an executed workout listed in match.executedWorkoutIds from soloActuals", () => {
+    // Arrange
+    const executed = workout({ id: "w-exec-1", source: "garmin" });
+    const ms = matched({
+      match: match({ executedWorkoutIds: ["w-exec-1"] }),
+    });
+    const args = {
+      days: DAYS,
+      coachingByDay: { [DAY]: [activity()] },
+      workoutsByDay: { [DAY]: [workout(), executed] },
+      matched: [ms],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    expect(buckets.matchedByDay[DAY]).toHaveLength(1);
+    expect(buckets.soloActualsByDay[DAY]).toEqual([]);
+  });
+
+  it("should suppress multiple executeds listed in match.executedWorkoutIds (1-N regression)", () => {
+    // Arrange
+    const e1 = workout({ id: "w-exec-1", source: "garmin" });
+    const e2 = workout({ id: "w-exec-2", source: "fit" });
+    const ms = matched({
+      match: match({ executedWorkoutIds: ["w-exec-1", "w-exec-2"] }),
+    });
+    const args = {
+      days: DAYS,
+      coachingByDay: { [DAY]: [activity()] },
+      workoutsByDay: { [DAY]: [workout(), e1, e2] },
+      matched: [ms],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    expect(buckets.soloActualsByDay[DAY]).toEqual([]);
+  });
+
+  it("should leave an executed workout solo when it is NOT in any match's executedWorkoutIds (A3)", () => {
+    // Arrange
+    const orphanExecuted = workout({ id: "w-exec-orphan", source: "garmin" });
+    const args = {
+      days: DAYS,
+      coachingByDay: {},
+      workoutsByDay: { [DAY]: [orphanExecuted] },
+      matched: [],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    expect(buckets.soloActualsByDay[DAY]).toEqual([orphanExecuted]);
   });
 
   it("should produce empty buckets for days with no items in either lane", () => {

@@ -32,6 +32,7 @@ describe("useUnmatchSession", () => {
       date: "2026-04-13",
       createdAt: "2026-04-13T10:00:00.000Z",
       source: "manual",
+      executedWorkoutIds: [],
     });
     const { result } = renderHook(() => useUnmatchSession(), {
       wrapper: Wrapper,
