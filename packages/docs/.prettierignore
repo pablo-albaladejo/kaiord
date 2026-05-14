@@ -2,3 +2,4 @@
 .vitepress/cache/
 api/
 node_modules/
+.omc/
