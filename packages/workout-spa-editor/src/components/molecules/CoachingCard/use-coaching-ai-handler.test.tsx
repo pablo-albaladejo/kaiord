@@ -12,6 +12,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AnalyticsProvider } from "../../../contexts/analytics-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { useCoachingAi } from "./use-coaching-ai-handler";
@@ -56,7 +57,7 @@ const wrap = (): ((props: { children: ReactNode }) => ReactNode) => {
   return ({ children }) => (
     <AnalyticsProvider analytics={{ event: vi.fn() }}>
       <PersistenceProvider persistence={persistence}>
-        {children}
+        <ToastContextProvider>{children}</ToastContextProvider>
       </PersistenceProvider>
     </AnalyticsProvider>
   );

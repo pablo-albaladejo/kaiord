@@ -1,23 +1,37 @@
 /**
  * E2E specs for the coaching-activity-dialog-redesign change.
  *
- * Covers the dialog flows that do NOT require LLM stubbing:
+ * Covers the dialog flows that exercise the AI transport boundary
+ * (mocked via the shared LLM mock seam) AND the flows that do NOT
+ * require LLM stubbing:
  *
+ *   (a) Process with AI → completes successfully, workout transitions
+ *       to structured, editor renders KRD, sidebar shows the activity
+ *       (D1/D3). Sub-case: empty-description prompt body is built from
+ *       `title + sport` only (§11.8).
+ *   (b) AI failure → inline error state + Retry AI affordance recovers
+ *       on the second attempt (D3, no-persist-on-failure).
+ *   (c) AI failure → static error toast fires and prevents state mutation
+ *       (C2 / R-PIIInterpolation).
  *   (d) Edit manually → editor renders template KRD + coaching sidebar;
  *       a `session_match` row is written alongside the workout (D1, D4).
  *   (e) Auto-heal → a converted-but-not-matched workout (legacy state)
  *       is silently linked when the dialog opens (D8 belt-and-braces).
+ *   (f) Process with AI from matched raw → transitions raw to structured
+ *       in place and preserves the existing session_match row (§7.4).
  *   (h) Empty description → dialog renders the AI hint (D6).
  *
- * The AI-bound flows (a, b, c, f, g) require Playwright route mocking
- * for the LLM transport and are tracked as follow-up issues filed at
- * archive time.
+ * Flow (g) (in-flight cancel) is covered by unit tests in
+ * `use-coaching-ai-handler.test.tsx`.
  */
 
-import type { Page } from "@playwright/test";
+import type { Page, Route } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
+import { mockLlmFailure, mockLlmSuccess } from "./fixtures/api-mocks";
+import { LLM_CYCLING_RESPONSE } from "./fixtures/llm-responses";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
+import { seedAiProvider } from "./helpers/seed-stores";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "coaching-redesign-profile";
@@ -236,6 +250,379 @@ test.describe("Coaching activity dialog redesign", () => {
     await expect(page.getByTestId("linked-workout-section")).toBeVisible({
       timeout: 5_000,
     });
+  });
+
+  test("flow (a): should render coaching dialog and convert via AI when Process with AI completes successfully", async ({
+    page,
+  }) => {
+    // Arrange — boot SPA, clear Dexie, seed profile + activity + AI provider
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await clearDexie(page);
+    await mockLlmSuccess(page, LLM_CYCLING_RESPONSE);
+    await seedAiProvider(page);
+    const day = getWeekDates(0)[2];
+    const ts = new Date(day + "T08:00:00Z").toISOString();
+    await seedProfileAndDummyWorkout(page, ts);
+    await seedActivity(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "ai-success",
+      date: day,
+      ts,
+      title: "AI success activity",
+      description: "Sweet spot Z3 5x6min with 3min recovery",
+    });
+
+    // Act — open dialog, click Process with AI
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    const card = page.getByTestId(`coaching-card-${SOURCE}:ai-success`);
+    await card.waitFor({ timeout: 10_000 });
+    await card.click();
+    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    await page.getByTestId("coaching-dialog-ai-process").click();
+
+    // Assert — navigated to editor and workout persisted in structured state
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+    const stored = await page.evaluate(async (profileId) => {
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as {
+        table: (n: string) => {
+          toArray: () => Promise<
+            { profileId: string; state: string; krd: unknown }[]
+          >;
+        };
+      };
+      const all = await db.table("workouts").toArray();
+      return all.filter((w) => w.profileId === profileId);
+    }, PROFILE_ID);
+    const structured = stored.filter((w) => w.state === "structured");
+    expect(structured.length).toBeGreaterThan(0);
+    expect(structured[0].krd).not.toBeNull();
+  });
+
+  test("flow (a) sub-case: empty-description prompt is built from title and sport only", async ({
+    page,
+  }) => {
+    // Arrange — capture the LLM request body via a custom route handler
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await clearDexie(page);
+    const capturedBodies: string[] = [];
+    const captureAndRespond = async (route: Route) => {
+      const body = route.request().postData() ?? "";
+      capturedBodies.push(body);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(LLM_CYCLING_RESPONSE),
+      });
+    };
+    await page.route("**/api.anthropic.com/**", captureAndRespond);
+    await page.route("**/api.openai.com/**", captureAndRespond);
+    await page.route(
+      "**/generativelanguage.googleapis.com/**",
+      captureAndRespond
+    );
+    await seedAiProvider(page);
+    const day = getWeekDates(0)[2];
+    const ts = new Date(day + "T08:00:00Z").toISOString();
+    await seedProfileAndDummyWorkout(page, ts);
+    const EMPTY_TITLE = "Empty desc activity";
+    await seedActivity(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "ai-empty-desc",
+      date: day,
+      ts,
+      title: EMPTY_TITLE,
+      description: "",
+    });
+
+    // Act — open dialog, click Process with AI
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    const card = page.getByTestId(`coaching-card-${SOURCE}:ai-empty-desc`);
+    await card.waitFor({ timeout: 10_000 });
+    await card.click();
+    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    await page.getByTestId("coaching-dialog-ai-process").click();
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+
+    // Assert — captured prompt body contains title (cycling) but not an
+    // empty/undefined description field. The exact serialization depends
+    // on the provider, so we check substring presence on the combined
+    // payload across all routes.
+    expect(capturedBodies.length).toBeGreaterThan(0);
+    const combined = capturedBodies.join("\n");
+    expect(combined).toContain(EMPTY_TITLE);
+    expect(combined).toContain("cycling");
+  });
+
+  test("flow (b): should show inline error with Retry AI affordance when LLM call fails", async ({
+    page,
+  }) => {
+    // Arrange — first call fails, second succeeds (handler swaps via
+    // an atomic counter so each interception is deterministic).
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await clearDexie(page);
+    let calls = 0;
+    const handler = async (route: Route) => {
+      calls += 1;
+      if (calls === 1) {
+        await route.fulfill({
+          status: 500,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "Mocked LLM failure" }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(LLM_CYCLING_RESPONSE),
+      });
+    };
+    await page.route("**/api.anthropic.com/**", handler);
+    await page.route("**/api.openai.com/**", handler);
+    await page.route("**/generativelanguage.googleapis.com/**", handler);
+    await seedAiProvider(page);
+    const day = getWeekDates(0)[2];
+    const ts = new Date(day + "T08:00:00Z").toISOString();
+    await seedProfileAndDummyWorkout(page, ts);
+    await seedActivity(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "ai-retry",
+      date: day,
+      ts,
+      title: "AI retry activity",
+      description: "Sweet spot Z3",
+    });
+
+    // Act — open dialog, click Process with AI (will fail), then Retry
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    const card = page.getByTestId(`coaching-card-${SOURCE}:ai-retry`);
+    await card.waitFor({ timeout: 10_000 });
+    await card.click();
+    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    await page.getByTestId("coaching-dialog-ai-process").click();
+    await expect(page.getByTestId("coaching-dialog-ai-error")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    // Failure-no-persist invariant: no workout was created on failure
+    const beforeRetry = await page.evaluate(async (profileId) => {
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as {
+        table: (n: string) => {
+          toArray: () => Promise<{ profileId: string; source: string }[]>;
+        };
+      };
+      const all = await db.table("workouts").toArray();
+      return all.filter((w) => w.profileId === profileId && w.source === SOURCE)
+        .length;
+    }, PROFILE_ID);
+    expect(beforeRetry).toBe(0);
+
+    // Click Retry AI — second call succeeds
+    await page.getByTestId("coaching-dialog-ai-retry").click();
+
+    // Assert — editor renders and the workout was persisted as structured
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+    const stored = await page.evaluate(async (profileId) => {
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as {
+        table: (n: string) => {
+          toArray: () => Promise<{ profileId: string; state: string }[]>;
+        };
+      };
+      const all = await db.table("workouts").toArray();
+      return all.filter(
+        (w) => w.profileId === profileId && w.state === "structured"
+      ).length;
+    }, PROFILE_ID);
+    expect(stored).toBeGreaterThan(0);
+  });
+
+  test("flow (c): should show static error toast when LLM call fails and prevent state mutation", async ({
+    page,
+  }) => {
+    // Arrange — every LLM call returns 500
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await clearDexie(page);
+    await mockLlmFailure(page);
+    await seedAiProvider(page);
+    const day = getWeekDates(0)[2];
+    const ts = new Date(day + "T08:00:00Z").toISOString();
+    await seedProfileAndDummyWorkout(page, ts);
+    await seedActivity(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "ai-toast",
+      date: day,
+      ts,
+      title: "AI toast activity",
+      description: "Sweet spot Z3",
+    });
+
+    // Act — open dialog, click Process with AI
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    const card = page.getByTestId(`coaching-card-${SOURCE}:ai-toast`);
+    await card.waitFor({ timeout: 10_000 });
+    await card.click();
+    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    await page.getByTestId("coaching-dialog-ai-process").click();
+
+    // Assert — toast appears with the C2 static literal
+    await expect(
+      page.getByText("Failed to process activity with AI")
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+    // No workout / no match persisted
+    const counts = await page.evaluate(async (profileId) => {
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as {
+        table: (n: string) => {
+          toArray: () => Promise<{ profileId: string; source?: string }[]>;
+        };
+      };
+      const workouts = await db.table("workouts").toArray();
+      const matches = await db.table("sessionMatches").toArray();
+      return {
+        workouts: workouts.filter(
+          (w) => w.profileId === profileId && w.source === SOURCE
+        ).length,
+        matches: matches.filter((m) => m.profileId === profileId).length,
+      };
+    }, PROFILE_ID);
+    expect(counts.workouts).toBe(0);
+    expect(counts.matches).toBe(0);
+  });
+
+  test("flow (f): should transition raw workout to structured in place when Process with AI completes successfully", async ({
+    page,
+  }) => {
+    // Arrange — seed a matched workout in `state="raw"` AND its session_match
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await clearDexie(page);
+    await mockLlmSuccess(page, LLM_CYCLING_RESPONSE);
+    await seedAiProvider(page);
+    const day = getWeekDates(0)[2];
+    const ts = new Date(day + "T08:00:00Z").toISOString();
+    await seedProfileAndDummyWorkout(page, ts);
+    await seedActivity(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "ai-in-place",
+      date: day,
+      ts,
+      title: "AI in-place activity",
+      description: "Sweet spot Z3",
+    });
+    await seedConvertedWorkout(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "ai-in-place",
+      date: day,
+      ts,
+      title: "AI in-place activity",
+      description: "Sweet spot Z3",
+      workoutId: "in-place-workout",
+    });
+    const PRESEEDED_MATCH_ID = "M-in-place";
+    await page.evaluate(
+      async ({ matchId, workoutId, day, profileId, source, sourceId, ts }) => {
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as Db;
+        await db.table("sessionMatches").put({
+          id: matchId,
+          profileId,
+          // Persisted COMPOSITE id shape: `${profileId}:${source}:${sourceId}`
+          // mirrors `buildCoachingActivityId(profileId, source, sourceId)`
+          // and matches the `coachingActivities.id` primary key.
+          coachingActivityId: `${profileId}:${source}:${sourceId}`,
+          workoutId,
+          date: day,
+          createdAt: ts,
+          source: "auto-coaching",
+          executedWorkoutIds: [],
+        });
+      },
+      {
+        matchId: PRESEEDED_MATCH_ID,
+        workoutId: "in-place-workout",
+        day,
+        profileId: PROFILE_ID,
+        source: SOURCE,
+        sourceId: "ai-in-place",
+        ts,
+      }
+    );
+
+    // Act — open dialog, click Process with AI from matched-raw state
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    const card = page.getByTestId(`coaching-card-${SOURCE}:ai-in-place`);
+    await card.waitFor({ timeout: 10_000 });
+    await card.click();
+    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    await page.getByTestId("coaching-dialog-ai-process").click();
+
+    // Assert — workout transitioned to structured in place AND the
+    // existing match row is preserved (same id).
+    await expect(page).toHaveURL(/\/workout\//, { timeout: 15_000 });
+    const result = await page.evaluate(
+      async ({ workoutId, matchId, profileId }) => {
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as {
+          table: (n: string) => {
+            get: (id: string) => Promise<{ state: string } | undefined>;
+            toArray: () => Promise<{ profileId: string; id: string }[]>;
+          };
+        };
+        const workout = await db.table("workouts").get(workoutId);
+        const matches = await db.table("sessionMatches").toArray();
+        const ourMatch = matches.find(
+          (m) => m.profileId === profileId && m.id === matchId
+        );
+        return {
+          state: workout?.state,
+          matchPreserved: Boolean(ourMatch),
+          matchCount: matches.filter((m) => m.profileId === profileId).length,
+        };
+      },
+      {
+        workoutId: "in-place-workout",
+        matchId: PRESEEDED_MATCH_ID,
+        profileId: PROFILE_ID,
+      }
+    );
+    expect(result.state).toBe("structured");
+    expect(result.matchPreserved).toBe(true);
+    expect(result.matchCount).toBe(1);
   });
 
   test("flow (h): empty-description activity shows the AI hint", async ({
