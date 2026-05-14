@@ -1,9 +1,3 @@
-/**
- * Three-way bucketing for the calendar week grid: matched sessions,
- * solo plans, solo actuals. Extracted from `CalendarPage` so the page
- * file stays under the per-file lint cap.
- */
-
 import type { MatchedSessionWithMetadata as PageMatchedSession } from "../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";

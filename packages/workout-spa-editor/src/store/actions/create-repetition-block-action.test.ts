@@ -533,12 +533,6 @@ describe("createRepetitionBlock", () => {
   });
 });
 
-/**
- * Property-Based Tests
- *
- * Feature: workout-spa-editor/08-pr25-fixes, Property 1: Insertion order preservation
- * Validates: Requirements 1.1, 1.2, 1.3
- */
 describe("createRepetitionBlock - Property Tests", () => {
   beforeEach(() => {
     useWorkoutStore.setState({

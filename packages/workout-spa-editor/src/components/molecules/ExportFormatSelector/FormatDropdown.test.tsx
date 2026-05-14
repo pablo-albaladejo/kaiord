@@ -35,10 +35,6 @@ const mockFormatOptions: FormatOption[] = [
 
 describe("FormatDropdown - Property Tests", () => {
   describe("Property 2: Keyboard navigation cycles within bounds", () => {
-    /**
-     * Feature: workout-spa-editor/08-pr25-fixes, Property 2: Keyboard navigation cycles within bounds
-     * Validates: Requirements 2.2, 2.3
-     */
     it("should keep focus at last option when pressing ArrowDown at boundary", async () => {
       // Arrange
       // Arrange
@@ -208,10 +204,6 @@ describe("FormatDropdown - Property Tests", () => {
   });
 
   describe("Property 3: Keyboard selection matches mouse selection", () => {
-    /**
-     * Feature: workout-spa-editor/08-pr25-fixes, Property 3: Keyboard selection matches mouse selection
-     * Validates: Requirements 2.4
-     */
     it("should select same option with Enter as with mouse click", async () => {
       // Arrange
       // Arrange

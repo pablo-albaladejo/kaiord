@@ -65,20 +65,6 @@ describe("createZwiftValidator", () => {
       }
     );
 
-    /**
-     * Property 6: Environment detection reflects current state
-     * Feature: 08-pr25-fixes, Property 6: Environment detection reflects current state
-     * Validates: Requirements 5.1, 5.2, 5.3
-     *
-     * For any test that modifies global.window, the module's isBrowser flag
-     * should reflect the modified state after module reload.
-     *
-     * This property test validates that:
-     * 1. Setting global.window to any truthy value makes isBrowser true
-     * 2. Setting global.window to undefined makes isBrowser false
-     * 3. Module reload is required for the flag to update
-     * 4. The behavior is consistent across multiple iterations
-     */
     describe("property: environment detection reflects current state", () => {
       const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>

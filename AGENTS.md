@@ -79,6 +79,11 @@ Before any non-trivial change:
 - All source/comments/commits/docs MUST be in English (regardless of user
   language).
 - Files ≤100 lines; functions <40 LOC (60 for React components). Tests exempt.
+  - Do NOT write JSDoc preambles that justify file extractions, reference
+    PRs/issues, or narrate prior code states. The 100-line cap is enforced by
+    ESLint; the split itself does not need explanation. Choose a descriptive
+    file name instead. Comments are reserved for non-obvious algorithm or
+    invariant explanation.
 - Prefer `type` over `interface`; separate type imports (`import type {...}`).
 - Functions over classes; factories like `createValidator()`.
 - Domain schemas: **snake_case** (`indoor_cycling`). Adapter schemas:

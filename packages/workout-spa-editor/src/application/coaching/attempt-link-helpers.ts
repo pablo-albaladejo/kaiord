@@ -1,8 +1,3 @@
-/**
- * Helpers extracted from attempt-link.ts to keep the use-case file
- * under the lint-enforced size limit.
- */
-
 import type { ProfileRepository } from "../../ports/persistence-port";
 import { ProfileNotFoundError } from "../profile/errors";
 import type {

@@ -1,10 +1,3 @@
-/**
- * Train2Go sendMessage helper.
- *
- * Promise-wraps chrome.runtime.sendMessage with a timeout. Extracted from
- * train2go-extension-transport.ts to keep that file under the lint limit.
- */
-
 export type Train2GoExtensionResponse = {
   ok: boolean;
   protocolVersion?: number;

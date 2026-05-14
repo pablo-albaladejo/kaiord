@@ -6,7 +6,6 @@
  * This module consolidates schema exports from focused submodules.
  */
 
-// Re-export core schemas and types from @kaiord/core
 export type {
   Duration,
   DurationType,
@@ -49,8 +48,6 @@ export {
   workoutSchema,
   workoutStepSchema,
 } from "./schemas/core-exports";
-
-// Re-export form validation schemas
 export type {
   PartialRepetitionBlock,
   PartialWorkoutStep,
@@ -61,8 +58,6 @@ export {
   partialWorkoutStepSchema,
   workoutMetadataFormSchema,
 } from "./schemas/form-schemas";
-
-// Re-export UI-specific schemas
 export type {
   ValidationErrorType,
   WorkoutStepWithId,
