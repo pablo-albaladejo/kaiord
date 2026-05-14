@@ -8,7 +8,6 @@
  * - krd-ui.ts: UI-specific helper types
  */
 
-// Re-export core types
 export type {
   Duration,
   DurationType,
@@ -29,11 +28,7 @@ export type {
   Workout,
   WorkoutStep,
 } from "./krd-core";
-
-// Re-export type guards
 export { isRepetitionBlock, isWorkoutStep } from "./krd-guards";
-
-// Re-export UI types
 export type {
   DragState,
   RepetitionFormData,

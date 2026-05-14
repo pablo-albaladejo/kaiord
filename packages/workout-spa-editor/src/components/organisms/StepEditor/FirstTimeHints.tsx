@@ -79,5 +79,4 @@ export const FirstTimeHints: React.FC<FirstTimeHintsProps> = ({
   );
 };
 
-// Re-export utilities for testing
 export { hasCompletedFirstWorkout, resetFirstWorkoutState };

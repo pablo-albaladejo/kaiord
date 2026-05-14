@@ -1,9 +1,3 @@
-/**
- * `ConflictGroupHeader` — title + band-count summary + Detail toggle
- * button. Extracted from `ConflictGroup` to keep that component under
- * the React 60-line cap.
- */
-
 export type ConflictGroupHeaderProps = {
   label: string;
   bandCount: number;

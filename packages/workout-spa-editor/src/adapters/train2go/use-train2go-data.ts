@@ -1,9 +1,3 @@
-/**
- * Live-query helpers extracted from `useTrain2GoSource` to keep the
- * factory hook under the function-line cap. These are the read paths
- * (activities + sync-state) — they own NO mutation, so splitting them
- * is purely cosmetic.
- */
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 

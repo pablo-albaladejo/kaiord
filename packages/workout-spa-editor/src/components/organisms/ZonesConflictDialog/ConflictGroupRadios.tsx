@@ -1,7 +1,3 @@
-/**
- * `ConflictGroupRadios` — accept/reject radio pair for a single group.
- * Extracted from `ConflictGroup` to keep that component under the cap.
- */
 import type { ConflictDecision } from "../../../types/coaching-zones";
 
 export type ConflictGroupRadiosProps = {

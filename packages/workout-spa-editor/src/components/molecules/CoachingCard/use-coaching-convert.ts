@@ -1,8 +1,3 @@
-/**
- * Convert handler for CoachingActivityDialog. Extracted from
- * use-coaching-dialog.ts to keep that hook under the lint limit.
- */
-
 import { useCallback, useState } from "react";
 import { useLocation } from "wouter";
 

@@ -56,6 +56,5 @@ export function renderWithProviders(
   return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
 
-// Re-export everything from React Testing Library
 export * from "@testing-library/react";
 export { default as userEvent } from "@testing-library/user-event";

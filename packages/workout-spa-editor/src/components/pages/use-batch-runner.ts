@@ -1,10 +1,3 @@
-/**
- * Encapsulates the actual dispatch of a staged batch: processing
- * state, progress updates, and cancellation. Extracted from
- * `useBatchState` to keep each hook under the max-lines-per-function
- * rule.
- */
-
 import { useCallback, useRef, useState } from "react";
 
 import { db } from "../../adapters/dexie/dexie-database";

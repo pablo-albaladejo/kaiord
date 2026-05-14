@@ -5,6 +5,8 @@ import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tseslint from "typescript-eslint";
 import vitest from "@vitest/eslint-plugin";
 
+import noNarrativeComments from "./scripts/eslint-rules/no-narrative-comments.mjs";
+
 const adapterPackages = ["fit", "tcx", "zwo", "garmin", "garmin-connect"];
 
 // garmin-connect legitimately depends on garmin (GCN format)
@@ -452,5 +454,23 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    // Local rule: ban narrative / history-telling comments across
+    // production code. The rule's pattern table is corpus-calibrated
+    // against `main`; see `.omc/specs/deep-dive-cleanup-narrative-comments.md`
+    // and `.omc/plans/ralplan-no-narrative-comments.md`.
+    files: ["packages/**/*.{ts,tsx}"],
+    plugins: {
+      local: { rules: { "no-narrative-comments": noNarrativeComments } },
+    },
+    rules: { "local/no-narrative-comments": "error" },
+  },
+  {
+    // Held-out path: Dexie migration adapters document the immutable
+    // forward-only migration contract (`// v8 —` changelog, legacy
+    // row markers). The rule is disabled here per spec §AC-3.
+    files: ["packages/workout-spa-editor/src/adapters/dexie/**"],
+    rules: { "local/no-narrative-comments": "off" },
   }
 );

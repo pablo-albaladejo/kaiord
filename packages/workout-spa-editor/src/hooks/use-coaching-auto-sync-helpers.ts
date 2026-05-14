@@ -1,8 +1,3 @@
-/**
- * Per-source auto-sync runner extracted from use-coaching-auto-sync.ts
- * to keep that hook under the lint-enforced size limit.
- */
-
 import type { Analytics } from "@kaiord/core";
 
 import type { PersistencePort } from "../ports/persistence-port";

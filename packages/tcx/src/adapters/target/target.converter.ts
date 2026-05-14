@@ -1,4 +1,3 @@
-// Re-export from split modules for modular structure
 export type { KrdTargetData } from "./krd-to-tcx.converter";
 export { convertKrdTargetToTcx } from "./krd-to-tcx.converter";
 export type { TcxTargetData } from "./tcx-to-krd.converter";

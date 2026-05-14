@@ -73,8 +73,7 @@ const READER_RE =
 // row, a function parameter), never a template literal constructed at
 // the call site. This is the executed-slot analogue of the H7 guard
 // — same shape rule, different write surface.
-const APPEND_EXECUTED_RE =
-  /\bappendExecutedWorkoutIds\s*\(\s*/g;
+const APPEND_EXECUTED_RE = /\bappendExecutedWorkoutIds\s*\(\s*/g;
 
 // Object-literal property assignment of `coachingActivityId:` whose
 // containing surface is one of the three known write call sites
