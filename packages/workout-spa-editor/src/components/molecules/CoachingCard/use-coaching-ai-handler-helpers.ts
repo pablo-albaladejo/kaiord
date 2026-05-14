@@ -48,15 +48,30 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   // composite `${profileId}:${source}:${sourceId}` — see
   // `buildCoachingActivityId`. Reconstruct here so the use case can
   // load the seeded row.
-  const result = await runConvertWithAi({
-    activityId: `${ctx.profileId}:${ctx.activity.id}`,
-    provider,
-    abortSignal: controller.signal,
-    persistence: ctx.persistence,
-    analytics: ctx.analytics,
-  });
-  ctx.abortRef.current = null;
-  ctx.setProcessing(false);
+  let result: Awaited<ReturnType<typeof runConvertWithAi>>;
+  try {
+    result = await runConvertWithAi({
+      activityId: `${ctx.profileId}:${ctx.activity.id}`,
+      provider,
+      abortSignal: controller.signal,
+      persistence: ctx.persistence,
+      analytics: ctx.analytics,
+    });
+  } catch (error) {
+    if (ctx.abortRef.current === controller) {
+      ctx.setFailure({
+        reason: "ai-error",
+        error: error instanceof Error ? error.message : String(error),
+      });
+      ctx.onFailureToast();
+    }
+    return;
+  } finally {
+    if (ctx.abortRef.current === controller) {
+      ctx.abortRef.current = null;
+      ctx.setProcessing(false);
+    }
+  }
   if (result.ok) {
     ctx.onClose();
     ctx.navigate(`/workout/${result.workoutId}`);

@@ -252,7 +252,7 @@ test.describe("Coaching activity dialog redesign", () => {
     });
   });
 
-  test("flow (a): should render coaching dialog and convert via AI when Process with AI completes successfully", async ({
+  test("should render coaching dialog and convert via AI when Process with AI completes successfully (flow a)", async ({
     page,
   }) => {
     // Arrange — boot SPA, clear Dexie, seed profile + activity + AI provider
@@ -305,7 +305,7 @@ test.describe("Coaching activity dialog redesign", () => {
     expect(structured[0].krd).not.toBeNull();
   });
 
-  test("flow (a) sub-case: empty-description prompt is built from title and sport only", async ({
+  test("should build empty-description prompt from title and sport only (flow a sub-case, §11.8)", async ({
     page,
   }) => {
     // Arrange — capture the LLM request body via a custom route handler
@@ -366,7 +366,7 @@ test.describe("Coaching activity dialog redesign", () => {
     expect(combined).toContain("cycling");
   });
 
-  test("flow (b): should show inline error with Retry AI affordance when LLM call fails", async ({
+  test("should show inline error with Retry AI affordance when LLM call fails (flow b)", async ({
     page,
   }) => {
     // Arrange — first call fails, second succeeds (handler swaps via
@@ -457,7 +457,7 @@ test.describe("Coaching activity dialog redesign", () => {
     expect(stored).toBeGreaterThan(0);
   });
 
-  test("flow (c): should show static error toast when LLM call fails and prevent state mutation", async ({
+  test("should show static error toast when LLM call fails and prevent state mutation (flow c)", async ({
     page,
   }) => {
     // Arrange — every LLM call returns 500
@@ -518,7 +518,7 @@ test.describe("Coaching activity dialog redesign", () => {
     expect(counts.matches).toBe(0);
   });
 
-  test("flow (f): should transition raw workout to structured in place when Process with AI completes successfully", async ({
+  test("should transition raw workout to structured in place when Process with AI completes successfully (flow f)", async ({
     page,
   }) => {
     // Arrange — seed a matched workout in `state="raw"` AND its session_match

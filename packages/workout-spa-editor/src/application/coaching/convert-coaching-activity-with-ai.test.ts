@@ -205,7 +205,7 @@ describe("convertCoachingActivityWithAi", () => {
     ]);
   });
 
-  it("should accept optional targetWorkoutId and write KRD into existing raw workout via processExistingRawInPlace", async () => {
+  it("should write KRD into existing raw workout via processExistingRawInPlace when existing.state is raw", async () => {
     // Arrange
     const existingRaw: WorkoutRecord = {
       id: "w-raw",
