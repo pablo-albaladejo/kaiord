@@ -45,6 +45,10 @@ vi.mock("../../../hooks/use-active-profile-live", () => ({
   }),
 }));
 
+vi.mock("../GarminPushButton/useGarminPush", () => ({
+  useGarminPush: () => ({ push: vi.fn() }),
+}));
+
 const baseActivity: CoachingActivity = {
   id: "train2go:12345",
   source: "train2go",

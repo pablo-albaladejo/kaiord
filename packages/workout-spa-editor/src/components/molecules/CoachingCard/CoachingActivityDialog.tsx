@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { useGarminPush } from "../GarminPushButton/useGarminPush";
 import { buildCoachingDialogCloseHandler } from "./build-coaching-dialog-close-handler";
 import { CoachingDialogShell } from "./coaching-dialog-shell";
 import { CoachingActivityDialogContent } from "./CoachingActivityDialogContent";
@@ -39,16 +40,19 @@ export function CoachingActivityDialog({
     activity?.sport.label ?? null
   );
   const [, navigate] = useLocation();
-  const matchedId =
-    dialog.dialogState?.kind === "matched"
-      ? dialog.dialogState.workout.id
-      : null;
+  const matchedWorkout =
+    dialog.dialogState?.kind === "matched" ? dialog.dialogState.workout : null;
+  const matchedId = matchedWorkout?.id ?? null;
   const onOpenEditor = useCallback(() => {
     if (matchedId) {
       onClose();
       navigate(`/workout/${matchedId}`);
     }
   }, [matchedId, navigate, onClose]);
+  const { push: pushToGarmin } = useGarminPush(matchedWorkout ?? undefined);
+  const onPushToGarmin = useCallback(() => {
+    void pushToGarmin();
+  }, [pushToGarmin]);
   const { cancelAi } = dialog.ai;
   const handleDialogClose = useMemo(
     () => buildCoachingDialogCloseHandler(cancelAi, onClose),
@@ -79,7 +83,7 @@ export function CoachingActivityDialog({
         onSelectWorkout={dialog.handleSelectWorkout}
         onOpenEditor={onOpenEditor}
         onOpenExecuted={handleOpenExecuted}
-        onPushToGarmin={onOpenEditor}
+        onPushToGarmin={onPushToGarmin}
         onSplit={dialog.handleSplit}
       />
     </CoachingDialogShell>
