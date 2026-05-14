@@ -158,12 +158,53 @@ describe("parser", () => {
 
       // Assert
       expect(activities).toHaveLength(1);
-      expect(activities[0].description).toContain("Avituallamiento intraentreno");
+      expect(activities[0].description).toContain(
+        "Avituallamiento intraentreno"
+      );
       expect(activities[0].description).toContain("**Calentamiento:**");
       expect(activities[0].description).toContain("3x15' Z3 d/5' Z1");
     });
 
-    it("should not leak the opening tag of the next sibling block into the description (regression: <div class=\" trailing fragment)", () => {
+    it("should preserve <li> bullet line breaks in description (regression: <ul><li> concatenation)", () => {
+      // Arrange
+      // Real-world Train2Go HTML ships single-line (no whitespace
+      // between tags): `<p>title</p><ul><li>a</li><li>b</li></ul>`.
+      // The previous extractDescription only converted `<br>` and the
+      // OPENING `<p>` to "\n" before stripping remaining tags, so
+      // `</li><li>` concatenated and the closing `</p>` did not break
+      // the line ahead of `<ul>`. User-reported symptom:
+      //   "3 progresiones de 1' en Z3 → Z4:1' @ 200–220w1' @ 220–240w..."
+      const html =
+        `<aside><div class="activity activity-medium" data-status="0" data-id="42">` +
+        `<figure class="icon icon-sportscycling"></figure>` +
+        `<span class="measured">1:55 h</span>` +
+        `<div class="workload workload-default" data-value="2"></div>` +
+        `<div class="activity-title"><strong>Progresiones</strong></div>` +
+        `<div class="activity-description">` +
+        `<p>3 progresiones de 1' en Z3 → Z4:</p>` +
+        `<ul><li>1' @ 200–220w</li><li>1' @ 220–240w</li><li>1' @ 240–260w</li></ul>` +
+        `<p>(Recuperación 1' fácil entre cada una)</p>` +
+        `</div></div></aside>`;
+
+      // Act
+      const activities = parseDailyHtml(html);
+
+      // Assert
+      expect(activities).toHaveLength(1);
+      const lines = activities[0].description.split("\n");
+      expect(lines).toContain("3 progresiones de 1' en Z3 → Z4:");
+      expect(lines).toContain("1' @ 200–220w");
+      expect(lines).toContain("1' @ 220–240w");
+      expect(lines).toContain("1' @ 240–260w");
+      expect(lines).toContain("(Recuperación 1' fácil entre cada una)");
+      // No bullet should be concatenated with another bullet or paragraph.
+      expect(activities[0].description).not.toMatch(/220w1'/);
+      expect(activities[0].description).not.toMatch(/240w1'/);
+      expect(activities[0].description).not.toMatch(/260w\(Recup/);
+      expect(activities[0].description).not.toMatch(/Z4:1'/);
+    });
+
+    it('should not leak the opening tag of the next sibling block into the description (regression: <div class=" trailing fragment)', () => {
       // Arrange
       // The live T2G response has the activity-description block followed
       // by an `activity-hint-ecos` div. The previous lookahead matched the

@@ -19,13 +19,31 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../../adapters/dexie/dexie-database";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
-import { namespaceSourceId } from "../../../types/coaching-activity-record";
+import {
+  namespaceSourceId,
+  toPersistedCoachingActivityId,
+} from "../../../types/coaching-activity-record";
 import type { SessionMatch } from "../../../types/session-match";
 
 export type CoachingDialogState =
   | { kind: "no-workout" }
   | { kind: "converted"; workout: WorkoutRecord }
-  | { kind: "matched"; matchId: string; workout: WorkoutRecord };
+  | {
+      kind: "matched";
+      matchId: string;
+      workout: WorkoutRecord;
+      executed: WorkoutRecord[];
+    };
+
+const resolveExecuted = async (
+  ids: readonly string[]
+): Promise<WorkoutRecord[]> => {
+  if (ids.length === 0) return [];
+  const rows = await db.table<WorkoutRecord>("workouts").bulkGet([...ids]);
+  // `bulkGet` returns `undefined` for missing ids; drop dangling refs so
+  // the dialog never renders a row for a deleted recording.
+  return rows.filter((r): r is WorkoutRecord => Boolean(r));
+};
 
 const resolveState = async (
   profileId: string,
@@ -34,7 +52,7 @@ const resolveState = async (
   const match = await db
     .table<SessionMatch>("sessionMatches")
     .where("[profileId+coachingActivityId]")
-    .equals([profileId, activity.id])
+    .equals([profileId, toPersistedCoachingActivityId(profileId, activity.id)])
     .first();
 
   if (match) {
@@ -46,7 +64,8 @@ const resolveState = async (
     // to the no-workout branch so the dialog re-offers AI/Manual/Match.
     // Stale-match cleanup belongs to the cascade hooks, not the dialog.
     if (!workout) return { kind: "no-workout" };
-    return { kind: "matched", matchId: match.id, workout };
+    const executed = await resolveExecuted(match.executedWorkoutIds ?? []);
+    return { kind: "matched", matchId: match.id, workout, executed };
   }
 
   const prefix = `${activity.source}:`;

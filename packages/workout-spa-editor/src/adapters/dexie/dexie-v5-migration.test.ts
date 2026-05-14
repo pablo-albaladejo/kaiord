@@ -61,6 +61,9 @@ async function seedV4(name: string, data: Fixture): Promise<void> {
   await v4.table("workouts").bulkPut(data.workouts);
   await v4.table("coachingActivities").bulkPut(data.coachingActivities);
   await v4.table("coachingSyncState").bulkPut(data.coachingSyncState);
+  // v13 expects meta.activeProfileId to be set when workouts exist.
+  // Seed it so the workout-profileId backfill resolves cleanly.
+  await v4.table("meta").put({ key: "activeProfileId", value: "p1" });
   v4.close();
 }
 
@@ -77,7 +80,12 @@ describe("Dexie v5 migration round-trip", () => {
     const activities = await db.table("coachingActivities").toArray();
     const sync = await db.table("coachingSyncState").toArray();
     expect(profiles).toEqual(fixture.profiles);
-    expect(workouts).toEqual(fixture.workouts);
+    // v13 backfills profileId on every legacy workout row; the rest of
+    // the fixture is preserved byte-identically. We assert the per-row
+    // shape rather than reusing the v4 fixture directly.
+    expect(workouts).toEqual(
+      fixture.workouts.map((w) => ({ ...w, profileId: "p1" }))
+    );
     expect(activities).toEqual(fixture.coachingActivities);
     expect(sync).toEqual(fixture.coachingSyncState);
     const sessionMatches = createDexieSessionMatchRepository(db);

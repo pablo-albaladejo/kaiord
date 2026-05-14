@@ -6,15 +6,17 @@
  * argument's `deletedProfileId` — NEVER `getActiveId()` (would race when
  * deleting a non-active profile or right after a switch).
  *
- * The cascade covers every per-profile repository: coaching activities,
- * coaching sync state, session matches, auto-match dismissals, and user
- * preferences. Each repository's deletion method is called once with the
- * deleted profile id.
+ * The cascade covers every per-profile repository: workouts, coaching
+ * activities, coaching sync state, session matches, auto-match
+ * dismissals, and user preferences. Each repository's deletion method
+ * is called once with the deleted profile id. As of Dexie v13 workouts
+ * are profile-scoped 1–1 (see `dexie-v13-migration.ts`), so they are
+ * included in the cascade — `isPerProfileTable` also auto-discovers
+ * them at delete time.
  *
- * Profile-agnostic data (workouts, templates, AI providers, usage, sync
- * state, meta) is NOT cascaded — those rows are user-owned across profile
- * boundaries by design (per spec "Profile delete preserves converted
- * workouts" and "AI providers are profile-agnostic").
+ * Profile-agnostic data (templates, AI providers, usage, sync state,
+ * meta) is NOT cascaded — those rows are user-owned across profile
+ * boundaries by design ("AI providers are profile-agnostic", etc.).
  *
  * Atomicity: this use case does NOT open its own transaction. The caller
  * MUST wrap both this call and the subsequent `deleteProfile` invocation
@@ -27,11 +29,13 @@ import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismis
 import type {
   CoachingRepository,
   CoachingSyncStateRepository,
+  WorkoutRepository,
 } from "../../ports/persistence-port";
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { UserPreferencesRepository } from "../../ports/user-preferences-repository";
 
 export type DeleteProfileWithCascadeDeps = {
+  workouts: WorkoutRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
   sessionMatch: SessionMatchRepository;
@@ -44,6 +48,7 @@ export const deleteProfileWithCascade = async (
   deletedProfileId: string
 ): Promise<void> => {
   await Promise.all([
+    deps.workouts.deleteByProfile(deletedProfileId),
     deps.coaching.deleteByProfile(deletedProfileId),
     deps.coachingSyncState.deleteByProfile(deletedProfileId),
     deps.sessionMatch.deleteByProfile(deletedProfileId),

@@ -30,6 +30,7 @@ function makeKrd(): KRD {
 function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   return {
     id: "w-1",
+    profileId: PROFILE_UUID_1,
     date: "2026-04-07",
     sport: "cycling",
     source: "kaiord",
@@ -203,6 +204,22 @@ describe("WorkoutRepository", () => {
     const result = await workouts.getById("w-1");
 
     expect(result?.state).toBe("pushed");
+  });
+
+  it("should delete all workouts for a given profile and leave other profiles untouched", async () => {
+    // Arrange
+    const { workouts } = createInMemoryPersistence();
+    await workouts.put(makeWorkout({ id: "w-1", profileId: PROFILE_UUID_1 }));
+    await workouts.put(makeWorkout({ id: "w-2", profileId: PROFILE_UUID_1 }));
+    await workouts.put(makeWorkout({ id: "w-3", profileId: PROFILE_UUID_2 }));
+
+    // Act
+    await workouts.deleteByProfile(PROFILE_UUID_1);
+
+    // Assert
+    expect(await workouts.getById("w-1")).toBeUndefined();
+    expect(await workouts.getById("w-2")).toBeUndefined();
+    expect(await workouts.getById("w-3")).toBeDefined();
   });
 });
 

@@ -99,6 +99,28 @@ const makeSeedRow = (
           },
         ],
       };
+    case "workouts":
+      return {
+        id,
+        profileId,
+        date: WEEK_START,
+        sport: "cycling",
+        source: "kaiord",
+        sourceId: null,
+        planId: null,
+        state: "raw",
+        raw: null,
+        krd: null,
+        lastProcessingError: null,
+        feedback: null,
+        aiMeta: null,
+        garminPushId: null,
+        tags: [],
+        previousState: null,
+        createdAt: NOW,
+        modifiedAt: null,
+        updatedAt: NOW,
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
@@ -117,6 +139,7 @@ const performCascadeOrchestration = async (
   await persistence.transaction(async () => {
     await deleteProfileWithCascade(
       {
+        workouts: persistence.workouts,
         coaching: persistence.coaching,
         coachingSyncState: persistence.coachingSyncState,
         sessionMatch: persistence.sessionMatch,
@@ -164,6 +187,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
         "coachingSyncState",
         "sessionMatches",
         "userPreferences",
+        "workouts",
       ])
     );
     const A = "00000000-0000-4000-8000-0000000000a1";
@@ -213,7 +237,11 @@ describe("deleteProfile cascade fan-out (integration)", () => {
       .mockImplementationOnce(() =>
         Promise.reject(new Error("simulated mid-cascade failure"))
       );
+
+    // Act
     await expect(performCascadeOrchestration(persistence, A)).rejects.toThrow();
+
+    // Assert
     for (const table of perProfileTables) {
       const countForA = await table
         .filter((row) => (row as { profileId?: string }).profileId === A)
@@ -235,9 +263,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
     expect(profileA).toBeDefined();
     expect(profileB).toBeDefined();
 
-    // Act
+    // Cleanup
     userPrefsSpy.mockRestore();
-
-    // Assert
   });
 });

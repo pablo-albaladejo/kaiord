@@ -12,6 +12,7 @@
 import { complianceBucket } from "../../../application/compliance-bucket";
 import { CardShell } from "../CardShell/CardShell";
 import { complianceBucketToBorderClass } from "../CardShell/status-tokens";
+import { ExecutedRows } from "./matched-session-executed-row";
 import {
   renderComfortableMetadata,
   renderComfortableSecondary,
@@ -38,6 +39,7 @@ export function MatchedSessionCard({
   onClick,
 }: MatchedSessionCardProps) {
   const bucket = complianceBucket(session.complianceScore);
+  const executed = session.executed ?? [];
   return (
     <CardShell
       borderClass={complianceBucketToBorderClass(bucket)}
@@ -56,6 +58,9 @@ export function MatchedSessionCard({
         density === "comfortable"
           ? renderComfortableSecondary(session)
           : undefined
+      }
+      footerRow={
+        executed.length > 0 ? <ExecutedRows executed={executed} /> : undefined
       }
     />
   );

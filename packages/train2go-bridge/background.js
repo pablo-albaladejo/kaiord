@@ -136,9 +136,7 @@ const readDay = async (date, userId) => {
   // activity to drop out of every per-day calendar bucket — the
   // visible symptom is the card disappearing the moment the user
   // opens its detail dialog (which lazy-fetches via expandDay).
-  const activities = parser
-    .parseDailyHtml(html)
-    .map((a) => ({ ...a, date }));
+  const activities = parser.parseDailyHtml(html).map((a) => ({ ...a, date }));
   return { activities };
 };
 

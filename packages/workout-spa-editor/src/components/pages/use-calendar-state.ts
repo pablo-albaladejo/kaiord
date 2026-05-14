@@ -8,13 +8,27 @@ import { useLocation } from "wouter";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { useGarminBridge } from "../../contexts";
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { getWeekIdForDate } from "../../utils/week-utils";
 import { useCalendarData } from "./calendar-hooks";
 import { useBatchState } from "./use-batch-state";
 
+const fetchLatestWorkout = async (
+  profileId: string | null
+): Promise<WorkoutRecord | undefined> => {
+  if (!profileId) return undefined;
+  const rows = await db
+    .table<WorkoutRecord>("workouts")
+    .where("profileId")
+    .equals(profileId)
+    .sortBy("date");
+  return rows.at(-1);
+};
+
 export function useCalendarState() {
-  const data = useCalendarData();
+  const profileId = useActiveProfileLive()?.id ?? null;
+  const data = useCalendarData(profileId);
   const [, navigate] = useLocation();
   const { extensionInstalled } = useGarminBridge();
   const [selectedWorkout, setSelectedWorkout] = useState<WorkoutRecord | null>(
@@ -24,8 +38,8 @@ export function useCalendarState() {
   const batch = useBatchState(data.weekStart, data.weekEnd);
 
   const latestWorkout = useLiveQuery(
-    () => db.table<WorkoutRecord>("workouts").orderBy("date").last(),
-    []
+    () => fetchLatestWorkout(profileId),
+    [profileId]
   );
 
   const aiProviderCount = useLiveQuery(

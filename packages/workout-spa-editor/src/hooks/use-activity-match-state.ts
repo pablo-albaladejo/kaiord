@@ -19,23 +19,35 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
 import type { WorkoutRecord } from "../types/calendar-record";
+import { toPersistedCoachingActivityId } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
 
 export type ActivityMatchState =
   | { kind: "solo" }
   | { kind: "matched"; matchId: string; workout: WorkoutRecord };
 
+/**
+ * @param activityViewModelId the in-memory `CoachingActivity.id`
+ *   (SHORT form `"${source}:${sourceId}"`). The hook composes the
+ *   canonical COMPOSITE persisted shape via `toPersistedCoachingActivityId`
+ *   before querying `sessionMatches.[profileId+coachingActivityId]`,
+ *   matching the COMPOSITE shape every writer persists. See
+ *   `.omc/autopilot/bug-trace.md` §H7 for the original divergence.
+ */
 export function useActivityMatchState(
   profileId: string | null,
-  activityId: string | null
+  activityViewModelId: string | null
 ): ActivityMatchState | undefined {
   return useLiveQuery<ActivityMatchState>(async () => {
-    if (!profileId || !activityId) return { kind: "solo" };
+    if (!profileId || !activityViewModelId) return { kind: "solo" };
 
     const match = await db
       .table<SessionMatch>("sessionMatches")
       .where("[profileId+coachingActivityId]")
-      .equals([profileId, activityId])
+      .equals([
+        profileId,
+        toPersistedCoachingActivityId(profileId, activityViewModelId),
+      ])
       .first();
 
     if (!match) return { kind: "solo" };
@@ -52,5 +64,5 @@ export function useActivityMatchState(
     }
 
     return { kind: "matched", matchId: match.id, workout };
-  }, [profileId, activityId]);
+  }, [profileId, activityViewModelId]);
 }

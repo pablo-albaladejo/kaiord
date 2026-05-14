@@ -27,10 +27,23 @@ function renderWithRouter(ui: React.ReactNode, path = "/calendar") {
   };
 }
 
+const PROFILE_ID = "00000000-0000-4000-8000-0000000000e1";
+
 describe("EmptyDayDialog", () => {
   beforeEach(async () => {
     await db.table("templates").clear();
     await db.table("workouts").clear();
+    await db.table("profiles").clear();
+    await db.table("meta").clear();
+    await db.table("profiles").put({
+      id: PROFILE_ID,
+      name: "Tester",
+      sportZones: {},
+      linkedAccounts: [],
+      createdAt: "2026-04-01T00:00:00.000Z",
+      updatedAt: "2026-04-01T00:00:00.000Z",
+    });
+    await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
   });
 
   it("should render dialog when date is provided (open)", () => {
@@ -176,6 +189,33 @@ describe("EmptyDayDialog", () => {
     expect(
       screen.queryByTestId("template-picker-dialog")
     ).not.toBeInTheDocument();
+  });
+
+  it("should fire toast.error and not persist when no active profile is set on pick", async () => {
+    // Arrange
+
+    await db.table("meta").clear();
+    const persistence = createDexiePersistence(db);
+    await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={onClose} />);
+
+    // Act
+
+    await user.click(screen.getByText("Add from Library"));
+    await waitFor(() => {
+      expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("Tempo Ride"));
+
+    // Assert
+
+    await waitFor(() => {
+      expect(screen.getByText("No active profile")).toBeInTheDocument();
+    });
+    const workouts = await db.table("workouts").toArray();
+    expect(workouts).toHaveLength(0);
   });
 
   it("should navigate to new workout with date and closes on Create click", async () => {
