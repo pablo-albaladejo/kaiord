@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.3.1
+
+### Patch Changes
+
+- 68660b5: Apply Prettier formatting to `cli/krd-converter.ts` (no behavior changes).
+
 ## 7.3.0
 
 ### Patch Changes
