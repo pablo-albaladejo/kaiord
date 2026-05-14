@@ -60,7 +60,10 @@
     "minmax",
     "opsx",
     "Dexie",
-    "affordances"
+    "affordances",
+    "frontmatter",
+    "openspec",
+    "CCPA"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
 }
