@@ -11,13 +11,27 @@
  * does not depend on the SPA's lib/generate-workout module; the dialog
  * wires the actual provider-aware implementation at the composition
  * root.
+ *
+ * Two-branch existing-workout shape (see
+ * `convert-coaching-activity-with-ai-idempotency.ts` header for the
+ * full contract):
+ *   - existing workout, `state !== "raw"` → `ensureMatchForExisting`
+ *     (no LLM call, auto-heal session_match if missing).
+ *   - existing workout, `state === "raw"` → `processExistingRawInPlace`
+ *     (bill the LLM, transition raw → structured in place, preserve
+ *     the existing session_match row).
+ *   - no existing workout → `performAiCreation` (create new workout +
+ *     session_match atomically).
  */
 import { namespaceSourceId } from "../../types/coaching-activity-record";
 import {
   performAiCreation,
   resolvePromptText,
 } from "./convert-coaching-activity-with-ai-helpers";
-import { ensureMatchForExisting } from "./convert-coaching-activity-with-ai-idempotency";
+import {
+  ensureMatchForExisting,
+  processExistingRawInPlace,
+} from "./convert-coaching-activity-with-ai-idempotency";
 import type {
   ConvertWithAiDeps,
   ConvertWithAiInput,
@@ -49,7 +63,17 @@ export const convertCoachingActivityWithAi = async (
     activity.source,
     nsSourceId
   );
-  if (existing) return ensureMatchForExisting(deps, activity, existing.id);
+  if (existing) {
+    if (existing.state === "raw") {
+      return processExistingRawInPlace(
+        deps,
+        activity,
+        existing,
+        input.abortSignal
+      );
+    }
+    return ensureMatchForExisting(deps, activity, existing.id);
+  }
 
   const text = resolvePromptText(activity);
   return performAiCreation(deps, activity, nsSourceId, text, input.abortSignal);

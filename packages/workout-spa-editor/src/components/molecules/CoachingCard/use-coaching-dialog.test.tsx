@@ -18,6 +18,7 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import {
   buildCoachingActivityId,
@@ -65,7 +66,7 @@ const wrap = (children: ReactNode) => {
   const persistence = createInMemoryPersistence();
   return (
     <PersistenceProvider persistence={persistence}>
-      {children}
+      <ToastContextProvider>{children}</ToastContextProvider>
     </PersistenceProvider>
   );
 };
@@ -196,7 +197,7 @@ describe("useCoachingDialog", () => {
       {
         wrapper: ({ children }) => (
           <PersistenceProvider persistence={persistence}>
-            {children}
+            <ToastContextProvider>{children}</ToastContextProvider>
           </PersistenceProvider>
         ),
       }
@@ -238,7 +239,7 @@ describe("useCoachingDialog", () => {
       {
         wrapper: ({ children }) => (
           <PersistenceProvider persistence={persistence}>
-            {children}
+            <ToastContextProvider>{children}</ToastContextProvider>
           </PersistenceProvider>
         ),
       }
