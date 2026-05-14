@@ -89,6 +89,11 @@ const config = {
     "Open-source health & fitness data framework for TypeScript. Convert FIT, TCX, ZWO, and GCN formats.",
   base: DOCS_BASE,
 
+  // AGENTS.md files are agent-facing documentation, not part of the public
+  // docs site. Exclude them from the VitePress build (dead-link checking,
+  // sitemap, llmstxt) but keep them on disk for AI agents to read.
+  srcExclude: ["**/AGENTS.md"],
+
   head: buildStaticHead({ docsBase: DOCS_BASE, ogImage: OG_IMAGE }),
 
   sitemap: {
