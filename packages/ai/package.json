@@ -30,17 +30,17 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "ai": "^6.0.175"
+    "ai": "^6.0.177"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^3.0.75",
-    "@types/node": "^25.6.0",
-    "@vitest/coverage-v8": "^4.1.5",
-    "ai": "^6.0.175",
+    "@ai-sdk/anthropic": "^3.0.76",
+    "@types/node": "^25.7.0",
+    "@vitest/coverage-v8": "^4.1.6",
+    "ai": "^6.0.177",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.6"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 import { transformerTwoslash } from "@shikijs/vitepress-twoslash";
 import llmstxt from "vitepress-plugin-llms";
-import type { HeadConfig, UserConfig } from "vitepress";
+import type { HeadConfig, TransformContext } from "vitepress";
 
 import { buildStaticHead } from "./head-config.mjs";
 
@@ -218,7 +218,7 @@ const config = {
     plugins: [...llmstxt()],
   },
 
-  transformHead({ pageData }) {
+  transformHead({ pageData }: TransformContext) {
     const head: HeadConfig[] = [];
     const isHome = pageData.relativePath === "index.md";
 
@@ -253,6 +253,6 @@ const config = {
 
     return head;
   },
-} satisfies UserConfig;
+};
 
 export default config;
