@@ -1,12 +1,3 @@
-/**
- * Train2Go ping result shape + boundary stringification.
- *
- * Extracted from train2go-extension-transport.ts to keep that file
- * under the lint-enforced size limit. Stringifies platform user ids at
- * the SPA-side JSON boundary so detection / connect callers receive
- * a string, never a (potentially lossy) JS number.
- */
-
 import type { Train2GoExtensionResponse } from "./train2go-send-message";
 
 type RawPingData = {

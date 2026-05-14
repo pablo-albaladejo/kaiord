@@ -1,8 +1,3 @@
-/**
- * `DialogShell` — modal backdrop, title, intro text, and Cancel/Apply
- * buttons. Extracted from `ZonesConflictDialog` to keep the parent
- * component under the React 60-line cap.
- */
 import type { ReactNode } from "react";
 
 export type DialogShellProps = {

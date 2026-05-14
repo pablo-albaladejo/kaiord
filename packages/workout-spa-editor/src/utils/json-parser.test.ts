@@ -257,13 +257,6 @@ describe("parseJSON", () => {
   });
 
   describe("performance properties", () => {
-    /**
-     * Property 8: JSON parsing is linear time
-     * Feature: workout-spa-editor/08-pr25-fixes, Property 8: JSON parsing is linear time
-     * Validates: Requirements 7.3, 7.5
-     *
-     * For any JSON string of length N, error location extraction should complete in O(N) time or better.
-     */
     it("should complete error parsing in linear time for various input sizes", () => {
       // Arrange - Generate invalid JSON strings of different sizes
       // Arrange

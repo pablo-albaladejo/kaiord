@@ -1,10 +1,3 @@
-/**
- * ConfirmationModal Panel
- *
- * The visual dialog panel containing header, message, and action buttons.
- * Extracted from ConfirmationModal to respect file size limits.
- */
-
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
