@@ -812,7 +812,7 @@ test.describe("Coaching activity dialog redesign", () => {
     await expect(page.getByTestId("coaching-dialog-push")).toBeVisible();
     await page.evaluate(async () => {
       const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as Db & {
+        .__KAIORD_DB__ as {
         table: (n: string) => {
           update: (
             id: string,
