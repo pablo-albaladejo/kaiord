@@ -34,9 +34,7 @@ import { useGarminPush } from "./useGarminPush";
 // A stub KRD payload that exportGcnWorkout will receive verbatim.
 const KRD_STUB = { name: "test workout" } as unknown;
 
-const makeWorkout = (
-  overrides: Partial<WorkoutRecord> = {}
-): WorkoutRecord =>
+const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
   ({
     id: "workout-1",
     profileId: "profile-1",
