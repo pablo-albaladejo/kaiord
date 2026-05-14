@@ -126,7 +126,14 @@ const seedMatchedCoachingWorkout = async (
         source: "manual",
       });
     },
-    { profileId: PROFILE_ID, source: SOURCE, sourceId: SOURCE_ID, workoutId: WORKOUT_ID, day, ts }
+    {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: SOURCE_ID,
+      workoutId: WORKOUT_ID,
+      day,
+      ts,
+    }
   );
 };
 
