@@ -13,7 +13,7 @@ import { installGarminStubScript } from "./garmin-bridge-stub-page-script";
 export const GARMIN_EXTENSION_ID = "garmin-stub-ext";
 export const GARMIN_BRIDGE_ID = "garmin-bridge";
 
-const DEFAULT_CAPS = ["push:workout", "list:workouts"] as const;
+const DEFAULT_CAPS = ["write:workouts", "read:workouts"] as const;
 
 /**
  * Install the bridge stub. Call BEFORE `page.goto(...)` so the

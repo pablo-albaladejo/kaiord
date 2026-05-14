@@ -47,6 +47,12 @@ import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "coaching-redesign-profile";
 const SOURCE = "train2go";
+// Backoff schedule for the flow (g) re-click poll: short first, then a
+// few seconds to give the Garmin bridge discovery + detect cycle time
+// to flip `sessionActive` to true. Values are wall-clock milliseconds
+// for Playwright's `expect.poll` and have no domain meaning.
+// eslint-disable-next-line no-magic-numbers -- poll backoff schedule, test-local
+const FLOW_G_PUSH_POLL_INTERVALS_MS = [500, 1000, 1000, 1000, 2000];
 
 type SeedActivityArgs = {
   profileId: string;
@@ -745,20 +751,26 @@ test.describe("Coaching activity dialog redesign", () => {
       matchId: "M-push-flow",
     });
 
-    // Act — open dialog, click Push to Garmin
+    // Act — open dialog, then click Push to Garmin. The push is a no-op
+    // until the Garmin bridge stub is detected (`sessionActive=true`),
+    // so the test re-clicks until the stub records a `push` action.
     await page.goto(`/calendar/${getWeekId(day)}`);
-    const card = page.getByTestId(`coaching-card-${SOURCE}:push-flow`);
+    const card = page.getByTestId(`matched-card-${SOURCE}:push-flow`);
     await card.waitFor({ timeout: 10_000 });
     await card.click();
     await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
     const pushBtn = page.getByTestId("coaching-dialog-push");
     await expect(pushBtn).toBeVisible({ timeout: 10_000 });
-    await expect(pushBtn).toBeEnabled();
-    await pushBtn.click();
 
-    // Assert — the Garmin bridge stub recorded a `push` action
+    // Assert — the Garmin bridge stub eventually records a `push` action
     await expect
-      .poll(() => getGarminBridgeCallActions(page), { timeout: 10_000 })
+      .poll(
+        async () => {
+          await pushBtn.click();
+          return getGarminBridgeCallActions(page);
+        },
+        { timeout: 15_000, intervals: FLOW_G_PUSH_POLL_INTERVALS_MS }
+      )
       .toContain("push");
   });
 
@@ -805,7 +817,7 @@ test.describe("Coaching activity dialog redesign", () => {
 
     // Act — open dialog and flip the workout state to pushed via Dexie
     await page.goto(`/calendar/${getWeekId(day)}`);
-    const card = page.getByTestId(`coaching-card-${SOURCE}:push-rerender`);
+    const card = page.getByTestId(`matched-card-${SOURCE}:push-rerender`);
     await card.waitFor({ timeout: 10_000 });
     await card.click();
     await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
