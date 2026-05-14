@@ -11,8 +11,9 @@ const ruleTester = new RuleTester({
   },
 });
 
-test("no-narrative-comments rule cases", () => {
-  ruleTester.run("no-narrative-comments", rule, {
+test("should enforce no-narrative-comments rule across valid and invalid cases", () => {
+  // Arrange
+  const cases = {
     valid: [
       // V1 — AAA marker.
       { code: "// Arrange\nconst x = 1;\n" },
@@ -64,5 +65,8 @@ test("no-narrative-comments rule cases", () => {
         output: 'export * from "./foo";\n',
       },
     ],
-  });
+  };
+
+  // Act + Assert
+  ruleTester.run("no-narrative-comments", rule, cases);
 });
