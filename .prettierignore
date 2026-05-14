@@ -15,6 +15,9 @@ packages/core/schema/*.json
 openspec/changes/archive/README.md
 scripts/fixtures/bridge-privacy-surface.json
 
+# Tooling state (OMC, agent caches)
+.omc/
+
 # Git
 .git/
 
