@@ -1,4 +1,3 @@
-// Re-export from split modules for modular structure
 export type { KrdDurationConversionResult } from "./krd-to-tcx.converter";
 export { convertKrdDurationToTcx } from "./krd-to-tcx.converter";
 export type {

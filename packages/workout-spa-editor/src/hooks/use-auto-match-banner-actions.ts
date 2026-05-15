@@ -1,9 +1,3 @@
-/**
- * useAutoMatchBannerActions — wires Accept / Reject to `matchSession`
- * (with `source: "auto-suggestion"`) and `dismissAutoMatchBanner`.
- * Extracted from CalendarPage so the page stays under the line caps.
- */
-
 import { useCallback } from "react";
 
 import type { MatchSuggestion } from "../application/match-suggestion";

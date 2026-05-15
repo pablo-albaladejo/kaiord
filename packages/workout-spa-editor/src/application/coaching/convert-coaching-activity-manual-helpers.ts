@@ -1,7 +1,3 @@
-/**
- * Helpers extracted from `convertCoachingActivityManual` so that
- * the use-case file stays under the per-file line cap.
- */
 import type { SessionMatchSource } from "../../types/session-match";
 import { buildCoachingTemplateKrd } from "./coaching-template";
 import type {

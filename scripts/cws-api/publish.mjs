@@ -1,10 +1,27 @@
 // Publish an uploaded CRX. POST without body to /items/<id>/publish.
 // Returns { status: [string] } per Google docs. 409 → conflict (a
 // concurrent publish is locking the item).
+//
+// Idempotency contract (Assumption A1 — Tier 2 use):
+//   publishItem(id, { trustedTesters: false }) is safe to call multiple
+//   times against an already-uploaded draft. Google returns HTTP 200 and
+//   does NOT re-trigger a new upload or increment the review queue entry.
+//   Callers may therefore retry publish without a preceding upload step
+//   when the workflow detects an in-flight draft (STUCK_DRAFT status).
+//   This contract is Tier 2 (empirically observed, not formally documented
+//   in the CWS REST API reference); treat unexpected 4xx as a signal that
+//   the assumption no longer holds and escalate to a human.
 
 import { CwsAuthError, CwsStateError } from "./errors.mjs";
 import { mintAccessToken } from "./auth.mjs";
 import { CWS_API_BASE_URL } from "./state.mjs";
+import { readErrorDetail } from "./error-detail.mjs";
+
+// Runbook for operators when this helper throws CwsStateError on a 4xx/5xx:
+// docs/runbooks/cws-service-account.md (sections "Emergency re-publish"
+// and "Reviewer rejections"). The thrown message includes the redacted
+// CWS response body so the runbook step can be picked directly.
+const RUNBOOK = "see docs/runbooks/cws-service-account.md";
 
 export async function publishItem(
   serviceAccount,
@@ -34,7 +51,10 @@ export async function publishItem(
     throw new CwsStateError("publishItem returned 429 (rate limited)");
   }
   if (!res.ok) {
-    throw new CwsStateError(`publishItem returned ${res.status}`);
+    const detail = await readErrorDetail(res);
+    throw new CwsStateError(
+      `publishItem returned ${res.status}: ${detail} — ${RUNBOOK}`
+    );
   }
   const body = await parseJsonOrThrow(res);
   return {

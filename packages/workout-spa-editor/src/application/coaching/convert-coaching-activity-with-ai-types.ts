@@ -1,9 +1,3 @@
-/**
- * Public-by-re-export type surface for `convertCoachingActivityWithAi`.
- * Lives in its own module so the orchestrator and helpers files can
- * each import only what they need without busting the per-file line
- * cap.
- */
 import type { Analytics } from "@kaiord/core";
 
 import type {

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { CoachingActivityDialog } from "./CoachingActivityDialog";
@@ -33,7 +34,7 @@ const baseActivity: CoachingActivity = {
 
 const wrap = (children: ReactNode) => (
   <PersistenceProvider persistence={createInMemoryPersistence()}>
-    {children}
+    <ToastContextProvider>{children}</ToastContextProvider>
   </PersistenceProvider>
 );
 

@@ -132,6 +132,11 @@ import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 
 - **TypeScript strict mode** - No implicit `any`
 - **Max 100 lines per file** (tests exempt)
+  - Do NOT write JSDoc preambles that justify file extractions, reference
+    PRs/issues, or narrate prior code states. The 100-line cap is enforced by
+    ESLint; the split itself does not need explanation. Choose a descriptive
+    file name instead. Comments are reserved for non-obvious algorithm or
+    invariant explanation.
 - **Max 40 lines per function** (60 for React components)
 - **Use `type` not `interface`**
 - **Separate type imports**: `import type { X } from "..."`

@@ -1,10 +1,3 @@
-/**
- * Bridge Transport
- *
- * Sends messages to Chrome extensions via chrome.runtime.sendMessage.
- * Extracted from garmin-extension-transport for reuse.
- */
-
 type ExtensionResponse = {
   ok: boolean;
   protocolVersion?: number;
