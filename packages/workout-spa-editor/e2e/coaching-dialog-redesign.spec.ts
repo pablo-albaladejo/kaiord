@@ -41,8 +41,8 @@ import {
   getGarminBridgeCallActions,
   installGarminBridgeStub,
 } from "./helpers/garmin-bridge-stub";
+import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
-import { seedAiProvider } from "./helpers/seed-stores";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "coaching-redesign-profile";
@@ -467,12 +467,18 @@ test.describe("Coaching activity dialog redesign", () => {
       { timeout: 10_000 }
     );
     await clearDexie(page);
+    // The @kaiord/ai package retries any thrown error up to
+    // `maxRetries` (default 2) inside executeWithRetry, so a single user
+    // click on "Process with AI" consumes up to 3 HTTP attempts. The first
+    // user click MUST fail every attempt for the inline-error UI to
+    // surface; only the second user click (Retry AI) should succeed.
+    const FIRST_CLICK_ATTEMPTS = 3;
     let calls = 0;
     const handler = async (route: Route) => {
       calls += 1;
-      if (calls === 1) {
+      if (calls <= FIRST_CLICK_ATTEMPTS) {
         await route.fulfill({
-          status: 500,
+          status: 401,
           contentType: "application/json",
           body: JSON.stringify({ error: "Mocked LLM failure" }),
         });
@@ -549,7 +555,8 @@ test.describe("Coaching activity dialog redesign", () => {
   test("should show static error toast when LLM call fails and prevent state mutation (flow c)", async ({
     page,
   }) => {
-    // Arrange — every LLM call returns 500
+    // Arrange — every LLM call returns 401 (non-retryable, so the AI SDK
+    // surfaces the error instead of backing off through `maxRetries`).
     await page.goto("/calendar");
     await page.waitForFunction(
       () =>
@@ -557,7 +564,7 @@ test.describe("Coaching activity dialog redesign", () => {
       { timeout: 10_000 }
     );
     await clearDexie(page);
-    await mockLlmFailure(page);
+    await mockLlmFailure(page, { status: 401 });
     await seedAiProvider(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();
@@ -672,9 +679,12 @@ test.describe("Coaching activity dialog redesign", () => {
       }
     );
 
-    // Act — open dialog, click Process with AI from matched-raw state
+    // Act — open dialog, click Process with AI from matched-raw state.
+    // The pre-seeded sessionMatch makes the calendar render the workout as
+    // a MatchedSessionCard (`matched-card-*` testid), not as the unmatched
+    // coaching-activity card (`coaching-card-*`).
     await page.goto(`/calendar/${getWeekId(day)}`);
-    const card = page.getByTestId(`coaching-card-${SOURCE}:ai-in-place`);
+    const card = page.getByTestId(`matched-card-${SOURCE}:ai-in-place`);
     await card.waitFor({ timeout: 10_000 });
     await card.click();
     await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
