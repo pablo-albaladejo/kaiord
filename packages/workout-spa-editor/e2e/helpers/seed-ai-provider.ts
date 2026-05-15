@@ -8,11 +8,13 @@ type ProviderSeed = {
 };
 
 type E2eSeed = {
-  aiProvider: (input: ProviderSeed & {
-    id: string;
-    isDefault: boolean;
-    createdAt: number;
-  }) => Promise<void>;
+  aiProvider: (
+    input: ProviderSeed & {
+      id: string;
+      isDefault: boolean;
+      createdAt: number;
+    }
+  ) => Promise<void>;
 };
 
 const DEFAULT_PROVIDER: ProviderSeed = {
