@@ -317,13 +317,10 @@ jobs:
     timeout-minutes: 30
     needs: [pre-flight, decide, aggregate]
     # Job-level gate: dry_run physically blocks the act job for workflow_dispatch
-    # runs. Push events bypass the dry-run gate entirely. The decision map gates
-    # per-extension execution: skip_all=true short-circuits unless tier_kick is
-    # set, in which case the tier-handler step runs (and never the upload path).
-    if: |
-      (github.event_name == 'push' || inputs.dry_run != true)
-      && (fromJSON(needs.aggregate.outputs.decisions_json)[matrix.extension.name].skip_all != 'true'
-          || fromJSON(needs.aggregate.outputs.decisions_json)[matrix.extension.name].tier_kick == 'true')
+    # runs. Push events bypass the dry-run gate entirely. The matrix-row gate
+    # (skip_all/tier_kick) is evaluated at step level below — GitHub Actions
+    # does not expand `matrix` context inside job-level `if:` expressions.
+    if: github.event_name == 'push' || inputs.dry_run != true
     concurrency:
       group: cws-issue-writer
       cancel-in-progress: false
