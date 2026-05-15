@@ -63,6 +63,19 @@ jobs:
           node scripts/cws-notify-issue.mjs cws-auth-broken "" \
             "Pre-flight failed at $(date -u +%FT%TZ). See workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
+      - name: Ensure issue labels exist
+        # Idempotent: `gh label create --force` updates the description
+        # if the label already exists. Without these, downstream
+        # `gh issue create --label` calls fail with non-zero exit and
+        # block the decide/act jobs even when the rest of the flow is
+        # healthy.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create cws-stuck --color FF9F1C --description "CWS draft uploaded but not live" --force
+          gh label create cws-untrusted-state --color D7263D --description "git tag and PUBLISHED projection disagree; force-dispatch required" --force
+          gh label create needs-human --color 6A0572 --description "Auto-retry exhausted; human action required" --force
+
       - name: Write summary header
         if: always()
         run: |
@@ -99,6 +112,11 @@ jobs:
           # checkout-action versions ship history without tag refs.
           fetch-depth: 0
           fetch-tags: true
+
+      - name: Ensure tags are fetched
+        # actions/checkout's fetch-tags is best-effort; ensure tag refs
+        # are actually present so the live-version resolver can see them.
+        run: git fetch --tags --force origin
 
       - name: Resolve current version
         id: version
@@ -195,7 +213,7 @@ jobs:
           if [ -z "$EXISTING" ]; then
             gh issue create \
               --title "$TITLE" \
-              --label "cws-untrusted-state-$EXT" \
+              --label "cws-untrusted-state" \
               --body "git tag and PUBLISHED projection disagree for $EXT. Force-dispatch with force_upload=true required to resolve after human reconciliation. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           else
             echo "cws-untrusted-state issue already open for $EXT (#$EXISTING); skipping create"
