@@ -16,6 +16,11 @@ on:
         type: boolean
         required: false
         default: false
+      dry_run:
+        description: "Run decide/summary only; do not upload or publish (workflow_dispatch only)"
+        type: boolean
+        required: false
+        default: false
 
 # Top-level concurrency: prevents two workflow runs (push vs dispatch)
 # from racing on the same ref. Job-level cws-issue-writer concurrency
@@ -58,13 +63,22 @@ jobs:
           node scripts/cws-notify-issue.mjs cws-auth-broken "" \
             "Pre-flight failed at $(date -u +%FT%TZ). See workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-  publish:
-    name: Publish ${{ matrix.extension.name }}
+      - name: Write summary header
+        if: always()
+        run: |
+          {
+            echo "## CWS Publish Status"
+            echo ""
+            echo "| Extension | Local | Draft | Git tag | API PUBLISHED | Status | Warnings |"
+            echo "|---|---|---|---|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  decide:
+    name: Decide ${{ matrix.extension.name }}
     runs-on: ubuntu-latest
-    # n=14 across both matrix entries (<20 successful runs) → fall back to
-    # test-family ceiling 30. wait-uploaded (60s) + wait-published (120s) +
-    # CWS API jitter all comfortably fit under this.
-    timeout-minutes: 30
+    # Read-only path: tag lookup + two CWS getItem calls + a few jq invocations.
+    # Comfortably under lint-family ceiling 10.
+    timeout-minutes: 10
     needs: pre-flight
     concurrency:
       group: cws-issue-writer
@@ -90,18 +104,12 @@ jobs:
           CURRENT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('packages/$EXT/package.json','utf8')).version)")
           echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
 
-      - name: Setup pnpm
-        uses: ./.github/actions/setup-pnpm
-
-      - name: Sync manifest versions
-        run: node scripts/sync-extension-version.mjs ${{ matrix.extension.name }}
-
-      - name: Package extension
-        run: bash scripts/package-extension.sh ${{ matrix.extension.name }}
-
-      - name: Query CWS state (skipped on force_upload)
+      # The decide job replaces the legacy "DRAFT response carries crxVersion of
+      # the live item" heuristic. The live-version subcommand combines git tag
+      # (canonical, per Principle #1) with projection=PUBLISHED verification;
+      # the DRAFT projection's crxVersion is no longer treated as authoritative.
+      - name: Query CWS DRAFT state
         id: state
-        if: ${{ inputs.force_upload != true }}
         env:
           CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
         run: |
@@ -109,31 +117,301 @@ jobs:
           echo "draft_version=$(echo "$STATE" | jq -r '.crxVersion // ""')" >> "$GITHUB_OUTPUT"
           echo "draft_upload_state=$(echo "$STATE" | jq -r '.uploadState // ""')" >> "$GITHUB_OUTPUT"
 
-      - name: Decide upload/publish skip
+      - name: Resolve live version (combined source-of-truth)
+        id: live
+        env:
+          CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
+        run: |
+          LIVE_JSON=$(node scripts/cws-api.mjs live-version \
+            ${{ secrets[matrix.extension.extension_id_secret] }} \
+            --package ${{ matrix.extension.name }})
+          # Persist the entire JSON payload as a single output for downstream
+          # decision branching; individual fields are also surfaced for
+          # readability in step logs.
+          {
+            echo "json<<LIVE_EOF"
+            echo "$LIVE_JSON"
+            echo "LIVE_EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "status=$(echo "$LIVE_JSON" | jq -r '.status')" >> "$GITHUB_OUTPUT"
+          echo "version=$(echo "$LIVE_JSON" | jq -r '.version // ""')" >> "$GITHUB_OUTPUT"
+          echo "source=$(echo "$LIVE_JSON" | jq -r '.source // ""')" >> "$GITHUB_OUTPUT"
+          echo "warnings_json=$(echo "$LIVE_JSON" | jq -c '.warnings // []')" >> "$GITHUB_OUTPUT"
+
+      - name: Compute decision branches
         id: decide
         run: |
           FORCE='${{ inputs.force_upload }}'
-          # crxVersion in the DRAFT projection actually exposes the
-          # currently-PUBLISHED version (CWS API quirk: projection=PUBLISHED
-          # is rejected with 400; DRAFT response carries crxVersion of the
-          # live item). If it equals our local version, there is nothing
-          # to upload or publish.
-          PUBLISHED_VER='${{ steps.state.outputs.draft_version }}'
+          STATUS='${{ steps.live.outputs.status }}'
           CURRENT='${{ steps.version.outputs.current }}'
+          DRAFT_VER='${{ steps.state.outputs.draft_version }}'
           if [ "$FORCE" = "true" ]; then
-            echo "skip_all=false" >> "$GITHUB_OUTPUT"
-            echo "Force-upload requested; ignoring CWS state."
-          elif [ "$PUBLISHED_VER" = "$CURRENT" ]; then
-            echo "skip_all=true" >> "$GITHUB_OUTPUT"
-            echo "CWS already at $CURRENT — no-op success."
+            SKIP_ALL=false
+            TIER_KICK=false
+            REASON="force-upload"
+          elif [ "$STATUS" = "SYNCED" ] && [ "$DRAFT_VER" = "$CURRENT" ]; then
+            SKIP_ALL=true
+            TIER_KICK=false
+            REASON="in-sync"
+          elif [ "$STATUS" = "DRAFT_AHEAD" ]; then
+            SKIP_ALL=false
+            TIER_KICK=false
+            REASON="publish-required"
+          elif [ "$STATUS" = "STUCK_DRAFT" ]; then
+            SKIP_ALL=true
+            TIER_KICK=true
+            REASON="stuck-draft (tier-handler)"
+          elif [ "$STATUS" = "UNTRUSTED_STATE" ]; then
+            SKIP_ALL=true
+            TIER_KICK=false
+            REASON="untrusted (force-dispatch required)"
           else
-            echo "skip_all=false" >> "$GITHUB_OUTPUT"
-            echo "CWS at ${PUBLISHED_VER:-<unknown>}; uploading $CURRENT."
+            # SYNCED but draft != current is a publish-required path too:
+            # the API and tag agree on the live version but the local repo is
+            # ahead and the draft has not been bumped yet.
+            SKIP_ALL=false
+            TIER_KICK=false
+            REASON="publish-required"
           fi
+          echo "skip_all=$SKIP_ALL" >> "$GITHUB_OUTPUT"
+          echo "tier_kick=$TIER_KICK" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+
+      - name: Open cws-untrusted-state issue (idempotent)
+        if: steps.live.outputs.status == 'UNTRUSTED_STATE'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXT="${{ matrix.extension.name }}"
+          TITLE="CWS untrusted state: $EXT"
+          EXISTING=$(gh issue list --state open --search "$TITLE in:title" \
+            --json number,title --limit 20 \
+            | jq -r --arg t "$TITLE" '.[] | select(.title == $t) | .number' \
+            | head -n 1 || true)
+          if [ -z "$EXISTING" ]; then
+            gh issue create \
+              --title "$TITLE" \
+              --label "cws-untrusted-state-$EXT" \
+              --body "git tag and PUBLISHED projection disagree for $EXT. Force-dispatch with force_upload=true required to resolve after human reconciliation. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            echo "cws-untrusted-state issue already open for $EXT (#$EXISTING); skipping create"
+          fi
+
+      - name: Build summary row
+        id: row
+        if: always()
+        run: |
+          EXT="${{ matrix.extension.name }}"
+          LOCAL='${{ steps.version.outputs.current }}'
+          DRAFT='${{ steps.state.outputs.draft_version }}'
+          LIVE_SOURCE='${{ steps.live.outputs.source }}'
+          LIVE_VER='${{ steps.live.outputs.version }}'
+          STATUS='${{ steps.live.outputs.status }}'
+          WARNINGS_JSON='${{ steps.live.outputs.warnings_json }}'
+          # Compute git-tag and API-PUBLISHED columns from source/version. If
+          # source=git_tag the live version came from a tag; the API column may
+          # be empty (only when the API projection failed and a warning was
+          # emitted) — render "-" for unknowns to keep the table well-formed.
+          if [ "$LIVE_SOURCE" = "git_tag" ]; then
+            GIT_TAG_COL="$LIVE_VER"
+            # If state_mismatch warning fires, PUBLISHED disagrees and lives in
+            # the warning; otherwise PUBLISHED matches the tag (or is unknown).
+            HAS_MISMATCH=$(echo "${WARNINGS_JSON:-[]}" | jq -r '[.[] | select(.code == "state_mismatch")] | length')
+            HAS_400=$(echo "${WARNINGS_JSON:-[]}" | jq -r '[.[] | select(.code == "published_projection_400")] | length')
+            if [ "${HAS_MISMATCH:-0}" != "0" ]; then
+              # The mismatch warning's message embeds the PUBLISHED value;
+              # extract it for the table cell.
+              API_PUB_COL=$(echo "$WARNINGS_JSON" | jq -r '[.[] | select(.code == "state_mismatch") | .message] | first' | sed -E 's/.*PUBLISHED ([^ ]+).*/\1/')
+            elif [ "${HAS_400:-0}" != "0" ]; then
+              API_PUB_COL="-"
+            else
+              API_PUB_COL="$LIVE_VER"
+            fi
+          elif [ "$LIVE_SOURCE" = "api_PUBLISHED" ]; then
+            GIT_TAG_COL="-"
+            API_PUB_COL="$LIVE_VER"
+          else
+            GIT_TAG_COL="-"
+            API_PUB_COL="-"
+          fi
+          case "$STATUS" in
+            SYNCED) STATUS_COL=":white_check_mark: SYNCED" ;;
+            DRAFT_AHEAD) STATUS_COL=":outbox_tray: DRAFT_AHEAD" ;;
+            STUCK_DRAFT) STATUS_COL=":warning: STUCK_DRAFT" ;;
+            UNTRUSTED_STATE) STATUS_COL=":x: UNTRUSTED_STATE (force-dispatch required)" ;;
+            *) STATUS_COL="$STATUS" ;;
+          esac
+          WARN_COL=$(echo "${WARNINGS_JSON:-[]}" | jq -r '[.[] | "\(.severity): \(.code): \(.message)"] | join("<br>")')
+          ROW="| $EXT | ${LOCAL:--} | ${DRAFT:--} | ${GIT_TAG_COL:--} | ${API_PUB_COL:--} | $STATUS_COL | $WARN_COL |"
+          echo "$ROW" >> "$GITHUB_STEP_SUMMARY"
+          # Also persist the row for the summary job to re-render escalation
+          # rows alongside the canonical one if needed.
+          mkdir -p "$RUNNER_TEMP/decision"
+          echo "$ROW" > "$RUNNER_TEMP/decision/row.md"
+
+      - name: Persist decision artifact
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/decision"
+          cat > "$RUNNER_TEMP/decision/decision.json" <<EOF
+          {
+            "extension": "${{ matrix.extension.name }}",
+            "skip_all": "${{ steps.decide.outputs.skip_all }}",
+            "tier_kick": "${{ steps.decide.outputs.tier_kick }}",
+            "status": "${{ steps.live.outputs.status }}",
+            "reason": "${{ steps.decide.outputs.reason }}",
+            "local_version": "${{ steps.version.outputs.current }}",
+            "live_version": "${{ steps.live.outputs.version }}",
+            "live_source": "${{ steps.live.outputs.source }}"
+          }
+          EOF
+
+      - name: Upload decision artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cws-decision-${{ matrix.extension.name }}
+          path: ${{ runner.temp }}/decision/
+          retention-days: 7
+
+  aggregate:
+    name: Aggregate decisions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: decide
+    if: always()
+    outputs:
+      decisions_json: ${{ steps.collect.outputs.decisions_json }}
+    steps:
+      - name: Download all decisions
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cws-decision-*
+          path: decisions
+          merge-multiple: false
+
+      - name: Collect into single JSON map
+        id: collect
+        run: |
+          MAP="{}"
+          for dir in decisions/cws-decision-*; do
+            [ -d "$dir" ] || continue
+            EXT=$(basename "$dir" | sed 's/^cws-decision-//')
+            FILE="$dir/decision.json"
+            if [ -f "$FILE" ]; then
+              MAP=$(echo "$MAP" | jq --arg ext "$EXT" --slurpfile dec "$FILE" '.[$ext] = $dec[0]')
+            fi
+          done
+          # Emit compact single-line JSON suitable for fromJSON() consumers.
+          COMPACT=$(echo "$MAP" | jq -c '.')
+          echo "decisions_json=$COMPACT" >> "$GITHUB_OUTPUT"
+          echo "Aggregated decisions:"
+          echo "$COMPACT"
+
+  act:
+    name: Act ${{ matrix.extension.name }}
+    runs-on: ubuntu-latest
+    # n=14 across both matrix entries (<20 successful runs) → fall back to
+    # test-family ceiling 30. wait-uploaded (60s) + wait-published (120s) +
+    # CWS API jitter all comfortably fit under this.
+    timeout-minutes: 30
+    needs: [pre-flight, decide, aggregate]
+    # Job-level gate: dry_run physically blocks the act job for workflow_dispatch
+    # runs. Push events bypass the dry-run gate entirely. The decision map gates
+    # per-extension execution: skip_all=true short-circuits unless tier_kick is
+    # set, in which case the tier-handler step runs (and never the upload path).
+    if: |
+      (github.event_name == 'push' || inputs.dry_run != true)
+      && (fromJSON(needs.aggregate.outputs.decisions_json)[matrix.extension.name].skip_all != 'true'
+          || fromJSON(needs.aggregate.outputs.decisions_json)[matrix.extension.name].tier_kick == 'true')
+    concurrency:
+      group: cws-issue-writer
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        extension:
+          - name: garmin-bridge
+            extension_id_secret: CWS_EXTENSION_ID
+          - name: train2go-bridge
+            extension_id_secret: CWS_TRAIN2GO_EXTENSION_ID
+    outputs:
+      escalation_failed: ${{ steps.tier_escalation_signal.outputs.escalation_failed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve current version
+        id: version
+        run: |
+          EXT="${{ matrix.extension.name }}"
+          CURRENT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('packages/$EXT/package.json','utf8')).version)")
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Read decision for this extension
+        id: dec
+        run: |
+          DECISIONS='${{ needs.aggregate.outputs.decisions_json }}'
+          EXT='${{ matrix.extension.name }}'
+          TIER_KICK=$(echo "$DECISIONS" | jq -r --arg ext "$EXT" '.[$ext].tier_kick // "false"')
+          SKIP_ALL=$(echo "$DECISIONS" | jq -r --arg ext "$EXT" '.[$ext].skip_all // "false"')
+          STATUS=$(echo "$DECISIONS" | jq -r --arg ext "$EXT" '.[$ext].status // ""')
+          echo "tier_kick=$TIER_KICK" >> "$GITHUB_OUTPUT"
+          echo "skip_all=$SKIP_ALL" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Tier handler (auto-unstick)
+        id: tier
+        if: steps.dec.outputs.tier_kick == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
+        run: |
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          node scripts/cws-stuck-draft-handler.mjs \
+            "${{ matrix.extension.name }}" \
+            "${{ secrets[matrix.extension.extension_id_secret] }}" \
+            "${{ steps.version.outputs.current }}" \
+            "$RUN_URL"
+
+      - name: Tier 3 escalation labels (best-effort)
+        id: tier3_labels
+        if: steps.dec.outputs.tier_kick == 'true' && steps.tier.outputs.tier == '3'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="cws-publish-stuck-${{ matrix.extension.name }}-${{ steps.version.outputs.current }}"
+          NUMBER=$(gh issue list --state open --search "$TITLE in:title" \
+            --json number,title --limit 20 \
+            | jq -r --arg t "$TITLE" '.[] | select(.title == $t) | .number' \
+            | head -n 1)
+          if [ -n "$NUMBER" ]; then
+            gh issue edit "$NUMBER" --add-label "needs-human"
+          fi
+
+      - name: Surface escalation label failure
+        id: tier_escalation_signal
+        if: always() && steps.tier3_labels.conclusion == 'failure'
+        run: echo "escalation_failed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Setup pnpm
+        if: steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true'
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Sync manifest versions
+        if: steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true'
+        run: node scripts/sync-extension-version.mjs ${{ matrix.extension.name }}
+
+      - name: Package extension
+        if: steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true'
+        run: bash scripts/package-extension.sh ${{ matrix.extension.name }}
 
       - name: Upload CRX to Chrome Web Store
         id: upload
-        if: ${{ steps.decide.outputs.skip_all != 'true' }}
+        if: steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true'
         env:
           CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
         run: |
@@ -145,7 +423,7 @@ jobs:
 
       - name: Wait for UPLOADED state
         id: wait_uploaded
-        if: ${{ steps.decide.outputs.skip_all != 'true' }}
+        if: steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true'
         env:
           CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
         run: |
@@ -155,7 +433,7 @@ jobs:
 
       - name: Publish
         id: publish
-        if: ${{ steps.decide.outputs.skip_all != 'true' }}
+        if: steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true'
         env:
           CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
         run: |
@@ -164,7 +442,7 @@ jobs:
 
       - name: Wait for terminal state (PUBLISHED / IN_REVIEW / REJECTED / TIMEOUT)
         id: wait_published
-        if: ${{ steps.decide.outputs.skip_all != 'true' }}
+        if: steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true'
         env:
           CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
         run: |
@@ -214,27 +492,50 @@ jobs:
           fi
 
       - name: Create git tag (only on PUBLISHED)
-        if: ${{ steps.decide.outputs.skip_all != 'true' && steps.wait_published.outputs.status == 'PUBLISHED' }}
+        if: ${{ steps.dec.outputs.tier_kick != 'true' && steps.dec.outputs.skip_all != 'true' && steps.wait_published.outputs.status == 'PUBLISHED' }}
         run: |
           EXT="${{ matrix.extension.name }}"
           TAG="@kaiord/$EXT@${{ steps.version.outputs.current }}"
           git tag "$TAG"
           git push origin "$TAG"
 
-      - name: Summary
-        if: always()
+  summary:
+    name: Summary (escalation rows)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [pre-flight, decide, aggregate, act]
+    # Always render so an act-job failure cannot suppress the summary surface.
+    if: always()
+    steps:
+      - name: Append escalation rows for failed act jobs
         run: |
-          EXT="${{ matrix.extension.name }}"
-          STATUS="${{ steps.wait_published.outputs.status }}"
-          SKIP_ALL="${{ steps.decide.outputs.skip_all }}"
-          PUBLISHED_VER="${{ steps.state.outputs.draft_version }}"
-          echo "## CWS Publish: $EXT" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Local version**: ${{ steps.version.outputs.current }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **CWS published**: ${PUBLISHED_VER:-<unknown>}" >> "$GITHUB_STEP_SUMMARY"
-          if [ "$SKIP_ALL" = "true" ]; then
-            echo "- **Status**: SKIPPED (already at target version, no-op)" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- **Status**: ${STATUS:-unknown}" >> "$GITHUB_STEP_SUMMARY"
+          DECISIONS='${{ needs.aggregate.outputs.decisions_json }}'
+          ACT_RESULT='${{ needs.act.result }}'
+          ESCALATION_FAILED='${{ needs.act.outputs.escalation_failed }}'
+          # The decide job already appended one row per extension. Append a
+          # follow-up "escalation pending" row when the act job's tier-handler
+          # leg reported escalation_failed=true (Phase 5 wires this; the
+          # placeholder always reports false).
+          if [ "$ESCALATION_FAILED" = "true" ]; then
+            {
+              echo ""
+              echo "> :rotating_light: One or more act jobs reported escalation_failed=true (tier-handler could not complete a label/notify mutation). Inspect the act job logs."
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
-          echo "- **Force upload**: ${{ inputs.force_upload }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$ACT_RESULT" = "failure" ]; then
+            {
+              echo ""
+              echo "> :warning: Act job(s) ended in failure. See run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "$ACT_RESULT" = "skipped" ]; then
+            {
+              echo ""
+              echo "> :information_source: Act job(s) skipped (dry-run or all extensions decided skip_all=true)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          # Footer row pinning the workflow run for cross-reference.
+          {
+            echo ""
+            echo "_force_upload=${{ inputs.force_upload }} • dry_run=${{ inputs.dry_run }} • run=${{ github.run_id }}_"
+          } >> "$GITHUB_STEP_SUMMARY"
