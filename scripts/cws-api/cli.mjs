@@ -73,6 +73,7 @@ function parseFlags(args) {
     else if (arg === "--timeout-ms") flags.timeoutMs = Number(args[++i]);
     else if (arg === "--trusted-testers") flags.trustedTesters = true;
     else if (arg === "--package") flags.package = args[++i];
+    else if (arg === "--local") flags.local = args[++i];
   }
   return flags;
 }

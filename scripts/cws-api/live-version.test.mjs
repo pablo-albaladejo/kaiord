@@ -140,7 +140,10 @@ test("git_tag_missing: no matching tag, falls back to api_PUBLISHED", async () =
   assert.equal(result.status, "SYNCED");
 });
 
-test("source = unknown when both tag and PUBLISHED are absent", async () => {
+test("UNTRUSTED_STATE: both tag and PUBLISHED absent (never silently SYNCED)", async () => {
+  // Driver #1 applied: "no info about live" must not collapse to SYNCED.
+  // Surface as UNTRUSTED_STATE so the workflow opens a tracked issue and
+  // requires human force-dispatch.
   const result = await resolveLiveVersion({
     extensionId: EXT_ID,
     packageName: PKG,
@@ -152,9 +155,27 @@ test("source = unknown when both tag and PUBLISHED are absent", async () => {
   });
   assert.equal(result.source, "unknown");
   assert.equal(result.version, null);
-  assert.equal(result.status, "SYNCED");
+  assert.equal(result.status, "UNTRUSTED_STATE");
   assert.ok(result.warnings.some((w) => w.code === "git_tag_missing"));
   assert.ok(result.warnings.some((w) => w.code === "published_projection_400"));
+});
+
+test("UNTRUSTED_STATE: empty-string crxVersion is treated as absent", async () => {
+  // CWS returns crxVersion='' for items with no public publish yet (e.g.
+  // trusted-tester-only). The resolver must not interpret '' as a valid
+  // live version — otherwise it would route to SYNCED with version='',
+  // reproducing the very class of silent no-op this PR was opened to fix.
+  const result = await resolveLiveVersion({
+    extensionId: EXT_ID,
+    packageName: PKG,
+    localVersion: "7.2.1",
+    getItem: makeGetItem(() => ({ crxVersion: "" })),
+    gitTags: [],
+  });
+  assert.equal(result.source, "unknown");
+  assert.equal(result.version, null);
+  assert.equal(result.status, "UNTRUSTED_STATE");
+  assert.ok(result.warnings.some((w) => w.code === "git_tag_missing"));
 });
 
 test("getItem is called with projection='PUBLISHED'", async () => {

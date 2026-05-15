@@ -95,7 +95,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
+          # Full history needed; fetch-tags is explicit because some
+          # checkout-action versions ship history without tag refs.
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Resolve current version
         id: version
@@ -124,7 +127,8 @@ jobs:
         run: |
           LIVE_JSON=$(node scripts/cws-api.mjs live-version \
             ${{ secrets[matrix.extension.extension_id_secret] }} \
-            --package ${{ matrix.extension.name }})
+            --package ${{ matrix.extension.name }} \
+            --local ${{ steps.version.outputs.current }})
           # Persist the entire JSON payload as a single output for downstream
           # decision branching; individual fields are also surfaced for
           # readability in step logs.
@@ -338,7 +342,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
+          # Full history needed; fetch-tags is explicit because some
+          # checkout-action versions ship history without tag refs.
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Resolve current version
         id: version

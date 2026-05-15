@@ -18,6 +18,7 @@ export async function runLiveVersion(id, flags, serviceAccount) {
   return resolveLiveVersion({
     extensionId: id,
     packageName: flags.package,
+    localVersion: flags.local ?? null,
     getItem: bound,
     gitTags: readGitTags(flags.package),
   });

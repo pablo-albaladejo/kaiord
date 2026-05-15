@@ -45,7 +45,11 @@ export class UsageError extends Error {
 async function fetchPublishedVersion(getItem, extensionId, warnings) {
   try {
     const item = await getItem(undefined, extensionId, "PUBLISHED");
-    return item?.crxVersion ?? null;
+    const v = item?.crxVersion ?? null;
+    // CWS returns an empty crxVersion for items that have no public publish
+    // yet (e.g. only trusted-tester releases). Treat as "no info" so the
+    // resolver routes to UNTRUSTED_STATE instead of silently SYNCED.
+    return v === "" ? null : v;
   } catch (err) {
     if (!(err instanceof CwsStateError)) throw err;
     warnings.push(publishedProjection400Warning(err));

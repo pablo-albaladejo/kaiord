@@ -39,6 +39,18 @@ export function decideStatus(ctx) {
         ? "api_PUBLISHED"
         : "unknown";
   const version = gitTagVersion ?? publishedVersion ?? null;
+  // Both live-version inputs absent: we know nothing about what's actually
+  // live. Never silently fall through to SYNCED — that re-introduces the
+  // class of bug under repair. Surface as UNTRUSTED_STATE so the workflow
+  // opens an issue and waits for human force-dispatch.
+  if (gitTagVersion === null && publishedVersion === null) {
+    return {
+      source,
+      version,
+      status: "UNTRUSTED_STATE",
+      warnings: ctx.warnings,
+    };
+  }
   if (
     gitTagVersion !== null &&
     publishedVersion !== null &&
