@@ -30,8 +30,8 @@ import { expect, test } from "@playwright/test";
 
 import { mockLlmFailure, mockLlmSuccess } from "./fixtures/api-mocks";
 import { LLM_CYCLING_RESPONSE } from "./fixtures/llm-responses";
+import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
-import { seedAiProvider } from "./helpers/seed-stores";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "coaching-redesign-profile";
