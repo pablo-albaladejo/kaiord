@@ -590,9 +590,12 @@ test.describe("Coaching activity dialog redesign", () => {
       }
     );
 
-    // Act — open dialog, click Process with AI from matched-raw state
+    // Act — open dialog, click Process with AI from matched-raw state.
+    // The pre-seeded sessionMatch makes the calendar render the workout as
+    // a MatchedSessionCard (`matched-card-*` testid), not as the unmatched
+    // coaching-activity card (`coaching-card-*`).
     await page.goto(`/calendar/${getWeekId(day)}`);
-    const card = page.getByTestId(`coaching-card-${SOURCE}:ai-in-place`);
+    const card = page.getByTestId(`matched-card-${SOURCE}:ai-in-place`);
     await card.waitFor({ timeout: 10_000 });
     await card.click();
     await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
