@@ -33,6 +33,10 @@ vi.mock("../../../hooks/use-ai-providers-live", () => ({
   useAiProvidersLive: () => [],
 }));
 
+vi.mock("../GarminPushButton/useGarminPush", () => ({
+  useGarminPush: () => ({ push: vi.fn() }),
+}));
+
 const baseActivity: CoachingActivity = {
   id: "train2go:abc",
   source: "train2go",

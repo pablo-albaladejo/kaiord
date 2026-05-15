@@ -2,7 +2,7 @@
  * Tests for `MatchedActions`: workout-state-conditional buttons (per
  * design D7). Each workout state shapes a different button bar.
  */
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { WorkoutState } from "../../../types/calendar-enums";
@@ -55,26 +55,52 @@ describe("MatchedActions", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should render Push to Garmin disabled for structured workouts", () => {
+  it("should render Push to Garmin enabled for structured workouts", () => {
     // Arrange
+    const onPushToGarmin = vi.fn();
 
     // Act
-    renderWithState("structured");
+    render(
+      <MatchedActions
+        workout={buildWorkout("structured")}
+        splitting={false}
+        onClose={vi.fn()}
+        onOpenEditor={vi.fn()}
+        onAiProcess={vi.fn()}
+        onPushToGarmin={onPushToGarmin}
+        onSplit={vi.fn()}
+      />
+    );
 
     // Assert
-    expect(screen.getByTestId("coaching-dialog-push")).toBeDisabled();
+    const pushBtn = screen.getByTestId("coaching-dialog-push");
+    expect(pushBtn).not.toBeDisabled();
+    fireEvent.click(pushBtn);
+    expect(onPushToGarmin).toHaveBeenCalledTimes(1);
   });
 
-  it("should render Push to Garmin disabled for ready workouts (deferred handler)", () => {
+  it("should render Push to Garmin enabled for ready workouts and invoke handler on click", () => {
     // Arrange
-    // Push from the dialog stays disabled until the dialog grows a real
-    // push handler — see MatchedActions header comment.
+    const onPushToGarmin = vi.fn();
 
     // Act
-    renderWithState("ready");
+    render(
+      <MatchedActions
+        workout={buildWorkout("ready")}
+        splitting={false}
+        onClose={vi.fn()}
+        onOpenEditor={vi.fn()}
+        onAiProcess={vi.fn()}
+        onPushToGarmin={onPushToGarmin}
+        onSplit={vi.fn()}
+      />
+    );
 
     // Assert
-    expect(screen.getByTestId("coaching-dialog-push")).toBeDisabled();
+    const pushBtn = screen.getByTestId("coaching-dialog-push");
+    expect(pushBtn).not.toBeDisabled();
+    fireEvent.click(pushBtn);
+    expect(onPushToGarmin).toHaveBeenCalledTimes(1);
   });
 
   it("should hide Push to Garmin for pushed workouts", () => {

@@ -1,6 +1,10 @@
+import { useLiveQuery } from "dexie-react-hooks";
 import { Upload } from "lucide-react";
+import { useParams } from "wouter";
 
+import { db } from "../../../adapters/dexie/dexie-database";
 import { useGarminBridge } from "../../../contexts";
+import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
 import { PushFeedback } from "./PushFeedback";
 import { useGarminPush } from "./useGarminPush";
@@ -8,7 +12,12 @@ import { useGarminPush } from "./useGarminPush";
 export const GarminPushButton: React.FC = () => {
   const { extensionInstalled, sessionActive, pushing, setPushing } =
     useGarminBridge();
-  const { push } = useGarminPush();
+  const { id } = useParams<{ id?: string }>();
+  const workout = useLiveQuery(
+    () => (id ? db.table<WorkoutRecord>("workouts").get(id) : undefined),
+    [id]
+  );
+  const { push } = useGarminPush(workout);
   const isLoading = pushing.status === "loading";
 
   if (!extensionInstalled) {

@@ -19,9 +19,16 @@
  *       is silently linked when the dialog opens (D8 belt-and-braces).
  *   (f) Process with AI from matched raw → transitions raw to structured
  *       in place and preserves the existing session_match row (§7.4).
+ *   (g) Push to Garmin from matched ready → pushes the workout via the
+ *       Garmin bridge stub and hides the Push button when the workout
+ *       transitions to `state="pushed"` (issue #553). The Garmin push
+ *       transport uses `chrome.runtime.sendMessage`, not HTTP, so the
+ *       test installs a page-side Garmin bridge stub (mirrors the
+ *       existing Train2Go stub) as the documented DI fallback per the
+ *       transport probe rule.
  *   (h) Empty description → dialog renders the AI hint (D6).
  *
- * Flow (g) (in-flight cancel) is covered by unit tests in
+ * In-flight AI cancel is covered by unit tests in
  * `use-coaching-ai-handler.test.tsx`.
  */
 
@@ -30,12 +37,22 @@ import { expect, test } from "@playwright/test";
 
 import { mockLlmFailure, mockLlmSuccess } from "./fixtures/api-mocks";
 import { LLM_CYCLING_RESPONSE } from "./fixtures/llm-responses";
+import {
+  getGarminBridgeCallActions,
+  installGarminBridgeStub,
+} from "./helpers/garmin-bridge-stub";
 import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "coaching-redesign-profile";
 const SOURCE = "train2go";
+// Backoff schedule for the flow (g) re-click poll: short first, then a
+// few seconds to give the Garmin bridge discovery + detect cycle time
+// to flip `sessionActive` to true. Values are wall-clock milliseconds
+// for Playwright's `expect.poll` and have no domain meaning.
+// eslint-disable-next-line no-magic-numbers -- poll backoff schedule, test-local
+const FLOW_G_PUSH_POLL_INTERVALS_MS = [500, 1000, 1000, 1000, 2000];
 
 type SeedActivityArgs = {
   profileId: string;
@@ -146,6 +163,78 @@ const seedConvertedWorkout = async (page: Page, args: SeedRunArgs) => {
       createdAt: a.ts,
       modifiedAt: null,
       updatedAt: a.ts,
+    });
+  }, args);
+};
+
+/**
+ * Seed a workout in `state="ready"` with a non-null KRD payload, plus a
+ * matching sessionMatches row. Used by flow (g) to exercise the Push to
+ * Garmin button from the coaching dialog.
+ */
+const seedMatchedReadyWorkout = async (
+  page: Page,
+  args: SeedRunArgs & { matchId: string }
+) => {
+  await page.evaluate(async (a) => {
+    const db = (window as unknown as Record<string, unknown>)
+      .__KAIORD_DB__ as Db;
+    const krd = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: { created: a.ts, sport: "cycling" },
+      extensions: {
+        structured_workout: {
+          name: a.title,
+          sport: "cycling",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 600 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 200 },
+              },
+              intensity: "active",
+            },
+          ],
+        },
+      },
+    };
+    await db.table("workouts").put({
+      id: a.workoutId,
+      profileId: a.profileId,
+      date: a.date,
+      state: "ready",
+      sport: "cycling",
+      source: a.source,
+      sourceId: `${a.profileId}:${a.sourceId}`,
+      planId: null,
+      raw: null,
+      krd,
+      lastProcessingError: null,
+      feedback: null,
+      aiMeta: null,
+      garminPushId: null,
+      tags: [],
+      previousState: null,
+      createdAt: a.ts,
+      modifiedAt: null,
+      updatedAt: a.ts,
+    });
+    await db.table("sessionMatches").put({
+      id: a.matchId,
+      profileId: a.profileId,
+      // Persisted COMPOSITE coachingActivityId, mirrors
+      // `buildCoachingActivityId(profileId, source, sourceId)`.
+      coachingActivityId: `${a.profileId}:${a.source}:${a.sourceId}`,
+      workoutId: a.workoutId,
+      date: a.date,
+      createdAt: a.ts,
+      source: "auto-coaching",
+      executedWorkoutIds: [],
     });
   }, args);
 };
@@ -633,6 +722,136 @@ test.describe("Coaching activity dialog redesign", () => {
     expect(result.state).toBe("structured");
     expect(result.matchPreserved).toBe(true);
     expect(result.matchCount).toBe(1);
+  });
+
+  test("should push matched ready workout to Garmin and transition state to pushed when Push button is clicked from dialog (flow g)", async ({
+    page,
+  }) => {
+    // Arrange — install Garmin bridge stub BEFORE goto so the SPA's
+    // bridge-discovery sees the announce on boot.
+    await installGarminBridgeStub(page);
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await clearDexie(page);
+    const day = getWeekDates(0)[2];
+    const ts = new Date(day + "T08:00:00Z").toISOString();
+    await seedProfileAndDummyWorkout(page, ts);
+    await seedActivity(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "push-flow",
+      date: day,
+      ts,
+      title: "Push flow activity",
+      description: "Ready workout to push to Garmin",
+    });
+    await seedMatchedReadyWorkout(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "push-flow",
+      date: day,
+      ts,
+      title: "Push flow activity",
+      description: "Ready workout to push to Garmin",
+      workoutId: "push-flow-workout",
+      matchId: "M-push-flow",
+    });
+
+    // Act — open dialog, then click Push to Garmin. The push is a no-op
+    // until the Garmin bridge stub is detected (`sessionActive=true`),
+    // so the test re-clicks until the stub records a `push` action.
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    const card = page.getByTestId(`matched-card-${SOURCE}:push-flow`);
+    await card.waitFor({ timeout: 10_000 });
+    await card.click();
+    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    const pushBtn = page.getByTestId("coaching-dialog-push");
+    await expect(pushBtn).toBeVisible({ timeout: 10_000 });
+
+    // Assert — the Garmin bridge stub eventually records a `push` action
+    await expect
+      .poll(
+        async () => {
+          await pushBtn.click();
+          return getGarminBridgeCallActions(page);
+        },
+        { timeout: 15_000, intervals: FLOW_G_PUSH_POLL_INTERVALS_MS }
+      )
+      .toContain("push");
+  });
+
+  test("should re-render dialog without Push button after successful push from dialog (flow g)", async ({
+    page,
+  }) => {
+    // Arrange — same setup as the previous flow (g) test plus a
+    // post-push state flip simulated by Dexie write so we can verify
+    // the matched-state UI re-renders correctly. The actual server-side
+    // workout-state transition is owned by `useEditorActions` and is
+    // covered by its own unit tests; here we verify that when the
+    // workout reaches `state="pushed"` the Push button is hidden.
+    await installGarminBridgeStub(page);
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await clearDexie(page);
+    const day = getWeekDates(0)[2];
+    const ts = new Date(day + "T08:00:00Z").toISOString();
+    await seedProfileAndDummyWorkout(page, ts);
+    await seedActivity(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "push-rerender",
+      date: day,
+      ts,
+      title: "Push re-render activity",
+      description: "Ready workout for re-render assertion",
+    });
+    await seedMatchedReadyWorkout(page, {
+      profileId: PROFILE_ID,
+      source: SOURCE,
+      sourceId: "push-rerender",
+      date: day,
+      ts,
+      title: "Push re-render activity",
+      description: "Ready workout for re-render assertion",
+      workoutId: "push-rerender-workout",
+      matchId: "M-push-rerender",
+    });
+
+    // Act — open dialog and flip the workout state to pushed via Dexie
+    await page.goto(`/calendar/${getWeekId(day)}`);
+    const card = page.getByTestId(`matched-card-${SOURCE}:push-rerender`);
+    await card.waitFor({ timeout: 10_000 });
+    await card.click();
+    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
+    await expect(page.getByTestId("coaching-dialog-push")).toBeVisible();
+    await page.evaluate(async () => {
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as {
+        table: (n: string) => {
+          update: (
+            id: string,
+            changes: Record<string, unknown>
+          ) => Promise<number>;
+        };
+      };
+      await db
+        .table("workouts")
+        .update("push-rerender-workout", { state: "pushed" });
+    });
+
+    // Assert — the Push button is no longer rendered for state="pushed"
+    await expect(page.getByTestId("coaching-dialog-push")).toHaveCount(0, {
+      timeout: 5_000,
+    });
+    await expect(page.getByTestId("coaching-dialog-open-editor")).toBeVisible();
   });
 
   test("flow (h): empty-description activity shows the AI hint", async ({
