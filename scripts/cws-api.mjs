@@ -55,6 +55,7 @@ function printUsage() {
       "  state          print current CWS state JSON",
       "  upload --source <zip-path>",
       "  publish        publish the uploaded draft",
+      "  live-version <extension-id> --package <package-name>",
       "  wait-uploaded --timeout-ms <N>",
       "  wait-published --version <V> --timeout-ms <N>",
       "",

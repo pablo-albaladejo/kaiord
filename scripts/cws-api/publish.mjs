@@ -1,6 +1,16 @@
 // Publish an uploaded CRX. POST without body to /items/<id>/publish.
 // Returns { status: [string] } per Google docs. 409 → conflict (a
 // concurrent publish is locking the item).
+//
+// Idempotency contract (Assumption A1 — Tier 2 use):
+//   publishItem(id, { trustedTesters: false }) is safe to call multiple
+//   times against an already-uploaded draft. Google returns HTTP 200 and
+//   does NOT re-trigger a new upload or increment the review queue entry.
+//   Callers may therefore retry publish without a preceding upload step
+//   when the workflow detects an in-flight draft (STUCK_DRAFT status).
+//   This contract is Tier 2 (empirically observed, not formally documented
+//   in the CWS REST API reference); treat unexpected 4xx as a signal that
+//   the assumption no longer holds and escalate to a human.
 
 import { CwsAuthError, CwsStateError } from "./errors.mjs";
 import { mintAccessToken } from "./auth.mjs";
