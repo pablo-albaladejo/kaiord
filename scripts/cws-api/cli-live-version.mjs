@@ -15,9 +15,15 @@ function readGitTags(packageName) {
 export async function runLiveVersion(id, flags, serviceAccount) {
   const bound = (_sa, itemId, projection) =>
     getItem(serviceAccount, itemId, projection);
+  // The resolver's regex expects packageName to match the tag prefix
+  // (`@kaiord/<name>@<version>`). The CLI receives the bare workspace
+  // name (e.g. `train2go-bridge`) from the workflow matrix, so prepend
+  // the npm-scope here. readGitTags below already hard-codes the same
+  // prefix in its `git tag -l` query.
+  const fullName = `@kaiord/${flags.package}`;
   return resolveLiveVersion({
     extensionId: id,
-    packageName: flags.package,
+    packageName: fullName,
     localVersion: flags.local ?? null,
     getItem: bound,
     gitTags: readGitTags(flags.package),
