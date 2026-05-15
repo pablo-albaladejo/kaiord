@@ -15,6 +15,13 @@
 import { CwsAuthError, CwsStateError } from "./errors.mjs";
 import { mintAccessToken } from "./auth.mjs";
 import { CWS_API_BASE_URL } from "./state.mjs";
+import { readErrorDetail } from "./error-detail.mjs";
+
+// Runbook for operators when this helper throws CwsStateError on a 4xx/5xx:
+// docs/runbooks/cws-service-account.md (sections "Emergency re-publish"
+// and "Reviewer rejections"). The thrown message includes the redacted
+// CWS response body so the runbook step can be picked directly.
+const RUNBOOK = "see docs/runbooks/cws-service-account.md";
 
 export async function publishItem(
   serviceAccount,
@@ -45,7 +52,9 @@ export async function publishItem(
   }
   if (!res.ok) {
     const detail = await readErrorDetail(res);
-    throw new CwsStateError(`publishItem returned ${res.status}: ${detail}`);
+    throw new CwsStateError(
+      `publishItem returned ${res.status}: ${detail} — ${RUNBOOK}`
+    );
   }
   const body = await parseJsonOrThrow(res);
   return {
@@ -53,21 +62,6 @@ export async function publishItem(
     statusDetail: Array.isArray(body.statusDetail) ? body.statusDetail : [],
     rawResponse: body,
   };
-}
-
-async function readErrorDetail(res) {
-  try {
-    const text = await res.text();
-    // Order matters: Authorization header consumed first so the Bearer regex
-    // doesn't double-redact the same span. No /i flag — error responses use
-    // canonical HTTP header casing.
-    const redacted = text
-      .replace(/Authorization:\s*Bearer\s+[A-Za-z0-9._\-\/=]+/g, "Authorization: [redacted]")
-      .replace(/\bBearer\s+[A-Za-z0-9._\-\/=]+/g, "Bearer [redacted]");
-    return redacted.replace(/\s+/g, " ").slice(0, 400);
-  } catch {
-    return "(no body)";
-  }
 }
 
 async function parseJsonOrThrow(res) {

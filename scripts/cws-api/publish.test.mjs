@@ -140,7 +140,9 @@ describe("publishItem 4xx body capture", () => {
     // Assert
     assert.ok(caught instanceof CwsStateError);
     // Message = "[CwsStateError] publishItem returned 400: " + up to 400 chars body
-    assert.ok(caught.message.length <= 450);
+    // + " — see docs/runbooks/cws-service-account.md"
+    assert.ok(caught.message.length <= 500);
+    assert.match(caught.message, /docs\/runbooks\/cws-service-account\.md/);
   });
 
   it("should redact Bearer tokens leaked back in the error body", async () => {
