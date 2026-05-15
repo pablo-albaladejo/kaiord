@@ -7,6 +7,7 @@
 
 import Dexie from "dexie";
 
+import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { registerKaiordVersions } from "./register-kaiord-versions";
 
 export {
@@ -26,5 +27,8 @@ export const db = new KaiordDatabase();
 
 // Expose for e2e test seeding (dev mode only)
 if (import.meta.env.DEV) {
-  (window as unknown as Record<string, unknown>).__KAIORD_DB__ = db;
+  const w = window as unknown as Record<string, unknown>;
+  w.__KAIORD_DB__ = db;
+  const aiRepo = createDexieAiProviderRepository(db);
+  w.__KAIORD_E2E_SEED__ = { aiProvider: aiRepo.put };
 }
