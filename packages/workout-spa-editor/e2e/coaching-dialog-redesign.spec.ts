@@ -383,7 +383,7 @@ test.describe("Coaching activity dialog redesign", () => {
       calls += 1;
       if (calls === 1) {
         await route.fulfill({
-          status: 500,
+          status: 401,
           contentType: "application/json",
           body: JSON.stringify({ error: "Mocked LLM failure" }),
         });
@@ -460,7 +460,8 @@ test.describe("Coaching activity dialog redesign", () => {
   test("should show static error toast when LLM call fails and prevent state mutation (flow c)", async ({
     page,
   }) => {
-    // Arrange — every LLM call returns 500
+    // Arrange — every LLM call returns 401 (non-retryable, so the AI SDK
+    // surfaces the error instead of backing off through `maxRetries`).
     await page.goto("/calendar");
     await page.waitForFunction(
       () =>
@@ -468,7 +469,7 @@ test.describe("Coaching activity dialog redesign", () => {
       { timeout: 10_000 }
     );
     await clearDexie(page);
-    await mockLlmFailure(page);
+    await mockLlmFailure(page, { status: 401 });
     await seedAiProvider(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();
