@@ -15,6 +15,13 @@
 import { CwsAuthError, CwsStateError } from "./errors.mjs";
 import { mintAccessToken } from "./auth.mjs";
 import { CWS_API_BASE_URL } from "./state.mjs";
+import { readErrorDetail } from "./error-detail.mjs";
+
+// Runbook for operators when this helper throws CwsStateError on a 4xx/5xx:
+// docs/runbooks/cws-service-account.md (sections "Emergency re-publish"
+// and "Reviewer rejections"). The thrown message includes the redacted
+// CWS response body so the runbook step can be picked directly.
+const RUNBOOK = "see docs/runbooks/cws-service-account.md";
 
 export async function publishItem(
   serviceAccount,
@@ -44,7 +51,10 @@ export async function publishItem(
     throw new CwsStateError("publishItem returned 429 (rate limited)");
   }
   if (!res.ok) {
-    throw new CwsStateError(`publishItem returned ${res.status}`);
+    const detail = await readErrorDetail(res);
+    throw new CwsStateError(
+      `publishItem returned ${res.status}: ${detail} — ${RUNBOOK}`
+    );
   }
   const body = await parseJsonOrThrow(res);
   return {
