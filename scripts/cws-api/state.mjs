@@ -45,7 +45,13 @@ export async function getItem(serviceAccount, id, projection = "DRAFT") {
 async function readErrorDetail(res) {
   try {
     const text = await res.text();
-    return text.replace(/\s+/g, " ").slice(0, 400);
+    // Order matters: Authorization header consumed first so the Bearer regex
+    // doesn't double-redact the same span. No /i flag — error responses use
+    // canonical HTTP header casing.
+    const redacted = text
+      .replace(/Authorization:\s*Bearer\s+[A-Za-z0-9._\-\/=]+/g, "Authorization: [redacted]")
+      .replace(/\bBearer\s+[A-Za-z0-9._\-\/=]+/g, "Bearer [redacted]");
+    return redacted.replace(/\s+/g, " ").slice(0, 400);
   } catch {
     return "(no body)";
   }

@@ -44,7 +44,8 @@ export async function publishItem(
     throw new CwsStateError("publishItem returned 429 (rate limited)");
   }
   if (!res.ok) {
-    throw new CwsStateError(`publishItem returned ${res.status}`);
+    const detail = await readErrorDetail(res);
+    throw new CwsStateError(`publishItem returned ${res.status}: ${detail}`);
   }
   const body = await parseJsonOrThrow(res);
   return {
@@ -52,6 +53,21 @@ export async function publishItem(
     statusDetail: Array.isArray(body.statusDetail) ? body.statusDetail : [],
     rawResponse: body,
   };
+}
+
+async function readErrorDetail(res) {
+  try {
+    const text = await res.text();
+    // Order matters: Authorization header consumed first so the Bearer regex
+    // doesn't double-redact the same span. No /i flag — error responses use
+    // canonical HTTP header casing.
+    const redacted = text
+      .replace(/Authorization:\s*Bearer\s+[A-Za-z0-9._\-\/=]+/g, "Authorization: [redacted]")
+      .replace(/\bBearer\s+[A-Za-z0-9._\-\/=]+/g, "Bearer [redacted]");
+    return redacted.replace(/\s+/g, " ").slice(0, 400);
+  } catch {
+    return "(no body)";
+  }
 }
 
 async function parseJsonOrThrow(res) {

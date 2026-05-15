@@ -120,3 +120,24 @@ test("getItem URL-encodes the extension id", async () => {
   );
   assert.match(apiUrl, /weird%2Fid%20with%20spaces/);
 });
+
+test("should redact Bearer tokens leaked back in getItem error body", async () => {
+  // Arrange
+  const sa = makeServiceAccount();
+  mockResponses.set("default", () =>
+    new Response("rejected: Bearer ya29.aaaaaaaaaaaaaaaaaaaa", { status: 400 })
+  );
+
+  // Act
+  let caught;
+  try {
+    await getItem(sa, "abc", "DRAFT");
+  } catch (e) {
+    caught = e;
+  }
+
+  // Assert
+  assert.ok(caught instanceof (await import("./errors.mjs")).CwsStateError);
+  assert.match(caught.message, /\[redacted\]/);
+  assert.ok(!caught.message.includes("ya29.aaaaaaaaaaaaaaaaaaaa"));
+});
