@@ -11,7 +11,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
-import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
+import { clearDexie, getWeekDates } from "./helpers/seed-dexie";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "visual-sidebar-profile";
@@ -158,14 +158,10 @@ test.describe("CoachingSidebar visual regression", () => {
     const ts = new Date(day + "T08:00:00Z").toISOString();
     await seedMatchedCoachingWorkout(page, day, ts);
 
-    // Act
-    await page.goto(`/calendar/${getWeekId(day)}`);
-    const card = page.getByTestId(`coaching-card-${SOURCE}:${SOURCE_ID}`);
-    await card.waitFor({ timeout: 10_000 });
-    await card.click();
-    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
-    await page.getByTestId("coaching-dialog-edit-manually").click();
-    await expect(page).toHaveURL(/\/workout\//, { timeout: 10_000 });
+    // Act — workout + sessionMatch are pre-seeded, so navigate straight
+    // to the editor. The dialog flow ("Edit manually") only applies to
+    // the no-workout state; a pre-matched workout opens directly.
+    await page.goto(`/workout/${WORKOUT_ID}`);
     await expect(page.getByTestId("coaching-sidebar")).toBeVisible({
       timeout: 10_000,
     });
@@ -190,14 +186,10 @@ test.describe("CoachingSidebar visual regression", () => {
     const ts = new Date(day + "T08:00:00Z").toISOString();
     await seedMatchedCoachingWorkout(page, day, ts);
 
-    // Act
-    await page.goto(`/calendar/${getWeekId(day)}`);
-    const card = page.getByTestId(`coaching-card-${SOURCE}:${SOURCE_ID}`);
-    await card.waitFor({ timeout: 10_000 });
-    await card.click();
-    await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
-    await page.getByTestId("coaching-dialog-edit-manually").click();
-    await expect(page).toHaveURL(/\/workout\//, { timeout: 10_000 });
+    // Act — workout + sessionMatch are pre-seeded, so navigate straight
+    // to the editor. The dialog flow ("Edit manually") only applies to
+    // the no-workout state; a pre-matched workout opens directly.
+    await page.goto(`/workout/${WORKOUT_ID}`);
     await expect(page.getByTestId("coaching-sidebar")).toBeVisible({
       timeout: 10_000,
     });
