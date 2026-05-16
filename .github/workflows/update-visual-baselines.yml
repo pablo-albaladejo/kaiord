@@ -8,10 +8,10 @@ on:
         required: true
         type: string
       spec:
-        description: "Visual spec glob (relative to packages/workout-spa-editor)"
+        description: "Playwright spec filter (regex matched against file paths under packages/workout-spa-editor/e2e)"
         required: false
         type: string
-        default: "e2e/**/*.visual.spec.ts"
+        default: "visual\\.spec\\.ts"
 
 permissions:
   contents: write
