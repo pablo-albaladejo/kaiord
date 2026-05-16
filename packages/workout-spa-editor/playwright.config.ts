@@ -56,6 +56,10 @@ export default defineConfig({
       name: "Mobile Safari",
       use: { ...devices["iPhone 12"] },
     },
+    {
+      name: "Mobile-768",
+      use: { viewport: { width: 768, height: 1024 } },
+    },
   ],
 
   webServer: {
