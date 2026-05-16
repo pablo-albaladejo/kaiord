@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAnalytics } from "../../contexts";
 import type { KRD, ValidationError } from "../../types/krd";
 import { Button } from "../atoms/Button/Button";
+import { Card } from "../atoms/Card/Card";
 import { FileUpload } from "../molecules/FileUpload/FileUpload";
 
 type ManualCreateSectionProps = {
@@ -28,7 +29,7 @@ export function ManualCreateSection({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <Card>
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
@@ -62,6 +63,6 @@ export function ManualCreateSection({
           />
         </div>
       )}
-    </div>
+    </Card>
   );
 }

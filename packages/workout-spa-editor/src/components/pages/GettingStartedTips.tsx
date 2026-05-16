@@ -1,6 +1,8 @@
+import { Card } from "../atoms/Card/Card";
+
 export function GettingStartedTips() {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <Card className="p-6">
       <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
         Getting Started
       </h3>
@@ -9,6 +11,6 @@ export function GettingStartedTips() {
         <li>• Load an existing workout file</li>
         <li>• Add, edit, and organize workout steps</li>
       </ul>
-    </div>
+    </Card>
   );
 }

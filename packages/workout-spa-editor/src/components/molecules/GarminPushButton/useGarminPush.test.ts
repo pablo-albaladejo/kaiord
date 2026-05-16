@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GarminBridgeState } from "../../../contexts";
+import type { WorkoutRecord } from "../../../types/calendar-record";
 
 const mockPushWorkout = vi.fn();
 const mockSetPushing = vi.fn();
@@ -21,14 +22,6 @@ vi.mock("../../../contexts", () => ({
   useAnalytics: vi.fn(() => ({ event: mockAnalyticsEvent, pageView: vi.fn() })),
 }));
 
-const workoutState: { currentWorkout: unknown } = {
-  currentWorkout: { name: "test workout" },
-};
-
-vi.mock("../../../store/selectors", () => ({
-  useCurrentWorkout: vi.fn(() => workoutState.currentWorkout),
-}));
-
 const mockExportGcnWorkout = vi.fn();
 
 vi.mock("../../../utils/export-workout-formats", () => ({
@@ -38,10 +31,36 @@ vi.mock("../../../utils/export-workout-formats", () => ({
 
 import { useGarminPush } from "./useGarminPush";
 
+// A stub KRD payload that exportGcnWorkout will receive verbatim.
+const KRD_STUB = { name: "test workout" } as unknown;
+
+const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
+  ({
+    id: "workout-1",
+    profileId: "profile-1",
+    date: "2026-05-14",
+    sport: "cycling",
+    source: "manual",
+    sourceId: null,
+    planId: null,
+    state: "ready",
+    raw: null,
+    krd: KRD_STUB,
+    lastProcessingError: null,
+    feedback: null,
+    aiMeta: null,
+    garminPushId: null,
+    tags: [],
+    previousState: null,
+    createdAt: "2026-05-14T08:00:00.000Z",
+    modifiedAt: null,
+    updatedAt: "2026-05-14T08:00:00.000Z",
+    ...overrides,
+  }) as unknown as WorkoutRecord;
+
 describe("useGarminPush", () => {
   beforeEach(() => {
     garminState.sessionActive = true;
-    workoutState.currentWorkout = { name: "test workout" };
     mockPushWorkout.mockResolvedValue(undefined);
     mockExportGcnWorkout.mockResolvedValue({ gcnWorkout: "data" });
   });
@@ -52,87 +71,89 @@ describe("useGarminPush", () => {
 
   it("should return a push function", () => {
     // Arrange
+    const workout = makeWorkout();
 
     // Act
-
-    const { result } = renderHook(() => useGarminPush());
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Assert
-
     expect(result.current.push).toBeTypeOf("function");
   });
 
-  it("should export workout to GCN and push it", async () => {
+  it("should accept WorkoutRecord argument and push without reading from Zustand store", async () => {
     // Arrange
-
+    const workout = makeWorkout();
     const gcn = { gcnWorkout: "data" };
     mockExportGcnWorkout.mockResolvedValue(gcn);
-    const { result } = renderHook(() => useGarminPush());
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
-
-    expect(mockExportGcnWorkout).toHaveBeenCalledWith({
-      name: "test workout",
-    });
+    expect(mockExportGcnWorkout).toHaveBeenCalledWith(KRD_STUB);
     expect(mockPushWorkout).toHaveBeenCalledWith(gcn);
   });
 
-  it("should do nothing when currentWorkout is null", async () => {
+  it("should do nothing when workout is undefined", async () => {
     // Arrange
-
-    workoutState.currentWorkout = null;
-    const { result } = renderHook(() => useGarminPush());
+    const { result } = renderHook(() => useGarminPush(undefined));
 
     // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
+    expect(mockExportGcnWorkout).not.toHaveBeenCalled();
+    expect(mockPushWorkout).not.toHaveBeenCalled();
+  });
 
+  it("should do nothing when workout has no krd", async () => {
+    // Arrange
+    const workout = makeWorkout({ krd: null });
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
     expect(mockExportGcnWorkout).not.toHaveBeenCalled();
     expect(mockPushWorkout).not.toHaveBeenCalled();
   });
 
   it("should do nothing when session is not active", async () => {
     // Arrange
-
     garminState.sessionActive = false;
-    const { result } = renderHook(() => useGarminPush());
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
-
     expect(mockExportGcnWorkout).not.toHaveBeenCalled();
     expect(mockPushWorkout).not.toHaveBeenCalled();
   });
 
   it("should set error when exportGcnWorkout throws an Error", async () => {
     // Arrange
-
     mockExportGcnWorkout.mockRejectedValue(new Error("Conversion failed"));
-    const { result } = renderHook(() => useGarminPush());
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
-
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
       message: "Conversion failed",
@@ -141,18 +162,16 @@ describe("useGarminPush", () => {
 
   it("should set fallback error message when non-Error is thrown", async () => {
     // Arrange
-
     mockExportGcnWorkout.mockRejectedValue("string error");
-    const { result } = renderHook(() => useGarminPush());
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
-
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
       message: "Conversion failed",
@@ -161,18 +180,16 @@ describe("useGarminPush", () => {
 
   it("should set error when pushWorkout throws", async () => {
     // Arrange
-
     mockPushWorkout.mockRejectedValue(new Error("Push rejected"));
-    const { result } = renderHook(() => useGarminPush());
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
-
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
       message: "Push rejected",
@@ -181,23 +198,16 @@ describe("useGarminPush", () => {
 
   it("should fire garmin-synced success event after successful push", async () => {
     // Arrange
-    // Arrange
-
     mockPushWorkout.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useGarminPush());
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-
-    // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
-
-    // Assert
-
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
       result: "success",
     });
@@ -205,23 +215,16 @@ describe("useGarminPush", () => {
 
   it("should fire garmin-synced failure event when push throws", async () => {
     // Arrange
-    // Arrange
-
     mockPushWorkout.mockRejectedValue(new Error("Push failed"));
-    const { result } = renderHook(() => useGarminPush());
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-
-    // Act
-
     await act(async () => {
       await result.current.push();
     });
 
     // Assert
-
-    // Assert
-
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
       result: "failure",
     });
