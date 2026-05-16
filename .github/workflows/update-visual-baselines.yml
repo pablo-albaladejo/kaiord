@@ -1,0 +1,60 @@
+name: Update Visual Baselines
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to update baselines on (must already exist on origin)"
+        required: true
+        type: string
+      spec:
+        description: "Visual spec glob (relative to packages/workout-spa-editor)"
+        required: false
+        type: string
+        default: "e2e/**/*.visual.spec.ts"
+
+permissions:
+  contents: write
+
+jobs:
+  update-baselines:
+    name: Regenerate Playwright snapshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+
+      - name: Build workspace dependencies
+        run: pnpm -r build
+
+      - name: Regenerate snapshots
+        run: |
+          pnpm --filter @kaiord/workout-spa-editor exec playwright test \
+            --project=chromium \
+            --update-snapshots \
+            ${{ inputs.spec }}
+        env:
+          CI: true
+
+      - name: Commit and push snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -z "$(git status --porcelain packages/workout-spa-editor)" ]]; then
+            echo "No snapshot changes — branch already has up-to-date baselines."
+            exit 0
+          fi
+          git add packages/workout-spa-editor
+          git commit -m "chore(spa-editor): regenerate visual baselines via update-visual-baselines workflow"
+          git push origin HEAD:${{ inputs.branch }}
