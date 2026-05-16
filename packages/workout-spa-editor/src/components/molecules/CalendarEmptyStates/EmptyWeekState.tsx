@@ -5,6 +5,8 @@
 import { Calendar, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 
+import { Button } from "../../atoms/Button/Button";
+
 export type EmptyWeekStateProps = {
   onGoToLatest?: () => void;
 };
@@ -20,22 +22,18 @@ export function EmptyWeekState({ onGoToLatest }: EmptyWeekStateProps) {
       <Calendar className="h-10 w-10 text-muted-foreground" />
       <p className="text-muted-foreground">No workouts this week</p>
       <div className="flex gap-3">
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => navigate("/workout/new")}
-          className="flex items-center gap-1.5 rounded-md bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700"
         >
           <Plus className="h-4 w-4" />
           Add workout
-        </button>
+        </Button>
         {onGoToLatest && (
-          <button
-            type="button"
-            onClick={onGoToLatest}
-            className="rounded-md border px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
+          <Button variant="secondary" size="sm" onClick={onGoToLatest}>
             Go to latest
-          </button>
+          </Button>
         )}
       </div>
     </div>
