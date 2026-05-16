@@ -17,7 +17,6 @@ import { useSearch } from "wouter";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
-import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
@@ -25,6 +24,7 @@ import { DateBanner } from "./DateBanner";
 import { EditorBody } from "./EditorBody";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
 import { EditorNewWorkout } from "./EditorNewWorkout";
+import { EditorPageHeader } from "./EditorPageHeader";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
 import { useEditorActions } from "./use-editor-actions";
 import { useWorkoutRecord } from "./use-workout-record";
@@ -58,9 +58,7 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   return (
     <div className="space-y-6">
-      <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">
-        {id ? "Edit workout" : "New workout"}
-      </h1>
+      <EditorPageHeader mode={id ? "edit" : "new"} />
       {!id && dateParam && <DateBanner date={dateParam} />}
       {record && (
         <EditorWorkflowBar

@@ -13,6 +13,7 @@ import { Play } from "lucide-react";
 
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { Button } from "../atoms/Button/Button";
+import { Card } from "../atoms/Card/Card";
 import { CardBadges } from "../organisms/WorkoutLibrary/components/CardBadges";
 import { CardHeader } from "../organisms/WorkoutLibrary/components/CardHeader";
 import { CardScheduleAction } from "../organisms/WorkoutLibrary/components/CardScheduleAction";
@@ -35,10 +36,7 @@ export function LibraryPageCard({
   onLoad,
 }: LibraryPageCardProps) {
   return (
-    <div
-      className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
-      data-testid="library-card"
-    >
+    <Card variant="interactive" data-testid="library-card">
       <CardThumbnail
         thumbnailData={template.thumbnailData}
         workoutName={template.name}
@@ -69,6 +67,6 @@ export function LibraryPageCard({
           Created {new Date(template.createdAt).toLocaleDateString()}
         </p>
       </div>
-    </div>
+    </Card>
   );
 }
