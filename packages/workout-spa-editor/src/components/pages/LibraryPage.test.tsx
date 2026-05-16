@@ -292,6 +292,34 @@ describe("LibraryPage", () => {
     });
   });
 
+  it("should show a success toast when a template is loaded into the editor", async () => {
+    // Arrange
+
+    const template = makeTemplate({
+      id: "t-toast",
+      name: "Sweet Spot",
+      sport: "cycling",
+    });
+    await db.table("templates").add(template);
+    useWorkoutStore.setState({ currentWorkout: ACTIVE_KRD });
+
+    const user = userEvent.setup();
+
+    // Act
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("card-load-into-editor")).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId("card-load-into-editor"));
+
+    // Assert
+
+    expect(await screen.findByText("Template loaded")).toBeInTheDocument();
+    expect(await screen.findByText("Sweet Spot")).toBeInTheDocument();
+  });
+
   it("should render the page heading with the route-heading attribute", async () => {
     // Arrange
 

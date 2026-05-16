@@ -35,7 +35,7 @@ import { useScheduleTemplate } from "./use-schedule-template";
 export default function LibraryPage() {
   const templates = useLibraryTemplatesLive();
   const persistence = usePersistence();
-  const { error: showError } = useToastContext();
+  const { error: showError, success: showSuccess } = useToastContext();
   const { scheduling, openScheduler, closeScheduler, confirmSchedule } =
     useScheduleTemplate();
   const currentWorkout = useCurrentWorkout();
@@ -57,6 +57,12 @@ export default function LibraryPage() {
 
   const handleLoad = (template: WorkoutTemplate) => {
     loadWorkout(template.krd);
+    // Toast confirms the load so the user does not land on the
+    // editor's welcome screen wondering whether anything happened.
+    // Title is a static literal (PII guard R-PIIInterpolation);
+    // template.name flows through the description field which the
+    // guard intentionally does not constrain.
+    showSuccess("Template loaded", template.name, { duration: 3000 });
     // SPA navigation (no full reload) so the freshly-loaded workout
     // survives the route transition. Hard reload would drop Zustand.
     navigate("/workout/new");
