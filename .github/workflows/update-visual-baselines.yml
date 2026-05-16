@@ -41,9 +41,9 @@ jobs:
       - name: Regenerate snapshots
         run: |
           pnpm --filter @kaiord/workout-spa-editor exec playwright test \
+            "${{ inputs.spec }}" \
             --project=chromium \
-            --update-snapshots \
-            ${{ inputs.spec }}
+            --update-snapshots=all
         env:
           CI: true
 
