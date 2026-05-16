@@ -467,16 +467,10 @@ test.describe("Coaching activity dialog redesign", () => {
       { timeout: 10_000 }
     );
     await clearDexie(page);
-    // The @kaiord/ai package retries any thrown error up to
-    // `maxRetries` (default 2) inside executeWithRetry, so a single user
-    // click on "Process with AI" consumes up to 3 HTTP attempts. The first
-    // user click MUST fail every attempt for the inline-error UI to
-    // surface; only the second user click (Retry AI) should succeed.
-    const FIRST_CLICK_ATTEMPTS = 3;
     let calls = 0;
     const handler = async (route: Route) => {
       calls += 1;
-      if (calls <= FIRST_CLICK_ATTEMPTS) {
+      if (calls === 1) {
         await route.fulfill({
           status: 401,
           contentType: "application/json",
