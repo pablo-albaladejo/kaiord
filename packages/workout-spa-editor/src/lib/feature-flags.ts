@@ -26,6 +26,8 @@ export const FEATURE_FLAGS = {
   "ux2026.commandPalette": false,
   /** Phase 2: read-only zone peek shortcut. */
   "ux2026.zonePeek": false,
+  /** Phase 2: unified /settings route with deep-linkable tabs. */
+  "ux2026.unifiedSettings": false,
 } as const;
 
 export type FeatureFlagName = keyof typeof FEATURE_FLAGS;
