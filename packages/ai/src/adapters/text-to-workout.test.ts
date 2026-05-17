@@ -51,10 +51,16 @@ const RUNNING_WORKOUT: Workout = {
   ],
 };
 
-vi.mock("ai", () => ({
-  generateText: vi.fn(),
-  Output: { object: vi.fn(({ schema }: { schema: unknown }) => ({ schema })) },
-}));
+vi.mock("ai", async () => {
+  const actual = await vi.importActual<typeof import("ai")>("ai");
+  return {
+    ...actual,
+    generateText: vi.fn(),
+    Output: {
+      object: vi.fn(({ schema }: { schema: unknown }) => ({ schema })),
+    },
+  };
+});
 
 const mockGenerateText = vi.mocked((await import("ai")).generateText);
 
