@@ -1,4 +1,4 @@
-import { generateText, Output } from "ai";
+import { APICallError, generateText, Output } from "ai";
 import type { Workout } from "@kaiord/core";
 import { workoutSchema } from "@kaiord/core";
 import type { TextToWorkoutConfig } from "../types";
@@ -46,6 +46,9 @@ export const executeWithRetry = async (
       logger?.debug("LLM raw output", { output: validated });
       return reindexSteps(validated);
     } catch (error) {
+      if (APICallError.isInstance(error) && !error.isRetryable) {
+        throw error;
+      }
       lastError = error instanceof Error ? error.message : String(error);
       logger?.warn("Parse attempt failed", { attempt, error: lastError });
 
