@@ -219,6 +219,22 @@ jobs:
             echo "cws-untrusted-state issue already open for $EXT (#$EXISTING); skipping create"
           fi
 
+      - name: Auto-close reconciled untrusted-state issues
+        if: steps.live.outputs.status == 'SYNCED' && steps.decide.outputs.reason == 'in-sync'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXT: ${{ matrix.extension.name }}
+        run: |
+          TITLE="CWS untrusted state: $EXT"
+          gh issue list --state open --search "$TITLE in:title" \
+            --json number,title --limit 20 \
+            | jq -r --arg t "$TITLE" '.[] | select(.title == $t) | .number' \
+            | while read n; do
+                [ -z "$n" ] && continue
+                gh issue close "$n" --comment \
+                  "Reconciled by run ${{ github.run_id }} (STATUS=SYNCED, reason=in-sync)."
+              done
+
       - name: Build summary row
         id: row
         if: always()
