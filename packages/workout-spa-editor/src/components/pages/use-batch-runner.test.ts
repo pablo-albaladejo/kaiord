@@ -58,6 +58,45 @@ describe("useBatchRunner", () => {
     expect(result.current.isProcessing).toBe(false);
   });
 
+  it("should fire onSuccess with the workout count after a clean batch run", async () => {
+    // Arrange
+
+    processBatchSpy.mockResolvedValueOnce(undefined);
+    const setMessage = vi.fn();
+    const onSuccess = vi.fn();
+
+    // Act
+
+    const { result } = renderHook(() => useBatchRunner(setMessage, onSuccess));
+    await act(async () => {
+      await result.current.run({ provider, workouts: [workout, workout] });
+    });
+
+    // Assert
+
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith(2);
+  });
+
+  it("should NOT fire onSuccess when processBatch throws", async () => {
+    // Arrange
+
+    processBatchSpy.mockRejectedValueOnce(new Error("boom"));
+    const setMessage = vi.fn();
+    const onSuccess = vi.fn();
+
+    // Act
+
+    const { result } = renderHook(() => useBatchRunner(setMessage, onSuccess));
+    await act(async () => {
+      await result.current.run({ provider, workouts: [workout] });
+    });
+
+    // Assert
+
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
   it("should surface an error message when processBatch throws", async () => {
     // Arrange
 
