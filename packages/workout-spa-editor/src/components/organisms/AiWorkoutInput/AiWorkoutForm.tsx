@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import { Button } from "../../atoms/Button";
+import { AiSuccessActionsContainer } from "./AiSuccessActionsContainer";
 import { ModelSelector } from "./ModelSelector";
 import { SportSelect } from "./SportSelect";
 import { useAiGeneration } from "./useAiGeneration";
@@ -15,6 +16,7 @@ export const AiWorkoutForm: React.FC = () => {
   const generation = useAiRuntimeStore((s) => s.generation);
   const { generate } = useAiGeneration();
   const isLoading = generation.status === "loading";
+  const isSuccess = generation.status === "success";
 
   const handleGenerate = () => {
     if (!text.trim() || isLoading) return;
@@ -56,6 +58,7 @@ export const AiWorkoutForm: React.FC = () => {
           {generation.message}
         </p>
       )}
+      {isSuccess && <AiSuccessActionsContainer onRegenerate={handleGenerate} />}
     </div>
   );
 };
