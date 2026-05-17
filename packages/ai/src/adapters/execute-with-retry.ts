@@ -1,4 +1,4 @@
-import { APICallError, generateText, Output } from "ai";
+import { generateText, Output } from "ai";
 import type { Workout } from "@kaiord/core";
 import { workoutSchema } from "@kaiord/core";
 import type { TextToWorkoutConfig } from "../types";
@@ -7,6 +7,16 @@ import { reindexSteps } from "./reindex-steps";
 import { aiWorkoutSchema } from "./ai-workout-schema";
 
 const MAX_ERROR_LENGTH = 200;
+
+const HTTP_REQUEST_TIMEOUT = 408;
+const HTTP_TOO_MANY_REQUESTS = 429;
+
+const isNonRetryableTransport = (error: unknown): boolean => {
+  const status = (error as { statusCode?: unknown })?.statusCode;
+  if (typeof status !== "number") return false;
+  if (status < 400 || status >= 500) return false;
+  return status !== HTTP_REQUEST_TIMEOUT && status !== HTTP_TOO_MANY_REQUESTS;
+};
 
 const truncate = (text: string, max: number): string =>
   text.length > max ? `${text.slice(0, max)}...` : text;
@@ -46,7 +56,7 @@ export const executeWithRetry = async (
       logger?.debug("LLM raw output", { output: validated });
       return reindexSteps(validated);
     } catch (error) {
-      if (APICallError.isInstance(error) && !error.isRetryable) {
+      if (isNonRetryableTransport(error)) {
         throw error;
       }
       lastError = error instanceof Error ? error.message : String(error);
