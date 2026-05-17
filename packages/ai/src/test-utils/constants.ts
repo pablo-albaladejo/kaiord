@@ -20,3 +20,7 @@ export const INPUT_TEXT_TRUNCATED_MAX_LEN = 203 as const;
 
 // === text-to-workout config defaults ===
 export const MAX_OUTPUT_TOKENS_DEFAULT = 4096 as const;
+
+// === HTTP status fixtures for APICallError mocks ===
+export const HTTP_STATUS_UNAUTHORIZED = 401 as const;
+export const HTTP_STATUS_SERVICE_OVERLOADED = 503 as const;
