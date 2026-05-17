@@ -19,6 +19,7 @@ import { Route, Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
+import { AppToastProvider } from "../../components/providers/AppToastProvider";
 import { GarminBridgeProvider } from "../../contexts";
 import { CoachingRegistryProvider } from "../../contexts/coaching-registry-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
@@ -107,9 +108,11 @@ const wrap = (children: ReactNode) => {
     <PersistenceProvider persistence={createInMemoryPersistence()}>
       <GarminBridgeProvider>
         <CoachingRegistryProvider factories={[]}>
-          <Router hook={hook}>
-            <Route path="/calendar/:weekId?">{children}</Route>
-          </Router>
+          <AppToastProvider>
+            <Router hook={hook}>
+              <Route path="/calendar/:weekId?">{children}</Route>
+            </Router>
+          </AppToastProvider>
         </CoachingRegistryProvider>
       </GarminBridgeProvider>
     </PersistenceProvider>
