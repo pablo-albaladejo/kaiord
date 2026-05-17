@@ -48,6 +48,12 @@ export const executeWithRetry = async (
         prompt,
         maxOutputTokens,
         temperature,
+        // Disable the AI SDK's internal retry layer. We already own the
+        // retry loop (`for (attempt = 1..maxRetries+1)`) and the catch
+        // gate above; without this, a retryable APICallError costs
+        // SDK-retries × executeWithRetry-attempts HTTP calls per user
+        // click instead of a single one per visible attempt.
+        maxRetries: 0,
       });
 
       if (!result.output) throw new Error("No structured output generated");
