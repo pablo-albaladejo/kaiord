@@ -37,4 +37,15 @@ export class GatewayAuthenticationError extends Error {
     super(message ?? "GatewayAuthenticationError");
     this.name = "GatewayAuthenticationError";
   }
+
+  // The `ai` SDK invokes `GatewayAuthenticationError.isInstance(error)`
+  // inside `wrapGatewayError` to decide whether to rewrap with a
+  // friendly "configure AI_GATEWAY_API_KEY" message. The SPA never
+  // talks to the gateway, so the answer is always `false`. Returning
+  // it preserves the original error (typically APICallError from the
+  // chosen provider) — otherwise the call throws TypeError and the
+  // executeWithRetry catch retries the request unnecessarily.
+  static isInstance(): boolean {
+    return false;
+  }
 }
