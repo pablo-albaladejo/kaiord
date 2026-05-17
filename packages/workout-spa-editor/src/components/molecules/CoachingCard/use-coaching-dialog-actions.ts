@@ -8,6 +8,7 @@
 
 import { useCallback, useState } from "react";
 
+import { useToastContext } from "../../../contexts/ToastContext";
 import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import { useMatchSession } from "../../../hooks/use-match-session";
 import { useUnmatchSession } from "../../../hooks/use-unmatch-session";
@@ -35,6 +36,7 @@ export const useCoachingDialogActions = (
 
   const matchSession = useMatchSession();
   const unmatchSession = useUnmatchSession();
+  const { success: showSuccess } = useToastContext();
 
   const handleSelectWorkout = useCallback(
     async (workoutId: string) => {
@@ -50,12 +52,15 @@ export const useCoachingDialogActions = (
           workoutId,
           source: "manual",
         });
+        // Static title satisfies R-PIIInterpolation; the dynamic
+        // activity title flows through the description field.
+        showSuccess("Workout matched", activity.title, { duration: 3000 });
         setPickerOpen(false);
       } finally {
         setMatching(false);
       }
     },
-    [activity, targetProfileId, matching, matchSession]
+    [activity, targetProfileId, matching, matchSession, showSuccess]
   );
 
   const handleSplit = useCallback(async () => {

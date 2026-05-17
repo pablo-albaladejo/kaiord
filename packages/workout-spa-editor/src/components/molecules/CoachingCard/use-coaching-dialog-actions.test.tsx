@@ -9,12 +9,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockMatch = vi.fn();
 const mockUnmatch = vi.fn();
+const mockShowSuccess = vi.fn();
 
 vi.mock("../../../hooks/use-match-session", () => ({
   useMatchSession: () => mockMatch,
 }));
 vi.mock("../../../hooks/use-unmatch-session", () => ({
   useUnmatchSession: () => mockUnmatch,
+}));
+vi.mock("../../../contexts/ToastContext", () => ({
+  useToastContext: () => ({
+    error: vi.fn(),
+    success: mockShowSuccess,
+    toast: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    toasts: [],
+    dismiss: vi.fn(),
+    dismissAll: vi.fn(),
+  }),
 }));
 
 import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";

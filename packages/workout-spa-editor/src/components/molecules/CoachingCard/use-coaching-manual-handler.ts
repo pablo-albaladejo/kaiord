@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import { convertCoachingActivityManual } from "../../../application/coaching/convert-coaching-activity-manual";
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { usePersistence } from "../../../contexts/persistence-context";
+import { useToastContext } from "../../../contexts/ToastContext";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 
 export type UseCoachingManual = {
@@ -29,6 +30,7 @@ export const useCoachingManual = (
 ): UseCoachingManual => {
   const persistence = usePersistence();
   const analytics = useAnalytics();
+  const { success: showSuccess } = useToastContext();
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +58,9 @@ export const useCoachingManual = (
           clock: () => new Date().toISOString(),
         }
       );
+      // Fire toast BEFORE onClose() to keep the success signal visible
+      // even though the AppToastProvider lives above the dialog tree.
+      showSuccess("Workout matched", activity.title, { duration: 3000 });
       onClose();
       navigate(`/workout/${result.workoutId}`);
     } catch (err) {
@@ -64,7 +69,15 @@ export const useCoachingManual = (
       setCreating(false);
       inFlight.current = false;
     }
-  }, [activity, profileId, persistence, analytics, navigate, onClose]);
+  }, [
+    activity,
+    profileId,
+    persistence,
+    analytics,
+    navigate,
+    onClose,
+    showSuccess,
+  ]);
 
   return {
     creating,
