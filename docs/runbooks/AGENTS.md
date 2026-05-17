@@ -11,9 +11,10 @@ external service.
 
 ## Key Files
 
-| File                     | Description                                                                                                                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cws-service-account.md` | Chrome Web Store service-account setup, key rotation, emergency `force_upload` re-publish, and compromised-key response. Required reading before touching `.github/workflows/cws-publish.yml`. |
+| File                        | Description                                                                                                                                                                                    |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cws-service-account.md`    | Chrome Web Store service-account setup, key rotation, emergency `force_upload` re-publish, and compromised-key response. Required reading before touching `.github/workflows/cws-publish.yml`. |
+| `required-status-checks.md` | Recipe for the manual `main`-branch protection settings change tracked by issue #623 (required-checks list, rollback, verification).                                                           |
 
 ## For AI Agents
 
