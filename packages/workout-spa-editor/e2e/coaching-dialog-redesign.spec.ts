@@ -467,10 +467,18 @@ test.describe("Coaching activity dialog redesign", () => {
       { timeout: 10_000 }
     );
     await clearDexie(page);
+    // PR #606's dialog AI pipeline fires more than one HTTP call per
+    // user click (in-place re-process layer wraps the AI SDK call), so
+    // a single-call 401 mock is still followed by a 200 that the
+    // pipeline consumes — the dialog navigates away before the inline
+    // error surfaces. Until the multi-call path is disentangled
+    // (follow-up to #622), fail the first burst of attempts and only
+    // succeed on the user's explicit Retry-AI click.
+    const FIRST_CLICK_ATTEMPTS = 3;
     let calls = 0;
     const handler = async (route: Route) => {
       calls += 1;
-      if (calls === 1) {
+      if (calls <= FIRST_CLICK_ATTEMPTS) {
         await route.fulfill({
           status: 401,
           contentType: "application/json",
