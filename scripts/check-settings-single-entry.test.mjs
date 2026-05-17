@@ -8,49 +8,85 @@ import {
 } from "./check-settings-single-entry.mjs";
 
 describe("isFlagEnabled", () => {
-  it("returns false when flag is set to false", () => {
+  it("should return false when flag is set to false", () => {
+    // Arrange
     const src = `export const FEATURE_FLAGS = { "ux2026.unifiedSettings": false };`;
-    assert.equal(isFlagEnabled(src), false);
+
+    // Act
+    const result = isFlagEnabled(src);
+
+    // Assert
+    assert.equal(result, false);
   });
 
-  it("returns true when flag is set to true", () => {
+  it("should return true when flag is set to true", () => {
+    // Arrange
     const src = `export const FEATURE_FLAGS = { "ux2026.unifiedSettings": true };`;
-    assert.equal(isFlagEnabled(src), true);
+
+    // Act
+    const result = isFlagEnabled(src);
+
+    // Assert
+    assert.equal(result, true);
   });
 
-  it("returns false when the flag entry is missing", () => {
+  it("should return false when the flag entry is missing", () => {
+    // Arrange
     const src = `export const FEATURE_FLAGS = { "ux2026.spineHeader": true };`;
-    assert.equal(isFlagEnabled(src), false);
+
+    // Act
+    const result = isFlagEnabled(src);
+
+    // Assert
+    assert.equal(result, false);
   });
 
-  it("returns true when the key uses single quotes", () => {
+  it("should return true when the key uses single quotes", () => {
+    // Arrange
     const src = `export const FEATURE_FLAGS = { 'ux2026.unifiedSettings': true };`;
-    assert.equal(isFlagEnabled(src), true);
+
+    // Act
+    const result = isFlagEnabled(src);
+
+    // Assert
+    assert.equal(result, true);
   });
 
-  it("returns true when the key is a bare identifier (no quotes)", () => {
+  it("should return true when the key is a bare identifier (no quotes)", () => {
+    // Arrange
     const src = `export const FEATURE_FLAGS = { ux2026.unifiedSettings: true };`;
-    assert.equal(isFlagEnabled(src), true);
+
+    // Act
+    const result = isFlagEnabled(src);
+
+    // Assert
+    assert.equal(result, true);
   });
 });
 
 describe("checkSingleEntry", () => {
   describe("no direct imports", () => {
-    it("returns no errors for files that do not import SettingsPanel or ProfileManager", () => {
-      const errors = checkSingleEntry(
-        `import { Button } from "../atoms/Button/Button";`,
-        "src/foo.tsx"
-      );
+    it("should return no errors for files that do not import SettingsPanel or ProfileManager", () => {
+      // Arrange
+      const src = `import { Button } from "../atoms/Button/Button";`;
+
+      // Act
+      const errors = checkSingleEntry(src, "src/foo.tsx");
+
+      // Assert
       assert.deepEqual(errors, []);
     });
   });
 
   describe("direct SettingsPanel import", () => {
-    it("flags a direct import of SettingsPanel", () => {
-      const errors = checkSingleEntry(
-        `import { SettingsPanel } from "../organisms/SettingsPanel/SettingsPanel";`,
-        "src/foo.tsx"
-      );
+    it("should flag a direct import of SettingsPanel", () => {
+      // Arrange
+      const src = `import { SettingsPanel } from "../organisms/SettingsPanel/SettingsPanel";`;
+
+      // Act
+      const errors = checkSingleEntry(src, "src/foo.tsx");
+
+      // Assert
       assert.equal(errors.length, 1);
       assert.ok(errors[0].includes("SettingsPanel"));
       assert.ok(errors[0].includes("src/foo.tsx:1"));
@@ -58,37 +94,47 @@ describe("checkSingleEntry", () => {
   });
 
   describe("direct ProfileManager import", () => {
-    it("flags a direct import of ProfileManager", () => {
-      const errors = checkSingleEntry(
-        `import { ProfileManager } from "../organisms/ProfileManager/ProfileManager";`,
-        "src/foo.tsx"
-      );
+    it("should flag a direct import of ProfileManager", () => {
+      // Arrange
+      const src = `import { ProfileManager } from "../organisms/ProfileManager/ProfileManager";`;
+
+      // Act
+      const errors = checkSingleEntry(src, "src/foo.tsx");
+
+      // Assert
       assert.equal(errors.length, 1);
       assert.ok(errors[0].includes("ProfileManager"));
     });
   });
 
   describe("allowlist", () => {
-    it("exempts files in the allowlist", () => {
+    it("should exempt files in the allowlist", () => {
+      // Arrange
       const allow = new Set(["src/legacy.tsx"]);
-      const errors = checkSingleEntry(
-        `import { SettingsPanel } from "../organisms/SettingsPanel/SettingsPanel";`,
-        "src/legacy.tsx",
-        allow
-      );
+      const src = `import { SettingsPanel } from "../organisms/SettingsPanel/SettingsPanel";`;
+
+      // Act
+      const errors = checkSingleEntry(src, "src/legacy.tsx", allow);
+
+      // Assert
       assert.deepEqual(errors, []);
     });
   });
 
   describe("multiline imports", () => {
-    it("flags a SettingsPanel import split across multiple lines", () => {
+    it("should flag a SettingsPanel import split across multiple lines", () => {
+      // Arrange
       const src = [
         "import {",
         "  SettingsPanel,",
         '} from "../organisms/SettingsPanel/SettingsPanel";',
         "",
       ].join("\n");
+
+      // Act
       const errors = checkSingleEntry(src, "src/multi.tsx");
+
+      // Assert
       assert.equal(errors.length, 1);
       assert.ok(errors[0].includes("SettingsPanel"));
       assert.ok(errors[0].includes("src/multi.tsx:1"));
@@ -96,8 +142,14 @@ describe("checkSingleEntry", () => {
   });
 
   describe("ALLOWLIST is empty initially", () => {
-    it("ships with an empty allowlist (production initial)", () => {
-      assert.equal(ALLOWLIST.size, 0);
+    it("should ship with an empty allowlist (production initial)", () => {
+      // Arrange
+
+      // Act
+      const size = ALLOWLIST.size;
+
+      // Assert
+      assert.equal(size, 0);
     });
   });
 });

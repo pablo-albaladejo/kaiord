@@ -8,31 +8,40 @@ const PAST = "2000-01-01";
 
 describe("checkStranglerExpiry", () => {
   describe("no marker", () => {
-    it("returns no errors when file has no strangler-until comment", () => {
-      const errors = checkStranglerExpiry(
-        "export const x = 1;\nexport const y = 2;\n",
-        "src/foo.ts"
-      );
+    it("should return no errors when file has no strangler-until comment", () => {
+      // Arrange
+      const src = "export const x = 1;\nexport const y = 2;\n";
+
+      // Act
+      const errors = checkStranglerExpiry(src, "src/foo.ts");
+
+      // Assert
       assert.deepEqual(errors, []);
     });
   });
 
   describe("future date", () => {
-    it("returns no errors when strangler-until is in the future", () => {
-      const errors = checkStranglerExpiry(
-        `// @strangler-until: ${FUTURE}\nexport const x = 1;\n`,
-        "src/foo.ts"
-      );
+    it("should return no errors when strangler-until is in the future", () => {
+      // Arrange
+      const src = `// @strangler-until: ${FUTURE}\nexport const x = 1;\n`;
+
+      // Act
+      const errors = checkStranglerExpiry(src, "src/foo.ts");
+
+      // Assert
       assert.deepEqual(errors, []);
     });
   });
 
   describe("past date", () => {
-    it("flags an expired strangler-until marker", () => {
-      const errors = checkStranglerExpiry(
-        `// @strangler-until: ${PAST}\nexport const x = 1;\n`,
-        "src/foo.ts"
-      );
+    it("should flag an expired strangler-until marker", () => {
+      // Arrange
+      const src = `// @strangler-until: ${PAST}\nexport const x = 1;\n`;
+
+      // Act
+      const errors = checkStranglerExpiry(src, "src/foo.ts");
+
+      // Assert
       assert.equal(errors.length, 1);
       assert.ok(errors[0].includes("has passed"));
       assert.ok(errors[0].includes("src/foo.ts:1"));
@@ -40,22 +49,28 @@ describe("checkStranglerExpiry", () => {
   });
 
   describe("malformed date", () => {
-    it("flags a non-YYYY-MM-DD date", () => {
-      const errors = checkStranglerExpiry(
-        `// @strangler-until: tomorrow\nexport const x = 1;\n`,
-        "src/foo.ts"
-      );
+    it("should flag a non-YYYY-MM-DD date", () => {
+      // Arrange
+      const src = `// @strangler-until: tomorrow\nexport const x = 1;\n`;
+
+      // Act
+      const errors = checkStranglerExpiry(src, "src/foo.ts");
+
+      // Assert
       assert.equal(errors.length, 1);
       assert.ok(errors[0].includes("malformed"));
     });
   });
 
   describe("multiple markers", () => {
-    it("flags each expired marker independently", () => {
-      const errors = checkStranglerExpiry(
-        `// @strangler-until: ${PAST}\nconst a = 1;\n// @strangler-until: ${PAST}\nconst b = 2;\n`,
-        "src/foo.ts"
-      );
+    it("should flag each expired marker independently", () => {
+      // Arrange
+      const src = `// @strangler-until: ${PAST}\nconst a = 1;\n// @strangler-until: ${PAST}\nconst b = 2;\n`;
+
+      // Act
+      const errors = checkStranglerExpiry(src, "src/foo.ts");
+
+      // Assert
       assert.equal(errors.length, 2);
       assert.ok(errors[0].includes("src/foo.ts:1"));
       assert.ok(errors[1].includes("src/foo.ts:3"));
