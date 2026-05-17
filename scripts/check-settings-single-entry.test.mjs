@@ -22,6 +22,16 @@ describe("isFlagEnabled", () => {
     const src = `export const FEATURE_FLAGS = { "ux2026.spineHeader": true };`;
     assert.equal(isFlagEnabled(src), false);
   });
+
+  it("returns true when the key uses single quotes", () => {
+    const src = `export const FEATURE_FLAGS = { 'ux2026.unifiedSettings': true };`;
+    assert.equal(isFlagEnabled(src), true);
+  });
+
+  it("returns true when the key is a bare identifier (no quotes)", () => {
+    const src = `export const FEATURE_FLAGS = { ux2026.unifiedSettings: true };`;
+    assert.equal(isFlagEnabled(src), true);
+  });
 });
 
 describe("checkSingleEntry", () => {
@@ -67,6 +77,21 @@ describe("checkSingleEntry", () => {
         allow
       );
       assert.deepEqual(errors, []);
+    });
+  });
+
+  describe("multiline imports", () => {
+    it("flags a SettingsPanel import split across multiple lines", () => {
+      const src = [
+        "import {",
+        "  SettingsPanel,",
+        '} from "../organisms/SettingsPanel/SettingsPanel";',
+        "",
+      ].join("\n");
+      const errors = checkSingleEntry(src, "src/multi.tsx");
+      assert.equal(errors.length, 1);
+      assert.ok(errors[0].includes("SettingsPanel"));
+      assert.ok(errors[0].includes("src/multi.tsx:1"));
     });
   });
 

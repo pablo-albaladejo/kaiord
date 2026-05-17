@@ -26,10 +26,10 @@ export default function SettingsPage() {
   const resolvedTab = isValidTab(tab) ? tab : null;
 
   useEffect(() => {
-    if (flagOn && resolvedTab === null) {
+    if (flagOn && tab === undefined) {
       navigate("/settings/profile", { replace: true });
     }
-  }, [flagOn, resolvedTab, navigate]);
+  }, [flagOn, tab, navigate]);
 
   if (!flagOn) return <Redirect to="/calendar" />;
   if (resolvedTab === null) return null;
