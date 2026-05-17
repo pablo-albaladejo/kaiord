@@ -11,6 +11,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useState } from "react";
 
 import { db } from "../../adapters/dexie/dexie-database";
+import { useToastContext } from "../../contexts/ToastContext";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { prepareBatch } from "./batch-prepare";
@@ -24,7 +25,12 @@ export type BatchPending = {
 export function useBatchState(weekStart: string, weekEnd: string) {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState<BatchPending | null>(null);
-  const runner = useBatchRunner(setMessage);
+  const { success: showSuccess } = useToastContext();
+  // Static title satisfies the R-PIIInterpolation guard; the dynamic
+  // count flows through the description field.
+  const runner = useBatchRunner(setMessage, (count) =>
+    showSuccess("Batch processed", `${count} workouts`, { duration: 3000 })
+  );
 
   const providerCount = useLiveQuery(() => db.table("aiProviders").count(), []);
 

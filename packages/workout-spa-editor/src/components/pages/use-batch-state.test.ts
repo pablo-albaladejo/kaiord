@@ -28,12 +28,37 @@ vi.mock("./batch-prepare", () => ({
   prepareBatch: async () => mockPrep,
 }));
 
+const runnerSuccessSpy = vi.fn<(count: number) => void>();
+
 vi.mock("./use-batch-runner", () => ({
-  useBatchRunner: () => ({
-    progress: null,
-    isProcessing: false,
-    run: runSpy,
-    cancel: vi.fn(),
+  useBatchRunner: (
+    _setMessage: (msg: string | null) => void,
+    onSuccess?: (count: number) => void
+  ) => {
+    if (onSuccess) {
+      runnerSuccessSpy.mockImplementation(onSuccess);
+    }
+    return {
+      progress: null,
+      isProcessing: false,
+      run: runSpy,
+      cancel: vi.fn(),
+    };
+  },
+}));
+
+const mockShowSuccess = vi.fn();
+
+vi.mock("../../contexts/ToastContext", () => ({
+  useToastContext: () => ({
+    error: vi.fn(),
+    success: mockShowSuccess,
+    toast: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    toasts: [],
+    dismiss: vi.fn(),
+    dismissAll: vi.fn(),
   }),
 }));
 
