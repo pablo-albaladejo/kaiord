@@ -1,13 +1,5 @@
-/**
- * FirstVisitState - Onboarding when no workouts exist anywhere.
- *
- * Shows 3 entry paths: Create, Import, Connect.
- */
-
 import { Download, PenLine, Plug } from "lucide-react";
 import { useLocation } from "wouter";
-
-import { useSettingsDialog } from "../../../contexts";
 
 export type FirstVisitStateProps = {
   onSettingsClick?: () => void;
@@ -41,7 +33,8 @@ function EntryPath({
 
 export function FirstVisitState({ onSettingsClick }: FirstVisitStateProps) {
   const [, navigate] = useLocation();
-  const { show } = useSettingsDialog();
+  const goToConnections = () =>
+    onSettingsClick ? onSettingsClick() : navigate("/settings/profile");
 
   return (
     <div
@@ -70,7 +63,7 @@ export function FirstVisitState({ onSettingsClick }: FirstVisitStateProps) {
           icon={Plug}
           title="Connect"
           description="Link Garmin Connect, Train2Go, or other platforms"
-          onClick={onSettingsClick ?? show}
+          onClick={goToConnections}
         />
       </div>
     </div>

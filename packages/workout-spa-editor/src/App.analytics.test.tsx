@@ -15,7 +15,6 @@ import { ToastProvider } from "./components/atoms/Toast";
 import {
   AnalyticsProvider,
   GarminBridgeProvider,
-  SettingsDialogProvider,
   ThemeProvider,
 } from "./contexts";
 import { PersistenceProvider } from "./contexts/persistence-context";
@@ -35,17 +34,15 @@ function renderAtPath({ path, analytics }: RenderArgs) {
     <AnalyticsProvider analytics={analytics}>
       <PersistenceProvider persistence={createInMemoryPersistence()}>
         <ThemeProvider>
-          <SettingsDialogProvider>
-            <GarminBridgeProvider>
-              <ToastProvider>
-                <ToastContextProvider>
-                  <Router hook={hook}>
-                    <App />
-                  </Router>
-                </ToastContextProvider>
-              </ToastProvider>
-            </GarminBridgeProvider>
-          </SettingsDialogProvider>
+          <GarminBridgeProvider>
+            <ToastProvider>
+              <ToastContextProvider>
+                <Router hook={hook}>
+                  <App />
+                </Router>
+              </ToastContextProvider>
+            </ToastProvider>
+          </GarminBridgeProvider>
         </ThemeProvider>
       </PersistenceProvider>
     </AnalyticsProvider>

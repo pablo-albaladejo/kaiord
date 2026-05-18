@@ -1,15 +1,7 @@
-/**
- * Editor New Workout Section
- *
- * Shows AI input + welcome section for creating new workouts. Wraps
- * the manual save flow with analytics so that `workout-created` events
- * with `source: "manual"` are emitted whenever the user saves a
- * non-AI workout.
- */
-
 import { lazy, Suspense } from "react";
+import { useLocation } from "wouter";
 
-import { useAnalytics, useSettingsDialog } from "../../contexts";
+import { useAnalytics } from "../../contexts/analytics-context";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import type { Sport, Workout } from "../../types/krd";
 import { WelcomeSection } from "./WelcomeSection";
@@ -25,7 +17,7 @@ type EditorNewWorkoutProps = {
 };
 
 export function EditorNewWorkout({ workout }: EditorNewWorkoutProps) {
-  const { show: settingsShow } = useSettingsDialog();
+  const [, navigate] = useLocation();
   const { handleFileLoad, handleFileError, handleCreateWorkout } =
     useAppHandlers();
   const analytics = useAnalytics();
@@ -38,7 +30,7 @@ export function EditorNewWorkout({ workout }: EditorNewWorkoutProps) {
   return (
     <>
       <Suspense fallback={null}>
-        <AiWorkoutInput onSettingsClick={settingsShow} />
+        <AiWorkoutInput onSettingsClick={() => navigate("/settings/ai")} />
       </Suspense>
       {!workout && (
         <WelcomeSection

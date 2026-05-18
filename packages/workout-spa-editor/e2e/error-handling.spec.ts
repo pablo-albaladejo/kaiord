@@ -47,8 +47,10 @@ test.describe("Error Handling", () => {
     // - Chromium: "position N" or "Unexpected token"
     // - Firefox: "line N" or "expected property name"
     // - WebKit: "Expected '}'" or similar
-    const errorDetail = page.getByText(/position|line|unexpected|expected/i);
-    await expect(errorDetail).toBeVisible({ timeout: 5000 });
+    const errorDetail = page
+      .locator(".text-red-700, .text-red-300")
+      .getByText(/position|line|unexpected|expected/i);
+    await expect(errorDetail.first()).toBeVisible({ timeout: 5000 });
   });
 
   test("should display specific error for missing required fields", async ({

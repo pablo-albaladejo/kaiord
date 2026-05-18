@@ -5,7 +5,6 @@ import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { CoachingRegistryProvider } from "./contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { PersistenceProvider } from "./contexts/persistence-context";
-import { SettingsDialogProvider } from "./contexts/settings-dialog-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
 import type { PersistencePort } from "./ports/persistence-port";
 import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
@@ -41,13 +40,11 @@ export function renderWithProviders(
     return (
       <ThemeProvider defaultTheme={defaultTheme}>
         <PersistenceProvider persistence={persistence}>
-          <SettingsDialogProvider>
-            <GarminBridgeProvider>
-              <CoachingRegistryProvider factories={[]}>
-                <AppToastProvider>{children}</AppToastProvider>
-              </CoachingRegistryProvider>
-            </GarminBridgeProvider>
-          </SettingsDialogProvider>
+          <GarminBridgeProvider>
+            <CoachingRegistryProvider factories={[]}>
+              <AppToastProvider>{children}</AppToastProvider>
+            </CoachingRegistryProvider>
+          </GarminBridgeProvider>
         </PersistenceProvider>
       </ThemeProvider>
     );

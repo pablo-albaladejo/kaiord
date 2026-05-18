@@ -1,13 +1,8 @@
-/**
- * NoAiProviderState - No AI provider configured.
- */
-
 import { Bot } from "lucide-react";
-
-import { useSettingsDialog } from "../../../contexts";
+import { useLocation } from "wouter";
 
 export function NoAiProviderState() {
-  const { show } = useSettingsDialog();
+  const [, navigate] = useLocation();
 
   return (
     <div
@@ -23,7 +18,7 @@ export function NoAiProviderState() {
       </div>
       <button
         type="button"
-        onClick={show}
+        onClick={() => navigate("/settings/ai")}
         className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
       >
         Configure

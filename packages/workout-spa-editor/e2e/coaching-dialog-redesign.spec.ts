@@ -581,9 +581,12 @@ test.describe("Coaching activity dialog redesign", () => {
     await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
     await page.getByTestId("coaching-dialog-ai-process").click();
 
-    // Assert — toast appears with the C2 static literal
+    // Assert — toast appears with the C2 static literal (scope to the
+    // visible toast body; the aria-live announcer node prefixes its
+    // content with "Notification " and would otherwise duplicate the
+    // match under strict mode).
     await expect(
-      page.getByText("Failed to process activity with AI")
+      page.getByText("Failed to process activity with AI", { exact: true })
     ).toBeVisible({
       timeout: 10_000,
     });

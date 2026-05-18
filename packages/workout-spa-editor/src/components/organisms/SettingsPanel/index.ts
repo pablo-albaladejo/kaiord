@@ -1,2 +1,1 @@
-export { SettingsPanel } from "./SettingsPanel";
-export type { SettingsPanelProps, SettingsTab } from "./types";
+export type { SettingsTab } from "./types";

@@ -1,12 +1,3 @@
-/**
- * DialogHeader Component
- *
- * Header section with inline-editable profile name.
- */
-
-import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-
 type DialogHeaderProps = {
   profileName?: string;
   onNameChange?: (name: string) => void;
@@ -15,18 +6,10 @@ type DialogHeaderProps = {
 export function DialogHeader({ profileName, onNameChange }: DialogHeaderProps) {
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Profile Manager
-        </Dialog.Title>
-        <Dialog.Close asChild>
-          <button
-            className="rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:ring-offset-gray-950"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </Dialog.Close>
+        </h2>
       </div>
 
       {profileName !== undefined && onNameChange && (
@@ -39,9 +22,9 @@ export function DialogHeader({ profileName, onNameChange }: DialogHeaderProps) {
         />
       )}
 
-      <Dialog.Description className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
         Manage your training profiles with zones and personal data.
-      </Dialog.Description>
+      </p>
     </>
   );
 }
