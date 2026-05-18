@@ -4,7 +4,6 @@ import { describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
-import { SettingsDialogProvider } from "../../../contexts";
 import { EmptyWeekState } from "./EmptyWeekState";
 import { FirstVisitState } from "./FirstVisitState";
 import { NoAiProviderState } from "./NoAiProviderState";
@@ -12,11 +11,7 @@ import { NoBridgesState } from "./NoBridgesState";
 
 function withRouter(ui: React.ReactNode, path = "/calendar") {
   const { hook } = memoryLocation({ path, record: true });
-  return (
-    <SettingsDialogProvider>
-      <Router hook={hook}>{ui}</Router>
-    </SettingsDialogProvider>
-  );
+  return <Router hook={hook}>{ui}</Router>;
 }
 
 describe("FirstVisitState", () => {
@@ -63,19 +58,21 @@ describe("FirstVisitState", () => {
     expect(onSettingsClick).toHaveBeenCalledOnce();
   });
 
-  it("should open settings dialog when Connect is clicked without prop", async () => {
+  it("should navigate to /settings/profile when Connect is clicked without prop", async () => {
     // Arrange
+    const user = userEvent.setup();
+    const memory = memoryLocation({ path: "/calendar", record: true });
+    render(
+      <Router hook={memory.hook}>
+        <FirstVisitState />
+      </Router>
+    );
 
     // Act
+    await user.click(screen.getByText("Connect"));
 
     // Assert
-
-    const user = userEvent.setup();
-
-    render(withRouter(<FirstVisitState />));
-
-    // Should not throw - falls back to context's show()
-    await user.click(screen.getByText("Connect"));
+    expect(memory.history.at(-1)).toBe("/settings/profile");
   });
 
   it("should navigate to /workout/new when Create is clicked", async () => {

@@ -10,7 +10,6 @@ import App from "./App.tsx";
 import {
   AnalyticsProvider,
   GarminBridgeProvider,
-  SettingsDialogProvider,
   ThemeProvider,
 } from "./contexts";
 import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
@@ -18,9 +17,6 @@ import { PersistenceProvider } from "./contexts/persistence-context";
 import { getCfAnalyticsToken } from "./lib/runtime-config";
 import { computeRouterBase } from "./router-base";
 
-// Analytics token is read from runtime config (window.__KAIORD_CONFIG__),
-// populated by an inline <script> in index.html whose value is substituted at
-// deploy time. The bundle stays environment-agnostic (12-factor III + V).
 const analytics = createCloudflareAnalytics(getCfAnalyticsToken());
 
 const persistence = createDexiePersistence();
@@ -32,15 +28,13 @@ createRoot(document.getElementById("root")!).render(
     <AnalyticsProvider analytics={analytics}>
       <PersistenceProvider persistence={persistence}>
         <ThemeProvider>
-          <SettingsDialogProvider>
-            <GarminBridgeProvider>
-              <CoachingRegistryBootstrap>
-                <Router base={routerBase}>
-                  <App />
-                </Router>
-              </CoachingRegistryBootstrap>
-            </GarminBridgeProvider>
-          </SettingsDialogProvider>
+          <GarminBridgeProvider>
+            <CoachingRegistryBootstrap>
+              <Router base={routerBase}>
+                <App />
+              </Router>
+            </CoachingRegistryBootstrap>
+          </GarminBridgeProvider>
         </ThemeProvider>
       </PersistenceProvider>
     </AnalyticsProvider>

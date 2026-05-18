@@ -17,7 +17,7 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
-import { GarminBridgeProvider, SettingsDialogProvider } from "../../contexts";
+import { GarminBridgeProvider } from "../../contexts";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { ToastContextProvider } from "../../contexts/ToastContext";
 import { useWorkoutStore } from "../../store/workout-store";
@@ -67,17 +67,15 @@ function renderEditor(id?: string) {
   const { hook } = memoryLocation({ path, record: true });
   return render(
     <PersistenceProvider persistence={createDexiePersistence(db)}>
-      <SettingsDialogProvider>
-        <GarminBridgeProvider>
-          <ToastProvider>
-            <ToastContextProvider>
-              <Router hook={hook}>
-                <EditorPage id={id} />
-              </Router>
-            </ToastContextProvider>
-          </ToastProvider>
-        </GarminBridgeProvider>
-      </SettingsDialogProvider>
+      <GarminBridgeProvider>
+        <ToastProvider>
+          <ToastContextProvider>
+            <Router hook={hook}>
+              <EditorPage id={id} />
+            </Router>
+          </ToastContextProvider>
+        </ToastProvider>
+      </GarminBridgeProvider>
     </PersistenceProvider>
   );
 }

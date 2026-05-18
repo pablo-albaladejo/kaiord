@@ -6,11 +6,7 @@ import { memoryLocation } from "wouter/memory-location";
 
 import App from "./App";
 import { ToastProvider } from "./components/atoms/Toast";
-import {
-  GarminBridgeProvider,
-  SettingsDialogProvider,
-  ThemeProvider,
-} from "./contexts";
+import { GarminBridgeProvider, ThemeProvider } from "./contexts";
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { ToastContextProvider } from "./contexts/ToastContext";
 import { useWorkoutStore } from "./store/workout-store";
@@ -22,17 +18,15 @@ function renderAtPath(path: string) {
   return render(
     <ThemeProvider>
       <PersistenceProvider persistence={createInMemoryPersistence()}>
-        <SettingsDialogProvider>
-          <GarminBridgeProvider>
-            <ToastProvider>
-              <ToastContextProvider>
-                <Router hook={hook}>
-                  <App />
-                </Router>
-              </ToastContextProvider>
-            </ToastProvider>
-          </GarminBridgeProvider>
-        </SettingsDialogProvider>
+        <GarminBridgeProvider>
+          <ToastProvider>
+            <ToastContextProvider>
+              <Router hook={hook}>
+                <App />
+              </Router>
+            </ToastContextProvider>
+          </ToastProvider>
+        </GarminBridgeProvider>
       </PersistenceProvider>
     </ThemeProvider>
   );
