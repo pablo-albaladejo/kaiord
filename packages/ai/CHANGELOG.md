@@ -1,5 +1,12 @@
 # @kaiord/ai
 
+## 7.3.2
+
+### Patch Changes
+
+- 5f3a93a: Disable the AI SDK's internal retry layer (`maxRetries: 0` on every `generateText` call). `executeWithRetry` already owns the retry loop and the non-retryable APICallError gate, so the SDK's `retry-with-exponential-backoff` was a redundant second layer — a retryable 5xx could fan out to up to (SDK-maxRetries+1) × (executeWithRetry-maxRetries+1) = 9 HTTP calls per user click. Collapsing to one layer makes the per-click HTTP cost predictable (≤ `maxRetries + 1` attempts) and unblocks the e2e flow b mock from needing the multi-call workaround.
+- 51f98ba: Propagate non-retryable `APICallError` immediately from `executeWithRetry` instead of catching it as a prompt-correction retry. Auth errors (e.g. 401/403 from Anthropic) and other provider-classified non-retryable failures now surface in one call rather than three, saving tokens and latency for users with revoked or misconfigured API keys. Provider-classified retryable failures (overloaded errors, network blips) continue to retry as before, and schema validation failures still trigger the prompt-correction loop.
+
 ## 7.1.1
 
 ### Patch Changes
