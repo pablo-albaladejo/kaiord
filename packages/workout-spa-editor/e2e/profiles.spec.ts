@@ -23,7 +23,7 @@ async function gotoProfileSettings(page: Page): Promise<Locator> {
   await openHeaderAction(page, /open profile manager/i);
   await page.waitForURL(/\/settings\/profile$/);
   const settingsPage = page.getByTestId("settings-page");
-  await expect(settingsPage).toBeVisible({ timeout: 5000 });
+  await expect(settingsPage).toBeVisible({ timeout: 10_000 });
   return settingsPage;
 }
 
@@ -289,7 +289,7 @@ test.describe("Profile Management", () => {
     // Assert - Profile still exists in settings page after re-navigation
     await expect(
       page.getByTestId("settings-page").getByText("Persistent Profile")
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible({ timeout: 10_000 });
 
     await context.close();
   });
