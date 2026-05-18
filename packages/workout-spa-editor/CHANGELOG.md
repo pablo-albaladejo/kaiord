@@ -1,5 +1,84 @@
 # @kaiord/workout-spa-editor
 
+## 0.5.0
+
+### Minor Changes
+
+- 20dacbb: Inline the UX 2026 redesign and remove the feature flag system. Settings now live at `/settings/<tab>` (profile, ai, extensions, usage, privacy) with a sidebar tablist; the persistent `StatusHeader` is always rendered and exposes Profile / Help / Settings entry buttons. The `SettingsPanel` and `ProfileManager` dialog wrappers, the `useSettingsDialog` context, the legacy `HeaderNav` / `DesktopNav` / `MobileMenu`, the `feature-flags` module, and the `R-SettingsSingleEntry` lint guard are all removed. Empty-state shortcuts and the editor "configure AI" affordance now navigate to `/settings/<tab>` instead of opening dialogs.
+
+### Patch Changes
+
+- 21b6a49: Add in-place raw→structured re-process for matched coaching activities + e2e coverage for AI dialog flows (a, b, c, f). Closes #552 and #555 as direct follow-ups to coaching-activity-dialog-redesign §7.4 and §11.1–§11.3/§11.8.
+- 5eb5676: Revert accidental `gap-4` addition on LayoutHeader's inner flex container introduced as a drive-by in #632. The class shifts the header layout and breaks the `coaching-sidebar-mobile.png` visual snapshot at 768px, blocking every downstream PR.
+- 3ce9bcc: UX redesign Phase 1 leftover: surface a 4-button affordance row
+  (`Regenerate` / `Edit` / `Discard` / `Save to Library`) inside the AI
+  workout panel as soon as generation succeeds. Closes the last
+  "dead-end after success" identified in the deep-dive trace — the user
+  no longer has to guess what to do with a freshly-generated workout.
+
+  New `AiSuccessActions` molecule
+  (`packages/workout-spa-editor/src/components/molecules/AiSuccessActions/`)
+  with 5 unit tests. Wired into `AiWorkoutForm` so it renders only when
+  `generation.status === "success"` and a workout is loaded:
+  - **Regenerate** re-invokes the existing `generate(text, sport)` with
+    the current prompt — no new code path.
+  - **Edit** resets the generation state to `idle` so the affordance
+    row collapses and the user proceeds with the editor below.
+  - **Discard** clears the workout via `useClearWorkout` and resets the
+    generation state.
+  - **Save to Library** reuses the existing `SaveToLibraryButton`
+    molecule so the save flow stays consistent with the rest of the app.
+
+  No behavioural change to the AI generation flow itself; the row is
+  purely additive UI.
+
+- 7a99f55: UX redesign Phase 1 leftover: surface a success toast when a batch
+  of raw workouts finishes processing. `useBatchRunner` gains an
+  optional `onSuccess(count)` callback that fires only when the
+  `processBatch` await resolves cleanly — cancellation and errors
+  short-circuit through the existing `catch` so no toast appears in
+  those paths. `useBatchState` wires `useToastContext().success` to
+  the callback with a static `"Batch processed"` title and a
+  `"${count} workouts"` description (R-PIIInterpolation compliant —
+  the title is a bare literal; the dynamic count flows through the
+  description field). Removes the "did anything happen?" dead-end on
+  the calendar's batch-process flow identified in the deep-dive trace.
+- 501ec50: UX redesign Phase 1 leftover: surface a success toast when a coaching
+  activity is matched to a workout (manual picker) or converted to a
+  new manual workout via the coaching dialog. Both success branches now
+  fire `toast.success("Workout matched", activity.title, { duration: 3000 })`.
+  The manual handler fires the toast BEFORE `onClose()` to make the
+  ordering explicit, even though `AppToastProvider` lives above the
+  dialog tree and would survive unmount either way. Static title
+  satisfies the R-PIIInterpolation guard; the dynamic activity title
+  flows through the description field. Removes another of the
+  "asymmetric handoff" dead-ends identified by the deep-dive trace.
+- ccaadfb: UX redesign foundations (Phase 0+1 structural slice): introduce a UX
+  glossary (`packages/workout-spa-editor/docs/ux-glossary.md`) defining
+  canonical verbs and nouns for the spa editor; add a `Card` atom and
+  migrate three duplicated inline `rounded-lg border …` surfaces
+  (`ManualCreateSection`, `GettingStartedTips`, `LibraryPageCard`) to it;
+  add a visible `EditorPageHeader` to replace the previous `sr-only` h1
+  so the editor matches the header pattern used by `LibraryPageHeader`.
+  `EmptyWeekState` is migrated from raw HTML buttons (inline
+  `bg-primary-600 px-4 py-2 …`) to the `Button` atom (`primary` /
+  `secondary`, `sm`) without copy changes. No behavioural change. See
+  `.omc/specs/deep-dive-ui-flow-map-ux-redesign.md` for the full phased
+  roadmap; verb-pass and AI/journey items ship in subsequent PRs.
+- 137698f: UX redesign Phase 1 leftover (start): show a success toast when a
+  template is loaded into the editor from the library. The library's
+  "Load into editor" CTA navigates to `/workout/new`; previously the
+  user landed on the welcome screen with no confirmation that the
+  template had been loaded. The new toast surfaces a static
+  `"Template loaded"` title (PII guard R-PIIInterpolation compliant)
+  with the template name as the description and a 3-second auto-dismiss,
+  addressing one of the "dead-ends after success" issues identified in
+  the deep-dive trace. Auto-dismiss + toast for the batch and coaching
+  completion flows ships in subsequent PRs.
+- Updated dependencies [5f3a93a]
+- Updated dependencies [51f98ba]
+  - @kaiord/ai@7.3.2
+
 ## 0.4.3
 
 ### Patch Changes
