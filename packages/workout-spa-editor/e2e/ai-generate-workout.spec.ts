@@ -76,36 +76,28 @@ test.describe("AI Generate Workout Flow", () => {
   });
 });
 
-/**
- * Helper: add a test AI provider through the Settings UI.
- */
 async function addTestProvider(
   page: Page,
   label = "Test Claude",
   type = "anthropic"
 ): Promise<void> {
-  // Open settings via header action (handles mobile hamburger menu)
   await openHeaderAction(page, /open settings/i);
+  await page.waitForURL(/\/settings\/ai$/);
 
-  const dialog = page.getByRole("dialog", { name: "Settings" });
-  await expect(dialog).toBeVisible({ timeout: 5000 });
+  const settingsPage = page.getByTestId("settings-page");
+  await expect(settingsPage).toBeVisible({ timeout: 5000 });
 
-  // Select provider type
-  const providerSelect = dialog.locator("select").first();
+  const providerSelect = settingsPage.locator("select").first();
   await providerSelect.selectOption(type);
 
-  // Fill in the form
-  await dialog.getByPlaceholder("e.g., My Claude").fill(label);
-  await dialog.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
+  await settingsPage.getByPlaceholder("e.g., My Claude").fill(label);
+  await settingsPage.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
 
-  // Click add
-  await dialog.getByRole("button", { name: /add provider/i }).click();
+  await settingsPage.getByRole("button", { name: /add provider/i }).click();
 
-  // Verify provider appears in list
-  await expect(dialog.getByText(label, { exact: true })).toBeVisible({
+  await expect(settingsPage.getByText(label, { exact: true })).toBeVisible({
     timeout: 3000,
   });
 
-  // Close settings dialog
-  await page.keyboard.press("Escape");
+  await page.goto("/workout/new");
 }

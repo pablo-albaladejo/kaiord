@@ -13,7 +13,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AnalyticsProvider,
   GarminBridgeProvider,
-  SettingsDialogProvider,
   ThemeProvider,
 } from "../../contexts";
 import { ToastContextProvider } from "../../contexts/ToastContext";
@@ -25,13 +24,11 @@ function renderEditorNewWorkout(analytics: Analytics, children: ReactNode) {
   return render(
     <AnalyticsProvider analytics={analytics}>
       <ThemeProvider>
-        <SettingsDialogProvider>
-          <GarminBridgeProvider>
-            <ToastProvider>
-              <ToastContextProvider>{children}</ToastContextProvider>
-            </ToastProvider>
-          </GarminBridgeProvider>
-        </SettingsDialogProvider>
+        <GarminBridgeProvider>
+          <ToastProvider>
+            <ToastContextProvider>{children}</ToastContextProvider>
+          </ToastProvider>
+        </GarminBridgeProvider>
       </ThemeProvider>
     </AnalyticsProvider>
   );

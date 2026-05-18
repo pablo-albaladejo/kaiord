@@ -8,7 +8,9 @@ import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
 const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
 const EditorPage = lazy(() => import("./components/pages/EditorPage"));
-const SettingsPage = lazy(() => import("./components/pages/SettingsPage"));
+const SettingsPage = lazy(
+  () => import("./components/pages/SettingsPage/SettingsPage")
+);
 
 export type AppRoutesProps = { analytics: Analytics };
 

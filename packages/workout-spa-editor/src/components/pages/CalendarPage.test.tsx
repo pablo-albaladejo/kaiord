@@ -4,8 +4,8 @@ import { Route, Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
-import { GarminBridgeProvider, SettingsDialogProvider } from "../../contexts";
 import { CoachingRegistryProvider } from "../../contexts/coaching-registry-context";
+import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../../types/calendar-record";
@@ -51,19 +51,17 @@ function renderCalendar(path = "/calendar/2026-W15") {
   const { hook } = memoryLocation({ path, record: true });
   return render(
     <PersistenceProvider persistence={createInMemoryPersistence()}>
-      <SettingsDialogProvider>
-        <GarminBridgeProvider>
-          <CoachingRegistryProvider factories={[]}>
-            <AppToastProvider>
-              <Router hook={hook}>
-                <Route path="/calendar/:weekId?">
-                  <CalendarPage />
-                </Route>
-              </Router>
-            </AppToastProvider>
-          </CoachingRegistryProvider>
-        </GarminBridgeProvider>
-      </SettingsDialogProvider>
+      <GarminBridgeProvider>
+        <CoachingRegistryProvider factories={[]}>
+          <AppToastProvider>
+            <Router hook={hook}>
+              <Route path="/calendar/:weekId?">
+                <CalendarPage />
+              </Route>
+            </Router>
+          </AppToastProvider>
+        </CoachingRegistryProvider>
+      </GarminBridgeProvider>
     </PersistenceProvider>
   );
 }
