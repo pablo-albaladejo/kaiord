@@ -55,14 +55,15 @@ test.describe("Calendar Empty States", () => {
     await page.waitForURL(/\/workout\/new\?action=import/);
   });
 
-  test('FirstVisitState "Connect" opens Settings dialog', async ({ page }) => {
+  test('FirstVisitState "Connect" navigates to /settings/profile', async ({
+    page,
+  }) => {
     await page.reload();
 
     await expect(page.getByTestId("first-visit-state")).toBeVisible();
     await page.getByRole("button", { name: "Connect" }).click();
 
-    // Settings dialog should appear
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.waitForURL(/\/settings\/profile$/);
   });
 
   test("Workouts in other week but not this shows EmptyWeekState", async ({

@@ -18,42 +18,47 @@ test.describe("Settings Panel", () => {
   });
 
   test("8.7: add provider, remove provider, set default", async ({ page }) => {
-    // Open settings
+    // Open settings (navigates to /settings/ai)
     await openHeaderAction(page, /open settings/i);
-    const dialog = page.getByRole("dialog", { name: "Settings" });
-    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await page.waitForURL(/\/settings\/ai$/);
+    const settingsPage = page.getByTestId("settings-page");
+    await expect(settingsPage).toBeVisible({ timeout: 5000 });
 
     // Should start with "No providers configured"
-    await expect(dialog.getByText("No providers configured")).toBeVisible();
+    await expect(
+      settingsPage.getByText("No providers configured")
+    ).toBeVisible();
 
     // Add first provider (Anthropic)
-    await dialog.getByPlaceholder("e.g., My Claude").fill("My Claude");
-    await dialog.getByPlaceholder("sk-...").fill("sk-ant-key-1");
-    await dialog.getByRole("button", { name: /add provider/i }).click();
+    await settingsPage.getByPlaceholder("e.g., My Claude").fill("My Claude");
+    await settingsPage.getByPlaceholder("sk-...").fill("sk-ant-key-1");
+    await settingsPage.getByRole("button", { name: /add provider/i }).click();
 
     // First provider should be default automatically
-    await expect(dialog.getByText("My Claude", { exact: true })).toBeVisible();
-    await expect(dialog.getByText("Default")).toBeVisible();
+    await expect(
+      settingsPage.getByText("My Claude", { exact: true })
+    ).toBeVisible();
+    await expect(settingsPage.getByText("Default")).toBeVisible();
 
     // Add second provider (OpenAI)
-    const providerSelect = dialog.locator("select").first();
+    const providerSelect = settingsPage.locator("select").first();
     await providerSelect.selectOption({ value: "openai" });
-    await dialog.getByPlaceholder("e.g., My Claude").fill("My GPT");
-    await dialog.getByPlaceholder("sk-...").fill("sk-openai-key-1");
-    await dialog.getByRole("button", { name: /add provider/i }).click();
+    await settingsPage.getByPlaceholder("e.g., My Claude").fill("My GPT");
+    await settingsPage.getByPlaceholder("sk-...").fill("sk-openai-key-1");
+    await settingsPage.getByRole("button", { name: /add provider/i }).click();
 
     // Second provider should be visible but not default
-    await expect(dialog.getByText("My GPT")).toBeVisible();
+    await expect(settingsPage.getByText("My GPT")).toBeVisible();
 
     // Set second as default
-    await dialog.getByRole("button", { name: /set default/i }).click();
+    await settingsPage.getByRole("button", { name: /set default/i }).click();
 
     // Wait for the flip to fully settle. The two-step persistence
     // (Claude flips off, then GPT flips on) is observable from the
     // DOM as: Claude row now exposes its own Set Default button AND
     // GPT no longer does. Gating here guarantees both puts have
     // committed before the following remove fires.
-    const claudeRow = dialog
+    const claudeRow = settingsPage
       .locator("div.rounded-lg.border")
       .filter({ hasText: "My Claude" });
     await expect(
@@ -66,29 +71,36 @@ test.describe("Settings Panel", () => {
 
     // Should only have GPT remaining
     await expect(
-      dialog.getByText("My Claude", { exact: true })
+      settingsPage.getByText("My Claude", { exact: true })
     ).not.toBeVisible();
-    await expect(dialog.getByText("My GPT")).toBeVisible();
+    await expect(settingsPage.getByText("My GPT")).toBeVisible();
   });
 
   test("8.8: Extensions tab shows bridge status", async ({ page }) => {
-    // Open settings
+    // Open settings (navigates to /settings/ai)
     await openHeaderAction(page, /open settings/i);
-    const dialog = page.getByRole("dialog", { name: "Settings" });
-    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await page.waitForURL(/\/settings\/ai$/);
+    const settingsPage = page.getByTestId("settings-page");
+    await expect(settingsPage).toBeVisible({ timeout: 5000 });
 
-    // Switch to Extensions tab
-    await dialog.getByRole("tab", { name: /extensions/i }).click();
+    // Switch to Extensions tab via the sidebar tab
+    await page.getByTestId("settings-tab-extensions").click();
+    await page.waitForURL(/\/settings\/extensions$/);
+
+    const extensionsPanel = page.getByTestId("settings-panel-extensions");
+    await expect(extensionsPanel).toBeVisible();
 
     // Should show both bridges in the status table
     await expect(
-      dialog.getByText("Garmin Connect", { exact: true })
+      extensionsPanel.getByText("Garmin Connect", { exact: true })
     ).toBeVisible();
-    await expect(dialog.getByText("Train2Go", { exact: true })).toBeVisible();
+    await expect(
+      extensionsPanel.getByText("Train2Go", { exact: true })
+    ).toBeVisible();
 
     // Should have a refresh button
     await expect(
-      dialog.getByRole("button", { name: /refresh status/i })
+      extensionsPanel.getByRole("button", { name: /refresh status/i })
     ).toBeVisible();
   });
 });

@@ -11,11 +11,21 @@
  * - Requirement 38: Profile import/export functionality
  */
 
+import type { Locator, Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures/base";
 import { openHeaderAction } from "./helpers/mobile-menu";
 
 const PROFILE_SWITCH_TEST_COUNT = 5;
 const PROFILE_LARGE_LIST_COUNT = 20;
+
+async function gotoProfileSettings(page: Page): Promise<Locator> {
+  await openHeaderAction(page, /open profile manager/i);
+  await page.waitForURL(/\/settings\/profile$/);
+  const settingsPage = page.getByTestId("settings-page");
+  await expect(settingsPage).toBeVisible({ timeout: 5000 });
+  return settingsPage;
+}
 
 test.describe("Profile Management", () => {
   test.beforeEach(async ({ page }) => {
@@ -31,16 +41,15 @@ test.describe("Profile Management", () => {
 
   test("should create a new profile with name only", async ({ page }) => {
     // Arrange - Open profile manager
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
 
     // Act - Create profile
     await page.getByLabel(/^name$/i).fill("Test Athlete");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Assert - Profile appears in dialog list
-    await expect(dialog.getByText("Test Athlete")).toBeVisible();
-    await expect(dialog.getByText(/saved profiles \(1\)/i)).toBeVisible();
+    // Assert - Profile appears in settings page list
+    await expect(settingsPage.getByText("Test Athlete")).toBeVisible();
+    await expect(settingsPage.getByText(/saved profiles \(1\)/i)).toBeVisible();
   });
 
   test("should create a profile with all fields", async ({
@@ -57,35 +66,33 @@ test.describe("Profile Management", () => {
       "Mobile Safari dialog content timing flake (Playwright/WebKit)"
     );
     // Arrange - Open profile manager
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
 
     // Act - Create profile with name (the only field in the create form)
     await page.getByLabel(/^name$/i).fill("Pro Cyclist");
     await page.getByRole("button", { name: /create profile/i }).click();
 
     // Assert - Profile appears in the list
-    await expect(dialog.getByText("Pro Cyclist")).toBeVisible();
+    await expect(settingsPage.getByText("Pro Cyclist")).toBeVisible();
 
     // Act - Edit profile to set cycling thresholds (FTP, LTHR)
     await page.getByRole("button", { name: /^edit$/i }).click();
 
     // The edit view opens on Training Zones tab with Cycling sport by default
-    await dialog.getByLabel(/FTP threshold/i).fill("300");
-    await dialog.getByLabel(/LTHR threshold/i).fill("170");
+    await settingsPage.getByLabel(/FTP threshold/i).fill("300");
+    await settingsPage.getByLabel(/LTHR threshold/i).fill("170");
 
     // Go back to list to verify
-    await dialog.getByRole("button", { name: /back to list/i }).click();
+    await settingsPage.getByRole("button", { name: /back to list/i }).click();
 
     // Assert - Profile shows FTP and LTHR in the list
-    await expect(dialog.getByText(/FTP: 300W/i)).toBeVisible();
-    await expect(dialog.getByText(/LTHR: 170 bpm/i)).toBeVisible();
+    await expect(settingsPage.getByText(/FTP: 300W/i)).toBeVisible();
+    await expect(settingsPage.getByText(/LTHR: 170 bpm/i)).toBeVisible();
   });
 
   test("should edit an existing profile", async ({ page }) => {
     // Arrange - Create a profile first
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
     await page.getByLabel(/^name$/i).fill("Original Name");
     await page.getByRole("button", { name: /create profile/i }).click();
 
@@ -93,19 +100,18 @@ test.describe("Profile Management", () => {
     await page.getByRole("button", { name: /^edit$/i }).click();
 
     // Set FTP in the cycling thresholds (Training Zones tab, Cycling sport)
-    await dialog.getByLabel(/FTP threshold/i).fill("280");
+    await settingsPage.getByLabel(/FTP threshold/i).fill("280");
 
     // Go back to list
-    await dialog.getByRole("button", { name: /back to list/i }).click();
+    await settingsPage.getByRole("button", { name: /back to list/i }).click();
 
-    // Assert - Profile shows updated FTP in dialog
-    await expect(dialog.getByText(/FTP: 280W/i)).toBeVisible();
+    // Assert - Profile shows updated FTP
+    await expect(settingsPage.getByText(/FTP: 280W/i)).toBeVisible();
   });
 
   test("should delete a profile", async ({ page }) => {
     // Arrange - Create two profiles
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
     await page.getByLabel(/^name$/i).fill("Profile 1");
     await page.getByRole("button", { name: /create profile/i }).click();
     // Wait for the form to clear (the "create succeeded" signal) before
@@ -117,7 +123,7 @@ test.describe("Profile Management", () => {
 
     // Act - Delete one of the two profiles. The specific identity is
     // irrelevant to this test; the assertion below checks the count.
-    await dialog
+    await settingsPage
       .getByRole("button", { name: /^delete profile$/i })
       .first()
       .click();
@@ -127,13 +133,12 @@ test.describe("Profile Management", () => {
       .click();
 
     // Assert - Exactly one profile remains.
-    await expect(dialog.getByText(/saved profiles \(1\)/i)).toBeVisible();
+    await expect(settingsPage.getByText(/saved profiles \(1\)/i)).toBeVisible();
   });
 
   test("should switch active profile", async ({ page }) => {
     // Arrange - Create two profiles (first created becomes active automatically)
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
     await page.getByLabel(/^name$/i).fill("Profile A");
     await page.getByRole("button", { name: /create profile/i }).click();
     await expect(page.getByLabel(/^name$/i)).toHaveValue("");
@@ -142,7 +147,7 @@ test.describe("Profile Management", () => {
     await expect(page.getByLabel(/^name$/i)).toHaveValue("");
 
     // Act - Click "Set Active" on the non-active profile
-    await dialog.getByRole("button", { name: /set active/i }).click();
+    await settingsPage.getByRole("button", { name: /set active/i }).click();
 
     // Assert - Notification appears for the newly activated profile
     await expect(
@@ -151,13 +156,13 @@ test.describe("Profile Management", () => {
 
     // Assert - Exactly one "Set Active" button remains (for the now-inactive profile)
     await expect(
-      dialog.getByRole("button", { name: /set active/i })
+      settingsPage.getByRole("button", { name: /set active/i })
     ).toHaveCount(1);
   });
 
   test("should export a profile", async ({ page }) => {
     // Arrange - Create a profile
-    await openHeaderAction(page, /open profile manager/i);
+    await gotoProfileSettings(page);
     await page.getByLabel(/^name$/i).fill("Export Test");
     await page.getByRole("button", { name: /create profile/i }).click();
 
@@ -207,8 +212,7 @@ test.describe("Profile Management", () => {
       updatedAt: new Date().toISOString(),
     };
 
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
 
     // Act - Import the profile
     await page.setInputFiles("#import-profile", {
@@ -217,8 +221,8 @@ test.describe("Profile Management", () => {
       buffer: Buffer.from(JSON.stringify(profileData)),
     });
 
-    // Assert - Profile appears in dialog list with cycling thresholds
-    await expect(dialog.getByText("Imported Profile")).toBeVisible();
+    // Assert - Profile appears in settings page list with cycling thresholds
+    await expect(settingsPage.getByText("Imported Profile")).toBeVisible();
   });
 
   test("should show error for invalid profile import", async ({ page }) => {
@@ -228,7 +232,7 @@ test.describe("Profile Management", () => {
       // Missing required fields
     };
 
-    await openHeaderAction(page, /open profile manager/i);
+    await gotoProfileSettings(page);
 
     // Act - Import invalid profile
     await page.setInputFiles("#import-profile", {
@@ -268,25 +272,23 @@ test.describe("Profile Management", () => {
     await page.reload();
 
     // Arrange - Create a profile
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
     await page.getByLabel(/^name$/i).fill("Persistent Profile");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Verify profile was created in dialog before reload
-    await expect(dialog.getByText("Persistent Profile")).toBeVisible();
+    // Verify profile was created in settings page before navigating away
+    await expect(settingsPage.getByText("Persistent Profile")).toBeVisible();
 
-    // Act - Close dialog and re-open to verify in-session persistence
+    // Act - Navigate away and back to verify in-session persistence
     // Note: Cross-reload persistence via Dexie hydration is pending
     // (store starts empty and hydration from IndexedDB is not yet wired).
-    // Closing and re-opening the dialog verifies the Zustand store retains data.
-    await dialog.getByRole("button", { name: /close/i }).click();
-    await page.getByRole("dialog").waitFor({ state: "hidden" });
+    // Navigating away and back verifies the Zustand store retains data.
+    await page.goto("/workout/new");
+    await page.goto("/settings/profile");
 
-    // Assert - Profile still exists in dialog after close/re-open
-    await openHeaderAction(page, /open profile manager/i);
+    // Assert - Profile still exists in settings page after re-navigation
     await expect(
-      page.getByRole("dialog").getByText("Persistent Profile")
+      page.getByTestId("settings-page").getByText("Persistent Profile")
     ).toBeVisible({ timeout: 5000 });
 
     await context.close();
@@ -303,16 +305,15 @@ test.describe("Zone Configuration", () => {
     await page.goto("/workout/new");
 
     // Create a profile and set cycling thresholds
-    await openHeaderAction(page, /open profile manager/i);
+    const settingsPage = await gotoProfileSettings(page);
     await page.getByLabel(/^name$/i).fill("Zone Test");
     await page.getByRole("button", { name: /create profile/i }).click();
 
     // Edit the profile to set FTP and LTHR in cycling thresholds
     await page.getByRole("button", { name: /^edit$/i }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel(/FTP threshold/i).fill("250");
-    await dialog.getByLabel(/LTHR threshold/i).fill("170");
-    await dialog.getByRole("button", { name: /back to list/i }).click();
+    await settingsPage.getByLabel(/FTP threshold/i).fill("250");
+    await settingsPage.getByLabel(/LTHR threshold/i).fill("170");
+    await settingsPage.getByRole("button", { name: /back to list/i }).click();
   });
 
   test("should edit power zones", async () => {
@@ -338,37 +339,37 @@ test.describe("Zone Configuration", () => {
   });
 
   test("should recalculate zones when FTP changes", async ({ page }) => {
-    const dialog = page.getByRole("dialog");
+    const settingsPage = page.getByTestId("settings-page");
 
     // Arrange - Edit profile to change FTP in cycling thresholds
     await page.getByRole("button", { name: /^edit$/i }).click();
 
     // FTP is in Training Zones > Cycling tab thresholds
-    await dialog.getByLabel(/FTP threshold/i).clear();
-    await dialog.getByLabel(/FTP threshold/i).fill("300");
+    await settingsPage.getByLabel(/FTP threshold/i).clear();
+    await settingsPage.getByLabel(/FTP threshold/i).fill("300");
 
     // Go back to list to verify
-    await dialog.getByRole("button", { name: /back to list/i }).click();
+    await settingsPage.getByRole("button", { name: /back to list/i }).click();
 
     // Assert - Profile shows updated FTP
-    await expect(dialog.getByText(/FTP: 300W/i)).toBeVisible();
+    await expect(settingsPage.getByText(/FTP: 300W/i)).toBeVisible();
   });
 
   test("should recalculate zones when LTHR changes", async ({ page }) => {
-    const dialog = page.getByRole("dialog");
+    const settingsPage = page.getByTestId("settings-page");
 
     // Arrange - Edit profile to change LTHR in cycling thresholds
     await page.getByRole("button", { name: /^edit$/i }).click();
 
     // LTHR is in Training Zones > Cycling tab thresholds
-    await dialog.getByLabel(/LTHR threshold/i).clear();
-    await dialog.getByLabel(/LTHR threshold/i).fill("175");
+    await settingsPage.getByLabel(/LTHR threshold/i).clear();
+    await settingsPage.getByLabel(/LTHR threshold/i).fill("175");
 
     // Go back to list to verify
-    await dialog.getByRole("button", { name: /back to list/i }).click();
+    await settingsPage.getByRole("button", { name: /back to list/i }).click();
 
     // Assert - Profile shows updated LTHR
-    await expect(dialog.getByText(/LTHR: 175 bpm/i)).toBeVisible();
+    await expect(settingsPage.getByText(/LTHR: 175 bpm/i)).toBeVisible();
   });
 });
 
@@ -381,7 +382,7 @@ test.describe("Profile Performance", () => {
     });
     await page.goto("/workout/new");
 
-    await openHeaderAction(page, /open profile manager/i);
+    await gotoProfileSettings(page);
 
     for (let i = 1; i <= PROFILE_SWITCH_TEST_COUNT; i++) {
       await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
@@ -414,8 +415,7 @@ test.describe("Profile Performance", () => {
     });
     await page.goto("/workout/new");
 
-    await openHeaderAction(page, /open profile manager/i);
-    const dialog = page.getByRole("dialog");
+    const settingsPage = await gotoProfileSettings(page);
 
     // Create 20 profiles
     for (let i = 1; i <= PROFILE_LARGE_LIST_COUNT; i++) {
@@ -426,9 +426,13 @@ test.describe("Profile Performance", () => {
       await expect(page.getByLabel(/^name$/i)).toHaveValue("");
     }
 
-    // Assert - All profiles are visible and scrollable in dialog
-    await expect(dialog.getByText(/saved profiles \(20\)/i)).toBeVisible();
-    await expect(dialog.getByText("Profile 1", { exact: true })).toBeVisible();
-    await expect(dialog.getByText("Profile 20")).toBeVisible();
+    // Assert - All profiles are visible and scrollable in settings page
+    await expect(
+      settingsPage.getByText(/saved profiles \(20\)/i)
+    ).toBeVisible();
+    await expect(
+      settingsPage.getByText("Profile 1", { exact: true })
+    ).toBeVisible();
+    await expect(settingsPage.getByText("Profile 20")).toBeVisible();
   });
 });
