@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useLocation } from "wouter";
 
-import { useAnalytics } from "../../contexts";
+import { useAnalytics } from "../../contexts/analytics-context";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import type { Sport, Workout } from "../../types/krd";
 import { WelcomeSection } from "./WelcomeSection";

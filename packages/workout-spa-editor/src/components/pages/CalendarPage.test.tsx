@@ -4,8 +4,8 @@ import { Route, Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
-import { GarminBridgeProvider } from "../../contexts";
 import { CoachingRegistryProvider } from "../../contexts/coaching-registry-context";
+import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../../types/calendar-record";

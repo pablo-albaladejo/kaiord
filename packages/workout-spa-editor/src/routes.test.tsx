@@ -6,8 +6,9 @@ import { memoryLocation } from "wouter/memory-location";
 
 import App from "./App";
 import { ToastProvider } from "./components/atoms/Toast";
-import { GarminBridgeProvider, ThemeProvider } from "./contexts";
+import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { PersistenceProvider } from "./contexts/persistence-context";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContextProvider } from "./contexts/ToastContext";
 import { useWorkoutStore } from "./store/workout-store";
 import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";

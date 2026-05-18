@@ -17,7 +17,7 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
-import { GarminBridgeProvider } from "../../contexts";
+import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { ToastContextProvider } from "../../contexts/ToastContext";
 import { useWorkoutStore } from "../../store/workout-store";
