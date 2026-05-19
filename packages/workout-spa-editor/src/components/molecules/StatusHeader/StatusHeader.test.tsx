@@ -1,10 +1,18 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
+import { useTrain2GoStore } from "../../../store/train2go-store";
 import { renderWithProviders } from "../../../test-utils";
 import { StatusHeader } from "./StatusHeader";
 
 describe("StatusHeader", () => {
+  afterEach(() => {
+    useTrain2GoStore.setState({
+      extensionInstalled: false,
+      sessionActive: false,
+    });
+  });
+
   it("should render the nav, profile button and new-workout button", () => {
     // Arrange
 
@@ -59,6 +67,19 @@ describe("StatusHeader", () => {
     // Assert
 
     expect(screen.queryByTestId("status-header-sync")).not.toBeInTheDocument();
+  });
+
+  it("should show Train2Go 'Synced' when the extension is installed", () => {
+    // Arrange
+    useTrain2GoStore.setState({ extensionInstalled: true });
+
+    // Act
+    renderWithProviders(<StatusHeader />);
+
+    // Assert
+    expect(screen.getByTestId("status-header-sync")).toHaveTextContent(
+      "Train2Go: Synced"
+    );
   });
 
   it("should label the new-workout button as 'New workout'", () => {
