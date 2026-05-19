@@ -1,4 +1,4 @@
-import { Calendar, Library, Plus, Settings, User } from "lucide-react";
+import { Calendar, Library, Plus, Settings } from "lucide-react";
 import type { ComponentType } from "react";
 
 export type EntryDef = {
@@ -31,13 +31,6 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
     label: "New workout",
     to: "/workout/new",
     variant: "primary",
-  },
-  {
-    id: "profile",
-    icon: User,
-    label: "Profile",
-    ariaLabel: "Open profile manager",
-    to: "/settings/profile",
   },
   {
     id: "settings",

@@ -5,7 +5,7 @@ import { renderWithProviders } from "../../../test-utils";
 import { StatusHeader } from "./StatusHeader";
 
 describe("StatusHeader", () => {
-  it("should render all four surfaces (profile / Garmin / Sync / + New)", () => {
+  it("should render the nav, profile button and new-workout button", () => {
     // Arrange
 
     // Act
@@ -15,13 +15,13 @@ describe("StatusHeader", () => {
     // Assert
 
     expect(screen.getByTestId("status-header")).toBeInTheDocument();
-    expect(screen.getByTestId("status-header-profile")).toBeInTheDocument();
-    expect(screen.getByTestId("status-header-garmin")).toBeInTheDocument();
-    expect(screen.getByTestId("status-header-sync")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("status-header-profile-button")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("status-header-new-button")).toBeInTheDocument();
   });
 
-  it("should show 'No profile' when no active profile is loaded", () => {
+  it("should show 'No profile' in the profile button when no active profile is loaded", () => {
     // Arrange
 
     // Act
@@ -30,12 +30,12 @@ describe("StatusHeader", () => {
 
     // Assert
 
-    expect(screen.getByTestId("status-header-profile")).toHaveTextContent(
-      "No profile"
-    );
+    expect(
+      screen.getByTestId("status-header-profile-button")
+    ).toHaveTextContent("No profile");
   });
 
-  it("should show Garmin status 'Offline' when no extension is installed", () => {
+  it("should hide the Garmin indicator when no extension is installed", () => {
     // Arrange
 
     // Act
@@ -44,12 +44,12 @@ describe("StatusHeader", () => {
 
     // Assert
 
-    expect(screen.getByTestId("status-header-garmin")).toHaveTextContent(
-      "Garmin: Offline"
-    );
+    expect(
+      screen.queryByTestId("status-header-garmin")
+    ).not.toBeInTheDocument();
   });
 
-  it("should show Sync status 'Synced' when no pending zone conflict is staged", () => {
+  it("should hide the Train2Go indicator when no extension is installed", () => {
     // Arrange
 
     // Act
@@ -58,9 +58,7 @@ describe("StatusHeader", () => {
 
     // Assert
 
-    expect(screen.getByTestId("status-header-sync")).toHaveTextContent(
-      "Sync: Synced"
-    );
+    expect(screen.queryByTestId("status-header-sync")).not.toBeInTheDocument();
   });
 
   it("should label the new-workout button as 'New workout'", () => {
