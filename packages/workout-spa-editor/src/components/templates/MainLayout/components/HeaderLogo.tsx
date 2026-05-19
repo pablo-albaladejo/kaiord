@@ -15,7 +15,10 @@ import { Link } from "wouter";
 
 export function HeaderLogo() {
   return (
-    <Link href="/calendar" className="flex items-center gap-3 no-underline">
+    <Link
+      href="/calendar"
+      className="flex shrink-0 items-center gap-3 no-underline"
+    >
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-white">
         <svg
           className="h-6 w-6"
@@ -35,7 +38,7 @@ export function HeaderLogo() {
         </svg>
       </div>
       <span
-        className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl"
+        className="whitespace-nowrap text-xl font-bold text-gray-900 dark:text-white sm:text-2xl"
         aria-label="Kaiord Editor"
       >
         Kaiord Editor
