@@ -37,12 +37,12 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
-    "@types/node": "^25.7.0",
+    "@types/node": "^25.9.0",
     "@types/rosie": "^0.0.45",
     "@vitest/coverage-v8": "^4.1.6",
     "rosie": "^2.1.1",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
   },
