@@ -1,7 +1,9 @@
 import { HelpCircle } from "lucide-react";
+import { Fragment } from "react";
 import { useLocation } from "wouter";
 
 import { Button } from "../../atoms/Button/Button";
+import { ProfileEntryButton } from "./ProfileEntryButton";
 import { ENTRY_DEFS } from "./status-entry-defs";
 
 type StatusEntryButtonsProps = {
@@ -13,19 +15,21 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
   return (
     <>
       {ENTRY_DEFS.map((entry) => (
-        <Button
-          key={entry.id}
-          variant={entry.variant ?? "tertiary"}
-          size="sm"
-          onClick={() => navigate(entry.to)}
-          aria-label={entry.ariaLabel}
-          data-testid={`status-header-${entry.id}-button`}
-        >
-          <entry.icon className="h-4 w-4" />
-          <span className={entry.id === "new" ? "" : "hidden sm:inline"}>
-            {entry.label}
-          </span>
-        </Button>
+        <Fragment key={entry.id}>
+          <Button
+            variant={entry.variant ?? "tertiary"}
+            size="sm"
+            onClick={() => navigate(entry.to)}
+            aria-label={entry.ariaLabel}
+            data-testid={`status-header-${entry.id}-button`}
+          >
+            <entry.icon className="h-4 w-4" />
+            <span className={entry.id === "new" ? "" : "hidden sm:inline"}>
+              {entry.label}
+            </span>
+          </Button>
+          {entry.id === "new" && <ProfileEntryButton />}
+        </Fragment>
       ))}
       <Button
         variant="tertiary"

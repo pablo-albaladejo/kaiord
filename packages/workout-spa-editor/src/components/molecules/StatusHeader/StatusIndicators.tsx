@@ -1,20 +1,17 @@
 import { useGarminBridge } from "../../../contexts/garmin-bridge-context";
 import { useTrain2GoZonesSync } from "../../../contexts/train2go-zones-sync-context";
-import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTrain2GoStore } from "../../../store/train2go-store";
 
-const garminLabel = (extensionInstalled: boolean, sessionActive: boolean) => {
-  if (sessionActive) return "Connected";
-  if (extensionInstalled) return "Detected";
-  return "Offline";
-};
+const garminLabel = (sessionActive: boolean) =>
+  sessionActive ? "Connected" : "Offline";
 
 const garminTone = (sessionActive: boolean) =>
   sessionActive ? "text-green-600 dark:text-green-400" : "text-gray-500";
 
 export function StatusIndicators() {
-  const activeProfile = useActiveProfileLive()?.profile ?? null;
   const garmin = useGarminBridge();
   const sync = useTrain2GoZonesSync();
+  const train2goInstalled = useTrain2GoStore((s) => s.extensionInstalled);
 
   const syncLabel = sync.pending ? "Conflict" : "Synced";
   const syncTone = sync.pending
@@ -23,21 +20,19 @@ export function StatusIndicators() {
 
   return (
     <>
-      <span
-        className="font-medium text-gray-900 dark:text-white"
-        data-testid="status-header-profile"
-      >
-        {activeProfile?.name ?? "No profile"}
-      </span>
-      <span
-        className={garminTone(garmin.sessionActive)}
-        data-testid="status-header-garmin"
-      >
-        Garmin: {garminLabel(garmin.extensionInstalled, garmin.sessionActive)}
-      </span>
-      <span className={syncTone} data-testid="status-header-sync">
-        Sync: {syncLabel}
-      </span>
+      {garmin.extensionInstalled && (
+        <span
+          className={garminTone(garmin.sessionActive)}
+          data-testid="status-header-garmin"
+        >
+          Garmin: {garminLabel(garmin.sessionActive)}
+        </span>
+      )}
+      {train2goInstalled && (
+        <span className={syncTone} data-testid="status-header-sync">
+          Train2Go: {syncLabel}
+        </span>
+      )}
     </>
   );
 }

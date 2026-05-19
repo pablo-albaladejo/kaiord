@@ -104,16 +104,16 @@ describe("LayoutHeader", () => {
   });
 
   describe("active profile surface", () => {
-    it("should show 'No profile' when no active profile is loaded", () => {
+    it("should show 'No profile' in the profile button when no active profile is loaded", () => {
       // Arrange
 
       // Act
       renderWithProviders(<LayoutHeader />);
 
       // Assert
-      expect(screen.getByTestId("status-header-profile")).toHaveTextContent(
-        "No profile"
-      );
+      expect(
+        screen.getByTestId("status-header-profile-button")
+      ).toHaveTextContent("No profile");
     });
 
     it("should show the active profile name once Dexie hydrates", async () => {

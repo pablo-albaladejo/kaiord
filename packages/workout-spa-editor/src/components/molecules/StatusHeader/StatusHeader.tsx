@@ -10,12 +10,16 @@ export function StatusHeader({ onHelpClick }: StatusHeaderProps) {
   return (
     <nav
       aria-label="Main navigation"
-      className="flex flex-wrap items-center gap-3 text-sm"
+      className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-sm"
       data-testid="status-header"
     >
-      <StatusIndicators />
-      <StatusEntryButtons onHelpClick={onHelpClick} />
-      <ThemeToggle />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <StatusIndicators />
+      </div>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <StatusEntryButtons onHelpClick={onHelpClick} />
+        <ThemeToggle />
+      </div>
     </nav>
   );
 }
