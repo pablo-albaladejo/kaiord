@@ -108,9 +108,10 @@ test.describe("Workout Library", () => {
       await cta.click();
 
       // The CTA loads the template into the store and SPA-navigates
-      // to /workout/new — no hard reload is required. Assert the
-      // editor mounts with the loaded steps.
-      await page.waitForURL(/\/workout\/new$/);
+      // to /workout/new?source=scratch — `source=scratch` bypasses
+      // the NewWorkoutPicker so the editor mounts directly with the
+      // loaded steps.
+      await page.waitForURL(/\/workout\/new\?source=scratch$/);
       await expect(page.getByTestId("step-card").first()).toBeVisible();
     });
 
