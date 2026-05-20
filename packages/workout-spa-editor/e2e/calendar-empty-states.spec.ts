@@ -21,14 +21,20 @@ test.describe("Calendar Empty States", () => {
     await clearDexie(page);
   });
 
-  test("No workouts: no welcome card, week grid still renders", async ({
+  test("should render the week grid without a welcome card when no workouts exist", async ({
     page,
   }) => {
+    // Arrange
     // PR header-zones-and-picker removed FirstVisitState. The calendar
     // now relies on the persistent header (`+ New workout`, Library,
     // Profile) for empty-state discoverability. The week grid still
     // renders so the user can scan upcoming days.
+
+    // Act
+
     await page.reload();
+
+    // Assert
 
     await expect(page.getByTestId("first-visit-state")).not.toBeAttached();
     await expect(page.getByText("Welcome to Kaiord")).not.toBeAttached();

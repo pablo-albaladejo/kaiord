@@ -107,6 +107,7 @@ test.describe("Workout Library", () => {
       await cta.waitFor({ state: "visible" });
       await cta.click();
 
+      // Assert
       // The CTA loads the template into the store and SPA-navigates
       // to /workout/new?source=scratch — `source=scratch` bypasses
       // the NewWorkoutPicker so the editor mounts directly with the
