@@ -186,7 +186,7 @@ test.describe("Library flows", () => {
     // true when we visit /library. `loadTestWorkout` performs a file-
     // upload through the WelcomeSection accordion which sets
     // `currentWorkout` in the Zustand store.
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await loadTestWorkout(page, "Initial Workout");
 
     // Seed a library template AFTER the dexie singleton is ready.

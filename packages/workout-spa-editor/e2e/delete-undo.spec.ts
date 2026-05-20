@@ -17,7 +17,7 @@ const POST_DOUBLE_DELETE_PROCESSING_MS = 1000;
 
 test.describe("Delete with Undo Flow", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState("networkidle");

@@ -20,7 +20,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     page,
   }) => {
     // Navigate to the application
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Wait for the editor route to mount. Per the SPA surface-
     // classification rule each routed page owns its own
@@ -145,7 +145,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   test("should validate KRD file and show errors for invalid format", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
@@ -172,7 +172,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   });
 
   test("should handle file parsing errors gracefully", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");

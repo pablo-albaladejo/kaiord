@@ -74,7 +74,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Wait for app to be fully loaded (critical for webkit/Safari)
     await page.waitForLoadState("networkidle");
   });
@@ -450,7 +450,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Wait for app to be fully loaded (critical for webkit/Safari)
     await page.waitForLoadState("networkidle");
   });
@@ -707,7 +707,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Wait for app to be fully loaded (critical for webkit/Safari)
     await page.waitForLoadState("networkidle");
   });

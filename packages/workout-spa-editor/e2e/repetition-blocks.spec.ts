@@ -14,7 +14,7 @@ test.describe("Repetition Blocks", () => {
   test("should create repetition block from selected steps", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
     await expandFileUpload(page);
@@ -152,7 +152,7 @@ test.describe("Repetition Blocks", () => {
   });
 
   test("should edit repeat count", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -229,7 +229,7 @@ test.describe("Repetition Blocks", () => {
   });
 
   test("should expand and collapse repetition block", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -309,7 +309,7 @@ test.describe("Repetition Blocks", () => {
   test("should calculate stats correctly with repetition blocks", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with repetition blocks
     await expandFileUpload(page);
@@ -404,7 +404,7 @@ test.describe("Repetition Blocks", () => {
   });
 
   test("should add step within repetition block", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -466,7 +466,7 @@ test.describe("Repetition Blocks", () => {
   });
 
   test("should handle undo/redo with repetition blocks", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout
     await expandFileUpload(page);
@@ -595,7 +595,7 @@ test.describe("Repetition Blocks", () => {
 
 test.describe("Repetition Blocks - Ungroup", () => {
   test("should ungroup repetition block via context menu", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -688,7 +688,7 @@ test.describe("Repetition Blocks - Ungroup", () => {
 
 test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
   test("should create block with Ctrl+G", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
     await expandFileUpload(page);
@@ -798,7 +798,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
   });
 
   test("should ungroup block with Ctrl+Shift+G", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -867,7 +867,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
   });
 
   test("should select all steps with Ctrl+A", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
     await expandFileUpload(page);
@@ -951,7 +951,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
   });
 
   test("should clear selection with Escape", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
     await expandFileUpload(page);
@@ -1059,7 +1059,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
   test("should open inline editor via Edit Count menu item", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -1131,7 +1131,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
   });
 
   test("should add step via context menu", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -1204,7 +1204,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     page,
   }) => {
     // Requirements: 1.1, 1.2, 1.3
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -1310,7 +1310,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
 test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
   test.beforeEach(async ({ page }) => {
     // Skip onboarding tutorial for all tests in this suite
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.evaluate(() => {
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
@@ -1320,7 +1320,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     page,
   }) => {
     // Requirements: 1.1, 1.6 - Verify blocks from selected steps preserve steps (no default added)
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with steps
     await expandFileUpload(page);
@@ -1433,7 +1433,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
 
   test("should delete block via delete button", async ({ page }) => {
     // Requirements: 2.1, 3.2
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -1558,7 +1558,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
 
   test("should restore block after undo", async ({ page }) => {
     // Requirements: 2.3, 2.4
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -1667,7 +1667,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
 
   test("should delete block via keyboard shortcut", async ({ page }) => {
     // Requirements: 4.1, 4.4
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple blocks
     await expandFileUpload(page);
@@ -1784,7 +1784,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     page,
   }) => {
     // Requirements: 4.1, 4.2, 4.3, 4.4
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await expandFileUpload(page);
@@ -1934,7 +1934,7 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
     page,
   }) => {
     // Requirements: 1.1, 1.2, 1.3, 1.4, 4.1, 4.2
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with 3 repetition blocks with identifiable content
     await expandFileUpload(page);
@@ -2088,7 +2088,7 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
 test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
   test.beforeEach(async ({ page }) => {
     // Skip onboarding tutorial for all tests in this suite
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.evaluate(() => {
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
@@ -2098,7 +2098,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     page,
   }) => {
     // Requirements: 1.1, 1.2, 1.3, 3.3, 3.4
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with 5 repetition blocks with unique identifiable content
     await expandFileUpload(page);
@@ -2451,7 +2451,7 @@ test.describe("Repetition Blocks - Performance", () => {
   test("should render large repetition blocks efficiently", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Create a workout with a large repetition block (25 steps)
     const LARGE_BLOCK_STEP_COUNT = 25;
@@ -2529,7 +2529,7 @@ test.describe("Repetition Blocks - Performance", () => {
   });
 
   test("should handle deeply nested repetitions", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Note: Current implementation doesn't support nested repetition blocks
     // This test documents the expected behavior for future implementation
@@ -2589,7 +2589,7 @@ test.describe("Repetition Blocks - Performance", () => {
 test.describe("Repetition Blocks - Button Styling Consistency (Task 18)", () => {
   test.beforeEach(async ({ page }) => {
     // Skip onboarding tutorial for all tests in this suite
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.evaluate(() => {
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
@@ -2599,7 +2599,7 @@ test.describe("Repetition Blocks - Button Styling Consistency (Task 18)", () => 
     page,
   }) => {
     // Requirements: 5.1, 5.2, 5.3, 5.4, 5.5
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with both regular steps and repetition blocks
     await expandFileUpload(page);

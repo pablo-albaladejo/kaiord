@@ -51,7 +51,7 @@ test.describe("Import/Export Multiple Formats", () => {
   };
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Editor is mounted once the route-heading h1 is in the DOM.
     // Per the SPA surface-classification rule each routed page owns
     // its own `<h1 data-route-heading>` (the brand label in the header
@@ -443,7 +443,7 @@ test.describe("Import/Export Mobile Flow", () => {
 
   test("should handle file upload on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Wait for the editor route to mount (data-route-heading contract).
     await expect(page.locator("[data-route-heading]")).toBeAttached();
 
@@ -480,7 +480,7 @@ test.describe("Import/Export Mobile Flow", () => {
 
   test("should handle format selection on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     const testWorkout = {
       version: "1.0",

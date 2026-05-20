@@ -22,7 +22,7 @@ test.describe("Workout Library", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the editor; clear localStorage; load a test workout
     // so the editor has data for save-to-library cases.
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.evaluate(() => {
       localStorage.clear();
     });

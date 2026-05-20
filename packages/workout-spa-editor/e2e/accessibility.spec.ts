@@ -11,7 +11,7 @@ import { expandFileUpload } from "./helpers/expand-file-upload";
  */
 test.describe("Accessibility", () => {
   test("should support keyboard navigation", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
@@ -64,7 +64,7 @@ test.describe("Accessibility", () => {
   });
 
   test("should have proper ARIA labels", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Verify main landmarks
     await expect(page.getByRole("main")).toBeVisible();
@@ -124,7 +124,7 @@ test.describe("Accessibility", () => {
   });
 
   test("should support keyboard shortcuts", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
@@ -208,7 +208,7 @@ test.describe("Accessibility", () => {
   });
 
   test("should have visible focus indicators", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
@@ -252,7 +252,7 @@ test.describe("Accessibility", () => {
   });
 
   test("should maintain color contrast for accessibility", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with different intensity levels
     await expandFileUpload(page);
@@ -321,7 +321,7 @@ test.describe("Accessibility", () => {
     isMobile,
   }) => {
     // Requirement 13: Theme switching
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Get initial theme state
     const html = page.locator("html");
@@ -354,7 +354,7 @@ test.describe("Accessibility", () => {
     isMobile,
   }) => {
     // Requirement 13: Theme persistence in localStorage
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Get initial theme
     const html = page.locator("html");
@@ -392,7 +392,7 @@ test.describe("Accessibility", () => {
 
   test("should apply theme to all UI elements", async ({ page, isMobile }) => {
     // Requirement 13: Theme applies to entire application
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout to have more UI elements
     await expandFileUpload(page);
@@ -459,7 +459,7 @@ test.describe("Accessibility", () => {
 
   test("should have smooth theme transitions", async ({ page, isMobile }) => {
     // Requirement 13: Smooth transitions between themes
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Verify transition CSS is applied (Tailwind's transition-colors sets
     // transitionProperty to a list including background-color or color)

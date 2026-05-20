@@ -25,7 +25,7 @@ test.describe("Onboarding", () => {
 
   test("should display tutorial for first-time user", async ({ page }) => {
     // Arrange & Act
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Assert - Tutorial should appear for first-time user
@@ -36,7 +36,7 @@ test.describe("Onboarding", () => {
 
   test("should allow skipping tutorial", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Wait for tutorial to appear
@@ -59,7 +59,7 @@ test.describe("Onboarding", () => {
 
   test("should not display tutorial on subsequent visits", async ({ page }) => {
     // Arrange - Complete onboarding
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Skip", exact: true }).click();
 
@@ -80,7 +80,7 @@ test.describe("Onboarding", () => {
 
   test("should navigate through tutorial steps", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Assert - First step
@@ -103,7 +103,7 @@ test.describe("Onboarding", () => {
 
   test("should complete tutorial on last step", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Act - Navigate to last step
@@ -136,7 +136,7 @@ test.describe("Onboarding", () => {
 
   test("should allow replaying tutorial from settings", async ({ page }) => {
     // Arrange - Complete onboarding first
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Skip", exact: true }).click();
 
@@ -160,7 +160,7 @@ test.describe("Onboarding", () => {
 
   test("should display progress indicator", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Assert - Progress bar should be visible
@@ -183,7 +183,7 @@ test.describe("Onboarding", () => {
     test.skip(isMobile, "Keyboard navigation not available on mobile");
 
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Assert - Tutorial is visible
@@ -208,7 +208,7 @@ test.describe("Onboarding", () => {
 test.describe("Tooltips", () => {
   test("should display tooltips on hover", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Skip onboarding if present
@@ -232,7 +232,7 @@ test.describe("Tooltips", () => {
   test("should hide tooltips when mouse leaves", async ({ page, isMobile }) => {
     test.skip(isMobile, "Mouse hover not available on mobile touch devices");
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Skip onboarding if present
@@ -264,7 +264,7 @@ test.describe("Tooltips", () => {
 test.describe("First-Time Hints", () => {
   test("should display hints for first workout creation", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Skip onboarding if present
@@ -294,7 +294,7 @@ test.describe("First-Time Hints", () => {
 
   test("should allow dismissing first-time hints", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Skip onboarding if present
@@ -331,7 +331,7 @@ test.describe("First-Time Hints", () => {
 test.describe("Help Section", () => {
   test("should display help documentation", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Skip onboarding if present
@@ -356,7 +356,7 @@ test.describe("Help Section", () => {
 
   test("should display keyboard shortcuts reference", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Skip onboarding if present
@@ -390,7 +390,7 @@ test.describe("Accessibility - Onboarding", () => {
 
   test("should have proper ARIA labels in tutorial", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Assert - Tutorial dialog should have proper ARIA attributes
@@ -412,7 +412,7 @@ test.describe("Accessibility - Onboarding", () => {
 
   test("should announce tutorial steps to screen readers", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Assert - Step indicator should have proper ARIA label
@@ -426,7 +426,7 @@ test.describe("Accessibility - Onboarding", () => {
 
   test("should support keyboard navigation for hints", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Skip onboarding
