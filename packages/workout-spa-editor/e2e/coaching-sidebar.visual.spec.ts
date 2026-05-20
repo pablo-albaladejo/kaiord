@@ -20,6 +20,15 @@ const SOURCE_ID = "visual-sidebar-activity";
 const WORKOUT_ID = "visual-sidebar-workout";
 
 test.describe("CoachingSidebar visual regression", () => {
+  // Baselines are generated on ubuntu-latest/chromium only (see
+  // `update-visual-baselines.yml`). Snapshots are not maintained for the
+  // other Playwright projects, so let them skip rather than fail with a
+  // missing-baseline error on every push to main.
+  test.skip(
+    (_fixtures, testInfo) => testInfo.project.name !== "chromium",
+    "Visual baselines are generated only for the chromium project."
+  );
+
   test.beforeEach(async ({ page }) => {
     await disableOnboardingTutorial(page);
   });
