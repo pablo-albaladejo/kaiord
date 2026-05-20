@@ -269,6 +269,7 @@ describe("EditorPage", () => {
 
     await waitFor(() => {
       const input = document.querySelector('input[type="file"]');
+      expect(input).not.toBeNull();
       expect(document.activeElement).not.toBe(input);
     });
   });

@@ -1,4 +1,5 @@
-import { type RefObject, useState } from "react";
+import type { RefObject } from "react";
+import { useState } from "react";
 
 import type { KRD, Sport, ValidationError } from "../../types/krd";
 import { CreateWorkoutDialog } from "../molecules/CreateWorkoutDialog/CreateWorkoutDialog";

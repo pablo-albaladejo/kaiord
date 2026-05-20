@@ -1,5 +1,6 @@
 import { ChevronDown, Plus, Upload } from "lucide-react";
-import { type RefObject, useState } from "react";
+import type { RefObject } from "react";
+import { useEffect, useState } from "react";
 
 import { useAnalytics } from "../../contexts";
 import type { KRD, ValidationError } from "../../types/krd";
@@ -35,6 +36,10 @@ export function ManualCreateSection({
 }: ManualCreateSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const analytics = useAnalytics();
+
+  useEffect(() => {
+    setExpanded(defaultExpanded);
+  }, [defaultExpanded]);
 
   const handleImported = (format: string) => {
     analytics.event("workout-imported", { format });
