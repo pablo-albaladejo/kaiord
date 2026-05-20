@@ -258,7 +258,7 @@ describe("EditorPage", () => {
     });
   });
 
-  it("should not shift focus when mounted with ?source=scratch", async () => {
+  it("should leave the file upload section collapsed when mounted with ?source=scratch", async () => {
     // Arrange
 
     // Act
@@ -267,10 +267,15 @@ describe("EditorPage", () => {
 
     // Assert
 
+    // In scratch mode the welcome section mounts but `ManualCreateSection`
+    // stays collapsed, so the `<input type="file">` is never rendered. That
+    // absence — not a focus comparison against a null input — is the real
+    // contract: scratch mode does NOT prime the import affordance.
     await waitFor(() => {
-      const input = document.querySelector('input[type="file"]');
-      expect(input).not.toBeNull();
-      expect(document.activeElement).not.toBe(input);
+      expect(
+        screen.getByRole("heading", { name: /getting started/i })
+      ).toBeInTheDocument();
     });
+    expect(document.querySelector('input[type="file"]')).toBeNull();
   });
 });
