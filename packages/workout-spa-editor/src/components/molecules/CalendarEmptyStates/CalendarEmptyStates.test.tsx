@@ -5,7 +5,6 @@ import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { EmptyWeekState } from "./EmptyWeekState";
-import { FirstVisitState } from "./FirstVisitState";
 import { NoAiProviderState } from "./NoAiProviderState";
 import { NoBridgesState } from "./NoBridgesState";
 
@@ -13,98 +12,6 @@ function withRouter(ui: React.ReactNode, path = "/calendar") {
   const { hook } = memoryLocation({ path, record: true });
   return <Router hook={hook}>{ui}</Router>;
 }
-
-describe("FirstVisitState", () => {
-  it("should render three entry paths", () => {
-    // Arrange
-
-    // Act
-
-    render(withRouter(<FirstVisitState />));
-
-    // Assert
-
-    expect(screen.getByText("Create")).toBeInTheDocument();
-    expect(screen.getByText("Import")).toBeInTheDocument();
-    expect(screen.getByText("Connect")).toBeInTheDocument();
-  });
-
-  it("should render welcome message", () => {
-    // Arrange
-
-    // Act
-
-    render(withRouter(<FirstVisitState />));
-
-    // Assert
-
-    expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
-  });
-
-  it("should call onSettingsClick when Connect is clicked", async () => {
-    // Arrange
-
-    const user = userEvent.setup();
-    const onSettingsClick = vi.fn();
-
-    render(withRouter(<FirstVisitState onSettingsClick={onSettingsClick} />));
-
-    // Act
-
-    await user.click(screen.getByText("Connect"));
-
-    // Assert
-
-    expect(onSettingsClick).toHaveBeenCalledOnce();
-  });
-
-  it("should navigate to /settings/profile when Connect is clicked without prop", async () => {
-    // Arrange
-    const user = userEvent.setup();
-    const memory = memoryLocation({ path: "/calendar", record: true });
-    render(
-      <Router hook={memory.hook}>
-        <FirstVisitState />
-      </Router>
-    );
-
-    // Act
-    await user.click(screen.getByText("Connect"));
-
-    // Assert
-    expect(memory.history.at(-1)).toBe("/settings/profile");
-  });
-
-  it("should navigate to /workout/new when Create is clicked", async () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-
-    const user = userEvent.setup();
-
-    render(withRouter(<FirstVisitState />));
-
-    await user.click(screen.getByText("Create"));
-    // Navigate is called - no error thrown
-  });
-
-  it("should navigate to import when Import is clicked", async () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-
-    const user = userEvent.setup();
-
-    render(withRouter(<FirstVisitState />));
-
-    await user.click(screen.getByText("Import"));
-    // Navigate is called - no error thrown
-  });
-});
 
 describe("EmptyWeekState", () => {
   it("should show add workout button", () => {

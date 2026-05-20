@@ -1,36 +1,67 @@
 import { HelpCircle } from "lucide-react";
-import { Fragment } from "react";
 import { useLocation } from "wouter";
 
 import { Button } from "../../atoms/Button/Button";
 import { ProfileEntryButton } from "./ProfileEntryButton";
+import type { EntryDef } from "./status-entry-defs";
 import { ENTRY_DEFS } from "./status-entry-defs";
+import { StatusIndicators } from "./StatusIndicators";
 
 type StatusEntryButtonsProps = {
   onHelpClick: () => void;
 };
 
+function EntryButton({
+  entry,
+  onClick,
+}: {
+  entry: EntryDef;
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      variant={entry.variant ?? "tertiary"}
+      size="sm"
+      onClick={onClick}
+      aria-label={entry.ariaLabel}
+      data-testid={`status-header-${entry.id}-button`}
+    >
+      <entry.icon className="h-4 w-4" />
+      <span className={entry.id === "new" ? "" : "hidden sm:inline"}>
+        {entry.label}
+      </span>
+    </Button>
+  );
+}
+
 export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
   const [, navigate] = useLocation();
+  const primaryNav = ENTRY_DEFS.filter((e) =>
+    ["calendar", "library", "new"].includes(e.id)
+  );
+  const settingsEntry = ENTRY_DEFS.find((e) => e.id === "settings");
   return (
     <>
-      {ENTRY_DEFS.map((entry) => (
-        <Fragment key={entry.id}>
-          <Button
-            variant={entry.variant ?? "tertiary"}
-            size="sm"
-            onClick={() => navigate(entry.to)}
-            aria-label={entry.ariaLabel}
-            data-testid={`status-header-${entry.id}-button`}
-          >
-            <entry.icon className="h-4 w-4" />
-            <span className={entry.id === "new" ? "" : "hidden sm:inline"}>
-              {entry.label}
-            </span>
-          </Button>
-          {entry.id === "new" && <ProfileEntryButton />}
-        </Fragment>
+      {primaryNav.map((entry) => (
+        <EntryButton
+          key={entry.id}
+          entry={entry}
+          onClick={() => navigate(entry.to)}
+        />
       ))}
+      <span
+        data-testid="status-header-divider"
+        className="hidden h-6 w-px bg-gray-200 dark:bg-slate-700 sm:inline-block"
+        aria-hidden="true"
+      />
+      <StatusIndicators />
+      <ProfileEntryButton />
+      {settingsEntry && (
+        <EntryButton
+          entry={settingsEntry}
+          onClick={() => navigate(settingsEntry.to)}
+        />
+      )}
       <Button
         variant="tertiary"
         size="sm"

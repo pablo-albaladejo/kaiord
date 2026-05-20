@@ -1,6 +1,6 @@
 import type { Analytics } from "@kaiord/core";
 import { lazy, Suspense } from "react";
-import { Redirect, Route, Switch } from "wouter";
+import { Redirect, Route, Switch, useSearch } from "wouter";
 
 import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
@@ -8,9 +8,21 @@ import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
 const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
 const EditorPage = lazy(() => import("./components/pages/EditorPage"));
+const NewWorkoutPicker = lazy(
+  () => import("./components/pages/NewWorkoutPicker")
+);
 const SettingsPage = lazy(
   () => import("./components/pages/SettingsPage/SettingsPage")
 );
+
+function NewWorkoutRoute() {
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const hasAction = params.get("action") === "import";
+  const hasSource = params.get("source") === "scratch";
+  if (hasAction || hasSource) return <EditorPage />;
+  return <NewWorkoutPicker />;
+}
 
 export type AppRoutesProps = { analytics: Analytics };
 
@@ -33,7 +45,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         </Route>
         <Route path="/workout/new">
           <RouteErrorBoundary analytics={analytics}>
-            <EditorPage />
+            <NewWorkoutRoute />
           </RouteErrorBoundary>
         </Route>
         <Route path="/workout/:id">

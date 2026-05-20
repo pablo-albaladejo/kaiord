@@ -62,9 +62,9 @@ function makeRecord(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   };
 }
 
-function renderEditor(id?: string) {
-  const path = id ? `/workout/${id}` : "/workout/new";
-  const { hook } = memoryLocation({ path, record: true });
+function renderEditor(id?: string, path?: string) {
+  const resolvedPath = path ?? (id ? `/workout/${id}` : "/workout/new");
+  const { hook } = memoryLocation({ path: resolvedPath, record: true });
   return render(
     <PersistenceProvider persistence={createDexiePersistence(db)}>
       <GarminBridgeProvider>
@@ -237,6 +237,39 @@ describe("EditorPage", () => {
     await waitFor(async () => {
       const record = await db.table("workouts").get("w-test");
       expect(record.state).toBe("pushed");
+    });
+  });
+
+  it("should focus the file input when mounted with ?action=import", async () => {
+    // Arrange
+
+    // Act
+
+    renderEditor(undefined, "/workout/new?action=import");
+
+    // Assert
+
+    await waitFor(() => {
+      const input = document.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement | null;
+      expect(input).not.toBeNull();
+      expect(document.activeElement).toBe(input);
+    });
+  });
+
+  it("should not shift focus when mounted with ?source=scratch", async () => {
+    // Arrange
+
+    // Act
+
+    renderEditor(undefined, "/workout/new?source=scratch");
+
+    // Assert
+
+    await waitFor(() => {
+      const input = document.querySelector('input[type="file"]');
+      expect(document.activeElement).not.toBe(input);
     });
   });
 });
