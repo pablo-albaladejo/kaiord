@@ -44,7 +44,11 @@ jobs:
 
   e2e-tests:
     name: E2E Tests
-    timeout-minutes: 35
+    # chromium/webkit finish in ~10-20 min; firefox is consistently ~2-3x
+    # slower and hit the previous 35 min cap (e.g. run 26158958084), so
+    # the workflow ends up "cancelled" even when nothing was failing. Bump
+    # the budget to 50 min while we evaluate whether to shard firefox.
+    timeout-minutes: 50
     runs-on: ubuntu-latest
     needs: check-ci-status
     if: needs.check-ci-status.outputs.should-run == 'true'
