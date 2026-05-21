@@ -20,6 +20,7 @@ import { applyV10Upgrade } from "./dexie-v10-migration";
 import { applyV11Upgrade } from "./dexie-v11-migration";
 import { applyV12Upgrade } from "./dexie-v12-migration";
 import { applyV13Upgrade } from "./dexie-v13-migration";
+import { applyV14Upgrade } from "./dexie-v14-migration";
 
 // Narrowed handle: only `version()` is needed and Dexie's full surface
 // causes "Type instantiation is excessively deep" when passed as a
@@ -101,10 +102,21 @@ const registerV13 = (db: DexieVersionHost): void => {
   db.version(13).stores(SCHEMAS.v13).upgrade(applyV13Upgrade);
 };
 
+const registerV14 = (db: DexieVersionHost): void => {
+  // v14 — calendar preference rename. Walks `userPreferences` rows,
+  // writes `calendarView = "grid"` unconditionally (both legacy
+  // `compact` and `comfortable` collapse to `grid`) and removes the
+  // legacy `calendarDensity` field. Schema unchanged from v13 (the
+  // `userPreferences` table is keyed by `profileId` only — no index
+  // change is required), so this is a data-only upgrade.
+  db.version(14).stores(SCHEMAS.v13).upgrade(applyV14Upgrade);
+};
+
 export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV1ToV3(db);
   registerV4ToV6(db);
   registerV7ToV9(db);
   registerV10ToV12(db);
   registerV13(db);
+  registerV14(db);
 };

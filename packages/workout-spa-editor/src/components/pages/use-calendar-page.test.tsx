@@ -188,7 +188,7 @@ describe("useCalendarPage", () => {
     });
     if (result.current.state !== "ready") throw new Error("not ready");
     expect(result.current.suggestions).toEqual([]);
-    expect(result.current.density).toBeUndefined();
+    expect(result.current.view).toBeUndefined();
     // No active profile → calendar query is empty (profile-scoped read).
     expect(result.current.buckets.soloActualsByDay[MONDAY] ?? []).toHaveLength(
       0

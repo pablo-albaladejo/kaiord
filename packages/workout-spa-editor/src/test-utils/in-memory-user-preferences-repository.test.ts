@@ -7,7 +7,7 @@ const baseRow = (
   overrides: Partial<UserPreferences> = {}
 ): UserPreferences => ({
   profileId: "p1",
-  calendarDensity: "compact",
+  calendarView: "grid",
   updatedAt: "2026-05-01T12:00:00.000Z",
   ...overrides,
 });
@@ -30,11 +30,11 @@ describe("InMemoryUserPreferencesRepository", () => {
 
   it("put is upsert by profileId", async () => {
     const repo = createInMemoryUserPreferencesRepository();
-    await repo.put(baseRow({ calendarDensity: "compact" }));
+    await repo.put(baseRow({ calendarView: "grid" }));
 
-    await repo.put(baseRow({ calendarDensity: "comfortable" }));
+    await repo.put(baseRow({ calendarView: "list" }));
 
-    expect((await repo.get("p1"))?.calendarDensity).toBe("comfortable");
+    expect((await repo.get("p1"))?.calendarView).toBe("list");
   });
 
   it("delete is idempotent on missing rows", async () => {
@@ -55,12 +55,10 @@ describe("InMemoryUserPreferencesRepository", () => {
   it("each profile has its own row", async () => {
     const repo = createInMemoryUserPreferencesRepository();
 
-    await repo.put(baseRow({ profileId: "p1", calendarDensity: "compact" }));
-    await repo.put(
-      baseRow({ profileId: "p2", calendarDensity: "comfortable" })
-    );
+    await repo.put(baseRow({ profileId: "p1", calendarView: "grid" }));
+    await repo.put(baseRow({ profileId: "p2", calendarView: "list" }));
 
-    expect((await repo.get("p1"))?.calendarDensity).toBe("compact");
-    expect((await repo.get("p2"))?.calendarDensity).toBe("comfortable");
+    expect((await repo.get("p1"))?.calendarView).toBe("grid");
+    expect((await repo.get("p2"))?.calendarView).toBe("list");
   });
 });

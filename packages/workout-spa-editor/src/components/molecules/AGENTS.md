@@ -22,7 +22,7 @@ Compositions of atoms with one focused responsibility. Each molecule may know ab
 - `ConfirmationModal/` — generic Radix-Dialog confirmation prompt.
 - `CreateRepetitionBlockButton/`, `CreateRepetitionBlockDialog/` — entry points for the create-block flow.
 - `CreateWorkoutDialog/` — new-workout creation dialog.
-- `DensityToggle/` — calendar density toggle.
+- `CalendarViewToggle/` — calendar Grid ↔ List view toggle.
 - `DurationPicker/` — time + distance picker.
 - `EmptyDayDialog/` — dialog opened from an empty calendar cell to schedule from Library or create new.
 - `EmptyWorkoutState/` — empty-state placeholder for the editor.

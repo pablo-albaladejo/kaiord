@@ -1,9 +1,9 @@
 /**
  * useUserPreferences — reactive read of the per-profile UI preferences
- * (compact / comfortable calendar density, future expansions).
+ * (calendar view (grid/list), future expansions).
  *
  * Falls back to a synthesised default when no row exists; the caller
- * (UI layer) supplies `defaultDensity` based on viewport width since
+ * (UI layer) supplies `defaultView` based on viewport width since
  * the hook itself is viewport-agnostic.
  *
  * Re-evaluates on profileId change and on writes to the underlying
@@ -13,33 +13,30 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
-import type {
-  CalendarDensity,
-  UserPreferences,
-} from "../types/user-preferences";
+import type { CalendarView, UserPreferences } from "../types/user-preferences";
 
 export type UseUserPreferencesArgs = {
   profileId: string | null;
-  defaultDensity: CalendarDensity;
+  defaultView: CalendarView;
 };
 
 const synthesizeDefault = (
   profileId: string,
-  defaultDensity: CalendarDensity
+  defaultView: CalendarView
 ): UserPreferences => ({
   profileId,
-  calendarDensity: defaultDensity,
+  calendarView: defaultView,
   updatedAt: new Date().toISOString(),
 });
 
 export const useUserPreferences = ({
   profileId,
-  defaultDensity,
+  defaultView,
 }: UseUserPreferencesArgs): UserPreferences | undefined =>
   useLiveQuery<UserPreferences | undefined>(async () => {
     if (!profileId) return undefined;
     const persisted = await db
       .table<UserPreferences>("userPreferences")
       .get(profileId);
-    return persisted ?? synthesizeDefault(profileId, defaultDensity);
-  }, [profileId, defaultDensity]);
+    return persisted ?? synthesizeDefault(profileId, defaultView);
+  }, [profileId, defaultView]);
