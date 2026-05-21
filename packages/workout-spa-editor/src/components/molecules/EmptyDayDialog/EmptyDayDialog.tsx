@@ -45,7 +45,7 @@ export function EmptyDayDialog({ date, onClose }: EmptyDayDialogProps) {
 
   const handleCreate = () => {
     onClose();
-    navigate(`/workout/new?date=${date}`);
+    navigate(`/workout/new?source=scratch&date=${date}`);
   };
 
   const handlePick = (templateId: string) => {

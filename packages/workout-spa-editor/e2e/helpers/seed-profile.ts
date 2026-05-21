@@ -33,6 +33,16 @@ export async function seedDefaultProfile(page: Page): Promise<string> {
       },
     ]);
     await db.table("meta").put({ key: "activeProfileId", value: profileId });
+    // Seed `calendarView: "grid"` so every e2e starts on the grid view
+    // regardless of viewport. The viewport-aware default (list on <768
+    // px) is intentional for real users but would make Mobile-Chrome /
+    // Mobile-Safari Playwright projects flaky across grid-affordance
+    // tests (the existing tests assume grid).
+    await db.table("userPreferences").put({
+      profileId,
+      calendarView: "grid",
+      updatedAt: now,
+    });
   }, E2E_DEFAULT_PROFILE_ID);
   return E2E_DEFAULT_PROFILE_ID;
 }
