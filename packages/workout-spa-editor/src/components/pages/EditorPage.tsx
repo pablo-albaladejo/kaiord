@@ -63,7 +63,10 @@ export default function EditorPage({ id }: EditorPageProps) {
   if (id && loading) return <EditorLoading />;
   if (id && record && !record.krd) return <EditorNoData />;
 
-  const showPopulatedBody = id || newWorkoutMode === undefined;
+  const importComplete = newWorkoutMode === "import" && currentWorkout !== null;
+  const showNewSurface = !id && newWorkoutMode !== undefined && !importComplete;
+  const showPopulatedBody =
+    id !== undefined || newWorkoutMode === undefined || importComplete;
 
   return (
     <div className="space-y-6">
@@ -77,7 +80,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           onRepush={() => pushWorkout(`garmin-${Date.now()}`)}
         />
       )}
-      {!id && renderNewWorkoutSurface(newWorkoutMode)}
+      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode)}
       {showPopulatedBody && workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection

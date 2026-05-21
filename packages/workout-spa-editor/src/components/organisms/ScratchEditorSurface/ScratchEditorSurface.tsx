@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { useAppHandlers } from "../../../hooks/useAppHandlers";
 import {
@@ -23,6 +23,11 @@ const DEFAULT_SCRATCH_NAME = "Untitled workout";
  * ONLY when `currentWorkout === null` — this guard prevents the
  * auto-init from overwriting a template just written by `LibraryPage`
  * before its `navigate("/workout/new?source=scratch")` (see plan A8).
+ *
+ * `startInEditMode` is wired to `autoCreatedRef`: only the auto-init
+ * path opens `WorkoutHeader.MetadataEditMode` so a fresh scratch user
+ * commits sport/name inline. Pre-populated workouts (library template
+ * load, e2e seeds) already have sport/name and render in view mode.
  */
 export function ScratchEditorSurface() {
   const currentWorkout = useCurrentWorkout();
@@ -32,9 +37,11 @@ export function ScratchEditorSurface() {
   const reorderStepsInBlock = useWorkoutStore((s) => s.reorderStepsInBlock);
   const { handleStepSelect } = useAppHandlers();
   const sidebarData = useCoachingSidebar(null, undefined);
+  const autoCreatedRef = useRef(false);
 
   useEffect(() => {
     if (currentWorkout !== null) return;
+    autoCreatedRef.current = true;
     createEmpty(DEFAULT_SCRATCH_NAME, DEFAULT_SCRATCH_SPORT);
   }, [currentWorkout, createEmpty]);
 
@@ -54,7 +61,7 @@ export function ScratchEditorSurface() {
             onStepSelect={handleStepSelect}
             onStepReorder={reorderStep}
             onReorderStepsInBlock={reorderStepsInBlock}
-            startInEditMode
+            startInEditMode={autoCreatedRef.current}
           />
         </EditorBody>
       )}
