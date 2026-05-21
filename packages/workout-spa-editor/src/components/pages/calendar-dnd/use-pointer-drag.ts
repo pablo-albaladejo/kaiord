@@ -49,18 +49,40 @@ export function usePointerDrag({
     setDropTargetId(null);
   }, []);
 
+  const cancelHold = useCallback(() => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  }, []);
+
   const bind = useCallback(
     (workoutId: string) => (event: React.PointerEvent) => {
       if (!enabled) return;
+      // Always clear any in-flight hold timer before starting a new one,
+      // otherwise a second pointerdown leaks the previous timeout and
+      // `setActiveWorkoutId` can fire on the stale workout id.
+      cancelHold();
       if (event.pointerType === "mouse") {
         setActiveWorkoutId(workoutId);
         return;
       }
+      // Touch path: wait for the hold to elapse before activating drag.
+      // If the user releases / scrolls away before the hold completes,
+      // the global up/cancel listeners below clear the pending timeout.
       holdTimerRef.current = setTimeout(() => {
+        holdTimerRef.current = null;
         setActiveWorkoutId(workoutId);
       }, TOUCH_HOLD_MS);
+      const onEarlyRelease = () => {
+        cancelHold();
+        window.removeEventListener("pointerup", onEarlyRelease);
+        window.removeEventListener("pointercancel", onEarlyRelease);
+      };
+      window.addEventListener("pointerup", onEarlyRelease, { once: true });
+      window.addEventListener("pointercancel", onEarlyRelease, { once: true });
     },
-    [enabled]
+    [enabled, cancelHold]
   );
 
   useGlobalDragListeners({

@@ -1,11 +1,4 @@
-/**
- * Vertical list view for the calendar week. One section per day in
- * calendar order. Each section renders the day's workouts using the
- * same workout-card primitives as `DayColumn` (via `renderDayCards`)
- * so the visual identity stays consistent across views, but with the
- * "comfortable" card density so full title + duration + status are
- * always visible.
- */
+/** Vertical list view for the calendar week — one section per day. */
 
 import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../types/calendar-record";
@@ -13,26 +6,12 @@ import type { CoachingActivity } from "../../types/coaching-activity";
 import { renderDayCards } from "../molecules/WorkoutCard/day-column-cards";
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTH_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+// prettier-ignore
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 const formatHeading = (date: string): string => {
   const d = new Date(date + "T12:00:00Z");
-  const day = DAY_NAMES[(d.getUTCDay() + 6) % 7] ?? "";
-  const month = MONTH_NAMES[d.getUTCMonth()] ?? "";
-  return `${day} ${month} ${d.getUTCDate()}`;
+  return `${DAY_NAMES[(d.getUTCDay() + 6) % 7] ?? ""} ${MONTH_NAMES[d.getUTCMonth()] ?? ""} ${d.getUTCDate()}`;
 };
 
 export type CalendarWeekListProps = {

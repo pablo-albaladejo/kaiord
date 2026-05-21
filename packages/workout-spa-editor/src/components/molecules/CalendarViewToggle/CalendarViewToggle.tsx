@@ -35,13 +35,17 @@ export function CalendarViewToggle({
   const label = `Switch to ${next} view`;
   const Icon = next === "grid" ? LayoutGrid : List;
   const handleClick = () => {
-    const result = onToggle(next);
-    if (result && typeof result.then === "function") {
-      result.catch(() => {
-        // View-write failure is non-fatal — the live-query observation
-        // in the consumer leaves the persisted state truthful and the
-        // UI stays consistent on the next render.
-      });
+    // View-write failure is non-fatal whether it surfaces synchronously
+    // (sync throw from a misbehaving consumer) or asynchronously (Dexie
+    // rejection). The live-query observation in the consumer keeps the
+    // persisted state truthful and the UI consistent on the next render.
+    try {
+      const result = onToggle(next);
+      if (result && typeof result.then === "function") {
+        result.catch(() => {});
+      }
+    } catch {
+      // swallow sync throw — same rationale as the async path.
     }
   };
   return (

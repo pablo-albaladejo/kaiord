@@ -3,8 +3,8 @@
  *
  * Wires every schema version + upgrade onto a Dexie instance. Extracted
  * from `KaiordDatabase` so the constructor stays under the per-function
- * line cap. See per-version comments inline for migration intent and
- * forward-only invariants.
+ * line cap. v10+ registrations live in `register-kaiord-versions-v10-plus.ts`
+ * so this file stays under the per-file line cap as history grows.
  */
 
 import type Dexie from "dexie";
@@ -16,11 +16,10 @@ import {
   backfillUsageRow,
 } from "./dexie-migrations";
 import { backfillLinkedAccounts, SCHEMAS } from "./dexie-schemas";
-import { applyV10Upgrade } from "./dexie-v10-migration";
-import { applyV11Upgrade } from "./dexie-v11-migration";
-import { applyV12Upgrade } from "./dexie-v12-migration";
-import { applyV13Upgrade } from "./dexie-v13-migration";
-import { applyV14Upgrade } from "./dexie-v14-migration";
+import {
+  registerV10ToV12,
+  registerV13AndV14,
+} from "./register-kaiord-versions-v10-plus";
 
 // Narrowed handle: only `version()` is needed and Dexie's full surface
 // causes "Type instantiation is excessively deep" when passed as a
@@ -47,10 +46,8 @@ const registerV4ToV6 = (db: DexieVersionHost): void => {
       await tx.table("profiles").toCollection().modify(backfillLinkedAccounts);
     });
   // v5 — session-match + user-preferences + auto-match-dismissals.
-  // Forward-only; new tables empty on first load.
   db.version(5).stores(SCHEMAS.v5);
-  // v6 — bridge profile-snapshot push: backfills snapshot-pusher state
-  // so de-dup and right-to-be-forgotten paths have well-defined data.
+  // v6 — bridge profile-snapshot push: backfills snapshot-pusher state.
   db.version(6)
     .stores(SCHEMAS.v5)
     .upgrade(async (tx) => {
@@ -63,8 +60,7 @@ const registerV4ToV6 = (db: DexieVersionHost): void => {
 
 const registerV7ToV9 = (db: DexieVersionHost): void => {
   // v7 — autoMatchDismissals reshape (D15 of calendar-coaching-redesign).
-  // UX-state cache, not user data: cleared forward-only rather than
-  // row-by-row reshaped.
+  // UX-state cache, not user data: cleared forward-only.
   db.version(7)
     .stores(SCHEMAS.v5)
     .upgrade(async (tx) => {
@@ -77,46 +73,10 @@ const registerV7ToV9 = (db: DexieVersionHost): void => {
   db.version(9).stores(SCHEMAS.v8).upgrade(applyV9Upgrade);
 };
 
-const registerV10ToV12 = (db: DexieVersionHost): void => {
-  // v10 — coaching auto-match retro-fix (per coaching-activity-dialog-
-  // redesign / D8). Schema is unchanged from v8; only the data-side
-  // upgrade fires, scanning coachingActivities × workouts for pairs
-  // that lack a sessionMatch and writing the missing rows.
-  db.version(10).stores(SCHEMAS.v8).upgrade(applyV10Upgrade);
-  // v11 — SessionMatch.source rename: legacy "auto-conversion" rows are
-  // rewritten to the canonical "auto-coaching" value (coaching-activity-
-  // dialog-redesign §1.4 follow-up). Schema unchanged from v8; data-only.
-  db.version(11).stores(SCHEMAS.v8).upgrade(applyV11Upgrade);
-  // v12 — SessionMatch.executedWorkoutIds backfill (Train2Go three-slot
-  // grouping). Schema unchanged from v8; data-only — every existing row
-  // gets `executedWorkoutIds: []` so the field is always present on read.
-  db.version(12).stores(SCHEMAS.v8).upgrade(applyV12Upgrade);
-};
-
-const registerV13 = (db: DexieVersionHost): void => {
-  // v13 — workouts become profile-scoped 1–1. Adds `profileId` +
-  // `[profileId+date]` indexes on the `workouts` store and backfills
-  // every legacy row from `meta.activeProfileId`. The upgrade throws
-  // when workouts exist but no active profile is set — degenerate
-  // state, not a silently-tolerated condition.
-  db.version(13).stores(SCHEMAS.v13).upgrade(applyV13Upgrade);
-};
-
-const registerV14 = (db: DexieVersionHost): void => {
-  // v14 — calendar preference rename. Walks `userPreferences` rows,
-  // writes `calendarView = "grid"` unconditionally (both legacy
-  // `compact` and `comfortable` collapse to `grid`) and removes the
-  // legacy `calendarDensity` field. Schema unchanged from v13 (the
-  // `userPreferences` table is keyed by `profileId` only — no index
-  // change is required), so this is a data-only upgrade.
-  db.version(14).stores(SCHEMAS.v13).upgrade(applyV14Upgrade);
-};
-
 export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV1ToV3(db);
   registerV4ToV6(db);
   registerV7ToV9(db);
   registerV10ToV12(db);
-  registerV13(db);
-  registerV14(db);
+  registerV13AndV14(db);
 };
