@@ -34,3 +34,10 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
     ...createModalActions(set),
   };
 });
+
+// Expose for e2e test seeding (dev mode only). Mirrors __KAIORD_DB__
+// in `adapters/dexie/dexie-database.ts`; production builds tree-shake.
+if (import.meta.env.DEV) {
+  const w = window as unknown as Record<string, unknown>;
+  w.__KAIORD_WORKOUT_STORE__ = useWorkoutStore;
+}

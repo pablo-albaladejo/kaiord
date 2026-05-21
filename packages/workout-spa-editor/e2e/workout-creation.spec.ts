@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 const EXPECTED_STEP_CARDS_AFTER_DUPLICATE = 3;
 const IMMEDIATE_DELETION_GRACE_MS = 300;
@@ -21,7 +21,7 @@ test.describe("Step Management Flow", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a minimal workout file
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -106,7 +106,7 @@ test.describe("Step Management Flow", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -167,7 +167,7 @@ test.describe("Step Management Flow", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",

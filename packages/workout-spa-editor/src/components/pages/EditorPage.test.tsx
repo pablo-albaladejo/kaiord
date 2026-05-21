@@ -240,7 +240,7 @@ describe("EditorPage", () => {
     });
   });
 
-  it("should focus the file input when mounted with ?action=import", async () => {
+  it("should mount the ImportDropzoneOverlay when navigated with ?action=import", async () => {
     // Arrange
 
     // Act
@@ -250,15 +250,15 @@ describe("EditorPage", () => {
     // Assert
 
     await waitFor(() => {
-      const input = document.querySelector(
-        'input[type="file"]'
-      ) as HTMLInputElement | null;
-      expect(input).not.toBeNull();
-      expect(document.activeElement).toBe(input);
+      expect(screen.getByTestId("import-dropzone-overlay")).toBeInTheDocument();
     });
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement | null;
+    expect(input).not.toBeNull();
   });
 
-  it("should leave the file upload section collapsed when mounted with ?source=scratch", async () => {
+  it("should render AiBanner closed and the editor in MetadataEditMode when mounted with ?source=scratch", async () => {
     // Arrange
 
     // Act
@@ -267,15 +267,20 @@ describe("EditorPage", () => {
 
     // Assert
 
-    // In scratch mode the welcome section mounts but `ManualCreateSection`
-    // stays collapsed, so the `<input type="file">` is never rendered. That
-    // absence — not a focus comparison against a null input — is the real
-    // contract: scratch mode does NOT prime the import affordance.
+    await waitFor(() => {
+      expect(screen.getByTestId("ai-banner")).toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("button", { name: /generate with ai/i })
+    ).toHaveAttribute("aria-expanded", "false");
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: /getting started/i })
+        screen.getByRole("form", { name: /edit workout metadata/i })
       ).toBeInTheDocument();
     });
-    expect(document.querySelector('input[type="file"]')).toBeNull();
+    expect(
+      screen.queryByRole("heading", { name: /getting started/i })
+    ).toBeNull();
+    expect(screen.queryByText(/or create manually/i)).toBeNull();
   });
 });
