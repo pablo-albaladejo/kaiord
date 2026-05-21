@@ -247,11 +247,13 @@ describe("deleteProfileWithCascade", () => {
     const deps = makeDeps();
     await deps.userPreferences.put({
       profileId: "p1",
-      calendarDensity: "compact",
+      calendarView: "grid",
+      updatedAt: NOW,
     });
     await deps.userPreferences.put({
       profileId: "p2",
-      calendarDensity: "comfortable",
+      calendarView: "list",
+      updatedAt: NOW,
     });
 
     // Act

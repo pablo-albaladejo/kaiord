@@ -1,14 +1,14 @@
 /**
  * Top-of-page banners + batch cost confirmation + week navigation row +
- * density toggle. Kept out of CalendarPage so each render function
+ * calendar view toggle. Kept out of CalendarPage so each render function
  * stays under the per-function line cap.
  */
 
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
-import type { CalendarDensity } from "../../types/user-preferences";
+import type { CalendarView } from "../../types/user-preferences";
 import { formatWeekLabel } from "../../utils/format-week-label";
+import { CalendarViewToggle } from "../molecules/CalendarViewToggle/CalendarViewToggle";
 import { CoachingSyncButton } from "../molecules/CoachingCard/CoachingSyncButton";
-import { DensityToggle } from "../molecules/DensityToggle/DensityToggle";
 import { WeekNavigation } from "../molecules/WorkoutCard/WeekNavigation";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
@@ -17,15 +17,15 @@ import type { useCalendarState } from "./use-calendar-state";
 export type CalendarHeaderProps = {
   state: ReturnType<typeof useCalendarState>;
   coaching: ReturnType<typeof useCoachingActivities>;
-  density?: CalendarDensity;
-  onDensityChange?: (next: CalendarDensity) => void;
+  view?: CalendarView;
+  onViewChange?: (next: CalendarView) => void;
 };
 
 export function CalendarHeader({
   state: s,
   coaching,
-  density,
-  onDensityChange,
+  view,
+  onViewChange,
 }: CalendarHeaderProps) {
   return (
     <>
@@ -57,8 +57,8 @@ export function CalendarHeader({
           weekLabel={formatWeekLabel(s.data.weekId)}
         />
         <div className="flex items-center gap-2">
-          {density && onDensityChange && (
-            <DensityToggle density={density} onToggle={onDensityChange} />
+          {view && onViewChange && (
+            <CalendarViewToggle view={view} onToggle={onViewChange} />
           )}
           {coaching.syncSources
             .filter((src) => src.linked)

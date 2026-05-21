@@ -23,26 +23,25 @@ import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
 import { useExecutedMatchAutoForCalendar } from "../../hooks/use-executed-match-auto";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
-import { useSetCalendarDensity } from "../../hooks/use-set-calendar-density";
+import { useSetCalendarView } from "../../hooks/use-set-calendar-view";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
 import type { CoachingActivity } from "../../types/coaching-activity";
+import type { CalendarView } from "../../types/user-preferences";
 import type { CalendarBuckets } from "./calendar-buckets";
 import { useCalendarBucketsMemo } from "./use-calendar-buckets-memo";
 import { useCalendarState } from "./use-calendar-state";
 import { useSelectedActivity } from "./use-selected-activity";
 
-const viewportDefaultDensity = (): "compact" | "comfortable" =>
-  typeof window !== "undefined" && window.innerWidth >= 768
-    ? "compact"
-    : "comfortable";
+const viewportDefaultView = (): CalendarView =>
+  typeof window !== "undefined" && window.innerWidth >= 768 ? "grid" : "list";
 
 export type CalendarPageReadyState = {
   state: "ready";
   s: ReturnType<typeof useCalendarState>;
   coaching: ReturnType<typeof useCoachingActivities>;
   buckets: CalendarBuckets;
-  density: "compact" | "comfortable" | undefined;
-  onDensityChange: (d: "compact" | "comfortable") => void;
+  view: CalendarView | undefined;
+  onViewChange: (v: CalendarView) => void;
   selectedActivity: CoachingActivity | null;
   setSelectedActivity: (a: CoachingActivity | null) => void;
   suggestions: MatchSuggestion[];
@@ -69,7 +68,7 @@ export function useCalendarPage(): CalendarPageState {
   const bannerActions = useAutoMatchBannerActions(profileId, weekStart);
   const prefs = useUserPreferences({
     profileId,
-    defaultDensity: viewportDefaultDensity(),
+    defaultView: viewportDefaultView(),
   });
   const buckets = useCalendarBucketsMemo({
     days: s.data.days,
@@ -77,7 +76,7 @@ export function useCalendarPage(): CalendarPageState {
     coachingByDay: coaching.byDay,
     matched: rawMatched ?? [],
   });
-  const onDensityChange = useSetCalendarDensity(profileId);
+  const onViewChange = useSetCalendarView(profileId);
 
   if (!s.data.isValidWeek) return { state: "redirect" };
   if (s.data.hydration === "pending") return { state: "skeleton" };
@@ -86,8 +85,8 @@ export function useCalendarPage(): CalendarPageState {
     s,
     coaching,
     buckets,
-    density: prefs?.calendarDensity,
-    onDensityChange,
+    view: prefs?.calendarView,
+    onViewChange,
     selectedActivity,
     setSelectedActivity,
     suggestions: suggestions ?? [],

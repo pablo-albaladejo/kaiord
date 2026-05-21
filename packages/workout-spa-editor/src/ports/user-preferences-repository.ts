@@ -1,6 +1,6 @@
 /**
  * UserPreferencesRepository port — per-profile UI preferences (calendar
- * density, future expansions). Rows are created lazily on first user-driven
+ * view, future expansions). Rows are created lazily on first user-driven
  * mutation; absence of a row is the canonical "no overrides" state and is
  * surfaced as `undefined` from `get`.
  */

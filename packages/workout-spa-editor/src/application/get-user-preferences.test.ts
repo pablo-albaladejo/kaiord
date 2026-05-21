@@ -11,7 +11,7 @@ describe("getUserPreferences", () => {
     const repo = createInMemoryUserPreferencesRepository();
     await repo.put({
       profileId: "p1",
-      calendarDensity: "comfortable",
+      calendarView: "list",
       updatedAt: "2026-04-30T10:00:00.000Z",
     });
 
@@ -24,7 +24,7 @@ describe("getUserPreferences", () => {
     // Assert
     expect(result).toEqual({
       profileId: "p1",
-      calendarDensity: "comfortable",
+      calendarView: "list",
       updatedAt: "2026-04-30T10:00:00.000Z",
     });
   });
@@ -35,20 +35,20 @@ describe("getUserPreferences", () => {
 
     // Act
     const result = await getUserPreferences(
-      { profileId: "p1", defaultDensity: "compact" },
+      { profileId: "p1", defaultView: "grid" },
       { repository: repo, clock: fixedClock }
     );
 
     // Assert
     expect(result).toEqual({
       profileId: "p1",
-      calendarDensity: "compact",
+      calendarView: "grid",
       updatedAt: "2026-05-01T12:00:00.000Z",
     });
     expect(await repo.get("p1")).toBeUndefined();
   });
 
-  it("should fall back to compact when no defaultDensity provided", async () => {
+  it("should fall back to grid when no defaultView provided", async () => {
     // Arrange
     const repo = createInMemoryUserPreferencesRepository();
 
@@ -59,20 +59,20 @@ describe("getUserPreferences", () => {
     );
 
     // Assert
-    expect(result.calendarDensity).toBe("compact");
+    expect(result.calendarView).toBe("grid");
   });
 
-  it("should use comfortable default when caller passes it (mobile viewport)", async () => {
+  it("should use list default when caller passes it (mobile viewport)", async () => {
     // Arrange
     const repo = createInMemoryUserPreferencesRepository();
 
     // Act
     const result = await getUserPreferences(
-      { profileId: "p1", defaultDensity: "comfortable" },
+      { profileId: "p1", defaultView: "list" },
       { repository: repo, clock: fixedClock }
     );
 
     // Assert
-    expect(result.calendarDensity).toBe("comfortable");
+    expect(result.calendarView).toBe("list");
   });
 });

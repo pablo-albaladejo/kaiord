@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  calendarDensitySchema,
+  calendarViewSchema,
   type UserPreferences,
   userPreferencesSchema,
 } from "./user-preferences";
@@ -10,20 +10,20 @@ const baseRow = (
   overrides: Partial<UserPreferences> = {}
 ): UserPreferences => ({
   profileId: "p1",
-  calendarDensity: "compact",
+  calendarView: "grid",
   updatedAt: "2026-05-01T12:00:00.000Z",
   ...overrides,
 });
 
-describe("calendarDensitySchema", () => {
-  it("should accept compact and comfortable", () => {
+describe("calendarViewSchema", () => {
+  it("should accept grid and list", () => {
     // Arrange
 
     // Act
 
     // Assert
-    expect(calendarDensitySchema.parse("compact")).toBe("compact");
-    expect(calendarDensitySchema.parse("comfortable")).toBe("comfortable");
+    expect(calendarViewSchema.parse("grid")).toBe("grid");
+    expect(calendarViewSchema.parse("list")).toBe("list");
   });
 
   it("should reject any other value", () => {
@@ -32,8 +32,8 @@ describe("calendarDensitySchema", () => {
     // Act
 
     // Assert
-    expect(() => calendarDensitySchema.parse("dense")).toThrow();
-    expect(() => calendarDensitySchema.parse("")).toThrow();
+    expect(() => calendarViewSchema.parse("compact")).toThrow();
+    expect(() => calendarViewSchema.parse("")).toThrow();
   });
 });
 
@@ -69,7 +69,7 @@ describe("userPreferencesSchema", () => {
     ).toThrow();
   });
 
-  it("should reject unknown density values", () => {
+  it("should reject unknown view values", () => {
     // Arrange
 
     // Act
@@ -77,7 +77,7 @@ describe("userPreferencesSchema", () => {
     // Assert
     expect(() =>
       // @ts-expect-error — verifying runtime rejection
-      userPreferencesSchema.parse(baseRow({ calendarDensity: "tight" }))
+      userPreferencesSchema.parse(baseRow({ calendarView: "tight" }))
     ).toThrow();
   });
 });

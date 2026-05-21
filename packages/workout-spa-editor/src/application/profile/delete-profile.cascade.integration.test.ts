@@ -86,7 +86,7 @@ const makeSeedRow = (
         source: "manual",
       };
     case "userPreferences":
-      return { profileId, calendarDensity: "compact" };
+      return { profileId, calendarView: "grid", updatedAt: NOW };
     case "autoMatchDismissals":
       return {
         profileId,

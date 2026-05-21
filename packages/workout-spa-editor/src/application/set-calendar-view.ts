@@ -1,5 +1,5 @@
 /**
- * setCalendarDensity — upserts the per-profile UserPreferences row.
+ * setCalendarView — upserts the per-profile UserPreferences row.
  *
  * The profile-existence read is sequenced before the write so a
  * concurrent profile delete surfaces as `ProfileNotFoundError` rather
@@ -11,22 +11,22 @@
 import type { ProfileRepository } from "../ports/persistence-port";
 import type { UserPreferencesRepository } from "../ports/user-preferences-repository";
 import { ProfileNotFoundError } from "../types/session-match-errors";
-import type { CalendarDensity } from "../types/user-preferences";
+import type { CalendarView } from "../types/user-preferences";
 
-export type SetCalendarDensityInput = {
+export type SetCalendarViewInput = {
   profileId: string;
-  density: CalendarDensity;
+  view: CalendarView;
 };
 
-export type SetCalendarDensityDeps = {
+export type SetCalendarViewDeps = {
   clock: () => string;
   repository: UserPreferencesRepository;
   profileRepository: ProfileRepository;
 };
 
-export async function setCalendarDensity(
-  input: SetCalendarDensityInput,
-  deps: SetCalendarDensityDeps
+export async function setCalendarView(
+  input: SetCalendarViewInput,
+  deps: SetCalendarViewDeps
 ): Promise<void> {
   const profile = await deps.profileRepository.getById(input.profileId);
   if (!profile) {
@@ -34,7 +34,7 @@ export async function setCalendarDensity(
   }
   await deps.repository.put({
     profileId: input.profileId,
-    calendarDensity: input.density,
+    calendarView: input.view,
     updatedAt: deps.clock(),
   });
 }

@@ -1,79 +1,67 @@
-/**
- * Renders three buckets in order: matched sessions, then solo coaching
- * plans, then solo executed workouts. Today is signalled via a pill on
- * the day-name label (NOT a column-wide tint), and the column carries
- * `aria-current="date"` so assistive tech can locate it without
- * relying on the visible pill. The empty-day affordance is permanently
- * visible (rather than hover-only) so first-time and keyboard-first
- * users discover it without hover state.
- */
+import type { PointerEvent } from "react";
 
 import type { MatchedSessionWithMetadata } from "../../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
-import type { CalendarDensity } from "../../../types/user-preferences";
+import type { CalendarView } from "../../../types/user-preferences";
 import { renderDayCards } from "./day-column-cards";
+import { getDayLabel } from "./day-label";
 
 export type DayColumnProps = {
   date: string;
   isToday: boolean;
-  density?: CalendarDensity;
+  view?: CalendarView;
   matchedSessions?: MatchedSessionWithMetadata[];
   soloPlans?: CoachingActivity[];
   soloActuals?: WorkoutRecord[];
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
+  workoutCardPointerDownFor?: (
+    workoutId: string
+  ) => (event: PointerEvent) => void;
+  dropTargetActive?: boolean;
 };
 
-const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-const getDayLabel = (date: string): { name: string; num: number } => {
-  const d = new Date(date + "T12:00:00Z");
-  return {
-    name: DAY_NAMES[(d.getUTCDay() + 6) % 7] ?? "",
-    num: d.getUTCDate(),
-  };
-};
-
-const TODAY_PILL =
-  "rounded-full bg-primary-100 px-1.5 text-primary-900 dark:bg-primary-900 dark:text-primary-100";
+const TODAY_BODY_TINT = "bg-primary-50/40 dark:bg-primary-900/20";
+const DROP_RING = "ring-2 ring-primary-500 ring-offset-1";
 
 export function DayColumn({
   date,
   isToday,
-  density = "compact",
+  view = "grid",
   matchedSessions = [],
   soloPlans = [],
   soloActuals = [],
   onWorkoutClick,
   onEmptyDayClick,
   onActivityClick,
+  workoutCardPointerDownFor,
+  dropTargetActive = false,
 }: DayColumnProps) {
   const label = getDayLabel(date);
   const total = matchedSessions.length + soloPlans.length + soloActuals.length;
-
+  const tint = isToday ? TODAY_BODY_TINT : "";
+  const dropRing = dropTargetActive ? DROP_RING : "";
   return (
     <div
       data-testid={`day-column-${date}`}
+      data-day={date}
+      data-today={isToday ? "true" : undefined}
+      data-drop-target={dropTargetActive ? "true" : undefined}
       aria-current={isToday ? "date" : undefined}
       role="group"
-      className="flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0"
+      className={`flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0 ${tint} ${dropRing}`}
     >
-      <span className="mb-2 text-xs font-semibold text-muted-foreground">
-        <span className={isToday ? TODAY_PILL : ""}>
-          {label.name} {label.num}
-        </span>
-        {isToday && <span className="sr-only"> (today)</span>}
-      </span>
       <div className="flex flex-1 flex-col gap-1.5">
         {renderDayCards({
           matchedSessions,
           soloPlans,
           soloActuals,
-          density,
+          view,
           onWorkoutClick,
           onActivityClick,
+          workoutCardPointerDownFor,
         })}
       </div>
       {total === 0 && (

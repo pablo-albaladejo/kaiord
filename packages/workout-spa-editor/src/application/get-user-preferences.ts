@@ -3,19 +3,16 @@
  * default when no row exists. The default is NOT written; the application
  * layer treats absence as the canonical "no override" state.
  *
- * `defaultDensity` is computed by the caller (UI layer reads viewport
+ * `defaultView` is computed by the caller (UI layer reads viewport
  * width); the application layer is viewport-agnostic.
  */
 
 import type { UserPreferencesRepository } from "../ports/user-preferences-repository";
-import type {
-  CalendarDensity,
-  UserPreferences,
-} from "../types/user-preferences";
+import type { CalendarView, UserPreferences } from "../types/user-preferences";
 
 export type GetUserPreferencesInput = {
   profileId: string;
-  defaultDensity?: CalendarDensity;
+  defaultView?: CalendarView;
 };
 
 export type GetUserPreferencesDeps = {
@@ -31,7 +28,7 @@ export async function getUserPreferences(
   if (persisted) return persisted;
   return {
     profileId: input.profileId,
-    calendarDensity: input.defaultDensity ?? "compact",
+    calendarView: input.defaultView ?? "grid",
     updatedAt: deps.clock(),
   };
 }
