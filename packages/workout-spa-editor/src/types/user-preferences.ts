@@ -10,13 +10,13 @@
 
 import { z } from "zod";
 
-export const calendarDensitySchema = z.enum(["compact", "comfortable"]);
+export const calendarViewSchema = z.enum(["grid", "list"]);
 
-export type CalendarDensity = z.infer<typeof calendarDensitySchema>;
+export type CalendarView = z.infer<typeof calendarViewSchema>;
 
 export const userPreferencesSchema = z.object({
   profileId: z.string().min(1),
-  calendarDensity: calendarDensitySchema,
+  calendarView: calendarViewSchema,
   updatedAt: z.iso.datetime(),
 });
 

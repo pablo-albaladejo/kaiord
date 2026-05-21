@@ -22,7 +22,7 @@ describe("useUserPreferences", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useUserPreferences({ profileId: null, defaultDensity: "compact" })
+      useUserPreferences({ profileId: null, defaultView: "grid" })
     );
 
     // Assert
@@ -35,18 +35,18 @@ describe("useUserPreferences", () => {
     // Arrange
     await seed({
       profileId: "p1",
-      calendarDensity: "comfortable",
+      calendarView: "list",
       updatedAt: "2026-04-30T10:00:00.000Z",
     });
 
     // Act
     const { result } = renderHook(() =>
-      useUserPreferences({ profileId: "p1", defaultDensity: "compact" })
+      useUserPreferences({ profileId: "p1", defaultView: "grid" })
     );
 
     // Assert
     await waitFor(() => {
-      expect(result.current?.calendarDensity).toBe("comfortable");
+      expect(result.current?.calendarView).toBe("list");
     });
   });
 
@@ -55,12 +55,12 @@ describe("useUserPreferences", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useUserPreferences({ profileId: "p1", defaultDensity: "comfortable" })
+      useUserPreferences({ profileId: "p1", defaultView: "list" })
     );
 
     // Assert
     await waitFor(() => {
-      expect(result.current?.calendarDensity).toBe("comfortable");
+      expect(result.current?.calendarView).toBe("list");
     });
   });
 
@@ -68,16 +68,15 @@ describe("useUserPreferences", () => {
     // Arrange
     await seed({
       profileId: "p1",
-      calendarDensity: "comfortable",
+      calendarView: "list",
       updatedAt: "2026-04-30T10:00:00.000Z",
     });
     const { result, rerender } = renderHook(
-      ({ profileId }) =>
-        useUserPreferences({ profileId, defaultDensity: "compact" }),
+      ({ profileId }) => useUserPreferences({ profileId, defaultView: "grid" }),
       { initialProps: { profileId: "p1" as string | null } }
     );
     await waitFor(() => {
-      expect(result.current?.calendarDensity).toBe("comfortable");
+      expect(result.current?.calendarView).toBe("list");
     });
 
     // Act
@@ -85,8 +84,8 @@ describe("useUserPreferences", () => {
 
     // Assert
     await waitFor(() => {
-      // p2 has no row → falls back to defaultDensity (compact), not p1's comfortable
-      expect(result.current?.calendarDensity).toBe("compact");
+      // p2 has no row → falls back to defaultView (grid), not p1's list
+      expect(result.current?.calendarView).toBe("grid");
       expect(result.current?.profileId).toBe("p2");
     });
   });
@@ -94,22 +93,22 @@ describe("useUserPreferences", () => {
   it("should re-fire when the underlying row is written", async () => {
     // Arrange
     const { result } = renderHook(() =>
-      useUserPreferences({ profileId: "p1", defaultDensity: "compact" })
+      useUserPreferences({ profileId: "p1", defaultView: "grid" })
     );
     await waitFor(() => {
-      expect(result.current?.calendarDensity).toBe("compact"); // default
+      expect(result.current?.calendarView).toBe("grid"); // default
     });
 
     // Act
     await seed({
       profileId: "p1",
-      calendarDensity: "comfortable",
+      calendarView: "list",
       updatedAt: "2026-05-01T12:00:00.000Z",
     });
 
     // Assert
     await waitFor(() => {
-      expect(result.current?.calendarDensity).toBe("comfortable");
+      expect(result.current?.calendarView).toBe("list");
     });
   });
 });

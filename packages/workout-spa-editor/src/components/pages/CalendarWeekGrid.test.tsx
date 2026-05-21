@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ToastContextProvider } from "../../contexts/ToastContext";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
+
+const renderWithToast = (ui: ReactElement) =>
+  render(<ToastContextProvider>{ui}</ToastContextProvider>);
 
 const DAYS_IN_WEEK = 7;
 
@@ -44,8 +49,7 @@ describe("CalendarWeekGrid", () => {
     // Arrange
 
     // Act
-
-    render(
+    renderWithToast(
       <CalendarWeekGrid
         days={DAYS}
         workoutsByDay={{}}
@@ -56,7 +60,6 @@ describe("CalendarWeekGrid", () => {
     );
 
     // Assert
-
     expect(screen.getByTestId("calendar-week-grid")).toBeInTheDocument();
     expect(screen.getAllByTestId(/^day-column-/)).toHaveLength(DAYS_IN_WEEK);
   });
@@ -65,8 +68,7 @@ describe("CalendarWeekGrid", () => {
     // Arrange
 
     // Act
-
-    render(
+    renderWithToast(
       <CalendarWeekGrid
         days={DAYS}
         workoutsByDay={{ "2026-04-07": [makeWorkout("w1", "2026-04-07")] }}
@@ -77,7 +79,6 @@ describe("CalendarWeekGrid", () => {
     );
 
     // Assert
-
     expect(screen.getByTestId("workout-card-w1")).toBeInTheDocument();
   });
 
@@ -85,8 +86,7 @@ describe("CalendarWeekGrid", () => {
     // Arrange
 
     // Act
-
-    render(
+    renderWithToast(
       <CalendarWeekGrid
         days={DAYS}
         workoutsByDay={{ "2026-04-07": [makeWorkout("w1", "2026-04-07")] }}
@@ -100,7 +100,6 @@ describe("CalendarWeekGrid", () => {
     );
 
     // Assert
-
     expect(screen.getByTestId("workout-card-w1")).toBeInTheDocument();
     expect(screen.getByTestId("coaching-card-c1")).toBeInTheDocument();
     expect(screen.getByText("Coach intervals")).toBeInTheDocument();
@@ -111,8 +110,7 @@ describe("CalendarWeekGrid", () => {
     // Arrange
 
     // Act
-
-    render(
+    renderWithToast(
       <CalendarWeekGrid
         days={DAYS}
         workoutsByDay={{}}
@@ -126,7 +124,6 @@ describe("CalendarWeekGrid", () => {
     );
 
     // Assert
-
     expect(screen.getByTestId("coaching-card-c2")).toBeInTheDocument();
   });
 
@@ -134,8 +131,7 @@ describe("CalendarWeekGrid", () => {
     // Arrange
 
     // Act
-
-    render(
+    renderWithToast(
       <CalendarWeekGrid
         days={DAYS}
         workoutsByDay={{}}
@@ -149,7 +145,6 @@ describe("CalendarWeekGrid", () => {
     );
 
     // Assert
-
     expect(
       screen.queryByTestId("empty-day-2026-04-06")
     ).not.toBeInTheDocument();
@@ -160,8 +155,7 @@ describe("CalendarWeekGrid", () => {
     // Arrange
 
     // Act
-
-    render(
+    renderWithToast(
       <CalendarWeekGrid
         days={DAYS}
         workoutsByDay={{}}
@@ -172,7 +166,82 @@ describe("CalendarWeekGrid", () => {
     );
 
     // Assert
-
     expect(screen.getAllByTestId(/^empty-day-/)).toHaveLength(DAYS_IN_WEEK);
+  });
+
+  it("should render a sticky day header row above the day columns", () => {
+    // Arrange
+
+    // Act
+    renderWithToast(
+      <CalendarWeekGrid
+        days={DAYS}
+        workoutsByDay={{}}
+        todayDate="2026-04-06"
+        onWorkoutClick={vi.fn()}
+        onEmptyDayClick={vi.fn()}
+      />
+    );
+
+    // Assert
+    const header = screen.getByTestId("calendar-week-grid-header");
+    expect(header).toBeInTheDocument();
+    expect(header.className).toContain("sticky");
+    for (const date of DAYS) {
+      expect(
+        screen.getByTestId(`calendar-week-grid-header-${date}`)
+      ).toBeInTheDocument();
+    }
+  });
+
+  it("should mark today's header cell with data-today and the today tint", () => {
+    // Arrange
+
+    // Act
+    renderWithToast(
+      <CalendarWeekGrid
+        days={DAYS}
+        workoutsByDay={{}}
+        todayDate="2026-04-09"
+        onWorkoutClick={vi.fn()}
+        onEmptyDayClick={vi.fn()}
+      />
+    );
+
+    // Assert
+    const todayHeader = screen.getByTestId(
+      "calendar-week-grid-header-2026-04-09"
+    );
+    expect(todayHeader.getAttribute("data-today")).toBe("true");
+    expect(todayHeader.className).toContain("bg-primary-50/40");
+    const todayBody = screen.getByTestId("day-column-2026-04-09");
+    expect(todayBody.getAttribute("data-today")).toBe("true");
+    expect(todayBody.className).toContain("bg-primary-50/40");
+  });
+
+  it("should render the multi-workout badge when a day has 3 or more activities", () => {
+    // Arrange
+    const w = (id: string): WorkoutRecord => makeWorkout(id, "2026-04-07");
+
+    // Act
+    renderWithToast(
+      <CalendarWeekGrid
+        days={DAYS}
+        workoutsByDay={{
+          "2026-04-07": [w("w1"), w("w2"), w("w3")],
+        }}
+        todayDate="2026-04-06"
+        onWorkoutClick={vi.fn()}
+        onEmptyDayClick={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(
+      screen.getByTestId("multi-workout-badge-2026-04-07")
+    ).toHaveTextContent("3 activities");
+    expect(
+      screen.queryByTestId("multi-workout-badge-2026-04-08")
+    ).not.toBeInTheDocument();
   });
 });
