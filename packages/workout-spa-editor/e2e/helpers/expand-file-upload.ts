@@ -5,9 +5,11 @@ import type { Page } from "@playwright/test";
  * so the file input becomes visible in the DOM.
  */
 export async function expandFileUpload(page: Page) {
-  // Navigate to editor if not already there
+  // Navigate to editor if not already there. `/workout/new` (no query)
+  // now renders the NewWorkoutPicker; `?source=scratch` opens the
+  // editor in blank mode so the file-upload accordion is reachable.
   if (!page.url().includes("/workout")) {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
   }
 
   const fileInput = page.locator('input[type="file"]');

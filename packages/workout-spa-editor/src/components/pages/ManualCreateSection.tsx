@@ -1,5 +1,6 @@
 import { ChevronDown, Plus, Upload } from "lucide-react";
-import { useState } from "react";
+import type { RefObject } from "react";
+import { useEffect, useState } from "react";
 
 import { useAnalytics } from "../../contexts";
 import type { KRD, ValidationError } from "../../types/krd";
@@ -14,15 +15,31 @@ type ManualCreateSectionProps = {
     error: string,
     validationErrors?: Array<ValidationError>
   ) => void;
+  /**
+   * Optional ref to the underlying file input, forwarded down so the
+   * editor's import mode can focus it on mount.
+   */
+  fileInputRef?: RefObject<HTMLInputElement | null>;
+  /**
+   * Whether the upload section starts expanded. Defaults to false; the
+   * editor's import mode sets this true so the file input is visible.
+   */
+  defaultExpanded?: boolean;
 };
 
 export function ManualCreateSection({
   onCreateClick,
   onFileLoad,
   onFileError,
+  fileInputRef,
+  defaultExpanded = false,
 }: ManualCreateSectionProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const analytics = useAnalytics();
+
+  useEffect(() => {
+    setExpanded(defaultExpanded);
+  }, [defaultExpanded]);
 
   const handleImported = (format: string) => {
     analytics.event("workout-imported", { format });
@@ -60,6 +77,7 @@ export function ManualCreateSection({
             onFileLoad={onFileLoad}
             onError={onFileError}
             onImported={handleImported}
+            inputRef={fileInputRef}
           />
         </div>
       )}

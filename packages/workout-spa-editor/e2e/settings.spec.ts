@@ -14,7 +14,7 @@ test.describe("Settings Panel", () => {
       localStorage.clear();
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
   });
 
   test("8.7: add provider, remove provider, set default", async ({ page }) => {

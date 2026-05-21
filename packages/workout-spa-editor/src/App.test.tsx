@@ -75,7 +75,7 @@ describe("App", () => {
 
     // Assert
 
-    expect(await screen.findByText("Welcome to Kaiord")).toBeInTheDocument();
+    expect(await screen.findByTestId("calendar-page")).toBeInTheDocument();
   });
 
   describe("onboarding tutorial integration (Requirements 37.1, 37.5)", () => {

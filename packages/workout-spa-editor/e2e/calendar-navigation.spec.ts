@@ -35,7 +35,7 @@ test.describe("Calendar Navigation", () => {
   test('Header "Calendar" button navigates to /calendar from /workout/new', async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.getByRole("button", { name: "Go to calendar" }).click();
     await page.waitForURL(/\/calendar/);
     await expect(page.getByTestId("calendar-page")).toBeVisible();

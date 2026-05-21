@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useTrain2GoStore } from "../../../store/train2go-store";
 import { renderWithProviders } from "../../../test-utils";
@@ -18,7 +18,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader />);
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
     // Assert
 
@@ -34,7 +34,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader />);
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
     // Assert
 
@@ -48,7 +48,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader />);
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
     // Assert
 
@@ -62,7 +62,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader />);
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
     // Assert
 
@@ -74,7 +74,7 @@ describe("StatusHeader", () => {
     useTrain2GoStore.setState({ extensionInstalled: true });
 
     // Act
-    renderWithProviders(<StatusHeader />);
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
     // Assert
     expect(screen.getByTestId("status-header-sync")).toHaveTextContent(
@@ -87,12 +87,33 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader />);
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
     // Assert
 
     expect(screen.getByTestId("status-header-new-button")).toHaveTextContent(
       "New workout"
     );
+  });
+
+  it("should render the zone divider between the primary nav and the account cluster", () => {
+    // Arrange
+
+    // Act
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+
+    // Assert
+    const divider = screen.getByTestId("status-header-divider");
+    const newButton = screen.getByTestId("status-header-new-button");
+    const profileButton = screen.getByTestId("status-header-profile-button");
+    expect(divider).toBeInTheDocument();
+    const parent = divider.parentElement;
+    expect(parent).not.toBeNull();
+    const children = Array.from(parent!.children);
+    const dividerIndex = children.indexOf(divider);
+    const newButtonIndex = children.indexOf(newButton);
+    const profileButtonIndex = children.indexOf(profileButton);
+    expect(dividerIndex).toBeGreaterThan(newButtonIndex);
+    expect(dividerIndex).toBeLessThan(profileButtonIndex);
   });
 });

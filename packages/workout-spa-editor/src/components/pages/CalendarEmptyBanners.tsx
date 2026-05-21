@@ -7,7 +7,6 @@ import { BatchMessage } from "../molecules/BatchProcessingBanner/BatchMessage";
 import { BatchProcessingBanner } from "../molecules/BatchProcessingBanner/BatchProcessingBanner";
 import {
   EmptyWeekState,
-  FirstVisitState,
   NoAiProviderState,
   NoBridgesState,
 } from "../molecules/CalendarEmptyStates";
@@ -31,7 +30,6 @@ export type CalendarEmptyBannersProps = {
 export function CalendarEmptyBanners(p: CalendarEmptyBannersProps) {
   return (
     <>
-      {!p.hasAnyWorkouts && <FirstVisitState />}
       {p.hasAnyWorkouts && !p.hasWeekWorkouts && (
         <EmptyWeekState onGoToLatest={p.onGoToLatest} />
       )}

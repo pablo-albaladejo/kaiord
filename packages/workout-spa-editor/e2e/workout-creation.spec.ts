@@ -18,7 +18,7 @@ const IMMEDIATE_DELETION_GRACE_MS = 300;
  */
 test.describe("Step Management Flow", () => {
   test("should create, duplicate, and delete steps", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a minimal workout file
     await expandFileUpload(page);
@@ -103,7 +103,7 @@ test.describe("Step Management Flow", () => {
   });
 
   test("should support undo/redo for step operations", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout
     await expandFileUpload(page);
@@ -164,7 +164,7 @@ test.describe("Step Management Flow", () => {
   });
 
   test("should save workout with keyboard shortcut", async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Load a workout
     await expandFileUpload(page);

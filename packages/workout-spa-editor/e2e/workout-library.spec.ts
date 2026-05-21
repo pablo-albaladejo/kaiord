@@ -22,7 +22,7 @@ test.describe("Workout Library", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the editor; clear localStorage; load a test workout
     // so the editor has data for save-to-library cases.
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.evaluate(() => {
       localStorage.clear();
     });
@@ -107,10 +107,12 @@ test.describe("Workout Library", () => {
       await cta.waitFor({ state: "visible" });
       await cta.click();
 
+      // Assert
       // The CTA loads the template into the store and SPA-navigates
-      // to /workout/new — no hard reload is required. Assert the
-      // editor mounts with the loaded steps.
-      await page.waitForURL(/\/workout\/new$/);
+      // to /workout/new?source=scratch — `source=scratch` bypasses
+      // the NewWorkoutPicker so the editor mounts directly with the
+      // loaded steps.
+      await page.waitForURL(/\/workout\/new\?source=scratch$/);
       await expect(page.getByTestId("step-card").first()).toBeVisible();
     });
 

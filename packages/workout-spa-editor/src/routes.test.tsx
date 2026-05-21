@@ -59,7 +59,7 @@ describe("Routing", () => {
 
     // Assert
 
-    expect(await screen.findByText("Welcome to Kaiord")).toBeInTheDocument();
+    expect(await screen.findByTestId("calendar-page")).toBeInTheDocument();
   });
 
   it("should render LibraryPage at /library", async () => {
@@ -76,7 +76,7 @@ describe("Routing", () => {
     });
   });
 
-  it("should render EditorPage at /workout/new", async () => {
+  it("should render NewWorkoutPicker at /workout/new", async () => {
     // Arrange
 
     // Act
@@ -86,8 +86,9 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      const container = document.querySelector(".space-y-6");
-      expect(container).toBeInTheDocument();
+      expect(
+        screen.getByTestId("new-workout-picker-scratch")
+      ).toBeInTheDocument();
     });
   });
 
@@ -101,7 +102,7 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
+      expect(screen.getByTestId("calendar-page")).toBeInTheDocument();
     });
   });
 
@@ -115,7 +116,7 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
+      expect(screen.getByTestId("calendar-page")).toBeInTheDocument();
     });
   });
 
@@ -129,7 +130,7 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
+      expect(screen.getByTestId("calendar-page")).toBeInTheDocument();
     });
   });
 });

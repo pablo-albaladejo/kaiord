@@ -21,52 +21,24 @@ test.describe("Calendar Empty States", () => {
     await clearDexie(page);
   });
 
-  test("No workouts shows FirstVisitState", async ({ page }) => {
-    await page.reload();
-
-    await expect(page.getByTestId("first-visit-state")).toBeVisible();
-    await expect(page.getByText("Welcome to Kaiord")).toBeVisible();
-  });
-
-  test("FirstVisitState still shows week grid below", async ({ page }) => {
-    await page.reload();
-
-    await expect(page.getByTestId("first-visit-state")).toBeVisible();
-    await expect(page.getByTestId("calendar-week-grid")).toBeVisible();
-  });
-
-  test('FirstVisitState "Create" navigates to /workout/new', async ({
-    page,
-  }) => {
-    await page.reload();
-
-    await expect(page.getByTestId("first-visit-state")).toBeVisible();
-    await page.getByRole("button", { name: "Create" }).click();
-    await page.waitForURL(/\/workout\/new/);
-  });
-
-  test('FirstVisitState "Import" navigates to /workout/new?action=import', async ({
-    page,
-  }) => {
-    await page.reload();
-
-    await expect(page.getByTestId("first-visit-state")).toBeVisible();
-    await page.getByRole("button", { name: "Import" }).click();
-    await page.waitForURL(/\/workout\/new\?action=import/);
-  });
-
-  test("should navigate to /settings/profile when FirstVisitState Connect is clicked", async ({
+  test("should render the week grid without a welcome card when no workouts exist", async ({
     page,
   }) => {
     // Arrange
-    await page.reload();
-    await expect(page.getByTestId("first-visit-state")).toBeVisible();
+    // PR header-zones-and-picker removed FirstVisitState. The calendar
+    // now relies on the persistent header (`+ New workout`, Library,
+    // Profile) for empty-state discoverability. The week grid still
+    // renders so the user can scan upcoming days.
 
     // Act
-    await page.getByRole("button", { name: "Connect" }).click();
+
+    await page.reload();
 
     // Assert
-    await page.waitForURL(/\/settings\/profile$/);
+
+    await expect(page.getByTestId("first-visit-state")).not.toBeAttached();
+    await expect(page.getByText("Welcome to Kaiord")).not.toBeAttached();
+    await expect(page.getByTestId("calendar-week-grid")).toBeVisible();
   });
 
   test("Workouts in other week but not this shows EmptyWeekState", async ({
