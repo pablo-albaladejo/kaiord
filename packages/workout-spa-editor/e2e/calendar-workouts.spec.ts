@@ -189,7 +189,7 @@ test.describe("Calendar Workouts", () => {
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
   });
 
-  test('EmptyDayDialog "Create new" navigates to /workout/new?date=X', async ({
+  test('EmptyDayDialog "Create new" navigates to /workout/new?source=scratch&date=X', async ({
     page,
   }) => {
     const dates = getWeekDates();
@@ -203,7 +203,12 @@ test.describe("Calendar Workouts", () => {
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
     await page.getByRole("button", { name: /Create new workout/i }).click();
-    await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
+    // `source=scratch` is the new explicit signal that bypasses the
+    // NewWorkoutPicker (introduced in PR #645) so the editor mounts
+    // directly with the date prefilled.
+    await page.waitForURL(
+      new RegExp(`/workout/new\\?source=scratch&date=${dates[0]}`)
+    );
   });
 
   test('EmptyDayDialog "Add from Library" opens the in-flow template picker (no navigation)', async ({

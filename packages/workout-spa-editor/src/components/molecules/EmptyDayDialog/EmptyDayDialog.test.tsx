@@ -234,6 +234,8 @@ describe("EmptyDayDialog", () => {
     // Assert
 
     expect(onClose).toHaveBeenCalledOnce();
-    expect(location.history).toContain("/workout/new?date=2025-03-15");
+    expect(location.history).toContain(
+      "/workout/new?source=scratch&date=2025-03-15"
+    );
   });
 });

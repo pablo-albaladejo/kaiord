@@ -49,7 +49,9 @@ export function RawWorkoutContent({
         onProcess={onProcess}
         onSkip={onSkip}
         onUnskip={onUnskip}
-        onManual={() => navigate(`/workout/new?date=${workout.date}`)}
+        onManual={() =>
+          navigate(`/workout/new?source=scratch&date=${workout.date}`)
+        }
         disabled={isSubmitting}
       />
     </div>
