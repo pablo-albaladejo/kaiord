@@ -69,6 +69,7 @@ export async function clearDexie(page: Page) {
       "syncState",
       "usage",
       "meta",
+      "userPreferences",
     ];
     await Promise.all(tables.map((t) => db.table(t).clear()));
   });
