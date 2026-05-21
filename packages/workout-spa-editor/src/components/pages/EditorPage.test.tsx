@@ -62,9 +62,9 @@ function makeRecord(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   };
 }
 
-function renderEditor(id?: string) {
-  const path = id ? `/workout/${id}` : "/workout/new";
-  const { hook } = memoryLocation({ path, record: true });
+function renderEditor(id?: string, path?: string) {
+  const resolvedPath = path ?? (id ? `/workout/${id}` : "/workout/new");
+  const { hook } = memoryLocation({ path: resolvedPath, record: true });
   return render(
     <PersistenceProvider persistence={createDexiePersistence(db)}>
       <GarminBridgeProvider>
@@ -238,5 +238,44 @@ describe("EditorPage", () => {
       const record = await db.table("workouts").get("w-test");
       expect(record.state).toBe("pushed");
     });
+  });
+
+  it("should focus the file input when mounted with ?action=import", async () => {
+    // Arrange
+
+    // Act
+
+    renderEditor(undefined, "/workout/new?action=import");
+
+    // Assert
+
+    await waitFor(() => {
+      const input = document.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement | null;
+      expect(input).not.toBeNull();
+      expect(document.activeElement).toBe(input);
+    });
+  });
+
+  it("should leave the file upload section collapsed when mounted with ?source=scratch", async () => {
+    // Arrange
+
+    // Act
+
+    renderEditor(undefined, "/workout/new?source=scratch");
+
+    // Assert
+
+    // In scratch mode the welcome section mounts but `ManualCreateSection`
+    // stays collapsed, so the `<input type="file">` is never rendered. That
+    // absence — not a focus comparison against a null input — is the real
+    // contract: scratch mode does NOT prime the import affordance.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /getting started/i })
+      ).toBeInTheDocument();
+    });
+    expect(document.querySelector('input[type="file"]')).toBeNull();
   });
 });

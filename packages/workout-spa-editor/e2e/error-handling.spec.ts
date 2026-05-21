@@ -15,7 +15,7 @@ const ERROR_REPETITION_COUNT = 5;
 
 test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Editor route is mounted when its `<h1 data-route-heading>` is in
     // the DOM. The brand label in the header is no longer an h1.
     await expect(page.locator("[data-route-heading]")).toBeAttached();
@@ -209,7 +209,7 @@ test.describe("Error Recovery", () => {
   };
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Editor route is mounted when its `<h1 data-route-heading>` is in
     // the DOM. The brand label in the header is no longer an h1.
     await expect(page.locator("[data-route-heading]")).toBeAttached();
@@ -380,7 +380,7 @@ test.describe("Error Handling - Mobile", () => {
 
   test("should display error messages on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Editor route is mounted when its `<h1 data-route-heading>` is in
     // the DOM. The brand label in the header is no longer an h1.
     await expect(page.locator("[data-route-heading]")).toBeAttached();
@@ -403,7 +403,7 @@ test.describe("Error Handling - Mobile", () => {
 
   test("should handle error recovery on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     const validWorkout = {
       version: "1.0",
@@ -449,7 +449,7 @@ test.describe("Error Handling - Performance", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Editor route is mounted when its `<h1 data-route-heading>` is in
     // the DOM. The brand label in the header is no longer an h1.
     await expect(page.locator("[data-route-heading]")).toBeAttached();
@@ -481,7 +481,7 @@ test.describe("Error Handling - Performance", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     // Editor route is mounted when its `<h1 data-route-heading>` is in
     // the DOM. The brand label in the header is no longer an h1.
     await expect(page.locator("[data-route-heading]")).toBeAttached();

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 
 import { useAnalytics } from "../../contexts/analytics-context";
@@ -12,20 +12,34 @@ const AiWorkoutInput = lazy(() =>
   }))
 );
 
+export type EditorNewWorkoutMode = "scratch" | "import";
+
 type EditorNewWorkoutProps = {
   workout: Workout | undefined;
+  mode?: EditorNewWorkoutMode;
 };
 
-export function EditorNewWorkout({ workout }: EditorNewWorkoutProps) {
+export function EditorNewWorkout({ workout, mode }: EditorNewWorkoutProps) {
   const [, navigate] = useLocation();
   const { handleFileLoad, handleFileError, handleCreateWorkout } =
     useAppHandlers();
   const analytics = useAnalytics();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleManualCreate = (name: string, sport: Sport) => {
     handleCreateWorkout(name, sport);
     analytics.event("workout-created", { source: "manual" });
   };
+
+  useEffect(() => {
+    if (mode !== "import") return;
+    const node = fileInputRef.current;
+    if (!node) return;
+    if (typeof node.scrollIntoView === "function") {
+      node.scrollIntoView({ block: "center" });
+    }
+    node.focus();
+  }, [mode, workout]);
 
   return (
     <>
@@ -37,6 +51,8 @@ export function EditorNewWorkout({ workout }: EditorNewWorkoutProps) {
           onFileLoad={handleFileLoad}
           onFileError={handleFileError}
           onCreateWorkout={handleManualCreate}
+          fileInputRef={fileInputRef}
+          defaultExpandManual={mode === "import"}
         />
       )}
     </>

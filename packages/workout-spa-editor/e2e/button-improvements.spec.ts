@@ -49,7 +49,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     // Load a workout to display the action buttons
@@ -145,7 +145,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     await expandFileUpload(page);
@@ -216,7 +216,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     await expandFileUpload(page);
@@ -301,7 +301,7 @@ test.describe("Button Improvements - Mobile Layout", () => {
 
   test("should stack buttons vertically on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     // Load a workout
@@ -389,7 +389,7 @@ test.describe("Button Improvements - Mobile Layout", () => {
 
   test("should have full-width buttons on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     await expandFileUpload(page);
@@ -480,7 +480,7 @@ test.describe("Button Improvements - Mobile Layout", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     await expandFileUpload(page);
@@ -566,7 +566,7 @@ test.describe("Button Improvements - Capitalization", () => {
 
   test("should display all button labels in title case", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     // Load a workout
@@ -638,7 +638,7 @@ test.describe("Button Improvements - Capitalization", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     await expandFileUpload(page);
@@ -704,7 +704,7 @@ test.describe("Button Improvements - Capitalization", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await dismissTutorialIfPresent(page);
 
     await expandFileUpload(page);

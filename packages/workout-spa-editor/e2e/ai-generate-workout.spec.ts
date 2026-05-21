@@ -19,7 +19,7 @@ test.describe("AI Generate Workout Flow", () => {
   test("8.9: no providers configured shows settings prompt", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // The AiWorkoutInput should show "Configure an AI provider" message
     // when no providers are configured
@@ -35,7 +35,7 @@ test.describe("AI Generate Workout Flow", () => {
   test("8.4: generate workout flow - type text, select model, generate", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // First add a provider via settings
     await addTestProvider(page);
@@ -59,7 +59,7 @@ test.describe("AI Generate Workout Flow", () => {
   test("8.10: model selector lists all configured providers", async ({
     page,
   }) => {
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Add two providers via settings
     await addTestProvider(page, "Test Claude", "anthropic");
@@ -99,5 +99,5 @@ async function addTestProvider(
     timeout: 3000,
   });
 
-  await page.goto("/workout/new");
+  await page.goto("/workout/new?source=scratch");
 }

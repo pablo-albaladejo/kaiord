@@ -36,7 +36,7 @@ test.describe("Profile Management", () => {
       // Re-set tutorial completion so the onboarding modal does not appear
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
   });
 
   test("should create a new profile with name only", async ({ page }) => {
@@ -264,7 +264,7 @@ test.describe("Profile Management", () => {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.evaluate(() => {
       localStorage.clear();
       localStorage.setItem("workout-spa-onboarding-completed", "true");
@@ -283,7 +283,7 @@ test.describe("Profile Management", () => {
     // Note: Cross-reload persistence via Dexie hydration is pending
     // (store starts empty and hydration from IndexedDB is not yet wired).
     // Navigating away and back verifies the Zustand store retains data.
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.goto("/settings/profile");
 
     // Assert - Profile still exists in settings page after re-navigation
@@ -302,7 +302,7 @@ test.describe("Zone Configuration", () => {
       localStorage.clear();
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     // Create a profile and set cycling thresholds
     const settingsPage = await gotoProfileSettings(page);
@@ -380,7 +380,7 @@ test.describe("Profile Performance", () => {
       localStorage.clear();
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     await gotoProfileSettings(page);
 
@@ -413,7 +413,7 @@ test.describe("Profile Performance", () => {
       localStorage.clear();
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
 
     const settingsPage = await gotoProfileSettings(page);
 

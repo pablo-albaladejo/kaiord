@@ -1,3 +1,6 @@
+import type { RefObject } from "react";
+import { useEffect } from "react";
+
 import type { KRD, ValidationError } from "../../../types/krd";
 import { FileUploadButton } from "./FileUploadButton";
 import { FileUploadInput } from "./FileUploadInput";
@@ -16,6 +19,12 @@ export type FileUploadProps = {
   accept?: string;
   className?: string;
   disabled?: boolean;
+  /**
+   * Optional ref exposing the underlying `<input type="file">` to a
+   * parent. Used by the editor's import mode to focus the input on
+   * mount via a chain from `EditorNewWorkout`.
+   */
+  inputRef?: RefObject<HTMLInputElement | null>;
 };
 
 export const FileUpload = ({
@@ -25,8 +34,17 @@ export const FileUpload = ({
   accept = ".fit,.tcx,.zwo,.krd,.json,.gcn",
   className = "",
   disabled = false,
+  inputRef,
 }: FileUploadProps) => {
   const upload = useFileUpload({ onFileLoad, onError, onImported });
+
+  useEffect(() => {
+    if (!inputRef) return;
+    inputRef.current = upload.fileInputRef.current;
+    return () => {
+      if (inputRef) inputRef.current = null;
+    };
+  }, [inputRef, upload.fileInputRef]);
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>

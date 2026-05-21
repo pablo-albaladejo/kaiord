@@ -186,7 +186,7 @@ test.describe("Library flows", () => {
     // true when we visit /library. `loadTestWorkout` performs a file-
     // upload through the WelcomeSection accordion which sets
     // `currentWorkout` in the Zustand store.
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await loadTestWorkout(page, "Initial Workout");
 
     // Seed a library template AFTER the dexie singleton is ready.
@@ -211,8 +211,10 @@ test.describe("Library flows", () => {
     // top-level `name` is "Tempo Ride", but its nested KRD's
     // `structured_workout.name` is "Template" (see `makeTemplate` in
     // helpers/dexie-factories.ts). The editor's WorkoutTitle reads
-    // the KRD name, so that's what we assert visible.
-    await page.waitForURL(/\/workout\/new$/);
+    // the KRD name, so that's what we assert visible. `source=scratch`
+    // is the new explicit signal that bypasses NewWorkoutPicker and
+    // mounts the editor with whatever the store currently holds.
+    await page.waitForURL(/\/workout\/new\?source=scratch$/);
     await expect(page.getByText(/Template/i).first()).toBeVisible();
   });
 

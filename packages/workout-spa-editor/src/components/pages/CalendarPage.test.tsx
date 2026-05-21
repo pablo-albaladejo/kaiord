@@ -82,7 +82,7 @@ describe("CalendarPage", () => {
     await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
   });
 
-  it("should show first-visit state when no workouts exist", async () => {
+  it("should not render the first-visit welcome card when no workouts exist", async () => {
     // Arrange
 
     // Act
@@ -90,10 +90,10 @@ describe("CalendarPage", () => {
     renderCalendar();
 
     // Assert
-
     await waitFor(() => {
-      expect(screen.getByTestId("first-visit-state")).toBeInTheDocument();
+      expect(screen.getByTestId("calendar-page")).toBeInTheDocument();
     });
+    expect(screen.queryByTestId("first-visit-state")).not.toBeInTheDocument();
   });
 
   it("should show empty-week state when workouts exist in other weeks", async () => {

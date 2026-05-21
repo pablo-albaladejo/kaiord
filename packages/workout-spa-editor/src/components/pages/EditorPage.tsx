@@ -23,6 +23,7 @@ import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-si
 import { DateBanner } from "./DateBanner";
 import { EditorBody } from "./EditorBody";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
+import type { EditorNewWorkoutMode } from "./EditorNewWorkout";
 import { EditorNewWorkout } from "./EditorNewWorkout";
 import { EditorPageHeader } from "./EditorPageHeader";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
@@ -32,11 +33,21 @@ import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
 export type EditorPageProps = { id?: string };
 
+function deriveNewWorkoutMode(
+  search: string
+): EditorNewWorkoutMode | undefined {
+  const params = new URLSearchParams(search);
+  if (params.get("action") === "import") return "import";
+  if (params.get("source") === "scratch") return "scratch";
+  return undefined;
+}
+
 export default function EditorPage({ id }: EditorPageProps) {
   useDeleteCleanup();
   const search = useSearch();
   const params = new URLSearchParams(search);
   const dateParam = params.get("date");
+  const newWorkoutMode = deriveNewWorkoutMode(search);
 
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
@@ -68,7 +79,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           onRepush={() => pushWorkout(`garmin-${Date.now()}`)}
         />
       )}
-      {!id && <EditorNewWorkout workout={workout} />}
+      {!id && <EditorNewWorkout workout={workout} mode={newWorkoutMode} />}
       {workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection

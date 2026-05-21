@@ -24,7 +24,7 @@ test.describe("Copy/Paste Functionality", () => {
       localStorage.clear();
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.goto("/workout/new");
+    await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
 
     // Load a test workout
