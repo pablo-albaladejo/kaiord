@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useLocation, useSearch } from "wouter";
 
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
-import { TemplatePickerDialog } from "../molecules/TemplatePickerDialog";
 import { formatDateLabel } from "../molecules/TemplatePickerDialog/format-date-label";
+import { TemplatePickerDialog } from "../molecules/TemplatePickerDialog/TemplatePickerDialog";
 import { NewWorkoutPickerTiles } from "./NewWorkoutPickerTiles";
 import { usePickerSchedule } from "./use-picker-schedule";
 
