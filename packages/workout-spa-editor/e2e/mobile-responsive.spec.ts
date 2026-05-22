@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 const WCAG_MIN_TOUCH_TARGET_PX = 44;
 const MOBILE_STEP_COUNT = 10;
@@ -45,7 +45,7 @@ test.describe("Mobile Responsive Design", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -100,7 +100,7 @@ test.describe("Mobile Responsive Design", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps instead of creating one
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -221,7 +221,7 @@ test.describe("Tablet Responsive Design", () => {
     expect(mainPadding.paddingRight).toBe("24px");
 
     // Load a workout to test tablet layout with content
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -325,7 +325,7 @@ test.describe("Workout Actions Overflow", () => {
 
   async function loadWorkout(page: Page) {
     await page.goto("/workout/new?source=scratch");
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "overflow-test.krd",

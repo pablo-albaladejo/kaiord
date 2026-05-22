@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 import {
   measureDragPerformance,
   verifyStepOrder,
@@ -89,7 +89,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
    */
   test("should not move first step up (keyboard test)", async ({ page }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -129,7 +129,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
    */
   test("should move first step down (keyboard test)", async ({ page }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -171,7 +171,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
    */
   test("should move last step up (keyboard test)", async ({ page }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -213,7 +213,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
    */
   test("should not move last step down (keyboard test)", async ({ page }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -255,7 +255,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     page,
   }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -297,7 +297,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     page,
   }) => {
     // Arrange - Load workout with repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -466,7 +466,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
    */
   test("should restore full opacity after drag completes", async ({ page }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -512,7 +512,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
    */
   test("should show drag handle on step cards", async ({ page }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -553,7 +553,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     page,
   }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -607,7 +607,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     page,
   }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -662,7 +662,7 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     page,
   }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -725,7 +725,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     page,
   }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -766,7 +766,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     page,
   }) => {
     // Arrange - Load 50-step workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "large-workout.krd",
@@ -816,7 +816,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     page,
   }) => {
     // Arrange
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",

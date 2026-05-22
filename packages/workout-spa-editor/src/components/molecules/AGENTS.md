@@ -21,8 +21,8 @@ Compositions of atoms with one focused responsibility. Each molecule may know ab
 - `CoachingCard/` — the largest molecule (52 files). The matched-session dialog + activity dialog, body, shell, executed/linked sections, MatchToPicker, no-workout actions, AI processing overlay, error states, and the hooks driving the coaching-dialog state machine.
 - `ConfirmationModal/` — generic Radix-Dialog confirmation prompt.
 - `CreateRepetitionBlockButton/`, `CreateRepetitionBlockDialog/` — entry points for the create-block flow.
-- `CreateWorkoutDialog/` — new-workout creation dialog.
 - `CalendarViewToggle/` — calendar Grid ↔ List view toggle.
+- `AiBanner/` — collapsed-by-default banner that wraps `AiWorkoutInput` on the scratch-editor canvas; auto-collapses on AI-generation success.
 - `DurationPicker/` — time + distance picker.
 - `EmptyDayDialog/` — dialog opened from an empty calendar cell to schedule from Library or create new.
 - `EmptyWorkoutState/` — empty-state placeholder for the editor.

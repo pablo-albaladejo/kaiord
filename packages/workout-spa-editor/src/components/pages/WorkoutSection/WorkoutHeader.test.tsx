@@ -243,6 +243,24 @@ describe("WorkoutHeader", () => {
     });
   });
 
+  describe("startInEditMode", () => {
+    it("should mount in MetadataEditMode when startInEditMode is true", () => {
+      // Arrange
+
+      // Act
+
+      render(
+        <WorkoutHeader workout={mockWorkout} krd={mockKrd} startInEditMode />
+      );
+
+      // Assert
+
+      expect(
+        screen.getByRole("form", { name: /edit workout metadata/i })
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("accessibility", () => {
     it("should have proper ARIA labels", () => {
       // Arrange & Act

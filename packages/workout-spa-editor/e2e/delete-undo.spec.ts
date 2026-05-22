@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
  * E2E Tests: Delete with Undo Flow
@@ -29,7 +29,7 @@ test.describe("Delete with Undo Flow", () => {
     }
 
     // Load a test workout with multiple steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",

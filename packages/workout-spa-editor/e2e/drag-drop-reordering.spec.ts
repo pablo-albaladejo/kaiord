@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
  * E2E Tests for Drag-and-Drop Step Reordering
@@ -63,7 +63,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
   test("should reorder steps using mouse drag-and-drop", async ({ page }) => {
     // Load workout with 3 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -122,7 +122,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     page,
   }) => {
     // Load workout with 3 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -161,7 +161,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     page,
   }) => {
     // Load workout with 3 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -198,7 +198,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
   test("should not move first step up", async ({ page }) => {
     // Load workout with 3 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -229,7 +229,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
   test("should not move last step down", async ({ page }) => {
     // Load workout with 3 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -260,7 +260,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
   test("should support undo/redo for reordering", async ({ page }) => {
     // Load workout with 3 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -312,7 +312,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     page,
   }) => {
     // Load workout with 50 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "large-workout.krd",
@@ -352,7 +352,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     page,
   }) => {
     // Load workout with distinct step data
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -411,7 +411,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     page,
   }) => {
     // Load workout with 3 distinct steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -467,7 +467,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     page,
   }) => {
     // Load workout with 3 steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = createTestWorkout(STEP_COUNT_DEFAULT);
 
@@ -519,7 +519,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     page,
   }) => {
     // Load workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -659,7 +659,7 @@ test.describe("Drag-and-Drop Mobile Touch", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",

@@ -19,16 +19,25 @@ type WorkoutHeaderProps = {
   readonly krd: KRD;
   /** Ref to the `<h2>` title for §7.5 heading-fallback focus. */
   readonly titleRef?: RefObject<HTMLHeadingElement | null>;
+  /** When true, the header mounts in `MetadataEditMode` so the user
+   *  commits `sport`/`name` before the first step is added. Used by
+   *  `ScratchEditorSurface` for `/workout/new?source=scratch`. */
+  readonly startInEditMode?: boolean;
 };
 
-export function WorkoutHeader({ workout, krd, titleRef }: WorkoutHeaderProps) {
+export function WorkoutHeader({
+  workout,
+  krd,
+  titleRef,
+  startInEditMode = false,
+}: WorkoutHeaderProps) {
   const updateWorkout = useUpdateWorkout();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
   const undo = useUndo();
   const redo = useRedo();
   const handleDiscard = useDiscardConfirmation();
-  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
+  const [isEditingMetadata, setIsEditingMetadata] = useState(startInEditMode);
 
   const handleEditMetadata = () => {
     setIsEditingMetadata(true);

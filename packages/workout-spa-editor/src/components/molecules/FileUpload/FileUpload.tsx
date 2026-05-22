@@ -21,8 +21,8 @@ export type FileUploadProps = {
   disabled?: boolean;
   /**
    * Optional ref exposing the underlying `<input type="file">` to a
-   * parent. Used by the editor's import mode to focus the input on
-   * mount via a chain from `EditorNewWorkout`.
+   * parent. Used by `ImportDropzoneOverlay` to focus and click the
+   * input on mount so the OS file picker opens automatically.
    */
   inputRef?: RefObject<HTMLInputElement | null>;
 };

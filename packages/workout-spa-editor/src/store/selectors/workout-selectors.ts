@@ -24,3 +24,6 @@ export const useSetEditing = () => useWorkoutStore((state) => state.setEditing);
 
 export const useClearWorkout = () =>
   useWorkoutStore((state) => state.clearWorkout);
+
+export const useCreateEmptyWorkout = () =>
+  useWorkoutStore((state) => state.createEmptyWorkout);

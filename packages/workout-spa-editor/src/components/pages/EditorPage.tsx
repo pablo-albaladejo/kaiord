@@ -2,8 +2,11 @@
  * EditorPage - Workout editor route component.
  *
  * When `id` is provided, loads the workout from Dexie and shows
- * workflow actions (accept, push, re-push). Otherwise shows the
- * standard editor with file upload / AI input.
+ * workflow actions (accept, push, re-push). Otherwise dispatches to a
+ * new-workout surface based on the URL: `?source=scratch` mounts the
+ * `ScratchEditorSurface`; `?action=import` mounts the
+ * `ImportDropzoneOverlay`. Unknown modes fall through to the populated
+ * `EditorBody` once `currentWorkout` exists in the store.
  *
  * For coaching-derived workouts (`session_match` row exists with a
  * coaching source per design D4), `EditorBody` renders a
@@ -23,24 +26,17 @@ import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-si
 import { DateBanner } from "./DateBanner";
 import { EditorBody } from "./EditorBody";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
-import type { EditorNewWorkoutMode } from "./EditorNewWorkout";
-import { EditorNewWorkout } from "./EditorNewWorkout";
 import { EditorPageHeader } from "./EditorPageHeader";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
+import {
+  deriveNewWorkoutMode,
+  renderNewWorkoutSurface,
+} from "./render-new-workout-surface";
 import { useEditorActions } from "./use-editor-actions";
 import { useWorkoutRecord } from "./use-workout-record";
 import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
 export type EditorPageProps = { id?: string };
-
-function deriveNewWorkoutMode(
-  search: string
-): EditorNewWorkoutMode | undefined {
-  const params = new URLSearchParams(search);
-  if (params.get("action") === "import") return "import";
-  if (params.get("source") === "scratch") return "scratch";
-  return undefined;
-}
 
 export default function EditorPage({ id }: EditorPageProps) {
   useDeleteCleanup();
@@ -67,6 +63,11 @@ export default function EditorPage({ id }: EditorPageProps) {
   if (id && loading) return <EditorLoading />;
   if (id && record && !record.krd) return <EditorNoData />;
 
+  const importComplete = newWorkoutMode === "import" && currentWorkout !== null;
+  const showNewSurface = !id && newWorkoutMode !== undefined && !importComplete;
+  const showPopulatedBody =
+    id !== undefined || newWorkoutMode === undefined || importComplete;
+
   return (
     <div className="space-y-6">
       <EditorPageHeader mode={id ? "edit" : "new"} />
@@ -79,8 +80,8 @@ export default function EditorPage({ id }: EditorPageProps) {
           onRepush={() => pushWorkout(`garmin-${Date.now()}`)}
         />
       )}
-      {!id && <EditorNewWorkout workout={workout} mode={newWorkoutMode} />}
-      {workout && currentWorkout && (
+      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode)}
+      {showPopulatedBody && workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection
             workout={workout}

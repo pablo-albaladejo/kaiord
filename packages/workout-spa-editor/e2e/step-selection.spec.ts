@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
  * E2E Tests: Step Selection with Unique IDs
@@ -30,7 +30,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with steps that have duplicate stepIndex values
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -143,7 +143,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with repetition blocks
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -250,7 +250,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple repetition blocks
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -420,7 +420,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout where multiple contexts have steps with stepIndex: 1
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -561,7 +561,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple blocks and duplicate stepIndex values
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",

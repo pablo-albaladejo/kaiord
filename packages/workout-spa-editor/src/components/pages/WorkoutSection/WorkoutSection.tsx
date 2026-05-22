@@ -29,6 +29,9 @@ export type WorkoutSectionProps = {
   /** Optional telemetry provider. Defaults to a no-op. Production deployments
    *  pass a Sentry/Datadog adapter here without touching focus-rule call sites. */
   focusTelemetry?: FocusTelemetry;
+  /** Forwarded to `WorkoutHeader` so scratch mode pre-opens
+   *  `MetadataEditMode` for sport/name commit on first mount. */
+  startInEditMode?: boolean;
 };
 
 function WorkoutSectionInner(props: WorkoutSectionProps) {
@@ -50,6 +53,7 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
         workout={props.workout}
         krd={props.krd}
         titleRef={titleRef}
+        startInEditMode={props.startInEditMode}
       />
       <WorkoutStats workout={props.workout} />
       <WorkoutPreview
