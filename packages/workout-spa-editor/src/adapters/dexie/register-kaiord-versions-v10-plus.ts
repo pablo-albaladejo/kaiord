@@ -13,6 +13,7 @@ import { applyV11Upgrade } from "./dexie-v11-migration";
 import { applyV12Upgrade } from "./dexie-v12-migration";
 import { applyV13Upgrade } from "./dexie-v13-migration";
 import { applyV14Upgrade } from "./dexie-v14-migration";
+import { applyV15Upgrade } from "./dexie-v15-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -28,7 +29,7 @@ export const registerV10ToV12 = (db: DexieVersionHost): void => {
   db.version(12).stores(SCHEMAS.v8).upgrade(applyV12Upgrade);
 };
 
-export const registerV13AndV14 = (db: DexieVersionHost): void => {
+export const registerV13ToV15 = (db: DexieVersionHost): void => {
   // v13 — workouts become profile-scoped 1–1. Adds `profileId` +
   // `[profileId+date]` indexes on `workouts` and backfills every legacy
   // row from `meta.activeProfileId`. The upgrade throws when workouts
@@ -39,4 +40,9 @@ export const registerV13AndV14 = (db: DexieVersionHost): void => {
   // `compact` and `comfortable` collapse to `grid`) and removes the
   // legacy `calendarDensity` field. Schema unchanged from v13.
   db.version(14).stores(SCHEMAS.v13).upgrade(applyV14Upgrade);
+  // v15 — userPreferences scratch-sport + AI banner state. Adds two
+  // optional fields (`lastScratchSport`, `aiBannerExpanded`) so the
+  // editor can pre-populate the scratch sport picker and persist the
+  // AI banner accordion state across sessions. Schema unchanged.
+  db.version(15).stores(SCHEMAS.v13).upgrade(applyV15Upgrade);
 };

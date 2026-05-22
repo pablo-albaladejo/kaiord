@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
 
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useSetUserPreferenceFields } from "../../../hooks/use-set-user-preference-fields";
+import { useUserPreferences } from "../../../hooks/use-user-preferences";
 import { useAppHandlers } from "../../../hooks/useAppHandlers";
 import {
   useCreateEmptyWorkout,
@@ -7,12 +10,13 @@ import {
 } from "../../../store/selectors";
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { Workout } from "../../../types/krd";
+import type { Sport } from "../../../types/krd-core";
 import { AiBanner } from "../../molecules/AiBanner/AiBanner";
 import { useCoachingSidebar } from "../../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorBody } from "../../pages/EditorBody";
 import { WorkoutSection } from "../../pages/WorkoutSection/WorkoutSection";
 
-const DEFAULT_SCRATCH_SPORT = "cycling";
+const DEFAULT_SCRATCH_SPORT: Sport = "cycling";
 const DEFAULT_SCRATCH_NAME = "Untitled workout";
 
 /**
@@ -28,6 +32,12 @@ const DEFAULT_SCRATCH_NAME = "Untitled workout";
  * path opens `WorkoutHeader.MetadataEditMode` so a fresh scratch user
  * commits sport/name inline. Pre-populated workouts (library template
  * load, e2e seeds) already have sport/name and render in view mode.
+ *
+ * The initial sport is sourced from `userPreferences.lastScratchSport`
+ * for the active profile when set; the on-save effect writes the
+ * current sport back so the next scratch session pre-selects it.
+ * Both reads/writes are gated on `autoCreatedRef.current` so library
+ * / e2e-seeded workouts never leak into the preference.
  */
 export function ScratchEditorSurface() {
   const currentWorkout = useCurrentWorkout();
@@ -38,16 +48,39 @@ export function ScratchEditorSurface() {
   const { handleStepSelect } = useAppHandlers();
   const sidebarData = useCoachingSidebar(null, undefined);
   const autoCreatedRef = useRef(false);
+  const activeProfile = useActiveProfileLive();
+  const profileId = activeProfile?.id ?? null;
+  const prefs = useUserPreferences({ profileId, defaultView: "grid" });
+  const setPrefs = useSetUserPreferenceFields(profileId);
+  const initialSportRef = useRef<Sport | null>(null);
 
   useEffect(() => {
     if (currentWorkout !== null) return;
+    // Wait for the active-profile live query to resolve. Then, when a
+    // profile is active, also wait for its userPreferences row so the
+    // seed picks `lastScratchSport`. With no active profile the prefs
+    // query returns undefined permanently — fall through to the
+    // hard-coded default so the editor still mounts.
+    if (activeProfile === undefined) return;
+    if (profileId !== null && prefs === undefined) return;
     autoCreatedRef.current = true;
-    createEmpty(DEFAULT_SCRATCH_NAME, DEFAULT_SCRATCH_SPORT);
-  }, [currentWorkout, createEmpty]);
+    const sport = prefs?.lastScratchSport ?? DEFAULT_SCRATCH_SPORT;
+    initialSportRef.current = sport;
+    createEmpty(DEFAULT_SCRATCH_NAME, sport);
+  }, [currentWorkout, createEmpty, prefs, profileId, activeProfile]);
 
   const workout = currentWorkout?.extensions?.structured_workout as
     | Workout
     | undefined;
+  const currentSport = workout?.sport;
+
+  useEffect(() => {
+    if (!autoCreatedRef.current) return;
+    if (!currentSport) return;
+    if (currentSport === initialSportRef.current) return;
+    initialSportRef.current = currentSport;
+    void setPrefs({ lastScratchSport: currentSport });
+  }, [currentSport, setPrefs]);
 
   return (
     <div className="space-y-6">
