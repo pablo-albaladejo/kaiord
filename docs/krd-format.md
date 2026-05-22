@@ -680,10 +680,101 @@ When performing round-trip conversions (FIT → KRD → FIT), the following tole
 - **Cadence**: ±1 rpm
 - **Distance**: ±1 meter
 
+## KRD v2.0 — Health Domain Extension
+
+KRD v2.0 extends the canonical format to carry health-domain payloads
+(sleep, weight, HRV, daily wellness, body composition, stress) alongside
+the existing workout / activity / course types. The full proposal lives in
+`openspec/changes/add-health-metrics-to-krd/`.
+
+### Breaking changes (v1.x → v2.0)
+
+External consumers that validate KRD with `@kaiord/core@<2`'s Zod schemas
+may break in three places:
+
+1. **`type` enum grew from 3 to 9 variants.** New variants:
+   `sleep_record`, `weight_measurement`, `hrv_summary`, `daily_wellness`,
+   `body_composition`, `stress_episode`. Exhaustive `switch` consumers
+   must add the new cases or fall back to a default branch.
+2. **`metadata.sport` is now conditionally optional.** A `superRefine` on
+   `krdSchema` keeps `metadata.sport` required for the three legacy
+   workout/activity/course types, so v1.x payloads continue to validate
+   byte-equivalently for those. Health-type payloads MUST omit `sport`.
+3. **`extensions` is tagged.** It was `z.record(z.string(), z.unknown())`;
+   it is now `krdExtensionsSchema` — a tagged shape with
+   `catchall(z.unknown())` that strictly validates the reserved
+   namespaces (`structured_workout`, `fit`, `course`, `course_points`,
+   `health.{sleep|weight|hrv|daily|bodyComposition|stress}`) while still
+   preserving any adapter-defined / unknown namespaces.
+
+### `extensions.health.*` namespace
+
+Each health type's payload lives in `extensions.health.<metric>`:
+
+```json
+{
+  "version": "2.0",
+  "type": "sleep_record",
+  "metadata": { "created": "2026-05-22T07:00:00Z" },
+  "extensions": {
+    "health": {
+      "sleep": {
+        "kind": "sleep",
+        "version": "2.0",
+        "startTime": "2026-05-21T23:00:00Z",
+        "endTime": "2026-05-22T07:00:00Z",
+        "totalDurationSeconds": 28800,
+        "stages": [
+          {
+            "stage": "light",
+            "startTime": "2026-05-21T23:00:00Z",
+            "durationSeconds": 10800
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+Sub-schema definitions are in
+`packages/core/src/domain/schemas/health/`. Each sub-schema declares a
+`version` field constrained by `z.string().regex(/^2\.\d+$/)` so future
+v2.x additions can ship optional fields without bumping the canonical KRD
+version.
+
+### Adapter coverage
+
+FIT is the only bidirectional adapter for the six health types in v2.0.
+TCX, ZWO, and GCN are workout-only by their format specs and throw a
+typed `UnsupportedKrdTypeError` when asked to write a health-type KRD.
+The complete matrix is in
+[`packages/core/docs/ADAPTER-COVERAGE.md`](../packages/core/docs/ADAPTER-COVERAGE.md).
+
+### Health follow-ups (deferred to separate changes)
+
+- FIT mappers for the six health types (Sleep / Weight / HRV / Daily /
+  BodyComposition / Stress) — implementation is gated on fixture
+  availability.
+- Garmin Connect HTTP endpoints for health
+  (`/wellness-service/wellness/*`, `/sleep-service/sleep`,
+  `/weight-service/weight`, `/hrv/*`, `/stress/*`) in
+  `@kaiord/garmin-connect`.
+- Garmin browser-bridge extension scraping of
+  `connect.garmin.com/wellness/*`.
+- Write-back of weight (or any health metric) to Garmin Connect.
+- Non-Garmin health-data sources (WHOOP, Oura, Apple Health, Strava
+  wellness).
+- SPA Health & Training Hub (new primary navigation surface +
+  `/health/*` routes) and Dexie v14 migration with six health stores
+  mirroring the `extensions.health.*` shape.
+- MCP tools for health-aware AI workflows.
+
 ## References
 
 - [Garmin FIT SDK](https://github.com/garmin/fit-javascript-sdk)
 - [FIT Workout Files](https://developer.garmin.com/fit/cookbook/encoding-workout-files/)
 - [FIT File Types](https://developer.garmin.com/fit/file-types/workout/)
 - [Zwift Format Extensions](../packages/core/docs/zwift-format-extensions.md)
+- [Adapter Coverage Matrix](../packages/core/docs/ADAPTER-COVERAGE.md)
 - [TCX Schema](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd)

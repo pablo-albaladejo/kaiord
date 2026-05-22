@@ -1,5 +1,9 @@
 import type { KRD, Logger, TextReader, TextWriter } from "@kaiord/core";
-import { createZwiftParsingError } from "@kaiord/core";
+import {
+  createUnsupportedKrdTypeError,
+  createZwiftParsingError,
+  isHealthFileType,
+} from "@kaiord/core";
 import { XMLParser } from "fast-xml-parser";
 
 import type { ZwiftValidator } from "../types";
@@ -42,6 +46,10 @@ export const createFastXmlZwiftReader =
 export const createFastXmlZwiftWriter =
   (logger: Logger, validator: ZwiftValidator): TextWriter =>
   async (krd: KRD): Promise<string> => {
+    if (isHealthFileType(krd.type)) {
+      throw createUnsupportedKrdTypeError(krd.type, "zwo");
+    }
+
     logger.debug("Converting KRD to Zwift format");
 
     let xmlString: string;

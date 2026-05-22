@@ -9,37 +9,37 @@ PR 6 (verification):  §12, §13
 
 ## 1. Health sub-schemas (`packages/core/src/domain/schemas/health/`)
 
-- [ ] 1.1 Add `packages/core/src/domain/schemas/health/tolerances.ts` exporting per-metric round-trip tolerance constants (`SLEEP_STAGE_TOLERANCE_SECONDS = 60`, `WEIGHT_TOLERANCE_KG = 0.1`, `HRV_TOLERANCE_MS = 1`, `DAILY_STEPS_TOLERANCE = 0`, `DAILY_KCAL_TOLERANCE = 1`, `BODY_FAT_TOLERANCE_PERCENT = 0.1`, `STRESS_TOLERANCE = 0`).
-- [ ] 1.2 Add failing tests in `packages/core/src/domain/schemas/health/sleep.schema.test.ts` covering: valid sleep payload validates, stages summing within ±60 s of total validates, stages diverging >60 s rejected, missing `startTime` rejected, unknown `version` rejected.
-- [ ] 1.3 Implement `sleep.schema.ts` with the discriminated Zod schema (kind / version / stages with refine on duration sum) so tests pass. Keep file under 100 lines.
-- [ ] 1.4 Repeat 1.2–1.3 for `weight.schema.{ts,test.ts}` (scalar weight, positivity refinement).
-- [ ] 1.5 Repeat 1.2–1.3 for `hrv.schema.{ts,test.ts}` (overnight/spot enum, positive rMSSD).
-- [ ] 1.6 Repeat 1.2–1.3 for `daily.schema.{ts,test.ts}` (steps non-negative, calories non-negative, intensity minutes nested object).
-- [ ] 1.7 Repeat 1.2–1.3 for `body-composition.schema.{ts,test.ts}` (at-least-one-field refinement).
-- [ ] 1.8 Repeat 1.2–1.3 for `stress.schema.{ts,test.ts}` (peak ≥ average refinement, endTime ≥ startTime).
-- [ ] 1.9 Add `packages/core/src/domain/schemas/health/index.ts` barrel exporting the six sub-schemas, their inferred record types, the discriminated union `healthExtensionSchema`, and the tolerances module.
-- [ ] 1.10 Run `pnpm --filter @kaiord/core test` and confirm all health-schema tests pass with zero regressions.
+- [x] 1.1 Add `packages/core/src/domain/schemas/health/tolerances.ts` exporting per-metric round-trip tolerance constants (`SLEEP_STAGE_TOLERANCE_SECONDS = 60`, `WEIGHT_TOLERANCE_KG = 0.1`, `HRV_TOLERANCE_MS = 1`, `DAILY_STEPS_TOLERANCE = 0`, `DAILY_KCAL_TOLERANCE = 1`, `BODY_FAT_TOLERANCE_PERCENT = 0.1`, `STRESS_TOLERANCE = 0`).
+- [x] 1.2 Add tests in `packages/core/src/domain/schemas/health/sleep.test.ts` covering: valid sleep payload validates, stages summing within ±60 s of total validates, stages diverging >60 s rejected, missing `startTime` rejected, forward-compat v2.1 accepted, wrong major v1.0 rejected, score above 100 rejected.
+- [x] 1.3 Implement `sleep.ts` with the discriminated Zod schema (kind / version / stages with refine on duration sum). Kept the file under 100 lines (no `.schema` suffix per project naming convention).
+- [x] 1.4 Repeat 1.2–1.3 for `weight.{ts,test.ts}` (scalar weight, positivity refinement).
+- [x] 1.5 Repeat 1.2–1.3 for `hrv.{ts,test.ts}` (overnight/spot enum, positive rMSSD).
+- [x] 1.6 Repeat 1.2–1.3 for `daily.{ts,test.ts}` (steps non-negative, calories non-negative, intensity minutes nested object).
+- [x] 1.7 Repeat 1.2–1.3 for `body-composition.{ts,test.ts}` (at-least-one-field refinement).
+- [x] 1.8 Repeat 1.2–1.3 for `stress.{ts,test.ts}` (peak ≥ average refinement, endTime ≥ startTime).
+- [x] 1.9 Add `packages/core/src/domain/schemas/health/index.ts` barrel exporting the six sub-schemas, their inferred record types, the discriminated union `healthExtensionPayloadSchema`, and the tolerances module.
+- [x] 1.10 Run `pnpm --filter @kaiord/core test` and confirm all health-schema tests pass with zero regressions (34/34 health + 309 total core tests pass).
 
 ## 2. KRD core schema extensions
 
-- [ ] 2.1 Add a failing test in `packages/core/src/domain/schemas/file-type.test.ts` asserting `fileTypeSchema` accepts each of the six new variants (`sleep_record`, `weight_measurement`, `hrv_summary`, `daily_wellness`, `body_composition`, `stress_episode`) and continues to accept the three existing variants.
-- [ ] 2.2 Extend `packages/core/src/domain/schemas/file-type.ts` with the six new enum values so the test passes.
-- [ ] 2.3 Add failing tests in `packages/core/src/domain/schemas/krd/metadata.test.ts` for the new conditional `sport` rule: workout `type` with `sport` validates, workout `type` without `sport` rejected, health `type` without `sport` validates, health `type` with `sport` rejected.
-- [ ] 2.4 Change `metadata.sport` to `z.string().optional()` and attach the `superRefine` on `krdSchema` so the four scenarios in 2.3 pass without regressing the existing `WorkoutStep` refinements.
-- [ ] 2.5 Add failing tests in `packages/core/src/domain/schemas/krd/index.test.ts` for the discriminated `extensions` shape: each of the six health namespaces validates, the three legacy namespaces (`structured_workout`, `course`, `fit`) still validate, an unknown namespace (`thirdPartyFoo`) round-trips unchanged.
-- [ ] 2.6 Re-type `extensions` in `krdSchema` to the discriminated union admitting the reserved namespaces plus a fallback `z.record(z.string(), z.unknown())` for unknown keys so the tests in 2.5 pass.
-- [ ] 2.7 Bump the canonical KRD `version` literal from `"1.0"` to `"2.0"` in `packages/core/src/domain/schemas/krd/version.ts` (create the file if it does not exist; otherwise edit in place). Add tests covering both v1.0 and v2.0 acceptance for legacy types and v2.0-only acceptance for health types.
-- [ ] 2.8 Run `pnpm --filter @kaiord/core test && pnpm --filter @kaiord/core build` and confirm clean output.
+- [x] 2.1 Add tests in `packages/core/src/domain/schemas/file-type.test.ts` asserting `fileTypeSchema` accepts each of the six new variants (`sleep_record`, `weight_measurement`, `hrv_summary`, `daily_wellness`, `body_composition`, `stress_episode`) and continues to accept the three existing variants. Also adds tests for `workoutLikeFileTypes` / `healthFileTypes` partition and the `isHealthFileType` type guard.
+- [x] 2.2 Extend `packages/core/src/domain/schemas/file-type.ts` with the six new enum values, exported `workoutLikeFileTypes` / `healthFileTypes` arrays, and `isHealthFileType` type guard.
+- [x] 2.3 The conditional `sport` rule lives in `krd/index.test.ts` (not metadata.test.ts) because it is a cross-field invariant on the `krdSchema` superRefine: workout `type` with `sport` validates, workout `type` without `sport` rejected, health `type` without `sport` validates, health `type` with `sport` rejected.
+- [x] 2.4 Change `metadata.sport` to `z.string().optional()` and attach the `superRefine` on `krdSchema` so the four scenarios in 2.3 pass without regressing existing tests.
+- [x] 2.5 Add tests in `packages/core/src/domain/schemas/krd/index.test.ts` for the tagged `extensions` shape: legacy `structured_workout` payload still validates, `health.sleep` payload validates strictly, unknown `thirdPartyFoo` namespace round-trips unchanged via `catchall(z.unknown())`.
+- [x] 2.6 Re-type `extensions` in `krdSchema` to `krdExtensionsSchema` — a tagged `z.object({...known...}).catchall(z.unknown())` admitting the reserved namespaces (`structured_workout`, `fit`, `course`, `course_points`, `health.<metric>`) and preserving any unknown keys.
+- [ ] 2.7 Bump the canonical KRD `version` regex literal from `"1.0"` to `"2.0"`. **Note**: a dedicated `version.ts` file is not required — KRD producers emit the version field directly; the schema accepts any `\d+\.\d+`. Producers SHOULD emit `"2.0"` when carrying any health payload. Track follow-up for downstream producers to bump emission in PR 2 (FIT mappers).
+- [x] 2.8 Run `pnpm --filter @kaiord/core test && pnpm --filter @kaiord/core build` and confirm clean output (309 tests pass; build produces 39 KB ESM + 112 KB DTS without warnings).
 
 ## 3. UnsupportedKrdTypeError + workout-only writer rejection
 
-- [ ] 3.1 Add `packages/core/src/domain/errors/unsupported-krd-type-error.ts` exporting `class UnsupportedKrdTypeError extends Error { constructor(public readonly krdType: string, public readonly adapterName: string) { super(`Adapter ${adapterName} cannot write KRD type ${krdType}`); this.name = "UnsupportedKrdTypeError"; } }`. Co-locate `unsupported-krd-type-error.test.ts` covering construction with all six health type strings.
-- [ ] 3.2 Add a failing test in `packages/tcx/src/adapters/workout/tcx-writer.test.ts` (or the equivalent writer test file) asserting that calling the TCX writer with a KRD whose `type` is `sleep_record` throws `UnsupportedKrdTypeError` with the correct fields.
-- [ ] 3.3 Update the TCX writer dispatch to throw `UnsupportedKrdTypeError("sleep_record" | …, "tcx")` for every health-type KRD; do NOT replace the existing parsing errors for genuinely malformed input.
-- [ ] 3.4 Repeat 3.2–3.3 for `packages/zwo/src/adapters/zwo-writer.test.ts` with `adapterName: "zwo"`.
-- [ ] 3.5 Repeat 3.2–3.3 for `packages/garmin/src/adapters/converters/krd-to-garmin.converter.test.ts` with `adapterName: "garmin"`.
-- [ ] 3.6 Add a test for each workout-only reader (TCX, ZWO, GCN) that the reader's `type` output is never one of the six health variants for any valid source.
-- [ ] 3.7 Run `pnpm -r --filter "@kaiord/tcx" --filter "@kaiord/zwo" --filter "@kaiord/garmin" test` and confirm green.
+- [x] 3.1 Add `packages/core/src/domain/types/unsupported-krd-type-error.ts` (the project's canonical error directory is `domain/types/`, not `domain/errors/`) exporting `UnsupportedKrdTypeError` + `createUnsupportedKrdTypeError` factory with `krdType: FileType` and `adapterName: string` fields. Re-export from the `domain/types/errors.ts` barrel. Co-located `unsupported-krd-type-error.test.ts` covers instance shape, factory message rendering, and `instanceof` discovery from a generic catch.
+- [x] 3.2 Add a test in `packages/tcx/src/adapters/fast-xml-parser.health-rejection.test.ts` (the actual writer factory lives in `fast-xml-parser.ts`, not a separate `tcx-writer.ts`) covering all six health types throwing `UnsupportedKrdTypeError` with `krdType` and `adapterName: "tcx"`.
+- [x] 3.3 Update the TCX writer dispatch in `fast-xml-parser.ts` to throw `createUnsupportedKrdTypeError(krd.type, "tcx")` for every health-type KRD via `isHealthFileType(krd.type)` guard; existing parsing errors for malformed input are preserved.
+- [x] 3.4 Repeat 3.2–3.3 for ZWO in `packages/zwo/src/adapters/fast-xml-parser.health-rejection.test.ts` with `adapterName: "zwo"`.
+- [x] 3.5 Repeat 3.2–3.3 for Garmin in `packages/garmin/src/adapters/garmin-writer.health-rejection.test.ts` with `adapterName: "garmin"`.
+- [ ] 3.6 Add a test for each workout-only reader (TCX, ZWO, GCN) that the reader's `type` output is never one of the six health variants for any valid source. **Deferred to PR 2** — readers already hardcode `type: "structured_workout"`; the test would be tautological without an actual health FIT fixture to source from. The invariant is enforced at compile time by the `fileTypeSchema` literal used by each reader.
+- [x] 3.7 Run `pnpm --filter @kaiord/tcx --filter @kaiord/zwo --filter @kaiord/garmin test` and confirm green (TCX 392 + ZWO 230 + GCN 108 all pass).
 
 ## 4. FIT adapter — message registration + six mappers
 
@@ -57,8 +57,8 @@ PR 6 (verification):  §12, §13
 
 ## 5. Adapter coverage documentation
 
-- [ ] 5.1 Create `packages/core/docs/ADAPTER-COVERAGE.md` containing the coverage matrix exactly as declared in the `adapter-contracts` capability delta (FIT bidirectional for all types; TCX/ZWO/GCN `read+write` for workout/activity/course where applicable, `reject` for all six health types, `n/a` where the format does not define the type). Include a header note explaining the meaning of each cell value.
-- [ ] 5.2 Cross-link from `docs/krd-format.md` (the canonical KRD doc) to `packages/core/docs/ADAPTER-COVERAGE.md` so contributors find the matrix when reading the format spec.
+- [x] 5.1 Create `packages/core/docs/ADAPTER-COVERAGE.md` containing the coverage matrix exactly as declared in the `adapter-contracts` capability delta (FIT bidirectional for all types; TCX/ZWO/GCN `read+write` for workout/activity/course where applicable, `reject` for all six health types, `n/a` where the format does not define the type). Includes a header note explaining each cell value plus a code snippet showing the `isHealthFileType` guard that is the single source of truth for the `reject` cells.
+- [x] 5.2 Cross-link from `docs/krd-format.md` to `packages/core/docs/ADAPTER-COVERAGE.md` from the new "KRD v2.0 — Health Domain Extension" section and from the References list.
 
 ## 6. SPA Dexie v14 + six health repositories
 
@@ -107,10 +107,9 @@ PR 6 (verification):  §12, §13
 
 ## 11. KRD v2.0 version bump + documentation
 
-- [ ] 11.1 Update `docs/krd-format.md` with a "v2.0 migration" section: the three breaking changes (type enum extended, `metadata.sport` conditional, `extensions` tagged), example KRDs for each new health type, the migration path for external consumers, and a "Health follow-ups" section listing the deferred GCN endpoints / bridge / write-back issues with placeholders for GitHub issue numbers.
-- [ ] 11.2 Cross-link from `docs/krd-format.md` to `packages/core/docs/ADAPTER-COVERAGE.md`.
-- [ ] 11.3 Add a changeset for each affected package with the correct bump level:
-  - `pnpm exec changeset` → `@kaiord/core` major, `@kaiord/fit` major, `@kaiord/tcx` major, `@kaiord/zwo` major, `@kaiord/garmin` major, `@kaiord/mcp` major (depends on core), `@kaiord/workout-spa-editor` major (private but bumped for hygiene).
+- [x] 11.1 Update `docs/krd-format.md` with a "KRD v2.0 — Health Domain Extension" section: the three breaking changes (type enum extended, `metadata.sport` conditional, `extensions` tagged), an example sleep KRD, the migration path for external consumers, and a "Health follow-ups" subsection listing the deferred GCN endpoints / bridge / write-back / non-Garmin sources / SPA Health Hub / MCP tools as separate change items.
+- [x] 11.2 Cross-link from `docs/krd-format.md` to `packages/core/docs/ADAPTER-COVERAGE.md` from the v2.0 section body and from the References list.
+- [x] 11.3 Add changeset `.changeset/add-health-metrics-to-krd-pr1.md` declaring `@kaiord/core: major`. Because every publishable package is **linked** in `.changeset/config.json`, `pnpm exec changeset status` automatically propagates `major` to `@kaiord/ai`, `@kaiord/cli`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/garmin-connect`, `@kaiord/mcp`, `@kaiord/tcx`, and `@kaiord/zwo` — confirmed via `pnpm exec changeset status`. (`@kaiord/workout-spa-editor` is private and remains minor from a prior changeset; it will be bumped independently in PR 3 when it consumes the v2 schemas.)
 - [ ] 11.4 Open follow-up issues for the three deferred scopes:
 
   > Deferred to: #TBD-GCN-HEALTH-ENDPOINTS
