@@ -25,8 +25,11 @@ export class KaiordDatabase extends Dexie {
 
 export const db = new KaiordDatabase();
 
-// Expose for e2e test seeding (dev mode only)
-if (import.meta.env.DEV) {
+// Expose for e2e test seeding (dev mode only). The `typeof window` guard
+// matches the symmetric `__KAIORD_WORKOUT_STORE__` exposure in
+// `src/store/workout-store.ts` so this module remains safe to import
+// from node tooling that doesn't provide a DOM (SSR-style consumers).
+if (import.meta.env.DEV && typeof window !== "undefined") {
   const w = window as unknown as Record<string, unknown>;
   w.__KAIORD_DB__ = db;
   const aiRepo = createDexieAiProviderRepository(db);
