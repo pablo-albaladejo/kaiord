@@ -8,7 +8,7 @@
  * - Requirement 36.5: Error recovery mechanisms
  */
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 const ERROR_DISPLAY_BUDGET_MS = 2000;
 const ERROR_REPETITION_COUNT = 5;
@@ -24,7 +24,7 @@ test.describe("Error Handling", () => {
   test("should display specific error for invalid JSON", async ({ page }) => {
     // Arrange
     const invalidJSON = "{ invalid json }";
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload invalid JSON
@@ -61,7 +61,7 @@ test.describe("Error Handling", () => {
       version: "1.0",
       // Missing 'type' and 'metadata'
     };
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload incomplete KRD
@@ -94,7 +94,7 @@ test.describe("Error Handling", () => {
         sport: "invalid_sport", // Invalid sport
       },
     };
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload invalid KRD
@@ -115,7 +115,7 @@ test.describe("Error Handling", () => {
     page,
   }) => {
     // Arrange - Invalid FIT file
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload corrupted FIT file
@@ -137,7 +137,7 @@ test.describe("Error Handling", () => {
   }) => {
     // Arrange - Invalid TCX file
     const invalidTCX = "<invalid>xml</invalid>";
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload invalid TCX file
@@ -159,7 +159,7 @@ test.describe("Error Handling", () => {
   }) => {
     // Arrange - Invalid ZWO file
     const invalidZWO = "<workout>incomplete";
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload invalid ZWO file
@@ -217,7 +217,7 @@ test.describe("Error Recovery", () => {
 
   test("should restore previous state after import error", async ({ page }) => {
     // Arrange - Load valid workout first
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "valid.krd",
@@ -245,7 +245,7 @@ test.describe("Error Recovery", () => {
     page,
   }) => {
     // Arrange - Load workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test.krd",
@@ -276,7 +276,7 @@ test.describe("Error Recovery", () => {
 
   test("should enable safe mode after error", async ({ page }) => {
     // Arrange - Load workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test.krd",
@@ -301,7 +301,7 @@ test.describe("Error Recovery", () => {
 
   test("should display success message after recovery", async ({ page }) => {
     // Arrange - Load workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test.krd",
@@ -325,7 +325,7 @@ test.describe("Error Recovery", () => {
 
   test("should provide retry option after error", async ({ page }) => {
     // Arrange - Try to load invalid file
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "invalid.krd",
@@ -348,7 +348,7 @@ test.describe("Error Recovery", () => {
     page,
   }) => {
     // Arrange - Trigger unrecoverable error (e.g., corrupted FIT file)
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "corrupted.fit",
@@ -386,7 +386,7 @@ test.describe("Error Handling - Mobile", () => {
     await expect(page.locator("[data-route-heading]")).toBeAttached();
 
     // Act - Upload invalid file
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "invalid.krd",
@@ -421,7 +421,7 @@ test.describe("Error Handling - Mobile", () => {
       },
     };
 
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "valid.krd",
@@ -454,7 +454,7 @@ test.describe("Error Handling - Performance", () => {
     // the DOM. The brand label in the header is no longer an h1.
     await expect(page.locator("[data-route-heading]")).toBeAttached();
 
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Measure time to display error
@@ -486,7 +486,7 @@ test.describe("Error Handling - Performance", () => {
     // the DOM. The brand label in the header is no longer an h1.
     await expect(page.locator("[data-route-heading]")).toBeAttached();
 
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Trigger multiple errors

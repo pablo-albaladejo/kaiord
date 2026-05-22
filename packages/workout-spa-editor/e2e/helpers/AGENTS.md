@@ -16,7 +16,7 @@ Flow-specific Playwright helpers. Distinguished from `e2e/test-utils/` (generic 
 - `seed-profile.ts` — single-call profile seed (creates row + sets active id).
 - `load-test-workout.ts`, `load-test-workout-with-blocks.ts` — load a known-good workout into the editor.
 - `build-repetition-steps.ts` — programmatic factory for repetition-block content.
-- `expand-file-upload.ts` — drives the FileUpload molecule (handles the hidden `<input type="file">`).
+- `seed-empty-workout.ts` — navigates to `/workout/new?action=import` so the hidden `<input type="file">` is mounted in the DOM; optional `krd` arg short-circuits via the `__KAIORD_WORKOUT_STORE__` dev global to pre-seed the editor with a built workout.
 - `focus-management-helpers.ts` — assertions for the focus-after-action suite.
 - `mobile-menu.ts` — open / close the mobile menu surface.
 - `train2go-bridge-stub.ts` + `train2go-bridge-stub-page-script.ts` — installs an in-page Train2Go bridge so coaching flows can run without the real extension.

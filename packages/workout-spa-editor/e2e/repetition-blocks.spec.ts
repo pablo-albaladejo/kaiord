@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
  * E2E Tests: Repetition Blocks
@@ -17,7 +17,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -155,7 +155,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -232,7 +232,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -312,7 +312,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with repetition blocks
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -407,7 +407,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -469,7 +469,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -598,7 +598,7 @@ test.describe("Repetition Blocks - Ungroup", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -691,7 +691,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -801,7 +801,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -870,7 +870,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -954,7 +954,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1062,7 +1062,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1134,7 +1134,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1207,7 +1207,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1323,7 +1323,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with steps
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1436,7 +1436,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1561,7 +1561,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1670,7 +1670,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple blocks
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1787,7 +1787,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -1937,7 +1937,7 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with 3 repetition blocks with identifiable content
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -2101,7 +2101,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with 5 repetition blocks with unique identifiable content
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -2489,7 +2489,7 @@ test.describe("Repetition Blocks - Performance", () => {
       },
     };
 
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "large-block.krd",
@@ -2567,7 +2567,7 @@ test.describe("Repetition Blocks - Performance", () => {
       },
     };
 
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "nested-test.krd",
@@ -2602,7 +2602,7 @@ test.describe("Repetition Blocks - Button Styling Consistency (Task 18)", () => 
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with both regular steps and repetition blocks
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",

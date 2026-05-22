@@ -3,14 +3,14 @@ import { fileURLToPath } from "node:url";
 
 import type { Page } from "@playwright/test";
 
-import { expandFileUpload } from "./expand-file-upload";
+import { seedEmptyWorkout } from "./seed-empty-workout";
 
 const FIXTURE_PATH = fileURLToPath(
   new URL("../fixtures/focus-workout.krd.json", import.meta.url)
 );
 
 export async function loadFocusFixture(page: Page): Promise<void> {
-  await expandFileUpload(page);
+  await seedEmptyWorkout(page);
   const content = readFileSync(FIXTURE_PATH);
   await page.locator('input[type="file"]').setInputFiles({
     name: "focus-workout.krd",

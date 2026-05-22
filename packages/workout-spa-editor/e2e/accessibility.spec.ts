@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
  * Critical Path: Accessibility and Keyboard Navigation
@@ -70,7 +70,7 @@ test.describe("Accessibility", () => {
     await expect(page.getByRole("main")).toBeVisible();
 
     // Load a workout to test more elements
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -130,7 +130,7 @@ test.describe("Accessibility", () => {
     await page.waitForLoadState("networkidle");
 
     // Load a workout
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -255,7 +255,7 @@ test.describe("Accessibility", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout with different intensity levels
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -395,7 +395,7 @@ test.describe("Accessibility", () => {
     await page.goto("/workout/new?source=scratch");
 
     // Load a workout to have more UI elements
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",

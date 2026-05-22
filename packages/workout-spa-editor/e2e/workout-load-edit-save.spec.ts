@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 
 import { expect, test } from "./fixtures/base";
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 const EDITED_DURATION_SECONDS = 420;
 const EDITED_POWER_WATTS = 220;
@@ -29,7 +29,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     await expect(page.locator("[data-route-heading]")).toBeAttached();
 
     // Load a workout file
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
 
     // Create a minimal valid KRD workout
@@ -147,7 +147,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   }) => {
     await page.goto("/workout/new?source=scratch");
 
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
 
     // Upload an invalid KRD file (missing required fields)
@@ -174,7 +174,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   test("should handle file parsing errors gracefully", async ({ page }) => {
     await page.goto("/workout/new?source=scratch");
 
-    await expandFileUpload(page);
+    await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Upload a file with invalid JSON

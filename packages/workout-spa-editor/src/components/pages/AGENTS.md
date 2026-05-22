@@ -34,9 +34,9 @@ Page components mounted by Wouter routes in `App.tsx`. Each page composes organi
 
 ### Editor page
 
-- `EditorPage.tsx` / `.test.tsx` — `/workout/new` and `/workout/:id` entry.
-- `EditorBody.tsx`, `EditorWorkflowBar.tsx`, `EditorLoadingState.tsx`, `EditorNewWorkout.tsx` (+ `.analytics.test.tsx`) — sub-parts.
-- `ManualCreateSection.tsx` (+ `.analytics.test.tsx`), `OrDivider.tsx`, `WelcomeSection.tsx`, `GettingStartedTips.tsx` — new-workout landing UI.
+- `EditorPage.tsx` / `.test.tsx` — `/workout/new` and `/workout/:id` entry. Dispatches the new-workout surface via `render-new-workout-surface.tsx`.
+- `EditorBody.tsx`, `EditorWorkflowBar.tsx`, `EditorLoadingState.tsx` — sub-parts.
+- `render-new-workout-surface.tsx` — pure dispatcher that returns `<ScratchEditorSurface />` for `?source=scratch` and `<ImportDropzoneOverlay />` for `?action=import`. The two surfaces live under `organisms/` (see `../organisms/ScratchEditorSurface/`, `../organisms/ImportDropzoneOverlay/`).
 - `use-editor-actions.ts` / `.test.ts` — editor-level action surface.
 - `use-dialog-handlers.ts` — dialog open/close handlers used by `WorkoutSection`.
 - `use-workout-record.ts` — load a workout record by id.

@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-import { expandFileUpload } from "./expand-file-upload";
+import { seedEmptyWorkout } from "./seed-empty-workout";
 
 /**
  * Helper function to load a test workout in E2E tests
@@ -13,7 +13,7 @@ export async function loadTestWorkout(
   page: Page,
   workoutName = "Test Workout"
 ) {
-  await expandFileUpload(page);
+  await seedEmptyWorkout(page);
   const fileInput = page.locator('input[type="file"]');
   const testWorkout = {
     version: "1.0",
