@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
@@ -9,8 +9,38 @@ import { GarminBridgeProvider } from "../../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { useWorkoutStore } from "../../../store/workout-store";
+import type { Profile } from "../../../types/profile";
+import type { UserPreferences } from "../../../types/user-preferences";
 import { ToastProvider } from "../../atoms/Toast";
 import { ScratchEditorSurface } from "./ScratchEditorSurface";
+
+const PROFILE_ID = "p1";
+const NOW = "2026-05-22T10:00:00.000Z";
+const NEGATIVE_ASSERT_DELAY_MS = 50;
+
+async function seedActiveProfile(): Promise<void> {
+  const profile: Profile = {
+    id: PROFILE_ID,
+    name: "Athlete",
+    ftpW: 250,
+    thresholdHr: 170,
+    linkedAccounts: [],
+  };
+  await db.table<Profile>("profiles").put(profile);
+  await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
+}
+
+async function seedLastScratchSport(
+  sport: UserPreferences["lastScratchSport"]
+): Promise<void> {
+  const row: UserPreferences = {
+    profileId: PROFILE_ID,
+    calendarView: "grid",
+    lastScratchSport: sport,
+    updatedAt: NOW,
+  };
+  await db.table<UserPreferences>("userPreferences").put(row);
+}
 
 function renderSurface() {
   const { hook } = memoryLocation({
@@ -35,6 +65,9 @@ function renderSurface() {
 describe("ScratchEditorSurface", () => {
   beforeEach(async () => {
     await db.table("workouts").clear();
+    await db.table("userPreferences").clear();
+    await db.table("profiles").clear();
+    await db.table("meta").clear();
     useWorkoutStore.setState({
       currentWorkout: null,
       undoHistory: [],
@@ -43,6 +76,12 @@ describe("ScratchEditorSurface", () => {
       selectedStepIds: [],
       isEditing: false,
     });
+  });
+
+  afterEach(async () => {
+    await db.table("userPreferences").clear();
+    await db.table("profiles").clear();
+    await db.table("meta").clear();
   });
 
   it("should seed an empty cycling workout when currentWorkout is null", async () => {
@@ -132,5 +171,102 @@ describe("ScratchEditorSurface", () => {
       expect(useWorkoutStore.getState().currentWorkout).not.toBeNull();
     });
     expect(put).not.toHaveBeenCalled();
+  });
+
+  it("should seed the workout with lastScratchSport from userPreferences", async () => {
+    // Arrange
+    await seedActiveProfile();
+    await seedLastScratchSport("running");
+
+    // Act
+    renderSurface();
+
+    // Assert
+    await waitFor(() => {
+      const state = useWorkoutStore.getState();
+      expect(state.currentWorkout?.extensions?.structured_workout?.sport).toBe(
+        "running"
+      );
+    });
+  });
+
+  it("should write lastScratchSport back to userPreferences when sport changes on auto-init", async () => {
+    // Arrange
+    await seedActiveProfile();
+    await seedLastScratchSport("cycling");
+
+    // Act
+    renderSurface();
+    await waitFor(() => {
+      const state = useWorkoutStore.getState();
+      expect(state.currentWorkout?.extensions?.structured_workout?.sport).toBe(
+        "cycling"
+      );
+    });
+    const krd = useWorkoutStore.getState().currentWorkout!;
+    useWorkoutStore.getState().updateWorkout({
+      ...krd,
+      metadata: { ...krd.metadata, sport: "swimming" },
+      extensions: {
+        ...krd.extensions,
+        structured_workout: {
+          ...krd.extensions!.structured_workout!,
+          sport: "swimming",
+        },
+      },
+    });
+
+    // Assert
+    await waitFor(async () => {
+      const row = await db
+        .table<UserPreferences>("userPreferences")
+        .get(PROFILE_ID);
+      expect(row?.lastScratchSport).toBe("swimming");
+    });
+  });
+
+  it("should NOT write lastScratchSport when workout is pre-populated (no auto-init)", async () => {
+    // Arrange
+    await seedActiveProfile();
+    const seeded = {
+      version: "1.0",
+      type: "structured_workout" as const,
+      metadata: { created: "2026-01-01T00:00:00Z", sport: "running" },
+      extensions: {
+        structured_workout: {
+          name: "Template Run",
+          sport: "running" as const,
+          steps: [],
+        },
+      },
+    };
+    useWorkoutStore.getState().loadWorkout(seeded);
+
+    // Act
+    renderSurface();
+    await waitFor(() => {
+      expect(screen.getByTestId("ai-banner")).toBeInTheDocument();
+    });
+    const krd = useWorkoutStore.getState().currentWorkout!;
+    useWorkoutStore.getState().updateWorkout({
+      ...krd,
+      metadata: { ...krd.metadata, sport: "swimming" },
+      extensions: {
+        ...krd.extensions,
+        structured_workout: {
+          ...krd.extensions!.structured_workout!,
+          sport: "swimming",
+        },
+      },
+    });
+
+    // Assert
+    await new Promise((resolve) =>
+      setTimeout(resolve, NEGATIVE_ASSERT_DELAY_MS)
+    );
+    const row = await db
+      .table<UserPreferences>("userPreferences")
+      .get(PROFILE_ID);
+    expect(row?.lastScratchSport).toBeUndefined();
   });
 });
