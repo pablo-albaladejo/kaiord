@@ -3,6 +3,9 @@ import type { KRD } from "@kaiord/core";
 import { fileTypeSchema } from "@kaiord/core";
 
 import { createCourseMessages } from "../course";
+import { convertFitToKrdHealthHrv } from "../health/hrv/fit-to-krd-health-hrv.converter";
+import { groupHrvMessages } from "../health/hrv/hrv-message-grouping";
+import { convertKrdToFitHealthHrvMessages } from "../health/hrv/krd-health-hrv-to-fit.converter";
 import { convertFitToKrdHealthSleep } from "../health/sleep/fit-to-krd-health-sleep.converter";
 import { convertKrdToFitHealthSleepMessages } from "../health/sleep/krd-health-sleep-to-fit.converter";
 import { groupSleepMessages } from "../health/sleep/sleep-message-grouping";
@@ -34,6 +37,8 @@ export const mapMessagesToKRD = (
       return convertFitToKrdHealthSleep(messages, logger);
     case fileTypeSchema.enum.weight_measurement:
       return convertFitToKrdHealthWeight(messages, logger);
+    case fileTypeSchema.enum.hrv_summary:
+      return convertFitToKrdHealthHrv(messages, logger);
     case fileTypeSchema.enum.recorded_activity:
       return mapActivityFileToKRD(messages, logger);
     case fileTypeSchema.enum.structured_workout:
@@ -88,6 +93,8 @@ export const createFitMessages = (
       return groupWeightMessages(
         convertKrdToFitHealthWeightMessages(krd, logger)
       );
+    case "hrv_summary":
+      return groupHrvMessages(convertKrdToFitHealthHrvMessages(krd, logger));
     default:
       throw new Error(`Unsupported FIT file type: ${fileType}`);
   }
