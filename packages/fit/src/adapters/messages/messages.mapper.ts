@@ -3,6 +3,9 @@ import type { KRD } from "@kaiord/core";
 import { type FileType, fileTypeSchema } from "@kaiord/core";
 
 import { createCourseMessages } from "../course";
+import { convertFitToKrdHealthSleep } from "../health/sleep/fit-to-krd-health-sleep.converter";
+import { convertKrdToFitHealthSleepMessages } from "../health/sleep/krd-health-sleep-to-fit.converter";
+import { groupSleepMessages } from "../health/sleep/sleep-message-grouping";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
@@ -11,10 +14,16 @@ import { mapActivityFileToKRD } from "./activity.mapper";
 import { createActivityMessages } from "./activity-messages.creator";
 import { mapWorkoutFileToKRD } from "./workout.mapper";
 
-/**
- * Detects file type from FIT messages.
- */
+const HEALTH_DETECTORS: ReadonlyArray<readonly [string, FileType]> = [
+  ["sleepLevelMesgs", fileTypeSchema.enum.sleep_record],
+];
+
 const detectFileType = (messages: FitMessages): FileType => {
+  for (const [key, type] of HEALTH_DETECTORS) {
+    const mesgs = messages[key];
+    if (mesgs && mesgs.length > 0) return type;
+  }
+
   const workoutMsgs = messages[fitMessageKeySchema.enum.workoutMesgs];
   if (workoutMsgs && workoutMsgs.length > 0)
     return fileTypeSchema.enum.structured_workout;
@@ -43,6 +52,8 @@ export const mapMessagesToKRD = (
   logger.debug("Detected file type", { fileType });
 
   switch (fileType) {
+    case fileTypeSchema.enum.sleep_record:
+      return convertFitToKrdHealthSleep(messages, logger);
     case fileTypeSchema.enum.recorded_activity:
       return mapActivityFileToKRD(messages, logger);
     case fileTypeSchema.enum.structured_workout:
@@ -73,11 +84,7 @@ const groupWorkoutMessages = (
 };
 
 /**
- * Creates FIT messages from KRD format with file type routing.
- *
- * Routes to the appropriate message creation function based on the
- * file type specified in KRD metadata. Supports workout, activity,
- * and course file types.
+ * Creates FIT messages from KRD format with file-type routing.
  */
 export const createFitMessages = (
   krd: KRD,
@@ -93,6 +100,10 @@ export const createFitMessages = (
       return createActivityMessages(krd, logger);
     case "course":
       return createCourseMessages(krd, logger);
+    case "sleep_record":
+      return groupSleepMessages(
+        convertKrdToFitHealthSleepMessages(krd, logger)
+      );
     default:
       throw new Error(`Unsupported FIT file type: ${fileType}`);
   }
