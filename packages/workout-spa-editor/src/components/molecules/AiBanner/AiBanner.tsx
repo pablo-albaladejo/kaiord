@@ -1,8 +1,8 @@
 import { ChevronDown, Sparkles } from "lucide-react";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 import { useLocation } from "wouter";
 
-import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
+import { useAiBannerState } from "./use-ai-banner-state";
 
 const AiWorkoutInput = lazy(() =>
   import("../../organisms/AiWorkoutInput/AiWorkoutInput").then((m) => ({
@@ -13,33 +13,14 @@ const AiWorkoutInput = lazy(() =>
 /**
  * Collapsed-by-default banner that wraps `AiWorkoutInput`.
  *
- * Auto-collapse rule (per plan A4): the panel auto-collapses ONLY on
- * the first AI-generation success after the user expanded it. Manual
- * step adds (`+ Add first step`) never collapse it. Subsequent AI
- * successes do not auto-collapse either — the user has now seen the
- * banner and owns the state.
+ * Open/armed/auto-collapse state and persistence are owned by
+ * `useAiBannerState` — this component stays a pure render. The hook
+ * seeds from `userPreferences.aiBannerExpanded`, writes toggles back,
+ * and runs the one-shot auto-collapse-on-first-success rule.
  */
 export function AiBanner() {
   const [, navigate] = useLocation();
-  const [open, setOpen] = useState(false);
-  const [armed, setArmed] = useState(false);
-  const [hasAutoCollapsed, setHasAutoCollapsed] = useState(false);
-  const generation = useAiRuntimeStore((s) => s.generation);
-
-  useEffect(() => {
-    if (!open) return;
-    if (generation.status === "success" && armed) {
-      setOpen(false);
-      setArmed(false);
-      setHasAutoCollapsed(true);
-    }
-  }, [generation.status, open, armed]);
-
-  const handleToggle = () => {
-    const next = !open;
-    setOpen(next);
-    if (next && !hasAutoCollapsed) setArmed(true);
-  };
+  const { open, toggle } = useAiBannerState();
 
   return (
     <div
@@ -48,7 +29,7 @@ export function AiBanner() {
     >
       <button
         type="button"
-        onClick={handleToggle}
+        onClick={toggle}
         aria-expanded={open}
         aria-controls="ai-banner-panel"
         className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
