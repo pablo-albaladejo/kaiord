@@ -40,15 +40,25 @@ test.describe("AI Generate Workout Flow", () => {
     // First add a provider via settings
     await addTestProvider(page);
 
-    // The AiWorkoutInput is now mounted in WelcomeSection
+    // AiWorkoutInput is mounted inside the collapsed AiBanner: expand
+    // the banner before the textarea becomes visible (PR #648).
+    await page
+      .getByRole("button", { name: /generate with ai/i })
+      .first()
+      .click();
     const textarea = page.getByLabel("Workout description");
     await expect(textarea).toBeVisible({ timeout: 5000 });
     await textarea.fill(
       "45 minutes sweet spot cycling with 10 min warmup and cooldown"
     );
 
-    // Click generate
-    await page.getByRole("button", { name: /generate/i }).click();
+    // Click generate (specifically the generate-workout button inside
+    // the AiWorkoutInput body, not the banner header chip which also
+    // matches /generate/i).
+    await page
+      .getByRole("button", { name: /generate workout/i })
+      .first()
+      .click();
 
     // Wait for the workout to appear (mock API responds instantly)
     await expect(page.getByText(/sweet spot cycling/i).first()).toBeVisible({
@@ -64,6 +74,12 @@ test.describe("AI Generate Workout Flow", () => {
     // Add two providers via settings
     await addTestProvider(page, "Test Claude", "anthropic");
     await addTestProvider(page, "Test GPT", "openai");
+
+    // Expand the AiBanner so the model selector renders.
+    await page
+      .getByRole("button", { name: /generate with ai/i })
+      .first()
+      .click();
 
     // Check model selector dropdown contains both
     const modelSelect = page.locator("select").filter({ hasText: /test/i });
