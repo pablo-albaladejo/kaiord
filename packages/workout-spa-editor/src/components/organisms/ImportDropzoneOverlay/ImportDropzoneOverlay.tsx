@@ -1,9 +1,11 @@
 import { Upload } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useSearch } from "wouter";
 
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { useAppHandlers } from "../../../hooks/useAppHandlers";
 import { FileUpload } from "../../molecules/FileUpload/FileUpload";
+import { useImportOnLoad } from "./use-import-on-load";
 
 /**
  * Centered overlay rendered when the editor mounts with
@@ -11,13 +13,17 @@ import { FileUpload } from "../../molecules/FileUpload/FileUpload";
  * via `useFileUpload`) and auto-clicks its hidden `<input type="file">`
  * on mount so the OS file picker opens without a second user gesture.
  *
- * On cancel the overlay stays visible; the user can click the button
- * or drag a file in. Successful parse loads the KRD into the store
- * which causes `EditorPage` to dispatch into the populated editor.
+ * When mounted with `?date=Y-M-D`, a successful import persists the
+ * resulting KRD as a `WorkoutRecord` tagged with that date and routes
+ * to `/workout/:id`. Header-entry imports (no `?date=`) keep the
+ * non-persisting behaviour (load into store, let the user decide).
  */
 export function ImportDropzoneOverlay() {
-  const { handleFileLoad, handleFileError } = useAppHandlers();
+  const { handleFileError } = useAppHandlers();
   const analytics = useAnalytics();
+  const search = useSearch();
+  const date = new URLSearchParams(search).get("date");
+  const onFileLoad = useImportOnLoad(date);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autoClickedRef = useRef(false);
 
@@ -51,7 +57,7 @@ export function ImportDropzoneOverlay() {
           The file picker opens automatically. Cancel to retry.
         </p>
         <FileUpload
-          onFileLoad={handleFileLoad}
+          onFileLoad={onFileLoad}
           onError={handleFileError}
           onImported={handleImported}
           inputRef={inputRef}

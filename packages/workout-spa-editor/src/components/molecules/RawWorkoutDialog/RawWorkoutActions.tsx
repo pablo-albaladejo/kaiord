@@ -55,7 +55,7 @@ export function RawWorkoutActions({
       )}
       <ActionBtn
         icon={PenLine}
-        label="Create manually"
+        label="Create workout"
         onClick={onManual}
         disabled={disabled}
       />
