@@ -1,44 +1,22 @@
 import type { Logger } from "@kaiord/core";
 import type { KRD } from "@kaiord/core";
-import { type FileType, fileTypeSchema } from "@kaiord/core";
+import { fileTypeSchema } from "@kaiord/core";
 
 import { createCourseMessages } from "../course";
 import { convertFitToKrdHealthSleep } from "../health/sleep/fit-to-krd-health-sleep.converter";
 import { convertKrdToFitHealthSleepMessages } from "../health/sleep/krd-health-sleep-to-fit.converter";
 import { groupSleepMessages } from "../health/sleep/sleep-message-grouping";
+import { convertFitToKrdHealthWeight } from "../health/weight/fit-to-krd-health-weight.converter";
+import { convertKrdToFitHealthWeightMessages } from "../health/weight/krd-health-weight-to-fit.converter";
+import { groupWeightMessages } from "../health/weight/weight-message-grouping";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import type { FitMessages } from "../shared/types";
 import { mapActivityFileToKRD } from "./activity.mapper";
 import { createActivityMessages } from "./activity-messages.creator";
+import { detectFileType } from "./file-type-detector";
 import { mapWorkoutFileToKRD } from "./workout.mapper";
-
-const HEALTH_DETECTORS: ReadonlyArray<readonly [string, FileType]> = [
-  ["sleepLevelMesgs", fileTypeSchema.enum.sleep_record],
-];
-
-const detectFileType = (messages: FitMessages): FileType => {
-  for (const [key, type] of HEALTH_DETECTORS) {
-    const mesgs = messages[key];
-    if (mesgs && mesgs.length > 0) return type;
-  }
-
-  const workoutMsgs = messages[fitMessageKeySchema.enum.workoutMesgs];
-  if (workoutMsgs && workoutMsgs.length > 0)
-    return fileTypeSchema.enum.structured_workout;
-
-  const sessionMsgs = messages[fitMessageKeySchema.enum.sessionMesgs];
-  const recordMsgs = messages[fitMessageKeySchema.enum.recordMesgs];
-  if (
-    (sessionMsgs && sessionMsgs.length > 0) ||
-    (recordMsgs && recordMsgs.length > 0)
-  ) {
-    return fileTypeSchema.enum.recorded_activity;
-  }
-
-  return fileTypeSchema.enum.structured_workout;
-};
 
 export const mapMessagesToKRD = (
   messages: FitMessages,
@@ -54,6 +32,8 @@ export const mapMessagesToKRD = (
   switch (fileType) {
     case fileTypeSchema.enum.sleep_record:
       return convertFitToKrdHealthSleep(messages, logger);
+    case fileTypeSchema.enum.weight_measurement:
+      return convertFitToKrdHealthWeight(messages, logger);
     case fileTypeSchema.enum.recorded_activity:
       return mapActivityFileToKRD(messages, logger);
     case fileTypeSchema.enum.structured_workout:
@@ -103,6 +83,10 @@ export const createFitMessages = (
     case "sleep_record":
       return groupSleepMessages(
         convertKrdToFitHealthSleepMessages(krd, logger)
+      );
+    case "weight_measurement":
+      return groupWeightMessages(
+        convertKrdToFitHealthWeightMessages(krd, logger)
       );
     default:
       throw new Error(`Unsupported FIT file type: ${fileType}`);

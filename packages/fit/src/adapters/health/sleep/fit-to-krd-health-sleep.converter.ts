@@ -3,6 +3,7 @@ import { fileTypeSchema } from "@kaiord/core";
 
 import { fitMessageKeySchema } from "../../schemas/fit-message-keys";
 import type { FitMessages } from "../../shared/types";
+import { buildHealthMetadata } from "../shared/health-metadata.builder";
 import {
   type FitSleepLevel,
   fitSleepLevelSchema,
@@ -10,13 +11,6 @@ import {
 import { mapFitSleepLevelsToKrdSleep } from "./health-sleep.converter";
 
 const KRD_VERSION = "2.0" as const;
-
-const convertTimeCreated = (timeCreated: unknown): string => {
-  if (timeCreated instanceof Date) return timeCreated.toISOString();
-  if (typeof timeCreated === "number")
-    return new Date(timeCreated * 1000).toISOString();
-  return new Date().toISOString();
-};
 
 const parseSleepLevels = (raw: unknown[], logger: Logger): FitSleepLevel[] => {
   const parsed: FitSleepLevel[] = [];
@@ -49,20 +43,10 @@ export const convertFitToKrdHealthSleep = (
   const fitLevels = parseSleepLevels(rawLevels, logger);
   const sleep = mapFitSleepLevelsToKrdSleep(fitLevels);
 
-  const metadata = {
-    created: convertTimeCreated(fileId?.timeCreated),
-    manufacturer:
-      typeof fileId?.manufacturer === "string"
-        ? fileId.manufacturer
-        : undefined,
-    product:
-      typeof fileId?.product === "number" ? String(fileId.product) : undefined,
-  };
-
   return {
     version: KRD_VERSION,
     type: fileTypeSchema.enum.sleep_record,
-    metadata,
+    metadata: buildHealthMetadata(fileId),
     extensions: sleep ? { health: { sleep } } : undefined,
   };
 };
