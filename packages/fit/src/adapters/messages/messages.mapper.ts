@@ -15,6 +15,9 @@ import { convertKrdToFitHealthHrvMessages } from "../health/hrv/krd-health-hrv-t
 import { convertFitToKrdHealthSleep } from "../health/sleep/fit-to-krd-health-sleep.converter";
 import { convertKrdToFitHealthSleepMessages } from "../health/sleep/krd-health-sleep-to-fit.converter";
 import { groupSleepMessages } from "../health/sleep/sleep-message-grouping";
+import { convertFitToKrdHealthStress } from "../health/stress/fit-to-krd-health-stress.converter";
+import { convertKrdToFitHealthStressMessages } from "../health/stress/krd-health-stress-to-fit.converter";
+import { groupStressMessages } from "../health/stress/stress-message-grouping";
 import { convertFitToKrdHealthWeight } from "../health/weight/fit-to-krd-health-weight.converter";
 import { convertKrdToFitHealthWeightMessages } from "../health/weight/krd-health-weight-to-fit.converter";
 import { groupWeightMessages } from "../health/weight/weight-message-grouping";
@@ -48,6 +51,8 @@ export const mapMessagesToKRD = (
       return convertFitToKrdHealthHrv(messages, logger);
     case fileTypeSchema.enum.daily_wellness:
       return convertFitToKrdHealthDaily(messages, logger);
+    case fileTypeSchema.enum.stress_episode:
+      return convertFitToKrdHealthStress(messages, logger);
     case fileTypeSchema.enum.recorded_activity:
       return mapActivityFileToKRD(messages, logger);
     case fileTypeSchema.enum.structured_workout:
@@ -90,6 +95,10 @@ export const createFitMessages = (
     case "daily_wellness":
       return groupDailyMessages(
         convertKrdToFitHealthDailyMessages(krd, logger)
+      );
+    case "stress_episode":
+      return groupStressMessages(
+        convertKrdToFitHealthStressMessages(krd, logger)
       );
     default:
       throw new Error(`Unsupported FIT file type: ${fileType}`);

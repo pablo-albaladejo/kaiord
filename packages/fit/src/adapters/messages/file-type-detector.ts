@@ -20,6 +20,7 @@ const HEALTH_DETECTORS: ReadonlyArray<readonly [string, FileType]> = [
   ["hrvStatusSummaryMesgs", fileTypeSchema.enum.hrv_summary],
   ["hrvValueMesgs", fileTypeSchema.enum.hrv_summary],
   ["monitoringMesgs", fileTypeSchema.enum.daily_wellness],
+  ["stressLevelMesgs", fileTypeSchema.enum.stress_episode],
 ];
 
 export const detectFileType = (messages: FitMessages): FileType => {
