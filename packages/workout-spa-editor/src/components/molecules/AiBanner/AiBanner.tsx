@@ -23,6 +23,7 @@ export function AiBanner() {
   const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
   const [armed, setArmed] = useState(false);
+  const [hasAutoCollapsed, setHasAutoCollapsed] = useState(false);
   const generation = useAiRuntimeStore((s) => s.generation);
 
   useEffect(() => {
@@ -30,13 +31,14 @@ export function AiBanner() {
     if (generation.status === "success" && armed) {
       setOpen(false);
       setArmed(false);
+      setHasAutoCollapsed(true);
     }
   }, [generation.status, open, armed]);
 
   const handleToggle = () => {
     const next = !open;
     setOpen(next);
-    if (next) setArmed(true);
+    if (next && !hasAutoCollapsed) setArmed(true);
   };
 
   return (

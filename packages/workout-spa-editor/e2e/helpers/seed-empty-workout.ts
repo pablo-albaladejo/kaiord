@@ -34,7 +34,12 @@ export async function seedEmptyWorkout(
           getState: () => { loadWorkout: (krd: unknown) => void };
         };
       };
-      w.__KAIORD_WORKOUT_STORE__?.getState().loadWorkout(seed);
+      if (!w.__KAIORD_WORKOUT_STORE__) {
+        throw new Error(
+          "__KAIORD_WORKOUT_STORE__ is not exposed on window — the dev-only guard in src/store/workout-store.ts must be active in the build under test."
+        );
+      }
+      w.__KAIORD_WORKOUT_STORE__.getState().loadWorkout(seed);
     }, krd);
     await page.goto("/workout/new?source=scratch");
     return;

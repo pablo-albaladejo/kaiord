@@ -19,8 +19,11 @@ export function ImportDropzoneOverlay() {
   const { handleFileLoad, handleFileError } = useAppHandlers();
   const analytics = useAnalytics();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const autoClickedRef = useRef(false);
 
   useEffect(() => {
+    if (autoClickedRef.current) return;
+    autoClickedRef.current = true;
     const node = inputRef.current;
     if (!node) return;
     if (typeof node.scrollIntoView === "function") {
