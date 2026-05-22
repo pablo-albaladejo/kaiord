@@ -15,6 +15,7 @@ import type { FitMessages } from "../shared/types";
  */
 const HEALTH_DETECTORS: ReadonlyArray<readonly [string, FileType]> = [
   ["sleepLevelMesgs", fileTypeSchema.enum.sleep_record],
+  ["bodyCompositionMesgs", fileTypeSchema.enum.body_composition],
   ["weightScaleMesgs", fileTypeSchema.enum.weight_measurement],
   ["hrvStatusSummaryMesgs", fileTypeSchema.enum.hrv_summary],
   ["hrvValueMesgs", fileTypeSchema.enum.hrv_summary],

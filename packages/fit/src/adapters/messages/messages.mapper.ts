@@ -3,6 +3,9 @@ import type { KRD } from "@kaiord/core";
 import { fileTypeSchema } from "@kaiord/core";
 
 import { createCourseMessages } from "../course";
+import { groupBodyCompositionMessages } from "../health/body-composition/body-composition-message-grouping";
+import { convertFitToKrdHealthBodyComposition } from "../health/body-composition/fit-to-krd-health-body-composition.converter";
+import { convertKrdToFitHealthBodyCompositionMessages } from "../health/body-composition/krd-health-body-composition-to-fit.converter";
 import { groupDailyMessages } from "../health/daily/daily-message-grouping";
 import { convertFitToKrdHealthDaily } from "../health/daily/fit-to-krd-health-daily.converter";
 import { convertKrdToFitHealthDailyMessages } from "../health/daily/krd-health-daily-to-fit.converter";
@@ -16,13 +19,12 @@ import { convertFitToKrdHealthWeight } from "../health/weight/fit-to-krd-health-
 import { convertKrdToFitHealthWeightMessages } from "../health/weight/krd-health-weight-to-fit.converter";
 import { groupWeightMessages } from "../health/weight/weight-message-grouping";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
-import { fitMessageKeySchema } from "../schemas/fit-message-keys";
-import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import type { FitMessages } from "../shared/types";
 import { mapActivityFileToKRD } from "./activity.mapper";
 import { createActivityMessages } from "./activity-messages.creator";
 import { detectFileType } from "./file-type-detector";
 import { mapWorkoutFileToKRD } from "./workout.mapper";
+import { groupWorkoutMessages } from "./workout-message-grouping";
 
 export const mapMessagesToKRD = (
   messages: FitMessages,
@@ -40,6 +42,8 @@ export const mapMessagesToKRD = (
       return convertFitToKrdHealthSleep(messages, logger);
     case fileTypeSchema.enum.weight_measurement:
       return convertFitToKrdHealthWeight(messages, logger);
+    case fileTypeSchema.enum.body_composition:
+      return convertFitToKrdHealthBodyComposition(messages, logger);
     case fileTypeSchema.enum.hrv_summary:
       return convertFitToKrdHealthHrv(messages, logger);
     case fileTypeSchema.enum.daily_wellness:
@@ -50,27 +54,6 @@ export const mapMessagesToKRD = (
     default:
       return mapWorkoutFileToKRD(messages, logger);
   }
-};
-
-const groupWorkoutMessages = (
-  rawMessages: unknown[]
-): Record<string, unknown[]> => {
-  const result: Record<string, unknown[]> = {};
-  for (const msg of rawMessages) {
-    const message = msg as { mesgNum?: number };
-    const key =
-      message.mesgNum === FIT_MESSAGE_NUMBERS.FILE_ID
-        ? fitMessageKeySchema.enum.fileIdMesgs
-        : message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
-          ? fitMessageKeySchema.enum.workoutMesgs
-          : message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT_STEP
-            ? fitMessageKeySchema.enum.workoutStepMesgs
-            : null;
-    if (key) {
-      result[key] = [...(result[key] || []), message];
-    }
-  }
-  return result;
 };
 
 /**
@@ -97,6 +80,10 @@ export const createFitMessages = (
     case "weight_measurement":
       return groupWeightMessages(
         convertKrdToFitHealthWeightMessages(krd, logger)
+      );
+    case "body_composition":
+      return groupBodyCompositionMessages(
+        convertKrdToFitHealthBodyCompositionMessages(krd, logger)
       );
     case "hrv_summary":
       return groupHrvMessages(convertKrdToFitHealthHrvMessages(krd, logger));
