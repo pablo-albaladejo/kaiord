@@ -11,8 +11,8 @@
  *   - accessible name MUST include the date so SR users hear the
  *     cell context the dialog is bound to.
  *
- * The heavy list is lazy-loaded so the EmptyDayDialog chunk does
- * not pull the picker eagerly.
+ * The heavy list is lazy-loaded so callers (NewWorkoutPicker, LibraryPage)
+ * do not pull the picker eagerly.
  */
 
 import * as Dialog from "@radix-ui/react-dialog";

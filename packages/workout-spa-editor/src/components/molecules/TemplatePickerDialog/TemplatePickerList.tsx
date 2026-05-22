@@ -3,8 +3,8 @@
  *
  * Search-only; no delete/edit affordances (those belong on the
  * routed Library page per the surface-classification rule). Lazy-
- * loaded by TemplatePickerDialog so opening the EmptyDayDialog
- * does not pull this chunk eagerly.
+ * loaded by TemplatePickerDialog so opening it does not pull this
+ * chunk eagerly.
  */
 
 import type { WorkoutTemplate } from "../../../types/workout-library";

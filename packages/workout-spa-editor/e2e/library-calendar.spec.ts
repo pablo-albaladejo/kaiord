@@ -110,7 +110,7 @@ test.describe("Library-Calendar Integration", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test('Empty day "Add from Library" opens the in-flow picker (no navigation)', async ({
+  test('Empty day "+" navigates to NewWorkoutPicker; Template tile opens the in-flow picker inline', async ({
     page,
   }) => {
     const dates = getWeekDates();
@@ -127,12 +127,14 @@ test.describe("Library-Calendar Integration", () => {
     const btn = page.getByTestId(`empty-day-${dates[1]}`);
     await btn.scrollIntoViewIfNeeded();
     await btn.click({ force: true });
-    await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
-    await page.getByRole("button", { name: /Add from Library/i }).click();
+    await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[1]}`));
+    await expect(page.getByTestId("new-workout-picker")).toBeVisible();
+
+    await page.getByTestId("new-workout-picker-template").click();
 
     await expect(page.getByTestId("template-picker-dialog")).toBeVisible();
-    // URL must NOT have navigated to the page route.
-    expect(page.url()).toMatch(new RegExp(`/calendar/${weekId}$`));
+    // URL must NOT have navigated away from the picker.
+    expect(page.url()).toMatch(new RegExp(`/workout/new\\?date=${dates[1]}`));
   });
 });

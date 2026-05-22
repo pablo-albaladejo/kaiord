@@ -44,10 +44,8 @@ export function CalendarPageView({
       />
       <CalendarDialogs
         selectedWorkout={s.selectedWorkout}
-        emptyDayDate={s.emptyDayDate}
         selectedCoachingActivity={selectedActivity}
         onCloseWorkout={() => s.setSelectedWorkout(null)}
-        onCloseDay={() => s.setEmptyDayDate(null)}
         onCloseCoaching={() => setSelectedActivity(null)}
         expandActivity={coaching.expandActivity}
         onOpenExecuted={s.handleWorkoutClick}

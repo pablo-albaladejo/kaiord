@@ -27,7 +27,7 @@ export function CalendarBodyView({
         soloActualsByDay={buckets.soloActualsByDay}
         todayDate={todayDate}
         onWorkoutClick={s.handleWorkoutClick}
-        onEmptyDayClick={s.setEmptyDayDate}
+        onEmptyDayClick={s.handleEmptyDayClick}
         onActivityClick={setSelectedActivity}
       />
     );
@@ -41,7 +41,7 @@ export function CalendarBodyView({
       todayDate={todayDate}
       view={view}
       onWorkoutClick={s.handleWorkoutClick}
-      onEmptyDayClick={s.setEmptyDayDate}
+      onEmptyDayClick={s.handleEmptyDayClick}
       onActivityClick={setSelectedActivity}
     />
   );

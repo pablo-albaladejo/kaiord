@@ -171,7 +171,9 @@ test.describe("Calendar Workouts", () => {
     await page.waitForURL(new RegExp(`/workout/${workoutId}`));
   });
 
-  test('Click "+" on empty day opens dialog', async ({ page }) => {
+  test('Click "+" on empty day navigates to /workout/new?date=X (NewWorkoutPicker)', async ({
+    page,
+  }) => {
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -186,10 +188,11 @@ test.describe("Calendar Workouts", () => {
     await btn.scrollIntoViewIfNeeded();
     await btn.click({ force: true });
 
-    await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
+    await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[1]}`));
+    await expect(page.getByTestId("new-workout-picker")).toBeVisible();
   });
 
-  test('EmptyDayDialog "Create new" navigates to /workout/new?source=scratch&date=X', async ({
+  test('Picker Scratch tile from empty day "+" navigates to /workout/new?source=scratch&date=X', async ({
     page,
   }) => {
     const dates = getWeekDates();
@@ -200,24 +203,21 @@ test.describe("Calendar Workouts", () => {
     const btn = page.getByTestId(`empty-day-${dates[0]}`);
     await btn.scrollIntoViewIfNeeded();
     await btn.click({ force: true });
-    await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
-    await page.getByRole("button", { name: /Create new workout/i }).click();
-    // `source=scratch` is the new explicit signal that bypasses the
-    // NewWorkoutPicker (introduced in PR #645) so the editor mounts
-    // directly with the date prefilled.
+    await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
+    await page.getByTestId("new-workout-picker-scratch").click();
     await page.waitForURL(
       new RegExp(`/workout/new\\?source=scratch&date=${dates[0]}`)
     );
   });
 
-  test('EmptyDayDialog "Add from Library" opens the in-flow template picker (no navigation)', async ({
+  test("Picker Template tile opens TemplatePickerDialog inline when ?date= is in URL", async ({
     page,
   }) => {
-    // Per the SPA surface-classification rule (spec/spa-routing) the
-    // "Add from Library" affordance opens an in-flow picker dialog
-    // bound to the empty-day's date — it does NOT navigate to the
-    // routed /library page (which would lose the date context).
+    // When the user enters the picker from a calendar empty day "+",
+    // the Template tile opens TemplatePickerDialog inline (instead of
+    // navigating to /library) so the user keeps one-click scheduling
+    // for the day they picked.
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -226,10 +226,10 @@ test.describe("Calendar Workouts", () => {
     const btn = page.getByTestId(`empty-day-${dates[0]}`);
     await btn.scrollIntoViewIfNeeded();
     await btn.click({ force: true });
-    await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
+    await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
 
-    await page.getByRole("button", { name: /Add from Library/i }).click();
+    await page.getByTestId("new-workout-picker-template").click();
     await expect(page.getByTestId("template-picker-dialog")).toBeVisible();
-    expect(page.url()).toMatch(new RegExp(`/calendar/${weekId}$`));
+    expect(page.url()).toMatch(new RegExp(`/workout/new\\?date=${dates[0]}`));
   });
 });
