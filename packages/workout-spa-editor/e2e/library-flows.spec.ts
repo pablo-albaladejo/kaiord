@@ -93,7 +93,7 @@ test.describe("Library flows", () => {
     await expect(page.getByTestId("calendar-page")).toBeVisible();
   });
 
-  test("Test B: empty-day picker opens with the date in its accessible name and schedules", async ({
+  test("Test B: empty-day picker opens NewWorkoutPicker with date and schedules via Template tile", async ({
     page,
   }) => {
     const dates = getWeekDates();
@@ -109,9 +109,11 @@ test.describe("Library flows", () => {
     const cell = page.getByTestId(`empty-day-${targetDate}`);
     await cell.scrollIntoViewIfNeeded();
     await cell.click({ force: true });
-    await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
-    await page.getByRole("button", { name: /Add from Library/i }).click();
+    await page.waitForURL(new RegExp(`/workout/new\\?date=${targetDate}`));
+    await expect(page.getByTestId("new-workout-picker")).toBeVisible();
+
+    await page.getByTestId("new-workout-picker-template").click();
 
     const picker = page.getByTestId("template-picker-dialog");
     await expect(picker).toBeVisible();
@@ -124,16 +126,15 @@ test.describe("Library flows", () => {
     const dateRegex = new RegExp(expectedDate, "i");
     await expect(page.getByRole("dialog", { name: dateRegex })).toBeVisible();
 
-    // URL has not navigated away.
-    expect(page.url()).toMatch(new RegExp(`/calendar/${weekId}$`));
-
     await page.getByText("Tempo Ride").click();
 
+    // On success the picker navigates back to /calendar and schedules
+    // the workout on the target date.
+    await page.waitForURL(/\/calendar/);
     await expect(picker).not.toBeVisible();
-    await expect(page.getByTestId("empty-day-dialog")).not.toBeVisible();
-    expect(page.url()).toMatch(new RegExp(`/calendar/${weekId}$`));
 
     // Workout was scheduled — calendar shows a card on the target date.
+    await page.goto(`/calendar/${weekId}`);
     await page.waitForSelector('[data-testid^="workout-card-"]');
     const targetCol = page.getByTestId(`day-column-${targetDate}`);
     await expect(
@@ -170,7 +171,8 @@ test.describe("Library flows", () => {
     const cell = page.getByTestId(`empty-day-${targetDate}`);
     await cell.scrollIntoViewIfNeeded();
     await cell.click({ force: true });
-    await page.getByRole("button", { name: /Add from Library/i }).click();
+    await page.waitForURL(new RegExp(`/workout/new\\?date=${targetDate}`));
+    await page.getByTestId("new-workout-picker-template").click();
     await expect(page.getByTestId("template-picker-dialog")).toBeVisible();
 
     await page.goBack();

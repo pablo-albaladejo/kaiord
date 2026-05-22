@@ -347,8 +347,6 @@ describe("RawWorkoutDialog", () => {
       screen.getByText("Process with AI").closest("button")
     ).toBeDisabled();
     expect(screen.getByText("Skip").closest("button")).toBeDisabled();
-    expect(
-      screen.getByText("Create manually").closest("button")
-    ).toBeDisabled();
+    expect(screen.getByText("Create workout").closest("button")).toBeDisabled();
   });
 });
