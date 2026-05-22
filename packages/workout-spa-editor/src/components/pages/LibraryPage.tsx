@@ -13,6 +13,12 @@
  * (SPA navigation) so the in-memory editor state is preserved; a hard
  * reload would drop the just-loaded workout from Zustand.
  *
+ * When entered with `?source=template-picker&date=YYYY-MM-DD`, the
+ * schedule click bypasses the explicit `ScheduleDateDialog` and
+ * dispatches `scheduleTemplate` directly with the URL's date. Invalid
+ * or absent `?date=` uses the explicit dialog flow — see
+ * `useLibrarySchedule` for the branch.
+ *
  * The `<h1>` marked with `[data-route-heading]` is rendered eagerly
  * (even while templates load) so the `useFocusOnRouteChange` hook
  * finds it on the post-paint rAF; otherwise focus would fall back to
@@ -30,6 +36,7 @@ import type { WorkoutTemplate } from "../../types/workout-library";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
 import { LibraryPageContent } from "./LibraryPageContent";
 import { LibraryPageHeader } from "./LibraryPageHeader";
+import { useLibrarySchedule } from "./use-library-schedule";
 import { useScheduleTemplate } from "./use-schedule-template";
 
 export default function LibraryPage() {
@@ -38,6 +45,7 @@ export default function LibraryPage() {
   const { error: showError, success: showSuccess } = useToastContext();
   const { scheduling, openScheduler, closeScheduler, confirmSchedule } =
     useScheduleTemplate();
+  const handleSchedule = useLibrarySchedule(openScheduler);
   const currentWorkout = useCurrentWorkout();
   const loadWorkout = useLoadWorkout();
   const [, navigate] = useLocation();
@@ -83,7 +91,7 @@ export default function LibraryPage() {
             templates={templates}
             hasCurrentWorkout={hasCurrentWorkout}
             onDelete={handleDelete}
-            onSchedule={openScheduler}
+            onSchedule={handleSchedule}
             onLoad={handleLoad}
           />
           <ScheduleDateDialog
