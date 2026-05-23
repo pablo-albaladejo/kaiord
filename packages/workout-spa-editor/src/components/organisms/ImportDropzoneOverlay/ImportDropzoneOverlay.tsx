@@ -11,8 +11,10 @@ import { useImportOnLoad } from "./use-import-on-load";
 /**
  * Centered overlay rendered when the editor mounts with
  * `?action=import`. Reuses `FileUpload` (which owns the parse pipeline
- * via `useFileUpload`) and auto-clicks its hidden `<input type="file">`
- * on mount so the OS file picker opens without a second user gesture.
+ * via `useFileUpload`). The hidden `<input type="file">` is focused +
+ * scrolled into view on mount, but the OS file picker is NOT opened
+ * automatically — the user clicks the "Choose file" affordance or
+ * drops a file onto the dropzone.
  *
  * When mounted with `?date=Y-M-D`, a successful import persists the
  * resulting KRD as a `WorkoutRecord` tagged with that date and routes
@@ -27,11 +29,11 @@ export function ImportDropzoneOverlay() {
   const onFileLoad = useImportOnLoad(date);
   const clearWorkout = useWorkoutStore((s) => s.clearWorkout);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const autoClickedRef = useRef(false);
+  const mountInitializedRef = useRef(false);
 
   useEffect(() => {
-    if (autoClickedRef.current) return;
-    autoClickedRef.current = true;
+    if (mountInitializedRef.current) return;
+    mountInitializedRef.current = true;
     // Discard any workout left in the store from a prior route (scratch
     // draft, template preview, etc.) so `EditorPage`'s `importComplete`
     // branch — `mode === "import" && currentWorkout !== null` — does not
@@ -43,7 +45,6 @@ export function ImportDropzoneOverlay() {
       node.scrollIntoView({ block: "center" });
     }
     node.focus();
-    node.click();
   }, [clearWorkout]);
 
   const handleImported = (format: string) => {
@@ -61,7 +62,7 @@ export function ImportDropzoneOverlay() {
           Drop a FIT, TCX, ZWO, GCN, or KRD file
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          The file picker opens automatically. Cancel to retry.
+          Or click below to choose one from your device.
         </p>
         <FileUpload
           onFileLoad={onFileLoad}
