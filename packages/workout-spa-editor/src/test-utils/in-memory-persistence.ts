@@ -73,6 +73,9 @@ export function createInMemoryPersistence(): PersistencePort {
     userPreferences: createInMemoryUserPreferencesRepository(
       stores.userPreferences
     ),
+    // No in-memory health data exists yet — per-metric repositories
+    // (and their snapshot wiring) ship in follow-up commits.
+    healthCleanup: { deleteByProfile: async () => undefined },
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(
         stores,

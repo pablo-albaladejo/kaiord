@@ -29,7 +29,7 @@ export const registerV10ToV12 = (db: DexieVersionHost): void => {
   db.version(12).stores(SCHEMAS.v8).upgrade(applyV12Upgrade);
 };
 
-export const registerV13ToV15 = (db: DexieVersionHost): void => {
+export const registerV13ToV16 = (db: DexieVersionHost): void => {
   // v13 — workouts become profile-scoped 1–1. Adds `profileId` +
   // `[profileId+date]` indexes on `workouts` and backfills every legacy
   // row from `meta.activeProfileId`. The upgrade throws when workouts
@@ -45,4 +45,8 @@ export const registerV13ToV15 = (db: DexieVersionHost): void => {
   // editor can pre-populate the scratch sport picker and persist the
   // AI banner accordion state across sessions. Schema unchanged.
   db.version(15).stores(SCHEMAS.v13).upgrade(applyV15Upgrade);
+  // v16 — KRD v2.0 health-domain stores: sleep, weight, hrv, daily,
+  // body composition, stress. Purely additive — Dexie auto-creates the
+  // new stores empty on upgrade so no data migration is needed.
+  db.version(16).stores(SCHEMAS.v16);
 };

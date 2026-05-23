@@ -26,6 +26,7 @@
  */
 
 import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismissal-repository";
+import type { HealthCleanupRepository } from "../../ports/health-cleanup-repository";
 import type {
   CoachingRepository,
   CoachingSyncStateRepository,
@@ -41,6 +42,9 @@ export type DeleteProfileWithCascadeDeps = {
   sessionMatch: SessionMatchRepository;
   autoMatchDismissal: AutoMatchDismissalRepository;
   userPreferences: UserPreferencesRepository;
+  // Cross-table cleanup for the six v16 health-domain stores.
+  // Per-metric typed repositories ship in follow-up commits.
+  healthCleanup: HealthCleanupRepository;
 };
 
 export const deleteProfileWithCascade = async (
@@ -54,5 +58,6 @@ export const deleteProfileWithCascade = async (
     deps.sessionMatch.deleteByProfile(deletedProfileId),
     deps.autoMatchDismissal.deleteByProfile(deletedProfileId),
     deps.userPreferences.delete(deletedProfileId),
+    deps.healthCleanup.deleteByProfile(deletedProfileId),
   ]);
 };

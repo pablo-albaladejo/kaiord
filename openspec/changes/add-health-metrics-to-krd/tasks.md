@@ -60,13 +60,19 @@ PR 6 (verification):  §12, §13
 - [x] 5.1 Create `packages/core/docs/ADAPTER-COVERAGE.md` containing the coverage matrix exactly as declared in the `adapter-contracts` capability delta (FIT bidirectional for all types; TCX/ZWO/GCN `read+write` for workout/activity/course where applicable, `reject` for all six health types, `n/a` where the format does not define the type). Includes a header note explaining each cell value plus a code snippet showing the `isHealthFileType` guard that is the single source of truth for the `reject` cells.
 - [x] 5.2 Cross-link from `docs/krd-format.md` to `packages/core/docs/ADAPTER-COVERAGE.md` from the new "KRD v2.0 — Health Domain Extension" section and from the References list.
 
-## 6. SPA Dexie v14 + six health repositories
+## 6. SPA Dexie v16 + six health repositories
 
-- [ ] 6.1 Add failing tests in `packages/workout-spa-editor/src/adapters/dexie/dexie-schemas.test.ts` asserting `CORE_V14` declares each of the six health stores with the required indexes, and that v13 stores are unchanged byte-equivalently.
-- [ ] 6.2 Extend `dexie-schemas.ts` with `CORE_V14 = { ...CORE_V13, healthSleep: "id, [profileId+date], date", healthWeight: …, healthHrv: …, healthDaily: …, healthBodyComposition: …, healthStress: …}` so 6.1 passes.
-- [ ] 6.3 Extend `dexie-migrations.ts` with a no-op `.version(14).stores(CORE_V14)` step (no data rewrite needed; the new stores are empty on upgrade).
-- [ ] 6.4 Add a migration integration test: open v13 with seed data → upgrade to v14 → assert v13 data intact and v14 health stores accessible.
-- [ ] 6.5 Add a failing-upgrade simulation test that aborts the v13 → v14 transaction mid-flight and asserts the database remains at v13 (storage degradation behaviour unchanged).
+> **Versioning note:** v14 was consumed by the calendar preference rename
+> in PR #646 and v15 by the userPreferences scratch+banner state in
+> PR #654 (both merged to main after this OpenSpec change was authored),
+> so the health-domain stores ship as **v16**. Names below have been
+> updated; behaviour is unchanged from the original v14 plan.
+
+- [x] 6.1 Add failing tests in `packages/workout-spa-editor/src/adapters/dexie/dexie-schemas.test.ts` asserting `CORE_V16` declares each of the six health stores with the required indexes, and that v13 stores are unchanged byte-equivalently.
+- [x] 6.2 Extend `dexie-schemas.ts` with `CORE_V16 = { ...CORE_V13, healthSleep: "id, profileId, [profileId+date], date", healthWeight: …, healthHrv: …, healthDaily: …, healthBodyComposition: …, healthStress: …}` so 6.1 passes.
+- [x] 6.3 Extend `register-kaiord-versions-v10-plus.ts` with a no-op `db.version(16).stores(SCHEMAS.v16)` step (no data rewrite needed; the new stores are empty on upgrade).
+- [x] 6.4 Add a migration integration test: open v15 with seed data → upgrade to v16 → assert v15 data intact and v16 health stores accessible.
+- [ ] 6.5 Add a failing-upgrade simulation test that aborts the v15 → v16 transaction mid-flight and asserts the database remains at v15 (storage degradation behaviour unchanged). Deferred — the v16 step has no data work, so the abort-mid-flight semantics reduce to Dexie's existing version-gate behaviour already covered by v13/v14/v15 tests.
 - [ ] 6.6 Define the six health record schemas in `packages/workout-spa-editor/src/types/health/` (`health-sleep-record.ts`, etc.), each importing the corresponding Zod payload from `@kaiord/core` and adding the Dexie row fields (`id`, `profileId`, `date`).
 - [ ] 6.7 For each metric, add failing tests in `dexie-health-{metric}-repository.test.ts` covering `put`, `getById`, `getByProfileAndDateRange` (with profile isolation), `upsertMany` idempotency, `delete` no-op for missing id, and `deleteByProfile` cascade. Implement `dexie-health-{metric}-repository.ts` so each test passes.
 - [ ] 6.8 Add the six repositories to `PersistencePort` and wire them through the `DexiePersistenceAdapter`. Update the in-memory adapter with `InMemoryHealthSleepRepository` etc. that share the test surface from 6.7.

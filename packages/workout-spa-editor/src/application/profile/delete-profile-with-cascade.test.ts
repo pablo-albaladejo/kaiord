@@ -71,6 +71,11 @@ const makeDeps = (
     createInMemoryAutoMatchDismissalRepository(),
   userPreferences:
     overrides.userPreferences ?? createInMemoryUserPreferencesRepository(),
+  healthCleanup: overrides.healthCleanup ?? {
+    // No in-memory health data exists yet; the cascade still calls
+    // this so the future per-metric repositories pick it up.
+    deleteByProfile: async () => undefined,
+  },
 });
 
 describe("deleteProfileWithCascade", () => {

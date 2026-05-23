@@ -15,6 +15,7 @@ import type {
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
+import type { HealthCleanupRepository } from "./health-cleanup-repository";
 import type { SessionMatchRepository } from "./session-match-repository";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
@@ -24,6 +25,7 @@ export type {
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
+export type { HealthCleanupRepository } from "./health-cleanup-repository";
 export type { SessionMatchRepository } from "./session-match-repository";
 export type { UserPreferencesRepository } from "./user-preferences-repository";
 export type { WorkoutRepository } from "./workout-repository";
@@ -89,6 +91,10 @@ export type PersistencePort = {
   sessionMatch: SessionMatchRepository;
   autoMatchDismissal: AutoMatchDismissalRepository;
   userPreferences: UserPreferencesRepository;
+  // Cross-table cleanup for the six v16 health-domain stores. The
+  // typed per-metric repositories ship in follow-up commits; this
+  // port covers ONLY the delete-by-profile cascade.
+  healthCleanup: HealthCleanupRepository;
   // Atomic commit-or-rollback wrapper for multi-write or read-modify-write
   // use cases. Dexie adapter delegates to db.transaction("rw", db.tables, fn);
   // in-memory adapter implements snapshot/revert. Application code MUST NOT

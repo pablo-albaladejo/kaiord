@@ -121,6 +121,16 @@ const makeSeedRow = (
         modifiedAt: null,
         updatedAt: NOW,
       };
+    case "healthSleep":
+    case "healthWeight":
+    case "healthHrv":
+    case "healthDaily":
+    case "healthBodyComposition":
+    case "healthStress":
+      // All six health stores share the same `id, profileId, [profileId+date], date`
+      // index shape. The cascade-fan-out test only needs the primary key
+      // and the per-profile + date indexed columns to round-trip a write.
+      return { id, profileId, date: WEEK_START };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
@@ -145,6 +155,7 @@ const performCascadeOrchestration = async (
         sessionMatch: persistence.sessionMatch,
         autoMatchDismissal: persistence.autoMatchDismissal,
         userPreferences: persistence.userPreferences,
+        healthCleanup: persistence.healthCleanup,
       },
       profileId
     );
