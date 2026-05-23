@@ -138,7 +138,7 @@ describe("ImportDropzoneOverlay", () => {
     expect(document.querySelector('input[type="file"]')).not.toBeNull();
   });
 
-  it("should auto-click the hidden input on mount so the OS picker opens", () => {
+  it("should NOT auto-open the OS file picker on mount so the user keeps control", () => {
     // Arrange
 
     const clickSpy = vi.spyOn(HTMLInputElement.prototype, "click");
@@ -150,7 +150,8 @@ describe("ImportDropzoneOverlay", () => {
 
     // Assert
 
-    expect(clickSpy).toHaveBeenCalled();
+    expect(clickSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("import-dropzone-overlay")).toBeInTheDocument();
   });
 
   it("should fire workout-imported with the detected format on a successful upload", async () => {
