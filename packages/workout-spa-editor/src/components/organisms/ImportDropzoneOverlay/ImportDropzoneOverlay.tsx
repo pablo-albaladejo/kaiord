@@ -4,6 +4,7 @@ import { useSearch } from "wouter";
 
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { useAppHandlers } from "../../../hooks/useAppHandlers";
+import { useWorkoutStore } from "../../../store/workout-store";
 import { FileUpload } from "../../molecules/FileUpload/FileUpload";
 import { useImportOnLoad } from "./use-import-on-load";
 
@@ -24,12 +25,18 @@ export function ImportDropzoneOverlay() {
   const search = useSearch();
   const date = new URLSearchParams(search).get("date");
   const onFileLoad = useImportOnLoad(date);
+  const clearWorkout = useWorkoutStore((s) => s.clearWorkout);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autoClickedRef = useRef(false);
 
   useEffect(() => {
     if (autoClickedRef.current) return;
     autoClickedRef.current = true;
+    // Discard any workout left in the store from a prior route (scratch
+    // draft, template preview, etc.) so `EditorPage`'s `importComplete`
+    // branch — `mode === "import" && currentWorkout !== null` — does not
+    // fire on the stale value and skip rendering this overlay.
+    clearWorkout();
     const node = inputRef.current;
     if (!node) return;
     if (typeof node.scrollIntoView === "function") {
@@ -37,7 +44,7 @@ export function ImportDropzoneOverlay() {
     }
     node.focus();
     node.click();
-  }, []);
+  }, [clearWorkout]);
 
   const handleImported = (format: string) => {
     analytics.event("workout-imported", { format });

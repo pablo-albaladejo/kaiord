@@ -98,6 +98,31 @@ describe("ImportDropzoneOverlay", () => {
     });
   });
 
+  it("should clear any stale currentWorkout from a prior route on mount", () => {
+    // Arrange
+
+    useWorkoutStore.setState({
+      currentWorkout: mockKrd,
+      undoHistory: [{ workout: mockKrd, selection: null }],
+      historyIndex: 0,
+      selectedStepId: null,
+      selectedStepIds: [],
+      isEditing: false,
+    });
+    expect(useWorkoutStore.getState().currentWorkout).not.toBeNull();
+    const analytics: Analytics = { pageView: vi.fn(), event: vi.fn() };
+
+    // Act
+
+    renderOverlay(analytics);
+
+    // Assert
+
+    expect(useWorkoutStore.getState().currentWorkout).toBeNull();
+    expect(useWorkoutStore.getState().undoHistory).toEqual([]);
+    expect(useWorkoutStore.getState().historyIndex).toBe(-1);
+  });
+
   it("should mount with a file input attached to the DOM", () => {
     // Arrange
 
