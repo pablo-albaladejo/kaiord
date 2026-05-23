@@ -5,18 +5,29 @@
  * persisted data domains in the workout SPA editor.
  */
 
-import type { LlmProviderConfig } from "../store/ai-store-types";
-import type { SyncState } from "../types/bridge-schemas";
-import type { Profile } from "../types/profile";
-import type { UsageRecord } from "../types/usage-schemas";
-import type { WorkoutTemplate } from "../types/workout-library";
+import type {
+  HealthBodyCompositionRecord,
+  HealthDailyRecord,
+  HealthHrvRecord,
+  HealthSleepRecord,
+  HealthStressRecord,
+  HealthWeightRecord,
+} from "../types/health/health-records";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 import type {
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
 import type { HealthCleanupRepository } from "./health-cleanup-repository";
+import type { HealthRecordRepository } from "./health-record-repository";
 import type { SessionMatchRepository } from "./session-match-repository";
+import type {
+  AiProviderRepository,
+  ProfileRepository,
+  SyncStateRepository,
+  TemplateRepository,
+  UsageRepository,
+} from "./simple-repositories";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
 
@@ -26,53 +37,20 @@ export type {
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
 export type { HealthCleanupRepository } from "./health-cleanup-repository";
+export type {
+  HealthRecord,
+  HealthRecordRepository,
+} from "./health-record-repository";
 export type { SessionMatchRepository } from "./session-match-repository";
+export type {
+  AiProviderRepository,
+  ProfileRepository,
+  SyncStateRepository,
+  TemplateRepository,
+  UsageRepository,
+} from "./simple-repositories";
 export type { UserPreferencesRepository } from "./user-preferences-repository";
 export type { WorkoutRepository } from "./workout-repository";
-
-export type TemplateRepository = {
-  getAll: () => Promise<WorkoutTemplate[]>;
-  getById: (id: string) => Promise<WorkoutTemplate | undefined>;
-  getBySport: (sport: string) => Promise<WorkoutTemplate[]>;
-  put: (template: WorkoutTemplate) => Promise<void>;
-  delete: (id: string) => Promise<void>;
-};
-
-export type ProfileRepository = {
-  getAll: () => Promise<Profile[]>;
-  getById: (id: string) => Promise<Profile | undefined>;
-  getActiveId: () => Promise<string | null>;
-  setActiveId: (id: string | null) => Promise<void>;
-  put: (profile: Profile) => Promise<void>;
-  delete: (id: string) => Promise<void>;
-  // Lightweight existence check; uses the underlying store's count primitive.
-  count: () => Promise<number>;
-};
-
-export type AiProviderRepository = {
-  getAll: () => Promise<LlmProviderConfig[]>;
-  getById: (id: string) => Promise<LlmProviderConfig | undefined>;
-  put: (provider: LlmProviderConfig) => Promise<void>;
-  delete: (id: string) => Promise<void>;
-  // Custom prompt belongs to the AI domain. Routing it through this
-  // repository keeps the meta-table read/write out of application
-  // code so the no-direct-port-call rule holds across the domain.
-  // `null` distinguishes "never set" from `""` (user cleared).
-  getCustomPrompt: () => Promise<string | null>;
-  setCustomPrompt: (prompt: string) => Promise<void>;
-};
-
-export type SyncStateRepository = {
-  getBySource: (source: string) => Promise<SyncState | undefined>;
-  getAll: () => Promise<SyncState[]>;
-  put: (state: SyncState) => Promise<void>;
-  delete: (source: string) => Promise<void>;
-};
-
-export type UsageRepository = {
-  getByMonth: (yearMonth: string) => Promise<UsageRecord | undefined>;
-  put: (record: UsageRecord) => Promise<void>;
-};
 
 export type PersistencePort = {
   workouts: WorkoutRepository;
@@ -91,10 +69,18 @@ export type PersistencePort = {
   sessionMatch: SessionMatchRepository;
   autoMatchDismissal: AutoMatchDismissalRepository;
   userPreferences: UserPreferencesRepository;
-  // Cross-table cleanup for the six v16 health-domain stores. The
-  // typed per-metric repositories ship in follow-up commits; this
-  // port covers ONLY the delete-by-profile cascade.
+  // Cross-table cleanup for the six v16 health-domain stores —
+  // single-shot deleteByProfile invoked by the profile-delete cascade.
   healthCleanup: HealthCleanupRepository;
+  // Typed per-metric CRUD repositories backed by the v16 health stores.
+  // Read/write surface is identical (HealthRecordRepository<T>); only
+  // the payload type differs per metric.
+  healthSleep: HealthRecordRepository<HealthSleepRecord>;
+  healthWeight: HealthRecordRepository<HealthWeightRecord>;
+  healthHrv: HealthRecordRepository<HealthHrvRecord>;
+  healthDaily: HealthRecordRepository<HealthDailyRecord>;
+  healthBodyComposition: HealthRecordRepository<HealthBodyCompositionRecord>;
+  healthStress: HealthRecordRepository<HealthStressRecord>;
   // Atomic commit-or-rollback wrapper for multi-write or read-modify-write
   // use cases. Dexie adapter delegates to db.transaction("rw", db.tables, fn);
   // in-memory adapter implements snapshot/revert. Application code MUST NOT

@@ -16,6 +16,7 @@ import {
 import { createInMemoryAutoMatchDismissalRepository } from "./in-memory-auto-match-dismissal-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
+import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
 import {
   captureSnapshot,
   restoreSnapshot,
@@ -45,6 +46,12 @@ export function createInMemoryPersistence(): PersistencePort {
     sessionMatch: new Map(),
     autoMatchDismissal: new Map(),
     userPreferences: new Map(),
+    healthSleep: new Map(),
+    healthWeight: new Map(),
+    healthHrv: new Map(),
+    healthDaily: new Map(),
+    healthBodyComposition: new Map(),
+    healthStress: new Map(),
   };
   const profileActiveIdRef: ActiveIdRef = { current: null };
   const aiCustomPromptRef: CustomPromptRef = { current: null };
@@ -73,9 +80,31 @@ export function createInMemoryPersistence(): PersistencePort {
     userPreferences: createInMemoryUserPreferencesRepository(
       stores.userPreferences
     ),
-    // No in-memory health data exists yet — per-metric repositories
-    // (and their snapshot wiring) ship in follow-up commits.
-    healthCleanup: { deleteByProfile: async () => undefined },
+    healthCleanup: {
+      deleteByProfile: async (profileId: string) => {
+        const healthMaps = [
+          stores.healthSleep,
+          stores.healthWeight,
+          stores.healthHrv,
+          stores.healthDaily,
+          stores.healthBodyComposition,
+          stores.healthStress,
+        ] as ReadonlyArray<Map<string, { profileId: string }>>;
+        for (const map of healthMaps) {
+          for (const [id, row] of map) {
+            if (row.profileId === profileId) map.delete(id);
+          }
+        }
+      },
+    },
+    healthSleep: createInMemoryHealthRecordRepository(stores.healthSleep),
+    healthWeight: createInMemoryHealthRecordRepository(stores.healthWeight),
+    healthHrv: createInMemoryHealthRecordRepository(stores.healthHrv),
+    healthDaily: createInMemoryHealthRecordRepository(stores.healthDaily),
+    healthBodyComposition: createInMemoryHealthRecordRepository(
+      stores.healthBodyComposition
+    ),
+    healthStress: createInMemoryHealthRecordRepository(stores.healthStress),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(
         stores,
