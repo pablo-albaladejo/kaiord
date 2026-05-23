@@ -72,7 +72,7 @@ test.describe("CalendarPage performance budget", () => {
     "CDP CPU throttle is Chromium-only (newCDPSession is unavailable on firefox/webkit)"
   );
 
-  test("FCP ≤ 200ms and useMatchedSessions ≤ 60ms with 30-card week", async ({
+  test("FCP ≤ 1.8s and useMatchedSessions ≤ 60ms with 30-card week", async ({
     page,
   }, testInfo) => {
     const useMatchedBudgetMs = USE_MATCHED_SESSIONS_BUDGET_MS;
