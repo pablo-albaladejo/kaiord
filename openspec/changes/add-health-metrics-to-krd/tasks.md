@@ -100,8 +100,8 @@ PR 6 (verification):  §12, §13
 
 ## 9. FIT import flow routes health to the health pipeline
 
-- [ ] 9.1 Add failing tests in `application/health/import-health-fit-file.use-case.test.ts` covering: a sleep FIT file persists into `healthSleep` and triggers a success toast; a weight FIT file persists into `healthWeight`; an unsupported `file_type` surfaces a clear error toast; an `UnsupportedKrdTypeError` from a workout-only writer is caught and surfaced via toast.
-- [ ] 9.2 Implement `application/health/import-health-fit-file.use-case.ts` taking `PersistencePort` and dispatching on the resulting KRD's `type` to the correct repository's `upsertMany`. Throw / surface clear errors for unsupported file types.
+- [x] 9.1 Add failing tests in `application/health/import-health-fit-file.use-case.test.ts` covering: each of the six health types persists into the matching repository with the correct date column; an unsupported `file_type` throws `UnsupportedHealthKrdError`; a health type missing its `extensions.health` payload throws `MissingHealthPayloadError`. Toast wiring is the UI layer's responsibility (§9.3); the use case throws typed errors the caller maps to toasts.
+- [x] 9.2 Implement `application/health/import-health-fit-file.use-case.ts` taking `PersistencePort` + `profileId` and dispatching on the resulting KRD's `type` to the correct repository's `put`. Per-metric routing lives in `import-health-dispatch.ts` (table-driven so the use case file stays under the SPA per-file cap); typed errors live in `import-health-errors.ts`.
 - [ ] 9.3 Extend the existing Settings → Import UI surface to dispatch on FIT `file_type`: workout types → existing workout import; health types → `importHealthFitFile`. Tests cover the dispatch.
 
 ## 10. MCP tools for health domain
