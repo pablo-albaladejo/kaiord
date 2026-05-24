@@ -156,6 +156,19 @@ describe("NewWorkoutPicker", () => {
     expect(location.history.at(-1)).toBe("/library?source=template-picker");
   });
 
+  it("should render a back button that navigates to /calendar", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const { ui, location } = withRouter(<NewWorkoutPicker />);
+    render(ui);
+
+    // Act
+    await user.click(screen.getByTestId("picker-back-button"));
+
+    // Assert
+    expect(location.history.at(-1)).toBe("/calendar");
+  });
+
   it("should open TemplatePickerDialog inline (no navigation) when From template is clicked with ?date=", async () => {
     // Arrange
     const user = userEvent.setup();
