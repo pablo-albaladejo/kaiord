@@ -4,6 +4,7 @@ import { Redirect, Route, Switch, useSearch } from "wouter";
 
 import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
+import { HealthSubRouter } from "./components/pages/health/health-routes";
 
 const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
 const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
@@ -59,6 +60,9 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
           <RouteErrorBoundary analytics={analytics}>
             <SettingsPage />
           </RouteErrorBoundary>
+        </Route>
+        <Route path="/health/*?">
+          <HealthSubRouter analytics={analytics} />
         </Route>
         <Route>
           <Redirect to="/calendar" />
