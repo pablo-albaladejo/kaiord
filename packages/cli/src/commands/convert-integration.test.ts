@@ -4,6 +4,7 @@ import { join, resolve } from "path";
 import stripAnsi from "strip-ansi";
 import { dir } from "tmp-promise";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import { getFixturePath, getFixturesDir } from "../tests/helpers/fixture-paths";
 import { ExitCode } from "../utils/exit-codes";
 
@@ -115,7 +116,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(4);
+      expect(result.exitCode).toBe(ExitCode.PARSING_ERROR);
 
       // Act
       const output = stripAnsi(result.stderr);
@@ -429,7 +430,7 @@ describe("convert command integration tests", () => {
             cliPath,
             "convert",
             "--input",
-            `${fixturesDir}/*.fit`,
+            `${fixturesDir}/Workout*.fit`,
             "--output-dir",
             outputDir,
             "--output-format",
@@ -471,7 +472,7 @@ describe("convert command integration tests", () => {
             cliPath,
             "convert",
             "--input",
-            `${fixturesDir}/*.fit`,
+            `${fixturesDir}/Workout*.fit`,
             "--output-dir",
             outputDir,
             "--output-format",
@@ -596,7 +597,7 @@ describe("convert command integration tests", () => {
             cliPath,
             "convert",
             "--input",
-            `${fixturesDir}/*.fit`,
+            `${fixturesDir}/Workout*.fit`,
             "--output-format",
             "krd",
           ],
@@ -628,7 +629,7 @@ describe("convert command integration tests", () => {
             cliPath,
             "convert",
             "--input",
-            `${fixturesDir}/*.fit`,
+            `${fixturesDir}/Workout*.fit`,
             "--output-dir",
             outputDir,
           ],

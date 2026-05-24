@@ -5,11 +5,21 @@
  */
 
 import type { PersistencePort } from "../../ports/persistence-port";
+import type {
+  HealthBodyCompositionRecord,
+  HealthDailyRecord,
+  HealthHrvRecord,
+  HealthSleepRecord,
+  HealthStressRecord,
+  HealthWeightRecord,
+} from "../../types/health/health-records";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
 import { createDexieCoachingRepository } from "./dexie-coaching-repository";
 import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
 import { db as defaultDb, type KaiordDatabase } from "./dexie-database";
+import { createDexieHealthCleanupRepository } from "./dexie-health-cleanup-repository";
+import { createDexieHealthRecordRepository } from "./dexie-health-record-repository";
 import { createDexieSessionMatchRepository } from "./dexie-session-match-repository";
 import { createDexieUserPreferencesRepository } from "./dexie-user-preferences-repository";
 
@@ -43,6 +53,32 @@ export function createDexiePersistence(
     sessionMatch: createDexieSessionMatchRepository(database),
     autoMatchDismissal: createDexieAutoMatchDismissalRepository(database),
     userPreferences: createDexieUserPreferencesRepository(database),
+    healthCleanup: createDexieHealthCleanupRepository(database),
+    healthSleep: createDexieHealthRecordRepository<HealthSleepRecord>(
+      database,
+      "healthSleep"
+    ),
+    healthWeight: createDexieHealthRecordRepository<HealthWeightRecord>(
+      database,
+      "healthWeight"
+    ),
+    healthHrv: createDexieHealthRecordRepository<HealthHrvRecord>(
+      database,
+      "healthHrv"
+    ),
+    healthDaily: createDexieHealthRecordRepository<HealthDailyRecord>(
+      database,
+      "healthDaily"
+    ),
+    healthBodyComposition:
+      createDexieHealthRecordRepository<HealthBodyCompositionRecord>(
+        database,
+        "healthBodyComposition"
+      ),
+    healthStress: createDexieHealthRecordRepository<HealthStressRecord>(
+      database,
+      "healthStress"
+    ),
     // Atomicity: on rejection the IDB transaction aborts and all writes
     // inside `fn` roll back. See PersistencePort.transaction for the rule.
     transaction: <T>(fn: () => Promise<T>): Promise<T> => {

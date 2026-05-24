@@ -26,6 +26,10 @@ export {
   ToleranceExceededError,
 } from "./tolerance-errors";
 export {
+  createUnsupportedKrdTypeError,
+  UnsupportedKrdTypeError,
+} from "./unsupported-krd-type-error";
+export {
   createZwiftParsingError,
   createZwiftValidationError,
   ZwiftParsingError,

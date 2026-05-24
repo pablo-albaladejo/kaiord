@@ -51,6 +51,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
               sessionMatch: persistence.sessionMatch,
               autoMatchDismissal: persistence.autoMatchDismissal,
               userPreferences: persistence.userPreferences,
+              healthCleanup: persistence.healthCleanup,
             },
             id
           );

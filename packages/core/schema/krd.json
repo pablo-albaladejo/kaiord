@@ -11,7 +11,13 @@
       "enum": [
         "structured_workout",
         "recorded_activity",
-        "course"
+        "course",
+        "sleep_record",
+        "weight_measurement",
+        "hrv_summary",
+        "daily_wellness",
+        "body_composition",
+        "stress_episode"
       ]
     },
     "metadata": {
@@ -39,8 +45,7 @@
         }
       },
       "required": [
-        "created",
-        "sport"
+        "created"
       ],
       "additionalProperties": false
     },
