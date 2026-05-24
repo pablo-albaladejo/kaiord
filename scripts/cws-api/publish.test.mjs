@@ -56,7 +56,8 @@ describe("publishItem 4xx body capture", () => {
       error: {
         code: 400,
         status: "INVALID_ARGUMENT",
-        message: "Item must be in DRAFT state to publish; current state: IN_REVIEW",
+        message:
+          "Item must be in DRAFT state to publish; current state: IN_REVIEW",
         details: [],
       },
     });
@@ -148,7 +149,10 @@ describe("publishItem 4xx body capture", () => {
   it("should redact Bearer tokens leaked back in the error body", async () => {
     // Arrange
     const sa = makeServiceAccount();
-    stubFetch({ status: 400, raw: "rejected: Bearer ya29.aaaaaaaaaaaaaaaaaaaa" });
+    stubFetch({
+      status: 400,
+      raw: "rejected: Bearer ya29.aaaaaaaaaaaaaaaaaaaa",
+    });
 
     // Act
     let caught;

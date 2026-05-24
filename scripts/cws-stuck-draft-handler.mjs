@@ -11,7 +11,10 @@ import { pathToFileURL } from "node:url";
 
 import { parseServiceAccountJson } from "./cws-api/auth.mjs";
 import { publishItem } from "./cws-api/publish.mjs";
-import { bumpRetryCount, parseRetryCount } from "./cws-api/stuck-draft-tier.mjs";
+import {
+  bumpRetryCount,
+  parseRetryCount,
+} from "./cws-api/stuck-draft-tier.mjs";
 
 // Tier mapping: null → 1 (fresh issue); 0/1 → 2 (kick); -1 or >=2 → 3 (escalate).
 function tierFor(count) {
@@ -29,8 +32,15 @@ const tier1Body = (ext, version, runUrl) =>
 
 export function findOpenIssue(gh, title) {
   const out = gh("issue", [
-    "list", "--state", "open", "--search", `${title} in:title`,
-    "--json", "number,title,body", "--limit", "20",
+    "list",
+    "--state",
+    "open",
+    "--search",
+    `${title} in:title`,
+    "--json",
+    "number,title,body",
+    "--limit",
+    "20",
   ]);
   const exact = JSON.parse(out || "[]").find((i) => i.title === title);
   return exact ? { number: exact.number, body: exact.body ?? "" } : null;
@@ -46,16 +56,35 @@ async function runTier2(gh, publish, issue, extensionId) {
     await publish(extensionId);
     return { tier: 2, action: "publishitem-kicked" };
   } catch {
-    editBody(gh, issue.number, bumped.replace(/RETRY_COUNT: \d+/, "RETRY_COUNT: -1"));
+    editBody(
+      gh,
+      issue.number,
+      bumped.replace(/RETRY_COUNT: \d+/, "RETRY_COUNT: -1")
+    );
     return { tier: "2-failed-to-3", action: "sentinel-applied" };
   }
 }
 
-export async function handle({ extension, extensionId, version, runUrl, gh, publish }) {
+export async function handle({
+  extension,
+  extensionId,
+  version,
+  runUrl,
+  gh,
+  publish,
+}) {
   const title = `cws-publish-stuck-${extension}-${version}`;
   const issue = findOpenIssue(gh, title);
   if (issue === null) {
-    gh("issue", ["create", "--title", title, "--label", "cws-stuck", "--body", tier1Body(extension, version, runUrl)]);
+    gh("issue", [
+      "create",
+      "--title",
+      title,
+      "--label",
+      "cws-stuck",
+      "--body",
+      tier1Body(extension, version, runUrl),
+    ]);
     return { tier: 1, action: "opened-issue" };
   }
   const tier = tierFor(parseRetryCount(issue.body));
@@ -68,7 +97,10 @@ export async function handle({ extension, extensionId, version, runUrl, gh, publ
 }
 
 const defaultGh = () => (sub, args) =>
-  execFileSync("gh", [sub, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  execFileSync("gh", [sub, ...args], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 
 const defaultPublish = (env) => {
   const sa = parseServiceAccountJson(env.CWS_SERVICE_ACCOUNT_KEY ?? "");
@@ -78,13 +110,25 @@ const defaultPublish = (env) => {
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [extension, extensionId, version, runUrl] = process.argv.slice(2);
   if (!extension || !extensionId || !version || !runUrl) {
-    process.stderr.write("Usage: cws-stuck-draft-handler.mjs <ext> <ext-id> <version> <run-url>\n");
+    process.stderr.write(
+      "Usage: cws-stuck-draft-handler.mjs <ext> <ext-id> <version> <run-url>\n"
+    );
     process.exit(2);
   }
-  handle({ extension, extensionId, version, runUrl, gh: defaultGh(), publish: defaultPublish(process.env) }).then(
+  handle({
+    extension,
+    extensionId,
+    version,
+    runUrl,
+    gh: defaultGh(),
+    publish: defaultPublish(process.env),
+  }).then(
     (result) => {
       if (process.env.GITHUB_OUTPUT) {
-        appendFileSync(process.env.GITHUB_OUTPUT, `tier=${result.tier}\naction=${result.action}\n`);
+        appendFileSync(
+          process.env.GITHUB_OUTPUT,
+          `tier=${result.tier}\naction=${result.action}\n`
+        );
       }
       process.stdout.write(JSON.stringify(result) + "\n");
       process.exit(0);
@@ -92,6 +136,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     (err) => {
       process.stderr.write(`[CwsStateError] ${err.message}\n`);
       process.exit(1);
-    },
+    }
   );
 }

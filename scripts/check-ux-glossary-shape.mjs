@@ -50,9 +50,7 @@ export function checkGlossaryShape(text) {
   const errors = [];
   for (const heading of REQUIRED_HEADINGS) {
     if (!text.includes(heading)) {
-      errors.push(
-        `R-UXGlossaryShape: missing required heading: "${heading}"`
-      );
+      errors.push(`R-UXGlossaryShape: missing required heading: "${heading}"`);
     }
   }
   if (!text.includes(REQUIRED_VERB_ROW_MARKER)) {
