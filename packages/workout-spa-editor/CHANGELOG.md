@@ -1,5 +1,29 @@
 # @kaiord/workout-spa-editor
 
+## 0.6.0
+
+### Minor Changes
+
+- d8ad94f: refactor: drop the welcome scaffold on `/workout/new?source=scratch` and `/workout/new?action=import`. Scratch lands directly on the editor canvas (collapsed AI banner + WorkoutHeader auto-opened in metadata-edit mode + empty steps list with `+ Add first step`). Import opens a dedicated dropzone overlay that auto-triggers the OS file picker on mount. The picker (`NewWorkoutPicker`) is now the single first-touch decision surface; in-editor onboarding (`Getting Started`, `Or create manually / import a file`) is gone.
+- 72872ff: feat(spa-editor): library page short-circuits scheduling when entered with `?source=template-picker&date=YYYY-MM-DD`. Clicking a template card now dispatches `scheduleTemplate` directly with the URL's date and navigates to `/calendar`, instead of opening `ScheduleDateDialog`. Invalid or absent `?date=`, or a different `?source=`, keeps the existing explicit-dialog flow. Implementation reuses `usePickerSchedule` (PR #650) via a new `useLibrarySchedule` hook so the library schedule call site stays a single line.
+- 6797048: refactor: unify calendar empty-day "+" entry through `NewWorkoutPicker`. Clicking "+" now navigates to `/workout/new?date=Y-M-D` (instead of opening `EmptyDayDialog`); the picker reads `?date=`, shows a date-aware heading, and propagates the date through all three tiles (Scratch, Import, Template). The Template tile mounts `TemplatePickerDialog` inline when a date is present so one-click scheduling is preserved. Imports on a dated picker auto-tag the persisted `WorkoutRecord.date` and route to `/workout/:id`; header-entry imports keep the prior non-persisting behaviour. `RawWorkoutContent`'s "Create manually" button is renamed to "Create workout" and routes through the picker (`/workout/new?date=…`). `EmptyDayDialog`, `EmptyDayChoices`, and their tests are deleted.
+- 0b74b2d: feat: persist `userPreferences.lastScratchSport` and `userPreferences.aiBannerExpanded` across sessions (per profile) via a forward-only Dexie v15 migration. The `ScratchEditorSurface` now pre-selects the user's last scratch sport in `MetadataEditMode` and writes the chosen sport back on the auto-init path (library-loaded and e2e-seeded workouts are skipped). `AiBanner` seeds its open/closed state from the persisted preference and writes manual toggles and the one-shot auto-collapse-on-first-success transition back, preserving the existing one-shot semantics.
+
+### Patch Changes
+
+- 6742618: fix(e2e): raise calendar-performance budgets to chromium-runner-tolerant ceilings (FCP 1800ms, useMatchedSessions 60ms). The test runs ONLY on chromium engines (skipped on firefox/webkit/Mobile Safari upstream), so both desktop chromium and Mobile Chrome share the same GH Actions runner contention envelope. PR #651's Mobile-Chrome-only relaxation was insufficient — desktop chromium hit the same flake post-merge of PRs #654 and #655.
+- eab7ad7: fix: `ImportDropzoneOverlay` now calls `clearWorkout()` on mount so a stale `currentWorkout` from a prior route (scratch draft, template preview, etc.) does not trigger `EditorPage`'s `importComplete` branch (`mode === "import" && currentWorkout !== null`) and silently skip rendering the dropzone overlay. Without this, navigating to `/workout/new?action=import` after viewing any other workout would show the populated editor body instead of the file picker.
+- 1045b36: chore: SSR guard the `__KAIORD_DB__` dev-only exposure with `typeof window !== "undefined"` so the module is safe to import from node tooling that doesn't provide a DOM. Matches the symmetric `__KAIORD_WORKOUT_STORE__` guard in `workout-store.ts`. Production builds are unaffected — Vite tree-shakes the `import.meta.env.DEV` block.
+- ddc2812: fix(e2e): relax `useMatchedSessions` performance budget to 60ms on the Mobile Chrome project (kept at 30ms for chromium / firefox / webkit / Mobile Safari). The Mobile Chrome runner consistently measured 43-48ms in PR #648 and #650 post-merge runs vs ~10-20ms on desktop chromium — pure CI runner CPU contention, not a code regression.
+- 9ce5e6d: fix: `ImportDropzoneOverlay` no longer auto-clicks the hidden file input on mount. The user now lands on the dropzone overlay and explicitly chooses when to open the OS file picker (via the visible "Choose file" affordance or drag-and-drop). Reverts the auto-open behaviour from PR #648 — the explicit-click flow gives the user more control and avoids the OS file picker appearing unexpectedly. `clearWorkout()` on mount (from PR #657) is retained.
+- Updated dependencies [581239f]
+  - @kaiord/core@8.0.0
+  - @kaiord/ai@8.0.0
+  - @kaiord/fit@8.0.0
+  - @kaiord/garmin@8.0.0
+  - @kaiord/tcx@8.0.0
+  - @kaiord/zwo@8.0.0
+
 ## 0.5.0
 
 ### Minor Changes
