@@ -30,6 +30,12 @@ function labelForPathname(pathname: string): string {
   if (pathname === "/library") return "Library page";
   if (pathname === "/workout/new") return "New workout";
   if (pathname.startsWith("/workout/")) return "Edit workout";
+  if (pathname === "/health") return "Health page";
+  if (pathname === "/health/sleep") return "Sleep page";
+  if (pathname === "/health/weight") return "Weight page";
+  if (pathname === "/health/recovery") return "Recovery page";
+  if (pathname === "/health/activity") return "Activity page";
+  if (pathname.startsWith("/settings")) return "Settings page";
   if (pathname === "/" || pathname.startsWith("/calendar"))
     return "Calendar page";
   return "Calendar page";
