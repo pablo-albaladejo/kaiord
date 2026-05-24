@@ -1,24 +1,36 @@
 /**
  * Hook composing the import-success handler for `ImportDropzoneOverlay`.
  *
- * Combines `handleFileLoad` (Zustand store load) with the date-aware
- * persistence + navigation. When `?date=` is absent the persistence
- * branch is skipped — header-entry imports stay non-persisting.
+ * Dispatches on `krd.type`:
+ *  - health-domain KRDs are routed through `importHealthFitFile` and
+ *    the user is sent to the matching Health Hub page; the workout
+ *    store is NOT touched.
+ *  - workout-type KRDs keep the existing flow (`handleFileLoad` +
+ *    optional date-aware persistence + navigation).
  */
 
+import { isHealthFileType } from "@kaiord/core";
 import { useLocation } from "wouter";
 
+import {
+  importHealthFitFile,
+  UnsupportedHealthKrdError,
+} from "../../../application/health/import-health-fit-file.use-case";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAppHandlers } from "../../../hooks/useAppHandlers";
 import type { KRD } from "../../../types/krd";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
+import { healthDestinationFor } from "./health-destination";
 import { persistImportedWorkout } from "./persist-imported-workout";
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const TOAST_IMPORT_FAIL_TITLE = "Import failed";
 const TOAST_IMPORT_FAIL_DESC =
   "Could not save the imported workout — please retry.";
+const TOAST_HEALTH_FAIL_TITLE = "Health import failed";
+const TOAST_HEALTH_FAIL_DESC =
+  "Could not save the imported health record — please retry.";
 
 export function useImportOnLoad(date: string | null) {
   const { handleFileLoad } = useAppHandlers();
@@ -27,6 +39,20 @@ export function useImportOnLoad(date: string | null) {
   const toast = useToastContext();
 
   return (krd: KRD) => {
+    if (isHealthFileType(krd.type)) {
+      void persistence.profiles
+        .getActiveId()
+        .then(async (profileId) => {
+          if (!profileId) return;
+          await importHealthFitFile({ persistence, profileId }, krd);
+          navigate(healthDestinationFor(krd.type));
+        })
+        .catch((error) => {
+          if (error instanceof UnsupportedHealthKrdError) return;
+          toast.error(TOAST_HEALTH_FAIL_TITLE, TOAST_HEALTH_FAIL_DESC);
+        });
+      return;
+    }
     handleFileLoad(krd);
     if (!date || !ISO_DATE_REGEX.test(date)) return;
     const sport = getStructuredWorkout(krd)?.sport ?? "cycling";
