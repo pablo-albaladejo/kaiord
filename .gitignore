@@ -69,3 +69,6 @@ packages/docs/.vitepress/cache/
 
 # Self-improve git worktrees
 worktrees/
+
+# understand-anything CLI knowledge graph (local tool, not part of repo)
+.understand-anything/
