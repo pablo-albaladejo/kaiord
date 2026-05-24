@@ -24,9 +24,8 @@ export function useBackHandler(
   const clearWorkout = useClearWorkout();
   const stepsLength = useWorkoutStore(
     (s) =>
-      (s.currentWorkout?.extensions?.structured_workout as
-        | Workout
-        | undefined)?.steps?.length ?? 0
+      (s.currentWorkout?.extensions?.structured_workout as Workout | undefined)
+        ?.steps?.length ?? 0
   );
 
   const isInPicker =
