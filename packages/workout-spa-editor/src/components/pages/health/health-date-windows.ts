@@ -9,7 +9,8 @@ const ISO_DATE_LENGTH = 10;
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_QUARTER = 90;
 
-const isoDate = (date: Date): string => date.toISOString().slice(0, ISO_DATE_LENGTH);
+const isoDate = (date: Date): string =>
+  date.toISOString().slice(0, ISO_DATE_LENGTH);
 
 const today = (): Date => new Date();
 

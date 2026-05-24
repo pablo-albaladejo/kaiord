@@ -12,7 +12,10 @@ type HealthPageHeaderProps = {
   subtitle?: string;
 };
 
-export const HealthPageHeader = ({ title, subtitle }: HealthPageHeaderProps) => (
+export const HealthPageHeader = ({
+  title,
+  subtitle,
+}: HealthPageHeaderProps) => (
   <header className="mb-6">
     <h1
       tabIndex={-1}

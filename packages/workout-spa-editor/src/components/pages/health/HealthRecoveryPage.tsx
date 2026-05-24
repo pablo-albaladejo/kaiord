@@ -19,7 +19,10 @@ export default function HealthRecoveryPage() {
   const stressLoading = stress === undefined;
   return (
     <section data-testid="health-recovery">
-      <HealthPageHeader title="Recovery" subtitle={`HRV ${RANGE.start} → ${RANGE.end} · Stress ${today}`} />
+      <HealthPageHeader
+        title="Recovery"
+        subtitle={`HRV ${RANGE.start} → ${RANGE.end} · Stress ${today}`}
+      />
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
         HRV history
       </h2>
@@ -30,7 +33,10 @@ export default function HealthRecoveryPage() {
       {!hrvLoading && hrv.length > 0 && (
         <ul className="mb-4 space-y-1">
           {hrv.map((r) => (
-            <li key={r.id} className="flex justify-between rounded border border-gray-200 p-2 text-sm dark:border-slate-800">
+            <li
+              key={r.id}
+              className="flex justify-between rounded border border-gray-200 p-2 text-sm dark:border-slate-800"
+            >
               <span>{r.date}</span>
               <span className="font-mono">{r.krd.rMSSD} ms</span>
             </li>
@@ -42,12 +48,17 @@ export default function HealthRecoveryPage() {
       </h2>
       {stressLoading && <p className="text-sm text-gray-600">Loading…</p>}
       {!stressLoading && stress.length === 0 && (
-        <p className="text-sm text-gray-600">No stress episodes recorded today.</p>
+        <p className="text-sm text-gray-600">
+          No stress episodes recorded today.
+        </p>
       )}
       {!stressLoading && stress.length > 0 && (
         <ul className="space-y-1">
           {stress.map((r) => (
-            <li key={r.id} className="rounded border border-gray-200 p-2 text-sm dark:border-slate-800">
+            <li
+              key={r.id}
+              className="rounded border border-gray-200 p-2 text-sm dark:border-slate-800"
+            >
               Avg {r.krd.averageLevel} · Peak {r.krd.peakLevel}
             </li>
           ))}
