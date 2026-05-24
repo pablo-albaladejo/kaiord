@@ -2,10 +2,13 @@ import { useState } from "react";
 import { useLocation, useSearch } from "wouter";
 
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
+import { BackButton } from "../atoms/BackButton/BackButton";
 import { formatDateLabel } from "../molecules/TemplatePickerDialog/format-date-label";
 import { TemplatePickerDialog } from "../molecules/TemplatePickerDialog/TemplatePickerDialog";
 import { NewWorkoutPickerTiles } from "./NewWorkoutPickerTiles";
 import { usePickerSchedule } from "./use-picker-schedule";
+
+const datedSuffix = (date: string | null) => (date ? `&date=${date}` : "");
 
 export default function NewWorkoutPicker() {
   const [, navigate] = useLocation();
@@ -17,12 +20,8 @@ export default function NewWorkoutPicker() {
   const heading = date
     ? `Schedule for ${formatDateLabel(date)}`
     : "Start a new workout";
-  const scratchHref = date
-    ? `/workout/new?source=scratch&date=${date}`
-    : "/workout/new?source=scratch";
-  const importHref = date
-    ? `/workout/new?action=import&date=${date}`
-    : "/workout/new?action=import";
+  const scratchHref = `/workout/new?source=scratch${datedSuffix(date)}`;
+  const importHref = `/workout/new?action=import${datedSuffix(date)}`;
 
   const handleTemplate = () => {
     if (date) {
@@ -41,6 +40,10 @@ export default function NewWorkoutPicker() {
   return (
     <div className="space-y-6 p-4" data-testid="new-workout-picker">
       <div className="space-y-2">
+        <BackButton
+          onClick={() => navigate("/calendar")}
+          testId="picker-back-button"
+        />
         <h1
           tabIndex={-1}
           {...{ [ROUTE_HEADING_ATTR]: "" }}

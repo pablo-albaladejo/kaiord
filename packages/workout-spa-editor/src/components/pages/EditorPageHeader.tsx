@@ -1,9 +1,11 @@
 import { PenLine } from "lucide-react";
 
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
+import { BackButton } from "../atoms/BackButton/BackButton";
 
 export type EditorPageHeaderProps = {
   mode: "new" | "edit";
+  onBack?: () => void;
 };
 
 const COPY = {
@@ -17,12 +19,13 @@ const COPY = {
   },
 } as const;
 
-export function EditorPageHeader({ mode }: EditorPageHeaderProps) {
+export function EditorPageHeader({ mode, onBack }: EditorPageHeaderProps) {
   const { title, description } = COPY[mode];
 
   return (
     <div className="mb-2">
       <div className="flex items-center gap-2 mb-1">
+        {onBack && <BackButton onClick={onBack} testId="editor-back-button" />}
         <PenLine className="h-5 w-5 text-primary" />
         <h1
           tabIndex={-1}

@@ -1,18 +1,9 @@
 /**
- * EditorPage - Workout editor route component.
- *
- * When `id` is provided, loads the workout from Dexie and shows
- * workflow actions (accept, push, re-push). Otherwise dispatches to a
- * new-workout surface based on the URL: `?source=scratch` mounts the
- * `ScratchEditorSurface`; `?action=import` mounts the
- * `ImportDropzoneOverlay`. Unknown modes fall through to the populated
- * `EditorBody` once `currentWorkout` exists in the store.
- *
- * For coaching-derived workouts (`session_match` row exists with a
- * coaching source per design D4), `EditorBody` renders a
- * `CoachingSidebar` to the right of the step editor so the user can
- * read the original prescription while building or refining the
- * structured workout.
+ * EditorPage — dispatches the `/workout/{id?}` route. When `id` is set
+ * it loads the workout from Dexie and shows workflow actions; otherwise
+ * `?source=scratch` / `?action=import` mounts the matching new-workout
+ * surface, with fallback to the populated `EditorBody`. Coaching-derived
+ * workouts mount the `CoachingSidebar` (design D4).
  */
 
 import { useSearch } from "wouter";
@@ -32,6 +23,7 @@ import {
   deriveNewWorkoutMode,
   renderNewWorkoutSurface,
 } from "./render-new-workout-surface";
+import { useBackHandler } from "./use-back-handler";
 import { useEditorActions } from "./use-editor-actions";
 import { useWorkoutRecord } from "./use-workout-record";
 import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
@@ -44,6 +36,7 @@ export default function EditorPage({ id }: EditorPageProps) {
   const params = new URLSearchParams(search);
   const dateParam = params.get("date");
   const newWorkoutMode = deriveNewWorkoutMode(search);
+  const handleBack = useBackHandler(newWorkoutMode, dateParam);
 
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
@@ -70,7 +63,10 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   return (
     <div className="space-y-6">
-      <EditorPageHeader mode={id ? "edit" : "new"} />
+      <EditorPageHeader
+        mode={id ? "edit" : "new"}
+        onBack={handleBack ?? undefined}
+      />
       {!id && dateParam && <DateBanner date={dateParam} />}
       {record && (
         <EditorWorkflowBar
