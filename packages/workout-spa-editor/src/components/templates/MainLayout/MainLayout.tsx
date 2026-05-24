@@ -4,6 +4,7 @@ import { useFocusOnRouteChange } from "../../../hooks/use-focus-on-route-change"
 import { useRouteAnnouncerLabel } from "../../../hooks/use-route-announcer-label";
 import { StorageAvailabilityBanner } from "../../molecules/StorageAvailabilityBanner";
 import { LayoutHeader } from "./LayoutHeader";
+import { PrimaryNav } from "./PrimaryNav";
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -16,6 +17,7 @@ export const MainLayout = ({ children, onReplayTutorial }: MainLayoutProps) => {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-slate-900">
       <LayoutHeader onReplayTutorial={onReplayTutorial} />
+      <PrimaryNav />
       {/*
         Route announcer.
         - `polite` because navigation announcements should not interrupt
