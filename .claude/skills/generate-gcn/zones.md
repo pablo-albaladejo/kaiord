@@ -22,15 +22,15 @@ Override this file with your personal zones. These are used by the generate-gcn 
 | Z4   | 1:39           | 1:32           | 1.01      | 1.09      | 80-89  |
 | Z5   | 1:31           | 1:26           | 1.10      | 1.16      | 90-100 |
 
-## Cycling Power Zones (2025-11-10)
+## Cycling Power Zones (2026-04-06)
 
 | Zone | Min (W) | Max (W) | %FTP   |
 | ---- | ------- | ------- | ------ |
-| Z1   | 111     | 143     | 50-59  |
-| Z2   | 144     | 198     | 60-69  |
-| Z3   | 199     | 229     | 70-79  |
-| Z4   | 230     | 259     | 80-89  |
-| Z5   | 260     | 386     | 90-100 |
+| Z1   | 111     | 149     | 50-59  |
+| Z2   | 150     | 198     | 60-69  |
+| Z3   | 199     | 239     | 70-79  |
+| Z4   | 240     | 268     | 80-89  |
+| Z5   | 269     | 386     | 90-100 |
 
 ## How to Override
 
@@ -38,7 +38,7 @@ Replace the values above with your own training zones. The generate-gcn skill re
 
 ### Derived Values
 
-- **FTP estimate**: ~260W (Z5 min)
+- **FTP estimate**: ~269W (Z5 min)
 - **Easy/Recovery pace**: Z1 range (6:34-5:50/km)
 - **"Progresivo"**: range spanning from current zone min to next zone max
 - **"A tope"**: Z5 range

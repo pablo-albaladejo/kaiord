@@ -78,7 +78,11 @@ const noNarrativeComments = {
               });
               const nextTwo = source.text.slice(end, end + 2);
               const removeEnd =
-                nextTwo === "\r\n" ? end + 2 : nextTwo[0] === "\n" ? end + 1 : end;
+                nextTwo === "\r\n"
+                  ? end + 2
+                  : nextTwo[0] === "\n"
+                    ? end + 1
+                    : end;
               const isOwnLine =
                 source.text.slice(lineStart, start).trim() === "";
               return fixer.removeRange(
