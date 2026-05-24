@@ -8,6 +8,15 @@ export const fitMessageKeySchema = z.enum([
   "recordMesgs",
   "eventMesgs",
   "lapMesgs",
+  // Health domain (KRD v2.0)
+  "sleepLevelMesgs",
+  "monitoringMesgs",
+  "monitoringInfoMesgs",
+  "weightScaleMesgs",
+  "bodyCompositionMesgs",
+  "hrvStatusSummaryMesgs",
+  "hrvValueMesgs",
+  "stressLevelMesgs",
 ]);
 
 export type FitMessageKey = z.infer<typeof fitMessageKeySchema>;

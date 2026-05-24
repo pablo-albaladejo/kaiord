@@ -58,8 +58,47 @@ export {
 } from "./swim-stroke";
 
 // File Type Schema and Types
-export type { FileType } from "./file-type";
-export { fileTypeSchema } from "./file-type";
+export type { FileType, HealthFileType } from "./file-type";
+export {
+  fileTypeSchema,
+  healthFileTypes,
+  isHealthFileType,
+  workoutLikeFileTypes,
+} from "./file-type";
+
+// Health Data Schemas and Types (KRD v2.0)
+export type {
+  BodyComposition,
+  DailyWellness,
+  HealthExtensionPayload,
+  HrvSummary,
+  SleepRecord,
+  SleepStage,
+  StressEpisode,
+  WeightMeasurement,
+} from "./health";
+export {
+  BODY_FAT_TOLERANCE_PERCENT,
+  bodyCompositionSchema,
+  DAILY_KCAL_TOLERANCE,
+  DAILY_STEPS_TOLERANCE,
+  dailyWellnessSchema,
+  healthExtensionPayloadSchema,
+  HRV_TOLERANCE_MS,
+  hrvSummarySchema,
+  SLEEP_STAGE_TOLERANCE_SECONDS,
+  SLEEP_TOTAL_DURATION_TOLERANCE_SECONDS,
+  sleepRecordSchema,
+  sleepStageSchema,
+  STRESS_TOLERANCE,
+  stressEpisodeSchema,
+  WEIGHT_TOLERANCE_KG,
+  weightMeasurementSchema,
+} from "./health";
+
+// KRD Extensions Tagged Shape
+export type { KRDExtensions } from "./krd";
+export { krdExtensionsSchema } from "./krd";
 
 // Length Unit Schema and Types
 export type { LengthUnit } from "./length-unit";

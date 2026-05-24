@@ -9,6 +9,8 @@ export {
   type KRD,
   type KRDEvent,
   krdEventSchema,
+  type KRDExtensions,
+  krdExtensionsSchema,
   type KRDLap,
   krdLapSchema,
   type KRDMetadata,

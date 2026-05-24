@@ -50,8 +50,8 @@ const warnUnresolved = (reason: FocusResolveReason) => {
 };
 
 const readFirstItemId = (): ItemId | null => {
-  const workout =
-    useWorkoutStore.getState().currentWorkout?.extensions?.structured_workout;
+  const workout = useWorkoutStore.getState().currentWorkout?.extensions
+    ?.structured_workout as { steps?: ReadonlyArray<unknown> } | undefined;
   const firstStep = workout?.steps?.[0] as { id?: string } | undefined;
   return (firstStep?.id ?? null) as ItemId | null;
 };

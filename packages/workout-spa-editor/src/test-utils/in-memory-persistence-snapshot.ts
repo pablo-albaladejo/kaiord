@@ -10,6 +10,14 @@ import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { CoachingSyncStateRecord } from "../types/coaching-sync-state";
+import type {
+  HealthBodyCompositionRecord,
+  HealthDailyRecord,
+  HealthHrvRecord,
+  HealthSleepRecord,
+  HealthStressRecord,
+  HealthWeightRecord,
+} from "../types/health/health-records";
 import type { Profile } from "../types/profile";
 import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
@@ -31,6 +39,12 @@ export type Stores = {
   sessionMatch: Map<string, SessionMatch>;
   autoMatchDismissal: Map<string, AutoMatchDismissal>;
   userPreferences: Map<string, UserPreferences>;
+  healthSleep: Map<string, HealthSleepRecord>;
+  healthWeight: Map<string, HealthWeightRecord>;
+  healthHrv: Map<string, HealthHrvRecord>;
+  healthDaily: Map<string, HealthDailyRecord>;
+  healthBodyComposition: Map<string, HealthBodyCompositionRecord>;
+  healthStress: Map<string, HealthStressRecord>;
 };
 
 export type Snapshot = {
@@ -58,6 +72,12 @@ export const captureSnapshot = (
   sessionMatch: new Map(stores.sessionMatch),
   autoMatchDismissal: new Map(stores.autoMatchDismissal),
   userPreferences: new Map(stores.userPreferences),
+  healthSleep: new Map(stores.healthSleep),
+  healthWeight: new Map(stores.healthWeight),
+  healthHrv: new Map(stores.healthHrv),
+  healthDaily: new Map(stores.healthDaily),
+  healthBodyComposition: new Map(stores.healthBodyComposition),
+  healthStress: new Map(stores.healthStress),
   profileActiveId: activeIdRef.current,
   aiCustomPrompt: customPromptRef.current,
 });

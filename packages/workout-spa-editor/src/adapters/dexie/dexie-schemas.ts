@@ -49,6 +49,23 @@ const CORE_V13 = {
     "id, profileId, [profileId+date], date, [date+state], [source+sourceId], sport, *tags",
 };
 
+// v16 — six health-domain stores added (KRD v2.0). Each store keys on
+// the KRD record `id` (nanoid) and indexes `[profileId+date]` so the
+// per-profile date-range queries that back `useHealth*Live` hooks hit
+// an index. Schema is purely additive; no rewrites of existing tables.
+// v14 (calendar preference rename, PR #646) and v15 (userPreferences
+// scratch + AI banner state, PR #654) both reused SCHEMAS.v13 — this
+// is the first new schema entry since v13.
+const CORE_V16 = {
+  ...CORE_V13,
+  healthSleep: "id, profileId, [profileId+date], date",
+  healthWeight: "id, profileId, [profileId+date], date",
+  healthHrv: "id, profileId, [profileId+date], date",
+  healthDaily: "id, profileId, [profileId+date], date",
+  healthBodyComposition: "id, profileId, [profileId+date], date",
+  healthStress: "id, profileId, [profileId+date], date",
+};
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -56,6 +73,7 @@ export const SCHEMAS = {
   v5: CORE_V5,
   v8: CORE_V8,
   v13: CORE_V13,
+  v16: CORE_V16,
 } as const;
 
 /** Backfills `linkedAccounts: []` on profile rows missing the field. */

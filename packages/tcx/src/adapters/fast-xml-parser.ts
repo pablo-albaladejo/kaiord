@@ -1,5 +1,10 @@
 import type { KRD, Logger, TextReader, TextWriter } from "@kaiord/core";
-import { createTcxParsingError, createTcxValidationError } from "@kaiord/core";
+import {
+  createTcxParsingError,
+  createTcxValidationError,
+  createUnsupportedKrdTypeError,
+  isHealthFileType,
+} from "@kaiord/core";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
 import type { TcxValidator } from "../types";
@@ -45,51 +50,62 @@ export const createFastXmlTcxReader =
 export const createFastXmlTcxWriter =
   (logger: Logger, validator: TcxValidator): TextWriter =>
   async (krd: KRD): Promise<string> => {
+    if (isHealthFileType(krd.type)) {
+      throw createUnsupportedKrdTypeError(krd.type, "tcx");
+    }
     logger.debug("Encoding KRD to TCX");
-
-    let tcxData: unknown;
-    try {
-      tcxData = convertKRDToTcx(krd, logger);
-    } catch (error) {
-      logger.error("Failed to convert KRD to TCX structure", { error });
-      throw createTcxParsingError("Failed to convert KRD to TCX", error);
-    }
-
-    let xmlString: string;
-    try {
-      const builder = new XMLBuilder({
-        ignoreAttributes: false,
-        attributeNamePrefix: "@_",
-        format: true,
-        indentBy: "  ",
-      });
-
-      xmlString = builder.build(tcxData);
-    } catch (error) {
-      logger.error("Failed to build TCX XML", { error });
-      throw createTcxParsingError("Failed to build TCX XML", error);
-    }
-
-    logger.debug("Validating generated TCX against XSD");
-
-    const validationResult = await validator(xmlString);
-    if (!validationResult.valid) {
-      logger.error("Generated TCX does not conform to XSD schema", {
-        errors: validationResult.errors,
-      });
-      throw createTcxValidationError(
-        "Generated TCX file does not conform to XSD schema",
-        validationResult.errors.map((err) => ({
-          field: err.path,
-          message: err.message,
-        }))
-      );
-    }
-
+    const tcxData = convertKRDStructure(krd, logger);
+    const xmlString = buildXml(tcxData, logger);
+    await assertXsdValid(xmlString, validator, logger);
     logger.info("KRD encoded to TCX successfully");
     return xmlString;
   };
 
 const convertKRDToTcx = (krd: KRD, logger: Logger): unknown => {
   return convertKRDToTcxStructure(krd, logger);
+};
+
+const convertKRDStructure = (krd: KRD, logger: Logger): unknown => {
+  try {
+    return convertKRDToTcx(krd, logger);
+  } catch (error) {
+    logger.error("Failed to convert KRD to TCX structure", { error });
+    throw createTcxParsingError("Failed to convert KRD to TCX", error);
+  }
+};
+
+const buildXml = (tcxData: unknown, logger: Logger): string => {
+  try {
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      format: true,
+      indentBy: "  ",
+    });
+    return builder.build(tcxData);
+  } catch (error) {
+    logger.error("Failed to build TCX XML", { error });
+    throw createTcxParsingError("Failed to build TCX XML", error);
+  }
+};
+
+const assertXsdValid = async (
+  xmlString: string,
+  validator: TcxValidator,
+  logger: Logger
+): Promise<void> => {
+  logger.debug("Validating generated TCX against XSD");
+  const validationResult = await validator(xmlString);
+  if (!validationResult.valid) {
+    logger.error("Generated TCX does not conform to XSD schema", {
+      errors: validationResult.errors,
+    });
+    throw createTcxValidationError(
+      "Generated TCX file does not conform to XSD schema",
+      validationResult.errors.map((err) => ({
+        field: err.path,
+        message: err.message,
+      }))
+    );
+  }
 };

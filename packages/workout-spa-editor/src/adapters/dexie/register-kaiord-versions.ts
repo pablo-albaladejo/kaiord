@@ -18,7 +18,7 @@ import {
 import { backfillLinkedAccounts, SCHEMAS } from "./dexie-schemas";
 import {
   registerV10ToV12,
-  registerV13ToV15,
+  registerV13ToV16,
 } from "./register-kaiord-versions-v10-plus";
 
 // Narrowed handle: only `version()` is needed and Dexie's full surface
@@ -78,5 +78,5 @@ export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV4ToV6(db);
   registerV7ToV9(db);
   registerV10ToV12(db);
-  registerV13ToV15(db);
+  registerV13ToV16(db);
 };
