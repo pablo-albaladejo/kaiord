@@ -8,20 +8,21 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { lastNinetyDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 
-const RANGE = lastNinetyDays();
 const EMPTY_MSG = "No weight records yet for the last 90 days.";
 
 export default function HealthWeightPage() {
+  // Computed per render so the window stays current across day rollovers.
+  const range = lastNinetyDays();
   const active = useActiveProfileLive();
   const profileId = active?.id;
-  const records = useHealthWeightHistoryLive(profileId ?? "", RANGE);
+  const records = useHealthWeightHistoryLive(profileId ?? "", range);
   const composition = useHealthBodyCompositionLatestLive(profileId ?? "");
   const loading = records === undefined;
   return (
     <section data-testid="health-weight">
       <HealthPageHeader
         title="Weight"
-        subtitle={`${RANGE.start} → ${RANGE.end}`}
+        subtitle={`${range.start} → ${range.end}`}
       />
       {composition && (
         <div className="mb-4 rounded border border-blue-200 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-950">

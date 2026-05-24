@@ -26,7 +26,13 @@ export function useRouteAnnouncerLabel(): string {
   return labelForPathname(pathname);
 }
 
-function labelForPathname(pathname: string): string {
+function normalizePath(pathname: string): string {
+  if (pathname === "/") return pathname;
+  return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+}
+
+function labelForPathname(rawPathname: string): string {
+  const pathname = normalizePath(rawPathname);
   if (pathname === "/library") return "Library page";
   if (pathname === "/workout/new") return "New workout";
   if (pathname.startsWith("/workout/")) return "Edit workout";

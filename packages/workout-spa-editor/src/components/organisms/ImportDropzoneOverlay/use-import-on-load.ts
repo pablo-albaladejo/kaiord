@@ -40,16 +40,17 @@ export function useImportOnLoad(date: string | null) {
 
   return (krd: KRD) => {
     if (isHealthFileType(krd.type)) {
-      void persistence.profiles.getActiveId().then(async (profileId) => {
-        if (!profileId) return;
-        try {
+      void persistence.profiles
+        .getActiveId()
+        .then(async (profileId) => {
+          if (!profileId) return;
           await importHealthFitFile({ persistence, profileId }, krd);
           navigate(healthDestinationFor(krd.type));
-        } catch (error) {
+        })
+        .catch((error) => {
           if (error instanceof UnsupportedHealthKrdError) return;
           toast.error(TOAST_HEALTH_FAIL_TITLE, TOAST_HEALTH_FAIL_DESC);
-        }
-      });
+        });
       return;
     }
     handleFileLoad(krd);

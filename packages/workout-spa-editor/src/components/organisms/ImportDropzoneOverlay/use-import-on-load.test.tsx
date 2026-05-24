@@ -15,6 +15,7 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { ToastContextProvider } from "../../../contexts/ToastContext";
+import type { PersistencePort } from "../../../ports/persistence-port";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { ToastProvider } from "../../atoms/Toast";
 import { useImportOnLoad } from "./use-import-on-load";
@@ -38,21 +39,26 @@ const makeSleepKrd = (): KRD => ({
   },
 });
 
-const wrapper =
-  (hook: ReturnType<typeof memoryLocation>["hook"]) =>
-  ({ children }: { children: ReactNode }) => {
-    const persistence = createInMemoryPersistence();
-    void persistence.profiles.setActiveId(ACTIVE_PROFILE_ID);
-    return (
-      <PersistenceProvider persistence={persistence}>
-        <ToastProvider>
-          <ToastContextProvider>
-            <Router hook={hook}>{children}</Router>
-          </ToastContextProvider>
-        </ToastProvider>
-      </PersistenceProvider>
-    );
-  };
+const setupPersistence = async (): Promise<PersistencePort> => {
+  const persistence = createInMemoryPersistence();
+  await persistence.profiles.setActiveId(ACTIVE_PROFILE_ID);
+  return persistence;
+};
+
+const makeWrapper =
+  (
+    persistence: PersistencePort,
+    hook: ReturnType<typeof memoryLocation>["hook"]
+  ) =>
+  ({ children }: { children: ReactNode }) => (
+    <PersistenceProvider persistence={persistence}>
+      <ToastProvider>
+        <ToastContextProvider>
+          <Router hook={hook}>{children}</Router>
+        </ToastContextProvider>
+      </ToastProvider>
+    </PersistenceProvider>
+  );
 
 vi.mock("../../../hooks/useAppHandlers", () => ({
   useAppHandlers: () => ({
@@ -64,12 +70,13 @@ vi.mock("../../../hooks/useAppHandlers", () => ({
 describe("useImportOnLoad (§9.3 dispatch)", () => {
   it("should navigate to /health/sleep after importing a sleep KRD", async () => {
     // Arrange
+    const persistence = await setupPersistence();
     const { hook, history } = memoryLocation({
       path: "/workout/new",
       record: true,
     });
     const { result } = renderHook(() => useImportOnLoad(null), {
-      wrapper: wrapper(hook),
+      wrapper: makeWrapper(persistence, hook),
     });
 
     // Act

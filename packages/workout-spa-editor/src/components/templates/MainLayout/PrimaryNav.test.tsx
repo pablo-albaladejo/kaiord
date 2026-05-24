@@ -1,15 +1,18 @@
 /**
- * PrimaryNav — top-level Training / Health / Settings tab bar.
+ * PrimaryNav — top-level Training / Health / Settings nav.
  *
- * Tests cover the six behaviours mandated by §7.2:
- *   - mounts with three labels in declared order
+ * Tests cover the six §7.2 behaviours, adapted to the post-review
+ * semantic-link design:
+ *   - mounts three items in declared order
  *   - clicking Training from a Health URL navigates to /calendar
  *   - clicking Health from a Training URL navigates to /health
  *   - clicking Settings navigates to /settings/ai
- *   - the active tab is visually indicated via aria-current
- *   - re-clicking the active tab is a no-op (no new history entry)
+ *   - the active tab carries aria-current="page" and is non-clickable
+ *   - re-clicking the active tab is a no-op (active item has no click
+ *     target — it's rendered as a `<span>`, not a `<Link>`)
  *
- * Plus §7.4 regression: existing deep links resolve with the right tab.
+ * Plus §7.4 regression: existing deep links resolve with the right
+ * tab marked active.
  */
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -17,6 +20,8 @@ import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { PrimaryNav } from "./PrimaryNav";
+
+const EXPECTED_NAV_ITEMS = 3;
 
 const renderAtPath = (path: string) => {
   const { hook, history } = memoryLocation({ path, record: true });
@@ -28,21 +33,24 @@ const renderAtPath = (path: string) => {
   return { ...utils, history };
 };
 
-const EXPECTED_TAB_COUNT = 3;
+const navItem = (id: "training" | "health" | "settings") =>
+  screen.getByTestId(`primary-nav-${id}`);
 
 describe("PrimaryNav", () => {
-  it("should mount three tabs in order: Training, Health, Settings", () => {
+  it("should mount three items in order: Training, Health, Settings", () => {
     // Arrange
     renderAtPath("/calendar");
 
     // Act
-    const tabs = screen.getAllByRole("tab");
+    const items = screen.getAllByTestId(
+      /^primary-nav-(training|health|settings)$/
+    );
 
     // Assert
-    expect(tabs).toHaveLength(EXPECTED_TAB_COUNT);
-    expect(tabs[0]).toHaveTextContent(/training/i);
-    expect(tabs[1]).toHaveTextContent(/health/i);
-    expect(tabs[2]).toHaveTextContent(/settings/i);
+    expect(items).toHaveLength(EXPECTED_NAV_ITEMS);
+    expect(items[0]).toHaveTextContent(/training/i);
+    expect(items[1]).toHaveTextContent(/health/i);
+    expect(items[2]).toHaveTextContent(/settings/i);
   });
 
   it("should navigate to /calendar when Training is clicked from a health URL", () => {
@@ -50,7 +58,7 @@ describe("PrimaryNav", () => {
     const { history } = renderAtPath("/health/sleep");
 
     // Act
-    fireEvent.click(screen.getByRole("tab", { name: /training/i }));
+    fireEvent.click(navItem("training"));
 
     // Assert
     expect(history[history.length - 1]).toBe("/calendar");
@@ -61,7 +69,7 @@ describe("PrimaryNav", () => {
     const { history } = renderAtPath("/calendar");
 
     // Act
-    fireEvent.click(screen.getByRole("tab", { name: /health/i }));
+    fireEvent.click(navItem("health"));
 
     // Assert
     expect(history[history.length - 1]).toBe("/health");
@@ -72,40 +80,40 @@ describe("PrimaryNav", () => {
     const { history } = renderAtPath("/calendar");
 
     // Act
-    fireEvent.click(screen.getByRole("tab", { name: /settings/i }));
+    fireEvent.click(navItem("settings"));
 
     // Assert
     expect(history[history.length - 1]).toBe("/settings/ai");
   });
 
-  it("should mark the Training tab active for /calendar via aria-current", () => {
+  it("should mark the Training item active for /calendar via aria-current", () => {
     // Arrange
     renderAtPath("/calendar");
 
     // Act
-    const training = screen.getByRole("tab", { name: /training/i });
+    const training = navItem("training");
 
     // Assert
     expect(training).toHaveAttribute("aria-current", "page");
   });
 
-  it("should mark the Health tab active for /health/sleep via aria-current", () => {
+  it("should mark the Health item active for /health/sleep via aria-current", () => {
     // Arrange
     renderAtPath("/health/sleep");
 
     // Act
-    const health = screen.getByRole("tab", { name: /health/i });
+    const health = navItem("health");
 
     // Assert
     expect(health).toHaveAttribute("aria-current", "page");
   });
 
-  it("should mark the Settings tab active for any /settings/* URL", () => {
+  it("should mark the Settings item active for any /settings/* URL", () => {
     // Arrange
     renderAtPath("/settings/ai");
 
     // Act
-    const settings = screen.getByRole("tab", { name: /settings/i });
+    const settings = navItem("settings");
 
     // Assert
     expect(settings).toHaveAttribute("aria-current", "page");
@@ -116,7 +124,7 @@ describe("PrimaryNav", () => {
     renderAtPath("/library");
 
     // Act
-    const training = screen.getByRole("tab", { name: /training/i });
+    const training = navItem("training");
 
     // Assert
     expect(training).toHaveAttribute("aria-current", "page");
@@ -127,21 +135,22 @@ describe("PrimaryNav", () => {
     renderAtPath("/workout/abc-123");
 
     // Act
-    const training = screen.getByRole("tab", { name: /training/i });
+    const training = navItem("training");
 
     // Assert
     expect(training).toHaveAttribute("aria-current", "page");
   });
 
-  it("should NOT add a history entry when the active tab is re-clicked", () => {
+  it("should render the active item as a non-link (re-click is a no-op)", () => {
     // Arrange
     const { history } = renderAtPath("/calendar");
     const initialLength = history.length;
 
     // Act
-    fireEvent.click(screen.getByRole("tab", { name: /training/i }));
+    fireEvent.click(navItem("training"));
 
     // Assert
     expect(history.length).toBe(initialLength);
+    expect(navItem("training").tagName).toBe("SPAN");
   });
 });

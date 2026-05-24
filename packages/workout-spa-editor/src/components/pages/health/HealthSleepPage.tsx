@@ -6,19 +6,20 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { lastSevenDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 
-const RANGE = lastSevenDays();
 const EMPTY_MSG = "No sleep records yet for the last 7 days.";
 
 export default function HealthSleepPage() {
+  // Computed per render so the window stays current across day rollovers.
+  const range = lastSevenDays();
   const active = useActiveProfileLive();
   const profileId = active?.id;
-  const records = useHealthSleepWeekLive(profileId ?? "", RANGE);
+  const records = useHealthSleepWeekLive(profileId ?? "", range);
   const loading = records === undefined;
   return (
     <section data-testid="health-sleep">
       <HealthPageHeader
         title="Sleep"
-        subtitle={`${RANGE.start} → ${RANGE.end}`}
+        subtitle={`${range.start} → ${range.end}`}
       />
       {loading && <p className="text-sm text-gray-600">Loading…</p>}
       {!loading && records.length === 0 && (

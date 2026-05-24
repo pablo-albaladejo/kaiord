@@ -7,13 +7,13 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { lastNinetyDays, todayIso } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 
-const RANGE = lastNinetyDays();
-
 export default function HealthRecoveryPage() {
+  // Computed per render so the window stays current across day rollovers.
+  const range = lastNinetyDays();
+  const today = todayIso();
   const active = useActiveProfileLive();
   const profileId = active?.id ?? "";
-  const today = todayIso();
-  const hrv = useHealthHrvHistoryLive(profileId, RANGE);
+  const hrv = useHealthHrvHistoryLive(profileId, range);
   const stress = useHealthStressDayLive(profileId, today);
   const hrvLoading = hrv === undefined;
   const stressLoading = stress === undefined;
@@ -21,7 +21,7 @@ export default function HealthRecoveryPage() {
     <section data-testid="health-recovery">
       <HealthPageHeader
         title="Recovery"
-        subtitle={`HRV ${RANGE.start} → ${RANGE.end} · Stress ${today}`}
+        subtitle={`HRV ${range.start} → ${range.end} · Stress ${today}`}
       />
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
         HRV history
