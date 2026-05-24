@@ -1,5 +1,12 @@
 # @kaiord/tcx
 
+## 8.0.0
+
+### Patch Changes
+
+- Updated dependencies [581239f]
+  - @kaiord/core@8.0.0
+
 ## 7.1.1
 
 ### Patch Changes

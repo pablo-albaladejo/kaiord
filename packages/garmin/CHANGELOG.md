@@ -1,5 +1,12 @@
 # @kaiord/garmin
 
+## 8.0.0
+
+### Patch Changes
+
+- Updated dependencies [581239f]
+  - @kaiord/core@8.0.0
+
 ## 7.3.0
 
 ### Minor Changes
