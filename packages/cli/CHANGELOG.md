@@ -1,5 +1,17 @@
 # Changelog
 
+## 8.0.0
+
+### Patch Changes
+
+- Updated dependencies [581239f]
+  - @kaiord/core@8.0.0
+  - @kaiord/fit@8.0.0
+  - @kaiord/garmin@8.0.0
+  - @kaiord/garmin-connect@8.0.0
+  - @kaiord/tcx@8.0.0
+  - @kaiord/zwo@8.0.0
+
 ## 7.3.1
 
 ### Patch Changes
