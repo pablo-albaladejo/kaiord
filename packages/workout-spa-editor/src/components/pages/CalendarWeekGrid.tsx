@@ -18,6 +18,7 @@
 import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
+import type { DayWellness } from "../../types/health/day-wellness";
 import type { CalendarView } from "../../types/user-preferences";
 import { DayColumn } from "../molecules/WorkoutCard/DayColumn";
 import { useGridReschedule } from "./calendar-dnd/use-grid-reschedule";
@@ -36,6 +37,7 @@ export type CalendarWeekGridProps = {
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
+  wellnessByDay?: Record<string, DayWellness>;
 };
 
 export function CalendarWeekGrid({
@@ -50,6 +52,7 @@ export function CalendarWeekGrid({
   onWorkoutClick,
   onEmptyDayClick,
   onActivityClick,
+  wellnessByDay,
 }: CalendarWeekGridProps) {
   // Back-compat: if the caller passes the legacy buckets, treat them as
   // solo. Once all callers migrate to matchedByDay / soloPlansByDay /
@@ -86,6 +89,7 @@ export function CalendarWeekGrid({
             onActivityClick={onActivityClick}
             workoutCardPointerDownFor={bind}
             dropTargetActive={dropTargetId === date}
+            wellness={wellnessByDay?.[date]}
           />
         ))}
       </div>

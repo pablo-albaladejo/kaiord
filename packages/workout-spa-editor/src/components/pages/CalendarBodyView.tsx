@@ -9,6 +9,7 @@ export type CalendarBodyViewProps = {
   view: CalendarPageReadyState["view"];
   todayDate: string;
   setSelectedActivity: (a: CoachingActivity | null) => void;
+  wellnessByDay: CalendarPageReadyState["wellnessByDay"];
 };
 
 export function CalendarBodyView({
@@ -17,6 +18,7 @@ export function CalendarBodyView({
   view,
   todayDate,
   setSelectedActivity,
+  wellnessByDay,
 }: CalendarBodyViewProps) {
   if (view === "list") {
     return (
@@ -29,6 +31,7 @@ export function CalendarBodyView({
         onWorkoutClick={s.handleWorkoutClick}
         onEmptyDayClick={s.handleEmptyDayClick}
         onActivityClick={setSelectedActivity}
+        wellnessByDay={wellnessByDay}
       />
     );
   }
@@ -43,6 +46,7 @@ export function CalendarBodyView({
       onWorkoutClick={s.handleWorkoutClick}
       onEmptyDayClick={s.handleEmptyDayClick}
       onActivityClick={setSelectedActivity}
+      wellnessByDay={wellnessByDay}
     />
   );
 }

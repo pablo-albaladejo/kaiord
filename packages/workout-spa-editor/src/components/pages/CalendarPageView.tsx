@@ -15,6 +15,7 @@ export function CalendarPageView({
   setSelectedActivity,
   suggestions,
   bannerActions,
+  wellnessByDay,
 }: CalendarPageReadyState) {
   const todayDate = new Date().toISOString().slice(0, 10);
   return (
@@ -41,6 +42,7 @@ export function CalendarPageView({
         view={view}
         todayDate={todayDate}
         setSelectedActivity={setSelectedActivity}
+        wellnessByDay={wellnessByDay}
       />
       <CalendarDialogs
         selectedWorkout={s.selectedWorkout}

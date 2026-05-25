@@ -13,6 +13,7 @@
  */
 
 import type { MatchSuggestion } from "../../application/match-suggestion";
+import { useCalendarWellnessWeekLive } from "../../hooks/health/use-calendar-wellness-week-live";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import {
   type AutoMatchBannerActions,
@@ -26,13 +27,14 @@ import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { useSetCalendarView } from "../../hooks/use-set-calendar-view";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
 import type { CoachingActivity } from "../../types/coaching-activity";
+import type { DayWellness } from "../../types/health/day-wellness";
 import type { CalendarView } from "../../types/user-preferences";
 import type { CalendarBuckets } from "./calendar-buckets";
 import { useCalendarBucketsMemo } from "./use-calendar-buckets-memo";
 import { useCalendarState } from "./use-calendar-state";
 import { useSelectedActivity } from "./use-selected-activity";
 
-const viewportDefaultView = (): CalendarView =>
+const defaultView = (): CalendarView =>
   typeof window !== "undefined" && window.innerWidth >= 768 ? "grid" : "list";
 
 export type CalendarPageReadyState = {
@@ -46,6 +48,7 @@ export type CalendarPageReadyState = {
   setSelectedActivity: (a: CoachingActivity | null) => void;
   suggestions: MatchSuggestion[];
   bannerActions: AutoMatchBannerActions;
+  wellnessByDay: Record<string, DayWellness> | undefined;
 };
 
 export type CalendarPageState =
@@ -57,19 +60,19 @@ export function useCalendarPage(): CalendarPageState {
   const s = useCalendarState();
   const coaching = useCoachingActivities(s.data.days);
   useCoachingAutoSync(coaching.syncSources, s.data.days[0]);
-  const { selectedActivity, setSelectedActivity } = useSelectedActivity(
-    coaching.byDay
-  );
+  const selected = useSelectedActivity(coaching.byDay);
   const profileId = useActiveProfileLive()?.id ?? null;
   const weekStart = s.data.days[0] ?? "";
+  const wellnessByDay = useCalendarWellnessWeekLive(
+    profileId,
+    weekStart,
+    s.data.days.at(-1) ?? ""
+  );
   const rawMatched = useMatchedSessions(profileId, s.data.days);
   useExecutedMatchAutoForCalendar(rawMatched, s.data.workoutsByDay);
   const suggestions = useAutoMatchSuggestions(profileId, weekStart);
   const bannerActions = useAutoMatchBannerActions(profileId, weekStart);
-  const prefs = useUserPreferences({
-    profileId,
-    defaultView: viewportDefaultView(),
-  });
+  const prefs = useUserPreferences({ profileId, defaultView: defaultView() });
   const buckets = useCalendarBucketsMemo({
     days: s.data.days,
     workoutsByDay: s.data.workoutsByDay,
@@ -87,9 +90,9 @@ export function useCalendarPage(): CalendarPageState {
     buckets,
     view: prefs?.calendarView,
     onViewChange,
-    selectedActivity,
-    setSelectedActivity,
+    ...selected,
     suggestions: suggestions ?? [],
     bannerActions,
+    wellnessByDay,
   };
 }

@@ -37,7 +37,7 @@ function EntryButton({
 export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
   const [, navigate] = useLocation();
   const primaryNav = ENTRY_DEFS.filter((e) =>
-    ["calendar", "library", "new"].includes(e.id)
+    ["calendar", "library", "trends", "new"].includes(e.id)
   );
   const settingsEntry = ENTRY_DEFS.find((e) => e.id === "settings");
   return (

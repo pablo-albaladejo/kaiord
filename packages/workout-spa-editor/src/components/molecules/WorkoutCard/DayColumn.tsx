@@ -3,9 +3,11 @@ import type { PointerEvent } from "react";
 import type { MatchedSessionWithMetadata } from "../../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { DayWellness } from "../../../types/health/day-wellness";
 import type { CalendarView } from "../../../types/user-preferences";
 import { renderDayCards } from "./day-column-cards";
-import { getDayLabel } from "./day-label";
+import { DayColumnAddButton } from "./DayColumnAddButton";
+import { WellnessBand } from "./WellnessBand/WellnessBand";
 
 export type DayColumnProps = {
   date: string;
@@ -21,6 +23,7 @@ export type DayColumnProps = {
     workoutId: string
   ) => (event: PointerEvent) => void;
   dropTargetActive?: boolean;
+  wellness?: DayWellness;
 };
 
 const TODAY_BODY_TINT = "bg-primary-50/40 dark:bg-primary-900/20";
@@ -38,8 +41,8 @@ export function DayColumn({
   onActivityClick,
   workoutCardPointerDownFor,
   dropTargetActive = false,
+  wellness,
 }: DayColumnProps) {
-  const label = getDayLabel(date);
   const total = matchedSessions.length + soloPlans.length + soloActuals.length;
   const tint = isToday ? TODAY_BODY_TINT : "";
   const dropRing = dropTargetActive ? DROP_RING : "";
@@ -53,6 +56,7 @@ export function DayColumn({
       role="group"
       className={`flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0 ${tint} ${dropRing}`}
     >
+      <WellnessBand wellness={wellness} />
       <div className="flex flex-1 flex-col gap-1.5">
         {renderDayCards({
           matchedSessions,
@@ -65,15 +69,7 @@ export function DayColumn({
         })}
       </div>
       {total === 0 && (
-        <button
-          type="button"
-          data-testid={`empty-day-${date}`}
-          aria-label={`Add to ${label.name} ${label.num}`}
-          className="mt-1 flex-1 rounded border border-dashed border-gray-300 text-xs text-muted-foreground transition-colors hover:border-primary-400 hover:text-primary-600 dark:border-gray-600"
-          onClick={() => onEmptyDayClick(date)}
-        >
-          + Add
-        </button>
+        <DayColumnAddButton date={date} onEmptyDayClick={onEmptyDayClick} />
       )}
     </div>
   );
