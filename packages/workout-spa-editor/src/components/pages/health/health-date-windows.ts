@@ -31,3 +31,8 @@ export const lastNinetyDays = () => ({
   start: isoDate(daysAgo(DAYS_IN_QUARTER - 1)),
   end: todayIso(),
 });
+
+export const lastNDays = (days: number) => ({
+  start: isoDate(daysAgo(days - 1)),
+  end: todayIso(),
+});

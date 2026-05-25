@@ -1,63 +1,35 @@
 /**
- * /health — Hub landing page.
+ * /health — Wellness trends hub.
  *
- * MVP: shows the active profile + a card grid linking to each
- * metric-specific page (Sleep, Weight, Recovery, Activity). When
- * the per-metric live data lands we surface the most-recent values
- * inline on each card.
+ * Cross-metric view: the user picks one or more metrics and a date
+ * range; each selected metric renders as a line chart (uPlot) over
+ * that range, with a per-metric empty state when no data exists.
  */
-import { Link } from "wouter";
+import { useMemo } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { lastNDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
-
-const CARDS: ReadonlyArray<{ to: string; label: string; description: string }> =
-  [
-    {
-      to: "/health/sleep",
-      label: "Sleep",
-      description: "Stages, duration, score across the week.",
-    },
-    {
-      to: "/health/weight",
-      label: "Weight",
-      description: "Weight history with optional body composition.",
-    },
-    {
-      to: "/health/recovery",
-      label: "Recovery",
-      description: "HRV trend + stress episodes.",
-    },
-    {
-      to: "/health/activity",
-      label: "Activity",
-      description: "Daily steps, calories, intensity minutes.",
-    },
-  ];
-
-const cardClass =
-  "block rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:border-blue-500 hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800";
+import { TrendChartsGrid } from "./trends/TrendChartsGrid";
+import { TrendMetricSelector } from "./trends/TrendMetricSelector";
+import { TrendRangeSelector } from "./trends/TrendRangeSelector";
+import { useTrendSelection } from "./trends/use-trend-selection";
+import { useTrendSeries } from "./trends/use-trend-series";
 
 export default function HealthDashboardPage() {
   const active = useActiveProfileLive();
   const profileLabel = active?.profile?.name ?? "Active profile";
+  const { selected, toggle, rangeDays, setRangeDays } = useTrendSelection();
+  const range = useMemo(() => lastNDays(rangeDays), [rangeDays]);
+  const series = useTrendSeries(active?.id ?? "", range);
   return (
     <section data-testid="health-dashboard">
-      <HealthPageHeader title="Health" subtitle={profileLabel} />
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {CARDS.map((card) => (
-          <li key={card.to}>
-            <Link href={card.to} className={cardClass}>
-              <span className="block text-sm font-semibold text-gray-900 dark:text-white">
-                {card.label}
-              </span>
-              <span className="mt-1 block text-sm text-gray-600 dark:text-gray-400">
-                {card.description}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <HealthPageHeader title="Trends" subtitle={profileLabel} />
+      <div className="mb-4 flex flex-col gap-3">
+        <TrendMetricSelector selected={selected} onToggle={toggle} />
+        <TrendRangeSelector selected={rangeDays} onSelect={setRangeDays} />
+      </div>
+      <TrendChartsGrid selected={selected} series={series} />
     </section>
   );
 }

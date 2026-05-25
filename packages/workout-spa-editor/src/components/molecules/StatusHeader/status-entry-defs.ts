@@ -1,4 +1,4 @@
-import { Calendar, Library, Plus, Settings } from "lucide-react";
+import { Activity, Calendar, Library, Plus, Settings } from "lucide-react";
 import type { ComponentType } from "react";
 
 export type EntryDef = {
@@ -24,6 +24,13 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
     label: "Library",
     ariaLabel: "Open workout library",
     to: "/library",
+  },
+  {
+    id: "trends",
+    icon: Activity,
+    label: "Trends",
+    ariaLabel: "Open wellness trends",
+    to: "/health",
   },
   {
     id: "new",

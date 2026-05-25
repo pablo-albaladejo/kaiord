@@ -82,6 +82,21 @@ describe("StatusHeader", () => {
     );
   });
 
+  it("should render the wellness trends entry pointing at the health hub", () => {
+    // Arrange
+
+    // Act
+
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+
+    // Assert
+
+    const trends = screen.getByTestId("status-header-trends-button");
+    expect(trends).toBeInTheDocument();
+    expect(trends).toHaveTextContent("Trends");
+    expect(trends).toHaveAccessibleName("Open wellness trends");
+  });
+
   it("should label the new-workout button as 'New workout'", () => {
     // Arrange
 

@@ -113,6 +113,25 @@ describe("MainLayout", () => {
     expect(nav).toBeInTheDocument();
   });
 
+  it("should not render the removed primary navigation tab bar", () => {
+    // Arrange
+
+    renderWithProviders(
+      <MainLayout>
+        <div>Content</div>
+      </MainLayout>,
+      { defaultTheme: "light" }
+    );
+
+    // Act
+
+    const tabBar = screen.queryByTestId("primary-nav");
+
+    // Assert
+
+    expect(tabBar).not.toBeInTheDocument();
+  });
+
   it("should have responsive classes", () => {
     // Arrange & Act
     // Arrange
