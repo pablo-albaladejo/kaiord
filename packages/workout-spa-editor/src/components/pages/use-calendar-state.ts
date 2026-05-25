@@ -10,6 +10,7 @@ import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { getWeekIdForDate } from "../../utils/week-utils";
 import { useCalendarData } from "./calendar-hooks";
+import { useAddEntryChooser } from "./use-add-entry-chooser";
 import { useBatchState } from "./use-batch-state";
 import {
   useAiProviderCountLive,
@@ -27,13 +28,7 @@ export function useCalendarState() {
   const batch = useBatchState(data.weekStart, data.weekEnd);
   const latestWorkout = useLatestWorkoutLive(profileId);
   const aiProviderCount = useAiProviderCountLive();
-
-  const handleEmptyDayClick = useCallback(
-    (date: string) => {
-      navigate(`/workout/new?date=${date}`);
-    },
-    [navigate]
-  );
+  const addEntry = useAddEntryChooser();
 
   const handleGoToLatest = useCallback(() => {
     if (latestWorkout?.date) {
@@ -73,7 +68,7 @@ export function useCalendarState() {
     hasReadyWorkouts,
     handleGoToLatest,
     handleWorkoutClick,
-    handleEmptyDayClick,
     setSelectedWorkout,
+    ...addEntry,
   };
 }
