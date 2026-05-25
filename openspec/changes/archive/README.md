@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-05-25 | [`add-health-metrics-to-krd`](./2026-05-25-add-health-metrics-to-krd/) | Garmin FIT files routinely carry health-domain data — sleep stages, body weight, HRV summaries, daily wellness (steps / active calories / intensity minutes), b… |
 | 2026-05-25 | [`calendar-add-workout-or-wellness`](./2026-05-25-calendar-add-workout-or-wellness/) | The predecessor change (remove-subtabs-unify-calendar) folded wellness into the calendar and added per-day wellness bands that show sleep, HRV, weight, and ste… |
 | 2026-05-25 | [`remove-subtabs-unify-calendar`](./2026-05-25-remove-subtabs-unify-calendar/) | The SPA shell renders a three-item primary tab bar — Training / Health / Settings — via PrimaryNav (packages/workout-spa-editor/src/components/templates/MainLa… |
 | 2026-05-10 | [`add-multisport-transitions`](./2026-05-10-add-multisport-transitions/) | Garmin Connect multisport workouts (triathlon-style or brick sessions with run/bike/run alternation) are currently unsupported end-to-end in Kaiord. The @kaior… |
