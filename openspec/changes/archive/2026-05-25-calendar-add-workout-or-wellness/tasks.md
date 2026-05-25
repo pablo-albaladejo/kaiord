@@ -6,7 +6,7 @@ PR 4 (gates):           §4
 PR 5 (verify+archive):  §5
 -->
 
-> Tasks: 28 completed, 2 deferred
+> Tasks: 30 completed, 0 deferred
 
 ## 1. Application use case + mapper (the write path) [PR-1]
 
@@ -76,5 +76,5 @@ PR 5 (verify+archive):  §5
 
 - [x] 5.1 `npx openspec validate calendar-add-workout-or-wellness` — passes.
 - [x] 5.2 `pnpm lint:specs` — passes (no orphaned scenario, no format violation).
-- [ ] 5.3 Trigger `update-visual-baselines.yml` workflow (Linux/chromium) in CI after PR-3 is up — the always-visible `+` shifts calendar screenshots. Do NOT regenerate locally. _(DEFERRED — CI-only step once the PR is open; cannot run on macOS.)_
-- [ ] 5.4 After merge: `/opsx:archive` (date-prefix the change folder, set `> Completed:`), then `pnpm archive:index`. _(DEFERRED — post-merge lifecycle step.)_
+- [x] 5.3 Trigger `update-visual-baselines.yml` workflow (Linux/chromium) in CI after PR-3 is up — the always-visible `+` shifts calendar screenshots. Do NOT regenerate locally. _(Triggered on the branch — run 26400642710 succeeded with no snapshot diff; the always-visible `+` did not shift any captured visual spec, so no baseline commit was needed. The broken e2e were functional specs asserting the old `+`→navigate behavior, updated to go through the chooser.)_
+- [x] 5.4 After merge: `/opsx:archive` (date-prefix the change folder, set `> Completed:`), then `pnpm archive:index`. _(Done — archived as 2026-05-25-calendar-add-workout-or-wellness with the `> Completed:` marker; canonical spa-routing synced; index regenerated.)_

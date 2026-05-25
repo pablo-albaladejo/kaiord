@@ -1,3 +1,5 @@
+> Completed: 2026-05-25
+
 > Depends on remove-subtabs-unify-calendar
 
 ## Why
