@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-05-25 | [`remove-subtabs-unify-calendar`](./2026-05-25-remove-subtabs-unify-calendar/) | The SPA shell renders a three-item primary tab bar — Training / Health / Settings — via PrimaryNav (packages/workout-spa-editor/src/components/templates/MainLa… |
 | 2026-05-10 | [`add-multisport-transitions`](./2026-05-10-add-multisport-transitions/) | Garmin Connect multisport workouts (triathlon-style or brick sessions with run/bike/run alternation) are currently unsupported end-to-end in Kaiord. The @kaior… |
 | 2026-05-07 | [`coaching-activity-dialog-redesign`](./2026-05-07-coaching-activity-dialog-redesign/) | Today, clicking a coaching activity card opens a dialog with one ambiguous "Convert to workout" button. Convert creates a RAW workout, navigates to the editor,… |
 | 2026-05-06 | [`repo-quality-maintenance-waves`](./2026-05-06-repo-quality-maintenance-waves/) | The kaiord codebase is structurally healthy (clean hex arch, strict TS, zero skipped tests, no dead code) but has accumulated discrete pockets of maintenance d… |

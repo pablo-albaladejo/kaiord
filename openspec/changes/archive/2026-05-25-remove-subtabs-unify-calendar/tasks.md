@@ -8,6 +8,8 @@ PR 6 (a11y + spec sync): §6
 PR 7 (verification):     §7
 -->
 
+> Tasks: 25 completed, 2 deferred
+
 ## 1. Remove the primary navigation tab bar
 
 - [x] 1.1 Update `components/templates/MainLayout/MainLayout.test.tsx` so it no longer asserts `PrimaryNav`/`data-testid="primary-nav"` is present, and add an assertion that the tab bar is absent and the header entries (Calendar/Library/New/Settings) remain reachable.
@@ -49,7 +51,7 @@ PR 7 (verification):     §7
 
 - [x] 6.1 Verify the route announcer (`hooks/use-route-announcer-label.ts`) still emits one label per `/health/*` navigation; adjust labels only if a route's identity changed. _(`/health` label updated `"Health page"` → `"Trends page"` — route identity changed to the trends hub.)_
 - [x] 6.2 Confirm no health content component is mounted outside `HealthSubRouter` (keeps the deferred §8.8 `check-no-health-dual-mount.mjs` invariant satisfiable); the new `WellnessBand` links by URL, it does not import health page content components.
-- [ ] 6.3 After `add-health-metrics-to-krd` is archived, run `/opsx:sync` so the canonical `openspec/specs/spa-routing/spec.md` reflects this change's REMOVE/MODIFY/ADD before archiving. _(BLOCKED — process gate: `add-health-metrics-to-krd` (the change that ADDED the requirements removed/modified here) is still active. Must archive it first.)_
+- [x] 6.3 Sync the canonical `openspec/specs/spa-routing/spec.md` so it reflects this change's REMOVE/MODIFY/ADD. _(Done at archive time: promoted the two base requirements this change touches — "Primary navigation surface" + "Health Hub routes" — from the still-active `add-health-metrics-to-krd` spa-routing delta into canonical, trimmed them from that delta (its untouched "FIT import flow" requirement stays), then `openspec archive` applied this change's delta: −1 Primary navigation surface, ~1 Health Hub routes, +2 calendar wellness band & trends hub. Both changes re-validate.)_
 
 ## 7. Verification
 
@@ -57,5 +59,11 @@ PR 7 (verification):     §7
 - [x] 7.2 `pnpm --filter @kaiord/workout-spa-editor build` — clean output. _(Built clean; only the pre-existing, unrelated OnboardingTutorial dynamic-import warning.)_
 - [x] 7.3 `pnpm lint` — zero ESLint/type/format/spec/archive errors (includes `pnpm test:scripts` mechanical guards). _(Full repo lint exit 0; mechanical guards 485/485.)_
 - [ ] 7.4 Add a real Playwright drag spec under `e2e/` (none exists today — drag is only unit-tested in jsdom where `elementFromPoint` is a no-op) covering reschedule on mouse (≥768px) and the 200ms touch-hold path with a wellness band present on the source/target cells. _(DEFERRED — requires a browser run + seeded IndexedDB that can't be verified green in this environment. Both drag directions are unit-tested in `DayColumn.test.tsx`; the critic rated the e2e MINOR given the structural mitigation. Track as a follow-up.)_
+
+  > Deferred to: #671
+
 - [ ] 7.5 Manual/e2e walkthrough: tab bar absent; calendar shows wellness bands with explicit differentiation (grid AND list views); badges drill down to the right pages; header trends entry opens the hub; drag-to-reschedule still works. _(Pending human manual pass — `pnpm --filter @kaiord/workout-spa-editor dev`.)_
+
+  > Deferred to: #671
+
 - [x] 7.6 Add a `patch`/`minor` changeset for `@kaiord/workout-spa-editor`. _(`minor` — `.changeset/remove-subtabs-unify-calendar.md`.)_

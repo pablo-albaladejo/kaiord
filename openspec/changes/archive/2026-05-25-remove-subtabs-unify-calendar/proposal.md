@@ -1,3 +1,5 @@
+> Completed: 2026-05-25
+
 ## Why
 
 The SPA shell renders a three-item primary tab bar — **Training / Health / Settings** — via `PrimaryNav` (`packages/workout-spa-editor/src/components/templates/MainLayout/PrimaryNav.tsx`), introduced by `add-health-metrics-to-krd` §7. Two of the three tabs are redundant with the existing header: `packages/workout-spa-editor/src/components/molecules/StatusHeader/status-entry-defs.ts` already exposes **Calendar**, **Library**, **New workout**, and **Settings** entry buttons. The Health tab is worse than redundant — it partitions wellness into a surface the athlete never sees next to their training. The product direction is the TrainingPeaks model: a single calendar where training and wellness coexist, with an **explicit visual difference** between the two.
