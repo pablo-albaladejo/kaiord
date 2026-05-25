@@ -109,6 +109,8 @@ test.describe("Library flows", () => {
     const cell = page.getByTestId(`empty-day-${targetDate}`);
     await cell.scrollIntoViewIfNeeded();
     await cell.click({ force: true });
+    // The "+" opens the Workout | Wellness chooser; pick Workout.
+    await page.getByTestId("add-entry-choose-workout").click();
 
     await page.waitForURL(new RegExp(`/workout/new\\?date=${targetDate}`));
     await expect(page.getByTestId("new-workout-picker")).toBeVisible();
@@ -171,6 +173,8 @@ test.describe("Library flows", () => {
     const cell = page.getByTestId(`empty-day-${targetDate}`);
     await cell.scrollIntoViewIfNeeded();
     await cell.click({ force: true });
+    // The "+" opens the Workout | Wellness chooser; pick Workout.
+    await page.getByTestId("add-entry-choose-workout").click();
     await page.waitForURL(new RegExp(`/workout/new\\?date=${targetDate}`));
     await page.getByTestId("new-workout-picker-template").click();
     await expect(page.getByTestId("template-picker-dialog")).toBeVisible();
