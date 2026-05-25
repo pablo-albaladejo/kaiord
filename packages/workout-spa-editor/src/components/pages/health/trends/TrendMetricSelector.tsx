@@ -1,4 +1,5 @@
-import { TREND_METRICS, type TrendMetricKey } from "./trend-metrics";
+import type { TrendMetricKey } from "./trend-metrics";
+import { TREND_METRICS } from "./trend-metrics";
 
 export type TrendMetricSelectorProps = {
   selected: ReadonlySet<TrendMetricKey>;
