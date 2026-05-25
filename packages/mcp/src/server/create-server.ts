@@ -17,6 +17,11 @@ import { registerGarminLoginTool } from "../tools/kaiord-garmin-login";
 import { registerGarminLogoutTool } from "../tools/kaiord-garmin-logout";
 import { registerGarminPushTool } from "../tools/kaiord-garmin-push";
 import { registerGetFormatSpecTool } from "../tools/kaiord-get-format-spec";
+import { registerGetHealthSummaryTool } from "../tools/kaiord-get-health-summary";
+import { registerGetHrvHistoryTool } from "../tools/kaiord-get-hrv-history";
+import { registerGetRecoveryStatusTool } from "../tools/kaiord-get-recovery-status";
+import { registerGetSleepHistoryTool } from "../tools/kaiord-get-sleep-history";
+import { registerGetWeightHistoryTool } from "../tools/kaiord-get-weight-history";
 import { registerInspectTool } from "../tools/kaiord-inspect";
 import { registerListFormatsTool } from "../tools/kaiord-list-formats";
 import { registerRoundTripValidateTool } from "../tools/kaiord-round-trip-validate";
@@ -33,6 +38,7 @@ const SERVER_INSTRUCTIONS = [
   "BEFORE creating or editing KRD documents, call the kaiord_get_format_spec tool to get the full specification.",
   "Use kaiord_list_formats to discover all supported formats (FIT, TCX, ZWO, GCN, KRD).",
   "Use kaiord_garmin_login to authenticate, then kaiord_garmin_list/kaiord_garmin_push to interact with Garmin Connect.",
+  "Use kaiord_get_health_summary / *_history / *_recovery_status to query health data from FIT health files (sleep, weight, HRV, daily wellness).",
 ].join("\n");
 
 export const createServer = (): McpServer => {
@@ -54,6 +60,11 @@ export const createServer = (): McpServer => {
   registerGarminLogoutTool(server, logger);
   registerGarminListTool(server, logger);
   registerGarminPushTool(server, logger);
+  registerGetHealthSummaryTool(server, logger);
+  registerGetSleepHistoryTool(server, logger);
+  registerGetWeightHistoryTool(server, logger);
+  registerGetHrvHistoryTool(server, logger);
+  registerGetRecoveryStatusTool(server, logger);
 
   registerKrdSchemaResource(server);
   registerSupportedFormatsResource(server);
