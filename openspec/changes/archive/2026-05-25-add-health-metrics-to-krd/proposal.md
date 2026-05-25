@@ -1,3 +1,5 @@
+> Completed: 2026-05-25
+
 ## Why
 
 Garmin FIT files routinely carry health-domain data — sleep stages, body weight, HRV summaries, daily wellness (steps / active calories / intensity minutes), body composition, and stress episodes — emitted by Garmin watches and connected accessories alongside workout activities. The Kaiord ecosystem is currently 100% workout-centric across every layer: the KRD canonical format enumerates only `structured_workout | recorded_activity | course`, the FIT adapter silently drops every message whose number is not registered in `FIT_MESSAGE_NUMBERS` (today only `FILE_ID(0)`, `WORKOUT(26)`, `WORKOUT_STEP(27)`) at `packages/fit/src/adapters/messages/messages.mapper.ts`, the SPA editor models only workouts/templates/coaching in Dexie v13, and the MCP server exposes only workout-conversion tools. Users today cannot bring their Garmin health data into Kaiord at all, and AI / planner workflows that should reason about recovery context (HRV trend, last night's sleep, current weight) are forced to treat the athlete as a black box.
