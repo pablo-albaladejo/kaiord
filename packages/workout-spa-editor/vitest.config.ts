@@ -65,6 +65,11 @@ export default defineConfig({
         // the bridges' own profile-snapshot tests + manual e2e.
         "**/use-profile-snapshot-push.ts",
         "**/use-profile-snapshot-push-helpers.ts",
+        // Thin imperative uPlot canvas wrapper. uPlot draws to <canvas>,
+        // which jsdom does not implement, so this glue cannot be unit
+        // tested; consumers mock it. The data-shaping it consumes
+        // (trend-series, trend-chart-options) is fully unit tested.
+        "**/trends/UplotChart.tsx",
         // Type definition files - validated by TypeScript at compile-time
         "**/*.types.ts",
         // Re-export index files - no logic to test

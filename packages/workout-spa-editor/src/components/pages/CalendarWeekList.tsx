@@ -3,7 +3,9 @@
 import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
+import type { DayWellness } from "../../types/health/day-wellness";
 import { renderDayCards } from "../molecules/WorkoutCard/day-column-cards";
+import { WellnessBand } from "../molecules/WorkoutCard/WellnessBand/WellnessBand";
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 // prettier-ignore
@@ -23,6 +25,7 @@ export type CalendarWeekListProps = {
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
+  wellnessByDay?: Record<string, DayWellness>;
 };
 
 export function CalendarWeekList({
@@ -34,6 +37,7 @@ export function CalendarWeekList({
   onWorkoutClick,
   onEmptyDayClick,
   onActivityClick,
+  wellnessByDay,
 }: CalendarWeekListProps) {
   return (
     <div data-testid="calendar-week-list" className="flex flex-col gap-3">
@@ -54,6 +58,7 @@ export function CalendarWeekList({
               {formatHeading(date)}
               {isToday && <span className="sr-only"> (today)</span>}
             </h2>
+            <WellnessBand wellness={wellnessByDay?.[date]} />
             <div className="flex flex-col gap-2">
               {renderDayCards({
                 matchedSessions: matched,
