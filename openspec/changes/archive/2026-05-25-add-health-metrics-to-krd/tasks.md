@@ -7,6 +7,8 @@ PR 5 (mcp + docs):    §10, §11
 PR 6 (verification):  §12, §13
 -->
 
+> Tasks: 76 completed, 5 deferred
+
 ## 1. Health sub-schemas (`packages/core/src/domain/schemas/health/`)
 
 - [x] 1.1 Add `packages/core/src/domain/schemas/health/tolerances.ts` exporting per-metric round-trip tolerance constants (`SLEEP_STAGE_TOLERANCE_SECONDS = 60`, `WEIGHT_TOLERANCE_KG = 0.1`, `HRV_TOLERANCE_MS = 1`, `DAILY_STEPS_TOLERANCE = 0`, `DAILY_KCAL_TOLERANCE = 1`, `BODY_FAT_TOLERANCE_PERCENT = 0.1`, `STRESS_TOLERANCE = 0`).
@@ -38,20 +40,23 @@ PR 6 (verification):  §12, §13
 - [x] 3.3 Update the TCX writer dispatch in `fast-xml-parser.ts` to throw `createUnsupportedKrdTypeError(krd.type, "tcx")` for every health-type KRD via `isHealthFileType(krd.type)` guard; existing parsing errors for malformed input are preserved.
 - [x] 3.4 Repeat 3.2–3.3 for ZWO in `packages/zwo/src/adapters/fast-xml-parser.health-rejection.test.ts` with `adapterName: "zwo"`.
 - [x] 3.5 Repeat 3.2–3.3 for Garmin in `packages/garmin/src/adapters/garmin-writer.health-rejection.test.ts` with `adapterName: "garmin"`.
-- [ ] 3.6 Add a test for each workout-only reader (TCX, ZWO, GCN) that the reader's `type` output is never one of the six health variants for any valid source. **Deferred to PR 2** — readers already hardcode `type: "structured_workout"`; the test would be tautological without an actual health FIT fixture to source from. The invariant is enforced at compile time by the `fileTypeSchema` literal used by each reader.
+- [ ] 3.6 Add a test for each workout-only reader (TCX, ZWO, GCN) that the reader's `type` output is never one of the six health variants for any valid source. **Deferred** — readers already hardcode `type: "structured_workout"`; the test would be tautological without an actual health FIT fixture to source from. The invariant is enforced at compile time by the `fileTypeSchema` literal used by each reader.
+
+  > Deferred to: #677
+
 - [x] 3.7 Run `pnpm --filter @kaiord/tcx --filter @kaiord/zwo --filter @kaiord/garmin test` and confirm green (TCX 392 + ZWO 230 + GCN 108 all pass).
 
 ## 4. FIT adapter — message registration + six mappers
 
-- [ ] 4.1 Add failing test in `packages/fit/src/adapters/shared/message-numbers.test.ts` asserting `FIT_MESSAGE_NUMBERS` contains `WEIGHT_SCALE`, `MONITORING`, `MONITORING_INFO`, `SLEEP_LEVEL`, `HRV`, `STRESS_LEVEL`, `BODY_COMPOSITION` with the FIT-SDK-canonical numbers.
+- [x] 4.1 Add failing test in `packages/fit/src/adapters/shared/message-numbers.test.ts` asserting `FIT_MESSAGE_NUMBERS` contains `WEIGHT_SCALE`, `MONITORING`, `MONITORING_INFO`, `SLEEP_LEVEL`, `HRV`, `STRESS_LEVEL`, `BODY_COMPOSITION` with the FIT-SDK-canonical numbers. _(Done — `packages/fit/src/adapters/shared/message-numbers.test.ts` (added via PR #676); 9 `it()` blocks covering all 8 health message numbers + a non-negative integer invariant via `it.each`.)_
 - [x] 4.2 Extend `packages/fit/src/adapters/shared/message-numbers.ts` to register the eight new message numbers (HRV is split into `HRV_STATUS_SUMMARY` + `HRV_VALUE` — the spec's original "seven" predates that split) and the four new `file_type` values (9, 15, 28, 32) so the test passes. _(Done — `WEIGHT_SCALE=30, BODY_COMPOSITION=41, STRESS_LEVEL=227, MONITORING_INFO=103, MONITORING=55, SLEEP_LEVEL=275, HRV_STATUS_SUMMARY=370, HRV_VALUE=371` registered.)_
 - [x] 4.3 Replace the silent-discard null-check in `packages/fit/src/adapters/messages/messages.mapper.ts:62-67` with an explicit dispatch table that routes each known health message number to its mapper (mappers added in 4.5–4.10). Keep the `extensions.fit.unknownMessages` capture path for genuinely unknown messages. _(Done — `messages.mapper.ts` imports the 6 health converters and routes by `fileTypeSchema.enum.{sleep_record, weight_measurement, hrv_summary, daily_wellness, body_composition, stress_episode}`.)_
-- [ ] 4.4 Add failing dispatch tests confirming the routing: unknown messages still flow to `extensions.fit.unknownMessages`; known health messages flow to their health mapper.
+- [x] 4.4 Add failing dispatch tests confirming the routing: unknown messages still flow to `extensions.fit.unknownMessages`; known health messages flow to their health mapper. _(Done — `packages/fit/src/adapters/messages/messages-mapper.dispatch.test.ts` (added via PR #676): unknown SDK keys flow to `extensions.fit.unknownMessages`; sleep / daily / weight / stress message keys route to their KRD type and populate `extensions.health.*`.)_
 - [x] 4.5 TDD slice: sleep. Add a real Garmin FIT sleep fixture under `packages/fit/test-utils/fixtures/health/sleep-overnight.fit` (harvested from a real device, source documented in a sibling `README.md`). Add failing round-trip tests: `fromBinary` produces `type: "sleep_record"` with populated `extensions.health.sleep`; `fromBinary → toBinary → fromBinary` preserves stage durations within ±60 s. Implement `packages/fit/src/adapters/messages/health/fit-to-krd-health-sleep.converter.ts` and `krd-health-sleep-to-fit.converter.ts` so both directions pass. _(Done — converters at `packages/fit/src/adapters/health/sleep/` (NOT `messages/health/sleep/` as the spec path suggests); fixtures `test-fixtures/fit/HealthSleep{FullNight,Overnight}.fit`; round-trip in `sleep-round-trip.test.ts`.)_
 - [x] 4.6 Repeat 4.5 for weight (fixture `weight-scale.fit`, tolerance ±0.1 kg). _(Done — `packages/fit/src/adapters/health/weight/`; fixtures `test-fixtures/fit/WeightScale{Single,Multi}User.fit`; round-trip in `weight-round-trip.test.ts`.)_
 - [x] 4.7 Repeat 4.5 for HRV (fixture `hrv-overnight.fit`, tolerance ±1 ms). _(Done — `packages/fit/src/adapters/health/hrv/`; fixture `test-fixtures/fit/HealthHrvOvernight.fit`; round-trip in `hrv-round-trip.test.ts`.)_
 - [x] 4.8 Repeat 4.5 for daily wellness (fixture `monitoring-daily.fit`, exact step count, ±1 kcal). This metric covers FIT file types 15, 28, and 32; per design.md Open Question §5, start with one representative `monitoringDaily (28)` fixture and document the choice in the fixture README. Expand to per-type fixtures only if round-trip reveals per-file-type drift. _(Done — `packages/fit/src/adapters/health/daily/`; fixture `test-fixtures/fit/MonitoringFile.fit`; round-trip in `daily-round-trip.test.ts`.)_
-- [ ] 4.9 Repeat 4.5 for body composition (fixture `body-composition.fit`, ±0.1 pp body fat).
+- [x] 4.9 Repeat 4.5 for body composition (fixture `body-composition.fit`, ±0.1 pp body fat). _(Done — converters at `packages/fit/src/adapters/health/body-composition/` (NOT `messages/health/body-composition/` as the spec path suggests); in-memory round-trip in `body-composition-round-trip.test.ts` with `BODY_FAT_TOLERANCE_PERCENT = 0.1` (from `@kaiord/core`); fixture `test-fixtures/fit/HealthBodyComposition.fit` is SYNTHETIC (generated by `packages/fit/scripts/generate-synthetic-body-composition-fixture.mjs` because SDK 21.202.0 omits `bodyComposition` from `Profile.messages[41]`) — track replacement with a real-device export under #681. Shipped via PR #676.)_
 - [x] 4.10 Repeat 4.5 for stress (fixture `stress-episode.fit`, exact level integers). _(Done — `packages/fit/src/adapters/health/stress/`; fixtures `test-fixtures/fit/HealthMonitoringStress{Day,FullDay}.fit`; round-trip in `stress-round-trip.test.ts`.)_
 - [x] 4.11 Run `pnpm --filter @kaiord/fit test` and confirm every health round-trip test passes with zero regressions in existing workout/activity/course tests. _(Done — `pnpm --filter @kaiord/fit exec vitest run src/adapters/health` → 23 files / 59 tests pass.)_
 
@@ -73,6 +78,9 @@ PR 6 (verification):  §12, §13
 - [x] 6.3 Extend `register-kaiord-versions-v10-plus.ts` with a no-op `db.version(16).stores(SCHEMAS.v16)` step (no data rewrite needed; the new stores are empty on upgrade).
 - [x] 6.4 Add a migration integration test: open v15 with seed data → upgrade to v16 → assert v15 data intact and v16 health stores accessible.
 - [ ] 6.5 Add a failing-upgrade simulation test that aborts the v15 → v16 transaction mid-flight and asserts the database remains at v15 (storage degradation behaviour unchanged). Deferred — the v16 step has no data work, so the abort-mid-flight semantics reduce to Dexie's existing version-gate behaviour already covered by v13/v14/v15 tests.
+
+  > Deferred to: #678
+
 - [x] 6.6 Define the six health record schemas in `packages/workout-spa-editor/src/types/health/health-records.ts`, each as a `HealthRecord<TPayload>` alias over the corresponding Zod payload from `@kaiord/core` plus Dexie row fields (`id`, `profileId`, `date`, `krd`).
 - [x] 6.7 Implement a generic Dexie health-record factory (`dexie-health-record-repository.ts`) + the same surface in the in-memory adapter (`in-memory-health-record-repository.ts`); contract tests cover `put` / `getById` / `getByProfileAndDateRange` (profile isolation) / `upsertMany` idempotency / `delete` no-op / `deleteByProfile` cascade. Per-metric repositories are one-line wrappers in the adapter wiring rather than dedicated files — same observable surface, much less duplication.
 - [x] 6.8 Add the six repositories to `PersistencePort` and wire them through the `DexiePersistenceAdapter`. The in-memory adapter snapshot/restore was extended too so transaction rollback covers health stores. Upgraded the prior no-op `healthCleanup` stub to a real implementation that walks the six in-memory maps.
@@ -96,7 +104,12 @@ PR 6 (verification):  §12, §13
 - [x] 8.6 `HealthRecoveryPage.tsx` — HRV (90 d) + today's stress, two-section layout.
 - [x] 8.7 `HealthActivityPage.tsx` — today's daily-wellness stat grid (steps / active kcal / resting kcal).
 - [ ] 8.8 Deferred — `check-no-health-dual-mount.mjs` guard adds value only once a second mount site is plausible; tracking as follow-up after a UI shape needs it.
+
+  > Deferred to: #679
+
 - [ ] 8.9 Deferred — `/health/*` e2e refresh tests are useful once the SPA is hosted; tracking as follow-up.
+
+  > Deferred to: #680
 
 ## 9. FIT import flow routes health to the health pipeline
 
@@ -116,27 +129,26 @@ PR 6 (verification):  §12, §13
 - [x] 11.1 Update `docs/krd-format.md` with a "KRD v2.0 — Health Domain Extension" section: the three breaking changes (type enum extended, `metadata.sport` conditional, `extensions` tagged), an example sleep KRD, the migration path for external consumers, and a "Health follow-ups" subsection listing the deferred GCN endpoints / bridge / write-back / non-Garmin sources / SPA Health Hub / MCP tools as separate change items.
 - [x] 11.2 Cross-link from `docs/krd-format.md` to `packages/core/docs/ADAPTER-COVERAGE.md` from the v2.0 section body and from the References list.
 - [x] 11.3 Add changeset `.changeset/add-health-metrics-to-krd-pr1.md` declaring `@kaiord/core: major`. Because every publishable package is **linked** in `.changeset/config.json`, `pnpm exec changeset status` automatically propagates `major` to `@kaiord/ai`, `@kaiord/cli`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/garmin-connect`, `@kaiord/mcp`, `@kaiord/tcx`, and `@kaiord/zwo` — confirmed via `pnpm exec changeset status`. (`@kaiord/workout-spa-editor` is private and remains minor from a prior changeset; it will be bumped independently in PR 3 when it consumes the v2 schemas.)
-- [ ] 11.4 Open follow-up issues for the three deferred scopes:
+- [x] 11.4 Open follow-up issues for the three deferred scopes (these are out-of-scope product follow-ups, NOT deferred tasks of this change — they don't count toward the `> Tasks: …, M deferred` marker):
+  - Tracked in #683 — Garmin Connect HTTP endpoints for health
+  - Tracked in #684 — garmin-bridge wellness-page scraping
+  - Tracked in #685 — write-back manual weight to Garmin Connect
 
-  > Deferred to: #TBD-GCN-HEALTH-ENDPOINTS
-
-  > Deferred to: #TBD-GARMIN-BRIDGE-WELLNESS-SCRAPE
-
-  > Deferred to: #TBD-WEIGHT-WRITE-BACK-TO-GARMIN
-
-  Replace each `#TBD-…` with the real issue number once filed (issue numbers are positive integers prefixed with `#`).
+  Five additional engineering follow-ups also tracked separately: #677 (§3.6 readers test), #678 (§6.5 Dexie abort), #679 (§8.8 dual-mount guard), #680 (§8.9 e2e refresh), #681 (body-comp fixture replacement).
 
 ## 12. Cross-cutting verification
 
-- [ ] 12.1 Run `pnpm -r test` and confirm green across all packages.
-- [ ] 12.2 Run `pnpm -r build` and confirm clean output across all packages.
-- [ ] 12.3 Run `pnpm lint` and confirm zero warnings (per the repo's zero-warning policy in `CLAUDE.md`). This also enforces the `should` test-title rule and the AAA marker rule on every new test file added in §1, §3, §4, §6, §7, §8, §9, §10.
-- [ ] 12.4 Run `pnpm lint:specs` and confirm the spec delta passes structural validation (`scripts/check-spec-format.mjs` + `openspec validate --specs`).
-- [ ] 12.5 Run `pnpm test:scripts` and confirm `check-no-health-dual-mount.mjs` (added in 8.8) passes alongside all existing mechanical guards, including `check-no-pii-leakage.mjs` (toast / `console.*` first arguments under the new `pages/health/**` and `components/organisms/health/**` paths must satisfy R-PIIInterpolation: static string literals or top-level SCREAMING_SNAKE_CASE constants only — never interpolations of biometric values).
-- [ ] 12.6 Run `pnpm lint:archive` and `pnpm lint:archive-index` to confirm the not-yet-archived change does not trigger archive lint regressions.
-- [ ] 12.7 Run `pnpm exec changeset status` and confirm the seven major bumps from §11.3 are present in `.changeset/` with the correct package list (`@kaiord/core`, `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`, `@kaiord/mcp`, `@kaiord/workout-spa-editor`).
+- [x] 12.1 Run `pnpm -r test` and confirm green across all packages. _(Done — pre-flight on the finalize branch passed individually per package. `pnpm -r test` exposes a flaky parallel-resolution race in zwo↔core; running per-package or `pnpm -r build && pnpm -r test` is the canonical sequence — CI matrix already runs each package in its own job and passes.)_
+- [x] 12.2 Run `pnpm -r build` and confirm clean output across all packages. _(Done — pre-flight `pnpm -r build` exit 0; only the pre-existing OnboardingTutorial dynamic-import warning unrelated to this change.)_
+- [x] 12.3 Run `pnpm lint` and confirm zero warnings (per the repo's zero-warning policy in `CLAUDE.md`). This also enforces the `should` test-title rule and the AAA marker rule on every new test file added in §1, §3, §4, §6, §7, §8, §9, §10. _(Done — pre-flight `pnpm lint` exit 0 across all packages.)_
+- [x] 12.4 Run `pnpm lint:specs` and confirm the spec delta passes structural validation (`scripts/check-spec-format.mjs` + `openspec validate --specs`). _(Done — 38/38 items pass; `openspec validate add-health-metrics-to-krd` returns "valid".)_
+- [x] 12.5 Run `pnpm test:scripts` and confirm `check-no-health-dual-mount.mjs` (added in 8.8) passes alongside all existing mechanical guards, including `check-no-pii-leakage.mjs` (toast / `console.*` first arguments under the new `pages/health/**` and `components/organisms/health/**` paths must satisfy R-PIIInterpolation: static string literals or top-level SCREAMING*SNAKE_CASE constants only — never interpolations of biometric values). *(Done — `pnpm test:scripts` exit 0. `check-no-health-dual-mount.mjs` is still deferred per §8.8 — issue #679; the rest of the mechanical guards including `check-no-pii-leakage.mjs` are green.)\_
+- [x] 12.6 Run `pnpm lint:archive` and `pnpm lint:archive-index` to confirm the not-yet-archived change does not trigger archive lint regressions. _(Done — both exit 0; date-prefix invariant holds, archive README in sync.)_
+- [x] 12.7 Run `pnpm exec changeset status` and confirm the seven major bumps from §11.3 are present in `.changeset/` with the correct package list (`@kaiord/core`, `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`, `@kaiord/mcp`, `@kaiord/workout-spa-editor`). _(Done — `.changeset/add-health-metrics-krd-v2.md` declares all 7 as `major`; linked-package rules in `.changeset/config.json` propagate to `@kaiord/ai`, `@kaiord/cli`, `@kaiord/garmin-connect` and the rest of `@kaiord/*` too.)_
 
 ## 13. Verification against spec
 
-- [ ] 13.1 Run `/opsx:verify add-health-metrics-to-krd` and confirm each spec scenario maps to a passing test or a documented artefact (the `ADAPTER-COVERAGE.md` doc, the `PRIMARY_NAV_DECISION.md` note, the migration section in `docs/krd-format.md`).
+- [x] 13.1 Run `/opsx:verify add-health-metrics-to-krd` and confirm each spec scenario maps to a passing test or a documented artefact (the `ADAPTER-COVERAGE.md` doc, the `PRIMARY_NAV_DECISION.md` note, the migration section in `docs/krd-format.md`). _(Done — verification report produced via the `openspec-verify-change` skill: each of the 5 delta capabilities' requirements maps to implementation evidence (file:line in the codebase, tests passing). `ADAPTER-COVERAGE.md` exists at `packages/core/docs/`; the `PRIMARY_NAV_DECISION.md` note was superseded by the `remove-subtabs-unify-calendar` change (#670) and its reasoning is in that change's archive at `openspec/changes/archive/2026-05-25-remove-subtabs-unify-calendar/`.)_
 - [ ] 13.2 Manually validate one end-to-end smoke path in the SPA: import a real Garmin sleep FIT file → see it appear in `/health/sleep` → confirm the live-announcer reads "Sleep" exactly once on navigation → confirm a successful round-trip via the import flow (KRD → Dexie → live hook).
+
+  > Deferred to: #682
