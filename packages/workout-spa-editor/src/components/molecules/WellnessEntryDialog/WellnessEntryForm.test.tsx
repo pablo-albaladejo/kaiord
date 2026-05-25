@@ -199,6 +199,29 @@ describe("WellnessEntryForm", () => {
     expect(sleep).toHaveLength(0);
   });
 
+  it("should treat a partial save as failure and keep the dialog open", async () => {
+    // Arrange
+    const persistence = await setup();
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    renderForm(persistence, onSaved);
+
+    // Act
+    await fillAndSave(user, { "Weight (kg)": "72", "Sleep score": "150" });
+
+    // Assert
+    expect(
+      await screen.findByText("Could not save — please retry")
+    ).toBeInTheDocument();
+    expect(onSaved).not.toHaveBeenCalled();
+    const sleep = await persistence.healthSleep.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(sleep).toHaveLength(0);
+  });
+
   it("should disable the Save button while isSaving", async () => {
     // Arrange
     const persistence = await setup();

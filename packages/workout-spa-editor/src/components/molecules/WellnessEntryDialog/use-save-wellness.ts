@@ -54,7 +54,10 @@ export function useSaveWellness(day: string): UseSaveWellnessResult {
         );
         if (result) savedCount += 1;
       }
-      if (savedCount === 0) {
+      // Anything short of all-saved is a failure: a rejected metric (e.g.
+      // an out-of-range value) must keep the dialog open so the entry is
+      // not silently lost behind a success toast.
+      if (savedCount < entries.length) {
         toast.error(TOAST_WELLNESS_SAVE_FAILED);
         return false;
       }
