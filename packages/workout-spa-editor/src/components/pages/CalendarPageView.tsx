@@ -1,5 +1,6 @@
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import { AutoMatchBanner } from "../organisms/AutoMatchBanner/AutoMatchBanner";
+import { CalendarAddEntryDialogs } from "./CalendarAddEntryDialogs";
 import { CalendarBodyView } from "./CalendarBodyView";
 import { CalendarDialogs } from "./CalendarDialogs";
 import { CalendarHeader } from "./CalendarHeader";
@@ -52,6 +53,7 @@ export function CalendarPageView({
         expandActivity={coaching.expandActivity}
         onOpenExecuted={s.handleWorkoutClick}
       />
+      <CalendarAddEntryDialogs s={s} />
     </div>
   );
 }

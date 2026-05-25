@@ -127,6 +127,8 @@ test.describe("Library-Calendar Integration", () => {
     const btn = page.getByTestId(`empty-day-${dates[1]}`);
     await btn.scrollIntoViewIfNeeded();
     await btn.click({ force: true });
+    // The "+" opens the Workout | Wellness chooser; pick Workout.
+    await page.getByTestId("add-entry-choose-workout").click();
 
     await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[1]}`));
     await expect(page.getByTestId("new-workout-picker")).toBeVisible();

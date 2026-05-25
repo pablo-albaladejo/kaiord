@@ -49,7 +49,7 @@ describe("CalendarWeekList", () => {
         days={DAYS}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -73,7 +73,7 @@ describe("CalendarWeekList", () => {
         }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -94,7 +94,7 @@ describe("CalendarWeekList", () => {
         }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -115,7 +115,7 @@ describe("CalendarWeekList", () => {
         }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -128,6 +128,25 @@ describe("CalendarWeekList", () => {
     ).toBeInTheDocument();
   });
 
+  it("should render the + Add button on every list-view day", () => {
+    // Arrange
+
+    // Act
+    render(
+      <CalendarWeekList
+        days={DAYS}
+        todayDate="2026-04-06"
+        onWorkoutClick={vi.fn()}
+        onAddClick={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(screen.getAllByTestId(/^calendar-list-add-/)).toHaveLength(
+      DAYS_IN_WEEK
+    );
+  });
+
   it("should mark today's section with data-today and aria-current", () => {
     // Arrange
 
@@ -137,7 +156,7 @@ describe("CalendarWeekList", () => {
         days={DAYS}
         todayDate="2026-04-09"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
