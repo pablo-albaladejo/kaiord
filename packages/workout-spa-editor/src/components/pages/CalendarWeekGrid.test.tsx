@@ -55,7 +55,7 @@ describe("CalendarWeekGrid", () => {
         workoutsByDay={{}}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -74,7 +74,7 @@ describe("CalendarWeekGrid", () => {
         workoutsByDay={{ "2026-04-07": [makeWorkout("w1", "2026-04-07")] }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -95,7 +95,7 @@ describe("CalendarWeekGrid", () => {
         }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -119,7 +119,7 @@ describe("CalendarWeekGrid", () => {
         }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -127,28 +127,27 @@ describe("CalendarWeekGrid", () => {
     expect(screen.getByTestId("coaching-card-c2")).toBeInTheDocument();
   });
 
-  it("should show empty-day button only when no workouts AND no coaching", () => {
+  it("should render the + Add button on a day that already has activities", () => {
     // Arrange
 
     // Act
     renderWithToast(
       <CalendarWeekGrid
         days={DAYS}
-        workoutsByDay={{}}
+        workoutsByDay={{ "2026-04-07": [makeWorkout("w1", "2026-04-07")] }}
         coachingByDay={{
           "2026-04-06": [makeCoaching("c3", "2026-04-06")],
         }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
     // Assert
-    expect(
-      screen.queryByTestId("empty-day-2026-04-06")
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("empty-day-2026-04-06")).toBeInTheDocument();
     expect(screen.getByTestId("empty-day-2026-04-07")).toBeInTheDocument();
+    expect(screen.getAllByTestId(/^empty-day-/)).toHaveLength(DAYS_IN_WEEK);
   });
 
   it("should render with empty coaching data (no registry)", () => {
@@ -161,7 +160,7 @@ describe("CalendarWeekGrid", () => {
         workoutsByDay={{}}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -179,7 +178,7 @@ describe("CalendarWeekGrid", () => {
         workoutsByDay={{}}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -204,7 +203,7 @@ describe("CalendarWeekGrid", () => {
         workoutsByDay={{}}
         todayDate="2026-04-09"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 
@@ -232,7 +231,7 @@ describe("CalendarWeekGrid", () => {
         }}
         todayDate="2026-04-06"
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
       />
     );
 

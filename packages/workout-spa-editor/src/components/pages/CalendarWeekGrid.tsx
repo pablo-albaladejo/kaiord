@@ -35,7 +35,7 @@ export type CalendarWeekGridProps = {
   todayDate: string;
   view?: CalendarView;
   onWorkoutClick: (workout: WorkoutRecord) => void;
-  onEmptyDayClick: (date: string) => void;
+  onAddClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
   wellnessByDay?: Record<string, DayWellness>;
 };
@@ -50,7 +50,7 @@ export function CalendarWeekGrid({
   todayDate,
   view,
   onWorkoutClick,
-  onEmptyDayClick,
+  onAddClick,
   onActivityClick,
   wellnessByDay,
 }: CalendarWeekGridProps) {
@@ -85,7 +85,7 @@ export function CalendarWeekGrid({
             soloPlans={plans[date] ?? []}
             soloActuals={actuals[date] ?? []}
             onWorkoutClick={onWorkoutClick}
-            onEmptyDayClick={onEmptyDayClick}
+            onAddClick={onAddClick}
             onActivityClick={onActivityClick}
             workoutCardPointerDownFor={bind}
             dropTargetActive={dropTargetId === date}

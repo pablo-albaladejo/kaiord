@@ -1,8 +1,9 @@
 /**
  * DayColumn wellness-band integration: present/absent rendering, the
- * unchanged `+ Add` gate, and the two drag invariants from the design
- * Risks section — a badge pointerdown does not start a drag, and a drop
- * onto a band-bearing cell still hit-tests to the day via `[data-day]`.
+ * always-visible `+ Add` affordance, and the drag invariants from the
+ * design Risks section — a badge/`+` pointerdown does not start a drag,
+ * and a drop onto a band-bearing cell still hit-tests to the day via
+ * `[data-day]`.
  */
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
@@ -57,7 +58,7 @@ function renderColumn(
         date={DATE}
         isToday={false}
         onWorkoutClick={vi.fn()}
-        onEmptyDayClick={vi.fn()}
+        onAddClick={vi.fn()}
         wellness={wellness}
         {...extra}
       />
@@ -89,7 +90,7 @@ describe("DayColumn wellness band", () => {
     expect(screen.queryByTestId("wellness-band")).not.toBeInTheDocument();
   });
 
-  it("should keep the + Add affordance gated on training only", () => {
+  it("should render the + Add affordance on an empty day", () => {
     // Arrange
     const wellness: DayWellness = { sleep: "82" };
 
@@ -98,6 +99,34 @@ describe("DayColumn wellness band", () => {
 
     // Assert
     expect(screen.getByTestId(`empty-day-${DATE}`)).toBeInTheDocument();
+  });
+
+  it("should render the + Add affordance on a day that already has a workout", () => {
+    // Arrange
+    const wellness: DayWellness = { sleep: "82" };
+
+    // Act
+    renderColumn(wellness, { soloActuals: [makeWorkout()] });
+
+    // Assert
+    expect(screen.getByTestId(`empty-day-${DATE}`)).toBeInTheDocument();
+  });
+
+  it("should not start a drag when the + Add button is pressed", () => {
+    // Arrange
+    const dragHandler = vi.fn();
+    const bind = vi.fn(() => () => dragHandler());
+    renderColumn(
+      { sleep: "82" },
+      { soloActuals: [makeWorkout()], workoutCardPointerDownFor: bind }
+    );
+    const addButton = screen.getByTestId(`empty-day-${DATE}`);
+
+    // Act
+    fireEvent.pointerDown(addButton);
+
+    // Assert
+    expect(dragHandler).not.toHaveBeenCalled();
   });
 
   it("should not bind a drag handler to the wellness badge", () => {

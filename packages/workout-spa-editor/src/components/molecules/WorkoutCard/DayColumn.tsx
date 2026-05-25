@@ -17,7 +17,7 @@ export type DayColumnProps = {
   soloPlans?: CoachingActivity[];
   soloActuals?: WorkoutRecord[];
   onWorkoutClick: (workout: WorkoutRecord) => void;
-  onEmptyDayClick: (date: string) => void;
+  onAddClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
   workoutCardPointerDownFor?: (
     workoutId: string
@@ -37,13 +37,12 @@ export function DayColumn({
   soloPlans = [],
   soloActuals = [],
   onWorkoutClick,
-  onEmptyDayClick,
+  onAddClick,
   onActivityClick,
   workoutCardPointerDownFor,
   dropTargetActive = false,
   wellness,
 }: DayColumnProps) {
-  const total = matchedSessions.length + soloPlans.length + soloActuals.length;
   const tint = isToday ? TODAY_BODY_TINT : "";
   const dropRing = dropTargetActive ? DROP_RING : "";
   return (
@@ -68,9 +67,7 @@ export function DayColumn({
           workoutCardPointerDownFor,
         })}
       </div>
-      {total === 0 && (
-        <DayColumnAddButton date={date} onEmptyDayClick={onEmptyDayClick} />
-      )}
+      <DayColumnAddButton date={date} onAddClick={onAddClick} />
     </div>
   );
 }

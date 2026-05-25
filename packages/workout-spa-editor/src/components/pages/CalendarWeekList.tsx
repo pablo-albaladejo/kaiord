@@ -23,7 +23,7 @@ export type CalendarWeekListProps = {
   soloActualsByDay?: Record<string, WorkoutRecord[]>;
   todayDate: string;
   onWorkoutClick: (workout: WorkoutRecord) => void;
-  onEmptyDayClick: (date: string) => void;
+  onAddClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
   wellnessByDay?: Record<string, DayWellness>;
 };
@@ -35,7 +35,7 @@ export function CalendarWeekList({
   soloActualsByDay = {},
   todayDate,
   onWorkoutClick,
-  onEmptyDayClick,
+  onAddClick,
   onActivityClick,
   wellnessByDay,
 }: CalendarWeekListProps) {
@@ -73,7 +73,7 @@ export function CalendarWeekList({
               type="button"
               data-testid={`calendar-list-add-${date}`}
               aria-label={`Add to ${formatHeading(date)}`}
-              onClick={() => onEmptyDayClick(date)}
+              onClick={() => onAddClick(date)}
               className="mt-2 w-full rounded border border-dashed border-gray-300 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary-400 hover:text-primary-600 dark:border-gray-600"
             >
               + Add
