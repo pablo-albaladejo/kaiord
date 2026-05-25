@@ -106,10 +106,10 @@ PR 6 (verification):  §12, §13
 
 ## 10. MCP tools for health domain
 
-- [ ] 10.1 Add failing smoke tests under `packages/mcp/src/server/tools/health/` for each of the five new tools: `get-health-summary`, `get-sleep-history`, `get-weight-history`, `get-hrv-history`, `get-recovery-status`. Tests inject seed data via the in-memory persistence and assert tool outputs are well-formed JSON.
-- [ ] 10.2 Implement each tool as a separate file under `packages/mcp/src/server/tools/health/`, each registered via the existing tool-registration pattern in `create-server.ts`.
-- [ ] 10.3 Update `SERVER_INSTRUCTIONS` in `packages/mcp/src/server/create-server.ts:31-36` to mention the new health domain and the five tools.
-- [ ] 10.4 Run `pnpm --filter @kaiord/mcp test` and confirm green.
+- [x] 10.1 Add failing smoke tests under `packages/mcp/src/server/tools/health/` for each of the five new tools: `get-health-summary`, `get-sleep-history`, `get-weight-history`, `get-hrv-history`, `get-recovery-status`. Tests inject seed data via the in-memory persistence and assert tool outputs are well-formed JSON. _(Done — tests at `packages/mcp/src/tools/kaiord-get-*.test.ts` (NOT `server/tools/health/` as the spec path suggests). Architecture reframed from "in-memory persistence" to "stateless, file-array input" to match MCP's existing pattern; tests use real fixtures from `test-fixtures/fit/`.)_
+- [x] 10.2 Implement each tool as a separate file under `packages/mcp/src/server/tools/health/`, each registered via the existing tool-registration pattern in `create-server.ts`. _(Done — 5 tools at `packages/mcp/src/tools/kaiord-get-{health-summary,sleep-history,weight-history,hrv-history,recovery-status}.ts` + 3 shared helpers under `packages/mcp/src/tools/health/` (`parse-health-records.ts`, `health-record-filters.ts`, `derive-recovery-status.ts`). All registered via `registerXxxTool(server, logger)` in `create-server.ts`. Stateless, array-of-paths input.)_
+- [x] 10.3 Update `SERVER_INSTRUCTIONS` in `packages/mcp/src/server/create-server.ts:31-36` to mention the new health domain and the five tools. _(Done — one-line health entry added to `SERVER_INSTRUCTIONS`.)_
+- [x] 10.4 Run `pnpm --filter @kaiord/mcp test` and confirm green. _(Done — 30 files / 141 tests pass.)_
 
 ## 11. KRD v2.0 version bump + documentation
 
