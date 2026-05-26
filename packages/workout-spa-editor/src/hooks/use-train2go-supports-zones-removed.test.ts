@@ -33,7 +33,8 @@ function collectSourceFiles(dir: string): string[] {
 describe("use-train2go-supports-zones deletion guard", () => {
   it("should have no source file under spa-editor/src that references use-train2go-supports-zones", () => {
     // Arrange
-    const files = collectSourceFiles(SPA_SRC);
+    const guardFile = resolve(__filename);
+    const files = collectSourceFiles(SPA_SRC).filter((f) => f !== guardFile);
 
     // Act
     const culprits = files.filter((f) =>
