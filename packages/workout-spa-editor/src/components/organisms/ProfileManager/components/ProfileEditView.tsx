@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useProfileByIdLive } from "../../../../hooks/use-profile-by-id-live";
 import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import type { ProfileFormData } from "../types";
+import { DataFlowsSection } from "./DataFlowsSection";
 import { LinkedAccountsSection } from "./LinkedAccountsSection";
 import { PersonalDataTab } from "./PersonalDataTab";
 import type { ProfileTab } from "./ProfileTabs";
@@ -49,6 +50,7 @@ export function ProfileEditView({
       {activeTab === "linked-accounts" && profile && (
         <LinkedAccountsSection profile={profile} />
       )}
+      {activeTab === "data-flows" && <DataFlowsSection profileId={profileId} />}
       <div className="mt-4 flex justify-end">
         <button
           type="button"
