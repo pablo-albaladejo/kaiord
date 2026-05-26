@@ -1,3 +1,5 @@
+> Completed: 2026-05-26
+
 > Depends on add-health-metrics-to-krd
 
 # Health Trends: Single Overlay Chart with Synchronized Panes
