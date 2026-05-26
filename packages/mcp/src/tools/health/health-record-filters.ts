@@ -1,10 +1,16 @@
-import type { KRD } from "@kaiord/core";
+import type { KRD, ManagedDataType } from "@kaiord/core";
 
 export type HealthKrdType =
   | "sleep_record"
   | "weight_measurement"
   | "hrv_summary"
   | "daily_wellness";
+
+// Health-flavored slice of the registry (excludes workout/training-*)
+export type HealthManagedDataType = Extract<
+  ManagedDataType,
+  "weight" | "sleep" | "hrv" | "daily-wellness" | "body-composition" | "stress"
+>;
 
 type DateExtractor = (health: Record<string, unknown>) => string | undefined;
 

@@ -167,3 +167,16 @@ export {
   profileSnapshotSchema,
   STALE_SNAPSHOT_THRESHOLD_DAYS,
 } from "./types/profile-snapshot";
+
+// Managed Data Registry
+export type {
+  BridgeId,
+  HashProjection,
+  ManagedDataRegistryEntry,
+  ManagedDataType,
+} from "./domain";
+export {
+  canonicalHash,
+  MANAGED_DATA_REGISTRY,
+  managedDataTypes,
+} from "./domain";

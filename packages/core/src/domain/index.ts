@@ -1,5 +1,13 @@
+export { canonicalHash } from "../hash/canonical-hash";
 export { convertLengthToMeters } from "./converters/length-unit.converter";
 export { createWorkoutKRD } from "./converters/workout-to-krd.converter";
+export type {
+  BridgeId,
+  HashProjection,
+  ManagedDataRegistryEntry,
+  ManagedDataType,
+} from "./managed-data-type";
+export { MANAGED_DATA_REGISTRY, managedDataTypes } from "./managed-data-type";
 export type {
   BodyComposition,
   CadenceValue,
