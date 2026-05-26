@@ -10,8 +10,8 @@ import { useMemo } from "react";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { lastNDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
-import { TrendChartsGrid } from "./trends/TrendChartsGrid";
 import { TrendMetricSelector } from "./trends/TrendMetricSelector";
+import { TrendOverlayCard } from "./trends/TrendOverlayCard";
 import { TrendRangeSelector } from "./trends/TrendRangeSelector";
 import { useTrendSelection } from "./trends/use-trend-selection";
 import { useTrendSeries } from "./trends/use-trend-series";
@@ -29,7 +29,11 @@ export default function HealthDashboardPage() {
         <TrendMetricSelector selected={selected} onToggle={toggle} />
         <TrendRangeSelector selected={rangeDays} onSelect={setRangeDays} />
       </div>
-      <TrendChartsGrid selected={selected} series={series} />
+      <TrendOverlayCard
+        selected={selected}
+        series={series}
+        rangeDays={rangeDays}
+      />
     </section>
   );
 }
