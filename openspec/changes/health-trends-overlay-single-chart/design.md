@@ -82,9 +82,9 @@ Three measurable constraints convert the "una sola gráfica" intent from a subje
 | VT2 | Inter-pane vertical gap ≤ 8 px — Tailwind `gap-2` on the pane stack container                      | `TrendOverlayCard.test.tsx`: assert `wrapper.className.includes("gap-2")`                                                                                             |
 | VT3 | No per-pane border — only the outer card has a border                                              | `TrendOverlayPane.test.tsx`: assert pane root `className` does NOT match `/\bborder(\b\|-)/`; `TrendOverlayCard.test.tsx`: assert card `className.includes("border")` |
 
-## Decision 7: File Structure — Six New Files + Two Edits + One Deletion Set
+## Decision 7: File Structure — Eight New Files + Two Edits + One Deletion Set
 
-Six new files, each well under the 80-line / 60-line-component caps:
+Eight new files (six initially planned + two hooks extracted per the consensus review to keep `TrendOverlayCard.tsx` under the 50-line component cap), each well under the 80-line / 60-line-component caps:
 
 | File                         | Purpose                                                                                                                   | Approx LOC |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------- |
@@ -127,6 +127,6 @@ This stays within the `spa-routing` capability's existing scope — no new capab
 
 **Real-uPlot construction in jsdom.** The sync test (`trend-overlay-sync.test.ts`) reads `uPlot.sync(key).plots` (a JS-level array), not canvas pixels. If `new UPlot(...)` throws because jsdom lacks canvas APIs, strategy B instantiates uPlot with minimal options (`width:1, height:1, scales:{x:{time:false}}`) to bypass time-axis rendering. As a last resort, stub `HTMLCanvasElement.prototype.getContext` in the test file's setup for this single file only.
 
-**`@kaiord/workout-spa-editor` is private — no changeset.** Mirrors `2026-04-10-cosmetic-polish`. Add a placeholder changeset only if CI complains.
+**Changeset.** `@kaiord/workout-spa-editor` is a private package, but this PR includes `.changeset/health-trends-overlay-single-chart.md` (a `minor` bump) for release-tracking hygiene, matching the pattern of recent SPA-only changes shipped in this repo. The changeset will be consumed (or no-op for the private package) by the regular release flow.
 
 **Visual-baseline shift.** The `/health` layout changes. Trigger `update-visual-baselines.yml` (Linux/chromium) in CI after the PR is up. Do NOT regenerate locally.
