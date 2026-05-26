@@ -23,7 +23,7 @@ vi.mock("./trends/use-trend-series", () => ({
 }));
 
 vi.mock("./trends/UplotChart", () => ({
-  UplotChart: () => <div data-testid="uplot-chart" />,
+  UplotChart: () => <div data-testid="uplot-chart-mock" />,
 }));
 
 describe("HealthDashboardPage trends hub", () => {
@@ -52,20 +52,18 @@ describe("HealthDashboardPage trends hub", () => {
     expect(range).toBeInTheDocument();
   });
 
-  it("should render a chart only for selected metrics", () => {
+  it("should render the single canvas when at least one metric is selected", () => {
     // Arrange
     render(<HealthDashboardPage />);
 
     // Act
-    const sleepCard = screen.queryByTestId("trend-card-sleep");
-    const weightCard = screen.queryByTestId("trend-card-weight");
+    const card = screen.queryByTestId("trend-single-chart-card");
 
     // Assert
-    expect(sleepCard).toBeInTheDocument();
-    expect(weightCard).not.toBeInTheDocument();
+    expect(card).toBeInTheDocument();
   });
 
-  it("should add a chart when a metric is selected", async () => {
+  it("should keep one canvas when a metric is added", async () => {
     // Arrange
     const user = userEvent.setup();
     render(<HealthDashboardPage />);
@@ -74,22 +72,25 @@ describe("HealthDashboardPage trends hub", () => {
     await user.click(screen.getByRole("button", { name: "Weight" }));
 
     // Assert
-    expect(screen.getByTestId("trend-card-weight")).toBeInTheDocument();
+    expect(screen.getByTestId("trend-single-chart-card")).toBeInTheDocument();
   });
 
-  it("should remove a chart when a selected metric is toggled off", async () => {
+  it("should show the bare empty message when all metrics are toggled off", async () => {
     // Arrange
     const user = userEvent.setup();
     render(<HealthDashboardPage />);
 
     // Act
     await user.click(screen.getByRole("button", { name: "Sleep" }));
+    await user.click(screen.getByRole("button", { name: "HRV" }));
 
     // Assert
-    expect(screen.queryByTestId("trend-card-sleep")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Select at least one metric to see its trend.")
+    ).toBeInTheDocument();
   });
 
-  it("should show a per-metric empty state when a metric has no data", async () => {
+  it("should omit a metric with zero points from the canvas while keeping the canvas mounted", async () => {
     // Arrange
     const user = userEvent.setup();
     render(<HealthDashboardPage />);
@@ -98,7 +99,7 @@ describe("HealthDashboardPage trends hub", () => {
     await user.click(screen.getByRole("button", { name: "Weight" }));
 
     // Assert
-    expect(screen.getByTestId("trend-empty-weight")).toBeInTheDocument();
+    expect(screen.getByTestId("trend-single-chart-card")).toBeInTheDocument();
   });
 
   it("should select a different date range", async () => {

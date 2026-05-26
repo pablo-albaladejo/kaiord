@@ -1,9 +1,11 @@
 /**
  * /health — Wellness trends hub.
  *
- * Cross-metric view: the user picks one or more metrics and a date
- * range; each selected metric renders as a line chart (uPlot) over
- * that range, with a per-metric empty state when no data exists.
+ * Renders a single uPlot canvas with one X axis (time, bottom) and one
+ * Y axis per selected metric (right side, packed horizontally outward)
+ * in each metric's native unit. All series share a uniform stroke; line
+ * discrimination is by axis + legend label. No drag-to-reorder; no
+ * multi-instance sync.
  */
 import { useMemo } from "react";
 
@@ -11,8 +13,8 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { lastNDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 import { TrendMetricSelector } from "./trends/TrendMetricSelector";
-import { TrendOverlayCard } from "./trends/TrendOverlayCard";
 import { TrendRangeSelector } from "./trends/TrendRangeSelector";
+import { TrendSingleChartCard } from "./trends/TrendSingleChartCard";
 import { useTrendSelection } from "./trends/use-trend-selection";
 import { useTrendSeries } from "./trends/use-trend-series";
 
@@ -29,7 +31,7 @@ export default function HealthDashboardPage() {
         <TrendMetricSelector selected={selected} onToggle={toggle} />
         <TrendRangeSelector selected={rangeDays} onSelect={setRangeDays} />
       </div>
-      <TrendOverlayCard
+      <TrendSingleChartCard
         selected={selected}
         series={series}
         rangeDays={rangeDays}
