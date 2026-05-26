@@ -38,6 +38,25 @@ export const upsertIntegrationPolicy = async (
       updatedAt: now,
     };
     await deps.policyRepo.put(updated);
+
+    const action =
+      input.enabled !== existing.enabled
+        ? input.enabled
+          ? "enabled"
+          : "disabled"
+        : input.mode !== existing.mode
+          ? "mode_changed"
+          : "enabled";
+    const extraProps = action === "mode_changed" ? { newMode: input.mode } : {};
+    deps.analytics?.event("integration_policy.toggled", {
+      profileId: input.profileId,
+      dataType: input.dataType,
+      direction: input.direction,
+      bridgeId: input.bridgeId,
+      action,
+      ...extraProps,
+    });
+
     return updated;
   }
 
@@ -47,5 +66,14 @@ export const upsertIntegrationPolicy = async (
     updatedAt: now,
   };
   await deps.policyRepo.put(row);
+
+  deps.analytics?.event("integration_policy.toggled", {
+    profileId: input.profileId,
+    dataType: input.dataType,
+    direction: input.direction,
+    bridgeId: input.bridgeId,
+    action: "added",
+  });
+
   return row;
 };
