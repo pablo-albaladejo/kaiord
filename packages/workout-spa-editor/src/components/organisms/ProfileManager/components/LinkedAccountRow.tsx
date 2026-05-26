@@ -57,10 +57,15 @@ export function LinkedAccountRow({
           </button>
         )}
       </div>
+      {/* TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones') */}
       {linked && supportsZones ? (
         <SyncZonesToggle
           sourceId={sourceMeta.id}
-          checked={linked.syncZones === true}
+          checked={
+            ((linked as Record<string, unknown>)["syncZones"] as
+              | boolean
+              | undefined) ?? false
+          }
           onChange={handleToggleSyncZones}
         />
       ) : null}

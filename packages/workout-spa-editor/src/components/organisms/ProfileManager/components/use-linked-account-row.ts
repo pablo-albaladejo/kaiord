@@ -10,6 +10,7 @@ import { unlinkAccount } from "../../../../application/coaching/unlink-account";
 import { useAnalytics } from "../../../../contexts";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
+import type { ProfileRepository } from "../../../../ports/persistence-port";
 import type { Profile } from "../../../../types/profile";
 
 export type SourceMeta = {
@@ -19,6 +20,25 @@ export type SourceMeta = {
 
 const ACCOUNT_LINKED_TOAST = "Coaching account linked";
 const ACCOUNT_DISCONNECTED_TOAST = "Coaching account disconnected";
+
+// TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
+const writeSyncZones = async (
+  repo: ProfileRepository,
+  profileId: string,
+  sourceId: string,
+  next: boolean
+): Promise<void> => {
+  const refreshed = await repo.getById(profileId);
+  if (!refreshed) return;
+  const linkedAccounts = refreshed.linkedAccounts.map((a) =>
+    a.source === sourceId ? ({ ...a, syncZones: next } as typeof a) : a
+  );
+  await repo.put({
+    ...refreshed,
+    linkedAccounts,
+    updatedAt: new Date().toISOString(),
+  });
+};
 
 export const useLinkedAccountRow = (
   profile: Profile,
@@ -38,16 +58,11 @@ export const useLinkedAccountRow = (
     setBusy(true);
     try {
       await t2gSource.connect(profile.id);
-      // connect() returns void on abort / session-not-active / errors;
-      // verify the link was actually persisted before claiming success.
       const refreshed = await persistence.profiles.getById(profile.id);
       const linked = refreshed?.linkedAccounts.some(
         (a) => a.source === sourceMeta.id
       );
       if (!linked) return;
-      // Static toast string keeps user-typed and external-account fields
-      // out of the user-facing message; the source/profile context is
-      // already implicit from the row the user clicked.
       toasts.success(ACCOUNT_LINKED_TOAST);
     } finally {
       setBusy(false);
@@ -67,25 +82,10 @@ export const useLinkedAccountRow = (
   }, [persistence, profile, sourceMeta, toasts, analytics]);
 
   const handleToggleSyncZones = useCallback(
-    async (next: boolean) => {
-      const refreshed = await persistence.profiles.getById(profile.id);
-      if (!refreshed) return;
-      const updatedAccounts = refreshed.linkedAccounts.map((a) =>
-        a.source === sourceMeta.id ? { ...a, syncZones: next } : a
-      );
-      await persistence.profiles.put({
-        ...refreshed,
-        linkedAccounts: updatedAccounts,
-        updatedAt: new Date().toISOString(),
-      });
-    },
+    async (next: boolean) =>
+      writeSyncZones(persistence.profiles, profile.id, sourceMeta.id, next),
     [persistence, profile, sourceMeta]
   );
 
-  return {
-    busy,
-    handleConnect,
-    handleDisconnect,
-    handleToggleSyncZones,
-  };
+  return { busy, handleConnect, handleDisconnect, handleToggleSyncZones };
 };

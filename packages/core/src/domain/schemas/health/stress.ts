@@ -13,6 +13,9 @@ export const stressEpisodeSchema = z
     endTime: z.iso.datetime(),
     averageLevel: z.number().int().min(0).max(100),
     peakLevel: z.number().int().min(0).max(100),
+    kaiordRecordId: z.string().uuid().optional(),
+    sourceBridgeId: z.string().optional(),
+    externalId: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (
