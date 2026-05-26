@@ -1,3 +1,5 @@
+> Completed: 2026-05-26
+
 > Depends on health-trends-overlay-single-chart
 
 # Health Trends: Single-Canvas Overlay with N Native Y Axes
