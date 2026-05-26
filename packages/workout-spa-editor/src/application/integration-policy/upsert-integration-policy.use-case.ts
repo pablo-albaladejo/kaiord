@@ -47,15 +47,19 @@ export const upsertIntegrationPolicy = async (
         : input.mode !== existing.mode
           ? "mode_changed"
           : "enabled";
-    const extraProps = action === "mode_changed" ? { newMode: input.mode } : {};
-    deps.analytics?.event("integration_policy.toggled", {
+    const baseProps = {
       profileId: input.profileId,
       dataType: input.dataType,
       direction: input.direction,
       bridgeId: input.bridgeId,
       action,
-      ...extraProps,
-    });
+    };
+    deps.analytics?.event(
+      "integration_policy.toggled",
+      action === "mode_changed"
+        ? { ...baseProps, newMode: input.mode }
+        : baseProps
+    );
 
     return updated;
   }
