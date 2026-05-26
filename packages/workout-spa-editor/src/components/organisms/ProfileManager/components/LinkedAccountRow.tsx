@@ -17,8 +17,10 @@ export function LinkedAccountRow({
   sourceMeta: SourceMeta;
 }) {
   const linked = profile.linkedAccounts.find((a) => a.source === sourceMeta.id);
-  const { busy, handleConnect, handleDisconnect } =
-    useLinkedAccountRow(profile, sourceMeta);
+  const { busy, handleConnect, handleDisconnect } = useLinkedAccountRow(
+    profile,
+    sourceMeta
+  );
 
   return (
     <div

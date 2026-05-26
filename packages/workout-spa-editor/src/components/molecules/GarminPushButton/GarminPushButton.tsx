@@ -37,8 +37,7 @@ export const GarminPushButton: React.FC<{ profileId?: string }> = ({
   const isLoading = pushing.status === "loading";
 
   const hasEnabledPolicy =
-    exportPolicies !== undefined &&
-    exportPolicies.some((p) => p.enabled);
+    exportPolicies !== undefined && exportPolicies.some((p) => p.enabled);
 
   if (!extensionInstalled || !hasEnabledPolicy) {
     return null;

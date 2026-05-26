@@ -17,7 +17,7 @@ export type EventBus<TMap extends Record<string, unknown>> = {
 };
 
 export const createEventBus = <
-  TMap extends Record<string, unknown>
+  TMap extends Record<string, unknown>,
 >(): EventBus<TMap> => {
   const listeners = new Map<keyof TMap, Set<Listener<unknown>>>();
 

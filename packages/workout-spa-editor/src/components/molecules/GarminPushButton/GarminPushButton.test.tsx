@@ -36,12 +36,9 @@ vi.mock("../../../adapters/dexie/dexie-database", () => ({
   db: { table: () => ({ get: async () => undefined }) },
 }));
 
-vi.mock(
-  "../../../adapters/dexie/dexie-integration-policy-repository",
-  () => ({
-    createDexieIntegrationPolicyRepository: () => ({}),
-  })
-);
+vi.mock("../../../adapters/dexie/dexie-integration-policy-repository", () => ({
+  createDexieIntegrationPolicyRepository: () => ({}),
+}));
 
 vi.mock(
   "../../../application/integration-policy/resolve-export-policies.use-case",
