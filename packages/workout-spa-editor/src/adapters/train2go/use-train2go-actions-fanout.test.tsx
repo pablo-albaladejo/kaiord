@@ -2,9 +2,10 @@
  * `useConnectCallback` / `useSyncCallback` — zones-sync fan-out tests.
  *
  * Spec scenarios for §8: after a successful link / weekly read AND the
- * persisted account has `syncZones === true`, the action callback
- * SHALL invoke `runZonesSync` exactly once. Errors thrown by
- * `runZonesSync` MUST NOT propagate up.
+ * persisted account has an enabled IntegrationPolicy(direction='import',
+ * dataType='training-zones'), the action callback SHALL invoke
+ * `runZonesSync` exactly once. Errors thrown by `runZonesSync` MUST NOT
+ * propagate up.
  */
 import type { Analytics } from "@kaiord/core";
 import { renderHook } from "@testing-library/react";
@@ -48,20 +49,12 @@ const analytics: Analytics = {
   reset: vi.fn(),
 } as unknown as Analytics;
 
-// syncZones retained in Dexie as nullable rollback buffer (v17 → v18 F-4).
-// TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
-const T2G_LINK_WITH_FLAG = {
+const T2G_LINK: LinkedCoachingAccount = {
   source: "train2go",
   externalUserId: "99999",
   externalUserName: "Pablo",
   linkedAt: "2026-04-28T10:00:00.000Z",
-  syncZones: true,
-} as unknown as LinkedCoachingAccount;
-
-const T2G_LINK_WITHOUT_FLAG = {
-  ...T2G_LINK_WITH_FLAG,
-  syncZones: false,
-} as unknown as LinkedCoachingAccount;
+};
 
 const makeProfile = (link: LinkedCoachingAccount): Profile => ({
   id: "p1",
@@ -85,10 +78,10 @@ const wrapPersistence = (
 describe("useConnectCallback fan-out", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("should call runZonesSync after attemptLink ok AND syncZones flag is true", async () => {
+  it("should call runZonesSync after attemptLink ok when runZonesSync is provided", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
+    await persistence.profiles.put(makeProfile(T2G_LINK));
     const runZonesSync = vi.fn(async () => undefined);
     const { result } = renderHook(
       () => useConnectCallback(persistence, transport, analytics, runZonesSync),
@@ -102,17 +95,17 @@ describe("useConnectCallback fan-out", () => {
     expect(runZonesSync).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
-  it("should do NOT call runZonesSync when the syncZones flag is false", async () => {
+  it("should NOT call runZonesSync when runZonesSync is not provided", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    await persistence.profiles.put(makeProfile(T2G_LINK_WITHOUT_FLAG));
+    await persistence.profiles.put(makeProfile(T2G_LINK));
     const runZonesSync = vi.fn(async () => undefined);
-    const { result } = renderHook(
-      () => useConnectCallback(persistence, transport, analytics, runZonesSync),
-      wrapPersistence(persistence)
-    );
 
     // Act
+    const { result } = renderHook(
+      () => useConnectCallback(persistence, transport, analytics),
+      wrapPersistence(persistence)
+    );
     await result.current("p1");
 
     // Assert
@@ -122,7 +115,7 @@ describe("useConnectCallback fan-out", () => {
   it("should swallow runZonesSync errors so the connect still resolves", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
+    await persistence.profiles.put(makeProfile(T2G_LINK));
     const runZonesSync = vi.fn(async () => {
       throw new Error("zones boom");
     });
@@ -141,10 +134,10 @@ describe("useConnectCallback fan-out", () => {
 describe("useSyncCallback fan-out", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("should call runZonesSync after syncWeek ok AND syncZones flag is true", async () => {
+  it("should call runZonesSync after syncWeek ok when runZonesSync is provided", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
+    await persistence.profiles.put(makeProfile(T2G_LINK));
     const runZonesSync = vi.fn(async () => undefined);
     const { result } = renderHook(
       () => useSyncCallback(persistence, transport, analytics, runZonesSync),
@@ -158,14 +151,14 @@ describe("useSyncCallback fan-out", () => {
     expect(runZonesSync).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
-  it("should do NOT call runZonesSync when syncWeek fails", async () => {
+  it("should NOT call runZonesSync when syncWeek fails", async () => {
     // Arrange
     mockSyncWeek.mockResolvedValueOnce({
       ok: false as const,
       reason: "shape-mismatch",
     } as never);
     const persistence = createInMemoryPersistence();
-    await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
+    await persistence.profiles.put(makeProfile(T2G_LINK));
     const runZonesSync = vi.fn(async () => undefined);
     const { result } = renderHook(
       () => useSyncCallback(persistence, transport, analytics, runZonesSync),

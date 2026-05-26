@@ -58,15 +58,12 @@ const makeProfile = (overrides: Partial<Profile> = {}): Profile => ({
   name: "Pablo",
   sportZones: {},
   linkedAccounts: [
-    // syncZones retained in Dexie as nullable rollback buffer (v17 → v18 F-4).
-    // TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
     {
       source: "train2go",
       externalUserId: "99999",
       externalUserName: "Pablo",
       linkedAt: NOW,
-      syncZones: true,
-    } as unknown as LinkedCoachingAccount,
+    } satisfies LinkedCoachingAccount,
   ],
   createdAt: NOW,
   updatedAt: NOW,
