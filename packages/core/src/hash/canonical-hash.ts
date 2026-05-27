@@ -21,4 +21,6 @@ const normalize = (value: unknown): unknown => {
 };
 
 export const canonicalHash = (value: Record<string, unknown>): string =>
-  createHash("sha256").update(JSON.stringify(normalize(value))).digest("hex");
+  createHash("sha256")
+    .update(JSON.stringify(normalize(value)))
+    .digest("hex");
