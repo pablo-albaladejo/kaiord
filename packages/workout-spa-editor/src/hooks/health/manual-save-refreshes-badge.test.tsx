@@ -55,7 +55,7 @@ describe("manual save refreshes the calendar wellness badge", () => {
     // Act
     await saveManualHealthMetric(
       { persistence, profileId: PROFILE_ID },
-      { metric: "steps", day: DAY, value: 8000 }
+      { metric: "daily-wellness", day: DAY, value: 8000 }
     );
     const { result } = renderHook(() =>
       useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END)

@@ -1,3 +1,4 @@
+import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -218,5 +219,40 @@ describe("syncStateSchema", () => {
         capabilities: ["delete:workouts"],
       })
     ).toThrow();
+  });
+});
+
+describe("bridgeCapabilitySchema coverage against MANAGED_DATA_REGISTRY", () => {
+  it("should keep bridgeCapabilitySchema in sync with MANAGED_DATA_REGISTRY tokens", () => {
+    // Arrange
+    const schemaTokens = new Set(bridgeCapabilitySchema.options);
+    const registryTokens = Object.values(MANAGED_DATA_REGISTRY)
+      .flatMap((entry) => [
+        entry.capabilities.import,
+        entry.capabilities.export,
+      ])
+      .filter((t): t is string => typeof t === "string");
+
+    // Act
+    const missing = registryTokens.filter((t) => !schemaTokens.has(t));
+
+    // Assert
+    expect(missing).toEqual([]);
+  });
+
+  it("should surface missing tokens when registry references an unknown capability", () => {
+    // Arrange
+    const schemaTokens = new Set(bridgeCapabilitySchema.options);
+    const fakeRegistryTokens = [
+      "read:body",
+      "write:workouts",
+      "read:unknown-future-cap",
+    ];
+
+    // Act
+    const missing = fakeRegistryTokens.filter((t) => !schemaTokens.has(t));
+
+    // Assert
+    expect(missing).toEqual(["read:unknown-future-cap"]);
   });
 });

@@ -50,7 +50,7 @@ const buildPayload = (
       return buildSleepPayload(value, day);
     case "hrv":
       return buildHrvPayload(value, day);
-    case "steps":
+    case "daily-wellness":
       return buildStepsPayload(value, day, prior?.krd as DailyWellness);
   }
 };

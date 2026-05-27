@@ -160,7 +160,7 @@ describe("saveManualHealthMetric", () => {
     // Act
     await saveManualHealthMetric(
       { persistence, profileId: PROFILE_ID },
-      { metric: "steps", day: DAY, value: NEW_STEPS }
+      { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
     );
 
     // Assert
@@ -181,7 +181,7 @@ describe("saveManualHealthMetric", () => {
     // Act
     await saveManualHealthMetric(
       { persistence, profileId: PROFILE_ID },
-      { metric: "steps", day: DAY, value: NEW_STEPS }
+      { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
     );
 
     // Assert
@@ -222,7 +222,7 @@ describe("saveManualHealthMetric", () => {
     // Act
     await saveManualHealthMetric(
       { persistence, profileId: PROFILE_ID },
-      { metric: "steps", day: DAY, value: NEW_STEPS }
+      { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
     );
 
     // Assert
