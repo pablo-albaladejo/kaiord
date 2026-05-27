@@ -18,7 +18,12 @@ export type WellnessEntryFormProps = {
 
 type Fields = Record<ManualHealthMetric, string>;
 
-const EMPTY_FIELDS: Fields = { weight: "", sleep: "", hrv: "", steps: "" };
+const EMPTY_FIELDS: Fields = {
+  weight: "",
+  sleep: "",
+  hrv: "",
+  "daily-wellness": "",
+};
 
 const collectFilled = (fields: Fields): WellnessValues => {
   const values: WellnessValues = {};
@@ -72,8 +77,8 @@ export function WellnessEntryForm({ date, onSaved }: WellnessEntryFormProps) {
       />
       <WellnessMetricField
         label="Steps"
-        value={fields.steps}
-        onChange={setField("steps")}
+        value={fields["daily-wellness"]}
+        onChange={setField("daily-wellness")}
         min={0}
         step={1}
       />
