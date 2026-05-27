@@ -25,7 +25,7 @@ This change introduces a first-class `IntegrationPolicy` entity, a canonical `MA
 
 ### Core entities
 
-```
+```text
 MANAGED_DATA_REGISTRY (packages/core/src/domain/managed-data-type.ts)
   Record<ManagedDataType, { label, schema, capabilities: { import?: string; export?: string } }>
   ManagedDataType = 'workout' | 'training-plan' | 'training-zones' | 'weight'
@@ -42,7 +42,7 @@ ExportLedgerEntry (packages/workout-spa-editor/src/types/export-ledger.ts)
 
 ### Data-flow diagram
 
-```
+```text
 Chrome extension bridges
   garmin-bridge  ──announces──▶  bridge-registry (SPA)
   train2go-bridge ─announces──▶  bridge-registry (SPA)
@@ -105,7 +105,7 @@ Each `MANAGED_DATA_REGISTRY` entry carries an optional `hashProjection: (payload
 
 For a given record `R` and destination bridge `B`:
 
-```
+```text
 1. BEGIN TRANSACTION
    INSERT ledger row { kaiordRecordId: R.id, destinationBridgeId: B,
                        destinationExternalId: 'pending', contentHash: hash(R) }

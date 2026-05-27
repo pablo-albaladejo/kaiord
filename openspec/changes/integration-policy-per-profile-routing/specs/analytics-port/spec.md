@@ -31,7 +31,7 @@ Payload shape:
 {
   profileId: string;
   dataType: ManagedDataType;
-  bridgeId: string;
+  sourceBridgeId: string;
   durationMs: number;
   outcome: "inserted" | "deduplicated";
 }

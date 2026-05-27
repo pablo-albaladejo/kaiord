@@ -1,5 +1,4 @@
 > Status: Draft
-
 > Source spec: `.omc/specs/deep-dive-chrome-extension-direction-model.md`
 > Source trace: `.omc/specs/deep-dive-trace-chrome-extension-direction-model.md`
 > Plan: `.omc/plans/ralplan-integration-policy-per-profile-routing.md`
