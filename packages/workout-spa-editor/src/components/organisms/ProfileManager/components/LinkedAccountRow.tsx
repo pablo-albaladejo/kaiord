@@ -1,20 +1,11 @@
 /**
  * LinkedAccountRow — single row in `LinkedAccountsSection`.
  *
- * Renders the connect/disconnect button + the optional `Sync zones`
- * toggle. The toggle is gated on TWO conditions: the row is currently
- * `linked`, AND the discovered Train2Go bridge advertises
- * `read:training-zones`. Older bridges never see the control.
- *
- * The conflict dialog itself lives at app root via
- * `Train2GoZonesSyncProvider` so its visibility is decoupled from the
- * Profile Manager being open — clicking sync from the calendar header
- * still surfaces the dialog.
+ * Renders the connect/disconnect button. The SyncZonesToggle has been
+ * removed in PR 5; the Data Flows section (PR 6) is the replacement.
  */
-import { useTrain2GoSupportsZones } from "../../../../hooks/use-train2go-supports-zones";
 import type { Profile } from "../../../../types/profile";
 import { RowInfo } from "./RowInfo";
-import { SyncZonesToggle } from "./SyncZonesToggle";
 import type { SourceMeta } from "./use-linked-account-row";
 import { useLinkedAccountRow } from "./use-linked-account-row";
 
@@ -26,9 +17,10 @@ export function LinkedAccountRow({
   sourceMeta: SourceMeta;
 }) {
   const linked = profile.linkedAccounts.find((a) => a.source === sourceMeta.id);
-  const { busy, handleConnect, handleDisconnect, handleToggleSyncZones } =
-    useLinkedAccountRow(profile, sourceMeta);
-  const supportsZones = useTrain2GoSupportsZones();
+  const { busy, handleConnect, handleDisconnect } = useLinkedAccountRow(
+    profile,
+    sourceMeta
+  );
 
   return (
     <div
@@ -57,14 +49,6 @@ export function LinkedAccountRow({
           </button>
         )}
       </div>
-      {/* TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones') */}
-      {linked && supportsZones ? (
-        <SyncZonesToggle
-          sourceId={sourceMeta.id}
-          checked={(linked as Record<string, unknown>)["syncZones"] === true}
-          onChange={handleToggleSyncZones}
-        />
-      ) : null}
     </div>
   );
 }

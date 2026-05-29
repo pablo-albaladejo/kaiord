@@ -10,11 +10,6 @@ import type { LinkedCoachingAccount } from "../../../../types/coaching-account";
 import type { Profile } from "../../../../types/profile";
 
 const mockConnect = vi.fn(async () => undefined);
-let mockSupportsZones = true;
-
-vi.mock("../../../../hooks/use-train2go-supports-zones", () => ({
-  useTrain2GoSupportsZones: () => mockSupportsZones,
-}));
 
 vi.mock("../../../../adapters/train2go/use-train2go-source", () => ({
   useTrain2GoSource: () => ({
@@ -112,10 +107,8 @@ describe("LinkedAccountsSection", () => {
     expect(mockConnect).toHaveBeenCalledWith("p1");
   });
 
-  it("should hide the Sync zones toggle when bridge does NOT advertise read:training-zones", () => {
+  it("should NOT render a Sync zones toggle after SyncZonesToggle removal", () => {
     // Arrange
-
-    mockSupportsZones = false;
 
     // Act
 
@@ -132,64 +125,5 @@ describe("LinkedAccountsSection", () => {
     expect(
       screen.queryByTestId("sync-zones-toggle-train2go")
     ).not.toBeInTheDocument();
-    mockSupportsZones = true;
-  });
-
-  it("should render the Sync zones toggle when linked AND bridge advertises capability", () => {
-    // Arrange
-
-    // Act
-
-    render(
-      wrap(
-        <LinkedAccountsSection
-          profile={makeProfile({ linkedAccounts: [T2G_LINK] })}
-        />
-      )
-    );
-
-    // Assert
-
-    expect(
-      screen.getByTestId("sync-zones-toggle-train2go")
-    ).toBeInTheDocument();
-  });
-
-  it("should persist the toggle state to the profile when clicked", async () => {
-    // Arrange
-
-    const persistence = createInMemoryPersistence();
-    const profile = {
-      ...makeProfile({ linkedAccounts: [T2G_LINK] }),
-    };
-    await persistence.profiles.put(profile);
-
-    render(
-      <PersistenceProvider persistence={persistence}>
-        <ToastContextProvider>
-          <LinkedAccountsSection profile={profile} />
-        </ToastContextProvider>
-      </PersistenceProvider>
-    );
-
-    const toggle = screen.getByTestId(
-      "sync-zones-toggle-train2go"
-    ) as HTMLLabelElement;
-    const checkbox = toggle.querySelector(
-      'input[type="checkbox"]'
-    ) as HTMLInputElement;
-    await userEvent.click(checkbox);
-
-    // Act
-
-    const after = await persistence.profiles.getById("p1");
-
-    // Assert
-    // syncZones retained in Dexie as nullable rollback buffer (v17 → v18 F-4).
-    // TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
-    const account = after?.linkedAccounts.find((a) => a.source === "train2go");
-    expect(
-      (account as Record<string, unknown> | undefined)?.["syncZones"]
-    ).toBe(true);
   });
 });
