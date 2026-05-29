@@ -44,4 +44,7 @@ export const createDexieExportLedgerRepository = (
   deleteById: async (id: string) => {
     await db.table("exportLedger").delete(id);
   },
+
+  countByDataType: async (dataType: string): Promise<number> =>
+    db.table("exportLedger").where("dataType").equals(dataType).count(),
 });

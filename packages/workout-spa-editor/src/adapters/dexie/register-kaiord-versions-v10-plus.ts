@@ -61,3 +61,8 @@ export const registerV17 = (db: DexieVersionHost): void => {
   // buffer until v18 (F-4).
   db.version(17).stores(SCHEMAS.v17).upgrade(applyV17Upgrade);
 };
+
+export const registerV18 = (db: DexieVersionHost): void => {
+  // v18 — add dataType index to exportLedger for countByDataType analytics.
+  db.version(18).stores(SCHEMAS.v18);
+};

@@ -51,6 +51,8 @@ const makeRepo = (): ExportLedgerRepository & {
         store.delete(id);
       }
     },
+    countByDataType: async (dt) =>
+      [...store.values()].filter((e) => e.dataType === dt).length,
   };
 };
 

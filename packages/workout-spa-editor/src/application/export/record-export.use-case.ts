@@ -1,22 +1,22 @@
-/**
- * recordExport — insert-pending → POST → UPDATE idempotency protocol.
- *
- * The unique index &[kaiordRecordId+destinationBridgeId] on exportLedger
- * acts as a mutex: only one caller can insert a 'pending' row for a given
- * (kaiordRecordId, destinationBridgeId) pair. The second concurrent
- * caller receives { ok: false; reason: 'constraint' } from insertPending
- * and returns 'lost-race' without ever calling postFn. This closes the
- * concurrent-trigger race (AC-8).
- */
-import type { ManagedDataType } from "@kaiord/core";
-import { canonicalHash, MANAGED_DATA_REGISTRY } from "@kaiord/core";
+import type { Analytics, ManagedDataType } from "@kaiord/core";
 
-import type { ExportLedgerEntry } from "../../types/export-ledger";
 import type { ExportLedgerRepository } from "./export-ledger-repository.port";
+import {
+  computeExportHash,
+  emitExportAnalytics,
+} from "./record-export-analytics";
 import { handleConstraintResult } from "./record-export-constraint";
+import {
+  postAndCommit,
+  type RecordExportOutcome,
+  type RecordExportResult,
+} from "./record-export-post";
+
+export type { RecordExportOutcome, RecordExportResult };
 
 export type RecordExportDeps = {
   ledgerRepo: ExportLedgerRepository;
+  analytics?: Analytics;
 };
 
 export type RecordExportInput = {
@@ -27,28 +27,6 @@ export type RecordExportInput = {
   postFn: (payload: Record<string, unknown>) => Promise<{ externalId: string }>;
 };
 
-export type RecordExportOutcome =
-  | "created"
-  | "updated"
-  | "skipped"
-  | "lost-race";
-
-export type RecordExportResult = {
-  ledgerId: string;
-  outcome: RecordExportOutcome;
-};
-
-const computeHash = (
-  dataType: ManagedDataType,
-  payload: Record<string, unknown>
-): string => {
-  const entry = MANAGED_DATA_REGISTRY[dataType];
-  const projected = entry?.hashProjection
-    ? entry.hashProjection(payload)
-    : payload;
-  return canonicalHash(projected as Record<string, unknown>);
-};
-
 export const recordExport = async (
   deps: RecordExportDeps,
   input: RecordExportInput
@@ -56,11 +34,11 @@ export const recordExport = async (
   const { ledgerRepo } = deps;
   const { kaiordRecordId, dataType, destinationBridgeId, payload, postFn } =
     input;
-  const contentHash = computeHash(dataType, payload);
+  const contentHash = computeExportHash(dataType, payload);
   const ledgerId = crypto.randomUUID();
   const now = new Date().toISOString();
-
-  const pending: ExportLedgerEntry = {
+  const t0 = Date.now();
+  const pending = {
     id: ledgerId,
     kaiordRecordId,
     dataType,
@@ -69,12 +47,9 @@ export const recordExport = async (
     contentHash,
     exportedAt: now,
   };
-
-  // Step 1: attempt insert of pending row — races are gated here.
   const insertResult = await ledgerRepo.insertPending(pending);
-
   if (!insertResult.ok) {
-    return handleConstraintResult(
+    const result = await handleConstraintResult(
       ledgerRepo,
       kaiordRecordId,
       destinationBridgeId,
@@ -83,21 +58,25 @@ export const recordExport = async (
       postFn,
       now
     );
+    await emitExportAnalytics(
+      deps.analytics,
+      ledgerRepo,
+      dataType,
+      destinationBridgeId,
+      result.outcome,
+      Date.now() - t0
+    );
+    return result;
   }
-
-  // Step 2: we won the race — call postFn.
-  let externalId: string;
-  try {
-    ({ externalId } = await postFn(payload));
-  } catch (postErr) {
-    await ledgerRepo.deleteById(ledgerId);
-    throw postErr;
-  }
-
-  // Step 3: commit — update pending row with real externalId.
-  await ledgerRepo.update(ledgerId, {
-    destinationExternalId: externalId,
-    exportedAt: new Date().toISOString(),
+  await postAndCommit({
+    ledgerRepo,
+    analytics: deps.analytics,
+    dataType,
+    destinationBridgeId,
+    ledgerId,
+    payload,
+    postFn,
+    t0,
   });
   return { ledgerId, outcome: "created" };
 };

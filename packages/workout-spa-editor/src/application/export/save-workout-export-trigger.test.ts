@@ -44,6 +44,7 @@ const makeLedgerRepo = (): ExportLedgerRepository => ({
   insertPending: async () => ({ ok: true }),
   update: async () => undefined,
   deleteById: async () => undefined,
+  countByDataType: async () => 0,
 });
 
 const makeEvent = (): WorkoutEventMap["entitySaved"] => ({

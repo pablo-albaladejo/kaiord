@@ -13,7 +13,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v17-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V16 = 16;
-const SCHEMA_V17 = 17;
+const SCHEMA_V18 = 18;
 const STORES_V16 = {
   profiles: "id",
   linkedAccounts: "id",
@@ -67,7 +67,7 @@ describe("Dexie v16 → v17 migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump database schema to version 17", async () => {
+  it("should bump database schema to version 18", async () => {
     // Arrange
     await seedV16(name);
 
@@ -78,7 +78,7 @@ describe("Dexie v16 → v17 migration", () => {
     db.close();
 
     // Assert
-    expect(version).toBe(SCHEMA_V17);
+    expect(version).toBe(SCHEMA_V18);
   });
 
   it("should create integrationPolicies store with the expected indices", async () => {

@@ -9,12 +9,13 @@
  * AC-7: two consecutive imports of the same (sourceBridgeId, externalId)
  * payload must produce exactly one row in the target store.
  */
-import type { ManagedDataType } from "@kaiord/core";
+import type { Analytics, ManagedDataType } from "@kaiord/core";
 
 import type { ImportedRecordRepository } from "./imported-record-repository.port";
 
 export type UpsertImportedRecordDeps = {
   recordRepo: ImportedRecordRepository;
+  analytics?: Analytics;
 };
 
 export type UpsertImportedRecordInput = {
@@ -36,7 +37,10 @@ export const upsertImportedRecord = async (
   deps: UpsertImportedRecordDeps,
   input: UpsertImportedRecordInput
 ): Promise<UpsertImportedRecordResult> => {
-  const existing = await deps.recordRepo.findByNaturalKey({
+  const { recordRepo, analytics } = deps;
+  const t0 = Date.now();
+
+  const existing = await recordRepo.findByNaturalKey({
     profileId: input.profileId,
     dataType: input.dataType,
     sourceBridgeId: input.sourceBridgeId,
@@ -44,11 +48,18 @@ export const upsertImportedRecord = async (
   });
 
   if (existing) {
+    analytics?.event("import_completed", {
+      profileId: input.profileId,
+      dataType: input.dataType,
+      bridgeId: input.sourceBridgeId,
+      durationMs: Date.now() - t0,
+      outcome: "deduplicated",
+    });
     return { kaiordRecordId: existing.kaiordRecordId, created: false };
   }
 
   const kaiordRecordId = crypto.randomUUID();
-  await deps.recordRepo.insert({
+  await recordRepo.insert({
     dataType: input.dataType,
     date: input.date,
     record: {
@@ -61,5 +72,12 @@ export const upsertImportedRecord = async (
     },
   });
 
+  analytics?.event("import_completed", {
+    profileId: input.profileId,
+    dataType: input.dataType,
+    bridgeId: input.sourceBridgeId,
+    durationMs: Date.now() - t0,
+    outcome: "inserted",
+  });
   return { kaiordRecordId, created: true };
 };
