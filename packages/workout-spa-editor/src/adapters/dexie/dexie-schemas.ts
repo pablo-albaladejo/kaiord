@@ -66,6 +66,26 @@ const CORE_V16 = {
   healthStress: "id, profileId, [profileId+date], date",
 };
 
+const HEALTH_SUFFIX =
+  ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
+
+// v17 — integrationPolicies + exportLedger stores; health stores gain
+// provenance fields (sourceBridgeId, externalId) and a unique compound
+// index [profileId+sourceBridgeId+externalId] for dedup on ingest.
+const CORE_V17 = {
+  ...CORE_V16,
+  integrationPolicies:
+    "id, [profileId+dataType+direction], &[profileId+dataType+direction+bridgeId], profileId",
+  exportLedger:
+    "id, &[kaiordRecordId+destinationBridgeId], kaiordRecordId, destinationBridgeId",
+  healthSleep: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+  healthWeight: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+  healthHrv: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+  healthDaily: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+  healthBodyComposition: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+  healthStress: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+};
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -74,6 +94,7 @@ export const SCHEMAS = {
   v8: CORE_V8,
   v13: CORE_V13,
   v16: CORE_V16,
+  v17: CORE_V17,
 } as const;
 
 /** Backfills `linkedAccounts: []` on profile rows missing the field. */

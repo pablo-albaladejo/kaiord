@@ -131,6 +131,17 @@ const makeSeedRow = (
       // index shape. The cascade-fan-out test only needs the primary key
       // and the per-profile + date indexed columns to round-trip a write.
       return { id, profileId, date: WEEK_START };
+    case "integrationPolicies":
+      return {
+        id,
+        profileId,
+        dataType: "training-zones",
+        bridgeId: "train2go-bridge",
+        direction: "import",
+        mode: "auto",
+        enabled: true,
+        updatedAt: NOW,
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
