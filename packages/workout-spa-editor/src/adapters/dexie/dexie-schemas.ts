@@ -86,6 +86,13 @@ const CORE_V17 = {
   healthStress: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
 };
 
+// v18 — add dataType index to exportLedger for countByDataType analytics gauge.
+const CORE_V18 = {
+  ...CORE_V17,
+  exportLedger:
+    "id, &[kaiordRecordId+destinationBridgeId], kaiordRecordId, destinationBridgeId, dataType",
+};
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -95,6 +102,7 @@ export const SCHEMAS = {
   v13: CORE_V13,
   v16: CORE_V16,
   v17: CORE_V17,
+  v18: CORE_V18,
 } as const;
 
 /** Backfills `linkedAccounts: []` on profile rows missing the field. */

@@ -8,7 +8,7 @@
  *   updated   — stale committed row, re-POST and update the ledger
  */
 import type { ExportLedgerRepository } from "./export-ledger-repository.port";
-import type { RecordExportResult } from "./record-export.use-case";
+import type { RecordExportResult } from "./record-export-post";
 
 export const handleConstraintResult = async (
   ledgerRepo: ExportLedgerRepository,

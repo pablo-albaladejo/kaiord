@@ -19,4 +19,5 @@ export type ExportLedgerRepository = {
   insertPending: (entry: ExportLedgerEntry) => Promise<InsertPendingResult>;
   update: (id: string, patch: Partial<ExportLedgerEntry>) => Promise<void>;
   deleteById: (id: string) => Promise<void>;
+  countByDataType: (dataType: string) => Promise<number>;
 };
