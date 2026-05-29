@@ -21,6 +21,9 @@ export const dailyWellnessSchema = z.object({
     vigorous: z.number().int().nonnegative(),
   }),
   floorsClimbed: z.number().int().nonnegative().optional(),
+  kaiordRecordId: z.string().uuid().optional(),
+  sourceBridgeId: z.string().optional(),
+  externalId: z.string().optional(),
 });
 
 export type DailyWellness = z.infer<typeof dailyWellnessSchema>;

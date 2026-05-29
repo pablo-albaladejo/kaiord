@@ -3,6 +3,8 @@
  * the linked account for `source` has the `Sync zones` toggle on.
  * Defensively returns `false` when the profile/link no longer exists,
  * so a connect/sync race can never trigger a phantom zones-sync.
+ *
+ * TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 
@@ -13,5 +15,5 @@ export const shouldFanOutZones = async (
 ): Promise<boolean> => {
   const profile = await p.profiles.getById(profileId);
   const link = profile?.linkedAccounts.find((a) => a.source === source);
-  return link?.syncZones === true;
+  return (link as Record<string, unknown> | undefined)?.["syncZones"] === true;
 };

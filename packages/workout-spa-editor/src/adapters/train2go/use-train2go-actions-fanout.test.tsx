@@ -48,18 +48,20 @@ const analytics: Analytics = {
   reset: vi.fn(),
 } as unknown as Analytics;
 
-const T2G_LINK_WITH_FLAG: LinkedCoachingAccount = {
+// syncZones retained in Dexie as nullable rollback buffer (v17 → v18 F-4).
+// TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
+const T2G_LINK_WITH_FLAG = {
   source: "train2go",
   externalUserId: "99999",
   externalUserName: "Pablo",
   linkedAt: "2026-04-28T10:00:00.000Z",
   syncZones: true,
-};
+} as unknown as LinkedCoachingAccount;
 
-const T2G_LINK_WITHOUT_FLAG: LinkedCoachingAccount = {
+const T2G_LINK_WITHOUT_FLAG = {
   ...T2G_LINK_WITH_FLAG,
   syncZones: false,
-};
+} as unknown as LinkedCoachingAccount;
 
 const makeProfile = (link: LinkedCoachingAccount): Profile => ({
   id: "p1",

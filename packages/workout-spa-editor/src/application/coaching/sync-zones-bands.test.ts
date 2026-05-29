@@ -38,6 +38,7 @@ import {
   Z5_LOWER_269,
 } from "../../test-utils/application-fixtures";
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
+import type { LinkedCoachingAccount } from "../../types/coaching-account";
 import type {
   ConflictDecision,
   FieldKey,
@@ -57,13 +58,15 @@ const makeProfile = (overrides: Partial<Profile> = {}): Profile => ({
   name: "Pablo",
   sportZones: {},
   linkedAccounts: [
+    // syncZones retained in Dexie as nullable rollback buffer (v17 → v18 F-4).
+    // TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
     {
       source: "train2go",
       externalUserId: "99999",
       externalUserName: "Pablo",
       linkedAt: NOW,
       syncZones: true,
-    },
+    } as unknown as LinkedCoachingAccount,
   ],
   createdAt: NOW,
   updatedAt: NOW,
@@ -201,7 +204,8 @@ describe("syncZones full-bands — cycling power watts→%FTP", () => {
     // Act
     await syncZones(PROFILE_ID, transport, repo);
 
-    // Assert — Z4: 240W..268W with FTP=268 → 90%..100% (exact integer)
+    // Assert
+    // Z4: 240W..268W with FTP=268 → 90%..100% (exact integer).
     const persisted = await repo.getById(PROFILE_ID);
     const z4 = persisted?.sportZones.cycling?.powerZones?.zones[3];
     expect(z4?.minPercent).toBe(Z4_MIN_PERCENT_90);
@@ -242,7 +246,8 @@ describe("syncZones full-bands — running pace inversion", () => {
     // Act
     await syncZones(PROFILE_ID, transport, repo);
 
-    // Assert — Z4 lower 4:44 (slower) → maxPace 284s; upper 4:10 (faster) → minPace 250s
+    // Assert
+    // Z4 lower 4:44 (slower) → maxPace 284s; upper 4:10 (faster) → minPace 250s.
     const persisted = await repo.getById(PROFILE_ID);
     const z4 = persisted?.sportZones.running?.paceZones?.zones[3];
     expect(z4?.minPace).toBe(PACE_Z4_MIN_SEC_250);
@@ -261,7 +266,8 @@ describe("syncZones full-bands — re-sync stability (round-trip)", () => {
     // First sync — silent-fills the empty profile.
     await syncZones(PROFILE_ID, transport, repo);
 
-    // Act — second sync against identical data.
+    // Act
+    // Second sync against identical data.
     const result = await syncZones(PROFILE_ID, transport, repo);
 
     // Assert
@@ -329,7 +335,8 @@ describe("commitConflictResolution full-bands — band-level merge", () => {
       })
     );
 
-    // Act — accept Z4 maxBpm (170 → 174), reject Z2 maxBpm (145 → 147)
+    // Act
+    // Accept Z4 maxBpm (170 → 174), reject Z2 maxBpm (145 → 147).
     const decisions = {
       "cycling.heartRateZones.z4.maxBpm": "accept",
       "cycling.heartRateZones.z2.maxBpm": "reject",
@@ -359,7 +366,8 @@ describe("mapPayloadToIncoming — direct unit tests for the band paths", () => 
     // Act
     const map = mapPayloadToIncoming(payload);
 
-    // Assert — bpmRest must not flow into the IncomingMap.
+    // Assert
+    // bpmRest must not flow into the IncomingMap.
     for (const key of map.keys()) {
       expect(key.toLowerCase()).not.toContain("rest");
     }

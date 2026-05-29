@@ -12,6 +12,9 @@ export const weightMeasurementSchema = z.object({
   version: z.string().regex(/^2\.\d+$/),
   measuredAt: z.iso.datetime(),
   weightKilograms: z.number().positive(),
+  kaiordRecordId: z.string().uuid().optional(),
+  sourceBridgeId: z.string().optional(),
+  externalId: z.string().optional(),
 });
 
 export type WeightMeasurement = z.infer<typeof weightMeasurementSchema>;

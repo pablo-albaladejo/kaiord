@@ -19,6 +19,9 @@ export const bodyCompositionSchema = z
     boneMassKilograms: z.number().positive().optional(),
     bodyWaterPercent: z.number().min(0).max(100).optional(),
     bmi: z.number().positive().optional(),
+    kaiordRecordId: z.string().uuid().optional(),
+    sourceBridgeId: z.string().optional(),
+    externalId: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     const hasAny =

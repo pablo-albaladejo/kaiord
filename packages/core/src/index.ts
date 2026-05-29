@@ -180,3 +180,6 @@ export {
   MANAGED_DATA_REGISTRY,
   managedDataTypes,
 } from "./domain";
+
+// Ingest utilities
+export { deriveExternalId } from "./ingest/derive-external-id";
