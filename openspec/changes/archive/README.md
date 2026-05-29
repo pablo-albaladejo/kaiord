@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-05-29 | [`integration-policy-per-profile-routing`](./2026-05-29-integration-policy-per-profile-routing/) | Kaiord has never modelled Integration Policy as a first-class concept. The bridge protocol has direction-aware capability strings (read:* / write:*), and the d… |
 | 2026-05-26 | [`health-trends-overlay-single-chart`](./2026-05-26-health-trends-overlay-single-chart/) | Health Trends: Single Overlay Chart with Synchronized Panes |
 | 2026-05-26 | [`single-canvas-trends-overlay`](./2026-05-26-single-canvas-trends-overlay/) | Health Trends: Single-Canvas Overlay with N Native Y Axes |
 | 2026-05-25 | [`add-health-metrics-to-krd`](./2026-05-25-add-health-metrics-to-krd/) | Garmin FIT files routinely carry health-domain data — sleep stages, body weight, HRV summaries, daily wellness (steps / active calories / intensity minutes), b… |
