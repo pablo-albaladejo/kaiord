@@ -6,8 +6,8 @@ export const exportLedgerEntrySchema = z.object({
   kaiordRecordId: z.string().uuid(),
   dataType: z.enum(managedDataTypes),
   destinationBridgeId: z.string().min(1),
-  destinationExternalId: z.string(),
-  contentHash: z.string(),
+  destinationExternalId: z.string().min(1),
+  contentHash: z.string().min(1),
   exportedAt: z.iso.datetime(),
 });
 export type ExportLedgerEntry = z.infer<typeof exportLedgerEntrySchema>;

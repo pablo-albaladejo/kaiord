@@ -15,8 +15,5 @@ export const shouldFanOutZones = async (
 ): Promise<boolean> => {
   const profile = await p.profiles.getById(profileId);
   const link = profile?.linkedAccounts.find((a) => a.source === source);
-  const syncZones: boolean | undefined = (
-    link as Record<string, unknown> | undefined
-  )?.["syncZones"] as boolean | undefined;
-  return syncZones ?? false;
+  return (link as Record<string, unknown> | undefined)?.["syncZones"] === true;
 };

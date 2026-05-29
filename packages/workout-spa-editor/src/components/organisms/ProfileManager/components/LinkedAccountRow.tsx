@@ -61,11 +61,7 @@ export function LinkedAccountRow({
       {linked && supportsZones ? (
         <SyncZonesToggle
           sourceId={sourceMeta.id}
-          checked={
-            ((linked as Record<string, unknown>)["syncZones"] as
-              | boolean
-              | undefined) ?? false
-          }
+          checked={(linked as Record<string, unknown>)["syncZones"] === true}
           onChange={handleToggleSyncZones}
         />
       ) : null}
