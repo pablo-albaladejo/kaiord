@@ -17,6 +17,8 @@ const HEALTH_TABLES = [
   "healthDaily",
   "healthBodyComposition",
   "healthStress",
+  // v17 — integrationPolicies is profile-scoped and cascades with health cleanup.
+  "integrationPolicies",
 ] as const;
 
 export const createDexieHealthCleanupRepository = (

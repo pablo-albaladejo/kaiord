@@ -14,6 +14,7 @@ import { applyV12Upgrade } from "./dexie-v12-migration";
 import { applyV13Upgrade } from "./dexie-v13-migration";
 import { applyV14Upgrade } from "./dexie-v14-migration";
 import { applyV15Upgrade } from "./dexie-v15-migration";
+import { applyV17Upgrade } from "./dexie-v17-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -49,4 +50,14 @@ export const registerV13ToV16 = (db: DexieVersionHost): void => {
   // body composition, stress. Purely additive — Dexie auto-creates the
   // new stores empty on upgrade so no data migration is needed.
   db.version(16).stores(SCHEMAS.v16);
+};
+
+export const registerV17 = (db: DexieVersionHost): void => {
+  // v17 — integrationPolicies + exportLedger stores; health stores gain
+  // sourceBridgeId + externalId columns and unique compound index
+  // [profileId+sourceBridgeId+externalId]. Backfills provenance on
+  // legacy health rows and converts syncZones=true linkedAccounts into
+  // IntegrationPolicy rows. syncZones column retained as rollback
+  // buffer until v18 (F-4).
+  db.version(17).stores(SCHEMAS.v17).upgrade(applyV17Upgrade);
 };

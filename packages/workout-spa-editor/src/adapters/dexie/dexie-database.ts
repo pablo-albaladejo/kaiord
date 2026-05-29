@@ -8,6 +8,7 @@
 import Dexie from "dexie";
 
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
+import { installExportLedgerCascade } from "./dexie-export-ledger-cascade";
 import { registerKaiordVersions } from "./register-kaiord-versions";
 
 export {
@@ -24,6 +25,7 @@ export class KaiordDatabase extends Dexie {
 }
 
 export const db = new KaiordDatabase();
+installExportLedgerCascade(db);
 
 // Expose for e2e test seeding (dev mode only). The `typeof window` guard
 // matches the symmetric `__KAIORD_WORKOUT_STORE__` exposure in
