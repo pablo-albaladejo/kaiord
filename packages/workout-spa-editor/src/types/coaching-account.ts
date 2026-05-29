@@ -52,12 +52,12 @@ export type LastSyncedZonesSnapshot = z.infer<
   typeof lastSyncedZonesSnapshotSchema
 >;
 
+// 'syncZones' removed in v17 — superseded by IntegrationPolicy(dataType='training-zones', direction='import'). Dexie column retained nullable as rollback buffer; full drop in v18 (F-4).
 export const linkedCoachingAccountSchema = z.object({
   source: z.string().min(1),
   externalUserId: z.string().min(1),
   externalUserName: z.string().min(1),
   linkedAt: z.iso.datetime(),
-  syncZones: z.boolean().optional(),
   lastSyncedZonesSnapshot: lastSyncedZonesSnapshotSchema.optional(),
 });
 

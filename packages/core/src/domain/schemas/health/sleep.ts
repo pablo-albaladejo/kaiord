@@ -36,6 +36,9 @@ export const sleepRecordSchema = z
     stages: z.array(sleepStageSchema),
     score: z.number().int().min(0).max(100).optional(),
     restingHeartRate: z.number().int().positive().optional(),
+    kaiordRecordId: z.string().uuid().optional(),
+    sourceBridgeId: z.string().optional(),
+    externalId: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     const stagesSum = value.stages.reduce(

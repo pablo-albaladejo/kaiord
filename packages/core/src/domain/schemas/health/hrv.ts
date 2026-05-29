@@ -12,6 +12,9 @@ export const hrvSummarySchema = z.object({
   rMSSD: z.number().positive(),
   measurementWindow: z.enum(["overnight", "spot"]),
   score: z.number().int().min(0).max(100).optional(),
+  kaiordRecordId: z.string().uuid().optional(),
+  sourceBridgeId: z.string().optional(),
+  externalId: z.string().optional(),
 });
 
 export type HrvSummary = z.infer<typeof hrvSummarySchema>;

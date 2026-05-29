@@ -185,9 +185,11 @@ describe("LinkedAccountsSection", () => {
     const after = await persistence.profiles.getById("p1");
 
     // Assert
-
+    // syncZones retained in Dexie as nullable rollback buffer (v17 → v18 F-4).
+    // TODO(PR 6): replace with IntegrationPolicy(direction='import',dataType='training-zones')
+    const account = after?.linkedAccounts.find((a) => a.source === "train2go");
     expect(
-      after?.linkedAccounts.find((a) => a.source === "train2go")?.syncZones
+      (account as Record<string, unknown> | undefined)?.["syncZones"]
     ).toBe(true);
   });
 });
