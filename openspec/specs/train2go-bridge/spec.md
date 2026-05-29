@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-05-29
 
 # Train2Go Bridge
 
@@ -282,25 +282,24 @@ The popup SHALL show clear status indicators (green for connected, red for disco
 
 ### Requirement: Bridge manifest for protocol discovery
 
-The Train2Go bridge's `BRIDGE_MANIFEST.capabilities` array SHALL include exactly the following capability strings:
+The Train2Go bridge's `BRIDGE_MANIFEST.capabilities` array SHALL continue to include `"read:training-plan"` and `"read:training-zones"`. These tokens remain the bridge's declaration of what it _can_ do. No change to the manifest or announcement protocol.
 
-- `read:training-plan` (existing — weekly / daily / tooltip reads)
-- `read:training-zones` (NEW — `read-details` action)
+The prior spec stated that the SPA gates the `Sync zones` toggle on the presence of `"read:training-zones"` in the manifest's `capabilities` array. This coupling is superseded. Policy authority for zones import moves to `IntegrationPolicy`; the bridge protocol is unchanged.
 
-The SPA SHALL gate any user-facing zones-sync UI (the `Sync zones` toggle on the Linked Account row) on the presence of `"read:training-zones"` in the manifest's `capabilities` array, so older-bridge users never see a feature their installed extension cannot fulfil.
-
-#### Scenario: Manifest exposes both capabilities
+#### Scenario: Manifest continues to expose both capabilities
 
 - **GIVEN** a bridge build that ships the `read-details` action
 - **WHEN** the SPA fetches the bridge's `ping` response
 - **THEN** the response data SHALL include `capabilities` containing both `"read:training-plan"` and `"read:training-zones"`
+- **AND** the SPA SHALL register both capability tokens via the bridge registry as before
+- **AND** the SPA SHALL NOT gate any user-facing zones-sync UI directly on capability presence — zones import is governed by `IntegrationPolicy` rows
 
-#### Scenario: An older bridge without the new capability is detected
+#### Scenario: Older bridge without read:training-zones — behavior unchanged
 
-- **GIVEN** the bridge response advertises `capabilities: ["read:training-plan"]` only
-- **WHEN** the SPA renders the Linked Account row for that bridge
-- **THEN** the `Sync zones` toggle SHALL be hidden
-- **AND** no zones-sync action SHALL be invokable
+- **GIVEN** the bridge response advertises `capabilities: ["read:training-plan"]` only (older extension not yet updated)
+- **WHEN** the SPA renders the profile's Data Flows section
+- **THEN** the `training-zones` import row for `train2go-bridge`, if present, renders as disabled with a "Bridge not installed / capability unavailable" hint
+- **AND** the `IntegrationPolicy` row is NOT deleted (C-8)
 
 ### Requirement: Bridge handles a `read-details` action
 

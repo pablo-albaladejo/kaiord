@@ -1,3 +1,5 @@
+> Completed: 2026-05-29
+
 > Status: Draft
 > Source spec: `.omc/specs/deep-dive-chrome-extension-direction-model.md`
 > Source trace: `.omc/specs/deep-dive-trace-chrome-extension-direction-model.md`

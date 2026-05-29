@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-05-29
 
 # SPA Garmin Extension
 
@@ -16,20 +16,24 @@ The extension ID SHALL be discovered at runtime from the content script announce
 
 If the browser is not Chrome-based (no `chrome.runtime.sendMessage` available), the SPA SHALL show a "Chrome required" message instead of the install prompt.
 
-#### Scenario: Extension is installed and session active
+`extensionInstalled` SHALL govern only bridge-lifecycle state (VERIFIED / UNAVAILABLE / REMOVED) and the "Bridge not installed" hint on existing `IntegrationPolicy` rows. It MUST NOT be used as the sole gate for push-affordance visibility; push affordance visibility MUST be determined by `resolveExportPolicies(profileId, 'workout')`.
+
+#### Scenario: Extension installed and session active — state tracked, not used for affordance gate
 
 - **WHEN** the SPA receives a bridge announcement and the verification ping returns `{ ok: true, protocolVersion: 1, data: { gcApi: { ok: true } } }`
-- **THEN** the SPA state is set to `extensionInstalled: true, sessionActive: true`
+- **THEN** the SPA state is set to `extensionInstalled: true, sessionActive: true` as before
+- **AND** the push affordance visibility is determined by `resolveExportPolicies(profileId, 'workout')`, not by `extensionInstalled` alone
 
 #### Scenario: Extension is installed but no session
 
 - **WHEN** the SPA receives a bridge announcement and the verification ping returns `{ ok: true, protocolVersion: 1, data: { gcApi: { ok: false } } }`
 - **THEN** the SPA state is set to `extensionInstalled: true, sessionActive: false`
 
-#### Scenario: Extension is not installed
+#### Scenario: Extension not installed — policy rows remain
 
 - **WHEN** no `KAIORD_BRIDGE_ANNOUNCE` with `bridgeId: "garmin-bridge"` is received within the discovery timeout
 - **THEN** the SPA state is set to `extensionInstalled: false, sessionActive: false`
+- **AND** any existing `IntegrationPolicy` rows referencing `garmin-bridge` are NOT deleted — they render as disabled with a "Bridge not installed" hint in the Data Flows section
 
 #### Scenario: Browser has no extension API
 
@@ -85,14 +89,31 @@ When the extension is installed but the session is not active, the SPA SHALL dis
 
 ### Requirement: Push workout via extension
 
-When the extension is installed and the session is active, the SPA SHALL provide a "Send to Garmin" button that converts the current workout to GCN format and sends it to the extension via `{ action: "push", gcn: payload }`. The SPA SHALL use a 15-second timeout for push operations.
+The `GarminPushButton` SHALL be visible if and only if `resolveExportPolicies(activeProfileId, 'workout')` returns at least one enabled `IntegrationPolicy` row. Bridge-discovery state is a secondary check: if the row exists but the bridge is not currently VERIFIED, the button renders as disabled with a hint rather than hidden.
 
-On any push/list failure with status 401 or 403, the SPA SHALL automatically re-run detection (`ping`) to update `sessionActive` before setting `lastError`.
+The prior requirement gated the button on `extensionInstalled && sessionActive`. This coupling is removed. The push operation itself (`{ action: "push", gcn: payload }`) is unchanged.
 
-#### Scenario: Successful push
+The SPA SHALL use a 15-second timeout for push operations. On any push/list failure with status 401 or 403, the SPA SHALL automatically re-run detection (`ping`) to update `sessionActive` before setting `lastError`.
 
-- **WHEN** the user clicks "Send to Garmin" and the extension returns `{ ok: true }`
-- **THEN** the SPA shows a success notification
+#### Scenario: Push button shown when policy row exists and bridge is verified
+
+- **GIVEN** `resolveExportPolicies(profileId, 'workout')` returns an enabled row for `garmin-bridge`
+- **AND** the Garmin Bridge is in VERIFIED state
+- **WHEN** the workout editor renders
+- **THEN** the `GarminPushButton` is visible and enabled
+
+#### Scenario: Push button hidden when no policy row exists
+
+- **GIVEN** `resolveExportPolicies(profileId, 'workout')` returns an empty array for the active profile
+- **WHEN** the workout editor renders
+- **THEN** the `GarminPushButton` is NOT rendered, regardless of `extensionInstalled` state
+
+#### Scenario: Push button disabled with hint when policy row exists but bridge unavailable
+
+- **GIVEN** `resolveExportPolicies(profileId, 'workout')` returns an enabled row for `garmin-bridge`
+- **AND** the Garmin Bridge is UNAVAILABLE or not detected
+- **WHEN** the workout editor renders
+- **THEN** the `GarminPushButton` renders as disabled with a "Bridge not installed" hint
 
 #### Scenario: Push fails
 
@@ -134,13 +155,7 @@ The SPA SHALL remove all Lambda proxy integration code:
 
 ### Requirement: Garmin store redesign
 
-The Zustand Garmin store SHALL be redesigned to track extension state instead of credentials:
-
-- `extensionInstalled: boolean`
-- `sessionActive: boolean`
-- `pushing: boolean`
-- `lastError: string | null`
-- `lastDetectionTimestamp: number | null`
+The Zustand Garmin store SHALL retain its existing fields: `extensionInstalled`, `sessionActive`, `pushing`, `lastError`, and `lastDetectionTimestamp`. The store MUST NOT gain a `policies` field — policy state SHALL be read from Dexie via the resolver use cases, not from the Zustand store.
 
 The store SHALL NOT persist any data to localStorage (no credentials, no tokens).
 
@@ -153,6 +168,11 @@ The store SHALL NOT persist any data to localStorage (no credentials, no tokens)
 
 - **WHEN** the extension ping completes
 - **THEN** the store reflects the detected state and updates `lastDetectionTimestamp`
+
+#### Scenario: Store does not control push affordance visibility
+
+- **WHEN** `extensionInstalled` is `false` in the Garmin store
+- **THEN** an existing `IntegrationPolicy` row for `(profileId, 'workout', 'export', 'garmin-bridge')` still causes the `GarminPushButton` to render as disabled with a hint, rather than being hidden entirely
 
 #### Scenario: Bridge lifecycle heartbeat
 

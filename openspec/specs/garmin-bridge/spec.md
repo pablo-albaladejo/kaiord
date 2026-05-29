@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-05-29
 
 # Garmin Bridge
 
@@ -148,15 +148,47 @@ The script SHALL re-announce when it receives a `KAIORD_BRIDGE_DISCOVER` message
 
 The production manifest (`manifest.prod.json`) SHALL only declare `https://*.kaiord.com/*` as the announce-script match; localhost origins SHALL NOT be present in the production build.
 
-#### Scenario: SPA loads on kaiord.com
+The prior spec stated that the SPA shows "Push to Garmin" UI based on the presence of `write:workouts` in the detected manifest. This coupling is superseded by the policy resolver (see `spa-bridge-protocol` spec, Requirement: Policy resolution). The bridge protocol is unchanged; the SPA-side consumption is what changes.
 
-- **WHEN** the SPA loads on `https://*.kaiord.com/*` and the extension is installed
-- **THEN** the announce content script posts `{ type: "KAIORD_BRIDGE_ANNOUNCE", bridgeId: "garmin-bridge", extensionId, ... }` to the page so the SPA can register the bridge
+#### Scenario: Garmin Bridge announces write:workouts capability
+
+- **WHEN** the Garmin Bridge extension is installed and announces via content script
+- **THEN** the announcement SHALL include `capabilities: ["write:workouts"]`
+- **AND** the SPA SHALL register the bridge as VERIFIED via the existing ping/verify flow
+- **AND** the SPA SHALL NOT use capability presence alone to show the push affordance — it SHALL additionally require at least one enabled `IntegrationPolicy` row via `resolveExportPolicies(profileId, 'workout')`
 
 #### Scenario: SPA requests rediscovery
 
 - **WHEN** the SPA dispatches `window.postMessage({ type: "KAIORD_BRIDGE_DISCOVER" }, window.location.origin)`
 - **THEN** the announce script re-announces with the same payload
+
+### Requirement: Push workout via extension
+
+The `GarminPushButton` component SHALL gate its visibility on `resolveExportPolicies(activeProfileId, 'workout')` returning at least one enabled `IntegrationPolicy` row, in addition to requiring the bridge to be currently discovered (VERIFIED state). Consulting `extensionInstalled` directly for affordance visibility is superseded.
+
+The push operation itself (`{ action: "push", gcn: payload }`) is unchanged.
+
+When a policy row exists but the `garmin-bridge` is not currently discovered (UNAVAILABLE or REMOVED), the push affordance SHALL render as disabled with a "Bridge not installed" hint rather than being hidden entirely. The `IntegrationPolicy` row is not deleted on bridge uninstall (C-8).
+
+#### Scenario: Push affordance visible when policy row exists and bridge is discovered
+
+- **GIVEN** the active profile has an enabled `IntegrationPolicy` row for `(dataType: 'workout', direction: 'export', bridgeId: 'garmin-bridge')`
+- **AND** the Garmin Bridge is currently in VERIFIED state
+- **WHEN** the workout editor renders
+- **THEN** the `GarminPushButton` is visible and enabled
+
+#### Scenario: Push affordance hidden when no policy row exists
+
+- **GIVEN** the active profile has no `IntegrationPolicy` row for `(dataType: 'workout', direction: 'export')`
+- **WHEN** the workout editor renders
+- **THEN** the `GarminPushButton` is NOT shown, even if the Garmin Bridge is VERIFIED
+
+#### Scenario: Push affordance disabled when policy row exists but bridge not installed
+
+- **GIVEN** the active profile has an enabled `IntegrationPolicy` row for `(dataType: 'workout', direction: 'export', bridgeId: 'garmin-bridge')`
+- **AND** the Garmin Bridge is not currently discovered (UNAVAILABLE or no announcement received)
+- **WHEN** the workout editor renders
+- **THEN** the `GarminPushButton` renders as disabled with a "Bridge not installed" hint
 
 ### Requirement: External message API
 

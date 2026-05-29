@@ -1,4 +1,4 @@
-> Synced: 2026-04-28 (train2go-profile-link)
+> Synced: 2026-05-29
 
 # SPA Train2Go Extension
 
@@ -28,6 +28,8 @@ The existing bridge registry (`adapters/bridge/bridge-registry.ts`) SHALL regist
 
 Detection results SHALL be cached for 30 seconds via `lastDetectionTimestamp`. If less than 30s have elapsed since the last detection and `extensionInstalled` is `true`, skip the ping. The cache is invalidated on any fetch failure with a connection error.
 
+`extensionInstalled` SHALL continue to track VERIFIED / UNAVAILABLE state. It MUST NOT gate zones-sync triggering — zones import SHALL be governed by `IntegrationPolicy` rows resolved via `resolveImportPolicies`.
+
 #### Scenario: Train2Go extension is installed and session active
 
 - **WHEN** the SPA receives a bridge announcement with `bridgeId: "train2go-bridge"` and the verification ping returns `{ ok: true, protocolVersion: 1, data: { sessionActive: true, userId: 28035 } }`
@@ -52,6 +54,12 @@ Detection results SHALL be cached for 30 seconds via `lastDetectionTimestamp`. I
 
 - **WHEN** less than 30 seconds have elapsed since last detection and `extensionInstalled` is `true`
 - **THEN** the SPA skips the ping and uses cached values
+
+#### Scenario: Detection does not trigger zones sync
+
+- **WHEN** `detectExtension` fires (app boot, heartbeat, or visibility change) and the Train2Go bridge is found VERIFIED
+- **THEN** `extensionInstalled` and `sessionActive` are updated as before
+- **AND** no zones import is triggered solely by detection — zones auto-import is governed by `resolveImportPolicies(profileId, 'training-zones')` with `mode: 'auto'` filter, not by `detectExtension` completing
 
 ### Requirement: Train2Go state management
 
@@ -296,7 +304,9 @@ The calendar empty states SHALL use platform-inclusive copy that references mult
 
 ### Requirement: `CoachingTransport` exposes an optional `readZones` capability
 
-The `CoachingTransport` port SHALL gain an optional method `readZones?: (externalUserId: string, signal?: AbortSignal) => Promise<ZonesPayload | null>`. The Train2Go transport adapter SHALL implement it; other adapters (Garmin) SHALL leave it unimplemented or return `null`. Application use cases that consume zones SHALL check for the method's presence before calling and SHALL gracefully degrade when absent (`{ ok: false, reason: "unsupported" }`).
+The `CoachingTransport` port SHALL retain the optional `readZones?: (externalUserId: string, signal?: AbortSignal) => Promise<ZonesPayload | null>` method unchanged. The caller change is that the `mode: 'auto'` zones import SHALL be triggered by the SPA-mount import lifecycle for any `IntegrationPolicy` row with `dataType: 'training-zones'`, `direction: 'import'`, `mode: 'auto'`, `enabled: true`, rather than by the deprecated `syncZones` flag fan-out in `useConnectCallback` / `useSyncCallback`.
+
+The Train2Go transport adapter SHALL implement `readZones`; other adapters (Garmin) SHALL leave it unimplemented or return `null`. Application use cases that consume zones SHALL check for the method's presence before calling and SHALL gracefully degrade when absent (`{ ok: false, reason: "unsupported" }`).
 
 #### Scenario: Train2Go transport implements readZones
 
@@ -336,21 +346,41 @@ The Train2Go transport's `readZones` implementation SHALL go through the existin
 
 ### Requirement: `LinkedAccountRow` exposes the `Sync zones` toggle
 
-The Profile Manager → Linked Accounts row for Train2Go SHALL include a checkbox or switch labelled `Sync zones from Train2Go`. The control SHALL be enabled only while the row is in the `linked` state. Toggling the control SHALL persist the new value to `profile.linkedAccounts[i].syncZones` via the existing persistence port. Toggling SHALL NOT trigger a sync by itself; the next link/sync action picks up the new value.
+This requirement is superseded. The `LinkedAccountRow` SHALL NOT expose a `Sync zones` toggle. Zone-sync configuration MUST be performed via the Data Flows section in ProfileManager (see ADDED Requirement: Data Flows configuration for training-zones import below). The `syncZones` field SHALL be removed from `linkedCoachingAccountSchema` at the Zod schema layer; the Dexie column remains nullable in v17 as a rollback buffer and is dropped in v18 (F-4).
 
-#### Scenario: Toggle is hidden for unlinked rows
+Profiles that previously had `syncZones: true` SHALL be migrated to an enabled `IntegrationPolicy` row (`dataType: 'training-zones'`, `bridgeId: 'train2go-bridge'`, `direction: 'import'`, `mode: 'auto'`, `enabled: true`) by the Dexie v17 upgrade. No user action is required.
 
-- **GIVEN** the user has not yet linked Train2Go
-- **WHEN** the user opens Profile Manager → Linked Accounts
-- **THEN** the row's primary control SHALL be the existing `Connect Train2Go` button
-- **AND** no `Sync zones` toggle SHALL be visible
+#### Scenario: Zone auto-import gated on IntegrationPolicy, not syncZones
 
-#### Scenario: Toggling the switch persists immediately
+- **GIVEN** a profile was migrated from `syncZones: true` to an enabled auto-import `IntegrationPolicy` row for `(dataType: 'training-zones', bridgeId: 'train2go-bridge', direction: 'import', mode: 'auto')`
+- **WHEN** the SPA mounts and the Train2Go bridge is VERIFIED
+- **THEN** the zones import fires once per SPA mount, deduplicating via the natural-key upsert (C-3), with no user-visible change in behavior relative to the prior `syncZones=true` state
 
-- **GIVEN** a linked Train2Go account with `syncZones: false`
-- **WHEN** the user clicks the `Sync zones` switch on
-- **THEN** the persisted profile SHALL be updated with `linkedAccounts[i].syncZones: true`
-- **AND** no zones-fetch network call SHALL fire as a side effect
+#### Scenario: No syncZones toggle in LinkedAccountRow
+
+- **WHEN** the user opens Profile Manager and views a linked Train2Go account
+- **THEN** the `LinkedAccountRow` SHALL NOT show a `Sync zones` checkbox or switch
+- **AND** authentication / identity / unlink controls SHALL remain unchanged (A-7)
+
+### Requirement: Data Flows configuration for training-zones import
+
+The ProfileManager **Data Flows** section SHALL expose the `training-zones` data type group with a Sources subsection. The Train2Go bridge SHALL appear as an available source when `MANAGED_DATA_REGISTRY['training-zones'].capabilities.import` resolves to a token present in the Train2Go manifest's `capabilities` array.
+
+Users can add, enable/disable, and set the mode (`manual` / `auto`) for the `training-zones` import policy row from this surface. The prior `SyncZonesToggle` in `LinkedAccountRow` is deleted; this is the replacement.
+
+#### Scenario: Data Flows section shows training-zones group when train2go-bridge is discovered
+
+- **GIVEN** the Train2Go bridge is VERIFIED and the active profile has an `IntegrationPolicy` row for `(dataType: 'training-zones', bridgeId: 'train2go-bridge', direction: 'import', mode: 'auto', enabled: true)`
+- **WHEN** the user opens ProfileManager > Data Flows > training-zones
+- **THEN** the group shows one source row for `train2go-bridge` with mode `auto` and enabled state on
+- **AND** no `Sync zones` toggle appears in the `LinkedAccountRow`
+
+#### Scenario: Migrated profile row appears in Data Flows after v17 upgrade
+
+- **GIVEN** a profile had `syncZones: true` before the v17 Dexie migration
+- **WHEN** the user opens ProfileManager > Data Flows > training-zones after the upgrade
+- **THEN** a source row for `train2go-bridge` with `mode: 'auto'` and `enabled: true` is visible
+- **AND** the user can toggle mode or disable it from this surface
 
 ### Requirement: Conflict dialog renders T2G strings safely
 
@@ -362,42 +392,6 @@ The `ZonesConflictDialog` component MUST NOT use `dangerouslySetInnerHTML`. Fiel
 - **WHEN** the conflict dialog opens
 - **THEN** the row label SHALL be `"FTP"` from the constant map (not from T2G)
 - **AND** the value cell SHALL render `270` as text via React children
-
-### Requirement: Train2Go connect callback fans out into a zones sync when toggle is on
-
-`useConnectCallback` (in `adapters/train2go/use-train2go-actions.ts`) SHALL, after `attemptLink` resolves with `{ ok: true }`, check the just-persisted `linkedAccounts[i].syncZones` flag. If `true`, it SHALL call the application's `syncZones(profileId, transport)` use case. The connect promise SHALL still resolve to the link's outcome regardless of the zones-sync result; zones-sync errors SHALL surface as toasts/analytics, not as a thrown exception.
-
-#### Scenario: Link succeeds with toggle on — sync fires
-
-- **GIVEN** the user enables `Sync zones` and runs connect
-- **WHEN** `attemptLink` resolves with `{ ok: true }`
-- **THEN** the SPA SHALL call `syncZones(profileId, transport)` exactly once
-- **AND** the connect callback SHALL resolve to the link result without rethrowing zones errors
-
-#### Scenario: Link succeeds with toggle off — no sync
-
-- **GIVEN** a fresh link with `syncZones: false`
-- **WHEN** `attemptLink` resolves with `{ ok: true }`
-- **THEN** the SPA SHALL NOT call `syncZones`
-
-### Requirement: Train2Go sync callback fans out into a zones sync after the weekly read
-
-`useSyncCallback` SHALL invoke the existing `weeklyRead` flow first; on its success AND when `linkedAccounts[i].syncZones` is `true`, the callback SHALL invoke `syncZones(profileId, transport)` once before resolving. A failure of the weekly read SHALL skip the zones sync (avoid stacking errors). A failure of zones-sync after a successful weekly read SHALL NOT mark the calendar sync as failed.
-
-#### Scenario: Weekly read succeeds, zones sync fires
-
-- **GIVEN** a linked account with `syncZones: true`
-- **WHEN** the user clicks the calendar header sync button
-- **THEN** the SPA SHALL execute the weekly read first
-- **AND** then call `syncZones(profileId, transport)` once
-- **AND** mark the calendar sync as succeeded regardless of the zones-sync outcome
-
-#### Scenario: Weekly read fails — zones sync is skipped
-
-- **GIVEN** a linked account with `syncZones: true`
-- **WHEN** the weekly read returns an error
-- **THEN** zones-sync SHALL NOT be invoked
-- **AND** the user SHALL see the existing calendar-sync error UX
 
 ### Requirement: `bodyWeight` and `heartRate.max` are populated from the `/user/details` physiological block, not the ping payload
 
