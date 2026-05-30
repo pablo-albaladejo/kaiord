@@ -71,6 +71,20 @@
   --brand-semantic-danger: #f87171; /* red-400 — 5.8:1 on page, 4.7:1 on danger-soft */
   --brand-semantic-danger-soft: #2d1216; /* Pre-computed: red-400 12% over slate-900 */
 
+  /* Training zones — 5-zone functional intensity ramp.
+     Powers zone bars, step rails, and the athlete zone map. Index n maps
+     to zone Zn. Used via the Tailwind `zone-1..5` color utilities mapped
+     in packages/workout-spa-editor/src/index.css @theme. */
+  --zone-1: #64748b; /* Z1 Recovery  (slate-500) */
+  --zone-2: #0ea5e9; /* Z2 Endurance (sky-500) */
+  --zone-3: #22c55e; /* Z3 Tempo     (green-500) */
+  --zone-4: #f59e0b; /* Z4 Threshold (amber-500) */
+  --zone-5: #ef4444; /* Z5 VO2 / Max (red-500) */
+
+  /* Deepened page background used by the mobile redesign surfaces
+     (one notch darker than --brand-bg-primary). */
+  --brand-bg-deep: #0b1220;
+
   /* Borders */
   --brand-border: #334155; /* Default (slate-700) */
   --brand-border-soft: #1e293b; /* Subtle (slate-800) */

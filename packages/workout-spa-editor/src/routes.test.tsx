@@ -50,7 +50,7 @@ describe("Routing", () => {
     localStorage.setItem("workout-spa-onboarding-completed", "true");
   });
 
-  it("should render CalendarPage at /calendar", async () => {
+  it("should render the Today page at /calendar", async () => {
     // Arrange
 
     // Act
@@ -59,7 +59,7 @@ describe("Routing", () => {
 
     // Assert
 
-    expect(await screen.findByTestId("calendar-page")).toBeInTheDocument();
+    expect(await screen.findByTestId("today-page")).toBeInTheDocument();
   });
 
   it("should render LibraryPage at /library", async () => {
@@ -71,12 +71,10 @@ describe("Routing", () => {
 
     // Assert
 
-    await waitFor(() => {
-      expect(screen.getByText("Workout Library")).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId("library-page")).toBeInTheDocument();
   });
 
-  it("should render NewWorkoutPicker at /workout/new", async () => {
+  it("should render the Create overlay at /workout/new", async () => {
     // Arrange
 
     // Act
@@ -86,9 +84,7 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("new-workout-picker-scratch")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("create-workout")).toBeInTheDocument();
     });
   });
 
@@ -102,7 +98,7 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByTestId("calendar-page")).toBeInTheDocument();
+      expect(screen.getByTestId("today-page")).toBeInTheDocument();
     });
   });
 
@@ -116,7 +112,7 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByTestId("calendar-page")).toBeInTheDocument();
+      expect(screen.getByTestId("today-page")).toBeInTheDocument();
     });
   });
 
