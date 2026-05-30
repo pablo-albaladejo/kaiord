@@ -76,7 +76,7 @@ describe("Routing", () => {
     });
   });
 
-  it("should render NewWorkoutPicker at /workout/new", async () => {
+  it("should render the Create overlay at /workout/new", async () => {
     // Arrange
 
     // Act
@@ -86,9 +86,7 @@ describe("Routing", () => {
     // Assert
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("new-workout-picker-scratch")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("create-workout")).toBeInTheDocument();
     });
   });
 
