@@ -4,6 +4,7 @@ export const AthletePage = lazy(() => import("./components/pages/AthletePage"));
 export const CalendarPage = lazy(
   () => import("./components/pages/CalendarPage")
 );
+export const TodayPage = lazy(() => import("./components/pages/Today"));
 export const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
 export const EditorPage = lazy(() => import("./components/pages/EditorPage"));
 export const WorkoutDetail = lazy(
