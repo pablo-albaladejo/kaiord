@@ -1,0 +1,84 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Bell,
+  Bike,
+  Calendar,
+  CalendarCheck,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Flame,
+  Footprints,
+  Heart,
+  LayoutGrid,
+  Link,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Route,
+  Settings,
+  Shield,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Upload,
+  User,
+  Watch,
+  Waves,
+  X,
+  Zap,
+} from "lucide-react";
+
+/* Stable semantic names used by the redesign surfaces, mapped to concrete
+   lucide-react icons. Screens reference icons by these names (via the
+   `IconName` type) so the underlying icon set can change in one place
+   without touching every call site. Names mirror the design handoff. */
+export const ICON_MAP = {
+  today: CalendarCheck,
+  library: LayoutGrid,
+  cards: LayoutGrid,
+  plus: Plus,
+  athlete: User,
+  gear: Settings,
+  bike: Bike,
+  run: Footprints,
+  swim: Waves,
+  zap: Zap,
+  sparkle: Sparkles,
+  heart: Heart,
+  watch: Watch,
+  arrowDown: ArrowDown,
+  arrowUp: ArrowUp,
+  chevR: ChevronRight,
+  chevL: ChevronLeft,
+  chevD: ChevronDown,
+  check: Check,
+  x: X,
+  clock: Clock,
+  route: Route,
+  flame: Flame,
+  sync: RefreshCw,
+  link: Link,
+  dots: MoreHorizontal,
+  edit: Pencil,
+  target: Target,
+  shield: Shield,
+  calendar: Calendar,
+  bell: Bell,
+  trend: TrendingUp,
+  upload: Upload,
+} as const satisfies Record<string, LucideIcon>;
+
+export type IconName = keyof typeof ICON_MAP;
+
+/** Maps a sport key to its redesign icon name. */
+export const SPORT_ICON_NAME = {
+  cycling: "bike",
+  running: "run",
+  swimming: "swim",
+} as const satisfies Record<string, IconName>;

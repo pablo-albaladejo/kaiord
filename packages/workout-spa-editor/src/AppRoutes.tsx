@@ -6,6 +6,7 @@ import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 import { HealthSubRouter } from "./components/pages/health/health-routes";
 
+const AthletePage = lazy(() => import("./components/pages/AthletePage"));
 const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
 const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
 const EditorPage = lazy(() => import("./components/pages/EditorPage"));
@@ -39,6 +40,11 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
             <CalendarPage />
           </RouteErrorBoundary>
         </Route>
+        <Route path="/athlete">
+          <RouteErrorBoundary analytics={analytics}>
+            <AthletePage />
+          </RouteErrorBoundary>
+        </Route>
         <Route path="/library">
           <RouteErrorBoundary analytics={analytics}>
             <LibraryPage />
@@ -55,6 +61,9 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
               <EditorPage id={params.id} />
             </RouteErrorBoundary>
           )}
+        </Route>
+        <Route path="/settings/profile">
+          <Redirect to="/athlete" />
         </Route>
         <Route path="/settings/:tab?">
           <RouteErrorBoundary analytics={analytics}>
