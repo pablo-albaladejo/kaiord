@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { useFocusOnRouteChange } from "../../../hooks/use-focus-on-route-change";
 import { useRouteAnnouncerLabel } from "../../../hooks/use-route-announcer-label";
+import { BottomNav } from "../../molecules/BottomNav";
 import { StorageAvailabilityBanner } from "../../molecules/StorageAvailabilityBanner";
 import { LayoutHeader } from "./LayoutHeader";
 
@@ -38,9 +39,10 @@ export const MainLayout = ({ children, onReplayTutorial }: MainLayoutProps) => {
       <div className="mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
         <StorageAvailabilityBanner />
       </div>
-      <main className="mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 py-6 pb-28 sm:px-6 lg:px-8 md:pb-6">
         {children}
       </main>
+      <BottomNav />
     </div>
   );
 };
