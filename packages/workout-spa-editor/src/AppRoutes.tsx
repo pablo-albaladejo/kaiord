@@ -1,31 +1,19 @@
 import type { Analytics } from "@kaiord/core";
-import { lazy, Suspense } from "react";
-import { Redirect, Route, Switch, useLocation, useSearch } from "wouter";
+import { Suspense } from "react";
+import { Redirect, Route, Switch } from "wouter";
 
 import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 import { HealthSubRouter } from "./components/pages/health/health-routes";
-
-const AthletePage = lazy(() => import("./components/pages/AthletePage"));
-const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
-const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
-const EditorPage = lazy(() => import("./components/pages/EditorPage"));
-const CreateWorkout = lazy(
-  () => import("./components/pages/CreateWorkout/CreateWorkout")
-);
-const SettingsPage = lazy(
-  () => import("./components/pages/SettingsPage/SettingsPage")
-);
-
-function NewWorkoutRoute() {
-  const search = useSearch();
-  const [, navigate] = useLocation();
-  const params = new URLSearchParams(search);
-  const hasAction = params.get("action") === "import";
-  const hasSource = params.get("source") === "scratch";
-  if (hasAction || hasSource) return <EditorPage />;
-  return <CreateWorkout onClose={() => navigate("/calendar")} />;
-}
+import {
+  AthletePage,
+  CalendarPage,
+  EditorPage,
+  LibraryPage,
+  SettingsPage,
+  WorkoutDetail,
+} from "./lazy-pages";
+import { NewWorkoutRoute } from "./new-workout-route";
 
 export type AppRoutesProps = { analytics: Analytics };
 
@@ -55,6 +43,13 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
           <RouteErrorBoundary analytics={analytics}>
             <NewWorkoutRoute />
           </RouteErrorBoundary>
+        </Route>
+        <Route path="/workout/view/:id">
+          {(params) => (
+            <RouteErrorBoundary analytics={analytics}>
+              <WorkoutDetail id={params.id} />
+            </RouteErrorBoundary>
+          )}
         </Route>
         <Route path="/workout/:id">
           {(params) => (
