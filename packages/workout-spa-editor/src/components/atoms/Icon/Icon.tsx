@@ -9,7 +9,8 @@ export type IconColor =
   | "success"
   | "warning"
   | "danger"
-  | "muted";
+  | "muted"
+  | "inherit";
 
 export type IconProps = Omit<HTMLAttributes<HTMLSpanElement>, "color"> & {
   icon: LucideIcon;
@@ -34,6 +35,9 @@ const colorClasses: Record<IconColor, string> = {
   warning: "text-yellow-600 dark:text-yellow-400",
   danger: "text-red-600 dark:text-red-400",
   muted: "text-gray-400 dark:text-gray-600",
+  // No color class — inherits currentColor from the parent so composite
+  // components can drive icon color via a wrapping `text-*` utility.
+  inherit: "",
 };
 
 export const Icon = forwardRef<HTMLSpanElement, IconProps>(

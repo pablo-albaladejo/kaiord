@@ -173,8 +173,7 @@ describe("LibraryPage", () => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
     });
 
-    const sportFilter = screen.getByLabelText("Sport");
-    await user.selectOptions(sportFilter, "running");
+    await user.click(screen.getByRole("button", { name: "Running" }));
 
     await waitFor(() => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -328,7 +327,7 @@ describe("LibraryPage", () => {
     // Act
 
     const heading = await screen.findByRole("heading", {
-      name: /workout library/i,
+      name: /^library$/i,
     });
 
     // Assert

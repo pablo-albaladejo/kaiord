@@ -34,8 +34,8 @@ import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live"
 import { useCurrentWorkout, useLoadWorkout } from "../../store/selectors";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
-import { LibraryPageContent } from "./LibraryPageContent";
-import { LibraryPageHeader } from "./LibraryPageHeader";
+import { LibraryContent } from "./Library/LibraryContent";
+import { LibraryHeader } from "./Library/LibraryHeader";
 import { useLibrarySchedule } from "./use-library-schedule";
 import { useScheduleTemplate } from "./use-schedule-template";
 
@@ -80,14 +80,16 @@ export default function LibraryPage() {
 
   return (
     <div className="space-y-4 p-4" data-testid="library-page">
-      <LibraryPageHeader />
       {templates === undefined ? (
-        <div className="flex items-center justify-center p-8 text-muted-foreground">
-          Loading library...
-        </div>
+        <>
+          <LibraryHeader count={0} />
+          <div className="flex items-center justify-center p-8 text-slate-400">
+            Loading library...
+          </div>
+        </>
       ) : (
         <>
-          <LibraryPageContent
+          <LibraryContent
             templates={templates}
             hasCurrentWorkout={hasCurrentWorkout}
             onDelete={handleDelete}

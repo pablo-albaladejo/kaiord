@@ -62,31 +62,77 @@ describe("SettingsPage", () => {
     });
   });
 
-  describe("routing", () => {
-    it("should redirect /settings to /settings/ai", async () => {
+  describe("landing list", () => {
+    it("should render the grouped list at /settings with no tab", () => {
       // Arrange
 
       // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-group-list")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "Settings"
+      );
+    });
+
+    it("should render every group eyebrow", () => {
+      // Arrange
+      const eyebrows = [
+        "AI generation",
+        "Preferences",
+        "Privacy & data",
+        "Advanced",
+      ];
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      for (const eyebrow of eyebrows) {
+        expect(screen.getByText(eyebrow)).toBeInTheDocument();
+      }
+    });
+
+    it("should navigate to a tab when clicking a navigating row", async () => {
+      // Arrange
+      const user = userEvent.setup();
       const { memory } = renderAtPath("/settings");
+
+      // Act
+      await user.click(screen.getByTestId("settings-row-Extensions"));
 
       // Assert
       await waitFor(() => {
-        expect(memory.history).toContain("/settings/ai");
+        expect(memory.history.at(-1)).toBe("/settings/extensions");
       });
     });
 
-    it("should redirect unknown tab to /settings/ai", () => {
+    it("should render Units as a non-navigating row", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      const row = screen.getByTestId("settings-row-Units");
+      expect(row.tagName).not.toBe("BUTTON");
+    });
+  });
+
+  describe("routing", () => {
+    it("should redirect unknown tab to /settings", () => {
       // Arrange
 
       // Act
       const { memory } = renderAtPath("/settings/unknown");
 
       // Assert
-      expect(memory.history.at(-1)).toBe("/settings/ai");
+      expect(memory.history.at(-1)).toBe("/settings");
     });
   });
 
-  describe("rendering", () => {
+  describe("detail views", () => {
     it("should render the page shell for a valid tab", () => {
       // Arrange
 
@@ -98,18 +144,6 @@ describe("SettingsPage", () => {
       expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
         "Settings · AI"
       );
-    });
-
-    it("should render the profile tab content at /settings/profile", async () => {
-      // Arrange
-
-      // Act
-      renderAtPath("/settings/profile");
-
-      // Assert
-      expect(
-        await screen.findByRole("heading", { name: /profile manager/i })
-      ).toBeInTheDocument();
     });
 
     it("should render the ai tab content at /settings/ai", () => {
@@ -156,36 +190,19 @@ describe("SettingsPage", () => {
     });
   });
 
-  describe("navigation", () => {
-    it("should navigate to a new tab when clicking a sidebar entry", async () => {
+  describe("back navigation", () => {
+    it("should navigate back to /settings from a detail view", async () => {
       // Arrange
       const user = userEvent.setup();
       const { memory } = renderAtPath("/settings/ai");
 
       // Act
-      await user.click(screen.getByTestId("settings-tab-privacy"));
+      await user.click(screen.getByTestId("settings-back"));
 
       // Assert
       await waitFor(() => {
-        expect(memory.history.at(-1)).toBe("/settings/privacy");
+        expect(memory.history.at(-1)).toBe("/settings");
       });
-    });
-
-    it("should mark the active tab with aria-selected", () => {
-      // Arrange
-
-      // Act
-      renderAtPath("/settings/extensions");
-
-      // Assert
-      expect(screen.getByTestId("settings-tab-extensions")).toHaveAttribute(
-        "aria-selected",
-        "true"
-      );
-      expect(screen.getByTestId("settings-tab-ai")).toHaveAttribute(
-        "aria-selected",
-        "false"
-      );
     });
   });
 });

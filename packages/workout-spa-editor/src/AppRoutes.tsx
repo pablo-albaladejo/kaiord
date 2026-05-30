@@ -1,66 +1,50 @@
 import type { Analytics } from "@kaiord/core";
-import { lazy, Suspense } from "react";
-import { Redirect, Route, Switch, useSearch } from "wouter";
+import type { ReactNode } from "react";
+import { Suspense } from "react";
+import { Redirect, Route, Switch } from "wouter";
 
 import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 import { HealthSubRouter } from "./components/pages/health/health-routes";
-
-const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
-const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
-const EditorPage = lazy(() => import("./components/pages/EditorPage"));
-const NewWorkoutPicker = lazy(
-  () => import("./components/pages/NewWorkoutPicker")
-);
-const SettingsPage = lazy(
-  () => import("./components/pages/SettingsPage/SettingsPage")
-);
-
-function NewWorkoutRoute() {
-  const search = useSearch();
-  const params = new URLSearchParams(search);
-  const hasAction = params.get("action") === "import";
-  const hasSource = params.get("source") === "scratch";
-  if (hasAction || hasSource) return <EditorPage />;
-  return <NewWorkoutPicker />;
-}
+import {
+  AthletePage,
+  CalendarPage,
+  EditorPage,
+  LibraryPage,
+  SettingsPage,
+  TodayPage,
+  WorkoutDetail,
+} from "./lazy-pages";
+import { NewWorkoutRoute } from "./new-workout-route";
 
 export type AppRoutesProps = { analytics: Analytics };
 
 export function AppRoutes({ analytics }: AppRoutesProps) {
+  const guard = (node: ReactNode) => (
+    <RouteErrorBoundary analytics={analytics}>{node}</RouteErrorBoundary>
+  );
+
   return (
     <Suspense fallback={<RouteSpinner />}>
       <Switch>
         <Route path="/">
           <Redirect to="/calendar" />
         </Route>
-        <Route path="/calendar/:weekId?">
-          <RouteErrorBoundary analytics={analytics}>
-            <CalendarPage />
-          </RouteErrorBoundary>
-        </Route>
-        <Route path="/library">
-          <RouteErrorBoundary analytics={analytics}>
-            <LibraryPage />
-          </RouteErrorBoundary>
-        </Route>
-        <Route path="/workout/new">
-          <RouteErrorBoundary analytics={analytics}>
-            <NewWorkoutRoute />
-          </RouteErrorBoundary>
+        <Route path="/calendar">{guard(<TodayPage />)}</Route>
+        <Route path="/calendar/:weekId">{guard(<CalendarPage />)}</Route>
+        <Route path="/athlete">{guard(<AthletePage />)}</Route>
+        <Route path="/library">{guard(<LibraryPage />)}</Route>
+        <Route path="/workout/new">{guard(<NewWorkoutRoute />)}</Route>
+        <Route path="/workout/view/:id">
+          {(params) => guard(<WorkoutDetail id={params.id} />)}
         </Route>
         <Route path="/workout/:id">
-          {(params) => (
-            <RouteErrorBoundary analytics={analytics}>
-              <EditorPage id={params.id} />
-            </RouteErrorBoundary>
-          )}
+          {(params) => guard(<EditorPage id={params.id} />)}
         </Route>
-        <Route path="/settings/:tab?">
-          <RouteErrorBoundary analytics={analytics}>
-            <SettingsPage />
-          </RouteErrorBoundary>
+        <Route path="/settings/profile">
+          <Redirect to="/athlete" />
         </Route>
+        <Route path="/settings/:tab?">{guard(<SettingsPage />)}</Route>
         <Route path="/health/*?">
           <HealthSubRouter analytics={analytics} />
         </Route>

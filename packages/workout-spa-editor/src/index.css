@@ -63,6 +63,22 @@
   --color-gray-900: var(--color-slate-900);
   --color-gray-950: var(--color-slate-950);
 
+  /* Training-zone ramp — exposes the --zone-1..5 brand tokens as Tailwind
+     color utilities (bg-zone-3, text-zone-3, border-zone-3, …) for the
+     redesign zone bars, step rails, and zone map. */
+  --color-zone-1: var(--zone-1);
+  --color-zone-2: var(--zone-2);
+  --color-zone-3: var(--zone-3);
+  --color-zone-4: var(--zone-4);
+  --color-zone-5: var(--zone-5);
+
+  /* Brand surfaces/text as Tailwind utilities so redesign components can
+     reach the exact dark-slate palette (bg-surface, text-faint, …) without
+     re-declaring hex values. */
+  --color-surface-deep: var(--brand-bg-deep);
+  --color-surface: var(--brand-bg-surface);
+  --color-surface-elevated: var(--brand-bg-elevated);
+
   --font-sans: var(--brand-font-sans);
 }
 

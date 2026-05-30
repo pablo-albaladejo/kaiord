@@ -113,6 +113,26 @@ describe("MainLayout", () => {
     expect(nav).toBeInTheDocument();
   });
 
+  it("should render the floating bottom navigation", () => {
+    // Arrange
+
+    renderWithProviders(
+      <MainLayout>
+        <div>Content</div>
+      </MainLayout>,
+      { defaultTheme: "light" }
+    );
+
+    // Act
+
+    const bottomNav = screen.getByRole("navigation", { name: "Primary" });
+
+    // Assert
+
+    expect(bottomNav).toBeInTheDocument();
+    expect(bottomNav).toHaveClass("md:hidden");
+  });
+
   it("should not render the removed primary navigation tab bar", () => {
     // Arrange
 
