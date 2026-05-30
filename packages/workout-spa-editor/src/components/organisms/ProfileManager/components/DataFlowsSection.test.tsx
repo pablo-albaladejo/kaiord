@@ -1,11 +1,14 @@
 import type { ManagedDataType } from "@kaiord/core";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { DiscoveredBridge } from "../../../../hooks/use-discovered-bridges";
 import type { UseDataFlowsResult } from "./useDataFlows";
 
+let mockBridges: readonly DiscoveredBridge[] = [];
+
 vi.mock("../../../../hooks/use-discovered-bridges", () => ({
-  useDiscoveredBridges: () => [],
+  useDiscoveredBridges: () => mockBridges,
 }));
 
 vi.mock("./useDataFlows", () => ({
@@ -23,6 +26,11 @@ import { useDataFlows } from "./useDataFlows";
 
 const mockUseDataFlows = vi.mocked(useDataFlows);
 
+const TRAIN2GO: DiscoveredBridge = {
+  bridgeId: "train2go-bridge",
+  extensionId: "ext-1",
+};
+
 const emptyResult: UseDataFlowsResult = {
   policies: [],
   byDataType: new Map(),
@@ -30,9 +38,14 @@ const emptyResult: UseDataFlowsResult = {
 };
 
 describe("DataFlowsSection", () => {
-  it("should render the zero-state banner when the profile has no policies", () => {
-    // Arrange
+  beforeEach(() => {
+    mockBridges = [];
     mockUseDataFlows.mockReturnValue(emptyResult);
+  });
+
+  it("should render the zero-state banner when no bridge is connected", () => {
+    // Arrange
+    mockBridges = [];
 
     // Act
     render(<DataFlowsSection profileId="p1" />);
@@ -44,8 +57,24 @@ describe("DataFlowsSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("should render groups for managed data types when at least one policy exists", () => {
+  it("should render groups when a bridge is connected even with no policies yet", () => {
     // Arrange
+    mockBridges = [TRAIN2GO];
+    mockUseDataFlows.mockReturnValue(emptyResult);
+
+    // Act
+    render(<DataFlowsSection profileId="p1" />);
+
+    // Assert
+    expect(
+      screen.queryByTestId("data-flows-zero-state")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("group-workout")).toBeInTheDocument();
+  });
+
+  it("should render groups when a bridge is connected and policies exist", () => {
+    // Arrange
+    mockBridges = [TRAIN2GO];
     const byDataType = new Map<ManagedDataType, { import: []; export: [] }>([
       ["workout", { import: [], export: [] }],
     ]);
