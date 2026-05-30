@@ -71,9 +71,7 @@ describe("Routing", () => {
 
     // Assert
 
-    await waitFor(() => {
-      expect(screen.getByText("Workout Library")).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId("library-page")).toBeInTheDocument();
   });
 
   it("should render the Create overlay at /workout/new", async () => {
