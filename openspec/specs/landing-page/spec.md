@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-05-31
 
 # Landing Page
 
@@ -24,7 +24,7 @@ The landing page SHALL be served at `kaiord.com/` as a static HTML page built fr
 
 ### Requirement: Sticky navigation
 
-The landing page SHALL have a sticky header containing the Kaiord logo wordmark, a "Docs" link pointing to `/docs/`, and primary CTAs ("Try the Editor", "GitHub"). The nav SHALL include smooth-scroll anchor links to each section. On mobile, the nav SHALL collapse to a minimal bar with logo and one CTA.
+The landing page SHALL have a sticky header containing the Kaiord logo wordmark, smooth-scroll anchor links to the in-page sections ("Features", "Developers", "Open Source"), a "Docs" link pointing to `/docs/`, a "GitHub" link, and a primary "Try the Editor" CTA linking to `/editor/`. On mobile (below ~860px) the nav SHALL collapse to a minimal bar with logo, a "Docs" link, and the "Try the Editor" CTA.
 
 #### Scenario: Nav persists on scroll
 
@@ -41,42 +41,47 @@ The landing page SHALL have a sticky header containing the Kaiord logo wordmark,
 - **WHEN** a user clicks a section link in the nav
 - **THEN** the page SHALL smooth-scroll to that section
 
-### Requirement: Hero section with dual CTAs
+### Requirement: Hero with audience fork
 
-The hero section SHALL display the tagline "One framework. Every fitness format.", the subtitle "A TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect formats. Use the visual editor or build with the SDK.", two call-to-action buttons: "Try the Editor" (primary, filled button) linking to `/editor/` and an install command (secondary) with copy-to-clipboard, and two highlight badges below the CTAs: "100% AI-coded" and "Zero infrastructure".
+The hero SHALL present an explicit audience fork rather than a single product pitch: a centered eyebrow pill, the neutral headline "One framework. Every fitness format." (the second line accented), and the subtitle "Whether you train or you build — pick your path." Below the headline the hero SHALL display two equal path cards, side-by-side on desktop and stacked on mobile:
 
-#### Scenario: User clicks Try the Editor
+1. **For athletes — "Use the editor"** (sky accent): copy, an editor device mockup, and a primary "Open the Editor" CTA linking to `/editor/`.
+2. **For developers — "Build with the SDK"** (purple accent): copy, the `convert.ts` code block, a static `npm i @kaiord/core` row, and a soft "Read the Docs" CTA linking to `/docs/`.
 
-- **WHEN** a user clicks the "Try the Editor" CTA
+The hero SHALL NOT display "100% AI-coded" or "Zero infrastructure" badges (the AI-coded claim is demoted to a single line near the open-source section; see Differentiators).
+
+#### Scenario: User clicks Open the Editor
+
+- **WHEN** a user clicks the athlete card's "Open the Editor" CTA
 - **THEN** the browser navigates to `kaiord.com/editor/`
 
-#### Scenario: Developer sees install command
+#### Scenario: Developer reads the docs
 
-- **WHEN** the hero section renders
-- **THEN** an install command (`npm install @kaiord/core`) SHALL be displayed with tabs for npm, yarn, pnpm, and bun
+- **WHEN** a user clicks the developer card's "Read the Docs" CTA
+- **THEN** the browser navigates to `kaiord.com/docs/`
 
-#### Scenario: Copy to clipboard
+#### Scenario: Cards stack on mobile
 
-- **WHEN** a user clicks the copy icon next to the install command
-- **THEN** the command text SHALL be copied to the clipboard AND visual feedback ("Copied!") SHALL be shown for 2 seconds in an `aria-live="polite"` region so assistive technology announces it
+- **WHEN** the viewport is below ~860px
+- **THEN** the two path cards SHALL stack vertically (athletes above developers) instead of sitting side-by-side
 
-### Requirement: User-facing features section
+### Requirement: User-facing showcase section
 
-The landing page SHALL include a section showcasing features for end users: Visual Workout Editor, AI Workout Generation, and Garmin Connect integration. This section SHALL appear BEFORE the format hub visual.
+The landing page SHALL include an athlete-facing showcase section (`id="features"`) with the eyebrow "For athletes" and heading "Plan, generate, sync.". It SHALL pair an editor device mockup with three feature rows — Visual workout editor, AI workout generation, and One-tap Garmin sync. This section SHALL appear BEFORE the format hub visual.
 
-#### Scenario: Feature cards display
+#### Scenario: Showcase renders
 
-- **WHEN** the user-facing section renders
-- **THEN** three feature cards SHALL be visible with titles, descriptions, and a CTA linking to the editor
+- **WHEN** the showcase section renders
+- **THEN** the editor mockup and three feature rows (each with an icon, title, and description) SHALL be visible
 
 ### Requirement: Format hub visual section
 
-The landing page SHALL include a visual section showing the format convergence through KRD: FIT, TCX, ZWO, and GCN formats flowing into and out of KRD as the canonical hub. CSS animations SHALL only use `transform` and `opacity` properties for GPU compositing.
+The landing page SHALL include a visual section ("One hub. Every format.") showing format convergence through KRD as a **radial** diagram: a central KRD hub with `.FIT`, `.TCX`, `.ZWO`, and `.GCN` arranged around it (N/W/E/S) and bidirectional connectors between each format and the hub. CSS animations SHALL only use `transform` and `opacity` properties for GPU compositing.
 
 #### Scenario: Format hub is visible
 
-- **WHEN** a user scrolls past the user features section
-- **THEN** a visual diagram showing format flow (FIT/TCX/ZWO/GCN ↔ KRD) SHALL be displayed with CSS animations
+- **WHEN** a user scrolls past the showcase section
+- **THEN** a radial diagram with the KRD hub centered and FIT/TCX/ZWO/GCN around it (bidirectional connectors) SHALL be displayed with CSS animations
 
 #### Scenario: Reduced motion respected
 
@@ -85,28 +90,38 @@ The landing page SHALL include a visual section showing the format convergence t
 
 ### Requirement: Developer-facing features section
 
-The landing page SHALL include a section with a code example (4 lines showing FIT → KRD → TCX conversion), a feature grid (TypeScript-first, Hexagonal architecture, Plugin system, CLI, MCP), and links to npm/docs.
+The landing page SHALL include a developer section (`id="developers"`, "Convert fitness data in 4 lines.") containing: an interactive install-command widget (npm/yarn/pnpm/bun tabs on desktop, native `<select>` on mobile, with a copy-to-clipboard button), the `convert.ts` code example (4 lines showing FIT → KRD → TCX conversion), and a six-item capability grid (TypeScript-first, Hexagonal architecture, Plugin system, CLI, MCP server, 5 format adapters).
 
 #### Scenario: Code example renders with syntax highlighting
 
 - **WHEN** the developer section renders
 - **THEN** a syntax-highlighted TypeScript code example SHALL be displayed showing the core conversion API, using build-time pre-highlighted HTML (no runtime JS highlighting library)
 
+#### Scenario: Install command tabs
+
+- **WHEN** the developer section renders
+- **THEN** an install command (`npm i @kaiord/core`) SHALL be shown with package-manager tabs for npm, yarn, pnpm, and bun (a native `<select>` on mobile); selecting one SHALL swap the displayed command
+
+#### Scenario: Copy to clipboard
+
+- **WHEN** a user clicks the copy button next to the install command
+- **THEN** the command text SHALL be copied to the clipboard, the icon SHALL briefly flip to a checkmark, AND visual feedback ("Copied!") SHALL be announced in an `aria-live="polite"` region, reverting after ~1.4 seconds
+
 ### Requirement: Differentiators section
 
-The landing page SHALL include a section highlighting two key differentiators:
+The landing page SHALL include a differentiators section with ONE prominent card and ONE demoted line:
 
-1. **100% AI-coded**: Every line of code written by AI agents (Claude Code). No human-written code. This is a real-world showcase of AI-assisted software development at scale.
-2. **Zero infrastructure**: Everything runs locally or in-browser with no servers, no accounts, no cloud dependencies. CLI converts files on your machine, SPA runs in the browser, MCP integrates with your local AI tools.
+1. **Zero infrastructure** (prominent card, "No servers. No accounts. No cloud."): everything runs locally or in-browser with no servers, accounts, or cloud dependencies — CLI converts files on your machine, the SPA editor runs in the browser, the MCP server integrates with local AI tools. The card SHALL include chips: CLI, SPA editor, MCP, Browser extension.
+2. **AI-coded** (single demoted line, NOT a full card): "Every line — domain, adapters, editor, this page — written by AI agents." followed by a "See the commits →" link to the commit history.
 
 #### Scenario: Differentiators display
 
 - **WHEN** a user scrolls to the differentiators section
-- **THEN** two cards SHALL be visible: one explaining the AI-coded nature with a link to the commit history as proof, and one explaining the zero-infra philosophy with examples (CLI, SPA, MCP)
+- **THEN** the prominent "Zero infrastructure" card SHALL be visible with its chips, followed by a single demoted AI-coded line with a "See the commits" link to the commit history
 
 ### Requirement: Open source section
 
-The landing page SHALL include a section with capability metrics ("5 format adapters", "100% round-trip safe", "80%+ test coverage"), README badges (CI, coverage, TypeScript), a "Star on GitHub" button (without count), and MIT license reference.
+The landing page SHALL include an open-source section (`id="open-source"`, "Built in the open.") with four stat cards — "5" (format adapters), "100%" (round-trip safe), "MIT" (licensed), and "0" (backend services) — and a "Star on GitHub" button (without count).
 
 #### Scenario: Open source links work
 
