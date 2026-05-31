@@ -19,6 +19,7 @@ function setActiveTab(tabs: NodeListOf<HTMLButtonElement>, pm: string): void {
   tabs.forEach((tab) => {
     const isActive = tab.dataset.pm === pm;
     tab.setAttribute("aria-selected", String(isActive));
+    tab.setAttribute("tabindex", isActive ? "0" : "-1");
     tab.classList.toggle("text-[var(--brand-text-primary)]", isActive);
     tab.classList.toggle("bg-[var(--brand-bg-primary)]", isActive);
     tab.classList.toggle("text-[var(--brand-text-muted)]", !isActive);
@@ -76,6 +77,10 @@ export function setupInstallWidget(root: Root = document): void {
   const cmdEl = root.querySelector<HTMLElement>("#install-cmd");
   const tabs = root.querySelectorAll<HTMLButtonElement>(".pm-tab");
   const select = root.querySelector<HTMLSelectElement>("#pm-select");
+  const initial =
+    Array.from(tabs).find((t) => t.getAttribute("aria-selected") === "true") ??
+    tabs[0];
+  if (initial) setActiveTab(tabs, initial.dataset.pm ?? "npm");
   wireTabs(tabs, cmdEl);
   select?.addEventListener("change", () => updateCommand(cmdEl, select.value));
   wireCopy(root, cmdEl);

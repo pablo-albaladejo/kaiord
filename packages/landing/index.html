@@ -94,7 +94,7 @@
     <!-- Skip to content -->
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-[var(--brand-accent-blue)] focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-[var(--brand-accent-blue)] focus:px-4 focus:py-2 focus:text-white"
     >
       Skip to main content
     </a>
@@ -619,21 +619,6 @@
                     class="font-mono text-[13.5px] text-[var(--brand-text-secondary)]"
                     >npm i @kaiord/core</span
                   >
-                  <svg
-                    class="ml-auto h-4 w-4 text-[var(--brand-text-muted)]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <rect x="9" y="9" width="11" height="11" rx="2" />
-                    <path
-                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                    />
-                  </svg>
                 </div>
               </div>
               <a
@@ -696,7 +681,7 @@
               >
                 <div
                   aria-hidden="true"
-                  class="absolute inset-[-18%_-14%] rounded-[60px] bg-[radial-gradient(closest-side,color-mix(in_srgb,#0284c7_20%,transparent),transparent)] blur-[20px]"
+                  class="absolute inset-[-18%_-14%] rounded-[60px] bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--brand-accent-blue)_20%,transparent),transparent)] blur-[20px]"
                 ></div>
                 <div
                   aria-hidden="true"
@@ -1145,7 +1130,7 @@
                 class="inline-flex items-center overflow-hidden rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)]"
               >
                 <div
-                  class="hidden sm:flex"
+                  class="hidden min-[860px]:flex"
                   role="tablist"
                   aria-label="Package manager"
                 >
@@ -1188,7 +1173,7 @@
                 </div>
                 <select
                   id="pm-select"
-                  class="rounded-l-xl border-r border-[var(--brand-border)] bg-[var(--brand-bg-primary)] px-2 py-3 text-xs font-semibold text-[var(--brand-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-blue)] sm:hidden"
+                  class="min-h-[44px] rounded-l-xl border-r border-[var(--brand-border)] bg-[var(--brand-bg-primary)] px-2 py-3 text-xs font-semibold text-[var(--brand-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-blue)] min-[860px]:hidden"
                   aria-label="Package manager"
                 >
                   <option value="npm" selected>npm</option>
@@ -1274,7 +1259,7 @@
           </div>
 
           <!-- Capability grid -->
-          <div class="grid gap-6 sm:grid-cols-2 min-[860px]:grid-cols-3">
+          <div class="grid gap-6 min-[860px]:grid-cols-3">
             <div class="flex items-start gap-3">
               <div
                 class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-sky-400/10 font-mono text-sm font-bold text-sky-400"
@@ -1465,7 +1450,7 @@
               href="https://github.com/pablo-albaladejo/kaiord/commits"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex min-h-[44px] items-center text-sm font-semibold text-[var(--brand-accent-purple)] transition-colors hover:text-[var(--brand-accent-purple)]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-purple)]"
+              class="inline-flex min-h-[44px] items-center text-sm font-semibold text-[var(--brand-accent-purple)] underline underline-offset-2 transition-colors hover:text-[var(--brand-accent-purple)]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-purple)]"
               >See the commits &rarr;</a
             >
           </div>
