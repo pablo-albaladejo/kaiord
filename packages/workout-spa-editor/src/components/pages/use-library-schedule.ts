@@ -5,8 +5,8 @@
  * a handler that dispatches `scheduleTemplate` directly with the URL's
  * date and navigates to the calendar (via `usePickerSchedule`). Other
  * URLs return `openScheduler`, which opens the explicit
- * `ScheduleDateDialog`. Caller wires the chosen handler into
- * `LibraryPageContent`'s `onSchedule` prop.
+ * `ScheduleDateDialog`. Caller wires the chosen handler into the Library
+ * list's `onSchedule` prop.
  */
 
 import type { WorkoutTemplate } from "../../types/workout-library";
