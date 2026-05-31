@@ -37,14 +37,6 @@ test.describe("Library flows", () => {
   test("Test A: header Library navigates to /library (no modal)", async ({
     page,
   }) => {
-    // NOTE: the original assertion that the routed `[data-route-heading]`
-    // H1 receives focus no longer holds. The redesigned StatusHeader nav
-    // entries are `<button onClick={navigate(...)}>` (programmatic wouter
-    // navigation) rather than `<Link>` anchors, so the clicked button
-    // retains focus and `useFocusOnRouteChange` does not move focus to the
-    // Library H1. This is an a11y regression in the shipped redesign —
-    // flagged in the e2e redesign report. The surface-classification
-    // contract (navigate, do not open a modal) is still asserted here.
     await page.goto("/calendar");
 
     // Use the mobile-aware helper so the test works on mobile
@@ -53,8 +45,11 @@ test.describe("Library flows", () => {
     await page.waitForURL(/\/library$/);
 
     await expect(page.getByTestId("library-page")).toBeVisible();
-    // The routed page owns a single `[data-route-heading]` H1.
-    await expect(page.locator("h1[data-route-heading]")).toHaveText("Library");
+    // The routed page owns a single `[data-route-heading]` H1, which
+    // receives focus on navigation via useFocusOnRouteChange.
+    const heading = page.locator("h1[data-route-heading]");
+    await expect(heading).toHaveText("Library");
+    await expect(heading).toBeFocused();
     // No dialog should have mounted as a side-effect of the click.
     await expect(page.getByRole("dialog")).toHaveCount(0);
 

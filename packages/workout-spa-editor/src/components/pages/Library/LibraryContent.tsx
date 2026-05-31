@@ -5,7 +5,6 @@ import type { WorkoutTemplate } from "../../../types/workout-library";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal";
 import { filterTemplates, type SportFilter } from "./library-filter";
 import { LibraryEmpty } from "./LibraryEmpty";
-import { LibraryHeader } from "./LibraryHeader";
 import { LibraryListRow } from "./LibraryListRow";
 import { LibrarySearchField } from "./LibrarySearchField";
 import { LibrarySportChips } from "./LibrarySportChips";
@@ -45,7 +44,6 @@ export function LibraryContent({
 
   return (
     <div className="space-y-4">
-      <LibraryHeader count={templates.length} />
       <LibrarySearchField value={query} onChange={setQuery} />
       <LibrarySportChips active={sport} onChange={setSport} />
       {filtered.length === 0 ? (

@@ -1,5 +1,6 @@
 import { Trash2 } from "lucide-react";
 
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { GarminPushButton } from "../../molecules/GarminPushButton";
@@ -24,6 +25,10 @@ export function WorkoutActions({
   onRedo,
   onDiscard,
 }: WorkoutActionsProps) {
+  // Restore the policy-gated push: GarminPushButton resolves export
+  // policies by profile, so without the active profile id it always
+  // renders null (AC-5 gating was dead after the redesign).
+  const activeProfileId = useActiveProfileLive()?.id ?? undefined;
   return (
     <div className="flex flex-wrap items-start gap-3">
       <UndoRedoButtons
@@ -34,7 +39,7 @@ export function WorkoutActions({
       />
       <SaveButton workout={krd} />
       <SaveToLibraryButton workout={krd} />
-      <GarminPushButton />
+      <GarminPushButton profileId={activeProfileId} />
       <Button
         variant="tertiary"
         onClick={onDiscard}

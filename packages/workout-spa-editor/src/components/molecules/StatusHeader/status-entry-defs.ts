@@ -1,6 +1,8 @@
 import { Activity, Calendar, Library, Plus, Settings } from "lucide-react";
 import type { ComponentType } from "react";
 
+import { getCurrentWeekId } from "../../../utils/week-utils";
+
 export type EntryDef = {
   id: string;
   icon: ComponentType<{ className?: string }>;
@@ -47,3 +49,11 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
     to: "/settings/ai",
   },
 ];
+
+/** Resolves an entry's navigation target. The bare `/calendar` route now
+    renders the Today page, so the Calendar entry points at the current
+    week (`/calendar/:weekId`) — otherwise the week calendar would only be
+    reachable by deep-link. */
+export function resolveEntryHref(entry: EntryDef): string {
+  return entry.id === "calendar" ? `/calendar/${getCurrentWeekId()}` : entry.to;
+}

@@ -93,22 +93,53 @@ test.describe("GarminPushButton resolver gating (AC-5)", () => {
     await page.reload();
     await page.waitForURL(/\/workout/, { timeout: 10_000 });
 
-    // Assert — no GarminPushButton rendered
-    // The button uses aria-label containing "garmin" or data-testid
-    await expect(page.getByRole("button", { name: /push to garmin/i }))
-      .not.toBeVisible({ timeout: 3_000 })
-      .catch(() => undefined);
+    // Assert — no editor GarminPushButton rendered (no enabled policy).
+    await expect(
+      page.getByRole("button", { name: /push to garmin/i })
+    ).toHaveCount(0);
+  });
+
+  test("should show the editor push button when an enabled export policy exists", async ({
+    page,
+  }) => {
+    // Verifies AC-5 is enforced again in the editor: with the active
+    // profile's enabled workout-export policy resolved (profileId wired
+    // into the editor GarminPushButton), the gated button renders.
+    const WORKOUT_ID = "garmin-push-editor-workout";
+    await installGarminBridgeStub(page);
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await seedProfileBase(page, PROFILE_ID);
+    await addExportPolicy(page, PROFILE_ID, GARMIN_BRIDGE_ID);
+    await seedWorkouts(page, [
+      makeWorkout({
+        id: WORKOUT_ID,
+        profileId: PROFILE_ID,
+        date: getWeekDates()[0],
+        state: "ready",
+      }),
+    ]);
+
+    // Act — open the workout in the editor.
+    await page.goto(`/workout/${WORKOUT_ID}`);
+
+    // Assert — the policy-gated editor push button renders.
+    await expect(
+      page.getByRole("button", { name: /push to garmin/i })
+    ).toBeVisible({ timeout: 8_000 });
   });
 
   test("should show the Push to Garmin button on the workout detail page", async ({
     page,
   }) => {
-    // NOTE: post-redesign the canonical Garmin push moved to the read-only
-    // WorkoutDetail page (/workout/view/:id), where the footer always
-    // renders "Push to Garmin". The editor's policy-gated GarminPushButton
-    // is no longer wired with a profileId, so resolver-gating (AC-5) is no
-    // longer enforced — flagged in the e2e redesign report. This test now
-    // asserts the shipped push surface.
+    // The redesign added a read-only WorkoutDetail page
+    // (/workout/view/:id) whose footer always renders "Push to Garmin"
+    // (ungated by design for that surface). This asserts that surface;
+    // the editor's policy-gated button is covered by the test above.
     const WORKOUT_ID = "garmin-push-detail-workout";
     await installGarminBridgeStub(page);
     await page.goto("/calendar");
