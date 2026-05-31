@@ -14,7 +14,9 @@
 ## 2. Phase 2 — CloudSyncPort + Google Drive adapter
 
 - [ ] 2.1 Define the `CloudSyncPort` interface in `ports/` (`isAuthenticated`, `authenticate`, `pull`, `push`) plus an in-memory fake implementation for use-case tests
-- [ ] 2.2 Add a Google Cloud OAuth Client ID config surface (env/build-time constant) and document the `appDataFolder` scope; load the GIS script (`accounts.google.com/gsi/client`) lazily
+- [ ] 2.2 Add a Google Cloud OAuth Client ID config surface and document the `appDataFolder` scope; load the GIS script (`accounts.google.com/gsi/client`) lazily.
+  - **Provisioned values (use these):** OAuth Client ID = `1059521446940-tplqmpmbrmp8qgsjn4r195gf75un4vt1.apps.googleusercontent.com` (public — Google client IDs are not secrets and may be committed). Scope = `https://www.googleapis.com/auth/drive.appdata` (confirmed NON-sensitive). Authorized JS origins set in Google: `http://localhost:5173` (Vite dev) and `https://kaiord.com` (production).
+  - Read the Client ID from `import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID`, with the value above committed as the default in a `.env` file (it is public). Do NOT hardcode it inline in feature code; expose it via a single config module and surface a clear error if the env var is unset at runtime.
 - [ ] 2.3 Implement `googleDriveCloudSyncAdapter.authenticate`/`isAuthenticated` via GIS `initTokenClient` (silent refresh with `prompt: ''`); unit-test token handling with a mocked GIS global
 - [ ] 2.4 Implement adapter file I/O against Drive REST: locate-or-create `kaiord-snapshot.json` in `appDataFolder`, multipart create, media PATCH update, `alt=media` download, request `fields=headRevisionId`; unit-test against a mocked `fetch`
 - [ ] 2.5 Write a test proving `pull()` returns `null` when the file is absent and returns `{ snapshot, headRevisionId }` when present
