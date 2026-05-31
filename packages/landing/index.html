@@ -104,12 +104,12 @@
       class="sticky top-0 z-40 border-b border-[var(--brand-border)] bg-[var(--brand-bg-primary)]/95 backdrop-blur-sm"
     >
       <nav
-        class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6"
+        class="mx-auto flex max-w-[1180px] items-center justify-between px-[22px] py-3.5 min-[860px]:px-12"
       >
         <!-- Logo -->
         <a
           href="/"
-          class="flex items-center gap-2 text-lg font-bold tracking-tight"
+          class="flex items-center gap-2 text-lg font-extrabold tracking-tight"
           aria-label="Kaiord home"
         >
           <svg
@@ -186,7 +186,7 @@
         </a>
 
         <!-- Nav links (desktop) -->
-        <div class="hidden items-center gap-6 text-sm sm:flex">
+        <div class="hidden items-center gap-6 text-sm min-[860px]:flex">
           <a
             href="#features"
             class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
@@ -216,13 +216,13 @@
           >
           <a
             href="/editor/"
-            class="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--brand-accent-blue)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-accent-blue)]/90"
+            class="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--brand-accent-blue)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-accent-blue-hover)]"
             >Try the Editor</a
           >
         </div>
 
         <!-- Mobile CTAs -->
-        <div class="flex items-center gap-3 sm:hidden">
+        <div class="flex items-center gap-3 min-[860px]:hidden">
           <a
             href="/docs/"
             class="text-sm text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
@@ -238,381 +238,880 @@
     </header>
 
     <main id="main">
-      <!-- ========== HERO ========== -->
-      <section
-        class="mx-auto max-w-4xl px-4 pb-20 pt-16 text-center sm:px-6 sm:pt-24 md:pt-32"
-      >
-        <h1
-          class="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
-        >
-          One framework.<br />
-          <span class="text-[var(--brand-accent-blue)]"
-            >Every fitness format.</span
-          >
-        </h1>
-        <p
-          class="mx-auto mt-6 max-w-2xl text-lg text-[var(--brand-text-secondary)] sm:text-xl"
-        >
-          A TypeScript framework for converting between FIT, TCX, ZWO, and
-          Garmin Connect formats. Use the visual editor or build with the SDK.
-        </p>
-
-        <!-- CTAs -->
+      <!-- ========== HERO — AUDIENCE FORK ========== -->
+      <section class="relative overflow-hidden">
         <div
-          class="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
+          aria-hidden="true"
+          class="pointer-events-none absolute -top-32 left-1/2 h-[360px] w-[700px] -translate-x-1/2 bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--brand-accent-blue)_13%,transparent),transparent)]"
+        ></div>
+
+        <!-- Heading block -->
+        <div
+          class="relative mx-auto max-w-[1180px] px-[22px] pt-11 pb-2 text-center min-[860px]:px-12 min-[860px]:pt-[72px] min-[860px]:pb-3"
         >
-          <a
-            href="/editor/"
-            class="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--brand-accent-blue)] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[var(--brand-accent-blue)]/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-blue)]"
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-1.5 text-xs font-semibold text-sky-400"
           >
-            Try the Editor
-          </a>
-          <!-- Install command -->
+            <svg
+              class="h-3.5 w-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"
+              />
+            </svg>
+            Open-source training toolkit
+          </span>
+          <h1
+            class="mx-auto mt-5 max-w-[760px] text-[40px] font-[850] leading-[1.05] tracking-[-0.03em] min-[860px]:text-[56px]"
+          >
+            One framework.<br />
+            <span class="text-sky-400">Every fitness format.</span>
+          </h1>
+          <p
+            class="mx-auto mt-5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)] min-[860px]:text-[18.5px]"
+          >
+            Whether you train or you build — pick your path.
+          </p>
+        </div>
+
+        <!-- Fork cards -->
+        <div
+          class="mx-auto grid max-w-[1180px] gap-5 px-[22px] pt-7 pb-14 min-[860px]:grid-cols-2 min-[860px]:items-stretch min-[860px]:px-12 min-[860px]:pt-8 min-[860px]:pb-20"
+        >
+          <!-- For athletes -->
           <div
-            class="flex items-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)]"
+            class="relative flex flex-col overflow-hidden rounded-[22px] border border-sky-400/35 bg-[var(--brand-bg-surface)] p-7"
           >
-            <!-- Package manager tabs (desktop) -->
             <div
-              class="hidden sm:flex"
-              role="tablist"
-              aria-label="Package manager"
-            >
-              <button
-                role="tab"
-                aria-selected="true"
-                aria-controls="install-cmd"
-                data-pm="npm"
-                class="pm-tab rounded-l-lg border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-primary)] bg-[var(--brand-bg-primary)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+              aria-hidden="true"
+              class="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,#38bdf8_13%,transparent),transparent)]"
+            ></div>
+            <div class="relative flex flex-1 flex-col">
+              <span
+                class="self-start rounded-full bg-sky-400/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.04em] text-sky-400"
+                >For athletes</span
               >
-                npm
-              </button>
-              <button
-                role="tab"
-                aria-selected="false"
-                aria-controls="install-cmd"
-                data-pm="yarn"
-                class="pm-tab border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+              <h2 class="mt-4 text-[27px] font-bold tracking-[-0.02em]">
+                Use the editor
+              </h2>
+              <p
+                class="mt-2 text-[15.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
               >
-                yarn
-              </button>
-              <button
-                role="tab"
-                aria-selected="false"
-                aria-controls="install-cmd"
-                data-pm="pnpm"
-                class="pm-tab border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+                Create, AI-generate, and sync structured workouts to Garmin. No
+                code, no account.
+              </p>
+              <div class="my-5 flex flex-1 justify-center">
+                <div class="h-[320px] overflow-hidden">
+                  <div class="origin-top scale-[0.64]">
+                    <!-- Editor mock (compact, no glow) -->
+                    <div
+                      role="img"
+                      aria-label="Kaiord editor on mobile showing today's readiness score and a Sweet Spot workout ready to push to Garmin"
+                      class="relative w-[270px]"
+                    >
+                      <div
+                        aria-hidden="true"
+                        class="relative w-[270px] rounded-[38px] border border-white/10 bg-[linear-gradient(160deg,#2a3850,#131c2e)] p-[9px] shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
+                      >
+                        <div
+                          class="relative h-[540px] overflow-hidden rounded-[30px] bg-[var(--brand-bg-deep)]"
+                        >
+                          <div
+                            class="flex items-center justify-between px-5 pt-3.5 pb-1.5 text-xs font-semibold text-[var(--brand-text-primary)]"
+                          >
+                            <span>9:41</span>
+                            <span
+                              class="h-[9px] w-4 rounded-sm border border-[var(--brand-text-muted)]"
+                            ></span>
+                          </div>
+                          <div class="px-4 pt-2">
+                            <div
+                              class="text-[12.5px] text-[var(--brand-text-muted)]"
+                            >
+                              Thursday, May 29
+                            </div>
+                            <div
+                              class="mb-3 text-[25px] font-bold tracking-[-0.02em]"
+                            >
+                              Today
+                            </div>
+                            <div
+                              class="mb-3 flex items-center gap-3 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-3"
+                            >
+                              <div class="relative h-[54px] w-[54px]">
+                                <svg width="54" height="54" class="-rotate-90">
+                                  <circle
+                                    cx="27"
+                                    cy="27"
+                                    r="23"
+                                    fill="none"
+                                    stroke="var(--brand-bg-elevated)"
+                                    stroke-width="5"
+                                  />
+                                  <circle
+                                    cx="27"
+                                    cy="27"
+                                    r="23"
+                                    fill="none"
+                                    stroke="var(--brand-semantic-tip)"
+                                    stroke-width="5"
+                                    stroke-linecap="round"
+                                    stroke-dasharray="144.5"
+                                    stroke-dashoffset="26"
+                                  />
+                                </svg>
+                                <div
+                                  class="absolute inset-0 flex items-center justify-center text-base font-bold"
+                                >
+                                  82
+                                </div>
+                              </div>
+                              <div>
+                                <div class="text-[13.5px] font-bold">
+                                  Good to push today
+                                </div>
+                                <div
+                                  class="mt-0.5 text-[11px] text-[var(--brand-text-muted)]"
+                                >
+                                  Recovery on track — green light.
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)]"
+                            >
+                              <div class="p-3">
+                                <div class="mb-3 flex items-center gap-2.5">
+                                  <div
+                                    class="flex h-[38px] w-[38px] items-center justify-center rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-deep)]"
+                                  >
+                                    <svg
+                                      class="h-5 w-5 text-sky-400"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                    >
+                                      <circle cx="5.5" cy="17.5" r="3.5" />
+                                      <circle cx="18.5" cy="17.5" r="3.5" />
+                                      <path
+                                        d="M5.5 17.5 10 8h4l3 6m-7.5 3.5h7M14 8h3.5M10 8 8 6"
+                                      />
+                                    </svg>
+                                  </div>
+                                  <div>
+                                    <div class="text-[14.5px] font-bold">
+                                      Sweet Spot 3×12
+                                    </div>
+                                    <div
+                                      class="text-[11px] text-[var(--brand-text-muted)]"
+                                    >
+                                      Build sustained power.
+                                    </div>
+                                  </div>
+                                </div>
+                                <div
+                                  class="mb-3 flex gap-3.5 text-[11.5px] font-semibold text-[var(--brand-text-secondary)]"
+                                >
+                                  <span class="inline-flex items-center gap-1">
+                                    <svg
+                                      class="h-3.5 w-3.5 text-[var(--brand-text-muted)]"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      stroke-width="2"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                    >
+                                      <circle cx="12" cy="12" r="9" />
+                                      <path d="M12 7v5.2l3.4 2" /></svg
+                                    >1h 05m
+                                  </span>
+                                  <span class="inline-flex items-center gap-1">
+                                    <svg
+                                      class="h-3.5 w-3.5 text-[var(--brand-text-muted)]"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      stroke-width="2"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                    >
+                                      <path
+                                        d="M12 3c1 3.5 4.5 4.8 4.5 8.5A4.5 4.5 0 0 1 12 16a4.5 4.5 0 0 1-4.5-4.5C7.5 9.5 9 8 9 6c1.2.7 2.4 1.7 3 3 .3-2 .2-4 0-6z"
+                                      /></svg
+                                    >78 TSS
+                                  </span>
+                                </div>
+                                <div
+                                  class="flex h-2 gap-0.5 overflow-hidden rounded-full"
+                                >
+                                  <span
+                                    class="bg-[var(--zone-1)]"
+                                    style="flex: 0.12"
+                                  ></span>
+                                  <span
+                                    class="bg-[var(--zone-2)]"
+                                    style="flex: 0.3"
+                                  ></span>
+                                  <span
+                                    class="bg-[var(--zone-3)]"
+                                    style="flex: 0.16"
+                                  ></span>
+                                  <span
+                                    class="bg-[var(--zone-4)]"
+                                    style="flex: 0.4"
+                                  ></span>
+                                  <span
+                                    class="bg-[var(--zone-5)]"
+                                    style="flex: 0.02"
+                                  ></span>
+                                </div>
+                              </div>
+                              <div
+                                class="flex gap-2 border-t border-[var(--brand-border-soft)] p-3"
+                              >
+                                <div
+                                  class="flex-1 rounded-xl border border-[var(--brand-border)] p-2 text-center text-[12.5px] font-semibold"
+                                >
+                                  Details
+                                </div>
+                                <div
+                                  class="flex flex-[1.5] items-center justify-center gap-1.5 rounded-xl bg-[var(--brand-accent-blue)] p-2 text-[12.5px] font-semibold text-white"
+                                >
+                                  <svg
+                                    class="h-3.5 w-3.5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  >
+                                    <rect
+                                      x="6"
+                                      y="6"
+                                      width="12"
+                                      height="12"
+                                      rx="3.5"
+                                    />
+                                    <path
+                                      d="M9 6l.7-3h4.6L15 6M9 18l.7 3h4.6l.7-3"
+                                    /></svg
+                                  >Push to Garmin
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="absolute inset-x-3.5 bottom-3 flex h-[50px] items-center justify-around rounded-[18px] border border-[var(--brand-border)] bg-[rgba(15,23,42,0.82)] backdrop-blur"
+                          >
+                            <span
+                              class="h-[7px] w-[7px] rounded-full bg-sky-400"
+                            ></span>
+                            <span
+                              class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
+                            ></span>
+                            <span
+                              class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
+                            ></span>
+                            <span
+                              class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
+                            ></span>
+                            <span
+                              class="absolute -top-4 left-1/2 flex h-[42px] w-[42px] -translate-x-1/2 items-center justify-center rounded-[14px] bg-[linear-gradient(160deg,#38bdf8,#0284c7)] text-2xl font-light text-white shadow-[0_6px_16px_color-mix(in_srgb,#0284c7_40%,transparent)]"
+                              >+</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <a
+                href="/editor/"
+                class="inline-flex min-h-[44px] items-center gap-2 self-start rounded-xl bg-[var(--brand-accent-blue)] px-5 py-3 text-base font-semibold text-white transition-colors hover:bg-[var(--brand-accent-blue-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-blue)]"
               >
-                pnpm
-              </button>
-              <button
-                role="tab"
-                aria-selected="false"
-                aria-controls="install-cmd"
-                data-pm="bun"
-                class="pm-tab border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
-              >
-                bun
-              </button>
-            </div>
-            <!-- Package manager select (mobile) -->
-            <select
-              id="pm-select"
-              class="sm:hidden rounded-l-lg border-r border-[var(--brand-border)] bg-[var(--brand-bg-primary)] px-2 py-3 text-xs font-medium text-[var(--brand-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-blue)]"
-              aria-label="Package manager"
-            >
-              <option value="npm" selected>npm</option>
-              <option value="yarn">yarn</option>
-              <option value="pnpm">pnpm</option>
-              <option value="bun">bun</option>
-            </select>
-            <code
-              id="install-cmd"
-              role="tabpanel"
-              class="px-3 py-3 font-mono text-sm text-[var(--brand-text-secondary)]"
-              >npm i @kaiord/core</code
-            >
-            <button
-              id="copy-btn"
-              class="min-h-[44px] min-w-[44px] rounded-r-lg px-3 py-3 text-[var(--brand-text-muted)] transition-colors hover:text-[var(--brand-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
-              aria-label="Copy install command"
-            >
-              <svg
-                class="h-4 w-4"
-                id="copy-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
+                Open the Editor
+                <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                />
-              </svg>
-            </button>
-            <span id="copy-feedback" class="sr-only" aria-live="polite"></span>
-          </div>
-        </div>
-
-        <!-- Badges -->
-        <div class="mt-8 flex flex-wrap justify-center gap-3">
-          <span
-            class="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-1 text-xs font-medium text-[var(--brand-text-secondary)]"
-          >
-            <svg
-              class="h-3.5 w-3.5 text-[var(--brand-accent-purple)]"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-            >
-              <path
-                d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.789l1.599.799L9 4.323V3a1 1 0 011-1z"
-              />
-            </svg>
-            100% AI-coded
-          </span>
-          <span
-            class="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-1 text-xs font-medium text-[var(--brand-text-secondary)]"
-          >
-            <svg
-              class="h-3.5 w-3.5 text-[var(--brand-accent-blue)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-            Zero infrastructure
-          </span>
-          <span
-            class="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-1 text-xs font-medium text-[var(--brand-text-secondary)]"
-          >
-            <svg
-              class="h-3.5 w-3.5 text-emerald-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            MIT Licensed
-          </span>
-        </div>
-      </section>
-
-      <!-- ========== USER FEATURES ========== -->
-      <section
-        id="features"
-        class="border-t border-[var(--brand-border)] py-20"
-      >
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 class="text-center text-3xl font-bold tracking-tight sm:text-4xl">
-            Create and manage workouts
-          </h2>
-          <p
-            class="mx-auto mt-4 max-w-2xl text-center text-[var(--brand-text-secondary)]"
-          >
-            A complete toolkit for athletes, coaches, and fitness enthusiasts.
-          </p>
-
-          <div class="mt-12 grid gap-8 sm:grid-cols-3">
-            <!-- Visual Editor -->
-            <div
-              class="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-6"
-            >
-              <div
-                class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--brand-accent-blue)]/10"
-              >
-                <svg
-                  class="h-5 w-5 text-[var(--brand-accent-blue)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
+                  <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
-              </div>
-              <h3 class="text-lg font-semibold">Visual Workout Editor</h3>
-              <p class="mt-2 text-sm text-[var(--brand-text-secondary)]">
-                Drag-and-drop interface to create structured workouts with
-                steps, intervals, and targets. Runs entirely in your browser.
-              </p>
-            </div>
-            <!-- AI Workouts -->
-            <div
-              class="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-6"
-            >
-              <div
-                class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--brand-accent-purple)]/10"
-              >
-                <svg
-                  class="h-5 w-5 text-[var(--brand-accent-purple)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-              <h3 class="text-lg font-semibold">AI Workout Generation</h3>
-              <p class="mt-2 text-sm text-[var(--brand-text-secondary)]">
-                Describe your training goal in plain language and generate
-                structured workouts with Claude, GPT, or Gemini.
-              </p>
-            </div>
-            <!-- Garmin Connect -->
-            <div
-              class="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-6"
-            >
-              <div
-                class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10"
-              >
-                <svg
-                  class="h-5 w-5 text-emerald-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-              </div>
-              <h3 class="text-lg font-semibold">Garmin Connect Sync</h3>
-              <p class="mt-2 text-sm text-[var(--brand-text-secondary)]">
-                Push workouts directly to Garmin Connect from your browser. No
-                server needed — works via a lightweight browser extension.
-              </p>
+              </a>
             </div>
           </div>
 
-          <div class="mt-10 text-center">
-            <a
-              href="/editor/"
-              class="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--brand-border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-text-primary)] transition-colors hover:bg-[var(--brand-bg-surface)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-blue)]"
-            >
-              Open the Editor &rarr;
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========== FORMAT HUB ========== -->
-      <section class="border-t border-[var(--brand-border)] py-20">
-        <div class="mx-auto max-w-4xl px-4 text-center sm:px-6">
-          <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
-            One hub. Every format.
-          </h2>
-          <p class="mx-auto mt-4 max-w-2xl text-[var(--brand-text-secondary)]">
-            KRD is the canonical format. All conversions flow through it —
-            lossless, round-trip safe.
-          </p>
-
-          <!-- Format hub diagram -->
+          <!-- For developers -->
           <div
-            class="mx-auto mt-12 max-w-lg"
-            role="img"
-            aria-label="Format conversion diagram: FIT, TCX, ZWO, and GCN formats all convert bidirectionally through the KRD hub format"
+            class="relative flex flex-col overflow-hidden rounded-[22px] border border-[var(--brand-accent-purple)]/40 bg-[var(--brand-bg-surface)] p-7"
           >
-            <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-              <!-- Left formats -->
-              <div class="flex flex-col gap-3 text-right">
-                <span
-                  class="format-label animate-fade-in-left rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  >.FIT</span
+            <div
+              aria-hidden="true"
+              class="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--brand-accent-purple)_13%,transparent),transparent)]"
+            ></div>
+            <div class="relative flex flex-1 flex-col">
+              <span
+                class="self-start rounded-full bg-[var(--brand-accent-purple)]/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.04em] text-[var(--brand-accent-purple)]"
+                >For developers</span
+              >
+              <h2 class="mt-4 text-[27px] font-bold tracking-[-0.02em]">
+                Build with the SDK
+              </h2>
+              <p
+                class="mt-2 text-[15.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+              >
+                Convert between FIT, TCX, ZWO &amp; Garmin in 4 lines of
+                TypeScript. Strategy pattern, your adapters.
+              </p>
+              <div class="my-5 flex-1">
+                <!-- convert.ts code block -->
+                <div
+                  class="overflow-hidden rounded-[13px] border border-[var(--brand-border)] bg-[var(--brand-code-block-bg)]"
                 >
-                <span
-                  class="format-label animate-fade-in-left rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  style="animation-delay: 0.1s"
-                  >.TCX</span
-                >
-                <span
-                  class="format-label animate-fade-in-left rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  style="animation-delay: 0.2s"
-                  >.ZWO</span
-                >
-                <span
-                  class="format-label animate-fade-in-left rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  style="animation-delay: 0.3s"
-                  >.GCN</span
-                >
-              </div>
+                  <div
+                    class="flex items-center gap-1.5 border-b border-[var(--brand-border)] px-3 py-2.5"
+                  >
+                    <span class="h-2.5 w-2.5 rounded-full bg-red-500/40"></span>
+                    <span
+                      class="h-2.5 w-2.5 rounded-full bg-amber-500/40"
+                    ></span>
+                    <span
+                      class="h-2.5 w-2.5 rounded-full bg-green-500/40"
+                    ></span>
+                    <span
+                      class="ml-1.5 font-mono text-[11.5px] text-[var(--brand-text-muted)]"
+                      >convert.ts</span
+                    >
+                  </div>
+                  <div class="overflow-x-auto">
+                    <pre
+                      class="p-4 font-mono text-[13px] leading-[1.7]"
+                    ><code><span class="text-[var(--brand-accent-purple)]">import</span> <span class="text-[var(--brand-text-primary)]">{ fromBinary, fitReader }</span> <span class="text-[var(--brand-accent-purple)]">from</span> <span class="text-emerald-400">'@kaiord/fit'</span>
+<span class="text-[var(--brand-accent-purple)]">import</span> <span class="text-[var(--brand-text-primary)]">{ toText, tcxWriter }</span> <span class="text-[var(--brand-accent-purple)]">from</span> <span class="text-emerald-400">'@kaiord/tcx'</span>
 
-              <!-- Arrows + KRD hub -->
-              <div class="flex flex-col items-center gap-1">
-                <div
-                  class="flex items-center gap-2 text-[var(--brand-text-muted)]"
-                >
-                  <span class="text-xs">&larr;&rarr;</span>
+<span class="text-[var(--brand-accent-purple)]">const</span> <span class="text-sky-400">krd</span> <span class="text-[var(--brand-text-muted)]">=</span> <span class="text-[var(--brand-accent-purple)]">await</span> <span class="text-amber-300">fromBinary</span><span class="text-[var(--brand-text-muted)]">(file, fitReader)</span>
+<span class="text-[var(--brand-accent-purple)]">const</span> <span class="text-sky-400">tcx</span> <span class="text-[var(--brand-text-muted)]">=</span> <span class="text-[var(--brand-accent-purple)]">await</span> <span class="text-amber-300">toText</span><span class="text-[var(--brand-text-muted)]">(krd, tcxWriter)</span></code></pre>
+                  </div>
                 </div>
+                <!-- npm install teaser (static; interactive widget lives in Developers) -->
                 <div
-                  class="animate-pulse-slow flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-[var(--brand-accent-blue)] bg-[var(--brand-accent-blue)]/10"
+                  class="mt-4 flex items-center gap-2.5 rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] px-3.5 py-2.5"
                 >
                   <span
-                    class="font-mono text-lg font-bold text-[var(--brand-accent-blue)]"
-                    >KRD</span
+                    class="font-mono text-[13.5px] text-[var(--brand-text-secondary)]"
+                    >npm i @kaiord/core</span
                   >
-                </div>
-                <div
-                  class="flex items-center gap-2 text-[var(--brand-text-muted)]"
-                >
-                  <span class="text-xs">&larr;&rarr;</span>
+                  <svg
+                    class="ml-auto h-4 w-4 text-[var(--brand-text-muted)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="9" y="9" width="11" height="11" rx="2" />
+                    <path
+                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                    />
+                  </svg>
                 </div>
               </div>
+              <a
+                href="/docs/"
+                class="inline-flex min-h-[44px] items-center gap-2 self-start rounded-xl bg-[var(--brand-accent-blue-soft)] px-5 py-3 text-base font-semibold text-sky-400 transition-colors hover:bg-[var(--brand-accent-blue-soft)]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-blue)]"
+              >
+                Read the Docs
+                <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <!-- Right formats -->
-              <div class="flex flex-col gap-3 text-left">
-                <span
-                  class="format-label animate-fade-in-right rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  >.FIT</span
+      <!-- ========== SHOWCASE (ATHLETES) ========== -->
+      <section
+        id="features"
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
+      >
+        <div class="mx-auto max-w-[1180px]">
+          <div class="mb-9 text-center min-[860px]:mb-14">
+            <p
+              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-sky-400"
+            >
+              For athletes
+            </p>
+            <h2
+              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            >
+              Plan, generate, sync.
+            </h2>
+            <p
+              class="mx-auto mt-3.5 max-w-[520px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+            >
+              A complete toolkit for athletes and coaches — running entirely in
+              your browser.
+            </p>
+          </div>
+
+          <div
+            class="flex flex-col items-center gap-9 min-[860px]:flex-row min-[860px]:gap-14"
+          >
+            <!-- Editor mock (full, with glow) -->
+            <div class="flex shrink-0 justify-center min-[860px]:order-2">
+              <div
+                role="img"
+                aria-label="Kaiord editor on mobile showing today's readiness score and a Sweet Spot workout ready to push to Garmin"
+                class="relative w-[270px]"
+              >
+                <div
+                  aria-hidden="true"
+                  class="absolute inset-[-18%_-14%] rounded-[60px] bg-[radial-gradient(closest-side,color-mix(in_srgb,#0284c7_20%,transparent),transparent)] blur-[20px]"
+                ></div>
+                <div
+                  aria-hidden="true"
+                  class="relative w-[270px] rounded-[38px] border border-white/10 bg-[linear-gradient(160deg,#2a3850,#131c2e)] p-[9px] shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
                 >
-                <span
-                  class="format-label animate-fade-in-right rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  style="animation-delay: 0.1s"
-                  >.TCX</span
-                >
-                <span
-                  class="format-label animate-fade-in-right rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  style="animation-delay: 0.2s"
-                  >.ZWO</span
-                >
-                <span
-                  class="format-label animate-fade-in-right rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2 font-mono text-sm font-semibold"
-                  style="animation-delay: 0.3s"
-                  >.GCN</span
-                >
+                  <div
+                    class="relative h-[540px] overflow-hidden rounded-[30px] bg-[var(--brand-bg-deep)]"
+                  >
+                    <div
+                      class="flex items-center justify-between px-5 pt-3.5 pb-1.5 text-xs font-semibold text-[var(--brand-text-primary)]"
+                    >
+                      <span>9:41</span>
+                      <span
+                        class="h-[9px] w-4 rounded-sm border border-[var(--brand-text-muted)]"
+                      ></span>
+                    </div>
+                    <div class="px-4 pt-2">
+                      <div class="text-[12.5px] text-[var(--brand-text-muted)]">
+                        Thursday, May 29
+                      </div>
+                      <div
+                        class="mb-3 text-[25px] font-bold tracking-[-0.02em]"
+                      >
+                        Today
+                      </div>
+                      <div
+                        class="mb-3 flex items-center gap-3 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-3"
+                      >
+                        <div class="relative h-[54px] w-[54px]">
+                          <svg width="54" height="54" class="-rotate-90">
+                            <circle
+                              cx="27"
+                              cy="27"
+                              r="23"
+                              fill="none"
+                              stroke="var(--brand-bg-elevated)"
+                              stroke-width="5"
+                            />
+                            <circle
+                              cx="27"
+                              cy="27"
+                              r="23"
+                              fill="none"
+                              stroke="var(--brand-semantic-tip)"
+                              stroke-width="5"
+                              stroke-linecap="round"
+                              stroke-dasharray="144.5"
+                              stroke-dashoffset="26"
+                            />
+                          </svg>
+                          <div
+                            class="absolute inset-0 flex items-center justify-center text-base font-bold"
+                          >
+                            82
+                          </div>
+                        </div>
+                        <div>
+                          <div class="text-[13.5px] font-bold">
+                            Good to push today
+                          </div>
+                          <div
+                            class="mt-0.5 text-[11px] text-[var(--brand-text-muted)]"
+                          >
+                            Recovery on track — green light.
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)]"
+                      >
+                        <div class="p-3">
+                          <div class="mb-3 flex items-center gap-2.5">
+                            <div
+                              class="flex h-[38px] w-[38px] items-center justify-center rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-deep)]"
+                            >
+                              <svg
+                                class="h-5 w-5 text-sky-400"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <circle cx="5.5" cy="17.5" r="3.5" />
+                                <circle cx="18.5" cy="17.5" r="3.5" />
+                                <path
+                                  d="M5.5 17.5 10 8h4l3 6m-7.5 3.5h7M14 8h3.5M10 8 8 6"
+                                />
+                              </svg>
+                            </div>
+                            <div>
+                              <div class="text-[14.5px] font-bold">
+                                Sweet Spot 3×12
+                              </div>
+                              <div
+                                class="text-[11px] text-[var(--brand-text-muted)]"
+                              >
+                                Build sustained power.
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="mb-3 flex gap-3.5 text-[11.5px] font-semibold text-[var(--brand-text-secondary)]"
+                          >
+                            <span class="inline-flex items-center gap-1">
+                              <svg
+                                class="h-3.5 w-3.5 text-[var(--brand-text-muted)]"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 7v5.2l3.4 2" /></svg
+                              >1h 05m
+                            </span>
+                            <span class="inline-flex items-center gap-1">
+                              <svg
+                                class="h-3.5 w-3.5 text-[var(--brand-text-muted)]"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path
+                                  d="M12 3c1 3.5 4.5 4.8 4.5 8.5A4.5 4.5 0 0 1 12 16a4.5 4.5 0 0 1-4.5-4.5C7.5 9.5 9 8 9 6c1.2.7 2.4 1.7 3 3 .3-2 .2-4 0-6z"
+                                /></svg
+                              >78 TSS
+                            </span>
+                          </div>
+                          <div
+                            class="flex h-2 gap-0.5 overflow-hidden rounded-full"
+                          >
+                            <span
+                              class="bg-[var(--zone-1)]"
+                              style="flex: 0.12"
+                            ></span>
+                            <span
+                              class="bg-[var(--zone-2)]"
+                              style="flex: 0.3"
+                            ></span>
+                            <span
+                              class="bg-[var(--zone-3)]"
+                              style="flex: 0.16"
+                            ></span>
+                            <span
+                              class="bg-[var(--zone-4)]"
+                              style="flex: 0.4"
+                            ></span>
+                            <span
+                              class="bg-[var(--zone-5)]"
+                              style="flex: 0.02"
+                            ></span>
+                          </div>
+                        </div>
+                        <div
+                          class="flex gap-2 border-t border-[var(--brand-border-soft)] p-3"
+                        >
+                          <div
+                            class="flex-1 rounded-xl border border-[var(--brand-border)] p-2 text-center text-[12.5px] font-semibold"
+                          >
+                            Details
+                          </div>
+                          <div
+                            class="flex flex-[1.5] items-center justify-center gap-1.5 rounded-xl bg-[var(--brand-accent-blue)] p-2 text-[12.5px] font-semibold text-white"
+                          >
+                            <svg
+                              class="h-3.5 w-3.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <rect
+                                x="6"
+                                y="6"
+                                width="12"
+                                height="12"
+                                rx="3.5"
+                              />
+                              <path
+                                d="M9 6l.7-3h4.6L15 6M9 18l.7 3h4.6l.7-3"
+                              /></svg
+                            >Push to Garmin
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="absolute inset-x-3.5 bottom-3 flex h-[50px] items-center justify-around rounded-[18px] border border-[var(--brand-border)] bg-[rgba(15,23,42,0.82)] backdrop-blur"
+                    >
+                      <span
+                        class="h-[7px] w-[7px] rounded-full bg-sky-400"
+                      ></span>
+                      <span
+                        class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
+                      ></span>
+                      <span
+                        class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
+                      ></span>
+                      <span
+                        class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
+                      ></span>
+                      <span
+                        class="absolute -top-4 left-1/2 flex h-[42px] w-[42px] -translate-x-1/2 items-center justify-center rounded-[14px] bg-[linear-gradient(160deg,#38bdf8,#0284c7)] text-2xl font-light text-white shadow-[0_6px_16px_color-mix(in_srgb,#0284c7_40%,transparent)]"
+                        >+</span
+                      >
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- Feature rows -->
+            <div class="flex flex-1 flex-col gap-6">
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-400/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-sky-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                    <path
+                      d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Visual workout editor</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Drag-and-drop steps, intervals, and targets into structured
+                    sessions. Real-time validation and stats.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-accent-purple)]/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-[var(--brand-accent-purple)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">AI workout generation</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Describe a session in plain language — Kaiord builds it
+                    around your power, HR, and pace zones with Claude, GPT, or
+                    Gemini.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-emerald-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="6" y="6" width="12" height="12" rx="3.5" />
+                    <path d="M9 6l.7-3h4.6L15 6M9 18l.7 3h4.6l.7-3" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">One-tap Garmin sync</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Push planned workouts straight to your watch, and pull
+                    completed activities back — no server in between.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== FORMAT HUB (RADIAL) ========== -->
+      <section
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
+      >
+        <div class="mx-auto max-w-[1180px]">
+          <div class="mb-9 text-center min-[860px]:mb-12">
+            <p
+              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--brand-text-muted)]"
+            >
+              The hub model
+            </p>
+            <h2
+              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            >
+              One hub. Every format.
+            </h2>
+            <p
+              class="mx-auto mt-3.5 max-w-[540px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+            >
+              KRD is the canonical format. Every conversion flows through it —
+              lossless and round-trip safe.
+            </p>
+          </div>
+
+          <!-- Radial diagram -->
+          <div
+            role="img"
+            aria-label="Format conversion diagram: FIT, TCX, ZWO, and GCN formats all convert bidirectionally through the central KRD hub format"
+            class="relative mx-auto h-[300px] w-[300px] min-[860px]:h-[360px] min-[860px]:w-[420px]"
+          >
+            <!-- connectors -->
+            <span
+              aria-hidden="true"
+              class="absolute left-1/2 top-[13%] h-[27%] w-0.5 -translate-x-1/2 bg-[color-mix(in_srgb,var(--brand-accent-blue)_40%,transparent)]"
+            ></span>
+            <span
+              aria-hidden="true"
+              class="absolute left-1/2 bottom-[13%] h-[27%] w-0.5 -translate-x-1/2 bg-[color-mix(in_srgb,var(--brand-accent-blue)_40%,transparent)]"
+            ></span>
+            <span
+              aria-hidden="true"
+              class="absolute top-1/2 left-[13%] h-0.5 w-[27%] -translate-y-1/2 bg-[color-mix(in_srgb,var(--brand-accent-blue)_40%,transparent)]"
+            ></span>
+            <span
+              aria-hidden="true"
+              class="absolute top-1/2 right-[13%] h-0.5 w-[27%] -translate-y-1/2 bg-[color-mix(in_srgb,var(--brand-accent-blue)_40%,transparent)]"
+            ></span>
+
+            <!-- hub -->
+            <div
+              class="animate-pulse-slow absolute left-1/2 top-1/2 flex h-[84px] w-[84px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[22px] border-2 border-[var(--brand-accent-blue)] bg-[color-mix(in_srgb,var(--brand-accent-blue)_10%,transparent)] shadow-[0_0_40px_color-mix(in_srgb,var(--brand-accent-blue)_27%,transparent)] min-[860px]:h-24 min-[860px]:w-24"
+            >
+              <span
+                class="font-mono text-lg font-extrabold text-sky-400 min-[860px]:text-xl"
+                >KRD</span
+              >
+            </div>
+
+            <!-- bidirectional markers -->
+            <span
+              aria-hidden="true"
+              class="absolute left-1/2 top-[30%] -translate-x-1/2 -translate-y-1/2 text-sm text-[var(--brand-text-muted)]"
+              >↕</span
+            >
+            <span
+              aria-hidden="true"
+              class="absolute left-1/2 top-[70%] -translate-x-1/2 -translate-y-1/2 text-sm text-[var(--brand-text-muted)]"
+              >↕</span
+            >
+            <span
+              aria-hidden="true"
+              class="absolute left-[30%] top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm text-[var(--brand-text-muted)]"
+              >↔</span
+            >
+            <span
+              aria-hidden="true"
+              class="absolute left-[70%] top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm text-[var(--brand-text-muted)]"
+              >↔</span
+            >
+
+            <!-- format chips -->
+            <span
+              class="animate-fade-in-right absolute left-1/2 top-0 -translate-x-1/2 rounded-[11px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              >.FIT</span
+            >
+            <span
+              class="animate-fade-in-left absolute left-0 top-1/2 -translate-y-1/2 rounded-[11px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              style="animation-delay: 0.1s"
+              >.TCX</span
+            >
+            <span
+              class="animate-fade-in-right absolute right-0 top-1/2 -translate-y-1/2 rounded-[11px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              style="animation-delay: 0.2s"
+              >.ZWO</span
+            >
+            <span
+              class="animate-fade-in-left absolute left-1/2 bottom-0 -translate-x-1/2 rounded-[11px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              style="animation-delay: 0.3s"
+              >.GCN</span
+            >
           </div>
         </div>
       </section>
@@ -620,66 +1119,173 @@
       <!-- ========== DEVELOPERS ========== -->
       <section
         id="developers"
-        class="border-t border-[var(--brand-border)] py-20"
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
       >
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 class="text-center text-3xl font-bold tracking-tight sm:text-4xl">
-            Built for developers
-          </h2>
-          <p
-            class="mx-auto mt-4 max-w-2xl text-center text-[var(--brand-text-secondary)]"
-          >
-            Convert fitness data in 4 lines of TypeScript. Strategy pattern —
-            bring your own adapters.
-          </p>
-          <p class="mx-auto mt-3 max-w-2xl text-center">
-            <a
-              href="/docs/"
-              class="inline-flex items-center gap-1 text-[var(--brand-accent-blue)] transition-colors hover:text-[var(--brand-accent-blue)]/80"
-              >Read the Docs &#8594;</a
+        <div class="mx-auto max-w-[1180px]">
+          <div class="mb-8 text-center min-[860px]:mb-11">
+            <p
+              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--brand-accent-purple)]"
             >
-          </p>
+              For developers
+            </p>
+            <h2
+              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            >
+              Convert fitness data in 4 lines.
+            </h2>
+            <p
+              class="mx-auto mt-3.5 mb-6 max-w-[520px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+            >
+              Strategy pattern — bring your own adapters. Type-safe end to end.
+            </p>
 
-          <!-- Code example -->
-          <div
-            class="relative mx-auto mt-10 max-w-2xl overflow-hidden rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)]"
-          >
-            <div
-              class="flex items-center gap-2 border-b border-[var(--brand-border)] px-4 py-2.5"
-            >
-              <span class="h-3 w-3 rounded-full bg-red-500/40"></span>
-              <span class="h-3 w-3 rounded-full bg-yellow-500/40"></span>
-              <span class="h-3 w-3 rounded-full bg-green-500/40"></span>
-              <span class="ml-2 text-xs text-[var(--brand-text-muted)]"
-                >convert.ts</span
-              >
-            </div>
-            <div class="overflow-x-auto">
+            <!-- Interactive install widget -->
+            <div class="flex justify-center">
               <div
-                class="relative after:pointer-events-none after:absolute after:right-0 after:top-0 after:h-full after:w-8 after:bg-gradient-to-l after:from-[var(--brand-bg-surface)] after:content-[''] sm:after:hidden"
+                class="inline-flex items-center overflow-hidden rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)]"
               >
-                <pre
-                  class="p-4 font-mono text-sm leading-relaxed"
-                ><code><span class="text-[var(--brand-accent-purple)]">import</span> <span class="text-[var(--brand-text-primary)]">{ fromBinary, fitReader }</span> <span class="text-[var(--brand-accent-purple)]">from</span> <span class="text-emerald-400">'@kaiord/fit'</span>
-<span class="text-[var(--brand-accent-purple)]">import</span> <span class="text-[var(--brand-text-primary)]">{ toText, tcxWriter }</span> <span class="text-[var(--brand-accent-purple)]">from</span> <span class="text-emerald-400">'@kaiord/tcx'</span>
-
-<span class="text-[var(--brand-accent-purple)]">const</span> <span class="text-[var(--brand-accent-blue)]">krd</span>  <span class="text-[var(--brand-text-muted)]">=</span> <span class="text-[var(--brand-accent-purple)]">await</span> <span class="text-amber-300">fromBinary</span><span class="text-[var(--brand-text-muted)]">(</span><span class="text-[var(--brand-text-primary)]">fitFile</span><span class="text-[var(--brand-text-muted)]">,</span> <span class="text-[var(--brand-text-primary)]">fitReader</span><span class="text-[var(--brand-text-muted)]">)</span>
-<span class="text-[var(--brand-accent-purple)]">const</span> <span class="text-[var(--brand-accent-blue)]">tcx</span>  <span class="text-[var(--brand-text-muted)]">=</span> <span class="text-[var(--brand-accent-purple)]">await</span> <span class="text-amber-300">toText</span><span class="text-[var(--brand-text-muted)]">(</span><span class="text-[var(--brand-accent-blue)]">krd</span><span class="text-[var(--brand-text-muted)]">,</span> <span class="text-[var(--brand-text-primary)]">tcxWriter</span><span class="text-[var(--brand-text-muted)]">)</span></code></pre>
+                <div
+                  class="hidden sm:flex"
+                  role="tablist"
+                  aria-label="Package manager"
+                >
+                  <button
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="install-cmd"
+                    data-pm="npm"
+                    class="pm-tab border-r border-[var(--brand-border)] bg-[var(--brand-bg-primary)] px-3.5 py-3 text-xs font-semibold text-[var(--brand-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+                  >
+                    npm
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="install-cmd"
+                    data-pm="yarn"
+                    class="pm-tab border-r border-[var(--brand-border)] px-3.5 py-3 text-xs font-semibold text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+                  >
+                    yarn
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="install-cmd"
+                    data-pm="pnpm"
+                    class="pm-tab border-r border-[var(--brand-border)] px-3.5 py-3 text-xs font-semibold text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+                  >
+                    pnpm
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="install-cmd"
+                    data-pm="bun"
+                    class="pm-tab border-r border-[var(--brand-border)] px-3.5 py-3 text-xs font-semibold text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+                  >
+                    bun
+                  </button>
+                </div>
+                <select
+                  id="pm-select"
+                  class="rounded-l-xl border-r border-[var(--brand-border)] bg-[var(--brand-bg-primary)] px-2 py-3 text-xs font-semibold text-[var(--brand-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-blue)] sm:hidden"
+                  aria-label="Package manager"
+                >
+                  <option value="npm" selected>npm</option>
+                  <option value="yarn">yarn</option>
+                  <option value="pnpm">pnpm</option>
+                  <option value="bun">bun</option>
+                </select>
+                <code
+                  id="install-cmd"
+                  role="tabpanel"
+                  class="px-4 py-3 font-mono text-sm text-[var(--brand-text-secondary)]"
+                  >npm i @kaiord/core</code
+                >
+                <button
+                  id="copy-btn"
+                  class="flex min-h-[44px] min-w-[44px] items-center justify-center px-3.5 py-3 text-[var(--brand-text-muted)] transition-colors hover:text-[var(--brand-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
+                  aria-label="Copy install command"
+                >
+                  <svg
+                    id="copy-icon"
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <svg
+                    id="check-icon"
+                    class="hidden h-4 w-4 text-[var(--brand-semantic-tip)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </button>
+                <span
+                  id="copy-feedback"
+                  class="sr-only"
+                  aria-live="polite"
+                ></span>
               </div>
             </div>
           </div>
 
-          <!-- Feature grid -->
-          <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <!-- convert.ts code block -->
+          <div
+            class="mx-auto mb-11 max-w-[680px] overflow-hidden rounded-[13px] border border-[var(--brand-border)] bg-[var(--brand-code-block-bg)]"
+          >
+            <div
+              class="flex items-center gap-1.5 border-b border-[var(--brand-border)] px-3 py-2.5"
+            >
+              <span class="h-2.5 w-2.5 rounded-full bg-red-500/40"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-amber-500/40"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-green-500/40"></span>
+              <span
+                class="ml-1.5 font-mono text-[11.5px] text-[var(--brand-text-muted)]"
+                >convert.ts</span
+              >
+            </div>
+            <div class="overflow-x-auto">
+              <pre
+                class="p-4 font-mono text-[13px] leading-[1.7]"
+              ><code><span class="text-[var(--brand-accent-purple)]">import</span> <span class="text-[var(--brand-text-primary)]">{ fromBinary, fitReader }</span> <span class="text-[var(--brand-accent-purple)]">from</span> <span class="text-emerald-400">'@kaiord/fit'</span>
+<span class="text-[var(--brand-accent-purple)]">import</span> <span class="text-[var(--brand-text-primary)]">{ toText, tcxWriter }</span> <span class="text-[var(--brand-accent-purple)]">from</span> <span class="text-emerald-400">'@kaiord/tcx'</span>
+
+<span class="text-[var(--brand-accent-purple)]">const</span> <span class="text-sky-400">krd</span> <span class="text-[var(--brand-text-muted)]">=</span> <span class="text-[var(--brand-accent-purple)]">await</span> <span class="text-amber-300">fromBinary</span><span class="text-[var(--brand-text-muted)]">(file, fitReader)</span>
+<span class="text-[var(--brand-accent-purple)]">const</span> <span class="text-sky-400">tcx</span> <span class="text-[var(--brand-text-muted)]">=</span> <span class="text-[var(--brand-accent-purple)]">await</span> <span class="text-amber-300">toText</span><span class="text-[var(--brand-text-muted)]">(krd, tcxWriter)</span></code></pre>
+            </div>
+          </div>
+
+          <!-- Capability grid -->
+          <div class="grid gap-6 sm:grid-cols-2 min-[860px]:grid-cols-3">
             <div class="flex items-start gap-3">
               <div
-                class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-accent-blue)]/10 text-[var(--brand-accent-blue)]"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-sky-400/10 font-mono text-sm font-bold text-sky-400"
               >
                 TS
               </div>
               <div>
-                <h3 class="font-semibold">TypeScript-first</h3>
-                <p class="mt-1 text-sm text-[var(--brand-text-secondary)]">
+                <h3 class="text-[15.5px] font-bold">TypeScript-first</h3>
+                <p
+                  class="mt-1 text-[13.5px] leading-[1.5] text-[var(--brand-text-secondary)]"
+                >
                   Strict types, Zod schemas, full IntelliSense. No
                   <code>any</code>.
                 </p>
@@ -687,66 +1293,76 @@
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-accent-purple)]/10 text-sm text-[var(--brand-accent-purple)]"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-[var(--brand-accent-purple)]/10 font-mono text-sm font-bold text-[var(--brand-accent-purple)]"
               >
                 &#x2B21;
               </div>
               <div>
-                <h3 class="font-semibold">Hexagonal Architecture</h3>
-                <p class="mt-1 text-sm text-[var(--brand-text-secondary)]">
+                <h3 class="text-[15.5px] font-bold">Hexagonal architecture</h3>
+                <p
+                  class="mt-1 text-[13.5px] leading-[1.5] text-[var(--brand-text-secondary)]"
+                >
                   Clean boundaries. Domain never depends on infrastructure.
                 </p>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-sm text-emerald-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-emerald-500/10 font-mono text-sm font-bold text-emerald-400"
               >
                 &#x2699;
               </div>
               <div>
-                <h3 class="font-semibold">Plugin System</h3>
-                <p class="mt-1 text-sm text-[var(--brand-text-secondary)]">
+                <h3 class="text-[15.5px] font-bold">Plugin system</h3>
+                <p
+                  class="mt-1 text-[13.5px] leading-[1.5] text-[var(--brand-text-secondary)]"
+                >
                   Strategy pattern: inject your own readers and writers.
                 </p>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-sm text-amber-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-amber-500/10 font-mono text-sm font-bold text-amber-400"
               >
                 &gt;_
               </div>
               <div>
-                <h3 class="font-semibold">CLI</h3>
-                <p class="mt-1 text-sm text-[var(--brand-text-secondary)]">
+                <h3 class="text-[15.5px] font-bold">CLI</h3>
+                <p
+                  class="mt-1 text-[13.5px] leading-[1.5] text-[var(--brand-text-secondary)]"
+                >
                   Convert files from your terminal. Pipe-friendly.
                 </p>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pink-500/10 text-sm text-pink-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-pink-500/10 font-mono text-sm font-bold text-pink-400"
               >
                 AI
               </div>
               <div>
-                <h3 class="font-semibold">MCP Server</h3>
-                <p class="mt-1 text-sm text-[var(--brand-text-secondary)]">
-                  AI-ready via Model Context Protocol. Works with Claude,
-                  Cursor, and more.
+                <h3 class="text-[15.5px] font-bold">MCP server</h3>
+                <p
+                  class="mt-1 text-[13.5px] leading-[1.5] text-[var(--brand-text-secondary)]"
+                >
+                  AI-ready via Model Context Protocol — Claude, Cursor &amp;
+                  more.
                 </p>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-sm text-cyan-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-cyan-500/10 font-mono text-sm font-bold text-cyan-400"
               >
                 5
               </div>
               <div>
-                <h3 class="font-semibold">5 Format Adapters</h3>
-                <p class="mt-1 text-sm text-[var(--brand-text-secondary)]">
+                <h3 class="text-[15.5px] font-bold">5 format adapters</h3>
+                <p
+                  class="mt-1 text-[13.5px] leading-[1.5] text-[var(--brand-text-secondary)]"
+                >
                   FIT, TCX, ZWO, GCN, KRD. All round-trip safe.
                 </p>
               </div>
@@ -756,100 +1372,102 @@
       </section>
 
       <!-- ========== DIFFERENTIATORS ========== -->
-      <section class="border-t border-[var(--brand-border)] py-20">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
-          <div class="grid gap-8 sm:grid-cols-2">
-            <!-- 100% AI-coded -->
+      <section
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
+      >
+        <div class="mx-auto max-w-[1180px]">
+          <!-- Zero infrastructure -->
+          <div
+            class="relative overflow-hidden rounded-[22px] border border-[color-mix(in_srgb,var(--brand-accent-blue)_25%,transparent)] bg-[color-mix(in_srgb,var(--brand-accent-blue)_5%,transparent)] p-7 min-[860px]:p-11"
+          >
             <div
-              class="rounded-xl border border-[var(--brand-accent-purple)]/30 bg-[var(--brand-accent-purple)]/5 p-6 sm:p-8"
-            >
-              <div
-                class="mb-4 inline-flex items-center gap-2 rounded-full bg-[var(--brand-accent-purple)]/10 px-3 py-1 text-xs font-semibold text-[var(--brand-accent-purple)]"
+              aria-hidden="true"
+              class="pointer-events-none absolute -top-16 -right-10 h-[220px] w-[220px] rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--brand-accent-blue)_13%,transparent),transparent)]"
+            ></div>
+            <div class="relative max-w-[620px]">
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-1.5 text-xs font-semibold text-sky-400"
               >
                 <svg
                   class="h-3.5 w-3.5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.789l1.599.799L9 4.323V3a1 1 0 011-1z"
-                  />
-                </svg>
-                100% AI-coded
-              </div>
-              <h3 class="text-xl font-bold">Every line written by AI agents</h3>
-              <p
-                class="mt-3 text-sm text-[var(--brand-text-secondary)] leading-relaxed"
-              >
-                This entire project — domain logic, adapters, CLI, MCP server,
-                web editor, tests, CI/CD, and this landing page — was written by
-                Claude Code. Not a single line of human-written code. A
-                real-world showcase of AI-assisted development at scale.
-              </p>
-              <a
-                href="https://github.com/pablo-albaladejo/kaiord/commits"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mt-4 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-[var(--brand-accent-purple)] transition-colors hover:text-[var(--brand-accent-purple)]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-purple)]"
-              >
-                See the commit history &rarr;
-              </a>
-            </div>
-
-            <!-- Zero infrastructure -->
-            <div
-              class="rounded-xl border border-[var(--brand-accent-blue)]/30 bg-[var(--brand-accent-blue)]/5 p-6 sm:p-8"
-            >
-              <div
-                class="mb-4 inline-flex items-center gap-2 rounded-full bg-[var(--brand-accent-blue)]/10 px-3 py-1 text-xs font-semibold text-[var(--brand-accent-blue)]"
-              >
-                <svg
-                  class="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                   aria-hidden="true"
                 >
+                  <rect x="6" y="6" width="12" height="12" rx="2" />
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"
                   />
                 </svg>
                 Zero infrastructure
-              </div>
-              <h3 class="text-xl font-bold">
+              </span>
+              <h2
+                class="mt-4 text-2xl font-extrabold tracking-[-0.02em] min-[860px]:text-3xl"
+              >
                 No servers. No accounts. No cloud.
-              </h3>
+              </h2>
               <p
-                class="mt-3 text-sm text-[var(--brand-text-secondary)] leading-relaxed"
+                class="mt-3 text-base leading-[1.6] text-[var(--brand-text-secondary)]"
               >
                 Everything runs locally or in-browser. The CLI converts files on
-                your machine. The SPA editor runs in your browser. The MCP
-                server integrates with your local AI tools. Your data never
-                leaves your device.
+                your machine, the editor runs in your browser, the MCP server
+                plugs into your local AI tools. Your data never leaves your
+                device.
               </p>
-              <div class="mt-4 flex flex-wrap gap-2">
+              <div class="mt-5 flex flex-wrap gap-2">
                 <span
-                  class="rounded-md bg-[var(--brand-bg-surface)] px-2 py-1 font-mono text-xs text-[var(--brand-text-muted)]"
+                  class="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--brand-text-secondary)]"
                   >CLI</span
                 >
                 <span
-                  class="rounded-md bg-[var(--brand-bg-surface)] px-2 py-1 font-mono text-xs text-[var(--brand-text-muted)]"
-                  >SPA</span
+                  class="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--brand-text-secondary)]"
+                  >SPA editor</span
                 >
                 <span
-                  class="rounded-md bg-[var(--brand-bg-surface)] px-2 py-1 font-mono text-xs text-[var(--brand-text-muted)]"
+                  class="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--brand-text-secondary)]"
                   >MCP</span
                 >
                 <span
-                  class="rounded-md bg-[var(--brand-bg-surface)] px-2 py-1 font-mono text-xs text-[var(--brand-text-muted)]"
-                  >Browser Extension</span
+                  class="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--brand-text-secondary)]"
+                  >Browser extension</span
                 >
               </div>
             </div>
+          </div>
+
+          <!-- Demoted, honest AI-coded line -->
+          <div
+            class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center"
+          >
+            <svg
+              class="h-4 w-4 text-[var(--brand-accent-purple)]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"
+              />
+            </svg>
+            <span class="text-sm text-[var(--brand-text-muted)]">
+              Every line — domain, adapters, editor, this page — written by AI
+              agents.
+            </span>
+            <a
+              href="https://github.com/pablo-albaladejo/kaiord/commits"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex min-h-[44px] items-center text-sm font-semibold text-[var(--brand-accent-purple)] transition-colors hover:text-[var(--brand-accent-purple)]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-purple)]"
+              >See the commits &rarr;</a
+            >
           </div>
         </div>
       </section>
@@ -857,86 +1475,106 @@
       <!-- ========== OPEN SOURCE ========== -->
       <section
         id="open-source"
-        class="border-t border-[var(--brand-border)] py-20"
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
       >
-        <div class="mx-auto max-w-4xl px-4 text-center sm:px-6">
-          <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+        <div class="mx-auto max-w-[1180px] text-center">
+          <p
+            class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--brand-text-muted)]"
+          >
             Open source
+          </p>
+          <h2
+            class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+          >
+            Built in the open.
           </h2>
-          <p class="mx-auto mt-4 max-w-xl text-[var(--brand-text-secondary)]">
-            MIT licensed. Built in the open. Contributions welcome.
+          <p
+            class="mx-auto mt-3.5 max-w-[460px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+          >
+            MIT licensed. Contributions welcome.
           </p>
 
-          <!-- Capability metrics -->
-          <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <!-- Stats -->
+          <div class="my-9 grid grid-cols-2 gap-3.5 min-[860px]:grid-cols-4">
             <div
-              class="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-4"
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-5"
             >
-              <div class="text-2xl font-bold text-[var(--brand-accent-blue)]">
+              <div
+                class="text-3xl font-extrabold tracking-[-0.02em] text-sky-400"
+              >
                 5
               </div>
-              <div class="mt-1 text-xs text-[var(--brand-text-muted)]">
-                Format Adapters
+              <div class="mt-1 text-[12.5px] text-[var(--brand-text-muted)]">
+                Format adapters
               </div>
             </div>
             <div
-              class="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-4"
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-5"
             >
-              <div class="text-2xl font-bold text-emerald-400">100%</div>
-              <div class="mt-1 text-xs text-[var(--brand-text-muted)]">
-                Round-trip Safe
+              <div
+                class="text-3xl font-extrabold tracking-[-0.02em] text-emerald-400"
+              >
+                100%
+              </div>
+              <div class="mt-1 text-[12.5px] text-[var(--brand-text-muted)]">
+                Round-trip safe
               </div>
             </div>
             <div
-              class="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-4"
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-5"
             >
-              <div class="text-2xl font-bold text-[var(--brand-accent-purple)]">
-                80%+
+              <div
+                class="text-3xl font-extrabold tracking-[-0.02em] text-[var(--brand-accent-purple)]"
+              >
+                MIT
               </div>
-              <div class="mt-1 text-xs text-[var(--brand-text-muted)]">
-                Test Coverage
+              <div class="mt-1 text-[12.5px] text-[var(--brand-text-muted)]">
+                Licensed
               </div>
             </div>
             <div
-              class="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-4"
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3.5 py-5"
             >
-              <div class="text-2xl font-bold text-amber-400">0</div>
-              <div class="mt-1 text-xs text-[var(--brand-text-muted)]">
-                Lint Warnings
+              <div
+                class="text-3xl font-extrabold tracking-[-0.02em] text-amber-400"
+              >
+                0
+              </div>
+              <div class="mt-1 text-[12.5px] text-[var(--brand-text-muted)]">
+                Backend services
               </div>
             </div>
           </div>
 
-          <!-- CTA -->
-          <div class="mt-10">
-            <a
-              href="https://github.com/pablo-albaladejo/kaiord"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-[var(--brand-bg-surface)] border border-[var(--brand-border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-text-primary)] transition-colors hover:bg-[var(--brand-bg-surface)]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-blue)]"
+          <a
+            href="https://github.com/pablo-albaladejo/kaiord"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-6 py-3.5 text-base font-semibold text-[var(--brand-text-primary)] transition-colors hover:bg-[var(--brand-bg-elevated)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-blue)]"
+          >
+            <svg
+              class="h-5 w-5"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              <svg
-                class="h-5 w-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
-                />
-              </svg>
-              Star on GitHub
-            </a>
-          </div>
+              <path
+                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+              />
+            </svg>
+            Star on GitHub
+          </a>
         </div>
       </section>
     </main>
 
     <!-- ========== FOOTER ========== -->
-    <footer class="border-t border-[var(--brand-border)] py-10">
-      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <footer
+      class="border-t border-[var(--brand-border)] px-[22px] py-10 min-[860px]:px-12"
+    >
+      <div class="mx-auto max-w-[1180px]">
         <div
-          class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between"
+          class="flex flex-col items-center gap-4 min-[860px]:flex-row min-[860px]:justify-between"
         >
           <!-- Logo -->
           <a
