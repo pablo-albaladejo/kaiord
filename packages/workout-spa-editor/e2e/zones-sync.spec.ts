@@ -82,6 +82,24 @@ const seedProfile = async (
         updatedAt: ts,
       });
 
+      // Zones auto-import is gated on an enabled auto-import
+      // IntegrationPolicy (the syncZones flag was migrated to one). Clear
+      // any prior policy, then mirror the test's syncZones intent onto a
+      // policy so the auto-sync fan-out fires (or not) accordingly.
+      await db.table("integrationPolicies").clear();
+      if (syncZonesFlag) {
+        await db.table("integrationPolicies").put({
+          id: "zones-sync-auto-policy",
+          profileId,
+          dataType: "training-zones",
+          bridgeId: "train2go-bridge",
+          direction: "import",
+          mode: "auto",
+          enabled: true,
+          updatedAt: ts,
+        });
+      }
+
       // Seed an out-of-week dummy workout so `hasAnyWorkouts` is true
       // and the FirstVisitState onboarding panel does NOT render — the
       // CalendarHeader (which owns the Sync button) only mounts when the
@@ -416,6 +434,16 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
           createdAt: ts,
           updatedAt: ts,
         });
+        await db.table("integrationPolicies").put({
+          id: "zones-sync-auto-policy",
+          profileId,
+          dataType: "training-zones",
+          bridgeId: "train2go-bridge",
+          direction: "import",
+          mode: "auto",
+          enabled: true,
+          updatedAt: ts,
+        });
         const dbWithBulk = db as Db & {
           table: (n: string) => {
             put: (r: unknown) => Promise<unknown>;
@@ -696,6 +724,16 @@ const seedTemplateDefaultsProfile = async (page: Page): Promise<void> => {
         createdAt: ts,
         updatedAt: ts,
       });
+      await db.table("integrationPolicies").put({
+        id: "zones-sync-auto-policy",
+        profileId,
+        dataType: "training-zones",
+        bridgeId: "train2go-bridge",
+        direction: "import",
+        mode: "auto",
+        enabled: true,
+        updatedAt: ts,
+      });
 
       // Dummy workout so the calendar header (and Sync button) mounts.
       await db.table("workouts").put({
@@ -859,6 +897,16 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
           },
         ],
         createdAt: ts,
+        updatedAt: ts,
+      });
+      await db.table("integrationPolicies").put({
+        id: "zones-sync-auto-policy",
+        profileId,
+        dataType: "training-zones",
+        bridgeId: "train2go-bridge",
+        direction: "import",
+        mode: "auto",
+        enabled: true,
         updatedAt: ts,
       });
 

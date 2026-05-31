@@ -16,6 +16,7 @@ import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import { createTrain2GoCoachingTransport } from "../adapters/train2go/train2go-coaching-transport";
+import { useZonesAutoImportOnMount } from "../adapters/train2go/use-zones-auto-import-on-mount";
 import {
   useZonesSyncOrchestrator,
   type ZonesSyncOrchestrator,
@@ -41,6 +42,7 @@ export const Train2GoZonesSyncProvider = ({
     []
   );
   const orchestrator = useZonesSyncOrchestrator(persistence, transport, toasts);
+  useZonesAutoImportOnMount(persistence, orchestrator.runSync);
 
   return (
     <Ctx.Provider value={orchestrator}>

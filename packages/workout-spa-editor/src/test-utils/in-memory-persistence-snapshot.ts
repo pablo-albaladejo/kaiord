@@ -23,6 +23,7 @@ import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { AutoMatchDismissal } from "../types/auto-match-dismissal";
+import type { IntegrationPolicy } from "../types/integration-policy";
 import type { SessionMatch } from "../types/session-match";
 import type { UserPreferences } from "../types/user-preferences";
 import type { ActiveIdRef } from "./in-memory-profile-repository";
@@ -36,6 +37,7 @@ export type Stores = {
   usage: Map<string, UsageRecord>;
   coaching: Map<string, CoachingActivityRecord>;
   coachingSyncState: Map<string, CoachingSyncStateRecord>;
+  integrationPolicies: Map<string, IntegrationPolicy>;
   sessionMatch: Map<string, SessionMatch>;
   autoMatchDismissal: Map<string, AutoMatchDismissal>;
   userPreferences: Map<string, UserPreferences>;
@@ -69,6 +71,7 @@ export const captureSnapshot = (
   usage: new Map(stores.usage),
   coaching: new Map(stores.coaching),
   coachingSyncState: new Map(stores.coachingSyncState),
+  integrationPolicies: new Map(stores.integrationPolicies),
   sessionMatch: new Map(stores.sessionMatch),
   autoMatchDismissal: new Map(stores.autoMatchDismissal),
   userPreferences: new Map(stores.userPreferences),

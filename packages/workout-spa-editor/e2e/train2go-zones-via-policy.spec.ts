@@ -42,7 +42,17 @@ const seedProfileWithZonesPolicy = async (
       await db.table("profiles").put({
         id: pid,
         name: "Zones Policy Profile",
-        linkedAccounts: [],
+        // A profile migrated from syncZones=true always retains its
+        // Train2Go link; the auto-import resolves externalUserId from it.
+        linkedAccounts: [
+          {
+            source: "train2go",
+            externalUserId: "99999",
+            externalUserName: "E2E",
+            linkedAt: now,
+          },
+        ],
+        sportZones: {},
         createdAt: now,
         updatedAt: now,
       });
@@ -103,6 +113,7 @@ test.describe("Train2Go zones auto-import via IntegrationPolicy (AC-6)", () => {
           id: pid,
           name: "Zones Disabled Profile",
           linkedAccounts: [],
+          sportZones: {},
           createdAt: now,
           updatedAt: now,
         });
