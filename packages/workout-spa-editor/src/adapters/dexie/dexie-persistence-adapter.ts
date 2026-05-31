@@ -35,6 +35,7 @@ type DexieTxScope = (
 import { createDexieProfileRepository } from "./dexie-profile-repository";
 import { createDexieSyncStateRepository } from "./dexie-sync-state-repository";
 import { createDexieTemplateRepository } from "./dexie-template-repository";
+import { createDexieTombstoneRepository } from "./dexie-tombstone-repository";
 import { createDexieUsageRepository } from "./dexie-usage-repository";
 import { createDexieWorkoutRepository } from "./dexie-workout-repository";
 
@@ -79,6 +80,7 @@ export function createDexiePersistence(
       database,
       "healthStress"
     ),
+    tombstones: createDexieTombstoneRepository(database),
     // Atomicity: on rejection the IDB transaction aborts and all writes
     // inside `fn` roll back. See PersistencePort.transaction for the rule.
     transaction: <T>(fn: () => Promise<T>): Promise<T> => {

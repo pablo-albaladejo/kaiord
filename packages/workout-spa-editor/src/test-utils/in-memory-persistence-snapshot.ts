@@ -19,6 +19,7 @@ import type {
   HealthWeightRecord,
 } from "../types/health/health-records";
 import type { Profile } from "../types/profile";
+import type { Tombstone } from "../types/snapshot";
 import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 import type { LlmProviderConfig } from "../store/ai-store-types";
@@ -45,6 +46,7 @@ export type Stores = {
   healthDaily: Map<string, HealthDailyRecord>;
   healthBodyComposition: Map<string, HealthBodyCompositionRecord>;
   healthStress: Map<string, HealthStressRecord>;
+  tombstones: Map<string, Tombstone>;
 };
 
 export type Snapshot = {
@@ -78,6 +80,7 @@ export const captureSnapshot = (
   healthDaily: new Map(stores.healthDaily),
   healthBodyComposition: new Map(stores.healthBodyComposition),
   healthStress: new Map(stores.healthStress),
+  tombstones: new Map(stores.tombstones),
   profileActiveId: activeIdRef.current,
   aiCustomPrompt: customPromptRef.current,
 });

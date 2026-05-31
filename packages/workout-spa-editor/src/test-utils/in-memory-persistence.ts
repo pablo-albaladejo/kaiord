@@ -28,6 +28,7 @@ import {
 } from "./in-memory-profile-repository";
 import { createInMemorySessionMatchRepository } from "./in-memory-session-match-repository";
 import { createInMemorySyncStateRepository } from "./in-memory-sync-state-repository";
+import { createInMemoryTombstoneRepository } from "./in-memory-tombstone-repository";
 import { createInMemoryTemplateRepository } from "./in-memory-template-repository";
 import { createInMemoryUsageRepository } from "./in-memory-usage-repository";
 import { createInMemoryUserPreferencesRepository } from "./in-memory-user-preferences-repository";
@@ -52,6 +53,7 @@ export function createInMemoryPersistence(): PersistencePort {
     healthDaily: new Map(),
     healthBodyComposition: new Map(),
     healthStress: new Map(),
+    tombstones: new Map(),
   };
   const profileActiveIdRef: ActiveIdRef = { current: null };
   const aiCustomPromptRef: CustomPromptRef = { current: null };
@@ -105,6 +107,7 @@ export function createInMemoryPersistence(): PersistencePort {
       stores.healthBodyComposition
     ),
     healthStress: createInMemoryHealthRecordRepository(stores.healthStress),
+    tombstones: createInMemoryTombstoneRepository(stores.tombstones),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(
         stores,

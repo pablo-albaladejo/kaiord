@@ -28,6 +28,7 @@ import type {
   TemplateRepository,
   UsageRepository,
 } from "./simple-repositories";
+import type { TombstoneRepository } from "./tombstone-repository";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
 
@@ -49,6 +50,7 @@ export type {
   TemplateRepository,
   UsageRepository,
 } from "./simple-repositories";
+export type { TombstoneRepository } from "./tombstone-repository";
 export type { UserPreferencesRepository } from "./user-preferences-repository";
 export type { WorkoutRepository } from "./workout-repository";
 
@@ -81,6 +83,9 @@ export type PersistencePort = {
   healthDaily: HealthRecordRepository<HealthDailyRecord>;
   healthBodyComposition: HealthRecordRepository<HealthBodyCompositionRecord>;
   healthStress: HealthRecordRepository<HealthStressRecord>;
+  // Delete markers for cross-device sync. Written by the `withTombstones`
+  // decorator on every delete; read by the snapshot/merge use cases.
+  tombstones: TombstoneRepository;
   // Atomic commit-or-rollback wrapper for multi-write or read-modify-write
   // use cases. Dexie adapter delegates to db.transaction("rw", db.tables, fn);
   // in-memory adapter implements snapshot/revert. Application code MUST NOT

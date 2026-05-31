@@ -1,15 +1,15 @@
 ## 1. Phase 1 — Snapshot export/import + tombstones (no OAuth)
 
-> Status note: Phase 1 was fully implemented and green once (4335 tests passing, build/lint/guards clean), but the implementation files were uncommitted on the `fix/spa-editor-redesign-e2e` branch and were lost during a branch switch. The code must be regenerated (re-run `Workflow openspec-lifecycle { mode: "implement", phase: "1" }`). The boxes below are reset to reflect the current tree. See design.md for the intended `SnapshotPort` shape that the regeneration must follow.
+> Status note: Phase 1 is implemented, committed, and fully green (539 files / 4342 tests passing; build/lint/guards clean). It was lost once when uncommitted code was discarded on a branch switch, then regenerated via the lifecycle workflow and committed immediately. A follow-up fix resolved a `TS2589`/`this`-binding issue in `dexie-snapshot-port.ts` (call `transaction` as a method on a narrowed `db` cast). Uses the `SnapshotPort` shape from design.md.
 
-- [ ] 1.1 Define `Snapshot`, `RemoteSnapshot`, and `SnapshotManifest` types in the domain/types layer (`manifest` with `schemaVersion`, `deviceId`, `exportedAt`, `encrypted`; `tables` map; `tombstones` array)
-- [ ] 1.2 Add the `tombstones` table to `dexie-schemas.ts` (PK `[table+id]`, fields `table`, `id`, `deletedAt`, `profileId?`) and register schema version 19 in `register-kaiord-versions-v10-plus.ts` (additive upgrade, no data transform)
-- [ ] 1.3 Write a failing test for the v18→v19 migration (existing rows intact, `tombstones` table present), then implement until green
-- [ ] 1.4 Extend `PersistencePort` with a `Tombstone` repository (read/list/prune) and write its in-memory adapter implementation for tests
-- [ ] 1.5 Write failing tests for a `withTombstones` delete-decorator over `PersistencePort` (delete records a tombstone; rolled-back delete records none; call sites pass no extra args), then implement the decorator wiring the tombstone write into the same transaction
-- [ ] 1.6 Write failing tests for `exportSnapshot` (all tables included, manifest schemaVersion correct), then implement it as a pure use case depending only on `SnapshotPort` (whole-DB dump/restore port; per-domain `PersistencePort` repos lack a uniform `getAll`/`clear`)
-- [ ] 1.7 Write failing tests for `importSnapshot` (clears + restores every table) and an export→import round-trip (including an encrypted `aiProviders` row decrypting afterward), then implement
-- [ ] 1.8 Verify no Phase-1 file under `application/` imports `dexie-database` (guard R-AppDexieImport) and run `pnpm test:scripts`
+- [x] 1.1 Define `Snapshot`, `RemoteSnapshot`, and `SnapshotManifest` types in the domain/types layer (`manifest` with `schemaVersion`, `deviceId`, `exportedAt`, `encrypted`; `tables` map; `tombstones` array)
+- [x] 1.2 Add the `tombstones` table to `dexie-schemas.ts` (PK `[table+id]`, fields `table`, `id`, `deletedAt`, `profileId?`) and register schema version 19 in `register-kaiord-versions-v10-plus.ts` (additive upgrade, no data transform)
+- [x] 1.3 Write a failing test for the v18→v19 migration (existing rows intact, `tombstones` table present), then implement until green
+- [x] 1.4 Extend `PersistencePort` with a `Tombstone` repository (read/list/prune) and write its in-memory adapter implementation for tests
+- [x] 1.5 Write failing tests for a `withTombstones` delete-decorator over `PersistencePort` (delete records a tombstone; rolled-back delete records none; call sites pass no extra args), then implement the decorator wiring the tombstone write into the same transaction
+- [x] 1.6 Write failing tests for `exportSnapshot` (all tables included, manifest schemaVersion correct), then implement it as a pure use case depending only on `SnapshotPort` (whole-DB dump/restore port; per-domain `PersistencePort` repos lack a uniform `getAll`/`clear`)
+- [x] 1.7 Write failing tests for `importSnapshot` (clears + restores every table) and an export→import round-trip (including an encrypted `aiProviders` row decrypting afterward), then implement
+- [x] 1.8 Verify no Phase-1 file under `application/` imports `dexie-database` (guard R-AppDexieImport) and run `pnpm test:scripts`
 
 ## 2. Phase 2 — CloudSyncPort + Google Drive adapter
 
