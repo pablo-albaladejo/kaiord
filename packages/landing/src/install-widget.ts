@@ -89,7 +89,7 @@ export function setupInstallWidget(root: Root = document): void {
 export function setupSmoothScroll(root: Root = document): void {
   root.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
     a.addEventListener("click", (e) => {
-      const target = document.querySelector(a.getAttribute("href") ?? "");
+      const target = root.querySelector(a.getAttribute("href") ?? "");
       if (target) {
         e.preventDefault();
         target.scrollIntoView({ behavior: "smooth" });
