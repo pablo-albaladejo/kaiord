@@ -34,15 +34,16 @@ test.describe("Calendar Navigation", () => {
     expect(page.url()).toContain("/calendar");
   });
 
-  test('Header "Calendar" button navigates to /calendar from /workout/new', async ({
+  test('Header "Calendar" button navigates to the week calendar', async ({
     page,
   }) => {
     await page.goto("/workout/new?source=scratch");
     await page.getByRole("button", { name: "Go to calendar" }).click();
-    await page.waitForURL(/\/calendar$/);
-    // The header "Go to calendar" entry targets bare /calendar, which
-    // renders the Today page post-redesign.
-    await expect(page.getByTestId("today-page")).toBeVisible();
+    // The Calendar entry targets the current week (/calendar/:weekId) so
+    // the week calendar is reachable from the header (bare /calendar is
+    // now the Today page).
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
   test("Kaiord logo navigates to /calendar (SPA, no reload)", async ({
