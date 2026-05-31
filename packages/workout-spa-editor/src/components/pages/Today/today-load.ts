@@ -6,28 +6,24 @@
  * (raw) entries still register a bar. Heights are normalised to the week's
  * busiest day so the tallest bar fills the track.
  */
+import { thresholdsForSport } from "../../../lib/athlete";
 import {
   buildReviewModel,
   type ReviewModel,
 } from "../../../lib/workout-review";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { Profile } from "../../../types/profile";
-import type { SportThresholds } from "../../../types/sport-zones";
 
 const FALLBACK_TITLE = "Workout";
 const RAW_FALLBACK_LOAD = 30;
 const MIN_BAR_FRACTION = 0.12;
-
-type SportZoneKey = keyof Profile["sportZones"];
 
 export function reviewFor(
   record: WorkoutRecord,
   profile: Profile | null
 ): ReviewModel | null {
   if (!record.krd) return null;
-  const sportKey = record.sport as SportZoneKey;
-  const thresholds: SportThresholds =
-    profile?.sportZones[sportKey]?.thresholds ?? {};
+  const thresholds = thresholdsForSport(profile, record.sport);
   return buildReviewModel(record.krd, thresholds, FALLBACK_TITLE);
 }
 

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
+import { thresholdsForSport } from "../../../lib/athlete";
 import { buildReviewModel } from "../../../lib/workout-review";
-import type { SportThresholds } from "../../../types/sport-zones";
 import { buildWorkoutRecord } from "./build-workout-record";
 import { CreateGeneratingPhase } from "./CreateGeneratingPhase";
 import { CreateInputPhase } from "./CreateInputPhase";
@@ -18,8 +18,7 @@ export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
   const { phase, sport, profile, activeProfileId, generatedKrd, promptText } =
     create;
 
-  const thresholds: SportThresholds =
-    profile?.sportZones[sport]?.thresholds ?? {};
+  const thresholds = thresholdsForSport(profile, sport);
   const model = generatedKrd
     ? buildReviewModel(generatedKrd, thresholds, FALLBACK_TITLE)
     : null;

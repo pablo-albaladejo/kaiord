@@ -1,10 +1,10 @@
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { thresholdsForSport } from "../../../lib/athlete";
 import {
   buildReviewModel,
   type ReviewModel,
 } from "../../../lib/workout-review";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import type { SportThresholds } from "../../../types/sport-zones";
 
 const FALLBACK_TITLE = "Workout";
 
@@ -19,13 +19,7 @@ export function useWorkoutDetailModel(
   const profile = useActiveProfileLive()?.profile;
   if (!record?.krd) return null;
 
-  // `record.sport` is a free-form string; narrow it to the typed sport-zones
-  // keys (lookup is undefined-safe for any non-matching sport).
-  const sportKey = record.sport as keyof NonNullable<
-    typeof profile
-  >["sportZones"];
-  const thresholds: SportThresholds =
-    profile?.sportZones[sportKey]?.thresholds ?? {};
+  const thresholds = thresholdsForSport(profile, record.sport);
   const fallback =
     (record.raw as { description?: string } | null)?.description ??
     FALLBACK_TITLE;
