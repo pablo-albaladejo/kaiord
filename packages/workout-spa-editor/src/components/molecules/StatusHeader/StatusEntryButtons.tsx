@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "../../atoms/Button/Button";
 import { ProfileEntryButton } from "./ProfileEntryButton";
 import type { EntryDef } from "./status-entry-defs";
-import { ENTRY_DEFS } from "./status-entry-defs";
+import { ENTRY_DEFS, resolveEntryHref } from "./status-entry-defs";
 import { StatusIndicators } from "./StatusIndicators";
 
 type StatusEntryButtonsProps = {
@@ -46,7 +46,7 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
         <EntryButton
           key={entry.id}
           entry={entry}
-          onClick={() => navigate(entry.to)}
+          onClick={() => navigate(resolveEntryHref(entry))}
         />
       ))}
       <span
