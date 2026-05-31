@@ -1,438 +1,196 @@
 /**
- * Profile Management E2E Tests
+ * Athlete page E2E tests (post mobile-first redesign).
  *
- * End-to-end tests for user profile management including creation, editing,
- * deletion, zone configuration, import/export, and profile switching.
+ * The legacy multi-profile ProfileManager surface (Settings → Profile
+ * tab: create / delete / switch / import / export multiple profiles,
+ * "Saved profiles (N)" list) was removed by the redesign. The active
+ * athlete now lives on a single-profile `/athlete` page: identity, a
+ * sport segmented control, a Thresholds card (FTP / LTHR via the
+ * threshold editor) and a Zone map. `/settings/profile` redirects to
+ * `/athlete`.
  *
- * Requirements:
- * - Requirement 9: User profile management with training zones
- * - Requirement 10: Zone configuration with visual editor
- * - Requirement 11: Multiple profiles with zone management
- * - Requirement 38: Profile import/export functionality
+ * Removed-feature coverage (create/delete/switch/import/export of
+ * multiple profiles) is intentionally dropped — see the e2e redesign
+ * report. The surviving capabilities (identity, sport switch, threshold
+ * editing → zone recompute) are covered below against the new UI.
  */
 
-import type { Locator, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
-import { openHeaderAction } from "./helpers/mobile-menu";
 
-const PROFILE_SWITCH_TEST_COUNT = 5;
-const PROFILE_LARGE_LIST_COUNT = 20;
+const PROFILE_ID = "athlete-e2e-profile";
+const PROFILE_NAME = "E2E Athlete";
 
-async function gotoProfileSettings(page: Page): Promise<Locator> {
-  await openHeaderAction(page, /open profile manager/i);
-  await page.waitForURL(/\/settings\/profile$/);
-  const settingsPage = page.getByTestId("settings-page");
-  await expect(settingsPage).toBeVisible({ timeout: 10_000 });
-  return settingsPage;
-}
-
-test.describe("Profile Management", () => {
-  test.beforeEach(async ({ page }) => {
-    // Clear localStorage BEFORE any page JS runs using addInitScript
-    // This prevents race conditions where the app reads stale data
-    await page.addInitScript(() => {
-      localStorage.clear();
-      // Re-set tutorial completion so the onboarding modal does not appear
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
-    await page.goto("/workout/new?source=scratch");
-  });
-
-  test("should create a new profile with name only", async ({ page }) => {
-    // Arrange - Open profile manager
-    const settingsPage = await gotoProfileSettings(page);
-
-    // Act - Create profile
-    await page.getByLabel(/^name$/i).fill("Test Athlete");
-    await page.getByRole("button", { name: /create profile/i }).click();
-
-    // Assert - Profile appears in settings page list
-    await expect(settingsPage.getByText("Test Athlete")).toBeVisible();
-    await expect(settingsPage.getByText(/saved profiles \(1\)/i)).toBeVisible();
-  });
-
-  test("should create a profile with all fields", async ({
-    page,
-    browserName,
-  }) => {
-    // Mobile Safari (webkit) emulator on CI sporadically times out
-    // waiting for the dialog content to settle after profile creation;
-    // passes on retry but Playwright still reports as failure. TODO:
-    // remove fixme once Playwright > 1.55 stabilizes mobile webkit
-    // dialog rendering.
-    test.fixme(
-      browserName === "webkit",
-      "Mobile Safari dialog content timing flake (Playwright/WebKit)"
-    );
-    // Arrange - Open profile manager
-    const settingsPage = await gotoProfileSettings(page);
-
-    // Act - Create profile with name (the only field in the create form)
-    await page.getByLabel(/^name$/i).fill("Pro Cyclist");
-    await page.getByRole("button", { name: /create profile/i }).click();
-
-    // Assert - Profile appears in the list
-    await expect(settingsPage.getByText("Pro Cyclist")).toBeVisible();
-
-    // Act - Edit profile to set cycling thresholds (FTP, LTHR)
-    await page.getByRole("button", { name: /^edit$/i }).click();
-
-    // The edit view opens on Training Zones tab with Cycling sport by default
-    await settingsPage.getByLabel(/FTP threshold/i).fill("300");
-    await settingsPage.getByLabel(/LTHR threshold/i).fill("170");
-
-    // Go back to list to verify
-    await settingsPage.getByRole("button", { name: /back to list/i }).click();
-
-    // Assert - Profile shows FTP and LTHR in the list
-    await expect(settingsPage.getByText(/FTP: 300W/i)).toBeVisible();
-    await expect(settingsPage.getByText(/LTHR: 170 bpm/i)).toBeVisible();
-  });
-
-  test("should edit an existing profile", async ({ page }) => {
-    // Arrange - Create a profile first
-    const settingsPage = await gotoProfileSettings(page);
-    await page.getByLabel(/^name$/i).fill("Original Name");
-    await page.getByRole("button", { name: /create profile/i }).click();
-
-    // Act - Edit the profile name (name is edited inline in the header)
-    await page.getByRole("button", { name: /^edit$/i }).click();
-
-    // Set FTP in the cycling thresholds (Training Zones tab, Cycling sport)
-    await settingsPage.getByLabel(/FTP threshold/i).fill("280");
-
-    // Go back to list
-    await settingsPage.getByRole("button", { name: /back to list/i }).click();
-
-    // Assert - Profile shows updated FTP
-    await expect(settingsPage.getByText(/FTP: 280W/i)).toBeVisible();
-  });
-
-  test("should delete a profile", async ({ page }) => {
-    // Arrange - Create two profiles
-    const settingsPage = await gotoProfileSettings(page);
-    await page.getByLabel(/^name$/i).fill("Profile 1");
-    await page.getByRole("button", { name: /create profile/i }).click();
-    // Wait for the form to clear (the "create succeeded" signal) before
-    // firing the next create.
-    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
-    await page.getByLabel(/^name$/i).fill("Profile 2");
-    await page.getByRole("button", { name: /create profile/i }).click();
-    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
-
-    // Act - Delete one of the two profiles. The specific identity is
-    // irrelevant to this test; the assertion below checks the count.
-    await settingsPage
-      .getByRole("button", { name: /^delete profile$/i })
-      .first()
-      .click();
-    await page
-      .getByRole("button", { name: /^delete$/i })
-      .last()
-      .click();
-
-    // Assert - Exactly one profile remains.
-    await expect(settingsPage.getByText(/saved profiles \(1\)/i)).toBeVisible();
-  });
-
-  test("should switch active profile", async ({ page }) => {
-    // Arrange - Create two profiles (first created becomes active automatically)
-    const settingsPage = await gotoProfileSettings(page);
-    await page.getByLabel(/^name$/i).fill("Profile A");
-    await page.getByRole("button", { name: /create profile/i }).click();
-    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
-    await page.getByLabel(/^name$/i).fill("Profile B");
-    await page.getByRole("button", { name: /create profile/i }).click();
-    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
-
-    // Act - Click "Set Active" on the non-active profile
-    await settingsPage.getByRole("button", { name: /set active/i }).click();
-
-    // Assert - Notification appears for the newly activated profile
-    await expect(
-      page.getByText(/switched to profile: profile b/i)
-    ).toBeVisible();
-
-    // Assert - Exactly one "Set Active" button remains (for the now-inactive profile)
-    await expect(
-      settingsPage.getByRole("button", { name: /set active/i })
-    ).toHaveCount(1);
-  });
-
-  test("should export a profile", async ({ page }) => {
-    // Arrange - Create a profile
-    await gotoProfileSettings(page);
-    await page.getByLabel(/^name$/i).fill("Export Test");
-    await page.getByRole("button", { name: /create profile/i }).click();
-
-    // Act - Set up download listener and click export
-    const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /export profile/i }).click();
-    const download = await downloadPromise;
-
-    // Assert - File is downloaded with correct name
-    expect(download.suggestedFilename()).toMatch(/profile-export-test\.json/);
-  });
-
-  test("should import a valid profile", async ({ page }) => {
-    // Arrange - Create a profile JSON matching the new schema (sportZones)
-    const profileData = {
-      id: crypto.randomUUID(),
-      name: "Imported Profile",
-      bodyWeight: 72,
-      sportZones: {
-        cycling: {
-          thresholds: { ftp: 320, lthr: 170 },
-          heartRateZones: {
-            method: "custom",
-            zones: [
-              { zone: 1, name: "Recovery", minBpm: 0, maxBpm: 117 },
-              { zone: 2, name: "Aerobic", minBpm: 117, maxBpm: 137 },
-              { zone: 3, name: "Tempo", minBpm: 137, maxBpm: 156 },
-              { zone: 4, name: "Threshold", minBpm: 156, maxBpm: 176 },
-              { zone: 5, name: "VO2 Max", minBpm: 176, maxBpm: 195 },
-            ],
-          },
-          powerZones: {
-            method: "coggan-7",
-            zones: [
-              { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
-              { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
-              { zone: 3, name: "Z3", minPercent: 76, maxPercent: 90 },
-              { zone: 4, name: "Z4", minPercent: 91, maxPercent: 105 },
-              { zone: 5, name: "Z5", minPercent: 106, maxPercent: 120 },
-              { zone: 6, name: "Z6", minPercent: 121, maxPercent: 150 },
-              { zone: 7, name: "Z7", minPercent: 151, maxPercent: 200 },
-            ],
+// Seed an active profile that has a cycling sport-zone config (so the
+// threshold editor renders the FTP/LTHR inputs) but no running config
+// (so switching to Running shows the empty-threshold prompt).
+async function seedAthleteProfile(page: Page) {
+  await page.evaluate(
+    async ({ profileId, name }) => {
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as {
+        table: (n: string) => {
+          put: (r: unknown) => Promise<void>;
+          clear: () => Promise<void>;
+        };
+      };
+      if (!db) throw new Error("__KAIORD_DB__ not available");
+      const now = new Date().toISOString();
+      for (const t of ["profiles", "meta", "userPreferences"]) {
+        await db.table(t).clear();
+      }
+      await db.table("profiles").put({
+        id: profileId,
+        name,
+        linkedAccounts: [],
+        sportZones: {
+          cycling: {
+            thresholds: {},
+            heartRateZones: { method: "manual", zones: [] },
+            powerZones: { method: "manual", zones: [] },
           },
         },
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+        createdAt: now,
+        updatedAt: now,
+      });
+      await db.table("meta").put({ key: "activeProfileId", value: profileId });
+      await db
+        .table("userPreferences")
+        .put({ profileId, calendarView: "grid", updatedAt: now });
+    },
+    { profileId: PROFILE_ID, name: PROFILE_NAME }
+  );
+}
 
-    const settingsPage = await gotoProfileSettings(page);
-
-    // Act - Import the profile
-    await page.setInputFiles("#import-profile", {
-      name: "profile.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(profileData)),
-    });
-
-    // Assert - Profile appears in settings page list with cycling thresholds
-    await expect(settingsPage.getByText("Imported Profile")).toBeVisible();
+async function gotoAthlete(page: Page) {
+  // Boot once to expose the Dexie singleton, seed the active profile,
+  // then load the populated Athlete page.
+  await page.goto("/athlete");
+  await page.waitForFunction(
+    () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+    { timeout: 10_000 }
+  );
+  await seedAthleteProfile(page);
+  await page.goto("/athlete");
+  await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible({
+    timeout: 10_000,
   });
+}
 
-  test("should show error for invalid profile import", async ({ page }) => {
-    // Arrange - Create invalid profile data
-    const invalidProfile = {
-      name: "Invalid",
-      // Missing required fields
-    };
+async function openThresholdEditor(page: Page) {
+  await page.getByRole("button", { name: /edit thresholds/i }).click();
+  await expect(
+    page.getByRole("dialog", { name: /edit thresholds/i })
+  ).toBeVisible();
+}
 
-    await gotoProfileSettings(page);
-
-    // Act - Import invalid profile
-    await page.setInputFiles("#import-profile", {
-      name: "invalid.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(invalidProfile)),
-    });
-
-    // Assert - Error message appears
-    await expect(page.getByText(/import failed/i)).toBeVisible();
-  });
-
-  test("should persist profiles across page reloads", async ({
-    browser,
-    browserName,
+test.describe("Athlete page", () => {
+  test("should render identity, sport selector, thresholds and zones", async ({
+    page,
   }) => {
-    // Mobile Safari (webkit) emulator on CI sporadically throws
-    // `page.reload: WebKit encountered an internal error` during the
-    // reload step, which Playwright reports as a flake even when the
-    // retry passes. Skip the WebKit project until the Playwright /
-    // emulated-webkit interaction is stabilized. TODO: remove fixme
-    // once Playwright > 1.55 stabilizes mobile webkit reload.
-    test.fixme(
-      browserName === "webkit",
-      "Mobile Safari page.reload internal error (Playwright/WebKit flake)"
-    );
-    // Use a fresh browser context so no addInitScript clears localStorage
-    // on reload. The persistence test needs IndexedDB (Dexie) to survive reloads.
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    // Arrange
+    await gotoAthlete(page);
 
-    await page.goto("/workout/new?source=scratch");
-    await page.evaluate(() => {
-      localStorage.clear();
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
+    // Act — (page already loaded)
+
+    // Assert — the redesigned Athlete surfaces. Scope the identity name
+    // to the page body (the header also shows the active-profile name).
+    await expect(page.getByRole("main").getByText(PROFILE_NAME)).toBeVisible();
+    const sport = page.getByRole("radiogroup", { name: "Sport" });
+    await expect(sport.getByRole("radio", { name: "Cycling" })).toBeVisible();
+    await expect(sport.getByRole("radio", { name: "Running" })).toBeVisible();
+    await expect(sport.getByRole("radio", { name: "Swim" })).toBeVisible();
+    await expect(page.getByText("Thresholds", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /connections/i })
+    ).toBeVisible();
+  });
+
+  test("should set the cycling FTP threshold and reflect it on the card", async ({
+    page,
+  }) => {
+    // Arrange
+    await gotoAthlete(page);
+
+    // Act — open the threshold editor and set FTP (Cycling is the
+    // default sport in the editor).
+    await openThresholdEditor(page);
+    const dialog = page.getByRole("dialog", { name: /edit thresholds/i });
+    await dialog.getByLabel(/FTP threshold/i).fill("300");
+    // The editor auto-persists on change; close the dialog.
+    await page.keyboard.press("Escape");
+
+    // Assert — the card now shows the FTP metric.
+    await expect(page.getByText("FTP")).toBeVisible();
+    await expect(page.getByText("300", { exact: true })).toBeVisible();
+  });
+
+  test("should set the cycling LTHR threshold and reflect it on the card", async ({
+    page,
+  }) => {
+    // Arrange
+    await gotoAthlete(page);
+
+    // Act
+    await openThresholdEditor(page);
+    const dialog = page.getByRole("dialog", { name: /edit thresholds/i });
+    await dialog.getByLabel(/LTHR threshold/i).fill("170");
+    await page.keyboard.press("Escape");
+
+    // Assert — the Threshold HR metric appears with the new value.
+    await expect(page.getByText("Threshold HR")).toBeVisible();
+    await expect(page.getByText("170", { exact: true })).toBeVisible();
+  });
+
+  test("should switch sport and show that sport's threshold prompt", async ({
+    page,
+  }) => {
+    // Arrange
+    await gotoAthlete(page);
+
+    // Act — switch to Running (no thresholds seeded for any sport).
+    await page
+      .getByRole("radiogroup", { name: "Sport" })
+      .getByRole("radio", { name: "Running" })
+      .click();
+
+    // Assert — the empty-thresholds prompt is sport-aware.
+    await expect(page.getByText(/add your running thresholds/i)).toBeVisible();
+  });
+
+  test("should persist a threshold edit across an Athlete-page reload", async ({
+    page,
+  }) => {
+    // Arrange
+    await gotoAthlete(page);
+
+    // Act — set FTP, then reload the Athlete page.
+    await openThresholdEditor(page);
+    const dialog = page.getByRole("dialog", { name: /edit thresholds/i });
+    await dialog.getByLabel(/FTP threshold/i).fill("280");
+    await page.keyboard.press("Escape");
+    await expect(page.getByText("300", { exact: true })).toBeHidden();
     await page.reload();
+    await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible();
 
-    // Arrange - Create a profile
-    const settingsPage = await gotoProfileSettings(page);
-    await page.getByLabel(/^name$/i).fill("Persistent Profile");
-    await page.getByRole("button", { name: /create profile/i }).click();
+    // Assert — the persisted FTP survives the reload (Dexie hydration).
+    await expect(page.getByText("FTP")).toBeVisible();
+    await expect(page.getByText("280", { exact: true })).toBeVisible();
+  });
+});
 
-    // Verify profile was created in settings page before navigating away
-    await expect(settingsPage.getByText("Persistent Profile")).toBeVisible();
-
-    // Act - Navigate away and back to verify in-session persistence
-    // Note: Cross-reload persistence via Dexie hydration is pending
-    // (store starts empty and hydration from IndexedDB is not yet wired).
-    // Navigating away and back verifies the Zustand store retains data.
-    await page.goto("/workout/new?source=scratch");
+test.describe("Profile route redirect", () => {
+  test("should redirect /settings/profile to /athlete", async ({ page }) => {
+    // Arrange & Act — the legacy Settings Profile tab now redirects to
+    // the Athlete page. No profile is seeded, so the Athlete page renders
+    // its empty state.
     await page.goto("/settings/profile");
 
-    // Assert - Profile still exists in settings page after re-navigation
-    await expect(
-      page.getByTestId("settings-page").getByText("Persistent Profile")
-    ).toBeVisible({ timeout: 10_000 });
-
-    await context.close();
-  });
-});
-
-test.describe("Zone Configuration", () => {
-  test.beforeEach(async ({ page }) => {
-    // Clear localStorage BEFORE any page JS runs using addInitScript
-    await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
+    // Assert
+    await page.waitForURL(/\/athlete$/);
+    await expect(page.getByText(/no athlete profile yet/i)).toBeVisible({
+      timeout: 10_000,
     });
-    await page.goto("/workout/new?source=scratch");
-
-    // Create a profile and set cycling thresholds
-    const settingsPage = await gotoProfileSettings(page);
-    await page.getByLabel(/^name$/i).fill("Zone Test");
-    await page.getByRole("button", { name: /create profile/i }).click();
-
-    // Edit the profile to set FTP and LTHR in cycling thresholds
-    await page.getByRole("button", { name: /^edit$/i }).click();
-    await settingsPage.getByLabel(/FTP threshold/i).fill("250");
-    await settingsPage.getByLabel(/LTHR threshold/i).fill("170");
-    await settingsPage.getByRole("button", { name: /back to list/i }).click();
-  });
-
-  test("should edit power zones", async () => {
-    // Arrange - Open zone editor (this would require a button in ProfileManager)
-    // For now, this test is a placeholder as the zone editor integration
-    // with ProfileManager needs to be implemented
-
-    // This test validates the requirement but implementation depends on
-    // how ZoneEditor is integrated into the ProfileManager UI
-    test.skip();
-  });
-
-  test("should edit heart rate zones", async () => {
-    // Arrange - Open zone editor
-    // Similar to power zones test, this is a placeholder
-
-    test.skip();
-  });
-
-  test("should validate zone ranges", async () => {
-    // Test that overlapping zones show validation errors
-    test.skip();
-  });
-
-  test("should recalculate zones when FTP changes", async ({ page }) => {
-    const settingsPage = page.getByTestId("settings-page");
-
-    // Arrange - Edit profile to change FTP in cycling thresholds
-    await page.getByRole("button", { name: /^edit$/i }).click();
-
-    // FTP is in Training Zones > Cycling tab thresholds
-    await settingsPage.getByLabel(/FTP threshold/i).clear();
-    await settingsPage.getByLabel(/FTP threshold/i).fill("300");
-
-    // Go back to list to verify
-    await settingsPage.getByRole("button", { name: /back to list/i }).click();
-
-    // Assert - Profile shows updated FTP
-    await expect(settingsPage.getByText(/FTP: 300W/i)).toBeVisible();
-  });
-
-  test("should recalculate zones when LTHR changes", async ({ page }) => {
-    const settingsPage = page.getByTestId("settings-page");
-
-    // Arrange - Edit profile to change LTHR in cycling thresholds
-    await page.getByRole("button", { name: /^edit$/i }).click();
-
-    // LTHR is in Training Zones > Cycling tab thresholds
-    await settingsPage.getByLabel(/LTHR threshold/i).clear();
-    await settingsPage.getByLabel(/LTHR threshold/i).fill("175");
-
-    // Go back to list to verify
-    await settingsPage.getByRole("button", { name: /back to list/i }).click();
-
-    // Assert - Profile shows updated LTHR
-    await expect(settingsPage.getByText(/LTHR: 175 bpm/i)).toBeVisible();
-  });
-});
-
-test.describe("Profile Performance", () => {
-  test("should switch profiles quickly", async ({ page }) => {
-    // Arrange - Create multiple profiles
-    await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
-    await page.goto("/workout/new?source=scratch");
-
-    await gotoProfileSettings(page);
-
-    for (let i = 1; i <= PROFILE_SWITCH_TEST_COUNT; i++) {
-      await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
-      await page.getByRole("button", { name: /create profile/i }).click();
-      // Wait for the form to clear — the canonical "create succeeded"
-      // signal — before the next iteration; otherwise an in-flight clear
-      // can wipe the next iteration's name after fill().
-      await expect(page.getByLabel(/^name$/i)).toHaveValue("");
-    }
-
-    // Act - Measure profile switch time
-    const startTime = Date.now();
-    await page
-      .getByRole("button", { name: /set active/i })
-      .first()
-      .click();
-    await page.waitForSelector('[role="status"]');
-    const endTime = Date.now();
-
-    // Assert - Switch completes within performance budget (< 500ms)
-    const duration = endTime - startTime;
-    expect(duration).toBeLessThan(500);
-  });
-
-  test("should handle large number of profiles", async ({ page }) => {
-    // Arrange - Create many profiles
-    await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
-    await page.goto("/workout/new?source=scratch");
-
-    const settingsPage = await gotoProfileSettings(page);
-
-    // Create 20 profiles
-    for (let i = 1; i <= PROFILE_LARGE_LIST_COUNT; i++) {
-      await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
-      await page.getByRole("button", { name: /create profile/i }).click();
-      // Wait for the form to clear before the next iteration so a late
-      // clear from the previous create cannot wipe the next name.
-      await expect(page.getByLabel(/^name$/i)).toHaveValue("");
-    }
-
-    // Assert - All profiles are visible and scrollable in settings page
-    await expect(
-      settingsPage.getByText(/saved profiles \(20\)/i)
-    ).toBeVisible();
-    await expect(
-      settingsPage.getByText("Profile 1", { exact: true })
-    ).toBeVisible();
-    await expect(settingsPage.getByText("Profile 20")).toBeVisible();
   });
 });

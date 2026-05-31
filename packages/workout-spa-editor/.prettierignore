@@ -5,6 +5,9 @@ coverage
 pnpm-lock.yaml
 package-lock.json
 
+# OMC agent runtime state (gitignored, but Prettier doesn't read .gitignore)
+.omc/
+
 # Generated: trimmed copy of @garmin/fitsdk Profile.js. Regenerate via
 # `pnpm --filter @kaiord/workout-spa-editor generate:fitsdk-minimal`.
 src/lib/fitsdk-minimal/

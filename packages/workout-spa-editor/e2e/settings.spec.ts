@@ -77,14 +77,13 @@ test.describe("Settings Panel", () => {
   });
 
   test("8.8: Extensions tab shows bridge status", async ({ page }) => {
-    // Open settings (navigates to /settings/ai)
+    // Post-redesign, Settings is a grouped list; the Extensions view is
+    // its own route. Navigate to it via the grouped-list row.
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings\/ai$/);
-    const settingsPage = page.getByTestId("settings-page");
-    await expect(settingsPage).toBeVisible({ timeout: 5000 });
-
-    // Switch to Extensions tab via the sidebar tab
-    await page.getByTestId("settings-tab-extensions").click();
+    await page.getByTestId("settings-back").click();
+    await page.waitForURL(/\/settings$/);
+    await page.getByTestId("settings-row-Extensions").click();
     await page.waitForURL(/\/settings\/extensions$/);
 
     const extensionsPanel = page.getByTestId("settings-panel-extensions");
