@@ -27,7 +27,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AnalyticsProvider analytics={analytics}>
       <PersistenceProvider persistence={persistence}>
-        <ThemeProvider>
+        <ThemeProvider defaultTheme="dark">
           <GarminBridgeProvider>
             <CoachingRegistryBootstrap>
               <Router base={routerBase}>
