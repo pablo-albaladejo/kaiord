@@ -80,13 +80,14 @@ export default function LibraryPage() {
 
   return (
     <div className="space-y-4 p-4" data-testid="library-page">
+      {/* Render the route heading once (a stable element) so the focus
+          set by useFocusOnRouteChange survives the loading→loaded swap;
+          a per-branch header would unmount and drop focus to <body>. */}
+      <LibraryHeader count={templates?.length ?? 0} />
       {templates === undefined ? (
-        <>
-          <LibraryHeader count={0} />
-          <div className="flex items-center justify-center p-8 text-slate-400">
-            Loading library...
-          </div>
-        </>
+        <div className="flex items-center justify-center p-8 text-slate-400">
+          Loading library...
+        </div>
       ) : (
         <>
           <LibraryContent
