@@ -15,9 +15,16 @@ import {
 
 const TWO_WEEKS_AGO = -2;
 
+// Post-redesign the week calendar lives at /calendar/:weekId (bare
+// /calendar is the Today page). Empty-state assertions target the
+// current week's calendar URL.
+const CURRENT_WEEK_ID = getWeekId(getWeekDates(0)[0]);
+
 test.describe("Calendar Empty States", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/calendar");
+    // Boot on the week calendar so the Dexie singleton is exposed and
+    // the week grid renders.
+    await page.goto(`/calendar/${CURRENT_WEEK_ID}`);
     await clearDexie(page);
   });
 

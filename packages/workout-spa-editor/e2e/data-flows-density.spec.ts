@@ -1,21 +1,22 @@
 /**
- * T-24 — Data Flows section density and collapse defaults.
+ * Athlete page — Connections section.
  *
- * Verifies AC-4 (Data Flows section renders groups) and M-3.5 (collapse
- * defaults). Uses the existing Dexie seed helpers so no production code
- * is modified.
+ * Post-redesign the legacy Settings → Profile → "Data Flows" tab was
+ * removed; the linked-accounts + data-flows UI merged into the Athlete
+ * page's "Connections" section. A connected bridge (here, the Garmin
+ * stub) renders an expandable row with "What syncs" flow toggles; brands
+ * without a discovered bridge render as "Not connected" available rows.
  *
- * Playwright Chromium runs without extension runtimes, so bridge stubs
- * are injected via addInitScript before page.goto (see helpers/).
- * Dexie operations are called AFTER page.goto since the DB is only
- * initialised once the app JS runs.
+ * Playwright Chromium runs without extension runtimes, so the Garmin
+ * bridge is injected via addInitScript before page.goto (see helpers/).
  */
 
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { installGarminBridgeStub } from "./helpers/garmin-bridge-stub";
 
-const PROFILE_ID = "data-flows-density-profile";
+const PROFILE_ID = "connections-profile";
 
 type DexieDb = {
   table: (n: string) => {
@@ -25,21 +26,18 @@ type DexieDb = {
   };
 };
 
-const seedProfileWithPolicies = async (
-  page: Page,
-  policyCount: number
-): Promise<void> => {
+const seedProfile = async (page: Page): Promise<void> => {
   await page.evaluate(
-    async ({ profileId, count }) => {
+    async ({ profileId }) => {
       const db = (window as unknown as Record<string, unknown>)
         .__KAIORD_DB__ as DexieDb;
       if (!db) throw new Error("__KAIORD_DB__ not available");
-
       const now = new Date().toISOString();
       await db.table("profiles").put({
         id: profileId,
-        name: "Density Test Profile",
+        name: "Connections Test Profile",
         linkedAccounts: [],
+        sportZones: {},
         createdAt: now,
         updatedAt: now,
       });
@@ -47,121 +45,66 @@ const seedProfileWithPolicies = async (
       await db
         .table("userPreferences")
         .put({ profileId, calendarView: "grid", updatedAt: now });
-
-      const policies = Array.from({ length: count }, (_, i) => ({
-        id: `policy-density-${i}`,
-        profileId,
-        dataType: "workout",
-        bridgeId: `bridge-${i}`,
-        direction: "export",
-        mode: "manual",
-        enabled: true,
-        updatedAt: now,
-      }));
-      await db.table("integrationPolicies").bulkPut(policies);
     },
-    { profileId: PROFILE_ID, count: policyCount }
+    { profileId: PROFILE_ID }
   );
 };
 
-const openDataFlowsTab = async (page: Page): Promise<void> => {
-  // Open profile manager via header button
-  const openBtn = page.getByRole("button", {
-    name: /open profile manager/i,
-  });
-  await expect(openBtn).toBeVisible({ timeout: 10_000 });
-  await openBtn.click();
-
-  await page.waitForURL(/\/settings\/profile$/, { timeout: 10_000 });
-
-  // Navigate to the first profile's edit view
-  const editBtn = page.getByRole("button", { name: /^edit$/i }).first();
-  await expect(editBtn).toBeVisible({ timeout: 5_000 });
-  await editBtn.click();
-
-  // Click the Data Flows tab
-  const dataFlowsTab = page.getByRole("tab", { name: /data flows/i });
-  await expect(dataFlowsTab).toBeVisible({ timeout: 5_000 });
-  await dataFlowsTab.click();
-};
-
-test.describe("Data Flows density", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
-    await page.goto("/workout/new?source=scratch");
-  });
-
-  test("should show zero-state banner when profile has no policies", async ({
+test.describe("Athlete Connections", () => {
+  test("should render the Connections section with available brands", async ({
     page,
   }) => {
     // Arrange
-    await page.evaluate(
-      async ({ profileId }) => {
-        const db = (window as unknown as Record<string, unknown>)
-          .__KAIORD_DB__ as DexieDb;
-        const now = new Date().toISOString();
-        await db.table("profiles").put({
-          id: profileId,
-          name: "Empty Profile",
-          linkedAccounts: [],
-          createdAt: now,
-          updatedAt: now,
-        });
-        await db
-          .table("meta")
-          .put({ key: "activeProfileId", value: profileId });
-        await db
-          .table("userPreferences")
-          .put({ profileId, calendarView: "grid", updatedAt: now });
-      },
-      { profileId: PROFILE_ID }
+    await page.goto("/athlete");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
     );
+    await seedProfile(page);
 
     // Act
-    await openDataFlowsTab(page);
+    await page.goto("/athlete");
 
-    // Assert
-    await expect(page.getByTestId("data-flows-zero-state")).toBeVisible({
-      timeout: 5_000,
-    });
+    // Assert — section heading + an available (not-yet-connected) brand.
+    await expect(
+      page.getByRole("heading", { name: /connections/i })
+    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Strava")).toBeVisible();
+    await expect(page.getByText("Not connected").first()).toBeVisible();
   });
 
-  test("should render an expanded group for a data type with at least one policy", async ({
+  test("should expand a connected bridge to reveal What-syncs flow toggles", async ({
     page,
   }) => {
-    // Arrange
-    await seedProfileWithPolicies(page, 1);
+    // Arrange — install the Garmin bridge stub BEFORE goto so discovery
+    // marks Garmin as connected.
+    await installGarminBridgeStub(page);
+    await page.goto("/athlete");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+    await seedProfile(page);
+    await page.goto("/athlete");
 
-    // Act
-    await openDataFlowsTab(page);
+    // Act — Garmin appears connected; expand its row.
+    const garminRow = page.getByRole("button", { name: /garmin/i }).first();
+    await expect(garminRow).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Connected").first()).toBeVisible();
+    await garminRow.click();
 
-    // Assert — at least one data-flows-group is rendered
-    await expect(page.getByTestId("data-flows-group-workout")).toBeVisible({
-      timeout: 5_000,
-    });
-  });
-
-  test("should have collapsed visible count within budget when profile has 18 rows", async ({
-    page,
-  }) => {
-    // Arrange
-    const STRESS_ROW_COUNT = 18; // 9 data types × 2 directions
-    await seedProfileWithPolicies(page, STRESS_ROW_COUNT);
-
-    // Act
-    await openDataFlowsTab(page);
-
-    // Assert — zero-state banner is NOT shown (has policies)
-    await expect(page.getByTestId("data-flows-zero-state")).not.toBeVisible({
-      timeout: 5_000,
-    });
-
-    // Assert — section container is present
-    await expect(page.getByTestId("data-flows-section")).toBeVisible({
-      timeout: 5_000,
-    });
+    // Assert — the "What syncs" group with per-flow toggles is revealed.
+    await expect(page.getByText("What syncs")).toBeVisible();
+    await expect(
+      page.getByRole("switch", { name: "Completed activities" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("switch", { name: "Planned workouts" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /disconnect/i })
+    ).toBeVisible();
   });
 });

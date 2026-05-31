@@ -13,9 +13,11 @@ test.describe("Calendar Navigation", () => {
     expect(page.url()).toContain("/calendar");
   });
 
-  test("/calendar shows the calendar page", async ({ page }) => {
+  test("/calendar shows the Today page", async ({ page }) => {
+    // Post-redesign, bare /calendar renders the Today page; the week
+    // calendar lives at /calendar/:weekId.
     await page.goto("/calendar");
-    await expect(page.getByTestId("calendar-page")).toBeVisible();
+    await expect(page.getByTestId("today-page")).toBeVisible();
   });
 
   test("/calendar/2026-W15 shows that week", async ({ page }) => {
@@ -37,8 +39,10 @@ test.describe("Calendar Navigation", () => {
   }) => {
     await page.goto("/workout/new?source=scratch");
     await page.getByRole("button", { name: "Go to calendar" }).click();
-    await page.waitForURL(/\/calendar/);
-    await expect(page.getByTestId("calendar-page")).toBeVisible();
+    await page.waitForURL(/\/calendar$/);
+    // The header "Go to calendar" entry targets bare /calendar, which
+    // renders the Today page post-redesign.
+    await expect(page.getByTestId("today-page")).toBeVisible();
   });
 
   test("Kaiord logo navigates to /calendar (SPA, no reload)", async ({
@@ -53,7 +57,9 @@ test.describe("Calendar Navigation", () => {
     });
 
     await page.getByRole("link", { name: /Kaiord Editor/i }).click();
-    await page.waitForURL(/\/calendar(?!\/2026-W15)/);
+    // The logo links to /calendar (the Today page post-redesign).
+    await page.waitForURL(/\/calendar$/);
+    await expect(page.getByTestId("today-page")).toBeVisible();
 
     const survived = await page.evaluate(
       () => (window as unknown as Record<string, unknown>).__SPA_NAV_CHECK__
@@ -79,20 +85,23 @@ test.describe("Calendar Navigation", () => {
     await expect(page.getByText(/· W16/)).toBeVisible();
   });
 
-  test('Click "Today" navigates to current week', async ({ page }) => {
+  test('Click "Today" navigates to the Today page', async ({ page }) => {
     await page.goto("/calendar/2026-W01");
     await expect(page.getByText(/· W01/)).toBeVisible();
 
     await page.getByRole("button", { name: "Today" }).click();
 
-    // Should navigate away from W01
-    await page.waitForURL(/\/calendar(?!\/2026-W01)/);
-    await expect(page.getByTestId("calendar-page")).toBeVisible();
+    // The week-nav "Today" button returns to bare /calendar, which
+    // renders the Today page post-redesign.
+    await page.waitForURL(/\/calendar$/);
+    await expect(page.getByTestId("today-page")).toBeVisible();
   });
 
   test("Invalid week ID redirects to /calendar", async ({ page }) => {
     await page.goto("/calendar/bad-week");
-    await page.waitForURL(/\/calendar(?!\/bad-week)/);
-    await expect(page.getByTestId("calendar-page")).toBeVisible();
+    await page.waitForURL(/\/calendar$/);
+    // CalendarPage redirects an unparseable week to bare /calendar,
+    // which renders the Today page post-redesign.
+    await expect(page.getByTestId("today-page")).toBeVisible();
   });
 });

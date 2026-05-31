@@ -28,6 +28,9 @@ export async function seedDefaultProfile(page: Page): Promise<string> {
         id: profileId,
         name: "E2E Default Profile",
         linkedAccounts: [],
+        // `sportZones` is a required Profile field; the Athlete page
+        // reads `profile.sportZones[sport]` and throws if it is absent.
+        sportZones: {},
         createdAt: now,
         updatedAt: now,
       },

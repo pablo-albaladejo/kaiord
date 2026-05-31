@@ -16,8 +16,10 @@ import {
 
 test.describe("Calendar Skeleton", () => {
   test("shows skeleton during hydration on boot", async ({ page }) => {
-    // Arrange
-    await page.goto("/calendar");
+    // Arrange — boot directly on a week calendar URL (bare /calendar is
+    // the Today page post-redesign; the week grid + skeleton live at
+    // /calendar/:weekId).
+    await page.goto(`/calendar/${getWeekId(getWeekDates()[0])}`);
     const skeleton = page.getByTestId("calendar-skeleton");
     const calendarPage = page.getByTestId("calendar-page");
     let skeletonWasVisible = false;
@@ -171,9 +173,12 @@ test.describe("Calendar Workouts", () => {
     await page.waitForURL(new RegExp(`/workout/${workoutId}`));
   });
 
-  test('Click "+" on empty day navigates to /workout/new?date=X (NewWorkoutPicker)', async ({
+  test('Click "+" on empty day navigates to /workout/new?date=X (Create overlay)', async ({
     page,
   }) => {
+    // Post-redesign, /workout/new (with only ?date=) renders the AI-first
+    // Create overlay; the legacy NewWorkoutPicker tiles moved into the
+    // overlay's "or start from" row.
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -191,12 +196,17 @@ test.describe("Calendar Workouts", () => {
     await page.getByTestId("add-entry-choose-workout").click();
 
     await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[1]}`));
-    await expect(page.getByTestId("new-workout-picker")).toBeVisible();
+    await expect(page.getByTestId("create-workout")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Blank" })).toBeVisible();
   });
 
-  test('Picker Scratch tile from empty day "+" navigates to /workout/new?source=scratch&date=X', async ({
+  test('Create overlay "Blank" tile from empty day "+" opens the scratch editor', async ({
     page,
   }) => {
+    // The redesign's Create overlay "Blank" tile routes to the scratch
+    // editor (?source=scratch). Note: the empty-day date is NOT carried
+    // through the overlay tiles — see the e2e redesign report flag on the
+    // lost "+"-to-date scheduling path.
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -209,19 +219,17 @@ test.describe("Calendar Workouts", () => {
     await page.getByTestId("add-entry-choose-workout").click();
 
     await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
-    await page.getByTestId("new-workout-picker-scratch").click();
-    await page.waitForURL(
-      new RegExp(`/workout/new\\?source=scratch&date=${dates[0]}`)
-    );
+    await page.getByRole("button", { name: "Blank" }).click();
+    await page.waitForURL(/\/workout\/new\?source=scratch/);
+    await expect(page.getByTestId("add-step-button")).toBeVisible();
   });
 
-  test("Picker Template tile opens TemplatePickerDialog inline when ?date= is in URL", async ({
+  test('Create overlay "Template" tile navigates to the Library', async ({
     page,
   }) => {
-    // When the user enters the picker from a calendar empty day "+",
-    // the Template tile opens TemplatePickerDialog inline (instead of
-    // navigating to /library) so the user keeps one-click scheduling
-    // for the day they picked.
+    // The redesign's Create overlay "Template" tile closes the overlay
+    // and routes to /library (the legacy inline TemplatePickerDialog on
+    // the picker was removed).
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -234,8 +242,8 @@ test.describe("Calendar Workouts", () => {
     await page.getByTestId("add-entry-choose-workout").click();
     await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
 
-    await page.getByTestId("new-workout-picker-template").click();
-    await expect(page.getByTestId("template-picker-dialog")).toBeVisible();
-    expect(page.url()).toMatch(new RegExp(`/workout/new\\?date=${dates[0]}`));
+    await page.getByRole("button", { name: "Template" }).click();
+    await page.waitForURL(/\/library$/);
+    await expect(page.getByTestId("library-page")).toBeVisible();
   });
 });

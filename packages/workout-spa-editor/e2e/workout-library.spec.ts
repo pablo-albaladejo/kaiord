@@ -17,6 +17,7 @@
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkout } from "./helpers/load-test-workout";
 import { openHeaderAction } from "./helpers/mobile-menu";
+import { makeTemplate, seedTemplates } from "./helpers/seed-dexie";
 
 test.describe("Workout Library", () => {
   test.beforeEach(async ({ page }) => {
@@ -166,42 +167,34 @@ test.describe("Workout Library", () => {
       await page.goto("/library");
       await page.getByPlaceholder(/search workouts/i).fill("morning");
 
+      // Library card titles render as text (not headings) post-redesign.
       await expect(
-        page.getByRole("heading", { name: "Morning Run" })
+        page.getByText("Morning Run", { exact: true })
       ).toBeVisible();
       await expect(
-        page.getByRole("heading", { name: "Evening Ride" })
+        page.getByText("Evening Ride", { exact: true })
       ).not.toBeVisible();
     });
 
-    test("should filter workouts by tags", async ({ page }) => {
-      await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
-      await page.getByLabel("Workout Name").fill("Easy Workout");
-      await page.getByLabel("Tags").fill("easy, recovery");
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: /^save$/i })
-        .click();
-      await expect(page.getByText("Workout Saved").first()).toBeVisible();
-
-      await page.getByRole("button", { name: /save to library/i }).click();
-      await page.getByLabel("Workout Name").fill("Hard Workout");
-      await page.getByLabel("Tags").fill("hard, intervals");
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: /^save$/i })
-        .click();
-      await expect(page.getByText("Workout Saved").first()).toBeVisible();
+    test("should filter workouts by sport", async ({ page }) => {
+      // Tag-based filtering was removed by the redesign; the Library now
+      // filters by sport chips (All / Cycling / Running / Swim). Seed two
+      // templates of different sports directly into Dexie.
+      await seedTemplates(page, [
+        makeTemplate({ name: "Cycling Workout", sport: "cycling" }),
+        makeTemplate({ name: "Running Workout", sport: "running" }),
+      ]);
 
       await page.goto("/library");
-      await page.getByRole("button", { name: "easy" }).first().click();
+      // The sport chip's accessible name is exactly "Running" (a
+      // per-card "Delete Running Workout" button also exists).
+      await page.getByRole("button", { name: "Running", exact: true }).click();
 
       await expect(
-        page.getByRole("heading", { name: "Easy Workout" })
+        page.getByText("Running Workout", { exact: true })
       ).toBeVisible();
       await expect(
-        page.getByRole("heading", { name: "Hard Workout" })
+        page.getByText("Cycling Workout", { exact: true })
       ).not.toBeVisible();
     });
 
@@ -239,10 +232,13 @@ test.describe("Workout Library", () => {
 
       await page.goto("/library");
       await page.getByLabel(/^Delete Delete Me$/i).click();
-      await page.getByRole("button", { name: /^delete$/i }).click();
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: /^delete$/i })
+        .click();
 
       await expect(
-        page.getByRole("heading", { name: "Delete Me" })
+        page.getByText("Delete Me", { exact: true })
       ).not.toBeVisible();
       await expect(page.getByText(/your library is empty/i)).toBeVisible();
     });
@@ -260,10 +256,10 @@ test.describe("Workout Library", () => {
       await page.goto("/library");
       await page.getByLabel(/^Delete Confirm Delete$/i).click();
 
+      // The redesigned confirm dialog shows a "Delete Workout" title and a
+      // "Delete "<name>"? This cannot be undone." message.
       await expect(page.getByText(/delete workout/i)).toBeVisible();
-      await expect(
-        page.getByText(/are you sure you want to delete/i)
-      ).toBeVisible();
+      await expect(page.getByText(/this cannot be undone/i)).toBeVisible();
     });
 
     test("should cancel delete operation", async ({ page }) => {
@@ -280,9 +276,7 @@ test.describe("Workout Library", () => {
       await page.getByLabel(/^Delete Keep Me$/i).click();
       await page.getByRole("button", { name: /cancel/i }).click();
 
-      await expect(
-        page.getByRole("heading", { name: "Keep Me" })
-      ).toBeVisible();
+      await expect(page.getByText("Keep Me", { exact: true })).toBeVisible();
     });
   });
 
@@ -292,7 +286,7 @@ test.describe("Workout Library", () => {
 
       await expect(page.getByText(/your library is empty/i)).toBeVisible();
       await expect(
-        page.getByText(/create your first workout and save it to your library/i)
+        page.getByText(/save a workout to your library to get started/i)
       ).toBeVisible();
     });
   });
