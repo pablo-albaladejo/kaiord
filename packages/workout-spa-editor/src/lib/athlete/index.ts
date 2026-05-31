@@ -10,3 +10,4 @@ export {
   type AthleteSportOption,
   isActiveSport,
 } from "./sports";
+export { thresholdsForSport } from "./threshold-for-sport";
