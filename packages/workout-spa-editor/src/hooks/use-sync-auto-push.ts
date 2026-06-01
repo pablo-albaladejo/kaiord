@@ -1,17 +1,20 @@
 /**
  * useSyncAutoPush — drive a debounced cloud push from live Dexie changes.
  *
- * Observes the row counts of the user-owned tables via `useLiveQuery`;
- * whenever the aggregate count changes (a create/delete settles) it asks
- * the sync engine for a debounced push, so a burst of edits collapses to
- * a single Drive write. This lives in a hook (not a Zustand store), so it
- * does not violate the no-write-through guards.
+ * Observes the synced tables via `useLiveQuery` and builds a change token
+ * (row count + latest timestamp) that advances on creates, deletes, AND
+ * in-place edits — so editing an existing workout arms the push, not only
+ * adding/removing rows. Whenever the token changes it asks the sync engine
+ * for a debounced push, so a burst of edits collapses to a single Drive
+ * write. This lives in a hook (not a Zustand store), so it does not violate
+ * the no-write-through guards.
  */
 
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
 import { useSync } from "../contexts/sync-context";
+import { buildChangeToken } from "./sync-change-token";
 import { useAutoPush } from "./use-auto-push";
 
 const SYNCED_TABLES = [
@@ -22,17 +25,27 @@ const SYNCED_TABLES = [
   "tombstones",
 ] as const;
 
-async function countSyncedRows(): Promise<number> {
-  const counts = await Promise.all(
-    SYNCED_TABLES.map((name) => db.table(name).count())
+// Real tokens always contain ":", so an empty string is a safe sentinel for
+// "loading / disconnected" that never collides with a genuine change token.
+const DISCONNECTED = "";
+
+async function syncedChangeToken(): Promise<string> {
+  const entries = await Promise.all(
+    SYNCED_TABLES.map(
+      async (name) =>
+        [
+          name,
+          (await db.table(name).toArray()) as Record<string, unknown>[],
+        ] as const
+    )
   );
-  return counts.reduce((sum, n) => sum + n, 0);
+  return buildChangeToken(Object.fromEntries(entries));
 }
 
 export function useSyncAutoPush(): void {
   const { connected, requestPush } = useSync();
-  const token = useLiveQuery(countSyncedRows, [], -1);
-  // Only arm auto-push once an account is connected; the token still
-  // advances either way, but requestPush no-ops while disconnected.
-  useAutoPush(connected ? token : -1, requestPush);
+  const token = useLiveQuery(syncedChangeToken, [], DISCONNECTED);
+  // Only arm auto-push once an account is connected; while disconnected the
+  // token is pinned to the sentinel so requestPush is never reached.
+  useAutoPush(connected ? token : DISCONNECTED, requestPush);
 }
