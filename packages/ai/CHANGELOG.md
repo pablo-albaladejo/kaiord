@@ -1,5 +1,15 @@
 # @kaiord/ai
 
+## 9.0.0
+
+### Patch Changes
+
+- Updated dependencies [a015501]
+- Updated dependencies [82a7467]
+- Updated dependencies [275c221]
+- Updated dependencies [d597cb4]
+  - @kaiord/core@9.0.0
+
 ## 8.0.0
 
 ### Patch Changes
