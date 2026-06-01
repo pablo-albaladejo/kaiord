@@ -66,3 +66,10 @@ export const registerV18 = (db: DexieVersionHost): void => {
   // v18 — add dataType index to exportLedger for countByDataType analytics.
   db.version(18).stores(SCHEMAS.v18);
 };
+
+export const registerV19 = (db: DexieVersionHost): void => {
+  // v19 — additive `tombstones` table for cross-device delete
+  // propagation. Dexie auto-creates the new store empty on upgrade, so
+  // no data migration is needed and existing tables are untouched.
+  db.version(19).stores(SCHEMAS.v19);
+};

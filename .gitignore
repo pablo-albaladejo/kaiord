@@ -31,6 +31,9 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+# The SPA editor .env holds only the PUBLIC Google OAuth client id (not a
+# secret) and is committed as the default for cross-device sync.
+!packages/workout-spa-editor/.env
 
 # Quality metrics (generated, keep history only)
 metrics/latest/
