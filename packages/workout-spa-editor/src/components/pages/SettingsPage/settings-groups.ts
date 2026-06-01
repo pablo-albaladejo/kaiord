@@ -26,6 +26,10 @@ export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [
     ],
   },
   {
+    eyebrow: "Cross-device sync",
+    rows: [{ icon: "sync", label: "Google Drive sync", to: "/settings/sync" }],
+  },
+  {
     eyebrow: "Preferences",
     rows: [
       { icon: "target", label: "Units" },

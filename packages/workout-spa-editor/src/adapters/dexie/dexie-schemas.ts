@@ -93,6 +93,21 @@ const CORE_V18 = {
     "id, &[kaiordRecordId+destinationBridgeId], kaiordRecordId, destinationBridgeId, dataType",
 };
 
+// v19 — additive `tombstones` table for cross-device delete propagation
+// (google-drive-cross-device-sync, Phase 1). PK is the composite
+// `[table+id]`; the `table` index supports per-table pruning and the
+// `deletedAt` index supports the retention-window prune. No data
+// transform — every existing table is carried over unchanged.
+//
+// `profileId` is a stored field (optional) but deliberately NOT indexed:
+// indexing it would make `isPerProfileTable` classify tombstones as a
+// per-profile cascade target, and tombstones MUST survive a profile
+// delete so the deletion still propagates across devices.
+const CORE_V19 = {
+  ...CORE_V18,
+  tombstones: "[table+id], table, deletedAt",
+};
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -103,6 +118,7 @@ export const SCHEMAS = {
   v16: CORE_V16,
   v17: CORE_V17,
   v18: CORE_V18,
+  v19: CORE_V19,
 } as const;
 
 /** Backfills `linkedAccounts: []` on profile rows missing the field. */

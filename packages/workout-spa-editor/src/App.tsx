@@ -11,10 +11,12 @@ import { useAnalytics } from "./contexts";
 import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
 import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
+import { useSyncAutoPush } from "./hooks/use-sync-auto-push";
 
 function App() {
   useStoreHydration();
   useProfileSnapshotPush();
+  useSyncAutoPush();
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();
   const analytics = useAnalytics();
   const [path] = useLocation();

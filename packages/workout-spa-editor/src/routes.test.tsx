@@ -12,6 +12,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContextProvider } from "./contexts/ToastContext";
 import { useWorkoutStore } from "./store/workout-store";
 import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
+import { TestSyncProvider } from "./test-utils/sync-test-provider";
 
 function renderAtPath(path: string) {
   const { hook } = memoryLocation({ path, record: true });
@@ -19,15 +20,17 @@ function renderAtPath(path: string) {
   return render(
     <ThemeProvider>
       <PersistenceProvider persistence={createInMemoryPersistence()}>
-        <GarminBridgeProvider>
-          <ToastProvider>
-            <ToastContextProvider>
-              <Router hook={hook}>
-                <App />
-              </Router>
-            </ToastContextProvider>
-          </ToastProvider>
-        </GarminBridgeProvider>
+        <TestSyncProvider>
+          <GarminBridgeProvider>
+            <ToastProvider>
+              <ToastContextProvider>
+                <Router hook={hook}>
+                  <App />
+                </Router>
+              </ToastContextProvider>
+            </ToastProvider>
+          </GarminBridgeProvider>
+        </TestSyncProvider>
       </PersistenceProvider>
     </ThemeProvider>
   );
