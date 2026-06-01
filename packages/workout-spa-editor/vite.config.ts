@@ -58,21 +58,6 @@ export default defineConfig({
           "./src/lib/ai-sdk-gateway-stub.ts"
         ),
       },
-      // Stub the Node `crypto` builtin. `@kaiord/core`'s built dist emits a
-      // bare `import { createHash } from "crypto"` (tsup strips the `node:`
-      // prefix). The production rolldown build already resolves this to an
-      // empty module (so `createHash` is `undefined`); the dev server instead
-      // externalizes `crypto` to a throwing proxy that crashes the SPA at
-      // module-eval. This stub gives dev exact parity with the shipped bundle.
-      // The proper fix belongs in @kaiord/core's build (do not emit bare
-      // `crypto`); see the e2e redesign report.
-      {
-        find: /^crypto$/,
-        replacement: path.resolve(
-          __dirname,
-          "./src/lib/node-crypto-browser-stub.ts"
-        ),
-      },
     ],
   },
   // GitHub Pages deployment configuration

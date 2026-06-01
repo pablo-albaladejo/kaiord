@@ -1,4 +1,5 @@
-import { createHash } from "node:crypto";
+import { sha256 } from "@noble/hashes/sha2";
+import { bytesToHex } from "@noble/hashes/utils";
 
 /**
  * Deterministic SHA-256 hash over a plain object.
@@ -8,6 +9,14 @@ import { createHash } from "node:crypto";
  * — regardless of property order at any depth — produce the same
  * digest. Used by MANAGED_DATA_REGISTRY hash projections to derive
  * stable external-id candidates.
+ *
+ * Uses a sync, isomorphic SHA-256 (@noble/hashes) instead of Node's
+ * `node:crypto`. The previous `node:crypto` import broke the browser
+ * bundle — the build emitted a bare `crypto` import and `createHash`
+ * was `undefined` at runtime, crashing any browser code path that
+ * hashed an export payload. The UTF-8 bytes hashed and the hex output
+ * are byte-for-byte identical to the old implementation, so persisted
+ * external-ids stay stable.
  */
 const normalize = (value: unknown): unknown => {
   if (value === null || typeof value !== "object") return value;
@@ -21,6 +30,6 @@ const normalize = (value: unknown): unknown => {
 };
 
 export const canonicalHash = (value: Record<string, unknown>): string =>
-  createHash("sha256")
-    .update(JSON.stringify(normalize(value)))
-    .digest("hex");
+  bytesToHex(
+    sha256(new TextEncoder().encode(JSON.stringify(normalize(value))))
+  );
