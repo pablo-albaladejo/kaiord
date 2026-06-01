@@ -47,7 +47,11 @@ function mergeTable(
     byKey.set(k, pickByClock(byKey.get(k), row) as Row);
   }
   return [...byKey.values()].filter((row) => {
-    const deletedAt = deletes.get(tombstoneKey(table, String(row.id ?? "")));
+    // Tombstones are keyed by `[table+id]`; only id-keyed rows can be
+    // suppressed, so non-id tables (which are never tombstoned) pass through.
+    const id = row.id;
+    if (typeof id !== "string") return true;
+    const deletedAt = deletes.get(tombstoneKey(table, id));
     return deletedAt === undefined || recordClock(row) > deletedAt;
   });
 }

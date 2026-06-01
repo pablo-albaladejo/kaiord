@@ -23,6 +23,13 @@ export async function importSnapshot({
   snapshot,
   now = () => new Date(),
 }: ImportSnapshotDeps): Promise<void> {
+  const localVersion = await port.schemaVersion();
+  if (snapshot.manifest.schemaVersion > localVersion) {
+    throw new Error(
+      `Snapshot schema v${snapshot.manifest.schemaVersion} is newer than this ` +
+        `app's v${localVersion}; update the app before importing.`
+    );
+  }
   await port.importTables(snapshot.tables);
   await port.replaceTombstones(pruneTombstones(snapshot.tombstones, now()));
 }

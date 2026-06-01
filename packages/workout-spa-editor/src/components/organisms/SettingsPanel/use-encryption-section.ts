@@ -7,7 +7,7 @@
  * shown this render and marks it seen so it never appears again.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { setSyncPassphrase } from "../../../lib/cloud-sync/encryption-runtime";
 import {
@@ -28,11 +28,16 @@ export type UseEncryptionSection = {
 export function useEncryptionSection(hasAiKeys: boolean): UseEncryptionSection {
   const [enabled, setEnabled] = useState<boolean>(() => isEncryptionEnabled());
   const [passphrase, setPassphraseState] = useState<string>("");
-  const [showWarning] = useState<boolean>(() => {
-    const show = hasAiKeys && !enabled && !wasPlaintextWarningSeen();
-    if (show) markPlaintextWarningSeen();
-    return show;
-  });
+  const [showWarning, setShowWarning] = useState<boolean>(false);
+
+  // Decide the one-time warning in an effect (never during render): mark it
+  // seen exactly once, and re-evaluate if `hasAiKeys`/`enabled` change.
+  useEffect(() => {
+    if (hasAiKeys && !enabled && !wasPlaintextWarningSeen()) {
+      markPlaintextWarningSeen();
+      setShowWarning(true);
+    }
+  }, [hasAiKeys, enabled]);
 
   const toggle = (next: boolean) => {
     setEncryptionEnabled(next);

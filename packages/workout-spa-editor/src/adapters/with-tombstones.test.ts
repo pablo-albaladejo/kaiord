@@ -47,6 +47,19 @@ describe("withTombstones", () => {
     expect(tombstone).toBeUndefined();
   });
 
+  it("should record no tombstone for a no-op delete of a missing record", async () => {
+    // Arrange
+    const base = createInMemoryPersistence();
+    const port = withTombstones(base);
+
+    // Act
+    await port.workouts.delete("never-existed");
+    const tombstone = await port.tombstones.get("workouts", "never-existed");
+
+    // Assert
+    expect(tombstone).toBeUndefined();
+  });
+
   it("should record a tombstone for a deleted template via the same call site", async () => {
     // Arrange
     const base = createInMemoryPersistence();

@@ -34,6 +34,9 @@ export function createGisAuth(clientId: string): GisAuth {
       scope: DRIVE_APPDATA_SCOPE,
       callback: (response) => {
         if (response.error || !response.access_token) {
+          // Drop any stale token so isAuthenticated() reflects the failure
+          // and the next call re-runs the consent/refresh flow.
+          accessToken = null;
           reject(new Error(response.error ?? "no access_token returned"));
           return;
         }

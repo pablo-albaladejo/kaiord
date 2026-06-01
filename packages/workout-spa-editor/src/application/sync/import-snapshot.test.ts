@@ -86,6 +86,31 @@ describe("importSnapshot", () => {
     ).toEqual(["t-old"]);
   });
 
+  it("should reject a snapshot from a newer schema version", async () => {
+    // Arrange
+    const port = createInMemorySnapshotPort({
+      schemaVersion: 19,
+      tables: {
+        workouts: [],
+        templates: [],
+        profiles: [],
+        aiProviders: [],
+        usage: [],
+      },
+      tombstones: [],
+    } as never);
+    const newer: Snapshot = {
+      ...snapshot(),
+      manifest: { ...snapshot().manifest, schemaVersion: 20 },
+    };
+
+    // Act
+    const attempt = importSnapshot({ port, snapshot: newer });
+
+    // Assert
+    await expect(attempt).rejects.toThrow(/newer than/i);
+  });
+
   it("should round-trip export then import preserving every row", async () => {
     // Arrange
     const source = {

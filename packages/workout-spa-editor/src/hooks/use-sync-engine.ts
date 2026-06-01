@@ -11,7 +11,7 @@
  * surface as `status === "error"`, leaving the local database usable.
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { syncWithCloud } from "../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../ports/cloud-sync-port";
@@ -41,16 +41,18 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
   const connectedRef = useRef<boolean>(connected);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const syncNow = useCallback(async () => {
+  const syncNow = useCallback(async (): Promise<boolean> => {
     setStatus("syncing");
     setError(null);
     try {
       await syncWithCloud({ cloud, snapshotPort, deviceId });
       setLastSyncedAt(new Date().toISOString());
       setStatus("idle");
+      return true;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Sync failed");
       setStatus("error");
+      return false;
     }
   }, [cloud, snapshotPort, deviceId]);
 
@@ -77,6 +79,9 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
     connectedRef.current = false;
     setConnected(false);
   }, []);
+
+  // Cancel a pending debounced push if the host unmounts (no fire-after-unmount).
+  useEffect(() => () => clearTimeout(timer.current ?? undefined), []);
 
   return {
     status,

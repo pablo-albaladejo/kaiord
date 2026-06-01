@@ -26,7 +26,10 @@ const TOMBSTONED_TABLES = [
 
 type TombstonedTable = (typeof TOMBSTONED_TABLES)[number];
 
-type IdDeletable = { delete: (id: string) => Promise<void> };
+type IdDeletable = {
+  delete: (id: string) => Promise<void>;
+  getById: (id: string) => Promise<unknown>;
+};
 
 const decorateRepo = (
   port: PersistencePort,
@@ -36,7 +39,11 @@ const decorateRepo = (
   ...repo,
   delete: (id: string) =>
     port.transaction(async () => {
+      // Only tombstone a delete that actually removed a row; tombstoning a
+      // no-op delete could wrongly suppress a record another device still has.
+      const existed = (await repo.getById(id)) !== undefined;
       await repo.delete(id);
+      if (!existed) return;
       await port.tombstones.put({
         table,
         id,

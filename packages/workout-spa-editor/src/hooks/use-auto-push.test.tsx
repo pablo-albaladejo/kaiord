@@ -25,7 +25,7 @@ describe("useAutoPush", () => {
     expect(requestPush).not.toHaveBeenCalled();
   });
 
-  it("should request a push once per change token transition", () => {
+  it("should skip the first transition then push on each later change", () => {
     // Arrange
     const requestPush = vi.fn();
     const { rerender } = renderHook(
@@ -34,8 +34,9 @@ describe("useAutoPush", () => {
     );
 
     // Act
-    act(() => rerender({ token: 1 }));
+    act(() => rerender({ token: 1 })); // first real transition: baseline only
     act(() => rerender({ token: 2 }));
+    act(() => rerender({ token: 3 }));
 
     // Assert
     expect(requestPush).toHaveBeenCalledTimes(2);

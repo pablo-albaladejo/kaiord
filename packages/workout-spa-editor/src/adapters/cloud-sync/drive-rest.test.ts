@@ -76,7 +76,7 @@ describe("createDriveRest.upload", () => {
     const rest = createDriveRest(() => "tok");
 
     // Act
-    const revision = await rest.upload(snapshot());
+    const revision = await rest.upload(snapshot(), null);
 
     // Assert
     expect(revision).toBe("rev-1");
@@ -99,12 +99,27 @@ describe("createDriveRest.upload", () => {
     const rest = createDriveRest(() => "tok");
 
     // Act
-    const revision = await rest.upload(snapshot());
+    const revision = await rest.upload(snapshot(), "rev-3");
 
     // Assert
     expect(revision).toBe("rev-4");
     const patch = calls.find((c) => c.method === "PATCH");
     expect(patch?.url).toContain("file-9");
     expect(patch?.url).toContain("uploadType=media");
+  });
+
+  it("should reject the upload when the remote revision has moved on", async () => {
+    // Arrange
+    const fetchMock = vi.fn(async () =>
+      jsonResponse({ files: [{ id: "file-9", headRevisionId: "rev-3" }] })
+    );
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    const rest = createDriveRest(() => "tok");
+
+    // Act
+    const attempt = rest.upload(snapshot(), "rev-1");
+
+    // Assert
+    await expect(attempt).rejects.toThrow(/revision conflict/i);
   });
 });

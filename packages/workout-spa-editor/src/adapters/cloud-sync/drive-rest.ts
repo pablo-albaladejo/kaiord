@@ -23,7 +23,10 @@ type DriveFile = { id: string; headRevisionId?: string };
 
 export type DriveRest = {
   download: () => Promise<RemoteSnapshot | null>;
-  upload: (snapshot: Snapshot) => Promise<string>;
+  upload: (
+    snapshot: Snapshot,
+    expectedRevision: string | null
+  ) => Promise<string>;
 };
 
 export function createDriveRest(getToken: () => string | null): DriveRest {
@@ -52,8 +55,17 @@ export function createDriveRest(getToken: () => string | null): DriveRest {
     return { snapshot, headRevisionId: file.headRevisionId ?? "" };
   };
 
-  const upload = async (snapshot: Snapshot): Promise<string> => {
+  const upload = async (
+    snapshot: Snapshot,
+    expectedRevision: string | null
+  ): Promise<string> => {
     const file = await findFile();
+    // Optimistic concurrency: refuse to overwrite if the remote moved on
+    // (or vanished/appeared) since the caller's last pull. syncWithCloud
+    // catches this and re-pulls/re-merges before retrying.
+    if ((file?.headRevisionId ?? null) !== expectedRevision) {
+      throw new Error("Drive snapshot revision conflict");
+    }
     const res = file
       ? await fetch(updateUrl(file.id), {
           method: "PATCH",

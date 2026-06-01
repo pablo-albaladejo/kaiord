@@ -24,7 +24,9 @@ export const meta = {
   ],
 };
 
-const REPO = "/Users/pablo/development/kaiord";
+// Configurable via args.repo (e.g. to target a git worktree); defaults to
+// "." — the agent's working directory — so it is not tied to one machine.
+const REPO = (typeof args !== "undefined" && args && args.repo) || ".";
 const change = (args && args.change) || "google-drive-cross-device-sync";
 // Default mode is "auto": assess, then auto-advance the next actionable phase.
 // Explicit modes: assess (read-only), implement, verify.

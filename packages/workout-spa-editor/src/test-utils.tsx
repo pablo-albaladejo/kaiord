@@ -7,10 +7,14 @@ import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { SyncProvider } from "./contexts/sync-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
+import type { CloudSyncPort } from "./ports/cloud-sync-port";
 import type { PersistencePort } from "./ports/persistence-port";
+import type { SnapshotPort } from "./ports/snapshot-port";
 import { createInMemoryCloudSyncPort } from "./test-utils/in-memory-cloud-sync-port";
 import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 import { createInMemorySnapshotPort } from "./test-utils/in-memory-snapshot-port";
+
+const EMPTY_SNAPSHOT_SCHEMA_VERSION = 19;
 
 /**
  * Options for renderWithProviders.
@@ -19,10 +23,18 @@ import { createInMemorySnapshotPort } from "./test-utils/in-memory-snapshot-port
  * that don't depend on `useLiveQuery` reactivity. Tests that exercise
  * Dexie-backed live hooks SHOULD pass `createDexiePersistence(db)`
  * (the production singleton, fake-indexeddb-backed in jsdom).
+ *
+ * The default `snapshotPort` is a standalone EMPTY in-memory store — it is
+ * NOT backed by `persistence`. Tests that actually exercise cloud sync MUST
+ * pass a `snapshotPort` (and `cloud`) wired to the same store/db as
+ * `persistence`, e.g. `createDexieSnapshotPort(db)` alongside
+ * `createDexiePersistence(db)`.
  */
 export type RenderWithProvidersOptions = Omit<RenderOptions, "wrapper"> & {
   defaultTheme?: Theme;
   persistence?: PersistencePort;
+  cloud?: CloudSyncPort;
+  snapshotPort?: SnapshotPort;
 };
 
 /**
@@ -37,6 +49,12 @@ export function renderWithProviders(
   const {
     defaultTheme,
     persistence = createInMemoryPersistence(),
+    cloud = createInMemoryCloudSyncPort(),
+    snapshotPort = createInMemorySnapshotPort({
+      schemaVersion: EMPTY_SNAPSHOT_SCHEMA_VERSION,
+      tables: {},
+      tombstones: [],
+    }),
     ...renderOptions
   } = options ?? {};
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -44,12 +62,8 @@ export function renderWithProviders(
       <ThemeProvider defaultTheme={defaultTheme}>
         <PersistenceProvider persistence={persistence}>
           <SyncProvider
-            cloud={createInMemoryCloudSyncPort()}
-            snapshotPort={createInMemorySnapshotPort({
-              schemaVersion: 19,
-              tables: {},
-              tombstones: [],
-            })}
+            cloud={cloud}
+            snapshotPort={snapshotPort}
             deviceId="test-device"
           >
             <GarminBridgeProvider>

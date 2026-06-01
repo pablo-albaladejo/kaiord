@@ -30,7 +30,8 @@ export function createGoogleDriveCloudSyncAdapter(
     isAuthenticated: () => auth.isAuthenticated(),
     authenticate: () => auth.authenticate(),
     pull: () => rest.download(),
-    push: (snapshot) => rest.upload(snapshot),
+    push: (snapshot, expectedRevision) =>
+      rest.upload(snapshot, expectedRevision),
   };
 }
 

@@ -17,8 +17,8 @@ export type SyncEngine = {
   error: string | null;
   /** True once a Google account is connected for sync. */
   connected: boolean;
-  /** Run a full pull-merge-push cycle now. */
-  syncNow: () => Promise<void>;
+  /** Run a full pull-merge-push cycle now; resolves true on success. */
+  syncNow: () => Promise<boolean>;
   /** Schedule a debounced push after edits settle. */
   requestPush: () => void;
   /** Run the OAuth consent flow and enable sync. */
