@@ -33,6 +33,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@noble/hashes": "^1.8.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
