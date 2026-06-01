@@ -1,5 +1,159 @@
 # @kaiord/workout-spa-editor
 
+## 1.0.0
+
+### Major Changes
+
+- a015501: KRD v2.0 — adds six health metrics (sleep, weight, HRV, daily wellness, body composition, stress) as first-class KRD types with bidirectional FIT adapter support.
+  - **@kaiord/core**: new health sub-schemas (`sleepRecordSchema`, `weightMeasurementSchema`, `hrvSummarySchema`, `dailyWellnessSchema`, `bodyCompositionSchema`, `stressEpisodeSchema`); six new KRD `type` enum values (`sleep_record`, `weight_measurement`, `hrv_summary`, `daily_wellness`, `body_composition`, `stress_episode`); health sub-schemas enforce `version` ∈ `2.x` (root `krdSchema.version` remains `\d+\.\d+`).
+  - **@kaiord/fit**: bidirectional converters for the six health metrics; seven new FIT message numbers registered (`WEIGHT_SCALE`, `MONITORING`, `MONITORING_INFO`, `SLEEP_LEVEL`, `HRV_STATUS_SUMMARY`, `HRV_VALUE`, `STRESS_LEVEL`, `BODY_COMPOSITION`); round-trip tests for sleep / weight / HRV / daily / stress against real Garmin fixtures (`test-fixtures/fit/`).
+  - **@kaiord/tcx, @kaiord/zwo, @kaiord/garmin**: workout-only writers now throw `UnsupportedKrdTypeError` when fed a health KRD instead of silently discarding it. **Breaking** for callers that fed unsupported KRDs to these writers.
+  - **@kaiord/mcp**: five new tools — `kaiord_get_health_summary`, `kaiord_get_sleep_history`, `kaiord_get_weight_history`, `kaiord_get_hrv_history`, `kaiord_get_recovery_status` — stateless, file-array input, parse FIT health files via the standard pipeline.
+  - **@kaiord/workout-spa-editor**: Dexie v16 with six health repositories (`healthSleep`, `healthWeight`, `healthHrv`, `healthDaily`, `healthBodyComposition`, `healthStress`); Health Hub routes under `/health/*`; FIT health files now route to the health pipeline instead of being ignored.
+
+### Minor Changes
+
+- 92b50eb: Calendar `+` now disambiguates adding a workout vs a wellness metric. The per-day `+` affordance renders on every day (grid and list views, no longer gated to empty training days) and opens a Workout | Wellness chooser. Workout preserves the existing `/workout/new?date=` flow; Wellness opens a manual-entry form (weight, sleep score, HRV, steps) plus a file-dated FIT import option. Manual entries persist via a new application use case that upserts one record per day per metric (reusing the existing `[profileId+date]` row id); a manual steps save merge-preserves any prior imported calories/intensity and overrides only the step count. Drag-to-reschedule is unaffected by the always-visible `+`.
+- f3cb525: Add in-app back navigation across the create-workout flow. `EditorPageHeader` accepts a new optional `onBack` prop that renders a shared `BackButton` atom; `EditorPage` wires it via `useBackHandler`, which preserves `?date=` on scratch/import and reuses the existing discard confirmation modal when `currentWorkout.steps.length > 0`. `NewWorkoutPicker` gains its own back button that navigates to `/calendar`.
+- 4d183e3: Health trends hub: replace the N-independent-chart grid at `/editor/health` with one composite widget of vertically-stacked panes (one per selected metric). Cursor and zoom are synchronized across all panes via `uPlot.sync` so the user perceives "una sola gráfica" while each metric keeps its native Y axis and unit. Each pane shows uPlot's built-in `legend.live` value at the cursor position. Empty panes (selected metric with no data in the active range) render an English placeholder. Panes are user-reorderable by dragging the header (reuses `@dnd-kit/sortable` via the existing `useDndCardWrapper` precedent). The 30/90/365 day range selector and the metric toggle pills are unchanged.
+
+  Implementation follows the consensus plan at `.omc/plans/ralplan-health-trends-overlay-single-chart.md` (Planner/Architect/Critic APPROVE iter 2) with the visual-tightness contract: shared X-axis ticks across panes, ≤8 px inter-pane gap, no per-pane border (only the outer card border). The five superseded files (`TrendChartsGrid`, `TrendMetricChart`, `trend-chart-options`, and their tests) are removed.
+
+- 275c221: feat(core): introduce MANAGED_DATA_REGISTRY single-source-of-truth for kaiord-managed data kinds; add deterministic external-id hash projection; tighten ManualHealthMetric and HealthKrdType to derive from ManagedDataType.
+
+  Foundational for the integration-policy-per-profile-routing feature (PR 1 of 7). No runtime behavior change yet — subsequent PRs wire policy resolution, Dexie migration, and the Data Flows UI on top of this registry.
+
+- d1ab0aa: feat(spa-editor): Data Flows section in ProfileManager
+
+  Adds the user-facing Data Flows configuration UI under ProfileManager.
+  Grouped by managed data type (9 groups), each with Sources / Destinations
+  subsections, [+ Add] affordances filtered by bridge capability tokens, and
+  per-row mode + enabled controls. Zero-state banner when no policies exist.
+  N-bridge ready: each subsection accepts arbitrarily many policy rows.
+
+  PR 6 of 7.
+
+- ab11c69: feat(spa-editor): Dexie v17 — integrationPolicies + exportLedger stores; health provenance + syncZones-to-IntegrationPolicy backfill
+
+  Bumps Dexie schema to v17. Adds the integrationPolicies and exportLedger
+  stores, alters all six health stores with a [profileId+sourceBridgeId+externalId]
+  unique compound index, and runs an idempotent chunked backfill that stamps
+  sourceBridgeId='manual' + a deterministic externalId on every legacy health row.
+  A second backfill walks linkedAccounts and creates an IntegrationPolicy
+  (dataType='training-zones', mode='auto', enabled=true) for every profile that
+  had syncZones=true. The syncZones column is retained nullable as a rollback
+  buffer until v18 (F-4).
+
+  QuotaExceededError on Safari/Firefox mid-chunk surfaces via the injected error
+  callback and leaves the partial backfill in place; per-row writes are
+  idempotent on retry. Export ledger cascades on health/workout record deletion;
+  an orphan sweep is available for new-machine disaster recovery.
+
+  PR 3 of 7 implementing integration-policy-per-profile-routing.
+
+- d597cb4: feat(core,spa): domain provenance fields + IntegrationPolicy/ExportLedger schemas
+
+  Adds kaiordRecordId, sourceBridgeId, externalId as optional fields to the six health Zod schemas (sleep, weight, hrv, daily, body-composition, stress); introduces deriveExternalId mapper in @kaiord/core/ingest; adds IntegrationPolicy + ExportLedgerEntry Zod schemas in @kaiord/workout-spa-editor; removes syncZones from linkedCoachingAccountSchema (Zod only — Dexie column retained as rollback buffer until v18).
+
+  PR 2 of 7 implementing integration-policy-per-profile-routing.
+
+- 0d325da: feat(spa-editor): resolver re-wiring — GarminPushButton, Train2Go zones, save-workout export trigger
+
+  GarminPushButton is now gated on resolveExportPolicies(profileId, 'workout')
+  instead of `extensionInstalled` alone. use-train2go-supports-zones.ts is
+  deleted; callers consult resolveImportPolicies(profileId, 'training-zones').
+  A regression test asserts the hook stays gone. A save-workout export trigger
+  listens for entitySaved events and fires recordExport for every enabled
+  mode='auto' export policy. Removes the transitional `as unknown as`
+  LinkedCoachingAccount casts from PR 2 and the deprecated SyncZonesToggle UI
+  (PR 6 introduces the Data Flows section as the replacement).
+
+  PR 5 of 7.
+
+- 2b1e93a: feat(spa-editor): integration-policy use cases + idempotent export ledger
+
+  Adds resolveImportPolicies / resolveExportPolicies / upsertIntegrationPolicy /
+  deleteIntegrationPolicy use cases. Adds upsertImportedRecord (natural-key
+  upsert against [profileId+sourceBridgeId+externalId]) and recordExport with
+  the insert-pending → POST → UPDATE protocol that closes the concurrent-
+  trigger race (unique constraint on [kaiordRecordId+destinationBridgeId]
+  gates the duplicate POST before the network call). Includes the AC-9
+  weight-export-aggregation integration test.
+
+  PR 4 of 7. Use cases are present but not yet wired into UI (PR 5/PR 6).
+
+- 129cc2d: feat(spa-editor): integration-policy verification — Playwright e2e, additivity tests, analytics-port events
+
+  Adds end-to-end coverage for the integration-policy-per-profile-routing
+  feature: Playwright specs for the Data Flows density baseline, the
+  Garmin push-via-policy happy path, and the Train2Go zones-via-policy
+  auto-import. Two additivity tests (existing token, new token) prove
+  AC-10. Analytics-port events fire on policy toggle, import complete,
+  and export complete; ledger-size gauge captures growth. tasks.md
+  reflects the completed scope.
+
+  PR 7 of 7 (terminal). Closes integration-policy-per-profile-routing.
+
+- 82f2e80: Unify training and wellness in the calendar (TrainingPeaks model). Removes the Training/Health/Settings primary tab bar (`PrimaryNav`) — the header already exposes Calendar/Library/New/Settings, and a new "Trends" header entry opens the wellness hub. Each calendar day cell now shows a muted per-day wellness band (sleep, HRV, weight, steps) read via a single per-week live query, visually distinct from training cards; each badge drills down to its per-metric page. The Health dashboard is rebuilt into a uPlot-backed trends hub with metric multi-select and 30/90/365-day range selection (lazy-loaded, code-split off the calendar bundle). The four per-metric health pages are retained as drill-down detail.
+- 5d7897b: Trends Hub now renders a single uPlot canvas with N native-unit Y axes packed on the right edge, replacing the stacked-panes architecture (the just-merged PRs #687 + #689). Lines accumulate on the same canvas as metrics are toggled; native units preserved per metric; no drag-to-reorder; no multi-instance sync. Uniform stroke `#2563eb` — line discrimination by axis label + legend label. Mobile layout accepted cramped at N=4. See `openspec/changes/single-canvas-trends-overlay/`.
+- b5fb373: feat(spa-editor): mobile-first redesign — Athlete, AI-first Create, Today, Workout Detail, Library, Settings, bottom nav
+
+  A ground-up mobile redesign of the editor app, built on the existing dark-slate and sky design system with a new 5-zone training color ramp (`--zone-1..5`).
+  - **Athlete** (`/athlete`): Profile is promoted out of Settings into a single top-level page — identity, a sport selector that recomputes thresholds plus a derived 5-zone map, and a **Connections** section that merges Linked Accounts with Data Flows into human per-connection sync toggles backed by live integration policies. `/settings/profile` redirects to `/athlete`.
+  - **Create**: an AI-first "New session" overlay (input → generating → review) that generates a workout via the configured AI provider with the active sport's zones injected, then Save and push persists it and pushes to Garmin.
+  - **Today** (`/calendar`): a morning landing with a readiness card (HRV/sleep from the health stores, graceful empty states), a week-load strip, and a planned-session card. The full week calendar stays at `/calendar/:weekId`.
+  - **Workout Detail** (`/workout/view/:id`) with a one-tap 3-state Push button.
+  - **Library**: reskinned to a mobile card list with search and sport filters.
+  - **Settings**: flattened into a grouped iOS-style list.
+  - **Navigation**: a responsive floating bottom nav and center FAB on mobile; the desktop chrome is unchanged.
+
+  New design-system atoms (Toggle, Segmented, Pill), viz primitives (ZoneMap, ZoneDist, ReadinessRing, AvatarRing, StepList, SummaryStrip, Metric, SectionHead), and derivation libs (`lib/athlete`, `lib/workout-review`).
+
+### Patch Changes
+
+- 82a7467: fix(core): make `canonicalHash` isomorphic (sync SHA-256, no `node:crypto`)
+
+  `canonicalHash` used `node:crypto`'s `createHash`, which the build emitted as a
+  bare `import { createHash } from "crypto"`. In the browser bundle `createHash`
+  resolved to `undefined`, so any browser code path that hashed an export payload
+  (the integration-policy export/push ledger via `computeExportHash`) crashed, and
+  Vite's dev server crashed the whole SPA at module-eval.
+
+  Switch to a sync, isomorphic SHA-256 (`@noble/hashes`). The UTF-8 bytes hashed
+  and the hex digest are byte-for-byte identical to the previous implementation —
+  verified against `node:crypto` in a test — so persisted external-ids stay
+  stable. This removes the dev-only `crypto` stub workaround in the editor's Vite
+  config.
+
+- 5795229: fix(spa-editor): Data Flows zero-state no longer dead-ends a fresh profile
+
+  The "Data Flows" tab keyed its zero-state banner on whether any
+  IntegrationPolicy already existed, so a profile with a connected bridge but
+  no policies showed "Connect a bridge to start syncing data with kaiord" and
+  rendered no groups — leaving the "+ Add source/destination" buttons (the only
+  way to create the first policy) unreachable. The banner is now keyed on bridge
+  presence: groups render as soon as a bridge is discovered, and the banner only
+  appears when no bridge is connected.
+
+- fccae34: Gate Train2Go zones auto-import on the IntegrationPolicy, not link presence.
+
+  Completes the syncZones → IntegrationPolicy migration that PR #705 left half-wired:
+  - `shouldFanOutZones` now requires an enabled auto-import `(training-zones, import, mode: auto)` policy in addition to a linked account, instead of firing on link presence alone.
+  - Adds the SPA-mount import lifecycle (`useZonesAutoImportOnMount` in `Train2GoZonesSyncProvider`) so a migrated profile auto-fetches zones once per mount when the policy is present (spec `spa-train2go-extension` §"Zone auto-import gated on IntegrationPolicy").
+  - Exposes `integrationPolicy` on `PersistencePort` (Dexie + in-memory adapters).
+  - Reconciles the `zones-sync` / `train2go-zones-via-policy` e2e specs to seed the policy, and updates the fan-out unit tests to the policy contract.
+
+- Updated dependencies [a015501]
+- Updated dependencies [82a7467]
+- Updated dependencies [275c221]
+- Updated dependencies [d597cb4]
+  - @kaiord/core@9.0.0
+  - @kaiord/fit@9.0.0
+  - @kaiord/tcx@9.0.0
+  - @kaiord/zwo@9.0.0
+  - @kaiord/garmin@9.0.0
+  - @kaiord/ai@9.0.0
+
 ## 0.6.0
 
 ### Minor Changes
