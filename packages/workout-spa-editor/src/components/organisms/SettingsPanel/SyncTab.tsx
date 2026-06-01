@@ -1,6 +1,8 @@
 import { useSync } from "../../../contexts/sync-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { Button } from "../../atoms/Button";
+import { EncryptionSection } from "./EncryptionSection";
 import { SyncStatusLine } from "./SyncStatusLine";
 
 const CONNECT_FAILED_TOAST = "Could not connect Google account — please retry.";
@@ -10,6 +12,8 @@ const SYNC_OK_TOAST = "Sync complete.";
 export const SyncTab: React.FC = () => {
   const sync = useSync();
   const toast = useToastContext();
+  const providers = useAiProvidersLive();
+  const hasAiKeys = (providers?.length ?? 0) > 0;
 
   const handleConnect = async () => {
     try {
@@ -57,6 +61,7 @@ export const SyncTab: React.FC = () => {
           </Button>
         )}
       </div>
+      <EncryptionSection hasAiKeys={hasAiKeys} />
     </div>
   );
 };

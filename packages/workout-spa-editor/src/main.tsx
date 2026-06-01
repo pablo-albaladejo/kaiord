@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
 
 import { createCloudflareAnalytics } from "./adapters/analytics/cloudflare-analytics";
+import { withEncryption } from "./adapters/cloud-sync/encrypting-cloud-sync";
 import { createGoogleDriveCloudSync } from "./adapters/cloud-sync/google-drive-cloud-sync-adapter";
 import { db } from "./adapters/dexie/dexie-database";
 import { createDexiePersistence } from "./adapters/dexie/dexie-persistence-adapter";
@@ -19,6 +20,8 @@ import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstra
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { SyncProvider } from "./contexts/sync-context";
 import { getDeviceId } from "./lib/cloud-sync/device-id";
+import { getSyncPassphrase } from "./lib/cloud-sync/encryption-runtime";
+import { isEncryptionEnabled } from "./lib/cloud-sync/sync-encryption-pref";
 import { getCfAnalyticsToken } from "./lib/runtime-config";
 import { computeRouterBase } from "./router-base";
 
@@ -26,7 +29,10 @@ const analytics = createCloudflareAnalytics(getCfAnalyticsToken());
 
 const persistence = createDexiePersistence();
 
-const cloudSync = createGoogleDriveCloudSync();
+const cloudSync = withEncryption(createGoogleDriveCloudSync(), {
+  isEnabled: isEncryptionEnabled,
+  getPassphrase: getSyncPassphrase,
+});
 const snapshotPort = createDexieSnapshotPort(db);
 
 const routerBase = computeRouterBase(import.meta.env.BASE_URL);

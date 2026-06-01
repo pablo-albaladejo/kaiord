@@ -46,3 +46,24 @@ export type RemoteSnapshot = {
   /** Drive `headRevisionId` for optimistic-concurrency push. */
   headRevisionId: string;
 };
+
+/**
+ * On-the-wire shape of an end-to-end-encrypted snapshot. The manifest
+ * stays cleartext (so a receiving device detects `encrypted: true` and
+ * prompts for the passphrase) while `tables`+`tombstones` are replaced by
+ * a single `ciphertext` blob (salt+iv+AES-GCM, base64 — see crypto.ts).
+ */
+export type EncryptedSnapshot = {
+  manifest: SnapshotManifest;
+  ciphertext: string;
+};
+
+/** A snapshot as it lives in cloud storage: cleartext or encrypted. */
+export type WireSnapshot = Snapshot | EncryptedSnapshot;
+
+/** Narrow a wire snapshot to its encrypted form. */
+export function isEncryptedSnapshot(
+  snapshot: WireSnapshot
+): snapshot is EncryptedSnapshot {
+  return snapshot.manifest.encrypted === true && "ciphertext" in snapshot;
+}

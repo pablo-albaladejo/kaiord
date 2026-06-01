@@ -42,10 +42,10 @@
 
 ## 5. Phase 5 — Optional E2E encryption
 
-- [ ] 5.1 Add an encryption toggle (off by default) and passphrase entry in Settings; persist the preference in `meta`
-- [ ] 5.2 Reuse `crypto.ts` PBKDF2→AES-GCM primitives to encrypt `tables`+`tombstones` with the user passphrase before push, keeping the manifest cleartext with `encrypted: true`; test that ciphertext only decrypts with the correct passphrase
-- [ ] 5.3 On pull, detect `manifest.encrypted` and prompt for the passphrase before import; test that import is blocked until decryption succeeds
-- [ ] 5.4 Implement the one-time plaintext warning shown when AI keys are in scope and encryption is off; test it shows once on connect/first-enable
+- [x] 5.1 Add an encryption toggle (off by default) and passphrase entry in Settings. Deviation: the toggle + warning-seen flags are persisted in **localStorage** (matching the `device-id.ts` sync-runtime precedent; the SPA exposes no generic `meta` accessor to the UI layer), and the **passphrase is kept in memory only** (never persisted) for security.
+- [x] 5.2 Reuse `crypto.ts` PBKDF2→AES-GCM primitives to encrypt `tables`+`tombstones` with the user passphrase before push, keeping the manifest cleartext with `encrypted: true`; test that ciphertext only decrypts with the correct passphrase
+- [x] 5.3 On pull, detect `manifest.encrypted` and prompt for the passphrase before import; test that import is blocked until decryption succeeds
+- [x] 5.4 Implement the one-time plaintext warning shown when AI keys are in scope and encryption is off; test it shows once on connect/first-enable
 
 ## 6. Verification & wrap-up
 
