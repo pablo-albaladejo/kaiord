@@ -51,6 +51,41 @@ describe("importSnapshot", () => {
     ]);
   });
 
+  it("should prune tombstones older than the retention window on import", async () => {
+    // Arrange
+    const state = {
+      schemaVersion: 19,
+      tables: {
+        workouts: [],
+        templates: [],
+        profiles: [],
+        aiProviders: [],
+        usage: [],
+      },
+      tombstones: [],
+    };
+    const port = createInMemorySnapshotPort(state as never);
+    const withStale: Snapshot = {
+      ...snapshot(),
+      tombstones: [
+        { table: "templates", id: "t-old", deletedAt: "2026-05-20T00:00:00Z" },
+        { table: "workouts", id: "ancient", deletedAt: "2026-01-01T00:00:00Z" },
+      ],
+    };
+
+    // Act
+    await importSnapshot({
+      port,
+      snapshot: withStale,
+      now: () => new Date("2026-06-01T00:00:00Z"),
+    });
+
+    // Assert
+    expect(
+      (state.tombstones as Array<{ id: string }>).map((t) => t.id)
+    ).toEqual(["t-old"]);
+  });
+
   it("should round-trip export then import preserving every row", async () => {
     // Arrange
     const source = {

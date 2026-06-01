@@ -24,13 +24,13 @@
 
 ## 3. Phase 3 — syncWithCloud merge engine
 
-- [ ] 3.1 Write failing tests for the pure per-record LWW merge: newer-local-wins, newer-remote-wins, present-on-one-side-kept, `createdAt` fallback when `updatedAt` absent
-- [ ] 3.2 Write failing tests for timestampless tables (`meta`, `usage`) merging whole-record by manifest `exportedAt`
-- [ ] 3.3 Write failing tests for tombstone handling: delete-on-A removes-on-B (tombstone retained), re-creation newer than tombstone is retained
-- [ ] 3.4 Implement the pure `mergeSnapshots` function until 3.1–3.3 are green
-- [ ] 3.5 Write failing tests for `syncWithCloud` orchestration using the fake `CloudSyncPort` and in-memory `PersistencePort`: pull → export → merge → import → push; stale `headRevisionId` triggers re-pull/re-merge/retry; unchanged revision pushes directly and records the returned revision
-- [ ] 3.6 Implement `syncWithCloud` (bounded retry on revision conflict) until green
-- [ ] 3.7 Add tombstone pruning on import (drop tombstones older than the retention window) with a test
+- [x] 3.1 Write failing tests for the pure per-record LWW merge: newer-local-wins, newer-remote-wins, present-on-one-side-kept, `createdAt` fallback when `updatedAt` absent
+- [x] 3.2 Write failing tests for timestampless tables (`meta`, `usage`) merging whole-record by manifest `exportedAt`
+- [x] 3.3 Write failing tests for tombstone handling: delete-on-A removes-on-B (tombstone retained), re-creation newer than tombstone is retained
+- [x] 3.4 Implement the pure `mergeSnapshots` function until 3.1–3.3 are green
+- [x] 3.5 Write failing tests for `syncWithCloud` orchestration using the fake `CloudSyncPort` and in-memory `PersistencePort`: pull → export → merge → import → push; stale `headRevisionId` triggers re-pull/re-merge/retry; unchanged revision pushes directly and records the returned revision
+- [x] 3.6 Implement `syncWithCloud` (bounded retry on revision conflict) until green
+- [x] 3.7 Add tombstone pruning on import (drop tombstones older than the retention window) with a test
 
 ## 4. Phase 4 — Hybrid sync UI
 
