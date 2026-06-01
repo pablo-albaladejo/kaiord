@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/core",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "description": "Core library for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
@@ -33,6 +33,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@noble/hashes": "^1.8.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

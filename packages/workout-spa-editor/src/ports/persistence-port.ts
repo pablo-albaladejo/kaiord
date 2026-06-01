@@ -5,6 +5,7 @@
  * persisted data domains in the workout SPA editor.
  */
 
+import type { IntegrationPolicyRepository } from "../application/integration-policy/integration-policy-repository.port";
 import type {
   HealthBodyCompositionRecord,
   HealthDailyRecord,
@@ -63,6 +64,8 @@ export type PersistencePort = {
   usage: UsageRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
+  // Per-profile integration policies (training-zones import/export gating).
+  integrationPolicy: IntegrationPolicyRepository;
   // Profile-scoped repos previously created on demand via direct `db`
   // imports. Routing them through PersistencePort keeps the cascade
   // (deleteProfileWithCascade) bound to the same database instance the

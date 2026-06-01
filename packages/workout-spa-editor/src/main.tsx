@@ -46,7 +46,7 @@ createRoot(document.getElementById("root")!).render(
           snapshotPort={snapshotPort}
           deviceId={getDeviceId()}
         >
-          <ThemeProvider>
+          <ThemeProvider defaultTheme="dark">
             <GarminBridgeProvider>
               <CoachingRegistryBootstrap>
                 <Router base={routerBase}>

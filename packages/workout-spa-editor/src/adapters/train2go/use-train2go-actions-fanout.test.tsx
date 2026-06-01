@@ -65,6 +65,20 @@ const makeProfile = (link: LinkedCoachingAccount): Profile => ({
   updatedAt: "2026-04-01T00:00:00.000Z",
 });
 
+const seedAutoImportPolicy = (
+  persistence: ReturnType<typeof createInMemoryPersistence>
+) =>
+  persistence.integrationPolicy.put({
+    id: "11111111-1111-4111-8111-111111111111",
+    profileId: "p1",
+    dataType: "training-zones",
+    bridgeId: "train2go-bridge",
+    direction: "import",
+    mode: "auto",
+    enabled: true,
+    updatedAt: "2026-04-28T10:00:00.000Z",
+  });
+
 const wrapPersistence = (
   persistence: ReturnType<typeof createInMemoryPersistence>
 ) => ({
@@ -82,6 +96,7 @@ describe("useConnectCallback fan-out", () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK));
+    await seedAutoImportPolicy(persistence);
     const runZonesSync = vi.fn(async () => undefined);
     const { result } = renderHook(
       () => useConnectCallback(persistence, transport, analytics, runZonesSync),
@@ -95,10 +110,28 @@ describe("useConnectCallback fan-out", () => {
     expect(runZonesSync).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
+  it("should NOT call runZonesSync when no enabled import policy exists", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.profiles.put(makeProfile(T2G_LINK));
+    const runZonesSync = vi.fn(async () => undefined);
+    const { result } = renderHook(
+      () => useConnectCallback(persistence, transport, analytics, runZonesSync),
+      wrapPersistence(persistence)
+    );
+
+    // Act
+    await result.current("p1");
+
+    // Assert
+    expect(runZonesSync).not.toHaveBeenCalled();
+  });
+
   it("should NOT call runZonesSync when runZonesSync is not provided", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK));
+    await seedAutoImportPolicy(persistence);
     const runZonesSync = vi.fn(async () => undefined);
 
     // Act
@@ -116,6 +149,7 @@ describe("useConnectCallback fan-out", () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK));
+    await seedAutoImportPolicy(persistence);
     const runZonesSync = vi.fn(async () => {
       throw new Error("zones boom");
     });
@@ -138,6 +172,7 @@ describe("useSyncCallback fan-out", () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK));
+    await seedAutoImportPolicy(persistence);
     const runZonesSync = vi.fn(async () => undefined);
     const { result } = renderHook(
       () => useSyncCallback(persistence, transport, analytics, runZonesSync),
@@ -159,6 +194,7 @@ describe("useSyncCallback fan-out", () => {
     } as never);
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK));
+    await seedAutoImportPolicy(persistence);
     const runZonesSync = vi.fn(async () => undefined);
     const { result } = renderHook(
       () => useSyncCallback(persistence, transport, analytics, runZonesSync),
