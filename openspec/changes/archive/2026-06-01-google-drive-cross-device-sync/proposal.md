@@ -1,3 +1,5 @@
+> Completed: 2026-06-01
+
 ## Why
 
 Today the workout-spa-editor persists everything to a single browser's IndexedDB (Dexie `kaiord-spa`, currently v18). A user with a laptop and a phone has two disconnected datasets — there is no way to see the same workouts, templates, profiles, or coaching data across their own devices. We want cross-device continuity **without** running any backend: the data must stay owned by the user, be free, and be secure. Google Drive's hidden `appDataFolder` lets the SPA store an app-scoped snapshot on the user's own Drive quota using purely client-side OAuth, so the app stays static-hostable with zero infrastructure to operate.
