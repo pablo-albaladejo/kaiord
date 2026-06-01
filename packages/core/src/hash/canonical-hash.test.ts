@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import { canonicalHash } from "./canonical-hash";
@@ -38,5 +40,32 @@ describe("canonicalHash", () => {
 
     // Assert
     expect(result).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("should match the previous node:crypto SHA-256 hex (external-id compatibility)", () => {
+    // Arrange
+    // Keys are already alphabetically sorted at every depth, so `normalize`
+    // is a no-op and we can compare against node:crypto over the identical
+    // canonical JSON — pinning byte-for-byte output so external-ids derived
+    // by the old implementation still match.
+    const sortedInputs: Array<Record<string, unknown>> = [
+      {},
+      { a: 1 },
+      { a: 1, b: "two" },
+      { a: 1, b: { c: 2, d: [1, 2] }, e: null },
+      // Non-ASCII / multibyte UTF-8 — the path most at risk of cross-impl
+      // drift; pins identical UTF-8 byte encoding vs node:crypto.
+      { name: "Ångström", note: "café ☕ 日本" },
+    ];
+
+    // Act
+
+    // Assert
+    for (const input of sortedInputs) {
+      const expected = createHash("sha256")
+        .update(JSON.stringify(input))
+        .digest("hex");
+      expect(canonicalHash(input)).toBe(expected);
+    }
   });
 });
