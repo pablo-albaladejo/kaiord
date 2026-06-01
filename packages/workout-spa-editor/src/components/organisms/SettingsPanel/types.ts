@@ -1,1 +1,1 @@
-export type SettingsTab = "ai" | "extensions" | "usage" | "privacy";
+export type SettingsTab = "ai" | "sync" | "extensions" | "usage" | "privacy";

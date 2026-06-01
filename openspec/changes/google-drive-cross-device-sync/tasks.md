@@ -34,11 +34,11 @@
 
 ## 4. Phase 4 — Hybrid sync UI
 
-- [ ] 4.1 Add a sync-state context/hook exposing status (idle, syncing, error, lastSyncedAt) without writing Dexie from Zustand (respect R-DexieImport / R-PersistStateImport)
-- [ ] 4.2 Wire pull-merge on app open after persistence boot; add a test that a connected account with a remote snapshot applies it before normal use
-- [ ] 4.3 Wire debounced auto-push after edits settle (single push for a burst of edits); test the debounce collapses multiple edits into one push
-- [ ] 4.4 Build the Settings sync section: connect/disconnect Google account, status display, "Sync now" button; component tests follow AAA and the PII guard for any toasts/logs
-- [ ] 4.5 Ensure sync failures are surfaced non-fatally and the app stays usable offline; test the offline-degradation path
+- [x] 4.1 Add a sync-state context/hook exposing status (idle, syncing, error, lastSyncedAt) without writing Dexie from Zustand (respect R-DexieImport / R-PersistStateImport)
+- [x] 4.2 Wire pull-merge on app open after persistence boot; add a test that a connected account with a remote snapshot applies it before normal use
+- [x] 4.3 Wire debounced auto-push after edits settle (single push for a burst of edits); test the debounce collapses multiple edits into one push
+- [x] 4.4 Build the Settings sync section: connect/disconnect Google account, status display, "Sync now" button; component tests follow AAA and the PII guard for any toasts/logs
+- [x] 4.5 Ensure sync failures are surfaced non-fatally and the app stays usable offline; test the offline-degradation path
 
 ## 5. Phase 5 — Optional E2E encryption
 

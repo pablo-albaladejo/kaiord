@@ -5,9 +5,12 @@ import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { CoachingRegistryProvider } from "./contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { PersistenceProvider } from "./contexts/persistence-context";
+import { SyncProvider } from "./contexts/sync-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
 import type { PersistencePort } from "./ports/persistence-port";
+import { createInMemoryCloudSyncPort } from "./test-utils/in-memory-cloud-sync-port";
 import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
+import { createInMemorySnapshotPort } from "./test-utils/in-memory-snapshot-port";
 
 /**
  * Options for renderWithProviders.
@@ -40,11 +43,21 @@ export function renderWithProviders(
     return (
       <ThemeProvider defaultTheme={defaultTheme}>
         <PersistenceProvider persistence={persistence}>
-          <GarminBridgeProvider>
-            <CoachingRegistryProvider factories={[]}>
-              <AppToastProvider>{children}</AppToastProvider>
-            </CoachingRegistryProvider>
-          </GarminBridgeProvider>
+          <SyncProvider
+            cloud={createInMemoryCloudSyncPort()}
+            snapshotPort={createInMemorySnapshotPort({
+              schemaVersion: 19,
+              tables: {},
+              tombstones: [],
+            })}
+            deviceId="test-device"
+          >
+            <GarminBridgeProvider>
+              <CoachingRegistryProvider factories={[]}>
+                <AppToastProvider>{children}</AppToastProvider>
+              </CoachingRegistryProvider>
+            </GarminBridgeProvider>
+          </SyncProvider>
         </PersistenceProvider>
       </ThemeProvider>
     );

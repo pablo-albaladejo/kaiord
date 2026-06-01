@@ -1,11 +1,13 @@
 import { AiTab } from "../../organisms/SettingsPanel/AiTab";
 import { ExtensionsTab } from "../../organisms/SettingsPanel/ExtensionsTab";
 import { PrivacyTab } from "../../organisms/SettingsPanel/PrivacyTab";
+import { SyncTab } from "../../organisms/SettingsPanel/SyncTab";
 import type { SettingsTab } from "../../organisms/SettingsPanel/types";
 import { UsageTab } from "../../organisms/SettingsPanel/UsageTab";
 
 const TAB_ORDER: ReadonlyArray<SettingsTab> = [
   "ai",
+  "sync",
   "extensions",
   "usage",
   "privacy",
@@ -13,6 +15,7 @@ const TAB_ORDER: ReadonlyArray<SettingsTab> = [
 
 const TAB_LABELS: Record<SettingsTab, string> = {
   ai: "AI",
+  sync: "Sync",
   extensions: "Extensions",
   usage: "Usage",
   privacy: "Privacy",
@@ -20,6 +23,7 @@ const TAB_LABELS: Record<SettingsTab, string> = {
 
 const TAB_VIEWS: Record<SettingsTab, React.FC> = {
   ai: AiTab,
+  sync: SyncTab,
   extensions: ExtensionsTab,
   usage: UsageTab,
   privacy: PrivacyTab,
