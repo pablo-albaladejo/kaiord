@@ -21,13 +21,11 @@ export function useDialogHandlers(
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // commentIndices is part of the dialog's onProcess contract but the workout
+  // route consumes no selection, so handleProcess takes only the workout id.
   const handleProcess = useCallback(
-    (id: string, commentIndices: number[]) => {
-      const params =
-        commentIndices.length > 0
-          ? `?comments=${commentIndices.join(",")}`
-          : "";
-      navigate(`/workout/${id}${params}`);
+    (id: string) => {
+      navigate(`/workout/${id}`);
       onCloseWorkout();
     },
     [navigate, onCloseWorkout]
