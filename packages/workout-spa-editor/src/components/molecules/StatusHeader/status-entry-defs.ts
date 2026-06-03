@@ -57,3 +57,22 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
 export function resolveEntryHref(entry: EntryDef): string {
   return entry.id === "calendar" ? `/calendar/${getCurrentWeekId()}` : entry.to;
 }
+
+/** Derives whether a header entry is active for the current location.
+    Mirrors the bottom-nav `isTabActive` predicate: calendar matches the
+    Today summary, the index route, and any `/calendar/:weekId` week grid;
+    settings matches any `/settings`-prefixed path; others match by prefix
+    of the entry's base target so sub-routes still highlight their parent. */
+export function isEntryActive(entry: EntryDef, location: string): boolean {
+  if (entry.id === "calendar") {
+    return (
+      location === "/calendar" ||
+      location === "/" ||
+      location.startsWith("/calendar/")
+    );
+  }
+  if (entry.id === "settings") {
+    return location === "/settings" || location.startsWith("/settings/");
+  }
+  return location === entry.to || location.startsWith(`${entry.to}/`);
+}
