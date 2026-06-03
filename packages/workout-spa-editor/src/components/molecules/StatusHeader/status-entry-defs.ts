@@ -1,4 +1,11 @@
-import { Activity, Calendar, Library, Plus, Settings } from "lucide-react";
+import {
+  Activity,
+  Calendar,
+  Library,
+  Plus,
+  Settings,
+  User,
+} from "lucide-react";
 import type { ComponentType } from "react";
 
 import { getCurrentWeekId } from "../../../utils/week-utils";
@@ -26,6 +33,13 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
     label: "Library",
     ariaLabel: "Open workout library",
     to: "/library",
+  },
+  {
+    id: "athlete",
+    icon: User,
+    label: "Athlete",
+    ariaLabel: "Open athlete profile",
+    to: "/athlete",
   },
   {
     id: "trends",
