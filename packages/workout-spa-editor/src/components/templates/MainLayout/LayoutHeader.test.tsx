@@ -145,7 +145,7 @@ describe("LayoutHeader", () => {
       expect(location.history).toContain("/athlete");
     });
 
-    it("should navigate to /settings/ai when the settings button is clicked", async () => {
+    it("should navigate to /settings when the settings button is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
       const { ui, location } = withRouter(<LayoutHeader />);
@@ -155,7 +155,7 @@ describe("LayoutHeader", () => {
       await user.click(screen.getByRole("button", { name: /open settings/i }));
 
       // Assert
-      expect(location.history).toContain("/settings/ai");
+      expect(location.history).toContain("/settings");
     });
 
     it("should navigate to /workout/new when the new-workout button is clicked", async () => {

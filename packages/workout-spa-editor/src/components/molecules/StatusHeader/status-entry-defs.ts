@@ -1,14 +1,12 @@
 import {
   Activity,
-  Calendar,
-  Library,
+  CalendarCheck,
+  LayoutGrid,
   Plus,
   Settings,
   User,
 } from "lucide-react";
 import type { ComponentType } from "react";
-
-import { getCurrentWeekId } from "../../../utils/week-utils";
 
 export type EntryDef = {
   id: string;
@@ -22,14 +20,14 @@ export type EntryDef = {
 export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
   {
     id: "calendar",
-    icon: Calendar,
-    label: "Calendar",
-    ariaLabel: "Go to calendar",
+    icon: CalendarCheck,
+    label: "Today",
+    ariaLabel: "Go to today",
     to: "/calendar",
   },
   {
     id: "library",
-    icon: Library,
+    icon: LayoutGrid,
     label: "Library",
     ariaLabel: "Open workout library",
     to: "/library",
@@ -60,17 +58,9 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
     icon: Settings,
     label: "Settings",
     ariaLabel: "Open settings",
-    to: "/settings/ai",
+    to: "/settings",
   },
 ];
-
-/** Resolves an entry's navigation target. The bare `/calendar` route now
-    renders the Today page, so the Calendar entry points at the current
-    week (`/calendar/:weekId`) — otherwise the week calendar would only be
-    reachable by deep-link. */
-export function resolveEntryHref(entry: EntryDef): string {
-  return entry.id === "calendar" ? `/calendar/${getCurrentWeekId()}` : entry.to;
-}
 
 /** Derives whether a header entry is active for the current location.
     Mirrors the bottom-nav `isTabActive` predicate: calendar matches the
