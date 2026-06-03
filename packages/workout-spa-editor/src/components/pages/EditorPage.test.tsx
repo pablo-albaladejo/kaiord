@@ -320,6 +320,45 @@ describe("EditorPage", () => {
     expect(location.history.at(-1)).toBe("/workout/new?date=2026-06-01");
   });
 
+  it("should resolve Back to /library when ?from=library on a scratch entry", async () => {
+    // Arrange
+    const user = userEvent.setup();
+
+    // Act
+    const { location } = renderEditor(
+      undefined,
+      "/workout/new?source=scratch&from=library"
+    );
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-back-button")).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId("editor-back-button"));
+    expect(location.history.at(-1)).toBe("/library");
+  });
+
+  it("should render a Back button to /calendar in edit mode when ?from=calendar is present", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    await db.table("workouts").add(makeRecord({ krd: makeStepfulKrd(2) }));
+    useWorkoutStore.setState({ currentWorkout: makeStepfulKrd(2) });
+
+    // Act
+    const { location } = renderEditor(
+      "w-test",
+      "/workout/w-test?from=calendar"
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-back-button")).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId("editor-back-button"));
+
+    // Assert
+    expect(useWorkoutStore.getState().isModalOpen).toBe(false);
+    expect(location.history.at(-1)).toBe("/calendar");
+  });
+
   it("should render the schedule control on a dated scratch route", async () => {
     // Arrange
 

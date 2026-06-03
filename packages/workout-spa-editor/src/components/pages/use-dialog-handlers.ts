@@ -12,6 +12,7 @@ import {
   transitionToRaw,
   transitionToSkipped,
 } from "../../application/workout-transitions";
+import { withOrigin } from "../../routing/with-origin";
 import type { WorkoutRecord } from "../../types/calendar-record";
 
 export function useDialogHandlers(
@@ -25,7 +26,7 @@ export function useDialogHandlers(
   // route consumes no selection, so handleProcess takes only the workout id.
   const handleProcess = useCallback(
     (id: string) => {
-      navigate(`/workout/${id}`);
+      navigate(withOrigin(`/workout/${id}`, "calendar"));
       onCloseWorkout();
     },
     [navigate, onCloseWorkout]

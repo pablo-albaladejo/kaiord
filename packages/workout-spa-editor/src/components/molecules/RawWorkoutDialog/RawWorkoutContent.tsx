@@ -4,6 +4,7 @@
 
 import { useLocation } from "wouter";
 
+import { withOrigin } from "../../../routing/with-origin";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { CommentSelector } from "./CommentSelector";
 import { useCommentSelection } from "./raw-workout-hooks";
@@ -49,7 +50,11 @@ export function RawWorkoutContent({
         onProcess={onProcess}
         onSkip={onSkip}
         onUnskip={onUnskip}
-        onManual={() => navigate(`/workout/new?date=${workout.date}`)}
+        onManual={() =>
+          navigate(
+            withOrigin(`/workout/new?date=${workout.date}`, "calendar-day")
+          )
+        }
         disabled={isSubmitting}
       />
     </div>

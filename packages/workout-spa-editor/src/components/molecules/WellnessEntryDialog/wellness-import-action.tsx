@@ -9,6 +9,8 @@
  */
 import { useLocation } from "wouter";
 
+import { withOrigin } from "../../../routing/with-origin";
+
 export function WellnessImportAction() {
   const [, navigate] = useLocation();
 
@@ -16,7 +18,9 @@ export function WellnessImportAction() {
     <div className="flex flex-col gap-1">
       <button
         type="button"
-        onClick={() => navigate("/workout/new?action=import")}
+        onClick={() =>
+          navigate(withOrigin("/workout/new?action=import", "today"))
+        }
         className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 dark:border-gray-600 dark:text-white"
       >
         Import a file

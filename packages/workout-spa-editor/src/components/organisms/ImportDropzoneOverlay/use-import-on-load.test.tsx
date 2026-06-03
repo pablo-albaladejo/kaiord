@@ -83,7 +83,7 @@ describe("useImportOnLoad (§9.3 dispatch)", () => {
       path: "/workout/new",
       record: true,
     });
-    const { result } = renderHook(() => useImportOnLoad(null), {
+    const { result } = renderHook(() => useImportOnLoad(null, null), {
       wrapper: makeWrapper(persistence, hook),
     });
 
@@ -103,7 +103,7 @@ describe("useImportOnLoad (§9.3 dispatch)", () => {
       path: "/workout/new",
       record: true,
     });
-    const { result } = renderHook(() => useImportOnLoad("2026-13-45"), {
+    const { result } = renderHook(() => useImportOnLoad("2026-13-45", null), {
       wrapper: makeWrapper(persistence, hook),
     });
 
@@ -120,5 +120,48 @@ describe("useImportOnLoad (§9.3 dispatch)", () => {
     );
     expect(stored).toHaveLength(0);
     expect(history.some((p) => /^\/workout\/[0-9a-f-]+$/.test(p))).toBe(false);
+  });
+
+  it("should append the threaded origin to the success navigate", async () => {
+    // Arrange
+    const persistence = await setupPersistence();
+    const { hook, history } = memoryLocation({
+      path: "/workout/new",
+      record: true,
+    });
+    const { result } = renderHook(
+      () => useImportOnLoad("2026-06-01", "calendar-day"),
+      { wrapper: makeWrapper(persistence, hook) }
+    );
+
+    // Act
+    result.current(makeWorkoutKrd());
+
+    // Assert
+    await waitFor(() => {
+      expect(history.at(-1)).toMatch(
+        /^\/workout\/[0-9a-f-]+\?from=calendar-day$/
+      );
+    });
+  });
+
+  it("should default the success navigate origin to calendar when none is threaded", async () => {
+    // Arrange
+    const persistence = await setupPersistence();
+    const { hook, history } = memoryLocation({
+      path: "/workout/new",
+      record: true,
+    });
+    const { result } = renderHook(() => useImportOnLoad("2026-06-01", null), {
+      wrapper: makeWrapper(persistence, hook),
+    });
+
+    // Act
+    result.current(makeWorkoutKrd());
+
+    // Assert
+    await waitFor(() => {
+      expect(history.at(-1)).toMatch(/^\/workout\/[0-9a-f-]+\?from=calendar$/);
+    });
   });
 });

@@ -31,6 +31,7 @@ import { deleteTemplate } from "../../application/library/delete-template";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live";
+import { withOrigin } from "../../routing/with-origin";
 import { useCurrentWorkout, useLoadWorkout } from "../../store/selectors";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
@@ -75,7 +76,7 @@ export default function LibraryPage() {
     // survives the route transition. Hard reload would drop Zustand.
     // `?source=scratch` mounts the editor directly with the
     // workout that's now in the store.
-    navigate("/workout/new?source=scratch");
+    navigate(withOrigin("/workout/new?source=scratch", "library"));
   };
 
   return (
