@@ -59,7 +59,7 @@ describe("RouteErrorFallback", () => {
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
-  it("should render Go to Calendar button", () => {
+  it("should render a Go to Today link to the Today summary", () => {
     // Arrange
 
     // Act
@@ -68,10 +68,13 @@ describe("RouteErrorFallback", () => {
 
     // Assert
 
-    expect(screen.getByText("Go to Calendar")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Go to Today" })).toHaveAttribute(
+      "href",
+      "/calendar"
+    );
   });
 
-  it("should navigate to /calendar when Go to Calendar is clicked", async () => {
+  it("should navigate to /calendar when Go to Today is clicked", async () => {
     // Arrange
 
     const user = userEvent.setup();
@@ -81,7 +84,7 @@ describe("RouteErrorFallback", () => {
 
     // Act
 
-    await user.click(screen.getByText("Go to Calendar"));
+    await user.click(screen.getByText("Go to Today"));
 
     // Assert
 
