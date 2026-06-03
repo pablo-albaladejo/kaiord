@@ -76,7 +76,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           onRepush={() => pushWorkout(`garmin-${Date.now()}`)}
         />
       )}
-      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode)}
+      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
       {showPopulatedBody && workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection

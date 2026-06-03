@@ -20,11 +20,11 @@ import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAppHandlers } from "../../../hooks/useAppHandlers";
 import type { KRD } from "../../../types/krd";
+import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { healthDestinationFor } from "./health-destination";
 import { persistImportedWorkout } from "./persist-imported-workout";
 
-const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const TOAST_IMPORT_FAIL_TITLE = "Import failed";
 const TOAST_IMPORT_FAIL_DESC =
   "Could not save the imported workout — please retry.";
@@ -54,7 +54,7 @@ export function useImportOnLoad(date: string | null) {
       return;
     }
     handleFileLoad(krd);
-    if (!date || !ISO_DATE_REGEX.test(date)) return;
+    if (!date || !isValidCalendarDate(date)) return;
     const sport = getStructuredWorkout(krd)?.sport ?? "cycling";
     void persistence.profiles
       .getActiveId()

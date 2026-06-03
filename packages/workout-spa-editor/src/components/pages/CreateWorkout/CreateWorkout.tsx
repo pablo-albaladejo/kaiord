@@ -18,6 +18,7 @@ export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
   const create = useCreateWorkout();
   const { phase, sport, profile, activeProfileId, generatedKrd, promptText } =
     create;
+  const { dateParam } = create;
 
   const thresholds = thresholdsForSport(profile, sport);
   const model = generatedKrd
@@ -33,8 +34,9 @@ export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
       prompt: promptText,
       title,
       krd: generatedKrd,
+      date: dateParam,
     });
-  }, [activeProfileId, sport, promptText, title, generatedKrd]);
+  }, [activeProfileId, sport, promptText, title, generatedKrd, dateParam]);
 
   const { save, saving } = useSaveAndPush({ buildRecord, onDone: onClose });
 

@@ -21,9 +21,10 @@ export function deriveNewWorkoutMode(
  * `NewWorkoutRoute`).
  */
 export function renderNewWorkoutSurface(
-  mode: NewWorkoutMode | undefined
+  mode: NewWorkoutMode | undefined,
+  date: string | null
 ): ReactNode {
-  if (mode === "scratch") return <ScratchEditorSurface />;
+  if (mode === "scratch") return <ScratchEditorSurface date={date} />;
   if (mode === "import") return <ImportDropzoneOverlay />;
   return null;
 }

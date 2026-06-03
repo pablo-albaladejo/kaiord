@@ -2,6 +2,7 @@ import { computeRawHash } from "../../../lib/raw-hash";
 import type { WorkoutRaw } from "../../../types/calendar-fragments";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { KRD } from "../../../types/krd";
+import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
 
 export type BuildWorkoutRecordInput = {
   profileId: string;
@@ -9,6 +10,8 @@ export type BuildWorkoutRecordInput = {
   prompt: string;
   title: string;
   krd: KRD;
+  /** Schedule target; falls back to today when absent (non-dated entry). */
+  date?: string | null;
 };
 
 const todayDate = (): string => new Date().toISOString().slice(0, 10);
@@ -29,10 +32,13 @@ export async function buildWorkoutRecord(
   };
   raw.rawHash = await computeRawHash(raw);
 
+  const date =
+    input.date && isValidCalendarDate(input.date) ? input.date : todayDate();
+
   return {
     id: crypto.randomUUID(),
     profileId: input.profileId,
-    date: todayDate(),
+    date,
     sport: input.sport,
     source: "ai-generated",
     sourceId: null,

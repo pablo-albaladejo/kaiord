@@ -320,6 +320,18 @@ describe("EditorPage", () => {
     expect(location.history.at(-1)).toBe("/workout/new?date=2026-06-01");
   });
 
+  it("should render the schedule control on a dated scratch route", async () => {
+    // Arrange
+
+    // Act
+    renderEditor(undefined, "/workout/new?source=scratch&date=2026-06-01");
+
+    // Assert
+    expect(
+      await screen.findByTestId("scratch-schedule-button")
+    ).toBeInTheDocument();
+  });
+
   it("should NOT render a back button when id is provided", async () => {
     // Arrange
     await db.table("workouts").add(makeRecord());
