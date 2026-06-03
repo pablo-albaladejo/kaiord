@@ -199,16 +199,17 @@ Defined in `components/templates/MainLayout/MainLayout.tsx`; wraps **every** rou
 
 ### `/workout/view/:id` — Workout detail (read-only)
 
-|              |                                                                                                                                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route        | `/workout/view/:id` (param `id`)                                                                                                                                                                  |
-| Renders      | `components/pages/WorkoutDetail/WorkoutDetail.tsx` (spinner / not-found / view)                                                                                                                   |
-| Header       | Global sticky header + in-sheet `WorkoutDetailHeader` (back chevron → `/calendar`, "Workout" h1 route-heading, **disabled inert** dots button)                                                    |
-| Bottom nav   | Visible (mobile)                                                                                                                                                                                  |
-| Responsive   | **No distinct layouts** — fixed `mx-auto max-w-md` sheet at all breakpoints. Grep across all WorkoutDetail files returned **zero** `sm:/md:/lg:/xl:/useMediaQuery/matchMedia/useIsMobile` matches |
-| Sub-views    | Structure · time-in-zone (when KRD/ReviewModel present) / minimal detail (no KRD); loading / not-found                                                                                            |
-| Dialogs      | None                                                                                                                                                                                              |
-| Outgoing nav | `/workout/:id` (footer Edit); `/calendar` (back chevron, Not-found "Back to calendar"); Garmin push (PushButton, in-place, no route/dialog)                                                       |
+|              |                                                                                                                                                                                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route        | `/workout/view/:id` (param `id`)                                                                                                                                                                                            |
+| Renders      | `components/pages/WorkoutDetail/WorkoutDetail.tsx` (spinner / not-found / view)                                                                                                                                             |
+| Header       | Global sticky header + in-sheet `WorkoutDetailHeader` (back chevron → `/calendar`, "Workout" h1 route-heading, **disabled inert** dots button)                                                                              |
+| Bottom nav   | Visible (mobile)                                                                                                                                                                                                            |
+| Responsive   | **No distinct layouts** — fixed `mx-auto max-w-md` sheet at all breakpoints. Grep across all WorkoutDetail files returned **zero** `sm:/md:/lg:/xl:/useMediaQuery/matchMedia/useIsMobile` matches                           |
+| Sub-views    | Structure · time-in-zone (when KRD/ReviewModel present) / minimal detail (no KRD); loading / not-found                                                                                                                      |
+| Dialogs      | None                                                                                                                                                                                                                        |
+| Outgoing nav | `/workout/:id` (footer Edit); `/calendar` (back chevron, Not-found "Back to calendar"); Garmin push (PushButton, in-place, no route/dialog)                                                                                 |
+| Inbound nav  | **Today-only** (#24): the sole inbound is the Today page `PlannedSessionCard` "Details" link. Calendar week cards have **no** "View" inbound — a real one needs a per-card context menu that does not exist (out of scope). |
 
 ### `/workout/:id` — Structured editor (edit mode)
 

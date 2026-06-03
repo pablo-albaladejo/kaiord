@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { PlannedSession } from "./PlannedSession";
 import { ReadinessCard } from "./ReadinessCard";
 import { TodayHeader } from "./TodayHeader";
+import { TrendsCard } from "./TrendsCard";
 import { useTodayData } from "./use-today-data";
 import { WeekStrip } from "./WeekStrip";
 
@@ -16,6 +17,7 @@ export default function Today() {
       <TodayHeader now={now} />
       <ReadinessCard readiness={readiness} />
       <WeekStrip days={days} workouts={weekWorkouts} profile={profile} />
+      <TrendsCard />
       <PlannedSession workout={todayWorkout} profile={profile} />
     </div>
   );
