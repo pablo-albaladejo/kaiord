@@ -56,11 +56,11 @@ describe("AthletePage", () => {
 
     // Assert
     await waitFor(() => {
-      expect(
-        screen.getByRole("heading", { name: "Athlete" })
-      ).toBeInTheDocument();
+      expect(screen.getByText("Ana Gomez")).toBeInTheDocument();
     });
-    expect(screen.getByText("Ana Gomez")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Athlete" })
+    ).toBeInTheDocument();
   });
 
   it("should render the empty state when no profile is active", async () => {
@@ -74,5 +74,22 @@ describe("AthletePage", () => {
     await waitFor(() => {
       expect(screen.getByText("No athlete profile yet")).toBeInTheDocument();
     });
+  });
+
+  it("should render the eager route heading even in the empty state", async () => {
+    // Arrange
+    await db.table("meta").put({ key: "activeProfileId", value: null });
+
+    // Act
+    const { container } = renderPage();
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText("No athlete profile yet")).toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("heading", { name: "Athlete" })
+    ).toBeInTheDocument();
+    expect(container.querySelector("[data-route-heading]")).not.toBeNull();
   });
 });

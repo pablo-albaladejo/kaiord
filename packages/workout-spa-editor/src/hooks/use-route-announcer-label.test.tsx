@@ -30,7 +30,9 @@ describe("useRouteAnnouncerLabel", () => {
     ["/calendar", "Calendar page"],
     ["/calendar/2026-W18", "Calendar page"],
     ["/library", "Library page"],
+    ["/athlete", "Athlete page"],
     ["/workout/new", "New workout"],
+    ["/workout/view/abc-123", "Workout page"],
     ["/workout/abc-123", "Edit workout"],
   ])("should return %s -> %s", (path, expected) => {
     // Arrange
