@@ -73,8 +73,8 @@ export default function LibraryPage() {
     showSuccess("Template loaded", template.name, { duration: 3000 });
     // SPA navigation (no full reload) so the freshly-loaded workout
     // survives the route transition. Hard reload would drop Zustand.
-    // `?source=scratch` bypasses NewWorkoutPicker and mounts the
-    // editor directly with the workout that's now in the store.
+    // `?source=scratch` mounts the editor directly with the
+    // workout that's now in the store.
     navigate("/workout/new?source=scratch");
   };
 

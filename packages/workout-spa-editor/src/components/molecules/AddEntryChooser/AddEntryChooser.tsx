@@ -1,9 +1,9 @@
 /**
  * AddEntryChooser — first step of the per-day add-entry flow.
  *
- * Radix `Dialog.Root` controlled by parent `useState` (mirrors
- * `TemplatePickerDialog`). Presents exactly two tiles, Workout and
- * Wellness; choosing one calls `onChoose` so the parent can navigate
+ * Radix `Dialog.Root` controlled by parent `useState`. Presents
+ * exactly two tiles, Workout and Wellness; choosing one calls
+ * `onChoose` so the parent can navigate
  * (workout) or open the wellness entry surface (wellness). The
  * accessible name includes the date so SR users hear the bound day.
  */

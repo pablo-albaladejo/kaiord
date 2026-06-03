@@ -3,7 +3,7 @@
  *
  * Renders RawWorkoutDialog and CoachingActivityDialog. The previous
  * EmptyDayDialog has been removed; the calendar empty-day "+" now
- * navigates to `/workout/new?date=Y-M-D` (NewWorkoutPicker).
+ * navigates to `/workout/new?date=Y-M-D`.
  */
 
 import type { WorkoutRecord } from "../../types/calendar-record";
