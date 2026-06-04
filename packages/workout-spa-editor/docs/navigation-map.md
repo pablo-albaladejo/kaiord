@@ -74,7 +74,7 @@ graph LR
   VIEW -->|"Back / Not found → Back to calendar"| TODAY
 
   %% Athlete
-  ATHLETE -->|"Create profile"| SPROFILE
+  ATHLETE -->|"Create profile (in-place ProfileManagerDialog)"| ATHLETE
   ATHLETE -->|"AvailableRow Connect"| SET
 
   %% Settings + Health
@@ -121,7 +121,7 @@ graph TD
 
 Defined in `components/templates/MainLayout/MainLayout.tsx`; wraps **every** route. Root is `flex min-h-screen flex-col`.
 
-- **LayoutHeader** (`LayoutHeader.tsx`) — **sticky top-0 z-50**, present on every route. Contains `HeaderLogo` (brand `<Link href="/calendar">`, left) + `StatusHeader` (right): primary nav buttons (Calendar → `/calendar/:weekId`, Library → `/library`, Trends → `/health`, New → `/workout/new`), `StatusIndicators` (Garmin / Train2Go pills, display-only), `ProfileEntryButton` (→ `/settings/profile`, redirects to `/athlete`), Settings (→ `/settings/ai`), a **Help** button (→ lazy `HelpDialog`), and `ThemeToggle`. Responsive: inner bar is `flex-col items-center gap-2` on mobile, `sm:flex-row sm:gap-4` on desktop; entry-button labels are `hidden sm:inline` (only "New workout" keeps its label on mobile); the nav↔indicator divider is `hidden sm:inline-block`.
+- **LayoutHeader** (`LayoutHeader.tsx`) — **sticky top-0 z-50**, present on every route. Contains `HeaderLogo` (brand `<Link href="/calendar">`, left) + `StatusHeader` (right): primary nav buttons (Calendar → `/calendar/:weekId`, Library → `/library`, Trends → `/health`, New → `/workout/new`), `StatusIndicators` (Garmin / Train2Go pills, display-only), `ProfileEntryButton` (→ `/athlete`), Settings (→ `/settings`), a **Help** button (→ lazy `HelpDialog`), and `ThemeToggle`. Responsive: inner bar is `flex-col items-center gap-2` on mobile, `sm:flex-row sm:gap-4` on desktop; entry-button labels are `hidden sm:inline` (only "New workout" keeps its label on mobile); the nav↔indicator divider is `hidden sm:inline-block`.
 - **BottomNav** (`components/molecules/BottomNav/BottomNav.tsx`) — **MOBILE ONLY** (`md:hidden`), fixed floating glass bar (`inset-x-[14px] bottom-[14px] z-30`, `max-w-md`, rounded). **4 tabs** from `BOTTOM_NAV_TABS`: Today → `/calendar`, Library → `/library`, Athlete → `/athlete`, Settings → `/settings`; plus a center notch **FAB** → `/workout/new` (`CREATE_WORKOUT_PATH`). `isTabActive` sets `aria-current` (Today active on `/` too; Settings active on any `/settings` prefix). **Desktop has NO bottom nav** — navigation is the header button row only.
 - **`<main>`** — `mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 py-6 pb-28 sm:px-6 lg:px-8 md:pb-6`. The `pb-28` clears the floating bottom nav on mobile; `md:pb-6` on desktop.
 - **StorageAvailabilityBanner** (`molecules/StorageAvailabilityBanner`) — `role="alert"` above `<main>`, renders only when storage-store status === `failed`.
@@ -169,7 +169,7 @@ Defined in `components/templates/MainLayout/MainLayout.tsx`; wraps **every** rou
 | Responsive   | **No distinct layouts** — single column (`space-y-5 px-4`); grep-confirmed zero responsive prefixes / no useMediaQuery / no grid-cols across AthletePage and AthleteConnections                 |
 | Sub-views    | loading / empty / body; sport Segmented (cycling\|running\|swimming, in-page useState); Garmin sync-flows expanded (single-open accordion)                                                      |
 | Dialogs      | ProfileEditDialog (tabs: Training Zones / Personal Data / Linked Accounts / Data Flows; nested DeleteConfirmDialog + **DataFlowsAddDialog**), ThresholdEditDialog, disconnect ConfirmationModal |
-| Outgoing nav | `/settings/profile` (AthleteEmptyState Create profile → redirects to `/athlete`); `/settings/extensions` (AvailableRow Connect)                                                                 |
+| Outgoing nav | AthleteEmptyState "Create profile" opens `ProfileManagerDialog` in place (no navigation); `/settings/extensions` (AvailableRow Connect)                                                         |
 
 ### `/library` — Library
 
@@ -322,5 +322,5 @@ Defined in `components/templates/MainLayout/MainLayout.tsx`; wraps **every** rou
 - **DataFlowsAddDialog added** (was the single gap flagged by the critic): confirmed as a real `role="dialog"` modal at `organisms/ProfileManager/components/DataFlowsAddDialog.tsx`, mounted by `DataFlowsGroup` inside the Profile Edit dialog's Data Flows tab. It is now catalogued in the Athlete screen row, the dialogs inventory, and the editor-dialog narrative — reachable only via Athlete → Edit profile → Data Flows.
 - **Orphan/unmounted surfaces flagged, not invented as routes:** `NewWorkoutPicker` / `NewWorkoutPickerTiles` / `PickerTile` (and the `TemplatePickerDialog` they alone mounted) were genuinely **not route-mounted** and have since been **removed**; the live equivalent is `CreateStartFrom` inside the CreateWorkout overlay. `StaleConflictDialog` has **no production mount** (only its own dir + AGENTS.md). `DeleteWorkoutDialog` is **legacy/unused** by the routed Library page (which uses the generic `ConfirmationModal`).
 - **Out-of-area dialogs** correctly attributed: `RawWorkoutDialog` mounts only via `CalendarDialogs.tsx` (calendar area), and `ZonesConflictDialog` only via the global `train2go-zones-sync-context.tsx` provider — neither belongs to the structured editor despite appearing in that area's file scope.
-- **Minor attribution nuance (not a missing edge):** `navigate("/settings/profile")` has two call sites — `ProfileEntryButton` (global header) and `AthleteEmptyState` (Athlete area). Both are captured, though the redirect screen's `edgesIn` list is not exhaustive of every upstream caller. Both ultimately land on `/athlete`.
+- **`/settings/profile` is now caller-less (overhaul):** the two former `navigate("/settings/profile")` call sites were removed — `ProfileEntryButton` now navigates to `/athlete` directly, and `AthleteEmptyState` opens `ProfileManagerDialog` in place. The `/settings/profile` → `/athlete` redirect route is kept only for backward-compatible external links.
 - **PushButton / Garmin push** is consistently an in-place async state machine (idle→pushing→done via `useGarminPush`) on Today, WorkoutDetail, and the coaching dialog — it opens no dialog and triggers no route change.

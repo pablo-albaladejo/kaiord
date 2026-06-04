@@ -119,7 +119,9 @@ describe("useImportOnLoad (§9.3 dispatch)", () => {
       "2100-01-01"
     );
     expect(stored).toHaveLength(0);
-    expect(history.some((p) => /^\/workout\/[0-9a-f-]+$/.test(p))).toBe(false);
+    // No navigation of any kind should occur — the location stays put.
+    expect(history).toHaveLength(1);
+    expect(history.at(-1)).toBe("/workout/new");
   });
 
   it("should append the threaded origin to the success navigate", async () => {

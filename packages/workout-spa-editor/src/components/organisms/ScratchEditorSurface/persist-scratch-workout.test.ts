@@ -47,6 +47,18 @@ describe("persistScratchWorkout", () => {
     expect(record.state).toBe("structured");
   });
 
+  it("should reject an impossible calendar date at the persist boundary", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const badInput = { ...input, date: "2026-13-45" };
+
+    // Act
+    const run = persistScratchWorkout(persistence, badInput);
+
+    // Assert
+    await expect(run).rejects.toThrow(/invalid calendar date/i);
+  });
+
   it("should return a record with a crypto uuid id", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();

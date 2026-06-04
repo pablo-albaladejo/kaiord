@@ -30,7 +30,14 @@ export function useFocusOnSectionChange(): void {
   const lastRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (section === null || section === lastRef.current) return;
+    if (section === null) {
+      // Clear the dedupe ref so re-selecting the same section after a
+      // section-less transition (e.g. /settings/ai?section=x -> /settings
+      // -> /settings/ai?section=x) focuses again.
+      lastRef.current = null;
+      return;
+    }
+    if (section === lastRef.current) return;
     lastRef.current = section;
 
     const raf = requestAnimationFrame(() => {
