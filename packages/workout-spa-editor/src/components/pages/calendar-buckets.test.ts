@@ -200,6 +200,28 @@ describe("buildCalendarBuckets", () => {
     expect(buckets.soloActualsByDay[DAY]).toEqual([orphanExecuted]);
   });
 
+  it("should tolerate a match whose executedWorkoutIds is absent (raw/pre-v12 row)", () => {
+    // Arrange
+    // Dexie returns un-parsed rows; a pre-v12 (or raw-seeded) match can lack
+    // executedWorkoutIds, which must not crash the bucketer.
+    const ms = matched({
+      match: match({ executedWorkoutIds: undefined as unknown as string[] }),
+    });
+    const args = {
+      days: DAYS,
+      coachingByDay: { [DAY]: [activity()] },
+      workoutsByDay: { [DAY]: [workout()] },
+      matched: [ms],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    expect(buckets.matchedByDay[DAY]).toHaveLength(1);
+    expect(buckets.soloActualsByDay[DAY]).toEqual([]);
+  });
+
   it("should produce empty buckets for days with no items in either lane", () => {
     // Arrange
     const args = {
