@@ -13,6 +13,7 @@
 import type { PersistencePort } from "../../../ports/persistence-port";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { KRD } from "../../../types/krd";
+import { krdSchema } from "../../../types/schemas";
 import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
 
 export type PersistScratchInput = {
@@ -30,6 +31,11 @@ export async function persistScratchWorkout(
   // that bypasses UI validation must not be able to schedule an impossible date.
   if (!isValidCalendarDate(input.date)) {
     throw new Error("Cannot persist scratch workout: invalid calendar date");
+  }
+  // Guard the structured-state invariant: a record persisted with
+  // state "structured" must carry a schema-valid KRD payload.
+  if (!krdSchema.safeParse(input.krd).success) {
+    throw new Error("Cannot persist scratch workout: KRD failed validation");
   }
   const now = new Date().toISOString();
   const record: WorkoutRecord = {

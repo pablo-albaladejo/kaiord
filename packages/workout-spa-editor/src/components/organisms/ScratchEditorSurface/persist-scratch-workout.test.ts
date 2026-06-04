@@ -59,6 +59,18 @@ describe("persistScratchWorkout", () => {
     await expect(run).rejects.toThrow(/invalid calendar date/i);
   });
 
+  it("should reject a schema-invalid KRD at the persist boundary", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const badInput = { ...input, krd: { version: "1.0" } as KRD };
+
+    // Act
+    const run = persistScratchWorkout(persistence, badInput);
+
+    // Assert
+    await expect(run).rejects.toThrow(/KRD failed validation/i);
+  });
+
   it("should return a record with a crypto uuid id", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();

@@ -4,9 +4,9 @@ Concrete, buildable designs for the **3 needs-design** items from the [implement
 
 ---
 
-### Back-navigation origin contract (#4 / #19 / #28)
+## Back-navigation origin contract (#4 / #19 / #28)
 
-## Problem
+### Problem (back-nav)
 
 There is **no navigation-origin source anywhere in the SPA** (`grep "from=" src/` = 0 matches; no `history.back()` / `useHistoryState()` in app code). Every back/close target is hardcoded and detached from where the user actually came from:
 
@@ -16,7 +16,7 @@ There is **no navigation-origin source anywhere in the SPA** (`grep "from=" src/
 
 The audit confirms `history.back()` and wouter `useHistoryState()` are **untestable** under the `memoryLocation({record:true})` harness, which records only the path string list (`location.history`), not `window.history.state`. We need an explicit, URL-carried, pure-resolvable origin contract.
 
-## Approach
+### Approach (back-nav)
 
 Build an explicit **`?from=<origin>` query contract**: every navigation _into_ the editor (`/workout/:id`, `/workout/new?…`) and detail (`/workout/view/:id`) appends a `from=<origin>` param naming the surface it departed from. A new **pure resolver** `routing/resolve-back-target.ts` maps `origin → href` with a safe default. `EditorPage` (already holds the parsed `URLSearchParams`) extracts the origin and passes it into `useBackHandler`; `WorkoutDetail` reads it via `useSearch()`.
 
@@ -32,7 +32,7 @@ Build an explicit **`?from=<origin>` query contract**: every navigation _into_ t
 1. **Edit-mode #19 needs a handler split.** `handleBack` today wraps the target in scratch-draft discard logic (`stepsLength > 0` → `openDiscardModal()`). An edit-mode origin-back has **no draft to discard** — it must be a plain `navigate(backTarget)`. The hook therefore computes the target from _either_ the legacy picker fallback (discard-aware) _or_ an origin (plain-navigate in edit mode), and returns the matching handler.
 2. **`CreateInputPhase` forwarding is dropped** — Library navigates _directly_ to `/workout/new?source=scratch`, which mounts `<EditorPage>` and **bypasses `CreateWorkout`/`CreateInputPhase` entirely** (`new-workout-route.tsx:15`). The bare `<CreateWorkout>` overlay's only inbound is the origin-less "New workout" CTA, so it stays origin-less; its `onBlank`/`onImport` need no `from=`.
 
-## Contract
+### Contract (back-nav)
 
 **Origin vocabulary** (closed set, lowercase kebab):
 
@@ -83,7 +83,7 @@ export function withOrigin(href: string, origin: BackOrigin): string;
 
 `URLSearchParams.toString()` appends `from` last, preserves existing param order, and is idempotent — verified against the existing query shapes.
 
-## New files
+### New files (back-nav)
 
 **`packages/workout-spa-editor/src/routing/back-origin.ts`** — vocabulary + parser (sketch above). ~14 lines.
 
@@ -142,7 +142,7 @@ export function withOrigin(href: string, origin: BackOrigin): string {
 
 **Tests (new):** `routing/resolve-back-target.test.ts`, `routing/back-origin.test.ts`, `routing/with-origin.test.ts` — all pure, AAA, "should " titles, mirroring `picker-href.test.ts`.
 
-## Edit points
+### Edit points (back-nav)
 
 | File                                                                   | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Line hint                 |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
@@ -154,7 +154,7 @@ export function withOrigin(href: string, origin: BackOrigin): string {
 
 `EditorPageHeader.tsx` and `WorkoutDetailView.tsx` need **no change** — they render the BackButton only when `onBack` is defined.
 
-## Call sites to thread
+### Call sites to thread (back-nav)
 
 Append `from=<origin>` (via `withOrigin`) at each navigation _into_ the editor/detail:
 
@@ -180,11 +180,11 @@ Each thread is `navigate(withOrigin(<href>, "<origin>"))`. For the `?date=` site
 
 **Left origin-less (correct):** `status-entry-defs.ts:41` (`to: "/workout/new"`, primary-nav CTA, line is 41 not 39 — `id:"new"` def) → defaults to `/calendar`; `CreateInputPhase.tsx:65-66` (`onBlank`/`onImport`) — the overlay is only reachable origin-less, so no forwarding (review correction). `wellness-import-action`, `EmptyWeekState`, and the `today`/`calendar` group all resolve to `/calendar` today; the explicit origin only matters if those targets later diverge.
 
-## Schema impact
+### Schema impact (back-nav)
 
 **None.** `from=` is ephemeral URL state, never persisted. No Dexie table/index/migration; no Zod schema change. `R-DexieImport` is untouched — the resolver is a pure function in `routing/`, persistence still flows through the existing repository/port, and nothing touches `window.history.state`.
 
-## Test plan
+### Test plan (back-nav)
 
 **New tests:**
 
@@ -207,20 +207,20 @@ Each thread is `navigate(withOrigin(<href>, "<origin>"))`. For the `?date=` site
 
 **No-change confirmations:** `routes.test.tsx` / `router-base.test.tsx` stay green — wouter matches path and ignores query, so `&from=…` on entry hrefs does not affect route matching.
 
-## Tradeoffs
+### Tradeoffs (back-nav)
 
 - **URL verbosity.** `?from=` is visible/shareable; a shared `/workout/new?source=scratch&from=library` renders Back to `/library` for a recipient who never saw Library — acceptable, the resolver guarantees a valid in-app surface (no exit/404).
 - **Manual threading vs. automatic history.** ~15 call-site edits beat `history.back()` because it is the _only_ deterministic, harness-testable option and never exits the SPA on a deep-link landing. `withOrigin` keeps each call site a one-token wrap.
 - **Closed vocabulary.** New surfaces must add a vocab value + resolver branch; `parseBackOrigin`'s null-fallback degrades a forgotten/typo'd origin gracefully to `/calendar` rather than crashing.
 
-## Micro-decision + recommended default
+### Micro-decision + recommended default (back-nav)
 
 **Should an in-picker editor with no `from=` keep falling back to `/workout/new`, or adopt the resolver's `/calendar` default?**
 **Recommended: keep `/workout/new` for the in-picker-no-origin case.** It preserves the `EditorPage.test.tsx:290-321` pins with zero behavior change for direct `/workout/new?source=scratch` entries, and `/workout/new` is itself a valid named surface. Implementation: `backTarget = origin ? resolveBackTarget({origin, date: dateParam}) : (isInPicker ? buildPickerHref(dateParam) : null)`, which cleanly separates origin-driven (plain navigate) from the legacy picker fallback (discard-aware), and keeps no-origin edit-mode at `null`.
 
 **Secondary:** `WorkoutDetailNotFound.tsx:20` hardcodes the visible label **"Back to calendar"**. With a non-`/calendar` origin the label can lie. **Recommended: leave as-is for now** (origin into the not-found state is rare — it requires a missing record id reached via an originated link). Note it; if later addressed, pass a derived label down from `WorkoutDetail`.
 
-## Risks
+### Risks (back-nav)
 
 - **Highest blast radius in the plan** (every editor/detail entry). Mitigation: land WP-1..WP-7 first so behavior tests surround this change; the resolver itself is pure and fully unit-covered.
 - **`WorkoutDetail.test.tsx` mock gap** — adding `useSearch` to `vi.mock("wouter")` is **mandatory**; the current mock (`:13-15`) lacks it, and calling an undefined mock export throws. Easiest regression to miss.
@@ -233,9 +233,9 @@ Each thread is `navigate(withOrigin(<href>, "<origin>"))`. For the `?date=` site
 
 ---
 
-### Scratch workout persist-on-date (#3 / D1)
+## Scratch workout persist-on-date (#3 / D1)
 
-## Problem
+### Problem (scratch persist)
 
 A blank "scratch" workout opened from a calendar day (`/workout/new?source=scratch&date=YYYY-MM-DD`) shows the `DateBanner` "Creating workout for <day>" (`packages/workout-spa-editor/src/components/pages/DateBanner.tsx:25-27`) but **never persists to Dexie**. Its only save path is `WorkoutActions` → `SaveButton` → `createSaveHandler` (`packages/workout-spa-editor/src/components/molecules/SaveButton/save-handler.ts:17-58`), which calls `exportWorkout` + `downloadWorkout` — a **file export**, never `persistence.workouts.put`. The scratch session is never scheduled onto the chosen date; the banner promises a calendar entry the code never creates.
 
@@ -247,7 +247,7 @@ Three hard constraints from the real code:
 2. **`WorkoutActions`/`SaveButton`/`WorkoutSection` is shared** with the id-loaded editor: `EditorPage.tsx:80-91` mounts the same `WorkoutSection` in its populated body, and `ScratchEditorSurface.tsx:90-98` mounts it too. A "Save & schedule" action MUST be scratch-local — adding it to `WorkoutActions`/`SaveButton`/`WorkoutSection` would leak it into the id-loaded editor, where a record already exists, producing a duplicate schedule action and a second `put`.
 3. **D6 mandates rejection, not fallback.** `navigation-fix-plan.md:123,251` (D6) require the persist boundary to _reject_ calendar-impossible dates "with a clear error" via a round-trip parse, and `:125` requires "a round-trip-rejection test for an impossible date." The boundary must refuse the save, not silently re-schedule onto today.
 
-## Approach
+### Approach (scratch persist)
 
 **What gets built + why:**
 
@@ -269,7 +269,7 @@ Three hard constraints from the real code:
 
 **Metadata-commit timing (accepted, not gated):** `ScratchEditorSurface` opens in `MetadataEditMode` (`startInEditMode`, `:97`). A user could click "Save & schedule" while the metadata form is open, persisting the default name/sport. This is **accepted**: name/sport are fully editable post-save on the id route, the record is valid, and gating the button on metadata commit would add cross-component coupling for no data-integrity gain. `schedule()` reads sport the same way the surface already does (`currentWorkout.extensions.structured_workout.sport`, `:72-75`) rather than re-deriving through the looser `getStructuredWorkout` guard.
 
-## Contract
+### Contract (scratch persist)
 
 ```ts
 // persist-scratch-workout.ts
@@ -311,7 +311,7 @@ Query-param vocabulary (consumed, not introduced):
   tags: [], previousState: null, createdAt: now, modifiedAt: null, updatedAt: now }
 ```
 
-## New files
+### New files (scratch persist)
 
 **`src/components/organisms/ScratchEditorSurface/persist-scratch-workout.ts`** (~40 lines, sibling to the surface, parallel to `ImportDropzoneOverlay/persist-imported-workout.ts`):
 
@@ -404,18 +404,18 @@ export function isValidCalendarDate(value: string): boolean {
 
 Test files (new): `persist-scratch-workout.test.ts`, `is-valid-calendar-date.test.ts`, and extensions to `ScratchEditorSurface.test.tsx` (the hook is exercised through the surface rather than via a separate `renderHook` file, mirroring how the surface tests already drive store + persistence).
 
-## Edit points
+### Edit points (scratch persist)
 
 - **`ScratchEditorSurface.tsx:42`** — change signature to `export function ScratchEditorSurface({ date }: { date: string | null })`. Inside the returned tree (after `<AiBanner />`, `:87`), add `{date && <ScratchScheduleButton date={date} />}` (one line). Mount effects (`:57-83`) untouched → the `:159` side-effect-free pin holds. Net change ≈ 2 lines; organism stays under the 80-line effective cap (file currently passes `npx eslint`).
 - **`render-new-workout-surface.tsx:23-28`** — `renderNewWorkoutSurface(mode, date)` gains `date: string | null`; pass `<ScratchEditorSurface date={date} />`. The `import` branch (`:27`) is unchanged. Update the `NewWorkoutMode` export's lone JSDoc note if the 100-line cap is touched (it is a `pages/**` file → 150 cap, ample room).
 - **`EditorPage.tsx:79`** — `{showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}` (`dateParam` already in scope at `:37`).
 - **`use-import-on-load.ts:57`** — replace `if (!date || !ISO_DATE_REGEX.test(date)) return;` with `if (!date || !isValidCalendarDate(date)) return;`; delete the local `ISO_DATE_REGEX` const (`:27`) and import `isValidCalendarDate` from `../../../utils/is-valid-calendar-date`. This adopts the D6 round-trip gate at the import persist boundary too.
 
-## Call sites to thread
+### Call sites to thread (scratch persist)
 
 `?date=` is already produced by the dated scratch entry points and consumed in `EditorPage`. The only new threading is **`EditorPage → renderNewWorkoutSurface → ScratchEditorSurface`** (3 hops, above). Producers needing no change: the dated `NewWorkoutPicker`/calendar-day "+" that append `&date=`. Non-dated producers (`LibraryPage`, `CreateInputPhase`) pass no date → `dateParam` is `null` → `ScratchScheduleButton` does not render → non-dated scratch behavior is unchanged (only the existing file-export `SaveButton`). **Not threaded here (out of scope, = WP-5 #1):** the AI-create path (`use-save-and-push`/`build-workout-record`) — it needs its own `useSearch`-based `?date=` thread.
 
-## Schema impact
+### Schema impact (scratch persist)
 
 **No Zod change, no Dexie schema change, no migration.**
 
@@ -425,7 +425,7 @@ Test files (new): `persist-scratch-workout.test.ts`, `is-valid-calendar-date.tes
 
 `persistScratchWorkout` always writes a concrete `date`. The schema-drift pin is untouched (we add nothing to the schema).
 
-## Test plan
+### Test plan (scratch persist)
 
 **New tests:**
 
@@ -450,7 +450,7 @@ Test files (new): `persist-scratch-workout.test.ts`, `is-valid-calendar-date.tes
 
 No test deletions.
 
-## Tradeoffs
+### Tradeoffs (scratch persist)
 
 - **Scratch-local control vs. extending `WorkoutActions`/`SaveButton`.** Extending the shared save path reaches the id-loaded editor (already-persisted records), producing a duplicate schedule action and a second `put`. A control in `ScratchEditorSurface` is the only place unique to scratch — chosen. Cost: a small extra component + hook instead of one shared button.
 - **Persist on explicit click vs. auto-persist on first edit.** Auto-persist breaks the `:159` mount pin and surprises users who open scratch and bail. Explicit click matches import semantics (persist on an explicit drop) and preserves the pin. Chosen.
@@ -458,11 +458,11 @@ No test deletions.
 - **Separate `persist-scratch-workout.ts` vs. parametrizing `persist-imported-workout.ts`.** They differ only in `source` — a shared helper would need a `source` param leaking authoring-method into a generic name. Kept separate to mirror the 1-file-per-flow convention and keep each ≤40 lines with a self-describing name. Low duplication, high clarity.
 - **AI-create deferred to #1 vs. folded in here.** Folding would conflate a build-ready fix (#1) with this needs-design blocker (#3) and bloat the WP. Deferring keeps each finding's blast radius and tests independent; D1 consistency is satisfied across #1/#3/#37 collectively.
 
-## Micro-decision + recommended default
+### Micro-decision + recommended default (scratch persist)
 
 **Where does `isValidCalendarDate` live — `src/utils/` or `application/shared/date-utils.ts`?** **Recommended: `src/utils/`.** `date-utils.ts` is application-layer (the `application` ring must not be imported by UI freely), whereas this helper is consumed at UI/organism boundaries (the scratch surface and `use-import-on-load`, both already importing from `src/utils`, e.g. `structured-workout.ts`). Placing it in `src/utils` matches the import locality of its two call sites and keeps the `application` ring clean. (The prior draft's Micro-decision about a today-fallback is **withdrawn** — D6 rejection removes the fallback, so there is no today-source decision to make.)
 
-## Risks
+### Risks (scratch persist)
 
 - **Surface prop churn.** Adding `date` to `ScratchEditorSurface` touches `render-new-workout-surface` and `EditorPage`, both exercised by `EditorPage.test.tsx`. Mitigation: the prop is additive, the `import` branch signature is unchanged, and `renderSurface()` defaults `date={null}` so existing surface pins are unperturbed; re-run both suites.
 - **Test harness prop vs. URL confusion.** `ScratchEditorSurface.test.tsx:45-63` renders the surface directly inside a `memoryLocation` `Router`; the new `date` arrives as a **prop**, so the tests must pass `date="…"` explicitly (the URL `?date=` does not populate the prop). Only the `EditorPage.test.tsx` addition exercises the true URL→prop threading. Mitigation: parameterize `renderSurface(date?)` and keep `useLocation` available for the nav assertion.
@@ -470,15 +470,15 @@ No test deletions.
 - **R-PIIInterpolation on toast args.** The mechanical guard requires `toast.error` first-args under `components/hooks/lib` to be static. Mitigation: all toast titles/descriptions in `use-persist-scratch.ts` are top-level SCREAMING_SNAKE_CASE string constants referencing literals — no interpolation.
 - **Scheduling never overwrites a same-date workout.** `persistScratchWorkout` uses a fresh `crypto.randomUUID()`; `put` keys on `id`, and `[profileId+date]` is non-unique — it adds a second workout on the day, identical to `persistImportedWorkout`. Correct, not a risk.
 
-## Estimated size
+### Estimated size (scratch persist)
 
 **~4 files edited** (`ScratchEditorSurface.tsx`, `render-new-workout-surface.tsx`, `EditorPage.tsx`, `use-import-on-load.ts`) · **~3 new source files** (`persist-scratch-workout.ts`, `is-valid-calendar-date.ts`, `use-persist-scratch.ts`) + `ScratchScheduleButton.tsx` = **4 new files** · **3 new test files** (`persist-scratch-workout.test.ts`, `is-valid-calendar-date.test.ts`) plus extensions to `ScratchEditorSurface.test.tsx`, `EditorPage.test.tsx`, and `use-import-on-load.test.tsx` (NET-NEW import-rejection case) · **0 pinned tests rewritten** (all existing pins, incl. the `:159` mount-side-effect invariant, are retained unmodified; only additive cases and a default `date={null}` arg in `renderSurface`).
 
 ---
 
-### Settings section anchors + focus, and the Export-everything row (#26 / #34 / D4)
+## Settings section anchors + focus, and the Export-everything row (#26 / #34 / D4)
 
-## Problem
+### Problem (settings anchors)
 
 Two defects in the Settings index → detail flow, both instances of consistency rule D4 ("destination granularity matches label granularity"):
 
@@ -486,7 +486,7 @@ Two defects in the Settings index → detail flow, both instances of consistency
 
 2. **"Export everything" is a dead promise (#26).** `settings-groups.ts:43` ships `{ icon: "upload", label: "Export everything", to: "/settings/privacy" }`, but `PrivacyTab.tsx` renders only three blocks: **Privacy Information** (`PrivacyInformationSection`, line 31), **Analytics** (line 33), and **Data Management** (line 52, a single "Clear All API Keys" danger button, line 56). There is **no export block anywhere**. The row names a capability the app does not have, and it duplicates the sibling "Data & privacy" row (line 42) that already points at `/settings/privacy`.
 
-## Approach
+### Approach (settings anchors)
 
 **What gets built:**
 
@@ -504,15 +504,15 @@ Two defects in the Settings index → detail flow, both instances of consistency
 
 **No persistence touched.** `?section=` is pure URL/UI state. No Dexie, no Zod, no repository/port — R-DexieImport is not in play.
 
-## Contract
+### Contract (settings anchors)
 
-### Query-param vocabulary
+#### Query-param vocabulary
 
 - Param name: `section` (lowercase, kebab values).
 - Values are a **closed enum**: `"providers" | "custom-instructions" | "data-management"`.
 - Absent / unknown `section` → hook is a no-op (page renders tab top, exactly as today). Unknown values are silently ignored (no redirect, no warn) — a missing section element is a non-fatal content-vs-URL drift, not a routing error (unlike the unknown-`tab` `Redirect` at `SettingsPage.tsx:21`, which guards a real 404-class path error).
 
-### Section id ↔ row ↔ element mapping
+#### Section id ↔ row ↔ element mapping
 
 | Row label (settings-groups.ts) | `to` target                                 | `data-settings-section` | DOM node                                          |
 | ------------------------------ | ------------------------------------------- | ----------------------- | ------------------------------------------------- |
@@ -520,7 +520,7 @@ Two defects in the Settings index → detail flow, both instances of consistency
 | Custom instructions            | `/settings/ai?section=custom-instructions`  | `custom-instructions`   | `AiTab.tsx:34` `<section>` (Custom System Prompt) |
 | Manage your data               | `/settings/privacy?section=data-management` | `data-management`       | `PrivacyTab.tsx:52` `<section>` (Data Management) |
 
-### Types / signatures
+#### Types / signatures
 
 ```ts
 // settings-section.ts (new, dependency-free — mirrors routing/constants.ts)
@@ -538,9 +538,9 @@ export function useFocusOnSectionChange(): void;
 
 The hook reads its own `useSearch()`; it takes **no** props.
 
-## New files
+### New files (settings anchors)
 
-### `src/components/pages/SettingsPage/settings-section.ts` (~10 lines)
+#### `src/components/pages/SettingsPage/settings-section.ts` (~10 lines)
 
 The DOM-contract constant + selector + closed section-id union. Dependency-free so both the hook and the tab components import _down_ to it (resolves the backwards-dependency the draft introduced by exporting `SETTINGS_SECTION_ATTR` from the hook file).
 
@@ -553,7 +553,7 @@ export type SettingsSectionId =
   | "data-management";
 ```
 
-### `src/hooks/use-focus-on-section-change.ts` (~30 lines, under the 100 cap; function under 40)
+#### `src/hooks/use-focus-on-section-change.ts` (~30 lines, under the 100 cap; function under 40)
 
 Reads `?section=`, resolves the element by **iterating** `querySelectorAll(SETTINGS_SECTION_SELECTOR)` and comparing `getAttribute` values — **no `CSS.escape`** (it is `undefined` in jsdom 29.1.1 and not polyfilled in `test-setup.ts`; a `CSS.escape` selector would `ReferenceError` in every test that exercises the focus path). Closed kebab values need no escaping anyway. Focuses via `applyFocusToElement`. Keyed on the section value (`lastRef` dedupe) so it re-fires on query-only transitions; **re-selecting the same section does not re-fire** — identical semantics to `useFocusOnRouteChange`'s `lastPathRef` (`use-focus-on-route-change.ts:42,45`). Single `requestAnimationFrame` (no `MutationObserver`) since the target tab is statically imported and already committed.
 
@@ -588,11 +588,11 @@ export function useFocusOnSectionChange(): void {
 
 _(`applyFocusToElement`'s `telemetry` arg is optional — `apply-focus-to-element.ts:22` — so we omit it, consistent with not threading the focus-telemetry provider into Settings. In jsdom, `el.focus()` works but `el.scrollIntoView()` throws; `applyFocusToElement` catches the scroll throw silently when no telemetry is passed — `apply-focus-to-element.ts:40-42` — so focus still lands. `apply-focus-to-element.test.ts` already proves both behaviors in jsdom.)_
 
-### `src/hooks/use-focus-on-section-change.test.tsx` (new test — see Test plan)
+#### `src/hooks/use-focus-on-section-change.test.tsx` (new test — see Test plan)
 
 Mirrors the `use-focus-on-route-change.test.tsx` harness (`FAKE_RAF` + `memoryLocation` + `Router`, AAA bodies, "should " titles).
 
-## Edit points
+### Edit points (settings anchors)
 
 | File:line                                              | Change                                                                                                                                                                                                                                                                                          |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -608,17 +608,17 @@ Mirrors the `use-focus-on-route-change.test.tsx` harness (`FAKE_RAF` + `memoryLo
 
 **Routing note:** `SettingsRow.tsx:54` calls `onNavigate(to)` → wouter `navigate(to)` (`SettingsPage.tsx:49`). wouter's `navigate` accepts a full `path?query` string, so `"/settings/ai?section=providers"` routes correctly and `useSearch()` inside `SettingsPage` exposes `section=providers`. **No change to `SettingsRow.tsx` or the `<Route path="/settings/:tab?">` pattern** — wouter matches on pathname and ignores the query.
 
-## Call sites to thread
+### Call sites to thread (settings anchors)
 
 Not applicable. The only producers of these section links are the three `settings-groups.ts` rows (edited above). No `?from=`-style origin threading is involved (that is the separate WP-11 mechanism — `resolve-back-target.ts`, origin vocab `library|calendar|...`). The two query contracts can coexist on one URL (`/settings/ai?section=providers&from=...`) without collision, since each reader pulls its own key; `?section=` is consumed once by `useFocusOnSectionChange` and is otherwise inert.
 
-## Schema impact
+### Schema impact (settings anchors)
 
 **None.** No Dexie table, index, or migration; no Zod schema. `?section=` is ephemeral URL state — the correct tier per the repo rule "Local UI → React state / URL" (CLAUDE.md State Management). R-DexieImport guard is not triggered (the hook imports only `wouter`, the focus helper, and the dependency-free `settings-section.ts`). The closed `SettingsSectionId` union is the only "schema" and lives as a plain `type` (per "Use `type` not `interface`").
 
-## Test plan
+### Test plan (settings anchors)
 
-### New tests
+#### New tests
 
 1. **`src/hooks/use-focus-on-section-change.test.tsx`** (new) — mirror the `use-focus-on-route-change.test.tsx` harness (`FAKE_RAF` that calls `cb(0)` synchronously; `memoryLocation`; `Router`; AAA markers; "should " titles). A `Harness` mounts `useFocusOnSectionChange()` plus two stub `<section data-settings-section="...">` with `tabIndex={-1}`. Cases:
    - `should focus the element matching the section query on change` — navigate to `?section=custom-instructions`; assert `document.activeElement.getAttribute("data-settings-section") === "custom-instructions"`.
@@ -632,7 +632,7 @@ Not applicable. The only producers of these section links are the three `setting
    - `should still render the ai tab top with no section query` — `renderAtPath("/settings/ai")` still shows "LLM Providers" and focuses no in-tab section (guards the no-op path).
    - `should point the manage-your-data row at the privacy data-management section` — from `/settings`, click `settings-row-Manage your data`; `await waitFor` that `memory.history.at(-1)` equals the **exact** string `"/settings/privacy?section=data-management"` (query included, since `record:true` captures the full path).
 
-### Existing tests that pin OLD behavior
+#### Existing tests that pin OLD behavior
 
 - **`SettingsPage.test.tsx` — none must be rewritten.** The "landing list" / "detail views" cases (lines 66-191) assert text/panel presence, not `to` values or query strings. The one row-navigation pin, `"should navigate to a tab when clicking a navigating row"` (line 97), clicks the **Extensions** row (`to` unchanged) and asserts `memory.history.at(-1) === "/settings/extensions"` — unaffected.
 - The eyebrow pin `"should render every group eyebrow"` (lines 79-95) asserts only four eyebrows (`AI generation`, `Preferences`, `Privacy & data`, `Advanced`) and **already omits** `Cross-device sync` (the `SyncTab` group at `settings-groups.ts:29`). The Export relabel does not touch any eyebrow, so this pin keeps passing — **no rewrite**. (Flagged so future section work on the Sync row knows this pin would need updating.)
@@ -640,7 +640,7 @@ Not applicable. The only producers of these section links are the three `setting
 
 **AAA / title compliance:** every new `it()` title starts with `"should "` (`R-ItTitleShould`) and every body carries the literal `// Arrange` / `// Act` / `// Assert` markers in order (`R-ItBodyAAA`, enforced by `scripts/check-test-aaa.mjs`).
 
-## Tradeoffs
+### Tradeoffs (settings anchors)
 
 - **New attribute vs reusing `data-route-heading`:** reusing it would put two `[data-route-heading]` nodes in one page, breaking the "first heading wins" `querySelector` assumption (`use-focus-on-route-change.ts:56`). A distinct keyed-by-value `data-settings-section` keeps the two focus owners orthogonal. Cost: one attribute constant.
 - **Constant in a dependency-free module vs in the hook file:** the constant + union live in `settings-section.ts` (not the hook) so a presentational tab never imports from a focus hook — mirroring `routing/constants.ts`. Cost: one tiny extra file.
@@ -648,7 +648,7 @@ Not applicable. The only producers of these section links are the three `setting
 - **rAF-only vs `MutationObserver`:** the section hook skips the observer because tab views are statically imported and committed before `?section=` is read. Acceptable now; if a future Settings tab becomes lazy-loaded _and_ section-addressable, the hook would need the observer pattern — noted as a trip-wire.
 - **Silent ignore of unknown section vs redirect:** unlike the unknown-`tab` `Redirect` (`SettingsPage.tsx:21`), a bad `?section=` lands at tab top (cosmetic), so matching the heavier path-level treatment would be over-engineering. Cost: a typo'd section link degrades silently.
 
-## Micro-decision + recommended default
+### Micro-decision + recommended default (settings anchors)
 
 **"Export everything" row (`settings-groups.ts:43`). ✅ ACCEPTED (product, 2026-06-03): RELABEL + RE-POINT to the existing Data Management block — do not remove the row, do not build export.**
 
@@ -663,7 +663,7 @@ and add `tabIndex={-1}` + `data-settings-section="data-management"` to the inlin
 
 **Why relabel over remove:** the row currently 404s its own promise (no export feature exists) and duplicates the sibling "Data & privacy" row (`settings-groups.ts:42`, same `to`). Re-pointing it to the real Data Management block (the only data-control surface that exists — "Clear All API Keys", `PrivacyTab.tsx:56`) keeps an affordance that does something true and discoverable, satisfies D4, and adds **zero** new feature surface. The `upload` icon (which implies export) is swapped for `shield` (the privacy/data icon already used by the sibling row at line 42). Removing the row is the fallback if product wants a leaner index, but it loses a real affordance. _(If product insists on keeping the word "Export", second-best is to drop this duplicate row entirely — but that loses a slot and is more disruptive.)_
 
-## Risks
+### Risks (settings anchors)
 
 - **wouter query round-trip:** relies on `navigate("/path?query")` preserving the query into `useSearch()`. Established read idiom in this codebase. Low risk.
 - **Function-line cap on `AiTab`:** the component is 49/60 lines; adding markers to two `<section>`s lands ~53 after format but is tight. Mitigation: drop the `id` (done) and, if it still crosses 60, extract a wrapper. Must re-check `AiTab` function length after `pnpm format` during apply.
@@ -672,6 +672,6 @@ and add `tabIndex={-1}` + `data-settings-section="data-management"` to the inlin
 - **jsdom `scrollIntoView`:** unimplemented in jsdom; `applyFocusToElement` catches the throw silently (no telemetry passed), so focus still lands — proven by `apply-focus-to-element.test.ts`. Tests assert `document.activeElement`, not scroll position. Low risk.
 - **Coverage:** the new hook + additive page tests keep the 70% frontend threshold satisfied (new code fully exercised; no source deleted).
 
-## Estimated size
+### Estimated size (settings anchors)
 
 ~5 files edited (`SettingsPage.tsx`, `settings-groups.ts`, `AiTab.tsx`, `PrivacyTab.tsx`, `SettingsPage.test.tsx`) / 3 new files (`settings-section.ts`, `use-focus-on-section-change.ts`, `use-focus-on-section-change.test.tsx`) / **0 pinned tests to rewrite** (all test changes additive).
