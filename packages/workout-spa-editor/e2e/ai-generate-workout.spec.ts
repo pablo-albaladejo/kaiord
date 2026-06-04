@@ -98,7 +98,9 @@ async function addTestProvider(
   type = "anthropic"
 ): Promise<void> {
   await openHeaderAction(page, /open settings/i);
-  await page.waitForURL(/\/settings\/ai$/);
+  await page.waitForURL(/\/settings$/);
+  await page.getByTestId("settings-row-Provider").click();
+  await page.waitForURL(/\/settings\/ai/);
 
   const settingsPage = page.getByTestId("settings-page");
   await expect(settingsPage).toBeVisible({ timeout: 5000 });

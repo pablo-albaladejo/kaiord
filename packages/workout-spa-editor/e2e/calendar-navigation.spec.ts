@@ -34,16 +34,15 @@ test.describe("Calendar Navigation", () => {
     expect(page.url()).toContain("/calendar");
   });
 
-  test('Header "Calendar" button navigates to the week calendar', async ({
+  test('Header "Today" button navigates to the Today page', async ({
     page,
   }) => {
     await page.goto("/workout/new?source=scratch");
-    await page.getByRole("button", { name: "Go to calendar" }).click();
-    // The Calendar entry targets the current week (/calendar/:weekId) so
-    // the week calendar is reachable from the header (bare /calendar is
-    // now the Today page).
-    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
-    await expect(page.getByTestId("week-navigation")).toBeVisible();
+    await page.getByTestId("status-header-calendar-button").click();
+    // The primary header calendar entry now targets bare /calendar (the
+    // Today page); the week grid is reached via the Today week strip.
+    await page.waitForURL(/\/calendar$/);
+    await expect(page.getByTestId("today-page")).toBeVisible();
   });
 
   test("Kaiord logo navigates to /calendar (SPA, no reload)", async ({
@@ -86,16 +85,21 @@ test.describe("Calendar Navigation", () => {
     await expect(page.getByText(/· W16/)).toBeVisible();
   });
 
-  test('Click "Today" navigates to the Today page', async ({ page }) => {
+  test('Week-nav "Today" button returns to the current week grid', async ({
+    page,
+  }) => {
     await page.goto("/calendar/2026-W01");
     await expect(page.getByText(/· W01/)).toBeVisible();
 
-    await page.getByRole("button", { name: "Today" }).click();
+    await page
+      .getByTestId("week-navigation")
+      .getByRole("button", { name: "Today" })
+      .click();
 
-    // The week-nav "Today" button returns to bare /calendar, which
-    // renders the Today page post-redesign.
-    await page.waitForURL(/\/calendar$/);
-    await expect(page.getByTestId("today-page")).toBeVisible();
+    // goToday now navigates to the current week's grid (staying inside
+    // the calendar surface), not back to the Today summary.
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
   test("Invalid week ID redirects to /calendar", async ({ page }) => {

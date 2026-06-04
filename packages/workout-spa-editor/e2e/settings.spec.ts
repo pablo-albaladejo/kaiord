@@ -18,9 +18,11 @@ test.describe("Settings Panel", () => {
   });
 
   test("8.7: add provider, remove provider, set default", async ({ page }) => {
-    // Open settings (navigates to /settings/ai)
+    // Open the grouped settings index, then enter the AI Provider section.
     await openHeaderAction(page, /open settings/i);
-    await page.waitForURL(/\/settings\/ai$/);
+    await page.waitForURL(/\/settings$/);
+    await page.getByTestId("settings-row-Provider").click();
+    await page.waitForURL(/\/settings\/ai/);
     const settingsPage = page.getByTestId("settings-page");
     await expect(settingsPage).toBeVisible({ timeout: 5000 });
 
@@ -80,8 +82,6 @@ test.describe("Settings Panel", () => {
     // Post-redesign, Settings is a grouped list; the Extensions view is
     // its own route. Navigate to it via the grouped-list row.
     await openHeaderAction(page, /open settings/i);
-    await page.waitForURL(/\/settings\/ai$/);
-    await page.getByTestId("settings-back").click();
     await page.waitForURL(/\/settings$/);
     await page.getByTestId("settings-row-Extensions").click();
     await page.waitForURL(/\/settings\/extensions$/);

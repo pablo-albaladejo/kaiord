@@ -113,7 +113,7 @@ test.describe("Workout Library", () => {
       // to /workout/new?source=scratch — `source=scratch` bypasses
       // the NewWorkoutPicker so the editor mounts directly with the
       // loaded steps.
-      await page.waitForURL(/\/workout\/new\?source=scratch$/);
+      await page.waitForURL(/\/workout\/new\?source=scratch/);
       await expect(page.getByTestId("step-card").first()).toBeVisible();
     });
 
