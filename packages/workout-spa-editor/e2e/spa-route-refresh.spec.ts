@@ -66,11 +66,13 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
     page,
   }) => {
     await page.goto(`${server.url}/editor/calendar`, { waitUntil: "load" });
-    await page.waitForFunction(
-      () => window.location.pathname === "/editor/calendar"
+    // Bare /calendar is a replace-redirect to the current week since the
+    // /today split, so the restored deep link settles on /editor/calendar/:weekId.
+    await page.waitForFunction(() =>
+      /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname)
     );
 
-    expect(page.url()).toMatch(/\/editor\/calendar$/);
+    expect(page.url()).toMatch(/\/editor\/calendar\/\d{4}-W\d{2}$/);
     const scriptCount = await page
       .locator('script[src^="/editor/assets/index-"]')
       .count();
@@ -80,26 +82,26 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
   test("Test 2 — in-app navigation prefixes URL", async ({ page }) => {
     await page.goto(`${server.url}/editor/`, { waitUntil: "load" });
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/calendar",
+      () => window.location.pathname === "/editor/today",
       null,
       {
         timeout: 15_000,
       }
     );
 
-    // Compare on pathname, not the full URL: a regex like /\/calendar$/ matches
-    // both `/calendar` and `/editor/calendar`, which is the opposite of the
+    // Compare on pathname, not the full URL: a regex like /\/today$/ matches
+    // both `/today` and `/editor/today`, which is the opposite of the
     // distinction this test exists to make.
     const pathname = new URL(page.url()).pathname;
-    expect(pathname).toBe("/editor/calendar");
+    expect(pathname).toBe("/editor/today");
   });
 
-  test("Test 3 — refresh inside SPA stays at /editor/calendar", async ({
+  test("Test 3 — refresh inside SPA stays at /editor/today", async ({
     page,
   }) => {
     await page.goto(`${server.url}/editor/`, { waitUntil: "load" });
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/calendar",
+      () => window.location.pathname === "/editor/today",
       null,
       {
         timeout: 15_000,
@@ -107,14 +109,14 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
     );
     await page.reload({ waitUntil: "load" });
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/calendar",
+      () => window.location.pathname === "/editor/today",
       null,
       {
         timeout: 15_000,
       }
     );
 
-    expect(page.url()).toMatch(/\/editor\/calendar$/);
+    expect(page.url()).toMatch(/\/editor\/today$/);
   });
 
   test("Test 4 — analytics path remains base-relative", async ({ page }) => {
@@ -148,8 +150,8 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
     });
 
     await page.goto(`${server.url}/editor/calendar`, { waitUntil: "load" });
-    await page.waitForFunction(
-      () => window.location.pathname === "/editor/calendar"
+    await page.waitForFunction(() =>
+      /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname)
     );
     // Poll for the pageView event captured via the exposed function — wouter's
     // useEffect-driven emission lands a tick after the route resolves.
@@ -157,7 +159,9 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       .poll(() => captured.length, { timeout: 5000 })
       .toBeGreaterThanOrEqual(1);
 
-    expect(captured[0]).toBe("/calendar");
+    // Base-relative (no /editor prefix); the bare-/calendar replace-redirect
+    // means the first emitted path may already carry the concrete weekId.
+    expect(captured[0]).toMatch(/^\/calendar(\/\d{4}-W\d{2})?$/);
     expect(captured[0]).not.toBe("/editor/calendar");
   });
 
@@ -169,13 +173,13 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       }
     );
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/calendar",
+      () => window.location.pathname === "/editor/today",
       null,
       {
         timeout: 15_000,
       }
     );
 
-    expect(page.url()).toMatch(/\/editor\/calendar$/);
+    expect(page.url()).toMatch(/\/editor\/today$/);
   });
 });

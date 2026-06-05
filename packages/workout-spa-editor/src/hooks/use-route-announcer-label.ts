@@ -44,7 +44,7 @@ function labelForPathname(rawPathname: string): string {
   if (pathname === "/health/recovery") return "Recovery page";
   if (pathname === "/health/activity") return "Activity page";
   if (pathname.startsWith("/settings")) return "Settings page";
-  if (pathname === "/" || pathname.startsWith("/calendar"))
-    return "Calendar page";
-  return "Calendar page";
+  if (pathname === "/" || pathname === "/today") return "Today page";
+  if (pathname.startsWith("/calendar")) return "Calendar page";
+  return "Today page";
 }

@@ -3,8 +3,9 @@ import { useLocation } from "wouter";
 
 import { Button } from "../../atoms/Button/Button";
 import { ProfileEntryButton } from "./ProfileEntryButton";
+import { isEntryActive } from "./status-entry-active";
 import { EntryButton } from "./status-entry-button";
-import { ENTRY_DEFS, isEntryActive } from "./status-entry-defs";
+import { ENTRY_DEFS } from "./status-entry-defs";
 import { StatusIndicators } from "./StatusIndicators";
 
 type StatusEntryButtonsProps = {
@@ -14,7 +15,7 @@ type StatusEntryButtonsProps = {
 export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
   const [location, navigate] = useLocation();
   const primaryNav = ENTRY_DEFS.filter((e) =>
-    ["calendar", "library", "athlete", "trends", "new"].includes(e.id)
+    ["today", "calendar", "library", "athlete", "trends", "new"].includes(e.id)
   );
   const settingsEntry = ENTRY_DEFS.find((e) => e.id === "settings");
   return (

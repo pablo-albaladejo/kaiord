@@ -6,7 +6,8 @@ import { BottomNavFab } from "./BottomNavFab";
 import { BottomNavTab } from "./BottomNavTab";
 
 const CREATE_WORKOUT_PATH = "/workout/new";
-const NOTCH_INDEX = 2;
+// FAB notch sits between Library (index 2) and Athlete (index 3).
+const NOTCH_INDEX = 3;
 
 /**
  * Floating glass bottom navigation with 4 tabs and a raised center FAB.

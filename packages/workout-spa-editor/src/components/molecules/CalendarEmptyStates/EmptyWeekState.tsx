@@ -9,10 +9,12 @@ import { withOrigin } from "../../../routing/with-origin";
 import { Button } from "../../atoms/Button/Button";
 
 export type EmptyWeekStateProps = {
+  /** The rendered week's id, carried on `?week=` so Back returns here. */
+  weekId: string;
   onGoToLatest?: () => void;
 };
 
-export function EmptyWeekState({ onGoToLatest }: EmptyWeekStateProps) {
+export function EmptyWeekState({ weekId, onGoToLatest }: EmptyWeekStateProps) {
   const [, navigate] = useLocation();
 
   return (
@@ -26,7 +28,9 @@ export function EmptyWeekState({ onGoToLatest }: EmptyWeekStateProps) {
         <Button
           variant="primary"
           size="sm"
-          onClick={() => navigate(withOrigin("/workout/new", "calendar"))}
+          onClick={() =>
+            navigate(withOrigin("/workout/new", "calendar", { week: weekId }))
+          }
         >
           <Plus className="h-4 w-4" />
           Add workout

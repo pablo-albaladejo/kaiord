@@ -30,6 +30,7 @@ export function CalendarHeader({
   return (
     <>
       <CalendarEmptyBanners
+        weekId={s.data.weekId}
         hasAnyWorkouts={s.hasAnyWorkouts}
         hasWeekWorkouts={s.hasWeekWorkouts}
         hasReadyWorkouts={s.hasReadyWorkouts}

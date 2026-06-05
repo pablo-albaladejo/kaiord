@@ -70,11 +70,11 @@ describe("RouteErrorFallback", () => {
 
     expect(screen.getByRole("link", { name: "Go to Today" })).toHaveAttribute(
       "href",
-      "/calendar"
+      "/today"
     );
   });
 
-  it("should navigate to /calendar when Go to Today is clicked", async () => {
+  it("should navigate to /today when Go to Today is clicked", async () => {
     // Arrange
 
     const user = userEvent.setup();
@@ -88,6 +88,6 @@ describe("RouteErrorFallback", () => {
 
     // Assert
 
-    expect(location.history).toContain("/calendar");
+    expect(location.history).toContain("/today");
   });
 });

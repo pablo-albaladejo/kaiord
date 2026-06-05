@@ -3,7 +3,7 @@
  *
  * Covers the four URL-derived paths for the schedule action:
  * 1. `?source=template-picker&date=YYYY-MM-DD` → schedule directly,
- *    navigate to `/calendar`, no `ScheduleDateDialog`.
+ *    navigate to the scheduled week's grid, no `ScheduleDateDialog`.
  * 2. No query params → explicit `ScheduleDateDialog` flow.
  * 3. Malformed `?date=` → explicit dialog flow.
  * 4. `?date=` present but `?source=` is not `template-picker` →
@@ -120,7 +120,7 @@ describe("LibraryPage short-circuit scheduling", () => {
       expect(workouts[0].profileId).toBe(PROFILE_ID);
     });
     expect(screen.queryByText("Schedule Workout")).not.toBeInTheDocument();
-    expect(location.history.at(-1)).toBe("/calendar");
+    expect(location.history.at(-1)).toMatch(/^\/calendar\/\d{4}-W\d{2}$/);
   });
 
   it("should fall through to ScheduleDateDialog when ?date= is absent", async () => {

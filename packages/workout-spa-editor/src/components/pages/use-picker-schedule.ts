@@ -12,6 +12,7 @@ import { scheduleTemplate } from "../../application/library/schedule-template";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
+import { calendarWeekHref } from "../../routing/calendar-week-href";
 
 const TOAST_SCHEDULE_OK_TITLE = "Workout scheduled";
 const TOAST_SCHEDULE_OK_DESC = "Added to your calendar.";
@@ -38,7 +39,8 @@ export function usePickerSchedule(date: string | null) {
     try {
       await scheduleTemplate(persistence, { templateId, date, profileId });
       toast.success(TOAST_SCHEDULE_OK_TITLE, TOAST_SCHEDULE_OK_DESC);
-      navigate("/calendar");
+      // Land on the SCHEDULED week's grid so the new card is visible.
+      navigate(calendarWeekHref(date));
       return "ok";
     } catch {
       toast.error(TOAST_SCHEDULE_FAIL_TITLE, TOAST_SCHEDULE_FAIL_DESC);

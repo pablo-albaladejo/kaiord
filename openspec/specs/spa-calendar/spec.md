@@ -8,14 +8,19 @@ Week-view calendar as the editor's home page — URL-addressable weeks, per-day 
 
 ## Requirements
 
-### Requirement: Calendar week view as home page
+### Requirement: Calendar week view
 
-The SPA SHALL display a calendar week view as the default home page at `/calendar`. The view SHALL show 7 days (Monday through Sunday) with workout cards for each day. The calendar SHALL support navigation between weeks via previous/next controls and a "Today" button.
+The SPA SHALL display the calendar week view for every `/calendar*` URL: `/calendar/:weekId` SHALL render that week, and bare `/calendar` SHALL redirect (replace, one hop) to `/calendar/<current week>` so the URL family always resolves to one surface. The default home page SHALL be the Today dashboard at `/today` (`/` redirects there). The view SHALL show 7 days (Monday through Sunday) with workout cards for each day. The calendar SHALL support navigation between weeks via previous/next controls and a "Today" button.
 
 #### Scenario: User opens the app
 
-- **WHEN** the user navigates to `/` or `/calendar`
-- **THEN** the system SHALL display the current week's calendar view with workout cards for each day that has workouts
+- **WHEN** the user navigates to `/`
+- **THEN** the system SHALL redirect to `/today` and display the Today dashboard
+
+#### Scenario: User opens the bare calendar URL
+
+- **WHEN** the user navigates to `/calendar`
+- **THEN** the system SHALL redirect (replace) to `/calendar/<current week>` and display the current week's calendar view with workout cards for each day that has workouts
 
 #### Scenario: Navigate to specific week
 
@@ -34,7 +39,7 @@ The calendar SHALL handle invalid or malformed weekId URL parameters gracefully.
 #### Scenario: Malformed weekId
 
 - **WHEN** the user navigates to `/calendar/not-a-week` or `/calendar/2026-W99`
-- **THEN** the system SHALL redirect to `/calendar` (current week)
+- **THEN** the system SHALL redirect (replace, one hop) to `/calendar/<current week>`
 
 ### Requirement: Multiple workouts per day
 

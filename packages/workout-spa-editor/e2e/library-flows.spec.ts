@@ -37,7 +37,7 @@ test.describe("Library flows", () => {
   test("Test A: header Library navigates to /library (no modal)", async ({
     page,
   }) => {
-    await page.goto("/calendar");
+    await page.goto("/today");
 
     // Use the mobile-aware helper so the test works on mobile
     // emulators where the Library button lives behind the hamburger menu.
@@ -53,9 +53,9 @@ test.describe("Library flows", () => {
     // No dialog should have mounted as a side-effect of the click.
     await expect(page.getByRole("dialog")).toHaveCount(0);
 
-    // Browser back returns to bare /calendar (the Today page).
+    // Browser back returns to /today (the Today page).
     await page.goBack();
-    await page.waitForURL(/\/calendar$/);
+    await page.waitForURL(/\/today$/);
     await expect(page.getByTestId("today-page")).toBeVisible();
   });
 
