@@ -52,17 +52,13 @@ const FCP_BUDGET_MS = 1800;
 const USE_MATCHED_SESSIONS_BUDGET_MS = 60;
 const CPU_THROTTLE_RATE = 4;
 
-// Runner-speed calibration for the useMatchedSessions slice. The measure
-// wraps an ASYNC `useLiveQuery` span (Dexie awaits + main-thread
-// availability), so its wall-clock inflates with overall runner slowdown,
-// not hook cost: contended ubuntu-latest runners produced worst measures
-// of 221-431ms across whole-job retries (PRs #727/#728) while healthy
-// runners sit at 40-49ms — and the same commit passed on re-run every
-// time. A fixed synthetic workload timed on the same throttled page
-// right before the measurement nav captures that slowdown; the budget
-// scales linearly with it (clamped). A structural regression in the hook
-// (e.g. a quadratic join) scales ABOVE the calibrated budget and still
-// fails; a slow runner alone no longer does.
+// Runner-speed calibration for the useMatchedSessions slice: a fixed
+// synthetic workload timed on the same throttled page scales the budget
+// for genuinely slow runner CPUs (clamped). Belt-and-braces only — main
+// run 27010705723 showed worst boot-window spans of 257-352ms on a
+// runner whose calibration came out HEALTHY (factor 1.00), which is why
+// the hook is asserted on a steady-state re-fire below rather than on
+// the boot window.
 const CALIBRATION_RUNS = 3;
 const CALIBRATION_LOOP_ITERATIONS = 3_000_000;
 // Prime modulus keeps the accumulator live so the loop cannot be
@@ -259,14 +255,47 @@ test.describe("CalendarPage performance budget", () => {
       `CalendarPage FCP ${fcpMs.toFixed(1)}ms exceeds the ${FCP_BUDGET_MS}ms budget`
     ).toBeLessThanOrEqual(FCP_BUDGET_MS);
 
+    // 6. Steady-state hook measurement. The boot-window span is NOT a
+    // faithful hook-cost signal: the measure wraps an async useLiveQuery
+    // callback, so between its start/end marks the wall-clock absorbs
+    // whatever else holds the main thread — chiefly the throttled first
+    // render of the 30-card week (a query-vs-render interleave race,
+    // bimodal: 40-49ms or 257-352ms for identical hook work). Post-boot,
+    // with the page quiescent, a re-fired query's span is dominated by
+    // the hook's own work — which is what the D16 budget is about.
+    await page.evaluate(() => {
+      performance.clearMeasures("useMatchedSessions");
+      // Double-rAF settle so the boot renders have flushed.
+      return new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+    });
+    // Touch a seeded match row to re-fire the liveQuery in steady state.
+    await page.evaluate(async () => {
+      type Db = {
+        table: (n: string) => {
+          get: (k: string) => Promise<unknown>;
+          put: (r: unknown) => Promise<unknown>;
+        };
+      };
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as Db;
+      const row = await db.table("sessionMatches").get("perf-match-0");
+      if (!row) throw new Error("perf-match-0 seed row missing");
+      await db.table("sessionMatches").put(row);
+    });
+    await page.waitForFunction(
+      () => performance.getEntriesByName("useMatchedSessions").length > 0,
+      undefined,
+      { timeout: 10_000 }
+    );
     const useMatchedMaxMs = await page.evaluate(() => {
       const entries = performance.getEntriesByName("useMatchedSessions");
-      if (entries.length === 0) return Number.POSITIVE_INFINITY;
       return Math.max(...entries.map((e) => e.duration));
     });
     expect(
       useMatchedMaxMs,
-      `useMatchedSessions worst measure ${useMatchedMaxMs.toFixed(1)}ms exceeds the ${useMatchedBudgetMs.toFixed(1)}ms calibrated slice (base ${USE_MATCHED_SESSIONS_BUDGET_MS}ms x runner slowdown ${slowdownFactor.toFixed(2)}, calibration ${calibrationMs.toFixed(1)}ms vs reference ${CALIBRATION_REFERENCE_MS}ms, project: ${testInfo.project.name})`
+      `useMatchedSessions steady-state worst measure ${useMatchedMaxMs.toFixed(1)}ms exceeds the ${useMatchedBudgetMs.toFixed(1)}ms calibrated slice (base ${USE_MATCHED_SESSIONS_BUDGET_MS}ms x runner slowdown ${slowdownFactor.toFixed(2)}, calibration ${calibrationMs.toFixed(1)}ms vs reference ${CALIBRATION_REFERENCE_MS}ms, project: ${testInfo.project.name})`
     ).toBeLessThanOrEqual(useMatchedBudgetMs);
 
     await cdp.detach();
