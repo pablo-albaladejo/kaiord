@@ -12,6 +12,8 @@ import {
 } from "../molecules/CalendarEmptyStates";
 
 export type CalendarEmptyBannersProps = {
+  /** Rendered week's id, threaded to EmptyWeekState's back-origin. */
+  weekId: string;
   hasAnyWorkouts: boolean;
   hasWeekWorkouts: boolean;
   hasReadyWorkouts: boolean;
@@ -31,7 +33,7 @@ export function CalendarEmptyBanners(p: CalendarEmptyBannersProps) {
   return (
     <>
       {p.hasAnyWorkouts && !p.hasWeekWorkouts && (
-        <EmptyWeekState onGoToLatest={p.onGoToLatest} />
+        <EmptyWeekState weekId={p.weekId} onGoToLatest={p.onGoToLatest} />
       )}
       {p.rawCount > 0 && !p.hasAiProvider && <NoAiProviderState />}
       {p.hasReadyWorkouts && !p.extensionInstalled && <NoBridgesState />}

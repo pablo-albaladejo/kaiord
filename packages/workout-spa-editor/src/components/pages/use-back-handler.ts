@@ -26,7 +26,8 @@ import { useDiscardConfirmation } from "./WorkoutSection/use-discard-confirmatio
 export function useBackHandler(
   newWorkoutMode: NewWorkoutMode | undefined,
   dateParam: string | null,
-  origin: BackOrigin | null
+  origin: BackOrigin | null,
+  weekParam: string | null = null
 ): (() => void) | null {
   const [, navigate] = useLocation();
   const clearWorkout = useClearWorkout();
@@ -39,7 +40,7 @@ export function useBackHandler(
   const isInPicker =
     newWorkoutMode === "scratch" || newWorkoutMode === "import";
   const backTarget = origin
-    ? resolveBackTarget({ origin, date: dateParam })
+    ? resolveBackTarget({ origin, date: dateParam, week: weekParam })
     : isInPicker
       ? buildPickerHref(dateParam)
       : null;

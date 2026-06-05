@@ -7,17 +7,23 @@
 import { expect, test } from "./fixtures/base";
 
 test.describe("Calendar Navigation", () => {
-  test("/ redirects to /calendar", async ({ page }) => {
+  test("/ redirects to /today", async ({ page }) => {
     await page.goto("/");
-    await page.waitForURL(/\/calendar/);
-    expect(page.url()).toContain("/calendar");
+    await page.waitForURL(/\/today/);
+    expect(page.url()).toContain("/today");
   });
 
-  test("/calendar shows the Today page", async ({ page }) => {
-    // Post-redesign, bare /calendar renders the Today page; the week
-    // calendar lives at /calendar/:weekId.
-    await page.goto("/calendar");
+  test("/today shows the Today page", async ({ page }) => {
+    await page.goto("/today");
     await expect(page.getByTestId("today-page")).toBeVisible();
+  });
+
+  test("/calendar redirects to the current week's grid", async ({ page }) => {
+    // One URL family, one view: bare /calendar is a non-durable alias
+    // for the current week (the Today dashboard lives at /today).
+    await page.goto("/calendar");
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
   test("/calendar/2026-W15 shows that week", async ({ page }) => {
@@ -28,26 +34,31 @@ test.describe("Calendar Navigation", () => {
     ).toBeVisible();
   });
 
-  test("/nonexistent redirects to /calendar", async ({ page }) => {
+  test("/nonexistent redirects to /today", async ({ page }) => {
     await page.goto("/nonexistent");
-    await page.waitForURL(/\/calendar/);
-    expect(page.url()).toContain("/calendar");
+    await page.waitForURL(/\/today/);
+    expect(page.url()).toContain("/today");
   });
 
   test('Header "Today" button navigates to the Today page', async ({
     page,
   }) => {
     await page.goto("/workout/new?source=scratch");
-    await page.getByTestId("status-header-calendar-button").click();
-    // The primary header calendar entry now targets bare /calendar (the
-    // Today page); the week grid is reached via the Today week strip.
-    await page.waitForURL(/\/calendar$/);
+    await page.getByTestId("status-header-today-button").click();
+    await page.waitForURL(/\/today$/);
     await expect(page.getByTestId("today-page")).toBeVisible();
   });
 
-  test("Kaiord logo navigates to /calendar (SPA, no reload)", async ({
+  test('Header "Calendar" button navigates to the current week grid', async ({
     page,
   }) => {
+    await page.goto("/workout/new?source=scratch");
+    await page.getByTestId("status-header-calendar-button").click();
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
+  });
+
+  test("Kaiord logo navigates to /today (SPA, no reload)", async ({ page }) => {
     await page.goto("/calendar/2026-W15");
     await expect(page.getByTestId("calendar-page")).toBeVisible();
 
@@ -57,8 +68,8 @@ test.describe("Calendar Navigation", () => {
     });
 
     await page.getByRole("link", { name: /Kaiord Editor/i }).click();
-    // The logo links to /calendar (the Today page post-redesign).
-    await page.waitForURL(/\/calendar$/);
+    // The logo is the durable "home" link → /today since the split.
+    await page.waitForURL(/\/today$/);
     await expect(page.getByTestId("today-page")).toBeVisible();
 
     const survived = await page.evaluate(
@@ -102,11 +113,13 @@ test.describe("Calendar Navigation", () => {
     await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
-  test("Invalid week ID redirects to /calendar", async ({ page }) => {
+  test("Invalid week ID redirects to the current week grid", async ({
+    page,
+  }) => {
     await page.goto("/calendar/bad-week");
-    await page.waitForURL(/\/calendar$/);
-    // CalendarPage redirects an unparseable week to bare /calendar,
-    // which renders the Today page post-redesign.
-    await expect(page.getByTestId("today-page")).toBeVisible();
+    // CalendarPage retargets an unparseable week to the CONCRETE current
+    // week (1-hop) since bare /calendar is itself a redirect.
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 });

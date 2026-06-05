@@ -16,6 +16,7 @@ import {
   WorkoutDetail,
 } from "./lazy-pages";
 import { NewWorkoutRoute } from "./new-workout-route";
+import { getCurrentWeekId } from "./utils/week-utils";
 
 export type AppRoutesProps = { analytics: Analytics };
 
@@ -28,9 +29,15 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
     <Suspense fallback={<RouteSpinner />}>
       <Switch>
         <Route path="/">
-          <Redirect to="/calendar" />
+          <Redirect to="/today" />
         </Route>
-        <Route path="/calendar">{guard(<TodayPage />)}</Route>
+        <Route path="/today">{guard(<TodayPage />)}</Route>
+        {/* Bare /calendar is intentionally a non-durable alias for the
+            CURRENT week: one URL family, one view (consensus plan, ADR).
+            `replace` avoids a back-button re-bounce trap. */}
+        <Route path="/calendar">
+          <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
+        </Route>
         <Route path="/calendar/:weekId">{guard(<CalendarPage />)}</Route>
         <Route path="/athlete">{guard(<AthletePage />)}</Route>
         <Route path="/library">{guard(<LibraryPage />)}</Route>
@@ -49,7 +56,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
           <HealthSubRouter analytics={analytics} />
         </Route>
         <Route>
-          <Redirect to="/calendar" />
+          <Redirect to="/today" />
         </Route>
       </Switch>
     </Suspense>

@@ -43,10 +43,15 @@ export function useCalendarState() {
       if (workout.state === "raw" || workout.state === "skipped") {
         setSelectedWorkout(workout);
       } else {
-        navigate(withOrigin(`/workout/${workout.id}`, "calendar"));
+        // Carry the originating week so Back returns to THIS grid.
+        navigate(
+          withOrigin(`/workout/${workout.id}`, "calendar", {
+            week: data.weekId,
+          })
+        );
       }
     },
-    [navigate]
+    [navigate, data.weekId]
   );
 
   const hasAnyWorkouts = (data.totalWorkoutCount ?? 0) > 0;

@@ -7,13 +7,17 @@
 
 import { Redirect } from "wouter";
 
+import { getCurrentWeekId } from "../../utils/week-utils";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
 import { CalendarPageView } from "./CalendarPageView";
 import { useCalendarPage } from "./use-calendar-page";
 
 export default function CalendarPage() {
   const result = useCalendarPage();
-  if (result.state === "redirect") return <Redirect to="/calendar" />;
+  // Invalid week ids retarget the CONCRETE current week (1-hop — bare
+  // /calendar is itself a redirect since the /today split).
+  if (result.state === "redirect")
+    return <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />;
   if (result.state === "skeleton") return <CalendarSkeleton />;
   return <CalendarPageView {...result} />;
 }

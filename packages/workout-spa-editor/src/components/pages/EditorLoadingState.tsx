@@ -20,7 +20,7 @@ export function EditorNoData() {
       <p className="text-muted-foreground">
         This workout has no structured data yet.
       </p>
-      <Link href="/calendar" className="text-primary underline mt-2">
+      <Link href="/today" className="text-primary underline mt-2">
         Go to Today
       </Link>
     </div>

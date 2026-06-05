@@ -15,9 +15,10 @@ import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 import { TestSyncProvider } from "./test-utils/sync-test-provider";
 
 function renderAtPath(path: string) {
-  const { hook } = memoryLocation({ path, record: true });
+  const location = memoryLocation({ path, record: true });
+  const { hook } = location;
 
-  return render(
+  const view = render(
     <ThemeProvider>
       <PersistenceProvider persistence={createInMemoryPersistence()}>
         <TestSyncProvider>
@@ -34,6 +35,7 @@ function renderAtPath(path: string) {
       </PersistenceProvider>
     </ThemeProvider>
   );
+  return { ...view, location };
 }
 
 describe("Routing", () => {
@@ -53,16 +55,32 @@ describe("Routing", () => {
     localStorage.setItem("workout-spa-onboarding-completed", "true");
   });
 
-  it("should render the Today page at /calendar", async () => {
+  it("should render the Today page at /today", async () => {
     // Arrange
 
     // Act
 
-    renderAtPath("/calendar");
+    renderAtPath("/today");
 
     // Assert
 
     expect(await screen.findByTestId("today-page")).toBeInTheDocument();
+  });
+
+  it("should redirect bare /calendar to the current week's grid in one hop", async () => {
+    // Arrange
+
+    // Act
+
+    const { location } = renderAtPath("/calendar");
+
+    // Assert
+
+    await waitFor(() => {
+      expect(location.history.at(-1)).toMatch(/^\/calendar\/\d{4}-W\d{2}$/);
+    });
+    // 1-hop: bare /calendar never rests in the history (replace redirect).
+    expect(location.history.filter((p) => p === "/calendar")).toHaveLength(0);
   });
 
   it("should render LibraryPage at /library", async () => {
@@ -91,7 +109,7 @@ describe("Routing", () => {
     });
   });
 
-  it("should redirect / to /calendar", async () => {
+  it("should redirect / to /today", async () => {
     // Arrange
 
     // Act
@@ -105,7 +123,7 @@ describe("Routing", () => {
     });
   });
 
-  it("should redirect unknown routes to /calendar", async () => {
+  it("should redirect unknown routes to /today", async () => {
     // Arrange
 
     // Act

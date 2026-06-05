@@ -19,7 +19,7 @@ describe("EmptyWeekState", () => {
 
     // Act
 
-    render(withRouter(<EmptyWeekState />));
+    render(withRouter(<EmptyWeekState weekId="2026-W23" />));
 
     // Assert
 
@@ -35,7 +35,7 @@ describe("EmptyWeekState", () => {
 
     const user = userEvent.setup();
 
-    render(withRouter(<EmptyWeekState />));
+    render(withRouter(<EmptyWeekState weekId="2026-W23" />));
 
     await user.click(screen.getByText("Add workout"));
     // Navigate to /workout/new is called - no error thrown
@@ -46,7 +46,9 @@ describe("EmptyWeekState", () => {
 
     // Act
 
-    render(withRouter(<EmptyWeekState onGoToLatest={vi.fn()} />));
+    render(
+      withRouter(<EmptyWeekState weekId="2026-W23" onGoToLatest={vi.fn()} />)
+    );
 
     // Assert
 
@@ -58,7 +60,7 @@ describe("EmptyWeekState", () => {
 
     // Act
 
-    render(withRouter(<EmptyWeekState />));
+    render(withRouter(<EmptyWeekState weekId="2026-W23" />));
 
     // Assert
 
@@ -71,7 +73,11 @@ describe("EmptyWeekState", () => {
     const user = userEvent.setup();
     const onGoToLatest = vi.fn();
 
-    render(withRouter(<EmptyWeekState onGoToLatest={onGoToLatest} />));
+    render(
+      withRouter(
+        <EmptyWeekState weekId="2026-W23" onGoToLatest={onGoToLatest} />
+      )
+    );
 
     // Act
 

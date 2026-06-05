@@ -15,13 +15,15 @@ export type WorkoutDetailProps = { id?: string };
 export default function WorkoutDetail({ id }: WorkoutDetailProps) {
   const [, navigate] = useLocation();
   const search = useSearch();
-  const origin = parseBackOrigin(new URLSearchParams(search).get("from"));
+  const params = new URLSearchParams(search);
+  const origin = parseBackOrigin(params.get("from"));
+  const weekParam = params.get("week");
   const { record, loading } = useWorkoutDetailRecord(id);
   const model = useWorkoutDetailModel(record);
 
   const onBack = useCallback(
-    () => navigate(resolveBackTarget({ origin })),
-    [navigate, origin]
+    () => navigate(resolveBackTarget({ origin, week: weekParam })),
+    [navigate, origin, weekParam]
   );
   const onEdit = useCallback(
     () => id && navigate(withOrigin(`/workout/${id}`, "detail")),

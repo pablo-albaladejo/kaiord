@@ -16,16 +16,18 @@ function renderAt(path: string) {
 }
 
 describe("StatusEntryButtons", () => {
-  it("should mark the calendar entry active on the Today summary route", () => {
+  it("should mark the today entry active on the Today route", () => {
     // Arrange
-    renderAt("/calendar");
+    renderAt("/today");
 
     // Act
+    const today = screen.getByTestId("status-header-today-button");
     const calendar = screen.getByTestId("status-header-calendar-button");
     const library = screen.getByTestId("status-header-library-button");
 
     // Assert
-    expect(calendar).toHaveAttribute("aria-current", "page");
+    expect(today).toHaveAttribute("aria-current", "page");
+    expect(calendar).not.toHaveAttribute("aria-current");
     expect(library).not.toHaveAttribute("aria-current");
   });
 
@@ -35,9 +37,11 @@ describe("StatusEntryButtons", () => {
 
     // Act
     const calendar = screen.getByTestId("status-header-calendar-button");
+    const today = screen.getByTestId("status-header-today-button");
 
     // Assert
     expect(calendar).toHaveAttribute("aria-current", "page");
+    expect(today).not.toHaveAttribute("aria-current");
   });
 
   it("should mark the library entry active on the library route", () => {
@@ -80,11 +84,13 @@ describe("StatusEntryButtons", () => {
     renderAt("/workout/view/abc");
 
     // Act
+    const today = screen.getByTestId("status-header-today-button");
     const calendar = screen.getByTestId("status-header-calendar-button");
     const library = screen.getByTestId("status-header-library-button");
     const trends = screen.getByTestId("status-header-trends-button");
 
     // Assert
+    expect(today).not.toHaveAttribute("aria-current");
     expect(calendar).not.toHaveAttribute("aria-current");
     expect(library).not.toHaveAttribute("aria-current");
     expect(trends).not.toHaveAttribute("aria-current");
