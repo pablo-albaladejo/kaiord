@@ -12,6 +12,7 @@ import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { Profile } from "../../../types/profile";
 import type { UserPreferences } from "../../../types/user-preferences";
+import { todayIsoDate } from "../../../utils/today-iso-date";
 import { ToastProvider } from "../../atoms/Toast";
 import { ScratchEditorSurface } from "./ScratchEditorSurface";
 
@@ -284,7 +285,7 @@ describe("ScratchEditorSurface", () => {
     ).toBeInTheDocument();
   });
 
-  it("should NOT render the schedule control without a date", async () => {
+  it("should render the schedule control without a date, defaulting to today", async () => {
     // Arrange
 
     // Act
@@ -294,7 +295,27 @@ describe("ScratchEditorSurface", () => {
     await waitFor(() => {
       expect(screen.getByTestId("ai-banner")).toBeInTheDocument();
     });
-    expect(screen.queryByTestId("scratch-schedule-button")).toBeNull();
+    expect(screen.getByTestId("scratch-schedule-button")).toBeInTheDocument();
+  });
+
+  it("should persist on today's date when entered without a date", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    await seedActiveProfile();
+    const put = vi.spyOn(db.table("workouts"), "put");
+
+    // Act
+    renderSurface(null);
+    const button = await screen.findByTestId("scratch-schedule-button");
+    await waitFor(() => expect(button).toBeEnabled());
+    await user.click(button);
+
+    // Assert
+    await waitFor(() => {
+      expect(put).toHaveBeenCalledWith(
+        expect.objectContaining({ date: todayIsoDate(), source: "scratch" })
+      );
+    });
   });
 
   it("should disable the schedule control when no profile is active", async () => {
@@ -307,7 +328,7 @@ describe("ScratchEditorSurface", () => {
     expect(await screen.findByTestId("scratch-schedule-button")).toBeDisabled();
   });
 
-  it("should persist on the route date and navigate to /workout/:id when scheduled", async () => {
+  it("should persist on the route date and land on its calendar week when scheduled", async () => {
     // Arrange
     const user = userEvent.setup();
     await seedActiveProfile();
@@ -326,7 +347,7 @@ describe("ScratchEditorSurface", () => {
       );
     });
     await waitFor(() => {
-      expect(location.history.at(-1)).toMatch(/^\/workout\/[0-9a-f-]+$/);
+      expect(location.history.at(-1)).toBe("/calendar/2026-W23");
     });
   });
 

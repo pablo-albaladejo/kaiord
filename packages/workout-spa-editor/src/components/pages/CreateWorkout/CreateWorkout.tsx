@@ -1,20 +1,24 @@
-import { useCallback } from "react";
-
 import { thresholdsForSport } from "../../../lib/athlete";
 import { buildReviewModel } from "../../../lib/workout-review";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
-import { buildWorkoutRecord } from "./build-workout-record";
 import { CreateGeneratingPhase } from "./CreateGeneratingPhase";
 import { CreateInputPhase } from "./CreateInputPhase";
 import { CreateResultPhase } from "./CreateResultPhase";
+import { useCreateSave } from "./use-create-save";
 import { useCreateWorkout } from "./use-create-workout";
-import { useSaveAndPush } from "./use-save-and-push";
 
 const FALLBACK_TITLE = "AI session";
 
-export type CreateWorkoutProps = { onClose: () => void };
+export type CreateWorkoutProps = {
+  onClose: () => void;
+  /** Post-save landing; receives the persisted record's calendar date. */
+  onSaved: (date: string) => void;
+};
 
-export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
+export default function CreateWorkout({
+  onClose,
+  onSaved,
+}: CreateWorkoutProps) {
   const create = useCreateWorkout();
   const { phase, sport, profile, activeProfileId, generatedKrd, promptText } =
     create;
@@ -26,19 +30,15 @@ export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
     : null;
   const title = model?.title ?? FALLBACK_TITLE;
 
-  const buildRecord = useCallback(() => {
-    if (!generatedKrd) throw new Error("No generated workout to save");
-    return buildWorkoutRecord({
-      profileId: activeProfileId ?? "",
-      sport,
-      prompt: promptText,
-      title,
-      krd: generatedKrd,
-      date: dateParam,
-    });
-  }, [activeProfileId, sport, promptText, title, generatedKrd, dateParam]);
-
-  const { save, saving } = useSaveAndPush({ buildRecord, onDone: onClose });
+  const { save, saving } = useCreateSave({
+    generatedKrd,
+    activeProfileId,
+    sport,
+    promptText,
+    title,
+    dateParam,
+    onSaved,
+  });
 
   return (
     <div

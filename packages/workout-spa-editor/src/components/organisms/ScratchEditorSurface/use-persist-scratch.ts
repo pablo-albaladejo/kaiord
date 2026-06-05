@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { calendarWeekHref } from "../../../routing/calendar-week-href";
 import { useCurrentWorkout } from "../../../store/selectors/workout-selectors";
 import type { Workout } from "../../../types/krd";
 import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
@@ -23,8 +24,9 @@ export type UsePersistScratch = {
 
 /**
  * Scratch-local "Save & schedule" wiring: persists `currentWorkout` onto
- * the route `date` as a new scratch WorkoutRecord, then navigates to the
- * id route. D6-rejects calendar-impossible dates (toast, no persist/nav).
+ * the target `date` as a new scratch WorkoutRecord, then lands on the
+ * calendar week containing it so the new card is visible on arrival.
+ * D6-rejects calendar-impossible dates (toast, no persist/nav).
  */
 export function usePersistScratch(date: string): UsePersistScratch {
   const currentWorkout = useCurrentWorkout();
@@ -46,13 +48,13 @@ export function usePersistScratch(date: string): UsePersistScratch {
       | undefined;
     const sport = workout?.sport ?? DEFAULT_SPORT;
     try {
-      const record = await persistScratchWorkout(persistence, {
+      await persistScratchWorkout(persistence, {
         krd: currentWorkout,
         date,
         profileId,
         sport,
       });
-      navigate(`/workout/${record.id}`);
+      navigate(calendarWeekHref(date));
     } catch {
       toast.error(SAVE_FAIL_TITLE, SAVE_FAIL_DESC);
     }
