@@ -28,6 +28,10 @@ const FIXTURE_POWER_200 = 200;
 const FIXTURE_POWER_210 = 210;
 const ERROR_MESSAGE_MIN_LENGTH = 10;
 const NON_QUADRATIC_RATIO_THRESHOLD = 100;
+// Samples per input size for the linear-time check; the minimum is kept.
+const TIMING_SAMPLES = 5;
+// Floor for sub-resolution timings so the size ratios never divide by ~0.
+const TIMING_EPSILON_MS = 0.0001;
 const ARRAY_VALUE_THIRD = 3;
 const FIXTURE_ARRAY_VALUES = [1, 2, ARRAY_VALUE_THIRD] as const;
 
@@ -268,17 +272,24 @@ describe("parseJSON", () => {
         // Create invalid JSON with specific size
         const invalidJson = '{"data": "' + "x".repeat(size) + '"invalid}';
 
-        // Act - Measure parsing time
-        const start = performance.now();
-        try {
-          parseJSON(invalidJson);
-        } catch {
-          // Expected to throw
+        // Act - Measure parsing time. Min-of-N is the least-noise
+        // estimator for micro-benchmarks: scheduler/GC interference only
+        // ever ADDS time, so the minimum sample is the closest to the
+        // true cost. A single sample flaked at ratio 100.5 vs the 100
+        // threshold on a contended CI runner.
+        let best = Number.POSITIVE_INFINITY;
+        for (let sample = 0; sample < TIMING_SAMPLES; sample += 1) {
+          const start = performance.now();
+          try {
+            parseJSON(invalidJson);
+          } catch {
+            // Expected to throw
+          }
+          const end = performance.now();
+          best = Math.min(best, end - start);
         }
-        const end = performance.now();
-        const duration = end - start;
 
-        timings.push({ size, time: duration });
+        timings.push({ size, time: Math.max(best, TIMING_EPSILON_MS) });
       }
 
       // Assert - Verify linear or better complexity
