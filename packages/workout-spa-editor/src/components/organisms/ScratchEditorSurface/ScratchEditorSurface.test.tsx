@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
@@ -42,24 +43,25 @@ async function seedLastScratchSport(
   await db.table<UserPreferences>("userPreferences").put(row);
 }
 
-function renderSurface() {
-  const { hook } = memoryLocation({
+function renderSurface(date: string | null = null) {
+  const loc = memoryLocation({
     path: "/workout/new?source=scratch",
     record: true,
   });
-  return render(
+  const utils = render(
     <PersistenceProvider persistence={createDexiePersistence(db)}>
       <GarminBridgeProvider>
         <ToastProvider>
           <ToastContextProvider>
-            <Router hook={hook}>
-              <ScratchEditorSurface />
+            <Router hook={loc.hook}>
+              <ScratchEditorSurface date={date} />
             </Router>
           </ToastContextProvider>
         </ToastProvider>
       </GarminBridgeProvider>
     </PersistenceProvider>
   );
+  return { ...utils, location: loc };
 }
 
 describe("ScratchEditorSurface", () => {
@@ -268,5 +270,83 @@ describe("ScratchEditorSurface", () => {
       .table<UserPreferences>("userPreferences")
       .get(PROFILE_ID);
     expect(row?.lastScratchSport).toBeUndefined();
+  });
+
+  it("should render a Save & schedule control when a date is present", async () => {
+    // Arrange
+
+    // Act
+    renderSurface("2026-06-01");
+
+    // Assert
+    expect(
+      await screen.findByTestId("scratch-schedule-button")
+    ).toBeInTheDocument();
+  });
+
+  it("should NOT render the schedule control without a date", async () => {
+    // Arrange
+
+    // Act
+    renderSurface(null);
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByTestId("ai-banner")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("scratch-schedule-button")).toBeNull();
+  });
+
+  it("should disable the schedule control when no profile is active", async () => {
+    // Arrange
+
+    // Act
+    renderSurface("2026-06-01");
+
+    // Assert
+    expect(await screen.findByTestId("scratch-schedule-button")).toBeDisabled();
+  });
+
+  it("should persist on the route date and navigate to /workout/:id when scheduled", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    await seedActiveProfile();
+    const put = vi.spyOn(db.table("workouts"), "put");
+
+    // Act
+    const { location } = renderSurface("2026-06-01");
+    const button = await screen.findByTestId("scratch-schedule-button");
+    await waitFor(() => expect(button).toBeEnabled());
+    await user.click(button);
+
+    // Assert
+    await waitFor(() => {
+      expect(put).toHaveBeenCalledWith(
+        expect.objectContaining({ date: "2026-06-01", source: "scratch" })
+      );
+    });
+    await waitFor(() => {
+      expect(location.history.at(-1)).toMatch(/^\/workout\/[0-9a-f-]+$/);
+    });
+  });
+
+  it("should reject a calendar-impossible date and not persist or navigate", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    await seedActiveProfile();
+    const put = vi.spyOn(db.table("workouts"), "put");
+
+    // Act
+    const { location } = renderSurface("2026-02-31");
+    const button = await screen.findByTestId("scratch-schedule-button");
+    await waitFor(() => expect(button).toBeEnabled());
+    await user.click(button);
+
+    // Assert
+    await new Promise((resolve) =>
+      setTimeout(resolve, NEGATIVE_ASSERT_DELAY_MS)
+    );
+    expect(put).not.toHaveBeenCalled();
+    expect(location.history.at(-1)).toBe("/workout/new?source=scratch");
   });
 });

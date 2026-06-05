@@ -5,6 +5,7 @@
 import { Calendar, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 
+import { withOrigin } from "../../../routing/with-origin";
 import { Button } from "../../atoms/Button/Button";
 
 export type EmptyWeekStateProps = {
@@ -25,7 +26,7 @@ export function EmptyWeekState({ onGoToLatest }: EmptyWeekStateProps) {
         <Button
           variant="primary"
           size="sm"
-          onClick={() => navigate("/workout/new")}
+          onClick={() => navigate(withOrigin("/workout/new", "calendar"))}
         >
           <Plus className="h-4 w-4" />
           Add workout

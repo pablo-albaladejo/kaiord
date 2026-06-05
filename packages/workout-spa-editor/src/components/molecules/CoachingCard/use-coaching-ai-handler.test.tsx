@@ -89,7 +89,7 @@ describe("useCoachingAi", () => {
 
     // Assert
     await waitFor(() => expect(onClose).toHaveBeenCalled());
-    expect(navigateMock).toHaveBeenCalledWith("/workout/w-new");
+    expect(navigateMock).toHaveBeenCalledWith("/workout/w-new?from=coaching");
   });
 
   it("should expose a typed failure state when the use case rejects", async () => {

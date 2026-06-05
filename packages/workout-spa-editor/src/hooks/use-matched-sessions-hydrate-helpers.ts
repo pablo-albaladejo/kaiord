@@ -17,7 +17,9 @@ export const collectWorkoutIds = (matches: SessionMatch[]): string[] => {
   const out = new Set<string>();
   for (const m of matches) {
     out.add(m.workoutId);
-    for (const wid of m.executedWorkoutIds) out.add(wid);
+    // Dexie returns raw rows (not Zod-parsed), so a row written before the
+    // v12 `executedWorkoutIds` backfill — or seeded raw — may lack the field.
+    for (const wid of m.executedWorkoutIds ?? []) out.add(wid);
   }
   return [...out];
 };
@@ -32,6 +34,6 @@ export const resolveExecuted = (
   match: SessionMatch,
   wById: ReadonlyMap<string, WorkoutRecord>
 ): WorkoutRecord[] =>
-  match.executedWorkoutIds
+  (match.executedWorkoutIds ?? [])
     .map((wid) => wById.get(wid))
     .filter((w): w is WorkoutRecord => w !== undefined);

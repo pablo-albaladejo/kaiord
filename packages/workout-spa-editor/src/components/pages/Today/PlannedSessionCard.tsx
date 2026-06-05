@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 
 import type { ReviewModel } from "../../../lib/workout-review";
+import { withOrigin } from "../../../routing/with-origin";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
 import { Card } from "../../atoms/Card";
@@ -54,7 +55,9 @@ export function PlannedSessionCard({
         <Button
           variant="ghost"
           className="flex-1"
-          onClick={() => navigate(`/workout/view/${workout.id}`)}
+          onClick={() =>
+            navigate(withOrigin(`/workout/view/${workout.id}`, "today"))
+          }
         >
           Details
           <Icon icon={ICON_MAP.chevR} size="sm" color="inherit" />

@@ -14,6 +14,7 @@ import { convertCoachingActivityManual } from "../../../application/coaching/con
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { withOrigin } from "../../../routing/with-origin";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 
 export type UseCoachingManual = {
@@ -62,7 +63,7 @@ export const useCoachingManual = (
       // even though the AppToastProvider lives above the dialog tree.
       showSuccess("Workout matched", activity.title, { duration: 3000 });
       onClose();
-      navigate(`/workout/${result.workoutId}`);
+      navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Manual creation failed");
     } finally {

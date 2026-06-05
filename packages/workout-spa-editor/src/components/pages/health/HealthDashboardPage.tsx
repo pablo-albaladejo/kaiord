@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { lastNDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
+import { HealthSubRouteLinks } from "./HealthSubRouteLinks";
 import { TrendMetricSelector } from "./trends/TrendMetricSelector";
 import { TrendRangeSelector } from "./trends/TrendRangeSelector";
 import { TrendSingleChartCard } from "./trends/TrendSingleChartCard";
@@ -36,6 +37,9 @@ export default function HealthDashboardPage() {
         series={series}
         rangeDays={rangeDays}
       />
+      <div className="mt-4">
+        <HealthSubRouteLinks />
+      </div>
     </section>
   );
 }

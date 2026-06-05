@@ -2,9 +2,9 @@
  * WellnessEntryDialog — narrow in-flow surface for hand-entering a day's
  * wellness metrics from the calendar.
  *
- * Radix `Dialog.Root` controlled by parent `useState` (mirrors
- * `TemplatePickerDialog`). The accessible name MUST include the date so
- * SR users hear the day the dialog is bound to. The body hosts the entry
+ * Radix `Dialog.Root` controlled by parent `useState`. The accessible
+ * name MUST include the date so SR users hear the day the dialog is
+ * bound to. The body hosts the entry
  * form plus the file-dated import action; a successful save closes it.
  */
 import * as Dialog from "@radix-ui/react-dialog";

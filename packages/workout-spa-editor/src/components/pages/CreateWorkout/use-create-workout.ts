@@ -1,5 +1,6 @@
 import type { KRD } from "@kaiord/core";
 import { useCallback, useState } from "react";
+import { useSearch } from "wouter";
 
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
@@ -32,6 +33,8 @@ export function useCreateWorkout() {
   const providers = useAiProvidersLive();
   const customPrompt = useAiCustomPromptLive();
   const toast = useToastContext();
+  const search = useSearch();
+  const dateParam = new URLSearchParams(search).get("date");
 
   const provider = pickProvider(providers);
 
@@ -69,6 +72,7 @@ export function useCreateWorkout() {
     provider,
     profile: active?.profile ?? null,
     activeProfileId: active?.id ?? null,
+    dateParam,
     generate,
   };
 }

@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
@@ -56,11 +57,11 @@ describe("AthletePage", () => {
 
     // Assert
     await waitFor(() => {
-      expect(
-        screen.getByRole("heading", { name: "Athlete" })
-      ).toBeInTheDocument();
+      expect(screen.getByText("Ana Gomez")).toBeInTheDocument();
     });
-    expect(screen.getByText("Ana Gomez")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Athlete" })
+    ).toBeInTheDocument();
   });
 
   it("should render the empty state when no profile is active", async () => {
@@ -74,5 +75,40 @@ describe("AthletePage", () => {
     await waitFor(() => {
       expect(screen.getByText("No athlete profile yet")).toBeInTheDocument();
     });
+  });
+
+  it("should open the create-profile dialog from the empty-state CTA", async () => {
+    // Arrange
+    await db.table("meta").put({ key: "activeProfileId", value: null });
+    const user = userEvent.setup();
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByText("No athlete profile yet")).toBeInTheDocument();
+    });
+
+    // Act
+    await user.click(screen.getByRole("button", { name: "Create profile" }));
+
+    // Assert
+    expect(
+      await screen.findByRole("dialog", { name: "Create athlete profile" })
+    ).toBeInTheDocument();
+  });
+
+  it("should render the eager route heading even in the empty state", async () => {
+    // Arrange
+    await db.table("meta").put({ key: "activeProfileId", value: null });
+
+    // Act
+    const { container } = renderPage();
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText("No athlete profile yet")).toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("heading", { name: "Athlete" })
+    ).toBeInTheDocument();
+    expect(container.querySelector("[data-route-heading]")).not.toBeNull();
   });
 });

@@ -19,12 +19,14 @@ import {
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAppHandlers } from "../../../hooks/useAppHandlers";
+import { parseBackOrigin } from "../../../routing/back-origin";
+import { withOrigin } from "../../../routing/with-origin";
 import type { KRD } from "../../../types/krd";
+import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { healthDestinationFor } from "./health-destination";
 import { persistImportedWorkout } from "./persist-imported-workout";
 
-const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const TOAST_IMPORT_FAIL_TITLE = "Import failed";
 const TOAST_IMPORT_FAIL_DESC =
   "Could not save the imported workout — please retry.";
@@ -32,7 +34,7 @@ const TOAST_HEALTH_FAIL_TITLE = "Health import failed";
 const TOAST_HEALTH_FAIL_DESC =
   "Could not save the imported health record — please retry.";
 
-export function useImportOnLoad(date: string | null) {
+export function useImportOnLoad(date: string | null, from: string | null) {
   const { handleFileLoad } = useAppHandlers();
   const persistence = usePersistence();
   const [, navigate] = useLocation();
@@ -54,7 +56,7 @@ export function useImportOnLoad(date: string | null) {
       return;
     }
     handleFileLoad(krd);
-    if (!date || !ISO_DATE_REGEX.test(date)) return;
+    if (!date || !isValidCalendarDate(date)) return;
     const sport = getStructuredWorkout(krd)?.sport ?? "cycling";
     void persistence.profiles
       .getActiveId()
@@ -66,7 +68,12 @@ export function useImportOnLoad(date: string | null) {
           profileId,
           sport,
         });
-        navigate(`/workout/${record.id}`);
+        navigate(
+          withOrigin(
+            `/workout/${record.id}`,
+            parseBackOrigin(from) ?? "calendar"
+          )
+        );
       })
       .catch(() => {
         toast.error(TOAST_IMPORT_FAIL_TITLE, TOAST_IMPORT_FAIL_DESC);

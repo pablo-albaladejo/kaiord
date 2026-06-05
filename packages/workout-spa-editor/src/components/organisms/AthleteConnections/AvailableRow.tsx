@@ -8,8 +8,9 @@ type AvailableRowProps = {
   config: ConnectionConfig;
 };
 
-/* Real OAuth/connect for these brands is not yet supported. The Connect
-   action routes to the Extensions settings where bridges are managed. */
+/* Real per-brand OAuth/connect is not yet supported, so the row makes a
+   generic promise: it routes to the Extensions settings where bridges are
+   managed rather than implying a direct one-tap connect for this brand. */
 export function AvailableRow({ config }: AvailableRowProps) {
   const [, navigate] = useLocation();
 
@@ -17,6 +18,7 @@ export function AvailableRow({ config }: AvailableRowProps) {
     <button
       type="button"
       onClick={() => navigate("/settings/extensions")}
+      aria-label={`Manage ${config.name} in Extensions settings`}
       className="flex w-full items-center gap-3 rounded-2xl border border-slate-700/60 bg-surface p-3 text-left"
     >
       <ConnectionMark mark={config.mark} />
@@ -26,8 +28,8 @@ export function AvailableRow({ config }: AvailableRowProps) {
         </div>
         <div className="text-[12.5px] text-slate-500">Not connected</div>
       </div>
-      <Pill tone="accent" icon="plus">
-        Connect
+      <Pill tone="accent" icon="link">
+        Manage
       </Pill>
     </button>
   );

@@ -146,7 +146,9 @@ describe("CalendarPage add-entry flow", () => {
     await user.click(await screen.findByTestId("add-entry-choose-workout"));
 
     // Assert
-    expect(history.at(-1)).toBe("/workout/new?date=2026-04-06");
+    expect(history.at(-1)).toBe(
+      "/workout/new?date=2026-04-06&from=calendar-day"
+    );
   });
 
   it("should open the wellness entry surface when Wellness is chosen", async () => {

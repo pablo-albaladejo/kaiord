@@ -4,6 +4,8 @@
  * Early-return UI for loading and no-KRD scenarios.
  */
 
+import { Link } from "wouter";
+
 export function EditorLoading() {
   return (
     <div className="flex items-center justify-center py-16 text-muted-foreground">
@@ -18,9 +20,9 @@ export function EditorNoData() {
       <p className="text-muted-foreground">
         This workout has no structured data yet.
       </p>
-      <a href="/calendar" className="text-primary underline mt-2">
-        Go to Calendar
-      </a>
+      <Link href="/calendar" className="text-primary underline mt-2">
+        Go to Today
+      </Link>
     </div>
   );
 }

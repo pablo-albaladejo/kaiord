@@ -11,6 +11,7 @@ import { useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 
 import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
+import { withOrigin } from "../../../routing/with-origin";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { useGarminPush } from "../GarminPushButton/useGarminPush";
@@ -46,7 +47,7 @@ export function CoachingActivityDialog({
   const onOpenEditor = useCallback(() => {
     if (matchedId) {
       onClose();
-      navigate(`/workout/${matchedId}`);
+      navigate(withOrigin(`/workout/${matchedId}`, "coaching"));
     }
   }, [matchedId, navigate, onClose]);
   const { push: pushToGarmin } = useGarminPush(matchedWorkout ?? undefined);

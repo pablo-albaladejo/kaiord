@@ -21,7 +21,9 @@ const collectMatchedWorkoutIds = (
   const out = new Set<string>();
   for (const m of matched) {
     out.add(m.workout.id);
-    for (const wid of m.match.executedWorkoutIds) out.add(wid);
+    // Tolerate raw/pre-v12 rows that may lack the executed slot (see
+    // use-matched-sessions-hydrate-helpers).
+    for (const wid of m.match.executedWorkoutIds ?? []) out.add(wid);
   }
   return out;
 };

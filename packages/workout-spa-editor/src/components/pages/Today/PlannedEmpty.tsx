@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 
+import { withOrigin } from "../../../routing/with-origin";
 import { Button } from "../../atoms/Button";
 import { Card } from "../../atoms/Card";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
@@ -18,7 +19,7 @@ export function PlannedEmpty() {
       <Button
         variant="primary"
         className="mt-4"
-        onClick={() => navigate("/workout/new")}
+        onClick={() => navigate(withOrigin("/workout/new", "today"))}
       >
         <Icon icon={ICON_MAP.plus} size="sm" color="inherit" />
         Plan a session

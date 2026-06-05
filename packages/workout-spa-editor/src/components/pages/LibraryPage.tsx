@@ -31,6 +31,7 @@ import { deleteTemplate } from "../../application/library/delete-template";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live";
+import { withOrigin } from "../../routing/with-origin";
 import { useCurrentWorkout, useLoadWorkout } from "../../store/selectors";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
@@ -73,9 +74,9 @@ export default function LibraryPage() {
     showSuccess("Template loaded", template.name, { duration: 3000 });
     // SPA navigation (no full reload) so the freshly-loaded workout
     // survives the route transition. Hard reload would drop Zustand.
-    // `?source=scratch` bypasses NewWorkoutPicker and mounts the
-    // editor directly with the workout that's now in the store.
-    navigate("/workout/new?source=scratch");
+    // `?source=scratch` mounts the editor directly with the
+    // workout that's now in the store.
+    navigate(withOrigin("/workout/new?source=scratch", "library"));
   };
 
   return (

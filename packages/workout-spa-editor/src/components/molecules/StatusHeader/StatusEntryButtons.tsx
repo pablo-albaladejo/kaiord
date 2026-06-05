@@ -3,41 +3,18 @@ import { useLocation } from "wouter";
 
 import { Button } from "../../atoms/Button/Button";
 import { ProfileEntryButton } from "./ProfileEntryButton";
-import type { EntryDef } from "./status-entry-defs";
-import { ENTRY_DEFS, resolveEntryHref } from "./status-entry-defs";
+import { EntryButton } from "./status-entry-button";
+import { ENTRY_DEFS, isEntryActive } from "./status-entry-defs";
 import { StatusIndicators } from "./StatusIndicators";
 
 type StatusEntryButtonsProps = {
   onHelpClick: () => void;
 };
 
-function EntryButton({
-  entry,
-  onClick,
-}: {
-  entry: EntryDef;
-  onClick: () => void;
-}) {
-  return (
-    <Button
-      variant={entry.variant ?? "tertiary"}
-      size="sm"
-      onClick={onClick}
-      aria-label={entry.ariaLabel}
-      data-testid={`status-header-${entry.id}-button`}
-    >
-      <entry.icon className="h-4 w-4" />
-      <span className={entry.id === "new" ? "" : "hidden sm:inline"}>
-        {entry.label}
-      </span>
-    </Button>
-  );
-}
-
 export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const primaryNav = ENTRY_DEFS.filter((e) =>
-    ["calendar", "library", "trends", "new"].includes(e.id)
+    ["calendar", "library", "athlete", "trends", "new"].includes(e.id)
   );
   const settingsEntry = ENTRY_DEFS.find((e) => e.id === "settings");
   return (
@@ -46,7 +23,8 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
         <EntryButton
           key={entry.id}
           entry={entry}
-          onClick={() => navigate(resolveEntryHref(entry))}
+          active={isEntryActive(entry, location)}
+          onClick={() => navigate(entry.to)}
         />
       ))}
       <span
@@ -59,6 +37,7 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
       {settingsEntry && (
         <EntryButton
           entry={settingsEntry}
+          active={isEntryActive(settingsEntry, location)}
           onClick={() => navigate(settingsEntry.to)}
         />
       )}
