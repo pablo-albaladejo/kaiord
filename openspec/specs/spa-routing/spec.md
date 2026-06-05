@@ -14,7 +14,7 @@ The `@kaiord/workout-spa-editor` SPA bootstrap (`packages/workout-spa-editor/src
 
 The strip is centralised in a pure helper `computeRouterBase(baseUrl: string): string` exported from `packages/workout-spa-editor/src/router-base.ts` so the rule is testable without rendering the JSX tree. Vite's `BASE_URL` always begins and ends with `/` (verified in Vite's `resolveBaseUrl`); the helper relies on that invariant and the unit test catches any future divergence.
 
-The requirement exists to prevent a subpath-deployed SPA from emitting URLs that diverge from the deploy path. Without `<Router base>`, wouter's catch-all `<Redirect to="/calendar" />` writes `/calendar` to the address bar even though the SPA itself is served from `/editor/`. On refresh, GitHub Pages cannot serve `/calendar` because no asset lives at that path, falls back to the landing's blue 404, and the previously-shipped rafgraph fallback (rooted under `cleanup-open-issues-may-2026`, scoped to `/editor/*` paths) does not match. Aligning wouter's base with Vite's deploy base closes this class of bug at the source. The two requirements compose: rafgraph restores the URL pre-mount, then wouter's base resolves the deep route.
+The requirement exists to prevent a subpath-deployed SPA from emitting URLs that diverge from the deploy path. Without `<Router base>`, wouter's catch-all `<Redirect to="/today" />` writes `/today` to the address bar even though the SPA itself is served from `/editor/`. On refresh, GitHub Pages cannot serve `/calendar` because no asset lives at that path, falls back to the landing's blue 404, and the previously-shipped rafgraph fallback (rooted under `cleanup-open-issues-may-2026`, scoped to `/editor/*` paths) does not match. Aligning wouter's base with Vite's deploy base closes this class of bug at the source. The two requirements compose: rafgraph restores the URL pre-mount, then wouter's base resolves the deep route.
 
 A unit test (`packages/workout-spa-editor/src/router-base.test.ts`) SHALL exercise `computeRouterBase` against representative inputs (`/`, `/editor/`, `/a/b/`, ``). An end-to-end test (`packages/workout-spa-editor/e2e/spa-route-refresh.spec.ts`, gated by `E2E_PROD_BASE=1`) SHALL build the SPA with `VITE_BASE_PATH=/editor/`, serve the merged dist via a static file server that returns 404 for unknown paths (no SPA fallback, mimicking GitHub Pages exactly), and verify a deep URL refresh keeps the SPA bundle and the route.
 
@@ -51,7 +51,7 @@ A unit test (`packages/workout-spa-editor/src/router-base.test.ts`) SHALL exerci
 #### Scenario: Garbage path under the deploy base resolves to the catch-all
 
 - **WHEN** a user requests `/editor/<malformed-path>` directly (cold) on a Pages-equivalent host
-- **THEN** the rafgraph round-trip SHALL restore the URL, the SPA's router SHALL strip the configured base, the SPA's catch-all route SHALL redirect to the canonical calendar route, the URL bar SHALL settle at `/editor/calendar`, and no infinite redirect loop or XSS SHALL occur (the address bar containing user-supplied characters is treated as a path string by `history.replaceState`, never as HTML)
+- **THEN** the rafgraph round-trip SHALL restore the URL, the SPA's router SHALL strip the configured base, the SPA's catch-all route SHALL redirect to the Today home route, the URL bar SHALL settle at `/editor/today`, and no infinite redirect loop or XSS SHALL occur (the address bar containing user-supplied characters is treated as a path string by `history.replaceState`, never as HTML)
 
 ### Requirement: SPA surface classification (routed-page vs modal)
 
@@ -105,7 +105,7 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 #### Scenario: Route change announces a single label
 
 - **WHEN** the wouter pathname changes (e.g., user navigates from `/calendar` to `/library`)
-- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library", "Calendar", "New workout", "Edit workout") so assistive technology announces the navigation as a single unit
+- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Today page", "Calendar page", "New workout", "Edit workout") so assistive technology announces the navigation as a single unit
 
 #### Scenario: Route change moves focus to the page heading
 

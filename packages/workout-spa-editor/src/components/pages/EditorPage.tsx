@@ -11,19 +11,16 @@ import { useSearch } from "wouter";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
-import { parseBackOrigin } from "../../routing/back-origin";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
 import { DateBanner } from "./DateBanner";
+import { parseEditorRouteParams } from "./editor-route-params";
 import { EditorBody } from "./EditorBody";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
 import { EditorPageHeader } from "./EditorPageHeader";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
-import {
-  deriveNewWorkoutMode,
-  renderNewWorkoutSurface,
-} from "./render-new-workout-surface";
+import { renderNewWorkoutSurface } from "./render-new-workout-surface";
 import { useBackHandler } from "./use-back-handler";
 import { useEditorActions } from "./use-editor-actions";
 import { useWorkoutRecord } from "./use-workout-record";
@@ -34,11 +31,14 @@ export type EditorPageProps = { id?: string };
 export default function EditorPage({ id }: EditorPageProps) {
   useDeleteCleanup();
   const search = useSearch();
-  const params = new URLSearchParams(search);
-  const dateParam = params.get("date");
-  const origin = parseBackOrigin(params.get("from"));
-  const newWorkoutMode = deriveNewWorkoutMode(search);
-  const handleBack = useBackHandler(newWorkoutMode, dateParam, origin);
+  const { dateParam, weekParam, origin, newWorkoutMode } =
+    parseEditorRouteParams(search);
+  const handleBack = useBackHandler(
+    newWorkoutMode,
+    dateParam,
+    origin,
+    weekParam
+  );
 
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);

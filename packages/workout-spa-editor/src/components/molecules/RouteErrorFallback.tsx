@@ -23,7 +23,7 @@ export function RouteErrorFallback({
         >
           Retry
         </button>
-        <Link href="/calendar" className="rounded border px-4 py-2 text-sm">
+        <Link href="/today" className="rounded border px-4 py-2 text-sm">
           Go to Today
         </Link>
       </div>
