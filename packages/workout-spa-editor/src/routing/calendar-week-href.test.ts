@@ -30,12 +30,15 @@ describe("calendarWeekHref", () => {
     const previousTz = process.env.TZ;
     process.env.TZ = "Pacific/Kiritimati";
 
-    // Act
-    const href = calendarWeekHref("2026-06-07");
+    try {
+      // Act
+      const href = calendarWeekHref("2026-06-07");
 
-    // Assert
-    expect(href).toBe("/calendar/2026-W23");
-    process.env.TZ = previousTz;
+      // Assert
+      expect(href).toBe("/calendar/2026-W23");
+    } finally {
+      process.env.TZ = previousTz;
+    }
   });
 
   it("should resolve year-boundary dates to the ISO week-numbering year", () => {
