@@ -11,6 +11,7 @@ import {
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { Workout } from "../../../types/krd";
 import type { Sport } from "../../../types/krd-core";
+import { todayIsoDate } from "../../../utils/today-iso-date";
 import { AiBanner } from "../../molecules/AiBanner/AiBanner";
 import { useCoachingSidebar } from "../../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorBody } from "../../pages/EditorBody";
@@ -86,7 +87,7 @@ export function ScratchEditorSurface({ date }: { date: string | null }) {
   return (
     <div className="space-y-6">
       <AiBanner />
-      {date && <ScratchScheduleButton date={date} />}
+      <ScratchScheduleButton date={date ?? todayIsoDate()} />
       {workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection

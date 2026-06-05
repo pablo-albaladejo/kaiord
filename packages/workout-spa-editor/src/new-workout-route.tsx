@@ -1,6 +1,7 @@
 import { useLocation, useSearch } from "wouter";
 
 import { CreateWorkout, EditorPage } from "./lazy-pages";
+import { calendarWeekHref } from "./routing/calendar-week-href";
 import { buildPickerHref } from "./routing/picker-href";
 
 /**
@@ -10,6 +11,9 @@ import { buildPickerHref } from "./routing/picker-href";
  * `onClose` is context-aware (#5): when the route carries a `?date=` (entered
  * from a dated calendar day) it returns to the dated picker so the date is
  * preserved; otherwise it falls back to the calendar home.
+ *
+ * `onSaved` lands on the calendar week containing the saved record so the
+ * new workout is visible on arrival.
  */
 export function NewWorkoutRoute() {
   const search = useSearch();
@@ -20,5 +24,10 @@ export function NewWorkoutRoute() {
   if (hasAction || hasSource) return <EditorPage />;
   const date = params.get("date");
   const closeTarget = date ? buildPickerHref(date) : "/calendar";
-  return <CreateWorkout onClose={() => navigate(closeTarget)} />;
+  return (
+    <CreateWorkout
+      onClose={() => navigate(closeTarget)}
+      onSaved={(savedDate) => navigate(calendarWeekHref(savedDate))}
+    />
+  );
 }

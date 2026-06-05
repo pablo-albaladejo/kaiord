@@ -11,7 +11,8 @@ const SAVED_ONLY = "Workout saved";
 
 export type SaveAndPushInput = {
   buildRecord: () => Promise<WorkoutRecord>;
-  onDone: () => void;
+  /** Called with the just-persisted record so callers can route by date. */
+  onDone: (record: WorkoutRecord) => void;
 };
 
 /**
@@ -46,7 +47,7 @@ export function useSaveAndPush({ buildRecord, onDone }: SaveAndPushInput) {
         toast.success(SAVED_ONLY);
       }
       setSaving(false);
-      onDone();
+      onDone(record);
     })();
   }, [record, sessionActive, push, toast, onDone]);
 
