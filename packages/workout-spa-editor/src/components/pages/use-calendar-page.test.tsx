@@ -136,12 +136,16 @@ describe("useCalendarPage", () => {
     });
 
     // Assert
+    // The bucket length check lives INSIDE waitFor: `ready` only gates
+    // the page skeleton, while the buckets hydrate through separate
+    // live queries that can emit after the state flips (the gap is
+    // wide enough to flake on contended CI runners).
     await waitFor(() => {
-      expect(result.current.state).toBe("ready");
+      if (result.current.state !== "ready") throw new Error("not ready yet");
+      expect(result.current.buckets.soloActualsByDay[MONDAY]).toHaveLength(1);
     });
     if (result.current.state !== "ready") throw new Error("not ready");
     expect(result.current.s.data.days[0]).toBe(MONDAY);
-    expect(result.current.buckets.soloActualsByDay[MONDAY]).toHaveLength(1);
     expect(result.current.suggestions).toEqual([]);
   });
 
@@ -212,8 +216,13 @@ describe("useCalendarPage", () => {
     });
 
     // Assert
+    // Same hydration race as the positive flow: wait for the bucket to
+    // materialise before pinning its contents.
     await waitFor(() => {
-      expect(result.current.state).toBe("ready");
+      if (result.current.state !== "ready") throw new Error("not ready yet");
+      expect(
+        result.current.buckets.soloActualsByDay[MONDAY] ?? []
+      ).not.toHaveLength(0);
     });
     if (result.current.state !== "ready") throw new Error("not ready");
     const mondayCards = result.current.buckets.soloActualsByDay[MONDAY] ?? [];
