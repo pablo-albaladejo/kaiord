@@ -19,10 +19,14 @@ export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [
       {
         icon: "sparkle",
         label: "Provider",
-        to: "/settings/ai",
+        to: "/settings/ai?section=providers",
         detailKey: "defaultProvider",
       },
-      { icon: "edit", label: "Custom instructions", to: "/settings/ai" },
+      {
+        icon: "edit",
+        label: "Custom instructions",
+        to: "/settings/ai?section=custom-instructions",
+      },
     ],
   },
   {
@@ -40,7 +44,11 @@ export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [
     eyebrow: "Privacy & data",
     rows: [
       { icon: "shield", label: "Data & privacy", to: "/settings/privacy" },
-      { icon: "upload", label: "Export everything", to: "/settings/privacy" },
+      {
+        icon: "shield",
+        label: "Manage your data",
+        to: "/settings/privacy?section=data-management",
+      },
     ],
   },
   {

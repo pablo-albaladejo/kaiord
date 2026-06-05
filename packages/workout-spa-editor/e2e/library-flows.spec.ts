@@ -155,7 +155,7 @@ test.describe("Library flows", () => {
     // the KRD name, so that's what we assert visible. `source=scratch`
     // is the new explicit signal that bypasses NewWorkoutPicker and
     // mounts the editor with whatever the store currently holds.
-    await page.waitForURL(/\/workout\/new\?source=scratch$/);
+    await page.waitForURL(/\/workout\/new\?source=scratch/);
     await expect(page.getByText(/Template/i).first()).toBeVisible();
   });
 

@@ -19,13 +19,18 @@ export const BOTTOM_NAV_TABS: readonly BottomNavTab[] = [
 
 /**
  * Derives whether a tab is active for the current location.
- * - Today: exact `/calendar` or the index route `/`.
+ * - Today: exact `/calendar`, the index route `/`, or any week-grid
+ *   `/calendar/:weekId` path (mirrors the Settings prefix rule).
  * - Settings: any `/settings`-prefixed path.
  * - Others: exact match.
  */
 export function isTabActive(tabPath: string, location: string): boolean {
   if (tabPath === "/calendar") {
-    return location === "/calendar" || location === "/";
+    return (
+      location === "/calendar" ||
+      location === "/" ||
+      location.startsWith("/calendar/")
+    );
   }
   if (tabPath === "/settings") {
     return location === "/settings" || location.startsWith("/settings/");

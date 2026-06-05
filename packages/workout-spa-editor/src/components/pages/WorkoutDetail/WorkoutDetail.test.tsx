@@ -8,10 +8,12 @@ import WorkoutDetail from "./WorkoutDetail";
 let mockRecord: WorkoutRecord | undefined;
 let mockLoading = false;
 let mockModel: ReviewModel | null = null;
+let mockSearch = "";
 const navigateMock = vi.fn();
 
 vi.mock("wouter", () => ({
   useLocation: () => ["/workout/view/w1", navigateMock],
+  useSearch: () => mockSearch,
 }));
 
 vi.mock("./use-workout-detail-record", () => ({
@@ -58,6 +60,7 @@ describe("WorkoutDetail", () => {
     mockRecord = RECORD;
     mockLoading = false;
     mockModel = MODEL;
+    mockSearch = "";
     navigateMock.mockClear();
   });
 
@@ -88,7 +91,7 @@ describe("WorkoutDetail", () => {
     expect(screen.getByText("Workout not found")).toBeInTheDocument();
   });
 
-  it("should navigate to the editor when Edit is clicked", () => {
+  it("should navigate to the editor with a detail origin when Edit is clicked", () => {
     // Arrange
 
     render(<WorkoutDetail id="w1" />);
@@ -99,6 +102,35 @@ describe("WorkoutDetail", () => {
 
     // Assert
 
-    expect(navigateMock).toHaveBeenCalledWith("/workout/w1");
+    expect(navigateMock).toHaveBeenCalledWith("/workout/w1?from=detail");
+  });
+
+  it("should navigate Back to /calendar by default when no origin is present", () => {
+    // Arrange
+
+    render(<WorkoutDetail id="w1" />);
+
+    // Act
+
+    screen.getByTestId("workout-detail-back").click();
+
+    // Assert
+
+    expect(navigateMock).toHaveBeenCalledWith("/calendar");
+  });
+
+  it("should navigate Back to /calendar when ?from=today is present", () => {
+    // Arrange
+
+    mockSearch = "from=today";
+
+    // Act
+
+    render(<WorkoutDetail id="w1" />);
+    screen.getByTestId("workout-detail-back").click();
+
+    // Assert
+
+    expect(navigateMock).toHaveBeenCalledWith("/calendar");
   });
 });

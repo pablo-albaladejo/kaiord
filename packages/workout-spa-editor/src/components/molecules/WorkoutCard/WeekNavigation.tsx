@@ -7,7 +7,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 
-import { getAdjacentWeekId } from "../../../utils/week-utils";
+import { getAdjacentWeekId, getCurrentWeekId } from "../../../utils/week-utils";
 
 export type WeekNavigationProps = {
   weekId: string;
@@ -19,7 +19,7 @@ export function WeekNavigation({ weekId, weekLabel }: WeekNavigationProps) {
 
   const goPrev = () => navigate(`/calendar/${getAdjacentWeekId(weekId, -1)}`);
   const goNext = () => navigate(`/calendar/${getAdjacentWeekId(weekId, 1)}`);
-  const goToday = () => navigate("/calendar");
+  const goToday = () => navigate(`/calendar/${getCurrentWeekId()}`);
 
   return (
     <div className="flex items-center gap-3" data-testid="week-navigation">

@@ -2,6 +2,7 @@ import { clearAllProviders } from "../../../application/ai/clear-all-providers";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { Button } from "../../atoms/Button";
+import { SETTINGS_SECTION_ATTR } from "../../pages/SettingsPage/settings-section";
 import { PrivacyInformationSection } from "./PrivacyInformationSection";
 
 const SECURE_STORAGE_PREFIX = "kaiord_secure_";
@@ -49,7 +50,10 @@ export const PrivacyTab: React.FC = () => {
         </p>
       </section>
 
-      <section>
+      <section
+        tabIndex={-1}
+        {...{ [SETTINGS_SECTION_ATTR]: "data-management" }}
+      >
         <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           Data Management
         </h3>

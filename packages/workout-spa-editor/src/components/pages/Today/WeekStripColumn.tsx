@@ -1,15 +1,18 @@
+import { Link } from "wouter";
+
 import type { WeekDay } from "./today-dates";
 
 export type WeekStripColumnProps = {
   day: WeekDay;
   fraction: number;
+  href: string;
 };
 
 const BAR_TRACK_HEIGHT = 40;
 const MIN_BAR_PX = 3;
 const PERCENT = 100;
 
-export function WeekStripColumn({ day, fraction }: WeekStripColumnProps) {
+export function WeekStripColumn({ day, fraction, href }: WeekStripColumnProps) {
   const barHeight = Math.max(
     MIN_BAR_PX,
     Math.round(fraction * BAR_TRACK_HEIGHT)
@@ -20,8 +23,10 @@ export function WeekStripColumn({ day, fraction }: WeekStripColumnProps) {
   const bar = day.isToday ? "bg-sky-400" : "bg-slate-600";
 
   return (
-    <div
-      className={`flex flex-1 flex-col items-center gap-1.5 rounded-md py-1.5 ${column}`}
+    <Link
+      href={href}
+      aria-label={`Open week of ${day.letter} ${day.dayNumber} in calendar`}
+      className={`flex flex-1 flex-col items-center gap-1.5 rounded-md py-1.5 transition-colors hover:bg-slate-800 ${column}`}
     >
       <span className="text-[11px] font-semibold">{day.letter}</span>
       <span className="text-[13px] font-bold tabular-nums">
@@ -36,6 +41,6 @@ export function WeekStripColumn({ day, fraction }: WeekStripColumnProps) {
           style={{ height: `${(barHeight / BAR_TRACK_HEIGHT) * PERCENT}%` }}
         />
       </div>
-    </div>
+    </Link>
   );
 }

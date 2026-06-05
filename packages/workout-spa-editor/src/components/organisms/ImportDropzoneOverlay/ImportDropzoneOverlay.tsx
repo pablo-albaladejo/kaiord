@@ -25,8 +25,10 @@ export function ImportDropzoneOverlay() {
   const { handleFileError } = useAppHandlers();
   const analytics = useAnalytics();
   const search = useSearch();
-  const date = new URLSearchParams(search).get("date");
-  const onFileLoad = useImportOnLoad(date);
+  const params = new URLSearchParams(search);
+  const date = params.get("date");
+  const from = params.get("from");
+  const onFileLoad = useImportOnLoad(date, from);
   const clearWorkout = useWorkoutStore((s) => s.clearWorkout);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const mountInitializedRef = useRef(false);

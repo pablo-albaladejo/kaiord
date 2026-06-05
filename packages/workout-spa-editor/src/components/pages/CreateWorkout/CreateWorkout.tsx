@@ -2,6 +2,7 @@ import { useCallback } from "react";
 
 import { thresholdsForSport } from "../../../lib/athlete";
 import { buildReviewModel } from "../../../lib/workout-review";
+import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { buildWorkoutRecord } from "./build-workout-record";
 import { CreateGeneratingPhase } from "./CreateGeneratingPhase";
 import { CreateInputPhase } from "./CreateInputPhase";
@@ -17,6 +18,7 @@ export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
   const create = useCreateWorkout();
   const { phase, sport, profile, activeProfileId, generatedKrd, promptText } =
     create;
+  const { dateParam } = create;
 
   const thresholds = thresholdsForSport(profile, sport);
   const model = generatedKrd
@@ -32,8 +34,9 @@ export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
       prompt: promptText,
       title,
       krd: generatedKrd,
+      date: dateParam,
     });
-  }, [activeProfileId, sport, promptText, title, generatedKrd]);
+  }, [activeProfileId, sport, promptText, title, generatedKrd, dateParam]);
 
   const { save, saving } = useSaveAndPush({ buildRecord, onDone: onClose });
 
@@ -42,6 +45,13 @@ export default function CreateWorkout({ onClose }: CreateWorkoutProps) {
       data-testid="create-workout"
       className="mx-auto min-h-screen w-full max-w-md bg-surface-deep p-4"
     >
+      {/* Eager route heading (D5): the route-heading marker lives on a stable
+          element so every phase — including `generating`, whose body has no
+          heading — exposes a focus target for useFocusOnRouteChange. Copy is
+          stable across phases; phase-specific titles live in CreateSheetHeader. */}
+      <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">
+        New session
+      </h1>
       {phase === "input" && (
         <CreateInputPhase
           sport={sport}

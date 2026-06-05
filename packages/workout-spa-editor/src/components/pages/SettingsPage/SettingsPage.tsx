@@ -1,5 +1,6 @@
 import { Redirect, useLocation, useParams } from "wouter";
 
+import { useFocusOnSectionChange } from "../../../hooks/use-focus-on-section-change";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Button } from "../../atoms/Button/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
@@ -17,6 +18,7 @@ const SETTINGS_ROOT = "/settings" as const;
 export default function SettingsPage() {
   const { tab } = useParams<SettingsPageParams>();
   const [, navigate] = useLocation();
+  useFocusOnSectionChange();
 
   if (tab !== undefined && !isSettingsTab(tab))
     return <Redirect to={SETTINGS_ROOT} />;

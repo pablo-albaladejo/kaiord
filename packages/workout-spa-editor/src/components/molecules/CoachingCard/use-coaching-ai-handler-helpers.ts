@@ -11,6 +11,7 @@ import type { MutableRefObject } from "react";
 
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import type { PersistencePort } from "../../../ports/persistence-port";
+import { withOrigin } from "../../../routing/with-origin";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { pickProvider, runConvertWithAi } from "./use-coaching-ai-helpers";
@@ -74,7 +75,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   }
   if (result.ok) {
     ctx.onClose();
-    ctx.navigate(`/workout/${result.workoutId}`);
+    ctx.navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     return;
   }
   if (result.reason !== "ai-cancelled") {

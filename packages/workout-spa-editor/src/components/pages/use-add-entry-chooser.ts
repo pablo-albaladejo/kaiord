@@ -9,6 +9,8 @@
 import { useCallback, useState } from "react";
 import { useLocation } from "wouter";
 
+import { withOrigin } from "../../routing/with-origin";
+
 export function useAddEntryChooser() {
   const [, navigate] = useLocation();
   const [addEntryDate, setAddEntryDate] = useState<string | null>(null);
@@ -19,7 +21,8 @@ export function useAddEntryChooser() {
   }, []);
 
   const handleChooseWorkout = useCallback(() => {
-    if (addEntryDate) navigate(`/workout/new?date=${addEntryDate}`);
+    if (addEntryDate)
+      navigate(withOrigin(`/workout/new?date=${addEntryDate}`, "calendar-day"));
     setAddEntryDate(null);
   }, [addEntryDate, navigate]);
 

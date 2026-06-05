@@ -1,10 +1,9 @@
 /**
- * Hook for the NewWorkoutPicker's inline Template-tile schedule flow.
+ * Hook for the inline Template schedule flow.
  *
- * When the picker is mounted with `?date=` in the URL, the Template
- * tile opens `TemplatePickerDialog` inline; on template click this
- * hook fires `scheduleTemplate` with the URL's date and navigates
- * back to the calendar on success.
+ * Given a `?date=` from the URL, on template click this hook fires
+ * `scheduleTemplate` with that date and navigates back to the
+ * calendar on success. Consumed by `useLibrarySchedule`.
  */
 
 import { useLocation } from "wouter";

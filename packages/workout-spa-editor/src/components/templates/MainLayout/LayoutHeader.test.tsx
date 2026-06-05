@@ -62,7 +62,7 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        screen.getByRole("button", { name: /open profile manager/i })
+        screen.getByTestId("status-header-profile-button")
       ).toBeInTheDocument();
     });
 
@@ -132,22 +132,20 @@ describe("LayoutHeader", () => {
   });
 
   describe("entry-button navigation", () => {
-    it("should navigate to /settings/profile when the profile button is clicked", async () => {
+    it("should navigate to /athlete when the profile button is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
       const { ui, location } = withRouter(<LayoutHeader />);
       renderWithProviders(ui);
 
       // Act
-      await user.click(
-        screen.getByRole("button", { name: /open profile manager/i })
-      );
+      await user.click(screen.getByTestId("status-header-profile-button"));
 
       // Assert
-      expect(location.history).toContain("/settings/profile");
+      expect(location.history).toContain("/athlete");
     });
 
-    it("should navigate to /settings/ai when the settings button is clicked", async () => {
+    it("should navigate to /settings when the settings button is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
       const { ui, location } = withRouter(<LayoutHeader />);
@@ -157,7 +155,7 @@ describe("LayoutHeader", () => {
       await user.click(screen.getByRole("button", { name: /open settings/i }));
 
       // Assert
-      expect(location.history).toContain("/settings/ai");
+      expect(location.history).toContain("/settings");
     });
 
     it("should navigate to /workout/new when the new-workout button is clicked", async () => {

@@ -9,7 +9,7 @@ export type CreateSheetHeaderProps = {
 export function CreateSheetHeader({ title, onClose }: CreateSheetHeaderProps) {
   return (
     <div className="mb-4 flex items-center justify-between">
-      <h1 className="text-[19px] font-bold text-slate-50">{title}</h1>
+      <h2 className="text-[19px] font-bold text-slate-50">{title}</h2>
       <button
         type="button"
         aria-label="Close"

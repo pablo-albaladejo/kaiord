@@ -10,14 +10,14 @@ export function ProfileEntryButton() {
   const label = activeProfile?.name ?? "No profile";
 
   const ariaLabel = activeProfile
-    ? `Open profile manager (active profile: ${activeProfile.name})`
-    : "Open profile manager (no active profile)";
+    ? `Open athlete profile (active profile: ${activeProfile.name})`
+    : "Open athlete profile (no active profile)";
 
   return (
     <Button
       variant="tertiary"
       size="sm"
-      onClick={() => navigate("/settings/profile")}
+      onClick={() => navigate("/athlete")}
       aria-label={ariaLabel}
       data-testid="status-header-profile-button"
     >

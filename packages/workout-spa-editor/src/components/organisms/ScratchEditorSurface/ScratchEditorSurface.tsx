@@ -15,6 +15,7 @@ import { AiBanner } from "../../molecules/AiBanner/AiBanner";
 import { useCoachingSidebar } from "../../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorBody } from "../../pages/EditorBody";
 import { WorkoutSection } from "../../pages/WorkoutSection/WorkoutSection";
+import { ScratchScheduleButton } from "./ScratchScheduleButton";
 
 const DEFAULT_SCRATCH_SPORT: Sport = "cycling";
 const DEFAULT_SCRATCH_NAME = "Untitled workout";
@@ -39,7 +40,7 @@ const DEFAULT_SCRATCH_NAME = "Untitled workout";
  * Both reads/writes are gated on `autoCreatedRef.current` so library
  * / e2e-seeded workouts never leak into the preference.
  */
-export function ScratchEditorSurface() {
+export function ScratchEditorSurface({ date }: { date: string | null }) {
   const currentWorkout = useCurrentWorkout();
   const createEmpty = useCreateEmptyWorkout();
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
@@ -85,6 +86,7 @@ export function ScratchEditorSurface() {
   return (
     <div className="space-y-6">
       <AiBanner />
+      {date && <ScratchScheduleButton date={date} />}
       {workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection

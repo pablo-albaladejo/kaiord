@@ -1,7 +1,7 @@
 /**
  * RouteErrorFallback - UI shown when a route component crashes.
  */
-import { useLocation } from "wouter";
+import { Link } from "wouter";
 
 type RouteErrorFallbackProps = {
   error: Error;
@@ -12,8 +12,6 @@ export function RouteErrorFallback({
   error,
   onRetry,
 }: RouteErrorFallbackProps) {
-  const [, navigate] = useLocation();
-
   return (
     <div className="flex flex-col items-center gap-4 p-8" role="alert">
       <h2 className="text-lg font-semibold">Something went wrong</h2>
@@ -25,12 +23,9 @@ export function RouteErrorFallback({
         >
           Retry
         </button>
-        <button
-          className="rounded border px-4 py-2 text-sm"
-          onClick={() => navigate("/calendar")}
-        >
-          Go to Calendar
-        </button>
+        <Link href="/calendar" className="rounded border px-4 py-2 text-sm">
+          Go to Today
+        </Link>
       </div>
     </div>
   );

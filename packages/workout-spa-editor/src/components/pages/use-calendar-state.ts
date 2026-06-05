@@ -7,6 +7,7 @@ import { useLocation } from "wouter";
 
 import { useGarminBridge } from "../../contexts";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
+import { withOrigin } from "../../routing/with-origin";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { getWeekIdForDate } from "../../utils/week-utils";
 import { useCalendarData } from "./calendar-hooks";
@@ -42,7 +43,7 @@ export function useCalendarState() {
       if (workout.state === "raw" || workout.state === "skipped") {
         setSelectedWorkout(workout);
       } else {
-        navigate(`/workout/${workout.id}`);
+        navigate(withOrigin(`/workout/${workout.id}`, "calendar"));
       }
     },
     [navigate]

@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { convertCoachingActivity } from "../../../application/coaching/convert-coaching-activity";
 import { useAnalytics } from "../../../contexts";
 import { usePersistence } from "../../../contexts/persistence-context";
+import { withOrigin } from "../../../routing/with-origin";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 
 const parseSourceId = (activity: CoachingActivity): string | null => {
@@ -61,7 +62,7 @@ export const useCoachingConvert = (
         });
       }
       onClose();
-      navigate(`/workout/${result.workoutId}`);
+      navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Conversion failed");
     } finally {

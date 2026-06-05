@@ -11,6 +11,7 @@ import { useSearch } from "wouter";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
+import { parseBackOrigin } from "../../routing/back-origin";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
@@ -35,8 +36,9 @@ export default function EditorPage({ id }: EditorPageProps) {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const dateParam = params.get("date");
+  const origin = parseBackOrigin(params.get("from"));
   const newWorkoutMode = deriveNewWorkoutMode(search);
-  const handleBack = useBackHandler(newWorkoutMode, dateParam);
+  const handleBack = useBackHandler(newWorkoutMode, dateParam, origin);
 
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
@@ -76,7 +78,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           onRepush={() => pushWorkout(`garmin-${Date.now()}`)}
         />
       )}
-      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode)}
+      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
       {showPopulatedBody && workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection

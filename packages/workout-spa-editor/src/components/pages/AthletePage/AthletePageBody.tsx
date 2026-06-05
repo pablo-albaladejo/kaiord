@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 import { type ActiveSport, ATHLETE_SPORTS } from "../../../lib/athlete";
-import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import type { Profile } from "../../../types/profile";
 import { Segmented } from "../../atoms/Segmented";
 import { AthleteConnections } from "../../organisms/AthleteConnections";
@@ -15,8 +14,6 @@ type AthletePageBodyProps = {
   profile: Profile;
 };
 
-const ROUTE_HEADING_PROPS = { [ROUTE_HEADING_ATTR]: true } as const;
-
 export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
   const [sport, setSport] = useState<ActiveSport>(() => defaultSport(profile));
   const sportLabel =
@@ -24,9 +21,6 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
 
   return (
     <div className="space-y-5 px-4 py-4">
-      <h1 {...ROUTE_HEADING_PROPS} className="sr-only">
-        Athlete
-      </h1>
       <AthleteIdentity profile={profile} />
       <Segmented
         options={[...ATHLETE_SPORTS]}

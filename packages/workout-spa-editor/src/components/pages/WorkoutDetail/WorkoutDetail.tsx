@@ -1,6 +1,9 @@
 import { useCallback } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 
+import { parseBackOrigin } from "../../../routing/back-origin";
+import { resolveBackTarget } from "../../../routing/resolve-back-target";
+import { withOrigin } from "../../../routing/with-origin";
 import { RouteSpinner } from "../../atoms/RouteSpinner";
 import { useWorkoutDetailModel } from "./use-workout-detail-model";
 import { useWorkoutDetailRecord } from "./use-workout-detail-record";
@@ -11,12 +14,17 @@ export type WorkoutDetailProps = { id?: string };
 
 export default function WorkoutDetail({ id }: WorkoutDetailProps) {
   const [, navigate] = useLocation();
+  const search = useSearch();
+  const origin = parseBackOrigin(new URLSearchParams(search).get("from"));
   const { record, loading } = useWorkoutDetailRecord(id);
   const model = useWorkoutDetailModel(record);
 
-  const onBack = useCallback(() => navigate("/calendar"), [navigate]);
+  const onBack = useCallback(
+    () => navigate(resolveBackTarget({ origin })),
+    [navigate, origin]
+  );
   const onEdit = useCallback(
-    () => id && navigate(`/workout/${id}`),
+    () => id && navigate(withOrigin(`/workout/${id}`, "detail")),
     [navigate, id]
   );
 

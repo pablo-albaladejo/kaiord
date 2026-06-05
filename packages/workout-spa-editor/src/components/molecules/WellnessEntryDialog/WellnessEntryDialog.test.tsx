@@ -74,7 +74,7 @@ describe("WellnessEntryDialog", () => {
 
     // Assert
     const target = history[history.length - 1];
-    expect(target).toBe("/workout/new?action=import");
+    expect(target).toBe("/workout/new?action=import&from=today");
     expect(target).not.toContain("date=");
   });
 

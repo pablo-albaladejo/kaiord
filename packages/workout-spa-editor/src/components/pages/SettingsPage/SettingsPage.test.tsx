@@ -205,4 +205,62 @@ describe("SettingsPage", () => {
       });
     });
   });
+
+  describe("section deep-links", () => {
+    const sectionOf = () =>
+      (document.activeElement as HTMLElement | null)?.getAttribute(
+        "data-settings-section"
+      ) ?? null;
+
+    it("should focus the providers section for the providers query", async () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/ai?section=providers");
+
+      // Assert
+      await waitFor(() => {
+        expect(sectionOf()).toBe("providers");
+      });
+    });
+
+    it("should focus the data management section for the data-management query", async () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/privacy?section=data-management");
+
+      // Assert
+      await waitFor(() => {
+        expect(sectionOf()).toBe("data-management");
+      });
+    });
+
+    it("should still render the ai tab top with no section query", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/ai");
+
+      // Assert
+      expect(screen.getByText("LLM Providers")).toBeInTheDocument();
+      expect(sectionOf()).toBeNull();
+    });
+
+    it("should point the manage-your-data row at the privacy data-management section", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const { memory } = renderAtPath("/settings");
+
+      // Act
+      await user.click(screen.getByTestId("settings-row-Manage your data"));
+
+      // Assert
+      await waitFor(() => {
+        expect(memory.history.at(-1)).toBe(
+          "/settings/privacy?section=data-management"
+        );
+      });
+    });
+  });
 });
