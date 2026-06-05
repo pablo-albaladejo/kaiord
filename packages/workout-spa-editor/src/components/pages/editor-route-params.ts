@@ -1,8 +1,7 @@
-import { type BackOrigin, parseBackOrigin } from "../../routing/back-origin";
-import {
-  deriveNewWorkoutMode,
-  type NewWorkoutMode,
-} from "./render-new-workout-surface";
+import type { BackOrigin } from "../../routing/back-origin";
+import { parseBackOrigin } from "../../routing/back-origin";
+import type { NewWorkoutMode } from "./render-new-workout-surface";
+import { deriveNewWorkoutMode } from "./render-new-workout-surface";
 
 export type EditorRouteParams = {
   dateParam: string | null;
