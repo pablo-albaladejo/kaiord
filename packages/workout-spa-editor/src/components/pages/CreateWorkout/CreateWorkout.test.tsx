@@ -10,7 +10,7 @@ function renderCreate() {
   const { hook } = memoryLocation({ path: "/workout/new", record: true });
   return renderWithProviders(
     <Router hook={hook}>
-      <CreateWorkout onClose={vi.fn()} />
+      <CreateWorkout onClose={vi.fn()} onSaved={vi.fn()} />
     </Router>
   );
 }

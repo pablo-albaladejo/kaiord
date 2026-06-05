@@ -1,8 +1,11 @@
 import { expect, test } from "./fixtures/base";
+import { buildStructuredCyclingKrd } from "./helpers/build-structured-cycling-krd";
+import { clearDexie, getWeekId } from "./helpers/seed-dexie";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 const EXPECTED_STEP_CARDS_AFTER_DUPLICATE = 3;
 const IMMEDIATE_DELETION_GRACE_MS = 300;
+const ISO_DATE_LENGTH = 10;
 
 /**
  * Critical Path: Step Management (Create, Delete, Duplicate)
@@ -213,5 +216,35 @@ test.describe("Step Management Flow", () => {
     await page.keyboard.press("Control+S");
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.krd$/);
+  });
+});
+
+test.describe("Create → Save & schedule → calendar landing", () => {
+  test("should land on the calendar week with the new workout visible after Save & schedule", async ({
+    page,
+  }) => {
+    // Arrange — clean DB with the default active profile, starting on the calendar
+    await page.goto("/calendar");
+    await page.waitForFunction(() => "__KAIORD_DB__" in window, undefined, {
+      timeout: 10000,
+    });
+    await clearDexie(page);
+    const today = new Date().toISOString().slice(0, ISO_DATE_LENGTH);
+    const weekId = getWeekId(today);
+
+    // Act — author a scratch workout without a date (defaults to today) and save
+    await seedEmptyWorkout(
+      page,
+      buildStructuredCyclingKrd(new Date().toISOString())
+    );
+    const scheduleButton = page.getByTestId("scratch-schedule-button");
+    await expect(scheduleButton).toBeEnabled({ timeout: 10000 });
+    await scheduleButton.click();
+
+    // Assert — back on the calendar week containing today, new card visible
+    await expect(page).toHaveURL(new RegExp(`/calendar/${weekId}$`));
+    await expect(
+      page.locator('[data-testid^="workout-card-"]').first()
+    ).toBeVisible({ timeout: 10000 });
   });
 });
