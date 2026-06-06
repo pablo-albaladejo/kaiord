@@ -7,10 +7,10 @@
 import { expect, test } from "./fixtures/base";
 
 test.describe("Calendar Navigation", () => {
-  test("/ redirects to /today", async ({ page }) => {
+  test("/ redirects to the current week's calendar", async ({ page }) => {
     await page.goto("/");
-    await page.waitForURL(/\/today/);
-    expect(page.url()).toContain("/today");
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
   test("/today shows the Today page", async ({ page }) => {
@@ -34,10 +34,12 @@ test.describe("Calendar Navigation", () => {
     ).toBeVisible();
   });
 
-  test("/nonexistent redirects to /today", async ({ page }) => {
+  test("/nonexistent redirects to the current week's calendar", async ({
+    page,
+  }) => {
     await page.goto("/nonexistent");
-    await page.waitForURL(/\/today/);
-    expect(page.url()).toContain("/today");
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
   test('Header "Today" button navigates to the Today page', async ({
