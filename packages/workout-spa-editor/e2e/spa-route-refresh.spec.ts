@@ -82,26 +82,26 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
   test("Test 2 — in-app navigation prefixes URL", async ({ page }) => {
     await page.goto(`${server.url}/editor/`, { waitUntil: "load" });
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/today",
+      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
       null,
       {
         timeout: 15_000,
       }
     );
 
-    // Compare on pathname, not the full URL: a regex like /\/today$/ matches
-    // both `/today` and `/editor/today`, which is the opposite of the
-    // distinction this test exists to make.
+    // Compare on pathname, not the full URL: a base-less regex matches both
+    // `/calendar/...` and `/editor/calendar/...`, which is the opposite of
+    // the distinction this test exists to make.
     const pathname = new URL(page.url()).pathname;
-    expect(pathname).toBe("/editor/today");
+    expect(pathname).toMatch(/^\/editor\/calendar\/\d{4}-W\d{2}$/);
   });
 
-  test("Test 3 — refresh inside SPA stays at /editor/today", async ({
+  test("Test 3 — refresh inside SPA stays on the calendar week", async ({
     page,
   }) => {
     await page.goto(`${server.url}/editor/`, { waitUntil: "load" });
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/today",
+      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
       null,
       {
         timeout: 15_000,
@@ -109,14 +109,14 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
     );
     await page.reload({ waitUntil: "load" });
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/today",
+      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
       null,
       {
         timeout: 15_000,
       }
     );
 
-    expect(page.url()).toMatch(/\/editor\/today$/);
+    expect(page.url()).toMatch(/\/editor\/calendar\/\d{4}-W\d{2}$/);
   });
 
   test("Test 4 — analytics path remains base-relative", async ({ page }) => {
@@ -173,13 +173,13 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       }
     );
     await page.waitForFunction(
-      () => window.location.pathname === "/editor/today",
+      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
       null,
       {
         timeout: 15_000,
       }
     );
 
-    expect(page.url()).toMatch(/\/editor\/today$/);
+    expect(page.url()).toMatch(/\/editor\/calendar\/\d{4}-W\d{2}$/);
   });
 });

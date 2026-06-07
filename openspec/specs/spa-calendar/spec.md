@@ -10,12 +10,12 @@ Week-view calendar as the editor's home page — URL-addressable weeks, per-day 
 
 ### Requirement: Calendar week view
 
-The SPA SHALL display the calendar week view for every `/calendar*` URL: `/calendar/:weekId` SHALL render that week, and bare `/calendar` SHALL redirect (replace, one hop) to `/calendar/<current week>` so the URL family always resolves to one surface. The default home page SHALL be the Today dashboard at `/today` (`/` redirects there). The view SHALL show 7 days (Monday through Sunday) with workout cards for each day. The calendar SHALL support navigation between weeks via previous/next controls and a "Today" button.
+The SPA SHALL display the calendar week view for every `/calendar*` URL: `/calendar/:weekId` SHALL render that week, and bare `/calendar` SHALL redirect (replace, one hop) to `/calendar/<current week>` so the URL family always resolves to one surface. The default home page SHALL be the current week's calendar (`/` replace-redirects to `/calendar/<current week>`); the Today dashboard remains available at `/today`. The view SHALL show 7 days (Monday through Sunday) with workout cards for each day. The calendar SHALL support navigation between weeks via previous/next controls and a "Today" button.
 
 #### Scenario: User opens the app
 
 - **WHEN** the user navigates to `/`
-- **THEN** the system SHALL redirect to `/today` and display the Today dashboard
+- **THEN** the system SHALL redirect (replace) to `/calendar/<current week>` and display the current week's calendar view
 
 #### Scenario: User opens the bare calendar URL
 
