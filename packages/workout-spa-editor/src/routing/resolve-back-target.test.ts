@@ -69,7 +69,7 @@ describe("resolveBackTarget", () => {
     expect(result).toBe("/workout/new?date=2026-06-01");
   });
 
-  it("should resolve a calendar-day origin without a date to the Today home", () => {
+  it("should resolve a calendar-day origin without a date to the calendar home", () => {
     // Arrange
     const input = { origin: "calendar-day" as const, date: null };
 
@@ -77,7 +77,7 @@ describe("resolveBackTarget", () => {
     const result = resolveBackTarget(input);
 
     // Assert
-    expect(result).toBe("/today");
+    expect(result).toBe("/calendar");
   });
 
   it("should resolve a detail origin with an id to the detail view", () => {
@@ -91,7 +91,7 @@ describe("resolveBackTarget", () => {
     expect(result).toBe("/workout/view/w1");
   });
 
-  it("should resolve a detail origin without an id to the Today home", () => {
+  it("should resolve a detail origin without an id to the calendar home", () => {
     // Arrange
     const input = { origin: "detail" as const, detailId: null };
 
@@ -99,10 +99,10 @@ describe("resolveBackTarget", () => {
     const result = resolveBackTarget(input);
 
     // Assert
-    expect(result).toBe("/today");
+    expect(result).toBe("/calendar");
   });
 
-  it("should resolve a null origin to the default /today home", () => {
+  it("should resolve a null origin to the default /calendar home", () => {
     // Arrange
     const input = { origin: null };
 
@@ -110,6 +110,6 @@ describe("resolveBackTarget", () => {
     const result = resolveBackTarget(input);
 
     // Assert
-    expect(result).toBe("/today");
+    expect(result).toBe("/calendar");
   });
 });

@@ -23,7 +23,7 @@ export function NewWorkoutRoute() {
   const hasSource = params.get("source") === "scratch";
   if (hasAction || hasSource) return <EditorPage />;
   const date = params.get("date");
-  const closeTarget = date ? buildPickerHref(date) : "/today";
+  const closeTarget = date ? buildPickerHref(date) : "/calendar";
   return (
     <CreateWorkout
       onClose={() => navigate(closeTarget)}

@@ -29,7 +29,8 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
     <Suspense fallback={<RouteSpinner />}>
       <Switch>
         <Route path="/">
-          <Redirect to="/today" />
+          {/* Default view: the current week's calendar (1-hop). */}
+          <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
         </Route>
         <Route path="/today">{guard(<TodayPage />)}</Route>
         {/* Bare /calendar is intentionally a non-durable alias for the
@@ -56,7 +57,8 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
           <HealthSubRouter analytics={analytics} />
         </Route>
         <Route>
-          <Redirect to="/today" />
+          {/* Unknown routes settle on the default view (calendar). */}
+          <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
         </Route>
       </Switch>
     </Suspense>

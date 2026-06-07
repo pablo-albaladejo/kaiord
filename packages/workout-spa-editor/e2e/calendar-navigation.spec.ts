@@ -7,10 +7,10 @@
 import { expect, test } from "./fixtures/base";
 
 test.describe("Calendar Navigation", () => {
-  test("/ redirects to /today", async ({ page }) => {
+  test("/ redirects to the current week's calendar", async ({ page }) => {
     await page.goto("/");
-    await page.waitForURL(/\/today/);
-    expect(page.url()).toContain("/today");
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
   test("/today shows the Today page", async ({ page }) => {
@@ -34,10 +34,12 @@ test.describe("Calendar Navigation", () => {
     ).toBeVisible();
   });
 
-  test("/nonexistent redirects to /today", async ({ page }) => {
+  test("/nonexistent redirects to the current week's calendar", async ({
+    page,
+  }) => {
     await page.goto("/nonexistent");
-    await page.waitForURL(/\/today/);
-    expect(page.url()).toContain("/today");
+    await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
   test('Header "Today" button navigates to the Today page', async ({
@@ -58,7 +60,9 @@ test.describe("Calendar Navigation", () => {
     await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
-  test("Kaiord logo navigates to /today (SPA, no reload)", async ({ page }) => {
+  test("Kaiord logo navigates to the calendar (SPA, no reload)", async ({
+    page,
+  }) => {
     await page.goto("/calendar/2026-W15");
     await expect(page.getByTestId("calendar-page")).toBeVisible();
 
@@ -68,9 +72,16 @@ test.describe("Calendar Navigation", () => {
     });
 
     await page.getByRole("link", { name: /Kaiord Editor/i }).click();
-    // The logo is the durable "home" link → /today since the split.
-    await page.waitForURL(/\/today$/);
-    await expect(page.getByTestId("today-page")).toBeVisible();
+    // The logo is the durable "home" link → the calendar (default view);
+    // bare /calendar replace-redirects to the CURRENT week's grid, so the
+    // URL must leave the seeded 2026-W15 (a plain week-id pattern would
+    // match the starting URL and resolve before the navigation).
+    await page.waitForURL(
+      (url) =>
+        /\/calendar\/\d{4}-W\d{2}$/.test(url.pathname) &&
+        !url.pathname.endsWith("/2026-W15")
+    );
+    await expect(page.getByTestId("week-navigation")).toBeVisible();
 
     const survived = await page.evaluate(
       () => (window as unknown as Record<string, unknown>).__SPA_NAV_CHECK__

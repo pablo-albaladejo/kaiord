@@ -105,7 +105,7 @@ describe("WorkoutDetail", () => {
     expect(navigateMock).toHaveBeenCalledWith("/workout/w1?from=detail");
   });
 
-  it("should navigate Back to /today by default when no origin is present", () => {
+  it("should navigate Back to /calendar by default when no origin is present", () => {
     // Arrange
 
     render(<WorkoutDetail id="w1" />);
@@ -116,7 +116,7 @@ describe("WorkoutDetail", () => {
 
     // Assert
 
-    expect(navigateMock).toHaveBeenCalledWith("/today");
+    expect(navigateMock).toHaveBeenCalledWith("/calendar");
   });
 
   it("should navigate Back to /today when ?from=today is present", () => {

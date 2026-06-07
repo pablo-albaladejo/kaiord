@@ -109,31 +109,31 @@ describe("Routing", () => {
     });
   });
 
-  it("should redirect / to /today", async () => {
+  it("should redirect / to the current week's calendar", async () => {
     // Arrange
 
     // Act
 
-    renderAtPath("/");
+    const { location } = renderAtPath("/");
 
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByTestId("today-page")).toBeInTheDocument();
+      expect(location.history.at(-1)).toMatch(/^\/calendar\/\d{4}-W\d{2}$/);
     });
   });
 
-  it("should redirect unknown routes to /today", async () => {
+  it("should redirect unknown routes to the current week's calendar", async () => {
     // Arrange
 
     // Act
 
-    renderAtPath("/nonexistent");
+    const { location } = renderAtPath("/nonexistent");
 
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByTestId("today-page")).toBeInTheDocument();
+      expect(location.history.at(-1)).toMatch(/^\/calendar\/\d{4}-W\d{2}$/);
     });
   });
 

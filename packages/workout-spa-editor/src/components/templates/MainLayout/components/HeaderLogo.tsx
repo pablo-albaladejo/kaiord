@@ -16,7 +16,7 @@ import { Link } from "wouter";
 export function HeaderLogo() {
   return (
     <Link
-      href="/today"
+      href="/calendar"
       className="flex shrink-0 items-center gap-3 no-underline"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-white">

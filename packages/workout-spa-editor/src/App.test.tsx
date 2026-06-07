@@ -64,7 +64,7 @@ describe("App", () => {
     expect(container).toBeInTheDocument();
   });
 
-  it("should render the Today page by default when no workout is loaded", async () => {
+  it("should render the calendar by default when no workout is loaded", async () => {
     // Arrange
 
     window.localStorage.setItem("workout-spa-onboarding-completed", "true");
@@ -75,7 +75,7 @@ describe("App", () => {
 
     // Assert
 
-    expect(await screen.findByTestId("today-page")).toBeInTheDocument();
+    expect(await screen.findByTestId("calendar-page")).toBeInTheDocument();
   });
 
   describe("onboarding tutorial integration (Requirements 37.1, 37.5)", () => {

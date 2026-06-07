@@ -26,7 +26,7 @@ function wrapWithRouter(path: string) {
 
 describe("useRouteAnnouncerLabel", () => {
   it.each([
-    ["/", "Today page"],
+    ["/", "Calendar page"],
     ["/today", "Today page"],
     ["/calendar", "Calendar page"],
     ["/calendar/2026-W18", "Calendar page"],

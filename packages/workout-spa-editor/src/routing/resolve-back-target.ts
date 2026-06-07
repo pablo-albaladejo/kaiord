@@ -3,17 +3,16 @@
  *
  * Always returns a known SPA surface — never `history.back()` — so a
  * deep-link landing can never walk off the app. Null/unknown origin
- * degrades to the Today home. `week` pins calendar-origin targets to the
- * originating `/calendar/:weekId`; without it, bare `/calendar` lands on
- * the current week via the route-level redirect. `coaching` writers pass
- * no week by design (documented behavior delta: they land on the current
- * week, previously the Today dashboard).
+ * degrades to the calendar home (the app's default view). `week` pins
+ * calendar-origin targets to the originating `/calendar/:weekId`; without
+ * it, bare `/calendar` lands on the current week via the route-level
+ * redirect. `coaching` writers pass no week by design.
  */
 
 import type { BackOrigin } from "./back-origin";
 import { buildPickerHref } from "./picker-href";
 
-const DEFAULT_TARGET = "/today";
+const DEFAULT_TARGET = "/calendar";
 
 export type ResolveBackInput = {
   origin: BackOrigin | null;
