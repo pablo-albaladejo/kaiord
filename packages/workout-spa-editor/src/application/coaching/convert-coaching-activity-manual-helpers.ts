@@ -25,7 +25,7 @@ export const handleExistingManualWorkout = async (
     await deps.workouts.put({
       ...existing,
       state: "structured",
-      krd: buildCoachingTemplateKrd(activity.sport),
+      krd: buildCoachingTemplateKrd(activity.sport, activity.title),
       updatedAt: deps.clock(),
     });
   }

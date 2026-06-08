@@ -40,7 +40,7 @@ const createNewWorkout = async (
     id: deps.newWorkoutId(),
     activity,
     namespacedSourceId: ns,
-    krd: buildCoachingTemplateKrd(activity.sport),
+    krd: buildCoachingTemplateKrd(activity.sport, activity.title),
     aiMeta: null,
     now: deps.clock(),
   });
