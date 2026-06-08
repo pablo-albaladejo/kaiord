@@ -10,8 +10,10 @@ import { useHealthSleepWeekLive } from "../../../hooks/health/use-health-sleep-w
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { Profile } from "../../../types/profile";
+import type { TodayBuckets } from "./build-today-buckets";
 import { toIsoDate, type WeekDay, weekDays } from "./today-dates";
 import { buildReadinessModel, type ReadinessModel } from "./today-readiness";
+import { useTodayPlannedBuckets } from "./use-today-planned-buckets";
 import { useWeekWorkoutsLive } from "./use-today-workouts-live";
 
 export type TodayData = {
@@ -19,7 +21,7 @@ export type TodayData = {
   todayIso: string;
   days: WeekDay[];
   weekWorkouts: WorkoutRecord[] | undefined;
-  todayWorkout: WorkoutRecord | undefined;
+  planned: TodayBuckets;
   readiness: ReadinessModel;
 };
 
@@ -29,6 +31,7 @@ export function useTodayData(now: Date): TodayData {
   const profile = active?.profile ?? null;
 
   const days = useMemo(() => weekDays(now), [now]);
+  const dayIsos = useMemo(() => days.map((d) => d.iso), [days]);
   const todayIso = toIsoDate(now);
   const start = days[0].iso;
   const end = days[days.length - 1].iso;
@@ -43,7 +46,12 @@ export function useTodayData(now: Date): TodayData {
     end: todayIso,
   });
 
-  const todayWorkout = weekWorkouts?.find((w) => w.date === todayIso);
+  const planned = useTodayPlannedBuckets(
+    profileId,
+    dayIsos,
+    todayIso,
+    weekWorkouts
+  );
   const readiness = buildReadinessModel(
     hrvRecords?.at(-1)?.krd,
     sleepRecords?.at(-1)?.krd
@@ -54,7 +62,7 @@ export function useTodayData(now: Date): TodayData {
     todayIso,
     days,
     weekWorkouts,
-    todayWorkout,
+    planned,
     readiness,
   };
 }
