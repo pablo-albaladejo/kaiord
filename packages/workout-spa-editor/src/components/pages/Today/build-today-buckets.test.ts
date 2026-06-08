@@ -66,7 +66,7 @@ describe("buildTodayBuckets", () => {
     // Act
     const buckets = buildTodayBuckets({
       dayIsos: DAYS,
-      todayIso: TODAY,
+      focusIso: TODAY,
       weekWorkouts: [raw],
       coachingByDay: {},
       matched: [],
@@ -85,7 +85,7 @@ describe("buildTodayBuckets", () => {
     // Act
     const buckets = buildTodayBuckets({
       dayIsos: DAYS,
-      todayIso: TODAY,
+      focusIso: TODAY,
       weekWorkouts: [],
       coachingByDay: { [TODAY]: [swim, gym] },
       matched: [],
@@ -111,7 +111,7 @@ describe("buildTodayBuckets", () => {
     const calendar = buildCalendarBuckets(sharedArgs);
     const today = buildTodayBuckets({
       dayIsos: DAYS,
-      todayIso: TODAY,
+      focusIso: TODAY,
       weekWorkouts: [workout()],
       coachingByDay: { [TODAY]: [activity()] },
       matched: [ms],
@@ -130,7 +130,7 @@ describe("buildTodayBuckets", () => {
     // Act
     const buckets = buildTodayBuckets({
       dayIsos: DAYS,
-      todayIso: TODAY,
+      focusIso: TODAY,
       weekWorkouts: [workout()],
       coachingByDay: { [TODAY]: [activity()] },
       matched: [ms],
@@ -150,7 +150,7 @@ describe("buildTodayBuckets", () => {
     // Act
     const buckets = buildTodayBuckets({
       dayIsos: DAYS,
-      todayIso: TODAY,
+      focusIso: TODAY,
       weekWorkouts: [],
       coachingByDay: { "2026-04-27": [otherDay] },
       matched: [],

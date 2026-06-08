@@ -2,8 +2,13 @@
  * Date helpers for the Today landing page.
  *
  * `toIsoDate` yields a local `YYYY-MM-DD` (matching how `WorkoutRecord.date`
- * is stored). `weekDays` returns the seven Monday-to-Sunday local dates of
- * the calendar week containing `today`.
+ * is stored). `weekDays` returns the seven Monday-to-Sunday local dates of the
+ * calendar week containing the focused date, flagging each as the focus cursor
+ * (`isFocused`) and/or the real calendar today (`isRealToday`).
+ *
+ * `isoToLocalDate` constructs a Date from a `YYYY-MM-DD` via the LOCAL
+ * constructor (`new Date(y, m-1, d)`), never `new Date(iso)` (which parses as
+ * UTC midnight and shifts the local day at timezone boundaries).
  */
 
 const DAYS_PER_WEEK = 7;
@@ -14,7 +19,8 @@ export type WeekDay = {
   iso: string;
   letter: string;
   dayNumber: number;
-  isToday: boolean;
+  isFocused: boolean;
+  isRealToday: boolean;
 };
 
 const WEEKDAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"] as const;
@@ -26,6 +32,11 @@ export function toIsoDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function isoToLocalDate(iso: string): Date {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 function mondayOf(date: Date): Date {
   const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const weekday = result.getDay();
@@ -34,9 +45,9 @@ function mondayOf(date: Date): Date {
   return result;
 }
 
-export function weekDays(today: Date): WeekDay[] {
-  const monday = mondayOf(today);
-  const todayIso = toIsoDate(today);
+export function weekDays(focus: Date, realTodayIso: string): WeekDay[] {
+  const monday = mondayOf(focus);
+  const focusIso = toIsoDate(focus);
   return Array.from({ length: DAYS_PER_WEEK }, (_, index) => {
     const date = new Date(monday);
     date.setDate(monday.getDate() + index);
@@ -45,7 +56,13 @@ export function weekDays(today: Date): WeekDay[] {
       iso,
       letter: WEEKDAY_LETTERS[index],
       dayNumber: date.getDate(),
-      isToday: iso === todayIso,
+      isFocused: iso === focusIso,
+      isRealToday: iso === realTodayIso,
     };
   });
+}
+
+/** The seven ISO day strings of the week containing `date`. */
+export function weekIsos(date: Date): string[] {
+  return weekDays(date, "").map((d) => d.iso);
 }

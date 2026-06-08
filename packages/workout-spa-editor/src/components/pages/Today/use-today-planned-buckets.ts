@@ -19,7 +19,7 @@ import { buildTodayBuckets, type TodayBuckets } from "./build-today-buckets";
 export function useTodayPlannedBuckets(
   profileId: string | null,
   dayIsos: string[],
-  todayIso: string,
+  focusIso: string,
   weekWorkouts: WorkoutRecord[] | undefined
 ): TodayBuckets {
   const coaching = useCoachingActivities(dayIsos);
@@ -29,11 +29,11 @@ export function useTodayPlannedBuckets(
     () =>
       buildTodayBuckets({
         dayIsos,
-        todayIso,
+        focusIso,
         weekWorkouts,
         coachingByDay: coaching.byDay,
         matched: matched ?? [],
       }),
-    [dayIsos, todayIso, weekWorkouts, coaching.byDay, matched]
+    [dayIsos, focusIso, weekWorkouts, coaching.byDay, matched]
   );
 }
