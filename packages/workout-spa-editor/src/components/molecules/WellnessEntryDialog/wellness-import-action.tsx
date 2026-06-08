@@ -19,7 +19,7 @@ export function WellnessImportAction() {
       <button
         type="button"
         onClick={() =>
-          navigate(withOrigin("/workout/new?action=import", "today"))
+          navigate(withOrigin("/workout/new?action=import", "daily"))
         }
         className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 dark:border-gray-600 dark:text-white"
       >

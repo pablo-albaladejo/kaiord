@@ -105,7 +105,7 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 #### Scenario: Route change announces a single label
 
 - **WHEN** the wouter pathname changes (e.g., user navigates from `/calendar` to `/library`)
-- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Today page", "Calendar page", "New workout", "Edit workout") so assistive technology announces the navigation as a single unit
+- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Daily page", "Calendar page", "New workout", "Edit workout") so assistive technology announces the navigation as a single unit
 
 #### Scenario: Route change moves focus to the page heading
 

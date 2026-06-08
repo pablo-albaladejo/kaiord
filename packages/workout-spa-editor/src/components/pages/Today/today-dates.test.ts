@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toIsoDate, weekDays } from "./today-dates";
+import { addDaysIso, toIsoDate, weekDays } from "./today-dates";
 
 const WEEK_LENGTH = 7;
 const YEAR = 2026;
@@ -21,6 +21,41 @@ describe("toIsoDate", () => {
 
     // Assert
     expect(iso).toBe("2026-01-05");
+  });
+});
+
+describe("addDaysIso", () => {
+  it("should cross the week boundary backward (Monday → prior Sunday)", () => {
+    // Arrange
+    const monday = "2026-06-08";
+
+    // Act
+    const prev = addDaysIso(monday, -1);
+
+    // Assert
+    expect(prev).toBe("2026-06-07");
+  });
+
+  it("should cross the week boundary forward (Sunday → next Monday)", () => {
+    // Arrange
+    const sunday = "2026-06-14";
+
+    // Act
+    const next = addDaysIso(sunday, 1);
+
+    // Assert
+    expect(next).toBe("2026-06-15");
+  });
+
+  it("should cross a month/year boundary", () => {
+    // Arrange
+    const newYearsEve = "2026-12-31";
+
+    // Act
+    const next = addDaysIso(newYearsEve, 1);
+
+    // Assert
+    expect(next).toBe("2027-01-01");
   });
 });
 

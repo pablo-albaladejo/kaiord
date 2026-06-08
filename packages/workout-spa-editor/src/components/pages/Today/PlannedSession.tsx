@@ -19,7 +19,7 @@ export function PlannedSession({
   onActivityClick,
 }: PlannedSessionProps) {
   return (
-    <section data-testid="today-planned-session">
+    <section data-testid="daily-planned-session">
       <SectionHead title="Planned" />
       {todayBucketsEmpty(buckets) ? (
         <PlannedEmpty />

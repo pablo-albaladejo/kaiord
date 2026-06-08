@@ -15,12 +15,10 @@ export type WeekStripProps = {
   onSelectDay: (iso: string) => void;
   onPrev: () => void;
   onNext: () => void;
-  canPrev: boolean;
-  canNext: boolean;
 };
 
 const ARROW =
-  "flex h-8 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent";
+  "flex h-8 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800";
 
 export function WeekStrip(props: WeekStripProps) {
   const { days, workouts, profile, onSelectDay } = props;
@@ -34,14 +32,13 @@ export function WeekStrip(props: WeekStripProps) {
 
   return (
     <div
-      data-testid="today-week-strip"
+      data-testid="daily-week-strip"
       className="rounded-lg bg-primary-900 border border-slate-800 p-3"
     >
       <div className="flex items-center gap-1.5">
         <button
           type="button"
           aria-label="Previous day"
-          disabled={!props.canPrev}
           onClick={props.onPrev}
           className={ARROW}
         >
@@ -58,7 +55,6 @@ export function WeekStrip(props: WeekStripProps) {
         <button
           type="button"
           aria-label="Next day"
-          disabled={!props.canNext}
           onClick={props.onNext}
           className={ARROW}
         >

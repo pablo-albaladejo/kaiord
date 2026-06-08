@@ -9,13 +9,14 @@ import { HealthSubRouter } from "./components/pages/health/health-routes";
 import {
   AthletePage,
   CalendarPage,
+  DailyPage,
   EditorPage,
   LibraryPage,
   SettingsPage,
-  TodayPage,
   WorkoutDetail,
 } from "./lazy-pages";
 import { NewWorkoutRoute } from "./new-workout-route";
+import { LegacyTodayRedirect } from "./routing/legacy-today-redirect";
 import { getCurrentWeekId } from "./utils/week-utils";
 
 export type AppRoutesProps = { analytics: Analytics };
@@ -32,7 +33,11 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
           {/* Default view: the current week's calendar (1-hop). */}
           <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
         </Route>
-        <Route path="/today">{guard(<TodayPage />)}</Route>
+        <Route path="/daily">{guard(<DailyPage />)}</Route>
+        {/* Legacy alias: the page was renamed /today → /daily; preserve ?date=. */}
+        <Route path="/today">
+          <LegacyTodayRedirect />
+        </Route>
         {/* Bare /calendar is intentionally a non-durable alias for the
             CURRENT week: one URL family, one view (consensus plan, ADR).
             `replace` avoids a back-button re-bounce trap. */}
