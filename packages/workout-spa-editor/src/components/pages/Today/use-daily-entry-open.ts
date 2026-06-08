@@ -34,17 +34,23 @@ export function useDailyEntryOpen(
 
   const handleWorkoutClick = useCallback(
     (workout: WorkoutRecord) => {
+      // Clear the opposite selection so the two dialogs never overlap.
+      setSelectedActivity(null);
       if (workout.state === "raw" || workout.state === "skipped") {
         setSelectedWorkout(workout);
       } else {
+        setSelectedWorkout(null);
         navigate(workoutHref(workout.id));
       }
     },
-    [navigate, workoutHref]
+    [navigate, workoutHref, setSelectedActivity]
   );
 
   const handleActivityClick = useCallback(
-    (activity: CoachingActivity) => setSelectedActivity(activity),
+    (activity: CoachingActivity) => {
+      setSelectedWorkout(null);
+      setSelectedActivity(activity);
+    },
     [setSelectedActivity]
   );
 

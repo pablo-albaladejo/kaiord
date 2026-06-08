@@ -73,6 +73,19 @@ describe("useDailyEntryOpen", () => {
     expect(history.at(-1)).toBe("/workout/w-1?from=daily&date=2026-06-10");
   });
 
+  it("should clear the opposite selection so dialogs never overlap", () => {
+    // Arrange
+    const { result } = setup();
+
+    // Act
+    act(() => result.current.handleActivityClick(ACTIVITY));
+    act(() => result.current.handleWorkoutClick(workout({ state: "raw" })));
+
+    // Assert
+    expect(result.current.selectedWorkout?.id).toBe("w-1");
+    expect(result.current.selectedActivity).toBeNull();
+  });
+
   it("should build a daily-origin process href carrying the focus date", () => {
     // Arrange
     const { result } = setup();
