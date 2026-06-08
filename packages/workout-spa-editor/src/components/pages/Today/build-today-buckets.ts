@@ -21,7 +21,7 @@ export type TodayBuckets = {
 
 export type BuildTodayBucketsArgs = {
   dayIsos: string[];
-  todayIso: string;
+  focusIso: string;
   weekWorkouts: WorkoutRecord[] | undefined;
   coachingByDay: Record<string, CoachingActivity[]>;
   matched: MatchedSessionWithMetadata[];
@@ -29,7 +29,7 @@ export type BuildTodayBucketsArgs = {
 
 export function buildTodayBuckets({
   dayIsos,
-  todayIso,
+  focusIso,
   weekWorkouts,
   coachingByDay,
   matched,
@@ -43,9 +43,9 @@ export function buildTodayBuckets({
       matched,
     });
   return {
-    matchedSessions: matchedByDay[todayIso] ?? [],
-    soloPlans: soloPlansByDay[todayIso] ?? [],
-    soloActuals: soloActualsByDay[todayIso] ?? [],
+    matchedSessions: matchedByDay[focusIso] ?? [],
+    soloPlans: soloPlansByDay[focusIso] ?? [],
+    soloActuals: soloActualsByDay[focusIso] ?? [],
   };
 }
 

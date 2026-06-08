@@ -13,6 +13,16 @@ const SECONDS_PER_HOUR = 3600;
 const HRV_TREND_THRESHOLD = 0;
 const SCORE_MAX = 100;
 
+const HEADLINE_PUSH_TODAY = "Good to push today";
+const HEADLINE_PUSH = "Good to push";
+const HEADLINE_EASY_TODAY = "Take it easy today";
+const HEADLINE_EASY = "Take it easy";
+
+function readyHeadline(ready: boolean, isFocusToday: boolean): string {
+  if (ready) return isFocusToday ? HEADLINE_PUSH_TODAY : HEADLINE_PUSH;
+  return isFocusToday ? HEADLINE_EASY_TODAY : HEADLINE_EASY;
+}
+
 export type ReadinessMetric = {
   label: string;
   value: string;
@@ -53,7 +63,8 @@ function hrvTrend(hrv: HrvSummary | undefined): string | undefined {
 
 export function buildReadinessModel(
   hrv: HrvSummary | undefined,
-  sleep: SleepRecord | undefined
+  sleep: SleepRecord | undefined,
+  isFocusToday: boolean
 ): ReadinessModel {
   const score = compositeScore(hrv, sleep);
   const ready = score !== null && score >= SCORE_MAX / 2;
@@ -62,9 +73,7 @@ export function buildReadinessModel(
     headline:
       score === null
         ? "No readiness data yet"
-        : ready
-          ? "Good to push today"
-          : "Take it easy today",
+        : readyHeadline(ready, isFocusToday),
     rationale:
       score === null
         ? "Connect Garmin to sync HRV and sleep."

@@ -29,18 +29,28 @@ describe("buildReadinessModel", () => {
     // Arrange
 
     // Act
-    const model = buildReadinessModel(HRV, SLEEP);
+    const model = buildReadinessModel(HRV, SLEEP, true);
 
     // Assert
     expect(model.score).toBe(EXPECTED_COMPOSITE);
     expect(model.headline).toBe("Good to push today");
   });
 
+  it("should drop the present-tense today suffix when focus is a past day", () => {
+    // Arrange
+
+    // Act
+    const model = buildReadinessModel(HRV, SLEEP, false);
+
+    // Assert
+    expect(model.headline).toBe("Good to push");
+  });
+
   it("should fall back to em-dash placeholders when data is absent", () => {
     // Arrange
 
     // Act
-    const model = buildReadinessModel(undefined, undefined);
+    const model = buildReadinessModel(undefined, undefined, true);
 
     // Assert
     expect(model.score).toBeNull();
@@ -53,7 +63,7 @@ describe("buildReadinessModel", () => {
     // Arrange
 
     // Act
-    const model = buildReadinessModel(HRV, undefined);
+    const model = buildReadinessModel(HRV, undefined, true);
 
     // Assert
     expect(model.hrv.value).toBe("62");

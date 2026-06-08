@@ -36,6 +36,17 @@ describe("withOrigin", () => {
     expect(result).toBe("/workout/new?date=2026-06-01&from=calendar-day");
   });
 
+  it("should append the focused day via the date option", () => {
+    // Arrange
+    const href = "/workout/abc";
+
+    // Act
+    const result = withOrigin(href, "today", { date: "2026-06-10" });
+
+    // Assert
+    expect(result).toBe("/workout/abc?from=today&date=2026-06-10");
+  });
+
   it("should be idempotent when applied twice", () => {
     // Arrange
     const once = withOrigin("/workout/new?source=scratch", "library");

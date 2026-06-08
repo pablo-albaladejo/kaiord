@@ -29,7 +29,7 @@ describe("weekDays", () => {
     // Arrange
 
     // Act
-    const days = weekDays(WEDNESDAY);
+    const days = weekDays(WEDNESDAY, "2026-05-27");
 
     // Assert
     expect(days).toHaveLength(WEEK_LENGTH);
@@ -37,15 +37,19 @@ describe("weekDays", () => {
     expect(days[WEEK_LENGTH - 1].iso).toBe("2026-05-31");
   });
 
-  it("should flag the matching day as today", () => {
+  it("should flag the focused day and the real today distinctly", () => {
     // Arrange
+    const realTodayIso = "2026-05-25";
 
     // Act
-    const days = weekDays(WEDNESDAY);
+    const days = weekDays(WEDNESDAY, realTodayIso);
 
     // Assert
-    const todays = days.filter((d) => d.isToday);
-    expect(todays).toHaveLength(1);
-    expect(todays[0].iso).toBe("2026-05-27");
+    const focused = days.filter((d) => d.isFocused);
+    const realToday = days.filter((d) => d.isRealToday);
+    expect(focused).toHaveLength(1);
+    expect(focused[0].iso).toBe("2026-05-27");
+    expect(realToday).toHaveLength(1);
+    expect(realToday[0].iso).toBe("2026-05-25");
   });
 });

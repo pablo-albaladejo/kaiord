@@ -39,7 +39,7 @@ export function resolveBackTarget({
     case "coaching":
       return "/calendar";
     case "today":
-      return "/today";
+      return date ? `/today?date=${date}` : "/today";
     default:
       return DEFAULT_TARGET;
   }
