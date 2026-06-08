@@ -18,48 +18,57 @@ import { useWeekWorkoutsLive } from "./use-today-workouts-live";
 
 export type TodayData = {
   profile: Profile | null;
-  todayIso: string;
+  focusIso: string;
+  realTodayIso: string;
+  isFocusToday: boolean;
   days: WeekDay[];
   weekWorkouts: WorkoutRecord[] | undefined;
   planned: TodayBuckets;
   readiness: ReadinessModel;
 };
 
-export function useTodayData(now: Date): TodayData {
+export function useTodayData(focusDate: Date, realTodayIso: string): TodayData {
   const active = useActiveProfileLive();
   const profileId = active?.id ?? null;
   const profile = active?.profile ?? null;
 
-  const days = useMemo(() => weekDays(now), [now]);
+  const days = useMemo(
+    () => weekDays(focusDate, realTodayIso),
+    [focusDate, realTodayIso]
+  );
   const dayIsos = useMemo(() => days.map((d) => d.iso), [days]);
-  const todayIso = toIsoDate(now);
+  const focusIso = toIsoDate(focusDate);
   const start = days[0].iso;
   const end = days[days.length - 1].iso;
 
   const weekWorkouts = useWeekWorkoutsLive(profileId, start, end);
   const hrvRecords = useHealthHrvHistoryLive(profileId ?? "", {
-    start: todayIso,
-    end: todayIso,
+    start: focusIso,
+    end: focusIso,
   });
   const sleepRecords = useHealthSleepWeekLive(profileId ?? "", {
-    start: todayIso,
-    end: todayIso,
+    start: focusIso,
+    end: focusIso,
   });
 
   const planned = useTodayPlannedBuckets(
     profileId,
     dayIsos,
-    todayIso,
+    focusIso,
     weekWorkouts
   );
+  const isFocusToday = focusIso === realTodayIso;
   const readiness = buildReadinessModel(
     hrvRecords?.at(-1)?.krd,
-    sleepRecords?.at(-1)?.krd
+    sleepRecords?.at(-1)?.krd,
+    isFocusToday
   );
 
   return {
     profile,
-    todayIso,
+    focusIso,
+    realTodayIso,
+    isFocusToday,
     days,
     weekWorkouts,
     planned,

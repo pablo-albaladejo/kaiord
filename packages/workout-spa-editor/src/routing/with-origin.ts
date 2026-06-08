@@ -5,12 +5,13 @@
  *
  * `opts.week` carries the originating `/calendar/:weekId` so calendar
  * back-targets return to THAT week (bare `/calendar` redirects to the
- * current week since the /today split).
+ * current week since the /today split). `opts.date` carries the Today
+ * page's focused day so a `today`-origin Back returns to `/today?date=`.
  */
 
 import type { BackOrigin } from "./back-origin";
 
-export type WithOriginOpts = { week?: string };
+export type WithOriginOpts = { week?: string; date?: string };
 
 export function withOrigin(
   href: string,
@@ -21,5 +22,6 @@ export function withOrigin(
   const params = new URLSearchParams(query);
   params.set("from", origin);
   if (opts.week) params.set("week", opts.week);
+  if (opts.date) params.set("date", opts.date);
   return `${path}?${params.toString()}`;
 }
