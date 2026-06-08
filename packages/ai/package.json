@@ -33,14 +33,14 @@
     "ai": "^6.0.177"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^3.0.76",
-    "@types/node": "^25.7.0",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@ai-sdk/anthropic": "^3.0.81",
+    "@types/node": "^25.9.2",
+    "@vitest/coverage-v8": "^4.1.8",
     "ai": "^6.0.177",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.8"
   },
   "repository": {
     "type": "git",
