@@ -60,7 +60,7 @@ const seedActivity = async (
     duration: activity.duration,
     effort: activity.effort,
     status: "pending",
-    sport: { label: "Cycling", icon: "🚴" },
+    sport: "cycling",
     description: activity.description ?? null,
     raw: null,
     createdAt: "2026-04-13T08:00:00Z",
