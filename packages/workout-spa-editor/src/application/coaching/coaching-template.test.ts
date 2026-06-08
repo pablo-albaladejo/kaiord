@@ -45,12 +45,47 @@ describe("buildCoachingTemplateKrd", () => {
     expect(krd.metadata.sport).toBe("generic");
   });
 
+  it("should canonicalize a coaching sport alias onto the KRD vocabulary", () => {
+    // Arrange
+    const sport = "bike";
+
+    // Act
+    const krd = buildCoachingTemplateKrd(sport);
+
+    // Assert
+    expect(krd.metadata.sport).toBe("cycling");
+  });
+
+  it("should set the workout name from the coaching activity title", () => {
+    // Arrange
+    const title = "Endurance Ride";
+
+    // Act
+    const krd = buildCoachingTemplateKrd("cycling", title);
+
+    // Assert
+    const workout = krd.extensions!.structured_workout as { name?: string };
+    expect(workout.name).toBe(title);
+  });
+
+  it("should omit the workout name when no title is provided", () => {
+    // Arrange
+    const sport = "running";
+
+    // Act
+    const krd = buildCoachingTemplateKrd(sport);
+
+    // Assert
+    const workout = krd.extensions!.structured_workout as { name?: string };
+    expect(workout.name).toBeUndefined();
+  });
+
   it("should produce a structurally identical step for running and swimming", () => {
     // Arrange
     const sports = ["running", "swimming"] as const;
 
     // Act
-    const krds = sports.map(buildCoachingTemplateKrd);
+    const krds = sports.map((s) => buildCoachingTemplateKrd(s));
 
     // Assert
     for (const krd of krds) {

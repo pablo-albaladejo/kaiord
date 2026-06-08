@@ -15,6 +15,7 @@
  */
 import { createWorkoutKRD } from "@kaiord/core";
 
+import { canonicalizeSport } from "../../lib/canonicalize-sport";
 import type { KRD, Sport } from "../../types/schemas";
 
 const TEN_MINUTES_SECONDS = 600;
@@ -25,9 +26,19 @@ const isKnownSport = (sport: string): sport is Sport =>
   sport === "swimming" ||
   sport === "generic";
 
-export const buildCoachingTemplateKrd = (sport: string): KRD =>
+// Map a coaching source's sport string onto the KRD sport vocabulary.
+// `canonicalizeSport` resolves aliases ("bike" → "cycling", "swim" →
+// "swimming", ...); sports the KRD model does not represent (e.g. gym,
+// strength) honestly collapse to "generic".
+const toKrdSport = (sport: string): Sport => {
+  const canonical = canonicalizeSport(sport);
+  return canonical && isKnownSport(canonical) ? canonical : "generic";
+};
+
+export const buildCoachingTemplateKrd = (sport: string, name?: string): KRD =>
   createWorkoutKRD({
-    sport: isKnownSport(sport) ? sport : "generic",
+    ...(name ? { name } : {}),
+    sport: toKrdSport(sport),
     steps: [
       {
         stepIndex: 0,
