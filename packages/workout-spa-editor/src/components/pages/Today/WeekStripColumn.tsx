@@ -1,29 +1,35 @@
+import type { DaySummary } from "./build-week-summary";
 import type { WeekDay } from "./today-dates";
+import { WeekStripMark } from "./weekstrip-mark";
 
 export type WeekStripColumnProps = {
   day: WeekDay;
-  fraction: number;
+  summary: DaySummary;
   onSelect: (iso: string) => void;
 };
 
-const BAR_TRACK_HEIGHT = 40;
-const MIN_BAR_PX = 3;
-const PERCENT = 100;
+function ariaLabel(day: WeekDay, summary: DaySummary): string {
+  const today = day.isRealToday ? " (today)" : "";
+  if (summary.count === 0) {
+    return `Focus ${day.letter} ${day.dayNumber}${today}, nothing planned`;
+  }
+  const intensity = summary.intensity
+    ? `, ${summary.intensity}${summary.estimated ? " estimated" : ""}`
+    : "";
+  return `Focus ${day.letter} ${day.dayNumber}${today}, ${summary.count} planned${intensity}`;
+}
 
 export function WeekStripColumn({
   day,
-  fraction,
+  summary,
   onSelect,
 }: WeekStripColumnProps) {
-  const barHeight = Math.max(
-    MIN_BAR_PX,
-    Math.round(fraction * BAR_TRACK_HEIGHT)
-  );
   const column = day.isFocused
     ? "bg-sky-500/15 border border-sky-500 text-sky-400"
     : "text-slate-500";
-  const bar = day.isFocused ? "bg-sky-400" : "bg-slate-600";
-  const label = `Focus ${day.letter} ${day.dayNumber}${day.isRealToday ? " (today)" : ""}`;
+  const number = day.isRealToday
+    ? "flex h-5 w-5 items-center justify-center rounded-full border border-sky-400 text-sky-400"
+    : "";
 
   return (
     <button
@@ -31,26 +37,16 @@ export function WeekStripColumn({
       onClick={() => onSelect(day.iso)}
       aria-pressed={day.isFocused}
       aria-current={day.isRealToday ? "date" : undefined}
-      aria-label={label}
+      aria-label={ariaLabel(day, summary)}
       className={`flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 transition-colors hover:bg-slate-800 ${column}`}
     >
       <span className="text-[11px] font-semibold">{day.letter}</span>
-      <span className="text-[13px] font-bold tabular-nums">
+      <span className={`text-[13px] font-bold tabular-nums ${number}`}>
         {day.dayNumber}
       </span>
-      <span
-        aria-hidden="true"
-        className={`h-1 w-1 rounded-full ${day.isRealToday ? "bg-sky-400" : "bg-transparent"}`}
-      />
-      <div
-        className="flex w-full items-end justify-center"
-        style={{ height: BAR_TRACK_HEIGHT }}
-      >
-        <div
-          className={`w-1.5 rounded-full ${bar}`}
-          style={{ height: `${(barHeight / BAR_TRACK_HEIGHT) * PERCENT}%` }}
-        />
-      </div>
+      <span className="flex h-3 items-center justify-center">
+        <WeekStripMark summary={summary} />
+      </span>
     </button>
   );
 }
