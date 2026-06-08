@@ -1,25 +1,39 @@
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import type { Profile } from "../../../types/profile";
+import type { CoachingActivity } from "../../../types/coaching-activity";
 import { SectionHead } from "../../molecules/SectionHead";
+import { renderDayCards } from "../../molecules/WorkoutCard/day-column-cards";
+import { type TodayBuckets, todayBucketsEmpty } from "./build-today-buckets";
 import { PlannedEmpty } from "./PlannedEmpty";
-import { PlannedSessionCard } from "./PlannedSessionCard";
-import { reviewFor } from "./today-load";
 
 export type PlannedSessionProps = {
-  workout: WorkoutRecord | undefined;
-  profile: Profile | null;
+  buckets: TodayBuckets;
+  onWorkoutClick: (workout: WorkoutRecord) => void;
+  onActivityClick: (activity: CoachingActivity) => void;
 };
 
-export function PlannedSession({ workout, profile }: PlannedSessionProps) {
-  const review = workout ? reviewFor(workout, profile) : null;
-
+/** Today's planned section — mirrors the calendar day cell: the same deduped,
+    multi-source, KRD-agnostic cards the calendar shows for today, as a list. */
+export function PlannedSession({
+  buckets,
+  onWorkoutClick,
+  onActivityClick,
+}: PlannedSessionProps) {
   return (
     <section data-testid="today-planned-session">
-      <SectionHead title="Planned session" />
-      {workout && review ? (
-        <PlannedSessionCard workout={workout} review={review} />
-      ) : (
+      <SectionHead title="Planned" />
+      {todayBucketsEmpty(buckets) ? (
         <PlannedEmpty />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {renderDayCards({
+            matchedSessions: buckets.matchedSessions,
+            soloPlans: buckets.soloPlans,
+            soloActuals: buckets.soloActuals,
+            view: "list",
+            onWorkoutClick,
+            onActivityClick,
+          })}
+        </div>
       )}
     </section>
   );
