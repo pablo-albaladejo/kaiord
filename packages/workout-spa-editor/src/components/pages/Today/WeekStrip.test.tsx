@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
+import type { WeekSummary } from "./build-week-summary";
 import type { WeekDay } from "./today-dates";
 import { weekDays } from "./today-dates";
 import { WeekStrip } from "./WeekStrip";
@@ -14,6 +15,12 @@ const JAN = 0;
 const TENTH = 10;
 const ANCHOR = new Date(Y, JAN, TENTH);
 const REAL_ISO = "2024-01-10";
+
+function emptySummary(days: WeekDay[]): WeekSummary {
+  return Object.fromEntries(
+    days.map((d) => [d.iso, { count: 0, intensity: null, estimated: false }])
+  );
+}
 
 function renderStrip(
   days: WeekDay[],
@@ -31,8 +38,7 @@ function renderStrip(
       <Router hook={hook}>
         <WeekStrip
           days={days}
-          workouts={[]}
-          profile={null}
+          weekSummary={overrides.weekSummary ?? emptySummary(days)}
           onSelectDay={onSelectDay}
           onPrev={onPrev}
           onNext={onNext}

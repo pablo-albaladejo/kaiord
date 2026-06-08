@@ -19,6 +19,8 @@ export type CalendarDialogsProps = {
   onCloseCoaching?: () => void;
   expandActivity: (activity: CoachingActivity) => void;
   onOpenExecuted?: (workout: WorkoutRecord) => void;
+  /** Override the "Process" target (Daily passes a `daily`-origin builder). */
+  buildProcessHref?: (id: string) => string;
 };
 
 export function CalendarDialogs({
@@ -28,9 +30,10 @@ export function CalendarDialogs({
   onCloseCoaching = () => {},
   expandActivity,
   onOpenExecuted,
+  buildProcessHref,
 }: CalendarDialogsProps) {
   const { handleProcess, handleSkip, handleUnskip, isSubmitting } =
-    useDialogHandlers(selectedWorkout, onCloseWorkout);
+    useDialogHandlers(selectedWorkout, onCloseWorkout, buildProcessHref);
 
   return (
     <>
