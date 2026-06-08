@@ -1,13 +1,13 @@
 /**
- * Reads the Today page's focused day from `?date=YYYY-MM-DD`, clamped into the
- * real-today week so the WeekStrip can never render an off-week strip. A
- * malformed, missing, or out-of-week param falls back to the real today.
- * Validation + clamp live in the pure `resolveFocusIso`.
+ * Reads the Daily page's focused day from `?date=YYYY-MM-DD`. Focus is
+ * unbounded (any past/future day); a malformed or missing param falls back to
+ * the real today. Validation lives in the pure `resolveFocusIso`; the local
+ * constructor (`isoToLocalDate`) avoids a UTC day-shift.
  */
 import { useMemo } from "react";
 import { useSearch } from "wouter";
 
-import { isoToLocalDate, toIsoDate, weekIsos } from "./today-dates";
+import { isoToLocalDate, toIsoDate } from "./today-dates";
 import { resolveFocusIso } from "./today-focus-date";
 
 export type TodayRouteParams = {
@@ -23,11 +23,7 @@ export function useTodayRouteParams(): TodayRouteParams {
     const realToday = new Date();
     const realTodayIso = toIsoDate(realToday);
     const requested = new URLSearchParams(search).get("date") ?? "";
-    const focusIso = resolveFocusIso(
-      requested,
-      realTodayIso,
-      weekIsos(realToday)
-    );
+    const focusIso = resolveFocusIso(requested, realTodayIso);
     const focusDate =
       focusIso === realTodayIso ? realToday : isoToLocalDate(focusIso);
 

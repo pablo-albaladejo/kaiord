@@ -3,16 +3,6 @@ import { describe, expect, it } from "vitest";
 import { isoToLocalDate } from "./today-dates";
 import { isRealIso, resolveFocusIso } from "./today-focus-date";
 
-// Week of Mon 2026-06-08 .. Sun 2026-06-14.
-const WEEK = [
-  "2026-06-08",
-  "2026-06-09",
-  "2026-06-10",
-  "2026-06-11",
-  "2026-06-12",
-  "2026-06-13",
-  "2026-06-14",
-];
 const REAL_TODAY = "2026-06-08";
 const Y = 2026;
 const JUN_INDEX = 5;
@@ -58,26 +48,37 @@ describe("isRealIso", () => {
 });
 
 describe("resolveFocusIso", () => {
-  it("should keep an in-week requested day", () => {
+  it("should keep a requested in-range day", () => {
     // Arrange
     const requested = "2026-06-10";
 
     // Act
-    const focus = resolveFocusIso(requested, REAL_TODAY, WEEK);
+    const focus = resolveFocusIso(requested, REAL_TODAY);
 
     // Assert
     expect(focus).toBe("2026-06-10");
   });
 
-  it("should fall back to real today for an out-of-week day", () => {
+  it("should honor an out-of-week past day (unbounded)", () => {
     // Arrange
-    const requested = "2026-06-01";
+    const requested = "2026-05-01";
 
     // Act
-    const focus = resolveFocusIso(requested, REAL_TODAY, WEEK);
+    const focus = resolveFocusIso(requested, REAL_TODAY);
 
     // Assert
-    expect(focus).toBe(REAL_TODAY);
+    expect(focus).toBe("2026-05-01");
+  });
+
+  it("should honor an out-of-week future day (unbounded)", () => {
+    // Arrange
+    const requested = "2027-01-20";
+
+    // Act
+    const focus = resolveFocusIso(requested, REAL_TODAY);
+
+    // Assert
+    expect(focus).toBe("2027-01-20");
   });
 
   it("should fall back to real today for a malformed param", () => {
@@ -85,7 +86,7 @@ describe("resolveFocusIso", () => {
     const requested = "not-a-date";
 
     // Act
-    const focus = resolveFocusIso(requested, REAL_TODAY, WEEK);
+    const focus = resolveFocusIso(requested, REAL_TODAY);
 
     // Assert
     expect(focus).toBe(REAL_TODAY);
@@ -96,7 +97,7 @@ describe("resolveFocusIso", () => {
     const requested = "";
 
     // Act
-    const focus = resolveFocusIso(requested, REAL_TODAY, WEEK);
+    const focus = resolveFocusIso(requested, REAL_TODAY);
 
     // Assert
     expect(focus).toBe(REAL_TODAY);

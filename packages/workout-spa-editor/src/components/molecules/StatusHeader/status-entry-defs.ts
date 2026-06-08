@@ -20,11 +20,11 @@ export type EntryDef = {
 
 export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
   {
-    id: "today",
+    id: "daily",
     icon: CalendarCheck,
-    label: "Today",
-    ariaLabel: "Go to today",
-    to: "/today",
+    label: "Daily",
+    ariaLabel: "Go to daily",
+    to: "/daily",
   },
   {
     id: "calendar",

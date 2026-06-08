@@ -38,8 +38,8 @@ export function resolveBackTarget({
       return week ? `/calendar/${week}` : "/calendar";
     case "coaching":
       return "/calendar";
-    case "today":
-      return date ? `/today?date=${date}` : "/today";
+    case "daily":
+      return date ? `/daily?date=${date}` : "/daily";
     default:
       return DEFAULT_TARGET;
   }

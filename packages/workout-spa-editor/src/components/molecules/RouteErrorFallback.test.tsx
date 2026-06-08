@@ -59,7 +59,7 @@ describe("RouteErrorFallback", () => {
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
-  it("should render a Go to Today link to the Today summary", () => {
+  it("should render a Go to Daily link to the Daily summary", () => {
     // Arrange
 
     // Act
@@ -68,13 +68,13 @@ describe("RouteErrorFallback", () => {
 
     // Assert
 
-    expect(screen.getByRole("link", { name: "Go to Today" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Go to Daily" })).toHaveAttribute(
       "href",
-      "/today"
+      "/daily"
     );
   });
 
-  it("should navigate to /today when Go to Today is clicked", async () => {
+  it("should navigate to /daily when Go to Daily is clicked", async () => {
     // Arrange
 
     const user = userEvent.setup();
@@ -84,10 +84,10 @@ describe("RouteErrorFallback", () => {
 
     // Act
 
-    await user.click(screen.getByText("Go to Today"));
+    await user.click(screen.getByText("Go to Daily"));
 
     // Assert
 
-    expect(location.history).toContain("/today");
+    expect(location.history).toContain("/daily");
   });
 });

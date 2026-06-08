@@ -11,7 +11,7 @@ export type BottomNavTab = {
  * visual notch between Library and Athlete.
  */
 export const BOTTOM_NAV_TABS: readonly BottomNavTab[] = [
-  { label: "Today", icon: "today", path: "/today" },
+  { label: "Daily", icon: "today", path: "/daily" },
   { label: "Calendar", icon: "calendar", path: "/calendar" },
   { label: "Library", icon: "cards", path: "/library" },
   { label: "Athlete", icon: "athlete", path: "/athlete" },
@@ -19,15 +19,15 @@ export const BOTTOM_NAV_TABS: readonly BottomNavTab[] = [
 
 /**
  * Derives whether a tab is active for the current location.
- * - Today: exact `/today`.
+ * - Daily: exact `/daily`.
  * - Calendar: the index route `/` (default view — it replace-redirects to
  *   the current week), bare `/calendar`, or any `/calendar/:weekId` path.
- * - Others: exact match. (Settings left the bottom-nav with the /today
+ * - Others: exact match. (Settings left the bottom-nav with the /daily
  *   split — it remains reachable from the header.)
  */
 export function isTabActive(tabPath: string, location: string): boolean {
-  if (tabPath === "/today") {
-    return location === "/today";
+  if (tabPath === "/daily") {
+    return location === "/daily";
   }
   if (tabPath === "/calendar") {
     return (

@@ -19,10 +19,14 @@ function renderStrip(
   days: WeekDay[],
   overrides: Partial<Parameters<typeof WeekStrip>[0]> = {}
 ) {
-  const { hook } = memoryLocation({ path: "/today", record: true });
+  const { hook } = memoryLocation({ path: "/daily", record: true });
   const onSelectDay = overrides.onSelectDay ?? vi.fn();
+  const onPrev = overrides.onPrev ?? vi.fn();
+  const onNext = overrides.onNext ?? vi.fn();
   return {
     onSelectDay,
+    onPrev,
+    onNext,
     ...render(
       <Router hook={hook}>
         <WeekStrip
@@ -30,10 +34,8 @@ function renderStrip(
           workouts={[]}
           profile={null}
           onSelectDay={onSelectDay}
-          onPrev={overrides.onPrev ?? vi.fn()}
-          onNext={overrides.onNext ?? vi.fn()}
-          canPrev={overrides.canPrev ?? true}
-          canNext={overrides.canNext ?? true}
+          onPrev={onPrev}
+          onNext={onNext}
         />
       </Router>
     ),
@@ -79,14 +81,20 @@ describe("WeekStrip", () => {
     expect(link.getAttribute("href")).toMatch(/^\/calendar\/\d{4}-W\d{2}$/);
   });
 
-  it("should disable the prev arrow when it cannot go back", () => {
+  it("should fire prev/next day callbacks (unbounded, never disabled)", () => {
     // Arrange
     const days = weekDays(ANCHOR, REAL_ISO);
+    const { onPrev, onNext } = renderStrip(days);
 
     // Act
-    renderStrip(days, { canPrev: false });
+    screen.getByRole("button", { name: "Previous day" }).click();
+    screen.getByRole("button", { name: "Next day" }).click();
 
     // Assert
-    expect(screen.getByRole("button", { name: "Previous day" })).toBeDisabled();
+    expect(onPrev).toHaveBeenCalledOnce();
+    expect(onNext).toHaveBeenCalledOnce();
+    expect(
+      screen.getByRole("button", { name: "Previous day" })
+    ).not.toBeDisabled();
   });
 });

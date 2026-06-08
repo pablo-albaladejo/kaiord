@@ -41,10 +41,10 @@ describe("withOrigin", () => {
     const href = "/workout/abc";
 
     // Act
-    const result = withOrigin(href, "today", { date: "2026-06-10" });
+    const result = withOrigin(href, "daily", { date: "2026-06-10" });
 
     // Assert
-    expect(result).toBe("/workout/abc?from=today&date=2026-06-10");
+    expect(result).toBe("/workout/abc?from=daily&date=2026-06-10");
   });
 
   it("should be idempotent when applied twice", () => {

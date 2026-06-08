@@ -13,14 +13,20 @@ test.describe("Calendar Navigation", () => {
     await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
-  test("/today shows the Today page", async ({ page }) => {
-    await page.goto("/today");
-    await expect(page.getByTestId("today-page")).toBeVisible();
+  test("/daily shows the Daily page", async ({ page }) => {
+    await page.goto("/daily");
+    await expect(page.getByTestId("daily-page")).toBeVisible();
+  });
+
+  test("/today redirects to /daily, preserving ?date=", async ({ page }) => {
+    await page.goto("/today?date=2026-06-05");
+    await page.waitForURL(/\/daily\?date=2026-06-05$/);
+    await expect(page.getByTestId("daily-page")).toBeVisible();
   });
 
   test("/calendar redirects to the current week's grid", async ({ page }) => {
     // One URL family, one view: bare /calendar is a non-durable alias
-    // for the current week (the Today dashboard lives at /today).
+    // for the current week (the Daily dashboard lives at /daily).
     await page.goto("/calendar");
     await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);
     await expect(page.getByTestId("week-navigation")).toBeVisible();
@@ -42,13 +48,13 @@ test.describe("Calendar Navigation", () => {
     await expect(page.getByTestId("week-navigation")).toBeVisible();
   });
 
-  test('Header "Today" button navigates to the Today page', async ({
+  test('Header "Daily" button navigates to the Daily page', async ({
     page,
   }) => {
     await page.goto("/workout/new?source=scratch");
-    await page.getByTestId("status-header-today-button").click();
-    await page.waitForURL(/\/today$/);
-    await expect(page.getByTestId("today-page")).toBeVisible();
+    await page.getByTestId("status-header-daily-button").click();
+    await page.waitForURL(/\/daily$/);
+    await expect(page.getByTestId("daily-page")).toBeVisible();
   });
 
   test('Header "Calendar" button navigates to the current week grid', async ({

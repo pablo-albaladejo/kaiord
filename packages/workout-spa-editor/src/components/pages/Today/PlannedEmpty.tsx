@@ -19,7 +19,7 @@ export function PlannedEmpty() {
       <Button
         variant="primary"
         className="mt-4"
-        onClick={() => navigate(withOrigin("/workout/new", "today"))}
+        onClick={() => navigate(withOrigin("/workout/new", "daily"))}
       >
         <Icon icon={ICON_MAP.plus} size="sm" color="inherit" />
         Plan a session

@@ -20,7 +20,7 @@ describe("TrendsCard", () => {
     renderCard();
 
     // Act
-    const card = screen.getByTestId("today-trends-card");
+    const card = screen.getByTestId("daily-trends-card");
 
     // Assert
     expect(card).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe("TrendsCard", () => {
     renderCard();
 
     // Act
-    const card = screen.getByTestId("today-trends-card");
+    const card = screen.getByTestId("daily-trends-card");
 
     // Assert
     expect(card).toHaveAttribute("href", "/health");

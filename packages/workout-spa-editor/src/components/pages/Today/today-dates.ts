@@ -1,5 +1,7 @@
 /**
- * Date helpers for the Today landing page.
+ * Date helpers for the Daily page. NOTE: the `today-*` helpers encode the
+ * literal calendar today (`realTodayIso`, `isRealToday`); the page concept is
+ * "Daily". These names are intentionally retained for real-today semantics.
  *
  * `toIsoDate` yields a local `YYYY-MM-DD` (matching how `WorkoutRecord.date`
  * is stored). `weekDays` returns the seven Monday-to-Sunday local dates of the
@@ -37,6 +39,13 @@ export function isoToLocalDate(iso: string): Date {
   return new Date(year, month - 1, day);
 }
 
+/** Adds `delta` days to a `YYYY-MM-DD` via the local constructor (DST-safe). */
+export function addDaysIso(iso: string, delta: number): string {
+  const date = isoToLocalDate(iso);
+  date.setDate(date.getDate() + delta);
+  return toIsoDate(date);
+}
+
 function mondayOf(date: Date): Date {
   const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const weekday = result.getDay();
@@ -60,9 +69,4 @@ export function weekDays(focus: Date, realTodayIso: string): WeekDay[] {
       isRealToday: iso === realTodayIso,
     };
   });
-}
-
-/** The seven ISO day strings of the week containing `date`. */
-export function weekIsos(date: Date): string[] {
-  return weekDays(date, "").map((d) => d.iso);
 }

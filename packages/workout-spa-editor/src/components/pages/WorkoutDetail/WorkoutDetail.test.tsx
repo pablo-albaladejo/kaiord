@@ -119,7 +119,7 @@ describe("WorkoutDetail", () => {
     expect(navigateMock).toHaveBeenCalledWith("/calendar");
   });
 
-  it("should navigate Back to /today when ?from=today is present", () => {
+  it("should navigate Back to /daily when the legacy ?from=today is present", () => {
     // Arrange
 
     mockSearch = "from=today";
@@ -131,6 +131,6 @@ describe("WorkoutDetail", () => {
 
     // Assert
 
-    expect(navigateMock).toHaveBeenCalledWith("/today");
+    expect(navigateMock).toHaveBeenCalledWith("/daily");
   });
 });

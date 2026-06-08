@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { todayHref } from "./today-href";
+import { dailyHref } from "./daily-href";
 
-describe("todayHref", () => {
-  it("should return the bare /today when focus is the real today", () => {
+describe("dailyHref", () => {
+  it("should return the bare /daily when focus is the real today", () => {
     // Arrange
     const iso = "2026-06-08";
 
     // Act
-    const href = todayHref(iso, iso);
+    const href = dailyHref(iso, iso);
 
     // Assert
-    expect(href).toBe("/today");
+    expect(href).toBe("/daily");
   });
 
   it("should carry ?date= when focus is a different day", () => {
@@ -20,9 +20,9 @@ describe("todayHref", () => {
     const realToday = "2026-06-08";
 
     // Act
-    const href = todayHref(focus, realToday);
+    const href = dailyHref(focus, realToday);
 
     // Assert
-    expect(href).toBe("/today?date=2026-06-10");
+    expect(href).toBe("/daily?date=2026-06-10");
   });
 });
