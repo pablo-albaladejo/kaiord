@@ -37,7 +37,7 @@ test.describe("Library flows", () => {
   test("Test A: header Library navigates to /library (no modal)", async ({
     page,
   }) => {
-    await page.goto("/today");
+    await page.goto("/daily");
 
     // Use the mobile-aware helper so the test works on mobile
     // emulators where the Library button lives behind the hamburger menu.
@@ -53,10 +53,10 @@ test.describe("Library flows", () => {
     // No dialog should have mounted as a side-effect of the click.
     await expect(page.getByRole("dialog")).toHaveCount(0);
 
-    // Browser back returns to /today (the Today page).
+    // Browser back returns to /daily (the Daily page).
     await page.goBack();
-    await page.waitForURL(/\/today$/);
-    await expect(page.getByTestId("today-page")).toBeVisible();
+    await page.waitForURL(/\/daily$/);
+    await expect(page.getByTestId("daily-page")).toBeVisible();
   });
 
   test("Test B: empty-day + opens the Create overlay whose Template tile routes to the Library", async ({

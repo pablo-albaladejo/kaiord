@@ -7,7 +7,7 @@ import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
 import { renderWithProviders } from "../../../test-utils";
 import type { Profile } from "../../../types/profile";
-import Today from "./Today";
+import Daily from "./Daily";
 
 const PROFILE_ID = "22222222-2222-2222-2222-222222222222";
 
@@ -24,7 +24,7 @@ function renderPage() {
   const { hook } = memoryLocation({ path: "/calendar", record: true });
   return renderWithProviders(
     <Router hook={hook}>
-      <Today />
+      <Daily />
     </Router>,
     { persistence: createDexiePersistence(db) }
   );
@@ -38,7 +38,7 @@ async function clearTables(): Promise<void> {
   await db.table("healthSleep").clear();
 }
 
-describe("Today", () => {
+describe("Daily", () => {
   beforeEach(clearTables);
   afterEach(clearTables);
 

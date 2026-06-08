@@ -14,6 +14,17 @@ describe("parseBackOrigin", () => {
     expect(results).toEqual(inputs);
   });
 
+  it("should normalize the legacy today origin to daily", () => {
+    // Arrange
+    const raw = "today";
+
+    // Act
+    const result = parseBackOrigin(raw);
+
+    // Assert
+    expect(result).toBe("daily");
+  });
+
   it("should return null for an unknown origin value", () => {
     // Arrange
     const raw = "settings";

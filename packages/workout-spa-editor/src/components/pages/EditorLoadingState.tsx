@@ -20,8 +20,8 @@ export function EditorNoData() {
       <p className="text-muted-foreground">
         This workout has no structured data yet.
       </p>
-      <Link href="/today" className="text-primary underline mt-2">
-        Go to Today
+      <Link href="/daily" className="text-primary underline mt-2">
+        Go to Daily
       </Link>
     </div>
   );

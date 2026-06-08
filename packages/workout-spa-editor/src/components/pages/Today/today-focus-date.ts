@@ -1,7 +1,8 @@
 /**
- * Pure focus-day resolution for the Today route param. Kept separate from the
- * `useTodayRouteParams` hook so the clamp + ISO validation (the load-bearing,
- * timezone-sensitive logic) is unit-testable without wouter/time setup.
+ * Pure focus-day resolution for the Daily route param. Kept separate from the
+ * `useTodayRouteParams` hook so the ISO validation (the load-bearing,
+ * timezone-sensitive logic) is unit-testable without wouter setup. Focus is
+ * unbounded (any past/future day); only malformed dates fall back to today.
  */
 import { isoToLocalDate, toIsoDate } from "./today-dates";
 
@@ -14,16 +15,11 @@ export function isRealIso(iso: string): boolean {
   return toIsoDate(isoToLocalDate(iso)) === iso;
 }
 
-/** The focused ISO day: the requested one when it is a real date inside the
-    given week, otherwise the real today (clamp/fallback — AC8). */
+/** The focused ISO day: any real `YYYY-MM-DD` (past or future) is honored;
+    a malformed/missing param falls back to the real today. */
 export function resolveFocusIso(
   requested: string,
-  realTodayIso: string,
-  week: string[]
+  realTodayIso: string
 ): string {
-  if (!isRealIso(requested)) return realTodayIso;
-  if (requested < week[0] || requested > week[week.length - 1]) {
-    return realTodayIso;
-  }
-  return requested;
+  return isRealIso(requested) ? requested : realTodayIso;
 }

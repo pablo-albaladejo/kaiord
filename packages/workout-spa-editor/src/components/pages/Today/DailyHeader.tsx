@@ -1,7 +1,7 @@
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 
-export type TodayHeaderProps = {
+export type DailyHeaderProps = {
   focusDate: Date;
   isFocusToday: boolean;
   onBackToToday: () => void;
@@ -14,11 +14,11 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
 };
 const TITLE_OPTIONS: Intl.DateTimeFormatOptions = { weekday: "long" };
 
-export function TodayHeader({
+export function DailyHeader({
   focusDate,
   isFocusToday,
   onBackToToday,
-}: TodayHeaderProps) {
+}: DailyHeaderProps) {
   const eyebrow = focusDate.toLocaleDateString(undefined, DATE_OPTIONS);
   const title = isFocusToday
     ? "Today"

@@ -47,26 +47,26 @@ describe("resolveBackTarget", () => {
     expect(result).toBe("/calendar");
   });
 
-  it("should resolve the today origin to /today", () => {
+  it("should resolve the daily origin to /daily", () => {
     // Arrange
-    const input = { origin: "today" as const };
+    const input = { origin: "daily" as const };
 
     // Act
     const result = resolveBackTarget(input);
 
     // Assert
-    expect(result).toBe("/today");
+    expect(result).toBe("/daily");
   });
 
-  it("should carry the focused day on a dated today origin", () => {
+  it("should carry the focused day on a dated daily origin", () => {
     // Arrange
-    const input = { origin: "today" as const, date: "2026-06-10" };
+    const input = { origin: "daily" as const, date: "2026-06-10" };
 
     // Act
     const result = resolveBackTarget(input);
 
     // Assert
-    expect(result).toBe("/today?date=2026-06-10");
+    expect(result).toBe("/daily?date=2026-06-10");
   });
 
   it("should resolve a dated calendar-day origin to the picker href", () => {

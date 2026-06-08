@@ -21,11 +21,11 @@ function renderAt(path: string) {
 describe("BottomNav", () => {
   it("should render four tabs and the create FAB", () => {
     // Arrange
-    renderAt("/today");
+    renderAt("/daily");
 
     // Act
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    const tabButtons = ["Today", "Calendar", "Library", "Athlete"].map((name) =>
+    const tabButtons = ["Daily", "Calendar", "Library", "Athlete"].map((name) =>
       screen.getByRole("button", { name })
     );
     const fab = screen.getByRole("button", { name: "Create workout" });
@@ -36,20 +36,20 @@ describe("BottomNav", () => {
     expect(fab).toBeInTheDocument();
   });
 
-  it("should mark the Today tab active on the today route", () => {
+  it("should mark the Daily tab active on the daily route", () => {
     // Arrange
-    renderAt("/today");
+    renderAt("/daily");
 
     // Act
-    const today = screen.getByRole("button", { name: "Today" });
+    const daily = screen.getByRole("button", { name: "Daily" });
 
     // Assert
-    expect(today).toHaveAttribute("aria-current", "page");
+    expect(daily).toHaveAttribute("aria-current", "page");
   });
 
   it("should render the FAB notch spacer immediately before the Athlete tab", () => {
     // Arrange
-    renderAt("/today");
+    renderAt("/daily");
 
     // Act
     const athleteWrapper = screen.getByRole("button", {
@@ -76,14 +76,14 @@ describe("BottomNav", () => {
 
     // Act
     const library = screen.getByRole("button", { name: "Library" });
-    const today = screen.getByRole("button", { name: "Today" });
+    const daily = screen.getByRole("button", { name: "Daily" });
 
     // Assert
     expect(library).toHaveAttribute("aria-current", "page");
-    expect(today).not.toHaveAttribute("aria-current");
+    expect(daily).not.toHaveAttribute("aria-current");
   });
 
-  it("should not offer a Settings tab (header-only since the /today split)", () => {
+  it("should not offer a Settings tab (header-only since the /daily split)", () => {
     // Arrange
     renderAt("/settings/ai");
 
@@ -100,17 +100,17 @@ describe("BottomNav", () => {
 
     // Act
     const calendar = screen.getByRole("button", { name: "Calendar" });
-    const today = screen.getByRole("button", { name: "Today" });
+    const daily = screen.getByRole("button", { name: "Daily" });
 
     // Assert
     expect(calendar).toHaveAttribute("aria-current", "page");
-    expect(today).not.toHaveAttribute("aria-current");
+    expect(daily).not.toHaveAttribute("aria-current");
   });
 
   it("should navigate to the new workout route when the FAB is clicked", async () => {
     // Arrange
     const user = userEvent.setup();
-    const { history } = renderAt("/today");
+    const { history } = renderAt("/daily");
 
     // Act
     await user.click(screen.getByRole("button", { name: "Create workout" }));
@@ -122,7 +122,7 @@ describe("BottomNav", () => {
   it("should navigate to the library route when the Library tab is clicked", async () => {
     // Arrange
     const user = userEvent.setup();
-    const { history } = renderAt("/today");
+    const { history } = renderAt("/daily");
 
     // Act
     await user.click(screen.getByRole("button", { name: "Library" }));

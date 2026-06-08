@@ -64,7 +64,7 @@ describe("Routing", () => {
 
     // Assert
 
-    expect(await screen.findByTestId("today-page")).toBeInTheDocument();
+    expect(await screen.findByTestId("daily-page")).toBeInTheDocument();
   });
 
   it("should redirect bare /calendar to the current week's grid in one hop", async () => {

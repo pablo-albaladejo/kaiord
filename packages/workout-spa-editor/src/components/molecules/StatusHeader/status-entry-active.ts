@@ -1,11 +1,11 @@
 import type { EntryDef } from "./status-entry-defs";
 
 /** Active-state predicate, mirroring the bottom-nav `isTabActive`:
-    today ⇔ `/today`; calendar ⇔ index route + `/calendar(/...)` (default
+    daily ⇔ `/daily`; calendar ⇔ index route + `/calendar(/...)` (default
     view); settings ⇔ `/settings(/...)`; others by base-target prefix. */
 export function isEntryActive(entry: EntryDef, location: string): boolean {
-  if (entry.id === "today") {
-    return location === "/today";
+  if (entry.id === "daily") {
+    return location === "/daily";
   }
   if (entry.id === "calendar") {
     return (
