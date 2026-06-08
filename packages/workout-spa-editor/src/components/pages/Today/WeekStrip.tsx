@@ -1,17 +1,14 @@
 import { Link } from "wouter";
 
 import { calendarWeekHref } from "../../../routing/calendar-week-href";
-import type { WorkoutRecord } from "../../../types/calendar-record";
-import type { Profile } from "../../../types/profile";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import type { DaySummary, WeekSummary } from "./build-week-summary";
 import type { WeekDay } from "./today-dates";
-import { weekLoadFractions } from "./today-load";
 import { WeekStripColumn } from "./WeekStripColumn";
 
 export type WeekStripProps = {
   days: WeekDay[];
-  workouts: WorkoutRecord[] | undefined;
-  profile: Profile | null;
+  weekSummary: WeekSummary;
   onSelectDay: (iso: string) => void;
   onPrev: () => void;
   onNext: () => void;
@@ -20,13 +17,10 @@ export type WeekStripProps = {
 const ARROW =
   "flex h-8 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800";
 
+const EMPTY: DaySummary = { count: 0, intensity: null, estimated: false };
+
 export function WeekStrip(props: WeekStripProps) {
-  const { days, workouts, profile, onSelectDay } = props;
-  const fractions = weekLoadFractions(
-    days.map((d) => d.iso),
-    workouts ?? [],
-    profile
-  );
+  const { days, weekSummary, onSelectDay } = props;
   const calendarHref =
     days.length > 0 ? calendarWeekHref(days[0].iso) : "/calendar";
 
@@ -44,11 +38,11 @@ export function WeekStrip(props: WeekStripProps) {
         >
           <Icon icon={ICON_MAP.chevL} size="sm" color="inherit" />
         </button>
-        {days.map((day, index) => (
+        {days.map((day) => (
           <WeekStripColumn
             key={day.iso}
             day={day}
-            fraction={fractions[index]}
+            summary={weekSummary[day.iso] ?? EMPTY}
             onSelect={onSelectDay}
           />
         ))}
