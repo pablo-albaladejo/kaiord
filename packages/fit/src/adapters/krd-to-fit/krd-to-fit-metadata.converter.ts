@@ -2,6 +2,7 @@ import type { KRD, Logger, Workout } from "@kaiord/core";
 
 import type { FitFileType } from "../schemas/fit-file-type";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
+import { mapSportToFit } from "../sport/sport.mapper";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
 import { mapManufacturer } from "./krd-to-fit-manufacturer.converter";
 import { countValidSteps } from "./krd-to-fit-step-count.helpers";
@@ -59,7 +60,7 @@ export const convertWorkoutMetadata = (
 
   const workoutMesg: Record<string, unknown> = {
     wktName: workout.name,
-    sport: workout.sport,
+    sport: mapSportToFit(workout.sport),
     numValidSteps,
   };
 

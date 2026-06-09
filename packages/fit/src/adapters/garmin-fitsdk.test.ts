@@ -46,7 +46,9 @@ describe("createGarminFitSdkReader", () => {
       expect(result.metadata.manufacturer).toBe("dynastream");
       expect(result.metadata.product).toBe("hrmFitSingleByteProductId");
       expect(result.metadata.serialNumber).toBe("1234");
-      expect(result.metadata.sport).toBe("cycling");
+      // Fixture workout message has no sport field; absence maps to `generic`
+      // (the cycling default was removed in favor of the honest fallback).
+      expect(result.metadata.sport).toBe("generic");
     });
 
     it("should convert workout steps in correct order", async () => {

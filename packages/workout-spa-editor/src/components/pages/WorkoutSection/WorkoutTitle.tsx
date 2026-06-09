@@ -4,6 +4,14 @@ import type { RefObject } from "react";
 import type { Workout } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 
+// Title-case a snake_case sport/subSport token so values such as
+// `flexibility_training` render as "Flexibility Training".
+const humanizeSport = (value: string): string =>
+  value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
 type WorkoutTitleProps = {
   workout: Workout;
   onEdit: () => void;
@@ -38,8 +46,8 @@ export function WorkoutTitle({ workout, onEdit, titleRef }: WorkoutTitleProps) {
         </Button>
       </div>
       <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        Sport: {workout.sport}
-        {workout.subSport && ` • ${workout.subSport}`}
+        Sport: {humanizeSport(workout.sport)}
+        {workout.subSport && ` • ${humanizeSport(workout.subSport)}`}
       </p>
     </div>
   );

@@ -7,6 +7,14 @@ export type WorkoutSectionProps = {
   onStepSelect: (stepId: string) => void;
 };
 
+// Title-case a snake_case sport/subSport token so values such as
+// `flexibility_training` render as "Flexibility Training".
+const humanizeSport = (value: string): string =>
+  value
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
 export function WorkoutSection({
   workout,
   selectedStepId,
@@ -20,8 +28,8 @@ export function WorkoutSection({
             {workout.name || "Untitled Workout"}
           </h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Sport: {workout.sport}
-            {workout.subSport && ` • ${workout.subSport}`}
+            Sport: {humanizeSport(workout.sport)}
+            {workout.subSport && ` • ${humanizeSport(workout.subSport)}`}
           </p>
         </div>
       </div>

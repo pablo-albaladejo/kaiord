@@ -68,7 +68,7 @@ describe("WorkoutHeader", () => {
 
       expect(screen.getByText("Test Workout")).toBeInTheDocument();
       expect(
-        screen.getByText(/Sport: cycling • indoor_cycling/i)
+        screen.getByText(/Sport: Cycling • Indoor Cycling/)
       ).toBeInTheDocument();
     });
 
@@ -113,7 +113,7 @@ describe("WorkoutHeader", () => {
 
       // Assert
 
-      expect(screen.getByText(/^Sport: cycling$/)).toBeInTheDocument();
+      expect(screen.getByText(/^Sport: Cycling$/)).toBeInTheDocument();
     });
 
     it("should render edit metadata button", () => {

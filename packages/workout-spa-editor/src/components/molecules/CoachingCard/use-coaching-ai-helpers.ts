@@ -13,9 +13,10 @@ import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import type { PersistencePort } from "../../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { Sport } from "../../../types/schemas";
+import { sportSchema } from "../../../types/schemas";
 
 const isKnownSport = (s: string): s is Sport =>
-  s === "cycling" || s === "running" || s === "swimming" || s === "generic";
+  sportSchema.safeParse(s).success;
 
 export const buildGenerateKrdPort = (
   provider: LlmProviderConfig,
