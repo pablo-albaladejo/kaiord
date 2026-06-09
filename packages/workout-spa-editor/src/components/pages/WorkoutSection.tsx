@@ -1,3 +1,4 @@
+import { humanizeSport } from "../../lib/format-sport";
 import type { Workout } from "../../types/krd";
 import { WorkoutList } from "../organisms/WorkoutList/WorkoutList";
 
@@ -6,14 +7,6 @@ export type WorkoutSectionProps = {
   selectedStepId: string | null;
   onStepSelect: (stepId: string) => void;
 };
-
-// Title-case a snake_case sport/subSport token so values such as
-// `flexibility_training` render as "Flexibility Training".
-const humanizeSport = (value: string): string =>
-  value
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
 
 export function WorkoutSection({
   workout,

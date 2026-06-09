@@ -1,16 +1,9 @@
 import { Edit2 } from "lucide-react";
 import type { RefObject } from "react";
 
+import { humanizeSport } from "../../../lib/format-sport";
 import type { Workout } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
-
-// Title-case a snake_case sport/subSport token so values such as
-// `flexibility_training` render as "Flexibility Training".
-const humanizeSport = (value: string): string =>
-  value
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
 
 type WorkoutTitleProps = {
   workout: Workout;

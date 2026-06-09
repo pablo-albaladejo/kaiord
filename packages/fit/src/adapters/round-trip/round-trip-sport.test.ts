@@ -16,7 +16,12 @@ import {
 import { convertFitToKrdLap, convertKrdToFitLap } from "../lap";
 import { mapFitSessionToKrd } from "../session";
 import { convertKrdToFitSession } from "../session/krd-to-fit-session.converter";
-import { mapSportToFit, mapSportToKrd } from "../sport/sport.mapper";
+import {
+  FIT_TO_KRD_SPORT,
+  KRD_TO_FIT_SPORT,
+  mapSportToFit,
+  mapSportToKrd,
+} from "../sport/sport.mapper";
 
 const buildWorkoutKrd = (sport: string): KRD =>
   buildKRD.build({
@@ -133,5 +138,19 @@ describe("sport mapper (camelCase ↔ snake_case)", () => {
 
     // Assert
     expect(results).toEqual(["generic", "generic", "generic", "generic"]);
+  });
+
+  it("should invert the forward map losslessly (no KRD-value collisions)", () => {
+    // Arrange
+    const forwardKeys = Object.keys(FIT_TO_KRD_SPORT);
+    const forwardValues = Object.values(FIT_TO_KRD_SPORT);
+
+    // Act
+    const reverseKeys = Object.keys(KRD_TO_FIT_SPORT);
+    const uniqueKrdValues = new Set(forwardValues);
+
+    // Assert
+    expect(uniqueKrdValues.size).toBe(forwardKeys.length);
+    expect(reverseKeys.length).toBe(forwardKeys.length);
   });
 });

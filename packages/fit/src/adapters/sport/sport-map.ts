@@ -3,8 +3,9 @@ import type { Sport } from "@kaiord/core";
 import type { FitSport } from "../schemas/fit-sport";
 
 /**
- * Bidirectional anchor: FIT `Sport` is camelCase, KRD `sport` is snake_case.
- * Both enums share the same order, so each entry pairs index-by-index.
+ * Explicit camelCase FIT `Sport` → snake_case KRD `sport` mapping (the forward
+ * direction). The reverse map is derived in `sport.mapper.ts`; the relationship
+ * is 1:1, so the inversion is lossless (asserted by a no-collision test).
  */
 export const FIT_TO_KRD_SPORT: Record<FitSport, Sport> = {
   generic: "generic",
