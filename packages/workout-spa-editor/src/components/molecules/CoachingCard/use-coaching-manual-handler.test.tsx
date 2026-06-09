@@ -1,7 +1,8 @@
 /**
- * Tests for `useCoachingManual` — covers the manual-create happy path
- * (workout + session match persisted, navigates to editor) and the
- * re-entry guard added per CodeRabbit feedback.
+ * Tests for `useCoachingManual` (defer-coaching-create): "Edit manually"
+ * no longer persists on click — it navigates to a store-only draft editor
+ * (`/workout/new?coaching=`) and persistence happens only on Save. If a
+ * workout already exists for the activity it opens that instead (idempotency).
  */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -10,28 +11,16 @@ import { describe, expect, it, vi } from "vitest";
 import { AnalyticsProvider } from "../../../contexts/analytics-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
+import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { CoachingActivityRecord } from "../../../types/coaching-activity-record";
+import { namespaceSourceId } from "../../../types/coaching-activity-record";
 import { useCoachingManual } from "./use-coaching-manual-handler";
 
 const navigateMock = vi.fn();
-const mockShowSuccess = vi.fn();
 
 vi.mock("wouter", () => ({
   useLocation: () => ["/calendar", navigateMock],
-}));
-
-vi.mock("../../../contexts/ToastContext", () => ({
-  useToastContext: () => ({
-    error: vi.fn(),
-    success: mockShowSuccess,
-    toast: vi.fn(),
-    warning: vi.fn(),
-    info: vi.fn(),
-    toasts: [],
-    dismiss: vi.fn(),
-    dismissAll: vi.fn(),
-  }),
 }));
 
 const activity: CoachingActivity = {
@@ -50,7 +39,7 @@ const activity: CoachingActivity = {
 const seedActivity = async (
   persistence: ReturnType<typeof createInMemoryPersistence>
 ) => {
-  const record: CoachingActivityRecord = {
+  const record = {
     id: `profile-1:${activity.id}`,
     profileId: "profile-1",
     source: "train2go",
@@ -82,10 +71,9 @@ const wrap = (
 };
 
 describe("useCoachingManual", () => {
-  it("should persist a workout and navigate to the editor on success", async () => {
+  it("should navigate to the draft route without persisting when no workout exists", async () => {
     // Arrange
     navigateMock.mockClear();
-    mockShowSuccess.mockClear();
     const persistence = createInMemoryPersistence();
     await seedActivity(persistence);
     const onClose = vi.fn();
@@ -101,17 +89,30 @@ describe("useCoachingManual", () => {
 
     // Assert
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+    // The composite id is percent-encoded in the URL (decoded on read).
     expect(navigateMock).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/workout\//)
+      expect.stringContaining("/workout/new?coaching=")
     );
+    const persisted = await persistence.workouts.getByDateRange(
+      activity.date,
+      activity.date
+    );
+    expect(persisted).toHaveLength(0);
   });
 
-  it("should fire a success toast with static title before closing the dialog", async () => {
+  it("should open the existing workout instead of a fresh draft", async () => {
     // Arrange
     navigateMock.mockClear();
-    mockShowSuccess.mockClear();
     const persistence = createInMemoryPersistence();
     await seedActivity(persistence);
+    const ns = namespaceSourceId("profile-1", "abc");
+    await persistence.workouts.put({
+      id: "w-existing",
+      source: "train2go",
+      sourceId: ns,
+      date: activity.date,
+      state: "structured",
+    } as unknown as WorkoutRecord);
     const onClose = vi.fn();
     const { result } = renderHook(
       () => useCoachingManual(activity, "profile-1", onClose),
@@ -124,17 +125,13 @@ describe("useCoachingManual", () => {
     });
 
     // Assert
-    await waitFor(() => expect(mockShowSuccess).toHaveBeenCalledTimes(1));
-    expect(mockShowSuccess).toHaveBeenCalledWith(
-      "Workout matched",
-      activity.title,
-      { duration: 3000 }
+    await waitFor(() => expect(navigateMock).toHaveBeenCalled());
+    expect(navigateMock).toHaveBeenCalledWith(
+      expect.stringContaining("/workout/w-existing")
     );
-    // Toast fires BEFORE onClose so the success signal is committed
-    // even though AppToastProvider lives above the dialog tree.
-    const successOrder = mockShowSuccess.mock.invocationCallOrder[0];
-    const onCloseOrder = onClose.mock.invocationCallOrder[0];
-    expect(successOrder).toBeLessThan(onCloseOrder);
+    expect(navigateMock).not.toHaveBeenCalledWith(
+      expect.stringContaining("new?coaching")
+    );
   });
 
   it("should no-op when activity or profileId is missing", async () => {

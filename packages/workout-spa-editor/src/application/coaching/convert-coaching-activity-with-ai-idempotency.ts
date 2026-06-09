@@ -16,10 +16,12 @@
  *     of the coaching-dialog redesign is observable through the same
  *     route-mock surface as flow (a, c).
  */
+import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import { transitionToStructured } from "../workout-transitions";
-import { classifyAiFailure } from "./convert-coaching-activity-error-mapper";
+import { forceKrdSport } from "./coaching-krd-sport";
+import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
 import { resolvePromptText } from "./convert-coaching-activity-with-ai-helpers";
 import type {
   ConvertWithAiDeps,
@@ -52,13 +54,21 @@ export const processExistingRawInPlace = async (
   abortSignal?: AbortSignal
 ): Promise<ConvertWithAiResult> => {
   const text = resolvePromptText(activity);
+  const resolved = resolveT2GSport(activity.sport);
   try {
     const generated = await deps.generateKrd({
       text,
-      sport: activity.sport,
+      // Resolved KRD sport hint (raw Train2Go keys make the LLM guess
+      // `generic`); raw key kept only for unmapped sports.
+      sport: resolved?.sport ?? activity.sport,
       abortSignal,
     });
-    const updated = transitionToStructured(existingWorkout, generated.krd, {
+    // Force the resolved sport onto the KRD too (not just the LLM hint) so a
+    // known Train2Go sport is never persisted as the model's `generic` guess.
+    const krd = resolved
+      ? forceKrdSport(generated.krd, resolved)
+      : generated.krd;
+    const updated = transitionToStructured(existingWorkout, krd, {
       provider: generated.aiMeta.provider,
       model: generated.aiMeta.model,
       promptVersion: generated.aiMeta.promptVersion,
@@ -70,16 +80,6 @@ export const processExistingRawInPlace = async (
     });
     return { ok: true, workoutId: updated.id, created: false };
   } catch (err) {
-    const reason = classifyAiFailure(err);
-    const eventName =
-      reason === "ai-cancelled"
-        ? "coaching.convert_with_ai.cancelled"
-        : "coaching.convert_with_ai.failure";
-    deps.analytics.event(eventName, { reason });
-    return {
-      ok: false,
-      reason,
-      error: err instanceof Error ? err.message : String(err),
-    };
+    return buildAiFailure(deps.analytics, err);
   }
 };

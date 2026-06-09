@@ -11,7 +11,7 @@
 import type { AiMeta } from "../../types/calendar-fragments";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
-import type { KRD } from "../../types/schemas";
+import type { KRD, Sport, SubSport } from "../../types/schemas";
 
 const buildRaw = (activity: CoachingActivityRecord): WorkoutRecord["raw"] => ({
   title: activity.title,
@@ -30,6 +30,11 @@ export type StructuredCoachingWorkoutInput = {
   krd: KRD;
   aiMeta: AiMeta | null;
   now: string;
+  // Resolved KRD sport (NOT the raw Train2Go key on activity.sport) so the
+  // record carries the same sport as its KRD instead of collapsing to a raw
+  // key the calendar/filters cannot interpret.
+  sport: Sport;
+  subSport?: SubSport;
 };
 
 export const buildStructuredCoachingWorkout = (
@@ -38,7 +43,7 @@ export const buildStructuredCoachingWorkout = (
   id: input.id,
   profileId: input.activity.profileId,
   date: input.activity.date,
-  sport: input.activity.sport,
+  sport: input.sport,
   source: input.activity.source,
   sourceId: input.namespacedSourceId,
   planId: null,

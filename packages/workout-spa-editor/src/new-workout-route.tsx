@@ -21,7 +21,8 @@ export function NewWorkoutRoute() {
   const params = new URLSearchParams(search);
   const hasAction = params.get("action") === "import";
   const hasSource = params.get("source") === "scratch";
-  if (hasAction || hasSource) return <EditorPage />;
+  const hasCoachingDraft = params.get("coaching") !== null;
+  if (hasAction || hasSource || hasCoachingDraft) return <EditorPage />;
   const date = params.get("date");
   const closeTarget = date ? buildPickerHref(date) : "/calendar";
   return (
