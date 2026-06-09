@@ -1,13 +1,14 @@
 /**
  * Internal helpers for `convertCoachingActivityWithAi`. Split from the
- * use-case file to keep the orchestrator under per-file/per-function
- * line caps; not part of the public application API.
+ * use-case file to keep it under the line caps; not public API.
  */
+import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { AiMeta } from "../../types/calendar-fragments";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { KRD } from "../../types/schemas";
+import { coachingSportArgs, type ResolvedSport } from "./coaching-krd-sport";
 import { buildStructuredCoachingWorkout } from "./coaching-workout-builder";
-import { classifyAiFailure } from "./convert-coaching-activity-error-mapper";
+import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
 import type {
   ConvertWithAiDeps,
   ConvertWithAiResult,
@@ -23,15 +24,16 @@ const persistFreshWorkout = async (
   deps: ConvertWithAiDeps,
   activity: CoachingActivityRecord,
   nsSourceId: string,
-  generated: { krd: KRD; aiMeta: AiMeta }
+  generated: { krd: KRD; aiMeta: AiMeta },
+  resolved: ResolvedSport | null
 ): Promise<string> => {
   const workout = buildStructuredCoachingWorkout({
     id: deps.newWorkoutId(),
     activity,
     namespacedSourceId: nsSourceId,
-    krd: generated.krd,
     aiMeta: generated.aiMeta,
     now: deps.clock(),
+    ...coachingSportArgs(generated.krd, resolved, activity.sport),
   });
   await deps.workouts.put(workout);
   await ensureSessionMatch(deps.sessionMatches, {
@@ -53,31 +55,25 @@ export const performAiCreation = async (
   text: string,
   abortSignal: AbortSignal | undefined
 ): Promise<ConvertWithAiResult> => {
+  const resolved = resolveT2GSport(activity.sport);
   let generated: { krd: KRD; aiMeta: AiMeta };
   try {
     generated = await deps.generateKrd({
       text,
-      sport: activity.sport,
+      // Resolved KRD sport hint; raw Train2Go keys make the LLM guess
+      // `generic`. Raw key kept only for unmapped sports.
+      sport: resolved?.sport ?? activity.sport,
       abortSignal,
     });
   } catch (err) {
-    const reason = classifyAiFailure(err);
-    const eventName =
-      reason === "ai-cancelled"
-        ? "coaching.convert_with_ai.cancelled"
-        : "coaching.convert_with_ai.failure";
-    deps.analytics.event(eventName, { reason });
-    return {
-      ok: false,
-      reason,
-      error: err instanceof Error ? err.message : String(err),
-    };
+    return buildAiFailure(deps.analytics, err);
   }
   const workoutId = await persistFreshWorkout(
     deps,
     activity,
     nsSourceId,
-    generated
+    generated,
+    resolved
   );
   deps.analytics.event("coaching.convert_with_ai.success", { created: true });
   return { ok: true, workoutId, created: true };

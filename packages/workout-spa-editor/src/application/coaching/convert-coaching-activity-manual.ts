@@ -10,13 +10,9 @@
  * The coach description is mirrored into `raw.description` so the
  * EditorPage sidebar can render it alongside the KRD step list.
  */
-import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import { namespaceSourceId } from "../../types/coaching-activity-record";
-import { buildCoachingTemplateKrd } from "./coaching-template";
-import {
-  buildRawCoachingWorkout,
-  buildStructuredCoachingWorkout,
-} from "./coaching-workout-builder";
+import { buildCoachingDraftKrd } from "./build-coaching-draft-krd";
+import { buildRawCoachingWorkout } from "./coaching-workout-builder";
 import {
   handleExistingManualWorkout,
   manualMatchSource,
@@ -28,6 +24,7 @@ import type {
   ConvertManualResult,
 } from "./convert-coaching-activity-manual-types";
 import { ensureSessionMatch } from "./ensure-session-match";
+import { persistCoachingWorkout } from "./persist-coaching-workout";
 
 export type {
   ConvertManualDeps,
@@ -35,33 +32,19 @@ export type {
   ConvertManualResult,
 } from "./convert-coaching-activity-manual-types";
 
-const createNewWorkout = async (
+const createRawRestDay = async (
   deps: ConvertManualDeps,
   activity: CoachingActivityForConvert,
   ns: string
 ): Promise<ConvertManualResult> => {
-  const resolved = resolveT2GSport(activity.sport);
   // A rest day (or unknown sport) is not a trainable workout: persist a
   // raw-only record so the activity still surfaces, without a KRD.
-  const workout = resolved
-    ? buildStructuredCoachingWorkout({
-        id: deps.newWorkoutId(),
-        activity,
-        namespacedSourceId: ns,
-        krd: buildCoachingTemplateKrd(
-          resolved.sport,
-          activity.title,
-          resolved.subSport
-        ),
-        aiMeta: null,
-        now: deps.clock(),
-      })
-    : buildRawCoachingWorkout({
-        id: deps.newWorkoutId(),
-        activity,
-        namespacedSourceId: ns,
-        now: deps.clock(),
-      });
+  const workout = buildRawCoachingWorkout({
+    id: deps.newWorkoutId(),
+    activity,
+    namespacedSourceId: ns,
+    now: deps.clock(),
+  });
   await deps.workouts.put(workout);
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
@@ -74,6 +57,18 @@ const createNewWorkout = async (
   });
   deps.analytics.event("coaching.convert_manual.success", { created: true });
   return { workoutId: workout.id, created: true };
+};
+
+const createNewWorkout = async (
+  deps: ConvertManualDeps,
+  activity: CoachingActivityForConvert,
+  ns: string
+): Promise<ConvertManualResult> => {
+  const draft = buildCoachingDraftKrd(activity);
+  if (!draft) return createRawRestDay(deps, activity, ns);
+  // Compose the split: build the template KRD (entry) then persist it
+  // (Save), preserving the one-shot behaviour for any other caller.
+  return persistCoachingWorkout({ krd: draft.krd, activity }, deps);
 };
 
 export const convertCoachingActivityManual = async (

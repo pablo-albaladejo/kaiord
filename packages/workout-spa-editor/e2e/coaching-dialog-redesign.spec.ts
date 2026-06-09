@@ -13,8 +13,10 @@
  *       on the second attempt (D3, no-persist-on-failure).
  *   (c) AI failure → static error toast fires and prevents state mutation
  *       (C2 / R-PIIInterpolation).
- *   (d) Edit manually → editor renders template KRD + coaching sidebar;
- *       a `session_match` row is written alongside the workout (D1, D4).
+ *   (d) Edit manually → opens a store-only draft editor (template KRD +
+ *       coaching sidebar); nothing is persisted until the explicit Save,
+ *       which then writes the workout + `session_match` row (D1, D4,
+ *       defer-coaching-create).
  *   (e) Auto-heal → a converted-but-not-matched workout (legacy state)
  *       is silently linked when the dialog opens (D8 belt-and-braces).
  *   (f) Process with AI from matched raw → transitions raw to structured
@@ -244,7 +246,7 @@ test.describe("Coaching activity dialog redesign", () => {
     await disableOnboardingTutorial(page);
   });
 
-  test("flow (d): Edit manually creates a structured workout + match and navigates to editor", async ({
+  test("flow (d): Edit manually opens a draft and persists only on Save", async ({
     page,
   }) => {
     // Arrange — boot SPA, clear Dexie, seed profile + activity
@@ -276,22 +278,34 @@ test.describe("Coaching activity dialog redesign", () => {
     await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
     await page.getByTestId("coaching-dialog-edit-manually").click();
 
-    // Assert — navigated to editor + session_match row written (per the
-    // auto-match invariant D1). The sidebar visibility is covered by
-    // unit tests (`CoachingSidebar.test.tsx`); here we focus on the
-    // end-to-end persistence contract.
-    await expect(page).toHaveURL(/\/workout\//, { timeout: 10_000 });
-    const matchCount = await page.evaluate(async (profileId) => {
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as {
-        table: (n: string) => {
-          toArray: () => Promise<{ profileId: string }[]>;
+    const countMatches = (profileId: string) =>
+      page.evaluate(async (id) => {
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as {
+          table: (n: string) => {
+            toArray: () => Promise<{ profileId: string }[]>;
+          };
         };
-      };
-      const all = await db.table("sessionMatches").toArray();
-      return all.filter((m) => m.profileId === profileId).length;
-    }, PROFILE_ID);
-    expect(matchCount).toBeGreaterThan(0);
+        const all = await db.table("sessionMatches").toArray();
+        return all.filter((m) => m.profileId === id).length;
+      }, profileId);
+
+    // Assert — opens the store-only DRAFT editor and persists NOTHING yet
+    // (defer-coaching-create): no session_match until the explicit Save.
+    await expect(page).toHaveURL(/\/workout\/new\?coaching=/, {
+      timeout: 10_000,
+    });
+    await expect(page.getByTestId("coaching-draft-save-button")).toBeVisible();
+    expect(await countMatches(PROFILE_ID)).toBe(0);
+
+    // Act — explicit Save persists the workout + match and lands on /workout/:id
+    await page.getByTestId("coaching-draft-save-button").click();
+
+    // Assert — navigated to the persisted record + session_match written
+    await expect(page).toHaveURL(/\/workout\/[0-9a-f-]{16,}/, {
+      timeout: 10_000,
+    });
+    expect(await countMatches(PROFILE_ID)).toBeGreaterThan(0);
   });
 
   test("flow (e): converted-without-match → dialog auto-heals to matched state", async ({

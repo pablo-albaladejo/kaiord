@@ -41,6 +41,8 @@ export const buildStubAnalytics = (): Analytics => ({
   event: vi.fn(),
 });
 export const fakeKrd = (): KRD => buildCoachingTemplateKrd("cycling");
+/** Simulates the LLM collapsing an unrecognised hint to `generic`. */
+export const fakeGenericKrd = (): KRD => buildCoachingTemplateKrd("generic");
 export const fakeAiMeta = (): AiMeta => ({
   promptVersion: "test",
   model: "test-model",

@@ -14,6 +14,7 @@ import {
   buildStubCoachingRepo,
   buildStubWorkoutRepo,
   fakeAiMeta,
+  fakeGenericKrd,
   fakeKrd,
   stubActivity,
 } from "./convert-coaching-activity-with-ai.test-helpers";
@@ -374,6 +375,52 @@ describe("convertCoachingActivityWithAi", () => {
     expect(call.text).toBe(`${empty.title} (${empty.sport})`);
     expect(call.text).not.toContain("undefined");
     expect(call.text).not.toContain("null");
+  });
+
+  it("should force record and KRD sport from the resolved Train2Go key for stationarybike", async () => {
+    // Arrange
+    const bike = stubActivity({ sport: "stationarybike" });
+    const generateKrd: GenerateKrdPort = vi
+      .fn()
+      .mockResolvedValue({ krd: fakeGenericKrd(), aiMeta: fakeAiMeta() });
+    const deps = buildDeps({
+      coaching: buildStubCoachingRepo([bike]),
+      generateKrd,
+    });
+
+    // Act
+    await convertCoachingActivityWithAi({ activityId: bike.id }, deps);
+
+    // Assert
+    const stored = await deps.workouts.getById("w-new");
+    expect(stored?.sport).toBe("cycling");
+    expect(stored?.krd?.metadata.sport).toBe("cycling");
+    expect(stored?.krd?.metadata.subSport).toBe("indoor_cycling");
+    const hint = (generateKrd as ReturnType<typeof vi.fn>).mock.calls[0][0]
+      .sport;
+    expect(hint).toBe("cycling");
+  });
+
+  it("should force record and KRD sport to training for stretching, never generic", async () => {
+    // Arrange
+    const stretch = stubActivity({ sport: "stretching" });
+    const generateKrd: GenerateKrdPort = vi
+      .fn()
+      .mockResolvedValue({ krd: fakeGenericKrd(), aiMeta: fakeAiMeta() });
+    const deps = buildDeps({
+      coaching: buildStubCoachingRepo([stretch]),
+      generateKrd,
+    });
+
+    // Act
+    await convertCoachingActivityWithAi({ activityId: stretch.id }, deps);
+
+    // Assert
+    const stored = await deps.workouts.getById("w-new");
+    expect(stored?.sport).toBe("training");
+    expect(stored?.sport).not.toBe("generic");
+    expect(stored?.krd?.metadata.sport).toBe("training");
+    expect(stored?.krd?.metadata.subSport).toBe("flexibility_training");
   });
 
   it("should not call the LLM when ensureMatchForExisting is invoked on an already-matched workout", async () => {

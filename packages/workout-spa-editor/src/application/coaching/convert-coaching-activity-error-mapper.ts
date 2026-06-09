@@ -12,6 +12,7 @@
  *   inline error banner without having to special-case provider
  *   adapters)
  */
+import type { Analytics } from "@kaiord/core";
 import { KrdValidationError } from "@kaiord/core";
 
 export type AiFailureReason =
@@ -53,4 +54,27 @@ export const classifyAiFailure = (err: unknown): AiFailureReason => {
   if (isInvalidKrd(err)) return "ai-invalid-krd";
   if (isTransport(err)) return "transport-error";
   return "ai-error";
+};
+
+/**
+ * Emit the convert-with-ai failure/cancel analytics event and shape the
+ * failure result. Shared by both AI persist branches so the telemetry
+ * names and the error payload stay identical.
+ */
+export const buildAiFailure = (
+  analytics: Analytics,
+  err: unknown
+): { ok: false; reason: AiFailureReason; error: string } => {
+  const reason = classifyAiFailure(err);
+  analytics.event(
+    reason === "ai-cancelled"
+      ? "coaching.convert_with_ai.cancelled"
+      : "coaching.convert_with_ai.failure",
+    { reason }
+  );
+  return {
+    ok: false,
+    reason,
+    error: err instanceof Error ? err.message : String(err),
+  };
 };
