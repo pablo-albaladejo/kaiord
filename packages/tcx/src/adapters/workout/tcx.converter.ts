@@ -1,7 +1,7 @@
 import type { KRD, Logger, Workout, WorkoutStep } from "@kaiord/core";
 import { createTcxParsingError } from "@kaiord/core";
 
-import { KRD_TO_TCX_SPORT } from "../schemas/tcx-sport";
+import { krdToTcxSport } from "../schemas/tcx-sport";
 import { addKaiordMetadata } from "./metadata-builder";
 import { convertStepToTcx } from "./step-to-tcx.converter";
 
@@ -9,8 +9,7 @@ const buildTcxWorkout = (
   workout: Workout,
   logger: Logger
 ): Record<string, unknown> => {
-  const tcxSport =
-    KRD_TO_TCX_SPORT[workout.sport as keyof typeof KRD_TO_TCX_SPORT] || "Other";
+  const tcxSport = krdToTcxSport(workout.sport);
 
   const tcxSteps = workout.steps.map((step, index) =>
     convertStepToTcx(step as WorkoutStep, index, logger)

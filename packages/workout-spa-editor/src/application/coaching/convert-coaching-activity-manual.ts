@@ -10,9 +10,13 @@
  * The coach description is mirrored into `raw.description` so the
  * EditorPage sidebar can render it alongside the KRD step list.
  */
+import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import { namespaceSourceId } from "../../types/coaching-activity-record";
 import { buildCoachingTemplateKrd } from "./coaching-template";
-import { buildStructuredCoachingWorkout } from "./coaching-workout-builder";
+import {
+  buildRawCoachingWorkout,
+  buildStructuredCoachingWorkout,
+} from "./coaching-workout-builder";
 import {
   handleExistingManualWorkout,
   manualMatchSource,
@@ -36,14 +40,28 @@ const createNewWorkout = async (
   activity: CoachingActivityForConvert,
   ns: string
 ): Promise<ConvertManualResult> => {
-  const workout = buildStructuredCoachingWorkout({
-    id: deps.newWorkoutId(),
-    activity,
-    namespacedSourceId: ns,
-    krd: buildCoachingTemplateKrd(activity.sport, activity.title),
-    aiMeta: null,
-    now: deps.clock(),
-  });
+  const resolved = resolveT2GSport(activity.sport);
+  // A rest day (or unknown sport) is not a trainable workout: persist a
+  // raw-only record so the activity still surfaces, without a KRD.
+  const workout = resolved
+    ? buildStructuredCoachingWorkout({
+        id: deps.newWorkoutId(),
+        activity,
+        namespacedSourceId: ns,
+        krd: buildCoachingTemplateKrd(
+          resolved.sport,
+          activity.title,
+          resolved.subSport
+        ),
+        aiMeta: null,
+        now: deps.clock(),
+      })
+    : buildRawCoachingWorkout({
+        id: deps.newWorkoutId(),
+        activity,
+        namespacedSourceId: ns,
+        now: deps.clock(),
+      });
   await deps.workouts.put(workout);
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,

@@ -55,3 +55,38 @@ export const buildStructuredCoachingWorkout = (
   modifiedAt: null,
   updatedAt: input.now,
 });
+
+export type RawCoachingWorkoutInput = {
+  id: string;
+  activity: CoachingActivityRecord;
+  namespacedSourceId: string;
+  now: string;
+};
+
+/**
+ * Raw-only coaching workout (no structured KRD). Used for non-trainable
+ * activities such as rest days, where building a KRD would be dishonest.
+ */
+export const buildRawCoachingWorkout = (
+  input: RawCoachingWorkoutInput
+): WorkoutRecord => ({
+  id: input.id,
+  profileId: input.activity.profileId,
+  date: input.activity.date,
+  sport: input.activity.sport,
+  source: input.activity.source,
+  sourceId: input.namespacedSourceId,
+  planId: null,
+  state: "raw",
+  raw: buildRaw(input.activity),
+  krd: null,
+  lastProcessingError: null,
+  feedback: null,
+  aiMeta: null,
+  garminPushId: null,
+  tags: [],
+  previousState: null,
+  createdAt: input.now,
+  modifiedAt: null,
+  updatedAt: input.now,
+});

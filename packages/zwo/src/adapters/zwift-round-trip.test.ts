@@ -1,3 +1,4 @@
+import type { KRD } from "@kaiord/core";
 import {
   buildKRD,
   buildWorkoutStep,
@@ -343,6 +344,63 @@ describe("Zwift Round-Trip Conversion", () => {
       expect(regeneratedStep.duration.meters).toBe(
         originalStep.duration.meters
       );
+    });
+
+    it("should round-trip a running workout preserving sport", async () => {
+      // Arrange
+      const originalKrd = buildKRD.build({
+        metadata: { sport: "running" },
+        extensions: {
+          structured_workout: {
+            name: "Running Test",
+            sport: "running",
+            steps: [
+              buildWorkoutStep.build({
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 600 },
+                targetType: "open",
+                target: { type: "open" },
+                intensity: "active",
+              }),
+            ],
+          },
+        },
+      });
+
+      // Act
+      const zwoXml = convertKRDToZwift(originalKrd, logger);
+      const zwoData = parseZwiftXml(zwoXml);
+      const regeneratedKrd = convertZwiftToKRD(zwoData, logger);
+
+      // Assert
+      expect(
+        (regeneratedKrd.extensions?.structured_workout as { sport: string })
+          .sport
+      ).toBe("running");
+    });
+
+    it("should collapse a non-endurance sport (training) to bike in ZWO output", () => {
+      // Arrange
+      const krd = buildKRD.build({
+        metadata: { sport: "training" },
+        extensions: {
+          structured_workout: {
+            name: "Strength Session",
+            sport: "training",
+            steps: [],
+          },
+        },
+      }) as KRD;
+
+      // Act
+      const zwoXml = convertKRDToZwift(krd, logger);
+      const zwoData = parseZwiftXml(zwoXml) as {
+        workout_file: { sportType: string };
+      };
+
+      // Assert
+      expect(zwoData.workout_file.sportType).toBe("bike");
     });
 
     it("should preserve heart rate targets in KRD → ZWO → KRD", async () => {

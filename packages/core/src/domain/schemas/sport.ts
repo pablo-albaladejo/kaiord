@@ -1,35 +1,97 @@
 import { z } from "zod";
 
 /**
- * Zod schema for sport type enumeration.
+ * Primary sport types supported by KRD, anchored on the Garmin FIT `Sport`
+ * enum (snake_case here; the FIT adapter maps to/from camelCase). `generic`
+ * remains the terminal fallback. Granular variants live in `subSportSchema`.
  *
- * Defines primary sport types supported by KRD format.
- *
- * @example
- * ```typescript
- * import { sportSchema } from '@kaiord/core';
- *
- * // Access enum values
- * const cycling = sportSchema.enum.cycling;
- * const running = sportSchema.enum.running;
- *
- * // Validate sport
- * const result = sportSchema.safeParse('running');
- * if (result.success) {
- *   console.log('Valid sport:', result.data);
- * }
- * ```
+ * Access values via `.enum`, e.g. `sportSchema.enum.cycling`.
  */
 export const sportSchema = z.enum([
-  "cycling",
-  "running",
-  "swimming",
   "generic",
+  "running",
+  "cycling",
+  "transition",
+  "fitness_equipment",
+  "swimming",
+  "basketball",
+  "soccer",
+  "tennis",
+  "american_football",
+  "training",
+  "walking",
+  "cross_country_skiing",
+  "alpine_skiing",
+  "snowboarding",
+  "rowing",
+  "mountaineering",
+  "hiking",
+  "multisport",
+  "paddling",
+  "flying",
+  "e_biking",
+  "motorcycling",
+  "boating",
+  "driving",
+  "golf",
+  "hang_gliding",
+  "horseback_riding",
+  "hunting",
+  "fishing",
+  "inline_skating",
+  "rock_climbing",
+  "sailing",
+  "ice_skating",
+  "sky_diving",
+  "snowshoeing",
+  "snowmobiling",
+  "stand_up_paddleboarding",
+  "surfing",
+  "wakeboarding",
+  "water_skiing",
+  "kayaking",
+  "rafting",
+  "windsurfing",
+  "kitesurfing",
+  "tactical",
+  "jumpmaster",
+  "boxing",
+  "floor_climbing",
+  "baseball",
+  "diving",
+  "shooting",
+  "winter_sport",
+  "grinding",
+  "hiit",
+  "video_gaming",
+  "racket",
+  "wheelchair_push_walk",
+  "wheelchair_push_run",
+  "meditation",
+  "para_sport",
+  "disc_golf",
+  "team_sport",
+  "cricket",
+  "rugby",
+  "hockey",
+  "lacrosse",
+  "volleyball",
+  "water_tubing",
+  "wakesurfing",
+  "water_sport",
+  "archery",
+  "mixed_martial_arts",
+  "motor_sports",
+  "snorkeling",
+  "dance",
+  "jump_rope",
+  "pool_apnea",
+  "mobility",
+  "geocaching",
+  "canoeing",
 ]);
 
 /**
- * TypeScript type for sport, inferred from {@link sportSchema}.
- *
- * String literal union of supported sport types.
+ * String literal union of supported sport types, inferred from {@link sportSchema}.
  */
 export type Sport = z.infer<typeof sportSchema>;

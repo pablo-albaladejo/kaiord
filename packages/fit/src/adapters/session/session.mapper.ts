@@ -1,6 +1,7 @@
 import type { KRDSession } from "@kaiord/core";
 
 import type { FitSession } from "../schemas/fit-session";
+import { mapSportToFit, mapSportToKrd } from "../sport/sport.mapper";
 import { mapSubSportToFit, mapSubSportToKrd } from "../sub-sport/sub-sport";
 
 /**
@@ -13,7 +14,7 @@ export const mapFitSessionToKrd = (fit: FitSession): KRDSession => ({
   totalTimerTime:
     fit.totalTimerTime !== undefined ? fit.totalTimerTime / 1000 : undefined,
   totalDistance: fit.totalDistance,
-  sport: String(fit.sport),
+  sport: mapSportToKrd(fit.sport),
   subSport: fit.subSport ? mapSubSportToKrd(fit.subSport) : undefined,
   avgHeartRate: fit.avgHeartRate,
   maxHeartRate: fit.maxHeartRate,
@@ -50,7 +51,7 @@ export const mapKrdSessionToFit = (krd: KRDSession): Partial<FitSession> => {
     totalElapsedTime: elapsedTimeMs,
     totalTimerTime: timerTimeMs,
     totalDistance: krd.totalDistance,
-    sport: krd.sport as FitSession["sport"],
+    sport: mapSportToFit(krd.sport),
     subSport: krd.subSport ? mapSubSportToFit(krd.subSport) : undefined,
     avgHeartRate: krd.avgHeartRate,
     maxHeartRate: krd.maxHeartRate,

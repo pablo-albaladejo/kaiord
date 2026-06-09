@@ -1,21 +1,15 @@
 import type { Sport } from "@kaiord/core";
-import { sportSchema } from "@kaiord/core";
+
+import { mapSportToKrd } from "../sport/sport.mapper";
 
 /**
  * Default values for FIT file generation and mapping
  */
 export const DEFAULT_MANUFACTURER = "development" as const;
-export const DEFAULT_SPORT = sportSchema.enum.cycling;
 
 /**
- * Maps FIT sport type to KRD sport type
- * Returns DEFAULT_SPORT if fitSport is undefined
+ * Maps FIT sport type (camelCase string) to KRD sport type (snake_case).
+ * Empty/invalid input falls back to `generic`.
  */
-export const mapSportType = (fitSport: string | undefined): Sport => {
-  if (!fitSport) {
-    return DEFAULT_SPORT;
-  }
-  const lower = fitSport.toLowerCase();
-  const result = sportSchema.safeParse(lower);
-  return result.success ? result.data : DEFAULT_SPORT;
-};
+export const mapSportType = (fitSport: string | undefined): Sport =>
+  mapSportToKrd(fitSport);

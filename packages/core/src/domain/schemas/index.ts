@@ -48,6 +48,8 @@ export type { Intensity } from "./intensity";
 export { intensitySchema } from "./intensity";
 export type { Sport } from "./sport";
 export { sportSchema } from "./sport";
+export type { SportCategory } from "./sport-category";
+export { sportCategory } from "./sport-category";
 export type { SubSport } from "./sub-sport";
 export { subSportSchema } from "./sub-sport";
 export type { SwimStroke } from "./swim-stroke";
