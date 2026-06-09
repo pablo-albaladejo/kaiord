@@ -7,7 +7,7 @@ import type { Workout } from "../../../domain/schemas/workout";
 import { buildRepetitionBlock } from "./repetition-block.fixtures";
 import { buildWorkoutStep } from "./workout-step.fixtures";
 
-const SUB_SPORTS: Record<Sport, SubSport[]> = {
+const SUB_SPORTS: Partial<Record<Sport, SubSport[]>> = {
   running: ["trail", "street", "track", "treadmill"],
   cycling: ["road", "mountain", "gravel_cycling", "indoor_cycling"],
   swimming: ["lap_swimming", "open_water"],
@@ -20,7 +20,7 @@ export const buildWorkout = new Factory<Workout>()
     faker.helpers.arrayElement(["running", "cycling", "swimming"] as const)
   )
   .attr("subSport", ["sport"], (sport: Sport) =>
-    faker.helpers.arrayElement(SUB_SPORTS[sport])
+    faker.helpers.arrayElement(SUB_SPORTS[sport] ?? ["generic"])
   )
   .attr("steps", () => [
     buildWorkoutStep.build(),
