@@ -1,21 +1,20 @@
 /**
  * Manual-create handler for the coaching dialog (per design D4).
  *
- * "Edit manually" creates a workout in `state="structured"` with a
- * 1-step warmup KRD template, persists the auto-match invariant (D1),
- * and navigates to the editor. The KRD is intentionally minimal — the
- * user fills in steps from the read-only coach description sidebar
- * (rendered in EditorPage from PR 3).
+ * "Edit manually" NO LONGER persists on click (defer-coaching-create):
+ * it navigates to a store-only draft editor and persistence happens only
+ * on an explicit Save (mirroring the scratch flow). First it checks for
+ * an already-matched workout with the SAME idempotency key as the persist
+ * path; if one exists it opens that `/workout/:id`, otherwise it opens a
+ * fresh draft at `/workout/new?coaching=<profileId>:<activity.id>`.
  */
 import { useCallback, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
-import { convertCoachingActivityManual } from "../../../application/coaching/convert-coaching-activity-manual";
-import { useAnalytics } from "../../../contexts/analytics-context";
 import { usePersistence } from "../../../contexts/persistence-context";
-import { useToastContext } from "../../../contexts/ToastContext";
 import { withOrigin } from "../../../routing/with-origin";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { namespaceSourceId } from "../../../types/coaching-activity-record";
 
 export type UseCoachingManual = {
   creating: boolean;
@@ -30,8 +29,6 @@ export const useCoachingManual = (
   onClose: () => void
 ): UseCoachingManual => {
   const persistence = usePersistence();
-  const analytics = useAnalytics();
-  const { success: showSuccess } = useToastContext();
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,42 +40,37 @@ export const useCoachingManual = (
     setError(null);
     setCreating(true);
     try {
-      // The view-model `activity.id` is `${source}:${sourceId}`; the
-      // persistence record id (what `coaching.getById` keys on) is the
-      // composite `${profileId}:${source}:${sourceId}` — see
-      // `buildCoachingActivityId`.
-      const result = await convertCoachingActivityManual(
-        { activityId: `${profileId}:${activity.id}` },
-        {
-          coaching: persistence.coaching,
-          workouts: persistence.workouts,
-          sessionMatches: persistence.sessionMatch,
-          analytics,
-          newWorkoutId: () => crypto.randomUUID(),
-          newMatchId: () => crypto.randomUUID(),
-          clock: () => new Date().toISOString(),
-        }
+      // Idempotency: if a workout already exists for this activity (same
+      // key the Save path guards on), open it instead of a fresh draft.
+      // `activity.id` is the SHORT `${source}:${sourceId}`; the raw
+      // sourceId is its second segment.
+      const sourceId = activity.id.split(":")[1] ?? "";
+      const ns = namespaceSourceId(profileId, sourceId);
+      const existing = await persistence.workouts.getBySourceId(
+        activity.source,
+        ns
       );
-      // Fire toast BEFORE onClose() to keep the success signal visible
-      // even though the AppToastProvider lives above the dialog tree.
-      showSuccess("Workout matched", activity.title, { duration: 3000 });
       onClose();
-      navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
+      if (existing) {
+        navigate(withOrigin(`/workout/${existing.id}`, "coaching"));
+        return;
+      }
+      // The draft route carries the composite id `coaching.getById` keys
+      // on (`${profileId}:${source}:${sourceId}`); `activity.id` is the
+      // SHORT form so prefix the profileId once.
+      navigate(
+        withOrigin(
+          `/workout/new?coaching=${profileId}:${activity.id}`,
+          "coaching"
+        )
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Manual creation failed");
     } finally {
       setCreating(false);
       inFlight.current = false;
     }
-  }, [
-    activity,
-    profileId,
-    persistence,
-    analytics,
-    navigate,
-    onClose,
-    showSuccess,
-  ]);
+  }, [activity, profileId, persistence, navigate, onClose]);
 
   return {
     creating,

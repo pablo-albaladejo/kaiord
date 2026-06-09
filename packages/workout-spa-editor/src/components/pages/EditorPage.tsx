@@ -9,29 +9,28 @@
 import { useSearch } from "wouter";
 
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
-import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
+import { CoachingDraftSurface } from "./CoachingDraftSurface";
 import { DateBanner } from "./DateBanner";
 import { parseEditorRouteParams } from "./editor-route-params";
-import { EditorBody } from "./EditorBody";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
 import { EditorPageHeader } from "./EditorPageHeader";
+import { EditorPopulatedBody } from "./EditorPopulatedBody";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
 import { renderNewWorkoutSurface } from "./render-new-workout-surface";
 import { useBackHandler } from "./use-back-handler";
 import { useEditorActions } from "./use-editor-actions";
 import { useWorkoutRecord } from "./use-workout-record";
-import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
 export type EditorPageProps = { id?: string };
 
 export default function EditorPage({ id }: EditorPageProps) {
   useDeleteCleanup();
   const search = useSearch();
-  const { dateParam, weekParam, origin, newWorkoutMode } =
+  const { dateParam, weekParam, origin, newWorkoutMode, coachingDraftId } =
     parseEditorRouteParams(search);
   const handleBack = useBackHandler(
     newWorkoutMode,
@@ -41,10 +40,6 @@ export default function EditorPage({ id }: EditorPageProps) {
   );
 
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
-  const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
-  const reorderStep = useWorkoutStore((s) => s.reorderStep);
-  const reorderStepsInBlock = useWorkoutStore((s) => s.reorderStepsInBlock);
-  const { handleStepSelect } = useAppHandlers();
 
   const { record, loading } = useWorkoutRecord(id);
   const { acceptWorkout, pushWorkout } = useEditorActions(record);
@@ -57,6 +52,14 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   if (id && loading) return <EditorLoading />;
   if (id && record && !record.krd) return <EditorNoData />;
+
+  if (!id && coachingDraftId)
+    return (
+      <CoachingDraftSurface
+        coachingDraftId={coachingDraftId}
+        onBack={handleBack ?? undefined}
+      />
+    );
 
   const importComplete = newWorkoutMode === "import" && currentWorkout !== null;
   const showNewSurface = !id && newWorkoutMode !== undefined && !importComplete;
@@ -80,16 +83,11 @@ export default function EditorPage({ id }: EditorPageProps) {
       )}
       {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
       {showPopulatedBody && workout && currentWorkout && (
-        <EditorBody sidebar={sidebarData}>
-          <WorkoutSection
-            workout={workout}
-            krd={currentWorkout}
-            selectedStepId={selectedStepId}
-            onStepSelect={handleStepSelect}
-            onStepReorder={reorderStep}
-            onReorderStepsInBlock={reorderStepsInBlock}
-          />
-        </EditorBody>
+        <EditorPopulatedBody
+          workout={workout}
+          currentWorkout={currentWorkout}
+          sidebar={sidebarData}
+        />
       )}
     </div>
   );
