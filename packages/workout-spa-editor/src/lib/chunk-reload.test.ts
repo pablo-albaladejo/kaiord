@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { isChunkLoadError, reloadOnceForChunkError } from "./chunk-reload";
+import { isChunkLoadError } from "./chunk-reload";
 
 const RELOAD_AT_KEY = "kaiord:chunk-reload-at";
 
@@ -33,6 +33,13 @@ describe("isChunkLoadError", () => {
 describe("reloadOnceForChunkError", () => {
   const reload = vi.fn();
 
+  // Fresh module per test so the in-memory `reloadedThisLoad` guard resets.
+  const loadFn = async () => {
+    vi.resetModules();
+    const mod = await import("./chunk-reload");
+    return mod.reloadOnceForChunkError;
+  };
+
   beforeEach(() => {
     reload.mockClear();
     sessionStorage.clear();
@@ -43,8 +50,9 @@ describe("reloadOnceForChunkError", () => {
     vi.unstubAllGlobals();
   });
 
-  it("should reload when no recent reload is recorded", () => {
+  it("should reload when no recent reload is recorded", async () => {
     // Arrange
+    const reloadOnceForChunkError = await loadFn();
 
     // Act
     const triggered = reloadOnceForChunkError();
@@ -54,9 +62,10 @@ describe("reloadOnceForChunkError", () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
-  it("should suppress a second reload within the cooldown window", () => {
+  it("should suppress a second reload within the cooldown window", async () => {
     // Arrange
     sessionStorage.setItem(RELOAD_AT_KEY, String(Date.now()));
+    const reloadOnceForChunkError = await loadFn();
 
     // Act
     const triggered = reloadOnceForChunkError();
@@ -64,5 +73,28 @@ describe("reloadOnceForChunkError", () => {
     // Assert
     expect(triggered).toBe(false);
     expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("should reload at most once per load when sessionStorage is unavailable", async () => {
+    // Arrange
+    vi.stubGlobal("sessionStorage", {
+      getItem: () => {
+        throw new Error("denied");
+      },
+      setItem: () => {
+        throw new Error("denied");
+      },
+      clear: () => undefined,
+    });
+    const reloadOnceForChunkError = await loadFn();
+
+    // Act
+    const first = reloadOnceForChunkError();
+    const second = reloadOnceForChunkError();
+
+    // Assert
+    expect(first).toBe(true);
+    expect(second).toBe(false);
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });
