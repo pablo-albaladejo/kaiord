@@ -27,7 +27,7 @@ const buildKrdMetadata = (
   session: ReturnType<typeof convertFitToKrdSession> | undefined
 ) => ({
   created: convertTimeCreated(fileId ? fileId.timeCreated : undefined),
-  sport: (session ? session.sport : undefined) ?? "other",
+  sport: (session ? session.sport : undefined) ?? "generic",
   subSport: session ? session.subSport : undefined,
 });
 

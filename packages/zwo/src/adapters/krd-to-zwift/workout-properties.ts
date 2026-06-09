@@ -1,3 +1,6 @@
+import type { Sport } from "@kaiord/core";
+import { sportCategory } from "@kaiord/core";
+
 type ZwiftExtensions = Record<string, unknown>;
 
 export const addWorkoutProperties = (
@@ -26,6 +29,12 @@ export const addWorkoutProperties = (
   }
 };
 
+// ZWO is a cycling-trainer format that only supports "bike" and "run".
+// Non-cycling/running sports (swimming, training, rowing, etc.) are
+// collapsed to "bike" — this is an explicit, lossy mapping by design.
 export const mapSportType = (sport?: string): string => {
-  return sport === "cycling" ? "bike" : sport === "running" ? "run" : "bike";
+  if (!sport) return "bike";
+  const category = sportCategory(sport as Sport);
+  if (category === "running") return "run";
+  return "bike";
 };

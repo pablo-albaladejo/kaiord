@@ -1,3 +1,4 @@
+import { humanizeSport } from "../../lib/format-sport";
 import type { Workout } from "../../types/krd";
 import { WorkoutList } from "../organisms/WorkoutList/WorkoutList";
 
@@ -20,8 +21,8 @@ export function WorkoutSection({
             {workout.name || "Untitled Workout"}
           </h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Sport: {workout.sport}
-            {workout.subSport && ` • ${workout.subSport}`}
+            Sport: {humanizeSport(workout.sport)}
+            {workout.subSport && ` • ${humanizeSport(workout.subSport)}`}
           </p>
         </div>
       </div>

@@ -72,6 +72,30 @@ describe("convertKRDToTcx", () => {
     expect(workout["@_Sport"]).toBe("Biking");
   });
 
+  it("should map non-endurance sport to Other", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const krd = createMinimalKrd({
+      metadata: { created: "2024-01-15T10:00:00Z", sport: "training" },
+      extensions: {
+        structured_workout: {
+          sport: "training",
+          name: "Strength Workout",
+          steps: [],
+        },
+      },
+    });
+    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
+    const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
+    const workouts = tcd.Workouts as Record<string, unknown>;
+
+    // Act
+    const workout = workouts.Workout as Record<string, unknown>;
+
+    // Assert
+    expect(workout["@_Sport"]).toBe("Other");
+  });
+
   it("should map running sport to Running", () => {
     // Arrange
     const logger = createMockLogger();

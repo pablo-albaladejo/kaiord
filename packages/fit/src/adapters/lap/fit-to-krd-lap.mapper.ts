@@ -2,6 +2,7 @@ import type { KRDLap } from "@kaiord/core";
 import { FIT_TO_SWIM_STROKE } from "@kaiord/core";
 
 import type { FitLap } from "../schemas/fit-lap";
+import { mapSportToKrd } from "../sport/sport.mapper";
 import { mapSubSportToKrd } from "../sub-sport/sub-sport";
 import { mapFitLapTriggerToKrd } from "./lap-trigger.mapper";
 
@@ -44,7 +45,7 @@ export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
 
   // Classification
   trigger: fit.lapTrigger ? mapFitLapTriggerToKrd(fit.lapTrigger) : undefined,
-  sport: fit.sport,
+  sport: fit.sport ? mapSportToKrd(fit.sport) : undefined,
   subSport: fit.subSport ? mapSubSportToKrd(fit.subSport) : undefined,
 
   // Workout reference

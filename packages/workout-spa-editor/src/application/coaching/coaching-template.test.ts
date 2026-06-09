@@ -34,7 +34,7 @@ describe("buildCoachingTemplateKrd", () => {
     expect(step.intensity).toBe("warmup");
   });
 
-  it("should fall back to generic sport when input is not a known Sport", () => {
+  it("should set the resolved sport on the KRD metadata", () => {
     // Arrange
     const sport = "rowing";
 
@@ -42,18 +42,29 @@ describe("buildCoachingTemplateKrd", () => {
     const krd = buildCoachingTemplateKrd(sport);
 
     // Assert
-    expect(krd.metadata.sport).toBe("generic");
+    expect(krd.metadata.sport).toBe("rowing");
   });
 
-  it("should canonicalize a coaching sport alias onto the KRD vocabulary", () => {
+  it("should set the optional subSport on the KRD metadata", () => {
     // Arrange
-    const sport = "bike";
+    const subSport = "flexibility_training";
+
+    // Act
+    const krd = buildCoachingTemplateKrd("training", undefined, subSport);
+
+    // Assert
+    expect(krd.metadata.subSport).toBe("flexibility_training");
+  });
+
+  it("should omit the subSport when none is provided", () => {
+    // Arrange
+    const sport = "cycling";
 
     // Act
     const krd = buildCoachingTemplateKrd(sport);
 
     // Assert
-    expect(krd.metadata.sport).toBe("cycling");
+    expect(krd.metadata.subSport).toBeUndefined();
   });
 
   it("should set the workout name from the coaching activity title", () => {
