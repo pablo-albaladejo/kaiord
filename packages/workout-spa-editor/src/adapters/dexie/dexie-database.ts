@@ -27,7 +27,12 @@ export class KaiordDatabase extends Dexie {
 
 export const db = new KaiordDatabase();
 installExportLedgerCascade(db);
-db.on("ready", () => runJunkCleanupOnce(db));
+// Fire-and-forget: returning the promise from a `ready` handler would make
+// Dexie block DB readiness (and all queued queries) until the cleanup scan
+// completes. `runJunkCleanupOnce` swallows its own errors, so voiding it is safe.
+db.on("ready", () => {
+  void runJunkCleanupOnce(db);
+});
 
 // Expose for e2e test seeding (dev mode only). The `typeof window` guard
 // matches the symmetric `__KAIORD_WORKOUT_STORE__` exposure in

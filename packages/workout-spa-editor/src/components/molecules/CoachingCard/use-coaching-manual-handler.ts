@@ -42,9 +42,9 @@ export const useCoachingManual = (
     try {
       // Idempotency: if a workout already exists for this activity (same
       // key the Save path guards on), open it instead of a fresh draft.
-      // `activity.id` is the SHORT `${source}:${sourceId}`; the raw
-      // sourceId is its second segment.
-      const sourceId = activity.id.split(":")[1] ?? "";
+      // `activity.id` is the SHORT `${source}:${sourceId}`; strip the known
+      // `${source}:` prefix (sourceId itself may contain `:`).
+      const sourceId = activity.id.slice(activity.source.length + 1);
       const ns = namespaceSourceId(profileId, sourceId);
       const existing = await persistence.workouts.getBySourceId(
         activity.source,
