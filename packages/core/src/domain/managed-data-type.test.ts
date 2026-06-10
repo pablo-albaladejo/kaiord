@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { canonicalHash } from "../hash/canonical-hash";
+import { canonicalHash } from "./hash/canonical-hash";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "./managed-data-type";
 
 const EXPECTED_TYPE_COUNT = 9;

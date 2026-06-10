@@ -120,6 +120,98 @@ describe("R-ArchDomainExt (external libs in domain)", () => {
     assert.equal(v.length, 1);
     assert.equal(v[0].rule, "R-ArchDomainExt");
   });
+
+  test("@noble/hashes subpath import in domain is allowed", () => {
+    write(
+      "core/src/domain/hash/x.ts",
+      "import { sha256 } from '@noble/hashes/sha2';\n"
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+
+  test("allowlist entries do not match prefix-sharing package names", () => {
+    write(
+      "core/src/domain/x.ts",
+      "import { evil } from '@noble/hashes-evil';\n"
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.equal(v[0].rule, "R-ArchDomainExt");
+  });
+});
+
+describe("protocol layer (governed like domain)", () => {
+  test("zod in protocol/ is allowed", () => {
+    write("core/src/protocol/x.ts", "import { z } from 'zod';\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+
+  test("non-allowlisted external lib in protocol/ is rejected", () => {
+    write("core/src/protocol/x.ts", "import { y } from 'fast-xml-parser';\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.equal(v[0].rule, "R-ArchDomainExt");
+  });
+
+  test("protocol → adapters is rejected", () => {
+    write("core/src/protocol/x.ts", "import { y } from '../adapters/foo';\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.equal(v[0].rule, "R-ArchLeftward");
+  });
+
+  test("domain → protocol is rejected", () => {
+    write("core/src/domain/x.ts", "import { y } from '../protocol/foo';\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.equal(v[0].rule, "R-ArchLeftward");
+  });
+});
+
+describe("R-ArchCoreSrcDirs (undeclared core/src directories)", () => {
+  test("undeclared top-level directory under core/src is rejected", () => {
+    write("core/src/rogue/x.ts", "export type Foo = number;\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.equal(v[0].rule, "R-ArchCoreSrcDirs");
+    assert.ok(v[0].file.includes("rogue"));
+  });
+
+  test("loose files directly under core/src are allowed", () => {
+    write("core/src/index.ts", "export {};\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+
+  test("freshness invariant: real packages/core/src/ matches CORE_SRC_ALLOWLIST", () => {
+    const v = runCheck();
+    const dirViolations = v.filter((x) => x.rule === "R-ArchCoreSrcDirs");
+    assert.deepEqual(
+      dirViolations,
+      [],
+      `Unexpected R-ArchCoreSrcDirs violations:\n${dirViolations
+        .map((x) => `  - ${x.file}: ${x.detail}`)
+        .join("\n")}`
+    );
+  });
 });
 
 describe("R-ArchAppPure (external libs in application)", () => {
@@ -260,7 +352,7 @@ describe("R-ArchCoreAdapterAllowlist", () => {
 describe("R-ArchCoreAmbientTypes", () => {
   test("ambient declaration of vendor SDK in core/ is rejected", () => {
     write(
-      "core/src/types/x.d.ts",
+      "core/src/domain/x.d.ts",
       'declare module "@vendor/sdk" {\n  export class Foo {}\n}\n'
     );
 
@@ -272,7 +364,7 @@ describe("R-ArchCoreAmbientTypes", () => {
 
   test("ambient declaration of file glob (e.g., *.svg) is allowed", () => {
     write(
-      "core/src/types/svg.d.ts",
+      "core/src/domain/svg.d.ts",
       'declare module "*.svg" {\n  const url: string;\n  export default url;\n}\n'
     );
 

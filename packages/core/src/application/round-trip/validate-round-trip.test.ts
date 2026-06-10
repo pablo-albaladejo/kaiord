@@ -46,8 +46,8 @@ import {
   VIOLATION_COUNT_LAP,
   VIOLATION_COUNT_RECORD,
 } from "../../test-utils/index.js";
-import { buildKRD } from "../fixtures/krd/krd.fixtures.js";
-import { createMockLogger } from "../helpers/test-utils.js";
+import { buildKRD } from "../../tests/fixtures/krd/krd.fixtures.js";
+import { createMockLogger } from "../../tests/helpers/test-utils.js";
 import { validateRoundTrip } from "./validate-round-trip.js";
 
 describe("validateRoundTrip", () => {
