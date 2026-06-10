@@ -19,11 +19,20 @@ import {
 import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { SyncProvider } from "./contexts/sync-context";
+import { reloadOnceForChunkError } from "./lib/chunk-reload";
 import { getDeviceId } from "./lib/cloud-sync/device-id";
 import { getSyncPassphrase } from "./lib/cloud-sync/encryption-runtime";
 import { isEncryptionEnabled } from "./lib/cloud-sync/sync-encryption-pref";
 import { getCfAnalyticsToken } from "./lib/runtime-config";
 import { computeRouterBase } from "./router-base";
+
+// Recover from stale lazy chunks after a deploy: Vite fires `vite:preloadError`
+// when a hashed chunk can no longer be fetched; reload once to pull the fresh
+// build (loop-guarded). See `lib/chunk-reload`.
+window.addEventListener("vite:preloadError", (event) => {
+  event.preventDefault();
+  reloadOnceForChunkError();
+});
 
 const analytics = createCloudflareAnalytics(getCfAnalyticsToken());
 

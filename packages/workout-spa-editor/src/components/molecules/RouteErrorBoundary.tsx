@@ -17,6 +17,10 @@ import type { ErrorInfo, ReactNode } from "react";
 import { Component } from "react";
 
 import { buildRouteErrorPayload } from "../../lib/build-route-error-payload";
+import {
+  isChunkLoadError,
+  reloadOnceForChunkError,
+} from "../../lib/chunk-reload";
 import { scrubAnalyticsString } from "../../lib/scrub-analytics-string";
 import { RouteErrorFallback } from "./RouteErrorFallback";
 
@@ -34,6 +38,9 @@ export class RouteErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    // A stale dynamic-import chunk (post-deploy) can surface here as a render
+    // error — recover by reloading once instead of showing the error screen.
+    if (isChunkLoadError(error) && reloadOnceForChunkError()) return;
     if (this.props.analytics) {
       try {
         const payload = buildRouteErrorPayload(
