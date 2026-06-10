@@ -5,7 +5,10 @@ import { targetUnitSchema } from "./unit";
 /**
  * Zod schema for stroke type target values.
  *
- * Validates swimming stroke type targets.
+ * Validates swimming stroke type targets. `value` is the FIT protocol
+ * swim-stroke code (0-5, see `SWIM_STROKE_TO_FIT`), NOT an index into
+ * the seven-variant `swimStrokeSchema` enum — `im` and `mixed` both map
+ * to FIT code 5, so `max(5)` is correct.
  *
  * @example
  * ```typescript

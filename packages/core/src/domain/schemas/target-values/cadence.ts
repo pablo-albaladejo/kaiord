@@ -1,11 +1,14 @@
 import { z } from "zod";
 
+import { MIN_LTE_MAX_MESSAGE, minLteMax } from "./range-refinement";
 import { targetUnitSchema } from "./unit";
 
 /**
  * Zod schema for cadence target values.
  *
- * Validates cadence targets in RPM or ranges.
+ * Validates cadence targets in RPM or ranges. Values are capped at
+ * 300 rpm (above running step-rate targets, which are expressed in
+ * steps per minute). Range targets enforce `min <= max`.
  *
  * @example
  * ```typescript
@@ -19,12 +22,17 @@ import { targetUnitSchema } from "./unit";
  * ```
  */
 export const cadenceValueSchema = z.discriminatedUnion("unit", [
-  z.object({ unit: z.literal(targetUnitSchema.enum.rpm), value: z.number() }),
   z.object({
-    unit: z.literal(targetUnitSchema.enum.range),
-    min: z.number(),
-    max: z.number(),
+    unit: z.literal(targetUnitSchema.enum.rpm),
+    value: z.number().min(0).max(300),
   }),
+  z
+    .object({
+      unit: z.literal(targetUnitSchema.enum.range),
+      min: z.number().min(0).max(300),
+      max: z.number().min(0).max(300),
+    })
+    .refine(minLteMax, { message: MIN_LTE_MAX_MESSAGE, path: ["min"] }),
 ]);
 
 /**

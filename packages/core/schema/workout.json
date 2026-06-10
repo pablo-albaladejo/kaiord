@@ -159,7 +159,8 @@
     },
     "poolLength": {
       "type": "number",
-      "exclusiveMinimum": 0
+      "minimum": 1,
+      "maximum": 655
     },
     "poolLengthUnit": {
       "type": "string",
@@ -527,7 +528,9 @@
                                 "const": "watts"
                               },
                               "value": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 5000
                               }
                             },
                             "required": [
@@ -544,7 +547,9 @@
                                 "const": "percent_ftp"
                               },
                               "value": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1000
                               }
                             },
                             "required": [
@@ -580,10 +585,14 @@
                                 "const": "range"
                               },
                               "min": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 5000
                               },
                               "max": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 5000
                               }
                             },
                             "required": [
@@ -619,7 +628,9 @@
                                 "const": "bpm"
                               },
                               "value": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 300
                               }
                             },
                             "required": [
@@ -655,7 +666,9 @@
                                 "const": "percent_max"
                               },
                               "value": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
                               }
                             },
                             "required": [
@@ -672,10 +685,14 @@
                                 "const": "range"
                               },
                               "min": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 300
                               },
                               "max": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 300
                               }
                             },
                             "required": [
@@ -711,7 +728,9 @@
                                 "const": "rpm"
                               },
                               "value": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 300
                               }
                             },
                             "required": [
@@ -728,10 +747,14 @@
                                 "const": "range"
                               },
                               "min": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 300
                               },
                               "max": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 300
                               }
                             },
                             "required": [
@@ -767,7 +790,9 @@
                                 "const": "mps"
                               },
                               "value": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 30
                               }
                             },
                             "required": [
@@ -803,10 +828,14 @@
                                 "const": "range"
                               },
                               "min": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 30
                               },
                               "max": {
-                                "type": "number"
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 30
                               }
                             },
                             "required": [
@@ -1288,7 +1317,9 @@
                                       "const": "watts"
                                     },
                                     "value": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 5000
                                     }
                                   },
                                   "required": [
@@ -1305,7 +1336,9 @@
                                       "const": "percent_ftp"
                                     },
                                     "value": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 1000
                                     }
                                   },
                                   "required": [
@@ -1341,10 +1374,14 @@
                                       "const": "range"
                                     },
                                     "min": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 5000
                                     },
                                     "max": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 5000
                                     }
                                   },
                                   "required": [
@@ -1380,7 +1417,9 @@
                                       "const": "bpm"
                                     },
                                     "value": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 300
                                     }
                                   },
                                   "required": [
@@ -1416,7 +1455,9 @@
                                       "const": "percent_max"
                                     },
                                     "value": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 100
                                     }
                                   },
                                   "required": [
@@ -1433,10 +1474,14 @@
                                       "const": "range"
                                     },
                                     "min": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 300
                                     },
                                     "max": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 300
                                     }
                                   },
                                   "required": [
@@ -1472,7 +1517,9 @@
                                       "const": "rpm"
                                     },
                                     "value": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 300
                                     }
                                   },
                                   "required": [
@@ -1489,10 +1536,14 @@
                                       "const": "range"
                                     },
                                     "min": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 300
                                     },
                                     "max": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 300
                                     }
                                   },
                                   "required": [
@@ -1528,7 +1579,9 @@
                                       "const": "mps"
                                     },
                                     "value": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 30
                                     }
                                   },
                                   "required": [
@@ -1564,10 +1617,14 @@
                                       "const": "range"
                                     },
                                     "min": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 30
                                     },
                                     "max": {
-                                      "type": "number"
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 30
                                     }
                                   },
                                   "required": [
