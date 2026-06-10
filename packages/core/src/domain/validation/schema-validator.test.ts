@@ -11,8 +11,6 @@ describe("createSchemaValidator", () => {
     const validator = createSchemaValidator();
 
     // Assert
-    expect(validator).toBeDefined();
-    expect(validator.validate).toBeDefined();
     expect(typeof validator.validate).toBe("function");
   });
 });
@@ -249,7 +247,7 @@ describe("SchemaValidator.validate", () => {
     );
 
     // Assert
-    expect(sessionError).toBeDefined();
-    expect(sessionError?.message).toBeDefined();
+    expect(sessionError?.field).toContain("sessions.0.totalElapsedTime");
+    expect(sessionError?.message).toMatch(/\S/);
   });
 });

@@ -3,7 +3,7 @@ import type { Logger } from "@kaiord/core";
 import { createFitParsingError } from "@kaiord/core";
 
 import { mapEquipmentToFit } from "../equipment/equipment.mapper";
-import { convertDuration } from "./krd-to-fit-duration.mapper";
+import { convertDuration } from "./krd-to-fit-duration.converter";
 import { convertTarget } from "./krd-to-fit-target.converter";
 
 /** FIT protocol maximum length for notes field */

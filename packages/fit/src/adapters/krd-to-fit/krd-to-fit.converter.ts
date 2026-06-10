@@ -8,7 +8,7 @@ import {
   convertMetadataToFileId,
   convertWorkoutMetadata,
 } from "./krd-to-fit-metadata.converter";
-import { convertWorkoutSteps } from "./krd-to-fit-workout.mapper";
+import { convertWorkoutSteps } from "./krd-to-fit-workout.converter";
 
 /**
  * Safely converts unknown to Record<string, unknown>.

@@ -2,9 +2,9 @@ import type { WorkoutStep } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
 
 import { fitTargetTypeSchema } from "../schemas/fit-target";
-import { convertCadenceTarget } from "./krd-to-fit-target-cadence.mapper";
+import { convertCadenceTarget } from "./krd-to-fit-target-cadence.converter";
 import { convertHeartRateTarget } from "./krd-to-fit-target-heart-rate.converter";
-import { convertPaceTarget } from "./krd-to-fit-target-pace.mapper";
+import { convertPaceTarget } from "./krd-to-fit-target-pace.converter";
 import { convertPowerTarget } from "./krd-to-fit-target-power.converter";
 import { convertStrokeTarget } from "./krd-to-fit-target-stroke.converter";
 
