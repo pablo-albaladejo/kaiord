@@ -1,5 +1,13 @@
 # @kaiord/landing
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [45a788a]
+- Updated dependencies [2678d66]
+  - @kaiord/core@9.1.0
+
 ## 4.1.0
 
 ### Minor Changes
