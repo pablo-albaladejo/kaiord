@@ -18,7 +18,7 @@ export function useZoneValidation(isPowerZones: boolean) {
     const errors: Array<ZoneValidationError> = [];
 
     for (let i = 0; i < zonesToValidate.length; i++) {
-      const zone = zonesToValidate[i];
+      const zone = zonesToValidate[i]!;
 
       if (isPowerZones && "minPercent" in zone && "maxPercent" in zone) {
         if (zone.minPercent >= zone.maxPercent) {
@@ -37,7 +37,7 @@ export function useZoneValidation(isPowerZones: boolean) {
       }
 
       if (i < zonesToValidate.length - 1) {
-        const nextZone = zonesToValidate[i + 1];
+        const nextZone = zonesToValidate[i + 1]!;
         if (isPowerZones && "maxPercent" in zone && "minPercent" in nextZone) {
           if (zone.maxPercent >= nextZone.minPercent) {
             errors.push({

@@ -69,7 +69,7 @@ export function CalendarHeader({
                 connected={src.connected}
                 loading={src.loading}
                 error={src.error}
-                onSync={() => src.sync(s.data.days[0])}
+                onSync={() => src.sync(s.data.days[0]!)}
                 onConnect={src.connect}
                 label={src.label}
                 lastSyncedAt={src.lastSyncedAt}

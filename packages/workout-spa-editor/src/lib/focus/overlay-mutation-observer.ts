@@ -3,6 +3,7 @@
  * entry point, so the public module stays under the 80-line limit.
  */
 
+import { logger } from "../../utils/logger";
 import { countOverlays } from "./overlay-count";
 import type { OverlayCallback, RootEntry } from "./overlay-singleton";
 
@@ -49,7 +50,7 @@ export const warnMutationObserverMissing = (): void => {
   if (mutationObserverMissingWarned) return;
   mutationObserverMissingWarned = true;
   if (isProduction()) return;
-  console.warn(MUTATION_OBSERVER_MISSING_WARN);
+  logger.warn(MUTATION_OBSERVER_MISSING_WARN);
 };
 
 export const subscribeDegraded = (callback: OverlayCallback): (() => void) => {

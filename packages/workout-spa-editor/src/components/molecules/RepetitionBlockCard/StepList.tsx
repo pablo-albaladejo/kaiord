@@ -24,7 +24,7 @@ export const StepList = ({
 }: StepListProps) => (
   <>
     {steps.map((step, index) => {
-      const stepId = sortableIds[index];
+      const stepId = sortableIds[index]!;
       return (
         <SortableStep
           key={stepId}

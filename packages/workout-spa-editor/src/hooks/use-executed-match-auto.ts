@@ -18,6 +18,7 @@ import { usePersistence } from "../contexts/persistence-context";
 import { canonicalizeSport } from "../lib/canonicalize-sport";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { SessionMatch } from "../types/session-match";
+import { logger } from "../utils/logger";
 import type { MatchedSessionWithMetadata } from "./use-matched-sessions";
 
 const FAIL_WARN =
@@ -35,7 +36,7 @@ const fireAppend = (
   // (otherwise a transient Dexie reject would block the pair forever).
   queueMicrotask(() => {
     append(matchId, toAppend).catch((err: unknown) => {
-      console.warn(FAIL_WARN, { matchId, toAppend, err });
+      logger.warn(FAIL_WARN, { matchId, toAppend, err });
       for (const wid of toAppend) firedRef.current.delete(`${matchId}:${wid}`);
     });
   });

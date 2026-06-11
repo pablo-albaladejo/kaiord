@@ -75,7 +75,7 @@ export function createSelectionActions(
         // Same invariant: every id must share a parent; otherwise we
         // drop everything but the items that share the first id's
         // parent.
-        const firstParent = parentOf(workout, ids[0]);
+        const firstParent = parentOf(workout, ids[0]!);
         const filtered = ids.filter(
           (id) => parentOf(workout, id) === firstParent
         );

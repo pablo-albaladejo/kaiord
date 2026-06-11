@@ -14,5 +14,5 @@ export function getZoneColor(zoneNumber: number): string {
     "bg-purple-100 dark:bg-purple-900/30",
     "bg-pink-100 dark:bg-pink-900/30",
   ];
-  return colors[(zoneNumber - 1) % colors.length];
+  return colors[(zoneNumber - 1) % colors.length]!;
 }

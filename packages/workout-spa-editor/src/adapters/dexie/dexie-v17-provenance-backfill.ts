@@ -9,11 +9,12 @@
  *   - kaiordRecordId = crypto.randomUUID()
  *
  * `QuotaExceededError` is surfaced to the injected `onQuotaError` callback
- * (default: console.warn) and does NOT throw — partial backfill is
+ * (default: logger.warn) and does NOT throw — partial backfill is
  * acceptable because the upgrade is idempotent on retry.
  */
 import type { Transaction } from "dexie";
 
+import { logger } from "../../utils/logger";
 import { backfillProvenanceStore } from "./dexie-v17-provenance-backfill-store";
 
 export type OnQuotaError = (err: unknown) => void;
@@ -31,7 +32,7 @@ const HEALTH_STORES = [
 export async function backfillHealthProvenance(
   tx: Transaction,
   onQuotaError: OnQuotaError = (err) =>
-    console.warn("[v17 backfill] QuotaExceededError:", err)
+    logger.warn("[v17 backfill] QuotaExceededError", { err })
 ): Promise<BackfillResult> {
   const result: BackfillResult = { stamped: 0, skipped: 0 };
   for (const storeName of HEALTH_STORES) {

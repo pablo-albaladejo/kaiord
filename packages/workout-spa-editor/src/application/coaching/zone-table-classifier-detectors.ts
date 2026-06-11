@@ -28,22 +28,22 @@ export const equalsHrZones = (
   b: HeartRateZone[]
 ): boolean =>
   a.length === b.length &&
-  a.every((z, i) => z.minBpm === b[i].minBpm && z.maxBpm === b[i].maxBpm);
+  a.every((z, i) => z.minBpm === b[i]!.minBpm && z.maxBpm === b[i]!.maxBpm);
 
 export const equalsPowerZones = (a: PowerZone[], b: PowerZone[]): boolean =>
   a.length === b.length &&
   a.every(
     (z, i) =>
-      z.minPercent === b[i].minPercent && z.maxPercent === b[i].maxPercent
+      z.minPercent === b[i]!.minPercent && z.maxPercent === b[i]!.maxPercent
   );
 
 export const equalsPaceZones = (a: PaceZone[], b: PaceZone[]): boolean =>
   a.length === b.length &&
   a.every(
     (z, i) =>
-      z.minPace === b[i].minPace &&
-      z.maxPace === b[i].maxPace &&
-      z.unit === b[i].unit
+      z.minPace === b[i]!.minPace &&
+      z.maxPace === b[i]!.maxPace &&
+      z.unit === b[i]!.unit
   );
 
 export const matchesHrFormula = (

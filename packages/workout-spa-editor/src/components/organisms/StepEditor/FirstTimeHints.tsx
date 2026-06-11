@@ -59,10 +59,10 @@ export const FirstTimeHints: React.FC<FirstTimeHintsProps> = ({
         />
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
-            {currentHint.title}
+            {currentHint?.title}
           </h3>
           <p className="mt-1 text-sm text-primary-700 dark:text-primary-300">
-            {currentHint.message}
+            {currentHint?.message}
           </p>
         </div>
         <button

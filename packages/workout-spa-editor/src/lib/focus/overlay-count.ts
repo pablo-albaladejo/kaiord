@@ -13,7 +13,7 @@ const OVERLAY_SELECTOR =
 
 const hasRadixAttribute = (el: Element): boolean => {
   for (let i = 0; i < el.attributes.length; i += 1) {
-    if (el.attributes[i].name.startsWith("data-radix-")) return true;
+    if (el.attributes[i]?.name.startsWith("data-radix-")) return true;
   }
   return false;
 };

@@ -36,7 +36,7 @@ export const calculateInsertPosition = (
 ): number => {
   let adjustedPosition = 0;
   for (let i = 0; i < insertPosition; i++) {
-    const step = workout.steps[i];
+    const step = workout.steps[i]!;
     if (
       !isWorkoutStep(step) ||
       !selectedIndices.has((step as WorkoutStep).stepIndex)

@@ -13,8 +13,8 @@ export function secondsToMmSs(totalSeconds: number): string {
 export function mmSsToSeconds(value: string): number | undefined {
   const parts = value.split(":");
   if (parts.length !== 2) return undefined;
-  const mins = parseInt(parts[0], 10);
-  const secs = parseInt(parts[1], 10);
+  const mins = parseInt(parts[0] ?? "", 10);
+  const secs = parseInt(parts[1] ?? "", 10);
   if (isNaN(mins) || isNaN(secs)) return undefined;
   return mins * 60 + secs;
 }

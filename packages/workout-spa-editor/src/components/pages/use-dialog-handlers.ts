@@ -20,8 +20,9 @@ import { getWeekIdForDate } from "../../utils/week-utils";
     convention as `calendar-week-href.ts` — `getWeekIdForDate` reads local
     calendar fields, so a UTC anchor would shift the week in UTC+13/+14). */
 const weekIdForDate = (date: string): string => {
-  const [year, month, day] = date.split("-").map(Number);
-  return getWeekIdForDate(new Date(year, month - 1, day));
+  const parts = date.split("-").map(Number);
+  const [year, month, day] = parts;
+  return getWeekIdForDate(new Date(year ?? 0, (month ?? 1) - 1, day ?? 1));
 };
 
 export function useDialogHandlers(

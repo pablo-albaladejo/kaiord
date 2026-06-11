@@ -27,7 +27,7 @@ export const parseJSON = <T = unknown>(text: string): T => {
       const lineColumnMatch = error.message.match(/line (\d+) column (\d+)/);
 
       if (positionMatch) {
-        const position = Number.parseInt(positionMatch[1], 10);
+        const position = Number.parseInt(positionMatch[1] ?? "0", 10);
         const { line, column } = getLineAndColumn(text, position);
         throw new FileParsingError(
           `Invalid JSON: ${error.message}`,
@@ -38,8 +38,8 @@ export const parseJSON = <T = unknown>(text: string): T => {
       }
 
       if (lineColumnMatch) {
-        const line = Number.parseInt(lineColumnMatch[1], 10);
-        const column = Number.parseInt(lineColumnMatch[2], 10);
+        const line = Number.parseInt(lineColumnMatch[1] ?? "0", 10);
+        const column = Number.parseInt(lineColumnMatch[2] ?? "0", 10);
         throw new FileParsingError(
           `Invalid JSON: ${error.message}`,
           line,
@@ -75,6 +75,6 @@ const getLineAndColumn = (
   const lines = text.substring(0, position).split("\n");
   return {
     line: lines.length,
-    column: lines[lines.length - 1].length + 1,
+    column: (lines[lines.length - 1] ?? "").length + 1,
   };
 };

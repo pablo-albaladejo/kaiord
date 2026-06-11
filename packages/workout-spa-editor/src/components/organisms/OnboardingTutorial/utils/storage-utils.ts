@@ -2,6 +2,8 @@
  * Storage utilities for onboarding state
  */
 
+import { logger } from "../../../../utils/logger";
+
 const DEFAULT_STORAGE_KEY = "workout-spa-onboarding-completed";
 
 export function hasCompletedOnboarding(
@@ -20,7 +22,7 @@ export function resetOnboarding(
   try {
     localStorage.removeItem(storageKey);
   } catch (error) {
-    console.error("Failed to reset onboarding state:", error);
+    logger.error("Failed to reset onboarding state:", { error });
   }
 }
 

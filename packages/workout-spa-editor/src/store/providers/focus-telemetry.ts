@@ -41,6 +41,8 @@ export const focusErrorEvent = (
   phase: "focus" | "scrollIntoView"
 ): FocusTelemetryEvent => ({ type: "focus-error", phase });
 
+import { logger } from "../../utils/logger";
+
 export const safeEmit = (
   telemetry: FocusTelemetry,
   event: FocusTelemetryEvent
@@ -48,9 +50,8 @@ export const safeEmit = (
   try {
     telemetry(event);
   } catch {
-    console.warn(
-      "[FocusTelemetry] telemetry handler threw — focus behavior unaffected",
-      event
+    logger.warn(
+      "[FocusTelemetry] telemetry handler threw — focus behavior unaffected"
     );
   }
 };

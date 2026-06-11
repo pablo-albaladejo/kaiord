@@ -39,7 +39,7 @@ function computeLayout(bars: PreviewBar[], totalDuration: number): BarLayout[] {
 
   let x = 0;
   return bars.map((bar, i) => {
-    const width = widths[i] * scale;
+    const width = widths[i]! * scale;
     const layout = { ...bar, x, width };
     x += width + gap;
     return layout;

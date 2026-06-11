@@ -22,7 +22,7 @@ const EMPTY: DaySummary = { count: 0, intensity: null, estimated: false };
 export function WeekStrip(props: WeekStripProps) {
   const { days, weekSummary, onSelectDay } = props;
   const calendarHref =
-    days.length > 0 ? calendarWeekHref(days[0].iso) : "/calendar";
+    days.length > 0 ? calendarWeekHref(days[0]!.iso) : "/calendar";
 
   return (
     <div
