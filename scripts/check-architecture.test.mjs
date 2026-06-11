@@ -180,6 +180,23 @@ describe("protocol layer (governed like domain)", () => {
     assert.equal(v.length, 1);
     assert.equal(v[0].rule, "R-ArchLeftward");
   });
+
+  test("protocol → domain is rejected", () => {
+    write("core/src/protocol/x.ts", "import { y } from '../domain/foo';\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.equal(v[0].rule, "R-ArchLeftward");
+  });
+
+  test("ports → domain stays allowed", () => {
+    write("core/src/ports/x.ts", "import type { Y } from '../domain/foo';\n");
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
 });
 
 describe("R-ArchCoreSrcDirs (undeclared core/src directories)", () => {

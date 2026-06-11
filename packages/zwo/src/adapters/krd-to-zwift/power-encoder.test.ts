@@ -229,8 +229,11 @@ describe("encodeRampPowerTarget", () => {
     });
     const interval: Record<string, unknown> = {};
 
-    // Act & Assert
-    expect(() => encodeRampPowerTarget(step, interval)).not.toThrow();
+    // Act
+    const act = (): void => encodeRampPowerTarget(step, interval);
+
+    // Assert
+    expect(act).not.toThrow();
   });
 
   it("should not modify interval when target type is not power", () => {

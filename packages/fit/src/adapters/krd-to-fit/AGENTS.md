@@ -46,7 +46,7 @@ KRD→FIT conversion. Transforms a KRD structured workout into an array of Garmi
 
 ### Common Patterns
 
-- **Mappers chain:** `krd-to-fit.converter.ts` → `krd-to-fit-metadata.converter.ts` → `krd-to-fit-workout.converter.ts` → duration/target converters.
+- **Converters chain:** `krd-to-fit.converter.ts` → `krd-to-fit-metadata.converter.ts` → `krd-to-fit-workout.converter.ts` → duration/target converters.
 - **Duration dispatch:** `krd-to-fit-duration.converter.ts` routes to type-specific converter in `duration-converters/`.
 - **Target dispatch:** `krd-to-fit-target.converter.ts` routes to type-specific converter (power, HR, cadence, pace, stroke).
 - **Step count helpers:** `krd-to-fit-step-count.helpers.ts` calculates correct FIT step indices for message arrays.

@@ -142,8 +142,11 @@ describe("encodeDuration", () => {
     const step = makeStep({ type: "distance", meters: 800 });
     const interval: Record<string, unknown> = {};
 
-    // Act & Assert
-    expect(() => encodeDuration(step, interval)).not.toThrow();
+    // Act
+    const act = (): void => encodeDuration(step, interval);
+
+    // Assert
+    expect(act).not.toThrow();
   });
 
   it.each([

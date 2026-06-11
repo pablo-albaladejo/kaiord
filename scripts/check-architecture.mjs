@@ -219,10 +219,14 @@ function relativeEscapesTo(spec, fromLayer) {
   )
     i++;
   const targetDir = parts[i];
-  // Layers that signal an architectural escape:
+  // Layers that signal an architectural escape. "domain" is included so
+  // protocol/ -> domain/ imports are caught (the two are independent
+  // leaves); per-layer branches ignore it where domain imports are legal
+  // (ports/, application/).
   if (
     targetDir === "adapters" ||
     targetDir === "application" ||
+    targetDir === "domain" ||
     targetDir === "ports" ||
     targetDir === "protocol"
   ) {
