@@ -32,6 +32,10 @@ function truncate(text, max = 160) {
   return trimmed.slice(0, max - 1) + "…";
 }
 
+function escapeTableCell(text) {
+  return text.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
+}
+
 function firstHeading(src) {
   const match = /^# (.+)$/m.exec(src);
   return match ? match[1].trim() : "";
@@ -84,7 +88,7 @@ export function buildInventory() {
   ];
   const lines = rows.map(
     ({ slug, title, purpose }) =>
-      `| [\`${slug}\`](./${slug}/spec.md) | ${title.replace(/\|/g, "\\|")} | ${purpose.replace(/\|/g, "\\|")} |`
+      `| [\`${slug}\`](./${slug}/spec.md) | ${escapeTableCell(title)} | ${escapeTableCell(purpose)} |`
   );
 
   return [...header, ...lines, ""].join("\n");

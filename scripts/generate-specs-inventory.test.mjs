@@ -116,6 +116,23 @@ test("should be idempotent across two runs", () => {
   h.cleanup();
 });
 
+test("should escape backslashes before pipes in extracted text", () => {
+  // Arrange
+  const h = mkHarness((specsDir) => {
+    writeSpec(specsDir, "bs-cap", "Back\\slash", "Uses \\| literally.");
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  assert.equal(result.status, 0, result.stderr);
+  const readme = h.readReadme();
+  assert.ok(readme.includes("Back\\\\slash"));
+  assert.ok(readme.includes("Uses \\\\\\| literally."));
+  h.cleanup();
+});
+
 test("should escape pipe characters in extracted text", () => {
   // Arrange
   const h = mkHarness((specsDir) => {
