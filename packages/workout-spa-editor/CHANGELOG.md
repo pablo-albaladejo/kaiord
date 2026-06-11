@@ -1,5 +1,179 @@
 # @kaiord/workout-spa-editor
 
+## 1.1.0
+
+### Minor Changes
+
+- 3bdc512: Daily WeekStrip shows per-day presence + intensity; Planned entries open in place
+
+  The Daily page's WeekStrip no longer shows a flat workout-only load bar (which
+  rendered an identical dash on coaching-only days). Each day now shows a
+  presence + coarse intensity mark across all sources (workouts, coaching, matched
+  sessions): an empty day is a faint hairline; a day with entries shows an
+  intensity-tinted dot (filled for measured TSS, outline for estimated coaching
+  effort) plus a count when 2+ entries; the real today is marked with a circled
+  day number. Tapping a "Planned" entry now opens it in place — a coaching
+  activity opens its dialog, a ready workout opens the editor, a raw/skipped
+  workout opens its process dialog — instead of bouncing to the calendar.
+
+- 4ceb995: Coaching "Edit manually" defers persistence until Save (+ AI sport fix + junk cleanup)
+
+  Clicking "Edit manually" on a coaching activity no longer eagerly persists a
+  workout: it opens a store-only draft editor (`/workout/new?coaching=…`, mirroring
+  the scratch flow) and the workout + its SessionMatch are written only on an
+  explicit Save. Leaving without saving persists nothing. If a workout already
+  exists for the activity, the existing one opens instead (idempotency).
+
+  Also: the AI "expand with AI" path now resolves the Train2Go sport before
+  prompting the model and force-sets the resolved sport/subSport, so both
+  `record.sport` and the KRD sport carry the real sport (cycling/training/…) instead
+  of collapsing to `generic`. The shared builder now sets `record.sport` from the
+  resolved sport for the manual path too.
+
+  A one-time, guarded maintenance pass removes the untouched 1-step template
+  workouts (and their orphaned session matches) left behind by earlier eager
+  "Edit manually" clicks, matched by step shape + `modifiedAt===null` +
+  `createdAt===updatedAt` so no user-edited workout is ever removed.
+
+- 58fd318: feat(spa-editor): cross-device sync via the user's own Google Drive
+
+  Adds optional cross-device synchronization of the editor's local data
+  (workouts, templates, profiles, coaching, health, AI providers) through the
+  user's own Google Drive `appDataFolder` — no backend, free, and the data stays
+  owned by the user. Connect a Google account from Settings → Google Drive sync.
+  - A whole-database snapshot is stored as a single `kaiord-snapshot.json` in the
+    hidden, app-scoped `appDataFolder`; Drive's native file revisions are a free
+    backup. Local snapshot export/import also enables on-device backup/restore.
+  - `CloudSyncPort` + a `fetch`-based Google Drive adapter (Google Identity
+    Services OAuth, `drive.appdata` scope, no Google SDK dependency); auth + I/O
+    only, no merge logic.
+  - Conflict resolution is last-write-wins per record (`updatedAt`/`createdAt`),
+    timestampless tables by snapshot time, with tombstones so deletions propagate
+    and a Dexie v19 `tombstones` table; optimistic concurrency on `headRevisionId`.
+  - Hybrid triggers: pull-merge on app open, debounced auto-push on any change
+    (create, delete, or in-place edit), and a manual "Sync now".
+  - Optional end-to-end encryption (off by default): a passphrase encrypts the
+    snapshot with AES-256-GCM before upload, with a one-time warning that AI API
+    keys are uploaded in cleartext when encryption is off.
+
+- e4b55a9: Rename the Today page to Daily, with unlimited cross-week navigation
+
+  The movable-focus dashboard is now "Daily" at `/daily` (the old `/today`
+  redirects to `/daily`, preserving `?date=`, and the `?from=today` back-origin
+  is still accepted). The focus day can now navigate across weeks in both
+  directions without limit — the previous/next day arrows shift the WeekStrip to
+  the adjacent week instead of stopping at the week edge (which previously left no
+  way to go back when today was a Monday). The real-today marker shows only when
+  the real today is in the visible week; "Back to Today" remains the way to jump
+  to the literal today.
+
+- dac5c6d: Today's focused day is now movable
+
+  The Today page's focused day can move within the visible week — tap a day in
+  the WeekStrip or use the prev/next day arrows. The focused day lives in the URL
+  (`/today?date=YYYY-MM-DD`), so it is deep-linkable, back-recoverable, and
+  shareable; the whole dashboard (readiness, planned sessions, header) follows the
+  focused day. The header shows "Today" with no reset when focus is the real
+  today, otherwise the focused weekday plus a "Back to Today" control. The
+  WeekStrip keeps a dedicated "open in calendar" control and marks the real today
+  distinctly from the focus cursor. Focus is bounded to the visible week and the
+  `?date=` param is clamped (malformed/out-of-week falls back to today).
+
+- 2678d66: Widen the KRD sport vocabulary to the full Garmin FIT taxonomy
+
+  The KRD domain `sport` enum is widened from 4 values (cycling/running/swimming/
+  generic) to the full FIT `Sport` taxonomy (snake_case), so workouts can carry
+  their real sport (training, rowing, hiking, tennis, cross-country skiing, …)
+  instead of collapsing to `generic`. The change is additive — every prior value
+  stays valid.
+  - **core**: full FIT-anchored `sportSchema` + a new `sportCategory()` classifier
+    (cycling/running/swimming/other) that drives all capability-dependent logic.
+  - **fit**: bidirectional camelCase↔snake_case sport mapper wired into the
+    metadata/session/lap read+write paths, so multi-word sports encode without
+    throwing and decode without falling back to cycling.
+  - **tcx/zwo**: lossy-format sport collapse now derives from `sportCategory()`
+    (TCX → Running/Biking/Other; ZWO → bike/run) instead of exhaustive tables, so
+    growing the vocabulary never breaks these adapters.
+  - **workout-spa-editor**: coaching activities map onto a real (sport, subSport)
+    pair (e.g. Stretching → training/flexibility_training, Gym →
+    training/strength_training, Rowing → rowing/indoor_rowing); the editor heading
+    shows the humanized sport. Non-endurance sports behave like `generic` for zones.
+
+### Patch Changes
+
+- 0c04c3a: Recover automatically from stale lazy chunks after a deploy
+
+  When a new build ships, the hashed lazy route chunks change; a browser tab still
+  running the previous `index` fails to import the old chunk ("Failed to fetch
+  dynamically imported module") and lands on the route error screen. The app now
+  reloads once to pull the fresh build — both on Vite's `vite:preloadError` event
+  and when the failure surfaces through the route error boundary — guarded by a
+  sessionStorage cooldown so a genuinely-unfetchable chunk never causes a reload loop.
+
+- 3d6a7ef: Coaching-derived workouts now keep their title and sport
+
+  When a coaching activity was materialised into a structured workout (manual
+  "create from coaching" path), the generated KRD carried neither the activity's
+  title nor its sport: the editor showed "Untitled Workout" and "Sport: generic".
+  The template builder now seeds the KRD workout name from the coaching activity
+  title and canonicalizes the source sport onto the KRD vocabulary (e.g.
+  `bike` → `cycling`, `swim` → `swimming`). Sports the KRD model does not
+  represent (e.g. gym/strength) still collapse to `generic` honestly.
+
+- 6538e8a: Create flows always persist and land on the calendar
+
+  The scratch editor's "Save & schedule" control now renders on every entry —
+  entered without a date it schedules onto today instead of leaving file export
+  as the only "save". After saving, both the scratch and AI create flows land on
+  the calendar week containing the saved workout (`/calendar/:weekId`) so the
+  new card is visible on arrival, replacing the previous `/workout/:id` and
+  dated-picker landings. The week resolution uses a local-midnight date anchor,
+  fixing a latent week-shift for far-east timezones at week boundaries (the
+  Today week strip now shares the same helper).
+
+- 7a94435: The default view is the calendar
+
+  Opening the app (`/`), unknown routes, the header logo, undated create
+  close, and unknown back-origins now land on the current week's calendar
+  grid instead of the Today dashboard. Today remains available at `/today`
+  via its nav tab and header entry; explicit "Go to Today" links keep
+  pointing there. The route announcer reads "/" as "Calendar page" and the
+  Calendar nav entry is active on the index route.
+
+- 29a5a7a: Navigation consistency overhaul
+
+  A single pass that makes in-app navigation predictable end to end. Create flows entered from a calendar day now schedule the workout onto **that** day (AI, scratch and import alike) instead of silently defaulting to today, and the scratch surface persists to the calendar rather than only exporting a file. The Athlete "Create profile" empty state opens the profile dialog in place instead of bouncing through a dead `/settings/profile` redirect, and the header "Settings" entry now opens the settings index (matching the mobile tab) rather than jumping into the AI sub-tab. Back/close actions are origin-aware via a shared `?from=` contract, so leaving the editor, a workout, or a detail view returns to where the user came from instead of a hardcoded default. Today gains a tappable week strip and a "Trends →" card; the desktop header gains active-state/`aria-current` and an Athlete entry; settings-index rows deep-link to and focus the named section. Accessibility is tightened too: route-announcer labels are corrected (Athlete and the read-only workout view no longer announce as "Calendar"/"Edit"), and every route renders a stable, focusable heading from first paint. Dead, route-unmounted picker code is removed.
+
+- 296874d: Today's planned section mirrors the calendar
+
+  The Today page's planned section now shows the same entries the calendar shows
+  for today — coaching activities, matched sessions, and workouts (including
+  KRD-less coaching-derived ones) — instead of "Nothing planned today" whenever
+  the day's activities were coaching-only. It reuses the calendar's
+  `buildCalendarBuckets` (week-scoped, deduped) and card rendering, so the two
+  surfaces stay consistent by construction. WeekStrip load-bar parity for
+  coaching-only days is tracked as a follow-up.
+
+- d40c4ab: One URL family, one view: Today moves to /today, /calendar is the week grid
+
+  The Today dashboard now lives at `/today` (the app home — `/` redirects
+  there), and bare `/calendar` redirects in one hop to the current week's
+  grid, so every `/calendar*` URL renders the same week view with
+  week-scoped data (TrainingPeaks-style). Navigation gains a Calendar entry
+  (mobile bottom-nav: Today · Calendar · Library · Athlete, with Settings
+  now header-only) and the `?from=` back contract carries the originating
+  `week`, so leaving a workout opened from another week returns to that
+  week's grid. Scheduling a template from the library now lands on the
+  scheduled week instead of the calendar home.
+
+- Updated dependencies [45a788a]
+- Updated dependencies [2678d66]
+  - @kaiord/core@9.1.0
+  - @kaiord/fit@9.1.0
+  - @kaiord/zwo@9.1.0
+  - @kaiord/garmin@9.1.0
+  - @kaiord/tcx@9.1.0
+
 ## 1.0.0
 
 ### Major Changes
