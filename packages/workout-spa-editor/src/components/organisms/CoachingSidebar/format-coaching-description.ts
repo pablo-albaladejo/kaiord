@@ -25,18 +25,34 @@ const STRONG_RE =
 
 const stripTagsExceptStrong = (html: string): string => {
   // Remove every tag except <strong>...</strong> markers (the strong
-  // splitter below extracts those before this strip).
-  return html.replace(/<\/?(?!strong\b)[^>]+>/gi, "").trim();
+  // splitter below extracts those before this strip). Looped until
+  // stable: a single pass can re-form a tag from interleaved input
+  // (e.g. `<scr<b>ipt` -> `<script`).
+  let text = html;
+  let prev: string;
+  do {
+    prev = text;
+    text = text.replace(/<\/?(?!strong\b)[^>]+>/gi, "");
+  } while (text !== prev);
+  return text.trim();
 };
 
+const ENTITY_REPLACEMENTS: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+  "&nbsp;": " ",
+};
+
+// Single-pass decode: sequential .replace() chains double-decode
+// payloads like `&amp;lt;` (first pass yields `&lt;`, second `<`).
 const decodeEntities = (s: string): string =>
-  s
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
+  s.replace(
+    /&(?:amp|lt|gt|quot|#39|nbsp);/g,
+    (entity) => ENTITY_REPLACEMENTS[entity] ?? entity
+  );
 
 const splitInlines = (paragraph: string): DescriptionInline[] => {
   const inlines: DescriptionInline[] = [];

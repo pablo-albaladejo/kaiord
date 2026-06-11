@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, existsSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -56,20 +56,24 @@ for (const pkg of packages) {
 
   const tsconfig = join(monorepoRoot, `packages/${pkg.name}/tsconfig.json`);
   try {
-    execSync(
+    // execFileSync (no shell) so paths with spaces or shell
+    // metacharacters cannot be reinterpreted as commands.
+    execFileSync(
+      join(docsRoot, "node_modules/.bin/typedoc"),
       [
-        join(docsRoot, "node_modules/.bin/typedoc"),
-        `--entryPoints ${entryPath}`,
-        "--plugin typedoc-plugin-markdown",
-        `--out ${outDir}`,
-        existsSync(tsconfig) ? `--tsconfig ${tsconfig}` : "",
-        "--readme none",
+        "--entryPoints",
+        entryPath,
+        "--plugin",
+        "typedoc-plugin-markdown",
+        "--out",
+        outDir,
+        ...(existsSync(tsconfig) ? ["--tsconfig", tsconfig] : []),
+        "--readme",
+        "none",
         "--hideGenerator",
         "--excludePrivate",
         "--excludeInternal",
-      ]
-        .filter(Boolean)
-        .join(" "),
+      ],
       {
         cwd: monorepoRoot,
         stdio: "pipe",

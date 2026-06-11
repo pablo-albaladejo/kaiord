@@ -42,6 +42,8 @@ jobs:
             paths-ignore:
               - "**/*.test.ts"
               - "**/*.test.tsx"
+              - "**/*.test.js"
+              - "**/*.test.mjs"
               - "**/*.spec.ts"
               - "**/test-utils/**"
               - "**/tests/fixtures/**"
