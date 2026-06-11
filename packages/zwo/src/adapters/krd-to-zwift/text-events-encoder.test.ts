@@ -58,7 +58,10 @@ describe("encodeTextEvents", () => {
     const result = encodeTextEvents(step);
 
     // Assert
-    expect(result).toStrictEqual({ "@_message": "Sprint!", "@_distoffset": 100 });
+    expect(result).toStrictEqual({
+      "@_message": "Sprint!",
+      "@_distoffset": 100,
+    });
   });
 
   it("should omit timeoffset key when not present in single event", () => {
@@ -137,7 +140,11 @@ describe("encodeTextEvents", () => {
 
     // Assert
     const arr = result as Array<Record<string, unknown>>;
-    expect(arr[0]).toStrictEqual({ "@_message": "Go", "@_timeoffset": 5, "@_distoffset": 50 });
+    expect(arr[0]).toStrictEqual({
+      "@_message": "Go",
+      "@_timeoffset": 5,
+      "@_distoffset": 50,
+    });
     expect(arr[1]).toStrictEqual({ "@_message": "Stop", "@_timeoffset": 60 });
   });
 

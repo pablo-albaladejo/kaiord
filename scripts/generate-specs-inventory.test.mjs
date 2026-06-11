@@ -72,7 +72,11 @@ test("should render one sorted row per spec with title and purpose", () => {
   const alphaIdx = readme.indexOf("alpha-cap");
   const zetaIdx = readme.indexOf("zeta-cap");
   assert.ok(alphaIdx >= 0 && zetaIdx > alphaIdx, "rows sorted by slug");
-  assert.ok(readme.includes("| [`alpha-cap`](./alpha-cap/spec.md) | Alpha | First purpose. |"));
+  assert.ok(
+    readme.includes(
+      "| [`alpha-cap`](./alpha-cap/spec.md) | Alpha | First purpose. |"
+    )
+  );
   assert.ok(readme.includes("2 specs."));
   h.cleanup();
 });

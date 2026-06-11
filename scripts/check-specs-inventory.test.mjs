@@ -38,7 +38,10 @@ function mkHarness() {
     join(root, "scripts", "generate-specs-inventory.mjs"),
     GENERATOR_SRC
   );
-  writeFileSync(join(root, "scripts", "check-specs-inventory.mjs"), CHECKER_SRC);
+  writeFileSync(
+    join(root, "scripts", "check-specs-inventory.mjs"),
+    CHECKER_SRC
+  );
   return {
     root,
     specsDir,

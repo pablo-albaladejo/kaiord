@@ -54,7 +54,7 @@ describe("encodeDuration", () => {
     expect(warnSpy).toHaveBeenCalledOnce();
     expect(warnSpy).toHaveBeenCalledWith(
       "Lossy conversion: distance duration converted to time",
-      expect.objectContaining({ originalMeters: 500, stepIndex: 2 }),
+      expect.objectContaining({ originalMeters: 500, stepIndex: 2 })
     );
   });
 
@@ -80,7 +80,9 @@ describe("encodeDuration", () => {
 
     // Assert
     expect(interval["@_Duration"]).toBe(300);
-    expect(interval["@_kaiord:originalDurationType"]).toBe("heart_rate_less_than");
+    expect(interval["@_kaiord:originalDurationType"]).toBe(
+      "heart_rate_less_than"
+    );
     expect(interval["@_kaiord:originalDurationBpm"]).toBe(140);
   });
 
@@ -108,7 +110,9 @@ describe("encodeDuration", () => {
 
     // Assert
     expect(interval["@_Duration"]).toBe(300);
-    expect(interval["@_kaiord:originalDurationType"]).toBe("power_greater_than");
+    expect(interval["@_kaiord:originalDurationType"]).toBe(
+      "power_greater_than"
+    );
     expect(interval["@_kaiord:originalDurationWatts"]).toBe(300);
   });
 
@@ -126,7 +130,10 @@ describe("encodeDuration", () => {
     expect(warnSpy).toHaveBeenCalledOnce();
     expect(warnSpy).toHaveBeenCalledWith(
       "Lossy conversion: unsupported duration type",
-      expect.objectContaining({ originalType: "heart_rate_less_than", fallbackSeconds: 300 }),
+      expect.objectContaining({
+        originalType: "heart_rate_less_than",
+        fallbackSeconds: 300,
+      })
     );
   });
 
@@ -143,15 +150,18 @@ describe("encodeDuration", () => {
     [60, 60],
     [300, 300],
     [3600, 3600],
-  ] as const)("should encode time duration of %i seconds", (seconds, expected) => {
-    // Arrange
-    const step = makeStep({ type: "time", seconds });
-    const interval: Record<string, unknown> = {};
+  ] as const)(
+    "should encode time duration of %i seconds",
+    (seconds, expected) => {
+      // Arrange
+      const step = makeStep({ type: "time", seconds });
+      const interval: Record<string, unknown> = {};
 
-    // Act
-    encodeDuration(step, interval);
+      // Act
+      encodeDuration(step, interval);
 
-    // Assert
-    expect(interval["@_Duration"]).toBe(expected);
-  });
+      // Assert
+      expect(interval["@_Duration"]).toBe(expected);
+    }
+  );
 });

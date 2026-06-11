@@ -4,9 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { encodeIntervalsT } from "./intervals-t-encoder";
 
-const makeStep = (
-  overrides: Partial<WorkoutStep> = {},
-): WorkoutStep => ({
+const makeStep = (overrides: Partial<WorkoutStep> = {}): WorkoutStep => ({
   stepIndex: 0,
   durationType: "time",
   duration: { type: "time", seconds: 60 },
@@ -18,7 +16,7 @@ const makeStep = (
 const makeBlock = (
   onStep: WorkoutStep,
   offStep: WorkoutStep,
-  repeatCount = 5,
+  repeatCount = 5
 ): RepetitionBlock => ({
   repeatCount,
   steps: [onStep, offStep],
@@ -38,8 +36,14 @@ describe("encodeIntervalsT", () => {
 
   it("should encode on-step time duration as @_OnDuration", () => {
     // Arrange
-    const onStep = makeStep({ duration: { type: "time", seconds: 30 }, durationType: "time" });
-    const offStep = makeStep({ duration: { type: "time", seconds: 90 }, durationType: "time" });
+    const onStep = makeStep({
+      duration: { type: "time", seconds: 30 },
+      durationType: "time",
+    });
+    const offStep = makeStep({
+      duration: { type: "time", seconds: 90 },
+      durationType: "time",
+    });
     const block = makeBlock(onStep, offStep);
 
     // Act
@@ -179,7 +183,9 @@ describe("encodeIntervalsT", () => {
         targetType: "power",
         target: { type: "power", value: { unit: "percent_ftp", value: 110 } },
       }),
-      extensions: { zwift: { textEvents: [{ message: "Go!", timeoffset: 5 }] } },
+      extensions: {
+        zwift: { textEvents: [{ message: "Go!", timeoffset: 5 }] },
+      },
     };
     const offStep = makeStep();
     const block = makeBlock(onStep, offStep);
@@ -188,7 +194,10 @@ describe("encodeIntervalsT", () => {
     const result = encodeIntervalsT(block);
 
     // Assert
-    expect(result.textevent).toStrictEqual({ "@_message": "Go!", "@_timeoffset": 5 });
+    expect(result.textevent).toStrictEqual({
+      "@_message": "Go!",
+      "@_timeoffset": 5,
+    });
   });
 
   it("should not include textevent key when on-step has no text events", () => {

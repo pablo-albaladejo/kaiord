@@ -4,7 +4,9 @@ import { describe, expect, it } from "vitest";
 import { convertCadenceTarget } from "./krd-to-fit-target-cadence.converter";
 
 const cadenceStep = (
-  value: { unit: "rpm"; value: number } | { unit: "range"; min: number; max: number }
+  value:
+    | { unit: "rpm"; value: number }
+    | { unit: "range"; min: number; max: number }
 ): WorkoutStep => ({
   stepIndex: 0,
   durationType: "open",

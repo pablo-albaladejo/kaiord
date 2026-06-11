@@ -3,7 +3,10 @@ import type { WorkoutStep } from "@kaiord/core";
 import { createMockLogger } from "@kaiord/core/test-utils";
 import { describe, expect, it, vi } from "vitest";
 
-import { encodeRampPowerTarget, encodeSteadyStatePowerTarget } from "./power-encoder";
+import {
+  encodeRampPowerTarget,
+  encodeSteadyStatePowerTarget,
+} from "./power-encoder";
 
 const makeStep = (target: WorkoutStep["target"]): WorkoutStep => ({
   stepIndex: 0,
@@ -16,7 +19,10 @@ const makeStep = (target: WorkoutStep["target"]): WorkoutStep => ({
 describe("encodeSteadyStatePowerTarget", () => {
   it("should encode percent_ftp target as @_Power fraction", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 85 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 85 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -29,7 +35,10 @@ describe("encodeSteadyStatePowerTarget", () => {
 
   it("should encode 100% FTP as @_Power 1.0", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 100 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 100 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -69,7 +78,10 @@ describe("encodeSteadyStatePowerTarget", () => {
 
   it("should encode absolute watts target using assumed FTP of 250", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "watts", value: 250 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "watts", value: 250 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -84,7 +96,10 @@ describe("encodeSteadyStatePowerTarget", () => {
 
   it("should encode 200 watts as 0.8 FTP fraction with assumed FTP 250", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "watts", value: 200 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "watts", value: 200 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -110,13 +125,16 @@ describe("encodeSteadyStatePowerTarget", () => {
   it.each([
     [1, 0.55],
     [2, 0.75],
-    [3, 0.90],
-    [5, 1.20],
-    [6, 1.50],
-    [7, 2.00],
+    [3, 0.9],
+    [5, 1.2],
+    [6, 1.5],
+    [7, 2.0],
   ] as const)("should encode zone %i as %f", (zone, expected) => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "zone", value: zone } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "zone", value: zone },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -130,7 +148,10 @@ describe("encodeSteadyStatePowerTarget", () => {
 describe("encodeRampPowerTarget", () => {
   it("should encode percent_ftp as equal PowerLow and PowerHigh", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 80 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 80 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -152,15 +173,18 @@ describe("encodeRampPowerTarget", () => {
 
     // Assert
     // zone 3 = 90% FTP → 0.90
-    expect(interval["@_PowerLow"]).toBe(0.90);
-    expect(interval["@_PowerHigh"]).toBe(0.90);
+    expect(interval["@_PowerLow"]).toBe(0.9);
+    expect(interval["@_PowerHigh"]).toBe(0.9);
     expect(interval["@_kaiord:powerUnit"]).toBe("zone");
     expect(interval["@_kaiord:powerZone"]).toBe(3);
   });
 
   it("should encode watt range as PowerLow and PowerHigh fractions with lossy warning", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "range", min: 150, max: 300 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "range", min: 150, max: 300 },
+    });
     const interval: Record<string, unknown> = {};
     const logger = createMockLogger();
     const warnSpy = vi.spyOn(logger, "warn");
@@ -169,8 +193,8 @@ describe("encodeRampPowerTarget", () => {
     encodeRampPowerTarget(step, interval, logger);
 
     // Assert
-    expect(interval["@_PowerLow"]).toBe((150 / 250) * 100 / 100);
-    expect(interval["@_PowerHigh"]).toBe((300 / 250) * 100 / 100);
+    expect(interval["@_PowerLow"]).toBe(((150 / 250) * 100) / 100);
+    expect(interval["@_PowerHigh"]).toBe(((300 / 250) * 100) / 100);
     expect(interval["@_kaiord:originalWattsLow"]).toBe(150);
     expect(interval["@_kaiord:originalWattsHigh"]).toBe(300);
     expect(interval["@_kaiord:assumedFtp"]).toBe(250);
@@ -179,7 +203,10 @@ describe("encodeRampPowerTarget", () => {
 
   it("should emit logger warn for watts range conversion", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "range", min: 100, max: 200 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "range", min: 100, max: 200 },
+    });
     const interval: Record<string, unknown> = {};
     const logger = createMockLogger();
     const warnSpy = vi.spyOn(logger, "warn");
@@ -190,13 +217,16 @@ describe("encodeRampPowerTarget", () => {
     // Assert
     expect(warnSpy).toHaveBeenCalledWith(
       "Lossy conversion: watts converted to percent FTP",
-      expect.objectContaining({ assumedFtp: 250 }),
+      expect.objectContaining({ assumedFtp: 250 })
     );
   });
 
   it("should not emit warning when no logger provided for watts range", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "range", min: 100, max: 200 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "range", min: 100, max: 200 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act & Assert

@@ -22,7 +22,10 @@ const makeStep = (target: WorkoutStep["target"]): WorkoutStep => ({
 describe("encodeSteadyStateTargets", () => {
   it("should encode percent_ftp power target", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 75 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 75 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -62,7 +65,10 @@ describe("encodeSteadyStateTargets", () => {
 describe("encodeRampTargets", () => {
   it("should encode power range as PowerLow and PowerHigh", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "range", min: 125, max: 250 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "range", min: 125, max: 250 },
+    });
     const interval: Record<string, unknown> = {};
     const logger = createMockLogger();
 
@@ -77,7 +83,10 @@ describe("encodeRampTargets", () => {
   it("should encode mps pace range as paceLow and paceHigh (inverted)", () => {
     // Arrange
     // min 3 m/s, max 5 m/s → paceLow = 1000/5 = 200, paceHigh = 1000/3 ≈ 333.3
-    const step = makeStep({ type: "pace", value: { unit: "range", min: 3, max: 5 } });
+    const step = makeStep({
+      type: "pace",
+      value: { unit: "range", min: 3, max: 5 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -149,7 +158,10 @@ describe("encodeFreeRideTargets", () => {
 describe("encodeTargets dispatch", () => {
   it("should delegate SteadyState to steady-state encoder", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 90 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 90 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -161,7 +173,10 @@ describe("encodeTargets dispatch", () => {
 
   it("should delegate Warmup to ramp encoder", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 60 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 60 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -174,7 +189,10 @@ describe("encodeTargets dispatch", () => {
 
   it("should delegate Cooldown to ramp encoder", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 50 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 50 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -187,7 +205,10 @@ describe("encodeTargets dispatch", () => {
 
   it("should delegate Ramp to ramp encoder", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 70 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 70 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -215,7 +236,10 @@ describe("encodeTargets dispatch", () => {
 
   it("should not set any power key for unknown interval type", () => {
     // Arrange
-    const step = makeStep({ type: "power", value: { unit: "percent_ftp", value: 80 } });
+    const step = makeStep({
+      type: "power",
+      value: { unit: "percent_ftp", value: 80 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -230,7 +254,10 @@ describe("encodeTargets dispatch", () => {
 describe("encodeCadence", () => {
   it("should encode rpm cadence target as @_Cadence", () => {
     // Arrange
-    const step = makeStep({ type: "cadence", value: { unit: "rpm", value: 90 } });
+    const step = makeStep({
+      type: "cadence",
+      value: { unit: "rpm", value: 90 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act
@@ -254,7 +281,10 @@ describe("encodeCadence", () => {
 
   it("should not set @_Cadence for cadence range unit", () => {
     // Arrange
-    const step = makeStep({ type: "cadence", value: { unit: "range", min: 80, max: 100 } });
+    const step = makeStep({
+      type: "cadence",
+      value: { unit: "range", min: 80, max: 100 },
+    });
     const interval: Record<string, unknown> = {};
 
     // Act

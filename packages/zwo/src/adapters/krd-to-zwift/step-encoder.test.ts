@@ -4,9 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { convertStepToInterval } from "./step-encoder";
 
-const makeStep = (
-  overrides: Partial<WorkoutStep> = {},
-): WorkoutStep => ({
+const makeStep = (overrides: Partial<WorkoutStep> = {}): WorkoutStep => ({
   stepIndex: 0,
   durationType: "time",
   duration: { type: "time", seconds: 120 },
@@ -18,7 +16,10 @@ const makeStep = (
 describe("convertStepToInterval", () => {
   it("should encode time duration into interval", () => {
     // Arrange
-    const step = makeStep({ duration: { type: "time", seconds: 180 }, durationType: "time" });
+    const step = makeStep({
+      duration: { type: "time", seconds: 180 },
+      durationType: "time",
+    });
 
     // Act
     const result = convertStepToInterval(step, "SteadyState");
