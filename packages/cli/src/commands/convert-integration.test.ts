@@ -38,7 +38,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
       const outputContent = await readFile(outputPath, "utf-8");
 
       // Act
@@ -65,7 +65,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
 
       // Act
       const outputBuffer = await readFile(outputPath);
@@ -141,7 +141,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
 
       // Act
       const outputContent = await readFile(outputPath, "utf-8");
@@ -177,7 +177,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
       const outputContent = await readFile(outputPath, "utf-8");
 
       // Act
@@ -247,7 +247,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
 
       // Act
       const outputContent = await readFile(outputPath, "utf-8");
@@ -281,7 +281,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
 
       // Act
       const outputContent = await readFile(outputPath, "utf-8");
@@ -315,7 +315,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const stderr = stripAnsi(result.stderr);
@@ -348,7 +348,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const stdout = stripAnsi(result.stdout);
@@ -381,7 +381,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = JSON.parse(result.stdout);
@@ -420,7 +420,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
         const stderr = result.stderr;
         const lines = stderr.split("\n").filter((line) => line.trim());
 
@@ -468,7 +468,7 @@ describe("convert command integration tests", () => {
             },
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
         const combinedOutput = result.stdout + result.stderr;
 
         // Act
@@ -478,7 +478,7 @@ describe("convert command integration tests", () => {
         if (combinedOutput.length > 0) {
           expect(combinedOutput).not.toBe(strippedOutput); // Has ANSI codes
         }
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
       }
     );
 
@@ -513,8 +513,8 @@ describe("convert command integration tests", () => {
         );
 
         // Assert
-        expect(result.exitCode).toBe(0);
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
       }
     );
 
@@ -543,7 +543,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = JSON.parse(result.stdout);
@@ -584,7 +584,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = stripAnsi(result.stdout);
@@ -675,7 +675,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = stripAnsi(result.stdout);
