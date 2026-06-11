@@ -3,6 +3,7 @@
  */
 import type { ToleranceExceededError } from "@kaiord/core";
 import chalk from "chalk";
+
 import { formatToleranceViolations } from "../format-violations";
 
 export const formatToleranceError = (

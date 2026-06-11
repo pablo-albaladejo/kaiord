@@ -1,4 +1,5 @@
 import type { Logger } from "@kaiord/core";
+
 import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import {
   compareExtensions,

@@ -1,4 +1,5 @@
 import type { KRD } from "@kaiord/core";
+
 import { isDifferent } from "./comparators";
 
 type StepDiff = {
@@ -6,61 +7,6 @@ type StepDiff = {
   field: string;
   file1Value: unknown;
   file2Value: unknown;
-};
-
-/**
- * Compare workout steps between two KRD files
- */
-export const compareSteps = (
-  krd1: KRD,
-  krd2: KRD
-): {
-  file1Count: number;
-  file2Count: number;
-  differences: Array<StepDiff>;
-} => {
-  const workout1 = krd1.extensions?.structured_workout as
-    | { steps?: Array<unknown> }
-    | undefined;
-  const workout2 = krd2.extensions?.structured_workout as
-    | { steps?: Array<unknown> }
-    | undefined;
-
-  const steps1 = workout1?.steps || [];
-  const steps2 = workout2?.steps || [];
-  const differences: Array<StepDiff> = [];
-  const maxSteps = Math.max(steps1.length, steps2.length);
-
-  for (let i = 0; i < maxSteps; i++) {
-    const step1 = steps1[i] as Record<string, unknown> | undefined;
-    const step2 = steps2[i] as Record<string, unknown> | undefined;
-
-    if (!step1 && step2) {
-      differences.push({
-        stepIndex: i,
-        field: "step",
-        file1Value: undefined,
-        file2Value: step2,
-      });
-      continue;
-    }
-
-    if (step1 && !step2) {
-      differences.push({
-        stepIndex: i,
-        field: "step",
-        file1Value: step1,
-        file2Value: undefined,
-      });
-      continue;
-    }
-
-    if (!step1 || !step2) continue;
-
-    compareStepFields(i, step1, step2, differences);
-  }
-
-  return { file1Count: steps1.length, file2Count: steps2.length, differences };
 };
 
 const STEP_FIELDS = [
@@ -92,3 +38,60 @@ function compareStepFields(
     }
   }
 }
+
+function diffOneStep(
+  i: number,
+  step1: Record<string, unknown> | undefined,
+  step2: Record<string, unknown> | undefined,
+  differences: Array<StepDiff>
+): void {
+  if (!step1 && step2) {
+    differences.push({
+      stepIndex: i,
+      field: "step",
+      file1Value: undefined,
+      file2Value: step2,
+    });
+    return;
+  }
+  if (step1 && !step2) {
+    differences.push({
+      stepIndex: i,
+      field: "step",
+      file1Value: step1,
+      file2Value: undefined,
+    });
+    return;
+  }
+  if (step1 && step2) {
+    compareStepFields(i, step1, step2, differences);
+  }
+}
+
+export const compareSteps = (
+  krd1: KRD,
+  krd2: KRD
+): { file1Count: number; file2Count: number; differences: Array<StepDiff> } => {
+  const workout1 = krd1.extensions?.structured_workout as
+    | { steps?: Array<unknown> }
+    | undefined;
+  const workout2 = krd2.extensions?.structured_workout as
+    | { steps?: Array<unknown> }
+    | undefined;
+
+  const steps1 = workout1?.steps || [];
+  const steps2 = workout2?.steps || [];
+  const differences: Array<StepDiff> = [];
+  const maxSteps = Math.max(steps1.length, steps2.length);
+
+  for (let i = 0; i < maxSteps; i++) {
+    diffOneStep(
+      i,
+      steps1[i] as Record<string, unknown> | undefined,
+      steps2[i] as Record<string, unknown> | undefined,
+      differences
+    );
+  }
+
+  return { file1Count: steps1.length, file2Count: steps2.length, differences };
+};

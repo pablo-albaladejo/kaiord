@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { createOutputDirectory } from "./directory-handler";
 
 vi.mock("fs/promises", () => ({

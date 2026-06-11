@@ -1,71 +1,75 @@
 import type { Logger } from "@kaiord/core";
 import chalk from "chalk";
+
 import { isTTY } from "../../utils/is-tty";
 import type { LoggerOptions } from "../../utils/logger-factory";
 
-/**
- * Creates a pretty terminal logger with colors and emoji prefixes
- *
- * @param options - Logger configuration options
- * @returns Logger instance compatible with @kaiord/core
- */
-export const createPrettyLogger = (options: LoggerOptions = {}): Logger => {
-  const level = options.level || "info";
-  const quiet = options.quiet || false;
+const LOG_LEVELS = ["debug", "info", "warn", "error"];
 
-  // Check if colors should be used:
-  // - Use colors if in TTY
-  // - OR if FORCE_COLOR is set (for testing)
-  const forceColor = process.env.FORCE_COLOR === "1";
-  const useColors = isTTY() || forceColor;
+type LogLevel = "debug" | "info" | "warn" | "error";
 
-  // Define log level hierarchy
-  const levels = ["debug", "info", "warn", "error"];
-  const minLevelIndex = levels.indexOf(level);
+type LogConfig = {
+  useColors: boolean;
+  quiet: boolean;
+  minLevelIndex: number;
+};
 
-  const shouldLog = (messageLevel: string): boolean => {
-    if (quiet && messageLevel !== "error") {
-      return false;
-    }
-    const messageLevelIndex = levels.indexOf(messageLevel);
-    return messageLevelIndex >= minLevelIndex;
+type MethodDisplay = {
+  prefix: string;
+  colorFn: (s: string) => string;
+  consoleFn: (s: string) => void;
+};
+
+const shouldLog = (cfg: LogConfig, messageLevel: string): boolean => {
+  if (cfg.quiet && messageLevel !== "error") return false;
+  return LOG_LEVELS.indexOf(messageLevel) >= cfg.minLevelIndex;
+};
+
+const formatContext = (
+  useColors: boolean,
+  context?: Record<string, unknown>
+): string => {
+  if (!context || Object.keys(context).length === 0) return "";
+  const contextStr = JSON.stringify(context);
+  return " " + (useColors ? chalk.gray(contextStr) : contextStr);
+};
+
+const makeLogMethod =
+  (cfg: LogConfig, level: LogLevel, display: MethodDisplay) =>
+  (message: string, context?: Record<string, unknown>): void => {
+    if (!shouldLog(cfg, level)) return;
+    const formatted = `${display.prefix} ${message}${formatContext(cfg.useColors, context)}`;
+    display.consoleFn(cfg.useColors ? display.colorFn(formatted) : formatted);
   };
 
-  const formatContext = (context?: Record<string, unknown>): string => {
-    if (!context || Object.keys(context).length === 0) {
-      return "";
-    }
-    const contextStr = JSON.stringify(context);
-    return " " + (useColors ? chalk.gray(contextStr) : contextStr);
+export const createPrettyLogger = (options: LoggerOptions = {}): Logger => {
+  const level = options.level || "info";
+  const cfg: LogConfig = {
+    quiet: options.quiet || false,
+    useColors: isTTY() || process.env.FORCE_COLOR === "1",
+    minLevelIndex: LOG_LEVELS.indexOf(level),
   };
 
   return {
-    debug: (message: string, context?: Record<string, unknown>): void => {
-      if (shouldLog("debug")) {
-        const formatted = `🐛 ${message}${formatContext(context)}`;
-        console.log(useColors ? chalk.gray(formatted) : formatted);
-      }
-    },
-
-    info: (message: string, context?: Record<string, unknown>): void => {
-      if (shouldLog("info")) {
-        const formatted = `ℹ ${message}${formatContext(context)}`;
-        console.log(useColors ? chalk.blue(formatted) : formatted);
-      }
-    },
-
-    warn: (message: string, context?: Record<string, unknown>): void => {
-      if (shouldLog("warn")) {
-        const formatted = `⚠ ${message}${formatContext(context)}`;
-        console.warn(useColors ? chalk.yellow(formatted) : formatted);
-      }
-    },
-
-    error: (message: string, context?: Record<string, unknown>): void => {
-      if (shouldLog("error")) {
-        const formatted = `✖ ${message}${formatContext(context)}`;
-        console.error(useColors ? chalk.red(formatted) : formatted);
-      }
-    },
+    debug: makeLogMethod(cfg, "debug", {
+      prefix: "🐛",
+      colorFn: chalk.gray,
+      consoleFn: console.log,
+    }),
+    info: makeLogMethod(cfg, "info", {
+      prefix: "ℹ",
+      colorFn: chalk.blue,
+      consoleFn: console.log,
+    }),
+    warn: makeLogMethod(cfg, "warn", {
+      prefix: "⚠",
+      colorFn: chalk.yellow,
+      consoleFn: console.warn,
+    }),
+    error: makeLogMethod(cfg, "error", {
+      prefix: "✖",
+      colorFn: chalk.red,
+      consoleFn: console.error,
+    }),
   };
 };

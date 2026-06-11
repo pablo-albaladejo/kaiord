@@ -14,6 +14,8 @@
   ],
   "scripts": {
     "build": "tsup",
+    "lint": "tsc --noEmit && eslint . && prettier --check src",
+    "lint:fix": "eslint . --fix && prettier --write src",
     "test": "pnpm build && vitest run",
     "test:coverage": "pnpm build && vitest run --coverage",
     "test:unit": "vitest run --exclude '**/*-{integration,smoke,snapshot}.test.ts'",

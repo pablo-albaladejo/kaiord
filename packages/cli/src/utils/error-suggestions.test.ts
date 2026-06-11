@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+
 import { getErrorTitle, getSuggestionForError } from "./error-suggestions";
+
+const EXPECTED_SUGGESTION_COUNT = 3;
 
 describe("getErrorTitle", () => {
   it("should return 'File not found' for file not found errors", () => {
@@ -135,7 +138,7 @@ describe("getSuggestionForError", () => {
 
     // Assert
     expect(result).not.toBeNull();
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(EXPECTED_SUGGESTION_COUNT);
     expect(result?.[0]).toContain("file path is correct");
   });
 

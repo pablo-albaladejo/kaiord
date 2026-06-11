@@ -1,7 +1,4 @@
-import { executeBatchConversion } from "./batch";
-import { mapErrorToExitCode } from "./error-exit-code";
-import { executeSingleFileConversion } from "./single-file";
-import { convertOptionsSchema } from "./types";
+import type { Config } from "../../utils/config-loader.js";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -9,8 +6,11 @@ import {
 import { formatError } from "../../utils/error-formatter";
 import { ExitCode } from "../../utils/exit-codes";
 import { createLogger } from "../../utils/logger-factory";
+import { executeBatchConversion } from "./batch";
+import { mapErrorToExitCode } from "./error-exit-code";
+import { executeSingleFileConversion } from "./single-file";
 import type { ConvertOptions } from "./types";
-import type { Config } from "../../utils/config-loader.js";
+import { convertOptionsSchema } from "./types";
 
 export type { ConvertOptions } from "./types";
 

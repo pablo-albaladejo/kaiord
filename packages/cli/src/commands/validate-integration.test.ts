@@ -4,22 +4,25 @@ import { join } from "path";
 import stripAnsi from "strip-ansi";
 import { dir } from "tmp-promise";
 import { beforeAll, describe, expect, it } from "vitest";
+
 import { getFixturePath } from "../tests/helpers/fixture-paths";
+
+const SETUP_TIMEOUT_MS = 10000;
+const TEST_TIMEOUT_MS = 10000;
+const PROCESS_TIMEOUT_MS = 15000;
 
 describe("validate command integration tests", () => {
   let tempDir: string;
-  let cleanup: () => void;
 
   beforeAll(async () => {
     const tmp = await dir({ unsafeCleanup: true });
     tempDir = tmp.path;
-    cleanup = tmp.cleanup;
-  }, 10000); // Increased timeout for setup
+  }, SETUP_TIMEOUT_MS); // Increased timeout for setup
 
   describe("successful validation", () => {
     it(
       "should validate FIT file successfully with exit code 0",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
@@ -41,7 +44,7 @@ describe("validate command integration tests", () => {
 
     it(
       "should display success message when validation passes",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
@@ -64,7 +67,7 @@ describe("validate command integration tests", () => {
   describe("custom tolerance config", () => {
     it(
       "should load custom tolerance config from JSON file",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
@@ -102,7 +105,7 @@ describe("validate command integration tests", () => {
 
     it(
       "should fail with invalid tolerance config JSON",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
@@ -127,31 +130,35 @@ describe("validate command integration tests", () => {
   });
 
   describe("error handling", () => {
-    it("should fail with exit code 2 for missing file", async () => {
-      // Arrange
+    it(
+      "should fail with exit code 2 for missing file",
+      async () => {
+        // Arrange
 
-      // Act
-      const nonExistentFile = join(tempDir, "nonexistent.fit");
+        // Act
+        const nonExistentFile = join(tempDir, "nonexistent.fit");
 
-      // Assert
-      try {
-        await execa("tsx", [
-          "src/bin/kaiord.ts",
-          "validate",
-          "--input",
-          nonExistentFile,
-        ]);
-        expect.fail("Should have thrown an error");
-      } catch (error: unknown) {
-        const execaError = error as { exitCode: number; stderr: string };
-        // Exit code 2 = FILE_NOT_FOUND per CLI specification
-        expect(execaError.exitCode).toBe(2);
-      }
-    }, 15000); // Increased timeout for process spawning under load
+        // Assert
+        try {
+          await execa("tsx", [
+            "src/bin/kaiord.ts",
+            "validate",
+            "--input",
+            nonExistentFile,
+          ]);
+          expect.fail("Should have thrown an error");
+        } catch (error: unknown) {
+          const execaError = error as { exitCode: number; stderr: string };
+          // Exit code 2 = FILE_NOT_FOUND per CLI specification
+          expect(execaError.exitCode).toBe(2);
+        }
+      },
+      PROCESS_TIMEOUT_MS
+    ); // Increased timeout for process spawning under load
 
     it(
       "should display error message for missing file",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
 
@@ -175,34 +182,38 @@ describe("validate command integration tests", () => {
       }
     );
 
-    it("should fail for non-FIT files", { timeout: 10000 }, async () => {
-      // Arrange
+    it(
+      "should fail for non-FIT files",
+      { timeout: TEST_TIMEOUT_MS },
+      async () => {
+        // Arrange
 
-      // Act
-      const krdFile = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+        // Act
+        const krdFile = getFixturePath("krd", "WorkoutIndividualSteps.krd");
 
-      // Assert
-      try {
-        await execa("tsx", [
-          "src/bin/kaiord.ts",
-          "validate",
-          "--input",
-          krdFile,
-        ]);
-        expect.fail("Should have thrown an error");
-      } catch (error: unknown) {
-        const execaError = error as { exitCode: number; stderr: string };
-        expect(execaError.exitCode).toBe(1);
-        const output = stripAnsi(execaError.stderr);
-        expect(output).toMatch(/only supports FIT files/i);
+        // Assert
+        try {
+          await execa("tsx", [
+            "src/bin/kaiord.ts",
+            "validate",
+            "--input",
+            krdFile,
+          ]);
+          expect.fail("Should have thrown an error");
+        } catch (error: unknown) {
+          const execaError = error as { exitCode: number; stderr: string };
+          expect(execaError.exitCode).toBe(1);
+          const output = stripAnsi(execaError.stderr);
+          expect(output).toMatch(/only supports FIT files/i);
+        }
       }
-    });
+    );
   });
 
   describe("JSON output", () => {
     it(
       "should output JSON format when --json flag is set",
-      { timeout: 15000 },
+      { timeout: PROCESS_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
@@ -229,7 +240,7 @@ describe("validate command integration tests", () => {
 
     it(
       "should include violations in JSON output when validation fails",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
@@ -280,7 +291,7 @@ describe("validate command integration tests", () => {
   describe("verbosity options", () => {
     it(
       "should show detailed output with --verbose flag",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
@@ -301,7 +312,7 @@ describe("validate command integration tests", () => {
 
     it(
       "should suppress output with --quiet flag",
-      { timeout: 10000 },
+      { timeout: TEST_TIMEOUT_MS },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");

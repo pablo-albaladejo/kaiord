@@ -1,14 +1,15 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Logger } from "@kaiord/core";
 import { ServiceAuthError } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { ExitCode } from "../../utils/exit-codes";
 
 vi.mock("./client-factory", () => ({
   createCliGarminClient: vi.fn(),
 }));
 
-import { loginCommand } from "./login";
 import { createCliGarminClient } from "./client-factory";
+import { loginCommand } from "./login";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),

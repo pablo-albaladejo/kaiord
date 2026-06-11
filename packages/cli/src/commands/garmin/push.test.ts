@@ -1,6 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { Logger, KRD } from "@kaiord/core";
+import type { KRD, Logger } from "@kaiord/core";
 import { ServiceAuthError } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { ExitCode } from "../../utils/exit-codes";
 
 vi.mock("./client-factory", () => ({
@@ -11,9 +12,9 @@ vi.mock("../../utils/krd-converter", () => ({
   loadFileAsKrd: vi.fn(),
 }));
 
-import { pushCommand } from "./push";
-import { createCliGarminClient } from "./client-factory";
 import { loadFileAsKrd } from "../../utils/krd-converter";
+import { createCliGarminClient } from "./client-factory";
+import { pushCommand } from "./push";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),

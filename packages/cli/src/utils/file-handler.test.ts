@@ -1,6 +1,11 @@
-import { writeFile as fsWriteFile, mkdir, rm } from "fs/promises";
+import { mkdir, rm, writeFile as fsWriteFile } from "fs/promises";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
+const SAMPLE_BYTES = Array.from(Buffer.from("0102030405", "hex"));
+const SHORT_BINARY = Array.from(Buffer.from("010203", "hex"));
+const SORTED_FILES_COUNT = SHORT_BINARY.length;
+
 import {
   findFiles,
   isNodeSystemError,
@@ -23,7 +28,7 @@ describe("readFile", () => {
   it("should read binary FIT file as Uint8Array", async () => {
     // Arrange
     const filePath = join(TEST_DIR, "test.fit");
-    const testData = new Uint8Array([1, 2, 3, 4, 5]);
+    const testData = new Uint8Array(SAMPLE_BYTES);
     await fsWriteFile(filePath, testData);
 
     // Act
@@ -31,7 +36,7 @@ describe("readFile", () => {
 
     // Assert
     expect(result).toBeInstanceOf(Uint8Array);
-    expect(Array.from(result as Uint8Array)).toEqual([1, 2, 3, 4, 5]);
+    expect(Array.from(result as Uint8Array)).toEqual(SAMPLE_BYTES);
   });
 
   it("should read KRD file as string", async () => {
@@ -121,7 +126,7 @@ describe("writeFile", () => {
   it("should write binary FIT file from Uint8Array", async () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.fit");
-    const testData = new Uint8Array([1, 2, 3, 4, 5]);
+    const testData = new Uint8Array(SAMPLE_BYTES);
     await writeFile(filePath, testData, "fit");
 
     // Act
@@ -129,7 +134,7 @@ describe("writeFile", () => {
 
     // Assert
     expect(result).toBeInstanceOf(Uint8Array);
-    expect(Array.from(result as Uint8Array)).toEqual([1, 2, 3, 4, 5]);
+    expect(Array.from(result as Uint8Array)).toEqual(SAMPLE_BYTES);
   });
 
   it("should write KRD file from string", async () => {
@@ -205,7 +210,7 @@ describe("writeFile", () => {
     const filePath = join(TEST_DIR, "output.krd");
 
     // Act
-    const testData = new Uint8Array([1, 2, 3]);
+    const testData = new Uint8Array(SHORT_BINARY);
 
     // Assert
     await expect(writeFile(filePath, testData, "krd")).rejects.toThrow(
@@ -340,7 +345,7 @@ describe("findFiles", () => {
     const result = await findFiles(join(TEST_DIR, "*.fit"));
 
     // Assert
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(SORTED_FILES_COUNT);
     expect(result[0]).toContain("a.fit");
     expect(result[1]).toContain("b.fit");
     expect(result[2]).toContain("c.fit");

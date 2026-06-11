@@ -1,4 +1,5 @@
 import type { Argv } from "yargs";
+
 import { ExitCode } from "../../utils/exit-codes";
 import { createLogger } from "../../utils/logger-factory";
 import { listCommand } from "./list";
