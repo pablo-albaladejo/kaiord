@@ -153,9 +153,7 @@ describe("config file integration", () => {
 
       // Assert
       expect(result.exitCode).toBe(0);
-      expect(stripAnsi(result.stderr)).toContain(
-        "No configuration file found"
-      );
+      expect(stripAnsi(result.stderr)).toContain("No configuration file found");
     }
   );
 

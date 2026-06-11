@@ -82,11 +82,7 @@ const versionGateCases: ReadonlyArray<
   ["weightMeasurementSchema", weightMeasurementSchema, validBases.weight],
   ["hrvSummarySchema", hrvSummarySchema, validBases.hrv],
   ["dailyWellnessSchema", dailyWellnessSchema, validBases.daily],
-  [
-    "bodyCompositionSchema",
-    bodyCompositionSchema,
-    validBases.bodyComposition,
-  ],
+  ["bodyCompositionSchema", bodyCompositionSchema, validBases.bodyComposition],
   ["sleepRecordSchema", sleepRecordSchema, validBases.sleep],
   ["stressEpisodeSchema", stressEpisodeSchema, validBases.stress],
 ];

@@ -16,7 +16,11 @@ type FitDurationFields = Parameters<typeof buildFitDurationData.build>[0];
 describe("convertFitDuration", () => {
   describe("value-present durations map to their KRD shape", () => {
     it.each<[string, FitDurationFields, Duration]>([
-      ["time", { durationType: "time", durationTime: 300 }, { type: "time", seconds: 300 }],
+      [
+        "time",
+        { durationType: "time", durationTime: 300 },
+        { type: "time", seconds: 300 },
+      ],
       [
         "distance",
         { durationType: "distance", durationDistance: 1000 },
@@ -44,37 +48,69 @@ describe("convertFitDuration", () => {
       ],
       [
         "repeatUntilTime",
-        { durationType: "repeatUntilTime", durationTime: 1800, durationStep: 0 },
+        {
+          durationType: "repeatUntilTime",
+          durationTime: 1800,
+          durationStep: 0,
+        },
         { type: "repeat_until_time", seconds: 1800, repeatFrom: 0 },
       ],
       [
         "repeatUntilDistance",
-        { durationType: "repeatUntilDistance", durationDistance: 5000, durationStep: 1 },
+        {
+          durationType: "repeatUntilDistance",
+          durationDistance: 5000,
+          durationStep: 1,
+        },
         { type: "repeat_until_distance", meters: 5000, repeatFrom: 1 },
       ],
       [
         "repeatUntilCalories",
-        { durationType: "repeatUntilCalories", durationCalories: 1000, durationStep: 2 },
+        {
+          durationType: "repeatUntilCalories",
+          durationCalories: 1000,
+          durationStep: 2,
+        },
         { type: "repeat_until_calories", calories: 1000, repeatFrom: 2 },
       ],
       [
         "repeatUntilHrLessThan",
-        { durationType: "repeatUntilHrLessThan", durationHr: 120, durationStep: 2 },
+        {
+          durationType: "repeatUntilHrLessThan",
+          durationHr: 120,
+          durationStep: 2,
+        },
         { type: "repeat_until_heart_rate_less_than", bpm: 120, repeatFrom: 2 },
       ],
       [
         "repeatUntilHrGreaterThan",
-        { durationType: "repeatUntilHrGreaterThan", repeatHr: 160, durationStep: 0 },
-        { type: "repeat_until_heart_rate_greater_than", bpm: 160, repeatFrom: 0 },
+        {
+          durationType: "repeatUntilHrGreaterThan",
+          repeatHr: 160,
+          durationStep: 0,
+        },
+        {
+          type: "repeat_until_heart_rate_greater_than",
+          bpm: 160,
+          repeatFrom: 0,
+        },
       ],
       [
         "repeatUntilPowerLessThan",
-        { durationType: "repeatUntilPowerLessThan", durationPower: 180, durationStep: 3 },
+        {
+          durationType: "repeatUntilPowerLessThan",
+          durationPower: 180,
+          durationStep: 3,
+        },
         { type: "repeat_until_power_less_than", watts: 180, repeatFrom: 3 },
       ],
       [
         "repeatUntilPowerGreaterThan",
-        { durationType: "repeatUntilPowerGreaterThan", durationPower: 300, durationStep: 1 },
+        {
+          durationType: "repeatUntilPowerGreaterThan",
+          durationPower: 300,
+          durationStep: 1,
+        },
         { type: "repeat_until_power_greater_than", watts: 300, repeatFrom: 1 },
       ],
     ])("should map %s to its KRD duration", (_type, fields, expected) => {
@@ -94,7 +130,10 @@ describe("convertFitDuration", () => {
       ["time without durationTime", { durationType: "time" }],
       ["distance without durationDistance", { durationType: "distance" }],
       ["calories without durationCalories", { durationType: "calories" }],
-      ["powerLessThan without durationPower", { durationType: "powerLessThan" }],
+      [
+        "powerLessThan without durationPower",
+        { durationType: "powerLessThan" },
+      ],
       [
         "repeatUntilCalories without durationStep",
         { durationType: "repeatUntilCalories", durationCalories: 800 },

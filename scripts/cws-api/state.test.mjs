@@ -124,8 +124,12 @@ test("getItem URL-encodes the extension id", async () => {
 test("should redact Bearer tokens leaked back in getItem error body", async () => {
   // Arrange
   const sa = makeServiceAccount();
-  mockResponses.set("default", () =>
-    new Response("rejected: Bearer ya29.aaaaaaaaaaaaaaaaaaaa", { status: 400 })
+  mockResponses.set(
+    "default",
+    () =>
+      new Response("rejected: Bearer ya29.aaaaaaaaaaaaaaaaaaaa", {
+        status: 400,
+      })
   );
 
   // Act

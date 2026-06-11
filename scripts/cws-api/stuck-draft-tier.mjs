@@ -45,10 +45,10 @@ export function bumpRetryCount(issueBody) {
   const current = parseRetryCount(normalized);
   if (current === -1) return normalized;
   if (current === null) {
-    const sep = normalized.length === 0 || normalized.endsWith("\n") ? "" : "\n";
+    const sep =
+      normalized.length === 0 || normalized.endsWith("\n") ? "" : "\n";
     return `${normalized}${sep}RETRY_COUNT: 0\n`;
   }
   const next = current + 1;
   return normalized.replace(MARKER_RE, `RETRY_COUNT: ${next}`);
 }
-

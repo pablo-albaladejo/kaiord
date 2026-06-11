@@ -26,7 +26,9 @@ describe("FIXTURE_NAMES", () => {
     expect(keys).toHaveLength(4);
     expect(FIXTURE_NAMES.INDIVIDUAL_STEPS).toBe("WorkoutIndividualSteps");
     expect(FIXTURE_NAMES.REPEAT_STEPS).toBe("WorkoutRepeatSteps");
-    expect(FIXTURE_NAMES.CUSTOM_TARGET_VALUES).toBe("WorkoutCustomTargetValues");
+    expect(FIXTURE_NAMES.CUSTOM_TARGET_VALUES).toBe(
+      "WorkoutCustomTargetValues"
+    );
     expect(FIXTURE_NAMES.REPEAT_GREATER_THAN).toBe(
       "WorkoutRepeatGreaterThanStep"
     );

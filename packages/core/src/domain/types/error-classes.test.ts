@@ -15,7 +15,10 @@ import {
   ZwiftValidationError,
 } from "./errors";
 
-type ParsingErrorCtor = new (message: string, cause?: unknown) => Error & {
+type ParsingErrorCtor = new (
+  message: string,
+  cause?: unknown
+) => Error & {
   cause?: unknown;
 };
 
@@ -92,7 +95,13 @@ describe("Domain Errors", () => {
       { field: "type", message: "Invalid value" },
     ];
     const violations = [
-      { field: "power", expected: 250, actual: 252, deviation: 2, tolerance: 1 },
+      {
+        field: "power",
+        expected: 250,
+        actual: 252,
+        deviation: 2,
+        tolerance: 1,
+      },
     ];
     const zwiftErrors = [
       { path: "workout_file.name", message: "Required attribute missing" },
@@ -118,7 +127,10 @@ describe("Domain Errors", () => {
       // Arrange
 
       // Act
-      const error = new ToleranceExceededError("Tolerance exceeded", violations);
+      const error = new ToleranceExceededError(
+        "Tolerance exceeded",
+        violations
+      );
 
       // Assert
       expect(error).toBeInstanceOf(Error);
@@ -176,7 +188,13 @@ describe("Domain Errors", () => {
     it("should create a ToleranceExceededError via factory preserving violations", () => {
       // Arrange
       const violations = [
-        { field: "test", expected: 100, actual: 105, deviation: 5, tolerance: 1 },
+        {
+          field: "test",
+          expected: 100,
+          actual: 105,
+          deviation: 5,
+          tolerance: 1,
+        },
       ];
 
       // Act

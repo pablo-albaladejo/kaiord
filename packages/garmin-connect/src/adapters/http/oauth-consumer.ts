@@ -11,7 +11,9 @@ export const fetchOAuthConsumer = async (
   logger.debug("[SSO] Fetching OAuth consumer credentials");
   const response = await fetchFn(OAUTH_CONSUMER_URL);
   if (!response.ok) {
-    logger.error("[SSO] OAuth consumer fetch failed", { status: response.status });
+    logger.error("[SSO] OAuth consumer fetch failed", {
+      status: response.status,
+    });
     throw createServiceAuthError(
       `Failed to fetch OAuth consumer: ${response.status} ${response.statusText}`
     );

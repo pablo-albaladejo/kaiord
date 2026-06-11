@@ -21,7 +21,10 @@ const getTokenOrThrow = (reader: TokenReader, msg: string): string => {
 };
 
 const throwHttpError = (response: Response, messagePrefix: string): never => {
-  throw createServiceApiError(`${messagePrefix}: ${response.statusText}`, response.status);
+  throw createServiceApiError(
+    `${messagePrefix}: ${response.statusText}`,
+    response.status
+  );
 };
 
 export const authFetch = async (
@@ -43,6 +46,7 @@ export const authFetch = async (
   if (reader.getGeneration() === gen) await reader.refresh();
   const freshToken = getTokenOrThrow(reader, "Token unavailable after refresh");
   const retry = await sendRequest(url, init, freshToken, fetchFn);
-  if (!retry.ok) throwHttpError(retry, "API request failed after token refresh");
+  if (!retry.ok)
+    throwHttpError(retry, "API request failed after token refresh");
   return retry;
 };

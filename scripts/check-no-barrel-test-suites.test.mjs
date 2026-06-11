@@ -29,7 +29,7 @@ test("flags a test suite whose subject module is a pure re-export barrel", () =>
     writeFileSync(
       join(pkgDir, "duration.converter.ts"),
       [
-        '// Barrel kept for import ergonomics.',
+        "// Barrel kept for import ergonomics.",
         'export { convertTcxDuration } from "./tcx-to-krd.converter";',
         'export type { KrdDurationConversionResult } from "./krd-to-tcx.converter";',
         'export * from "./shared";',
@@ -79,7 +79,10 @@ test("ignores test files without a resolvable subject module", () => {
 test("scopes to *.test.{ts,tsx} excluding test-utils, e2e, stories, and test-setup", () => {
   assert.equal(isInScope("packages/tcx/src/adapters/x.test.ts"), true);
   assert.equal(isInScope("packages/spa/src/components/X.test.tsx"), true);
-  assert.equal(isInScope("packages/core/src/test-utils/fixtures.test.ts"), false);
+  assert.equal(
+    isInScope("packages/core/src/test-utils/fixtures.test.ts"),
+    false
+  );
   assert.equal(isInScope("packages/spa/e2e/editor.test.ts"), false);
   assert.equal(isInScope("packages/spa/src/Badge.stories.test.tsx"), false);
   assert.equal(isInScope("packages/spa/src/test-setup.ts"), false);
@@ -88,7 +91,9 @@ test("scopes to *.test.{ts,tsx} excluding test-utils, e2e, stories, and test-set
 
 test("classifies barrel sources correctly", () => {
   assert.equal(
-    isPureReexportBarrel('export { a } from "./a";\nexport type { B } from "./b";'),
+    isPureReexportBarrel(
+      'export { a } from "./a";\nexport type { B } from "./b";'
+    ),
     true
   );
   assert.equal(isPureReexportBarrel('export * as ns from "./ns";'), true);

@@ -1,6 +1,9 @@
 import { createGarminParsingError } from "@kaiord/core";
 
-import type { GarminTargetInfo, PaceZoneTable } from "../converters/target-types";
+import type {
+  GarminTargetInfo,
+  PaceZoneTable,
+} from "../converters/target-types";
 import { buildTargetType } from "../converters/target-types";
 import { TargetTypeId } from "../schemas/common";
 

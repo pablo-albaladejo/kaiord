@@ -34,26 +34,18 @@ describe("SchemaValidator.validate", () => {
   });
 
   it.each([
+    ["version", { type: "structured_workout", metadata: validMetadata }],
+    ["type", { version: "1.0", metadata: validMetadata }],
+    ["metadata", { version: "1.0", type: "structured_workout" }],
     [
       "version",
-      { type: "structured_workout", metadata: validMetadata },
+      {
+        version: "invalid",
+        type: "structured_workout",
+        metadata: validMetadata,
+      },
     ],
-    [
-      "type",
-      { version: "1.0", metadata: validMetadata },
-    ],
-    [
-      "metadata",
-      { version: "1.0", type: "structured_workout" },
-    ],
-    [
-      "version",
-      { version: "invalid", type: "structured_workout", metadata: validMetadata },
-    ],
-    [
-      "type",
-      { version: "1.0", type: "invalid", metadata: validMetadata },
-    ],
+    ["type", { version: "1.0", type: "invalid", metadata: validMetadata }],
     [
       "metadata.created",
       {

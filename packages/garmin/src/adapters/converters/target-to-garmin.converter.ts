@@ -1,6 +1,9 @@
 import type { Target } from "@kaiord/core";
 
-import { buildPaceTargetType, resolvePaceZone } from "../mappers/target-pace.mapper";
+import {
+  buildPaceTargetType,
+  resolvePaceZone,
+} from "../mappers/target-pace.mapper";
 import { TargetTypeId } from "../schemas/common";
 import type {
   GarminTargetInfo,
