@@ -1,4 +1,4 @@
-import type { ToastItem, ToastOptions } from "./useToast.types";
+import type { ToastItem, ToastOptions } from "./use-toast.types";
 
 /**
  * Create a variant-specific toast helper

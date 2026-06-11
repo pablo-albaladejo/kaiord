@@ -2,7 +2,7 @@ import type { Logger, TextWriter } from "@kaiord/core";
 import { createUnsupportedKrdTypeError, isHealthFileType } from "@kaiord/core";
 
 import { convertKRDToGarmin } from "./converters/krd-to-garmin.converter";
-import type { TargetMapperOptions } from "./mappers/target.converter";
+import type { TargetMapperOptions } from "./converters/target-types";
 
 export type GarminWriterConfig = TargetMapperOptions & {
   logger: Logger;

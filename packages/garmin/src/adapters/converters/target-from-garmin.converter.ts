@@ -4,7 +4,7 @@ type TargetResult = { targetType: TargetType; target: Target };
 
 const OPEN: TargetResult = { targetType: "open", target: { type: "open" } };
 
-export const mapGarminTargetToKrd = (
+export const convertGarminTargetToKrd = (
   targetTypeKey: string,
   valueOne: number | null,
   valueTwo: number | null,

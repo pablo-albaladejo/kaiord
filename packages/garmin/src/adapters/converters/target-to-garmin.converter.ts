@@ -1,7 +1,7 @@
 import type { Target } from "@kaiord/core";
 
+import { buildPaceTargetType, resolvePaceZone } from "../mappers/target-pace.mapper";
 import { TargetTypeId } from "../schemas/common";
-import { buildPaceTargetType, resolvePaceZone } from "./target-pace.mapper";
 import type {
   GarminTargetInfo,
   PaceZoneTable,
@@ -12,7 +12,7 @@ import { buildTargetType } from "./target-types";
 type Val = { unit: string; value?: number; min?: number; max?: number };
 type TT = GarminTargetInfo["targetType"];
 
-export const mapKrdTargetToGarmin = (
+export const convertKrdTargetToGarmin = (
   target: Target,
   options?: TargetMapperOptions
 ): GarminTargetInfo => {

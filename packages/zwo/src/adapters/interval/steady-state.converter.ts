@@ -2,7 +2,7 @@ import type { WorkoutStep } from "@kaiord/core";
 import { intensitySchema } from "@kaiord/core";
 
 import type { ZwiftDurationData } from "../duration/duration.mapper";
-import { mapZwiftDuration } from "../duration/duration.mapper";
+import { convertOriginalZwiftDuration } from "../duration/original-duration.converter";
 import type { ZwiftTextEvent } from "./index";
 import { extractTextEvents } from "./index";
 import { restoreSteadyStateTarget } from "./steady-state-target.helpers";
@@ -33,7 +33,7 @@ export type ZwiftSteadyStateData = {
   "kaiord:assumedFtp"?: number;
 };
 
-export const mapSteadyStateToKrd = (
+export const convertSteadyStateToKrd = (
   data: ZwiftSteadyStateData
 ): WorkoutStep => {
   const durationData: ZwiftDurationData = {
@@ -45,7 +45,7 @@ export const mapSteadyStateToKrd = (
     "kaiord:originalDurationWatts": data["kaiord:originalDurationWatts"],
   };
 
-  const duration = mapZwiftDuration(durationData);
+  const duration = convertOriginalZwiftDuration(durationData);
   const target = restoreSteadyStateTarget(data);
   const textEventData = extractTextEvents(data.textevent);
 

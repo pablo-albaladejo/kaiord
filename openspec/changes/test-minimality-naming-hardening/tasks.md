@@ -63,17 +63,17 @@
 
 ## 9. Naming hardening (design D6)
 
-- [ ] 9.1 garmin-connect: rename `s`→`state` (token-manager + helpers), `o1`/`o2`→`oauth1Token`/`oauth2Token`, `doRefresh`→`refreshTokens`, `res`→`response` (oauth-consumer), `opts`→`options` (retry, fixing the `withRetry` alias), `handleNonOk`→`throwHttpError`
-- [ ] 9.2 zwo: rename `duration.mapper.ts`→`duration.converter.ts` and `steady-state.mapper.ts`→`steady-state.converter.ts`; re-point the existing behavior tests as their co-located suites so `check-converter-has-tests` passes; rename the `orig`/`val`/`ext`/`item` locals flagged in `naming-core.md`
-- [ ] 9.3 garmin: move `mappers/target.converter.ts`→`converters/target.converter.ts` and rename `mapGarminTargetToKrd`/`mapKrdTargetToGarmin`→`convertGarminTargetToKrd`/`convertKrdTargetToGarmin`; rename `idx`/`s` locals in `flatten-segments.converter.ts`
-- [ ] 9.4 spa-editor: rename `useToast.ts`, `useAppHandlers.ts`, `useDeleteCleanup.ts`, `useKeyboardShortcuts.ts`, `useToast.helpers.ts`, `useToast.types.ts` to kebab-case and update all imports; rename `idx`→`selectedStepIndex` in `build-clipboard-handlers.ts`/`build-step-handlers.ts`
-- [ ] 9.5 cli: rename the `cfg` loop variable to `commandConfig` in `bin/register-commands.ts` and the `yargs-subcommands.ts` glue
+- [x] 9.1 garmin-connect: rename `s`→`state` (token-manager + helpers), `o1`/`o2`→`oauth1Token`/`oauth2Token`, `doRefresh`→`refreshTokens`, `res`→`response` (oauth-consumer), `opts`→`options` (retry, fixing the `withRetry` alias), `handleNonOk`→`throwHttpError`
+- [x] 9.2 zwo: rename `duration.mapper.ts`→`duration.converter.ts` and `steady-state.mapper.ts`→`steady-state.converter.ts`; re-point the existing behavior tests as their co-located suites so `check-converter-has-tests` passes; rename the `orig`/`val`/`ext`/`item` locals flagged in `naming-core.md`
+- [x] 9.3 garmin: move `mappers/target.converter.ts`→`converters/target.converter.ts` and rename `mapGarminTargetToKrd`/`mapKrdTargetToGarmin`→`convertGarminTargetToKrd`/`convertKrdTargetToGarmin`; rename `idx`/`s` locals in `flatten-segments.converter.ts`
+- [x] 9.4 spa-editor: rename `useToast.ts`, `useAppHandlers.ts`, `useDeleteCleanup.ts`, `useKeyboardShortcuts.ts`, `useToast.helpers.ts`, `useToast.types.ts` to kebab-case and update all imports; rename `idx`→`selectedStepIndex` in `build-clipboard-handlers.ts`/`build-step-handlers.ts`
+- [x] 9.5 cli: rename the `cfg` loop variable to `commandConfig` in `bin/register-commands.ts` and the `yargs-subcommands.ts` glue
 
 ## 10. Mechanical guard (specs/test-minimality)
 
-- [ ] 10.1 Write `scripts/check-no-barrel-test-suites.mjs` per the spec: subject-module resolution, pure-re-export detection, `R-NoBarrelTestSuite` stderr format, `--changed-files` mode, exit codes
-- [ ] 10.2 Write the co-located `scripts/check-no-barrel-test-suites.test.mjs` (node:test) covering the three spec scenarios plus a real-tree smoke test
-- [ ] 10.3 Wire the guard into `pnpm test:scripts` and document it in the CLAUDE.md mechanical-guards list and `scripts/README.md`
+- [x] 10.1 Write `scripts/check-no-barrel-test-suites.mjs` per the spec: subject-module resolution, pure-re-export detection, `R-NoBarrelTestSuite` stderr format, `--changed-files` mode, exit codes
+- [x] 10.2 Write the co-located `scripts/check-no-barrel-test-suites.test.mjs` (node:test) covering the three spec scenarios plus a real-tree smoke test
+- [x] 10.3 Wire the guard into `pnpm test:scripts` and document it in the CLAUDE.md mechanical-guards list and `scripts/README.md`
 
 ## 11. Verification and closure
 

@@ -9,17 +9,17 @@ export const fetchOAuthConsumer = async (
   logger: Logger
 ): Promise<OAuthConsumer> => {
   logger.debug("[SSO] Fetching OAuth consumer credentials");
-  const res = await fetchFn(OAUTH_CONSUMER_URL);
-  if (!res.ok) {
-    logger.error("[SSO] OAuth consumer fetch failed", { status: res.status });
+  const response = await fetchFn(OAUTH_CONSUMER_URL);
+  if (!response.ok) {
+    logger.error("[SSO] OAuth consumer fetch failed", { status: response.status });
     throw createServiceAuthError(
-      `Failed to fetch OAuth consumer: ${res.status} ${res.statusText}`
+      `Failed to fetch OAuth consumer: ${response.status} ${response.statusText}`
     );
   }
-  logger.debug("[SSO] OAuth consumer fetch", { status: res.status });
-  const data = (await res.json()) as {
+  logger.debug("[SSO] OAuth consumer fetch", { status: response.status });
+  const tokenJson = (await response.json()) as {
     consumer_key: string;
     consumer_secret: string;
   };
-  return { key: data.consumer_key, secret: data.consumer_secret };
+  return { key: tokenJson.consumer_key, secret: tokenJson.consumer_secret };
 };

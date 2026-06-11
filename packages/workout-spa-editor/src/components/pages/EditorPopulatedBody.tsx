@@ -2,7 +2,7 @@
  * The populated editor body (sidebar + step list) for `EditorPage`. Lives
  * in its own file so `EditorPage` stays under the per-function line cap.
  */
-import { useAppHandlers } from "../../hooks/useAppHandlers";
+import { useAppHandlers } from "../../hooks/use-app-handlers";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { KRD, Workout } from "../../types/krd";
 import type { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";

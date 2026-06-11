@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 
 describe("useKeyboardShortcuts", () => {
   describe("save shortcut", () => {

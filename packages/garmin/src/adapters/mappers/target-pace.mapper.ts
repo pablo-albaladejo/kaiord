@@ -1,8 +1,8 @@
 import { createGarminParsingError } from "@kaiord/core";
 
+import type { GarminTargetInfo, PaceZoneTable } from "../converters/target-types";
+import { buildTargetType } from "../converters/target-types";
 import { TargetTypeId } from "../schemas/common";
-import type { GarminTargetInfo, PaceZoneTable } from "./target-types";
-import { buildTargetType } from "./target-types";
 
 type Val = { unit: string; value?: number; min?: number; max?: number };
 

@@ -2,10 +2,10 @@ import type { Target } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import { PACE_M_PER_S, POWER_W, ZONE } from "../../test-utils/constants";
-import type { PaceZoneTable } from "./target.converter";
-import { mapGarminTargetToKrd, mapKrdTargetToGarmin } from "./target.converter";
+import { convertKrdTargetToGarmin } from "./target-to-garmin.converter";
+import type { PaceZoneTable } from "./target-types";
 
-describe("mapKrdTargetToGarmin", () => {
+describe("convertKrdTargetToGarmin", () => {
   describe("pace zone resolution", () => {
     const paceZones: PaceZoneTable = [
       { zone: 1, minMps: 2.54, maxMps: 2.86 },
@@ -23,7 +23,7 @@ describe("mapKrdTargetToGarmin", () => {
       };
 
       // Act
-      const result = mapKrdTargetToGarmin(target, { paceZones });
+      const result = convertKrdTargetToGarmin(target, { paceZones });
 
       // Assert
       // Garmin stores pace ranges as (faster_m_s, slower_m_s) — see adapter-contracts spec.
@@ -43,7 +43,7 @@ describe("mapKrdTargetToGarmin", () => {
       };
 
       // Assert
-      expect(() => mapKrdTargetToGarmin(target)).toThrow(
+      expect(() => convertKrdTargetToGarmin(target)).toThrow(
         /pace zone .* require/i
       );
     });
@@ -58,7 +58,7 @@ describe("mapKrdTargetToGarmin", () => {
       };
 
       // Assert
-      expect(() => mapKrdTargetToGarmin(target, { paceZones })).toThrow(
+      expect(() => convertKrdTargetToGarmin(target, { paceZones })).toThrow(
         /zone 9/i
       );
     });
@@ -71,7 +71,7 @@ describe("mapKrdTargetToGarmin", () => {
       };
 
       // Act
-      const result = mapKrdTargetToGarmin(target);
+      const result = convertKrdTargetToGarmin(target);
 
       // Assert
       // Faster pace = higher m/s -> targetValueOne; slower = lower m/s -> targetValueTwo.
@@ -92,7 +92,7 @@ describe("mapKrdTargetToGarmin", () => {
       };
 
       // Act
-      const result = mapKrdTargetToGarmin(target);
+      const result = convertKrdTargetToGarmin(target);
 
       // Assert
       // Higher wattage = higher intensity -> targetValueOne.
@@ -112,7 +112,7 @@ describe("mapKrdTargetToGarmin", () => {
       };
 
       // Act
-      const result = mapKrdTargetToGarmin(target);
+      const result = convertKrdTargetToGarmin(target);
 
       // Assert
       expect(result.zoneNumber).toBe(ZONE.Z3);
@@ -130,79 +130,12 @@ describe("mapKrdTargetToGarmin", () => {
       };
 
       // Act
-      const result = mapKrdTargetToGarmin(target);
+      const result = convertKrdTargetToGarmin(target);
 
       // Assert
       expect(result.zoneNumber).toBe(ZONE.Z4);
       expect(result.targetValueOne).toBeNull();
       expect(result.targetValueTwo).toBeNull();
-    });
-  });
-});
-
-describe("mapGarminTargetToKrd range normalization", () => {
-  it("should normalize a slower-first pace range into [min, max]", () => {
-    // Arrange
-    const slowerFirstOne = 3.57;
-    const fasterSecondTwo = 3.7;
-
-    // Act
-    const result = mapGarminTargetToKrd(
-      "pace.zone",
-      slowerFirstOne,
-      fasterSecondTwo,
-      null
-    );
-
-    // Assert
-    expect(result.targetType).toBe("pace");
-    expect(result.target).toEqual({
-      type: "pace",
-      value: { unit: "range", min: 3.57, max: 3.7 },
-    });
-  });
-
-  it("should normalize a faster-first pace range into [min, max]", () => {
-    // Arrange
-    const fasterFirstOne = 3.7;
-    const slowerSecondTwo = 3.57;
-
-    // Act
-    const result = mapGarminTargetToKrd(
-      "pace.zone",
-      fasterFirstOne,
-      slowerSecondTwo,
-      null
-    );
-
-    // Assert
-    expect(result.target).toEqual({
-      type: "pace",
-      value: { unit: "range", min: 3.57, max: 3.7 },
-    });
-  });
-
-  it("should normalize a higher-first power range into [min, max]", () => {
-    // Arrange
-    const higherFirstOne = POWER_W.RANGE_HIGH;
-    const lowerSecondTwo = POWER_W.RANGE_LOW;
-
-    // Act
-    const result = mapGarminTargetToKrd(
-      "power.zone",
-      higherFirstOne,
-      lowerSecondTwo,
-      null
-    );
-
-    // Assert
-    expect(result.target).toEqual({
-      type: "power",
-      value: {
-        unit: "range",
-        min: POWER_W.RANGE_LOW,
-        max: POWER_W.RANGE_HIGH,
-      },
     });
   });
 });

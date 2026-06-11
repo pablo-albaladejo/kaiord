@@ -8,7 +8,7 @@ import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as store from "../store";
-import { useDeleteCleanup } from "./useDeleteCleanup";
+import { useDeleteCleanup } from "./use-delete-cleanup";
 
 const THREE_INTERVAL_TICKS_MS = 3_000;
 const TWO_INTERVAL_TICKS_MS = 2_000;

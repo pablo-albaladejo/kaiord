@@ -1,7 +1,7 @@
 import type { Intensity, WorkoutStep } from "@kaiord/core";
 import { intensitySchema } from "@kaiord/core";
 
-import { mapZwiftDuration } from "../duration/duration.mapper";
+import { convertOriginalZwiftDuration } from "../duration/original-duration.converter";
 import type { ZwiftTextEvent } from "./index";
 import { extractTextEvents } from "./index";
 import type { ZwiftRampData } from "./ramp-helpers";
@@ -30,7 +30,7 @@ export const mapRampToKrd = (
   data: ZwiftRampData,
   intensity: Intensity = intensitySchema.enum.active
 ): WorkoutStep => {
-  const duration = mapZwiftDuration(buildRampDurationData(data));
+  const duration = convertOriginalZwiftDuration(buildRampDurationData(data));
   const target = resolveRampTarget(data);
   const textEventData = extractTextEvents(
     data.textevent as ZwiftTextEvent | Array<ZwiftTextEvent> | undefined

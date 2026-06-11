@@ -21,16 +21,16 @@ export const buildStepHandlers = (
   hasClipboard: () => boolean
 ): StepHandlers => ({
   onMoveStepUp: () => {
-    const idx = deps.stepIndex();
-    if (idx === null || idx <= 0) return false;
-    deps.reorderStep(idx, idx - 1);
+    const selectedStepIndex = deps.stepIndex();
+    if (selectedStepIndex === null || selectedStepIndex <= 0) return false;
+    deps.reorderStep(selectedStepIndex, selectedStepIndex - 1);
     return true;
   },
   onMoveStepDown: () => {
-    const idx = deps.stepIndex();
-    if (idx === null || !deps.workout) return false;
-    if (idx >= deps.workout.steps.length - 1) return false;
-    deps.reorderStep(idx, idx + 1);
+    const selectedStepIndex = deps.stepIndex();
+    if (selectedStepIndex === null || !deps.workout) return false;
+    if (selectedStepIndex >= deps.workout.steps.length - 1) return false;
+    deps.reorderStep(selectedStepIndex, selectedStepIndex + 1);
     return true;
   },
   ...buildClipboardHandlers(deps, hasClipboard),

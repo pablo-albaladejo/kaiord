@@ -7,7 +7,7 @@ import {
   TOAST_ZONES_SHAPE_MISMATCH,
   TOAST_ZONES_UNSUPPORTED,
 } from "../../application/coaching/sync-zones";
-import type { useToast } from "../../hooks/useToast";
+import type { useToast } from "../../hooks/use-toast";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
   ConflictItem,

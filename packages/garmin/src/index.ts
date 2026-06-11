@@ -5,15 +5,15 @@
 import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createConsoleLogger } from "@kaiord/core";
 
+import type { PaceZoneTable } from "./adapters/converters/target-types";
 import { createGarminReader as createGarminReaderImpl } from "./adapters/garmin-reader";
 import { createGarminWriter as createGarminWriterImpl } from "./adapters/garmin-writer";
-import type { PaceZoneTable } from "./adapters/mappers/target.converter";
 import { isLogger } from "./adapters/utils/is-logger";
 
 export type {
   PaceZoneEntry,
   PaceZoneTable,
-} from "./adapters/mappers/target.converter";
+} from "./adapters/converters/target-types";
 
 export type GarminWriterOptions = {
   logger?: Logger;

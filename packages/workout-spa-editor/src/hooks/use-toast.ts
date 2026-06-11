@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
-import { createToastItem } from "./useToast.helpers";
-import type { ToastItem, ToastOptions } from "./useToast.types";
+import { createToastItem } from "./use-toast.helpers";
+import type { ToastItem, ToastOptions } from "./use-toast.types";
 
 export type { ToastItem, ToastOptions };
 

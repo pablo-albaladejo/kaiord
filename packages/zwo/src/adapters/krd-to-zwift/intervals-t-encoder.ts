@@ -42,19 +42,19 @@ const encodePowerTargets = (
 
 const resolveStepCadence = (step: WorkoutStep): number | undefined => {
   if (step.target.type === "cadence") {
-    const val = step.target.value;
-    if (val.unit === "rpm") return val.value as number;
+    const cadenceValue = step.target.value;
+    if (cadenceValue.unit === "rpm") return cadenceValue.value as number;
     if (
-      val.unit === "range" &&
-      val.min !== undefined &&
-      val.max !== undefined
+      cadenceValue.unit === "range" &&
+      cadenceValue.min !== undefined &&
+      cadenceValue.max !== undefined
     ) {
-      return Math.round((val.min + val.max) / 2);
+      return Math.round((cadenceValue.min + cadenceValue.max) / 2);
     }
   }
   const zwift = step.extensions ? step.extensions.zwift : undefined;
-  const ext = zwift as Record<string, unknown> | undefined;
-  return ext ? (ext.cadence as number | undefined) : undefined;
+  const extensions = zwift as Record<string, unknown> | undefined;
+  return extensions ? (extensions.cadence as number | undefined) : undefined;
 };
 
 const encodeCadenceTargets = (

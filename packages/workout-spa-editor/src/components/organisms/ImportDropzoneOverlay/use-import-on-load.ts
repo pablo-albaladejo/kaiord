@@ -18,7 +18,7 @@ import {
 } from "../../../application/health/import-health-fit-file.use-case";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
-import { useAppHandlers } from "../../../hooks/useAppHandlers";
+import { useAppHandlers } from "../../../hooks/use-app-handlers";
 import { parseBackOrigin } from "../../../routing/back-origin";
 import { withOrigin } from "../../../routing/with-origin";
 import type { KRD } from "../../../types/krd";
