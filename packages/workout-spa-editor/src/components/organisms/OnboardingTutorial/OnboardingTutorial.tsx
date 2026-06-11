@@ -38,8 +38,10 @@ export const OnboardingTutorial: React.FC<OnboardingTutorialProps> = ({
     onComplete,
   });
 
-  const step = steps[currentStep]!;
+  const step = steps[currentStep];
   const highlightedElement = useElementHighlight(open, step?.targetSelector);
+
+  if (!step) return null;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

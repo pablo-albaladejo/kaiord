@@ -21,7 +21,8 @@ export function drawWorkoutBars(
 
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
-    const duration = durations[i]!;
+    const duration = durations[i];
+    if (duration === undefined) continue;
     const barWidth = (duration / totalDuration) * availableWidth;
     const color = getStepColor(step);
 

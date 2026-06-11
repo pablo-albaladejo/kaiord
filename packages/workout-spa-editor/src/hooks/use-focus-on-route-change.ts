@@ -90,7 +90,7 @@ export function useFocusOnRouteChange(): void {
         cleanup();
         // Fallback per spec — warn loudly, focus body so the document
         // still has a sensible focus owner.
-        logger.warn(FALLBACK_WARN);
+        logger.warn(FALLBACK_WARN, { pathname });
         document.body.focus?.();
       }, OBSERVE_TIMEOUT_MS);
     });

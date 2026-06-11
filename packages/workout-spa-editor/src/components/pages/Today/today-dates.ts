@@ -34,10 +34,16 @@ export function toIsoDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+const finitePart = (value: number | undefined, fallback: number): number =>
+  value !== undefined && Number.isFinite(value) ? value : fallback;
+
 export function isoToLocalDate(iso: string): Date {
-  const parts = iso.split("-").map(Number);
-  const [year, month, day] = parts;
-  return new Date(year ?? 0, (month ?? 1) - 1, day ?? 1);
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(
+    finitePart(year, 0),
+    finitePart(month, 1) - 1,
+    finitePart(day, 1)
+  );
 }
 
 /** Adds `delta` days to a `YYYY-MM-DD` via the local constructor (DST-safe). */
