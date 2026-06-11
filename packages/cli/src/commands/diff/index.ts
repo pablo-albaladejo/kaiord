@@ -3,7 +3,7 @@ import { formatError } from "../../utils/error-formatter.js";
 import { ExitCode } from "../../utils/exit-codes.js";
 import { createLogger } from "../../utils/logger-factory.js";
 import { computeDiff, printDiffResult } from "./diff-executor";
-import { diffOptionsSchema, type DiffOptions } from "./types";
+import { type DiffOptions, diffOptionsSchema } from "./types";
 
 export type { DiffOptions } from "./types";
 

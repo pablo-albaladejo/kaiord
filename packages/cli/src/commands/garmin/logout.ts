@@ -1,5 +1,6 @@
 import type { Logger } from "@kaiord/core";
 import { ServiceAuthError } from "@kaiord/core";
+
 import { ExitCode } from "../../utils/exit-codes";
 import { createCliGarminClient } from "./client-factory";
 

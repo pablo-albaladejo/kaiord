@@ -102,7 +102,7 @@ export const useWorkoutListDnd = (
 
   // Get the active item for DragOverlay
   const activeItem = activeId
-    ? workout.steps[sortableIds.indexOf(activeId)]
+    ? (workout.steps[sortableIds.indexOf(activeId)] ?? null)
     : null;
 
   return {

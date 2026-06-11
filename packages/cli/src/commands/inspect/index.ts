@@ -1,7 +1,5 @@
 import ora from "ora";
-import { buildInspectSummary } from "./build-summary.js";
-import { handleInspectError } from "./handle-error.js";
-import { inspectOptionsSchema } from "./types.js";
+
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -9,7 +7,10 @@ import {
 import { ExitCode } from "../../utils/exit-codes.js";
 import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import { createLogger } from "../../utils/logger-factory.js";
+import { buildInspectSummary } from "./build-summary.js";
+import { handleInspectError } from "./handle-error.js";
 import type { InspectOptions } from "./types.js";
+import { inspectOptionsSchema } from "./types.js";
 
 const getLogLevel = (opts: InspectOptions): "debug" | "error" | "info" => {
   if (opts.verbose) return "debug";

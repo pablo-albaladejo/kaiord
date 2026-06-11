@@ -6,8 +6,8 @@ import { formatErrorAsPretty } from "./error-formatter-pretty";
 
 // Re-export violation formatters for backwards compatibility
 export {
-  formatValidationErrors,
   formatToleranceViolations,
+  formatValidationErrors,
 } from "./format-violations";
 
 type FormatOptions = {

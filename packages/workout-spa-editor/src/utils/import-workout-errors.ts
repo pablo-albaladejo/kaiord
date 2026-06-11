@@ -20,19 +20,13 @@ const fmtValidation = (
   errors: Array<{ field: string; message: string }>
 ): string => errors.map((e) => `${e.field}: ${e.message}`).join(", ");
 
-const parsingErrorMap: Record<string, new (...args: never[]) => Error> = {
-  FitParsingError: FitParsingError,
-  TcxParsingError: TcxParsingError,
-  ZwiftParsingError: ZwiftParsingError,
-  GarminParsingError: GarminParsingError,
-};
-
-const formatLabel: Record<string, string> = {
-  FitParsingError: "FIT",
-  TcxParsingError: "TCX",
-  ZwiftParsingError: "ZWO",
-  GarminParsingError: "GCN",
-};
+const parsingErrors: ReadonlyArray<[new (...args: never[]) => Error, string]> =
+  [
+    [FitParsingError, "FIT"],
+    [TcxParsingError, "TCX"],
+    [ZwiftParsingError, "ZWO"],
+    [GarminParsingError, "GCN"],
+  ];
 
 export const transformError = (
   error: unknown,
@@ -62,10 +56,10 @@ export const transformError = (
       error
     );
   }
-  for (const [name, label] of Object.entries(formatLabel)) {
-    if (error instanceof parsingErrorMap[name]) {
+  for (const [cls, label] of parsingErrors) {
+    if (error instanceof cls) {
       return new ImportError(
-        `Failed to parse ${label} file: ${(error as Error).message}`,
+        `Failed to parse ${label} file: ${error.message}`,
         format,
         error
       );

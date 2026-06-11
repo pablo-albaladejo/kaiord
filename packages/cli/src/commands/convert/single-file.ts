@@ -1,5 +1,6 @@
 import type { Logger } from "@kaiord/core";
 import ora from "ora";
+
 import { writeFile } from "../../utils/file-handler";
 import type { FileFormat } from "../../utils/format-detector";
 import { convertFromKrd, loadFileAsKrd } from "../../utils/krd-converter";
@@ -7,24 +8,26 @@ import { resolveSingleFileFormats } from "./single-file-formats";
 import { reportConversionSuccess } from "./single-file-reporter";
 import type { ValidatedConvertOptions } from "./types";
 
-/**
- * Convert a single file from one format to another
- */
-export const convertSingleFile = async (
-  inputFile: string,
-  outputFile: string,
-  inputFormat: string,
-  outputFormat: string,
-  logger: Logger
-): Promise<void> => {
-  const krd = await loadFileAsKrd(inputFile, inputFormat, logger);
-  const outputData = await convertFromKrd(krd, outputFormat, logger);
-  await writeFile(outputFile, outputData, outputFormat as FileFormat);
+type ConversionParams = {
+  inputFile: string;
+  outputFile: string;
+  inputFormat: string;
+  outputFormat: string;
 };
 
-/**
- * Execute single file conversion mode
- */
+export const convertSingleFile = async (
+  params: ConversionParams,
+  logger: Logger
+): Promise<void> => {
+  const krd = await loadFileAsKrd(params.inputFile, params.inputFormat, logger);
+  const outputData = await convertFromKrd(krd, params.outputFormat, logger);
+  await writeFile(
+    params.outputFile,
+    outputData,
+    params.outputFormat as FileFormat
+  );
+};
+
 export const executeSingleFileConversion = async (
   options: ValidatedConvertOptions,
   logger: Logger
@@ -44,10 +47,12 @@ export const executeSingleFileConversion = async (
 
   try {
     await convertSingleFile(
-      options.input,
-      output,
-      inputFormat,
-      outputFormat,
+      {
+        inputFile: options.input,
+        outputFile: output,
+        inputFormat,
+        outputFormat,
+      },
       logger
     );
 

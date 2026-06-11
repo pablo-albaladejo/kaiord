@@ -3,6 +3,7 @@
  */
 import { mkdir } from "fs/promises";
 import { dirname } from "path";
+
 import { isNodeSystemError } from "./fs-errors";
 
 /**
@@ -17,14 +18,17 @@ export const createOutputDirectory = async (path: string): Promise<void> => {
   } catch (error) {
     if (isNodeSystemError(error)) {
       if (error.code === "EACCES") {
-        throw new Error(`Permission denied creating directory: ${dir}`);
+        throw new Error(`Permission denied creating directory: ${dir}`, {
+          cause: error,
+        });
       }
       if (error.code === "ENOTDIR" || error.code === "EEXIST") {
         throw new Error(
-          `Cannot create directory (path exists as file): ${dir}`
+          `Cannot create directory (path exists as file): ${dir}`,
+          { cause: error }
         );
       }
     }
-    throw new Error(`Failed to create directory: ${dir}`);
+    throw new Error(`Failed to create directory: ${dir}`, { cause: error });
   }
 };

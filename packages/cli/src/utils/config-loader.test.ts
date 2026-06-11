@@ -1,6 +1,7 @@
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { configSchema, loadConfig, mergeWithConfig } from "./config-loader";
 
 // Mock fs/promises

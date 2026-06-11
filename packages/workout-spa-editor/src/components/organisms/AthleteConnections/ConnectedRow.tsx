@@ -28,6 +28,7 @@ export function ConnectedRow(props: ConnectedRowProps) {
 
   const onToggleFlow = (flowIndex: number, next: boolean) => {
     const flow = config.flows[flowIndex];
+    if (!flow) return;
     void toggleFlow({ profileId, bridgeId, ...flow, next });
   };
 

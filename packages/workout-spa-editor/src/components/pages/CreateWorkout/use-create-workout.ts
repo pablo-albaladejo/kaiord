@@ -20,13 +20,13 @@ const pickProvider = (
   providers: LlmProviderConfig[] | undefined
 ): LlmProviderConfig | null => {
   if (!providers || providers.length === 0) return null;
-  return providers.find((p) => p.isDefault) ?? providers[0];
+  return providers.find((p) => p.isDefault) ?? providers[0] ?? null;
 };
 
 export function useCreateWorkout() {
   const [phase, setPhase] = useState<CreatePhase>("input");
   const [promptText, setPromptText] = useState("");
-  const [sport, setSport] = useState<ActiveSport>(ATHLETE_SPORTS[0].value);
+  const [sport, setSport] = useState<ActiveSport>(ATHLETE_SPORTS[0]!.value);
   const [generatedKrd, setGeneratedKrd] = useState<KRD | null>(null);
 
   const active = useActiveProfileLive();

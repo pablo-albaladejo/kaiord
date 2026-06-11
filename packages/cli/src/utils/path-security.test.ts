@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { validatePathSecurity } from "./path-security";
 
 describe("validatePathSecurity", () => {

@@ -1,5 +1,6 @@
 import type { Logger } from "@kaiord/core";
 import { basename, join } from "path";
+
 import { detectFormat } from "../../utils/format-detector";
 import { convertSingleFile } from "./single-file";
 import type { ConversionResult, ValidatedConvertOptions } from "./types";
@@ -51,10 +52,7 @@ export const convertBatchFile = async (
     const outputFile = join(options.outputDir!, outputFileName);
 
     await convertSingleFile(
-      file,
-      outputFile,
-      inputFormat,
-      outputFormat,
+      { inputFile: file, outputFile, inputFormat, outputFormat },
       logger
     );
     return { success: true, inputFile: file, outputFile };

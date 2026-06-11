@@ -5,6 +5,7 @@ import {
   defaultFocusTelemetry,
   type FocusTelemetry,
 } from "../store/providers/focus-telemetry";
+import { logger } from "../utils/logger";
 
 export const FocusTelemetryContext = createContext<FocusTelemetry>(
   defaultFocusTelemetry
@@ -28,7 +29,7 @@ export function FocusTelemetryProvider({
   const prevRef = useRef<FocusTelemetry | null>(null);
   if (import.meta.env.DEV) {
     if (prevRef.current !== null && prevRef.current !== value) {
-      console.warn(
+      logger.warn(
         "[FocusTelemetry] provider value changed reference — wrap in useCallback to preserve context memoization"
       );
     }

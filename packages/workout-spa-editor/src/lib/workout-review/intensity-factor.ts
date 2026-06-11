@@ -8,7 +8,7 @@ const PER_KM_METERS = 1000;
 const MAX_ZONE_INDEX = 4;
 
 const zoneMidpoint = (zone: number): number =>
-  ZONE_MIDPOINTS[Math.min(Math.max(zone, 1), MAX_ZONE_INDEX + 1) - 1];
+  ZONE_MIDPOINTS[Math.min(Math.max(zone, 1), MAX_ZONE_INDEX + 1) - 1]!;
 
 function powerFactor(
   value: Target & { type: "power" },

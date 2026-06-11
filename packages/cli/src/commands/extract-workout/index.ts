@@ -1,7 +1,6 @@
 import { extractWorkout } from "@kaiord/core";
 import ora from "ora";
-import { handleExtractWorkoutError } from "./handle-error.js";
-import { extractWorkoutOptionsSchema } from "./types.js";
+
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -9,7 +8,9 @@ import {
 import { ExitCode } from "../../utils/exit-codes.js";
 import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import { createLogger } from "../../utils/logger-factory.js";
+import { handleExtractWorkoutError } from "./handle-error.js";
 import type { ExtractWorkoutOptions } from "./types.js";
+import { extractWorkoutOptionsSchema } from "./types.js";
 
 const resolveOptions = async (
   options: unknown

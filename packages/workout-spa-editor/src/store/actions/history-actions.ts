@@ -27,7 +27,7 @@ const focusForHistoryIndex = (
   state: WorkoutState,
   newIndex: number
 ): ReturnType<typeof preservedSelectionTarget> => {
-  const entry = state.undoHistory[newIndex];
+  const entry = state.undoHistory[newIndex]!;
   const workout = entry?.workout?.extensions?.structured_workout as
     | Workout
     | undefined;
@@ -58,7 +58,7 @@ export const createUndoAction = (
   if (state.historyIndex > 0) {
     const newIndex = state.historyIndex - 1;
     return {
-      currentWorkout: state.undoHistory[newIndex].workout,
+      currentWorkout: state.undoHistory[newIndex]!.workout,
       historyIndex: newIndex,
       pendingFocusTarget: focusForUndo(state, newIndex),
     };
@@ -72,7 +72,7 @@ export const createRedoAction = (
   if (state.historyIndex < state.undoHistory.length - 1) {
     const newIndex = state.historyIndex + 1;
     return {
-      currentWorkout: state.undoHistory[newIndex].workout,
+      currentWorkout: state.undoHistory[newIndex]!.workout,
       historyIndex: newIndex,
       pendingFocusTarget: focusForHistoryIndex(state, newIndex),
     };

@@ -6,9 +6,22 @@ import {
 } from "@kaiord/core";
 import { createFitReader, createFitWriter } from "@kaiord/fit";
 import { readFile as fsReadFile } from "fs/promises";
+
 import { readFile } from "../../utils/file-handler.js";
 import { detectFormat } from "../../utils/format-detector.js";
 import type { ValidateOptions } from "./types";
+
+const loadToleranceConfig = async (
+  configPath: string,
+  logger: Logger
+): Promise<ToleranceConfig> => {
+  logger.debug("Loading custom tolerance config", { path: configPath });
+  const configContent = await fsReadFile(configPath, "utf-8");
+  const configJson = JSON.parse(configContent);
+  const toleranceConfig = toleranceConfigSchema.parse(configJson);
+  logger.debug("Custom tolerance config loaded", { config: toleranceConfig });
+  return toleranceConfig;
+};
 
 export const executeValidation = async (
   opts: ValidateOptions,
@@ -32,21 +45,11 @@ export const executeValidation = async (
     throw new Error("Expected binary data for FIT file");
   }
 
-  let toleranceConfig: ToleranceConfig | undefined;
-  if (opts.toleranceConfig) {
-    logger.debug("Loading custom tolerance config", {
-      path: opts.toleranceConfig,
-    });
-    const configContent = await fsReadFile(opts.toleranceConfig, "utf-8");
-    const configJson = JSON.parse(configContent);
-    toleranceConfig = toleranceConfigSchema.parse(configJson);
-    logger.debug("Custom tolerance config loaded", {
-      config: toleranceConfig,
-    });
-  }
+  const toleranceConfig = opts.toleranceConfig
+    ? await loadToleranceConfig(opts.toleranceConfig, logger)
+    : undefined;
 
   const toleranceChecker = createToleranceChecker(toleranceConfig);
-
   const roundTripValidator = validateRoundTrip(
     createFitReader(logger),
     createFitWriter(logger),
@@ -55,7 +58,5 @@ export const executeValidation = async (
   );
 
   logger.info("Starting round-trip validation", { file: opts.input });
-  return roundTripValidator.validateFitToKrdToFit({
-    originalFit: inputData,
-  });
+  return roundTripValidator.validateFitToKrdToFit({ originalFit: inputData });
 };

@@ -22,7 +22,8 @@ export function timeInZone(
     if (dur === null) continue;
     const zone = classifyTargetZone(step.target, thresholds);
     if (zone === null) continue;
-    seconds[zone - 1] += dur;
+    const idx = zone - 1;
+    seconds[idx] = (seconds[idx] ?? 0) + dur;
     total += dur;
   }
 

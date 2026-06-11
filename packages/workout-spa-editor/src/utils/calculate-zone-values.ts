@@ -26,12 +26,13 @@ export const calculateZoneValues = (
 ): Array<ZoneValue> => {
   const zones: Array<ZoneValue> = [];
   for (let i = 0; i < method.defaults.length; i++) {
-    const def = method.defaults[i];
+    const def = method.defaults[i]!;
     const max = Math.round((threshold * def.maxPercent) / 100);
+    const prev = zones[i - 1];
     const min =
-      i === 0
+      i === 0 || prev === undefined
         ? Math.round((threshold * def.minPercent) / 100)
-        : zones[i - 1].max + 1;
+        : prev.max + 1;
     zones.push({ zone: i + 1, name: def.name, min, max });
   }
   return zones;

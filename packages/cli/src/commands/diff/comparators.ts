@@ -49,7 +49,6 @@ export const compareMetadata = (
   return differences;
 };
 
-// Re-export compareSteps from dedicated module
 export { compareSteps } from "./compare-steps";
 
 /**

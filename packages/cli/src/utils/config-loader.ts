@@ -2,6 +2,7 @@ import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import { z } from "zod";
+
 import { fileFormatSchema } from "./format-detector.js";
 
 /**
