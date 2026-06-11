@@ -2,9 +2,9 @@
 
 ## 1. Evidence snapshot and preconditions
 
-- [ ] 1.1 Copy the seven audit reports from `/tmp/audit-*.md` into `openspec/changes/test-minimality-naming-hardening/audit/` as `core.md`, `fit.md`, `adapters.md`, `cli-mcp.md`, `spa.md`, `naming-core.md`, `naming-spa.md`
-- [ ] 1.2 Record baseline coverage per package (`pnpm -r test` with coverage) into `audit/coverage-baseline.md` for the non-decreasing-coverage gate (design D2)
-- [ ] 1.3 Verify via `packages/tcx/src/index.ts` and grep that none of the orphan tcx converter modules is re-exported from the package entry point; if any is, stop and re-scope per design D3
+- [x] 1.1 Copy the seven audit reports from `/tmp/audit-*.md` into `openspec/changes/test-minimality-naming-hardening/audit/` as `core.md`, `fit.md`, `adapters.md`, `cli-mcp.md`, `spa.md`, `naming-core.md`, `naming-spa.md`
+- [x] 1.2 Record baseline coverage per package (`pnpm -r test` with coverage) into `audit/coverage-baseline.md` for the non-decreasing-coverage gate (design D2)
+- [x] 1.3 Verify via `packages/tcx/src/index.ts` and grep that none of the orphan tcx converter modules is re-exported from the package entry point; if any is, stop and re-scope per design D3
 
 ## 2. Fill the genuine gaps (before any deletion — design D2)
 
@@ -16,7 +16,7 @@
 
 ## 3. TCX pipeline resolution (specs/adapter-contracts delta)
 
-- [ ] 3.1 Resolve the running-cadence semantics (doubling vs pass-through) from the TCX XSD and Garmin-exported fixtures; record the decision in `design.md` Open Questions (design D4)
+- [x] 3.1 Resolve the running-cadence semantics (doubling vs pass-through) from the TCX XSD and Garmin-exported fixtures; record the decision in `design.md` Open Questions (design D4)
 - [ ] 3.2 Port the confirmed cadence behavior and the canonical pace-unit handling to `workout/target-to-tcx.converter.ts`, ensuring writer/reader agreement
 - [ ] 3.3 Add round-trip tests on the wired path: running cadence ±1 rpm, cycling cadence ±1 rpm, pace target with consistent unit (the three positive delta scenarios)
 - [ ] 3.4 Delete the orphan chain — `target/{krd-to-tcx,pace,cadence,heart-rate}.converter.ts`, `duration/{tcx-to-krd,standard-duration,extended-duration}.converter.ts`, their barrels and test suites — after confirming every unique assertion is ported (delta scenario: orphaned chain rejected)
