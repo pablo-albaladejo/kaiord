@@ -185,3 +185,21 @@ describe("convertSteadyStateToKrd", () => {
     });
   });
 });
+
+describe("convertSteadyStateToKrd power-unit extension edge", () => {
+  it("should ignore a watts power-unit marker without an original watts value", () => {
+    // Arrange
+    const data = {
+      Duration: 300,
+      Power: 0.75,
+      "kaiord:powerUnit": "watts",
+    };
+
+    // Act
+    const result = convertSteadyStateToKrd(data, 0);
+
+    // Assert
+    expect(result.target.type).toBe("power");
+    expect(result.target).not.toMatchObject({ value: { unit: "watts" } });
+  });
+});

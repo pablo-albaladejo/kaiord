@@ -77,7 +77,7 @@
 
 ## 11. Verification and closure
 
-- [ ] 11.1 Run `pnpm -r test && pnpm -r build && pnpm lint:fix` to green; confirm per-package coverage is non-decreasing vs `audit/coverage-baseline.md`
-- [ ] 11.2 Run `pnpm lint:specs` over the new/delta specs
-- [ ] 11.3 Add changesets: `fix(tcx)` if task 3.2 changed wired-path output, `patch` for other published packages with source changes, none for test-only packages
-- [ ] 11.4 Record final deleted/collapsed test counts per package in `audit/result-summary.md` for the archive
+- [x] 11.1 Run `pnpm -r test && pnpm -r build && pnpm lint:fix` to green; confirm per-package coverage is non-decreasing vs `audit/coverage-baseline.md`
+- [x] 11.2 Run `pnpm lint:specs` over the new/delta specs
+- [x] 11.3 Add changesets: `fix(tcx)` if task 3.2 changed wired-path output, `patch` for other published packages with source changes, none for test-only packages
+- [x] 11.4 Record final deleted/collapsed test counts per package in `audit/result-summary.md` for the archive

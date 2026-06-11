@@ -11,6 +11,8 @@ import {
 } from "../../test-utils/index.js";
 import { checkField } from "./check-field";
 import { compareLaps } from "./compare-laps";
+import { compareRecords } from "./compare-records";
+import { compareSessions } from "./compare-sessions";
 
 const LAP_ELAPSED_FIRST_SEC = 100;
 const LAP_ELAPSED_SECOND_SEC = 200;
@@ -217,5 +219,152 @@ describe("compareLaps", () => {
 
     // Assert
     expect(violations).toStrictEqual([]);
+  });
+});
+
+describe("compareSessions", () => {
+  it("should surface a session power drift beyond tolerance", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const krd1: KRD = {
+      version: "1.0",
+      type: "recorded_activity",
+      metadata: { created: FIRST_LAP_START, sport: "cycling" },
+      sessions: [{ totalElapsedTime: 3600, avgPower: 250 }],
+    };
+    const krd2: KRD = {
+      ...krd1,
+      sessions: [{ totalElapsedTime: 3600, avgPower: 260 }],
+    };
+
+    // Act
+    const violations = compareSessions(krd1, krd2, checker);
+
+    // Assert
+    expect(violations).toHaveLength(1);
+    expect(violations[0].field).toBe("sessions[0].avgPower");
+  });
+
+  it("should report nothing when one side has no sessions", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const krd1: KRD = {
+      version: "1.0",
+      type: "recorded_activity",
+      metadata: { created: FIRST_LAP_START, sport: "cycling" },
+      sessions: [{ totalElapsedTime: 3600 }],
+    };
+    const krd2: KRD = { ...krd1, sessions: undefined };
+
+    // Act
+    const violations = compareSessions(krd1, krd2, checker);
+
+    // Assert
+    expect(violations).toStrictEqual([]);
+  });
+});
+
+describe("compareRecords", () => {
+  it("should surface a record heart-rate drift beyond tolerance", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const krd1: KRD = {
+      version: "1.0",
+      type: "recorded_activity",
+      metadata: { created: FIRST_LAP_START, sport: "running" },
+      records: [{ timestamp: FIRST_LAP_START, heartRate: HR_EXPECTED }],
+    };
+    const krd2: KRD = {
+      ...krd1,
+      records: [{ timestamp: FIRST_LAP_START, heartRate: HR_ACTUAL_HIGH }],
+    };
+
+    // Act
+    const violations = compareRecords(krd1, krd2, checker);
+
+    // Assert
+    expect(violations).toHaveLength(1);
+    expect(violations[0].field).toBe("records[0].heartRate");
+  });
+
+  it("should report nothing when one side has no records", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const krd1: KRD = {
+      version: "1.0",
+      type: "recorded_activity",
+      metadata: { created: FIRST_LAP_START, sport: "running" },
+      records: [{ timestamp: FIRST_LAP_START, heartRate: HR_EXPECTED }],
+    };
+    const krd2: KRD = { ...krd1, records: undefined };
+
+    // Act
+    const violations = compareRecords(krd1, krd2, checker);
+
+    // Assert
+    expect(violations).toStrictEqual([]);
+  });
+});
+
+describe("entity comparison with absent or sparse collections", () => {
+  const baseKrd: KRD = {
+    version: "1.0",
+    type: "recorded_activity",
+    metadata: { created: FIRST_LAP_START, sport: "running" },
+  };
+
+  it("should report nothing when the first KRD has no laps", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const krd2: KRD = {
+      ...baseKrd,
+      laps: [{ startTime: FIRST_LAP_START, totalElapsedTime: 100 }],
+    };
+
+    // Act
+    const violations = compareLaps(baseKrd, krd2, checker);
+
+    // Assert
+    expect(violations).toStrictEqual([]);
+  });
+
+  it("should report nothing when the first KRD has no sessions or records", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const krd2: KRD = {
+      ...baseKrd,
+      sessions: [{ totalElapsedTime: 3600 }],
+      records: [{ timestamp: FIRST_LAP_START, heartRate: HR_EXPECTED }],
+    };
+
+    // Act
+    const sessionViolations = compareSessions(baseKrd, krd2, checker);
+    const recordViolations = compareRecords(baseKrd, krd2, checker);
+
+    // Assert
+    expect(sessionViolations).toStrictEqual([]);
+    expect(recordViolations).toStrictEqual([]);
+  });
+
+  it("should skip sparse entries instead of comparing them", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const sparse = [undefined] as unknown;
+    const krd1: KRD = {
+      ...baseKrd,
+      laps: sparse as KRD["laps"],
+      sessions: sparse as KRD["sessions"],
+      records: sparse as KRD["records"],
+    };
+
+    // Act
+    const lapViolations = compareLaps(krd1, krd1, checker);
+    const sessionViolations = compareSessions(krd1, krd1, checker);
+    const recordViolations = compareRecords(krd1, krd1, checker);
+
+    // Assert
+    expect(lapViolations).toStrictEqual([]);
+    expect(sessionViolations).toStrictEqual([]);
+    expect(recordViolations).toStrictEqual([]);
   });
 });

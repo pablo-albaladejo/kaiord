@@ -160,3 +160,20 @@ describe("createXsdZwiftValidator", () => {
     });
   });
 });
+
+describe("createXsdZwiftValidator schema enforcement", () => {
+  it("should reject well-formed XML that violates the Zwift schema", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const validator = createXsdZwiftValidator(logger);
+    const wellFormedButInvalid =
+      '<?xml version="1.0" encoding="UTF-8"?><workout_file><not_a_zwift_element/></workout_file>';
+
+    // Act
+    const result = await validator(wellFormedButInvalid);
+
+    // Assert
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+});

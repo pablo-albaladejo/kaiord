@@ -139,3 +139,51 @@ describe("convertKrdTargetToGarmin", () => {
     });
   });
 });
+
+describe("convertKrdTargetToGarmin defensive null fallbacks", () => {
+  it("should encode a zone target without a zone number as null", () => {
+    // Arrange
+    const target = {
+      type: "power",
+      value: { unit: "zone" },
+    } as unknown as Target;
+
+    // Act
+    const result = convertKrdTargetToGarmin(target);
+
+    // Assert
+    expect(result.zoneNumber).toBeNull();
+    expect(result.targetValueOne).toBeNull();
+    expect(result.targetValueTwo).toBeNull();
+  });
+
+  it("should encode a range target without bounds as null values", () => {
+    // Arrange
+    const target = {
+      type: "heart_rate",
+      value: { unit: "range" },
+    } as unknown as Target;
+
+    // Act
+    const result = convertKrdTargetToGarmin(target);
+
+    // Assert
+    expect(result.targetValueOne).toBeNull();
+    expect(result.targetValueTwo).toBeNull();
+  });
+
+  it("should encode a single-value target without a value as null values", () => {
+    // Arrange
+    const target = {
+      type: "power",
+      value: { unit: "watts" },
+    } as unknown as Target;
+
+    // Act
+    const result = convertKrdTargetToGarmin(target);
+
+    // Assert
+    expect(result.targetValueOne).toBeNull();
+    expect(result.targetValueTwo).toBeNull();
+  });
+});

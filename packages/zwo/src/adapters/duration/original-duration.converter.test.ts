@@ -75,6 +75,39 @@ describe("convertOriginalZwiftDuration", () => {
         watts: 200,
       });
     });
+
+    it("should restore a distance duration with no recoverable value as zero meters", () => {
+      // Arrange
+      const data = { "kaiord:originalDurationType": "distance" };
+
+      // Act
+      const result = convertOriginalZwiftDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({ type: "distance", meters: 0 });
+    });
+
+    it("should restore a heart-rate duration with no bpm as zero", () => {
+      // Arrange
+      const data = { "kaiord:originalDurationType": "heart_rate_less_than" };
+
+      // Act
+      const result = convertOriginalZwiftDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({ type: "heart_rate_less_than", bpm: 0 });
+    });
+
+    it("should restore a power duration with no watts as zero", () => {
+      // Arrange
+      const data = { "kaiord:originalDurationType": "power_less_than" };
+
+      // Act
+      const result = convertOriginalZwiftDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({ type: "power_less_than", watts: 0 });
+    });
   });
 
   describe("standard duration fallback", () => {
