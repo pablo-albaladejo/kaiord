@@ -1,4 +1,5 @@
 import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
+import { createZwiftParsingError } from "@kaiord/core";
 
 import { encodeTextEvents } from "./text-events-encoder";
 
@@ -74,8 +75,12 @@ const encodeCadenceTargets = (
 export const encodeIntervalsT = (
   repetitionBlock: RepetitionBlock
 ): Record<string, unknown> => {
-  const onStep = repetitionBlock.steps[0];
-  const offStep = repetitionBlock.steps[1];
+  const [onStep, offStep] = repetitionBlock.steps;
+  if (!onStep || !offStep) {
+    throw createZwiftParsingError(
+      "IntervalsT requires a two-step repetition block (on/off)"
+    );
+  }
 
   const intervalsT: Record<string, unknown> = {
     "@_Repeat": repetitionBlock.repeatCount,

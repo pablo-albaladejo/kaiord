@@ -9,8 +9,7 @@ import { validateAgainstXsdSchema } from "./xsd-schema-validator";
 // Use a type-safe check that works in both Node.js and browser environments
 const isBrowser = ((): boolean => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return typeof (globalThis as any).window !== "undefined";
+    return typeof (globalThis as { window?: unknown }).window !== "undefined";
   } catch {
     return false;
   }

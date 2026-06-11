@@ -30,6 +30,11 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
+    // Deferred: the base config enables noUncheckedIndexedAccess for all
+    // library packages. The SPA has ~109 remaining violations; flip this
+    // to true once they are drained (tracked follow-up from the 2026-06
+    // audit-hardening pass).
+    "noUncheckedIndexedAccess": false,
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],

@@ -10,7 +10,7 @@ export const findRepetitionStepIndices = (
   const indices = new Set<number>();
 
   for (let i = 0; i < workoutSteps.length; i++) {
-    const step = workoutSteps[i];
+    const step = workoutSteps[i]!;
     if (
       step.durationType === fitDurationTypeSchema.enum.repeatUntilStepsCmplt
     ) {
@@ -31,7 +31,7 @@ export const buildWorkoutSteps = (
   const steps = [];
 
   for (let i = 0; i < workoutSteps.length; i++) {
-    const step = workoutSteps[i];
+    const step = workoutSteps[i]!;
 
     if (
       step.durationType === fitDurationTypeSchema.enum.repeatUntilStepsCmplt &&
@@ -57,7 +57,7 @@ export const buildRepetitionBlock = (
   const repeatedSteps = [];
 
   for (let j = startIndex; j < currentIndex; j++) {
-    repeatedSteps.push(mapStep(workoutSteps[j], j));
+    repeatedSteps.push(mapStep(workoutSteps[j]!, j));
   }
 
   return {

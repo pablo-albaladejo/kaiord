@@ -20,7 +20,7 @@ export const extractTextEvents = (
     return {};
   }
 
-  const primaryMessage = events[0].message;
+  const primaryMessage = events[0]!.message;
   const result: {
     notes?: string;
     extensions?: { zwift: { textEvents: Array<ZwiftTextEvent> } };

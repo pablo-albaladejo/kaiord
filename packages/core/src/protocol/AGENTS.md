@@ -1,11 +1,11 @@
 <!-- Parent: ../AGENTS.md -->
 <!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
 
-# types
+# protocol
 
 ## Purpose
 
-Cross-cutting protocol DTOs that don't fit in `domain/` because they describe transport boundaries (SPA ↔ browser-extension bridge) rather than the KRD domain itself. Currently holds only the Profile Snapshot — the SPA derives a snapshot from its domain profile and pushes it to every VERIFIED bridge so the bridge popup can render athlete data without a network call.
+Cross-package protocol DTOs that don't fit in `domain/` because they describe transport boundaries (SPA ↔ browser-extension bridge) rather than the KRD domain itself. The layer is declared in `CORE_SRC_ALLOWLIST` (`scripts/architecture.vocab.mjs`) and governed like `domain/` by `scripts/check-architecture.mjs`: externals limited to `DOMAIN_EXTERNAL_ALLOWLIST`, no imports from `ports/`, `application/`, or `adapters/`. Currently holds only the Profile Snapshot — the SPA derives a snapshot from its domain profile and pushes it to every VERIFIED bridge so the bridge popup can render athlete data without a network call.
 
 ## Key Files
 

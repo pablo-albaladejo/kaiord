@@ -11,7 +11,7 @@ const REPO = dirname(HERE);
 // repo-root devDependency on the package. The source file is the
 // single source of truth; bridges vendor a literal copy.
 const SOURCE = readFileSync(
-  join(REPO, "packages/core/src/types/profile-snapshot.ts"),
+  join(REPO, "packages/core/src/protocol/profile-snapshot.ts"),
   "utf8"
 );
 const sourceMatch = SOURCE.match(

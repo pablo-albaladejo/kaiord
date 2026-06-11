@@ -100,6 +100,6 @@ const TARGET_BUILDERS: Record<string, () => Target> = {
 export const buildTarget = new Factory<Target>()
   .attr("type", () => faker.helpers.arrayElement([...TARGET_TYPES]))
   .after((target) => {
-    const builder = TARGET_BUILDERS[target.type];
+    const builder = TARGET_BUILDERS[target.type]!;
     return Object.assign(target, builder());
   });

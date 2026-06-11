@@ -11,6 +11,12 @@ export { durationTypeSchema } from "./duration-type";
  * Validates duration specifications using discriminated unions based on duration type.
  * Supports time-based, distance-based, heart rate conditional, power conditional,
  * calorie-based, and open durations.
+ *
+ * `repeatFrom` (on the `repeat_until_*` variants) is a 0-based **step
+ * index**, not a repeat count: execution jumps back to the step at that
+ * index and repeats the steps from there up to the current one until the
+ * variant's condition is met (elapsed time, distance, calories, or the
+ * HR/power threshold crossing).
  */
 export const durationSchema = z.discriminatedUnion("type", [
   z.object({

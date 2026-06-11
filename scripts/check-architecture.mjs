@@ -14,9 +14,11 @@
  *     - packages/core/src/application/** ↛ adapters/
  *
  *   R-ArchDomainExt
- *     - packages/core/src/domain/** must NOT import any external library
- *       other than `zod`. Test files MAY import vitest /
- *       @kaiord/core/test-utils (excluded from evaluation upstream).
+ *     - packages/core/src/domain/** and packages/core/src/protocol/**
+ *       must NOT import any external library outside
+ *       DOMAIN_EXTERNAL_ALLOWLIST (architecture.vocab.mjs). Test files
+ *       MAY import vitest / @kaiord/core/test-utils (excluded from
+ *       evaluation upstream).
  *
  *   R-ArchAppPure
  *     - packages/core/src/application/** must NOT import any external
@@ -42,6 +44,11 @@
  *     - packages/core/src/adapters/ must contain only the subfolders
  *       in CORE_ADAPTER_ALLOWLIST (architecture.vocab.mjs).
  *
+ *   R-ArchCoreSrcDirs
+ *     - packages/core/src/ must contain only the top-level directories
+ *       in CORE_SRC_ALLOWLIST (architecture.vocab.mjs). Undeclared
+ *       directories escape every per-layer rule, so they are rejected.
+ *
  *   R-ArchCoreAmbientTypes
  *     - Any *.d.ts under packages/core/src/ containing
  *       `declare module "@<vendor>/<sdk>"` is rejected (vendor SDK
@@ -60,6 +67,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   CORE_ADAPTER_ALLOWLIST,
+  CORE_SRC_ALLOWLIST,
+  DOMAIN_EXTERNAL_ALLOWLIST,
   FORMAT_ADAPTERS,
 } from "./architecture.vocab.mjs";
 
@@ -210,15 +219,28 @@ function relativeEscapesTo(spec, fromLayer) {
   )
     i++;
   const targetDir = parts[i];
-  // Layers that signal an architectural escape:
+  // Layers that signal an architectural escape. "domain" is included so
+  // protocol/ -> domain/ imports are caught (the two are independent
+  // leaves); per-layer branches ignore it where domain imports are legal
+  // (ports/, application/).
   if (
     targetDir === "adapters" ||
     targetDir === "application" ||
-    targetDir === "ports"
+    targetDir === "domain" ||
+    targetDir === "ports" ||
+    targetDir === "protocol"
   ) {
     return targetDir;
   }
   return null;
+}
+
+// DOMAIN_EXTERNAL_ALLOWLIST entries match both the bare specifier and
+// subpath imports (e.g. "@noble/hashes" allows "@noble/hashes/sha2").
+function isAllowedDomainExternal(spec) {
+  return DOMAIN_EXTERNAL_ALLOWLIST.some(
+    (lib) => spec === lib || spec.startsWith(`${lib}/`)
+  );
 }
 
 function checkCoreSourceFile(file, source, packagesRoot) {
@@ -229,36 +251,43 @@ function checkCoreSourceFile(file, source, packagesRoot) {
   const rel = relPosix(file, dirname(packagesRoot));
 
   for (const spec of imports) {
-    // Layer-rule checks for the four core layers:
-    if (layer === "domain") {
-      const escape = relativeEscapesTo(spec, "domain");
-      if (escape) {
+    // Layer-rule checks for the core layers. `protocol/` (cross-package
+    // protocol contracts) is governed exactly like `domain/`: no layer
+    // escapes other than domain/, externals limited to the allowlist.
+    if (layer === "domain" || layer === "protocol") {
+      const escape = relativeEscapesTo(spec, layer);
+      if (escape && escape !== layer) {
         violations.push({
           rule: "R-ArchLeftward",
           file: rel,
-          detail: `domain/ may not import ${escape}/ (specifier: ${spec})`,
+          detail: `${layer}/ may not import ${escape}/ (specifier: ${spec})`,
         });
       } else if (
         isExternalSpec(spec) &&
-        spec !== "zod" &&
+        !isAllowedDomainExternal(spec) &&
         !spec.startsWith("node:")
       ) {
         // node: builtins also forbidden in domain (no I/O).
         violations.push({
           rule: "R-ArchDomainExt",
           file: rel,
-          detail: `domain/ may not import external library "${spec}" (only zod allowed)`,
+          detail: `${layer}/ may not import external library "${spec}" (only [${DOMAIN_EXTERNAL_ALLOWLIST.join(", ")}] allowed)`,
         });
       } else if (spec.startsWith("node:")) {
         violations.push({
           rule: "R-ArchDomainExt",
           file: rel,
-          detail: `domain/ may not import node: builtin "${spec}"`,
+          detail: `${layer}/ may not import node: builtin "${spec}"`,
         });
       }
     } else if (layer === "ports") {
       const escape = relativeEscapesTo(spec, "ports");
-      if (escape && (escape === "application" || escape === "adapters")) {
+      if (
+        escape &&
+        (escape === "application" ||
+          escape === "adapters" ||
+          escape === "protocol")
+      ) {
         violations.push({
           rule: "R-ArchLeftward",
           file: rel,
@@ -267,11 +296,11 @@ function checkCoreSourceFile(file, source, packagesRoot) {
       }
     } else if (layer === "application") {
       const escape = relativeEscapesTo(spec, "application");
-      if (escape === "adapters") {
+      if (escape === "adapters" || escape === "protocol") {
         violations.push({
           rule: "R-ArchLeftward",
           file: rel,
-          detail: `application/ may not import adapters/ (specifier: ${spec})`,
+          detail: `application/ may not import ${escape}/ (specifier: ${spec})`,
         });
       } else if (
         isExternalSpec(spec) &&
@@ -359,6 +388,25 @@ function checkCoreAdapterAllowlist(packagesRoot) {
   return violations;
 }
 
+function checkCoreSrcDirs(packagesRoot) {
+  const srcRoot = join(packagesRoot, "core", "src");
+  const stat = safeStat(srcRoot);
+  if (!stat || !stat.isDirectory()) return [];
+  const allowed = new Set(CORE_SRC_ALLOWLIST);
+  const violations = [];
+  for (const entry of readdirSync(srcRoot, { withFileTypes: true })) {
+    if (entry.name.startsWith(".")) continue;
+    if (!entry.isDirectory()) continue;
+    if (allowed.has(entry.name)) continue;
+    violations.push({
+      rule: "R-ArchCoreSrcDirs",
+      file: `packages/core/src/${entry.name}/`,
+      detail: `core/src/${entry.name}/ is not a declared layer [${CORE_SRC_ALLOWLIST.join(", ")}]. Undeclared directories escape every per-layer rule. Move the code into a governed layer, or declare the new layer in scripts/architecture.vocab.mjs + openspec/specs/hexagonal-arch/spec.md.`,
+    });
+  }
+  return violations;
+}
+
 function checkCoreAmbientTypes(file, source, packagesRoot) {
   // Only flag *.d.ts under packages/core/src/.
   const rel = relPosix(file, packagesRoot);
@@ -396,8 +444,9 @@ export function runCheck({ packagesRoot } = {}) {
     }
   });
 
-  // Core-adapter-allowlist runs once on the directory listing.
+  // Directory-listing rules run once per check.
   violations.push(...checkCoreAdapterAllowlist(root));
+  violations.push(...checkCoreSrcDirs(root));
 
   // Apply allowlist (only for the real packages root).
   if (root !== PACKAGES_ROOT) return violations;

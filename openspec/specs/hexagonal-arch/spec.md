@@ -24,9 +24,10 @@ Code in `packages/core/src/domain/` SHALL NOT import from:
 
 - `adapters/`
 - `application/`
-- Any external library other than `zod`
+- `protocol/`
+- Any external library outside `DOMAIN_EXTERNAL_ALLOWLIST` (exported from `scripts/architecture.vocab.mjs`; currently `["@noble/hashes", "zod"]`)
 
-Domain contains only pure TypeScript types and Zod schemas. Test files (`*.test.{ts,tsx}`) under `packages/core/src/domain/` MAY additionally import the test runner (`vitest`) and the shared fixture loader from `@kaiord/core/test-utils`.
+Domain contains only pure TypeScript types, Zod schemas, and pure helper functions. Every `DOMAIN_EXTERNAL_ALLOWLIST` entry MUST be pure, isomorphic, and I/O-free; `@noble/hashes` backs `domain/hash/canonical-hash.ts` (the sync SHA-256 used for managed-data identity hashing — `node:crypto` broke browser bundles). Test files (`*.test.{ts,tsx}`) under `packages/core/src/domain/` MAY additionally import the test runner (`vitest`) and the shared fixture loader from `@kaiord/core/test-utils`.
 
 The rule SHALL be enforced by `scripts/check-architecture.mjs`, run as part of `pnpm test:scripts`, the husky `pre-commit` hook, and `pnpm lint`. The rule ID is `R-ArchDomainExt` for external-library violations and `R-ArchLeftward` for cross-layer violations.
 
@@ -41,6 +42,12 @@ The rule SHALL be enforced by `scripts/check-architecture.mjs`, run as part of `
 - **GIVEN** an edit to `packages/core/src/domain/<X>.ts` (a non-test file) that contains `import { Z } from '@garmin/fitsdk'`
 - **WHEN** `pnpm test:scripts` runs
 - **THEN** the process exits with a non-zero code and stderr contains the literal substring `R-ArchDomainExt` and the offending file path
+
+#### Scenario: Allowlisted pure hash library in domain is allowed
+
+- **GIVEN** a file `packages/core/src/domain/hash/<X>.ts` containing `import { sha256 } from '@noble/hashes/sha2'`
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the process exits with code 0 and stderr does NOT contain `R-ArchDomainExt` for this file
 
 ### Requirement: Application Isolation
 
@@ -130,11 +137,12 @@ The script SHALL implement at minimum these rules:
 | Rule ID                      | Forbids                                                                                                                                                                                                                         |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `R-ArchLeftward`             | `packages/core/src/domain/**` importing `application/`, `adapters/`, or `ports/`; `packages/core/src/ports/**` importing `application/` or `adapters/`; `packages/core/src/application/**` importing `adapters/`                |
-| `R-ArchDomainExt`            | `packages/core/src/domain/**` importing any external library other than `zod`                                                                                                                                                   |
+| `R-ArchDomainExt`            | `packages/core/src/domain/**` or `packages/core/src/protocol/**` importing any external library outside `DOMAIN_EXTERNAL_ALLOWLIST` (`zod`, `@noble/hashes`)                                                                    |
 | `R-ArchAppPure`              | `packages/core/src/application/**` importing any external library                                                                                                                                                               |
 | `R-ArchPortPure`             | `packages/core/src/ports/**` containing any AST node other than type aliases, interfaces, or re-exports of the same                                                                                                             |
 | `R-ArchAdapterCross`         | `packages/{fit,tcx,zwo,garmin}/src/**` importing from a sibling format adapter (`@kaiord/{fit,tcx,zwo,garmin}` other than the package's own). Cross-package imports beyond format adapters are governed by `R-ArchPackageDeps`. |
 | `R-ArchCoreAdapterAllowlist` | any folder under `packages/core/src/adapters/` whose name is not `logger` or `analytics`                                                                                                                                        |
+| `R-ArchCoreSrcDirs`          | any top-level directory under `packages/core/src/` not enumerated in `CORE_SRC_ALLOWLIST` (`adapters`, `application`, `domain`, `ports`, `protocol`, `test-utils`, `tests`)                                                     |
 | `R-ArchCoreAmbientTypes`     | any `*.d.ts` under `packages/core/src/` containing `declare module "<external-package>"` for a vendor SDK                                                                                                                       |
 
 The `{logger, analytics}` allowlist used by `R-ArchCoreAdapterAllowlist` SHALL live in a single source-of-truth module `scripts/architecture.vocab.mjs` exporting `CORE_ADAPTER_ALLOWLIST = ["analytics", "logger"]`. The same array SHALL be reproduced verbatim inside a fenced block in `.claude/skills/guidelines/architecture-hexagonal/SKILL.md` between the markers `<!-- arch-vocab:start -->` and `<!-- arch-vocab:end -->`. The test in `scripts/check-architecture.test.mjs` SHALL parse the SKILL.md block, import `architecture.vocab.mjs`, and assert array equality (order-sensitive). Drift between doc and code MUST fail CI.
@@ -186,11 +194,29 @@ This requirement aligns the `architecture-hexagonal` guideline document with the
 - **WHEN** `pnpm test:scripts` runs
 - **THEN** the process exits with a non-zero code and stderr contains `R-ArchCoreAdapterAllowlist` and the suggested fix `create packages/cache/ instead`
 
+### Requirement: Core source directory allowlist
+
+`packages/core/src/` SHALL contain only the top-level directories enumerated in `CORE_SRC_ALLOWLIST` exported from `scripts/architecture.vocab.mjs`. The current allowlist is `["adapters", "application", "domain", "ports", "protocol", "test-utils", "tests"]`. Undeclared directories escape every per-layer rule (the per-file checks classify files by their top-level directory name), so they are rejected outright by `scripts/check-architecture.mjs` under rule ID `R-ArchCoreSrcDirs`. Loose files directly under `packages/core/src/` (e.g., `index.ts`) are not affected.
+
+The `protocol/` layer holds cross-package protocol contracts (DTO schemas shared between the SPA and browser-extension bridges, e.g. the Profile Snapshot). It SHALL be governed by the same rules as `domain/`: no imports from `ports/`, `application/`, or `adapters/`, and no external libraries outside `DOMAIN_EXTERNAL_ALLOWLIST`. `domain/` SHALL NOT import from `protocol/` — the two are independent leaves.
+
+#### Scenario: Undeclared core/src directory rejected
+
+- **GIVEN** a directory `packages/core/src/cache/` containing any `.ts` file
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the process exits with a non-zero code and stderr contains `R-ArchCoreSrcDirs`, the offending directory name `cache`, and a hint to move the code into a governed layer or declare the new layer in `scripts/architecture.vocab.mjs`
+
+#### Scenario: Protocol layer governed like domain
+
+- **GIVEN** a file `packages/core/src/protocol/<X>.ts` containing `import { parse } from 'fast-xml-parser'`
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the process exits with a non-zero code and stderr contains `R-ArchDomainExt` and the offending file path
+
 ### Requirement: Vendor SDK ambient types live in their adapter package
 
 Any `*.d.ts` file declaring an external vendor SDK module (`declare module "@<vendor>/<sdk>"`) SHALL live in the package that consumes that SDK, never in `packages/core/`. For example, `garmin-fitsdk.d.ts` (declaring `@garmin/fitsdk`) SHALL live under `packages/fit/src/types/`, not `packages/core/src/types/`.
 
-The `packages/core/src/` tree SHALL NOT contain a top-level `types/` folder; type declarations specific to core's own domain MUST live alongside their consumers under `domain/`, `ports/`, `application/`, or `adapters/`.
+The `packages/core/src/` tree SHALL NOT contain a top-level `types/` folder; type declarations specific to core's own domain MUST live alongside their consumers under `domain/`, `ports/`, `application/`, or `adapters/`. Cross-package protocol contracts (e.g., the SPA ↔ bridge Profile Snapshot DTO) live in the dedicated `protocol/` layer, governed by the same purity rules as `domain/`.
 
 #### Scenario: Vendor ambient declaration in core is moved on PR
 

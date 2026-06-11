@@ -74,9 +74,10 @@ All conversions MUST pass through KRD. Direct format-to-format (e.g., FIT → TC
 ```
 packages/
 ├── core/src/
-│   ├── domain/{types,schemas}/    # pure types + Zod
+│   ├── domain/{types,schemas}/    # pure types + Zod (+ hash/, ingest/ pure utilities)
 │   ├── ports/                     # interfaces only
-│   ├── application/               # use cases
+│   ├── application/               # use cases (incl. round-trip/ validation)
+│   ├── protocol/                  # cross-package protocol DTOs (SPA ↔ bridges), governed like domain
 │   └── adapters/{logger,analytics}/  # only built-in adapters in core (see arch-vocab below)
 ├── fit|tcx|zwo|garmin/src/adapters/
 ├── garmin-connect/src/            # Garmin Connect HTTP client
@@ -113,10 +114,23 @@ Both are infrastructure-free, zero-runtime-dependency adapters that ship
 with `@kaiord/core` for ergonomic defaults. Any new adapter category
 MUST live in its own `@kaiord/<name>` package.
 
+## Core source directory allowlist (mechanically enforced)
+
+`packages/core/src/` MAY contain only the top-level directories in
+`CORE_SRC_ALLOWLIST` (`scripts/architecture.vocab.mjs`): `adapters`,
+`application`, `domain`, `ports`, `protocol`, `test-utils`, `tests`.
+Undeclared directories escape every per-layer rule, so
+`scripts/check-architecture.mjs` rejects them under `R-ArchCoreSrcDirs`.
+
+`domain/` and `protocol/` may import externals only from
+`DOMAIN_EXTERNAL_ALLOWLIST` (`zod`, `@noble/hashes`) — every entry MUST be
+pure, isomorphic, and I/O-free.
+
 ## Enforcement
 
 The layer rules in this guideline are enforced by `scripts/check-architecture.mjs`
 (rules `R-ArchLeftward`, `R-ArchPortPure`, `R-ArchAppPure`, `R-ArchDomainExt`,
-`R-ArchAdapterCross`, `R-ArchCoreAdapterAllowlist`, `R-ArchCoreAmbientTypes`)
-and `scripts/check-package-deps.mjs` (rule `R-ArchPackageDeps`). Both run via
-`pnpm test:scripts`, the husky `pre-commit` hook, and `pnpm lint`.
+`R-ArchAdapterCross`, `R-ArchCoreAdapterAllowlist`, `R-ArchCoreSrcDirs`,
+`R-ArchCoreAmbientTypes`) and `scripts/check-package-deps.mjs` (rule
+`R-ArchPackageDeps`). Both run via `pnpm test:scripts`, the husky
+`pre-commit` hook, and `pnpm lint`.
