@@ -23,7 +23,7 @@ import { useKeyboardStoreSelectors } from "../store/selectors";
 import type { Workout } from "../types/krd";
 import { buildKeyboardHandlers } from "../utils/build-keyboard-handlers";
 import { getSelectedStepIndex } from "../utils/get-selected-step-index";
-import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 
 export const useAppKeyboardHandlers = () => {
   const store = useKeyboardStoreSelectors();

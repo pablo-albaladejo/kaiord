@@ -25,7 +25,9 @@ function makeGh(listResponses = ["[]"]) {
 }
 
 const issueListJson = (body) =>
-  JSON.stringify([{ number: 7, title: "cws-publish-stuck-train2go-bridge-7.2.1", body }]);
+  JSON.stringify([
+    { number: 7, title: "cws-publish-stuck-train2go-bridge-7.2.1", body },
+  ]);
 
 const baseArgs = {
   extension: "train2go-bridge",
@@ -48,7 +50,9 @@ test("Tier 1 — no issue exists -> creates issue with template body", async () 
 });
 
 test("Tier 1 — issue exists but RETRY_COUNT missing -> resets counter", async () => {
-  const { gh, calls } = makeGh([issueListJson("Human edited body, no marker.\n")]);
+  const { gh, calls } = makeGh([
+    issueListJson("Human edited body, no marker.\n"),
+  ]);
   const result = await handle({ ...baseArgs, gh, publish: async () => {} });
   assert.deepEqual(result, { tier: 1, action: "reset-counter" });
   const edit = calls.find((c) => c.args[0] === "edit");
@@ -94,7 +98,10 @@ test("Tier 2 — publishItem 429 -> sentinel RETRY_COUNT: -1 applied", async () 
     throw new Error("[CwsStateError] publishItem returned 429 (rate limited)");
   };
   const result = await handle({ ...baseArgs, gh, publish });
-  assert.deepEqual(result, { tier: "2-failed-to-3", action: "sentinel-applied" });
+  assert.deepEqual(result, {
+    tier: "2-failed-to-3",
+    action: "sentinel-applied",
+  });
   const edits = calls.filter((c) => c.args[0] === "edit");
   assert.equal(edits.length, 2, "expect two edits: bump then sentinel");
   const lastBodyIdx = edits[1].args.indexOf("--body");

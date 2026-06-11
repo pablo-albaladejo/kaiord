@@ -31,45 +31,45 @@ export const persistBestEffort = async (
 export const isExpired = (oauth2: OAuth2Token | undefined): boolean =>
   !oauth2 || oauth2.expires_at <= Date.now() / 1000;
 
-export const doRefresh = (
-  s: TokenState,
+export const refreshTokens = (
+  state: TokenState,
   refreshFn: RefreshFn,
   logger: Logger,
   tokenStore: TokenStore | undefined
 ): Promise<void> => {
-  if (!s.oauth1) {
+  if (!state.oauth1) {
     throw createServiceApiError("No OAuth1 token for refresh", 401);
   }
-  const currentOAuth1 = s.oauth1;
-  const generationAtStart = s.generation;
-  s.refreshPromise = refreshFn(currentOAuth1)
+  const currentOAuth1 = state.oauth1;
+  const generationAtStart = state.generation;
+  state.refreshPromise = refreshFn(currentOAuth1)
     .then(async (newOAuth2) => {
-      if (s.generation !== generationAtStart) return;
-      s.oauth2 = newOAuth2;
-      s.generation++;
-      logger.info("Token refreshed", { generation: s.generation });
+      if (state.generation !== generationAtStart) return;
+      state.oauth2 = newOAuth2;
+      state.generation++;
+      logger.info("Token refreshed", { generation: state.generation });
       await persistBestEffort(tokenStore, currentOAuth1, newOAuth2, logger);
     })
     .finally(() => {
-      s.refreshPromise = undefined;
+      state.refreshPromise = undefined;
     });
-  return s.refreshPromise;
+  return state.refreshPromise;
 };
 
 export const restoreFromStore = async (
-  s: TokenState,
+  state: TokenState,
   tokenStore: TokenStore,
   logger: Logger
 ): Promise<{ restored: boolean }> => {
-  const data = await tokenStore.load();
-  if (!data) return { restored: false };
-  if (s.oauth1 && s.oauth2) return { restored: false };
-  const parsed = garminTokensSchema.safeParse(data);
+  const storedTokens = await tokenStore.load();
+  if (!storedTokens) return { restored: false };
+  if (state.oauth1 && state.oauth2) return { restored: false };
+  const parsed = garminTokensSchema.safeParse(storedTokens);
   if (!parsed.success) return { restored: false };
-  s.oauth1 = parsed.data.oauth1;
-  s.oauth2 = parsed.data.oauth2;
-  s.generation++;
-  if (isExpired(s.oauth2)) logger.warn("Restored tokens are expired");
-  logger.info("Tokens restored from store", { generation: s.generation });
+  state.oauth1 = parsed.data.oauth1;
+  state.oauth2 = parsed.data.oauth2;
+  state.generation++;
+  if (isExpired(state.oauth2)) logger.warn("Restored tokens are expired");
+  logger.info("Tokens restored from store", { generation: state.generation });
   return { restored: true };
 };

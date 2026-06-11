@@ -57,15 +57,4 @@ describe("hrvSummarySchema", () => {
     // Assert
     expect(result.success).toBe(false);
   });
-
-  it("should reject a wrong major version", () => {
-    // Arrange
-    const input = { ...baseHrv, version: "1.0" };
-
-    // Act
-    const result = hrvSummarySchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
 });

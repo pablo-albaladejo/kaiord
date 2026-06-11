@@ -7,7 +7,7 @@ import {
   mapRampToKrd,
   mapWarmupToKrd,
 } from "../interval/ramp.mapper";
-import { mapSteadyStateToKrd } from "../interval/steady-state.mapper";
+import { convertSteadyStateToKrd } from "../interval/steady-state.converter";
 
 type IntervalData = { type: string; data: Record<string, unknown> };
 type ProcessResult = {
@@ -36,7 +36,7 @@ const processSingleStep = (
   const data = { ...normalizedData, stepIndex, durationType };
 
   if (interval.type === "SteadyState") {
-    return { step: mapSteadyStateToKrd(data), indexIncrement: 1 };
+    return { step: convertSteadyStateToKrd(data), indexIncrement: 1 };
   } else if (interval.type === "Warmup") {
     return { step: mapWarmupToKrd(data), indexIncrement: 1 };
   } else if (interval.type === "Ramp") {

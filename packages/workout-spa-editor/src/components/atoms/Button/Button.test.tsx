@@ -2,11 +2,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import type { ButtonSize, ButtonVariant } from "./Button";
 import { Button } from "./Button";
 
 describe("Button", () => {
   describe("rendering", () => {
-    it("should render with default props", () => {
+    it("should render its children as the accessible label", () => {
       // Arrange
 
       render(<Button>Click me</Button>);
@@ -18,28 +19,20 @@ describe("Button", () => {
       // Assert
 
       expect(button).toBeInTheDocument();
-      expect(button).toHaveClass("bg-primary-600");
-      expect(button).toHaveClass("px-4");
-    });
-
-    it("should render children content", () => {
-      // Arrange
-
-      // Act
-
-      render(<Button>Test Content</Button>);
-
-      // Assert
-
-      expect(screen.getByText("Test Content")).toBeInTheDocument();
+      expect(screen.getByText("Click me")).toBeInTheDocument();
     });
   });
 
-  describe("variants", () => {
-    it("should render primary variant", () => {
+  describe("variant class map", () => {
+    it.each<[ButtonVariant, string]>([
+      ["primary", "bg-primary-600"],
+      ["secondary", "bg-white"],
+      ["tertiary", "bg-transparent"],
+      ["danger", "bg-red-600"],
+    ])("should map the %s variant to its background class", (variant, bg) => {
       // Arrange
 
-      render(<Button variant="primary">Primary</Button>);
+      render(<Button variant={variant}>{variant}</Button>);
 
       // Act
 
@@ -47,60 +40,37 @@ describe("Button", () => {
 
       // Assert
 
-      expect(button).toHaveClass("bg-primary-600");
-      expect(button).toHaveClass("text-white");
-    });
-
-    it("should render secondary variant", () => {
-      // Arrange
-
-      render(<Button variant="secondary">Secondary</Button>);
-
-      // Act
-
-      const button = screen.getByRole("button");
-
-      // Assert
-
-      expect(button).toHaveClass("border");
-      expect(button).toHaveClass("bg-white");
-    });
-
-    it("should render tertiary variant", () => {
-      // Arrange
-
-      render(<Button variant="tertiary">Tertiary</Button>);
-
-      // Act
-
-      const button = screen.getByRole("button");
-
-      // Assert
-
-      expect(button).toHaveClass("bg-transparent");
-    });
-
-    it("should render danger variant", () => {
-      // Arrange
-
-      render(<Button variant="danger">Danger</Button>);
-
-      // Act
-
-      const button = screen.getByRole("button");
-
-      // Assert
-
-      expect(button).toHaveClass("bg-red-600");
-      expect(button).toHaveClass("text-white");
+      expect(button).toHaveClass(bg);
     });
   });
 
-  describe("sizes", () => {
-    it("should render small size", () => {
+  describe("size class map", () => {
+    it.each<[ButtonSize, string, string]>([
+      ["sm", "px-3", "min-h-[44px]"],
+      ["md", "px-4", "min-h-[44px]"],
+      ["lg", "px-6", "min-h-[48px]"],
+    ])(
+      "should map the %s size to its padding and WCAG minimum height",
+      (size, padding, minHeight) => {
+        // Arrange
+
+        render(<Button size={size}>{size}</Button>);
+
+        // Act
+
+        const button = screen.getByRole("button");
+
+        // Assert
+
+        expect(button).toHaveClass(padding);
+        expect(button).toHaveClass(minHeight);
+      }
+    );
+
+    it("should meet the WCAG 44px minimum touch target by default", () => {
       // Arrange
 
-      render(<Button size="sm">Small</Button>);
+      render(<Button>Default</Button>);
 
       // Act
 
@@ -108,44 +78,7 @@ describe("Button", () => {
 
       // Assert
 
-      expect(button).toHaveClass("px-3");
-      expect(button).toHaveClass("py-2.5"); // Updated for WCAG 44px minimum
-      expect(button).toHaveClass("text-sm");
-      expect(button).toHaveClass("min-h-[44px]"); // WCAG 2.1 AA compliance
-    });
-
-    it("should render medium size", () => {
-      // Arrange
-
-      render(<Button size="md">Medium</Button>);
-
-      // Act
-
-      const button = screen.getByRole("button");
-
-      // Assert
-
-      expect(button).toHaveClass("px-4");
-      expect(button).toHaveClass("py-2.5"); // Updated for WCAG 44px minimum
-      expect(button).toHaveClass("text-base");
-      expect(button).toHaveClass("min-h-[44px]"); // WCAG 2.1 AA compliance
-    });
-
-    it("should render large size", () => {
-      // Arrange
-
-      render(<Button size="lg">Large</Button>);
-
-      // Act
-
-      const button = screen.getByRole("button");
-
-      // Assert
-
-      expect(button).toHaveClass("px-6");
-      expect(button).toHaveClass("py-3");
-      expect(button).toHaveClass("text-lg");
-      expect(button).toHaveClass("min-h-[48px]"); // Larger for better UX
+      expect(button).toHaveClass("min-h-[44px]");
     });
   });
 

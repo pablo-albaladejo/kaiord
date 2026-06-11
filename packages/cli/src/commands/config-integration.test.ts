@@ -1,11 +1,20 @@
 import { execa } from "execa";
-import { mkdir, writeFile } from "fs/promises";
-import { join } from "path";
+import { readFile, writeFile } from "fs/promises";
+import { join, resolve } from "path";
+import stripAnsi from "strip-ansi";
 import { dir } from "tmp-promise";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-const FIT_HEADER_BYTES = Buffer.from("0e100000", "hex");
-const PROCESS_TIMEOUT_MS = 15000;
+import { getFixturePath, getFixturesDir } from "../tests/helpers/fixture-paths";
+
+const PROCESS_TIMEOUT_MS = 30_000;
+const CLI_PATH = resolve(__dirname, "../bin/kaiord.ts");
+const FIT_FIXTURE = getFixturePath("fit", "WorkoutIndividualSteps.fit");
+
+// The CLI discovers `.kaiordrc.json` from process.cwd(), so every spawn sets
+// `cwd` to the temp directory that holds the config under test.
+const runConvert = (cwd: string, args: Array<string>) =>
+  execa("tsx", [CLI_PATH, "convert", ...args], { cwd, reject: false });
 
 describe("config file integration", () => {
   let tmpDir: { path: string; cleanup: () => Promise<void> };
@@ -19,200 +28,157 @@ describe("config file integration", () => {
   });
 
   it(
-    "should use config file defaults for convert command",
+    "should apply defaultOutputFormat from config when the output extension is unknown",
     { timeout: PROCESS_TIMEOUT_MS },
     async () => {
       // Arrange
       const configPath = join(tmpDir.path, ".kaiordrc.json");
-      const config = {
-        defaultOutputFormat: "krd",
-        verbose: true,
-      };
-      await writeFile(configPath, JSON.stringify(config, null, 2));
-      const inputPath = join(tmpDir.path, "workout.fit");
-      await writeFile(inputPath, FIT_HEADER_BYTES);
-      const outputPath = join(tmpDir.path, "workout.krd");
-
-      // Act
-      const result = await execa(
-        "node",
-        [
-          "dist/bin/kaiord.js",
-          "convert",
-          "--input",
-          inputPath,
-          "--output",
-          outputPath,
-        ],
-        {
-          cwd: tmpDir.path,
-          reject: false,
-        }
-      );
-
-      // Assert
-      expect(result.exitCode).toBeDefined();
-    }
-  );
-
-  it(
-    "should prioritize CLI options over config defaults",
-    { timeout: PROCESS_TIMEOUT_MS },
-    async () => {
-      // Arrange
-      const configPath = join(tmpDir.path, ".kaiordrc.json");
-      const config = {
-        verbose: true,
-      };
-      await writeFile(configPath, JSON.stringify(config, null, 2));
-      const inputPath = join(tmpDir.path, "workout.fit");
-      await writeFile(inputPath, FIT_HEADER_BYTES);
-      const outputPath = join(tmpDir.path, "workout.krd");
-
-      // Act
-      const result = await execa(
-        "node",
-        [
-          "dist/bin/kaiord.js",
-          "convert",
-          "--input",
-          inputPath,
-          "--output",
-          outputPath,
-          "--quiet",
-        ],
-        {
-          cwd: tmpDir.path,
-          reject: false,
-        }
-      );
-
-      // Assert
-      expect(result.exitCode).toBeDefined();
-    }
-  );
-
-  it("should use default output directory from config", async () => {
-    // Arrange
-    const outputDir = join(tmpDir.path, "output");
-    await mkdir(outputDir, { recursive: true });
-    const configPath = join(tmpDir.path, ".kaiordrc.json");
-    const config = {
-      defaultOutputDir: outputDir,
-      defaultOutputFormat: "krd",
-    };
-    await writeFile(configPath, JSON.stringify(config, null, 2));
-    const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, FIT_HEADER_BYTES);
-
-    // Act
-    const result = await execa(
-      "node",
-      ["dist/bin/kaiord.js", "convert", "--input", "*.fit"],
-      {
-        cwd: tmpDir.path,
-        reject: false,
-      }
-    );
-
-    // Assert
-    expect(result.exitCode).toBeDefined();
-  });
-
-  it(
-    "should use default tolerance config from config file",
-    async () => {
-      // Arrange
-      const toleranceConfigPath = join(tmpDir.path, "tolerance.json");
-      const toleranceConfig = {
-        time: { absolute: 2, unit: "seconds" },
-        power: { absolute: 2, percentage: 2, unit: "watts" },
-      };
       await writeFile(
-        toleranceConfigPath,
-        JSON.stringify(toleranceConfig, null, 2)
+        configPath,
+        JSON.stringify({ defaultOutputFormat: "krd" })
       );
-      const configPath = join(tmpDir.path, ".kaiordrc.json");
-      const config = {
-        defaultToleranceConfig: toleranceConfigPath,
-      };
-      await writeFile(configPath, JSON.stringify(config, null, 2));
-      const inputPath = join(tmpDir.path, "workout.fit");
-      await writeFile(inputPath, FIT_HEADER_BYTES);
+      // ".dat" is not auto-detectable, so the format can only come from config.
+      const outputPath = join(tmpDir.path, "workout.dat");
 
       // Act
-      const result = await execa(
-        "node",
-        ["dist/bin/kaiord.js", "validate", "--input", inputPath],
-        {
-          cwd: tmpDir.path,
-          reject: false,
-        }
-      );
-
-      // Assert
-      expect(result.exitCode).toBeDefined();
-    },
-    PROCESS_TIMEOUT_MS
-  ); // Increased timeout for process spawning under load
-
-  it("should work without config file", async () => {
-    // Arrange
-    const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, FIT_HEADER_BYTES);
-    const outputPath = join(tmpDir.path, "workout.krd");
-
-    // Act
-    const result = await execa(
-      "node",
-      [
-        "dist/bin/kaiord.js",
-        "convert",
+      const result = await runConvert(tmpDir.path, [
         "--input",
-        inputPath,
+        FIT_FIXTURE,
         "--output",
         outputPath,
-      ],
-      {
-        cwd: tmpDir.path,
-        reject: false,
-      }
-    );
+      ]);
 
-    // Assert
-    expect(result.exitCode).toBeDefined();
-  });
+      // Assert
+      expect(result.exitCode).toBe(0);
+      const krd = JSON.parse(await readFile(outputPath, "utf-8"));
+      expect(krd.type).toBe("structured_workout");
+    }
+  );
 
   it(
-    "should handle invalid config file gracefully",
+    "should emit debug logs when verbose is enabled via config",
+    { timeout: PROCESS_TIMEOUT_MS },
     async () => {
       // Arrange
       const configPath = join(tmpDir.path, ".kaiordrc.json");
-      await writeFile(configPath, "invalid json");
-      const inputPath = join(tmpDir.path, "workout.fit");
-      await writeFile(inputPath, FIT_HEADER_BYTES);
+      await writeFile(configPath, JSON.stringify({ verbose: true }));
       const outputPath = join(tmpDir.path, "workout.krd");
 
       // Act
-      const result = await execa(
-        "node",
-        [
-          "dist/bin/kaiord.js",
-          "convert",
-          "--input",
-          inputPath,
-          "--output",
-          outputPath,
-        ],
-        {
-          cwd: tmpDir.path,
-          reject: false,
-        }
-      );
+      const result = await runConvert(tmpDir.path, [
+        "--input",
+        FIT_FIXTURE,
+        "--output",
+        outputPath,
+      ]);
 
       // Assert
-      expect(result.exitCode).toBeDefined();
-    },
-    PROCESS_TIMEOUT_MS
-  ); // Increased timeout for process spawning under load
+      expect(result.exitCode).toBe(0);
+      expect(stripAnsi(result.stderr)).toContain("Convert command initialized");
+    }
+  );
+
+  it(
+    "should let the CLI --quiet flag override the config verbose default",
+    { timeout: PROCESS_TIMEOUT_MS },
+    async () => {
+      // Arrange
+      const configPath = join(tmpDir.path, ".kaiordrc.json");
+      await writeFile(configPath, JSON.stringify({ verbose: true }));
+      const outputPath = join(tmpDir.path, "workout.krd");
+
+      // Act
+      const result = await runConvert(tmpDir.path, [
+        "--input",
+        FIT_FIXTURE,
+        "--output",
+        outputPath,
+        "--quiet",
+      ]);
+
+      // Assert
+      expect(result.exitCode).toBe(0);
+      expect(stripAnsi(result.stderr)).not.toContain(
+        "Convert command initialized"
+      );
+    }
+  );
+
+  it(
+    "should write batch output into defaultOutputDir from config",
+    { timeout: PROCESS_TIMEOUT_MS },
+    async () => {
+      // Arrange
+      const outputDir = join(tmpDir.path, "configured-output");
+      const configPath = join(tmpDir.path, ".kaiordrc.json");
+      await writeFile(
+        configPath,
+        JSON.stringify({
+          defaultOutputDir: outputDir,
+          defaultOutputFormat: "krd",
+        })
+      );
+      // The wildcard triggers batch mode, which is the only mode that reads
+      // defaultOutputDir; the pattern matches exactly one fixture file.
+      const inputGlob = `${getFixturesDir("fit")}/WorkoutIndividualStep*.fit`;
+
+      // Act
+      const result = await runConvert(tmpDir.path, ["--input", inputGlob]);
+
+      // Assert
+      expect(result.exitCode).toBe(0);
+      const written = await readFile(
+        join(outputDir, "WorkoutIndividualSteps.krd"),
+        "utf-8"
+      );
+      expect(JSON.parse(written).type).toBe("structured_workout");
+    }
+  );
+
+  it(
+    "should report no configuration file found when none is present",
+    { timeout: PROCESS_TIMEOUT_MS },
+    async () => {
+      // Arrange
+      const outputPath = join(tmpDir.path, "workout.krd");
+
+      // Act
+      const result = await runConvert(tmpDir.path, [
+        "--input",
+        FIT_FIXTURE,
+        "--output",
+        outputPath,
+        "--verbose",
+      ]);
+
+      // Assert
+      expect(result.exitCode).toBe(0);
+      expect(stripAnsi(result.stderr)).toContain("No configuration file found");
+    }
+  );
+
+  it(
+    "should still convert successfully when the config file is malformed JSON",
+    { timeout: PROCESS_TIMEOUT_MS },
+    async () => {
+      // Arrange
+      const configPath = join(tmpDir.path, ".kaiordrc.json");
+      await writeFile(configPath, "{ not valid json");
+      const outputPath = join(tmpDir.path, "workout.krd");
+
+      // Act
+      const result = await runConvert(tmpDir.path, [
+        "--input",
+        FIT_FIXTURE,
+        "--output",
+        outputPath,
+        "--verbose",
+      ]);
+
+      // Assert
+      expect(result.exitCode).toBe(0);
+      const krd = JSON.parse(await readFile(outputPath, "utf-8"));
+      expect(krd.type).toBe("structured_workout");
+    }
+  );
 });

@@ -24,8 +24,13 @@ const commands: YargsConfig[] = [
 ];
 
 export const registerCommands = (yargs: Argv): Argv => {
-  for (const cfg of commands) {
-    yargs = yargs.command(cfg.command, cfg.describe, cfg.builder, cfg.handler);
+  for (const commandConfig of commands) {
+    yargs = yargs.command(
+      commandConfig.command,
+      commandConfig.describe,
+      commandConfig.builder,
+      commandConfig.handler
+    );
   }
   return yargs;
 };

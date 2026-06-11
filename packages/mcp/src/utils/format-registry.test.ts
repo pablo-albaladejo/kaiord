@@ -55,49 +55,20 @@ describe("FORMAT_REGISTRY", () => {
 });
 
 describe("detectFormatFromPath", () => {
-  it("should detect FIT format from file path", () => {
+  it.each([
+    ["/path/to/file.fit", "fit"],
+    ["/path/to/file.tcx", "tcx"],
+    ["workout.zwo", "zwo"],
+    ["workout.gcn", "gcn"],
+    ["data.krd", "krd"],
+  ] as const)("should detect %s as %s", (path, expected) => {
     // Arrange
 
     // Act
+    const result = detectFormatFromPath(path);
 
     // Assert
-    expect(detectFormatFromPath("/path/to/file.fit")).toBe("fit");
-  });
-
-  it("should detect TCX format from file path", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(detectFormatFromPath("/path/to/file.tcx")).toBe("tcx");
-  });
-
-  it("should detect ZWO format from file path", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(detectFormatFromPath("workout.zwo")).toBe("zwo");
-  });
-
-  it("should detect GCN format from file path", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(detectFormatFromPath("workout.gcn")).toBe("gcn");
-  });
-
-  it("should detect KRD format from file path", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(detectFormatFromPath("data.krd")).toBe("krd");
+    expect(result).toBe(expected);
   });
 
   it("should be case-insensitive for extensions", () => {

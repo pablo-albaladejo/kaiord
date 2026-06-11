@@ -211,3 +211,40 @@ describe("encodeIntervalsT", () => {
     expect(result.textevent).toBeUndefined();
   });
 });
+
+describe("encodeIntervalsT distance durations and malformed blocks", () => {
+  it("should encode distance-based on and off durations in meters", () => {
+    // Arrange
+    const block = makeBlock(
+      makeStep({
+        durationType: "distance",
+        duration: { type: "distance", meters: 400 },
+      }),
+      makeStep({
+        durationType: "distance",
+        duration: { type: "distance", meters: 200 },
+      })
+    );
+
+    // Act
+    const result = encodeIntervalsT(block);
+
+    // Assert
+    expect(result["@_OnDuration"]).toBe(400);
+    expect(result["@_OffDuration"]).toBe(200);
+  });
+
+  it("should reject a repetition block without an on/off step pair", () => {
+    // Arrange
+    const block = {
+      repeatCount: 3,
+      steps: [makeStep()],
+    } as RepetitionBlock;
+
+    // Act
+    const encode = () => encodeIntervalsT(block);
+
+    // Assert
+    expect(encode).toThrow(/two-step repetition block/);
+  });
+});

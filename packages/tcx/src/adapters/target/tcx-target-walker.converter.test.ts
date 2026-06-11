@@ -78,7 +78,7 @@ describe("convertTcxTarget (mapper)", () => {
     const logger = createMockLogger();
 
     // Act
-    const result = convertTcxTarget(undefined, logger);
+    const result = convertTcxTarget(undefined, "generic", logger);
 
     // Assert
     expect(result).toStrictEqual({ type: "open" });
@@ -90,7 +90,7 @@ describe("convertTcxTarget (mapper)", () => {
     const tcxTarget = { "@_xsi:type": "None_t" };
 
     // Act
-    const result = convertTcxTarget(tcxTarget, logger);
+    const result = convertTcxTarget(tcxTarget, "generic", logger);
 
     // Assert
     expect(result).toStrictEqual({ type: "open" });
@@ -109,7 +109,7 @@ describe("convertTcxTarget (mapper)", () => {
       };
 
       // Act
-      const result = convertTcxTarget(tcxTarget, logger);
+      const result = convertTcxTarget(tcxTarget, "generic", logger);
 
       // Assert
       expect(result).toStrictEqual({
@@ -131,7 +131,7 @@ describe("convertTcxTarget (mapper)", () => {
       };
 
       // Act
-      const result = convertTcxTarget(tcxTarget, logger);
+      const result = convertTcxTarget(tcxTarget, "generic", logger);
 
       // Assert
       expect(result).toStrictEqual({
@@ -151,7 +151,7 @@ describe("convertTcxTarget (mapper)", () => {
       };
 
       // Act
-      const result = convertTcxTarget(tcxTarget, logger);
+      const result = convertTcxTarget(tcxTarget, "generic", logger);
 
       // Assert
       expect(result).toStrictEqual({ type: "open" });
@@ -166,7 +166,7 @@ describe("convertTcxTarget (mapper)", () => {
       };
 
       // Act
-      const result = convertTcxTarget(tcxTarget, logger);
+      const result = convertTcxTarget(tcxTarget, "generic", logger);
 
       // Assert
       expect(result).toStrictEqual({ type: "open" });
@@ -185,24 +185,65 @@ describe("convertTcxTarget (mapper)", () => {
       };
 
       // Act
-      const result = convertTcxTarget(tcxTarget, logger);
+      const result = convertTcxTarget(tcxTarget, "generic", logger);
 
       // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
   });
 
+  it("should route Speed_t targets to the native speed decoder", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const tcxTarget = {
+      "@_xsi:type": "Speed_t",
+      SpeedZone: {
+        "@_xsi:type": "CustomSpeedZone_t",
+        LowInMetersPerSecond: 3.0,
+        HighInMetersPerSecond: 4.0,
+      },
+    };
+
+    // Act
+    const result = convertTcxTarget(tcxTarget, "running", logger);
+
+    // Assert
+    expect(result?.type).toBe("pace");
+  });
+
+  it("should route Cadence_t targets to the sport-aware cadence decoder", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const tcxTarget = {
+      "@_xsi:type": "Cadence_t",
+      CadenceZone: {
+        "@_xsi:type": "CustomCadenceZone_t",
+        Low: 170,
+        High: 190,
+      },
+    };
+
+    // Act
+    const result = convertTcxTarget(tcxTarget, "running", logger);
+
+    // Assert
+    expect(result).toStrictEqual({
+      type: "cadence",
+      value: { unit: "range", min: 85, max: 95 },
+    });
+  });
+
   it("should log warning for unsupported target type", () => {
     // Arrange
     const logger = createMockLogger();
-    const tcxTarget = { "@_xsi:type": "Speed_t" };
+    const tcxTarget = { "@_xsi:type": "UnknownType_t" };
 
     // Act
-    convertTcxTarget(tcxTarget, logger);
+    convertTcxTarget(tcxTarget, "generic", logger);
 
     // Assert
     expect(logger.warn).toHaveBeenCalledWith("Unsupported target type", {
-      targetType: "Speed_t",
+      targetType: "UnknownType_t",
     });
   });
 
@@ -212,7 +253,7 @@ describe("convertTcxTarget (mapper)", () => {
     const tcxTarget = { "@_xsi:type": "UnknownType_t" };
 
     // Act
-    const result = convertTcxTarget(tcxTarget, logger);
+    const result = convertTcxTarget(tcxTarget, "generic", logger);
 
     // Assert
     expect(result).toStrictEqual({ type: "open" });

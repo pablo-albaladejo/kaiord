@@ -36,6 +36,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+node scripts/check-no-barrel-test-suites.mjs --changed-files
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Barrel-test-suite check failed! Commit blocked."
+  exit 1
+fi
+
 echo "✅ Staged test checks passed!"
 echo ""
 echo "🧪 Running scripts/ unit tests (whole-tree mechanical guards)..."

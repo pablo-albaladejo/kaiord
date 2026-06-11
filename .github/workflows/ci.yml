@@ -601,6 +601,11 @@ jobs:
           path: |
             packages/*/dist/
             packages/*/package.json
+            # zwo's XSD lives in a gitignored, postbuild-generated schema/
+            # folder that the dist-built validator resolves at runtime
+            # (dist/../schema/zwift-workout.xsd); without it every dist
+            # consumer (e.g. the CLI converting KRD to ZWO) fails ENOENT.
+            packages/zwo/schema/
           # 30 days covers the typical PR review cycle so "Re-run failed
           # jobs only" stays usable; spec floor 14, ceiling 90.
           retention-days: 30

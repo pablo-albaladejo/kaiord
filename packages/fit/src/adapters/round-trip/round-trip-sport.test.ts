@@ -10,18 +10,26 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
+  FIT_TARGET_POWER_RANGE_HIGH,
+  FIT_TARGET_POWER_RANGE_LOW,
+} from "../../test-utils/constants";
+import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,
 } from "../garmin-fitsdk";
+import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { convertFitToKrdLap, convertKrdToFitLap } from "../lap";
 import { mapFitSessionToKrd } from "../session";
 import { convertKrdToFitSession } from "../session/krd-to-fit-session.converter";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import {
   FIT_TO_KRD_SPORT,
   KRD_TO_FIT_SPORT,
   mapSportToFit,
   mapSportToKrd,
 } from "../sport/sport.mapper";
+import type { FitTargetData } from "../target/target.converter";
+import { convertFitTarget } from "../target/target.converter";
 
 const buildWorkoutKrd = (sport: string): KRD =>
   buildKRD.build({
@@ -87,6 +95,63 @@ describe("Round-trip: sport field (snake↔camel mapper)", () => {
     // Assert
     expect(fitMessage.sport).toBe("rowing");
     expect(decoded.sport).toBe("rowing");
+  });
+});
+
+describe("Round-trip: power range target (targetValue:0 sentinel)", () => {
+  it("should preserve a power range through KRD encode then FIT decode", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const krd = buildKRD.build({
+      version: "1.0",
+      type: "structured_workout",
+      metadata: buildKRDMetadata.build({ sport: "cycling" }),
+      extensions: {
+        structured_workout: {
+          name: "Power Range Round-Trip",
+          sport: "cycling",
+          steps: [
+            buildWorkoutStep.build({
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: {
+                  unit: "range",
+                  min: FIT_TARGET_POWER_RANGE_LOW,
+                  max: FIT_TARGET_POWER_RANGE_HIGH,
+                },
+              },
+            }),
+          ],
+        },
+      },
+    });
+    const messages = convertKRDToMessages(krd, logger);
+    const stepMsg = messages.find(
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as FitTargetData & { mesgNum: number };
+
+    // Act
+    const decodedTarget = convertFitTarget(stepMsg);
+
+    // Assert
+    expect(stepMsg.targetValue).toBe(0);
+    expect(stepMsg.customTargetPowerLow).toBe(FIT_TARGET_POWER_RANGE_LOW);
+    expect(stepMsg.customTargetPowerHigh).toBe(FIT_TARGET_POWER_RANGE_HIGH);
+    expect(decodedTarget).toStrictEqual({
+      type: "power",
+      value: {
+        unit: "range",
+        min: FIT_TARGET_POWER_RANGE_LOW,
+        max: FIT_TARGET_POWER_RANGE_HIGH,
+      },
+    });
   });
 });
 

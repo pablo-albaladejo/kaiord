@@ -26,8 +26,8 @@ export const extractIntervals = (
     const data = workout[type as keyof typeof workout];
     if (data) {
       if (Array.isArray(data)) {
-        for (const item of data) {
-          intervals.push({ type, data: item as Record<string, unknown> });
+        for (const interval of data) {
+          intervals.push({ type, data: interval as Record<string, unknown> });
         }
       } else {
         intervals.push({ type, data: data as Record<string, unknown> });

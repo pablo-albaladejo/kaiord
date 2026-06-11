@@ -38,7 +38,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
       const outputContent = await readFile(outputPath, "utf-8");
 
       // Act
@@ -65,7 +65,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
 
       // Act
       const outputBuffer = await readFile(outputPath);
@@ -141,7 +141,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
 
       // Act
       const outputContent = await readFile(outputPath, "utf-8");
@@ -177,7 +177,7 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode, result.stderr).toBe(0);
       const outputContent = await readFile(outputPath, "utf-8");
 
       // Act
@@ -186,6 +186,108 @@ describe("convert command integration tests", () => {
       // Assert
       expect(krd.version).toBeDefined();
       expect(krd.type).toBe("structured_workout");
+    }
+  );
+
+  it(
+    "should reject an unsupported output format and name the invalid value",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const cliPath = resolve(__dirname, "../bin/kaiord.ts");
+      const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+      const outputPath = join(tempDir.path, "output.bogus");
+      const result = await execa(
+        "tsx",
+        [
+          cliPath,
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+          "--output-format",
+          "bogus",
+        ],
+        {
+          reject: false,
+        }
+      );
+
+      // Act
+      const output = stripAnsi(result.stderr);
+
+      // Assert
+      expect(result.exitCode).not.toBe(0);
+      expect(output).toContain("bogus");
+    }
+  );
+
+  it(
+    "should produce a TCX document when converting KRD to TCX",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const cliPath = resolve(__dirname, "../bin/kaiord.ts");
+      const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+      const outputPath = join(tempDir.path, "output.tcx");
+      const result = await execa(
+        "tsx",
+        [
+          cliPath,
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+          "--output-format",
+          "tcx",
+        ],
+        {
+          reject: false,
+        }
+      );
+      expect(result.exitCode, result.stderr).toBe(0);
+
+      // Act
+      const outputContent = await readFile(outputPath, "utf-8");
+
+      // Assert
+      expect(outputContent).toContain("<TrainingCenterDatabase");
+    }
+  );
+
+  it(
+    "should produce a ZWO document when converting KRD to ZWO",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const cliPath = resolve(__dirname, "../bin/kaiord.ts");
+      const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+      const outputPath = join(tempDir.path, "output.zwo");
+      const result = await execa(
+        "tsx",
+        [
+          cliPath,
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+          "--output-format",
+          "zwo",
+        ],
+        {
+          reject: false,
+        }
+      );
+      expect(result.exitCode, result.stderr).toBe(0);
+
+      // Act
+      const outputContent = await readFile(outputPath, "utf-8");
+
+      // Assert
+      expect(outputContent).toContain("<workout_file");
     }
   );
 
@@ -213,7 +315,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const stderr = stripAnsi(result.stderr);
@@ -246,7 +348,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const stdout = stripAnsi(result.stdout);
@@ -279,7 +381,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = JSON.parse(result.stdout);
@@ -318,7 +420,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
         const stderr = result.stderr;
         const lines = stderr.split("\n").filter((line) => line.trim());
 
@@ -366,7 +468,7 @@ describe("convert command integration tests", () => {
             },
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
         const combinedOutput = result.stdout + result.stderr;
 
         // Act
@@ -376,7 +478,7 @@ describe("convert command integration tests", () => {
         if (combinedOutput.length > 0) {
           expect(combinedOutput).not.toBe(strippedOutput); // Has ANSI codes
         }
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
       }
     );
 
@@ -411,8 +513,8 @@ describe("convert command integration tests", () => {
         );
 
         // Assert
-        expect(result.exitCode).toBe(0);
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
       }
     );
 
@@ -441,7 +543,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = JSON.parse(result.stdout);
@@ -482,7 +584,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = stripAnsi(result.stdout);
@@ -573,7 +675,7 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode, result.stderr).toBe(0);
 
         // Act
         const output = stripAnsi(result.stdout);

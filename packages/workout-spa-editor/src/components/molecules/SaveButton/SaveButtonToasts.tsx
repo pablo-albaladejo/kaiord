@@ -1,4 +1,4 @@
-import type { ToastItem } from "../../../hooks/useToast";
+import type { ToastItem } from "../../../hooks/use-toast";
 import { Toast } from "../../atoms/Toast";
 
 type SaveButtonToastsProps = {

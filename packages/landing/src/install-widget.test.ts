@@ -67,12 +67,12 @@ describe("install widget", () => {
     expect(
       root.querySelector('[data-pm="npm"]')?.getAttribute("aria-selected")
     ).toBe("false");
-    expect(root.querySelector('[data-pm="yarn"]')?.getAttribute("tabindex")).toBe(
-      "0"
-    );
-    expect(root.querySelector('[data-pm="npm"]')?.getAttribute("tabindex")).toBe(
-      "-1"
-    );
+    expect(
+      root.querySelector('[data-pm="yarn"]')?.getAttribute("tabindex")
+    ).toBe("0");
+    expect(
+      root.querySelector('[data-pm="npm"]')?.getAttribute("tabindex")
+    ).toBe("-1");
   });
 
   it("should swap the command when the mobile select changes", () => {
@@ -113,8 +113,8 @@ describe("install widget", () => {
     expect(
       root.querySelector("#check-icon")?.classList.contains("hidden")
     ).toBe(true);
-    expect(
-      root.querySelector("#copy-icon")?.classList.contains("hidden")
-    ).toBe(false);
+    expect(root.querySelector("#copy-icon")?.classList.contains("hidden")).toBe(
+      false
+    );
   });
 });

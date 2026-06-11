@@ -28,40 +28,27 @@ describe("formatSchema", () => {
   });
 });
 
-describe("BINARY_FORMATS", () => {
-  it("should contain only fit", () => {
+describe("binary format classification", () => {
+  it("should mark only fit as binary in both the set and the predicate", () => {
     // Arrange
 
     // Act
 
     // Assert
     expect(BINARY_FORMATS.has("fit")).toBe(true);
-    expect(BINARY_FORMATS.has("tcx")).toBe(false);
-    expect(BINARY_FORMATS.has("zwo")).toBe(false);
-    expect(BINARY_FORMATS.has("gcn")).toBe(false);
-    expect(BINARY_FORMATS.has("krd")).toBe(false);
-  });
-});
-
-describe("isBinaryFormat", () => {
-  it("should return true for FIT format", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
     expect(isBinaryFormat("fit")).toBe(true);
   });
 
-  it("should return false for text formats", () => {
+  it("should mark text formats as non-binary in both the set and the predicate", () => {
     // Arrange
+    const textFormats = ["tcx", "zwo", "gcn", "krd"] as const;
 
     // Act
 
     // Assert
-    expect(isBinaryFormat("tcx")).toBe(false);
-    expect(isBinaryFormat("zwo")).toBe(false);
-    expect(isBinaryFormat("gcn")).toBe(false);
-    expect(isBinaryFormat("krd")).toBe(false);
+    for (const format of textFormats) {
+      expect(BINARY_FORMATS.has(format)).toBe(false);
+      expect(isBinaryFormat(format)).toBe(false);
+    }
   });
 });

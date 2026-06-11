@@ -44,4 +44,4 @@ export const extractTextEvents = (
 export { mapFreeRideToKrd } from "./free-ride.mapper";
 export { mapIntervalsTToKrd } from "./intervals-t.mapper";
 export { mapCooldownToKrd, mapRampToKrd, mapWarmupToKrd } from "./ramp.mapper";
-export { mapSteadyStateToKrd } from "./steady-state.mapper";
+export { convertSteadyStateToKrd } from "./steady-state.converter";

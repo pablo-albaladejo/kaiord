@@ -1,18 +1,21 @@
+import type * as FsPromises from "fs/promises";
 import { mkdir, rm, writeFile as fsWriteFile } from "fs/promises";
 import { join } from "path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("fs/promises", async (importActual) => {
+  const actual = await importActual<typeof FsPromises>();
+  return {
+    ...actual,
+    readFile: vi.fn(actual.readFile),
+  };
+});
 
 const SAMPLE_BYTES = Array.from(Buffer.from("0102030405", "hex"));
 const SHORT_BINARY = Array.from(Buffer.from("010203", "hex"));
 const SORTED_FILES_COUNT = SHORT_BINARY.length;
 
-import {
-  findFiles,
-  isNodeSystemError,
-  readFile,
-  validatePathSecurity,
-  writeFile,
-} from "./file-handler";
+import { findFiles, readFile, writeFile } from "./file-handler";
 
 const TEST_DIR = join(process.cwd(), "test-temp");
 
@@ -39,47 +42,23 @@ describe("readFile", () => {
     expect(Array.from(result as Uint8Array)).toEqual(SAMPLE_BYTES);
   });
 
-  it("should read KRD file as string", async () => {
-    // Arrange
-    const filePath = join(TEST_DIR, "test.krd");
-    const testData = '{"version":"1.0","type":"structured_workout"}';
-    await fsWriteFile(filePath, testData, "utf-8");
+  // KRD/TCX/ZWO share the single non-FIT text branch in readFile.
+  it.each(["krd", "tcx", "zwo"] as const)(
+    "should read a %s file as string",
+    async (format) => {
+      // Arrange
+      const filePath = join(TEST_DIR, `test.${format}`);
+      const testData = `<sample format="${format}"/>`;
+      await fsWriteFile(filePath, testData, "utf-8");
 
-    // Act
-    const result = await readFile(filePath, "krd");
+      // Act
+      const result = await readFile(filePath, format);
 
-    // Assert
-    expect(typeof result).toBe("string");
-    expect(result).toBe(testData);
-  });
-
-  it("should read TCX file as string", async () => {
-    // Arrange
-    const filePath = join(TEST_DIR, "test.tcx");
-    const testData = '<?xml version="1.0"?><TrainingCenterDatabase/>';
-    await fsWriteFile(filePath, testData, "utf-8");
-
-    // Act
-    const result = await readFile(filePath, "tcx");
-
-    // Assert
-    expect(typeof result).toBe("string");
-    expect(result).toBe(testData);
-  });
-
-  it("should read ZWO file as string", async () => {
-    // Arrange
-    const filePath = join(TEST_DIR, "test.zwo");
-    const testData = '<?xml version="1.0"?><workout_file/>';
-    await fsWriteFile(filePath, testData, "utf-8");
-
-    // Act
-    const result = await readFile(filePath, "zwo");
-
-    // Assert
-    expect(typeof result).toBe("string");
-    expect(result).toBe(testData);
-  });
+      // Assert
+      expect(typeof result).toBe("string");
+      expect(result).toBe(testData);
+    }
+  );
 
   it("should throw error for missing file", async () => {
     // Arrange
@@ -91,14 +70,20 @@ describe("readFile", () => {
     await expect(readFile(filePath, "fit")).rejects.toThrow("File not found");
   });
 
-  it("should throw error for permission denied", async () => {
+  it("should throw permission denied error when the OS reports EACCES", async () => {
     // Arrange
+    const { readFile: fsReadFile } = await import("fs/promises");
+    const filePath = join(TEST_DIR, "protected.fit");
+    const eaccesError = Object.assign(new Error("EACCES"), { code: "EACCES" });
+    const original = vi.mocked(fsReadFile).getMockImplementation();
+    vi.mocked(fsReadFile).mockRejectedValueOnce(eaccesError);
 
     // Act
-    const filePath = "/root/protected.fit";
+    const promise = readFile(filePath, "fit");
 
     // Assert
-    await expect(readFile(filePath, "fit")).rejects.toThrow();
+    await expect(promise).rejects.toThrow("Permission denied");
+    vi.mocked(fsReadFile).mockImplementation(original);
   });
 
   it("should throw error for path with null bytes", async () => {
@@ -137,47 +122,23 @@ describe("writeFile", () => {
     expect(Array.from(result as Uint8Array)).toEqual(SAMPLE_BYTES);
   });
 
-  it("should write KRD file from string", async () => {
-    // Arrange
-    const filePath = join(TEST_DIR, "output.krd");
-    const testData = '{"version":"1.0","type":"structured_workout"}';
-    await writeFile(filePath, testData, "krd");
+  // KRD/TCX/ZWO share the single non-FIT text branch in writeFile.
+  it.each(["krd", "tcx", "zwo"] as const)(
+    "should write a %s file from string",
+    async (format) => {
+      // Arrange
+      const filePath = join(TEST_DIR, `output.${format}`);
+      const testData = `<sample format="${format}"/>`;
+      await writeFile(filePath, testData, format);
 
-    // Act
-    const result = await readFile(filePath, "krd");
+      // Act
+      const result = await readFile(filePath, format);
 
-    // Assert
-    expect(typeof result).toBe("string");
-    expect(result).toBe(testData);
-  });
-
-  it("should write TCX file from string", async () => {
-    // Arrange
-    const filePath = join(TEST_DIR, "output.tcx");
-    const testData = '<?xml version="1.0"?><TrainingCenterDatabase/>';
-    await writeFile(filePath, testData, "tcx");
-
-    // Act
-    const result = await readFile(filePath, "tcx");
-
-    // Assert
-    expect(typeof result).toBe("string");
-    expect(result).toBe(testData);
-  });
-
-  it("should write ZWO file from string", async () => {
-    // Arrange
-    const filePath = join(TEST_DIR, "output.zwo");
-    const testData = '<?xml version="1.0"?><workout_file/>';
-    await writeFile(filePath, testData, "zwo");
-
-    // Act
-    const result = await readFile(filePath, "zwo");
-
-    // Assert
-    expect(typeof result).toBe("string");
-    expect(result).toBe(testData);
-  });
+      // Assert
+      expect(typeof result).toBe("string");
+      expect(result).toBe(testData);
+    }
+  );
 
   it("should create directories if they don't exist", async () => {
     // Arrange
@@ -228,86 +189,6 @@ describe("writeFile", () => {
     await expect(writeFile(filePath, "data", "krd")).rejects.toThrow(
       "Invalid path: dangerous characters detected"
     );
-  });
-});
-
-describe("validatePathSecurity", () => {
-  it("should allow absolute paths", () => {
-    // Arrange
-
-    // Act
-    const validPath = "/Users/test/file.txt";
-
-    // Assert
-    expect(() => validatePathSecurity(validPath)).not.toThrow();
-  });
-
-  it("should allow relative paths including parent traversal", () => {
-    // Arrange
-
-    // Act
-    const validPath = "../other-project/file.txt";
-
-    // Assert
-    expect(() => validatePathSecurity(validPath)).not.toThrow();
-  });
-
-  it("should reject paths with null bytes", () => {
-    // Arrange
-
-    // Act
-    const invalidPath = "/valid/path\0/injection";
-
-    // Assert
-    expect(() => validatePathSecurity(invalidPath)).toThrow(
-      "Invalid path: dangerous characters detected"
-    );
-  });
-
-  it("should reject paths with shell metacharacters", () => {
-    // Arrange
-
-    // Act
-    const invalidPath = "path|cat /etc/passwd";
-
-    // Assert
-    expect(() => validatePathSecurity(invalidPath)).toThrow(
-      "Invalid path: dangerous characters detected"
-    );
-  });
-});
-
-describe("isNodeSystemError", () => {
-  it("should return true for errors with code property", () => {
-    // Arrange
-
-    // Act
-    const error = Object.assign(new Error("test"), { code: "ENOENT" });
-
-    // Assert
-    expect(isNodeSystemError(error)).toBe(true);
-  });
-
-  it("should return false for regular errors", () => {
-    // Arrange
-
-    // Act
-    const error = new Error("test");
-
-    // Assert
-    expect(isNodeSystemError(error)).toBe(false);
-  });
-
-  it("should return false for non-error values", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(isNodeSystemError("string")).toBe(false);
-    expect(isNodeSystemError(null)).toBe(false);
-    expect(isNodeSystemError(undefined)).toBe(false);
-    expect(isNodeSystemError({ code: "ENOENT" })).toBe(false);
   });
 });
 

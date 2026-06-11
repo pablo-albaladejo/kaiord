@@ -4,6 +4,7 @@ import {
   complianceBucketToBorderClass,
   statusToColourClass,
   statusToIcon,
+  workoutStateToColourClass,
 } from "./status-tokens";
 
 describe("statusToColourClass", () => {
@@ -72,6 +73,31 @@ describe("statusToIcon", () => {
 
     expect(icon.label).toBe("Skipped");
   });
+});
+
+describe("workoutStateToColourClass", () => {
+  it.each([
+    ["stale", "border-amber-600"],
+    ["modified", "border-amber-600"],
+    ["raw", "border-amber-600"],
+    ["structured", "border-slate-500"],
+    ["skipped", "border-slate-500"],
+    ["ready", "border-emerald-600"],
+    ["pushed", "border-emerald-600"],
+  ] as const)(
+    "should map the %s workout state to the %s border token",
+    (state, expected) => {
+      // Arrange
+
+      // Act
+
+      const cls = workoutStateToColourClass(state);
+
+      // Assert
+
+      expect(cls).toBe(expected);
+    }
+  );
 });
 
 describe("complianceBucketToBorderClass", () => {

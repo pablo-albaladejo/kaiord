@@ -9,9 +9,11 @@ import {
 import {
   convertZwiftCadenceTarget,
   convertZwiftPaceTarget,
+} from "./pace-cadence.converter";
+import {
   convertZwiftPowerRange,
   convertZwiftPowerTarget,
-} from "./target.converter";
+} from "./power.converter";
 
 /**
  * Map Zwift Power attribute to KRD power target

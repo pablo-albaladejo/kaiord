@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useContext } from "react";
 
-import { useToast } from "../hooks/useToast";
-import type { ToastOptions } from "../hooks/useToast.types";
+import { useToast } from "../hooks/use-toast";
+import type { ToastOptions } from "../hooks/use-toast.types";
 
 type ToastContextType = ReturnType<typeof useToast>;
 

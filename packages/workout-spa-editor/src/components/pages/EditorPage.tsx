@@ -9,7 +9,7 @@
 import { useSearch } from "wouter";
 
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
-import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
+import { useDeleteCleanup } from "../../hooks/use-delete-cleanup";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";

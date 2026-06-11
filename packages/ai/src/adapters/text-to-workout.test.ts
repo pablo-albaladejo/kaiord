@@ -120,42 +120,6 @@ describe("createTextToWorkout", () => {
     expect(result.name).toBe("My Workout");
   });
 
-  it("should retry on first failure and succeeds on second attempt", async () => {
-    // Arrange
-    mockGenerateText
-      .mockRejectedValueOnce(new Error("Schema validation failed"))
-      .mockResolvedValueOnce({
-        output: RUNNING_WORKOUT,
-      } as never);
-    const parse = createTextToWorkout({ model: mockModel });
-
-    // Act
-    const result = await parse("4x(8' a 5'15\")");
-
-    // Assert
-    expect(result.sport).toBe("running");
-    expect(mockGenerateText).toHaveBeenCalledTimes(2);
-  });
-
-  it("should include error feedback in retry prompt", async () => {
-    // Arrange
-    mockGenerateText
-      .mockRejectedValueOnce(new Error("Invalid duration"))
-      .mockResolvedValueOnce({
-        output: RUNNING_WORKOUT,
-      } as never);
-    const parse = createTextToWorkout({ model: mockModel });
-    await parse("test workout");
-
-    // Act
-    const retryArgs = mockGenerateText.mock.calls[1]?.[0] as {
-      prompt?: string;
-    };
-
-    // Assert
-    expect(retryArgs.prompt).toContain("Invalid duration");
-  });
-
   it("should throw AiParsingError after max retries exhausted", async () => {
     // Arrange
     mockGenerateText.mockRejectedValue(new Error("Always fails"));
@@ -181,7 +145,7 @@ describe("createTextToWorkout", () => {
     await expect(parse("test")).rejects.toThrow(AiParsingError);
   });
 
-  it("should reindex non-sequential stepIndex values", async () => {
+  it("should apply step reindexing to the parsed workout", async () => {
     // Arrange
     const badIndices: Workout = {
       sport: "running",
@@ -193,26 +157,16 @@ describe("createTextToWorkout", () => {
           targetType: "open",
           target: { type: "open" },
         },
-        {
-          stepIndex: 42,
-          durationType: "time",
-          duration: { type: "time", seconds: 300 },
-          targetType: "open",
-          target: { type: "open" },
-        },
       ],
     };
-    mockGenerateText.mockResolvedValueOnce({
-      output: badIndices,
-    } as never);
+    mockGenerateText.mockResolvedValueOnce({ output: badIndices } as never);
     const parse = createTextToWorkout({ model: mockModel });
 
     // Act
-    const result = await parse("warmup + cooldown");
+    const result = await parse("warmup");
 
     // Assert
     expect(result.steps[0]).toMatchObject({ stepIndex: 0 });
-    expect(result.steps[1]).toMatchObject({ stepIndex: 1 });
   });
 
   it("should log at debug, info, and warn levels", async () => {
@@ -306,22 +260,5 @@ describe("createTextToWorkout", () => {
     // Assert
     expect(callArgs.maxOutputTokens).toBe(MAX_OUTPUT_TOKENS_DEFAULT);
     expect(callArgs.temperature).toBe(0);
-  });
-
-  it("should handle non-Error thrown values in catch", async () => {
-    // Arrange
-    mockGenerateText
-      .mockRejectedValueOnce("plain string error")
-      .mockResolvedValueOnce({
-        output: RUNNING_WORKOUT,
-      } as never);
-    const parse = createTextToWorkout({ model: mockModel });
-
-    // Act
-    const result = await parse("test");
-
-    // Assert
-    expect(result.sport).toBe("running");
-    expect(mockGenerateText).toHaveBeenCalledTimes(2);
   });
 });

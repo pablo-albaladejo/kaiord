@@ -6,11 +6,11 @@ import {
 } from "@kaiord/core";
 
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
-import type { TargetMapperOptions } from "../mappers/target.converter";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
 import { mapRepetitionBlock } from "./garmin-repetition.converter";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";
+import type { TargetMapperOptions } from "./target-types";
 
 export type GarminWriterOptions = TargetMapperOptions & {
   logger: Logger;

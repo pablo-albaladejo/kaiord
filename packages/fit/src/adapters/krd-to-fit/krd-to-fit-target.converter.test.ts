@@ -32,7 +32,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message).toStrictEqual({ targetType: "open" });
   });
 
-  it("should dispatch power → convertPowerTarget", () => {
+  it("should encode a power target as FIT targetType power", () => {
     // Arrange
     const step = baseStep("power", {
       type: "power",
@@ -48,7 +48,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetPowerZone).toBe(FIT_TARGET_POWER_ZONE_3);
   });
 
-  it("should dispatch heart_rate → convertHeartRateTarget", () => {
+  it("should encode a heart-rate target as FIT targetType heartRate", () => {
     // Arrange
     const step = baseStep("heart_rate", {
       type: "heart_rate",
@@ -79,7 +79,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetType).toBe("cadence");
   });
 
-  it("should dispatch pace → convertPaceTarget", () => {
+  it("should encode a pace target as FIT targetType speed", () => {
     // Arrange
     const step = baseStep("pace", {
       type: "pace",
@@ -94,7 +94,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetType).toBe("speed");
   });
 
-  it("should dispatch stroke_type → convertStrokeTarget", () => {
+  it("should encode a stroke-type target as FIT targetType swimStroke", () => {
     // Arrange
     const step = baseStep("stroke_type", {
       type: "stroke_type",

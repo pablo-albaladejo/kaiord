@@ -39,7 +39,8 @@ describe("mapManufacturer", () => {
     // Arrange
     const logger = createMockLogger();
 
-    // Act — "wahooFitness" is the FIT enum value; user inputs just "wahoo"
+    // Act
+    // "wahooFitness" is the FIT enum value; user inputs just "wahoo"
     const result = mapManufacturer("wahoo", logger);
 
     // Assert
@@ -51,7 +52,8 @@ describe("mapManufacturer", () => {
     // Arrange
     const logger = createMockLogger();
 
-    // Act — "garmin connect" starts with the "garmin" enum value
+    // Act
+    // "garmin connect" starts with the "garmin" enum value
     const result = mapManufacturer("garmin connect", logger);
 
     // Assert

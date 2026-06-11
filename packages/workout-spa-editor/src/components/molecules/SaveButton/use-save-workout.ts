@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts";
-import { useToast } from "../../../hooks/useToast";
+import { useToast } from "../../../hooks/use-toast";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { createSaveHandler } from "./save-handler";

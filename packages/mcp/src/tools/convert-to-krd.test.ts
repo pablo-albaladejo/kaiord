@@ -35,7 +35,7 @@ describe("convertToKrd", () => {
     expect(result.type).toBe("structured_workout");
   });
 
-  it("should convert KRD file to KRD object", async () => {
+  it("should convert a KRD file with format auto-detected from the extension", async () => {
     // Arrange
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
     const filePath = join(tmpDir, "test.krd");
@@ -46,6 +46,7 @@ describe("convertToKrd", () => {
 
     // Assert
     expect(result.version).toBe("1.0");
+    expect(result.type).toBe("structured_workout");
   });
 
   it("should convert TCX text content to KRD", async () => {
@@ -72,19 +73,6 @@ describe("convertToKrd", () => {
     // Assert
     expect(result.version).toBe("1.0");
     expect(result.type).toBe("structured_workout");
-  });
-
-  it("should auto-detect format from file extension", async () => {
-    // Arrange
-    const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
-    const filePath = join(tmpDir, "input.krd");
-    await writeFile(filePath, krdJson);
-
-    // Act
-    const result = await convertToKrd(filePath, undefined, undefined, logger);
-
-    // Assert
-    expect(result.version).toBe("1.0");
   });
 
   it("should throw when format cannot be detected", async () => {

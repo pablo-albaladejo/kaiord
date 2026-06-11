@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useSearch } from "wouter";
 
 import { useAnalytics } from "../../../contexts/analytics-context";
-import { useAppHandlers } from "../../../hooks/useAppHandlers";
+import { useAppHandlers } from "../../../hooks/use-app-handlers";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { FileUpload } from "../../molecules/FileUpload/FileUpload";
 import { useImportOnLoad } from "./use-import-on-load";

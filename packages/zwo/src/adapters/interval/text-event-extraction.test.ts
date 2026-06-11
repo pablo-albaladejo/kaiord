@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { mapFreeRideToKrd } from "./free-ride.mapper";
 import { mapIntervalsTToKrd } from "./intervals-t.mapper";
 import { mapRampToKrd } from "./ramp.mapper";
-import { mapSteadyStateToKrd } from "./steady-state.mapper";
+import { convertSteadyStateToKrd } from "./steady-state.converter";
 
 describe("text event extraction", () => {
   describe("single text event", () => {
@@ -21,7 +21,7 @@ describe("text event extraction", () => {
       };
 
       // Act
-      const result = mapSteadyStateToKrd(data);
+      const result = convertSteadyStateToKrd(data);
 
       // Assert
       expect(result.notes).toBe("Push hard!");
@@ -156,7 +156,7 @@ describe("text event extraction", () => {
       };
 
       // Act
-      const result = mapSteadyStateToKrd(data);
+      const result = convertSteadyStateToKrd(data);
 
       // Assert
       expect(result.notes).toBe("Start strong");
@@ -200,7 +200,7 @@ describe("text event extraction", () => {
       };
 
       // Act
-      const result = mapSteadyStateToKrd(data);
+      const result = convertSteadyStateToKrd(data);
 
       // Assert
       expect(result.notes).toBe("Start");
@@ -232,7 +232,7 @@ describe("text event extraction", () => {
       };
 
       // Act
-      const result = mapSteadyStateToKrd(data);
+      const result = convertSteadyStateToKrd(data);
 
       // Assert
       expect(result.notes).toBeUndefined();
@@ -250,7 +250,7 @@ describe("text event extraction", () => {
       };
 
       // Act
-      const result = mapSteadyStateToKrd(data);
+      const result = convertSteadyStateToKrd(data);
 
       // Assert
       expect(result.notes).toBeUndefined();

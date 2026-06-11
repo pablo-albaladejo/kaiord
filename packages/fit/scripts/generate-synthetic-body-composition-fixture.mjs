@@ -31,7 +31,7 @@ import { resolve } from "node:path";
 
 const OUTPUT_PATH = resolve(
   import.meta.dirname,
-  "../../../test-fixtures/fit/HealthBodyComposition.fit",
+  "../../../test-fixtures/fit/HealthBodyComposition.fit"
 );
 
 const FILE_ID_MESG_NUM = 0;
@@ -60,12 +60,52 @@ Profile.messages[BODY_COMPOSITION_MESG_NUM] = {
   name: "bodyComposition",
   messagesKey: "bodyCompositionMesgs",
   fields: {
-    253: baseField({ num: 253, name: "timestamp", type: "dateTime", baseType: "uint32" }),
-    0: baseField({ num: 0, name: "percentFat", type: "uint16", baseType: "uint16", scale: PERCENT_SCALE, units: "%" }),
-    1: baseField({ num: 1, name: "percentHydration", type: "uint16", baseType: "uint16", scale: PERCENT_SCALE, units: "%" }),
-    4: baseField({ num: 4, name: "boneMass", type: "uint16", baseType: "uint16", scale: FIT_KG_SCALE, units: "kg" }),
-    5: baseField({ num: 5, name: "muscleMass", type: "uint16", baseType: "uint16", scale: FIT_KG_SCALE, units: "kg" }),
-    8: baseField({ num: 8, name: "bmi", type: "uint16", baseType: "uint16", scale: BMI_SCALE, units: "" }),
+    253: baseField({
+      num: 253,
+      name: "timestamp",
+      type: "dateTime",
+      baseType: "uint32",
+    }),
+    0: baseField({
+      num: 0,
+      name: "percentFat",
+      type: "uint16",
+      baseType: "uint16",
+      scale: PERCENT_SCALE,
+      units: "%",
+    }),
+    1: baseField({
+      num: 1,
+      name: "percentHydration",
+      type: "uint16",
+      baseType: "uint16",
+      scale: PERCENT_SCALE,
+      units: "%",
+    }),
+    4: baseField({
+      num: 4,
+      name: "boneMass",
+      type: "uint16",
+      baseType: "uint16",
+      scale: FIT_KG_SCALE,
+      units: "kg",
+    }),
+    5: baseField({
+      num: 5,
+      name: "muscleMass",
+      type: "uint16",
+      baseType: "uint16",
+      scale: FIT_KG_SCALE,
+      units: "kg",
+    }),
+    8: baseField({
+      num: 8,
+      name: "bmi",
+      type: "uint16",
+      baseType: "uint16",
+      scale: BMI_SCALE,
+      units: "",
+    }),
   },
 };
 

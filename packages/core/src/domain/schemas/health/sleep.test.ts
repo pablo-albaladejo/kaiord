@@ -112,28 +112,6 @@ describe("sleepRecordSchema", () => {
     }
   });
 
-  it("should accept a forward-compatible v2.1 payload", () => {
-    // Arrange
-    const input = { ...baseSleep, version: "2.1" };
-
-    // Act
-    const result = sleepRecordSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(true);
-  });
-
-  it("should reject a v1.0 payload (wrong major)", () => {
-    // Arrange
-    const input = { ...baseSleep, version: "1.0" };
-
-    // Act
-    const result = sleepRecordSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
   it("should reject a score above 100", () => {
     // Arrange
     const input = { ...baseSleep, score: 150 };

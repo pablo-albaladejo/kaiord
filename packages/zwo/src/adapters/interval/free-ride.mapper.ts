@@ -2,7 +2,7 @@ import type { WorkoutStep } from "@kaiord/core";
 import { intensitySchema, targetTypeSchema } from "@kaiord/core";
 
 import type { ZwiftDurationData } from "../duration/duration.mapper";
-import { mapZwiftDuration } from "../duration/duration.mapper";
+import { convertOriginalZwiftDuration } from "../duration/original-duration.converter";
 import type { ZwiftTextEvent } from "./index";
 import { extractTextEvents } from "./index";
 
@@ -26,7 +26,7 @@ export const mapFreeRideToKrd = (data: ZwiftFreeRideData): WorkoutStep => {
     durationType: data.durationType,
   };
 
-  const duration = mapZwiftDuration(durationData);
+  const duration = convertOriginalZwiftDuration(durationData);
 
   const textEventData = extractTextEvents(data.textevent);
 
