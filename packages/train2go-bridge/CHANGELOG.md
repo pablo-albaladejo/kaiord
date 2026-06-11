@@ -1,5 +1,16 @@
 # @kaiord/train2go-bridge
 
+## 9.1.0
+
+### Patch Changes
+
+- d1d759d: Harden HTML sanitization in the Train2Go parser: entity decoding is now
+  single-pass (no double-unescaping of payloads like `&amp;lt;`) and tag,
+  comment, and script/style stripping repeat until stable so interleaved
+  markup cannot re-form a tag after one pass. Resolves the CodeQL
+  `js/double-escaping` and `js/incomplete-multi-character-sanitization`
+  findings.
+
 ## 7.2.1
 
 ### Patch Changes
