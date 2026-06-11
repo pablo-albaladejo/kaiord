@@ -5,17 +5,32 @@
  * Designed for graceful degradation: returns empty arrays on malformed HTML.
  */
 
+const NAMED_ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"' };
+
+// Single-pass decode: sequential .replace() chains double-decode
+// payloads like `&amp;lt;` (first pass yields `&lt;`, second yields
+// `<`), which is what CodeQL's js/double-escaping flags.
 const decodeEntities = (text) =>
-  text
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) =>
-      String.fromCharCode(parseInt(h, 16))
-    )
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#0?39;/g, "'");
+  text.replace(
+    /&(?:#(\d+)|#x([0-9a-f]+)|(amp|lt|gt|quot));/gi,
+    (match, dec, hex, named) => {
+      if (dec) return String.fromCharCode(Number(dec));
+      if (hex) return String.fromCharCode(parseInt(hex, 16));
+      return NAMED_ENTITIES[named.toLowerCase()];
+    }
+  );
+
+// Repeat a replacement until the string stops changing — a single pass
+// can leave new matches behind (e.g. stripping `<b>` from `<scr<b>ipt`
+// re-forms `<script`).
+const replaceUntilStable = (text, pattern, replacement) => {
+  let prev;
+  do {
+    prev = text;
+    text = text.replace(pattern, replacement);
+  } while (text !== prev);
+  return text;
+};
 
 const extractNumber = (text) => {
   const m = text?.match(/\d+/);
@@ -162,7 +177,7 @@ const extractDescription = (block) => {
   text = text.replace(/<\/(p|h[1-6]|li|ul|ol)>/gi, "\n");
   text = text.replace(/<(p|li)\b[^>]*>/gi, "\n");
   // Strip remaining HTML
-  text = text.replace(/<[^>]+>/g, "");
+  text = replaceUntilStable(text, /<[^>]+>/g, "");
   text = decodeEntities(text);
   // Clean up whitespace
   return text
@@ -190,11 +205,15 @@ const htmlToPlainText = (html) => {
   // Drop script/style blocks ENTIRE — including their text content —
   // before the tag-strip pass; otherwise the inner JS/CSS leaks into
   // the popup's textContent.
-  const noEmbedded = html.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, "");
+  const noEmbedded = replaceUntilStable(
+    html,
+    /<(script|style)[^>]*>[\s\S]*?<\/\1>/gi,
+    ""
+  );
   const withBreaks = noEmbedded
     .replace(/<\/(p|h[1-6]|li|div)>/gi, "$&\n")
     .replace(/<br\s*\/?>/gi, "\n");
-  const stripped = withBreaks.replace(/<[^>]+>/g, "");
+  const stripped = replaceUntilStable(withBreaks, /<[^>]+>/g, "");
   const decoded = decodeEntities(stripped);
   return decoded
     .replace(/\r\n?/g, "\n")
@@ -320,7 +339,7 @@ const parseHrZonesBlock = (html) => {
   // Generic → skip fallback per D-FB1. HTML comments are stripped
   // first so prose mentions of zone class names (e.g. fixture
   // headers) cannot anchor the wrapper regex.
-  const stripped = html.replace(/<!--[\s\S]*?-->/g, "");
+  const stripped = replaceUntilStable(html, /<!--[\s\S]*?-->/g, "");
   const block = sliceBetween(
     stripped,
     /id="hrzones-\d+"/,
