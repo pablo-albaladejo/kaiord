@@ -1,3 +1,5 @@
+> Completed: 2026-06-11
+
 # Proposal: test-minimality-naming-hardening
 
 ## Why
