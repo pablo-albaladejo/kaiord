@@ -1,14 +1,9 @@
 import type { BodyComposition } from "@kaiord/core";
 
+import { fitTimestampToIso } from "../../shared/fit-timestamp";
 import type { FitBodyComposition } from "./fit-body-composition.schema";
 
 const HEALTH_VERSION = "2.0";
-
-const toIsoString = (value: FitBodyComposition["timestamp"]): string => {
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value === "number") return new Date(value * 1000).toISOString();
-  return new Date(value).toISOString();
-};
 
 const FIT_KG_SCALE = 100;
 
@@ -51,7 +46,7 @@ export const mapFitBodyCompositionToKrd = (
   return {
     kind: "bodyComposition",
     version: HEALTH_VERSION,
-    measuredAt: toIsoString(fit.timestamp),
+    measuredAt: fitTimestampToIso(fit.timestamp),
     ...measurements,
   };
 };

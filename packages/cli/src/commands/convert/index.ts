@@ -3,11 +3,11 @@ import {
   loadConfigWithMetadata,
   mergeWithConfig,
 } from "../../utils/config-loader.js";
+import { mapErrorToExitCode } from "../../utils/error-exit-code.js";
 import { formatError } from "../../utils/error-formatter";
 import { ExitCode } from "../../utils/exit-codes";
 import { createLogger } from "../../utils/logger-factory";
 import { executeBatchConversion } from "./batch";
-import { mapErrorToExitCode } from "./error-exit-code";
 import { executeSingleFileConversion } from "./single-file";
 import type { ConvertOptions } from "./types";
 import { convertOptionsSchema } from "./types";

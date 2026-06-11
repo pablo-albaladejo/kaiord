@@ -1,8 +1,12 @@
-import type { Intensity, Target, WorkoutStep } from "@kaiord/core";
+// kaiord:* attributes carry KRD concepts Zwift's schema cannot express (watts,
+// power zones, HR targets, intensity) so a Zwift round-trip is lossless even
+// though native Zwift readers ignore them.
+import type { Intensity, Logger, Target, WorkoutStep } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
 
 import type { ZwiftDurationData } from "../duration/duration.mapper";
 import { convertZwiftPowerRange } from "../target/power.converter";
+import { restoreIntensity } from "./intensity-restoration";
 import {
   restoreHeartRateTarget,
   restorePowerTarget,
@@ -59,11 +63,10 @@ export const resolveRampTarget = (data: ZwiftRampData): Target => {
 
 export const resolveIntensity = (
   data: ZwiftRampData,
-  defaultIntensity: Intensity
+  defaultIntensity: Intensity,
+  logger?: Logger
 ): Intensity => {
-  return (
-    (data["kaiord:intensity"] as Intensity | undefined) || defaultIntensity
-  );
+  return restoreIntensity(data["kaiord:intensity"], logger, defaultIntensity);
 };
 
 export const addRampMetadata = (

@@ -1,5 +1,6 @@
 import type { Argv } from "yargs";
 
+import { FORMAT_CODES } from "../../utils/format-registry";
 import { convertCommand } from "./index";
 import type { ConvertOptions } from "./types";
 
@@ -25,12 +26,12 @@ export const convertYargsConfig = {
       })
       .option("input-format", {
         type: "string" as const,
-        choices: ["fit", "gcn", "krd", "tcx", "zwo"] as const,
+        choices: FORMAT_CODES,
         description: "Override input format detection",
       })
       .option("output-format", {
         type: "string" as const,
-        choices: ["fit", "gcn", "krd", "tcx", "zwo"] as const,
+        choices: FORMAT_CODES,
         description: "Override output format detection",
       })
       .example("$0 convert -i workout.fit -o workout.krd", "Convert FIT to KRD")

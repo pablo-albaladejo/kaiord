@@ -2,27 +2,27 @@
 
 ## 1. CLI failure contract (failure-semantics spec — critical)
 
-- [ ] 1.1 Confirm `ENVIRONMENT_ERROR`/`SERVICE_ERROR` numeric values against the existing `EXIT_CODES` table (design open question) and add them with doc comments
-- [ ] 1.2 Introduce typed errors for paths that currently throw raw `Error` with magic strings (`UnsupportedFormatError`, `DirectoryCreateError`, `EnvironmentError`); have `directory-handler.ts` and the schema/dependency-resolution failure paths throw them
-- [ ] 1.3 Build the single `mapErrorToExitCode` (instanceof/name-based) covering all existing codes plus the two new categories; route `bin/kaiord.ts` and every command handler through it
-- [ ] 1.4 Delete `commands/convert/error-exit-code.ts`, the name-table in `utils/error-exit-code.ts`, and the substring matching in `commands/{validate,inspect,extract-workout}/handle-error.ts` (the validate "only supports" matcher becomes a typed error)
-- [ ] 1.5 Add exit-code scenario tests: identical failure across convert/validate/inspect yields one code; reworded message keeps its code; unwritable output dir exits `DIRECTORY_CREATE_ERROR`; simulated missing schema exits `ENVIRONMENT_ERROR` with reinstall hint; simulated Garmin 503 exits `SERVICE_ERROR`
-- [ ] 1.6 Create the CLI `format-registry.ts` and feed the zod enum, yargs `choices`, converter dispatch, extension detection, and "Supported formats" strings from it; grep gate: format codes as string literals only inside the registry and tests
+- [x] 1.1 Confirm `ENVIRONMENT_ERROR`/`SERVICE_ERROR` numeric values against the existing `EXIT_CODES` table (design open question) and add them with doc comments
+- [x] 1.2 Introduce typed errors for paths that currently throw raw `Error` with magic strings (`UnsupportedFormatError`, `DirectoryCreateError`, `EnvironmentError`); have `directory-handler.ts` and the schema/dependency-resolution failure paths throw them
+- [x] 1.3 Build the single `mapErrorToExitCode` (instanceof/name-based) covering all existing codes plus the two new categories; route `bin/kaiord.ts` and every command handler through it
+- [x] 1.4 Delete `commands/convert/error-exit-code.ts`, the name-table in `utils/error-exit-code.ts`, and the substring matching in `commands/{validate,inspect,extract-workout}/handle-error.ts` (the validate "only supports" matcher becomes a typed error)
+- [x] 1.5 Add exit-code scenario tests: identical failure across convert/validate/inspect yields one code; reworded message keeps its code; unwritable output dir exits `DIRECTORY_CREATE_ERROR`; simulated missing schema exits `ENVIRONMENT_ERROR` with reinstall hint; simulated Garmin 503 exits `SERVICE_ERROR`
+- [x] 1.6 Create the CLI `format-registry.ts` and feed the zod enum, yargs `choices`, converter dispatch, extension detection, and "Supported formats" strings from it; grep gate: format codes as string literals only inside the registry and tests
 
 ## 2. Lossy-conversion honesty (conversion-loss-honesty spec)
 
-- [ ] 2.1 zwo: add the `Lossy conversion:` warning to the steady-state watts→%FTP branch in `power-encoder.ts`; hoist `ASSUMED_FTP_WATTS = 250` (single commented constant, both branches) and `UNSUPPORTED_DURATION_FALLBACK_SECONDS = 300` in `duration-encoder.ts`
-- [ ] 2.2 zwo: change `original-duration.converter.ts` restore coercions — attribute present-but-unparseable warns and restores open instead of `|| 0`; add tests for the corrupted-attribute scenario
-- [ ] 2.3 zwo: comment the `1000 / x` sec-per-km pace factor and the deliberate min↔max swap in `target-encoder.ts`; extract `normalizeAttributeNames` XML mechanics out of `intervals-processor.ts`
-- [ ] 2.4 garmin: name `GARMIN_STEP_NOTES_MAX`/`GARMIN_NAME_MAX` (resolving 255 vs 256 against Garmin's real limits), warn on truncation; warn on unknown condition/intensity/stroke defaults; warn-and-open for the `REPS` end-condition per the adapter-contracts delta; comment the `im↔mixed` value-5 collapse and the faster-first ordering convention on `mapRangeOrValue`/`resolvePaceZone`; comment the pool `unitId`/`factor` wire constants
-- [ ] 2.5 garmin: route `mapToWorkoutSummary.sport` through `mapGarminSportToKrd` (changeset `fix(garmin)`); test that listed summaries carry KRD sport vocabulary
+- [x] 2.1 zwo: add the `Lossy conversion:` warning to the steady-state watts→%FTP branch in `power-encoder.ts`; hoist `ASSUMED_FTP_WATTS = 250` (single commented constant, both branches) and `UNSUPPORTED_DURATION_FALLBACK_SECONDS = 300` in `duration-encoder.ts`
+- [x] 2.2 zwo: change `original-duration.converter.ts` restore coercions — attribute present-but-unparseable warns and restores open instead of `|| 0`; add tests for the corrupted-attribute scenario
+- [x] 2.3 zwo: comment the `1000 / x` sec-per-km pace factor and the deliberate min↔max swap in `target-encoder.ts`; extract `normalizeAttributeNames` XML mechanics out of `intervals-processor.ts`
+- [x] 2.4 garmin: name `GARMIN_STEP_NOTES_MAX`/`GARMIN_NAME_MAX` (resolving 255 vs 256 against Garmin's real limits), warn on truncation; warn on unknown condition/intensity/stroke defaults; warn-and-open for the `REPS` end-condition per the adapter-contracts delta; comment the `im↔mixed` value-5 collapse and the faster-first ordering convention on `mapRangeOrValue`/`resolvePaceZone`; comment the pool `unitId`/`factor` wire constants
+- [x] 2.5 garmin: route `mapToWorkoutSummary.sport` through `mapGarminSportToKrd` (changeset `fix(garmin)`); test that listed summaries carry KRD sport vocabulary
 - [ ] 2.6 tcx + zwo: handle the full 7-value intensity enum per the adapter-contracts delta — extend `extractIntensity`/intensity encoders to map representable members and emit `Lossy conversion:` warnings for the rest; round-trip tests for `rest` (representable) and `recovery` (lossy) per format
 - [ ] 2.7 tcx/zwo: add the `kaiord:` namespace purpose header to writer and reader extension modules (target-restoration, hr-target-restoration, ramp-helpers, duration-kaiord-restorer, metadata-encoder)
 
 ## 3. Shared named constants for duplicated rules
 
-- [ ] 3.1 fit: extract `hr-helpers.ts` (mirror of `power-helpers.ts`) owning the bpm `+100` offset for encode and decode; both converters import it; name the zone-validity bounds (`POWER_ZONE_MAX = 7`, `HR_ZONE_MAX = 5`, `PACE_ZONE_MAX = 5`) with the overload rule stated once
-- [ ] 3.2 fit: add a shared `fitTimestampToIso` helper replacing the seven duplicated `* 1000` + `Date|number|string` branches across health converters and `event.mapper.ts`
+- [x] 3.1 fit: extract `hr-helpers.ts` (mirror of `power-helpers.ts`) owning the bpm `+100` offset for encode and decode; both converters import it; name the zone-validity bounds (`POWER_ZONE_MAX = 7`, `HR_ZONE_MAX = 5`, `PACE_ZONE_MAX = 5`) with the overload rule stated once
+- [x] 3.2 fit: add a shared `fitTimestampToIso` helper replacing the seven duplicated `* 1000` + `Date|number|string` branches across health converters and `event.mapper.ts`
 - [ ] 3.3 core: export the health version gate once (named pattern or shared field schema) and import it in all six health schemas
 - [ ] 3.4 garmin-connect: name the retry-policy constants (`HTTP_TOO_MANY_REQUESTS`, server-error range, default retries/backoff) in `retry.ts`; add `nowEpochSeconds()` used by `sso-oauth.ts` and `token-manager.helpers.ts`; move the workout web URL from `garmin-workout-service.ts` into `urls.ts`
 

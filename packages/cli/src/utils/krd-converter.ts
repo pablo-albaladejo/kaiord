@@ -1,7 +1,12 @@
 import type { KRD, Logger } from "@kaiord/core";
 
+import { UnsupportedFormatError } from "./cli-errors";
 import { readFile } from "./file-handler";
-import { detectFormat, type FileFormat } from "./format-detector";
+import { detectFormat } from "./format-detector";
+import {
+  type FileFormat,
+  SUPPORTED_EXTENSIONS,
+} from "./format-registry";
 import {
   fitToKrd,
   gcnToKrd,
@@ -24,9 +29,9 @@ export const loadFileAsKrd = async (
   const detectedFormat = format || detectFormat(filePath);
 
   if (!detectedFormat) {
-    throw new Error(
+    throw new UnsupportedFormatError(
       `Unable to detect format for file: ${filePath}. ` +
-        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
+        `Supported formats: ${SUPPORTED_EXTENSIONS}`
     );
   }
 
@@ -41,7 +46,7 @@ export const convertToKrd = async (
   format: string,
   logger: Logger
 ): Promise<KRD> => {
-  switch (format) {
+  switch (format as FileFormat) {
     case "fit":
       return fitToKrd(data, logger);
     case "tcx":
@@ -53,7 +58,7 @@ export const convertToKrd = async (
     case "krd":
       return krdToKrd(data);
     default:
-      throw new Error(`Unsupported format: ${format}`);
+      throw new UnsupportedFormatError(`Unsupported format: ${format}`);
   }
 };
 
@@ -63,7 +68,7 @@ export const convertFromKrd = async (
   format: string,
   logger: Logger
 ): Promise<Uint8Array | string> => {
-  switch (format) {
+  switch (format as FileFormat) {
     case "fit":
       return krdToFit(krd, logger);
     case "tcx":
@@ -75,6 +80,6 @@ export const convertFromKrd = async (
     case "krd":
       return krdToText(krd);
     default:
-      throw new Error(`Unsupported output format: ${format}`);
+      throw new UnsupportedFormatError(`Unsupported output format: ${format}`);
   }
 };

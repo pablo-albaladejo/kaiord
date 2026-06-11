@@ -1,4 +1,4 @@
-import type { WorkoutStep } from "@kaiord/core";
+import type { Logger, WorkoutStep } from "@kaiord/core";
 
 import { mapDurationToCondition } from "../mappers/condition.mapper";
 import { mapKrdEquipmentToGarmin } from "../mappers/equipment.mapper";
@@ -32,8 +32,8 @@ const STEP_TYPE_ORDER: Record<StepTypeKey, number> = {
   rest: 5,
 };
 
-const getStepTypeInfo = (intensity: string) => {
-  const key = mapIntensityToStepType(intensity);
+const getStepTypeInfo = (intensity: string, logger?: Logger) => {
+  const key = mapIntensityToStepType(intensity, logger);
   return {
     stepTypeId: STEP_TYPE_IDS[key],
     stepTypeKey: key,
@@ -44,13 +44,15 @@ const getStepTypeInfo = (intensity: string) => {
 export const mapWorkoutStep = (
   step: WorkoutStep,
   counter: { value: number },
-  options?: TargetMapperOptions
+  options?: TargetMapperOptions,
+  logger?: Logger
 ): GarminWorkoutStepInput => {
   const stepOrder = counter.value++;
-  const stepType = getStepTypeInfo(step.intensity ?? "active");
+  const stepType = getStepTypeInfo(step.intensity ?? "active", logger);
   const { endCondition, endConditionValue } = mapDurationToCondition(
     step.durationType,
-    step.duration
+    step.duration,
+    logger
   );
   const { targetType, targetValueOne, targetValueTwo, zoneNumber } =
     convertKrdTargetToGarmin(step.target, options);
