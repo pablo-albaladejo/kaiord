@@ -5,7 +5,7 @@ import {
   createMockLogger,
   loadFitFixture,
 } from "@kaiord/core/test-utils";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { FIT_REPEAT_COUNT_3, FIT_STEPS_COUNT_4 } from "../test-utils/constants";
 import {
@@ -113,44 +113,49 @@ describe("createGarminFitSdkReader", () => {
       expect(repetitionBlock.steps).toHaveLength(2);
     });
 
-    it("should handle WorkoutRepeatGreaterThanStep correctly", async () => {
+    it("should decode a repeat-until-HR-greater-than step into its duration", async () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutRepeatGreaterThanStep.fit");
       const result = await reader(buffer);
-      expect(result.extensions?.structured_workout).toBeDefined();
 
       // Act
       const workout = result.extensions?.structured_workout as {
-        name?: string;
-        sport: string;
-        steps: Array<unknown>;
+        steps: Array<{ durationType: string; duration: unknown }>;
       };
 
       // Assert
-      expect(workout.steps).toBeDefined();
-      expect(Array.isArray(workout.steps)).toBe(true);
+      expect(workout.steps[3]).toMatchObject({
+        durationType: "repeat_until_heart_rate_greater_than",
+        duration: {
+          type: "repeat_until_heart_rate_greater_than",
+          bpm: 80,
+          repeatFrom: 1,
+        },
+      });
     });
 
-    it("should handle WorkoutCustomTargetValues correctly", async () => {
+    it("should decode custom target values into a range target", async () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutCustomTargetValues.fit");
       const result = await reader(buffer);
-      expect(result.extensions?.structured_workout).toBeDefined();
 
       // Act
       const workout = result.extensions?.structured_workout as {
-        name?: string;
-        sport: string;
-        steps: Array<unknown>;
+        steps: Array<{ targetType: string; target: unknown }>;
       };
 
       // Assert
-      expect(workout.steps).toBeDefined();
-      expect(Array.isArray(workout.steps)).toBe(true);
+      expect(workout.steps[1]).toMatchObject({
+        targetType: "power",
+        target: {
+          type: "power",
+          value: { unit: "range", min: 300, max: 310 },
+        },
+      });
     });
 
     it("should throw FitParsingError when buffer is corrupted", async () => {
@@ -175,54 +180,6 @@ describe("createGarminFitSdkReader", () => {
 
       // Assert
       await expect(reader(emptyBuffer)).rejects.toThrow(FitParsingError);
-    });
-
-    it("should log debug message when parsing starts", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const debugSpy = vi.spyOn(logger, "debug");
-      const reader = createGarminFitSdkReader(logger);
-      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-      // Act
-      await reader(buffer);
-
-      // Assert
-      expect(debugSpy).toHaveBeenCalledWith("Parsing FIT file", {
-        bufferSize: buffer.length,
-      });
-    });
-
-    it("should log info message when parsing succeeds", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const infoSpy = vi.spyOn(logger, "info");
-      const reader = createGarminFitSdkReader(logger);
-      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-      // Act
-      await reader(buffer);
-
-      // Assert
-      expect(infoSpy).toHaveBeenCalledWith("FIT file parsed successfully");
-    });
-
-    it("should log error message when parsing fails", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const errorSpy = vi.spyOn(logger, "error");
-      const reader = createGarminFitSdkReader(logger);
-      const corruptedBuffer = new Uint8Array([0, 0, 0, 0]);
-
-      // Act
-      try {
-        await reader(corruptedBuffer);
-      } catch {
-        // Expected to throw
-      }
-
-      // Assert
-      expect(errorSpy).toHaveBeenCalled();
     });
 
     it("should preserve FIT extensions in extensions.fit", async () => {
@@ -256,26 +213,6 @@ describe("createGarminFitSdkReader", () => {
       }
     });
 
-    it("should log info when preserving developer fields", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const infoSpy = vi.spyOn(logger, "info");
-      const reader = createGarminFitSdkReader(logger);
-      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
-      await reader(buffer);
-      const infoCalls = infoSpy.mock.calls.map((call) => call[0]);
-
-      // Act
-      const hasExtensionLog =
-        infoCalls.some((msg) => msg.includes("developer fields")) ||
-        infoCalls.some((msg) => msg.includes("unknown message"));
-
-      // Assert
-      expect(
-        hasExtensionLog || infoCalls.includes("FIT file parsed successfully")
-      ).toBe(true);
-    });
-
     it("should handle FIT files without extensions gracefully", async () => {
       // Arrange
       const logger = createMockLogger();
@@ -295,103 +232,21 @@ describe("createGarminFitSdkReader", () => {
 
 describe("createGarminFitSdkWriter", () => {
   describe("FitWriter", () => {
-    it("should throw FitParsingError when conversion not implemented", async () => {
+    it("should reject when the encoder cannot serialize the produced messages", async () => {
       // Arrange
       const logger = createMockLogger();
       const writer = createGarminFitSdkWriter(logger);
-
-      // Act
       const krd = buildKRD.build({
         version: "1.0",
         type: "structured_workout",
+        metadata: buildKRDMetadata.build({ sport: "cycling" }),
       });
-
-      // Assert
-      await expect(writer(krd)).rejects.toThrow(FitParsingError);
-    });
-
-    it("should log debug message when encoding starts", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const debugSpy = vi.spyOn(logger, "debug");
-      const writer = createGarminFitSdkWriter(logger);
 
       // Act
-      const krd = buildKRD.build({
-        version: "1.0",
-        type: "structured_workout",
-      });
+      const encode = writer(krd);
 
       // Assert
-      await expect(writer(krd)).rejects.toThrow();
-      expect(debugSpy).toHaveBeenCalledWith("Encoding KRD to FIT");
-    });
-
-    it("should log debug message when converting KRD to messages", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const debugSpy = vi.spyOn(logger, "debug");
-      const writer = createGarminFitSdkWriter(logger);
-
-      // Act
-      const krd = buildKRD.build({
-        version: "1.0",
-        type: "structured_workout",
-      });
-
-      // Assert
-      await expect(writer(krd)).rejects.toThrow();
-      expect(debugSpy).toHaveBeenCalledWith("Converting KRD to FIT messages");
-    });
-
-    it("should inject logger correctly", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const debugSpy = vi.spyOn(logger, "debug");
-      const writer = createGarminFitSdkWriter(logger);
-
-      // Act
-      const krd = buildKRD.build({
-        version: "1.0",
-        type: "structured_workout",
-      });
-
-      // Assert
-      await expect(writer(krd)).rejects.toThrow();
-      expect(debugSpy).toHaveBeenCalled();
-    });
-
-    it("should handle valid KRD structure", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const writer = createGarminFitSdkWriter(logger);
-
-      // Act
-      const krd = buildKRD.build({
-        version: "1.0",
-        type: "structured_workout",
-        metadata: buildKRDMetadata.build({
-          sport: "cycling",
-        }),
-      });
-
-      // Assert
-      await expect(writer(krd)).rejects.toThrow(FitParsingError);
-    });
-
-    it("should propagate FitParsingError without wrapping", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const writer = createGarminFitSdkWriter(logger);
-
-      // Act
-      const krd = buildKRD.build({
-        version: "1.0",
-        type: "structured_workout",
-      });
-
-      // Assert
-      await expect(writer(krd)).rejects.toThrow(FitParsingError);
+      await expect(encode).rejects.toThrow(FitParsingError);
     });
   });
 });

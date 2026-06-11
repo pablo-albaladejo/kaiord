@@ -1,7 +1,7 @@
 import type { Target } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
 
-import { convertZwiftPowerTarget } from "../target/target.converter";
+import { convertZwiftPowerTarget } from "../target/power.converter";
 import type { ZwiftSteadyStateData } from "./steady-state.mapper";
 import { restoreHeartRateTarget } from "./target-restoration";
 

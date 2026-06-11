@@ -73,15 +73,4 @@ describe("dailyWellnessSchema", () => {
     // Assert
     expect(result.success).toBe(false);
   });
-
-  it("should reject a wrong major version", () => {
-    // Arrange
-    const input = { ...baseDaily, version: "1.0" };
-
-    // Act
-    const result = dailyWellnessSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
 });

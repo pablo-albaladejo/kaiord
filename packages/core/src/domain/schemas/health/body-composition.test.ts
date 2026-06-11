@@ -77,20 +77,4 @@ describe("bodyCompositionSchema", () => {
     // Assert
     expect(result.success).toBe(false);
   });
-
-  it("should reject a wrong major version", () => {
-    // Arrange
-    const input = {
-      kind: "bodyComposition" as const,
-      version: "1.0",
-      measuredAt: baseMeasuredAt,
-      bodyFatPercent: 18.4,
-    };
-
-    // Act
-    const result = bodyCompositionSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
 });

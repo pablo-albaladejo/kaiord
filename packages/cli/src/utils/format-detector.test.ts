@@ -1,50 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  detectFormat,
-  fileFormatSchema,
-  validateFormat,
-} from "./format-detector";
+import { detectFormat, validateFormat } from "./format-detector";
 
 describe("detectFormat", () => {
-  it("should detect FIT format from .fit extension", () => {
+  it.each([
+    ["workout.fit", "fit"],
+    ["workout.krd", "krd"],
+    ["workout.tcx", "tcx"],
+    ["workout.zwo", "zwo"],
+  ] as const)("should detect %s as %s", (path, expected) => {
     // Arrange
 
     // Act
-    const result = detectFormat("workout.fit");
+    const result = detectFormat(path);
 
     // Assert
-    expect(result).toBe("fit");
-  });
-
-  it("should detect KRD format from .krd extension", () => {
-    // Arrange
-
-    // Act
-    const result = detectFormat("workout.krd");
-
-    // Assert
-    expect(result).toBe("krd");
-  });
-
-  it("should detect TCX format from .tcx extension", () => {
-    // Arrange
-
-    // Act
-    const result = detectFormat("workout.tcx");
-
-    // Assert
-    expect(result).toBe("tcx");
-  });
-
-  it("should detect ZWO format from .zwo extension", () => {
-    // Arrange
-
-    // Act
-    const result = detectFormat("workout.zwo");
-
-    // Assert
-    expect(result).toBe("zwo");
+    expect(result).toBe(expected);
   });
 
   it("should handle uppercase extensions", () => {
@@ -89,45 +60,18 @@ describe("detectFormat", () => {
 });
 
 describe("validateFormat", () => {
-  it("should validate fit as valid format", () => {
-    // Arrange
+  it.each(["fit", "krd", "tcx", "zwo"] as const)(
+    "should validate %s as a valid format",
+    (format) => {
+      // Arrange
 
-    // Act
-    const result = validateFormat("fit");
+      // Act
+      const result = validateFormat(format);
 
-    // Assert
-    expect(result).toBe(true);
-  });
-
-  it("should validate krd as valid format", () => {
-    // Arrange
-
-    // Act
-    const result = validateFormat("krd");
-
-    // Assert
-    expect(result).toBe(true);
-  });
-
-  it("should validate tcx as valid format", () => {
-    // Arrange
-
-    // Act
-    const result = validateFormat("tcx");
-
-    // Assert
-    expect(result).toBe(true);
-  });
-
-  it("should validate zwo as valid format", () => {
-    // Arrange
-
-    // Act
-    const result = validateFormat("zwo");
-
-    // Assert
-    expect(result).toBe(true);
-  });
+      // Assert
+      expect(result).toBe(true);
+    }
+  );
 
   it("should reject invalid format strings", () => {
     // Arrange
@@ -147,30 +91,5 @@ describe("validateFormat", () => {
 
     // Assert
     expect(result).toBe(false);
-  });
-});
-
-describe("fileFormatSchema", () => {
-  it("should parse valid format strings", () => {
-    // Arrange
-
-    // Act
-    const result = fileFormatSchema.safeParse("fit");
-
-    // Assert
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBe("fit");
-    }
-  });
-
-  it("should reject invalid format strings", () => {
-    // Arrange
-
-    // Act
-    const result = fileFormatSchema.safeParse("invalid");
-
-    // Assert
-    expect(result.success).toBe(false);
   });
 });

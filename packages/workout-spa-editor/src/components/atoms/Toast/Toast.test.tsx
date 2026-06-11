@@ -94,101 +94,35 @@ describe("Toast", () => {
     });
   });
 
-  describe("variants", () => {
-    it("should render success variant with correct styles", () => {
-      // Arrange & Act
-      // Arrange
+  describe("variant style map", () => {
+    it.each([
+      ["success", "border-green-500", "bg-green-50"],
+      ["error", "border-red-500", "bg-red-50"],
+      ["warning", "border-yellow-500", "bg-yellow-50"],
+      ["info", "border-blue-500", "bg-blue-50"],
+    ] as const)(
+      "should map the %s variant to its border and background classes",
+      (variant, border, background) => {
+        // Arrange
 
-      render(
-        <ToastProvider>
-          <Toast title="Success" variant="success" open={true} />
-        </ToastProvider>
-      );
+        render(
+          <ToastProvider>
+            <Toast title={variant} variant={variant} open={true} />
+          </ToastProvider>
+        );
 
-      // Assert
-      const title = screen.getByText("Success");
+        // Act
 
-      // Act
+        const toast = screen.getByText(variant).closest("li");
 
-      const toast = title.closest("li");
+        // Assert
 
-      // Assert
+        expect(toast).toHaveClass(border);
+        expect(toast).toHaveClass(background);
+      }
+    );
 
-      expect(toast).toHaveClass("border-green-500");
-      expect(toast).toHaveClass("bg-green-50");
-    });
-
-    it("should render error variant with correct styles", () => {
-      // Arrange & Act
-      // Arrange
-
-      render(
-        <ToastProvider>
-          <Toast title="Error" variant="error" open={true} />
-        </ToastProvider>
-      );
-
-      // Assert
-      const title = screen.getByText("Error");
-
-      // Act
-
-      const toast = title.closest("li");
-
-      // Assert
-
-      expect(toast).toHaveClass("border-red-500");
-      expect(toast).toHaveClass("bg-red-50");
-    });
-
-    it("should render warning variant with correct styles", () => {
-      // Arrange & Act
-      // Arrange
-
-      render(
-        <ToastProvider>
-          <Toast title="Warning" variant="warning" open={true} />
-        </ToastProvider>
-      );
-
-      // Assert
-      const title = screen.getByText("Warning");
-
-      // Act
-
-      const toast = title.closest("li");
-
-      // Assert
-
-      expect(toast).toHaveClass("border-yellow-500");
-      expect(toast).toHaveClass("bg-yellow-50");
-    });
-
-    it("should render info variant with correct styles", () => {
-      // Arrange & Act
-      // Arrange
-
-      render(
-        <ToastProvider>
-          <Toast title="Info" variant="info" open={true} />
-        </ToastProvider>
-      );
-
-      // Assert
-      const title = screen.getByText("Info");
-
-      // Act
-
-      const toast = title.closest("li");
-
-      // Assert
-
-      expect(toast).toHaveClass("border-blue-500");
-      expect(toast).toHaveClass("bg-blue-50");
-    });
-
-    it("should default to info variant when not specified", () => {
-      // Arrange & Act
+    it("should default to the info variant styles when none is specified", () => {
       // Arrange
 
       render(
@@ -197,12 +131,9 @@ describe("Toast", () => {
         </ToastProvider>
       );
 
-      // Assert
-      const title = screen.getByText("Default");
-
       // Act
 
-      const toast = title.closest("li");
+      const toast = screen.getByText("Default").closest("li");
 
       // Assert
 

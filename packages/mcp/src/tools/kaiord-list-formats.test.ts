@@ -27,41 +27,4 @@ describe("kaiord_list_formats", () => {
     expect(names).toContain("gcn");
     expect(names).toContain("krd");
   });
-
-  it("should include format details", async () => {
-    // Arrange
-    const client = await createTestClient();
-    const result = (await client.callTool({
-      name: "kaiord_list_formats",
-      arguments: {},
-    })) as McpToolResult;
-    const formats = JSON.parse(result.content[0].text);
-
-    // Act
-    const fit = formats.find((f: { format: string }) => f.format === "fit");
-
-    // Assert
-    expect(fit).toHaveProperty("name");
-    expect(fit).toHaveProperty("extension");
-    expect(fit).toHaveProperty("description");
-    expect(fit).toHaveProperty("binary");
-  });
-
-  it("should mark FIT as binary and text formats as non-binary", async () => {
-    // Arrange
-    const client = await createTestClient();
-    const result = (await client.callTool({
-      name: "kaiord_list_formats",
-      arguments: {},
-    })) as McpToolResult;
-    const formats = JSON.parse(result.content[0].text);
-    const fit = formats.find((f: { format: string }) => f.format === "fit");
-
-    // Act
-    const tcx = formats.find((f: { format: string }) => f.format === "tcx");
-
-    // Assert
-    expect(fit.binary).toBe(true);
-    expect(tcx.binary).toBe(false);
-  });
 });

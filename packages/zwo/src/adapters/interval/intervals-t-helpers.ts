@@ -3,10 +3,8 @@ import { intensitySchema, targetTypeSchema } from "@kaiord/core";
 
 import type { ZwiftDurationData } from "../duration/duration.mapper";
 import { mapZwiftDuration } from "../duration/duration.mapper";
-import {
-  convertZwiftCadenceTarget,
-  convertZwiftPowerTarget,
-} from "../target/target.converter";
+import { convertZwiftCadenceTarget } from "../target/pace-cadence.converter";
+import { convertZwiftPowerTarget } from "../target/power.converter";
 import type { ZwiftTextEvent } from "./index";
 import { extractTextEvents } from "./index";
 

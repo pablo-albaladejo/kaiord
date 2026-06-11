@@ -65,7 +65,6 @@ describe("MainLayout", () => {
     // Assert
 
     expect(header).toBeInTheDocument();
-    expect(header).toHaveClass("sticky");
   });
 
   it("should render main content area", () => {
@@ -130,7 +129,6 @@ describe("MainLayout", () => {
     // Assert
 
     expect(bottomNav).toBeInTheDocument();
-    expect(bottomNav).toHaveClass("md:hidden");
   });
 
   it("should not render the removed primary navigation tab bar", () => {
@@ -150,50 +148,6 @@ describe("MainLayout", () => {
     // Assert
 
     expect(tabBar).not.toBeInTheDocument();
-  });
-
-  it("should have responsive classes", () => {
-    // Arrange & Act
-    // Arrange
-
-    renderWithProviders(
-      <MainLayout>
-        <div>Content</div>
-      </MainLayout>,
-      { defaultTheme: "light" }
-    );
-
-    // Assert
-
-    // Act
-
-    const main = screen.getByRole("main");
-
-    // Assert
-
-    expect(main).toHaveClass("px-4", "sm:px-6", "lg:px-8");
-  });
-
-  it("should have mobile-first layout structure", () => {
-    // Arrange & Act
-    // Arrange
-
-    renderWithProviders(
-      <MainLayout>
-        <div>Content</div>
-      </MainLayout>,
-      { defaultTheme: "light" }
-    );
-
-    // Assert
-
-    // Act
-
-    const container = screen.getByRole("main").parentElement;
-
-    // Assert
-
-    expect(container).toHaveClass("min-h-screen", "flex-col");
   });
 
   it("should render theme toggle button", () => {

@@ -56,93 +56,7 @@ const mockProfile: Profile = {
 // ============================================
 
 describe("ZoneEditor - rendering", () => {
-  it("should render power zones editor", () => {
-    // Arrange
-
-    // Act
-
-    render(
-      <ZoneEditor
-        profile={mockProfile}
-        zoneType="power"
-        onSave={vi.fn()}
-        onCancel={vi.fn()}
-      />
-    );
-
-    // Assert
-
-    expect(screen.getByText("Power Zones")).toBeInTheDocument();
-    expect(screen.getByText(/Configure 7 power zones/)).toBeInTheDocument();
-    expect(screen.getByText(/250W/)).toBeInTheDocument();
-  });
-
-  it("should render heart rate zones editor", () => {
-    // Arrange
-
-    // Act
-
-    render(
-      <ZoneEditor
-        profile={mockProfile}
-        zoneType="heartRate"
-        onSave={vi.fn()}
-        onCancel={vi.fn()}
-      />
-    );
-
-    // Assert
-
-    expect(screen.getByText("Heart Rate Zones")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Configure 5 heart rate zones/)
-    ).toBeInTheDocument();
-    expect(screen.getByText(/190 bpm/)).toBeInTheDocument();
-  });
-
-  it("should render all power zones", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-
-    render(
-      <ZoneEditor
-        profile={mockProfile}
-        zoneType="power"
-        onSave={vi.fn()}
-        onCancel={vi.fn()}
-      />
-    );
-
-    DEFAULT_POWER_ZONES.forEach((zone) => {
-      expect(screen.getByDisplayValue(zone.name)).toBeInTheDocument();
-    });
-  });
-
-  it("should render all heart rate zones", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-
-    render(
-      <ZoneEditor
-        profile={mockProfile}
-        zoneType="heartRate"
-        onSave={vi.fn()}
-        onCancel={vi.fn()}
-      />
-    );
-
-    hrZonesWithValues.forEach((zone) => {
-      expect(screen.getByDisplayValue(zone.name)).toBeInTheDocument();
-    });
-  });
-
-  it("should render zone preview with power values", () => {
+  it("should render the power zones editor with all zones and a value preview", () => {
     // Arrange
 
     render(
@@ -160,7 +74,39 @@ describe("ZoneEditor - rendering", () => {
 
     // Assert
 
+    expect(screen.getByText("Power Zones")).toBeInTheDocument();
+    expect(screen.getByText(/Configure 7 power zones/)).toBeInTheDocument();
+    expect(screen.getByText(/250W/)).toBeInTheDocument();
+    DEFAULT_POWER_ZONES.forEach((zone) => {
+      expect(screen.getByDisplayValue(zone.name)).toBeInTheDocument();
+    });
     expect(previews.length).toBeGreaterThan(0);
+  });
+
+  it("should render the heart rate zones editor with all zones", () => {
+    // Arrange
+
+    render(
+      <ZoneEditor
+        profile={mockProfile}
+        zoneType="heartRate"
+        onSave={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Act
+
+    // Assert
+
+    expect(screen.getByText("Heart Rate Zones")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Configure 5 heart rate zones/)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/190 bpm/)).toBeInTheDocument();
+    hrZonesWithValues.forEach((zone) => {
+      expect(screen.getByDisplayValue(zone.name)).toBeInTheDocument();
+    });
   });
 
   it("should display calculated power values when FTP is set", () => {

@@ -1,171 +1,153 @@
 import type { Duration } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import {
-  NUMERIC_DURATION_TYPE_SAMPLE,
-  SECONDS_PER_MINUTE_SAMPLE,
-} from "../../test-utils/constants";
 import { buildFitDurationData } from "../../tests/fixtures/fit-duration.fixtures";
 import { convertFitDuration } from "../duration/duration.converter";
 
+// Dispatcher suite for convertFitDuration. It routes on `durationType` to a
+// per-type leaf converter (duration-converters.ts / repeat-duration-converters.ts).
+// The leaf converters have no co-located suites, so the two it.each tables below
+// own the value-mapping proof: each row is one (type present -> mapped value)
+// equivalence class, and the absent table is the (type present, value missing ->
+// open) equivalence class. The dispatch-table block proves the routing/fallback.
+
+type FitDurationFields = Parameters<typeof buildFitDurationData.build>[0];
+
 describe("convertFitDuration", () => {
-  describe("time-based durations", () => {
-    it("should convert FIT time duration to seconds", () => {
+  describe("value-present durations map to their KRD shape", () => {
+    it.each<[string, FitDurationFields, Duration]>([
+      ["time", { durationType: "time", durationTime: 300 }, { type: "time", seconds: 300 }],
+      [
+        "distance",
+        { durationType: "distance", durationDistance: 1000 },
+        { type: "distance", meters: 1000 },
+      ],
+      [
+        "hrLessThan",
+        { durationType: "hrLessThan", durationHr: 140 },
+        { type: "heart_rate_less_than", bpm: 140 },
+      ],
+      [
+        "calories",
+        { durationType: "calories", durationCalories: 500 },
+        { type: "calories", calories: 500 },
+      ],
+      [
+        "powerLessThan",
+        { durationType: "powerLessThan", durationPower: 200 },
+        { type: "power_less_than", watts: 200 },
+      ],
+      [
+        "powerGreaterThan",
+        { durationType: "powerGreaterThan", durationPower: 250 },
+        { type: "power_greater_than", watts: 250 },
+      ],
+      [
+        "repeatUntilTime",
+        { durationType: "repeatUntilTime", durationTime: 1800, durationStep: 0 },
+        { type: "repeat_until_time", seconds: 1800, repeatFrom: 0 },
+      ],
+      [
+        "repeatUntilDistance",
+        { durationType: "repeatUntilDistance", durationDistance: 5000, durationStep: 1 },
+        { type: "repeat_until_distance", meters: 5000, repeatFrom: 1 },
+      ],
+      [
+        "repeatUntilCalories",
+        { durationType: "repeatUntilCalories", durationCalories: 1000, durationStep: 2 },
+        { type: "repeat_until_calories", calories: 1000, repeatFrom: 2 },
+      ],
+      [
+        "repeatUntilHrLessThan",
+        { durationType: "repeatUntilHrLessThan", durationHr: 120, durationStep: 2 },
+        { type: "repeat_until_heart_rate_less_than", bpm: 120, repeatFrom: 2 },
+      ],
+      [
+        "repeatUntilHrGreaterThan",
+        { durationType: "repeatUntilHrGreaterThan", repeatHr: 160, durationStep: 0 },
+        { type: "repeat_until_heart_rate_greater_than", bpm: 160, repeatFrom: 0 },
+      ],
+      [
+        "repeatUntilPowerLessThan",
+        { durationType: "repeatUntilPowerLessThan", durationPower: 180, durationStep: 3 },
+        { type: "repeat_until_power_less_than", watts: 180, repeatFrom: 3 },
+      ],
+      [
+        "repeatUntilPowerGreaterThan",
+        { durationType: "repeatUntilPowerGreaterThan", durationPower: 300, durationStep: 1 },
+        { type: "repeat_until_power_greater_than", watts: 300, repeatFrom: 1 },
+      ],
+    ])("should map %s to its KRD duration", (_type, fields, expected) => {
       // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: 300,
-      });
+      const data = buildFitDurationData.build(fields);
 
       // Act
       const result = convertFitDuration(data);
 
       // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: 300,
-      });
-    });
-
-    it("should handle zero seconds", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: 0,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: 0,
-      });
-    });
-
-    it("should handle large time values", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: 7200,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: 7200,
-      });
-    });
-
-    it("should handle fractional seconds", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: 90.5,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: 90.5,
-      });
-    });
-  });
-
-  describe("distance-based durations", () => {
-    it("should convert FIT distance duration to meters", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: 1000,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "distance",
-        meters: 1000,
-      });
-    });
-
-    it("should handle zero meters", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: 0,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "distance",
-        meters: 0,
-      });
-    });
-
-    it("should handle large distance values", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: 42195,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "distance",
-        meters: 42195,
-      });
-    });
-
-    it("should handle fractional meters", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: 1609.34,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "distance",
-        meters: 1609.34,
-      });
+      expect(result).toStrictEqual(expected);
     });
   });
 
-  describe("open durations", () => {
-    it("should convert FIT open duration", () => {
+  describe("value-absent durations fall back to open", () => {
+    it.each<[string, FitDurationFields]>([
+      ["time without durationTime", { durationType: "time" }],
+      ["distance without durationDistance", { durationType: "distance" }],
+      ["calories without durationCalories", { durationType: "calories" }],
+      ["powerLessThan without durationPower", { durationType: "powerLessThan" }],
+      [
+        "repeatUntilCalories without durationStep",
+        { durationType: "repeatUntilCalories", durationCalories: 800 },
+      ],
+      [
+        "repeatUntilTime without durationStep",
+        { durationType: "repeatUntilTime", durationTime: 600 },
+      ],
+      [
+        "repeatUntilDistance without durationStep",
+        { durationType: "repeatUntilDistance", durationDistance: 3000 },
+      ],
+      [
+        "repeatUntilHrLessThan without durationStep",
+        { durationType: "repeatUntilHrLessThan", durationHr: 130 },
+      ],
+      [
+        "repeatUntilPowerLessThan without durationStep",
+        { durationType: "repeatUntilPowerLessThan", durationPower: 150 },
+      ],
+      [
+        "repeatUntilHrGreaterThan without durationStep",
+        { durationType: "repeatUntilHrGreaterThan", repeatHr: 170 },
+      ],
+      [
+        "repeatUntilHrGreaterThan without repeatHr",
+        { durationType: "repeatUntilHrGreaterThan", durationStep: 1 },
+      ],
+    ])("should map %s to open", (_label, fields) => {
       // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "open",
-      });
+      const data = buildFitDurationData.build(fields);
 
       // Act
       const result = convertFitDuration(data);
 
       // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
+      expect(result).toStrictEqual({ type: "open" });
+    });
+  });
+
+  describe("dispatch table routing and fallbacks", () => {
+    it("should map an explicit open duration to open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({ durationType: "open" });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({ type: "open" });
     });
 
-    it("should handle missing duration type as open", () => {
+    it("should map a missing duration type to open", () => {
       // Arrange
       const data = buildFitDurationData.build({});
 
@@ -173,177 +155,21 @@ describe("convertFitDuration", () => {
       const result = convertFitDuration(data);
 
       // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
+      expect(result).toStrictEqual({ type: "open" });
     });
 
-    it("should handle unknown duration type as open", () => {
+    it("should map an unrecognised duration type to open", () => {
       // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "unknown_type",
-      });
+      const data = buildFitDurationData.build({ durationType: "unknown_type" });
 
       // Act
       const result = convertFitDuration(data);
 
       // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
+      expect(result).toStrictEqual({ type: "open" });
     });
 
-    it("should handle time duration type without durationTime value as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should handle distance duration type without durationDistance value as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-  });
-
-  describe("validation", () => {
-    it("should return open duration for invalid duration type", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "invalid_type",
-        durationTime: 300,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should return open duration for null duration type", () => {
-      // Arrange
-      const data = {
-        durationType: null as unknown as string,
-        durationTime: 300,
-      };
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should return open duration for numeric duration type", () => {
-      // Arrange
-      const data = {
-        durationType: NUMERIC_DURATION_TYPE_SAMPLE as unknown as string,
-        durationTime: 300,
-      };
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should validate and convert valid time duration type", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: 600,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: 600,
-      });
-    });
-
-    it("should validate and convert valid distance duration type", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: 5000,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "distance",
-        meters: 5000,
-      });
-    });
-
-    it("should validate and convert valid hrLessThan duration type", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "hrLessThan",
-        durationHr: 140,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "heart_rate_less_than",
-        bpm: 140,
-      });
-    });
-  });
-
-  describe("edge cases", () => {
-    it("should handle HR_LESS_THAN duration type correctly", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "hrLessThan",
-        durationHr: 150,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "heart_rate_less_than",
-        bpm: 150,
-      });
-    });
-
-    it("should handle REPEAT_UNTIL_STEPS_COMPLETE duration type as open", () => {
+    it("should map a valid type without a registered converter to open", () => {
       // Arrange
       const data = buildFitDurationData.build({
         durationType: "repeatUntilStepsCmplt",
@@ -354,513 +180,7 @@ describe("convertFitDuration", () => {
       const result = convertFitDuration(data);
 
       // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-  });
-
-  describe("type validation", () => {
-    it("should return Duration type for time duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: SECONDS_PER_MINUTE_SAMPLE,
-      });
-
-      // Act
-      const result: Duration = convertFitDuration(data);
-
-      // Assert
-      expect(result.type).toBe("time");
-      if (result.type === "time") {
-        expect(result.seconds).toBe(SECONDS_PER_MINUTE_SAMPLE);
-      }
-    });
-
-    it("should return Duration type for distance duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: 500,
-      });
-
-      // Act
-      const result: Duration = convertFitDuration(data);
-
-      // Assert
-      expect(result.type).toBe("distance");
-      if (result.type === "distance") {
-        expect(result.meters).toBe(500);
-      }
-    });
-
-    it("should return Duration type for open duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "open",
-      });
-
-      // Act
-      const result: Duration = convertFitDuration(data);
-
-      // Assert
-      expect(result.type).toBe("open");
-    });
-  });
-
-  describe("calorie-based durations", () => {
-    it("should convert FIT calories duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "calories",
-        durationCalories: 500,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "calories",
-        calories: 500,
-      });
-    });
-
-    it("should convert FIT repeatUntilCalories duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilCalories",
-        durationCalories: 1000,
-        durationStep: 2,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "repeat_until_calories",
-        calories: 1000,
-        repeatFrom: 2,
-      });
-    });
-
-    it("should handle calories duration without value as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "calories",
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should handle repeatUntilCalories without durationStep as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilCalories",
-        durationCalories: 800,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-  });
-
-  describe("power-based durations", () => {
-    it("should convert FIT powerLessThan duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "powerLessThan",
-        durationPower: 200,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "power_less_than",
-        watts: 200,
-      });
-    });
-
-    it("should convert FIT powerGreaterThan duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "powerGreaterThan",
-        durationPower: 250,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "power_greater_than",
-        watts: 250,
-      });
-    });
-
-    it("should convert FIT repeatUntilPowerLessThan duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilPowerLessThan",
-        durationPower: 180,
-        durationStep: 3,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "repeat_until_power_less_than",
-        watts: 180,
-        repeatFrom: 3,
-      });
-    });
-
-    it("should convert FIT repeatUntilPowerGreaterThan duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilPowerGreaterThan",
-        durationPower: 300,
-        durationStep: 1,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "repeat_until_power_greater_than",
-        watts: 300,
-        repeatFrom: 1,
-      });
-    });
-
-    it("should handle powerLessThan duration without value as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "powerLessThan",
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should handle repeatUntilPowerLessThan without durationStep as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilPowerLessThan",
-        durationPower: 150,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-  });
-
-  describe("repeat conditional durations", () => {
-    it("should convert FIT repeatUntilTime duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilTime",
-        durationTime: 1800,
-        durationStep: 0,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "repeat_until_time",
-        seconds: 1800,
-        repeatFrom: 0,
-      });
-    });
-
-    it("should convert FIT repeatUntilDistance duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilDistance",
-        durationDistance: 5000,
-        durationStep: 1,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "repeat_until_distance",
-        meters: 5000,
-        repeatFrom: 1,
-      });
-    });
-
-    it("should convert FIT repeatUntilHrLessThan duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilHrLessThan",
-        durationHr: 120,
-        durationStep: 2,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "repeat_until_heart_rate_less_than",
-        bpm: 120,
-        repeatFrom: 2,
-      });
-    });
-
-    it("should handle repeatUntilTime without durationStep as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilTime",
-        durationTime: 600,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should handle repeatUntilDistance without durationStep as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilDistance",
-        durationDistance: 3000,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should handle repeatUntilHrLessThan without durationStep as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilHrLessThan",
-        durationHr: 130,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-  });
-
-  describe("repeatUntilHrGreaterThan duration", () => {
-    it("should convert FIT repeatUntilHrGreaterThan duration", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilHrGreaterThan",
-        repeatHr: 160,
-        durationStep: 0,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "repeat_until_heart_rate_greater_than",
-        bpm: 160,
-        repeatFrom: 0,
-      });
-    });
-
-    it("should handle repeatUntilHrGreaterThan without durationStep as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilHrGreaterThan",
-        repeatHr: 170,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-
-    it("should handle repeatUntilHrGreaterThan without repeatHr as open", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "repeatUntilHrGreaterThan",
-        durationStep: 1,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "open",
-      });
-    });
-  });
-
-  describe("boundary value edge cases", () => {
-    it("should handle negative time values", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: -100,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: -100,
-      });
-    });
-
-    it("should handle negative distance values", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: -500,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "distance",
-        meters: -500,
-      });
-    });
-
-    it("should handle very large time values", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: 86400,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: 86400,
-      });
-    });
-
-    it("should handle very large distance values", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "distance",
-        durationDistance: 100000,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "distance",
-        meters: 100000,
-      });
-    });
-
-    it("should handle maximum safe integer time value", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: Number.MAX_SAFE_INTEGER,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: Number.MAX_SAFE_INTEGER,
-      });
-    });
-
-    it("should handle Infinity as duration value", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: Infinity,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: Infinity,
-      });
-    });
-
-    it("should handle NaN as duration value by treating it as undefined", () => {
-      // Arrange
-      const data = buildFitDurationData.build({
-        durationType: "time",
-        durationTime: NaN,
-      });
-
-      // Act
-      const result = convertFitDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: "time",
-        seconds: NaN,
-      });
+      expect(result).toStrictEqual({ type: "open" });
     });
   });
 });

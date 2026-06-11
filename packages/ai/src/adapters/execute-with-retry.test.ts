@@ -143,4 +143,26 @@ describe("executeWithRetry", () => {
     await expect(run).rejects.toThrow(AiParsingError);
     expect(mockGenerateText).toHaveBeenCalledTimes(2);
   });
+
+  it("should coerce a non-Error thrown value before retrying", async () => {
+    // Arrange
+    mockGenerateText
+      .mockRejectedValueOnce("plain string error")
+      .mockResolvedValueOnce({ output: VALID_WORKOUT } as never);
+
+    // Act
+    const result = await executeWithRetry(
+      mockModel,
+      "sys",
+      "txt",
+      1,
+      MAX_OUTPUT_TOKENS_DEFAULT,
+      0,
+      undefined
+    );
+
+    // Assert
+    expect(result.sport).toBe("running");
+    expect(mockGenerateText).toHaveBeenCalledTimes(2);
+  });
 });

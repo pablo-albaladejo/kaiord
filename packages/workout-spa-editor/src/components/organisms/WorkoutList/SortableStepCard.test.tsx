@@ -33,122 +33,34 @@ describe("SortableStepCard", () => {
     );
   };
 
-  describe("prop handling", () => {
-    it("should render without React warnings", () => {
-      // Arrange
-      const warningChecker = expectNoReactWarnings();
+  it("should render the wrapped step card cleanly", () => {
+    // Arrange
 
-      // Act
-      renderWithDndContext(
-        <SortableStepCard
-          id="step-0"
-          step={mockStep}
-          visualIndex={0}
-          isSelected={false}
-          isMultiSelected={false}
-        />
-      );
+    const warningChecker = expectNoReactWarnings();
+    const mockHandlers = {
+      onSelect: () => {},
+      onToggleMultiSelect: () => {},
+      onDelete: () => {},
+      onDuplicate: () => {},
+      onCopy: () => {},
+    };
 
-      // Assert
-      expect(screen.getByTestId("step-card")).toBeInTheDocument();
-      warningChecker.verify();
-    });
+    // Act
 
-    it("should render without warnings when all props provided", () => {
-      // Arrange
-      const warningChecker = expectNoReactWarnings();
-      const mockHandlers = {
-        onSelect: () => {},
-        onToggleMultiSelect: () => {},
-        onDelete: () => {},
-        onDuplicate: () => {},
-        onCopy: () => {},
-      };
+    renderWithDndContext(
+      <SortableStepCard
+        id="step-0"
+        step={mockStep}
+        visualIndex={0}
+        isSelected={false}
+        isMultiSelected={false}
+        {...mockHandlers}
+      />
+    );
 
-      // Act
-      renderWithDndContext(
-        <SortableStepCard
-          id="step-0"
-          step={mockStep}
-          visualIndex={0}
-          isSelected={false}
-          isMultiSelected={false}
-          {...mockHandlers}
-        />
-      );
+    // Assert
 
-      // Assert
-      expect(screen.getByTestId("step-card")).toBeInTheDocument();
-      warningChecker.verify();
-    });
-
-    it("should not pass dnd-kit specific props to StepCard", () => {
-      // Arrange
-      const warningChecker = expectNoReactWarnings();
-
-      // Act
-      renderWithDndContext(
-        <SortableStepCard
-          id="step-0"
-          step={mockStep}
-          visualIndex={0}
-          isSelected={false}
-          isMultiSelected={false}
-        />
-      );
-
-      // Assert
-      const stepCard = screen.getByTestId("step-card");
-      expect(stepCard).toBeInTheDocument();
-
-      // Verify no dnd-kit props leaked to DOM
-      expect(stepCard).not.toHaveAttribute("id", "step-0");
-
-      warningChecker.verify();
-    });
-  });
-
-  describe("HTML attributes", () => {
-    it("should forward data-* attributes to wrapper div", () => {
-      // Arrange
-      const warningChecker = expectNoReactWarnings();
-
-      // Act
-      const { container } = renderWithDndContext(
-        <SortableStepCard
-          id="step-0"
-          step={mockStep}
-          visualIndex={0}
-          isSelected={false}
-          isMultiSelected={false}
-        />
-      );
-
-      // Assert
-      const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toBeInTheDocument();
-      warningChecker.verify();
-    });
-
-    it("should forward aria-* attributes to wrapper div", () => {
-      // Arrange
-      const warningChecker = expectNoReactWarnings();
-
-      // Act
-      const { container } = renderWithDndContext(
-        <SortableStepCard
-          id="step-0"
-          step={mockStep}
-          visualIndex={0}
-          isSelected={false}
-          isMultiSelected={false}
-        />
-      );
-
-      // Assert
-      const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toBeInTheDocument();
-      warningChecker.verify();
-    });
+    expect(screen.getByTestId("step-card")).toBeInTheDocument();
+    warningChecker.verify();
   });
 });
