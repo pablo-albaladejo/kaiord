@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "path";
 import stripAnsi from "strip-ansi";
 import { fileURLToPath } from "url";
 import { describe, expect, it } from "vitest";
+
 import { ExitCode } from "../utils/exit-codes";
 
 const __filename = fileURLToPath(import.meta.url);

@@ -15,12 +15,13 @@ export function groupWorkoutsByDay(
   if (!workouts) return map;
 
   for (const w of workouts) {
-    if (map[w.date]) {
-      map[w.date].push(w);
+    const bucket = map[w.date];
+    if (bucket !== undefined) {
+      bucket.push(w);
     }
   }
   for (const day of days) {
-    map[day].sort(
+    map[day]?.sort(
       (a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );

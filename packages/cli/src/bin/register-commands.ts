@@ -1,4 +1,5 @@
 import type { Argv } from "yargs";
+
 import { convertYargsConfig } from "../commands/convert/yargs-config.js";
 import { diffYargsConfig } from "../commands/diff/yargs-config.js";
 import { extractWorkoutYargsConfig } from "../commands/extract-workout/yargs-config.js";

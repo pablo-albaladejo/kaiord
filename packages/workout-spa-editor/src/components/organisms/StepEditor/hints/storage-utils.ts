@@ -4,6 +4,7 @@
  * LocalStorage utilities for first-time hints.
  */
 
+import { logger } from "../../../../utils/logger";
 import { DEFAULT_STORAGE_KEY } from "./constants";
 
 /**
@@ -26,7 +27,7 @@ export function saveCompletionState(storageKey: string): void {
   try {
     localStorage.setItem(storageKey, "true");
   } catch (error) {
-    console.error("Failed to save first workout completion state:", error);
+    logger.error("Failed to save first workout completion state:", { error });
   }
 }
 
@@ -39,6 +40,6 @@ export function resetFirstWorkoutState(
   try {
     localStorage.removeItem(storageKey);
   } catch (error) {
-    console.error("Failed to reset first workout state:", error);
+    logger.error("Failed to reset first workout state:", { error });
   }
 }

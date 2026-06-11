@@ -25,12 +25,12 @@ export type ZoneNumber = 1 | 2 | 3 | 4 | 5;
 
 /** Background utility class for a 1-based zone number. */
 export function zoneBgClass(zone: ZoneNumber): string {
-  return ZONE_BG_CLASSES[zone - 1];
+  return ZONE_BG_CLASSES[zone - 1]!;
 }
 
 /** Raw hex for a 1-based zone number (for inline gradients). */
 export function zoneHex(zone: ZoneNumber): string {
-  return ZONE_HEX[zone - 1];
+  return ZONE_HEX[zone - 1]!;
 }
 
 /** Vertical zone gradient (solid top → 80% alpha bottom) with inset top

@@ -1,4 +1,5 @@
 import type { Argv } from "yargs";
+
 import { ExitCode } from "../../utils/exit-codes";
 import { extractWorkoutCommand } from "./index";
 

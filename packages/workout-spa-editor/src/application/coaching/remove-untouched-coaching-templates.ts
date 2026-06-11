@@ -18,6 +18,7 @@
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { WorkoutRepository } from "../../ports/workout-repository";
 import type { WorkoutRecord } from "../../types/calendar-record";
+import { logger } from "../../utils/logger";
 
 const TRAIN2GO_SOURCE = "train2go";
 const TEMPLATE_STEP_NAME = "Warmup";
@@ -73,10 +74,9 @@ export const removeUntouchedCoachingTemplates = async (
   }
 
   if (junk.length > 0) {
-    console.info(
-      "[junk-cleanup] removed untouched coaching templates:",
-      junk.map((r) => r.id)
-    );
+    logger.info("[junk-cleanup] removed untouched coaching templates", {
+      ids: junk.map((r) => r.id),
+    });
   }
 
   return { removed: junk.length };

@@ -23,12 +23,13 @@ export const calculateHrZones = (
 
   const zones: Array<HeartRateZone> = [];
   for (let i = 0; i < method.defaults.length; i++) {
-    const def = method.defaults[i];
+    const def = method.defaults[i]!;
     const maxBpm = Math.round((lthr * def.maxPercent) / 100);
+    const prev = zones[i - 1];
     const minBpm =
-      i === 0
+      i === 0 || prev === undefined
         ? Math.round((lthr * def.minPercent) / 100)
-        : zones[i - 1].maxBpm + 1;
+        : prev.maxBpm + 1;
     zones.push({ zone: i + 1, name: def.name, minBpm, maxBpm });
   }
   return zones;

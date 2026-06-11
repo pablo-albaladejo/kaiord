@@ -25,4 +25,4 @@ export const PROVIDER_MODELS: Record<LlmProviderType, Array<ModelOption>> = {
 };
 
 export const getDefaultModel = (type: LlmProviderType): string =>
-  PROVIDER_MODELS[type][0].id;
+  PROVIDER_MODELS[type][0]?.id ?? "";

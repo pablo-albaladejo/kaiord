@@ -1,7 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import {
-  createGarminConnectClient,
   createFileTokenStore,
+  createGarminConnectClient,
 } from "@kaiord/garmin-connect";
 
 export const createCliGarminClient = async (logger: Logger) => {

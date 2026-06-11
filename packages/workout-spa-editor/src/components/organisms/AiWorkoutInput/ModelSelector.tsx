@@ -11,7 +11,7 @@ export const ModelSelector: React.FC = () => {
   const currentValue =
     selectedProviderId ??
     providers.find((p) => p.isDefault)?.id ??
-    providers[0].id;
+    providers[0]!.id;
 
   return (
     <div className="w-full">

@@ -43,8 +43,8 @@ export function useTodayData(focusDate: Date, realTodayIso: string): TodayData {
   );
   const dayIsos = useMemo(() => days.map((d) => d.iso), [days]);
   const focusIso = toIsoDate(focusDate);
-  const start = days[0].iso;
-  const end = days[days.length - 1].iso;
+  const start = days[0]!.iso;
+  const end = days[days.length - 1]!.iso;
 
   const weekWorkouts = useWeekWorkoutsLive(profileId, start, end);
   const hrvRecords = useHealthHrvHistoryLive(profileId ?? "", {

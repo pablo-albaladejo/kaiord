@@ -6,11 +6,15 @@ import {
 } from "@kaiord/core";
 import stripAnsi from "strip-ansi";
 import { describe, expect, it } from "vitest";
+
 import {
   formatError,
   formatToleranceViolations,
   formatValidationErrors,
 } from "./error-formatter";
+
+const EXPECTED_DURATION_SECONDS = 300;
+const ACTUAL_DURATION_SECONDS = 301;
 
 describe("formatError", () => {
   describe("FitParsingError", () => {
@@ -107,8 +111,8 @@ describe("formatError", () => {
       const violations: Array<ToleranceViolation> = [
         {
           field: "steps[0].duration.seconds",
-          expected: 300,
-          actual: 301,
+          expected: EXPECTED_DURATION_SECONDS,
+          actual: ACTUAL_DURATION_SECONDS,
           deviation: 1,
           tolerance: 1,
         },
@@ -143,8 +147,8 @@ describe("formatError", () => {
       const violations: Array<ToleranceViolation> = [
         {
           field: "steps[0].duration.seconds",
-          expected: 300,
-          actual: 301,
+          expected: EXPECTED_DURATION_SECONDS,
+          actual: ACTUAL_DURATION_SECONDS,
           deviation: 1,
           tolerance: 1,
         },
@@ -165,8 +169,10 @@ describe("formatError", () => {
       expect(parsed.error.violations[0].field).toBe(
         "steps[0].duration.seconds"
       );
-      expect(parsed.error.violations[0].expected).toBe(300);
-      expect(parsed.error.violations[0].actual).toBe(301);
+      expect(parsed.error.violations[0].expected).toBe(
+        EXPECTED_DURATION_SECONDS
+      );
+      expect(parsed.error.violations[0].actual).toBe(ACTUAL_DURATION_SECONDS);
     });
   });
 
@@ -279,8 +285,8 @@ describe("formatToleranceViolations", () => {
     const violations: Array<ToleranceViolation> = [
       {
         field: "steps[0].duration.seconds",
-        expected: 300,
-        actual: 301,
+        expected: EXPECTED_DURATION_SECONDS,
+        actual: ACTUAL_DURATION_SECONDS,
         deviation: 1,
         tolerance: 1,
       },

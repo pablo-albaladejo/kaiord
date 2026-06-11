@@ -3,6 +3,7 @@
  */
 import { readFile as fsReadFile, writeFile as fsWriteFile } from "fs/promises";
 import { glob } from "glob";
+
 import { createOutputDirectory } from "./directory-handler";
 import type { FileFormat } from "./format-detector";
 import { isNodeSystemError } from "./fs-errors";
@@ -31,13 +32,13 @@ export const readFile = async (
   } catch (error) {
     if (isNodeSystemError(error)) {
       if (error.code === "ENOENT") {
-        throw new Error(`File not found: ${path}`);
+        throw new Error(`File not found: ${path}`, { cause: error });
       }
       if (error.code === "EACCES") {
-        throw new Error(`Permission denied: ${path}`);
+        throw new Error(`Permission denied: ${path}`, { cause: error });
       }
     }
-    throw new Error(`Failed to read file: ${path}`);
+    throw new Error(`Failed to read file: ${path}`, { cause: error });
   }
 };
 
@@ -69,13 +70,17 @@ export const writeFile = async (
   } catch (error) {
     if (isNodeSystemError(error)) {
       if (error.code === "EACCES") {
-        throw new Error(`Permission denied writing file: ${path}`);
+        throw new Error(`Permission denied writing file: ${path}`, {
+          cause: error,
+        });
       }
       if (error.code === "EISDIR") {
-        throw new Error(`Cannot write file (path is a directory): ${path}`);
+        throw new Error(`Cannot write file (path is a directory): ${path}`, {
+          cause: error,
+        });
       }
     }
-    throw new Error(`Failed to write file: ${path}`);
+    throw new Error(`Failed to write file: ${path}`, { cause: error });
   }
 };
 

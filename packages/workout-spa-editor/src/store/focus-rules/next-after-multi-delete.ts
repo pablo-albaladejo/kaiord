@@ -41,8 +41,8 @@ export const nextAfterMultiDelete = (
   }
 
   const indices = [...deletedIndices].sort((a, b) => a - b);
-  const firstDeleted = indices[0];
-  const lastDeleted = indices[indices.length - 1];
+  const firstDeleted = indices[0]!;
+  const lastDeleted = indices[indices.length - 1]!;
   const removedCount = indices.length;
 
   // The "first remaining item after the last-deleted original position"
@@ -66,9 +66,8 @@ export const nextAfterMultiDelete = (
   // focus on whatever survives nearest the original first-deleted
   // position rather than collapsing to empty-state when the list is
   // not actually empty.
-  const candidate = steps[Math.min(firstDeleted, steps.length - 1)] as
-    | { id?: string }
-    | undefined;
+  const candidateIdx = Math.min(firstDeleted, steps.length - 1);
+  const candidate = steps[candidateIdx] as { id?: string } | undefined;
   if (candidate?.id) return focusItem(candidate.id as ItemId);
 
   return focusEmptyState;

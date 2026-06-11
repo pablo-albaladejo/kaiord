@@ -30,8 +30,8 @@ export function PaceInput({
     }
     const parts = raw.split(":");
     if (parts.length !== 2) return;
-    const mins = parseInt(parts[0], 10);
-    const secs = parseInt(parts[1], 10);
+    const mins = parseInt(parts[0] ?? "", 10);
+    const secs = parseInt(parts[1] ?? "", 10);
     if (isNaN(mins) || isNaN(secs)) return;
     onChange(mins * 60 + secs);
   };

@@ -2,6 +2,7 @@
  * Generic and unknown error formatters
  */
 import chalk from "chalk";
+
 import { getErrorTitle, getSuggestionForError } from "../error-suggestions";
 
 export const formatGenericError = (

@@ -3,6 +3,7 @@
  */
 import type { ToleranceViolation, ValidationError } from "@kaiord/core";
 import chalk from "chalk";
+
 import { isTTY } from "./is-tty";
 
 const shouldUseColors = (): boolean => {

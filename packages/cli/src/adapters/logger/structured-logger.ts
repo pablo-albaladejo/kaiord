@@ -1,5 +1,6 @@
 import type { Logger } from "@kaiord/core";
 import winston from "winston";
+
 import type { LoggerOptions } from "../../utils/logger-factory";
 
 /**

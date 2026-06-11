@@ -1,4 +1,5 @@
 import type { Argv } from "yargs";
+
 import {
   listSubcommand,
   loginSubcommand,

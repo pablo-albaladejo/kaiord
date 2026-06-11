@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { isTTY } from "./is-tty";
 
 describe("isTTY", () => {

@@ -51,9 +51,9 @@ function buildZoneMap(
   return model.names.map((name, i) => ({
     n: (i + 1) as ZoneNumber,
     name,
-    range: ranges[i],
-    pct: model.pcts[i],
-    w: ZONE_WEIGHTS[i],
+    range: ranges[i]!,
+    pct: model.pcts[i]!,
+    w: ZONE_WEIGHTS[i]!,
   }));
 }
 

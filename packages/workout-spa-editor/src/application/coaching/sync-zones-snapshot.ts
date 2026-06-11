@@ -43,6 +43,12 @@ const BAND_INDEX: Record<string, number> = {
   z5: 4,
 };
 
+const BOUND_PROPS: Record<ZoneKind, [string, string]> = {
+  heartRateZones: ["minBpm", "maxBpm"],
+  powerZones: ["minPercent", "maxPercent"],
+  paceZones: ["minPace", "maxPace"],
+};
+
 /**
  * Project the snapshot zones for a single sport-kind into a
  * `Map<FieldKey, number>` keyed by the band-level FieldKeys so the
@@ -55,19 +61,12 @@ export const snapshotZonesToFieldMap = (
 ): Map<FieldKey, number> => {
   const out = new Map<FieldKey, number>();
   if (!snapshotZones) return out;
+  const [minProp, maxProp] = BOUND_PROPS[kind];
   for (let i = 0; i < snapshotZones.length; i++) {
     const z = snapshotZones[i] as Record<string, number>;
     const band = `z${i + 1}`;
-    if (kind === "heartRateZones") {
-      out.set(`${sport}.${kind}.${band}.minBpm` as FieldKey, z.minBpm);
-      out.set(`${sport}.${kind}.${band}.maxBpm` as FieldKey, z.maxBpm);
-    } else if (kind === "powerZones") {
-      out.set(`${sport}.${kind}.${band}.minPercent` as FieldKey, z.minPercent);
-      out.set(`${sport}.${kind}.${band}.maxPercent` as FieldKey, z.maxPercent);
-    } else {
-      out.set(`${sport}.${kind}.${band}.minPace` as FieldKey, z.minPace);
-      out.set(`${sport}.${kind}.${band}.maxPace` as FieldKey, z.maxPace);
-    }
+    out.set(`${sport}.${kind}.${band}.${minProp}` as FieldKey, z[minProp] ?? 0);
+    out.set(`${sport}.${kind}.${band}.${maxProp}` as FieldKey, z[maxProp] ?? 0);
   }
   return out;
 };
@@ -82,5 +81,5 @@ export const tableKeyOfField = (
 
 export const bandIndexOfField = (field: FieldKey): number | undefined => {
   const m = BAND_KEY_RE.exec(field);
-  return m ? BAND_INDEX[m[3]] : undefined;
+  return m ? BAND_INDEX[m[3] ?? ""] : undefined;
 };

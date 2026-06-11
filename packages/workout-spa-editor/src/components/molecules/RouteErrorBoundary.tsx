@@ -22,6 +22,7 @@ import {
   reloadOnceForChunkError,
 } from "../../lib/chunk-reload";
 import { scrubAnalyticsString } from "../../lib/scrub-analytics-string";
+import { logger } from "../../utils/logger";
 import { RouteErrorFallback } from "./RouteErrorFallback";
 
 type Props = {
@@ -53,7 +54,10 @@ export class RouteErrorBoundary extends Component<Props, State> {
         // analytics must not cause a secondary failure inside the error boundary
       }
     }
-    console.error("Route error:", error, info.componentStack);
+    logger.error("Route error", {
+      error,
+      componentStack: info.componentStack,
+    });
   }
 
   handleRetry = () => {

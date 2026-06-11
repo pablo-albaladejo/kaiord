@@ -46,7 +46,7 @@ export const duplicateStepInRepetitionBlockAction = (
 
   // Create a deep clone of the step and assign a fresh ItemId so focus /
   // selection can reference the duplicate distinctly from the original.
-  const stepToDuplicate = block.steps[stepIndex];
+  const stepToDuplicate = block.steps[stepIndex]!;
   const duplicatedStep = {
     ...structuredClone(stepToDuplicate),
     id: defaultIdProvider(),

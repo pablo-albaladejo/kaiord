@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { fileFormatSchema } from "../../utils/format-detector.js";
 
 export const extractWorkoutOptionsSchema = z.object({

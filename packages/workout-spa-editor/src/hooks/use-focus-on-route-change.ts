@@ -27,6 +27,7 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 
 import { ROUTE_HEADING_SELECTOR } from "../routing/constants";
+import { logger } from "../utils/logger";
 
 const FALLBACK_WARN = "useFocusOnRouteChange: no [data-route-heading]";
 // Bound the wait for a route-heading to appear. Long enough to cover
@@ -89,7 +90,7 @@ export function useFocusOnRouteChange(): void {
         cleanup();
         // Fallback per spec — warn loudly, focus body so the document
         // still has a sensible focus owner.
-        console.warn(FALLBACK_WARN, pathname);
+        logger.warn(FALLBACK_WARN, { pathname });
         document.body.focus?.();
       }, OBSERVE_TIMEOUT_MS);
     });

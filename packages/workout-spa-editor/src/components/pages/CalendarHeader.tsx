@@ -21,6 +21,14 @@ export type CalendarHeaderProps = {
   onViewChange?: (next: CalendarView) => void;
 };
 
+const syncFromFirstDay = <T,>(
+  sync: (day: T) => unknown,
+  days: readonly T[]
+): void => {
+  const firstDay = days[0];
+  if (firstDay !== undefined) sync(firstDay);
+};
+
 export function CalendarHeader({
   state: s,
   coaching,
@@ -69,7 +77,7 @@ export function CalendarHeader({
                 connected={src.connected}
                 loading={src.loading}
                 error={src.error}
-                onSync={() => src.sync(s.data.days[0])}
+                onSync={() => syncFromFirstDay(src.sync, s.data.days)}
                 onConnect={src.connect}
                 label={src.label}
                 lastSyncedAt={src.lastSyncedAt}

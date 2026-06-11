@@ -364,7 +364,7 @@ describe("FirstTimeHints", () => {
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           "Failed to reset first workout state:",
-          expect.any(Error)
+          { error: expect.any(Error) }
         );
 
         consoleErrorSpy.mockRestore();
@@ -447,7 +447,7 @@ describe("FirstTimeHints", () => {
       expect(screen.queryByTestId("first-time-hints")).not.toBeInTheDocument();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Failed to save first workout completion state:",
-        expect.any(Error)
+        { error: expect.any(Error) }
       );
 
       consoleErrorSpy.mockRestore();

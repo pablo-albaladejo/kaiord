@@ -213,6 +213,26 @@ export default tseslint.config(
     },
   },
   {
+    // All SPA logging goes through src/utils/logger.ts so log levels and
+    // transports stay controllable. Only the logger itself, the
+    // console-spy test utilities, and tests may touch console directly.
+    files: [
+      "packages/workout-spa-editor/src/**/*.ts",
+      "packages/workout-spa-editor/src/**/*.tsx",
+    ],
+    ignores: [
+      "packages/workout-spa-editor/src/utils/logger.ts",
+      "packages/workout-spa-editor/src/test-utils/**",
+      "packages/workout-spa-editor/src/**/*.test.ts",
+      "packages/workout-spa-editor/src/**/*.test.tsx",
+      "packages/workout-spa-editor/src/**/*.stories.ts",
+      "packages/workout-spa-editor/src/**/*.stories.tsx",
+    ],
+    rules: {
+      "no-console": "error",
+    },
+  },
+  {
     // Coaching dialog files MUST NOT consume the coaching-source registry
     // directly (Rules-of-Hooks compliance + single source materialization).
     // The dialog receives `expandActivity` as a callback prop instead.

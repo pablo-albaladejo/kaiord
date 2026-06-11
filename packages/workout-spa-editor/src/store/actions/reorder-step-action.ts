@@ -70,7 +70,8 @@ export const reorderStepAction = (
     return {};
   }
 
-  const [movedStep] = steps.splice(activeIndex, 1);
+  const spliced = steps.splice(activeIndex, 1);
+  const movedStep = spliced[0]!;
   steps.splice(overIndex, 0, movedStep);
 
   const reindexedSteps = reindexSteps(steps);

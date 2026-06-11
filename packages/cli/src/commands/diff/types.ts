@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { fileFormatSchema } from "../../utils/format-detector";
 
 export const diffOptionsSchema = z.object({

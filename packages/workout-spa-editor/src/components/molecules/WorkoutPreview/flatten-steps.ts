@@ -50,7 +50,7 @@ function flattenBlock(
 
   for (let rep = 0; rep < block.repeatCount; rep++) {
     for (let j = 0; j < block.steps.length; j++) {
-      const inner = block.steps[j];
+      const inner = block.steps[j]!;
       // `barId` is unique per rendered bar; `stepId` points at the block so
       // clicking any bar inside the block selects the block itself.
       const barId = `${blockId}-rep-${rep}-step-${j}`;
@@ -65,7 +65,7 @@ export function flattenWorkoutSteps(workout: Workout): PreviewBar[] {
   const bars: PreviewBar[] = [];
 
   for (let i = 0; i < workout.steps.length; i++) {
-    const item = workout.steps[i];
+    const item = workout.steps[i]!;
 
     if (isRepetitionBlock(item)) {
       bars.push(...flattenBlock(item, i));

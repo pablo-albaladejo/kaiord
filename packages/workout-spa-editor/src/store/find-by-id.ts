@@ -45,7 +45,7 @@ export const findById = (
   if (!workout || !id) return null;
 
   for (let i = 0; i < workout.steps.length; i++) {
-    const item = workout.steps[i];
+    const item = workout.steps[i]!;
     if (isRepetitionBlock(item)) {
       if ((item as UIRepetitionBlock).id === id) {
         return {

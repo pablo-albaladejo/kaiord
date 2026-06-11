@@ -47,12 +47,13 @@ export const calculatePowerZoneValues = (
     maxWatts: number;
   }> = [];
   for (let i = 0; i < zones.length; i++) {
-    const z = zones[i];
+    const z = zones[i]!;
     const maxWatts = Math.round((ftp * z.maxPercent) / 100);
+    const prev = result[i - 1];
     const minWatts =
-      i === 0
+      i === 0 || prev === undefined
         ? Math.round((ftp * z.minPercent) / 100)
-        : result[i - 1].maxWatts + 1;
+        : prev.maxWatts + 1;
     result.push({ zone: z.zone, name: z.name, minWatts, maxWatts });
   }
   return result;

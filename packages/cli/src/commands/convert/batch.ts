@@ -1,15 +1,52 @@
 import type { Logger } from "@kaiord/core";
 import ora from "ora";
 import { basename } from "path";
+
 import { ExitCode } from "../../utils/exit-codes";
 import { findFiles } from "../../utils/file-handler";
 import { convertBatchFile, validateBatchOptions } from "./batch-helpers";
 import { printBatchJson, printBatchSummary } from "./batch-output";
 import type { ConversionResult, ValidatedConvertOptions } from "./types";
 
-/**
- * Execute batch file conversion mode
- */
+type Spinner = ReturnType<typeof ora> | null;
+
+type BatchSummary = {
+  total: number;
+  successful: Array<ConversionResult>;
+  failed: Array<ConversionResult>;
+  totalTime: number;
+};
+
+type ProgressContext = { index: number; total: number; file: string };
+
+const reportProgress = (
+  spinner: Spinner,
+  logger: Logger,
+  ctx: ProgressContext
+): void => {
+  const label = `Converting ${ctx.index + 1}/${ctx.total}: ${basename(ctx.file)}`;
+  if (spinner) {
+    spinner.text = label;
+  } else {
+    logger.info(label);
+  }
+};
+
+const printResults = (
+  options: ValidatedConvertOptions,
+  summary: BatchSummary,
+  results: Array<ConversionResult>
+): void => {
+  if (options.json) printBatchJson(summary, results);
+  else printBatchSummary(summary);
+};
+
+const resolveExitCode = (summary: BatchSummary): number => {
+  if (summary.failed.length === 0) return ExitCode.SUCCESS;
+  if (summary.successful.length === 0) return ExitCode.INVALID_ARGUMENT;
+  return ExitCode.PARTIAL_SUCCESS;
+};
+
 export const executeBatchConversion = async (
   options: ValidatedConvertOptions,
   logger: Logger
@@ -38,25 +75,21 @@ export const executeBatchConversion = async (
   const results: Array<ConversionResult> = [];
 
   for (const [index, file] of files.entries()) {
-    if (spinner) {
-      spinner.text = `Converting ${index + 1}/${files.length}: ${basename(file)}`;
-    } else {
-      logger.info(`Converting ${index + 1}/${files.length}: ${basename(file)}`);
-    }
+    reportProgress(spinner, logger, { index, total: files.length, file });
     results.push(await convertBatchFile(file, options, outputFormat, logger));
   }
 
   if (spinner) spinner.stop();
 
-  const totalTime = Date.now() - startTime;
   const successful = results.filter((r) => r.success);
   const failed = results.filter((r) => !r.success);
-  const summary = { total: files.length, successful, failed, totalTime };
+  const summary: BatchSummary = {
+    total: files.length,
+    successful,
+    failed,
+    totalTime: Date.now() - startTime,
+  };
 
-  if (options.json) printBatchJson(summary, results);
-  else printBatchSummary(summary);
-
-  if (failed.length === 0) return ExitCode.SUCCESS;
-  if (successful.length === 0) return ExitCode.INVALID_ARGUMENT;
-  return ExitCode.PARTIAL_SUCCESS;
+  printResults(options, summary, results);
+  return resolveExitCode(summary);
 };

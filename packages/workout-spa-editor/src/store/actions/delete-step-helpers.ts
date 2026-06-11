@@ -16,7 +16,7 @@ export const findStepToDelete = (
   stepIndex: number
 ): FoundStep | null => {
   for (let i = 0; i < workout.steps.length; i++) {
-    const step = workout.steps[i];
+    const step = workout.steps[i]!;
     if (isWorkoutStep(step) && step.stepIndex === stepIndex) {
       return { step, arrayIndex: i };
     }

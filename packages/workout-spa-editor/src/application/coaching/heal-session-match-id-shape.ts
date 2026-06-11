@@ -11,6 +11,7 @@
  */
 
 import type { SessionMatch } from "../../types/session-match";
+import { logger } from "../../utils/logger";
 import { resolveCanonicalActivityId } from "./heal-session-match-id-shape-helpers";
 import type {
   HealOutcome,
@@ -31,7 +32,7 @@ const dropOrphan = async (
   deps: HealSessionMatchIdShapeDeps
 ): Promise<HealOutcome> => {
   await deps.sessionMatches.delete(match.id);
-  console.info("[heal] session-match orphan dropped", {
+  logger.info("[heal] session-match orphan dropped", {
     matchId: match.id,
     canonicalMatchId,
     from: match.coachingActivityId,
@@ -50,7 +51,7 @@ const rewriteIdShape = async (
   deps: HealSessionMatchIdShapeDeps
 ): Promise<HealOutcome> => {
   await deps.sessionMatches.updateCoachingActivityId(match.id, composite);
-  console.info("[heal] session-match id-shape rewritten", {
+  logger.info("[heal] session-match id-shape rewritten", {
     matchId: match.id,
     from: match.coachingActivityId,
     to: composite,

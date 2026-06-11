@@ -1,14 +1,21 @@
+import type * as KaiordCore from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { convertFromKrd, convertToKrd, loadFileAsKrd } from "./krd-converter";
 
+const FIT_MAGIC_BYTES = Uint8Array.from(Buffer.from("2e464954", "hex"));
+const SAMPLE_BINARY = Uint8Array.from(Buffer.from("010203", "hex"));
+
 vi.mock("@kaiord/core", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@kaiord/core")>();
+  const actual = await importOriginal<typeof KaiordCore>();
   return {
     ...actual,
     fromBinary: vi.fn().mockResolvedValue({ metadata: { sport: "cycling" } }),
     fromText: vi.fn().mockResolvedValue({ metadata: { sport: "cycling" } }),
-    toBinary: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
+    toBinary: vi
+      .fn()
+      .mockResolvedValue(Uint8Array.from(Buffer.from("010203", "hex"))),
     toText: vi.fn().mockResolvedValue("<output/>"),
   };
 });
@@ -49,7 +56,7 @@ describe("convertToKrd", () => {
     // Arrange
     const { fromBinary } = await import("@kaiord/core");
     const { createFitReader } = await import("@kaiord/fit");
-    const fitData = new Uint8Array([0x2e, 0x46, 0x49, 0x54]);
+    const fitData = FIT_MAGIC_BYTES;
 
     // Act
     await convertToKrd(fitData, "fit", mockLogger);
@@ -161,7 +168,7 @@ describe("convertToKrd", () => {
     // Arrange
 
     // Act
-    const data = new Uint8Array([1, 2, 3]);
+    const data = SAMPLE_BINARY;
 
     // Assert
     await expect(convertToKrd(data, "tcx", mockLogger)).rejects.toThrow(

@@ -10,6 +10,7 @@
  * throws so it cannot block app startup.
  */
 import { removeUntouchedCoachingTemplates } from "../../application/coaching/remove-untouched-coaching-templates";
+import { logger } from "../../utils/logger";
 import type { KaiordDatabase } from "./dexie-database";
 import { createDexieSessionMatchRepository } from "./dexie-session-match-repository";
 import { createDexieWorkoutRepository } from "./dexie-workout-repository";
@@ -27,6 +28,6 @@ export const runJunkCleanupOnce = async (db: KaiordDatabase): Promise<void> => {
 
     await db.table("meta").put({ key: META_KEY, value: true });
   } catch (err) {
-    console.warn("[junk-cleanup] failed, skipping:", err);
+    logger.warn("[junk-cleanup] failed, skipping", { err });
   }
 };

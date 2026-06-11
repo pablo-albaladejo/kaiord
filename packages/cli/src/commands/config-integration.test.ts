@@ -4,6 +4,9 @@ import { join } from "path";
 import { dir } from "tmp-promise";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+const FIT_HEADER_BYTES = Buffer.from("0e100000", "hex");
+const PROCESS_TIMEOUT_MS = 15000;
+
 describe("config file integration", () => {
   let tmpDir: { path: string; cleanup: () => Promise<void> };
 
@@ -17,7 +20,7 @@ describe("config file integration", () => {
 
   it(
     "should use config file defaults for convert command",
-    { timeout: 15000 },
+    { timeout: PROCESS_TIMEOUT_MS },
     async () => {
       // Arrange
       const configPath = join(tmpDir.path, ".kaiordrc.json");
@@ -27,7 +30,7 @@ describe("config file integration", () => {
       };
       await writeFile(configPath, JSON.stringify(config, null, 2));
       const inputPath = join(tmpDir.path, "workout.fit");
-      await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
+      await writeFile(inputPath, FIT_HEADER_BYTES);
       const outputPath = join(tmpDir.path, "workout.krd");
 
       // Act
@@ -54,7 +57,7 @@ describe("config file integration", () => {
 
   it(
     "should prioritize CLI options over config defaults",
-    { timeout: 15000 },
+    { timeout: PROCESS_TIMEOUT_MS },
     async () => {
       // Arrange
       const configPath = join(tmpDir.path, ".kaiordrc.json");
@@ -63,7 +66,7 @@ describe("config file integration", () => {
       };
       await writeFile(configPath, JSON.stringify(config, null, 2));
       const inputPath = join(tmpDir.path, "workout.fit");
-      await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
+      await writeFile(inputPath, FIT_HEADER_BYTES);
       const outputPath = join(tmpDir.path, "workout.krd");
 
       // Act
@@ -100,7 +103,7 @@ describe("config file integration", () => {
     };
     await writeFile(configPath, JSON.stringify(config, null, 2));
     const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
+    await writeFile(inputPath, FIT_HEADER_BYTES);
 
     // Act
     const result = await execa(
@@ -116,43 +119,47 @@ describe("config file integration", () => {
     expect(result.exitCode).toBeDefined();
   });
 
-  it("should use default tolerance config from config file", async () => {
-    // Arrange
-    const toleranceConfigPath = join(tmpDir.path, "tolerance.json");
-    const toleranceConfig = {
-      time: { absolute: 2, unit: "seconds" },
-      power: { absolute: 2, percentage: 2, unit: "watts" },
-    };
-    await writeFile(
-      toleranceConfigPath,
-      JSON.stringify(toleranceConfig, null, 2)
-    );
-    const configPath = join(tmpDir.path, ".kaiordrc.json");
-    const config = {
-      defaultToleranceConfig: toleranceConfigPath,
-    };
-    await writeFile(configPath, JSON.stringify(config, null, 2));
-    const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
+  it(
+    "should use default tolerance config from config file",
+    async () => {
+      // Arrange
+      const toleranceConfigPath = join(tmpDir.path, "tolerance.json");
+      const toleranceConfig = {
+        time: { absolute: 2, unit: "seconds" },
+        power: { absolute: 2, percentage: 2, unit: "watts" },
+      };
+      await writeFile(
+        toleranceConfigPath,
+        JSON.stringify(toleranceConfig, null, 2)
+      );
+      const configPath = join(tmpDir.path, ".kaiordrc.json");
+      const config = {
+        defaultToleranceConfig: toleranceConfigPath,
+      };
+      await writeFile(configPath, JSON.stringify(config, null, 2));
+      const inputPath = join(tmpDir.path, "workout.fit");
+      await writeFile(inputPath, FIT_HEADER_BYTES);
 
-    // Act
-    const result = await execa(
-      "node",
-      ["dist/bin/kaiord.js", "validate", "--input", inputPath],
-      {
-        cwd: tmpDir.path,
-        reject: false,
-      }
-    );
+      // Act
+      const result = await execa(
+        "node",
+        ["dist/bin/kaiord.js", "validate", "--input", inputPath],
+        {
+          cwd: tmpDir.path,
+          reject: false,
+        }
+      );
 
-    // Assert
-    expect(result.exitCode).toBeDefined();
-  }, 15000); // Increased timeout for process spawning under load
+      // Assert
+      expect(result.exitCode).toBeDefined();
+    },
+    PROCESS_TIMEOUT_MS
+  ); // Increased timeout for process spawning under load
 
   it("should work without config file", async () => {
     // Arrange
     const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
+    await writeFile(inputPath, FIT_HEADER_BYTES);
     const outputPath = join(tmpDir.path, "workout.krd");
 
     // Act
@@ -176,32 +183,36 @@ describe("config file integration", () => {
     expect(result.exitCode).toBeDefined();
   });
 
-  it("should handle invalid config file gracefully", async () => {
-    // Arrange
-    const configPath = join(tmpDir.path, ".kaiordrc.json");
-    await writeFile(configPath, "invalid json");
-    const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
-    const outputPath = join(tmpDir.path, "workout.krd");
+  it(
+    "should handle invalid config file gracefully",
+    async () => {
+      // Arrange
+      const configPath = join(tmpDir.path, ".kaiordrc.json");
+      await writeFile(configPath, "invalid json");
+      const inputPath = join(tmpDir.path, "workout.fit");
+      await writeFile(inputPath, FIT_HEADER_BYTES);
+      const outputPath = join(tmpDir.path, "workout.krd");
 
-    // Act
-    const result = await execa(
-      "node",
-      [
-        "dist/bin/kaiord.js",
-        "convert",
-        "--input",
-        inputPath,
-        "--output",
-        outputPath,
-      ],
-      {
-        cwd: tmpDir.path,
-        reject: false,
-      }
-    );
+      // Act
+      const result = await execa(
+        "node",
+        [
+          "dist/bin/kaiord.js",
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+        ],
+        {
+          cwd: tmpDir.path,
+          reject: false,
+        }
+      );
 
-    // Assert
-    expect(result.exitCode).toBeDefined();
-  }, 15000); // Increased timeout for process spawning under load
+      // Assert
+      expect(result.exitCode).toBeDefined();
+    },
+    PROCESS_TIMEOUT_MS
+  ); // Increased timeout for process spawning under load
 });

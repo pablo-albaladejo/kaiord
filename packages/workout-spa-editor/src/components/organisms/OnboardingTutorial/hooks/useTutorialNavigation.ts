@@ -6,6 +6,8 @@
 
 import { useState } from "react";
 
+import { logger } from "../../../../utils/logger";
+
 type UseTutorialNavigationParams = {
   stepsCount: number;
   storageKey: string;
@@ -49,7 +51,7 @@ export function useTutorialNavigation(params: UseTutorialNavigationParams) {
     try {
       localStorage.setItem(storageKey, "true");
     } catch (error) {
-      console.error("Failed to save onboarding completion state:", error);
+      logger.error("Failed to save onboarding completion state:", { error });
     }
   };
 

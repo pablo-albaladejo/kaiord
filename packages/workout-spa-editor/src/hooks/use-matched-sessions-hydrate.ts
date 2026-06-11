@@ -17,6 +17,7 @@ import type { MatchedSession } from "../components/molecules/MatchedSessionCard/
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
+import { logger } from "../utils/logger";
 import type { DanglingMatch } from "./use-matched-sessions-heal";
 import {
   collectWorkoutIds,
@@ -66,7 +67,7 @@ export const hydrateMatchedSessions = async (
     const record = aById.get(match.coachingActivityId);
     const workout = wById.get(match.workoutId);
     if (!record || !workout) {
-      console.warn(DROP_WARN, {
+      logger.warn(DROP_WARN, {
         matchId: match.id,
         coachingActivityId: match.coachingActivityId,
         workoutId: match.workoutId,

@@ -43,7 +43,7 @@ export const findBlockById = (
   blockId: string
 ): { block: RepetitionBlock; position: number } | null => {
   for (let i = 0; i < workout.steps.length; i++) {
-    const step = workout.steps[i];
+    const step = workout.steps[i]!;
     if (isRepetitionBlock(step) && step.id === blockId) {
       return { block: step, position: i };
     }

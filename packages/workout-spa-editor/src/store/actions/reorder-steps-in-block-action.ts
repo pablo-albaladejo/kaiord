@@ -59,7 +59,8 @@ export const reorderStepsInBlockAction = (
   }
 
   // Move the step within the block
-  const [movedStep] = blockSteps.splice(activeIndex, 1);
+  const spliced = blockSteps.splice(activeIndex, 1);
+  const movedStep = spliced[0]!;
   blockSteps.splice(overIndex, 0, movedStep);
 
   // NOTE: We do NOT update stepIndex during reorder to maintain stable React keys

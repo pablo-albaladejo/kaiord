@@ -1,7 +1,8 @@
 import type { Argv } from "yargs";
+
 import { ExitCode } from "../../utils/exit-codes";
-import type { DiffOptions } from "./types";
 import { diffCommand } from "./index";
+import type { DiffOptions } from "./types";
 
 export const diffYargsConfig = {
   command: "diff",

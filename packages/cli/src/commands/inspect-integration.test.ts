@@ -2,6 +2,7 @@ import { execa } from "execa";
 import { resolve } from "path";
 import stripAnsi from "strip-ansi";
 import { describe, expect, it } from "vitest";
+
 import { getFixturePath } from "../tests/helpers/fixture-paths";
 
 const cliPath = resolve(__dirname, "../bin/kaiord.ts");

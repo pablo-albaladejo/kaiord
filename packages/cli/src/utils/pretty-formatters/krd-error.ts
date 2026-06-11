@@ -3,6 +3,7 @@
  */
 import type { KrdValidationError } from "@kaiord/core";
 import chalk from "chalk";
+
 import { formatValidationErrors } from "../format-violations";
 
 export const formatKrdValidationError = (

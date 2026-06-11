@@ -34,9 +34,16 @@ export function toIsoDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+const finitePart = (value: number | undefined, fallback: number): number =>
+  value !== undefined && Number.isFinite(value) ? value : fallback;
+
 export function isoToLocalDate(iso: string): Date {
   const [year, month, day] = iso.split("-").map(Number);
-  return new Date(year, month - 1, day);
+  return new Date(
+    finitePart(year, 0),
+    finitePart(month, 1) - 1,
+    finitePart(day, 1)
+  );
 }
 
 /** Adds `delta` days to a `YYYY-MM-DD` via the local constructor (DST-safe). */
@@ -63,7 +70,7 @@ export function weekDays(focus: Date, realTodayIso: string): WeekDay[] {
     const iso = toIsoDate(date);
     return {
       iso,
-      letter: WEEKDAY_LETTERS[index],
+      letter: WEEKDAY_LETTERS[index]!,
       dayNumber: date.getDate(),
       isFocused: iso === focusIso,
       isRealToday: iso === realTodayIso,

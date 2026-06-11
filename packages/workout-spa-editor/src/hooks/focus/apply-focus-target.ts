@@ -19,6 +19,7 @@ import {
 } from "../../store/providers/focus-telemetry";
 import type { ItemId } from "../../store/providers/item-id";
 import { useWorkoutStore } from "../../store/workout-store";
+import { logger } from "../../utils/logger";
 import {
   applyFocusToElement,
   prefersReducedMotion,
@@ -44,9 +45,7 @@ const FOCUS_UNRESOLVED_WARN =
 
 const warnUnresolved = (reason: FocusResolveReason) => {
   if (import.meta.env.MODE === "production") return;
-  // Pass `reason` as a structured second arg so DevTools renders it
-  // separately; the user-facing message stays statically known.
-  console.warn(FOCUS_UNRESOLVED_WARN, { reason });
+  logger.warn(FOCUS_UNRESOLVED_WARN, { reason });
 };
 
 const readFirstItemId = (): ItemId | null => {

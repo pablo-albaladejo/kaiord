@@ -1,6 +1,7 @@
 import type { Argv } from "yargs";
-import type { ConvertOptions } from "./types";
+
 import { convertCommand } from "./index";
+import type { ConvertOptions } from "./types";
 
 export const convertYargsConfig = {
   command: "convert",

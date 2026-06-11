@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import { createLogger } from "./logger-factory";
 
 describe("logger-factory", () => {

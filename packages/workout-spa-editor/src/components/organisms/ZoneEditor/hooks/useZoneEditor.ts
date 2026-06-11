@@ -46,6 +46,7 @@ export function useZoneEditor(
   ) => {
     const updatedZones = [...zones];
     const zone = updatedZones[zoneIndex];
+    if (!zone) return;
 
     if (field === "name") {
       zone.name = value as string;

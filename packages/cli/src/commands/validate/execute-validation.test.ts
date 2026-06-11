@@ -1,5 +1,8 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import type * as KaiordCore from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const SAMPLE_FIT_BYTES = Uint8Array.from(Buffer.from("00010203", "hex"));
 
 vi.mock("../../utils/file-handler.js", () => ({
   readFile: vi.fn(),
@@ -10,7 +13,7 @@ vi.mock("../../utils/format-detector.js", () => ({
 }));
 
 vi.mock("@kaiord/core", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@kaiord/core")>();
+  const actual = await importOriginal<typeof KaiordCore>();
   return {
     ...actual,
     createToleranceChecker: vi.fn(() => ({})),
@@ -35,11 +38,12 @@ vi.mock("fs/promises", () => ({
   readFile: vi.fn(),
 }));
 
-import { executeValidation } from "./execute-validation";
+import { validateRoundTrip } from "@kaiord/core";
+import { readFile as fsReadFile } from "fs/promises";
+
 import { readFile } from "../../utils/file-handler.js";
 import { detectFormat } from "../../utils/format-detector.js";
-import { readFile as fsReadFile } from "fs/promises";
-import { validateRoundTrip } from "@kaiord/core";
+import { executeValidation } from "./execute-validation";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),
@@ -96,7 +100,7 @@ describe("executeValidation", () => {
   it("should execute validation for valid FIT file", async () => {
     // Arrange
     const logger = createMockLogger();
-    const binaryData = new Uint8Array([0, 1, 2, 3]);
+    const binaryData = SAMPLE_FIT_BYTES;
     vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
     const mockValidateResult = {
@@ -125,7 +129,7 @@ describe("executeValidation", () => {
   it("should load custom tolerance config when provided", async () => {
     // Arrange
     const logger = createMockLogger();
-    const binaryData = new Uint8Array([0, 1, 2, 3]);
+    const binaryData = SAMPLE_FIT_BYTES;
     const toleranceConfig = {
       timeTolerance: 2,
       distanceTolerance: 1,
@@ -160,7 +164,7 @@ describe("executeValidation", () => {
   it("should log debug messages for format and path", async () => {
     // Arrange
     const logger = createMockLogger();
-    const binaryData = new Uint8Array([0, 1, 2, 3]);
+    const binaryData = SAMPLE_FIT_BYTES;
     vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
     const mockValidator = {
