@@ -61,6 +61,7 @@ export const updateSnapshot = (
   const idx = profile.linkedAccounts.findIndex((a) => a.source === source);
   if (idx === -1) return profile;
   const account = profile.linkedAccounts[idx];
+  if (!account) return profile;
   const base = account.lastSyncedZonesSnapshot ?? emptySnapshot(now);
   const next: LastSyncedZonesSnapshot = { ...base, syncedAt: now };
   for (const { sport, kind } of sportKinds) {

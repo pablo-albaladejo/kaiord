@@ -46,7 +46,7 @@ const fetchCsrfToken = async (
   if (!csrfMatch) {
     throw createServiceAuthError("CSRF token not found on login page");
   }
-  return csrfMatch[1];
+  return csrfMatch[1]!;
 };
 
 export const getLoginTicket = async (
@@ -90,5 +90,5 @@ export const getLoginTicket = async (
       "Login failed: ticket not found. Check username and password."
     );
   }
-  return ticketMatch[1];
+  return ticketMatch[1]!;
 };

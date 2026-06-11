@@ -1,0 +1,51 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/**"
+      - "scripts/**"
+      - ".github/workflows/codeql.yml"
+  schedule:
+    # Weekly - Mondays at 7 AM UTC, before the dependency audit
+    - cron: "0 7 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze JavaScript/TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          # Tests and fixtures are not attack surface; scanning them
+          # only produces noise.
+          config: |
+            paths-ignore:
+              - "**/*.test.ts"
+              - "**/*.test.tsx"
+              - "**/*.spec.ts"
+              - "**/test-utils/**"
+              - "**/tests/fixtures/**"
+              - "**/e2e/**"
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"

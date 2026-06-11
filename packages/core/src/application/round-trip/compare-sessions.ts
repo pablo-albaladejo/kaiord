@@ -3,7 +3,16 @@ import type {
   ToleranceChecker,
   ToleranceViolation,
 } from "../../domain/validation/tolerance-checker";
-import { checkField } from "./check-field";
+import { compareEntityFields } from "./compare-entity-fields";
+
+const SESSION_CHECKS = [
+  ["totalElapsedTime", "checkTime"],
+  ["totalDistance", "checkDistance"],
+  ["avgHeartRate", "checkHeartRate"],
+  ["maxHeartRate", "checkHeartRate"],
+  ["avgCadence", "checkCadence"],
+  ["avgPower", "checkPower"],
+] as const;
 
 export const compareSessions = (
   krd1: KRD,
@@ -11,62 +20,20 @@ export const compareSessions = (
   checker: ToleranceChecker
 ): Array<ToleranceViolation> => {
   const violations: Array<ToleranceViolation> = [];
-
-  if (!krd1.sessions || !krd2.sessions) {
-    return violations;
-  }
-
-  for (
-    let i = 0;
-    i < Math.min(krd1.sessions.length, krd2.sessions.length);
-    i++
-  ) {
-    const s1 = krd1.sessions[i];
-    const s2 = krd2.sessions[i];
-
-    checkField(
+  const sessions1 = krd1.sessions ?? [];
+  const sessions2 = krd2.sessions ?? [];
+  for (let i = 0; i < Math.min(sessions1.length, sessions2.length); i++) {
+    const s1 = sessions1[i];
+    const s2 = sessions2[i];
+    if (!s1 || !s2) continue;
+    compareEntityFields(
       violations,
-      checker.checkTime,
-      s1.totalElapsedTime,
-      s2.totalElapsedTime,
-      `sessions[${i}].totalElapsedTime`
-    );
-    checkField(
-      violations,
-      checker.checkDistance,
-      s1.totalDistance,
-      s2.totalDistance,
-      `sessions[${i}].totalDistance`
-    );
-    checkField(
-      violations,
-      checker.checkHeartRate,
-      s1.avgHeartRate,
-      s2.avgHeartRate,
-      `sessions[${i}].avgHeartRate`
-    );
-    checkField(
-      violations,
-      checker.checkHeartRate,
-      s1.maxHeartRate,
-      s2.maxHeartRate,
-      `sessions[${i}].maxHeartRate`
-    );
-    checkField(
-      violations,
-      checker.checkCadence,
-      s1.avgCadence,
-      s2.avgCadence,
-      `sessions[${i}].avgCadence`
-    );
-    checkField(
-      violations,
-      checker.checkPower,
-      s1.avgPower,
-      s2.avgPower,
-      `sessions[${i}].avgPower`
+      s1,
+      s2,
+      checker,
+      `sessions[${i}]`,
+      SESSION_CHECKS
     );
   }
-
   return violations;
 };

@@ -74,8 +74,8 @@ const encodeCadenceTargets = (
 export const encodeIntervalsT = (
   repetitionBlock: RepetitionBlock
 ): Record<string, unknown> => {
-  const onStep = repetitionBlock.steps[0];
-  const offStep = repetitionBlock.steps[1];
+  const onStep = repetitionBlock.steps[0]!;
+  const offStep = repetitionBlock.steps[1]!;
 
   const intervalsT: Record<string, unknown> = {
     "@_Repeat": repetitionBlock.repeatCount,

@@ -58,7 +58,7 @@ export const compareRepetitionBlocks = (
 
     // Check nested steps with tolerance
     for (let j = 0; j < step1.steps.length; j++) {
-      compareNestedSteps(step1.steps[j], step2.steps[j], toleranceChecker);
+      compareNestedSteps(step1.steps[j]!, step2.steps[j]!, toleranceChecker);
     }
   }
 };

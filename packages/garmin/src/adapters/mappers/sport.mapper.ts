@@ -40,4 +40,4 @@ export const mapGarminSportToKrd = (sportTypeKey: string): Sport =>
   GARMIN_TO_KRD_SPORT[sportTypeKey] ?? "generic";
 
 export const mapKrdSportToGarmin = (sport: string): GarminSportType =>
-  KRD_TO_GARMIN_SPORT[sport] ?? KRD_TO_GARMIN_SPORT["generic"];
+  KRD_TO_GARMIN_SPORT[sport] ?? KRD_TO_GARMIN_SPORT["generic"]!;

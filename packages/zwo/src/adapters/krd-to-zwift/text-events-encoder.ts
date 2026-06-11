@@ -15,7 +15,7 @@ export const encodeTextEvents = (
   }
 
   if (textEvents.length === 1) {
-    const event = textEvents[0];
+    const event = textEvents[0]!;
     const encoded: Record<string, unknown> = {
       "@_message": event.message,
     };

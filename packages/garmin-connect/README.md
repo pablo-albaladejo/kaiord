@@ -147,6 +147,30 @@ if (!restored) await client.auth.login(email, password);
 
 See the [design document](https://github.com/pablo-albaladejo/kaiord/blob/main/openspec/changes/archive/2026-04-03-refactor-garmin-auth/design.md) for the full migration guide.
 
+## Security
+
+### Token storage threat model
+
+`createFileTokenStore(path)` persists Garmin OAuth tokens as **plaintext JSON** with file mode `0600` (owner read/write only).
+
+What this protects against:
+
+- Other local users on a multi-user system (POSIX permissions).
+
+What this does **not** protect against:
+
+- Any process running as your own user — including malware and backup/sync agents that scan your home directory.
+- Disk forensics on unencrypted volumes.
+
+Recommendations:
+
+- Keep the token file on an encrypted volume (the default on modern macOS and Windows).
+- Exclude the token path from cloud backup and sync tools.
+- Treat the file like a password: the tokens grant Garmin Connect account access until they expire. `client.auth.logout()` clears them.
+- If you need at-rest encryption, implement the `TokenStore` port backed by your OS keychain and pass it as `tokenStore` — the port is the supported extension point.
+
+Passwords and CSRF tokens are never logged; SSO logging records only status codes and byte counts.
+
 ## License
 
 MIT
