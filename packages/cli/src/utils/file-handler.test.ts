@@ -1,6 +1,15 @@
+import type * as FsPromises from "fs/promises";
 import { mkdir, rm, writeFile as fsWriteFile } from "fs/promises";
 import { join } from "path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("fs/promises", async (importActual) => {
+  const actual = await importActual<typeof FsPromises>();
+  return {
+    ...actual,
+    readFile: vi.fn(actual.readFile),
+  };
+});
 
 const SAMPLE_BYTES = Array.from(Buffer.from("0102030405", "hex"));
 const SHORT_BINARY = Array.from(Buffer.from("010203", "hex"));
@@ -91,14 +100,20 @@ describe("readFile", () => {
     await expect(readFile(filePath, "fit")).rejects.toThrow("File not found");
   });
 
-  it("should throw error for permission denied", async () => {
+  it("should throw permission denied error when the OS reports EACCES", async () => {
     // Arrange
+    const { readFile: fsReadFile } = await import("fs/promises");
+    const filePath = join(TEST_DIR, "protected.fit");
+    const eaccesError = Object.assign(new Error("EACCES"), { code: "EACCES" });
+    const original = vi.mocked(fsReadFile).getMockImplementation();
+    vi.mocked(fsReadFile).mockRejectedValueOnce(eaccesError);
 
     // Act
-    const filePath = "/root/protected.fit";
+    const promise = readFile(filePath, "fit");
 
     // Assert
-    await expect(readFile(filePath, "fit")).rejects.toThrow();
+    await expect(promise).rejects.toThrow("Permission denied");
+    vi.mocked(fsReadFile).mockImplementation(original);
   });
 
   it("should throw error for path with null bytes", async () => {

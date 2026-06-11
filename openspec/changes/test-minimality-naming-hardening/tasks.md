@@ -8,11 +8,11 @@
 
 ## 2. Fill the genuine gaps (before any deletion — design D2)
 
-- [ ] 2.1 core: add unit tests for `application/round-trip/check-field.ts` (undefined-skip branch) and `compare-laps.ts` (length mismatch + `maxHeartRate`) using a real `createToleranceChecker`, not a mock
-- [ ] 2.2 core: add a direct test for `domain/validation/validate-krd.ts` asserting the joined error-message shape and that the parsed (not input) object is returned
-- [ ] 2.3 spa-editor: extend `store/clipboard-store.test.ts` with overwrite, payload round-trip (write→read content equality), and rejected/throwing `navigator.clipboard` write cases
-- [ ] 2.4 mcp: add a `skipped === 1` invalid-file case to each of `kaiord-get-{hrv-history,recovery-status,sleep-history,weight-history}.test.ts` (shared `it.each` acceptable) and an unsupported-`output_format` rejection test to `convert-from-krd.test.ts`
-- [ ] 2.5 cli: add an invalid `--output-format` exit-code test and one TCX and one ZWO end-to-end conversion test asserting output-content markers to `convert-integration.test.ts`; replace the env-dependent `/root` permission test with a mocked EACCES rejection asserting the `Permission denied` message
+- [x] 2.1 core: add unit tests for `application/round-trip/check-field.ts` (undefined-skip branch) and `compare-laps.ts` (length mismatch + `maxHeartRate`) using a real `createToleranceChecker`, not a mock
+- [x] 2.2 core: add a direct test for `domain/validation/validate-krd.ts` asserting the joined error-message shape and that the parsed (not input) object is returned
+- [x] 2.3 spa-editor: extend `store/clipboard-store.test.ts` with overwrite, payload round-trip (write→read content equality), and rejected/throwing `navigator.clipboard` write cases
+- [x] 2.4 mcp: add a `skipped === 1` invalid-file case to each of `kaiord-get-{hrv-history,recovery-status,sleep-history,weight-history}.test.ts` (shared `it.each` acceptable) and an unsupported-`output_format` rejection test to `convert-from-krd.test.ts`
+- [x] 2.5 cli: add an invalid `--output-format` exit-code test and one TCX and one ZWO end-to-end conversion test asserting output-content markers to `convert-integration.test.ts`; replace the env-dependent `/root` permission test with a mocked EACCES rejection asserting the `Permission denied` message
 
 ## 3. TCX pipeline resolution (specs/adapter-contracts delta)
 

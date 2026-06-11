@@ -35,4 +35,20 @@ describe("kaiord_get_sleep_history", () => {
       true
     );
   });
+
+  it("should report skipped count for invalid file paths", async () => {
+    // Arrange
+    const client = await createTestClient();
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_get_sleep_history",
+      arguments: { input_files: ["/nonexistent/file.fit"] },
+    })) as McpToolResult;
+
+    // Assert
+    expect(result.isError).toBeUndefined();
+    const parsed = JSON.parse(result.content[0].text) as { skipped: number };
+    expect(parsed.skipped).toBe(1);
+  });
 });

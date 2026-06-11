@@ -5,6 +5,7 @@ import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { loadKrdFixture } from "../tests/helpers/test-fixtures";
+import type { FileFormat } from "../types/tool-schemas";
 import { convertFromKrd } from "./convert-from-krd";
 
 describe("convertFromKrd", () => {
@@ -78,5 +79,16 @@ describe("convertFromKrd", () => {
 
     // Assert
     expect(buffer.length).toBeGreaterThan(0);
+  });
+
+  it("should reject an unsupported output format", async () => {
+    // Arrange
+    const unsupported = "xyz" as FileFormat;
+
+    // Act
+    const attempt = convertFromKrd(krd, unsupported, undefined, logger);
+
+    // Assert
+    await expect(attempt).rejects.toThrow("Unsupported output format: xyz");
   });
 });

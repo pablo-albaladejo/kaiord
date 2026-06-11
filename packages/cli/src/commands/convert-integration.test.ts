@@ -189,6 +189,108 @@ describe("convert command integration tests", () => {
     }
   );
 
+  it(
+    "should reject an unsupported output format and name the invalid value",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const cliPath = resolve(__dirname, "../bin/kaiord.ts");
+      const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+      const outputPath = join(tempDir.path, "output.bogus");
+      const result = await execa(
+        "tsx",
+        [
+          cliPath,
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+          "--output-format",
+          "bogus",
+        ],
+        {
+          reject: false,
+        }
+      );
+
+      // Act
+      const output = stripAnsi(result.stderr);
+
+      // Assert
+      expect(result.exitCode).not.toBe(0);
+      expect(output).toContain("bogus");
+    }
+  );
+
+  it(
+    "should produce a TCX document when converting KRD to TCX",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const cliPath = resolve(__dirname, "../bin/kaiord.ts");
+      const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+      const outputPath = join(tempDir.path, "output.tcx");
+      const result = await execa(
+        "tsx",
+        [
+          cliPath,
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+          "--output-format",
+          "tcx",
+        ],
+        {
+          reject: false,
+        }
+      );
+      expect(result.exitCode).toBe(0);
+
+      // Act
+      const outputContent = await readFile(outputPath, "utf-8");
+
+      // Assert
+      expect(outputContent).toContain("<TrainingCenterDatabase");
+    }
+  );
+
+  it(
+    "should produce a ZWO document when converting KRD to ZWO",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const cliPath = resolve(__dirname, "../bin/kaiord.ts");
+      const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+      const outputPath = join(tempDir.path, "output.zwo");
+      const result = await execa(
+        "tsx",
+        [
+          cliPath,
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+          "--output-format",
+          "zwo",
+        ],
+        {
+          reject: false,
+        }
+      );
+      expect(result.exitCode).toBe(0);
+
+      // Act
+      const outputContent = await readFile(outputPath, "utf-8");
+
+      // Assert
+      expect(outputContent).toContain("<workout_file");
+    }
+  );
+
   describe("verbosity and output control", () => {
     it(
       "should increase log output with --verbose flag",
