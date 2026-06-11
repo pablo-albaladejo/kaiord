@@ -1,11 +1,13 @@
 export {
   convertKrdCadenceToZwift,
   convertKrdPaceToZwift,
+  convertZwiftCadenceTarget,
+  convertZwiftPaceTarget,
+} from "./pace-cadence.converter";
+export {
   convertKrdPowerRangeToZwift,
   convertKrdPowerToZwift,
   convertPowerZoneToPercentFtp,
-  convertZwiftCadenceTarget,
-  convertZwiftPaceTarget,
   convertZwiftPowerRange,
   convertZwiftPowerTarget,
-} from "./target.converter";
+} from "./power.converter";

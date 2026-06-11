@@ -32,28 +32,28 @@ const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 const waitAndLog = (
-  opts: ResolvedOptions,
+  options: ResolvedOptions,
   attempt: number,
   message: string,
   info: Record<string, unknown>
 ): Promise<void> => {
   const delay = computeDelay(
     attempt,
-    opts.baseDelay,
-    opts.maxDelay,
-    opts.randomFn
+    options.baseDelay,
+    options.maxDelay,
+    options.randomFn
   );
-  opts.logger?.debug(message, { ...info, delay: Math.round(delay) });
+  options.logger?.debug(message, { ...info, delay: Math.round(delay) });
   return sleep(delay);
 };
 
 const handleRetryableResponse = async (
   attempt: number,
   response: Response,
-  opts: ResolvedOptions
+  options: ResolvedOptions
 ): Promise<boolean> => {
-  if (attempt < opts.maxRetries && isRetryable(response.status)) {
-    await waitAndLog(opts, attempt, "Retrying request", {
+  if (attempt < options.maxRetries && isRetryable(response.status)) {
+    await waitAndLog(options, attempt, "Retrying request", {
       attempt: attempt + 1,
       status: response.status,
     });
@@ -65,10 +65,10 @@ const handleRetryableResponse = async (
 const handleRetryableError = async (
   attempt: number,
   error: unknown,
-  opts: ResolvedOptions
+  options: ResolvedOptions
 ): Promise<boolean> => {
-  if (attempt < opts.maxRetries && error instanceof TypeError) {
-    await waitAndLog(opts, attempt, "Retrying request after network error", {
+  if (attempt < options.maxRetries && error instanceof TypeError) {
+    await waitAndLog(options, attempt, "Retrying request after network error", {
       attempt: attempt + 1,
       error: (error as Error).message,
     });
@@ -79,24 +79,24 @@ const handleRetryableError = async (
 
 export const withRetry = (
   fetchFn: FetchFn,
-  options?: RetryOptions
+  retryOptions?: RetryOptions
 ): FetchFn => {
-  const opts: ResolvedOptions = {
-    maxRetries: options?.maxRetries ?? 3,
-    baseDelay: options?.baseDelay ?? 1000,
-    maxDelay: options?.maxDelay ?? 10000,
-    randomFn: options?.randomFn ?? Math.random,
-    logger: options?.logger,
+  const options: ResolvedOptions = {
+    maxRetries: retryOptions?.maxRetries ?? 3,
+    baseDelay: retryOptions?.baseDelay ?? 1000,
+    maxDelay: retryOptions?.maxDelay ?? 10000,
+    randomFn: retryOptions?.randomFn ?? Math.random,
+    logger: retryOptions?.logger,
   };
 
   return async (input, init?) => {
-    for (let attempt = 0; attempt <= opts.maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= options.maxRetries; attempt++) {
       try {
         const response = await fetchFn(input, init);
-        if (await handleRetryableResponse(attempt, response, opts)) continue;
+        if (await handleRetryableResponse(attempt, response, options)) continue;
         return response;
       } catch (error) {
-        if (await handleRetryableError(attempt, error, opts)) continue;
+        if (await handleRetryableError(attempt, error, options)) continue;
         throw error;
       }
     }

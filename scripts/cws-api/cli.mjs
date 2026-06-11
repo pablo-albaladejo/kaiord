@@ -49,15 +49,22 @@ async function runSubcommand(subcommand, id, flags, serviceAccount) {
   }
   if (subcommand === "wait-uploaded") {
     if (!id) throw new UsageError("wait-uploaded requires <extension-id>");
-    return await waitUploaded(serviceAccount, id, { timeoutMs: flags.timeoutMs ?? 60000 });
+    return await waitUploaded(serviceAccount, id, {
+      timeoutMs: flags.timeoutMs ?? 60000,
+    });
   }
   if (subcommand === "wait-published") {
-    if (!id || !flags.version) throw new UsageError("wait-published requires <id> --version <V>");
-    return await waitPublished(serviceAccount, id, { version: flags.version, timeoutMs: flags.timeoutMs ?? 120000 });
+    if (!id || !flags.version)
+      throw new UsageError("wait-published requires <id> --version <V>");
+    return await waitPublished(serviceAccount, id, {
+      version: flags.version,
+      timeoutMs: flags.timeoutMs ?? 120000,
+    });
   }
   if (subcommand === "live-version") {
     if (!id) throw new UsageError("live-version requires <extension-id>");
-    if (!flags.package) throw new UsageError("live-version requires --package <name>");
+    if (!flags.package)
+      throw new UsageError("live-version requires --package <name>");
     return await runLiveVersion(id, flags, serviceAccount);
   }
   throw new UsageError(`unknown subcommand: ${subcommand}`);
@@ -85,7 +92,10 @@ function handleError(err) {
     process.stderr.write(`[CwsStateError] usage: ${err.message}\n`);
     return 2;
   }
-  const typed = err instanceof CwsAuthError || err instanceof CwsStateError || err instanceof CwsTimeoutError;
+  const typed =
+    err instanceof CwsAuthError ||
+    err instanceof CwsStateError ||
+    err instanceof CwsTimeoutError;
   if (typed) {
     process.stderr.write(err.message + "\n");
     return 1;

@@ -39,20 +39,20 @@ const mapRepeatGroup = (
   logger: Logger
 ): RepetitionBlock => {
   const steps: WorkoutStep[] = [];
-  let idx = startIndex;
+  let currentIndex = startIndex;
 
   for (const step of group.workoutSteps) {
     if (step.type === "ExecutableStepDTO") {
-      steps.push(mapExecutableStep(step, idx));
-      idx++;
+      steps.push(mapExecutableStep(step, currentIndex));
+      currentIndex++;
     } else {
       logger.warn("Nested repeat groups are flattened", {
         iterations: step.numberOfIterations,
       });
-      const nested = mapRepeatGroup(step, idx, logger);
-      for (const s of nested.steps) {
-        steps.push({ ...s, stepIndex: idx });
-        idx++;
+      const nested = mapRepeatGroup(step, currentIndex, logger);
+      for (const nestedStep of nested.steps) {
+        steps.push({ ...nestedStep, stepIndex: currentIndex });
+        currentIndex++;
       }
     }
   }

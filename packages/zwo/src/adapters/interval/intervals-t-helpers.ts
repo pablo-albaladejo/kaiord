@@ -2,11 +2,9 @@ import type { Target, WorkoutStep } from "@kaiord/core";
 import { intensitySchema, targetTypeSchema } from "@kaiord/core";
 
 import type { ZwiftDurationData } from "../duration/duration.mapper";
-import { mapZwiftDuration } from "../duration/duration.mapper";
-import {
-  convertZwiftCadenceTarget,
-  convertZwiftPowerTarget,
-} from "../target/target.converter";
+import { convertOriginalZwiftDuration } from "../duration/original-duration.converter";
+import { convertZwiftCadenceTarget } from "../target/pace-cadence.converter";
+import { convertZwiftPowerTarget } from "../target/power.converter";
 import type { ZwiftTextEvent } from "./index";
 import { extractTextEvents } from "./index";
 
@@ -28,7 +26,7 @@ export const createOnStep = (data: ZwiftIntervalsTData): WorkoutStep => {
     Duration: data.OnDuration,
     durationType: data.durationType,
   };
-  const onDuration = mapZwiftDuration(onDurationData);
+  const onDuration = convertOriginalZwiftDuration(onDurationData);
 
   let onTarget: Target;
   if (data.OnPower !== undefined) {
@@ -67,7 +65,7 @@ export const createOffStep = (data: ZwiftIntervalsTData): WorkoutStep => {
     Duration: data.OffDuration,
     durationType: data.durationType,
   };
-  const offDuration = mapZwiftDuration(offDurationData);
+  const offDuration = convertOriginalZwiftDuration(offDurationData);
 
   let offTarget: Target;
   if (data.OffPower !== undefined) {

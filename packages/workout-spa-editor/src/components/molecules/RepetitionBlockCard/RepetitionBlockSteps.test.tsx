@@ -43,103 +43,11 @@ describe("RepetitionBlockSteps", () => {
   };
 
   describe("rendering", () => {
-    it("should render steps without React warnings", () => {
-      // Arrange
-      // Arrange
-
-      const warningChecker = expectNoReactWarnings();
-      const steps = [mockStep1, mockStep2];
-
-      // Act
-      render(<RepetitionBlockSteps steps={steps} />);
-
-      // Assert
-
-      // Act
-
-      const stepCards = screen.getAllByTestId("step-card");
-
-      // Assert
-
-      expect(stepCards).toHaveLength(2);
-
-      warningChecker.verify();
-    });
-
-    it("should render with all props without warnings", () => {
-      // Arrange
+    it("should render one card per inner step", () => {
       // Arrange
 
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1, mockStep2];
-      const onSelectStep = vi.fn();
-      const onToggleStepSelection = vi.fn();
-      const onRemoveStep = vi.fn();
-      const onDuplicateStep = vi.fn();
-      const onAddStep = vi.fn();
-      const onReorderSteps = vi.fn();
-
-      // Act
-      render(
-        <RepetitionBlockSteps
-          steps={steps}
-          selectedStepIndex={0}
-          selectedStepIds={["block-0-step-0"]}
-          onSelectStep={onSelectStep}
-          onToggleStepSelection={onToggleStepSelection}
-          onRemoveStep={onRemoveStep}
-          onDuplicateStep={onDuplicateStep}
-          onAddStep={onAddStep}
-          onReorderSteps={onReorderSteps}
-          blockIndex={0}
-        />
-      );
-
-      // Assert
-
-      // Act
-
-      const stepCards = screen.getAllByTestId("step-card");
-
-      // Assert
-
-      expect(stepCards).toHaveLength(2);
-
-      warningChecker.verify();
-    });
-
-    it("should render add step button when onAddStep is provided", () => {
-      // Arrange
-      // Arrange
-
-      const warningChecker = expectNoReactWarnings();
-      const steps = [mockStep1];
-      const onAddStep = vi.fn();
-
-      // Act
-      render(<RepetitionBlockSteps steps={steps} onAddStep={onAddStep} />);
-
-      // Assert
-
-      // Act
-
-      const addButton = screen.getByTestId("add-step-button");
-
-      // Assert
-
-      expect(addButton).toBeInTheDocument();
-
-      warningChecker.verify();
-    });
-
-    it("should not render add step button when onAddStep is not provided", () => {
-      // Arrange
-      // Arrange
-
-      const warningChecker = expectNoReactWarnings();
-      const steps = [mockStep1];
-
-      // Act
 
       // Act
 
@@ -147,131 +55,53 @@ describe("RepetitionBlockSteps", () => {
 
       // Assert
 
-      // Assert
-
-      expect(screen.queryByTestId("add-step-button")).not.toBeInTheDocument();
-
-      warningChecker.verify();
-    });
-  });
-
-  describe("prop handling", () => {
-    it("should not pass component-specific props to DOM elements", () => {
-      // Arrange
-      // Arrange
-
-      const warningChecker = expectNoReactWarnings();
-      const steps = [mockStep1, mockStep2];
-      const onSelectStep = vi.fn();
-      const onToggleStepSelection = vi.fn();
-      const onRemoveStep = vi.fn();
-      const onDuplicateStep = vi.fn();
-      const onAddStep = vi.fn();
-      const onReorderSteps = vi.fn();
-
-      // Act
-      render(
-        <RepetitionBlockSteps
-          steps={steps}
-          selectedStepIndex={0}
-          selectedStepIds={["block-0-step-0", "block-0-step-1"]}
-          onSelectStep={onSelectStep}
-          onToggleStepSelection={onToggleStepSelection}
-          onRemoveStep={onRemoveStep}
-          onDuplicateStep={onDuplicateStep}
-          onAddStep={onAddStep}
-          onReorderSteps={onReorderSteps}
-          blockIndex={0}
-        />
-      );
-
-      // Assert - Component should render without warnings
-
-      // Act
-
-      const stepCards = screen.getAllByTestId("step-card");
-
-      // Assert
-
-      expect(stepCards).toHaveLength(2);
-
+      expect(screen.getAllByTestId("step-card")).toHaveLength(2);
       warningChecker.verify();
     });
 
-    it("should handle empty steps array without warnings", () => {
-      // Arrange
+    it("should render no cards for an empty steps array", () => {
       // Arrange
 
       const warningChecker = expectNoReactWarnings();
       const steps: WorkoutStep[] = [];
 
       // Act
+
       render(<RepetitionBlockSteps steps={steps} />);
 
       // Assert
 
-      // Act
-
-      const stepCards = screen.queryAllByTestId("step-card");
-
-      // Assert
-
-      expect(stepCards).toHaveLength(0);
-
+      expect(screen.queryAllByTestId("step-card")).toHaveLength(0);
       warningChecker.verify();
     });
 
-    it("should handle single step without warnings", () => {
-      // Arrange
+    it("should render the add step button when onAddStep is provided", () => {
       // Arrange
 
-      const warningChecker = expectNoReactWarnings();
+      const onAddStep = vi.fn();
       const steps = [mockStep1];
 
       // Act
-      render(<RepetitionBlockSteps steps={steps} blockIndex={0} />);
+
+      render(<RepetitionBlockSteps steps={steps} onAddStep={onAddStep} />);
 
       // Assert
 
-      // Act
-
-      const stepCards = screen.getAllByTestId("step-card");
-
-      // Assert
-
-      expect(stepCards).toHaveLength(1);
-
-      warningChecker.verify();
+      expect(screen.getByTestId("add-step-button")).toBeInTheDocument();
     });
 
-    it("should handle multiple selected steps without warnings", () => {
+    it("should not render the add step button when onAddStep is omitted", () => {
       // Arrange
-      // Arrange
 
-      const warningChecker = expectNoReactWarnings();
-      const steps = [mockStep1, mockStep2];
-      const selectedStepIds = ["block-0-step-0", "block-0-step-1"];
-
-      // Act
-      render(
-        <RepetitionBlockSteps
-          steps={steps}
-          selectedStepIds={selectedStepIds}
-          blockIndex={0}
-        />
-      );
-
-      // Assert
+      const steps = [mockStep1];
 
       // Act
 
-      const stepCards = screen.getAllByTestId("step-card");
+      render(<RepetitionBlockSteps steps={steps} />);
 
       // Assert
 
-      expect(stepCards).toHaveLength(2);
-
-      warningChecker.verify();
+      expect(screen.queryByTestId("add-step-button")).not.toBeInTheDocument();
     });
   });
 });

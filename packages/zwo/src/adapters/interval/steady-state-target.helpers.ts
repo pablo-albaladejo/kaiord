@@ -1,8 +1,8 @@
 import type { Target } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
 
-import { convertZwiftPowerTarget } from "../target/target.converter";
-import type { ZwiftSteadyStateData } from "./steady-state.mapper";
+import { convertZwiftPowerTarget } from "../target/power.converter";
+import type { ZwiftSteadyStateData } from "./steady-state.converter";
 import { restoreHeartRateTarget } from "./target-restoration";
 
 export const restoreSteadyStateTarget = (

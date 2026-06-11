@@ -24,7 +24,7 @@ import { resolve } from "node:path";
 
 const OUTPUT_PATH = resolve(
   import.meta.dirname,
-  "../../../test-fixtures/fit/HealthHrvOvernight.fit",
+  "../../../test-fixtures/fit/HealthHrvOvernight.fit"
 );
 
 const FILE_ID_MESG_NUM = 0;

@@ -7,8 +7,8 @@ import {
   mapGarminStrokeToKrd,
   strokeToFitValue,
 } from "../mappers/stroke.mapper";
-import { mapGarminTargetToKrd } from "../mappers/target.converter";
 import type { ParsedExecutableStep } from "../schemas/garmin-workout-parse.schema";
+import { convertGarminTargetToKrd } from "./target-from-garmin.converter";
 
 export const mapExecutableStep = (
   step: ParsedExecutableStep,
@@ -55,7 +55,7 @@ export const mapExecutableStep = (
 const resolveTarget = (
   step: ParsedExecutableStep
 ): { targetType: TargetType; target: Target } => {
-  const primary = mapGarminTargetToKrd(
+  const primary = convertGarminTargetToKrd(
     step.targetType.workoutTargetTypeKey,
     step.targetValueOne ?? null,
     step.targetValueTwo ?? null,
@@ -63,7 +63,7 @@ const resolveTarget = (
   );
 
   if (step.secondaryTargetType && primary.targetType === "open") {
-    return mapGarminTargetToKrd(
+    return convertGarminTargetToKrd(
       step.secondaryTargetType.workoutTargetTypeKey,
       step.secondaryTargetValueOne ?? null,
       step.secondaryTargetValueTwo ?? null,

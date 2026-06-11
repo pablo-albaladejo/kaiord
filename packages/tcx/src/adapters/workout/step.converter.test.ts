@@ -29,7 +29,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).not.toBeNull();
@@ -56,7 +56,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 1, logger);
+    const result = convertTcxStep(tcxStep, 1, "generic", logger);
 
     // Assert
     expect(result).not.toBeNull();
@@ -83,7 +83,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).not.toBeNull();
@@ -102,7 +102,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).toBeNull();
@@ -121,7 +121,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).toBeNull();
@@ -150,7 +150,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).not.toBeNull();
@@ -178,7 +178,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).not.toBeNull();
@@ -203,7 +203,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).not.toBeNull();
@@ -225,7 +225,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    const result = convertTcxStep(tcxStep, 0, logger);
+    const result = convertTcxStep(tcxStep, 0, "generic", logger);
 
     // Assert
     expect(result).not.toBeNull();
@@ -247,7 +247,7 @@ describe("convertTcxStep", () => {
     };
 
     // Act
-    convertTcxStep(tcxStep, STEP_INDEX_FIVE, logger);
+    convertTcxStep(tcxStep, STEP_INDEX_FIVE, "generic", logger);
 
     // Assert
     expect(logger.debug).toHaveBeenCalledWith("Converting TCX step", {

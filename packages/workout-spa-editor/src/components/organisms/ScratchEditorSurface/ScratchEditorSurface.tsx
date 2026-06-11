@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useAppHandlers } from "../../../hooks/use-app-handlers";
 import { useSetUserPreferenceFields } from "../../../hooks/use-set-user-preference-fields";
 import { useUserPreferences } from "../../../hooks/use-user-preferences";
-import { useAppHandlers } from "../../../hooks/useAppHandlers";
 import {
   useCreateEmptyWorkout,
   useCurrentWorkout,

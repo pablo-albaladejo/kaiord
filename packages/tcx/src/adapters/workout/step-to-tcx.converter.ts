@@ -1,4 +1,4 @@
-import type { Logger, WorkoutStep } from "@kaiord/core";
+import type { Logger, Sport, WorkoutStep } from "@kaiord/core";
 
 import { convertDurationToTcx } from "./duration-to-tcx-encoder";
 import { convertTargetToTcx } from "./target-to-tcx.converter";
@@ -31,6 +31,7 @@ const addPowerExtensions = (
 export const convertStepToTcx = (
   step: WorkoutStep,
   index: number,
+  sport: Sport,
   logger: Logger
 ): Record<string, unknown> => {
   logger.debug("Converting step to TCX", { stepIndex: step.stepIndex });
@@ -50,7 +51,7 @@ export const convertStepToTcx = (
     tcxStep.Intensity = capitalizeFirst(step.intensity);
   }
 
-  tcxStep.Target = convertTargetToTcx(step);
+  tcxStep.Target = convertTargetToTcx(step, sport);
 
   if (step.extensions?.tcx) {
     logger.debug("Restoring step-level TCX extensions", {

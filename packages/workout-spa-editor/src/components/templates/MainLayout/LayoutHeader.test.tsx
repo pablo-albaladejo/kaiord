@@ -34,14 +34,37 @@ describe("LayoutHeader", () => {
   });
 
   describe("rendering", () => {
-    it("should render the brand label", () => {
+    it.each<[string, () => HTMLElement]>([
+      ["brand label", () => screen.getByLabelText(/kaiord editor/i)],
+      [
+        "profile entry button",
+        () => screen.getByTestId("status-header-profile-button"),
+      ],
+      [
+        "help entry button",
+        () => screen.getByRole("button", { name: /open help/i }),
+      ],
+      [
+        "settings entry button",
+        () => screen.getByRole("button", { name: /open settings/i }),
+      ],
+      [
+        "theme toggle",
+        () =>
+          screen.getByRole("button", { name: /switch to (light|dark) mode/i }),
+      ],
+    ])("should render the %s", (_label, query) => {
       // Arrange
 
-      // Act
       renderWithProviders(<LayoutHeader />);
 
+      // Act
+
+      const element = query();
+
       // Assert
-      expect(screen.getByLabelText(/kaiord editor/i)).toBeInTheDocument();
+
+      expect(element).toBeInTheDocument();
     });
 
     it("should always render the StatusHeader (no feature flag gate)", () => {
@@ -52,54 +75,6 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(screen.getByTestId("status-header")).toBeInTheDocument();
-    });
-
-    it("should render the profile entry button", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<LayoutHeader />);
-
-      // Assert
-      expect(
-        screen.getByTestId("status-header-profile-button")
-      ).toBeInTheDocument();
-    });
-
-    it("should render the help entry button", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<LayoutHeader />);
-
-      // Assert
-      expect(
-        screen.getByRole("button", { name: /open help/i })
-      ).toBeInTheDocument();
-    });
-
-    it("should render the settings entry button", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<LayoutHeader />);
-
-      // Assert
-      expect(
-        screen.getByRole("button", { name: /open settings/i })
-      ).toBeInTheDocument();
-    });
-
-    it("should render the theme toggle", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<LayoutHeader />);
-
-      // Assert
-      expect(
-        screen.getByRole("button", { name: /switch to (light|dark) mode/i })
-      ).toBeInTheDocument();
     });
   });
 

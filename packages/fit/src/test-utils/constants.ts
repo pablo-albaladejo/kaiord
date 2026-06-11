@@ -128,6 +128,8 @@ export const FIT_PERCENT_FTP_85 = 85 as const;
 export const FIT_DURATION_CALORIES_10000 = 10000 as const;
 export const FIT_DURATION_POWER_50 = 50 as const;
 export const FIT_DURATION_POWER_1000 = 1000 as const;
+export const FIT_TARGET_POWER_RANGE_LOW = 200 as const;
+export const FIT_TARGET_POWER_RANGE_HIGH = 250 as const;
 
 // === Session conversion samples ===
 export const FIT_SESSION_TIMESTAMP_SEC = 1704067200 as const;

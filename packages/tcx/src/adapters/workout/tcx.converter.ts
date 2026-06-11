@@ -12,7 +12,7 @@ const buildTcxWorkout = (
   const tcxSport = krdToTcxSport(workout.sport);
 
   const tcxSteps = workout.steps.map((step, index) =>
-    convertStepToTcx(step as WorkoutStep, index, logger)
+    convertStepToTcx(step as WorkoutStep, index, workout.sport, logger)
   );
 
   const tcxWorkout: Record<string, unknown> = {

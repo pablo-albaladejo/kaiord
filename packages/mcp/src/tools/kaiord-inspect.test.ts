@@ -20,7 +20,7 @@ describe("kaiord_inspect", () => {
     await rm(tmpDir, { recursive: true });
   });
 
-  it("should return summary for KRD file", async () => {
+  it("should return a summary for a KRD file detected by extension", async () => {
     // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
@@ -34,26 +34,9 @@ describe("kaiord_inspect", () => {
     })) as McpToolResult;
 
     // Assert
-    expect(result.content[0].text).toContain("Type:");
-    expect(result.content[0].text).toContain("Sport:");
-  });
-
-  it("should detect format from file extension", async () => {
-    // Arrange
-    const client = await createTestClient();
-    const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
-    const filePath = join(tmpDir, "activity.krd");
-    await writeFile(filePath, krdJson);
-
-    // Act
-    const result = (await client.callTool({
-      name: "kaiord_inspect",
-      arguments: { input_file: filePath },
-    })) as McpToolResult;
-
-    // Assert
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("Type:");
+    expect(result.content[0].text).toContain("Sport:");
   });
 
   it("should return error for non-existent file", async () => {

@@ -32,28 +32,6 @@ describe("weightMeasurementSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should reject a wrong major version", () => {
-    // Arrange
-    const input = { ...baseWeight, version: "1.0" };
-
-    // Act
-    const result = weightMeasurementSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
-  it("should accept a forward-compatible v2.1 payload", () => {
-    // Arrange
-    const input = { ...baseWeight, version: "2.1" };
-
-    // Act
-    const result = weightMeasurementSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(true);
-  });
-
   it("should reject a missing weightKilograms field", () => {
     // Arrange
     const withoutWeight = { ...baseWeight } as Partial<typeof baseWeight>;

@@ -11,10 +11,10 @@ import {
   fitValueToStroke,
   mapKrdStrokeToGarmin,
 } from "../mappers/stroke.mapper";
-import type { TargetMapperOptions } from "../mappers/target.converter";
-import { mapKrdTargetToGarmin } from "../mappers/target.converter";
 import { StepTypeId } from "../schemas/common";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
+import { convertKrdTargetToGarmin } from "./target-to-garmin.converter";
+import type { TargetMapperOptions } from "./target-types";
 
 const STEP_TYPE_IDS: Record<StepTypeKey, number> = {
   warmup: StepTypeId.WARMUP,
@@ -53,7 +53,7 @@ export const mapWorkoutStep = (
     step.duration
   );
   const { targetType, targetValueOne, targetValueTwo, zoneNumber } =
-    mapKrdTargetToGarmin(step.target, options);
+    convertKrdTargetToGarmin(step.target, options);
 
   const strokeType =
     step.target.type === "stroke_type"

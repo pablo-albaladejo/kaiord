@@ -1,7 +1,11 @@
-import type { Logger, Target, TargetType } from "@kaiord/core";
+import type { Logger, Sport, Target, TargetType } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
 
 import { tcxTargetTypeSchema } from "../schemas/tcx-target";
+import {
+  convertCadenceTarget,
+  convertSpeedTarget,
+} from "./tcx-native-target.converter";
 
 export const mapTargetType = (
   tcxTargetType: string | undefined
@@ -50,6 +54,7 @@ const convertHeartRateTarget = (
 
 export const convertTcxTarget = (
   tcxTarget: Record<string, unknown> | undefined,
+  sport: Sport,
   logger: Logger
 ): Target | null => {
   if (!tcxTarget) {
@@ -67,6 +72,16 @@ export const convertTcxTarget = (
       | Record<string, unknown>
       | undefined;
     const result = convertHeartRateTarget(heartRateZone);
+    if (result) return result;
+  }
+
+  if (targetType === "Speed_t") {
+    const result = convertSpeedTarget(tcxTarget);
+    if (result) return result;
+  }
+
+  if (targetType === "Cadence_t") {
+    const result = convertCadenceTarget(tcxTarget, sport);
     if (result) return result;
   }
 
