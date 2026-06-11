@@ -75,6 +75,6 @@ const DURATION_BUILDERS: Record<string, () => Duration> = {
 export const buildDuration = new Factory<Duration>()
   .attr("type", () => faker.helpers.arrayElement([...DURATION_TYPES]))
   .after((duration) => {
-    const builder = DURATION_BUILDERS[duration.type];
+    const builder = DURATION_BUILDERS[duration.type]!;
     return Object.assign(duration, builder());
   });

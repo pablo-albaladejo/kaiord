@@ -23,12 +23,23 @@ export const repetitionBlockSchema = z.object({
  *
  * Validates a structured workout with metadata and a sequence of steps
  * or repetition blocks.
+ *
+ * `stepIndex` values on steps are advisory ordering metadata: producers
+ * SHOULD emit 0-based contiguous indices, but the schema deliberately
+ * does not enforce contiguity or uniqueness — adapters renumber steps
+ * when flattening repetition blocks (see the garmin adapter's
+ * flatten-segments converter) and consumers MUST rely on array order,
+ * not on index arithmetic.
+ *
+ * `poolLength` is bounded to [1, 655] meters — generous enough for
+ * endless pools (~5 m) and the FIT protocol envelope, while rejecting
+ * nonsense values like 0.0001 or 99999.
  */
 export const workoutSchema = z.object({
   name: z.string().optional(),
   sport: sportSchema,
   subSport: subSportSchema.optional(),
-  poolLength: z.number().positive().optional(),
+  poolLength: z.number().min(1).max(655).optional(),
   poolLengthUnit: z.literal("meters").optional(),
   steps: z.array(z.union([workoutStepSchema, repetitionBlockSchema])),
   extensions: z.record(z.string(), z.unknown()).optional(),

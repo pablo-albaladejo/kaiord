@@ -10,7 +10,7 @@
  * `Object.prototype`.
  */
 
-import type { ProfileSnapshot } from "../types/profile-snapshot";
+import type { ProfileSnapshot } from "../protocol/profile-snapshot";
 
 const ISO = "2026-05-01T08:30:00.000Z";
 

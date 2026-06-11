@@ -1,11 +1,15 @@
 import { z } from "zod";
 
+import { MIN_LTE_MAX_MESSAGE, minLteMax } from "./range-refinement";
 import { targetUnitSchema } from "./unit";
 
 /**
  * Zod schema for power target values.
  *
  * Validates power targets in watts, percent FTP, zones, or ranges.
+ * Watts and range bounds are capped at 5000 W (above any recorded human
+ * sprint peak); percent FTP is capped at 1000. Range targets enforce
+ * `min <= max`.
  *
  * @example
  * ```typescript
@@ -22,20 +26,25 @@ import { targetUnitSchema } from "./unit";
  * ```
  */
 export const powerValueSchema = z.discriminatedUnion("unit", [
-  z.object({ unit: z.literal(targetUnitSchema.enum.watts), value: z.number() }),
+  z.object({
+    unit: z.literal(targetUnitSchema.enum.watts),
+    value: z.number().min(0).max(5000),
+  }),
   z.object({
     unit: z.literal(targetUnitSchema.enum.percent_ftp),
-    value: z.number(),
+    value: z.number().min(0).max(1000),
   }),
   z.object({
     unit: z.literal(targetUnitSchema.enum.zone),
     value: z.number().int().min(1).max(7),
   }),
-  z.object({
-    unit: z.literal(targetUnitSchema.enum.range),
-    min: z.number(),
-    max: z.number(),
-  }),
+  z
+    .object({
+      unit: z.literal(targetUnitSchema.enum.range),
+      min: z.number().min(0).max(5000),
+      max: z.number().min(0).max(5000),
+    })
+    .refine(minLteMax, { message: MIN_LTE_MAX_MESSAGE, path: ["min"] }),
 ]);
 
 /**

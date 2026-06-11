@@ -30,7 +30,7 @@ The KRD envelope — Zod schemas for the canonical `application/vnd.kaiord+json`
 
 ### Testing Requirements
 
-- Coverage target: 80%. Direct schema tests are sparse — most coverage comes from `validate-krd.test.ts` and round-trip suites in `../../tests/round-trip/`. AAA + `should ` invariants apply.
+- Coverage target: 80%. Direct schema tests are sparse — most coverage comes from `validate-krd.test.ts` and round-trip suites in `../../application/round-trip/`. AAA + `should ` invariants apply.
 
 ### Common Patterns
 

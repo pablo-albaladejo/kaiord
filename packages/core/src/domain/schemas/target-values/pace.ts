@@ -1,11 +1,14 @@
 import { z } from "zod";
 
+import { MIN_LTE_MAX_MESSAGE, minLteMax } from "./range-refinement";
 import { targetUnitSchema } from "./unit";
 
 /**
  * Zod schema for pace target values.
  *
  * Validates pace targets in meters per second, zones, or ranges.
+ * Speed values are capped at 30 m/s (above any human-powered speed,
+ * including downhill cycling). Range targets enforce `min <= max`.
  *
  * @example
  * ```typescript
@@ -19,16 +22,21 @@ import { targetUnitSchema } from "./unit";
  * ```
  */
 export const paceValueSchema = z.discriminatedUnion("unit", [
-  z.object({ unit: z.literal(targetUnitSchema.enum.mps), value: z.number() }),
+  z.object({
+    unit: z.literal(targetUnitSchema.enum.mps),
+    value: z.number().min(0).max(30),
+  }),
   z.object({
     unit: z.literal(targetUnitSchema.enum.zone),
     value: z.number().int().min(1).max(5),
   }),
-  z.object({
-    unit: z.literal(targetUnitSchema.enum.range),
-    min: z.number(),
-    max: z.number(),
-  }),
+  z
+    .object({
+      unit: z.literal(targetUnitSchema.enum.range),
+      min: z.number().min(0).max(30),
+      max: z.number().min(0).max(30),
+    })
+    .refine(minLteMax, { message: MIN_LTE_MAX_MESSAGE, path: ["min"] }),
 ]);
 
 /**

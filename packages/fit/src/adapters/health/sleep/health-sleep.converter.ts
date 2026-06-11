@@ -37,14 +37,14 @@ export const mapFitSleepLevelsToKrdSleep = (
       new Date(toIsoString(a.timestamp)).getTime() -
       new Date(toIsoString(b.timestamp)).getTime()
   );
-  const startTime = toIsoString(sorted[0].timestamp);
-  const endTime = toIsoString(sorted[sorted.length - 1].timestamp);
+  const startTime = toIsoString(sorted[0]!.timestamp);
+  const endTime = toIsoString(sorted[sorted.length - 1]!.timestamp);
   const stages: SleepStage[] = [];
   for (let i = 0; i < sorted.length - 1; i += 1) {
-    const current = sorted[i];
+    const current = sorted[i]!;
     if (!isKnownSleepStage(current.sleepLevel)) continue;
     const startMs = new Date(toIsoString(current.timestamp)).getTime();
-    const nextMs = new Date(toIsoString(sorted[i + 1].timestamp)).getTime();
+    const nextMs = new Date(toIsoString(sorted[i + 1]!.timestamp)).getTime();
     const durationSeconds = Math.max(0, Math.round((nextMs - startMs) / 1000));
     stages.push({
       stage: current.sleepLevel,

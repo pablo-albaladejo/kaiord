@@ -8,7 +8,7 @@ import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import {
   convertWorkoutStep,
   type ConvertWorkoutStepOptions,
-} from "./krd-to-fit-step.mapper";
+} from "./krd-to-fit-step.converter";
 
 export type ConvertWorkoutStepsOptions = ConvertWorkoutStepOptions;
 

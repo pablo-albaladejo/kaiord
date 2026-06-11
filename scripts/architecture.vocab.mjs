@@ -8,6 +8,28 @@
 // Allowed subfolders under `packages/core/src/adapters/`. Order is normative.
 export const CORE_ADAPTER_ALLOWLIST = ["analytics", "logger"];
 
+// Allowed top-level directories under `packages/core/src/`. Any other
+// directory is rejected by R-ArchCoreSrcDirs — undeclared layers are
+// invisible to the per-layer rules, so they are forbidden outright.
+// `protocol/` holds cross-package protocol contracts (SPA ↔ bridge DTOs)
+// and is governed by the same purity rules as `domain/`. Order is normative.
+export const CORE_SRC_ALLOWLIST = [
+  "adapters",
+  "application",
+  "domain",
+  "ports",
+  "protocol",
+  "test-utils",
+  "tests",
+];
+
+// External libraries `packages/core/src/{domain,protocol}/` may import.
+// Every entry MUST be pure, isomorphic, and I/O-free. `@noble/hashes`
+// backs `domain/hash/canonical-hash.ts` (sync SHA-256 that works in both
+// Node and the browser; `node:crypto` broke browser bundles). Order is
+// normative.
+export const DOMAIN_EXTERNAL_ALLOWLIST = ["@noble/hashes", "zod"];
+
 // Format-adapter packages whose cross-imports (sibling-format → sibling-format)
 // are forbidden by R-ArchAdapterCross. Order is normative.
 export const FORMAT_ADAPTERS = ["fit", "garmin", "tcx", "zwo"];

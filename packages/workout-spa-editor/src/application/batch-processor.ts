@@ -54,6 +54,7 @@ export async function processBatch(
     }
 
     const workout = workouts[i];
+    if (!workout) continue;
     byId[workout.id] = "processing";
     onProgress(buildBatchProgress(workouts.length, workout.id, byId));
 

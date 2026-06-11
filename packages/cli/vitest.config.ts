@@ -16,11 +16,15 @@ export default defineConfig({
         "**/*.test.ts",
         "src/tests/**",
       ],
+      // CLI meets the 80% core-package standard on lines/functions/
+      // statements. Branches stay at 70%: the remainder is process-level
+      // error plumbing (exit-code paths, signal handling) that needs
+      // subprocess harnesses with little assertion value.
       thresholds: {
-        lines: 70,
-        functions: 70,
+        lines: 80,
+        functions: 80,
         branches: 70,
-        statements: 70,
+        statements: 80,
       },
     },
   },

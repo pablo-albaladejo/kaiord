@@ -32,6 +32,10 @@ function truncate(text, max = 160) {
   return trimmed.slice(0, max - 1) + "…";
 }
 
+function escapeTableCell(text) {
+  return text.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
+}
+
 function firstProse(src) {
   // Walk lines, skip metadata (> Completed:, > Synced:), find the first
   // non-heading, non-blank prose line. Strip inline markdown bold.
@@ -88,7 +92,7 @@ export function buildIndex() {
   ];
   const lines = rows.map(
     ({ date, slug, entry, summary }) =>
-      `| ${date} | [\`${slug}\`](./${entry}/) | ${summary.replace(/\|/g, "\\|")} |`
+      `| ${date} | [\`${slug}\`](./${entry}/) | ${escapeTableCell(summary)} |`
   );
 
   return [...header, ...lines, ""].join("\n");

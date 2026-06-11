@@ -62,6 +62,7 @@ export const hasUserData = (
     const band = zones[i] as { minPercent?: number; maxPercent?: number };
     const def = COGGAN_7_DEFAULTS[i];
     if (
+      !def ||
       (band.minPercent ?? -1) !== def.minPercent ||
       (band.maxPercent ?? -1) !== def.maxPercent
     ) {

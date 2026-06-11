@@ -58,7 +58,9 @@ export const mapActivityFileToKRD = (
   });
 
   const session =
-    sessionMsgs.length > 0 ? convertFitToKrdSession(sessionMsgs[0]) : undefined;
+    sessionMsgs.length > 0
+      ? convertFitToKrdSession(sessionMsgs[0]!)
+      : undefined;
   const records = convertFitToKrdRecords(recordMsgs);
   const events = convertFitToKrdEvents(eventMsgs);
   const laps = convertFitToKrdLaps(lapMsgs);

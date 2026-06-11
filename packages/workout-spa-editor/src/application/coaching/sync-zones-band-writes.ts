@@ -30,6 +30,17 @@ const mergeSport = (profile: Profile, sport: Sport, patch: object): Profile => {
   };
 };
 
+const setBandBound = <K extends string>(
+  zones: Array<Partial<Record<K, number>>>,
+  band: Band,
+  bound: K,
+  value: number
+): void => {
+  const idx = BAND_INDEX[band];
+  const zone = idx === undefined ? undefined : zones[idx];
+  if (zone) zone[bound] = value;
+};
+
 export const writeHrBand = (
   profile: Profile,
   sport: Sport,
@@ -40,8 +51,7 @@ export const writeHrBand = (
   const zones = cloneOrSeedHrZones(
     profile.sportZones[sport]?.heartRateZones?.zones
   );
-  if (bound === "minBpm") zones[BAND_INDEX[band]].minBpm = value;
-  else zones[BAND_INDEX[band]].maxBpm = value;
+  setBandBound(zones, band, bound, value);
   const method = profile.sportZones[sport]?.heartRateZones?.method ?? "custom";
   return mergeSport(profile, sport, { heartRateZones: { method, zones } });
 };
@@ -55,8 +65,7 @@ export const writePowerBand = (
   const zones = cloneOrSeedPowerZones(
     profile.sportZones.cycling?.powerZones?.zones
   );
-  if (bound === "minPercent") zones[BAND_INDEX[band]].minPercent = value;
-  else zones[BAND_INDEX[band]].maxPercent = value;
+  setBandBound(zones, band, bound, value);
   const method = profile.sportZones.cycling?.powerZones?.method ?? "custom";
   return mergeSport(profile, "cycling", { powerZones: { method, zones } });
 };
@@ -72,8 +81,7 @@ export const writePaceBand = (
     sport,
     profile.sportZones[sport]?.paceZones?.zones
   );
-  if (bound === "minPace") zones[BAND_INDEX[band]].minPace = value;
-  else zones[BAND_INDEX[band]].maxPace = value;
+  setBandBound(zones, band, bound, value);
   const method = profile.sportZones[sport]?.paceZones?.method ?? "custom";
   return mergeSport(profile, sport, { paceZones: { method, zones } });
 };

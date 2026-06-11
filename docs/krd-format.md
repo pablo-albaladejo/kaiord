@@ -88,7 +88,7 @@ Represents a structured workout definition.
 - **name** (string, optional): Workout name
 - **sport** (string): Primary sport type
 - **subSport** (string, optional): Sport subtype for detailed categorization
-- **poolLength** (number, optional): Pool length in meters (swimming workouts)
+- **poolLength** (number, optional): Pool length in meters (swimming workouts); bounded to [1, 655]
 - **poolLengthUnit** (string, optional): Always "meters" in KRD
 - **steps** (array): Array of workout steps or repetition blocks
 
@@ -246,10 +246,10 @@ Represents an individual interval or segment within a workout.
 
 Supported units:
 
-- **watts**: Absolute power in watts
-- **percent_ftp**: Percentage of Functional Threshold Power
+- **watts**: Absolute power in watts (0-5000)
+- **percent_ftp**: Percentage of Functional Threshold Power (0-1000)
 - **zone**: Power zone (1-7)
-- **range**: Power range with min/max values
+- **range**: Power range with min/max values (each 0-5000, min <= max)
 
 ### Heart Rate Targets
 
@@ -265,10 +265,10 @@ Supported units:
 
 Supported units:
 
-- **bpm**: Beats per minute
-- **percent_max**: Percentage of maximum heart rate
+- **bpm**: Beats per minute (0-300)
+- **percent_max**: Percentage of maximum heart rate (0-100)
 - **zone**: Heart rate zone (1-5)
-- **range**: Heart rate range with min/max values
+- **range**: Heart rate range with min/max values (each 0-300, min <= max)
 
 ### Pace Targets
 
@@ -284,9 +284,9 @@ Supported units:
 
 Supported units:
 
-- **meters_per_second**: Speed in m/s
+- **meters_per_second**: Speed in m/s (0-30)
 - **zone**: Pace zone
-- **range**: Pace range with min/max values
+- **range**: Pace range with min/max values (each 0-30, min <= max)
 
 ### Cadence Targets
 
@@ -302,9 +302,9 @@ Supported units:
 
 Supported units:
 
-- **rpm**: Revolutions per minute (cycling) or steps per minute / 2 (running)
+- **rpm**: Revolutions per minute (cycling) or steps per minute / 2 (running), 0-300
 - **zone**: Cadence zone
-- **range**: Cadence range with min/max values
+- **range**: Cadence range with min/max values (each 0-300, min <= max)
 
 ### Open Target
 

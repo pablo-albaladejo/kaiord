@@ -1,11 +1,14 @@
 import { z } from "zod";
 
+import { MIN_LTE_MAX_MESSAGE, minLteMax } from "./range-refinement";
 import { targetUnitSchema } from "./unit";
 
 /**
  * Zod schema for heart rate target values.
  *
  * Validates heart rate targets in BPM, zones, percent max, or ranges.
+ * BPM and range bounds are capped at 300 (matching the KRD record clamp);
+ * percent max is capped at 100. Range targets enforce `min <= max`.
  *
  * @example
  * ```typescript
@@ -19,20 +22,25 @@ import { targetUnitSchema } from "./unit";
  * ```
  */
 export const heartRateValueSchema = z.discriminatedUnion("unit", [
-  z.object({ unit: z.literal(targetUnitSchema.enum.bpm), value: z.number() }),
+  z.object({
+    unit: z.literal(targetUnitSchema.enum.bpm),
+    value: z.number().min(0).max(300),
+  }),
   z.object({
     unit: z.literal(targetUnitSchema.enum.zone),
     value: z.number().int().min(1).max(5),
   }),
   z.object({
     unit: z.literal(targetUnitSchema.enum.percent_max),
-    value: z.number(),
+    value: z.number().min(0).max(100),
   }),
-  z.object({
-    unit: z.literal(targetUnitSchema.enum.range),
-    min: z.number(),
-    max: z.number(),
-  }),
+  z
+    .object({
+      unit: z.literal(targetUnitSchema.enum.range),
+      min: z.number().min(0).max(300),
+      max: z.number().min(0).max(300),
+    })
+    .refine(minLteMax, { message: MIN_LTE_MAX_MESSAGE, path: ["min"] }),
 ]);
 
 /**

@@ -102,6 +102,20 @@ export type ValidateRoundTrip = ReturnType<typeof validateRoundTrip>;
  * );
  * ```
  */
+const logOutcome = (
+  logger: Logger,
+  label: string,
+  violations: Array<ToleranceViolation>
+): void => {
+  if (violations.length === 0) {
+    logger.info(`${label} round-trip validation passed`);
+  } else {
+    logger.warn(`${label} round-trip validation failed`, {
+      violationCount: violations.length,
+    });
+  }
+};
+
 export const validateRoundTrip = (
   binaryReader: BinaryReader,
   binaryWriter: BinaryWriter,
@@ -118,15 +132,7 @@ export const validateRoundTrip = (
     const krd2 = await binaryReader(convertedFit);
 
     const violations = compareKRDs(krd, krd2, toleranceChecker, logger);
-
-    if (violations.length === 0) {
-      logger.info("FIT → KRD → FIT round-trip validation passed");
-    } else {
-      logger.warn("FIT → KRD → FIT round-trip validation failed", {
-        violationCount: violations.length,
-      });
-    }
-
+    logOutcome(logger, "FIT → KRD → FIT", violations);
     return violations;
   },
 
@@ -146,15 +152,7 @@ export const validateRoundTrip = (
       toleranceChecker,
       logger
     );
-
-    if (violations.length === 0) {
-      logger.info("KRD → FIT → KRD round-trip validation passed");
-    } else {
-      logger.warn("KRD → FIT → KRD round-trip validation failed", {
-        violationCount: violations.length,
-      });
-    }
-
+    logOutcome(logger, "KRD → FIT → KRD", violations);
     return violations;
   },
 });

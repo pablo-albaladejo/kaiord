@@ -133,9 +133,22 @@ Kaiord uses GitHub Actions for continuous integration and deployment:
 - **Automated Testing**: Multi-version testing on Node.js 22.x (Maintenance LTS) and 24.x (Active LTS)
 - **Code Quality**: ESLint, Prettier, and TypeScript strict mode validation
 - **Release Automation**: Changesets for version management and npm publishing
-- **Security**: Weekly dependency vulnerability audits
+- **Security**: Weekly dependency vulnerability audits, CodeQL static analysis, and automated dependency updates
 
 For complete CI/CD documentation, deployment guides, and npm publishing instructions, see **[Deployment](./docs/deployment.md)**.
+
+### Mechanical invariant guards
+
+Beyond linting, the repo enforces its architecture and conventions with **60+ purpose-built guard scripts** under [`scripts/`](./scripts/README.md), each with its own co-located test suite. They run on every commit (husky pre-commit) and in CI (`pnpm test:scripts`), and cover, among others:
+
+- **Hexagonal architecture** — layer purity, adapter isolation, and the `packages/core/src/` directory allowlist (`check-architecture.mjs`)
+- **Package dependency graph** — every `@kaiord/*` dependency must match the spec table (`check-package-deps.mjs`)
+- **Test conventions** — `should `-prefixed titles and Arrange/Act/Assert structure on every test (`check-test-title-should.mjs`, `check-test-aaa.mjs`)
+- **Privacy** — no runtime values interpolated into toasts or console logs (`check-no-pii-leakage.mjs`)
+- **State discipline** — no Zustand store writes persistence directly (`check-no-zustand-writethrough.mjs`)
+- **Spec hygiene** — OpenSpec format, archive dates, and auto-generated indexes stay in sync (`check-spec-format.mjs`, `check-archive-*.mjs`)
+
+If a rule matters here, a script enforces it — documentation describes the rules, but the guards are what make them true.
 
 ### Contributing
 
