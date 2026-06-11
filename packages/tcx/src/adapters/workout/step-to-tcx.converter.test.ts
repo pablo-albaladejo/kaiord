@@ -29,7 +29,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep();
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result["@_xsi:type"]).toBe("Step_t");
@@ -47,7 +47,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep();
 
     // Act
-    const result = convertStepToTcx(step, STEP_INDEX_FOUR, logger);
+    const result = convertStepToTcx(step, STEP_INDEX_FOUR, "generic", logger);
 
     // Assert
     expect(result.StepId).toBe(STEP_ID_FIVE);
@@ -59,7 +59,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep({ name: "Warm Up" });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Name).toBe("Warm Up");
@@ -71,7 +71,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep({ name: undefined });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Name).toBeUndefined();
@@ -83,7 +83,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep({ intensity: "warmup" });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Intensity).toBe("Warmup");
@@ -95,7 +95,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep({ intensity: "active" });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Intensity).toBe("Active");
@@ -107,7 +107,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep({ intensity: undefined });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Intensity).toBeUndefined();
@@ -123,7 +123,7 @@ describe("convertStepToTcx", () => {
     });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Extensions).toStrictEqual({ TPX: { Watts: 250 } });
@@ -145,7 +145,7 @@ describe("convertStepToTcx", () => {
     });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Extensions).toStrictEqual({
@@ -168,7 +168,7 @@ describe("convertStepToTcx", () => {
     });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Extensions).toBeUndefined();
@@ -180,7 +180,7 @@ describe("convertStepToTcx", () => {
     const step = createWorkoutStep({ stepIndex: 2 });
 
     // Act
-    convertStepToTcx(step, 2, logger);
+    convertStepToTcx(step, 2, "generic", logger);
 
     // Assert
     expect(logger.debug).toHaveBeenCalledWith("Converting step to TCX", {
@@ -197,7 +197,7 @@ describe("convertStepToTcx", () => {
     });
 
     // Act
-    const result = convertStepToTcx(step, 0, logger);
+    const result = convertStepToTcx(step, 0, "generic", logger);
 
     // Assert
     expect(result.Duration).toStrictEqual({

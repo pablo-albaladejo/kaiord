@@ -1,7 +1,13 @@
-import type { Logger, Workout, WorkoutStep } from "@kaiord/core";
+import type { Logger, Sport, Workout, WorkoutStep } from "@kaiord/core";
 
 import { TCX_TO_KRD_SPORT, tcxSportSchema } from "../schemas/tcx-sport";
 import { convertTcxStep } from "./step.converter";
+
+const extractSport = (tcxWorkout: Record<string, unknown>): Sport => {
+  const sportAttr = tcxWorkout["@_Sport"] as string | undefined;
+  const sportResult = tcxSportSchema.safeParse(sportAttr);
+  return sportResult.success ? TCX_TO_KRD_SPORT[sportResult.data] : "generic";
+};
 
 const extractWorkoutExtensions = (
   tcxWorkout: Record<string, unknown>,
@@ -22,6 +28,7 @@ const extractWorkoutExtensions = (
 
 const convertSteps = (
   tcxSteps: unknown,
+  sport: Sport,
   logger: Logger
 ): Array<WorkoutStep> => {
   const steps: Array<WorkoutStep> = [];
@@ -35,6 +42,7 @@ const convertSteps = (
     const step = convertTcxStep(
       tcxStep as Record<string, unknown>,
       stepIndex,
+      sport,
       logger
     );
     if (step) {
@@ -52,14 +60,9 @@ export const convertTcxWorkout = (
 ): Workout => {
   logger.debug("Converting TCX workout");
 
-  const sportAttr = tcxWorkout["@_Sport"] as string | undefined;
-  const sportResult = tcxSportSchema.safeParse(sportAttr);
-  const sport = sportResult.success
-    ? TCX_TO_KRD_SPORT[sportResult.data]
-    : "generic";
-
+  const sport = extractSport(tcxWorkout);
   const name = tcxWorkout.Name as string | undefined;
-  const steps = convertSteps(tcxWorkout.Step, logger);
+  const steps = convertSteps(tcxWorkout.Step, sport, logger);
   const extensions = extractWorkoutExtensions(tcxWorkout, logger);
 
   const workout: Workout = {

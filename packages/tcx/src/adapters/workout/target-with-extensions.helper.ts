@@ -1,15 +1,17 @@
-import type { Logger, Target } from "@kaiord/core";
+import type { Logger, Sport, Target } from "@kaiord/core";
 
-import { convertTcxTarget } from "../target/target.mapper";
+import { convertTcxTarget } from "../target/tcx-target-walker.converter";
 import { extractPowerFromExtensions } from "./step-helpers";
 
 export const convertTargetWithExtensions = (
   tcxStep: Record<string, unknown>,
   extensions: Record<string, unknown> | undefined,
+  sport: Sport,
   logger: Logger
 ): Target | null => {
   const target = convertTcxTarget(
     tcxStep.Target as Record<string, unknown> | undefined,
+    sport,
     logger
   );
   if (!target) return null;

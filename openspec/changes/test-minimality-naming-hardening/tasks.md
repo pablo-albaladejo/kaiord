@@ -17,10 +17,10 @@
 ## 3. TCX pipeline resolution (specs/adapter-contracts delta)
 
 - [x] 3.1 Resolve the running-cadence semantics (doubling vs pass-through) from the TCX XSD and Garmin-exported fixtures; record the decision in `design.md` Open Questions (design D4)
-- [ ] 3.2 Port the confirmed cadence behavior and the canonical pace-unit handling to `workout/target-to-tcx.converter.ts`, ensuring writer/reader agreement
-- [ ] 3.3 Add round-trip tests on the wired path: running cadence ±1 rpm, cycling cadence ±1 rpm, pace target with consistent unit (the three positive delta scenarios)
-- [ ] 3.4 Delete the orphan chain — `target/{krd-to-tcx,pace,cadence,heart-rate}.converter.ts`, `duration/{tcx-to-krd,standard-duration,extended-duration}.converter.ts`, their barrels and test suites — after confirming every unique assertion is ported (delta scenario: orphaned chain rejected)
-- [ ] 3.5 tcx: delete the barrel-duplicate suites `duration/duration.converter.test.ts` and `target/target.converter.test.ts`; trim the duplicated helper-level suites subsumed by `duration-walker.converter.test.ts` per audit `adapters.md`
+- [x] 3.2 Port the confirmed cadence behavior and the canonical pace-unit handling to `workout/target-to-tcx.converter.ts`, ensuring writer/reader agreement
+- [x] 3.3 Add round-trip tests on the wired path: running cadence ±1 rpm, cycling cadence ±1 rpm, pace target with consistent unit (the three positive delta scenarios)
+- [x] 3.4 Delete the orphan chain — `target/{krd-to-tcx,pace,cadence,heart-rate}.converter.ts`, `duration/{tcx-to-krd,standard-duration,extended-duration}.converter.ts`, their barrels and test suites — after confirming every unique assertion is ported (delta scenario: orphaned chain rejected)
+- [x] 3.5 tcx: delete the barrel-duplicate suites `duration/duration.converter.test.ts` and `target/target.converter.test.ts`; trim the duplicated helper-level suites subsumed by `duration-walker.converter.test.ts` per audit `adapters.md`
 
 ## 4. zwo and remaining adapter test cleanup
 
