@@ -4,6 +4,10 @@ import { targetUnitSchema } from "@kaiord/core";
 import { convertPowerValue, interpretWorkoutPower } from "./power-helpers";
 import type { FitTargetData } from "./target.types";
 
+// FIT defines 7 power zones. If the zone field is out of range,
+// reinterpret it as an absolute value (FIT overloads the zone field).
+const POWER_ZONE_MAX = 7;
+
 export const convertPowerTarget = (data: FitTargetData): Target => {
   const rangeTarget = buildPowerRangeTarget(data);
   if (rangeTarget) return rangeTarget;
@@ -64,9 +68,7 @@ const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
 
 const buildPowerZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetPowerZone !== undefined) {
-    // Validate zone is in valid range (1-7)
-    // If not, treat as power value instead
-    if (data.targetPowerZone >= 1 && data.targetPowerZone <= 7) {
+    if (data.targetPowerZone >= 1 && data.targetPowerZone <= POWER_ZONE_MAX) {
       return {
         type: targetTypeSchema.enum.power,
         value: {

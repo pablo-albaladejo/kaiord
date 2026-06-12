@@ -5,16 +5,12 @@
  * Requirement 3: Update step indices and reorder workout structure
  */
 
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 
 /**
  * Validates indices for step reordering
@@ -59,11 +55,11 @@ export const reorderStepAction = (
   overIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout || activeIndex === overIndex) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout || activeIndex === overIndex) {
     return {};
   }
 
-  const workout = krd.extensions.structured_workout as Workout;
   const steps = [...workout.steps];
 
   if (!validateIndices(activeIndex, overIndex, steps.length)) {

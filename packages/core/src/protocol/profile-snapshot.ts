@@ -120,6 +120,10 @@ export const STALE_SNAPSHOT_THRESHOLD_DAYS = 7;
  * re-implement the hash. Bridges SHALL NOT compute or compare
  * fingerprints — de-duplication is a SPA-side optimization.
  */
+// Canonical FNV-1a 32-bit parameters (the algorithm's standard seed and prime).
+const FNV_OFFSET_BASIS = 0x811c9dc5;
+const FNV_PRIME = 0x01000193;
+
 export const fingerprintSnapshot = (
   profileId: string,
   snapshot: ProfileSnapshot
@@ -128,10 +132,10 @@ export const fingerprintSnapshot = (
   void _ignored;
   const payload = `${profileId.length}:${profileId}|${JSON.stringify(rest)}`;
 
-  let hash = 0x811c9dc5;
+  let hash = FNV_OFFSET_BASIS;
   for (let i = 0; i < payload.length; i += 1) {
     hash ^= payload.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193) >>> 0;
+    hash = Math.imul(hash, FNV_PRIME) >>> 0;
   }
   return hash.toString(16).padStart(8, "0");
 };

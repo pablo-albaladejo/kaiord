@@ -1,5 +1,5 @@
-import type { WorkoutStep } from "@kaiord/core";
-import { describe, expect, it } from "vitest";
+import type { Logger, WorkoutStep } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
 
 import { PACE_M_PER_S } from "../../test-utils/constants";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";
@@ -13,6 +13,13 @@ const buildWorkoutStep = (overrides?: Partial<WorkoutStep>): WorkoutStep => ({
   target: { type: "open" },
   intensity: "active",
   ...overrides,
+});
+
+const createLogger = (): Logger => ({
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 });
 
 describe("mapWorkoutStep", () => {
@@ -51,6 +58,41 @@ describe("mapWorkoutStep", () => {
       // Assert
       expect(() => mapWorkoutStep(step, { value: 1 })).toThrow(
         /pace zone .* require/i
+      );
+    });
+  });
+
+  describe("lossy-conversion warnings", () => {
+    it("should warn when intensity is unknown", () => {
+      // Arrange
+      const logger = createLogger();
+      const step = buildWorkoutStep({ intensity: "sprint" });
+
+      // Act
+      mapWorkoutStep(step, { value: 1 }, undefined, logger);
+
+      // Assert
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Lossy conversion: unknown intensity, defaulting to interval step type",
+        expect.objectContaining({ intensity: "sprint" })
+      );
+    });
+
+    it("should warn when duration type is unsupported", () => {
+      // Arrange
+      const logger = createLogger();
+      const step = buildWorkoutStep({
+        durationType: "heart_rate_less_than",
+        duration: { type: "heart_rate_less_than", bpm: 150 },
+      });
+
+      // Act
+      mapWorkoutStep(step, { value: 1 }, undefined, logger);
+
+      // Assert
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Lossy conversion: unknown duration type, using lap-button condition",
+        expect.objectContaining({ durationType: "heart_rate_less_than" })
       );
     });
   });

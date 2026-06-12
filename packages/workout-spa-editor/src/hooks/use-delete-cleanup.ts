@@ -9,6 +9,7 @@
 import { useEffect } from "react";
 
 import { useClearExpiredDeletes } from "../store";
+import { UNDO_DELETE_CLEANUP_TICK_MS } from "../store/actions/delete-undo-constants";
 
 export const useDeleteCleanup = () => {
   const clearExpiredDeletes = useClearExpiredDeletes();
@@ -16,7 +17,7 @@ export const useDeleteCleanup = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       clearExpiredDeletes();
-    }, 1000);
+    }, UNDO_DELETE_CLEANUP_TICK_MS);
 
     return () => clearInterval(interval);
   }, [clearExpiredDeletes]);

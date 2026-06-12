@@ -1,9 +1,5 @@
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 import {
   createUpdatedKrd,
   getSuccessMessage,
@@ -34,11 +30,10 @@ export const pasteStepAction = async (
   krd: KRD,
   insertIndex?: number
 ): Promise<PasteStepResult> => {
-  if (!krd.extensions?.structured_workout) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) {
     return { success: false, message: "No workout found" };
   }
-
-  const workout = krd.extensions.structured_workout as Workout;
 
   try {
     const clipboardResult = await readClipboard();

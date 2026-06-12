@@ -46,6 +46,25 @@ describe("createGarminWorkoutService", () => {
     );
   });
 
+  it("should map a Garmin sport key to KRD sport in summaries", async () => {
+    // Arrange
+    const httpClient = createMockHttpClient();
+    vi.mocked(httpClient.get).mockResolvedValue([
+      {
+        workoutId: 7,
+        workoutName: "Strength",
+        sportType: { sportTypeKey: "cardio_training" },
+      },
+    ]);
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    // Act
+    const workouts = await service.list({ offset: 0, limit: 10 });
+
+    // Assert
+    expect(workouts[0].sport).toBe("generic");
+  });
+
   it("should push a workout", async () => {
     // Arrange
     const httpClient = createMockHttpClient();

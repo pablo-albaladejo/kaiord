@@ -8,23 +8,12 @@ import {
   mapWarmupToKrd,
 } from "../interval/ramp.mapper";
 import { convertSteadyStateToKrd } from "../interval/steady-state.converter";
+import { normalizeAttributeNames } from "./attribute-helpers";
 
 type IntervalData = { type: string; data: Record<string, unknown> };
 type ProcessResult = {
   step: WorkoutStep | RepetitionBlock;
   indexIncrement: number;
-};
-
-const normalizeAttributeNames = (
-  data: Record<string, unknown>
-): Record<string, unknown> => {
-  const normalized: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(data)) {
-    // Remove @_ prefix from attribute names
-    const normalizedKey = key.startsWith("@_") ? key.substring(2) : key;
-    normalized[normalizedKey] = value;
-  }
-  return normalized;
 };
 
 const processSingleStep = (

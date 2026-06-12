@@ -4,24 +4,21 @@
  * Action for restoring a deleted step at its original position.
  */
 
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import { restoredAfterUndoTarget } from "../focus-rules";
 import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 
 export const undoDeleteAction = (
   krd: KRD,
   timestamp: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) {
     return {};
   }
 
@@ -32,7 +29,6 @@ export const undoDeleteAction = (
     return {};
   }
 
-  const workout = krd.extensions.structured_workout as Workout;
   const { step, index } = deletedStepEntry;
 
   // Insert the step back at its original position

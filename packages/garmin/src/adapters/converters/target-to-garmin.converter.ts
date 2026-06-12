@@ -72,6 +72,14 @@ const mapZoneOrRange = (
   return mapRangeOrValue(tt, value, fasterFirst);
 };
 
+/**
+ * Garmin wire convention for range targets: speed/power targets are ordered
+ * fastest-bound-first (the higher numeric value in `targetValueOne`), while
+ * heart-rate and cadence targets are ordered ascending (lower bound first).
+ * `fasterFirst` selects between the two orderings — `true` for power and pace,
+ * `false` for heart rate and cadence (see the call sites in
+ * `convertKrdTargetToGarmin`).
+ */
 const mapRangeOrValue = (
   tt: TT,
   value: Val,
