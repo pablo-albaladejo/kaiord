@@ -1,7 +1,14 @@
 import type { Logger } from "@kaiord/core";
 
+// KRD intensity values TCX cannot express. Garmin's TCX Intensity element is
+// limited (Active/Resting), so KRD's recovery/interval/other have no faithful
+// TCX representation and are dropped on read-back — announced as a lossy
+// conversion rather than silently discarded.
+const TCX_UNREPRESENTABLE_INTENSITIES = new Set(["recovery", "interval", "other"]);
+
 export const extractIntensity = (
-  tcxStep: Record<string, unknown>
+  tcxStep: Record<string, unknown>,
+  logger: Logger
 ): "warmup" | "active" | "cooldown" | "rest" | undefined => {
   const raw = tcxStep.Intensity as string | undefined;
   const value = raw?.toLowerCase();
@@ -15,6 +22,12 @@ export const extractIntensity = (
     case "resting":
       return "rest";
     default:
+      if (value && TCX_UNREPRESENTABLE_INTENSITIES.has(value)) {
+        logger.warn(
+          `Lossy conversion: intensity '${value}' has no TCX equivalent, dropping`,
+          { intensity: value }
+        );
+      }
       return undefined;
   }
 };

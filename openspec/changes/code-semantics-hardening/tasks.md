@@ -16,8 +16,8 @@
 - [x] 2.3 zwo: comment the `1000 / x` sec-per-km pace factor and the deliberate min↔max swap in `target-encoder.ts`; extract `normalizeAttributeNames` XML mechanics out of `intervals-processor.ts`
 - [x] 2.4 garmin: name `GARMIN_STEP_NOTES_MAX`/`GARMIN_NAME_MAX` (resolving 255 vs 256 against Garmin's real limits), warn on truncation; warn on unknown condition/intensity/stroke defaults; warn-and-open for the `REPS` end-condition per the adapter-contracts delta; comment the `im↔mixed` value-5 collapse and the faster-first ordering convention on `mapRangeOrValue`/`resolvePaceZone`; comment the pool `unitId`/`factor` wire constants
 - [x] 2.5 garmin: route `mapToWorkoutSummary.sport` through `mapGarminSportToKrd` (changeset `fix(garmin)`); test that listed summaries carry KRD sport vocabulary
-- [ ] 2.6 tcx + zwo: handle the full 7-value intensity enum per the adapter-contracts delta — extend `extractIntensity`/intensity encoders to map representable members and emit `Lossy conversion:` warnings for the rest; round-trip tests for `rest` (representable) and `recovery` (lossy) per format
-- [ ] 2.7 tcx/zwo: add the `kaiord:` namespace purpose header to writer and reader extension modules (target-restoration, hr-target-restoration, ramp-helpers, duration-kaiord-restorer, metadata-encoder)
+- [x] 2.6 tcx + zwo: handle the full 7-value intensity enum per the adapter-contracts delta — extend `extractIntensity`/intensity encoders to map representable members and emit `Lossy conversion:` warnings for the rest; round-trip tests for `rest` (representable) and `recovery` (lossy) per format
+- [x] 2.7 tcx/zwo: add the `kaiord:` namespace purpose header to writer and reader extension modules (target-restoration, hr-target-restoration, ramp-helpers, duration-kaiord-restorer, metadata-encoder)
 
 ## 3. Shared named constants for duplicated rules
 
@@ -45,7 +45,7 @@
 ## 6. ai and misc renames
 
 - [x] 6.1 ai: remove the dead `minPercent`/`maxPercent` fields from `evals/types.ts` (or implement them — decide from eval usage); name `ZONE_TOLERANCE = 0.05` in `assertions.ts`
-- [ ] 6.2 tcx: rename `tcx-target-walker.converter.ts` → `tcx-target-decoder.converter.ts` and `duration-walker.converter.ts` → `duration-decoder.converter.ts` (they own rule sets, not traversal); move co-located tests with them
+- [x] 6.2 tcx: rename `tcx-target-walker.converter.ts` → `tcx-target-decoder.converter.ts` and `duration-walker.converter.ts` → `duration-decoder.converter.ts` (they own rule sets, not traversal); move co-located tests with them
 
 ## 7. Verification and closure
 

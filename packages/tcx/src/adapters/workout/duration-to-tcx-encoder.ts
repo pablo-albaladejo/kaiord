@@ -1,3 +1,8 @@
+// Advanced KRD duration types (heart-rate / power / calorie end-conditions)
+// have no native TCX representation, so they are emitted as a LapButton_t with
+// their real type preserved in `kaiord:` extension attributes. The matching
+// reader (`duration-kaiord-restorer`) restores them, making the round-trip
+// lossless even though native TCX readers ignore the namespace.
 import type { Duration } from "@kaiord/core";
 
 const addKaiordAttributes = (
