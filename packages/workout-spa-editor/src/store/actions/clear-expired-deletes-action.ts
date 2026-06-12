@@ -5,16 +5,16 @@
  */
 
 import type { WorkoutState } from "../workout-actions";
+import { UNDO_DELETE_WINDOW_MS } from "./delete-undo-constants";
 
 export const clearExpiredDeletesAction = (
   state: WorkoutState
 ): Partial<WorkoutState> => {
   const deletedSteps = state.deletedSteps || [];
   const now = Date.now();
-  const EXPIRY_TIME = 5000; // 5 seconds
 
   const nonExpiredSteps = deletedSteps.filter(
-    (d) => now - d.timestamp < EXPIRY_TIME
+    (d) => now - d.timestamp < UNDO_DELETE_WINDOW_MS
   );
 
   return {

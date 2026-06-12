@@ -4,13 +4,14 @@
  * Action for duplicating a step within a repetition block.
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { KRD, RepetitionBlock } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { ItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 
 /**
  * Duplicates a step within a repetition block
@@ -27,11 +28,11 @@ export const duplicateStepInRepetitionBlockAction = (
   stepIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) {
     return {};
   }
 
-  const workout = krd.extensions.structured_workout as Workout;
   const blockInfo = findBlockById(workout, blockId);
 
   if (!blockInfo) {
