@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { healthVersionSchema } from "./version";
+
 /**
  * Zod schema for `extensions.health.bodyComposition` — a body-composition
  * snapshot captured at a point in time.
@@ -12,7 +14,7 @@ import { z } from "zod";
 export const bodyCompositionSchema = z
   .object({
     kind: z.literal("bodyComposition"),
-    version: z.string().regex(/^2\.\d+$/),
+    version: healthVersionSchema,
     measuredAt: z.iso.datetime(),
     bodyFatPercent: z.number().min(0).max(100).optional(),
     leanMassKilograms: z.number().positive().optional(),

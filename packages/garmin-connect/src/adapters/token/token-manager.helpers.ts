@@ -1,6 +1,7 @@
 import type { Logger, TokenStore } from "@kaiord/core";
 import { createServiceApiError } from "@kaiord/core";
 
+import { nowEpochSeconds } from "../http/time";
 import type { OAuth1Token, OAuth2Token } from "../http/types";
 import { garminTokensSchema } from "../schemas/garmin-token.schema";
 import type { RefreshFn } from "./token-manager.types";
@@ -29,7 +30,7 @@ export const persistBestEffort = async (
 };
 
 export const isExpired = (oauth2: OAuth2Token | undefined): boolean =>
-  !oauth2 || oauth2.expires_at <= Date.now() / 1000;
+  !oauth2 || oauth2.expires_at <= nowEpochSeconds();
 
 export const refreshTokens = (
   state: TokenState,

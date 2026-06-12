@@ -12,3 +12,7 @@ export const USER_AGENT_MOBILE = "com.garmin.android.apps.connectmobile";
 export const USER_AGENT_SSO = "GCM-iOS-5.7.2.1";
 export const USER_AGENT_BROWSER =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36";
+
+/** Garmin Connect web URL for a pushed workout (used in push result). */
+export const garminWorkoutWebUrl = (id: string | number): string =>
+  `https://connect.garmin.com/modern/workout/${id}`;

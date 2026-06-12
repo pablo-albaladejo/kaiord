@@ -23,16 +23,16 @@
 
 - [x] 3.1 fit: extract `hr-helpers.ts` (mirror of `power-helpers.ts`) owning the bpm `+100` offset for encode and decode; both converters import it; name the zone-validity bounds (`POWER_ZONE_MAX = 7`, `HR_ZONE_MAX = 5`, `PACE_ZONE_MAX = 5`) with the overload rule stated once
 - [x] 3.2 fit: add a shared `fitTimestampToIso` helper replacing the seven duplicated `* 1000` + `Date|number|string` branches across health converters and `event.mapper.ts`
-- [ ] 3.3 core: export the health version gate once (named pattern or shared field schema) and import it in all six health schemas
-- [ ] 3.4 garmin-connect: name the retry-policy constants (`HTTP_TOO_MANY_REQUESTS`, server-error range, default retries/backoff) in `retry.ts`; add `nowEpochSeconds()` used by `sso-oauth.ts` and `token-manager.helpers.ts`; move the workout web URL from `garmin-workout-service.ts` into `urls.ts`
+- [x] 3.3 core: export the health version gate once (named pattern or shared field schema) and import it in all six health schemas
+- [x] 3.4 garmin-connect: name the retry-policy constants (`HTTP_TOO_MANY_REQUESTS`, server-error range, default retries/backoff) in `retry.ts`; add `nowEpochSeconds()` used by `sso-oauth.ts` and `token-manager.helpers.ts`; move the workout web URL from `garmin-workout-service.ts` into `urls.ts`
 
 ## 4. Core modeling and mcp
 
-- [ ] 4.1 core: add JSDoc unit annotations to every bare physiological number in `record.ts`, `session.ts`, `lap.ts` (watts, m/s, bpm, rpm, meters, seconds, mm, ms)
-- [ ] 4.2 core: rename `validate-round-trip` methods to match the port-level abstraction (`validateBinaryRoundTrip`/`validateKrdRoundTrip`) with deprecated aliases for the published API; align the type/docs wording
-- [ ] 4.3 core: rephrase the `extract-workout` error to lead with the domain statement ("KRD does not contain a structured workout"), keeping the field path in the structured error data; name the FNV constants in `profile-snapshot.ts`; widen or document `poolLengthUnit` vs the length-unit converter's two-unit vocabulary
-- [ ] 4.4 mcp: add machine-readable error classification (`type`, optional `suggestion`) to `formatError` per design D7 (resolve `structuredContent` vs fenced JSON against the installed SDK); update tool tests to assert the type for at least unsupported-format, auth, and file-not-found failures
-- [ ] 4.5 mcp: include `skipped` in the `kaiord_get_recovery_status` payload; test for health-family parity
+- [x] 4.1 core: add JSDoc unit annotations to every bare physiological number in `record.ts`, `session.ts`, `lap.ts` (watts, m/s, bpm, rpm, meters, seconds, mm, ms)
+- [x] 4.2 core: rename `validate-round-trip` methods to match the port-level abstraction (`validateBinaryRoundTrip`/`validateKrdRoundTrip`) with deprecated aliases for the published API; align the type/docs wording
+- [x] 4.3 core: rephrase the `extract-workout` error to lead with the domain statement ("KRD does not contain a structured workout"), keeping the field path in the structured error data; name the FNV constants in `profile-snapshot.ts`; widen or document `poolLengthUnit` vs the length-unit converter's two-unit vocabulary
+- [x] 4.4 mcp: add machine-readable error classification (`type`, optional `suggestion`) to `formatError` per design D7 (resolve `structuredContent` vs fenced JSON against the installed SDK); update tool tests to assert the type for at least unsupported-format, auth, and file-not-found failures
+- [x] 4.5 mcp: include `skipped` in the `kaiord_get_recovery_status` payload; test for health-family parity
 
 ## 5. SPA logic-layer polish
 
@@ -44,7 +44,7 @@
 
 ## 6. ai and misc renames
 
-- [ ] 6.1 ai: remove the dead `minPercent`/`maxPercent` fields from `evals/types.ts` (or implement them — decide from eval usage); name `ZONE_TOLERANCE = 0.05` in `assertions.ts`
+- [x] 6.1 ai: remove the dead `minPercent`/`maxPercent` fields from `evals/types.ts` (or implement them — decide from eval usage); name `ZONE_TOLERANCE = 0.05` in `assertions.ts`
 - [ ] 6.2 tcx: rename `tcx-target-walker.converter.ts` → `tcx-target-decoder.converter.ts` and `duration-walker.converter.ts` → `duration-decoder.converter.ts` (they own rule sets, not traversal); move co-located tests with them
 
 ## 7. Verification and closure

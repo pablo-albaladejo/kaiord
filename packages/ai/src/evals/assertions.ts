@@ -2,6 +2,9 @@ import { workoutSchema } from "@kaiord/core";
 import type { Benchmark, EvalResult } from "./types";
 import type { Workout } from "@kaiord/core";
 
+// Eval allows ±5% drift on zone bounds to absorb AI rounding.
+const ZONE_TOLERANCE = 0.05;
+
 export const evaluateBenchmark = (
   benchmark: Benchmark,
   workout: Workout,
@@ -77,10 +80,10 @@ const checkZones = (workout: Workout, benchmark: Benchmark): Array<string> => {
     const min = (value.min ?? value.value) as number | undefined;
     const max = (value.max ?? value.value) as number | undefined;
 
-    if (zc.minValue && min !== undefined && min < zc.minValue * 0.95) {
+    if (zc.minValue && min !== undefined && min < zc.minValue * (1 - ZONE_TOLERANCE)) {
       errors.push(`Zone low ${min} below expected ${zc.minValue}`);
     }
-    if (zc.maxValue && max !== undefined && max > zc.maxValue * 1.05) {
+    if (zc.maxValue && max !== undefined && max > zc.maxValue * (1 + ZONE_TOLERANCE)) {
       errors.push(`Zone high ${max} above expected ${zc.maxValue}`);
     }
   }
