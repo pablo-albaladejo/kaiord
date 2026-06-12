@@ -80,10 +80,18 @@ const checkZones = (workout: Workout, benchmark: Benchmark): Array<string> => {
     const min = (value.min ?? value.value) as number | undefined;
     const max = (value.max ?? value.value) as number | undefined;
 
-    if (zc.minValue && min !== undefined && min < zc.minValue * (1 - ZONE_TOLERANCE)) {
+    if (
+      zc.minValue &&
+      min !== undefined &&
+      min < zc.minValue * (1 - ZONE_TOLERANCE)
+    ) {
       errors.push(`Zone low ${min} below expected ${zc.minValue}`);
     }
-    if (zc.maxValue && max !== undefined && max > zc.maxValue * (1 + ZONE_TOLERANCE)) {
+    if (
+      zc.maxValue &&
+      max !== undefined &&
+      max > zc.maxValue * (1 + ZONE_TOLERANCE)
+    ) {
       errors.push(`Zone high ${max} above expected ${zc.maxValue}`);
     }
   }

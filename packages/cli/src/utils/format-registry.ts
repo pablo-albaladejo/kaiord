@@ -54,9 +54,9 @@ export const FORMAT_REGISTRY = {
 export type FileFormat = keyof typeof FORMAT_REGISTRY;
 
 /** Format codes in stable (alphabetical) order for enums and yargs choices. */
-export const FORMAT_CODES = Object.keys(FORMAT_REGISTRY).sort() as Array<
-  FileFormat
->;
+export const FORMAT_CODES = Object.keys(
+  FORMAT_REGISTRY
+).sort() as Array<FileFormat>;
 
 /** Zod enum over the registry codes. */
 export const fileFormatSchema = z.enum(

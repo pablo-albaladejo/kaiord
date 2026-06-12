@@ -526,7 +526,9 @@ describe("mapExecutableStep", () => {
       expect(result.notes).toHaveLength(NOTES_MAX_LENGTH);
       expect(logger.warn).toHaveBeenCalledWith(
         `Lossy conversion: step notes truncated to ${NOTES_MAX_LENGTH} characters`,
-        expect.objectContaining({ originalLength: NOTES_OVERSIZED_INPUT_LENGTH })
+        expect.objectContaining({
+          originalLength: NOTES_OVERSIZED_INPUT_LENGTH,
+        })
       );
     });
   });

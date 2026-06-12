@@ -14,7 +14,7 @@ import {
 import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
 
 import type { GarminHttpClient } from "../http/types";
-import { garminWorkoutWebUrl,WORKOUT_URL } from "../http/urls";
+import { garminWorkoutWebUrl, WORKOUT_URL } from "../http/urls";
 import { mapToWorkoutSummary } from "../mappers/workout-summary.mapper";
 import {
   garminPushResponseSchema,

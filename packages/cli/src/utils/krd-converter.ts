@@ -3,10 +3,7 @@ import type { KRD, Logger } from "@kaiord/core";
 import { UnsupportedFormatError } from "./cli-errors";
 import { readFile } from "./file-handler";
 import { detectFormat } from "./format-detector";
-import {
-  type FileFormat,
-  SUPPORTED_EXTENSIONS,
-} from "./format-registry";
+import { type FileFormat, SUPPORTED_EXTENSIONS } from "./format-registry";
 import {
   fitToKrd,
   gcnToKrd,

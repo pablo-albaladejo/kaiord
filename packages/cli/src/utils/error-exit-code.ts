@@ -62,10 +62,7 @@ const getErrorName = (error: unknown): string | undefined => {
   return undefined;
 };
 
-type InstanceRule = readonly [
-  new (...args: never[]) => Error,
-  ExitCodeValue,
-];
+type InstanceRule = readonly [new (...args: never[]) => Error, ExitCodeValue];
 
 /**
  * Typed-class rules, most specific first. Class checks survive cross-realm

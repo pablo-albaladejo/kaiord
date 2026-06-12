@@ -33,10 +33,7 @@ export const convertKRDToGarmin = (
 
   const input: PoolInput & Record<string, unknown> = {
     sportType,
-    workoutName: truncateName(
-      workout.name ?? "Kaiord Workout",
-      options.logger
-    ),
+    workoutName: truncateName(workout.name ?? "Kaiord Workout", options.logger),
     workoutSegments: [
       {
         segmentOrder: 1,

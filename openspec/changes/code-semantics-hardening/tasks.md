@@ -49,7 +49,7 @@
 
 ## 7. Verification and closure
 
-- [ ] 7.1 `pnpm -r test && pnpm -r build && pnpm lint` green; per-package coverage non-decreasing (new warning branches covered)
-- [ ] 7.2 `pnpm lint:specs` over the two new capabilities and the delta; `pnpm specs:inventory` regenerated
-- [ ] 7.3 Changesets: `feat(cli)` additive exit codes, `fix(garmin)` sport mapping, patch for other published packages with source changes
-- [ ] 7.4 Record before/after grades summary in `audit/result-summary.md`
+- [x] 7.1 `pnpm -r test && pnpm -r build && pnpm lint` green; per-package coverage non-decreasing (new warning branches covered)
+- [x] 7.2 `pnpm lint:specs` over the two new capabilities and the delta; `pnpm specs:inventory` regenerated
+- [x] 7.3 Changesets: `feat(cli)` additive exit codes, `fix(garmin)` sport mapping, patch for other published packages with source changes
+- [x] 7.4 Record before/after grades summary in `audit/result-summary.md`

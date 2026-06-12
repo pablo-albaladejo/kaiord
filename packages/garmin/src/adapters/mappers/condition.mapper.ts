@@ -22,7 +22,10 @@ export const mapConditionToDuration = (
 ): MappedDuration => {
   switch (conditionTypeKey) {
     case "time":
-      return { durationType: "time", duration: { type: "time", seconds: value } };
+      return {
+        durationType: "time",
+        duration: { type: "time", seconds: value },
+      };
     case "distance":
       return {
         durationType: "distance",

@@ -4,7 +4,11 @@ import type { Logger } from "@kaiord/core";
 // limited (Active/Resting), so KRD's recovery/interval/other have no faithful
 // TCX representation and are dropped on read-back — announced as a lossy
 // conversion rather than silently discarded.
-const TCX_UNREPRESENTABLE_INTENSITIES = new Set(["recovery", "interval", "other"]);
+const TCX_UNREPRESENTABLE_INTENSITIES = new Set([
+  "recovery",
+  "interval",
+  "other",
+]);
 
 export const extractIntensity = (
   tcxStep: Record<string, unknown>,

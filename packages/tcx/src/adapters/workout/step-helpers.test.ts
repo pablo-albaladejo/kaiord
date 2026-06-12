@@ -20,7 +20,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Warmup" }, createMockLogger());
+    const result = extractIntensity(
+      { Intensity: "Warmup" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("warmup");
@@ -30,7 +33,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Active" }, createMockLogger());
+    const result = extractIntensity(
+      { Intensity: "Active" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("active");
@@ -40,7 +46,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Cooldown" }, createMockLogger());
+    const result = extractIntensity(
+      { Intensity: "Cooldown" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("cooldown");
@@ -60,7 +69,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Resting" }, createMockLogger());
+    const result = extractIntensity(
+      { Intensity: "Resting" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("rest");
@@ -70,7 +82,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "warmup" }, createMockLogger());
+    const result = extractIntensity(
+      { Intensity: "warmup" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("warmup");
@@ -90,7 +105,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Unknown" }, createMockLogger());
+    const result = extractIntensity(
+      { Intensity: "Unknown" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBeUndefined();
@@ -100,7 +118,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: undefined }, createMockLogger());
+    const result = extractIntensity(
+      { Intensity: undefined },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBeUndefined();

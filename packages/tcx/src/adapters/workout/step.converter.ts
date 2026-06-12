@@ -6,9 +6,8 @@ import type {
   WorkoutStep,
 } from "@kaiord/core";
 
-import { convertTcxDuration } from "../duration/duration-decoder.converter";
+import { resolveDurationAndTarget } from "./resolve-step-parts";
 import { extractExtensions, extractIntensity } from "./step-helpers";
-import { convertTargetWithExtensions } from "./target-with-extensions.helper";
 
 type BuildStepInput = {
   stepIndex: number;
@@ -56,27 +55,23 @@ export const convertTcxStep = (
     return null;
   }
 
-  const duration = convertTcxDuration(
-    tcxStep.Duration as Record<string, unknown> | undefined,
-    logger
-  );
-  if (!duration) {
-    logger.warn("Step has no valid duration, skipping", { stepIndex });
-    return null;
-  }
-
   const extensions = extractExtensions(tcxStep, logger);
-  const target = convertTargetWithExtensions(tcxStep, extensions, sport, logger);
-  if (!target) {
-    logger.warn("Step has no valid target, skipping", { stepIndex });
+  const resolved = resolveDurationAndTarget({
+    tcxStep,
+    extensions,
+    sport,
+    stepIndex,
+    logger,
+  });
+  if (!resolved) {
     return null;
   }
 
   return buildWorkoutStep({
     stepIndex,
     name: tcxStep.Name as string | undefined,
-    duration,
-    target,
+    duration: resolved.duration,
+    target: resolved.target,
     tcxStep,
     extensions,
     logger,

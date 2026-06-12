@@ -27,7 +27,9 @@ describe("FORMAT_REGISTRY", () => {
     const codes = FORMAT_CODES;
 
     // Act
-    const parsed = codes.map((code) => fileFormatSchema.safeParse(code).success);
+    const parsed = codes.map(
+      (code) => fileFormatSchema.safeParse(code).success
+    );
 
     // Assert
     expect(parsed.every(Boolean)).toBe(true);

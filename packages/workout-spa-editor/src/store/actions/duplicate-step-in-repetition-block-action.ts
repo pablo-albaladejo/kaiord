@@ -4,7 +4,7 @@
  * Action for duplicating a step within a repetition block.
  */
 
-import type { KRD, RepetitionBlock } from "../../types/krd";
+import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { ItemId } from "../providers/item-id";
