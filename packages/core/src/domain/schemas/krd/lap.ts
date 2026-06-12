@@ -24,36 +24,36 @@ export type KRDLapTrigger = z.infer<typeof krdLapTriggerSchema>;
  * Validates lap/interval data within a session.
  */
 export const krdLapSchema = z.object({
-  // Timing
+  // Timing — seconds
   startTime: z.iso.datetime(),
   totalElapsedTime: z.number().min(0),
   totalTimerTime: z.number().min(0).optional(),
 
-  // Distance
+  // Distance — meters
   totalDistance: z.number().min(0).optional(),
 
-  // Heart rate
+  // Heart rate — bpm
   avgHeartRate: z.number().int().min(0).max(300).optional(),
   maxHeartRate: z.number().int().min(0).max(300).optional(),
 
-  // Cadence
+  // Cadence — rpm
   avgCadence: z.number().min(0).optional(),
   maxCadence: z.number().min(0).optional(),
 
-  // Power
+  // Power — watts
   avgPower: z.number().min(0).optional(),
   maxPower: z.number().min(0).optional(),
   normalizedPower: z.number().min(0).optional(),
 
-  // Speed
+  // Speed — m/s
   avgSpeed: z.number().min(0).optional(),
   maxSpeed: z.number().min(0).optional(),
 
-  // Elevation
+  // Elevation — meters
   totalAscent: z.number().min(0).optional(),
   totalDescent: z.number().min(0).optional(),
 
-  // Calories
+  // Calories — kcal
   totalCalories: z.number().int().min(0).optional(),
 
   // Classification

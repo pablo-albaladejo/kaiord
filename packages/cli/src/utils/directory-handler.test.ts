@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { DirectoryCreateError } from "./cli-errors";
 import { createOutputDirectory } from "./directory-handler";
+import { mapErrorToExitCode } from "./error-exit-code";
+import { ExitCode } from "./exit-codes";
 
 vi.mock("fs/promises", () => ({
   mkdir: vi.fn(),
@@ -99,5 +102,21 @@ describe("createOutputDirectory", () => {
     await expect(
       createOutputDirectory("/valid/path/file.tcx")
     ).resolves.toBeUndefined();
+  });
+
+  it("should throw a DirectoryCreateError that maps to its exit code", async () => {
+    // Arrange
+    const { mkdir } = await import("fs/promises");
+    const error = Object.assign(new Error("EACCES"), { code: "EACCES" });
+    vi.mocked(mkdir).mockRejectedValue(error);
+
+    // Act
+    const thrown = await createOutputDirectory("/restricted/file.tcx").catch(
+      (e: unknown) => e
+    );
+
+    // Assert
+    expect(thrown).toBeInstanceOf(DirectoryCreateError);
+    expect(mapErrorToExitCode(thrown)).toBe(ExitCode.DIRECTORY_CREATE_ERROR);
   });
 });

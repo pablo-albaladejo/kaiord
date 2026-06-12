@@ -26,7 +26,7 @@ export const extractWorkout = (krd: KRD): Workout => {
 
   if (!ext || typeof ext !== "object" || Array.isArray(ext)) {
     throw createKrdValidationError(
-      "Missing or invalid extensions.structured_workout",
+      "KRD does not contain a structured workout",
       [{ field: "extensions.structured_workout", message: "Required" }]
     );
   }

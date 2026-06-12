@@ -14,7 +14,7 @@ import {
 import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
 
 import type { GarminHttpClient } from "../http/types";
-import { WORKOUT_URL } from "../http/urls";
+import { garminWorkoutWebUrl, WORKOUT_URL } from "../http/urls";
 import { mapToWorkoutSummary } from "../mappers/workout-summary.mapper";
 import {
   garminPushResponseSchema,
@@ -43,7 +43,7 @@ const pushWorkout = async (
     return {
       id: String(result.workoutId),
       name: result.workoutName ?? "Workout",
-      url: `https://connect.garmin.com/modern/workout/${result.workoutId}`,
+      url: garminWorkoutWebUrl(result.workoutId),
     };
   } catch (error) {
     throw createServiceApiError("Failed to push workout", undefined, error);

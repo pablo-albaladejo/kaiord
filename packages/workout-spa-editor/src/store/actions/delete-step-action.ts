@@ -5,11 +5,12 @@
  * Tracks deleted steps for undo functionality.
  */
 
-import type { KRD, Workout } from "../../types/krd";
+import type { KRD } from "../../types/krd";
 import type { UIWorkoutItem } from "../../types/krd-ui";
 import { nextAfterDelete } from "../focus-rules";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 import {
   filterSteps,
   findStepToDelete,
@@ -21,11 +22,11 @@ export const deleteStepAction = (
   stepIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) {
     return {};
   }
 
-  const workout = krd.extensions.structured_workout as Workout;
   const found = findStepToDelete(workout, stepIndex);
   const updatedSteps = filterSteps(workout.steps, stepIndex);
   const reindexedSteps = reindexSteps(updatedSteps);
@@ -38,8 +39,8 @@ export const deleteStepAction = (
 
   const deletedSteps = state.deletedSteps || [];
   // Runtime invariant: `state.currentWorkout` is a UIWorkout, so the
-  // deleted item already carries its stable ItemId. The `as Workout` cast
-  // above erased that at the type level — re-assert it here so the undo
+  // deleted item already carries its stable ItemId that the domain
+  // `Workout` type does not surface — re-assert it here so the undo
   // trail stays on the UIWorkoutItem contract.
   const newDeletedSteps = found
     ? [

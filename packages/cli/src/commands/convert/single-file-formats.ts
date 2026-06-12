@@ -1,16 +1,13 @@
+import { UnsupportedFormatError } from "../../utils/cli-errors";
 import { detectFormat } from "../../utils/format-detector";
+import { SUPPORTED_EXTENSIONS } from "../../utils/format-registry";
 import type { ValidatedConvertOptions } from "./types";
-
-const buildInvalidArgumentError = (message: string): Error => {
-  const error = new Error(message);
-  error.name = "InvalidArgumentError";
-  return error;
-};
 
 /**
  * Resolves and validates input/output formats for a single-file conversion.
  *
- * Throws InvalidArgumentError if formats cannot be detected or output is missing.
+ * Throws on undetectable formats (UnsupportedFormatError) or missing output
+ * (InvalidArgumentError).
  */
 export const resolveSingleFileFormats = (
   options: ValidatedConvertOptions
@@ -18,22 +15,24 @@ export const resolveSingleFileFormats = (
   const inputFormat = options.inputFormat || detectFormat(options.input);
 
   if (!inputFormat) {
-    throw buildInvalidArgumentError(
+    throw new UnsupportedFormatError(
       `Unable to detect input format from file: ${options.input}. ` +
-        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
+        `Supported formats: ${SUPPORTED_EXTENSIONS}`
     );
   }
 
   if (!options.output) {
-    throw buildInvalidArgumentError("Output file is required");
+    const error = new Error("Output file is required");
+    error.name = "InvalidArgumentError";
+    throw error;
   }
 
   const outputFormat = options.outputFormat || detectFormat(options.output);
 
   if (!outputFormat) {
-    throw buildInvalidArgumentError(
+    throw new UnsupportedFormatError(
       `Unable to detect output format from file: ${options.output}. ` +
-        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
+        `Supported formats: ${SUPPORTED_EXTENSIONS}`
     );
   }
 

@@ -1,5 +1,6 @@
 import { durationTypeSchema, intensitySchema } from "@kaiord/core";
-import { describe, expect, it } from "vitest";
+import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
 
 import { convertSteadyStateToKrd } from "./steady-state.converter";
 
@@ -91,6 +92,49 @@ describe("convertSteadyStateToKrd", () => {
 
       // Assert
       expect(result.intensity).toBe(intensitySchema.enum.warmup);
+    });
+
+    it("should restore a representable recovery intensity round-trip", () => {
+      // Arrange
+      const data = {
+        Duration: 300,
+        durationType: "time" as const,
+        Power: 1.0,
+        stepIndex: 0,
+        "kaiord:intensity": "recovery",
+      };
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+
+      // Act
+      const result = convertSteadyStateToKrd(data, logger);
+
+      // Assert
+      expect(result.intensity).toBe(intensitySchema.enum.recovery);
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it("should narrow a lossy unknown intensity to active with a warning", () => {
+      // Arrange
+      const data = {
+        Duration: 300,
+        durationType: "time" as const,
+        Power: 1.0,
+        stepIndex: 0,
+        "kaiord:intensity": "sprint",
+      };
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+
+      // Act
+      const result = convertSteadyStateToKrd(data, logger);
+
+      // Assert
+      expect(result.intensity).toBe(intensitySchema.enum.active);
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Lossy conversion: intensity has no Zwift equivalent, using default",
+        expect.objectContaining({ originalIntensity: "sprint" })
+      );
     });
   });
 

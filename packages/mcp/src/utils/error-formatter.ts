@@ -1,6 +1,13 @@
+import {
+  classifyError,
+  type McpErrorClassification,
+} from "./error-classification";
+
 export type ToolResult = {
   content: Array<{ type: "text"; text: string }>;
   isError?: boolean;
+  /** Machine-readable failure classification for AI-agent branching. */
+  structuredContent?: { error: McpErrorClassification };
 };
 
 export const formatSuccess = (text: string): ToolResult => ({
@@ -12,5 +19,6 @@ export const formatError = (error: unknown): ToolResult => {
   return {
     content: [{ type: "text", text: `Error: ${message}` }],
     isError: true,
+    structuredContent: { error: classifyError(error) },
   };
 };

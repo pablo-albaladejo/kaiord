@@ -7,6 +7,7 @@ import {
 import { createFitReader, createFitWriter } from "@kaiord/fit";
 import { readFile as fsReadFile } from "fs/promises";
 
+import { UnsupportedFormatError } from "../../utils/cli-errors.js";
 import { readFile } from "../../utils/file-handler.js";
 import { detectFormat } from "../../utils/format-detector.js";
 import type { ValidateOptions } from "./types";
@@ -29,11 +30,13 @@ export const executeValidation = async (
 ) => {
   const format = detectFormat(opts.input);
   if (!format) {
-    throw new Error(`Unable to detect format from file: ${opts.input}`);
+    throw new UnsupportedFormatError(
+      `Unable to detect format from file: ${opts.input}`
+    );
   }
 
   if (format !== "fit") {
-    throw new Error(
+    throw new UnsupportedFormatError(
       `Validation currently only supports FIT files. Got: ${format}`
     );
   }

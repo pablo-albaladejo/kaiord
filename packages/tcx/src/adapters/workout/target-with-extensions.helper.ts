@@ -1,6 +1,6 @@
 import type { Logger, Sport, Target } from "@kaiord/core";
 
-import { convertTcxTarget } from "../target/tcx-target-walker.converter";
+import { convertTcxTarget } from "../target/tcx-target-decoder.converter";
 import { extractPowerFromExtensions } from "./step-helpers";
 
 export const convertTargetWithExtensions = (

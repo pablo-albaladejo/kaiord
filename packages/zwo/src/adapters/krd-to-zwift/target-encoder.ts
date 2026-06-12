@@ -7,11 +7,13 @@ import {
 
 export const encodeSteadyStateTargets = (
   step: WorkoutStep,
-  interval: Record<string, unknown>
+  interval: Record<string, unknown>,
+  logger?: Logger
 ): void => {
-  encodeSteadyStatePowerTarget(step, interval);
+  encodeSteadyStatePowerTarget(step, interval, logger);
 
   if (step.target.type === "pace" && step.target.value.unit === "mps") {
+    // Zwift pace is sec/km, KRD is m/s: sec/km = 1000 / m_s.
     interval["@_pace"] = 1000 / step.target.value.value;
   }
 };
@@ -24,6 +26,8 @@ export const encodeRampTargets = (
   encodeRampPowerTarget(step, interval, logger);
 
   if (step.target.type === "pace" && step.target.value.unit === "range") {
+    // Zwift pace is sec/km, KRD is m/s: sec/km = 1000 / m_s. paceLow (slowest)
+    // maps to the fastest speed, hence max→Low / min→High.
     interval["@_paceLow"] = 1000 / step.target.value.max;
     interval["@_paceHigh"] = 1000 / step.target.value.min;
   }
@@ -51,7 +55,7 @@ export const encodeTargets = (
   logger?: Logger
 ): void => {
   if (intervalType === "SteadyState") {
-    encodeSteadyStateTargets(step, interval);
+    encodeSteadyStateTargets(step, interval, logger);
   } else if (
     intervalType === "Warmup" ||
     intervalType === "Ramp" ||

@@ -8,6 +8,7 @@
 import { useCallback } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
+import { UNDO_DELETE_WINDOW_MS } from "../../../store/actions/delete-undo-constants";
 import { useDeleteStep, useUndoDelete } from "../../../store/selectors";
 import { useWorkoutStore } from "../../../store/workout-store";
 
@@ -29,7 +30,7 @@ export function useDeleteStepWithToast() {
             title: "Step deleted",
             description: "The step has been removed from your workout.",
             variant: "info",
-            duration: 5000,
+            duration: UNDO_DELETE_WINDOW_MS,
             action: (
               <button
                 onClick={() => undoDelete(mostRecentDelete.timestamp)}

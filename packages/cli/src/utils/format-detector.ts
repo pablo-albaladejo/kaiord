@@ -1,23 +1,13 @@
 import { extname } from "path";
-import { z } from "zod";
 
-/**
- * Supported file formats for workout conversion
- */
-export const fileFormatSchema = z.enum(["fit", "gcn", "krd", "tcx", "zwo"]);
+import {
+  EXTENSION_TO_FORMAT,
+  type FileFormat,
+  fileFormatSchema,
+} from "./format-registry";
 
-export type FileFormat = z.infer<typeof fileFormatSchema>;
-
-/**
- * Map of file extensions to format types
- */
-const EXTENSION_TO_FORMAT: Record<string, FileFormat> = {
-  ".fit": "fit",
-  ".gcn": "gcn",
-  ".krd": "krd",
-  ".tcx": "tcx",
-  ".zwo": "zwo",
-};
+export type { FileFormat } from "./format-registry";
+export { fileFormatSchema } from "./format-registry";
 
 /**
  * Detect file format from file path extension

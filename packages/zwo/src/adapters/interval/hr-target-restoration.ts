@@ -1,3 +1,7 @@
+// kaiord:* attributes carry KRD concepts Zwift's schema cannot express; Zwift
+// has no HR target at all, so KRD heart-rate targets survive only as this
+// side-channel, keeping a Zwift round-trip lossless even though native readers
+// ignore it.
 import { type Target, targetTypeSchema } from "@kaiord/core";
 
 type KaiordHrAttributes = {

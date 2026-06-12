@@ -1,4 +1,4 @@
-import type { RepetitionBlock } from "@kaiord/core";
+import type { Logger, RepetitionBlock } from "@kaiord/core";
 
 import { ConditionTypeId, StepTypeId } from "../schemas/common";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
@@ -8,11 +8,12 @@ import type { TargetMapperOptions } from "./target-types";
 export const mapRepetitionBlock = (
   block: RepetitionBlock,
   counter: { value: number },
-  options?: TargetMapperOptions
+  options?: TargetMapperOptions,
+  logger?: Logger
 ): GarminWorkoutStepInput => {
   const stepOrder = counter.value++;
   const innerSteps: GarminWorkoutStepInput[] = block.steps.map((step) =>
-    mapWorkoutStep(step, counter, options)
+    mapWorkoutStep(step, counter, options, logger)
   );
 
   return {

@@ -1,5 +1,6 @@
 import { durationTypeSchema } from "@kaiord/core";
-import { describe, expect, it } from "vitest";
+import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
 
 import { convertOriginalZwiftDuration } from "./original-duration.converter";
 
@@ -76,18 +77,67 @@ describe("convertOriginalZwiftDuration", () => {
       });
     });
 
-    it("should restore a distance duration with no recoverable value as zero meters", () => {
+    it("should restore open when distance type is present but meters are missing", () => {
       // Arrange
       const data = { "kaiord:originalDurationType": "distance" };
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
 
       // Act
-      const result = convertOriginalZwiftDuration(data);
+      const result = convertOriginalZwiftDuration(data, logger);
 
       // Assert
-      expect(result).toStrictEqual({ type: "distance", meters: 0 });
+      expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Lossy conversion: corrupted round-trip duration restored as open",
+        expect.objectContaining({
+          originalDurationType: "distance",
+          attribute: "originalDurationMeters",
+        })
+      );
     });
 
-    it("should restore a heart-rate duration with no bpm as zero", () => {
+    it("should restore open when heart-rate type is present but bpm is missing", () => {
+      // Arrange
+      const data = { "kaiord:originalDurationType": "heart_rate_less_than" };
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+
+      // Act
+      const result = convertOriginalZwiftDuration(data, logger);
+
+      // Assert
+      expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Lossy conversion: corrupted round-trip duration restored as open",
+        expect.objectContaining({
+          originalDurationType: "heart_rate_less_than",
+          attribute: "originalDurationBpm",
+        })
+      );
+    });
+
+    it("should restore open when power type is present but watts are missing", () => {
+      // Arrange
+      const data = { "kaiord:originalDurationType": "power_less_than" };
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+
+      // Act
+      const result = convertOriginalZwiftDuration(data, logger);
+
+      // Assert
+      expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Lossy conversion: corrupted round-trip duration restored as open",
+        expect.objectContaining({
+          originalDurationType: "power_less_than",
+          attribute: "originalDurationWatts",
+        })
+      );
+    });
+
+    it("should restore open without a logger when bpm is missing", () => {
       // Arrange
       const data = { "kaiord:originalDurationType": "heart_rate_less_than" };
 
@@ -95,18 +145,7 @@ describe("convertOriginalZwiftDuration", () => {
       const result = convertOriginalZwiftDuration(data);
 
       // Assert
-      expect(result).toStrictEqual({ type: "heart_rate_less_than", bpm: 0 });
-    });
-
-    it("should restore a power duration with no watts as zero", () => {
-      // Arrange
-      const data = { "kaiord:originalDurationType": "power_less_than" };
-
-      // Act
-      const result = convertOriginalZwiftDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({ type: "power_less_than", watts: 0 });
+      expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
     });
   });
 

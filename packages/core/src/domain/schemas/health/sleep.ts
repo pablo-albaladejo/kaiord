@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SLEEP_TOTAL_DURATION_TOLERANCE_SECONDS } from "./tolerances";
+import { healthVersionSchema } from "./version";
 
 /**
  * Zod schema for a single sleep stage within a sleep session.
@@ -29,7 +30,7 @@ export type SleepStage = z.infer<typeof sleepStageSchema>;
 export const sleepRecordSchema = z
   .object({
     kind: z.literal("sleep"),
-    version: z.string().regex(/^2\.\d+$/),
+    version: healthVersionSchema,
     startTime: z.iso.datetime(),
     endTime: z.iso.datetime(),
     totalDurationSeconds: z.number().int().nonnegative(),

@@ -4,9 +4,10 @@
  * writing any SessionMatch row. The user accepts/rejects each row in
  * the banner.
  *
- * Heuristic: same day + same canonical sport family + duration variance
- * within ±20% (score ≥ 0.6). Duration-unknown candidates bypass the
- * threshold but score `null` so the visual encoding stays neutral.
+ * Heuristic: same day + same canonical sport family + a compliance score
+ * (1 − |Δduration| / planDuration) at or above SCORE_THRESHOLD (0.6),
+ * i.e. duration variance within ≈±40%. Duration-unknown candidates bypass
+ * the threshold but score `null` so the visual encoding stays neutral.
  *
  * Tiebreaker: highest score first; on tie, lower `activityId` first;
  * on further tie, lower `workoutId` first. Greedy assignment ensures

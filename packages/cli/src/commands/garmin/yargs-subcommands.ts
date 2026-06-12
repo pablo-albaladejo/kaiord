@@ -1,6 +1,7 @@
 import type { Argv } from "yargs";
 
 import { ExitCode } from "../../utils/exit-codes";
+import { FORMAT_CODES } from "../../utils/format-registry";
 import { createLogger } from "../../utils/logger-factory";
 import { listCommand } from "./list";
 import { loginCommand } from "./login";
@@ -84,7 +85,7 @@ export const pushSubcommand = {
       })
       .option("input-format", {
         type: "string" as const,
-        choices: ["fit", "gcn", "krd", "tcx", "zwo"] as const,
+        choices: FORMAT_CODES,
         description: "Override input format detection",
       }),
   handler: async (argv: Record<string, unknown>) => {

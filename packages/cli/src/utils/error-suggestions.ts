@@ -3,6 +3,8 @@
  * Provides actionable next steps for users when errors occur
  */
 
+import { SUPPORTED_FORMAT_CODES } from "./format-registry";
+
 type ErrorPattern = {
   pattern: string;
   title: string;
@@ -76,7 +78,7 @@ const ERROR_PATTERNS: Array<ErrorPattern> = [
     title: "Invalid argument",
     suggestions: [
       "Use --input-format to explicitly specify the format.",
-      "Supported formats: fit, gcn, krd, tcx, zwo",
+      `Supported formats: ${SUPPORTED_FORMAT_CODES}`,
     ],
   },
 ];

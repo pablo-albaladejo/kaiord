@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { healthVersionSchema } from "./version";
+
 /**
  * Zod schema for `extensions.health.hrv` — a heart-rate-variability
  * summary captured either overnight (Garmin Body Battery / HRV Status)
@@ -7,7 +9,7 @@ import { z } from "zod";
  */
 export const hrvSummarySchema = z.object({
   kind: z.literal("hrv"),
-  version: z.string().regex(/^2\.\d+$/),
+  version: healthVersionSchema,
   measuredAt: z.iso.datetime(),
   rMSSD: z.number().positive(),
   measurementWindow: z.enum(["overnight", "spot"]),

@@ -1,14 +1,9 @@
 import type { HrvSummary } from "@kaiord/core";
 
+import { fitTimestampToIso } from "../../shared/fit-timestamp";
 import type { FitHrvStatusSummary, FitHrvValue } from "./fit-hrv.schema";
 
 const HEALTH_VERSION = "2.0";
-
-const toIsoString = (value: FitHrvStatusSummary["timestamp"]): string => {
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value === "number") return new Date(value * 1000).toISOString();
-  return new Date(value).toISOString();
-};
 
 /**
  * Builds the KRD HRV summary from FIT messages.
@@ -26,7 +21,7 @@ export const mapFitHrvToKrd = (
     return {
       kind: "hrv",
       version: HEALTH_VERSION,
-      measuredAt: toIsoString(summary.timestamp),
+      measuredAt: fitTimestampToIso(summary.timestamp),
       rMSSD: summary.lastNightAverage,
       measurementWindow: "overnight",
     };
@@ -35,7 +30,7 @@ export const mapFitHrvToKrd = (
     return {
       kind: "hrv",
       version: HEALTH_VERSION,
-      measuredAt: toIsoString(firstValue.timestamp),
+      measuredAt: fitTimestampToIso(firstValue.timestamp),
       rMSSD: firstValue.value,
       measurementWindow: "spot",
     };

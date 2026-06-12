@@ -1,6 +1,7 @@
 import type { Argv } from "yargs";
 
 import { ExitCode } from "../../utils/exit-codes";
+import { FORMAT_CODES } from "../../utils/format-registry";
 import { diffCommand } from "./index";
 import type { DiffOptions } from "./types";
 
@@ -23,12 +24,12 @@ export const diffYargsConfig = {
       })
       .option("format1", {
         type: "string" as const,
-        choices: ["fit", "gcn", "krd", "tcx", "zwo"] as const,
+        choices: FORMAT_CODES,
         description: "Override format detection for first file",
       })
       .option("format2", {
         type: "string" as const,
-        choices: ["fit", "gcn", "krd", "tcx", "zwo"] as const,
+        choices: FORMAT_CODES,
         description: "Override format detection for second file",
       })
       .example(

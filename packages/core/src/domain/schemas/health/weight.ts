@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { healthVersionSchema } from "./version";
+
 /**
  * Zod schema for `extensions.health.weight` — a scalar weight measurement
  * captured at a point in time. Body-composition fields (fat percent, lean
@@ -9,7 +11,7 @@ import { z } from "zod";
  */
 export const weightMeasurementSchema = z.object({
   kind: z.literal("weight"),
-  version: z.string().regex(/^2\.\d+$/),
+  version: healthVersionSchema,
   measuredAt: z.iso.datetime(),
   weightKilograms: z.number().positive(),
   kaiordRecordId: z.string().uuid().optional(),

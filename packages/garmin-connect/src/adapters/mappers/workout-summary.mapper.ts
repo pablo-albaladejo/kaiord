@@ -1,4 +1,5 @@
 import type { WorkoutSummary } from "@kaiord/core";
+import { mapGarminSportToKrd } from "@kaiord/garmin";
 
 export const mapToWorkoutSummary = (garminWorkout: {
   workoutId?: number | string;
@@ -9,7 +10,12 @@ export const mapToWorkoutSummary = (garminWorkout: {
 }): WorkoutSummary => ({
   id: String(garminWorkout.workoutId ?? ""),
   name: garminWorkout.workoutName ?? "Unnamed",
-  sport: garminWorkout.sportType?.sportTypeKey ?? "unknown",
+  // Translate the raw Garmin sport key to KRD sport vocabulary so the summary
+  // speaks the domain, not the SDK. Absent keys keep the documented "unknown"
+  // fallback rather than mapping to a sport.
+  sport: garminWorkout.sportType?.sportTypeKey
+    ? mapGarminSportToKrd(garminWorkout.sportType.sportTypeKey)
+    : "unknown",
   created_at: garminWorkout.createdDate
     ? new Date(garminWorkout.createdDate).toISOString()
     : "",

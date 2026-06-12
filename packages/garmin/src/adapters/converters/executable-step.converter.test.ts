@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import type { Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   NOTES_MAX_LENGTH,
@@ -7,6 +8,13 @@ import {
 } from "../../test-utils/constants";
 import type { ParsedExecutableStep } from "../schemas/garmin-workout-parse.schema";
 import { mapExecutableStep } from "./executable-step.converter";
+
+const createLogger = (): Logger => ({
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+});
 
 const buildStep = (
   overrides?: Partial<ParsedExecutableStep>
@@ -430,6 +438,98 @@ describe("mapExecutableStep", () => {
 
       // Assert
       expect(result.stepIndex).toBe(STEP_INDEX.FIVE);
+    });
+  });
+
+  describe("lossy-conversion warnings", () => {
+    it("should warn and open when end-condition is reps", () => {
+      // Arrange
+      const logger = createLogger();
+      const step = buildStep({
+        endCondition: { conditionTypeKey: "reps" },
+        endConditionValue: 10,
+      });
+
+      // Act
+      const result = mapExecutableStep(step, 0, logger);
+
+      // Assert
+      expect(result.durationType).toBe("open");
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Lossy conversion: reps end-condition not supported, treating as open",
+        expect.objectContaining({ conditionTypeKey: "reps" })
+      );
+    });
+
+    it("should warn when end-condition is unknown", () => {
+      // Arrange
+      const logger = createLogger();
+      const step = buildStep({
+        endCondition: { conditionTypeKey: "iterations" },
+        endConditionValue: 3,
+      });
+
+      // Act
+      const result = mapExecutableStep(step, 0, logger);
+
+      // Assert
+      expect(result.durationType).toBe("open");
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Lossy conversion: unknown end-condition, treating as open",
+        expect.objectContaining({ conditionTypeKey: "iterations" })
+      );
+    });
+
+    it("should warn when step type is unknown", () => {
+      // Arrange
+      const logger = createLogger();
+      const step = buildStep({ stepType: { stepTypeKey: "mystery" } });
+
+      // Act
+      const result = mapExecutableStep(step, 0, logger);
+
+      // Assert
+      expect(result.intensity).toBe("active");
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Lossy conversion: unknown Garmin step type, defaulting to active",
+        expect.objectContaining({ stepTypeKey: "mystery" })
+      );
+    });
+
+    it("should warn when stroke is unknown", () => {
+      // Arrange
+      const logger = createLogger();
+      const step = buildStep({
+        strokeType: { strokeTypeKey: "mystery", strokeTypeId: 99 },
+      });
+
+      // Act
+      mapExecutableStep(step, 0, logger);
+
+      // Assert
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Lossy conversion: unknown Garmin stroke, dropping stroke field",
+        expect.objectContaining({ strokeTypeKey: "mystery" })
+      );
+    });
+
+    it("should warn when notes are truncated", () => {
+      // Arrange
+      const logger = createLogger();
+      const longDescription = "A".repeat(NOTES_OVERSIZED_INPUT_LENGTH);
+      const step = buildStep({ description: longDescription });
+
+      // Act
+      const result = mapExecutableStep(step, 0, logger);
+
+      // Assert
+      expect(result.notes).toHaveLength(NOTES_MAX_LENGTH);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Lossy conversion: step notes truncated to ${NOTES_MAX_LENGTH} characters`,
+        expect.objectContaining({
+          originalLength: NOTES_OVERSIZED_INPUT_LENGTH,
+        })
+      );
     });
   });
 });

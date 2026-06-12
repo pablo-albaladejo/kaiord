@@ -1,4 +1,4 @@
-import type { SwimStroke } from "@kaiord/core";
+import type { Logger, SwimStroke } from "@kaiord/core";
 import type { z } from "zod";
 
 import type { GarminStrokeType, strokeTypeKeySchema } from "../schemas/common";
@@ -30,11 +30,19 @@ const KRD_TO_GARMIN_STROKE: Record<
 
 export const mapGarminStrokeToKrd = (
   strokeTypeKey: string | null,
-  strokeTypeId: number
+  strokeTypeId: number,
+  logger?: Logger
 ): SwimStroke | undefined => {
   if (!strokeTypeKey || strokeTypeId === 0) return undefined;
   if (strokeTypeKey === "any_stroke") return undefined;
-  return GARMIN_TO_KRD_STROKE[strokeTypeKey];
+  const mapped = GARMIN_TO_KRD_STROKE[strokeTypeKey];
+  if (!mapped) {
+    logger?.warn(
+      "Lossy conversion: unknown Garmin stroke, dropping stroke field",
+      { strokeTypeKey, strokeTypeId }
+    );
+  }
+  return mapped;
 };
 
 export const mapKrdStrokeToGarmin = (
@@ -54,6 +62,10 @@ export const mapKrdStrokeToGarmin = (
   };
 };
 
+// FIT defines no distinct value for individual-medley, so `im` deliberately
+// collapses onto FIT value 5 (`mixed`). This is a known, accepted loss:
+// `FIT_TO_STROKE` decodes 5 back to `mixed`, so an `im` stroke round-trips
+// through FIT as `mixed`.
 const STROKE_TO_FIT: Record<string, number> = {
   freestyle: 0,
   backstroke: 1,

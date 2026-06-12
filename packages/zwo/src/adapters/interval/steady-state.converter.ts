@@ -1,10 +1,10 @@
-import type { WorkoutStep } from "@kaiord/core";
-import { intensitySchema } from "@kaiord/core";
+import type { Logger, WorkoutStep } from "@kaiord/core";
 
 import type { ZwiftDurationData } from "../duration/duration.mapper";
 import { convertOriginalZwiftDuration } from "../duration/original-duration.converter";
 import type { ZwiftTextEvent } from "./index";
 import { extractTextEvents } from "./index";
+import { restoreIntensity } from "./intensity-restoration";
 import { restoreSteadyStateTarget } from "./steady-state-target.helpers";
 
 export type ZwiftSteadyStateData = {
@@ -34,7 +34,8 @@ export type ZwiftSteadyStateData = {
 };
 
 export const convertSteadyStateToKrd = (
-  data: ZwiftSteadyStateData
+  data: ZwiftSteadyStateData,
+  logger?: Logger
 ): WorkoutStep => {
   const durationData: ZwiftDurationData = {
     Duration: data.Duration,
@@ -45,7 +46,7 @@ export const convertSteadyStateToKrd = (
     "kaiord:originalDurationWatts": data["kaiord:originalDurationWatts"],
   };
 
-  const duration = convertOriginalZwiftDuration(durationData);
+  const duration = convertOriginalZwiftDuration(durationData, logger);
   const target = restoreSteadyStateTarget(data);
   const textEventData = extractTextEvents(data.textevent);
 
@@ -55,13 +56,7 @@ export const convertSteadyStateToKrd = (
     duration,
     targetType: target.type,
     target,
-    intensity:
-      (data["kaiord:intensity"] as
-        | "warmup"
-        | "active"
-        | "cooldown"
-        | "rest"
-        | undefined) || intensitySchema.enum.active,
+    intensity: restoreIntensity(data["kaiord:intensity"], logger),
     ...textEventData,
   };
 

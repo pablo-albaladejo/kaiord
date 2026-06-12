@@ -3,6 +3,10 @@ import { targetUnitSchema } from "@kaiord/core";
 
 import type { FitTargetData } from "./target.types";
 
+// FIT defines 5 speed/pace zones. If the zone field is out of range,
+// reinterpret it as an absolute value (FIT overloads the zone field).
+const PACE_ZONE_MAX = 5;
+
 export const convertPaceTarget = (data: FitTargetData): Target => {
   const rangeTarget = buildPaceRangeTarget(data);
   if (rangeTarget) return rangeTarget;
@@ -50,9 +54,7 @@ const buildPaceRangeTarget = (data: FitTargetData): Target | null => {
 
 const buildPaceZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetSpeedZone !== undefined) {
-    // Validate zone is in valid range (1-5)
-    // If not, treat as mps value instead
-    if (data.targetSpeedZone >= 1 && data.targetSpeedZone <= 5) {
+    if (data.targetSpeedZone >= 1 && data.targetSpeedZone <= PACE_ZONE_MAX) {
       return {
         type: targetTypeSchema.enum.pace,
         value: {

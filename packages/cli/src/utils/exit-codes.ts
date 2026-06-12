@@ -25,6 +25,10 @@ export const ExitCode = {
   PARTIAL_SUCCESS: 11,
   /** Directory creation failed */
   DIRECTORY_CREATE_ERROR: 12,
+  /** Environmental failure: bundled schema or runtime dependency missing (installation problem — reinstall) */
+  ENVIRONMENT_ERROR: 13,
+  /** External-service failure: Garmin Connect API or network error (may be retried) */
+  SERVICE_ERROR: 14,
   /** Unknown or unhandled error */
   UNKNOWN_ERROR: 99,
 } as const;

@@ -1,16 +1,25 @@
-import type { Duration, DurationType } from "@kaiord/core";
-import type { z } from "zod";
+import type { Duration, DurationType, Logger } from "@kaiord/core";
 
-import type {
-  conditionTypeKeySchema,
-  GarminConditionType,
-} from "../schemas/common";
-import { ConditionTypeId } from "../schemas/common";
+import type { GarminConditionType } from "../schemas/common";
+import {
+  buildCaloriesCondition,
+  buildDistanceCondition,
+  buildOpenCondition,
+  buildTimeCondition,
+} from "./condition-builders.mapper";
+
+type MappedDuration = { durationType: DurationType; duration: Duration };
+
+const OPEN_DURATION: MappedDuration = {
+  durationType: "open",
+  duration: { type: "open" },
+};
 
 export const mapConditionToDuration = (
   conditionTypeKey: string,
-  value: number
-): { durationType: DurationType; duration: Duration } => {
+  value: number,
+  logger?: Logger
+): MappedDuration => {
   switch (conditionTypeKey) {
     case "time":
       return {
@@ -27,56 +36,27 @@ export const mapConditionToDuration = (
         durationType: "calories",
         duration: { type: "calories", calories: value },
       };
+    case "reps":
+      // KRD has no reps-based duration vocabulary; modelling it is out of
+      // scope (see design D4). Degrade loudly to open rather than silently.
+      logger?.warn(
+        "Lossy conversion: reps end-condition not supported, treating as open",
+        { conditionTypeKey, value }
+      );
+      return OPEN_DURATION;
     default:
-      return {
-        durationType: "open",
-        duration: { type: "open" },
-      };
+      logger?.warn(
+        "Lossy conversion: unknown end-condition, treating as open",
+        { conditionTypeKey, value }
+      );
+      return OPEN_DURATION;
   }
 };
 
-type ConditionTypeKey = z.infer<typeof conditionTypeKeySchema>;
-
-const buildCondition = (
-  id: number,
-  key: ConditionTypeKey,
-  order: number,
-  displayable: boolean
-): GarminConditionType => ({
-  conditionTypeId: id,
-  conditionTypeKey: key,
-  displayOrder: order,
-  displayable,
-});
-
-const buildTimeCondition = (duration: Duration) => ({
-  endCondition: buildCondition(ConditionTypeId.TIME, "time", 2, true),
-  endConditionValue: "seconds" in duration ? duration.seconds : 0,
-});
-
-const buildDistanceCondition = (duration: Duration) => ({
-  endCondition: buildCondition(ConditionTypeId.DISTANCE, "distance", 3, true),
-  endConditionValue: "meters" in duration ? duration.meters : 0,
-});
-
-const buildCaloriesCondition = (duration: Duration) => ({
-  endCondition: buildCondition(ConditionTypeId.CALORIES, "calories", 4, true),
-  endConditionValue: "calories" in duration ? duration.calories : 0,
-});
-
-const buildOpenCondition = () => ({
-  endCondition: buildCondition(
-    ConditionTypeId.LAP_BUTTON,
-    "lap.button",
-    1,
-    true
-  ),
-  endConditionValue: 0,
-});
-
 export const mapDurationToCondition = (
   durationType: string,
-  duration: Duration
+  duration: Duration,
+  logger?: Logger
 ): { endCondition: GarminConditionType; endConditionValue: number } => {
   switch (durationType) {
     case "time":
@@ -85,7 +65,13 @@ export const mapDurationToCondition = (
       return buildDistanceCondition(duration);
     case "calories":
       return buildCaloriesCondition(duration);
+    case "open":
+      return buildOpenCondition();
     default:
+      logger?.warn(
+        "Lossy conversion: unknown duration type, using lap-button condition",
+        { durationType }
+      );
       return buildOpenCondition();
   }
 };

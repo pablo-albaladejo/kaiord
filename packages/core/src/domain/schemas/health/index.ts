@@ -50,4 +50,5 @@ export {
   STRESS_TOLERANCE,
   WEIGHT_TOLERANCE_KG,
 } from "./tolerances";
+export { HEALTH_SCHEMA_VERSION_PATTERN, healthVersionSchema } from "./version";
 export { type WeightMeasurement, weightMeasurementSchema } from "./weight";

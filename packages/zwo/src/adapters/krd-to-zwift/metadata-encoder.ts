@@ -1,3 +1,6 @@
+// kaiord:* attributes carry KRD concepts Zwift's schema cannot express (HR
+// targets, step name, intensity, equipment) so a Zwift round-trip is lossless
+// even though native Zwift readers ignore them.
 import type { WorkoutStep } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 

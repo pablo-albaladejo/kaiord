@@ -6,6 +6,7 @@
  */
 
 import type { useToastContext } from "../../../contexts/ToastContext";
+import { UNDO_DELETE_WINDOW_MS } from "../../../store/actions/delete-undo-constants";
 import { useWorkoutStore } from "../../../store/workout-store";
 
 export function executeDeleteWithToast(
@@ -22,7 +23,7 @@ export function executeDeleteWithToast(
       toast({
         title: "Repetition block deleted",
         variant: "info",
-        duration: 5000,
+        duration: UNDO_DELETE_WINDOW_MS,
         action: (
           <button
             onClick={() => undoDelete(mostRecentDelete.timestamp)}

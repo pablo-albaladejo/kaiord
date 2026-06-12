@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { healthVersionSchema } from "./version";
+
 /**
  * Zod schema for `extensions.health.daily` — a day-scoped wellness
  * summary covering steps, calories, and intensity minutes.
@@ -11,7 +13,7 @@ import { z } from "zod";
  */
 export const dailyWellnessSchema = z.object({
   kind: z.literal("daily"),
-  version: z.string().regex(/^2\.\d+$/),
+  version: healthVersionSchema,
   date: z.iso.date(),
   steps: z.number().int().nonnegative(),
   activeCalories: z.number().int().nonnegative(),

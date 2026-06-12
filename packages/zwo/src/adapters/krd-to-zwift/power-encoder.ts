@@ -2,9 +2,14 @@ import type { Logger, WorkoutStep } from "@kaiord/core";
 
 import { convertPowerZoneToPercentFtp } from "../target/power.converter";
 
+// No FTP in KRD watts targets; 250 W is a conventional default road-cyclist FTP
+// used only to derive Zwift's required %FTP fraction.
+const ASSUMED_FTP_WATTS = 250;
+
 export const encodeSteadyStatePowerTarget = (
   step: WorkoutStep,
-  interval: Record<string, unknown>
+  interval: Record<string, unknown>,
+  logger?: Logger
 ): void => {
   if (step.target.type !== "power") return;
 
@@ -21,10 +26,15 @@ export const encodeSteadyStatePowerTarget = (
     interval["@_kaiord:powerUnit"] = "watts";
     interval["@_kaiord:originalWatts"] = step.target.value.value;
 
-    const assumedFtp = 250;
-    interval["@_kaiord:assumedFtp"] = assumedFtp;
-    const percentFtp = (step.target.value.value / assumedFtp) * 100;
+    interval["@_kaiord:assumedFtp"] = ASSUMED_FTP_WATTS;
+    const percentFtp = (step.target.value.value / ASSUMED_FTP_WATTS) * 100;
     interval["@_Power"] = percentFtp / 100;
+
+    logger?.warn("Lossy conversion: watts converted to percent FTP", {
+      originalWatts: step.target.value.value,
+      assumedFtp: ASSUMED_FTP_WATTS,
+      stepIndex: step.stepIndex,
+    });
   }
 };
 
@@ -41,19 +51,18 @@ export const encodeRampPowerTarget = (
 
     interval["@_kaiord:powerUnit"] = "watts";
 
-    const assumedFtp = 250;
     const originalLow = powerLow;
     const originalHigh = powerHigh;
-    powerLow = (powerLow / assumedFtp) * 100;
-    powerHigh = (powerHigh / assumedFtp) * 100;
+    powerLow = (powerLow / ASSUMED_FTP_WATTS) * 100;
+    powerHigh = (powerHigh / ASSUMED_FTP_WATTS) * 100;
 
     interval["@_kaiord:originalWattsLow"] = originalLow;
     interval["@_kaiord:originalWattsHigh"] = originalHigh;
-    interval["@_kaiord:assumedFtp"] = assumedFtp;
+    interval["@_kaiord:assumedFtp"] = ASSUMED_FTP_WATTS;
 
     logger?.warn("Lossy conversion: watts converted to percent FTP", {
       originalWatts: { low: originalLow, high: originalHigh },
-      assumedFtp,
+      assumedFtp: ASSUMED_FTP_WATTS,
       convertedPercentFtp: { low: powerLow, high: powerHigh },
       stepIndex: step.stepIndex,
     });

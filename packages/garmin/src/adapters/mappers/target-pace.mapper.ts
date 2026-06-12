@@ -28,6 +28,9 @@ export const resolvePaceZone = (
       `Pace zone ${value.value} not found in pace zone table`
     );
   }
+  // Garmin orders speed/power targets fastest-bound-first: the higher speed
+  // (maxMps, the faster pace) goes in targetValueOne, the slower (minMps) in
+  // targetValueTwo. HR/cadence targets order ascending instead.
   return {
     targetType: buildPaceTargetType(),
     targetValueOne: entry.maxMps,

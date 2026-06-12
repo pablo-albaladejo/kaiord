@@ -1,5 +1,6 @@
-import type { Target, TargetType, WorkoutStep } from "@kaiord/core";
+import type { Logger, Target, TargetType, WorkoutStep } from "@kaiord/core";
 
+import { GARMIN_STEP_NOTES_MAX } from "../constants";
 import { mapConditionToDuration } from "../mappers/condition.mapper";
 import { mapGarminEquipmentToKrd } from "../mappers/equipment.mapper";
 import { mapStepTypeToIntensity } from "../mappers/intensity.mapper";
@@ -12,21 +13,24 @@ import { convertGarminTargetToKrd } from "./target-from-garmin.converter";
 
 export const mapExecutableStep = (
   step: ParsedExecutableStep,
-  stepIndex: number
+  stepIndex: number,
+  logger?: Logger
 ): WorkoutStep => {
   const { durationType, duration } = mapConditionToDuration(
     step.endCondition.conditionTypeKey,
-    step.endConditionValue
+    step.endConditionValue,
+    logger
   );
 
   const { targetType, target } = resolveTarget(step);
-  const intensity = mapStepTypeToIntensity(step.stepType.stepTypeKey);
+  const intensity = mapStepTypeToIntensity(step.stepType.stepTypeKey, logger);
   const equipment = mapGarminEquipmentToKrd(
     step.equipmentType?.equipmentTypeKey ?? null
   );
   const stroke = mapGarminStrokeToKrd(
     step.strokeType?.strokeTypeKey ?? null,
-    step.strokeType?.strokeTypeId ?? 0
+    step.strokeType?.strokeTypeId ?? 0,
+    logger
   );
 
   const result: WorkoutStep = {
@@ -38,18 +42,21 @@ export const mapExecutableStep = (
     intensity,
   };
 
-  if (step.description) result.notes = step.description.slice(0, 256);
-  if (equipment) result.equipment = equipment;
-
-  if (stroke) {
-    result.targetType = "stroke_type";
-    result.target = {
-      type: "stroke_type",
-      value: { unit: "swim_stroke", value: strokeToFitValue(stroke) },
-    };
+  if (step.description) {
+    result.notes = truncateNotes(step.description, stepIndex, logger);
   }
+  if (equipment) result.equipment = equipment;
+  if (stroke) applyStroke(result, stroke);
 
   return result;
+};
+
+const applyStroke = (result: WorkoutStep, stroke: string): void => {
+  result.targetType = "stroke_type";
+  result.target = {
+    type: "stroke_type",
+    value: { unit: "swim_stroke", value: strokeToFitValue(stroke) },
+  };
 };
 
 const resolveTarget = (
@@ -72,4 +79,17 @@ const resolveTarget = (
   }
 
   return primary;
+};
+
+const truncateNotes = (
+  notes: string,
+  stepIndex: number,
+  logger?: Logger
+): string => {
+  if (notes.length <= GARMIN_STEP_NOTES_MAX) return notes;
+  logger?.warn(
+    `Lossy conversion: step notes truncated to ${GARMIN_STEP_NOTES_MAX} characters`,
+    { stepIndex, originalLength: notes.length }
+  );
+  return notes.slice(0, GARMIN_STEP_NOTES_MAX);
 };

@@ -1,4 +1,4 @@
-import type { Intensity } from "@kaiord/core";
+import type { Intensity, Logger } from "@kaiord/core";
 
 const STEP_TYPE_TO_INTENSITY: Record<string, Intensity> = {
   warmup: "warmup",
@@ -26,8 +26,28 @@ const INTENSITY_TO_STEP_TYPE: Record<string, StepTypeKey> = {
   other: "interval",
 };
 
-export const mapStepTypeToIntensity = (stepTypeKey: string): Intensity =>
-  STEP_TYPE_TO_INTENSITY[stepTypeKey] ?? "active";
+export const mapStepTypeToIntensity = (
+  stepTypeKey: string,
+  logger?: Logger
+): Intensity => {
+  const mapped = STEP_TYPE_TO_INTENSITY[stepTypeKey];
+  if (mapped) return mapped;
+  logger?.warn(
+    "Lossy conversion: unknown Garmin step type, defaulting to active",
+    { stepTypeKey }
+  );
+  return "active";
+};
 
-export const mapIntensityToStepType = (intensity: string): StepTypeKey =>
-  INTENSITY_TO_STEP_TYPE[intensity] ?? "interval";
+export const mapIntensityToStepType = (
+  intensity: string,
+  logger?: Logger
+): StepTypeKey => {
+  const mapped = INTENSITY_TO_STEP_TYPE[intensity];
+  if (mapped) return mapped;
+  logger?.warn(
+    "Lossy conversion: unknown intensity, defaulting to interval step type",
+    { intensity }
+  );
+  return "interval";
+};

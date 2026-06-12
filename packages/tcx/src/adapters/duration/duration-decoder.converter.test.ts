@@ -1,7 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
-import { convertTcxDuration } from "./duration-walker.converter";
+import { convertTcxDuration } from "./duration-decoder.converter";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),

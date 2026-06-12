@@ -7,12 +7,13 @@
  * - Requirement 4: Create repetition blocks from selected steps
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { KRD, RepetitionBlock } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 import {
   calculateInsertPosition,
   extractSteps,
@@ -28,15 +29,11 @@ export const createRepetitionBlockAction = (
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (
-    !krd.extensions?.structured_workout ||
-    stepIndices.length === 0 ||
-    repeatCount < 2
-  ) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout || stepIndices.length === 0 || repeatCount < 2) {
     return {};
   }
 
-  const workout = krd.extensions.structured_workout as Workout;
   const selectedIndices = new Set(stepIndices);
 
   const { stepsToWrap, remainingSteps, insertPosition } = extractSteps(

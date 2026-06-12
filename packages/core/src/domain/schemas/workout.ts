@@ -33,12 +33,16 @@ export const repetitionBlockSchema = z.object({
  *
  * `poolLength` is bounded to [1, 655] meters — generous enough for
  * endless pools (~5 m) and the FIT protocol envelope, while rejecting
- * nonsense values like 0.0001 or 99999.
+ * nonsense values like 0.0001 or 99999. KRD always stores pool length
+ * normalized to meters; adapters that accept yard-based pools convert on
+ * ingest (see `length-unit.converter`), so `poolLengthUnit` is fixed to
+ * `"meters"` here rather than carrying the source unit.
  */
 export const workoutSchema = z.object({
   name: z.string().optional(),
   sport: sportSchema,
   subSport: subSportSchema.optional(),
+  /** meters — always normalized to meters on ingest */
   poolLength: z.number().min(1).max(655).optional(),
   poolLengthUnit: z.literal("meters").optional(),
   steps: z.array(z.union([workoutStepSchema, repetitionBlockSchema])),

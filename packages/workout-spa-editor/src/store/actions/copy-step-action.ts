@@ -5,14 +5,10 @@
  * Requirement 39.2: Copy step data as JSON to clipboard
  */
 
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
 import { writeClipboard } from "../clipboard-store";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 
 export type CopyStepResult = {
   success: boolean;
@@ -23,14 +19,13 @@ export const copyStepAction = async (
   krd: KRD,
   stepIndex: number
 ): Promise<CopyStepResult> => {
-  if (!krd.extensions?.structured_workout) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) {
     return {
       success: false,
       message: "No workout found",
     };
   }
-
-  const workout = krd.extensions.structured_workout as Workout;
 
   // Find the step to copy
   const stepToCopy = workout.steps.find(

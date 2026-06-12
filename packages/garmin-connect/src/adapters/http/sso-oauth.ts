@@ -2,6 +2,7 @@ import type { Logger } from "@kaiord/core";
 import { createServiceAuthError } from "@kaiord/core";
 
 import { createOAuthSigner } from "./oauth-signer";
+import { nowEpochSeconds } from "./time";
 import type { FetchFn, OAuthConsumer } from "./types";
 import type { OAuth1Token, OAuth2Token } from "./types";
 import { GARMIN_SSO_EMBED, OAUTH_URL, USER_AGENT_MOBILE } from "./urls";
@@ -74,6 +75,6 @@ export const exchangeOAuth2 = async (
 
   return {
     ...data,
-    expires_at: Math.floor(Date.now() / 1000) + data.expires_in,
+    expires_at: nowEpochSeconds() + data.expires_in,
   };
 };

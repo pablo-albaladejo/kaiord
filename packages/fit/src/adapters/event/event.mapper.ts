@@ -6,6 +6,10 @@ import type {
   FitEventType,
 } from "../schemas/fit-event";
 import {
+  fitTimestampToIso,
+  isoToFitTimestampSeconds,
+} from "../shared/fit-timestamp";
+import {
   FIT_EVENT_TO_KRD_TYPE,
   KRD_TYPE_TO_FIT_EVENT,
   KRD_TYPE_TO_FIT_EVENT_TYPE,
@@ -33,7 +37,7 @@ const mapEventTypeToKrd = (
 
 /** Maps FIT EVENT to KRD event. */
 export const mapFitEventToKrd = (fit: FitEventMessage): KRDEvent => ({
-  timestamp: new Date(fit.timestamp * 1000).toISOString(),
+  timestamp: fitTimestampToIso(fit.timestamp),
   eventType: mapEventTypeToKrd(fit.event, fit.eventType),
   eventGroup: fit.eventGroup,
   data: fit.data,
@@ -41,7 +45,7 @@ export const mapFitEventToKrd = (fit: FitEventMessage): KRDEvent => ({
 
 /** Maps KRD event to FIT EVENT. */
 export const mapKrdEventToFit = (krd: KRDEvent): Partial<FitEventMessage> => ({
-  timestamp: Math.floor(new Date(krd.timestamp).getTime() / 1000),
+  timestamp: isoToFitTimestampSeconds(krd.timestamp),
   event: KRD_TYPE_TO_FIT_EVENT[krd.eventType] ?? "userMarker",
   eventType: KRD_TYPE_TO_FIT_EVENT_TYPE[krd.eventType] ?? "marker",
   eventGroup: krd.eventGroup,

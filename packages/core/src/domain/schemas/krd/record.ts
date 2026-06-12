@@ -26,15 +26,25 @@ export const krdRecordSchema = z.object({
       lon: z.number().min(-180).max(180),
     })
     .optional(),
+  /** meters */
   altitude: z.number().optional(),
+  /** bpm (beats per minute) */
   heartRate: z.number().int().min(0).max(300).optional(),
+  /** rpm (revolutions per minute) */
   cadence: z.number().min(0).optional(),
+  /** watts */
   power: z.number().min(0).optional(),
+  /** m/s (meters per second) */
   speed: z.number().min(0).optional(),
+  /** meters */
   distance: z.number().min(0).optional(),
+  /** degrees Celsius */
   temperature: z.number().optional(),
+  /** mm (millimeters) */
   verticalOscillation: z.number().min(0).optional(),
+  /** ms (milliseconds) */
   stanceTime: z.number().min(0).optional(),
+  /** mm (millimeters) */
   stepLength: z.number().min(0).optional(),
 });
 

@@ -110,6 +110,41 @@ describe("encodeSteadyStatePowerTarget", () => {
     expect(interval["@_kaiord:originalWatts"]).toBe(200);
   });
 
+  it("should emit a lossy warning when watts are converted to percent FTP", () => {
+    // Arrange
+    const step = makeStep({
+      type: "power",
+      value: { unit: "watts", value: 200 },
+    });
+    const interval: Record<string, unknown> = {};
+    const logger = createMockLogger();
+    const warnSpy = vi.spyOn(logger, "warn");
+
+    // Act
+    encodeSteadyStatePowerTarget(step, interval, logger);
+
+    // Assert
+    expect(warnSpy).toHaveBeenCalledWith(
+      "Lossy conversion: watts converted to percent FTP",
+      expect.objectContaining({ originalWatts: 200, assumedFtp: 250 })
+    );
+  });
+
+  it("should not throw when no logger is provided for watts conversion", () => {
+    // Arrange
+    const step = makeStep({
+      type: "power",
+      value: { unit: "watts", value: 200 },
+    });
+    const interval: Record<string, unknown> = {};
+
+    // Act
+    const act = (): void => encodeSteadyStatePowerTarget(step, interval);
+
+    // Assert
+    expect(act).not.toThrow();
+  });
+
   it("should not modify interval when target type is not power", () => {
     // Arrange
     const step = makeStep({ type: "open" });

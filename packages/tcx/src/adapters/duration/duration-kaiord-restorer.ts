@@ -1,3 +1,7 @@
+// Restores KRD duration concepts that TCX's schema cannot natively express
+// (heart-rate / power / calorie end-conditions) from `kaiord:` extension
+// attributes the encoder wrote onto a LapButton_t, so a TCX round-trip is
+// lossless even though native TCX readers ignore those attributes.
 import type { Duration } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 

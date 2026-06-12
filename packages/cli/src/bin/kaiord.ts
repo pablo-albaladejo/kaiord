@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-import { getExitCodeForError } from "../utils/error-exit-code.js";
+import { mapErrorToExitCode } from "../utils/error-exit-code.js";
 import { formatError } from "../utils/error-formatter.js";
 import { ExitCode } from "../utils/exit-codes.js";
 import { registerCommands } from "./register-commands.js";
@@ -59,7 +59,7 @@ const main = async (): Promise<void> => {
     const formattedError = formatError(error, { json: false });
     console.error(formattedError);
 
-    process.exit(getExitCodeForError(error));
+    process.exit(mapErrorToExitCode(error));
   }
 };
 

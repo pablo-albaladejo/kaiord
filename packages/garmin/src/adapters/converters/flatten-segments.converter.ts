@@ -24,7 +24,7 @@ export const flattenSegmentsToSteps = (
         stepIndex += block.steps.length;
         allSteps.push(block);
       } else {
-        allSteps.push(mapExecutableStep(step, stepIndex));
+        allSteps.push(mapExecutableStep(step, stepIndex, logger));
         stepIndex++;
       }
     }
@@ -43,7 +43,7 @@ const mapRepeatGroup = (
 
   for (const step of group.workoutSteps) {
     if (step.type === "ExecutableStepDTO") {
-      steps.push(mapExecutableStep(step, currentIndex));
+      steps.push(mapExecutableStep(step, currentIndex, logger));
       currentIndex++;
     } else {
       logger.warn("Nested repeat groups are flattened", {

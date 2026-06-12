@@ -1,15 +1,10 @@
 import type { WeightMeasurement } from "@kaiord/core";
 
+import { fitTimestampToIso } from "../../shared/fit-timestamp";
 import type { FitWeightScale } from "./fit-weight-scale.schema";
 
 const HEALTH_VERSION = "2.0";
 const FIT_WEIGHT_SCALE = 100;
-
-const toIsoString = (value: FitWeightScale["timestamp"]): string => {
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value === "number") return new Date(value * 1000).toISOString();
-  return new Date(value).toISOString();
-};
 
 /**
  * Converts a single FIT `weight_scale` message into a KRD weight payload.
@@ -28,7 +23,7 @@ export const mapFitWeightScaleToKrd = (
   return {
     kind: "weight",
     version: HEALTH_VERSION,
-    measuredAt: toIsoString(fit.timestamp),
+    measuredAt: fitTimestampToIso(fit.timestamp),
     weightKilograms: fit.weight / FIT_WEIGHT_SCALE,
   };
 };
