@@ -70,7 +70,7 @@ describe("validateRoundTrip", () => {
         mockFitWriter,
         passthroughChecker(),
         logger
-      ).validateFitToKrdToFit({ originalFit });
+      ).validateBinaryRoundTrip({ originalBinary: originalFit });
 
       // Assert
       expect(result).toStrictEqual([]);
@@ -140,7 +140,7 @@ describe("validateRoundTrip", () => {
         mockFitWriter,
         checker,
         logger
-      ).validateFitToKrdToFit({ originalFit });
+      ).validateBinaryRoundTrip({ originalBinary: originalFit });
 
       // Assert
       const fields = result.map((v) => v.field);
@@ -175,7 +175,7 @@ describe("validateRoundTrip", () => {
           mockFitWriter,
           passthroughChecker(),
           logger
-        ).validateFitToKrdToFit({ originalFit });
+        ).validateBinaryRoundTrip({ originalBinary: originalFit });
 
         // Assert
         await expect(run).rejects.toThrow(error);
@@ -198,7 +198,7 @@ describe("validateRoundTrip", () => {
         mockFitWriter,
         passthroughChecker(),
         logger
-      ).validateKrdToFitToKrd({ originalKrd });
+      ).validateKrdRoundTrip({ originalKrd });
 
       // Assert
       expect(result).toStrictEqual([]);
@@ -230,11 +230,53 @@ describe("validateRoundTrip", () => {
           mockFitWriter,
           passthroughChecker(),
           logger
-        ).validateKrdToFitToKrd({ originalKrd });
+        ).validateKrdRoundTrip({ originalKrd });
 
         // Assert
         await expect(run).rejects.toThrow(error);
       }
     );
+  });
+
+  describe("deprecated aliases", () => {
+    it("should keep validateFitToKrdToFit working as an alias for validateBinaryRoundTrip", async () => {
+      // Arrange
+      const originalFit = createFitBufferSample();
+      const krd = buildKRD.build();
+      const mockFitReader = vi.fn().mockResolvedValue(krd);
+      const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
+      const logger = createMockLogger();
+
+      // Act
+      const result = await validateRoundTrip(
+        mockFitReader,
+        mockFitWriter,
+        passthroughChecker(),
+        logger
+      ).validateFitToKrdToFit({ originalFit });
+
+      // Assert
+      expect(result).toStrictEqual([]);
+    });
+
+    it("should keep validateKrdToFitToKrd working as an alias for validateKrdRoundTrip", async () => {
+      // Arrange
+      const originalKrd = buildKRD.build();
+      const fitBuffer = createFitBufferSample();
+      const mockFitReader = vi.fn().mockResolvedValue(originalKrd);
+      const mockFitWriter = vi.fn().mockResolvedValue(fitBuffer);
+      const logger = createMockLogger();
+
+      // Act
+      const result = await validateRoundTrip(
+        mockFitReader,
+        mockFitWriter,
+        passthroughChecker(),
+        logger
+      ).validateKrdToFitToKrd({ originalKrd });
+
+      // Assert
+      expect(result).toStrictEqual([]);
+    });
   });
 });

@@ -14,6 +14,7 @@ export type {
   PaceZoneEntry,
   PaceZoneTable,
 } from "./adapters/converters/target-types";
+export { mapGarminSportToKrd } from "./adapters/mappers/sport.mapper";
 
 export type GarminWriterOptions = {
   logger?: Logger;

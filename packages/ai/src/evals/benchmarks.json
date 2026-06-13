@@ -152,9 +152,7 @@
     "category": "zones",
     "language": "en",
     "zoneCheck": {
-      "targetType": "power",
-      "minPercent": 83,
-      "maxPercent": 98
+      "targetType": "power"
     }
   },
   {

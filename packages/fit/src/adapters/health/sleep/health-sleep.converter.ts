@@ -1,15 +1,10 @@
 import type { SleepRecord, SleepStage } from "@kaiord/core";
 
+import { fitTimestampToIso } from "../../shared/fit-timestamp";
 import type { FitSleepLevel } from "./fit-sleep-level.schema";
 
 const HEALTH_VERSION = "2.0";
 const TERMINATOR_LEVEL: SleepStage["stage"] = "awake";
-
-const toIsoString = (value: FitSleepLevel["timestamp"]): string => {
-  if (value instanceof Date) return value.toISOString();
-  if (typeof value === "number") return new Date(value * 1000).toISOString();
-  return new Date(value).toISOString();
-};
 
 const isKnownSleepStage = (
   level: FitSleepLevel["sleepLevel"]
@@ -34,21 +29,23 @@ export const mapFitSleepLevelsToKrdSleep = (
   if (fitLevels.length < 2) return undefined;
   const sorted = [...fitLevels].sort(
     (a, b) =>
-      new Date(toIsoString(a.timestamp)).getTime() -
-      new Date(toIsoString(b.timestamp)).getTime()
+      new Date(fitTimestampToIso(a.timestamp)).getTime() -
+      new Date(fitTimestampToIso(b.timestamp)).getTime()
   );
-  const startTime = toIsoString(sorted[0]!.timestamp);
-  const endTime = toIsoString(sorted[sorted.length - 1]!.timestamp);
+  const startTime = fitTimestampToIso(sorted[0]!.timestamp);
+  const endTime = fitTimestampToIso(sorted[sorted.length - 1]!.timestamp);
   const stages: SleepStage[] = [];
   for (let i = 0; i < sorted.length - 1; i += 1) {
     const current = sorted[i]!;
     if (!isKnownSleepStage(current.sleepLevel)) continue;
-    const startMs = new Date(toIsoString(current.timestamp)).getTime();
-    const nextMs = new Date(toIsoString(sorted[i + 1]!.timestamp)).getTime();
+    const startMs = new Date(fitTimestampToIso(current.timestamp)).getTime();
+    const nextMs = new Date(
+      fitTimestampToIso(sorted[i + 1]!.timestamp)
+    ).getTime();
     const durationSeconds = Math.max(0, Math.round((nextMs - startMs) / 1000));
     stages.push({
       stage: current.sleepLevel,
-      startTime: toIsoString(current.timestamp),
+      startTime: fitTimestampToIso(current.timestamp),
       durationSeconds,
     });
   }

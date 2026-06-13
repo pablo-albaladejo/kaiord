@@ -1,21 +1,17 @@
 import type { DailyWellness } from "@kaiord/core";
 
+import { fitTimestampToIso } from "../../shared/fit-timestamp";
 import type { FitMonitoring, FitMonitoringInfo } from "./fit-monitoring.schema";
 
 const HEALTH_VERSION = "2.0";
 const FULL_DAY_MIN = 1440;
+const ISO_DATE_LENGTH = 10;
 
 const toIsoDate = (
   value: FitMonitoringInfo["timestamp"] | undefined
 ): string | undefined => {
   if (!value) return undefined;
-  const date =
-    value instanceof Date
-      ? value
-      : typeof value === "number"
-        ? new Date(value * 1000)
-        : new Date(value);
-  return date.toISOString().slice(0, 10);
+  return fitTimestampToIso(value).slice(0, ISO_DATE_LENGTH);
 };
 
 const sumSteps = (samples: FitMonitoring[]): number =>

@@ -1,5 +1,5 @@
 import type { KRD, Logger } from "@kaiord/core";
-import { ServiceAuthError } from "@kaiord/core";
+import { ServiceApiError, ServiceAuthError } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ExitCode } from "../../utils/exit-codes";
@@ -22,6 +22,8 @@ const createMockLogger = (): Logger => ({
   warn: vi.fn(),
   error: vi.fn(),
 });
+
+const HTTP_SERVICE_UNAVAILABLE = 503;
 
 const mockKrd = { version: "1.0" } as unknown as KRD;
 const mockPushResult = {
@@ -130,5 +132,32 @@ describe("pushCommand", () => {
 
     // Assert
     expect(result).toBe(ExitCode.AUTH_ERROR);
+  });
+
+  it("should return SERVICE_ERROR with a retry-later message on a Garmin 503", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const mockService = {
+      push: vi
+        .fn()
+        .mockRejectedValue(
+          new ServiceApiError("Service Unavailable", HTTP_SERVICE_UNAVAILABLE)
+        ),
+    };
+    const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
+    vi.mocked(createCliGarminClient).mockResolvedValue({
+      auth: mockAuth,
+      service: mockService,
+    } as never);
+    vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
+
+    // Act
+    const result = await pushCommand({ input: "workout.krd" }, logger);
+
+    // Assert
+    expect(result).toBe(ExitCode.SERVICE_ERROR);
+    expect(logger.error).toHaveBeenCalledWith(
+      "Garmin Connect request failed. Please retry later."
+    );
   });
 });

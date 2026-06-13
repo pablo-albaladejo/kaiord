@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { healthVersionSchema } from "./version";
+
 /**
  * Zod schema for `extensions.health.stress` — a continuous stress episode
  * with an average and peak level over a time window (0–100 on Garmin's
@@ -8,7 +10,7 @@ import { z } from "zod";
 export const stressEpisodeSchema = z
   .object({
     kind: z.literal("stress"),
-    version: z.string().regex(/^2\.\d+$/),
+    version: healthVersionSchema,
     startTime: z.iso.datetime(),
     endTime: z.iso.datetime(),
     averageLevel: z.number().int().min(0).max(100),
