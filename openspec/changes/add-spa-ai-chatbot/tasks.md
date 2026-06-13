@@ -25,18 +25,19 @@
 - [x] 3.5 action tool `sync_coaching` factory (requiresConfirmation; execute delegates to an injected op — the Train2Go use case + extension-not-connected error wiring lands in the group-4 hook)
 - [x] 3.6 action tool `create_workout` factory (confirmation payload carries description + target date + sport; `createTextToWorkout` + persistence wiring lands in the group-4 hook)
 - [x] 3.7 action tool `log_health_metric` factory (metric/day/value schema with metric-enum rejection; `saveManualHealthMetric` wiring lands in the group-4 hook)
-- [~] 3.8 transcript use cases: `clearConversation` (group 2) + windowed `listByProfile(profileId, limit)` (group 2) done; `append` + per-turn usage accounting into the `usage` row are wired with `use-chat-turn` in group 4
+- [x] 3.8 transcript use cases: `clearConversation` (group 2) + windowed `listByProfile` (group 2) + `append-turn-messages` (user/assistant/tool) + `recordChatUsage` per-turn into the `usage` row, all wired through `use-chat-turn` (group 4b)
 - [x] 3.9 Author the chat system prompt (untrusted-data fence rule, tool usage guidance, relative-date guidance) as a versioned module; injection test: fenced coach-description instruction stays data (`query_coaching` fences it; action tools remain confirmation-gated)
 
 ## 4. Chat UI
 
 - [x] 4.1 Add `/chat` route in `AppRoutes.tsx` (lazy `ChatPage`, `RouteErrorBoundary`, `[data-route-heading]`, "Chat page" announcer label) + route tests done; **nav entry pending** (deferred placement — bottom-nav FAB-notch layout is tuned; wire in 4b)
 - [x] 4.2 TDD `use-chat-messages-live` hook (single `useLiveQuery` for the active profile transcript; chronological + re-fire-on-append test)
-- [ ] 4.3 TDD `use-chat-turn` hook orchestrating: provider selection → `createLanguageModel` → `createChatAgent` turn → streaming text into local state → persistence via application use cases (components never touch Dexie/AI SDK directly) — **4b** (Train2Go sync op must use the transport + sync use case directly, NOT `useTrain2GoSource`, since `Train2GoZonesSyncProvider` is not in the global tree)
-- [~] 4.4 ChatPage organisms: message list + provider selector (reuses `ModelSelector`) + no-provider empty state (reuses `CreateProvidersEmpty`) + `chat-message-mapper` done; **composer pending — 4b**
-- [ ] 4.5 Build the pending-action confirmation card (human-readable tool input, approve/deny, deny resumes with declined result); component tests for both paths — **4b**
-- [ ] 4.6 In-conversation error entries with retry for provider/tool failures; count-only analytics events (`chat-message-sent`, `chat-tool-confirmed`); verify PII guard compliance (no message content in toasts/console) — **4b**
-- [ ] 4.7 "Clear conversation" action with confirm; test other profiles' transcripts remain — **4b** (uses the `clearConversation` use case from group 2)
+- [x] 4.3 `use-chat-turn` hook orchestrating provider → `createLanguageModel` → `createChatAgent` → streamed turn → persistence + pending-action confirm/deny resume. Logic extracted to testable `chat-turn-runner`/`chat-turn-context` functions (unit-tested with a mocked agent); Train2Go sync op uses the transport + `syncWeek` directly (not `useTrain2GoSource`)
+- [x] 4.4 ChatPage organisms: ChatMessageList + ChatComposer + provider selector (`ModelSelector`) + no-provider empty state (`CreateProvidersEmpty`) + `chat-message-mapper`
+- [x] 4.5 Pending-action confirmation card (humanized tool label + validated input, Approve/Decline; deny resumes with a declined result, approve runs the tool then resumes) — approve/deny paths covered by the runner unit test
+- [~] 4.6 In-conversation error entries with retry for provider/tool failures done (fixed-category `ChatErrorNotice`, no message content — PII-safe); **count-only analytics events (`chat-message-sent`, `chat-tool-confirmed`) still pending**
+- [x] 4.7 "Clear conversation" two-step confirm wired to the group-2 `clearConversation` use case
+- [ ] 4.8 Nav entry for `/chat` (deferred placement — bottom-nav is a tuned 4-tab + FAB-notch layout; decide header vs. tab with the redesign, then one-line wire + classification test)
 
 ## 5. Privacy policy and docs
 

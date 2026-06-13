@@ -10,14 +10,26 @@
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAiProvidersLive } from "../../hooks/use-ai-providers-live";
 import { useChatMessagesLive } from "../../hooks/use-chat-messages-live";
+import { useAiRuntimeStore } from "../../store/ai-runtime-store";
+import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { ModelSelector } from "../organisms/AiWorkoutInput/ModelSelector";
+import { ChatConversation } from "../organisms/Chat/ChatConversation";
 import { ChatHeader } from "../organisms/Chat/ChatHeader";
-import { ChatMessageList } from "../organisms/Chat/ChatMessageList";
 import { CreateProvidersEmpty } from "./CreateWorkout/CreateProvidersEmpty";
+
+const resolveProvider = (
+  providers: LlmProviderConfig[],
+  selectedId: string | null
+): LlmProviderConfig | null =>
+  providers.find((p) => p.id === selectedId) ??
+  providers.find((p) => p.isDefault) ??
+  providers[0] ??
+  null;
 
 export default function ChatPage() {
   const active = useActiveProfileLive();
   const providers = useAiProvidersLive();
+  const selectedId = useAiRuntimeStore((s) => s.selectedProviderId);
   const profileId = active?.id ?? null;
   const messages = useChatMessagesLive(profileId);
   const hasProviders = (providers?.length ?? 0) > 0;
@@ -34,7 +46,11 @@ export default function ChatPage() {
       ) : (
         <>
           <ModelSelector />
-          <ChatMessageList messages={messages ?? []} />
+          <ChatConversation
+            profileId={profileId}
+            provider={resolveProvider(providers, selectedId)}
+            messages={messages ?? []}
+          />
         </>
       )}
     </div>
