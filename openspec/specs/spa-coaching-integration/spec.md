@@ -1,13 +1,11 @@
-> Synced: 2026-05-08 (coaching-activity-dialog-redesign)
+> Synced: 2026-06-13 (train2go-links-and-day-comments)
 
 # SPA Coaching Integration
 
 ## Purpose
 
 Profile-anchored coaching platform linking, persisted coaching activities, auto-sync with staleness gate, and conversion of coaching activities into editable workouts. Generic across coaching sources (Train2Go today, TrainingPeaks/others later).
-
 ## Requirements
-
 ### Requirement: LinkedCoachingAccount domain semantics
 
 A `Profile` SHALL be able to carry zero or more `LinkedCoachingAccount` entries, each shaped as `{ source: string, externalUserId: string, externalUserName: string, linkedAt: string (ISO datetime) }`. At most one entry per `source` per profile MUST exist.
@@ -553,7 +551,7 @@ When the EditorPage opens a workout, it SHALL determine whether the workout is d
 - Activity title (heading)
 - Sport icon and label
 - Status (pending / completed / skipped)
-- Coach description (read-only, formatted text — `<p>` paragraphs and `<strong>` markers preserved as plain visual emphasis)
+- Coach description (read-only, formatted text — `<p>` paragraphs, `<strong>` markers as plain visual emphasis, and hyperlinks rendered per the safe-linkification requirement)
 
 The sidebar SHALL be collapsible via a toggle button. The collapsed/expanded state SHALL be persisted per-user (localStorage, key `kaiord.editor.coachSidebar.collapsed`). Default state on first render: expanded for viewports ≥ 768px, collapsed for narrower viewports.
 
@@ -579,17 +577,11 @@ The sidebar is read-only; it never mutates `activity.description` or any other f
 - **WHEN** the user opens its EditorPage
 - **THEN** no sidebar renders; the editor uses its full-width layout
 
-#### Scenario: Sidebar collapse state persists across sessions
+#### Scenario: Sidebar description with a link is clickable
 
-- **GIVEN** the user has collapsed the sidebar in a prior session
-- **WHEN** the user reopens the EditorPage in a new session
-- **THEN** the sidebar starts collapsed; expanding it persists the new state
-
-#### Scenario: Sidebar default closed on narrow viewport
-
-- **GIVEN** the user has never set a sidebar preference
-- **WHEN** the user opens the EditorPage on a viewport < 768px wide
-- **THEN** the sidebar starts collapsed; on a wider viewport it would start expanded
+- **GIVEN** a coaching-derived workout whose activity description contains `[vídeo técnica](https://youtu.be/abc123)`
+- **WHEN** the user opens its EditorPage
+- **THEN** the sidebar renders `vídeo técnica` as an `https`-only anchor with `target="_blank"` and `rel="noopener noreferrer"`, per the safe-linkification requirement
 
 ### Requirement: Calendar Sync button gated on linked account
 
@@ -627,3 +619,39 @@ The `CoachingSource` port SHALL expose `query(profileId, days): CoachingActivity
 
 - **WHEN** the calendar renders the week grid
 - **THEN** the call graph from `CalendarPage` includes only `CoachingSource`-shaped types and `CoachingActivity` view-models — no `Train2GoActivity`, `Train2GoStore`, or `train2go-*` files
+
+### Requirement: Safe linkification of coaching text
+
+The SPA SHALL render coaching-sourced text (activity descriptions and day-comment bodies) through a single shared formatter that produces a structured AST of inline nodes — `text`, `strong`, and `link` — and a renderer that maps that AST to React elements. The renderer MUST NOT use `dangerouslySetInnerHTML`.
+
+`link` inlines SHALL be produced from two sources:
+
+- Markdown links `[label](url)` as stored by the train2go-bridge parser
+- Bare URLs beginning with `https://` appearing in plain text (auto-linkified; covers coach-pasted URLs and data persisted before this change)
+
+The renderer SHALL emit `link` inlines as `<a href={url} target="_blank" rel="noopener noreferrer" title={url}>label</a>`. The full URL in the `title` attribute exposes the real destination when the label differs from the href.
+
+**Scheme allowlist:** only `https:` URLs SHALL become anchors. A markdown link or bare URL with any other scheme (`javascript:`, `data:`, `http:`, etc.) SHALL render as plain text, never as an anchor. This check happens at render time, independent of what the parser stored.
+
+Existing behavior is preserved: `<p>` paragraphs and `**bold**`/`<strong>` markers render as before; text without links is unaffected.
+
+#### Scenario: Markdown link renders as a safe anchor
+
+- **WHEN** a coaching description contains `Técnica: [vídeo técnica](https://youtu.be/abc123)`
+- **THEN** the rendered output contains an anchor with `href="https://youtu.be/abc123"`, `target="_blank"`, `rel="noopener noreferrer"`, `title="https://youtu.be/abc123"`, and text content `vídeo técnica`
+
+#### Scenario: Bare https URL is auto-linkified
+
+- **WHEN** a coaching description contains `Material en https://www.dropbox.com/s/xyz aquí`
+- **THEN** `https://www.dropbox.com/s/xyz` renders as an anchor with that href and the surrounding text renders as plain text
+
+#### Scenario: Non-https scheme is refused
+
+- **WHEN** a coaching description contains `[click](javascript:alert(1))`
+- **THEN** no anchor is rendered; the content renders as plain text and no `javascript:` href appears anywhere in the DOM
+
+#### Scenario: Bold and paragraphs unchanged
+
+- **WHEN** a coaching description contains `**Calentamiento:** 20' Z1\n6x(30" Z5)`
+- **THEN** rendering is identical to the pre-change behavior: a strong inline for `Calentamiento:` and two paragraphs, with no anchors
+

@@ -1,4 +1,4 @@
-# Proposal: train2go-links-and-day-comments
+> Completed: 2026-06-13
 
 ## Why
 
