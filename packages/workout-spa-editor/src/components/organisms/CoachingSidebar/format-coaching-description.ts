@@ -1,86 +1,36 @@
 /**
  * Minimal formatter for coaching descriptions: preserves paragraph
- * breaks and bold emphasis, strips every other tag (per design D4 /
- * spec §9.3). Returns a structured AST so the renderer can map to
- * React without using `dangerouslySetInnerHTML`.
+ * breaks, bold emphasis, and safe links, stripping every other tag.
+ * Returns a structured AST so the renderer can map to React without
+ * `dangerouslySetInnerHTML`. The inline tokenizer lives in
+ * `format-coaching-inlines.ts`.
  *
  * Bold input shapes (both supported):
  *   - HTML  `<strong>X</strong>` — what Train2Go ships natively.
- *   - Markdown `**X**` — what the train2go-bridge currently stores
- *     after its HTML→text conversion (`<strong>` → `**`).
+ *   - Markdown `**X**` — what the train2go-bridge stores after its
+ *     HTML→text conversion (`<strong>` → `**`).
  *
- * Out of scope: full HTML, links, lists, line breaks via `<br>`.
+ * Link input shapes (both supported):
+ *   - Markdown `[label](url)` — what the train2go-bridge stores after
+ *     converting `<a href>` anchors.
+ *   - Bare `https://…` URLs in plain text (coach-pasted, or data stored
+ *     before linkification existed).
+ *
+ * Links are emitted ONLY for `https:` URLs (defense in depth: a
+ * `javascript:`/`data:`/`http:` URL degrades to plain text and never
+ * becomes an anchor), so the renderer can trust every `link` inline.
+ * Out of scope: full HTML, lists.
  */
 
-export type DescriptionInline =
-  | { kind: "text"; value: string }
-  | { kind: "strong"; value: string };
+import {
+  type DescriptionParagraph,
+  splitInlines,
+} from "./format-coaching-inlines";
 
-export type DescriptionParagraph = {
-  inlines: DescriptionInline[];
-};
-
-const STRONG_RE =
-  /<strong\b[^>]*>([\s\S]*?)<\/strong>|\*\*([^*\n][^*]*?)\*\*/gi;
-
-const stripTagsExceptStrong = (html: string): string => {
-  // Remove every tag except <strong>...</strong> markers (the strong
-  // splitter below extracts those before this strip). Looped until
-  // stable: a single pass can re-form a tag from interleaved input
-  // (e.g. `<scr<b>ipt` -> `<script`).
-  let text = html;
-  let prev: string;
-  do {
-    prev = text;
-    text = text.replace(/<\/?(?!strong\b)[^>]+>/gi, "");
-  } while (text !== prev);
-  return text.trim();
-};
-
-const ENTITY_REPLACEMENTS: Record<string, string> = {
-  "&amp;": "&",
-  "&lt;": "<",
-  "&gt;": ">",
-  "&quot;": '"',
-  "&#39;": "'",
-  "&nbsp;": " ",
-};
-
-// Single-pass decode: sequential .replace() chains double-decode
-// payloads like `&amp;lt;` (first pass yields `&lt;`, second `<`).
-const decodeEntities = (s: string): string =>
-  s.replace(
-    /&(?:amp|lt|gt|quot|#39|nbsp);/g,
-    (entity) => ENTITY_REPLACEMENTS[entity] ?? entity
-  );
-
-const splitInlines = (paragraph: string): DescriptionInline[] => {
-  const inlines: DescriptionInline[] = [];
-  let lastIndex = 0;
-  for (const match of paragraph.matchAll(STRONG_RE)) {
-    const start = match.index ?? 0;
-    if (start > lastIndex) {
-      const text = decodeEntities(
-        stripTagsExceptStrong(paragraph.slice(lastIndex, start))
-      );
-      if (text) inlines.push({ kind: "text", value: text });
-    }
-    // Two capture groups: HTML `<strong>...</strong>` (group 1) OR
-    // markdown `**...**` (group 2). Whichever matched is the bold body.
-    const inner = decodeEntities(
-      stripTagsExceptStrong(match[1] ?? match[2] ?? "")
-    );
-    if (inner) inlines.push({ kind: "strong", value: inner });
-    lastIndex = start + match[0].length;
-  }
-  if (lastIndex < paragraph.length) {
-    const tail = decodeEntities(
-      stripTagsExceptStrong(paragraph.slice(lastIndex))
-    );
-    if (tail) inlines.push({ kind: "text", value: tail });
-  }
-  return inlines;
-};
+export type {
+  DescriptionInline,
+  DescriptionParagraph,
+} from "./format-coaching-inlines";
 
 export const formatCoachingDescription = (
   raw: string

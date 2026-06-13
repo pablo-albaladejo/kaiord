@@ -1,10 +1,12 @@
 /**
  * Renders a coaching description as paragraphs with optional bold
- * emphasis. The formatter is in `format-coaching-description.ts`; this
- * component only walks the parsed AST → React. Avoids
+ * emphasis and safe links. The formatter is in
+ * `format-coaching-description.ts`; this component only walks the
+ * parsed AST → React via the shared inline renderer. Avoids
  * `dangerouslySetInnerHTML` so the sidebar is safe even if the
  * upstream description carries unexpected markup.
  */
+import { renderCoachingInline } from "./coaching-inline";
 import { formatCoachingDescription } from "./format-coaching-description";
 
 export type CoachingDescriptionProps = {
@@ -30,13 +32,7 @@ export function CoachingDescription({ description }: CoachingDescriptionProps) {
     >
       {paragraphs.map((p, pi) => (
         <p key={pi}>
-          {p.inlines.map((inline, ii) =>
-            inline.kind === "strong" ? (
-              <strong key={ii}>{inline.value}</strong>
-            ) : (
-              <span key={ii}>{inline.value}</span>
-            )
-          )}
+          {p.inlines.map((inline, ii) => renderCoachingInline(inline, ii))}
         </p>
       ))}
     </div>

@@ -274,6 +274,65 @@ describe("background service worker", () => {
       });
     });
 
+    it("should return an empty comments array from read-day when the day has no comment thread", async () => {
+      // Arrange
+      const html = `<div data-id="9002" data-status="0" class="activity activity-default">
+        <span class="activity-title"><strong>No comments here</strong></span>
+        <figure class="icon-sportscycling"></figure>
+        <span class="measured">60min</span>
+      </div>`;
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: { data: { content: html } } })
+      );
+
+      // Act
+      const result = await handleAction({
+        action: "read-day",
+        date: "2026-05-07",
+        userId: 28035,
+      });
+
+      // Assert
+      expect(result.comments).toEqual([]);
+    });
+
+    it("should return the parsed day comment thread alongside activities from read-day", async () => {
+      // Arrange
+      const html =
+        `<div data-id="9003" data-status="0" class="activity activity-default">` +
+        `<span class="activity-title"><strong>Race</strong></span>` +
+        `<figure class="icon-sportsrunning"></figure>` +
+        `<span class="measured">90min</span></div>` +
+        `<div class="comments "><div class="comment" id="c1">` +
+        `<picture class="image" title="Coach Dani"></picture>` +
+        `<div class="content">` +
+        `<time datetime="2026-06-08 13:02:21">Mon</time>` +
+        `<p>Great race!</p></div></div></div>`;
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: { data: { content: html } } })
+      );
+
+      // Act
+      const result = await handleAction({
+        action: "read-day",
+        date: "2026-06-07",
+        userId: 28035,
+      });
+
+      // Assert
+      expect(result.activities).toHaveLength(1);
+      expect(result.comments).toEqual([
+        {
+          author: "Coach Dani",
+          isOwn: false,
+          timestamp: "2026-06-08 13:02:21",
+          text: "Great race!",
+        },
+      ]);
+    });
+
     it("handles open-train2go action", async () => {
       await handleAction({ action: "open-train2go" });
       expect(chrome.tabs.create).toHaveBeenCalledWith({

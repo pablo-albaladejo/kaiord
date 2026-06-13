@@ -17,7 +17,9 @@ import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 
 const PASSPHRASE = "kaiord-spa-v1";
-const SCHEMA_HEAD = 19;
+// Current head version KaiordDatabase opens at; bumped to 20 when the
+// coachingDayNotes table was added (train2go-links-and-day-comments).
+const SCHEMA_HEAD = 20;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;

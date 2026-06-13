@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryAutoMatchDismissalRepository } from "../../test-utils/in-memory-auto-match-dismissal-repository";
+import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
@@ -62,6 +63,8 @@ const makeDeps = (
 ): DeleteProfileWithCascadeDeps => ({
   workouts: overrides.workouts ?? createInMemoryWorkoutRepository(),
   coaching: overrides.coaching ?? createInMemoryCoachingRepository(),
+  coachingDayNotes:
+    overrides.coachingDayNotes ?? createInMemoryCoachingDayNotesRepository(),
   coachingSyncState:
     overrides.coachingSyncState ?? createInMemoryCoachingSyncStateRepository(),
   sessionMatch:
@@ -244,6 +247,38 @@ describe("deleteProfileWithCascade", () => {
     ).toBeUndefined();
     expect(
       await deps.autoMatchDismissal.getByProfileAndWeek("p2", "2026-04-13")
+    ).toBeDefined();
+  });
+
+  it("should cascade coachingDayNotes.deleteByProfile", async () => {
+    // Arrange
+    const coachingDayNotes = createInMemoryCoachingDayNotesRepository();
+    await coachingDayNotes.upsert({
+      id: "p1:train2go:2026-04-13",
+      profileId: "p1",
+      source: "train2go",
+      date: "2026-04-13",
+      comments: [],
+      fetchedAt: NOW,
+    });
+    await coachingDayNotes.upsert({
+      id: "p2:train2go:2026-04-13",
+      profileId: "p2",
+      source: "train2go",
+      date: "2026-04-13",
+      comments: [],
+      fetchedAt: NOW,
+    });
+
+    // Act
+    await deleteProfileWithCascade(makeDeps({ coachingDayNotes }), "p1");
+
+    // Assert
+    expect(
+      await coachingDayNotes.getByDate("p1", "train2go", "2026-04-13")
+    ).toBeUndefined();
+    expect(
+      await coachingDayNotes.getByDate("p2", "train2go", "2026-04-13")
     ).toBeDefined();
   });
 

@@ -73,13 +73,14 @@ const makeTransport = (): CoachingTransport => ({
   })),
   openExternal: vi.fn(async () => undefined),
   readWeek: vi.fn(async () => []),
-  readDay: vi.fn(async () => []),
+  readDay: vi.fn(async () => ({ activities: [] })),
   readZones: vi.fn(async () => PAYLOAD),
 });
 
 describe("syncZones method-aware — first-sync (3.4a)", () => {
   it("should produce zero conflicts and flip method to 'train2go' on a fresh profile", async () => {
-    // Arrange — fresh profile: cycling has Coggan-7 power; cycling/running/
+    // Arrange
+    // Fresh profile: cycling has Coggan-7 power; cycling/running/
     // swimming heartRateZones are seeded with all-zero HR.
     const repo = createInMemoryProfileRepository();
     await repo.put(
@@ -139,7 +140,8 @@ describe("syncZones method-aware — first-sync (3.4a)", () => {
 
 describe("syncZones method-aware — re-sync stability (3.4b)", () => {
   it("should produce zero conflicts AND zero applied entries on re-sync of unchanged data", async () => {
-    // Arrange — first sync establishes baseline.
+    // Arrange
+    // First sync establishes baseline.
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -156,7 +158,8 @@ describe("syncZones method-aware — re-sync stability (3.4b)", () => {
     );
     await syncZones(PROFILE_ID, makeTransport(), repo);
 
-    // Act — second sync against same data.
+    // Act
+    // Second sync against same data.
     const result = await syncZones(PROFILE_ID, makeTransport(), repo);
 
     // Assert
@@ -169,7 +172,8 @@ describe("syncZones method-aware — re-sync stability (3.4b)", () => {
 
 describe("commitConflictResolution method-aware — accept-all (3.4g)", () => {
   it("should set method = 'train2go' when ALL band conflicts of a table are accepted", async () => {
-    // Arrange — profile already user-customized; conflicts emitted; user
+    // Arrange
+    // Profile already user-customized; conflicts emitted; user
     // accepts all 5 cycling-HR band-bound conflicts.
     const repo = createInMemoryProfileRepository();
     await repo.put(
@@ -215,7 +219,8 @@ describe("commitConflictResolution method-aware — accept-all (3.4g)", () => {
 
 describe("commitConflictResolution method-aware — mixed accept/reject (3.4f)", () => {
   it("should set method = 'user' when SOME but NOT ALL band conflicts are accepted", async () => {
-    // Arrange — user accepts Z1 (both bounds) and Z2.maxBpm; rejects Z4.maxBpm and Z5.minBpm.
+    // Arrange
+    // User accepts Z1 (both bounds) and Z2.maxBpm; rejects Z4.maxBpm and Z5.minBpm.
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({

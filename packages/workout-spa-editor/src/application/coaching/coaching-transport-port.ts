@@ -14,12 +14,24 @@
  */
 
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
+import type { CoachingDayComment } from "../../types/coaching-day-notes-record";
 import type { ZonesPayload } from "../../types/coaching-zones";
 
 export type CoachingPingResult = {
   sessionActive: boolean;
   externalUserId: string | null;
   externalUserName: string | null;
+};
+
+/**
+ * Result of a single-day read. `comments` is the day-scoped thread; it is
+ * `undefined` when the platform/bridge did not provide it (older bridge),
+ * which the use case treats as "leave local notes untouched". An empty
+ * array means "the day has no comments" and replaces the local thread.
+ */
+export type CoachingDayRead = {
+  activities: CoachingActivityRecord[];
+  comments?: CoachingDayComment[];
 };
 
 export type CoachingTransport = {
@@ -42,14 +54,15 @@ export type CoachingTransport = {
   ) => Promise<CoachingActivityRecord[]>;
   /**
    * Fetches a single day's activities (typically returns every activity
-   * for that day, including siblings of the clicked one). Used by
-   * `expandDay` to populate descriptions.
+   * for that day, including siblings of the clicked one) plus the day's
+   * comment thread. Used by `expandDay` to populate descriptions and
+   * persist the day-notes record.
    */
   readDay: (
     profileId: string,
     date: string,
     externalUserId: string
-  ) => Promise<CoachingActivityRecord[]>;
+  ) => Promise<CoachingDayRead>;
   /**
    * Fetches the user's training thresholds and physiological values.
    * Optional: only Train2Go implements it today; Garmin (when present)

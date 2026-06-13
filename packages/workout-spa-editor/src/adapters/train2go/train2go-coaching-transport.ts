@@ -11,7 +11,10 @@ import type {
   CoachingPingResult,
   CoachingTransport,
 } from "../../application/coaching/coaching-transport-port";
-import type { Train2GoActivity } from "../../store/train2go-extension-transport";
+import type {
+  Train2GoActivity,
+  Train2GoComment,
+} from "../../store/train2go-extension-transport";
 import {
   openTrain2Go,
   ping,
@@ -33,7 +36,7 @@ const fetchActivities = async (
   action: string,
   res: {
     ok: boolean;
-    data?: { activities: Train2GoActivity[] };
+    data?: { activities: Train2GoActivity[]; comments?: Train2GoComment[] };
     error?: string;
   },
   profileId: string,
@@ -72,7 +75,11 @@ export const createTrain2GoCoachingTransport = (
 
   readDay: async (profileId, date, externalUserId) => {
     const res = await readDay(getExtensionId(), date, externalUserId);
-    return fetchActivities("Read day", res, profileId, now());
+    const activities = await fetchActivities("Read day", res, profileId, now());
+    // `comments` is passed through verbatim — the bridge already emits the
+    // {author,isOwn,timestamp,text} shape. `undefined` (older bridge) tells
+    // the use case to leave local notes untouched.
+    return { activities, comments: res.data?.comments };
   },
 
   readZones: (externalUserId, signal) =>

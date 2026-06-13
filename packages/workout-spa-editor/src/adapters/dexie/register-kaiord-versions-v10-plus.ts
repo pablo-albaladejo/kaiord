@@ -73,3 +73,10 @@ export const registerV19 = (db: DexieVersionHost): void => {
   // no data migration is needed and existing tables are untouched.
   db.version(19).stores(SCHEMAS.v19);
 };
+
+export const registerV20 = (db: DexieVersionHost): void => {
+  // v20 — additive `coachingDayNotes` table for Train2Go day comment
+  // threads. Dexie auto-creates the store empty on upgrade; no data
+  // migration, existing tables untouched.
+  db.version(20).stores(SCHEMAS.v20);
+};

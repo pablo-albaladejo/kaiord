@@ -89,4 +89,39 @@ describe("CoachingSidebar", () => {
     // Assert
     expect(screen.getByTestId("coaching-sidebar-empty")).toBeInTheDocument();
   });
+
+  it("should render a markdown link as a safe anchor with href, target, rel and title (links change)", () => {
+    // Arrange
+    const withLink = {
+      ...activity,
+      description: "Técnica: [vídeo técnica](https://youtu.be/abc123)",
+    };
+
+    // Act
+    render(<CoachingSidebar activity={withLink} />);
+
+    // Assert
+    const anchor = screen.getByRole("link", { name: "vídeo técnica" });
+    expect(anchor).toHaveAttribute("href", "https://youtu.be/abc123");
+    expect(anchor).toHaveAttribute("target", "_blank");
+    expect(anchor).toHaveAttribute("rel", "noopener noreferrer");
+    // The full href in the title mitigates label/href spoofing.
+    expect(anchor).toHaveAttribute("title", "https://youtu.be/abc123");
+  });
+
+  it("should not render an anchor for a non-https link (links change)", () => {
+    // Arrange
+    const withBadLink = {
+      ...activity,
+      description: "Pulsa [aquí](javascript:alert(1)) ahora",
+    };
+
+    // Act
+    render(<CoachingSidebar activity={withBadLink} />);
+
+    // Assert
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    const desc = screen.getByTestId("coaching-sidebar-description");
+    expect(desc.innerHTML).not.toContain("javascript:");
+  });
 });

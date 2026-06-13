@@ -21,7 +21,7 @@ const stubBase = (source: string): Omit<CoachingTransport, "readZones"> => ({
   })),
   openExternal: vi.fn(async () => undefined),
   readWeek: vi.fn(async () => []),
-  readDay: vi.fn(async () => []),
+  readDay: vi.fn(async () => ({ activities: [] })),
 });
 
 describe("CoachingTransport.readZones", () => {

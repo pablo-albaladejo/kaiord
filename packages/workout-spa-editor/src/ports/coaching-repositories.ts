@@ -17,6 +17,7 @@
  */
 
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
+import type { CoachingDayNotesRecord } from "../types/coaching-day-notes-record";
 import type { CoachingSyncStateRecord } from "../types/coaching-sync-state";
 
 export type CoachingRepository = {
@@ -44,5 +45,20 @@ export type CoachingSyncStateRepository = {
     profileId: string
   ) => Promise<CoachingSyncStateRecord | undefined>;
   put: (record: CoachingSyncStateRecord) => Promise<void>;
+  deleteByProfile: (profileId: string) => Promise<void>;
+};
+
+/**
+ * Day-scoped coaching comment threads. Keyed by the composite
+ * `${profileId}:${source}:${date}` so a single `getByDate` lookup hits the
+ * primary key. `upsert` replaces the day's thread wholesale.
+ */
+export type CoachingDayNotesRepository = {
+  getByDate: (
+    profileId: string,
+    source: string,
+    date: string
+  ) => Promise<CoachingDayNotesRecord | undefined>;
+  upsert: (record: CoachingDayNotesRecord) => Promise<void>;
   deleteByProfile: (profileId: string) => Promise<void>;
 };

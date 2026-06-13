@@ -165,4 +165,93 @@ describe("formatCoachingDescription", () => {
     // Assert
     expect(result[0]?.inlines[0]?.value).toBe("Pace < threshold & effort > Z3");
   });
+
+  it("should turn a markdown link into a link inline (links change)", () => {
+    // Arrange
+    const text = "Técnica: [vídeo técnica](https://youtu.be/abc123)";
+
+    // Act
+    const result = formatCoachingDescription(text);
+
+    // Assert
+    expect(result[0]?.inlines).toEqual([
+      { kind: "text", value: "Técnica:" },
+      {
+        kind: "link",
+        href: "https://youtu.be/abc123",
+        label: "vídeo técnica",
+      },
+    ]);
+  });
+
+  it("should auto-linkify a bare https URL in plain text (links change)", () => {
+    // Arrange
+    const text = "Material en https://www.dropbox.com/s/xyz aquí";
+
+    // Act
+    const result = formatCoachingDescription(text);
+
+    // Assert
+    expect(result[0]?.inlines).toEqual([
+      { kind: "text", value: "Material en" },
+      {
+        kind: "link",
+        href: "https://www.dropbox.com/s/xyz",
+        label: "https://www.dropbox.com/s/xyz",
+      },
+      { kind: "text", value: "aquí" },
+    ]);
+  });
+
+  it("should refuse a non-https markdown link and never emit its url (links change)", () => {
+    // Arrange
+    const text = "[click](javascript:alert(1))";
+
+    // Act
+    const result = formatCoachingDescription(text);
+
+    // Assert
+    const hasLink = result.some((p) =>
+      p.inlines.some((i) => i.kind === "link")
+    );
+    expect(hasLink).toBe(false);
+    expect(JSON.stringify(result)).not.toContain("javascript:");
+  });
+
+  it("should not linkify a bare http (non-https) URL (links change)", () => {
+    // Arrange
+    const text = "Ver http://insecure.example.com ahora";
+
+    // Act
+    const result = formatCoachingDescription(text);
+
+    // Assert
+    const hasLink = result.some((p) =>
+      p.inlines.some((i) => i.kind === "link")
+    );
+    expect(hasLink).toBe(false);
+    expect(result[0]?.inlines[0]?.value).toContain(
+      "http://insecure.example.com"
+    );
+  });
+
+  it("should leave bold and paragraphs unchanged when there are no links (links change)", () => {
+    // Arrange
+    const text = "**Calentamiento:** 20' Z1\n6x(30\" Z5)";
+
+    // Act
+    const result = formatCoachingDescription(text);
+
+    // Assert
+    expect(result).toHaveLength(2);
+    expect(result[0]?.inlines).toEqual([
+      { kind: "strong", value: "Calentamiento:" },
+      { kind: "text", value: "20' Z1" },
+    ]);
+    expect(result[1]?.inlines).toEqual([{ kind: "text", value: '6x(30" Z5)' }]);
+    const hasLink = result.some((p) =>
+      p.inlines.some((i) => i.kind === "link")
+    );
+    expect(hasLink).toBe(false);
+  });
 });

@@ -7,6 +7,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { renderCoachingInline } from "../../organisms/CoachingSidebar/coaching-inline";
 import { formatCoachingDescription } from "../../organisms/CoachingSidebar/format-coaching-description";
 
 export const STATUS_LABEL: Record<string, string> = {
@@ -61,14 +62,7 @@ export const DialogDescription = ({
       {paragraphs.map((p, pi) => (
         <p key={pi}>
           {p.inlines.map((inline, ii) =>
-            inline.kind === "strong" ? (
-              <strong key={ii}>{inline.value}</strong>
-            ) : (
-              <span key={ii}>
-                {ii > 0 ? " " : ""}
-                {inline.value}
-              </span>
-            )
+            renderCoachingInline(inline, ii, true)
           )}
         </p>
       ))}

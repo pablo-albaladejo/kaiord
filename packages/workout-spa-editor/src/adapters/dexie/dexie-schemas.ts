@@ -108,6 +108,14 @@ const CORE_V19 = {
   tombstones: "[table+id], table, deletedAt",
 };
 
+// v20 — additive `coachingDayNotes` table for Train2Go day-scoped comment
+// threads. PK is the composite `id` (`${profileId}:${source}:${date}`),
+// matching `coachingActivities`; `getByDate` reads it directly. The
+// `[profileId+date]` index drives the profile-delete cascade range scan
+// (and makes `isPerProfileTable` auto-discover the table). Dexie
+// auto-creates the store empty on upgrade — no data migration.
+const CORE_V20 = { ...CORE_V19, coachingDayNotes: "id, [profileId+date]" };
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -119,6 +127,7 @@ export const SCHEMAS = {
   v17: CORE_V17,
   v18: CORE_V18,
   v19: CORE_V19,
+  v20: CORE_V20,
 } as const;
 
 /** Backfills `linkedAccounts: []` on profile rows missing the field. */

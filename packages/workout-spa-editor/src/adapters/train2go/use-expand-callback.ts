@@ -18,7 +18,12 @@ export const useExpandCallback = (
         profileId,
       });
       await expandDay(
-        { profiles: p.profiles, coaching: p.coaching, transport: t },
+        {
+          profiles: p.profiles,
+          coaching: p.coaching,
+          coachingDayNotes: p.coachingDayNotes,
+          transport: t,
+        },
         profileId,
         date
       );

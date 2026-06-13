@@ -163,7 +163,7 @@ describe("createTrain2GoCoachingTransport", () => {
     expect(result[0]?.fetchedAt).toBe("2026-04-28T10:00:00.000Z");
   });
 
-  it("should return empty array when wire response has no activities via readDay()", async () => {
+  it("should return empty activities when wire response has no activities via readDay()", async () => {
     // Arrange
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
@@ -179,7 +179,36 @@ describe("createTrain2GoCoachingTransport", () => {
     const result = await t.readDay("p1", "2026-04-13", "28035");
 
     // Assert
-    expect(result).toEqual([]);
+    expect(result.activities).toEqual([]);
+    // No `comments` key from this bridge response → leave local notes alone.
+    expect(result.comments).toBeUndefined();
+  });
+
+  it("should pass the day comment thread through readDay() verbatim", async () => {
+    // Arrange
+    const comments = [
+      {
+        author: "Coach",
+        isOwn: false,
+        timestamp: "2026-06-07 22:55:38",
+        text: "[connect.garmin.com](https://connect.garmin.com/app/activity/1)",
+      },
+    ];
+    const mockSend = vi.fn(
+      (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+        cb({ ok: true, data: { activities: [], comments } });
+      }
+    );
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: { lastError: null, sendMessage: mockSend },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    // Act
+    const result = await t.readDay("p1", "2026-06-07", "28035");
+
+    // Assert
+    expect(result.comments).toEqual(comments);
   });
 
   it("should throw fallback message on generic transport error via readDay()", async () => {

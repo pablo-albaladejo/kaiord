@@ -81,7 +81,7 @@ const makeTransport = (
   })),
   openExternal: vi.fn(async () => undefined),
   readWeek: vi.fn(async () => []),
-  readDay: vi.fn(async () => []),
+  readDay: vi.fn(async () => ({ activities: [] })),
   ...(readZones ? { readZones } : {}),
 });
 
