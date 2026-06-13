@@ -15,6 +15,7 @@ import type {
   HealthWeightRecord,
 } from "../types/health/health-records";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
+import type { ChatMessageRepository } from "./chat-message-repository";
 import type {
   CoachingDayNotesRepository,
   CoachingRepository,
@@ -36,6 +37,7 @@ import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
 
 export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
+export type { ChatMessageRepository } from "./chat-message-repository";
 export type {
   CoachingRepository,
   CoachingSyncStateRepository,
@@ -99,6 +101,10 @@ export type PersistencePort = {
   healthDaily: HealthRecordRepository<HealthDailyRecord>;
   healthBodyComposition: HealthRecordRepository<HealthBodyCompositionRecord>;
   healthStress: HealthRecordRepository<HealthStressRecord>;
+  // Per-profile AI chat transcript (one rolling conversation per profile).
+  // Append-only; cascade-deleted on profile removal. Clear-conversation
+  // tombstones each removed message via the clear use case.
+  chatMessages: ChatMessageRepository;
   // Delete markers for cross-device sync. Written by the `withTombstones`
   // decorator on every delete; read by the snapshot/merge use cases.
   tombstones: TombstoneRepository;

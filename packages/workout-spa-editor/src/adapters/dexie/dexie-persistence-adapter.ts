@@ -15,6 +15,7 @@ import type {
 } from "../../types/health/health-records";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
+import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
 import { createDexieCoachingDayNotesRepository } from "./dexie-coaching-day-notes-repository";
 import { createDexieCoachingRepository } from "./dexie-coaching-repository";
 import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
@@ -77,6 +78,7 @@ export function createDexiePersistence(
       database,
       "healthStress"
     ),
+    chatMessages: createDexieChatMessageRepository(database),
     tombstones: createDexieTombstoneRepository(database),
     transaction: createTransactionRunner(database),
   };

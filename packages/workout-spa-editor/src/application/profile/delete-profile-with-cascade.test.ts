@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryAutoMatchDismissalRepository } from "../../test-utils/in-memory-auto-match-dismissal-repository";
+import { createInMemoryChatMessageRepository } from "../../test-utils/in-memory-chat-message-repository";
 import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
@@ -79,6 +80,7 @@ const makeDeps = (
     // this so the future per-metric repositories pick it up.
     deleteByProfile: async () => undefined,
   },
+  chatMessages: overrides.chatMessages ?? createInMemoryChatMessageRepository(),
 });
 
 describe("deleteProfileWithCascade", () => {

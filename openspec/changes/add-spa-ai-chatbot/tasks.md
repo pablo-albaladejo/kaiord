@@ -9,12 +9,12 @@
 
 ## 2. Transcript persistence (port → adapters)
 
-- [ ] 2.1 Define `ChatMessageRepository` port (`append`, `listByProfile(profileId, limit?)`, `clear(profileId)`) and the `ChatMessageRecord` type; wire it into `PersistencePort` (tests for type-level contract via in-memory impl)
-- [ ] 2.2 TDD `InMemoryChatMessageRepository` in `src/test-utils/` (profile scoping, chronological order, clear semantics)
-- [ ] 2.3 Add Dexie v20 (`chatMessages: "id, profileId, [profileId+createdAt]"`) in `dexie-schemas.ts` + `register-kaiord-versions-v10-plus.ts`; tests: fresh install at v20, v19→v20 upgrade preserves rows, schema-inventory test updated
-- [ ] 2.4 TDD `DexieChatMessageRepository` and register it on the Dexie persistence adapter; verify per-profile cascade delete picks up the table (existing `isPerProfileTable` discovery test extended)
-- [ ] 2.5 Include `chatMessages` in the cloud-sync snapshot export; tests: exported snapshot contains the rows, two-device merge unions messages by `id`, and `recordClock` reads the ISO-8601 `createdAt`
-- [ ] 2.6 TDD delete-propagation for the transcript: clear-conversation and profile-cascade deletes write per-row tombstones inside one port transaction; merge test proves cleared messages do not resurrect from a stale snapshot
+- [x] 2.1 Define `ChatMessageRepository` port (`append`, `listByProfile(profileId, limit?)`, `deleteByProfile`) and the `ChatMessageRecord` type; wire it into `PersistencePort` (clear is layered as a use case so tombstoning lives in the application layer)
+- [x] 2.2 TDD `InMemoryChatMessageRepository` in `src/test-utils/` (profile scoping, chronological order, limit semantics, deleteByProfile)
+- [x] 2.3 Add Dexie v20 (`chatMessages: "id, profileId, [profileId+createdAt]"`) in `dexie-schemas.ts` + `register-kaiord-versions-v10-plus.ts`; tests: fresh install at v20, v19→v20 upgrade preserves rows, schema-inventory test updated (extracted `backfillLinkedAccounts` to keep `dexie-schemas.ts` under the line cap)
+- [x] 2.4 TDD `DexieChatMessageRepository` and register it on the Dexie persistence adapter; per-profile cascade delete picks up the table (cascade dep + `useProfileDelete` + `isPerProfileTable` fan-out integration test extended)
+- [x] 2.5 Include `chatMessages` in the cloud-sync snapshot export (automatic via `exportTables` table enumeration); tests: exported snapshot contains the rows, two-device merge unions messages by `id`, and `recordClock` reads the ISO-8601 `createdAt`
+- [x] 2.6 TDD delete-propagation for the transcript: clear-conversation writes per-message tombstones inside one port transaction (profile-cascade deletes follow the existing no-tombstone convention); merge test proves cleared messages do not resurrect from a stale snapshot
 
 ## 3. Chat tools (SPA application layer)
 
