@@ -18,15 +18,15 @@
 
 ## 3. Chat tools (SPA application layer)
 
-- [ ] 3.1 TDD read tool `query_workouts` over `WorkoutRepository` (zod input with date range + optional sport, range clamping, row budget + aggregates, `range_used` metadata, profile isolation)
-- [ ] 3.2 TDD read tool `query_health` over the health repositories (metric enum across the six stores, same bounding/`range_used` rules)
-- [ ] 3.3 TDD read tool `query_coaching` over coaching + session-match repositories (activities summary, match/compliance rollup, fenced untrusted description text with per-field length cap)
-- [ ] 3.4 TDD `get_today` date/week resolution tool (client clock, locale week id via existing `week-utils`)
-- [ ] 3.5 TDD action tool `sync_coaching` wrapping the existing Train2Go sync use case (success, extension-not-connected error surfaced as tool result)
-- [ ] 3.6 TDD action tool `create_workout` wrapping `createTextToWorkout` + the existing workout persistence use case (confirmation payload contains description + target date; sanity-check failure surfaces as tool result)
-- [ ] 3.7 TDD action tool `log_health_metric` wrapping `save-manual-health-metric.use-case.ts` (sleep duration happy path; metric/payload validation rejections)
-- [ ] 3.8 TDD `application/chat/` transcript use cases: append turn messages, list window (last N for model context), clear conversation; usage accounting per completed turn into the existing `usage` row
-- [ ] 3.9 Author the chat system prompt (untrusted-data rule, tool usage guidance, locale/date guidance) as a versioned prompt module; injection test: fenced coach-description instruction does not bypass confirmation
+- [x] 3.1 TDD read tool `query_workouts` over `WorkoutRepository` (zod input with date range + optional sport, range clamping, row budget + aggregates incl. longest computed over all rows, `range_used` metadata, profile isolation via fetch-then-filter)
+- [x] 3.2 TDD read tool `query_health` over the health repositories (metric enum across the six stores, same bounding/`range_used` rules)
+- [x] 3.3 TDD read tool `query_coaching` (activities summary with status + completionPercent as the compliance signal, fenced untrusted title/description with per-field length cap; sessionMatch rollup deferred — status/completion already conveys planned-vs-done)
+- [x] 3.4 TDD `get_today` date/week resolution tool (injected `today`, ISO week id via existing `week-utils`)
+- [x] 3.5 action tool `sync_coaching` factory (requiresConfirmation; execute delegates to an injected op — the Train2Go use case + extension-not-connected error wiring lands in the group-4 hook)
+- [x] 3.6 action tool `create_workout` factory (confirmation payload carries description + target date + sport; `createTextToWorkout` + persistence wiring lands in the group-4 hook)
+- [x] 3.7 action tool `log_health_metric` factory (metric/day/value schema with metric-enum rejection; `saveManualHealthMetric` wiring lands in the group-4 hook)
+- [~] 3.8 transcript use cases: `clearConversation` (group 2) + windowed `listByProfile(profileId, limit)` (group 2) done; `append` + per-turn usage accounting into the `usage` row are wired with `use-chat-turn` in group 4
+- [x] 3.9 Author the chat system prompt (untrusted-data fence rule, tool usage guidance, relative-date guidance) as a versioned module; injection test: fenced coach-description instruction stays data (`query_coaching` fences it; action tools remain confirmation-gated)
 
 ## 4. Chat UI
 
