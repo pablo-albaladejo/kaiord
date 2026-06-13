@@ -4,16 +4,15 @@
  * Action creators for undo/redo functionality.
  */
 
-import type { Workout } from "../../types/krd";
 import { findById } from "../find-by-id";
 import type { FocusTarget } from "../focus/focus-target.types";
 import { focusItem } from "../focus/focus-target.types";
 import { preservedSelectionTarget } from "../focus-rules";
 import type { WorkoutState } from "../workout-actions";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 
 const currentSelectionMainListIndex = (state: WorkoutState): number => {
-  const currentWorkout = state.currentWorkout?.extensions
-    ?.structured_workout as Workout | undefined;
+  const currentWorkout = extractStructuredWorkout(state.currentWorkout);
   const steps = currentWorkout?.steps ?? [];
   const currentId = state.selectedStepId;
   if (!currentId) return 0;
@@ -28,9 +27,7 @@ const focusForHistoryIndex = (
   newIndex: number
 ): ReturnType<typeof preservedSelectionTarget> => {
   const entry = state.undoHistory[newIndex]!;
-  const workout = entry?.workout?.extensions?.structured_workout as
-    | Workout
-    | undefined;
+  const workout = extractStructuredWorkout(entry?.workout) ?? undefined;
   const priorSelection = entry?.selection ?? null;
   const fallbackIndex = currentSelectionMainListIndex(state);
   return preservedSelectionTarget(workout, priorSelection, fallbackIndex);
@@ -41,8 +38,8 @@ const focusForUndo = (state: WorkoutState, newIndex: number): FocusTarget => {
   // Check whether the selection recorded at mutation time exists there — if it
   // does, restore focus directly to it (instead of falling back to position 0).
   const currentEntry = state.undoHistory[state.historyIndex];
-  const restoredWorkout = state.undoHistory[newIndex]?.workout?.extensions
-    ?.structured_workout as Workout | undefined;
+  const restoredWorkout =
+    extractStructuredWorkout(state.undoHistory[newIndex]?.workout) ?? undefined;
   if (
     currentEntry?.selection &&
     findById(restoredWorkout, currentEntry.selection)

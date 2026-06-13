@@ -19,6 +19,7 @@ import { createInMemoryCoachingRepository } from "./in-memory-coaching-repositor
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
 import { createInMemoryIntegrationPolicyRepository } from "./in-memory-integration-policy-repository";
+import { createInMemoryMatchedSessionsReadModel } from "./in-memory-matched-sessions-read-model";
 import {
   captureSnapshot,
   restoreSnapshot,
@@ -86,6 +87,11 @@ export function createInMemoryPersistence(): PersistencePort {
       stores.integrationPolicies
     ),
     sessionMatch: createInMemorySessionMatchRepository(stores.sessionMatch),
+    matchedSessionsReadModel: createInMemoryMatchedSessionsReadModel(
+      stores.coaching,
+      stores.workouts,
+      stores.sessionMatch
+    ),
     autoMatchDismissal: createInMemoryAutoMatchDismissalRepository(
       stores.autoMatchDismissal
     ),

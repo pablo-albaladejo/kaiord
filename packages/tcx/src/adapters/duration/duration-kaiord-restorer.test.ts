@@ -186,4 +186,54 @@ describe("restoreKaiordDuration", () => {
     // Assert
     expect(result).toBeNull();
   });
+
+  it("should warn and drop a restored threshold that is zero or negative", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const tcxDuration = {
+      "@_kaiord:originalDurationType": "power_less_than",
+      "@_kaiord:originalDurationWatts": 0,
+    };
+
+    // Act
+    const result = restoreKaiordDuration(tcxDuration, logger);
+
+    // Assert
+    expect(result).toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(
+      "Lossy conversion: kaiord power_less_than watts attribute is not a positive finite number, dropping",
+      { value: 0 }
+    );
+  });
+
+  it("should warn and drop a restored threshold that is not finite", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const tcxDuration = {
+      "@_kaiord:originalDurationType": "calories",
+      "@_kaiord:originalDurationCalories": Number.POSITIVE_INFINITY,
+    };
+
+    // Act
+    const result = restoreKaiordDuration(tcxDuration, logger);
+
+    // Assert
+    expect(result).toBeNull();
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it("should not warn when the attribute is simply absent", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const tcxDuration = {
+      "@_kaiord:originalDurationType": "heart_rate_less_than",
+    };
+
+    // Act
+    const result = restoreKaiordDuration(tcxDuration, logger);
+
+    // Assert
+    expect(result).toBeNull();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
 });

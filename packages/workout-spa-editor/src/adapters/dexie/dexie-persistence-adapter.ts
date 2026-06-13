@@ -22,6 +22,7 @@ import { db as defaultDb, type KaiordDatabase } from "./dexie-database";
 import { createDexieHealthCleanupRepository } from "./dexie-health-cleanup-repository";
 import { createDexieHealthRecordRepository } from "./dexie-health-record-repository";
 import { createDexieIntegrationPolicyRepository } from "./dexie-integration-policy-repository";
+import { createDexieMatchedSessionsReadModel } from "./dexie-matched-sessions-read-model";
 import { createDexieProfileRepository } from "./dexie-profile-repository";
 import { createDexieSessionMatchRepository } from "./dexie-session-match-repository";
 import { createDexieSyncStateRepository } from "./dexie-sync-state-repository";
@@ -47,6 +48,7 @@ export function createDexiePersistence(
     coachingDayNotes: createDexieCoachingDayNotesRepository(database),
     integrationPolicy: createDexieIntegrationPolicyRepository(database),
     sessionMatch: createDexieSessionMatchRepository(database),
+    matchedSessionsReadModel: createDexieMatchedSessionsReadModel(database),
     autoMatchDismissal: createDexieAutoMatchDismissalRepository(database),
     userPreferences: createDexieUserPreferencesRepository(database),
     healthCleanup: createDexieHealthCleanupRepository(database),

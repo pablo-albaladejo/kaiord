@@ -1,6 +1,7 @@
-import type { KRD, RepetitionBlock, Workout, WorkoutStep } from "../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../types/krd";
 import { isWorkoutStep } from "../types/krd";
 import type { UIWorkout } from "../types/krd-ui";
+import { extractStructuredWorkout } from "./actions/_helpers/extract-workout";
 import type { IdProvider } from "./providers/id-provider";
 import { defaultIdProvider } from "./providers/id-provider";
 import type { ItemId } from "./providers/item-id";
@@ -56,7 +57,7 @@ export const hydrateUIWorkout = (
 ): UIWorkout => {
   const idProvider = options.idProvider ?? defaultIdProvider;
   const preserve = options.preserveExistingIds ?? false;
-  const workout = krd.extensions?.structured_workout as Workout | undefined;
+  const workout = extractStructuredWorkout(krd);
 
   if (!workout) return krd as UIWorkout;
 
