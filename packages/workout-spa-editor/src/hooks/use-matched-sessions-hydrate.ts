@@ -9,13 +9,11 @@
  * `.omc/autopilot/bug-trace.md` §H8 for the original symptom.
  */
 
-import { db } from "../adapters/dexie/dexie-database";
 import { toCoachingActivity } from "../adapters/train2go/coaching-record-to-activity.converter";
 import { computeComplianceScore } from "../application/compute-compliance-score";
 import { parseCoachingDuration } from "../application/parse-coaching-duration";
 import type { MatchedSession } from "../components/molecules/MatchedSessionCard/MatchedSessionCard";
-import type { WorkoutRecord } from "../types/calendar-record";
-import type { CoachingActivityRecord } from "../types/coaching-activity-record";
+import type { MatchedSessionsReadModel } from "../ports/matched-sessions-read-model";
 import type { SessionMatch } from "../types/session-match";
 import { logger } from "../utils/logger";
 import type { DanglingMatch } from "./use-matched-sessions-heal";
@@ -30,37 +28,18 @@ export type MatchedSessionWithMetadata = MatchedSession & {
 
 const DROP_WARN = "[matched-sessions] dropping match — dangling ref";
 
-const fetchById = async (
-  matches: SessionMatch[]
-): Promise<{
-  aById: Map<string, CoachingActivityRecord>;
-  wById: Map<string, WorkoutRecord>;
-}> => {
-  const [activities, workouts] = await Promise.all([
-    db
-      .table<CoachingActivityRecord>("coachingActivities")
-      .where("id")
-      .anyOf(matches.map((m) => m.coachingActivityId))
-      .toArray(),
-    db
-      .table<WorkoutRecord>("workouts")
-      .where("id")
-      .anyOf(collectWorkoutIds(matches))
-      .toArray(),
-  ]);
-  return {
-    aById: new Map(activities.map((a) => [a.id, a])),
-    wById: new Map(workouts.map((w) => [w.id, w])),
-  };
-};
-
 export const hydrateMatchedSessions = async (
-  matches: SessionMatch[]
+  matches: SessionMatch[],
+  readModel: MatchedSessionsReadModel
 ): Promise<{
   matched: MatchedSessionWithMetadata[];
   dangling: DanglingMatch[];
 }> => {
-  const { aById, wById } = await fetchById(matches);
+  const { activitiesById: aById, workoutsById: wById } =
+    await readModel.loadJoinSources(
+      matches.map((m) => m.coachingActivityId),
+      collectWorkoutIds(matches)
+    );
   const matched: MatchedSessionWithMetadata[] = [];
   const dangling: DanglingMatch[] = [];
   for (const match of matches) {

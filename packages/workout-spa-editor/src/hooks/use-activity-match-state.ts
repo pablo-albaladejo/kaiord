@@ -17,10 +17,9 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { db } from "../adapters/dexie/dexie-database";
+import { usePersistence } from "../contexts/persistence-context";
 import type { WorkoutRecord } from "../types/calendar-record";
 import { toPersistedCoachingActivityId } from "../types/coaching-activity-record";
-import type { SessionMatch } from "../types/session-match";
 
 export type ActivityMatchState =
   | { kind: "solo" }
@@ -30,39 +29,32 @@ export type ActivityMatchState =
  * @param activityViewModelId the in-memory `CoachingActivity.id`
  *   (SHORT form `"${source}:${sourceId}"`). The hook composes the
  *   canonical COMPOSITE persisted shape via `toPersistedCoachingActivityId`
- *   before querying `sessionMatches.[profileId+coachingActivityId]`,
+ *   before asking the read-model for `sessionMatches.[profileId+coachingActivityId]`,
  *   matching the COMPOSITE shape every writer persists. See
  *   `.omc/autopilot/bug-trace.md` §H7 for the original divergence.
+ *
+ * Reads go through `matchedSessionsReadModel` (not `db` directly); its Dexie
+ * adapter issues the same observable queries, so `useLiveQuery` reactivity is
+ * preserved while the persistence boundary stays behind the port.
  */
 export function useActivityMatchState(
   profileId: string | null,
   activityViewModelId: string | null
 ): ActivityMatchState | undefined {
+  const { matchedSessionsReadModel } = usePersistence();
   return useLiveQuery<ActivityMatchState>(async () => {
     if (!profileId || !activityViewModelId) return { kind: "solo" };
 
-    const match = await db
-      .table<SessionMatch>("sessionMatches")
-      .where("[profileId+coachingActivityId]")
-      .equals([
-        profileId,
-        toPersistedCoachingActivityId(profileId, activityViewModelId),
-      ])
-      .first();
+    // Dangling-ref tolerance lives in the read-model: a missing workout
+    // (mid-cascade race) returns null, which we render as solo so the dialog
+    // shows the manual-match affordances until the cascade hooks reconcile.
+    const match = await matchedSessionsReadModel.findActivityMatch(
+      profileId,
+      toPersistedCoachingActivityId(profileId, activityViewModelId)
+    );
 
     if (!match) return { kind: "solo" };
 
-    const workout = await db
-      .table<WorkoutRecord>("workouts")
-      .get(match.workoutId);
-
-    if (!workout) {
-      // Dangling-ref tolerance: the match exists but the workout is
-      // gone (mid-cascade race). Treat as solo so the dialog re-renders
-      // the manual-match affordances; the cascade hooks will reconcile.
-      return { kind: "solo" };
-    }
-
-    return { kind: "matched", matchId: match.id, workout };
-  }, [profileId, activityViewModelId]);
+    return { kind: "matched", matchId: match.matchId, workout: match.workout };
+  }, [profileId, activityViewModelId, matchedSessionsReadModel]);
 }

@@ -21,6 +21,7 @@ import type {
 } from "./coaching-repositories";
 import type { HealthCleanupRepository } from "./health-cleanup-repository";
 import type { HealthRecordRepository } from "./health-record-repository";
+import type { MatchedSessionsReadModel } from "./matched-sessions-read-model";
 import type { SessionMatchRepository } from "./session-match-repository";
 import type {
   AiProviderRepository,
@@ -43,6 +44,11 @@ export type {
   HealthRecord,
   HealthRecordRepository,
 } from "./health-record-repository";
+export type {
+  ActivityMatch,
+  MatchedSessionJoinSources,
+  MatchedSessionsReadModel,
+} from "./matched-sessions-read-model";
 export type { SessionMatchRepository } from "./session-match-repository";
 export type {
   AiProviderRepository,
@@ -72,6 +78,10 @@ export type PersistencePort = {
   // outer `transaction` opens, so a different PersistencePort backed by
   // a different db cannot accidentally split writes.
   sessionMatch: SessionMatchRepository;
+  // Read-only (CQRS) query surface for the matched-sessions calendar
+  // projections. Lets the reactive hooks read their join data through the
+  // port instead of importing `db`, preserving useLiveQuery observability.
+  matchedSessionsReadModel: MatchedSessionsReadModel;
   autoMatchDismissal: AutoMatchDismissalRepository;
   userPreferences: UserPreferencesRepository;
   // Cross-table cleanup for the six v16 health-domain stores —

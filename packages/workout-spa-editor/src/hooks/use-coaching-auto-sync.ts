@@ -19,7 +19,10 @@ import { useAnalytics } from "../contexts";
 import { usePersistence } from "../contexts/persistence-context";
 import { useActiveProfileLive } from "./use-active-profile-live";
 import type { CoachingSyncState } from "./use-coaching-activities";
-import { runSourceSync } from "./use-coaching-auto-sync-helpers";
+import {
+  runSourceSync,
+  type SourceSyncOutcome,
+} from "./use-coaching-auto-sync-helpers";
 
 export const useCoachingAutoSync = (
   syncSources: CoachingSyncState[],
@@ -48,8 +51,9 @@ export const useCoachingAutoSync = (
     if (targets.length === 0) return;
 
     void (async () => {
+      const outcomes: { source: string; outcome: SourceSyncOutcome }[] = [];
       for (const src of targets) {
-        await runSourceSync(
+        const outcome = await runSourceSync(
           src,
           activeProfileId,
           weekStart,
@@ -58,7 +62,16 @@ export const useCoachingAutoSync = (
           persistence,
           analytics
         );
+        outcomes.push({ source: src.id, outcome });
       }
+      // Low-cardinality completion summary so the silent auto-sync loop is
+      // observable in telemetry (counts only — never per-source error text).
+      analytics.event("coaching.autosync.completed", {
+        trigger,
+        synced: outcomes.filter((o) => o.outcome === "synced").length,
+        skipped: outcomes.filter((o) => o.outcome === "skipped").length,
+        failed: outcomes.filter((o) => o.outcome === "failed").length,
+      });
     })();
   }, [
     activeProfileId,

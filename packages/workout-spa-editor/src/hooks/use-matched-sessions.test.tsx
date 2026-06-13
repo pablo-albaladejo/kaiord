@@ -5,15 +5,17 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adapter";
 import { PersistenceProvider } from "../contexts/persistence-context";
-import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
 import { useMatchedSessions } from "./use-matched-sessions";
 
+// Dexie-backed so the read-model and `queryMatchesForWeek` observe the same
+// `db` the test seeds (the hook reads matches and join sources from one store).
 const wrap = ({ children }: { children: ReactNode }) => (
-  <PersistenceProvider persistence={createInMemoryPersistence()}>
+  <PersistenceProvider persistence={createDexiePersistence(db)}>
     {children}
   </PersistenceProvider>
 );
