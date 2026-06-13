@@ -47,7 +47,7 @@
 
 ## 6. Verification and release
 
-- [ ] 6.1 `pnpm lint:specs` passes for the new/updated spec deltas
-- [ ] 6.2 `pnpm -r test && pnpm -r build && pnpm lint:fix` green across packages (coverage thresholds: 80% core/ai, 70% SPA)
-- [ ] 6.3 Manual smoke: configure a provider, ask a history question, approve a sync and a sleep log, create a workout from chat, reload and verify transcript, clear conversation
-- [ ] 6.4 Add changeset (`@kaiord/ai` minor, `@kaiord/workout-spa-editor` minor)
+- [x] 6.1 `pnpm lint:specs` passes (39/39); `openspec validate add-spa-ai-chatbot` valid
+- [x] 6.2 `pnpm -r build` green across all packages; `@kaiord/ai` coverage 98.6% stmts / 99.5% lines (≥80), SPA coverage 89.1% stmts / 90.8% lines (≥70), 4658 SPA + 77 ai tests pass, lint clean. Fixed a `tsc -b` strict-mode (`noUncheckedIndexedAccess`) error in `query-health-tool` that the lint `tsc --noEmit` did not catch
+- [~] 6.3 Manual browser smoke (configure provider → history question → approve sync + sleep log → create workout → reload → clear) requires a human with a real provider API key — NOT runnable autonomously. Automated equivalents are green: route mount + heading/announcer (App/routes tests), page + empty state (ChatPage test), turn send/pending/approve/deny/error (chat-turn-runner test), transcript persistence + cascade + sync merge (groups 2 tests), tools (group 3 tests)
+- [x] 6.4 Changeset `.changeset/spa-ai-chatbot.md` (`@kaiord/ai` minor, `@kaiord/workout-spa-editor` minor); `changeset status` confirms both bump at minor
