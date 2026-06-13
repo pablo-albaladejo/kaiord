@@ -1,5 +1,25 @@
 # @kaiord/workout-spa-editor
 
+## 1.1.1
+
+### Patch Changes
+
+- 2009aa7: feat(train2go): preserve coach hyperlinks and surface day comment threads
+
+  The Train2Go bridge now keeps hyperlinks from activity descriptions instead of stripping them: `<a href>` anchors are converted to markdown `[label](url)` in the parser (mirroring the existing `<strong>` → `**` handling). It also parses the day-scoped coach/athlete comment thread from the same daily sidebar HTML — no new endpoints or permissions — and returns it on the `read-day` response (additive; older SPAs ignore it).
+
+  In the SPA, the coaching description renderer gains safe link support: markdown links and bare `https://` URLs render as `target="_blank" rel="noopener noreferrer"` anchors with the full href in the `title`, enforced through an https-only scheme allowlist at render time (no `dangerouslySetInnerHTML`). Day comments persist in a new profile-scoped `coachingDayNotes` Dexie store (v20, additive), are replaced wholesale on each `read-day`, cleared by the profile-delete cascade, and render in a read-only panel inside the coaching activity dialog.
+
+- Updated dependencies [a0c22e6]
+- Updated dependencies [73a2ce4]
+- Updated dependencies [4f712ef]
+  - @kaiord/tcx@9.2.0
+  - @kaiord/garmin@9.2.0
+  - @kaiord/core@9.2.0
+  - @kaiord/fit@9.2.0
+  - @kaiord/zwo@9.2.0
+  - @kaiord/ai@9.2.0
+
 ## 1.1.0
 
 ### Minor Changes
