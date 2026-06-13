@@ -33,6 +33,11 @@ in your browser to remove everything at once.
 If you configure AI features, prompts are sent directly to the
 provider (Anthropic, OpenAI, or Google).
 
+When you use the in-app chat assistant, summaries of your workout,
+coaching, and health data are sent to the provider only while you
+converse. Your chat transcripts are stored locally and, with sync on,
+in your own cloud snapshot — never on a Kaiord server.
+
 ## Kaiord Garmin Bridge Extension
 
 - **CSRF Token**: stored in \`chrome.storage.session\`.
@@ -100,6 +105,18 @@ test("missing LLM provider disclosure is flagged", () => {
   const src = FULL.replace(/\(Anthropic, OpenAI, or Google\)/, "");
   const v = checkPolicy(src);
   assert.ok(v.some((r) => r.includes("LLM provider data flow")));
+});
+
+test("missing chat assistant data-flow disclosure is flagged", () => {
+  const src = FULL.replace(/in-app chat assistant/g, "some-feature");
+  const v = checkPolicy(src);
+  assert.ok(v.some((r) => r.includes("Chat assistant data flow")));
+});
+
+test("missing chat transcript storage disclosure is flagged", () => {
+  const src = FULL.replace(/chat transcripts/g, "some-records");
+  const v = checkPolicy(src);
+  assert.ok(v.some((r) => r.includes("Chat transcripts")));
 });
 
 test("missing IndexedDB clarifier is flagged", () => {

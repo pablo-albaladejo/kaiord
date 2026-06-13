@@ -41,9 +41,9 @@
 
 ## 5. Privacy policy and docs
 
-- [ ] 5.1 Update the privacy policy page content: chat data flow disclosure (workout/coaching/health summaries to configured provider, user-initiated only), chat transcripts in client-side storage disclosure, clear-conversation in retention guidance; bump "Last updated"
-- [ ] 5.2 Extend `lint:privacy-policy` required-disclosure checks for the new chat disclosures
-- [ ] 5.3 Update SPA AGENTS.md entries for the new `application/chat/`, ports, and page surfaces
+- [x] 5.1 Privacy policy updated: chat data-flow paragraph (workout/coaching/health summaries to the configured provider, user-initiated only; transcripts stored locally and in the user's own cloud-sync snapshot, never on a Kaiord server), `chat transcripts` added to the client-side storage list, clear-conversation added to retention guidance, "Last updated" → 2026-06-13
+- [x] 5.2 `check-privacy-policy.mjs` gains two required-disclosure rules (chat assistant data flow; chat transcripts storage) + fixture and missing-disclosure tests; docs lint green (prettier + cspell + checker)
+- [x] 5.3 SPA AGENTS.md updated: `application/AGENTS.md` (`chat/` subdir), `ports/AGENTS.md` (`ChatMessageRepository` entry + impl-table row), `src/AGENTS.md` (`/chat` route + `ChatPage`)
 
 ## 6. Verification and release
 
