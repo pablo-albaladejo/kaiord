@@ -16,6 +16,11 @@
  */
 
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
+import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
 import { db } from "./dexie-database";
 
 export const aiProviderRepository = createDexieAiProviderRepository(db);
+
+/** Module-level chat transcript repo bound to the production db, for the
+ * `useChatMessagesLive` live query. */
+export const chatMessageRepository = createDexieChatMessageRepository(db);

@@ -30,13 +30,13 @@
 
 ## 4. Chat UI
 
-- [ ] 4.1 Add `/chat` route in `AppRoutes.tsx` (lazy `ChatPage`, `RouteErrorBoundary`, `[data-route-heading]`, "Chat page" announcer label) + route tests; add navigation entry
-- [ ] 4.2 TDD `use-chat-messages-live` hook (single `useLiveQuery` for the active profile transcript)
-- [ ] 4.3 TDD `use-chat-turn` hook orchestrating: provider selection → `createLanguageModel` → `createChatAgent` turn → streaming text into local state → persistence via application use cases (components never touch Dexie/AI SDK directly)
-- [ ] 4.4 Build ChatPage organisms within line caps: message list (user/assistant/tool-event entries), composer, provider selector reusing the existing model-selector pattern, no-provider empty state reusing the `CreateProvidersEmpty` pattern
-- [ ] 4.5 Build the pending-action confirmation card (human-readable tool input, approve/deny, deny resumes with declined result); component tests for both paths
-- [ ] 4.6 In-conversation error entries with retry for provider/tool failures; count-only analytics events (`chat-message-sent`, `chat-tool-confirmed`); verify PII guard compliance (no message content in toasts/console)
-- [ ] 4.7 "Clear conversation" action with confirm; test other profiles' transcripts remain
+- [x] 4.1 Add `/chat` route in `AppRoutes.tsx` (lazy `ChatPage`, `RouteErrorBoundary`, `[data-route-heading]`, "Chat page" announcer label) + route tests done; **nav entry pending** (deferred placement — bottom-nav FAB-notch layout is tuned; wire in 4b)
+- [x] 4.2 TDD `use-chat-messages-live` hook (single `useLiveQuery` for the active profile transcript; chronological + re-fire-on-append test)
+- [ ] 4.3 TDD `use-chat-turn` hook orchestrating: provider selection → `createLanguageModel` → `createChatAgent` turn → streaming text into local state → persistence via application use cases (components never touch Dexie/AI SDK directly) — **4b** (Train2Go sync op must use the transport + sync use case directly, NOT `useTrain2GoSource`, since `Train2GoZonesSyncProvider` is not in the global tree)
+- [~] 4.4 ChatPage organisms: message list + provider selector (reuses `ModelSelector`) + no-provider empty state (reuses `CreateProvidersEmpty`) + `chat-message-mapper` done; **composer pending — 4b**
+- [ ] 4.5 Build the pending-action confirmation card (human-readable tool input, approve/deny, deny resumes with declined result); component tests for both paths — **4b**
+- [ ] 4.6 In-conversation error entries with retry for provider/tool failures; count-only analytics events (`chat-message-sent`, `chat-tool-confirmed`); verify PII guard compliance (no message content in toasts/console) — **4b**
+- [ ] 4.7 "Clear conversation" action with confirm; test other profiles' transcripts remain — **4b** (uses the `clearConversation` use case from group 2)
 
 ## 5. Privacy policy and docs
 
