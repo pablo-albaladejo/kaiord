@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-06-13 | [`code-semantics-hardening`](./2026-06-13-code-semantics-hardening/) | code-semantics-hardening |
 | 2026-06-11 | [`test-minimality-naming-hardening`](./2026-06-11-test-minimality-naming-hardening/) | test-minimality-naming-hardening |
 | 2026-06-01 | [`google-drive-cross-device-sync`](./2026-06-01-google-drive-cross-device-sync/) | Today the workout-spa-editor persists everything to a single browser's IndexedDB (Dexie kaiord-spa, currently v18). A user with a laptop and a phone has two di… |
 | 2026-05-29 | [`integration-policy-per-profile-routing`](./2026-05-29-integration-policy-per-profile-routing/) | Kaiord has never modelled Integration Policy as a first-class concept. The bridge protocol has direction-aware capability strings (read:* / write:*), and the d… |
