@@ -152,7 +152,10 @@ const parseDailyHtml = (html) => {
 // `decodeEntities` pass, so `&amp;` query separators become `&`.
 const anchorToMarkdown = (_match, attrs, inner) => {
   const href = attrs.match(/\bhref\s*=\s*"([^"]*)"/i)?.[1];
-  const label = inner.replace(/<[^>]+>/g, "").trim();
+  // Strip nested tags from the label with the looped strip — a single
+  // `.replace()` pass can leave a re-formed tag behind (e.g. `<scr<b>ipt`
+  // -> `<script`), which CodeQL flags as incomplete sanitization.
+  const label = replaceUntilStable(inner, /<[^>]+>/g, "").trim();
   return href && label ? `[${label}](${href})` : label;
 };
 
