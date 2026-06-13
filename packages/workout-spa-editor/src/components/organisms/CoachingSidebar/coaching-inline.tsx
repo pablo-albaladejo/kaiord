@@ -9,7 +9,7 @@
  * anchor `title` so a spoofed label (e.g. text "dropbox.com" pointing
  * elsewhere) reveals its real destination on hover/long-press.
  */
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import type { DescriptionInline } from "./format-coaching-description";
 
@@ -23,7 +23,14 @@ export function renderCoachingInline(
 ): ReactNode {
   const prefix = leadingSpace && key > 0 ? " " : "";
   if (inline.kind === "strong") {
-    return <strong key={key}>{inline.value}</strong>;
+    // Keep the leading space OUTSIDE the bold so a strong token following
+    // text doesn't collapse into the previous word when leadingSpace=true.
+    return (
+      <Fragment key={key}>
+        {prefix}
+        <strong>{inline.value}</strong>
+      </Fragment>
+    );
   }
   if (inline.kind === "link") {
     return (

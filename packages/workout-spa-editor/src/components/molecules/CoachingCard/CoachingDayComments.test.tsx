@@ -58,6 +58,18 @@ describe("CoachingDayComments", () => {
     expect(anchor).toHaveAttribute("target", "_blank");
   });
 
+  it("should keep a space before a bold token in the body (no word collapse)", () => {
+    // Arrange
+    const comments = [comment({ text: "Ritmo **Z4** fuerte" })];
+
+    // Act
+    const { container } = render(<CoachingDayComments comments={comments} />);
+
+    // Assert
+    expect(container.textContent).toContain("Ritmo Z4 fuerte");
+    expect(container.textContent).not.toContain("RitmoZ4");
+  });
+
   it("should render nothing when there are no comments", () => {
     // Arrange
     const comments: CoachingDayComment[] = [];
