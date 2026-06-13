@@ -1,3 +1,5 @@
+> Completed: 2026-06-13
+
 # Proposal: code-semantics-hardening
 
 ## Why

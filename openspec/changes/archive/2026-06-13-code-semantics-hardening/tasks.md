@@ -1,5 +1,7 @@
 # Tasks: code-semantics-hardening
 
+> Tasks: 31 completed, 2 deferred
+
 ## 1. CLI failure contract (failure-semantics spec — critical)
 
 - [x] 1.1 Confirm `ENVIRONMENT_ERROR`/`SERVICE_ERROR` numeric values against the existing `EXIT_CODES` table (design open question) and add them with doc comments
@@ -38,9 +40,11 @@
 
 - [x] 5.1 Extract `UNDO_DELETE_WINDOW_MS = 5000` and `CLEANUP_TICK_MS = 1000` into a shared store constants module; import from `clear-expired-deletes-action.ts`, both delete-with-toast call sites, and `use-delete-cleanup.ts`
 - [ ] 5.2 Route all step/block actions through `extractStructuredWorkout`; grep gate: `structured_workout as Workout` appears only in the helper
+  > Deferred to: #758
 - [x] 5.3 Brand `create-step-action`'s new id as `ItemId` (or type `defaultIdProvider` to return it) so all four create/mutate actions share the id vocabulary
 - [x] 5.4 Fix the auto-match doc/code divergence per design D8: keep the 0.6 threshold, correct the comment to "score ≥ 0.6 (≈ ±40% duration variance)", and name the threshold constant where it is consumed
 - [ ] 5.5 Define the `MatchedSessionsReadModel` port (application layer) and its Dexie adapter; migrate `use-activity-match-state` and `use-matched-sessions-hydrate` to it; record `{source, outcome}` results in `use-coaching-auto-sync`'s loop for observability
+  > Deferred to: #758
 
 ## 6. ai and misc renames
 
