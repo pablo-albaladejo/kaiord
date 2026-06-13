@@ -8,7 +8,7 @@
  * cascade uses for `coachingActivities`.
  */
 
-import type { CoachingDayNotesRepository } from "../../ports/persistence-port";
+import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
 import {
   buildCoachingDayNotesId,
   type CoachingDayNotesRecord,

@@ -6,7 +6,7 @@
  * `createInMemoryPersistence` can snapshot it for transaction rollback.
  */
 
-import type { CoachingDayNotesRepository } from "../ports/persistence-port";
+import type { CoachingDayNotesRepository } from "../ports/coaching-repositories";
 import {
   buildCoachingDayNotesId,
   type CoachingDayNotesRecord,

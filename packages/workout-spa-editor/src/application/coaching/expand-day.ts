@@ -18,8 +18,8 @@
  * and must not suppress the next legitimate auto-sync of the same week.
  */
 
+import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
 import type {
-  CoachingDayNotesRepository,
   CoachingRepository,
   ProfileRepository,
 } from "../../ports/persistence-port";

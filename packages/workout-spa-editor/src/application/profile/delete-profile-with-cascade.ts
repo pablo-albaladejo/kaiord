@@ -26,9 +26,9 @@
  */
 
 import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismissal-repository";
+import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
 import type { HealthCleanupRepository } from "../../ports/health-cleanup-repository";
 import type {
-  CoachingDayNotesRepository,
   CoachingRepository,
   CoachingSyncStateRepository,
   WorkoutRepository,

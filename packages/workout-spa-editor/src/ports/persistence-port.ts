@@ -37,7 +37,6 @@ import type { WorkoutRepository } from "./workout-repository";
 
 export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 export type {
-  CoachingDayNotesRepository,
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
