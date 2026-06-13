@@ -27,7 +27,18 @@ export type Train2GoActivity = {
   completion?: number;
 };
 
-type ReadData = { activities: Train2GoActivity[] };
+export type Train2GoComment = {
+  author: string;
+  isOwn: boolean;
+  timestamp: string;
+  text: string;
+};
+
+type ReadData = {
+  activities: Train2GoActivity[];
+  // Present only on `read-day` responses from a comments-capable bridge.
+  comments?: Train2GoComment[];
+};
 type ReadResponse = Train2GoExtensionResponse & { data?: ReadData };
 
 const PING_T1 = 2_000;

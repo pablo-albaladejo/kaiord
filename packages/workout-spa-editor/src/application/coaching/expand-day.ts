@@ -7,20 +7,31 @@
  * upsert ALL returned activities so siblings on the same day also gain
  * their descriptions in the same transaction.
  *
+ * The same response carries the day's comment thread. It is persisted as
+ * a day-scoped `coachingDayNotes` record, replaced wholesale. A comments
+ * failure MUST NOT break the activities upsert (the dialog still renders
+ * descriptions); it is logged with a static message instead. When the
+ * transport omits `comments` (older bridge), local notes are untouched.
+ *
  * NOTE: expandDay does NOT update `coachingSyncState.lastSyncedAt` — only
  * `syncWeek` advances the staleness gate. A description fetch is per-day
  * and must not suppress the next legitimate auto-sync of the same week.
  */
 
+import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
 import type {
   CoachingRepository,
   ProfileRepository,
 } from "../../ports/persistence-port";
+import type { CoachingDayComment } from "../../types/coaching-day-notes-record";
+import { buildCoachingDayNotesId } from "../../types/coaching-day-notes-record";
+import { logger } from "../../utils/logger";
 import type { CoachingTransport } from "./coaching-transport-port";
 
 export type ExpandDayDeps = {
   profiles: ProfileRepository;
   coaching: CoachingRepository;
+  coachingDayNotes: CoachingDayNotesRepository;
   transport: CoachingTransport;
 };
 
@@ -31,6 +42,31 @@ export type ExpandDayResult =
       reason: "not-linked" | "session-expired" | "transport-error";
       error?: string;
     };
+
+const persistDayNotes = async (
+  deps: ExpandDayDeps,
+  profileId: string,
+  date: string,
+  comments: CoachingDayComment[] | undefined
+): Promise<void> => {
+  // `undefined` → bridge did not send comments; leave local notes intact.
+  if (comments === undefined) return;
+  const source = deps.transport.source;
+  try {
+    await deps.coachingDayNotes.upsert({
+      id: buildCoachingDayNotesId(profileId, source, date),
+      profileId,
+      source,
+      date,
+      comments,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch {
+    // Isolated from the activities upsert — a notes write failure must not
+    // hide the descriptions. Static message; never interpolate content.
+    logger.warn("[expand-day] failed to persist day comments", { source });
+  }
+};
 
 export const expandDay = async (
   deps: ExpandDayDeps,
@@ -60,6 +96,7 @@ export const expandDay = async (
     return { ok: false, reason: "transport-error", error };
   }
 
-  await deps.coaching.upsertMany(fetched);
-  return { ok: true, activityCount: fetched.length };
+  await deps.coaching.upsertMany(fetched.activities);
+  await persistDayNotes(deps, profileId, date, fetched.comments);
+  return { ok: true, activityCount: fetched.activities.length };
 };

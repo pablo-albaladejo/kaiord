@@ -9,6 +9,7 @@
 import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
+import type { CoachingDayNotesRecord } from "../types/coaching-day-notes-record";
 import type { CoachingSyncStateRecord } from "../types/coaching-sync-state";
 import type {
   HealthBodyCompositionRecord,
@@ -38,6 +39,7 @@ export type Stores = {
   usage: Map<string, UsageRecord>;
   coaching: Map<string, CoachingActivityRecord>;
   coachingSyncState: Map<string, CoachingSyncStateRecord>;
+  coachingDayNotes: Map<string, CoachingDayNotesRecord>;
   integrationPolicies: Map<string, IntegrationPolicy>;
   sessionMatch: Map<string, SessionMatch>;
   autoMatchDismissal: Map<string, AutoMatchDismissal>;
@@ -73,6 +75,7 @@ export const captureSnapshot = (
   usage: new Map(stores.usage),
   coaching: new Map(stores.coaching),
   coachingSyncState: new Map(stores.coachingSyncState),
+  coachingDayNotes: new Map(stores.coachingDayNotes),
   integrationPolicies: new Map(stores.integrationPolicies),
   sessionMatch: new Map(stores.sessionMatch),
   autoMatchDismissal: new Map(stores.autoMatchDismissal),

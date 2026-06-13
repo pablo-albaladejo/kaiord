@@ -137,7 +137,10 @@ const readDay = async (date, userId) => {
   // visible symptom is the card disappearing the moment the user
   // opens its detail dialog (which lazy-fetches via expandDay).
   const activities = parser.parseDailyHtml(html).map((a) => ({ ...a, date }));
-  return { activities };
+  // The day-scoped comment thread lives in the same fragment (right
+  // column). Additive payload — older SPAs ignore `comments`.
+  const comments = parser.extractComments(html);
+  return { activities, comments };
 };
 
 // Reads the server-rendered /user/details page and extracts a raw-shape

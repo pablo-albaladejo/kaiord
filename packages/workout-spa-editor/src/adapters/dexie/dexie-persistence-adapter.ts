@@ -15,6 +15,7 @@ import type {
 } from "../../types/health/health-records";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
+import { createDexieCoachingDayNotesRepository } from "./dexie-coaching-day-notes-repository";
 import { createDexieCoachingRepository } from "./dexie-coaching-repository";
 import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
 import { db as defaultDb, type KaiordDatabase } from "./dexie-database";
@@ -44,6 +45,7 @@ export function createDexiePersistence(
     usage: createDexieUsageRepository(database),
     coaching: createDexieCoachingRepository(database),
     coachingSyncState: createDexieCoachingSyncStateRepository(database),
+    coachingDayNotes: createDexieCoachingDayNotesRepository(database),
     integrationPolicy: createDexieIntegrationPolicyRepository(database),
     sessionMatch: createDexieSessionMatchRepository(database),
     matchedSessionsReadModel: createDexieMatchedSessionsReadModel(database),
