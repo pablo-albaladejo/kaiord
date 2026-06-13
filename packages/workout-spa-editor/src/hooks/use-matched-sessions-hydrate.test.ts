@@ -3,6 +3,7 @@ import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
+import { createDexieMatchedSessionsReadModel } from "../adapters/dexie/dexie-matched-sessions-read-model";
 import type { WorkoutRecord } from "../types/calendar-record";
 import {
   buildCoachingActivityId,
@@ -11,6 +12,8 @@ import {
 } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
 import { hydrateMatchedSessions } from "./use-matched-sessions-hydrate";
+
+const readModel = createDexieMatchedSessionsReadModel(db);
 
 const PROFILE = "p1";
 const SOURCE = "train2go";
@@ -83,7 +86,7 @@ describe("hydrateMatchedSessions", () => {
     const match = seedMatch();
 
     // Act
-    const result = await hydrateMatchedSessions([match]);
+    const result = await hydrateMatchedSessions([match], readModel);
 
     // Assert
     expect(result.matched).toHaveLength(1);
@@ -101,7 +104,7 @@ describe("hydrateMatchedSessions", () => {
     const orphan = seedMatch({ coachingActivityId: SHORT });
 
     // Act
-    const result = await hydrateMatchedSessions([orphan]);
+    const result = await hydrateMatchedSessions([orphan], readModel);
 
     // Assert
     expect(result.matched).toEqual([]);
@@ -130,7 +133,7 @@ describe("hydrateMatchedSessions", () => {
     });
 
     // Act
-    const result = await hydrateMatchedSessions([orphan]);
+    const result = await hydrateMatchedSessions([orphan], readModel);
 
     // Assert
     expect(result.matched).toEqual([]);
@@ -151,7 +154,7 @@ describe("hydrateMatchedSessions", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     // Act
-    const result = await hydrateMatchedSessions([good, orphan]);
+    const result = await hydrateMatchedSessions([good, orphan], readModel);
 
     // Assert
     expect(result.matched.map((m) => m.match.id)).toEqual(["m-1"]);
