@@ -144,6 +144,45 @@ const parseDailyHtml = (html) => {
   return activities;
 };
 
+// Convert a single `<a href="URL">label</a>` to markdown `[label](url)`
+// BEFORE the strip-all pass so the URL survives (T2G ships anchors that
+// the strip-all below would otherwise reduce to bare label text). An
+// anchor with no `href`, or with empty label text, contributes only its
+// plain-text label. The `href` is decoded later by the shared
+// `decodeEntities` pass, so `&amp;` query separators become `&`.
+const anchorToMarkdown = (_match, attrs, inner) => {
+  const href = attrs.match(/\bhref\s*=\s*"([^"]*)"/i)?.[1];
+  const label = inner.replace(/<[^>]+>/g, "").trim();
+  return href && label ? `[${label}](${href})` : label;
+};
+
+// Shared HTML-fragment → plain-text pipeline for both activity
+// descriptions and comment bodies. Preserves `<strong>` as `**`,
+// `<a href>` as `[label](url)`, and break/block tags as newlines;
+// strips every other tag. Callers strip fragment-specific wrappers
+// (SVGs, the trailing `activity-hint-ecos` div) BEFORE calling.
+const htmlFragmentToText = (fragment) => {
+  let text = fragment.replace(/<strong>([^<]*)<\/strong>/g, "**$1**");
+  // `<\/a\s*>` (not `<\/a>`) tolerates whitespace before the closing
+  // bracket so both compact server HTML and pretty-printed fixtures
+  // (which wrap the tag as `</a\n>`) convert correctly.
+  text = text.replace(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi, anchorToMarkdown);
+  // Convert breaks and block-level tags to newlines BEFORE stripping
+  // remaining HTML. Without `<li>`/`</li>`/`</p>` conversion the live
+  // single-line T2G shape `<p>title</p><ul><li>a</li><li>b</li></ul>`
+  // collapses to `titleab` after strip-all (user-reported regression).
+  text = text.replace(/<br\s*\/?>/gi, "\n");
+  text = text.replace(/<\/(p|h[1-6]|li|ul|ol)>/gi, "\n");
+  text = text.replace(/<(p|li)\b[^>]*>/gi, "\n");
+  text = replaceUntilStable(text, /<[^>]+>/g, "");
+  text = decodeEntities(text);
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l)
+    .join("\n");
+};
+
 const extractDescription = (block) => {
   // The lookahead boundary MUST stop at the start of the next sibling
   // tag (the `<div class="activity-hint-ecos ...">` block, or the form
@@ -163,33 +202,67 @@ const extractDescription = (block) => {
   // and all — which is intentional for the trailing
   // `activity-hint-ecos` div but would also eat bullets if Train2Go
   // ever wrapped them in <div> instead of <ul><li>. Bullets currently
-  // arrive as <ul><li>, so we mirror htmlToPlainText's pattern below
-  // (convert closing block-level tags to "\n" BEFORE strip-all) to
-  // preserve the line break that <li> implies.
+  // arrive as <ul><li>, so we mirror htmlToPlainText's pattern (convert
+  // closing block-level tags to "\n" BEFORE strip-all) to preserve the
+  // line break that <li> implies.
   text = text.replace(/<div[\s\S]*?<\/div>/g, "");
-  // Preserve bold markers
-  text = text.replace(/<strong>([^<]*)<\/strong>/g, "**$1**");
-  // Convert breaks and block-level tags to newlines BEFORE stripping
-  // remaining HTML. Without `<li>`/`</li>`/`</p>` conversion the live
-  // single-line T2G shape `<p>title</p><ul><li>a</li><li>b</li></ul>`
-  // collapses to `titleab` after strip-all (user-reported regression).
-  text = text.replace(/<br\s*\/?>/gi, "\n");
-  text = text.replace(/<\/(p|h[1-6]|li|ul|ol)>/gi, "\n");
-  text = text.replace(/<(p|li)\b[^>]*>/gi, "\n");
-  // Strip remaining HTML
-  text = replaceUntilStable(text, /<[^>]+>/g, "");
-  text = decodeEntities(text);
-  // Clean up whitespace
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l)
-    .join("\n");
+  return htmlFragmentToText(text);
 };
 
 const extractCompletion = (block) => {
   const pctMatch = block.match(/class="percent[^"]*"[^>]*>\s*(\d+)%/);
   return pctMatch ? Number(pctMatch[1]) : 0;
+};
+
+/**
+ * Parse the day-scoped comment thread from the daily workplan HTML.
+ *
+ * Comments live in the `div.comments` block of the daily sidebar's right
+ * column. Each `<div class="comment">` yields:
+ *   - author    (from the avatar `<picture title="...">`)
+ *   - isOwn     (the viewer's own comments carry a delete button whose
+ *                `data-remote` targets `/api/v2/comments/{id}`)
+ *   - timestamp (verbatim `<time datetime="...">`)
+ *   - text      (body after `</time>`, via the shared description pipeline)
+ *
+ * Returns [] when there is no comments block. Malformed entries (no
+ * `<time>`) are skipped. Avatar image URLs are never emitted.
+ */
+const extractComments = (html) => {
+  if (!html || typeof html !== "string") return [];
+
+  const comments = [];
+  // `class="comment"` (closing quote right after `comment`) uniquely
+  // identifies a comment wrapper — it does NOT match the container
+  // `class="comments "`. The first chunk is everything before the first
+  // comment; skip it.
+  const blocks = html.split(/<div class="comment"/);
+  for (const block of blocks.slice(1)) {
+    const dt = block.match(/<time[^>]*\bdatetime="([^"]*)"/);
+    // `\s*` before the closing bracket tolerates pretty-printed HTML
+    // (`</time\n>`) as well as compact server output.
+    const close = block.match(/<\/time\s*>/);
+    if (!dt || !close || close.index === undefined) continue; // malformed
+
+    // Metadata lives BEFORE the timestamp (avatar picture + the delete
+    // button on own comments); the body lives AFTER it.
+    const head = block.slice(0, close.index);
+    const author = head.match(/<picture[^>]*\btitle="([^"]*)"/)?.[1] ?? "";
+    const isOwn = /data-remote="[^"]*\/api\/v2\/comments\/\d/.test(head);
+
+    const afterTime = block.slice(close.index + close[0].length);
+    const bodyEnd = afterTime.search(/<\/div\s*>/);
+    const bodyHtml = bodyEnd >= 0 ? afterTime.slice(0, bodyEnd) : afterTime;
+
+    comments.push({
+      author: decodeEntities(author),
+      isOwn,
+      timestamp: dt[1],
+      text: htmlFragmentToText(bodyHtml),
+    });
+  }
+
+  return comments;
 };
 
 /**
@@ -578,6 +651,7 @@ if (typeof self !== "undefined" && typeof module === "undefined") {
   self.decodeEntities = decodeEntities;
   self.extractDescription = extractDescription;
   self.extractCompletion = extractCompletion;
+  self.extractComments = extractComments;
 }
 
 // Exported for testing (Node.js / vitest)
@@ -590,6 +664,7 @@ if (typeof module !== "undefined") {
     decodeEntities,
     extractDescription,
     extractCompletion,
+    extractComments,
     htmlToPlainText,
   };
 }

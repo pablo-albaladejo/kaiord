@@ -7,8 +7,8 @@
  * deleting a non-active profile or right after a switch).
  *
  * The cascade covers every per-profile repository: workouts, coaching
- * activities, coaching sync state, session matches, auto-match
- * dismissals, and user preferences. Each repository's deletion method
+ * activities, coaching day notes, coaching sync state, session matches,
+ * auto-match dismissals, and user preferences. Each repository's deletion method
  * is called once with the deleted profile id. As of Dexie v13 workouts
  * are profile-scoped 1–1 (see `dexie-v13-migration.ts`), so they are
  * included in the cascade — `isPerProfileTable` also auto-discovers
@@ -28,6 +28,7 @@
 import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismissal-repository";
 import type { HealthCleanupRepository } from "../../ports/health-cleanup-repository";
 import type {
+  CoachingDayNotesRepository,
   CoachingRepository,
   CoachingSyncStateRepository,
   WorkoutRepository,
@@ -38,6 +39,7 @@ import type { UserPreferencesRepository } from "../../ports/user-preferences-rep
 export type DeleteProfileWithCascadeDeps = {
   workouts: WorkoutRepository;
   coaching: CoachingRepository;
+  coachingDayNotes: CoachingDayNotesRepository;
   coachingSyncState: CoachingSyncStateRepository;
   sessionMatch: SessionMatchRepository;
   autoMatchDismissal: AutoMatchDismissalRepository;
@@ -54,6 +56,7 @@ export const deleteProfileWithCascade = async (
   await Promise.all([
     deps.workouts.deleteByProfile(deletedProfileId),
     deps.coaching.deleteByProfile(deletedProfileId),
+    deps.coachingDayNotes.deleteByProfile(deletedProfileId),
     deps.coachingSyncState.deleteByProfile(deletedProfileId),
     deps.sessionMatch.deleteByProfile(deletedProfileId),
     deps.autoMatchDismissal.deleteByProfile(deletedProfileId),

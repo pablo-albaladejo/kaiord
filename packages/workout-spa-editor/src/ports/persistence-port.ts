@@ -16,6 +16,7 @@ import type {
 } from "../types/health/health-records";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 import type {
+  CoachingDayNotesRepository,
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
@@ -35,6 +36,7 @@ import type { WorkoutRepository } from "./workout-repository";
 
 export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 export type {
+  CoachingDayNotesRepository,
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
@@ -64,6 +66,8 @@ export type PersistencePort = {
   usage: UsageRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
+  // Day-scoped coaching comment threads (Train2Go coach/athlete notes).
+  coachingDayNotes: CoachingDayNotesRepository;
   // Per-profile integration policies (training-zones import/export gating).
   integrationPolicy: IntegrationPolicyRepository;
   // Profile-scoped repos previously created on demand via direct `db`

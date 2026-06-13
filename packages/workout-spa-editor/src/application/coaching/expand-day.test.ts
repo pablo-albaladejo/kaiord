@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
+import type { CoachingDayComment } from "../../types/coaching-day-notes-record";
 import type { Profile } from "../../types/profile";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { expandDay } from "./expand-day";
@@ -30,9 +32,18 @@ const transport = (
   ping: vi.fn(),
   openExternal: vi.fn(),
   readWeek: vi.fn(),
-  readDay: vi.fn(async () => []),
+  readDay: vi.fn(async () => ({ activities: [] })),
   ...overrides,
 });
+
+const COMMENTS: CoachingDayComment[] = [
+  {
+    author: "Daniel",
+    isOwn: false,
+    timestamp: "2026-04-13 09:00:00",
+    text: "Buen entreno",
+  },
+];
 
 describe("expandDay", () => {
   let deps: Parameters<typeof expandDay>[0];
@@ -42,6 +53,7 @@ describe("expandDay", () => {
     deps = {
       profiles,
       coaching: createInMemoryCoachingRepository(),
+      coachingDayNotes: createInMemoryCoachingDayNotesRepository(),
       transport: transport(),
     };
   });
@@ -103,5 +115,118 @@ describe("expandDay", () => {
       reason: "transport-error",
       error: "network down",
     });
+  });
+
+  it("should persist the day comment thread returned by readDay", async () => {
+    // Arrange
+    const t = transport({
+      readDay: vi.fn(async () => ({ activities: [], comments: COMMENTS })),
+    });
+    deps = { ...deps, transport: t };
+
+    // Act
+    await expandDay(deps, "p1", "2026-04-13");
+
+    // Assert
+    const notes = await deps.coachingDayNotes.getByDate(
+      "p1",
+      "train2go",
+      "2026-04-13"
+    );
+    expect(notes?.comments).toEqual(COMMENTS);
+  });
+
+  it("should replace the stored thread wholesale on re-fetch", async () => {
+    // Arrange
+    await deps.coachingDayNotes.upsert({
+      id: "p1:train2go:2026-04-13",
+      profileId: "p1",
+      source: "train2go",
+      date: "2026-04-13",
+      comments: COMMENTS,
+      fetchedAt: "2026-04-13T08:00:00.000Z",
+    });
+    const t = transport({
+      readDay: vi.fn(async () => ({ activities: [], comments: [] })),
+    });
+    deps = { ...deps, transport: t };
+
+    // Act
+    await expandDay(deps, "p1", "2026-04-13");
+
+    // Assert
+    const notes = await deps.coachingDayNotes.getByDate(
+      "p1",
+      "train2go",
+      "2026-04-13"
+    );
+    expect(notes?.comments).toEqual([]);
+  });
+
+  it("should leave local notes untouched when readDay omits comments", async () => {
+    // Arrange
+    await deps.coachingDayNotes.upsert({
+      id: "p1:train2go:2026-04-13",
+      profileId: "p1",
+      source: "train2go",
+      date: "2026-04-13",
+      comments: COMMENTS,
+      fetchedAt: "2026-04-13T08:00:00.000Z",
+    });
+    const t = transport({
+      readDay: vi.fn(async () => ({ activities: [] })),
+    });
+    deps = { ...deps, transport: t };
+
+    // Act
+    await expandDay(deps, "p1", "2026-04-13");
+
+    // Assert
+    const notes = await deps.coachingDayNotes.getByDate(
+      "p1",
+      "train2go",
+      "2026-04-13"
+    );
+    expect(notes?.comments).toEqual(COMMENTS);
+  });
+
+  it("should still upsert activities when day-notes persistence throws", async () => {
+    // Arrange
+    const coaching = createInMemoryCoachingRepository();
+    const throwingNotes = {
+      getByDate: async () => undefined,
+      upsert: async () => {
+        throw new Error("notes write failed");
+      },
+      deleteByProfile: async () => undefined,
+    };
+    const t = transport({
+      readDay: vi.fn(async () => ({
+        activities: [
+          {
+            id: "p1:train2go:Z",
+            profileId: "p1",
+            source: "train2go",
+            sourceId: "Z",
+            date: "2026-04-13",
+            sport: "cycling",
+            title: "Intervals",
+            status: "pending" as const,
+            description: "desc",
+            fetchedAt: "2026-04-13T08:00:00.000Z",
+          },
+        ],
+        comments: COMMENTS,
+      })),
+    });
+    deps = { ...deps, coaching, coachingDayNotes: throwingNotes, transport: t };
+
+    // Act
+    const result = await expandDay(deps, "p1", "2026-04-13");
+
+    // Assert
+    expect(result).toEqual({ ok: true, activityCount: 1 });
+    const stored = await coaching.getById("p1:train2go:Z");
+    expect(stored?.description).toBe("desc");
   });
 });

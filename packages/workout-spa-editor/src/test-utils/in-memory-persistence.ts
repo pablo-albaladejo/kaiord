@@ -14,6 +14,7 @@ import {
   type CustomPromptRef,
 } from "./in-memory-ai-provider-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "./in-memory-auto-match-dismissal-repository";
+import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
@@ -45,6 +46,7 @@ export function createInMemoryPersistence(): PersistencePort {
     usage: new Map(),
     coaching: new Map(),
     coachingSyncState: new Map(),
+    coachingDayNotes: new Map(),
     integrationPolicies: new Map(),
     sessionMatch: new Map(),
     autoMatchDismissal: new Map(),
@@ -76,6 +78,9 @@ export function createInMemoryPersistence(): PersistencePort {
     coaching: createInMemoryCoachingRepository(stores.coaching),
     coachingSyncState: createInMemoryCoachingSyncStateRepository(
       stores.coachingSyncState
+    ),
+    coachingDayNotes: createInMemoryCoachingDayNotesRepository(
+      stores.coachingDayNotes
     ),
     integrationPolicy: createInMemoryIntegrationPolicyRepository(
       stores.integrationPolicies
