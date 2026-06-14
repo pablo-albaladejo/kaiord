@@ -1,4 +1,4 @@
-import type { ModelMessage } from "ai";
+import type { JSONValue, ModelMessage } from "ai";
 import type { ToolResolution } from "./chat-types";
 
 /**
@@ -11,9 +11,9 @@ export const appendToolResult = (
   messages: ModelMessage[],
   resolution: ToolResolution
 ): ModelMessage[] => {
-  const value =
+  const value: JSONValue =
     resolution.status === "approved"
-      ? resolution.output
+      ? (resolution.output as JSONValue)
       : { declined: true, reason: "The user declined this action." };
 
   const toolMessage: ModelMessage = {
@@ -23,7 +23,7 @@ export const appendToolResult = (
         type: "tool-result",
         toolCallId: resolution.toolCallId,
         toolName: resolution.toolName,
-        output: { type: "json", value: value as never },
+        output: { type: "json", value },
       },
     ],
   };

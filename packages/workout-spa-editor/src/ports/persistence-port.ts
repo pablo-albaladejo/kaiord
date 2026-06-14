@@ -69,11 +69,8 @@ export type PersistencePort = HealthRepositories & {
   coachingDayNotes: CoachingDayNotesRepository;
   // Per-profile integration policies (training-zones import/export gating).
   integrationPolicy: IntegrationPolicyRepository;
-  // Profile-scoped repos previously created on demand via direct `db`
-  // imports. Routing them through PersistencePort keeps the cascade
-  // (deleteProfileWithCascade) bound to the same database instance the
-  // outer `transaction` opens, so a different PersistencePort backed by
-  // a different db cannot accidentally split writes.
+  // Profile-scoped repos routed through PersistencePort so the cascade and
+  // `transaction` bind to one db instance (no accidental split writes).
   sessionMatch: SessionMatchRepository;
   // Read-only (CQRS) query surface for the matched-sessions calendar
   // projections. Lets the reactive hooks read their join data through the
@@ -84,11 +81,9 @@ export type PersistencePort = HealthRepositories & {
   // Cross-table cleanup for the six v16 health-domain stores —
   // single-shot deleteByProfile invoked by the profile-delete cascade.
   healthCleanup: HealthCleanupRepository;
-  // The six typed per-metric health repositories come from the intersected
-  // `HealthRepositories` type.
-  // Per-profile AI chat transcript (one rolling conversation per profile).
-  // Append-only; cascade-deleted on profile removal. Clear-conversation
-  // tombstones each removed message via the clear use case.
+  // (The six per-metric health repos are intersected in via HealthRepositories.)
+  // Per-profile AI chat transcript; append-only, cascade-deleted on profile
+  // removal. Clear-conversation tombstones each message via the clear use case.
   chatMessages: ChatMessageRepository;
   // Delete markers for cross-device sync. Written by the `withTombstones`
   // decorator on every delete; read by the snapshot/merge use cases.
