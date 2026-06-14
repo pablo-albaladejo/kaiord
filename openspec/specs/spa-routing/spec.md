@@ -1,4 +1,4 @@
-> Synced: 2026-05-01
+> Synced: 2026-06-14 (add-spa-ai-chatbot)
 
 # SPA Routing
 
@@ -63,11 +63,11 @@ Each SPA editor surface (top-level UI region invoked from a header button or fro
 
 A surface SHALL NOT exist as both a routed page AND a header-mounted modal that share the same content component, because feature drift between the two surfaces is otherwise inevitable. If both browse-and-manage and pick-in-flow are needed for the same content, the page covers the former and a separate narrow picker dialog covers the latter.
 
-The Workout Library is the canonical case: the `/library` page is the destination; a narrow template picker dialog (mounted by the calendar's empty-day flow with a `date` prop) is the in-flow picker. URLs referenced in this requirement (e.g. `/library`, `/calendar`) are base-relative and resolve to deploy-prefixed URLs per the SPA router base alignment requirement above.
+The Workout Library is the canonical case: the `/library` page is the destination; a narrow template picker dialog (mounted by the calendar's empty-day flow with a `date` prop) is the in-flow picker. URLs referenced in this requirement (e.g. `/library`, `/calendar`, `/chat`) are base-relative and resolve to deploy-prefixed URLs per the SPA router base alignment requirement above.
 
 Examples in the SPA editor today (non-normative):
 
-- Routed pages: Calendar, Library, Workout (new and edit).
+- Routed pages: Calendar, Library, Workout (new and edit), Chat.
 - Meta modals: Settings, Help, Profile.
 - In-flow picker dialogs: the calendar's empty-day "Add from Library" picker.
 
@@ -81,6 +81,11 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 
 - **WHEN** the user clicks the "Library" button in the desktop or mobile navigation header
 - **THEN** the SPA SHALL navigate to the base-relative URL `/library`, the page surface SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount as a result of the click
+
+#### Scenario: Chat is classified as a routed page
+
+- **WHEN** the user activates the Chat entry in the navigation
+- **THEN** the SPA SHALL navigate to the base-relative URL `/chat`, the chat page SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount as a result of the activation
 
 #### Scenario: Settings, Help, and Profile are classified as meta modals
 
@@ -105,7 +110,7 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 #### Scenario: Route change announces a single label
 
 - **WHEN** the wouter pathname changes (e.g., user navigates from `/calendar` to `/library`)
-- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Daily page", "Calendar page", "New workout", "Edit workout") so assistive technology announces the navigation as a single unit
+- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Daily page", "Calendar page", "New workout", "Edit workout", "Chat page") so assistive technology announces the navigation as a single unit
 
 #### Scenario: Route change moves focus to the page heading
 

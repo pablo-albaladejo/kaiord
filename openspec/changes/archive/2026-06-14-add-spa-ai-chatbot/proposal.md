@@ -1,3 +1,5 @@
+> Completed: 2026-06-14
+
 # Add SPA AI Chat Assistant
 
 ## Why

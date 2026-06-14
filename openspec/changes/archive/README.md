@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-06-14 | [`add-spa-ai-chatbot`](./2026-06-14-add-spa-ai-chatbot/) | Add SPA AI Chat Assistant |
 | 2026-06-13 | [`code-semantics-hardening`](./2026-06-13-code-semantics-hardening/) | code-semantics-hardening |
 | 2026-06-13 | [`train2go-links-and-day-comments`](./2026-06-13-train2go-links-and-day-comments/) | Coaches routinely attach YouTube/Dropbox links to Train2Go workout descriptions and hold per-day comment threads with their athletes, but neither survives the … |
 | 2026-06-11 | [`test-minimality-naming-hardening`](./2026-06-11-test-minimality-naming-hardening/) | test-minimality-naming-hardening |
