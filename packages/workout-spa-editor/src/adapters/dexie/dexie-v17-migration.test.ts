@@ -13,9 +13,9 @@ const dbName = (suffix: string) =>
   `kaiord-test-v17-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V16 = 16;
-// Current head version KaiordDatabase opens at; bumped to 20 when the
-// coachingDayNotes table was added (train2go-links-and-day-comments).
-const SCHEMA_HEAD = 20;
+// Current head version KaiordDatabase opens at; v20 added coachingDayNotes,
+// v21 added chatMessages (this change).
+const SCHEMA_HEAD = 21;
 const STORES_V16 = {
   profiles: "id",
   linkedAccounts: "id",

@@ -9,6 +9,7 @@ import { HealthSubRouter } from "./components/pages/health/health-routes";
 import {
   AthletePage,
   CalendarPage,
+  ChatPage,
   DailyPage,
   EditorPage,
   LibraryPage,
@@ -46,6 +47,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         </Route>
         <Route path="/calendar/:weekId">{guard(<CalendarPage />)}</Route>
         <Route path="/athlete">{guard(<AthletePage />)}</Route>
+        <Route path="/chat">{guard(<ChatPage />)}</Route>
         <Route path="/library">{guard(<LibraryPage />)}</Route>
         <Route path="/workout/new">{guard(<NewWorkoutRoute />)}</Route>
         <Route path="/workout/view/:id">

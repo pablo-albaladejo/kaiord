@@ -54,3 +54,40 @@ describe("SCHEMAS.v16 (health-domain stores)", () => {
     expect(added.sort()).toEqual([...HEALTH_STORES].sort());
   });
 });
+
+describe("SCHEMAS.v21 (chat transcript store)", () => {
+  it("should declare chatMessages with the per-profile chronological index", () => {
+    // Arrange
+    const stores = SCHEMAS.v21 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    expect(stores.chatMessages).toBe("id, profileId, [profileId+createdAt]");
+  });
+
+  it("should add exactly the chatMessages store on top of v20", () => {
+    // Arrange
+    const v20Keys = new Set(Object.keys(SCHEMAS.v20));
+    const v21Keys = new Set(Object.keys(SCHEMAS.v21));
+    const added = [...v21Keys].filter((k) => !v20Keys.has(k));
+
+    // Act
+
+    // Assert
+    expect(added).toEqual(["chatMessages"]);
+  });
+
+  it("should leave every v20 store byte-equivalent to its v20 form", () => {
+    // Arrange
+    const v20 = SCHEMAS.v20 as Record<string, string>;
+    const v21 = SCHEMAS.v21 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    for (const key of Object.keys(v20)) {
+      expect(v21[key]).toBe(v20[key]);
+    }
+  });
+});

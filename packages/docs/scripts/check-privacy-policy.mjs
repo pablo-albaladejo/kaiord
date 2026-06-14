@@ -126,6 +126,15 @@ const REQUIRED_RULES = [
     re: /Anthropic.*OpenAI.*Google/s,
   },
   {
+    label:
+      "Chat assistant data flow disclosed (health summaries, user-initiated)",
+    re: /chat assistant[\s\S]*?health/i,
+  },
+  {
+    label: "Chat transcripts client-side storage disclosed",
+    re: /chat transcripts?/i,
+  },
+  {
     label: "Client-side-only storage clarified (IndexedDB / Dexie)",
     re: /IndexedDB/i,
   },

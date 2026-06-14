@@ -17,9 +17,9 @@ import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 
 const PASSPHRASE = "kaiord-spa-v1";
-// Current head version KaiordDatabase opens at; bumped to 20 when the
-// coachingDayNotes table was added (train2go-links-and-day-comments).
-const SCHEMA_HEAD = 20;
+// Current head version KaiordDatabase opens at; v20 added coachingDayNotes
+// (train2go-links-and-day-comments), v21 added chatMessages (this change).
+const SCHEMA_HEAD = 21;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -47,6 +47,27 @@ describe("createDexieSnapshotPort", () => {
     expect(snapshot.manifest.schemaVersion).toBe(SCHEMA_HEAD);
     expect(snapshot.tables.workouts).toHaveLength(1);
     expect(snapshot.tables).toHaveProperty("templates");
+  });
+
+  it("should include the chatMessages store in the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("chatMessages").add({
+      id: "c-1",
+      profileId: "p-1",
+      role: "user",
+      content: "hi",
+      createdAt: "2026-06-13T10:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables.chatMessages).toHaveLength(1);
   });
 
   it("should round-trip a cleared database back to its original rows", async () => {

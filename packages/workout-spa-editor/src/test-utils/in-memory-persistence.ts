@@ -14,6 +14,7 @@ import {
   type CustomPromptRef,
 } from "./in-memory-ai-provider-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "./in-memory-auto-match-dismissal-repository";
+import { createInMemoryChatMessageRepository } from "./in-memory-chat-message-repository";
 import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
@@ -58,6 +59,7 @@ export function createInMemoryPersistence(): PersistencePort {
     healthDaily: new Map(),
     healthBodyComposition: new Map(),
     healthStress: new Map(),
+    chatMessages: new Map(),
     tombstones: new Map(),
   };
   const profileActiveIdRef: ActiveIdRef = { current: null };
@@ -123,6 +125,7 @@ export function createInMemoryPersistence(): PersistencePort {
       stores.healthBodyComposition
     ),
     healthStress: createInMemoryHealthRecordRepository(stores.healthStress),
+    chatMessages: createInMemoryChatMessageRepository(stores.chatMessages),
     tombstones: createInMemoryTombstoneRepository(stores.tombstones),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(

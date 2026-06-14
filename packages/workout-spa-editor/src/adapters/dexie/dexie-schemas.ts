@@ -128,9 +128,9 @@ export const SCHEMAS = {
   v18: CORE_V18,
   v19: CORE_V19,
   v20: CORE_V20,
+  // v21 — additive `chatMessages` store for the in-SPA AI chat transcript.
+  // Append-only rows keyed on `id` (nanoid); `[profileId+createdAt]` serves
+  // the per-profile chronological read and makes the table a cascade target.
+  // ISO-8601 `createdAt` lets the snapshot merge clock apply (no `updatedAt`).
+  v21: { ...CORE_V20, chatMessages: "id, profileId, [profileId+createdAt]" },
 } as const;
-
-/** Backfills `linkedAccounts: []` on profile rows missing the field. */
-export const backfillLinkedAccounts = (row: Record<string, unknown>): void => {
-  if (!Array.isArray(row.linkedAccounts)) row.linkedAccounts = [];
-};

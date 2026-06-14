@@ -53,6 +53,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
               autoMatchDismissal: persistence.autoMatchDismissal,
               userPreferences: persistence.userPreferences,
               healthCleanup: persistence.healthCleanup,
+              chatMessages: persistence.chatMessages,
             },
             id
           );

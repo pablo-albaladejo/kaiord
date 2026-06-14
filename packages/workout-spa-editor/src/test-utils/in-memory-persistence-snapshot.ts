@@ -8,6 +8,7 @@
 
 import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
+import type { ChatMessageRecord } from "../types/chat/chat-message-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { CoachingDayNotesRecord } from "../types/coaching-day-notes-record";
 import type { CoachingSyncStateRecord } from "../types/coaching-sync-state";
@@ -50,6 +51,7 @@ export type Stores = {
   healthDaily: Map<string, HealthDailyRecord>;
   healthBodyComposition: Map<string, HealthBodyCompositionRecord>;
   healthStress: Map<string, HealthStressRecord>;
+  chatMessages: Map<string, ChatMessageRecord>;
   tombstones: Map<string, Tombstone>;
 };
 
@@ -86,6 +88,7 @@ export const captureSnapshot = (
   healthDaily: new Map(stores.healthDaily),
   healthBodyComposition: new Map(stores.healthBodyComposition),
   healthStress: new Map(stores.healthStress),
+  chatMessages: new Map(stores.chatMessages),
   tombstones: new Map(stores.tombstones),
   profileActiveId: activeIdRef.current,
   aiCustomPrompt: customPromptRef.current,
