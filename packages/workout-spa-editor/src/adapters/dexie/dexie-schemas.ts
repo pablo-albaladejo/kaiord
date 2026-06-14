@@ -116,18 +116,6 @@ const CORE_V19 = {
 // auto-creates the store empty on upgrade — no data migration.
 const CORE_V20 = { ...CORE_V19, coachingDayNotes: "id, [profileId+date]" };
 
-// v21 — additive `chatMessages` store for the in-SPA AI chat transcript
-// (add-spa-ai-chatbot). PK is the message `id` (nanoid); `profileId` and
-// `[profileId+createdAt]` index the per-profile chronological read and make
-// the table an automatic per-profile cascade target. Append-only rows carry
-// an ISO-8601 `createdAt` so the snapshot merge clock applies without an
-// `updatedAt`. Dexie auto-creates the store empty on upgrade — no data
-// transform; every existing table is carried over unchanged.
-const CORE_V21 = {
-  ...CORE_V20,
-  chatMessages: "id, profileId, [profileId+createdAt]",
-};
-
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -140,5 +128,9 @@ export const SCHEMAS = {
   v18: CORE_V18,
   v19: CORE_V19,
   v20: CORE_V20,
-  v21: CORE_V21,
+  // v21 — additive `chatMessages` store for the in-SPA AI chat transcript.
+  // Append-only rows keyed on `id` (nanoid); `[profileId+createdAt]` serves
+  // the per-profile chronological read and makes the table a cascade target.
+  // ISO-8601 `createdAt` lets the snapshot merge clock apply (no `updatedAt`).
+  v21: { ...CORE_V20, chatMessages: "id, profileId, [profileId+createdAt]" },
 } as const;
