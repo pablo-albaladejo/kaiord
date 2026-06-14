@@ -1,36 +1,74 @@
-Single Purpose Description
+Chrome Web Store — Privacy practices form answers (Train2Go bridge)
+====================================================================
+Copy-paste reference for the item's "Privacy" tab in the CWS Developer
+Dashboard. Headings mirror the dashboard form fields. Keep this in sync
+with manifest.prod.json permissions: tabs, storage, scripting +
+host https://app.train2go.com/* and the *.kaiord.com content script.
+
+
+Single purpose description
 --------------------------
-Kaiord Train2Go Bridge reads training plans from the Train2Go coaching platform
-and bridges them to the Kaiord workout editor for editing, conversion, and
-push to fitness devices.
+Reads training plans from the Train2Go coaching platform and bridges them to
+the Kaiord workout editor for editing, conversion, and push to fitness devices.
 
-Host Permission Justification
+
+Permission justification
+------------------------
+tabs
+  Why: Query for open Train2Go tabs to route messages to the content script,
+  and open new Train2Go tabs via the popup action.
+  Usage: chrome.tabs.query({ url: "https://app.train2go.com/*" }) and
+  chrome.tabs.create().
+
+storage
+  Why: Persist the user's pushed Train2Go profile snapshot and a "last push"
+  receipt locally, so the popup can show connection status and the most recent
+  push without re-fetching.
+  Usage: chrome.storage.local.set/get/remove for the keys profileSnapshot,
+  lastWeeklyRollup, and lastPushReceipt. Stored only on the user's device —
+  never synced and never sent to any server.
+
+scripting
+  Why: Chrome MV3 terminates content scripts in already-open tabs when the
+  extension updates or reloads and does not re-inject them automatically.
+  Without re-injection, messaging to those tabs fails and the bridge silently
+  breaks until the user reopens every tab.
+  Usage: On chrome.runtime.onInstalled, chrome.scripting.executeScript
+  re-injects the extension's own bundled content script into already-open tabs
+  whose URL is covered by the extension's host permissions. Only the bundled
+  script is injected — no remote or dynamically generated code.
+
+
+Host permission justification
 -----------------------------
-Host permission: https://app.train2go.com/*
+(The form counts match patterns from both "permissions" and "content_scripts".)
 
-The extension injects a content script into Train2Go pages to read the coaching
-plan DOM (training sessions, workout structures, dates). This data is sent via
-chrome.runtime messaging to the extension popup, which forwards it to the Kaiord
-SPA. No data is modified on the Train2Go page. No network requests are made to
-Train2Go servers — all reading is done from the already-loaded page DOM.
+https://app.train2go.com/*
+  The content script runs on Train2Go pages to read the coaching-plan DOM
+  (training sessions, workout structures, dates, coach comments) and relay it to
+  the extension via messaging. No data is modified on the page, and no network
+  requests are made to Train2Go servers — reading is from the already-loaded DOM.
 
-Tabs Permission Justification
------------------------------
-Permission: tabs
+https://*.kaiord.com/*
+  A small announce content script posts the extension's runtime ID, name, and
+  capabilities to the Kaiord web app (via window.postMessage) so the app can
+  discover and message the extension. It does NOT read or collect any page
+  content from kaiord.com.
 
-Used for two purposes:
-1. chrome.tabs.query({ url: "https://app.train2go.com/*" }) — detect whether the
-   user has an active Train2Go session open, to show connection status in the popup.
-2. chrome.tabs.create() — open a new Train2Go tab when the user clicks "Open
-   Train2Go" in the popup and no active tab exists.
 
-No tab URLs, titles, or browsing history are read beyond the Train2Go domain match.
+Are you using remote code?
+--------------------------
+No. The scripting permission injects only the extension's own bundled content
+script; there is no eval, no remotely hosted code, and no dynamically fetched
+scripts.
 
-Data Handling
+
+Data handling
 -------------
-- No user data is collected, stored, or transmitted to any server
-- No analytics, telemetry, or tracking of any kind
-- No cookies, tokens, or credentials are accessed
-- Training plan data is read on-demand from the page DOM and discarded after use
+- No user data is collected, stored remotely, transmitted to any server, sold,
+  or used for any purpose unrelated to the single purpose above.
+- No analytics, telemetry, or tracking.
+- The profile snapshot persisted via chrome.storage.local stays on the user's
+  device and is removed on disconnect.
 - The extension communicates only with app.train2go.com (content script) and
-  kaiord.com (externally_connectable messaging)
+  *.kaiord.com (announce content script + externally_connectable messaging).
