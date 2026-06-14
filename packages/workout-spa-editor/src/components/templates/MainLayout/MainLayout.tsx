@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useFocusOnRouteChange } from "../../../hooks/use-focus-on-route-change";
 import { useRouteAnnouncerLabel } from "../../../hooks/use-route-announcer-label";
 import { BottomNav } from "../../molecules/BottomNav";
+import { ChatFab } from "../../molecules/ChatFab";
 import { StorageAvailabilityBanner } from "../../molecules/StorageAvailabilityBanner";
 import { LayoutHeader } from "./LayoutHeader";
 
@@ -42,6 +43,7 @@ export const MainLayout = ({ children, onReplayTutorial }: MainLayoutProps) => {
       <main className="mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 py-6 pb-28 sm:px-6 lg:px-8 md:pb-6">
         {children}
       </main>
+      <ChatFab />
       <BottomNav />
     </div>
   );
