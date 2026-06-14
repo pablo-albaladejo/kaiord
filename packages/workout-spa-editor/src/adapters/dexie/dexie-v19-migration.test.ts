@@ -14,10 +14,10 @@ const dbName = (suffix: string) =>
   `kaiord-test-v19-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V18 = 18;
-// KaiordDatabase always opens at the current head version; opening a
-// seeded v18 db runs every forward migration (v19's tombstones table
-// included) and lands at head. Bumped to 20 with coachingDayNotes.
-const SCHEMA_HEAD = 20;
+// Opening KaiordDatabase always migrates to the latest registered version,
+// so a seeded v18 db lands at the current head (v20 coachingDayNotes,
+// v21 chatMessages), not exactly v19.
+const SCHEMA_HEAD = 21;
 const STORES_V18 = {
   workouts: "id, profileId, [profileId+date], date",
   meta: "key",

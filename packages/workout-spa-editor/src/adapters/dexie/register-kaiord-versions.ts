@@ -9,13 +9,14 @@
 
 import type Dexie from "dexie";
 
+import { backfillLinkedAccounts } from "./dexie-backfill-linked-accounts";
 import {
   applyV8Upgrade,
   applyV9Upgrade,
   backfillBridgeSnapshotState,
   backfillUsageRow,
 } from "./dexie-migrations";
-import { backfillLinkedAccounts, SCHEMAS } from "./dexie-schemas";
+import { SCHEMAS } from "./dexie-schemas";
 import {
   registerV10ToV12,
   registerV13ToV16,
@@ -23,6 +24,7 @@ import {
   registerV18,
   registerV19,
   registerV20,
+  registerV21,
 } from "./register-kaiord-versions-v10-plus";
 
 // Narrowed handle: only `version()` is needed and Dexie's full surface
@@ -87,4 +89,5 @@ export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV18(db);
   registerV19(db);
   registerV20(db);
+  registerV21(db);
 };

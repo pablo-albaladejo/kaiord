@@ -80,3 +80,10 @@ export const registerV20 = (db: DexieVersionHost): void => {
   // migration, existing tables untouched.
   db.version(20).stores(SCHEMAS.v20);
 };
+
+export const registerV21 = (db: DexieVersionHost): void => {
+  // v21 — additive `chatMessages` store for the AI chat transcript.
+  // Dexie auto-creates the new store empty on upgrade, so no data
+  // migration is needed and existing tables are untouched.
+  db.version(21).stores(SCHEMAS.v21);
+};
