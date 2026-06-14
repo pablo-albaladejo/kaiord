@@ -140,6 +140,14 @@ const makeSeedRow = (
       // index shape. The cascade-fan-out test only needs the primary key
       // and the per-profile + date indexed columns to round-trip a write.
       return { id, profileId, date: WEEK_START };
+    case "chatMessages":
+      return {
+        id,
+        profileId,
+        role: "user",
+        content: "hi",
+        createdAt: NOW,
+      };
     case "integrationPolicies":
       return {
         id,
@@ -177,6 +185,7 @@ const performCascadeOrchestration = async (
         autoMatchDismissal: persistence.autoMatchDismissal,
         userPreferences: persistence.userPreferences,
         healthCleanup: persistence.healthCleanup,
+        chatMessages: persistence.chatMessages,
       },
       profileId
     );
@@ -215,6 +224,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
     expect(discoveredNames).toEqual(
       expect.arrayContaining([
         "autoMatchDismissals",
+        "chatMessages",
         "coachingActivities",
         "coachingSyncState",
         "sessionMatches",

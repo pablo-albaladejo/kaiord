@@ -6,22 +6,15 @@
  */
 
 import type { IntegrationPolicyRepository } from "../application/integration-policy/integration-policy-repository.port";
-import type {
-  HealthBodyCompositionRecord,
-  HealthDailyRecord,
-  HealthHrvRecord,
-  HealthSleepRecord,
-  HealthStressRecord,
-  HealthWeightRecord,
-} from "../types/health/health-records";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
+import type { ChatMessageRepository } from "./chat-message-repository";
 import type {
   CoachingDayNotesRepository,
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
 import type { HealthCleanupRepository } from "./health-cleanup-repository";
-import type { HealthRecordRepository } from "./health-record-repository";
+import type { HealthRepositories } from "./health-repositories";
 import type { MatchedSessionsReadModel } from "./matched-sessions-read-model";
 import type { SessionMatchRepository } from "./session-match-repository";
 import type {
@@ -36,6 +29,7 @@ import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
 
 export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
+export type { ChatMessageRepository } from "./chat-message-repository";
 export type {
   CoachingRepository,
   CoachingSyncStateRepository,
@@ -62,7 +56,7 @@ export type { TombstoneRepository } from "./tombstone-repository";
 export type { UserPreferencesRepository } from "./user-preferences-repository";
 export type { WorkoutRepository } from "./workout-repository";
 
-export type PersistencePort = {
+export type PersistencePort = HealthRepositories & {
   workouts: WorkoutRepository;
   templates: TemplateRepository;
   profiles: ProfileRepository;
@@ -90,15 +84,12 @@ export type PersistencePort = {
   // Cross-table cleanup for the six v16 health-domain stores —
   // single-shot deleteByProfile invoked by the profile-delete cascade.
   healthCleanup: HealthCleanupRepository;
-  // Typed per-metric CRUD repositories backed by the v16 health stores.
-  // Read/write surface is identical (HealthRecordRepository<T>); only
-  // the payload type differs per metric.
-  healthSleep: HealthRecordRepository<HealthSleepRecord>;
-  healthWeight: HealthRecordRepository<HealthWeightRecord>;
-  healthHrv: HealthRecordRepository<HealthHrvRecord>;
-  healthDaily: HealthRecordRepository<HealthDailyRecord>;
-  healthBodyComposition: HealthRecordRepository<HealthBodyCompositionRecord>;
-  healthStress: HealthRecordRepository<HealthStressRecord>;
+  // The six typed per-metric health repositories come from the intersected
+  // `HealthRepositories` type.
+  // Per-profile AI chat transcript (one rolling conversation per profile).
+  // Append-only; cascade-deleted on profile removal. Clear-conversation
+  // tombstones each removed message via the clear use case.
+  chatMessages: ChatMessageRepository;
   // Delete markers for cross-device sync. Written by the `withTombstones`
   // decorator on every delete; read by the snapshot/merge use cases.
   tombstones: TombstoneRepository;
