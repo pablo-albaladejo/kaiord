@@ -57,6 +57,17 @@ describe("StatusEntryButtons", () => {
     expect(calendar).not.toHaveAttribute("aria-current");
   });
 
+  it("should mark the chat entry active on the chat route", () => {
+    // Arrange
+    renderAt("/chat");
+
+    // Act
+    const chat = screen.getByTestId("status-header-chat-button");
+
+    // Assert
+    expect(chat).toHaveAttribute("aria-current", "page");
+  });
+
   it("should mark the trends entry active on a nested health route", () => {
     // Arrange
     renderAt("/health/sleep");

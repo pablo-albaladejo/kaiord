@@ -3,6 +3,7 @@ import {
   Calendar,
   CalendarCheck,
   LayoutGrid,
+  MessageCircle,
   Plus,
   Settings,
   User,
@@ -53,6 +54,13 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
     label: "Trends",
     ariaLabel: "Open wellness trends",
     to: "/health",
+  },
+  {
+    id: "chat",
+    icon: MessageCircle,
+    label: "Chat",
+    ariaLabel: "Open chat assistant",
+    to: "/chat",
   },
   {
     id: "new",
