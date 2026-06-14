@@ -32,19 +32,19 @@
 - **WHEN** the user clears the conversation on device A and a later sync merges device B's snapshot (which still contains the old messages)
 - **THEN** the cleared messages SHALL remain deleted on both devices because the clear recorded a tombstone per deleted message
 
-### Requirement: Dexie v20 migration
+### Requirement: Dexie v21 migration
 
-The Dexie schema SHALL add version 20 introducing the `chatMessages` store with primary key `id` and indexes `profileId` and `[profileId+createdAt]`. The migration SHALL be purely additive: no existing table is rewritten and no data transform runs.
+The Dexie schema SHALL add version 21 introducing the `chatMessages` store with primary key `id` and indexes `profileId` and `[profileId+createdAt]`. The migration SHALL be purely additive: no existing table is rewritten and no data transform runs.
 
-#### Scenario: Fresh install at v20
+#### Scenario: Fresh install at v21
 
 - **WHEN** the SPA initializes IndexedDB on a device with no prior database
-- **THEN** the database SHALL open at version 20 with the `chatMessages` store present and all pre-existing stores unchanged
+- **THEN** the database SHALL open at version 21 with the `chatMessages` store present and all pre-existing stores unchanged
 
-#### Scenario: Upgrade from v19 to v20
+#### Scenario: Upgrade from an earlier version to v21
 
-- **WHEN** a device with a v19 database loads the new build
-- **THEN** the database SHALL upgrade to v20 adding the empty `chatMessages` store while preserving all existing rows in every other store
+- **WHEN** a device with a pre-v21 database loads the new build
+- **THEN** the database SHALL upgrade to v21 adding the empty `chatMessages` store while preserving all existing rows in every other store
 
 ### Requirement: InMemoryChatMessageRepository
 
