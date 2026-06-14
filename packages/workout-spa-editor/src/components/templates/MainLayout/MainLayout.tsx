@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useFocusOnRouteChange } from "../../../hooks/use-focus-on-route-change";
 import { useRouteAnnouncerLabel } from "../../../hooks/use-route-announcer-label";
 import { BottomNav } from "../../molecules/BottomNav";
-import { ChatFab } from "../../molecules/ChatFab";
+import { ChatFab } from "../../molecules/ChatFab/ChatFab";
 import { StorageAvailabilityBanner } from "../../molecules/StorageAvailabilityBanner";
 import { LayoutHeader } from "./LayoutHeader";
 
