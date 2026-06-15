@@ -3,7 +3,7 @@
 - [x] 1.1 Add `AiModelPurpose` (`"default" | "chat" | "workout_generation"`) and
       `AiModelBinding` (`{ profileId, purpose, providerId, modelId, updatedAt }`) types in a
       new `src/types/ai-model-binding.ts`.
-- [ ] 1.2 Relax `LlmProviderConfig.model` to optional in `src/store/ai-store-types.ts` and
+- [x] 1.2 Relax `LlmProviderConfig.model` to optional in `src/store/ai-store-types.ts` and
       add a deprecation comment pointing to the binding model.
 - [x] 1.3 Define `AiModelBindingRepository` (put / get / getAll / delete) and add it to
       `PersistencePort` (`src/ports/simple-repositories.ts` + `src/ports/persistence-port.ts`),
