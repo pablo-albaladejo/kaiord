@@ -12,7 +12,11 @@ const PURPOSE_ROWS: ReadonlyArray<{
 }> = [
   { purpose: "default", label: "Default model", resettable: false },
   { purpose: "chat", label: "Chat", resettable: true },
-  { purpose: "workout_generation", label: "Workout generation", resettable: true },
+  {
+    purpose: "workout_generation",
+    label: "Workout generation",
+    resettable: true,
+  },
 ];
 
 const HINT =

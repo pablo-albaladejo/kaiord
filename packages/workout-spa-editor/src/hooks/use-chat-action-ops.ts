@@ -54,8 +54,7 @@ export const useChatActionOps = (
   const { provider, modelId } = generation;
   const createWorkout = useCallback(
     (input: CreateWorkoutInput) => {
-      if (!provider || !modelId)
-        throw new Error("No AI provider configured");
+      if (!provider || !modelId) throw new Error("No AI provider configured");
       return doCreateWorkout(
         persistence,
         requireProfile(profileId),

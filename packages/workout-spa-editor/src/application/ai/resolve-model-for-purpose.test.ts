@@ -42,7 +42,11 @@ describe("resolveModelForPurpose", () => {
     ];
     const bindings = [
       binding({ purpose: "chat", providerId: "prov-2", modelId: "chat-model" }),
-      binding({ purpose: "default", providerId: "prov-1", modelId: "def-model" }),
+      binding({
+        purpose: "default",
+        providerId: "prov-1",
+        modelId: "def-model",
+      }),
     ];
 
     // Act

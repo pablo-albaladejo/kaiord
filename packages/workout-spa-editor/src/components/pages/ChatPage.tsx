@@ -26,11 +26,7 @@ export default function ChatPage() {
   const bindings = useAiModelBindingsLive(profileId);
   const messages = useChatMessagesLive(profileId);
   const hasProviders = (providers?.length ?? 0) > 0;
-  const models = resolveChatModels(
-    providers ?? [],
-    bindings ?? [],
-    selectedId
-  );
+  const models = resolveChatModels(providers ?? [], bindings ?? [], selectedId);
 
   return (
     <div className="space-y-4 p-4" data-testid="chat-page">

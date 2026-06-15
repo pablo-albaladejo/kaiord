@@ -43,7 +43,11 @@ describe("ModelPicker", () => {
 
     // Act
     render(
-      <ModelPicker type="anthropic" value="my-custom-model" onChange={vi.fn()} />
+      <ModelPicker
+        type="anthropic"
+        value="my-custom-model"
+        onChange={vi.fn()}
+      />
     );
 
     // Assert

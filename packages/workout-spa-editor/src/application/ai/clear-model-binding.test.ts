@@ -22,6 +22,8 @@ describe("clearModelBinding", () => {
     await clearModelBinding(persistence, "p-1", "chat");
 
     // Assert
-    expect(await persistence.aiModelBindings.get("p-1", "chat")).toBeUndefined();
+    expect(
+      await persistence.aiModelBindings.get("p-1", "chat")
+    ).toBeUndefined();
   });
 });

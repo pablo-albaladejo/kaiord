@@ -7,7 +7,10 @@
  */
 import { getDefaultModel } from "../../lib/provider-models";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
-import type { AiModelBinding, AiModelPurpose } from "../../types/ai-model-binding";
+import type {
+  AiModelBinding,
+  AiModelPurpose,
+} from "../../types/ai-model-binding";
 
 export type ResolvedModel = {
   provider: LlmProviderConfig;
