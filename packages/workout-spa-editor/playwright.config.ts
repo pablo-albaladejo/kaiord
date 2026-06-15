@@ -38,20 +38,7 @@ export default defineConfig({
     },
     {
       name: "firefox",
-      use: {
-        ...devices["Desktop Firefox"],
-        launchOptions: {
-          // Headless Firefox on Linux (CI) does not treat the page as the
-          // active focus owner, so programmatic `element.focus()` in app
-          // code (e.g. useFocusOnRouteChange) is not reflected as `:focus`
-          // and `toBeFocused()` reports "inactive" — even though real
-          // headed Firefox and headless Firefox on macOS focus correctly.
-          // geckodriver/Selenium set this pref by default; Playwright does
-          // not. Enabling it aligns the test env with real-browser focus
-          // behaviour. Fixes the firefox-only library-flows focus failure.
-          firefoxUserPrefs: { "focusmanager.testmode": true },
-        },
-      },
+      use: { ...devices["Desktop Firefox"] },
     },
     {
       name: "webkit",
