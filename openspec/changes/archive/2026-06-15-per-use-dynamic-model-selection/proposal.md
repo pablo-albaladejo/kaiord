@@ -1,3 +1,5 @@
+> Completed: 2026-06-15
+
 # Proposal: Per-Use Model Selection with SDK-Sourced Model Catalog
 
 ## Why
