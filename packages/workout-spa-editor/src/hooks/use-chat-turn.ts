@@ -9,36 +9,16 @@ import type { ChatAgent, ChatTool, PendingAction } from "@kaiord/ai";
 import type { ModelMessage } from "ai";
 import { useCallback, useMemo, useRef, useState } from "react";
 
+import { useAnalytics } from "../contexts/analytics-context";
 import { usePersistence } from "../contexts/persistence-context";
-import type { LlmProviderConfig } from "../store/ai-store-types";
-import type { ChatMessageRecord } from "../types/chat/chat-message-record";
 import { approveAction, denyAction, sendTurn } from "./chat/chat-turn-runner";
 import { type ChatTurnState, makeChatTurnCtx } from "./chat/chat-turn-types";
 import { useChatActionOps } from "./use-chat-action-ops";
-
-export type UseChatTurnArgs = {
-  profileId: string | null;
-  provider: LlmProviderConfig | null;
-  modelId: string | null;
-  generationProvider: LlmProviderConfig | null;
-  generationModelId: string | null;
-  today: string;
-  messages: ChatMessageRecord[];
-};
-
-export type UseChatTurn = {
-  state: ChatTurnState;
-  streamingText: string;
-  pendingAction: PendingAction | null;
-  error: string | null;
-  send: (text: string) => void;
-  approve: () => void;
-  deny: () => void;
-  retry: () => void;
-};
+import type { UseChatTurn, UseChatTurnArgs } from "./use-chat-turn-types";
 
 export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const persistence = usePersistence();
+  const analytics = useAnalytics();
   const ops = useChatActionOps(args.profileId, {
     provider: args.generationProvider,
     modelId: args.generationModelId,
@@ -69,13 +49,17 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
     (text: string) => {
       if (!ctx || state === "streaming" || !text.trim()) return;
       lastInputRef.current = text;
+      // Count-only: no message content reaches analytics (spec usage rule).
+      analytics.event("chat-message-sent");
       void sendTurn(ctx, messages, text);
     },
-    [ctx, state, messages]
+    [ctx, state, messages, analytics]
   );
   const approve = useCallback(() => {
-    if (ctx && pendingAction) void approveAction(ctx, pendingAction);
-  }, [ctx, pendingAction]);
+    if (!ctx || !pendingAction) return;
+    analytics.event("chat-tool-confirmed", { tool: pendingAction.toolName });
+    void approveAction(ctx, pendingAction);
+  }, [ctx, pendingAction, analytics]);
   const deny = useCallback(() => {
     if (ctx && pendingAction) void denyAction(ctx, pendingAction);
   }, [ctx, pendingAction]);
