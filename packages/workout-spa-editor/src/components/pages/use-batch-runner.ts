@@ -21,7 +21,7 @@ export function useBatchRunner(
       const controller = new AbortController();
       abortRef.current = controller;
       try {
-        const processOne = createProcessOne(batch.provider, db);
+        const processOne = createProcessOne(batch.provider, batch.modelId, db);
         await processBatch(
           batch.workouts,
           processOne,

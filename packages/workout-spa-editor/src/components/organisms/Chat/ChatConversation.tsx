@@ -7,13 +7,15 @@ import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
 import { todayIsoDate } from "../../../utils/today-iso-date";
 import { ChatComposer } from "./ChatComposer";
-import { ChatErrorNotice } from "./ChatErrorNotice";
 import { ChatMessageList } from "./ChatMessageList";
-import { PendingActionCard } from "./PendingActionCard";
+import { ChatTurnExtras } from "./ChatTurnExtras";
 
 export type ChatConversationProps = {
   profileId: string | null;
   provider: LlmProviderConfig | null;
+  modelId: string | null;
+  generationProvider: LlmProviderConfig | null;
+  generationModelId: string | null;
   messages: ChatMessageRecord[];
 };
 
@@ -23,12 +25,18 @@ export type ChatConversationProps = {
 export function ChatConversation({
   profileId,
   provider,
+  modelId,
+  generationProvider,
+  generationModelId,
   messages,
 }: ChatConversationProps) {
   const persistence = usePersistence();
   const turn = useChatTurn({
     profileId,
     provider,
+    modelId,
+    generationProvider,
+    generationModelId,
     today: todayIsoDate(),
     messages,
   });
@@ -57,22 +65,15 @@ export function ChatConversation({
         </button>
       )}
       <ChatMessageList messages={messages} />
-      {busy && turn.streamingText !== "" && (
-        <p className="max-w-[80%] self-start whitespace-pre-wrap rounded-2xl bg-slate-800 px-3 py-2 text-[14px] text-slate-50">
-          {turn.streamingText}
-        </p>
-      )}
-      {turn.pendingAction && (
-        <PendingActionCard
-          action={turn.pendingAction}
-          onApprove={turn.approve}
-          onDeny={turn.deny}
-          busy={busy}
-        />
-      )}
-      {turn.error !== null && (
-        <ChatErrorNotice message={turn.error} onRetry={turn.retry} />
-      )}
+      <ChatTurnExtras
+        busy={busy}
+        streamingText={turn.streamingText}
+        pendingAction={turn.pendingAction}
+        error={turn.error}
+        onApprove={turn.approve}
+        onDeny={turn.deny}
+        onRetry={turn.retry}
+      />
       <ChatComposer
         onSend={turn.send}
         disabled={busy || turn.state === "awaiting_confirmation"}

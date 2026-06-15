@@ -14,8 +14,8 @@ import type { AiFailureReason } from "../../../application/coaching/convert-coac
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
-import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { runStartAi, type StartAiCtx } from "./use-coaching-ai-handler-helpers";
 
@@ -43,7 +43,7 @@ export const useCoachingAi = (
   const analytics = useAnalytics();
   const toast = useToastContext();
   const providers = useAiProvidersLive();
-  const selectedProviderId = useAiRuntimeStore((s) => s.selectedProviderId);
+  const bindings = useAiModelBindingsLive(profileId);
   const [, navigate] = useLocation();
   const [processing, setProcessing] = useState(false);
   const [failure, setFailure] = useState<AiFailureState | null>(null);
@@ -54,7 +54,7 @@ export const useCoachingAi = (
       activity,
       profileId,
       providers,
-      selectedProviderId,
+      bindings,
       persistence,
       analytics,
       abortRef,
@@ -69,7 +69,7 @@ export const useCoachingAi = (
     activity,
     profileId,
     providers,
-    selectedProviderId,
+    bindings,
     persistence,
     analytics,
     toast,

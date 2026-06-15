@@ -22,6 +22,7 @@ const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
     persistence,
     profileId: "p1",
     provider,
+    modelId: "claude-sonnet-4-5",
     today: "2026-06-13",
     ops: {} as never,
     agentRef: { current: fakeAgent as never },

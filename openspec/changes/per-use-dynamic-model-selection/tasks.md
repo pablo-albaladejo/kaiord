@@ -51,14 +51,14 @@
 
 ## 5. Factory seam + wire consumers
 
-- [ ] 5.1 Change `createLanguageModel` to `(credential: { type, apiKey }, modelId: string)`;
+- [x] 5.1 Change `createLanguageModel` to `(credential: { type, apiKey }, modelId: string)`;
       update its tests. (`@kaiord/ai` factories untouched.)
-- [ ] 5.2 Route chat (`ChatPage.tsx` / `build-chat-agent.ts`) through `resolveModelForPurpose`
+- [x] 5.2 Route chat (`ChatPage.tsx` / `build-chat-agent.ts`) through `resolveModelForPurpose`
       for the `chat` purpose; preserve mid-conversation provider switching.
-- [ ] 5.3 Route free-text generation (`useAiGeneration.ts`), coaching conversion
+- [x] 5.3 Route free-text generation (`useAiGeneration.ts`), coaching conversion
       (`use-coaching-ai-helpers.ts`), and batch (`batch-prepare.ts`) through the resolver for
       `workout_generation`; delete the four divergent fallback chains.
-- [ ] 5.4 Ensure `AiMeta.model` (audit) is written from the resolved `modelId`, not the
+- [x] 5.4 Ensure `AiMeta.model` (audit) is written from the resolved `modelId`, not the
       credential record; update generation/coaching/batch tests.
 
 ## 6. Settings UI

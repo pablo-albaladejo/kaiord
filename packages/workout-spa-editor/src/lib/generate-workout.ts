@@ -8,6 +8,7 @@ import { createLanguageModel } from "./provider-factory";
 export type GenerateWorkoutOptions = {
   text: string;
   provider: LlmProviderConfig;
+  modelId: string;
   sport?: Sport;
   customPrompt?: string;
   zonesContext?: string;
@@ -16,7 +17,7 @@ export type GenerateWorkoutOptions = {
 export const generateWorkoutKrd = async (
   options: GenerateWorkoutOptions
 ): Promise<KRD> => {
-  const model = await createLanguageModel(options.provider);
+  const model = await createLanguageModel(options.provider, options.modelId);
   const textToWorkout = createTextToWorkout({ model });
 
   const prompt = buildPrompt(options);

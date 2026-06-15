@@ -8,9 +8,11 @@ import { type ChatAgent, type ChatTool, createChatAgent } from "@kaiord/ai";
 import { buildChatSystemPrompt } from "../../application/chat/chat-system-prompt";
 import { buildChatTools } from "../../application/chat/tools/build-chat-tools";
 import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
-import { createLanguageModel } from "../../lib/provider-factory";
+import {
+  createLanguageModel,
+  type ProviderCredential,
+} from "../../lib/provider-factory";
 import type { PersistencePort } from "../../ports/persistence-port";
-import type { LlmProviderConfig } from "../../store/ai-store-types";
 
 export type BuiltChatAgent = { agent: ChatAgent; tools: ChatTool[] };
 
@@ -18,7 +20,8 @@ export type BuildChatAgentArgs = {
   persistence: PersistencePort;
   profileId: string;
   today: string;
-  provider: LlmProviderConfig;
+  provider: ProviderCredential;
+  modelId: string;
   actions: ChatActionOps;
   onTextDelta: (delta: string) => void;
 };
@@ -32,7 +35,7 @@ export const buildChatAgent = async (
     today: args.today,
     actions: args.actions,
   });
-  const model = await createLanguageModel(args.provider);
+  const model = await createLanguageModel(args.provider, args.modelId);
   const agent = createChatAgent({
     model,
     tools,

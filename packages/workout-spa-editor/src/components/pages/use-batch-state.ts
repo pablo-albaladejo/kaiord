@@ -19,6 +19,7 @@ import { useBatchRunner } from "./use-batch-runner";
 
 export type BatchPending = {
   provider: LlmProviderConfig;
+  modelId: string;
   workouts: WorkoutRecord[];
 };
 
@@ -45,7 +46,11 @@ export function useBatchState(weekStart: string, weekEnd: string) {
       return;
     }
     setMessage(null);
-    setPending({ provider: prep.provider, workouts: prep.workouts });
+    setPending({
+      provider: prep.provider,
+      modelId: prep.modelId,
+      workouts: prep.workouts,
+    });
   }, [weekStart, weekEnd, providerCount]);
 
   const confirmStart = useCallback(async () => {
