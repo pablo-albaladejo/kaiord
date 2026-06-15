@@ -7,13 +7,11 @@ import type { AddProviderInput } from "./add-provider";
 export const baseProvider: AddProviderInput = {
   type: "anthropic",
   apiKey: "sk-test-1",
-  model: "claude-sonnet-4-5",
   label: "Anthropic",
 };
 
 export const secondProvider: AddProviderInput = {
   type: "openai",
   apiKey: "sk-test-2",
-  model: "gpt-4",
   label: "OpenAI",
 };

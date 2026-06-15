@@ -1,16 +1,13 @@
 import { useState } from "react";
 
-import { getDefaultModel } from "../../../lib/provider-models";
 import type { LlmProviderType } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
-import { ModelSelect } from "./ModelSelect";
 
 type ProviderFormProps = {
   onAdd: (config: {
     type: LlmProviderType;
     apiKey: string;
-    model: string;
     label: string;
   }) => void;
 };
@@ -18,17 +15,11 @@ type ProviderFormProps = {
 export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
   const [type, setType] = useState<LlmProviderType>("anthropic");
   const [apiKey, setApiKey] = useState("");
-  const [model, setModel] = useState(getDefaultModel("anthropic"));
   const [label, setLabel] = useState("");
 
-  const handleTypeChange = (newType: LlmProviderType) => {
-    setType(newType);
-    setModel(getDefaultModel(newType));
-  };
-
   const handleSubmit = () => {
-    if (!apiKey || !model || !label) return;
-    onAdd({ type, apiKey, model, label });
+    if (!apiKey || !label) return;
+    onAdd({ type, apiKey, label });
     setApiKey("");
     setLabel("");
   };
@@ -39,7 +30,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         label="Provider"
         variant="select"
         value={type}
-        onChange={(e) => handleTypeChange(e.target.value as LlmProviderType)}
+        onChange={(e) => setType(e.target.value as LlmProviderType)}
         options={[
           { value: "anthropic", label: "Anthropic (Claude)" },
           { value: "openai", label: "OpenAI (GPT)" },
@@ -59,12 +50,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
       />
-      <ModelSelect type={type} value={model} onChange={setModel} />
-      <Button
-        size="sm"
-        onClick={handleSubmit}
-        disabled={!apiKey || !model || !label}
-      >
+      <Button size="sm" onClick={handleSubmit} disabled={!apiKey || !label}>
         Add Provider
       </Button>
     </div>

@@ -9,6 +9,7 @@
  */
 
 import type { PersistencePort } from "../ports/persistence-port";
+import { createInMemoryAiModelBindingRepository } from "./in-memory-ai-model-binding-repository";
 import {
   createInMemoryAiProviderRepository,
   type CustomPromptRef,
@@ -60,6 +61,7 @@ export function createInMemoryPersistence(): PersistencePort {
     healthBodyComposition: new Map(),
     healthStress: new Map(),
     chatMessages: new Map(),
+    aiModelBindings: new Map(),
     tombstones: new Map(),
   };
   const profileActiveIdRef: ActiveIdRef = { current: null };
@@ -126,6 +128,9 @@ export function createInMemoryPersistence(): PersistencePort {
     ),
     healthStress: createInMemoryHealthRecordRepository(stores.healthStress),
     chatMessages: createInMemoryChatMessageRepository(stores.chatMessages),
+    aiModelBindings: createInMemoryAiModelBindingRepository(
+      stores.aiModelBindings
+    ),
     tombstones: createInMemoryTombstoneRepository(stores.tombstones),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(

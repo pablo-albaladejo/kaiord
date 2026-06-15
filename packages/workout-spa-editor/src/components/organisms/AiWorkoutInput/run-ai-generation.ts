@@ -20,6 +20,7 @@ export type GenerateRunArgs = {
   text: string;
   sport: Sport | undefined;
   provider: LlmProviderConfig;
+  modelId: string;
   profile: Profile | null;
   customPrompt: string | null;
   setGeneration: (state: GenerationState) => void;
@@ -31,6 +32,7 @@ export const runAiGeneration = async ({
   text,
   sport,
   provider,
+  modelId,
   profile,
   customPrompt,
   setGeneration,
@@ -49,6 +51,7 @@ export const runAiGeneration = async ({
     krd = await generateWorkoutKrd({
       text,
       provider,
+      modelId,
       sport,
       customPrompt: customPrompt ? customPrompt : undefined,
       zonesContext,

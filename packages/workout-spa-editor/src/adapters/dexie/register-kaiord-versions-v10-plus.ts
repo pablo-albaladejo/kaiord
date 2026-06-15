@@ -15,6 +15,7 @@ import { applyV13Upgrade } from "./dexie-v13-migration";
 import { applyV14Upgrade } from "./dexie-v14-migration";
 import { applyV15Upgrade } from "./dexie-v15-migration";
 import { applyV17Upgrade } from "./dexie-v17-migration";
+import { applyV22Upgrade } from "./dexie-v22-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -86,4 +87,11 @@ export const registerV21 = (db: DexieVersionHost): void => {
   // Dexie auto-creates the new store empty on upgrade, so no data
   // migration is needed and existing tables are untouched.
   db.version(21).stores(SCHEMAS.v21);
+};
+
+export const registerV22 = (db: DexieVersionHost): void => {
+  // v22 — additive `aiModelBindings` store + default-binding backfill from the
+  // current default provider so AI features behave identically after the
+  // key↔model decoupling.
+  db.version(22).stores(SCHEMAS.v22).upgrade(applyV22Upgrade);
 };

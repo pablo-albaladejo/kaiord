@@ -18,28 +18,17 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 
-import type { LlmProviderConfig } from "../store/ai-store";
 import { createLanguageModel } from "./provider-factory";
-
-const baseConfig: Omit<LlmProviderConfig, "type" | "model"> = {
-  id: "test-id",
-  apiKey: "test-key",
-  label: "Test",
-  isDefault: false,
-  createdAt: 0,
-};
 
 describe("createLanguageModel", () => {
   it("should create an Anthropic model with browser access header", async () => {
     // Arrange
-    const config: LlmProviderConfig = {
-      ...baseConfig,
-      type: "anthropic",
-      model: "claude-sonnet-4-5-20241022",
-    };
 
     // Act
-    const result = await createLanguageModel(config);
+    const result = await createLanguageModel(
+      { type: "anthropic", apiKey: "test-key" },
+      "claude-sonnet-4-5-20241022"
+    );
 
     // Assert
     expect(createAnthropic).toHaveBeenCalledWith({
@@ -51,14 +40,12 @@ describe("createLanguageModel", () => {
 
   it("should create an OpenAI model", async () => {
     // Arrange
-    const config: LlmProviderConfig = {
-      ...baseConfig,
-      type: "openai",
-      model: "gpt-4o",
-    };
 
     // Act
-    const result = await createLanguageModel(config);
+    const result = await createLanguageModel(
+      { type: "openai", apiKey: "test-key" },
+      "gpt-4o"
+    );
 
     // Assert
     expect(createOpenAI).toHaveBeenCalledWith({ apiKey: "test-key" });
@@ -67,14 +54,12 @@ describe("createLanguageModel", () => {
 
   it("should create a Google model", async () => {
     // Arrange
-    const config: LlmProviderConfig = {
-      ...baseConfig,
-      type: "google",
-      model: "gemini-2.0-flash",
-    };
 
     // Act
-    const result = await createLanguageModel(config);
+    const result = await createLanguageModel(
+      { type: "google", apiKey: "test-key" },
+      "gemini-2.0-flash"
+    );
 
     // Assert
     expect(createGoogleGenerativeAI).toHaveBeenCalledWith({

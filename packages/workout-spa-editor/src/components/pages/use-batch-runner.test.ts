@@ -51,7 +51,11 @@ describe("useBatchRunner", () => {
 
     expect(result.current.isProcessing).toBe(false);
     await act(async () => {
-      await result.current.run({ provider, workouts: [workout] });
+      await result.current.run({
+        provider,
+        modelId: "claude",
+        workouts: [workout],
+      });
     });
 
     await waitFor(() => expect(processBatchSpy).toHaveBeenCalledTimes(1));
@@ -69,7 +73,11 @@ describe("useBatchRunner", () => {
 
     const { result } = renderHook(() => useBatchRunner(setMessage, onSuccess));
     await act(async () => {
-      await result.current.run({ provider, workouts: [workout, workout] });
+      await result.current.run({
+        provider,
+        modelId: "claude",
+        workouts: [workout, workout],
+      });
     });
 
     // Assert
@@ -89,7 +97,11 @@ describe("useBatchRunner", () => {
 
     const { result } = renderHook(() => useBatchRunner(setMessage, onSuccess));
     await act(async () => {
-      await result.current.run({ provider, workouts: [workout] });
+      await result.current.run({
+        provider,
+        modelId: "claude",
+        workouts: [workout],
+      });
     });
 
     // Assert
@@ -108,7 +120,11 @@ describe("useBatchRunner", () => {
     // Act
 
     await act(async () => {
-      await result.current.run({ provider, workouts: [workout] });
+      await result.current.run({
+        provider,
+        modelId: "claude",
+        workouts: [workout],
+      });
     });
 
     // Assert

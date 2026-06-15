@@ -4,7 +4,8 @@ export type LlmProviderConfig = {
   id: string;
   type: LlmProviderType;
   apiKey: string;
-  model: string;
+  // Deprecated: model now lives in aiModelBindings; kept one release for migration.
+  model?: string;
   label: string;
   isDefault: boolean;
   // Epoch ms stamped at addProvider; immutable thereafter. Drives the

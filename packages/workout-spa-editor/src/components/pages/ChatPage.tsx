@@ -8,31 +8,25 @@
  * in a follow-up; this surface is the navigable, transcript-rendering shell.
  */
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
+import { useAiModelBindingsLive } from "../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../hooks/use-ai-providers-live";
 import { useChatMessagesLive } from "../../hooks/use-chat-messages-live";
 import { useAiRuntimeStore } from "../../store/ai-runtime-store";
-import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { ModelSelector } from "../organisms/AiWorkoutInput/ModelSelector";
 import { ChatConversation } from "../organisms/Chat/ChatConversation";
 import { ChatHeader } from "../organisms/Chat/ChatHeader";
 import { CreateProvidersEmpty } from "./CreateWorkout/CreateProvidersEmpty";
-
-const resolveProvider = (
-  providers: LlmProviderConfig[],
-  selectedId: string | null
-): LlmProviderConfig | null =>
-  providers.find((p) => p.id === selectedId) ??
-  providers.find((p) => p.isDefault) ??
-  providers[0] ??
-  null;
+import { resolveChatModels } from "./resolve-chat-models";
 
 export default function ChatPage() {
   const active = useActiveProfileLive();
   const providers = useAiProvidersLive();
   const selectedId = useAiRuntimeStore((s) => s.selectedProviderId);
   const profileId = active?.id ?? null;
+  const bindings = useAiModelBindingsLive(profileId);
   const messages = useChatMessagesLive(profileId);
   const hasProviders = (providers?.length ?? 0) > 0;
+  const models = resolveChatModels(providers ?? [], bindings ?? [], selectedId);
 
   return (
     <div className="space-y-4 p-4" data-testid="chat-page">
@@ -48,7 +42,10 @@ export default function ChatPage() {
           <ModelSelector />
           <ChatConversation
             profileId={profileId}
-            provider={resolveProvider(providers, selectedId)}
+            provider={models.provider}
+            modelId={models.modelId}
+            generationProvider={models.generationProvider}
+            generationModelId={models.generationModelId}
             messages={messages ?? []}
           />
         </>
