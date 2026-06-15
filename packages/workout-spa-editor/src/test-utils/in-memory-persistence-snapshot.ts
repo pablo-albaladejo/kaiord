@@ -6,6 +6,7 @@
  * collects every repo's underlying Map plus the profile active-id ref.
  */
 
+import type { AiModelBinding } from "../types/ai-model-binding";
 import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { ChatMessageRecord } from "../types/chat/chat-message-record";
@@ -52,6 +53,7 @@ export type Stores = {
   healthBodyComposition: Map<string, HealthBodyCompositionRecord>;
   healthStress: Map<string, HealthStressRecord>;
   chatMessages: Map<string, ChatMessageRecord>;
+  aiModelBindings: Map<string, AiModelBinding>;
   tombstones: Map<string, Tombstone>;
 };
 
@@ -89,6 +91,7 @@ export const captureSnapshot = (
   healthBodyComposition: new Map(stores.healthBodyComposition),
   healthStress: new Map(stores.healthStress),
   chatMessages: new Map(stores.chatMessages),
+  aiModelBindings: new Map(stores.aiModelBindings),
   tombstones: new Map(stores.tombstones),
   profileActiveId: activeIdRef.current,
   aiCustomPrompt: customPromptRef.current,

@@ -2,26 +2,20 @@ import type { KRD } from "@kaiord/core";
 import { useCallback, useState } from "react";
 import { useSearch } from "wouter";
 
+import { resolveModelForPurpose } from "../../../application/ai/resolve-model-for-purpose";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
+import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import type { ActiveSport } from "../../../lib/athlete";
 import { ATHLETE_SPORTS } from "../../../lib/athlete";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
-import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { formatZonesContext } from "../../organisms/AiWorkoutInput/zones-formatter";
 
 export type CreatePhase = "input" | "generating" | "result";
 
 const GENERATION_FAILED = "Workout generation failed";
-
-const pickProvider = (
-  providers: LlmProviderConfig[] | undefined
-): LlmProviderConfig | null => {
-  if (!providers || providers.length === 0) return null;
-  return providers.find((p) => p.isDefault) ?? providers[0] ?? null;
-};
 
 export function useCreateWorkout() {
   const [phase, setPhase] = useState<CreatePhase>("input");
@@ -31,15 +25,21 @@ export function useCreateWorkout() {
 
   const active = useActiveProfileLive();
   const providers = useAiProvidersLive();
+  const bindings = useAiModelBindingsLive(active?.id ?? null);
   const customPrompt = useAiCustomPromptLive();
   const toast = useToastContext();
   const search = useSearch();
   const dateParam = new URLSearchParams(search).get("date");
 
-  const provider = pickProvider(providers);
+  const resolved = resolveModelForPurpose(
+    "workout_generation",
+    providers ?? [],
+    bindings ?? []
+  );
+  const provider = resolved?.provider ?? null;
 
   const generate = useCallback(async () => {
-    if (!promptText.trim() || !provider) return;
+    if (!promptText.trim() || !resolved) return;
     setPhase("generating");
     try {
       const profile = active?.profile ?? null;
@@ -48,7 +48,8 @@ export function useCreateWorkout() {
         : undefined;
       const krd = await generateWorkoutKrd({
         text: promptText,
-        provider,
+        provider: resolved.provider,
+        modelId: resolved.modelId,
         sport,
         customPrompt: customPrompt ?? undefined,
         zonesContext,
@@ -59,7 +60,7 @@ export function useCreateWorkout() {
       setPhase("input");
       toast.error(GENERATION_FAILED);
     }
-  }, [promptText, provider, active, sport, customPrompt, toast]);
+  }, [promptText, resolved, active, sport, customPrompt, toast]);
 
   return {
     phase,

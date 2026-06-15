@@ -15,11 +15,16 @@
  * cannot occur in production builds.
  */
 
+import { createDexieAiModelBindingRepository } from "./dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
 import { db } from "./dexie-database";
 
 export const aiProviderRepository = createDexieAiProviderRepository(db);
+
+/** Module-level model-binding repo bound to the production db, for the
+ * `useAiModelBindingsLive` live query. */
+export const aiModelBindingRepository = createDexieAiModelBindingRepository(db);
 
 /** Module-level chat transcript repo bound to the production db, for the
  * `useChatMessagesLive` live query. */

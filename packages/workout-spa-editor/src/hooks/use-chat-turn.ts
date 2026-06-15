@@ -19,6 +19,9 @@ import { useChatActionOps } from "./use-chat-action-ops";
 export type UseChatTurnArgs = {
   profileId: string | null;
   provider: LlmProviderConfig | null;
+  modelId: string | null;
+  generationProvider: LlmProviderConfig | null;
+  generationModelId: string | null;
   today: string;
   messages: ChatMessageRecord[];
 };
@@ -36,7 +39,10 @@ export type UseChatTurn = {
 
 export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const persistence = usePersistence();
-  const ops = useChatActionOps(args.profileId, args.provider);
+  const ops = useChatActionOps(args.profileId, {
+    provider: args.generationProvider,
+    modelId: args.generationModelId,
+  });
   const [state, setState] = useState<ChatTurnState>("idle");
   const [streamingText, setStreamingText] = useState("");
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(
@@ -48,15 +54,15 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const messagesRef = useRef<ModelMessage[]>([]);
   const lastInputRef = useRef("");
 
-  const { profileId, provider, today, messages } = args;
+  const { profileId, provider, modelId, today, messages } = args;
   const ctx = useMemo(
     () =>
       makeChatTurnCtx(
-        { persistence, profileId, provider, today, ops },
+        { persistence, profileId, provider, modelId, today, ops },
         { agentRef, toolsRef, messagesRef },
         { setState, setStreamingText, setPendingAction, setError }
       ),
-    [persistence, profileId, provider, today, ops]
+    [persistence, profileId, provider, modelId, today, ops]
   );
 
   const send = useCallback(

@@ -25,6 +25,7 @@
  * canonical orchestration.
  */
 
+import type { AiModelBindingRepository } from "../../ports/ai-model-binding-repository";
 import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismissal-repository";
 import type { ChatMessageRepository } from "../../ports/chat-message-repository";
 import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
@@ -51,6 +52,8 @@ export type DeleteProfileWithCascadeDeps = {
   // Per-profile AI chat transcript. Plain bulk delete (no tombstones —
   // propagates via the profile tombstone like the other per-profile stores).
   chatMessages: ChatMessageRepository;
+  // Per-profile model bindings; plain bulk delete like the other stores.
+  aiModelBindings: AiModelBindingRepository;
 };
 
 export const deleteProfileWithCascade = async (
@@ -67,5 +70,6 @@ export const deleteProfileWithCascade = async (
     deps.userPreferences.delete(deletedProfileId),
     deps.healthCleanup.deleteByProfile(deletedProfileId),
     deps.chatMessages.deleteByProfile(deletedProfileId),
+    deps.aiModelBindings.deleteByProfile(deletedProfileId),
   ]);
 };

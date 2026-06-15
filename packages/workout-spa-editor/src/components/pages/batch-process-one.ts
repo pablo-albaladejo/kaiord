@@ -16,6 +16,7 @@ import type { WorkoutRecord } from "../../types/calendar-record";
 
 export function createProcessOne(
   provider: LlmProviderConfig,
+  modelId: string,
   db: KaiordDatabase
 ): ProcessOneFn {
   return async (
@@ -26,6 +27,7 @@ export function createProcessOne(
       generateWorkoutKrd({
         text: prompt,
         provider,
+        modelId,
         sport: sport as Parameters<typeof generateWorkoutKrd>[0]["sport"],
       });
 
@@ -35,7 +37,7 @@ export function createProcessOne(
       zonesContext: "",
       generateFn,
       provider: provider.type,
-      model: provider.model,
+      model: modelId,
       allowRetry,
     });
 

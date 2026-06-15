@@ -1,6 +1,7 @@
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { SETTINGS_SECTION_ATTR } from "../../pages/SettingsPage/settings-section";
+import { ModelsSection } from "./ModelsSection";
 import { ProviderForm } from "./ProviderForm";
 import { ProviderList } from "./ProviderList";
 import { useAiTabHandlers } from "./use-ai-tab-handlers";
@@ -30,6 +31,13 @@ export const AiTab: React.FC = () => {
           Add Provider
         </h3>
         <ProviderForm onAdd={onAdd} />
+      </section>
+
+      <section>
+        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          Models
+        </h3>
+        <ModelsSection />
       </section>
 
       <section

@@ -49,11 +49,13 @@ export const doCreateWorkout = async (
   persistence: PersistencePort,
   profileId: string,
   provider: LlmProviderConfig,
+  modelId: string,
   input: CreateWorkoutInput
 ): Promise<unknown> => {
   const krd = await generateWorkoutKrd({
     text: input.description,
     provider,
+    modelId,
     sport: input.sport as Sport | undefined,
   });
   const record = await buildWorkoutRecord({

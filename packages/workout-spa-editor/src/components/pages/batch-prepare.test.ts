@@ -1,15 +1,30 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
+import type { AiModelBinding } from "../../types/ai-model-binding";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { prepareBatch } from "./batch-prepare";
 
 let mockProviders: LlmProviderConfig[] = [];
+let mockBindings: AiModelBinding[] = [];
 let mockWorkouts: WorkoutRecord[] = [];
+let mockActiveProfileId: string | null = "profile-1";
 
 vi.mock("../../adapters/dexie/dexie-ai-provider-repository", () => ({
   createDexieAiProviderRepository: () => ({
     getAll: async () => mockProviders,
+  }),
+}));
+
+vi.mock("../../adapters/dexie/dexie-ai-model-binding-repository", () => ({
+  createDexieAiModelBindingRepository: () => ({
+    getAll: async () => mockBindings,
+  }),
+}));
+
+vi.mock("../../adapters/dexie/dexie-profile-repository", () => ({
+  createDexieProfileRepository: () => ({
+    getActiveId: async () => mockActiveProfileId,
   }),
 }));
 
@@ -57,56 +72,59 @@ const rawWorkout = {
 describe("prepareBatch", () => {
   beforeEach(() => {
     mockProviders = [];
+    mockBindings = [];
     mockWorkouts = [];
+    mockActiveProfileId = "profile-1";
   });
 
-  it("should return the default provider when one is flagged isDefault", async () => {
+  it("should resolve the workout_generation binding's provider and model", async () => {
     // Arrange
-
     mockProviders = [secondaryProvider, defaultProvider];
+    mockBindings = [
+      {
+        profileId: "profile-1",
+        purpose: "workout_generation",
+        providerId: "p2",
+        modelId: "gpt-4o",
+        updatedAt: "2026-04-18T00:00:00.000Z",
+      },
+    ];
     mockWorkouts = [rawWorkout];
 
     // Act
-
     const result = await prepareBatch("2026-04-13", "2026-04-19");
 
     // Assert
-
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       ok: true,
-      provider: defaultProvider,
+      provider: secondaryProvider,
+      modelId: "gpt-4o",
       workouts: [rawWorkout],
     });
   });
 
-  it("should fall back to the first provider when none are flagged isDefault", async () => {
+  it("should fall back to the default provider's catalog model when no binding exists", async () => {
     // Arrange
-
-    const noDefault = { ...defaultProvider, isDefault: false };
-    mockProviders = [noDefault, secondaryProvider];
+    mockProviders = [secondaryProvider, defaultProvider];
     mockWorkouts = [rawWorkout];
 
     // Act
-
     const result = await prepareBatch("2026-04-13", "2026-04-19");
 
     // Assert
-
-    expect(result).toMatchObject({ ok: true, provider: noDefault });
+    expect(result).toMatchObject({ ok: true, provider: defaultProvider });
+    if (result.ok) expect(result.modelId).toEqual(expect.any(String));
   });
 
   it("should return a user-friendly error when no providers are configured", async () => {
     // Arrange
-
     mockProviders = [];
     mockWorkouts = [rawWorkout];
 
     // Act
-
     const result = await prepareBatch("2026-04-13", "2026-04-19");
 
     // Assert
-
     expect(result).toEqual({
       ok: false,
       message: "Configure an AI provider in Settings.",
@@ -115,16 +133,13 @@ describe("prepareBatch", () => {
 
   it("should return a user-friendly error when the week has no raw workouts", async () => {
     // Arrange
-
     mockProviders = [defaultProvider];
     mockWorkouts = [];
 
     // Act
-
     const result = await prepareBatch("2026-04-13", "2026-04-19");
 
     // Assert
-
     expect(result).toEqual({
       ok: false,
       message: "No raw workouts to process this week.",

@@ -1,31 +1,22 @@
 import type { Sport } from "@kaiord/core";
 import { useCallback } from "react";
 
+import { resolveModelForPurpose } from "../../../application/ai/resolve-model-for-purpose";
 import { useAnalytics } from "../../../contexts";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
+import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useLatestRef } from "../../../hooks/use-latest-ref";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
-import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { useLoadWorkout } from "../../../store/selectors";
 import { runAiGeneration } from "./run-ai-generation";
 import { useAiFallbackEffect } from "./use-ai-fallback-effect";
 
-const resolveProvider = (
-  providers: LlmProviderConfig[] | undefined,
-  selectedId: string | null
-): LlmProviderConfig | null => {
-  if (!providers) return null;
-  return (
-    providers.find((p) => p.id === selectedId) ??
-    providers.find((p) => p.isDefault) ??
-    null
-  );
-};
-
 export const useAiGeneration = () => {
+  const active = useActiveProfileLive();
   const providers = useAiProvidersLive();
+  const bindings = useAiModelBindingsLive(active?.id ?? null);
   const customPrompt = useAiCustomPromptLive();
   const selectedProviderId = useAiRuntimeStore((s) => s.selectedProviderId);
   const selectForGeneration = useAiRuntimeStore((s) => s.selectForGeneration);
@@ -36,23 +27,26 @@ export const useAiGeneration = () => {
   // Latest-ref so the LLM-call closure reads the freshest provider /
   // profile / prompt at call time without rebuilding the closure on
   // every mutation (which would cancel in-flight generation).
-  const profileRef = useLatestRef(useActiveProfileLive()?.profile ?? null);
+  const profileRef = useLatestRef(active?.profile ?? null);
   const providersRef = useLatestRef(providers);
+  const bindingsRef = useLatestRef(bindings);
   const customPromptRef = useLatestRef(customPrompt);
   const loadWorkout = useLoadWorkout();
   const analytics = useAnalytics();
 
   const generate = useCallback(
     async (text: string, sport?: Sport) => {
-      const provider = resolveProvider(
-        providersRef.current,
-        selectedProviderId
+      const resolved = resolveModelForPurpose(
+        "workout_generation",
+        providersRef.current ?? [],
+        bindingsRef.current ?? []
       );
-      if (!provider) return;
+      if (!resolved) return;
       await runAiGeneration({
         text,
         sport,
-        provider,
+        provider: resolved.provider,
+        modelId: resolved.modelId,
         profile: profileRef.current,
         customPrompt: customPromptRef.current ?? null,
         setGeneration,
@@ -62,7 +56,7 @@ export const useAiGeneration = () => {
     },
     [
       providersRef,
-      selectedProviderId,
+      bindingsRef,
       customPromptRef,
       setGeneration,
       profileRef,

@@ -28,6 +28,7 @@ const OVER_LIMIT_PROMPT_LENGTH = 600;
 
 const baseOptions: GenerateWorkoutOptions = {
   text: "30 minute endurance ride",
+  modelId: "claude-sonnet-4-5-20241022",
   provider: {
     id: "test-id",
     type: "anthropic",
@@ -45,14 +46,17 @@ describe("generateWorkoutKrd", () => {
     mockTextToWorkout.mockResolvedValue({ name: "Ride", steps: [] });
   });
 
-  it("should create language model from provider config", async () => {
+  it("should create language model from provider config and resolved model id", async () => {
     // Arrange
 
     // Act
     await generateWorkoutKrd(baseOptions);
 
     // Assert
-    expect(createLanguageModel).toHaveBeenCalledWith(baseOptions.provider);
+    expect(createLanguageModel).toHaveBeenCalledWith(
+      baseOptions.provider,
+      baseOptions.modelId
+    );
   });
 
   it("should call createTextToWorkout with the language model", async () => {

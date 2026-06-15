@@ -24,6 +24,7 @@
     "lint": "tsc --noEmit && eslint . && prettier --check src e2e",
     "lint:fix": "eslint . --fix && prettier --write src e2e",
     "generate:fitsdk-minimal": "node scripts/generate-fitsdk-minimal.mjs",
+    "generate:model-catalog": "node scripts/generate-model-catalog.mjs",
     "format": "prettier --write src e2e",
     "format:check": "prettier --check src e2e",
     "preview": "vite preview",

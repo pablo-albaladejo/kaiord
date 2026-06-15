@@ -9,12 +9,14 @@
 import type { Analytics } from "@kaiord/core";
 import type { MutableRefObject } from "react";
 
+import { resolveModelForPurpose } from "../../../application/ai/resolve-model-for-purpose";
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import type { PersistencePort } from "../../../ports/persistence-port";
 import { withOrigin } from "../../../routing/with-origin";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
+import type { AiModelBinding } from "../../../types/ai-model-binding";
 import type { CoachingActivity } from "../../../types/coaching-activity";
-import { pickProvider, runConvertWithAi } from "./use-coaching-ai-helpers";
+import { runConvertWithAi } from "./use-coaching-ai-helpers";
 
 type Reason = AiFailureReason | "not-found" | "no-provider";
 
@@ -22,7 +24,7 @@ export type StartAiCtx = {
   activity: CoachingActivity | null;
   profileId: string | null;
   providers: LlmProviderConfig[] | undefined;
-  selectedProviderId: string | null;
+  bindings: AiModelBinding[] | undefined;
   persistence: PersistencePort;
   analytics: Analytics;
   abortRef: MutableRefObject<AbortController | null>;
@@ -35,8 +37,12 @@ export type StartAiCtx = {
 
 export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   if (!ctx.activity || !ctx.profileId || ctx.abortRef.current) return;
-  const provider = pickProvider(ctx.providers, ctx.selectedProviderId);
-  if (!provider) {
+  const resolved = resolveModelForPurpose(
+    "workout_generation",
+    ctx.providers ?? [],
+    ctx.bindings ?? []
+  );
+  if (!resolved) {
     ctx.setFailure({ reason: "no-provider" });
     return;
   }
@@ -53,7 +59,8 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   try {
     result = await runConvertWithAi({
       activityId: `${ctx.profileId}:${ctx.activity.id}`,
-      provider,
+      provider: resolved.provider,
+      modelId: resolved.modelId,
       abortSignal: controller.signal,
       persistence: ctx.persistence,
       analytics: ctx.analytics,

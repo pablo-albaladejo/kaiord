@@ -33,14 +33,19 @@ export type ChatTurnDeps = {
   persistence: PersistencePort;
   profileId: string | null;
   provider: LlmProviderConfig | null;
+  modelId: string | null;
   today: string;
   ops: ChatActionOps;
 };
 
-export type ChatTurnCtx = Omit<ChatTurnDeps, "profileId" | "provider"> &
+export type ChatTurnCtx = Omit<
+  ChatTurnDeps,
+  "profileId" | "provider" | "modelId"
+> &
   ChatTurnRefs & {
     profileId: string;
     provider: LlmProviderConfig;
+    modelId: string;
     set: {
       state: (s: ChatTurnState) => void;
       streamingText: Dispatch<SetStateAction<string>>;
@@ -54,11 +59,12 @@ export const makeChatTurnCtx = (
   refs: ChatTurnRefs,
   setters: ChatTurnSetters
 ): ChatTurnCtx | null => {
-  if (!deps.profileId || !deps.provider) return null;
+  if (!deps.profileId || !deps.provider || !deps.modelId) return null;
   return {
     persistence: deps.persistence,
     profileId: deps.profileId,
     provider: deps.provider,
+    modelId: deps.modelId,
     today: deps.today,
     ops: deps.ops,
     ...refs,

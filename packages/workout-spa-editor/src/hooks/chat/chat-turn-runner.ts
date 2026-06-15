@@ -33,6 +33,7 @@ export const sendTurn = async (
       profileId: ctx.profileId,
       today: ctx.today,
       provider: ctx.provider,
+      modelId: ctx.modelId,
       actions: ctx.ops,
       onTextDelta: (d) => ctx.set.streamingText((p) => p + d),
     });

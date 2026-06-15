@@ -136,7 +136,7 @@ describe("useBatchState (two-phase start)", () => {
     // Arrange
 
     mockProviderCount = 1;
-    mockPrep = { ok: true, provider, workouts: [workout] };
+    mockPrep = { ok: true, provider, modelId: "claude", workouts: [workout] };
 
     const { result } = renderHook(() =>
       useBatchState("2026-04-13", "2026-04-19")
@@ -152,6 +152,7 @@ describe("useBatchState (two-phase start)", () => {
 
     expect(result.current.pending).toEqual({
       provider,
+      modelId: "claude",
       workouts: [workout],
     });
     expect(runSpy).not.toHaveBeenCalled();
@@ -161,7 +162,7 @@ describe("useBatchState (two-phase start)", () => {
     // Arrange
 
     mockProviderCount = 1;
-    mockPrep = { ok: true, provider, workouts: [workout] };
+    mockPrep = { ok: true, provider, modelId: "claude", workouts: [workout] };
 
     const { result } = renderHook(() =>
       useBatchState("2026-04-13", "2026-04-19")
@@ -182,6 +183,7 @@ describe("useBatchState (two-phase start)", () => {
     await waitFor(() => expect(runSpy).toHaveBeenCalledTimes(1));
     expect(runSpy.mock.calls[0][0]).toEqual({
       provider,
+      modelId: "claude",
       workouts: [workout],
     });
     expect(result.current.pending).toBeNull();
@@ -191,7 +193,7 @@ describe("useBatchState (two-phase start)", () => {
     // Arrange
 
     mockProviderCount = 1;
-    mockPrep = { ok: true, provider, workouts: [workout] };
+    mockPrep = { ok: true, provider, modelId: "claude", workouts: [workout] };
 
     const { result } = renderHook(() =>
       useBatchState("2026-04-13", "2026-04-19")

@@ -54,6 +54,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
               userPreferences: persistence.userPreferences,
               healthCleanup: persistence.healthCleanup,
               chatMessages: persistence.chatMessages,
+              aiModelBindings: persistence.aiModelBindings,
             },
             id
           );

@@ -11,3 +11,7 @@ package-lock.json
 # Generated: trimmed copy of @garmin/fitsdk Profile.js. Regenerate via
 # `pnpm --filter @kaiord/workout-spa-editor generate:fitsdk-minimal`.
 src/lib/fitsdk-minimal/
+
+# Generated: SDK-sourced model catalog. Regenerate via
+# `pnpm --filter @kaiord/workout-spa-editor generate:model-catalog`.
+src/lib/generated/

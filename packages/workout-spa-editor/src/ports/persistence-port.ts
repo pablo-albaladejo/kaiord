@@ -6,6 +6,7 @@
  */
 
 import type { IntegrationPolicyRepository } from "../application/integration-policy/integration-policy-repository.port";
+import type { AiModelBindingRepository } from "./ai-model-binding-repository";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 import type { ChatMessageRepository } from "./chat-message-repository";
 import type {
@@ -28,6 +29,7 @@ import type { TombstoneRepository } from "./tombstone-repository";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
 
+export type { AiModelBindingRepository } from "./ai-model-binding-repository";
 export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 export type { ChatMessageRepository } from "./chat-message-repository";
 export type {
@@ -85,6 +87,9 @@ export type PersistencePort = HealthRepositories & {
   // Per-profile AI chat transcript; append-only, cascade-deleted on profile
   // removal. Clear-conversation tombstones each message via the clear use case.
   chatMessages: ChatMessageRepository;
+  // Per-profile model bindings (which provider+model each AI purpose uses).
+  // Cascade-deleted on profile removal; rides the cloud-sync snapshot.
+  aiModelBindings: AiModelBindingRepository;
   // Delete markers for cross-device sync. Written by the `withTombstones`
   // decorator on every delete; read by the snapshot/merge use cases.
   tombstones: TombstoneRepository;

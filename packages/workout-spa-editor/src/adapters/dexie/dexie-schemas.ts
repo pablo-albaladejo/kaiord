@@ -103,10 +103,7 @@ const CORE_V18 = {
 // indexing it would make `isPerProfileTable` classify tombstones as a
 // per-profile cascade target, and tombstones MUST survive a profile
 // delete so the deletion still propagates across devices.
-const CORE_V19 = {
-  ...CORE_V18,
-  tombstones: "[table+id], table, deletedAt",
-};
+const CORE_V19 = { ...CORE_V18, tombstones: "[table+id], table, deletedAt" };
 
 // v20 — additive `coachingDayNotes` table for Train2Go day-scoped comment
 // threads. PK is the composite `id` (`${profileId}:${source}:${date}`),
@@ -115,6 +112,15 @@ const CORE_V19 = {
 // (and makes `isPerProfileTable` auto-discover the table). Dexie
 // auto-creates the store empty on upgrade — no data migration.
 const CORE_V20 = { ...CORE_V19, coachingDayNotes: "id, [profileId+date]" };
+
+// v21 — additive `chatMessages` store for the in-SPA AI chat transcript.
+// Append-only rows keyed on `id` (nanoid); `[profileId+createdAt]` serves the
+// per-profile chronological read and makes the table a cascade target.
+// ISO-8601 `createdAt` lets the snapshot merge clock apply (no `updatedAt`).
+const CORE_V21 = {
+  ...CORE_V20,
+  chatMessages: "id, profileId, [profileId+createdAt]",
+};
 
 export const SCHEMAS = {
   v1: CORE_V1,
@@ -128,9 +134,10 @@ export const SCHEMAS = {
   v18: CORE_V18,
   v19: CORE_V19,
   v20: CORE_V20,
-  // v21 — additive `chatMessages` store for the in-SPA AI chat transcript.
-  // Append-only rows keyed on `id` (nanoid); `[profileId+createdAt]` serves
-  // the per-profile chronological read and makes the table a cascade target.
-  // ISO-8601 `createdAt` lets the snapshot merge clock apply (no `updatedAt`).
-  v21: { ...CORE_V20, chatMessages: "id, profileId, [profileId+createdAt]" },
+  v21: CORE_V21,
+  // v22 — additive `aiModelBindings` store for per-profile model bindings.
+  // Composite PK `[profileId+purpose]` keeps one row per purpose per profile;
+  // the `profileId` index drives the cascade and makes the table a cascade
+  // target (also auto-discovered by `isPerProfileTable`).
+  v22: { ...CORE_V21, aiModelBindings: "[profileId+purpose], profileId" },
 } as const;

@@ -29,9 +29,14 @@ const requireProfile = (profileId: string | null): string => {
   return profileId;
 };
 
+export type ChatGenerationModel = {
+  provider: LlmProviderConfig | null;
+  modelId: string | null;
+};
+
 export const useChatActionOps = (
   profileId: string | null,
-  provider: LlmProviderConfig | null
+  generation: ChatGenerationModel
 ): ChatActionOps => {
   const persistence = usePersistence();
   const transport = useMemo(
@@ -46,17 +51,19 @@ export const useChatActionOps = (
     () => doSyncCoaching(persistence, transport, requireProfile(profileId)),
     [persistence, transport, profileId]
   );
+  const { provider, modelId } = generation;
   const createWorkout = useCallback(
     (input: CreateWorkoutInput) => {
-      if (!provider) throw new Error("No AI provider configured");
+      if (!provider || !modelId) throw new Error("No AI provider configured");
       return doCreateWorkout(
         persistence,
         requireProfile(profileId),
         provider,
+        modelId,
         input
       );
     },
-    [persistence, profileId, provider]
+    [persistence, profileId, provider, modelId]
   );
   const logHealthMetric = useCallback(
     (input: LogHealthMetricInput) =>
