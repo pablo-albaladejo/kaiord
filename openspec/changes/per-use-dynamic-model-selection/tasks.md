@@ -27,15 +27,15 @@
 
 ## 3. SDK-sourced model catalog
 
-- [ ] 3.1 Write `scripts/generate-model-catalog.mjs`: parse installed
+- [x] 3.1 Write `scripts/generate-model-catalog.mjs`: parse installed
       `@ai-sdk/anthropic|openai|google` type defs, extract `*ModelId` literals, filter to
       chat/text models, emit `src/lib/generated/model-catalog.ts`
       (`Record<LlmProviderType, ModelOption[]>`). Add `generate:model-catalog` package script.
-- [ ] 3.2 Write `scripts/generate-model-catalog.test.mjs` (`node:test`) covering extraction,
+- [x] 3.2 Write `scripts/generate-model-catalog.test.mjs` (`node:test`) covering extraction,
       chat-model filtering, and exclusion of embeddings/tts/image/moderation ids.
-- [ ] 3.3 Write `scripts/check-model-catalog.mjs` (regenerate-in-memory, diff against the
+- [x] 3.3 Write `scripts/check-model-catalog.mjs` (regenerate-in-memory, diff against the
       committed file, fail on drift) + its `*.test.mjs`; wire into `pnpm test:scripts`.
-- [ ] 3.4 Generate the catalog and replace `PROVIDER_MODELS` in `src/lib/provider-models.ts`
+- [x] 3.4 Generate the catalog and replace `PROVIDER_MODELS` in `src/lib/provider-models.ts`
       with imports from the generated catalog; `getDefaultModel(type)` returns the catalog's
       first id for that type. Remove the hardcoded model arrays.
 
