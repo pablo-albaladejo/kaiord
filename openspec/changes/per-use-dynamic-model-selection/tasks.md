@@ -41,13 +41,13 @@
 
 ## 4. Resolver & binding use-cases (TDD)
 
-- [ ] 4.1 Write `resolve-model-for-purpose.test.ts` covering the full fallback chain: purpose
+- [x] 4.1 Write `resolve-model-for-purpose.test.ts` covering the full fallback chain: purpose
       override → default binding → default provider + catalog model → none; stale-provider
       skip; no-providers → none — red.
-- [ ] 4.2 Implement pure `src/application/ai/resolve-model-for-purpose.ts` — green.
-- [ ] 4.3 Add binding use-cases (`set-model-binding.ts`, `clear-model-binding.ts`) with tests,
+- [x] 4.2 Implement pure `src/application/ai/resolve-model-for-purpose.ts` — green.
+- [x] 4.3 Add binding use-cases (`set-model-binding.ts`, `clear-model-binding.ts`) with tests,
       validating `providerId` exists and `purpose` is valid.
-- [ ] 4.4 Add a `useAiModelBindingsLive(profileId)` reactive hook (one `useLiveQuery`).
+- [x] 4.4 Add a `useAiModelBindingsLive(profileId)` reactive hook (one `useLiveQuery`).
 
 ## 5. Factory seam + wire consumers
 
