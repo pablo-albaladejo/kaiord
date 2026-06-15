@@ -13,6 +13,7 @@ import type {
   HealthStressRecord,
   HealthWeightRecord,
 } from "../../types/health/health-records";
+import { createDexieAiModelBindingRepository } from "./dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
 import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
@@ -79,6 +80,7 @@ export function createDexiePersistence(
       "healthStress"
     ),
     chatMessages: createDexieChatMessageRepository(database),
+    aiModelBindings: createDexieAiModelBindingRepository(database),
     tombstones: createDexieTombstoneRepository(database),
     transaction: createTransactionRunner(database),
   };
