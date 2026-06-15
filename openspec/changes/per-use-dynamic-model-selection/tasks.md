@@ -63,11 +63,11 @@
 
 ## 6. Settings UI
 
-- [ ] 6.1 Remove `ModelSelect` from `ProviderForm.tsx` and `ProviderEditRow.tsx`; the forms
+- [x] 6.1 Remove `ModelSelect` from `ProviderForm.tsx` and `ProviderEditRow.tsx`; the forms
       collect type + label + API key only. Update their tests/stories.
-- [ ] 6.2 Build a reusable model picker (catalog `<select>` for the chosen provider's type +
+- [x] 6.2 Build a reusable model picker (catalog `<select>` for the chosen provider's type +
       free-text "custom model id" input) with tests.
-- [ ] 6.3 Add a per-profile "Models" section to `AiTab.tsx`: default model row + Chat and
+- [x] 6.3 Add a per-profile "Models" section to `AiTab.tsx`: default model row + Chat and
       Workout-generation override rows (provider select + model picker), persisting via the
       binding use-cases. Component + interaction tests.
 

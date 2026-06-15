@@ -15,12 +15,12 @@ describe("updateProvider", () => {
     // Act
     const updated = await updateProvider(persistence, created.id, {
       label: "Renamed",
-      model: "claude-haiku-4-5",
+      apiKey: "sk-renamed",
     });
 
     // Assert
     expect(updated.label).toBe("Renamed");
-    expect(updated.model).toBe("claude-haiku-4-5");
+    expect(updated.apiKey).toBe("sk-renamed");
     expect(updated.id).toBe(created.id);
     expect(updated.isDefault).toBe(true);
   });
