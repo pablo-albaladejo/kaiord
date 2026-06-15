@@ -1,9 +1,9 @@
 /**
  * Resolves the provider + model for an AI purpose: the purpose's own binding,
- * else the `default` binding, else the default provider with the catalog's
- * default model, else null. A binding whose provider no longer exists is
- * skipped. The single resolution path shared by chat, generation, coaching,
- * and batch.
+ * else the `default` binding, else the default provider paired with its stored
+ * model (transitional back-compat) or the catalog's default model, else null.
+ * A binding whose provider no longer exists is skipped. The single resolution
+ * path shared by chat, generation, coaching, and batch.
  */
 import { getDefaultModel } from "../../lib/provider-models";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
@@ -30,9 +30,13 @@ const fromDefaultProvider = (
   providers: LlmProviderConfig[]
 ): ResolvedModel | undefined => {
   const provider = providers.find((p) => p.isDefault) ?? providers[0];
-  return provider
-    ? { provider, modelId: getDefaultModel(provider.type) }
-    : undefined;
+  if (!provider) return undefined;
+  // Prefer the provider's stored model (a migrated/legacy choice) over the
+  // catalog default while `LlmProviderConfig.model` is still carried.
+  return {
+    provider,
+    modelId: provider.model ?? getDefaultModel(provider.type),
+  };
 };
 
 export const resolveModelForPurpose = (

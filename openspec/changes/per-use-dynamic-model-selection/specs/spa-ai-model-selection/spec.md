@@ -78,8 +78,9 @@ snapshot.
 All AI features SHALL obtain their provider and model through a single
 `resolveModelForPurpose(profileId, purpose, providers, bindings)` function with the fallback
 order: the purpose's own binding → the `default` binding → the `isDefault` provider (or the
-first provider) paired with the catalog's default model for that provider type → none. A
-binding whose referenced provider no longer exists SHALL be skipped. The chat feature SHALL
+first provider) paired with that provider's stored model if present, otherwise the catalog's
+default model for its type → none. A binding whose referenced provider no longer exists SHALL
+be skipped. The chat feature SHALL
 resolve the `chat` purpose; free-text generation, coaching-activity conversion, and batch
 processing SHALL resolve the `workout_generation` purpose.
 
@@ -95,12 +96,13 @@ processing SHALL resolve the `workout_generation` purpose.
 - **WHEN** chat resolves its model
 - **THEN** the resolver SHALL return the `default` binding's provider and model id
 
-#### Scenario: Fall back to the default provider and catalog model
+#### Scenario: Fall back to the default provider and its model
 
 - **GIVEN** no bindings exist for the profile but at least one provider is configured
 - **WHEN** any purpose resolves its model
 - **THEN** the resolver SHALL return the `isDefault` provider (or the first provider) paired
-  with the catalog's default model for that provider type
+  with that provider's stored model if present, otherwise the catalog's default model for its
+  type
 
 #### Scenario: Binding referencing a deleted provider is skipped
 

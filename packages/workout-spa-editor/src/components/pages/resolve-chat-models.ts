@@ -39,7 +39,7 @@ export const resolveChatModels = (
   const modelId =
     chat && chat.provider.id === selected.id
       ? chat.modelId
-      : getDefaultModel(selected.type);
+      : (selected.model ?? getDefaultModel(selected.type));
   return {
     provider: selected,
     modelId,

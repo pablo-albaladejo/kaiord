@@ -68,9 +68,25 @@ describe("resolveModelForPurpose", () => {
     expect(resolved).toEqual({ provider: providers[0], modelId: "def-model" });
   });
 
-  it("should fall back to the default provider and catalog model", () => {
+  it("should fall back to the default provider's stored model", () => {
     // Arrange
-    const providers = [provider({ type: "anthropic", isDefault: true })];
+    const providers = [provider({ isDefault: true, model: "stored-model" })];
+
+    // Act
+    const resolved = resolveModelForPurpose("chat", providers, []);
+
+    // Assert
+    expect(resolved).toEqual({
+      provider: providers[0],
+      modelId: "stored-model",
+    });
+  });
+
+  it("should use the catalog default when the provider has no stored model", () => {
+    // Arrange
+    const providers = [
+      provider({ type: "anthropic", isDefault: true, model: undefined }),
+    ];
 
     // Act
     const resolved = resolveModelForPurpose("chat", providers, []);
