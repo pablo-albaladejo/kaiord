@@ -70,7 +70,7 @@ type AiModelBinding = {
   purpose: AiModelPurpose;
   providerId: string;
   modelId: string;
-  updatedAt: number;
+  updatedAt: string; // ISO-8601, for the snapshot merge clock
 };
 type AiModelBindingRepository = {
   getAll(profileId: string): Promise<AiModelBinding[]>;

@@ -73,10 +73,10 @@
 
 ## 7. Verification & ship
 
-- [ ] 7.1 Grep for remaining reads of `provider.model` / `config.model`; confirm none drive
+- [x] 7.1 Grep for remaining reads of `provider.model` / `config.model`; confirm none drive
       inference (only migration + audit-source).
-- [ ] 7.2 `pnpm -r build && pnpm -r test && pnpm lint:fix` clean; frontend coverage ≥70%;
+- [x] 7.2 `pnpm -r build && pnpm -r test && pnpm lint:fix` clean; frontend coverage ≥70%;
       `pnpm test:scripts` (incl. catalog freshness guard) green.
-- [ ] 7.3 `pnpm lint:specs` passes; run `/opsx:verify` against the scenarios.
-- [ ] 7.4 Add a changeset (`@kaiord/workout-spa-editor`: minor) describing key-only providers,
+- [x] 7.3 `pnpm lint:specs` passes; run `/opsx:verify` against the scenarios.
+- [x] 7.4 Add a changeset (`@kaiord/workout-spa-editor`: minor) describing key-only providers,
       per-use models, and the SDK-sourced catalog.
