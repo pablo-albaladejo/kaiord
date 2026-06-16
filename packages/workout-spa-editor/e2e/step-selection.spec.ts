@@ -27,8 +27,6 @@ test.describe("Step Selection - Unique IDs", () => {
     page,
   }) => {
     // Requirement 4.1: Test selecting main workout step
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout with steps that have duplicate stepIndex values
     await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
@@ -140,8 +138,6 @@ test.describe("Step Selection - Unique IDs", () => {
     page,
   }) => {
     // Requirement 4.2: Test selecting step in repetition block
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout with repetition blocks
     await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
@@ -247,8 +243,6 @@ test.describe("Step Selection - Unique IDs", () => {
     // (rather than extend it) so `selectedStepIds` always shares one
     // parent. This test previously asserted the old (extend) behavior;
     // it now asserts the new (replace) behavior.
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout with multiple repetition blocks
     await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
@@ -417,8 +411,6 @@ test.describe("Step Selection - Unique IDs", () => {
     page,
   }) => {
     // Requirement 4.4: Verify steps with same stepIndex are independently selectable
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout where multiple contexts have steps with stepIndex: 1
     await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
@@ -558,8 +550,6 @@ test.describe("Step Selection - Unique IDs", () => {
     page,
   }) => {
     // Requirement 4.4: Verify selection behavior with duplicate stepIndex values
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout with multiple blocks and duplicate stepIndex values
     await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");

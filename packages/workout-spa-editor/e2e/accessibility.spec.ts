@@ -252,8 +252,6 @@ test.describe("Accessibility", () => {
   });
 
   test("should maintain color contrast for accessibility", async ({ page }) => {
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout with different intensity levels
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -392,8 +390,6 @@ test.describe("Accessibility", () => {
 
   test("should apply theme to all UI elements", async ({ page, isMobile }) => {
     // Requirement 13: Theme applies to entire application
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout to have more UI elements
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
