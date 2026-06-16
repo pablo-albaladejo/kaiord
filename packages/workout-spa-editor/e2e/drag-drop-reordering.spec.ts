@@ -656,8 +656,6 @@ test.describe("Drag-and-Drop Mobile Touch", () => {
   });
 
   test("should support touch drag on mobile", async ({ page }) => {
-    await page.goto("/workout/new?source=scratch");
-
     // Load workout
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');

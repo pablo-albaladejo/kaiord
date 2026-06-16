@@ -403,8 +403,6 @@ test.describe("Error Handling - Mobile", () => {
 
   test("should handle error recovery on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new?source=scratch");
-
     const validWorkout = {
       version: "1.0",
       type: "structured_workout",

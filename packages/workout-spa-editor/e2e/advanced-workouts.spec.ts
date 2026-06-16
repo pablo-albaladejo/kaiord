@@ -26,8 +26,6 @@ test.describe("Advanced Workout Features", () => {
       page,
     }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       // Load a swimming workout
       await seedEmptyWorkout(page);
       const fileInput = page.locator('input[type="file"]');
@@ -103,8 +101,6 @@ test.describe("Advanced Workout Features", () => {
       page,
     }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const swimmingWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -161,8 +157,6 @@ test.describe("Advanced Workout Features", () => {
   test.describe("Advanced Duration Types", () => {
     test("should handle calorie-based duration", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const calorieWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -214,8 +208,6 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle power threshold duration", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const powerThresholdWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -264,8 +256,6 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle heart rate threshold duration", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const hrThresholdWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -314,8 +304,6 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle repeat until conditions", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const repeatWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -372,8 +360,6 @@ test.describe("Advanced Workout Features", () => {
   test.describe("Workout Notes", () => {
     test("should display step notes when present", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const workoutWithNotes = {
         version: "1.0",
         type: "structured_workout",
@@ -443,8 +429,6 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle steps without notes", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const workoutWithoutNotes = {
         version: "1.0",
         type: "structured_workout",
@@ -495,8 +479,6 @@ test.describe("Advanced Workout Features", () => {
   test.describe("Workout Metadata Editing", () => {
     test("should edit workout name via metadata editor", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const testWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -569,8 +551,6 @@ test.describe("Advanced Workout Features", () => {
 
     test("should edit workout sport via metadata editor", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const testWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -642,8 +622,6 @@ test.describe("Advanced Workout Features", () => {
 
     test("should cancel metadata editing without saving", async ({ page }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       const testWorkout = {
         version: "1.0",
         type: "structured_workout",
@@ -718,8 +696,6 @@ test.describe("Advanced Workout Features", () => {
       page,
     }) => {
       // Arrange
-      await page.goto("/workout/new?source=scratch");
-
       // Create a workout with PERF_STEP_COUNT steps
       const steps = Array.from({ length: PERF_STEP_COUNT }, (_, i) => ({
         stepIndex: i,
