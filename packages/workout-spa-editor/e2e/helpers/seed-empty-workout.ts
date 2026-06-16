@@ -20,30 +20,14 @@ import type { Page } from "@playwright/test";
  *    and skips auto-init; `WorkoutHeader` stays in view mode (seeded
  *    workout already has sport/name).
  */
-// The editor consumes its query params on mount and rewrites the URL
-// (strips `?source=scratch` / `?action=import` back to `/workout/new`).
-// A default `goto` waits for `load`, so that client-side rewrite races
-// the navigation — WebKit aborts it ("Frame load interrupted" /
-// "interrupted by another navigation"), failing the seed. `waitUntil:
-// "commit"` resolves once the document commits, before the rewrite; the
-// explicit readiness waits below replace the dropped `load` wait.
-const READY_TIMEOUT_MS = 20000;
-
 export async function seedEmptyWorkout(
   page: Page,
   krd?: Record<string, unknown>
 ): Promise<void> {
   if (krd) {
     if (!page.url().includes("/workout/new")) {
-      await page.goto("/workout/new", { waitUntil: "commit" });
+      await page.goto("/workout/new");
     }
-    // `commit` does not wait for scripts, so the store global may not be
-    // installed yet — wait for it before seeding.
-    await page.waitForFunction(
-      () => "__KAIORD_WORKOUT_STORE__" in window,
-      undefined,
-      { timeout: READY_TIMEOUT_MS }
-    );
     await page.evaluate((seed) => {
       const w = window as unknown as {
         __KAIORD_WORKOUT_STORE__?: {
@@ -57,13 +41,13 @@ export async function seedEmptyWorkout(
       }
       w.__KAIORD_WORKOUT_STORE__.getState().loadWorkout(seed);
     }, krd);
-    await page.goto("/workout/new?source=scratch", { waitUntil: "commit" });
+    await page.goto("/workout/new?source=scratch");
     return;
   }
 
   if (!page.url().includes("action=import")) {
-    await page.goto("/workout/new?action=import", { waitUntil: "commit" });
+    await page.goto("/workout/new?action=import");
   }
   const fileInput = page.locator('input[type="file"]');
-  await fileInput.waitFor({ state: "attached", timeout: READY_TIMEOUT_MS });
+  await fileInput.waitFor({ state: "attached", timeout: 20000 });
 }
