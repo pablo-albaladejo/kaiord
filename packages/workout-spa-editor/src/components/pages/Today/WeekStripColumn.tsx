@@ -1,6 +1,6 @@
 import type { DaySummary } from "./build-week-summary";
 import type { WeekDay } from "./today-dates";
-import { WeekStripMark } from "./weekstrip-mark";
+import { WeekStripMark } from "./WeekStripMark";
 
 export type WeekStripColumnProps = {
   day: WeekDay;

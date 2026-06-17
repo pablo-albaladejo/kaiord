@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { DaySummary } from "./build-week-summary";
-import { WeekStripMark } from "./weekstrip-mark";
+import { WeekStripMark } from "./WeekStripMark";
 
 const summary = (o: Partial<DaySummary> = {}): DaySummary => ({
   count: 1,
