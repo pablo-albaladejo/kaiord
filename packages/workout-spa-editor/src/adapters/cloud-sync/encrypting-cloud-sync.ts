@@ -36,6 +36,9 @@ export type EncryptionSettings = {
 const MISSING_PASSPHRASE =
   "Encrypted snapshot requires a passphrase before it can be applied";
 
+const DOWNGRADED_SNAPSHOT =
+  "Snapshot manifest is marked cleartext but carries a ciphertext (tampered)";
+
 export function withEncryption(
   inner: CloudSyncPort,
   settings: EncryptionSettings
@@ -44,7 +47,14 @@ export function withEncryption(
     const remote = await inner.pull();
     if (!remote) return null;
     const wire = remote.snapshot as unknown as WireSnapshot;
-    if (!isEncryptedSnapshot(wire)) return remote;
+    if (!isEncryptedSnapshot(wire)) {
+      // A cleartext wire must not carry a `ciphertext`. That combination
+      // is an encrypted-flag downgrade (manifest.encrypted flipped to
+      // false to skip decryption), leaving a snapshot with no readable
+      // tables/tombstones — reject it rather than process garbage.
+      if ("ciphertext" in wire) throw new Error(DOWNGRADED_SNAPSHOT);
+      return remote;
+    }
     const passphrase = settings.getPassphrase();
     if (!passphrase) throw new Error(MISSING_PASSPHRASE);
     const snapshot = await decryptSnapshot(wire, passphrase);

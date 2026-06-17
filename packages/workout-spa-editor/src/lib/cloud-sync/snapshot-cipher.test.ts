@@ -73,4 +73,34 @@ describe("snapshot-cipher", () => {
     // Assert
     await expect(attempt).rejects.toThrow();
   });
+
+  it("should fail to decrypt when the cleartext manifest deviceId is tampered", async () => {
+    // Arrange
+    const encrypted = await encryptSnapshot(makeSnapshot(), "correct horse");
+    const tampered = {
+      ...encrypted,
+      manifest: { ...encrypted.manifest, deviceId: "attacker-device" },
+    };
+
+    // Act
+    const attempt = decryptSnapshot(tampered, "correct horse");
+
+    // Assert
+    await expect(attempt).rejects.toThrow();
+  });
+
+  it("should fail to decrypt when the cleartext manifest schemaVersion is tampered", async () => {
+    // Arrange
+    const encrypted = await encryptSnapshot(makeSnapshot(), "correct horse");
+    const tampered = {
+      ...encrypted,
+      manifest: { ...encrypted.manifest, schemaVersion: 99 },
+    };
+
+    // Act
+    const attempt = decryptSnapshot(tampered, "correct horse");
+
+    // Assert
+    await expect(attempt).rejects.toThrow();
+  });
 });

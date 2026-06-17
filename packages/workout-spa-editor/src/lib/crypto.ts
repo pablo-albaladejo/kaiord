@@ -7,14 +7,16 @@ const copyBytes = (data: Uint8Array): Uint8Array =>
     data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
   );
 
+const bytes = (text: string): BufferSource =>
+  copyBytes(new TextEncoder().encode(text)) as BufferSource;
+
 const deriveKey = async (
   passphrase: string,
   salt: Uint8Array
 ): Promise<CryptoKey> => {
-  const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    copyBytes(encoder.encode(passphrase)) as BufferSource,
+    bytes(passphrase),
     "PBKDF2",
     false,
     ["deriveKey"]
@@ -33,19 +35,30 @@ const deriveKey = async (
   );
 };
 
+// AAD: authenticated by the AES-GCM tag but not encrypted; decryption
+// fails unless the identical value is supplied. Binds cleartext metadata
+// (e.g. a snapshot manifest) to the ciphertext so tampering is detectable.
+const gcmParams = (iv: Uint8Array, additionalData?: string): AesGcmParams => ({
+  name: "AES-GCM",
+  iv: copyBytes(iv) as BufferSource,
+  ...(additionalData !== undefined && {
+    additionalData: bytes(additionalData),
+  }),
+});
+
 export const encrypt = async (
   plaintext: string,
-  passphrase: string
+  passphrase: string,
+  additionalData?: string
 ): Promise<string> => {
-  const encoder = new TextEncoder();
   const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
   const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
   const key = await deriveKey(passphrase, salt);
 
   const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: copyBytes(iv) as BufferSource },
+    gcmParams(iv, additionalData),
     key,
-    copyBytes(encoder.encode(plaintext)) as BufferSource
+    bytes(plaintext)
   );
 
   const combined = new Uint8Array(
@@ -60,7 +73,8 @@ export const encrypt = async (
 
 export const decrypt = async (
   encoded: string,
-  passphrase: string
+  passphrase: string,
+  additionalData?: string
 ): Promise<string> => {
   const combined = Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0));
   const salt = combined.slice(0, SALT_LENGTH);
@@ -69,7 +83,7 @@ export const decrypt = async (
 
   const key = await deriveKey(passphrase, salt);
   const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: copyBytes(iv) as BufferSource },
+    gcmParams(iv, additionalData),
     key,
     copyBytes(ciphertext) as BufferSource
   );
