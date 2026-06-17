@@ -71,4 +71,36 @@ describe("crypto", () => {
     // Assert
     expect(() => atob(encrypted)).not.toThrow();
   });
+
+  it("should round-trip when additionalData matches", async () => {
+    // Arrange
+    const aad = "manifest-context";
+    const encrypted = await encrypt("secret", passphrase, aad);
+
+    // Act
+    const decrypted = await decrypt(encrypted, passphrase, aad);
+
+    // Assert
+    expect(decrypted).toBe("secret");
+  });
+
+  it("should fail decryption when additionalData differs", async () => {
+    // Arrange
+    const encrypted = await encrypt("secret", passphrase, "context-a");
+
+    // Act
+
+    // Assert
+    await expect(decrypt(encrypted, passphrase, "context-b")).rejects.toThrow();
+  });
+
+  it("should fail decryption when additionalData is omitted on decrypt", async () => {
+    // Arrange
+    const encrypted = await encrypt("secret", passphrase, "context-a");
+
+    // Act
+
+    // Assert
+    await expect(decrypt(encrypted, passphrase)).rejects.toThrow();
+  });
 });
