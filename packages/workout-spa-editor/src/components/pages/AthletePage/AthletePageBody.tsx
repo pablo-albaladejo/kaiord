@@ -8,6 +8,7 @@ import {
   isActiveSport,
 } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
+import { logger } from "../../../utils/logger";
 import { Segmented } from "../../atoms/Segmented";
 import { AthleteConnections } from "../../organisms/AthleteConnections";
 import { AthleteIdentity } from "./AthleteIdentity";
@@ -34,7 +35,11 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
 
   const handleSportChange = (next: ActiveSport) => {
     setSport(next);
-    void setPrefs({ activeSport: next });
+    // Best-effort persist; a failed preference write must not surface as an
+    // unhandled rejection (the optimistic local state already updated).
+    void setPrefs({ activeSport: next }).catch((error: unknown) => {
+      logger.warn("Failed to persist active sport", { error });
+    });
   };
 
   const sportLabel =
