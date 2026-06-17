@@ -89,6 +89,42 @@ describe("setUserPreferenceFields", () => {
     });
   });
 
+  it("should persist activeSport on first call", async () => {
+    // Arrange
+    const repository = createInMemoryUserPreferencesRepository();
+    const profileRepository = stubProfileRepo([stubProfile()]);
+
+    // Act
+    await setUserPreferenceFields(
+      { profileId: "p1", patch: { activeSport: "running" } },
+      { clock: fixedClock, repository, profileRepository }
+    );
+
+    // Assert
+    expect((await repository.get("p1"))?.activeSport).toBe("running");
+  });
+
+  it("should preserve activeSport when a later patch changes another field", async () => {
+    // Arrange
+    const repository = createInMemoryUserPreferencesRepository();
+    const profileRepository = stubProfileRepo([stubProfile()]);
+    await setUserPreferenceFields(
+      { profileId: "p1", patch: { activeSport: "swimming" } },
+      { clock: fixedClock, repository, profileRepository }
+    );
+
+    // Act
+    await setUserPreferenceFields(
+      { profileId: "p1", patch: { calendarView: "list" } },
+      { clock: fixedClock, repository, profileRepository }
+    );
+
+    // Assert
+    const row = await repository.get("p1");
+    expect(row?.activeSport).toBe("swimming");
+    expect(row?.calendarView).toBe("list");
+  });
+
   it("should throw ProfileNotFoundError when profile is missing", async () => {
     // Arrange
     const repository = createInMemoryUserPreferencesRepository();

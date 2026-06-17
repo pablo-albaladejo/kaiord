@@ -21,6 +21,8 @@ export const userPreferencesSchema = z.object({
   // Optional: pre-v15 rows lack these fields. The Dexie v15 migration is
   // data-only; absence remains a valid state until the user first writes.
   lastScratchSport: sportSchema.optional(),
+  /** Sport last selected on the Athlete page; absent until first chosen. */
+  activeSport: sportSchema.optional(),
   aiBannerExpanded: z.boolean().optional(),
   updatedAt: z.iso.datetime(),
 });
