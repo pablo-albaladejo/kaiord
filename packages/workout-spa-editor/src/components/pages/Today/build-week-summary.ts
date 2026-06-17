@@ -13,6 +13,7 @@ import type { Profile } from "../../../types/profile";
 import { buildCalendarBuckets } from "../calendar-buckets";
 import { groupWorkoutsByDay } from "../calendar-utils";
 import { estimatedBucket, measuredBucket } from "./day-intensity";
+import { representativeDaySport } from "./day-sport";
 import type { IntensityBucket } from "./intensity-bucket";
 
 export type { IntensityBucket };
@@ -21,6 +22,8 @@ export type DaySummary = {
   count: number;
   intensity: IntensityBucket | null;
   estimated: boolean;
+  /** Representative sport glyph (emoji) for the day, or null for a dot. */
+  sport: string | null;
 };
 
 export type WeekSummary = Record<string, DaySummary>;
@@ -55,13 +58,14 @@ export function buildWeekSummary({
     const plans = soloPlansByDay[iso] ?? [];
     const actuals = soloActualsByDay[iso] ?? [];
     const count = dayMatched.length + plans.length + actuals.length;
+    const sport = representativeDaySport(dayMatched, plans, actuals);
 
     const measured = measuredBucket(
       [...dayMatched.map((m) => m.workout), ...actuals],
       profile
     );
     if (measured) {
-      summary[iso] = { count, intensity: measured, estimated: false };
+      summary[iso] = { count, intensity: measured, estimated: false, sport };
       continue;
     }
     const estimated = estimatedBucket([
@@ -72,6 +76,7 @@ export function buildWeekSummary({
       count,
       intensity: estimated,
       estimated: estimated !== null,
+      sport,
     };
   }
   return summary;

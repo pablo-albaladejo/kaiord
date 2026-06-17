@@ -81,6 +81,7 @@ describe("buildWeekSummary", () => {
       count: 1,
       intensity: "hard",
       estimated: true,
+      sport: "bike",
     });
   });
 
@@ -154,6 +155,7 @@ describe("buildWeekSummary", () => {
       count: 1,
       intensity: null,
       estimated: false,
+      sport: "\u{1F6B4}",
     });
   });
 
@@ -174,6 +176,7 @@ describe("buildWeekSummary", () => {
       count: 0,
       intensity: null,
       estimated: false,
+      sport: null,
     });
   });
 });

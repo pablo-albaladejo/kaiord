@@ -17,7 +17,12 @@ export type WeekStripProps = {
 const ARROW =
   "flex h-8 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800";
 
-const EMPTY: DaySummary = { count: 0, intensity: null, estimated: false };
+const EMPTY: DaySummary = {
+  count: 0,
+  intensity: null,
+  estimated: false,
+  sport: null,
+};
 
 export function WeekStrip(props: WeekStripProps) {
   const { days, weekSummary, onSelectDay } = props;
