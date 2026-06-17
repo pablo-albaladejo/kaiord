@@ -114,6 +114,36 @@ describe("createDexieSnapshotPort", () => {
     expect(decrypted).toBe("sk-secret-123");
   });
 
+  it("should roll the whole import back when a later phase fails (atomic)", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("workouts").add({ id: "original", profileId: "p-1" });
+    const base = createDexieSnapshotPort(db);
+    const snapshot = await exportSnapshot({ port: base, deviceId: "dev-1" });
+    const imported = {
+      ...snapshot,
+      tables: { ...snapshot.tables, workouts: [{ id: "imported" }] },
+    };
+    // The tombstone phase fails *after* importTables has written in the
+    // same transaction; the whole transaction must roll back.
+    const failing = {
+      ...base,
+      replaceTombstones: async () => {
+        throw new Error("simulated mid-restore failure");
+      },
+    };
+
+    // Act
+    const attempt = importSnapshot({ port: failing, snapshot: imported });
+
+    // Assert
+    await expect(attempt).rejects.toThrow(/mid-restore/i);
+    const workouts = await db.table("workouts").toArray();
+    db.close();
+    expect(workouts).toEqual([{ id: "original", profileId: "p-1" }]);
+  });
+
   it("should round-trip tombstones via the dedicated tombstone methods", async () => {
     // Arrange
     const db = new KaiordDatabase(name);

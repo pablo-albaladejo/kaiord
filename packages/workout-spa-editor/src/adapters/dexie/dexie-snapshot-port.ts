@@ -16,7 +16,7 @@ const TOMBSTONES = "tombstones";
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive
 // transaction overloads (TS2589). Same pattern as dexie-persistence-adapter.
 type DexieTxScope = (
-  mode: "rw",
+  mode: "r" | "rw",
   tables: ReadonlyArray<unknown>,
   scope: () => Promise<unknown>
 ) => Promise<unknown>;
@@ -27,6 +27,17 @@ export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
   const scoped = db as unknown as { transaction: DexieTxScope };
 
   return {
+    // One transaction over every table. The inner `importTables` /
+    // `replaceTombstones` / read calls below open Dexie transactions on
+    // subsets of this scope, which Dexie nests into (joins) this one — so
+    // the whole export/import is a single atomic unit.
+    transaction: <T>(mode: "r" | "rw", scope: () => Promise<T>): Promise<T> =>
+      scoped.transaction(
+        mode,
+        db.tables,
+        scope as () => Promise<unknown>
+      ) as Promise<T>,
+
     schemaVersion: async () => db.verno,
 
     exportTables: async () => {

@@ -30,6 +30,11 @@ export async function importSnapshot({
         `app's v${localVersion}; update the app before importing.`
     );
   }
-  await port.importTables(snapshot.tables);
-  await port.replaceTombstones(pruneTombstones(snapshot.tombstones, now()));
+  // Single read-write transaction so tables and tombstones are restored
+  // atomically: a failure mid-restore rolls the whole database back rather
+  // than leaving tables replaced but tombstones stale (or vice versa).
+  await port.transaction("rw", async () => {
+    await port.importTables(snapshot.tables);
+    await port.replaceTombstones(pruneTombstones(snapshot.tombstones, now()));
+  });
 }

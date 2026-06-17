@@ -19,6 +19,9 @@ export function createInMemorySnapshotPort(
   state: InMemorySnapshotState
 ): SnapshotPort {
   return {
+    // No real transactions to model in memory — run the scope directly.
+    transaction: <T>(_mode: "r" | "rw", scope: () => Promise<T>) => scope(),
+
     schemaVersion: async () => state.schemaVersion,
 
     exportTables: async () => {

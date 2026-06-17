@@ -22,11 +22,16 @@ export async function exportSnapshot({
   deviceId,
   now = () => new Date(),
 }: ExportSnapshotDeps): Promise<Snapshot> {
-  const [schemaVersion, tables, tombstones] = await Promise.all([
-    port.schemaVersion(),
-    port.exportTables(),
-    port.listTombstones(),
-  ]);
+  // Single read transaction so the schema version, table rows, and
+  // tombstones are a consistent point-in-time snapshot (a concurrent
+  // local write cannot interleave between the reads).
+  const [schemaVersion, tables, tombstones] = await port.transaction("r", () =>
+    Promise.all([
+      port.schemaVersion(),
+      port.exportTables(),
+      port.listTombstones(),
+    ])
+  );
   return {
     manifest: {
       schemaVersion,
