@@ -14,6 +14,15 @@
 import type { SnapshotTables, Tombstone } from "../types/snapshot";
 
 export type SnapshotPort = {
+  /**
+   * Run `scope` inside a single database transaction spanning all
+   * snapshot tables so a whole export (`"r"`) or import (`"rw"`) is
+   * atomic and consistent: a concurrent write cannot interleave, and a
+   * mid-restore failure rolls the database back. Inner port calls made
+   * within `scope` join this transaction. The in-memory fake runs
+   * `scope` directly (no real transactions to model).
+   */
+  transaction: <T>(mode: "r" | "rw", scope: () => Promise<T>) => Promise<T>;
   /** Current Dexie schema version of the underlying database. */
   schemaVersion: () => Promise<number>;
   /** Dump every table's rows, keyed by table name. */
