@@ -1,10 +1,7 @@
 import type { ZoneMapEntry } from "../../components/organisms/ZoneMap";
 import type { Profile } from "../../types/profile";
-import {
-  paceSecondsFactor,
-  paceUnitLabelFor,
-  type Units,
-} from "../units/units";
+import type { Units } from "../units/units";
+import { paceSecondsFactor, paceUnitLabelFor } from "../units/units";
 import type { ActiveSport } from "./sports";
 import { buildZoneMap } from "./zone-bands";
 import { HR_MODEL, PACE_MODEL, POWER_MODEL } from "./zone-models";

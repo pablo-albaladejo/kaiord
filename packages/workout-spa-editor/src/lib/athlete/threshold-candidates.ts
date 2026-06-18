@@ -1,9 +1,6 @@
 import type { SportThresholds } from "../../types/sport-zones";
-import {
-  paceSecondsFactor,
-  paceUnitLabelFor,
-  type Units,
-} from "../units/units";
+import type { Units } from "../units/units";
+import { paceSecondsFactor, paceUnitLabelFor } from "../units/units";
 import { formatPace } from "./format";
 import type { ActiveSport } from "./sports";
 

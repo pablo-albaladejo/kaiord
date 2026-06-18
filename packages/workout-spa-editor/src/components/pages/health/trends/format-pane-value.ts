@@ -2,7 +2,8 @@
 // to toast()/console.* without re-evaluating the static-source rule
 // (scripts/check-no-pii-leakage.mjs walks components/hooks/lib).
 
-import { formatWeightKg, type Units } from "../../../../lib/units/units";
+import type { Units } from "../../../../lib/units/units";
+import { formatWeightKg } from "../../../../lib/units/units";
 import type { TrendMetricDef, TrendMetricKey } from "./trend-metrics";
 
 const EMPTY = "—";

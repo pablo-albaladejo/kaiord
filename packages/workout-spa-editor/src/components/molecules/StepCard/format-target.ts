@@ -1,8 +1,5 @@
-import {
-  formatPaceFromMps,
-  runPaceLabel,
-  type Units,
-} from "../../../lib/units/units";
+import type { Units } from "../../../lib/units/units";
+import { formatPaceFromMps, runPaceLabel } from "../../../lib/units/units";
 import type { WorkoutStep } from "../../../types/krd";
 
 /** Finite-number predicate used by every target formatter below. */
