@@ -36,8 +36,8 @@ export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [
   {
     eyebrow: "Preferences",
     rows: [
-      { icon: "target", label: "Units" },
-      { icon: "bell", label: "Notifications" },
+      { icon: "target", label: "Units", to: "/settings/preferences" },
+      { icon: "bell", label: "Notifications", to: "/settings/preferences" },
     ],
   },
   {

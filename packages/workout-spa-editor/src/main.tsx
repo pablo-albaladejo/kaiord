@@ -19,6 +19,7 @@ import {
 import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { SyncProvider } from "./contexts/sync-context";
+import { UnitsProvider } from "./contexts/units-context";
 import { reloadOnceForChunkError } from "./lib/chunk-reload";
 import { getDeviceId } from "./lib/cloud-sync/device-id";
 import { getSyncPassphrase } from "./lib/cloud-sync/encryption-runtime";
@@ -58,9 +59,11 @@ createRoot(document.getElementById("root")!).render(
           <ThemeProvider defaultTheme="dark">
             <GarminBridgeProvider>
               <CoachingRegistryBootstrap>
-                <Router base={routerBase}>
-                  <App />
-                </Router>
+                <UnitsProvider>
+                  <Router base={routerBase}>
+                    <App />
+                  </Router>
+                </UnitsProvider>
               </CoachingRegistryBootstrap>
             </GarminBridgeProvider>
           </ThemeProvider>

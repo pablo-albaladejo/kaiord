@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useUnits } from "../../../contexts/units-context";
 import { type ActiveSport, deriveThresholdMetrics } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
 import { Button } from "../../atoms/Button";
@@ -24,7 +25,8 @@ export function ThresholdCard({
 }: ThresholdCardProps) {
   const [auto, setAuto] = useState(true);
   const [editing, setEditing] = useState(false);
-  const metrics = deriveThresholdMetrics(profile, sport);
+  const units = useUnits();
+  const metrics = deriveThresholdMetrics(profile, sport, units);
 
   return (
     <Card className="rounded-[20px] border border-slate-700/60 bg-surface p-4">

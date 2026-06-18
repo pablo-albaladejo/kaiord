@@ -1,4 +1,5 @@
 import type { Profile } from "../../types/profile";
+import type { Units } from "../units/units";
 import type { ActiveSport } from "./sports";
 import { thresholdCandidates } from "./threshold-candidates";
 
@@ -14,10 +15,11 @@ export type ThresholdMetric = {
     is rendered in the accent color (per the design). */
 export function deriveThresholdMetrics(
   profile: Profile,
-  sport: ActiveSport
+  sport: ActiveSport,
+  units: Units = "metric"
 ): ThresholdMetric[] {
   const thresholds = profile.sportZones[sport]?.thresholds;
-  return thresholdCandidates(sport, thresholds, profile.maxHeartRate)
+  return thresholdCandidates(sport, thresholds, profile.maxHeartRate, units)
     .filter(
       (
         candidate

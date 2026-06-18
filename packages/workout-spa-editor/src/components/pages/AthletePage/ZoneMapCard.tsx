@@ -1,3 +1,4 @@
+import { useUnits } from "../../../contexts/units-context";
 import { type ActiveSport, deriveZoneMap } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
 import { Card } from "../../atoms/Card";
@@ -15,7 +16,8 @@ type ZoneMapCardProps = {
 };
 
 export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
-  const zones = deriveZoneMap(profile, sport);
+  const units = useUnits();
+  const zones = deriveZoneMap(profile, sport, units);
 
   return (
     <div>

@@ -2,9 +2,11 @@
  * /health/weight — last 90 days of weight measurements (+ latest body
  * composition if available).
  */
+import { useUnits } from "../../../contexts/units-context";
 import { useHealthBodyCompositionLatestLive } from "../../../hooks/health/use-health-body-composition-latest-live";
 import { useHealthWeightHistoryLive } from "../../../hooks/health/use-health-weight-history-live";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { formatWeightKg } from "../../../lib/units/units";
 import { lastNinetyDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 
@@ -13,6 +15,7 @@ const EMPTY_MSG = "No weight records yet for the last 90 days.";
 export default function HealthWeightPage() {
   // Computed per render so the window stays current across day rollovers.
   const range = lastNinetyDays();
+  const units = useUnits();
   const active = useActiveProfileLive();
   const profileId = active?.id;
   const records = useHealthWeightHistoryLive(profileId ?? "", range);
@@ -44,7 +47,9 @@ export default function HealthWeightPage() {
               className="flex justify-between rounded border border-gray-200 p-2 text-sm dark:border-slate-800"
             >
               <span>{r.date}</span>
-              <span className="font-mono">{r.krd.weightKilograms} kg</span>
+              <span className="font-mono">
+                {formatWeightKg(r.krd.weightKilograms, units)}
+              </span>
             </li>
           ))}
         </ul>

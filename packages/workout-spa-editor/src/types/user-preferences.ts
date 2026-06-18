@@ -15,6 +15,10 @@ export const calendarViewSchema = z.enum(["grid", "list"]);
 
 export type CalendarView = z.infer<typeof calendarViewSchema>;
 
+export const unitsSchema = z.enum(["metric", "imperial"]);
+
+export type Units = z.infer<typeof unitsSchema>;
+
 export const userPreferencesSchema = z.object({
   profileId: z.string().min(1),
   calendarView: calendarViewSchema,
@@ -24,6 +28,10 @@ export const userPreferencesSchema = z.object({
   /** Sport last selected on the Athlete page; absent until first chosen. */
   activeSport: sportSchema.optional(),
   aiBannerExpanded: z.boolean().optional(),
+  /** Measurement system for display only; absent defaults to metric. */
+  units: unitsSchema.optional(),
+  /** User intent to enable browser notifications; absent defaults to off. */
+  notificationsEnabled: z.boolean().optional(),
   updatedAt: z.iso.datetime(),
 });
 

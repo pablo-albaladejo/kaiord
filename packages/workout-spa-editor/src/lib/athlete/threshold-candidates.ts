@@ -1,5 +1,7 @@
 import type { SportThresholds } from "../../types/sport-zones";
-import { formatPace, paceUnitLabel } from "./format";
+import type { Units } from "../units/units";
+import { paceSecondsFactor, paceUnitLabelFor } from "../units/units";
+import { formatPace } from "./format";
 import type { ActiveSport } from "./sports";
 
 export type ThresholdCandidate = {
@@ -29,13 +31,17 @@ function hrCandidates(
 function paceCandidate(
   thresholds: SportThresholds | undefined,
   fallbackUnit: SportThresholds["paceUnit"],
-  label: string
+  label: string,
+  units: Units
 ): ThresholdCandidate {
   const pace = thresholds?.thresholdPace;
-  const unit = thresholds?.paceUnit ?? fallbackUnit ?? "min_per_km";
+  const base = thresholds?.paceUnit ?? fallbackUnit ?? "min_per_km";
   return {
-    value: pace === undefined ? undefined : formatPace(pace),
-    unit: paceUnitLabel(unit),
+    value:
+      pace === undefined
+        ? undefined
+        : formatPace(pace * paceSecondsFactor(base, units)),
+    unit: paceUnitLabelFor(base, units),
     label,
   };
 }
@@ -44,7 +50,8 @@ function paceCandidate(
 export function thresholdCandidates(
   sport: ActiveSport,
   thresholds: SportThresholds | undefined,
-  maxHeartRate: number | undefined
+  maxHeartRate: number | undefined,
+  units: Units = "metric"
 ): ThresholdCandidate[] {
   if (sport === "cycling") {
     return [
@@ -54,12 +61,12 @@ export function thresholdCandidates(
   }
   if (sport === "running") {
     return [
-      paceCandidate(thresholds, "min_per_km", "Threshold pace"),
+      paceCandidate(thresholds, "min_per_km", "Threshold pace", units),
       ...hrCandidates(thresholds, maxHeartRate, true),
     ];
   }
   return [
-    paceCandidate(thresholds, "min_per_100m", "CSS pace"),
+    paceCandidate(thresholds, "min_per_100m", "CSS pace", units),
     ...hrCandidates(thresholds, maxHeartRate, false),
   ];
 }

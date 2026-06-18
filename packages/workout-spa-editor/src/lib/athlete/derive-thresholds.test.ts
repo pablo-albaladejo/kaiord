@@ -52,6 +52,38 @@ describe("deriveThresholdMetrics", () => {
     });
   });
 
+  it("should convert running threshold pace to min/mi for imperial units", () => {
+    // Arrange
+    const profile = profileWith("running", {
+      thresholdPace: 245,
+      paceUnit: "min_per_km",
+    });
+
+    // Act
+    const metrics = deriveThresholdMetrics(profile, "running", "imperial");
+
+    // Assert
+    expect(metrics[0]).toMatchObject({
+      value: "6:34",
+      unit: "/mi",
+      label: "Threshold pace",
+    });
+  });
+
+  it("should convert swimming CSS pace to 100yd for imperial units", () => {
+    // Arrange
+    const profile = profileWith("swimming", {
+      thresholdPace: SWIM_CSS_PACE,
+      paceUnit: "min_per_100m",
+    });
+
+    // Act
+    const metrics = deriveThresholdMetrics(profile, "swimming", "imperial");
+
+    // Assert
+    expect(metrics[0]).toMatchObject({ value: "1:30", unit: "/100yd" });
+  });
+
   it("should omit unset metrics and accent the first present one", () => {
     // Arrange
     const profile = profileWith("cycling", { lthr: LTHR });
