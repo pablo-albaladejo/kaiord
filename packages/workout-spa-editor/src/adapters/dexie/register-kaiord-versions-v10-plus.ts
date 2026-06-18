@@ -95,3 +95,10 @@ export const registerV22 = (db: DexieVersionHost): void => {
   // key↔model decoupling.
   db.version(22).stores(SCHEMAS.v22).upgrade(applyV22Upgrade);
 };
+
+export const registerV23 = (db: DexieVersionHost): void => {
+  // v23 — index `updatedAt` on workouts/templates/profiles so the auto-push
+  // change token reads max(updatedAt) via an index (#725). Index-only: Dexie
+  // rebuilds the indexes on upgrade, no data migration, tables untouched.
+  db.version(23).stores(SCHEMAS.v23);
+};

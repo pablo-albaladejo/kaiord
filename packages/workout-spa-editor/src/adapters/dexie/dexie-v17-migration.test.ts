@@ -15,7 +15,7 @@ const dbName = (suffix: string) =>
 const SCHEMA_V16 = 16;
 // Current head version KaiordDatabase opens at; v20 added coachingDayNotes,
 // v21 added chatMessages (this change).
-const SCHEMA_HEAD = 22;
+const SCHEMA_HEAD = 23;
 const STORES_V16 = {
   profiles: "id",
   linkedAccounts: "id",
