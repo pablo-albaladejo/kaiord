@@ -1,12 +1,13 @@
 /**
  * Aggregates every reactive source the Today page renders: the active
- * profile, this week's workouts, and today's Garmin health metrics (HRV +
- * sleep). View-model derivation stays in the pure `today-*` helpers.
+ * profile, this week's workouts, and today's Garmin health metrics (HRV,
+ * sleep, stress). View-model derivation stays in the pure `today-*` helpers.
  */
 import { useMemo } from "react";
 
 import { useHealthHrvHistoryLive } from "../../../hooks/health/use-health-hrv-history-live";
 import { useHealthSleepWeekLive } from "../../../hooks/health/use-health-sleep-week-live";
+import { useHealthStressDayLive } from "../../../hooks/health/use-health-stress-day-live";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
@@ -55,6 +56,7 @@ export function useTodayData(focusDate: Date, realTodayIso: string): TodayData {
     start: focusIso,
     end: focusIso,
   });
+  const stressRecords = useHealthStressDayLive(profileId ?? "", focusIso);
 
   const { planned, weekSummary, coachingByDay, expandActivity } =
     useTodayPlannedBuckets(profileId, dayIsos, focusIso, weekWorkouts, profile);
@@ -62,6 +64,7 @@ export function useTodayData(focusDate: Date, realTodayIso: string): TodayData {
   const readiness = buildReadinessModel(
     hrvRecords?.at(-1)?.krd,
     sleepRecords?.at(-1)?.krd,
+    stressRecords?.map((record) => record.krd),
     isFocusToday
   );
 
