@@ -1,45 +1,54 @@
 /**
  * useSyncAutoPush — drive a debounced cloud push from live Dexie changes.
  *
- * Observes the synced tables via `useLiveQuery` and builds a change token
- * (row count + latest timestamp) that advances on creates, deletes, AND
- * in-place edits — so editing an existing workout arms the push, not only
- * adding/removing rows. Whenever the token changes it asks the sync engine
- * for a debounced push, so a burst of edits collapses to a single Drive
- * write. This lives in a hook (not a Zustand store), so it does not violate
- * the no-write-through guards.
+ * Observes the synced tables via `useLiveQuery` and builds a change token from
+ * each table's row `count` plus the max of an indexed timestamp column. The
+ * token advances on creates, deletes, AND in-place edits (an edit sets
+ * `updatedAt` to now, advancing the max) — so editing an existing workout arms
+ * the push, not only adding/removing rows. Reading the max via an index keeps
+ * the query O(tables) instead of scanning every row on every change. Whenever
+ * the token changes it asks the sync engine for a debounced push, so a burst
+ * of edits collapses to a single Drive write. This lives in a hook (not a
+ * Zustand store), so it does not violate the no-write-through guards.
  */
 
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
 import { useSync } from "../contexts/sync-context";
-import { buildChangeToken } from "./sync-change-token";
+import { buildChangeToken, type TableSignal } from "./sync-change-token";
 import { useAutoPush } from "./use-auto-push";
 
-const SYNCED_TABLES = [
-  "workouts",
-  "templates",
-  "profiles",
-  "aiProviders",
-  "tombstones",
-] as const;
+// [table, indexed timestamp column]. workouts/templates/profiles index
+// `updatedAt` (Dexie v23); aiProviders has an indexed numeric `createdAt`
+// (insertion order) and tombstones an indexed `deletedAt`.
+const SYNCED_TABLES: ReadonlyArray<readonly [string, string]> = [
+  ["workouts", "updatedAt"],
+  ["templates", "updatedAt"],
+  ["profiles", "updatedAt"],
+  ["aiProviders", "createdAt"],
+  ["tombstones", "deletedAt"],
+];
 
 // Real tokens always contain ":", so an empty string is a safe sentinel for
 // "loading / disconnected" that never collides with a genuine change token.
 const DISCONNECTED = "";
 
+async function tableSignal(name: string, field: string): Promise<TableSignal> {
+  const table = db.table(name);
+  const [count, last] = await Promise.all([
+    table.count(),
+    table.orderBy(field).last(),
+  ]);
+  const latest = (last as Record<string, unknown> | undefined)?.[field];
+  return { count, latest: latest == null ? "" : String(latest) };
+}
+
 async function syncedChangeToken(): Promise<string> {
-  const entries = await Promise.all(
-    SYNCED_TABLES.map(
-      async (name) =>
-        [
-          name,
-          (await db.table(name).toArray()) as Record<string, unknown>[],
-        ] as const
-    )
+  const signals = await Promise.all(
+    SYNCED_TABLES.map(([name, field]) => tableSignal(name, field))
   );
-  return buildChangeToken(Object.fromEntries(entries));
+  return buildChangeToken(signals);
 }
 
 export function useSyncAutoPush(): void {
