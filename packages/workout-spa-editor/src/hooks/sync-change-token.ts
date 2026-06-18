@@ -1,32 +1,19 @@
 /**
  * Pure change-token builder for cloud auto-push.
  *
- * Combines the total row count with the latest timestamp across the synced
- * tables, so the token advances on creates, deletes, AND in-place edits
- * (an edit bumps updatedAt/modifiedAt). ISO-8601 timestamps sort
- * chronologically as plain strings, so a lexical max is a chronological max.
+ * Each synced table contributes a cheap signal: its row `count` plus the
+ * `latest` value of an indexed timestamp column. The token changes whenever
+ * any table gains/loses a row (count) or any row is touched in place (an edit
+ * sets `updatedAt` to now, advancing the per-table max). ISO-8601 timestamps
+ * sort chronologically as plain strings, so a lexical max is a chronological
+ * max. Reading the max via an index keeps this O(tables), not O(all rows).
  */
 
-const TIMESTAMP_FIELDS = [
-  "updatedAt",
-  "modifiedAt",
-  "createdAt",
-  "deletedAt",
-] as const;
+export type TableSignal = {
+  count: number;
+  latest: string;
+};
 
-export function buildChangeToken(
-  tables: Record<string, ReadonlyArray<Record<string, unknown>>>
-): string {
-  let count = 0;
-  let latest = "";
-  for (const rows of Object.values(tables)) {
-    count += rows.length;
-    for (const row of rows) {
-      for (const field of TIMESTAMP_FIELDS) {
-        const value = row[field];
-        if (typeof value === "string" && value > latest) latest = value;
-      }
-    }
-  }
-  return `${count}:${latest}`;
+export function buildChangeToken(signals: ReadonlyArray<TableSignal>): string {
+  return signals.map((signal) => `${signal.count}:${signal.latest}`).join("|");
 }

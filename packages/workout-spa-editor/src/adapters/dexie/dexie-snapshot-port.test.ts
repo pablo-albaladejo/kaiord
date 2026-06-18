@@ -19,7 +19,7 @@ const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 const PASSPHRASE = "kaiord-spa-v1";
 // Current head version KaiordDatabase opens at; v20 added coachingDayNotes
 // (train2go-links-and-day-comments), v21 added chatMessages (this change).
-const SCHEMA_HEAD = 22;
+const SCHEMA_HEAD = 23;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
