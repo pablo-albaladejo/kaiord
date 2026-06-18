@@ -1,17 +1,24 @@
 /**
  * Readiness view-model derivation for the Today page.
  *
- * Inputs are Garmin daily metrics persisted under the v16 health stores:
- * the overnight HRV summary (`rMSSD` + optional 0..100 `score`) and the
- * sleep session (`score` + duration). No values are invented — every metric
- * resolves to a string or the em-dash placeholder when its record is absent.
+ * Inputs are Garmin daily metrics persisted under the health stores: the
+ * overnight HRV summary (`rMSSD` + optional 0..100 `score`), the sleep
+ * session (`score` + duration), and the day's stress episodes. The Battery
+ * stat is a daily-energy proxy derived from stress (100 − mean stress level),
+ * an independent signal — not the HRV score. No values are invented: every
+ * metric resolves to a string or the em-dash placeholder when its record is
+ * absent.
  */
-import type { HrvSummary, SleepRecord } from "@kaiord/core";
+import type { HrvSummary, SleepRecord, StressEpisode } from "@kaiord/core";
 
-const EM_DASH = "—";
-const SECONDS_PER_HOUR = 3600;
-const HRV_TREND_THRESHOLD = 0;
-const SCORE_MAX = 100;
+import {
+  batteryValue,
+  compositeScore,
+  EM_DASH,
+  hrvTrend,
+  SCORE_MAX,
+  sleepValue,
+} from "./readiness-metrics";
 
 const HEADLINE_PUSH_TODAY = "Good to push today";
 const HEADLINE_PUSH = "Good to push";
@@ -38,32 +45,10 @@ export type ReadinessModel = {
   battery: ReadinessMetric;
 };
 
-function compositeScore(
-  hrv: HrvSummary | undefined,
-  sleep: SleepRecord | undefined
-): number | null {
-  const scores = [hrv?.score, sleep?.score].filter(
-    (value): value is number => typeof value === "number"
-  );
-  if (scores.length === 0) return null;
-  const sum = scores.reduce((acc, value) => acc + value, 0);
-  return Math.round(sum / scores.length);
-}
-
-function sleepValue(sleep: SleepRecord | undefined): string {
-  if (!sleep) return EM_DASH;
-  const hours = sleep.totalDurationSeconds / SECONDS_PER_HOUR;
-  return `${hours.toFixed(1)}h`;
-}
-
-function hrvTrend(hrv: HrvSummary | undefined): string | undefined {
-  if (!hrv?.score) return undefined;
-  return hrv.score > HRV_TREND_THRESHOLD ? "balanced" : undefined;
-}
-
 export function buildReadinessModel(
   hrv: HrvSummary | undefined,
   sleep: SleepRecord | undefined,
+  stress: StressEpisode[] | undefined,
   isFocusToday: boolean
 ): ReadinessModel {
   const score = compositeScore(hrv, sleep);
@@ -84,9 +69,6 @@ export function buildReadinessModel(
       trend: hrvTrend(hrv),
     },
     sleep: { label: "Sleep", value: sleepValue(sleep) },
-    battery: {
-      label: "Battery",
-      value: hrv?.score !== undefined ? `${hrv.score}` : EM_DASH,
-    },
+    battery: { label: "Battery", value: batteryValue(stress) },
   };
 }
