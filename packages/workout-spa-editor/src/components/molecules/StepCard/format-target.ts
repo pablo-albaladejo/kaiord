@@ -1,18 +1,13 @@
+import {
+  formatPaceFromMps,
+  runPaceLabel,
+  type Units,
+} from "../../../lib/units/units";
 import type { WorkoutStep } from "../../../types/krd";
 
 /** Finite-number predicate used by every target formatter below. */
 const isValidNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
-
-/** Convert meters per second to a `m:ss min/km` pace string. */
-const mpsToMinPerKm = (mps: number): string => {
-  if (mps <= 0 || !isFinite(mps)) return "--:--";
-  const minPerKm = 1000 / (mps * 60);
-  const minutes = Math.floor(minPerKm);
-  const seconds = Math.round((minPerKm - minutes) * 60);
-  if (seconds === 60) return `${minutes + 1}:00`;
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-};
 
 type TargetValue = Record<string, unknown>;
 
@@ -52,20 +47,27 @@ export const formatCadenceTarget = (value: unknown): string => {
   return "Cadence";
 };
 
-export const formatPaceTarget = (value: unknown): string => {
+export const formatPaceTarget = (
+  value: unknown,
+  units: Units = "metric"
+): string => {
   const v = asRecord(value);
   if (!v || !("unit" in v)) return "Pace";
+  const label = runPaceLabel(units);
   if (v.unit === "mps" && isValidNumber(v.value))
-    return `${mpsToMinPerKm(v.value)} min/km`;
+    return `${formatPaceFromMps(v.value, units)} ${label}`;
   if (v.unit === "zone" && isValidNumber(v.value)) return `Zone ${v.value}`;
   if (v.unit === "range" && isValidNumber(v.min) && isValidNumber(v.max))
     // In pace, lower m/s = slower (higher min/km); show faster-slower.
-    return `${mpsToMinPerKm(v.max)}-${mpsToMinPerKm(v.min)} min/km`;
+    return `${formatPaceFromMps(v.max, units)}-${formatPaceFromMps(v.min, units)} ${label}`;
   return "Pace";
 };
 
 /** Top-level target formatter used by StepCard. */
-export const formatTarget = (step: WorkoutStep): string => {
+export const formatTarget = (
+  step: WorkoutStep,
+  units: Units = "metric"
+): string => {
   const { target, targetType } = step;
   if (targetType === "open") return "Open";
   if (!("value" in target)) return targetType.replace(/_/g, " ");
@@ -78,7 +80,7 @@ export const formatTarget = (step: WorkoutStep): string => {
     case "cadence":
       return formatCadenceTarget(value);
     case "pace":
-      return formatPaceTarget(value);
+      return formatPaceTarget(value, units);
     default:
       return targetType.replace(/_/g, " ");
   }

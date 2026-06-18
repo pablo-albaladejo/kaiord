@@ -2,6 +2,7 @@
 // to toast()/console.* without re-evaluating the static-source rule
 // (scripts/check-no-pii-leakage.mjs walks components/hooks/lib).
 
+import { formatWeightKg, type Units } from "../../../../lib/units/units";
 import type { TrendMetricDef, TrendMetricKey } from "./trend-metrics";
 
 const EMPTY = "—";
@@ -19,8 +20,11 @@ const FORMATTERS: Record<TrendMetricKey, Formatter> = {
 
 export const formatPaneValue = (
   metric: TrendMetricDef,
-  v: number | null | undefined
+  v: number | null | undefined,
+  units: Units = "metric"
 ): string => {
   if (v === null || v === undefined || !Number.isFinite(v)) return EMPTY;
+  // Weight values are stored in kilograms; relabel in the active units.
+  if (metric.key === "weight") return formatWeightKg(v, units);
   return FORMATTERS[metric.key](v);
 };

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { useUnits } from "../../../../contexts/units-context";
 import {
   buildTrendChartData,
   type PerMetricPoints,
@@ -31,6 +32,7 @@ export const TrendSingleChartCard = ({
   series,
   rangeDays,
 }: TrendSingleChartCardProps) => {
+  const units = useUnits();
   const selectedKeys = TREND_METRICS.map((m) => m.key).filter((k) =>
     selected.has(k)
   );
@@ -46,7 +48,10 @@ export const TrendSingleChartCard = ({
     for (const k of presentKeys) obj[k] = series[k].points;
     return obj;
   }, [presentKeys, series]);
-  const options = useMemo(() => buildTrendChartOptions(metrics), [metrics]);
+  const options = useMemo(
+    () => buildTrendChartOptions(metrics, units),
+    [metrics, units]
+  );
   const data = useMemo(
     () => buildTrendChartData(presentKeys, seriesByKey),
     [presentKeys, seriesByKey]

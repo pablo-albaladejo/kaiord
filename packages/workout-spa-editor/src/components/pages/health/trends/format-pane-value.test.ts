@@ -27,6 +27,17 @@ describe("formatPaneValue", () => {
     expect(out).toBe("72.3 kg");
   });
 
+  it("should format weight values in pounds for imperial units", () => {
+    // Arrange
+    const metric = byKey("weight");
+
+    // Act
+    const out = formatPaneValue(metric, WEIGHT_KG, "imperial");
+
+    // Assert
+    expect(out).toBe("159.5 lb");
+  });
+
   it("should format HRV values as integer milliseconds", () => {
     // Arrange
     const metric = byKey("hrv");

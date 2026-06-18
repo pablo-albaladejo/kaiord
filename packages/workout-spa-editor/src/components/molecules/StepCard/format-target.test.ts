@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import type { WorkoutStep } from "../../../types/krd";
 import {
   formatCadenceTarget,
   formatHeartRateTarget,
   formatPaceTarget,
   formatPowerTarget,
+  formatTarget,
 } from "./format-target";
 
 const NUMERIC_NON_OBJECT_INPUT = 42;
@@ -181,5 +183,32 @@ describe("formatPaceTarget", () => {
 
     // Assert
     expect(actual).toBe(expected);
+  });
+
+  it("should format mps pace as min/mi for imperial units", () => {
+    // Arrange
+    const value = { unit: "mps", value: 3.5 };
+
+    // Act
+    const actual = formatPaceTarget(value, "imperial");
+
+    // Assert
+    expect(actual).toBe("7:40 min/mi");
+  });
+});
+
+describe("formatTarget", () => {
+  it("should apply the imperial unit when formatting a pace step", () => {
+    // Arrange
+    const step = {
+      targetType: "pace",
+      target: { value: { unit: "mps", value: 3.5 } },
+    } as unknown as WorkoutStep;
+
+    // Act
+    const actual = formatTarget(step, "imperial");
+
+    // Assert
+    expect(actual).toBe("7:40 min/mi");
   });
 });
