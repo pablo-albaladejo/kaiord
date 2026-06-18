@@ -108,15 +108,18 @@ describe("SettingsPage", () => {
       });
     });
 
-    it("should render Units as a non-navigating row", () => {
+    it("should navigate to the preferences tab from the Units row", async () => {
       // Arrange
+      const user = userEvent.setup();
+      const { memory } = renderAtPath("/settings");
 
       // Act
-      renderAtPath("/settings");
+      await user.click(screen.getByTestId("settings-row-Units"));
 
       // Assert
-      const row = screen.getByTestId("settings-row-Units");
-      expect(row.tagName).not.toBe("BUTTON");
+      await waitFor(() => {
+        expect(memory.history.at(-1)).toBe("/settings/preferences");
+      });
     });
   });
 
