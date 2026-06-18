@@ -1,9 +1,10 @@
-import type { HrvSummary, SleepRecord } from "@kaiord/core";
+import type { HrvSummary, SleepRecord, StressEpisode } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import { buildReadinessModel } from "./today-readiness";
 
 const EXPECTED_COMPOSITE = 75;
+const EXPECTED_BATTERY = 65;
 
 const HRV: HrvSummary = {
   kind: "hrv",
@@ -24,12 +25,32 @@ const SLEEP: SleepRecord = {
   score: 70,
 };
 
+// Mean averageLevel (30, 40) = 35 → energy = 100 − 35 = 65.
+const STRESS: StressEpisode[] = [
+  {
+    kind: "stress",
+    version: "2.0",
+    startTime: "2026-05-27T08:00:00.000Z",
+    endTime: "2026-05-27T10:00:00.000Z",
+    averageLevel: 30,
+    peakLevel: 55,
+  },
+  {
+    kind: "stress",
+    version: "2.0",
+    startTime: "2026-05-27T12:00:00.000Z",
+    endTime: "2026-05-27T14:00:00.000Z",
+    averageLevel: 40,
+    peakLevel: 60,
+  },
+];
+
 describe("buildReadinessModel", () => {
   it("should average available scores into a composite", () => {
     // Arrange
 
     // Act
-    const model = buildReadinessModel(HRV, SLEEP, true);
+    const model = buildReadinessModel(HRV, SLEEP, STRESS, true);
 
     // Assert
     expect(model.score).toBe(EXPECTED_COMPOSITE);
@@ -40,7 +61,7 @@ describe("buildReadinessModel", () => {
     // Arrange
 
     // Act
-    const model = buildReadinessModel(HRV, SLEEP, false);
+    const model = buildReadinessModel(HRV, SLEEP, STRESS, false);
 
     // Assert
     expect(model.headline).toBe("Good to push");
@@ -50,7 +71,7 @@ describe("buildReadinessModel", () => {
     // Arrange
 
     // Act
-    const model = buildReadinessModel(undefined, undefined, true);
+    const model = buildReadinessModel(undefined, undefined, undefined, true);
 
     // Assert
     expect(model.score).toBeNull();
@@ -59,15 +80,34 @@ describe("buildReadinessModel", () => {
     expect(model.battery.value).toBe("—");
   });
 
-  it("should render rounded HRV and battery values from the summary", () => {
+  it("should render the rounded HRV value from the summary", () => {
     // Arrange
 
     // Act
-    const model = buildReadinessModel(HRV, undefined, true);
+    const model = buildReadinessModel(HRV, undefined, undefined, true);
 
     // Assert
     expect(model.hrv.value).toBe("62");
-    expect(model.battery.value).toBe("80");
     expect(model.sleep.value).toBe("—");
+  });
+
+  it("should derive battery as 100 minus the mean stress level", () => {
+    // Arrange
+
+    // Act
+    const model = buildReadinessModel(undefined, undefined, STRESS, true);
+
+    // Assert
+    expect(model.battery.value).toBe(`${EXPECTED_BATTERY}`);
+  });
+
+  it("should em-dash the battery when no stress is recorded", () => {
+    // Arrange
+
+    // Act
+    const model = buildReadinessModel(HRV, SLEEP, [], true);
+
+    // Assert
+    expect(model.battery.value).toBe("—");
   });
 });
