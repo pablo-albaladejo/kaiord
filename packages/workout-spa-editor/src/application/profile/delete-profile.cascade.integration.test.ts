@@ -167,6 +167,14 @@ const makeSeedRow = (
         modelId: "claude-sonnet-4-6",
         updatedAt: NOW,
       };
+    case "connections":
+      return {
+        profileId,
+        providerId: "intervals",
+        status: "connected",
+        mechanism: "api-key",
+        updatedAt: NOW,
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
@@ -195,6 +203,7 @@ const performCascadeOrchestration = async (
         healthCleanup: persistence.healthCleanup,
         chatMessages: persistence.chatMessages,
         aiModelBindings: persistence.aiModelBindings,
+        connections: persistence.connections,
       },
       profileId
     );

@@ -15,7 +15,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v22-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_SEED = 19;
-const SCHEMA_HEAD = 23;
+const SCHEMA_HEAD = 24;
 const STORES_SEED = {
   profiles: "id",
   aiProviders: "id, createdAt",

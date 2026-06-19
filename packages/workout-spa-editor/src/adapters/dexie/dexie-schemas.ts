@@ -109,6 +109,16 @@ const CORE_V23 = {
   profiles: `${CORE_V1.profiles}, updatedAt`,
 };
 
+// v24 — additive `connections` store for per-(profile, provider) account
+// linkage (#714). PK `[profileId+providerId]`; the `profileId` index drives the
+// profile-delete cascade and makes `isPerProfileTable` auto-discover it. Dexie
+// auto-creates the store empty on upgrade — no data transform. The store is
+// deliberately excluded from the cloud snapshot (credentials stay device-local).
+const CORE_V24 = {
+  ...CORE_V23,
+  connections: "[profileId+providerId], profileId",
+};
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -124,4 +134,5 @@ export const SCHEMAS = {
   v21: CORE_V21,
   v22: CORE_V22,
   v23: CORE_V23,
+  v24: CORE_V24,
 } as const;

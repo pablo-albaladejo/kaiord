@@ -10,6 +10,7 @@ import { createInMemoryChatMessageRepository } from "../../test-utils/in-memory-
 import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
+import { createInMemoryConnectionRepository } from "../../test-utils/in-memory-connection-repository";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryUserPreferencesRepository } from "../../test-utils/in-memory-user-preferences-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
@@ -84,6 +85,7 @@ const makeDeps = (
   chatMessages: overrides.chatMessages ?? createInMemoryChatMessageRepository(),
   aiModelBindings:
     overrides.aiModelBindings ?? createInMemoryAiModelBindingRepository(),
+  connections: overrides.connections ?? createInMemoryConnectionRepository(),
 });
 
 describe("deleteProfileWithCascade", () => {

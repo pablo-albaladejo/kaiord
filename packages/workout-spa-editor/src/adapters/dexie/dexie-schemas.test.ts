@@ -129,3 +129,40 @@ describe("SCHEMAS.v23 (auto-push updatedAt indexes)", () => {
     expect(changed.sort()).toEqual(["profiles", "templates", "workouts"]);
   });
 });
+
+describe("SCHEMAS.v24 (connections store)", () => {
+  it("should declare connections with the composite key + profileId index", () => {
+    // Arrange
+    const stores = SCHEMAS.v24 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    expect(stores.connections).toBe("[profileId+providerId], profileId");
+  });
+
+  it("should add exactly the connections store on top of v23", () => {
+    // Arrange
+    const v23Keys = new Set(Object.keys(SCHEMAS.v23));
+    const v24Keys = new Set(Object.keys(SCHEMAS.v24));
+
+    // Act
+    const added = [...v24Keys].filter((k) => !v23Keys.has(k));
+
+    // Assert
+    expect(added).toEqual(["connections"]);
+  });
+
+  it("should leave every v23 store byte-equivalent to its v23 form", () => {
+    // Arrange
+    const v23 = SCHEMAS.v23 as Record<string, string>;
+    const v24 = SCHEMAS.v24 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    for (const key of Object.keys(v23)) {
+      expect(v24[key]).toBe(v23[key]);
+    }
+  });
+});
