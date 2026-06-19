@@ -1,6 +1,6 @@
 ## 1. Domain types
 
-- [ ] 1.1 Add `chat-conversation-record.ts` (`ChatConversationRecord`: `id`, `profileId`, `title`, `createdAt`, `updatedAt`) with the doc comment explaining the mutable `updatedAt` LWW clock
+- [ ] 1.1 Add `chat-conversation-record.ts` (`ChatConversationRecord`: `id`, `profileId`, `title`, `createdAt`, `updatedAt`, optional `providerId`/`modelId`) with the doc comment explaining the mutable `updatedAt` LWW clock
 - [ ] 1.2 Add `conversationId: string` to `ChatMessageRecord` and update its doc comment (FK into `chatConversations`)
 - [ ] 1.3 Add a pure `derive-conversation-title.ts` helper (trim + truncate to 60 chars + ellipsis) with unit tests
 
@@ -28,24 +28,26 @@
 
 ## 5. Application use cases
 
-- [ ] 5.1 Add `createConversation(port, profileId)` (returns the new conversation, equal `createdAt`/`updatedAt`) + tests
+- [ ] 5.1 Add the first-message persist path: in one transaction create the `chatConversations` row (auto-title, equal `createdAt`/`updatedAt`, draft model override if any) and append the first message; no standalone "create empty conversation" use case + tests
 - [ ] 5.2 Add `renameConversation(port, profileId, conversationId, title)` — reject empty/whitespace, advance `updatedAt` + tests
 - [ ] 5.3 Add `deleteConversation(port, profileId, conversationId)` — single transaction: delete messages, delete conversation row, write `[chatConversations+id]` + per-message tombstones + tests
-- [ ] 5.4 Replace `clearConversation` usages; ensure auto-title sets the conversation title on the first persisted user message (advancing `updatedAt`)
-- [ ] 5.5 Ensure each appended message touches its conversation's `updatedAt`
+- [ ] 5.4 Add `setConversationModel(port, profileId, conversationId, providerId, modelId)` — write override, advance `updatedAt` + tests; add a model resolver that prefers the conversation override over `resolveModelForPurpose('chat')`
+- [ ] 5.5 Remove `clearConversation`; ensure each appended message touches its conversation's `updatedAt`
 
 ## 6. Hooks & routing
 
 - [ ] 6.1 Add `useChatConversationsLive(profileId)` (live query, `updatedAt` desc) + test
 - [ ] 6.2 Refactor `useChatMessagesLive` to read the active conversation (`profileId`, `conversationId`) + update tests
 - [ ] 6.3 Register the `/chat/:conversationId` route in `AppRoutes.tsx`; resolve the active conversation from the param with a guarded fallback to the list for unknown/foreign ids
+- [ ] 6.4 Hold the new-conversation draft (active id + pending model) in component/React state (ephemeral UI per the state rules); "New conversation" is idempotent on an empty draft
 
 ## 7. UI surface
 
 - [ ] 7.1 Add the conversation-list component (select active, "New conversation", per-item rename and delete) reading `useChatConversationsLive`
 - [ ] 7.2 Update `ChatPage`/`ChatConversation` to render list + active thread; remove the delete-all "Clear conversation" control in favour of per-conversation delete + new
 - [ ] 7.3 Wire rename UI (inline edit) and delete confirmation; keep composer/turn behaviour intact
-- [ ] 7.4 Component tests: list renders newest-active first, switch/deep-link selects a thread, delete falls back correctly, empty-profile starting state
+- [ ] 7.4 Wire the `ModelSelector` to the active conversation: persisted conversation writes the override; draft holds it in state until first message
+- [ ] 7.5 Component tests: list renders newest-active first, switch/deep-link selects a thread, delete falls back correctly, empty-profile starting state, model override is per-conversation, "New" is idempotent on an empty draft
 
 ## 8. Quality gates
 

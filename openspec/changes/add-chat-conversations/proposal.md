@@ -4,9 +4,11 @@ The in-SPA AI chat at `/chat` persists exactly one rolling transcript per profil
 
 ## What Changes
 
-- **Introduce a conversation entity.** A new Dexie store `chatConversations` (`id, profileId, title, createdAt, updatedAt`) becomes the parent of chat messages. Each `chatMessages` row gains a `conversationId` foreign key and a new compound index `[profileId+conversationId+createdAt]`.
-- **Full conversation management.** Users can create a new conversation, switch between conversations from a list (ordered by most-recently-updated), rename a conversation, and delete a single conversation (its messages + the conversation row) without touching the others.
-- **Auto-generated, editable titles.** A new conversation's title is derived from the user's first message (truncated); the user can rename it at any time.
+- **Introduce a conversation entity.** A new Dexie store `chatConversations` (`id, profileId, title, createdAt, updatedAt`, plus optional `providerId`/`modelId` for the per-conversation model) becomes the parent of chat messages. Each `chatMessages` row gains a `conversationId` foreign key and a new compound index `[profileId+conversationId+createdAt]`.
+- **Full conversation management.** Users can start a new conversation, switch between conversations from a list (ordered by most-recently-updated), rename a conversation, and delete a single conversation (its messages + the conversation row) without touching the others.
+- **New conversation is a draft until first message.** "New conversation" opens an empty in-memory draft; the `chatConversations` row is persisted only when the user sends the first message. Invoking "New conversation" while already on an empty draft is a no-op, so titleless empty rows never accumulate.
+- **Per-conversation model.** Each conversation remembers its own provider/model (`providerId`/`modelId`); when unset it falls back to the existing `resolveModelForPurpose('chat')` resolution, so migrated conversations behave exactly as today.
+- **Auto-generated, editable titles.** A new conversation's title is derived from the user's first message (trimmed, ~80 chars, CSS-truncated in the list); the user can rename it at any time.
 - **Routing.** `/chat` renders the conversation list plus the active thread; `/chat/:conversationId` deep-links a specific conversation. Both remain routed pages per `spa-routing` (heading focus, single live announcement, lazy-loaded).
 - **BREAKING (internal SPA contract):** "Clear conversation" (delete-all-for-profile) is replaced by **delete-one-conversation** + **new-conversation**. The `clearConversation` use case and the `ChatMessageRepository.deleteByProfile` read path used by it change shape; the bulk profile-delete cascade is preserved.
 - **Migration v23→v24.** On upgrade, all existing `chatMessages` for each profile are grouped into a single seeded conversation ("Conversation 1") so no history is lost; `conversationId` is backfilled on every existing message.

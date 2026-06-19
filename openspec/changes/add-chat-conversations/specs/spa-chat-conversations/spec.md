@@ -2,12 +2,12 @@
 
 ### Requirement: Conversation entity
 
-The SPA SHALL persist chat conversations as first-class rows in a `chatConversations` store, scoped per profile. Each conversation row SHALL carry `id`, `profileId`, `title`, `createdAt` (ISO-8601), and `updatedAt` (ISO-8601). Chat messages SHALL belong to exactly one conversation via a `conversationId` foreign key. A conversation and its messages SHALL be scoped to a single profile; conversations SHALL NOT be shared across profiles.
+The SPA SHALL persist chat conversations as first-class rows in a `chatConversations` store, scoped per profile. Each conversation row SHALL carry `id`, `profileId`, `title`, `createdAt` (ISO-8601), `updatedAt` (ISO-8601), and an optional `providerId`/`modelId` per-conversation model override. Chat messages SHALL belong to exactly one conversation via a `conversationId` foreign key. A conversation and its messages SHALL be scoped to a single profile; conversations SHALL NOT be shared across profiles.
 
-#### Scenario: New conversation is persisted
+#### Scenario: Conversation is persisted on first message
 
-- **WHEN** the user creates a new conversation
-- **THEN** a `chatConversations` row SHALL be written for the active profile with a generated `id`, an empty (or default) title, and equal `createdAt`/`updatedAt`, and the row SHALL survive a reload
+- **WHEN** the user sends the first message of a new conversation
+- **THEN** a `chatConversations` row SHALL be written for the active profile with a generated `id`, the auto-generated title, and equal `createdAt`/`updatedAt`, together with the first message in a single transaction, and the row SHALL survive a reload
 
 #### Scenario: Messages reference their conversation
 
@@ -29,24 +29,29 @@ The chat page SHALL render a list of the active profile's conversations, ordered
 - **WHEN** the user opens the chat with zero conversations for the active profile
 - **THEN** the page SHALL present a way to start the first conversation, and sending the first message SHALL create a conversation implicitly
 
-### Requirement: Create a conversation
+### Requirement: New conversation draft
 
-The user SHALL be able to create a new, empty conversation. Creating a conversation SHALL make it the active conversation. Sending the first message in a conversation with no persisted user message yet SHALL also create a conversation when none is active.
+Starting a new conversation SHALL open an empty in-memory draft and make it the active conversation; no `chatConversations` row SHALL be persisted until the user sends the first message. "New conversation" SHALL be idempotent: invoking it while the active conversation is an already-empty draft SHALL be a no-op rather than opening a second draft. As a result the conversation list SHALL never contain a titleless message-less conversation.
 
-#### Scenario: Explicit new conversation
+#### Scenario: New conversation opens an empty draft
 
 - **WHEN** the user activates "New conversation"
-- **THEN** a fresh conversation SHALL be created for the active profile, SHALL become active, and SHALL show an empty thread with the composer enabled
+- **THEN** an empty thread SHALL render with the composer enabled, no new `chatConversations` row SHALL be persisted yet, and the row SHALL be persisted only when the first message is sent
+
+#### Scenario: New conversation is idempotent on an empty draft
+
+- **GIVEN** the active conversation is an empty draft with no messages
+- **WHEN** the user activates "New conversation" again
+- **THEN** no additional draft or row SHALL be created and the same empty draft SHALL remain active
 
 ### Requirement: Auto-generated, editable title
 
-A conversation's title SHALL be auto-generated from the user's first message, truncated to a bounded length. The user SHALL be able to rename a conversation to any non-empty title; renaming SHALL advance the conversation's `updatedAt`. An empty or whitespace-only rename SHALL be rejected and leave the prior title unchanged.
+A conversation's title SHALL be auto-generated from the user's first message, trimmed and truncated to a bounded stored length (~80 characters, with an ellipsis when cut); the conversation list MAY truncate it further visually. The user SHALL be able to rename a conversation to any non-empty title; renaming SHALL advance the conversation's `updatedAt`. An empty or whitespace-only rename SHALL be rejected and leave the prior title unchanged.
 
 #### Scenario: Title derived from first message
 
-- **GIVEN** a newly created conversation with no title
-- **WHEN** the user sends the first message
-- **THEN** the conversation's title SHALL be set to a truncated form of that message text
+- **WHEN** the user sends the first message of a draft conversation
+- **THEN** the persisted conversation's title SHALL be set to the trimmed message text truncated to the bounded stored length
 
 #### Scenario: Manual rename
 
@@ -57,6 +62,21 @@ A conversation's title SHALL be auto-generated from the user's first message, tr
 
 - **WHEN** the user attempts to rename a conversation to an empty or whitespace-only title
 - **THEN** the rename SHALL be rejected and the existing title SHALL remain unchanged
+
+### Requirement: Per-conversation model
+
+Each conversation SHALL remember its own AI model via optional `providerId`/`modelId` on the conversation row. The active model for a turn SHALL be the conversation's override when set, otherwise the result of `resolveModelForPurpose('chat')` (so migrated and never-customized conversations behave exactly as before). Changing the model on a persisted conversation SHALL write the override to its row and advance `updatedAt`; changing it on a draft SHALL be held in memory and written when the conversation is first persisted.
+
+#### Scenario: Model override is per conversation
+
+- **GIVEN** conversation A has a model override set and conversation B has none
+- **WHEN** the user switches between A and B
+- **THEN** A's turns SHALL use A's override and B's turns SHALL use the `resolveModelForPurpose('chat')` fallback
+
+#### Scenario: Override survives reload and sync
+
+- **WHEN** the user sets a conversation's model and later reloads or syncs another device
+- **THEN** the conversation SHALL retain its `providerId`/`modelId`, converging by `updatedAt` last-write-wins on conflict
 
 ### Requirement: Delete a single conversation
 
