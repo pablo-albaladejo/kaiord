@@ -17,6 +17,7 @@
 
 import { createDexieAiModelBindingRepository } from "./dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
+import { createDexieChatConversationRepository } from "./dexie-chat-conversation-repository";
 import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
 import { db } from "./dexie-database";
 
@@ -29,3 +30,8 @@ export const aiModelBindingRepository = createDexieAiModelBindingRepository(db);
 /** Module-level chat transcript repo bound to the production db, for the
  * `useChatMessagesLive` live query. */
 export const chatMessageRepository = createDexieChatMessageRepository(db);
+
+/** Module-level conversation repo bound to the production db, for the
+ * `useChatConversationsLive` live query. */
+export const chatConversationRepository =
+  createDexieChatConversationRepository(db);
