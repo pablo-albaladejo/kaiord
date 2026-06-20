@@ -1,5 +1,6 @@
 import type { ManagedDataType } from "@kaiord/core";
 
+import type { ConnectionMechanism } from "../../../types/connection";
 import type { IntegrationPolicyDirection } from "../../../types/integration-policy";
 
 export type ConnectionFlow = {
@@ -14,18 +15,21 @@ export type ConnectionConfig = {
   name: string;
   mark: string;
   bridgeId: string | null;
+  /** How this brand connects: extension bridge, API key, or not yet. */
+  mechanism: ConnectionMechanism;
   flows: ConnectionFlow[];
 };
 
-/* Static catalog of connections shown on the Athlete page. Only Garmin has a
-   real bridge today; Strava/Wahoo/intervals.icu are "available" placeholders
-   whose Connect action routes to the Extensions settings (no OAuth yet). */
+/* Static catalog of connections shown on the Athlete page. Garmin connects via
+   its extension bridge; intervals.icu via an API key; Strava/Wahoo have no
+   connect mechanism yet (OAuth needs a token-exchange backend — #714). */
 export const CONNECTIONS: readonly ConnectionConfig[] = [
   {
     id: "garmin",
     name: "Garmin",
     mark: "G",
     bridgeId: "garmin-bridge",
+    mechanism: "bridge",
     flows: [
       {
         label: "Completed activities",
@@ -47,13 +51,28 @@ export const CONNECTIONS: readonly ConnectionConfig[] = [
       },
     ],
   },
-  { id: "strava", name: "Strava", mark: "S", bridgeId: null, flows: [] },
-  { id: "wahoo", name: "Wahoo", mark: "W", bridgeId: null, flows: [] },
+  {
+    id: "strava",
+    name: "Strava",
+    mark: "S",
+    bridgeId: null,
+    mechanism: "not-supported",
+    flows: [],
+  },
+  {
+    id: "wahoo",
+    name: "Wahoo",
+    mark: "W",
+    bridgeId: null,
+    mechanism: "not-supported",
+    flows: [],
+  },
   {
     id: "intervals",
     name: "intervals.icu",
     mark: "i",
     bridgeId: null,
+    mechanism: "api-key",
     flows: [],
   },
 ];

@@ -21,12 +21,12 @@
 
 ## 4. Catalog + UI wiring
 
-- [ ] 4.1 Extend `connection-config.ts`: declare each provider's `mechanism` (Garmin/Train2Go `bridge`, intervals.icu `api-key`, Strava/Wahoo `not-supported`)
-- [ ] 4.2 Add a `useConnectionStatus` live hook reading the `connections` store per profile
-- [ ] 4.3 Refactor disconnect: compose `clear connection/credential` + existing `disableBridge` flow-disable into a single real `disconnect` (update `use-policy-toggle.ts` callers)
-- [ ] 4.4 Render the api-key connect affordance (key entry + validation states) for intervals.icu
-- [ ] 4.5 Render the honest `not-supported` state for Strava/Wahoo (no functional Connect action; clear "not supported yet" copy)
-- [ ] 4.6 Show real `connected`/`disconnected` state per the connection record (not policy inference)
+- [x] 4.1 Extend `connection-config.ts`: declare each provider's `mechanism` (Garmin `bridge`, intervals.icu `api-key`, Strava/Wahoo `not-supported`)
+- [x] 4.2 Add a `useConnectionStatus` live hook reading the `connections` store per profile
+- [x] 4.3 Refactor disconnect: `useConnectionActions` composes `provider.disconnect` (clear record/credential) + `disableBridge` flow-disable into a single real disconnect (ConnectedRow + ApiKeyRow use it)
+- [x] 4.4 Render the api-key connect affordance (`ApiKeyConnectForm` key entry + validation/error states) for intervals.icu via `ApiKeyRow`
+- [x] 4.5 Render the honest `not-supported` state for Strava/Wahoo (`NotSupportedRow`, no functional Connect action)
+- [x] 4.6 Show real `connected`/`disconnected` state per the connection record (api-key) / bridge discovery (bridge), not policy inference
 
 ## 5. Verify + ship
 
