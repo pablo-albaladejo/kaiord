@@ -2,12 +2,12 @@ import { useState } from "react";
 
 import { useConnectionActions } from "../../../hooks/use-connection-actions";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
-import { ConfirmationModal } from "../../molecules/ConfirmationModal";
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import type { ConnectionConfig } from "./connection-config";
 import { ConnectionFlows } from "./ConnectionFlows";
 import { ConnectionMark } from "./ConnectionMark";
 import { bridgePolicies } from "./data-flow-lookup";
+import { DisconnectConfirmation } from "./DisconnectConfirmation";
 import { usePolicyToggle } from "./use-policy-toggle";
 
 type ConnectedRowProps = {
@@ -63,13 +63,9 @@ export function ConnectedRow(props: ConnectedRowProps) {
           onDisconnect={() => setConfirming(true)}
         />
       )}
-      <ConfirmationModal
+      <DisconnectConfirmation
         isOpen={confirming}
-        title="Disconnect"
         message="This disables every sync for this connection. You can re-enable them later."
-        confirmLabel="Disconnect"
-        cancelLabel="Cancel"
-        variant="destructive"
         onCancel={() => setConfirming(false)}
         onConfirm={() => {
           void disconnect(

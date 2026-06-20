@@ -34,15 +34,16 @@ export const createApiKeyConnectionProvider = (
       profileId,
       credential,
     }: ConnectInput): Promise<ConnectionRecord> => {
-      if (!credential) throw new Error("An API key is required");
-      if (!(await validate(credential)))
+      const key = credential?.trim();
+      if (!key) throw new Error("An API key is required");
+      if (!(await validate(key)))
         throw new Error("The API key was rejected by the provider");
       const record: ConnectionRecord = {
         profileId,
         providerId,
         status: "connected",
         mechanism: "api-key",
-        credentialRef: await encryptCredential(credential),
+        credentialRef: await encryptCredential(key),
         updatedAt: clock(),
       };
       await repository.put(record);

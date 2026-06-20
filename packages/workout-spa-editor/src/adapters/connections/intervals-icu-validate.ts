@@ -6,6 +6,7 @@
  * injectable for tests.
  */
 const ATHLETE_URL = "https://intervals.icu/api/v1/athlete/0";
+const REQUEST_TIMEOUT_MS = 10000;
 
 export const validateIntervalsIcuKey = async (
   credential: string,
@@ -14,6 +15,7 @@ export const validateIntervalsIcuKey = async (
   const auth = btoa(`API_KEY:${credential}`);
   const response = await fetchFn(ATHLETE_URL, {
     headers: { Authorization: `Basic ${auth}` },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   return response.ok;
 };

@@ -28,7 +28,7 @@ export const createConnectionProvider = (
     return createApiKeyConnectionProvider({
       providerId,
       repository: deps.repository,
-      validate: (key) => validateIntervalsIcuKey(key),
+      validate: validateIntervalsIcuKey,
       encryptCredential: deps.credentials.encrypt,
       clock: deps.clock,
     });

@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 import { useConnectionActions } from "../../../hooks/use-connection-actions";
-import { ConfirmationModal } from "../../molecules/ConfirmationModal";
 import { ApiKeyConnectForm } from "./ApiKeyConnectForm";
 import { ApiKeyRowHeader } from "./ApiKeyRowHeader";
 import type { ConnectionConfig } from "./connection-config";
+import { DisconnectConfirmation } from "./DisconnectConfirmation";
 
 type ApiKeyRowProps = {
   profileId: string;
@@ -38,13 +38,9 @@ export function ApiKeyRow({ profileId, config, connected }: ApiKeyRowProps) {
           onCancel={() => setShowForm(false)}
         />
       )}
-      <ConfirmationModal
+      <DisconnectConfirmation
         isOpen={confirming}
-        title="Disconnect"
         message="This removes the stored API key for this connection."
-        confirmLabel="Disconnect"
-        cancelLabel="Cancel"
-        variant="destructive"
         onCancel={() => setConfirming(false)}
         onConfirm={() => {
           void disconnect(config.id, "api-key", []);
