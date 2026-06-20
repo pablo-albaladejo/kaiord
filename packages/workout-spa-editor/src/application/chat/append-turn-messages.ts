@@ -4,7 +4,7 @@
  * timestamps are injected for deterministic tests; production passes the
  * real generators.
  */
-import type { ChatTurnResult, ChatUsage } from "@kaiord/ai";
+import type { ChatTurnResult } from "@kaiord/ai";
 
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderType } from "../../store/ai-store-types";
@@ -21,6 +21,7 @@ const defaultGen: IdGen = {
 export const appendUserMessage = (
   persistence: PersistencePort,
   profileId: string,
+  conversationId: string,
   content: string,
   gen: IdGen = defaultGen
 ): Promise<void> =>
@@ -28,6 +29,7 @@ export const appendUserMessage = (
     newChatMessage({
       id: gen.newId(),
       profileId,
+      conversationId,
       role: "user",
       content,
       createdAt: gen.now(),
@@ -37,6 +39,7 @@ export const appendUserMessage = (
 export const appendToolEvent = (
   persistence: PersistencePort,
   profileId: string,
+  conversationId: string,
   toolName: string,
   ok: boolean,
   gen: IdGen = defaultGen
@@ -45,6 +48,7 @@ export const appendToolEvent = (
     newChatMessage({
       id: gen.newId(),
       profileId,
+      conversationId,
       role: "tool",
       content: ok ? `Ran ${toolName}.` : `${toolName} failed.`,
       toolName,
@@ -55,6 +59,7 @@ export const appendToolEvent = (
 export const appendAssistantTurn = async (
   persistence: PersistencePort,
   profileId: string,
+  conversationId: string,
   result: Extract<ChatTurnResult, { text: string }>,
   providerType: LlmProviderType,
   gen: IdGen = defaultGen
@@ -67,24 +72,17 @@ export const appendAssistantTurn = async (
     newChatMessage({
       id: gen.newId(),
       profileId,
+      conversationId,
       role: "assistant",
       content: text,
       createdAt: gen.now(),
       usage: result.usage,
     })
   );
-  await recordUsage(persistence, providerType, result.usage);
+  if (result.usage)
+    await recordChatUsage(persistence, {
+      providerType,
+      promptTokens: result.usage.promptTokens,
+      completionTokens: result.usage.completionTokens,
+    });
 };
-
-const recordUsage = (
-  persistence: PersistencePort,
-  providerType: LlmProviderType,
-  usage: ChatUsage | undefined
-): Promise<void> =>
-  usage
-    ? recordChatUsage(persistence, {
-        providerType,
-        promptTokens: usage.promptTokens,
-        completionTokens: usage.completionTokens,
-      })
-    : Promise.resolve();
