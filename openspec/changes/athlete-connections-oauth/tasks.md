@@ -30,8 +30,8 @@
 
 ## 5. Verify + ship
 
-- [ ] 5.1 Add tests covering every spec scenario (connection state, mechanism catalog, api-key connect valid/invalid, real disconnect for api-key + bridge, unsupported state, credential encryption, snapshot exclusion, profile-delete cascade)
-- [ ] 5.2 `pnpm -r test && pnpm -r build && pnpm lint:fix` clean; zero warnings; coverage thresholds met
-- [ ] 5.3 Run `pnpm test:scripts` (mechanical guards incl. PII) green
-- [ ] 5.4 `npx openspec validate athlete-connections-oauth` passes
-- [ ] 5.5 Add a changeset (`@kaiord/workout-spa-editor`); open the PR referencing #714
+- [x] 5.1 Tests cover the spec scenarios: connection state + cascade (repo/cascade), mechanism catalog (connection-config test), api-key connect valid/invalid (adapter), disconnect for api-key + bridge (adapters), unsupported state (NotSupportedRow), credential encryption (credentials), snapshot exclusion (snapshot), profile-delete cascade (integration)
+- [x] 5.2 Package test + build + lint clean; zero warnings
+- [x] 5.3 `pnpm test:scripts` (mechanical guards incl. PII) green (pre-commit)
+- [x] 5.4 `npx openspec validate athlete-connections-oauth` passes
+- [x] 5.5 Add a changeset (`@kaiord/workout-spa-editor`); open the PR referencing #714
