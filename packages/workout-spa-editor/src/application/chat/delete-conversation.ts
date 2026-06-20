@@ -16,6 +16,11 @@ export const deleteConversation = async (
   now: () => Date = () => new Date()
 ): Promise<void> => {
   await port.transaction(async () => {
+    const existing = await port.chatConversations.get(
+      profileId,
+      conversationId
+    );
+    if (!existing) return;
     const messages = await port.chatMessages.listByConversation(
       profileId,
       conversationId

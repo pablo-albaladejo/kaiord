@@ -1,8 +1,7 @@
 /**
  * `sendTurn` for `useChatTurn`: ensures the conversation exists (persisting a
  * draft on its first message), appends the user message, builds the agent, and
- * runs the turn. The confirm/deny resume actions live in `chat-turn-resume`;
- * the shared engine (apply/run + ctx factory) in `chat-turn-context`.
+ * runs the turn.
  */
 import type { ModelMessage } from "ai";
 
@@ -19,19 +18,19 @@ export const sendTurn = async (
   history: ChatMessageRecord[],
   text: string
 ): Promise<void> => {
-  await ensureConversationForTurn(ctx.persistence, {
-    profileId: ctx.profileId,
-    conversationId: ctx.conversationId,
-    firstMessageText: text,
-    model: { providerId: ctx.provider.id, modelId: ctx.modelId },
-  });
-  await appendUserMessage(
-    ctx.persistence,
-    ctx.profileId,
-    ctx.conversationId,
-    text
-  );
   await runAgent(ctx, async () => {
+    await ensureConversationForTurn(ctx.persistence, {
+      profileId: ctx.profileId,
+      conversationId: ctx.conversationId,
+      firstMessageText: text,
+      model: { providerId: ctx.provider.id, modelId: ctx.modelId },
+    });
+    await appendUserMessage(
+      ctx.persistence,
+      ctx.profileId,
+      ctx.conversationId,
+      text
+    );
     const built = await buildChatAgent({
       persistence: ctx.persistence,
       profileId: ctx.profileId,

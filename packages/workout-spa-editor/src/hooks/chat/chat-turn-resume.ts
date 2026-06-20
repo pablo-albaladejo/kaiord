@@ -1,8 +1,7 @@
 /**
  * Resume actions for a parked chat turn: `approve` runs the confirmed tool,
  * appends a tool-event message, and resumes the agent; `deny` resumes with a
- * declined result without running anything. Split from `chat-turn-runner` so
- * each file stays under the line cap.
+ * declined result without running anything.
  */
 import type { PendingAction } from "@kaiord/ai";
 
@@ -22,22 +21,22 @@ export const approveAction = async (
     pending.toolName,
     pending.input
   );
-  await appendToolEvent(
-    ctx.persistence,
-    ctx.profileId,
-    ctx.conversationId,
-    pending.toolName,
-    ok
-  );
   ctx.set.pendingAction(null);
-  await runAgent(ctx, () =>
-    agent.resume(ctx.messagesRef.current, {
+  await runAgent(ctx, async () => {
+    await appendToolEvent(
+      ctx.persistence,
+      ctx.profileId,
+      ctx.conversationId,
+      pending.toolName,
+      ok
+    );
+    return agent.resume(ctx.messagesRef.current, {
       toolCallId: pending.toolCallId,
       toolName: pending.toolName,
       status: "approved",
       output,
-    })
-  );
+    });
+  });
 };
 
 export const denyAction = async (

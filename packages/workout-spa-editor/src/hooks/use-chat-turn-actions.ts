@@ -1,8 +1,8 @@
 /**
- * The user-facing turn actions for `useChatTurn` (send/approve/deny/retry),
- * split out so the hook body stays under the line cap. Each action no-ops
- * unless the context and any required pending action are present, and emits
- * the count-only analytics events the chat usage rule mandates.
+ * The user-facing turn actions for `useChatTurn` (send/approve/deny/retry).
+ * Each action no-ops unless the context and any required pending action are
+ * present, and emits the count-only analytics events the chat usage rule
+ * mandates.
  */
 import type { PendingAction } from "@kaiord/ai";
 import type { Analytics } from "@kaiord/core";
