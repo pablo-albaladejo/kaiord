@@ -13,11 +13,11 @@
 
 ## 3. ConnectionProvider port + mechanism adapters
 
-- [ ] 3.1 Define the `ConnectionProvider` port: `connect(input)`, `disconnect(profileId)`, `status(profileId)` (port specified before adapters, per hexagonal rules)
-- [ ] 3.2 Implement the `bridge` adapter (Garmin, Train2Go): `status` from extension/session detection; `disconnect` clears local bridge linkage + the connection record
-- [ ] 3.3 Implement the `not-supported` sentinel adapter (Strava, Wahoo): `status` always `not-supported`, `connect` is a no-op error
-- [ ] 3.4 Implement the `api-key` adapter (intervals.icu): `connect` validates the key via a live request and stores it encrypted; `disconnect` deletes the credential + record
-- [ ] 3.5 Reuse `lib/crypto.ts` (AES-GCM) for credential encrypt/decrypt; unit-test ciphertext-at-rest + round-trip
+- [x] 3.1 Define the `ConnectionProvider` port: `connect(input)`, `disconnect(profileId)`, `status(profileId)` (port specified before adapters, per hexagonal rules)
+- [x] 3.2 Implement the `bridge` adapter (Garmin, Train2Go): tracks local linkage; `disconnect` clears the connection record to `disconnected`
+- [x] 3.3 Implement the `not-supported` sentinel adapter (Strava, Wahoo): `status` always `not-supported`, `connect` throws
+- [x] 3.4 Implement the `api-key` adapter (intervals.icu): `connect` validates via injected request and stores encrypted; `disconnect` deletes the credential + record; `intervals-icu-validate.ts` does the live Basic-auth check
+- [x] 3.5 Reuse `lib/crypto.ts` (AES-GCM) for credential encrypt/decrypt via `connection-credentials.ts`; unit-tested ciphertext-at-rest + round-trip
 
 ## 4. Catalog + UI wiring
 
