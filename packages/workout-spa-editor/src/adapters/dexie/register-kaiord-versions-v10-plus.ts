@@ -102,3 +102,10 @@ export const registerV23 = (db: DexieVersionHost): void => {
   // rebuilds the indexes on upgrade, no data migration, tables untouched.
   db.version(23).stores(SCHEMAS.v23);
 };
+
+export const registerV24 = (db: DexieVersionHost): void => {
+  // v24 — additive `connections` store for Athlete account linkage (#714).
+  // Dexie auto-creates the store empty on upgrade; no data migration, existing
+  // tables untouched.
+  db.version(24).stores(SCHEMAS.v24);
+};
