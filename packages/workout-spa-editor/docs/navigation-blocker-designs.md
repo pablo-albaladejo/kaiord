@@ -12,7 +12,7 @@ There is **no navigation-origin source anywhere in the SPA** (`grep "from=" src/
 
 - `components/pages/use-back-handler.ts:33` — `backTarget = isInPicker ? buildPickerHref(dateParam) : null` always resolves a `scratch`/`import` picker to `/workout/new[?date=…]`. Opening the editor from Library "Load" (`components/pages/LibraryPage.tsx:78` → `/workout/new?source=scratch`) sends **Back to the AI Create overlay the user never visited** (`src/new-workout-route.tsx:15` mounts `<EditorPage>` for `source`/`action`, and the bare `/workout/new` mounts `<CreateWorkout>`). (#4)
 - `components/pages/use-back-handler.ts:50` — edit-mode (`?id`) editor returns `null` ⇒ **no Back button at all** when the editor was reached from calendar/coaching/detail. (#19)
-- `components/pages/WorkoutDetail/WorkoutDetail.tsx:17` — `onBack` hardcodes `navigate("/calendar")` regardless of whether the detail was opened from Today (`components/pages/Today/PlannedSessionCard.tsx:57` → `/workout/view/:id`) or elsewhere. (#28)
+- `components/pages/WorkoutDetail/WorkoutDetail.tsx:17` — `onBack` hardcodes `navigate("/calendar")` regardless of whether the detail was opened from Today (`components/pages/Daily/PlannedSessionCard.tsx:57` → `/workout/view/:id`) or elsewhere. (#28)
 
 The audit confirms `history.back()` and wouter `useHistoryState()` are **untestable** under the `memoryLocation({record:true})` harness, which records only the path string list (`location.history`), not `window.history.state`. We need an explicit, URL-carried, pure-resolvable origin contract.
 
@@ -163,8 +163,8 @@ Append `from=<origin>` (via `withOrigin`) at each navigation _into_ the editor/d
 | `components/pages/LibraryPage.tsx:78`                                     | `/workout/new?source=scratch`                    | `library`                                           |
 | `components/molecules/WellnessEntryDialog/wellness-import-action.tsx:19`  | `/workout/new?action=import`                     | `today`                                             |
 | `components/molecules/CalendarEmptyStates/EmptyWeekState.tsx:28`          | `/workout/new`                                   | `calendar`                                          |
-| `components/pages/Today/PlannedEmpty.tsx:21`                              | `/workout/new`                                   | `today`                                             |
-| `components/pages/Today/PlannedSessionCard.tsx:57`                        | `/workout/view/${id}`                            | `today`                                             |
+| `components/pages/Daily/PlannedEmpty.tsx:21`                              | `/workout/new`                                   | `today`                                             |
+| `components/pages/Daily/PlannedSessionCard.tsx:57`                        | `/workout/view/${id}`                            | `today`                                             |
 | `components/pages/use-add-entry-chooser.ts:22`                            | `/workout/new?date=${addEntryDate}`              | `calendar-day`                                      |
 | `components/molecules/RawWorkoutDialog/RawWorkoutContent.tsx:52`          | `/workout/new?date=${workout.date}`              | `calendar-day`                                      |
 | `components/pages/use-calendar-state.ts:45`                               | `/workout/${workout.id}`                         | `calendar`                                          |
