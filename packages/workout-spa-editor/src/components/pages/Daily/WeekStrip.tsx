@@ -22,6 +22,7 @@ const EMPTY: DaySummary = {
   intensity: null,
   estimated: false,
   sport: null,
+  durationSec: null,
 };
 
 export function WeekStrip(props: WeekStripProps) {

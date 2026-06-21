@@ -2,10 +2,12 @@
  * Per-day mark for a WeekStrip column: a faint hairline when the day is empty;
  * otherwise the day's sport glyph (emoji) when one is known — dimmed by
  * intensity (easy/moderate/hard, fainter when presence-only) — falling back to
- * an intensity-tinted dot when no sport is available. A small count is appended
- * when the day holds 2+ entries.
+ * an intensity-tinted dot when no sport is available. The mark grows with the
+ * day's measured duration (short/medium/long). A small count is appended when
+ * the day holds 2+ entries.
  */
 import type { DaySummary, IntensityBucket } from "./build-week-summary";
+import { DOT_SIZE, durationMarkSize, GLYPH_SIZE } from "./mark-size";
 
 const FILL: Record<IntensityBucket, string> = {
   easy: "bg-sky-500/40",
@@ -42,6 +44,7 @@ export function WeekStripMark({ summary }: { summary: DaySummary }) {
       />
     );
   }
+  const size = durationMarkSize(summary.durationSec);
   const count = summary.count >= 2 && (
     <span className="text-[9px] font-semibold leading-none text-slate-500">
       {summary.count}
@@ -51,7 +54,7 @@ export function WeekStripMark({ summary }: { summary: DaySummary }) {
     <span
       data-testid="weekstrip-sport"
       aria-hidden="true"
-      className={`text-[10px] leading-none ${glyphOpacity(summary)}`}
+      className={`${GLYPH_SIZE[size]} leading-none ${glyphOpacity(summary)}`}
     >
       {summary.sport}
     </span>
@@ -59,7 +62,7 @@ export function WeekStripMark({ summary }: { summary: DaySummary }) {
     <span
       data-testid="weekstrip-dot"
       aria-hidden="true"
-      className={`h-1.5 w-1.5 rounded-full ${dotClass(summary)}`}
+      className={`${DOT_SIZE[size]} rounded-full ${dotClass(summary)}`}
     />
   );
   return (
