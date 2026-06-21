@@ -1,3 +1,5 @@
+> Completed: 2026-06-21
+
 ## Why
 
 The Athlete page's **Connections** section ships Strava, Wahoo, and

@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-06-21 | [`athlete-connections-oauth`](./2026-06-21-athlete-connections-oauth/) | The Athlete page's Connections section ships Strava, Wahoo, and |
 | 2026-06-15 | [`per-use-dynamic-model-selection`](./2026-06-15-per-use-dynamic-model-selection/) | Per-Use Model Selection with SDK-Sourced Model Catalog |
 | 2026-06-14 | [`add-spa-ai-chatbot`](./2026-06-14-add-spa-ai-chatbot/) | Add SPA AI Chat Assistant |
 | 2026-06-13 | [`code-semantics-hardening`](./2026-06-13-code-semantics-hardening/) | code-semantics-hardening |
