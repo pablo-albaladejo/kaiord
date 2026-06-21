@@ -612,9 +612,11 @@ jobs:
 
   test-frontend:
     runs-on: ubuntu-latest
-    # P95 = 334s (worst matrix shard); ceil(P95 × 1.5 / 60) = 9; capped at
-    # test-family ceiling 30.
-    timeout-minutes: 9
+    # Frontend vitest + coverage P95 drifted to ~9min as the suite grew,
+    # intermittently exceeding the old 9-min cap (timeout flake on the
+    # 22.18.0 shard). Bumped to 15 for headroom; still under the test-family
+    # ceiling of 30.
+    timeout-minutes: 15
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
