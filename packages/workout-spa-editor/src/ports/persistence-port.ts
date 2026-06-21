@@ -5,6 +5,7 @@
  * persisted data domains in the workout SPA editor.
  */
 
+import type { ConnectionRepository } from "../application/connections/connection-repository.port";
 import type { IntegrationPolicyRepository } from "../application/integration-policy/integration-policy-repository.port";
 import type { AiModelBindingRepository } from "./ai-model-binding-repository";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
@@ -90,6 +91,9 @@ export type PersistencePort = HealthRepositories & {
   // Per-profile model bindings (which provider+model each AI purpose uses).
   // Cascade-deleted on profile removal; rides the cloud-sync snapshot.
   aiModelBindings: AiModelBindingRepository;
+  // Per-profile provider account linkage (#714). Device-local (excluded from
+  // the cloud snapshot); cascade-deleted on profile removal.
+  connections: ConnectionRepository;
   // Delete markers for cross-device sync. Written by the `withTombstones`
   // decorator on every delete; read by the snapshot/merge use cases.
   tombstones: TombstoneRepository;

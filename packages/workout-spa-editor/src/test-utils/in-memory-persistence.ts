@@ -19,6 +19,7 @@ import { createInMemoryChatMessageRepository } from "./in-memory-chat-message-re
 import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
+import { createInMemoryConnectionRepository } from "./in-memory-connection-repository";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
 import { createInMemoryIntegrationPolicyRepository } from "./in-memory-integration-policy-repository";
 import { createInMemoryMatchedSessionsReadModel } from "./in-memory-matched-sessions-read-model";
@@ -87,6 +88,7 @@ export function createInMemoryPersistence(): PersistencePort {
     coachingDayNotes: createInMemoryCoachingDayNotesRepository(
       stores.coachingDayNotes
     ),
+    connections: createInMemoryConnectionRepository(),
     integrationPolicy: createInMemoryIntegrationPolicyRepository(
       stores.integrationPolicies
     ),

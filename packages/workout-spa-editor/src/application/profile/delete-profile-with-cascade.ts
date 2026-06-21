@@ -37,6 +37,7 @@ import type {
 } from "../../ports/persistence-port";
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { UserPreferencesRepository } from "../../ports/user-preferences-repository";
+import type { ConnectionRepository } from "../connections/connection-repository.port";
 
 export type DeleteProfileWithCascadeDeps = {
   workouts: WorkoutRepository;
@@ -54,6 +55,8 @@ export type DeleteProfileWithCascadeDeps = {
   chatMessages: ChatMessageRepository;
   // Per-profile model bindings; plain bulk delete like the other stores.
   aiModelBindings: AiModelBindingRepository;
+  // Per-profile provider connections (#714); device-local, bulk delete.
+  connections: ConnectionRepository;
 };
 
 export const deleteProfileWithCascade = async (
@@ -71,5 +74,6 @@ export const deleteProfileWithCascade = async (
     deps.healthCleanup.deleteByProfile(deletedProfileId),
     deps.chatMessages.deleteByProfile(deletedProfileId),
     deps.aiModelBindings.deleteByProfile(deletedProfileId),
+    deps.connections.deleteByProfile(deletedProfileId),
   ]);
 };
