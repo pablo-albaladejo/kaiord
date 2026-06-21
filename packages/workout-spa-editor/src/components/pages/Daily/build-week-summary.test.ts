@@ -82,6 +82,7 @@ describe("buildWeekSummary", () => {
       intensity: "hard",
       estimated: true,
       sport: "bike",
+      durationSec: null,
     });
   });
 
@@ -156,6 +157,7 @@ describe("buildWeekSummary", () => {
       intensity: null,
       estimated: false,
       sport: "\u{1F6B4}",
+      durationSec: null,
     });
   });
 
@@ -177,6 +179,23 @@ describe("buildWeekSummary", () => {
       intensity: null,
       estimated: false,
       sport: null,
+      durationSec: null,
     });
+  });
+
+  it("should expose the measured duration of a KRD workout", () => {
+    // Arrange
+
+    // Act
+    const summary = buildWeekSummary({
+      dayIsos: DAYS,
+      weekWorkouts: [krdWorkout()],
+      coachingByDay: {},
+      matched: NO_MATCHED,
+      profile: PROFILE,
+    });
+
+    // Assert
+    expect(summary[DAY].durationSec).toBe(STEP_SECONDS);
   });
 });

@@ -18,7 +18,16 @@ const REAL_ISO = "2024-01-10";
 
 function emptySummary(days: WeekDay[]): WeekSummary {
   return Object.fromEntries(
-    days.map((d) => [d.iso, { count: 0, intensity: null, estimated: false }])
+    days.map((d) => [
+      d.iso,
+      {
+        count: 0,
+        intensity: null,
+        estimated: false,
+        sport: null,
+        durationSec: null,
+      },
+    ])
   );
 }
 
