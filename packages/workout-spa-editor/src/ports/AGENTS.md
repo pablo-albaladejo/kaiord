@@ -15,7 +15,8 @@ Hexagonal port interfaces. Each `.ts` file here defines a repository contract th
 - `session-match-repository.ts` — `SessionMatchRepository`: enforces uniqueness on `(profileId, coachingActivityId)` and `(profileId, workoutId)`; has `updateCoachingActivityId` (heal path), `appendExecutedWorkoutIds` (Train2Go three-slot grouping), and the cascade hooks `deleteByActivityId`/`deleteByWorkoutId`/`deleteByProfile`.
 - `auto-match-dismissal-repository.ts` — `AutoMatchDismissalRepository`: per `(profileId, weekStart)` dismissals with cascade-on-profile-delete.
 - `user-preferences-repository.ts` — `UserPreferencesRepository`: per-profile UI prefs, lazy row creation, cascade-on-profile-delete.
-- `chat-message-repository.ts` — `ChatMessageRepository`: append-only per-profile chat transcript (`append`, `listByProfile(profileId, limit?)` for the most-recent-N model context, `deleteByProfile` cascade). Clear-conversation tombstones each message in the `clearConversation` use case; profile-cascade follows the no-tombstone convention.
+- `chat-message-repository.ts` — `ChatMessageRepository`: append-only chat transcript (`append`, `listByProfile`/`listByConversation` with optional most-recent-N windowing for model context, `deleteByConversation`, `deleteByProfile` cascade). The `deleteConversation` use case tombstones each removed message; the profile-cascade `deleteByProfile` follows the no-tombstone convention.
+- `chat-conversation-repository.ts` — `ChatConversationRepository`: per-profile conversation rows (`put`, `get`, `listByProfile` most-recently-updated-first, `delete`, `deleteByProfile` cascade). Rows are mutable (rename/touch/set-model advance `updatedAt`), so the snapshot merge resolves concurrent edits last-write-wins; `deleteConversation` layers a `[chatConversations+id]` tombstone on top of `delete`.
 - `index.ts` — module export surface.
 
 ## For AI Agents

@@ -16,6 +16,7 @@ import { applyV14Upgrade } from "./dexie-v14-migration";
 import { applyV15Upgrade } from "./dexie-v15-migration";
 import { applyV17Upgrade } from "./dexie-v17-migration";
 import { applyV22Upgrade } from "./dexie-v22-migration";
+import { applyV25Upgrade } from "./dexie-v25-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -108,4 +109,11 @@ export const registerV24 = (db: DexieVersionHost): void => {
   // Dexie auto-creates the store empty on upgrade; no data migration, existing
   // tables untouched.
   db.version(24).stores(SCHEMAS.v24);
+};
+
+export const registerV25 = (db: DexieVersionHost): void => {
+  // v25 — multi-conversation chat: additive `chatConversations` store +
+  // `conversationId` on `chatMessages`. The upgrade buckets prior messages
+  // into one seeded "Conversation 1" per profile and backfills the FK.
+  db.version(25).stores(SCHEMAS.v25).upgrade(applyV25Upgrade);
 };

@@ -32,6 +32,7 @@ export type ChatTurnRefs = {
 export type ChatTurnDeps = {
   persistence: PersistencePort;
   profileId: string | null;
+  conversationId: string | null;
   provider: LlmProviderConfig | null;
   modelId: string | null;
   today: string;
@@ -40,10 +41,11 @@ export type ChatTurnDeps = {
 
 export type ChatTurnCtx = Omit<
   ChatTurnDeps,
-  "profileId" | "provider" | "modelId"
+  "profileId" | "conversationId" | "provider" | "modelId"
 > &
   ChatTurnRefs & {
     profileId: string;
+    conversationId: string;
     provider: LlmProviderConfig;
     modelId: string;
     set: {
@@ -59,10 +61,17 @@ export const makeChatTurnCtx = (
   refs: ChatTurnRefs,
   setters: ChatTurnSetters
 ): ChatTurnCtx | null => {
-  if (!deps.profileId || !deps.provider || !deps.modelId) return null;
+  if (
+    !deps.profileId ||
+    !deps.conversationId ||
+    !deps.provider ||
+    !deps.modelId
+  )
+    return null;
   return {
     persistence: deps.persistence,
     profileId: deps.profileId,
+    conversationId: deps.conversationId,
     provider: deps.provider,
     modelId: deps.modelId,
     today: deps.today,

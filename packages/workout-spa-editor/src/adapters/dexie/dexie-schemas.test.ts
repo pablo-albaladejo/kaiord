@@ -166,3 +166,42 @@ describe("SCHEMAS.v24 (connections store)", () => {
     }
   });
 });
+
+describe("SCHEMAS.v25 (multi-conversation chat)", () => {
+  it("should add exactly the chatConversations store on top of v24", () => {
+    // Arrange
+    const v24Keys = new Set(Object.keys(SCHEMAS.v24));
+    const v25Keys = new Set(Object.keys(SCHEMAS.v25));
+
+    // Act
+    const added = [...v25Keys].filter((k) => !v24Keys.has(k));
+
+    // Assert
+    expect(added).toEqual(["chatConversations"]);
+  });
+
+  it("should order conversations by the per-profile updatedAt index", () => {
+    // Arrange
+    const stores = SCHEMAS.v25 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    expect(stores.chatConversations).toBe(
+      "id, profileId, [profileId+updatedAt]"
+    );
+  });
+
+  it("should add the conversation-scoped index to chatMessages", () => {
+    // Arrange
+    const stores = SCHEMAS.v25 as Record<string, string>;
+
+    // Act
+    const indexes = stores.chatMessages.split(", ");
+
+    // Assert
+    expect(indexes).toContain("conversationId");
+    expect(indexes).toContain("[profileId+conversationId+createdAt]");
+    expect(indexes).toContain("[profileId+createdAt]");
+  });
+});

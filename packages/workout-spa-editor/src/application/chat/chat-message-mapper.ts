@@ -25,6 +25,7 @@ export const recordsToModelMessages = (
 export type NewChatMessageInput = {
   id: string;
   profileId: string;
+  conversationId: string;
   role: ChatMessageRole;
   content: string;
   createdAt: string;
@@ -37,6 +38,7 @@ export const newChatMessage = (
 ): ChatMessageRecord => ({
   id: input.id,
   profileId: input.profileId,
+  conversationId: input.conversationId,
   role: input.role,
   content: input.content,
   createdAt: input.createdAt,

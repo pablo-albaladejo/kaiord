@@ -24,6 +24,8 @@ vi.mock("./use-chat-action-ops", () => ({
 }));
 vi.mock("./chat/chat-turn-runner", () => ({
   sendTurn: (...args: unknown[]) => mockSendTurn(...args),
+}));
+vi.mock("./chat/chat-turn-resume", () => ({
   approveAction: (...args: unknown[]) => mockApproveAction(...args),
   denyAction: vi.fn(),
 }));
@@ -39,6 +41,7 @@ const provider: LlmProviderConfig = {
 
 const args = {
   profileId: "prof-1",
+  conversationId: "conv-1",
   provider,
   modelId: "claude-sonnet-4-6",
   generationProvider: provider,

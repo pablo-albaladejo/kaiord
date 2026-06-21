@@ -144,9 +144,18 @@ const makeSeedRow = (
       return {
         id,
         profileId,
+        conversationId: `conv-${profileId}`,
         role: "user",
         content: "hi",
         createdAt: NOW,
+      };
+    case "chatConversations":
+      return {
+        id,
+        profileId,
+        title: "Conversation 1",
+        createdAt: NOW,
+        updatedAt: NOW,
       };
     case "integrationPolicies":
       return {
@@ -202,6 +211,7 @@ const performCascadeOrchestration = async (
         userPreferences: persistence.userPreferences,
         healthCleanup: persistence.healthCleanup,
         chatMessages: persistence.chatMessages,
+        chatConversations: persistence.chatConversations,
         aiModelBindings: persistence.aiModelBindings,
         connections: persistence.connections,
       },

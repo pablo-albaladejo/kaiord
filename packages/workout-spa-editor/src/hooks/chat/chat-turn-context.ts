@@ -23,6 +23,7 @@ const applyResult = async (
   await appendAssistantTurn(
     ctx.persistence,
     ctx.profileId,
+    ctx.conversationId,
     result,
     ctx.provider.type
   );

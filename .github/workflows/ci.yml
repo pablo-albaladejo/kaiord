@@ -612,9 +612,11 @@ jobs:
 
   test-frontend:
     runs-on: ubuntu-latest
-    # P95 = 334s (worst matrix shard); ceil(P95 × 1.5 / 60) = 9; capped at
+    # The node 22.18.0 matrix leg runs ~50% slower than 24.x and the suite has
+    # grown past the old 9-min cap (it hit the timeout on PR #790). Recalibrated
+    # from the slow leg: P95 ≈ 540s; ceil(P95 × 1.5 / 60) = 14; capped at
     # test-family ceiling 30.
-    timeout-minutes: 9
+    timeout-minutes: 14
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:

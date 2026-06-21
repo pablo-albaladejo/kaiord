@@ -8,6 +8,7 @@ import type { PersistencePort } from "../../ports/persistence-port";
 import { createDexieAiModelBindingRepository } from "./dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
+import { createDexieChatConversationRepository } from "./dexie-chat-conversation-repository";
 import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
 import { createDexieCoachingDayNotesRepository } from "./dexie-coaching-day-notes-repository";
 import { createDexieCoachingRepository } from "./dexie-coaching-repository";
@@ -50,6 +51,7 @@ export function createDexiePersistence(
     healthCleanup: createDexieHealthCleanupRepository(database),
     ...createDexieHealthRecordRepositories(database),
     chatMessages: createDexieChatMessageRepository(database),
+    chatConversations: createDexieChatConversationRepository(database),
     aiModelBindings: createDexieAiModelBindingRepository(database),
     tombstones: createDexieTombstoneRepository(database),
     transaction: createTransactionRunner(database),

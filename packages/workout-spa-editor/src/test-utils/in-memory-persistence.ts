@@ -15,6 +15,7 @@ import {
   type CustomPromptRef,
 } from "./in-memory-ai-provider-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "./in-memory-auto-match-dismissal-repository";
+import { createInMemoryChatConversationRepository } from "./in-memory-chat-conversation-repository";
 import { createInMemoryChatMessageRepository } from "./in-memory-chat-message-repository";
 import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
@@ -62,6 +63,7 @@ export function createInMemoryPersistence(): PersistencePort {
     healthBodyComposition: new Map(),
     healthStress: new Map(),
     chatMessages: new Map(),
+    chatConversations: new Map(),
     aiModelBindings: new Map(),
     tombstones: new Map(),
   };
@@ -130,6 +132,9 @@ export function createInMemoryPersistence(): PersistencePort {
     ),
     healthStress: createInMemoryHealthRecordRepository(stores.healthStress),
     chatMessages: createInMemoryChatMessageRepository(stores.chatMessages),
+    chatConversations: createInMemoryChatConversationRepository(
+      stores.chatConversations
+    ),
     aiModelBindings: createInMemoryAiModelBindingRepository(
       stores.aiModelBindings
     ),

@@ -9,6 +9,7 @@ import type { ConnectionRepository } from "../application/connections/connection
 import type { IntegrationPolicyRepository } from "../application/integration-policy/integration-policy-repository.port";
 import type { AiModelBindingRepository } from "./ai-model-binding-repository";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
+import type { ChatConversationRepository } from "./chat-conversation-repository";
 import type { ChatMessageRepository } from "./chat-message-repository";
 import type {
   CoachingDayNotesRepository,
@@ -32,6 +33,7 @@ import type { WorkoutRepository } from "./workout-repository";
 
 export type { AiModelBindingRepository } from "./ai-model-binding-repository";
 export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
+export type { ChatConversationRepository } from "./chat-conversation-repository";
 export type { ChatMessageRepository } from "./chat-message-repository";
 export type {
   CoachingRepository,
@@ -86,8 +88,12 @@ export type PersistencePort = HealthRepositories & {
   healthCleanup: HealthCleanupRepository;
   // (The six per-metric health repos are intersected in via HealthRepositories.)
   // Per-profile AI chat transcript; append-only, cascade-deleted on profile
-  // removal. Clear-conversation tombstones each message via the clear use case.
+  // removal. Delete-conversation tombstones each message via its use case.
   chatMessages: ChatMessageRepository;
+  // Per-profile conversation threads (parents of chatMessages). Mutable rows
+  // (rename, model override, updatedAt) — cascade-deleted on profile removal
+  // and merged last-write-wins on updatedAt in the cloud-sync snapshot.
+  chatConversations: ChatConversationRepository;
   // Per-profile model bindings (which provider+model each AI purpose uses).
   // Cascade-deleted on profile removal; rides the cloud-sync snapshot.
   aiModelBindings: AiModelBindingRepository;

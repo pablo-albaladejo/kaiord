@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
-import { approveAction, denyAction, sendTurn } from "./chat-turn-runner";
+import { approveAction, denyAction } from "./chat-turn-resume";
+import { sendTurn } from "./chat-turn-runner";
 import type { ChatTurnCtx, ChatTurnState } from "./chat-turn-types";
 
 const fakeAgent = { sendTurn: vi.fn(), resume: vi.fn() };
@@ -12,7 +13,7 @@ vi.mock("./build-chat-agent", () => ({
   buildChatAgent: vi.fn(async () => ({ agent: fakeAgent, tools: [] })),
 }));
 
-const provider = { type: "anthropic" } as LlmProviderConfig;
+const provider = { id: "prov-1", type: "anthropic" } as LlmProviderConfig;
 
 const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
   const states: ChatTurnState[] = [];
@@ -21,6 +22,7 @@ const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
   const ctx: ChatTurnCtx = {
     persistence,
     profileId: "p1",
+    conversationId: "c1",
     provider,
     modelId: "claude-sonnet-4-5",
     today: "2026-06-13",
@@ -58,6 +60,9 @@ describe("chat-turn-runner", () => {
     // Assert
     const stored = await persistence.chatMessages.listByProfile("p1");
     expect(stored.map((m) => m.role)).toEqual(["user", "assistant"]);
+    expect(stored.every((m) => m.conversationId === "c1")).toBe(true);
+    const conversation = await persistence.chatConversations.get("p1", "c1");
+    expect(conversation?.title).toBe("longest ride?");
     expect(states.at(-1)).toBe("idle");
   });
 

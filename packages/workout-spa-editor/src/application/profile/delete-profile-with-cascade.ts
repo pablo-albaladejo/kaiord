@@ -27,6 +27,7 @@
 
 import type { AiModelBindingRepository } from "../../ports/ai-model-binding-repository";
 import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismissal-repository";
+import type { ChatConversationRepository } from "../../ports/chat-conversation-repository";
 import type { ChatMessageRepository } from "../../ports/chat-message-repository";
 import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
 import type { HealthCleanupRepository } from "../../ports/health-cleanup-repository";
@@ -53,6 +54,8 @@ export type DeleteProfileWithCascadeDeps = {
   // Per-profile AI chat transcript. Plain bulk delete (no tombstones —
   // propagates via the profile tombstone like the other per-profile stores).
   chatMessages: ChatMessageRepository;
+  // Per-profile conversation threads; plain bulk delete like the other stores.
+  chatConversations: ChatConversationRepository;
   // Per-profile model bindings; plain bulk delete like the other stores.
   aiModelBindings: AiModelBindingRepository;
   // Per-profile provider connections (#714); device-local, bulk delete.
@@ -73,6 +76,7 @@ export const deleteProfileWithCascade = async (
     deps.userPreferences.delete(deletedProfileId),
     deps.healthCleanup.deleteByProfile(deletedProfileId),
     deps.chatMessages.deleteByProfile(deletedProfileId),
+    deps.chatConversations.deleteByProfile(deletedProfileId),
     deps.aiModelBindings.deleteByProfile(deletedProfileId),
     deps.connections.deleteByProfile(deletedProfileId),
   ]);

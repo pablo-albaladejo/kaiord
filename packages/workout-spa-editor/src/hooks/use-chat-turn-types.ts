@@ -10,6 +10,7 @@ import type { ChatTurnState } from "./chat/chat-turn-types";
 
 export type UseChatTurnArgs = {
   profileId: string | null;
+  conversationId: string | null;
   provider: LlmProviderConfig | null;
   modelId: string | null;
   generationProvider: LlmProviderConfig | null;

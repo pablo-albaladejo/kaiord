@@ -5,10 +5,12 @@ import { createInMemoryChatMessageRepository } from "./in-memory-chat-message-re
 const msg = (
   id: string,
   profileId: string,
-  createdAt: string
+  createdAt: string,
+  conversationId = "conv-default"
 ): ChatMessageRecord => ({
   id,
   profileId,
+  conversationId,
   role: "user",
   content: id,
   createdAt,
@@ -72,5 +74,35 @@ describe("createInMemoryChatMessageRepository", () => {
     expect((await repo.listByProfile(PROFILE_B)).map((m) => m.id)).toEqual([
       "b1",
     ]);
+  });
+
+  it("should list only the conversation's messages in order", async () => {
+    // Arrange
+    const repo = createInMemoryChatMessageRepository();
+    await repo.append(msg("c1b", PROFILE_A, "2026-06-13T10:02:00.000Z", "c1"));
+    await repo.append(msg("c1a", PROFILE_A, "2026-06-13T10:01:00.000Z", "c1"));
+    await repo.append(msg("c2a", PROFILE_A, "2026-06-13T10:03:00.000Z", "c2"));
+
+    // Act
+    const result = await repo.listByConversation(PROFILE_A, "c1");
+
+    // Assert
+    expect(result.map((m) => m.id)).toEqual(["c1a", "c1b"]);
+  });
+
+  it("should delete only the target conversation on deleteByConversation", async () => {
+    // Arrange
+    const repo = createInMemoryChatMessageRepository();
+    await repo.append(msg("c1a", PROFILE_A, "2026-06-13T10:01:00.000Z", "c1"));
+    await repo.append(msg("c2a", PROFILE_A, "2026-06-13T10:02:00.000Z", "c2"));
+
+    // Act
+    await repo.deleteByConversation("c1");
+
+    // Assert
+    expect(await repo.listByConversation(PROFILE_A, "c1")).toEqual([]);
+    expect(
+      (await repo.listByConversation(PROFILE_A, "c2")).map((m) => m.id)
+    ).toEqual(["c2a"]);
   });
 });
