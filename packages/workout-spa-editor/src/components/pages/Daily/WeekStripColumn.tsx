@@ -1,3 +1,4 @@
+import { formatHms } from "../../../lib/workout-review";
 import type { DaySummary } from "./build-week-summary";
 import type { WeekDay } from "./today-dates";
 import { WeekStripMark } from "./WeekStripMark";
@@ -16,7 +17,9 @@ function ariaLabel(day: WeekDay, summary: DaySummary): string {
   const intensity = summary.intensity
     ? `, ${summary.intensity}${summary.estimated ? " estimated" : ""}`
     : "";
-  return `Focus ${day.letter} ${day.dayNumber}${today}, ${summary.count} planned${intensity}`;
+  const duration =
+    summary.durationSec !== null ? `, ${formatHms(summary.durationSec)}` : "";
+  return `Focus ${day.letter} ${day.dayNumber}${today}, ${summary.count} planned${intensity}${duration}`;
 }
 
 export function WeekStripColumn({

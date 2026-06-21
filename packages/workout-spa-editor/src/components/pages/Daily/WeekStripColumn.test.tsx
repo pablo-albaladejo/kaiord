@@ -13,10 +13,14 @@ const DAY: WeekDay = {
   isRealToday: false,
 };
 
+const SESSION_SECONDS = 2700; // 45 min
+
 const summary = (o: Partial<DaySummary> = {}): DaySummary => ({
   count: 1,
   intensity: "moderate",
   estimated: false,
+  sport: null,
+  durationSec: null,
   ...o,
 });
 
@@ -81,5 +85,18 @@ describe("WeekStripColumn", () => {
 
     // Assert
     expect(screen.getByRole("button")).toHaveAttribute("aria-current", "date");
+  });
+
+  it("should include the measured duration in the aria-label", () => {
+    // Arrange
+    const s = summary({ durationSec: SESSION_SECONDS });
+
+    // Act
+    renderColumn(DAY, s);
+
+    // Assert
+    expect(screen.getByRole("button").getAttribute("aria-label")).toContain(
+      "45m"
+    );
   });
 });
