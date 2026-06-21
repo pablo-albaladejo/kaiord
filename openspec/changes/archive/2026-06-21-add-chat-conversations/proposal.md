@@ -1,3 +1,5 @@
+> Completed: 2026-06-21
+
 ## Why
 
 The in-SPA AI chat at `/chat` persists exactly one rolling transcript per profile (`spa-ai-chat` → "Transcript persistence"). A user cannot keep separate threads for separate topics, revisit a past exchange, or start fresh without destroying history — the only reset is "Clear conversation", which deletes everything. Bringing the chat to parity with familiar assistants (ChatGPT/Claude) requires a first-class conversation entity and a list to manage it.
@@ -17,9 +19,11 @@ The in-SPA AI chat at `/chat` persists exactly one rolling transcript per profil
 ## Capabilities
 
 ### New Capabilities
+
 - `spa-chat-conversations`: The conversation manager — the `chatConversations` store and its repository port, the create/rename/delete/list use cases, title auto-generation, the conversation-list UI surface, and the cross-device merge rules (mutable `updatedAt` LWW + tombstones) for conversation rows.
 
 ### Modified Capabilities
+
 - `spa-ai-chat`: "Transcript persistence" changes from one-transcript-per-profile to per-conversation transcripts; messages carry `conversationId`; the chat page renders the **active** conversation rather than the whole profile transcript; "Clear conversation" is replaced by delete-one + new-conversation.
 - `spa-routing`: Adds the `/chat/:conversationId` deep-linkable route and re-classifies the `/chat` surface as a conversation list + active thread (heading/announcement/lazy-load invariants unchanged).
 - `spa-persistence-port`: Adds the `ChatConversationRepository` port and extends `ChatMessageRepository` with a per-conversation read (`listByConversation`) and per-conversation delete; the `chatConversations` table joins the snapshot/tombstone surface.
