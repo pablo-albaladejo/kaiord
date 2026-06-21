@@ -11,6 +11,7 @@ import { usePersistence } from "../contexts/persistence-context";
 import { getDefaultModel } from "../lib/provider-models";
 import { useAiRuntimeStore } from "../store/ai-runtime-store";
 import type { LlmProviderConfig } from "../store/ai-store-types";
+import { logger } from "../utils/logger";
 
 export type ChatModelSelectionArgs = {
   profileId: string | null;
@@ -41,7 +42,12 @@ export const useChatModelSelection = ({
         activeId,
         providerId,
         provider.model ?? getDefaultModel(provider.type)
-      );
+      ).catch((error: unknown) => {
+        logger.error("Failed to persist chat conversation model override", {
+          error,
+        });
+        selectForGeneration(providerId);
+      });
     },
     [persistence, selectForGeneration, profileId, activeId, isDraft, providers]
   );

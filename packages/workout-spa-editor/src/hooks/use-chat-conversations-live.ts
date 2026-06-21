@@ -9,8 +9,11 @@
  */
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { chatConversationRepository } from "../adapters/dexie";
+import { createDexieChatConversationRepository } from "../adapters/dexie/dexie-chat-conversation-repository";
+import { db } from "../adapters/dexie/dexie-database";
 import type { ChatConversationRecord } from "../types/chat/chat-conversation-record";
+
+const chatConversationRepository = createDexieChatConversationRepository(db);
 
 export const useChatConversationsLive = (
   profileId: string | null

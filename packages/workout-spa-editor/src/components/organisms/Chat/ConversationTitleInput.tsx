@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export type ConversationTitleInputProps = {
   initialTitle: string;
@@ -14,6 +14,9 @@ export function ConversationTitleInput({
   onCancel,
 }: ConversationTitleInputProps) {
   const [draft, setDraft] = useState(initialTitle);
+  // Escape sets this so the trailing blur (focus loss on unmount) does not
+  // commit. Enter blurs to commit exactly once via onBlur.
+  const suppressBlurCommitRef = useRef(false);
   return (
     <input
       aria-label="Conversation title"
@@ -21,10 +24,23 @@ export function ConversationTitleInput({
       value={draft}
       autoFocus
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => onCommit(draft)}
+      onBlur={() => {
+        if (suppressBlurCommitRef.current) {
+          suppressBlurCommitRef.current = false;
+          return;
+        }
+        onCommit(draft);
+      }}
       onKeyDown={(e) => {
-        if (e.key === "Enter") onCommit(draft);
-        if (e.key === "Escape") onCancel();
+        if (e.key === "Enter") {
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          suppressBlurCommitRef.current = true;
+          onCancel();
+        }
       }}
     />
   );

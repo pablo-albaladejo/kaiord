@@ -7,12 +7,11 @@
  * Model resolution prefers the conversation's own override, falling back to
  * the page-level chat resolution. No provider configured → settings link.
  */
-import { deleteConversation } from "../../application/chat/delete-conversation";
-import { renameConversation } from "../../application/chat/rename-conversation";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAiModelBindingsLive } from "../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../hooks/use-ai-providers-live";
+import { useChatConversationActions } from "../../hooks/use-chat-conversation-actions";
 import { useChatConversationNav } from "../../hooks/use-chat-conversation-nav";
 import { useChatConversationsLive } from "../../hooks/use-chat-conversations-live";
 import { useChatMessagesLive } from "../../hooks/use-chat-messages-live";
@@ -50,14 +49,12 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
   const activeConv = conversations?.find((c) => c.id === nav.activeId);
   const model = resolveActiveChatModel(activeConv, providers ?? [], fallback);
 
-  const rename = (id: string, title: string) => {
-    if (profileId) void renameConversation(persistence, profileId, id, title);
-  };
-  const remove = (id: string) => {
-    if (!profileId) return;
-    void deleteConversation(persistence, profileId, id);
-    if (id === nav.activeId) nav.startNew();
-  };
+  const { rename, remove } = useChatConversationActions({
+    persistence,
+    profileId,
+    activeId: nav.activeId,
+    startNew: nav.startNew,
+  });
 
   return (
     <div className="space-y-4 p-4" data-testid="chat-page">
