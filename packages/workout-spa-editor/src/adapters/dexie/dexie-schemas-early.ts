@@ -1,5 +1,5 @@
 /**
- * Early Dexie schema versions (v1–v13). Split out of `dexie-schemas.ts` so
+ * Early Dexie schema versions (v1–v16). Split out of `dexie-schemas.ts` so
  * that file stays under the per-file line cap as the migration history grows;
  * `dexie-schemas.ts` imports these and assembles the public `SCHEMAS` map.
  */
@@ -45,4 +45,18 @@ export const CORE_V13 = {
   ...CORE_V8,
   workouts:
     "id, profileId, [profileId+date], date, [date+state], [source+sourceId], sport, *tags",
+};
+// v16 — six health-domain stores added (KRD v2.0). Each store keys on the
+// KRD record `id` (nanoid) and indexes `[profileId+date]` so the per-profile
+// date-range queries that back `useHealth*Live` hooks hit an index. Schema is
+// purely additive. v14/v15 reused SCHEMAS.v13 — this is the first new schema
+// entry since v13.
+export const CORE_V16 = {
+  ...CORE_V13,
+  healthSleep: "id, profileId, [profileId+date], date",
+  healthWeight: "id, profileId, [profileId+date], date",
+  healthHrv: "id, profileId, [profileId+date], date",
+  healthDaily: "id, profileId, [profileId+date], date",
+  healthBodyComposition: "id, profileId, [profileId+date], date",
+  healthStress: "id, profileId, [profileId+date], date",
 };

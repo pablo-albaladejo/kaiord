@@ -3,8 +3,8 @@
  *
  * Per-version `stores()` configs for the Kaiord IndexedDB schema.
  * Co-located with `dexie-database.ts` but split out so the database
- * class stays under the per-file line cap. Early versions (v1–v13) live
- * in `dexie-schemas-early.ts`; this file adds v16+ and assembles `SCHEMAS`.
+ * class stays under the per-file line cap. Early versions (v1–v16) live
+ * in `dexie-schemas-early.ts`; this file adds v17+ and assembles `SCHEMAS`.
  */
 
 import {
@@ -14,24 +14,8 @@ import {
   CORE_V5,
   CORE_V8,
   CORE_V13,
+  CORE_V16,
 } from "./dexie-schemas-early";
-
-// v16 — six health-domain stores added (KRD v2.0). Each store keys on
-// the KRD record `id` (nanoid) and indexes `[profileId+date]` so the
-// per-profile date-range queries that back `useHealth*Live` hooks hit
-// an index. Schema is purely additive; no rewrites of existing tables.
-// v14 (calendar preference rename, PR #646) and v15 (userPreferences
-// scratch + AI banner state, PR #654) both reused SCHEMAS.v13 — this
-// is the first new schema entry since v13.
-const CORE_V16 = {
-  ...CORE_V13,
-  healthSleep: "id, profileId, [profileId+date], date",
-  healthWeight: "id, profileId, [profileId+date], date",
-  healthHrv: "id, profileId, [profileId+date], date",
-  healthDaily: "id, profileId, [profileId+date], date",
-  healthBodyComposition: "id, profileId, [profileId+date], date",
-  healthStress: "id, profileId, [profileId+date], date",
-};
 
 const HEALTH_SUFFIX =
   ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
@@ -119,6 +103,17 @@ const CORE_V24 = {
   connections: "[profileId+providerId], profileId",
 };
 
+// v25 — multi-conversation chat. Adds the mutable `chatConversations` store
+// (`[profileId+updatedAt]` orders the list and resolves rename LWW) and a
+// `conversationId` FK + `[profileId+conversationId+createdAt]` index on
+// `chatMessages`. Data migration: `applyV25Upgrade` (see dexie-v25-migration).
+const CORE_V25 = {
+  ...CORE_V24,
+  chatConversations: "id, profileId, [profileId+updatedAt]",
+  chatMessages:
+    "id, profileId, conversationId, [profileId+createdAt], [profileId+conversationId+createdAt]",
+};
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -135,4 +130,5 @@ export const SCHEMAS = {
   v22: CORE_V22,
   v23: CORE_V23,
   v24: CORE_V24,
+  v25: CORE_V25,
 } as const;

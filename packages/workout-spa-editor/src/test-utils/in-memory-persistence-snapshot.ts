@@ -9,6 +9,7 @@
 import type { AiModelBinding } from "../types/ai-model-binding";
 import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
+import type { ChatConversationRecord } from "../types/chat/chat-conversation-record";
 import type { ChatMessageRecord } from "../types/chat/chat-message-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { CoachingDayNotesRecord } from "../types/coaching-day-notes-record";
@@ -53,6 +54,7 @@ export type Stores = {
   healthBodyComposition: Map<string, HealthBodyCompositionRecord>;
   healthStress: Map<string, HealthStressRecord>;
   chatMessages: Map<string, ChatMessageRecord>;
+  chatConversations: Map<string, ChatConversationRecord>;
   aiModelBindings: Map<string, AiModelBinding>;
   tombstones: Map<string, Tombstone>;
 };
@@ -91,6 +93,7 @@ export const captureSnapshot = (
   healthBodyComposition: new Map(stores.healthBodyComposition),
   healthStress: new Map(stores.healthStress),
   chatMessages: new Map(stores.chatMessages),
+  chatConversations: new Map(stores.chatConversations),
   aiModelBindings: new Map(stores.aiModelBindings),
   tombstones: new Map(stores.tombstones),
   profileActiveId: activeIdRef.current,

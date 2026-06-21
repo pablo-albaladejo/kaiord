@@ -10,6 +10,7 @@ const record = (
 ): ChatMessageRecord => ({
   id,
   profileId: "p1",
+  conversationId: "c1",
   role,
   content,
   createdAt: "2026-06-13T10:00:00.000Z",
@@ -49,6 +50,7 @@ describe("newChatMessage", () => {
     const input = {
       id: "1",
       profileId: "p1",
+      conversationId: "c1",
       role: "user" as const,
       content: "hi",
       createdAt: "2026-06-13T10:00:00.000Z",
@@ -67,6 +69,7 @@ describe("newChatMessage", () => {
     const input = {
       id: "2",
       profileId: "p1",
+      conversationId: "c1",
       role: "assistant" as const,
       content: "done",
       createdAt: "2026-06-13T10:00:00.000Z",

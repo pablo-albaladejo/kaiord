@@ -7,13 +7,13 @@
  */
 import type { ChatAgent, ChatTool, PendingAction } from "@kaiord/ai";
 import type { ModelMessage } from "ai";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { useAnalytics } from "../contexts/analytics-context";
 import { usePersistence } from "../contexts/persistence-context";
-import { approveAction, denyAction, sendTurn } from "./chat/chat-turn-runner";
 import { type ChatTurnState, makeChatTurnCtx } from "./chat/chat-turn-types";
 import { useChatActionOps } from "./use-chat-action-ops";
+import { useChatTurnActions } from "./use-chat-turn-actions";
 import type { UseChatTurn, UseChatTurnArgs } from "./use-chat-turn-types";
 
 export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
@@ -32,47 +32,33 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const agentRef = useRef<ChatAgent | null>(null);
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
-  const lastInputRef = useRef("");
 
-  const { profileId, provider, modelId, today, messages } = args;
+  const { profileId, conversationId, provider, modelId, today, messages } =
+    args;
   const ctx = useMemo(
     () =>
       makeChatTurnCtx(
-        { persistence, profileId, provider, modelId, today, ops },
+        {
+          persistence,
+          profileId,
+          conversationId,
+          provider,
+          modelId,
+          today,
+          ops,
+        },
         { agentRef, toolsRef, messagesRef },
         { setState, setStreamingText, setPendingAction, setError }
       ),
-    [persistence, profileId, provider, modelId, today, ops]
+    [persistence, profileId, conversationId, provider, modelId, today, ops]
   );
 
-  const send = useCallback(
-    (text: string) => {
-      if (!ctx || state === "streaming" || !text.trim()) return;
-      lastInputRef.current = text;
-      // Count-only: no message content reaches analytics (spec usage rule).
-      analytics.event("chat-message-sent");
-      void sendTurn(ctx, messages, text);
-    },
-    [ctx, state, messages, analytics]
-  );
-  const approve = useCallback(() => {
-    if (!ctx || !pendingAction) return;
-    analytics.event("chat-tool-confirmed", { tool: pendingAction.toolName });
-    void approveAction(ctx, pendingAction);
-  }, [ctx, pendingAction, analytics]);
-  const deny = useCallback(() => {
-    if (ctx && pendingAction) void denyAction(ctx, pendingAction);
-  }, [ctx, pendingAction]);
-  const retry = useCallback(() => send(lastInputRef.current), [send]);
-
-  return {
+  const actions = useChatTurnActions(
+    ctx,
     state,
-    streamingText,
+    messages,
     pendingAction,
-    error,
-    send,
-    approve,
-    deny,
-    retry,
-  };
+    analytics
+  );
+  return { state, streamingText, pendingAction, error, ...actions };
 };

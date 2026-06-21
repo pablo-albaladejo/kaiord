@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import { createInMemoryAiModelBindingRepository } from "../../test-utils/in-memory-ai-model-binding-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "../../test-utils/in-memory-auto-match-dismissal-repository";
+import { createInMemoryChatConversationRepository } from "../../test-utils/in-memory-chat-conversation-repository";
 import { createInMemoryChatMessageRepository } from "../../test-utils/in-memory-chat-message-repository";
 import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
@@ -83,6 +84,8 @@ const makeDeps = (
     deleteByProfile: async () => undefined,
   },
   chatMessages: overrides.chatMessages ?? createInMemoryChatMessageRepository(),
+  chatConversations:
+    overrides.chatConversations ?? createInMemoryChatConversationRepository(),
   aiModelBindings:
     overrides.aiModelBindings ?? createInMemoryAiModelBindingRepository(),
   connections: overrides.connections ?? createInMemoryConnectionRepository(),

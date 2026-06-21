@@ -1,7 +1,3 @@
-import { useState } from "react";
-
-import { clearConversation } from "../../../application/chat/clear-conversation";
-import { usePersistence } from "../../../contexts/persistence-context";
 import { useChatTurn } from "../../../hooks/use-chat-turn";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
@@ -12,6 +8,7 @@ import { ChatTurnExtras } from "./ChatTurnExtras";
 
 export type ChatConversationProps = {
   profileId: string | null;
+  conversationId: string | null;
   provider: LlmProviderConfig | null;
   modelId: string | null;
   generationProvider: LlmProviderConfig | null;
@@ -19,20 +16,22 @@ export type ChatConversationProps = {
   messages: ChatMessageRecord[];
 };
 
-/** Interactive transcript: streamed turns, action confirmation, errors, and
- * a two-step clear. The composer is disabled while a turn is in flight or
- * awaiting confirmation. */
+/** Interactive transcript for the active conversation: streamed turns, action
+ * confirmation, and errors. The composer is disabled while a turn is in flight
+ * or awaiting confirmation. Conversation lifecycle (new/rename/delete) lives in
+ * the conversation list. */
 export function ChatConversation({
   profileId,
+  conversationId,
   provider,
   modelId,
   generationProvider,
   generationModelId,
   messages,
 }: ChatConversationProps) {
-  const persistence = usePersistence();
   const turn = useChatTurn({
     profileId,
+    conversationId,
     provider,
     modelId,
     generationProvider,
@@ -40,30 +39,10 @@ export function ChatConversation({
     today: todayIsoDate(),
     messages,
   });
-  const [confirmingClear, setConfirmingClear] = useState(false);
   const busy = turn.state === "streaming";
-
-  const clear = () => {
-    if (!profileId) return;
-    if (!confirmingClear) {
-      setConfirmingClear(true);
-      return;
-    }
-    setConfirmingClear(false);
-    void clearConversation(persistence, profileId);
-  };
 
   return (
     <div className="flex flex-col gap-3">
-      {messages.length > 0 && (
-        <button
-          type="button"
-          onClick={clear}
-          className="self-end text-[12px] text-slate-400 hover:text-slate-200"
-        >
-          {confirmingClear ? "Confirm clear" : "Clear conversation"}
-        </button>
-      )}
       <ChatMessageList messages={messages} />
       <ChatTurnExtras
         busy={busy}

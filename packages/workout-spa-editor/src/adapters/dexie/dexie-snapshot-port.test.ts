@@ -17,9 +17,10 @@ import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 
 const PASSPHRASE = "kaiord-spa-v1";
-// Current head version KaiordDatabase opens at (v24 added the device-local
-// `connections` store, which is deliberately excluded from the snapshot).
-const SCHEMA_HEAD = 24;
+// Current head version KaiordDatabase opens at; v24 added the device-local
+// `connections` store (deliberately excluded from the snapshot), v25 added
+// chatConversations + the conversationId FK (this change).
+const SCHEMA_HEAD = 25;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -77,6 +78,7 @@ describe("createDexieSnapshotPort", () => {
     await db.table("chatMessages").add({
       id: "c-1",
       profileId: "p-1",
+      conversationId: "conv-1",
       role: "user",
       content: "hi",
       createdAt: "2026-06-13T10:00:00.000Z",
@@ -89,6 +91,27 @@ describe("createDexieSnapshotPort", () => {
 
     // Assert
     expect(snapshot.tables.chatMessages).toHaveLength(1);
+  });
+
+  it("should include the chatConversations store in the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("chatConversations").add({
+      id: "conv-1",
+      profileId: "p-1",
+      title: "Cycling",
+      createdAt: "2026-06-13T10:00:00.000Z",
+      updatedAt: "2026-06-13T10:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables.chatConversations).toHaveLength(1);
   });
 
   it("should round-trip a cleared database back to its original rows", async () => {
