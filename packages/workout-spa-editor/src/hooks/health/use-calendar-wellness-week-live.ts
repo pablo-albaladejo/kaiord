@@ -14,6 +14,7 @@
  */
 import { useLiveQuery } from "dexie-react-hooks";
 
+import { usePersistence } from "../../contexts/persistence-context";
 import type { DayWellness } from "../../types/health/day-wellness";
 import type {
   HealthDailyRecord,
@@ -21,18 +22,20 @@ import type {
   HealthSleepRecord,
   HealthWeightRecord,
 } from "../../types/health/health-records";
-import { reduceWellnessByDay } from "./calendar-wellness-reduce";
+import { buildNetByWeek } from "./calendar-net-week";
+import { mergeNetByDay, reduceWellnessByDay } from "./calendar-wellness-reduce";
 import { queryHealthRangeAsync } from "./health-live-query";
 
 export const useCalendarWellnessWeekLive = (
   profileId: string | null,
   weekStart: string,
   weekEnd: string
-): Record<string, DayWellness> | undefined =>
-  useLiveQuery<Record<string, DayWellness>>(async () => {
+): Record<string, DayWellness> | undefined => {
+  const persistence = usePersistence();
+  return useLiveQuery<Record<string, DayWellness>>(async () => {
     if (!profileId || !weekStart || !weekEnd) return {};
     const range = { start: weekStart, end: weekEnd };
-    const [sleep, hrv, weight, daily] = await Promise.all([
+    const [sleep, hrv, weight, daily, netByDay] = await Promise.all([
       queryHealthRangeAsync<HealthSleepRecord>("healthSleep", profileId, range),
       queryHealthRangeAsync<HealthHrvRecord>("healthHrv", profileId, range),
       queryHealthRangeAsync<HealthWeightRecord>(
@@ -41,6 +44,11 @@ export const useCalendarWellnessWeekLive = (
         range
       ),
       queryHealthRangeAsync<HealthDailyRecord>("healthDaily", profileId, range),
+      buildNetByWeek(persistence, profileId, weekStart, weekEnd),
     ]);
-    return reduceWellnessByDay({ sleep, hrv, weight, daily });
-  }, [profileId, weekStart, weekEnd]);
+    return mergeNetByDay(
+      reduceWellnessByDay({ sleep, hrv, weight, daily }),
+      netByDay
+    );
+  }, [persistence, profileId, weekStart, weekEnd]);
+};

@@ -57,6 +57,9 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
               chatConversations: persistence.chatConversations,
               aiModelBindings: persistence.aiModelBindings,
               connections: persistence.connections,
+              intakeEntries: persistence.intakeEntries,
+              intakePresets: persistence.intakePresets,
+              energyTargets: persistence.energyTargets,
             },
             id
           );

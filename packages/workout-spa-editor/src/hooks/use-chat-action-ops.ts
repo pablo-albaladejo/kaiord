@@ -15,6 +15,7 @@ import type {
   ChatActionOps,
   CreateWorkoutInput,
   LogHealthMetricInput,
+  LogIntakeInput,
 } from "../application/chat/tools/chat-tool-deps";
 import { usePersistence } from "../contexts/persistence-context";
 import type { LlmProviderConfig } from "../store/ai-store-types";
@@ -23,6 +24,7 @@ import {
   doLogHealthMetric,
   doSyncCoaching,
 } from "./chat/chat-action-ops-impl";
+import { doLogIntake } from "./chat/do-log-intake";
 
 const requireProfile = (profileId: string | null): string => {
   if (!profileId) throw new Error("No active profile");
@@ -70,9 +72,14 @@ export const useChatActionOps = (
       doLogHealthMetric(persistence, requireProfile(profileId), input),
     [persistence, profileId]
   );
+  const logIntake = useCallback(
+    (input: LogIntakeInput) =>
+      doLogIntake(persistence, requireProfile(profileId), input),
+    [persistence, profileId]
+  );
 
   return useMemo(
-    () => ({ syncCoaching, createWorkout, logHealthMetric }),
-    [syncCoaching, createWorkout, logHealthMetric]
+    () => ({ syncCoaching, createWorkout, logHealthMetric, logIntake }),
+    [syncCoaching, createWorkout, logHealthMetric, logIntake]
   );
 };
