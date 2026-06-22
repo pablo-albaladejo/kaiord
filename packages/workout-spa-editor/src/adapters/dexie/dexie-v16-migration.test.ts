@@ -24,14 +24,18 @@ const SCHEMA_V16 = 16;
 const STORES_V15 = {
   userPreferences: "profileId",
 } as const;
+// Mirrors the real v16 health-store contract (CORE_V16 in dexie-schemas-early):
+// `[profileId+date], date` indexes are present from v16; the provenance suffix
+// is a v17 addition and is intentionally out of scope here.
+const HEALTH_STORE_SCHEMA_V16 = "id, profileId, [profileId+date], date";
 const STORES_V16 = {
   ...STORES_V15,
-  healthSleep: "id, profileId",
-  healthWeight: "id, profileId",
-  healthHrv: "id, profileId",
-  healthDaily: "id, profileId",
-  healthBodyComposition: "id, profileId",
-  healthStress: "id, profileId",
+  healthSleep: HEALTH_STORE_SCHEMA_V16,
+  healthWeight: HEALTH_STORE_SCHEMA_V16,
+  healthHrv: HEALTH_STORE_SCHEMA_V16,
+  healthDaily: HEALTH_STORE_SCHEMA_V16,
+  healthBodyComposition: HEALTH_STORE_SCHEMA_V16,
+  healthStress: HEALTH_STORE_SCHEMA_V16,
 } as const;
 
 const HEALTH_STORES = [
@@ -138,9 +142,10 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
     await expect(failing.open()).rejects.toThrow();
     failing.close();
 
-    // Assert — the aborted transaction leaves the DB at v15: it still opens
-    // with only the v15 schema (a committed v16 would reject as VersionError),
-    // the legacy row is intact, and no health store was created.
+    // Assert
+    // The aborted transaction leaves the DB at v15: it still opens with only the
+    // v15 schema (a committed v16 would reject as VersionError), the legacy row
+    // is intact, and no health store was created.
     const reopened = new Dexie(name);
     reopened.version(SCHEMA_V15).stores(STORES_V15);
     await reopened.open();
@@ -152,7 +157,9 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
     reopened.close();
 
     expect(verno).toBe(SCHEMA_V15);
-    expect(tables).not.toContain("healthSleep");
+    for (const store of HEALTH_STORES) {
+      expect(tables).not.toContain(store);
+    }
     expect(row?.calendarView).toBe("grid");
   });
 });
