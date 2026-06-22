@@ -1,4 +1,4 @@
-> Synced: 2026-04-28 (train2go-profile-link)
+> Synced: 2026-06-22 (energy-balance-tracking)
 
 # SPA Calendar
 
@@ -285,3 +285,21 @@ Both budgets are enforced by a Playwright spec at `packages/workout-spa-editor/e
 - **GIVEN** the `useMatchedSessions` hook is built under `import.meta.env.PROD === true` (production bundle)
 - **WHEN** the hook executes
 - **THEN** no `performance.mark` or `performance.measure` calls are emitted; the production bundle has zero observable perf-instrumentation overhead; the marks ship only under DEV / test modes
+
+### Requirement: Net-balance badge on the calendar
+
+The calendar WellnessBand SHALL display a per-day net energy-balance badge when the
+day's balance is resolvable, indicating deficit or surplus, and SHALL omit the badge
+when expenditure cannot be resolved.
+
+#### Scenario: Badge shown for a resolvable day
+
+- **GIVEN** a calendar day with resolvable expenditure and logged intake
+- **WHEN** the WellnessBand renders
+- **THEN** a net-balance badge shows the day's deficit or surplus
+
+#### Scenario: Badge omitted when balance is unresolvable
+
+- **GIVEN** a calendar day with no resolvable expenditure
+- **WHEN** the WellnessBand renders
+- **THEN** no net-balance badge is shown for that day

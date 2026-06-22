@@ -1,4 +1,4 @@
-> Synced: 2026-06-14 (add-spa-ai-chatbot)
+> Synced: 2026-06-22 (energy-balance-tracking)
 
 # SPA Routing
 
@@ -368,3 +368,20 @@ If the FIT parser raises an `UnsupportedKrdTypeError` from a workout-only writer
 - **GIVEN** the user attempts a path that would call a workout-only writer (TCX/ZWO/GCN) with a KRD whose `type` is a health variant (test-only path, not user-reachable in the normal UI flow)
 - **WHEN** the writer throws `UnsupportedKrdTypeError`
 - **THEN** the caller catches the error via `instanceof UnsupportedKrdTypeError`, surfaces a toast naming the metric and the unsupported adapter, and routes the user to the Health Hub import surface
+
+### Requirement: Nutrition destination
+
+The SPA SHALL provide a top-level "Nutrition" navigation destination that hosts the
+energy-goal setup, intake logger, and energy-balance trends as the primary home for
+the feature. The destination SHALL be reachable from the main navigation.
+
+#### Scenario: Navigating to Nutrition
+
+- **WHEN** the user selects "Nutrition" from the main navigation
+- **THEN** the Nutrition destination renders with goal, intake, and trends entry points
+
+#### Scenario: Deep link from the Today card
+
+- **GIVEN** the energy-balance card on the Today view
+- **WHEN** the user activates the card
+- **THEN** the app navigates to the Nutrition destination
