@@ -40,6 +40,10 @@ export function useProfileEdit(params: UseProfileEditParams) {
     });
   };
 
+  // Persist in place: editing fields (name in the header, physiology in the
+  // Personal Data tab) auto-save as the user types/selects WITHOUT exiting edit
+  // mode. The edit view is left only via "Back to List" (handleCancel); by then
+  // every change is already saved, so no explicit "Save & close" is needed.
   const handleSave = (overrideData?: ProfileFormData) => {
     const data = overrideData ?? formData;
     if (!editingProfile || !data.name.trim()) return;
@@ -54,8 +58,6 @@ export function useProfileEdit(params: UseProfileEditParams) {
           restingHeartRate: data.restingHeartRate,
           activityLevel: data.activityLevel,
         });
-        setEditingProfile(null);
-        setFormData({ name: "" });
       } catch {
         toast.error(TOAST_ERROR);
       }
