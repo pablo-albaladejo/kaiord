@@ -1,13 +1,11 @@
-> Synced: 2026-06-22 (energy-balance-tracking)
+> Synced: 2026-06-22 (energy-expenditure-activity-factor)
 
 # energy-expenditure Specification
 
 ## Purpose
 
 Defines per-day energy expenditure: basal metabolic rate (Mifflin-St Jeor, or Katch-McArdle when body-fat is known) plus activity, resolved as measured from ingested wellness or predicted from BMR plus a tiered expected-workout-kcal estimate. Anthropometric profile inputs (height, age, sex) gate the basal-derived path.
-
 ## Requirements
-
 ### Requirement: Anthropometric profile inputs
 
 The profile SHALL support `height` (cm), `birthDate` (from which age is derived),
@@ -53,8 +51,14 @@ The result SHALL record which formula was used.
 
 The system SHALL resolve a day's total energy expenditure as measured
 (`restingCalories + activeCalories`) when a connection covers that day, and as
-predicted (`BMR + expectedActivityKcal`) otherwise. Each resolved value SHALL be
-labelled `measured`, `predicted`, or `mixed`.
+predicted (`BMR × activityFactor + expectedActivityKcal`) otherwise, where
+`activityFactor` is the profile's activity-level NEAT multiplier
+(`sedentary` 1.2, `light` 1.3, `moderate` 1.4, `active` 1.5, `very_active` 1.6;
+defaulting to 1.2 when the activity level is unset). These NEAT factors cover
+non-exercise daily movement only; scheduled-workout energy is added separately
+via `expectedActivityKcal` and SHALL NOT be double-counted. Each resolved value
+SHALL be labelled `measured`, `predicted`, or `mixed`. The measured path SHALL
+ignore the activity factor.
 
 #### Scenario: Measured expenditure from ingested wellness
 
@@ -67,8 +71,20 @@ labelled `measured`, `predicted`, or `mixed`.
 
 - **GIVEN** a future day with no ingested wellness record
 - **WHEN** daily expenditure is resolved
-- **THEN** expenditure equals `BMR + expectedActivityKcal`
+- **THEN** expenditure equals `BMR × activityFactor + expectedActivityKcal`
 - **AND** the value is labelled `predicted`
+
+#### Scenario: Moderate-activity rest day scales the basal by the NEAT factor
+
+- **GIVEN** a profile with `activityLevel` = `moderate` and a computed `BMR` of 1750 kcal
+- **WHEN** daily expenditure is resolved for a day with no scheduled workout (`expectedActivityKcal` = 0)
+- **THEN** the predicted expenditure equals `1750 × 1.4` = 2450 kcal, not the raw 1750 kcal
+
+#### Scenario: Scheduled workout kcal are not double-counted
+
+- **GIVEN** a profile with `activityLevel` = `moderate` and a scheduled workout estimated at 500 `expectedActivityKcal`
+- **WHEN** daily expenditure is resolved
+- **THEN** the predicted expenditure equals `BMR × 1.4 + 500` — the workout kcal are added once on top of the NEAT-scaled basal and are NOT folded into the activity factor
 
 ### Requirement: Expected workout energy estimation
 
@@ -88,3 +104,4 @@ is resolved from a MET compendium via a `sport`/`subSport`→activity-code mappi
 - **GIVEN** a planned strength session with only sport, intensity, and duration
 - **WHEN** expected activity kcal is estimated
 - **THEN** the MET tier is used with the sport's mapped compendium MET value and the bodyweight
+

@@ -1,3 +1,5 @@
+> Completed: 2026-06-22
+
 ## Why
 
 `resolveDayExpenditure`'s predicted path is `BMR + expectedActivityKcal`. On a
