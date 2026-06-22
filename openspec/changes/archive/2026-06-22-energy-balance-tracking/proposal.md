@@ -1,3 +1,5 @@
+> Completed: 2026-06-22
+
 ## Why
 
 Athletes can already see ingested wellness data (steps, sleep, HRV, weight, and
@@ -41,6 +43,7 @@ No public API (`@kaiord/*` exports) breaking changes — all additive.
 ## Capabilities
 
 ### New Capabilities
+
 - `energy-expenditure`: per-day basal + activity expenditure — BMR
   (Katch-McArdle/Mifflin-St Jeor), measured-vs-predicted resolution, and the tiered
   expected-workout-kcal estimator with the MET compendium + sport mapping. Requires
@@ -54,6 +57,7 @@ No public API (`@kaiord/*` exports) breaking changes — all additive.
   tool, and the Today/Nutrition surfaces.
 
 ### Modified Capabilities
+
 - `spa-ai-chat`: the assistant gains an energy-balance query tool (and optional
   intake-logging action tool) in the existing tool registry.
 - `spa-routing`: a new top-level "Nutrition" destination is added to the SPA's
