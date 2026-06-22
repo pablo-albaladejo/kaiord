@@ -125,3 +125,86 @@ describe("resolveDayExpenditure (input guards)", () => {
     expect(act).toThrow(RangeError);
   });
 });
+
+describe("resolveDayExpenditure (NEAT factor)", () => {
+  const NEAT_FACTOR = 1.4;
+
+  it("should scale the predicted basal by neatFactor without double-counting activity", () => {
+    // Arrange
+    const input: DayExpenditureInput = {
+      bmrKcal: BMR_KCAL,
+      expectedActivityKcal: EXPECTED_ACTIVITY_KCAL,
+      neatFactor: NEAT_FACTOR,
+    };
+
+    // Act
+    const result = resolveDayExpenditure(input);
+
+    // Assert
+    expect(result.basalKcal).toBe(BMR_KCAL * NEAT_FACTOR);
+    expect(result.activityKcal).toBe(EXPECTED_ACTIVITY_KCAL);
+    expect(result.expenditureKcal).toBe(
+      BMR_KCAL * NEAT_FACTOR + EXPECTED_ACTIVITY_KCAL
+    );
+  });
+
+  it("should raise a rest-day basal above raw BMR when neatFactor is applied", () => {
+    // Arrange
+    const input: DayExpenditureInput = {
+      bmrKcal: BMR_KCAL,
+      expectedActivityKcal: 0,
+      neatFactor: NEAT_FACTOR,
+    };
+
+    // Act
+    const result = resolveDayExpenditure(input);
+
+    // Assert
+    expect(result.expenditureKcal).toBe(BMR_KCAL * NEAT_FACTOR);
+    expect(result.expenditureKcal).toBeGreaterThan(BMR_KCAL);
+  });
+
+  it("should keep the basal at raw BMR when neatFactor is omitted", () => {
+    // Arrange
+    const input: DayExpenditureInput = {
+      bmrKcal: BMR_KCAL,
+      expectedActivityKcal: 0,
+    };
+
+    // Act
+    const result = resolveDayExpenditure(input);
+
+    // Assert
+    expect(result.basalKcal).toBe(BMR_KCAL);
+  });
+
+  it("should throw RangeError for a neatFactor below one", () => {
+    // Arrange
+    const input: DayExpenditureInput = {
+      bmrKcal: BMR_KCAL,
+      expectedActivityKcal: EXPECTED_ACTIVITY_KCAL,
+      neatFactor: 0.9,
+    };
+
+    // Act
+    const act = () => resolveDayExpenditure(input);
+
+    // Assert
+    expect(act).toThrow(RangeError);
+  });
+
+  it("should throw RangeError for a non-finite neatFactor", () => {
+    // Arrange
+    const input: DayExpenditureInput = {
+      bmrKcal: BMR_KCAL,
+      expectedActivityKcal: EXPECTED_ACTIVITY_KCAL,
+      neatFactor: Number.POSITIVE_INFINITY,
+    };
+
+    // Act
+    const act = () => resolveDayExpenditure(input);
+
+    // Assert
+    expect(act).toThrow(RangeError);
+  });
+});

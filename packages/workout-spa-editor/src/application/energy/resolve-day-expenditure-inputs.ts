@@ -17,6 +17,7 @@ import {
   toMeasuredWellness,
 } from "./day-energy-balance-inputs";
 import type { DayEnergySources } from "./load-day-energy-sources";
+import { neatFactorForActivityLevel } from "./neat-factor";
 
 /** Sum of logged intake kcal; `null` when nothing is logged (untracked). */
 export const sumIntakeKcal = (entries: IntakeEntryRecord[]): number | null =>
@@ -58,5 +59,9 @@ export const toExpenditureInput = (
     sex: profile.sex!,
     bodyFatFraction: toBodyFatFraction(sources.bodyComposition),
   });
-  return { bmrKcal: bmr.kcal, expectedActivityKcal };
+  return {
+    bmrKcal: bmr.kcal,
+    expectedActivityKcal,
+    neatFactor: neatFactorForActivityLevel(profile.activityLevel),
+  };
 };
