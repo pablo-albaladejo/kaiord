@@ -79,7 +79,7 @@ describe("useProfileEdit", () => {
   });
 
   describe("handleSave", () => {
-    it("should persist updates and clear editing state on success", async () => {
+    it("should persist updates in place without exiting edit mode", async () => {
       // Arrange
       errorSpy.mockReset();
       const persistence = createInMemoryPersistence();
@@ -111,8 +111,8 @@ describe("useProfileEdit", () => {
         expect(fresh?.name).toBe("Renamed");
         expect(fresh?.bodyWeight).toBe(75);
       });
-      expect(setEditingProfile).toHaveBeenCalledWith(null);
-      expect(setFormData).toHaveBeenCalledWith({ name: "" });
+      expect(setEditingProfile).not.toHaveBeenCalled();
+      expect(setFormData).not.toHaveBeenCalled();
       expect(errorSpy).not.toHaveBeenCalled();
     });
 
