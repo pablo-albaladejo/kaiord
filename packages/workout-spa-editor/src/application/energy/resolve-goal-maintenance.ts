@@ -3,11 +3,13 @@
  * derive its day target, independently of the measured-vs-predicted expenditure
  * path (a measured day still needs a modeled maintenance for the goal math).
  *
- * Maintenance is the BMR the goal delta is measured against; the day's expected
- * activity is added separately at the periodized-target layer so it raises the
- * day target without inflating the goal delta. Returns `null` when the profile
- * lacks the physiological fields BMR estimation requires, so the use-case leaves
- * `target_kcal` null rather than inventing a number.
+ * Maintenance is BMR scaled by the profile's non-exercise activity (NEAT)
+ * factor — the rest-day expenditure the goal delta is measured against; the
+ * day's expected workout activity is added separately at the periodized-target
+ * layer so it raises the day target without inflating the goal delta. Returns
+ * `null` when the profile lacks the physiological fields BMR estimation
+ * requires, so the use-case leaves `target_kcal` null rather than inventing a
+ * number.
  */
 
 import { computeBmr } from "@kaiord/core";
@@ -16,6 +18,7 @@ import type { HealthWeightRecord } from "../../types/health/health-records";
 import type { Profile } from "../../types/profile";
 import { deriveAge, toBodyFatFraction } from "./day-energy-balance-inputs";
 import type { DayEnergySources } from "./load-day-energy-sources";
+import { neatFactorForActivityLevel } from "./neat-factor";
 
 export type GoalMaintenance = {
   maintenanceKcal: number;
@@ -59,5 +62,7 @@ export const resolveGoalMaintenance = (
     sex: profile.sex,
     bodyFatFraction: toBodyFatFraction(sources.bodyComposition),
   });
-  return { maintenanceKcal: bmr.kcal, currentWeightKg };
+  const maintenanceKcal =
+    bmr.kcal * neatFactorForActivityLevel(profile.activityLevel);
+  return { maintenanceKcal, currentWeightKg };
 };
