@@ -1,5 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { Profile } from "../../../types/profile";
 import { ProfileManagerDialog } from "../../organisms/ProfileManager/components/ProfileManagerDialog";
@@ -23,8 +23,20 @@ export function ProfileEditDialog({
   const manager = useProfileManager();
   const { handleEdit } = manager;
 
+  // Enter edit mode once per open. `handleEdit` is recreated every render and
+  // writes a fresh `formData` object, so re-running it on each render would
+  // loop setState -> render -> setState forever (React "max update depth").
+  // Seed only on the closed->open transition; the dialog edits the active
+  // profile, which does not change while the dialog is open.
+  const seeded = useRef(false);
   useEffect(() => {
-    if (open) handleEdit(profile);
+    if (!open) {
+      seeded.current = false;
+      return;
+    }
+    if (seeded.current) return;
+    seeded.current = true;
+    handleEdit(profile);
   }, [open, profile, handleEdit]);
 
   return (
