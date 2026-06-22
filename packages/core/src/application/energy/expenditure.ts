@@ -23,6 +23,11 @@ export type DayExpenditureInput = {
   bmrKcal: number;
   /** Estimated activity kcal for the predicted fallback (Phase 4 input). */
   expectedActivityKcal: number;
+  /**
+   * NEAT multiplier applied to BMR for the predicted basal; defaults to 1.
+   * The measured path ignores it.
+   */
+  basalActivityFactor?: number;
 };
 
 export type DayExpenditureResult = {
@@ -46,6 +51,9 @@ const assertMeasured = (measured: MeasuredWellness): void => {
   }
 };
 
+const isPositiveFinite = (value: number): boolean =>
+  Number.isFinite(value) && value > 0;
+
 const assertPredicted = (input: DayExpenditureInput): void => {
   if (
     !isNonNegativeFinite(input.bmrKcal) ||
@@ -53,6 +61,14 @@ const assertPredicted = (input: DayExpenditureInput): void => {
   ) {
     throw new RangeError(
       "Predicted expenditure requires non-negative finite bmrKcal and expectedActivityKcal."
+    );
+  }
+  if (
+    input.basalActivityFactor !== undefined &&
+    !isPositiveFinite(input.basalActivityFactor)
+  ) {
+    throw new RangeError(
+      "Predicted expenditure requires a positive finite basalActivityFactor."
     );
   }
 };
@@ -69,10 +85,12 @@ const resolveMeasured = (measured: MeasuredWellness): DayExpenditureResult => {
 
 const resolvePredicted = (input: DayExpenditureInput): DayExpenditureResult => {
   assertPredicted(input);
+  const factor = input.basalActivityFactor ?? 1;
+  const basalKcal = input.bmrKcal * factor;
   return {
-    basalKcal: input.bmrKcal,
+    basalKcal,
     activityKcal: input.expectedActivityKcal,
-    expenditureKcal: input.bmrKcal + input.expectedActivityKcal,
+    expenditureKcal: basalKcal + input.expectedActivityKcal,
     source: "predicted",
   };
 };

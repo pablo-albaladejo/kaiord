@@ -94,6 +94,35 @@ describe("resolveDayExpenditure (predicted)", () => {
     expect(result.source).toBe("predicted");
     expect(result.expenditureKcal).toBe(BMR_KCAL);
   });
+
+  it("should scale the basal by the activity factor when provided", () => {
+    // Arrange
+    const factor = 1.4;
+    const input: DayExpenditureInput = {
+      ...PREDICTED_INPUT,
+      basalActivityFactor: factor,
+    };
+
+    // Act
+    const result = resolveDayExpenditure(input);
+
+    // Assert
+    expect(result.basalKcal).toBe(BMR_KCAL * factor);
+    expect(result.expenditureKcal).toBe(
+      BMR_KCAL * factor + EXPECTED_ACTIVITY_KCAL
+    );
+  });
+
+  it("should keep the raw basal when no activity factor is provided", () => {
+    // Arrange
+    const input = PREDICTED_INPUT;
+
+    // Act
+    const result = resolveDayExpenditure(input);
+
+    // Assert
+    expect(result.basalKcal).toBe(BMR_KCAL);
+  });
 });
 
 describe("resolveDayExpenditure (input guards)", () => {
@@ -123,5 +152,37 @@ describe("resolveDayExpenditure (input guards)", () => {
 
     // Assert
     expect(act).toThrow(RangeError);
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "should throw RangeError for an invalid activity factor %s",
+    (factor) => {
+      // Arrange
+      const input: DayExpenditureInput = {
+        ...PREDICTED_INPUT,
+        basalActivityFactor: factor,
+      };
+
+      // Act
+      const act = () => resolveDayExpenditure(input);
+
+      // Assert
+      expect(act).toThrow(RangeError);
+    }
+  );
+
+  it("should ignore the activity factor on the measured path", () => {
+    // Arrange
+    const input: DayExpenditureInput = {
+      ...MEASURED_INPUT,
+      basalActivityFactor: 1.6,
+    };
+
+    // Act
+    const result = resolveDayExpenditure(input);
+
+    // Assert
+    expect(result.source).toBe("measured");
+    expect(result.expenditureKcal).toBe(RESTING_KCAL + ACTIVE_KCAL);
   });
 });
