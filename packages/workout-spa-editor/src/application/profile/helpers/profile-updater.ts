@@ -5,10 +5,11 @@
  */
 
 import type { Profile } from "../../../types/profile";
+import type { UpdateProfileInput } from "../update-profile";
 
 export function updateProfileData(
   profile: Profile,
-  updates: Partial<Pick<Profile, "name" | "bodyWeight">>
+  updates: UpdateProfileInput
 ): Profile {
   return {
     ...profile,

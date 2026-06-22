@@ -32,7 +32,25 @@ export {
   bodyCompositionSchema,
 } from "./body-composition";
 export { type DailyWellness, dailyWellnessSchema } from "./daily";
+export {
+  type DayEnergyBalance,
+  dayEnergyBalanceSchema,
+  type ExpenditureSource,
+  expenditureSourceSchema,
+} from "./energy-balance";
+export {
+  type EnergyGoal,
+  energyGoalSchema,
+  type GoalType,
+  goalTypeSchema,
+} from "./energy-goal";
 export { type HrvSummary, hrvSummarySchema } from "./hrv";
+export {
+  type MacroNutrients,
+  macroNutrientsSchema,
+  type MealSlot,
+  mealSlotSchema,
+} from "./nutrition";
 export {
   type SleepRecord,
   sleepRecordSchema,

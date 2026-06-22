@@ -8,10 +8,14 @@ export type {
   BodyComposition,
   CadenceValue,
   DailyWellness,
+  DayEnergyBalance,
   Duration,
   DurationType,
+  EnergyGoal,
   Equipment,
+  ExpenditureSource,
   FileType,
+  GoalType,
   HealthExtensionPayload,
   HealthFileType,
   HeartRateValue,
@@ -26,6 +30,8 @@ export type {
   KRDRecord,
   KRDSession,
   LengthUnit,
+  MacroNutrients,
+  MealSlot,
   PaceValue,
   PowerValue,
   PowerZone,
@@ -70,15 +76,19 @@ export {
   DAILY_KCAL_TOLERANCE,
   DAILY_STEPS_TOLERANCE,
   dailyWellnessSchema,
+  dayEnergyBalanceSchema,
   DEFAULT_TOLERANCES,
   durationSchema,
   durationTypeSchema,
+  energyGoalSchema,
   equipmentSchema,
+  expenditureSourceSchema,
   extractWorkout,
   fileTypeSchema,
   FIT_TO_SWIM_STROKE,
   FitParsingError,
   GarminParsingError,
+  goalTypeSchema,
   healthExtensionPayloadSchema,
   healthFileTypes,
   HRV_TOLERANCE_MS,
@@ -97,6 +107,8 @@ export {
   krdSessionSchema,
   KrdValidationError,
   lengthUnitSchema,
+  macroNutrientsSchema,
+  mealSlotSchema,
   percentFtpToZone,
   POWER_ZONE_PERCENT_FTP,
   POWER_ZONES,
@@ -157,6 +169,59 @@ export type { Analytics, AnalyticsEvent } from "./ports/analytics";
 // Application: Conversion Functions
 export { fromBinary, fromText } from "./application";
 export { toBinary, toText } from "./application";
+
+// Application: Energy calculators (pure)
+export type {
+  AdaptiveTdeeResult,
+  ComputeAdaptiveTdeeInput,
+} from "./application/energy/adaptive-tdee";
+export {
+  computeAdaptiveTdee,
+  KCAL_PER_KG_FAT,
+  MIN_ADAPTIVE_DAYS,
+} from "./application/energy/adaptive-tdee";
+export type { EnergyBalanceRollup } from "./application/energy/aggregate-energy-balance";
+export { aggregateEnergyBalance } from "./application/energy/aggregate-energy-balance";
+export type {
+  BmrFormula,
+  BmrInput,
+  BmrResult,
+  Sex,
+} from "./application/energy/bmr";
+export { computeBmr } from "./application/energy/bmr";
+export type {
+  AssembleDayEnergyBalanceInput,
+  ResolvedExpenditure,
+} from "./application/energy/day-balance";
+export { assembleDayEnergyBalance } from "./application/energy/day-balance";
+export type { EmaOptions, EmaPoint, EmaResult } from "./application/energy/ema";
+export { exponentialMovingAverage } from "./application/energy/ema";
+export type { ExpectedActivityKcalInput } from "./application/energy/expected-activity-kcal";
+export { estimateExpectedActivityKcal } from "./application/energy/expected-activity-kcal";
+export type {
+  DayExpenditureInput,
+  DayExpenditureResult,
+  MeasuredWellness,
+} from "./application/energy/expenditure";
+export { resolveDayExpenditure } from "./application/energy/expenditure";
+export type {
+  ComputeDailyDeltaInput,
+  ComputeDailyDeltaResult,
+} from "./application/energy/goal-delta";
+export {
+  computeDailyDelta,
+  FLOOR_KCAL,
+  MUSCLE_SURPLUS_CAP,
+} from "./application/energy/goal-delta";
+export type { ComputeMacroTargetsInput } from "./application/energy/macro-targets";
+export { computeMacroTargets } from "./application/energy/macro-targets";
+export {
+  DEFAULT_MET,
+  MET_TABLE,
+  metForSport,
+} from "./application/energy/met-table";
+export type { ComputePeriodizedTargetInput } from "./application/energy/periodized-target";
+export { computePeriodizedTarget } from "./application/energy/periodized-target";
 
 // Round-Trip Validation
 export type { ValidateRoundTrip } from "./application/round-trip/validate-round-trip";

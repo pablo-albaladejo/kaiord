@@ -6,10 +6,12 @@
  * are absent (not present-but-empty).
  */
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { PersistenceProvider } from "../../contexts/persistence-context";
 import type {
   HealthDailyRecord,
   HealthHrvRecord,
@@ -21,6 +23,13 @@ import { useCalendarWellnessWeekLive } from "./use-calendar-wellness-week-live";
 const PROFILE_ID = "p-1";
 const WEEK_START = "2026-05-18";
 const WEEK_END = "2026-05-24";
+const INTAKE_KCAL = 2000;
+
+const wrap = ({ children }: { children: ReactNode }) => (
+  <PersistenceProvider persistence={createDexiePersistence(db)}>
+    {children}
+  </PersistenceProvider>
+);
 
 const sleep = (id: string, date: string): HealthSleepRecord => ({
   id,
@@ -77,12 +86,56 @@ const daily = (id: string, date: string): HealthDailyRecord => ({
   } as unknown as HealthDailyRecord["krd"],
 });
 
+const seedProfile = () =>
+  db.table("profiles").put({
+    id: PROFILE_ID,
+    name: "Athlete",
+    bodyWeight: 70,
+    height: 178,
+    birthDate: "1990-06-21",
+    sex: "male",
+    sportZones: {},
+    linkedAccounts: [],
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  });
+
+const seedResolvableDay = (date: string) =>
+  db.table("healthDaily").put({
+    id: `wd-${date}`,
+    profileId: PROFILE_ID,
+    date,
+    krd: {
+      kind: "daily",
+      version: "2.0",
+      date,
+      steps: 9000,
+      activeCalories: 600,
+      restingCalories: 1700,
+      intensityMinutes: { moderate: 0, vigorous: 0 },
+    },
+  });
+
+const seedIntake = (date: string, kcal: number) =>
+  db.table("intakeEntries").put({
+    id: `i-${date}`,
+    profileId: PROFILE_ID,
+    date,
+    loggedAt: `${date}T12:00:00.000Z`,
+    kcal,
+    proteinG: 0,
+    carbG: 0,
+    fatG: 0,
+  });
+
 const clear = () =>
   Promise.all([
     db.table("healthSleep").clear(),
     db.table("healthHrv").clear(),
     db.table("healthWeight").clear(),
     db.table("healthDaily").clear(),
+    db.table("profiles").clear(),
+    db.table("intakeEntries").clear(),
   ]);
 
 describe("useCalendarWellnessWeekLive", () => {
@@ -91,8 +144,9 @@ describe("useCalendarWellnessWeekLive", () => {
 
   it("should return undefined while the query is loading", () => {
     // Arrange
-    const { result } = renderHook(() =>
-      useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END)
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
     );
 
     // Act
@@ -111,8 +165,9 @@ describe("useCalendarWellnessWeekLive", () => {
     await persistence.healthDaily.put(daily("d-1", "2026-05-19"));
 
     // Act
-    const { result } = renderHook(() =>
-      useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END)
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
     );
 
     // Assert
@@ -133,8 +188,9 @@ describe("useCalendarWellnessWeekLive", () => {
     await persistence.healthWeight.put(weight("w-1", "2026-05-20"));
 
     // Act
-    const { result } = renderHook(() =>
-      useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END)
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
     );
 
     // Assert
@@ -143,5 +199,42 @@ describe("useCalendarWellnessWeekLive", () => {
     });
     expect(result.current?.["2026-05-18"]).toBeUndefined();
     expect(Object.keys(result.current ?? {})).toEqual(["2026-05-20"]);
+  });
+
+  it("should attach a net badge for a resolvable day with logged intake", async () => {
+    // Arrange
+    await seedProfile();
+    await seedResolvableDay("2026-05-19");
+    await seedIntake("2026-05-19", INTAKE_KCAL);
+
+    // Act
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
+    );
+
+    // Assert
+    await waitFor(() =>
+      expect(result.current?.["2026-05-19"]?.net).toBeDefined()
+    );
+    expect(result.current?.["2026-05-19"]?.net).toBe("-300");
+  });
+
+  it("should omit the net badge for a day with untracked intake", async () => {
+    // Arrange
+    await seedProfile();
+    await seedResolvableDay("2026-05-19");
+
+    // Act
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
+    );
+
+    // Assert
+    await waitFor(() =>
+      expect(result.current?.["2026-05-19"]?.steps).toBe("9000")
+    );
+    expect(result.current?.["2026-05-19"]?.net).toBeUndefined();
   });
 });

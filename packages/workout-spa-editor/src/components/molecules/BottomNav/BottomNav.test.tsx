@@ -6,7 +6,7 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { BottomNav } from "./BottomNav";
 
-const TAB_COUNT = 4;
+const TAB_COUNT = 5;
 
 function renderAt(path: string) {
   const { hook, history } = memoryLocation({ path, record: true });
@@ -19,21 +19,50 @@ function renderAt(path: string) {
 }
 
 describe("BottomNav", () => {
-  it("should render four tabs and the create FAB", () => {
+  it("should render five tabs and the create FAB", () => {
     // Arrange
     renderAt("/daily");
 
     // Act
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    const tabButtons = ["Daily", "Calendar", "Library", "Athlete"].map((name) =>
-      screen.getByRole("button", { name })
-    );
+    const tabButtons = [
+      "Daily",
+      "Calendar",
+      "Library",
+      "Nutrition",
+      "Athlete",
+    ].map((name) => screen.getByRole("button", { name }));
     const fab = screen.getByRole("button", { name: "Create workout" });
 
     // Assert
     expect(nav).toBeInTheDocument();
     expect(tabButtons).toHaveLength(TAB_COUNT);
     expect(fab).toBeInTheDocument();
+  });
+
+  it("should mark the Nutrition tab active on the nutrition route", () => {
+    // Arrange
+    renderAt("/nutrition");
+
+    // Act
+    const nutrition = screen.getByRole("button", { name: "Nutrition" });
+    const daily = screen.getByRole("button", { name: "Daily" });
+
+    // Assert
+    expect(nutrition).toHaveAttribute("aria-current", "page");
+    expect(daily).not.toHaveAttribute("aria-current");
+  });
+
+  it("should navigate to the nutrition route when the Nutrition tab is clicked", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const { history } = renderAt("/daily");
+
+    // Act
+    await user.click(screen.getByRole("button", { name: "Nutrition" }));
+
+    // Assert
+    expect(history.at(-1)).toBe("/nutrition");
   });
 
   it("should mark the Daily tab active on the daily route", () => {
@@ -47,23 +76,23 @@ describe("BottomNav", () => {
     expect(daily).toHaveAttribute("aria-current", "page");
   });
 
-  it("should render the FAB notch spacer immediately before the Athlete tab", () => {
+  it("should render the FAB notch spacer immediately before the Nutrition tab", () => {
     // Arrange
     renderAt("/daily");
 
     // Act
-    const athleteWrapper = screen.getByRole("button", {
-      name: "Athlete",
+    const nutritionWrapper = screen.getByRole("button", {
+      name: "Nutrition",
     }).parentElement;
     const libraryWrapper = screen.getByRole("button", {
       name: "Library",
     }).parentElement;
 
     // Assert
-    // The notch spacer renders inside the wrapper at NOTCH_INDEX (Athlete,
-    // index 3) and nowhere else — pinning "between Library and Athlete".
+    // The notch spacer renders inside the wrapper at NOTCH_INDEX (Nutrition,
+    // index 3) and nowhere else — pinning "between Library and Nutrition".
     expect(
-      athleteWrapper?.querySelector('span[aria-hidden="true"]')
+      nutritionWrapper?.querySelector('span[aria-hidden="true"]')
     ).not.toBeNull();
     expect(
       libraryWrapper?.querySelector('span[aria-hidden="true"]')

@@ -12,4 +12,5 @@ export const WELLNESS_BADGE_ROUTES: Record<WellnessMetric, string> = {
   hrv: "/health/recovery",
   weight: "/health/weight",
   steps: "/health/activity",
+  net: "/nutrition",
 };

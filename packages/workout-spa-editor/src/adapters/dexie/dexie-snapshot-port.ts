@@ -8,7 +8,10 @@
  *
  * The `connections` store is deliberately EXCLUDED (device-local): it holds
  * provider account linkage + encrypted credentials that must never be written
- * to remote snapshot storage (#714, design D5).
+ * to remote snapshot storage (#714, design D5). The energy-balance stores
+ * (`intakeEntries`, `intakePresets`, `energyTargets`) are likewise EXCLUDED:
+ * nutrition intake, presets, and the deficit/surplus goal are device-local
+ * PII that must never reach remote snapshot storage (energy-balance-tracking).
  */
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
@@ -17,7 +20,13 @@ import type { KaiordDatabase } from "./dexie-database";
 
 const TOMBSTONES = "tombstones";
 // Device-local; never exported to / imported from a remote snapshot.
-const DEVICE_LOCAL = new Set([TOMBSTONES, "connections"]);
+const DEVICE_LOCAL = new Set([
+  TOMBSTONES,
+  "connections",
+  "intakeEntries",
+  "intakePresets",
+  "energyTargets",
+]);
 
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive
 // transaction overloads (TS2589). Same pattern as dexie-persistence-adapter.

@@ -5,17 +5,25 @@
  * path to `useCalendarWellnessWeekLive` (not just the unit pieces).
  */
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
 import { saveManualHealthMetric } from "../../application/health/save-manual-health-metric.use-case";
+import { PersistenceProvider } from "../../contexts/persistence-context";
 import { useCalendarWellnessWeekLive } from "./use-calendar-wellness-week-live";
 
 const PROFILE_ID = "p-1";
 const WEEK_START = "2026-05-18";
 const WEEK_END = "2026-05-24";
 const DAY = "2026-05-20";
+
+const wrap = ({ children }: { children: ReactNode }) => (
+  <PersistenceProvider persistence={createDexiePersistence(db)}>
+    {children}
+  </PersistenceProvider>
+);
 
 const clear = () =>
   Promise.all([
@@ -38,8 +46,9 @@ describe("manual save refreshes the calendar wellness badge", () => {
       { persistence, profileId: PROFILE_ID },
       { metric: "weight", day: DAY, value: 71.5 }
     );
-    const { result } = renderHook(() =>
-      useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END)
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
     );
 
     // Assert
@@ -57,8 +66,9 @@ describe("manual save refreshes the calendar wellness badge", () => {
       { persistence, profileId: PROFILE_ID },
       { metric: "daily-wellness", day: DAY, value: 8000 }
     );
-    const { result } = renderHook(() =>
-      useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END)
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
     );
 
     // Assert

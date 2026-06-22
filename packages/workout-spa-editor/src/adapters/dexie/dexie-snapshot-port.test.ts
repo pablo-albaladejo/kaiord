@@ -18,9 +18,10 @@ const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 
 const PASSPHRASE = "kaiord-spa-v1";
 // Current head version KaiordDatabase opens at; v24 added the device-local
-// `connections` store (deliberately excluded from the snapshot), v25 added
-// chatConversations + the conversationId FK (this change).
-const SCHEMA_HEAD = 25;
+// `connections` store (excluded from the snapshot), v25 added chatConversations
+// + the conversationId FK, and v26 added the device-local energy-balance stores
+// (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded.
+const SCHEMA_HEAD = 26;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -69,6 +70,51 @@ describe("createDexieSnapshotPort", () => {
 
     // Assert
     expect(snapshot.tables).not.toHaveProperty("connections");
+  });
+
+  it("should exclude the device-local energy-balance stores from the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("intakeEntries").add({
+      id: "i-1",
+      profileId: "p-1",
+      date: "2026-06-21",
+      loggedAt: "2026-06-21T08:00:00.000Z",
+      kcal: 600,
+      proteinG: 40,
+      carbG: 60,
+      fatG: 20,
+    });
+    await db.table("intakePresets").add({
+      id: "pre-1",
+      profileId: "p-1",
+      label: "breakfast",
+      kcal: 400,
+      proteinG: 20,
+      carbG: 50,
+      fatG: 10,
+      createdAt: "2026-06-21T08:00:00.000Z",
+    });
+    await db.table("energyTargets").add({
+      profileId: "p-1",
+      goalType: "fat_loss",
+      startWeightKg: 80,
+      targetWeightKg: 75,
+      targetDate: "2026-09-01",
+      createdAt: "2026-06-21T08:00:00.000Z",
+      updatedAt: "2026-06-21T08:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables).not.toHaveProperty("intakeEntries");
+    expect(snapshot.tables).not.toHaveProperty("intakePresets");
+    expect(snapshot.tables).not.toHaveProperty("energyTargets");
   });
 
   it("should include the chatMessages store in the export", async () => {

@@ -29,7 +29,15 @@ export function useProfileEdit(params: UseProfileEditParams) {
 
   const handleEdit = (profile: Profile) => {
     setEditingProfile(profile);
-    setFormData({ name: profile.name, bodyWeight: profile.bodyWeight });
+    setFormData({
+      name: profile.name,
+      bodyWeight: profile.bodyWeight,
+      height: profile.height,
+      birthDate: profile.birthDate,
+      sex: profile.sex,
+      restingHeartRate: profile.restingHeartRate,
+      activityLevel: profile.activityLevel,
+    });
   };
 
   const handleSave = (overrideData?: ProfileFormData) => {
@@ -40,6 +48,11 @@ export function useProfileEdit(params: UseProfileEditParams) {
         await updateProfile(persistence, editingProfile.id, {
           name: data.name.trim(),
           bodyWeight: data.bodyWeight,
+          height: data.height,
+          birthDate: data.birthDate,
+          sex: data.sex,
+          restingHeartRate: data.restingHeartRate,
+          activityLevel: data.activityLevel,
         });
         setEditingProfile(null);
         setFormData({ name: "" });

@@ -184,6 +184,38 @@ const makeSeedRow = (
         mechanism: "api-key",
         updatedAt: NOW,
       };
+    case "intakeEntries":
+      return {
+        id,
+        profileId,
+        date: WEEK_START,
+        loggedAt: NOW,
+        kcal: 500,
+        proteinG: 30,
+        carbG: 50,
+        fatG: 15,
+      };
+    case "intakePresets":
+      return {
+        id,
+        profileId,
+        label: "preset",
+        kcal: 400,
+        proteinG: 20,
+        carbG: 40,
+        fatG: 10,
+        createdAt: NOW,
+      };
+    case "energyTargets":
+      return {
+        profileId,
+        goalType: "fat_loss",
+        startWeightKg: 80,
+        targetWeightKg: 75,
+        targetDate: "2026-09-01",
+        createdAt: NOW,
+        updatedAt: NOW,
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
@@ -214,6 +246,9 @@ const performCascadeOrchestration = async (
         chatConversations: persistence.chatConversations,
         aiModelBindings: persistence.aiModelBindings,
         connections: persistence.connections,
+        intakeEntries: persistence.intakeEntries,
+        intakePresets: persistence.intakePresets,
+        energyTargets: persistence.energyTargets,
       },
       profileId
     );

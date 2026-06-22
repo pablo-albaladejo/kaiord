@@ -13,9 +13,10 @@ const dbName = (suffix: string) =>
   `kaiord-test-v17-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V16 = 16;
-// Current head version KaiordDatabase opens at; v20 added coachingDayNotes,
-// v21 added chatMessages (this change).
-const SCHEMA_HEAD = 25;
+// Current head version KaiordDatabase opens at; later versions add stores
+// (v24 connections, v25 chat conversations, v26 energy-balance), so a seeded
+// db lands at head.
+const SCHEMA_HEAD = 26;
 const STORES_V16 = {
   profiles: "id",
   linkedAccounts: "id",

@@ -1,5 +1,6 @@
 import { CalendarDialogs } from "../CalendarDialogs";
 import { DailyHeader } from "./DailyHeader";
+import { EnergyBalanceCard } from "./EnergyBalanceCard";
 import { PlannedSession } from "./PlannedSession";
 import { ReadinessCard } from "./ReadinessCard";
 import { TrendsCard } from "./TrendsCard";
@@ -19,6 +20,7 @@ export default function Daily() {
     isFocusToday,
     expandActivity,
     coachingByDay,
+    profile,
   } = useTodayData(focusDate, realTodayIso);
   const nav = useTodayFocusNav(focusIso, realTodayIso);
   const open = useDailyEntryOpen(coachingByDay, focusIso, realTodayIso);
@@ -31,6 +33,7 @@ export default function Daily() {
         onBackToToday={nav.backToToday}
       />
       <ReadinessCard readiness={readiness} />
+      <EnergyBalanceCard profileId={profile?.id ?? null} date={focusIso} />
       <WeekStrip
         days={days}
         weekSummary={weekSummary}

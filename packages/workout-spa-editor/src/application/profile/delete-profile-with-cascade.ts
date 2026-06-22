@@ -30,6 +30,11 @@ import type { AutoMatchDismissalRepository } from "../../ports/auto-match-dismis
 import type { ChatConversationRepository } from "../../ports/chat-conversation-repository";
 import type { ChatMessageRepository } from "../../ports/chat-message-repository";
 import type { CoachingDayNotesRepository } from "../../ports/coaching-repositories";
+import type {
+  EnergyTargetRepository,
+  IntakeEntryRepository,
+  IntakePresetRepository,
+} from "../../ports/energy-balance-repositories";
 import type { HealthCleanupRepository } from "../../ports/health-cleanup-repository";
 import type {
   CoachingRepository,
@@ -60,6 +65,11 @@ export type DeleteProfileWithCascadeDeps = {
   aiModelBindings: AiModelBindingRepository;
   // Per-profile provider connections (#714); device-local, bulk delete.
   connections: ConnectionRepository;
+  // Per-profile energy-balance stores (energy-balance-tracking); device-local,
+  // bulk delete on profile removal.
+  intakeEntries: IntakeEntryRepository;
+  intakePresets: IntakePresetRepository;
+  energyTargets: EnergyTargetRepository;
 };
 
 export const deleteProfileWithCascade = async (
@@ -79,5 +89,8 @@ export const deleteProfileWithCascade = async (
     deps.chatConversations.deleteByProfile(deletedProfileId),
     deps.aiModelBindings.deleteByProfile(deletedProfileId),
     deps.connections.deleteByProfile(deletedProfileId),
+    deps.intakeEntries.deleteByProfile(deletedProfileId),
+    deps.intakePresets.deleteByProfile(deletedProfileId),
+    deps.energyTargets.deleteByProfile(deletedProfileId),
   ]);
 };

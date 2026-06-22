@@ -6,11 +6,12 @@ import { BottomNavFab } from "./BottomNavFab";
 import { BottomNavTab } from "./BottomNavTab";
 
 const CREATE_WORKOUT_PATH = "/workout/new";
-// FAB notch sits between Library (index 2) and Athlete (index 3).
+// FAB notch sits between Library (index 2) and Nutrition (index 3), the
+// central slot of the five tabs, so the raised create button stays centered.
 const NOTCH_INDEX = 3;
 
 /**
- * Floating glass bottom navigation with 4 tabs and a raised center FAB.
+ * Floating glass bottom navigation with five tabs and a raised center FAB.
  * Self-contained: derives the active tab and navigates via wouter.
  * Hidden on desktop (`md:hidden`); the desktop header chrome is unchanged.
  */

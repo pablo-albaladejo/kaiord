@@ -12,6 +12,7 @@ const makeOps = (over: Partial<ChatActionOps> = {}): ChatActionOps => ({
   createWorkout: over.createWorkout ?? vi.fn().mockResolvedValue({ id: "w" }),
   logHealthMetric:
     over.logHealthMetric ?? vi.fn().mockResolvedValue({ ok: true }),
+  logIntake: over.logIntake ?? vi.fn().mockResolvedValue({ id: "i" }),
 });
 
 describe("action tools", () => {

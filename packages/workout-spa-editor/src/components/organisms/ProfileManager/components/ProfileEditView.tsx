@@ -40,12 +40,7 @@ export function ProfileEditView({
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
       {activeTab === "zones" && <SportZoneEditor profileId={profileId} />}
       {activeTab === "personal" && (
-        <PersonalDataTab
-          bodyWeight={formData.bodyWeight}
-          onBodyWeightChange={(bw) =>
-            setFormData({ ...formData, bodyWeight: bw })
-          }
-        />
+        <PersonalDataTab formData={formData} onChange={setFormData} />
       )}
       {activeTab === "linked-accounts" && profile && (
         <LinkedAccountsSection profile={profile} />

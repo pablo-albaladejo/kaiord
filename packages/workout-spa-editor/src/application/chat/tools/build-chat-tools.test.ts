@@ -15,6 +15,7 @@ describe("buildChatTools", () => {
         syncCoaching: vi.fn(),
         createWorkout: vi.fn(),
         logHealthMetric: vi.fn(),
+        logIntake: vi.fn(),
       },
     };
 
@@ -26,14 +27,16 @@ describe("buildChatTools", () => {
       "create_workout",
       "get_today",
       "log_health_metric",
+      "log_intake",
       "query_coaching",
+      "query_energy_balance",
       "query_health",
       "query_workouts",
       "sync_coaching",
     ]);
   });
 
-  it("should mark exactly the three action tools as requiring confirmation", () => {
+  it("should mark exactly the four action tools as requiring confirmation", () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     const deps = {
@@ -44,6 +47,7 @@ describe("buildChatTools", () => {
         syncCoaching: vi.fn(),
         createWorkout: vi.fn(),
         logHealthMetric: vi.fn(),
+        logIntake: vi.fn(),
       },
     };
 
@@ -57,6 +61,7 @@ describe("buildChatTools", () => {
     expect(confirmed).toEqual([
       "create_workout",
       "log_health_metric",
+      "log_intake",
       "sync_coaching",
     ]);
   });

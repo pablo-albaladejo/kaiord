@@ -8,12 +8,14 @@ export type BottomNavTab = {
 
 /**
  * Tab order matches the floating bottom-nav layout: the FAB occupies a
- * visual notch between Library and Athlete.
+ * visual notch between Library and Nutrition (the central slot of the
+ * five tabs), keeping the raised create button centered on the bar.
  */
 export const BOTTOM_NAV_TABS: readonly BottomNavTab[] = [
   { label: "Daily", icon: "today", path: "/daily" },
   { label: "Calendar", icon: "calendar", path: "/calendar" },
   { label: "Library", icon: "cards", path: "/library" },
+  { label: "Nutrition", icon: "nutrition", path: "/nutrition" },
   { label: "Athlete", icon: "athlete", path: "/athlete" },
 ] as const;
 
