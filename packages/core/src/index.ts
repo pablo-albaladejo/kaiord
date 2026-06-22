@@ -171,6 +171,12 @@ export { fromBinary, fromText } from "./application";
 export { toBinary, toText } from "./application";
 
 // Application: Energy calculators (pure)
+export type { ActivityLevel } from "./application/energy/activity-factor";
+export {
+  DEFAULT_NEAT_FACTOR,
+  NEAT_FACTOR,
+  neatFactorForActivityLevel,
+} from "./application/energy/activity-factor";
 export type {
   AdaptiveTdeeResult,
   ComputeAdaptiveTdeeInput,

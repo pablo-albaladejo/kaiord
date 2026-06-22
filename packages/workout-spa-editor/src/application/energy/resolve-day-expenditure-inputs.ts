@@ -7,7 +7,11 @@
  * we never show a basal-derived number we cannot honestly compute.
  */
 
-import { computeBmr, type DayExpenditureInput } from "@kaiord/core";
+import {
+  computeBmr,
+  type DayExpenditureInput,
+  neatFactorForActivityLevel,
+} from "@kaiord/core";
 
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import type { Profile } from "../../types/profile";
@@ -58,5 +62,9 @@ export const toExpenditureInput = (
     sex: profile.sex!,
     bodyFatFraction: toBodyFatFraction(sources.bodyComposition),
   });
-  return { bmrKcal: bmr.kcal, expectedActivityKcal };
+  return {
+    bmrKcal: bmr.kcal,
+    expectedActivityKcal,
+    basalActivityFactor: neatFactorForActivityLevel(profile.activityLevel),
+  };
 };
