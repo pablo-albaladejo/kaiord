@@ -16,6 +16,7 @@ import {
   CORE_V13,
   CORE_V16,
 } from "./dexie-schemas-early";
+import { buildCoreV24, buildCoreV26 } from "./dexie-schemas-late";
 
 const HEALTH_SUFFIX =
   ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
@@ -93,15 +94,9 @@ const CORE_V23 = {
   profiles: `${CORE_V1.profiles}, updatedAt`,
 };
 
-// v24 — additive `connections` store for per-(profile, provider) account
-// linkage (#714). PK `[profileId+providerId]`; the `profileId` index drives the
-// profile-delete cascade and makes `isPerProfileTable` auto-discover it. Dexie
-// auto-creates the store empty on upgrade — no data transform. The store is
-// deliberately excluded from the cloud snapshot (credentials stay device-local).
-const CORE_V24 = {
-  ...CORE_V23,
-  connections: "[profileId+providerId], profileId",
-};
+// v24 (connections) and v26 (energy-balance stores) live in
+// `dexie-schemas-late.ts` so this file stays under the per-file line cap.
+const CORE_V24 = buildCoreV24(CORE_V23);
 
 // v25 — multi-conversation chat. Adds the mutable `chatConversations` store
 // (`[profileId+updatedAt]` orders the list and resolves rename LWW) and a
@@ -113,6 +108,10 @@ const CORE_V25 = {
   chatMessages:
     "id, profileId, conversationId, [profileId+createdAt], [profileId+conversationId+createdAt]",
 };
+
+// v26 — additive device-local energy-balance stores (`intakeEntries`,
+// `intakePresets`, `energyTargets`); built in `dexie-schemas-late.ts`.
+const CORE_V26 = buildCoreV26(CORE_V25);
 
 export const SCHEMAS = {
   v1: CORE_V1,
@@ -131,4 +130,5 @@ export const SCHEMAS = {
   v23: CORE_V23,
   v24: CORE_V24,
   v25: CORE_V25,
+  v26: CORE_V26,
 } as const;

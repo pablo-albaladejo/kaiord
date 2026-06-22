@@ -15,6 +15,7 @@ import { createDexieCoachingRepository } from "./dexie-coaching-repository";
 import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
 import { createDexieConnectionRepository } from "./dexie-connection-repository";
 import { db as defaultDb, type KaiordDatabase } from "./dexie-database";
+import { createDexieEnergyBalanceRepositories } from "./dexie-energy-balance-repositories";
 import { createDexieHealthCleanupRepository } from "./dexie-health-cleanup-repository";
 import { createDexieHealthRecordRepositories } from "./dexie-health-repositories";
 import { createDexieIntegrationPolicyRepository } from "./dexie-integration-policy-repository";
@@ -50,6 +51,7 @@ export function createDexiePersistence(
     userPreferences: createDexieUserPreferencesRepository(database),
     healthCleanup: createDexieHealthCleanupRepository(database),
     ...createDexieHealthRecordRepositories(database),
+    ...createDexieEnergyBalanceRepositories(database),
     chatMessages: createDexieChatMessageRepository(database),
     chatConversations: createDexieChatConversationRepository(database),
     aiModelBindings: createDexieAiModelBindingRepository(database),
