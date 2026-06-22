@@ -20,8 +20,22 @@ const dbName = (suffix: string) =>
   `kaiord-test-v16-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V15 = 15;
+const SCHEMA_V16 = 16;
 const STORES_V15 = {
   userPreferences: "profileId",
+} as const;
+// Mirrors the real v16 health-store contract (CORE_V16 in dexie-schemas-early):
+// `[profileId+date], date` indexes are present from v16; the provenance suffix
+// is a v17 addition and is intentionally out of scope here.
+const HEALTH_STORE_SCHEMA_V16 = "id, profileId, [profileId+date], date";
+const STORES_V16 = {
+  ...STORES_V15,
+  healthSleep: HEALTH_STORE_SCHEMA_V16,
+  healthWeight: HEALTH_STORE_SCHEMA_V16,
+  healthHrv: HEALTH_STORE_SCHEMA_V16,
+  healthDaily: HEALTH_STORE_SCHEMA_V16,
+  healthBodyComposition: HEALTH_STORE_SCHEMA_V16,
+  healthStress: HEALTH_STORE_SCHEMA_V16,
 } as const;
 
 const HEALTH_STORES = [
@@ -105,4 +119,47 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
       });
     }
   );
+
+  it("should leave the database at v15 when the v15→v16 upgrade aborts mid-flight", async () => {
+    // Arrange
+    await seedV15(name, [
+      {
+        profileId: PROFILE_ID,
+        calendarView: "grid",
+        updatedAt: "2026-05-08T10:00:00.000Z",
+      },
+    ]);
+    const failing = new Dexie(name);
+    failing.version(SCHEMA_V15).stores(STORES_V15);
+    failing
+      .version(SCHEMA_V16)
+      .stores(STORES_V16)
+      .upgrade(() => {
+        throw new Error("simulated mid-flight upgrade failure");
+      });
+
+    // Act
+    await expect(failing.open()).rejects.toThrow();
+    failing.close();
+
+    // Assert
+    // The aborted transaction leaves the DB at v15: it still opens with only the
+    // v15 schema (a committed v16 would reject as VersionError), the legacy row
+    // is intact, and no health store was created.
+    const reopened = new Dexie(name);
+    reopened.version(SCHEMA_V15).stores(STORES_V15);
+    await reopened.open();
+    const verno = reopened.verno;
+    const tables = reopened.tables.map((t) => t.name);
+    const row = (await reopened.table("userPreferences").get(PROFILE_ID)) as
+      | { calendarView?: string }
+      | undefined;
+    reopened.close();
+
+    expect(verno).toBe(SCHEMA_V15);
+    for (const store of HEALTH_STORES) {
+      expect(tables).not.toContain(store);
+    }
+    expect(row?.calendarView).toBe("grid");
+  });
 });
