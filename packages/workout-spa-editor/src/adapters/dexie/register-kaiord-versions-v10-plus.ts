@@ -16,6 +16,7 @@ import { applyV14Upgrade } from "./dexie-v14-migration";
 import { applyV15Upgrade } from "./dexie-v15-migration";
 import { applyV17Upgrade } from "./dexie-v17-migration";
 import { applyV22Upgrade } from "./dexie-v22-migration";
+import { applyV25Upgrade } from "./dexie-v25-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -94,4 +95,28 @@ export const registerV22 = (db: DexieVersionHost): void => {
   // current default provider so AI features behave identically after the
   // key↔model decoupling.
   db.version(22).stores(SCHEMAS.v22).upgrade(applyV22Upgrade);
+};
+
+export const registerV23 = (db: DexieVersionHost): void => {
+  // v23 — index `updatedAt` on workouts/templates/profiles so the auto-push
+  // change token reads max(updatedAt) via an index (#725). Index-only: Dexie
+  // rebuilds the indexes on upgrade, no data migration, tables untouched.
+  db.version(23).stores(SCHEMAS.v23);
+};
+
+export const registerV24 = (db: DexieVersionHost): void => {
+  // v24 — additive `connections` store for Athlete account linkage (#714).
+  // Dexie auto-creates the store empty on upgrade; no data migration, existing
+  // tables untouched.
+  db.version(24).stores(SCHEMAS.v24);
+};
+
+export const registerV25 = (db: DexieVersionHost): void => {
+  // v25 — multi-conversation chat: additive `chatConversations` store +
+  // `conversationId` on `chatMessages`. The upgrade buckets prior messages
+  // into one seeded "Conversation 1" per profile and backfills the FK.
+  db.version(25).stores(SCHEMAS.v25).upgrade(applyV25Upgrade);
+  // v26 — additive energy-balance device-local stores (`intakeEntries`,
+  // `intakePresets`, `energyTargets`); auto-created empty, no upgrade fn.
+  db.version(26).stores(SCHEMAS.v26);
 };

@@ -29,9 +29,21 @@ export function useProfileEdit(params: UseProfileEditParams) {
 
   const handleEdit = (profile: Profile) => {
     setEditingProfile(profile);
-    setFormData({ name: profile.name, bodyWeight: profile.bodyWeight });
+    setFormData({
+      name: profile.name,
+      bodyWeight: profile.bodyWeight,
+      height: profile.height,
+      birthDate: profile.birthDate,
+      sex: profile.sex,
+      restingHeartRate: profile.restingHeartRate,
+      activityLevel: profile.activityLevel,
+    });
   };
 
+  // Persist in place: editing fields (name in the header, physiology in the
+  // Personal Data tab) auto-save as the user types/selects WITHOUT exiting edit
+  // mode. The edit view is left only via "Back to List" (handleCancel); by then
+  // every change is already saved, so no explicit "Save & close" is needed.
   const handleSave = (overrideData?: ProfileFormData) => {
     const data = overrideData ?? formData;
     if (!editingProfile || !data.name.trim()) return;
@@ -40,9 +52,12 @@ export function useProfileEdit(params: UseProfileEditParams) {
         await updateProfile(persistence, editingProfile.id, {
           name: data.name.trim(),
           bodyWeight: data.bodyWeight,
+          height: data.height,
+          birthDate: data.birthDate,
+          sex: data.sex,
+          restingHeartRate: data.restingHeartRate,
+          activityLevel: data.activityLevel,
         });
-        setEditingProfile(null);
-        setFormData({ name: "" });
       } catch {
         toast.error(TOAST_ERROR);
       }

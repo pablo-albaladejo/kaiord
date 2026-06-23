@@ -15,10 +15,13 @@ import {
   type CustomPromptRef,
 } from "./in-memory-ai-provider-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "./in-memory-auto-match-dismissal-repository";
+import { createInMemoryChatConversationRepository } from "./in-memory-chat-conversation-repository";
 import { createInMemoryChatMessageRepository } from "./in-memory-chat-message-repository";
 import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
+import { createInMemoryConnectionRepository } from "./in-memory-connection-repository";
+import { createInMemoryEnergyBalanceRepositories } from "./in-memory-energy-balance-repositories";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
 import { createInMemoryIntegrationPolicyRepository } from "./in-memory-integration-policy-repository";
 import { createInMemoryMatchedSessionsReadModel } from "./in-memory-matched-sessions-read-model";
@@ -61,6 +64,7 @@ export function createInMemoryPersistence(): PersistencePort {
     healthBodyComposition: new Map(),
     healthStress: new Map(),
     chatMessages: new Map(),
+    chatConversations: new Map(),
     aiModelBindings: new Map(),
     tombstones: new Map(),
   };
@@ -87,6 +91,7 @@ export function createInMemoryPersistence(): PersistencePort {
     coachingDayNotes: createInMemoryCoachingDayNotesRepository(
       stores.coachingDayNotes
     ),
+    connections: createInMemoryConnectionRepository(),
     integrationPolicy: createInMemoryIntegrationPolicyRepository(
       stores.integrationPolicies
     ),
@@ -128,9 +133,13 @@ export function createInMemoryPersistence(): PersistencePort {
     ),
     healthStress: createInMemoryHealthRecordRepository(stores.healthStress),
     chatMessages: createInMemoryChatMessageRepository(stores.chatMessages),
+    chatConversations: createInMemoryChatConversationRepository(
+      stores.chatConversations
+    ),
     aiModelBindings: createInMemoryAiModelBindingRepository(
       stores.aiModelBindings
     ),
+    ...createInMemoryEnergyBalanceRepositories(),
     tombstones: createInMemoryTombstoneRepository(stores.tombstones),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(

@@ -1,24 +1,29 @@
 /**
- * useChatMessagesLive — reactive read hook for the active profile's chat
- * transcript. One `useLiveQuery` per page (the spa-routing read primitive):
- * every `append`/`deleteByProfile` through the same Dexie table re-fires it.
+ * useChatMessagesLive — reactive read hook for the active conversation's
+ * transcript. One `useLiveQuery`: every `append`/`deleteByConversation`
+ * through the same Dexie table re-fires it.
  *
- * Returns `undefined` while resolving on first mount (treat as loading),
- * then the profile's messages in ascending `createdAt` order. A null
- * `profileId` yields an empty transcript without touching the table.
+ * Returns `undefined` while resolving on first mount (treat as loading), then
+ * the conversation's messages in ascending `createdAt` order. A null
+ * `profileId` or `conversationId` (e.g. an unsaved draft) yields an empty
+ * transcript without touching the table.
  */
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { chatMessageRepository } from "../adapters/dexie";
+import { createDexieChatMessageRepository } from "../adapters/dexie/dexie-chat-message-repository";
+import { db } from "../adapters/dexie/dexie-database";
 import type { ChatMessageRecord } from "../types/chat/chat-message-record";
 
+const chatMessageRepository = createDexieChatMessageRepository(db);
+
 export const useChatMessagesLive = (
-  profileId: string | null
+  profileId: string | null,
+  conversationId: string | null
 ): ChatMessageRecord[] | undefined =>
   useLiveQuery<ChatMessageRecord[]>(
     () =>
-      profileId
-        ? chatMessageRepository.listByProfile(profileId)
+      profileId && conversationId
+        ? chatMessageRepository.listByConversation(profileId, conversationId)
         : Promise.resolve([]),
-    [profileId]
+    [profileId, conversationId]
   );

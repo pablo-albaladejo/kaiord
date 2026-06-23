@@ -26,13 +26,28 @@ const snap = (
 const chatRow = (id: string, createdAt: string) => ({
   id,
   profileId: "p-1",
+  conversationId: "c-1",
   role: "user",
   content: id,
   createdAt,
 });
 
+const convRow = (id: string, title: string, updatedAt: string) => ({
+  id,
+  profileId: "p-1",
+  title,
+  createdAt: "2026-06-13T10:00:00.000Z",
+  updatedAt,
+});
+
 const chatRows = (merged: Snapshot) =>
   (merged.tables.chatMessages ?? []) as Array<{ id: string }>;
+
+const convRows = (merged: Snapshot) =>
+  (merged.tables.chatConversations ?? []) as Array<{
+    id: string;
+    title: string;
+  }>;
 
 describe("chat transcript cross-device sync", () => {
   it("should union messages from both devices by id", () => {
@@ -74,5 +89,41 @@ describe("chat transcript cross-device sync", () => {
 
     // Assert
     expect(chatRows(merged)).toEqual([]);
+  });
+
+  it("should converge a renamed conversation by updatedAt last-write-wins", () => {
+    // Arrange
+    const local = snap("2026-06-13T12:00:00.000Z", {
+      chatConversations: [convRow("c-1", "Newer", "2026-06-13T11:00:00.000Z")],
+    });
+    const remote = snap("2026-06-13T13:00:00.000Z", {
+      chatConversations: [convRow("c-1", "Older", "2026-06-13T10:00:00.000Z")],
+    });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    expect(convRows(merged).map((c) => c.title)).toEqual(["Newer"]);
+  });
+
+  it("should not resurrect a conversation deleted on one device via a tombstone", () => {
+    // Arrange
+    const local = snap("2026-06-13T12:00:01.000Z", { chatConversations: [] }, [
+      {
+        table: "chatConversations",
+        id: "c-1",
+        deletedAt: "2026-06-13T12:00:00.000Z",
+      },
+    ]);
+    const remote = snap("2026-06-13T10:05:00.000Z", {
+      chatConversations: [convRow("c-1", "Stale", "2026-06-13T10:01:00.000Z")],
+    });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    expect(convRows(merged)).toEqual([]);
   });
 });

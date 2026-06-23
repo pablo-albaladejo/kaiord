@@ -1,4 +1,5 @@
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
+import { todayIsoDate } from "../../utils/today-iso-date";
 import { AutoMatchBanner } from "../organisms/AutoMatchBanner/AutoMatchBanner";
 import { CalendarAddEntryDialogs } from "./CalendarAddEntryDialogs";
 import { CalendarBodyView } from "./CalendarBodyView";
@@ -18,7 +19,7 @@ export function CalendarPageView({
   bannerActions,
   wellnessByDay,
 }: CalendarPageReadyState) {
-  const todayDate = new Date().toISOString().slice(0, 10);
+  const todayDate = todayIsoDate();
   return (
     <div className="space-y-4" data-testid="calendar-page">
       <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">

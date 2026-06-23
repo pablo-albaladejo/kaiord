@@ -106,6 +106,31 @@ describe("withEncryption", () => {
     await expect(attempt).rejects.toThrow(/passphrase/i);
   });
 
+  it("should reject a downgraded snapshot whose cleartext manifest carries a ciphertext", async () => {
+    // Arrange
+    const encrypted = await encryptSnapshot(makeSnapshot(), "secret");
+    const downgraded = {
+      ...encrypted,
+      manifest: { ...encrypted.manifest, encrypted: false },
+    };
+    const inner = createInMemoryCloudSyncPort({
+      authenticated: true,
+      snapshot: downgraded as unknown as Snapshot,
+      revision: "rev-0",
+      pushCount: 0,
+    });
+    const port = withEncryption(inner, {
+      isEnabled: () => true,
+      getPassphrase: () => "secret",
+    });
+
+    // Act
+    const attempt = port.pull();
+
+    // Assert
+    await expect(attempt).rejects.toThrow(/tampered/i);
+  });
+
   it("should pass through a cleartext remote snapshot unchanged on pull", async () => {
     // Arrange
     const inner = createInMemoryCloudSyncPort({

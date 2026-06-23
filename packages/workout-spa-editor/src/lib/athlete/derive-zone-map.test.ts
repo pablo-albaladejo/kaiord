@@ -59,6 +59,21 @@ describe("deriveZoneMap", () => {
     expect(map?.[ZONE_5].range).toBe("< 4:00 /km");
   });
 
+  it("should label the running pace view in min/mi for imperial units", () => {
+    // Arrange
+    const profile = profileWith("running", {
+      thresholdPace: THRESHOLD_PACE_KM,
+      paceUnit: "min_per_km",
+    });
+
+    // Act
+    const map = deriveZoneMap(profile, "running", "imperial");
+
+    // Assert
+    expect(map?.[ZONE_1].range.endsWith("/mi")).toBe(true);
+    expect(map?.[ZONE_5].range.endsWith("/mi")).toBe(true);
+  });
+
   it("should return null when the sport has no usable threshold", () => {
     // Arrange
     const profile = profileWith("cycling", {});

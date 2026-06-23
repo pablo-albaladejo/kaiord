@@ -1,22 +1,24 @@
 import type uPlot from "uplot";
 
+import type { Units } from "../../../../lib/units/units";
 import { formatPaneValue } from "./format-pane-value";
 import type { TrendMetricDef } from "./trend-metrics";
 
 const STROKE = "#2563eb";
 
 const tickFormatter =
-  (metric: TrendMetricDef) =>
+  (metric: TrendMetricDef, units: Units) =>
   (_u: uPlot, splits: number[]): string[] =>
-    splits.map((v) => formatPaneValue(metric, v));
+    splits.map((v) => formatPaneValue(metric, v, units));
 
 const legendFormatter =
-  (metric: TrendMetricDef) =>
+  (metric: TrendMetricDef, units: Units) =>
   (_u: uPlot, v: number | null | undefined): string =>
-    formatPaneValue(metric, v);
+    formatPaneValue(metric, v, units);
 
 export const buildTrendChartOptions = (
-  metrics: ReadonlyArray<TrendMetricDef>
+  metrics: ReadonlyArray<TrendMetricDef>,
+  units: Units = "metric"
 ): uPlot.Options => {
   const scales: uPlot.Scales = { x: { time: true } };
   for (const m of metrics) scales[m.key] = { auto: true };
@@ -27,7 +29,7 @@ export const buildTrendChartOptions = (
       scale: m.key,
       side: 1,
       label: m.label,
-      values: tickFormatter(m),
+      values: tickFormatter(m, units),
     });
 
   const series: uPlot.Series[] = [{}];
@@ -36,7 +38,7 @@ export const buildTrendChartOptions = (
       label: m.label,
       scale: m.key,
       stroke: STROKE,
-      value: legendFormatter(m),
+      value: legendFormatter(m, units),
     });
 
   return {

@@ -13,6 +13,7 @@ import {
   DailyPage,
   EditorPage,
   LibraryPage,
+  NutritionPage,
   SettingsPage,
   WorkoutDetail,
 } from "./lazy-pages";
@@ -47,7 +48,12 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         </Route>
         <Route path="/calendar/:weekId">{guard(<CalendarPage />)}</Route>
         <Route path="/athlete">{guard(<AthletePage />)}</Route>
-        <Route path="/chat">{guard(<ChatPage />)}</Route>
+        <Route path="/nutrition">{guard(<NutritionPage />)}</Route>
+        <Route path="/chat/:conversationId?">
+          {(params) =>
+            guard(<ChatPage conversationId={params.conversationId} />)
+          }
+        </Route>
         <Route path="/library">{guard(<LibraryPage />)}</Route>
         <Route path="/workout/new">{guard(<NewWorkoutRoute />)}</Route>
         <Route path="/workout/view/:id">

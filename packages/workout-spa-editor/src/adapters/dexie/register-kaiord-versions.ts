@@ -26,6 +26,9 @@ import {
   registerV20,
   registerV21,
   registerV22,
+  registerV23,
+  registerV24,
+  registerV25,
 } from "./register-kaiord-versions-v10-plus";
 
 // Narrowed handle: only `version()` is needed and Dexie's full surface
@@ -92,4 +95,7 @@ export const registerKaiordVersions = (db: DexieVersionHost): void => {
   registerV20(db);
   registerV21(db);
   registerV22(db);
+  registerV23(db);
+  registerV24(db);
+  registerV25(db);
 };

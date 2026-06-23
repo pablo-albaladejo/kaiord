@@ -42,8 +42,6 @@ test.describe("Mobile Responsive Design", () => {
   });
 
   test("should support touch gestures for navigation", async ({ page }) => {
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -97,8 +95,6 @@ test.describe("Mobile Responsive Design", () => {
   });
 
   test("should scroll smoothly on mobile", async ({ page }) => {
-    await page.goto("/workout/new?source=scratch");
-
     // Load a workout with multiple steps instead of creating one
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -324,7 +320,6 @@ test.describe("Workout Actions Overflow", () => {
   };
 
   async function loadWorkout(page: Page) {
-    await page.goto("/workout/new?source=scratch");
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({

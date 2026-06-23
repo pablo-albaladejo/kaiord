@@ -17,7 +17,12 @@ import type { UserPreferences } from "../types/user-preferences";
 export type UserPreferenceFieldsPatch = Partial<
   Pick<
     UserPreferences,
-    "calendarView" | "lastScratchSport" | "aiBannerExpanded"
+    | "calendarView"
+    | "lastScratchSport"
+    | "activeSport"
+    | "aiBannerExpanded"
+    | "units"
+    | "notificationsEnabled"
   >
 >;
 
@@ -45,7 +50,10 @@ export async function setUserPreferenceFields(
     profileId: input.profileId,
     calendarView: existing?.calendarView ?? "grid",
     lastScratchSport: existing?.lastScratchSport,
+    activeSport: existing?.activeSport,
     aiBannerExpanded: existing?.aiBannerExpanded,
+    units: existing?.units,
+    notificationsEnabled: existing?.notificationsEnabled,
     ...input.patch,
     updatedAt: deps.clock(),
   };

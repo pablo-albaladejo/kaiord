@@ -1,4 +1,4 @@
-> Synced: 2026-06-14 (add-spa-ai-chatbot)
+> Synced: 2026-06-22 (energy-balance-tracking)
 
 # SPA Persistence Port
 
@@ -377,17 +377,12 @@ The `InMemoryPersistenceAdapter` SHALL include `InMemoryHealthSleepRepository`, 
 
 ### Requirement: ChatMessageRepository
 
-`PersistencePort` SHALL expose a `ChatMessageRepository` for the chat transcript with operations to append a message, list a profile's messages in `createdAt` order (optionally limited to the most recent N), and clear all messages for a profile. Records are profile-scoped (`{ id, profileId, role, content, toolName?, createdAt, usage? }`) with `createdAt` as an ISO-8601 string so the snapshot merge clock applies; rows are append-only (never updated in place). The store SHALL participate in the per-profile cascade delete and SHALL be included in the cloud-sync snapshot export, merged by `id` like other id-keyed tables. A clear-conversation SHALL record one tombstone per deleted message so the clear propagates across devices instead of resurrecting on merge; the profile-cascade deletion follows the existing per-profile convention (no per-row tombstones — it runs independently on each device and propagates via the profile tombstone).
+`PersistencePort` SHALL expose a `ChatMessageRepository` for chat transcripts with operations to append a message, list a profile's messages in `createdAt` order (optionally limited to the most recent N), list a single conversation's messages in `createdAt` order (optionally limited to the most recent N), delete every message for a `conversationId`, and bulk-delete every message for a profile. Records are profile- and conversation-scoped (`{ id, profileId, conversationId, role, content, toolName?, createdAt, usage? }`) with `createdAt` as an ISO-8601 string so the snapshot merge clock applies; rows are append-only (never updated in place). The store SHALL participate in the per-profile cascade delete and SHALL be included in the cloud-sync snapshot export, merged by `id` like other id-keyed tables. The per-profile bulk delete follows the existing per-profile cascade convention (no per-row tombstones — it runs independently on each device and propagates via the profile tombstone). An explicit single-conversation delete SHALL instead record one tombstone per deleted message (plus a `chatConversations` tombstone) so it propagates across devices instead of resurrecting on merge; that tombstoning lives in the `deleteConversation` use case (see the spa-chat-conversations capability), not in the repository.
 
 #### Scenario: Chronological read per profile
 
 - **WHEN** messages exist for profiles A and B and the chat page queries profile A's transcript
 - **THEN** the repository SHALL return only profile A's messages ordered by `createdAt`
-
-#### Scenario: Clear by profile
-
-- **WHEN** `clear(profileId)` runs for profile A
-- **THEN** all of profile A's chat messages SHALL be deleted and profile B's messages SHALL remain
 
 #### Scenario: Cascade delete on profile removal
 
@@ -399,11 +394,40 @@ The `InMemoryPersistenceAdapter` SHALL include `InMemoryHealthSleepRepository`, 
 - **WHEN** a cloud-sync snapshot export runs on a device with chat messages
 - **THEN** the exported snapshot SHALL contain the `chatMessages` rows, and merging that snapshot on another device SHALL union the messages by `id` so both devices converge on the same transcript
 
-#### Scenario: Cleared messages do not resurrect on merge
+#### Scenario: Deleted conversation messages do not resurrect on merge
 
 - **GIVEN** device A and device B share the same synced transcript
-- **WHEN** the user clears the conversation on device A and a later sync merges device B's snapshot (which still contains the old messages)
-- **THEN** the cleared messages SHALL remain deleted on both devices because the clear recorded a tombstone per deleted message
+- **WHEN** the user deletes a conversation on device A and a later sync merges device B's snapshot (which still contains the old messages)
+- **THEN** the deleted messages SHALL remain deleted on both devices because the delete recorded a tombstone per deleted message plus a `chatConversations` tombstone
+
+### Requirement: ChatConversationRepository port
+
+The persistence port SHALL expose a `ChatConversationRepository` for the `chatConversations` store. It SHALL provide: append/put a conversation row; list a profile's conversations ordered by `updatedAt` descending; rename a conversation (updating `title` and advancing `updatedAt`); touch a conversation (advance `updatedAt` on activity); delete one conversation row; and bulk-delete every conversation for a profile (the profile-delete cascade path). Ids SHALL be caller-supplied (nanoid). The `chatConversations` table SHALL be included in the snapshot export and the tombstone surface.
+
+#### Scenario: List ordered by recent activity
+
+- **GIVEN** a profile has multiple conversations
+- **WHEN** the caller lists the profile's conversations
+- **THEN** rows SHALL be returned ordered by `updatedAt` descending
+
+#### Scenario: Conversation row appears in snapshot export
+
+- **WHEN** a snapshot is exported for a profile that has conversations
+- **THEN** the export SHALL include the `chatConversations` rows so cross-device sync can merge them
+
+### Requirement: Per-conversation message reads
+
+The `ChatMessageRepository` SHALL support reading and deleting messages scoped to a single conversation: list a conversation's messages in ascending `createdAt` order (optionally limited to the most recent N, still oldest-to-newest), and delete every message for a given `conversationId`. The existing per-profile bulk delete used by the profile-delete cascade SHALL be retained.
+
+#### Scenario: Read a conversation's messages
+
+- **WHEN** the caller lists messages for a `(profileId, conversationId)` pair
+- **THEN** only that conversation's messages SHALL be returned, in ascending `createdAt` order
+
+#### Scenario: Delete a conversation's messages
+
+- **WHEN** the caller deletes messages for a `conversationId`
+- **THEN** only that conversation's messages SHALL be removed; other conversations' messages SHALL remain
 
 ### Requirement: Dexie v21 migration
 
@@ -427,3 +451,99 @@ The in-memory persistence adapter SHALL implement `ChatMessageRepository` with t
 
 - **WHEN** a chat use-case test appends and lists messages through the in-memory adapter
 - **THEN** the results SHALL match the Dexie adapter's contract (profile scoping, chronological order, clear semantics)
+
+### Requirement: AiModelBindingRepository
+
+`PersistencePort` SHALL expose an `AiModelBindingRepository` for per-profile model bindings
+with operations to put a binding, get one binding by `(profileId, purpose)`, list all
+bindings for a profile, and delete one binding. Records are profile-scoped
+(`{ profileId, purpose, providerId, modelId, updatedAt }`) where `purpose` is one of
+`default | chat | workout_generation`, keyed by the compound `[profileId+purpose]` so each
+purpose has at most one binding per profile. The store SHALL participate in the per-profile
+cascade delete and SHALL be included in the cloud-sync snapshot export. Stores and use cases
+SHALL depend on the port interface, never on the Dexie table directly.
+
+#### Scenario: One binding per purpose per profile
+
+- **WHEN** a binding for `(profile A, chat)` is put twice with different `modelId` values
+- **THEN** the repository SHALL retain a single `(profile A, chat)` row reflecting the latest
+  put
+
+#### Scenario: List bindings per profile
+
+- **WHEN** bindings exist for profiles A and B and the Models settings reads profile A's
+  bindings
+- **THEN** the repository SHALL return only profile A's bindings
+
+#### Scenario: Cascade delete on profile removal
+
+- **WHEN** a profile is deleted
+- **THEN** that profile's model bindings SHALL be removed by the same cascade that covers the
+  other per-profile stores
+
+#### Scenario: Bindings included in cloud-sync snapshot
+
+- **WHEN** a cloud-sync snapshot export runs on a device with model bindings
+- **THEN** the exported snapshot SHALL contain the `aiModelBindings` rows so they merge on
+  other devices
+
+### Requirement: Dexie v22 migration
+
+The Dexie schema SHALL add version 22 introducing the `aiModelBindings` store with compound
+primary key `[profileId+purpose]` and index `profileId`. The migration SHALL be additive for
+existing stores and SHALL backfill a `default` binding for each profile that has at least one
+configured provider, seeded from that profile's `isDefault` provider (or the first provider)
+and that provider's existing `model`, so AI features behave identically immediately after
+upgrade. The backfill SHALL be idempotent.
+
+#### Scenario: Fresh install at v22
+
+- **WHEN** the SPA initializes IndexedDB on a device with no prior database
+- **THEN** the database SHALL open at version 22 with the `aiModelBindings` store present and
+  all pre-existing stores unchanged
+
+#### Scenario: Upgrade backfills the default binding
+
+- **GIVEN** a pre-v22 database with at least one configured provider carrying a `model`
+- **WHEN** the device loads the new build
+- **THEN** the database SHALL upgrade to v22 and SHALL contain a `default` binding seeded from
+  the existing default provider's id and model, while preserving all other stores' rows
+
+#### Scenario: Upgrade with no providers adds an empty store
+
+- **GIVEN** a pre-v22 database with zero configured providers
+- **WHEN** the device loads the new build
+- **THEN** the database SHALL upgrade to v22 with an empty `aiModelBindings` store and no
+  binding rows
+
+### Requirement: InMemoryAiModelBindingRepository
+
+The in-memory persistence adapter SHALL implement `AiModelBindingRepository` with the same
+observable behavior so model-binding use cases and components are unit-testable without
+IndexedDB.
+
+#### Scenario: Unit test with model-binding persistence
+
+- **WHEN** a use-case test puts and reads bindings through the in-memory adapter
+- **THEN** the results SHALL match the Dexie adapter's contract (profile scoping, one row per
+  `(profileId, purpose)`, delete semantics)
+
+### Requirement: Energy and intake stores
+
+The persistence layer SHALL provide device-local stores for `intakeEntries`
+(indexed by `[profileId+date]`), `intakePresets` (indexed by `profileId`), and
+`energyTargets` (per profile), introduced via a Dexie **v25** upgrade following the
+existing versioned-schema migration pattern with a co-located migration test. These
+stores SHALL be excluded from the cloud snapshot.
+
+#### Scenario: New stores available after v25 upgrade
+
+- **GIVEN** a database upgraded to Dexie v25
+- **WHEN** the app reads the schema
+- **THEN** `intakeEntries`, `intakePresets`, and `energyTargets` stores exist with their declared indexes
+
+#### Scenario: Energy and intake stores excluded from snapshot
+
+- **GIVEN** populated `intakeEntries`, `intakePresets`, and `energyTargets` stores
+- **WHEN** a cloud snapshot is produced
+- **THEN** none of these stores' rows appear in the snapshot
