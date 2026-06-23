@@ -12,6 +12,7 @@ import type { AiMeta } from "../../types/calendar-fragments";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { KRD, Sport, SubSport } from "../../types/schemas";
+import { withCoachNotes } from "../../utils/structured-workout";
 
 const buildRaw = (activity: CoachingActivityRecord): WorkoutRecord["raw"] => ({
   title: activity.title,
@@ -49,7 +50,9 @@ export const buildStructuredCoachingWorkout = (
   planId: null,
   state: "structured",
   raw: buildRaw(input.activity),
-  krd: input.krd,
+  // Coach description is the canonical workout-level note (krd-format); also
+  // mirrored into raw.description above for the sidebar.
+  krd: withCoachNotes(input.krd, input.activity.description),
   lastProcessingError: null,
   feedback: null,
   aiMeta: input.aiMeta,

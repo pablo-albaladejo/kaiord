@@ -11,9 +11,13 @@ export function buildUpdatedKrd(
   krd: KRD,
   name: string,
   sport: Sport,
-  subSport: SubSport
+  subSport: SubSport,
+  notes?: string
 ): KRD {
   const structured = getStructuredWorkout(krd);
+  // Empty notes are omitted (no empty-string notes are written), mirroring the
+  // coaching builder's behavior.
+  const notesPatch = notes ? { notes } : { notes: undefined };
 
   return {
     ...krd,
@@ -25,8 +29,8 @@ export function buildUpdatedKrd(
     extensions: {
       ...krd.extensions,
       structured_workout: structured
-        ? { ...structured, name, sport, subSport }
-        : { name, sport, subSport, steps: [] },
+        ? { ...structured, name, sport, subSport, ...notesPatch }
+        : { name, sport, subSport, steps: [], ...notesPatch },
     },
   };
 }

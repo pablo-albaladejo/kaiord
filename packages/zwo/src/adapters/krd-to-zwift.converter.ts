@@ -12,6 +12,7 @@ const extractWorkoutData = (krd: KRD) => {
 
   return workout as {
     name?: string;
+    notes?: string;
     sport?: string;
     steps?: Array<WorkoutStep | RepetitionBlock>;
   };

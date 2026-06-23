@@ -21,10 +21,13 @@ export function useMetadataForm(krd: KRD) {
     typeof structured?.subSport === "string"
       ? (structured.subSport as SubSport)
       : "generic";
+  const workoutNotes =
+    typeof structured?.notes === "string" ? structured.notes : "";
 
   const [name, setName] = useState(workoutName || "");
   const [sport, setSport] = useState<Sport>(workoutSport);
   const [subSport, setSubSport] = useState<SubSport>(workoutSubSport);
+  const [notes, setNotes] = useState(workoutNotes);
 
   const handleSportChange = (newSport: Sport) => {
     setSport(newSport);
@@ -35,8 +38,10 @@ export function useMetadataForm(krd: KRD) {
     name,
     sport,
     subSport,
+    notes,
     setName,
     setSport: handleSportChange,
     setSubSport,
+    setNotes,
   };
 }

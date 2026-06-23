@@ -78,7 +78,7 @@ describe("useCoachingManual", () => {
     await seedActivity(persistence);
     const onClose = vi.fn();
     const { result } = renderHook(
-      () => useCoachingManual(activity, "profile-1", onClose),
+      () => useCoachingManual(activity, "profile-1", onClose, vi.fn()),
       { wrapper: wrap(persistence) }
     );
 
@@ -115,7 +115,7 @@ describe("useCoachingManual", () => {
     } as unknown as WorkoutRecord);
     const onClose = vi.fn();
     const { result } = renderHook(
-      () => useCoachingManual(activity, "profile-1", onClose),
+      () => useCoachingManual(activity, "profile-1", onClose, vi.fn()),
       { wrapper: wrap(persistence) }
     );
 
@@ -134,13 +134,55 @@ describe("useCoachingManual", () => {
     );
   });
 
+  it("should prefetch the description before navigating when not yet loaded", async () => {
+    // Arrange
+    navigateMock.mockClear();
+    const persistence = createInMemoryPersistence();
+    await seedActivity(persistence);
+    const unloaded: CoachingActivity = { ...activity, description: undefined };
+    const expandActivity = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(
+      () => useCoachingManual(unloaded, "profile-1", vi.fn(), expandActivity),
+      { wrapper: wrap(persistence) }
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.startManual();
+    });
+
+    // Assert
+    expect(expandActivity).toHaveBeenCalledWith(unloaded);
+    await waitFor(() => expect(navigateMock).toHaveBeenCalled());
+  });
+
+  it("should not prefetch when the description is already loaded", async () => {
+    // Arrange
+    navigateMock.mockClear();
+    const persistence = createInMemoryPersistence();
+    await seedActivity(persistence);
+    const expandActivity = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(
+      () => useCoachingManual(activity, "profile-1", vi.fn(), expandActivity),
+      { wrapper: wrap(persistence) }
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.startManual();
+    });
+
+    // Assert
+    expect(expandActivity).not.toHaveBeenCalled();
+  });
+
   it("should no-op when activity or profileId is missing", async () => {
     // Arrange
     navigateMock.mockClear();
     const persistence = createInMemoryPersistence();
     const onClose = vi.fn();
     const { result } = renderHook(
-      () => useCoachingManual(null, "profile-1", onClose),
+      () => useCoachingManual(null, "profile-1", onClose, vi.fn()),
       { wrapper: wrap(persistence) }
     );
 

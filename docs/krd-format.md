@@ -74,6 +74,7 @@ Represents a structured workout definition.
 {
   "workout": {
     "name": "Trail Run Workout",
+    "notes": "Keep cadence > 85. See [video](https://youtu.be/abc)",
     "sport": "running",
     "subSport": "trail",
     "poolLength": 25,
@@ -86,6 +87,7 @@ Represents a structured workout definition.
 ### Fields
 
 - **name** (string, optional): Workout name
+- **notes** (string, optional): Workout-level free-text coaching instructions for the workout as a whole (may contain markdown links). Distinct from per-step `notes` and from the short `name`. No length cap in KRD; format adapters whose target imposes one (FIT step notes: 256) truncate best-effort at export. ZWO carries it as the workout `description`.
 - **sport** (string): Primary sport type
 - **subSport** (string, optional): Sport subtype for detailed categorization
 - **poolLength** (number, optional): Pool length in meters (swimming workouts); bounded to [1, 655]

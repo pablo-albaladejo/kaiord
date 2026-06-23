@@ -35,18 +35,20 @@ type ZwiftWorkoutFile = {
   "@_kaiord:hrmFitProductId"?: number;
 };
 
+const mapZwiftSport = (sportType?: string): string =>
+  sportType === "bike"
+    ? "cycling"
+    : sportType === "run"
+      ? "running"
+      : "generic";
+
 export const convertZwiftToKRD = (zwiftData: unknown, logger: Logger): KRD => {
   logger.debug("Converting Zwift to KRD");
 
   const workoutFile = (zwiftData as { workout_file: unknown })
     .workout_file as ZwiftWorkoutFile;
 
-  const sport =
-    workoutFile.sportType === "bike"
-      ? "cycling"
-      : workoutFile.sportType === "run"
-        ? "running"
-        : "generic";
+  const sport = mapZwiftSport(workoutFile.sportType);
 
   const durationType: "time" | "distance" =
     workoutFile.durationType === "distance" ? "distance" : "time";
@@ -58,8 +60,10 @@ export const convertZwiftToKRD = (zwiftData: unknown, logger: Logger): KRD => {
   const fitExtensions = extractFitExtensions(workoutFile);
 
   const extensions: Record<string, unknown> = {
+    // `notes` = canonical coach-notes home; `zwift.description` kept for compat.
     structured_workout: {
       name: workoutFile.name,
+      notes: workoutFile.description,
       sport,
       steps,
     },
