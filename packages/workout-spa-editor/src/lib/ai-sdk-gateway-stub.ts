@@ -49,3 +49,18 @@ export class GatewayAuthenticationError extends Error {
     return false;
   }
 }
+
+// Base gateway error the `ai` SDK statically imports (newer @ai-sdk/gateway
+// versions). `wrapGatewayError` calls `GatewayError.isInstance(error)`; same
+// reasoning as above — the SPA never reaches the gateway, so it is always
+// `false`, preserving the original provider error.
+export class GatewayError extends Error {
+  constructor(message?: string) {
+    super(message ?? "GatewayError");
+    this.name = "GatewayError";
+  }
+
+  static isInstance(): boolean {
+    return false;
+  }
+}
