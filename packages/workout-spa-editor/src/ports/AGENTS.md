@@ -15,6 +15,8 @@ Hexagonal port interfaces. Each `.ts` file here defines a repository contract th
 - `session-match-repository.ts` — `SessionMatchRepository`: enforces uniqueness on `(profileId, coachingActivityId)` and `(profileId, workoutId)`; has `updateCoachingActivityId` (heal path), `appendExecutedWorkoutIds` (Train2Go three-slot grouping), and the cascade hooks `deleteByActivityId`/`deleteByWorkoutId`/`deleteByProfile`.
 - `auto-match-dismissal-repository.ts` — `AutoMatchDismissalRepository`: per `(profileId, weekStart)` dismissals with cascade-on-profile-delete.
 - `user-preferences-repository.ts` — `UserPreferencesRepository`: per-profile UI prefs, lazy row creation, cascade-on-profile-delete.
+- `chat-message-repository.ts` — `ChatMessageRepository`: append-only chat transcript (`append`, `listByProfile`/`listByConversation` with optional most-recent-N windowing for model context, `deleteByConversation`, `deleteByProfile` cascade). The `deleteConversation` use case tombstones each removed message; the profile-cascade `deleteByProfile` follows the no-tombstone convention.
+- `chat-conversation-repository.ts` — `ChatConversationRepository`: per-profile conversation rows (`put`, `get`, `listByProfile` most-recently-updated-first, `delete`, `deleteByProfile` cascade). Rows are mutable (rename/touch/set-model advance `updatedAt`), so the snapshot merge resolves concurrent edits last-write-wins; `deleteConversation` layers a `[chatConversations+id]` tombstone on top of `delete`.
 - `index.ts` — module export surface.
 
 ## For AI Agents
@@ -51,6 +53,7 @@ Hexagonal port interfaces. Each `.ts` file here defines a repository contract th
 | `SessionMatchRepository`       | `adapters/dexie/dexie-session-match-repository.ts`        | `test-utils/in-memory-session-match-repository.ts`        |
 | `AutoMatchDismissalRepository` | `adapters/dexie/dexie-auto-match-dismissal-repository.ts` | `test-utils/in-memory-auto-match-dismissal-repository.ts` |
 | `UserPreferencesRepository`    | `adapters/dexie/dexie-user-preferences-repository.ts`     | `test-utils/in-memory-user-preferences-repository.ts`     |
+| `ChatMessageRepository`        | `adapters/dexie/dexie-chat-message-repository.ts`         | `test-utils/in-memory-chat-message-repository.ts`         |
 
 ## Dependencies
 

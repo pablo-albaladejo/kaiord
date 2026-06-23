@@ -5,6 +5,13 @@
  * a table added in a future schema version is captured without changing
  * the snapshot use cases. The `tombstones` store is handled by the
  * dedicated tombstone methods, not by `exportTables`/`importTables`.
+ *
+ * The `connections` store is deliberately EXCLUDED (device-local): it holds
+ * provider account linkage + encrypted credentials that must never be written
+ * to remote snapshot storage (#714, design D5). The energy-balance stores
+ * (`intakeEntries`, `intakePresets`, `energyTargets`) are likewise EXCLUDED:
+ * nutrition intake, presets, and the deficit/surplus goal are device-local
+ * PII that must never reach remote snapshot storage (energy-balance-tracking).
  */
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
@@ -12,21 +19,40 @@ import type { SnapshotTables, Tombstone } from "../../types/snapshot";
 import type { KaiordDatabase } from "./dexie-database";
 
 const TOMBSTONES = "tombstones";
+// Device-local; never exported to / imported from a remote snapshot.
+const DEVICE_LOCAL = new Set([
+  TOMBSTONES,
+  "connections",
+  "intakeEntries",
+  "intakePresets",
+  "energyTargets",
+]);
 
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive
 // transaction overloads (TS2589). Same pattern as dexie-persistence-adapter.
 type DexieTxScope = (
-  mode: "rw",
+  mode: "r" | "rw",
   tables: ReadonlyArray<unknown>,
   scope: () => Promise<unknown>
 ) => Promise<unknown>;
 
 export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
-  const dataTables = () => db.tables.filter((t) => t.name !== TOMBSTONES);
+  const dataTables = () => db.tables.filter((t) => !DEVICE_LOCAL.has(t.name));
   // Call transaction as a method on the cast db so `this` stays bound to it.
   const scoped = db as unknown as { transaction: DexieTxScope };
 
   return {
+    // One transaction over every table. The inner `importTables` /
+    // `replaceTombstones` / read calls below open Dexie transactions on
+    // subsets of this scope, which Dexie nests into (joins) this one — so
+    // the whole export/import is a single atomic unit.
+    transaction: <T>(mode: "r" | "rw", scope: () => Promise<T>): Promise<T> =>
+      scoped.transaction(
+        mode,
+        db.tables,
+        scope as () => Promise<unknown>
+      ) as Promise<T>,
+
     schemaVersion: async () => db.verno,
 
     exportTables: async () => {

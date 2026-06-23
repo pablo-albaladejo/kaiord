@@ -14,7 +14,10 @@ const dbName = (suffix: string) =>
   `kaiord-test-v19-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V18 = 18;
-const SCHEMA_V19 = 19;
+// Opening KaiordDatabase always migrates to the latest registered version,
+// so a seeded v18 db lands at the current head (v24 connections, v25 chat
+// conversations, v26 energy-balance stores), not exactly v19.
+const SCHEMA_HEAD = 26;
 const STORES_V18 = {
   workouts: "id, profileId, [profileId+date], date",
   meta: "key",
@@ -42,7 +45,7 @@ describe("Dexie v18 → v19 migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump database schema to version 19", async () => {
+  it("should bump database schema to the current head version", async () => {
     // Arrange
     await seedV18(name, []);
 
@@ -53,7 +56,7 @@ describe("Dexie v18 → v19 migration", () => {
     db.close();
 
     // Assert
-    expect(version).toBe(SCHEMA_V19);
+    expect(version).toBe(SCHEMA_HEAD);
   });
 
   it("should create an empty queryable tombstones table", async () => {

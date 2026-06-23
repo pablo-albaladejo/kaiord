@@ -1,3 +1,6 @@
+// kaiord:* attributes carry KRD concepts Zwift's schema cannot express (watts,
+// power zones, HR targets) so a Zwift round-trip is lossless even though native
+// Zwift readers ignore them.
 import { type Target, targetTypeSchema } from "@kaiord/core";
 
 type KaiordTargetAttributes = {

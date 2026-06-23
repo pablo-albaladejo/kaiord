@@ -7,6 +7,7 @@ const {
   parseDetailsHtml,
   decodeEntities,
   htmlToPlainText,
+  extractComments,
 } = require("../parser.js");
 
 const fixture = (name) =>
@@ -238,6 +239,146 @@ describe("parser", () => {
       expect(activities[0].description).not.toContain("class=");
       expect(activities[0].description).toContain("Avituallamiento");
       expect(activities[0].description).toContain("Soltar Z2-1");
+    });
+
+    it("should preserve description hyperlinks as markdown links (links change)", () => {
+      // Arrange
+      const html = fixture("daily-with-links.html");
+
+      // Act
+      const activities = parseDailyHtml(html);
+
+      // Assert
+      expect(activities).toHaveLength(1);
+      const desc = activities[0].description;
+      expect(desc).toContain("[vídeo técnica](https://youtu.be/abc123)");
+      expect(desc).toContain("[Dropbox](https://www.dropbox.com/s/xyz)");
+      // The raw href must never survive as a bare <a> tag.
+      expect(desc).not.toContain("<a");
+      expect(desc).not.toContain("href");
+    });
+
+    it("should degrade an anchor without href to plain text (links change)", () => {
+      // Arrange
+      const html = fixture("daily-with-links.html");
+
+      // Act
+      const activities = parseDailyHtml(html);
+
+      // Assert
+      const desc = activities[0].description;
+      expect(desc).toContain("Ver vídeo sin enlace");
+      expect(desc).not.toContain("[vídeo]");
+    });
+
+    it("should decode entity-encoded hrefs in markdown links (links change)", () => {
+      // Arrange
+      // T2G renders query separators as &amp; in HTML; the stored
+      // markdown URL must carry the decoded ampersand.
+      const html =
+        `<aside><div class="activity activity-default" data-status="0" data-id="7">` +
+        `<div class="activity-title"><strong>X</strong></div>` +
+        `<div class="activity-description">` +
+        `<p>Vídeo <a href="https://youtu.be/x?t=1&amp;list=ab">aquí</a></p>` +
+        `</div></div></aside>`;
+
+      // Act
+      const activities = parseDailyHtml(html);
+
+      // Assert
+      expect(activities[0].description).toContain(
+        "[aquí](https://youtu.be/x?t=1&list=ab)"
+      );
+    });
+  });
+
+  describe("extractComments", () => {
+    it("should parse a coach comment with author, timestamp and body", () => {
+      // Arrange
+      const html = fixture("daily-with-comments.html");
+
+      // Act
+      const comments = extractComments(html);
+
+      // Assert
+      expect(comments[0]).toEqual({
+        author: "Daniel Blanco Galindo",
+        isOwn: false,
+        timestamp: "2026-06-01 17:26:22",
+        text: "Notas recordatorio para el día de la prueba:\nNos hidratamos con agua nada más despertar.",
+      });
+    });
+
+    it("should mark a comment with a delete button as own and linkify its body", () => {
+      // Arrange
+      const html = fixture("daily-with-comments.html");
+
+      // Act
+      const comments = extractComments(html);
+      const own = comments.find((c) => c.isOwn);
+
+      // Assert
+      expect(own).toMatchObject({
+        author: "Pablo Albaladejo",
+        isOwn: true,
+        timestamp: "2026-06-07 22:55:38",
+        text: "[connect.garmin.com](https://connect.garmin.com/app/activity/23160614260)",
+      });
+    });
+
+    it("should preserve DOM order and skip malformed entries without a timestamp", () => {
+      // Arrange
+      const html = fixture("daily-with-comments.html");
+
+      // Act
+      const comments = extractComments(html);
+
+      // Assert
+      // 4 comment divs in the fixture; the one without <time> is skipped.
+      expect(comments).toHaveLength(3);
+      expect(comments.map((c) => c.author)).toEqual([
+        "Daniel Blanco Galindo",
+        "Pablo Albaladejo",
+        "Daniel Blanco Galindo",
+      ]);
+      expect(comments.some((c) => c.text.includes("no timestamp"))).toBe(false);
+    });
+
+    it("should never include avatar image URLs in the output", () => {
+      // Arrange
+      const html = fixture("daily-with-comments.html");
+
+      // Act
+      const comments = extractComments(html);
+
+      // Assert
+      const serialized = JSON.stringify(comments);
+      expect(serialized).not.toContain("avatars");
+      expect(serialized).not.toContain("cloudfront");
+      expect(serialized).not.toContain(".png");
+      expect(serialized).not.toContain(".jpg");
+    });
+
+    it("should return an empty array when there is no comments block", () => {
+      // Arrange
+      const html = fixture("daily.html");
+
+      // Act
+      const comments = extractComments(html);
+
+      // Assert
+      expect(comments).toEqual([]);
+    });
+
+    it("should return an empty array for null or empty input", () => {
+      // Arrange
+      const inputs = [null, undefined, ""];
+
+      // Act
+      const results = inputs.map((i) => extractComments(i));
+
+      // Assert
+      expect(results).toEqual([[], [], []]);
     });
   });
 

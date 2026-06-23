@@ -1,55 +1,52 @@
 /**
  * buildChangeToken — the cloud auto-push change token must advance on
- * creates, deletes, and in-place edits (not just row-count changes).
+ * creates, deletes, and in-place edits (not just row-count changes). It is
+ * assembled from per-table { count, latest } signals read via an index.
  */
 import { describe, expect, it } from "vitest";
 
-import { buildChangeToken } from "./sync-change-token";
+import { buildChangeToken, type TableSignal } from "./sync-change-token";
 
 describe("buildChangeToken", () => {
-  it("should combine the total row count with the latest timestamp", () => {
+  it("should join each table's count and latest timestamp", () => {
     // Arrange
-    const tables = {
-      workouts: [{ id: "w-1", updatedAt: "2026-05-01T00:00:00.000Z" }],
-      templates: [{ id: "t-1", createdAt: "2026-05-02T00:00:00.000Z" }],
-    };
+    const signals: TableSignal[] = [
+      { count: 2, latest: "2026-05-02T00:00:00.000Z" },
+      { count: 1, latest: "2026-05-01T00:00:00.000Z" },
+    ];
 
     // Act
-    const token = buildChangeToken(tables);
+    const token = buildChangeToken(signals);
 
     // Assert
-    expect(token).toBe("2:2026-05-02T00:00:00.000Z");
+    expect(token).toBe("2:2026-05-02T00:00:00.000Z|1:2026-05-01T00:00:00.000Z");
   });
 
   it("should change the token on an in-place edit even when the count is unchanged", () => {
     // Arrange
-    const before = buildChangeToken({
-      workouts: [{ id: "w-1", updatedAt: "2026-05-01T00:00:00.000Z" }],
-    });
+    const before = buildChangeToken([
+      { count: 1, latest: "2026-05-01T00:00:00.000Z" },
+    ]);
 
     // Act
-    const after = buildChangeToken({
-      workouts: [{ id: "w-1", updatedAt: "2026-05-09T00:00:00.000Z" }],
-    });
+    const after = buildChangeToken([
+      { count: 1, latest: "2026-05-09T00:00:00.000Z" },
+    ]);
 
     // Assert
     expect(after).not.toBe(before);
   });
 
-  it("should advance the token when a tombstone records a deletion", () => {
+  it("should advance the token when a row count changes", () => {
     // Arrange
-    const before = buildChangeToken({
-      workouts: [{ id: "w-1", updatedAt: "2026-05-01T00:00:00.000Z" }],
-      tombstones: [],
-    });
+    const before = buildChangeToken([
+      { count: 1, latest: "2026-05-01T00:00:00.000Z" },
+    ]);
 
     // Act
-    const after = buildChangeToken({
-      workouts: [{ id: "w-1", updatedAt: "2026-05-01T00:00:00.000Z" }],
-      tombstones: [
-        { table: "workouts", id: "w-9", deletedAt: "2026-05-10T00:00:00.000Z" },
-      ],
-    });
+    const after = buildChangeToken([
+      { count: 2, latest: "2026-05-01T00:00:00.000Z" },
+    ]);
 
     // Assert
     expect(after).not.toBe(before);
@@ -57,12 +54,15 @@ describe("buildChangeToken", () => {
 
   it("should return a zero-count token for an empty database", () => {
     // Arrange
-    const tables = { workouts: [], templates: [] };
+    const signals: TableSignal[] = [
+      { count: 0, latest: "" },
+      { count: 0, latest: "" },
+    ];
 
     // Act
-    const token = buildChangeToken(tables);
+    const token = buildChangeToken(signals);
 
     // Assert
-    expect(token).toBe("0:");
+    expect(token).toBe("0:|0:");
   });
 });

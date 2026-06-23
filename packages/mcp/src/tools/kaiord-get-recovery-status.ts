@@ -37,7 +37,10 @@ export const registerGetRecoveryStatusTool = (
     schema,
     async (args) => {
       try {
-        const { records } = await parseHealthRecords(args.input_files, logger);
+        const { records, skipped } = await parseHealthRecords(
+          args.input_files,
+          logger
+        );
         const latestHrvKrd = latestOf(pickHealthByType(records, "hrv_summary"));
         const latestSleepKrd = latestOf(
           pickHealthByType(records, "sleep_record")
@@ -52,6 +55,7 @@ export const registerGetRecoveryStatusTool = (
             hrvAt: hrv?.measuredAt,
             sleepAt: sleep?.startTime,
           },
+          skipped,
         };
         return formatSuccess(JSON.stringify(payload));
       } catch (error) {

@@ -4,6 +4,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
@@ -77,7 +78,7 @@ const makeTransport = (
   })),
   openExternal: vi.fn(async () => undefined),
   readWeek: vi.fn(async () => []),
-  readDay: vi.fn(async () => []),
+  readDay: vi.fn(async () => ({ activities: [] })),
   ...overrides,
 });
 
@@ -293,13 +294,20 @@ describe("expandDay", () => {
     await profiles.put(makeProfile("p1", [T2G_LINK]));
     const coaching = createInMemoryCoachingRepository();
     const t = makeTransport({
-      readDay: vi.fn(async () => [
-        makeRecord({ sourceId: "X", description: "X desc" }),
-        makeRecord({ sourceId: "Y", description: "Y desc" }),
-      ]),
+      readDay: vi.fn(async () => ({
+        activities: [
+          makeRecord({ sourceId: "X", description: "X desc" }),
+          makeRecord({ sourceId: "Y", description: "Y desc" }),
+        ],
+      })),
     });
     const result = await expandDay(
-      { profiles, coaching, transport: t },
+      {
+        profiles,
+        coaching,
+        coachingDayNotes: createInMemoryCoachingDayNotesRepository(),
+        transport: t,
+      },
       "p1",
       "2026-04-13"
     );
@@ -324,8 +332,19 @@ describe("expandDay", () => {
     await profiles.put(makeProfile("p1", [T2G_LINK]));
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
-    const t = makeTransport({ readDay: vi.fn(async () => []) });
-    await expandDay({ profiles, coaching, transport: t }, "p1", "2026-04-13");
+    const t = makeTransport({
+      readDay: vi.fn(async () => ({ activities: [] })),
+    });
+    await expandDay(
+      {
+        profiles,
+        coaching,
+        coachingDayNotes: createInMemoryCoachingDayNotesRepository(),
+        transport: t,
+      },
+      "p1",
+      "2026-04-13"
+    );
 
     // Act
     const sync = await coachingSyncState.getBySourceAndProfile(

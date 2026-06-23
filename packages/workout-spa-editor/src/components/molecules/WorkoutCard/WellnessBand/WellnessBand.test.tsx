@@ -92,6 +92,32 @@ describe("WellnessBand", () => {
     expect(band.className).not.toContain("border-l-4");
   });
 
+  it("should render a net badge linking to the nutrition page", () => {
+    // Arrange
+    const wellness: DayWellness = { net: "-600" };
+
+    // Act
+    renderBand(wellness);
+
+    // Assert
+    expect(screen.getByTestId("wellness-badge-net")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Net -600" })).toHaveAttribute(
+      "href",
+      "/nutrition"
+    );
+  });
+
+  it("should omit the net badge when no net is present", () => {
+    // Arrange
+    const wellness: DayWellness = { sleep: "82" };
+
+    // Act
+    renderBand(wellness);
+
+    // Assert
+    expect(screen.queryByTestId("wellness-badge-net")).not.toBeInTheDocument();
+  });
+
   it("should render four badges for a dense day without dropping any", () => {
     // Arrange
     const wellness: DayWellness = {

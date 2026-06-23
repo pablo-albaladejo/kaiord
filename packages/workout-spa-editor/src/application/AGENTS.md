@@ -28,6 +28,7 @@ Use cases. Pure functions and small orchestrators that take a `PersistencePort` 
 ## Subdirectories
 
 - `ai/` — AI provider config use cases (add/remove/update/clear/set-default + custom prompt).
+- `chat/` — in-app AI chat assistant: the tool registry (`tools/` — read tools over `PersistencePort` + confirmation-gated action tools), versioned system prompt, record↔`ModelMessage` mapper, conversation use cases (`ensure-conversation`, `rename-conversation`, `delete-conversation`, `set-conversation-model`, `derive-conversation-title`), the `append-turn-messages` transcript writer, and `record-chat-usage`. The provider-agnostic turn engine lives in `@kaiord/ai` (`createChatAgent`).
 - `coaching/` — coaching domain use cases (link/unlink, convert, zones sync, expand-day, heal-id-shape).
 - `library/` — workout template use cases (add/update/delete/schedule).
 - `profile/` — profile + sport-zone use cases (CRUD + cascade-delete).

@@ -6,9 +6,13 @@
  * collects every repo's underlying Map plus the profile active-id ref.
  */
 
+import type { AiModelBinding } from "../types/ai-model-binding";
 import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
+import type { ChatConversationRecord } from "../types/chat/chat-conversation-record";
+import type { ChatMessageRecord } from "../types/chat/chat-message-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
+import type { CoachingDayNotesRecord } from "../types/coaching-day-notes-record";
 import type { CoachingSyncStateRecord } from "../types/coaching-sync-state";
 import type {
   HealthBodyCompositionRecord,
@@ -38,6 +42,7 @@ export type Stores = {
   usage: Map<string, UsageRecord>;
   coaching: Map<string, CoachingActivityRecord>;
   coachingSyncState: Map<string, CoachingSyncStateRecord>;
+  coachingDayNotes: Map<string, CoachingDayNotesRecord>;
   integrationPolicies: Map<string, IntegrationPolicy>;
   sessionMatch: Map<string, SessionMatch>;
   autoMatchDismissal: Map<string, AutoMatchDismissal>;
@@ -48,6 +53,9 @@ export type Stores = {
   healthDaily: Map<string, HealthDailyRecord>;
   healthBodyComposition: Map<string, HealthBodyCompositionRecord>;
   healthStress: Map<string, HealthStressRecord>;
+  chatMessages: Map<string, ChatMessageRecord>;
+  chatConversations: Map<string, ChatConversationRecord>;
+  aiModelBindings: Map<string, AiModelBinding>;
   tombstones: Map<string, Tombstone>;
 };
 
@@ -73,6 +81,7 @@ export const captureSnapshot = (
   usage: new Map(stores.usage),
   coaching: new Map(stores.coaching),
   coachingSyncState: new Map(stores.coachingSyncState),
+  coachingDayNotes: new Map(stores.coachingDayNotes),
   integrationPolicies: new Map(stores.integrationPolicies),
   sessionMatch: new Map(stores.sessionMatch),
   autoMatchDismissal: new Map(stores.autoMatchDismissal),
@@ -83,6 +92,9 @@ export const captureSnapshot = (
   healthDaily: new Map(stores.healthDaily),
   healthBodyComposition: new Map(stores.healthBodyComposition),
   healthStress: new Map(stores.healthStress),
+  chatMessages: new Map(stores.chatMessages),
+  chatConversations: new Map(stores.chatConversations),
+  aiModelBindings: new Map(stores.aiModelBindings),
   tombstones: new Map(stores.tombstones),
   profileActiveId: activeIdRef.current,
   aiCustomPrompt: customPromptRef.current,

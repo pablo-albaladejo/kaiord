@@ -1,12 +1,13 @@
 import { useState } from "react";
 
+import { useConnectionActions } from "../../../hooks/use-connection-actions";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
-import { ConfirmationModal } from "../../molecules/ConfirmationModal";
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import type { ConnectionConfig } from "./connection-config";
 import { ConnectionFlows } from "./ConnectionFlows";
 import { ConnectionMark } from "./ConnectionMark";
 import { bridgePolicies } from "./data-flow-lookup";
+import { DisconnectConfirmation } from "./DisconnectConfirmation";
 import { usePolicyToggle } from "./use-policy-toggle";
 
 type ConnectedRowProps = {
@@ -18,13 +19,13 @@ type ConnectedRowProps = {
   onToggleExpanded: () => void;
 };
 
-/* Bridge-level connect/disconnect semantics are provisional: "Disconnect"
-   here simply disables every policy on the bridge. Real account unlinking is
-   not yet supported. */
+/* Disconnect is a real account-unlink: it clears the bridge connection record
+   and disables every flow policy on the bridge (#714). */
 export function ConnectedRow(props: ConnectedRowProps) {
   const { profileId, config, bridgeId, byDataType, expanded } = props;
   const [confirming, setConfirming] = useState(false);
-  const { toggleFlow, disableBridge } = usePolicyToggle();
+  const { toggleFlow } = usePolicyToggle();
+  const { disconnect } = useConnectionActions(profileId);
 
   const onToggleFlow = (flowIndex: number, next: boolean) => {
     const flow = config.flows[flowIndex];
@@ -62,16 +63,16 @@ export function ConnectedRow(props: ConnectedRowProps) {
           onDisconnect={() => setConfirming(true)}
         />
       )}
-      <ConfirmationModal
+      <DisconnectConfirmation
         isOpen={confirming}
-        title="Disconnect"
         message="This disables every sync for this connection. You can re-enable them later."
-        confirmLabel="Disconnect"
-        cancelLabel="Cancel"
-        variant="destructive"
         onCancel={() => setConfirming(false)}
         onConfirm={() => {
-          void disableBridge(bridgePolicies(byDataType, bridgeId));
+          void disconnect(
+            config.id,
+            "bridge",
+            bridgePolicies(byDataType, bridgeId)
+          );
           setConfirming(false);
         }}
       />

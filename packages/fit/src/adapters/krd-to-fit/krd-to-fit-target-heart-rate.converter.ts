@@ -3,6 +3,7 @@ import { targetTypeSchema } from "@kaiord/core";
 import { targetUnitSchema } from "@kaiord/core";
 
 import { fitTargetTypeSchema } from "../schemas/fit-target";
+import { encodeWorkoutHeartRate } from "../target/heart-rate-helpers";
 
 export const convertHeartRateTarget = (
   step: WorkoutStep,
@@ -19,8 +20,8 @@ export const convertHeartRateTarget = (
     message.customTargetHeartRateLow = value.min;
     message.customTargetHeartRateHigh = value.max;
   } else if (value.unit === targetUnitSchema.enum.bpm) {
-    // Garmin encoding: Absolute bpm needs +100 offset
-    message.targetValue = value.value + 100;
+    // FIT absolute-bpm offset rule (see target/heart-rate-helpers.ts)
+    message.targetValue = encodeWorkoutHeartRate(value.value);
   } else if (value.unit === targetUnitSchema.enum.percent_max) {
     // Garmin encoding: Percentage max HR has no offset
     message.targetValue = value.value;

@@ -51,9 +51,11 @@ describe("kaiord_get_recovery_status", () => {
     const parsed = JSON.parse(result.content[0].text) as {
       status: string;
       basedOn: { hrvAt?: string; sleepAt?: string };
+      skipped: number;
     };
     expect(parsed.status).toBe("unknown");
     expect(parsed.basedOn.hrvAt).toBeUndefined();
     expect(parsed.basedOn.sleepAt).toBeUndefined();
+    expect(parsed.skipped).toBe(1);
   });
 });

@@ -1,5 +1,5 @@
 import type { Logger } from "@kaiord/core";
-import { ServiceAuthError } from "@kaiord/core";
+import { ServiceApiError, ServiceAuthError } from "@kaiord/core";
 
 import { ExitCode } from "../../utils/exit-codes";
 import { loadFileAsKrd } from "../../utils/krd-converter";
@@ -38,6 +38,10 @@ export const pushCommand = async (
     if (error instanceof ServiceAuthError) {
       logger.error("Authentication expired. Run: kaiord garmin login");
       return ExitCode.AUTH_ERROR;
+    }
+    if (error instanceof ServiceApiError) {
+      logger.error("Garmin Connect request failed. Please retry later.");
+      return ExitCode.SERVICE_ERROR;
     }
     throw error;
   }

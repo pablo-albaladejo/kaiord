@@ -51,9 +51,7 @@ export function CoachingActivityDialog({
     }
   }, [matchedId, navigate, onClose]);
   const { push: pushToGarmin } = useGarminPush(matchedWorkout ?? undefined);
-  const onPushToGarmin = useCallback(() => {
-    void pushToGarmin();
-  }, [pushToGarmin]);
+  const onPushToGarmin = useCallback(() => void pushToGarmin(), [pushToGarmin]);
   const { cancelAi } = dialog.ai;
   const handleDialogClose = useMemo(
     () => buildCoachingDialogCloseHandler(cancelAi, onClose),
@@ -68,6 +66,7 @@ export function CoachingActivityDialog({
       <CoachingActivityDialogContent
         activity={activity}
         dialogState={dialog.dialogState}
+        profileId={dialog.targetProfileId}
         pickerOpen={dialog.pickerOpen}
         pickerWorkouts={pickable ?? []}
         matching={dialog.matching}

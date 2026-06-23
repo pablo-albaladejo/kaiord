@@ -20,7 +20,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Warmup" });
+    const result = extractIntensity(
+      { Intensity: "Warmup" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("warmup");
@@ -30,7 +33,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Active" });
+    const result = extractIntensity(
+      { Intensity: "Active" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("active");
@@ -40,7 +46,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Cooldown" });
+    const result = extractIntensity(
+      { Intensity: "Cooldown" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("cooldown");
@@ -50,7 +59,7 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Rest" });
+    const result = extractIntensity({ Intensity: "Rest" }, createMockLogger());
 
     // Assert
     expect(result).toBe("rest");
@@ -60,7 +69,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Resting" });
+    const result = extractIntensity(
+      { Intensity: "Resting" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("rest");
@@ -70,7 +82,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "warmup" });
+    const result = extractIntensity(
+      { Intensity: "warmup" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBe("warmup");
@@ -80,7 +95,7 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({});
+    const result = extractIntensity({}, createMockLogger());
 
     // Assert
     expect(result).toBeUndefined();
@@ -90,7 +105,10 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: "Unknown" });
+    const result = extractIntensity(
+      { Intensity: "Unknown" },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBeUndefined();
@@ -100,10 +118,40 @@ describe("extractIntensity", () => {
     // Arrange
 
     // Act
-    const result = extractIntensity({ Intensity: undefined });
+    const result = extractIntensity(
+      { Intensity: undefined },
+      createMockLogger()
+    );
 
     // Assert
     expect(result).toBeUndefined();
+  });
+
+  it("should warn and drop an intensity TCX cannot represent", () => {
+    // Arrange
+    const logger = createMockLogger();
+
+    // Act
+    const result = extractIntensity({ Intensity: "Recovery" }, logger);
+
+    // Assert
+    expect(result).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      "Lossy conversion: intensity 'recovery' has no TCX equivalent, dropping",
+      { intensity: "recovery" }
+    );
+  });
+
+  it("should not warn when no intensity element is present", () => {
+    // Arrange
+    const logger = createMockLogger();
+
+    // Act
+    const result = extractIntensity({}, logger);
+
+    // Assert
+    expect(result).toBeUndefined();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
 

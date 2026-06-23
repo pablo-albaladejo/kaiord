@@ -47,11 +47,19 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
             {
               workouts: persistence.workouts,
               coaching: persistence.coaching,
+              coachingDayNotes: persistence.coachingDayNotes,
               coachingSyncState: persistence.coachingSyncState,
               sessionMatch: persistence.sessionMatch,
               autoMatchDismissal: persistence.autoMatchDismissal,
               userPreferences: persistence.userPreferences,
               healthCleanup: persistence.healthCleanup,
+              chatMessages: persistence.chatMessages,
+              chatConversations: persistence.chatConversations,
+              aiModelBindings: persistence.aiModelBindings,
+              connections: persistence.connections,
+              intakeEntries: persistence.intakeEntries,
+              intakePresets: persistence.intakePresets,
+              energyTargets: persistence.energyTargets,
             },
             id
           );

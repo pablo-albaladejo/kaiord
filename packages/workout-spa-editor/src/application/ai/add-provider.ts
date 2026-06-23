@@ -17,7 +17,6 @@ import type {
 export type AddProviderInput = {
   type: LlmProviderType;
   apiKey: string;
-  model: string;
   label: string;
 };
 

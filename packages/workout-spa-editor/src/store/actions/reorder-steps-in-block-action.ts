@@ -5,12 +5,13 @@
  * Requirement 3.4: Maintain repetition block integrity during reordering
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { KRD, RepetitionBlock } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import type { ItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { extractStructuredWorkout } from "./_helpers/extract-workout";
 
 /**
  * Reorders steps within a repetition block
@@ -28,7 +29,8 @@ export const reorderStepsInBlockAction = (
   overIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) {
     return {};
   }
 
@@ -36,7 +38,6 @@ export const reorderStepsInBlockAction = (
     return {};
   }
 
-  const workout = krd.extensions.structured_workout as Workout;
   const blockInfo = findBlockById(workout, blockId);
 
   if (!blockInfo) {

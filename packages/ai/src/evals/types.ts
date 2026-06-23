@@ -1,7 +1,5 @@
 export type ZoneCheck = {
   targetType: string;
-  minPercent?: number;
-  maxPercent?: number;
   minValue?: number;
   maxValue?: number;
 };

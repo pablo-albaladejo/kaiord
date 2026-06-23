@@ -8,6 +8,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Calendar, X } from "lucide-react";
 import { useState } from "react";
 
+import { todayIsoDate } from "../../../utils/today-iso-date";
 import { Button } from "../../atoms/Button/Button";
 
 type ScheduleDateDialogProps = {
@@ -23,10 +24,7 @@ export function ScheduleDateDialog({
   onConfirm,
   onCancel,
 }: ScheduleDateDialogProps) {
-  const [date, setDate] = useState(() => {
-    const d = new Date();
-    return d.toISOString().slice(0, 10);
-  });
+  const [date, setDate] = useState(() => todayIsoDate());
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onCancel()}>

@@ -15,6 +15,14 @@ export const isStale = (
   return now - t > STALENESS_MS;
 };
 
+/**
+ * Per-source result of an auto-sync attempt. `skipped` means the staleness
+ * gate was closed; `synced` a clean run; `failed` an error surfaced on the
+ * source or thrown. Returned so the loop can record a `{ source, outcome }`
+ * trail for observability without changing the silent-auto-sync behavior.
+ */
+export type SourceSyncOutcome = "skipped" | "synced" | "failed";
+
 export const runSourceSync = async (
   src: CoachingSyncState,
   profileId: string,
@@ -23,13 +31,13 @@ export const runSourceSync = async (
   now: number,
   persistence: PersistencePort,
   analytics: Analytics
-): Promise<void> => {
+): Promise<SourceSyncOutcome> => {
   try {
     const row = await persistence.coachingSyncState.getBySourceAndProfile(
       src.id,
       profileId
     );
-    if (!isStale(row?.lastSyncedAt, now)) return;
+    if (!isStale(row?.lastSyncedAt, now)) return "skipped";
     analytics.event("coaching.sync.invoked", {
       source: src.id,
       profileId,
@@ -43,7 +51,9 @@ export const runSourceSync = async (
         errorKind: "transport-error",
         isAutoSync: true,
       });
+      return "failed";
     }
+    return "synced";
   } catch {
     // Silent; raw exception text never reaches telemetry.
     analytics.event("coaching.sync.failure", {
@@ -52,5 +62,6 @@ export const runSourceSync = async (
       errorKind: "transport-error",
       isAutoSync: true,
     });
+    return "failed";
   }
 };

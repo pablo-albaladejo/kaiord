@@ -17,7 +17,11 @@ import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 
 const PASSPHRASE = "kaiord-spa-v1";
-const SCHEMA_HEAD = 19;
+// Current head version KaiordDatabase opens at; v24 added the device-local
+// `connections` store (excluded from the snapshot), v25 added chatConversations
+// + the conversationId FK, and v26 added the device-local energy-balance stores
+// (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded.
+const SCHEMA_HEAD = 26;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -45,6 +49,115 @@ describe("createDexieSnapshotPort", () => {
     expect(snapshot.manifest.schemaVersion).toBe(SCHEMA_HEAD);
     expect(snapshot.tables.workouts).toHaveLength(1);
     expect(snapshot.tables).toHaveProperty("templates");
+  });
+
+  it("should exclude the device-local connections store from the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("connections").add({
+      profileId: "p-1",
+      providerId: "intervals",
+      status: "connected",
+      mechanism: "api-key",
+      updatedAt: "2026-06-19T00:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables).not.toHaveProperty("connections");
+  });
+
+  it("should exclude the device-local energy-balance stores from the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("intakeEntries").add({
+      id: "i-1",
+      profileId: "p-1",
+      date: "2026-06-21",
+      loggedAt: "2026-06-21T08:00:00.000Z",
+      kcal: 600,
+      proteinG: 40,
+      carbG: 60,
+      fatG: 20,
+    });
+    await db.table("intakePresets").add({
+      id: "pre-1",
+      profileId: "p-1",
+      label: "breakfast",
+      kcal: 400,
+      proteinG: 20,
+      carbG: 50,
+      fatG: 10,
+      createdAt: "2026-06-21T08:00:00.000Z",
+    });
+    await db.table("energyTargets").add({
+      profileId: "p-1",
+      goalType: "fat_loss",
+      startWeightKg: 80,
+      targetWeightKg: 75,
+      targetDate: "2026-09-01",
+      createdAt: "2026-06-21T08:00:00.000Z",
+      updatedAt: "2026-06-21T08:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables).not.toHaveProperty("intakeEntries");
+    expect(snapshot.tables).not.toHaveProperty("intakePresets");
+    expect(snapshot.tables).not.toHaveProperty("energyTargets");
+  });
+
+  it("should include the chatMessages store in the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("chatMessages").add({
+      id: "c-1",
+      profileId: "p-1",
+      conversationId: "conv-1",
+      role: "user",
+      content: "hi",
+      createdAt: "2026-06-13T10:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables.chatMessages).toHaveLength(1);
+  });
+
+  it("should include the chatConversations store in the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("chatConversations").add({
+      id: "conv-1",
+      profileId: "p-1",
+      title: "Cycling",
+      createdAt: "2026-06-13T10:00:00.000Z",
+      updatedAt: "2026-06-13T10:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables.chatConversations).toHaveLength(1);
   });
 
   it("should round-trip a cleared database back to its original rows", async () => {
@@ -89,6 +202,36 @@ describe("createDexieSnapshotPort", () => {
 
     // Assert
     expect(decrypted).toBe("sk-secret-123");
+  });
+
+  it("should roll the whole import back when a later phase fails (atomic)", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("workouts").add({ id: "original", profileId: "p-1" });
+    const base = createDexieSnapshotPort(db);
+    const snapshot = await exportSnapshot({ port: base, deviceId: "dev-1" });
+    const imported = {
+      ...snapshot,
+      tables: { ...snapshot.tables, workouts: [{ id: "imported" }] },
+    };
+    // The tombstone phase fails *after* importTables has written in the
+    // same transaction; the whole transaction must roll back.
+    const failing = {
+      ...base,
+      replaceTombstones: async () => {
+        throw new Error("simulated mid-restore failure");
+      },
+    };
+
+    // Act
+    const attempt = importSnapshot({ port: failing, snapshot: imported });
+
+    // Assert
+    await expect(attempt).rejects.toThrow(/mid-restore/i);
+    const workouts = await db.table("workouts").toArray();
+    db.close();
+    expect(workouts).toEqual([{ id: "original", profileId: "p-1" }]);
   });
 
   it("should round-trip tombstones via the dedicated tombstone methods", async () => {

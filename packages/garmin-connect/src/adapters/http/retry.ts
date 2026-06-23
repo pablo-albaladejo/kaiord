@@ -1,5 +1,11 @@
 import type { Logger } from "@kaiord/core";
 
+import {
+  DEFAULT_BASE_DELAY_MS,
+  DEFAULT_MAX_DELAY_MS,
+  DEFAULT_MAX_RETRIES,
+  isRetryable,
+} from "./retry-policy";
 import type { FetchFn } from "./types";
 
 export type RetryOptions = {
@@ -17,9 +23,6 @@ type ResolvedOptions = {
   randomFn: () => number;
   logger?: Logger;
 };
-
-const isRetryable = (status: number): boolean =>
-  status === 429 || (status >= 500 && status <= 599);
 
 const computeDelay = (
   attempt: number,
@@ -82,9 +85,9 @@ export const withRetry = (
   retryOptions?: RetryOptions
 ): FetchFn => {
   const options: ResolvedOptions = {
-    maxRetries: retryOptions?.maxRetries ?? 3,
-    baseDelay: retryOptions?.baseDelay ?? 1000,
-    maxDelay: retryOptions?.maxDelay ?? 10000,
+    maxRetries: retryOptions?.maxRetries ?? DEFAULT_MAX_RETRIES,
+    baseDelay: retryOptions?.baseDelay ?? DEFAULT_BASE_DELAY_MS,
+    maxDelay: retryOptions?.maxDelay ?? DEFAULT_MAX_DELAY_MS,
     randomFn: retryOptions?.randomFn ?? Math.random,
     logger: retryOptions?.logger,
   };

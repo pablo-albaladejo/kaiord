@@ -24,7 +24,7 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
     <div>
       <span className="font-medium">{p.label}</span>
       <span className="ml-2 text-xs text-gray-500">
-        {PROVIDER_LABELS[p.type]} &middot; {p.model}
+        {PROVIDER_LABELS[p.type]}
       </span>
       {p.isDefault && (
         <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">

@@ -78,11 +78,11 @@ module.exports = [
   {
     name: "@kaiord/ai",
     path: "packages/ai/dist/index.js",
-    // Baseline at 50 kB (current bundle ~41 kB after externalizing zod/core).
-    // The original 20 kB limit was set before the package grew; bumping to
-    // 50 kB locks in current state as the regression-detection baseline.
-    // Reducing actual bundle size is out of scope for §1.1 (gate-wiring).
-    limit: "50 kB",
+    // Baseline at 55 kB. The `createChatAgent` chat engine (add-spa-ai-chatbot)
+    // adds the multi-step tool-calling loop and pulls in `streamText`, taking
+    // the bundle just past the prior 50 kB baseline; 55 kB restores headroom
+    // as the regression-detection baseline.
+    limit: "55 kB",
     import: "*",
     modifyEsbuildConfig: externalize(["zod", "@kaiord/core"]),
   },

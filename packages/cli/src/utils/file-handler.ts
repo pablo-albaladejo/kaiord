@@ -6,6 +6,7 @@ import { glob } from "glob";
 
 import { createOutputDirectory } from "./directory-handler";
 import type { FileFormat } from "./format-detector";
+import { isBinaryFormat } from "./format-registry";
 import { isNodeSystemError } from "./fs-errors";
 import { validatePathSecurity } from "./path-security";
 
@@ -23,7 +24,7 @@ export const readFile = async (
   validatePathSecurity(path);
 
   try {
-    if (format === "fit") {
+    if (isBinaryFormat(format)) {
       const buffer = await fsReadFile(path);
       return new Uint8Array(buffer);
     } else {
@@ -32,10 +33,18 @@ export const readFile = async (
   } catch (error) {
     if (isNodeSystemError(error)) {
       if (error.code === "ENOENT") {
-        throw new Error(`File not found: ${path}`, { cause: error });
+        // Preserve the Node code so the exit-code mapper classifies by signature,
+        // not by message text.
+        throw Object.assign(new Error(`File not found: ${path}`), {
+          code: "ENOENT",
+          cause: error,
+        });
       }
       if (error.code === "EACCES") {
-        throw new Error(`Permission denied: ${path}`, { cause: error });
+        throw Object.assign(new Error(`Permission denied: ${path}`), {
+          code: "EACCES",
+          cause: error,
+        });
       }
     }
     throw new Error(`Failed to read file: ${path}`, { cause: error });
@@ -52,17 +61,18 @@ export const writeFile = async (
 ): Promise<void> => {
   validatePathSecurity(path);
 
-  if (format === "fit" && !(data instanceof Uint8Array)) {
+  const binary = isBinaryFormat(format);
+  if (binary && !(data instanceof Uint8Array)) {
     throw new Error("FIT files require Uint8Array data");
   }
-  if (format !== "fit" && typeof data !== "string") {
+  if (!binary && typeof data !== "string") {
     throw new Error("Text files require string data");
   }
 
   await createOutputDirectory(path);
 
   try {
-    if (format === "fit") {
+    if (binary) {
       await fsWriteFile(path, data as Uint8Array);
     } else {
       await fsWriteFile(path, data as string, "utf-8");

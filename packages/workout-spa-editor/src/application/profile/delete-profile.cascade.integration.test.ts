@@ -73,6 +73,15 @@ const makeSeedRow = (
         status: "pending",
         fetchedAt: NOW,
       };
+    case "coachingDayNotes":
+      return {
+        id: `${profileId}:train2go:${WEEK_START}`,
+        profileId,
+        source: "train2go",
+        date: WEEK_START,
+        comments: [],
+        fetchedAt: NOW,
+      };
     case "coachingSyncState":
       return { source: "train2go", profileId, lastSyncedAt: NOW };
     case "sessionMatches":
@@ -131,6 +140,23 @@ const makeSeedRow = (
       // index shape. The cascade-fan-out test only needs the primary key
       // and the per-profile + date indexed columns to round-trip a write.
       return { id, profileId, date: WEEK_START };
+    case "chatMessages":
+      return {
+        id,
+        profileId,
+        conversationId: `conv-${profileId}`,
+        role: "user",
+        content: "hi",
+        createdAt: NOW,
+      };
+    case "chatConversations":
+      return {
+        id,
+        profileId,
+        title: "Conversation 1",
+        createdAt: NOW,
+        updatedAt: NOW,
+      };
     case "integrationPolicies":
       return {
         id,
@@ -140,6 +166,54 @@ const makeSeedRow = (
         direction: "import",
         mode: "auto",
         enabled: true,
+        updatedAt: NOW,
+      };
+    case "aiModelBindings":
+      return {
+        profileId,
+        purpose: "default",
+        providerId: `prov-${profileId}`,
+        modelId: "claude-sonnet-4-6",
+        updatedAt: NOW,
+      };
+    case "connections":
+      return {
+        profileId,
+        providerId: "intervals",
+        status: "connected",
+        mechanism: "api-key",
+        updatedAt: NOW,
+      };
+    case "intakeEntries":
+      return {
+        id,
+        profileId,
+        date: WEEK_START,
+        loggedAt: NOW,
+        kcal: 500,
+        proteinG: 30,
+        carbG: 50,
+        fatG: 15,
+      };
+    case "intakePresets":
+      return {
+        id,
+        profileId,
+        label: "preset",
+        kcal: 400,
+        proteinG: 20,
+        carbG: 40,
+        fatG: 10,
+        createdAt: NOW,
+      };
+    case "energyTargets":
+      return {
+        profileId,
+        goalType: "fat_loss",
+        startWeightKg: 80,
+        targetWeightKg: 75,
+        targetDate: "2026-09-01",
+        createdAt: NOW,
         updatedAt: NOW,
       };
     default:
@@ -162,11 +236,19 @@ const performCascadeOrchestration = async (
       {
         workouts: persistence.workouts,
         coaching: persistence.coaching,
+        coachingDayNotes: persistence.coachingDayNotes,
         coachingSyncState: persistence.coachingSyncState,
         sessionMatch: persistence.sessionMatch,
         autoMatchDismissal: persistence.autoMatchDismissal,
         userPreferences: persistence.userPreferences,
         healthCleanup: persistence.healthCleanup,
+        chatMessages: persistence.chatMessages,
+        chatConversations: persistence.chatConversations,
+        aiModelBindings: persistence.aiModelBindings,
+        connections: persistence.connections,
+        intakeEntries: persistence.intakeEntries,
+        intakePresets: persistence.intakePresets,
+        energyTargets: persistence.energyTargets,
       },
       profileId
     );
@@ -205,6 +287,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
     expect(discoveredNames).toEqual(
       expect.arrayContaining([
         "autoMatchDismissals",
+        "chatMessages",
         "coachingActivities",
         "coachingSyncState",
         "sessionMatches",

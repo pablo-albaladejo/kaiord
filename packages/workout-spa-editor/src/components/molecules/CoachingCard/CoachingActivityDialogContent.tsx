@@ -21,17 +21,25 @@ import {
   DialogMeta,
   STATUS_LABEL,
 } from "./coaching-dialog-parts";
+import { CoachingDayComments } from "./CoachingDayComments";
+import { useCoachingDayComments } from "./use-coaching-day-comments";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
 export type CoachingActivityDialogContentProps = CoachingDialogBodyProps & {
   dialogState: CoachingDialogState | undefined;
+  profileId: string | null;
 };
 
 export function CoachingActivityDialogContent(
   props: CoachingActivityDialogContentProps
 ) {
-  const { activity, dialogState } = props;
+  const { activity, dialogState, profileId } = props;
   const matched = dialogState?.kind === "matched" ? dialogState : null;
+  const comments = useCoachingDayComments(
+    profileId,
+    activity.source,
+    activity.date
+  );
   return (
     <div className="space-y-3">
       <DialogHeader activity={activity} />
@@ -45,6 +53,7 @@ export function CoachingActivityDialogContent(
       {matched
         ? renderMatchedBody(props, matched.workout, matched.executed)
         : renderNoWorkoutBody(props)}
+      <CoachingDayComments comments={comments} />
     </div>
   );
 }

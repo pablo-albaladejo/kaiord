@@ -20,19 +20,21 @@ const isKnownSport = (s: string): s is Sport =>
 
 export const buildGenerateKrdPort = (
   provider: LlmProviderConfig,
+  modelId: string,
   now: () => string
 ): GenerateKrdPort => {
   return async ({ text, sport }) => {
     const krd = await generateWorkoutKrd({
       text,
       provider,
+      modelId,
       sport: isKnownSport(sport) ? sport : undefined,
     });
     return {
       krd,
       aiMeta: {
         provider: provider.type,
-        model: provider.model,
+        model: modelId,
         promptVersion: PROMPT_VERSION,
         processedAt: now(),
       },
@@ -40,20 +42,10 @@ export const buildGenerateKrdPort = (
   };
 };
 
-export const pickProvider = (
-  providers: LlmProviderConfig[] | undefined,
-  selectedProviderId: string | null
-): LlmProviderConfig | null => {
-  return (
-    providers?.find((p) => p.id === selectedProviderId) ??
-    providers?.[0] ??
-    null
-  );
-};
-
 export type RunAiInput = {
   activityId: string;
   provider: LlmProviderConfig;
+  modelId: string;
   abortSignal: AbortSignal;
   persistence: PersistencePort;
   analytics: Analytics;
@@ -67,7 +59,7 @@ export const runConvertWithAi = (input: RunAiInput) =>
       workouts: input.persistence.workouts,
       sessionMatches: input.persistence.sessionMatch,
       analytics: input.analytics,
-      generateKrd: buildGenerateKrdPort(input.provider, () =>
+      generateKrd: buildGenerateKrdPort(input.provider, input.modelId, () =>
         new Date().toISOString()
       ),
       newWorkoutId: () => crypto.randomUUID(),

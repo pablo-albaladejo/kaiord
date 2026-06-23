@@ -25,6 +25,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import type { MatchedSession } from "../components/molecules/MatchedSessionCard/MatchedSessionCard";
+import { usePersistence } from "../contexts/persistence-context";
 import type { SessionMatch } from "../types/session-match";
 import {
   type DanglingMatch,
@@ -54,17 +55,18 @@ export function useMatchedSessions(
   profileId: string | null,
   days: string[]
 ): MatchedSessionWithMetadata[] | undefined {
+  const { matchedSessionsReadModel } = usePersistence();
   const result = useLiveQuery<HydrateResult>(async () => {
     markUseMatchedSessionsStart();
     try {
       if (!profileId || days.length === 0) return EMPTY;
       const matches = await queryMatchesForWeek(profileId, days);
       if (matches.length === 0) return EMPTY;
-      return await hydrateMatchedSessions(matches);
+      return await hydrateMatchedSessions(matches, matchedSessionsReadModel);
     } finally {
       markUseMatchedSessionsEnd();
     }
-  }, [profileId, days.join(",")]);
+  }, [profileId, days.join(","), matchedSessionsReadModel]);
 
   useMatchedSessionsHeal(result?.dangling ?? null);
 

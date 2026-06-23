@@ -4,9 +4,9 @@ import { useLocation } from "wouter";
 import type { BackOrigin } from "../../routing/back-origin";
 import { buildPickerHref } from "../../routing/picker-href";
 import { resolveBackTarget } from "../../routing/resolve-back-target";
+import { extractStructuredWorkout } from "../../store/actions/_helpers/extract-workout";
 import { useClearWorkout } from "../../store/selectors/workout-selectors";
 import { useWorkoutStore } from "../../store/workout-store";
-import type { Workout } from "../../types/krd";
 import type { NewWorkoutMode } from "./render-new-workout-surface";
 import { useDiscardConfirmation } from "./WorkoutSection/use-discard-confirmation";
 
@@ -32,9 +32,7 @@ export function useBackHandler(
   const [, navigate] = useLocation();
   const clearWorkout = useClearWorkout();
   const stepsLength = useWorkoutStore(
-    (s) =>
-      (s.currentWorkout?.extensions?.structured_workout as Workout | undefined)
-        ?.steps?.length ?? 0
+    (s) => extractStructuredWorkout(s.currentWorkout)?.steps?.length ?? 0
   );
 
   const isInPicker =

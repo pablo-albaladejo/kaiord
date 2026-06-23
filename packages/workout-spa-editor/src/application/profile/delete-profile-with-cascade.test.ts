@@ -4,9 +4,15 @@
 
 import { describe, expect, it } from "vitest";
 
+import { createInMemoryAiModelBindingRepository } from "../../test-utils/in-memory-ai-model-binding-repository";
 import { createInMemoryAutoMatchDismissalRepository } from "../../test-utils/in-memory-auto-match-dismissal-repository";
+import { createInMemoryChatConversationRepository } from "../../test-utils/in-memory-chat-conversation-repository";
+import { createInMemoryChatMessageRepository } from "../../test-utils/in-memory-chat-message-repository";
+import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
+import { createInMemoryConnectionRepository } from "../../test-utils/in-memory-connection-repository";
+import { createInMemoryEnergyBalanceRepositories } from "../../test-utils/in-memory-energy-balance-repositories";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryUserPreferencesRepository } from "../../test-utils/in-memory-user-preferences-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
@@ -62,6 +68,8 @@ const makeDeps = (
 ): DeleteProfileWithCascadeDeps => ({
   workouts: overrides.workouts ?? createInMemoryWorkoutRepository(),
   coaching: overrides.coaching ?? createInMemoryCoachingRepository(),
+  coachingDayNotes:
+    overrides.coachingDayNotes ?? createInMemoryCoachingDayNotesRepository(),
   coachingSyncState:
     overrides.coachingSyncState ?? createInMemoryCoachingSyncStateRepository(),
   sessionMatch:
@@ -76,6 +84,23 @@ const makeDeps = (
     // this so the future per-metric repositories pick it up.
     deleteByProfile: async () => undefined,
   },
+  chatMessages: overrides.chatMessages ?? createInMemoryChatMessageRepository(),
+  chatConversations:
+    overrides.chatConversations ?? createInMemoryChatConversationRepository(),
+  aiModelBindings:
+    overrides.aiModelBindings ?? createInMemoryAiModelBindingRepository(),
+  connections: overrides.connections ?? createInMemoryConnectionRepository(),
+  ...((): Pick<
+    DeleteProfileWithCascadeDeps,
+    "intakeEntries" | "intakePresets" | "energyTargets"
+  > => {
+    const energy = createInMemoryEnergyBalanceRepositories();
+    return {
+      intakeEntries: overrides.intakeEntries ?? energy.intakeEntries,
+      intakePresets: overrides.intakePresets ?? energy.intakePresets,
+      energyTargets: overrides.energyTargets ?? energy.energyTargets,
+    };
+  })(),
 });
 
 describe("deleteProfileWithCascade", () => {
@@ -247,6 +272,38 @@ describe("deleteProfileWithCascade", () => {
     ).toBeDefined();
   });
 
+  it("should cascade coachingDayNotes.deleteByProfile", async () => {
+    // Arrange
+    const coachingDayNotes = createInMemoryCoachingDayNotesRepository();
+    await coachingDayNotes.upsert({
+      id: "p1:train2go:2026-04-13",
+      profileId: "p1",
+      source: "train2go",
+      date: "2026-04-13",
+      comments: [],
+      fetchedAt: NOW,
+    });
+    await coachingDayNotes.upsert({
+      id: "p2:train2go:2026-04-13",
+      profileId: "p2",
+      source: "train2go",
+      date: "2026-04-13",
+      comments: [],
+      fetchedAt: NOW,
+    });
+
+    // Act
+    await deleteProfileWithCascade(makeDeps({ coachingDayNotes }), "p1");
+
+    // Assert
+    expect(
+      await coachingDayNotes.getByDate("p1", "train2go", "2026-04-13")
+    ).toBeUndefined();
+    expect(
+      await coachingDayNotes.getByDate("p2", "train2go", "2026-04-13")
+    ).toBeDefined();
+  });
+
   it("should cascade userPreferences.delete", async () => {
     // Arrange
     const deps = makeDeps();
@@ -267,5 +324,48 @@ describe("deleteProfileWithCascade", () => {
     // Assert
     expect(await deps.userPreferences.get("p1")).toBeUndefined();
     expect(await deps.userPreferences.get("p2")).toBeDefined();
+  });
+
+  it("should cascade the energy-balance stores for the deleted profile", async () => {
+    // Arrange
+    const deps = makeDeps();
+    await deps.intakeEntries.put({
+      id: "i-1",
+      profileId: "p1",
+      date: "2026-04-13",
+      loggedAt: NOW,
+      kcal: 500,
+      proteinG: 30,
+      carbG: 50,
+      fatG: 15,
+    });
+    await deps.energyTargets.put({
+      profileId: "p1",
+      goalType: "fat_loss",
+      startWeightKg: 80,
+      targetWeightKg: 75,
+      targetDate: "2026-09-01",
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+    await deps.energyTargets.put({
+      profileId: "p2",
+      goalType: "maintain",
+      startWeightKg: 70,
+      targetWeightKg: 70,
+      targetDate: "2026-09-01",
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+
+    // Act
+    await deleteProfileWithCascade(deps, "p1");
+
+    // Assert
+    expect(
+      await deps.intakeEntries.getByProfileAndDate("p1", "2026-04-13")
+    ).toHaveLength(0);
+    expect(await deps.energyTargets.get("p1")).toBeUndefined();
+    expect(await deps.energyTargets.get("p2")).toBeDefined();
   });
 });

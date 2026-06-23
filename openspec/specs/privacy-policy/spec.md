@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-06-14 (add-spa-ai-chatbot)
 
 # Privacy Policy
 
@@ -23,8 +23,8 @@ The privacy policy SHALL cover the following topics:
 
 - **Data controller identity**: The policy SHALL state that Kaiord operates no backend and that processing is entirely client-side, so there is no Kaiord-operated data controller beyond the user
 - **Data collection**: The project does NOT collect personal data, analytics, or telemetry
-- **Client-side storage disclosure**: The policy SHALL state that workout-editor state (workouts, templates, profiles, AI provider keys, sync state) is stored locally in the user's browser via IndexedDB / Dexie, and that nothing is sent to a Kaiord-operated server
-- **LLM provider data flow**: The policy SHALL disclose that, when the user configures AI features, prompts and workout content are sent directly from the browser to the chosen LLM provider (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service, and that Kaiord does not receive or relay this data
+- **Client-side storage disclosure**: The policy SHALL state that workout-editor state (workouts, templates, profiles, AI provider keys, sync state, chat transcripts) is stored locally in the user's browser via IndexedDB / Dexie, and that nothing is sent to a Kaiord-operated server
+- **LLM provider data flow**: The policy SHALL disclose that, when the user configures AI features, prompts and workout content are sent directly from the browser to the chosen LLM provider (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service, and that Kaiord does not receive or relay this data. For the chat assistant specifically, the policy SHALL disclose that summaries of the user's locally stored history — including workout, coaching, and health data (e.g. sleep) — are sent to the configured provider only when the user converses with the assistant, and never in the background. The policy SHALL also state that chat transcripts are stored locally and, when the user enables cross-device sync, are included in the sync snapshot stored in the user's own cloud storage — never on a Kaiord-operated server
 - **Garmin Bridge extension data handling**: The Garmin Bridge extension stores only a CSRF token in `chrome.storage.session` (memory-only, isolated from page scripts, cleared when the browser closes; Chrome additionally encrypts the area when OS-level key material is available)
 - **Train2Go Bridge extension data handling**: The Train2Go Bridge extension stores no data locally; training plans are read on-demand from the Train2Go page DOM and delivered directly to the Kaiord workout editor
 - **Multi-extension coverage**: The policy SHALL cover every Chrome extension currently shipping in the monorepo (at minimum `@kaiord/garmin-bridge` and `@kaiord/train2go-bridge`) with symmetric data-handling disclosures
@@ -35,7 +35,7 @@ The privacy policy SHALL cover the following topics:
 - **Localhost dev disclosure**: The policy SHALL disclose that local-development manifests additionally accept messages from `http://localhost:5173` / `http://localhost:5174` via `externally_connectable`, that the announce content script injects on `http://localhost/*`, and SHALL state that these development-only matches are stripped from the production manifest before CWS submission
 - **Regulatory compliance**: Statement of compliance with applicable data protection regulations (GDPR, CCPA) — specifically that because no personal data is collected server-side, there is no personal data held by Kaiord to protect, share, or delete
 - **Data-subject rights**: The policy SHALL explicitly enumerate GDPR/CCPA rights (access, rectification, erasure, portability) and state that, because Kaiord holds no records, such requests have no data to act upon
-- **Retention guidance**: The policy SHALL describe how the user can remove local data — at minimum the editor's API-key clear action, per-workout delete, and the browser-level "clear site data" path
+- **Retention guidance**: The policy SHALL describe how the user can remove local data — at minimum the editor's API-key clear action, per-workout delete, the per-conversation chat delete action (delete an individual conversation), and the browser-level "clear site data" path
 - **Host-permission narrowing**: The policy SHALL state that each extension declares `host_permissions` limited to its single disclosed host (no wildcard, no `<all_urls>`)
 - **Children's Privacy**: The policy SHALL include a Children's Privacy section stating the products are not directed at children under 13 (or 16 in jurisdictions where that age applies)
 - **Changes to this Policy**: The policy SHALL include a Changes-to-this-Policy section explaining how material changes are announced (project release notes / git log / "Last updated" date)
@@ -72,6 +72,11 @@ The privacy policy SHALL cover the following topics:
 
 - **WHEN** the privacy policy is read
 - **THEN** it SHALL state that if the user configures AI features, prompts and workout content are sent directly from the browser to the chosen provider (Anthropic, OpenAI, or Google) and that Kaiord does not receive or relay this data
+
+#### Scenario: Policy discloses chat assistant data flow
+
+- **WHEN** the privacy policy is read
+- **THEN** it SHALL state that the chat assistant sends summaries of locally stored workout, coaching, and health data to the user-configured LLM provider only during a user-initiated conversation, and that chat transcripts are stored locally in the browser (and in the user's own cloud-sync snapshot when cross-device sync is enabled), never on a Kaiord-operated server
 
 #### Scenario: Policy clarifies client-side storage boundary
 

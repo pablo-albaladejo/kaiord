@@ -1,4 +1,4 @@
-> Synced: 2026-05-01
+> Synced: 2026-06-22 (energy-balance-tracking)
 
 # SPA Routing
 
@@ -63,11 +63,11 @@ Each SPA editor surface (top-level UI region invoked from a header button or fro
 
 A surface SHALL NOT exist as both a routed page AND a header-mounted modal that share the same content component, because feature drift between the two surfaces is otherwise inevitable. If both browse-and-manage and pick-in-flow are needed for the same content, the page covers the former and a separate narrow picker dialog covers the latter.
 
-The Workout Library is the canonical case: the `/library` page is the destination; a narrow template picker dialog (mounted by the calendar's empty-day flow with a `date` prop) is the in-flow picker. URLs referenced in this requirement (e.g. `/library`, `/calendar`) are base-relative and resolve to deploy-prefixed URLs per the SPA router base alignment requirement above.
+The Workout Library is the canonical case: the `/library` page is the destination; a narrow template picker dialog (mounted by the calendar's empty-day flow with a `date` prop) is the in-flow picker. URLs referenced in this requirement (e.g. `/library`, `/calendar`, `/chat`) are base-relative and resolve to deploy-prefixed URLs per the SPA router base alignment requirement above.
 
 Examples in the SPA editor today (non-normative):
 
-- Routed pages: Calendar, Library, Workout (new and edit).
+- Routed pages: Calendar, Library, Workout (new and edit), Chat.
 - Meta modals: Settings, Help, Profile.
 - In-flow picker dialogs: the calendar's empty-day "Add from Library" picker.
 
@@ -81,6 +81,11 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 
 - **WHEN** the user clicks the "Library" button in the desktop or mobile navigation header
 - **THEN** the SPA SHALL navigate to the base-relative URL `/library`, the page surface SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount as a result of the click
+
+#### Scenario: Chat is classified as a routed page
+
+- **WHEN** the user activates the Chat entry in the navigation
+- **THEN** the SPA SHALL navigate to the base-relative URL `/chat`, the chat page SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount as a result of the activation
 
 #### Scenario: Settings, Help, and Profile are classified as meta modals
 
@@ -105,7 +110,7 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 #### Scenario: Route change announces a single label
 
 - **WHEN** the wouter pathname changes (e.g., user navigates from `/calendar` to `/library`)
-- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Daily page", "Calendar page", "New workout", "Edit workout") so assistive technology announces the navigation as a single unit
+- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Daily page", "Calendar page", "New workout", "Edit workout", "Chat page") so assistive technology announces the navigation as a single unit
 
 #### Scenario: Route change moves focus to the page heading
 
@@ -121,6 +126,20 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 
 - **WHEN** the SPA loads for the first time at any route (including a deep-linked `/library` or `/workout/:id`)
 - **THEN** the announcer region SHALL emit one announcement matching the loaded route's label, so assistive technology hears the page identity on first load. The page heading text and the announcer label SHOULD be sufficiently distinct (e.g. heading "Library", announcer "Library page") to avoid duplicate reads
+
+### Requirement: Conversation deep-link route
+
+The SPA SHALL register a deep-linkable route `/chat/:conversationId` in addition to `/chat`. The route SHALL be a routed page sharing the chat surface's classification (heading focus via `[data-route-heading]`, single "Chat page" live announcement, lazy-loaded). Navigating to `/chat/:conversationId` for a conversation owned by the active profile SHALL select it as the active conversation; navigating to `/chat` with no id SHALL render the list with the most-recently-updated conversation active (or the empty state when none exist).
+
+#### Scenario: Deep link selects a conversation
+
+- **WHEN** the user navigates to `/chat/:conversationId` for a conversation owned by the active profile
+- **THEN** the chat page SHALL render with that conversation active and its thread visible
+
+#### Scenario: Unknown or foreign conversation id
+
+- **WHEN** the user navigates to `/chat/:conversationId` for an id that does not exist for the active profile
+- **THEN** the page SHALL fall back to the conversation list (no thread selected) without crashing, and SHALL NOT leak another profile's conversation
 
 ### Requirement: Health Hub routes are routed pages with primary heading focus and live-announcement
 
@@ -349,3 +368,20 @@ If the FIT parser raises an `UnsupportedKrdTypeError` from a workout-only writer
 - **GIVEN** the user attempts a path that would call a workout-only writer (TCX/ZWO/GCN) with a KRD whose `type` is a health variant (test-only path, not user-reachable in the normal UI flow)
 - **WHEN** the writer throws `UnsupportedKrdTypeError`
 - **THEN** the caller catches the error via `instanceof UnsupportedKrdTypeError`, surfaces a toast naming the metric and the unsupported adapter, and routes the user to the Health Hub import surface
+
+### Requirement: Nutrition destination
+
+The SPA SHALL provide a top-level "Nutrition" navigation destination that hosts the
+energy-goal setup, intake logger, and energy-balance trends as the primary home for
+the feature. The destination SHALL be reachable from the main navigation.
+
+#### Scenario: Navigating to Nutrition
+
+- **WHEN** the user selects "Nutrition" from the main navigation
+- **THEN** the Nutrition destination renders with goal, intake, and trends entry points
+
+#### Scenario: Deep link from the Today card
+
+- **GIVEN** the energy-balance card on the Today view
+- **WHEN** the user activates the card
+- **THEN** the app navigates to the Nutrition destination

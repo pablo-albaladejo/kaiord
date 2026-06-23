@@ -17,7 +17,18 @@ import type { Profile } from "../../types/profile";
 import { ProfileNotFoundError } from "./errors";
 import { updateProfileData } from "./helpers/profile-updater";
 
-export type UpdateProfileInput = Partial<Pick<Profile, "name" | "bodyWeight">>;
+export type UpdateProfileInput = Partial<
+  Pick<
+    Profile,
+    | "name"
+    | "bodyWeight"
+    | "height"
+    | "birthDate"
+    | "sex"
+    | "restingHeartRate"
+    | "activityLevel"
+  >
+>;
 
 export const updateProfile = async (
   persistence: PersistencePort,

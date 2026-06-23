@@ -13,7 +13,11 @@ import type {
   HealthSleepRecord,
   HealthWeightRecord,
 } from "../../types/health/health-records";
-import { formatSleep, reduceWellnessByDay } from "./calendar-wellness-reduce";
+import {
+  formatSleep,
+  mergeNetByDay,
+  reduceWellnessByDay,
+} from "./calendar-wellness-reduce";
 
 const sleep = (
   date: string,
@@ -132,5 +136,44 @@ describe("reduceWellnessByDay", () => {
 
     // Assert
     expect(result["2026-05-19"]).toBeUndefined();
+  });
+});
+
+describe("mergeNetByDay", () => {
+  it("should attach a present net to an existing wellness day", () => {
+    // Arrange
+    const wellness = { "2026-05-19": { sleep: "82" } };
+    const netByDay = { "2026-05-19": "-600" };
+
+    // Act
+    const result = mergeNetByDay(wellness, netByDay);
+
+    // Assert
+    expect(result["2026-05-19"]).toEqual({ sleep: "82", net: "-600" });
+  });
+
+  it("should create a net-only day when no other metric is present", () => {
+    // Arrange
+    const wellness = {};
+    const netByDay = { "2026-05-20": "+300" };
+
+    // Act
+    const result = mergeNetByDay(wellness, netByDay);
+
+    // Assert
+    expect(result["2026-05-20"]).toEqual({ net: "+300" });
+  });
+
+  it("should skip days whose net is null", () => {
+    // Arrange
+    const wellness = { "2026-05-19": { sleep: "82" } };
+    const netByDay = { "2026-05-19": null, "2026-05-20": null };
+
+    // Act
+    const result = mergeNetByDay(wellness, netByDay);
+
+    // Assert
+    expect(result["2026-05-19"]).toEqual({ sleep: "82" });
+    expect(result["2026-05-20"]).toBeUndefined();
   });
 });

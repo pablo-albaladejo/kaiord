@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-06-13 (code-semantics-hardening)
 
 # Adapter Contracts
 
@@ -207,3 +207,68 @@ Cross-format round-trip tests SHALL exist only for cells where both the source a
 
 - **WHEN** the CI test suite runs cross-format round-trip tests
 - **THEN** there is no test attempting `FIT (health type) → TCX → FIT` or any combination crossing a `reject` cell; round-trip coverage is constrained to the matrix's `read+write` rectangles
+
+### Requirement: TCX Adapter Round-Trips Cadence And Pace Targets On Its Wired Encoding Path
+
+The TCX writer's production encoding path (the converter chain reachable from the registered `TextWriter`, currently `workout/step-to-tcx.converter.ts` → `workout/target-to-tcx.converter.ts` and `duration/duration-walker.converter.ts`) SHALL preserve cadence and pace targets across a full KRD → TCX → KRD round-trip within the configured tolerances (cadence ±1 rpm, time ±1 s). The writer and reader SHALL agree on one canonical encoding for running cadence (steps-per-minute doubling or rpm pass-through, resolved against the TCX schema semantics and Garmin-exported fixtures) and on one canonical pace unit identifier; divergent encodings between writer and reader are a violation regardless of which encoding is chosen. The TCX package SHALL contain exactly one production implementation per conversion direction — orphaned parallel converter chains SHALL NOT exist.
+
+#### Scenario: Running cadence target survives the round-trip
+
+- **GIVEN** a KRD running workout with a step carrying a cadence target of 90 rpm
+- **WHEN** the KRD is written to TCX by the wired writer path and read back by the wired reader path
+- **THEN** the resulting KRD step SHALL carry a cadence target equal to 90 rpm within ±1 rpm
+
+#### Scenario: Cycling cadence target survives the round-trip unchanged
+
+- **GIVEN** a KRD cycling workout with a step carrying a cadence target of 90 rpm
+- **WHEN** the KRD is written to TCX and read back through the wired paths
+- **THEN** the resulting KRD step SHALL carry a cadence target equal to 90 rpm within ±1 rpm
+
+#### Scenario: Pace target survives the round-trip with a consistent unit
+
+- **GIVEN** a KRD running workout with a pace target expressed in the canonical KRD speed unit
+- **WHEN** the KRD is written to TCX and read back through the wired paths
+- **THEN** the resulting pace target SHALL equal the original within the configured tolerance
+- **AND** the writer and reader SHALL have used the same unit identifier for the encoded value
+
+#### Scenario: Orphaned converter chain is rejected
+
+- **WHEN** the TCX package contains a target- or duration-converter module that no production code path imports (only tests or re-export barrels reference it)
+- **THEN** the module SHALL be removed (or wired in as the single canonical path), and its unique assertions SHALL be ported to the wired path's suite before removal
+
+### Requirement: Adapters SHALL handle the full KRD intensity vocabulary explicitly
+
+Workout adapters SHALL handle every member of the KRD intensity enum (`warmup`, `active`, `cooldown`, `rest`, `recovery`, `interval`, `other`) on both conversion legs: mapped to a native representation where the format has one, or narrowed with a `Lossy conversion:` warning where it does not. Silent narrowing of unhandled members to a default is a violation.
+
+#### Scenario: Representable intensity survives the round-trip
+
+- **GIVEN** a KRD step with intensity `rest` written to a format with a native rest notion
+- **WHEN** the file is read back through the same adapter pair
+- **THEN** the restored step carries intensity `rest`
+
+#### Scenario: Unrepresentable intensity narrows loudly
+
+- **GIVEN** a KRD step with intensity `recovery` written to a format with no recovery notion
+- **WHEN** the writer substitutes the closest representable intensity (or omits the field)
+- **THEN** it SHALL emit a `Lossy conversion:` warning naming `recovery` and the substitution applied
+
+### Requirement: Garmin GCN listing summaries SHALL speak KRD sport vocabulary
+
+The GCN adapter's workout-summary mapping SHALL translate Garmin sport keys to KRD sport vocabulary via the sport mapper; raw Garmin `sportTypeKey` values SHALL NOT appear in `WorkoutSummary.sport`.
+
+#### Scenario: Listed workout shows a KRD sport
+
+- **GIVEN** Garmin Connect returns a workout whose `sportTypeKey` is a Garmin-specific key
+- **WHEN** the adapter builds the `WorkoutSummary`
+- **THEN** `sport` carries the mapped KRD sport value (or the documented unknown fallback), not the raw key
+
+### Requirement: Garmin GCN end-conditions without a KRD equivalent SHALL degrade loudly
+
+When the GCN adapter encounters an end-condition the KRD duration vocabulary cannot express (e.g. repetition-count conditions), it SHALL emit a `Lossy conversion:` warning naming the condition and the substitution, rather than silently producing an open duration.
+
+#### Scenario: Reps end-condition warns
+
+- **GIVEN** a Garmin step whose end-condition is repetition-based
+- **WHEN** the adapter converts it to a KRD duration
+- **THEN** a `Lossy conversion:` warning names the reps condition
+- **AND** the produced duration is open

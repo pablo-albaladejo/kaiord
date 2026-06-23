@@ -480,8 +480,6 @@ test.describe("Import/Export Mobile Flow", () => {
 
   test("should handle format selection on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/workout/new?source=scratch");
-
     const testWorkout = {
       version: "1.0",
       type: "structured_workout",

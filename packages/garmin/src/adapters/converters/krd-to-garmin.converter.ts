@@ -5,6 +5,7 @@ import {
   workoutSchema,
 } from "@kaiord/core";
 
+import { GARMIN_NAME_MAX } from "../constants";
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
@@ -28,20 +29,11 @@ export const convertKRDToGarmin = (
   }
 
   const sportType = mapKrdSportToGarmin(workout.sport);
-  const counter = { value: 1 };
-  const targetOpts: TargetMapperOptions = {
-    paceZones: options.paceZones,
-  };
-
-  const workoutSteps: GarminWorkoutStepInput[] = workout.steps.map((step) =>
-    isRepetitionBlock(step)
-      ? mapRepetitionBlock(step, counter, targetOpts)
-      : mapWorkoutStep(step, counter, targetOpts)
-  );
+  const workoutSteps = mapSteps(workout, options);
 
   const input: PoolInput & Record<string, unknown> = {
     sportType,
-    workoutName: (workout.name ?? "Kaiord Workout").substring(0, 255),
+    workoutName: truncateName(workout.name ?? "Kaiord Workout", options.logger),
     workoutSegments: [
       {
         segmentOrder: 1,
@@ -62,11 +54,33 @@ export const convertKRDToGarmin = (
   return JSON.stringify(input, null, 2);
 };
 
+const mapSteps = (
+  workout: Workout,
+  options: GarminWriterOptions
+): GarminWorkoutStepInput[] => {
+  const counter = { value: 1 };
+  const targetOpts: TargetMapperOptions = { paceZones: options.paceZones };
+  return workout.steps.map((step) =>
+    isRepetitionBlock(step)
+      ? mapRepetitionBlock(step, counter, targetOpts, options.logger)
+      : mapWorkoutStep(step, counter, targetOpts, options.logger)
+  );
+};
+
 const extractTransitionFlag = (krd: KRD): boolean | undefined => {
   const gcnExt = krd.extensions?.gcn;
   if (!gcnExt || typeof gcnExt !== "object") return undefined;
   const flag = (gcnExt as Record<string, unknown>).isSessionTransitionEnabled;
   return typeof flag === "boolean" ? flag : undefined;
+};
+
+const truncateName = (name: string, logger: Logger): string => {
+  if (name.length <= GARMIN_NAME_MAX) return name;
+  logger.warn(
+    `Lossy conversion: workout name truncated to ${GARMIN_NAME_MAX} characters`,
+    { originalLength: name.length }
+  );
+  return name.substring(0, GARMIN_NAME_MAX);
 };
 
 const extractWorkout = (krd: KRD): Workout | undefined => {

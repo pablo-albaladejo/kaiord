@@ -34,6 +34,7 @@ function normalizePath(pathname: string): string {
 function labelForPathname(rawPathname: string): string {
   const pathname = normalizePath(rawPathname);
   if (pathname === "/library") return "Library page";
+  if (pathname === "/chat") return "Chat page";
   if (pathname === "/athlete") return "Athlete page";
   if (pathname === "/workout/new") return "New workout";
   if (pathname.startsWith("/workout/view/")) return "Workout page";
@@ -44,6 +45,7 @@ function labelForPathname(rawPathname: string): string {
   if (pathname === "/health/recovery") return "Recovery page";
   if (pathname === "/health/activity") return "Activity page";
   if (pathname.startsWith("/settings")) return "Settings page";
+  if (pathname === "/nutrition") return "Nutrition page";
   if (pathname === "/daily") return "Daily page";
   if (pathname === "/" || pathname.startsWith("/calendar"))
     return "Calendar page";

@@ -18,7 +18,11 @@ export const convertFromKrd = async (
   logger: Logger
 ): Promise<ConvertFromKrdResult> => {
   if (!FORMAT_REGISTRY[outputFormat]) {
-    throw new Error(`Unsupported output format: ${String(outputFormat)}`);
+    const error = new Error(
+      `Unsupported output format: ${String(outputFormat)}`
+    );
+    error.name = "UnsupportedFormatError";
+    throw error;
   }
   if (isBinaryFormat(outputFormat)) {
     return writeBinaryOutput(krd, outputFormat, outputFile, logger);
