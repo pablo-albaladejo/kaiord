@@ -154,6 +154,9 @@ describe("useCoachingManual", () => {
     // Assert
     expect(expandActivity).toHaveBeenCalledWith(unloaded);
     await waitFor(() => expect(navigateMock).toHaveBeenCalled());
+    expect(expandActivity.mock.invocationCallOrder[0]).toBeLessThan(
+      navigateMock.mock.invocationCallOrder[0]
+    );
   });
 
   it("should not prefetch when the description is already loaded", async () => {

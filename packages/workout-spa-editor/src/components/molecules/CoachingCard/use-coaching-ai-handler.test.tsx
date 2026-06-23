@@ -114,6 +114,9 @@ describe("useCoachingAi", () => {
     // Assert
     expect(expandActivity).toHaveBeenCalledWith(unloaded);
     expect(runConvertMock).toHaveBeenCalled();
+    expect(expandActivity.mock.invocationCallOrder[0]).toBeLessThan(
+      runConvertMock.mock.invocationCallOrder[0]
+    );
   });
 
   it("should not prefetch when the description is already loaded", async () => {
