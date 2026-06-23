@@ -25,6 +25,22 @@ describe("CoachingDialogShell", () => {
     expect(screen.getByText("Body content")).toBeInTheDocument();
   });
 
+  it("should expose an accessible dialog title", () => {
+    // Arrange
+
+    // Act
+    render(
+      <CoachingDialogShell onClose={vi.fn()}>
+        <p>Body</p>
+      </CoachingDialogShell>
+    );
+
+    // Assert
+    expect(
+      screen.getByRole("dialog", { name: "Coaching activity" })
+    ).toBeInTheDocument();
+  });
+
   it("should fire onClose when the user dismisses the dialog with Escape", async () => {
     // Arrange
     const onClose = vi.fn();
