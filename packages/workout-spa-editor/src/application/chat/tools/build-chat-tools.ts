@@ -7,7 +7,9 @@ import {
 } from "./action-tools";
 import type { ChatToolDeps } from "./chat-tool-deps";
 import { createGetTodayTool } from "./get-today-tool";
+import { createLogIntakeTool } from "./log-intake-tool";
 import { createQueryCoachingTool } from "./query-coaching-tool";
+import { createQueryEnergyBalanceTool } from "./query-energy-balance-tool";
 import { createQueryHealthTool } from "./query-health-tool";
 import { createQueryWorkoutsTool } from "./query-workouts-tool";
 
@@ -27,9 +29,11 @@ export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
     createGetTodayTool({ today: deps.today }),
     createQueryWorkoutsTool(read),
     createQueryHealthTool(read),
+    createQueryEnergyBalanceTool(read),
     createQueryCoachingTool(read),
     createSyncCoachingTool(deps.actions),
     createCreateWorkoutTool(deps.actions),
     createLogHealthMetricTool(deps.actions),
+    createLogIntakeTool(deps.actions),
   ];
 };

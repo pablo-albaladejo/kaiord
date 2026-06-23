@@ -28,6 +28,7 @@ import {
   TrendingUp,
   Upload,
   User,
+  Utensils,
   Watch,
   Waves,
   X,
@@ -72,6 +73,7 @@ export const ICON_MAP = {
   bell: Bell,
   trend: TrendingUp,
   upload: Upload,
+  nutrition: Utensils,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICON_MAP;
