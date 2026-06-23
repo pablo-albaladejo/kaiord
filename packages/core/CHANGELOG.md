@@ -1,5 +1,26 @@
 # @kaiord/core
 
+## 9.2.0
+
+### Minor Changes
+
+- bad73d3: Add energy-balance calculators powering the new energy-balance tracking feature: BMR
+  (Mifflin-St Jeor / Katch-McArdle), daily expenditure resolution (measured vs
+  predicted), goal daily-delta with safety caps, periodized daily target, P/C/F macro
+  targets, expected-activity-kcal estimation (curated MET table + tiered estimator),
+  exponential-moving-average smoothing, energy-balance rollup aggregation, and adaptive
+  TDEE (self-correcting maintenance from the weight trend vs logged intake). All pure,
+  fully unit-tested functions exported from the package root.
+- cfb1b06: Add an activity-level NEAT factor API (`ActivityLevel`, `NEAT_FACTOR`, `DEFAULT_NEAT_FACTOR`, `neatFactorForActivityLevel`) and apply it to the predicted daily expenditure. `resolveDayExpenditure` now accepts an optional `basalActivityFactor` that scales the predicted basal (`bmrKcal × factor`), so a no-workout day reflects realistic maintenance instead of raw BMR. The factors are NEAT-only (sedentary 1.2 … very_active 1.6); scheduled-workout energy is still added separately via `expectedActivityKcal` and is never double-counted, and the measured-wellness path is unchanged.
+
+### Patch Changes
+
+- 73a2ce4: feat(cli): semantic failure exit codes. A single typed `mapErrorToExitCode` replaces the previous divergent mappers and message-substring matching; new `ENVIRONMENT_ERROR` (missing bundled schema/dependency → reinstall hint) and `SERVICE_ERROR` (Garmin Connect API/network) codes mean environmental and external-service failures no longer collapse into `UNKNOWN_ERROR`. A single `FORMAT_REGISTRY` now sources the format vocabulary.
+
+  fix(garmin): `WorkoutSummary.sport` now carries KRD sport vocabulary (via the sport mapper) instead of the raw Garmin `sportTypeKey`.
+
+  Internal semantic hardening with no other behavior changes: lossy adapter conversions (zwo watts→%FTP, garmin truncation / unknown-enum / REPS, tcx-zwo intensity narrowing) now emit named `Lossy conversion:` warnings with named assumed/fallback constants; duplicated domain rules are single-sourced (fit bpm offset and zone bounds, fit FIT-timestamp helper, core health version gate, garmin-connect retry policy); core round-trip methods gained honest port-level names (`validateBinaryRoundTrip`/`validateKrdRoundTrip`) with deprecated FIT-named aliases; MCP tool errors carry a machine-readable `structuredContent.error` classification and `kaiord_get_recovery_status` reports `skipped`.
+
 ## 9.1.0
 
 ### Minor Changes

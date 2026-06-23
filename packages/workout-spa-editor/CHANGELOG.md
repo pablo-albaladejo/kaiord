@@ -1,5 +1,108 @@
 # @kaiord/workout-spa-editor
 
+## 1.2.0
+
+### Minor Changes
+
+- f78931a: Athlete Connections: real connect/disconnect semantics. Connection state is now
+  a first-class per-(profile, provider) record (device-local, excluded from the
+  cloud snapshot, cascade-deleted with the profile) instead of being inferred from
+  integration policies. Each brand declares a connect mechanism:
+  - **intervals.icu** — connect with a personal API key (validated against the
+    intervals.icu API, stored AES-GCM encrypted at rest).
+  - **Garmin** — bridge connection; disconnect is now a real unlink (clears the
+    local linkage and disables the bridge's flows), not just a policy toggle.
+  - **Strava / Wahoo** — an honest "not supported yet" state (no fake connect).
+    OAuth for these needs a token-exchange backend and remains a follow-up.
+
+  Dexie v24 adds the device-local `connections` store (index-only, non-destructive).
+
+- 03ad7dd: Turn the in-SPA AI chat into a multi-conversation manager. A new
+  `chatConversations` store (Dexie v24) parents the transcript via a
+  `conversationId` foreign key, and the `/chat` page gains a conversation list
+  with create, switch, rename, deep-link (`/chat/:conversationId`), and
+  delete-one. A new conversation is an in-memory draft until its first message
+  persists it; its title is auto-derived from that message and editable. Each
+  conversation remembers its own model override, falling back to the chat
+  default. Existing transcripts migrate into one seeded "Conversation 1" per
+  profile, and conversations ride the cross-device snapshot/sync (last-write-wins
+  on `updatedAt`, tombstoned on delete).
+- af9b72c: Decouple the AI provider API key from the model and add per-use model
+  selection. Adding a provider at Settings · AI now collects only type, label,
+  and API key. A new per-profile "Models" section binds a model to each use —
+  a Default plus Chat and Workout-generation overrides — resolved through a
+  single `resolveModelForPurpose()` shared by chat, free-text generation,
+  coaching conversion, and batch processing. Model choices come from a catalog
+  generated from the installed `@ai-sdk/*` packages (with a free-text field for
+  ids newer than the pinned SDK), replacing the hardcoded model enum. Existing
+  users are unaffected: a Dexie v22 migration backfills each profile's default
+  binding from its current default provider.
+- 6941e55: Make the Settings "Units" and "Notifications" rows functional (previously
+  display-only). A new Preferences tab persists a per-profile `units`
+  (metric/imperial) preference and a browser-notification toggle.
+
+  Units are display-only — canonical data stays in SI. Choosing imperial
+  relabels workout step-target pace (min/km → min/mi), athlete threshold pace and
+  zones (running min/mi, swimming /100yd), and weight surfaces (kg → lb) in the
+  weight history and health trends. The Notifications toggle drives the real
+  browser Notification permission rather than being a dead control.
+
+- 2af582f: Add an in-SPA AI chat assistant.
+
+  `@kaiord/ai` gains `createChatAgent`: a provider-agnostic, multi-step
+  tool-calling chat engine on the Vercel AI SDK (read tools auto-execute;
+  action tools pause for explicit user confirmation and resume).
+
+  The workout SPA editor gains a `/chat` page that answers questions over the
+  user's own history (workouts, coaching, the six health metrics) and performs
+  confirmation-gated actions (sync coaching, create a workout, log a health
+  metric), reusing the existing AI provider credentials. Transcripts persist
+  per profile (Dexie v20 `chatMessages`) and ride the existing cross-device
+  cloud-sync snapshot; per-turn token usage is recorded in the monthly usage
+  row. No new backend and no new runtime dependencies.
+
+### Patch Changes
+
+- e40a6d7: Emit count-only analytics for the AI chat: a `chat-message-sent` event per
+  user turn and a `chat-tool-confirmed` event (with the bounded tool name) when a
+  pending action is approved. No message content or API keys reach analytics,
+  satisfying the spa-ai-chat usage rule.
+- bf0a83a: Add discoverable entry points to the AI chat assistant: a "Chat" action in the
+  header navigation (all viewports) and a desktop floating button. Both navigate
+  to the existing `/chat` routed page, so deep-linking and history are preserved.
+- 329e85a: Cross-device sync: make the auto-push change token cheap. It previously
+  `toArray()`-ed every synced table and scanned every row's timestamps on each
+  Dexie write (O(all rows) per change). It now reads each table's row `count`
+  plus the max of an indexed timestamp (`updatedAt` for workouts/templates/
+  profiles via a new Dexie v23 index, `createdAt`/`deletedAt` elsewhere) — O(tables)
+  per change. In-place-edit correctness is preserved: an edit sets `updatedAt`
+  to now, advancing the per-table max. The v23 migration is index-only
+  (non-destructive, no data transform).
+- df268d1: Today readiness: derive the "Battery" stat from a real, independent signal
+  (the day's ingested stress episodes) instead of reusing the HRV overnight
+  score. Battery now shows a daily-energy proxy — 100 − mean stress level,
+  clamped 0–100 — and falls back to the em-dash empty state when no stress
+  record exists for the day. Full Garmin Body Battery ingestion remains a
+  follow-up.
+- 2009aa7: feat(train2go): preserve coach hyperlinks and surface day comment threads
+
+  The Train2Go bridge now keeps hyperlinks from activity descriptions instead of stripping them: `<a href>` anchors are converted to markdown `[label](url)` in the parser (mirroring the existing `<strong>` → `**` handling). It also parses the day-scoped coach/athlete comment thread from the same daily sidebar HTML — no new endpoints or permissions — and returns it on the `read-day` response (additive; older SPAs ignore it).
+
+  In the SPA, the coaching description renderer gains safe link support: markdown links and bare `https://` URLs render as `target="_blank" rel="noopener noreferrer"` anchors with the full href in the `title`, enforced through an https-only scheme allowlist at render time (no `dangerouslySetInnerHTML`). Day comments persist in a new profile-scoped `coachingDayNotes` Dexie store (v20, additive), are replaced wholesale on each `read-day`, cleared by the profile-delete cascade, and render in a read-only panel inside the coaching activity dialog.
+
+- Updated dependencies [a0c22e6]
+- Updated dependencies [73a2ce4]
+- Updated dependencies [bad73d3]
+- Updated dependencies [cfb1b06]
+- Updated dependencies [2af582f]
+- Updated dependencies [4f712ef]
+  - @kaiord/tcx@9.2.0
+  - @kaiord/garmin@9.2.0
+  - @kaiord/core@9.2.0
+  - @kaiord/fit@9.2.0
+  - @kaiord/zwo@9.2.0
+  - @kaiord/ai@9.2.0
+
 ## 1.1.0
 
 ### Minor Changes

@@ -1,5 +1,36 @@
 # @kaiord/ai
 
+## 9.2.0
+
+### Minor Changes
+
+- 2af582f: Add an in-SPA AI chat assistant.
+
+  `@kaiord/ai` gains `createChatAgent`: a provider-agnostic, multi-step
+  tool-calling chat engine on the Vercel AI SDK (read tools auto-execute;
+  action tools pause for explicit user confirmation and resume).
+
+  The workout SPA editor gains a `/chat` page that answers questions over the
+  user's own history (workouts, coaching, the six health metrics) and performs
+  confirmation-gated actions (sync coaching, create a workout, log a health
+  metric), reusing the existing AI provider credentials. Transcripts persist
+  per profile (Dexie v20 `chatMessages`) and ride the existing cross-device
+  cloud-sync snapshot; per-turn token usage is recorded in the monthly usage
+  row. No new backend and no new runtime dependencies.
+
+### Patch Changes
+
+- 73a2ce4: feat(cli): semantic failure exit codes. A single typed `mapErrorToExitCode` replaces the previous divergent mappers and message-substring matching; new `ENVIRONMENT_ERROR` (missing bundled schema/dependency → reinstall hint) and `SERVICE_ERROR` (Garmin Connect API/network) codes mean environmental and external-service failures no longer collapse into `UNKNOWN_ERROR`. A single `FORMAT_REGISTRY` now sources the format vocabulary.
+
+  fix(garmin): `WorkoutSummary.sport` now carries KRD sport vocabulary (via the sport mapper) instead of the raw Garmin `sportTypeKey`.
+
+  Internal semantic hardening with no other behavior changes: lossy adapter conversions (zwo watts→%FTP, garmin truncation / unknown-enum / REPS, tcx-zwo intensity narrowing) now emit named `Lossy conversion:` warnings with named assumed/fallback constants; duplicated domain rules are single-sourced (fit bpm offset and zone bounds, fit FIT-timestamp helper, core health version gate, garmin-connect retry policy); core round-trip methods gained honest port-level names (`validateBinaryRoundTrip`/`validateKrdRoundTrip`) with deprecated FIT-named aliases; MCP tool errors carry a machine-readable `structuredContent.error` classification and `kaiord_get_recovery_status` reports `skipped`.
+
+- Updated dependencies [73a2ce4]
+- Updated dependencies [bad73d3]
+- Updated dependencies [cfb1b06]
+  - @kaiord/core@9.2.0
+
 ## 9.0.0
 
 ### Patch Changes
