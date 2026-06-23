@@ -51,3 +51,21 @@ export const reduceWellnessByDay = (
       set(map, r.date, { steps: `${r.krd.steps}` });
   return Object.fromEntries(map);
 };
+
+/**
+ * Merges a per-day net-balance map (date → formatted net string, or null when
+ * the day yields no badge) into an existing `wellnessByDay`, attaching the
+ * `net` metric only where present. A net-only day still becomes a present
+ * `DayWellness` entry so the band renders the badge alone.
+ */
+export const mergeNetByDay = (
+  wellnessByDay: Record<string, DayWellness>,
+  netByDay: Record<string, string | null>
+): Record<string, DayWellness> => {
+  const map = new Map<string, DayWellness>(Object.entries(wellnessByDay));
+  for (const [date, net] of Object.entries(netByDay)) {
+    if (net === null) continue;
+    set(map, date, { net });
+  }
+  return Object.fromEntries(map);
+};

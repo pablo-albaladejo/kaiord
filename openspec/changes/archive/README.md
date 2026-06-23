@@ -7,6 +7,8 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-06-22 | [`energy-balance-tracking`](./2026-06-22-energy-balance-tracking/) | Athletes can already see ingested wellness data (steps, sleep, HRV, weight, and |
+| 2026-06-22 | [`energy-expenditure-activity-factor`](./2026-06-22-energy-expenditure-activity-factor/) | resolveDayExpenditure's predicted path is BMR + expectedActivityKcal. On a |
 | 2026-06-21 | [`add-chat-conversations`](./2026-06-21-add-chat-conversations/) | The in-SPA AI chat at /chat persists exactly one rolling transcript per profile (spa-ai-chat → "Transcript persistence"). A user cannot keep separate threads f… |
 | 2026-06-21 | [`athlete-connections-oauth`](./2026-06-21-athlete-connections-oauth/) | The Athlete page's Connections section ships Strava, Wahoo, and |
 | 2026-06-15 | [`per-use-dynamic-model-selection`](./2026-06-15-per-use-dynamic-model-selection/) | Per-Use Model Selection with SDK-Sourced Model Catalog |

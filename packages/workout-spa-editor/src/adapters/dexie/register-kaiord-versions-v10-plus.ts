@@ -116,4 +116,7 @@ export const registerV25 = (db: DexieVersionHost): void => {
   // `conversationId` on `chatMessages`. The upgrade buckets prior messages
   // into one seeded "Conversation 1" per profile and backfills the FK.
   db.version(25).stores(SCHEMAS.v25).upgrade(applyV25Upgrade);
+  // v26 — additive energy-balance device-local stores (`intakeEntries`,
+  // `intakePresets`, `energyTargets`); auto-created empty, no upgrade fn.
+  db.version(26).stores(SCHEMAS.v26);
 };

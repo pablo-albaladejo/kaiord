@@ -21,6 +21,7 @@ import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-d
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import { createInMemoryConnectionRepository } from "./in-memory-connection-repository";
+import { createInMemoryEnergyBalanceRepositories } from "./in-memory-energy-balance-repositories";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
 import { createInMemoryIntegrationPolicyRepository } from "./in-memory-integration-policy-repository";
 import { createInMemoryMatchedSessionsReadModel } from "./in-memory-matched-sessions-read-model";
@@ -138,6 +139,7 @@ export function createInMemoryPersistence(): PersistencePort {
     aiModelBindings: createInMemoryAiModelBindingRepository(
       stores.aiModelBindings
     ),
+    ...createInMemoryEnergyBalanceRepositories(),
     tombstones: createInMemoryTombstoneRepository(stores.tombstones),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(

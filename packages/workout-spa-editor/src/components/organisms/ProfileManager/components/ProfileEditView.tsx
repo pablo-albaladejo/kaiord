@@ -18,14 +18,15 @@ import { ProfileTabs } from "./ProfileTabs";
 type ProfileEditViewProps = {
   profileId: string;
   formData: ProfileFormData;
-  setFormData: (data: ProfileFormData) => void;
+  /** Updates form state AND persists in place (see ProfileManagerDialog). */
+  onChange: (data: ProfileFormData) => void;
   onCancel: () => void;
 };
 
 export function ProfileEditView({
   profileId,
   formData,
-  setFormData,
+  onChange,
   onCancel,
 }: ProfileEditViewProps) {
   const [activeTab, setActiveTab] = useState<ProfileTab>("zones");
@@ -40,12 +41,7 @@ export function ProfileEditView({
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
       {activeTab === "zones" && <SportZoneEditor profileId={profileId} />}
       {activeTab === "personal" && (
-        <PersonalDataTab
-          bodyWeight={formData.bodyWeight}
-          onBodyWeightChange={(bw) =>
-            setFormData({ ...formData, bodyWeight: bw })
-          }
-        />
+        <PersonalDataTab formData={formData} onChange={onChange} />
       )}
       {activeTab === "linked-accounts" && profile && (
         <LinkedAccountsSection profile={profile} />
