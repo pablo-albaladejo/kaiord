@@ -51,6 +51,7 @@ export const useChatSearch = (
     if (!active || !profileId || loadedProfile.current === profileId) return;
     loadedProfile.current = profileId;
     let cancelled = false;
+    setMessages([]);
     void chatMessageRepository.listByProfile(profileId).then((rows) => {
       if (!cancelled) setMessages(rows);
     });
