@@ -14,6 +14,7 @@ export type ChatConversationProps = {
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
   messages: ChatMessageRecord[];
+  focusMessageId?: string | null;
 };
 
 /** Interactive transcript for the active conversation: streamed turns, action
@@ -28,6 +29,7 @@ export function ChatConversation({
   generationProvider,
   generationModelId,
   messages,
+  focusMessageId,
 }: ChatConversationProps) {
   const turn = useChatTurn({
     profileId,
@@ -43,7 +45,7 @@ export function ChatConversation({
 
   return (
     <div className="flex flex-col gap-3">
-      <ChatMessageList messages={messages} />
+      <ChatMessageList messages={messages} focusMessageId={focusMessageId} />
       <ChatTurnExtras
         busy={busy}
         streamingText={turn.streamingText}
