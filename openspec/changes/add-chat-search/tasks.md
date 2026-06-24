@@ -17,8 +17,8 @@
 
 ## 4. Search hook (orchestration)
 
-- [x] 4.1 Create `hooks/use-chat-search.ts`: debounce the query; when the effective query is non-empty, lazily load profile messages via `chatMessages.listByProfile(profileId)`; run `searchConversations`; expose `{ query, setQuery, results, isSearching }`.
-- [x] 4.2 Write `use-chat-search.test.tsx`: no message read until query is effective; debounced search; results update on query change; clearing query returns to idle.
+- [x] 4.1 Create `hooks/use-chat-search.ts`: debounce the query; when the effective query is non-empty, read profile messages via a `useLiveQuery` over `chatMessages.listByProfile(profileId)` gated on `active` (no read while idle, live while searching); run `searchConversations`; expose `{ query, setQuery, results, active }`.
+- [x] 4.2 Write `use-chat-search.test.tsx`: no message read until query is effective; debounced search; results update on query change; messages appended during an active search are reflected; clearing query returns to idle.
 
 ## 5. Results UI and focus wiring
 

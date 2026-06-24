@@ -1,14 +1,17 @@
 /**
- * useChatSearch — query state + lazy, debounced chat search for a profile.
+ * useChatSearch — query state + live, debounced chat search for a profile.
  *
  * The conversation list is already live in the page; this hook adds the message
- * side. It loads the profile's messages once, only when the search first becomes
- * active (an effective, multi-character query), then recomputes results from the
- * debounced query. `active` reflects the raw query so the UI can swap to the
- * results panel immediately, while `results` follow the debounced query to avoid
- * recomputing on every keystroke. Read-only: it never writes to Dexie.
+ * side. While the search is active it subscribes — via `useLiveQuery` — to the
+ * profile's messages, so messages appended during the session (and a profile
+ * switch) are reflected without remounting. While the search is idle the query
+ * resolves to an empty set, so no per-profile read runs until search is active.
+ * `active` reflects the raw query so the UI can swap to the results panel
+ * immediately, while `results` follow the debounced query to avoid recomputing
+ * on every keystroke. Read-only: it never writes to Dexie.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect, useMemo, useState } from "react";
 
 import { createDexieChatMessageRepository } from "../adapters/dexie/dexie-chat-message-repository";
 import { db } from "../adapters/dexie/dexie-database";
@@ -24,6 +27,8 @@ const chatMessageRepository = createDexieChatMessageRepository(db);
 
 const DEBOUNCE_MS = 200;
 
+const EMPTY: ChatMessageRecord[] = [];
+
 export type UseChatSearch = {
   query: string;
   setQuery: (query: string) => void;
@@ -37,8 +42,6 @@ export const useChatSearch = (
 ): UseChatSearch => {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [messages, setMessages] = useState<ChatMessageRecord[]>([]);
-  const loadedProfile = useRef<string | null>(null);
 
   const active = tokenize(query).length > 0;
 
@@ -47,21 +50,16 @@ export const useChatSearch = (
     return () => clearTimeout(handle);
   }, [query]);
 
-  useEffect(() => {
-    if (!active || !profileId || loadedProfile.current === profileId) return;
-    loadedProfile.current = profileId;
-    let cancelled = false;
-    setMessages([]);
-    void chatMessageRepository.listByProfile(profileId).then((rows) => {
-      if (!cancelled) setMessages(rows);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [active, profileId]);
+  const messages = useLiveQuery<ChatMessageRecord[]>(
+    () =>
+      active && profileId
+        ? chatMessageRepository.listByProfile(profileId)
+        : Promise.resolve(EMPTY),
+    [active, profileId]
+  );
 
   const results = useMemo(
-    () => searchConversations(debounced, conversations, messages),
+    () => searchConversations(debounced, conversations, messages ?? EMPTY),
     [debounced, conversations, messages]
   );
 

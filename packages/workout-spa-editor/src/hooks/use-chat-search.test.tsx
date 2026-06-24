@@ -1,8 +1,8 @@
 /**
  * Co-located test for `useChatSearch`. Verifies idle behavior for an ineffective
  * query, debounced results once the query is effective (messages lazily loaded),
- * result updates on query change, and a return to idle when cleared. Runs against
- * fake-indexeddb.
+ * result updates on query change, live reflection of messages appended during an
+ * active search, and a return to idle when cleared. Runs against fake-indexeddb.
  */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -83,6 +83,27 @@ describe("useChatSearch", () => {
 
     // Act
     act(() => result.current.setQuery("vo2"));
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current.results.map((r) => r.conversationId)).toEqual([
+        "c1",
+      ]);
+    });
+  });
+
+  it("should reflect messages appended while the search is active", async () => {
+    // Arrange
+    const persistence = createDexiePersistence(db);
+    await persistence.chatMessages.append(message("m1", "hablar de cadencia"));
+    const { result } = renderHook(() => useChatSearch(PROFILE, conversations));
+    act(() => result.current.setQuery("umbral"));
+    await waitFor(() => expect(result.current.results).toEqual([]));
+
+    // Act
+    await act(async () => {
+      await persistence.chatMessages.append(message("m2", "subir el umbral"));
+    });
 
     // Assert
     await waitFor(() => {

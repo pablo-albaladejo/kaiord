@@ -85,14 +85,23 @@ so shared links keep one meaning and history is not polluted by per-result focus
 - **Alternative — `?m=<messageId>` query param:** deep-linkable to a message, but
   complicates routing and history for a transient UI affordance. Rejected for v1.
 
-### D5 — Lazy, debounced message load; results panel replaces the list
+### D5 — Live-while-active, debounced message read; results panel replaces the list
 
-Profile messages for search are read via the existing `listByProfile` only when
-search is active, debounced on input, rather than holding the whole transcript in
-memory continuously. While the query is non-empty the results panel replaces
-`ConversationList` in the same column (with a clear control); an empty query
-restores the list. This keeps the "one query per page" posture and avoids a
-standing live subscription to every message.
+Profile messages for search are read via the existing `listByProfile`, but only
+**while search is active** and through `useLiveQuery` — the repo's standard
+posture for persisted data. When the query is idle the live query resolves to an
+empty set, so no per-profile read runs until the user searches; once active, the
+subscription reflects messages appended during the session and a profile switch
+without a remount. Input is debounced before the search recomputes. While the
+query is non-empty the results panel replaces `ConversationList` in the same
+column (with a clear control); an empty query restores the list.
+
+- **Why not a one-time snapshot load:** a single `listByProfile().then(setState)`
+  on first activation is simpler, but freezes the searched set for the hook's
+  lifetime — messages sent during the session are not searchable until remount,
+  and a profile switch briefly searches the previous profile's messages against
+  the new profile's conversations. Gating `useLiveQuery` on `active` keeps the
+  "no read until active" guarantee while removing both staleness modes.
 
 ### D6 — Module layout (cap-driven)
 
@@ -100,7 +109,7 @@ standing live subscription to every message.
 conversations, messages) → SearchResult[]`. Unit-tested.
 - `application/chat/normalize-search-text.ts` — normalization + tokenization helper.
 - `application/chat/build-snippet.ts` — windowing + match-range computation.
-- `hooks/use-chat-search.ts` — debounce, lazy message load, orchestration.
+- `hooks/use-chat-search.ts` — debounce, live-while-active message read, orchestration.
 - `components/organisms/Chat/ChatSearchResults.tsx` + a search box wired into
   `ChatWorkspace`/`ConversationList`; `ChatMessageList` gains `focusMessageId`.
 
@@ -116,6 +125,11 @@ messageId, role, snippet, ranges }[] }`.
   single-user personal app's volume; debounced and only while search is active. If
   volume ever grows, D1's use-case seam allows swapping in an index without UI
   changes.
+- **Live subscription recomputes results on every message change (D5)** → While
+  searching, an `append` re-fires the query and re-runs `searchConversations`.
+  In practice a user rarely chats and searches simultaneously, the gate keeps the
+  subscription off otherwise, and the recompute is a bounded in-memory pass; the
+  staleness it removes outweighs the occasional extra pass.
 - **No stopwords** → Common short words ("de", "la") become required tokens, but
   under AND over Spanish prose they are almost always satisfied, so recall is
   barely affected; the cost is negligible and avoids language-specific lists.

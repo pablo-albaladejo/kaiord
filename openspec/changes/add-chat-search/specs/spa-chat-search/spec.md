@@ -150,8 +150,10 @@ which remains `/chat/:conversationId`.
 
 The search SHALL be read-only: it SHALL NOT write to or migrate any Dexie store,
 add any port, or affect cross-device sync. Profile messages used for searching
-SHALL be loaded via the existing per-profile message read only when search is
-active, and query input SHALL be debounced before searching.
+SHALL be read via the existing per-profile message read only while search is
+active, through a reactive (live) subscription so that messages appended during
+the session and a profile switch are reflected without remounting. Query input
+SHALL be debounced before searching.
 
 #### Scenario: Searching performs no writes
 
@@ -163,3 +165,15 @@ active, and query input SHALL be debounced before searching.
 - **GIVEN** the user has not engaged the search box
 - **WHEN** the chat page renders
 - **THEN** the per-profile message read for search SHALL NOT run until the search becomes active
+
+#### Scenario: Messages appended during an active search become searchable
+
+- **GIVEN** the user has an effective query active and is viewing results
+- **WHEN** a new message is appended to the active profile (e.g. a chat sent in the same session)
+- **THEN** the search results SHALL update to reflect that message without requiring a remount
+
+#### Scenario: Switching profiles does not search the previous profile's messages
+
+- **GIVEN** the user has an effective query active for one profile
+- **WHEN** the active profile changes
+- **THEN** the results SHALL be computed from the new profile's messages only, never from the previous profile's messages
