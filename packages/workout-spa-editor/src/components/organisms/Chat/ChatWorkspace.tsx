@@ -1,9 +1,10 @@
+import type { UseChatSearchPanel } from "../../../hooks/use-chat-search-panel";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { ChatConversationRecord } from "../../../types/chat/chat-conversation-record";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
 import { ChatConversation } from "./ChatConversation";
 import { ChatModelPicker } from "./ChatModelPicker";
-import { ConversationList } from "./ConversationList";
+import { ConversationSidebar } from "./ConversationSidebar";
 
 export type ChatWorkspaceProps = {
   profileId: string | null;
@@ -15,6 +16,7 @@ export type ChatWorkspaceProps = {
   modelId: string | null;
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
+  search: UseChatSearchPanel;
   onModelChange: (providerId: string) => void;
   onSelect: (id: string) => void;
   onNew: () => void;
@@ -26,10 +28,15 @@ export type ChatWorkspaceProps = {
  * prompt to pick/start one when no thread is selected). */
 export function ChatWorkspace(props: ChatWorkspaceProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-[220px_1fr]">
-      <ConversationList
+    <div className="grid gap-4 md:grid-cols-[240px_1fr]">
+      <ConversationSidebar
         conversations={props.conversations}
         activeId={props.activeId}
+        searchQuery={props.search.query}
+        searchActive={props.search.active}
+        searchResults={props.search.results}
+        onSearchChange={props.search.setQuery}
+        onResultSelect={props.search.onResultSelect}
         onSelect={props.onSelect}
         onNew={props.onNew}
         onRename={props.onRename}
@@ -50,6 +57,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
             generationProvider={props.generationProvider}
             generationModelId={props.generationModelId}
             messages={props.messages}
+            focusMessageId={props.search.focusMessageId}
           />
         ) : (
           <p className="p-4 text-sm text-slate-400">

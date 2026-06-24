@@ -16,6 +16,7 @@ import { useChatConversationNav } from "../../hooks/use-chat-conversation-nav";
 import { useChatConversationsLive } from "../../hooks/use-chat-conversations-live";
 import { useChatMessagesLive } from "../../hooks/use-chat-messages-live";
 import { useChatModelSelection } from "../../hooks/use-chat-model-selection";
+import { useChatSearchPanel } from "../../hooks/use-chat-search-panel";
 import { useAiRuntimeStore } from "../../store/ai-runtime-store";
 import { ChatHeader } from "../organisms/Chat/ChatHeader";
 import { ChatWorkspace } from "../organisms/Chat/ChatWorkspace";
@@ -34,6 +35,7 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
   const conversations = useChatConversationsLive(profileId);
   const nav = useChatConversationNav(conversations, conversationId);
   const messages = useChatMessagesLive(profileId, nav.activeId);
+  const search = useChatSearchPanel(profileId, conversations ?? [], nav.select);
   const onModelChange = useChatModelSelection({
     profileId,
     activeId: nav.activeId,
@@ -76,6 +78,7 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
           modelId={model.modelId}
           generationProvider={fallback.generationProvider}
           generationModelId={fallback.generationModelId}
+          search={search}
           onModelChange={onModelChange}
           onSelect={nav.select}
           onNew={nav.startNew}
