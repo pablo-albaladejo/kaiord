@@ -220,28 +220,22 @@ describe("createTextToWorkout", () => {
     expect(result.name).toBe("LLM Name");
   });
 
-  it("should throw AiParsingError on empty input without calling LLM", async () => {
-    // Arrange
+  it.each([
+    ["empty input", ""],
+    ["input exceeding max length", "a".repeat(INPUT_LEN_OVER_LIMIT)],
+  ])(
+    "should throw AiParsingError on %s without calling LLM",
+    async (_case, input) => {
+      // Arrange
+      const parse = createTextToWorkout({ model: mockModel });
 
-    // Act
-    const parse = createTextToWorkout({ model: mockModel });
+      // Act
 
-    // Assert
-    await expect(parse("")).rejects.toThrow(AiParsingError);
-    expect(mockGenerateText).not.toHaveBeenCalled();
-  });
-
-  it("should throw AiParsingError on input exceeding max length", async () => {
-    // Arrange
-    const parse = createTextToWorkout({ model: mockModel });
-
-    // Act
-    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
-
-    // Assert
-    await expect(parse(longInput)).rejects.toThrow(AiParsingError);
-    expect(mockGenerateText).not.toHaveBeenCalled();
-  });
+      // Assert
+      await expect(parse(input)).rejects.toThrow(AiParsingError);
+      expect(mockGenerateText).not.toHaveBeenCalled();
+    }
+  );
 
   it("should pass default config values to generateText", async () => {
     // Arrange
