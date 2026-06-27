@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-06-27 | [`train2go-coach-links`](./2026-06-27-train2go-coach-links/) | Coach instructions imported from Train2Go — including the YouTube/Dropbox links |
 | 2026-06-22 | [`energy-balance-tracking`](./2026-06-22-energy-balance-tracking/) | Athletes can already see ingested wellness data (steps, sleep, HRV, weight, and |
 | 2026-06-22 | [`energy-expenditure-activity-factor`](./2026-06-22-energy-expenditure-activity-factor/) | resolveDayExpenditure's predicted path is BMR + expectedActivityKcal. On a |
 | 2026-06-21 | [`add-chat-conversations`](./2026-06-21-add-chat-conversations/) | The in-SPA AI chat at /chat persists exactly one rolling transcript per profile (spa-ai-chat → "Transcript persistence"). A user cannot keep separate threads f… |
