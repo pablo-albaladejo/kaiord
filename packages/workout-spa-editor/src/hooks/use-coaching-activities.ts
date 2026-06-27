@@ -59,7 +59,11 @@ export function useCoachingActivities(days: string[]) {
     (activity: CoachingActivity) => {
       if (!activeProfileId) return;
       const source = sources.find((s) => s.id === activity.source);
-      void source?.expand(activeProfileId, activity.date);
+      // Return (not discard) the expand promise so callers that must wait for
+      // the description before acting (e.g. convert) can `await` it. The public
+      // type stays `=> void`; awaiting a void-typed call is valid and resolves
+      // the real promise at runtime.
+      return source?.expand(activeProfileId, activity.date);
     },
     [sources, activeProfileId]
   );

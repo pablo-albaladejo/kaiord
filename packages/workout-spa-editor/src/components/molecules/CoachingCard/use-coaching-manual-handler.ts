@@ -26,7 +26,8 @@ export type UseCoachingManual = {
 export const useCoachingManual = (
   activity: CoachingActivity | null,
   profileId: string | null,
-  onClose: () => void
+  onClose: () => void,
+  expandActivity: (activity: CoachingActivity) => void
 ): UseCoachingManual => {
   const persistence = usePersistence();
   const [, navigate] = useLocation();
@@ -40,6 +41,18 @@ export const useCoachingManual = (
     setError(null);
     setCreating(true);
     try {
+      // Prefetch the coach description before building the draft when it has
+      // not loaded yet (weekly sync carries none) so the draft/Save path
+      // captures it as the workout-level note. Awaiting closes the race with
+      // the fire-and-forget on-open expand. Best-effort: a transport failure
+      // must not block the draft (it just opens without the description).
+      if (activity.description === undefined) {
+        try {
+          await expandActivity(activity);
+        } catch {
+          // ignore — proceed to the draft without the description
+        }
+      }
       // Idempotency: if a workout already exists for this activity (same
       // key the Save path guards on), open it instead of a fresh draft.
       // `activity.id` is the SHORT `${source}:${sourceId}`; strip the known
@@ -70,7 +83,7 @@ export const useCoachingManual = (
       setCreating(false);
       inFlight.current = false;
     }
-  }, [activity, profileId, persistence, navigate, onClose]);
+  }, [activity, profileId, persistence, navigate, onClose, expandActivity]);
 
   return {
     creating,

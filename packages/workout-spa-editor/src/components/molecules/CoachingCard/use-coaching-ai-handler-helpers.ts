@@ -23,6 +23,7 @@ type Reason = AiFailureReason | "not-found" | "no-provider";
 export type StartAiCtx = {
   activity: CoachingActivity | null;
   profileId: string | null;
+  expandActivity: (activity: CoachingActivity) => void;
   providers: LlmProviderConfig[] | undefined;
   bindings: AiModelBinding[] | undefined;
   persistence: PersistencePort;
@@ -37,6 +38,13 @@ export type StartAiCtx = {
 
 export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   if (!ctx.activity || !ctx.profileId || ctx.abortRef.current) return;
+  // Prefetch the coach description before convert reads the activity (weekly
+  // sync carries none) so it becomes the workout-level note. `expandDay`
+  // resolves a result (never rejects), so awaiting is safe and closes the
+  // race with the fire-and-forget on-open expand.
+  if (ctx.activity.description === undefined) {
+    await ctx.expandActivity(ctx.activity);
+  }
   const resolved = resolveModelForPurpose(
     "workout_generation",
     ctx.providers ?? [],

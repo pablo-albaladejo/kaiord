@@ -7,6 +7,7 @@
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
+import { CoachNotesField } from "./components/CoachNotesField";
 import { SportSelect } from "./components/SportSelect";
 import { SubSportSelect } from "./components/SubSportSelect";
 import { useMetadataForm } from "./hooks/useMetadataForm";
@@ -23,13 +24,19 @@ export function WorkoutMetadataEditor({
   onSave,
   onCancel,
 }: WorkoutMetadataEditorProps) {
-  const { name, sport, subSport, setName, setSport, setSubSport } =
-    useMetadataForm(krd);
+  const {
+    name,
+    sport,
+    subSport,
+    notes,
+    setName,
+    setSport,
+    setSubSport,
+    setNotes,
+  } = useMetadataForm(krd);
 
-  const handleSave = () => {
-    const updatedKrd = buildUpdatedKrd(krd, name, sport, subSport);
-    onSave(updatedKrd);
-  };
+  const handleSave = () =>
+    onSave(buildUpdatedKrd(krd, name, sport, subSport, notes));
 
   return (
     <div
@@ -58,6 +65,7 @@ export function WorkoutMetadataEditor({
 
       <SportSelect value={sport} onChange={setSport} />
       <SubSportSelect sport={sport} value={subSport} onChange={setSubSport} />
+      <CoachNotesField value={notes} onChange={setNotes} />
 
       <div className="flex justify-end gap-2">
         <Button

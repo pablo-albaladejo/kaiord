@@ -78,7 +78,7 @@ describe("useCoachingAi", () => {
     });
     const onClose = vi.fn();
     const { result } = renderHook(
-      () => useCoachingAi(activity, "profile-1", onClose),
+      () => useCoachingAi(activity, "profile-1", onClose, vi.fn()),
       { wrapper: wrap() }
     );
 
@@ -92,6 +92,55 @@ describe("useCoachingAi", () => {
     expect(navigateMock).toHaveBeenCalledWith("/workout/w-new?from=coaching");
   });
 
+  it("should prefetch the description before converting when not yet loaded", async () => {
+    // Arrange
+    runConvertMock.mockResolvedValue({
+      ok: true,
+      workoutId: "w",
+      created: true,
+    });
+    const unloaded: CoachingActivity = { ...activity, description: undefined };
+    const expandActivity = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(
+      () => useCoachingAi(unloaded, "profile-1", vi.fn(), expandActivity),
+      { wrapper: wrap() }
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.startAi();
+    });
+
+    // Assert
+    expect(expandActivity).toHaveBeenCalledWith(unloaded);
+    expect(runConvertMock).toHaveBeenCalled();
+    expect(expandActivity.mock.invocationCallOrder[0]).toBeLessThan(
+      runConvertMock.mock.invocationCallOrder[0]
+    );
+  });
+
+  it("should not prefetch when the description is already loaded", async () => {
+    // Arrange
+    runConvertMock.mockResolvedValue({
+      ok: true,
+      workoutId: "w",
+      created: true,
+    });
+    const expandActivity = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(
+      () => useCoachingAi(activity, "profile-1", vi.fn(), expandActivity),
+      { wrapper: wrap() }
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.startAi();
+    });
+
+    // Assert
+    expect(expandActivity).not.toHaveBeenCalled();
+  });
+
   it("should expose a typed failure state when the use case rejects", async () => {
     // Arrange
     runConvertMock.mockResolvedValue({
@@ -99,7 +148,7 @@ describe("useCoachingAi", () => {
       reason: "ai-timeout",
     });
     const { result } = renderHook(
-      () => useCoachingAi(activity, "profile-1", vi.fn()),
+      () => useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
       { wrapper: wrap() }
     );
 
@@ -116,7 +165,7 @@ describe("useCoachingAi", () => {
     // Arrange
     runConvertMock.mockResolvedValue({ ok: false, reason: "ai-error" });
     const { result } = renderHook(
-      () => useCoachingAi(activity, "profile-1", vi.fn()),
+      () => useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
       { wrapper: wrap() }
     );
     await act(async () => {
@@ -137,7 +186,7 @@ describe("useCoachingAi", () => {
       () => new Promise((res) => (resolveRun = res))
     );
     const { result } = renderHook(
-      () => useCoachingAi(activity, "profile-1", vi.fn()),
+      () => useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
       { wrapper: wrap() }
     );
     act(() => {
