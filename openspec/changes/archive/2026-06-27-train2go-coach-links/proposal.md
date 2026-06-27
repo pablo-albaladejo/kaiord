@@ -1,3 +1,5 @@
+> Completed: 2026-06-27
+
 ## Why
 
 Coach instructions imported from Train2Go — including the YouTube/Dropbox links
