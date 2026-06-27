@@ -236,6 +236,62 @@ describe("WorkoutMetadataEditor", () => {
       expect(updatedKrd.metadata.subSport).toBe("trail");
     });
 
+    it("should render existing coach notes", () => {
+      // Arrange
+      const krdWithNotes: KRD = {
+        ...mockKrd,
+        extensions: {
+          structured_workout: {
+            name: "Test Workout",
+            sport: "cycling",
+            steps: [],
+            notes: "Keep cadence > 85",
+          },
+        },
+      };
+
+      // Act
+      render(
+        <WorkoutMetadataEditor
+          krd={krdWithNotes}
+          onSave={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      // Assert
+      expect(screen.getByLabelText("Workout coach notes")).toHaveValue(
+        "Keep cadence > 85"
+      );
+    });
+
+    it("should persist edited coach notes into KRD on save", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const handleSave = vi.fn();
+      render(
+        <WorkoutMetadataEditor
+          krd={mockKrd}
+          onSave={handleSave}
+          onCancel={vi.fn()}
+        />
+      );
+
+      // Act
+      // `[[` types a literal `[` — user-event treats a lone `[` as a key spec.
+      await user.type(
+        screen.getByLabelText("Workout coach notes"),
+        "See [[video](https://youtu.be/abc)"
+      );
+      await user.click(screen.getByRole("button", { name: /save/i }));
+
+      // Assert
+      const updatedKrd = handleSave.mock.calls[0][0];
+      expect(updatedKrd.extensions?.structured_workout?.notes).toBe(
+        "See [video](https://youtu.be/abc)"
+      );
+    });
+
     it("should call onCancel when cancel button is clicked", async () => {
       // Arrange
       // Arrange

@@ -60,8 +60,13 @@ export const useCoachingDialog = (
     targetProfileId,
     matchState
   );
-  const ai = useCoachingAi(activity, targetProfileId, onClose);
-  const manual = useCoachingManual(activity, targetProfileId, onClose);
+  const ai = useCoachingAi(activity, targetProfileId, onClose, expandActivity);
+  const manual = useCoachingManual(
+    activity,
+    targetProfileId,
+    onClose,
+    expandActivity
+  );
   const convert = useCoachingConvert(activity, targetProfileId, onClose);
   return {
     error: convert.error,

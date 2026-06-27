@@ -7,7 +7,7 @@ import { convertDuration } from "./krd-to-fit-duration.converter";
 import { convertTarget } from "./krd-to-fit-target.converter";
 
 /** FIT protocol maximum length for notes field */
-const FIT_NOTES_MAX_LENGTH = 256;
+export const FIT_NOTES_MAX_LENGTH = 256;
 
 export type TruncationBehavior = "truncate" | "error";
 
@@ -60,7 +60,7 @@ export const convertWorkoutStep = (
   return workoutStepMesg;
 };
 
-const convertNotes = (
+export const convertNotes = (
   notes: string,
   stepIndex: number,
   behavior: TruncationBehavior,

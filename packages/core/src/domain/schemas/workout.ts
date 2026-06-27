@@ -40,6 +40,14 @@ export const repetitionBlockSchema = z.object({
  */
 export const workoutSchema = z.object({
   name: z.string().optional(),
+  /**
+   * Workout-level free-text coaching instructions (e.g. Train2Go coach
+   * descriptions, possibly containing markdown `[label](url)` links). Distinct
+   * from per-step `notes` and from the short `name`. No length cap here; format
+   * adapters whose target imposes one (FIT step notes: 256) truncate best-effort
+   * at export rather than rejecting the KRD.
+   */
+  notes: z.string().optional(),
   sport: sportSchema,
   subSport: subSportSchema.optional(),
   /** meters — always normalized to meters on ingest */

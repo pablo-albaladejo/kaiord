@@ -37,7 +37,8 @@ export type UseCoachingAi = {
 export const useCoachingAi = (
   activity: CoachingActivity | null,
   profileId: string | null,
-  onClose: () => void
+  onClose: () => void,
+  expandActivity: (activity: CoachingActivity) => void
 ): UseCoachingAi => {
   const persistence = usePersistence();
   const analytics = useAnalytics();
@@ -53,6 +54,7 @@ export const useCoachingAi = (
     const ctx: StartAiCtx = {
       activity,
       profileId,
+      expandActivity,
       providers,
       bindings,
       persistence,
@@ -75,6 +77,7 @@ export const useCoachingAi = (
     toast,
     onClose,
     navigate,
+    expandActivity,
   ]);
 
   return {

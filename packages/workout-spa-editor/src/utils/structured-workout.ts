@@ -19,6 +19,8 @@ import type { KRD } from "../types/krd";
  */
 export type StructuredWorkout = {
   name?: string;
+  /** Workout-level coach instructions (markdown), distinct from step notes. */
+  notes?: string;
   sport?: string;
   subSport?: string;
   steps: Array<unknown>;
@@ -34,4 +36,22 @@ export function getStructuredWorkout(krd: KRD): StructuredWorkout | undefined {
   if (!("steps" in data) || !Array.isArray((data as { steps: unknown }).steps))
     return undefined;
   return data as StructuredWorkout;
+}
+
+/**
+ * Returns a copy of `krd` with the workout-level coach `notes` set from a
+ * coaching activity description. No-op when there is no description or no
+ * structured workout present (e.g. raw/rest-day records). Never overwrites an
+ * existing structured workout's other fields.
+ */
+export function withCoachNotes(krd: KRD, description?: string): KRD {
+  const workout = getStructuredWorkout(krd);
+  if (!description || !workout) return krd;
+  return {
+    ...krd,
+    extensions: {
+      ...krd.extensions,
+      structured_workout: { ...workout, notes: description },
+    },
+  };
 }

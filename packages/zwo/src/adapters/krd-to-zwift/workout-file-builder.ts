@@ -11,6 +11,7 @@ import { addWorkoutProperties, mapSportType } from "./workout-properties";
 
 type WorkoutData = {
   name?: string;
+  notes?: string;
   sport?: string;
   steps?: Array<WorkoutStep | RepetitionBlock>;
 };
@@ -36,7 +37,12 @@ export const buildWorkoutFile = ({
   const workoutFile: Record<string, unknown> = {};
 
   // Add author and name first (XSD requires this order)
-  addWorkoutProperties(workoutFile, workoutData.name, zwiftExtensions);
+  addWorkoutProperties(
+    workoutFile,
+    workoutData.name,
+    zwiftExtensions,
+    workoutData.notes
+  );
   // Then sportType
   workoutFile.sportType = mapSportType(workoutData.sport);
 

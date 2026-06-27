@@ -6,11 +6,28 @@ import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import {
+  convertNotes,
   convertWorkoutStep,
   type ConvertWorkoutStepOptions,
 } from "./krd-to-fit-step.converter";
 
 export type ConvertWorkoutStepsOptions = ConvertWorkoutStepOptions;
+
+// FIT has no workout-level notes — only per-step notes (max 256). Workout-level
+// `notes` (e.g. a coach description) are attached best-effort to the FIRST step
+// when that step has no note of its own, truncated via the shared step-note
+// rule. A step's own note is more specific and is never overwritten.
+const attachWorkoutNotesToFirstStep = (
+  messages: Array<Record<string, unknown>>,
+  workout: Workout,
+  notesTruncation: "truncate" | "error",
+  logger: Logger
+): void => {
+  if (!workout.notes) return;
+  const first = messages[0];
+  if (!first || first.notes !== undefined) return;
+  first.notes = convertNotes(workout.notes, 0, notesTruncation, logger);
+};
 
 export const convertWorkoutSteps = (
   workout: Workout,
@@ -19,7 +36,7 @@ export const convertWorkoutSteps = (
 ): Array<unknown> => {
   logger.debug("Converting workout steps", { stepCount: workout.steps.length });
 
-  const messages: Array<unknown> = [];
+  const messages: Array<Record<string, unknown>> = [];
   let messageIndex = 0;
 
   for (const step of workout.steps) {
@@ -44,6 +61,13 @@ export const convertWorkoutSteps = (
     }
   }
 
+  attachWorkoutNotesToFirstStep(
+    messages,
+    workout,
+    options.notesTruncation ?? "truncate",
+    logger
+  );
+
   return messages;
 };
 
@@ -52,13 +76,13 @@ const convertRepetitionBlock = (
   startIndex: number,
   logger: Logger,
   options: ConvertWorkoutStepsOptions
-): Array<unknown> => {
+): Array<Record<string, unknown>> => {
   logger.debug("Converting repetition block", {
     repeatCount: block.repeatCount,
     stepCount: block.steps.length,
   });
 
-  const messages: Array<unknown> = [];
+  const messages: Array<Record<string, unknown>> = [];
   let messageIndex = startIndex;
 
   for (const step of block.steps) {

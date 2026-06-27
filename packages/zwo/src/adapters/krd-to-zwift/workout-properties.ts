@@ -6,7 +6,8 @@ type ZwiftExtensions = Record<string, unknown>;
 export const addWorkoutProperties = (
   workoutFile: Record<string, unknown>,
   workoutName: string | undefined,
-  zwiftExtensions: ZwiftExtensions
+  zwiftExtensions: ZwiftExtensions,
+  notes?: string
 ): void => {
   if (zwiftExtensions.author) {
     workoutFile.author = zwiftExtensions.author;
@@ -14,8 +15,11 @@ export const addWorkoutProperties = (
   if (workoutName) {
     workoutFile.name = workoutName;
   }
-  if (zwiftExtensions.description) {
-    workoutFile.description = zwiftExtensions.description;
+  // Canonical workout-level `notes` (krd-format) wins; fall back to the legacy
+  // `zwift.description` so KRD produced before the notes field still exports.
+  const description = notes ?? zwiftExtensions.description;
+  if (description) {
+    workoutFile.description = description;
   }
   if (zwiftExtensions.thresholdSecPerKm !== undefined) {
     workoutFile.thresholdSecPerKm = zwiftExtensions.thresholdSecPerKm;

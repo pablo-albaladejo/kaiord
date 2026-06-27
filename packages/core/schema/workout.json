@@ -5,6 +5,9 @@
     "name": {
       "type": "string"
     },
+    "notes": {
+      "type": "string"
+    },
     "sport": {
       "type": "string",
       "enum": [
