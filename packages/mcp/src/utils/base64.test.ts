@@ -3,26 +3,17 @@ import { describe, expect, it } from "vitest";
 import { decodeBase64 } from "./base64";
 
 describe("decodeBase64", () => {
-  it("should decode valid base64 string", () => {
+  it.each([
+    [Buffer.from("hello world").toString("base64"), "hello world"],
+    [Buffer.from("ab").toString("base64"), "ab"],
+  ])("should decode base64 %s to %s", (encoded, decoded) => {
     // Arrange
-    const encoded = Buffer.from("hello world").toString("base64");
 
     // Act
     const result = decodeBase64(encoded);
 
     // Assert
-    expect(Buffer.from(result).toString()).toBe("hello world");
-  });
-
-  it("should handle base64 with padding", () => {
-    // Arrange
-    const encoded = Buffer.from("ab").toString("base64");
-
-    // Act
-    const result = decodeBase64(encoded);
-
-    // Assert
-    expect(Buffer.from(result).toString()).toBe("ab");
+    expect(Buffer.from(result).toString()).toBe(decoded);
   });
 
   it("should handle whitespace in base64", () => {
@@ -52,6 +43,8 @@ describe("decodeBase64", () => {
     // Act
 
     // Assert
-    expect(() => decodeBase64("====")).toThrow("Invalid base64");
+    expect(() => decodeBase64("=")).toThrow(
+      "Base64 decoding produced empty buffer."
+    );
   });
 });

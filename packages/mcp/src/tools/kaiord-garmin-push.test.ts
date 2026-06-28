@@ -1,6 +1,8 @@
-import type * as KaiordCore from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { loadKrdFixtureRaw } from "../tests/helpers/test-fixtures";
+import { registerGarminPushTool } from "./kaiord-garmin-push";
 
 const mockPush = vi.fn();
 const mockIsAuthenticated = vi.fn();
@@ -11,21 +13,6 @@ vi.mock("../utils/garmin-client-state", () => ({
     service: { push: mockPush },
   })),
 }));
-
-vi.mock("../utils/resolve-input", () => ({
-  resolveTextInput: vi.fn(),
-}));
-
-vi.mock("@kaiord/core", async (importOriginal) => {
-  const actual = await importOriginal<typeof KaiordCore>();
-  return {
-    ...actual,
-    validateKrd: vi.fn((data) => data),
-  };
-});
-
-import { resolveTextInput } from "../utils/resolve-input";
-import { registerGarminPushTool } from "./kaiord-garmin-push";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),
@@ -64,9 +51,9 @@ describe("kaiord_garmin_push", () => {
   it("should push workout when authenticated", async () => {
     // Arrange
     mockIsAuthenticated.mockReturnValue(true);
-    vi.mocked(resolveTextInput).mockResolvedValue('{"version":"1.0"}');
     mockPush.mockResolvedValue(mockPushResult);
-    const result = await handler({ input_content: '{"version":"1.0"}' });
+    const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
+    const result = await handler({ input_content: krdJson });
     expect(result.isError).toBeUndefined();
 
     // Act
@@ -91,11 +78,11 @@ describe("kaiord_garmin_push", () => {
   it("should return error on push failure", async () => {
     // Arrange
     mockIsAuthenticated.mockReturnValue(true);
-    vi.mocked(resolveTextInput).mockResolvedValue('{"version":"1.0"}');
     mockPush.mockRejectedValue(new Error("Push failed"));
+    const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
 
     // Act
-    const result = await handler({ input_content: '{"version":"1.0"}' });
+    const result = await handler({ input_content: krdJson });
 
     // Assert
     expect(result.isError).toBe(true);

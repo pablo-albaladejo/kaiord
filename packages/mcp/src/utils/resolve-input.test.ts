@@ -28,22 +28,16 @@ describe("validateExclusiveInput", () => {
     );
   });
 
-  it("should accept only input_file", () => {
+  it.each([
+    ["file.krd", undefined],
+    [undefined, "{}"],
+  ])("should accept exactly one input: %s/%s", (file, content) => {
     // Arrange
 
     // Act
 
     // Assert
-    expect(() => validateExclusiveInput("file.krd", undefined)).not.toThrow();
-  });
-
-  it("should accept only input_content", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(() => validateExclusiveInput(undefined, "{}")).not.toThrow();
+    expect(() => validateExclusiveInput(file, content)).not.toThrow();
   });
 });
 

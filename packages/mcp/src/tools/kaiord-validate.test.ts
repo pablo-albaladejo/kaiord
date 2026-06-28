@@ -52,31 +52,20 @@ describe("kaiord_validate", () => {
     expect(result.content[0].text).toContain("Valid KRD document");
   });
 
-  it("should return error for invalid JSON", async () => {
-    // Arrange
-    const client = await createTestClient();
+  it.each(["not json", '{"foo": "bar"}'])(
+    "should return error for invalid input: %s",
+    async (inputContent) => {
+      // Arrange
+      const client = await createTestClient();
 
-    // Act
-    const result = (await client.callTool({
-      name: "kaiord_validate",
-      arguments: { input_content: "not json" },
-    })) as McpToolResult;
+      // Act
+      const result = (await client.callTool({
+        name: "kaiord_validate",
+        arguments: { input_content: inputContent },
+      })) as McpToolResult;
 
-    // Assert
-    expect(result.isError).toBe(true);
-  });
-
-  it("should return error for schema mismatch", async () => {
-    // Arrange
-    const client = await createTestClient();
-
-    // Act
-    const result = (await client.callTool({
-      name: "kaiord_validate",
-      arguments: { input_content: '{"foo": "bar"}' },
-    })) as McpToolResult;
-
-    // Assert
-    expect(result.isError).toBe(true);
-  });
+      // Assert
+      expect(result.isError).toBe(true);
+    }
+  );
 });

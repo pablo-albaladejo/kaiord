@@ -27,50 +27,34 @@ describe("compareKrdFiles", () => {
       expect(result.metadata).toHaveLength(0);
     });
 
-    it("should detect sport differences", () => {
-      // Arrange
-      const krd1 = createKrd({
-        metadata: { created: "2025-01-15T10:00:00Z", sport: "cycling" },
-      });
-      const krd2 = createKrd({
-        metadata: { created: "2025-01-15T10:00:00Z", sport: "running" },
-      });
-      const result = compareKrdFiles(krd1, krd2);
-
-      // Act
-      const sportDiff = result.metadata.find((d) => d.field === "sport");
-
-      // Assert
-      expect(sportDiff).toBeDefined();
-      expect(sportDiff?.file1).toBe("cycling");
-      expect(sportDiff?.file2).toBe("running");
-    });
-
-    it("should detect differences in optional fields", () => {
+    it.each([
+      { field: "sport", v1: "cycling", v2: "running" },
+      { field: "manufacturer", v1: "Garmin", v2: "Wahoo" },
+    ])("should detect metadata differences in $field", ({ field, v1, v2 }) => {
       // Arrange
       const krd1 = createKrd({
         metadata: {
           created: "2025-01-15T10:00:00Z",
           sport: "cycling",
-          manufacturer: "Garmin",
+          [field]: v1,
         },
       });
       const krd2 = createKrd({
         metadata: {
           created: "2025-01-15T10:00:00Z",
           sport: "cycling",
-          manufacturer: "Wahoo",
+          [field]: v2,
         },
       });
-      const result = compareKrdFiles(krd1, krd2);
 
       // Act
-      const mfgDiff = result.metadata.find((d) => d.field === "manufacturer");
+      const result = compareKrdFiles(krd1, krd2);
+      const diff = result.metadata.find((d) => d.field === field);
 
       // Assert
-      expect(mfgDiff).toBeDefined();
-      expect(mfgDiff?.file1).toBe("Garmin");
-      expect(mfgDiff?.file2).toBe("Wahoo");
+      expect(diff).toBeDefined();
+      expect(diff?.file1).toBe(v1);
+      expect(diff?.file2).toBe(v2);
     });
   });
 
