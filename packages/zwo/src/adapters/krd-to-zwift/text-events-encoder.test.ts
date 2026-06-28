@@ -101,29 +101,6 @@ describe("encodeTextEvents", () => {
     ]);
   });
 
-  it("should encode three events as an array preserving order", () => {
-    // Arrange
-    const step = makeStep({
-      zwift: {
-        textEvents: [
-          { message: "A", timeoffset: 0 },
-          { message: "B", timeoffset: 15 },
-          { message: "C", timeoffset: 45 },
-        ],
-      },
-    });
-
-    // Act
-    const result = encodeTextEvents(step);
-
-    // Assert
-    expect(Array.isArray(result)).toBe(true);
-    const arr = result as Array<Record<string, unknown>>;
-    expect(arr[0]).toStrictEqual({ "@_message": "A", "@_timeoffset": 0 });
-    expect(arr[1]).toStrictEqual({ "@_message": "B", "@_timeoffset": 15 });
-    expect(arr[2]).toStrictEqual({ "@_message": "C", "@_timeoffset": 45 });
-  });
-
   it("should include both timeoffset and distoffset when both are present in multi-event", () => {
     // Arrange
     const step = makeStep({
