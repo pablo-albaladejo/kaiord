@@ -196,23 +196,6 @@ describe("createGarminFitSdkReader", () => {
       expect(result.extensions?.fit).toBeDefined();
     });
 
-    it("should extract unknown message types to extensions.fit.unknownMessages", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const reader = createGarminFitSdkReader(logger);
-      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
-      const result = await reader(buffer);
-      expect(result.extensions?.fit).toBeDefined();
-
-      // Act
-      const fitExt = result.extensions?.fit as Record<string, unknown>;
-
-      // Assert
-      if (fitExt.unknownMessages) {
-        expect(typeof fitExt.unknownMessages).toBe("object");
-      }
-    });
-
     it("should handle FIT files without extensions gracefully", async () => {
       // Arrange
       const logger = createMockLogger();

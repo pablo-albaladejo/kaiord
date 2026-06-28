@@ -43,39 +43,7 @@ const extractBody = (krd: KRD): BodyComposition => {
 };
 
 describe("body composition KRD → FIT → KRD round-trip", () => {
-  it("should preserve measuredAt exactly through one round-trip", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const original = buildOriginalKrd(buildOriginalBody());
-
-    // Act
-    const flat = convertKrdToFitHealthBodyCompositionMessages(original, logger);
-    const grouped = groupBodyCompositionMessages(flat) as FitMessages;
-    const replayed = convertFitToKrdHealthBodyComposition(grouped, logger);
-
-    // Assert
-    expect(extractBody(replayed).measuredAt).toBe(MEASURED_AT);
-  });
-
-  it("should preserve bodyFatPercent within ±0.1 percent", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const body = buildOriginalBody();
-    const original = buildOriginalKrd(body);
-
-    // Act
-    const flat = convertKrdToFitHealthBodyCompositionMessages(original, logger);
-    const grouped = groupBodyCompositionMessages(flat) as FitMessages;
-    const replayed = convertFitToKrdHealthBodyComposition(grouped, logger);
-    const delta = Math.abs(
-      (extractBody(replayed).bodyFatPercent ?? 0) - (body.bodyFatPercent ?? 0)
-    );
-
-    // Assert
-    expect(delta).toBeLessThanOrEqual(BODY_FAT_TOLERANCE_PERCENT);
-  });
-
-  it("should preserve leanMass and boneMass within ±0.01 kg", () => {
+  it("should preserve all body composition fields through one round-trip", () => {
     // Arrange
     const logger = createMockLogger();
     const body = buildOriginalBody();
@@ -86,6 +54,9 @@ describe("body composition KRD → FIT → KRD round-trip", () => {
     const grouped = groupBodyCompositionMessages(flat) as FitMessages;
     const replayed = extractBody(
       convertFitToKrdHealthBodyComposition(grouped, logger)
+    );
+    const bodyFatDelta = Math.abs(
+      (replayed.bodyFatPercent ?? 0) - (body.bodyFatPercent ?? 0)
     );
     const leanDelta = Math.abs(
       (replayed.leanMassKilograms ?? 0) - (body.leanMassKilograms ?? 0)
@@ -95,24 +66,10 @@ describe("body composition KRD → FIT → KRD round-trip", () => {
     );
 
     // Assert
+    expect(replayed.measuredAt).toBe(MEASURED_AT);
+    expect(bodyFatDelta).toBeLessThanOrEqual(BODY_FAT_TOLERANCE_PERCENT);
     expect(leanDelta).toBeLessThanOrEqual(WEIGHT_TOLERANCE_KG);
     expect(boneDelta).toBeLessThanOrEqual(WEIGHT_TOLERANCE_KG);
-  });
-
-  it("should preserve bodyWaterPercent and bmi exactly", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const body = buildOriginalBody();
-    const original = buildOriginalKrd(body);
-
-    // Act
-    const flat = convertKrdToFitHealthBodyCompositionMessages(original, logger);
-    const grouped = groupBodyCompositionMessages(flat) as FitMessages;
-    const replayed = extractBody(
-      convertFitToKrdHealthBodyComposition(grouped, logger)
-    );
-
-    // Assert
     expect(replayed.bodyWaterPercent).toBe(body.bodyWaterPercent);
     expect(replayed.bmi).toBe(body.bmi);
   });

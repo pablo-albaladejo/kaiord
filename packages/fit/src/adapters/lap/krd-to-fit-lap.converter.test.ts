@@ -293,25 +293,27 @@ describe("round-trip conversion", () => {
     expect(roundTrippedKrd.avgCadence).toBe(originalKrd.avgCadence);
   });
 
-  it("should preserve trigger through round-trip (simple triggers)", () => {
+  it.each([
+    "manual",
+    "time",
+    "distance",
+    "session_end",
+    "fitness_equipment",
+    "position",
+  ] as const)("should preserve %s trigger through round-trip", (trigger) => {
     // Arrange
+    const originalKrd = {
+      startTime: "2024-01-01T00:00:00.000Z",
+      totalElapsedTime: 600,
+      trigger,
+    };
 
     // Act
-    const simpleTriggers = ["manual", "time", "distance"] as const;
+    const fitResult = convertKrdToFitLap(originalKrd);
+    const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
     // Assert
-    for (const trigger of simpleTriggers) {
-      const originalKrd = {
-        startTime: "2024-01-01T00:00:00.000Z",
-        totalElapsedTime: 600,
-        trigger,
-      };
-
-      const fitResult = convertKrdToFitLap(originalKrd);
-      const roundTrippedKrd = convertFitToKrdLap(fitResult);
-
-      expect(roundTrippedKrd.trigger).toBe(trigger);
-    }
+    expect(roundTrippedKrd.trigger).toBe(trigger);
   });
 
   it("should preserve speed through round-trip", () => {
@@ -364,27 +366,6 @@ describe("round-trip conversion", () => {
 
     // Assert
     expect(roundTrippedKrd.totalDistance).toBe(originalKrd.totalDistance);
-  });
-
-  it("should preserve all trigger types through round-trip", () => {
-    // Arrange
-
-    // Act
-    const triggers = ["session_end", "fitness_equipment", "position"] as const;
-
-    // Assert
-    for (const trigger of triggers) {
-      const originalKrd = {
-        startTime: "2024-01-01T00:00:00.000Z",
-        totalElapsedTime: 600,
-        trigger,
-      };
-
-      const fitResult = convertKrdToFitLap(originalKrd);
-      const roundTrippedKrd = convertFitToKrdLap(fitResult);
-
-      expect(roundTrippedKrd.trigger).toBe(trigger);
-    }
   });
 
   it("should preserve calories through round-trip", () => {

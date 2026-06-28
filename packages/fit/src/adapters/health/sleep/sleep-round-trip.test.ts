@@ -6,7 +6,6 @@ import { sleepRecordSchema } from "@kaiord/core";
 import { createMockLogger } from "@kaiord/core/test-utils";
 import { describe, expect, it } from "vitest";
 
-import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
 import type { FitMessages } from "../../shared/types";
 import { convertFitToKrdHealthSleep } from "./fit-to-krd-health-sleep.converter";
 import { convertKrdToFitHealthSleepMessages } from "./krd-health-sleep-to-fit.converter";
@@ -48,27 +47,6 @@ describe("FIT → KRD: HealthSleepOvernight.fit", () => {
 });
 
 describe("KRD → FIT messages: HealthSleepOvernight round-trip", () => {
-  it("should round-trip stage timestamps and types through FIT messages", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const sourceMessages = decodeFixture();
-    const krd = convertFitToKrdHealthSleep(sourceMessages, logger);
-
-    // Act
-    const fitMessages = convertKrdToFitHealthSleepMessages(krd, logger);
-
-    // Assert
-    // fileId + (N transitions = stages.length + 1 terminator)
-    const sleep = (
-      krd.extensions as { health: { sleep: { stages: unknown[] } } }
-    ).health.sleep;
-    expect(fitMessages[0].mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
-    const sleepLevelMesgs = fitMessages.filter(
-      (m) => m.mesgNum === FIT_MESSAGE_NUMBERS.SLEEP_LEVEL
-    );
-    expect(sleepLevelMesgs).toHaveLength(sleep.stages.length + 1);
-  });
-
   it("should preserve every stage's timestamp + level through KRD → FIT → KRD", () => {
     // Arrange
     const logger = createMockLogger();

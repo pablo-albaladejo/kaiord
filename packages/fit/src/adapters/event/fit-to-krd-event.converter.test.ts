@@ -11,7 +11,29 @@ import {
 import { convertKrdToFitEvent } from "./krd-to-fit-event.converter";
 
 describe("convertFitToKrdEvent", () => {
-  it("should convert timer start event", () => {
+  it.each([
+    ["timer", "start", "event_start"],
+    ["timer", "stop", "event_stop"],
+    ["timer", "stopDisable", "event_pause"],
+    ["lap", "marker", "event_lap"],
+    ["workoutStep", "marker", "event_workout_step_change"],
+    ["userMarker", "marker", "event_marker"],
+  ])("should convert %s/%s event to %s", (event, eventType, expectedType) => {
+    // Arrange
+    const fitEvent = {
+      timestamp: 1704067200,
+      event,
+      eventType,
+    };
+
+    // Act
+    const result = convertFitToKrdEvent(fitEvent);
+
+    // Assert
+    expect(result.eventType).toBe(expectedType);
+  });
+
+  it("should convert FIT timestamp to ISO timestamp", () => {
     // Arrange
     const fitEvent = {
       timestamp: 1704067200,
@@ -24,82 +46,6 @@ describe("convertFitToKrdEvent", () => {
 
     // Assert
     expect(result.timestamp).toBe("2024-01-01T00:00:00.000Z");
-    expect(result.eventType).toBe("event_start");
-  });
-
-  it("should convert timer stop event", () => {
-    // Arrange
-    const fitEvent = {
-      timestamp: 1704067200,
-      event: "timer",
-      eventType: "stop",
-    };
-
-    // Act
-    const result = convertFitToKrdEvent(fitEvent);
-
-    // Assert
-    expect(result.eventType).toBe("event_stop");
-  });
-
-  it("should convert timer stopDisable to pause", () => {
-    // Arrange
-    const fitEvent = {
-      timestamp: 1704067200,
-      event: "timer",
-      eventType: "stopDisable",
-    };
-
-    // Act
-    const result = convertFitToKrdEvent(fitEvent);
-
-    // Assert
-    expect(result.eventType).toBe("event_pause");
-  });
-
-  it("should convert lap event", () => {
-    // Arrange
-    const fitEvent = {
-      timestamp: 1704067200,
-      event: "lap",
-      eventType: "marker",
-    };
-
-    // Act
-    const result = convertFitToKrdEvent(fitEvent);
-
-    // Assert
-    expect(result.eventType).toBe("event_lap");
-  });
-
-  it("should convert workout step event", () => {
-    // Arrange
-    const fitEvent = {
-      timestamp: 1704067200,
-      event: "workoutStep",
-      eventType: "marker",
-    };
-
-    // Act
-    const result = convertFitToKrdEvent(fitEvent);
-
-    // Assert
-    expect(result.eventType).toBe("event_workout_step_change");
-  });
-
-  it("should convert user marker event", () => {
-    // Arrange
-    const fitEvent = {
-      timestamp: 1704067200,
-      event: "userMarker",
-      eventType: "marker",
-    };
-
-    // Act
-    const result = convertFitToKrdEvent(fitEvent);
-
-    // Assert
-    expect(result.eventType).toBe("event_marker");
   });
 
   it("should preserve event data", () => {
