@@ -17,13 +17,14 @@ describe("validation formatters", () => {
     it("should format single Zod error", () => {
       // Arrange
       const schema = z.object({ name: z.string() });
-      const result = schema.safeParse({ name: 123 });
 
       // Act
+      const result = schema.safeParse({ name: 123 });
+
+      // Assert
+      expect(result.success).toBe(false);
       if (!result.success) {
         const formatted = formatZodError(result.error);
-
-        // Assert
         expect(formatted).toHaveLength(1);
         expect(formatted[0].path).toEqual(["name"]);
         expect(formatted[0].message).toBeDefined();
@@ -36,13 +37,14 @@ describe("validation formatters", () => {
         name: z.string(),
         age: z.number(),
       });
-      const result = schema.safeParse({ name: 123, age: "invalid" });
 
       // Act
+      const result = schema.safeParse({ name: 123, age: "invalid" });
+
+      // Assert
+      expect(result.success).toBe(false);
       if (!result.success) {
         const formatted = formatZodError(result.error);
-
-        // Assert
         expect(formatted.length).toBeGreaterThanOrEqual(2);
       }
     });
@@ -50,13 +52,14 @@ describe("validation formatters", () => {
     it("should preserve error codes", () => {
       // Arrange
       const schema = z.object({ name: z.string() });
-      const result = schema.safeParse({});
 
       // Act
+      const result = schema.safeParse({});
+
+      // Assert
+      expect(result.success).toBe(false);
       if (!result.success) {
         const formatted = formatZodError(result.error);
-
-        // Assert
         expect(formatted[0].code).toBeDefined();
       }
     });
@@ -68,13 +71,14 @@ describe("validation formatters", () => {
           name: z.string(),
         }),
       });
-      const result = schema.safeParse({ user: { name: 123 } });
 
       // Act
+      const result = schema.safeParse({ user: { name: 123 } });
+
+      // Assert
+      expect(result.success).toBe(false);
       if (!result.success) {
         const formatted = formatZodError(result.error);
-
-        // Assert
         expect(formatted[0].path).toEqual(["user", "name"]);
       }
     });
@@ -84,13 +88,14 @@ describe("validation formatters", () => {
       const schema = z.object({
         items: z.array(z.number()),
       });
-      const result = schema.safeParse({ items: MIXED_ARRAY_FIXTURE });
 
       // Act
+      const result = schema.safeParse({ items: MIXED_ARRAY_FIXTURE });
+
+      // Assert
+      expect(result.success).toBe(false);
       if (!result.success) {
         const formatted = formatZodError(result.error);
-
-        // Assert
         expect(formatted[0].path).toContain("items");
         expect(formatted[0].path).toContain(1);
       }
@@ -109,17 +114,54 @@ describe("validation formatters", () => {
       expect(result).toBe("");
     });
 
-    it("should format single error", () => {
+    it.each<{
+      path: Array<string | number>;
+      message: string;
+      expected: string;
+    }>([
+      {
+        path: ["name"],
+        message: "Required field",
+        expected: "name: Required field",
+      },
+      {
+        path: ["steps", 0, "duration"],
+        message: "Invalid duration",
+        expected: "steps.0.duration: Invalid duration",
+      },
+      { path: [], message: "General error", expected: "General error" },
+      {
+        path: [
+          "extensions",
+          "structured_workout",
+          "steps",
+          0,
+          "duration",
+          "seconds",
+        ],
+        message: "Must be positive",
+        expected:
+          "extensions.structured_workout.steps.0.duration.seconds: Must be positive",
+      },
+      {
+        path: ["steps", 0, "name"],
+        message: "Required",
+        expected: "steps.0.name: Required",
+      },
+      {
+        path: ["metadata", "sport"],
+        message: "Invalid",
+        expected: "metadata.sport: Invalid",
+      },
+    ])("should format $expected", ({ path, message, expected }) => {
       // Arrange
-      const errors: Array<ValidationError> = [
-        { path: ["name"], message: "Required field" },
-      ];
+      const errors: Array<ValidationError> = [{ path, message }];
 
       // Act
       const result = formatValidationErrors(errors);
 
       // Assert
-      expect(result).toBe("name: Required field");
+      expect(result).toBe(expected);
     });
 
     it("should format multiple errors with newlines", () => {
@@ -138,57 +180,6 @@ describe("validation formatters", () => {
       expect(result).toContain("\n");
     });
 
-    it("should handle nested paths with dots", () => {
-      // Arrange
-      const errors: Array<ValidationError> = [
-        { path: ["steps", 0, "duration"], message: "Invalid duration" },
-      ];
-
-      // Act
-      const result = formatValidationErrors(errors);
-
-      // Assert
-      expect(result).toBe("steps.0.duration: Invalid duration");
-    });
-
-    it("should handle empty path", () => {
-      // Arrange
-      const errors: Array<ValidationError> = [
-        { path: [], message: "General error" },
-      ];
-
-      // Act
-      const result = formatValidationErrors(errors);
-
-      // Assert
-      expect(result).toBe("General error");
-    });
-
-    it("should handle deep nesting", () => {
-      // Arrange
-      const errors: Array<ValidationError> = [
-        {
-          path: [
-            "extensions",
-            "structured_workout",
-            "steps",
-            0,
-            "duration",
-            "seconds",
-          ],
-          message: "Must be positive",
-        },
-      ];
-
-      // Act
-      const result = formatValidationErrors(errors);
-
-      // Assert
-      expect(result).toBe(
-        "extensions.structured_workout.steps.0.duration.seconds: Must be positive"
-      );
-    });
-
     it("should preserve error order", () => {
       // Arrange
       const errors: Array<ValidationError> = [
@@ -205,21 +196,6 @@ describe("validation formatters", () => {
       expect(lines[0]).toBe("first: First error");
       expect(lines[1]).toBe("second: Second error");
       expect(lines[2]).toBe("third: Third error");
-    });
-
-    it("should handle mixed path types", () => {
-      // Arrange
-      const errors: Array<ValidationError> = [
-        { path: ["steps", 0, "name"], message: "Required" },
-        { path: ["metadata", "sport"], message: "Invalid" },
-      ];
-
-      // Act
-      const result = formatValidationErrors(errors);
-
-      // Assert
-      expect(result).toContain("steps.0.name: Required");
-      expect(result).toContain("metadata.sport: Invalid");
     });
   });
 });

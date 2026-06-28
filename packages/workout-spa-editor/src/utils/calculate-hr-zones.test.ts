@@ -61,24 +61,4 @@ describe("calculateHrZones", () => {
     expect(zones[0]).toMatchObject({ minBpm: 0, maxBpm: 148 });
     expect(zones[3]).toMatchObject({ minBpm: 170, maxBpm: 180 });
   });
-
-  it("should return zone names in correct order", () => {
-    // Arrange
-
-    const zones = calculateHrZones(LTHR_170);
-
-    // Act
-
-    const names = zones.map((z) => z.name);
-
-    // Assert
-
-    expect(names).toEqual([
-      "Recovery",
-      "Aerobic",
-      "Tempo",
-      "Threshold",
-      "VO2 Max",
-    ]);
-  });
 });

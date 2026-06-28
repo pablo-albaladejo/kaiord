@@ -9,72 +9,47 @@ import {
 } from "./session-match-errors";
 
 describe("session-match error classes", () => {
-  it("should carry name and message on SessionAlreadyMatchedError", () => {
+  it.each<{
+    Ctor: new (message: string) => Error;
+    name: string;
+    message: string;
+  }>([
+    {
+      Ctor: SessionAlreadyMatchedError,
+      name: "SessionAlreadyMatchedError",
+      message: "activity already matched",
+    },
+    {
+      Ctor: CrossProfileMatchError,
+      name: "CrossProfileMatchError",
+      message: "activity belongs to p1",
+    },
+    {
+      Ctor: CoachingActivityNotFoundError,
+      name: "CoachingActivityNotFoundError",
+      message: "p1:train2go:9999",
+    },
+    {
+      Ctor: WorkoutNotFoundError,
+      name: "WorkoutNotFoundError",
+      message: "w-deleted",
+    },
+    {
+      Ctor: ProfileNotFoundError,
+      name: "ProfileNotFoundError",
+      message: "p-deleted",
+    },
+  ])("should carry name and message on $name", ({ Ctor, name, message }) => {
     // Arrange
 
     // Act
-
-    const err = new SessionAlreadyMatchedError("activity already matched");
+    const err = new Ctor(message);
 
     // Assert
-
     expect(err).toBeInstanceOf(Error);
-    expect(err).toBeInstanceOf(SessionAlreadyMatchedError);
-    expect(err.name).toBe("SessionAlreadyMatchedError");
-    expect(err.message).toBe("activity already matched");
-  });
-
-  it("should carry name and message on CrossProfileMatchError", () => {
-    // Arrange
-
-    // Act
-
-    const err = new CrossProfileMatchError("activity belongs to p1");
-
-    // Assert
-
-    expect(err).toBeInstanceOf(Error);
-    expect(err.name).toBe("CrossProfileMatchError");
-    expect(err.message).toBe("activity belongs to p1");
-  });
-
-  it("should carry name and message on CoachingActivityNotFoundError", () => {
-    // Arrange
-
-    // Act
-
-    const err = new CoachingActivityNotFoundError("p1:train2go:9999");
-
-    // Assert
-
-    expect(err.name).toBe("CoachingActivityNotFoundError");
-    expect(err.message).toBe("p1:train2go:9999");
-  });
-
-  it("should carry name and message on WorkoutNotFoundError", () => {
-    // Arrange
-
-    // Act
-
-    const err = new WorkoutNotFoundError("w-deleted");
-
-    // Assert
-
-    expect(err.name).toBe("WorkoutNotFoundError");
-    expect(err.message).toBe("w-deleted");
-  });
-
-  it("should carry name and message on ProfileNotFoundError", () => {
-    // Arrange
-
-    // Act
-
-    const err = new ProfileNotFoundError("p-deleted");
-
-    // Assert
-
-    expect(err.name).toBe("ProfileNotFoundError");
-    expect(err.message).toBe("p-deleted");
+    expect(err).toBeInstanceOf(Ctor);
+    expect(err.name).toBe(name);
+    expect(err.message).toBe(message);
   });
 
   it("should give each error its own constructor for instanceof discrimination", () => {

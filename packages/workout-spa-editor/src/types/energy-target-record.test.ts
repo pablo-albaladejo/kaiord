@@ -13,17 +13,6 @@ const VALID = {
 };
 
 describe("energyTargetRecordSchema", () => {
-  it("should accept a valid fat-loss target", () => {
-    // Arrange
-    const input = VALID;
-
-    // Act
-    const result = energyTargetRecordSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(true);
-  });
-
   it("should accept each supported goal type", () => {
     // Arrange
     const inputs = (["fat_loss", "muscle_gain", "maintain"] as const).map(

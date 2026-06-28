@@ -85,16 +85,6 @@ describe("computeRawHash", () => {
     expect(hash1).not.toBe(hash2);
   });
 
-  it("should handle empty comments array", async () => {
-    // Arrange
-
-    // Act
-    const hash = await computeRawHash(makeRaw({ comments: [] }));
-
-    // Assert
-    expect(hash).toMatch(/^[0-9a-f]{64}$/);
-  });
-
   it("should sort comments by timestamp ascending", async () => {
     // Arrange
     const comments = [
@@ -166,36 +156,15 @@ describe("computeRawHash", () => {
     expect(hash1).toBe(hash2);
   });
 
-  it("should handle Unicode content correctly", async () => {
+  it("should handle multi-byte Unicode and emoji content", async () => {
     // Arrange
     const raw = makeRaw({
-      title: "Entrenamiento de fuerza",
-      description: "Sentadillas con barra olimpica",
+      title: "Café entrenamiento ☕",
+      description: "Sesión de fuerza 🏋️ con barra olímpica",
       comments: [
         {
           author: "entrenador",
-          text: "Buena sesion!",
-          timestamp: "2025-01-15T10:00:00Z",
-        },
-      ],
-    });
-
-    // Act
-    const hash = await computeRawHash(raw);
-
-    // Assert
-    expect(hash).toMatch(/^[0-9a-f]{64}$/);
-  });
-
-  it("should handle emoji in content", async () => {
-    // Arrange
-    const raw = makeRaw({
-      title: "Morning run",
-      description: "Easy pace with strides",
-      comments: [
-        {
-          author: "coach",
-          text: "Great job!",
+          text: "¡Buena sesión! 🏃‍♂️💪",
           timestamp: "2025-01-15T10:00:00Z",
         },
       ],

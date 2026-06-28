@@ -11,8 +11,6 @@ describe("validateKRD", () => {
   describe("valid KRD", () => {
     it("should validate minimal valid workout KRD", () => {
       // Arrange
-      // Arrange
-
       const data = {
         version: "1.0",
         type: "structured_workout",
@@ -29,22 +27,14 @@ describe("validateKRD", () => {
       };
 
       // Act
-
-      // Act
-
       const result = validateKRD(data);
 
       // Assert
-
-      // Assert
-
       expect(result).toStrictEqual(data);
     });
 
     it("should validate recorded activity KRD", () => {
       // Arrange
-      // Arrange
-
       const data = {
         version: "1.0",
         type: "recorded_activity",
@@ -55,346 +45,159 @@ describe("validateKRD", () => {
       };
 
       // Act
-
-      // Act
-
       const result = validateKRD(data);
 
       // Assert
-
-      // Assert
-
       expect(result).toStrictEqual(data);
     });
   });
 
   describe("missing required fields", () => {
-    it("should throw ValidationError when version is missing", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
+    it.each([
+      {
+        field: "version",
+        message: "Missing required field",
+        data: {
+          type: "structured_workout",
+          metadata: { created: "2025-01-15T10:30:00Z", sport: "running" },
         },
-      };
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "version",
-            message: "Missing required field",
-          });
-        }
-      }
-    });
-
-    it("should throw ValidationError when type is missing", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: "1.0",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
+      },
+      {
+        field: "type",
+        message: "Missing required field",
+        data: {
+          version: "1.0",
+          metadata: { created: "2025-01-15T10:30:00Z", sport: "running" },
         },
-      };
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "type",
-            message: "Missing required field",
-          });
-        }
-      }
-    });
-
-    it("should throw ValidationError when metadata is missing", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: "1.0",
-        type: "structured_workout",
-      };
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "metadata",
-            message: "Missing required field",
-          });
-        }
-      }
-    });
-
-    it("should throw ValidationError when metadata.created is missing", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          sport: "running",
+      },
+      {
+        field: "metadata",
+        message: "Missing required field",
+        data: { version: "1.0", type: "structured_workout" },
+      },
+      {
+        field: "metadata.created",
+        message: "Missing required field",
+        data: {
+          version: "1.0",
+          type: "structured_workout",
+          metadata: { sport: "running" },
         },
-      };
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "metadata.created",
-            message: "Missing required field",
-          });
-        }
-      }
-    });
-
-    it("should throw ValidationError when metadata.sport is missing", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
+      },
+      {
+        field: "metadata.sport",
+        message: "Missing required field",
+        data: {
+          version: "1.0",
+          type: "structured_workout",
+          metadata: { created: "2025-01-15T10:30:00Z" },
         },
-      };
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "metadata.sport",
-            message: "Missing required field",
-          });
-        }
-      }
-    });
-
-    it("should throw ValidationError when extensions.structured_workout is missing for workout type", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
+      },
+      {
+        field: "extensions.structured_workout",
+        message: "Missing required field for workout type",
+        data: {
+          version: "1.0",
+          type: "structured_workout",
+          metadata: { created: "2025-01-15T10:30:00Z", sport: "running" },
+          extensions: {},
         },
-        extensions: {},
-      };
+      },
+    ])(
+      "should throw ValidationError when $field is missing",
+      ({ field, message, data }) => {
+        // Arrange
+        let caught: unknown;
 
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "extensions.structured_workout",
-            message: "Missing required field for workout type",
-          });
+        // Act
+        try {
+          validateKRD(data);
+        } catch (error) {
+          caught = error;
+        }
+
+        // Assert
+        expect(caught).toBeInstanceOf(ValidationError);
+        if (caught instanceof ValidationError) {
+          expect(caught.errors).toContainEqual({ field, message });
         }
       }
-    });
+    );
 
     it("should list all missing fields", () => {
       // Arrange
+      const data = {};
+      let caught: unknown;
 
       // Act
-
-      // Assert
-
-      // Arrange
-      const data = {};
-
-      // Act & Assert
       try {
         validateKRD(data);
-        expect.fail("Should have thrown");
       } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors.length).toBeGreaterThan(1);
-          expect(error.message).toBe("KRD validation failed");
-        }
+        caught = error;
+      }
+
+      // Assert
+      expect(caught).toBeInstanceOf(ValidationError);
+      if (caught instanceof ValidationError) {
+        expect(caught.errors.length).toBeGreaterThan(1);
+        expect(caught.message).toBe("KRD validation failed");
       }
     });
   });
 
   describe("invalid field values", () => {
-    it("should throw ValidationError when version is not a string", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: 1.0,
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
+    it.each([
+      {
+        field: "version",
+        message: "Invalid value",
+        data: {
+          version: 1.0,
+          type: "structured_workout",
+          metadata: { created: "2025-01-15T10:30:00Z", sport: "running" },
         },
-      };
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "version",
-            message: "Invalid value",
-          });
-        }
-      }
-    });
-
-    it("should throw ValidationError when type is invalid", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: "1.0",
-        type: "invalid",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
+      },
+      {
+        field: "type",
+        message: "Invalid value",
+        data: {
+          version: "1.0",
+          type: "invalid",
+          metadata: { created: "2025-01-15T10:30:00Z", sport: "running" },
         },
-      };
+      },
+      {
+        field: "metadata",
+        message: "Must be an object",
+        data: {
+          version: "1.0",
+          type: "structured_workout",
+          metadata: "invalid",
+        },
+      },
+      {
+        field: "root",
+        message: "Expected an object",
+        data: "invalid",
+      },
+    ])(
+      "should throw ValidationError for invalid $field",
+      ({ field, message, data }) => {
+        // Arrange
+        let caught: unknown;
 
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "type",
-            message: "Invalid value",
-          });
+        // Act
+        try {
+          validateKRD(data);
+        } catch (error) {
+          caught = error;
+        }
+
+        // Assert
+        expect(caught).toBeInstanceOf(ValidationError);
+        if (caught instanceof ValidationError) {
+          expect(caught.errors).toContainEqual({ field, message });
         }
       }
-    });
-
-    it("should throw ValidationError when metadata is not an object", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: "invalid",
-      };
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "metadata",
-            message: "Must be an object",
-          });
-        }
-      }
-    });
-
-    it("should throw ValidationError when data is not an object", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
-      const data = "invalid";
-
-      // Act & Assert
-      try {
-        validateKRD(data);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-        if (error instanceof ValidationError) {
-          expect(error.errors).toContainEqual({
-            field: "root",
-            message: "Expected an object",
-          });
-        }
-      }
-    });
+    );
   });
 });

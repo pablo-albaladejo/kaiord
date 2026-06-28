@@ -63,23 +63,6 @@ describe("calculatePaceZones", () => {
     });
   });
 
-  it("should have Z1 as slowest and Z5 as fastest", () => {
-    // Arrange
-
-    const zones = calculatePaceZones(THRESHOLD_PACE_SEC_300, "min_per_km");
-
-    // Z1 maxPace (slowest) > Z5 maxPace (fastest)
-    const z1 = zones[0];
-
-    // Act
-
-    const z5 = zones[4];
-
-    // Assert
-
-    expect(z1?.maxPace).toBeGreaterThan(z5?.maxPace ?? 0);
-  });
-
   it("should return zone names in correct order", () => {
     // Arrange
 

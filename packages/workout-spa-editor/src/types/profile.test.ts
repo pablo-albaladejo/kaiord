@@ -40,42 +40,14 @@ describe("profileSchema anthropometric fields", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should reject a non-positive height", () => {
+  it.each([
+    { field: "height", value: 0 },
+    { field: "sex", value: "other" },
+    { field: "birthDate", value: "1990/05/12" },
+    { field: "activityLevel", value: "extreme" },
+  ])("should reject an invalid $field", ({ field, value }) => {
     // Arrange
-    const input = { ...BASE, height: 0 };
-
-    // Act
-    const result = profileSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject an invalid sex value", () => {
-    // Arrange
-    const input = { ...BASE, sex: "other" };
-
-    // Act
-    const result = profileSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject a malformed birth date", () => {
-    // Arrange
-    const input = { ...BASE, birthDate: "1990/05/12" };
-
-    // Act
-    const result = profileSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject an unknown activity level", () => {
-    // Arrange
-    const input = { ...BASE, activityLevel: "extreme" };
+    const input = { ...BASE, [field]: value };
 
     // Act
     const result = profileSchema.safeParse(input);

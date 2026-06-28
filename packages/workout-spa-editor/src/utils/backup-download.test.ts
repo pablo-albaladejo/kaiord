@@ -243,4 +243,85 @@ describe("promptBackupDownload", () => {
 
     vi.useRealTimers();
   });
+
+  it("should not proceed when user declines backup and declines proceeding", async () => {
+    // Arrange
+    const mockWorkout: KRD = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: {
+        created: "2025-01-15T10:30:00Z",
+        sport: "running",
+      },
+      extensions: {
+        structured_workout: {
+          name: "Test Workout",
+          sport: "running",
+          steps: [],
+        },
+      },
+    };
+
+    const mockShowModal = vi.fn((config) => {
+      // Simulate user declining download, then declining to proceed
+      if (config.title === "Download Backup?") {
+        config.onCancel();
+      } else if (config.title === "Proceed Without Backup?") {
+        config.onCancel();
+      }
+    });
+
+    // Act
+    const result = await promptBackupDownload(
+      mockWorkout,
+      "Delete All Steps",
+      mockShowModal
+    );
+
+    // Assert
+    expect(result).toBe(false);
+    expect(mockShowModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Proceed Without Backup?",
+        variant: "destructive",
+      })
+    );
+
+    vi.useRealTimers();
+  });
+
+  it("should never call window.alert, confirm, or prompt (uses the modal system)", async () => {
+    // Arrange
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const confirmSpy = vi
+      .spyOn(window, "confirm")
+      .mockImplementation(() => false);
+    const promptSpy = vi.spyOn(window, "prompt").mockImplementation(() => null);
+    const mockWorkout: KRD = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: { created: "2025-01-15T10:30:00Z", sport: "running" },
+      extensions: {
+        structured_workout: {
+          name: "Test Workout",
+          sport: "running",
+          steps: [],
+        },
+      },
+    };
+    const mockShowModal = vi.fn((config) => {
+      config.onCancel();
+    });
+
+    // Act
+    await promptBackupDownload(mockWorkout, "Delete All Steps", mockShowModal);
+
+    // Assert
+    expect(alertSpy).not.toHaveBeenCalled();
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(promptSpy).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
+    confirmSpy.mockRestore();
+    promptSpy.mockRestore();
+  });
 });
