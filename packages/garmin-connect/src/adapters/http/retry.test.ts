@@ -47,6 +47,7 @@ describe("withRetry", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
@@ -187,17 +188,16 @@ describe("withRetry", () => {
       baseDelay: RETRY_TIMING_MS.BASE_DELAY_LARGE,
       maxDelay: RETRY_TIMING_MS.MAX_DELAY,
     });
+
+    // Act
     const promise = retryFetch("https://example.com");
     // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary advance budget, not domain-modeled
     await vi.advanceTimersByTimeAsync(50000);
     await promise;
-    expect(delays[0]).toBe(RETRY_TIMING_MS.JITTERED_DELAY_500);
-    expect(delays[1]).toBe(RETRY_TIMING_MS.BASE_DELAY_LARGE);
-
-    // Act
-    vi.mocked(globalThis.setTimeout).mockRestore();
 
     // Assert
+    expect(delays[0]).toBe(RETRY_TIMING_MS.JITTERED_DELAY_500);
+    expect(delays[1]).toBe(RETRY_TIMING_MS.BASE_DELAY_LARGE);
   });
 
   it("should log debug on each retry with attempt info", async () => {
