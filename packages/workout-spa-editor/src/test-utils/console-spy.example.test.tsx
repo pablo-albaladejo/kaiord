@@ -32,24 +32,6 @@ describe("Console Spy Usage Examples", () => {
     warningChecker.verify();
   });
 
-  it("Example 2: Component with valid HTML attributes", () => {
-    // Arrange
-    const warningChecker = expectNoReactWarnings();
-
-    // Act - Render with valid HTML attributes
-    render(
-      <ExampleComponent
-        validProp="test"
-        data-testid="example"
-        aria-label="Example"
-        className="test-class"
-      />
-    );
-
-    // Assert - Should pass because these are valid HTML attributes
-    warningChecker.verify();
-  });
-
   // Note: This test would fail if ExampleComponent passes invalidProp to DOM
   // it("Example 3: Component with invalid props (would fail)", () => {
   //   const warningChecker = expectNoReactWarnings();

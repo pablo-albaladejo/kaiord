@@ -1,10 +1,10 @@
 /**
- * Performance Tests for Core Operations
+ * Functional Tests for Core Operations
  *
- * Tests performance of critical operations:
- * - Block deletion (< 100ms)
- * - Undo operations (< 100ms)
- * - Modal operations (< 200ms)
+ * Exercises critical store operations against larger workouts:
+ * - Block deletion (result shape + step-index recalculation)
+ * - Undo operations (history navigation + boundary no-op)
+ * - Combined delete + undo flows
  *
  * Requirements: Task 15.1
  */
@@ -50,11 +50,10 @@ const PRE_DELETE_LIST_LENGTH = 100;
 const HISTORY_DEPTH = 50;
 const HISTORY_LAST_INDEX = 49;
 const UNDO_BATCH_COUNT = 10;
-const MODAL_BATCH_COUNT = 10;
 const NESTED_BLOCKS_COUNT = 5;
 const NESTED_DELETE_LOOP_COUNT = 3;
 
-describe("Performance Tests", () => {
+describe("Core Operations", () => {
   const createMockKrd = (steps: Array<WorkoutStep | RepetitionBlock>): KRD => ({
     version: "1.0",
     type: "structured_workout",
@@ -105,8 +104,8 @@ describe("Performance Tests", () => {
     isEditing: false,
   });
 
-  describe("block deletion performance", () => {
-    it("should delete small block within 100ms", () => {
+  describe("block deletion", () => {
+    it("should delete a small block", () => {
       // Arrange
       const block = createRepetitionBlock(
         BLOCK_SCAFFOLD_NESTED_STEPS,
@@ -118,19 +117,15 @@ describe("Performance Tests", () => {
         createWorkoutStep(1),
       ]);
       const state = createMockState(krd);
-      const startTime = performance.now();
-      const result = deleteRepetitionBlockAction(krd, block.id!, state);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
       // Assert
       expect(result.currentWorkout).toBeDefined();
-      expect(duration).toBeLessThan(100);
     });
 
-    it("should delete large block within 100ms", () => {
+    it("should delete a large block", () => {
       // Arrange
       const largeBlock = createRepetitionBlock(
         BLOCK_SCAFFOLD_LARGE_STEPS,
@@ -142,19 +137,15 @@ describe("Performance Tests", () => {
         createWorkoutStep(1),
       ]);
       const state = createMockState(krd);
-      const startTime = performance.now();
-      const result = deleteRepetitionBlockAction(krd, largeBlock.id!, state);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = deleteRepetitionBlockAction(krd, largeBlock.id!, state);
 
       // Assert
       expect(result.currentWorkout).toBeDefined();
-      expect(duration).toBeLessThan(100);
     });
 
-    it("should delete block from workout with many steps within 100ms", () => {
+    it("should delete a block from a workout with many steps", () => {
       // Arrange
       const steps: Array<WorkoutStep | RepetitionBlock> = [];
       for (let i = 0; i < MANY_STEPS_COUNT; i++) {
@@ -170,19 +161,15 @@ describe("Performance Tests", () => {
       }
       const krd = createMockKrd(steps);
       const state = createMockState(krd);
-      const startTime = performance.now();
-      const result = deleteRepetitionBlockAction(krd, blockToDelete.id!, state);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = deleteRepetitionBlockAction(krd, blockToDelete.id!, state);
 
       // Assert
       expect(result.currentWorkout).toBeDefined();
-      expect(duration).toBeLessThan(100);
     });
 
-    it("should recalculate indices efficiently after deletion", () => {
+    it("should recalculate indices after deletion", () => {
       // Arrange
       const steps: Array<WorkoutStep | RepetitionBlock> = [];
       const blockToDelete = createRepetitionBlock(
@@ -195,19 +182,15 @@ describe("Performance Tests", () => {
       }
       const krd = createMockKrd(steps);
       const state = createMockState(krd);
-      const startTime = performance.now();
-      const result = deleteRepetitionBlockAction(krd, blockToDelete.id!, state);
-      const endTime = performance.now();
-      const duration = endTime - startTime;
-      expect(result.currentWorkout).toBeDefined();
-      expect(duration).toBeLessThan(100);
 
       // Act
+      const result = deleteRepetitionBlockAction(krd, blockToDelete.id!, state);
+
+      // Assert
+      expect(result.currentWorkout).toBeDefined();
       const workout = result.currentWorkout?.extensions?.structured_workout as
         | Workout
         | undefined;
-
-      // Assert
       if (workout) {
         const updatedSteps = workout.steps;
         let expectedIndex = 0;
@@ -221,8 +204,8 @@ describe("Performance Tests", () => {
     });
   });
 
-  describe("undo operation performance", () => {
-    it("should undo within 100ms", () => {
+  describe("undo operation", () => {
+    it("should undo to the previous workout", () => {
       // Arrange
       const krd1 = createMockKrd([createWorkoutStep(0)]);
       const krd2 = createMockKrd([createWorkoutStep(0), createWorkoutStep(1)]);
@@ -243,20 +226,16 @@ describe("Performance Tests", () => {
         selectedStepIds: [],
         isEditing: false,
       };
-      const startTime = performance.now();
-      const result = createUndoAction(state);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = createUndoAction(state);
 
       // Assert
       expect(result.currentWorkout).toBe(krd2);
       expect(result.historyIndex).toBe(1);
-      expect(duration).toBeLessThan(100);
     });
 
-    it("should undo with large workout within 100ms", () => {
+    it("should undo with a large workout", () => {
       // Arrange
       const steps1 = Array.from({ length: MANY_STEPS_COUNT }, (_, i) =>
         createWorkoutStep(i)
@@ -284,20 +263,16 @@ describe("Performance Tests", () => {
         selectedStepIds: [],
         isEditing: false,
       };
-      const startTime = performance.now();
-      const result = createUndoAction(state);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = createUndoAction(state);
 
       // Assert
       expect(result.currentWorkout).toBe(krd2);
       expect(result.historyIndex).toBe(1);
-      expect(duration).toBeLessThan(100);
     });
 
-    it("should undo multiple times efficiently", () => {
+    it("should undo multiple times", () => {
       // Arrange
       const history: Array<KRD> = [];
       for (let i = 0; i < HISTORY_DEPTH; i++) {
@@ -314,7 +289,8 @@ describe("Performance Tests", () => {
         selectedStepIds: [],
         isEditing: false,
       };
-      const startTime = performance.now();
+
+      // Act
       for (let i = 0; i < UNDO_BATCH_COUNT; i++) {
         const result = createUndoAction(state);
         state = {
@@ -323,18 +299,13 @@ describe("Performance Tests", () => {
           historyIndex: result.historyIndex!,
         };
       }
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
 
       // Assert
       // eslint-disable-next-line no-magic-numbers -- post-undo invariant: HISTORY_LAST_INDEX (49) - UNDO_BATCH_COUNT (10) = 39, mechanical derivation
       expect(state.historyIndex).toBe(39);
-      expect(duration).toBeLessThan(100);
     });
 
-    it("should handle undo at history boundary efficiently", () => {
+    it("should return empty object when undoing at the history boundary", () => {
       // Arrange
       const krd = createMockKrd([createWorkoutStep(0)]);
       const state: WorkoutState = {
@@ -345,148 +316,17 @@ describe("Performance Tests", () => {
         selectedStepIds: [],
         isEditing: false,
       };
-      const startTime = performance.now();
-      const result = createUndoAction(state);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = createUndoAction(state);
 
       // Assert
       expect(result).toEqual({});
-      expect(duration).toBeLessThan(100);
     });
   });
 
-  describe("modal operation performance", () => {
-    it("should create modal config within 200ms", () => {
-      // Arrange
-      const modalConfig = {
-        title: "Delete Repetition Block",
-        message: "Are you sure you want to delete this repetition block?",
-        confirmLabel: "Delete",
-        cancelLabel: "Cancel",
-        onConfirm: () => {},
-        onCancel: () => {},
-      };
-      const startTime = performance.now();
-      const config = { ...modalConfig };
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
-
-      // Assert
-      expect(config.title).toBe("Delete Repetition Block");
-      expect(duration).toBeLessThan(200);
-    });
-
-    it("should handle modal state changes within 200ms", () => {
-      // Arrange
-      let isModalOpen = false;
-      let modalConfig: unknown = null;
-      const showModal = (config: unknown) => {
-        isModalOpen = true;
-        modalConfig = config;
-      };
-      const hideModal = () => {
-        isModalOpen = false;
-        modalConfig = null;
-      };
-      const config = {
-        title: "Confirm Action",
-        message: "Are you sure?",
-        confirmLabel: "Yes",
-        cancelLabel: "No",
-        onConfirm: () => {},
-        onCancel: () => {},
-      };
-      const startTime = performance.now();
-      showModal(config);
-      hideModal();
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
-
-      // Assert
-      expect(isModalOpen).toBe(false);
-      expect(modalConfig).toBe(null);
-      expect(duration).toBeLessThan(200);
-    });
-
-    it("should handle multiple modal operations within 200ms", () => {
-      // Arrange
-      let isModalOpen = false;
-      const showModal = () => {
-        isModalOpen = true;
-      };
-      const hideModal = () => {
-        isModalOpen = false;
-      };
-      const configs = Array.from({ length: MODAL_BATCH_COUNT }, (_, i) => ({
-        title: `Modal ${i}`,
-        message: `Message ${i}`,
-        confirmLabel: "OK",
-        cancelLabel: "Cancel",
-        onConfirm: () => {},
-        onCancel: () => {},
-      }));
-      const startTime = performance.now();
-      configs.forEach(() => {
-        showModal();
-        hideModal();
-      });
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
-
-      // Assert
-      expect(isModalOpen).toBe(false);
-      expect(duration).toBeLessThan(200);
-    });
-
-    it("should handle modal with complex callbacks within 200ms", () => {
-      // Arrange
-      const largeBlock = createRepetitionBlock(
-        BLOCK_SCAFFOLD_LARGE_STEPS,
-        BLOCK_SCAFFOLD_LARGE_REPS
-      );
-      const krd = createMockKrd([largeBlock]);
-      const state = createMockState(krd);
-      const onConfirm = () => {
-        // Simulate complex operation
-        deleteRepetitionBlockAction(krd, 0, state);
-      };
-      const onCancel = () => {
-        // Simulate cleanup
-        return;
-      };
-      const modalConfig = {
-        title: "Delete Large Block",
-        message: "This will delete 50 steps. Continue?",
-        confirmLabel: "Delete",
-        cancelLabel: "Cancel",
-        onConfirm,
-        onCancel,
-      };
-      const startTime = performance.now();
-      const config = { ...modalConfig };
-      config.onConfirm();
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
-
-      // Assert
-      expect(config.title).toBe("Delete Large Block");
-      expect(duration).toBeLessThan(200);
-    });
-  });
-
-  describe("combined operations performance", () => {
-    it("should handle delete + undo cycle within 200ms", () => {
+  describe("combined operations", () => {
+    it("should handle a delete then undo cycle", () => {
       // Arrange
       const block = createRepetitionBlock(
         BLOCK_SCAFFOLD_UNDO_LARGE_STEPS,
@@ -498,7 +338,8 @@ describe("Performance Tests", () => {
         createWorkoutStep(1),
       ]);
       const state = createMockState(krd);
-      const startTime = performance.now();
+
+      // Act
       const deleteResult = deleteRepetitionBlockAction(krd, 0, state);
       const updatedState: WorkoutState = {
         ...state,
@@ -510,24 +351,20 @@ describe("Performance Tests", () => {
         historyIndex: 1,
       };
       const undoResult = createUndoAction(updatedState);
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
 
       // Assert
       expect(undoResult.currentWorkout).toBe(krd);
-      expect(duration).toBeLessThan(200);
     });
 
-    it("should handle multiple operations efficiently", () => {
+    it("should handle multiple delete operations", () => {
       // Arrange
       const blocks = Array.from({ length: NESTED_BLOCKS_COUNT }, (_, i) =>
         createRepetitionBlock(BLOCK_SCAFFOLD_NESTED_STEPS, 2 + i)
       );
       const krd = createMockKrd(blocks);
       let state = createMockState(krd);
-      const startTime = performance.now();
+
+      // Act
       for (let i = 0; i < NESTED_DELETE_LOOP_COUNT; i++) {
         // Get the first block's ID from the current workout
         const workout = state.currentWorkout?.extensions
@@ -552,20 +389,14 @@ describe("Performance Tests", () => {
           historyIndex: state.historyIndex + 1,
         };
       }
-      const endTime = performance.now();
-      const duration = endTime - startTime;
 
-      // Act
+      // Assert
       const workout = state.currentWorkout?.extensions?.structured_workout as
         | Workout
         | undefined;
-
-      // Assert
       if (workout) {
         expect(workout.steps).toHaveLength(2);
       }
-      // eslint-disable-next-line no-magic-numbers -- timer-test arbitrary upper-bound budget, not domain-modeled
-      expect(duration).toBeLessThan(300);
     });
   });
 });

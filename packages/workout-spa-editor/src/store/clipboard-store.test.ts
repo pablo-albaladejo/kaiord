@@ -49,53 +49,52 @@ describe("writeClipboard", () => {
 });
 
 describe("readClipboard", () => {
-  it("should return the same step payload that was copied", async () => {
-    // Arrange
-    const stepPayload = JSON.stringify(
-      {
-        id: "step-1",
-        type: "step",
-        stepIndex: 0,
-        intensity: "active",
-        duration: { type: "time", value: 300 },
-        target: { type: "power", value: 200 },
-      },
-      null,
-      2
-    );
+  it.each([
+    {
+      label: "step",
+      payload: JSON.stringify(
+        {
+          id: "step-1",
+          type: "step",
+          stepIndex: 0,
+          intensity: "active",
+          duration: { type: "time", value: 300 },
+          target: { type: "power", value: 200 },
+        },
+        null,
+        2
+      ),
+    },
+    {
+      label: "repetition block",
+      payload: JSON.stringify(
+        {
+          id: "block-1",
+          type: "repetition",
+          repetitions: 3,
+          steps: [
+            { id: "s-1", type: "step", stepIndex: 0 },
+            { id: "s-2", type: "step", stepIndex: 1 },
+          ],
+        },
+        null,
+        2
+      ),
+    },
+  ])(
+    "should return the same $label payload that was copied",
+    async ({ payload }) => {
+      // Arrange
 
-    // Act
-    await writeClipboard(stepPayload);
-    const readBack = await readClipboard();
+      // Act
+      await writeClipboard(payload);
+      const readBack = await readClipboard();
 
-    // Assert
-    expect(readBack).toBe(stepPayload);
-    expect(JSON.parse(readBack)).toStrictEqual(JSON.parse(stepPayload));
-  });
-
-  it("should return the same repetition block payload that was copied", async () => {
-    // Arrange
-    const blockPayload = JSON.stringify(
-      {
-        id: "block-1",
-        type: "repetition",
-        repetitions: 3,
-        steps: [
-          { id: "s-1", type: "step", stepIndex: 0 },
-          { id: "s-2", type: "step", stepIndex: 1 },
-        ],
-      },
-      null,
-      2
-    );
-
-    // Act
-    await writeClipboard(blockPayload);
-    const readBack = await readClipboard();
-
-    // Assert
-    expect(JSON.parse(readBack)).toStrictEqual(JSON.parse(blockPayload));
-  });
+      // Assert
+      expect(readBack).toBe(payload);
+      expect(JSON.parse(readBack)).toStrictEqual(JSON.parse(payload));
+    }
+  );
 });
 
 describe("clipboard failure handling", () => {

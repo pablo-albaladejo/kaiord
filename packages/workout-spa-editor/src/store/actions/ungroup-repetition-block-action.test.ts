@@ -209,20 +209,6 @@ describe("ungroupRepetitionBlockAction", () => {
       expect(result).toEqual({});
     });
 
-    it("should return empty object when target is not a repetition block", () => {
-      // Arrange
-      const step1 = createMockStep(0);
-      const step2 = createMockStep(1);
-      const krd = createMockKRD([step1, step2]);
-      const state = createMockState();
-
-      // Act
-      const result = ungroupRepetitionBlockAction(krd, "nonexistent-id", state);
-
-      // Assert
-      expect(result).toEqual({});
-    });
-
     it("should handle ungrouping a block with single step", () => {
       // Arrange
       const step1 = createMockStep(0);

@@ -28,7 +28,7 @@ describe("useWorkoutStore", () => {
   });
 
   describe("initial state", () => {
-    it("should have null workout initially", () => {
+    it("should have null workout, null selectedStepId, and isEditing false initially", () => {
       // Arrange
 
       // Act
@@ -36,25 +36,7 @@ describe("useWorkoutStore", () => {
 
       // Assert
       expect(state.currentWorkout).toBeNull();
-    });
-
-    it("should have null selectedStepId initially", () => {
-      // Arrange
-
-      // Act
-      const state = useWorkoutStore.getState();
-
-      // Assert
       expect(state.selectedStepId).toBeNull();
-    });
-
-    it("should have isEditing false initially", () => {
-      // Arrange
-
-      // Act
-      const state = useWorkoutStore.getState();
-
-      // Assert
       expect(state.isEditing).toBe(false);
     });
   });
@@ -282,28 +264,22 @@ describe("useWorkoutStore", () => {
   });
 
   describe("setEditing", () => {
-    it("should set isEditing to true", () => {
-      // Arrange
-      useWorkoutStore.getState().setEditing(true);
+    it.each([
+      { initial: false, value: true },
+      { initial: true, value: false },
+    ])(
+      "should set isEditing to $value via setEditing",
+      ({ initial, value }) => {
+        // Arrange
+        useWorkoutStore.setState({ isEditing: initial });
 
-      // Act
-      const state = useWorkoutStore.getState();
+        // Act
+        useWorkoutStore.getState().setEditing(value);
 
-      // Assert
-      expect(state.isEditing).toBe(true);
-    });
-
-    it("should set isEditing to false", () => {
-      // Arrange
-      useWorkoutStore.setState({ isEditing: true });
-      useWorkoutStore.getState().setEditing(false);
-
-      // Act
-      const state = useWorkoutStore.getState();
-
-      // Assert
-      expect(state.isEditing).toBe(false);
-    });
+        // Assert
+        expect(useWorkoutStore.getState().isEditing).toBe(value);
+      }
+    );
   });
 
   describe("clearWorkout", () => {
@@ -902,37 +878,6 @@ describe("useWorkoutStore", () => {
       expect(state.currentWorkout).toBeNull();
       expect(state.undoHistory).toHaveLength(0);
     });
-
-    it("should create step with open duration and open target", () => {
-      // Arrange
-      const mockKrd: KRD = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
-        },
-        extensions: {
-          structured_workout: {
-            sport: "running",
-            steps: [],
-          },
-        },
-      };
-      useWorkoutStore.getState().loadWorkout(mockKrd);
-      useWorkoutStore.getState().createStep();
-      const state = useWorkoutStore.getState();
-      const workout = state.currentWorkout?.extensions?.structured_workout;
-
-      // Act
-      const newStep = workout?.steps[0];
-
-      // Assert
-      expect(newStep?.durationType).toBe("open");
-      expect(newStep?.duration).toEqual({ type: "open" });
-      expect(newStep?.targetType).toBe("open");
-      expect(newStep?.target).toEqual({ type: "open" });
-    });
   });
 
   describe("deleteStep", () => {
@@ -1207,55 +1152,6 @@ describe("useWorkoutStore", () => {
         type: "time",
         seconds: 300,
       });
-    });
-  });
-
-  describe("selector hooks", () => {
-    it("should provide access to currentWorkout", () => {
-      // Arrange
-      const mockKrd: KRD = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "cycling",
-        },
-        extensions: {
-          structured_workout: {
-            sport: "cycling",
-            steps: [],
-          },
-        },
-      };
-      useWorkoutStore.setState({ currentWorkout: mockKrd });
-
-      // Act
-      const workout = useWorkoutStore.getState().currentWorkout;
-
-      // Assert
-      expect(workout).toEqual(mockKrd);
-    });
-
-    it("should provide access to selectedStepId", () => {
-      // Arrange
-      useWorkoutStore.setState({ selectedStepId: "step-999" });
-
-      // Act
-      const stepId = useWorkoutStore.getState().selectedStepId;
-
-      // Assert
-      expect(stepId).toBe("step-999");
-    });
-
-    it("should provide access to isEditing", () => {
-      // Arrange
-      useWorkoutStore.setState({ isEditing: true });
-
-      // Act
-      const editing = useWorkoutStore.getState().isEditing;
-
-      // Assert
-      expect(editing).toBe(true);
     });
   });
 

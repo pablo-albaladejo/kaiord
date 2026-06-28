@@ -56,43 +56,32 @@ describe("App", () => {
     // Arrange
 
     // Act
-
     const { container } = renderWithProviders(<App />);
 
     // Assert
-
     expect(container).toBeInTheDocument();
   });
 
   it("should render the calendar by default when no workout is loaded", async () => {
     // Arrange
-
     window.localStorage.setItem("workout-spa-onboarding-completed", "true");
 
     // Act
-
     renderWithProviders(<App />);
 
     // Assert
-
     expect(await screen.findByTestId("calendar-page")).toBeInTheDocument();
   });
 
   describe("onboarding tutorial integration (Requirements 37.1, 37.5)", () => {
     it("should show tutorial on first visit", async () => {
-      // Arrange - localStorage is empty (first visit)
-
-      // Act
       // Arrange
+      // localStorage is empty (first visit)
 
       // Act
-
       renderWithProviders(<App />);
 
-      // Assert - Tutorial should appear (check for unique tutorial content)
-
       // Assert
-
       await waitFor(
         () => {
           expect(
@@ -106,21 +95,13 @@ describe("App", () => {
     });
 
     it("should not show tutorial if already completed", () => {
-      // Arrange - Mark tutorial as completed
       // Arrange
-
       localStorage.setItem("workout-spa-onboarding-completed", "true");
 
       // Act
-
-      // Act
-
       renderWithProviders(<App />);
 
-      // Assert - Tutorial should not appear (check for unique tutorial content)
-
       // Assert
-
       expect(
         screen.queryByText(
           /this tutorial will guide you through the key features/i
@@ -130,18 +111,13 @@ describe("App", () => {
 
     it("should allow skipping tutorial", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
 
       // Act
-
       renderWithProviders(<App />);
 
-      // Wait for tutorial to appear
-
       // Assert
-
+      // Wait for tutorial to appear
       await waitFor(
         () => {
           expect(
@@ -153,11 +129,11 @@ describe("App", () => {
         { timeout: 2000 }
       );
 
-      // Act - Click the "Skip" button
+      // Click the "Skip" button
       const skipButton = screen.getByRole("button", { name: /^skip$/i });
       await user.click(skipButton);
 
-      // Assert - Tutorial should be closed
+      // Tutorial should be closed
       await waitFor(
         () => {
           expect(
@@ -177,18 +153,13 @@ describe("App", () => {
 
     it("should save completion state when tutorial is completed", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
 
       // Act
-
       renderWithProviders(<App />);
 
-      // Wait for tutorial to appear
-
       // Assert
-
+      // Wait for tutorial to appear
       await waitFor(
         () => {
           expect(
@@ -200,7 +171,7 @@ describe("App", () => {
         { timeout: 2000 }
       );
 
-      // Act - Navigate through all steps and complete
+      // Navigate through all steps and complete
       // Click through all 6 steps (0-5)
       for (let i = 0; i < TUTORIAL_TOTAL_STEPS; i++) {
         // On the last step, the button says "Finish", otherwise "Next"
@@ -218,7 +189,7 @@ describe("App", () => {
         }
       }
 
-      // Assert - Tutorial should be closed
+      // Tutorial should be closed
       await waitFor(
         () => {
           expect(
@@ -270,8 +241,6 @@ describe("App", () => {
 
     it("should move step up when Alt+ArrowUp is pressed with a selected step", () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0, 100); // 100W
       const step2 = createMockStep(1, 200); // 200W
       const step3 = createMockStep(2, STEP3_POWER_WATTS); // 300W
@@ -311,15 +280,9 @@ describe("App", () => {
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
       const updatedStep0 = updatedWorkout?.steps[0] as WorkoutStep;
-
-      // Act
-
       const updatedStep1 = updatedWorkout?.steps[1] as WorkoutStep;
 
       // Verify that the step that was at index 1 is now at index 0
-
-      // Assert
-
       expect(updatedStep0.target.value?.value).toBe(initialStep1Power);
       expect(updatedStep0.target.value?.value).toBe(200);
 
@@ -334,8 +297,6 @@ describe("App", () => {
 
     it("should move step down when Alt+ArrowDown is pressed with a selected step", () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0, 100); // 100W
       const step2 = createMockStep(1, 200); // 200W
       const step3 = createMockStep(2, STEP3_POWER_WATTS); // 300W
@@ -373,15 +334,9 @@ describe("App", () => {
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
       const updatedStep1 = updatedWorkout?.steps[1] as WorkoutStep;
-
-      // Act
-
       const updatedStep2 = updatedWorkout?.steps[2] as WorkoutStep;
 
       // Verify that the step that was at index 2 is now at index 1
-
-      // Assert
-
       expect(updatedStep1.target.value?.value).toBe(initialStep2Power);
       expect(updatedStep1.target.value?.value).toBe(STEP3_POWER_WATTS);
 
@@ -396,8 +351,6 @@ describe("App", () => {
 
     it("should not move step up when it is already at the top", () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0, 100);
       const step2 = createMockStep(1, 200);
       const workout = createMockWorkout([step1, step2]);
@@ -424,21 +377,13 @@ describe("App", () => {
       window.dispatchEvent(event);
 
       // Assert
-
-      // Act
-
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
-
-      // Assert
-
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
     it("should not move step down when it is already at the bottom", () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0, 100);
       const step2 = createMockStep(1, 200);
       const workout = createMockWorkout([step1, step2]);
@@ -465,21 +410,13 @@ describe("App", () => {
       window.dispatchEvent(event);
 
       // Assert
-
-      // Act
-
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
-
-      // Assert
-
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
     it("should not move step when no step is selected", () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0, 100);
       const step2 = createMockStep(1, 200);
       const workout = createMockWorkout([step1, step2]);
@@ -509,21 +446,13 @@ describe("App", () => {
       window.dispatchEvent(downEvent);
 
       // Assert
-
-      // Act
-
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
-
-      // Assert
-
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
     it("should not move step when no workout is loaded", () => {
       // Arrange
-      // Arrange
-
       renderWithProviders(<App />);
 
       // Act
@@ -539,15 +468,10 @@ describe("App", () => {
         altKey: true,
         bubbles: true,
       });
-
-      // Act
-
       window.dispatchEvent(downEvent);
 
-      // Assert - no error thrown
-
       // Assert
-
+      // No error thrown
       expect(useWorkoutStore.getState().currentWorkout).toBeNull();
     });
   });

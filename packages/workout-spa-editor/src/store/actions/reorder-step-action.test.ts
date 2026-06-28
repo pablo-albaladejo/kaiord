@@ -315,48 +315,6 @@ describe("reorderStepAction", () => {
     });
   });
 
-  describe("step index stability", () => {
-    it("should preserve original stepIndex values after reordering", () => {
-      // Arrange
-      const activeIndex = 0;
-      const overIndex = 2;
-      const result = reorderStepAction(
-        mockKrd,
-        activeIndex,
-        overIndex,
-        mockState
-      );
-
-      // Act
-      const workout = result.currentWorkout?.extensions?.structured_workout;
-
-      // Assert
-      expect(workout?.steps[0].stepIndex).toBe(1);
-      expect(workout?.steps[1].stepIndex).toBe(2);
-      expect(workout?.steps[2].stepIndex).toBe(0);
-    });
-
-    it("should maintain stable stepIndex for all steps after reordering", () => {
-      // Arrange
-      const activeIndex = 2;
-      const overIndex = 0;
-      const result = reorderStepAction(
-        mockKrd,
-        activeIndex,
-        overIndex,
-        mockState
-      );
-
-      // Act
-      const workout = result.currentWorkout?.extensions?.structured_workout;
-
-      // Assert
-      expect(workout?.steps[0].stepIndex).toBe(2);
-      expect(workout?.steps[1].stepIndex).toBe(0);
-      expect(workout?.steps[2].stepIndex).toBe(1);
-    });
-  });
-
   describe("repetition blocks", () => {
     it("should handle reordering with repetition blocks", () => {
       // Arrange

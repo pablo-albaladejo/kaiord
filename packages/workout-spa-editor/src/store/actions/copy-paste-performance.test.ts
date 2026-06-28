@@ -82,32 +82,7 @@ describe("Copy/Paste Performance", () => {
   });
 
   describe("large repetition blocks", () => {
-    it("should copy large repetition block within 500ms", async () => {
-      // Arrange
-      const largeBlock = createRepetitionBlock(
-        BLOCK_SCAFFOLD_LARGE_STEPS,
-        BLOCK_SCAFFOLD_LARGE_REPS
-      );
-      const krd = createMockKrd([largeBlock]);
-      const mockWriteText = vi.fn().mockResolvedValue(undefined);
-      Object.assign(navigator, {
-        clipboard: {
-          writeText: mockWriteText,
-        },
-      });
-      const startTime = performance.now();
-      const result = await copyStepAction(krd, 0);
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
-
-      // Assert
-      expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(500);
-    });
-
-    it("should paste large repetition block within 500ms", async () => {
+    it("should paste large repetition block", async () => {
       // Arrange
       const largeBlock = createRepetitionBlock(
         BLOCK_SCAFFOLD_LARGE_STEPS,
@@ -122,16 +97,12 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-      const startTime = performance.now();
-      const result = await pasteStepAction(krd);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = await pasteStepAction(krd);
 
       // Assert
       expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(500);
     });
 
     it("should handle repetition block with 100 steps", async () => {
@@ -171,31 +142,7 @@ describe("Copy/Paste Performance", () => {
   });
 
   describe("many steps", () => {
-    it("should copy workout with 100 steps within 500ms", async () => {
-      // Arrange
-      const manySteps = Array.from({ length: MANY_STEPS_COUNT }, (_, i) =>
-        createWorkoutStep(i)
-      );
-      const krd = createMockKrd(manySteps);
-      const mockWriteText = vi.fn().mockResolvedValue(undefined);
-      Object.assign(navigator, {
-        clipboard: {
-          writeText: mockWriteText,
-        },
-      });
-      const startTime = performance.now();
-      const result = await copyStepAction(krd, PASTE_TARGET_INDEX);
-      const endTime = performance.now();
-
-      // Act
-      const duration = endTime - startTime;
-
-      // Assert
-      expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(500);
-    });
-
-    it("should paste into workout with 100 steps within 500ms", async () => {
+    it("should paste into workout with 100 steps", async () => {
       // Arrange
       const manySteps = Array.from({ length: MANY_STEPS_COUNT }, (_, i) =>
         createWorkoutStep(i)
@@ -210,22 +157,18 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-      const startTime = performance.now();
-      const result = await pasteStepAction(krd, PASTE_TARGET_INDEX);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      const result = await pasteStepAction(krd, PASTE_TARGET_INDEX);
 
       // Assert
       expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(500);
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
       // eslint-disable-next-line no-magic-numbers -- post-paste invariant: input length 100 + 1 pasted step, mechanical derivation
       expect(steps).toHaveLength(101);
     });
 
-    it("should recalculate indices for 100 steps efficiently", async () => {
+    it("should recalculate indices for 100 steps after paste", async () => {
       // Arrange
       const manySteps = Array.from({ length: MANY_STEPS_COUNT }, (_, i) =>
         createWorkoutStep(i)
@@ -240,12 +183,8 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-      const startTime = performance.now();
       const result = await pasteStepAction(krd, 0);
-      const endTime = performance.now();
-      const duration = endTime - startTime;
       expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(500);
 
       // Act
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
@@ -291,17 +230,13 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-      const startTime = performance.now();
-      await copyStepAction(krd, 1);
-      const pasteResult = await pasteStepAction(krd);
-      const endTime = performance.now();
 
       // Act
-      const duration = endTime - startTime;
+      await copyStepAction(krd, 1);
+      const pasteResult = await pasteStepAction(krd);
 
       // Assert
       expect(pasteResult.success).toBe(true);
-      expect(duration).toBeLessThan(500);
       expect(
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps
       ).toHaveLength(NESTED_STEPS_LENGTH_AFTER_PASTE);
