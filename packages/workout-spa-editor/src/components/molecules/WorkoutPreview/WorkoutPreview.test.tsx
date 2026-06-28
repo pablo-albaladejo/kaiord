@@ -532,8 +532,6 @@ describe("flattenWorkoutSteps", () => {
 describe("WorkoutPreview", () => {
   it("should render bars for each step", () => {
     // Arrange
-    // Arrange
-
     const workout = makeWorkout([
       makeStep(0, PREVIEW_TEST.DURATION_DEFAULT),
       makeStep(1, PREVIEW_TEST.DURATION_LONG),
@@ -541,42 +539,26 @@ describe("WorkoutPreview", () => {
 
     // Act
     render(<WorkoutPreview workout={workout} />);
-
-    // Assert
     const region = screen.getByTestId("workout-preview");
-
-    // Act
-
     const rects = region.querySelectorAll("rect");
 
     // Assert
-
     expect(rects).toHaveLength(PREVIEW_TEST.BARS_FROM_TWO_STEPS);
   });
 
   it("should return null for empty workout", () => {
     // Arrange
-    // Arrange
-
     const workout = makeWorkout([]);
 
     // Act
-
-    // Act
-
     const { container } = render(<WorkoutPreview workout={workout} />);
 
     // Assert
-
-    // Assert
-
     expect(container.firstChild).toBeNull();
   });
 
   it("should highlight selected step bar", () => {
     // Arrange
-    // Arrange
-
     const workout = makeWorkout([
       makeStep(0, PREVIEW_TEST.DURATION_DEFAULT),
       makeStep(1, PREVIEW_TEST.DURATION_LONG),
@@ -584,16 +566,10 @@ describe("WorkoutPreview", () => {
 
     // Act
     render(<WorkoutPreview workout={workout} selectedStepId="step-0" />);
-
-    // Assert
     const region = screen.getByTestId("workout-preview");
-
-    // Act
-
     const rects = region.querySelectorAll("rect");
 
     // Assert
-
     expect(rects[0].getAttribute("stroke")).toBe(PREVIEW_TEST.SELECTED_STROKE);
     expect(rects[1].getAttribute("stroke")).toBe(
       PREVIEW_TEST.UNSELECTED_STROKE
@@ -602,31 +578,21 @@ describe("WorkoutPreview", () => {
 
   it("should call onStepSelect when bar is clicked", () => {
     // Arrange
-    // Arrange
-
     const onSelect = vi.fn();
     const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
-
-    // Act
     render(<WorkoutPreview workout={workout} onStepSelect={onSelect} />);
     const region = screen.getByTestId("workout-preview");
     const rect = region.querySelector("rect");
 
     // Act
-
     fireEvent.click(rect!);
 
     // Assert
-
-    // Assert
-
     expect(onSelect).toHaveBeenCalledWith("step-0");
   });
 
   it("should expand repetition blocks into multiple bars", () => {
     // Arrange
-    // Arrange
-
     const block: RepetitionBlock = {
       repeatCount: PREVIEW_TEST.REPEAT_FOUR,
       steps: [
@@ -638,62 +604,40 @@ describe("WorkoutPreview", () => {
 
     // Act
     render(<WorkoutPreview workout={workout} />);
-
-    // Assert
     const region = screen.getByTestId("workout-preview");
-
-    // Act
-
     const rects = region.querySelectorAll("rect");
 
     // Assert
-
     expect(rects).toHaveLength(PREVIEW_TEST.BARS_FROM_REPEAT_4X2);
   });
 
   it("should select block when clicking any repeated bar", () => {
     // Arrange
-    // Arrange
-
     const onSelect = vi.fn();
     const block: RepetitionBlock = {
       repeatCount: PREVIEW_TEST.REPEAT_TWICE,
       steps: [makeStep(0, PREVIEW_TEST.DURATION_SHORT)],
     };
     const workout = makeWorkout([block]);
-
-    // Act
     render(<WorkoutPreview workout={workout} onStepSelect={onSelect} />);
     const region = screen.getByTestId("workout-preview");
     const rects = region.querySelectorAll("rect");
 
     // Act
-
     fireEvent.click(rects[1]);
 
     // Assert
-
-    // Assert
-
     expect(onSelect).toHaveBeenCalledWith("block-0");
   });
 
   it("should have proper ARIA role", () => {
     // Arrange
-    // Arrange
-
     const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
-
-    // Act
-
     render(<WorkoutPreview workout={workout} />);
 
     // Assert
-
-    // Assert
-
     expect(
       screen.getByRole("region", { name: "Workout preview" })
     ).toBeInTheDocument();
@@ -701,92 +645,58 @@ describe("WorkoutPreview", () => {
 
   it("should apply custom className", () => {
     // Arrange
-    // Arrange
-
     const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
 
     // Act
     render(<WorkoutPreview workout={workout} className="mt-4" />);
-
-    // Assert
-
-    // Act
-
     const region = screen.getByTestId("workout-preview");
 
     // Assert
-
     expect(region).toHaveClass("mt-4");
   });
 
   it("should call onStepSelect on Enter key", () => {
     // Arrange
-    // Arrange
-
     const onSelect = vi.fn();
     const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
-
-    // Act
     render(<WorkoutPreview workout={workout} onStepSelect={onSelect} />);
     const rect = screen.getByTestId("workout-preview").querySelector("rect")!;
 
     // Act
-
     fireEvent.keyDown(rect, { key: "Enter" });
 
     // Assert
-
-    // Assert
-
     expect(onSelect).toHaveBeenCalledWith("step-0");
   });
 
   it("should call onStepSelect on Space key", () => {
     // Arrange
-    // Arrange
-
     const onSelect = vi.fn();
     const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
-
-    // Act
     render(<WorkoutPreview workout={workout} onStepSelect={onSelect} />);
     const rect = screen.getByTestId("workout-preview").querySelector("rect")!;
 
     // Act
-
     fireEvent.keyDown(rect, { key: " " });
 
     // Assert
-
-    // Assert
-
     expect(onSelect).toHaveBeenCalledWith("step-0");
   });
 
   it("should not throw when onStepSelect is undefined", () => {
     // Arrange
-    // Arrange
-
     const workout = makeWorkout([makeStep(0, PREVIEW_TEST.DURATION_DEFAULT)]);
-
-    // Act
     render(<WorkoutPreview workout={workout} />);
-
-    // Act
-
     const rect = screen.getByTestId("workout-preview").querySelector("rect")!;
 
-    // Assert
+    // Act
 
     // Assert
-
     expect(() => fireEvent.click(rect)).not.toThrow();
   });
 
   it("should render cadence target steps", () => {
     // Arrange
-    // Arrange
-
     const workout = makeWorkout([
       makeStep(0, PREVIEW_TEST.DURATION_DEFAULT, {
         targetType: "cadence",
@@ -799,17 +709,11 @@ describe("WorkoutPreview", () => {
 
     // Act
     render(<WorkoutPreview workout={workout} />);
-
-    // Assert
-
-    // Act
-
     const rects = screen
       .getByTestId("workout-preview")
       .querySelectorAll("rect");
 
     // Assert
-
     expect(rects).toHaveLength(PREVIEW_TEST.BARS_SINGLE);
   });
 });

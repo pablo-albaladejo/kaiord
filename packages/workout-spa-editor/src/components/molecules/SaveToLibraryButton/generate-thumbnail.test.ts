@@ -64,7 +64,6 @@ describe("generateThumbnail", () => {
   describe("empty workout", () => {
     it("should generate thumbnail for empty workout", async () => {
       // Arrange
-      // Arrange
 
       const workout: KRD = {
         ...mockKRD,
@@ -79,11 +78,7 @@ describe("generateThumbnail", () => {
 
       // Act
 
-      // Act
-
       const result = await generateThumbnail(workout);
-
-      // Assert
 
       // Assert
 
@@ -120,11 +115,7 @@ describe("generateThumbnail", () => {
 
       // Act
 
-      // Act
-
       const result = await generateThumbnail(workout);
-
-      // Assert
 
       // Assert
 
@@ -132,7 +123,6 @@ describe("generateThumbnail", () => {
     });
 
     it("should generate thumbnail for workout with repetition blocks", async () => {
-      // Arrange
       // Arrange
 
       const step: WorkoutStep = {
@@ -158,11 +148,7 @@ describe("generateThumbnail", () => {
 
       // Act
 
-      // Act
-
       const result = await generateThumbnail(workout);
-
-      // Assert
 
       // Assert
 
@@ -170,7 +156,6 @@ describe("generateThumbnail", () => {
     });
 
     it("should handle non-time duration steps", async () => {
-      // Arrange
       // Arrange
 
       const step: WorkoutStep = {
@@ -191,11 +176,7 @@ describe("generateThumbnail", () => {
 
       // Act
 
-      // Act
-
       const result = await generateThumbnail(workout);
-
-      // Assert
 
       // Assert
 
@@ -206,7 +187,6 @@ describe("generateThumbnail", () => {
   describe("error handling", () => {
     it("should throw error when canvas context is not available", async () => {
       // Arrange
-      // Arrange
 
       const mockCanvas = {
         getContext: vi.fn(() => null),
@@ -216,11 +196,9 @@ describe("generateThumbnail", () => {
         mockCanvas as unknown as HTMLCanvasElement
       );
 
-      // Act
-
       const workout = mockKRD;
 
-      // Act & Assert
+      // Act
 
       // Assert
 
@@ -269,11 +247,7 @@ describe("generateThumbnail", () => {
 
       // Act
 
-      // Act
-
       const result = await generateThumbnail(workout);
-
-      // Assert
 
       // Assert
 

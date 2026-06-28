@@ -14,54 +14,37 @@ import { PasteButton } from "./PasteButton";
 describe("PasteButton", () => {
   describe("rendering", () => {
     it("should render paste button with correct label", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<PasteButton onPaste={vi.fn()} />);
-
-      // Assert
-
       // Act
-
+      render(<PasteButton onPaste={vi.fn()} />);
       const button = screen.getByRole("button", {
         name: "Paste step from clipboard",
       });
 
       // Assert
-
       expect(button).toBeInTheDocument();
       expect(button).toHaveTextContent("Paste Step");
     });
 
     it("should render with custom className", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<PasteButton onPaste={vi.fn()} className="custom-class" />);
-
-      // Assert
-
       // Act
-
+      render(<PasteButton onPaste={vi.fn()} className="custom-class" />);
       const button = screen.getByRole("button");
 
       // Assert
-
       expect(button).toHaveClass("custom-class");
     });
 
     it("should have correct data-testid", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<PasteButton onPaste={vi.fn()} />);
 
       // Assert
-
-      // Assert
-
       expect(screen.getByTestId("paste-step-button")).toBeInTheDocument();
     });
   });
@@ -69,29 +52,19 @@ describe("PasteButton", () => {
   describe("interactions", () => {
     it("should call onPaste when clicked", async () => {
       // Arrange
-      // Arrange
-
       const handlePaste = vi.fn();
       const user = userEvent.setup();
       render(<PasteButton onPaste={handlePaste} />);
 
       // Act
-
-      // Act
-
       await user.click(screen.getByRole("button"));
 
       // Assert
-
-      // Assert
-
       expect(handlePaste).toHaveBeenCalledOnce();
     });
 
     it("should stop event propagation when clicked", async () => {
       // Arrange
-      // Arrange
-
       const handlePaste = vi.fn();
       const handleParentClick = vi.fn();
       const user = userEvent.setup();
@@ -103,15 +76,9 @@ describe("PasteButton", () => {
       );
 
       // Act
-
-      // Act
-
       await user.click(screen.getByRole("button"));
 
       // Assert
-
-      // Assert
-
       expect(handlePaste).toHaveBeenCalledOnce();
       expect(handleParentClick).not.toHaveBeenCalled();
     });

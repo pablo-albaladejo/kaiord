@@ -354,14 +354,10 @@ describe("StepCard", () => {
     it("should not produce React warnings when rendering with component props", () => {
       // Arrange
 
-      // Act
-
-      // Assert
-
-      // Arrange
       const warningChecker = expectNoReactWarnings();
 
       // Act
+
       render(
         <StepCard
           step={mockStep}
@@ -379,11 +375,11 @@ describe("StepCard", () => {
       );
 
       // Assert
+
       warningChecker.verify();
     });
 
     it("should forward HTML attributes to DOM element", () => {
-      // Arrange & Act
       // Arrange
 
       render(
@@ -393,8 +389,6 @@ describe("StepCard", () => {
           aria-describedby="description-id"
         />
       );
-
-      // Assert
 
       // Act
 

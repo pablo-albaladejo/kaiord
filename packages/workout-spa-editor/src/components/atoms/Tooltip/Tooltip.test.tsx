@@ -142,21 +142,6 @@ describe("Tooltip", () => {
   });
 
   describe("disabled state", () => {
-    it("should render only children when disabled", () => {
-      // Arrange
-
-      // Act
-      render(
-        <Tooltip content="Tooltip content" disabled>
-          <button>Hover me</button>
-        </Tooltip>
-      );
-      const trigger = screen.getByRole("button", { name: "Hover me" });
-
-      // Assert
-      expect(trigger).toBeInTheDocument();
-    });
-
     it("should not wrap children in extra DOM when disabled", () => {
       // Arrange
 

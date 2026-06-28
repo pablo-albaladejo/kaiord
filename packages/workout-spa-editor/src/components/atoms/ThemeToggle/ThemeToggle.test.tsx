@@ -72,7 +72,6 @@ describe("ThemeToggle", () => {
   describe("interactions", () => {
     it("should cycle from light to dark mode", async () => {
       // Arrange
-
       const user = userEvent.setup();
 
       render(
@@ -86,21 +85,14 @@ describe("ThemeToggle", () => {
       });
 
       // Act
-
-      // Act
-
       await user.click(button);
 
-      // Assert - cycles to dark
-
       // Assert
-
       expect(button).toHaveAttribute("aria-label", "Switch to light mode");
     });
 
     it("should cycle from dark to light mode", async () => {
       // Arrange
-
       const user = userEvent.setup();
 
       render(
@@ -114,21 +106,14 @@ describe("ThemeToggle", () => {
       });
 
       // Act
-
-      // Act
-
       await user.click(button);
 
-      // Assert - cycles back to light
-
       // Assert
-
       expect(button).toHaveAttribute("aria-label", "Switch to dark mode");
     });
 
     it("should toggle from system theme to explicit theme", async () => {
       // Arrange
-
       const user = userEvent.setup();
 
       render(
@@ -138,23 +123,16 @@ describe("ThemeToggle", () => {
       );
 
       const button = screen.getByRole("button");
-
-      // System theme resolves based on actual system preference
-      // Just verify the button has an aria-label
-
-      // Act
-
+      // System theme resolves based on actual system preference;
+      // capture the initial aria-label before toggling.
       const initialLabel = button.getAttribute("aria-label");
 
-      // Assert
-
-      expect(initialLabel).toMatch(/Switch to (light|dark) mode/);
-
-      // Act - click to toggle
+      // Act
       await user.click(button);
 
-      // Assert - label should change
+      // Assert
       const newLabel = button.getAttribute("aria-label");
+      expect(initialLabel).toMatch(/Switch to (light|dark) mode/);
       expect(newLabel).toMatch(/Switch to (light|dark) mode/);
       expect(newLabel).not.toBe(initialLabel);
     });
