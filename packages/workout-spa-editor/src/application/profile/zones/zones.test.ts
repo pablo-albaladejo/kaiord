@@ -145,7 +145,8 @@ describe("updateSportZones", () => {
   });
 
   it("should flip method to 'user' on manual band edit (4.3a)", async () => {
-    // Arrange — profile starts with method = "train2go" (post-T2G-sync).
+    // Arrange
+    // profile starts with method = "train2go" (post-T2G-sync).
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.cycling = {
@@ -160,7 +161,8 @@ describe("updateSportZones", () => {
     };
     await seedProfile(persistence, profile);
 
-    // Act — user manually edits Z2.maxBpm via Profile Manager.
+    // Act
+    // user manually edits Z2.maxBpm via Profile Manager.
     const updated = await updateSportZones(
       persistence,
       profile.id,
@@ -181,7 +183,8 @@ describe("updateSportZones", () => {
   });
 
   it("should flip method from 'custom' to 'user' on manual band edit (4.3b)", async () => {
-    // Arrange — fresh profile starting at "custom".
+    // Arrange
+    // fresh profile starting at "custom".
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.cycling = {
@@ -204,7 +207,8 @@ describe("updateSportZones", () => {
   });
 
   it("should not affect setZoneMethod (formula path stays as-is) (4.3c)", async () => {
-    // Arrange — calling setZoneMethod (the formula-recompute path)
+    // Arrange
+    // calling setZoneMethod (the formula-recompute path)
     // should keep the chosen method id, NOT flip to "user".
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
@@ -232,7 +236,8 @@ describe("updateSportZones", () => {
   });
 
   it("should flip from formula method to 'user' when user manually edits a band (4.3d)", async () => {
-    // Arrange — profile in `karvonen-5` formula state.
+    // Arrange
+    // profile in `karvonen-5` formula state.
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.cycling = {
@@ -244,7 +249,8 @@ describe("updateSportZones", () => {
     };
     await seedProfile(persistence, profile);
 
-    // Act — user touches a band via Profile Manager.
+    // Act
+    // user touches a band via Profile Manager.
     const updated = await updateSportZones(
       persistence,
       profile.id,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { validateSanity } from "./sanity-checks";
+import { makeValidKrd } from "./test-helpers";
 
 const ONE_HOUR_SECONDS = 3600;
 
@@ -13,7 +14,6 @@ const OVER_STEP_LIMIT = 201;
 const SHORT_DURATION_S = 30;
 
 const EXCESSIVE_DURATION_S = 30000;
-import { makeValidKrd } from "./test-helpers";
 
 describe("validateSanity", () => {
   it("should return null for valid KRD", () => {
@@ -27,49 +27,36 @@ describe("validateSanity", () => {
     expect(result).toBeNull();
   });
 
-  it("should reject zero steps", () => {
-    // Arrange
-    const krd = makeValidKrd(0, ONE_HOUR_SECONDS);
+  it.each([
+    { steps: 0, dur: ONE_HOUR_SECONDS, contains: "Step count 0" },
+    {
+      steps: OVER_STEP_LIMIT,
+      dur: ONE_HOUR_SECONDS,
+      contains: "Step count 201",
+    },
+    {
+      steps: STEP_COUNT_THREE,
+      dur: SHORT_DURATION_S,
+      contains: "Duration 30s",
+    },
+    {
+      steps: STEP_COUNT_THREE,
+      dur: EXCESSIVE_DURATION_S,
+      contains: "Duration 30000s",
+    },
+  ])(
+    "should reject an out-of-range KRD ($contains)",
+    ({ steps, dur, contains }) => {
+      // Arrange
+      const krd = makeValidKrd(steps, dur);
 
-    // Act
-    const result = validateSanity(krd);
+      // Act
+      const result = validateSanity(krd);
 
-    // Assert
-    expect(result).toContain("Step count 0");
-  });
-
-  it("should reject more than 200 steps", () => {
-    // Arrange
-    const krd = makeValidKrd(OVER_STEP_LIMIT, ONE_HOUR_SECONDS);
-
-    // Act
-    const result = validateSanity(krd);
-
-    // Assert
-    expect(result).toContain("Step count 201");
-  });
-
-  it("should reject duration under 1 minute", () => {
-    // Arrange
-    const krd = makeValidKrd(STEP_COUNT_THREE, SHORT_DURATION_S);
-
-    // Act
-    const result = validateSanity(krd);
-
-    // Assert
-    expect(result).toContain("Duration 30s");
-  });
-
-  it("should reject duration over 8 hours", () => {
-    // Arrange
-    const krd = makeValidKrd(STEP_COUNT_THREE, EXCESSIVE_DURATION_S);
-
-    // Act
-    const result = validateSanity(krd);
-
-    // Assert
-    expect(result).toContain("Duration 30000s");
-  });
+      // Assert
+      expect(result).toContain(contains);
+    }
+  );
 
   it("should accept KRD without structured_workout extension", () => {
     // Arrange

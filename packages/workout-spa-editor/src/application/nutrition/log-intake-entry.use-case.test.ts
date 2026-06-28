@@ -43,41 +43,28 @@ describe("logIntakeEntry", () => {
     expect(stored[0]?.kcal).toBe(LUNCH_KCAL);
   });
 
-  it("should reject an entry with a negative kcal and persist nothing", async () => {
-    // Arrange
-    const d = deps();
+  it.each([
+    { field: "kcal", kcal: -1, proteinG: 0 },
+    { field: "proteinG", kcal: 100, proteinG: -5 },
+  ])(
+    "should reject an entry with a negative $field and persist nothing",
+    async ({ kcal, proteinG }) => {
+      // Arrange
+      const d = deps();
 
-    // Act
-    const entry = await logIntakeEntry(d, {
-      date: DATE,
-      kcal: -1,
-      proteinG: 0,
-      carbG: 0,
-      fatG: 0,
-    });
+      // Act
+      const entry = await logIntakeEntry(d, {
+        date: DATE,
+        kcal,
+        proteinG,
+        carbG: 0,
+        fatG: 0,
+      });
 
-    // Assert
-    const stored = await listIntakeForDate(d, DATE);
-    expect(entry).toBeUndefined();
-    expect(stored).toHaveLength(0);
-  });
-
-  it("should reject an entry with a negative macro and persist nothing", async () => {
-    // Arrange
-    const d = deps();
-
-    // Act
-    const entry = await logIntakeEntry(d, {
-      date: DATE,
-      kcal: 100,
-      proteinG: -5,
-      carbG: 0,
-      fatG: 0,
-    });
-
-    // Assert
-    const stored = await listIntakeForDate(d, DATE);
-    expect(entry).toBeUndefined();
-    expect(stored).toHaveLength(0);
-  });
+      // Assert
+      const stored = await listIntakeForDate(d, DATE);
+      expect(entry).toBeUndefined();
+      expect(stored).toHaveLength(0);
+    }
+  );
 });

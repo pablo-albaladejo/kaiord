@@ -23,17 +23,14 @@ describe("clearAllProviders", () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await addProvider(persistence, baseProvider);
-    const original = persistence.aiProviders.delete.bind(
-      persistence.aiProviders
-    );
     persistence.aiProviders.delete = async () => {
       throw new Error("disk full");
     };
-    await expect(clearAllProviders(persistence)).rejects.toThrow("disk full");
 
     // Act
-    persistence.aiProviders.delete = original;
+    const act = clearAllProviders(persistence);
 
     // Assert
+    await expect(act).rejects.toThrow("disk full");
   });
 });

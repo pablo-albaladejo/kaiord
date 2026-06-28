@@ -48,31 +48,23 @@ describe("getUserPreferences", () => {
     expect(await repo.get("p1")).toBeUndefined();
   });
 
-  it("should fall back to grid when no defaultView provided", async () => {
-    // Arrange
-    const repo = createInMemoryUserPreferencesRepository();
+  it.each([
+    { defaultView: undefined, expected: "grid" },
+    { defaultView: "list", expected: "list" },
+  ] as const)(
+    "should resolve calendarView to $expected when defaultView is $defaultView",
+    async ({ defaultView, expected }) => {
+      // Arrange
+      const repo = createInMemoryUserPreferencesRepository();
 
-    // Act
-    const result = await getUserPreferences(
-      { profileId: "p1" },
-      { repository: repo, clock: fixedClock }
-    );
+      // Act
+      const result = await getUserPreferences(
+        { profileId: "p1", defaultView },
+        { repository: repo, clock: fixedClock }
+      );
 
-    // Assert
-    expect(result.calendarView).toBe("grid");
-  });
-
-  it("should use list default when caller passes it (mobile viewport)", async () => {
-    // Arrange
-    const repo = createInMemoryUserPreferencesRepository();
-
-    // Act
-    const result = await getUserPreferences(
-      { profileId: "p1", defaultView: "list" },
-      { repository: repo, clock: fixedClock }
-    );
-
-    // Assert
-    expect(result.calendarView).toBe("list");
-  });
+      // Assert
+      expect(result.calendarView).toBe(expected);
+    }
+  );
 });

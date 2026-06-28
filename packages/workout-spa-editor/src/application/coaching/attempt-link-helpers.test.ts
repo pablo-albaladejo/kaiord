@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
-import { ProfileNotFoundError } from "../profile/errors";
 import {
   aborted,
   persistLinkOrDeleted,
@@ -170,16 +169,5 @@ describe("attempt-link helpers", () => {
         "2026-04-28T10:00:00.000Z"
       )
     ).rejects.toThrow("network error");
-  });
-
-  it("should match ProfileNotFoundError via instanceof", () => {
-    // Arrange
-
-    // Act
-    const err = new ProfileNotFoundError("p1");
-
-    // Assert
-    expect(err).toBeInstanceOf(ProfileNotFoundError);
-    expect(err.profileId).toBe("p1");
   });
 });

@@ -167,24 +167,7 @@ describe("recordExport", () => {
 
   it("should return lost-race when another caller has a pending row", async () => {
     // Arrange
-    const ledgerRepo = makeRepo();
     const existingId = crypto.randomUUID();
-    ledgerRepo.store.set(existingId, {
-      id: existingId,
-      kaiordRecordId: KAIO_ID,
-      dataType: "weight",
-      destinationBridgeId: DEST_BRIDGE,
-      destinationExternalId: "pending",
-      contentHash: "different-hash",
-      exportedAt: new Date().toISOString(),
-    });
-    // Manually prime the natural-key index so insertPending sees the conflict.
-    const findResult = await ledgerRepo.findByNaturalKey({
-      kaiordRecordId: KAIO_ID,
-      destinationBridgeId: DEST_BRIDGE,
-    });
-    // findByNaturalKey won't find it since naturalKeyIndex wasn't primed via insertPending.
-    // Re-create the repo with a pre-seeded constraint row via insertPending.
     const freshRepo = makeRepo();
     await freshRepo.insertPending({
       id: existingId,
@@ -212,7 +195,5 @@ describe("recordExport", () => {
     // Assert
     expect(postFn).not.toHaveBeenCalled();
     expect(result.outcome).toBe("lost-race");
-    // findResult just consumed; suppress unused warning
-    void findResult;
   });
 });

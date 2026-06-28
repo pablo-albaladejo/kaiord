@@ -73,47 +73,31 @@ describe("upsertImportedRecord", () => {
     expect(repo.rows).toHaveLength(1);
   });
 
-  it("should create separate records for different sourceBridgeId on same date", async () => {
-    // Arrange
-    const repo = makeRepo();
-    const deps = { recordRepo: repo };
+  it.each([
+    {
+      field: "sourceBridgeId",
+      second: { ...baseInput, sourceBridgeId: "withings-bridge" },
+    },
+    {
+      field: "externalId",
+      second: { ...baseInput, externalId: "ext-002" },
+    },
+  ])(
+    "should create separate records for different $field on same date",
+    async ({ second }) => {
+      // Arrange
+      const repo = makeRepo();
+      const deps = { recordRepo: repo };
 
-    // Act
-    const garmin = await upsertImportedRecord(deps, {
-      ...baseInput,
-      sourceBridgeId: "garmin-bridge",
-    });
-    const withings = await upsertImportedRecord(deps, {
-      ...baseInput,
-      sourceBridgeId: "withings-bridge",
-    });
+      // Act
+      const first = await upsertImportedRecord(deps, baseInput);
+      const result = await upsertImportedRecord(deps, second);
 
-    // Assert
-    expect(garmin.created).toBe(true);
-    expect(withings.created).toBe(true);
-    expect(garmin.kaiordRecordId).not.toBe(withings.kaiordRecordId);
-    expect(repo.rows).toHaveLength(2);
-  });
-
-  it("should create separate records for different externalId on same date", async () => {
-    // Arrange
-    const repo = makeRepo();
-    const deps = { recordRepo: repo };
-
-    // Act
-    const result1 = await upsertImportedRecord(deps, {
-      ...baseInput,
-      externalId: "ext-001",
-    });
-    const result2 = await upsertImportedRecord(deps, {
-      ...baseInput,
-      externalId: "ext-002",
-    });
-
-    // Assert
-    expect(result1.created).toBe(true);
-    expect(result2.created).toBe(true);
-    expect(result1.kaiordRecordId).not.toBe(result2.kaiordRecordId);
-    expect(repo.rows).toHaveLength(2);
-  });
+      // Assert
+      expect(first.created).toBe(true);
+      expect(result.created).toBe(true);
+      expect(first.kaiordRecordId).not.toBe(result.kaiordRecordId);
+      expect(repo.rows).toHaveLength(2);
+    }
+  );
 });
