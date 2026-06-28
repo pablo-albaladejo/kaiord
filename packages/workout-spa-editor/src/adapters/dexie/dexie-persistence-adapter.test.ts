@@ -357,12 +357,13 @@ describe("DexieProfileRepository", () => {
   it("should track active profile id", async () => {
     // Arrange
     const { profiles } = createDexiePersistence(testDb);
-    expect(await profiles.getActiveId()).toBeNull();
 
     // Act
+    const initialActiveId = await profiles.getActiveId();
     await profiles.setActiveId(PROFILE_UUID_1);
 
     // Assert
+    expect(initialActiveId).toBeNull();
     expect(await profiles.getActiveId()).toBe(PROFILE_UUID_1);
   });
 
@@ -439,12 +440,13 @@ describe("DexieAiProviderRepository", () => {
 
   it("should return undefined for non-existent id", async () => {
     // Arrange
-
-    // Act
     const { aiProviders } = createDexiePersistence(testDb);
 
+    // Act
+    const result = await aiProviders.getById("missing");
+
     // Assert
-    expect(await aiProviders.getById("missing")).toBeUndefined();
+    expect(result).toBeUndefined();
   });
 
   it("should getAll providers with decryption", async () => {
@@ -453,12 +455,12 @@ describe("DexieAiProviderRepository", () => {
     await aiProviders.put(makeProvider({ id: "ai-1" }));
     await aiProviders.put(makeProvider({ id: "ai-2", apiKey: "another-key" }));
     const result = await aiProviders.getAll();
-    expect(result).toHaveLength(2);
 
     // Act
     const keys = result.map((p) => p.apiKey).sort();
 
     // Assert
+    expect(result).toHaveLength(2);
     expect(keys).toEqual(["another-key", "test-key-not-real"]);
   });
 
@@ -510,12 +512,13 @@ describe("DexieSyncStateRepository", () => {
 
   it("should return undefined for non-existent source", async () => {
     // Arrange
-
-    // Act
     const { syncState } = createDexiePersistence(testDb);
 
+    // Act
+    const result = await syncState.getBySource("missing");
+
     // Assert
-    expect(await syncState.getBySource("missing")).toBeUndefined();
+    expect(result).toBeUndefined();
   });
 
   it("should getAll sync states", async () => {
@@ -590,12 +593,13 @@ describe("DexieUsageRepository", () => {
 
   it("should return undefined for non-existent month", async () => {
     // Arrange
-
-    // Act
     const { usage } = createDexiePersistence(testDb);
 
+    // Act
+    const result = await usage.getByMonth("2025-01");
+
     // Assert
-    expect(await usage.getByMonth("2025-01")).toBeUndefined();
+    expect(result).toBeUndefined();
   });
 
   it("should overwrite on put with same yearMonth", async () => {
@@ -657,11 +661,9 @@ describe("DexiePersistence.transaction", () => {
   it("should roll back both writes when the callback rejects", async () => {
     // Arrange
     const persistence = createDexiePersistence(testDb);
-
-    // Act
     const profile = makeProfile({ id: PROFILE_UUID_1 });
 
-    // Assert
+    // Act
     await expect(
       persistence.transaction(async () => {
         await persistence.profiles.put(profile);
@@ -669,6 +671,8 @@ describe("DexiePersistence.transaction", () => {
         throw new Error("simulated mid-transaction failure");
       })
     ).rejects.toThrow("simulated mid-transaction failure");
+
+    // Assert
     expect(await persistence.profiles.getById(PROFILE_UUID_1)).toBeUndefined();
     expect(await persistence.profiles.getActiveId()).toBeNull();
   });
@@ -676,17 +680,17 @@ describe("DexiePersistence.transaction", () => {
   it("should roll back a write even when no second write follows (fake-indexeddb sanity)", async () => {
     // Arrange
     const persistence = createDexiePersistence(testDb);
-
-    // Act
     const profile = makeProfile({ id: PROFILE_UUID_1 });
 
-    // Assert
+    // Act
     await expect(
       persistence.transaction(async () => {
         await persistence.profiles.put(profile);
         throw new Error("abort before second write");
       })
     ).rejects.toThrow("abort before second write");
+
+    // Assert
     expect(await persistence.profiles.getAll()).toEqual([]);
   });
 

@@ -187,15 +187,15 @@ describe("useToast", () => {
       act(() => {
         result.current.dismiss(toastId!);
       });
+
+      // Act
       act(() => {
         vi.advanceTimersByTime(200);
       });
-      expect(result.current.toasts).toHaveLength(0);
-
-      // Act
-      vi.useRealTimers();
 
       // Assert
+      expect(result.current.toasts).toHaveLength(0);
+      vi.useRealTimers();
     });
 
     it("should dismiss all toasts", () => {
@@ -227,15 +227,15 @@ describe("useToast", () => {
       act(() => {
         result.current.dismissAll();
       });
+
+      // Act
       act(() => {
         vi.advanceTimersByTime(200);
       });
-      expect(result.current.toasts).toHaveLength(0);
-
-      // Act
-      vi.useRealTimers();
 
       // Assert
+      expect(result.current.toasts).toHaveLength(0);
+      vi.useRealTimers();
     });
 
     it("should only dismiss specified toast, not others", () => {

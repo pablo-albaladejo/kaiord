@@ -17,16 +17,16 @@ describe("sendBridgeMessage", () => {
     // Arrange
     const originalChrome = globalThis.chrome;
     delete globalThis.chrome;
+
+    // Act
     const result = await sendBridgeMessage("ext-id", { type: "ping" });
+
+    // Assert
     expect(result).toEqual({
       ok: false,
       error: "Chrome runtime not available",
     });
-
-    // Act
     globalThis.chrome = originalChrome;
-
-    // Assert
   });
 
   it("should send message via chrome.runtime.sendMessage", async () => {

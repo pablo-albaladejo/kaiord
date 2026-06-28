@@ -4,22 +4,14 @@ import { createCloudflareAnalytics } from "./cloudflare-analytics";
 
 describe("createCloudflareAnalytics", () => {
   describe("when token is falsy", () => {
-    it("should return noop on undefined token", () => {
+    it.each([
+      { label: "undefined", token: undefined },
+      { label: "empty string", token: "" },
+    ])("should return noop on $label token", ({ token }) => {
       // Arrange
 
       // Act
-      const analytics = createCloudflareAnalytics(undefined);
-
-      // Assert
-      expect(() => analytics.pageView("/")).not.toThrow();
-      expect(() => analytics.event("test")).not.toThrow();
-    });
-
-    it("should return noop on empty string token", () => {
-      // Arrange
-
-      // Act
-      const analytics = createCloudflareAnalytics("");
+      const analytics = createCloudflareAnalytics(token);
 
       // Assert
       expect(() => analytics.pageView("/")).not.toThrow();

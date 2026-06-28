@@ -79,15 +79,6 @@ describe("Dexie v5 migration round-trip", () => {
     const workouts = await db.table("workouts").toArray();
     const activities = await db.table("coachingActivities").toArray();
     const sync = await db.table("coachingSyncState").toArray();
-    expect(profiles).toEqual(fixture.profiles);
-    // v13 backfills profileId on every legacy workout row; the rest of
-    // the fixture is preserved byte-identically. We assert the per-row
-    // shape rather than reusing the v4 fixture directly.
-    expect(workouts).toEqual(
-      fixture.workouts.map((w) => ({ ...w, profileId: "p1" }))
-    );
-    expect(activities).toEqual(fixture.coachingActivities);
-    expect(sync).toEqual(fixture.coachingSyncState);
     const sessionMatches = createDexieSessionMatchRepository(db);
     const userPrefs = createDexieUserPreferencesRepository(db);
     const dismissals = createDexieAutoMatchDismissalRepository(db);
@@ -102,6 +93,25 @@ describe("Dexie v5 migration round-trip", () => {
       "2000-01-01",
       "2099-12-31"
     );
+    const storedUserPrefs = await userPrefs.get("p1");
+    const storedDismissal = await dismissals.getByProfileAndWeek(
+      "p1",
+      "2026-04-27"
+    );
+
+    // Act
+    db.close();
+
+    // Assert
+    expect(profiles).toEqual(fixture.profiles);
+    // v13 backfills profileId on every legacy workout row; the rest of
+    // the fixture is preserved byte-identically. We assert the per-row
+    // shape rather than reusing the v4 fixture directly.
+    expect(workouts).toEqual(
+      fixture.workouts.map((w) => ({ ...w, profileId: "p1" }))
+    );
+    expect(activities).toEqual(fixture.coachingActivities);
+    expect(sync).toEqual(fixture.coachingSyncState);
     expect(matches).toHaveLength(1);
     expect(matches[0]).toMatchObject({
       profileId: "p1",
@@ -109,14 +119,7 @@ describe("Dexie v5 migration round-trip", () => {
       workoutId: "w-pre-1",
       source: "auto-coaching-v10-migration",
     });
-    expect(await userPrefs.get("p1")).toBeUndefined();
-    expect(
-      await dismissals.getByProfileAndWeek("p1", "2026-04-27")
-    ).toBeUndefined();
-
-    // Act
-    db.close();
-
-    // Assert
+    expect(storedUserPrefs).toBeUndefined();
+    expect(storedDismissal).toBeUndefined();
   });
 });

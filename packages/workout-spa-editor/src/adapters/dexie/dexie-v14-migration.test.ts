@@ -52,53 +52,32 @@ describe("Dexie v13 → v14 migration (userPreferences calendar rename)", () => 
     await Dexie.delete(name);
   });
 
-  it("should rewrite a comfortable row to calendarView=grid and drop calendarDensity", async () => {
-    // Arrange
-    await seedV13(name, [
-      { profileId: "p1", calendarDensity: "comfortable", updatedAt: NOW },
-    ]);
+  it.each([{ density: "comfortable" }, { density: "compact" }])(
+    "should rewrite a $density row to calendarView=grid and drop calendarDensity",
+    async ({ density }) => {
+      // Arrange
+      await seedV13(name, [
+        { profileId: "p1", calendarDensity: density, updatedAt: NOW },
+      ]);
 
-    // Act
-    const v14 = new KaiordDatabase(name);
-    await v14.open();
-    const migrated = (await v14
-      .table("userPreferences")
-      .get("p1")) as UserPreferences & { calendarDensity?: unknown };
+      // Act
+      const v14 = new KaiordDatabase(name);
+      await v14.open();
+      const migrated = (await v14
+        .table("userPreferences")
+        .get("p1")) as UserPreferences & { calendarDensity?: unknown };
 
-    // Assert
-    expect(migrated).toEqual({
-      profileId: "p1",
-      calendarView: "grid",
-      updatedAt: NOW,
-    });
-    expect(migrated.calendarDensity).toBeUndefined();
-    expect(userPreferencesSchema.safeParse(migrated).success).toBe(true);
-    v14.close();
-  });
-
-  it("should rewrite a compact row to calendarView=grid and drop calendarDensity", async () => {
-    // Arrange
-    await seedV13(name, [
-      { profileId: "p1", calendarDensity: "compact", updatedAt: NOW },
-    ]);
-
-    // Act
-    const v14 = new KaiordDatabase(name);
-    await v14.open();
-    const migrated = (await v14
-      .table("userPreferences")
-      .get("p1")) as UserPreferences & { calendarDensity?: unknown };
-
-    // Assert
-    expect(migrated).toEqual({
-      profileId: "p1",
-      calendarView: "grid",
-      updatedAt: NOW,
-    });
-    expect(migrated.calendarDensity).toBeUndefined();
-    expect(userPreferencesSchema.safeParse(migrated).success).toBe(true);
-    v14.close();
-  });
+      // Assert
+      expect(migrated).toEqual({
+        profileId: "p1",
+        calendarView: "grid",
+        updatedAt: NOW,
+      });
+      expect(migrated.calendarDensity).toBeUndefined();
+      expect(userPreferencesSchema.safeParse(migrated).success).toBe(true);
+      v14.close();
+    }
+  );
 
   it("should migrate every row when multiple profiles exist", async () => {
     // Arrange

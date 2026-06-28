@@ -16,21 +16,6 @@ describe("useLatestRef", () => {
     expect(result.current.current).toBe("initial");
   });
 
-  it("should update ref.current to the latest render's value", () => {
-    // Arrange
-    const { result, rerender } = renderHook(({ v }) => useLatestRef(v), {
-      initialProps: { v: 1 },
-    });
-    const firstRef = result.current;
-
-    // Act
-    rerender({ v: 2 });
-
-    // Assert
-    expect(result.current.current).toBe(2);
-    expect(result.current).toBe(firstRef);
-  });
-
   it("should preserve the ref identity across renders", () => {
     // Arrange
     const { result, rerender } = renderHook(({ v }) => useLatestRef(v), {

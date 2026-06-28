@@ -22,35 +22,28 @@ describe("buildChangeToken", () => {
     expect(token).toBe("2:2026-05-02T00:00:00.000Z|1:2026-05-01T00:00:00.000Z");
   });
 
-  it("should change the token on an in-place edit even when the count is unchanged", () => {
-    // Arrange
-    const before = buildChangeToken([
-      { count: 1, latest: "2026-05-01T00:00:00.000Z" },
-    ]);
+  it.each([
+    {
+      before: { count: 1, latest: "2026-05-01T00:00:00.000Z" },
+      after: { count: 1, latest: "2026-05-09T00:00:00.000Z" },
+    },
+    {
+      before: { count: 1, latest: "2026-05-01T00:00:00.000Z" },
+      after: { count: 2, latest: "2026-05-01T00:00:00.000Z" },
+    },
+  ])(
+    "should advance the token when a signal field changes",
+    ({ before, after }) => {
+      // Arrange
+      const beforeToken = buildChangeToken([before]);
 
-    // Act
-    const after = buildChangeToken([
-      { count: 1, latest: "2026-05-09T00:00:00.000Z" },
-    ]);
+      // Act
+      const afterToken = buildChangeToken([after]);
 
-    // Assert
-    expect(after).not.toBe(before);
-  });
-
-  it("should advance the token when a row count changes", () => {
-    // Arrange
-    const before = buildChangeToken([
-      { count: 1, latest: "2026-05-01T00:00:00.000Z" },
-    ]);
-
-    // Act
-    const after = buildChangeToken([
-      { count: 2, latest: "2026-05-01T00:00:00.000Z" },
-    ]);
-
-    // Assert
-    expect(after).not.toBe(before);
-  });
+      // Assert
+      expect(afterToken).not.toBe(beforeToken);
+    }
+  );
 
   it("should return a zero-count token for an empty database", () => {
     // Arrange
