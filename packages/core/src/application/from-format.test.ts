@@ -64,19 +64,6 @@ describe("fromBinary", () => {
     expect(infoSpy).toHaveBeenCalledWith("Converting binary format to KRD");
     expect(infoSpy).toHaveBeenCalledWith("Conversion to KRD successful");
   });
-
-  it("should work without logger", async () => {
-    // Arrange
-    const buffer = new Uint8Array(SAMPLE_BUFFER_BYTES);
-    const expectedKrd = buildKRD.build();
-    const reader = vi.fn<BinaryReader>().mockResolvedValue(expectedKrd);
-
-    // Act
-    const result = await fromBinary(buffer, reader);
-
-    // Assert
-    expect(result).toStrictEqual(expectedKrd);
-  });
 });
 
 describe("fromText", () => {

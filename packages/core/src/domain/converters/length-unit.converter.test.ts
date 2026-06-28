@@ -10,64 +10,35 @@ import {
 } from "../../test-utils/tolerance-constants";
 import { convertLengthToMeters } from "./length-unit.converter";
 
+const YARDS_DECIMAL_LENGTH = 27.5;
+
 describe("convertLengthToMeters", () => {
-  it("should return length unchanged when unit is meters", () => {
+  it.each([
+    [POOL_LENGTH_25, LENGTH_UNIT_YARDS_25_AS_METERS],
+    [POOL_LENGTH_50, LENGTH_UNIT_YARDS_50_AS_METERS],
+    [YARDS_DECIMAL_LENGTH, LENGTH_UNIT_YARDS_27_5_AS_METERS],
+  ])("should convert %p yards to meters", (length, expected) => {
     // Arrange
-    const length = POOL_LENGTH_25;
-    const unit = "meters" as const;
-
-    // Act
-    const result = convertLengthToMeters(length, unit);
-
-    // Assert
-    expect(result).toBe(POOL_LENGTH_25);
-  });
-
-  it("should convert yards to meters", () => {
-    // Arrange
-    const length = POOL_LENGTH_25;
     const unit = "yards" as const;
 
     // Act
     const result = convertLengthToMeters(length, unit);
 
     // Assert
-    expect(result).toBeCloseTo(LENGTH_UNIT_YARDS_25_AS_METERS, 2);
+    expect(result).toBeCloseTo(expected, 2);
   });
 
-  it("should convert 50 yards to meters", () => {
-    // Arrange
-    const length = POOL_LENGTH_50;
-    const unit = "yards" as const;
+  it.each([POOL_LENGTH_25, LENGTH_DECIMAL_METERS])(
+    "should return %p unchanged when unit is meters",
+    (length) => {
+      // Arrange
+      const unit = "meters" as const;
 
-    // Act
-    const result = convertLengthToMeters(length, unit);
+      // Act
+      const result = convertLengthToMeters(length, unit);
 
-    // Assert
-    expect(result).toBeCloseTo(LENGTH_UNIT_YARDS_50_AS_METERS, 2);
-  });
-
-  it("should handle decimal lengths in meters", () => {
-    // Arrange
-    const length = LENGTH_DECIMAL_METERS;
-    const unit = "meters" as const;
-
-    // Act
-    const result = convertLengthToMeters(length, unit);
-
-    // Assert
-    expect(result).toBe(LENGTH_DECIMAL_METERS);
-  });
-
-  it("should handle decimal lengths in yards", () => {
-    // Arrange
-    const length = 27.5;
-    const unit = "yards" as const;
-
-    // Act
-    const result = convertLengthToMeters(length, unit);
-
-    // Assert
-    expect(result).toBeCloseTo(LENGTH_UNIT_YARDS_27_5_AS_METERS, 2);
-  });
+      // Assert
+      expect(result).toBe(length);
+    }
+  );
 });

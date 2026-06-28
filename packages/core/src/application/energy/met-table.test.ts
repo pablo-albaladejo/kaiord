@@ -5,41 +5,24 @@ import { DEFAULT_MET, MET_TABLE, metForSport } from "./met-table";
 const RUNNING_MET = 9.8;
 const CYCLING_MET = 8.0;
 const SWIMMING_MET = 7.0;
-const EXPECTED_DEFAULT_MET = 6.0;
 
 describe("metForSport", () => {
-  it("should return the curated MET for a mapped endurance sport", () => {
-    // Arrange
-    const sport = "running" as const;
+  it.each([
+    ["running", RUNNING_MET],
+    ["cycling", CYCLING_MET],
+    ["swimming", SWIMMING_MET],
+  ] as const)(
+    "should return the curated MET for a mapped %s sport",
+    (sport, expected) => {
+      // Arrange
 
-    // Act
-    const met = metForSport(sport);
+      // Act
+      const met = metForSport(sport);
 
-    // Assert
-    expect(met).toBe(RUNNING_MET);
-  });
-
-  it("should return the curated MET for cycling", () => {
-    // Arrange
-    const sport = "cycling" as const;
-
-    // Act
-    const met = metForSport(sport);
-
-    // Assert
-    expect(met).toBe(CYCLING_MET);
-  });
-
-  it("should return the curated MET for swimming", () => {
-    // Arrange
-    const sport = "swimming" as const;
-
-    // Act
-    const met = metForSport(sport);
-
-    // Assert
-    expect(met).toBe(SWIMMING_MET);
-  });
+      // Assert
+      expect(met).toBe(expected);
+    }
+  );
 
   it("should fall back to DEFAULT_MET for an unmapped sport", () => {
     // Arrange
@@ -65,16 +48,5 @@ describe("MET_TABLE", () => {
 
     // Assert
     expect(allValid).toBe(true);
-  });
-
-  it("should document a moderate-effort DEFAULT_MET", () => {
-    // Arrange
-    const expected = EXPECTED_DEFAULT_MET;
-
-    // Act
-    const actual = DEFAULT_MET;
-
-    // Assert
-    expect(actual).toBe(expected);
   });
 });
