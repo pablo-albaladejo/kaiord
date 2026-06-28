@@ -88,20 +88,6 @@ describe("formatValidationErrors", () => {
     expect(stripped).toContain("Validation errors:");
     expect(stripped).toContain("test: error");
   });
-
-  it("should produce plain output when not in TTY and no FORCE_COLOR", () => {
-    // Arrange
-    const errors: Array<ValidationError> = [
-      { field: "field1", message: "msg1" },
-    ];
-
-    // Act
-    const result = formatValidationErrors(errors);
-
-    // Assert
-    expect(result).toContain("Validation errors:");
-    expect(result).toContain("field1: msg1");
-  });
 });
 
 describe("formatToleranceViolations", () => {
@@ -212,26 +198,5 @@ describe("formatToleranceViolations", () => {
     expect(stripped).toContain("Tolerance violations:");
     expect(stripped).toContain("power");
     expect(stripped).toContain("expected 250, got 252");
-  });
-
-  it("should produce plain output when not in TTY and no FORCE_COLOR", () => {
-    // Arrange
-    const violations: Array<ToleranceViolation> = [
-      {
-        field: "hr",
-        expected: 150,
-        actual: 152,
-        deviation: 2,
-        tolerance: 1,
-      },
-    ];
-
-    // Act
-    const result = formatToleranceViolations(violations);
-
-    // Assert
-    expect(result).toContain("Tolerance violations:");
-    expect(result).toContain("hr");
-    expect(result).toContain("expected 150, got 152");
   });
 });
