@@ -37,33 +37,24 @@ const baseMultisportInput = {
 };
 
 describe("garminWorkoutInputSchema isSessionTransitionEnabled", () => {
-  it("should accept a multisport input with isSessionTransitionEnabled true", () => {
-    // Arrange
-    const input = { ...baseMultisportInput, isSessionTransitionEnabled: true };
+  it.each([[true], [false]])(
+    "should accept a multisport input with isSessionTransitionEnabled %s",
+    (isSessionTransitionEnabled) => {
+      // Arrange
+      const input = { ...baseMultisportInput, isSessionTransitionEnabled };
 
-    // Act
-    const result = garminWorkoutInputSchema.safeParse(input);
+      // Act
+      const result = garminWorkoutInputSchema.safeParse(input);
 
-    // Assert
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.isSessionTransitionEnabled).toBe(true);
+      // Assert
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.isSessionTransitionEnabled).toBe(
+          isSessionTransitionEnabled
+        );
+      }
     }
-  });
-
-  it("should accept a multisport input with isSessionTransitionEnabled false", () => {
-    // Arrange
-    const input = { ...baseMultisportInput, isSessionTransitionEnabled: false };
-
-    // Act
-    const result = garminWorkoutInputSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.isSessionTransitionEnabled).toBe(false);
-    }
-  });
+  );
 
   it("should accept a workout input without the isSessionTransitionEnabled field", () => {
     // Arrange
