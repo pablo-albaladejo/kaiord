@@ -82,7 +82,7 @@ describe("createFastXmlTcxReader", () => {
       );
     });
 
-    it("should log debug message when parsing starts", async () => {
+    it("should parse a stepless workout into an empty steps array", async () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createFastXmlTcxReader(logger);
@@ -96,14 +96,14 @@ describe("createFastXmlTcxReader", () => {
 </TrainingCenterDatabase>`;
 
       // Act
-      try {
-        await reader(validTcx);
-      } catch {
-        // Expected to throw "not yet implemented"
-      }
+      const result = await reader(validTcx);
 
       // Assert
-      expect(logger).toBeDefined();
+      const workout = result.extensions?.structured_workout as {
+        steps: unknown[];
+      };
+      expect(workout).toBeDefined();
+      expect(workout.steps).toHaveLength(0);
     });
 
     it("should extract workout metadata correctly", async () => {
@@ -565,40 +565,6 @@ describe("createFastXmlTcxWriter", () => {
       expect(mockValidator).toHaveBeenCalledOnce();
     });
 
-    it("should validate generated TCX against XSD schema", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const mockValidator = vi.fn<TcxValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const writer = createFastXmlTcxWriter(logger, mockValidator);
-      const krd: KRD = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
-        },
-        extensions: {
-          structured_workout: {
-            name: "Test Workout",
-            sport: "running",
-            steps: [],
-          },
-        },
-      };
-
-      // Act
-      try {
-        await writer(krd);
-      } catch {
-        // Expected to throw "Not implemented"
-      }
-
-      // Assert
-    });
-
     it("should throw TcxValidationError when XSD validation fails", async () => {
       // Arrange
       const logger = createMockLogger();
@@ -652,111 +618,6 @@ describe("createFastXmlTcxWriter", () => {
 
       // Assert
       await expect(writer(invalidKrd)).rejects.toThrow(TcxParsingError);
-    });
-
-    it("should log debug message when encoding starts", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const mockValidator = vi.fn<TcxValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const writer = createFastXmlTcxWriter(logger, mockValidator);
-      const krd: KRD = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
-        },
-        extensions: {
-          structured_workout: {
-            name: "Test Workout",
-            sport: "running",
-            steps: [],
-          },
-        },
-      };
-
-      // Act
-      try {
-        await writer(krd);
-      } catch {
-        // Expected to throw "Not implemented"
-      }
-
-      // Assert
-      expect(logger).toBeDefined();
-    });
-
-    it("should inject logger for structured logging", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const mockValidator = vi.fn<TcxValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const writer = createFastXmlTcxWriter(logger, mockValidator);
-      const krd: KRD = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
-        },
-        extensions: {
-          structured_workout: {
-            name: "Test Workout",
-            sport: "running",
-            steps: [],
-          },
-        },
-      };
-
-      // Act
-      try {
-        await writer(krd);
-      } catch {
-        // Expected to throw "Not implemented"
-      }
-
-      // Assert
-      expect(logger).toBeDefined();
-    });
-
-    it("should inject validator for XSD validation", async () => {
-      // Arrange
-      const logger = createMockLogger();
-      const mockValidator = vi.fn<TcxValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const writer = createFastXmlTcxWriter(logger, mockValidator);
-      const krd: KRD = {
-        version: "1.0",
-        type: "structured_workout",
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
-        },
-        extensions: {
-          structured_workout: {
-            name: "Test Workout",
-            sport: "running",
-            steps: [],
-          },
-        },
-      };
-
-      // Act
-      try {
-        await writer(krd);
-      } catch {
-        // Expected to throw "Not implemented"
-      }
-
-      // Assert
-      expect(mockValidator).toBeDefined();
     });
   });
 });
