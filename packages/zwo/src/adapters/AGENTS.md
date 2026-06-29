@@ -30,7 +30,6 @@ Adapter implementations for ZWO reading, writing, validation, and conversion. Al
 | `krd-to-zwift/` | KRD → ZWO encoders (metadata, intervals, targets, steps, text events) |
 | `target/`       | Target converters (power, pace, HR, cadence) between domains          |
 | `zwift-to-krd/` | ZWO → KRD extractors (metadata, intervals, tags)                      |
-| `schemas/`      | Zod domain schemas (ZwiftSport, ZwiftTarget, ZwiftInterval)           |
 | `round-trip/`   | Round-trip test helpers and real-file comparison utilities            |
 
 ## For AI Agents
@@ -86,12 +85,11 @@ Adapter implementations for ZWO reading, writing, validation, and conversion. Al
 ### Internal
 
 - `@kaiord/core` — KRD, WorkoutStep, RepetitionBlock, Sport, Logger, error factories
-- All subdirectories (`duration/`, `interval/`, `krd-to-zwift/`, `target/`, `zwift-to-krd/`, `schemas/`, `round-trip/`)
+- All subdirectories (`duration/`, `interval/`, `krd-to-zwift/`, `target/`, `zwift-to-krd/`, `round-trip/`)
 
 ### External
 
 - `fast-xml-parser@^5.7.3` — XML parsing and building
 - `xsd-schema-validator@^0.11.0` — XSD validation (Node.js only, optional, loaded dynamically)
-- `zod@^4.4.3` — Schema validation
 
 <!-- MANUAL: -->
