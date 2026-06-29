@@ -10,10 +10,6 @@ import { isBinaryFormat } from "./format-registry";
 import { isNodeSystemError } from "./fs-errors";
 import { validatePathSecurity } from "./path-security";
 
-// Re-export for backwards compatibility
-export { isNodeSystemError } from "./fs-errors";
-export { validatePathSecurity } from "./path-security";
-
 /**
  * Read a file from disk, handling binary and text formats appropriately
  */
