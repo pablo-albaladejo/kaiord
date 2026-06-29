@@ -12,11 +12,3 @@ export const mapLengthUnitToKrd = (fitUnit: number | undefined): LengthUnit => {
 
   return FIT_LENGTH_UNIT_MAP[fitUnit] || lengthUnitSchema.enum.meters;
 };
-
-export const mapLengthUnitToFit = (krdUnit: LengthUnit): number => {
-  if (krdUnit === lengthUnitSchema.enum.yards) {
-    return 1;
-  }
-
-  return 0;
-};

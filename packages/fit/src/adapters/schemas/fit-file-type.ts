@@ -59,29 +59,3 @@ export const FIT_FILE_TYPE_TO_NUMBER: Record<FitFileType, number> = {
   segmentList: 35,
   exdConfiguration: 40,
 };
-
-/**
- * Bidirectional mapping: numeric value → FIT file type
- *
- * Maps FIT protocol numeric values to string file type.
- */
-export const NUMBER_TO_FIT_FILE_TYPE: Record<number, FitFileType> = {
-  1: "device",
-  2: "settings",
-  3: "sport",
-  4: "activity",
-  5: "workout",
-  6: "course",
-  7: "schedules",
-  9: "weight",
-  10: "totals",
-  11: "goals",
-  14: "bloodPressure",
-  15: "monitoringA",
-  20: "activitySummary",
-  28: "monitoringDaily",
-  32: "monitoringB",
-  34: "segment",
-  35: "segmentList",
-  40: "exdConfiguration",
-};
