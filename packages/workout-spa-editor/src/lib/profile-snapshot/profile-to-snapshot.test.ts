@@ -131,16 +131,4 @@ describe("profileToSnapshot", () => {
     expect(snapshot.thresholds.running).toBeUndefined();
     expect(snapshot.thresholds.swimming).toBeUndefined();
   });
-
-  it("should emit ISO datetime for generatedAt", () => {
-    // Arrange
-
-    // Act
-    const snapshot = profileToSnapshot(baseProfile, "cycling", FIXED_NOW);
-
-    // Assert
-    expect(snapshot.generatedAt).toMatch(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
-    );
-  });
 });

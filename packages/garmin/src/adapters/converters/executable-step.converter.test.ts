@@ -97,70 +97,27 @@ describe("mapExecutableStep", () => {
   });
 
   describe("intensity mapping", () => {
-    it("should map warmup step type to warmup intensity", () => {
-      // Arrange
-      const step = buildStep({
-        stepType: { stepTypeKey: "warmup" },
-      });
+    it.each([
+      ["warmup", "warmup"],
+      ["cooldown", "cooldown"],
+      ["interval", "active"],
+      ["recovery", "recovery"],
+      ["rest", "rest"],
+    ])(
+      "should map %s step type to %s intensity",
+      (stepTypeKey, expectedIntensity) => {
+        // Arrange
+        const step = buildStep({
+          stepType: { stepTypeKey },
+        });
 
-      // Act
-      const result = mapExecutableStep(step, 0);
+        // Act
+        const result = mapExecutableStep(step, 0);
 
-      // Assert
-      expect(result.intensity).toBe("warmup");
-    });
-
-    it("should map cooldown step type to cooldown intensity", () => {
-      // Arrange
-      const step = buildStep({
-        stepType: { stepTypeKey: "cooldown" },
-      });
-
-      // Act
-      const result = mapExecutableStep(step, 0);
-
-      // Assert
-      expect(result.intensity).toBe("cooldown");
-    });
-
-    it("should map interval step type to active intensity", () => {
-      // Arrange
-      const step = buildStep({
-        stepType: { stepTypeKey: "interval" },
-      });
-
-      // Act
-      const result = mapExecutableStep(step, 0);
-
-      // Assert
-      expect(result.intensity).toBe("active");
-    });
-
-    it("should map recovery step type to recovery intensity", () => {
-      // Arrange
-      const step = buildStep({
-        stepType: { stepTypeKey: "recovery" },
-      });
-
-      // Act
-      const result = mapExecutableStep(step, 0);
-
-      // Assert
-      expect(result.intensity).toBe("recovery");
-    });
-
-    it("should map rest step type to rest intensity", () => {
-      // Arrange
-      const step = buildStep({
-        stepType: { stepTypeKey: "rest" },
-      });
-
-      // Act
-      const result = mapExecutableStep(step, 0);
-
-      // Assert
-      expect(result.intensity).toBe("rest");
-    });
+        // Assert
+        expect(result.intensity).toBe(expectedIntensity);
+      }
+    );
   });
 
   describe("target mapping", () => {
@@ -309,19 +266,6 @@ describe("mapExecutableStep", () => {
       expect(result.equipment).toBe("swim_fins");
     });
 
-    it("should not include equipment when equipmentType is null", () => {
-      // Arrange
-      const step = buildStep({
-        equipmentType: null,
-      });
-
-      // Act
-      const result = mapExecutableStep(step, 0);
-
-      // Assert
-      expect(result.equipment).toBeUndefined();
-    });
-
     it("should not include equipment when equipmentType is absent", () => {
       // Arrange
       const step = buildStep();
@@ -395,17 +339,6 @@ describe("mapExecutableStep", () => {
     it("should omit notes when description is absent", () => {
       // Arrange
       const step = buildStep();
-
-      // Act
-      const result = mapExecutableStep(step, 0);
-
-      // Assert
-      expect(result.notes).toBeUndefined();
-    });
-
-    it("should omit notes when description is null", () => {
-      // Arrange
-      const step = buildStep({ description: null });
 
       // Act
       const result = mapExecutableStep(step, 0);

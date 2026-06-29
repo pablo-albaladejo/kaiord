@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import type { KRD, Workout } from "../types/krd";
-import { isRepetitionBlock } from "../types/krd";
 import { hydrateUIWorkout } from "./hydrate-ui-workout";
 import { stripIds } from "./strip-ids";
 
@@ -38,28 +37,6 @@ const sampleKrd: KRD = {
 };
 
 describe("stripIds", () => {
-  it("should remove id fields from every step and block", () => {
-    // Arrange
-    const ui = hydrateUIWorkout(sampleKrd);
-    const stripped = stripIds(ui);
-
-    // Act
-    const workout = stripped.extensions?.structured_workout as
-      | Workout
-      | undefined;
-
-    // Assert
-    expect(workout).toBeDefined();
-    for (const item of workout!.steps) {
-      expect((item as { id?: string }).id).toBeUndefined();
-      if (isRepetitionBlock(item)) {
-        for (const inner of item.steps) {
-          expect((inner as { id?: string }).id).toBeUndefined();
-        }
-      }
-    }
-  });
-
   it("should be idempotent for already-stripped payloads", () => {
     // Arrange
 

@@ -37,14 +37,11 @@ describe("RouteErrorBoundary analytics", () => {
 
   it("should fire route-error event with the full scrubbed payload when a child throws", () => {
     // Arrange
-    // Arrange
 
     const analytics: Analytics = {
       pageView: vi.fn(),
       event: vi.fn(),
     };
-
-    // Act
 
     // Act
 
@@ -54,12 +51,11 @@ describe("RouteErrorBoundary analytics", () => {
       </RouteErrorBoundary>
     );
 
-    // Assert — payload-shape correctness lives in
-    // build-route-error-payload.test.ts; here we only verify the
-    // boundary forwards the four-field shape to analytics.
-
     // Assert
 
+    // Payload-shape correctness lives in
+    // build-route-error-payload.test.ts; here we only verify the
+    // boundary forwards the four-field shape to analytics.
     expect(analytics.event).toHaveBeenCalledTimes(1);
     const [eventName, payload] = (analytics.event as ReturnType<typeof vi.fn>)
       .mock.calls[0];
@@ -77,13 +73,11 @@ describe("RouteErrorBoundary analytics", () => {
   });
 
   it("should not invoke the payload builder when no analytics prop is provided (zero scrub work in noop deployments)", async () => {
-    // Arrange — spy on the payload builder
     // Arrange
 
+    // Spy on the payload builder.
     const buildModule = await import("../../lib/build-route-error-payload");
     const buildSpy = vi.spyOn(buildModule, "buildRouteErrorPayload");
-
-    // Act
 
     // Act
 
@@ -95,16 +89,14 @@ describe("RouteErrorBoundary analytics", () => {
 
     // Assert
 
-    // Assert
-
     expect(buildSpy).not.toHaveBeenCalled();
     buildSpy.mockRestore();
   });
 
   it("should render fallback when analytics.event throws synchronously", () => {
-    // Arrange — analytics.event throws (e.g., adapter misconfig)
     // Arrange
 
+    // analytics.event throws (e.g., adapter misconfig).
     const analytics: Analytics = {
       pageView: vi.fn(),
       event: vi.fn(() => {
@@ -114,23 +106,19 @@ describe("RouteErrorBoundary analytics", () => {
 
     // Act
 
-    // Act
-
     renderWithRouter(
       <RouteErrorBoundary analytics={analytics}>
         <Boom />
       </RouteErrorBoundary>
     );
 
-    // Assert — boundary still renders fallback (no secondary failure)
-
     // Assert
 
+    // Boundary still renders fallback (no secondary failure).
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
 
   it("should render fallback without throwing when no analytics prop is provided", () => {
-    // Arrange & Act
     // Arrange
 
     // Act
@@ -141,15 +129,13 @@ describe("RouteErrorBoundary analytics", () => {
       </RouteErrorBoundary>
     );
 
-    // Assert — fallback rendered, no secondary error
-
     // Assert
 
+    // Fallback rendered, no secondary error.
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
 
   it("should not fire route-error when child renders successfully", () => {
-    // Arrange
     // Arrange
 
     const analytics: Analytics = {
@@ -159,15 +145,11 @@ describe("RouteErrorBoundary analytics", () => {
 
     // Act
 
-    // Act
-
     renderWithRouter(
       <RouteErrorBoundary analytics={analytics}>
         <div>healthy</div>
       </RouteErrorBoundary>
     );
-
-    // Assert
 
     // Assert
 

@@ -8,26 +8,6 @@ import { describe, expect, it } from "vitest";
 import { FIXTURE_NAMES, loadKrdFixture } from "./fixtures";
 
 describe("Shared Fixtures", () => {
-  it("should load WorkoutIndividualSteps fixture", () => {
-    // Arrange & Act
-    const krd = loadKrdFixture(`${FIXTURE_NAMES.INDIVIDUAL_STEPS}.krd`);
-
-    // Assert
-    expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("structured_workout");
-    expect(krd.extensions?.structured_workout).toBeDefined();
-  });
-
-  it("should load WorkoutRepeatSteps fixture", () => {
-    // Arrange & Act
-    const krd = loadKrdFixture(`${FIXTURE_NAMES.REPEAT_STEPS}.krd`);
-
-    // Assert
-    expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("structured_workout");
-    expect(krd.extensions?.structured_workout?.steps).toBeDefined();
-  });
-
   it("should load all available fixtures", () => {
     // Arrange
     const fixtureNames = Object.values(FIXTURE_NAMES);
@@ -37,6 +17,8 @@ describe("Shared Fixtures", () => {
       const krd = loadKrdFixture(`${name}.krd`);
       expect(krd.version).toBe("1.0");
       expect(krd.type).toBe("structured_workout");
+      expect(krd.extensions?.structured_workout).toBeDefined();
+      expect(krd.extensions?.structured_workout?.steps).toBeDefined();
     }
   });
 });

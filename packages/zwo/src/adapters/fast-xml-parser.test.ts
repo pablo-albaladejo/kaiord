@@ -248,55 +248,38 @@ describe("createFastXmlZwiftReader", () => {
       );
     });
 
-    it("should map bike sportType to cycling", async () => {
-      // Arrange
-      const xmlWithBike = `<?xml version="1.0" encoding="UTF-8"?>
+    it.each([
+      ["bike", "cycling"],
+      ["run", "running"],
+    ] as const)(
+      "should map %s sportType to %s",
+      async (sportType, expectedSport) => {
+        // Arrange
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
-  <name>Cycling Workout</name>
-  <sportType>bike</sportType>
+  <name>Sport Mapping Workout</name>
+  <sportType>${sportType}</sportType>
   <workout>
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-      const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const logger = createMockLogger();
-      const reader = createFastXmlZwiftReader(logger, mockValidator);
+        const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
+          valid: true,
+          errors: [],
+        });
+        const logger = createMockLogger();
+        const reader = createFastXmlZwiftReader(logger, mockValidator);
 
-      // Act
-      const result = await reader(xmlWithBike);
+        // Act
+        const result = await reader(xml);
 
-      // Assert
-      expect(result.metadata.sport).toBe("cycling");
-      expect(result.extensions?.structured_workout?.sport).toBe("cycling");
-    });
-
-    it("should map run sportType to running", async () => {
-      // Arrange
-      const xmlWithRun = `<?xml version="1.0" encoding="UTF-8"?>
-<workout_file>
-  <name>Running Workout</name>
-  <sportType>run</sportType>
-  <workout>
-    <SteadyState Duration="300" pace="240"/>
-  </workout>
-</workout_file>`;
-      const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const logger = createMockLogger();
-      const reader = createFastXmlZwiftReader(logger, mockValidator);
-
-      // Act
-      const result = await reader(xmlWithRun);
-
-      // Assert
-      expect(result.metadata.sport).toBe("running");
-      expect(result.extensions?.structured_workout?.sport).toBe("running");
-    });
+        // Assert
+        expect(result.metadata.sport).toBe(expectedSport);
+        expect(result.extensions?.structured_workout?.sport).toBe(
+          expectedSport
+        );
+      }
+    );
 
     it("should extract tags from workout", async () => {
       // Arrange
@@ -618,67 +601,42 @@ describe("createFastXmlZwiftWriter", () => {
       expect(result).toContain('name="Intervals"');
     });
 
-    it("should map cycling sport to bike sportType", async () => {
-      // Arrange
-      const krd = {
-        version: "1.0",
-        type: "structured_workout" as const,
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "cycling",
-        },
-        extensions: {
-          structured_workout: {
-            name: "Cycling Workout",
-            sport: "cycling",
-            steps: [],
+    it.each([
+      ["cycling", "bike"],
+      ["running", "run"],
+    ] as const)(
+      "should map %s sport to %s sportType",
+      async (sport, sportType) => {
+        // Arrange
+        const krd = {
+          version: "1.0",
+          type: "structured_workout" as const,
+          metadata: {
+            created: "2025-01-15T10:30:00Z",
+            sport,
           },
-        },
-      };
-      const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const logger = createMockLogger();
-      const writer = createFastXmlZwiftWriter(logger, mockValidator);
-
-      // Act
-      const result = await writer(krd);
-
-      // Assert
-      expect(result).toContain("<sportType>bike</sportType>");
-    });
-
-    it("should map running sport to run sportType", async () => {
-      // Arrange
-      const krd = {
-        version: "1.0",
-        type: "structured_workout" as const,
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "running",
-        },
-        extensions: {
-          structured_workout: {
-            name: "Running Workout",
-            sport: "running",
-            steps: [],
+          extensions: {
+            structured_workout: {
+              name: "Sport Mapping Workout",
+              sport,
+              steps: [],
+            },
           },
-        },
-      };
-      const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const logger = createMockLogger();
-      const writer = createFastXmlZwiftWriter(logger, mockValidator);
+        };
+        const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
+          valid: true,
+          errors: [],
+        });
+        const logger = createMockLogger();
+        const writer = createFastXmlZwiftWriter(logger, mockValidator);
 
-      // Act
-      const result = await writer(krd);
+        // Act
+        const result = await writer(krd);
 
-      // Assert
-      expect(result).toContain("<sportType>run</sportType>");
-    });
+        // Assert
+        expect(result).toContain(`<sportType>${sportType}</sportType>`);
+      }
+    );
   });
 
   describe("interval encoding", () => {

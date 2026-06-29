@@ -30,8 +30,6 @@ describe("createSaveHandler — analytics call-site", () => {
 
   it("should call onExported with format after successful export", async () => {
     // Arrange
-    // Arrange
-
     const onExported = vi.fn();
     const handler = createSaveHandler(
       fakeWorkout as never,
@@ -45,22 +43,14 @@ describe("createSaveHandler — analytics call-site", () => {
     );
 
     // Act
-
-    // Act
-
     await handler();
 
     // Assert
-
-    // Assert
-
     expect(onExported).toHaveBeenCalledWith("fit");
   });
 
   it("should not call onExported when export throws", async () => {
     // Arrange
-    // Arrange
-
     mockExportWorkout.mockRejectedValue(new Error("Export failed"));
     const onExported = vi.fn();
     const handler = createSaveHandler(
@@ -75,24 +65,14 @@ describe("createSaveHandler — analytics call-site", () => {
     );
 
     // Act
-
-    // Act
-
     await handler();
 
     // Assert
-
-    // Assert
-
     expect(onExported).not.toHaveBeenCalled();
   });
 
   it("should work without onExported (optional callback)", async () => {
     // Arrange
-    // Arrange
-
-    // Act
-
     const handler = createSaveHandler(
       fakeWorkout as never,
       "krd",
@@ -103,10 +83,10 @@ describe("createSaveHandler — analytics call-site", () => {
       noop
     );
 
-    // Act & Assert — no throw when callback is omitted
+    // Act
+    const result = handler();
 
     // Assert
-
-    await expect(handler()).resolves.toBeUndefined();
+    await expect(result).resolves.toBeUndefined();
   });
 });

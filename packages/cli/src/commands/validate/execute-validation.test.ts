@@ -8,10 +8,6 @@ vi.mock("../../utils/file-handler.js", () => ({
   readFile: vi.fn(),
 }));
 
-vi.mock("../../utils/format-detector.js", () => ({
-  detectFormat: vi.fn(),
-}));
-
 vi.mock("@kaiord/core", async (importOriginal) => {
   const actual = await importOriginal<typeof KaiordCore>();
   return {
@@ -42,7 +38,6 @@ import { validateRoundTrip } from "@kaiord/core";
 import { readFile as fsReadFile } from "fs/promises";
 
 import { readFile } from "../../utils/file-handler.js";
-import { detectFormat } from "../../utils/format-detector.js";
 import { executeValidation } from "./execute-validation";
 
 const createMockLogger = (): Logger => ({
@@ -62,7 +57,6 @@ describe("executeValidation", () => {
     const logger = createMockLogger();
 
     // Act
-    vi.mocked(detectFormat).mockReturnValue(null);
 
     // Assert
     await expect(
@@ -75,7 +69,6 @@ describe("executeValidation", () => {
     const logger = createMockLogger();
 
     // Act
-    vi.mocked(detectFormat).mockReturnValue("tcx");
 
     // Assert
     await expect(
@@ -86,7 +79,6 @@ describe("executeValidation", () => {
   it("should throw when FIT file returns string data", async () => {
     // Arrange
     const logger = createMockLogger();
-    vi.mocked(detectFormat).mockReturnValue("fit");
 
     // Act
     vi.mocked(readFile).mockResolvedValue("string data");
@@ -101,7 +93,6 @@ describe("executeValidation", () => {
     // Arrange
     const logger = createMockLogger();
     const binaryData = SAMPLE_FIT_BYTES;
-    vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
     const mockValidateResult = {
       isValid: true,
@@ -139,7 +130,6 @@ describe("executeValidation", () => {
       cadenceTolerance: 1,
       paceTolerance: 0.01,
     };
-    vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
     vi.mocked(fsReadFile).mockResolvedValue(JSON.stringify(toleranceConfig));
     const mockValidator = {
@@ -165,7 +155,6 @@ describe("executeValidation", () => {
     // Arrange
     const logger = createMockLogger();
     const binaryData = SAMPLE_FIT_BYTES;
-    vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
     const mockValidator = {
       validateFitToKrdToFit: vi.fn().mockResolvedValue({ isValid: true }),

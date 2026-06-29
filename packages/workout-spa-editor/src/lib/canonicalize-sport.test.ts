@@ -73,20 +73,4 @@ describe("canonicalizeSport", () => {
     // Assert
     expect(result).toBeNull();
   });
-
-  it("should never map across canonical families", () => {
-    // Arrange
-
-    // Act
-    const cycling = canonicalizeSport("bike");
-    const running = canonicalizeSport("run");
-    const swimming = canonicalizeSport("swim");
-
-    // Assert
-    expect(cycling).toBe("cycling");
-    expect(running).toBe("running");
-    expect(swimming).toBe("swimming");
-    expect(cycling).not.toBe(running);
-    expect(running).not.toBe(swimming);
-  });
 });

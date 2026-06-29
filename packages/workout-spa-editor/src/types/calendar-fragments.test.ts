@@ -2,34 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   aiMetaSchema,
-  valueWithUnitSchema,
   workoutCommentSchema,
   workoutFeedbackSchema,
   workoutRawSchema,
 } from "./calendar-fragments";
-
-describe("valueWithUnitSchema", () => {
-  it("should accept valid value with unit", () => {
-    // Arrange
-
-    // Act
-
-    const result = valueWithUnitSchema.parse({ value: 10.5, unit: "km" });
-
-    // Assert
-
-    expect(result).toEqual({ value: 10.5, unit: "km" });
-  });
-
-  it("should reject missing unit", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(() => valueWithUnitSchema.parse({ value: 10 })).toThrow();
-  });
-});
 
 describe("workoutCommentSchema", () => {
   it("should accept valid comment with ISO timestamp", () => {

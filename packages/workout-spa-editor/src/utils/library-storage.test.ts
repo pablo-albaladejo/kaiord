@@ -18,8 +18,6 @@ describe("library-storage", () => {
   describe("saveLibrary", () => {
     it("should save templates to localStorage", () => {
       // Arrange
-      // Arrange
-
       const templates: Array<WorkoutTemplate> = [
         {
           id: "550e8400-e29b-41d4-a716-446655440000",
@@ -50,52 +48,19 @@ describe("library-storage", () => {
       ];
 
       // Act
-
-      // Act
-
       const error = saveLibrary(templates);
 
       // Assert
-
-      // Assert
-
       expect(error).toBeNull();
       const stored = localStorage.getItem("workout-spa-library");
       expect(stored).toBeDefined();
-
       const parsed = JSON.parse(stored!);
       expect(parsed.templates).toHaveLength(1);
       expect(parsed.templates[0].name).toBe("Test Workout");
     });
 
-    it("should save empty templates array", () => {
-      // Arrange
-      // Arrange
-
-      const templates: Array<WorkoutTemplate> = [];
-
-      // Act
-
-      // Act
-
-      const error = saveLibrary(templates);
-
-      // Assert
-
-      // Assert
-
-      expect(error).toBeNull();
-      const stored = localStorage.getItem("workout-spa-library");
-      expect(stored).toBeDefined();
-
-      const parsed = JSON.parse(stored!);
-      expect(parsed.templates).toHaveLength(0);
-    });
-
     it("should handle quota exceeded error", () => {
       // Arrange
-      // Arrange
-
       const templates: Array<WorkoutTemplate> = [
         {
           id: "550e8400-e29b-41d4-a716-446655440000",
@@ -130,15 +95,9 @@ describe("library-storage", () => {
       });
 
       // Act
-
-      // Act
-
       const error = saveLibrary(templates);
 
       // Assert
-
-      // Assert
-
       expect(error).not.toBeNull();
       expect(error?.type).toBe("quota_exceeded");
       expect(error?.message).toContain("Storage quota exceeded");
@@ -146,8 +105,6 @@ describe("library-storage", () => {
 
     it("should handle unknown errors", () => {
       // Arrange
-      // Arrange
-
       const templates: Array<WorkoutTemplate> = [
         {
           id: "550e8400-e29b-41d4-a716-446655440000",
@@ -179,15 +136,9 @@ describe("library-storage", () => {
       });
 
       // Act
-
-      // Act
-
       const error = saveLibrary(templates);
 
       // Assert
-
-      // Assert
-
       expect(error).not.toBeNull();
       expect(error?.type).toBe("unknown_error");
       expect(error?.message).toBe("Unknown error");
@@ -197,8 +148,6 @@ describe("library-storage", () => {
   describe("loadLibrary", () => {
     it("should load templates from localStorage", () => {
       // Arrange
-      // Arrange
-
       const state = {
         templates: [
           {
@@ -232,15 +181,9 @@ describe("library-storage", () => {
       localStorage.setItem("workout-spa-library", JSON.stringify(state));
 
       // Act
-
-      // Act
-
       const result = loadLibrary();
 
       // Assert
-
-      // Assert
-
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.templates).toHaveLength(1);
@@ -251,19 +194,11 @@ describe("library-storage", () => {
 
     it("should return empty templates when no data exists", () => {
       // Arrange
-      // localStorage is empty
 
       // Act
-      // Arrange
-
-      // Act
-
       const result = loadLibrary();
 
       // Assert
-
-      // Assert
-
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.templates).toHaveLength(0);
@@ -272,79 +207,32 @@ describe("library-storage", () => {
 
     it("should handle invalid JSON", () => {
       // Arrange
-      // Arrange
-
       localStorage.setItem("workout-spa-library", "invalid json");
 
       // Act
-
-      // Act
-
       const result = loadLibrary();
 
       // Assert
-
-      // Assert
-
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.type).toBe("parse_error");
       }
     });
 
-    it("should handle invalid schema", () => {
+    it.each([
+      {
+        label: "invalid schema",
+        state: { templates: [{ id: "not-a-uuid", name: "" }] },
+      },
+      { label: "missing templates field", state: {} },
+    ])("should return parse_error for $label", ({ state }) => {
       // Arrange
-      // Arrange
-
-      const invalidState = {
-        templates: [
-          {
-            id: "not-a-uuid",
-            name: "",
-            // Missing required fields
-          },
-        ],
-      };
-
-      localStorage.setItem("workout-spa-library", JSON.stringify(invalidState));
+      localStorage.setItem("workout-spa-library", JSON.stringify(state));
 
       // Act
-
-      // Act
-
       const result = loadLibrary();
 
       // Assert
-
-      // Assert
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.type).toBe("parse_error");
-        expect(result.error.message).toContain("Invalid library data");
-      }
-    });
-
-    it("should handle missing templates field", () => {
-      // Arrange
-      // Arrange
-
-      const invalidState = {
-        // Missing templates field
-      };
-
-      localStorage.setItem("workout-spa-library", JSON.stringify(invalidState));
-
-      // Act
-
-      // Act
-
-      const result = loadLibrary();
-
-      // Assert
-
-      // Assert
-
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.type).toBe("parse_error");
@@ -355,8 +243,6 @@ describe("library-storage", () => {
   describe("clearLibrary", () => {
     it("should remove library from localStorage", () => {
       // Arrange
-      // Arrange
-
       const state = {
         templates: [
           {
@@ -391,21 +277,11 @@ describe("library-storage", () => {
       clearLibrary();
 
       // Assert
-
-      // Act
-
       const stored = localStorage.getItem("workout-spa-library");
-
-      // Assert
-
       expect(stored).toBeNull();
     });
 
     it("should not throw when clearing empty storage", () => {
-      // Arrange
-      // localStorage is empty
-
-      // Act & Assert
       // Arrange
 
       // Act
@@ -418,8 +294,6 @@ describe("library-storage", () => {
   describe("integration", () => {
     it("should save and load templates correctly", () => {
       // Arrange
-      // Arrange
-
       const templates: Array<WorkoutTemplate> = [
         {
           id: "550e8400-e29b-41d4-a716-446655440000",
@@ -476,18 +350,11 @@ describe("library-storage", () => {
 
       // Act
       const saveError = saveLibrary(templates);
-
-      // Act
-
       const loadResult = loadLibrary();
 
       // Assert
-
-      // Assert
-
       expect(saveError).toBeNull();
       expect(loadResult.success).toBe(true);
-
       if (loadResult.success) {
         expect(loadResult.data.templates).toHaveLength(2);
         expect(loadResult.data.templates[0].name).toBe("Morning Ride");
@@ -497,8 +364,6 @@ describe("library-storage", () => {
 
     it("should handle multiple save operations", () => {
       // Arrange
-      // Arrange
-
       const templates1: Array<WorkoutTemplate> = [
         {
           id: "550e8400-e29b-41d4-a716-446655440000",
@@ -555,15 +420,9 @@ describe("library-storage", () => {
       // Act
       saveLibrary(templates1);
       saveLibrary(templates2);
-
-      // Act
-
       const result = loadLibrary();
 
       // Assert
-
-      // Assert
-
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.templates).toHaveLength(2);

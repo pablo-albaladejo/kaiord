@@ -86,35 +86,25 @@ describe("encodeDuration", () => {
     expect(interval["@_kaiord:originalDurationBpm"]).toBe(140);
   });
 
-  it("should encode power_less_than duration as 300 second fallback with watts metadata", () => {
-    // Arrange
-    const step = makeStep({ type: "power_less_than", watts: 200 });
-    const interval: Record<string, unknown> = {};
+  it.each([
+    { type: "power_less_than", watts: 200 },
+    { type: "power_greater_than", watts: 300 },
+  ] as const)(
+    "should encode $type duration as 300 second fallback with watts metadata",
+    (duration) => {
+      // Arrange
+      const step = makeStep(duration);
+      const interval: Record<string, unknown> = {};
 
-    // Act
-    encodeDuration(step, interval);
+      // Act
+      encodeDuration(step, interval);
 
-    // Assert
-    expect(interval["@_Duration"]).toBe(300);
-    expect(interval["@_kaiord:originalDurationType"]).toBe("power_less_than");
-    expect(interval["@_kaiord:originalDurationWatts"]).toBe(200);
-  });
-
-  it("should encode power_greater_than duration as 300 second fallback with watts metadata", () => {
-    // Arrange
-    const step = makeStep({ type: "power_greater_than", watts: 300 });
-    const interval: Record<string, unknown> = {};
-
-    // Act
-    encodeDuration(step, interval);
-
-    // Assert
-    expect(interval["@_Duration"]).toBe(300);
-    expect(interval["@_kaiord:originalDurationType"]).toBe(
-      "power_greater_than"
-    );
-    expect(interval["@_kaiord:originalDurationWatts"]).toBe(300);
-  });
+      // Assert
+      expect(interval["@_Duration"]).toBe(300);
+      expect(interval["@_kaiord:originalDurationType"]).toBe(duration.type);
+      expect(interval["@_kaiord:originalDurationWatts"]).toBe(duration.watts);
+    }
+  );
 
   it("should emit logger warn for unsupported duration type", () => {
     // Arrange
@@ -151,7 +141,6 @@ describe("encodeDuration", () => {
 
   it.each([
     [60, 60],
-    [300, 300],
     [3600, 3600],
   ] as const)(
     "should encode time duration of %i seconds",

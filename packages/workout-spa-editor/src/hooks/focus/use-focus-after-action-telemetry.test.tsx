@@ -1,6 +1,5 @@
 /**
- * Telemetry emission tests for `useFocusAfterAction` (tasks 3.1.a–3.5.a).
- * These tests FAIL until Phase C wiring (tasks 3.1.b–3.5.b).
+ * Telemetry emission tests for `useFocusAfterAction`.
  */
 import { act, render } from "@testing-library/react";
 import { useContext, useEffect, useRef } from "react";
@@ -303,6 +302,8 @@ describe("useFocusAfterAction — telemetry", () => {
       root.appendChild(dialog);
       await new Promise<void>((r) => queueMicrotask(r));
       await new Promise<void>((r) => queueMicrotask(r));
+
+      // Act
       act(() => {
         useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
       });
@@ -317,6 +318,8 @@ describe("useFocusAfterAction — telemetry", () => {
       act(() => {
         vi.runAllTimers();
       });
+
+      // Assert
       const events = eventsOfType(spy, "overlay-deferred-apply");
       expect(events).toHaveLength(1);
       const { deferredForMs } = events[0][0] as {
@@ -325,11 +328,7 @@ describe("useFocusAfterAction — telemetry", () => {
       };
       expect(deferredForMs).toBe(TELEMETRY_TICK_300_MS);
       expect(deferredForMs % 100).toBe(0);
-
-      // Act
       rafSpy.mockRestore();
-
-      // Assert
     });
   });
 

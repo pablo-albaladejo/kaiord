@@ -43,10 +43,6 @@ describe("WorkoutActions - Property Tests", () => {
     // Arrange
 
     // Act
-
-    // Assert
-
-    // Arrange & Act
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
@@ -112,57 +108,42 @@ describe("WorkoutActions - Property Tests", () => {
    * Additional test: Verify specific button labels are in title case
    */
   it("should have 'Save Workout' button in title case", () => {
-    // Arrange & Act
     // Arrange
 
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-    // Assert
-
     // Act
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     const saveButton = screen.getByRole("button", { name: /save workout/i });
 
     // Assert
-
     expect(saveButton.textContent).toContain("Save Workout");
   });
 
   it("should have 'Save to Library' button in title case", () => {
-    // Arrange & Act
     // Arrange
 
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-    // Assert
-
     // Act
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     const libraryButton = screen.getByRole("button", {
       name: /save to library/i,
     });
 
     // Assert
-
     expect(libraryButton.textContent).toContain("Save to Library");
   });
 
   it("should have 'Discard' button in title case", () => {
-    // Arrange & Act
     // Arrange
 
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-    // Assert
-
     // Act
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     const discardButton = screen.getByRole("button", {
       name: /discard/i,
     });
 
     // Assert
-
     expect(discardButton.textContent).toContain("Discard");
   });
 
@@ -172,14 +153,10 @@ describe("WorkoutActions - Property Tests", () => {
    * with proper spacing (desktop) or stack vertically (mobile) without overflow
    */
   it("should have responsive layout classes with flex-wrap", () => {
-    // Arrange & Act
     // Arrange
 
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-    // Assert
-
     // Act
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     const container = screen.getByTestId(
       "discard-workout-button"
@@ -188,7 +165,6 @@ describe("WorkoutActions - Property Tests", () => {
     // Flex-wrap allows buttons to flow and wrap naturally
 
     // Assert
-
     expect(container).toHaveClass("flex-wrap");
 
     // Proper spacing

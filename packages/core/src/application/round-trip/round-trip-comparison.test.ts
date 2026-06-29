@@ -30,59 +30,30 @@ const buildKRDWithLaps = (laps: KRD["laps"]): KRD => ({
 });
 
 describe("checkField", () => {
-  it("should record no violation when the expected value is absent", () => {
-    // Arrange
-    const checker = createToleranceChecker();
-    const violations: Array<ToleranceViolation> = [];
+  it.each<[number | undefined, number | undefined]>([
+    [undefined, HR_EXPECTED],
+    [HR_EXPECTED, undefined],
+    [undefined, undefined],
+  ])(
+    "should record no violation when a value is absent (%p, %p)",
+    (expected, actual) => {
+      // Arrange
+      const checker = createToleranceChecker();
+      const violations: Array<ToleranceViolation> = [];
 
-    // Act
-    checkField(
-      violations,
-      checker.checkHeartRate,
-      undefined,
-      HR_EXPECTED,
-      "lap.hr"
-    );
+      // Act
+      checkField(
+        violations,
+        checker.checkHeartRate,
+        expected,
+        actual,
+        "lap.hr"
+      );
 
-    // Assert
-    expect(violations).toStrictEqual([]);
-  });
-
-  it("should record no violation when the actual value is absent", () => {
-    // Arrange
-    const checker = createToleranceChecker();
-    const violations: Array<ToleranceViolation> = [];
-
-    // Act
-    checkField(
-      violations,
-      checker.checkHeartRate,
-      HR_EXPECTED,
-      undefined,
-      "lap.hr"
-    );
-
-    // Assert
-    expect(violations).toStrictEqual([]);
-  });
-
-  it("should record no violation when both values are absent", () => {
-    // Arrange
-    const checker = createToleranceChecker();
-    const violations: Array<ToleranceViolation> = [];
-
-    // Act
-    checkField(
-      violations,
-      checker.checkHeartRate,
-      undefined,
-      undefined,
-      "lap.hr"
-    );
-
-    // Assert
-    expect(violations).toStrictEqual([]);
-  });
+      // Assert
+      expect(violations).toStrictEqual([]);
+    }
+  );
 
   it("should record no violation when both values are within tolerance", () => {
     // Arrange

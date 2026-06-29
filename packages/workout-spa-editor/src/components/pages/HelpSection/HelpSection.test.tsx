@@ -7,14 +7,10 @@ import { HelpSection } from "./HelpSection";
 describe("HelpSection", () => {
   describe("rendering", () => {
     it("should render the main heading", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -24,14 +20,10 @@ describe("HelpSection", () => {
     });
 
     it("should render all major sections", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -52,14 +44,10 @@ describe("HelpSection", () => {
 
   describe("getting started section", () => {
     it("should display creating a workout instructions", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -72,14 +60,10 @@ describe("HelpSection", () => {
     });
 
     it("should display loading a workout instructions", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -92,14 +76,10 @@ describe("HelpSection", () => {
     });
 
     it("should display organizing steps instructions", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -114,14 +94,10 @@ describe("HelpSection", () => {
 
   describe("keyboard shortcuts section", () => {
     it("should display file operation shortcuts", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -132,14 +108,10 @@ describe("HelpSection", () => {
     });
 
     it("should display edit operation shortcuts", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -153,14 +125,10 @@ describe("HelpSection", () => {
     });
 
     it("should display step management shortcuts", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -176,14 +144,10 @@ describe("HelpSection", () => {
     });
 
     it("should display selection shortcuts", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -195,33 +159,23 @@ describe("HelpSection", () => {
     });
 
     it("should display keyboard shortcut keys", () => {
-      // Arrange & Act
       // Arrange
-
       const { container } = render(<HelpSection />);
 
-      // Assert
-
       // Act
-
       const kbdElements = container.querySelectorAll("kbd");
 
       // Assert
-
       expect(kbdElements.length).toBeGreaterThan(0);
     });
   });
 
   describe("example workouts section", () => {
     it("should display sweet spot intervals example", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -235,14 +189,10 @@ describe("HelpSection", () => {
     });
 
     it("should display tempo run example", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -254,14 +204,10 @@ describe("HelpSection", () => {
     });
 
     it("should display swim intervals example", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -275,14 +221,10 @@ describe("HelpSection", () => {
 
   describe("FAQ section", () => {
     it("should display file formats question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -295,14 +237,10 @@ describe("HelpSection", () => {
     });
 
     it("should display repetition block question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -317,14 +255,10 @@ describe("HelpSection", () => {
     });
 
     it("should display offline usage question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -337,14 +271,10 @@ describe("HelpSection", () => {
     });
 
     it("should display training zones question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -357,14 +287,10 @@ describe("HelpSection", () => {
     });
 
     it("should display export question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -377,14 +303,10 @@ describe("HelpSection", () => {
     });
 
     it("should display undo question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -395,14 +317,10 @@ describe("HelpSection", () => {
     });
 
     it("should display duration types question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -417,14 +335,10 @@ describe("HelpSection", () => {
     });
 
     it("should display library question", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -441,38 +355,28 @@ describe("HelpSection", () => {
 
   describe("accessibility", () => {
     it("should have proper heading hierarchy", () => {
-      // Arrange & Act
       // Arrange
-
       render(<HelpSection />);
 
-      // Assert
+      // Act
       const h1 = screen.getByRole("heading", {
         level: 1,
         name: /help & documentation/i,
       });
       const h2Headings = screen.getAllByRole("heading", { level: 2 });
-
-      // Act
-
       const h3Headings = screen.getAllByRole("heading", { level: 3 });
 
       // Assert
-
       expect(h1).toBeInTheDocument();
       expect(h2Headings.length).toBeGreaterThan(0);
       expect(h3Headings.length).toBeGreaterThan(0);
     });
 
     it("should have descriptive text for all sections", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -487,34 +391,22 @@ describe("HelpSection", () => {
   describe("replay tutorial (Requirements 37.5)", () => {
     it("should render replay tutorial button when onReplayTutorial is provided", () => {
       // Arrange
-      // Arrange
-
       const mockOnReplayTutorial = vi.fn();
 
       // Act
-
-      // Act
-
       render(<HelpSection onReplayTutorial={mockOnReplayTutorial} />);
 
       // Assert
-
-      // Assert
-
       expect(
         screen.getByRole("button", { name: /replay tutorial/i })
       ).toBeInTheDocument();
     });
 
     it("should not render replay tutorial button when onReplayTutorial is not provided", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<HelpSection />);
-
-      // Assert
 
       // Assert
 
@@ -525,8 +417,6 @@ describe("HelpSection", () => {
 
     it("should call onReplayTutorial when replay button is clicked", async () => {
       // Arrange
-      // Arrange
-
       const mockOnReplayTutorial = vi.fn();
       const user = userEvent.setup();
       render(<HelpSection onReplayTutorial={mockOnReplayTutorial} />);
@@ -547,15 +437,9 @@ describe("HelpSection", () => {
       const replayButton = screen.getByRole("button", {
         name: /replay tutorial/i,
       });
-
-      // Act
-
       await user.click(replayButton);
 
       // Assert
-
-      // Assert
-
       expect(mockOnReplayTutorial).toHaveBeenCalledOnce();
       expect(localStorageMock.removeItem).toHaveBeenCalledWith(
         "workout-spa-onboarding-completed"

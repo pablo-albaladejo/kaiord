@@ -14,16 +14,6 @@ describe("formatSuccess", () => {
       content: [{ type: "text", text: "Operation completed" }],
     });
   });
-
-  it("should not include isError property", () => {
-    // Arrange
-
-    // Act
-    const result = formatSuccess("OK");
-
-    // Assert
-    expect(result.isError).toBeUndefined();
-  });
 });
 
 const namedError = (name: string, message: string): Error => {

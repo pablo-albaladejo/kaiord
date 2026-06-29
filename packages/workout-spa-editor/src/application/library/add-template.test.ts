@@ -9,6 +9,8 @@ describe("addTemplate", () => {
     // Arrange
     const TEMPLATE_DURATION_MIN = 60;
     const persistence = createInMemoryPersistence();
+
+    // Act
     const template = await addTemplate(
       persistence,
       "Tempo Ride",
@@ -20,16 +22,14 @@ describe("addTemplate", () => {
         duration: TEMPLATE_DURATION_MIN,
       }
     );
+
+    // Assert
     expect(template.name).toBe("Tempo Ride");
     expect(template.sport).toBe("cycling");
     expect(template.tags).toEqual(["base", "endurance"]);
     expect(template.difficulty).toBe("intermediate");
     expect(template.duration).toBe(TEMPLATE_DURATION_MIN);
-
-    // Act
     const stored = await persistence.templates.getById(template.id);
-
-    // Assert
     expect(stored).toEqual(template);
   });
 

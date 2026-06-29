@@ -135,7 +135,8 @@ describe("convertStepToInterval", () => {
     const result = convertStepToInterval(step, "Warmup");
 
     // Assert
-    expect(result["@_PowerLow"]).toBeDefined();
-    expect(result["@_PowerHigh"]).toBeDefined();
+    // range{min:100,max:200} → watts-lossy: (min/250)=0.4, (max/250)=0.8
+    expect(result["@_PowerLow"]).toBe(0.4);
+    expect(result["@_PowerHigh"]).toBe(0.8);
   });
 });

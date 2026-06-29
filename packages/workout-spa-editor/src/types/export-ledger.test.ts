@@ -23,36 +23,17 @@ describe("exportLedgerEntrySchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should accept the pending sentinel value for destinationExternalId", () => {
-    // Arrange
-    const input = { ...VALID_ENTRY, destinationExternalId: "pending" };
+  it.each([{ field: "id" }, { field: "kaiordRecordId" }])(
+    "should reject an invalid uuid for $field",
+    ({ field }) => {
+      // Arrange
+      const input = { ...VALID_ENTRY, [field]: "not-a-uuid" };
 
-    // Act
-    const result = exportLedgerEntrySchema.safeParse(input);
+      // Act
+      const result = exportLedgerEntrySchema.safeParse(input);
 
-    // Assert
-    expect(result.success).toBe(true);
-  });
-
-  it("should reject an invalid uuid for id field", () => {
-    // Arrange
-    const input = { ...VALID_ENTRY, id: "not-a-uuid" };
-
-    // Act
-    const result = exportLedgerEntrySchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject an invalid uuid for kaiordRecordId field", () => {
-    // Arrange
-    const input = { ...VALID_ENTRY, kaiordRecordId: "bad-id" };
-
-    // Act
-    const result = exportLedgerEntrySchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
+      // Assert
+      expect(result.success).toBe(false);
+    }
+  );
 });

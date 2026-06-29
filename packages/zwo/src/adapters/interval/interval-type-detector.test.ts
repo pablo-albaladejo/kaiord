@@ -8,47 +8,32 @@ import { detectIntervalType } from "./interval-type-detector";
 
 describe("detectIntervalType", () => {
   describe("SteadyState detection", () => {
-    it("should detect SteadyState for constant percent_ftp power target", () => {
-      // Arrange
-      const step: WorkoutStep = {
-        stepIndex: 0,
-        durationType: "time",
-        duration: { type: "time", seconds: 300 },
-        targetType: targetTypeSchema.enum.power,
-        target: {
-          type: targetTypeSchema.enum.power,
-          value: { unit: targetUnitSchema.enum.percent_ftp, value: 85 },
-        },
-        intensity: intensitySchema.enum.active,
-      };
+    it.each([
+      { unit: targetUnitSchema.enum.percent_ftp, value: 85 },
+      { unit: targetUnitSchema.enum.watts, value: 250 },
+    ] as const)(
+      "should detect SteadyState for constant $unit power target",
+      (powerValue) => {
+        // Arrange
+        const step: WorkoutStep = {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: targetTypeSchema.enum.power,
+          target: {
+            type: targetTypeSchema.enum.power,
+            value: powerValue,
+          },
+          intensity: intensitySchema.enum.active,
+        };
 
-      // Act
-      const result = detectIntervalType(step);
+        // Act
+        const result = detectIntervalType(step);
 
-      // Assert
-      expect(result).toBe("SteadyState");
-    });
-
-    it("should detect SteadyState for constant watts power target", () => {
-      // Arrange
-      const step: WorkoutStep = {
-        stepIndex: 0,
-        durationType: "time",
-        duration: { type: "time", seconds: 300 },
-        targetType: targetTypeSchema.enum.power,
-        target: {
-          type: targetTypeSchema.enum.power,
-          value: { unit: targetUnitSchema.enum.watts, value: 250 },
-        },
-        intensity: intensitySchema.enum.active,
-      };
-
-      // Act
-      const result = detectIntervalType(step);
-
-      // Assert
-      expect(result).toBe("SteadyState");
-    });
+        // Assert
+        expect(result).toBe("SteadyState");
+      }
+    );
 
     it("should detect SteadyState for non-power targets", () => {
       // Arrange
@@ -119,46 +104,32 @@ describe("detectIntervalType", () => {
   });
 
   describe("Ramp detection", () => {
-    it("should detect Ramp for range target with active intensity", () => {
-      // Arrange
-      const step: WorkoutStep = {
-        stepIndex: 0,
-        durationType: "time",
-        duration: { type: "time", seconds: 300 },
-        targetType: targetTypeSchema.enum.power,
-        target: {
-          type: targetTypeSchema.enum.power,
-          value: { unit: targetUnitSchema.enum.range, min: 80, max: 100 },
-        },
-        intensity: intensitySchema.enum.active,
-      };
+    it.each([
+      { intensity: intensitySchema.enum.active },
+      { intensity: undefined },
+    ])(
+      "should detect Ramp for range target with intensity $intensity",
+      ({ intensity }) => {
+        // Arrange
+        const step: WorkoutStep = {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: targetTypeSchema.enum.power,
+          target: {
+            type: targetTypeSchema.enum.power,
+            value: { unit: targetUnitSchema.enum.range, min: 80, max: 100 },
+          },
+          ...(intensity ? { intensity } : {}),
+        };
 
-      // Act
-      const result = detectIntervalType(step);
+        // Act
+        const result = detectIntervalType(step);
 
-      // Assert
-      expect(result).toBe("Ramp");
-    });
-
-    it("should detect Ramp for range target without intensity", () => {
-      // Arrange
-      const step: WorkoutStep = {
-        stepIndex: 0,
-        durationType: "time",
-        duration: { type: "time", seconds: 300 },
-        targetType: targetTypeSchema.enum.power,
-        target: {
-          type: targetTypeSchema.enum.power,
-          value: { unit: targetUnitSchema.enum.range, min: 80, max: 100 },
-        },
-      };
-
-      // Act
-      const result = detectIntervalType(step);
-
-      // Assert
-      expect(result).toBe("Ramp");
-    });
+        // Assert
+        expect(result).toBe("Ramp");
+      }
+    );
   });
 
   describe("FreeRide detection", () => {

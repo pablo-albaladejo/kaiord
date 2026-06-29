@@ -40,7 +40,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
   describe("Selection with duplicate stepIndex values", () => {
     it("should only select main workout step when clicked, not block steps with same stepIndex", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       const onStepSelect = vi.fn();
@@ -62,8 +61,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         blockA, // Block at index 1
         blockB, // Block at index 2
       ]);
-
-      // Act
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Click on the main workout step (Step 1)
@@ -78,15 +75,11 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
 
       // Assert
       // Should call onStepSelect with the main workout step's hierarchical ID
-
-      // Assert
-
       expect(onStepSelect).toHaveBeenCalledWith("step-0");
       expect(onStepSelect).toHaveBeenCalledTimes(1);
     });
 
     it("should only select step in Block A when clicked, not main workout or Block B steps with same stepIndex", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -105,8 +98,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         blockA, // Block at index 1
         blockB, // Block at index 2
       ]);
-
-      // Act
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Expand Block A to see its steps
@@ -125,14 +116,10 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
 
       // Assert
       // Should call onStepSelect with the step's stepIndex within the block (0)
-
-      // Assert
-
       expect(onStepSelect).toHaveBeenCalled();
     });
 
     it("should only select step in Block B when clicked, not main workout or Block A steps with same stepIndex", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -151,8 +138,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         blockA, // Block at index 1
         blockB, // Block at index 2
       ]);
-
-      // Act
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Expand Block B to see its steps
@@ -171,16 +156,12 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
 
       // Assert
       // Should call onStepSelect with the step's stepIndex within the block (0)
-
-      // Assert
-
       expect(onStepSelect).toHaveBeenCalled();
     });
   });
 
   describe("Visual selection isolation", () => {
     it("should only highlight main workout step when selected, not block steps with same stepIndex", () => {
-      // Arrange
       // Arrange
 
       const blockA: RepetitionBlock = {
@@ -192,19 +173,15 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         blockA, // Block at index 1
       ]);
 
-      // Act - Select main workout step with ID "step-0"
+      // Act
+      // Select main workout step with ID "step-0"
       render(<WorkoutList workout={workout} selectedStepId="step-0" />);
 
       // Assert
 
-      // Act
-
       const mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
-
-      // Assert
-
       expect(mainWorkoutStep).toHaveClass("border-primary-500");
 
       // Block steps should not be highlighted (they would have ID "block-1-step-0")
@@ -214,7 +191,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
 
     it("should only highlight step in block when selected, not main workout step with same stepIndex", () => {
       // Arrange
-      // Arrange
 
       const blockA: RepetitionBlock = {
         repeatCount: 2,
@@ -225,27 +201,22 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         blockA, // Block at index 1
       ]);
 
-      // Act - Select block step with ID "block-1-step-0"
+      // Act
+      // Select block step with ID "block-1-step-0"
       render(<WorkoutList workout={workout} selectedStepId="block-1-step-0" />);
 
       // Assert
-
-      // Act
 
       const mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
       // Main workout step should NOT be highlighted
-
-      // Assert
-
       expect(mainWorkoutStep).not.toHaveClass("border-primary-500");
     });
   });
 
   describe("Selection state verification", () => {
     it("should generate unique IDs for steps with same stepIndex in different contexts", () => {
-      // Arrange
       // Arrange
 
       const blockA: RepetitionBlock = {
@@ -263,14 +234,12 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       ]);
 
       // Act
+
       const { container } = render(<WorkoutList workout={workout} />);
 
       // Assert
       // All step IDs should be unique
       const allStepButtons = container.querySelectorAll('[role="button"]');
-
-      // Act
-
       const stepIds = Array.from(allStepButtons).map(
         (button) => button.getAttribute("data-step-id") || ""
       );
@@ -278,14 +247,10 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       // Note: This test assumes steps have data-step-id attributes
       // If not implemented, this test documents the expected behavior
       // The actual ID uniqueness is enforced by the generateStepId function
-
-      // Assert
-
       expect(stepIds.length).toBeGreaterThan(0);
     });
 
     it("should maintain selection isolation when switching between steps with same stepIndex", async () => {
-      // Arrange
       // Arrange
 
       const onStepSelect = vi.fn();
@@ -298,8 +263,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         createMockStep(0), // Main workout step with stepIndex: 0
         blockA, // Block at index 1
       ]);
-
-      // Act
       const { rerender } = render(
         <WorkoutList
           workout={workout}
@@ -307,19 +270,13 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
           selectedStepId="step-0"
         />
       );
-
       // Verify main workout step is selected
-
-      // Act
-
       let mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
-
-      // Assert
-
       expect(mainWorkoutStep).toHaveClass("border-primary-500");
 
+      // Act
       // Change selection to block step
       rerender(
         <WorkoutList
@@ -338,7 +295,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
 
   describe("Complex workout structures", () => {
     it("should handle selection in workout with multiple blocks and duplicate stepIndex values", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -364,8 +320,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         createMockStep(2), // Index 3 - ID: "step-2"
         blockB, // Index 4 - Steps: "block-4-step-0", "block-4-step-1"
       ]);
-
-      // Act
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Click on main workout Step 1 (stepIndex: 0)
@@ -379,8 +333,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
 
       // Assert
 
-      // Assert
-
       expect(onStepSelect).toHaveBeenCalledWith("step-0");
 
       // Click on main workout Step 2 (stepIndex: 1)
@@ -388,8 +340,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         name: /Step 2:/,
       });
       await user.click(allStep2Buttons[0]);
-
-      // Assert
       expect(onStepSelect).toHaveBeenCalledWith("step-1");
     });
   });

@@ -160,8 +160,9 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
-    // Assert — group row uses the new testid; per-band row exists in
-    // the DOM (inside collapsed Detail) but is hidden via aria-hidden.
+    // Assert
+    // group row uses the new testid; per-band row exists in the DOM
+    // (inside collapsed Detail) but is hidden via aria-hidden.
     expect(
       screen.getByTestId("zones-conflict-group-cycling.heartRateZones")
     ).toBeInTheDocument();
@@ -173,9 +174,10 @@ describe("ZonesConflictDialog", () => {
   });
 
   it("should preserve insertion order grouping scalars first then band groups (5.2b)", () => {
-    // Arrange — mixed scalar + band conflicts; scalar (LTHR) first.
-    // FTP would couple with cycling.powerZones — use cycling.thresholds.lthr to
-    // avoid the FTP+power coupling and test pure ordering.
+    // Arrange
+    // mixed scalar + band conflicts; scalar (LTHR) first. FTP would couple
+    // with cycling.powerZones — use cycling.thresholds.lthr to avoid the
+    // FTP+power coupling and test pure ordering.
     const mixed: ConflictItem[] = [
       { field: "cycling.thresholds.lthr", current: 160, incoming: 174 },
       {
@@ -200,7 +202,8 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
-    // Assert — scalar keeps its per-row testid; bands collapse into one group.
+    // Assert
+    // scalar keeps its per-row testid; bands collapse into one group.
     expect(
       screen.getByTestId("zones-conflict-row-cycling.thresholds.lthr")
     ).toBeInTheDocument();
@@ -211,8 +214,9 @@ describe("ZonesConflictDialog", () => {
   });
 
   it("should emit accept decisions for all bands when the group's accept radio is selected (5.2c)", async () => {
-    // Arrange — 4 conflicts in cycling.heartRateZones; user clicks ONCE
-    // on the group's accept radio (NOT 4 individual radios).
+    // Arrange
+    // 4 conflicts in cycling.heartRateZones; user clicks ONCE on the
+    // group's accept radio (NOT 4 individual radios).
     const tableConflicts: ConflictItem[] = [
       {
         field: "cycling.heartRateZones.z1.minBpm",
@@ -255,7 +259,8 @@ describe("ZonesConflictDialog", () => {
     // Act
     await userEvent.click(screen.getByRole("button", { name: "Apply" }));
 
-    // Assert — single group click emits accept for all 4 band-bound keys.
+    // Assert
+    // single group click emits accept for all 4 band-bound keys.
     expect(onConfirm).toHaveBeenCalledWith({
       "cycling.heartRateZones.z1.minBpm": "accept",
       "cycling.heartRateZones.z1.maxBpm": "accept",
@@ -265,8 +270,9 @@ describe("ZonesConflictDialog", () => {
   });
 
   it("should couple FTP scalar + cycling.powerZones into a single group (5.2d / D-MA6)", async () => {
-    // Arrange — FTP scalar conflict alongside cycling-power band conflicts
-    // SHALL render as one coupled group, not separate.
+    // Arrange
+    // FTP scalar conflict alongside cycling-power band conflicts SHALL
+    // render as one coupled group, not separate.
     const coupled: ConflictItem[] = [
       { field: "cycling.thresholds.ftp", current: 200, incoming: 268 },
       {
@@ -289,32 +295,28 @@ describe("ZonesConflictDialog", () => {
         onCancel={vi.fn()}
       />
     );
-
-    // Assert — coupled group exists; the FTP row testid lives INSIDE
-    // the coupled group's Detail view (per the spec — Detail keeps all
-    // rows in DOM via aria-hidden), NOT as a standalone scalar row.
     const coupledGroup = screen.getByTestId(
       "zones-conflict-group-cycling.threshold-and-zones"
     );
-    expect(coupledGroup).toBeInTheDocument();
-    expect(screen.getByText("Cycling threshold + zones")).toBeInTheDocument();
-    // FTP testid is INSIDE the coupled group, not at top level.
     const ftpRow = screen.getByTestId(
       "zones-conflict-row-cycling.thresholds.ftp"
     );
-    expect(coupledGroup.contains(ftpRow)).toBe(true);
 
-    // Act — accept the coupled group; both FTP and bands should be in the decisions.
-    const group = screen.getByTestId(
-      "zones-conflict-group-cycling.threshold-and-zones"
-    );
-    const acceptInput = group.querySelector(
+    // Act
+    // accept the coupled group; both FTP and bands should be in the decisions.
+    const acceptInput = coupledGroup.querySelector(
       'input[value="accept"]'
     ) as HTMLInputElement;
     await userEvent.click(acceptInput);
     await userEvent.click(screen.getByRole("button", { name: "Apply" }));
 
     // Assert
+    // coupled group exists; the FTP row testid lives INSIDE the coupled
+    // group's Detail view (per the spec — Detail keeps all rows in DOM
+    // via aria-hidden), NOT as a standalone scalar row.
+    expect(coupledGroup).toBeInTheDocument();
+    expect(screen.getByText("Cycling threshold + zones")).toBeInTheDocument();
+    expect(coupledGroup.contains(ftpRow)).toBe(true);
     expect(onConfirm).toHaveBeenCalledWith({
       "cycling.thresholds.ftp": "accept",
       "cycling.powerZones.z4.minPercent": "accept",

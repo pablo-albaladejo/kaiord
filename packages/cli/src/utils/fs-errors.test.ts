@@ -25,56 +25,18 @@ describe("isNodeSystemError", () => {
     expect(result).toBe(false);
   });
 
-  it("should return false for null", () => {
+  it.each<[string, unknown]>([
+    ["null", null],
+    ["undefined", undefined],
+    ["a string", "ENOENT"],
+    ["a plain object with code", { code: "ENOENT", message: "test" }],
+  ])("should return false for %s", (_label, input) => {
     // Arrange
 
     // Act
-    const result = isNodeSystemError(null);
+    const result = isNodeSystemError(input);
 
     // Assert
     expect(result).toBe(false);
-  });
-
-  it("should return false for undefined", () => {
-    // Arrange
-
-    // Act
-    const result = isNodeSystemError(undefined);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false for a string", () => {
-    // Arrange
-
-    // Act
-    const result = isNodeSystemError("ENOENT");
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false for a plain object with code", () => {
-    // Arrange
-
-    // Act
-    const result = isNodeSystemError({ code: "ENOENT", message: "test" });
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should allow access to code property when type guard passes", () => {
-    // Arrange
-
-    // Act
-    const error = Object.assign(new Error("test"), { code: "EACCES" });
-
-    // Assert
-    expect(isNodeSystemError(error)).toBe(true);
-    if (isNodeSystemError(error)) {
-      expect(error.code).toBe("EACCES");
-    }
   });
 });

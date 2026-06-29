@@ -16,94 +16,67 @@ const EXPECTED_CLICK_COUNT = 3;
 describe("CreateRepetitionBlockButton", () => {
   describe("rendering", () => {
     it("should not render when less than 2 steps selected", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       const { container } = render(
         <CreateRepetitionBlockButton selectedCount={0} onClick={vi.fn()} />
       );
 
       // Assert
-
-      // Assert
-
       expect(container).toBeEmptyDOMElement();
     });
 
     it("should not render when exactly 1 step selected", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       const { container } = render(
         <CreateRepetitionBlockButton selectedCount={1} onClick={vi.fn()} />
       );
 
       // Assert
-
-      // Assert
-
       expect(container).toBeEmptyDOMElement();
     });
 
     it("should render when 2 steps selected", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton selectedCount={2} onClick={vi.fn()} />
       );
 
-      // Assert
-
       // Act
-
       const button = screen.getByRole("button", {
         name: "Create repetition block from 2 selected steps",
       });
 
       // Assert
-
       expect(button).toBeInTheDocument();
       expect(button).toHaveTextContent("Create Repetition Block (2 steps)");
     });
 
     it("should render when 3 steps selected", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton selectedCount={3} onClick={vi.fn()} />
       );
 
-      // Assert
-
       // Act
-
       const button = screen.getByRole("button");
 
       // Assert
-
       expect(button).toHaveTextContent("Create Repetition Block (3 steps)");
     });
 
     it("should display correct count for multiple steps", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(
         <CreateRepetitionBlockButton selectedCount={5} onClick={vi.fn()} />
       );
 
       // Assert
-
-      // Assert
-
       expect(
         screen.getByRole("button", {
           name: "Create repetition block from 5 selected steps",
@@ -112,9 +85,7 @@ describe("CreateRepetitionBlockButton", () => {
     });
 
     it("should render with custom className", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton
           selectedCount={2}
@@ -123,81 +94,58 @@ describe("CreateRepetitionBlockButton", () => {
         />
       );
 
-      // Assert
-
       // Act
-
       const button = screen.getByRole("button");
 
       // Assert
-
       expect(button).toHaveClass("custom-class");
     });
 
     it("should have correct data-testid", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(
         <CreateRepetitionBlockButton selectedCount={2} onClick={vi.fn()} />
       );
 
       // Assert
-
-      // Assert
-
       expect(
         screen.getByTestId("create-repetition-block-button")
       ).toBeInTheDocument();
     });
 
     it("should render Repeat icon", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton selectedCount={2} onClick={vi.fn()} />
       );
-
-      // Assert
       const button = screen.getByRole("button");
 
       // Act
-
       const icon = button.querySelector("svg");
 
       // Assert
-
       expect(icon).toBeInTheDocument();
     });
   });
 
   describe("states", () => {
     it("should be enabled by default", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton selectedCount={2} onClick={vi.fn()} />
       );
 
-      // Assert
-
       // Act
-
       const button = screen.getByRole("button");
 
       // Assert
-
       expect(button).not.toBeDisabled();
     });
 
     it("should be disabled when disabled prop is true", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton
           selectedCount={2}
@@ -206,21 +154,15 @@ describe("CreateRepetitionBlockButton", () => {
         />
       );
 
-      // Assert
-
       // Act
-
       const button = screen.getByRole("button");
 
       // Assert
-
       expect(button).toBeDisabled();
     });
 
     it("should be enabled when disabled prop is false", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton
           selectedCount={2}
@@ -229,14 +171,10 @@ describe("CreateRepetitionBlockButton", () => {
         />
       );
 
-      // Assert
-
       // Act
-
       const button = screen.getByRole("button");
 
       // Assert
-
       expect(button).not.toBeDisabled();
     });
   });
@@ -244,8 +182,6 @@ describe("CreateRepetitionBlockButton", () => {
   describe("interactions", () => {
     it("should call onClick when clicked", async () => {
       // Arrange
-      // Arrange
-
       const handleClick = vi.fn();
       const user = userEvent.setup();
       render(
@@ -253,22 +189,14 @@ describe("CreateRepetitionBlockButton", () => {
       );
 
       // Act
-
-      // Act
-
       await user.click(screen.getByRole("button"));
 
       // Assert
-
-      // Assert
-
       expect(handleClick).toHaveBeenCalledOnce();
     });
 
     it("should not call onClick when disabled", async () => {
       // Arrange
-      // Arrange
-
       const handleClick = vi.fn();
       const user = userEvent.setup();
       render(
@@ -280,22 +208,14 @@ describe("CreateRepetitionBlockButton", () => {
       );
 
       // Act
-
-      // Act
-
       await user.click(screen.getByRole("button"));
 
       // Assert
-
-      // Assert
-
       expect(handleClick).not.toHaveBeenCalled();
     });
 
     it("should call onClick multiple times when clicked multiple times", async () => {
       // Arrange
-      // Arrange
-
       const handleClick = vi.fn();
       const user = userEvent.setup();
       render(
@@ -305,88 +225,60 @@ describe("CreateRepetitionBlockButton", () => {
       // Act
       await user.click(screen.getByRole("button"));
       await user.click(screen.getByRole("button"));
-
-      // Act
-
       await user.click(screen.getByRole("button"));
 
       // Assert
-
-      // Assert
-
       expect(handleClick).toHaveBeenCalledTimes(EXPECTED_CLICK_COUNT);
     });
   });
 
   describe("accessibility", () => {
     it("should have proper aria-label with step count", () => {
-      // Arrange & Act
       // Arrange
-
       render(
         <CreateRepetitionBlockButton selectedCount={4} onClick={vi.fn()} />
       );
 
-      // Assert
-
       // Act
-
       const button = screen.getByRole("button", {
         name: "Create repetition block from 4 selected steps",
       });
 
       // Assert
-
       expect(button).toBeInTheDocument();
     });
 
     it("should be keyboard accessible", async () => {
       // Arrange
-      // Arrange
-
       const handleClick = vi.fn();
       const user = userEvent.setup();
       render(
         <CreateRepetitionBlockButton selectedCount={2} onClick={handleClick} />
       );
-
-      // Act
       const button = screen.getByRole("button");
       button.focus();
 
       // Act
-
       await user.keyboard("{Enter}");
 
       // Assert
-
-      // Assert
-
       expect(handleClick).toHaveBeenCalledOnce();
     });
 
     it("should be keyboard accessible with Space key", async () => {
       // Arrange
-      // Arrange
-
       const handleClick = vi.fn();
       const user = userEvent.setup();
       render(
         <CreateRepetitionBlockButton selectedCount={2} onClick={handleClick} />
       );
-
-      // Act
       const button = screen.getByRole("button");
       button.focus();
 
       // Act
-
       await user.keyboard(" ");
 
       // Assert
-
-      // Assert
-
       expect(handleClick).toHaveBeenCalledOnce();
     });
   });

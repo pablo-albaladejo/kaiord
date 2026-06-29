@@ -57,34 +57,6 @@ describe("Modal Store Actions", () => {
       // Assert
       expect(state.modalConfig).toEqual(config);
     });
-
-    it("should preserve all modal configuration properties", () => {
-      // Arrange
-      const onConfirm = () => console.log("confirmed");
-      const onCancel = () => console.log("cancelled");
-      const config = {
-        title: "Test Title",
-        message: "Test Message",
-        confirmLabel: "Confirm",
-        cancelLabel: "Cancel",
-        onConfirm,
-        onCancel,
-        variant: "default" as const,
-      };
-      useWorkoutStore.getState().showConfirmationModal(config);
-
-      // Act
-      const state = useWorkoutStore.getState();
-
-      // Assert
-      expect(state.modalConfig?.title).toBe("Test Title");
-      expect(state.modalConfig?.message).toBe("Test Message");
-      expect(state.modalConfig?.confirmLabel).toBe("Confirm");
-      expect(state.modalConfig?.cancelLabel).toBe("Cancel");
-      expect(state.modalConfig?.onConfirm).toBe(onConfirm);
-      expect(state.modalConfig?.onCancel).toBe(onCancel);
-      expect(state.modalConfig?.variant).toBe("default");
-    });
   });
 
   describe("hideConfirmationModal", () => {

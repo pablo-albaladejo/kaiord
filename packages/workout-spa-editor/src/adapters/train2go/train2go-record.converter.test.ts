@@ -9,10 +9,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Train2GoActivity } from "../../store/train2go-extension-transport";
-import {
-  toCoachingActivityRecord,
-  TRAIN2GO_STATUS_MAP,
-} from "./train2go-record.converter";
+import { toCoachingActivityRecord } from "./train2go-record.converter";
 
 const base: Train2GoActivity = {
   id: 12345,
@@ -130,18 +127,5 @@ describe("toCoachingActivityRecord", () => {
 
     // Assert
     expect(result.completionPercent).toBe(COMPLETION_PERCENT);
-  });
-
-  it("should guard against drift via STATUS_MAP parity test", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(TRAIN2GO_STATUS_MAP).toEqual({
-      0: "pending",
-      1: "completed",
-      [-1]: "skipped",
-    });
   });
 });

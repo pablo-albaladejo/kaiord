@@ -38,23 +38,21 @@ describe("validateInput", () => {
     expect(() => validateInput(longInput)).toThrow("exceeds");
   });
 
-  it("should strip control characters but keep newlines", () => {
+  it.each([
+    [
+      "control characters stripped, newlines kept",
+      "step 1\nstep 2\x00\x01\x02",
+      "step 1\nstep 2",
+    ],
+    ["tabs preserved", "step\t1", "step\t1"],
+  ])("should sanitize input (%s)", (_case, input, expected) => {
     // Arrange
 
     // Act
-    const input = "step 1\nstep 2\x00\x01\x02";
+    const result = validateInput(input);
 
     // Assert
-    expect(validateInput(input)).toBe("step 1\nstep 2");
-  });
-
-  it("should preserve tabs", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(validateInput("step\t1")).toBe("step\t1");
+    expect(result).toBe(expected);
   });
 
   it("should accept exactly 2000 characters", () => {
@@ -79,9 +77,10 @@ describe("validateInput", () => {
 
   it("should truncate inputText in error for long inputs", () => {
     // Arrange
+    expect.assertions(1);
+    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
 
     // Act
-    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
 
     // Assert
     try {

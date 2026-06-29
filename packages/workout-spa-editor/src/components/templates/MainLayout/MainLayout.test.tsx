@@ -6,7 +6,6 @@ import { MainLayout } from "./MainLayout";
 
 describe("MainLayout", () => {
   it("should render children content", () => {
-    // Arrange & Act
     // Arrange
 
     // Act
@@ -20,13 +19,10 @@ describe("MainLayout", () => {
 
     // Assert
 
-    // Assert
-
     expect(screen.getByText("Test Content")).toBeInTheDocument();
   });
 
   it("should render app title", () => {
-    // Arrange & Act
     // Arrange
 
     // Act
@@ -40,13 +36,10 @@ describe("MainLayout", () => {
 
     // Assert
 
-    // Assert
-
     expect(screen.getByText("Kaiord Editor")).toBeInTheDocument();
   });
 
   it("should render header with logo", () => {
-    // Arrange & Act
     // Arrange
 
     renderWithProviders(
@@ -55,8 +48,6 @@ describe("MainLayout", () => {
       </MainLayout>,
       { defaultTheme: "light" }
     );
-
-    // Assert
 
     // Act
 
@@ -68,7 +59,6 @@ describe("MainLayout", () => {
   });
 
   it("should render main content area", () => {
-    // Arrange & Act
     // Arrange
 
     renderWithProviders(
@@ -77,8 +67,6 @@ describe("MainLayout", () => {
       </MainLayout>,
       { defaultTheme: "light" }
     );
-
-    // Assert
 
     // Act
 
@@ -91,7 +79,6 @@ describe("MainLayout", () => {
   });
 
   it("should render navigation landmark", () => {
-    // Arrange & Act
     // Arrange
 
     renderWithProviders(
@@ -100,8 +87,6 @@ describe("MainLayout", () => {
       </MainLayout>,
       { defaultTheme: "light" }
     );
-
-    // Assert
 
     // Act
 
@@ -151,7 +136,6 @@ describe("MainLayout", () => {
   });
 
   it("should render theme toggle button", () => {
-    // Arrange & Act
     // Arrange
 
     renderWithProviders(
@@ -160,8 +144,6 @@ describe("MainLayout", () => {
       </MainLayout>,
       { defaultTheme: "light" }
     );
-
-    // Assert
 
     // Act
 
@@ -176,11 +158,8 @@ describe("MainLayout", () => {
 
   it("should pass onReplayTutorial prop to LayoutHeader", () => {
     // Arrange
-    // Arrange
 
     const mockOnReplayTutorial = vi.fn();
-
-    // Act
 
     // Act
 
@@ -191,15 +170,12 @@ describe("MainLayout", () => {
       { defaultTheme: "light" }
     );
 
-    // Assert - Component renders without error
-
     // Assert
 
     expect(screen.getByText("Content")).toBeInTheDocument();
   });
 
   it("should mount the storage-availability banner region exactly once", () => {
-    // Arrange & Act
     // Arrange
 
     const { container } = renderWithProviders(
@@ -209,7 +185,7 @@ describe("MainLayout", () => {
       { defaultTheme: "light" }
     );
 
-    // Assert — the banner is mounted once, in the layout shell shared by
+    // The banner is mounted once, in the layout shell shared by
     // every route. The probe runs via useStoreHydration; the banner
     // renders null while status is "checking" (initial state in tests).
     // Re-rendering different children must not duplicate it.

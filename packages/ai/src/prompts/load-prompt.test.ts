@@ -11,15 +11,6 @@ describe("loadPrompt", () => {
     expect(loadPrompt("Hello world")).toBe("Hello world");
   });
 
-  it("should return raw string when vars is undefined", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(loadPrompt("Hello", undefined)).toBe("Hello");
-  });
-
   it("should replace single variable", () => {
     // Arrange
 

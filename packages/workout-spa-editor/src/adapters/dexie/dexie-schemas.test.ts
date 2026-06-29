@@ -7,6 +7,8 @@ import { describe, expect, it } from "vitest";
 
 import { SCHEMAS } from "./dexie-schemas";
 
+type SchemaVersion = keyof typeof SCHEMAS;
+
 const HEALTH_STORES = [
   "healthSleep",
   "healthWeight",
@@ -28,31 +30,6 @@ describe("SCHEMAS.v16 (health-domain stores)", () => {
       expect(stores[name]).toBe("id, profileId, [profileId+date], date");
     }
   });
-
-  it("should leave every v13 store byte-equivalent to its v13 form", () => {
-    // Arrange
-    const v13 = SCHEMAS.v13 as Record<string, string>;
-    const v16 = SCHEMAS.v16 as Record<string, string>;
-
-    // Act
-
-    // Assert
-    for (const key of Object.keys(v13)) {
-      expect(v16[key]).toBe(v13[key]);
-    }
-  });
-
-  it("should add exactly the six health stores on top of v13", () => {
-    // Arrange
-    const v13Keys = new Set(Object.keys(SCHEMAS.v13));
-    const v16Keys = new Set(Object.keys(SCHEMAS.v16));
-    const added = [...v16Keys].filter((k) => !v13Keys.has(k));
-
-    // Act
-
-    // Assert
-    expect(added.sort()).toEqual([...HEALTH_STORES].sort());
-  });
 });
 
 describe("SCHEMAS.v21 (chat transcript store)", () => {
@@ -64,31 +41,6 @@ describe("SCHEMAS.v21 (chat transcript store)", () => {
 
     // Assert
     expect(stores.chatMessages).toBe("id, profileId, [profileId+createdAt]");
-  });
-
-  it("should add exactly the chatMessages store on top of v20", () => {
-    // Arrange
-    const v20Keys = new Set(Object.keys(SCHEMAS.v20));
-    const v21Keys = new Set(Object.keys(SCHEMAS.v21));
-    const added = [...v21Keys].filter((k) => !v20Keys.has(k));
-
-    // Act
-
-    // Assert
-    expect(added).toEqual(["chatMessages"]);
-  });
-
-  it("should leave every v20 store byte-equivalent to its v20 form", () => {
-    // Arrange
-    const v20 = SCHEMAS.v20 as Record<string, string>;
-    const v21 = SCHEMAS.v21 as Record<string, string>;
-
-    // Act
-
-    // Assert
-    for (const key of Object.keys(v20)) {
-      expect(v21[key]).toBe(v20[key]);
-    }
   });
 });
 
@@ -103,18 +55,6 @@ describe("SCHEMAS.v23 (auto-push updatedAt indexes)", () => {
     for (const name of ["workouts", "templates", "profiles"]) {
       expect(stores[name].split(", ")).toContain("updatedAt");
     }
-  });
-
-  it("should add no new stores on top of v22 (index-only change)", () => {
-    // Arrange
-    const v22Keys = new Set(Object.keys(SCHEMAS.v22));
-    const v23Keys = new Set(Object.keys(SCHEMAS.v23));
-
-    // Act
-    const added = [...v23Keys].filter((k) => !v22Keys.has(k));
-
-    // Assert
-    expect(added).toEqual([]);
   });
 
   it("should change only workouts/templates/profiles from v22", () => {
@@ -140,46 +80,9 @@ describe("SCHEMAS.v24 (connections store)", () => {
     // Assert
     expect(stores.connections).toBe("[profileId+providerId], profileId");
   });
-
-  it("should add exactly the connections store on top of v23", () => {
-    // Arrange
-    const v23Keys = new Set(Object.keys(SCHEMAS.v23));
-    const v24Keys = new Set(Object.keys(SCHEMAS.v24));
-
-    // Act
-    const added = [...v24Keys].filter((k) => !v23Keys.has(k));
-
-    // Assert
-    expect(added).toEqual(["connections"]);
-  });
-
-  it("should leave every v23 store byte-equivalent to its v23 form", () => {
-    // Arrange
-    const v23 = SCHEMAS.v23 as Record<string, string>;
-    const v24 = SCHEMAS.v24 as Record<string, string>;
-
-    // Act
-
-    // Assert
-    for (const key of Object.keys(v23)) {
-      expect(v24[key]).toBe(v23[key]);
-    }
-  });
 });
 
 describe("SCHEMAS.v25 (multi-conversation chat)", () => {
-  it("should add exactly the chatConversations store on top of v24", () => {
-    // Arrange
-    const v24Keys = new Set(Object.keys(SCHEMAS.v24));
-    const v25Keys = new Set(Object.keys(SCHEMAS.v25));
-
-    // Act
-    const added = [...v25Keys].filter((k) => !v24Keys.has(k));
-
-    // Assert
-    expect(added).toEqual(["chatConversations"]);
-  });
-
   it("should order conversations by the per-profile updatedAt index", () => {
     // Arrange
     const stores = SCHEMAS.v25 as Record<string, string>;
@@ -204,4 +107,59 @@ describe("SCHEMAS.v25 (multi-conversation chat)", () => {
     expect(indexes).toContain("[profileId+conversationId+createdAt]");
     expect(indexes).toContain("[profileId+createdAt]");
   });
+});
+
+describe("SCHEMAS cross-version drift guards", () => {
+  const byteEquivalentPairs: ReadonlyArray<{
+    prev: SchemaVersion;
+    next: SchemaVersion;
+  }> = [
+    { prev: "v13", next: "v16" },
+    { prev: "v20", next: "v21" },
+    { prev: "v23", next: "v24" },
+  ];
+
+  it.each(byteEquivalentPairs)(
+    "should leave every $prev store byte-equivalent in $next",
+    ({ prev, next }) => {
+      // Arrange
+      const prevStores = SCHEMAS[prev] as Record<string, string>;
+      const nextStores = SCHEMAS[next] as Record<string, string>;
+
+      // Act
+
+      // Assert
+      for (const key of Object.keys(prevStores)) {
+        expect(nextStores[key]).toBe(prevStores[key]);
+      }
+    }
+  );
+
+  const addedStoreCases: ReadonlyArray<{
+    prev: SchemaVersion;
+    next: SchemaVersion;
+    added: ReadonlyArray<string>;
+  }> = [
+    { prev: "v13", next: "v16", added: HEALTH_STORES },
+    { prev: "v20", next: "v21", added: ["chatMessages"] },
+    { prev: "v22", next: "v23", added: [] },
+    { prev: "v23", next: "v24", added: ["connections"] },
+    { prev: "v24", next: "v25", added: ["chatConversations"] },
+  ];
+
+  it.each(addedStoreCases)(
+    "should add only the expected stores from $prev to $next",
+    ({ prev, next, added }) => {
+      // Arrange
+      const prevKeys = new Set(Object.keys(SCHEMAS[prev]));
+
+      // Act
+      const actualAdded = Object.keys(SCHEMAS[next]).filter(
+        (k) => !prevKeys.has(k)
+      );
+
+      // Assert
+      expect(actualAdded.slice().sort()).toEqual([...added].sort());
+    }
+  );
 });

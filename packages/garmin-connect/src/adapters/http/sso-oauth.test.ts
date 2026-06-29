@@ -5,12 +5,6 @@ import { MILLISECONDS_PER_SECOND } from "../../test-utils/constants";
 import { exchangeOAuth2, getOAuth1Token } from "./sso-oauth";
 import type { OAuthConsumer } from "./types";
 
-vi.mock("./oauth-signer", () => ({
-  createOAuthSigner: () => ({
-    toHeader: () => ({ Authorization: "OAuth mock-header" }),
-  }),
-}));
-
 const consumer: OAuthConsumer = { key: "ck", secret: "cs" };
 
 const mockLogger: Logger = {

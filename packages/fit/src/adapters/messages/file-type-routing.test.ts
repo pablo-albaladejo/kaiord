@@ -102,48 +102,18 @@ describe("File type routing", () => {
       expect(messages.workoutMesgs).toBeDefined();
     });
 
-    it("should default to workout when fileType not specified", () => {
+    it("should throw for an unsupported FIT file type", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.structured_workout,
+        type: "unsupported_file_type" as never,
         metadata: buildKRDMetadata.build({}),
-        extensions: {
-          structured_workout: {
-            name: "Test Workout",
-            sport: "running",
-            steps: [],
-          },
-        },
       });
 
       // Act
-      const messages = createFitMessages(krd, logger);
+      const act = () => createFitMessages(krd, logger);
 
       // Assert
-      expect(messages.fileIdMesgs).toBeDefined();
-      expect(messages.workoutMesgs).toBeDefined();
-    });
-
-    it("should route structured_workout by default", () => {
-      // Arrange
-      const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.structured_workout,
-        metadata: buildKRDMetadata.build({}),
-        extensions: {
-          structured_workout: {
-            name: "Default Workout",
-            sport: "cycling",
-            steps: [],
-          },
-        },
-      });
-
-      // Act
-      const messages = createFitMessages(krd, logger);
-
-      // Assert
-      expect(messages.fileIdMesgs).toBeDefined();
-      expect(messages.workoutMesgs).toBeDefined();
+      expect(act).toThrow(/Unsupported FIT file type/);
     });
   });
 

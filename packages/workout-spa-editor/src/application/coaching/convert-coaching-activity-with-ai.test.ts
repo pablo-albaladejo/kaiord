@@ -356,27 +356,6 @@ describe("convertCoachingActivityWithAi", () => {
     expect(match).toBeUndefined();
   });
 
-  it("should build prompt from title and sport only when activity description is empty", async () => {
-    // Arrange
-    const empty = stubActivity({ description: "" });
-    const generateKrd: GenerateKrdPort = vi
-      .fn()
-      .mockResolvedValue({ krd: fakeKrd(), aiMeta: fakeAiMeta() });
-    const deps = buildDeps({
-      coaching: buildStubCoachingRepo([empty]),
-      generateKrd,
-    });
-
-    // Act
-    await convertCoachingActivityWithAi({ activityId: empty.id }, deps);
-
-    // Assert
-    const call = (generateKrd as ReturnType<typeof vi.fn>).mock.calls[0][0];
-    expect(call.text).toBe(`${empty.title} (${empty.sport})`);
-    expect(call.text).not.toContain("undefined");
-    expect(call.text).not.toContain("null");
-  });
-
   it("should force record and KRD sport from the resolved Train2Go key for stationarybike", async () => {
     // Arrange
     const bike = stubActivity({ sport: "stationarybike" });

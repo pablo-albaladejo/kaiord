@@ -3,80 +3,43 @@ import { describe, expect, it } from "vitest";
 import { canonicalSportFamily } from "./canonical-sport-family";
 
 describe("canonicalSportFamily", () => {
-  it("should collapse swim variants to swimming", () => {
-    // Arrange
+  it.each([
+    { input: "swim", expected: "swimming" },
+    { input: "open_water_swim", expected: "swimming" },
+    { input: "lap_swimming", expected: "swimming" },
+    { input: "pool_swim", expected: "swimming" },
+    { input: "bike", expected: "cycling" },
+    { input: "cycling", expected: "cycling" },
+    { input: "road_cycling", expected: "cycling" },
+    { input: "gravel_cycling", expected: "cycling" },
+    { input: "mountain_biking", expected: "cycling" },
+    { input: "indoor_cycling", expected: "cycling" },
+    { input: "virtual_cycle", expected: "cycling" },
+    { input: "run", expected: "running" },
+    { input: "running", expected: "running" },
+    { input: "trail_running", expected: "running" },
+    { input: "treadmill_running", expected: "running" },
+    { input: "track_running", expected: "running" },
+    { input: "gym", expected: "strength" },
+    { input: "strength", expected: "strength" },
+    { input: "strength_training", expected: "strength" },
+    { input: "weightlifting", expected: "strength" },
+    { input: "core", expected: "strength" },
+    { input: "yoga", expected: "yoga" },
+    { input: "kayaking", expected: "kayaking" },
+    { input: "pilates", expected: "pilates" },
+    { input: "SWIM", expected: "swimming" },
+    { input: "Cycling", expected: "cycling" },
+  ])(
+    "should map $input to canonical family $expected",
+    ({ input, expected }) => {
+      // Arrange
 
-    // Act
+      // Act
+      const result = canonicalSportFamily(input);
 
-    // Assert
-    expect(canonicalSportFamily("swim")).toBe("swimming");
-    expect(canonicalSportFamily("open_water_swim")).toBe("swimming");
-    expect(canonicalSportFamily("lap_swimming")).toBe("swimming");
-    expect(canonicalSportFamily("pool_swim")).toBe("swimming");
-  });
-
-  it("should collapse bike variants to cycling", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(canonicalSportFamily("bike")).toBe("cycling");
-    expect(canonicalSportFamily("cycling")).toBe("cycling");
-    expect(canonicalSportFamily("road_cycling")).toBe("cycling");
-    expect(canonicalSportFamily("gravel_cycling")).toBe("cycling");
-    expect(canonicalSportFamily("mountain_biking")).toBe("cycling");
-    expect(canonicalSportFamily("indoor_cycling")).toBe("cycling");
-    expect(canonicalSportFamily("virtual_cycle")).toBe("cycling");
-  });
-
-  it("should collapse run variants to running", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(canonicalSportFamily("run")).toBe("running");
-    expect(canonicalSportFamily("running")).toBe("running");
-    expect(canonicalSportFamily("trail_running")).toBe("running");
-    expect(canonicalSportFamily("treadmill_running")).toBe("running");
-    expect(canonicalSportFamily("track_running")).toBe("running");
-  });
-
-  it("should collapse gym variants to strength", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(canonicalSportFamily("gym")).toBe("strength");
-    expect(canonicalSportFamily("strength")).toBe("strength");
-    expect(canonicalSportFamily("strength_training")).toBe("strength");
-    expect(canonicalSportFamily("weightlifting")).toBe("strength");
-    expect(canonicalSportFamily("core")).toBe("strength");
-  });
-
-  it("should return the raw key for unmapped sports (no cross-sport false matches)", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(canonicalSportFamily("yoga")).toBe("yoga");
-    expect(canonicalSportFamily("kayaking")).toBe("kayaking");
-    expect(canonicalSportFamily("pilates")).toBe("pilates");
-    expect(canonicalSportFamily("yoga")).not.toBe(
-      canonicalSportFamily("kayaking")
-    );
-  });
-
-  it("should normalize case so input variations agree", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(canonicalSportFamily("SWIM")).toBe("swimming");
-    expect(canonicalSportFamily("Cycling")).toBe("cycling");
-  });
+      // Assert
+      expect(result).toBe(expected);
+    }
+  );
 });

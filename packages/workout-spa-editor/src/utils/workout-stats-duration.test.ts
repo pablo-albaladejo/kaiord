@@ -7,16 +7,16 @@
 import { describe, expect, it } from "vitest";
 
 import type { Duration } from "../types/krd";
-
-const FIVE_MIN_SECONDS = 300;
-const TEN_MIN_SECONDS = 600;
-const ONE_KM_METERS = 1000;
-const FIVE_KM_METERS = 5000;
 import {
   calculateStepDistance,
   calculateStepDuration,
   isOpenDuration,
 } from "./workout-stats-duration";
+
+const FIVE_MIN_SECONDS = 300;
+const TEN_MIN_SECONDS = 600;
+const ONE_KM_METERS = 1000;
+const FIVE_KM_METERS = 5000;
 
 describe("workout-stats-duration", () => {
   describe("calculateStepDuration", () => {
@@ -45,53 +45,14 @@ describe("workout-stats-duration", () => {
       expect(result).toBe(TEN_MIN_SECONDS);
     });
 
-    it("should return null for open duration", () => {
+    it.each<{ duration: Duration }>([
+      { duration: { type: "open" } },
+      { duration: { type: "distance", meters: 1000 } },
+      { duration: { type: "heart_rate_less_than", bpm: 140 } },
+      { duration: { type: "power_less_than", watts: 200 } },
+      { duration: { type: "calories", calories: 500 } },
+    ])("should return null for $duration.type duration", ({ duration }) => {
       // Arrange
-      const duration: Duration = { type: "open" };
-
-      // Act
-      const result = calculateStepDuration(duration);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null for distance-based duration", () => {
-      // Arrange
-      const duration: Duration = { type: "distance", meters: 1000 };
-
-      // Act
-      const result = calculateStepDuration(duration);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null for heart_rate_less_than", () => {
-      // Arrange
-      const duration: Duration = { type: "heart_rate_less_than", bpm: 140 };
-
-      // Act
-      const result = calculateStepDuration(duration);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null for power_less_than", () => {
-      // Arrange
-      const duration: Duration = { type: "power_less_than", watts: 200 };
-
-      // Act
-      const result = calculateStepDuration(duration);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null for calories", () => {
-      // Arrange
-      const duration: Duration = { type: "calories", calories: 500 };
 
       // Act
       const result = calculateStepDuration(duration);
@@ -127,45 +88,13 @@ describe("workout-stats-duration", () => {
       expect(result).toBe(FIVE_KM_METERS);
     });
 
-    it("should return null for time-based duration", () => {
+    it.each<{ duration: Duration }>([
+      { duration: { type: "time", seconds: 300 } },
+      { duration: { type: "open" } },
+      { duration: { type: "repeat_until_heart_rate_greater_than", bpm: 160 } },
+      { duration: { type: "power_greater_than", watts: 250 } },
+    ])("should return null for $duration.type distance", ({ duration }) => {
       // Arrange
-      const duration: Duration = { type: "time", seconds: 300 };
-
-      // Act
-      const result = calculateStepDistance(duration);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null for open duration", () => {
-      // Arrange
-      const duration: Duration = { type: "open" };
-
-      // Act
-      const result = calculateStepDistance(duration);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null for heart rate conditional", () => {
-      // Arrange
-      const duration: Duration = {
-        type: "repeat_until_heart_rate_greater_than",
-        bpm: 160,
-      };
-
-      // Act
-      const result = calculateStepDistance(duration);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null for power conditional", () => {
-      // Arrange
-      const duration: Duration = { type: "power_greater_than", watts: 250 };
 
       // Act
       const result = calculateStepDistance(duration);
@@ -176,9 +105,14 @@ describe("workout-stats-duration", () => {
   });
 
   describe("isOpenDuration", () => {
-    it("should return true for open duration", () => {
+    it.each<{ duration: Duration }>([
+      { duration: { type: "open" } },
+      { duration: { type: "heart_rate_less_than", bpm: 140 } },
+      { duration: { type: "repeat_until_heart_rate_greater_than", bpm: 160 } },
+      { duration: { type: "power_less_than", watts: 200 } },
+      { duration: { type: "repeat_until_power_greater_than", watts: 300 } },
+    ])("should return true for $duration.type duration", ({ duration }) => {
       // Arrange
-      const duration: Duration = { type: "open" };
 
       // Act
       const result = isOpenDuration(duration);
@@ -187,81 +121,12 @@ describe("workout-stats-duration", () => {
       expect(result).toBe(true);
     });
 
-    it("should return true for heart_rate_less_than", () => {
+    it.each<{ duration: Duration }>([
+      { duration: { type: "time", seconds: 300 } },
+      { duration: { type: "distance", meters: 1000 } },
+      { duration: { type: "calories", calories: 500 } },
+    ])("should return false for $duration.type duration", ({ duration }) => {
       // Arrange
-      const duration: Duration = { type: "heart_rate_less_than", bpm: 140 };
-
-      // Act
-      const result = isOpenDuration(duration);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it("should return true for repeat_until_heart_rate_greater_than", () => {
-      // Arrange
-      const duration: Duration = {
-        type: "repeat_until_heart_rate_greater_than",
-        bpm: 160,
-      };
-
-      // Act
-      const result = isOpenDuration(duration);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it("should return true for power_less_than", () => {
-      // Arrange
-      const duration: Duration = { type: "power_less_than", watts: 200 };
-
-      // Act
-      const result = isOpenDuration(duration);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it("should return true for repeat_until_power_greater_than", () => {
-      // Arrange
-      const duration: Duration = {
-        type: "repeat_until_power_greater_than",
-        watts: 300,
-      };
-
-      // Act
-      const result = isOpenDuration(duration);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it("should return false for time duration", () => {
-      // Arrange
-      const duration: Duration = { type: "time", seconds: 300 };
-
-      // Act
-      const result = isOpenDuration(duration);
-
-      // Assert
-      expect(result).toBe(false);
-    });
-
-    it("should return false for distance duration", () => {
-      // Arrange
-      const duration: Duration = { type: "distance", meters: 1000 };
-
-      // Act
-      const result = isOpenDuration(duration);
-
-      // Assert
-      expect(result).toBe(false);
-    });
-
-    it("should return false for calories duration", () => {
-      // Arrange
-      const duration: Duration = { type: "calories", calories: 500 };
 
       // Act
       const result = isOpenDuration(duration);

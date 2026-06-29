@@ -55,43 +55,31 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     const profile = await v4
       .table<{ id: string; linkedAccounts: unknown[] }>("profiles")
       .get("00000000-0000-0000-0000-000000000001");
+
+    // Act
+    v4.close();
+
+    // Assert
     expect(profile?.linkedAccounts).toEqual([]);
-
-    // Act
-    v4.close();
-
-    // Assert
   });
 
-  it("should create an empty coachingActivities table", async () => {
-    // Arrange
-    const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
-    await seedV3(dbName);
-    const v4 = new KaiordDatabase(dbName);
-    await v4.open();
-    const count = await v4.table("coachingActivities").count();
-    expect(count).toBe(0);
+  it.each(["coachingActivities", "coachingSyncState"])(
+    "should create an empty %s table",
+    async (tableName) => {
+      // Arrange
+      const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
+      await seedV3(dbName);
+      const v4 = new KaiordDatabase(dbName);
+      await v4.open();
+      const count = await v4.table(tableName).count();
 
-    // Act
-    v4.close();
+      // Act
+      v4.close();
 
-    // Assert
-  });
-
-  it("should create an empty coachingSyncState table", async () => {
-    // Arrange
-    const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
-    await seedV3(dbName);
-    const v4 = new KaiordDatabase(dbName);
-    await v4.open();
-    const count = await v4.table("coachingSyncState").count();
-    expect(count).toBe(0);
-
-    // Act
-    v4.close();
-
-    // Assert
-  });
+      // Assert
+      expect(count).toBe(0);
+    }
+  );
 
   it("should leave bridge-discovery syncState rows byte-identically unchanged", async () => {
     // Arrange
@@ -100,6 +88,11 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     const v4 = new KaiordDatabase(dbName);
     await v4.open();
     const row = await v4.table("syncState").get("garmin-bridge");
+
+    // Act
+    v4.close();
+
+    // Assert
     expect(row).toEqual({
       source: "garmin-bridge",
       extensionId: "ext-1",
@@ -107,11 +100,6 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
       capabilities: ["write:workouts"],
       protocolVersion: 1,
     });
-
-    // Act
-    v4.close();
-
-    // Assert
   });
 
   it("should have syncState store schema string equal 'source' byte-identically (no compound index added)", async () => {
@@ -121,13 +109,13 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     const v4 = new KaiordDatabase(dbName);
     await v4.open();
     const schema = v4.table("syncState").schema;
-    expect(schema.primKey.keyPath).toBe("source");
-    expect(schema.indexes.map((i) => i.name)).toEqual([]);
 
     // Act
     v4.close();
 
     // Assert
+    expect(schema.primKey.keyPath).toBe("source");
+    expect(schema.indexes.map((i) => i.name)).toEqual([]);
   });
 
   it("should have coachingSyncState store schema string equal '[source+profileId], source, profileId' byte-identically", async () => {
@@ -137,14 +125,14 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     const v4 = new KaiordDatabase(dbName);
     await v4.open();
     const schema = v4.table("coachingSyncState").schema;
-    expect(schema.primKey.keyPath).toEqual(["source", "profileId"]);
     const indexNames = schema.indexes.map((i) => i.name).sort();
-    expect(indexNames).toEqual(["profileId", "source"]);
 
     // Act
     v4.close();
 
     // Assert
+    expect(schema.primKey.keyPath).toEqual(["source", "profileId"]);
+    expect(indexNames).toEqual(["profileId", "source"]);
   });
 
   it("should keep a v4-migrated profile row readable under v3 schema (forward-tolerance)", async () => {
@@ -187,12 +175,12 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
         linkedAccounts?: Array<{ source: string; externalUserId: string }>;
       }>("profiles")
       .get("00000000-0000-0000-0000-000000000002");
-    expect(profile?.linkedAccounts).toBeDefined();
-    expect(profile?.linkedAccounts?.[0]?.externalUserId).toBe("28035");
 
     // Act
     v3Again.close();
 
     // Assert
+    expect(profile?.linkedAccounts).toBeDefined();
+    expect(profile?.linkedAccounts?.[0]?.externalUserId).toBe("28035");
   });
 });

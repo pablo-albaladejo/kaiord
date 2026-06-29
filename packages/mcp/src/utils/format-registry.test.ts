@@ -91,22 +91,16 @@ describe("detectFormatFromPath", () => {
     expect(detectFormatFromPath("file.json")).toBeNull();
   });
 
-  it("should return null for paths without extensions", () => {
-    // Arrange
+  it.each(["noextension", "fit", "tcx"])(
+    "should return null when path has no extension: %s",
+    (path) => {
+      // Arrange
 
-    // Act
+      // Act
+      const result = detectFormatFromPath(path);
 
-    // Assert
-    expect(detectFormatFromPath("noextension")).toBeNull();
-  });
-
-  it("should return null for filenames matching format names without dot", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(detectFormatFromPath("fit")).toBeNull();
-    expect(detectFormatFromPath("tcx")).toBeNull();
-  });
+      // Assert
+      expect(result).toBeNull();
+    }
+  );
 });

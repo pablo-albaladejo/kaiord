@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   RECORD_BATCH_SAMPLE_SIZE,
   SAMPLE_EVENT_DATA,
-  SAMPLE_TIMESTAMP_2024_01_01_SEC,
   TIME_TOLERANCE_MS,
 } from "../../test-utils/constants";
 import { convertFitToKrdEvent } from "./fit-to-krd-event.converter";
@@ -13,96 +12,30 @@ import {
 } from "./krd-to-fit-event.converter";
 
 describe("convertKrdToFitEvent", () => {
-  it("should convert start event", () => {
-    // Arrange
-    const krdEvent = {
-      timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "event_start",
-    };
+  it.each([
+    ["event_start", "timer", "start"],
+    ["event_stop", "timer", "stop"],
+    ["event_pause", "timer", "stopDisable"],
+    ["event_lap", "lap", "marker"],
+    ["event_marker", "userMarker", "marker"],
+    ["event_workout_step_change", "workoutStep", "marker"],
+  ])(
+    "should convert %s to event %s/%s",
+    (eventType, expectedEvent, expectedEventType) => {
+      // Arrange
+      const krdEvent = {
+        timestamp: "2024-01-01T00:00:00.000Z",
+        eventType,
+      };
 
-    // Act
-    const result = convertKrdToFitEvent(krdEvent);
+      // Act
+      const result = convertKrdToFitEvent(krdEvent);
 
-    // Assert
-    expect(result.timestamp).toBe(SAMPLE_TIMESTAMP_2024_01_01_SEC);
-    expect(result.event).toBe("timer");
-    expect(result.eventType).toBe("start");
-  });
-
-  it("should convert stop event", () => {
-    // Arrange
-    const krdEvent = {
-      timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "event_stop",
-    };
-
-    // Act
-    const result = convertKrdToFitEvent(krdEvent);
-
-    // Assert
-    expect(result.event).toBe("timer");
-    expect(result.eventType).toBe("stop");
-  });
-
-  it("should convert pause event to stopDisable", () => {
-    // Arrange
-    const krdEvent = {
-      timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "event_pause",
-    };
-
-    // Act
-    const result = convertKrdToFitEvent(krdEvent);
-
-    // Assert
-    expect(result.event).toBe("timer");
-    expect(result.eventType).toBe("stopDisable");
-  });
-
-  it("should convert lap event", () => {
-    // Arrange
-    const krdEvent = {
-      timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "event_lap",
-    };
-
-    // Act
-    const result = convertKrdToFitEvent(krdEvent);
-
-    // Assert
-    expect(result.event).toBe("lap");
-    expect(result.eventType).toBe("marker");
-  });
-
-  it("should convert marker event to userMarker", () => {
-    // Arrange
-    const krdEvent = {
-      timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "event_marker",
-    };
-
-    // Act
-    const result = convertKrdToFitEvent(krdEvent);
-
-    // Assert
-    expect(result.event).toBe("userMarker");
-    expect(result.eventType).toBe("marker");
-  });
-
-  it("should convert workout_step event", () => {
-    // Arrange
-    const krdEvent = {
-      timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "event_workout_step_change",
-    };
-
-    // Act
-    const result = convertKrdToFitEvent(krdEvent);
-
-    // Assert
-    expect(result.event).toBe("workoutStep");
-    expect(result.eventType).toBe("marker");
-  });
+      // Assert
+      expect(result.event).toBe(expectedEvent);
+      expect(result.eventType).toBe(expectedEventType);
+    }
+  );
 
   it("should preserve event data", () => {
     // Arrange
@@ -156,41 +89,34 @@ describe("convertKrdToFitEvents", () => {
 });
 
 describe("round-trip conversion", () => {
-  it("should preserve common event types through KRD -> FIT -> KRD", () => {
+  it.each([
+    "event_start",
+    "event_stop",
+    "event_pause",
+    "event_lap",
+    "event_marker",
+  ])("should preserve %s through KRD -> FIT -> KRD", (eventType) => {
     // Arrange
+    const originalKrd = {
+      timestamp: "2024-01-01T00:00:00.000Z",
+      eventType,
+      eventGroup: 1,
+      data: 42,
+    };
 
     // Act
-    const eventTypes = [
-      "event_start",
-      "event_stop",
-      "event_pause",
-      "event_lap",
-      "event_marker",
-    ] as const;
+    const fitResult = convertKrdToFitEvent(originalKrd);
+    const roundTrippedKrd = convertFitToKrdEvent(fitResult as never);
 
     // Assert
-    eventTypes.forEach((eventType) => {
-      const originalKrd = {
-        timestamp: "2024-01-01T00:00:00.000Z",
-        eventType,
-        eventGroup: 1,
-        data: 42,
-      };
-
-      const fitResult = convertKrdToFitEvent(originalKrd);
-      const roundTrippedKrd = convertFitToKrdEvent(fitResult as never);
-
-      const originalTime = new Date(originalKrd.timestamp).getTime();
-      const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
-      expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
-        TIME_TOLERANCE_MS
-      );
-
-      expect(roundTrippedKrd.eventType).toBe(eventType);
-
-      expect(roundTrippedKrd.eventGroup).toBe(originalKrd.eventGroup);
-      expect(roundTrippedKrd.data).toBe(originalKrd.data);
-    });
+    const originalTime = new Date(originalKrd.timestamp).getTime();
+    const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
+      TIME_TOLERANCE_MS
+    );
+    expect(roundTrippedKrd.eventType).toBe(eventType);
+    expect(roundTrippedKrd.eventGroup).toBe(originalKrd.eventGroup);
+    expect(roundTrippedKrd.data).toBe(originalKrd.data);
   });
 
   it("should preserve start event through round-trip with tolerance", () => {
