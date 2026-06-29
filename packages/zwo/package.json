@@ -32,16 +32,16 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "fast-xml-parser": "^5.8.0",
+    "fast-xml-parser": "^5.9.3",
     "xsd-schema-validator": "^0.11.0"
   },
   "devDependencies": {
     "@types/node": "^25.7.0",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.9",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.9"
   },
   "repository": {
     "type": "git",
