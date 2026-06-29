@@ -32,11 +32,6 @@ const replaceUntilStable = (text, pattern, replacement) => {
   return text;
 };
 
-const extractNumber = (text) => {
-  const m = text?.match(/\d+/);
-  return m ? Number(m[0]) : 0;
-};
-
 /**
  * Parse weekly workplan HTML fragment.
  * Input: raw HTML string from data.replace["#workplan"]
@@ -459,20 +454,24 @@ const sliceBetween = (text, startPattern, endPatternOrString) => {
     : after;
 };
 
-const extractInputValueAsNumber = (block, name) => {
-  // Match `name="X"` followed (in either order) by `value="N"` within
-  // the same <input> tag. T2G renders these in `<input ... name="weight" ... value="83">`.
-  const re = new RegExp(
-    `<input[^>]*\\bname="${name}"[^>]*\\bvalue="([\\d.]+)"|` +
-      `<input[^>]*\\bvalue="([\\d.]+)"[^>]*\\bname="${name}"`,
-    "i"
-  );
+const matchNumericGroup = (block, re) => {
   const m = block.match(re);
   if (!m) return undefined;
-  const raw = m[1] ?? m[2];
-  const num = Number(raw);
+  const num = Number(m[1] ?? m[2]);
   return Number.isFinite(num) ? num : undefined;
 };
+
+// Match `name="X"` followed (in either order) by `value="N"` within
+// the same <input> tag. T2G renders these in `<input ... name="weight" ... value="83">`.
+const extractInputValueAsNumber = (block, name) =>
+  matchNumericGroup(
+    block,
+    new RegExp(
+      `<input[^>]*\\bname="${name}"[^>]*\\bvalue="([\\d.]+)"|` +
+        `<input[^>]*\\bvalue="([\\d.]+)"[^>]*\\bname="${name}"`,
+      "i"
+    )
+  );
 
 // For each sport, the paces table has 5 measurement-blocks. The DOM
 // indexes them 0..4 (`z0_lower` .. `z4_upper`); visual Z1..Z5 maps
@@ -581,21 +580,18 @@ const sliceWithinForm = (text, fromPattern) => {
   return formClose >= 0 ? after.slice(0, formClose) : after;
 };
 
-const extractInputValueByNameSuffix = (block, suffix) => {
-  // Form names look like `measurement[z3_upper][0]`; we match by
-  // suffix so the bracket-prefix and field-prefix variations are
-  // tolerated. Capture the first numeric input that follows.
-  const re = new RegExp(
-    `\\bname="[^"]*${escapeForRegex(suffix)}"[^>]*\\bvalue="([\\d.]+)"|` +
-      `\\bvalue="([\\d.]+)"[^>]*\\bname="[^"]*${escapeForRegex(suffix)}"`,
-    "i"
+// Form names look like `measurement[z3_upper][0]`; we match by
+// suffix so the bracket-prefix and field-prefix variations are
+// tolerated. Capture the first numeric input that follows.
+const extractInputValueByNameSuffix = (block, suffix) =>
+  matchNumericGroup(
+    block,
+    new RegExp(
+      `\\bname="[^"]*${escapeForRegex(suffix)}"[^>]*\\bvalue="([\\d.]+)"|` +
+        `\\bvalue="([\\d.]+)"[^>]*\\bname="[^"]*${escapeForRegex(suffix)}"`,
+      "i"
+    )
   );
-  const m = block.match(re);
-  if (!m) return undefined;
-  const raw = m[1] ?? m[2];
-  const num = Number(raw);
-  return Number.isFinite(num) ? num : undefined;
-};
 
 const escapeForRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -633,17 +629,14 @@ const extractHrFullBands = (block, label) => {
   return Object.keys(out).length > 0 ? out : null;
 };
 
-const extractHrBandValue = (sportBlock, name) => {
-  const valRe = new RegExp(
-    `\\bname="${name}"[^>]*\\bvalue="(\\d+)"|\\bvalue="(\\d+)"[^>]*\\bname="${name}"`,
-    "i"
+const extractHrBandValue = (sportBlock, name) =>
+  matchNumericGroup(
+    sportBlock,
+    new RegExp(
+      `\\bname="${name}"[^>]*\\bvalue="(\\d+)"|\\bvalue="(\\d+)"[^>]*\\bname="${name}"`,
+      "i"
+    )
   );
-  const v = sportBlock.match(valRe);
-  if (!v) return undefined;
-  const raw = v[1] ?? v[2];
-  const num = Number(raw);
-  return Number.isFinite(num) ? num : undefined;
-};
 
 // Export to service worker global scope (importScripts doesn't add const to globalThis)
 if (typeof self !== "undefined" && typeof module === "undefined") {
