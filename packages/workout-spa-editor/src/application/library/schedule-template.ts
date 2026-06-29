@@ -9,8 +9,10 @@
  */
 
 import type { PersistencePort } from "../../ports/persistence-port";
-import type { WorkoutRecord } from "../../types/calendar-record";
-import type { WorkoutTemplate } from "../../types/workout-library";
+import {
+  createStructuredWorkoutRecord,
+  type WorkoutRecord,
+} from "../../types/calendar-record";
 
 export type ScheduleTemplateInput = {
   templateId: string;
@@ -26,36 +28,15 @@ export const scheduleTemplate = async (
   if (!template) {
     throw new Error(`Template not found: ${templateId}`);
   }
-  const record = createWorkoutFromTemplate(template, date, profileId);
-  await persistence.workouts.put(record);
-  return record;
-};
-
-function createWorkoutFromTemplate(
-  template: WorkoutTemplate,
-  date: string,
-  profileId: string
-): WorkoutRecord {
-  const now = new Date().toISOString();
-  return {
-    id: crypto.randomUUID(),
+  const record = createStructuredWorkoutRecord({
     profileId,
     date,
     sport: template.sport,
     source: "kaiord",
-    sourceId: null,
-    planId: null,
-    state: "structured",
-    raw: null,
     krd: template.krd,
-    lastProcessingError: null,
-    feedback: null,
-    aiMeta: null,
-    garminPushId: null,
-    tags: [...template.tags],
-    previousState: null,
-    createdAt: now,
-    modifiedAt: null,
-    updatedAt: now,
-  };
-}
+    tags: template.tags,
+    raw: null,
+  });
+  await persistence.workouts.put(record);
+  return record;
+};

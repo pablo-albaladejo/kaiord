@@ -22,5 +22,3 @@ export const garminWorkoutInputSchema = z.object({
 
   isSessionTransitionEnabled: z.boolean().optional(),
 });
-
-export type GarminWorkoutInput = z.infer<typeof garminWorkoutInputSchema>;

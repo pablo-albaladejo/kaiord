@@ -9,41 +9,12 @@ import { useCallback, useState } from "react";
 import { db } from "../../adapters/dexie/dexie-database";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
-import type { WorkoutRecord } from "../../types/calendar-record";
+import { createStructuredWorkoutRecord } from "../../types/calendar-record";
 import type { WorkoutTemplate } from "../../types/workout-library";
 
 const TOAST_NO_PROFILE_TITLE = "No active profile";
 const TOAST_NO_PROFILE_DESC =
   "Open the profile manager to select or create one.";
-
-function createWorkoutFromTemplate(
-  template: WorkoutTemplate,
-  date: string,
-  profileId: string
-): WorkoutRecord {
-  const now = new Date().toISOString();
-  return {
-    id: crypto.randomUUID(),
-    profileId,
-    date,
-    sport: template.sport,
-    source: "kaiord",
-    sourceId: null,
-    planId: null,
-    state: "structured",
-    raw: null,
-    krd: template.krd,
-    lastProcessingError: null,
-    feedback: null,
-    aiMeta: null,
-    garminPushId: null,
-    tags: [...template.tags],
-    previousState: null,
-    createdAt: now,
-    modifiedAt: null,
-    updatedAt: now,
-  };
-}
 
 export function useScheduleTemplate() {
   const [scheduling, setScheduling] = useState<WorkoutTemplate | null>(null);
@@ -65,7 +36,15 @@ export function useScheduleTemplate() {
         toast.error(TOAST_NO_PROFILE_TITLE, TOAST_NO_PROFILE_DESC);
         return;
       }
-      const record = createWorkoutFromTemplate(scheduling, date, profileId);
+      const record = createStructuredWorkoutRecord({
+        profileId,
+        date,
+        sport: scheduling.sport,
+        source: "kaiord",
+        krd: scheduling.krd,
+        tags: scheduling.tags,
+        raw: null,
+      });
       await db.table("workouts").put(record);
       setScheduling(null);
     },

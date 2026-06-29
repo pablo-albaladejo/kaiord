@@ -59,8 +59,7 @@ const countSteps = (workout: Workout): number =>
 
 const checkZones = (workout: Workout, benchmark: Benchmark): Array<string> => {
   const errors: Array<string> = [];
-  const zc = benchmark.zoneCheck;
-  if (!zc) return errors;
+  const zc = benchmark.zoneCheck!;
 
   const steps = workout.steps.flatMap((s) =>
     "repeatCount" in s ? s.steps : [s]

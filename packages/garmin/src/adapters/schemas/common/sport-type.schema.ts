@@ -10,7 +10,7 @@ export const SportTypeId = {
   MULTI_SPORT: 10,
 } as const;
 
-export const sportTypeKeySchema = z.enum([
+const sportTypeKeySchema = z.enum([
   "running",
   "cycling",
   "hiking",

@@ -11,16 +11,10 @@ Target conversion between KRD domain and ZWO domain. Handles bidirectional mappi
 
 | File                             | Description                                                          |
 | -------------------------------- | -------------------------------------------------------------------- |
-| `index.ts`                       | Re-exports all target converters and mappers                         |
 | `power.converter.ts`             | Power target conversion (watts ↔ FTP %) with absolute/relative logic |
 | `power.converter.test.ts`        | Tests for power conversion edge cases and rounding                   |
 | `pace-cadence.converter.ts`      | Pace (min/km) and cadence (rpm) conversions                          |
 | `pace-cadence.converter.test.ts` | Tests for pace/cadence conversions                                   |
-| `target.converter.ts`            | Main target type converter (dispatches by target type)               |
-| `target.converter.test.ts`       | Integration tests for target conversion                              |
-| `target.mapper.ts`               | Simple mapper for target attribute extraction from ZWO               |
-| `krd-to-zwift.mapper.ts`         | KRD → ZWO target mapper (encodes target for XML)                     |
-| `zwift-to-krd.mapper.ts`         | ZWO → KRD target mapper (decodes target from XML)                    |
 
 ## Subdirectories
 
@@ -31,7 +25,6 @@ None.
 ### Working In This Directory
 
 - **Converter pattern**: Power, pace, cadence converters are domain logic with tests. They handle unit conversions, rounding, and FTP-relative calculations.
-- **Mapper pattern**: Simple mappers (`*.mapper.ts`) extract or format target attributes without logic (<20 LOC, no tests).
 - **Power targets**: ZWO supports absolute (watts) and relative (FTP %) power. KRD uses absolute watts. Conversion handles fallback when FTP missing.
 - **Pace targets**: ZWO pace in seconds/km; KRD in meters/second (or km/hour). Converter handles the unit transformation.
 - **HR and cadence targets**: Direct bpm/rpm conversions with min/max bounds checking.
@@ -78,6 +71,6 @@ None.
 
 ### External
 
-- `zod` (schema validation)
+- None
 
 <!-- MANUAL: -->

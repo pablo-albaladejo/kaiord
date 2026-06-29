@@ -1,11 +1,5 @@
 import { type Duration, durationTypeSchema } from "@kaiord/core";
 
-export type ZwiftIntervalData = {
-  "@_Duration"?: number;
-  "@_OnDuration"?: number;
-  "@_OffDuration"?: number;
-};
-
 // Zwift → KRD converters
 export const convertZwiftTimeDuration = (seconds: number): Duration => {
   if (seconds <= 0) {

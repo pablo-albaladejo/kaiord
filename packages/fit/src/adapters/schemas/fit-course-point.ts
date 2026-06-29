@@ -36,11 +36,6 @@ export const fitCoursePointTypeSchema = z.enum([
 ]);
 
 /**
- * TypeScript type for FIT course point type
- */
-export type FitCoursePointType = z.infer<typeof fitCoursePointTypeSchema>;
-
-/**
  * FIT course point message schema
  *
  * Represents a point of interest along a course route.

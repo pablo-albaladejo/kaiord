@@ -8,7 +8,10 @@
  */
 
 import type { PersistencePort } from "../../../ports/persistence-port";
-import type { WorkoutRecord } from "../../../types/calendar-record";
+import {
+  createStructuredWorkoutRecord,
+  type WorkoutRecord,
+} from "../../../types/calendar-record";
 import type { KRD } from "../../../types/krd";
 
 export type PersistImportedInput = {
@@ -22,28 +25,15 @@ export async function persistImportedWorkout(
   persistence: PersistencePort,
   input: PersistImportedInput
 ): Promise<WorkoutRecord> {
-  const now = new Date().toISOString();
-  const record: WorkoutRecord = {
-    id: crypto.randomUUID(),
+  const record = createStructuredWorkoutRecord({
     profileId: input.profileId,
     date: input.date,
     sport: input.sport,
     source: "kaiord",
-    sourceId: null,
-    planId: null,
-    state: "structured",
-    raw: null,
     krd: input.krd,
-    lastProcessingError: null,
-    feedback: null,
-    aiMeta: null,
-    garminPushId: null,
     tags: [],
-    previousState: null,
-    createdAt: now,
-    modifiedAt: null,
-    updatedAt: now,
-  };
+    raw: null,
+  });
   await persistence.workouts.put(record);
   return record;
 }

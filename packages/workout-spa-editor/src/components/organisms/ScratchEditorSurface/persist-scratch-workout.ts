@@ -11,7 +11,10 @@
  */
 
 import type { PersistencePort } from "../../../ports/persistence-port";
-import type { WorkoutRecord } from "../../../types/calendar-record";
+import {
+  createStructuredWorkoutRecord,
+  type WorkoutRecord,
+} from "../../../types/calendar-record";
 import type { KRD } from "../../../types/krd";
 import { krdSchema } from "../../../types/schemas";
 import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
@@ -37,28 +40,15 @@ export async function persistScratchWorkout(
   if (!krdSchema.safeParse(input.krd).success) {
     throw new Error("Cannot persist scratch workout: KRD failed validation");
   }
-  const now = new Date().toISOString();
-  const record: WorkoutRecord = {
-    id: crypto.randomUUID(),
+  const record = createStructuredWorkoutRecord({
     profileId: input.profileId,
     date: input.date,
     sport: input.sport,
     source: "scratch",
-    sourceId: null,
-    planId: null,
-    state: "structured",
-    raw: null,
     krd: input.krd,
-    lastProcessingError: null,
-    feedback: null,
-    aiMeta: null,
-    garminPushId: null,
     tags: [],
-    previousState: null,
-    createdAt: now,
-    modifiedAt: null,
-    updatedAt: now,
-  };
+    raw: null,
+  });
   await persistence.workouts.put(record);
   return record;
 }

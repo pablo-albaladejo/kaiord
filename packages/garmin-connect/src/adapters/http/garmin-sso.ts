@@ -5,7 +5,6 @@ import { getLoginTicket } from "./sso-login";
 import { exchangeOAuth2 as exchange, getOAuth1Token } from "./sso-oauth";
 import type { FetchFn, OAuth1Token, OAuth2Token } from "./types";
 
-export type { OAuth1Token, OAuth2Token } from "./types";
 export type SsoResult = { oauth1: OAuth1Token; oauth2: OAuth2Token };
 
 /**
@@ -36,5 +35,3 @@ export const garminSso = async (
   logger.info("Garmin Connect SSO login successful");
   return { oauth1, oauth2 };
 };
-
-export { exchangeOAuth2 } from "./sso-oauth";
