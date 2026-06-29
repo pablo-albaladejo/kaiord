@@ -20,6 +20,23 @@ export type RecoveryResult<T> = {
 };
 
 /**
+ * Build the failure branch of a recovery result: coerce the thrown value to
+ * an Error and restore from backup when one was captured.
+ */
+const toRecoveryFailure = <T>(
+  error: unknown,
+  backup: KRD | null,
+  onRestore: (state: KRD) => void
+): RecoveryResult<T> => {
+  const err = error instanceof Error ? error : new Error(String(error));
+  if (backup) {
+    onRestore(backup);
+    return { success: false, error: err, recovered: true };
+  }
+  return { success: false, error: err, recovered: false };
+};
+
+/**
  * Execute an operation with automatic backup and recovery
  *
  * @param operation - The operation to execute
@@ -32,32 +49,11 @@ export const withErrorRecovery = async <T>(
   currentState: KRD | null,
   onRestore: (state: KRD) => void
 ): Promise<RecoveryResult<T>> => {
-  // Create backup
   const backup = currentState ? structuredClone(currentState) : null;
-
   try {
-    const result = await operation();
-    return {
-      success: true,
-      data: result,
-      recovered: false,
-    };
+    return { success: true, data: await operation(), recovered: false };
   } catch (error) {
-    // Restore from backup if available
-    if (backup) {
-      onRestore(backup);
-      return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
-        recovered: true,
-      };
-    }
-
-    return {
-      success: false,
-      error: error instanceof Error ? error : new Error(String(error)),
-      recovered: false,
-    };
+    return toRecoveryFailure(error, backup, onRestore);
   }
 };
 
@@ -69,31 +65,10 @@ export const withErrorRecoverySync = <T>(
   currentState: KRD | null,
   onRestore: (state: KRD) => void
 ): RecoveryResult<T> => {
-  // Create backup
   const backup = currentState ? structuredClone(currentState) : null;
-
   try {
-    const result = operation();
-    return {
-      success: true,
-      data: result,
-      recovered: false,
-    };
+    return { success: true, data: operation(), recovered: false };
   } catch (error) {
-    // Restore from backup if available
-    if (backup) {
-      onRestore(backup);
-      return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
-        recovered: true,
-      };
-    }
-
-    return {
-      success: false,
-      error: error instanceof Error ? error : new Error(String(error)),
-      recovered: false,
-    };
+    return toRecoveryFailure(error, backup, onRestore);
   }
 };
