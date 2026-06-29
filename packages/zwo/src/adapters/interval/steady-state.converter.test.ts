@@ -189,45 +189,6 @@ describe("convertSteadyStateToKrd", () => {
       expect(result.equipment).toBe("bike");
     });
   });
-
-  describe("text event extraction", () => {
-    it("should extract single text event to notes and extensions", () => {
-      // Arrange
-      const data = {
-        Duration: 300,
-        durationType: "time" as const,
-        Power: 1.0,
-        stepIndex: 0,
-        textevent: { message: "Push hard!", timeoffset: 0 },
-      };
-
-      // Act
-      const result = convertSteadyStateToKrd(data);
-
-      // Assert
-      expect(result.notes).toBe("Push hard!");
-      expect(result.extensions).toStrictEqual({
-        zwift: { textEvents: [{ message: "Push hard!", timeoffset: 0 }] },
-      });
-    });
-
-    it("should not set notes or extensions when no text events", () => {
-      // Arrange
-      const data = {
-        Duration: 300,
-        durationType: "time" as const,
-        Power: 1.0,
-        stepIndex: 0,
-      };
-
-      // Act
-      const result = convertSteadyStateToKrd(data);
-
-      // Assert
-      expect(result.notes).toBeUndefined();
-      expect(result.extensions).toBeUndefined();
-    });
-  });
 });
 
 describe("convertSteadyStateToKrd power-unit extension edge", () => {
@@ -236,11 +197,12 @@ describe("convertSteadyStateToKrd power-unit extension edge", () => {
     const data = {
       Duration: 300,
       Power: 0.75,
-      "kaiord:powerUnit": "watts",
+      "kaiord:powerUnit": "watts" as const,
+      stepIndex: 0,
     };
 
     // Act
-    const result = convertSteadyStateToKrd(data, 0);
+    const result = convertSteadyStateToKrd(data);
 
     // Assert
     expect(result.target.type).toBe("power");

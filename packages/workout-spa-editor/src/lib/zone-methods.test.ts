@@ -36,50 +36,6 @@ describe("zone method registries", () => {
       expect(POWER_METHODS).toHaveLength(POWER_METHODS_COUNT);
     });
 
-    it("should have 7 zones for Coggan 7-zone", () => {
-      // Arrange
-
-      // Act
-      const coggan = findMethod(POWER_METHODS, "coggan-7");
-
-      // Assert
-      expect(coggan?.zoneCount).toBe(COGGAN_ZONE_COUNT);
-      expect(coggan?.defaults).toHaveLength(COGGAN_ZONE_COUNT);
-    });
-
-    it("should have 7 zones for Friel 7-zone", () => {
-      // Arrange
-
-      // Act
-      const friel = findMethod(POWER_METHODS, "friel-7");
-
-      // Assert
-      expect(friel?.zoneCount).toBe(FRIEL_ZONE_COUNT);
-      expect(friel?.defaults).toHaveLength(FRIEL_ZONE_COUNT);
-    });
-
-    it("should have 6 zones for British Cycling", () => {
-      // Arrange
-
-      // Act
-      const bc = findMethod(POWER_METHODS, "british-cycling-6");
-
-      // Assert
-      expect(bc?.zoneCount).toBe(BRITISH_CYCLING_ZONE_COUNT);
-      expect(bc?.defaults).toHaveLength(BRITISH_CYCLING_ZONE_COUNT);
-    });
-
-    it("should have 5 default zones for Custom", () => {
-      // Arrange
-
-      // Act
-      const custom = findMethod(POWER_METHODS, "custom");
-
-      // Assert
-      expect(custom?.zoneCount).toBe(CUSTOM_POWER_ZONE_COUNT);
-      expect(custom?.defaults).toHaveLength(CUSTOM_POWER_ZONE_COUNT);
-    });
-
     it("should set Coggan Z1 to 0-55%", () => {
       // Arrange
 
@@ -103,17 +59,6 @@ describe("zone method registries", () => {
 
       // Assert
       expect(HR_METHODS).toHaveLength(HR_METHODS_COUNT);
-    });
-
-    it("should have 5 zones for Karvonen 5-zone", () => {
-      // Arrange
-
-      // Act
-      const karvonen = findMethod(HR_METHODS, "karvonen-5");
-
-      // Assert
-      expect(karvonen?.zoneCount).toBe(KARVONEN_ZONE_COUNT);
-      expect(karvonen?.defaults).toHaveLength(KARVONEN_ZONE_COUNT);
     });
 
     it("should set Karvonen Z1 to 0-82%", () => {
@@ -140,104 +85,83 @@ describe("zone method registries", () => {
       // Assert
       expect(PACE_METHODS).toHaveLength(PACE_METHODS_COUNT);
     });
+  });
 
-    it("should have 5 zones for Daniels 5-zone", () => {
+  describe("method zoneCount", () => {
+    it.each([
+      { methods: POWER_METHODS, id: "coggan-7", count: COGGAN_ZONE_COUNT },
+      { methods: POWER_METHODS, id: "friel-7", count: FRIEL_ZONE_COUNT },
+      {
+        methods: POWER_METHODS,
+        id: "british-cycling-6",
+        count: BRITISH_CYCLING_ZONE_COUNT,
+      },
+      { methods: POWER_METHODS, id: "custom", count: CUSTOM_POWER_ZONE_COUNT },
+      { methods: HR_METHODS, id: "karvonen-5", count: KARVONEN_ZONE_COUNT },
+      { methods: PACE_METHODS, id: "daniels-5", count: DANIELS_ZONE_COUNT },
+    ])("should have $count zones for method $id", ({ methods, id, count }) => {
       // Arrange
 
       // Act
-      const daniels = findMethod(PACE_METHODS, "daniels-5");
+      const method = findMethod(methods, id);
 
       // Assert
-      expect(daniels?.zoneCount).toBe(DANIELS_ZONE_COUNT);
-      expect(daniels?.defaults).toHaveLength(DANIELS_ZONE_COUNT);
+      expect(method?.zoneCount).toBe(count);
+      expect(method?.defaults).toHaveLength(count);
     });
   });
 
   describe("getDefaultMethodId", () => {
-    it("should return coggan-7 for power", () => {
+    it.each([
+      { type: "power" as const, expected: "coggan-7" },
+      { type: "hr" as const, expected: "karvonen-5" },
+      { type: "pace" as const, expected: "daniels-5" },
+    ])("should return $expected for $type", ({ type, expected }) => {
       // Arrange
 
       // Act
+      const result = getDefaultMethodId(type);
 
       // Assert
-      expect(getDefaultMethodId("power")).toBe("coggan-7");
-    });
-
-    it("should return karvonen-5 for hr", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      expect(getDefaultMethodId("hr")).toBe("karvonen-5");
-    });
-
-    it("should return daniels-5 for pace", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      expect(getDefaultMethodId("pace")).toBe("daniels-5");
+      expect(result).toBe(expected);
     });
   });
 
   describe("getMethodsForType", () => {
-    it("should return power methods", () => {
+    it.each([
+      { type: "power" as const, expected: POWER_METHODS },
+      { type: "hr" as const, expected: HR_METHODS },
+      { type: "pace" as const, expected: PACE_METHODS },
+    ])("should return the registry for $type", ({ type, expected }) => {
       // Arrange
 
       // Act
+      const result = getMethodsForType(type);
 
       // Assert
-      expect(getMethodsForType("power")).toBe(POWER_METHODS);
-    });
-
-    it("should return hr methods", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      expect(getMethodsForType("hr")).toBe(HR_METHODS);
-    });
-
-    it("should return pace methods", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      expect(getMethodsForType("pace")).toBe(PACE_METHODS);
+      expect(result).toBe(expected);
     });
   });
 
   describe("percentage ranges", () => {
-    it("should ensure all power methods have non-negative percentages", () => {
-      // Arrange
+    it.each([
+      { label: "power", methods: POWER_METHODS },
+      { label: "HR", methods: HR_METHODS },
+    ])(
+      "should ensure all $label methods have non-negative percentages",
+      ({ methods }) => {
+        // Arrange
 
-      // Act
+        // Act
 
-      // Assert
-      for (const method of POWER_METHODS) {
-        for (const def of method.defaults) {
-          expect(def.minPercent).toBeGreaterThanOrEqual(0);
-          expect(def.maxPercent).toBeGreaterThan(0);
+        // Assert
+        for (const method of methods) {
+          for (const def of method.defaults) {
+            expect(def.minPercent).toBeGreaterThanOrEqual(0);
+            expect(def.maxPercent).toBeGreaterThan(0);
+          }
         }
       }
-    });
-
-    it("should ensure all HR methods have non-negative percentages", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      for (const method of HR_METHODS) {
-        for (const def of method.defaults) {
-          expect(def.minPercent).toBeGreaterThanOrEqual(0);
-          expect(def.maxPercent).toBeGreaterThan(0);
-        }
-      }
-    });
+    );
   });
 });

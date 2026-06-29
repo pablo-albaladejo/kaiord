@@ -130,7 +130,8 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
   });
 
   it("should normalize method = 'manual' to 'custom' (1.4b)", async () => {
-    // Arrange — the prior PR 2 sync wrote method = "manual" when seeding
+    // Arrange
+    // the prior PR 2 sync wrote method = "manual" when seeding
     // a fresh sport config. Migration normalizes that back to "custom".
     const profile = baseProfile({
       sportZones: {
@@ -191,7 +192,8 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
   });
 
   it("should leave method = 'coggan-7' + Coggan defaults unchanged (1.4e)", async () => {
-    // Arrange — formula-derived state stays as-is (the post-migration
+    // Arrange
+    // formula-derived state stays as-is (the post-migration
     // classifier handles it via "method-derived" detection).
     const profile = baseProfile({
       sportZones: {
@@ -215,7 +217,8 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
   });
 
   it("should reclassify method = 'coggan-7' + zones-differ-from-formula to 'user' is OUT OF SCOPE for migration (1.4f)", async () => {
-    // Arrange — the migration only flips "custom" → "user". A profile
+    // Arrange
+    // the migration only flips "custom" → "user". A profile
     // with method = "coggan-7" + edited zones stays at "coggan-7"
     // (the post-migration classifier's content-detection tail rule
     // catches this case at sync time, returning user-customized).
@@ -233,7 +236,8 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     // Act
     const post = await openV9AndRead(name, profile.id);
 
-    // Assert — method stays at coggan-7; classifier handles the rest at runtime.
+    // Assert
+    // method stays at coggan-7; classifier handles the rest at runtime.
     expect(post.sportZones.cycling.powerZones.method).toBe("coggan-7");
   });
 
@@ -247,7 +251,8 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     };
     const profile = baseProfile({ sportZones: initial });
 
-    // Act — apply reclassifyZoneMethods twice (the modifier function is
+    // Act
+    // apply reclassifyZoneMethods twice (the modifier function is
     // pure; running twice should produce identical result).
     const row1 = JSON.parse(JSON.stringify(profile));
     reclassifyZoneMethods(row1);
@@ -283,28 +288,48 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
 
 describe("hasUserData heuristic", () => {
   it("should return false for empty zones array", () => {
-    // Arrange + Act + Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(hasUserData([], "heartRateZones")).toBe(false);
     expect(hasUserData(undefined, "heartRateZones")).toBe(false);
   });
 
   it("should return false for HR all-zero seed (5 entries)", () => {
-    // Arrange + Act + Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(hasUserData(allZeroHr(), "heartRateZones")).toBe(false);
   });
 
   it("should return true for HR with any non-zero band", () => {
-    // Arrange + Act + Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(hasUserData(userEditedHr(), "heartRateZones")).toBe(true);
   });
 
   it("should return false for power Coggan-7 defaults (7 entries)", () => {
-    // Arrange + Act + Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(hasUserData(cogganSevenDefaults(), "powerZones")).toBe(false);
   });
 
   it("should return true for power zones differing from Coggan-7 defaults", () => {
-    // Arrange + Act + Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(hasUserData(userEditedPower(), "powerZones")).toBe(true);
   });
 
@@ -324,7 +349,9 @@ describe("hasUserData heuristic", () => {
       { zone: 5, name: "VO2 Max", minPace: 0, maxPace: 0, unit: "min_per_km" },
     ];
 
-    // Act + Assert
+    // Act
+
+    // Assert
     expect(hasUserData(allZeroPace, "paceZones")).toBe(false);
   });
 
@@ -350,7 +377,9 @@ describe("hasUserData heuristic", () => {
       { zone: 5, name: "VO2 Max", minPace: 0, maxPace: 0, unit: "min_per_km" },
     ];
 
-    // Act + Assert
+    // Act
+
+    // Assert
     expect(hasUserData(editedPace, "paceZones")).toBe(true);
   });
 });

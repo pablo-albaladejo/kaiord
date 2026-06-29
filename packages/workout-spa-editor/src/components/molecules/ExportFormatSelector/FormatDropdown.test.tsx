@@ -37,13 +37,9 @@ describe("FormatDropdown - Property Tests", () => {
   describe("Property 2: Keyboard navigation cycles within bounds", () => {
     it("should keep focus at last option when pressing ArrowDown at boundary", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
-
-      // Act
 
       render(
         <FormatDropdown
@@ -56,20 +52,17 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
+      // Act
+      // Navigate to the last option, then try to go beyond it.
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowDown}");
+
       // Assert
-
       expect(screen.getByRole("menu")).toBeInTheDocument();
-
-      // Act - Navigate to last option
-      await user.keyboard("{ArrowDown}");
-      await user.keyboard("{ArrowDown}");
-      await user.keyboard("{ArrowDown}");
-
-      // Try to go beyond last option
-      await user.keyboard("{ArrowDown}");
-      await user.keyboard("{ArrowDown}");
-
-      // Assert - Focus should stay at last option (index 3)
+      // Focus should stay at the last option (index 3).
       const options = screen.getAllByRole("menuitem");
       expect(options[3]).toHaveAttribute("tabIndex", "0");
       expect(options[0]).toHaveAttribute("tabIndex", "-1");
@@ -79,13 +72,9 @@ describe("FormatDropdown - Property Tests", () => {
 
     it("should keep focus at first option when pressing ArrowUp at boundary", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
-
-      // Act
 
       render(
         <FormatDropdown
@@ -98,15 +87,14 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
+      // Act
+      // Try to go before the first option.
+      await user.keyboard("{ArrowUp}");
+      await user.keyboard("{ArrowUp}");
+
       // Assert
-
       expect(screen.getByRole("menu")).toBeInTheDocument();
-
-      // Act - Try to go before first option
-      await user.keyboard("{ArrowUp}");
-      await user.keyboard("{ArrowUp}");
-
-      // Assert - Focus should stay at first option (index 0)
+      // Focus should stay at the first option (index 0).
       const options = screen.getAllByRole("menuitem");
       expect(options[0]).toHaveAttribute("tabIndex", "0");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
@@ -116,12 +104,6 @@ describe("FormatDropdown - Property Tests", () => {
 
     it("should cycle through all options with ArrowDown", async () => {
       // Arrange
-
-      // Act
-
-      // Assert
-
-      // Arrange
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -139,19 +121,20 @@ describe("FormatDropdown - Property Tests", () => {
 
       const options = screen.getAllByRole("menuitem");
 
-      // Act & Assert - Navigate through all options
+      // Act
+
+      // Assert
+      // Navigate through every option, asserting the roving tabindex
+      // (focused option has tabIndex 0, the rest -1) at each step.
       for (let i = 0; i < mockFormatOptions.length; i++) {
-        // Current option should have tabIndex 0
         expect(options[i]).toHaveAttribute("tabIndex", "0");
 
-        // All other options should have tabIndex -1
         for (let j = 0; j < mockFormatOptions.length; j++) {
           if (j !== i) {
             expect(options[j]).toHaveAttribute("tabIndex", "-1");
           }
         }
 
-        // Move to next option (unless at last)
         if (i < mockFormatOptions.length - 1) {
           await user.keyboard("{ArrowDown}");
         }
@@ -159,12 +142,6 @@ describe("FormatDropdown - Property Tests", () => {
     });
 
     it("should cycle through all options with ArrowUp", async () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
       // Arrange
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
@@ -183,19 +160,20 @@ describe("FormatDropdown - Property Tests", () => {
 
       const options = screen.getAllByRole("menuitem");
 
-      // Act & Assert - Navigate backwards through all options
+      // Act
+
+      // Assert
+      // Navigate backwards through every option, asserting the roving
+      // tabindex (focused option has tabIndex 0, the rest -1) at each step.
       for (let i = mockFormatOptions.length - 1; i >= 0; i--) {
-        // Current option should have tabIndex 0
         expect(options[i]).toHaveAttribute("tabIndex", "0");
 
-        // All other options should have tabIndex -1
         for (let j = 0; j < mockFormatOptions.length; j++) {
           if (j !== i) {
             expect(options[j]).toHaveAttribute("tabIndex", "-1");
           }
         }
 
-        // Move to previous option (unless at first)
         if (i > 0) {
           await user.keyboard("{ArrowUp}");
         }
@@ -206,8 +184,6 @@ describe("FormatDropdown - Property Tests", () => {
   describe("Property 3: Keyboard selection matches mouse selection", () => {
     it("should select same option with Enter as with mouse click", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -223,26 +199,15 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      // Act - Navigate to option 2 (TCX) and select with Enter
-      await user.keyboard("{ArrowDown}");
-      await user.keyboard("{ArrowDown}");
-
       // Act
-
+      // Navigate to option 2 (TCX) and select it with Enter, then re-open
+      // the dropdown and select the same option with a mouse click.
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowDown}");
       await user.keyboard("{Enter}");
+      const keyboardSelection = [...onFormatSelect.mock.calls];
 
-      // Assert - Should have called onFormatSelect with "tcx"
-
-      // Assert
-
-      expect(onFormatSelect).toHaveBeenCalledWith("tcx");
-      expect(onFormatSelect).toHaveBeenCalledTimes(1);
-
-      // Reset mocks
       onFormatSelect.mockClear();
-      onToggle.mockClear();
-
-      // Rerender with dropdown open again
       rerender(
         <FormatDropdown
           isOpen={true}
@@ -253,20 +218,16 @@ describe("FormatDropdown - Property Tests", () => {
           disabled={false}
         />
       );
+      await user.click(screen.getByTestId("export-format-option-tcx"));
+      const mouseSelection = [...onFormatSelect.mock.calls];
 
-      // Act - Click on option 2 (TCX) with mouse
-      const tcxOption = screen.getByTestId("export-format-option-tcx");
-      await user.click(tcxOption);
-
-      // Assert - Should have called onFormatSelect with same value
-      expect(onFormatSelect).toHaveBeenCalledWith("tcx");
-      expect(onFormatSelect).toHaveBeenCalledTimes(1);
+      // Assert
+      expect(keyboardSelection).toEqual([["tcx"]]);
+      expect(mouseSelection).toEqual([["tcx"]]);
     });
 
     it("should select same option with Space as with mouse click", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -282,25 +243,14 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      // Act - Navigate to option 1 (FIT) and select with Space
-      await user.keyboard("{ArrowDown}");
-
       // Act
-
+      // Navigate to option 1 (FIT) and select it with Space, then re-open
+      // the dropdown and select the same option with a mouse click.
+      await user.keyboard("{ArrowDown}");
       await user.keyboard(" ");
+      const keyboardSelection = [...onFormatSelect.mock.calls];
 
-      // Assert - Should have called onFormatSelect with "fit"
-
-      // Assert
-
-      expect(onFormatSelect).toHaveBeenCalledWith("fit");
-      expect(onFormatSelect).toHaveBeenCalledTimes(1);
-
-      // Reset mocks
       onFormatSelect.mockClear();
-      onToggle.mockClear();
-
-      // Rerender with dropdown open again
       rerender(
         <FormatDropdown
           isOpen={true}
@@ -311,20 +261,16 @@ describe("FormatDropdown - Property Tests", () => {
           disabled={false}
         />
       );
+      await user.click(screen.getByTestId("export-format-option-fit"));
+      const mouseSelection = [...onFormatSelect.mock.calls];
 
-      // Act - Click on option 1 (FIT) with mouse
-      const fitOption = screen.getByTestId("export-format-option-fit");
-      await user.click(fitOption);
-
-      // Assert - Should have called onFormatSelect with same value
-      expect(onFormatSelect).toHaveBeenCalledWith("fit");
-      expect(onFormatSelect).toHaveBeenCalledTimes(1);
+      // Assert
+      expect(keyboardSelection).toEqual([["fit"]]);
+      expect(mouseSelection).toEqual([["fit"]]);
     });
 
     it("should close dropdown after keyboard selection like mouse selection", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -340,17 +286,11 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      // Act - Select with Enter
-      await user.keyboard("{ArrowDown}");
-
       // Act
-
+      await user.keyboard("{ArrowDown}");
       await user.keyboard("{Enter}");
 
-      // Assert - Should have called onToggle to close dropdown
-
       // Assert
-
       expect(onToggle).toHaveBeenCalledTimes(1);
     });
   });
@@ -360,8 +300,6 @@ describe("FormatDropdown - Unit Tests", () => {
   describe("keyboard navigation", () => {
     it("should navigate down with ArrowDown key", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -380,23 +318,16 @@ describe("FormatDropdown - Unit Tests", () => {
       const options = screen.getAllByRole("menuitem");
 
       // Act
-
-      // Act
-
       await user.keyboard("{ArrowDown}");
 
-      // Assert - Focus should move to second option
-
       // Assert
-
+      // Focus should move to the second option.
       expect(options[1]).toHaveAttribute("tabIndex", "0");
       expect(options[0]).toHaveAttribute("tabIndex", "-1");
     });
 
     it("should navigate up with ArrowUp key", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -415,23 +346,16 @@ describe("FormatDropdown - Unit Tests", () => {
       const options = screen.getAllByRole("menuitem");
 
       // Act
-
-      // Act
-
       await user.keyboard("{ArrowUp}");
 
-      // Assert - Focus should move to first option
-
       // Assert
-
+      // Focus should move to the first option.
       expect(options[0]).toHaveAttribute("tabIndex", "0");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
     });
 
     it("should select option with Enter key", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -449,23 +373,15 @@ describe("FormatDropdown - Unit Tests", () => {
 
       // Act
       await user.keyboard("{ArrowDown}");
-
-      // Act
-
       await user.keyboard("{Enter}");
 
       // Assert
-
-      // Assert
-
       expect(onFormatSelect).toHaveBeenCalledWith("fit");
       expect(onToggle).toHaveBeenCalledTimes(1);
     });
 
     it("should select option with Space key", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -483,23 +399,15 @@ describe("FormatDropdown - Unit Tests", () => {
 
       // Act
       await user.keyboard("{ArrowDown}");
-
-      // Act
-
       await user.keyboard(" ");
 
       // Assert
-
-      // Assert
-
       expect(onFormatSelect).toHaveBeenCalledWith("fit");
       expect(onToggle).toHaveBeenCalledTimes(1);
     });
 
     it("should close dropdown with Escape key", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -516,15 +424,9 @@ describe("FormatDropdown - Unit Tests", () => {
       );
 
       // Act
-
-      // Act
-
       await user.keyboard("{Escape}");
 
       // Assert
-
-      // Assert
-
       expect(onToggle).toHaveBeenCalledTimes(1);
       expect(onFormatSelect).not.toHaveBeenCalled();
     });
@@ -533,8 +435,6 @@ describe("FormatDropdown - Unit Tests", () => {
   describe("focus initialization", () => {
     it("should focus selected option when dropdown opens", () => {
       // Arrange
-      // Arrange
-
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
 
@@ -549,14 +449,11 @@ describe("FormatDropdown - Unit Tests", () => {
         />
       );
 
-      // Assert - TCX option (index 2) should be focused
-
       // Act
-
       const options = screen.getAllByRole("menuitem");
 
       // Assert
-
+      // TCX option (index 2) should be focused.
       expect(options[2]).toHaveAttribute("tabIndex", "0");
       expect(options[0]).toHaveAttribute("tabIndex", "-1");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
@@ -565,8 +462,6 @@ describe("FormatDropdown - Unit Tests", () => {
 
     it("should focus first option when no option is selected", () => {
       // Arrange
-      // Arrange
-
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
 
@@ -581,14 +476,11 @@ describe("FormatDropdown - Unit Tests", () => {
         />
       );
 
-      // Assert - First option should be focused
-
       // Act
-
       const options = screen.getAllByRole("menuitem");
 
       // Assert
-
+      // First option should be focused.
       expect(options[0]).toHaveAttribute("tabIndex", "0");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
       expect(options[2]).toHaveAttribute("tabIndex", "-1");
@@ -599,8 +491,6 @@ describe("FormatDropdown - Unit Tests", () => {
   describe("disabled state", () => {
     it("should not respond to keyboard events when disabled", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -616,30 +506,20 @@ describe("FormatDropdown - Unit Tests", () => {
         />
       );
 
-      // Act - Try various keyboard interactions
+      // Act
+      // Try various keyboard interactions while disabled.
       await user.keyboard("{ArrowDown}");
       await user.keyboard("{Enter}");
       await user.keyboard(" ");
-
-      // Act
-
       await user.keyboard("{Escape}");
 
-      // Assert - No callbacks should be triggered
-
       // Assert
-
+      // No callbacks should be triggered.
       expect(onFormatSelect).not.toHaveBeenCalled();
       expect(onToggle).not.toHaveBeenCalled();
     });
 
     it("should disable all option buttons when disabled", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
       // Arrange
       const onFormatSelect = vi.fn();
       const onToggle = vi.fn();
@@ -655,8 +535,11 @@ describe("FormatDropdown - Unit Tests", () => {
         />
       );
 
-      // Assert - All options should be disabled
+      // Act
       const options = screen.getAllByRole("menuitem");
+
+      // Assert
+      // All options should be disabled.
       options.forEach((option) => {
         expect(option).toBeDisabled();
       });

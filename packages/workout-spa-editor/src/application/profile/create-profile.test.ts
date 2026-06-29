@@ -62,18 +62,6 @@ describe("createProfile", () => {
     expect(profile.sportZones.cycling?.heartRateZones.method).toBe("custom");
   });
 
-  it("should generate a fresh id per profile", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const a = await createProfile(persistence, "A");
-
-    // Act
-    const b = await createProfile(persistence, "B");
-
-    // Assert
-    expect(a.id).not.toBe(b.id);
-  });
-
   it("should roll back the put when setActiveId rejects on the first profile (transaction atomicity)", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();

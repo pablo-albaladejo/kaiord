@@ -1,6 +1,26 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createPrettyLogger } from "../adapters/logger/pretty-logger";
+import { createStructuredLogger } from "../adapters/logger/structured-logger";
 import { createLogger } from "./logger-factory";
+
+vi.mock("../adapters/logger/pretty-logger", () => ({
+  createPrettyLogger: vi.fn(() => ({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  })),
+}));
+
+vi.mock("../adapters/logger/structured-logger", () => ({
+  createStructuredLogger: vi.fn(() => ({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  })),
+}));
 
 describe("logger-factory", () => {
   let originalIsTTY: boolean | undefined;
@@ -12,6 +32,7 @@ describe("logger-factory", () => {
     originalIsTTY = process.stdout.isTTY;
     originalCI = process.env.CI;
     originalNodeEnv = process.env.NODE_ENV;
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -47,10 +68,8 @@ describe("logger-factory", () => {
 
       // Assert
       expect(logger).toBeDefined();
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
+      expect(createPrettyLogger).toHaveBeenCalledTimes(1);
+      expect(createStructuredLogger).not.toHaveBeenCalled();
     });
 
     it("should create structured logger in CI environment", async () => {
@@ -62,10 +81,8 @@ describe("logger-factory", () => {
 
       // Assert
       expect(logger).toBeDefined();
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
+      expect(createStructuredLogger).toHaveBeenCalledTimes(1);
+      expect(createPrettyLogger).not.toHaveBeenCalled();
     });
 
     it("should create structured logger in production environment", async () => {
@@ -77,10 +94,8 @@ describe("logger-factory", () => {
 
       // Assert
       expect(logger).toBeDefined();
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
+      expect(createStructuredLogger).toHaveBeenCalledTimes(1);
+      expect(createPrettyLogger).not.toHaveBeenCalled();
     });
 
     it("should create structured logger in non-TTY environment", async () => {
@@ -97,10 +112,8 @@ describe("logger-factory", () => {
 
       // Assert
       expect(logger).toBeDefined();
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
+      expect(createStructuredLogger).toHaveBeenCalledTimes(1);
+      expect(createPrettyLogger).not.toHaveBeenCalled();
     });
   });
 
@@ -114,10 +127,8 @@ describe("logger-factory", () => {
 
       // Assert
       expect(logger).toBeDefined();
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
+      expect(createPrettyLogger).toHaveBeenCalledTimes(1);
+      expect(createStructuredLogger).not.toHaveBeenCalled();
     });
 
     it("should create structured logger when type is specified", async () => {
@@ -133,29 +144,27 @@ describe("logger-factory", () => {
 
       // Assert
       expect(logger).toBeDefined();
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
+      expect(createStructuredLogger).toHaveBeenCalledTimes(1);
+      expect(createPrettyLogger).not.toHaveBeenCalled();
     });
   });
 
   describe("logger options", () => {
     it("should pass options to logger implementation", async () => {
       // Arrange
+      const options = { level: "warn", quiet: true } as const;
 
       // Act
-      const logger = await createLogger({
-        level: "warn",
-        quiet: true,
-      });
+      const logger = await createLogger(options);
 
       // Assert
       expect(logger).toBeDefined();
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
+      const allCalls = [
+        ...vi.mocked(createPrettyLogger).mock.calls,
+        ...vi.mocked(createStructuredLogger).mock.calls,
+      ];
+      expect(allCalls).toHaveLength(1);
+      expect(allCalls[0]?.[0]).toEqual(options);
     });
   });
 });

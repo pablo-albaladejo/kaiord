@@ -1,8 +1,7 @@
-import { assert, describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import { asItemId } from "../providers/item-id";
 import type {
-  FocusTarget,
   FocusTargetEmptyState,
   FocusTargetItem,
 } from "./focus-target.types";
@@ -27,35 +26,6 @@ describe("FocusTarget discriminated union", () => {
 
     // Act
     expectTypeOf(focusEmptyState).toEqualTypeOf<FocusTargetEmptyState>();
-
-    // Assert
-  });
-
-  it("should narrow on `kind` at call sites", () => {
-    // Arrange
-
-    // Act
-    const target: FocusTarget = focusItem(asItemId("narrow-me"));
-
-    // Assert
-    if (target.kind === "item") {
-      expectTypeOf(target.id).toBeString();
-      expect(target.id).toBe("narrow-me");
-    } else {
-      assert.fail("Expected item kind");
-    }
-  });
-
-  it("should narrow on `kind` to the empty-state branch", () => {
-    // Arrange
-    const target: FocusTarget = focusEmptyState;
-
-    // Act
-    if (target.kind === "empty-state") {
-      expectTypeOf(target).toEqualTypeOf<FocusTargetEmptyState>();
-    } else {
-      assert.fail("Expected empty-state kind");
-    }
 
     // Assert
   });

@@ -15,54 +15,21 @@ const createKrd = (overrides: Partial<KRD["metadata"]> = {}): KRD => ({
 });
 
 describe("addKaiordMetadata", () => {
-  it("should add created timestamp", () => {
+  it.each([
+    ["created", "@_kaiord:timeCreated", "2024-01-15T10:00:00Z"],
+    ["manufacturer", "@_kaiord:manufacturer", "Garmin"],
+    ["product", "@_kaiord:product", "Edge 1040"],
+    ["serialNumber", "@_kaiord:serialNumber", "ABC123"],
+  ])("should add %s as the %s attribute", (field, expectedAttr, value) => {
     // Arrange
     const trainingCenterDatabase: Record<string, unknown> = {};
-    const krd = createKrd({ created: "2024-01-15T10:00:00Z" });
+    const krd = createKrd({ [field]: value } as Partial<KRD["metadata"]>);
 
     // Act
     addKaiordMetadata(trainingCenterDatabase, krd);
 
     // Assert
-    expect(trainingCenterDatabase["@_kaiord:timeCreated"]).toBe(
-      "2024-01-15T10:00:00Z"
-    );
-  });
-
-  it("should add manufacturer", () => {
-    // Arrange
-    const trainingCenterDatabase: Record<string, unknown> = {};
-    const krd = createKrd({ manufacturer: "Garmin" });
-
-    // Act
-    addKaiordMetadata(trainingCenterDatabase, krd);
-
-    // Assert
-    expect(trainingCenterDatabase["@_kaiord:manufacturer"]).toBe("Garmin");
-  });
-
-  it("should add product", () => {
-    // Arrange
-    const trainingCenterDatabase: Record<string, unknown> = {};
-    const krd = createKrd({ product: "Edge 1040" });
-
-    // Act
-    addKaiordMetadata(trainingCenterDatabase, krd);
-
-    // Assert
-    expect(trainingCenterDatabase["@_kaiord:product"]).toBe("Edge 1040");
-  });
-
-  it("should add serial number", () => {
-    // Arrange
-    const trainingCenterDatabase: Record<string, unknown> = {};
-    const krd = createKrd({ serialNumber: "ABC123" });
-
-    // Act
-    addKaiordMetadata(trainingCenterDatabase, krd);
-
-    // Assert
-    expect(trainingCenterDatabase["@_kaiord:serialNumber"]).toBe("ABC123");
+    expect(trainingCenterDatabase[expectedAttr]).toBe(value);
   });
 
   it("should not add undefined metadata fields", () => {
@@ -80,28 +47,6 @@ describe("addKaiordMetadata", () => {
     expect(trainingCenterDatabase["@_kaiord:manufacturer"]).toBeUndefined();
     expect(trainingCenterDatabase["@_kaiord:product"]).toBeUndefined();
     expect(trainingCenterDatabase["@_kaiord:serialNumber"]).toBeUndefined();
-  });
-
-  it("should add all metadata fields when present", () => {
-    // Arrange
-    const trainingCenterDatabase: Record<string, unknown> = {};
-    const krd = createKrd({
-      created: "2024-01-15T10:00:00Z",
-      manufacturer: "Garmin",
-      product: "Edge 1040",
-      serialNumber: "ABC123",
-    });
-
-    // Act
-    addKaiordMetadata(trainingCenterDatabase, krd);
-
-    // Assert
-    expect(trainingCenterDatabase["@_kaiord:timeCreated"]).toBe(
-      "2024-01-15T10:00:00Z"
-    );
-    expect(trainingCenterDatabase["@_kaiord:manufacturer"]).toBe("Garmin");
-    expect(trainingCenterDatabase["@_kaiord:product"]).toBe("Edge 1040");
-    expect(trainingCenterDatabase["@_kaiord:serialNumber"]).toBe("ABC123");
   });
 
   it("should not overwrite existing attributes", () => {

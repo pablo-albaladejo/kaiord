@@ -42,75 +42,58 @@ describe("installExportLedgerCascade + sweepOrphanLedgerEntries", () => {
     await Dexie.delete(name);
   });
 
-  it("should delete matching exportLedger rows when a health record is deleted", async () => {
-    // Arrange
-    const kaiordRecordId = crypto.randomUUID();
-    await db.table("healthSleep").add({
-      id: kaiordRecordId,
-      profileId: PROFILE_ID,
+  it.each([
+    {
+      store: "healthSleep",
       date: "2026-01-01",
-      kaiordRecordId,
-    });
-    await db.table("exportLedger").add({
-      id: crypto.randomUUID(),
-      kaiordRecordId,
       dataType: "health-sleep",
-      destinationBridgeId: "garmin-bridge",
       destinationExternalId: "ext-1",
       contentHash: "abc",
-      exportedAt: new Date().toISOString(),
-    });
-
-    // Act
-    // Delete inside a transaction that includes exportLedger so the
-    // hook promise can complete within the same IDB transaction.
-    await db.transaction(
-      "rw",
-      [db.table("healthSleep"), db.table("exportLedger")],
-      async () => {
-        await db.table("healthSleep").delete(kaiordRecordId);
-      }
-    );
-
-    // Assert
-    const remaining = await db.table("exportLedger").toArray();
-    expect(remaining).toHaveLength(0);
-  });
-
-  it("should delete matching exportLedger rows when a workout is deleted", async () => {
-    // Arrange
-    const kaiordRecordId = crypto.randomUUID();
-    await db.table("workouts").add({
-      id: kaiordRecordId,
-      profileId: PROFILE_ID,
+    },
+    {
+      store: "workouts",
       date: "2026-01-02",
-      kaiordRecordId,
-    });
-    await db.table("exportLedger").add({
-      id: crypto.randomUUID(),
-      kaiordRecordId,
       dataType: "workout",
-      destinationBridgeId: "garmin-bridge",
       destinationExternalId: "ext-2",
       contentHash: "def",
-      exportedAt: new Date().toISOString(),
-    });
+    },
+  ])(
+    "should delete matching exportLedger rows when a $store record is deleted",
+    async ({ store, date, dataType, destinationExternalId, contentHash }) => {
+      // Arrange
+      const kaiordRecordId = crypto.randomUUID();
+      await db.table(store).add({
+        id: kaiordRecordId,
+        profileId: PROFILE_ID,
+        date,
+        kaiordRecordId,
+      });
+      await db.table("exportLedger").add({
+        id: crypto.randomUUID(),
+        kaiordRecordId,
+        dataType,
+        destinationBridgeId: "garmin-bridge",
+        destinationExternalId,
+        contentHash,
+        exportedAt: new Date().toISOString(),
+      });
 
-    // Act
-    // Delete inside a transaction that includes exportLedger so the
-    // hook promise can complete within the same IDB transaction.
-    await db.transaction(
-      "rw",
-      [db.table("workouts"), db.table("exportLedger")],
-      async () => {
-        await db.table("workouts").delete(kaiordRecordId);
-      }
-    );
+      // Act
+      // Delete inside a transaction that includes exportLedger so the
+      // hook promise can complete within the same IDB transaction.
+      await db.transaction(
+        "rw",
+        [db.table(store), db.table("exportLedger")],
+        async () => {
+          await db.table(store).delete(kaiordRecordId);
+        }
+      );
 
-    // Assert
-    const remaining = await db.table("exportLedger").toArray();
-    expect(remaining).toHaveLength(0);
-  });
+      // Assert
+      const remaining = await db.table("exportLedger").toArray();
+      expect(remaining).toHaveLength(0);
+    }
+  );
 
   it("should remove orphan ledger entries whose kaiordRecordId resolves to nothing", async () => {
     // Arrange

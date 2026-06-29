@@ -63,18 +63,6 @@ describe("HealthDashboardPage trends hub", () => {
     expect(card).toBeInTheDocument();
   });
 
-  it("should keep one canvas when a metric is added", async () => {
-    // Arrange
-    const user = userEvent.setup();
-    render(<HealthDashboardPage />);
-
-    // Act
-    await user.click(screen.getByRole("button", { name: "Weight" }));
-
-    // Assert
-    expect(screen.getByTestId("trend-single-chart-card")).toBeInTheDocument();
-  });
-
   it("should show the bare empty message when all metrics are toggled off", async () => {
     // Arrange
     const user = userEvent.setup();

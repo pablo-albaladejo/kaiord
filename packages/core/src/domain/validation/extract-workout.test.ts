@@ -56,67 +56,38 @@ describe("extractWorkout", () => {
     );
   });
 
-  it("should throw for missing extensions", () => {
+  it.each<[string, KRD]>([
+    [
+      "missing extensions",
+      {
+        version: "1.0",
+        type: "structured_workout",
+        metadata: { created: "2025-01-15T10:00:00Z", sport: "cycling" },
+      },
+    ],
+    [
+      "missing extensions.structured_workout",
+      { ...validKrd, extensions: { fit: {} } },
+    ],
+    [
+      "a primitive structured_workout value",
+      { ...validKrd, extensions: { structured_workout: "not an object" } },
+    ],
+    [
+      "a null structured_workout value",
+      { ...validKrd, extensions: { structured_workout: null } },
+    ],
+    [
+      "an array structured_workout value",
+      {
+        ...validKrd,
+        extensions: { structured_workout: [...SAMPLE_BUFFER_BYTES] },
+      },
+    ],
+  ])("should throw for %s", (_name, krd) => {
     // Arrange
 
     // Act
-    const krd: KRD = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: { created: "2025-01-15T10:00:00Z", sport: "cycling" },
-    };
-
-    // Assert
-    expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
-  });
-
-  it("should throw for missing extensions.structured_workout", () => {
-    // Arrange
-
-    // Act
-    const krd: KRD = {
-      ...validKrd,
-      extensions: { fit: {} },
-    };
-
-    // Assert
-    expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
-  });
-
-  it("should throw for primitive structured_workout value", () => {
-    // Arrange
-
-    // Act
-    const krd: KRD = {
-      ...validKrd,
-      extensions: { structured_workout: "not an object" },
-    };
-
-    // Assert
-    expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
-  });
-
-  it("should throw for null structured_workout value", () => {
-    // Arrange
-
-    // Act
-    const krd: KRD = {
-      ...validKrd,
-      extensions: { structured_workout: null },
-    };
-
-    // Assert
-    expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
-  });
-
-  it("should throw for array structured_workout value", () => {
-    // Arrange
-
-    // Act
-    const krd: KRD = {
-      ...validKrd,
-      extensions: { structured_workout: [...SAMPLE_BUFFER_BYTES] },
-    };
 
     // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);

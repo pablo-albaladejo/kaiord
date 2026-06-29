@@ -76,8 +76,9 @@ describe("encodeRampTargets", () => {
     encodeRampTargets(step, interval, logger);
 
     // Assert
-    expect(interval["@_PowerLow"]).toBeDefined();
-    expect(interval["@_PowerHigh"]).toBeDefined();
+    // range{min:125,max:250} → watts-lossy: (min/250)=0.5, (max/250)=1.0
+    expect(interval["@_PowerLow"]).toBe(0.5);
+    expect(interval["@_PowerHigh"]).toBe(1.0);
   });
 
   it("should encode mps pace range as paceLow and paceHigh (inverted)", () => {
@@ -171,52 +172,24 @@ describe("encodeTargets dispatch", () => {
     expect(interval["@_Power"]).toBe(0.9);
   });
 
-  it("should delegate Warmup to ramp encoder", () => {
+  it.each([
+    { type: "Warmup", percent: 60, low: 0.6 },
+    { type: "Cooldown", percent: 50, low: 0.5 },
+    { type: "Ramp", percent: 70, low: 0.7 },
+  ])("should delegate $type to ramp encoder", ({ type, percent, low }) => {
     // Arrange
     const step = makeStep({
       type: "power",
-      value: { unit: "percent_ftp", value: 60 },
+      value: { unit: "percent_ftp", value: percent },
     });
     const interval: Record<string, unknown> = {};
 
     // Act
-    encodeTargets(step, "Warmup", interval);
+    encodeTargets(step, type, interval);
 
     // Assert
-    expect(interval["@_PowerLow"]).toBe(0.6);
-    expect(interval["@_PowerHigh"]).toBe(0.6);
-  });
-
-  it("should delegate Cooldown to ramp encoder", () => {
-    // Arrange
-    const step = makeStep({
-      type: "power",
-      value: { unit: "percent_ftp", value: 50 },
-    });
-    const interval: Record<string, unknown> = {};
-
-    // Act
-    encodeTargets(step, "Cooldown", interval);
-
-    // Assert
-    expect(interval["@_PowerLow"]).toBe(0.5);
-    expect(interval["@_PowerHigh"]).toBe(0.5);
-  });
-
-  it("should delegate Ramp to ramp encoder", () => {
-    // Arrange
-    const step = makeStep({
-      type: "power",
-      value: { unit: "percent_ftp", value: 70 },
-    });
-    const interval: Record<string, unknown> = {};
-
-    // Act
-    encodeTargets(step, "Ramp", interval);
-
-    // Assert
-    expect(interval["@_PowerLow"]).toBe(0.7);
-    expect(interval["@_PowerHigh"]).toBe(0.7);
+    expect(interval["@_PowerLow"]).toBe(low);
+    expect(interval["@_PowerHigh"]).toBe(low);
   });
 
   it("should delegate FreeRide to free-ride encoder", () => {

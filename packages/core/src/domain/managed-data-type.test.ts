@@ -38,32 +38,16 @@ describe("MANAGED_DATA_REGISTRY", () => {
 
   it("should use opaque-string capability tokens (no Zod-enum import from SPA)", () => {
     // Arrange
-    const allTokens = Object.values(MANAGED_DATA_REGISTRY).flatMap((e) =>
-      [e.capabilities.import, e.capabilities.export].filter(
-        (t): t is string => typeof t === "string"
-      )
-    );
+    const definedTokens = Object.values(MANAGED_DATA_REGISTRY)
+      .flatMap((e) => [e.capabilities.import, e.capabilities.export])
+      .filter((t) => t !== undefined);
 
     // Act
-    const allStrings = allTokens.every((t) => typeof t === "string");
+    const allStrings = definedTokens.every((t) => typeof t === "string");
 
     // Assert
     expect(allStrings).toBe(true);
-    expect(allTokens.length).toBeGreaterThan(0);
-  });
-
-  it("should default hashProjection to identity when omitted", () => {
-    // Arrange
-    const entry = MANAGED_DATA_REGISTRY["workout"];
-    const payload = { name: "Test workout" };
-
-    // Act
-    const projected = entry.hashProjection
-      ? entry.hashProjection(payload)
-      : payload;
-
-    // Assert
-    expect(projected).toEqual(payload);
+    expect(definedTokens.length).toBeGreaterThan(0);
   });
 
   it("should produce a stable hash output when an unrelated optional Zod field is added", () => {

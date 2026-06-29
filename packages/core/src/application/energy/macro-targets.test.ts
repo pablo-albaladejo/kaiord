@@ -29,44 +29,23 @@ const baseInput = (
 });
 
 describe("computeMacroTargets (protein per goal)", () => {
-  it("should use 2.2 g/kg protein for fat_loss", () => {
-    // Arrange
-    const input = baseInput({ goalType: "fat_loss", weightKg: WEIGHT_KG });
+  it.each([
+    ["fat_loss", PROTEIN_FAT_LOSS_PER_KG],
+    ["muscle_gain", PROTEIN_MUSCLE_PER_KG],
+    ["maintain", PROTEIN_MAINTAIN_PER_KG],
+  ] as const)(
+    "should derive protein for the %s goal at %s g/kg",
+    (goalType, perKg) => {
+      // Arrange
+      const input = baseInput({ goalType, weightKg: WEIGHT_KG });
 
-    // Act
-    const result = computeMacroTargets(input);
+      // Act
+      const result = computeMacroTargets(input);
 
-    // Assert
-    expect(result.protein_g).toBe(
-      Math.round(PROTEIN_FAT_LOSS_PER_KG * WEIGHT_KG)
-    );
-  });
-
-  it("should use 2.0 g/kg protein for muscle_gain", () => {
-    // Arrange
-    const input = baseInput({ goalType: "muscle_gain", weightKg: WEIGHT_KG });
-
-    // Act
-    const result = computeMacroTargets(input);
-
-    // Assert
-    expect(result.protein_g).toBe(
-      Math.round(PROTEIN_MUSCLE_PER_KG * WEIGHT_KG)
-    );
-  });
-
-  it("should use 1.8 g/kg protein for maintain", () => {
-    // Arrange
-    const input = baseInput({ goalType: "maintain", weightKg: WEIGHT_KG });
-
-    // Act
-    const result = computeMacroTargets(input);
-
-    // Assert
-    expect(result.protein_g).toBe(
-      Math.round(PROTEIN_MAINTAIN_PER_KG * WEIGHT_KG)
-    );
-  });
+      // Assert
+      expect(result.protein_g).toBe(Math.round(perKg * WEIGHT_KG));
+    }
+  );
 });
 
 describe("computeMacroTargets (fat floor and carbs)", () => {

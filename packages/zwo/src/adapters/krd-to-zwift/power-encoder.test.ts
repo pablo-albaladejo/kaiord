@@ -17,37 +17,27 @@ const makeStep = (target: WorkoutStep["target"]): WorkoutStep => ({
 });
 
 describe("encodeSteadyStatePowerTarget", () => {
-  it("should encode percent_ftp target as @_Power fraction", () => {
-    // Arrange
-    const step = makeStep({
-      type: "power",
-      value: { unit: "percent_ftp", value: 85 },
-    });
-    const interval: Record<string, unknown> = {};
+  it.each([
+    [85, 0.85],
+    [100, 1.0],
+  ] as const)(
+    "should encode percent_ftp %i as @_Power %f",
+    (percent, expectedPower) => {
+      // Arrange
+      const step = makeStep({
+        type: "power",
+        value: { unit: "percent_ftp", value: percent },
+      });
+      const interval: Record<string, unknown> = {};
 
-    // Act
-    encodeSteadyStatePowerTarget(step, interval);
+      // Act
+      encodeSteadyStatePowerTarget(step, interval);
 
-    // Assert
-    expect(interval["@_Power"]).toBe(0.85);
-    expect(interval["@_kaiord:powerUnit"]).toBe("percent_ftp");
-  });
-
-  it("should encode 100% FTP as @_Power 1.0", () => {
-    // Arrange
-    const step = makeStep({
-      type: "power",
-      value: { unit: "percent_ftp", value: 100 },
-    });
-    const interval: Record<string, unknown> = {};
-
-    // Act
-    encodeSteadyStatePowerTarget(step, interval);
-
-    // Assert
-    expect(interval["@_Power"]).toBe(1.0);
-    expect(interval["@_kaiord:powerUnit"]).toBe("percent_ftp");
-  });
+      // Assert
+      expect(interval["@_Power"]).toBe(expectedPower);
+      expect(interval["@_kaiord:powerUnit"]).toBe("percent_ftp");
+    }
+  );
 
   it("should encode zone target converting to percent_ftp fraction", () => {
     // Arrange
@@ -62,18 +52,6 @@ describe("encodeSteadyStatePowerTarget", () => {
     expect(interval["@_Power"]).toBe(1.05);
     expect(interval["@_kaiord:powerUnit"]).toBe("zone");
     expect(interval["@_kaiord:powerZone"]).toBe(4);
-  });
-
-  it("should encode zone 1 (recovery) as 0.55", () => {
-    // Arrange
-    const step = makeStep({ type: "power", value: { unit: "zone", value: 1 } });
-    const interval: Record<string, unknown> = {};
-
-    // Act
-    encodeSteadyStatePowerTarget(step, interval);
-
-    // Assert
-    expect(interval["@_Power"]).toBe(0.55);
   });
 
   it("should encode absolute watts target using assumed FTP of 250", () => {

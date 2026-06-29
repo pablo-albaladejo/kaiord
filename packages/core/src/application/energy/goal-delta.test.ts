@@ -88,6 +88,7 @@ describe("computeDailyDelta (fat_loss)", () => {
     expect(result.capped).toBe(true);
     expect(result.capReason).toBe("0.75%/week rate cap");
     expect(result.dailyDeltaKcal).toBeCloseTo(-cap, PRECISION);
+    expect(result.overridden).toBe(false);
   });
 
   it("should return the raw deficit but keep the flag when the cap is overridden", () => {
@@ -107,22 +108,6 @@ describe("computeDailyDelta (fat_loss)", () => {
     expect(result.capped).toBe(true);
     expect(result.overridden).toBe(true);
     expect(result.dailyDeltaKcal).toBeCloseTo(-rawDeficit, PRECISION);
-  });
-
-  it("should still clamp when the cap binds but no override is given", () => {
-    // Arrange
-    const input = baseInput({
-      targetWeightKg: AGGRESSIVE_TARGET_KG,
-      targetDate: TARGET_30D,
-    });
-    const cap = rateCapKcal(DEFAULT_WEIGHT_KG);
-
-    // Act
-    const result = computeDailyDelta(input);
-
-    // Assert
-    expect(result.overridden).toBe(false);
-    expect(result.dailyDeltaKcal).toBeCloseTo(-cap, PRECISION);
   });
 
   it("should clamp so intake never falls below FLOOR_KCAL", () => {

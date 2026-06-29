@@ -61,7 +61,6 @@ describe("OnboardingTutorial", () => {
 
   describe("rendering", () => {
     it("should render when open is true", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -76,8 +75,6 @@ describe("OnboardingTutorial", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.getByText("Welcome")).toBeInTheDocument();
       expect(
         screen.getByText("Welcome to the Workout SPA Editor!")
@@ -85,7 +82,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should not render when open is false", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -100,13 +96,10 @@ describe("OnboardingTutorial", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.queryByText("Welcome")).not.toBeInTheDocument();
     });
 
     it("should display first step by default", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -121,14 +114,11 @@ describe("OnboardingTutorial", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.getByText("Welcome")).toBeInTheDocument();
       expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
     });
 
     it("should display progress bar", () => {
-      // Arrange & Act
       // Arrange
 
       renderWithProviders(
@@ -138,8 +128,6 @@ describe("OnboardingTutorial", () => {
           onOpenChange={vi.fn()}
         />
       );
-
-      // Assert
 
       // Act
 
@@ -153,7 +141,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should display skip button", () => {
-      // Arrange & Act
       // Arrange
 
       renderWithProviders(
@@ -163,20 +150,17 @@ describe("OnboardingTutorial", () => {
           onOpenChange={vi.fn()}
         />
       );
-
-      // Assert - There are two skip buttons (X icon and Skip text button)
 
       // Act
 
       const skipButtons = screen.getAllByRole("button", { name: /skip/i });
 
       // Assert
-
+      // There are two skip buttons (X icon and Skip text button).
       expect(skipButtons.length).toBeGreaterThanOrEqual(1);
     });
 
     it("should display close button", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -188,8 +172,6 @@ describe("OnboardingTutorial", () => {
           onOpenChange={vi.fn()}
         />
       );
-
-      // Assert
 
       // Assert
 
@@ -204,7 +186,6 @@ describe("OnboardingTutorial", () => {
   describe("navigation", () => {
     it("should navigate to next step when next button is clicked", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       renderWithProviders(
@@ -217,11 +198,7 @@ describe("OnboardingTutorial", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /next/i }));
-
-      // Assert
 
       // Assert
 
@@ -230,7 +207,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should navigate to previous step when previous button is clicked", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -244,8 +220,6 @@ describe("OnboardingTutorial", () => {
 
       // Navigate to second step
       await user.click(screen.getByRole("button", { name: /next/i }));
-
-      // Act
       const prevButtons = screen.getAllByRole("button");
       const prevButton = prevButtons.find((btn) => btn.querySelector("svg")); // Button with ChevronLeft icon
 
@@ -255,14 +229,11 @@ describe("OnboardingTutorial", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.getByText("Welcome")).toBeInTheDocument();
       expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
     });
 
     it("should disable previous button on first step", () => {
-      // Arrange & Act
       // Arrange
 
       renderWithProviders(
@@ -273,22 +244,19 @@ describe("OnboardingTutorial", () => {
         />
       );
 
-      // Assert - Previous button exists but is disabled
-      const buttons = screen.getAllByRole("button");
-
       // Act
 
+      const buttons = screen.getAllByRole("button");
       const prevButton = buttons.find(
         (btn) => btn.querySelector("svg") && btn.disabled
       );
 
       // Assert
-
+      // Previous button exists but is disabled.
       expect(prevButton).toBeDefined();
     });
 
     it("should show complete button on last step", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -300,14 +268,10 @@ describe("OnboardingTutorial", () => {
         />
       );
 
-      // Act - Navigate to last step
-      await user.click(screen.getByRole("button", { name: /next/i }));
-
       // Act
-
+      // Navigate to last step
       await user.click(screen.getByRole("button", { name: /next/i }));
-
-      // Assert
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
 
@@ -319,7 +283,6 @@ describe("OnboardingTutorial", () => {
 
     it("should update progress bar as user navigates", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       renderWithProviders(
@@ -329,21 +292,15 @@ describe("OnboardingTutorial", () => {
           onOpenChange={vi.fn()}
         />
       );
-
-      // Act
-
       const progressBar = screen.getByRole("progressbar");
-
-      // Assert initial state
-
-      // Assert
-
       expect(progressBar).toHaveAttribute("aria-valuenow", "1");
 
-      // Act - Navigate to second step
+      // Act
+      // Navigate to second step
       await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
+
       expect(progressBar).toHaveAttribute("aria-valuenow", "2");
     });
   });
@@ -355,7 +312,6 @@ describe("OnboardingTutorial", () => {
   describe("skip and complete", () => {
     it("should call onOpenChange when skip button is clicked", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       const onOpenChange = vi.fn();
@@ -369,11 +325,7 @@ describe("OnboardingTutorial", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /^skip$/i }));
-
-      // Assert
 
       // Assert
 
@@ -382,7 +334,6 @@ describe("OnboardingTutorial", () => {
 
     it("should call onOpenChange when close button is clicked", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       const onOpenChange = vi.fn();
@@ -396,11 +347,7 @@ describe("OnboardingTutorial", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByLabelText("Skip tutorial"));
-
-      // Assert
 
       // Assert
 
@@ -408,7 +355,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should call onComplete when complete button is clicked", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -428,11 +374,7 @@ describe("OnboardingTutorial", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /finish/i }));
-
-      // Assert
 
       // Assert
 
@@ -440,7 +382,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should save completion state to localStorage when skipped", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -454,11 +395,7 @@ describe("OnboardingTutorial", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /^skip$/i }));
-
-      // Assert
 
       // Assert
 
@@ -468,7 +405,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should save completion state to localStorage when completed", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -486,11 +422,7 @@ describe("OnboardingTutorial", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /finish/i }));
-
-      // Assert
 
       // Assert
 
@@ -500,7 +432,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should use custom storage key when provided", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -516,11 +447,7 @@ describe("OnboardingTutorial", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /^skip$/i }));
-
-      // Assert
 
       // Assert
 
@@ -528,7 +455,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should reset to first step after completion", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -546,10 +472,8 @@ describe("OnboardingTutorial", () => {
       await user.click(screen.getByRole("button", { name: /next/i }));
       await user.click(screen.getByRole("button", { name: /finish/i }));
 
-      // Act - Reopen tutorial
-
       // Act
-
+      // Reopen tutorial
       rerender(
         <OnboardingTutorial
           steps={mockSteps}
@@ -557,8 +481,6 @@ describe("OnboardingTutorial", () => {
           onOpenChange={onOpenChange}
         />
       );
-
-      // Assert
 
       // Assert
 
@@ -574,7 +496,6 @@ describe("OnboardingTutorial", () => {
   describe("element highlighting", () => {
     it("should not highlight element when no targetSelector is provided", () => {
       // Arrange
-      // Arrange
 
       const stepsWithoutTarget: Array<TutorialStep> = [
         {
@@ -582,8 +503,6 @@ describe("OnboardingTutorial", () => {
           description: "Welcome message",
         },
       ];
-
-      // Act
       renderWithProviders(
         <OnboardingTutorial
           steps={stepsWithoutTarget}
@@ -592,26 +511,21 @@ describe("OnboardingTutorial", () => {
         />
       );
 
-      // Assert - No highlight element with ring should be rendered
-
       // Act
 
       const highlight = document.querySelector(".ring-4.ring-primary-500");
 
       // Assert
-
+      // No highlight element with ring should be rendered.
       expect(highlight).not.toBeInTheDocument();
     });
 
     it("should attempt to highlight element when targetSelector is provided", async () => {
       // Arrange
-      // Arrange
 
       const targetElement = document.createElement("button");
       targetElement.id = "create-button";
       document.body.appendChild(targetElement);
-
-      // Act
       renderWithProviders(
         <OnboardingTutorial
           steps={mockSteps}
@@ -629,8 +543,6 @@ describe("OnboardingTutorial", () => {
 
       // Assert
 
-      // Assert
-
       await waitFor(() => {
         const highlight = document.querySelector(".ring-4.ring-primary-500");
         expect(highlight).toBeInTheDocument();
@@ -645,14 +557,11 @@ describe("OnboardingTutorial", () => {
   describe("utility functions", () => {
     describe("hasCompletedOnboarding", () => {
       it("should return false when onboarding not completed", () => {
-        // Arrange & Act
         // Arrange
 
         // Act
 
         const result = hasCompletedOnboarding();
-
-        // Assert
 
         // Assert
 
@@ -661,17 +570,12 @@ describe("OnboardingTutorial", () => {
 
       it("should return true when onboarding completed", () => {
         // Arrange
-        // Arrange
 
         localStorage.setItem("workout-spa-onboarding-completed", "true");
 
         // Act
 
-        // Act
-
         const result = hasCompletedOnboarding();
-
-        // Assert
 
         // Assert
 
@@ -680,18 +584,13 @@ describe("OnboardingTutorial", () => {
 
       it("should use custom storage key when provided", () => {
         // Arrange
-        // Arrange
 
         const customKey = "custom-key";
         localStorage.setItem(customKey, "true");
 
         // Act
 
-        // Act
-
         const result = hasCompletedOnboarding(customKey);
-
-        // Assert
 
         // Assert
 
@@ -700,7 +599,6 @@ describe("OnboardingTutorial", () => {
 
       it("should return false on localStorage error", () => {
         // Arrange
-        // Arrange
 
         vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
           throw new Error("Storage error");
@@ -708,11 +606,7 @@ describe("OnboardingTutorial", () => {
 
         // Act
 
-        // Act
-
         const result = hasCompletedOnboarding();
-
-        // Assert
 
         // Assert
 
@@ -723,17 +617,12 @@ describe("OnboardingTutorial", () => {
     describe("resetOnboarding", () => {
       it("should remove completion state from localStorage", () => {
         // Arrange
-        // Arrange
 
         localStorage.setItem("workout-spa-onboarding-completed", "true");
 
         // Act
 
-        // Act
-
         resetOnboarding();
-
-        // Assert
 
         // Assert
 
@@ -744,12 +633,9 @@ describe("OnboardingTutorial", () => {
 
       it("should use custom storage key when provided", () => {
         // Arrange
-        // Arrange
 
         const customKey = "custom-key";
         localStorage.setItem(customKey, "true");
-
-        // Act
 
         // Act
 
@@ -757,13 +643,10 @@ describe("OnboardingTutorial", () => {
 
         // Assert
 
-        // Assert
-
         expect(localStorage.getItem(customKey)).toBeNull();
       });
 
       it("should handle localStorage errors gracefully", () => {
-        // Arrange
         // Arrange
 
         const consoleErrorSpy = vi
@@ -775,11 +658,7 @@ describe("OnboardingTutorial", () => {
 
         // Act
 
-        // Act
-
         resetOnboarding();
-
-        // Assert
 
         // Assert
 
@@ -794,7 +673,6 @@ describe("OnboardingTutorial", () => {
 
   describe("positioning", () => {
     it("should apply center position by default", () => {
-      // Arrange & Act
       // Arrange
 
       renderWithProviders(
@@ -804,8 +682,6 @@ describe("OnboardingTutorial", () => {
           onOpenChange={vi.fn()}
         />
       );
-
-      // Assert
 
       // Act
 
@@ -819,7 +695,6 @@ describe("OnboardingTutorial", () => {
 
     it("should apply bottom position when specified", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       renderWithProviders(
@@ -830,13 +705,9 @@ describe("OnboardingTutorial", () => {
         />
       );
 
-      // Act - Navigate to step with bottom position
-      await user.click(screen.getByRole("button", { name: /next/i }));
-
-      // Assert
-
       // Act
-
+      // Navigate to step with bottom position
+      await user.click(screen.getByRole("button", { name: /next/i }));
       const dialog = screen.getByRole("dialog");
 
       // Assert
@@ -846,7 +717,6 @@ describe("OnboardingTutorial", () => {
 
     it("should apply right position when specified", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       renderWithProviders(
@@ -857,14 +727,10 @@ describe("OnboardingTutorial", () => {
         />
       );
 
-      // Act - Navigate to step with right position
-      await user.click(screen.getByRole("button", { name: /next/i }));
-      await user.click(screen.getByRole("button", { name: /next/i }));
-
-      // Assert
-
       // Act
-
+      // Navigate to step with right position
+      await user.click(screen.getByRole("button", { name: /next/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
       const dialog = screen.getByRole("dialog");
 
       // Assert
@@ -879,7 +745,6 @@ describe("OnboardingTutorial", () => {
 
   describe("accessibility", () => {
     it("should have proper ARIA labels", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -891,8 +756,6 @@ describe("OnboardingTutorial", () => {
           onOpenChange={vi.fn()}
         />
       );
-
-      // Assert
 
       // Assert
 
@@ -904,7 +767,6 @@ describe("OnboardingTutorial", () => {
     });
 
     it("should have proper dialog role", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -919,13 +781,10 @@ describe("OnboardingTutorial", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
 
     it("should have describedby attribute", () => {
-      // Arrange & Act
       // Arrange
 
       renderWithProviders(
@@ -935,8 +794,6 @@ describe("OnboardingTutorial", () => {
           onOpenChange={vi.fn()}
         />
       );
-
-      // Assert
 
       // Act
 

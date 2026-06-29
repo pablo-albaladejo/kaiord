@@ -198,41 +198,6 @@ describe("reorderStepsInBlockAction", () => {
     expect(result).toEqual({});
   });
 
-  it("should return empty object when item is not a repetition block", () => {
-    // Arrange
-    const workout: Workout = {
-      name: "Test Workout",
-      sport: "cycling",
-      steps: [
-        {
-          stepIndex: 0,
-          durationType: "time",
-          duration: { type: "time", seconds: 300 },
-          targetType: "power",
-          target: {
-            type: "power",
-            value: { unit: "watts", value: 200 },
-          },
-          intensity: "active",
-        },
-      ],
-    };
-    const krd = createMockKRD(workout);
-    const state = createMockState();
-
-    // Act
-    const result = reorderStepsInBlockAction(
-      krd,
-      "non-existent-block",
-      0,
-      1,
-      state
-    );
-
-    // Assert
-    expect(result).toEqual({});
-  });
-
   it("should return empty object when workout is not present", () => {
     // Arrange
     const krd: KRD = {

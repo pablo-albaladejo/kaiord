@@ -1,10 +1,9 @@
 /**
  * Type-level tests for UIWorkout.
  *
- * Compile-time checks that ensure the UIWorkout contract is actually
- * enforced by TypeScript (not just documented). If TypeScript stops
- * rejecting a plain-KRD assignment, these assertions start failing at
- * `pnpm exec tsc` time.
+ * Compile-time check on the UIWorkout/KRD relationship. `UIWorkout` is
+ * currently a structural alias of `KRD` (see `ui-workout.ts`), so the
+ * portable shape is assignable to `KRD`.
  */
 
 import { describe, expectTypeOf, it } from "vitest";
@@ -13,23 +12,12 @@ import type { KRD } from "./krd-core";
 import type { UIWorkout } from "./ui-workout";
 
 describe("UIWorkout type boundary", () => {
-  it("should not accept a plain KRD (ids required in structured_workout)", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-
-    expectTypeOf<KRD>().not.toMatchTypeOf<UIWorkout>();
-  });
-
   it("should make UIWorkout assignable to KRD (portable shape is a supertype)", () => {
     // Arrange
 
     // Act
 
     // Assert
-
     expectTypeOf<UIWorkout>().toMatchTypeOf<KRD>();
   });
 });

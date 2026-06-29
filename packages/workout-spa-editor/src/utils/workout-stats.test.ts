@@ -18,44 +18,19 @@ import {
 
 describe("workout-stats", () => {
   describe("calculateWorkoutStats", () => {
-    it("should return null stats for null workout", () => {
-      // Arrange & Act
+    it.each([
+      { scenario: "null workout", workout: null },
+      {
+        scenario: "workout with no steps",
+        workout: { sport: "running", steps: [] } as Workout,
+      },
+    ])("should return null stats for $scenario", ({ workout }) => {
       // Arrange
 
       // Act
-
-      const result = calculateWorkoutStats(null);
-
-      // Assert
-
-      // Assert
-
-      expect(result.totalDuration).toBeNull();
-      expect(result.totalDistance).toBeNull();
-      expect(result.hasOpenSteps).toBe(false);
-      expect(result.stepCount).toBe(0);
-      expect(result.repetitionCount).toBe(0);
-    });
-
-    it("should return null stats for workout with no steps", () => {
-      // Arrange
-      // Arrange
-
-      const workout: Workout = {
-        sport: "running",
-        steps: [],
-      };
-
-      // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBeNull();
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
@@ -65,8 +40,6 @@ describe("workout-stats", () => {
 
     it("should calculate stats for workout with time-based steps", () => {
       // Arrange
-      // Arrange
-
       const workout: Workout = {
         sport: "cycling",
         steps: [
@@ -88,15 +61,9 @@ describe("workout-stats", () => {
       };
 
       // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBe(TIME_STATS_TOTAL_SECONDS);
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
@@ -106,8 +73,6 @@ describe("workout-stats", () => {
 
     it("should calculate stats for workout with distance-based steps", () => {
       // Arrange
-      // Arrange
-
       const workout: Workout = {
         sport: "running",
         steps: [
@@ -129,15 +94,9 @@ describe("workout-stats", () => {
       };
 
       // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBeNull();
       expect(result.totalDistance).toBe(DISTANCE_STATS_TOTAL_METERS);
       expect(result.hasOpenSteps).toBe(false);
@@ -147,8 +106,6 @@ describe("workout-stats", () => {
 
     it("should calculate stats for workout with repetition blocks", () => {
       // Arrange
-      // Arrange
-
       const workout: Workout = {
         sport: "cycling",
         steps: [
@@ -189,15 +146,9 @@ describe("workout-stats", () => {
       };
 
       // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBe(
         STEP_SECONDS.warmup +
           (STEP_SECONDS.short + STEP_SECONDS.medium) * REPEAT_COUNTS.tripled +
@@ -211,8 +162,6 @@ describe("workout-stats", () => {
 
     it("should handle workout with open steps", () => {
       // Arrange
-      // Arrange
-
       const workout: Workout = {
         sport: "running",
         steps: [
@@ -234,15 +183,9 @@ describe("workout-stats", () => {
       };
 
       // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBeNull();
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(true);
@@ -252,8 +195,6 @@ describe("workout-stats", () => {
 
     it("should handle mixed duration types", () => {
       // Arrange
-      // Arrange
-
       const workout: Workout = {
         sport: "triathlon",
         steps: [
@@ -275,15 +216,9 @@ describe("workout-stats", () => {
       };
 
       // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBeNull();
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(false);
@@ -293,8 +228,6 @@ describe("workout-stats", () => {
 
     it("should count steps correctly with multiple repetition blocks", () => {
       // Arrange
-      // Arrange
-
       const workout: Workout = {
         sport: "running",
         steps: [
@@ -332,15 +265,9 @@ describe("workout-stats", () => {
       };
 
       // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBe(
         STEP_SECONDS.short * REPEAT_COUNTS.doubled +
           STEP_SECONDS.medium * REPEAT_COUNTS.tripled
@@ -351,8 +278,6 @@ describe("workout-stats", () => {
 
     it("should handle complex workout structure", () => {
       // Arrange
-      // Arrange
-
       const workout: Workout = {
         name: "Complex Workout",
         sport: "cycling",
@@ -401,15 +326,9 @@ describe("workout-stats", () => {
       };
 
       // Act
-
-      // Act
-
       const result = calculateWorkoutStats(workout);
 
       // Assert
-
-      // Assert
-
       expect(result.totalDuration).toBeNull(); // Has open step
       expect(result.totalDistance).toBeNull();
       expect(result.hasOpenSteps).toBe(true);

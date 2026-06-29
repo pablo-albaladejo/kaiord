@@ -6,23 +6,46 @@ import { convertOriginalZwiftDuration } from "./original-duration.converter";
 
 describe("convertOriginalZwiftDuration", () => {
   describe("original duration type restoration", () => {
-    it("should restore distance duration from kaiord extension", () => {
-      // Arrange
-      const data = {
-        Duration: 1000,
-        "kaiord:originalDurationType": "distance",
-        "kaiord:originalDurationMeters": 2000,
-      };
+    it.each([
+      {
+        data: {
+          Duration: 1000,
+          "kaiord:originalDurationType": "distance",
+          "kaiord:originalDurationMeters": 2000,
+        },
+        expected: { type: durationTypeSchema.enum.distance, meters: 2000 },
+      },
+      {
+        data: {
+          Duration: 300,
+          "kaiord:originalDurationType": "heart_rate_less_than",
+          "kaiord:originalDurationBpm": 140,
+        },
+        expected: {
+          type: durationTypeSchema.enum.heart_rate_less_than,
+          bpm: 140,
+        },
+      },
+      {
+        data: {
+          Duration: 300,
+          "kaiord:originalDurationType": "power_less_than",
+          "kaiord:originalDurationWatts": 200,
+        },
+        expected: { type: durationTypeSchema.enum.power_less_than, watts: 200 },
+      },
+    ])(
+      "should restore $expected.type duration from kaiord extension",
+      ({ data, expected }) => {
+        // Arrange
 
-      // Act
-      const result = convertOriginalZwiftDuration(data);
+        // Act
+        const result = convertOriginalZwiftDuration(data);
 
-      // Assert
-      expect(result).toStrictEqual({
-        type: durationTypeSchema.enum.distance,
-        meters: 2000,
-      });
-    });
+        // Assert
+        expect(result).toStrictEqual(expected);
+      }
+    );
 
     it("should fall back to Duration when originalDurationMeters is absent", () => {
       // Arrange
@@ -41,101 +64,35 @@ describe("convertOriginalZwiftDuration", () => {
       });
     });
 
-    it("should restore heart_rate_less_than duration from kaiord extension", () => {
-      // Arrange
-      const data = {
-        Duration: 300,
-        "kaiord:originalDurationType": "heart_rate_less_than",
-        "kaiord:originalDurationBpm": 140,
-      };
+    it.each([
+      { originalDurationType: "distance", attribute: "originalDurationMeters" },
+      {
+        originalDurationType: "heart_rate_less_than",
+        attribute: "originalDurationBpm",
+      },
+      {
+        originalDurationType: "power_less_than",
+        attribute: "originalDurationWatts",
+      },
+    ])(
+      "should restore open and warn when $originalDurationType value is missing",
+      ({ originalDurationType, attribute }) => {
+        // Arrange
+        const data = { "kaiord:originalDurationType": originalDurationType };
+        const logger = createMockLogger();
+        const warnSpy = vi.spyOn(logger, "warn");
 
-      // Act
-      const result = convertOriginalZwiftDuration(data);
+        // Act
+        const result = convertOriginalZwiftDuration(data, logger);
 
-      // Assert
-      expect(result).toStrictEqual({
-        type: durationTypeSchema.enum.heart_rate_less_than,
-        bpm: 140,
-      });
-    });
-
-    it("should restore power_less_than duration from kaiord extension", () => {
-      // Arrange
-      const data = {
-        Duration: 300,
-        "kaiord:originalDurationType": "power_less_than",
-        "kaiord:originalDurationWatts": 200,
-      };
-
-      // Act
-      const result = convertOriginalZwiftDuration(data);
-
-      // Assert
-      expect(result).toStrictEqual({
-        type: durationTypeSchema.enum.power_less_than,
-        watts: 200,
-      });
-    });
-
-    it("should restore open when distance type is present but meters are missing", () => {
-      // Arrange
-      const data = { "kaiord:originalDurationType": "distance" };
-      const logger = createMockLogger();
-      const warnSpy = vi.spyOn(logger, "warn");
-
-      // Act
-      const result = convertOriginalZwiftDuration(data, logger);
-
-      // Assert
-      expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
-      expect(warnSpy).toHaveBeenCalledWith(
-        "Lossy conversion: corrupted round-trip duration restored as open",
-        expect.objectContaining({
-          originalDurationType: "distance",
-          attribute: "originalDurationMeters",
-        })
-      );
-    });
-
-    it("should restore open when heart-rate type is present but bpm is missing", () => {
-      // Arrange
-      const data = { "kaiord:originalDurationType": "heart_rate_less_than" };
-      const logger = createMockLogger();
-      const warnSpy = vi.spyOn(logger, "warn");
-
-      // Act
-      const result = convertOriginalZwiftDuration(data, logger);
-
-      // Assert
-      expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
-      expect(warnSpy).toHaveBeenCalledWith(
-        "Lossy conversion: corrupted round-trip duration restored as open",
-        expect.objectContaining({
-          originalDurationType: "heart_rate_less_than",
-          attribute: "originalDurationBpm",
-        })
-      );
-    });
-
-    it("should restore open when power type is present but watts are missing", () => {
-      // Arrange
-      const data = { "kaiord:originalDurationType": "power_less_than" };
-      const logger = createMockLogger();
-      const warnSpy = vi.spyOn(logger, "warn");
-
-      // Act
-      const result = convertOriginalZwiftDuration(data, logger);
-
-      // Assert
-      expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
-      expect(warnSpy).toHaveBeenCalledWith(
-        "Lossy conversion: corrupted round-trip duration restored as open",
-        expect.objectContaining({
-          originalDurationType: "power_less_than",
-          attribute: "originalDurationWatts",
-        })
-      );
-    });
+        // Assert
+        expect(result).toStrictEqual({ type: durationTypeSchema.enum.open });
+        expect(warnSpy).toHaveBeenCalledWith(
+          "Lossy conversion: corrupted round-trip duration restored as open",
+          expect.objectContaining({ originalDurationType, attribute })
+        );
+      }
+    );
 
     it("should restore open without a logger when bpm is missing", () => {
       // Arrange

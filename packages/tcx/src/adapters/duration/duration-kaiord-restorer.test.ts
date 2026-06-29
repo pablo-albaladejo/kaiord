@@ -116,61 +116,22 @@ describe("restoreKaiordDuration", () => {
     expect(result).toBeNull();
   });
 
-  it("should return null when heart_rate_less_than has no bpm", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxDuration = {
-      "@_kaiord:originalDurationType": "heart_rate_less_than",
-    };
+  it.each([["power_less_than"], ["power_greater_than"], ["calories"]] as const)(
+    "should return null when %s has no threshold value",
+    (originalDurationType) => {
+      // Arrange
+      const logger = createMockLogger();
+      const tcxDuration = {
+        "@_kaiord:originalDurationType": originalDurationType,
+      };
 
-    // Act
-    const result = restoreKaiordDuration(tcxDuration, logger);
+      // Act
+      const result = restoreKaiordDuration(tcxDuration, logger);
 
-    // Assert
-    expect(result).toBeNull();
-  });
-
-  it("should return null when power_less_than has no watts", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxDuration = {
-      "@_kaiord:originalDurationType": "power_less_than",
-    };
-
-    // Act
-    const result = restoreKaiordDuration(tcxDuration, logger);
-
-    // Assert
-    expect(result).toBeNull();
-  });
-
-  it("should return null when power_greater_than has no watts", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxDuration = {
-      "@_kaiord:originalDurationType": "power_greater_than",
-    };
-
-    // Act
-    const result = restoreKaiordDuration(tcxDuration, logger);
-
-    // Assert
-    expect(result).toBeNull();
-  });
-
-  it("should return null when calories has no calories value", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxDuration = {
-      "@_kaiord:originalDurationType": "calories",
-    };
-
-    // Act
-    const result = restoreKaiordDuration(tcxDuration, logger);
-
-    // Assert
-    expect(result).toBeNull();
-  });
+      // Assert
+      expect(result).toBeNull();
+    }
+  );
 
   it("should return null when bpm is string instead of number", () => {
     // Arrange

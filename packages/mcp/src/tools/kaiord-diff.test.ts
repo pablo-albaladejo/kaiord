@@ -20,26 +20,6 @@ describe("kaiord_diff", () => {
     await rm(tmpDir, { recursive: true });
   });
 
-  it("should show no metadata differences for identical files", async () => {
-    // Arrange
-    const client = await createTestClient();
-    const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
-    const file1 = join(tmpDir, "a.krd");
-    const file2 = join(tmpDir, "b.krd");
-    await writeFile(file1, krdJson);
-    await writeFile(file2, krdJson);
-    const result = (await client.callTool({
-      name: "kaiord_diff",
-      arguments: { file1, file2 },
-    })) as McpToolResult;
-
-    // Act
-    const diff = JSON.parse(result.content[0].text);
-
-    // Assert
-    expect(diff.metadata).toHaveLength(0);
-  });
-
   it("should detect metadata differences", async () => {
     // Arrange
     const client = await createTestClient();

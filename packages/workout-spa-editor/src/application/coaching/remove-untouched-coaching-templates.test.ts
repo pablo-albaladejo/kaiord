@@ -59,137 +59,103 @@ const makeRecord = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord => ({
   ...overrides,
 });
 
+const multiStepKrd = (): WorkoutRecord["krd"] => {
+  const krd = makeTemplateKrd();
+  return {
+    ...krd,
+    extensions: {
+      structured_workout: {
+        ...krd.extensions.structured_workout,
+        steps: [WARMUP_STEP, { ...WARMUP_STEP, stepIndex: 1, name: "Main" }],
+      },
+    },
+  } as WorkoutRecord["krd"];
+};
+
+const editedDurationKrd = (): WorkoutRecord["krd"] => {
+  const krd = makeTemplateKrd();
+  return {
+    ...krd,
+    extensions: {
+      structured_workout: {
+        ...krd.extensions.structured_workout,
+        steps: [{ ...WARMUP_STEP, duration: { type: "time", seconds: 1200 } }],
+      },
+    },
+  } as WorkoutRecord["krd"];
+};
+
+const renamedStepKrd = (): WorkoutRecord["krd"] => {
+  const krd = makeTemplateKrd();
+  return {
+    ...krd,
+    extensions: {
+      structured_workout: {
+        ...krd.extensions.structured_workout,
+        steps: [{ ...WARMUP_STEP, name: "Custom" }],
+      },
+    },
+  } as WorkoutRecord["krd"];
+};
+
 describe("isUntouchedCoachingTemplate", () => {
-  it("should return true for an untouched coaching template record", () => {
-    // Arrange
-    const record = makeRecord();
+  const cases: Array<{
+    label: string;
+    override: Partial<WorkoutRecord>;
+    expected: boolean;
+  }> = [
+    { label: "an untouched coaching template", override: {}, expected: true },
+    {
+      label: "a non-structured state",
+      override: { state: "raw" },
+      expected: false,
+    },
+    {
+      label: "a non-coaching (non-train2go) source",
+      override: { source: "manual" },
+      expected: false,
+    },
+    {
+      label: "a set modifiedAt (user explicitly saved)",
+      override: { modifiedAt: "2026-01-02T10:00:00.000Z" },
+      expected: false,
+    },
+    {
+      label: "updatedAt differing from createdAt (user-edited)",
+      override: { updatedAt: "2026-01-02T10:00:00.000Z" },
+      expected: false,
+    },
+    {
+      label: "a multi-step workout",
+      override: { krd: multiStepKrd() },
+      expected: false,
+    },
+    {
+      label: "a single step with a modified duration",
+      override: { krd: editedDurationKrd() },
+      expected: false,
+    },
+    {
+      label: "a renamed single step",
+      override: { krd: renamedStepKrd() },
+      expected: false,
+    },
+    { label: "a null krd", override: { krd: null }, expected: false },
+  ];
 
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
+  it.each(cases)(
+    "should return $expected for $label",
+    ({ override, expected }) => {
+      // Arrange
+      const record = makeRecord(override);
 
-    // Assert
-    expect(result).toBe(true);
-  });
+      // Act
+      const result = isUntouchedCoachingTemplate(record);
 
-  it("should return false when state is not structured", () => {
-    // Arrange
-    const record = makeRecord({ state: "raw" });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false for a non-coaching (non-train2go) source", () => {
-    // Arrange
-    const record = makeRecord({ source: "manual" });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false when modifiedAt is set (user explicitly saved)", () => {
-    // Arrange
-    const record = makeRecord({ modifiedAt: "2026-01-02T10:00:00.000Z" });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false when updatedAt differs from createdAt (user-edited)", () => {
-    // Arrange
-    const record = makeRecord({ updatedAt: "2026-01-02T10:00:00.000Z" });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false for a multi-step workout", () => {
-    // Arrange
-    const krd = makeTemplateKrd();
-    const multiStep = {
-      ...krd,
-      extensions: {
-        structured_workout: {
-          ...krd.extensions.structured_workout,
-          steps: [WARMUP_STEP, { ...WARMUP_STEP, stepIndex: 1, name: "Main" }],
-        },
-      },
-    };
-    const record = makeRecord({ krd: multiStep as WorkoutRecord["krd"] });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false when the single step has been modified (different duration)", () => {
-    // Arrange
-    const krd = makeTemplateKrd();
-    const editedKrd = {
-      ...krd,
-      extensions: {
-        structured_workout: {
-          ...krd.extensions.structured_workout,
-          steps: [
-            { ...WARMUP_STEP, duration: { type: "time", seconds: 1200 } },
-          ],
-        },
-      },
-    };
-    const record = makeRecord({ krd: editedKrd as WorkoutRecord["krd"] });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false when the step name differs (user renamed step)", () => {
-    // Arrange
-    const krd = makeTemplateKrd();
-    const editedKrd = {
-      ...krd,
-      extensions: {
-        structured_workout: {
-          ...krd.extensions.structured_workout,
-          steps: [{ ...WARMUP_STEP, name: "Custom" }],
-        },
-      },
-    };
-    const record = makeRecord({ krd: editedKrd as WorkoutRecord["krd"] });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should return false when krd is null", () => {
-    // Arrange
-    const record = makeRecord({ krd: null });
-
-    // Act
-    const result = isUntouchedCoachingTemplate(record);
-
-    // Assert
-    expect(result).toBe(false);
-  });
+      // Assert
+      expect(result).toBe(expected);
+    }
+  );
 });
 
 describe("removeUntouchedCoachingTemplates", () => {
@@ -225,12 +191,31 @@ describe("removeUntouchedCoachingTemplates", () => {
     expect(workouts.delete).toHaveBeenCalledWith("w-junk");
   });
 
-  it("should not remove a user-edited workout (updatedAt > createdAt)", async () => {
+  const negativeCases: Array<{
+    label: string;
+    override: Partial<WorkoutRecord>;
+  }> = [
+    {
+      label: "a user-edited workout (updatedAt > createdAt)",
+      override: { id: "w-edited", updatedAt: "2026-01-02T10:00:00.000Z" },
+    },
+    {
+      label: "a user-edited workout (modifiedAt set)",
+      override: { id: "w-modified", modifiedAt: "2026-01-02T10:00:00.000Z" },
+    },
+    {
+      label: "a non-coaching (scratch) workout",
+      override: { id: "w-scratch", source: "scratch" },
+    },
+    {
+      label: "a multi-step coaching workout",
+      override: { id: "w-multi", krd: multiStepKrd() },
+    },
+  ];
+
+  it.each(negativeCases)("should not remove $label", async ({ override }) => {
     // Arrange
-    const record = makeRecord({
-      id: "w-edited",
-      updatedAt: "2026-01-02T10:00:00.000Z",
-    });
+    const record = makeRecord(override);
     const { workouts, sessionMatch } = makeRepos([record]);
 
     // Act
@@ -243,71 +228,6 @@ describe("removeUntouchedCoachingTemplates", () => {
     expect(result.removed).toBe(0);
     expect(workouts.delete).not.toHaveBeenCalled();
     expect(sessionMatch.deleteByWorkoutId).not.toHaveBeenCalled();
-  });
-
-  it("should not remove a user-edited workout (modifiedAt set)", async () => {
-    // Arrange
-    const record = makeRecord({
-      id: "w-modified",
-      modifiedAt: "2026-01-02T10:00:00.000Z",
-    });
-    const { workouts, sessionMatch } = makeRepos([record]);
-
-    // Act
-    const result = await removeUntouchedCoachingTemplates(
-      workouts,
-      sessionMatch
-    );
-
-    // Assert
-    expect(result.removed).toBe(0);
-    expect(workouts.delete).not.toHaveBeenCalled();
-  });
-
-  it("should not remove a non-coaching (scratch) workout", async () => {
-    // Arrange
-    const record = makeRecord({ id: "w-scratch", source: "scratch" });
-    const { workouts, sessionMatch } = makeRepos([record]);
-
-    // Act
-    const result = await removeUntouchedCoachingTemplates(
-      workouts,
-      sessionMatch
-    );
-
-    // Assert
-    expect(result.removed).toBe(0);
-    expect(workouts.delete).not.toHaveBeenCalled();
-    expect(sessionMatch.deleteByWorkoutId).not.toHaveBeenCalled();
-  });
-
-  it("should not remove a multi-step coaching workout", async () => {
-    // Arrange
-    const krd = makeTemplateKrd();
-    const multiKrd = {
-      ...krd,
-      extensions: {
-        structured_workout: {
-          ...krd.extensions.structured_workout,
-          steps: [WARMUP_STEP, { ...WARMUP_STEP, stepIndex: 1, name: "Main" }],
-        },
-      },
-    };
-    const record = makeRecord({
-      id: "w-multi",
-      krd: multiKrd as WorkoutRecord["krd"],
-    });
-    const { workouts, sessionMatch } = makeRepos([record]);
-
-    // Act
-    const result = await removeUntouchedCoachingTemplates(
-      workouts,
-      sessionMatch
-    );
-
-    // Assert
-    expect(result.removed).toBe(0);
-    expect(workouts.delete).not.toHaveBeenCalled();
   });
 
   it("should be idempotent — second run is a no-op when store is empty", async () => {

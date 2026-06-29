@@ -55,129 +55,85 @@ describe("RepetitionBlockCard", () => {
 
   describe("rendering", () => {
     it("should render repetition block with repeat count", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert
-
-      // Assert
-
       expect(screen.getByText("Repeat Block")).toBeInTheDocument();
       expect(screen.getByText("3x")).toBeInTheDocument();
     });
 
     it("should render step count", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert
-
-      // Assert
-
       expect(screen.getByText("2 steps")).toBeInTheDocument();
     });
 
     it("should render single step count correctly", () => {
       // Arrange
-      // Arrange
-
       const singleStepBlock: RepetitionBlock = {
         repeatCount: 2,
         steps: [mockStep1],
       };
 
       // Act
-
-      // Act
-
       render(<RepetitionBlockCard block={singleStepBlock} />);
 
       // Assert
-
-      // Assert
-
       expect(screen.getByText("1 step")).toBeInTheDocument();
     });
 
     it("should render nested steps when expanded", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<RepetitionBlockCard block={mockBlock} />);
-
-      // Assert
-
       // Act
-
+      render(<RepetitionBlockCard block={mockBlock} />);
       const stepCards = screen.getAllByTestId("step-card");
 
       // Assert
-
       expect(stepCards).toHaveLength(2);
     });
 
     it("should render repeat icon", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<RepetitionBlockCard block={mockBlock} />);
-
-      // Assert
-
       // Act
-
+      render(<RepetitionBlockCard block={mockBlock} />);
       const repeatIcon = screen.getByTestId("repetition-block-card");
 
       // Assert
-
       expect(repeatIcon).toBeInTheDocument();
     });
   });
 
   describe("expand/collapse", () => {
     it("should start expanded by default", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<RepetitionBlockCard block={mockBlock} />);
-
-      // Assert
-
       // Act
-
+      render(<RepetitionBlockCard block={mockBlock} />);
       const stepCards = screen.getAllByTestId("step-card");
 
       // Assert
-
       expect(stepCards).toHaveLength(2);
     });
 
     it("should collapse when toggle button is clicked", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Act
       const toggleButton = screen.getByTestId("toggle-expand-button");
-
-      // Act
-
       await user.click(toggleButton);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(screen.queryAllByTestId("step-card")).toHaveLength(0);
       });
@@ -185,25 +141,17 @@ describe("RepetitionBlockCard", () => {
 
     it("should expand when toggle button is clicked again", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} />);
       const toggleButton = screen.getByTestId("toggle-expand-button");
 
-      // Act - collapse first
-
       // Act
-
+      // collapse first
       await user.click(toggleButton);
-
-      // Assert
-
       await waitFor(() => {
         expect(screen.queryAllByTestId("step-card")).toHaveLength(0);
       });
-
-      // Act - expand again
+      // expand again
       await user.click(toggleButton);
 
       // Assert
@@ -215,25 +163,15 @@ describe("RepetitionBlockCard", () => {
 
     it("should update aria-label when toggling", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} />);
-
-      // Act
-
       const toggleButton = screen.getByTestId("toggle-expand-button");
-
-      // Assert initial state
-
-      // Assert
-
       expect(toggleButton).toHaveAttribute("aria-label", "Collapse block");
 
       // Act
       await user.click(toggleButton);
 
-      // Assert collapsed state
+      // Assert
       await waitFor(() => {
         expect(toggleButton).toHaveAttribute("aria-label", "Expand block");
       });
@@ -243,22 +181,14 @@ describe("RepetitionBlockCard", () => {
   describe("edit repeat count", () => {
     it("should show input when edit button is clicked", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Act
       const editButton = screen.getByTestId("edit-count-button");
-
-      // Act
-
       await user.click(editButton);
 
       // Assert
-
-      // Assert
-
       expect(screen.getByTestId("repeat-count-input")).toBeInTheDocument();
       expect(screen.getByTestId("save-count-button")).toBeInTheDocument();
       expect(screen.getByTestId("cancel-count-button")).toBeInTheDocument();
@@ -266,8 +196,6 @@ describe("RepetitionBlockCard", () => {
 
     it("should call onEditRepeatCount when save is clicked", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -286,22 +214,14 @@ describe("RepetitionBlockCard", () => {
       await user.type(input, "5");
 
       const saveButton = screen.getByTestId("save-count-button");
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       expect(onEditRepeatCount).toHaveBeenCalledWith(SAVED_REPEAT_COUNT_FIVE);
     });
 
     it("should hide input after save", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -320,15 +240,9 @@ describe("RepetitionBlockCard", () => {
       await user.type(input, "5");
 
       const saveButton = screen.getByTestId("save-count-button");
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(
           screen.queryByTestId("repeat-count-input")
@@ -338,8 +252,6 @@ describe("RepetitionBlockCard", () => {
 
     it("should cancel edit when cancel button is clicked", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -358,15 +270,9 @@ describe("RepetitionBlockCard", () => {
       await user.type(input, "5");
 
       const cancelButton = screen.getByTestId("cancel-count-button");
-
-      // Act
-
       await user.click(cancelButton);
 
       // Assert
-
-      // Assert
-
       expect(onEditRepeatCount).not.toHaveBeenCalled();
       await waitFor(() => {
         expect(
@@ -377,8 +283,6 @@ describe("RepetitionBlockCard", () => {
 
     it("should save on Enter key", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -394,22 +298,14 @@ describe("RepetitionBlockCard", () => {
 
       const input = screen.getByTestId("repeat-count-input");
       await user.clear(input);
-
-      // Act
-
       await user.type(input, "4{Enter}");
 
       // Assert
-
-      // Assert
-
       expect(onEditRepeatCount).toHaveBeenCalledWith(SAVED_REPEAT_COUNT_FOUR);
     });
 
     it("should cancel on Escape key", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -425,22 +321,14 @@ describe("RepetitionBlockCard", () => {
 
       const input = screen.getByTestId("repeat-count-input");
       await user.clear(input);
-
-      // Act
-
       await user.type(input, "5{Escape}");
 
       // Assert
-
-      // Assert
-
       expect(onEditRepeatCount).not.toHaveBeenCalled();
     });
 
     it("should save valid count (minimum 1)", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -459,22 +347,14 @@ describe("RepetitionBlockCard", () => {
       await user.type(input, "1");
 
       const saveButton = screen.getByTestId("save-count-button");
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       expect(onEditRepeatCount).toHaveBeenCalledWith(1);
     });
 
     it("should not save invalid count (less than 1)", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -493,22 +373,14 @@ describe("RepetitionBlockCard", () => {
       await user.type(input, "0");
 
       const saveButton = screen.getByTestId("save-count-button");
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       expect(onEditRepeatCount).not.toHaveBeenCalled();
     });
 
     it("should not save non-numeric value", async () => {
       // Arrange
-      // Arrange
-
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -527,15 +399,9 @@ describe("RepetitionBlockCard", () => {
       await user.type(input, "abc");
 
       const saveButton = screen.getByTestId("save-count-button");
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       expect(onEditRepeatCount).not.toHaveBeenCalled();
     });
   });
@@ -543,45 +409,30 @@ describe("RepetitionBlockCard", () => {
   describe("step management", () => {
     it("should call onAddStep when add button is clicked", async () => {
       // Arrange
-      // Arrange
-
       const onAddStep = vi.fn();
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} onAddStep={onAddStep} />);
 
       // Act
       const addButton = screen.getByTestId("add-step-button");
-
-      // Act
-
       await user.click(addButton);
 
       // Assert
-
-      // Assert
-
       expect(onAddStep).toHaveBeenCalledOnce();
     });
 
     it("should not render add button when onAddStep is not provided", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert
-
-      // Assert
-
       expect(screen.queryByTestId("add-step-button")).not.toBeInTheDocument();
     });
 
     it("should call onSelectStep when step is clicked", async () => {
       // Arrange
-      // Arrange
-
       const onSelectStep = vi.fn();
       const user = userEvent.setup();
       render(
@@ -590,32 +441,20 @@ describe("RepetitionBlockCard", () => {
 
       // Act
       const stepCards = screen.getAllByTestId("step-card");
-
-      // Act
-
       await user.click(stepCards[0]);
 
       // Assert
-
-      // Assert
-
       expect(onSelectStep).toHaveBeenCalledWith("block-step-0");
     });
 
     it("should highlight selected step", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<RepetitionBlockCard block={mockBlock} selectedStepIndex={0} />);
-
-      // Assert
-
       // Act
-
+      render(<RepetitionBlockCard block={mockBlock} selectedStepIndex={0} />);
       const stepCards = screen.getAllByTestId("step-card");
 
       // Assert
-
       expect(stepCards[0]).toHaveClass("border-primary-500");
     });
   });
@@ -623,43 +462,27 @@ describe("RepetitionBlockCard", () => {
   describe("delete button", () => {
     it("should render delete button in block header", () => {
       // Arrange
-      // Arrange
-
       const onDelete = vi.fn();
 
       // Act
       render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
-
-      // Assert
-
-      // Act
-
       const deleteButton = screen.getByTestId("delete-block-button");
 
       // Assert
-
       expect(deleteButton).toBeInTheDocument();
     });
 
     it("should show tooltip on delete button", async () => {
       // Arrange
-      // Arrange
-
       const onDelete = vi.fn();
       const user = userEvent.setup();
-
-      // Act
       render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
-      const deleteButton = screen.getByTestId("delete-block-button");
 
       // Act
-
+      const deleteButton = screen.getByTestId("delete-block-button");
       await user.hover(deleteButton);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         const tooltips = screen.getAllByText("Delete repetition block");
         expect(tooltips.length).toBeGreaterThan(0);
@@ -667,17 +490,12 @@ describe("RepetitionBlockCard", () => {
     });
 
     it("should not render delete button when onDelete is not provided", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert
-
-      // Assert
-
       expect(
         screen.queryByTestId("delete-block-button")
       ).not.toBeInTheDocument();
@@ -685,44 +503,28 @@ describe("RepetitionBlockCard", () => {
 
     it("should call onDelete when delete button is clicked", async () => {
       // Arrange
-      // Arrange
-
       const onDelete = vi.fn();
       const user = userEvent.setup();
-
-      // Act
       render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
-      const deleteButton = screen.getByTestId("delete-block-button");
 
       // Act
-
+      const deleteButton = screen.getByTestId("delete-block-button");
       await user.click(deleteButton);
 
       // Assert
-
-      // Assert
-
       expect(onDelete).toHaveBeenCalledOnce();
     });
 
     it("should style delete button as destructive variant", () => {
       // Arrange
-      // Arrange
-
       const onDelete = vi.fn();
 
       // Act
       render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
-
-      // Assert
-
-      // Act
-
       const deleteButton = screen.getByTestId("delete-block-button");
-      // Check for red/destructive styling classes
 
       // Assert
-
+      // Check for red/destructive styling classes
       expect(deleteButton).toHaveClass("text-red-600");
     });
   });
@@ -738,8 +540,6 @@ describe("RepetitionBlockCard", () => {
      */
     it("should render one step card per inner step of a multi-step block", () => {
       // Arrange
-      // Arrange
-
       const blockIndex = 2;
       const multiStepBlock: RepetitionBlock = {
         repeatCount: 3,
@@ -784,22 +584,15 @@ describe("RepetitionBlockCard", () => {
       render(
         <RepetitionBlockCard block={multiStepBlock} blockIndex={blockIndex} />
       );
-
       // Three inner steps → three step-card elements.
-
-      // Act
-
       const stepCards = screen.getAllByTestId("step-card");
 
       // Assert
-
       expect(stepCards).toHaveLength(THREE_STEP_BLOCK_CARD_COUNT);
     });
 
     it("should render one step card per block regardless of blockIndex", () => {
       // Arrange
-      // Arrange
-
       const block1Index = 1;
       const block2Index = 3;
 
@@ -837,34 +630,25 @@ describe("RepetitionBlockCard", () => {
         ],
       };
 
-      // Act - Render both blocks
+      // Act
       const { rerender } = render(
         <RepetitionBlockCard block={block1} blockIndex={block1Index} />
       );
 
-      // Assert block 1: one step card rendered.
-
-      // Act
-
-      let stepCards = screen.getAllByTestId("step-card");
-
       // Assert
-
+      // block 1: one step card rendered.
+      let stepCards = screen.getAllByTestId("step-card");
       expect(stepCards).toHaveLength(1);
 
-      // Act - Render block 2
+      // block 2: one step card rendered. Inner items carry stable ItemIds;
+      // no positional `block-N-step-M` string to verify.
       rerender(<RepetitionBlockCard block={block2} blockIndex={block2Index} />);
-
-      // Assert block 2: one step card rendered. Inner items carry
-      // stable ItemIds; no positional `block-N-step-M` string to verify.
       stepCards = screen.getAllByTestId("step-card");
       expect(stepCards).toHaveLength(1);
     });
 
     it("should handle block without blockIndex gracefully", () => {
       // Arrange
-      // Arrange
-
       const block: RepetitionBlock = {
         repeatCount: 2,
         steps: [
@@ -882,30 +666,23 @@ describe("RepetitionBlockCard", () => {
         ],
       };
 
-      // Act - Render without blockIndex
-      render(<RepetitionBlockCard block={block} />);
-
-      // Assert - component renders and produces the inner step card even
-      // when `blockIndex` is omitted; stable `ItemId`s on the inner items
-      // carry the identity that used to be encoded in the positional id.
-
       // Act
-
+      // Render without blockIndex; stable `ItemId`s on the inner items carry
+      // the identity that used to be encoded in the positional id.
+      render(<RepetitionBlockCard block={block} />);
       const stepCards = screen.getAllByTestId("step-card");
 
       // Assert
-
       expect(stepCards).toHaveLength(1);
       expect(stepCards[0]).toBeInTheDocument();
     });
 
     it("should render steps with the same stepIndex in different blocks independently", () => {
+      // Arrange
       // Step identity is now a stable ItemId — two blocks containing
       // steps with identical `stepIndex` are rendered independently
       // because each step card binds to its own id, not the positional
       // `block-N-step-M` string.
-      // Arrange
-
       const step: WorkoutStep = {
         stepIndex: 5,
         durationType: "time",
@@ -924,13 +701,11 @@ describe("RepetitionBlockCard", () => {
       };
 
       // Act
-
       const { rerender } = render(
         <RepetitionBlockCard block={block} blockIndex={0} />
       );
 
       // Assert
-
       expect(screen.getAllByTestId("step-card")).toHaveLength(1);
 
       rerender(<RepetitionBlockCard block={block} blockIndex={1} />);
@@ -940,12 +715,6 @@ describe("RepetitionBlockCard", () => {
 
   describe("prop handling", () => {
     it("should not pass component-specific props to DOM element", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
       // Arrange
       const warningChecker = expectNoReactWarnings();
       const onEditRepeatCount = vi.fn();
@@ -985,8 +754,6 @@ describe("RepetitionBlockCard", () => {
 
     it("should forward HTML attributes to DOM element", () => {
       // Arrange
-      // Arrange
-
       const warningChecker = expectNoReactWarnings();
 
       // Act
@@ -998,15 +765,9 @@ describe("RepetitionBlockCard", () => {
           role="region"
         />
       );
-
-      // Assert
-
-      // Act
-
       const element = screen.getByTestId("repetition-block-card");
 
       // Assert
-
       expect(element).toHaveAttribute("data-custom", "test-value");
       expect(element).toHaveAttribute("aria-label", "Test block");
       expect(element).toHaveAttribute("role", "region");
@@ -1015,12 +776,6 @@ describe("RepetitionBlockCard", () => {
     });
 
     it("should not produce warnings with all props provided", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-
       // Arrange
       const warningChecker = expectNoReactWarnings();
 

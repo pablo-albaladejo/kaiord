@@ -4,7 +4,6 @@ import {
   defaultFocusTelemetry,
   focusErrorEvent,
   type FocusTelemetry,
-  type FocusTelemetryEvent,
   formFieldShortCircuitEvent,
   overlayDeferredApplyEvent,
   safeEmit,
@@ -19,53 +18,6 @@ import {
   FOCUS_TELEMETRY_EVENT_TYPES as TYPES,
   FOCUS_TELEMETRY_TARGETS as TARGETS,
 } from "./focus-telemetry.test-fixtures";
-
-// Task 1.1.a — Exhaustive switch coverage via `never` assertion.
-// If a new variant is added to FocusTelemetryEvent without updating the
-// switch, TypeScript will error here at compile time.
-const assertExhaustive = (event: never): never => {
-  throw new Error(`${ERRORS.unhandledEventPrefix}${JSON.stringify(event)}`);
-};
-
-const handleEvent = (event: FocusTelemetryEvent): string => {
-  switch (event.type) {
-    case TYPES.wiringCanary:
-      return TYPES.wiringCanary;
-    case TYPES.unresolvedTargetFallback:
-      return TYPES.unresolvedTargetFallback;
-    case TYPES.formFieldShortCircuit:
-      return TYPES.formFieldShortCircuit;
-    case TYPES.overlayDeferredApply:
-      return TYPES.overlayDeferredApply;
-    case TYPES.focusError:
-      return TYPES.focusError;
-    default:
-      return assertExhaustive(event);
-  }
-};
-
-describe("FocusTelemetryEvent discriminated union", () => {
-  it("should cover all five variants in an exhaustive switch without hitting the never branch", () => {
-    // Arrange
-
-    // Act
-    const events: FocusTelemetryEvent[] = [
-      wiringCanaryEvent(),
-      unresolvedTargetFallbackEvent(
-        TARGETS.itemKind,
-        TARGETS.firstItemFallback
-      ),
-      formFieldShortCircuitEvent(),
-      overlayDeferredApplyEvent(MS.twoHundredFifty),
-      focusErrorEvent(TARGETS.focusPhase),
-    ];
-
-    // Assert
-    for (const event of events) {
-      expect(() => handleEvent(event)).not.toThrow();
-    }
-  });
-});
 
 describe("defaultFocusTelemetry", () => {
   it("should be a no-op function that does not throw", () => {
@@ -119,13 +71,13 @@ describe("safeEmit", () => {
       throw new Error(ERRORS.telemetryDown);
     };
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    safeEmit(throwing, wiringCanaryEvent());
-    expect(warnSpy).toHaveBeenCalledOnce();
 
     // Act
-    warnSpy.mockRestore();
+    safeEmit(throwing, wiringCanaryEvent());
 
     // Assert
+    expect(warnSpy).toHaveBeenCalledOnce();
+    warnSpy.mockRestore();
   });
 });
 

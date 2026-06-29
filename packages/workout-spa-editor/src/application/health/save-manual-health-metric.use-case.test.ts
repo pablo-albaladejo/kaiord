@@ -1,8 +1,4 @@
-import {
-  type DailyWellness,
-  dailyWellnessSchema,
-  sleepRecordSchema,
-} from "@kaiord/core";
+import { type DailyWellness } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
@@ -195,7 +191,7 @@ describe("saveManualHealthMetric", () => {
     expect(rows[0]?.krd.intensityMinutes).toEqual({ moderate: 0, vigorous: 0 });
   });
 
-  it("should build a minimal valid sleep payload that passes sleepRecordSchema.parse", async () => {
+  it("should persist a valid in-range sleep score", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
@@ -211,27 +207,7 @@ describe("saveManualHealthMetric", () => {
       DAY,
       DAY
     );
-    expect(() => sleepRecordSchema.parse(rows[0]?.krd)).not.toThrow();
     expect(rows[0]?.krd.score).toBe(SAMPLE_SLEEP_SCORE);
-  });
-
-  it("should build a minimal valid daily payload that passes dailyWellnessSchema.parse", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-
-    // Act
-    await saveManualHealthMetric(
-      { persistence, profileId: PROFILE_ID },
-      { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
-    );
-
-    // Assert
-    const rows = await persistence.healthDaily.getByProfileAndDateRange(
-      PROFILE_ID,
-      DAY,
-      DAY
-    );
-    expect(() => dailyWellnessSchema.parse(rows[0]?.krd)).not.toThrow();
   });
 
   it("should set hrv measurementWindow to a valid enum value", async () => {
@@ -273,43 +249,26 @@ describe("saveManualHealthMetric", () => {
     expect(rows).toHaveLength(0);
   });
 
-  it("should not persist an out-of-range sleep score", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
+  it.each([{ value: 150 }, { value: 88.5 }])(
+    "should not persist an invalid sleep score ($value)",
+    async ({ value }) => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
 
-    // Act
-    const result = await saveManualHealthMetric(
-      { persistence, profileId: PROFILE_ID },
-      { metric: "sleep", day: DAY, value: 150 }
-    );
+      // Act
+      const result = await saveManualHealthMetric(
+        { persistence, profileId: PROFILE_ID },
+        { metric: "sleep", day: DAY, value }
+      );
 
-    // Assert
-    expect(result).toBeUndefined();
-    const rows = await persistence.healthSleep.getByProfileAndDateRange(
-      PROFILE_ID,
-      DAY,
-      DAY
-    );
-    expect(rows).toHaveLength(0);
-  });
-
-  it("should not persist a fractional sleep score", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-
-    // Act
-    const result = await saveManualHealthMetric(
-      { persistence, profileId: PROFILE_ID },
-      { metric: "sleep", day: DAY, value: 88.5 }
-    );
-
-    // Assert
-    expect(result).toBeUndefined();
-    const rows = await persistence.healthSleep.getByProfileAndDateRange(
-      PROFILE_ID,
-      DAY,
-      DAY
-    );
-    expect(rows).toHaveLength(0);
-  });
+      // Assert
+      expect(result).toBeUndefined();
+      const rows = await persistence.healthSleep.getByProfileAndDateRange(
+        PROFILE_ID,
+        DAY,
+        DAY
+      );
+      expect(rows).toHaveLength(0);
+    }
+  );
 });

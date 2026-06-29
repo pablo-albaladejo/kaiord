@@ -38,40 +38,25 @@ describe("evaluatePingResult", () => {
     });
   });
 
-  it("should flag outdated bridge with unsupported protocol version", () => {
-    // Arrange
+  it.each([
+    { res: { ok: true, protocolVersion: 999, data: { gcApi: { ok: true } } } },
+    { res: { ok: true, data: { gcApi: { ok: true } } } },
+  ])(
+    "should flag an outdated bridge when the protocol version is unsupported or missing",
+    ({ res }) => {
+      // Arrange
 
-    // Act
-    const result = evaluatePingResult({
-      ok: true,
-      protocolVersion: 999,
-      data: { gcApi: { ok: true } },
-    });
+      // Act
+      const result = evaluatePingResult(res);
 
-    // Assert
-    expect(result).toEqual({
-      installed: true,
-      session: false,
-      error: "Update your Kaiord Garmin Bridge extension",
-    });
-  });
-
-  it("should flag missing protocol version as outdated", () => {
-    // Arrange
-
-    // Act
-    const result = evaluatePingResult({
-      ok: true,
-      data: { gcApi: { ok: true } },
-    });
-
-    // Assert
-    expect(result).toEqual({
-      installed: true,
-      session: false,
-      error: "Update your Kaiord Garmin Bridge extension",
-    });
-  });
+      // Assert
+      expect(result).toEqual({
+        installed: true,
+        session: false,
+        error: "Update your Kaiord Garmin Bridge extension",
+      });
+    }
+  );
 
   it("should report session=false when gcApi is not ok", () => {
     // Arrange

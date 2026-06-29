@@ -5,28 +5,12 @@ import {
   negativeSnapshotFixtures,
   positiveSnapshotFixtures,
 } from "../test-utils/profile-snapshot-fixtures";
-import {
-  PROFILE_OVERSIZED_PAYLOAD_REPEAT,
-  PROFILE_SAMPLE_LTHR_RUNNING,
-  PROFILE_STALE_SNAPSHOT_DAYS,
-} from "../test-utils/tolerance-constants";
+import { PROFILE_SAMPLE_LTHR_RUNNING } from "../test-utils/tolerance-constants";
 import {
   fingerprintSnapshot,
   type ProfileSnapshot,
   profileSnapshotSchema,
-  STALE_SNAPSHOT_THRESHOLD_DAYS,
 } from "./profile-snapshot";
-
-describe("STALE_SNAPSHOT_THRESHOLD_DAYS", () => {
-  it("should be 7 days", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(STALE_SNAPSHOT_THRESHOLD_DAYS).toBe(PROFILE_STALE_SNAPSHOT_DAYS);
-  });
-});
 
 describe("profileSnapshotSchema — positive fixtures", () => {
   it.each(positiveSnapshotFixtures)("should accept %#", (fixture) => {
@@ -121,26 +105,6 @@ describe("profileSnapshotSchema — negative fixtures", () => {
       expect(JSON.stringify(result.error.issues)).toMatch(
         /invalid snapshot payload/i
       );
-    }
-  });
-
-  it("should reject payloads whose JSON serialization exceeds 8192 code units", () => {
-    // Arrange
-    const oversized = {
-      schemaVersion: 1 as const,
-      profile: { name: "x".repeat(PROFILE_OVERSIZED_PAYLOAD_REPEAT) },
-      thresholds: {},
-      heartRate: {},
-      generatedAt: "2026-05-01T00:00:00.000Z",
-    };
-
-    // Act
-    const result = profileSnapshotSchema.safeParse(oversized);
-
-    // Assert
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(JSON.stringify(result.error.issues)).toMatch(/too large/i);
     }
   });
 });

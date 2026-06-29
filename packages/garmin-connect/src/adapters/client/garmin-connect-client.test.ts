@@ -113,12 +113,15 @@ describe("createGarminConnectClient", () => {
       expect(client.auth.is_authenticated()).toBe(true);
     });
 
-    it("should return restored false when store is empty", async () => {
+    it.each([
+      { scenario: "store is empty", withStore: true },
+      { scenario: "tokenStore is absent", withStore: false },
+    ])("should return restored false when $scenario", async ({ withStore }) => {
       // Arrange
-      const store = createMockStore(null);
+      const tokenStore = withStore ? createMockStore(null) : undefined;
       const client = createGarminConnectClient({
         logger,
-        tokenStore: store,
+        tokenStore,
         fetchFn: mockFetchOk(),
       });
 
@@ -128,20 +131,6 @@ describe("createGarminConnectClient", () => {
       // Assert
       expect(result).toEqual({ restored: false });
       expect(client.auth.is_authenticated()).toBe(false);
-    });
-
-    it("should return restored false without tokenStore", async () => {
-      // Arrange
-      const client = createGarminConnectClient({
-        logger,
-        fetchFn: mockFetchOk(),
-      });
-
-      // Act
-      const result = await client.init();
-
-      // Assert
-      expect(result).toEqual({ restored: false });
     });
   });
 

@@ -5,49 +5,15 @@ import { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 
 describe("useKeyboardShortcuts", () => {
   describe("save shortcut", () => {
-    it("should call onSave when Ctrl+S is pressed", () => {
+    it.each([
+      { label: "Ctrl+S", init: { key: "s", ctrlKey: true } },
+      { label: "Cmd+S", init: { key: "s", metaKey: true } },
+      { label: "uppercase Ctrl+S", init: { key: "S", ctrlKey: true } },
+    ])("should call onSave when $label is pressed", ({ init }) => {
       // Arrange
       const onSave = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onSave }));
-      const event = new KeyboardEvent("keydown", {
-        key: "s",
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onSave).toHaveBeenCalledOnce();
-    });
-
-    it("should call onSave when Cmd+S is pressed", () => {
-      // Arrange
-      const onSave = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onSave }));
-      const event = new KeyboardEvent("keydown", {
-        key: "s",
-        metaKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onSave).toHaveBeenCalledOnce();
-    });
-
-    it("should handle uppercase S", () => {
-      // Arrange
-      const onSave = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onSave }));
-      const event = new KeyboardEvent("keydown", {
-        key: "S",
-        ctrlKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -293,49 +259,15 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("copy shortcut (Requirement 39.2)", () => {
-    it("should call onCopy when Ctrl+C is pressed", () => {
+    it.each([
+      { label: "Ctrl+C", init: { key: "c", ctrlKey: true } },
+      { label: "Cmd+C", init: { key: "c", metaKey: true } },
+      { label: "uppercase Ctrl+C", init: { key: "C", ctrlKey: true } },
+    ])("should call onCopy when $label is pressed", ({ init }) => {
       // Arrange
       const onCopy = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onCopy }));
-      const event = new KeyboardEvent("keydown", {
-        key: "c",
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onCopy).toHaveBeenCalledOnce();
-    });
-
-    it("should call onCopy when Cmd+C is pressed", () => {
-      // Arrange
-      const onCopy = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onCopy }));
-      const event = new KeyboardEvent("keydown", {
-        key: "c",
-        metaKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onCopy).toHaveBeenCalledOnce();
-    });
-
-    it("should handle uppercase C", () => {
-      // Arrange
-      const onCopy = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onCopy }));
-      const event = new KeyboardEvent("keydown", {
-        key: "C",
-        ctrlKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -362,49 +294,15 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("paste shortcut (Requirement 39.2)", () => {
-    it("should call onPaste when Ctrl+V is pressed", () => {
+    it.each([
+      { label: "Ctrl+V", init: { key: "v", ctrlKey: true } },
+      { label: "Cmd+V", init: { key: "v", metaKey: true } },
+      { label: "uppercase Ctrl+V", init: { key: "V", ctrlKey: true } },
+    ])("should call onPaste when $label is pressed", ({ init }) => {
       // Arrange
       const onPaste = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onPaste }));
-      const event = new KeyboardEvent("keydown", {
-        key: "v",
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onPaste).toHaveBeenCalledOnce();
-    });
-
-    it("should call onPaste when Cmd+V is pressed", () => {
-      // Arrange
-      const onPaste = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onPaste }));
-      const event = new KeyboardEvent("keydown", {
-        key: "v",
-        metaKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onPaste).toHaveBeenCalledOnce();
-    });
-
-    it("should handle uppercase V", () => {
-      // Arrange
-      const onPaste = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onPaste }));
-      const event = new KeyboardEvent("keydown", {
-        key: "V",
-        ctrlKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -431,49 +329,15 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("create block shortcut (Requirement 7.6.1)", () => {
-    it("should call onCreateBlock when Ctrl+G is pressed", () => {
+    it.each([
+      { label: "Ctrl+G", init: { key: "g", ctrlKey: true } },
+      { label: "Cmd+G", init: { key: "g", metaKey: true } },
+      { label: "uppercase Ctrl+G", init: { key: "G", ctrlKey: true } },
+    ])("should call onCreateBlock when $label is pressed", ({ init }) => {
       // Arrange
       const onCreateBlock = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
-      const event = new KeyboardEvent("keydown", {
-        key: "g",
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onCreateBlock).toHaveBeenCalledOnce();
-    });
-
-    it("should call onCreateBlock when Cmd+G is pressed", () => {
-      // Arrange
-      const onCreateBlock = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
-      const event = new KeyboardEvent("keydown", {
-        key: "g",
-        metaKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onCreateBlock).toHaveBeenCalledOnce();
-    });
-
-    it("should handle uppercase G", () => {
-      // Arrange
-      const onCreateBlock = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
-      const event = new KeyboardEvent("keydown", {
-        key: "G",
-        ctrlKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -591,49 +455,15 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("select all shortcut (Requirement 7.6.3)", () => {
-    it("should call onSelectAll when Ctrl+A is pressed", () => {
+    it.each([
+      { label: "Ctrl+A", init: { key: "a", ctrlKey: true } },
+      { label: "Cmd+A", init: { key: "a", metaKey: true } },
+      { label: "uppercase Ctrl+A", init: { key: "A", ctrlKey: true } },
+    ])("should call onSelectAll when $label is pressed", ({ init }) => {
       // Arrange
       const onSelectAll = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onSelectAll }));
-      const event = new KeyboardEvent("keydown", {
-        key: "a",
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onSelectAll).toHaveBeenCalledOnce();
-    });
-
-    it("should call onSelectAll when Cmd+A is pressed", () => {
-      // Arrange
-      const onSelectAll = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
-      const event = new KeyboardEvent("keydown", {
-        key: "a",
-        metaKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onSelectAll).toHaveBeenCalledOnce();
-    });
-
-    it("should handle uppercase A", () => {
-      // Arrange
-      const onSelectAll = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
-      const event = new KeyboardEvent("keydown", {
-        key: "A",
-        ctrlKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -712,99 +542,59 @@ describe("useKeyboardShortcuts", () => {
       return { event, cleanup: () => el.remove() };
     };
 
-    it("should not intercept Ctrl+V when target is an input", () => {
-      // Arrange
-      const onPaste = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onPaste }));
-      const { event, cleanup } = createEventFromElement("input", "v", {
-        ctrlKey: true,
-      });
-      window.dispatchEvent(event);
-      expect(onPaste).not.toHaveBeenCalled();
+    it.each([
+      {
+        tag: "input" as const,
+        key: "v",
+        init: { ctrlKey: true },
+        build: (spy: () => boolean) => ({ onPaste: spy }),
+      },
+      {
+        tag: "textarea" as const,
+        key: "c",
+        init: { ctrlKey: true },
+        build: (spy: () => boolean) => ({ onCopy: spy }),
+      },
+      {
+        tag: "select" as const,
+        key: "a",
+        init: { ctrlKey: true },
+        build: (spy: () => boolean) => ({ onSelectAll: spy }),
+      },
+      {
+        tag: "input" as const,
+        key: "z",
+        init: { ctrlKey: true },
+        build: (spy: () => boolean) => ({ onUndo: spy }),
+      },
+      {
+        tag: "input" as const,
+        key: "ArrowUp",
+        init: { altKey: true },
+        build: (spy: () => boolean) => ({ onMoveStepUp: spy }),
+      },
+      {
+        tag: "input" as const,
+        key: "Escape",
+        init: {},
+        build: (spy: () => boolean) => ({ onClearSelection: spy }),
+      },
+    ])(
+      "should not intercept $key when target is a $tag",
+      ({ tag, key, init, build }) => {
+        // Arrange
+        const spy = vi.fn();
+        renderHook(() => useKeyboardShortcuts(build(spy)));
+        const { event, cleanup } = createEventFromElement(tag, key, init);
 
-      // Act
-      cleanup();
+        // Act
+        window.dispatchEvent(event);
 
-      // Assert
-    });
-
-    it("should not intercept Ctrl+C when target is a textarea", () => {
-      // Arrange
-      const onCopy = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onCopy }));
-      const { event, cleanup } = createEventFromElement("textarea", "c", {
-        ctrlKey: true,
-      });
-      window.dispatchEvent(event);
-      expect(onCopy).not.toHaveBeenCalled();
-
-      // Act
-      cleanup();
-
-      // Assert
-    });
-
-    it("should not intercept Ctrl+A when target is a select", () => {
-      // Arrange
-      const onSelectAll = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
-      const { event, cleanup } = createEventFromElement("select", "a", {
-        ctrlKey: true,
-      });
-      window.dispatchEvent(event);
-      expect(onSelectAll).not.toHaveBeenCalled();
-
-      // Act
-      cleanup();
-
-      // Assert
-    });
-
-    it("should not intercept Ctrl+Z when target is an input", () => {
-      // Arrange
-      const onUndo = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onUndo }));
-      const { event, cleanup } = createEventFromElement("input", "z", {
-        ctrlKey: true,
-      });
-      window.dispatchEvent(event);
-      expect(onUndo).not.toHaveBeenCalled();
-
-      // Act
-      cleanup();
-
-      // Assert
-    });
-
-    it("should not intercept Alt+ArrowUp when target is an input", () => {
-      // Arrange
-      const onMoveStepUp = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onMoveStepUp }));
-      const { event, cleanup } = createEventFromElement("input", "ArrowUp", {
-        altKey: true,
-      });
-      window.dispatchEvent(event);
-      expect(onMoveStepUp).not.toHaveBeenCalled();
-
-      // Act
-      cleanup();
-
-      // Assert
-    });
-
-    it("should not intercept Escape when target is an input", () => {
-      // Arrange
-      const onClearSelection = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
-      const { event, cleanup } = createEventFromElement("input", "Escape");
-      window.dispatchEvent(event);
-      expect(onClearSelection).not.toHaveBeenCalled();
-
-      // Act
-      cleanup();
-
-      // Assert
-    });
+        // Assert
+        expect(spy).not.toHaveBeenCalled();
+        cleanup();
+      }
+    );
   });
 
   describe("optional handlers", () => {

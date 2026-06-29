@@ -23,47 +23,6 @@ const makeUI = (marker: string): UIWorkout =>
     },
   }) as unknown as UIWorkout;
 
-// Task 4.1.a — HistoryEntry shape and undoHistory typing
-describe("HistoryEntry type shape", () => {
-  it("should expose HistoryEntry as an object with workout and selection fields", () => {
-    // Arrange
-
-    // Act
-    const entry: HistoryEntry = {
-      workout: makeUI("a"),
-      selection: asItemId("sel-1"),
-    };
-
-    // Assert
-    expect(entry.workout).toBeDefined();
-    expect(entry.selection).toBe("sel-1");
-  });
-
-  it("should allow HistoryEntry selection to be null", () => {
-    // Arrange
-
-    // Act
-    const entry: HistoryEntry = { workout: makeUI("b"), selection: null };
-
-    // Assert
-    expect(entry.selection).toBeNull();
-  });
-
-  it("should expose UndoHistory as an array of HistoryEntry", () => {
-    // Arrange
-
-    // Act
-    const history: UndoHistory = [
-      { workout: makeUI("a"), selection: null },
-      { workout: makeUI("b"), selection: asItemId("sel-1") },
-    ];
-
-    // Assert
-    expect(history).toHaveLength(2);
-    expect(history[1].selection).toBe("sel-1");
-  });
-});
-
 // Task 4.2.a — pushHistorySnapshot 1-arg signature
 describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
   it("should accept a single HistoryEntry and pushes atomically", () => {

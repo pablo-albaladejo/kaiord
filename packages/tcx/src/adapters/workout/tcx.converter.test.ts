@@ -57,30 +57,19 @@ describe("convertKRDToTcx", () => {
     expect(tcd["@_xmlns:kaiord"]).toBe("http://kaiord.dev/tcx-extensions/1.0");
   });
 
-  it("should include Workouts with proper sport", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const krd = createMinimalKrd();
-    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
-    const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
-    const workouts = tcd.Workouts as Record<string, unknown>;
-
-    // Act
-    const workout = workouts.Workout as Record<string, unknown>;
-
-    // Assert
-    expect(workout["@_Sport"]).toBe("Biking");
-  });
-
-  it("should map non-endurance sport to Other", () => {
+  it.each([
+    ["cycling", "Biking"],
+    ["training", "Other"],
+    ["running", "Running"],
+  ] as const)("should map %s sport to TCX %s", (krdSport, expectedTcxSport) => {
     // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd({
-      metadata: { created: "2024-01-15T10:00:00Z", sport: "training" },
+      metadata: { created: "2024-01-15T10:00:00Z", sport: krdSport },
       extensions: {
         structured_workout: {
-          sport: "training",
-          name: "Strength Workout",
+          sport: krdSport,
+          name: "Test Workout",
           steps: [],
         },
       },
@@ -93,31 +82,7 @@ describe("convertKRDToTcx", () => {
     const workout = workouts.Workout as Record<string, unknown>;
 
     // Assert
-    expect(workout["@_Sport"]).toBe("Other");
-  });
-
-  it("should map running sport to Running", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const krd = createMinimalKrd({
-      metadata: { created: "2024-01-15T10:00:00Z", sport: "running" },
-      extensions: {
-        structured_workout: {
-          sport: "running",
-          name: "Run Workout",
-          steps: [],
-        },
-      },
-    });
-    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
-    const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
-    const workouts = tcd.Workouts as Record<string, unknown>;
-
-    // Act
-    const workout = workouts.Workout as Record<string, unknown>;
-
-    // Assert
-    expect(workout["@_Sport"]).toBe("Running");
+    expect(workout["@_Sport"]).toBe(expectedTcxSport);
   });
 
   it("should throw when KRD has no structured_workout", () => {

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import type { StorageStatus } from "../../../store/storage-store";
 import { StorageAvailabilityBanner } from "./StorageAvailabilityBanner";
 
 const STORAGE_UNAVAILABLE_MESSAGE =
@@ -33,29 +34,18 @@ describe("StorageAvailabilityBanner", () => {
     );
   });
 
-  it("should render nothing when status is 'checking'", () => {
-    // Arrange
+  it.each<StorageStatus>(["checking", "ok"])(
+    "should render nothing when status is %s",
+    (status) => {
+      // Arrange
 
-    // Act
+      // Act
+      const { container } = render(
+        <StorageAvailabilityBanner status={status} />
+      );
 
-    const { container } = render(
-      <StorageAvailabilityBanner status="checking" />
-    );
-
-    // Assert
-
-    expect(container.firstChild).toBeNull();
-  });
-
-  it("should render nothing when status is 'ok'", () => {
-    // Arrange
-
-    // Act
-
-    const { container } = render(<StorageAvailabilityBanner status="ok" />);
-
-    // Assert
-
-    expect(container.firstChild).toBeNull();
-  });
+      // Assert
+      expect(container.firstChild).toBeNull();
+    }
+  );
 });

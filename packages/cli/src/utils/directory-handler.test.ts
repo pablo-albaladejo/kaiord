@@ -36,33 +36,22 @@ describe("createOutputDirectory", () => {
     );
   });
 
-  it("should throw path-exists-as-file error for ENOTDIR", async () => {
-    // Arrange
-    const { mkdir } = await import("fs/promises");
-    const error = Object.assign(new Error("ENOTDIR"), { code: "ENOTDIR" });
+  it.each(["ENOTDIR", "EEXIST"])(
+    "should throw path-exists-as-file error for %s",
+    async (code) => {
+      // Arrange
+      const { mkdir } = await import("fs/promises");
+      const error = Object.assign(new Error(code), { code });
 
-    // Act
-    vi.mocked(mkdir).mockRejectedValue(error);
+      // Act
+      vi.mocked(mkdir).mockRejectedValue(error);
 
-    // Assert
-    await expect(
-      createOutputDirectory("/existing-file/out.tcx")
-    ).rejects.toThrow("Cannot create directory (path exists as file)");
-  });
-
-  it("should throw path-exists-as-file error for EEXIST", async () => {
-    // Arrange
-    const { mkdir } = await import("fs/promises");
-    const error = Object.assign(new Error("EEXIST"), { code: "EEXIST" });
-
-    // Act
-    vi.mocked(mkdir).mockRejectedValue(error);
-
-    // Assert
-    await expect(createOutputDirectory("/conflict/out.tcx")).rejects.toThrow(
-      "Cannot create directory (path exists as file)"
-    );
-  });
+      // Assert
+      await expect(
+        createOutputDirectory("/existing-file/out.tcx")
+      ).rejects.toThrow("Cannot create directory (path exists as file)");
+    }
+  );
 
   it("should throw generic directory creation error for other errors", async () => {
     // Arrange
@@ -89,19 +78,6 @@ describe("createOutputDirectory", () => {
     await expect(createOutputDirectory("/bad/out.tcx")).rejects.toThrow(
       "Failed to create directory"
     );
-  });
-
-  it("should succeed when mkdir resolves", async () => {
-    // Arrange
-    const { mkdir } = await import("fs/promises");
-
-    // Act
-    vi.mocked(mkdir).mockResolvedValue(undefined);
-
-    // Assert
-    await expect(
-      createOutputDirectory("/valid/path/file.tcx")
-    ).resolves.toBeUndefined();
   });
 
   it("should throw a DirectoryCreateError that maps to its exit code", async () => {

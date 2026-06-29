@@ -20,27 +20,17 @@ describe("FocusSlice", () => {
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
-  it("should write an item target via setPendingFocusTarget", () => {
+  it.each([
+    { label: "item target", target: focusItem(asItemId("step-x")) },
+    { label: "empty-state sentinel", target: focusEmptyState },
+  ])("should write the $label via setPendingFocusTarget", ({ target }) => {
     // Arrange
-    const target = focusItem(asItemId("step-x"));
 
     // Act
     useWorkoutStore.getState().setPendingFocusTarget(target);
 
     // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toEqual(target);
-  });
-
-  it("should write the empty-state sentinel via setPendingFocusTarget", () => {
-    // Arrange
-
-    // Act
-    useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
-
-    // Assert
-    expect(useWorkoutStore.getState().pendingFocusTarget).toEqual(
-      focusEmptyState
-    );
   });
 
   it("should clear via null through setPendingFocusTarget", () => {
@@ -81,14 +71,5 @@ describe("FocusSlice", () => {
     expect(useWorkoutStore.getState().pendingFocusTarget).toEqual(
       focusItem(asItemId("ghost-id"))
     );
-  });
-
-  it("should start selectionHistory empty on a fresh store", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(useWorkoutStore.getState().undoHistory).toEqual([]);
   });
 });

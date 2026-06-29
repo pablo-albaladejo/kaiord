@@ -90,20 +90,4 @@ describe("buildCoachingTemplateKrd", () => {
     const workout = krd.extensions!.structured_workout as { name?: string };
     expect(workout.name).toBeUndefined();
   });
-
-  it("should produce a structurally identical step for running and swimming", () => {
-    // Arrange
-    const sports = ["running", "swimming"] as const;
-
-    // Act
-    const krds = sports.map((s) => buildCoachingTemplateKrd(s));
-
-    // Assert
-    for (const krd of krds) {
-      const workout = krd.extensions!.structured_workout as {
-        steps: Array<unknown>;
-      };
-      expect(workout.steps).toHaveLength(1);
-    }
-  });
 });

@@ -40,13 +40,4 @@ describe("formatWeekLabel", () => {
     // Assert
     expect(formatWeekLabel("not-a-week")).toBe("not-a-week");
   });
-
-  it("should be deterministic", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(formatWeekLabel("2026-W18")).toBe(formatWeekLabel("2026-W18"));
-  });
 });

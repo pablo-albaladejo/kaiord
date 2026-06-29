@@ -20,7 +20,6 @@ const TEN_REPEATS = 10;
 describe("CreateRepetitionBlockDialog", () => {
   describe("rendering", () => {
     it("should render dialog with default repeat count of 2", () => {
-      // Arrange & Act
       // Arrange
 
       render(
@@ -30,8 +29,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
         />
       );
-
-      // Assert
 
       // Act
 
@@ -43,7 +40,6 @@ describe("CreateRepetitionBlockDialog", () => {
     });
 
     it("should render dialog with step count", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -59,13 +55,10 @@ describe("CreateRepetitionBlockDialog", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.getByText(/3 steps/i)).toBeInTheDocument();
     });
 
     it("should render dialog without step count", () => {
-      // Arrange & Act
       // Arrange
 
       render(
@@ -75,8 +68,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
         />
       );
-
-      // Assert
 
       // Act
 
@@ -88,7 +79,6 @@ describe("CreateRepetitionBlockDialog", () => {
     });
 
     it("should render cancel button", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -100,8 +90,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
         />
       );
-
-      // Assert
 
       // Assert
 
@@ -111,7 +99,6 @@ describe("CreateRepetitionBlockDialog", () => {
     });
 
     it("should render confirm button", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -123,8 +110,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
         />
       );
-
-      // Assert
 
       // Assert
 
@@ -137,7 +122,6 @@ describe("CreateRepetitionBlockDialog", () => {
   describe("validation", () => {
     it("should show error when repeat count is less than 2", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -150,15 +134,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "1");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Assert
 
       // Assert
 
@@ -170,7 +151,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should show error when repeat count is 0", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -183,15 +163,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "0");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Assert
 
       // Assert
 
@@ -203,7 +180,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should show error when repeat count is negative", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -216,15 +192,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "-5");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Assert
 
       // Assert
 
@@ -236,7 +209,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should show error when repeat count is not a number", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -249,15 +221,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "abc");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Assert
 
       // Assert
 
@@ -269,7 +238,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should accept repeat count of 2", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -282,15 +250,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "2");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Assert
 
       // Assert
 
@@ -299,7 +264,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should accept repeat count greater than 2", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -312,15 +276,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "5");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Assert
 
       // Assert
 
@@ -329,7 +290,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should clear error when user types valid value", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -341,16 +301,13 @@ describe("CreateRepetitionBlockDialog", () => {
         />
       );
 
-      // Act - First trigger error
+      // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "1");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Verify error is shown
 
       // Assert
 
@@ -358,11 +315,9 @@ describe("CreateRepetitionBlockDialog", () => {
         screen.getByText("Repeat count must be at least 2")
       ).toBeInTheDocument();
 
-      // Act - Type valid value
+      // Typing a valid value clears the error.
       await user.clear(input);
       await user.type(input, "3");
-
-      // Assert - Error should be cleared
       expect(
         screen.queryByText("Repeat count must be at least 2")
       ).not.toBeInTheDocument();
@@ -372,7 +327,6 @@ describe("CreateRepetitionBlockDialog", () => {
   describe("interactions", () => {
     it("should call onConfirm with repeat count when confirmed", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -385,15 +339,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "3");
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /create/i }));
-
-      // Assert
 
       // Assert
 
@@ -403,7 +354,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should call onCancel when cancel button clicked", async () => {
       // Arrange
-      // Arrange
 
       const handleCancel = vi.fn();
       const user = userEvent.setup();
@@ -417,11 +367,7 @@ describe("CreateRepetitionBlockDialog", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByRole("button", { name: /cancel/i }));
-
-      // Assert
 
       // Assert
 
@@ -430,7 +376,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should call onCancel when X button clicked", async () => {
       // Arrange
-      // Arrange
 
       const handleCancel = vi.fn();
       const user = userEvent.setup();
@@ -443,13 +388,9 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const closeButton = screen.getByRole("button", { name: /close/i });
-
-      // Act
-
       await user.click(closeButton);
-
-      // Assert
 
       // Assert
 
@@ -457,7 +398,6 @@ describe("CreateRepetitionBlockDialog", () => {
     });
 
     it("should allow changing repeat count", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -470,14 +410,10 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
-
-      // Act
-
       await user.type(input, "10");
-
-      // Assert
 
       // Assert
 
@@ -488,7 +424,6 @@ describe("CreateRepetitionBlockDialog", () => {
   describe("keyboard shortcuts", () => {
     it("should call onConfirm when Enter is pressed in input", async () => {
       // Arrange
-      // Arrange
 
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
@@ -501,15 +436,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "3");
 
-      // Act
-
       await user.keyboard("{Enter}");
-
-      // Assert
 
       // Assert
 
@@ -517,7 +449,6 @@ describe("CreateRepetitionBlockDialog", () => {
     });
 
     it("should call onCancel when Escape is pressed in input", async () => {
-      // Arrange
       // Arrange
 
       const handleCancel = vi.fn();
@@ -531,14 +462,10 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       input.focus();
-
-      // Act
-
       await user.keyboard("{Escape}");
-
-      // Assert
 
       // Assert
 
@@ -546,7 +473,6 @@ describe("CreateRepetitionBlockDialog", () => {
     });
 
     it("should not call onConfirm when Enter is pressed with invalid value", async () => {
-      // Arrange
       // Arrange
 
       const handleConfirm = vi.fn();
@@ -560,15 +486,12 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "1");
 
-      // Act
-
       await user.keyboard("{Enter}");
-
-      // Assert
 
       // Assert
 
@@ -581,7 +504,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
   describe("accessibility", () => {
     it("should have proper dialog structure", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -593,8 +515,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
         />
       );
-
-      // Assert
 
       // Assert
 
@@ -608,7 +528,6 @@ describe("CreateRepetitionBlockDialog", () => {
     });
 
     it("should have accessible input label", () => {
-      // Arrange & Act
       // Arrange
 
       render(
@@ -618,8 +537,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
         />
       );
-
-      // Assert
 
       // Act
 
@@ -632,7 +549,6 @@ describe("CreateRepetitionBlockDialog", () => {
 
     it("should display error message accessibly", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       render(
@@ -644,6 +560,7 @@ describe("CreateRepetitionBlockDialog", () => {
       );
 
       // Act
+
       const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "1");
@@ -651,12 +568,7 @@ describe("CreateRepetitionBlockDialog", () => {
 
       // Assert
 
-      // Act
-
       const errorMessage = screen.getByText("Repeat count must be at least 2");
-
-      // Assert
-
       expect(errorMessage).toBeInTheDocument();
       expect(errorMessage).toHaveClass("text-red-600");
     });

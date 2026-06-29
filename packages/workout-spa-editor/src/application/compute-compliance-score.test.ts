@@ -32,27 +32,21 @@ describe("computeComplianceScore", () => {
     );
   });
 
-  it("should return 0.5 for substantial undershoot (60min plan, 30min actual)", () => {
-    // Arrange
+  it.each([
+    { plan: HOUR_AS_SEC, actual: THIRTY_MINUTES_AS_SEC },
+    { plan: HOUR_AS_SEC, actual: HOUR_AND_HALF_AS_SEC },
+  ])(
+    "should return 0.5 for substantial variance (plan $plan actual $actual)",
+    ({ plan, actual }) => {
+      // Arrange
 
-    // Act
+      // Act
+      const score = computeComplianceScore(plan, actual);
 
-    // Assert
-    expect(computeComplianceScore(HOUR_AS_SEC, THIRTY_MINUTES_AS_SEC)).toBe(
-      COMPLIANCE_HALF
-    );
-  });
-
-  it("should return 0.5 for substantial overshoot (60min plan, 90min actual)", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(computeComplianceScore(HOUR_AS_SEC, HOUR_AND_HALF_AS_SEC)).toBe(
-      COMPLIANCE_HALF
-    );
-  });
+      // Assert
+      expect(score).toBe(COMPLIANCE_HALF);
+    }
+  );
 
   it("should clamp to 0 for very large variance", () => {
     // Arrange
@@ -68,32 +62,22 @@ describe("computeComplianceScore", () => {
     );
   });
 
-  it("should return null when planDur is undefined", () => {
-    // Arrange
+  it.each([
+    { plan: undefined, actual: MINUTES_43_AS_SEC },
+    { plan: MINUTES_45_AS_SEC, actual: undefined },
+    { plan: undefined, actual: undefined },
+  ])(
+    "should return null when a duration is undefined (plan $plan actual $actual)",
+    ({ plan, actual }) => {
+      // Arrange
 
-    // Act
+      // Act
+      const score = computeComplianceScore(plan, actual);
 
-    // Assert
-    expect(computeComplianceScore(undefined, MINUTES_43_AS_SEC)).toBeNull();
-  });
-
-  it("should return null when actualDur is undefined", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(computeComplianceScore(MINUTES_45_AS_SEC, undefined)).toBeNull();
-  });
-
-  it("should return null when both are undefined", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(computeComplianceScore(undefined, undefined)).toBeNull();
-  });
+      // Assert
+      expect(score).toBeNull();
+    }
+  );
 
   it("should return null when planDur is 0 (division-by-zero guard)", () => {
     // Arrange

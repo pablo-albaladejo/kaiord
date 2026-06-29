@@ -85,55 +85,37 @@ describe("assembleDayEnergyBalance (untracked intake)", () => {
 });
 
 describe("assembleDayEnergyBalance (tracked intake)", () => {
-  it("should report a negative net (deficit) when intake is below expenditure", () => {
-    // Arrange
-    const input = baseInput({ intakeKcal: INTAKE_BELOW });
+  it.each([
+    // deficit / surplus / balanced / spec "Day in deficit" (3000 burn, 2400 intake)
+    [
+      INTAKE_BELOW,
+      PREDICTED.expenditureKcal,
+      INTAKE_BELOW - PREDICTED.expenditureKcal,
+    ],
+    [
+      INTAKE_ABOVE,
+      PREDICTED.expenditureKcal,
+      INTAKE_ABOVE - PREDICTED.expenditureKcal,
+    ],
+    [PREDICTED.expenditureKcal, PREDICTED.expenditureKcal, 0],
+    [SPEC_INTAKE, SPEC_EXPENDITURE, SPEC_NET],
+  ])(
+    "should report net_kcal %i - %i = %i for tracked intake",
+    (intakeKcal, expenditureKcal, expectedNet) => {
+      // Arrange
+      const input = baseInput({
+        expenditure: { ...PREDICTED, expenditureKcal },
+        intakeKcal,
+      });
 
-    // Act
-    const result = assembleDayEnergyBalance(input);
+      // Act
+      const result = assembleDayEnergyBalance(input);
 
-    // Assert
-    expect(result.intake_kcal).toBe(INTAKE_BELOW);
-    expect(result.net_kcal).toBe(INTAKE_BELOW - PREDICTED.expenditureKcal);
-    expect(result.net_kcal).toBeLessThan(0);
-  });
-
-  it("should report a positive net (surplus) when intake exceeds expenditure", () => {
-    // Arrange
-    const input = baseInput({ intakeKcal: INTAKE_ABOVE });
-
-    // Act
-    const result = assembleDayEnergyBalance(input);
-
-    // Assert
-    expect(result.net_kcal).toBe(INTAKE_ABOVE - PREDICTED.expenditureKcal);
-    expect(result.net_kcal).toBeGreaterThan(0);
-  });
-
-  it("should report a zero net when intake equals expenditure", () => {
-    // Arrange
-    const input = baseInput({ intakeKcal: PREDICTED.expenditureKcal });
-
-    // Act
-    const result = assembleDayEnergyBalance(input);
-
-    // Assert
-    expect(result.net_kcal).toBe(0);
-  });
-
-  it("should match the spec deficit example (3000 burn, 2400 intake) with net -600", () => {
-    // Arrange
-    const input = baseInput({
-      expenditure: { ...PREDICTED, expenditureKcal: SPEC_EXPENDITURE },
-      intakeKcal: SPEC_INTAKE,
-    });
-
-    // Act
-    const result = assembleDayEnergyBalance(input);
-
-    // Assert
-    expect(result.net_kcal).toBe(SPEC_NET);
-  });
+      // Assert
+      expect(result.intake_kcal).toBe(intakeKcal);
+      expect(result.net_kcal).toBe(expectedNet);
+    }
+  );
 });
 
 describe("assembleDayEnergyBalance (targets and macros)", () => {

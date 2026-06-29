@@ -79,19 +79,4 @@ describe("Train2Go PII redaction audit", () => {
     expect(result.error ?? "").not.toMatch(PII.externalUserName);
     expect(result.error ?? "").not.toMatch(PII.externalUserId);
   });
-
-  it("should use only Kaiord profile name in toast string templates from LinkedAccountsSection", () => {
-    // Arrange
-    const linkTemplate = (label: string, kaiordName: string) =>
-      `Linked ${label} to ${kaiordName}`;
-    const unlinkTemplate = (label: string) => `Disconnected ${label}`;
-    const link = linkTemplate("Train2Go", "Pablo (Kaiord)");
-
-    // Act
-    const unlink = unlinkTemplate("Train2Go");
-
-    // Assert
-    expect(containsAnyPII(link)).toBe(false);
-    expect(containsAnyPII(unlink)).toBe(false);
-  });
 });

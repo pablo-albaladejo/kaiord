@@ -77,38 +77,23 @@ describe("bridgeManifestSchema", () => {
     );
   });
 
-  it("should reject non-integer protocolVersion", () => {
-    // Arrange
+  it.each([
+    { protocolVersion: 1.5 },
+    { protocolVersion: 0 },
+    { protocolVersion: -1 },
+  ])(
+    "should reject protocolVersion $protocolVersion",
+    ({ protocolVersion }) => {
+      // Arrange
 
-    // Act
+      // Act
 
-    // Assert
-    expect(() =>
-      bridgeManifestSchema.parse({ ...validManifest, protocolVersion: 1.5 })
-    ).toThrow();
-  });
-
-  it("should reject zero protocolVersion", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(() =>
-      bridgeManifestSchema.parse({ ...validManifest, protocolVersion: 0 })
-    ).toThrow();
-  });
-
-  it("should reject negative protocolVersion", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(() =>
-      bridgeManifestSchema.parse({ ...validManifest, protocolVersion: -1 })
-    ).toThrow();
-  });
+      // Assert
+      expect(() =>
+        bridgeManifestSchema.parse({ ...validManifest, protocolVersion })
+      ).toThrow();
+    }
+  );
 
   it("should reject empty capabilities with invalid entry", () => {
     // Arrange
@@ -238,21 +223,5 @@ describe("bridgeCapabilitySchema coverage against MANAGED_DATA_REGISTRY", () => 
 
     // Assert
     expect(missing).toEqual([]);
-  });
-
-  it("should surface missing tokens when registry references an unknown capability", () => {
-    // Arrange
-    const schemaTokens = new Set(bridgeCapabilitySchema.options);
-    const fakeRegistryTokens = [
-      "read:body",
-      "write:workouts",
-      "read:unknown-future-cap",
-    ];
-
-    // Act
-    const missing = fakeRegistryTokens.filter((t) => !schemaTokens.has(t));
-
-    // Assert
-    expect(missing).toEqual(["read:unknown-future-cap"]);
   });
 });

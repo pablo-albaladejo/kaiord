@@ -18,6 +18,31 @@ const createMockHttpClient = (): GarminHttpClient => ({
   del: vi.fn(async () => ({})),
 });
 
+const sampleKrd: KRD = {
+  version: "1.0",
+  type: "structured_workout",
+  metadata: {
+    created: "2025-01-15T10:00:00Z",
+    sport: "cycling",
+  },
+  extensions: {
+    structured_workout: {
+      sport: "cycling",
+      name: "Test Workout",
+      steps: [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+          intensity: "warmup",
+        },
+      ],
+    },
+  },
+};
+
 describe("createGarminWorkoutService", () => {
   it("should list workouts", async () => {
     // Arrange
@@ -46,25 +71,6 @@ describe("createGarminWorkoutService", () => {
     );
   });
 
-  it("should map a Garmin sport key to KRD sport in summaries", async () => {
-    // Arrange
-    const httpClient = createMockHttpClient();
-    vi.mocked(httpClient.get).mockResolvedValue([
-      {
-        workoutId: 7,
-        workoutName: "Strength",
-        sportType: { sportTypeKey: "cardio_training" },
-      },
-    ]);
-    const service = createGarminWorkoutService(httpClient, mockLogger);
-
-    // Act
-    const workouts = await service.list({ offset: 0, limit: 10 });
-
-    // Assert
-    expect(workouts[0].sport).toBe("generic");
-  });
-
   it("should push a workout", async () => {
     // Arrange
     const httpClient = createMockHttpClient();
@@ -73,33 +79,9 @@ describe("createGarminWorkoutService", () => {
       workoutName: "Pushed",
     });
     const service = createGarminWorkoutService(httpClient, mockLogger);
-    const krd: KRD = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: "2025-01-15T10:00:00Z",
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          sport: "cycling",
-          name: "Test Workout",
-          steps: [
-            {
-              stepIndex: 0,
-              durationType: "time",
-              duration: { type: "time", seconds: 300 },
-              targetType: "open",
-              target: { type: "open" },
-              intensity: "warmup",
-            },
-          ],
-        },
-      },
-    };
 
     // Act
-    const result = await service.push(krd);
+    const result = await service.push(sampleKrd);
 
     // Assert
     expect(result.id).toBe("999");
@@ -118,33 +100,11 @@ describe("createGarminWorkoutService", () => {
     const service = createGarminWorkoutService(httpClient, mockLogger);
 
     // Act
-    const krd: KRD = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: "2025-01-15T10:00:00Z",
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          sport: "cycling",
-          name: "Test Workout",
-          steps: [
-            {
-              stepIndex: 0,
-              durationType: "time",
-              duration: { type: "time", seconds: 300 },
-              targetType: "open",
-              target: { type: "open" },
-              intensity: "warmup",
-            },
-          ],
-        },
-      },
-    };
 
     // Assert
-    await expect(service.push(krd)).rejects.toThrow("Failed to push workout");
+    await expect(service.push(sampleKrd)).rejects.toThrow(
+      "Failed to push workout"
+    );
   });
 
   it("should throw a ServiceApiError when list fails", async () => {

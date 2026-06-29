@@ -28,22 +28,8 @@ const buildHealthKrd = (
   }) as unknown as KRD;
 
 describe("ZWO writer — health-type rejection", () => {
-  it("should throw UnsupportedKrdTypeError for sleep_record", async () => {
-    // Arrange
-    const krd = buildHealthKrd("sleep_record");
-
-    // Act
-    const promise = writer(krd);
-
-    // Assert
-    await expect(promise).rejects.toBeInstanceOf(UnsupportedKrdTypeError);
-    await expect(promise).rejects.toMatchObject({
-      krdType: "sleep_record",
-      adapterName: "zwo",
-    });
-  });
-
   it.each([
+    ["sleep_record"],
     ["weight_measurement"],
     ["hrv_summary"],
     ["daily_wellness"],

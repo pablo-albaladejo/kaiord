@@ -22,259 +22,106 @@ const NON_STRING_FILENAME_SENTINEL = 123;
 
 describe("file-format-detector", () => {
   describe("detectFormat", () => {
-    it("should detect FIT format", () => {
-      // Arrange
-      const filename = "workout.fit";
+    it.each<{ filename: string; expected: WorkoutFileFormat }>([
+      { filename: "workout.fit", expected: "fit" },
+      { filename: "workout.tcx", expected: "tcx" },
+      { filename: "workout.zwo", expected: "zwo" },
+      { filename: "workout.gcn", expected: "gcn" },
+      { filename: "workout.krd", expected: "krd" },
+      { filename: "workout.json", expected: "krd" },
+      { filename: "workout.FIT", expected: "fit" },
+      { filename: "workout.TcX", expected: "tcx" },
+      { filename: "my.workout.file.zwo", expected: "zwo" },
+      { filename: "/path/to/workout.fit", expected: "fit" },
+      { filename: ".fit", expected: "fit" },
+    ])(
+      "should detect $expected format from $filename",
+      ({ filename, expected }) => {
+        // Arrange
 
-      // Act
-      const result = detectFormat(filename);
+        // Act
+        const result = detectFormat(filename);
 
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("fit");
+        // Assert
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.format).toBe(expected);
+        }
       }
-    });
+    );
 
-    it("should detect TCX format", () => {
+    it.each<{
+      scenario: string;
+      filename: unknown;
+      expectedErrors: ReadonlyArray<string>;
+    }>([
+      {
+        scenario: "unsupported extension",
+        filename: "workout.txt",
+        expectedErrors: [
+          "Unsupported file format",
+          ".txt",
+          ".fit",
+          ".tcx",
+          ".zwo",
+          ".krd",
+        ],
+      },
+      {
+        scenario: "filename without extension",
+        filename: "workout",
+        expectedErrors: ["Unsupported file format"],
+      },
+      {
+        scenario: "empty filename",
+        filename: "",
+        expectedErrors: ["Invalid filename", "non-empty string"],
+      },
+      {
+        scenario: "whitespace-only filename",
+        filename: "   ",
+        expectedErrors: ["Invalid filename", "cannot be empty"],
+      },
+      {
+        scenario: "null filename",
+        filename: null,
+        expectedErrors: ["Invalid filename", "non-empty string"],
+      },
+      {
+        scenario: "undefined filename",
+        filename: undefined,
+        expectedErrors: ["Invalid filename", "non-empty string"],
+      },
+      {
+        scenario: "non-string filename",
+        filename: NON_STRING_FILENAME_SENTINEL,
+        expectedErrors: ["Invalid filename", "non-empty string"],
+      },
+    ])("should return error for $scenario", ({ filename, expectedErrors }) => {
       // Arrange
-      const filename = "workout.tcx";
 
       // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("tcx");
-      }
-    });
-
-    it("should detect ZWO format", () => {
-      // Arrange
-      const filename = "workout.zwo";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("zwo");
-      }
-    });
-
-    it("should detect KRD format from .krd extension", () => {
-      // Arrange
-      const filename = "workout.krd";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("krd");
-      }
-    });
-
-    it("should detect KRD format from .json extension", () => {
-      // Arrange
-      const filename = "workout.json";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("krd");
-      }
-    });
-
-    it("should handle uppercase extensions", () => {
-      // Arrange
-      const filename = "workout.FIT";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("fit");
-      }
-    });
-
-    it("should handle mixed case extensions", () => {
-      // Arrange
-      const filename = "workout.TcX";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("tcx");
-      }
-    });
-
-    it("should handle filenames with multiple dots", () => {
-      // Arrange
-      const filename = "my.workout.file.zwo";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("zwo");
-      }
-    });
-
-    it("should handle filenames with paths", () => {
-      // Arrange
-      const filename = "/path/to/workout.fit";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("fit");
-      }
-    });
-
-    it("should return error for unsupported format", () => {
-      // Arrange
-      const filename = "workout.txt";
-
-      // Act
-      const result = detectFormat(filename);
+      const result = detectFormat(filename as string);
 
       // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toContain("Unsupported file format");
-        expect(result.error).toContain(".txt");
-        expect(result.error).toContain(".fit");
-        expect(result.error).toContain(".tcx");
-        expect(result.error).toContain(".zwo");
-        expect(result.error).toContain(".krd");
-      }
-    });
-
-    it("should return error for filename without extension", () => {
-      // Arrange
-      const filename = "workout";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Unsupported file format");
-      }
-    });
-
-    it("should return error for empty filename", () => {
-      // Arrange
-      const filename = "";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Invalid filename");
-        expect(result.error).toContain("non-empty string");
-      }
-    });
-
-    it("should return error for whitespace-only filename", () => {
-      // Arrange
-      const filename = "   ";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Invalid filename");
-        expect(result.error).toContain("cannot be empty");
-      }
-    });
-
-    it("should return error for null filename", () => {
-      // Arrange
-      const filename = null as unknown as string;
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Invalid filename");
-        expect(result.error).toContain("non-empty string");
-      }
-    });
-
-    it("should return error for undefined filename", () => {
-      // Arrange
-      const filename = undefined as unknown as string;
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Invalid filename");
-        expect(result.error).toContain("non-empty string");
-      }
-    });
-
-    it("should return error for non-string filename", () => {
-      // Arrange
-      const filename = NON_STRING_FILENAME_SENTINEL as unknown as string;
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Invalid filename");
-        expect(result.error).toContain("non-empty string");
-      }
-    });
-
-    it("should handle filename with only extension", () => {
-      // Arrange
-      const filename = ".fit";
-
-      // Act
-      const result = detectFormat(filename);
-
-      // Assert
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.format).toBe("fit");
+        expectedErrors.forEach((expectedError) => {
+          expect(result.error).toContain(expectedError);
+        });
       }
     });
   });
 
   describe("isValidFormat", () => {
-    it("should return true for fit format", () => {
+    it.each<{ format: string }>([
+      { format: "fit" },
+      { format: "tcx" },
+      { format: "zwo" },
+      { format: "gcn" },
+      { format: "krd" },
+    ])("should return true for $format format", ({ format }) => {
       // Arrange
-      const format = "fit";
 
       // Act
       const result = isValidFormat(format);
@@ -283,53 +130,11 @@ describe("file-format-detector", () => {
       expect(result).toBe(true);
     });
 
-    it("should return true for tcx format", () => {
+    it.each<{ scenario: string; format: string }>([
+      { scenario: "invalid format", format: "txt" },
+      { scenario: "empty string", format: "" },
+    ])("should return false for $scenario", ({ format }) => {
       // Arrange
-      const format = "tcx";
-
-      // Act
-      const result = isValidFormat(format);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it("should return true for zwo format", () => {
-      // Arrange
-      const format = "zwo";
-
-      // Act
-      const result = isValidFormat(format);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it("should return true for krd format", () => {
-      // Arrange
-      const format = "krd";
-
-      // Act
-      const result = isValidFormat(format);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it("should return false for invalid format", () => {
-      // Arrange
-      const format = "txt";
-
-      // Act
-      const result = isValidFormat(format);
-
-      // Assert
-      expect(result).toBe(false);
-    });
-
-    it("should return false for empty string", () => {
-      // Arrange
-      const format = "";
 
       // Act
       const result = isValidFormat(format);
@@ -340,199 +145,116 @@ describe("file-format-detector", () => {
   });
 
   describe("getMimeType", () => {
-    it("should return correct MIME type for FIT", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "fit";
+    it.each<{ format: WorkoutFileFormat; mimeType: string }>([
+      { format: "fit", mimeType: "application/octet-stream" },
+      { format: "tcx", mimeType: "application/xml" },
+      { format: "zwo", mimeType: "application/xml" },
+      { format: "krd", mimeType: "application/json" },
+      { format: "gcn", mimeType: "application/json" },
+    ])(
+      "should return $mimeType MIME type for $format",
+      ({ format, mimeType }) => {
+        // Arrange
 
-      // Act
-      const result = getMimeType(format);
+        // Act
+        const result = getMimeType(format);
 
-      // Assert
-      expect(result).toBe("application/octet-stream");
-    });
-
-    it("should return correct MIME type for TCX", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "tcx";
-
-      // Act
-      const result = getMimeType(format);
-
-      // Assert
-      expect(result).toBe("application/xml");
-    });
-
-    it("should return correct MIME type for ZWO", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "zwo";
-
-      // Act
-      const result = getMimeType(format);
-
-      // Assert
-      expect(result).toBe("application/xml");
-    });
-
-    it("should return correct MIME type for KRD", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "krd";
-
-      // Act
-      const result = getMimeType(format);
-
-      // Assert
-      expect(result).toBe("application/json");
-    });
+        // Assert
+        expect(result).toBe(mimeType);
+      }
+    );
   });
 
   describe("getFileExtension", () => {
-    it("should return correct extension for FIT", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "fit";
+    it.each<{ format: WorkoutFileFormat; extension: string }>([
+      { format: "fit", extension: "fit" },
+      { format: "tcx", extension: "tcx" },
+      { format: "zwo", extension: "zwo" },
+      { format: "krd", extension: "krd" },
+      { format: "gcn", extension: "gcn" },
+    ])(
+      "should return $extension extension for $format",
+      ({ format, extension }) => {
+        // Arrange
 
-      // Act
-      const result = getFileExtension(format);
+        // Act
+        const result = getFileExtension(format);
 
-      // Assert
-      expect(result).toBe("fit");
-    });
-
-    it("should return correct extension for TCX", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "tcx";
-
-      // Act
-      const result = getFileExtension(format);
-
-      // Assert
-      expect(result).toBe("tcx");
-    });
-
-    it("should return correct extension for ZWO", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "zwo";
-
-      // Act
-      const result = getFileExtension(format);
-
-      // Assert
-      expect(result).toBe("zwo");
-    });
-
-    it("should return correct extension for KRD", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "krd";
-
-      // Act
-      const result = getFileExtension(format);
-
-      // Assert
-      expect(result).toBe("krd");
-    });
+        // Assert
+        expect(result).toBe(extension);
+      }
+    );
   });
 
   describe("getFormatName", () => {
-    it("should return correct name for FIT", () => {
+    it.each<{ format: WorkoutFileFormat; name: string }>([
+      { format: "fit", name: "FIT" },
+      { format: "tcx", name: "TCX" },
+      { format: "zwo", name: "ZWO" },
+      { format: "krd", name: "KRD" },
+      { format: "gcn", name: "GCN" },
+    ])("should return $name name for $format", ({ format, name }) => {
       // Arrange
-      const format: WorkoutFileFormat = "fit";
 
       // Act
       const result = getFormatName(format);
 
       // Assert
-      expect(result).toBe("FIT");
-    });
-
-    it("should return correct name for TCX", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "tcx";
-
-      // Act
-      const result = getFormatName(format);
-
-      // Assert
-      expect(result).toBe("TCX");
-    });
-
-    it("should return correct name for ZWO", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "zwo";
-
-      // Act
-      const result = getFormatName(format);
-
-      // Assert
-      expect(result).toBe("ZWO");
-    });
-
-    it("should return correct name for KRD", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "krd";
-
-      // Act
-      const result = getFormatName(format);
-
-      // Assert
-      expect(result).toBe("KRD");
+      expect(result).toBe(name);
     });
   });
 
   describe("getFormatDescription", () => {
-    it("should return description and compatibility for FIT", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "fit";
+    it.each<{
+      format: WorkoutFileFormat;
+      descriptionParts: ReadonlyArray<string>;
+      compatibilityParts: ReadonlyArray<string>;
+    }>([
+      {
+        format: "fit",
+        descriptionParts: ["Garmin FIT", "Binary"],
+        compatibilityParts: [
+          "Garmin devices",
+          "Garmin Connect",
+          "TrainingPeaks",
+        ],
+      },
+      {
+        format: "tcx",
+        descriptionParts: ["Training Center XML", "XML"],
+        compatibilityParts: ["Garmin Connect", "TrainingPeaks", "Strava"],
+      },
+      {
+        format: "zwo",
+        descriptionParts: ["Zwift", "XML"],
+        compatibilityParts: ["Zwift"],
+      },
+      {
+        format: "krd",
+        descriptionParts: ["Kaiord", "JSON"],
+        compatibilityParts: ["Kaiord tools", "Web editors"],
+      },
+      {
+        format: "gcn",
+        descriptionParts: ["Garmin Connect", "JSON"],
+        compatibilityParts: ["Garmin Connect", "Garmin devices"],
+      },
+    ])(
+      "should return description and compatibility for $format",
+      ({ format, descriptionParts, compatibilityParts }) => {
+        // Arrange
 
-      // Act
-      const result = getFormatDescription(format);
+        // Act
+        const result = getFormatDescription(format);
 
-      // Assert
-      expect(result.description).toContain("Garmin FIT");
-      expect(result.description).toContain("Binary");
-      expect(result.compatibility).toContain("Garmin devices");
-      expect(result.compatibility).toContain("Garmin Connect");
-      expect(result.compatibility).toContain("TrainingPeaks");
-    });
-
-    it("should return description and compatibility for TCX", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "tcx";
-
-      // Act
-      const result = getFormatDescription(format);
-
-      // Assert
-      expect(result.description).toContain("Training Center XML");
-      expect(result.description).toContain("XML");
-      expect(result.compatibility).toContain("Garmin Connect");
-      expect(result.compatibility).toContain("TrainingPeaks");
-      expect(result.compatibility).toContain("Strava");
-    });
-
-    it("should return description and compatibility for ZWO", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "zwo";
-
-      // Act
-      const result = getFormatDescription(format);
-
-      // Assert
-      expect(result.description).toContain("Zwift");
-      expect(result.description).toContain("XML");
-      expect(result.compatibility).toContain("Zwift");
-    });
-
-    it("should return description and compatibility for KRD", () => {
-      // Arrange
-      const format: WorkoutFileFormat = "krd";
-
-      // Act
-      const result = getFormatDescription(format);
-
-      // Assert
-      expect(result.description).toContain("Kaiord");
-      expect(result.description).toContain("JSON");
-      expect(result.compatibility).toContain("Kaiord tools");
-      expect(result.compatibility).toContain("Web editors");
-    });
+        // Assert
+        descriptionParts.forEach((part) => {
+          expect(result.description).toContain(part);
+        });
+        compatibilityParts.forEach((part) => {
+          expect(result.compatibility).toContain(part);
+        });
+      }
+    );
   });
 });

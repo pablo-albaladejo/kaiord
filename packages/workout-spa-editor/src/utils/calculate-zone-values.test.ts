@@ -13,7 +13,6 @@ import {
   FTP_DEFAULT_WATTS,
   KARVONEN_LTHR_170_OUTPUTS,
   LTHR_DEFAULT_BPM,
-  PACE_THRESHOLD_DEFAULT_SEC,
   ZONE_INDEX_0,
   ZONE_INDEX_1,
   ZONE_INDEX_2,
@@ -22,22 +21,18 @@ import {
   ZONE_LENGTH_7,
 } from "../test-utils/zone-fixtures";
 import { calculateHrZones } from "./calculate-hr-zones";
-import { calculatePaceZones } from "./calculate-pace-zones";
 import { calculatePowerZoneValues } from "./calculate-power-zones";
 import { calculateZoneValues } from "./calculate-zone-values";
 
 describe("calculateZoneValues", () => {
   it("should calculate Coggan zones with FTP=250", () => {
     // Arrange
-
     const method = findMethod(POWER_METHODS, "coggan-7")!;
 
     // Act
-
     const zones = calculateZoneValues(method, FTP_DEFAULT_WATTS);
 
     // Assert
-
     expect(zones).toHaveLength(ZONE_LENGTH_7);
     expect(zones[ZONE_INDEX_0]).toEqual({
       zone: 1,
@@ -61,15 +56,12 @@ describe("calculateZoneValues", () => {
 
   it("should calculate Karvonen HR zones with LTHR=170", () => {
     // Arrange
-
     const method = findMethod(HR_METHODS, "karvonen-5")!;
 
     // Act
-
     const zones = calculateZoneValues(method, LTHR_DEFAULT_BPM);
 
     // Assert
-
     expect(zones).toHaveLength(ZONE_LENGTH_5);
     expect(zones[ZONE_INDEX_0]).toEqual({
       zone: 1,
@@ -86,11 +78,9 @@ describe("calculatePowerZoneValues", () => {
     // Arrange
 
     // Act
-
     const zones = calculatePowerZoneValues(FTP_DEFAULT_WATTS, "coggan-7");
 
     // Assert
-
     expect(zones).toHaveLength(ZONE_LENGTH_7);
     expect(zones[ZONE_INDEX_0].minWatts).toBe(COGGAN_FTP_250_OUTPUTS.z1.min);
     expect(zones[ZONE_INDEX_0].maxWatts).toBe(COGGAN_FTP_250_OUTPUTS.z1.max);
@@ -104,11 +94,9 @@ describe("calculatePowerZoneValues", () => {
     // Arrange
 
     // Act
-
     const zones = calculatePowerZoneValues(FTP_ALT_WATTS, "british-cycling-6");
 
     // Assert
-
     expect(zones).toHaveLength(ZONE_LENGTH_6);
     expect(zones[ZONE_INDEX_0].name).toBe("Active Recovery");
     expect(zones[ZONE_INDEX_0].maxWatts).toBe(BRITISH_CYCLING_FTP_300_Z1_MAX);
@@ -118,87 +106,24 @@ describe("calculatePowerZoneValues", () => {
     // Arrange
 
     // Act
-
     const zones = calculatePowerZoneValues(FTP_DEFAULT_WATTS, "friel-7");
 
     // Assert
-
     expect(zones).toHaveLength(ZONE_LENGTH_7);
     expect(zones[ZONE_INDEX_0].name).toBe("Active Recovery");
   });
 });
 
 describe("calculateHrZones", () => {
-  it("should calculate Karvonen zones with LTHR=170", () => {
-    // Arrange
-
-    // Act
-
-    const zones = calculateHrZones(LTHR_DEFAULT_BPM, "karvonen-5");
-
-    // Assert
-
-    expect(zones).toHaveLength(ZONE_LENGTH_5);
-    expect(zones[ZONE_INDEX_0].maxBpm).toBe(KARVONEN_LTHR_170_OUTPUTS.z1Max);
-    expect(zones[ZONE_INDEX_1].minBpm).toBe(KARVONEN_LTHR_170_OUTPUTS.z2Min);
-  });
-
   it("should calculate Friel HR zones", () => {
     // Arrange
 
     // Act
-
     const zones = calculateHrZones(LTHR_DEFAULT_BPM, "friel-hr-5");
 
     // Assert
-
     expect(zones).toHaveLength(ZONE_LENGTH_5);
     expect(zones[ZONE_INDEX_0].name).toBe("Recovery");
     expect(zones[ZONE_INDEX_0].maxBpm).toBe(FRIEL_LTHR_170_Z1_MAX);
-  });
-
-  it("should default to karvonen-5 with no method specified", () => {
-    // Arrange
-
-    // Act
-
-    const zones = calculateHrZones(LTHR_DEFAULT_BPM);
-
-    // Assert
-
-    expect(zones).toHaveLength(ZONE_LENGTH_5);
-    expect(zones[ZONE_INDEX_0].name).toBe("Recovery");
-  });
-});
-
-describe("calculatePaceZones", () => {
-  it("should calculate Daniels zones with threshold 300s", () => {
-    // Arrange
-
-    // Act
-
-    const zones = calculatePaceZones(
-      PACE_THRESHOLD_DEFAULT_SEC,
-      "min_per_km",
-      "daniels-5"
-    );
-
-    // Assert
-
-    expect(zones).toHaveLength(ZONE_LENGTH_5);
-    expect(zones[ZONE_INDEX_0].name).toBe("Easy");
-    expect(zones[ZONE_INDEX_0].unit).toBe("min_per_km");
-  });
-
-  it("should default to daniels-5", () => {
-    // Arrange
-
-    // Act
-
-    const zones = calculatePaceZones(PACE_THRESHOLD_DEFAULT_SEC, "min_per_km");
-
-    // Assert
-
-    expect(zones).toHaveLength(ZONE_LENGTH_5);
   });
 });

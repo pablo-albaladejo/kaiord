@@ -47,19 +47,6 @@ describe("useRouteAnnouncerLabel", () => {
     expect(result.current).toBe(expected);
   });
 
-  it("should return a non-empty label on initial mount with a deep-linked URL", () => {
-    // Arrange
-
-    // Act
-    const { result } = renderHook(() => useRouteAnnouncerLabel(), {
-      wrapper: wrapWithRouter("/library"),
-    });
-
-    // Assert
-    expect(result.current).not.toBe("");
-    expect(result.current).toBe("Library page");
-  });
-
   it("should not change the label on query-string changes (pathname stays /library)", () => {
     // Arrange
 

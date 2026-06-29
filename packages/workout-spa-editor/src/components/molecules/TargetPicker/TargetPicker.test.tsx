@@ -316,7 +316,6 @@ describe("TargetPicker", () => {
   describe("Profile Integration", () => {
     it("should show zone name when profile is active and zone is selected", async () => {
       // Arrange
-      // Arrange
 
       const persistence = createDexiePersistence(db);
       const profile = await createProfile(persistence, "Test Profile");
@@ -333,11 +332,7 @@ describe("TargetPicker", () => {
 
       // Act
 
-      // Act
-
       render(<TargetPicker value={value} onChange={onChange} />);
-
-      // Assert
 
       // Assert
 
@@ -346,7 +341,6 @@ describe("TargetPicker", () => {
     });
 
     it("should show heart rate zone name when profile is active", async () => {
-      // Arrange
       // Arrange
 
       const persistence = createDexiePersistence(db);
@@ -371,20 +365,16 @@ describe("TargetPicker", () => {
 
       // Act
 
-      // Act
-
       render(<TargetPicker value={value} onChange={onChange} />);
-
-      // Assert - Karvonen zone 2: contiguous from Z1.max+1 to round(89%*180)
 
       // Assert
 
+      // Karvonen zone 2: contiguous from Z1.max+1 to round(89%*180).
       expect(await screen.findByText(/Aerobic/)).toBeInTheDocument();
       expect(await screen.findByText(/149-160 BPM/)).toBeInTheDocument();
     });
 
     it("should not show zone info when no profile is active", () => {
-      // Arrange
       // Arrange
 
       const onChange = vi.fn();
@@ -395,11 +385,7 @@ describe("TargetPicker", () => {
 
       // Act
 
-      // Act
-
       render(<TargetPicker value={value} onChange={onChange} />);
-
-      // Assert
 
       // Assert
 
@@ -407,9 +393,9 @@ describe("TargetPicker", () => {
     });
 
     it("should update zone info when profile changes", async () => {
-      // Arrange — first profile is auto-set active by createProfile (I1).
       // Arrange
 
+      // First profile is auto-set active by createProfile (I1).
       const persistence = createDexiePersistence(db);
       const profile1 = await createProfile(persistence, "Profile 1");
       await updateSportThresholds(persistence, profile1.id, "cycling", {
@@ -428,13 +414,12 @@ describe("TargetPicker", () => {
         <TargetPicker value={value} onChange={onChange} />
       );
 
-      // Assert initial zone info
-
       // Assert
 
+      // Initial zone info.
       expect(await screen.findByText(/190-225W/)).toBeInTheDocument();
 
-      // Act — second profile does not auto-set active; switch explicitly.
+      // Second profile does not auto-set active; switch explicitly.
       const profile2 = await createProfile(persistence, "Profile 2");
       await updateSportThresholds(persistence, profile2.id, "cycling", {
         ftp: 300,
@@ -443,12 +428,11 @@ describe("TargetPicker", () => {
 
       rerender(<TargetPicker value={value} onChange={onChange} />);
 
-      // Assert updated zone info
+      // Updated zone info.
       expect(await screen.findByText(/228-270W/)).toBeInTheDocument();
     });
 
     it("should show zone label with no profile indicator when no profile", () => {
-      // Arrange
       // Arrange
 
       const onChange = vi.fn();
@@ -458,12 +442,10 @@ describe("TargetPicker", () => {
       };
 
       // Act
+
       render(<TargetPicker value={value} onChange={onChange} />);
 
-      // Assert
       const unitSelect = screen.getByLabelText("Select target unit");
-
-      // Act
 
       const zoneOption = Array.from(unitSelect.querySelectorAll("option")).find(
         (opt) => opt.value === "zone"
@@ -475,7 +457,6 @@ describe("TargetPicker", () => {
     });
 
     it("should calculate absolute power values from zone and FTP", async () => {
-      // Arrange
       // Arrange
 
       const persistence = createDexiePersistence(db);
@@ -492,21 +473,18 @@ describe("TargetPicker", () => {
 
       // Act
 
-      // Act
-
       render(<TargetPicker value={value} onChange={onChange} />);
-
-      // Assert - Zone 4 is 91-105% of FTP
 
       // Assert
 
+      // Zone 4 is 91-105% of FTP.
       expect(await screen.findByText(/182-210W/)).toBeInTheDocument();
     });
 
     it("should not show power range when FTP is not set", async () => {
-      // Arrange — createProfile sets active automatically (I1).
       // Arrange
 
+      // createProfile sets active automatically (I1).
       const persistence = createDexiePersistence(db);
       await createProfile(persistence, "Test Profile");
 
@@ -518,14 +496,11 @@ describe("TargetPicker", () => {
 
       // Act
 
-      // Act
-
       render(<TargetPicker value={value} onChange={onChange} />);
-
-      // Assert - Should show zone name but not power range
 
       // Assert
 
+      // Should show zone name but not power range.
       expect(await screen.findByText(/Tempo/)).toBeInTheDocument();
       // Should not show power range in watts (e.g., "190-225W")
       expect(screen.queryByText(/\d+-\d+W/)).not.toBeInTheDocument();

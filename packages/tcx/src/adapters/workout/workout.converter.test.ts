@@ -34,12 +34,17 @@ describe("convertTcxWorkout", () => {
     expect(result.steps).toHaveLength(1);
   });
 
-  it("should convert a workout with Biking sport", () => {
+  it.each([
+    ["Biking", "cycling"],
+    ["Other", "generic"],
+    ["Swimming", "generic"],
+    [undefined, "generic"],
+  ])("should resolve sport %s to %s", (sportAttr, expectedSport) => {
     // Arrange
     const logger = createMockLogger();
     const tcxWorkout = {
-      "@_Sport": "Biking",
-      Name: "Cycling Intervals",
+      "@_Sport": sportAttr,
+      Name: "Test Workout",
       Step: [],
     };
 
@@ -47,55 +52,7 @@ describe("convertTcxWorkout", () => {
     const result = convertTcxWorkout(tcxWorkout, logger);
 
     // Assert
-    expect(result.sport).toBe("cycling");
-    expect(result.name).toBe("Cycling Intervals");
-  });
-
-  it("should convert a workout with Other sport to generic", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxWorkout = {
-      "@_Sport": "Other",
-      Name: "Cross Training",
-      Step: [],
-    };
-
-    // Act
-    const result = convertTcxWorkout(tcxWorkout, logger);
-
-    // Assert
-    expect(result.sport).toBe("generic");
-  });
-
-  it("should default to generic for unknown sport", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxWorkout = {
-      "@_Sport": "Swimming",
-      Name: "Swim Workout",
-      Step: [],
-    };
-
-    // Act
-    const result = convertTcxWorkout(tcxWorkout, logger);
-
-    // Assert
-    expect(result.sport).toBe("generic");
-  });
-
-  it("should default to generic when sport is missing", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxWorkout = {
-      Name: "Unnamed Workout",
-      Step: [],
-    };
-
-    // Act
-    const result = convertTcxWorkout(tcxWorkout, logger);
-
-    // Assert
-    expect(result.sport).toBe("generic");
+    expect(result.sport).toBe(expectedSport);
   });
 
   it("should handle multiple steps as array", () => {
@@ -231,22 +188,6 @@ describe("convertTcxWorkout", () => {
 
     // Assert
     expect(result.steps).toHaveLength(2);
-  });
-
-  it("should extract workout name", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxWorkout = {
-      "@_Sport": "Running",
-      Name: "My Workout Name",
-      Step: [],
-    };
-
-    // Act
-    const result = convertTcxWorkout(tcxWorkout, logger);
-
-    // Assert
-    expect(result.name).toBe("My Workout Name");
   });
 
   it("should handle missing name", () => {

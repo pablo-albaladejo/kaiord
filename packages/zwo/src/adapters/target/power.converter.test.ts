@@ -10,301 +10,114 @@ import {
 } from "./power.converter";
 
 describe("convertZwiftPowerTarget", () => {
-  it("should convert 0.85 FTP to 85 percent_ftp", () => {
+  it.each([
+    { ftp: 0.85, pct: 85 },
+    { ftp: 0.5, pct: 50 },
+    { ftp: 1.5, pct: 150 },
+    { ftp: 3.0, pct: 300 },
+    { ftp: 0, pct: 0 },
+  ])("should convert $ftp FTP to $pct percent_ftp", ({ ftp, pct }) => {
     // Arrange
 
     // Act
-    const result = convertZwiftPowerTarget(0.85);
+    const result = convertZwiftPowerTarget(ftp);
 
     // Assert
     expect(result).toStrictEqual({
       type: "power",
-      value: { unit: "percent_ftp", value: 85 },
-    });
-  });
-
-  it("should convert 0.5 FTP to 50 percent_ftp", () => {
-    // Arrange
-
-    // Act
-    const result = convertZwiftPowerTarget(0.5);
-
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "percent_ftp", value: 50 },
-    });
-  });
-
-  it("should convert 1.5 FTP to 150 percent_ftp", () => {
-    // Arrange
-
-    // Act
-    const result = convertZwiftPowerTarget(1.5);
-
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "percent_ftp", value: 150 },
-    });
-  });
-
-  it("should convert 3.0 FTP to 300 percent_ftp", () => {
-    // Arrange
-
-    // Act
-    const result = convertZwiftPowerTarget(3.0);
-
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "percent_ftp", value: 300 },
-    });
-  });
-
-  it("should handle zero FTP percentage", () => {
-    // Arrange
-
-    // Act
-    const result = convertZwiftPowerTarget(0);
-
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "percent_ftp", value: 0 },
+      value: { unit: "percent_ftp", value: pct },
     });
   });
 });
 
 describe("convertZwiftPowerRange", () => {
-  it("should convert low/high FTP range to percent range", () => {
-    // Arrange
+  it.each([
+    { low: 0.6, high: 0.8, min: 60, max: 80 },
+    { low: 0.25, high: 0.75, min: 25, max: 75 },
+    { low: 0.75, high: 0.5, min: 75, max: 50 },
+    { low: 1.0, high: 1.2, min: 100, max: 120 },
+  ])(
+    "should convert FTP range $low/$high to percent range $min/$max",
+    ({ low, high, min, max }) => {
+      // Arrange
 
-    // Act
-    const result = convertZwiftPowerRange(0.6, 0.8);
+      // Act
+      const result = convertZwiftPowerRange(low, high);
 
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "range", min: 60, max: 80 },
-    });
-  });
-
-  it("should handle warmup range", () => {
-    // Arrange
-
-    // Act
-    const result = convertZwiftPowerRange(0.25, 0.75);
-
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "range", min: 25, max: 75 },
-    });
-  });
-
-  it("should handle cooldown range (high to low)", () => {
-    // Arrange
-
-    // Act
-    const result = convertZwiftPowerRange(0.75, 0.5);
-
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "range", min: 75, max: 50 },
-    });
-  });
-
-  it("should handle full FTP range", () => {
-    // Arrange
-
-    // Act
-    const result = convertZwiftPowerRange(1.0, 1.2);
-
-    // Assert
-    expect(result).toStrictEqual({
-      type: "power",
-      value: { unit: "range", min: 100, max: 120 },
-    });
-  });
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "range", min, max },
+      });
+    }
+  );
 });
 
 describe("convertKrdPowerToZwift", () => {
-  it("should convert 85 percent_ftp to 0.85", () => {
+  it.each([
+    { pct: 85, ftp: 0.85 },
+    { pct: 100, ftp: 1.0 },
+    { pct: 150, ftp: 1.5 },
+    { pct: 50, ftp: 0.5 },
+  ])("should convert $pct percent_ftp to $ftp FTP", ({ pct, ftp }) => {
     // Arrange
 
     // Act
-    const result = convertKrdPowerToZwift(85);
+    const result = convertKrdPowerToZwift(pct);
 
     // Assert
-    expect(result).toBe(0.85);
-  });
-
-  it("should convert 100 percent_ftp to 1.0", () => {
-    // Arrange
-
-    // Act
-    const result = convertKrdPowerToZwift(100);
-
-    // Assert
-    expect(result).toBe(1.0);
-  });
-
-  it("should convert 150 percent_ftp to 1.5", () => {
-    // Arrange
-
-    // Act
-    const result = convertKrdPowerToZwift(150);
-
-    // Assert
-    expect(result).toBe(1.5);
-  });
-
-  it("should convert 50 percent_ftp to 0.5", () => {
-    // Arrange
-
-    // Act
-    const result = convertKrdPowerToZwift(50);
-
-    // Assert
-    expect(result).toBe(0.5);
+    expect(result).toBe(ftp);
   });
 });
 
 describe("convertKrdPowerRangeToZwift", () => {
-  it("should convert percent range to Zwift FTP range", () => {
-    // Arrange
+  it.each([
+    { min: 60, max: 80, out: [0.6, 0.8] },
+    { min: 25, max: 75, out: [0.25, 0.75] },
+    { min: 75, max: 50, out: [0.75, 0.5] },
+  ])(
+    "should convert percent range $min/$max to Zwift FTP range",
+    ({ min, max, out }) => {
+      // Arrange
 
-    // Act
-    const result = convertKrdPowerRangeToZwift(60, 80);
+      // Act
+      const result = convertKrdPowerRangeToZwift(min, max);
 
-    // Assert
-    expect(result).toStrictEqual([0.6, 0.8]);
-  });
-
-  it("should handle warmup range", () => {
-    // Arrange
-
-    // Act
-    const result = convertKrdPowerRangeToZwift(25, 75);
-
-    // Assert
-    expect(result).toStrictEqual([0.25, 0.75]);
-  });
-
-  it("should handle cooldown range", () => {
-    // Arrange
-
-    // Act
-    const result = convertKrdPowerRangeToZwift(75, 50);
-
-    // Assert
-    expect(result).toStrictEqual([0.75, 0.5]);
-  });
+      // Assert
+      expect(result).toStrictEqual(out);
+    }
+  );
 });
 
 describe("convertPowerZoneToPercentFtp", () => {
-  it("should convert zone 1 to 55%", () => {
+  it.each([
+    { zone: 1, pct: 55 },
+    { zone: 2, pct: 75 },
+    { zone: 3, pct: 90 },
+    { zone: 4, pct: 105 },
+    { zone: 5, pct: 120 },
+    { zone: 6, pct: 150 },
+    { zone: 7, pct: 200 },
+  ])("should convert zone $zone to $pct percent", ({ zone, pct }) => {
     // Arrange
 
     // Act
-    const result = convertPowerZoneToPercentFtp(1);
+    const result = convertPowerZoneToPercentFtp(zone);
 
     // Assert
-    expect(result).toBe(55);
+    expect(result).toBe(pct);
   });
 
-  it("should convert zone 2 to 75%", () => {
-    // Arrange
+  it.each([0, 8, -1])(
+    "should throw RangeError for out-of-range zone %i",
+    (invalidZone) => {
+      // Arrange
 
-    // Act
-    const result = convertPowerZoneToPercentFtp(2);
+      // Act
+      const act = () => convertPowerZoneToPercentFtp(invalidZone);
 
-    // Assert
-    expect(result).toBe(75);
-  });
-
-  it("should convert zone 3 to 90%", () => {
-    // Arrange
-
-    // Act
-    const result = convertPowerZoneToPercentFtp(3);
-
-    // Assert
-    expect(result).toBe(90);
-  });
-
-  it("should convert zone 4 to 105%", () => {
-    // Arrange
-
-    // Act
-    const result = convertPowerZoneToPercentFtp(4);
-
-    // Assert
-    expect(result).toBe(105);
-  });
-
-  it("should convert zone 5 to 120%", () => {
-    // Arrange
-
-    // Act
-    const result = convertPowerZoneToPercentFtp(5);
-
-    // Assert
-    expect(result).toBe(120);
-  });
-
-  it("should convert zone 6 to 150%", () => {
-    // Arrange
-
-    // Act
-    const result = convertPowerZoneToPercentFtp(6);
-
-    // Assert
-    expect(result).toBe(150);
-  });
-
-  it("should convert zone 7 to 200%", () => {
-    // Arrange
-
-    // Act
-    const result = convertPowerZoneToPercentFtp(7);
-
-    // Assert
-    expect(result).toBe(200);
-  });
-
-  it("should throw RangeError for zone 0 (below range)", () => {
-    // Arrange
-    const invalidZone = 0;
-
-    // Act
-    const act = () => convertPowerZoneToPercentFtp(invalidZone);
-
-    // Assert
-    expect(act).toThrow(RangeError);
-  });
-
-  it("should throw RangeError for zone 8 (above range)", () => {
-    // Arrange
-    const invalidZone = 8;
-
-    // Act
-    const act = () => convertPowerZoneToPercentFtp(invalidZone);
-
-    // Assert
-    expect(act).toThrow(RangeError);
-  });
-
-  it("should throw RangeError for negative zone", () => {
-    // Arrange
-    const invalidZone = -1;
-
-    // Act
-    const act = () => convertPowerZoneToPercentFtp(invalidZone);
-
-    // Assert
-    expect(act).toThrow(RangeError);
-  });
+      // Assert
+      expect(act).toThrow(RangeError);
+    }
+  );
 });

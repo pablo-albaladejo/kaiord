@@ -7,30 +7,17 @@ const OPENAI_RATE_USD_PER_M = 1.5;
 const GOOGLE_RATE_USD_PER_M = 0.3;
 
 describe("getProviderRate", () => {
-  it("should return the anthropic blended rate", () => {
+  it.each([
+    { type: "anthropic", rate: ANTHROPIC_RATE_USD_PER_M },
+    { type: "openai", rate: OPENAI_RATE_USD_PER_M },
+    { type: "google", rate: GOOGLE_RATE_USD_PER_M },
+  ] as const)("should return the $type blended rate", ({ type, rate }) => {
     // Arrange
 
     // Act
+    const result = getProviderRate(type);
 
     // Assert
-    expect(getProviderRate("anthropic")).toBe(ANTHROPIC_RATE_USD_PER_M);
-  });
-
-  it("should return the openai blended rate", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(getProviderRate("openai")).toBe(OPENAI_RATE_USD_PER_M);
-  });
-
-  it("should return the google blended rate", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(getProviderRate("google")).toBe(GOOGLE_RATE_USD_PER_M);
+    expect(result).toBe(rate);
   });
 });

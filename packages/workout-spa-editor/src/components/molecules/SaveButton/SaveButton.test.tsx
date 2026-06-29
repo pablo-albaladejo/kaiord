@@ -110,74 +110,52 @@ describe("SaveButton", () => {
 
   describe("rendering", () => {
     it("should render save button with default text", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Assert
-
-      // Assert
-
       expect(
         screen.getByRole("button", { name: /save workout/i })
       ).toBeInTheDocument();
     });
 
     it("should render format selector", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
-
       renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Assert
-
-      // Assert
-
       expect(
         screen.getByRole("button", { name: /select export format/i })
       ).toBeInTheDocument();
     });
 
     it("should render download icon", () => {
-      // Arrange & Act
       // Arrange
 
-      renderWithToast(<SaveButton workout={mockKRD} />);
-
-      // Assert
-      const button = screen.getByRole("button", { name: /save workout/i });
-
       // Act
-
+      renderWithToast(<SaveButton workout={mockKRD} />);
+      const button = screen.getByRole("button", { name: /save workout/i });
       const icon = button.querySelector("svg");
 
       // Assert
-
       expect(icon).toBeInTheDocument();
     });
 
     it("should apply custom className to container", () => {
-      // Arrange & Act
       // Arrange
 
+      // Act
       renderWithToast(
         <SaveButton workout={mockKRD} className="custom-class" />
       );
-
-      // Assert
       const button = screen.getByRole("button", { name: /save workout/i });
-
-      // Act
-
       const container = button.closest(".custom-class");
 
       // Assert
-
       expect(container).toBeInTheDocument();
     });
   });
@@ -185,8 +163,6 @@ describe("SaveButton", () => {
   describe("save functionality", () => {
     it("should export workout in default KRD format when button is clicked", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
@@ -194,15 +170,9 @@ describe("SaveButton", () => {
       // Act
       renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
-
-      // Act
-
       await user.click(button);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
@@ -219,8 +189,6 @@ describe("SaveButton", () => {
 
     it("should show success notification with format name", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
@@ -231,18 +199,13 @@ describe("SaveButton", () => {
       // Act
       await user.click(button);
 
-      // Assert - Wait for toast to appear
-
-      // Act
-
+      // Assert
+      // Wait for toast to appear
       const title = await screen.findByText(
         "Workout Saved",
         {},
         { timeout: TOAST_WAIT_MS }
       );
-
-      // Assert
-
       expect(title).toBeInTheDocument();
       const description = await screen.findByText(
         /"Test Workout" has been saved as KRD/,
@@ -254,8 +217,6 @@ describe("SaveButton", () => {
 
     it("should generate correct filename for workout without name", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const workoutWithoutName: KRD = {
         ...mockKRD,
@@ -273,15 +234,9 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Act
-
-      // Act
-
       await user.click(button);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(downloadWorkout).toHaveBeenCalledWith(
           mockBuffer,
@@ -293,22 +248,14 @@ describe("SaveButton", () => {
 
     it("should not export when disabled", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} disabled={true} />);
       const button = screen.getByRole("button", { name: /save workout/i });
-
-      // Act
-
       await user.click(button);
 
       // Assert
-
-      // Assert
-
       expect(exportWorkout).not.toHaveBeenCalled();
     });
   });
@@ -316,29 +263,22 @@ describe("SaveButton", () => {
   describe("multi-format save", () => {
     it("should export workout in FIT format when selected", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
 
-      // Act - Select FIT format
+      // Act
+      // Select FIT format
       const fitOption = screen.getByRole("button", { name: /FIT/i });
       await user.click(fitOption);
 
       // Click save button
       const saveButton = screen.getByRole("button", { name: /save workout/i });
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
@@ -355,29 +295,22 @@ describe("SaveButton", () => {
 
     it("should export workout in TCX format when selected", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
 
-      // Act - Select TCX format
+      // Act
+      // Select TCX format
       const tcxOption = screen.getByRole("button", { name: /TCX/i });
       await user.click(tcxOption);
 
       // Click save button
       const saveButton = screen.getByRole("button", { name: /save workout/i });
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
@@ -394,29 +327,22 @@ describe("SaveButton", () => {
 
     it("should export workout in ZWO format when selected", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
 
-      // Act - Select ZWO format
+      // Act
+      // Select ZWO format
       const zwoOption = screen.getByRole("button", { name: /ZWO/i });
       await user.click(zwoOption);
 
       // Click save button
       const saveButton = screen.getByRole("button", { name: /save workout/i });
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
@@ -433,15 +359,14 @@ describe("SaveButton", () => {
 
     it("should show success notification with correct format name", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
 
-      // Act - Select FIT format
+      // Act
+      // Select FIT format
       const fitOption = screen.getByRole("button", { name: /FIT/i });
       await user.click(fitOption);
 
@@ -449,18 +374,13 @@ describe("SaveButton", () => {
       const saveButton = screen.getByRole("button", { name: /save workout/i });
       await user.click(saveButton);
 
-      // Assert - Wait for toast to appear
-
-      // Act
-
+      // Assert
+      // Wait for toast to appear
       const title = await screen.findByText(
         "Workout Saved",
         {},
         { timeout: TOAST_WAIT_MS }
       );
-
-      // Assert
-
       expect(title).toBeInTheDocument();
       const description = await screen.findByText(
         /"Test Workout" has been saved as FIT/,
@@ -472,29 +392,22 @@ describe("SaveButton", () => {
 
     it("should generate correct filename with format extension", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
 
-      // Act - Select TCX format
+      // Act
+      // Select TCX format
       const tcxOption = screen.getByRole("button", { name: /TCX/i });
       await user.click(tcxOption);
 
       // Click save button
       const saveButton = screen.getByRole("button", { name: /save workout/i });
-
-      // Act
-
       await user.click(saveButton);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(downloadWorkout).toHaveBeenCalledWith(
           mockBuffer,
@@ -508,8 +421,6 @@ describe("SaveButton", () => {
   describe("error handling", () => {
     it("should display error notification when export fails", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(async () => {
         throw new Error("Export failed");
@@ -520,18 +431,13 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
       await user.click(button);
 
-      // Assert - Wait for error toast to appear
-
-      // Act
-
+      // Assert
+      // Wait for error toast to appear
       const errorTitle = await screen.findByText(
         "Export Failed",
         {},
         { timeout: TOAST_WAIT_MS }
       );
-
-      // Assert
-
       expect(errorTitle).toBeInTheDocument();
       // Find error message in toast description (more specific)
       const errorMessages = await screen.findAllByText(
@@ -544,8 +450,6 @@ describe("SaveButton", () => {
 
     it("should allow retry after export error", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
 
@@ -561,27 +465,23 @@ describe("SaveButton", () => {
       renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
 
+      // Act
       // First attempt fails
       await user.click(button);
 
+      // Assert
       // Wait for error toast
-
-      // Act
-
       const errorTitle = await screen.findByText(
         "Export Failed",
         {},
         { timeout: TOAST_WAIT_MS }
       );
-
-      // Assert
-
       expect(errorTitle).toBeInTheDocument();
 
-      // Act - Click save button again
+      // Click save button again
       await user.click(button);
 
-      // Assert - Second save should succeed
+      // Second save should succeed
       await waitFor(
         () => {
           expect(callCount).toBe(EXPECTED_RETRY_CALL_COUNT);
@@ -600,19 +500,13 @@ describe("SaveButton", () => {
 
   describe("disabled state", () => {
     it("should be disabled when disabled prop is true", () => {
-      // Arrange & Act
       // Arrange
 
-      renderWithToast(<SaveButton workout={mockKRD} disabled={true} />);
-
-      // Assert
-
       // Act
-
+      renderWithToast(<SaveButton workout={mockKRD} disabled={true} />);
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Assert
-
       expect(button).toBeDisabled();
     });
   });
@@ -620,8 +514,6 @@ describe("SaveButton", () => {
   describe("loading states", () => {
     it("should show spinner during export", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
@@ -636,15 +528,10 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Act
-
-      // Act
-
       const clickPromise = user.click(button);
 
-      // Assert - check for spinner
-
       // Assert
-
+      // check for spinner
       await waitFor(() => {
         const spinner = document.querySelector(".animate-spin");
         expect(spinner).toBeInTheDocument();
@@ -659,8 +546,6 @@ describe("SaveButton", () => {
 
     it("should show Saving... text during export", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
@@ -675,15 +560,9 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Act
-
-      // Act
-
       const clickPromise = user.click(button);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(screen.getByText("Saving...")).toBeInTheDocument();
       });
@@ -697,8 +576,6 @@ describe("SaveButton", () => {
 
     it("should disable button during export", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
@@ -713,15 +590,9 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Act
-
-      // Act
-
       const clickPromise = user.click(button);
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         const savingButton = screen.getByRole("button", { name: /saving/i });
         expect(savingButton).toBeDisabled();
@@ -736,8 +607,6 @@ describe("SaveButton", () => {
 
     it("should disable format selector during export", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
@@ -752,15 +621,10 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Act
-
-      // Act
-
       const clickPromise = user.click(button);
 
-      // Assert - format selector should be disabled
-
       // Assert
-
+      // format selector should be disabled
       await waitFor(() => {
         const formatButton = screen.getByRole("button", {
           name: /select export format/i,
@@ -777,8 +641,6 @@ describe("SaveButton", () => {
 
     it("should display progress bar during export", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
@@ -796,15 +658,10 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Act
-
-      // Act
-
       const clickPromise = user.click(button);
 
-      // Assert - check for progress bar
-
       // Assert
-
+      // check for progress bar
       await waitFor(() => {
         const progressBar = screen.queryByRole("progressbar");
         expect(progressBar).toBeInTheDocument();
@@ -819,8 +676,6 @@ describe("SaveButton", () => {
 
     it("should update progress bar value during export", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       vi.mocked(exportWorkout).mockImplementation(
         async (krd, format, onProgress) => {
@@ -838,15 +693,10 @@ describe("SaveButton", () => {
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Act
-
-      // Act
-
       const clickPromise = user.click(button);
 
-      // Assert - check progress bar updates
-
       // Assert
-
+      // check progress bar updates
       await waitFor(() => {
         const progressBar = screen.queryByRole("progressbar");
         expect(progressBar).toBeInTheDocument();
@@ -863,26 +713,18 @@ describe("SaveButton", () => {
 
   describe("accessibility", () => {
     it("should have proper button role", () => {
-      // Arrange & Act
       // Arrange
 
-      renderWithToast(<SaveButton workout={mockKRD} />);
-
-      // Assert
-
       // Act
-
+      renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
 
       // Assert
-
       expect(button).toBeInTheDocument();
     });
 
     it("should be keyboard accessible", async () => {
       // Arrange
-      // Arrange
-
       const user = userEvent.setup();
       const mockBuffer = new Uint8Array(MOCK_BUFFER_BYTES);
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
@@ -891,15 +733,9 @@ describe("SaveButton", () => {
       renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       button.focus();
-
-      // Act
-
       await user.keyboard("{Enter}");
 
       // Assert
-
-      // Assert
-
       await waitFor(() => {
         expect(exportWorkout).toHaveBeenCalled();
       });

@@ -125,23 +125,4 @@ describe("setCalendarView", () => {
     ).rejects.toBeInstanceOf(ProfileNotFoundError);
     expect(await repo.get("p1")).toBeUndefined();
   });
-
-  it("should use injected clock — no real-time leakage", async () => {
-    // Arrange
-    const repo = createInMemoryUserPreferencesRepository();
-    const profileRepo = stubProfileRepo([stubProfile()]);
-
-    // Act
-    await setCalendarView(
-      { profileId: "p1", view: "grid" },
-      {
-        clock: () => "2026-04-01T00:00:00.000Z",
-        repository: repo,
-        profileRepository: profileRepo,
-      }
-    );
-
-    // Assert
-    expect((await repo.get("p1"))?.updatedAt).toBe("2026-04-01T00:00:00.000Z");
-  });
 });

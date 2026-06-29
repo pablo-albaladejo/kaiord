@@ -7,30 +7,16 @@ describe("createXsdTcxValidator", () => {
   const logger = createMockLogger();
 
   describe("valid XML", () => {
-    it("should validate well-formed TCX XML", async () => {
-      // Arrange
-      const validator = createXsdTcxValidator(logger);
-      const validXml = `<?xml version="1.0" encoding="UTF-8"?>
+    it.each([
+      `<?xml version="1.0" encoding="UTF-8"?>
 <TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
   <Workouts>
     <Workout Sport="Running">
       <Name>Test Workout</Name>
     </Workout>
   </Workouts>
-</TrainingCenterDatabase>`;
-
-      // Act
-      const result = await validator(validXml);
-
-      // Assert
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-    });
-
-    it("should validate TCX with workout steps", async () => {
-      // Arrange
-      const validator = createXsdTcxValidator(logger);
-      const validXml = `<?xml version="1.0" encoding="UTF-8"?>
+</TrainingCenterDatabase>`,
+      `<?xml version="1.0" encoding="UTF-8"?>
 <TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Workouts>
     <Workout Sport="Running">
@@ -45,7 +31,10 @@ describe("createXsdTcxValidator", () => {
       </Step>
     </Workout>
   </Workouts>
-</TrainingCenterDatabase>`;
+</TrainingCenterDatabase>`,
+    ])("should validate well-formed TCX XML", async (validXml) => {
+      // Arrange
+      const validator = createXsdTcxValidator(logger);
 
       // Act
       const result = await validator(validXml);
@@ -57,17 +46,25 @@ describe("createXsdTcxValidator", () => {
   });
 
   describe("invalid XML", () => {
-    it("should reject malformed XML", async () => {
-      // Arrange
-      const validator = createXsdTcxValidator(logger);
-      const invalidXml = `<?xml version="1.0" encoding="UTF-8"?>
+    it.each([
+      `<?xml version="1.0" encoding="UTF-8"?>
 <TrainingCenterDatabase>
   <Workouts>
     <Workout Sport="Running">
       <Name>Test Workout
     </Workout>
   </Workouts>
-</TrainingCenterDatabase>`;
+</TrainingCenterDatabase>`,
+      `<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase>
+  <Workouts>
+    <Workout Sport="Running">
+  </Workouts>
+</TrainingCenterDatabase>`,
+      "",
+    ])("should reject invalid XML", async (invalidXml) => {
+      // Arrange
+      const validator = createXsdTcxValidator(logger);
 
       // Act
       const result = await validator(invalidXml);
@@ -76,37 +73,6 @@ describe("createXsdTcxValidator", () => {
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors[0].message).toContain("XML");
-    });
-
-    it("should reject XML with unclosed tags", async () => {
-      // Arrange
-      const validator = createXsdTcxValidator(logger);
-      const invalidXml = `<?xml version="1.0" encoding="UTF-8"?>
-<TrainingCenterDatabase>
-  <Workouts>
-    <Workout Sport="Running">
-  </Workouts>
-</TrainingCenterDatabase>`;
-
-      // Act
-      const result = await validator(invalidXml);
-
-      // Assert
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-    });
-
-    it("should reject empty string", async () => {
-      // Arrange
-      const validator = createXsdTcxValidator(logger);
-      const invalidXml = "";
-
-      // Act
-      const result = await validator(invalidXml);
-
-      // Assert
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
     });
   });
 

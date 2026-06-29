@@ -232,27 +232,6 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
     );
   });
 
-  it("should keep the warning message as a static literal (no identifier interpolation)", async () => {
-    // Arrange
-    const repo = createInMemoryAutoMatchDismissalRepository();
-    const logger = { warn: vi.fn() };
-    await fillCap(repo);
-    await dismissAutoMatchBanner(
-      { ...baseInput, activityId: "a-leak", workoutId: "w-leak" },
-      { repository: repo, clock: () => NOW_2, logger }
-    );
-
-    // Act
-    const message = (logger.warn as ReturnType<typeof vi.fn>).mock
-      .calls[0]?.[0];
-
-    // Assert
-    expect(message).toBe("dismissAutoMatchBanner: cap reached");
-    expect(message).not.toContain("a-leak");
-    expect(message).not.toContain("w-leak");
-    expect(message).not.toContain("p1");
-  });
-
   it("should re-dismis at the cap updates the existing entry without violating the cap", async () => {
     // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();

@@ -23,30 +23,17 @@ describe("kaiord_round_trip_validate", () => {
     expect(result.content[0].text).toContain("Round-trip validation");
   });
 
-  it("should return error for non-existent file", async () => {
+  it.each([
+    "/tmp/nonexistent.fit",
+    getFixturePath("krd", "WorkoutIndividualSteps.krd"),
+  ])("should return error for invalid input: %s", async (inputFile) => {
     // Arrange
     const client = await createTestClient();
 
     // Act
     const result = (await client.callTool({
       name: "kaiord_round_trip_validate",
-      arguments: { input_file: "/tmp/nonexistent.fit" },
-    })) as McpToolResult;
-
-    // Assert
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Error");
-  });
-
-  it("should return error for invalid FIT data", async () => {
-    // Arrange
-    const client = await createTestClient();
-    const krdPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
-
-    // Act
-    const result = (await client.callTool({
-      name: "kaiord_round_trip_validate",
-      arguments: { input_file: krdPath },
+      arguments: { input_file: inputFile },
     })) as McpToolResult;
 
     // Assert

@@ -4,16 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { UsageRecord } from "../../../types/usage-schemas";
 import { UsageTab } from "./UsageTab";
 
-type QueryFactory = () => Promise<UsageRecord[]>;
-
 let mockRows: UsageRecord[] = [];
-let lastFactory: QueryFactory | null = null;
 
 vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: (factory: QueryFactory) => {
-    lastFactory = factory;
-    return mockRows;
-  },
+  useLiveQuery: () => mockRows,
 }));
 
 vi.mock("../../../adapters/dexie/dexie-database", () => ({
@@ -31,7 +25,6 @@ vi.mock("../../../adapters/dexie/dexie-database", () => ({
 describe("UsageTab", () => {
   beforeEach(() => {
     mockRows = [];
-    lastFactory = null;
   });
 
   it("should render the empty state when no records exist", () => {
@@ -116,24 +109,5 @@ describe("UsageTab", () => {
 
     expect(row).toHaveTextContent("12,345");
     expect(row).toHaveTextContent("$0.0123");
-  });
-
-  it("should query the last 6 calendar months (current + 5 prior)", () => {
-    // Arrange
-
-    mockRows = [];
-
-    // Act
-
-    render(<UsageTab />);
-
-    // The factory isn't awaited here because the mocked useLiveQuery
-    // returns mockRows directly, but the factory itself was called
-    // during render so we can't assert on its closure input. Instead
-    // we confirm the factory was passed (smoke-test).
-
-    // Assert
-
-    expect(lastFactory).toBeTypeOf("function");
   });
 });

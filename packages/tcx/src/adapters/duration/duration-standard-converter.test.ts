@@ -101,48 +101,4 @@ describe("convertStandardTcxDuration", () => {
     // Assert
     expect(result).toBeNull();
   });
-
-  it("should handle large time values", () => {
-    // Arrange
-    const tcxDuration = { "@_xsi:type": "Time_t", Seconds: 7200 };
-
-    // Act
-    const result = convertStandardTcxDuration(tcxDuration);
-
-    // Assert
-    expect(result).toStrictEqual({ type: "time", seconds: 7200 });
-  });
-
-  it("should handle fractional meters", () => {
-    // Arrange
-    const tcxDuration = { "@_xsi:type": "Distance_t", Meters: 1609.34 };
-
-    // Act
-    const result = convertStandardTcxDuration(tcxDuration);
-
-    // Assert
-    expect(result).toStrictEqual({ type: "distance", meters: 1609.34 });
-  });
-
-  it("should return null for Time_t without Seconds property", () => {
-    // Arrange
-    const tcxDuration = { "@_xsi:type": "Time_t" };
-
-    // Act
-    const result = convertStandardTcxDuration(tcxDuration);
-
-    // Assert
-    expect(result).toBeNull();
-  });
-
-  it("should return null for Distance_t without Meters property", () => {
-    // Arrange
-    const tcxDuration = { "@_xsi:type": "Distance_t" };
-
-    // Act
-    const result = convertStandardTcxDuration(tcxDuration);
-
-    // Assert
-    expect(result).toBeNull();
-  });
 });

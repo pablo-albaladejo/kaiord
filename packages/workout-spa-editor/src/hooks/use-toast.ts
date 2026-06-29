@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { createToastItem } from "./use-toast.helpers";
 import type { ToastItem, ToastOptions } from "./use-toast.types";
@@ -16,6 +16,11 @@ export type { ToastItem, ToastOptions };
  */
 export const useToast = () => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const dismissTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // Clear pending auto-dismiss timers on unmount, else a queued setState fires
+  // after the component/test env is gone (ReferenceError: window is not defined).
+  useEffect(() => () => dismissTimers.current.forEach(clearTimeout), []);
 
   const toast = useCallback((options: ToastOptions) => {
     const newToast = createToastItem(options);
@@ -27,14 +32,16 @@ export const useToast = () => {
     setToasts((prev) =>
       prev.map((t) => (t.id === id ? { ...t, open: false } : t))
     );
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 200);
+    dismissTimers.current.push(
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 200)
+    );
   }, []);
 
   const dismissAll = useCallback(() => {
     setToasts((prev) => prev.map((t) => ({ ...t, open: false })));
-    setTimeout(() => setToasts([]), 200);
+    dismissTimers.current.push(setTimeout(() => setToasts([]), 200));
   }, []);
 
   // Variant helpers: inline forms so exhaustive-deps can verify deps

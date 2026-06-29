@@ -67,15 +67,10 @@ describe("WorkoutSection", () => {
 
   it("should render workout information", () => {
     // Arrange
-    // Arrange
-
     const workout = createMockWorkout([createMockStep(0)]);
     const krd = createMockKRD(workout);
 
     // Act
-
-    // Act
-
     renderWithProviders(
       <WorkoutSection
         workout={workout}
@@ -86,9 +81,6 @@ describe("WorkoutSection", () => {
     );
 
     // Assert
-
-    // Assert
-
     expect(
       screen.getByText(workout.name || "Untitled Workout")
     ).toBeInTheDocument();
@@ -97,15 +89,10 @@ describe("WorkoutSection", () => {
 
   it("should render SaveToLibraryButton when workout is loaded (Requirement 17)", () => {
     // Arrange
-    // Arrange
-
     const workout = createMockWorkout([createMockStep(0)]);
     const krd = createMockKRD(workout);
 
     // Act
-
-    // Act
-
     renderWithProviders(
       <WorkoutSection
         workout={workout}
@@ -116,9 +103,6 @@ describe("WorkoutSection", () => {
     );
 
     // Assert
-
-    // Assert
-
     expect(
       screen.getByRole("button", { name: /Save to Library/i })
     ).toBeInTheDocument();
@@ -126,8 +110,6 @@ describe("WorkoutSection", () => {
 
   it("should open StepEditor when step is selected and editing is enabled", () => {
     // Arrange
-    // Arrange
-
     const workout = createMockWorkout([createMockStep(0, "id-step-0")]);
     const krd = createMockKRD(workout);
     const selectedStepId = "id-step-0";
@@ -136,9 +118,6 @@ describe("WorkoutSection", () => {
     useWorkoutStore.setState({ isEditing: true });
 
     // Act
-
-    // Act
-
     renderWithProviders(
       <WorkoutSection
         workout={workout}
@@ -148,10 +127,7 @@ describe("WorkoutSection", () => {
       />
     );
 
-    // Assert - StepEditor should be visible with Edit Step heading
-
     // Assert
-
     expect(screen.getByText(/Edit Step/)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Save step changes/ })
@@ -161,17 +137,12 @@ describe("WorkoutSection", () => {
 
   it("should not show StepEditor when no step is selected", () => {
     // Arrange
-    // Arrange
-
     const workout = createMockWorkout([createMockStep(0)]);
     const krd = createMockKRD(workout);
 
     useWorkoutStore.setState({ isEditing: false });
 
     // Act
-
-    // Act
-
     renderWithProviders(
       <WorkoutSection
         workout={workout}
@@ -181,17 +152,12 @@ describe("WorkoutSection", () => {
       />
     );
 
-    // Assert - StepEditor should not be visible (no Edit Step heading)
-
     // Assert
-
     expect(screen.queryByText(/Edit Step/)).not.toBeInTheDocument();
   });
 
   it("should show editor when step is selected and editing is true", () => {
     // Arrange
-    // Arrange
-
     const workout = createMockWorkout([createMockStep(0, "id-show-editor")]);
     const krd = createMockKRD(workout);
 
@@ -202,9 +168,6 @@ describe("WorkoutSection", () => {
     });
 
     // Act
-
-    // Act
-
     renderWithProviders(
       <WorkoutSection
         workout={workout}
@@ -214,17 +177,12 @@ describe("WorkoutSection", () => {
       />
     );
 
-    // Assert - Editor should be visible
-
     // Assert
-
     expect(screen.getByText(/Edit Step/)).toBeInTheDocument();
   });
 
   it("should close editor and clear selection on cancel", async () => {
     // Arrange
-    // Arrange
-
     const workout = createMockWorkout([createMockStep(0, "id-step-0")]);
     const krd = createMockKRD(workout);
     const selectedStepId = "id-step-0";
@@ -243,19 +201,13 @@ describe("WorkoutSection", () => {
       />
     );
 
-    // Act - Click cancel button
-    const cancelButton = screen.getByText(/Cancel/);
-
     // Act
-
+    const cancelButton = screen.getByText(/Cancel/);
     await act(async () => {
       cancelButton.click();
     });
 
-    // Assert - Wait for state updates
-
     // Assert
-
     await waitFor(() => {
       expect(useWorkoutStore.getState().isEditing).toBe(false);
       expect(useWorkoutStore.getState().selectedStepId).toBe(null);
@@ -265,8 +217,6 @@ describe("WorkoutSection", () => {
   describe("CreateRepetitionBlockButton integration (Requirement 7.1)", () => {
     it("should not show create repetition block button when no steps selected", () => {
       // Arrange
-      // Arrange
-
       const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
       const krd = createMockKRD(workout);
 
@@ -275,9 +225,6 @@ describe("WorkoutSection", () => {
       });
 
       // Act
-
-      // Act
-
       renderWithProviders(
         <WorkoutSection
           workout={workout}
@@ -288,9 +235,6 @@ describe("WorkoutSection", () => {
       );
 
       // Assert
-
-      // Assert
-
       expect(
         screen.queryByTestId("create-repetition-block-button")
       ).not.toBeInTheDocument();
@@ -298,8 +242,6 @@ describe("WorkoutSection", () => {
 
     it("should not show create repetition block button when only 1 step selected", () => {
       // Arrange
-      // Arrange
-
       const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
       const krd = createMockKRD(workout);
 
@@ -308,9 +250,6 @@ describe("WorkoutSection", () => {
       });
 
       // Act
-
-      // Act
-
       renderWithProviders(
         <WorkoutSection
           workout={workout}
@@ -321,9 +260,6 @@ describe("WorkoutSection", () => {
       );
 
       // Assert
-
-      // Assert
-
       expect(
         screen.queryByTestId("create-repetition-block-button")
       ).not.toBeInTheDocument();
@@ -331,8 +267,6 @@ describe("WorkoutSection", () => {
 
     it("should show create repetition block button when 2+ steps selected", () => {
       // Arrange
-      // Arrange
-
       const workout = createMockWorkout([
         createMockStep(0),
         createMockStep(1),
@@ -355,21 +289,13 @@ describe("WorkoutSection", () => {
       );
 
       // Assert
-
-      // Act
-
       const button = screen.getByTestId("create-repetition-block-button");
-
-      // Assert
-
       expect(button).toBeInTheDocument();
       expect(button).toHaveTextContent("Create Repetition Block (2 steps)");
     });
 
     it("should open CreateRepetitionBlockDialog when button clicked", async () => {
       // Arrange
-      // Arrange
-
       const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
       const krd = createMockKRD(workout);
 
@@ -386,19 +312,13 @@ describe("WorkoutSection", () => {
         />
       );
 
-      // Act - Click create repetition block button
-      const button = screen.getByTestId("create-repetition-block-button");
-
       // Act
-
+      const button = screen.getByTestId("create-repetition-block-button");
       await act(async () => {
         button.click();
       });
 
-      // Assert - Dialog should be visible
-
       // Assert
-
       await waitFor(() => {
         expect(screen.getByText("Create Repetition Block")).toBeInTheDocument();
         expect(screen.getByLabelText("Repeat Count")).toBeInTheDocument();
@@ -406,10 +326,9 @@ describe("WorkoutSection", () => {
     });
 
     it("should create repetition block and clear selection on confirm", async () => {
-      // Arrange — steps carry stable ItemIds so `findById` in
-      // `extractStepIndices` can resolve the selection to array positions.
       // Arrange
-
+      // steps carry stable ItemIds so `findById` in
+      // `extractStepIndices` can resolve the selection to array positions.
       const workout = createMockWorkout([
         createMockStep(0, "id-rep-step-0"),
         createMockStep(1, "id-rep-step-1"),
@@ -430,18 +349,11 @@ describe("WorkoutSection", () => {
         />
       );
 
-      // Act - Open dialog
-      const button = screen.getByTestId("create-repetition-block-button");
-
       // Act
-
+      const button = screen.getByTestId("create-repetition-block-button");
       await act(async () => {
         button.click();
       });
-
-      // Act - Confirm with repeat count
-
-      // Assert
 
       await waitFor(() => {
         expect(screen.getByLabelText("Repeat Count")).toBeInTheDocument();
@@ -458,7 +370,7 @@ describe("WorkoutSection", () => {
         confirmButton.click();
       });
 
-      // Assert - Dialog should close and selection should be cleared
+      // Assert
       await waitFor(() => {
         expect(
           screen.queryByText("Create Repetition Block")
@@ -469,8 +381,6 @@ describe("WorkoutSection", () => {
 
     it("should close dialog without creating block on cancel", async () => {
       // Arrange
-      // Arrange
-
       const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
       const krd = createMockKRD(workout);
 
@@ -487,28 +397,22 @@ describe("WorkoutSection", () => {
         />
       );
 
-      // Act - Open dialog
-      const button = screen.getByTestId("create-repetition-block-button");
-
       // Act
-
+      const button = screen.getByTestId("create-repetition-block-button");
       await act(async () => {
         button.click();
       });
-
-      // Assert
 
       await waitFor(() => {
         expect(screen.getByText("Create Repetition Block")).toBeInTheDocument();
       });
 
-      // Act - Cancel
       const cancelButton = screen.getByRole("button", { name: /Cancel/i });
       await act(async () => {
         cancelButton.click();
       });
 
-      // Assert - Dialog should close, selection should remain
+      // Assert
       await waitFor(() => {
         expect(
           screen.queryByText("Create Repetition Block")
@@ -519,8 +423,6 @@ describe("WorkoutSection", () => {
 
     it("should display correct step count in button text", () => {
       // Arrange
-      // Arrange
-
       const workout = createMockWorkout([
         createMockStep(0),
         createMockStep(1),
@@ -544,13 +446,7 @@ describe("WorkoutSection", () => {
       );
 
       // Assert
-
-      // Act
-
       const button = screen.getByTestId("create-repetition-block-button");
-
-      // Assert
-
       expect(button).toHaveTextContent("Create Repetition Block (3 steps)");
     });
   });
@@ -558,8 +454,6 @@ describe("WorkoutSection", () => {
   describe("step deletion without modal (Requirement 1.1, 1.2, 1.3)", () => {
     it("should delete step immediately without modal", () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0);
       const step2 = createMockStep(1);
       const workout = createMockWorkout([step1, step2]);
@@ -578,33 +472,25 @@ describe("WorkoutSection", () => {
         />
       );
 
-      // Act - Delete the first step
+      // Act
       act(() => {
         useWorkoutStore.getState().deleteStep(0);
       });
 
-      // Assert - Step should be deleted immediately
+      // Assert
       const state = useWorkoutStore.getState();
-
-      // Act
-
       const updatedWorkout = state.currentWorkout?.extensions
         ?.structured_workout as Workout;
-
-      // Assert
-
       expect(updatedWorkout.steps).toHaveLength(1);
       expect((updatedWorkout.steps[0] as WorkoutStep).stepIndex).toBe(0); // Reindexed
 
-      // Assert - No modal should appear
+      // No modal should appear
       expect(screen.queryByText("Delete Step")).not.toBeInTheDocument();
       expect(screen.queryByText("Are you sure")).not.toBeInTheDocument();
     });
 
     it("should show undo toast after deletion", async () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0);
       const step2 = createMockStep(1);
       const workout = createMockWorkout([step1, step2]);
@@ -616,8 +502,6 @@ describe("WorkoutSection", () => {
         deletedSteps: [],
       });
 
-      // Act
-
       renderWithProviders(
         <WorkoutSection
           workout={workout}
@@ -628,17 +512,14 @@ describe("WorkoutSection", () => {
       );
 
       // Verify initial state
-
-      // Assert
-
       expect(useWorkoutStore.getState().deletedSteps).toHaveLength(0);
 
-      // Act - Delete the first step
+      // Act
       act(() => {
         useWorkoutStore.getState().deleteStep(0);
       });
 
-      // Assert - Deleted step should be tracked for undo
+      // Assert
       await waitFor(() => {
         const state = useWorkoutStore.getState();
         expect(state.deletedSteps).toHaveLength(1);
@@ -650,8 +531,6 @@ describe("WorkoutSection", () => {
 
     it("should restore step when undo is clicked", async () => {
       // Arrange
-      // Arrange
-
       const step1 = createMockStep(0);
       const step2 = createMockStep(1);
       const workout = createMockWorkout([step1, step2]);
@@ -670,7 +549,7 @@ describe("WorkoutSection", () => {
         />
       );
 
-      // Act - Delete the first step
+      // Act
       let deletedTimestamp: number;
       act(() => {
         useWorkoutStore.getState().deleteStep(0);
@@ -680,22 +559,16 @@ describe("WorkoutSection", () => {
 
       // Verify step was deleted
       let state = useWorkoutStore.getState();
-
-      // Act
-
       let updatedWorkout = state.currentWorkout?.extensions
         ?.structured_workout as Workout;
-
-      // Assert
-
       expect(updatedWorkout.steps).toHaveLength(1);
 
-      // Act - Undo the deletion
+      // Undo the deletion
       act(() => {
         useWorkoutStore.getState().undoDelete(deletedTimestamp);
       });
 
-      // Assert - Step should be restored
+      // Assert
       await waitFor(() => {
         state = useWorkoutStore.getState();
         updatedWorkout = state.currentWorkout?.extensions

@@ -164,36 +164,36 @@ describe("convertCoachingActivityManual", () => {
     expect(stored?.updatedAt).toBe(NOW);
   });
 
-  it("should set record and KRD sport from the resolved key for stationarybike", async () => {
-    // Arrange
-    const activity = stubActivity({ sport: "stationarybike" });
-    const deps = buildDeps({ coaching: buildStubCoachingRepo([activity]) });
+  it.each([
+    {
+      sport: "stationarybike",
+      recordSport: "cycling",
+      metaSport: "cycling",
+      subSport: "indoor_cycling",
+    },
+    {
+      sport: "stretching",
+      recordSport: "training",
+      metaSport: "training",
+      subSport: "flexibility_training",
+    },
+  ] as const)(
+    "should set record and KRD sport from the resolved key for $sport",
+    async ({ sport, recordSport, metaSport, subSport }) => {
+      // Arrange
+      const activity = stubActivity({ sport });
+      const deps = buildDeps({ coaching: buildStubCoachingRepo([activity]) });
 
-    // Act
-    await convertCoachingActivityManual({ activityId: activity.id }, deps);
+      // Act
+      await convertCoachingActivityManual({ activityId: activity.id }, deps);
 
-    // Assert
-    const stored = await deps.workouts.getById("w-new");
-    expect(stored?.sport).toBe("cycling");
-    expect(stored?.krd?.metadata.sport).toBe("cycling");
-    expect(stored?.krd?.metadata.subSport).toBe("indoor_cycling");
-  });
-
-  it("should set record and KRD sport to training for stretching, never generic", async () => {
-    // Arrange
-    const activity = stubActivity({ sport: "stretching" });
-    const deps = buildDeps({ coaching: buildStubCoachingRepo([activity]) });
-
-    // Act
-    await convertCoachingActivityManual({ activityId: activity.id }, deps);
-
-    // Assert
-    const stored = await deps.workouts.getById("w-new");
-    expect(stored?.sport).toBe("training");
-    expect(stored?.sport).not.toBe("generic");
-    expect(stored?.krd?.metadata.sport).toBe("training");
-    expect(stored?.krd?.metadata.subSport).toBe("flexibility_training");
-  });
+      // Assert
+      const stored = await deps.workouts.getById("w-new");
+      expect(stored?.sport).toBe(recordSport);
+      expect(stored?.krd?.metadata.sport).toBe(metaSport);
+      expect(stored?.krd?.metadata.subSport).toBe(subSport);
+    }
+  );
 
   it("should emit invoked + success analytics events", async () => {
     // Arrange

@@ -28,17 +28,22 @@ describe("EmptyWeekState", () => {
 
   it("should navigate when Add workout is clicked", async () => {
     // Arrange
+    const user = userEvent.setup();
+    const { hook, history } = memoryLocation({
+      path: "/calendar",
+      record: true,
+    });
+    render(
+      <Router hook={hook}>
+        <EmptyWeekState weekId="2026-W23" />
+      </Router>
+    );
 
     // Act
+    await user.click(screen.getByText("Add workout"));
 
     // Assert
-
-    const user = userEvent.setup();
-
-    render(withRouter(<EmptyWeekState weekId="2026-W23" />));
-
-    await user.click(screen.getByText("Add workout"));
-    // Navigate to /workout/new is called - no error thrown
+    expect(history.at(-1)).toContain("/workout/new");
   });
 
   it("should show go to latest when callback provided", () => {

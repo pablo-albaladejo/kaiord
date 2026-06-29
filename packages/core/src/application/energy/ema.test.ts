@@ -54,19 +54,6 @@ describe("exponentialMovingAverage (empty and single)", () => {
 });
 
 describe("exponentialMovingAverage (smoothing)", () => {
-  it("should mirror the input length one-to-one", () => {
-    // Arrange
-    const points = series;
-
-    // Act
-    const result = exponentialMovingAverage(points, {
-      windowDays: WINDOW_DAYS,
-    });
-
-    // Assert
-    expect(result).toHaveLength(series.length);
-  });
-
   it("should carry the date through unchanged at each point", () => {
     // Arrange
     const points = series;
@@ -130,29 +117,19 @@ describe("exponentialMovingAverage (smoothing)", () => {
 });
 
 describe("exponentialMovingAverage (guards)", () => {
-  it("should throw for a non-positive window", () => {
-    // Arrange
-    const points = series;
+  it.each([0, Number.NaN])(
+    "should throw for an invalid window %p",
+    (windowDays) => {
+      // Arrange
+      const points = series;
 
-    // Act
-    const act = () =>
-      exponentialMovingAverage(points, { windowDays: STEP_LOW });
+      // Act
+      const act = () => exponentialMovingAverage(points, { windowDays });
 
-    // Assert
-    expect(act).toThrow(RangeError);
-  });
-
-  it("should throw for a non-finite window", () => {
-    // Arrange
-    const points = series;
-
-    // Act
-    const act = () =>
-      exponentialMovingAverage(points, { windowDays: Number.NaN });
-
-    // Assert
-    expect(act).toThrow(RangeError);
-  });
+      // Assert
+      expect(act).toThrow(RangeError);
+    }
+  );
 
   it("should throw for a non-finite point value", () => {
     // Arrange

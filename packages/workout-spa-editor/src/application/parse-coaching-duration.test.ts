@@ -136,18 +136,4 @@ describe("parseCoachingDuration", () => {
     expect(parseCoachingDuration("PT45M/PT50M")).toBeUndefined();
     expect(parseCoachingDuration("PT45M--PT50M")).toBeUndefined();
   });
-
-  it("should be deterministic for canonical forms", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(parseCoachingDuration("45 min")).toBe(
-      parseCoachingDuration("45 min")
-    );
-    expect(parseCoachingDuration("PT1H30M")).toBe(
-      parseCoachingDuration("PT1H30M")
-    );
-  });
 });

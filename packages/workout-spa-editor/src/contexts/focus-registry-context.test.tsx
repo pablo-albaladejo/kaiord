@@ -34,81 +34,60 @@ const captureValue = (sink: { current: FocusRegistryValue | null }) => {
 describe("FocusRegistryContext", () => {
   it("should store the element under its id via registerItem", () => {
     // Arrange
-    // Arrange
-
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-1");
     const el = document.createElement("div");
 
     // Act
-
-    // Act
-
     sink.current!.registerItem(id, el);
 
     // Assert
-
-    // Assert
-
     expect(sink.current!.getItem(id)).toBe(el);
   });
 
   it("should be idempotent via registerItem for the same (id, el) pair", () => {
     // Arrange
-    // Arrange
-
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-2");
     const el = document.createElement("div");
 
-    // Act — register twice with the same pair.
-    sink.current!.registerItem(id, el);
-
     // Act
-
+    // Register twice with the same pair.
     sink.current!.registerItem(id, el);
-
-    // Assert — still the same element, no crash, no duplicate entry.
+    sink.current!.registerItem(id, el);
 
     // Assert
-
+    // Still the same element, no crash, no duplicate entry.
     expect(sink.current!.getItem(id)).toBe(el);
   });
 
   it("should replace the entry via registerItem with a new element for the same id", () => {
     // Arrange
-    // Arrange
-
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-3");
     const first = document.createElement("div");
     const second = document.createElement("div");
 
-    // Act — StrictMode's second mount registers a fresh element.
-    sink.current!.registerItem(id, first);
-
     // Act
-
+    // StrictMode's second mount registers a fresh element.
+    sink.current!.registerItem(id, first);
     sink.current!.registerItem(id, second);
 
-    // Assert — the live element wins.
-
     // Assert
-
+    // The live element wins.
     expect(sink.current!.getItem(id)).toBe(second);
   });
 
   it("should delete only when the stored element matches via unregisterItem (StrictMode guard)", () => {
-    // Arrange — simulate StrictMode double-mount order:
+    // Arrange
+    // Simulate StrictMode double-mount order:
     //   first mount registers `first`
     //   second mount registers `second`        (replaces)
     //   first mount cleanup calls unregister(id, first)   (stale — MUST NOT evict)
     //   second mount cleanup calls unregister(id, second) (live — evicts)
-    // Arrange
-
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-4");
@@ -118,29 +97,23 @@ describe("FocusRegistryContext", () => {
     // Act
     sink.current!.registerItem(id, first);
     sink.current!.registerItem(id, second);
-
-    // Act
-
     sink.current!.unregisterItem(id, first); // stale cleanup from first mount
 
-    // Assert — the live `second` is still registered because the stale
-    // cleanup identity did not match.
-
     // Assert
-
+    // The live `second` is still registered because the stale
+    // cleanup identity did not match.
     expect(sink.current!.getItem(id)).toBe(second);
 
-    // Act — the live cleanup correctly evicts.
+    // The live cleanup correctly evicts.
     sink.current!.unregisterItem(id, second);
     expect(sink.current!.getItem(id)).toBeUndefined();
   });
 
   it("should keep value reference stable across re-renders with no registry mutations", () => {
-    // Arrange — a parent that re-renders on a state toggle. The context
+    // Arrange
+    // A parent that re-renders on a state toggle. The context
     // value must be reference-equal across the toggle so a memoized
     // consumer does not re-render.
-    // Arrange
-
     const observedValues = new Set<FocusRegistryValue>();
     let triggerRerender = () => {};
 
@@ -166,22 +139,15 @@ describe("FocusRegistryContext", () => {
 
     // Act
     triggerRerender();
-
-    // Act
-
     triggerRerender();
 
-    // Assert — every render saw the same context-value reference.
-
     // Assert
-
+    // Every render saw the same context-value reference.
     expect(observedValues.size).toBe(1);
   });
 
   it("should support multiple ids independently", () => {
     // Arrange
-    // Arrange
-
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const a = asItemId("item-a");
@@ -191,28 +157,21 @@ describe("FocusRegistryContext", () => {
 
     // Act
     sink.current!.registerItem(a, elA);
-
-    // Act
-
     sink.current!.registerItem(b, elB);
 
     // Assert
-
-    // Assert
-
     expect(sink.current!.getItem(a)).toBe(elA);
     expect(sink.current!.getItem(b)).toBe(elB);
 
-    // Act — evicting `a` does not touch `b`.
+    // Evicting `a` does not touch `b`.
     sink.current!.unregisterItem(a, elA);
     expect(sink.current!.getItem(a)).toBeUndefined();
     expect(sink.current!.getItem(b)).toBe(elB);
   });
 
   it("should integrate with a typical useEffect register/unregister pattern", () => {
-    // Arrange — a component that mounts, registers on effect, unmounts.
     // Arrange
-
+    // A component that mounts, registers on effect, unmounts.
     const sink = { current: null as FocusRegistryValue | null };
 
     const ItemCard = ({ id }: { id: string }) => {
@@ -237,19 +196,14 @@ describe("FocusRegistryContext", () => {
     );
 
     // Act
-
     const { rerender, unmount } = render(<App show />);
 
-    // Assert — after mount, the card is registered.
-
     // Assert
-
+    // After mount, the card is registered.
     expect(sink.current!.getItem(asItemId("card-1"))).not.toBeUndefined();
 
-    // Act — unmount the card.
+    // Unmount the card; cleanup removes it.
     rerender(<App show={false} />);
-
-    // Assert — cleanup removed it.
     expect(sink.current!.getItem(asItemId("card-1"))).toBeUndefined();
 
     unmount();

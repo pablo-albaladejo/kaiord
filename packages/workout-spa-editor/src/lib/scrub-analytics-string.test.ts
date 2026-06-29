@@ -78,46 +78,18 @@ describe("scrubAnalyticsString", () => {
   });
 
   describe("Email (rule 3)", () => {
-    it("should replace ASCII email", () => {
+    it.each([
+      "from user@example.com",
+      "from usuario@correo.es",
+      "from 用户@example.cn",
+      "from 用户@example.中国",
+    ])("should replace %s with <email>", (input) => {
       // Arrange
 
       // Act
 
       // Assert
-      expect(scrubAnalyticsString("from user@example.com")).toBe(
-        "from <email>"
-      );
-    });
-
-    it("should replace Spanish-style internationalized email", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      expect(scrubAnalyticsString("from usuario@correo.es")).toBe(
-        "from <email>"
-      );
-    });
-
-    it("should replace CJK local part email", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      expect(scrubAnalyticsString("from 用户@example.cn")).toBe("from <email>");
-    });
-
-    it("should replace email with CJK TLD", () => {
-      // Arrange
-
-      // Act
-
-      // Assert
-      expect(scrubAnalyticsString("from 用户@example.中国")).toBe(
-        "from <email>"
-      );
+      expect(scrubAnalyticsString(input)).toBe("from <email>");
     });
 
     it("should do NOT replace bare @ without a TLD", () => {
@@ -302,27 +274,22 @@ describe("scrubAnalyticsString", () => {
       expect(out).toContain("<uuid>");
     });
 
-    it("should truncate a 600-char message with no scrub matches to exactly 500 chars", () => {
-      // Arrange
-      const input = ".".repeat(TRUNCATION_INPUT_LEN_OVER);
+    it.each([
+      { len: TRUNCATION_INPUT_LEN_OVER, max: TRUNCATION_MAX_LEN },
+      { len: COMPONENT_STACK_INPUT_LEN_OVER, max: COMPONENT_STACK_MAX_LEN },
+    ])(
+      "should truncate a $len-char message with no matches to exactly $max chars",
+      ({ len, max }) => {
+        // Arrange
+        const input = ".".repeat(len);
 
-      // Act
-      const out = scrubAnalyticsString(input, TRUNCATION_MAX_LEN);
+        // Act
+        const out = scrubAnalyticsString(input, max);
 
-      // Assert
-      expect(out.length).toBe(TRUNCATION_MAX_LEN);
-    });
-
-    it("should truncate a 1100-char componentStack to exactly 1000 chars", () => {
-      // Arrange
-      const input = ".".repeat(COMPONENT_STACK_INPUT_LEN_OVER);
-
-      // Act
-      const out = scrubAnalyticsString(input, COMPONENT_STACK_MAX_LEN);
-
-      // Assert
-      expect(out.length).toBe(COMPONENT_STACK_MAX_LEN);
-    });
+        // Assert
+        expect(out.length).toBe(max);
+      }
+    );
 
     it("should do NOT truncate when input is already under maxLen", () => {
       // Arrange

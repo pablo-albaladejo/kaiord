@@ -57,14 +57,11 @@ describe("FileUpload", () => {
   });
 
   it("should render upload button", () => {
-    // Arrange & Act
     // Arrange
 
     // Act
 
     render(<FileUpload onFileLoad={vi.fn()} />);
-
-    // Assert
 
     // Assert
 
@@ -75,18 +72,14 @@ describe("FileUpload", () => {
 
   it("should trigger file input when button is clicked", async () => {
     // Arrange
-    // Arrange
 
     const user = userEvent.setup();
     render(<FileUpload onFileLoad={vi.fn()} />);
     const button = screen.getByRole("button", { name: /upload workout file/i });
 
     // Act
+
     await user.click(button);
-
-    // Assert
-
-    // Act
 
     const fileInput = screen.getByLabelText(/upload workout file/i);
 
@@ -96,7 +89,6 @@ describe("FileUpload", () => {
   });
 
   it("should call onFileLoad with valid KRD file", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout } = await import("../../../utils/import-workout");
@@ -113,11 +105,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -127,7 +115,6 @@ describe("FileUpload", () => {
   });
 
   it("should call onError with invalid file", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout, ImportError } =
@@ -147,11 +134,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -161,7 +144,6 @@ describe("FileUpload", () => {
   });
 
   it("should display error message with retry button for invalid file", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout, ImportError } =
@@ -180,11 +162,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -201,7 +179,6 @@ describe("FileUpload", () => {
 
   it("should call onError with invalid KRD schema", async () => {
     // Arrange
-    // Arrange
 
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
@@ -222,11 +199,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -236,7 +209,6 @@ describe("FileUpload", () => {
   });
 
   it("should display error for invalid file", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout, ImportError } =
@@ -257,11 +229,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -274,7 +242,6 @@ describe("FileUpload", () => {
   });
 
   it("should display file name and format badge after successful load", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout } = await import("../../../utils/import-workout");
@@ -290,11 +257,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -307,12 +270,9 @@ describe("FileUpload", () => {
   });
 
   it("should be disabled when disabled prop is true", () => {
-    // Arrange & Act
     // Arrange
 
     render(<FileUpload onFileLoad={vi.fn()} disabled={true} />);
-
-    // Assert
 
     // Act
 
@@ -324,12 +284,9 @@ describe("FileUpload", () => {
   });
 
   it("should accept multiple file formats by default", () => {
-    // Arrange & Act
     // Arrange
 
     render(<FileUpload onFileLoad={vi.fn()} />);
-
-    // Assert
 
     // Act
 
@@ -344,12 +301,9 @@ describe("FileUpload", () => {
   });
 
   it("should accept custom file types", () => {
-    // Arrange & Act
     // Arrange
 
     render(<FileUpload onFileLoad={vi.fn()} accept=".json" />);
-
-    // Assert
 
     // Act
 
@@ -361,7 +315,6 @@ describe("FileUpload", () => {
   });
 
   it("should reject files larger than 10 MB", async () => {
-    // Arrange
     // Arrange
 
     const onError = vi.fn();
@@ -382,11 +335,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -397,7 +346,6 @@ describe("FileUpload", () => {
   });
 
   it("should retry file upload when Try Again button is clicked", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout, ImportError } =
@@ -425,21 +373,17 @@ describe("FileUpload", () => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
     });
 
-    // Second attempt - valid KRD
+    // Second attempt - valid KRD.
     vi.mocked(importWorkout).mockResolvedValueOnce(mockKRD);
 
     const validFile = new File([JSON.stringify(mockKRD)], "workout.krd", {
       type: "application/json",
     });
 
-    // Act - click retry button
+    // Click retry, then upload the valid file.
     const retryButton = screen.getByRole("button", { name: /try again/i });
     await user.click(retryButton);
-
-    // Upload valid file
     await user.upload(fileInput, validFile);
-
-    // Assert
     await waitFor(() => {
       expect(onFileLoad).toHaveBeenCalledWith(mockKRD);
       expect(screen.queryByText("Import Failed")).not.toBeInTheDocument();
@@ -447,7 +391,6 @@ describe("FileUpload", () => {
   });
 
   it("should dismiss error when Dismiss button is clicked", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout, ImportError } =
@@ -474,18 +417,15 @@ describe("FileUpload", () => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
     });
 
-    // Act - click dismiss button
+    // Clicking dismiss clears the error.
     const dismissButton = screen.getByRole("button", { name: /dismiss/i });
     await user.click(dismissButton);
-
-    // Assert
     await waitFor(() => {
       expect(screen.queryByText("Import Failed")).not.toBeInTheDocument();
     });
   });
 
   it("should clear error when new file is selected", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout, ImportError } =
@@ -512,17 +452,15 @@ describe("FileUpload", () => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
     });
 
-    // Second upload - valid KRD
+    // Second upload - valid KRD.
     vi.mocked(importWorkout).mockResolvedValueOnce(mockKRD);
 
     const validFile = new File([JSON.stringify(mockKRD)], "valid-workout.krd", {
       type: "application/json",
     });
 
-    // Act - upload new file
+    // Uploading a new file clears the previous error.
     await user.upload(fileInput, validFile);
-
-    // Assert
     await waitFor(() => {
       expect(screen.queryByText("Import Failed")).not.toBeInTheDocument();
       expect(
@@ -532,7 +470,6 @@ describe("FileUpload", () => {
   });
 
   it("should show format badge for FIT files", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout } = await import("../../../utils/import-workout");
@@ -548,11 +485,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -564,7 +497,6 @@ describe("FileUpload", () => {
   });
 
   it("should show format badge for TCX files", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout } = await import("../../../utils/import-workout");
@@ -580,11 +512,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -596,7 +524,6 @@ describe("FileUpload", () => {
   });
 
   it("should show format badge for ZWO files", async () => {
-    // Arrange
     // Arrange
 
     const { importWorkout } = await import("../../../utils/import-workout");
@@ -612,11 +539,7 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert
 
     // Assert
 
@@ -651,14 +574,11 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     const uploadPromise = user.upload(fileInput, file);
-
-    // Assert - check for progress bar while loading
 
     // Assert
 
+    // Check for the progress bar while loading.
     await waitFor(() => {
       const progressBar = screen.queryByRole("progressbar");
       expect(progressBar).toBeInTheDocument();
@@ -689,14 +609,11 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     await user.upload(fileInput, file);
-
-    // Assert - check for converting message (it may disappear quickly)
 
     // Assert
 
+    // The converting message may disappear quickly.
     expect(screen.getByText(/converting workout.fit/i)).toBeInTheDocument();
   });
 
@@ -721,14 +638,11 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     const uploadPromise = user.upload(fileInput, file);
-
-    // Assert - check for spinner
 
     // Assert
 
+    // Check for the spinner.
     await waitFor(() => {
       const spinner = document.querySelector(".animate-spin");
       expect(spinner).toBeInTheDocument();
@@ -758,14 +672,11 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     const uploadPromise = user.upload(fileInput, file);
-
-    // Assert - button should be disabled during loading
 
     // Assert
 
+    // The button should be disabled during loading.
     await waitFor(() => {
       const button = screen.queryByRole("button", {
         name: /loading/i,
@@ -802,14 +713,11 @@ describe("FileUpload", () => {
 
     // Act
 
-    // Act
-
     const uploadPromise = user.upload(fileInput, file);
-
-    // Assert - check for time estimate
 
     // Assert
 
+    // Check for the time estimate.
     await waitFor(
       () => {
         expect(screen.getByText(/remaining/i)).toBeInTheDocument();

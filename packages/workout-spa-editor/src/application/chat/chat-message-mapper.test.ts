@@ -73,6 +73,7 @@ describe("newChatMessage", () => {
       role: "assistant" as const,
       content: "done",
       createdAt: "2026-06-13T10:00:00.000Z",
+      toolName: "query_workouts",
       usage: { promptTokens: 5, completionTokens: 3 },
     };
 
@@ -81,5 +82,6 @@ describe("newChatMessage", () => {
 
     // Assert
     expect(result.usage).toEqual({ promptTokens: 5, completionTokens: 3 });
+    expect(result.toolName).toBe("query_workouts");
   });
 });

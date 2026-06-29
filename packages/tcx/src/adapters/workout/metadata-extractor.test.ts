@@ -58,47 +58,24 @@ describe("extractKaiordMetadata", () => {
     expect(result.subSport).toBe("indoor_cycling");
   });
 
-  it("should extract manufacturer from kaiord attributes", () => {
-    // Arrange
-    const tcd = {
-      "@_kaiord:manufacturer": "Garmin",
-    };
-    const workout = { sport: "cycling" as const, steps: [] };
+  it.each([
+    ["@_kaiord:manufacturer", "Garmin", "manufacturer"],
+    ["@_kaiord:product", "Edge 1040", "product"],
+    ["@_kaiord:serialNumber", "ABC123", "serialNumber"],
+  ])(
+    "should extract %s from kaiord attributes",
+    (attrKey, value, resultKey) => {
+      // Arrange
+      const tcd = { [attrKey]: value };
+      const workout = { sport: "cycling" as const, steps: [] };
 
-    // Act
-    const result = extractKaiordMetadata(tcd, workout);
+      // Act
+      const result = extractKaiordMetadata(tcd, workout);
 
-    // Assert
-    expect(result.manufacturer).toBe("Garmin");
-  });
-
-  it("should extract product from kaiord attributes", () => {
-    // Arrange
-    const tcd = {
-      "@_kaiord:product": "Edge 1040",
-    };
-    const workout = { sport: "cycling" as const, steps: [] };
-
-    // Act
-    const result = extractKaiordMetadata(tcd, workout);
-
-    // Assert
-    expect(result.product).toBe("Edge 1040");
-  });
-
-  it("should extract serialNumber from kaiord attributes", () => {
-    // Arrange
-    const tcd = {
-      "@_kaiord:serialNumber": "ABC123",
-    };
-    const workout = { sport: "cycling" as const, steps: [] };
-
-    // Act
-    const result = extractKaiordMetadata(tcd, workout);
-
-    // Assert
-    expect(result.serialNumber).toBe("ABC123");
-  });
+      // Assert
+      expect(result[resultKey as keyof typeof result]).toBe(value);
+    }
+  );
 
   it("should convert numeric serialNumber to string", () => {
     // Arrange
@@ -114,41 +91,20 @@ describe("extractKaiordMetadata", () => {
     expect(result.serialNumber).toBe("12345");
   });
 
-  it("should not include manufacturer when not present", () => {
-    // Arrange
-    const tcd = {};
-    const workout = { sport: "cycling" as const, steps: [] };
+  it.each([["manufacturer"], ["product"], ["serialNumber"]])(
+    "should not include %s when not present",
+    (resultKey) => {
+      // Arrange
+      const tcd = {};
+      const workout = { sport: "cycling" as const, steps: [] };
 
-    // Act
-    const result = extractKaiordMetadata(tcd, workout);
+      // Act
+      const result = extractKaiordMetadata(tcd, workout);
 
-    // Assert
-    expect(result.manufacturer).toBeUndefined();
-  });
-
-  it("should not include product when not present", () => {
-    // Arrange
-    const tcd = {};
-    const workout = { sport: "cycling" as const, steps: [] };
-
-    // Act
-    const result = extractKaiordMetadata(tcd, workout);
-
-    // Assert
-    expect(result.product).toBeUndefined();
-  });
-
-  it("should not include serialNumber when not present", () => {
-    // Arrange
-    const tcd = {};
-    const workout = { sport: "cycling" as const, steps: [] };
-
-    // Act
-    const result = extractKaiordMetadata(tcd, workout);
-
-    // Assert
-    expect(result.serialNumber).toBeUndefined();
-  });
+      // Assert
+      expect(result[resultKey as keyof typeof result]).toBeUndefined();
+    }
+  );
 
   it("should extract all metadata fields together", () => {
     // Arrange

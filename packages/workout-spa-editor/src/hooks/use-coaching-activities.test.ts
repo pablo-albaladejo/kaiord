@@ -136,20 +136,30 @@ describe("useCoachingActivities", () => {
     expect(fakeSource.expand).not.toHaveBeenCalled();
   });
 
-  it("should inject activeProfileId before calling source.sync via syncSources.sync", async () => {
+  it("should inject activeProfileId before calling source.sync", async () => {
     // Arrange
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
     const source = result.current.syncSources[0]!;
-    await source.sync("2026-04-13");
 
     // Act
-    await source.connect();
+    await source.sync("2026-04-13");
 
     // Assert
     expect(fakeSource.sync).toHaveBeenCalledWith(
       ACTIVE_PROFILE_ID,
       "2026-04-13"
     );
+  });
+
+  it("should inject activeProfileId before calling source.connect", async () => {
+    // Arrange
+    const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
+    const source = result.current.syncSources[0]!;
+
+    // Act
+    await source.connect();
+
+    // Assert
     expect(fakeSource.connect).toHaveBeenCalledWith(ACTIVE_PROFILE_ID);
   });
 });

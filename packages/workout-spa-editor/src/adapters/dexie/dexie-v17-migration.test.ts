@@ -143,14 +143,16 @@ describe("Dexie v16 → v17 migration", () => {
     await db.open();
 
     // Act
-    for (const storeName of HEALTH_STORES) {
+    const indexNamesByStore = HEALTH_STORES.map((storeName) => {
       const schema = db.table(storeName).schema;
-      const indexNames = schema.indexes.map((i) =>
+      return schema.indexes.map((i) =>
         Array.isArray(i.keyPath) ? i.keyPath.join("+") : i.keyPath
       );
-      db.close();
+    });
+    db.close();
 
-      // Assert
+    // Assert
+    for (const indexNames of indexNamesByStore) {
       expect(indexNames).toContain("sourceBridgeId");
       expect(indexNames).toContain("externalId");
       expect(
@@ -158,7 +160,6 @@ describe("Dexie v16 → v17 migration", () => {
           (n) => n.includes("sourceBridgeId") && n.includes("externalId")
         )
       ).toBe(true);
-      return;
     }
   });
 

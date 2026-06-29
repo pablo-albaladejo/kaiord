@@ -16,79 +16,21 @@ const createMockLogger = (): Logger => ({
 });
 
 describe("extractIntensity", () => {
-  it("should extract Warmup as warmup", () => {
+  it.each([
+    ["Warmup", "warmup"],
+    ["Active", "active"],
+    ["Cooldown", "cooldown"],
+    ["Rest", "rest"],
+    ["Resting", "rest"],
+    ["warmup", "warmup"],
+  ])("should extract %s intensity as %s", (input, expected) => {
     // Arrange
 
     // Act
-    const result = extractIntensity(
-      { Intensity: "Warmup" },
-      createMockLogger()
-    );
+    const result = extractIntensity({ Intensity: input }, createMockLogger());
 
     // Assert
-    expect(result).toBe("warmup");
-  });
-
-  it("should extract Active as active", () => {
-    // Arrange
-
-    // Act
-    const result = extractIntensity(
-      { Intensity: "Active" },
-      createMockLogger()
-    );
-
-    // Assert
-    expect(result).toBe("active");
-  });
-
-  it("should extract Cooldown as cooldown", () => {
-    // Arrange
-
-    // Act
-    const result = extractIntensity(
-      { Intensity: "Cooldown" },
-      createMockLogger()
-    );
-
-    // Assert
-    expect(result).toBe("cooldown");
-  });
-
-  it("should extract Rest as rest", () => {
-    // Arrange
-
-    // Act
-    const result = extractIntensity({ Intensity: "Rest" }, createMockLogger());
-
-    // Assert
-    expect(result).toBe("rest");
-  });
-
-  it("should extract Resting as rest", () => {
-    // Arrange
-
-    // Act
-    const result = extractIntensity(
-      { Intensity: "Resting" },
-      createMockLogger()
-    );
-
-    // Assert
-    expect(result).toBe("rest");
-  });
-
-  it("should handle lowercase warmup", () => {
-    // Arrange
-
-    // Act
-    const result = extractIntensity(
-      { Intensity: "warmup" },
-      createMockLogger()
-    );
-
-    // Assert
-    expect(result).toBe("warmup");
+    expect(result).toBe(expected);
   });
 
   it("should return undefined for missing Intensity", () => {

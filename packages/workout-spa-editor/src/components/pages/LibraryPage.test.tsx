@@ -317,6 +317,12 @@ describe("LibraryPage", () => {
 
     expect(await screen.findByText("Template loaded")).toBeInTheDocument();
     expect(await screen.findByText("Sweet Spot")).toBeInTheDocument();
+
+    // Let the 200ms toast auto-dismiss fire while jsdom is still alive, so its
+    // setState timer cannot run after teardown (ReferenceError: window is not defined).
+    await waitFor(() => {
+      expect(screen.queryByText("Template loaded")).not.toBeInTheDocument();
+    });
   });
 
   it("should render the page heading with the route-heading attribute", async () => {

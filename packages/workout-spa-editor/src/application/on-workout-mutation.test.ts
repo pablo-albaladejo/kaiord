@@ -59,17 +59,6 @@ describe("onWorkoutMutation", () => {
     expect(first.updatedAt).toBe(stamp);
   });
 
-  it("should preserve the state by default — mutation alone does not transition", () => {
-    // Arrange
-    const record = makeRecord({ state: "structured" });
-
-    // Act
-    const result = onWorkoutMutation(record);
-
-    // Assert
-    expect(result.state).toBe("structured");
-  });
-
   it("should pass through an optional nextState when a transition applies", () => {
     // Arrange
     const record = makeRecord({
@@ -119,38 +108,21 @@ describe("onWorkoutMutation", () => {
     expect(result.modifiedAt).not.toBeNull();
   });
 
-  it("should advance modifiedAt for STRUCTURED edits without changing state", () => {
-    // Arrange
-    const record = makeRecord({ state: "structured", modifiedAt: null });
+  it.each([
+    { state: "structured" as WorkoutRecord["state"] },
+    { state: "ready" as WorkoutRecord["state"] },
+  ])(
+    "should advance modifiedAt for $state edits without changing state",
+    ({ state }) => {
+      // Arrange
+      const record = makeRecord({ state, modifiedAt: null });
 
-    // Act
-    const result = onWorkoutMutation(record);
+      // Act
+      const result = onWorkoutMutation(record);
 
-    // Assert
-    expect(result.state).toBe("structured");
-    expect(result.modifiedAt).not.toBeNull();
-  });
-
-  it("should advance modifiedAt for READY edits without changing state", () => {
-    // Arrange
-    const record = makeRecord({ state: "ready", modifiedAt: null });
-
-    // Act
-    const result = onWorkoutMutation(record);
-
-    // Assert
-    expect(result.state).toBe("ready");
-    expect(result.modifiedAt).not.toBeNull();
-  });
-
-  it("should NOT route selection-only actions through the helper — guarding note", () => {
-    // Arrange
-    const record = makeRecord({ modifiedAt: "2026-04-20T07:00:00Z" });
-
-    // Act
-    const unchanged = record;
-
-    // Assert
-    expect(unchanged.modifiedAt).toBe("2026-04-20T07:00:00Z");
-  });
+      // Assert
+      expect(result.state).toBe(state);
+      expect(result.modifiedAt).not.toBeNull();
+    }
+  );
 });

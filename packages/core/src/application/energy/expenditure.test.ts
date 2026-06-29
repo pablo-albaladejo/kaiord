@@ -112,17 +112,6 @@ describe("resolveDayExpenditure (predicted)", () => {
       BMR_KCAL * factor + EXPECTED_ACTIVITY_KCAL
     );
   });
-
-  it("should keep the raw basal when no activity factor is provided", () => {
-    // Arrange
-    const input = PREDICTED_INPUT;
-
-    // Act
-    const result = resolveDayExpenditure(input);
-
-    // Assert
-    expect(result.basalKcal).toBe(BMR_KCAL);
-  });
 });
 
 describe("resolveDayExpenditure (input guards)", () => {

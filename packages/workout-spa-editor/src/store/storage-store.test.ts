@@ -80,18 +80,4 @@ describe("storage-store", () => {
     // Assert
     expect(probe).toHaveBeenCalledTimes(1);
   });
-
-  it("should expose a stable status shape for subscribers", async () => {
-    // Arrange
-    const probe = vi.fn().mockResolvedValue("failed");
-    const store = createStorageStore({ probe });
-    const observed: string[] = [];
-    store.subscribe((state) => observed.push(state.status));
-
-    // Act
-    await store.getState().probe();
-
-    // Assert
-    expect(observed[observed.length - 1]).toBe("failed");
-  });
 });

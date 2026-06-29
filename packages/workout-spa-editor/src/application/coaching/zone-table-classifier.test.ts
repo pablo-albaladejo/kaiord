@@ -100,7 +100,9 @@ const snapshotFor = (cyclingHrZones: unknown): LastSyncedZonesSnapshot =>
 
 describe("classifyZoneTable — empty (2.2a)", () => {
   it("should return 'empty' when zones array is missing", () => {
-    // Arrange + Act
+    // Arrange
+
+    // Act
     const state = classifyZoneTable(
       baseProfile(),
       "cycling",
@@ -274,7 +276,8 @@ describe("classifyZoneTable — train2go-synced-clean (2.2d)", () => {
 
 describe("classifyZoneTable — train2go-synced-edited (2.2e)", () => {
   it("should return 'train2go-synced-edited' when method = 'train2go' and zones differ from snapshot", () => {
-    // Arrange — snapshot says Z2.maxBpm=147; persisted has 145 (user edited).
+    // Arrange
+    // snapshot says Z2.maxBpm=147; persisted has 145 (user edited).
     const persisted = t2gHr().map((z, i) =>
       i === 1 ? { ...z, maxBpm: 145 } : z
     );
@@ -322,7 +325,8 @@ describe("classifyZoneTable — user-customized (2.2f, 2.2g)", () => {
   });
 
   it("should return 'user-customized' for method = 'custom' + non-default zones (tail rule)", () => {
-    // Arrange — content-detection tail rule: method = "custom" but
+    // Arrange
+    // content-detection tail rule: method = "custom" but
     // zones don't match seed/formula. Defensive — covers PR 2/PR 3
     // ship window where method-tracking isn't fully ironclad yet.
     const profile = baseProfile({
@@ -345,7 +349,8 @@ describe("classifyZoneTable — user-customized (2.2f, 2.2g)", () => {
   });
 
   it("should fall through to 'default-template' for HR formula method without threshold + seed zones", () => {
-    // Arrange — D-MA1 threshold-fallback rule: when method is a formula
+    // Arrange
+    // D-MA1 threshold-fallback rule: when method is a formula
     // id but threshold is absent, classifier falls through to content
     // detection. Seed zones → default-template.
     const profile = baseProfile({

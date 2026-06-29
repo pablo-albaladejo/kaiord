@@ -380,35 +380,4 @@ describe("analytics-port events — kaiord.export.ledger.size gauge", () => {
       count: STUB_LEDGER_COUNT,
     });
   });
-
-  it("should include a non-negative integer count in the gauge payload", async () => {
-    // Arrange
-    const STUB_SMALL_COUNT = 7;
-    const analytics = makeAnalytics();
-    const ledgerRepo = makeLedgerRepo({
-      countByDataType: async () => STUB_SMALL_COUNT,
-    });
-    const postFn = vi.fn().mockResolvedValue({ externalId: "ext-1" });
-
-    // Act
-    await recordExport(
-      { ledgerRepo, analytics },
-      {
-        kaiordRecordId: "rec-2",
-        dataType: "weight",
-        destinationBridgeId: "garmin-bridge",
-        payload: {},
-        postFn,
-      }
-    );
-
-    // Assert
-    const gauge = analytics.events.find(
-      (e) => e.name === "kaiord.export.ledger.size"
-    );
-    const count = (gauge?.props as Record<string, unknown>)["count"];
-    expect(typeof count).toBe("number");
-    expect(count as number).toBeGreaterThanOrEqual(0);
-    expect(Number.isInteger(count)).toBe(true);
-  });
 });

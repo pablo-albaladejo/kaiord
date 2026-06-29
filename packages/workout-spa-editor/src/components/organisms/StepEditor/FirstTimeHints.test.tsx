@@ -30,14 +30,11 @@ describe("FirstTimeHints", () => {
 
   describe("rendering", () => {
     it("should render hints for first-time users", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
 
       render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert
 
       // Assert
 
@@ -47,11 +44,8 @@ describe("FirstTimeHints", () => {
 
     it("should not render hints if already completed", () => {
       // Arrange
-      // Arrange
 
       localStorage.setItem(TEST_STORAGE_KEY, "true");
-
-      // Act
 
       // Act
 
@@ -59,13 +53,10 @@ describe("FirstTimeHints", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.queryByTestId("first-time-hints")).not.toBeInTheDocument();
     });
 
     it("should render with default storage key", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
@@ -74,20 +65,15 @@ describe("FirstTimeHints", () => {
 
       // Assert
 
-      // Assert
-
       expect(screen.getByTestId("first-time-hints")).toBeInTheDocument();
     });
 
     it("should render progress dots", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert
-
       // Act
+
+      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
 
       const dots = screen.getAllByLabelText(/Hint \d+ of 3/);
 
@@ -97,14 +83,11 @@ describe("FirstTimeHints", () => {
     });
 
     it("should highlight current hint dot", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert
-
       // Act
+
+      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
 
       const currentDot = screen.getByLabelText("Hint 1 of 3 (current)");
 
@@ -117,7 +100,6 @@ describe("FirstTimeHints", () => {
   describe("interactions", () => {
     it("should dismiss hints when close button is clicked", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       const onDismiss = vi.fn();
@@ -127,11 +109,7 @@ describe("FirstTimeHints", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByLabelText("Dismiss hints"));
-
-      // Assert
 
       // Assert
 
@@ -141,12 +119,9 @@ describe("FirstTimeHints", () => {
 
     it("should save completion state when dismissed", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Act
 
       // Act
 
@@ -154,20 +129,15 @@ describe("FirstTimeHints", () => {
 
       // Assert
 
-      // Assert
-
       expect(localStorage.getItem(TEST_STORAGE_KEY)).toBe("true");
     });
 
     it("should display first hint initially", () => {
-      // Arrange & Act
       // Arrange
 
       // Act
 
       render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert - first hint is shown
 
       // Assert
 
@@ -182,14 +152,11 @@ describe("FirstTimeHints", () => {
 
   describe("accessibility", () => {
     it("should have proper ARIA attributes", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert
-
       // Act
+
+      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
 
       const hints = screen.getByTestId("first-time-hints");
 
@@ -200,14 +167,11 @@ describe("FirstTimeHints", () => {
     });
 
     it("should have accessible close button", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert
-
       // Act
+
+      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
 
       const closeButton = screen.getByLabelText("Dismiss hints");
 
@@ -217,14 +181,11 @@ describe("FirstTimeHints", () => {
     });
 
     it("should have accessible progress dots", () => {
-      // Arrange & Act
       // Arrange
 
-      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert
-
       // Act
+
+      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
 
       const dots = screen.getAllByLabelText(/Hint \d+ of 3/);
 
@@ -240,14 +201,11 @@ describe("FirstTimeHints", () => {
   describe("utility functions", () => {
     describe("hasCompletedFirstWorkout", () => {
       it("should return false for first-time users", () => {
-        // Arrange & Act
         // Arrange
 
         // Act
 
         const result = hasCompletedFirstWorkout(TEST_STORAGE_KEY);
-
-        // Assert
 
         // Assert
 
@@ -256,11 +214,8 @@ describe("FirstTimeHints", () => {
 
       it("should return true if completion state is saved", () => {
         // Arrange
-        // Arrange
 
         localStorage.setItem(TEST_STORAGE_KEY, "true");
-
-        // Act
 
         // Act
 
@@ -268,13 +223,10 @@ describe("FirstTimeHints", () => {
 
         // Assert
 
-        // Assert
-
         expect(result).toBe(true);
       });
 
       it("should return false if localStorage throws error", () => {
-        // Arrange
         // Arrange
 
         const getItemSpy = vi
@@ -285,11 +237,7 @@ describe("FirstTimeHints", () => {
 
         // Act
 
-        // Act
-
         const result = hasCompletedFirstWorkout(TEST_STORAGE_KEY);
-
-        // Assert
 
         // Assert
 
@@ -300,18 +248,13 @@ describe("FirstTimeHints", () => {
 
       it("should use default storage key when not provided", () => {
         // Arrange
-        // Arrange
 
         const defaultKey = "workout-spa-first-workout-hints-dismissed";
         localStorage.setItem(defaultKey, "true");
 
         // Act
 
-        // Act
-
         const result = hasCompletedFirstWorkout();
-
-        // Assert
 
         // Assert
 
@@ -322,11 +265,8 @@ describe("FirstTimeHints", () => {
     describe("resetFirstWorkoutState", () => {
       it("should remove completion state from localStorage", () => {
         // Arrange
-        // Arrange
 
         localStorage.setItem(TEST_STORAGE_KEY, "true");
-
-        // Act
 
         // Act
 
@@ -334,13 +274,10 @@ describe("FirstTimeHints", () => {
 
         // Assert
 
-        // Assert
-
         expect(localStorage.getItem(TEST_STORAGE_KEY)).toBeNull();
       });
 
       it("should handle localStorage errors gracefully", () => {
-        // Arrange
         // Arrange
 
         const consoleErrorSpy = vi
@@ -354,11 +291,7 @@ describe("FirstTimeHints", () => {
 
         // Act
 
-        // Act
-
         resetFirstWorkoutState(TEST_STORAGE_KEY);
-
-        // Assert
 
         // Assert
 
@@ -373,18 +306,13 @@ describe("FirstTimeHints", () => {
 
       it("should use default storage key when not provided", () => {
         // Arrange
-        // Arrange
 
         const defaultKey = "workout-spa-first-workout-hints-dismissed";
         localStorage.setItem(defaultKey, "true");
 
         // Act
 
-        // Act
-
         resetFirstWorkoutState();
-
-        // Assert
 
         // Assert
 
@@ -396,7 +324,6 @@ describe("FirstTimeHints", () => {
   describe("edge cases", () => {
     it("should handle missing localStorage gracefully", () => {
       // Arrange
-      // Arrange
 
       const getItemSpy = vi
         .spyOn(Storage.prototype, "getItem")
@@ -406,11 +333,7 @@ describe("FirstTimeHints", () => {
 
       // Act
 
-      // Act
-
       render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Assert - should render hints (default to first-time user)
 
       // Assert
 
@@ -420,7 +343,6 @@ describe("FirstTimeHints", () => {
     });
 
     it("should handle setItem errors when dismissing", async () => {
-      // Arrange
       // Arrange
 
       const user = userEvent.setup();
@@ -436,11 +358,7 @@ describe("FirstTimeHints", () => {
 
       // Act
 
-      // Act
-
       await user.click(screen.getByLabelText("Dismiss hints"));
-
-      // Assert - hints should still be dismissed from UI
 
       // Assert
 
@@ -456,12 +374,9 @@ describe("FirstTimeHints", () => {
 
     it("should not call onDismiss if not provided", async () => {
       // Arrange
-      // Arrange
 
       const user = userEvent.setup();
       render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      // Act & Assert - should not throw
 
       // Act
 

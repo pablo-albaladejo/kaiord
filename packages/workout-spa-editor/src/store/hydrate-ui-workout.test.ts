@@ -142,20 +142,4 @@ describe("hydrateUIWorkout", () => {
     expect(block.id).toBe("keep-block");
     expect((block.steps[0] as { id: string }).id).toBe("keep-nested");
   });
-
-  it("should accept a custom IdProvider for deterministic regeneration", () => {
-    // Arrange
-    let counter = 0;
-    const deterministic = () => asItemId(`uuid-${counter++}`);
-    const ui = hydrateUIWorkout(buildKrd([bareStep as never]), {
-      idProvider: deterministic,
-    });
-
-    // Act
-    const steps = (ui.extensions?.structured_workout as Workout | undefined)
-      ?.steps;
-
-    // Assert
-    expect((steps?.[0] as { id: string }).id).toBe("uuid-0");
-  });
 });

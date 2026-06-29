@@ -14,64 +14,21 @@ const createMockLogger = (): Logger => ({
 });
 
 describe("mapTargetType", () => {
-  it("should map HeartRate to heart_rate", () => {
+  it.each([
+    ["HeartRate", "heart_rate"],
+    ["Speed", "pace"],
+    ["Cadence", "cadence"],
+    ["None", "open"],
+    [undefined, "open"],
+    ["Unknown", "open"],
+  ])("should map %s to %s", (input, expected) => {
     // Arrange
 
     // Act
-    const result = mapTargetType("HeartRate");
+    const result = mapTargetType(input);
 
     // Assert
-    expect(result).toBe("heart_rate");
-  });
-
-  it("should map Speed to pace", () => {
-    // Arrange
-
-    // Act
-    const result = mapTargetType("Speed");
-
-    // Assert
-    expect(result).toBe("pace");
-  });
-
-  it("should map Cadence to cadence", () => {
-    // Arrange
-
-    // Act
-    const result = mapTargetType("Cadence");
-
-    // Assert
-    expect(result).toBe("cadence");
-  });
-
-  it("should map None to open", () => {
-    // Arrange
-
-    // Act
-    const result = mapTargetType("None");
-
-    // Assert
-    expect(result).toBe("open");
-  });
-
-  it("should map undefined to open", () => {
-    // Arrange
-
-    // Act
-    const result = mapTargetType(undefined);
-
-    // Assert
-    expect(result).toBe("open");
-  });
-
-  it("should map unknown string to open", () => {
-    // Arrange
-
-    // Act
-    const result = mapTargetType("Unknown");
-
-    // Assert
-    expect(result).toBe("open");
+    expect(result).toBe(expected);
   });
 });
 
@@ -236,21 +193,7 @@ describe("convertTcxTarget (mapper)", () => {
     });
   });
 
-  it("should log warning for unsupported target type", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxTarget = { "@_xsi:type": "UnknownType_t" };
-
-    // Act
-    convertTcxTarget(tcxTarget, "generic", logger);
-
-    // Assert
-    expect(logger.warn).toHaveBeenCalledWith("Unsupported target type", {
-      targetType: "UnknownType_t",
-    });
-  });
-
-  it("should return open for unsupported target type", () => {
+  it("should warn and return open for unsupported target type", () => {
     // Arrange
     const logger = createMockLogger();
     const tcxTarget = { "@_xsi:type": "UnknownType_t" };
@@ -259,6 +202,9 @@ describe("convertTcxTarget (mapper)", () => {
     const result = convertTcxTarget(tcxTarget, "generic", logger);
 
     // Assert
+    expect(logger.warn).toHaveBeenCalledWith("Unsupported target type", {
+      targetType: "UnknownType_t",
+    });
     expect(result).toStrictEqual({ type: "open" });
   });
 });
