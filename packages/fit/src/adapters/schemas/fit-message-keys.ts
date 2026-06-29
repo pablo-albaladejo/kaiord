@@ -18,5 +18,3 @@ export const fitMessageKeySchema = z.enum([
   "hrvValueMesgs",
   "stressLevelMesgs",
 ]);
-
-export type FitMessageKey = z.infer<typeof fitMessageKeySchema>;

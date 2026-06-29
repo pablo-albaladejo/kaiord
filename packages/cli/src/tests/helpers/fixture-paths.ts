@@ -44,13 +44,3 @@ export const getFixturePath = (
 export const getFixturesDir = (type: "fit" | "krd" | "tcx" | "zwo"): string => {
   return resolve(__dirname, `../../../../../test-fixtures/${type}`);
 };
-
-/**
- * Predefined fixture names for common test files
- */
-export const FIXTURE_NAMES = {
-  INDIVIDUAL_STEPS: "WorkoutIndividualSteps",
-  REPEAT_STEPS: "WorkoutRepeatSteps",
-  CUSTOM_TARGET_VALUES: "WorkoutCustomTargetValues",
-  REPEAT_GREATER_THAN: "WorkoutRepeatGreaterThanStep",
-} as const;

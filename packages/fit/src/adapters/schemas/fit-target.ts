@@ -8,5 +8,3 @@ export const fitTargetTypeSchema = z.enum([
   "swimStroke",
   "open",
 ]);
-
-export type FitTargetType = z.infer<typeof fitTargetTypeSchema>;

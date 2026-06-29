@@ -7,12 +7,3 @@ export type ZwiftDurationData = {
   "kaiord:originalDurationBpm"?: number;
   "kaiord:originalDurationWatts"?: number;
 };
-
-// KRD → Zwift mappers
-export const mapKrdTimeDurationToZwift = (seconds: number): number => {
-  return seconds;
-};
-
-export const mapKrdDistanceDurationToZwift = (meters: number): number => {
-  return meters;
-};

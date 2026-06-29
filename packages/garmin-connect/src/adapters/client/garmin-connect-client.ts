@@ -15,7 +15,6 @@ import { createGarminWorkoutService } from "./garmin-workout-service";
 export type {
   GarminConnectClient,
   GarminConnectClientOptions,
-  InitResult,
 } from "./garmin-connect-client.types";
 
 /**

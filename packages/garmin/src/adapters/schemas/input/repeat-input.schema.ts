@@ -30,8 +30,6 @@ export const repeatGroupDTOInputSchema: z.ZodType<{
   })
 );
 
-export type RepeatGroupDTOInput = z.infer<typeof repeatGroupDTOInputSchema>;
-
 export const garminWorkoutStepInputSchema: z.ZodType<GarminWorkoutStepInput> =
   z.lazy(() =>
     z.union([executableStepDTOInputSchema, repeatGroupDTOInputSchema])

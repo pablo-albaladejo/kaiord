@@ -18,5 +18,3 @@ export const fitDurationTypeSchema = z.enum([
   "repeatUntilPowerGreaterThan",
   "open",
 ]);
-
-export type FitDurationType = z.infer<typeof fitDurationTypeSchema>;
