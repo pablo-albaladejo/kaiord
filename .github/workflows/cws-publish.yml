@@ -47,7 +47,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: CWS auth check
         id: check
@@ -106,7 +106,7 @@ jobs:
             extension_id_secret: CWS_TRAIN2GO_EXTENSION_ID
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Full history needed; fetch-tags is explicit because some
           # checkout-action versions ship history without tag refs.
@@ -374,7 +374,7 @@ jobs:
       escalation_failed: ${{ steps.tier_escalation_signal.outputs.escalation_failed }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Full history needed; fetch-tags is explicit because some
           # checkout-action versions ship history without tag refs.
