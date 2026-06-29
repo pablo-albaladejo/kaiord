@@ -6,5 +6,3 @@ export const tcxTargetTypeSchema = z.enum([
   "Cadence",
   "None",
 ]);
-
-export type TcxTargetType = z.infer<typeof tcxTargetTypeSchema>;
