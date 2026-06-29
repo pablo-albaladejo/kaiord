@@ -1,2 +1,3 @@
 export { convertFitToKrdSession } from "./fit-to-krd-session.converter";
-export { mapFitSessionToKrd } from "./session.mapper";
+export { convertKrdToFitSession } from "./krd-to-fit-session.converter";
+export { mapFitSessionToKrd, mapKrdSessionToFit } from "./session.mapper";
