@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-export const oauth1TokenSchema = z.object({
+const oauth1TokenSchema = z.object({
   oauth_token: z.string(),
   oauth_token_secret: z.string(),
 });
 
-export const oauth2TokenSchema = z.object({
+const oauth2TokenSchema = z.object({
   access_token: z.string(),
   refresh_token: z.string(),
   token_type: z.string(),
