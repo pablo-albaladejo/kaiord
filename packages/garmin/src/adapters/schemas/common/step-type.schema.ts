@@ -10,7 +10,7 @@ export const StepTypeId = {
   MAIN: 8,
 } as const;
 
-export const stepTypeKeySchema = z.enum([
+const stepTypeKeySchema = z.enum([
   "warmup",
   "cooldown",
   "interval",
@@ -25,5 +25,3 @@ export const garminStepTypeSchema = z.object({
   stepTypeKey: stepTypeKeySchema,
   displayOrder: z.number().int().nonnegative(),
 });
-
-export type GarminStepType = z.infer<typeof garminStepTypeSchema>;

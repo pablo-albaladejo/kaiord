@@ -13,14 +13,8 @@ export {
   type GarminSportType,
   garminSportTypeSchema,
   SportTypeId,
-  sportTypeKeySchema,
 } from "./sport-type.schema";
-export {
-  type GarminStepType,
-  garminStepTypeSchema,
-  StepTypeId,
-  stepTypeKeySchema,
-} from "./step-type.schema";
+export { garminStepTypeSchema, StepTypeId } from "./step-type.schema";
 export {
   type GarminStrokeType,
   garminStrokeTypeSchema,

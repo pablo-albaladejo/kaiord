@@ -18,7 +18,3 @@ export const garminWorkoutSegmentInputSchema = z.object({
   estimatedDistanceUnit: garminUnitInputSchema.optional(),
   estimateType: z.string().nullable().optional(),
 });
-
-export type GarminWorkoutSegmentInput = z.infer<
-  typeof garminWorkoutSegmentInputSchema
->;
