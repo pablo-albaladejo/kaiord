@@ -126,16 +126,16 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-      const copyResult = await copyStepAction(krd, 0);
-      const pasteResult = await pasteStepAction(krd);
-      expect(copyResult.success).toBe(true);
-      expect(pasteResult.success).toBe(true);
 
       // Act
-      const pastedBlock = pasteResult.updatedKrd!.extensions!
-        .structured_workout!.steps[1] as RepetitionBlock;
+      const copyResult = await copyStepAction(krd, 0);
+      const pasteResult = await pasteStepAction(krd);
 
       // Assert
+      expect(copyResult.success).toBe(true);
+      expect(pasteResult.success).toBe(true);
+      const pastedBlock = pasteResult.updatedKrd!.extensions!
+        .structured_workout!.steps[1] as RepetitionBlock;
       expect(pastedBlock.steps).toHaveLength(BLOCK_SCAFFOLD_VERY_LARGE_STEPS);
       expect(pastedBlock.repeatCount).toBe(BLOCK_SCAFFOLD_VERY_LARGE_REPS);
     });

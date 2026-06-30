@@ -41,13 +41,13 @@ describe("convertKRDToTcx", () => {
     // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd();
-    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
-    expect(result.TrainingCenterDatabase).toBeDefined();
 
     // Act
+    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
 
     // Assert
+    expect(result.TrainingCenterDatabase).toBeDefined();
     expect(tcd["@_xmlns"]).toBe(
       "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
     );
@@ -74,11 +74,11 @@ describe("convertKRDToTcx", () => {
         },
       },
     });
+
+    // Act
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
     const workouts = tcd.Workouts as Record<string, unknown>;
-
-    // Act
     const workout = workouts.Workout as Record<string, unknown>;
 
     // Assert
@@ -115,9 +115,9 @@ describe("convertKRDToTcx", () => {
         serialNumber: "ABC123",
       },
     });
-    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
 
     // Act
+    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
 
     // Assert
@@ -140,9 +140,9 @@ describe("convertKRDToTcx", () => {
         tcx: { CustomField: "custom_value" },
       },
     });
-    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
 
     // Act
+    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
 
     // Assert
@@ -164,11 +164,11 @@ describe("convertKRDToTcx", () => {
         },
       },
     });
+
+    // Act
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
     const workouts = tcd.Workouts as Record<string, unknown>;
-
-    // Act
     const workout = workouts.Workout as Record<string, unknown>;
 
     // Assert
@@ -179,9 +179,9 @@ describe("convertKRDToTcx", () => {
     // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd();
-    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
 
     // Act
+    const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
 
     // Assert
@@ -217,12 +217,12 @@ describe("convertKRDToTcx", () => {
         },
       },
     });
+
+    // Act
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
     const workouts = tcd.Workouts as Record<string, unknown>;
     const workout = workouts.Workout as Record<string, unknown>;
-
-    // Act
     const steps = workout.Step as Array<Record<string, unknown>>;
 
     // Assert

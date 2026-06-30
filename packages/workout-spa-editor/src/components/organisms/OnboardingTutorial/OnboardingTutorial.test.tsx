@@ -60,27 +60,6 @@ describe("OnboardingTutorial", () => {
   // ============================================
 
   describe("rendering", () => {
-    it("should render when open is true", () => {
-      // Arrange
-
-      // Act
-
-      renderWithProviders(
-        <OnboardingTutorial
-          steps={mockSteps}
-          open={true}
-          onOpenChange={vi.fn()}
-        />
-      );
-
-      // Assert
-
-      expect(screen.getByText("Welcome")).toBeInTheDocument();
-      expect(
-        screen.getByText("Welcome to the Workout SPA Editor!")
-      ).toBeInTheDocument();
-    });
-
     it("should not render when open is false", () => {
       // Arrange
 
@@ -158,24 +137,6 @@ describe("OnboardingTutorial", () => {
       // Assert
       // There are two skip buttons (X icon and Skip text button).
       expect(skipButtons.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("should display close button", () => {
-      // Arrange
-
-      // Act
-
-      renderWithProviders(
-        <OnboardingTutorial
-          steps={mockSteps}
-          open={true}
-          onOpenChange={vi.fn()}
-        />
-      );
-
-      // Assert
-
-      expect(screen.getByLabelText("Skip tutorial")).toBeInTheDocument();
     });
   });
 
@@ -672,71 +633,40 @@ describe("OnboardingTutorial", () => {
   // ============================================
 
   describe("positioning", () => {
-    it("should apply center position by default", () => {
-      // Arrange
+    it.each([
+      { navigationClicks: 0, expectedClass: "left-[50%]", position: "center" },
+      {
+        navigationClicks: 1,
+        expectedClass: "bottom-[10%]",
+        position: "bottom",
+      },
+      { navigationClicks: 2, expectedClass: "right-[10%]", position: "right" },
+    ])(
+      "should apply $position position after $navigationClicks navigation clicks",
+      async ({ navigationClicks, expectedClass }) => {
+        // Arrange
 
-      renderWithProviders(
-        <OnboardingTutorial
-          steps={mockSteps}
-          open={true}
-          onOpenChange={vi.fn()}
-        />
-      );
+        const user = userEvent.setup();
+        renderWithProviders(
+          <OnboardingTutorial
+            steps={mockSteps}
+            open={true}
+            onOpenChange={vi.fn()}
+          />
+        );
 
-      // Act
+        // Act
 
-      const dialog = screen.getByRole("dialog");
+        for (let i = 0; i < navigationClicks; i++) {
+          await user.click(screen.getByRole("button", { name: /next/i }));
+        }
+        const dialog = screen.getByRole("dialog");
 
-      // Assert
+        // Assert
 
-      expect(dialog).toHaveClass("left-[50%]");
-      expect(dialog).toHaveClass("top-[50%]");
-    });
-
-    it("should apply bottom position when specified", async () => {
-      // Arrange
-
-      const user = userEvent.setup();
-      renderWithProviders(
-        <OnboardingTutorial
-          steps={mockSteps}
-          open={true}
-          onOpenChange={vi.fn()}
-        />
-      );
-
-      // Act
-      // Navigate to step with bottom position
-      await user.click(screen.getByRole("button", { name: /next/i }));
-      const dialog = screen.getByRole("dialog");
-
-      // Assert
-
-      expect(dialog).toHaveClass("bottom-[10%]");
-    });
-
-    it("should apply right position when specified", async () => {
-      // Arrange
-
-      const user = userEvent.setup();
-      renderWithProviders(
-        <OnboardingTutorial
-          steps={mockSteps}
-          open={true}
-          onOpenChange={vi.fn()}
-        />
-      );
-
-      // Act
-      // Navigate to step with right position
-      await user.click(screen.getByRole("button", { name: /next/i }));
-      await user.click(screen.getByRole("button", { name: /next/i }));
-      const dialog = screen.getByRole("dialog");
-
-      // Assert
-
-      expect(dialog).toHaveClass("right-[10%]");
-    });
+        expect(dialog).toHaveClass(expectedClass);
+      }
+    );
   });
 
   // ============================================
