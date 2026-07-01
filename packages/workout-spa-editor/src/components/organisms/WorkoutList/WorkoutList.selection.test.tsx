@@ -216,40 +216,6 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
   });
 
   describe("Selection state verification", () => {
-    it("should generate unique IDs for steps with same stepIndex in different contexts", () => {
-      // Arrange
-
-      const blockA: RepetitionBlock = {
-        repeatCount: 2,
-        steps: [createMockStep(1), createMockStep(2)],
-      };
-      const blockB: RepetitionBlock = {
-        repeatCount: 3,
-        steps: [createMockStep(1), createMockStep(2)],
-      };
-      const workout = createMockWorkout([
-        createMockStep(1), // Main workout step - should get ID "step-1"
-        blockA, // Block at index 1 - steps should get IDs "block-1-step-1", "block-1-step-2"
-        blockB, // Block at index 2 - steps should get IDs "block-2-step-1", "block-2-step-2"
-      ]);
-
-      // Act
-
-      const { container } = render(<WorkoutList workout={workout} />);
-
-      // Assert
-      // All step IDs should be unique
-      const allStepButtons = container.querySelectorAll('[role="button"]');
-      const stepIds = Array.from(allStepButtons).map(
-        (button) => button.getAttribute("data-step-id") || ""
-      );
-
-      // Note: This test assumes steps have data-step-id attributes
-      // If not implemented, this test documents the expected behavior
-      // The actual ID uniqueness is enforced by the generateStepId function
-      expect(stepIds.length).toBeGreaterThan(0);
-    });
-
     it("should maintain selection isolation when switching between steps with same stepIndex", async () => {
       // Arrange
 

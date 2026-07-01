@@ -151,9 +151,9 @@ describe("isAutoMatchBannerDismissed", () => {
 describe("dismissAutoMatchBanner — defensive guards", () => {
   it("should reject empty profileId on the write path", async () => {
     // Arrange
+    const repo = createInMemoryAutoMatchDismissalRepository();
 
     // Act
-    const repo = createInMemoryAutoMatchDismissalRepository();
 
     // Assert
     await expect(
@@ -168,9 +168,9 @@ describe("dismissAutoMatchBanner — defensive guards", () => {
     "should reject empty %s on the write path",
     async (field) => {
       // Arrange
+      const repo = createInMemoryAutoMatchDismissalRepository();
 
       // Act
-      const repo = createInMemoryAutoMatchDismissalRepository();
 
       // Assert
       await expect(

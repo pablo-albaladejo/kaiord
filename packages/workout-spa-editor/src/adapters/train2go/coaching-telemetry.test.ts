@@ -109,36 +109,26 @@ describe("emitLinkResult", () => {
     assertNoPII(a);
   });
 
-  it("should emit coaching.link.failure with normalized errorKind", () => {
-    // Arrange
-    const a = makeAnalytics();
-    const reasons = [
-      "profile-deleted",
-      "session-not-active",
-      "transport-error",
-    ] as const;
+  it.each([
+    { reason: "profile-deleted" as const },
+    { reason: "session-not-active" as const },
+    { reason: "transport-error" as const },
+  ])(
+    "should emit coaching.link.failure with normalized errorKind for $reason",
+    ({ reason }) => {
+      // Arrange
+      const a = makeAnalytics();
 
-    // Act
-    for (const reason of reasons) {
+      // Act
       emitLinkResult(a, "train2go", "p1", { ok: false, reason });
-    }
 
-    // Assert
-    expect(a.event).toHaveBeenCalledWith("coaching.link.failure", {
-      source: "train2go",
-      profileId: "p1",
-      errorKind: "profile-deleted",
-    });
-    expect(a.event).toHaveBeenCalledWith("coaching.link.failure", {
-      source: "train2go",
-      profileId: "p1",
-      errorKind: "session-not-active",
-    });
-    expect(a.event).toHaveBeenCalledWith("coaching.link.failure", {
-      source: "train2go",
-      profileId: "p1",
-      errorKind: "transport-error",
-    });
-    assertNoPII(a);
-  });
+      // Assert
+      expect(a.event).toHaveBeenCalledWith("coaching.link.failure", {
+        source: "train2go",
+        profileId: "p1",
+        errorKind: reason,
+      });
+      assertNoPII(a);
+    }
+  );
 });

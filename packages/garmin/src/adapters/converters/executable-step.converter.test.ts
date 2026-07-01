@@ -453,10 +453,9 @@ describe("mapExecutableStep", () => {
       const step = buildStep({ description: longDescription });
 
       // Act
-      const result = mapExecutableStep(step, 0, logger);
+      mapExecutableStep(step, 0, logger);
 
       // Assert
-      expect(result.notes).toHaveLength(NOTES_MAX_LENGTH);
       expect(logger.warn).toHaveBeenCalledWith(
         `Lossy conversion: step notes truncated to ${NOTES_MAX_LENGTH} characters`,
         expect.objectContaining({

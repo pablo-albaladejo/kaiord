@@ -251,12 +251,9 @@ describe("WorkoutStepsListActions", () => {
   });
 
   describe("Button interaction flow", () => {
-    it("should call correct handlers for each button", async () => {
+    it("should call onCreateRepetitionBlock when create repetition block button is clicked", async () => {
       // Arrange
       const handleCreateBlock = vi.fn();
-      const handleCreateEmpty = vi.fn();
-      const handleAddStep = vi.fn();
-      const handlePaste = vi.fn();
       const user = userEvent.setup();
 
       render(
@@ -264,24 +261,87 @@ describe("WorkoutStepsListActions", () => {
           hasMultipleSelection={true}
           selectedStepCount={2}
           onCreateRepetitionBlock={handleCreateBlock}
-          onCreateEmptyRepetitionBlock={handleCreateEmpty}
-          onAddStep={handleAddStep}
-          onPasteStep={handlePaste}
+          onCreateEmptyRepetitionBlock={vi.fn()}
+          onAddStep={vi.fn()}
+          onPasteStep={vi.fn()}
         />
       );
 
       // Act
       await user.click(screen.getByTestId("create-repetition-block-button"));
-      await user.click(
-        screen.getByTestId("create-empty-repetition-block-button")
-      );
-      await user.click(screen.getByTestId("add-step-button"));
-      await user.click(screen.getByTestId("paste-step-button"));
 
       // Assert
       expect(handleCreateBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should call onCreateEmptyRepetitionBlock when create empty repetition block button is clicked", async () => {
+      // Arrange
+      const handleCreateEmpty = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <WorkoutStepsListActions
+          hasMultipleSelection={true}
+          selectedStepCount={2}
+          onCreateRepetitionBlock={vi.fn()}
+          onCreateEmptyRepetitionBlock={handleCreateEmpty}
+          onAddStep={vi.fn()}
+          onPasteStep={vi.fn()}
+        />
+      );
+
+      // Act
+      await user.click(
+        screen.getByTestId("create-empty-repetition-block-button")
+      );
+
+      // Assert
       expect(handleCreateEmpty).toHaveBeenCalledOnce();
+    });
+
+    it("should call onAddStep when add step button is clicked", async () => {
+      // Arrange
+      const handleAddStep = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <WorkoutStepsListActions
+          hasMultipleSelection={true}
+          selectedStepCount={2}
+          onCreateRepetitionBlock={vi.fn()}
+          onCreateEmptyRepetitionBlock={vi.fn()}
+          onAddStep={handleAddStep}
+          onPasteStep={vi.fn()}
+        />
+      );
+
+      // Act
+      await user.click(screen.getByTestId("add-step-button"));
+
+      // Assert
       expect(handleAddStep).toHaveBeenCalledOnce();
+    });
+
+    it("should call onPasteStep when paste step button is clicked", async () => {
+      // Arrange
+      const handlePaste = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <WorkoutStepsListActions
+          hasMultipleSelection={true}
+          selectedStepCount={2}
+          onCreateRepetitionBlock={vi.fn()}
+          onCreateEmptyRepetitionBlock={vi.fn()}
+          onAddStep={vi.fn()}
+          onPasteStep={handlePaste}
+        />
+      );
+
+      // Act
+      await user.click(screen.getByTestId("paste-step-button"));
+
+      // Assert
       expect(handlePaste).toHaveBeenCalledOnce();
     });
   });

@@ -173,10 +173,10 @@ describe("fingerprintSnapshot", () => {
     // Arrange
 
     // Act
+    const fp1 = fingerprintSnapshot("profile-1", baselineSnapshot);
+    const fp2 = fingerprintSnapshot("profile-2", baselineSnapshot);
 
     // Assert
-    expect(fingerprintSnapshot("profile-1", baselineSnapshot)).not.toBe(
-      fingerprintSnapshot("profile-2", baselineSnapshot)
-    );
+    expect(fp1).not.toBe(fp2);
   });
 });
