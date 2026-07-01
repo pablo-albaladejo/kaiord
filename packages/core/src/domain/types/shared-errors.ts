@@ -1,7 +1,7 @@
 import type { ValidationError } from "./error-types";
 
 /**
- * Base class for format-specific parsing errors (FIT, TCX, ZWO, GCN).
+ * Base class for format-specific parsing errors (FIT, Garmin, TCX, Zwift).
  *
  * Subclasses only set their own `name`; the optional `cause` carries the
  * underlying failure and the offending constructor frame is trimmed from
