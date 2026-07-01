@@ -634,7 +634,11 @@ describe("OnboardingTutorial", () => {
 
   describe("positioning", () => {
     it.each([
-      { navigationClicks: 0, expectedClass: "left-[50%]", position: "center" },
+      {
+        navigationClicks: 0,
+        expectedClass: "left-[50%] top-[50%]",
+        position: "center",
+      },
       {
         navigationClicks: 1,
         expectedClass: "bottom-[10%]",
