@@ -1,8 +1,7 @@
 import type { KRD } from "../schemas/krd";
 import type { Workout } from "../schemas/workout";
-import { workoutSchema } from "../schemas/workout";
 import { createKrdValidationError } from "../types/errors";
-import { mapZodErrors } from "./map-zod-errors";
+import { parseWorkoutOrThrow } from "./parse-workout";
 
 /**
  * Extracts and validates the structured workout from a KRD object.
@@ -31,15 +30,5 @@ export const extractWorkout = (krd: KRD): Workout => {
     );
   }
 
-  const result = workoutSchema.safeParse(ext);
-
-  if (!result.success) {
-    const errors = mapZodErrors(result.error.issues);
-    throw createKrdValidationError(
-      `Invalid workout: ${errors.map((e) => `${e.field}: ${e.message}`).join(", ")}`,
-      errors
-    );
-  }
-
-  return result.data;
+  return parseWorkoutOrThrow(ext);
 };
