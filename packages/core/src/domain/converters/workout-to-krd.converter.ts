@@ -1,7 +1,5 @@
 import type { KRD } from "../schemas/krd";
-import { workoutSchema } from "../schemas/workout";
-import { createKrdValidationError } from "../types/errors";
-import { mapZodErrors } from "../validation/map-zod-errors";
+import { parseWorkoutOrThrow } from "../validation/parse-workout";
 
 type CreateWorkoutKRDOptions = {
   created?: string;
@@ -22,17 +20,7 @@ export const createWorkoutKRD = (
   workout: unknown,
   options?: CreateWorkoutKRDOptions
 ): KRD => {
-  const result = workoutSchema.safeParse(workout);
-
-  if (!result.success) {
-    const errors = mapZodErrors(result.error.issues);
-    throw createKrdValidationError(
-      `Invalid workout: ${errors.map((e) => `${e.field}: ${e.message}`).join(", ")}`,
-      errors
-    );
-  }
-
-  const parsed = result.data;
+  const parsed = parseWorkoutOrThrow(workout);
 
   return {
     version: "1.0",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MIN_LTE_MAX_MESSAGE, minLteMax } from "./range-refinement";
+import { rangeMember } from "./range-refinement";
 import { targetUnitSchema } from "./unit";
 
 /**
@@ -38,13 +38,7 @@ export const powerValueSchema = z.discriminatedUnion("unit", [
     unit: z.literal(targetUnitSchema.enum.zone),
     value: z.number().int().min(1).max(7),
   }),
-  z
-    .object({
-      unit: z.literal(targetUnitSchema.enum.range),
-      min: z.number().min(0).max(5000),
-      max: z.number().min(0).max(5000),
-    })
-    .refine(minLteMax, { message: MIN_LTE_MAX_MESSAGE, path: ["min"] }),
+  rangeMember(5000),
 ]);
 
 /**
