@@ -118,7 +118,6 @@ export {
   createServiceAuthError,
   createTcxParsingError,
   createTcxValidationError,
-  createToleranceExceededError,
   createUnsupportedKrdTypeError,
   createZwiftParsingError,
   createZwiftValidationError,

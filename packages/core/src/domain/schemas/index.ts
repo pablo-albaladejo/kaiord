@@ -2,14 +2,18 @@
 export type {
   KRD,
   KRDEvent,
+  KRDExtensions,
   KRDLap,
+  KRDLapTrigger,
   KRDMetadata,
   KRDRecord,
   KRDSession,
 } from "./krd";
 export {
   krdEventSchema,
+  krdExtensionsSchema,
   krdLapSchema,
+  krdLapTriggerSchema,
   krdMetadataSchema,
   krdRecordSchema,
   krdSchema,
@@ -110,14 +114,6 @@ export {
   weightMeasurementSchema,
 } from "./health";
 
-// KRD Extensions Tagged Shape
-export type { KRDExtensions } from "./krd";
-export { krdExtensionsSchema } from "./krd";
-
 // Length Unit Schema and Types
 export type { LengthUnit } from "./length-unit";
 export { lengthUnitSchema } from "./length-unit";
-
-// KRD Lap Trigger Schema and Types
-export type { KRDLapTrigger } from "./krd/lap";
-export { krdLapTriggerSchema } from "./krd/lap";
