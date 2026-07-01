@@ -1,4 +1,5 @@
 import type { ValidationError } from "./error-types";
+import { SchemaValidationError } from "./shared-errors";
 
 /**
  * Error thrown when KRD schema validation fails.
@@ -22,18 +23,8 @@ import type { ValidationError } from "./error-types";
  * }
  * ```
  */
-export class KrdValidationError extends Error {
+export class KrdValidationError extends SchemaValidationError {
   public override readonly name = "KrdValidationError";
-
-  constructor(
-    message: string,
-    public readonly errors: Array<ValidationError>
-  ) {
-    super(message);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, KrdValidationError);
-    }
-  }
 }
 
 /**
