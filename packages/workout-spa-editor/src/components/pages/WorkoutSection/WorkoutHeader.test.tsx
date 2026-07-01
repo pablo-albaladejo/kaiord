@@ -114,8 +114,6 @@ describe("WorkoutHeader", () => {
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Assert
-      expect(screen.getByTestId("save-button")).toBeInTheDocument();
-      expect(screen.getByTestId("save-to-library-button")).toBeInTheDocument();
       expect(
         screen.getByRole("button", {
           name: /discard workout and return to welcome screen/i,

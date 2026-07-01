@@ -30,8 +30,12 @@ describe("WorkoutActions", () => {
     onDiscard: vi.fn(),
   };
 
-  describe("button spacing", () => {
-    it("should have 12px gap between button groups", () => {
+  describe("button layout", () => {
+    it.each([
+      { className: "gap-3" },
+      { className: "flex" },
+      { className: "flex-wrap" },
+    ])("should apply $className class to button container", ({ className }) => {
       // Arrange
 
       // Act
@@ -42,54 +46,11 @@ describe("WorkoutActions", () => {
         "discard-workout-button"
       ).parentElement;
 
-      expect(container).toHaveClass("gap-3"); // gap-3 = 12px in Tailwind
-    });
-
-    it("should use flex layout for button container", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-      // Assert
-      const container = screen.getByTestId(
-        "discard-workout-button"
-      ).parentElement;
-
-      expect(container).toHaveClass("flex");
-    });
-  });
-
-  describe("button alignment", () => {
-    it("should use flex-wrap for responsive layout", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-      // Assert
-      const container = screen.getByTestId(
-        "discard-workout-button"
-      ).parentElement;
-
-      expect(container).toHaveClass("flex-wrap");
+      expect(container).toHaveClass(className);
     });
   });
 
   describe("button variants", () => {
-    it("should use primary variant for save button", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-      // Assert
-      const saveButton = screen.getByRole("button", { name: /save workout/i });
-      // SaveButton component should use primary variant by default
-
-      expect(saveButton).toBeInTheDocument();
-    });
-
     it("should use tertiary variant for discard button", () => {
       // Arrange
 

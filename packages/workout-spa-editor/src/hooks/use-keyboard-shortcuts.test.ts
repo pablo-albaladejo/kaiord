@@ -24,32 +24,14 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("undo shortcut", () => {
-    it("should call onUndo when Ctrl+Z is pressed", () => {
+    it.each([
+      { label: "Ctrl+Z", init: { key: "z", ctrlKey: true } },
+      { label: "Cmd+Z", init: { key: "z", metaKey: true } },
+    ])("should call onUndo when $label is pressed", ({ init }) => {
       // Arrange
       const onUndo = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onUndo }));
-      const event = new KeyboardEvent("keydown", {
-        key: "z",
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onUndo).toHaveBeenCalledOnce();
-    });
-
-    it("should call onUndo when Cmd+Z is pressed", () => {
-      // Arrange
-      const onUndo = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onUndo }));
-      const event = new KeyboardEvent("keydown", {
-        key: "z",
-        metaKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -382,52 +364,24 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("ungroup block shortcut (Requirement 7.6.2)", () => {
-    it("should call onUngroupBlock when Ctrl+Shift+G is pressed", () => {
+    it.each([
+      {
+        label: "Ctrl+Shift+G",
+        init: { key: "g", ctrlKey: true, shiftKey: true },
+      },
+      {
+        label: "Cmd+Shift+G",
+        init: { key: "g", metaKey: true, shiftKey: true },
+      },
+      {
+        label: "uppercase Ctrl+Shift+G",
+        init: { key: "G", ctrlKey: true, shiftKey: true },
+      },
+    ])("should call onUngroupBlock when $label is pressed", ({ init }) => {
       // Arrange
       const onUngroupBlock = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
-      const event = new KeyboardEvent("keydown", {
-        key: "g",
-        ctrlKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onUngroupBlock).toHaveBeenCalledOnce();
-    });
-
-    it("should call onUngroupBlock when Cmd+Shift+G is pressed", () => {
-      // Arrange
-      const onUngroupBlock = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
-      const event = new KeyboardEvent("keydown", {
-        key: "g",
-        metaKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onUngroupBlock).toHaveBeenCalledOnce();
-    });
-
-    it("should handle uppercase G with Shift", () => {
-      // Arrange
-      const onUngroupBlock = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
-      const event = new KeyboardEvent("keydown", {
-        key: "G",
-        ctrlKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -598,68 +552,35 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("optional handlers", () => {
-    it("should not throw when handlers are undefined", () => {
-      // Arrange
-      renderHook(() => useKeyboardShortcuts({}));
-      const saveEvent = new KeyboardEvent("keydown", {
-        key: "s",
-        ctrlKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(saveEvent)).not.toThrow();
-      const moveUpEvent = new KeyboardEvent("keydown", {
-        key: "ArrowUp",
-        altKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(moveUpEvent)).not.toThrow();
-      const copyEvent = new KeyboardEvent("keydown", {
-        key: "c",
-        ctrlKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(copyEvent)).not.toThrow();
-      const pasteEvent = new KeyboardEvent("keydown", {
-        key: "v",
-        ctrlKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(pasteEvent)).not.toThrow();
-      const cutEvent = new KeyboardEvent("keydown", {
-        key: "x",
-        ctrlKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(cutEvent)).not.toThrow();
-      const createBlockEvent = new KeyboardEvent("keydown", {
-        key: "g",
-        ctrlKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(createBlockEvent)).not.toThrow();
-      const ungroupBlockEvent = new KeyboardEvent("keydown", {
-        key: "g",
-        ctrlKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(ungroupBlockEvent)).not.toThrow();
-      const selectAllEvent = new KeyboardEvent("keydown", {
-        key: "a",
-        ctrlKey: true,
-        bubbles: true,
-      });
-      expect(() => window.dispatchEvent(selectAllEvent)).not.toThrow();
+    it.each([
+      { label: "Ctrl+S (save)", init: { key: "s", ctrlKey: true } },
+      {
+        label: "Alt+ArrowUp (move up)",
+        init: { key: "ArrowUp", altKey: true },
+      },
+      { label: "Ctrl+C (copy)", init: { key: "c", ctrlKey: true } },
+      { label: "Ctrl+V (paste)", init: { key: "v", ctrlKey: true } },
+      { label: "Ctrl+X (cut)", init: { key: "x", ctrlKey: true } },
+      { label: "Ctrl+G (create block)", init: { key: "g", ctrlKey: true } },
+      {
+        label: "Ctrl+Shift+G (ungroup block)",
+        init: { key: "g", ctrlKey: true, shiftKey: true },
+      },
+      { label: "Ctrl+A (select all)", init: { key: "a", ctrlKey: true } },
+      { label: "Escape (clear selection)", init: { key: "Escape" } },
+    ])(
+      "should not throw when handlers are undefined and $label is pressed",
+      ({ init }) => {
+        // Arrange
+        renderHook(() => useKeyboardShortcuts({}));
+        const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
-      // Act
-      const escapeEvent = new KeyboardEvent("keydown", {
-        key: "Escape",
-        bubbles: true,
-      });
+        // Act
 
-      // Assert
-      expect(() => window.dispatchEvent(escapeEvent)).not.toThrow();
-    });
+        // Assert
+        expect(() => window.dispatchEvent(event)).not.toThrow();
+      }
+    );
   });
 
   describe("cut shortcut (Cmd+X)", () => {
@@ -917,13 +838,13 @@ describe("useKeyboardShortcuts", () => {
         ctrlKey: true,
         bubbles: true,
       });
-      el.dispatchEvent(event);
-      expect(onCopy).not.toHaveBeenCalled();
 
       // Act
+      el.dispatchEvent(event);
       el.remove();
 
       // Assert
+      expect(onCopy).not.toHaveBeenCalled();
     });
 
     it("should not intercept Escape when target is contentEditable", () => {
@@ -937,13 +858,13 @@ describe("useKeyboardShortcuts", () => {
         key: "Escape",
         bubbles: true,
       });
-      el.dispatchEvent(event);
-      expect(onClearSelection).not.toHaveBeenCalled();
 
       // Act
+      el.dispatchEvent(event);
       el.remove();
 
       // Assert
+      expect(onClearSelection).not.toHaveBeenCalled();
     });
   });
 });

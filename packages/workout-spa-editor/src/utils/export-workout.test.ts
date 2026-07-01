@@ -183,12 +183,11 @@ describe("exportWorkout", () => {
         } as unknown as KRD;
 
         // Act
+        const rejection = exportWorkout(invalidKrd, format);
 
         // Assert
-        await expect(exportWorkout(invalidKrd, format)).rejects.toThrow(
-          ExportError
-        );
-        await expect(exportWorkout(invalidKrd, format)).rejects.toThrow(
+        await expect(rejection).rejects.toThrow(ExportError);
+        await expect(rejection).rejects.toThrow(
           new RegExp(`Failed to export workout as ${label}`)
         );
       }
@@ -233,14 +232,11 @@ describe("exportWorkout", () => {
       const unsupportedFormat = "pdf" as WorkoutFileFormat;
 
       // Act
+      const rejection = exportWorkout(mockKrd, unsupportedFormat);
 
       // Assert
-      await expect(exportWorkout(mockKrd, unsupportedFormat)).rejects.toThrow(
-        ExportError
-      );
-      await expect(exportWorkout(mockKrd, unsupportedFormat)).rejects.toThrow(
-        /Unsupported format/
-      );
+      await expect(rejection).rejects.toThrow(ExportError);
+      await expect(rejection).rejects.toThrow(/Unsupported format/);
     });
 
     it("should export a GCN buffer for the gcn format", async () => {

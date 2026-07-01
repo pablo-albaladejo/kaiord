@@ -124,17 +124,17 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithMetadata);
-      expect(result.metadata.sport).toBe("cycling");
-      expect(result.extensions?.structured_workout).toBeDefined();
 
       // Act
+      const result = await reader(tcxWithMetadata);
       const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
       };
 
       // Assert
+      expect(result.metadata.sport).toBe("cycling");
+      expect(result.extensions?.structured_workout).toBeDefined();
       expect(workout.name).toBe("Cycling Intervals");
       expect(workout.sport).toBe("cycling");
     });
@@ -156,9 +156,9 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithTimeStep);
 
       // Act
+      const result = await reader(tcxWithTimeStep);
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ duration: { type: string; seconds?: number } }>;
       };
@@ -186,9 +186,9 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithDistanceStep);
 
       // Act
+      const result = await reader(tcxWithDistanceStep);
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ duration: { type: string; meters?: number } }>;
       };
@@ -220,9 +220,9 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithHRZone);
 
       // Act
+      const result = await reader(tcxWithHRZone);
       const workout = result.extensions?.structured_workout as {
         steps: Array<{
           target: { type: string; value?: { unit: string; value: number } };
@@ -271,9 +271,9 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithMultipleSteps);
 
       // Act
+      const result = await reader(tcxWithMultipleSteps);
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ stepIndex: number; name?: string; intensity?: string }>;
       };
@@ -311,9 +311,9 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithStepExtensions);
 
       // Act
+      const result = await reader(tcxWithStepExtensions);
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
@@ -347,21 +347,21 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
+
+      // Act
       const result = await reader(tcxWithPowerExtensions);
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
-      expect(workout.steps).toHaveLength(1);
-      expect(workout.steps[0].extensions).toBeDefined();
-      expect(workout.steps[0].extensions?.tcx).toBeDefined();
-
-      // Act
       const tpx = workout.steps[0].extensions?.tcx.TPX as Record<
         string,
         unknown
       >;
 
       // Assert
+      expect(workout.steps).toHaveLength(1);
+      expect(workout.steps[0].extensions).toBeDefined();
+      expect(workout.steps[0].extensions?.tcx).toBeDefined();
       expect(tpx).toBeDefined();
       expect(tpx.Watts).toBe(POWER_WATTS_250);
     });
@@ -388,9 +388,9 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithPowerExtensions);
 
       // Act
+      const result = await reader(tcxWithPowerExtensions);
       const workout = result.extensions?.structured_workout as {
         steps: Array<{
           targetType: string;
@@ -426,9 +426,9 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithWorkoutExtensions);
 
       // Act
+      const result = await reader(tcxWithWorkoutExtensions);
       const workout = result.extensions?.structured_workout as {
         extensions?: { tcx: Record<string, unknown> };
       };
@@ -461,13 +461,13 @@ describe("createFastXmlTcxReader", () => {
     <DatabaseCustomField>DatabaseCustomValue</DatabaseCustomField>
   </Extensions>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithDatabaseExtensions);
-      expect(result.extensions?.tcx).toBeDefined();
 
       // Act
+      const result = await reader(tcxWithDatabaseExtensions);
       const tcxExtensions = result.extensions?.tcx as Record<string, unknown>;
 
       // Assert
+      expect(result.extensions?.tcx).toBeDefined();
       expect(tcxExtensions.DatabaseCustomField).toBe("DatabaseCustomValue");
     });
 
@@ -497,18 +497,18 @@ describe("createFastXmlTcxReader", () => {
     <DatabaseField>DatabaseValue</DatabaseField>
   </Extensions>
 </TrainingCenterDatabase>`;
-      const result = await reader(tcxWithAllExtensions);
-      expect(result.extensions?.tcx).toBeDefined();
-      const tcxExtensions = result.extensions?.tcx as Record<string, unknown>;
-      expect(tcxExtensions.DatabaseField).toBe("DatabaseValue");
 
       // Act
+      const result = await reader(tcxWithAllExtensions);
+      const tcxExtensions = result.extensions?.tcx as Record<string, unknown>;
       const workout = result.extensions?.structured_workout as {
         extensions?: { tcx: Record<string, unknown> };
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
 
       // Assert
+      expect(result.extensions?.tcx).toBeDefined();
+      expect(tcxExtensions.DatabaseField).toBe("DatabaseValue");
       expect(workout.extensions?.tcx).toBeDefined();
       expect(workout.extensions?.tcx.WorkoutField).toBe("WorkoutValue");
       expect(workout.steps[0].extensions?.tcx).toBeDefined();
@@ -831,20 +831,20 @@ it("should preserve step order", async () => {
       },
     },
   };
+
+  // Act
   const result = await writer(krd);
+  const warmupIndex = result.indexOf("<Name>Warmup</Name>");
+  const workIndex = result.indexOf("<Name>Work</Name>");
+  const cooldownIndex = result.indexOf("<Name>Cooldown</Name>");
+
+  // Assert
   expect(result).toContain("<Name>Warmup</Name>");
   expect(result).toContain("<Name>Work</Name>");
   expect(result).toContain("<Name>Cooldown</Name>");
   expect(result).toContain("<Intensity>Warmup</Intensity>");
   expect(result).toContain("<Intensity>Active</Intensity>");
   expect(result).toContain("<Intensity>Cooldown</Intensity>");
-  const warmupIndex = result.indexOf("<Name>Warmup</Name>");
-  const workIndex = result.indexOf("<Name>Work</Name>");
-
-  // Act
-  const cooldownIndex = result.indexOf("<Name>Cooldown</Name>");
-
-  // Assert
   expect(warmupIndex).toBeLessThan(workIndex);
   expect(workIndex).toBeLessThan(cooldownIndex);
 });

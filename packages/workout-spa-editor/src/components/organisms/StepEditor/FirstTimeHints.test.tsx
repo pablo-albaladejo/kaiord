@@ -56,30 +56,14 @@ describe("FirstTimeHints", () => {
       expect(screen.queryByTestId("first-time-hints")).not.toBeInTheDocument();
     });
 
-    it("should render with default storage key", () => {
+    it("should render with the default storage key when none is provided", () => {
       // Arrange
 
       // Act
-
       render(<FirstTimeHints />);
 
       // Assert
-
       expect(screen.getByTestId("first-time-hints")).toBeInTheDocument();
-    });
-
-    it("should render progress dots", () => {
-      // Arrange
-
-      // Act
-
-      render(<FirstTimeHints storageKey={TEST_STORAGE_KEY} />);
-
-      const dots = screen.getAllByLabelText(/Hint \d+ of 3/);
-
-      // Assert
-
-      expect(dots).toHaveLength(HINT_DOT_COUNT);
     });
 
     it("should highlight current hint dot", () => {

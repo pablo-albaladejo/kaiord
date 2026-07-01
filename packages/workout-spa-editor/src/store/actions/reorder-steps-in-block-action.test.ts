@@ -82,16 +82,16 @@ describe("reorderStepsInBlockAction", () => {
     };
     const krd = createMockKRD(workout);
     const state = createMockState();
-    const result = reorderStepsInBlockAction(krd, "block-test-1", 0, 2, state);
-    expect(result.currentWorkout).toBeDefined();
-    const updatedWorkout = result.currentWorkout?.extensions
-      ?.structured_workout as Workout;
-    expect(updatedWorkout).toBeDefined();
 
     // Act
+    const result = reorderStepsInBlockAction(krd, "block-test-1", 0, 2, state);
+    const updatedWorkout = result.currentWorkout?.extensions
+      ?.structured_workout as Workout;
     const updatedBlock = updatedWorkout.steps[0] as RepetitionBlock;
 
     // Assert
+    expect(result.currentWorkout).toBeDefined();
+    expect(updatedWorkout).toBeDefined();
     expect(updatedBlock.steps).toHaveLength(REORDERED_BLOCK_STEP_COUNT);
     expect(updatedBlock.steps[0].duration.seconds).toBe(SECONDS_LONG_INTERVAL);
     expect(updatedBlock.steps[1].duration.seconds).toBe(SECONDS_SHORT_INTERVAL);

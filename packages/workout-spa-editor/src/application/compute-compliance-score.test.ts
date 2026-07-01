@@ -48,19 +48,21 @@ describe("computeComplianceScore", () => {
     }
   );
 
-  it("should clamp to 0 for very large variance", () => {
-    // Arrange
+  it.each([
+    { plan: MINUTE_AS_SEC, actual: TEN_MINUTES_AS_SEC },
+    { plan: MINUTE_AS_SEC, actual: HUNDRED_MINUTES_AS_SEC },
+  ])(
+    "should clamp to 0 for very large variance (plan $plan actual $actual)",
+    ({ plan, actual }) => {
+      // Arrange
 
-    // Act
+      // Act
+      const score = computeComplianceScore(plan, actual);
 
-    // Assert
-    expect(computeComplianceScore(MINUTE_AS_SEC, TEN_MINUTES_AS_SEC)).toBe(
-      COMPLIANCE_ZERO
-    );
-    expect(computeComplianceScore(MINUTE_AS_SEC, HUNDRED_MINUTES_AS_SEC)).toBe(
-      COMPLIANCE_ZERO
-    );
-  });
+      // Assert
+      expect(score).toBe(COMPLIANCE_ZERO);
+    }
+  );
 
   it.each([
     { plan: undefined, actual: MINUTES_43_AS_SEC },
@@ -88,15 +90,21 @@ describe("computeComplianceScore", () => {
     expect(computeComplianceScore(0, THIRTY_MINUTES_AS_SEC)).toBeNull();
   });
 
-  it("should return null on NaN inputs", () => {
-    // Arrange
+  it.each([
+    { plan: NaN, actual: THIRTY_MINUTES_AS_SEC },
+    { plan: MINUTES_45_AS_SEC, actual: NaN },
+  ])(
+    "should return null on NaN inputs (plan $plan actual $actual)",
+    ({ plan, actual }) => {
+      // Arrange
 
-    // Act
+      // Act
+      const score = computeComplianceScore(plan, actual);
 
-    // Assert
-    expect(computeComplianceScore(NaN, THIRTY_MINUTES_AS_SEC)).toBeNull();
-    expect(computeComplianceScore(MINUTES_45_AS_SEC, NaN)).toBeNull();
-  });
+      // Assert
+      expect(score).toBeNull();
+    }
+  );
 
   it("should be symmetric — undershoot and overshoot yield identical scores", () => {
     // Arrange

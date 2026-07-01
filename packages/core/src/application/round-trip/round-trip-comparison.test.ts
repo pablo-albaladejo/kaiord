@@ -299,22 +299,34 @@ describe("entity comparison with absent or sparse collections", () => {
     expect(violations).toStrictEqual([]);
   });
 
-  it("should report nothing when the first KRD has no sessions or records", () => {
+  it("should report nothing when the first KRD has no sessions", () => {
     // Arrange
     const checker = createToleranceChecker();
     const krd2: KRD = {
       ...baseKrd,
       sessions: [{ totalElapsedTime: 3600 }],
+    };
+
+    // Act
+    const violations = compareSessions(baseKrd, krd2, checker);
+
+    // Assert
+    expect(violations).toStrictEqual([]);
+  });
+
+  it("should report nothing when the first KRD has no records", () => {
+    // Arrange
+    const checker = createToleranceChecker();
+    const krd2: KRD = {
+      ...baseKrd,
       records: [{ timestamp: FIRST_LAP_START, heartRate: HR_EXPECTED }],
     };
 
     // Act
-    const sessionViolations = compareSessions(baseKrd, krd2, checker);
-    const recordViolations = compareRecords(baseKrd, krd2, checker);
+    const violations = compareRecords(baseKrd, krd2, checker);
 
     // Assert
-    expect(sessionViolations).toStrictEqual([]);
-    expect(recordViolations).toStrictEqual([]);
+    expect(violations).toStrictEqual([]);
   });
 
   it("should skip sparse entries instead of comparing them", () => {

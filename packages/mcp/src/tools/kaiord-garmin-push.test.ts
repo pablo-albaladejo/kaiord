@@ -53,13 +53,13 @@ describe("kaiord_garmin_push", () => {
     mockIsAuthenticated.mockReturnValue(true);
     mockPush.mockResolvedValue(mockPushResult);
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
-    const result = await handler({ input_content: krdJson });
-    expect(result.isError).toBeUndefined();
 
     // Act
+    const result = await handler({ input_content: krdJson });
     const parsed = JSON.parse(result.content[0].text) as unknown;
 
     // Assert
+    expect(result.isError).toBeUndefined();
     expect(parsed).toEqual(mockPushResult);
   });
 

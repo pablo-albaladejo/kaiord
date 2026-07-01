@@ -106,12 +106,11 @@ describe("importWorkout", () => {
       const file = createMockFile(invalidJson, "invalid.krd");
 
       // Act
+      const rejection = importWorkout(file);
 
       // Assert
-      await expect(importWorkout(file)).rejects.toThrow(ImportError);
-      await expect(importWorkout(file)).rejects.toThrow(
-        /Failed to parse KRD file/
-      );
+      await expect(rejection).rejects.toThrow(ImportError);
+      await expect(rejection).rejects.toThrow(/Failed to parse KRD file/);
     });
 
     it("should provide useful error message for invalid JSON", async () => {
@@ -143,10 +142,11 @@ describe("importWorkout", () => {
       const file = createMockFile(invalidKrd, "invalid.krd");
 
       // Act
+      const rejection = importWorkout(file);
 
       // Assert
-      await expect(importWorkout(file)).rejects.toThrow(ImportError);
-      await expect(importWorkout(file)).rejects.toThrow(/Validation failed/);
+      await expect(rejection).rejects.toThrow(ImportError);
+      await expect(rejection).rejects.toThrow(/Validation failed/);
     });
 
     it("should list all missing fields in validation error", async () => {
@@ -213,12 +213,11 @@ describe("importWorkout", () => {
       const file = createMockFile(buffer, "workout.txt");
 
       // Act
+      const rejection = importWorkout(file);
 
       // Assert
-      await expect(importWorkout(file)).rejects.toThrow(ImportError);
-      await expect(importWorkout(file)).rejects.toThrow(
-        /Unsupported file format/
-      );
+      await expect(rejection).rejects.toThrow(ImportError);
+      await expect(rejection).rejects.toThrow(/Unsupported file format/);
     });
 
     it("should throw ImportError for empty filename", async () => {
@@ -227,10 +226,11 @@ describe("importWorkout", () => {
       const file = createMockFile(buffer, "");
 
       // Act
+      const rejection = importWorkout(file);
 
       // Assert
-      await expect(importWorkout(file)).rejects.toThrow(ImportError);
-      await expect(importWorkout(file)).rejects.toThrow(/Invalid filename/);
+      await expect(rejection).rejects.toThrow(ImportError);
+      await expect(rejection).rejects.toThrow(/Invalid filename/);
     });
 
     it("should throw ImportError for filename without extension", async () => {
@@ -239,12 +239,11 @@ describe("importWorkout", () => {
       const file = createMockFile(buffer, "workout");
 
       // Act
+      const rejection = importWorkout(file);
 
       // Assert
-      await expect(importWorkout(file)).rejects.toThrow(ImportError);
-      await expect(importWorkout(file)).rejects.toThrow(
-        /Unsupported file format/
-      );
+      await expect(rejection).rejects.toThrow(ImportError);
+      await expect(rejection).rejects.toThrow(/Unsupported file format/);
     });
   });
 
@@ -308,10 +307,11 @@ describe("importWorkout", () => {
         const file = createMockFile(data, filename);
 
         // Act
+        const rejection = importWorkout(file);
 
         // Assert
-        await expect(importWorkout(file)).rejects.toThrow(ImportError);
-        await expect(importWorkout(file)).rejects.toThrow(
+        await expect(rejection).rejects.toThrow(ImportError);
+        await expect(rejection).rejects.toThrow(
           new RegExp(`Failed to parse ${label} file`)
         );
       }

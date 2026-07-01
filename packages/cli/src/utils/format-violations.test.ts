@@ -32,10 +32,9 @@ describe("formatValidationErrors", () => {
     const errors: Array<ValidationError> = [
       { field: "version", message: "Required field missing" },
     ];
-    const result = formatValidationErrors(errors);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatValidationErrors(errors));
 
     // Assert
     expect(stripped).toContain("Validation errors:");
@@ -48,10 +47,9 @@ describe("formatValidationErrors", () => {
       { field: "version", message: "Required field missing" },
       { field: "type", message: "Invalid value" },
     ];
-    const result = formatValidationErrors(errors);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatValidationErrors(errors));
 
     // Assert
     expect(stripped).toContain("Validation errors:");
@@ -64,10 +62,9 @@ describe("formatValidationErrors", () => {
     const errors: Array<ValidationError> = [
       { field: "version", message: "Required" },
     ];
-    const result = formatValidationErrors(errors);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatValidationErrors(errors));
 
     // Assert
     expect(stripped).toContain("\u2022");
@@ -79,10 +76,9 @@ describe("formatValidationErrors", () => {
     const errors: Array<ValidationError> = [
       { field: "test", message: "error" },
     ];
-    const result = formatValidationErrors(errors);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatValidationErrors(errors));
 
     // Assert
     expect(stripped).toContain("Validation errors:");
@@ -117,10 +113,9 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-    const result = formatToleranceViolations(violations);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatToleranceViolations(violations));
 
     // Assert
     expect(stripped).toContain("Tolerance violations:");
@@ -147,10 +142,9 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-    const result = formatToleranceViolations(violations);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatToleranceViolations(violations));
 
     // Assert
     expect(stripped).toContain("power");
@@ -168,10 +162,9 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-    const result = formatToleranceViolations(violations);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatToleranceViolations(violations));
 
     // Assert
     expect(stripped).toContain("deviation: 2");
@@ -189,10 +182,9 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-    const result = formatToleranceViolations(violations);
 
     // Act
-    const stripped = stripAnsi(result);
+    const stripped = stripAnsi(formatToleranceViolations(violations));
 
     // Assert
     expect(stripped).toContain("Tolerance violations:");

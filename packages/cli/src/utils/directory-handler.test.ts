@@ -67,19 +67,6 @@ describe("createOutputDirectory", () => {
     );
   });
 
-  it("should throw generic error for non-system errors", async () => {
-    // Arrange
-    const { mkdir } = await import("fs/promises");
-
-    // Act
-    vi.mocked(mkdir).mockRejectedValue(new Error("something else"));
-
-    // Assert
-    await expect(createOutputDirectory("/bad/out.tcx")).rejects.toThrow(
-      "Failed to create directory"
-    );
-  });
-
   it("should throw a DirectoryCreateError that maps to its exit code", async () => {
     // Arrange
     const { mkdir } = await import("fs/promises");

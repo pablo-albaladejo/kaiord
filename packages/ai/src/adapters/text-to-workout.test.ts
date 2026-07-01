@@ -95,14 +95,14 @@ describe("createTextToWorkout", () => {
       output: RUNNING_WORKOUT,
     } as never);
     const parse = createTextToWorkout({ model: mockModel });
-    await parse("4x(8' a 5'15\")", { sport: "running" });
 
     // Act
+    await parse("4x(8' a 5'15\")", { sport: "running" });
+
+    // Assert
     const callArgs = mockGenerateText.mock.calls[0]?.[0] as {
       system?: string;
     };
-
-    // Assert
     expect(callArgs.system).toContain("running");
   });
 
@@ -123,15 +123,14 @@ describe("createTextToWorkout", () => {
   it("should throw AiParsingError after max retries exhausted", async () => {
     // Arrange
     mockGenerateText.mockRejectedValue(new Error("Always fails"));
-
-    // Act
     const parse = createTextToWorkout({ model: mockModel, maxRetries: 1 });
 
+    // Act
+    const rejection = expect(parse("bad input")).rejects;
+
     // Assert
-    await expect(parse("bad input")).rejects.toThrow(AiParsingError);
-    await expect(parse("bad input")).rejects.toMatchObject({
-      code: "AI_PARSING_ERROR",
-    });
+    await rejection.toThrow(AiParsingError);
+    await rejection.toMatchObject({ code: "AI_PARSING_ERROR" });
   });
 
   it("should throw AiParsingError when output is null", async () => {

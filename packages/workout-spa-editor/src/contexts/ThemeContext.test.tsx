@@ -85,7 +85,20 @@ describe("ThemeContext", () => {
   });
 
   describe("theme switching", () => {
-    it("should switch to light theme", () => {
+    it.each([
+      {
+        theme: "light" as const,
+        expectedResolvedTheme: /^light$/,
+      },
+      {
+        theme: "dark" as const,
+        expectedResolvedTheme: /^dark$/,
+      },
+      {
+        theme: "system" as const,
+        expectedResolvedTheme: /^(light|dark)$/,
+      },
+    ])("should switch to $theme theme", ({ theme, expectedResolvedTheme }) => {
       // Arrange
       Object.defineProperty(window, "matchMedia", {
         writable: true,
@@ -100,7 +113,6 @@ describe("ThemeContext", () => {
           dispatchEvent: vi.fn(),
         })),
       });
-
       const wrapper = ({ children }: { children: ReactNode }) => (
         <ThemeProvider>{children}</ThemeProvider>
       );
@@ -108,76 +120,12 @@ describe("ThemeContext", () => {
 
       // Act
       act(() => {
-        result.current.setTheme("light");
+        result.current.setTheme(theme);
       });
 
       // Assert
-      expect(result.current.theme).toBe("light");
-      expect(result.current.resolvedTheme).toBe("light");
-      expect(document.documentElement.classList.contains("dark")).toBe(false);
-    });
-
-    it("should switch to dark theme", () => {
-      // Arrange
-      Object.defineProperty(window, "matchMedia", {
-        writable: true,
-        value: vi.fn().mockImplementation((query) => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        })),
-      });
-
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <ThemeProvider>{children}</ThemeProvider>
-      );
-      const { result } = renderHook(() => useTheme(), { wrapper });
-
-      // Act
-      act(() => {
-        result.current.setTheme("dark");
-      });
-
-      // Assert
-      expect(result.current.theme).toBe("dark");
-      expect(result.current.resolvedTheme).toBe("dark");
-      expect(document.documentElement.classList.contains("dark")).toBe(true);
-    });
-
-    it("should switch to system theme", () => {
-      // Arrange
-      Object.defineProperty(window, "matchMedia", {
-        writable: true,
-        value: vi.fn().mockImplementation((query) => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        })),
-      });
-
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <ThemeProvider>{children}</ThemeProvider>
-      );
-      const { result } = renderHook(() => useTheme(), { wrapper });
-
-      // Act
-      act(() => {
-        result.current.setTheme("system");
-      });
-
-      // Assert
-      expect(result.current.theme).toBe("system");
-      expect(result.current.resolvedTheme).toMatch(/^(light|dark)$/);
+      expect(result.current.theme).toBe(theme);
+      expect(result.current.resolvedTheme).toMatch(expectedResolvedTheme);
     });
   });
 

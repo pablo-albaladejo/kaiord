@@ -825,7 +825,6 @@ describe("convertKRDToMessages", () => {
       expect(messages.length).toBe(FIT_REPEATED_MESSAGES_6);
       const repeat1Msg = messages[3] as Record<string, unknown>;
       expect(repeat1Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      expect(repeat1Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(repeat1Msg).toMatchObject({
         repeatSteps: block1.repeatCount,
         durationStep: 0,
@@ -835,7 +834,6 @@ describe("convertKRDToMessages", () => {
       const repeat2Msg = messages[5] as Record<string, unknown>;
 
       // Assert
-      expect(repeat2Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(repeat2Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(repeat2Msg).toMatchObject({
         repeatSteps: block2.repeatCount,
@@ -906,7 +904,6 @@ describe("convertKRDToMessages", () => {
         messageIndex: 0,
         durationType: fitDurationTypeSchema.enum.calories,
         durationCalories: 500,
-        targetType: stepMsg.targetType,
       });
     });
 
@@ -953,7 +950,6 @@ describe("convertKRDToMessages", () => {
         durationType: fitDurationTypeSchema.enum.repeatUntilTime,
         durationTime: 1800,
         durationStep: 0,
-        targetType: stepMsg.targetType,
       });
     });
   });

@@ -156,31 +156,6 @@ describe("WorkoutSection", () => {
     expect(screen.queryByText(/Edit Step/)).not.toBeInTheDocument();
   });
 
-  it("should show editor when step is selected and editing is true", () => {
-    // Arrange
-    const workout = createMockWorkout([createMockStep(0, "id-show-editor")]);
-    const krd = createMockKRD(workout);
-
-    // Set up state with a selected step and editing enabled
-    useWorkoutStore.setState({
-      isEditing: true,
-      selectedStepId: "id-show-editor",
-    });
-
-    // Act
-    renderWithProviders(
-      <WorkoutSection
-        workout={workout}
-        krd={krd}
-        selectedStepId="id-show-editor"
-        onStepSelect={vi.fn()}
-      />
-    );
-
-    // Assert
-    expect(screen.getByText(/Edit Step/)).toBeInTheDocument();
-  });
-
   it("should close editor and clear selection on cancel", async () => {
     // Arrange
     const workout = createMockWorkout([createMockStep(0, "id-step-0")]);

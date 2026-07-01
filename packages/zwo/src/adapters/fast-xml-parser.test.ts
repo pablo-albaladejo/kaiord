@@ -1557,7 +1557,7 @@ describe("createFastXmlZwiftWriter", () => {
       expect(result).toContain("<thresholdSecPerKm>240</thresholdSecPerKm>");
     });
 
-    it("should not include durationType when not present in extensions", async () => {
+    it("should not include durationType or thresholdSecPerKm when not present in extensions", async () => {
       // Arrange
       const krd = {
         version: "1.0",
@@ -1587,37 +1587,6 @@ describe("createFastXmlZwiftWriter", () => {
 
       // Assert
       expect(result).not.toContain("<durationType>");
-    });
-
-    it("should not include thresholdSecPerKm when not present in extensions", async () => {
-      // Arrange
-      const krd = {
-        version: "1.0",
-        type: "structured_workout" as const,
-        metadata: {
-          created: "2025-01-15T10:30:00Z",
-          sport: "cycling",
-        },
-        extensions: {
-          structured_workout: {
-            name: "Simple Workout",
-            sport: "cycling",
-            steps: [],
-          },
-          zwift: {},
-        },
-      };
-      const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
-        valid: true,
-        errors: [],
-      });
-      const logger = createMockLogger();
-      const writer = createFastXmlZwiftWriter(logger, mockValidator);
-
-      // Act
-      const result = await writer(krd);
-
-      // Assert
       expect(result).not.toContain("<thresholdSecPerKm>");
     });
 

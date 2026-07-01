@@ -7,41 +7,31 @@ import {
 
 describe("validateRepetitionBlockCreation", () => {
   describe("minimum steps validation", () => {
-    it("should return error when no steps are selected", () => {
-      // Arrange
-      const selectedStepIds: Array<string> = [];
-      const repeatCount = 3;
+    it.each([
+      {
+        description: "no steps selected",
+        selectedStepIds: [] as Array<string>,
+      },
+      { description: "only one step selected", selectedStepIds: ["step-0"] },
+    ])(
+      "should return MIN_STEPS error when $description",
+      ({ selectedStepIds }) => {
+        // Arrange
+        const repeatCount = 3;
 
-      // Act
-      const result = validateRepetitionBlockCreation(
-        selectedStepIds,
-        repeatCount
-      );
+        // Act
+        const result = validateRepetitionBlockCreation(
+          selectedStepIds,
+          repeatCount
+        );
 
-      // Assert
-      expect(result).toEqual<RepetitionBlockValidationError>({
-        type: "MIN_STEPS",
-        message: "Select at least 2 steps to create a repetition block",
-      });
-    });
-
-    it("should return error when only one step is selected", () => {
-      // Arrange
-      const selectedStepIds = ["step-0"];
-      const repeatCount = 3;
-
-      // Act
-      const result = validateRepetitionBlockCreation(
-        selectedStepIds,
-        repeatCount
-      );
-
-      // Assert
-      expect(result).toEqual<RepetitionBlockValidationError>({
-        type: "MIN_STEPS",
-        message: "Select at least 2 steps to create a repetition block",
-      });
-    });
+        // Assert
+        expect(result).toEqual<RepetitionBlockValidationError>({
+          type: "MIN_STEPS",
+          message: "Select at least 2 steps to create a repetition block",
+        });
+      }
+    );
 
     it("should pass validation when two steps are selected", () => {
       // Arrange

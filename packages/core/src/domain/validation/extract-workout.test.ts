@@ -45,15 +45,14 @@ describe("extractWorkout", () => {
 
   it("should throw for wrong KRD type", () => {
     // Arrange
-
-    // Act
     const krd: KRD = { ...validKrd, type: "recorded_activity" };
 
+    // Act
+    const act = () => extractWorkout(krd);
+
     // Assert
-    expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
-    expect(() => extractWorkout(krd)).toThrow(
-      'Expected type "structured_workout"'
-    );
+    expect(act).toThrow(KrdValidationError);
+    expect(act).toThrow('Expected type "structured_workout"');
   });
 
   it.each<[string, KRD]>([

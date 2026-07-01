@@ -40,34 +40,42 @@ describe("getOAuth1Token", () => {
 
   it("should throw when response is not ok", async () => {
     // Arrange
-
-    // Act
     const mockFetch = vi.fn(async () => ({
       ok: false,
       status: 401,
       statusText: "Unauthorized",
     })) as unknown as typeof globalThis.fetch;
 
+    // Act
+    const promise = getOAuth1Token(
+      "ticket-123",
+      consumer,
+      mockFetch,
+      mockLogger
+    );
+
     // Assert
-    await expect(
-      getOAuth1Token("ticket-123", consumer, mockFetch, mockLogger)
-    ).rejects.toThrow("OAuth1 token request failed");
+    await expect(promise).rejects.toThrow("OAuth1 token request failed");
   });
 
   it("should throw when oauth_token is missing from response", async () => {
     // Arrange
-
-    // Act
     const mockFetch = vi.fn(async () => ({
       ok: true,
       status: 200,
       text: async () => "some_other_param=value",
     })) as unknown as typeof globalThis.fetch;
 
+    // Act
+    const promise = getOAuth1Token(
+      "ticket-123",
+      consumer,
+      mockFetch,
+      mockLogger
+    );
+
     // Assert
-    await expect(
-      getOAuth1Token("ticket-123", consumer, mockFetch, mockLogger)
-    ).rejects.toThrow("OAuth1 token exchange failed");
+    await expect(promise).rejects.toThrow("OAuth1 token exchange failed");
   });
 });
 
@@ -105,17 +113,16 @@ describe("exchangeOAuth2", () => {
 
   it("should throw when response is not ok", async () => {
     // Arrange
-
-    // Act
     const mockFetch = vi.fn(async () => ({
       ok: false,
       status: 500,
       statusText: "Internal Server Error",
     })) as unknown as typeof globalThis.fetch;
 
+    // Act
+    const promise = exchangeOAuth2(oauth1, consumer, mockFetch, mockLogger);
+
     // Assert
-    await expect(
-      exchangeOAuth2(oauth1, consumer, mockFetch, mockLogger)
-    ).rejects.toThrow("OAuth2 exchange failed");
+    await expect(promise).rejects.toThrow("OAuth2 exchange failed");
   });
 });
