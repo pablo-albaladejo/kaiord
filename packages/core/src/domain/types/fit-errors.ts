@@ -1,3 +1,5 @@
+import { FormatParsingError } from "./shared-errors";
+
 /**
  * Error thrown when FIT file parsing fails.
  *
@@ -20,18 +22,8 @@
  * }
  * ```
  */
-export class FitParsingError extends Error {
+export class FitParsingError extends FormatParsingError {
   public override readonly name = "FitParsingError";
-
-  constructor(
-    message: string,
-    public readonly cause?: unknown
-  ) {
-    super(message);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, FitParsingError);
-    }
-  }
 }
 
 /**

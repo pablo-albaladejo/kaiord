@@ -1,4 +1,5 @@
 import type { ValidationError } from "./error-types";
+import { FormatParsingError, SchemaValidationError } from "./shared-errors";
 
 /**
  * Error thrown when TCX file parsing fails.
@@ -21,18 +22,8 @@ import type { ValidationError } from "./error-types";
  * }
  * ```
  */
-export class TcxParsingError extends Error {
+export class TcxParsingError extends FormatParsingError {
   public override readonly name = "TcxParsingError";
-
-  constructor(
-    message: string,
-    public readonly cause?: unknown
-  ) {
-    super(message);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, TcxParsingError);
-    }
-  }
 }
 
 /**
@@ -67,18 +58,8 @@ export const createTcxParsingError = (
  * }
  * ```
  */
-export class TcxValidationError extends Error {
+export class TcxValidationError extends SchemaValidationError {
   public override readonly name = "TcxValidationError";
-
-  constructor(
-    message: string,
-    public readonly errors: Array<ValidationError>
-  ) {
-    super(message);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, TcxValidationError);
-    }
-  }
 }
 
 /**

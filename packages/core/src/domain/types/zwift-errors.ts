@@ -1,4 +1,5 @@
 import type { ValidationError } from "./error-types";
+import { FormatParsingError, SchemaValidationError } from "./shared-errors";
 
 /**
  * Error thrown when Zwift workout file parsing fails.
@@ -21,18 +22,8 @@ import type { ValidationError } from "./error-types";
  * }
  * ```
  */
-export class ZwiftParsingError extends Error {
+export class ZwiftParsingError extends FormatParsingError {
   public override readonly name = "ZwiftParsingError";
-
-  constructor(
-    message: string,
-    public readonly cause?: unknown
-  ) {
-    super(message);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ZwiftParsingError);
-    }
-  }
 }
 
 /**
@@ -67,18 +58,8 @@ export const createZwiftParsingError = (
  * }
  * ```
  */
-export class ZwiftValidationError extends Error {
+export class ZwiftValidationError extends SchemaValidationError {
   public override readonly name = "ZwiftValidationError";
-
-  constructor(
-    message: string,
-    public readonly errors: Array<ValidationError>
-  ) {
-    super(message);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ZwiftValidationError);
-    }
-  }
 }
 
 /**
