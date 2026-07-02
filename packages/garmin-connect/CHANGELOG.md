@@ -1,5 +1,24 @@
 # @kaiord/garmin-connect
 
+## 9.3.0
+
+### Patch Changes
+
+- 95da9fa: Internal code-reduction sweep: remove dead files, unused re-exports and types,
+  consolidate genuine duplication, and drop redundant constructs across packages.
+
+  No public API or runtime behavior change — every removed symbol was unused
+  (grep-confirmed across the monorepo) and none belonged to a package's published
+  `src/index.ts` surface. The `@kaiord/zwo` `zod` dependency is dropped (its only
+  users were the deleted schemas). All test suites stay green and coverage is at
+  or above baseline in every package.
+
+- Updated dependencies [95da9fa]
+- Updated dependencies [372db2c]
+- Updated dependencies [63c4cb6]
+  - @kaiord/core@9.3.0
+  - @kaiord/garmin@9.3.0
+
 ## 9.2.0
 
 ### Patch Changes

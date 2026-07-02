@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/whoop",
-  "version": "9.2.0",
+  "version": "9.3.0",
   "description": "WHOOP API (v2) health adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
