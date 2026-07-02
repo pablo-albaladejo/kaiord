@@ -132,6 +132,11 @@ import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 ## Code Style
 
 - **TypeScript strict mode** - No implicit `any`
+  - **Documented exception — bridge extensions**: `packages/garmin-bridge`,
+    `packages/train2go-bridge`, and `packages/whoop-bridge` are plain
+    JavaScript. Chrome extensions ship as standalone unbundled files (see
+    `openspec/specs/adapter-contracts/spec.md`), so the strict-TS policy does
+    not apply there; their correctness is covered by their vitest suites.
 - **Max 100 lines per file** (tests exempt)
   - Do NOT write JSDoc preambles that justify file extractions, reference
     PRs/issues, or narrate prior code states. The 100-line cap is enforced by

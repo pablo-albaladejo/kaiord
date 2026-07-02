@@ -1,5 +1,11 @@
 # Workout SPA Editor — Navigation & Layout Map
 
+> **Nav registry:** header and mobile bottom-nav entries derive from the single
+> registry in `src/routing/nav-destinations.ts` (parity test:
+> `nav-destinations.test.ts`). Do not add destinations to either surface
+> directly.
+
+
 @kaiord/workout-spa-editor is a private React SPA in the Kaiord monorepo. Routing is **wouter** (`<Switch>` in `AppRoutes.tsx`); layout is **Tailwind** (mobile-first, breakpoints sm=640/md=768/lg=1024/xl=1280); persisted data flows through **Dexie.js + `useLiveQuery`** (one query per page) while editor runtime lives in a single **Zustand** `workout-store`. The app follows a hexagonal split (`app/` UI over `adapters/` for KRD/FIT/TCX/ZWO/GCN). Every route is wrapped by `MainLayout` global chrome (sticky header + mobile-only bottom nav); KRD is the canonical workout format that all import/export passes through.
 
 ## Route table
@@ -7,7 +13,7 @@
 | Route pattern       | Component (file)                                                     | Params / Query                                          | Notes                                                                                                      |
 | ------------------- | -------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `/`                 | — (`AppRoutes.tsx`)                                                  | —                                                       | **Redirect → `/calendar`**                                                                                 |
-| `/calendar`         | `DailyPage` (`components/pages/Daily/Daily.tsx`)                     | —                                                       | **Renders Today, NOT CalendarPage.** App skips no nav here; this is the app landing surface                |
+| `/calendar`         | redirect → `/calendar/:weekId` (current week `CalendarPage`)         | —                                                       | Week-grid calendar is the app landing surface; `/daily` renders the former Today page                      |
 | `/calendar/:weekId` | `CalendarPage` (`components/pages/CalendarPage.tsx`)                 | `weekId`                                                | The week grid/list. Invalid `weekId` → **Redirect `/calendar`**                                            |
 | `/athlete`          | `AthletePage` (`components/pages/AthletePage/AthletePage.tsx`)       | —                                                       | Gates on active profile (spinner / empty / body)                                                           |
 | `/library`          | `LibraryPage` (`components/pages/LibraryPage.tsx`)                   | `?source=template-picker`, `?date=YYYY-MM-DD`           | `source=template-picker` switches Schedule to direct-schedule short-circuit                                |
