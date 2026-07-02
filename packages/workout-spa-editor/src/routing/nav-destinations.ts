@@ -1,4 +1,4 @@
-import type { IconName } from "../components/atoms/Icon";
+import type { IconName } from "../components/atoms/Icon/icon-map";
 
 export type NavSurfaces = {
   /** The header nav renders on every breakpoint today, so this is the only

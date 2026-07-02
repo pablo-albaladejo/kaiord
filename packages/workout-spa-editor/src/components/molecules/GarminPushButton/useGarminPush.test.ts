@@ -30,9 +30,15 @@ vi.mock("../../../utils/export-workout-formats", () => ({
 }));
 
 const mockPut = vi.fn();
+const mockGet = vi.fn();
 
 vi.mock("../../../adapters/dexie/dexie-database", () => ({
-  db: { table: () => ({ put: (record: unknown) => mockPut(record) as void }) },
+  db: {
+    table: () => ({
+      put: (record: unknown) => mockPut(record) as void,
+      get: (id: unknown) => mockGet(id) as unknown,
+    }),
+  },
 }));
 
 import { useGarminPush } from "./useGarminPush";
@@ -72,6 +78,7 @@ describe("useGarminPush", () => {
       garminWorkoutId: "gw-123",
     });
     mockExportGcnWorkout.mockResolvedValue({ gcnWorkout: "data" });
+    mockGet.mockResolvedValue(undefined);
   });
 
   afterEach(() => {

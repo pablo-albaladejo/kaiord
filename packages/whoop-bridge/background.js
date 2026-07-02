@@ -105,6 +105,14 @@ const whoopFetch = async (path) => {
   let res = await request(await auth.getAccessToken());
   if (res.status === 401) {
     res = await request(await auth.refreshAccessToken());
+    if (res.status === 401) {
+      // A freshly refreshed token was still rejected — surface it as a
+      // reauth condition instead of a generic request failure.
+      const err = new Error("WHOOP authorization required");
+      err.status = 401;
+      err.needsReauth = true;
+      throw err;
+    }
   }
   if (res.status === 429) throw rateLimitError(res);
   if (!res.ok) {
@@ -186,7 +194,10 @@ const isAllowedSenderOrigin = (sender) =>
   ALLOWED_ORIGIN_REGEX.test(sender.origin);
 
 const dispatchExternal = (message, sender, sendResponse) => {
-  if (!isAllowedSenderOrigin(sender) || !EXTERNAL_ACTIONS.has(message?.action)) {
+  if (
+    !isAllowedSenderOrigin(sender) ||
+    !EXTERNAL_ACTIONS.has(message?.action)
+  ) {
     sendResponse({
       ok: false,
       protocolVersion: PROTOCOL_VERSION,

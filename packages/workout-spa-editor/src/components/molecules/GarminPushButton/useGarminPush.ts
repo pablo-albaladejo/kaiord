@@ -38,7 +38,15 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
       const outcome = await pushWorkout(gcn);
       if (outcome.success) {
         const pushId = outcome.garminWorkoutId ?? `garmin-${Date.now()}`;
-        await db.table("workouts").put(recordGarminPush(workout, pushId));
+        // Re-read before persisting: the record may have been edited while
+        // the push was in flight, and writing the captured copy back would
+        // silently drop those edits.
+        const fresh = (await db.table("workouts").get(workout.id)) as
+          | WorkoutRecord
+          | undefined;
+        await db
+          .table("workouts")
+          .put(recordGarminPush(fresh ?? workout, pushId));
       }
       analytics.event("garmin-synced", {
         result: outcome.success ? "success" : "failure",

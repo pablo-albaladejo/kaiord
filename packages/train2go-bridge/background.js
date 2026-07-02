@@ -29,6 +29,10 @@ const BRIDGE_MANIFEST = {
 const TELEMETRY_KEY = "bridgeTelemetry";
 const TELEMETRY_MAX_ENTRIES = 25;
 
+// Writes are chained so concurrent calls cannot interleave their
+// read-modify-write cycles and silently drop each other's entries.
+let telemetryWrite = Promise.resolve();
+
 const logSwallowed = (level, action, cause) => {
   const entry = {
     level,
@@ -36,8 +40,8 @@ const logSwallowed = (level, action, cause) => {
     cause: String(cause?.message ?? cause),
     at: Date.now(),
   };
-  return chrome.storage.local
-    .get(TELEMETRY_KEY)
+  telemetryWrite = telemetryWrite
+    .then(() => chrome.storage.local.get(TELEMETRY_KEY))
     .then(({ [TELEMETRY_KEY]: existing = [] }) =>
       chrome.storage.local.set({
         [TELEMETRY_KEY]: [...existing, entry].slice(-TELEMETRY_MAX_ENTRIES),
@@ -46,6 +50,7 @@ const logSwallowed = (level, action, cause) => {
     .catch(() => {
       // Storage itself unavailable (e.g. quota); nothing more we can do.
     });
+  return telemetryWrite;
 };
 
 // ── Parser (loaded inline for service worker) ──

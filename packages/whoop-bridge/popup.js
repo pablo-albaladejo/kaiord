@@ -110,7 +110,10 @@ const runSaveCreds = async () => {
     clientId,
     clientSecret,
   });
-  if (!res.ok) setStatus("no", "✗", res.error || "Could not save credentials");
+  if (!res.ok) {
+    setStatus("no", "✗", res.error || "Could not save credentials");
+    return;
+  }
   $("client-secret").value = "";
   await refresh();
 };

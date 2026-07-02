@@ -21,6 +21,11 @@ export const doPushToGarmin = async (
   const outcome = await pushWorkout(gcn);
   if (!outcome.success) return { error: "push_failed" };
   const garminPushId = outcome.garminWorkoutId ?? `garmin-${Date.now()}`;
-  await persistence.workouts.put(recordGarminPush(record, garminPushId));
+  // Re-read before persisting so edits made while the push was in flight
+  // are not overwritten by the stale copy captured above.
+  const fresh = await persistence.workouts.getById(workoutId);
+  await persistence.workouts.put(
+    recordGarminPush(fresh ?? record, garminPushId)
+  );
   return { workoutId: record.id, garminPushId };
 };

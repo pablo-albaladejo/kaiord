@@ -84,7 +84,7 @@ Code in `packages/core/src/ports/` SHALL define pure type aliases or interfaces.
 
 ### Requirement: Adapter Freedom
 
-Adapter packages (`@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`) MAY import external libraries. They SHALL depend on `@kaiord/core` (ports + domain) only, never on other adapter packages. The non-format-adapter packages `@kaiord/garmin-connect`, `@kaiord/ai`, `@kaiord/mcp`, `@kaiord/cli`, `@kaiord/workout-spa-editor`, `@kaiord/docs`, `@kaiord/landing`, `@kaiord/garmin-bridge`, `@kaiord/train2go-bridge` are governed by the `Package Dependencies` requirement (rule ID `R-ArchPackageDeps`), not by `R-ArchAdapterCross`. Per the canonical `Package Dependencies` row, `@kaiord/garmin-connect` MAY import `@kaiord/garmin` (the only documented allowance to the format-adapter-isolation principle).
+Adapter packages (`@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`) MAY import external libraries. They SHALL depend on `@kaiord/core` (ports + domain) only, never on other adapter packages. The non-format-adapter packages `@kaiord/garmin-connect`, `@kaiord/ai`, `@kaiord/mcp`, `@kaiord/cli`, `@kaiord/workout-spa-editor`, `@kaiord/docs`, `@kaiord/landing`, `@kaiord/garmin-bridge`, `@kaiord/train2go-bridge`, `@kaiord/whoop`, `@kaiord/whoop-bridge` are governed by the `Package Dependencies` requirement (rule ID `R-ArchPackageDeps`), not by `R-ArchAdapterCross`. Per the canonical `Package Dependencies` row, `@kaiord/garmin-connect` MAY import `@kaiord/garmin` (the only documented allowance to the format-adapter-isolation principle).
 
 The format-adapter cross-import rule SHALL be enforced by `scripts/check-architecture.mjs` under rule ID `R-ArchAdapterCross`.
 
@@ -121,6 +121,8 @@ Each package SHALL respect the following dependency rules:
 | `@kaiord/landing`                                             | `@kaiord/core`                                                                              |
 | `@kaiord/garmin-bridge`                                       | No workspace deps (Chrome extension, communicates via `externally_connectable`)             |
 | `@kaiord/train2go-bridge`                                     | No workspace deps (Chrome extension, communicates via `externally_connectable`)             |
+| `@kaiord/whoop`                                               | `@kaiord/core`                                                                              |
+| `@kaiord/whoop-bridge`                                        | No workspace deps (Chrome extension, communicates via `externally_connectable`)             |
 
 #### Scenario: Core declares no workspace dependencies
 
@@ -230,18 +232,18 @@ The repository SHALL contain `scripts/check-package-deps.mjs` (+ co-located `*.t
 
 The allowlist (codified in the script as a `PACKAGE_DEPS` constant, byte-identical to the `Package Dependencies` requirement in this spec):
 
-| Package                                                       | Allowed `@kaiord/*` deps                                                                    |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `@kaiord/core`                                                | _(none)_                                                                                    |
-| `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` | `@kaiord/core`                                                                              |
-| `@kaiord/garmin-connect`                                      | `@kaiord/core`, `@kaiord/garmin`                                                            |
-| `@kaiord/ai`                                                  | `@kaiord/core`                                                                              |
-| `@kaiord/mcp`                                                 | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect`                             |
-| `@kaiord/cli`                                                 | `@kaiord/core` + all adapters + `@kaiord/garmin-connect`                                    |
-| `@kaiord/workout-spa-editor`                                  | `@kaiord/core`, `@kaiord/ai`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/tcx`, `@kaiord/zwo` |
-| `@kaiord/docs`                                                | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` + `@kaiord/cli` + `@kaiord/mcp`    |
-| `@kaiord/landing`                                             | `@kaiord/core`                                                                              |
-| `@kaiord/garmin-bridge`, `@kaiord/train2go-bridge`            | _(none — Chrome extensions)_                                                                |
+| Package                                                                    | Allowed `@kaiord/*` deps                                                                    |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `@kaiord/core`                                                             | _(none)_                                                                                    |
+| `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`              | `@kaiord/core`                                                                              |
+| `@kaiord/garmin-connect`                                                   | `@kaiord/core`, `@kaiord/garmin`                                                            |
+| `@kaiord/ai`                                                               | `@kaiord/core`                                                                              |
+| `@kaiord/mcp`                                                              | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect`                             |
+| `@kaiord/cli`                                                              | `@kaiord/core` + all adapters + `@kaiord/garmin-connect`                                    |
+| `@kaiord/workout-spa-editor`                                               | `@kaiord/core`, `@kaiord/ai`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/tcx`, `@kaiord/zwo` |
+| `@kaiord/docs`                                                             | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` + `@kaiord/cli` + `@kaiord/mcp`    |
+| `@kaiord/landing`                                                          | `@kaiord/core`                                                                              |
+| `@kaiord/garmin-bridge`, `@kaiord/train2go-bridge`, `@kaiord/whoop-bridge` | _(none — Chrome extensions)_                                                                |
 
 #### Scenario: Disallowed workspace dep blocked
 

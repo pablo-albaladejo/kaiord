@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 
 import { NAV_DESTINATIONS } from "../../../routing/nav-destinations";
-import { ICON_MAP } from "../../atoms/Icon";
+import { ICON_MAP } from "../../atoms/Icon/icon-map";
 
 export type EntryDef = {
   id: string;

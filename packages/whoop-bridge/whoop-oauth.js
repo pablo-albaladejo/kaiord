@@ -86,7 +86,9 @@ const createWhoopAuth = (deps) => {
     const tokens = await readTokens();
     if (!tokens?.refreshToken) throw needsReauthError();
     const creds = await readCreds();
-    if (!creds?.clientId) throw needsReauthError("Missing WHOOP credentials");
+    if (!creds?.clientId || !creds?.clientSecret) {
+      throw needsReauthError("Missing WHOOP credentials");
+    }
     let json;
     try {
       json = await tokenRequest({
@@ -97,7 +99,7 @@ const createWhoopAuth = (deps) => {
         client_secret: creds.clientSecret,
       });
     } catch (err) {
-      if (err.oauthError === "invalid_grant" || err.status === 400) {
+      if (err.oauthError === "invalid_grant") {
         await storage.remove([STORAGE_TOKENS]);
         await setState({ needsReauth: true, lastError: err.message });
         throw needsReauthError(err.message);

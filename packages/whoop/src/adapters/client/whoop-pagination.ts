@@ -21,7 +21,8 @@ export const fetchAllRecords = async <T extends z.ZodTypeAny>(
   httpClient: WhoopHttpClient,
   basePath: string,
   recordSchema: T,
-  query: WhoopQuery = {}
+  query: WhoopQuery = {},
+  onTruncated?: (basePath: string) => void
 ): Promise<z.infer<T>[]> => {
   const pageSchema = whoopPaginatedSchema(recordSchema);
   const records: z.infer<T>[] = [];
@@ -36,5 +37,6 @@ export const fetchAllRecords = async <T extends z.ZodTypeAny>(
     nextToken = parsed.next_token;
   }
 
+  onTruncated?.(basePath);
   return records;
 };

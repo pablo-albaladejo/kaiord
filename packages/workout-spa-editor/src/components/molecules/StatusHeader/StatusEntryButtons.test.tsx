@@ -117,4 +117,14 @@ describe("StatusEntryButtons", () => {
     expect(library).not.toHaveAttribute("aria-current");
     expect(trends).not.toHaveAttribute("aria-current");
   });
+  it("should not render a dedicated athlete entry (ProfileEntryButton owns /athlete)", () => {
+    // Arrange
+    renderAt("/daily");
+
+    // Act
+    const athlete = screen.queryByTestId("status-header-athlete-button");
+
+    // Assert
+    expect(athlete).toBeNull();
+  });
 });

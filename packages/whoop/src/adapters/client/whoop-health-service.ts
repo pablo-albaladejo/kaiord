@@ -43,7 +43,8 @@ export const createWhoopHealthService = (
       httpClient,
       RECOVERY_PATH,
       whoopRecoveryRecordSchema,
-      query
+      query,
+      (path) => log.warn(`WHOOP pagination truncated at MAX_PAGES for ${path}`)
     ).catch((error) => {
       throw createServiceApiError(
         "Failed to import WHOOP recovery",
@@ -66,7 +67,8 @@ export const createWhoopHealthService = (
       httpClient,
       SLEEP_PATH,
       whoopSleepRecordSchema,
-      query
+      query,
+      (path) => log.warn(`WHOOP pagination truncated at MAX_PAGES for ${path}`)
     ).catch((error) => {
       throw createServiceApiError(
         "Failed to import WHOOP sleep",
