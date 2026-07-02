@@ -16,7 +16,6 @@ Time-series record (sample) conversion between FIT and KRD. Handles per-second a
 | `krd-to-fit-record.converter.ts` | Converts KRD TimeSeries samples to FIT record messages. |
 | `record-from-fit.mapper.ts`      | Maps individual FIT record fields to KRD sample fields. |
 | `record-to-fit.mapper.ts`        | Maps individual KRD sample fields to FIT record fields. |
-| `record.mapper.ts`               | Re-exports mappers.                                     |
 
 ## Subdirectories
 
