@@ -15,10 +15,11 @@ const LINKABLE_TOOLS = new Set(["create_workout", "push_to_garmin"]);
 type WorkoutToolResult = { workoutId: string; date?: string };
 
 function isWorkoutToolResult(value: unknown): value is WorkoutToolResult {
+  if (typeof value !== "object" || value === null) return false;
+  const { workoutId, date } = value as Record<string, unknown>;
   return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as Record<string, unknown>).workoutId === "string"
+    typeof workoutId === "string" &&
+    (date === undefined || typeof date === "string")
   );
 }
 
