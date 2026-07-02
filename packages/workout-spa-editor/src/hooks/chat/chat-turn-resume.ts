@@ -28,7 +28,8 @@ export const approveAction = async (
       ctx.profileId,
       ctx.conversationId,
       pending.toolName,
-      ok
+      ok,
+      output
     );
     return agent.resume(ctx.messagesRef.current, {
       toolCallId: pending.toolCallId,

@@ -7,6 +7,8 @@
  * Model resolution prefers the conversation's own override, falling back to
  * the page-level chat resolution. No provider configured → settings link.
  */
+import { useSearch } from "wouter";
+
 import { usePersistence } from "../../contexts/persistence-context";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAiModelBindingsLive } from "../../hooks/use-ai-model-bindings-live";
@@ -27,6 +29,8 @@ import { resolveChatModels } from "./resolve-chat-models";
 export type ChatPageProps = { conversationId?: string };
 
 export default function ChatPage({ conversationId }: ChatPageProps) {
+  const searchString = useSearch();
+  const prefill = new URLSearchParams(searchString).get("prefill") ?? undefined;
   const profileId = useActiveProfileLive()?.id ?? null;
   const persistence = usePersistence();
   const providers = useAiProvidersLive();
@@ -79,6 +83,7 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
           generationProvider={fallback.generationProvider}
           generationModelId={fallback.generationModelId}
           search={search}
+          composerInitialText={prefill}
           onModelChange={onModelChange}
           onSelect={nav.select}
           onNew={nav.startNew}

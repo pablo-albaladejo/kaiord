@@ -16,7 +16,9 @@ import type {
   CreateWorkoutInput,
   LogHealthMetricInput,
   LogIntakeInput,
+  PushToGarminInput,
 } from "../application/chat/tools/chat-tool-deps";
+import { useGarminBridge } from "../contexts";
 import { usePersistence } from "../contexts/persistence-context";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import {
@@ -25,6 +27,7 @@ import {
   doSyncCoaching,
 } from "./chat/chat-action-ops-impl";
 import { doLogIntake } from "./chat/do-log-intake";
+import { doPushToGarmin } from "./chat/do-push-to-garmin";
 
 const requireProfile = (profileId: string | null): string => {
   if (!profileId) throw new Error("No active profile");
@@ -41,6 +44,7 @@ export const useChatActionOps = (
   generation: ChatGenerationModel
 ): ChatActionOps => {
   const persistence = usePersistence();
+  const { pushWorkout } = useGarminBridge();
   const transport = useMemo(
     () =>
       createTrain2GoCoachingTransport(
@@ -77,9 +81,20 @@ export const useChatActionOps = (
       doLogIntake(persistence, requireProfile(profileId), input),
     [persistence, profileId]
   );
+  const pushToGarmin = useCallback(
+    (input: PushToGarminInput) =>
+      doPushToGarmin(persistence, pushWorkout, input.workoutId),
+    [persistence, pushWorkout]
+  );
 
   return useMemo(
-    () => ({ syncCoaching, createWorkout, logHealthMetric, logIntake }),
-    [syncCoaching, createWorkout, logHealthMetric, logIntake]
+    () => ({
+      syncCoaching,
+      createWorkout,
+      logHealthMetric,
+      logIntake,
+      pushToGarmin,
+    }),
+    [syncCoaching, createWorkout, logHealthMetric, logIntake, pushToGarmin]
   );
 };

@@ -17,6 +17,7 @@ export type ChatWorkspaceProps = {
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
   search: UseChatSearchPanel;
+  composerInitialText?: string;
   onModelChange: (providerId: string) => void;
   onSelect: (id: string) => void;
   onNew: () => void;
@@ -58,6 +59,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
             generationModelId={props.generationModelId}
             messages={props.messages}
             focusMessageId={props.search.focusMessageId}
+            composerInitialText={props.composerInitialText}
           />
         ) : (
           <p className="p-4 text-sm text-slate-400">

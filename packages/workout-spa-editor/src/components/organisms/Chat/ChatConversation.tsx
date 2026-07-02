@@ -15,6 +15,7 @@ export type ChatConversationProps = {
   generationModelId: string | null;
   messages: ChatMessageRecord[];
   focusMessageId?: string | null;
+  composerInitialText?: string;
 };
 
 /** Interactive transcript for the active conversation: streamed turns, action
@@ -30,6 +31,7 @@ export function ChatConversation({
   generationModelId,
   messages,
   focusMessageId,
+  composerInitialText,
 }: ChatConversationProps) {
   const turn = useChatTurn({
     profileId,
@@ -58,6 +60,7 @@ export function ChatConversation({
       <ChatComposer
         onSend={turn.send}
         disabled={busy || turn.state === "awaiting_confirmation"}
+        initialText={composerInitialText}
       />
     </div>
   );

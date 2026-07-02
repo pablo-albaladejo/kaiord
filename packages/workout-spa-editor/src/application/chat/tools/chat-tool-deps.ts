@@ -41,11 +41,16 @@ export type LogIntakeInput = {
   mealSlot?: MealSlot;
 };
 
+export type PushToGarminInput = {
+  workoutId: string;
+};
+
 export type ChatActionOps = {
   syncCoaching: () => Promise<unknown>;
   createWorkout: (input: CreateWorkoutInput) => Promise<unknown>;
   logHealthMetric: (input: LogHealthMetricInput) => Promise<unknown>;
   logIntake: (input: LogIntakeInput) => Promise<unknown>;
+  pushToGarmin: (input: PushToGarminInput) => Promise<unknown>;
 };
 
 export type ChatToolDeps = ReadToolDeps & { actions: ChatActionOps };
