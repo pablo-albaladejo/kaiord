@@ -4,8 +4,8 @@
  * same WCAG 1.4.1 convention as `CardShell/status-tokens`. Order here
  * is the render order.
  */
+import type { LucideIcon } from "lucide-react";
 import { CircleCheck, Link2, Sparkles, Watch } from "lucide-react";
-import type { ComponentType } from "react";
 
 import type { SessionLifecycleFlags } from "./session-lifecycle";
 
@@ -13,7 +13,7 @@ export type LifecycleFacet = keyof SessionLifecycleFlags;
 
 export type LifecycleBadgeDef = {
   facet: LifecycleFacet;
-  icon: ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   label: string;
 };
 
