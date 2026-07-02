@@ -10,10 +10,11 @@ const routeClient = (routes: Record<string, unknown[]>): WhoopHttpClient => ({
   get: vi.fn(async (path: string) => {
     const key = Object.keys(routes).find((prefix) => path.startsWith(prefix));
     const pages = key ? routes[key]! : [];
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (pages.shift() ?? { records: [], next_token: null })!;
   }),
 });
+
+const EXPECTED_RESTING_HR = 64;
 
 describe("createWhoopHealthService", () => {
   it("should join recovery resting heart rate onto the matching sleep record", async () => {
@@ -34,7 +35,7 @@ describe("createWhoopHealthService", () => {
     expect(result.recovery).toHaveLength(1);
     expect(result.sleep).toHaveLength(1);
     expect(result.krds).toHaveLength(2);
-    expect(sleep?.restingHeartRate).toBe(64);
+    expect(sleep?.restingHeartRate).toBe(EXPECTED_RESTING_HR);
   });
 
   it("should follow next_token across pages", async () => {

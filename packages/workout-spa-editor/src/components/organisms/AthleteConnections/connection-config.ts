@@ -1,14 +1,8 @@
-import type { ManagedDataType } from "@kaiord/core";
-
 import type { ConnectionMechanism } from "../../../types/connection";
-import type { IntegrationPolicyDirection } from "../../../types/integration-policy";
+import type { ConnectionFlow } from "./connection-flows";
+import { GARMIN_FLOWS, WHOOP_FLOWS } from "./connection-flows";
 
-export type ConnectionFlow = {
-  label: string;
-  sublabel: string;
-  dataType: ManagedDataType;
-  direction: IntegrationPolicyDirection;
-};
+export type { ConnectionFlow } from "./connection-flows";
 
 export type ConnectionConfig = {
   id: string;
@@ -34,26 +28,7 @@ export const CONNECTIONS: readonly ConnectionConfig[] = [
     mark: "G",
     bridgeId: "garmin-bridge",
     mechanism: "bridge",
-    flows: [
-      {
-        label: "Completed activities",
-        sublabel: "Import finished workouts",
-        dataType: "workout",
-        direction: "import",
-      },
-      {
-        label: "Planned workouts",
-        sublabel: "Push planned sessions",
-        dataType: "workout",
-        direction: "export",
-      },
-      {
-        label: "Daily readiness (HRV, sleep)",
-        sublabel: "Import recovery signals",
-        dataType: "hrv",
-        direction: "import",
-      },
-    ],
+    flows: GARMIN_FLOWS,
   },
   {
     id: "whoop",
@@ -61,20 +36,7 @@ export const CONNECTIONS: readonly ConnectionConfig[] = [
     mark: "Wh",
     bridgeId: "whoop-bridge",
     mechanism: "bridge",
-    flows: [
-      {
-        label: "Recovery & HRV",
-        sublabel: "Import readiness signals",
-        dataType: "hrv",
-        direction: "import",
-      },
-      {
-        label: "Sleep",
-        sublabel: "Import sleep stages",
-        dataType: "sleep",
-        direction: "import",
-      },
-    ],
+    flows: WHOOP_FLOWS,
   },
   {
     id: "strava",

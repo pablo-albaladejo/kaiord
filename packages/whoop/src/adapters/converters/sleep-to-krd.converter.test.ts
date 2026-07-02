@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 import { SCORED_SLEEP, UNSCORED_SLEEP } from "../../test-utils/fixtures";
 import { mapWhoopSleepToKrd } from "./sleep-to-krd.converter";
 
+const EXPECTED_SLEEP_SCORE = 98;
+const EXPECTED_RESTING_HR = 65;
+
 describe("mapWhoopSleepToKrd", () => {
   it("should synthesise time-ordered stages whose durations sum to the total", () => {
     // Arrange
@@ -26,7 +29,7 @@ describe("mapWhoopSleepToKrd", () => {
       "rem",
     ]);
     expect(stageSum).toBe(record?.totalDurationSeconds);
-    expect(record?.score).toBe(98);
+    expect(record?.score).toBe(EXPECTED_SLEEP_SCORE);
   });
 
   it("should produce a KRD that validates against the canonical schema", () => {
@@ -52,7 +55,9 @@ describe("mapWhoopSleepToKrd", () => {
     const krd = mapWhoopSleepToKrd(SCORED_SLEEP, options);
 
     // Assert
-    expect(krd?.extensions?.health?.sleep?.restingHeartRate).toBe(65);
+    expect(krd?.extensions?.health?.sleep?.restingHeartRate).toBe(
+      EXPECTED_RESTING_HR
+    );
   });
 
   it("should return undefined for an unscored sleep record", () => {

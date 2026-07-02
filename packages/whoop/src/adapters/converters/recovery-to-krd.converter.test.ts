@@ -4,6 +4,10 @@ import { describe, expect, it } from "vitest";
 import { SCORED_RECOVERY, UNSCORED_RECOVERY } from "../../test-utils/fixtures";
 import { mapWhoopRecoveryToKrd } from "./recovery-to-krd.converter";
 
+const EXPECTED_SCORE = 44;
+const EXPECTED_RMSSD = 31.813562;
+const RMSSD_PRECISION = 5;
+
 describe("mapWhoopRecoveryToKrd", () => {
   it("should map recovery_score to hrv_summary.score and rMSSD from hrv_rmssd_milli", () => {
     // Arrange
@@ -15,8 +19,8 @@ describe("mapWhoopRecoveryToKrd", () => {
 
     // Assert
     expect(krd?.type).toBe("hrv_summary");
-    expect(hrv?.score).toBe(44);
-    expect(hrv?.rMSSD).toBeCloseTo(31.813562, 5);
+    expect(hrv?.score).toBe(EXPECTED_SCORE);
+    expect(hrv?.rMSSD).toBeCloseTo(EXPECTED_RMSSD, RMSSD_PRECISION);
     expect(hrv?.measurementWindow).toBe("overnight");
     expect(hrv?.externalId).toBe(recovery.sleep_id);
   });
