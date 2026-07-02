@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.85",
-    "@types/node": "^25.7.0",
+    "@types/node": "^26.1.0",
     "@vitest/coverage-v8": "^4.1.6",
     "ai": "^6.0.177",
     "tsup": "^8.5.1",
