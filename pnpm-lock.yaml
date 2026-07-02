@@ -150,7 +150,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.6
-        version: 4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.7.0)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@25.7.0)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.7.0)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@25.7.0)(esbuild@0.27.3)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/cli:
     dependencies:
@@ -220,7 +220,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.6
-        version: 4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.7.0)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@25.7.0)(esbuild@0.27.3)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.7.0)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@25.7.0)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/core:
     dependencies:
@@ -590,8 +590,8 @@ importers:
         specifier: ^3.0.83
         version: 3.0.83(zod@4.4.3)
       '@ai-sdk/openai':
-        specifier: ^3.0.74
-        version: 3.0.74(zod@4.4.3)
+        specifier: ^4.0.5
+        version: 4.0.5(zod@4.4.3)
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -828,9 +828,9 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.74':
-    resolution: {integrity: sha512-LPDBWd2WCv0GQs29K2pHcNrGx24hm4D8QEP386HwUAUPr1URho6bNVXHNmIv0FxaW+xDkLpNMTen+mFCUBp2LA==}
-    engines: {node: '>=18'}
+  '@ai-sdk/openai@4.0.5':
+    resolution: {integrity: sha512-a9cYQNAKAbkMTt6bHAvDuLv3klwtJT9m0A6x7s8EZlf1ebcxadg/1CONaYh1GA80ZRA9UQHJUS2wHoOphkQQkg==}
+    engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
@@ -846,9 +846,19 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/provider-utils@5.0.3':
+    resolution: {integrity: sha512-El0JOXXGcHFe6+owJ1UV0VgB9XtdivP8vcZni+rUIt6lt+cBHCnUdddaA6LE2avJGJ5AD0uXSY+uAvRL2tSvgw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider@3.0.10':
     resolution: {integrity: sha512-Q3BZ27qfpYqnCYGvE3vt+Qi6LGOF9R5Nmzn+9JoM1lCRsD9mYaIhfJLkSunN48nfGXJ6n+XNV0J/XVpqGQl7Dw==}
     engines: {node: '>=18'}
+
+  '@ai-sdk/provider@4.0.1':
+    resolution: {integrity: sha512-6p3C/vGqVIjcptBu1DnVd/BZJ2wWmV9TUv9192vT6ZvT9KNED8EwRTqyqFpoQZKgSbMDSvBSq3dqR524Nt/Crw==}
+    engines: {node: '>=22'}
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -3999,6 +4009,9 @@ packages:
   '@webcontainer/env@1.1.1':
     resolution: {integrity: sha512-6aN99yL695Hi9SuIk1oC88l9o0gmxL1nGWWQ/kNy81HigJ0FoaoTXpytCj6ItzgyCEwA9kF1wixsTuv5cjsgng==}
 
+  '@workflow/serde@4.1.0':
+    resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
+
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
 
@@ -4844,6 +4857,10 @@ packages:
     resolution: {integrity: sha512-70QWGkr4snxr0OXLRWsFLeRBIRPuQOvt4s8QYjmUlmlkyTZkRqS7EDVRZtzU3TiyDbXSzaOeF0XUKy8PchzukQ==}
     engines: {node: '>=18.0.0'}
 
+  eventsource-parser@3.1.0:
+    resolution: {integrity: sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg==}
+    engines: {node: '>=18.0.0'}
+
   eventsource@3.0.7:
     resolution: {integrity: sha512-CRT1WTyuQoD771GW56XEZFQ/ZoSfWid1alKGDYMmkt2yl8UXrVR4pspqWNEcqKvVIzg6PAltWjxcSSPrboA4iA==}
     engines: {node: '>=18.0.0'}
@@ -5089,6 +5106,7 @@ packages:
   git-raw-commits@5.0.1:
     resolution: {integrity: sha512-Y+csSm2GD/PCSh6Isd/WiMjNAydu0VBiG9J7EdQsNA5P9uXvLayqjmTsNlK5Gs9IhblFZqOU0yid5Il5JPoLiQ==}
     engines: {node: '>=18'}
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -7622,10 +7640,10 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.30(zod@4.4.3)
       zod: 4.4.3
 
-  '@ai-sdk/openai@3.0.74(zod@4.4.3)':
+  '@ai-sdk/openai@4.0.5(zod@4.4.3)':
     dependencies:
-      '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.30(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.1
+      '@ai-sdk/provider-utils': 5.0.3(zod@4.4.3)
       zod: 4.4.3
 
   '@ai-sdk/provider-utils@4.0.27(zod@4.4.3)':
@@ -7642,7 +7660,19 @@ snapshots:
       eventsource-parser: 3.0.8
       zod: 4.4.3
 
+  '@ai-sdk/provider-utils@5.0.3(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.1
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.0
+      zod: 4.4.3
+
   '@ai-sdk/provider@3.0.10':
+    dependencies:
+      json-schema: 0.4.0
+
+  '@ai-sdk/provider@4.0.1':
     dependencies:
       json-schema: 0.4.0
 
@@ -10566,6 +10596,8 @@ snapshots:
 
   '@webcontainer/env@1.1.1': {}
 
+  '@workflow/serde@4.1.0': {}
+
   abbrev@1.1.1: {}
 
   accepts@2.0.0:
@@ -11446,6 +11478,8 @@ snapshots:
   eventsource-parser@3.0.6: {}
 
   eventsource-parser@3.0.8: {}
+
+  eventsource-parser@3.1.0: {}
 
   eventsource@3.0.7:
     dependencies:
