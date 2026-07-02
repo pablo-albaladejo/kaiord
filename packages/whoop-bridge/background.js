@@ -72,8 +72,19 @@ const auth = createWhoopAuth({
 
 // ── Data relay ──
 
-const isAllowedPath = (path) =>
-  ALLOWED_PREFIXES.some((prefix) => path.startsWith(prefix));
+// Normalize before checking so `..` segments cannot escape the allowlist
+// (the URL parser collapses dot-segments the same way fetch will).
+const isAllowedPath = (path) => {
+  let normalized;
+  try {
+    normalized = new URL(path, "https://x").pathname;
+  } catch {
+    return false;
+  }
+  return ALLOWED_PREFIXES.some(
+    (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`)
+  );
+};
 
 const rateLimitError = (res) => {
   const reset = Number(res.headers.get("X-RateLimit-Reset")) || undefined;
@@ -161,9 +172,35 @@ const dispatch = (message, sendResponse) => {
   return true;
 };
 
+// External (web) callers get a reduced action surface: credential writes
+// stay popup-only, and the sender origin is pinned in runtime as a second
+// layer over the manifest's externally_connectable (same defense as
+// garmin-bridge's snapshot actions).
+const EXTERNAL_ACTIONS = new Set(["ping", "status", "connect", "whoop-fetch"]);
+
+const ALLOWED_ORIGIN_REGEX =
+  /^(https:\/\/[a-z0-9-]+\.kaiord\.com|http:\/\/localhost:(5173|5174))$/;
+
+const isAllowedSenderOrigin = (sender) =>
+  typeof sender?.origin === "string" &&
+  ALLOWED_ORIGIN_REGEX.test(sender.origin);
+
+const dispatchExternal = (message, sender, sendResponse) => {
+  if (!isAllowedSenderOrigin(sender) || !EXTERNAL_ACTIONS.has(message?.action)) {
+    sendResponse({
+      ok: false,
+      protocolVersion: PROTOCOL_VERSION,
+      error: "Origin or action not permitted",
+      retryable: false,
+    });
+    return true;
+  }
+  return dispatch(message, sendResponse);
+};
+
 if (typeof chrome !== "undefined" && chrome.runtime?.onMessageExternal) {
-  chrome.runtime.onMessageExternal.addListener((message, _sender, respond) =>
-    dispatch(message, respond)
+  chrome.runtime.onMessageExternal.addListener((message, sender, respond) =>
+    dispatchExternal(message, sender, respond)
   );
   chrome.runtime.onMessage.addListener((message, _sender, respond) =>
     dispatch(message, respond)
@@ -181,6 +218,9 @@ if (typeof module !== "undefined") {
     handleAction,
     whoopFetch,
     dispatch,
+    dispatchExternal,
+    isAllowedSenderOrigin,
+    EXTERNAL_ACTIONS,
     sendError,
     auth,
   };
