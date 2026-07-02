@@ -18,7 +18,7 @@ describe("Modal Store Actions", () => {
   });
 
   describe("showConfirmationModal", () => {
-    it("should set isModalOpen to true", () => {
+    it("should set isModalOpen to true and modalConfig with provided configuration", () => {
       // Arrange
       const config = {
         title: "Delete Block",
@@ -29,38 +29,19 @@ describe("Modal Store Actions", () => {
         onCancel: () => {},
         variant: "destructive" as const,
       };
-      useWorkoutStore.getState().showConfirmationModal(config);
 
       // Act
+      useWorkoutStore.getState().showConfirmationModal(config);
       const state = useWorkoutStore.getState();
 
       // Assert
       expect(state.isModalOpen).toBe(true);
-    });
-
-    it("should set modalConfig with provided configuration", () => {
-      // Arrange
-      const config = {
-        title: "Delete Block",
-        message: "Are you sure you want to delete this repetition block?",
-        confirmLabel: "Delete",
-        cancelLabel: "Cancel",
-        onConfirm: () => {},
-        onCancel: () => {},
-        variant: "destructive" as const,
-      };
-      useWorkoutStore.getState().showConfirmationModal(config);
-
-      // Act
-      const state = useWorkoutStore.getState();
-
-      // Assert
       expect(state.modalConfig).toEqual(config);
     });
   });
 
   describe("hideConfirmationModal", () => {
-    it("should set isModalOpen to false", () => {
+    it("should set isModalOpen to false and clear modalConfig", () => {
       // Arrange
       useWorkoutStore.setState({
         isModalOpen: true,
@@ -74,35 +55,13 @@ describe("Modal Store Actions", () => {
           variant: "default",
         },
       });
-      useWorkoutStore.getState().hideConfirmationModal();
 
       // Act
+      useWorkoutStore.getState().hideConfirmationModal();
       const state = useWorkoutStore.getState();
 
       // Assert
       expect(state.isModalOpen).toBe(false);
-    });
-
-    it("should clear modalConfig", () => {
-      // Arrange
-      useWorkoutStore.setState({
-        isModalOpen: true,
-        modalConfig: {
-          title: "Test",
-          message: "Test",
-          confirmLabel: "OK",
-          cancelLabel: "Cancel",
-          onConfirm: () => {},
-          onCancel: () => {},
-          variant: "default",
-        },
-      });
-      useWorkoutStore.getState().hideConfirmationModal();
-
-      // Act
-      const state = useWorkoutStore.getState();
-
-      // Assert
       expect(state.modalConfig).toBeNull();
     });
 

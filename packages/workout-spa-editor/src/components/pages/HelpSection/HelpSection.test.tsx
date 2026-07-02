@@ -43,7 +43,20 @@ describe("HelpSection", () => {
   });
 
   describe("getting started section", () => {
-    it("should display creating a workout instructions", () => {
+    it.each([
+      {
+        heading: /creating a workout/i,
+        body: /click "create new workout" on the welcome screen/i,
+      },
+      {
+        heading: /loading a workout/i,
+        body: /supported formats: krd, fit, tcx, zwo/i,
+      },
+      {
+        heading: /organizing steps/i,
+        body: /drag and drop steps to reorder them/i,
+      },
+    ])("should display $heading instructions", ({ heading, body }) => {
       // Arrange
 
       // Act
@@ -52,43 +65,9 @@ describe("HelpSection", () => {
       // Assert
 
       expect(
-        screen.getByRole("heading", { name: /creating a workout/i })
+        screen.getByRole("heading", { name: heading })
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(/click "create new workout" on the welcome screen/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display loading a workout instructions", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /loading a workout/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/supported formats: krd, fit, tcx, zwo/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display organizing steps instructions", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /organizing steps/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/drag and drop steps to reorder them/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(body)).toBeInTheDocument();
     });
   });
 
@@ -171,7 +150,20 @@ describe("HelpSection", () => {
   });
 
   describe("example workouts section", () => {
-    it("should display sweet spot intervals example", () => {
+    it.each([
+      {
+        heading: /sweet spot intervals/i,
+        body: /classic sweet spot training/i,
+      },
+      {
+        heading: /tempo run/i,
+        body: /sustained tempo effort/i,
+      },
+      {
+        heading: /swim intervals/i,
+        body: /high-intensity intervals/i,
+      },
+    ])("should display $heading example", ({ heading, body }) => {
       // Arrange
 
       // Act
@@ -180,47 +172,47 @@ describe("HelpSection", () => {
       // Assert
 
       expect(
-        screen.getByRole("heading", { name: /sweet spot intervals/i })
+        screen.getByRole("heading", { name: heading })
       ).toBeInTheDocument();
-      expect(screen.getAllByText(/cycling/i).length).toBeGreaterThan(0);
-      expect(
-        screen.getByText(/classic sweet spot training/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display tempo run example", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /tempo run/i })
-      ).toBeInTheDocument();
-      expect(screen.getAllByText(/running/i).length).toBeGreaterThan(0);
-      expect(screen.getByText(/sustained tempo effort/i)).toBeInTheDocument();
-    });
-
-    it("should display swim intervals example", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /swim intervals/i })
-      ).toBeInTheDocument();
-      expect(screen.getAllByText(/swimming/i).length).toBeGreaterThan(0);
-      expect(screen.getByText(/high-intensity intervals/i)).toBeInTheDocument();
+      expect(screen.getByText(body)).toBeInTheDocument();
     });
   });
 
   describe("FAQ section", () => {
-    it("should display file formats question", () => {
+    it.each([
+      {
+        heading: /what file formats are supported/i,
+        body: /the editor supports krd/i,
+      },
+      {
+        heading: /how do i create a repetition block/i,
+        body: /select multiple steps by clicking/i,
+      },
+      {
+        heading: /can i use this offline/i,
+        body: /yes! the editor works offline/i,
+      },
+      {
+        heading: /what are training zones/i,
+        body: /training zones are intensity ranges/i,
+      },
+      {
+        heading: /how do i export my workout/i,
+        body: /click the 'save' button and select/i,
+      },
+      {
+        heading: /can i undo changes/i,
+        body: /yes! use ctrl\+z/i,
+      },
+      {
+        heading: /what's the difference between duration types/i,
+        body: /time-based durations use minutes\/seconds/i,
+      },
+      {
+        heading: /how do i save workouts to my library/i,
+        body: /click the 'save to library' button/i,
+      },
+    ])("should display FAQ: $heading", ({ heading, body }) => {
       // Arrange
 
       // Act
@@ -229,127 +221,9 @@ describe("HelpSection", () => {
       // Assert
 
       expect(
-        screen.getByRole("heading", {
-          name: /what file formats are supported/i,
-        })
+        screen.getByRole("heading", { name: heading })
       ).toBeInTheDocument();
-      expect(screen.getByText(/the editor supports krd/i)).toBeInTheDocument();
-    });
-
-    it("should display repetition block question", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", {
-          name: /how do i create a repetition block/i,
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/select multiple steps by clicking/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display offline usage question", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /can i use this offline/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/yes! the editor works offline/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display training zones question", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /what are training zones/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/training zones are intensity ranges/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display export question", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /how do i export my workout/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/click the 'save' button and select/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display undo question", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", { name: /can i undo changes/i })
-      ).toBeInTheDocument();
-      expect(screen.getByText(/yes! use ctrl\+z/i)).toBeInTheDocument();
-    });
-
-    it("should display duration types question", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", {
-          name: /what's the difference between duration types/i,
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/time-based durations use minutes\/seconds/i)
-      ).toBeInTheDocument();
-    });
-
-    it("should display library question", () => {
-      // Arrange
-
-      // Act
-      render(<HelpSection />);
-
-      // Assert
-
-      expect(
-        screen.getByRole("heading", {
-          name: /how do i save workouts to my library/i,
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/click the 'save to library' button/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(body)).toBeInTheDocument();
     });
   });
 

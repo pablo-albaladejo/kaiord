@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { ProfileRepository } from "../ports/persistence-port";
+import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import { createInMemoryUserPreferencesRepository } from "../test-utils/in-memory-user-preferences-repository";
 import type { Profile } from "../types/profile";
 import { ProfileNotFoundError } from "../types/session-match-errors";
@@ -15,27 +15,14 @@ const stubProfile = (overrides: Partial<Profile> = {}): Profile => ({
   ...overrides,
 });
 
-const stubProfileRepo = (rows: Profile[]): ProfileRepository => {
-  const map = new Map(rows.map((r) => [r.id, r]));
-  return {
-    getAll: async () => [...map.values()],
-    getById: async (id) => map.get(id),
-    put: async (p) => {
-      map.set(p.id, p);
-    },
-    delete: async (id) => {
-      map.delete(id);
-    },
-  };
-};
-
 const fixedClock = () => "2026-05-01T12:00:00.000Z";
 
 describe("setCalendarView", () => {
   it("should create the row on first call with updatedAt from injected clock", async () => {
     // Arrange
     const repo = createInMemoryUserPreferencesRepository();
-    const profileRepo = stubProfileRepo([stubProfile()]);
+    const profileRepo = createInMemoryPersistence().profiles;
+    await profileRepo.put(stubProfile());
 
     // Act
     await setCalendarView(
@@ -54,7 +41,8 @@ describe("setCalendarView", () => {
   it("should update the row in place on subsequent calls", async () => {
     // Arrange
     const repo = createInMemoryUserPreferencesRepository();
-    const profileRepo = stubProfileRepo([stubProfile()]);
+    const profileRepo = createInMemoryPersistence().profiles;
+    await profileRepo.put(stubProfile());
     await setCalendarView(
       { profileId: "p1", view: "list" },
       {
@@ -85,7 +73,8 @@ describe("setCalendarView", () => {
   it("should still refresh updatedAt when idempotent on same value", async () => {
     // Arrange
     const repo = createInMemoryUserPreferencesRepository();
-    const profileRepo = stubProfileRepo([stubProfile()]);
+    const profileRepo = createInMemoryPersistence().profiles;
+    await profileRepo.put(stubProfile());
     await setCalendarView(
       { profileId: "p1", view: "grid" },
       {
@@ -112,9 +101,10 @@ describe("setCalendarView", () => {
   it("should throw ProfileNotFoundError when profile is missing (concurrent delete)", async () => {
     // Arrange
     const repo = createInMemoryUserPreferencesRepository();
+    const profileRepo = createInMemoryPersistence().profiles;
 
     // Act
-    const profileRepo = stubProfileRepo([]);
+    // (profileRepo has no entries — simulates a concurrent delete)
 
     // Assert
     await expect(

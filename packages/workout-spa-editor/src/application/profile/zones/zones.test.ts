@@ -314,6 +314,8 @@ describe("addCustomZone", () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
+
+    // Act
     const updated = await addCustomZone(
       persistence,
       profile.id,
@@ -321,8 +323,6 @@ describe("addCustomZone", () => {
       "heartRateZones",
       HR_ZONE
     );
-
-    // Act
     const zones = updated.sportZones.cycling?.heartRateZones.zones ?? [];
 
     // Assert
@@ -410,6 +410,8 @@ describe("removeCustomZone", () => {
       ],
     };
     await seedProfile(persistence, profile);
+
+    // Act
     const updated = await removeCustomZone(
       persistence,
       profile.id,
@@ -417,8 +419,6 @@ describe("removeCustomZone", () => {
       "heartRateZones",
       1
     );
-
-    // Act
     const zones = updated.sportZones.cycling?.heartRateZones.zones ?? [];
 
     // Assert

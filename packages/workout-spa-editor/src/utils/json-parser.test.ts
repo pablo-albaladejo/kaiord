@@ -129,34 +129,34 @@ describe("parseJSON", () => {
       expect(result).toStrictEqual({ name: "duplicate" });
     });
 
-    it("should handle various JSON error types gracefully", () => {
+    it.each([
+      { description: "unclosed string", json: '{"unclosed": "string' },
+      { description: "trailing comma", json: '{"trailing": "comma",}' },
+      { description: "unquoted key", json: '{unquoted: "key"}' },
+      { description: "double decimal number", json: '{"number": 123.456.789}' },
+      { description: "trailing comma in array", json: '{"array": [1, 2, 3,]}' },
+      {
+        description: "unclosed nested object",
+        json: '{"nested": {"unclosed": }',
+      },
+    ])("should handle $description JSON error gracefully", ({ json }) => {
       // Arrange
-      const invalidJSONs = [
-        '{"unclosed": "string',
-        '{"trailing": "comma",}',
-        '{unquoted: "key"}',
-        '{"number": 123.456.789}',
-        '{"array": [1, 2, 3,]}',
-        '{"nested": {"unclosed": }',
-      ];
 
       // Act
+      let caught: unknown;
+      try {
+        parseJSON(json);
+        expect.fail(`Should have thrown for: ${json}`);
+      } catch (error) {
+        caught = error;
+      }
 
       // Assert
-      for (const json of invalidJSONs) {
-        try {
-          parseJSON(json);
-          expect.fail(`Should have thrown for: ${json}`);
-        } catch (error) {
-          expect(error).toBeInstanceOf(FileParsingError);
-          if (error instanceof FileParsingError) {
-            expect(error.message).toContain("Invalid JSON");
-            expect(error.cause).toBeDefined();
-            expect(error.message.length).toBeGreaterThan(
-              ERROR_MESSAGE_MIN_LENGTH
-            );
-          }
-        }
+      expect(caught).toBeInstanceOf(FileParsingError);
+      if (caught instanceof FileParsingError) {
+        expect(caught.message).toContain("Invalid JSON");
+        expect(caught.cause).toBeDefined();
+        expect(caught.message.length).toBeGreaterThan(ERROR_MESSAGE_MIN_LENGTH);
       }
     });
 

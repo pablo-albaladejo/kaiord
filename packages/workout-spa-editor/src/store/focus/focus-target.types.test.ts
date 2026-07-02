@@ -11,22 +11,23 @@ describe("FocusTarget discriminated union", () => {
   it("should produce a FocusTargetItem with the supplied ItemId via focusItem", () => {
     // Arrange
     const id = asItemId("some-item");
-    const target = focusItem(id);
-    expect(target).toEqual({ kind: "item", id: "some-item" });
 
     // Act
-    expectTypeOf(target).toEqualTypeOf<FocusTargetItem>();
+    const target = focusItem(id);
 
     // Assert
+    expect(target).toEqual({ kind: "item", id: "some-item" });
+    expectTypeOf(target).toEqualTypeOf<FocusTargetItem>();
   });
 
   it("should expose focusEmptyState as a FocusTargetEmptyState sentinel", () => {
     // Arrange
-    expect(focusEmptyState).toEqual({ kind: "empty-state" });
 
     // Act
-    expectTypeOf(focusEmptyState).toEqualTypeOf<FocusTargetEmptyState>();
+    const sentinel = focusEmptyState;
 
     // Assert
+    expect(sentinel).toEqual({ kind: "empty-state" });
+    expectTypeOf(sentinel).toEqualTypeOf<FocusTargetEmptyState>();
   });
 });

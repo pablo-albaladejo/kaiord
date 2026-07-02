@@ -2,7 +2,7 @@ import { writeFileSync } from "fs";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { z } from "zod";
-import { krdSchema } from "../src/domain/schemas/krd.js";
+import { krdSchema } from "../src/domain/schemas/krd/index.js";
 import { workoutSchema } from "../src/domain/schemas/workout.js";
 
 const __filename = fileURLToPath(import.meta.url);

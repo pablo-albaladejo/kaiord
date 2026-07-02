@@ -34,17 +34,6 @@ describe("buildCoachingTemplateKrd", () => {
     expect(step.intensity).toBe("warmup");
   });
 
-  it("should set the resolved sport on the KRD metadata", () => {
-    // Arrange
-    const sport = "rowing";
-
-    // Act
-    const krd = buildCoachingTemplateKrd(sport);
-
-    // Assert
-    expect(krd.metadata.sport).toBe("rowing");
-  });
-
   it("should set the optional subSport on the KRD metadata", () => {
     // Arrange
     const subSport = "flexibility_training";

@@ -29,19 +29,19 @@ describe("kaiord_diff", () => {
     const file2 = join(tmpDir, "b.krd");
     await writeFile(file1, JSON.stringify(krd1));
     await writeFile(file2, JSON.stringify(krd2));
+
+    // Act
     const result = (await client.callTool({
       name: "kaiord_diff",
       arguments: { file1, file2 },
     })) as McpToolResult;
     const diff = JSON.parse(result.content[0].text);
-    expect(diff.metadata.length).toBeGreaterThan(0);
-
-    // Act
     const sportDiff = diff.metadata.find(
       (d: { field: string }) => d.field === "sport"
     );
 
     // Assert
+    expect(diff.metadata.length).toBeGreaterThan(0);
     expect(sportDiff).toBeDefined();
   });
 
