@@ -1,12 +1,14 @@
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import type { ConnectionConfig } from "./connection-config";
 import { isFlowEnabled } from "./data-flow-lookup";
+import { flowAvailability } from "./flow-availability";
 import { FlowRow } from "./FlowRow";
 
 type ConnectionFlowsProps = {
   config: ConnectionConfig;
   bridgeId: string;
   byDataType: DataFlowsByType;
+  capabilities: readonly string[];
   onToggleFlow: (flowIndex: number, next: boolean) => void;
   onDisconnect: () => void;
 };
@@ -15,6 +17,7 @@ export function ConnectionFlows({
   config,
   bridgeId,
   byDataType,
+  capabilities,
   onToggleFlow,
   onDisconnect,
 }: ConnectionFlowsProps) {
@@ -27,6 +30,7 @@ export function ConnectionFlows({
         <FlowRow
           key={`${flow.dataType}-${flow.direction}`}
           flow={flow}
+          availability={flowAvailability(flow, capabilities)}
           checked={isFlowEnabled(byDataType, flow, bridgeId)}
           onToggle={(next) => onToggleFlow(index, next)}
         />

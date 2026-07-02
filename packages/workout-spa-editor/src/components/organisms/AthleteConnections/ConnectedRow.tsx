@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useBridgeCapabilities } from "../../../hooks/use-bridge-capabilities";
 import { useConnectionActions } from "../../../hooks/use-connection-actions";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
@@ -26,6 +27,7 @@ export function ConnectedRow(props: ConnectedRowProps) {
   const [confirming, setConfirming] = useState(false);
   const { toggleFlow } = usePolicyToggle();
   const { disconnect } = useConnectionActions(profileId);
+  const capabilities = useBridgeCapabilities(bridgeId);
 
   const onToggleFlow = (flowIndex: number, next: boolean) => {
     const flow = config.flows[flowIndex];
@@ -59,6 +61,7 @@ export function ConnectedRow(props: ConnectedRowProps) {
           config={config}
           bridgeId={bridgeId}
           byDataType={byDataType}
+          capabilities={capabilities}
           onToggleFlow={onToggleFlow}
           onDisconnect={() => setConfirming(true)}
         />

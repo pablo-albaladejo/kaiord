@@ -8,6 +8,8 @@ const {
   readDay,
   openTrain2Go,
   reinjectContentScripts,
+  logSwallowed,
+  TELEMETRY_KEY,
 } = require("../background.js");
 const parser = require("../parser.js");
 const pkg = require("../package.json");
@@ -149,6 +151,23 @@ describe("background service worker", () => {
         protocolVersion: 1,
         capabilities: ["read:training-plan", "read:training-zones"],
         sessionActive: false,
+      });
+    });
+
+    it("records structured telemetry for the swallowed ping failure (cause stays inspectable, not silent)", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+
+      await handleAction({ action: "ping" });
+
+      await vi.waitFor(() => {
+        const log = __chromeLocalStore[TELEMETRY_KEY];
+        expect(log).toHaveLength(1);
+        expect(log[0]).toMatchObject({
+          level: "warn",
+          action: "ping",
+          cause: "No Train2Go tab open. Open app.train2go.com first.",
+        });
+        expect(log[0].at).toEqual(expect.any(Number));
       });
     });
 
@@ -460,6 +479,16 @@ describe("background service worker", () => {
 
       await expect(reinjectContentScripts()).resolves.toBeUndefined();
       expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
+      await vi.waitFor(() => {
+        const log = __chromeLocalStore[TELEMETRY_KEY];
+        expect(log).toHaveLength(1);
+        expect(log[0]).toMatchObject({
+          level: "warn",
+          action: "reinject-content-script",
+          cause: "Cannot access tab",
+        });
+        expect(log[0].at).toEqual(expect.any(Number));
+      });
     });
 
     it("the onInstalled listener invokes reinjectContentScripts", async () => {
@@ -470,6 +499,33 @@ describe("background service worker", () => {
       });
 
       await expect(Promise.resolve(onInstalledCb())).resolves.toBeUndefined();
+    });
+  });
+
+  describe("logSwallowed", () => {
+    it("records a structured entry (level, action, cause, timestamp)", async () => {
+      await logSwallowed("error", "load-parser", new Error("boom"));
+
+      const log = __chromeLocalStore[TELEMETRY_KEY];
+      expect(log).toEqual([
+        {
+          level: "error",
+          action: "load-parser",
+          cause: "boom",
+          at: expect.any(Number),
+        },
+      ]);
+    });
+
+    it("caps the log to the most recent 25 entries", async () => {
+      for (let i = 0; i < 30; i += 1) {
+        await logSwallowed("warn", "ping", `err-${i}`);
+      }
+
+      const log = __chromeLocalStore[TELEMETRY_KEY];
+      expect(log).toHaveLength(25);
+      expect(log[0].cause).toBe("err-5");
+      expect(log[24].cause).toBe("err-29");
     });
   });
 });

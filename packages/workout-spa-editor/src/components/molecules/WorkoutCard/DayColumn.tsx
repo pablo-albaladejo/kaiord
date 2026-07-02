@@ -24,6 +24,8 @@ export type DayColumnProps = {
   ) => (event: PointerEvent) => void;
   dropTargetActive?: boolean;
   wellness?: DayWellness;
+  /** Whether the week-level wellness query has resolved (see WellnessBand). */
+  wellnessResolved?: boolean;
 };
 
 const TODAY_BODY_TINT = "bg-primary-50/40 dark:bg-primary-900/20";
@@ -42,6 +44,7 @@ export function DayColumn({
   workoutCardPointerDownFor,
   dropTargetActive = false,
   wellness,
+  wellnessResolved = false,
 }: DayColumnProps) {
   const tint = isToday ? TODAY_BODY_TINT : "";
   const dropRing = dropTargetActive ? DROP_RING : "";
@@ -55,7 +58,7 @@ export function DayColumn({
       role="group"
       className={`flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0 ${tint} ${dropRing}`}
     >
-      <WellnessBand wellness={wellness} />
+      <WellnessBand wellness={wellness} resolved={wellnessResolved} />
       <div className="flex flex-1 flex-col gap-1.5">
         {renderDayCards({
           matchedSessions,

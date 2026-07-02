@@ -4,6 +4,8 @@
  * component over the per-file line cap.
  */
 
+import { deriveWorkoutLifecycle } from "../WorkoutCard/session-lifecycle";
+import { SessionLifecycleBadges } from "../WorkoutCard/SessionLifecycleBadges";
 import {
   actualDurationText,
   actualTitle,
@@ -14,6 +16,9 @@ import {
 
 const hasFiniteCompliance = (score: number | null): score is number =>
   score !== null && Number.isFinite(score);
+
+const lifecycleOf = (s: MatchedSession) =>
+  deriveWorkoutLifecycle(s.workout, s.executed?.length ?? 0);
 
 export const renderTitleRow = (s: MatchedSession) => (
   <>
@@ -28,6 +33,7 @@ export const renderComfortableMetadata = (s: MatchedSession) => (
   <>
     <span className="text-[10px] text-slate-500">Plan ·</span>
     <span>{planDurationText(s)}</span>
+    <SessionLifecycleBadges flags={lifecycleOf(s)} />
     {hasFiniteCompliance(s.complianceScore) && (
       <span className="ml-auto text-[10px] text-slate-600">
         {formatPercent(s.complianceScore)}
@@ -46,6 +52,7 @@ export const renderComfortableSecondary = (s: MatchedSession) => (
 export const renderCompactMetadata = (s: MatchedSession) => (
   <>
     <span>{actualDurationText(s)}</span>
+    <SessionLifecycleBadges flags={lifecycleOf(s)} />
     {hasFiniteCompliance(s.complianceScore) && (
       <span className="ml-auto text-[10px] text-slate-600">
         {formatPercent(s.complianceScore)}

@@ -25,6 +25,7 @@ export const ImportEnabled: Story = {
       dataType: "workout",
       direction: "import",
     },
+    availability: "operational",
     checked: true,
     onToggle: () => {},
   },
@@ -41,6 +42,43 @@ export const ExportDisabled: Story = {
       dataType: "workout",
       direction: "export",
     },
+    availability: "operational",
+    checked: false,
+    onToggle: () => {},
+  },
+};
+
+/**
+ * Import flow with no backend on the connected bridge — badge instead of
+ * an operative toggle, honest fallback to manual FIT import.
+ */
+export const ImportManual: Story = {
+  args: {
+    flow: {
+      label: "Daily readiness (HRV, sleep)",
+      sublabel: "Import recovery signals",
+      dataType: "hrv",
+      direction: "import",
+    },
+    availability: "manual",
+    checked: false,
+    onToggle: () => {},
+  },
+};
+
+/**
+ * Export flow with no backend on the connected bridge — no manual push
+ * equivalent exists, so it's flagged "coming soon" instead.
+ */
+export const ExportComingSoon: Story = {
+  args: {
+    flow: {
+      label: "Training zones",
+      sublabel: "Push updated zones",
+      dataType: "training-zones",
+      direction: "export",
+    },
+    availability: "coming-soon",
     checked: false,
     onToggle: () => {},
   },

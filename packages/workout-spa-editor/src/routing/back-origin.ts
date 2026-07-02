@@ -15,6 +15,7 @@ export const BACK_ORIGINS = [
   "coaching",
   "daily",
   "detail",
+  "chat",
 ] as const;
 
 export type BackOrigin = (typeof BACK_ORIGINS)[number];

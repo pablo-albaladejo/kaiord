@@ -68,6 +68,17 @@ describe("StatusEntryButtons", () => {
     expect(chat).toHaveAttribute("aria-current", "page");
   });
 
+  it("should mark the nutrition entry active on the nutrition route", () => {
+    // Arrange
+    renderAt("/nutrition");
+
+    // Act
+    const nutrition = screen.getByTestId("status-header-nutrition-button");
+
+    // Assert
+    expect(nutrition).toHaveAttribute("aria-current", "page");
+  });
+
   it("should mark the trends entry active on a nested health route", () => {
     // Arrange
     renderAt("/health/sleep");
@@ -105,5 +116,15 @@ describe("StatusEntryButtons", () => {
     expect(calendar).not.toHaveAttribute("aria-current");
     expect(library).not.toHaveAttribute("aria-current");
     expect(trends).not.toHaveAttribute("aria-current");
+  });
+  it("should not render a dedicated athlete entry (ProfileEntryButton owns /athlete)", () => {
+    // Arrange
+    renderAt("/daily");
+
+    // Act
+    const athlete = screen.queryByTestId("status-header-athlete-button");
+
+    // Assert
+    expect(athlete).toBeNull();
   });
 });

@@ -42,6 +42,7 @@ export const appendToolEvent = (
   conversationId: string,
   toolName: string,
   ok: boolean,
+  toolResult?: unknown,
   gen: IdGen = defaultGen
 ): Promise<void> =>
   persistence.chatMessages.append(
@@ -52,6 +53,7 @@ export const appendToolEvent = (
       role: "tool",
       content: ok ? `Ran ${toolName}.` : `${toolName} failed.`,
       toolName,
+      toolResult: ok ? toolResult : undefined,
       createdAt: gen.now(),
     })
   );

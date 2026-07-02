@@ -30,6 +30,7 @@ export type NewChatMessageInput = {
   content: string;
   createdAt: string;
   toolName?: string;
+  toolResult?: unknown;
   usage?: ChatMessageUsage;
 };
 
@@ -43,5 +44,6 @@ export const newChatMessage = (
   content: input.content,
   createdAt: input.createdAt,
   ...(input.toolName ? { toolName: input.toolName } : {}),
+  ...(input.toolResult !== undefined ? { toolResult: input.toolResult } : {}),
   ...(input.usage ? { usage: input.usage } : {}),
 });

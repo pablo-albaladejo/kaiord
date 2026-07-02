@@ -29,6 +29,18 @@ vi.mock("../../../utils/export-workout-formats", () => ({
     mockExportGcnWorkout(...args) as unknown,
 }));
 
+const mockPut = vi.fn();
+const mockGet = vi.fn();
+
+vi.mock("../../../adapters/dexie/dexie-database", () => ({
+  db: {
+    table: () => ({
+      put: (record: unknown) => mockPut(record) as void,
+      get: (id: unknown) => mockGet(id) as unknown,
+    }),
+  },
+}));
+
 import { useGarminPush } from "./useGarminPush";
 
 // A stub KRD payload that exportGcnWorkout will receive verbatim.
@@ -61,8 +73,12 @@ const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
 describe("useGarminPush", () => {
   beforeEach(() => {
     garminState.sessionActive = true;
-    mockPushWorkout.mockResolvedValue(undefined);
+    mockPushWorkout.mockResolvedValue({
+      success: true,
+      garminWorkoutId: "gw-123",
+    });
     mockExportGcnWorkout.mockResolvedValue({ gcnWorkout: "data" });
+    mockGet.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -198,7 +214,10 @@ describe("useGarminPush", () => {
 
   it("should fire garmin-synced success event after successful push", async () => {
     // Arrange
-    mockPushWorkout.mockResolvedValue(undefined);
+    mockPushWorkout.mockResolvedValue({
+      success: true,
+      garminWorkoutId: "gw-123",
+    });
     const workout = makeWorkout();
     const { result } = renderHook(() => useGarminPush(workout));
 
@@ -211,6 +230,44 @@ describe("useGarminPush", () => {
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
       result: "success",
     });
+  });
+
+  it("should fire garmin-synced failure event when the bridge reports a failed push (an outcome that never throws)", async () => {
+    // Arrange
+    mockPushWorkout.mockResolvedValue({
+      success: false,
+      garminWorkoutId: null,
+    });
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
+      result: "failure",
+    });
+  });
+
+  it("should not persist any workout-state transition (owned by useEditorActions)", async () => {
+    // Arrange
+    mockPushWorkout.mockResolvedValue({
+      success: true,
+      garminWorkoutId: "gw-123",
+    });
+    const workout = makeWorkout({ state: "ready" });
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockPut).not.toHaveBeenCalled();
   });
 
   it("should fire garmin-synced failure event when push throws", async () => {

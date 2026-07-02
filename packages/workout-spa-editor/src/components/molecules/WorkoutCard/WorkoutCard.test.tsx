@@ -145,4 +145,59 @@ describe("WorkoutCard", () => {
 
     expect(screen.getByRole("img", { name: "Raw" })).toBeInTheDocument();
   });
+
+  it("should not show any lifecycle badge for a plain manual workout", () => {
+    // Arrange
+
+    const workout = makeWorkout();
+
+    // Act
+
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Assert
+
+    expect(
+      screen.queryByTestId("session-lifecycle-badges")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should show the fromCoach and pushedToGarmin lifecycle badges when applicable", () => {
+    // Arrange
+
+    const workout = makeWorkout({
+      source: "train2go",
+      garminPushId: "garmin-1",
+    });
+
+    // Act
+
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Assert
+
+    expect(screen.getByTestId("lifecycle-badge-fromCoach")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("lifecycle-badge-pushedToGarmin")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("lifecycle-badge-aiAssisted")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should show the aiAssisted lifecycle badge for an AI-generated workout", () => {
+    // Arrange
+
+    const workout = makeWorkout({ source: "ai-generated" });
+
+    // Act
+
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Assert
+
+    expect(
+      screen.getByTestId("lifecycle-badge-aiAssisted")
+    ).toBeInTheDocument();
+  });
 });

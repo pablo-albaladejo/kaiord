@@ -16,6 +16,7 @@ describe("buildChatTools", () => {
         createWorkout: vi.fn(),
         logHealthMetric: vi.fn(),
         logIntake: vi.fn(),
+        pushToGarmin: vi.fn(),
       },
     };
 
@@ -28,6 +29,7 @@ describe("buildChatTools", () => {
       "get_today",
       "log_health_metric",
       "log_intake",
+      "push_to_garmin",
       "query_coaching",
       "query_energy_balance",
       "query_health",
@@ -36,7 +38,7 @@ describe("buildChatTools", () => {
     ]);
   });
 
-  it("should mark exactly the four action tools as requiring confirmation", () => {
+  it("should mark exactly the five action tools as requiring confirmation", () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     const deps = {
@@ -48,6 +50,7 @@ describe("buildChatTools", () => {
         createWorkout: vi.fn(),
         logHealthMetric: vi.fn(),
         logIntake: vi.fn(),
+        pushToGarmin: vi.fn(),
       },
     };
 
@@ -62,6 +65,7 @@ describe("buildChatTools", () => {
       "create_workout",
       "log_health_metric",
       "log_intake",
+      "push_to_garmin",
       "sync_coaching",
     ]);
   });

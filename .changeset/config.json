@@ -15,7 +15,9 @@
       "@kaiord/mcp",
       "@kaiord/ai",
       "@kaiord/garmin-bridge",
-      "@kaiord/train2go-bridge"
+      "@kaiord/train2go-bridge",
+      "@kaiord/whoop",
+      "@kaiord/whoop-bridge"
     ]
   ],
   "access": "public",

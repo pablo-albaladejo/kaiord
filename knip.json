@@ -54,13 +54,18 @@
         "tmp-promise",
         "strip-ansi"
       ]
+    },
+    "packages/workout-spa-editor": {
+      "entry": ["src/main.tsx", "e2e/**/*.ts", "playwright.config.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": [
+        "src/**/*.test.{ts,tsx}",
+        "src/**/*.stories.tsx",
+        "src/test-utils/**",
+        "src/test-setup.ts"
+      ]
     }
   },
-  "ignore": [
-    "packages/workout-spa-editor/**",
-    "scripts/**",
-    "metrics/**",
-    "docs/**"
-  ],
+  "ignore": ["scripts/**", "metrics/**", "docs/**"],
   "ignoreDependencies": ["@changesets/cli", "husky", "prettier"]
 }

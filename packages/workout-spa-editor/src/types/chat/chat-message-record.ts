@@ -25,6 +25,12 @@ export type ChatMessageRecord = {
   content: string;
   /** Set on tool-event entries: the tool that produced the entry. */
   toolName?: string;
+  /**
+   * Set on successful tool-event entries: the tool's raw execution result
+   * (e.g. `{ workoutId, date }` for `create_workout`), so the transcript can
+   * render a deep-link without re-deriving it from `content`.
+   */
+  toolResult?: unknown;
   /** ISO-8601 timestamp; merge clock and chronological sort key. */
   createdAt: string;
   /** Provider-reported token usage, present on completed assistant turns. */

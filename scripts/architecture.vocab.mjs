@@ -48,6 +48,7 @@ export const PACKAGE_DEPS = {
   tcx: ["@kaiord/core"],
   zwo: ["@kaiord/core"],
   garmin: ["@kaiord/core"],
+  whoop: ["@kaiord/core"],
   "garmin-connect": ["@kaiord/core", "@kaiord/garmin"],
   ai: ["@kaiord/core"],
   mcp: [
@@ -92,6 +93,7 @@ export const PACKAGE_DEPS = {
   // dependency on @kaiord/core.
   "garmin-bridge": ["@kaiord/core"],
   "train2go-bridge": ["@kaiord/core"],
+  "whoop-bridge": ["@kaiord/core"],
   // Static-asset package — SVG icon master + popup CSS master shared
   // across both bridges. Private, never published, zero deps.
   _shared: [],

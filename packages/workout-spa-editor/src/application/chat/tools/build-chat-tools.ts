@@ -8,6 +8,7 @@ import {
 import type { ChatToolDeps } from "./chat-tool-deps";
 import { createGetTodayTool } from "./get-today-tool";
 import { createLogIntakeTool } from "./log-intake-tool";
+import { createPushToGarminTool } from "./push-to-garmin-tool";
 import { createQueryCoachingTool } from "./query-coaching-tool";
 import { createQueryEnergyBalanceTool } from "./query-energy-balance-tool";
 import { createQueryHealthTool } from "./query-health-tool";
@@ -35,5 +36,6 @@ export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
     createCreateWorkoutTool(deps.actions),
     createLogHealthMetricTool(deps.actions),
     createLogIntakeTool(deps.actions),
+    createPushToGarminTool(deps.actions),
   ];
 };

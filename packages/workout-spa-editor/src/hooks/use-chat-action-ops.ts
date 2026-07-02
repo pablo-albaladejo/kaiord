@@ -25,6 +25,7 @@ import {
   doSyncCoaching,
 } from "./chat/chat-action-ops-impl";
 import { doLogIntake } from "./chat/do-log-intake";
+import { usePushToGarminOp } from "./use-push-to-garmin-op";
 
 const requireProfile = (profileId: string | null): string => {
   if (!profileId) throw new Error("No active profile");
@@ -41,6 +42,7 @@ export const useChatActionOps = (
   generation: ChatGenerationModel
 ): ChatActionOps => {
   const persistence = usePersistence();
+  const pushToGarmin = usePushToGarminOp();
   const transport = useMemo(
     () =>
       createTrain2GoCoachingTransport(
@@ -79,7 +81,13 @@ export const useChatActionOps = (
   );
 
   return useMemo(
-    () => ({ syncCoaching, createWorkout, logHealthMetric, logIntake }),
-    [syncCoaching, createWorkout, logHealthMetric, logIntake]
+    () => ({
+      syncCoaching,
+      createWorkout,
+      logHealthMetric,
+      logIntake,
+      pushToGarmin,
+    }),
+    [syncCoaching, createWorkout, logHealthMetric, logIntake, pushToGarmin]
   );
 };

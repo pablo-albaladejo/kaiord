@@ -5,11 +5,17 @@ import { Button } from "../../atoms/Button";
 export type ChatComposerProps = {
   onSend: (text: string) => void;
   disabled: boolean;
+  /** Seeds the input on mount (e.g. an "adjust with AI" deep-link prefill). */
+  initialText?: string;
 };
 
 /** Message input. Enter sends; Shift+Enter inserts a newline. */
-export function ChatComposer({ onSend, disabled }: ChatComposerProps) {
-  const [text, setText] = useState("");
+export function ChatComposer({
+  onSend,
+  disabled,
+  initialText,
+}: ChatComposerProps) {
+  const [text, setText] = useState(initialText ?? "");
 
   const submit = () => {
     const trimmed = text.trim();

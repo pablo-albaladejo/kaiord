@@ -158,6 +158,27 @@ describe("CoachingActivityCard", () => {
     expect(screen.queryByText("Delete")).not.toBeInTheDocument();
   });
 
+  it("should show the fromCoach lifecycle badge for a train2go activity", () => {
+    // Arrange
+
+    // Act
+
+    render(<CoachingActivityCard activity={baseActivity} />);
+
+    // Assert
+
+    expect(screen.getByTestId("lifecycle-badge-fromCoach")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("lifecycle-badge-aiAssisted")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("lifecycle-badge-pushedToGarmin")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("lifecycle-badge-executedAndMatched")
+    ).not.toBeInTheDocument();
+  });
+
   it("should render different border colours for completed and skipped", () => {
     // Arrange
 

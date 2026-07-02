@@ -29,7 +29,7 @@
     "**/*.yml",
     "**/*.gcn"
   ],
-  "format": ["typescript", "tsx"],
+  "format": ["typescript", "tsx", "javascript"],
   "minLines": 6,
   "minTokens": 50,
   "path": ["packages/"],

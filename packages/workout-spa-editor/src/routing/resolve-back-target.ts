@@ -40,6 +40,8 @@ export function resolveBackTarget({
       return "/calendar";
     case "daily":
       return date ? `/daily?date=${date}` : "/daily";
+    case "chat":
+      return "/chat";
     default:
       return DEFAULT_TARGET;
   }

@@ -1,0 +1,16 @@
+{
+  "name": "@kaiord/whoop-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that bridges the Kaiord SPA to the WHOOP API via OAuth (bring your own WHOOP developer app)",
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage"
+  },
+  "devDependencies": {
+    "@kaiord/core": "workspace:*",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.6"
+  }
+}

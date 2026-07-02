@@ -14,16 +14,11 @@ type StatusEntryButtonsProps = {
 
 export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
   const [location, navigate] = useLocation();
-  const primaryNav = ENTRY_DEFS.filter((e) =>
-    [
-      "daily",
-      "calendar",
-      "library",
-      "athlete",
-      "trends",
-      "chat",
-      "new",
-    ].includes(e.id)
+  // Athlete is reachable through ProfileEntryButton below, and settings
+  // renders in its dedicated trailing slot — rendering either here would
+  // duplicate the destination in the same bar.
+  const primaryNav = ENTRY_DEFS.filter(
+    (e) => e.id !== "settings" && e.id !== "athlete"
   );
   const settingsEntry = ENTRY_DEFS.find((e) => e.id === "settings");
   return (

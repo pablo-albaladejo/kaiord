@@ -90,6 +90,7 @@ export function CalendarWeekGrid({
             workoutCardPointerDownFor={bind}
             dropTargetActive={dropTargetId === date}
             wellness={wellnessByDay?.[date]}
+            wellnessResolved={wellnessByDay !== undefined}
           />
         ))}
       </div>
