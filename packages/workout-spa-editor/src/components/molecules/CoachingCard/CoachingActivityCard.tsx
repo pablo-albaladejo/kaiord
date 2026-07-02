@@ -11,6 +11,8 @@
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { CardShell } from "../CardShell/CardShell";
 import { statusToColourClass, statusToIcon } from "../CardShell/status-tokens";
+import { deriveCoachingActivityLifecycle } from "../WorkoutCard/session-lifecycle";
+import { SessionLifecycleBadges } from "../WorkoutCard/SessionLifecycleBadges";
 
 export type CoachingActivityCardProps = {
   activity: CoachingActivity;
@@ -26,6 +28,7 @@ export function CoachingActivityCard({
   const intensity = Math.min(activity.effort ?? 0, 5);
   const status = statusToIcon(activity.status);
   const StatusIcon = status.Component;
+  const lifecycle = deriveCoachingActivityLifecycle(activity);
 
   return (
     <CardShell
@@ -56,6 +59,7 @@ export function CoachingActivityCard({
               {"○".repeat(5 - intensity)}
             </span>
           )}
+          <SessionLifecycleBadges flags={lifecycle} />
           {density === "comfortable" && (
             <span className="ml-auto text-[10px] uppercase tracking-wide">
               {status.label}
