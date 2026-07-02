@@ -3,12 +3,13 @@
  */
 import type { PushState } from "../contexts/garmin-bridge-types";
 import { sendMessage } from "../store/garmin-extension-transport";
+import { parseGarminWorkoutId } from "./garmin-push-id";
 
 const PUSH_TIMEOUT = 15_000;
 const LIST_TIMEOUT = 10_000;
 
 export type PushResult =
-  | { status: "success" }
+  | { status: "success"; garminWorkoutId: string | null }
   | { status: "error"; message: string; redetect: boolean }
   | { status: "invalidated" };
 
@@ -35,7 +36,7 @@ export async function executePush(
     return { status: "error", message, redetect };
   }
 
-  return { status: "success" };
+  return { status: "success", garminWorkoutId: parseGarminWorkoutId(res.data) };
 }
 
 export async function executeList(

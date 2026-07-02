@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 
+import { db } from "../../../adapters/dexie/dexie-database";
+import { recordGarminPush } from "../../../application/record-garmin-push";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
@@ -12,13 +14,15 @@ import { exportGcnWorkout } from "../../../utils/export-workout-formats";
  * Dexie-backed record (read via `useLiveQuery`), not the in-memory editor
  * draft.
  *
+ * On a confirmed push the record is re-persisted with the Garmin-assigned
+ * id (`recordGarminPush`), so the calendar lifecycle badge reflects the
+ * push regardless of which surface triggered it.
+ *
  * Callers:
  * - `GarminPushButton.tsx` — reads the workout via `useLiveQuery` and passes
  *   the record. The editor pushes the last-persisted state.
  * - `CoachingActivityDialog.tsx` — reads the workout via the same Dexie path
  *   and passes the record from the matched session.
- *
- * Signature: useGarminPush(workout: WorkoutRecord | undefined): { push, ... }
  */
 export const useGarminPush = (workout: WorkoutRecord | undefined) => {
   const { pushWorkout, setPushing, sessionActive } = useGarminBridge();
@@ -29,8 +33,16 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
 
     try {
       const gcn = await exportGcnWorkout(workout.krd);
-      await pushWorkout(gcn);
-      analytics.event("garmin-synced", { result: "success" });
+      // pushWorkout never rejects on a bridge-reported failure — it
+      // resolves { success: false } and sets the error state itself.
+      const outcome = await pushWorkout(gcn);
+      if (outcome.success) {
+        const pushId = outcome.garminWorkoutId ?? `garmin-${Date.now()}`;
+        await db.table("workouts").put(recordGarminPush(workout, pushId));
+      }
+      analytics.event("garmin-synced", {
+        result: outcome.success ? "success" : "failure",
+      });
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Conversion failed";
