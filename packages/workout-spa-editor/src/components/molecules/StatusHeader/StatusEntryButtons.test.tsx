@@ -68,6 +68,17 @@ describe("StatusEntryButtons", () => {
     expect(chat).toHaveAttribute("aria-current", "page");
   });
 
+  it("should mark the nutrition entry active on the nutrition route", () => {
+    // Arrange
+    renderAt("/nutrition");
+
+    // Act
+    const nutrition = screen.getByTestId("status-header-nutrition-button");
+
+    // Assert
+    expect(nutrition).toHaveAttribute("aria-current", "page");
+  });
+
   it("should mark the trends entry active on a nested health route", () => {
     // Arrange
     renderAt("/health/sleep");

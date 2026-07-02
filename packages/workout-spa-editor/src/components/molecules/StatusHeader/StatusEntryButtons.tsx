@@ -14,17 +14,7 @@ type StatusEntryButtonsProps = {
 
 export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
   const [location, navigate] = useLocation();
-  const primaryNav = ENTRY_DEFS.filter((e) =>
-    [
-      "daily",
-      "calendar",
-      "library",
-      "athlete",
-      "trends",
-      "chat",
-      "new",
-    ].includes(e.id)
-  );
+  const primaryNav = ENTRY_DEFS.filter((e) => e.id !== "settings");
   const settingsEntry = ENTRY_DEFS.find((e) => e.id === "settings");
   return (
     <>

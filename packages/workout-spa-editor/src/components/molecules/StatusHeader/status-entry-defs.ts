@@ -1,14 +1,7 @@
-import {
-  Activity,
-  Calendar,
-  CalendarCheck,
-  LayoutGrid,
-  MessageCircle,
-  Plus,
-  Settings,
-  User,
-} from "lucide-react";
 import type { ComponentType } from "react";
+
+import { NAV_DESTINATIONS } from "../../../routing/nav-destinations";
+import { ICON_MAP } from "../../atoms/Icon";
 
 export type EntryDef = {
   id: string;
@@ -17,63 +10,28 @@ export type EntryDef = {
   ariaLabel?: string;
   to: string;
   variant?: "primary" | "tertiary";
+  /** True when the destination also lives in the mobile bottom nav — the
+      header hides it below `md` so mobile never shows duplicate entries. */
+  mobileHidden?: boolean;
 };
 
-export const ENTRY_DEFS: ReadonlyArray<EntryDef> = [
-  {
-    id: "daily",
-    icon: CalendarCheck,
-    label: "Daily",
-    ariaLabel: "Go to daily",
-    to: "/daily",
-  },
-  {
-    id: "calendar",
-    icon: Calendar,
-    label: "Calendar",
-    ariaLabel: "Go to calendar",
-    to: "/calendar",
-  },
-  {
-    id: "library",
-    icon: LayoutGrid,
-    label: "Library",
-    ariaLabel: "Open workout library",
-    to: "/library",
-  },
-  {
-    id: "athlete",
-    icon: User,
-    label: "Athlete",
-    ariaLabel: "Open athlete profile",
-    to: "/athlete",
-  },
-  {
-    id: "trends",
-    icon: Activity,
-    label: "Trends",
-    ariaLabel: "Open wellness trends",
-    to: "/health",
-  },
-  {
-    id: "chat",
-    icon: MessageCircle,
-    label: "Chat",
-    ariaLabel: "Open chat assistant",
-    to: "/chat",
-  },
-  {
-    id: "new",
-    icon: Plus,
-    label: "New workout",
-    to: "/workout/new",
-    variant: "primary",
-  },
-  {
-    id: "settings",
-    icon: Settings,
-    label: "Settings",
-    ariaLabel: "Open settings",
-    to: "/settings",
-  },
-];
+/** Only the "new workout" entry gets the primary CTA treatment; every
+    other header entry renders as a tertiary nav button. This is a
+    header-only presentation concern, so it stays local instead of living
+    on the neutral nav-destinations registry. */
+const PRIMARY_VARIANT_IDS: ReadonlySet<string> = new Set(["new"]);
+
+/** Header entries, derived from the single nav-destinations registry
+    (`src/routing/nav-destinations.ts`) so the header and the mobile
+    bottom nav can never drift out of sync again. */
+export const ENTRY_DEFS: ReadonlyArray<EntryDef> = NAV_DESTINATIONS.filter(
+  (destination) => destination.surfaces.header
+).map((destination) => ({
+  id: destination.id,
+  icon: ICON_MAP[destination.icon],
+  label: destination.labelKey,
+  ariaLabel: destination.ariaLabel,
+  to: destination.path,
+  variant: PRIMARY_VARIANT_IDS.has(destination.id) ? "primary" : undefined,
+  mobileHidden: destination.surfaces.bottomNav,
+}));

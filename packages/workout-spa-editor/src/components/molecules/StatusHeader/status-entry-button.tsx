@@ -12,6 +12,15 @@ type EntryButtonProps = {
 };
 
 export function EntryButton({ entry, active, onClick }: EntryButtonProps) {
+  const classes =
+    [
+      active ? ACTIVE_ENTRY_CLASS : undefined,
+      // Destinations mirrored in the mobile bottom nav hide here below
+      // `md`, so mobile users never see the same entry twice.
+      entry.mobileHidden ? "hidden md:inline-flex" : undefined,
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined;
   return (
     <Button
       variant={entry.variant ?? "tertiary"}
@@ -19,7 +28,7 @@ export function EntryButton({ entry, active, onClick }: EntryButtonProps) {
       onClick={onClick}
       aria-label={entry.ariaLabel}
       aria-current={active ? "page" : undefined}
-      className={active ? ACTIVE_ENTRY_CLASS : undefined}
+      className={classes}
       data-testid={`status-header-${entry.id}-button`}
     >
       <entry.icon className="h-4 w-4" />
