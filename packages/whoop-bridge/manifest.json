@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Kaiord WHOOP Bridge",
+  "version": "0.1.0",
+  "description": "Connects the Kaiord editor to your WHOOP recovery & sleep data via OAuth (bring your own WHOOP developer app)",
+
+  "permissions": ["storage", "identity"],
+
+  "host_permissions": ["https://api.prod.whoop.com/*"],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
+      "js": ["kaiord-announce.js"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:5173/*",
+      "http://localhost:5174/*",
+      "https://*.kaiord.com/*"
+    ]
+  }
+}
