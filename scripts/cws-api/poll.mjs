@@ -3,7 +3,7 @@
 // (NOT inside pollUntil) so wait-published can share pollUntil without
 // inheriting the retry behavior.
 
-import { CwsTimeoutError } from "./errors.mjs";
+import { CwsStateError, CwsTimeoutError } from "./errors.mjs";
 import { getItem } from "./state.mjs";
 
 export async function pollUntil(
@@ -64,7 +64,24 @@ export async function waitPublished(
   const start = now();
   const deadline = start + timeoutMs;
   for (;;) {
-    const item = await getItem(serviceAccount, id, "PUBLISHED");
+    let item;
+    try {
+      item = await getItem(serviceAccount, id, "PUBLISHED");
+    } catch (err) {
+      if (!(err instanceof CwsStateError)) throw err;
+      // The CWS API intermittently rejects the PUBLISHED projection with a
+      // 400 ("Please append ?projection=DRAFT"); live-version.mjs already
+      // tolerates the same error. Fall back to the DRAFT projection (the
+      // path wait-uploaded relies on) so a genuine rejection is still
+      // caught; otherwise report IN_REVIEW — the submission succeeded but
+      // the API cannot confirm the published state, and the workflow
+      // treats IN_REVIEW as a non-fatal "track it" outcome.
+      const draft = await getItem(serviceAccount, id, "DRAFT");
+      if (isRejected(draft)) {
+        return { status: "REJECTED", version, raw: draft.rawResponse };
+      }
+      return { status: "IN_REVIEW", version, raw: draft.rawResponse };
+    }
     const rejected = isRejected(item);
     if (rejected) {
       return { status: "REJECTED", version, raw: item.rawResponse };

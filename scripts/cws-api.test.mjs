@@ -578,6 +578,69 @@ describe("waitPublished", () => {
       }
     );
   });
+
+  it("degrades to IN_REVIEW when the PUBLISHED projection 400s and DRAFT is clean", async () => {
+    const { pem } = makeKey();
+    const account = makeAccount(pem);
+    await withMockFetch(
+      async (url) => {
+        if (url.includes("oauth2.googleapis.com")) {
+          return makeResponse({ body: { access_token: "AT" } });
+        }
+        if (url.includes("projection=PUBLISHED")) {
+          return makeResponse({
+            status: 400,
+            body: { error: { message: "Please append ?projection=DRAFT" } },
+          });
+        }
+        return makeResponse({
+          body: { id: "abc", uploadState: "SUCCESS", crxVersion: "1.0.0" },
+        });
+      },
+      async () => {
+        const result = await waitPublished(account, "abc", {
+          version: "1.0.0",
+          timeoutMs: 5000,
+          sleep: async () => {},
+        });
+        strictEqual(result.status, "IN_REVIEW");
+        strictEqual(result.version, "1.0.0");
+      }
+    );
+  });
+
+  it("still returns REJECTED when the PUBLISHED projection 400s but DRAFT shows rejection", async () => {
+    const { pem } = makeKey();
+    const account = makeAccount(pem);
+    await withMockFetch(
+      async (url) => {
+        if (url.includes("oauth2.googleapis.com")) {
+          return makeResponse({ body: { access_token: "AT" } });
+        }
+        if (url.includes("projection=PUBLISHED")) {
+          return makeResponse({
+            status: 400,
+            body: { error: { message: "Please append ?projection=DRAFT" } },
+          });
+        }
+        return makeResponse({
+          body: {
+            id: "abc",
+            uploadState: "FAILURE",
+            itemError: [{ error_code: "ITEM_REJECTED" }],
+          },
+        });
+      },
+      async () => {
+        const result = await waitPublished(account, "abc", {
+          version: "1.0.0",
+          timeoutMs: 120000,
+          sleep: async () => {},
+        });
+        strictEqual(result.status, "REJECTED");
+      }
+    );
+  });
 });
 
 // ---------- CLI dispatch ----------
