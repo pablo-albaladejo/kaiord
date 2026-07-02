@@ -17,14 +17,54 @@ const BRIDGE_MANIFEST = {
   capabilities: ["write:workouts"],
 };
 
+// ── Swallowed-error telemetry ──
+//
+// Several catch{} blocks below intentionally swallow errors so a single
+// failure doesn't break the whole bridge (see the comment at each call
+// site). That used to make root-causing "why doesn't X work" impossible
+// without opening the service worker's devtools console. This keeps the
+// swallow behavior but records a structured, capped log so the cause is
+// inspectable — e.g. `chrome.storage.local.get("bridgeTelemetry")` from
+// the popup or chrome://extensions devtools.
+const TELEMETRY_KEY = "bridgeTelemetry";
+const TELEMETRY_MAX_ENTRIES = 25;
+
+const logSwallowed = (level, action, cause) => {
+  const entry = {
+    level,
+    action,
+    cause: String(cause?.message ?? cause),
+    at: Date.now(),
+  };
+  return chrome.storage.local
+    .get(TELEMETRY_KEY)
+    .then(({ [TELEMETRY_KEY]: existing = [] }) =>
+      chrome.storage.local.set({
+        [TELEMETRY_KEY]: [...existing, entry].slice(-TELEMETRY_MAX_ENTRIES),
+      })
+    )
+    .catch(() => {
+      // Storage itself unavailable (e.g. quota); nothing more we can do.
+    });
+};
+
 // ── Profile snapshot validator (plain JS, parity-tested via shared fixtures) ──
 let snapshotValidator;
 try {
   importScripts("profile-snapshot.js");
   snapshotValidator = globalThis;
-} catch {
+} catch (e) {
   snapshotValidator =
     typeof require !== "undefined" ? require("./profile-snapshot.js") : {};
+  // In the packaged extension this only fires if the bundled file is
+  // missing or fails to parse — a real misconfiguration. Under Node
+  // (tests, build tooling) it fires on every load and is expected, so
+  // it's logged at "debug" rather than "error".
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-profile-snapshot",
+    e
+  );
 }
 
 const SNAPSHOT_ACTIONS = new Set([
@@ -269,8 +309,9 @@ const reinjectContentScripts = async () => {
           target: { tabId: tab.id, allFrames: !!script.all_frames },
           files: script.js,
         });
-      } catch {
+      } catch (e) {
         // Tab may be in a restricted context or already injected; ignore.
+        void logSwallowed("warn", "reinject-content-script", e);
       }
     }
   }
@@ -299,5 +340,7 @@ if (typeof module !== "undefined") {
     persistSnapshot,
     clearSnapshot,
     reinjectContentScripts,
+    TELEMETRY_KEY,
+    logSwallowed,
   };
 }

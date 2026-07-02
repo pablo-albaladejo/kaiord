@@ -17,6 +17,37 @@ const BRIDGE_MANIFEST = {
   capabilities: ["read:training-plan", "read:training-zones"],
 };
 
+// ── Swallowed-error telemetry ──
+//
+// Several catch{} blocks below intentionally swallow errors so a single
+// failure doesn't break the whole bridge (see the comment at each call
+// site). That used to make root-causing "why doesn't X work" impossible
+// without opening the service worker's devtools console. This keeps the
+// swallow behavior but records a structured, capped log so the cause is
+// inspectable — e.g. `chrome.storage.local.get("bridgeTelemetry")` from
+// the popup or chrome://extensions devtools.
+const TELEMETRY_KEY = "bridgeTelemetry";
+const TELEMETRY_MAX_ENTRIES = 25;
+
+const logSwallowed = (level, action, cause) => {
+  const entry = {
+    level,
+    action,
+    cause: String(cause?.message ?? cause),
+    at: Date.now(),
+  };
+  return chrome.storage.local
+    .get(TELEMETRY_KEY)
+    .then(({ [TELEMETRY_KEY]: existing = [] }) =>
+      chrome.storage.local.set({
+        [TELEMETRY_KEY]: [...existing, entry].slice(-TELEMETRY_MAX_ENTRIES),
+      })
+    )
+    .catch(() => {
+      // Storage itself unavailable (e.g. quota); nothing more we can do.
+    });
+};
+
 // ── Parser (loaded inline for service worker) ──
 // In the extension, parser.js is loaded via importScripts or inlined.
 // For testing, it's required via module.exports.
@@ -24,17 +55,31 @@ let parser;
 try {
   importScripts("parser.js");
   parser = globalThis;
-} catch {
+} catch (e) {
   parser = typeof require !== "undefined" ? require("./parser.js") : {};
+  // In the packaged extension this only fires if the bundled file is
+  // missing or fails to parse — a real misconfiguration. Under Node
+  // (tests, build tooling) it fires on every load and is expected, so
+  // it's logged at "debug" rather than "error".
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-parser",
+    e
+  );
 }
 
 let snapshotValidator;
 try {
   importScripts("profile-snapshot.js");
   snapshotValidator = globalThis;
-} catch {
+} catch (e) {
   snapshotValidator =
     typeof require !== "undefined" ? require("./profile-snapshot.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-profile-snapshot",
+    e
+  );
 }
 
 const SNAPSHOT_ACTIONS = new Set([
@@ -100,7 +145,11 @@ const ping = async () => {
     };
     // session may also carry coachName / notes — both are spread above
     // and only the BRIDGE_MANIFEST keys are explicitly overwritten.
-  } catch {
+  } catch (e) {
+    // Network failure, malformed response, or parser error — degrade to
+    // "no session" rather than throwing, so a transient Train2Go outage
+    // doesn't break the popup/detection flow. The cause is still recorded.
+    void logSwallowed("warn", "ping", e);
     return { ...BRIDGE_MANIFEST, sessionActive: false };
   }
 };
@@ -286,8 +335,9 @@ const reinjectContentScripts = async () => {
           target: { tabId: tab.id, allFrames: !!script.all_frames },
           files: script.js,
         });
-      } catch {
+      } catch (e) {
         // Tab may be in a restricted context or already injected; ignore.
+        void logSwallowed("warn", "reinject-content-script", e);
       }
     }
   }
@@ -316,5 +366,7 @@ if (typeof module !== "undefined") {
     persistSnapshot,
     clearSnapshot,
     reinjectContentScripts,
+    TELEMETRY_KEY,
+    logSwallowed,
   };
 }
