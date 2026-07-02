@@ -252,53 +252,13 @@ describe("useGarminPush", () => {
     });
   });
 
-  it("should persist the Garmin-assigned push id on the record after a successful push", async () => {
+  it("should not persist any workout-state transition (owned by useEditorActions)", async () => {
     // Arrange
     mockPushWorkout.mockResolvedValue({
       success: true,
       garminWorkoutId: "gw-123",
     });
     const workout = makeWorkout({ state: "ready" });
-    const { result } = renderHook(() => useGarminPush(workout));
-
-    // Act
-    await act(async () => {
-      await result.current.push();
-    });
-
-    // Assert
-    expect(mockPut).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: "workout-1",
-        state: "pushed",
-        garminPushId: "gw-123",
-      })
-    );
-  });
-
-  it("should persist a locally-generated push id when the bridge response has no workout id", async () => {
-    // Arrange
-    mockPushWorkout.mockResolvedValue({ success: true, garminWorkoutId: null });
-    const workout = makeWorkout({ state: "ready" });
-    const { result } = renderHook(() => useGarminPush(workout));
-
-    // Act
-    await act(async () => {
-      await result.current.push();
-    });
-
-    // Assert
-    const persisted = mockPut.mock.calls[0]?.[0] as { garminPushId: string };
-    expect(persisted.garminPushId).toMatch(/^garmin-\d+$/);
-  });
-
-  it("should not persist the record when the push fails", async () => {
-    // Arrange
-    mockPushWorkout.mockResolvedValue({
-      success: false,
-      garminWorkoutId: null,
-    });
-    const workout = makeWorkout();
     const { result } = renderHook(() => useGarminPush(workout));
 
     // Act

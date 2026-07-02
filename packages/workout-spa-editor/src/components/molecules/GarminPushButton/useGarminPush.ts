@@ -1,7 +1,5 @@
 import { useCallback } from "react";
 
-import { db } from "../../../adapters/dexie/dexie-database";
-import { recordGarminPush } from "../../../application/record-garmin-push";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
@@ -14,9 +12,10 @@ import { exportGcnWorkout } from "../../../utils/export-workout-formats";
  * Dexie-backed record (read via `useLiveQuery`), not the in-memory editor
  * draft.
  *
- * On a confirmed push the record is re-persisted with the Garmin-assigned
- * id (`recordGarminPush`), so the calendar lifecycle badge reflects the
- * push regardless of which surface triggered it.
+ * This hook sends the workout and reports the outcome; it does NOT persist
+ * the `pushed` state transition — that stays owned by `useEditorActions`
+ * (spa-workout-state-machine), so a quick push from the detail footer or
+ * the coaching dialog does not flip state out from under an open editor.
  *
  * Callers:
  * - `GarminPushButton.tsx` — reads the workout via `useLiveQuery` and passes
@@ -35,19 +34,9 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
       const gcn = await exportGcnWorkout(workout.krd);
       // pushWorkout never rejects on a bridge-reported failure — it
       // resolves { success: false } and sets the error state itself.
+      // Reading the result keeps this analytics event honest instead of
+      // always reporting "success" once the promise settles.
       const outcome = await pushWorkout(gcn);
-      if (outcome.success) {
-        const pushId = outcome.garminWorkoutId ?? `garmin-${Date.now()}`;
-        // Re-read before persisting: the record may have been edited while
-        // the push was in flight, and writing the captured copy back would
-        // silently drop those edits.
-        const fresh = (await db.table("workouts").get(workout.id)) as
-          | WorkoutRecord
-          | undefined;
-        await db
-          .table("workouts")
-          .put(recordGarminPush(fresh ?? workout, pushId));
-      }
       analytics.event("garmin-synced", {
         result: outcome.success ? "success" : "failure",
       });
