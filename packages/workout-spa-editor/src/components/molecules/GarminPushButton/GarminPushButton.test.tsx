@@ -237,4 +237,22 @@ describe("GarminPushButton", () => {
 
     expect(screen.getByText("Push failed")).toBeInTheDocument();
   });
+
+  it("should show the push error cause even when a 401/403 redetect flipped the session to inactive (not a silent failure)", () => {
+    // Arrange
+
+    mockState.extensionInstalled = true;
+    mockState.sessionActive = false;
+    mockState.pushing = { status: "error", message: "Push failed: 403" };
+    mockPolicies = [ENABLED_POLICY];
+
+    // Act
+
+    render(<GarminPushButton profileId="p1" />);
+
+    // Assert
+
+    expect(screen.getByText("Push failed: 403")).toBeInTheDocument();
+    expect(screen.getByText("Garmin (no session)")).toBeInTheDocument();
+  });
 });

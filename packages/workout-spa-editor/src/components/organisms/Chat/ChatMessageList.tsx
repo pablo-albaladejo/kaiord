@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
+import { buildToolResultLinks } from "./build-tool-result-links";
+import { ToolResultLinks } from "./ToolResultLinks";
 
 const ROLE_STYLE: Record<string, string> = {
   user: "self-end bg-sky-600 text-white",
@@ -56,6 +58,7 @@ export function ChatMessageList({
               {ROLE_LABEL[m.role] ?? m.role}
             </span>
             {m.content}
+            <ToolResultLinks links={buildToolResultLinks(m)} />
           </li>
         );
       })}

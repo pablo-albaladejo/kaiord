@@ -16,6 +16,7 @@ import {
   Heart,
   LayoutGrid,
   Link,
+  MessageCircle,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -74,6 +75,7 @@ export const ICON_MAP = {
   trend: TrendingUp,
   upload: Upload,
   nutrition: Utensils,
+  chat: MessageCircle,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICON_MAP;

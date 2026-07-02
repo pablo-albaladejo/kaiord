@@ -113,6 +113,17 @@ describe("resolveBackTarget", () => {
     expect(result).toBe("/calendar");
   });
 
+  it("should resolve the chat origin to /chat", () => {
+    // Arrange
+    const input = { origin: "chat" as const };
+
+    // Act
+    const result = resolveBackTarget(input);
+
+    // Assert
+    expect(result).toBe("/chat");
+  });
+
   it("should resolve a null origin to the default /calendar home", () => {
     // Arrange
     const input = { origin: null };

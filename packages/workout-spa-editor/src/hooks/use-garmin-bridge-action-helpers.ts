@@ -5,7 +5,10 @@
  */
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import type { PushState } from "../contexts/garmin-bridge-types";
+import type {
+  GarminPushOutcome,
+  PushState,
+} from "../contexts/garmin-bridge-types";
 import { ping } from "../store/garmin-extension-transport";
 import { evaluatePingResult, executePush } from "./garmin-bridge-operations";
 
@@ -37,11 +40,18 @@ export const runDetect = async ({
   setLastError(result.installed ? result.error : null);
 };
 
+/**
+ * Resolves with the push outcome. Callers MUST read `success` (rather
+ * than assuming success once the promise resolves) — this never rejects,
+ * so a caller ignoring the result would otherwise report success even
+ * when the bridge returned an error. `garminWorkoutId` carries the
+ * Garmin-assigned id parsed from the push response (null when absent).
+ */
 export const runPush = async (
   gcn: unknown,
   setPushing: (s: PushState) => void,
   redetect: () => Promise<void>
-): Promise<void> => {
+): Promise<GarminPushOutcome> => {
   setPushing({ status: "loading" });
   const result = await executePush(getGarminExtensionId(), gcn);
   if (result.status === "invalidated") {
@@ -50,12 +60,13 @@ export const runPush = async (
       status: "error",
       message: "Extension was updated. Please try again.",
     });
-    return;
+    return { success: false, garminWorkoutId: null };
   }
   if (result.status === "error") {
     if (result.redetect) await redetect();
     setPushing({ status: "error", message: result.message });
-    return;
+    return { success: false, garminWorkoutId: null };
   }
   setPushing({ status: "success" });
+  return { success: true, garminWorkoutId: result.garminWorkoutId };
 };

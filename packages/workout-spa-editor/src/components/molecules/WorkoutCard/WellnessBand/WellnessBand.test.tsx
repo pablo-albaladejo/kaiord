@@ -6,12 +6,12 @@ import { memoryLocation } from "wouter/memory-location";
 import type { DayWellness } from "../../../../types/health/day-wellness";
 import { WellnessBand } from "./WellnessBand";
 
-function renderBand(wellness: DayWellness | undefined) {
+function renderBand(wellness: DayWellness | undefined, resolved?: boolean) {
   const loc = memoryLocation({ path: "/calendar", record: true });
   return {
     ...render(
       <Router hook={loc.hook}>
-        <WellnessBand wellness={wellness} />
+        <WellnessBand wellness={wellness} resolved={resolved} />
       </Router>
     ),
     location: loc,
@@ -44,6 +44,40 @@ describe("WellnessBand", () => {
 
     // Assert
     expect(screen.queryByTestId("wellness-band")).not.toBeInTheDocument();
+  });
+
+  it("should render no empty marker while still loading (resolved defaults to false)", () => {
+    // Arrange
+
+    // Act
+    renderBand(undefined);
+
+    // Assert
+    expect(screen.queryByTestId("wellness-band-empty")).not.toBeInTheDocument();
+  });
+
+  it("should render an explicit empty marker once resolved with no data for the day", () => {
+    // Arrange
+
+    // Act
+    renderBand(undefined, true);
+
+    // Assert
+    expect(screen.getByTestId("wellness-band-empty")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "No readiness data" })
+    ).toBeInTheDocument();
+  });
+
+  it("should render the populated band, not the empty marker, when resolved with data", () => {
+    // Arrange
+
+    // Act
+    renderBand({ sleep: "82" }, true);
+
+    // Assert
+    expect(screen.getByTestId("wellness-band")).toBeInTheDocument();
+    expect(screen.queryByTestId("wellness-band-empty")).not.toBeInTheDocument();
   });
 
   it("should give each badge an aria-label and the route from the map", () => {

@@ -97,6 +97,20 @@ describe("StatusHeader", () => {
     expect(trends).toHaveAccessibleName("Open wellness trends");
   });
 
+  it("should render the nutrition entry reachable from the header (desktop)", () => {
+    // Arrange
+
+    // Act
+
+    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+
+    // Assert
+
+    const nutrition = screen.getByTestId("status-header-nutrition-button");
+    expect(nutrition).toBeInTheDocument();
+    expect(nutrition).toHaveAccessibleName("Open nutrition");
+  });
+
   it("should label the new-workout button as 'New workout'", () => {
     // Arrange
 

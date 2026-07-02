@@ -225,6 +225,49 @@ describe("MatchedSessionCard", () => {
     ).toBeInTheDocument();
   });
 
+  it("should show the fromCoach badge but not executedAndMatched when no executed is linked", () => {
+    // Arrange
+
+    // Act
+    render(<MatchedSessionCard session={session()} />);
+
+    // Assert
+    expect(screen.getByTestId("lifecycle-badge-fromCoach")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("lifecycle-badge-executedAndMatched")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should show the executedAndMatched badge once an executed recording is linked", () => {
+    // Arrange
+    const executed: WorkoutRecord = { ...baseWorkout, id: "w-exec-1" };
+
+    // Act
+    render(<MatchedSessionCard session={session({ executed: [executed] })} />);
+
+    // Assert
+    expect(
+      screen.getByTestId("lifecycle-badge-executedAndMatched")
+    ).toBeInTheDocument();
+  });
+
+  it("should show the pushedToGarmin badge when the matched workout carries a garminPushId", () => {
+    // Arrange
+    const workout: WorkoutRecord = {
+      ...baseWorkout,
+      garminPushId: "garmin-1",
+      state: "pushed",
+    };
+
+    // Act
+    render(<MatchedSessionCard session={session({ workout })} />);
+
+    // Assert
+    expect(
+      screen.getByTestId("lifecycle-badge-pushedToGarmin")
+    ).toBeInTheDocument();
+  });
+
   it("should call onClick with the activity when clicked", async () => {
     // Arrange
 

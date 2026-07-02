@@ -84,4 +84,30 @@ describe("newChatMessage", () => {
     expect(result.usage).toEqual({ promptTokens: 5, completionTokens: 3 });
     expect(result.toolName).toBe("query_workouts");
   });
+
+  it("should carry toolResult when provided and omit it otherwise", () => {
+    // Arrange
+    const withResult = {
+      id: "3",
+      profileId: "p1",
+      conversationId: "c1",
+      role: "tool" as const,
+      content: "Ran create_workout.",
+      createdAt: "2026-06-13T10:00:00.000Z",
+      toolName: "create_workout",
+      toolResult: { workoutId: "w1", date: "2026-06-13" },
+    };
+    const withoutResult = { ...withResult, toolResult: undefined };
+
+    // Act
+    const resultWith = newChatMessage(withResult);
+    const resultWithout = newChatMessage(withoutResult);
+
+    // Assert
+    expect(resultWith.toolResult).toEqual({
+      workoutId: "w1",
+      date: "2026-06-13",
+    });
+    expect(resultWithout).not.toHaveProperty("toolResult");
+  });
 });

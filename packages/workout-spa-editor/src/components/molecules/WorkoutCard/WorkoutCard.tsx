@@ -11,6 +11,8 @@
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { CardShell } from "../CardShell/CardShell";
 import { workoutStateToColourClass } from "../CardShell/status-tokens";
+import { deriveWorkoutLifecycle } from "./session-lifecycle";
+import { SessionLifecycleBadges } from "./SessionLifecycleBadges";
 import { formatDuration, getStateIndicator } from "./workout-card-utils";
 
 export type WorkoutCardProps = {
@@ -22,6 +24,7 @@ export function WorkoutCard({ workout, onClick }: WorkoutCardProps) {
   const indicator = getStateIndicator(workout.state);
   const title = workout.raw?.title ?? workout.sport;
   const duration = workout.raw?.duration;
+  const lifecycle = deriveWorkoutLifecycle(workout);
 
   return (
     <CardShell
@@ -48,6 +51,7 @@ export function WorkoutCard({ workout, onClick }: WorkoutCardProps) {
         <>
           <span>{workout.sport}</span>
           {duration && <span>{formatDuration(duration.value)}</span>}
+          <SessionLifecycleBadges flags={lifecycle} />
         </>
       }
     />

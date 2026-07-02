@@ -218,6 +218,45 @@ describe("CalendarWeekGrid", () => {
     expect(todayBody.className).toContain("bg-primary-50/40");
   });
 
+  it("should not render an empty readiness marker while wellnessByDay is still loading", () => {
+    // Arrange
+
+    // Act
+    renderWithToast(
+      <CalendarWeekGrid
+        days={DAYS}
+        workoutsByDay={{}}
+        todayDate="2026-04-06"
+        onWorkoutClick={vi.fn()}
+        onAddClick={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(screen.queryAllByTestId("wellness-band-empty")).toHaveLength(0);
+  });
+
+  it("should render an explicit empty readiness marker per day once wellnessByDay has resolved", () => {
+    // Arrange
+
+    // Act
+    renderWithToast(
+      <CalendarWeekGrid
+        days={DAYS}
+        workoutsByDay={{}}
+        todayDate="2026-04-06"
+        onWorkoutClick={vi.fn()}
+        onAddClick={vi.fn()}
+        wellnessByDay={{}}
+      />
+    );
+
+    // Assert
+    expect(screen.getAllByTestId("wellness-band-empty")).toHaveLength(
+      DAYS_IN_WEEK
+    );
+  });
+
   it("should render the multi-workout badge when a day has 3 or more activities", () => {
     // Arrange
     const w = (id: string): WorkoutRecord => makeWorkout(id, "2026-04-07");

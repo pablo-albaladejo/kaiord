@@ -12,13 +12,16 @@ import { exportGcnWorkout } from "../../../utils/export-workout-formats";
  * Dexie-backed record (read via `useLiveQuery`), not the in-memory editor
  * draft.
  *
+ * This hook sends the workout and reports the outcome; it does NOT persist
+ * the `pushed` state transition — that stays owned by `useEditorActions`
+ * (spa-workout-state-machine), so a quick push from the detail footer or
+ * the coaching dialog does not flip state out from under an open editor.
+ *
  * Callers:
  * - `GarminPushButton.tsx` — reads the workout via `useLiveQuery` and passes
  *   the record. The editor pushes the last-persisted state.
  * - `CoachingActivityDialog.tsx` — reads the workout via the same Dexie path
  *   and passes the record from the matched session.
- *
- * Signature: useGarminPush(workout: WorkoutRecord | undefined): { push, ... }
  */
 export const useGarminPush = (workout: WorkoutRecord | undefined) => {
   const { pushWorkout, setPushing, sessionActive } = useGarminBridge();
@@ -29,8 +32,14 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
 
     try {
       const gcn = await exportGcnWorkout(workout.krd);
-      await pushWorkout(gcn);
-      analytics.event("garmin-synced", { result: "success" });
+      // pushWorkout never rejects on a bridge-reported failure — it
+      // resolves { success: false } and sets the error state itself.
+      // Reading the result keeps this analytics event honest instead of
+      // always reporting "success" once the promise settles.
+      const outcome = await pushWorkout(gcn);
+      analytics.event("garmin-synced", {
+        result: outcome.success ? "success" : "failure",
+      });
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Conversion failed";

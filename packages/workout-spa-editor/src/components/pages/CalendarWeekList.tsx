@@ -58,7 +58,10 @@ export function CalendarWeekList({
               {formatHeading(date)}
               {isToday && <span className="sr-only"> (today)</span>}
             </h2>
-            <WellnessBand wellness={wellnessByDay?.[date]} />
+            <WellnessBand
+              wellness={wellnessByDay?.[date]}
+              resolved={wellnessByDay !== undefined}
+            />
             <div className="flex flex-col gap-2">
               {renderDayCards({
                 matchedSessions: matched,

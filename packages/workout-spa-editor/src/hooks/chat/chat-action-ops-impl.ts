@@ -67,7 +67,7 @@ export const doCreateWorkout = async (
     date: input.date,
   });
   await persistence.workouts.put(record);
-  return { id: record.id, date: record.date };
+  return { workoutId: record.id, date: record.date };
 };
 
 export const doLogHealthMetric = async (

@@ -147,6 +147,26 @@ describe("CalendarWeekList", () => {
     );
   });
 
+  it("should render an explicit empty readiness marker per day once wellnessByDay has resolved", () => {
+    // Arrange
+
+    // Act
+    render(
+      <CalendarWeekList
+        days={DAYS}
+        todayDate="2026-04-06"
+        onWorkoutClick={vi.fn()}
+        onAddClick={vi.fn()}
+        wellnessByDay={{}}
+      />
+    );
+
+    // Assert
+    expect(screen.getAllByTestId("wellness-band-empty")).toHaveLength(
+      DAYS_IN_WEEK
+    );
+  });
+
   it("should mark today's section with data-today and aria-current", () => {
     // Arrange
 

@@ -119,6 +119,39 @@ describe("chat-turn-runner", () => {
     );
   });
 
+  it("should persist the create_workout result on the tool-event message", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence);
+    const execute = vi
+      .fn()
+      .mockResolvedValue({ workoutId: "w1", date: "2026-06-20" });
+    ctx.toolsRef.current = [
+      { name: "create_workout", execute } as unknown as ChatTool,
+    ];
+    fakeAgent.resume.mockResolvedValueOnce({
+      status: "complete",
+      text: "created your workout",
+      messages: [],
+    });
+    const pending: PendingAction = {
+      toolName: "create_workout",
+      toolCallId: "c3",
+      input: { description: "easy ride", date: "2026-06-20" },
+    };
+
+    // Act
+    await approveAction(ctx, pending);
+
+    // Assert
+    const stored = await persistence.chatMessages.listByProfile("p1");
+    const toolMessage = stored.find((m) => m.toolName === "create_workout");
+    expect(toolMessage?.toolResult).toEqual({
+      workoutId: "w1",
+      date: "2026-06-20",
+    });
+  });
+
   it("should resume with a declined result on deny without running a tool", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();

@@ -1,3 +1,4 @@
+import { useChatPrefill } from "../../../hooks/use-chat-prefill";
 import type { UseChatSearchPanel } from "../../../hooks/use-chat-search-panel";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { ChatConversationRecord } from "../../../types/chat/chat-conversation-record";
@@ -27,6 +28,7 @@ export type ChatWorkspaceProps = {
 /** Two-column chat surface: the conversation list and the active thread (or a
  * prompt to pick/start one when no thread is selected). */
 export function ChatWorkspace(props: ChatWorkspaceProps) {
+  const prefill = useChatPrefill();
   return (
     <div className="grid gap-4 md:grid-cols-[240px_1fr]">
       <ConversationSidebar
@@ -58,6 +60,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
             generationModelId={props.generationModelId}
             messages={props.messages}
             focusMessageId={props.search.focusMessageId}
+            composerInitialText={prefill}
           />
         ) : (
           <p className="p-4 text-sm text-slate-400">

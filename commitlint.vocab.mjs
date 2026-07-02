@@ -30,6 +30,8 @@ export const SCOPE_ENUM = [
   "spa-editor",
   "garmin-bridge",
   "train2go-bridge",
+  "whoop",
+  "whoop-bridge",
   "analytics",
   "landing",
   "docs-site",

@@ -8,6 +8,8 @@ const {
   getCsrfToken,
   checkSession,
   reinjectContentScripts,
+  logSwallowed,
+  TELEMETRY_KEY,
 } = require("../background.js");
 const pkg = require("../package.json");
 
@@ -505,6 +507,16 @@ describe("background.js", () => {
 
       await expect(reinjectContentScripts()).resolves.toBeUndefined();
       expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
+      await vi.waitFor(() => {
+        const log = __chromeLocalStore[TELEMETRY_KEY];
+        expect(log).toHaveLength(1);
+        expect(log[0]).toMatchObject({
+          level: "warn",
+          action: "reinject-content-script",
+          cause: "Cannot access tab",
+        });
+        expect(log[0].at).toEqual(expect.any(Number));
+      });
     });
 
     it("the onInstalled listener invokes reinjectContentScripts", async () => {
@@ -517,6 +529,33 @@ describe("background.js", () => {
       });
 
       await expect(Promise.resolve(onInstalledCb())).resolves.toBeUndefined();
+    });
+  });
+
+  describe("logSwallowed", () => {
+    it("records a structured entry (level, action, cause, timestamp)", async () => {
+      await logSwallowed("error", "load-profile-snapshot", new Error("boom"));
+
+      const log = __chromeLocalStore[TELEMETRY_KEY];
+      expect(log).toEqual([
+        {
+          level: "error",
+          action: "load-profile-snapshot",
+          cause: "boom",
+          at: expect.any(Number),
+        },
+      ]);
+    });
+
+    it("caps the log to the most recent 25 entries", async () => {
+      for (let i = 0; i < 30; i += 1) {
+        await logSwallowed("warn", "reinject-content-script", `err-${i}`);
+      }
+
+      const log = __chromeLocalStore[TELEMETRY_KEY];
+      expect(log).toHaveLength(25);
+      expect(log[0].cause).toBe("err-5");
+      expect(log[24].cause).toBe("err-29");
     });
   });
 });

@@ -1,5 +1,10 @@
 # Workout SPA Editor — Navigation & Layout Map
 
+> **Nav registry:** header and mobile bottom-nav entries derive from the single
+> registry in `src/routing/nav-destinations.ts` (parity test:
+> `nav-destinations.test.ts`). Do not add destinations to either surface
+> directly.
+
 @kaiord/workout-spa-editor is a private React SPA in the Kaiord monorepo. Routing is **wouter** (`<Switch>` in `AppRoutes.tsx`); layout is **Tailwind** (mobile-first, breakpoints sm=640/md=768/lg=1024/xl=1280); persisted data flows through **Dexie.js + `useLiveQuery`** (one query per page) while editor runtime lives in a single **Zustand** `workout-store`. The app follows a hexagonal split (`app/` UI over `adapters/` for KRD/FIT/TCX/ZWO/GCN). Every route is wrapped by `MainLayout` global chrome (sticky header + mobile-only bottom nav); KRD is the canonical workout format that all import/export passes through.
 
 ## Route table
@@ -7,7 +12,7 @@
 | Route pattern       | Component (file)                                                     | Params / Query                                          | Notes                                                                                                      |
 | ------------------- | -------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `/`                 | — (`AppRoutes.tsx`)                                                  | —                                                       | **Redirect → `/calendar`**                                                                                 |
-| `/calendar`         | `DailyPage` (`components/pages/Daily/Daily.tsx`)                     | —                                                       | **Renders Today, NOT CalendarPage.** App skips no nav here; this is the app landing surface                |
+| `/calendar`         | redirect → `/calendar/:weekId` (current week `CalendarPage`)         | —                                                       | Week-grid calendar is the app landing surface; `/daily` renders the former Today page                      |
 | `/calendar/:weekId` | `CalendarPage` (`components/pages/CalendarPage.tsx`)                 | `weekId`                                                | The week grid/list. Invalid `weekId` → **Redirect `/calendar`**                                            |
 | `/athlete`          | `AthletePage` (`components/pages/AthletePage/AthletePage.tsx`)       | —                                                       | Gates on active profile (spinner / empty / body)                                                           |
 | `/library`          | `LibraryPage` (`components/pages/LibraryPage.tsx`)                   | `?source=template-picker`, `?date=YYYY-MM-DD`           | `source=template-picker` switches Schedule to direct-schedule short-circuit                                |
@@ -136,7 +141,7 @@ Defined in `components/templates/MainLayout/MainLayout.tsx`; wraps **every** rou
 
 |              |                                                                                                                                                                            |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route        | `/calendar` (renders **Today**, not Calendar)                                                                                                                              |
+| Route        | `/calendar` (redirects to the `/calendar/:weekId` week grid)                                                                                                               |
 | Renders      | `components/pages/Daily/Daily.tsx` (lazy `DailyPage`)                                                                                                                      |
 | Header       | Global sticky header + page `TodayHeader` (date eyebrow + "Today" h1 route-heading + inert Notifications bell)                                                             |
 | Bottom nav   | Visible (mobile)                                                                                                                                                           |
@@ -318,7 +323,7 @@ Defined in `components/templates/MainLayout/MainLayout.tsx`; wraps **every** rou
 
 ## Coverage notes
 
-- **Routing ground truth verified** against `AppRoutes.tsx`: all 12 routes present and correctly attributed, including the `/calendar` = **Today** (not Calendar) distinction and the `/settings/profile` → `/athlete` redirect being declared _above_ `/settings/:tab?` so it wins. The Health sub-router's 5 lazy pages + null→Redirect fallback are all mapped.
+- **Routing ground truth verified** against `AppRoutes.tsx`: all 12 routes present and correctly attributed, including the `/calendar` → `/calendar/:weekId` week-grid redirect and the `/settings/profile` → `/athlete` redirect being declared _above_ `/settings/:tab?` so it wins. The Health sub-router's 5 lazy pages + null→Redirect fallback are all mapped.
 - **DataFlowsAddDialog added** (was the single gap flagged by the critic): confirmed as a real `role="dialog"` modal at `organisms/ProfileManager/components/DataFlowsAddDialog.tsx`, mounted by `DataFlowsGroup` inside the Profile Edit dialog's Data Flows tab. It is now catalogued in the Athlete screen row, the dialogs inventory, and the editor-dialog narrative — reachable only via Athlete → Edit profile → Data Flows.
 - **Orphan/unmounted surfaces flagged, not invented as routes:** `NewWorkoutPicker` / `NewWorkoutPickerTiles` / `PickerTile` (and the `TemplatePickerDialog` they alone mounted) were genuinely **not route-mounted** and have since been **removed**; the live equivalent is `CreateStartFrom` inside the CreateWorkout overlay. `StaleConflictDialog` has **no production mount** (only its own dir + AGENTS.md). `DeleteWorkoutDialog` is **legacy/unused** by the routed Library page (which uses the generic `ConfirmationModal`).
 - **Out-of-area dialogs** correctly attributed: `RawWorkoutDialog` mounts only via `CalendarDialogs.tsx` (calendar area), and `ZonesConflictDialog` only via the global `train2go-zones-sync-context.tsx` provider — neither belongs to the structured editor despite appearing in that area's file scope.

@@ -90,6 +90,16 @@ describe("DayColumn wellness band", () => {
     expect(screen.queryByTestId("wellness-band")).not.toBeInTheDocument();
   });
 
+  it("should thread wellnessResolved through to the explicit empty marker", () => {
+    // Arrange
+
+    // Act
+    renderColumn(undefined, { wellnessResolved: true });
+
+    // Assert
+    expect(screen.getByTestId("wellness-band-empty")).toBeInTheDocument();
+  });
+
   it("should render the + Add affordance on an empty day", () => {
     // Arrange
     const wellness: DayWellness = { sleep: "82" };
