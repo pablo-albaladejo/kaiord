@@ -4,6 +4,7 @@ import { fileTypeSchema } from "@kaiord/core";
 
 import { convertFitToKrdEvents } from "../event";
 import { extractFitExtensions } from "../extensions/extensions.extractor";
+import { convertFitTimeCreatedToIso } from "../health/shared/health-metadata.builder";
 import { convertFitToKrdLaps } from "../lap";
 import { convertFitToKrdRecords } from "../record";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
@@ -12,21 +13,11 @@ import type { FitMessages } from "../shared/types";
 
 const KRD_VERSION = "1.0" as const;
 
-/**
- * Converts FIT timeCreated to ISO string, handling Date objects and numbers
- */
-const convertTimeCreated = (timeCreated: unknown): string => {
-  if (timeCreated instanceof Date) return timeCreated.toISOString();
-  if (typeof timeCreated === "number")
-    return new Date(timeCreated * 1000).toISOString();
-  return new Date().toISOString();
-};
-
 const buildKrdMetadata = (
   fileId: Record<string, unknown> | undefined,
   session: ReturnType<typeof convertFitToKrdSession> | undefined
 ) => ({
-  created: convertTimeCreated(fileId ? fileId.timeCreated : undefined),
+  created: convertFitTimeCreatedToIso(fileId ? fileId.timeCreated : undefined),
   sport: (session ? session.sport : undefined) ?? "generic",
   subSport: session ? session.subSport : undefined,
 });
