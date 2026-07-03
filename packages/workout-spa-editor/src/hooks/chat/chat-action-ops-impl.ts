@@ -22,8 +22,7 @@ import { getCurrentWeekId, parseWeekId } from "../../utils/week-utils";
 
 const sportOf = (krd: KRD, fallback?: string): string => {
   const structured = krd.extensions?.structured_workout as
-    | { sport?: string }
-    | undefined;
+    { sport?: string } | undefined;
   return structured?.sport ?? fallback ?? "running";
 };
 

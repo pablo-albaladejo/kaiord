@@ -55,8 +55,7 @@ export function PhysiologySelects({
           onChange({
             ...formData,
             activityLevel: (e.target.value || undefined) as
-              | ActivityLevel
-              | undefined,
+              ActivityLevel | undefined,
           })
         }
       />

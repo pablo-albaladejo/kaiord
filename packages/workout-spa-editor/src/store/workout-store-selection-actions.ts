@@ -35,8 +35,7 @@ export function createSelectionActions(
     toggleStepSelection: (id: string) =>
       set((state: MinimalState) => {
         const workout = state.currentWorkout?.extensions?.structured_workout as
-          | Workout
-          | undefined;
+          Workout | undefined;
         const isSelected = state.selectedStepIds.includes(id);
         if (isSelected) {
           return {
@@ -67,8 +66,7 @@ export function createSelectionActions(
     selectAllSteps: (ids: Array<string>) =>
       set((state: MinimalState) => {
         const workout = state.currentWorkout?.extensions?.structured_workout as
-          | Workout
-          | undefined;
+          Workout | undefined;
         if (ids.length === 0) {
           return { selectedStepIds: [], selectedStepId: null };
         }

@@ -82,7 +82,7 @@ logger): Promise<{content, writtenTo}>`. Branches binary vs text writer;
 ### Working In This Directory
 
 - Tool naming: snake*case prefixed with `kaiord*`; file name mirrors the
-tool name (`kaiord-foo.ts`registers`kaiord_foo`).
+  tool name (`kaiord-foo.ts`registers`kaiord_foo`).
 - Every tool handler wraps its body in `try { ... } catch (error) { return
 formatError(error); }` so MCP clients always receive a structured
   `{content, isError}` shape instead of a thrown exception.

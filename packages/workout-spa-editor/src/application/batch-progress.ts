@@ -9,10 +9,7 @@
  */
 
 export type WorkoutBatchStatus =
-  | "queued"
-  | "processing"
-  | "succeeded"
-  | "failed";
+  "queued" | "processing" | "succeeded" | "failed";
 
 export type BatchProgressCounts = {
   queued: number;

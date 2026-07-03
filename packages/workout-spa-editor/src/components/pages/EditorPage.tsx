@@ -47,8 +47,7 @@ export default function EditorPage({ id }: EditorPageProps) {
   const sidebarData = useCoachingSidebar(profileId, id);
 
   const workout = currentWorkout?.extensions?.structured_workout as
-    | Workout
-    | undefined;
+    Workout | undefined;
 
   if (id && loading) return <EditorLoading />;
   if (id && record && !record.krd) return <EditorNoData />;

@@ -9,24 +9,24 @@ Every Zod schema that defines the KRD domain model. The barrel `index.ts` re-exp
 
 ## Key Files
 
-| File               | Description                                                                                                                                                                                        |
+| File | Description |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `index.ts`         | Barrel — re-exports KRD envelope schemas, workout/step/duration/target schemas, sport/sub-sport/intensity/equipment/swim-stroke enums, file-type, length-unit, and `KRDLapTrigger`.                |
-| `krd.ts`           | Re-export shim that forwards everything from `./krd/index` (the modular KRD schemas).                                                                                                              |
-| `workout.ts`       | `workoutSchema` (sport, optional subSport, poolLength, steps as union of WorkoutStep                                                                                                               | RepetitionBlock) and `repetitionBlockSchema` (`repeatCount`, `steps`). |
-| `workout-step.ts`  | `workoutStepSchema` — `stepIndex`, durationType+duration, targetType+target, optional intensity/notes/equipment. Refines so `durationType === duration.type` and `targetType === target.type`.     |
-| `duration.ts`      | `durationSchema` — discriminated union of 14 duration variants (time, distance, calories, heart*rate_less_than, power_less_than/greater_than, and all `repeat_until*\*`siblings with`repeatFrom`). |
-| `duration-type.ts` | `durationTypeSchema` — `z.enum([...])` covering every duration discriminator value (snake_case).                                                                                                   |
-| `target.ts`        | `targetSchema` — discriminated union of power/heart_rate/cadence/pace/stroke_type/open targets, each referencing its `*ValueSchema`.                                                               |
-| `target-type.ts`   | `targetTypeSchema` — `z.enum(["power","heart_rate","cadence","pace","stroke_type","open"])`.                                                                                                       |
-| `target-values.ts` | Re-export shim forwarding everything from `./target-values/index`.                                                                                                                                 |
-| `sport.ts`         | `sportSchema` — `z.enum(["cycling","running","swimming","generic"])`.                                                                                                                              |
-| `sub-sport.ts`     | `subSportSchema` — `z.enum([...])` listing 60+ snake_case sub-sport values (treadmill, trail, indoor_cycling, lap_swimming, gravel_cycling, …).                                                    |
-| `intensity.ts`     | `intensitySchema` — warmup, active, cooldown, rest, recovery, interval, other.                                                                                                                     |
-| `equipment.ts`     | `equipmentSchema` — swim_fins, swim_kickboard, swim_paddles, swim_pull_buoy, swim_snorkel, plus `none`.                                                                                            |
-| `swim-stroke.ts`   | `swimStrokeSchema` enum + `SWIM_STROKE_TO_FIT` (string → numeric code) and `FIT_TO_SWIM_STROKE` (inverse) lookup tables.                                                                           |
-| `file-type.ts`     | `fileTypeSchema` — `z.enum(["structured_workout","recorded_activity","course"])` matching `KRD.type`.                                                                                              |
-| `length-unit.ts`   | `lengthUnitSchema` — `z.enum(["meters","yards"])`.                                                                                                                                                 |
+| `index.ts` | Barrel — re-exports KRD envelope schemas, workout/step/duration/target schemas, sport/sub-sport/intensity/equipment/swim-stroke enums, file-type, length-unit, and `KRDLapTrigger`. |
+| `krd.ts` | Re-export shim that forwards everything from `./krd/index` (the modular KRD schemas). |
+| `workout.ts` | `workoutSchema` (sport, optional subSport, poolLength, steps as union of WorkoutStep | RepetitionBlock) and `repetitionBlockSchema` (`repeatCount`, `steps`). |
+| `workout-step.ts` | `workoutStepSchema` — `stepIndex`, durationType+duration, targetType+target, optional intensity/notes/equipment. Refines so `durationType === duration.type` and `targetType === target.type`. |
+| `duration.ts` | `durationSchema` — discriminated union of 14 duration variants (time, distance, calories, heart*rate_less_than, power_less_than/greater_than, and all `repeat_until*\*`siblings with`repeatFrom`). |
+| `duration-type.ts` | `durationTypeSchema` — `z.enum([...])` covering every duration discriminator value (snake_case). |
+| `target.ts` | `targetSchema` — discriminated union of power/heart_rate/cadence/pace/stroke_type/open targets, each referencing its `*ValueSchema`. |
+| `target-type.ts` | `targetTypeSchema` — `z.enum(["power","heart_rate","cadence","pace","stroke_type","open"])`. |
+| `target-values.ts` | Re-export shim forwarding everything from `./target-values/index`. |
+| `sport.ts` | `sportSchema` — `z.enum(["cycling","running","swimming","generic"])`. |
+| `sub-sport.ts` | `subSportSchema` — `z.enum([...])` listing 60+ snake_case sub-sport values (treadmill, trail, indoor_cycling, lap_swimming, gravel_cycling, …). |
+| `intensity.ts` | `intensitySchema` — warmup, active, cooldown, rest, recovery, interval, other. |
+| `equipment.ts` | `equipmentSchema` — swim_fins, swim_kickboard, swim_paddles, swim_pull_buoy, swim_snorkel, plus `none`. |
+| `swim-stroke.ts` | `swimStrokeSchema` enum + `SWIM_STROKE_TO_FIT` (string → numeric code) and `FIT_TO_SWIM_STROKE` (inverse) lookup tables. |
+| `file-type.ts` | `fileTypeSchema` — `z.enum(["structured_workout","recorded_activity","course"])` matching `KRD.type`. |
+| `length-unit.ts` | `lengthUnitSchema` — `z.enum(["meters","yards"])`. |
 
 ## Subdirectories
 

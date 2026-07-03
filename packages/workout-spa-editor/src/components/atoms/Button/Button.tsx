@@ -4,12 +4,7 @@ import { sizeClasses, variantClasses } from "./button-styles";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "tertiary"
-  | "danger"
-  | "ghost"
-  | "soft";
+  "primary" | "secondary" | "tertiary" | "danger" | "ghost" | "soft";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

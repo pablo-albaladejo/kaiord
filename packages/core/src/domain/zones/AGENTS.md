@@ -9,10 +9,10 @@ Coggan 7-band cycling power-zone math. Single source of truth for translating be
 
 ## Key Files
 
-| File                  | Description                                                                                                                                                                                            |
+| File | Description |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | --- | --- | --- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `index.ts`            | Barrel re-exporting `PowerZone`, `POWER_ZONES`, `POWER_ZONE_PERCENT_FTP`, `isPowerZone`, `zoneToPercentFtp`, `percentFtpToZone`.                                                                       |
-| `power-zones.ts`      | Defines `PowerZone = 1                                                                                                                                                                                 | 2   | 3   | 4   | 5   | 6   | 7`, the readonly `POWER_ZONE_PERCENT_FTP`lookup (1→55, 2→75, 3→90, 4→105, 5→120, 6→150, 7→200),`isPowerZone`type guard (rejects NaN, Infinity, non-integers, out-of-range),`zoneToPercentFtp`(RangeError on invalid), and`percentFtpToZone` (strict discrete inverse — only matches exact canonical values). |
+| `index.ts` | Barrel re-exporting `PowerZone`, `POWER_ZONES`, `POWER_ZONE_PERCENT_FTP`, `isPowerZone`, `zoneToPercentFtp`, `percentFtpToZone`. |
+| `power-zones.ts` | Defines `PowerZone = 1                                                                                                                                                                                 | 2   | 3   | 4   | 5   | 6   | 7`, the readonly `POWER_ZONE_PERCENT_FTP`lookup (1→55, 2→75, 3→90, 4→105, 5→120, 6→150, 7→200),`isPowerZone`type guard (rejects NaN, Infinity, non-integers, out-of-range),`zoneToPercentFtp`(RangeError on invalid), and`percentFtpToZone` (strict discrete inverse — only matches exact canonical values). |
 | `power-zones.test.ts` | Tests the full round-trip identity (`percentFtpToZone(zoneToPercentFtp(z)) === z`), boundary rejection (0, 8, -1, 1.5, NaN, Infinity), and the non-classifier contract (84% does NOT round to zone 2). |
 
 ## For AI Agents

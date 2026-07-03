@@ -38,8 +38,7 @@ export const convertFitToKrdHealthBodyComposition = (
   logger: Logger
 ): KRD => {
   const fileId = messages[fitMessageKeySchema.enum.fileIdMesgs]?.[0] as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const rawBody = messages[fitMessageKeySchema.enum.bodyCompositionMesgs] ?? [];
   const fitBody = parseFirstBodyComposition(rawBody, logger);
   const body = fitBody ? mapFitBodyCompositionToKrd(fitBody) : undefined;

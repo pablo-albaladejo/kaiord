@@ -9,8 +9,7 @@ const extractTcxExtensions = (
   logger: Logger
 ): Record<string, unknown> | undefined => {
   const extensions = trainingCenterDatabase.Extensions as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   if (!extensions) {
     return undefined;
   }
@@ -25,8 +24,7 @@ const extractWorkoutData = (
   trainingCenterDatabase: Record<string, unknown>
 ): Record<string, unknown> => {
   const workouts = trainingCenterDatabase.Workouts as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
 
   if (!workouts) {
     throw createTcxParsingError("No workouts found in TCX file");

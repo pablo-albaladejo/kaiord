@@ -7,8 +7,7 @@ const HEALTH_HRV_FILE_TYPE = "monitoringDaily" as const;
 
 const getHrvPayload = (krd: KRD): HrvSummary | undefined => {
   const extensions = krd.extensions as
-    | { health?: { hrv?: HrvSummary } }
-    | undefined;
+    { health?: { hrv?: HrvSummary } } | undefined;
   return extensions?.health?.hrv;
 };
 

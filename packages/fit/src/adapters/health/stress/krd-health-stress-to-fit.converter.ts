@@ -7,8 +7,7 @@ const HEALTH_STRESS_FILE_TYPE = "monitoringB" as const;
 
 const getStressPayload = (krd: KRD): StressEpisode | undefined => {
   const extensions = krd.extensions as
-    | { health?: { stress?: StressEpisode } }
-    | undefined;
+    { health?: { stress?: StressEpisode } } | undefined;
   return extensions?.health?.stress;
 };
 

@@ -432,8 +432,7 @@ describe("convertGarminToKRD", () => {
 
       // Assert
       const gcnExt = krd.extensions?.gcn as
-        | { isSessionTransitionEnabled?: boolean }
-        | undefined;
+        { isSessionTransitionEnabled?: boolean } | undefined;
       expect(gcnExt?.isSessionTransitionEnabled).toBe(true);
     });
 
@@ -446,8 +445,7 @@ describe("convertGarminToKRD", () => {
 
       // Assert
       const gcnExt = krd.extensions?.gcn as
-        | { isSessionTransitionEnabled?: boolean }
-        | undefined;
+        { isSessionTransitionEnabled?: boolean } | undefined;
       expect(gcnExt?.isSessionTransitionEnabled).toBe(false);
     });
 

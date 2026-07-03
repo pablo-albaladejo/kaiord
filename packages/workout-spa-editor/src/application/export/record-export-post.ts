@@ -4,10 +4,7 @@ import type { ExportLedgerRepository } from "./export-ledger-repository.port";
 import { emitExportAnalytics } from "./record-export-analytics";
 
 export type RecordExportOutcome =
-  | "created"
-  | "updated"
-  | "skipped"
-  | "lost-race";
+  "created" | "updated" | "skipped" | "lost-race";
 
 export type RecordExportResult = {
   ledgerId: string;

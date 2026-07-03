@@ -16,8 +16,7 @@ export function generateWorkoutFilename(
   format: WorkoutFileFormat
 ): string {
   const workoutData = workout.extensions?.structured_workout as
-    | { name?: string }
-    | undefined;
+    { name?: string } | undefined;
   const workoutName = workoutData?.name || "workout";
   const sanitizedName = sanitizeWorkoutName(workoutName);
   const extension = getFileExtension(format);

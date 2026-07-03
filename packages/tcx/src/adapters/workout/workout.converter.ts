@@ -14,8 +14,7 @@ const extractWorkoutExtensions = (
   logger: Logger
 ): Record<string, unknown> | undefined => {
   const extensions = tcxWorkout.Extensions as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   if (!extensions) {
     return undefined;
   }

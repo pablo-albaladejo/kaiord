@@ -191,8 +191,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       () => {
         const calls =
           ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-            | { action: string }[]
-            | undefined) ?? [];
+            { action: string }[] | undefined) ?? [];
         return calls.some((c) => c.action === "read-week");
       },
       { timeout: 10_000 }
@@ -223,8 +222,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       () => {
         const calls =
           ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-            | { action: string }[]
-            | undefined) ?? [];
+            { action: string }[] | undefined) ?? [];
         return calls.some((c) => c.action === "read-details");
       },
       { timeout: 10_000 }
@@ -549,8 +547,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       ({ baseline }) => {
         const calls =
           ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-            | { action: string }[]
-            | undefined) ?? [];
+            { action: string }[] | undefined) ?? [];
         return (
           calls.filter((c) => c.action === "read-details").length > baseline
         );
@@ -963,8 +960,7 @@ const countReadDetails = async (page: Page): Promise<number> =>
   page.evaluate(() => {
     const calls =
       ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-        | { action: string }[]
-        | undefined) ?? [];
+        { action: string }[] | undefined) ?? [];
     return calls.filter((c) => c.action === "read-details").length;
   });
 

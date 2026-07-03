@@ -7,11 +7,7 @@ import { canonicalHash, MANAGED_DATA_REGISTRY } from "@kaiord/core";
 import type { ExportLedgerRepository } from "./export-ledger-repository.port";
 
 export type ExportAnalyticsOutcome =
-  | "created"
-  | "updated"
-  | "skipped"
-  | "lost-race"
-  | "error";
+  "created" | "updated" | "skipped" | "lost-race" | "error";
 
 export const computeExportHash = (
   dataType: ManagedDataType,

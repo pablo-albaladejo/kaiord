@@ -52,8 +52,7 @@ export const isUntouchedCoachingTemplate = (record: WorkoutRecord): boolean => {
   if (record.createdAt !== record.updatedAt) return false;
 
   const ext = record.krd?.extensions?.structured_workout as
-    | { steps?: unknown[] }
-    | undefined;
+    { steps?: unknown[] } | undefined;
   const steps = ext?.steps;
   if (!Array.isArray(steps) || steps.length !== 1) return false;
   return isTemplateStep(steps[0]);

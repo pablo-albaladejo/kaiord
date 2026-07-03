@@ -8,8 +8,7 @@
 import type { ExportLedgerEntry } from "../../types/export-ledger";
 
 export type InsertPendingResult =
-  | { ok: true }
-  | { ok: false; reason: "constraint" };
+  { ok: true } | { ok: false; reason: "constraint" };
 
 export type ExportLedgerRepository = {
   findByNaturalKey: (input: {

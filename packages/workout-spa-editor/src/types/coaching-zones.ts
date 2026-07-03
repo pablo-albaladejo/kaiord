@@ -22,8 +22,7 @@ type HrBoundKey = `${Sport}.heartRateZones.${Band}.${"minBpm" | "maxBpm"}`;
 type PowerBoundKey =
   `cycling.powerZones.${Band}.${"minPercent" | "maxPercent"}`;
 type PaceBoundKey = `${"running" | "swimming"}.paceZones.${Band}.${
-  | "minPace"
-  | "maxPace"}`;
+  "minPace" | "maxPace"}`;
 
 export type ThresholdFieldKey =
   | "cycling.thresholds.ftp"
@@ -50,10 +49,7 @@ export type ConflictItem = {
 export type ConflictDecision = "accept" | "reject";
 
 export type SyncZonesFailureReason =
-  | "unsupported"
-  | "transport-error"
-  | "shape-mismatch"
-  | "profile-deleted";
+  "unsupported" | "transport-error" | "shape-mismatch" | "profile-deleted";
 
 export type ZonesPayload = z.infer<typeof zonesPayloadSchema>;
 export type HrBandBlock = NonNullable<ZonesPayload["hrZones"]>["cycling"];

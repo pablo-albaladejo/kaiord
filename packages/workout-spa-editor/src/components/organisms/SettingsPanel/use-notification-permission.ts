@@ -9,10 +9,7 @@
 import { useCallback, useState } from "react";
 
 export type NotificationPermissionState =
-  | "unsupported"
-  | "default"
-  | "granted"
-  | "denied";
+  "unsupported" | "default" | "granted" | "denied";
 
 const readPermission = (): NotificationPermissionState =>
   typeof Notification === "undefined" ? "unsupported" : Notification.permission;

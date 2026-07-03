@@ -49,5 +49,4 @@ export type ResolvedDayEnergyBalance = {
 };
 
 export type DayEnergyBalanceResult =
-  | GatedDayEnergyBalance
-  | ResolvedDayEnergyBalance;
+  GatedDayEnergyBalance | ResolvedDayEnergyBalance;

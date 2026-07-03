@@ -4,11 +4,9 @@ export const encodeTextEvents = (
   step: WorkoutStep
 ): Array<Record<string, unknown>> | Record<string, unknown> | undefined => {
   const stepExtensions = step.extensions?.zwift as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const textEvents = stepExtensions?.textEvents as
-    | Array<Record<string, unknown>>
-    | undefined;
+    Array<Record<string, unknown>> | undefined;
 
   if (!textEvents || textEvents.length === 0) {
     return undefined;

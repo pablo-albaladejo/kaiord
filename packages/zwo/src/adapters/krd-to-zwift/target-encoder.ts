@@ -38,11 +38,9 @@ export const encodeFreeRideTargets = (
   interval: Record<string, unknown>
 ): void => {
   const stepExtensions = step.extensions?.zwift as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const flatRoad = (stepExtensions?.flatRoad || stepExtensions?.FlatRoad) as
-    | number
-    | undefined;
+    number | undefined;
   if (flatRoad !== undefined) {
     interval["@_FlatRoad"] = flatRoad;
   }

@@ -93,8 +93,7 @@ export const restoreKaiordDuration = (
   logger: Logger
 ): Duration | null => {
   const originalDurationType = tcxDuration["@_kaiord:originalDurationType"] as
-    | string
-    | undefined;
+    string | undefined;
 
   if (originalDurationType === "heart_rate_less_than") {
     return restoreHeartRateLessThan(tcxDuration, logger);

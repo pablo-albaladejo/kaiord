@@ -34,8 +34,7 @@ export function useRepetitionBlockHandlers() {
   const handleDelete = useDeleteWithConfirmation();
 
   const workout = currentWorkout?.extensions?.structured_workout as
-    | Workout
-    | undefined;
+    Workout | undefined;
   const handleConfirmCreateBlock = buildHandleConfirmCreateBlock({
     selectedStepIds,
     workout,

@@ -19,5 +19,4 @@ export type RepeatGroupDTOInputType = {
 };
 
 export type GarminWorkoutStepInput =
-  | ExecutableStepDTOInput
-  | RepeatGroupDTOInputType;
+  ExecutableStepDTOInput | RepeatGroupDTOInputType;

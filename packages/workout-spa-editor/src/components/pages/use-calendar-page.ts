@@ -52,9 +52,7 @@ export type CalendarPageReadyState = {
 };
 
 export type CalendarPageState =
-  | { state: "redirect" }
-  | { state: "skeleton" }
-  | CalendarPageReadyState;
+  { state: "redirect" } | { state: "skeleton" } | CalendarPageReadyState;
 
 export function useCalendarPage(): CalendarPageState {
   const s = useCalendarState();

@@ -21,8 +21,7 @@ export function createDexieTombstoneRepository(
 
     get: async (tableName, id) => {
       const result = (await table().get([tableName, id])) as
-        | Tombstone
-        | undefined;
+        Tombstone | undefined;
       return result ?? undefined;
     },
 

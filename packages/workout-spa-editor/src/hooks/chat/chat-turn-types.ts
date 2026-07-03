@@ -11,10 +11,7 @@ import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 
 export type ChatTurnState =
-  | "idle"
-  | "streaming"
-  | "awaiting_confirmation"
-  | "error";
+  "idle" | "streaming" | "awaiting_confirmation" | "error";
 
 export type ChatTurnSetters = {
   setState: (s: ChatTurnState) => void;

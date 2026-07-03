@@ -31,8 +31,7 @@ export const useAppKeyboardHandlers = () => {
   const pasteStep = usePasteStep();
 
   const workout = store.currentWorkout?.extensions?.structured_workout as
-    | Workout
-    | undefined;
+    Workout | undefined;
 
   const stepIndex = useCallback(
     () => getSelectedStepIndex(store.selectedStepId, workout),

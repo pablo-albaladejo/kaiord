@@ -90,8 +90,14 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
     { id: "gemini-3-pro-preview", label: "gemini-3-pro-preview" },
     { id: "gemini-3-flash-preview", label: "gemini-3-flash-preview" },
     { id: "gemini-3.1-pro-preview", label: "gemini-3.1-pro-preview" },
-    { id: "gemini-3.1-pro-preview-customtools", label: "gemini-3.1-pro-preview-customtools" },
-    { id: "gemini-3.1-flash-lite-preview", label: "gemini-3.1-flash-lite-preview" },
+    {
+      id: "gemini-3.1-pro-preview-customtools",
+      label: "gemini-3.1-pro-preview-customtools",
+    },
+    {
+      id: "gemini-3.1-flash-lite-preview",
+      label: "gemini-3.1-flash-lite-preview",
+    },
     { id: "gemini-3.5-flash", label: "gemini-3.5-flash" },
     { id: "gemini-pro-latest", label: "gemini-pro-latest" },
     { id: "gemini-flash-latest", label: "gemini-flash-latest" },

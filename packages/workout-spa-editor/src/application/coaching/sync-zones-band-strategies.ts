@@ -20,8 +20,7 @@ export const setTableMethodTrainTwoGo = (
   const sportConfig = profile.sportZones[sport];
   if (!sportConfig) return profile;
   const tc = (sportConfig as Record<string, unknown>)[kind] as
-    | { method?: string; zones?: unknown[] }
-    | undefined;
+    { method?: string; zones?: unknown[] } | undefined;
   if (!tc) return profile;
   return {
     ...profile,

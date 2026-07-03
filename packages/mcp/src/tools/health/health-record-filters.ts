@@ -1,10 +1,7 @@
 import type { KRD } from "@kaiord/core";
 
 export type HealthKrdType =
-  | "sleep_record"
-  | "weight_measurement"
-  | "hrv_summary"
-  | "daily_wellness";
+  "sleep_record" | "weight_measurement" | "hrv_summary" | "daily_wellness";
 
 type DateExtractor = (health: Record<string, unknown>) => string | undefined;
 

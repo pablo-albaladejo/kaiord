@@ -29,8 +29,7 @@ const stripBlock = (block: RepetitionBlock): RepetitionBlock => {
  */
 export const stripIds = (uiWorkout: UIWorkout): KRD => {
   const workout = uiWorkout.extensions?.structured_workout as
-    | Workout
-    | undefined;
+    Workout | undefined;
 
   if (!workout) return uiWorkout;
 
