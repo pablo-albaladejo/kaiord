@@ -36,7 +36,7 @@ jobs:
       spa_marker: ${{ steps.spa_marker.outputs.marker }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
