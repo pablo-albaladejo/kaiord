@@ -42,8 +42,7 @@ const readPersistedZones = (
   const cfg = profile.sportZones[sport];
   if (!cfg) return undefined;
   const zc = (cfg as Record<string, unknown>)[kind] as
-    | { zones?: unknown[] }
-    | undefined;
+    { zones?: unknown[] } | undefined;
   return zc?.zones;
 };
 

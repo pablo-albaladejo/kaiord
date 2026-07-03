@@ -27,8 +27,7 @@ export async function seedWorkouts(
 ) {
   await page.evaluate(async (records) => {
     const db = (window as unknown as Record<string, unknown>).__KAIORD_DB__ as
-      | DexieDb
-      | undefined;
+      DexieDb | undefined;
     if (!db) throw new Error("__KAIORD_DB__ not available");
     await db.table("workouts").bulkPut(records);
   }, workouts);
@@ -41,8 +40,7 @@ export async function seedTemplates(
 ) {
   await page.evaluate(async (records) => {
     const db = (window as unknown as Record<string, unknown>).__KAIORD_DB__ as
-      | DexieDb
-      | undefined;
+      DexieDb | undefined;
     if (!db) throw new Error("__KAIORD_DB__ not available");
     await db.table("templates").bulkPut(records);
   }, templates);
@@ -58,8 +56,7 @@ export async function seedTemplates(
 export async function clearDexie(page: Page) {
   await page.evaluate(async () => {
     const db = (window as unknown as Record<string, unknown>).__KAIORD_DB__ as
-      | DexieDb
-      | undefined;
+      DexieDb | undefined;
     if (!db) return;
     const tables = [
       "workouts",

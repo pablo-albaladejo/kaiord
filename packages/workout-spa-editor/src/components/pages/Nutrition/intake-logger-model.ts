@@ -20,8 +20,7 @@ export type IntakeLoggerFields = {
 export type IntakeLoggerEntry = Omit<LogIntakeEntryInput, "date">;
 
 export type IntakeLoggerResult =
-  | { entry: IntakeLoggerEntry }
-  | { error: string };
+  { entry: IntakeLoggerEntry } | { error: string };
 
 export const EMPTY_INTAKE_FIELDS: IntakeLoggerFields = {
   kcal: "",

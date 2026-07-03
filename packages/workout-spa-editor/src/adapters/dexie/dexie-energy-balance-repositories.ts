@@ -74,8 +74,7 @@ const createEnergyTargetRepository = (
 ): EnergyTargetRepository => ({
   get: async (profileId) =>
     (await db.table("energyTargets").get(profileId)) as
-      | EnergyTargetRecord
-      | undefined,
+      EnergyTargetRecord | undefined,
 
   put: async (record) => {
     await db.table("energyTargets").put(record);

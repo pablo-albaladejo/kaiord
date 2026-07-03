@@ -48,8 +48,7 @@ export const classifyZoneTable = (
   if (method === "train2go") {
     if (!snapshot) return "user-customized";
     const snapZones = snapshot[SNAPSHOT_KEY[`${sport}.${kind}`]] as
-      | unknown[]
-      | undefined;
+      unknown[] | undefined;
     return equalsSnapshot(zones, snapZones, kind)
       ? "train2go-synced-clean"
       : "train2go-synced-edited";

@@ -9,10 +9,10 @@ Cross-package protocol DTOs that don't fit in `domain/` because they describe tr
 
 ## Key Files
 
-| File                       | Description                                                                                                                                                                                                                                                                                                                                                                                                     |
+| File | Description |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `profile-snapshot.ts`      | `profileSnapshotSchema` (Zod) + `ProfileSnapshot` (inferred type) + `STALE_SNAPSHOT_THRESHOLD_DAYS=7` + `fingerprintSnapshot(profileId, snapshot)`. The schema enforces strict object shape, rejects prototype-pollution keys (`__proto__`/`constructor`/`prototype`) via a `superRefine`, and caps payload size at 8192 bytes of JSON. The fingerprint is FNV-1a 32-bit over `${profileId.length}:${profileId} | ${JSON.stringify(rest)}`(excluding`generatedAt`), returning 8-char lowercase hex. |
-| `profile-snapshot.test.ts` | Tests positive parsing, negative rejection (prototype-pollution top-level + nested, oversized payload, missing fields, unknown `activeSport`), and fingerprint stability/uniqueness.                                                                                                                                                                                                                            |
+| `profile-snapshot.ts` | `profileSnapshotSchema` (Zod) + `ProfileSnapshot` (inferred type) + `STALE_SNAPSHOT_THRESHOLD_DAYS=7` + `fingerprintSnapshot(profileId, snapshot)`. The schema enforces strict object shape, rejects prototype-pollution keys (`__proto__`/`constructor`/`prototype`) via a `superRefine`, and caps payload size at 8192 bytes of JSON. The fingerprint is FNV-1a 32-bit over `${profileId.length}:${profileId} | ${JSON.stringify(rest)}`(excluding`generatedAt`), returning 8-char lowercase hex. |
+| `profile-snapshot.test.ts` | Tests positive parsing, negative rejection (prototype-pollution top-level + nested, oversized payload, missing fields, unknown `activeSport`), and fingerprint stability/uniqueness. |
 
 ## For AI Agents
 

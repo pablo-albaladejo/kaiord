@@ -189,8 +189,7 @@ describe("Core Operations", () => {
       // Assert
       expect(result.currentWorkout).toBeDefined();
       const workout = result.currentWorkout?.extensions?.structured_workout as
-        | Workout
-        | undefined;
+        Workout | undefined;
       if (workout) {
         const updatedSteps = workout.steps;
         let expectedIndex = 0;
@@ -392,8 +391,7 @@ describe("Core Operations", () => {
 
       // Assert
       const workout = state.currentWorkout?.extensions?.structured_workout as
-        | Workout
-        | undefined;
+        Workout | undefined;
       if (workout) {
         expect(workout.steps).toHaveLength(2);
       }

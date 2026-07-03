@@ -10,11 +10,7 @@ const STEP_TYPE_TO_INTENSITY: Record<string, Intensity> = {
 };
 
 export type StepTypeKey =
-  | "warmup"
-  | "cooldown"
-  | "interval"
-  | "recovery"
-  | "rest";
+  "warmup" | "cooldown" | "interval" | "recovery" | "rest";
 
 const INTENSITY_TO_STEP_TYPE: Record<string, StepTypeKey> = {
   warmup: "warmup",

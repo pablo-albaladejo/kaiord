@@ -44,8 +44,7 @@ export function usePersistScratch(date: string): UsePersistScratch {
       return;
     }
     const workout = currentWorkout.extensions?.structured_workout as
-      | Workout
-      | undefined;
+      Workout | undefined;
     const sport = workout?.sport ?? DEFAULT_SPORT;
     try {
       await persistScratchWorkout(persistence, {

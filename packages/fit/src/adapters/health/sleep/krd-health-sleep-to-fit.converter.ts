@@ -7,8 +7,7 @@ const HEALTH_SLEEP_FILE_TYPE = "sleep" as const;
 
 const getSleepPayload = (krd: KRD): SleepRecord | undefined => {
   const extensions = krd.extensions as
-    | { health?: { sleep?: SleepRecord } }
-    | undefined;
+    { health?: { sleep?: SleepRecord } } | undefined;
   return extensions?.health?.sleep;
 };
 

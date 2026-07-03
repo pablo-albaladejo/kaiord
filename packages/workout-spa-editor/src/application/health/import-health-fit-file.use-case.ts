@@ -40,8 +40,7 @@ export type ImportHealthFitFileResult = {
 
 const readHealth = (krd: KRD): HealthExtensions => {
   const extensions = krd.extensions as
-    | { health?: HealthExtensions }
-    | undefined;
+    { health?: HealthExtensions } | undefined;
   return extensions?.health ?? {};
 };
 

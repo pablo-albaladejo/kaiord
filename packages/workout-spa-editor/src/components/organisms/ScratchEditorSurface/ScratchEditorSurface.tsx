@@ -72,8 +72,7 @@ export function ScratchEditorSurface({ date }: { date: string | null }) {
   }, [currentWorkout, createEmpty, prefs, profileId, activeProfile]);
 
   const workout = currentWorkout?.extensions?.structured_workout as
-    | Workout
-    | undefined;
+    Workout | undefined;
   const currentSport = workout?.sport;
 
   useEffect(() => {

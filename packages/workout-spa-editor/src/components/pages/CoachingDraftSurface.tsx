@@ -37,8 +37,7 @@ export function CoachingDraftSurface({
   const { handleStepSelect } = useAppHandlers();
 
   const workout = currentWorkout?.extensions?.structured_workout as
-    | Workout
-    | undefined;
+    Workout | undefined;
 
   return (
     <div className="space-y-6">

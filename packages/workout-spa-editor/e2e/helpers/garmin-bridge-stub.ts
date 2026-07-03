@@ -34,7 +34,6 @@ export const getGarminBridgeCallActions = async (
   page.evaluate(() => {
     const calls =
       ((window as unknown as Record<string, unknown>).__GARMIN_STUB_CALLS__ as
-        | { action: string }[]
-        | undefined) ?? [];
+        { action: string }[] | undefined) ?? [];
     return calls.map((c) => c.action);
   });

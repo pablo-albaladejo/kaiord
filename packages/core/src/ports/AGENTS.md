@@ -9,16 +9,16 @@ Interface-only definitions ("ports" in hexagonal terminology). Pure `type` decla
 
 ## Key Files
 
-| File                 | Description                                                                                                                                            |
+| File | Description |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ---------- |
-| `format-strategy.ts` | The four conversion port types: `BinaryReader`/`BinaryWriter` (Uint8Array ↔ KRD) and `TextReader`/`TextWriter` (string ↔ KRD).                         |
-| `logger.ts`          | `Logger` interface (`debug`/`info`/`warn`/`error`, each taking a message and optional context record) and `LogLevel` union.                            |
-| `auth-provider.ts`   | `AuthProvider` port (`login`/`is_authenticated`/`export_tokens`/`restore_tokens`/`logout`) and opaque `TokenData = Record<string, unknown>`.           |
-| `token-store.ts`     | `TokenStore` port (`save`/`load`/`clear`) for persisting `TokenData` between sessions.                                                                 |
+| `format-strategy.ts` | The four conversion port types: `BinaryReader`/`BinaryWriter` (Uint8Array ↔ KRD) and `TextReader`/`TextWriter` (string ↔ KRD). |
+| `logger.ts` | `Logger` interface (`debug`/`info`/`warn`/`error`, each taking a message and optional context record) and `LogLevel` union. |
+| `auth-provider.ts` | `AuthProvider` port (`login`/`is_authenticated`/`export_tokens`/`restore_tokens`/`logout`) and opaque `TokenData = Record<string, unknown>`. |
+| `token-store.ts` | `TokenStore` port (`save`/`load`/`clear`) for persisting `TokenData` between sessions. |
 | `workout-service.ts` | `WorkoutService` port (`push`/`pull`/`list`/`remove`) plus `WorkoutSummary`, `PushResult`, `ListOptions` DTOs for remote services like Garmin Connect. |
-| `analytics.ts`       | `Analytics` port (`pageView`/`event`) and `AnalyticsEvent = Record<string, string                                                                      | number | boolean>`. |
-| `index.ts`           | Barrel re-export of all port types.                                                                                                                    |
-| `logger.test.ts`     | Smoke test against a stub `Logger` to lock the shape.                                                                                                  |
+| `analytics.ts` | `Analytics` port (`pageView`/`event`) and `AnalyticsEvent = Record<string, string                                                                      | number | boolean>`. |
+| `index.ts` | Barrel re-export of all port types. |
+| `logger.test.ts` | Smoke test against a stub `Logger` to lock the shape. |
 
 ## For AI Agents
 

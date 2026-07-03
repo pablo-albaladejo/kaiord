@@ -20,8 +20,7 @@ const ACTIVE_PROFILE_KEY = "activeProfileId";
 
 const readActiveProfileId = async (tx: Transaction): Promise<string | null> => {
   const row = (await tx.table("meta").get(ACTIVE_PROFILE_KEY)) as
-    | MetaRow
-    | undefined;
+    MetaRow | undefined;
   return typeof row?.value === "string" ? row.value : null;
 };
 

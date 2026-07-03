@@ -32,14 +32,13 @@ export const createQueryEnergyBalanceTool = (deps: ReadToolDeps): ChatTool => ({
     const to = input.dateTo ?? input.date ?? deps.today;
     const days = eachDay(range.from, to);
     const balances = await Promise.all(
-      days.map(
-        (date): Promise<DayEnergyBalanceResult> =>
-          buildDayEnergyBalance({
-            persistence: deps.persistence,
-            profileId: deps.profileId,
-            date,
-            today: deps.today,
-          })
+      days.map((date): Promise<DayEnergyBalanceResult> =>
+        buildDayEnergyBalance({
+          persistence: deps.persistence,
+          profileId: deps.profileId,
+          date,
+          today: deps.today,
+        })
       )
     );
     const todayResult = await buildDayEnergyBalance({

@@ -69,8 +69,7 @@ export const convertTcxTarget = (
 
   if (targetType === "HeartRate_t") {
     const heartRateZone = tcxTarget.HeartRateZone as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     const result = convertHeartRateTarget(heartRateZone);
     if (result) return result;
   }

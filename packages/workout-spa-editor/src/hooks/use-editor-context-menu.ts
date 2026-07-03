@@ -9,8 +9,7 @@ import { getSelectedStepIndex } from "../utils/get-selected-step-index";
 export function useEditorContextMenu() {
   const store = useContextMenuStore();
   const workout = store.currentWorkout?.extensions?.structured_workout as
-    | Workout
-    | undefined;
+    Workout | undefined;
 
   const stepIndex = useCallback(
     () => getSelectedStepIndex(store.selectedStepId, workout),

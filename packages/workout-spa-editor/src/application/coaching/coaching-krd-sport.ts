@@ -12,8 +12,7 @@ export type ResolvedSport = { sport: Sport; subSport?: SubSport };
 
 export const forceKrdSport = (krd: KRD, resolved: ResolvedSport): KRD => {
   const workout = krd.extensions?.structured_workout as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   return {
     ...krd,
     metadata: {

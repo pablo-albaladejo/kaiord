@@ -40,8 +40,7 @@ export const convertFitToKrdHealthWeight = (
   logger: Logger
 ): KRD => {
   const fileId = messages[fitMessageKeySchema.enum.fileIdMesgs]?.[0] as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const rawWeights = messages[fitMessageKeySchema.enum.weightScaleMesgs] ?? [];
   if (rawWeights.length > 1) {
     logger.warn("Multiple weight_scale messages — keeping the first only", {
