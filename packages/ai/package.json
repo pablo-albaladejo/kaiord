@@ -33,7 +33,7 @@
     "ai": "^7.0.14"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^3.0.85",
+    "@ai-sdk/anthropic": "^4.0.7",
     "@types/node": "^26.1.0",
     "@vitest/coverage-v8": "^4.1.9",
     "ai": "^7.0.14",
