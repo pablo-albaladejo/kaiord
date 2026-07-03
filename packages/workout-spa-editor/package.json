@@ -47,7 +47,7 @@
     "@radix-ui/react-dialog": "^1.1.18",
     "@radix-ui/react-dropdown-menu": "^2.1.19",
     "@radix-ui/react-toast": "^1.2.18",
-    "ai": "^6.0.177",
+    "ai": "^7.0.14",
     "dexie": "^4.4.4",
     "dexie-react-hooks": "^4.4.0",
     "lucide-react": "^1.23.0",
