@@ -46,34 +46,19 @@ describe("buildToolResultLinks", () => {
     ]);
   });
 
-  it("should return no links for a non-create_workout tool event", () => {
+  it.each([
+    {
+      label: "the tool event is not create_workout",
+      over: { toolName: "sync_coaching", toolResult: { synced: 3 } },
+    },
+    {
+      label: "the tool result lacks a workoutId",
+      over: { toolResult: { error: "boom" } },
+    },
+    { label: "the tool result is absent", over: {} },
+  ])("should return no links when $label", ({ over }) => {
     // Arrange
-    const message = toolMessage({
-      toolName: "sync_coaching",
-      toolResult: { synced: 3 },
-    });
-
-    // Act
-    const links = buildToolResultLinks(message);
-
-    // Assert
-    expect(links).toEqual([]);
-  });
-
-  it("should return no links when the tool result lacks a workoutId", () => {
-    // Arrange
-    const message = toolMessage({ toolResult: { error: "boom" } });
-
-    // Act
-    const links = buildToolResultLinks(message);
-
-    // Assert
-    expect(links).toEqual([]);
-  });
-
-  it("should return no links when the tool result is absent", () => {
-    // Arrange
-    const message = toolMessage();
+    const message = toolMessage(over);
 
     // Act
     const links = buildToolResultLinks(message);

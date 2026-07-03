@@ -85,17 +85,6 @@ describe("useGarminPush", () => {
     vi.clearAllMocks();
   });
 
-  it("should return a push function", () => {
-    // Arrange
-    const workout = makeWorkout();
-
-    // Act
-    const { result } = renderHook(() => useGarminPush(workout));
-
-    // Assert
-    expect(result.current.push).toBeTypeOf("function");
-  });
-
   it("should accept WorkoutRecord argument and push without reading from Zustand store", async () => {
     // Arrange
     const workout = makeWorkout();
@@ -113,39 +102,22 @@ describe("useGarminPush", () => {
     expect(mockPushWorkout).toHaveBeenCalledWith(gcn);
   });
 
-  it("should do nothing when workout is undefined", async () => {
+  it.each([
+    { label: "the workout is undefined", arrange: () => undefined },
+    {
+      label: "the workout has no krd",
+      arrange: () => makeWorkout({ krd: null }),
+    },
+    {
+      label: "the session is not active",
+      arrange: () => {
+        garminState.sessionActive = false;
+        return makeWorkout();
+      },
+    },
+  ])("should do nothing when $label", async ({ arrange }) => {
     // Arrange
-    const { result } = renderHook(() => useGarminPush(undefined));
-
-    // Act
-    await act(async () => {
-      await result.current.push();
-    });
-
-    // Assert
-    expect(mockExportGcnWorkout).not.toHaveBeenCalled();
-    expect(mockPushWorkout).not.toHaveBeenCalled();
-  });
-
-  it("should do nothing when workout has no krd", async () => {
-    // Arrange
-    const workout = makeWorkout({ krd: null });
-    const { result } = renderHook(() => useGarminPush(workout));
-
-    // Act
-    await act(async () => {
-      await result.current.push();
-    });
-
-    // Assert
-    expect(mockExportGcnWorkout).not.toHaveBeenCalled();
-    expect(mockPushWorkout).not.toHaveBeenCalled();
-  });
-
-  it("should do nothing when session is not active", async () => {
-    // Arrange
-    garminState.sessionActive = false;
-    const workout = makeWorkout();
+    const workout = arrange();
     const { result } = renderHook(() => useGarminPush(workout));
 
     // Act

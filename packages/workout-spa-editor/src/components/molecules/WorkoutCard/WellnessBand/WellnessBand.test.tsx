@@ -80,37 +80,32 @@ describe("WellnessBand", () => {
     expect(screen.queryByTestId("wellness-band-empty")).not.toBeInTheDocument();
   });
 
-  it("should give each badge an aria-label and the route from the map", () => {
-    // Arrange
-    const wellness: DayWellness = { sleep: "82", hrv: "45" };
+  it.each([
+    { wellness: { sleep: "82" }, name: "Sleep 82", href: "/health/sleep" },
+    { wellness: { hrv: "45" }, name: "HRV 45", href: "/health/recovery" },
+    {
+      wellness: { weight: "72.4" },
+      name: "Weight 72.4",
+      href: "/health/weight",
+    },
+    {
+      wellness: { steps: "9432" },
+      name: "Steps 9432",
+      href: "/health/activity",
+    },
+    { wellness: { net: "-600" }, name: "Net -600", href: "/nutrition" },
+  ] satisfies { wellness: DayWellness; name: string; href: string }[])(
+    "should route the $name badge to $href",
+    ({ wellness, name, href }) => {
+      // Arrange
 
-    // Act
-    renderBand(wellness);
+      // Act
+      renderBand(wellness);
 
-    // Assert
-    const sleep = screen.getByRole("link", { name: "Sleep 82" });
-    const hrv = screen.getByRole("link", { name: "HRV 45" });
-    expect(sleep).toHaveAttribute("href", "/health/sleep");
-    expect(hrv).toHaveAttribute("href", "/health/recovery");
-  });
-
-  it("should route weight and steps badges to their pages", () => {
-    // Arrange
-    const wellness: DayWellness = { weight: "72.4", steps: "9432" };
-
-    // Act
-    renderBand(wellness);
-
-    // Assert
-    expect(screen.getByRole("link", { name: "Weight 72.4" })).toHaveAttribute(
-      "href",
-      "/health/weight"
-    );
-    expect(screen.getByRole("link", { name: "Steps 9432" })).toHaveAttribute(
-      "href",
-      "/health/activity"
-    );
-  });
+      // Assert
+      expect(screen.getByRole("link", { name })).toHaveAttribute("href", href);
+    }
+  );
 
   it("should use a muted band class distinct from brand-coloured cards", () => {
     // Arrange
@@ -124,21 +119,6 @@ describe("WellnessBand", () => {
     expect(band.className).toContain("border-gray-200");
     expect(band.className).not.toContain("border-emerald");
     expect(band.className).not.toContain("border-l-4");
-  });
-
-  it("should render a net badge linking to the nutrition page", () => {
-    // Arrange
-    const wellness: DayWellness = { net: "-600" };
-
-    // Act
-    renderBand(wellness);
-
-    // Assert
-    expect(screen.getByTestId("wellness-badge-net")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Net -600" })).toHaveAttribute(
-      "href",
-      "/nutrition"
-    );
   });
 
   it("should omit the net badge when no net is present", () => {
