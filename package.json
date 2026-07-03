@@ -123,7 +123,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "husky": "^9.1.7",
-    "jscpd": "^4.1.1",
+    "jscpd": "^5.0.11",
     "knip": "^6.13.1",
     "lint-staged": "^17.0.4",
     "npm-run-all2": "^9.0.2",
