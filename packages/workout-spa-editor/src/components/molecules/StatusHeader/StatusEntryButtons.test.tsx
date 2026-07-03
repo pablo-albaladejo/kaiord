@@ -16,89 +16,23 @@ function renderAt(path: string) {
 }
 
 describe("StatusEntryButtons", () => {
-  it("should mark the daily entry active on the Daily route", () => {
+  it.each([
+    { route: "/daily", testId: "status-header-daily-button" },
+    { route: "/calendar/2026-W23", testId: "status-header-calendar-button" },
+    { route: "/library", testId: "status-header-library-button" },
+    { route: "/chat", testId: "status-header-chat-button" },
+    { route: "/nutrition", testId: "status-header-nutrition-button" },
+    { route: "/health/sleep", testId: "status-header-trends-button" },
+    { route: "/settings/ai", testId: "status-header-settings-button" },
+  ])("should mark the matching entry active on $route", ({ route, testId }) => {
     // Arrange
-    renderAt("/daily");
+    renderAt(route);
 
     // Act
-    const daily = screen.getByTestId("status-header-daily-button");
-    const calendar = screen.getByTestId("status-header-calendar-button");
-    const library = screen.getByTestId("status-header-library-button");
+    const active = screen.getByTestId(testId);
 
     // Assert
-    expect(daily).toHaveAttribute("aria-current", "page");
-    expect(calendar).not.toHaveAttribute("aria-current");
-    expect(library).not.toHaveAttribute("aria-current");
-  });
-
-  it("should mark the calendar entry active on a week-grid route", () => {
-    // Arrange
-    renderAt("/calendar/2026-W23");
-
-    // Act
-    const calendar = screen.getByTestId("status-header-calendar-button");
-    const daily = screen.getByTestId("status-header-daily-button");
-
-    // Assert
-    expect(calendar).toHaveAttribute("aria-current", "page");
-    expect(daily).not.toHaveAttribute("aria-current");
-  });
-
-  it("should mark the library entry active on the library route", () => {
-    // Arrange
-    renderAt("/library");
-
-    // Act
-    const library = screen.getByTestId("status-header-library-button");
-    const calendar = screen.getByTestId("status-header-calendar-button");
-
-    // Assert
-    expect(library).toHaveAttribute("aria-current", "page");
-    expect(calendar).not.toHaveAttribute("aria-current");
-  });
-
-  it("should mark the chat entry active on the chat route", () => {
-    // Arrange
-    renderAt("/chat");
-
-    // Act
-    const chat = screen.getByTestId("status-header-chat-button");
-
-    // Assert
-    expect(chat).toHaveAttribute("aria-current", "page");
-  });
-
-  it("should mark the nutrition entry active on the nutrition route", () => {
-    // Arrange
-    renderAt("/nutrition");
-
-    // Act
-    const nutrition = screen.getByTestId("status-header-nutrition-button");
-
-    // Assert
-    expect(nutrition).toHaveAttribute("aria-current", "page");
-  });
-
-  it("should mark the trends entry active on a nested health route", () => {
-    // Arrange
-    renderAt("/health/sleep");
-
-    // Act
-    const trends = screen.getByTestId("status-header-trends-button");
-
-    // Assert
-    expect(trends).toHaveAttribute("aria-current", "page");
-  });
-
-  it("should mark the settings entry active on a nested settings route", () => {
-    // Arrange
-    renderAt("/settings/ai");
-
-    // Act
-    const settings = screen.getByTestId("status-header-settings-button");
-
-    // Assert
-    expect(settings).toHaveAttribute("aria-current", "page");
+    expect(active).toHaveAttribute("aria-current", "page");
   });
 
   it("should mark no primary entry active on an unrelated route", () => {
