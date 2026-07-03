@@ -81,8 +81,9 @@ module.exports = [
     // Baseline at 55 kB. The `createChatAgent` chat engine (add-spa-ai-chatbot)
     // adds the multi-step tool-calling loop and pulls in `streamText`, taking
     // the bundle just past the prior 50 kB baseline; 55 kB restores headroom
-    // as the regression-detection baseline.
-    limit: "55 kB",
+    // as the regression-detection baseline. Bumped to 60 kB when `ai` moved
+    // 6 -> 7 (the v7 core adds ~2.2 kB, taking the bundle to ~57.2 kB).
+    limit: "60 kB",
     import: "*",
     modifyEsbuildConfig: externalize(["zod", "@kaiord/core"]),
   },
