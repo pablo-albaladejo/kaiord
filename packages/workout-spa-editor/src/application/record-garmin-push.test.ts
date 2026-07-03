@@ -27,30 +27,29 @@ const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
     ...overrides,
   }) as unknown as WorkoutRecord;
 
+const LEGAL_TRANSITIONS: {
+  state: WorkoutRecord["state"];
+  pushId: string;
+}[] = [
+  { state: "ready", pushId: "gw-42" },
+  { state: "modified", pushId: "gw-43" },
+];
+
 describe("recordGarminPush", () => {
-  it("should transition a ready workout to pushed with the push id", () => {
-    // Arrange
-    const workout = makeWorkout({ state: "ready" });
+  it.each(LEGAL_TRANSITIONS)(
+    "should transition a $state workout to pushed with the push id",
+    ({ state, pushId }) => {
+      // Arrange
+      const workout = makeWorkout({ state });
 
-    // Act
-    const result = recordGarminPush(workout, "gw-42");
+      // Act
+      const result = recordGarminPush(workout, pushId);
 
-    // Assert
-    expect(result.state).toBe("pushed");
-    expect(result.garminPushId).toBe("gw-42");
-  });
-
-  it("should transition a modified workout to pushed with the push id", () => {
-    // Arrange
-    const workout = makeWorkout({ state: "modified" });
-
-    // Act
-    const result = recordGarminPush(workout, "gw-43");
-
-    // Assert
-    expect(result.state).toBe("pushed");
-    expect(result.garminPushId).toBe("gw-43");
-  });
+      // Assert
+      expect(result.state).toBe("pushed");
+      expect(result.garminPushId).toBe(pushId);
+    }
+  );
 
   it("should record the push id without changing state when the transition is not legal", () => {
     // Arrange

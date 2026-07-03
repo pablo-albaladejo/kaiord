@@ -111,62 +111,52 @@ describe("MatchedSessionCard", () => {
     expect(screen.getByText("95%")).toBeInTheDocument();
   });
 
-  it("should use emerald lateral border for high-compliance sessions", () => {
-    // Arrange
+  it.each([
+    { tone: "emerald", score: 0.95, border: "border-emerald-600" },
+    { tone: "amber", score: 0.3, border: "border-amber-600" },
+    { tone: "neutral slate", score: null, border: "border-slate-500" },
+  ] satisfies { tone: string; score: number | null; border: string }[])(
+    "should use a $tone lateral border for a $score compliance score",
+    ({ score, border }) => {
+      // Arrange
+      render(
+        <MatchedSessionCard session={session({ complianceScore: score })} />
+      );
 
-    render(<MatchedSessionCard session={session({ complianceScore: 0.95 })} />);
+      // Act
+      const button = screen.getByTestId("matched-card-train2go:123");
 
-    // Act
+      // Assert
+      expect(button.className).toContain(border);
+    }
+  );
 
-    const button = screen.getByTestId("matched-card-train2go:123");
+  it.each([
+    {
+      label: "the percentage when compliance is known",
+      score: 0.92,
+      text: "92%",
+    },
+    {
+      label: "an unavailable note when compliance is null",
+      score: null,
+      text: "compliance unavailable",
+    },
+  ] satisfies { label: string; score: number | null; text: string }[])(
+    "should surface $label in the aria-label",
+    ({ score, text }) => {
+      // Arrange
+      render(
+        <MatchedSessionCard session={session({ complianceScore: score })} />
+      );
 
-    // Assert
+      // Act
+      const button = screen.getByTestId("matched-card-train2go:123");
 
-    expect(button.className).toContain("border-emerald-600");
-  });
-
-  it("should use amber lateral border for low-compliance sessions", () => {
-    // Arrange
-
-    render(<MatchedSessionCard session={session({ complianceScore: 0.3 })} />);
-
-    // Act
-
-    const button = screen.getByTestId("matched-card-train2go:123");
-
-    // Assert
-
-    expect(button.className).toContain("border-amber-600");
-  });
-
-  it("should use neutral slate-500 lateral border when complianceScore is null", () => {
-    // Arrange
-
-    render(<MatchedSessionCard session={session({ complianceScore: null })} />);
-
-    // Act
-
-    const button = screen.getByTestId("matched-card-train2go:123");
-
-    // Assert
-
-    expect(button.className).toContain("border-slate-500");
-    expect(button.getAttribute("aria-label")).toContain(
-      "compliance unavailable"
-    );
-  });
-
-  it("should include the compliance percentage in the aria-label", () => {
-    // Arrange
-
-    // Act
-
-    render(<MatchedSessionCard session={session({ complianceScore: 0.92 })} />);
-
-    // Assert
-
-    expect(screen.getByLabelText(/Matched session.*92%/i)).toBeInTheDocument();
-  });
+      // Assert
+      expect(button.getAttribute("aria-label")).toContain(text);
+    }
+  );
 
   it("should NOT render the executed slot when no executeds are present", () => {
     // Arrange

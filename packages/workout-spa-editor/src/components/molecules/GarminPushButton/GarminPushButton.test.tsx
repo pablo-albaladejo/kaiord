@@ -91,80 +91,46 @@ describe("GarminPushButton", () => {
     mockPolicies = [];
   });
 
-  it("should render nothing when extension is not installed", () => {
-    // Arrange
+  it.each([
+    {
+      label: "the extension is not installed",
+      extensionInstalled: false,
+      sessionActive: false,
+      policies: [] as IntegrationPolicy[],
+    },
+    {
+      label: "the bridge is installed but no workout export policy exists",
+      extensionInstalled: true,
+      sessionActive: true,
+      policies: [] as IntegrationPolicy[],
+    },
+    {
+      label: "a policy exists but the bridge is not installed",
+      extensionInstalled: false,
+      sessionActive: false,
+      policies: [ENABLED_POLICY],
+    },
+    {
+      label: "the policy exists but is disabled",
+      extensionInstalled: true,
+      sessionActive: true,
+      policies: [DISABLED_POLICY],
+    },
+  ])(
+    "should render nothing when $label",
+    ({ extensionInstalled, sessionActive, policies }) => {
+      // Arrange
+      mockState.extensionInstalled = extensionInstalled;
+      mockState.sessionActive = sessionActive;
+      mockPolicies = policies;
 
-    // Act
+      // Act
+      const { container } = render(<GarminPushButton profileId="p1" />);
 
-    const { container } = render(<GarminPushButton profileId="p1" />);
-
-    // Assert
-
-    expect(container.innerHTML).toBe("");
-  });
-
-  it("should render the push button when bridge is installed AND a workout export policy is enabled", () => {
-    // Arrange
-
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
-    mockPolicies = [ENABLED_POLICY];
-
-    // Act
-
-    render(<GarminPushButton profileId="p1" />);
-
-    // Assert
-
-    expect(screen.getByText("Send to Garmin")).toBeInTheDocument();
-  });
-
-  it("should NOT render when bridge is installed but no workout export policy exists", () => {
-    // Arrange
-
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
-    mockPolicies = [];
-
-    // Act
-
-    const { container } = render(<GarminPushButton profileId="p1" />);
-
-    // Assert
-
-    expect(container.innerHTML).toBe("");
-  });
-
-  it("should NOT render when policy exists but bridge is not installed", () => {
-    // Arrange
-
-    mockState.extensionInstalled = false;
-    mockPolicies = [ENABLED_POLICY];
-
-    // Act
-
-    const { container } = render(<GarminPushButton profileId="p1" />);
-
-    // Assert
-
-    expect(container.innerHTML).toBe("");
-  });
-
-  it("should NOT render when policy exists but is disabled", () => {
-    // Arrange
-
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
-    mockPolicies = [DISABLED_POLICY];
-
-    // Act
-
-    const { container } = render(<GarminPushButton profileId="p1" />);
-
-    // Assert
-
-    expect(container.innerHTML).toBe("");
-  });
+      // Assert
+      expect(container.innerHTML).toBe("");
+    }
+  );
 
   it("should show disabled button when no session", () => {
     // Arrange

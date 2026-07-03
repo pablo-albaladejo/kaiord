@@ -1,137 +1,81 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveBackTarget } from "./resolve-back-target";
+import {
+  type ResolveBackInput,
+  resolveBackTarget,
+} from "./resolve-back-target";
+
+const CASES: { label: string; input: ResolveBackInput; expected: string }[] = [
+  {
+    label: "the library origin to /library",
+    input: { origin: "library" },
+    expected: "/library",
+  },
+  {
+    label: "an unweeked calendar origin to bare /calendar",
+    input: { origin: "calendar" },
+    expected: "/calendar",
+  },
+  {
+    label: "a weeked calendar origin to the originating week",
+    input: { origin: "calendar", week: "2026-W15" },
+    expected: "/calendar/2026-W15",
+  },
+  {
+    label: "the coaching origin to /calendar",
+    input: { origin: "coaching" },
+    expected: "/calendar",
+  },
+  {
+    label: "the daily origin to /daily",
+    input: { origin: "daily" },
+    expected: "/daily",
+  },
+  {
+    label: "a dated daily origin to the focused day",
+    input: { origin: "daily", date: "2026-06-10" },
+    expected: "/daily?date=2026-06-10",
+  },
+  {
+    label: "a dated calendar-day origin to the picker href",
+    input: { origin: "calendar-day", date: "2026-06-01" },
+    expected: "/workout/new?date=2026-06-01",
+  },
+  {
+    label: "an undated calendar-day origin to the calendar home",
+    input: { origin: "calendar-day", date: null },
+    expected: "/calendar",
+  },
+  {
+    label: "a detail origin with an id to the detail view",
+    input: { origin: "detail", detailId: "w1" },
+    expected: "/workout/view/w1",
+  },
+  {
+    label: "a detail origin without an id to the calendar home",
+    input: { origin: "detail", detailId: null },
+    expected: "/calendar",
+  },
+  {
+    label: "the chat origin to /chat",
+    input: { origin: "chat" },
+    expected: "/chat",
+  },
+  {
+    label: "a null origin to the default /calendar home",
+    input: { origin: null },
+    expected: "/calendar",
+  },
+];
 
 describe("resolveBackTarget", () => {
-  it("should resolve the library origin to /library", () => {
+  it.each(CASES)("should resolve $label", ({ input, expected }) => {
     // Arrange
-    const input = { origin: "library" as const };
 
     // Act
     const result = resolveBackTarget(input);
 
     // Assert
-    expect(result).toBe("/library");
-  });
-
-  it("should resolve the calendar origin without a week to bare /calendar", () => {
-    // Arrange
-    const input = { origin: "calendar" as const };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/calendar");
-  });
-
-  it("should pin the calendar origin to the originating week when provided", () => {
-    // Arrange
-    const input = { origin: "calendar" as const, week: "2026-W15" };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/calendar/2026-W15");
-  });
-
-  it("should resolve the coaching origin to /calendar", () => {
-    // Arrange
-    const input = { origin: "coaching" as const };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/calendar");
-  });
-
-  it("should resolve the daily origin to /daily", () => {
-    // Arrange
-    const input = { origin: "daily" as const };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/daily");
-  });
-
-  it("should carry the focused day on a dated daily origin", () => {
-    // Arrange
-    const input = { origin: "daily" as const, date: "2026-06-10" };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/daily?date=2026-06-10");
-  });
-
-  it("should resolve a dated calendar-day origin to the picker href", () => {
-    // Arrange
-    const input = { origin: "calendar-day" as const, date: "2026-06-01" };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/workout/new?date=2026-06-01");
-  });
-
-  it("should resolve a calendar-day origin without a date to the calendar home", () => {
-    // Arrange
-    const input = { origin: "calendar-day" as const, date: null };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/calendar");
-  });
-
-  it("should resolve a detail origin with an id to the detail view", () => {
-    // Arrange
-    const input = { origin: "detail" as const, detailId: "w1" };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/workout/view/w1");
-  });
-
-  it("should resolve a detail origin without an id to the calendar home", () => {
-    // Arrange
-    const input = { origin: "detail" as const, detailId: null };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/calendar");
-  });
-
-  it("should resolve the chat origin to /chat", () => {
-    // Arrange
-    const input = { origin: "chat" as const };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/chat");
-  });
-
-  it("should resolve a null origin to the default /calendar home", () => {
-    // Arrange
-    const input = { origin: null };
-
-    // Act
-    const result = resolveBackTarget(input);
-
-    // Assert
-    expect(result).toBe("/calendar");
+    expect(result).toBe(expected);
   });
 });

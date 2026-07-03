@@ -39,23 +39,17 @@ describe("mapWhoopRecoveryToKrd", () => {
     expect(krd?.metadata.sport).toBeUndefined();
   });
 
-  it("should return undefined for an unscored recovery record", () => {
+  it.each([
+    { label: "an unscored recovery record", recovery: UNSCORED_RECOVERY },
+    {
+      label: "hrv_rmssd_milli is non-positive",
+      recovery: {
+        ...SCORED_RECOVERY,
+        score: { ...SCORED_RECOVERY.score!, hrv_rmssd_milli: 0 },
+      },
+    },
+  ])("should return undefined when $label", ({ recovery }) => {
     // Arrange
-    const recovery = UNSCORED_RECOVERY;
-
-    // Act
-    const krd = mapWhoopRecoveryToKrd(recovery);
-
-    // Assert
-    expect(krd).toBeUndefined();
-  });
-
-  it("should return undefined when hrv_rmssd_milli is non-positive", () => {
-    // Arrange
-    const recovery = {
-      ...SCORED_RECOVERY,
-      score: { ...SCORED_RECOVERY.score!, hrv_rmssd_milli: 0 },
-    };
 
     // Act
     const krd = mapWhoopRecoveryToKrd(recovery);

@@ -24,64 +24,54 @@ const importReadiness: ConnectionFlow = {
   direction: "import",
 };
 
+const noExportPath: ConnectionFlow = {
+  label: "Future export",
+  sublabel: "Not yet mapped",
+  dataType: "training-plan",
+  direction: "export",
+};
+
 describe("flowAvailability", () => {
-  it("should mark an import flow as manual when the bridge lacks the read capability", () => {
+  it.each([
+    {
+      label: "an import flow whose bridge lacks the read capability is manual",
+      flow: importActivities,
+      capabilities: ["write:workouts"],
+      expected: "manual",
+    },
+    {
+      label:
+        "an export flow with the announced write capability is operational",
+      flow: exportWorkouts,
+      capabilities: ["write:workouts"],
+      expected: "operational",
+    },
+    {
+      label: "a readiness import flow lacking read:body is manual",
+      flow: importReadiness,
+      capabilities: ["write:workouts"],
+      expected: "manual",
+    },
+    {
+      label: "a readiness import flow with read:body announced is operational",
+      flow: importReadiness,
+      capabilities: ["write:workouts", "read:body", "read:sleep"],
+      expected: "operational",
+    },
+    {
+      label:
+        "an export flow whose required capability is undefined is coming-soon",
+      flow: noExportPath,
+      capabilities: [],
+      expected: "coming-soon",
+    },
+  ])("should resolve that $label", ({ flow, capabilities, expected }) => {
     // Arrange
-    const capabilities = ["write:workouts"];
 
     // Act
-    const result = flowAvailability(importActivities, capabilities);
+    const result = flowAvailability(flow, capabilities);
 
     // Assert
-    expect(result).toBe("manual");
-  });
-
-  it("should mark an export flow as operational when the bridge announces the write capability", () => {
-    // Arrange
-    const capabilities = ["write:workouts"];
-
-    // Act
-    const result = flowAvailability(exportWorkouts, capabilities);
-
-    // Assert
-    expect(result).toBe("operational");
-  });
-
-  it("should mark a readiness import flow as manual when the bridge lacks read:body", () => {
-    // Arrange
-    const capabilities = ["write:workouts"];
-
-    // Act
-    const result = flowAvailability(importReadiness, capabilities);
-
-    // Assert
-    expect(result).toBe("manual");
-  });
-
-  it("should mark a readiness import flow as operational once the bridge announces read:body", () => {
-    // Arrange
-    const capabilities = ["write:workouts", "read:body", "read:sleep"];
-
-    // Act
-    const result = flowAvailability(importReadiness, capabilities);
-
-    // Assert
-    expect(result).toBe("operational");
-  });
-
-  it("should mark an export flow as coming-soon when the required capability is undefined", () => {
-    // Arrange
-    const noExportPath: ConnectionFlow = {
-      label: "Future export",
-      sublabel: "Not yet mapped",
-      dataType: "training-plan",
-      direction: "export",
-    };
-
-    // Act
-    const result = flowAvailability(noExportPath, []);
-
-    // Assert
-    expect(result).toBe("coming-soon");
+    expect(result).toBe(expected);
   });
 });

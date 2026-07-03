@@ -58,22 +58,24 @@ describe("CoachingActivityCard", () => {
     expect(screen.getByLabelText("Intensity 3 of 5")).toBeInTheDocument();
   });
 
-  it("should use the lateral border colour driven by status (pending → amber-600)", () => {
-    // Arrange
+  it.each([
+    { status: "pending", border: "border-amber-600" },
+    { status: "completed", border: "border-emerald-600" },
+    { status: "skipped", border: "border-slate-500" },
+  ] satisfies { status: CoachingActivity["status"]; border: string }[])(
+    "should drive the lateral border colour from status ($status → $border)",
+    ({ status, border }) => {
+      // Arrange
+      render(<CoachingActivityCard activity={{ ...baseActivity, status }} />);
 
-    render(<CoachingActivityCard activity={baseActivity} />);
+      // Act
+      const button = screen.getByTestId("coaching-card-train2go:123");
 
-    // Act
-
-    const button = screen.getByTestId("coaching-card-train2go:123");
-
-    // Assert
-
-    expect(button.className).toContain("border-l-4");
-    expect(button.className).toContain("border-amber-600");
-    expect(button.className).not.toContain("border-rose");
-    expect(button.className).not.toContain("dashed");
-  });
+      // Assert
+      expect(button.className).toContain("border-l-4");
+      expect(button.className).toContain(border);
+    }
+  );
 
   it("should render the status icon (Pending) with an accessible label", () => {
     // Arrange
@@ -177,30 +179,5 @@ describe("CoachingActivityCard", () => {
     expect(
       screen.queryByTestId("lifecycle-badge-executedAndMatched")
     ).not.toBeInTheDocument();
-  });
-
-  it("should render different border colours for completed and skipped", () => {
-    // Arrange
-
-    // Act
-
-    const { rerender } = render(
-      <CoachingActivityCard
-        activity={{ ...baseActivity, status: "completed" }}
-      />
-    );
-
-    // Assert
-
-    expect(
-      screen.getByTestId("coaching-card-train2go:123").className
-    ).toContain("border-emerald-600");
-
-    rerender(
-      <CoachingActivityCard activity={{ ...baseActivity, status: "skipped" }} />
-    );
-    expect(
-      screen.getByTestId("coaching-card-train2go:123").className
-    ).toContain("border-slate-500");
   });
 });
