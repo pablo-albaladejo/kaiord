@@ -30,13 +30,13 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "ai": "^6.0.177"
+    "ai": "^7.0.14"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.85",
     "@types/node": "^26.1.0",
     "@vitest/coverage-v8": "^4.1.9",
-    "ai": "^6.0.177",
+    "ai": "^7.0.14",
     "tsup": "^8.5.1",
     "tsx": "^4.22.5",
     "typescript": "^6.0.3",
