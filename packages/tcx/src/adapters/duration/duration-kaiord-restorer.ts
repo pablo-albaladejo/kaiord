@@ -2,8 +2,7 @@
 // (heart-rate / power / calorie end-conditions) from `kaiord:` extension
 // attributes the encoder wrote onto a LapButton_t, so a TCX round-trip is
 // lossless even though native TCX readers ignore those attributes.
-import type { Duration } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
+import type { Duration, Logger } from "@kaiord/core";
 
 /**
  * Reads a restored numeric `kaiord:` attribute. Returns the value only when it

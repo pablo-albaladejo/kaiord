@@ -1,5 +1,4 @@
-import type { KRD } from "@kaiord/core";
-import type { Workout } from "@kaiord/core";
+import type { KRD, Workout } from "@kaiord/core";
 
 export const extractKaiordMetadata = (
   trainingCenterDatabase: Record<string, unknown>,
