@@ -35,12 +35,12 @@
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.85",
     "@types/node": "^26.1.0",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.9",
     "ai": "^6.0.177",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.5",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.9"
   },
   "repository": {
     "type": "git",
