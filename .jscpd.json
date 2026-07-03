@@ -6,6 +6,7 @@
   "ignore": [
     "**/node_modules/**",
     "**/dist/**",
+    "**/fitsdk-minimal/**",
     "**/coverage/**",
     "**/*.test.ts",
     "**/*.test.tsx",
