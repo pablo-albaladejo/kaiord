@@ -24,7 +24,7 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm

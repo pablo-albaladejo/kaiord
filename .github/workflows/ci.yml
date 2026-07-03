@@ -47,7 +47,7 @@ jobs:
       should-test: ${{ steps.changes.outputs.should-test }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -218,7 +218,7 @@ jobs:
         node-version: ["22.18.0", "24.x"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Deep clone so the commitlint backstop step can resolve the
           # base..head revision range against the PR's merge base.
@@ -400,7 +400,7 @@ jobs:
       vars.JSCPD_BOT_ENABLED != 'false'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -420,7 +420,7 @@ jobs:
     timeout-minutes: 1
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install lychee
         uses: taiki-e/install-action@v2
@@ -438,7 +438,7 @@ jobs:
     if: needs.detect-changes.outputs.should-test == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -469,7 +469,7 @@ jobs:
       vars.SIZE_LIMIT_BOT_ENABLED != 'false'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -507,7 +507,7 @@ jobs:
           ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -569,7 +569,7 @@ jobs:
     if: github.actor != 'github-actions[bot]' && needs.detect-changes.outputs.should-test == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -625,7 +625,7 @@ jobs:
         node-version: ["22.18.0", "24.x"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -674,7 +674,7 @@ jobs:
         node-version: ["22.18.0", "24.x"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -722,7 +722,7 @@ jobs:
         package: ["core", "garmin"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -780,7 +780,7 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -816,7 +816,7 @@ jobs:
       needs.detect-changes.outputs.frontend-changed == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -859,7 +859,7 @@ jobs:
       needs.detect-changes.outputs.frontend-changed == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -1056,7 +1056,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           sparse-checkout: scripts
           sparse-checkout-cone-mode: false

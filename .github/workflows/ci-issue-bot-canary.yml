@@ -22,7 +22,7 @@ jobs:
     if: ${{ vars.CI_ISSUE_BOT_ENABLED != 'false' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           sparse-checkout: scripts
           sparse-checkout-cone-mode: false
