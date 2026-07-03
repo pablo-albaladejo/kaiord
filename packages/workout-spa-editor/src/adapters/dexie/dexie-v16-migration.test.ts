@@ -86,8 +86,7 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
     const db = new KaiordDatabase(name);
     await db.open();
     const row = (await db.table("userPreferences").get(PROFILE_ID)) as
-      | { calendarView?: string }
-      | undefined;
+      { calendarView?: string } | undefined;
     db.close();
 
     // Assert
@@ -107,8 +106,7 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
         .table(storeName)
         .put({ id: "r-1", profileId: PROFILE_ID, date: SAMPLE_DATE });
       const row = (await db.table(storeName).get("r-1")) as
-        | { profileId: string; date: string }
-        | undefined;
+        { profileId: string; date: string } | undefined;
       db.close();
 
       // Assert
@@ -152,8 +150,7 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
     const verno = reopened.verno;
     const tables = reopened.tables.map((t) => t.name);
     const row = (await reopened.table("userPreferences").get(PROFILE_ID)) as
-      | { calendarView?: string }
-      | undefined;
+      { calendarView?: string } | undefined;
     reopened.close();
 
     expect(verno).toBe(SCHEMA_V15);

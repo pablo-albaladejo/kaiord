@@ -175,8 +175,7 @@ describe("Dexie v16 → v17 migration", () => {
     const db = new KaiordDatabase(name);
     await db.open();
     const row = (await db.table("healthSleep").get("r-1")) as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     db.close();
 
     // Assert

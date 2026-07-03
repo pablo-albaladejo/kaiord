@@ -7,8 +7,7 @@ const HEALTH_BODY_COMPOSITION_FILE_TYPE = "weight" as const;
 
 const getBodyCompositionPayload = (krd: KRD): BodyComposition | undefined => {
   const extensions = krd.extensions as
-    | { health?: { bodyComposition?: BodyComposition } }
-    | undefined;
+    { health?: { bodyComposition?: BodyComposition } } | undefined;
   return extensions?.health?.bodyComposition;
 };
 

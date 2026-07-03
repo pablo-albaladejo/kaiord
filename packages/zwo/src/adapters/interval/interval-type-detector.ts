@@ -4,11 +4,7 @@ import { targetTypeSchema } from "@kaiord/core";
 import { targetUnitSchema } from "@kaiord/core";
 
 export type ZwiftIntervalType =
-  | "SteadyState"
-  | "Warmup"
-  | "Ramp"
-  | "Cooldown"
-  | "FreeRide";
+  "SteadyState" | "Warmup" | "Ramp" | "Cooldown" | "FreeRide";
 
 /**
  * Determine Zwift interval type from KRD workout step

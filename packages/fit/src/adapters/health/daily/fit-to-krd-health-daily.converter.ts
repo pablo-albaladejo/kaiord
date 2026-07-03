@@ -51,8 +51,7 @@ export const convertFitToKrdHealthDaily = (
   logger: Logger
 ): KRD => {
   const fileId = messages[fitMessageKeySchema.enum.fileIdMesgs]?.[0] as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const info = parseMonitoringInfo(
     messages[fitMessageKeySchema.enum.monitoringInfoMesgs] ?? [],
     logger

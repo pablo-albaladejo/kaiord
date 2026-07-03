@@ -9,15 +9,15 @@ The per-target-type value schemas referenced by `targetSchema` (in `../target.ts
 
 ## Key Files
 
-| File             | Description                                                                                                                                                                |
+| File | Description |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
-| `index.ts`       | Barrel re-exporting all value schemas + `targetUnitSchema`.                                                                                                                |
-| `unit.ts`        | `targetUnitSchema` — `z.enum(["watts","percent_ftp","zone","range","bpm","percent_max","rpm","mps","swim_stroke"])`. Shared discriminator across all target-value schemas. |
-| `power.ts`       | `powerValueSchema` — discriminated union of `{unit:"watts"                                                                                                                 | "percent_ftp"   | "zone"                                             | "range", ...}`with`zone`constrained to int`[1,7]` (Coggan 7-band).   |
-| `heart-rate.ts`  | `heartRateValueSchema` — discriminated union of `{unit:"bpm"                                                                                                               | "zone"          | "percent_max"                                      | "range", ...}`with`zone`constrained to int`[1,5]` (5-zone HR model). |
-| `cadence.ts`     | `cadenceValueSchema` — discriminated union of `{unit:"rpm"                                                                                                                 | "range", ...}`. |
-| `pace.ts`        | `paceValueSchema` — discriminated union of `{unit:"mps"                                                                                                                    | "zone"          | "range", ...}`with`zone`constrained to int`[1,5]`. |
-| `stroke-type.ts` | `strokeTypeValueSchema` — non-union object: `{unit:"swim_stroke", value: int[0,5]}`. Numeric value matches FIT stroke codes (0=freestyle, …5=mixed/IM).                    |
+| `index.ts` | Barrel re-exporting all value schemas + `targetUnitSchema`. |
+| `unit.ts` | `targetUnitSchema` — `z.enum(["watts","percent_ftp","zone","range","bpm","percent_max","rpm","mps","swim_stroke"])`. Shared discriminator across all target-value schemas. |
+| `power.ts` | `powerValueSchema` — discriminated union of `{unit:"watts"                                                                                                                 | "percent_ftp"   | "zone"                                             | "range", ...}`with`zone`constrained to int`[1,7]` (Coggan 7-band). |
+| `heart-rate.ts` | `heartRateValueSchema` — discriminated union of `{unit:"bpm"                                                                                                               | "zone"          | "percent_max"                                      | "range", ...}`with`zone`constrained to int`[1,5]` (5-zone HR model). |
+| `cadence.ts` | `cadenceValueSchema` — discriminated union of `{unit:"rpm"                                                                                                                 | "range", ...}`. |
+| `pace.ts` | `paceValueSchema` — discriminated union of `{unit:"mps"                                                                                                                    | "zone"          | "range", ...}`with`zone`constrained to int`[1,5]`. |
+| `stroke-type.ts` | `strokeTypeValueSchema` — non-union object: `{unit:"swim_stroke", value: int[0,5]}`. Numeric value matches FIT stroke codes (0=freestyle, …5=mixed/IM). |
 
 ## For AI Agents
 

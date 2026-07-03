@@ -37,8 +37,7 @@ export const convertFitToKrdHealthSleep = (
   logger: Logger
 ): KRD => {
   const fileId = messages[fitMessageKeySchema.enum.fileIdMesgs]?.[0] as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const rawLevels = messages[fitMessageKeySchema.enum.sleepLevelMesgs] ?? [];
   const fitLevels = parseSleepLevels(rawLevels, logger);
   const sleep = mapFitSleepLevelsToKrdSleep(fitLevels);

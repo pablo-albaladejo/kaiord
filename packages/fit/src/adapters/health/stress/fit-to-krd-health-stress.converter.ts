@@ -34,8 +34,7 @@ export const convertFitToKrdHealthStress = (
   logger: Logger
 ): KRD => {
   const fileId = messages[fitMessageKeySchema.enum.fileIdMesgs]?.[0] as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const samples = parseSamples(
     messages[fitMessageKeySchema.enum.stressLevelMesgs] ?? [],
     logger

@@ -13,11 +13,7 @@
  */
 
 export type ActivityLevel =
-  | "sedentary"
-  | "light"
-  | "moderate"
-  | "active"
-  | "very_active";
+  "sedentary" | "light" | "moderate" | "active" | "very_active";
 
 /** NEAT factor used when the profile has no `activityLevel` set. */
 export const DEFAULT_NEAT_FACTOR = 1.2;

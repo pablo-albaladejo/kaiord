@@ -19,8 +19,7 @@ export const createDexieConnectionRepository = (
 
   get: async (profileId, providerId) =>
     (await db.table("connections").get([profileId, providerId])) as
-      | ConnectionRecord
-      | undefined,
+      ConnectionRecord | undefined,
 
   put: async (record: ConnectionRecord) => {
     await db.table("connections").put(record);

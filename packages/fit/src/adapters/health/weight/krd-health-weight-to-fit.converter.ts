@@ -7,8 +7,7 @@ const HEALTH_WEIGHT_FILE_TYPE = "weight" as const;
 
 const getWeightPayload = (krd: KRD): WeightMeasurement | undefined => {
   const extensions = krd.extensions as
-    | { health?: { weight?: WeightMeasurement } }
-    | undefined;
+    { health?: { weight?: WeightMeasurement } } | undefined;
   return extensions?.health?.weight;
 };
 

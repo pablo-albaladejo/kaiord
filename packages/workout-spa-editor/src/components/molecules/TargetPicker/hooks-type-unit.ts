@@ -17,11 +17,7 @@ export const useTypeChange = (
   return useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const type = e.target.value as
-        | "power"
-        | "heart_rate"
-        | "pace"
-        | "cadence"
-        | "open";
+        "power" | "heart_rate" | "pace" | "cadence" | "open";
 
       setTargetType(type);
       setValidationError("");

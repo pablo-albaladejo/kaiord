@@ -13,11 +13,7 @@ import type { FocusTarget } from "../../store/focus/focus-target.types";
 import type { ItemId } from "../../store/providers/item-id";
 
 export type FocusResolveReason =
-  | "target"
-  | "empty-state"
-  | "first-item"
-  | "heading"
-  | "unresolved";
+  "target" | "empty-state" | "first-item" | "heading" | "unresolved";
 
 export type FocusResolveResult = {
   element: HTMLElement | null;

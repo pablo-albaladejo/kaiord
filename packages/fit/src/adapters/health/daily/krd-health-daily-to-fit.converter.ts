@@ -7,8 +7,7 @@ const HEALTH_DAILY_FILE_TYPE = "monitoringB" as const;
 
 const getDailyPayload = (krd: KRD): DailyWellness | undefined => {
   const extensions = krd.extensions as
-    | { health?: { daily?: DailyWellness } }
-    | undefined;
+    { health?: { daily?: DailyWellness } } | undefined;
   return extensions?.health?.daily;
 };
 

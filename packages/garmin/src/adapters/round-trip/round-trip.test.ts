@@ -86,11 +86,9 @@ describe("Garmin GCN Round-Trip", () => {
 
     // Assert
     const ext1 = krd1.extensions?.gcn as
-      | { isSessionTransitionEnabled?: boolean }
-      | undefined;
+      { isSessionTransitionEnabled?: boolean } | undefined;
     const ext2 = krd2.extensions?.gcn as
-      | { isSessionTransitionEnabled?: boolean }
-      | undefined;
+      { isSessionTransitionEnabled?: boolean } | undefined;
     expect(ext1?.isSessionTransitionEnabled).toBe(true);
     expect(ext2?.isSessionTransitionEnabled).toBe(true);
     expect(JSON.parse(gcnOutput).isSessionTransitionEnabled).toBe(true);

@@ -776,8 +776,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
 
       // Act
       const fitExt2 = krd2.extensions?.fit as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
 
       // Assert
       if (fitExt) {

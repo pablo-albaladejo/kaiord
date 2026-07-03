@@ -19,8 +19,7 @@ type DexieDb = {
 export async function seedDefaultProfile(page: Page): Promise<string> {
   await page.evaluate(async (profileId) => {
     const db = (window as unknown as Record<string, unknown>).__KAIORD_DB__ as
-      | DexieDb
-      | undefined;
+      DexieDb | undefined;
     if (!db) throw new Error("__KAIORD_DB__ not available");
     const now = new Date().toISOString();
     await db.table("profiles").bulkPut([

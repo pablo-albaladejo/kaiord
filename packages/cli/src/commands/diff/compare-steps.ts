@@ -73,11 +73,9 @@ export const compareSteps = (
   krd2: KRD
 ): { file1Count: number; file2Count: number; differences: Array<StepDiff> } => {
   const workout1 = krd1.extensions?.structured_workout as
-    | { steps?: Array<unknown> }
-    | undefined;
+    { steps?: Array<unknown> } | undefined;
   const workout2 = krd2.extensions?.structured_workout as
-    | { steps?: Array<unknown> }
-    | undefined;
+    { steps?: Array<unknown> } | undefined;
 
   const steps1 = workout1?.steps || [];
   const steps2 = workout2?.steps || [];

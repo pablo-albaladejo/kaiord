@@ -74,16 +74,14 @@ export const hasUserData = (
 
 export const reclassifyZoneMethods = (row: Record<string, unknown>): void => {
   const sportZones = row.sportZones as
-    | Record<string, Record<string, unknown> | undefined>
-    | undefined;
+    Record<string, Record<string, unknown> | undefined> | undefined;
   if (!sportZones) return;
   for (const sport of SPORTS) {
     const cfg = sportZones[sport];
     if (!cfg) continue;
     for (const kind of ZONE_KINDS) {
       const zc = cfg[kind] as
-        | { method?: string; zones?: unknown[] }
-        | undefined;
+        { method?: string; zones?: unknown[] } | undefined;
       if (!zc) continue;
       if (zc.method === "manual") zc.method = "custom";
       if (zc.method === "custom" && hasUserData(zc.zones, kind)) {
