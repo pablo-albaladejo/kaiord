@@ -26,6 +26,7 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
     { id: "claude-opus-4-7", label: "claude-opus-4-7" },
     { id: "claude-opus-4-8", label: "claude-opus-4-8" },
     { id: "claude-fable-5", label: "claude-fable-5" },
+    { id: "claude-sonnet-5", label: "claude-sonnet-5" },
   ],
   openai: [
     { id: "o1", label: "o1" },
@@ -90,14 +91,8 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
     { id: "gemini-3-pro-preview", label: "gemini-3-pro-preview" },
     { id: "gemini-3-flash-preview", label: "gemini-3-flash-preview" },
     { id: "gemini-3.1-pro-preview", label: "gemini-3.1-pro-preview" },
-    {
-      id: "gemini-3.1-pro-preview-customtools",
-      label: "gemini-3.1-pro-preview-customtools",
-    },
-    {
-      id: "gemini-3.1-flash-lite-preview",
-      label: "gemini-3.1-flash-lite-preview",
-    },
+    { id: "gemini-3.1-pro-preview-customtools", label: "gemini-3.1-pro-preview-customtools" },
+    { id: "gemini-3.1-flash-lite-preview", label: "gemini-3.1-flash-lite-preview" },
     { id: "gemini-3.5-flash", label: "gemini-3.5-flash" },
     { id: "gemini-pro-latest", label: "gemini-pro-latest" },
     { id: "gemini-flash-latest", label: "gemini-flash-latest" },

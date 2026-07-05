@@ -11,9 +11,17 @@ import { dirname, join } from "node:path";
 
 const requireFrom = createRequire(import.meta.url);
 
-/** Per-provider: which union to read and which non-text ids to drop. */
+/**
+ * Per-provider: which union to read and which non-text ids to drop. `union`
+ * accepts a single name or a new-then-legacy list so the extractor tolerates
+ * the union renames that `@ai-sdk/*` ships on major bumps (v4 renamed
+ * `AnthropicMessagesModelId`/`GoogleGenerativeAIModelId`).
+ */
 export const SOURCES = {
-  anthropic: { pkg: "@ai-sdk/anthropic", union: "AnthropicMessagesModelId" },
+  anthropic: {
+    pkg: "@ai-sdk/anthropic",
+    union: ["AnthropicModelId", "AnthropicMessagesModelId"],
+  },
   openai: {
     pkg: "@ai-sdk/openai",
     union: "OpenAIChatModelId",
@@ -21,25 +29,32 @@ export const SOURCES = {
   },
   google: {
     pkg: "@ai-sdk/google",
-    union: "GoogleGenerativeAIModelId",
+    union: ["GoogleModelId", "GoogleGenerativeAIModelId"],
     exclude:
       /(image|tts|audio|computer-use|robotics|embedding|imagen|veo|lyria|nano-banana|deep-research)/,
   },
 };
 
+/** Single-quoted literals of `type <unionName> = ...;`, or null if absent. */
+const matchUnion = (dtsText, unionName) => {
+  const match = new RegExp(`type ${unionName}\\s*=([^;]*);`).exec(dtsText);
+  return match ? [...match[1].matchAll(/'([^']+)'/g)].map((m) => m[1]) : null;
+};
+
 /** Extract single-quoted literals from `type <unionName> = '...' | ...;`. */
 export const parseModelIds = (dtsText, unionName) => {
-  const match = new RegExp(`type ${unionName}\\s*=([^;]*);`).exec(dtsText);
-  if (!match) throw new Error(`union ${unionName} not found`);
-  return [...match[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+  const ids = matchUnion(dtsText, unionName);
+  if (!ids) throw new Error(`union ${unionName} not found`);
+  return ids;
 };
 
 /** Parsed, exclusion-filtered chat ids for one provider type. */
 export const chatModelIds = (type, dtsText) => {
   const { union, exclude } = SOURCES[type];
-  return parseModelIds(dtsText, union).filter(
-    (id) => !(exclude && exclude.test(id))
-  );
+  const names = Array.isArray(union) ? union : [union];
+  const ids = names.map((n) => matchUnion(dtsText, n)).find((v) => v !== null);
+  if (!ids) throw new Error(`union not found: ${names.join(" | ")}`);
+  return ids.filter((id) => !(exclude && exclude.test(id)));
 };
 
 const readSdkDts = (pkg) =>
