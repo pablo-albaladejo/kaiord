@@ -1,15 +1,13 @@
-import type { Logger, TextWriter } from "@kaiord/core";
+import type { TextWriter } from "@kaiord/core";
 import { createUnsupportedKrdTypeError, isHealthFileType } from "@kaiord/core";
 
-import { convertKRDToGarmin } from "./converters/krd-to-garmin.converter";
-import type { TargetMapperOptions } from "./converters/target-types";
-
-export type GarminWriterConfig = TargetMapperOptions & {
-  logger: Logger;
-};
+import {
+  convertKRDToGarmin,
+  type GarminWriterOptions,
+} from "./converters/krd-to-garmin.converter";
 
 export const createGarminWriter =
-  (config: GarminWriterConfig): TextWriter =>
+  (config: GarminWriterOptions): TextWriter =>
   async (krd) => {
     if (isHealthFileType(krd.type)) {
       throw createUnsupportedKrdTypeError(krd.type, "garmin");
