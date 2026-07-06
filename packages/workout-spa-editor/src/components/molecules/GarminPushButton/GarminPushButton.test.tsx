@@ -99,22 +99,10 @@ describe("GarminPushButton", () => {
       policies: [] as IntegrationPolicy[],
     },
     {
-      label: "the bridge is installed but no workout export policy exists",
-      extensionInstalled: true,
-      sessionActive: true,
-      policies: [] as IntegrationPolicy[],
-    },
-    {
       label: "a policy exists but the bridge is not installed",
       extensionInstalled: false,
       sessionActive: false,
       policies: [ENABLED_POLICY],
-    },
-    {
-      label: "the policy exists but is disabled",
-      extensionInstalled: true,
-      sessionActive: true,
-      policies: [DISABLED_POLICY],
     },
   ])(
     "should render nothing when $label",
@@ -129,6 +117,34 @@ describe("GarminPushButton", () => {
 
       // Assert
       expect(container.innerHTML).toBe("");
+    }
+  );
+
+  it.each([
+    {
+      label: "no workout export policy exists",
+      policies: [] as IntegrationPolicy[],
+    },
+    { label: "the only policy is disabled", policies: [DISABLED_POLICY] },
+    {
+      label: "the only enabled policy targets a different bridge",
+      policies: [{ ...ENABLED_POLICY, bridgeId: "whoop-bridge" }],
+    },
+  ])(
+    "should show a disabled button with a visible cause when $label",
+    ({ policies }) => {
+      // Arrange
+      mockState.extensionInstalled = true;
+      mockState.sessionActive = true;
+      mockPolicies = policies;
+
+      // Act
+      render(<GarminPushButton profileId="p1" />);
+
+      // Assert
+      const button = screen.getByRole("button");
+      expect(button).toBeDisabled();
+      expect(button.textContent).toContain("Garmin (export disabled)");
     }
   );
 

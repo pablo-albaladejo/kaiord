@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GarminBridgeState } from "../../../contexts";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { IntegrationPolicy } from "../../../types/integration-policy";
 
 const mockPushWorkout = vi.fn();
 const mockSetPushing = vi.fn();
@@ -41,6 +42,55 @@ vi.mock("../../../adapters/dexie/dexie-database", () => ({
   },
 }));
 
+vi.mock("../../../adapters/dexie/dexie-integration-policy-repository", () => ({
+  createDexieIntegrationPolicyRepository: () => ({}),
+}));
+vi.mock("../../../adapters/dexie/dexie-export-ledger-repository", () => ({
+  createDexieExportLedgerRepository: () => ({}),
+}));
+
+const ENABLED_GARMIN_POLICY: IntegrationPolicy = {
+  id: "00000000-0000-0000-0000-000000000001",
+  profileId: "profile-1",
+  dataType: "workout",
+  bridgeId: "garmin-bridge",
+  direction: "export",
+  mode: "manual",
+  enabled: true,
+  updatedAt: "2026-05-01T00:00:00.000Z",
+};
+
+// Governs the destination policy the executeWorkoutPush gate sees —
+// defaults to an active route so existing push-mechanics tests exercise
+// the happy path; individual tests override it to exercise the gate.
+let mockPolicies: IntegrationPolicy[] = [ENABLED_GARMIN_POLICY];
+
+vi.mock(
+  "../../../application/integration-policy/resolve-export-policies.use-case",
+  () => ({
+    resolveExportPolicies: async () => mockPolicies,
+  })
+);
+
+const { mockRecordExport } = vi.hoisted(() => ({
+  mockRecordExport: vi.fn(
+    async (
+      _deps: unknown,
+      input: {
+        postFn: (p: unknown) => Promise<{ externalId: string }>;
+        payload: unknown;
+      }
+    ) => {
+      const { externalId } = await input.postFn(input.payload);
+      return { ledgerId: "ledger-1", outcome: "created", externalId };
+    }
+  ),
+}));
+
+vi.mock("../../../application/export/record-export.use-case", () => ({
+  recordExport: mockRecordExport,
+}));
+
 import { useGarminPush } from "./useGarminPush";
 
 // A stub KRD payload that exportGcnWorkout will receive verbatim.
@@ -73,6 +123,7 @@ const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
 describe("useGarminPush", () => {
   beforeEach(() => {
     garminState.sessionActive = true;
+    mockPolicies = [ENABLED_GARMIN_POLICY];
     mockPushWorkout.mockResolvedValue({
       success: true,
       garminWorkoutId: "gw-123",
@@ -222,6 +273,9 @@ describe("useGarminPush", () => {
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
       result: "failure",
     });
+    // The bridge's own runPush already set the specific pushing message —
+    // the hook must not overwrite it with a generic one.
+    expect(mockSetPushing).not.toHaveBeenCalled();
   });
 
   it("should not persist any workout-state transition (owned by useEditorActions)", async () => {
@@ -257,5 +311,41 @@ describe("useGarminPush", () => {
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
       result: "failure",
     });
+  });
+
+  it("should block the push and never call pushWorkout when no active export route exists", async () => {
+    // Arrange
+    mockPolicies = [];
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockPushWorkout).not.toHaveBeenCalled();
+    expect(mockSetPushing).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "error",
+        message: expect.stringContaining("garmin-bridge"),
+      })
+    );
+  });
+
+  it("should block the push when the only export policy is disabled", async () => {
+    // Arrange
+    mockPolicies = [{ ...ENABLED_GARMIN_POLICY, enabled: false }];
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockPushWorkout).not.toHaveBeenCalled();
   });
 });
