@@ -2,24 +2,25 @@
  * CoachingSyncButton — Sync/Connect button for coaching platforms.
  *
  * Connected state: 32×32 icon-only button with a relative-time tooltip
- * ("<Label> · 5m ago", "<Label> · syncing…", "<Label> · never synced").
- * The spinner replaces the icon in place during sync; under
- * `prefers-reduced-motion: reduce` the spinner becomes a static glyph.
+ * ("<Label> · 5m ago", "<Label> · syncing…", "<Label> · never synced",
+ * "<Label> · route inactive"). The spinner replaces the icon in place during
+ * sync; under `prefers-reduced-motion: reduce` it becomes a static glyph.
  *
  * Not-connected state retains the textual "Connect to <Label>" CTA per
  * archived design D7 (low-frequency action, deserves discoverability).
  *
- * Color tokens are slate-based so the button does not compete with the
- * status-color palette of the redesigned card stack. Tooltip composition
- * + reduced-motion subscription live in coaching-sync-button-tooltip.ts.
+ * When the import route is off (`routeInactive`, F1.3) the connected button
+ * shows an amber "route inactive" treatment so a disabled sync is never silent.
+ * Tooltip composition + reduced-motion subscription live in
+ * coaching-sync-button-tooltip.ts; the icon button chrome in
+ * CoachingSyncIconButton.tsx.
  */
-
-import { Loader2, RefreshCw } from "lucide-react";
 
 import {
   buildSyncTooltip,
   usePrefersReducedMotion,
 } from "./coaching-sync-button-tooltip";
+import { CoachingSyncIconButton } from "./CoachingSyncIconButton";
 
 export type CoachingSyncButtonProps = {
   connected: boolean;
@@ -30,33 +31,9 @@ export type CoachingSyncButtonProps = {
   label?: string;
   /** ISO timestamp of the last successful sync; undefined when never synced. */
   lastSyncedAt?: string | undefined;
+  /** When true, the import route is off — sync no-ops; show "route inactive". */
+  routeInactive?: boolean;
 };
-
-const ConnectedIconButton: React.FC<{
-  loading: boolean;
-  reducedMotion: boolean;
-  ariaLabel: string;
-  title: string;
-  onSync: () => void;
-}> = ({ loading, reducedMotion, ariaLabel, title, onSync }) => (
-  <button
-    type="button"
-    disabled={loading}
-    onClick={onSync}
-    aria-label={ariaLabel}
-    title={title}
-    className="inline-flex h-8 w-8 items-center justify-center rounded border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    {loading ? (
-      <Loader2
-        className={reducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"}
-        aria-hidden="true"
-      />
-    ) : (
-      <RefreshCw className="h-4 w-4" aria-hidden="true" />
-    )}
-  </button>
-);
 
 export function CoachingSyncButton({
   connected,
@@ -66,6 +43,7 @@ export function CoachingSyncButton({
   onConnect,
   label = "Coach",
   lastSyncedAt,
+  routeInactive = false,
 }: CoachingSyncButtonProps) {
   const reducedMotion = usePrefersReducedMotion();
 
@@ -84,12 +62,16 @@ export function CoachingSyncButton({
     );
   }
 
+  const title = routeInactive
+    ? `${label} · route inactive`
+    : buildSyncTooltip(label, loading, lastSyncedAt);
   return (
-    <ConnectedIconButton
+    <CoachingSyncIconButton
       loading={loading}
       reducedMotion={reducedMotion}
-      ariaLabel={`Sync ${label}`}
-      title={buildSyncTooltip(label, loading, lastSyncedAt)}
+      ariaLabel={routeInactive ? `${label} — route inactive` : `Sync ${label}`}
+      title={title}
+      routeInactive={routeInactive}
       onSync={onSync}
     />
   );

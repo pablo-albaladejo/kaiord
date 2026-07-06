@@ -15,13 +15,17 @@ import type {
   CoachingSyncStateRepository,
   ProfileRepository,
 } from "../../ports/persistence-port";
+import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import { addDaysIso } from "../shared/date-utils";
 import type { CoachingTransport } from "./coaching-transport-port";
+import { hasEnabledPlannedSessionImportRoute } from "./planned-session-import-route";
+import { persistSyncedWeek } from "./sync-week-persist";
 
 export type SyncWeekDeps = {
   profiles: ProfileRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
+  integrationPolicy: IntegrationPolicyRepository;
   transport: CoachingTransport;
   now?: () => string;
 };
@@ -30,7 +34,8 @@ export type SyncWeekResult =
   | { ok: true; activityCount: number; orphansDeleted: number }
   | {
       ok: false;
-      reason: "not-linked" | "session-expired" | "transport-error";
+      reason:
+        "route-inactive" | "not-linked" | "session-expired" | "transport-error";
       error?: string;
     };
 
@@ -46,6 +51,14 @@ export const syncWeek = async (
     (a) => a.source === deps.transport.source
   );
   if (!link) return { ok: false, reason: "not-linked" };
+
+  // Kill test (F1.3): a linked profile still syncs nothing without an active
+  // planned-session import route — fail-closed forward, with a visible cause.
+  const routeActive = await hasEnabledPlannedSessionImportRoute(
+    deps.integrationPolicy,
+    profileId
+  );
+  if (!routeActive) return { ok: false, reason: "route-inactive" };
 
   const weekEnd = addDaysIso(weekStart, 6);
   const localBefore = await deps.coaching.getByProfileAndDateRange(
@@ -72,24 +85,14 @@ export const syncWeek = async (
     return { ok: false, reason: "transport-error", error };
   }
 
-  await deps.coaching.upsertMany(fetched);
+  const orphansDeleted = await persistSyncedWeek(
+    {
+      coaching: deps.coaching,
+      coachingSyncState: deps.coachingSyncState,
+      now: deps.now,
+    },
+    { profileId, source: deps.transport.source, fetched, localSameSource }
+  );
 
-  const fetchedIds = new Set(fetched.map((r) => r.id));
-  const orphans = localSameSource.filter((r) => !fetchedIds.has(r.id));
-  for (const orphan of orphans) {
-    await deps.coaching.delete(orphan.id);
-  }
-
-  const now = deps.now ?? (() => new Date().toISOString());
-  await deps.coachingSyncState.put({
-    source: deps.transport.source,
-    profileId,
-    lastSyncedAt: now(),
-  });
-
-  return {
-    ok: true,
-    activityCount: fetched.length,
-    orphansDeleted: orphans.length,
-  };
+  return { ok: true, activityCount: fetched.length, orphansDeleted };
 };

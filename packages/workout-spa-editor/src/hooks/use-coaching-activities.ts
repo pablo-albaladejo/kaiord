@@ -21,6 +21,8 @@ export type CoachingSyncState = {
   /** Source has a linkedAccount on the active profile. */
   linked: boolean;
   connected: boolean;
+  /** Whether an enabled import route governs this source (F1.3). */
+  routeActive?: boolean;
   loading: boolean;
   error: string | null;
   /** ISO timestamp of the last successful sync for the active profile. */
@@ -80,6 +82,7 @@ export function useCoachingActivities(days: string[]) {
       label: s.label,
       linked: linkedSourceIds.has(s.id),
       connected: s.connected,
+      routeActive: s.routeActive,
       loading: s.loading,
       error: s.error,
       lastSyncedAt: s.lastSyncedAt,

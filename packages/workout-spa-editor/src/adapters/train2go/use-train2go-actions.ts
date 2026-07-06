@@ -32,6 +32,7 @@ export const useSyncCallback = (
           coaching: p.coaching,
           transport: t,
           coachingSyncState: p.coachingSyncState,
+          integrationPolicy: p.integrationPolicy,
         },
         profileId,
         weekStart

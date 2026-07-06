@@ -18,6 +18,7 @@ import { applyV17Upgrade } from "./dexie-v17-migration";
 import { applyV22Upgrade } from "./dexie-v22-migration";
 import { applyV25Upgrade } from "./dexie-v25-migration";
 import { applyV27Upgrade } from "./dexie-v27-migration";
+import { applyV28Upgrade } from "./dexie-v28-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -128,4 +129,12 @@ export const registerV27 = (db: DexieVersionHost): void => {
   // rewrites `integrationPolicies.dataType` "training-plan" → "planned-session".
   // `coachingActivities` is retained this version for reversibility.
   db.version(27).stores(SCHEMAS.v27).upgrade(applyV27Upgrade);
+};
+
+export const registerV28 = (db: DexieVersionHost): void => {
+  // v28 — data-only (schema unchanged from v27): backfill provenance
+  // `sourceBridgeId:"unknown"` on historical health/activities rows lacking a
+  // source, and seed a default enabled planned-session import policy for
+  // Train2Go-linked profiles (partial fail-open seeding — see dexie-v28-migration).
+  db.version(28).stores(SCHEMAS.v27).upgrade(applyV28Upgrade);
 };
