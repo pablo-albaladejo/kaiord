@@ -4,8 +4,6 @@ import type { TokenReader } from "../token/token-manager.types";
 import { authFetch } from "./garmin-auth-fetch";
 import type { FetchFn, GarminHttpClient } from "./types";
 
-export type { GarminHttpClient } from "./types";
-
 export const createGarminHttpClient = (
   tokenReader: TokenReader,
   fetchFn: FetchFn,

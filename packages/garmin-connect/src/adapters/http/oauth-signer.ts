@@ -4,7 +4,6 @@ import OAuth from "oauth-1.0a";
 
 import type { OAuthConsumer } from "./types";
 
-export type { OAuthConsumer } from "./types";
 type OAuthToken = { key: string; secret: string };
 
 export type OAuthSigner = {
