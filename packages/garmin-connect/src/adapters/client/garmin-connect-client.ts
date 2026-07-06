@@ -12,11 +12,6 @@ import type {
 } from "./garmin-connect-client.types";
 import { createGarminWorkoutService } from "./garmin-workout-service";
 
-export type {
-  GarminConnectClient,
-  GarminConnectClientOptions,
-} from "./garmin-connect-client.types";
-
 /**
  * Create a Garmin Connect client with auth, workout service, and optional token auto-restore.
  *
