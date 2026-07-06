@@ -23,6 +23,13 @@ export const activityRecordSchema = z.object({
   externalId: z.string().min(1),
   durationSeconds: z.number().nonnegative().optional(),
   distanceMeters: z.number().nonnegative().optional(),
+  /**
+   * Id of the transitional twin WorkoutRecord written for the same event
+   * (dual-write). The executed-match union excludes this workout from the
+   * legacy scan so one event is never matched twice. `null` for source-only
+   * activities with no twin (e.g. a future Garmin pull).
+   */
+  linkedWorkoutId: z.uuid().nullable(),
   krd: krdSchema.nullable(),
   createdAt: z.iso.datetime(),
 });
@@ -35,6 +42,7 @@ export type BuildActivityRecordInput = {
   sport: string;
   sourceBridgeId: string;
   externalId: string;
+  linkedWorkoutId: string | null;
   krd: KRD;
 };
 
@@ -52,6 +60,7 @@ export const buildActivityRecord = (
     externalId: input.externalId,
     durationSeconds: session?.totalElapsedTime,
     distanceMeters: session?.totalDistance,
+    linkedWorkoutId: input.linkedWorkoutId,
     krd: input.krd,
     createdAt: new Date().toISOString(),
   };

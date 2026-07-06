@@ -78,6 +78,8 @@ describe("persistImportedWorkout dual-write", () => {
     });
     expect(activities[0].externalId).toEqual(expect.any(String));
     expect(workouts).toHaveLength(1);
+    // The activity links to its transitional twin WorkoutRecord.
+    expect(activities[0].linkedWorkoutId).toBe(workouts[0].id);
   });
 
   it("should not duplicate the activity when the same file is re-imported", async () => {

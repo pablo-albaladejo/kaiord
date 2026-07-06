@@ -38,6 +38,7 @@ const activity = (overrides: Partial<ActivityRecord> = {}): ActivityRecord =>
     sport: "cycling",
     sourceBridgeId: "fit-import",
     externalId: "hash-x",
+    linkedWorkoutId: null,
     krd: null,
     createdAt: "2026-04-28T10:00:00.000Z",
     ...overrides,
@@ -242,14 +243,15 @@ describe("matchExecutedWorkouts", () => {
 
   it("should dedup an activity against its co-written executed workout", () => {
     // Arrange
-    // New drop: the FIT file produced BOTH an activity and a WorkoutRecord
-    // for the same event — match once, not twice (test d).
+    // New drop: the FIT file produced BOTH an activity and its twin
+    // WorkoutRecord (linkedWorkoutId). The twin is excluded from the legacy
+    // scan so the event is matched exactly once (test d).
     const structured = workout({ id: "w-structured-1", source: "train2go" });
-    const executed = workout({ id: "w-exec-1", source: "garmin" });
+    const twin = workout({ id: "w-exec-1", source: "kaiord" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [structured, executed],
-      activities: [activity({ externalId: "hash-1" })],
+      workouts: [structured, twin],
+      activities: [activity({ linkedWorkoutId: "w-exec-1" })],
       canonicalSport: canonical,
     };
 

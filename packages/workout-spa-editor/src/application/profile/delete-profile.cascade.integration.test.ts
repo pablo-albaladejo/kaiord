@@ -84,6 +84,7 @@ const makeSeedRow = (
         sport: "cycling",
         sourceBridgeId: "garmin",
         externalId: id,
+        linkedWorkoutId: null,
         createdAt: NOW,
       };
     case "coachingDayNotes":

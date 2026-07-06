@@ -14,25 +14,12 @@ export type CanonicalSport = (raw: string) => string | null;
 
 const isExecuted = (w: WorkoutRecord): boolean => w.source !== TRAIN2GO;
 
-const resolveActivityRef = (
-  activity: ActivityRecord,
-  workouts: readonly WorkoutRecord[],
-  canonicalSport: CanonicalSport
-): ExecutedRef => {
-  const canonical = canonicalSport(activity.sport);
-  const workout = workouts.find(
-    (w) =>
-      isExecuted(w) &&
-      w.date === activity.date &&
-      canonicalSport(w.sport) === canonical
-  );
-  return { id: workout?.id ?? activity.id, canonical };
-};
-
 /**
- * Index the executed side by date: the union of legacy executed workouts
- * (source !== train2go) and the v27 activities — each activity resolved to
- * its co-written renderable workout id, or its own id if none exists (F5).
+ * Index the executed side by date: the union of v27 activities and the legacy
+ * executed workouts (source !== train2go), EXCLUDING every workout whose id is
+ * the twin (`linkedWorkoutId`) of an activity — so a dual-written event is
+ * matched once. Each activity appends its twin's renderable id, or its own id
+ * when it has no twin (e.g. a future Garmin pull).
  */
 export const indexExecutedRefsByDate = (
   workouts: readonly WorkoutRecord[],
@@ -45,12 +32,20 @@ export const indexExecutedRefsByDate = (
     bucket.push(ref);
     out.set(date, bucket);
   };
+  const linked = new Set(
+    activities
+      .map((a) => a.linkedWorkoutId)
+      .filter((id): id is string => id !== null)
+  );
   for (const w of workouts) {
-    if (!isExecuted(w)) continue;
+    if (!isExecuted(w) || linked.has(w.id)) continue;
     push(w.date, { id: w.id, canonical: canonicalSport(w.sport) });
   }
   for (const a of activities) {
-    push(a.date, resolveActivityRef(a, workouts, canonicalSport));
+    push(a.date, {
+      id: a.linkedWorkoutId ?? a.id,
+      canonical: canonicalSport(a.sport),
+    });
   }
   return out;
 };
