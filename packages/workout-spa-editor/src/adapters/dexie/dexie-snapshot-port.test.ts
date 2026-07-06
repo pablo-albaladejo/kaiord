@@ -21,7 +21,7 @@ const PASSPHRASE = "kaiord-spa-v1";
 // `connections` store (excluded from the snapshot), v25 added chatConversations
 // + the conversationId FK, and v26 added the device-local energy-balance stores
 // (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded.
-const SCHEMA_HEAD = 28;
+const SCHEMA_HEAD = 29;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;

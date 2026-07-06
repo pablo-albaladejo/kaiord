@@ -17,7 +17,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v25-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_SEED = 23;
-const SCHEMA_HEAD = 28;
+const SCHEMA_HEAD = 29;
 const STORES_SEED = {
   profiles: "id, updatedAt",
   chatMessages: "id, profileId, [profileId+createdAt]",
@@ -55,7 +55,7 @@ describe("Dexie chatConversations (v25) migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump the database schema to head version 28", async () => {
+  it("should bump the database schema to head version 29", async () => {
     // Arrange
     await seed(name, []);
 

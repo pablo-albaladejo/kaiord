@@ -19,6 +19,7 @@ import { applyV22Upgrade } from "./dexie-v22-migration";
 import { applyV25Upgrade } from "./dexie-v25-migration";
 import { applyV27Upgrade } from "./dexie-v27-migration";
 import { applyV28Upgrade } from "./dexie-v28-migration";
+import { applyV29Upgrade } from "./dexie-v29-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -137,4 +138,12 @@ export const registerV28 = (db: DexieVersionHost): void => {
   // source, and seed a default enabled planned-session import policy for
   // Train2Go-linked profiles (partial fail-open seeding — see dexie-v28-migration).
   db.version(28).stores(SCHEMAS.v27).upgrade(applyV28Upgrade);
+};
+
+export const registerV29 = (db: DexieVersionHost): void => {
+  // v29 — data-only: full fail-open policy seeding. Seeds enabled routes for
+  // everything live today (planned-session←train2go import, workout→garmin
+  // export) so a working profile survives the governance gates (F1.3/F2).
+  // Idempotent superset of v28 — see dexie-v29-migration.
+  db.version(29).stores(SCHEMAS.v27).upgrade(applyV29Upgrade);
 };
