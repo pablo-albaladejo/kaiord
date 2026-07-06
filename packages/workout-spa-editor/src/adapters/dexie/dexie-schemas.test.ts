@@ -109,6 +109,30 @@ describe("SCHEMAS.v25 (multi-conversation chat)", () => {
   });
 });
 
+describe("SCHEMAS.v27 (Data Hub domain stores)", () => {
+  it("should mirror the coachingActivities index shape on plannedSessions", () => {
+    // Arrange
+    const stores = SCHEMAS.v27 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    expect(stores.plannedSessions).toBe(stores.coachingActivities);
+  });
+
+  it("should declare the activities store with dedup + date-range indexes", () => {
+    // Arrange
+    const stores = SCHEMAS.v27 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    expect(stores.activities).toBe(
+      "id, [profileId+date], [profileId+source+sourceId]"
+    );
+  });
+});
+
 describe("SCHEMAS cross-version drift guards", () => {
   const byteEquivalentPairs: ReadonlyArray<{
     prev: SchemaVersion;
@@ -117,6 +141,7 @@ describe("SCHEMAS cross-version drift guards", () => {
     { prev: "v13", next: "v16" },
     { prev: "v20", next: "v21" },
     { prev: "v23", next: "v24" },
+    { prev: "v26", next: "v27" },
   ];
 
   it.each(byteEquivalentPairs)(
@@ -145,6 +170,7 @@ describe("SCHEMAS cross-version drift guards", () => {
     { prev: "v22", next: "v23", added: [] },
     { prev: "v23", next: "v24", added: ["connections"] },
     { prev: "v24", next: "v25", added: ["chatConversations"] },
+    { prev: "v26", next: "v27", added: ["activities", "plannedSessions"] },
   ];
 
   it.each(addedStoreCases)(

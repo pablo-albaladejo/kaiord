@@ -62,6 +62,9 @@ const makeSeedRow = (
         updatedAt: NOW,
       };
     case "coachingActivities":
+    case "plannedSessions":
+      // plannedSessions mirrors the coachingActivities row shape (v27 migrated
+      // rows preserve it), so the same seed shape round-trips both stores.
       return {
         id,
         profileId,
@@ -72,6 +75,14 @@ const makeSeedRow = (
         title: "T",
         status: "pending",
         fetchedAt: NOW,
+      };
+    case "activities":
+      return {
+        id,
+        profileId,
+        source: "garmin",
+        sourceId: id,
+        date: WEEK_START,
       };
     case "coachingDayNotes":
       return {

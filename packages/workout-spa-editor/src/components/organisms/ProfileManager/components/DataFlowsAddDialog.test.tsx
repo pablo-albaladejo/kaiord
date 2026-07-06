@@ -36,14 +36,14 @@ const garminDiscovered: DiscoveredBridge = {
 describe("DataFlowsAddDialog", () => {
   it("should filter the bridge dropdown to bridges advertising the matching capability token", () => {
     // Arrange
-    // "training-plan" only has import capability (read:training-plan)
+    // "planned-session" only has import capability (read:training-plan)
     // garmin-bridge is discovered; train2go-bridge is not
 
     // Act
     render(
       <DataFlowsAddDialog
         profileId="p1"
-        dataType="training-plan"
+        dataType="planned-session"
         direction="import"
         discoveredBridges={[garminDiscovered]}
         onClose={vi.fn()}

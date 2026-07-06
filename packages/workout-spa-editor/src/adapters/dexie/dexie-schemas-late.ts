@@ -30,3 +30,16 @@ export const buildCoreV26 = (prev: Stores): Stores => ({
   intakePresets: "id, profileId",
   energyTargets: "profileId",
 });
+
+// v27 — Data Hub domain tables. `plannedSessions` receives the migrated
+// `coachingActivities` rows (ids preserved, same index shape) so the routable
+// unit is the individual coach-prescribed session. `activities` is the
+// executed-session store, auto-created empty until the FIT-import classifier
+// and the Garmin activity pull (F5) populate it. `coachingActivities` is
+// retained this version for reversibility (see dexie-v27-migration).
+export const buildCoreV27 = (prev: Stores): Stores => ({
+  ...prev,
+  plannedSessions:
+    "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
+  activities: "id, [profileId+date], [profileId+source+sourceId]",
+});

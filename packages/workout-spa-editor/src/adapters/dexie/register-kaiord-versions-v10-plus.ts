@@ -17,6 +17,7 @@ import { applyV15Upgrade } from "./dexie-v15-migration";
 import { applyV17Upgrade } from "./dexie-v17-migration";
 import { applyV22Upgrade } from "./dexie-v22-migration";
 import { applyV25Upgrade } from "./dexie-v25-migration";
+import { applyV27Upgrade } from "./dexie-v27-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -119,4 +120,12 @@ export const registerV25 = (db: DexieVersionHost): void => {
   // v26 — additive energy-balance device-local stores (`intakeEntries`,
   // `intakePresets`, `energyTargets`); auto-created empty, no upgrade fn.
   db.version(26).stores(SCHEMAS.v26);
+};
+
+export const registerV27 = (db: DexieVersionHost): void => {
+  // v27 — Data Hub domain tables. Adds `plannedSessions` (migrated from
+  // `coachingActivities`, ids preserved) and `activities` (empty), and
+  // rewrites `integrationPolicies.dataType` "training-plan" → "planned-session".
+  // `coachingActivities` is retained this version for reversibility.
+  db.version(27).stores(SCHEMAS.v27).upgrade(applyV27Upgrade);
 };

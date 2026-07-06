@@ -27,7 +27,7 @@ const importReadiness: ConnectionFlow = {
 const noExportPath: ConnectionFlow = {
   label: "Future export",
   sublabel: "Not yet mapped",
-  dataType: "training-plan",
+  dataType: "planned-session",
   direction: "export",
 };
 

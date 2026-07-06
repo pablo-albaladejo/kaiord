@@ -17,7 +17,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v25-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_SEED = 23;
-const SCHEMA_HEAD = 26;
+const SCHEMA_HEAD = 27;
 const STORES_SEED = {
   profiles: "id, updatedAt",
   chatMessages: "id, profileId, [profileId+createdAt]",

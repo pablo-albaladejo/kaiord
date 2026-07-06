@@ -35,20 +35,20 @@ const makePolicy = (
 describe("DataFlowsGroup", () => {
   it("should render a Sources subsection only when the data type supports import", async () => {
     // Arrange
-    // "training-plan" has only import capability
+    // "planned-session" has only import capability
 
     // Act
     render(
       <DataFlowsGroup
         profileId="p1"
-        dataType="training-plan"
+        dataType="planned-session"
         policies={{ import: [], export: [] }}
         allBridges={NO_BRIDGES}
       />
     );
     // open the group (default collapsed since no policies)
     await userEvent.click(
-      screen.getByRole("button", { name: /Training Plan/i })
+      screen.getByRole("button", { name: /Planned Session/i })
     );
 
     // Assert
