@@ -116,7 +116,7 @@
     "@size-limit/esbuild": "^12.1.0",
     "@size-limit/file": "^12.1.0",
     "@types/node": "^26.1.0",
-    "@vitest/eslint-plugin": "^1.6.20",
+    "@vitest/eslint-plugin": "^1.6.21",
     "dependency-cruiser": "^18.0.0",
     "eslint": "^10.6.0",
     "eslint-plugin-boundaries": "^6.0.2",

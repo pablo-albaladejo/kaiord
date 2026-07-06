@@ -34,11 +34,11 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.0",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "^4.1.10",
     "tsup": "^8.5.1",
-    "tsx": "^4.22.5",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",
