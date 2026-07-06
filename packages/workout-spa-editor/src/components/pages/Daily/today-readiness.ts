@@ -34,6 +34,11 @@ export type ReadinessMetric = {
   label: string;
   value: string;
   trend?: string;
+  /** F3.2/F3.3: which source the resolver picked for this metric, and
+      whether it had to fall back past the preferred source. Undefined
+      for metrics the resolver doesn't govern yet (battery/stress). */
+  source?: string;
+  usedFallback?: boolean;
 };
 
 export type ReadinessModel = {
@@ -45,11 +50,18 @@ export type ReadinessModel = {
   battery: ReadinessMetric;
 };
 
+export type ReadinessMetricSource = {
+  sourceBridgeId: string | undefined;
+  usedFallback: boolean;
+};
+
 export function buildReadinessModel(
   hrv: HrvSummary | undefined,
   sleep: SleepRecord | undefined,
   stress: StressEpisode[] | undefined,
-  isFocusToday: boolean
+  isFocusToday: boolean,
+  hrvSource?: ReadinessMetricSource,
+  sleepSource?: ReadinessMetricSource
 ): ReadinessModel {
   const score = compositeScore(hrv, sleep);
   const ready = score !== null && score >= SCORE_MAX / 2;
@@ -67,8 +79,15 @@ export function buildReadinessModel(
       label: "HRV",
       value: hrv ? `${Math.round(hrv.rMSSD)}` : EM_DASH,
       trend: hrvTrend(hrv),
+      source: hrvSource?.sourceBridgeId,
+      usedFallback: hrvSource?.usedFallback,
     },
-    sleep: { label: "Sleep", value: sleepValue(sleep) },
+    sleep: {
+      label: "Sleep",
+      value: sleepValue(sleep),
+      source: sleepSource?.sourceBridgeId,
+      usedFallback: sleepSource?.usedFallback,
+    },
     battery: { label: "Battery", value: batteryValue(stress) },
   };
 }

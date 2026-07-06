@@ -9,6 +9,7 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { formatWeightKg } from "../../../lib/units/units";
 import { lastNinetyDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
+import { HealthSourceBadge } from "./HealthSourceBadge";
 
 const EMPTY_MSG = "No weight records yet for the last 90 days.";
 
@@ -44,11 +45,14 @@ export default function HealthWeightPage() {
           {records.map((r) => (
             <li
               key={r.id}
-              className="flex justify-between rounded border border-gray-200 p-2 text-sm dark:border-slate-800"
+              className="flex items-center justify-between gap-2 rounded border border-gray-200 p-2 text-sm dark:border-slate-800"
             >
               <span>{r.date}</span>
-              <span className="font-mono">
-                {formatWeightKg(r.krd.weightKilograms, units)}
+              <span className="flex items-center gap-2">
+                <span className="font-mono">
+                  {formatWeightKg(r.krd.weightKilograms, units)}
+                </span>
+                <HealthSourceBadge sourceBridgeId={r.sourceBridgeId} />
               </span>
             </li>
           ))}

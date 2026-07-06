@@ -3,10 +3,10 @@
  * profile, this week's workouts, and today's Garmin health metrics (HRV,
  * sleep, stress). View-model derivation stays in the pure `today-*` helpers.
  */
+import type { HrvSummary, SleepRecord } from "@kaiord/core";
 import { useMemo } from "react";
 
-import { useHealthHrvHistoryLive } from "../../../hooks/health/use-health-hrv-history-live";
-import { useHealthSleepWeekLive } from "../../../hooks/health/use-health-sleep-week-live";
+import { useEffectiveHealthRecordLive } from "../../../hooks/health/use-effective-health-record-live";
 import { useHealthStressDayLive } from "../../../hooks/health/use-health-stress-day-live";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { WorkoutRecord } from "../../../types/calendar-record";
@@ -14,6 +14,7 @@ import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { Profile } from "../../../types/profile";
 import type { TodayBuckets } from "./build-today-buckets";
 import type { WeekSummary } from "./build-week-summary";
+import { pickEffectiveHealthRecord } from "./pick-effective-health-record";
 import { toIsoDate, type WeekDay, weekDays } from "./today-dates";
 import { buildReadinessModel, type ReadinessModel } from "./today-readiness";
 import { useTodayPlannedBuckets } from "./use-today-planned-buckets";
@@ -48,24 +49,35 @@ export function useTodayData(focusDate: Date, realTodayIso: string): TodayData {
   const end = days[days.length - 1]!.iso;
 
   const weekWorkouts = useWeekWorkoutsLive(profileId, start, end);
-  const hrvRecords = useHealthHrvHistoryLive(profileId ?? "", {
-    start: focusIso,
-    end: focusIso,
-  });
-  const sleepRecords = useHealthSleepWeekLive(profileId ?? "", {
-    start: focusIso,
-    end: focusIso,
-  });
+  // F3.2/F3.3: HRV/sleep resolve through the multi-source resolver
+  // instead of reading the table directly — same single-day scope as
+  // before, but the "winning" record is now a governed choice (union
+  // default today; priority + fallback once F3.1's companion table
+  // exists), not just the query's last row.
+  const hrvResult = useEffectiveHealthRecordLive<HrvSummary>(
+    profileId ?? "",
+    "hrv",
+    focusIso
+  );
+  const sleepResult = useEffectiveHealthRecordLive<SleepRecord>(
+    profileId ?? "",
+    "sleep",
+    focusIso
+  );
   const stressRecords = useHealthStressDayLive(profileId ?? "", focusIso);
+  const hrvPick = pickEffectiveHealthRecord(hrvResult);
+  const sleepPick = pickEffectiveHealthRecord(sleepResult);
 
   const { planned, weekSummary, coachingByDay, expandActivity } =
     useTodayPlannedBuckets(profileId, dayIsos, focusIso, weekWorkouts, profile);
   const isFocusToday = focusIso === realTodayIso;
   const readiness = buildReadinessModel(
-    hrvRecords?.at(-1)?.krd,
-    sleepRecords?.at(-1)?.krd,
+    hrvPick.record,
+    sleepPick.record,
     stressRecords?.map((record) => record.krd),
-    isFocusToday
+    isFocusToday,
+    { sourceBridgeId: hrvPick.sourceBridgeId, usedFallback: hrvPick.usedFallback },
+    { sourceBridgeId: sleepPick.sourceBridgeId, usedFallback: sleepPick.usedFallback }
   );
 
   return {
