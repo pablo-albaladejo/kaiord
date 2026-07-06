@@ -9,6 +9,7 @@ import { ConnectionFlows } from "./ConnectionFlows";
 import { ConnectionMark } from "./ConnectionMark";
 import { bridgePolicies } from "./data-flow-lookup";
 import { DisconnectConfirmation } from "./DisconnectConfirmation";
+import { deriveConnectionFlows } from "./flow-availability";
 import { usePolicyToggle } from "./use-policy-toggle";
 
 type ConnectedRowProps = {
@@ -28,9 +29,10 @@ export function ConnectedRow(props: ConnectedRowProps) {
   const { toggleFlow } = usePolicyToggle();
   const { disconnect } = useConnectionActions(profileId);
   const capabilities = useBridgeCapabilities(bridgeId);
+  const flows = deriveConnectionFlows(capabilities);
 
   const onToggleFlow = (flowIndex: number, next: boolean) => {
-    const flow = config.flows[flowIndex];
+    const flow = flows[flowIndex];
     if (!flow) return;
     void toggleFlow({ profileId, bridgeId, ...flow, next });
   };
@@ -58,7 +60,6 @@ export function ConnectedRow(props: ConnectedRowProps) {
       </button>
       {expanded && (
         <ConnectionFlows
-          config={config}
           bridgeId={bridgeId}
           byDataType={byDataType}
           capabilities={capabilities}

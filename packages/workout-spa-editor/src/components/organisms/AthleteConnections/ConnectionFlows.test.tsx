@@ -2,18 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
-import { CONNECTIONS } from "./connection-config";
 import { ConnectionFlows } from "./ConnectionFlows";
-
-const garmin = CONNECTIONS.find((connection) => connection.id === "garmin");
-if (!garmin) throw new Error("garmin fixture missing from CONNECTIONS");
 
 const EMPTY_FLOWS: DataFlowsByType = new Map();
 
 function renderFlows(capabilities: readonly string[]) {
   render(
     <ConnectionFlows
-      config={garmin}
       bridgeId="garmin-bridge"
       byDataType={EMPTY_FLOWS}
       capabilities={capabilities}
@@ -24,17 +19,55 @@ function renderFlows(capabilities: readonly string[]) {
 }
 
 describe("ConnectionFlows", () => {
-  it("should show both import flows as manual when the bridge only announces write:workouts", () => {
+  it("should show only the operational export flow when the bridge only announces write:workouts", () => {
     // Arrange
 
     // Act
     renderFlows(["write:workouts"]);
 
     // Assert
-    expect(screen.getAllByText("Manual (import FIT)")).toHaveLength(2);
+    // No aspirational placeholders for capabilities the bridge never
+    // announced (F1.0 consensus: honest state over speculative UI).
+    expect(
+      screen.getByRole("switch", { name: "Export Workout" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Manual (import FIT)")).not.toBeInTheDocument();
+    expect(screen.queryByText("Coming soon")).not.toBeInTheDocument();
   });
 
-  it("should keep the export flow operative when the bridge announces write:workouts", () => {
+  it("should derive six flows once the bridge announces read:body and read:sleep", () => {
+    // Arrange
+
+    // Act
+    renderFlows(["read:body", "read:sleep"]);
+
+    // Assert
+    // read:body alone covers 5 managed data types by design (N:1 wire
+    // token), plus sleep via read:sleep.
+    for (const label of [
+      "Import Weight",
+      "Import HRV",
+      "Import Daily Wellness",
+      "Import Body Composition",
+      "Import Stress",
+      "Import Sleep",
+    ]) {
+      expect(screen.getByRole("switch", { name: label })).toBeInTheDocument();
+    }
+  });
+
+  it("should render no flows and no toggles when the bridge announces nothing", () => {
+    // Arrange
+
+    // Act
+    renderFlows([]);
+
+    // Assert
+    expect(screen.queryAllByRole("switch")).toHaveLength(0);
+    expect(screen.getByText("What syncs")).toBeInTheDocument();
+  });
+
+  it("should always render the disconnect action", () => {
     // Arrange
 
     // Act
@@ -42,32 +75,7 @@ describe("ConnectionFlows", () => {
 
     // Assert
     expect(
-      screen.getByRole("switch", { name: "Planned workouts" })
+      screen.getByRole("button", { name: /disconnect/i })
     ).toBeInTheDocument();
-  });
-
-  it("should make the readiness import flow operative once the bridge announces read:body", () => {
-    // Arrange
-
-    // Act
-    renderFlows(["write:workouts", "read:body", "read:sleep"]);
-
-    // Assert
-    expect(
-      screen.getByRole("switch", { name: "Daily readiness (HRV, sleep)" })
-    ).toBeInTheDocument();
-  });
-
-  it("should keep completed-activities import manual without read:workouts", () => {
-    // Arrange
-
-    // Act
-    renderFlows(["write:workouts", "read:body", "read:sleep"]);
-
-    // Assert
-    expect(screen.getByText("Manual (import FIT)")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("switch", { name: "Completed activities" })
-    ).toBeNull();
   });
 });

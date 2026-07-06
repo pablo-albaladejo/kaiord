@@ -1,11 +1,9 @@
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
-import type { ConnectionConfig } from "./connection-config";
 import { isFlowEnabled } from "./data-flow-lookup";
-import { flowAvailability } from "./flow-availability";
+import { deriveConnectionFlows, flowAvailability } from "./flow-availability";
 import { FlowRow } from "./FlowRow";
 
 type ConnectionFlowsProps = {
-  config: ConnectionConfig;
   bridgeId: string;
   byDataType: DataFlowsByType;
   capabilities: readonly string[];
@@ -14,19 +12,19 @@ type ConnectionFlowsProps = {
 };
 
 export function ConnectionFlows({
-  config,
   bridgeId,
   byDataType,
   capabilities,
   onToggleFlow,
   onDisconnect,
 }: ConnectionFlowsProps) {
+  const flows = deriveConnectionFlows(capabilities);
   return (
     <div className="mt-1 border-t border-slate-800 pt-1">
       <div className="px-1 pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
         What syncs
       </div>
-      {config.flows.map((flow, index) => (
+      {flows.map((flow, index) => (
         <FlowRow
           key={`${flow.dataType}-${flow.direction}`}
           flow={flow}

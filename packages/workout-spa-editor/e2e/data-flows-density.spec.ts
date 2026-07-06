@@ -96,12 +96,14 @@ test.describe("Athlete Connections", () => {
     await garminRow.click();
 
     // Assert — the "What syncs" group with per-flow toggles is revealed.
+    // The stub announces both read:workouts and write:workouts, so both
+    // directions derive as operational flows (see deriveConnectionFlows).
     await expect(page.getByText("What syncs")).toBeVisible();
     await expect(
-      page.getByRole("switch", { name: "Completed activities" })
+      page.getByRole("switch", { name: "Import Workout" })
     ).toBeVisible();
     await expect(
-      page.getByRole("switch", { name: "Planned workouts" })
+      page.getByRole("switch", { name: "Export Workout" })
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: /disconnect/i })

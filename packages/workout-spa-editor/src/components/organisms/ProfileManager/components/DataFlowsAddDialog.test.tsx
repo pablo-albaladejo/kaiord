@@ -4,11 +4,15 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { IntegrationPolicy } from "../../../../types/integration-policy";
 
-const { mockUpsert } = vi.hoisted(() => ({
+const { mockUpsert, mockGetCapabilities } = vi.hoisted(() => ({
   mockUpsert: vi.fn(async () => ({}) as IntegrationPolicy),
+  mockGetCapabilities: vi.fn((): readonly string[] | null => null),
 }));
 
 vi.mock("../../../../adapters/dexie/dexie-database", () => ({ db: {} }));
+vi.mock("../../../../adapters/bridge/bridge-discovery", () => ({
+  bridgeDiscovery: { getCapabilities: mockGetCapabilities },
+}));
 vi.mock(
   "../../../../adapters/dexie/dexie-integration-policy-repository",
   () => ({
@@ -34,10 +38,15 @@ const garminDiscovered: DiscoveredBridge = {
 };
 
 describe("DataFlowsAddDialog", () => {
-  it("should filter the bridge dropdown to bridges advertising the matching capability token", () => {
+  it("should only offer bridges that actually announce the matching capability token", () => {
     // Arrange
-    // "planned-session" only has import capability (read:training-plan)
-    // garmin-bridge is discovered; train2go-bridge is not
+    // "planned-session" import requires read:training-plan — only
+    // train2go-bridge announces it; garmin-bridge announces write:workouts.
+    mockGetCapabilities.mockImplementation((bridgeId) => {
+      if (bridgeId === "train2go-bridge") return ["read:training-plan"];
+      if (bridgeId === "garmin-bridge") return ["write:workouts"];
+      return null;
+    });
 
     // Act
     render(
@@ -51,12 +60,38 @@ describe("DataFlowsAddDialog", () => {
     );
 
     // Assert
-    // Both known bridge IDs should appear as options (filtered by capToken existence)
-    expect(
-      screen.getByRole("option", { name: /garmin-bridge/ })
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("option", { name: /train2go-bridge/ })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("option", { name: /garmin-bridge/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should offer whoop-bridge for an hrv import once it announces read:body (previously missing from KNOWN_BRIDGE_IDS)", () => {
+    // Arrange
+    mockGetCapabilities.mockImplementation((bridgeId) =>
+      bridgeId === "whoop-bridge" ? ["read:body", "read:sleep"] : null
+    );
+    const whoopDiscovered: DiscoveredBridge = {
+      bridgeId: "whoop-bridge",
+      extensionId: "ext-002",
+    };
+
+    // Act
+    render(
+      <DataFlowsAddDialog
+        profileId="p1"
+        dataType="hrv"
+        direction="import"
+        discoveredBridges={[whoopDiscovered]}
+        onClose={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(
+      screen.getByRole("option", { name: /whoop-bridge/ })
     ).toBeInTheDocument();
   });
 
@@ -81,6 +116,9 @@ describe("DataFlowsAddDialog", () => {
 
   it("should call upsertIntegrationPolicy with the chosen bridge, mode, and enabled state", async () => {
     // Arrange
+    mockGetCapabilities.mockImplementation((bridgeId) =>
+      bridgeId === "garmin-bridge" ? ["write:workouts"] : null
+    );
     const onClose = vi.fn();
     render(
       <DataFlowsAddDialog

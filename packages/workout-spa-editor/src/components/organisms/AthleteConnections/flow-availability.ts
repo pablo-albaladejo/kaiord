@@ -1,8 +1,25 @@
-import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
+import type { ManagedDataType } from "@kaiord/core";
+import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 
-import type { ConnectionFlow } from "./connection-config";
+import type { IntegrationPolicyDirection } from "../../../types/integration-policy";
+
+export type ConnectionFlow = {
+  label: string;
+  sublabel: string;
+  dataType: ManagedDataType;
+  direction: IntegrationPolicyDirection;
+};
 
 export type FlowAvailability = "operational" | "manual" | "coming-soon";
+
+const DIRECTIONS: readonly IntegrationPolicyDirection[] = ["import", "export"];
+const DIRECTION_COPY: Record<
+  IntegrationPolicyDirection,
+  { label: string; sublabel: string }
+> = {
+  import: { label: "Import", sublabel: "Reads from this bridge" },
+  export: { label: "Export", sublabel: "Sends to this bridge" },
+};
 
 /** Required bridge capability token for a flow, sourced from the single
     domain registry — never hardcoded per flow, so a newly-announced
@@ -26,4 +43,38 @@ export function flowAvailability(
     return "operational";
   }
   return flow.direction === "import" ? "manual" : "coming-soon";
+}
+
+/**
+ * Derives the flows a connected bridge can actually serve: every
+ * (dataType, direction) in MANAGED_DATA_REGISTRY whose capability token
+ * is among the bridge's REAL announced capabilities. Replaces the
+ * hand-curated GARMIN_FLOWS/WHOOP_FLOWS catalogs (removed) — a newly
+ * announced capability makes its flow appear with zero UI changes, and
+ * a capability the bridge never announces never shows an aspirational
+ * "manual" placeholder (F1.0 consensus: honest state over fake fallback).
+ *
+ * `flowAvailability` is still the source of truth for each derived
+ * flow's status, kept as a separate call at the render site — so a
+ * future staleness signal (bridge seen but capabilities expired) can
+ * extend that function without another rewrite here.
+ */
+export function deriveConnectionFlows(
+  capabilities: readonly string[]
+): ConnectionFlow[] {
+  const flows: ConnectionFlow[] = [];
+  for (const dataType of managedDataTypes) {
+    for (const direction of DIRECTIONS) {
+      const token = MANAGED_DATA_REGISTRY[dataType].capabilities[direction];
+      if (token === undefined || !capabilities.includes(token)) continue;
+      const copy = DIRECTION_COPY[direction];
+      flows.push({
+        label: `${copy.label} ${MANAGED_DATA_REGISTRY[dataType].label}`,
+        sublabel: copy.sublabel,
+        dataType,
+        direction,
+      });
+    }
+  }
+  return flows;
 }

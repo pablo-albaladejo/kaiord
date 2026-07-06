@@ -1,15 +1,15 @@
 import type { ManagedDataType } from "@kaiord/core";
-import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
 import { useState } from "react";
 
+import { bridgeDiscovery } from "../../../../adapters/bridge/bridge-discovery";
 import { db } from "../../../../adapters/dexie/dexie-database";
 import { createDexieIntegrationPolicyRepository } from "../../../../adapters/dexie/dexie-integration-policy-repository";
 import { upsertIntegrationPolicy } from "../../../../application/integration-policy/upsert-integration-policy.use-case";
 import type { DiscoveredBridge } from "../../../../hooks/use-discovered-bridges";
+import { eligibleBridgeIds } from "../../../../integrations/integration-registry";
 import type { IntegrationPolicyDirection } from "../../../../types/integration-policy";
 
 const policyRepo = createDexieIntegrationPolicyRepository(db);
-const KNOWN_BRIDGE_IDS = ["garmin-bridge", "train2go-bridge"] as const;
 
 type Params = {
   profileId: string;
@@ -26,8 +26,9 @@ export function useDataFlowsAdd({
   discoveredBridges,
   onClose,
 }: Params) {
-  const capToken = MANAGED_DATA_REGISTRY[dataType].capabilities[direction];
-  const eligible = KNOWN_BRIDGE_IDS.filter(() => capToken !== undefined);
+  const eligible = eligibleBridgeIds(dataType, direction, (bridgeId) =>
+    bridgeDiscovery.getCapabilities(bridgeId) ?? []
+  );
   const [bridgeId, setBridgeId] = useState<string>(eligible[0] ?? "");
   const [mode, setMode] = useState<"manual" | "auto">("manual");
   const [enabled, setEnabled] = useState(true);

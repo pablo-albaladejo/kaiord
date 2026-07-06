@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ConnectionFlow } from "./connection-config";
-import { flowAvailability } from "./flow-availability";
+import { deriveConnectionFlows, flowAvailability } from "./flow-availability";
 
 const importActivities: ConnectionFlow = {
   label: "Completed activities",
@@ -73,5 +73,65 @@ describe("flowAvailability", () => {
 
     // Assert
     expect(result).toBe(expected);
+  });
+});
+
+describe("deriveConnectionFlows", () => {
+  it("should derive only garmin's one real operational flow — its 2 aspirational flows disappear", () => {
+    // Arrange
+    // garmin-bridge announces only write:workouts; it never announced
+    // read:workouts or read:body, so those legacy hardcoded flows are
+    // gone by construction (intentional per F1.0 consensus, not a bug).
+
+    // Act
+    const flows = deriveConnectionFlows(["write:workouts"]);
+
+    // Assert
+    expect(flows).toEqual([
+      expect.objectContaining({ dataType: "workout", direction: "export" }),
+    ]);
+  });
+
+  it("should derive six flows for whoop's read:body + read:sleep capabilities (N:1 wire token by design)", () => {
+    // Arrange
+
+    // Act
+    const flows = deriveConnectionFlows(["read:body", "read:sleep"]);
+    const dataTypes = flows.map((f) => f.dataType).sort();
+
+    // Assert
+    expect(dataTypes).toEqual(
+      [
+        "body-composition",
+        "daily-wellness",
+        "hrv",
+        "sleep",
+        "stress",
+        "weight",
+      ].sort()
+    );
+  });
+
+  it("should derive no flows for a bridge that announces nothing", () => {
+    // Arrange
+
+    // Act
+    const flows = deriveConnectionFlows([]);
+
+    // Assert
+    expect(flows).toEqual([]);
+  });
+
+  it("should never derive a flow whose availability resolves to anything but operational", () => {
+    // Arrange
+    const capabilities = ["write:workouts", "read:body", "read:sleep"];
+
+    // Act
+    const flows = deriveConnectionFlows(capabilities);
+
+    // Assert
+    for (const flow of flows) {
+      expect(flowAvailability(flow, capabilities)).toBe("operational");
+    }
   });
 });
