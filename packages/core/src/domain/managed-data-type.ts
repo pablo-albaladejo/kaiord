@@ -8,7 +8,8 @@ import type { z } from "zod";
 
 export const managedDataTypes = [
   "workout",
-  "training-plan",
+  "planned-session",
+  "activity",
   "training-zones",
   "weight",
   "sleep",

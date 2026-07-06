@@ -28,6 +28,29 @@ export {
   workoutStepSchema,
 } from "./workout";
 
+// Planned Session Schema and Types (replaces the former `training-plan`)
+export type { PlannedSession, PlannedSessionStatus } from "./planned-session";
+export {
+  plannedSessionSchema,
+  plannedSessionStatusSchema,
+} from "./planned-session";
+
+// Activity Schema and Types (executed session: summary + optional KRD)
+export type { Activity, ActivitySummary } from "./activity";
+export { activitySchema, activitySummarySchema } from "./activity";
+
+// Training Zones Schema and Types
+export type {
+  TrainingZoneBand,
+  TrainingZones,
+  TrainingZoneSet,
+} from "./training-zones";
+export {
+  trainingZoneBandSchema,
+  trainingZoneSetSchema,
+  trainingZonesSchema,
+} from "./training-zones";
+
 // Duration Schema and Types
 export type { Duration, DurationType } from "./duration";
 export { durationSchema, durationTypeSchema } from "./duration";
