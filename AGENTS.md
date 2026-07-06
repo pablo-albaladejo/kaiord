@@ -164,6 +164,7 @@ opening them.
 | `com.kaiord.watch-test-review`   | every 20m   | `~/.kaiord/watch-test-review-pr.sh` | drives `auto-test-review` PRs to green + merges          |
 | `com.kaiord.nightly-minify`      | 04:15 daily | `~/.kaiord/nightly-minify.sh`   | `chore/minify-<pkg>-*` → PR label `auto-minify`             |
 | `com.kaiord.watch-minify-pr`     | every 20m   | `~/.kaiord/watch-minify-pr.sh`  | drives `auto-minify` PRs to green (merges only if opted in) |
+| `com.kaiord.watch-main-green`    | every 20m   | `~/.kaiord/watch-main-green.sh`  | read-only guard: opens `needs-human` issue if the tip of `main` has a red **full-CI** run (any merge source) |
 
 Shared conventions: every script does `unset ANTHROPIC_API_KEY` to use the Claude
 **subscription** login (`~/.claude`, never the paid API), runs
@@ -171,6 +172,20 @@ Shared conventions: every script does `unset ANTHROPIC_API_KEY` to use the Claud
 **dedicated worktree** under `~/development/kaiord.worktrees/` with `main` as the
 fetch anchor, never merges from the nightly (only opens a labeled PR), and logs to
 `~/.kaiord/*-YYYYMMDD.log`.
+
+**Invariant — "green" means the FULL CI run, not the required-checks subset.** The
+branch-protection-required checks (`detect-changes, lint, typecheck, test, build,
+round-trip, Check for Changeset, Link checker`) are a *subset* of what the `CI`
+workflow runs. Non-required jobs (`test-frontend`, `e2e-frontend`, `e2e-prod-base`,
+`size-limit`, `jscpd`) still run on both the PR and the `main` push, and a
+dependency/SDK **major** bump can turn one red while every required check passes (e.g.
+`@ai-sdk/*` v4 renamed the model-id type unions, staling the SPA model catalog and
+reddening `test-frontend` on `main`). So when driving a PR to green or verifying `main`
+after a merge, require the **whole CI run to succeed** — gate on `gh pr checks` without
+`--required`, and treat a red non-required job on `main` as a red `main`. If a bump
+staled a generated artifact, regenerate it (e.g. `pnpm generate:model-catalog`) rather
+than merging around the red. The `com.kaiord.watch-main-green` watchdog enforces this
+for the tip of `main` regardless of who merged (dependabot / human / bot).
 
 ### Nightly minify (`nightly-minify.sh`)
 
