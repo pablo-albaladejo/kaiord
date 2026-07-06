@@ -3,7 +3,12 @@
  * Each alias specialises the generic `HealthRecordRepository` to one metric's
  * KRD payload; the read/write surface is identical, only the payload differs.
  * `PersistencePort` intersects this type.
+ *
+ * `importedRecords` is intersected here too (rather than inline on
+ * `PersistencePort`, which is line-capped): it's the natural-key upsert
+ * port over those same six stores, used by `upsertImportedRecord`.
  */
+import type { ImportedRecordRepository } from "../application/import/imported-record-repository.port";
 import type {
   HealthBodyCompositionRecord,
   HealthDailyRecord,
@@ -21,4 +26,5 @@ export type HealthRepositories = {
   healthDaily: HealthRecordRepository<HealthDailyRecord>;
   healthBodyComposition: HealthRecordRepository<HealthBodyCompositionRecord>;
   healthStress: HealthRecordRepository<HealthStressRecord>;
+  importedRecords: ImportedRecordRepository;
 };
