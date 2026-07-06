@@ -230,6 +230,13 @@ const makeSeedRow = (
         createdAt: NOW,
         updatedAt: NOW,
       };
+    case "dataTypeSourcePolicy":
+      return {
+        profileId,
+        dataType: "sleep",
+        mode: "priority",
+        sourceOrder: ["whoop-bridge"],
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
@@ -263,6 +270,7 @@ const performCascadeOrchestration = async (
         intakeEntries: persistence.intakeEntries,
         intakePresets: persistence.intakePresets,
         energyTargets: persistence.energyTargets,
+        dataTypeSourcePolicy: persistence.dataTypeSourcePolicy,
       },
       profileId
     );

@@ -22,6 +22,7 @@ import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-d
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import { createInMemoryConnectionRepository } from "./in-memory-connection-repository";
+import { createInMemoryDataTypeSourcePolicyRepository } from "./in-memory-data-type-source-policy-repository";
 import { createInMemoryEnergyBalanceRepositories } from "./in-memory-energy-balance-repositories";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
 import { createInMemoryImportedRecordRepository } from "./in-memory-imported-record-repository";
@@ -143,6 +144,7 @@ export function createInMemoryPersistence(): PersistencePort {
       stress: stores.healthStress,
     }),
     activities: createInMemoryActivityRepository(),
+    dataTypeSourcePolicy: createInMemoryDataTypeSourcePolicyRepository(),
     chatMessages: createInMemoryChatMessageRepository(stores.chatMessages),
     chatConversations: createInMemoryChatConversationRepository(
       stores.chatConversations

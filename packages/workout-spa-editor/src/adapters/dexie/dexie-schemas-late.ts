@@ -7,6 +7,17 @@
 
 type Stores = Record<string, string>;
 
+// v22 — additive `aiModelBindings` store for per-profile model bindings.
+// Composite PK `[profileId+purpose]` keeps one row per purpose per profile;
+// the `profileId` index drives the cascade and makes the table a cascade
+// target (also auto-discovered by `isPerProfileTable`). Moved here (rather
+// than dexie-schemas.ts, where it originated) to keep that file under the
+// per-file line cap.
+export const buildCoreV22 = (prev: Stores): Stores => ({
+  ...prev,
+  aiModelBindings: "[profileId+purpose], profileId",
+});
+
 // v24 — additive `connections` store for per-(profile, provider) account
 // linkage (#714). PK `[profileId+providerId]`; the `profileId` index drives the
 // profile-delete cascade and makes `isPerProfileTable` auto-discover it. Dexie
@@ -45,4 +56,15 @@ export const buildCoreV27 = (prev: Stores): Stores => ({
   // the health stores, so a re-imported FIT file (same content-hash) is a
   // no-op; `[profileId+date]` drives calendar reads and the profile cascade.
   activities: "id, [profileId+date], [profileId+sourceBridgeId+externalId]",
+});
+
+// v30 — additive `dataTypeSourcePolicy` companion table (F3.1): per-(profile,
+// dataType) multi-source semantics (union|priority + sourceOrder), consumed by
+// resolveEffectiveSource (F3.2). PK is the compound `[profileId+dataType]` —
+// exactly one row per type per profile; the `profileId` index drives the
+// profile-delete cascade. Auto-created empty on upgrade: no row means the
+// implicit "union" default, so there is nothing to seed.
+export const buildCoreV30 = (prev: Stores): Stores => ({
+  ...prev,
+  dataTypeSourcePolicy: "[profileId+dataType], profileId",
 });

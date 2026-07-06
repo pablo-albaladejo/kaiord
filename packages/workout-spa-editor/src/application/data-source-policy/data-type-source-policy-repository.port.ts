@@ -16,4 +16,6 @@ export type DataTypeSourcePolicyRepository = {
     dataType: ManagedDataType;
   }) => Promise<DataTypeSourcePolicy | undefined>;
   put: (policy: DataTypeSourcePolicy) => Promise<void>;
+  /** Bulk-delete every policy row for a profile (profile-delete cascade). */
+  deleteByProfile: (profileId: string) => Promise<void>;
 };

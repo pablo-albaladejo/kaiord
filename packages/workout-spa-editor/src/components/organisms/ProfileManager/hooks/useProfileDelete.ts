@@ -60,6 +60,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
               intakeEntries: persistence.intakeEntries,
               intakePresets: persistence.intakePresets,
               energyTargets: persistence.energyTargets,
+              dataTypeSourcePolicy: persistence.dataTypeSourcePolicy,
             },
             id
           );
