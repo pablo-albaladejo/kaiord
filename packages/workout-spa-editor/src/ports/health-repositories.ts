@@ -4,9 +4,10 @@
  * KRD payload; the read/write surface is identical, only the payload differs.
  * `PersistencePort` intersects this type.
  *
- * `importedRecords` is intersected here too (rather than inline on
- * `PersistencePort`, which is line-capped): it's the natural-key upsert
- * port over those same six stores, used by `upsertImportedRecord`.
+ * `importedRecords` and `activities` are intersected here too (rather than
+ * inline on `PersistencePort`, which is line-capped): the former is the
+ * natural-key upsert over those six health stores; the latter is the v27
+ * Data Hub executed-activity write port.
  */
 import type { ImportedRecordRepository } from "../application/import/imported-record-repository.port";
 import type {
@@ -17,6 +18,7 @@ import type {
   HealthStressRecord,
   HealthWeightRecord,
 } from "../types/health/health-records";
+import type { ActivityRepository } from "./activity-repository";
 import type { HealthRecordRepository } from "./health-record-repository";
 
 export type HealthRepositories = {
@@ -27,4 +29,7 @@ export type HealthRepositories = {
   healthBodyComposition: HealthRecordRepository<HealthBodyCompositionRecord>;
   healthStress: HealthRecordRepository<HealthStressRecord>;
   importedRecords: ImportedRecordRepository;
+  // v27 Data Hub executed-activity write port (hosted here for the same
+  // line-cap reason as importedRecords).
+  activities: ActivityRepository;
 };

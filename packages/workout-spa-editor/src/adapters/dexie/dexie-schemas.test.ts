@@ -120,7 +120,7 @@ describe("SCHEMAS.v27 (Data Hub domain stores)", () => {
     expect(stores.plannedSessions).toBe(stores.coachingActivities);
   });
 
-  it("should declare the activities store with dedup + date-range indexes", () => {
+  it("should declare the activities store with provenance-dedup + date indexes", () => {
     // Arrange
     const stores = SCHEMAS.v27 as Record<string, string>;
 
@@ -128,7 +128,7 @@ describe("SCHEMAS.v27 (Data Hub domain stores)", () => {
 
     // Assert
     expect(stores.activities).toBe(
-      "id, [profileId+date], [profileId+source+sourceId]"
+      "id, [profileId+date], [profileId+sourceBridgeId+externalId]"
     );
   });
 });

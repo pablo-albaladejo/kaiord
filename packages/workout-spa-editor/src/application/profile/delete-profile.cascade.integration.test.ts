@@ -80,9 +80,11 @@ const makeSeedRow = (
       return {
         id,
         profileId,
-        source: "garmin",
-        sourceId: id,
         date: WEEK_START,
+        sport: "cycling",
+        sourceBridgeId: "garmin",
+        externalId: id,
+        createdAt: NOW,
       };
     case "coachingDayNotes":
       return {

@@ -5,6 +5,7 @@
  */
 
 import type { PersistencePort } from "../../ports/persistence-port";
+import { createDexieActivityRepository } from "./dexie-activity-repository";
 import { createDexieAiModelBindingRepository } from "./dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
@@ -51,6 +52,7 @@ export function createDexiePersistence(
     autoMatchDismissal: createDexieAutoMatchDismissalRepository(database),
     userPreferences: createDexieUserPreferencesRepository(database),
     healthCleanup: createDexieHealthCleanupRepository(database),
+    activities: createDexieActivityRepository(database),
     importedRecords: createDexieImportedRecordRepository(database),
     ...createDexieHealthRecordRepositories(database),
     ...createDexieEnergyBalanceRepositories(database),

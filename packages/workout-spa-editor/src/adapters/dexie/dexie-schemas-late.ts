@@ -41,5 +41,8 @@ export const buildCoreV27 = (prev: Stores): Stores => ({
   ...prev,
   plannedSessions:
     "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
-  activities: "id, [profileId+date], [profileId+source+sourceId]",
+  // `activities` dedups by provenance (sourceBridgeId, externalId) mirroring
+  // the health stores, so a re-imported FIT file (same content-hash) is a
+  // no-op; `[profileId+date]` drives calendar reads and the profile cascade.
+  activities: "id, [profileId+date], [profileId+sourceBridgeId+externalId]",
 });

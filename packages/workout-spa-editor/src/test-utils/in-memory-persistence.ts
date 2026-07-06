@@ -9,6 +9,7 @@
  */
 
 import type { PersistencePort } from "../ports/persistence-port";
+import { createInMemoryActivityRepository } from "./in-memory-activity-repository";
 import { createInMemoryAiModelBindingRepository } from "./in-memory-ai-model-binding-repository";
 import {
   createInMemoryAiProviderRepository,
@@ -141,6 +142,7 @@ export function createInMemoryPersistence(): PersistencePort {
       "body-composition": stores.healthBodyComposition,
       stress: stores.healthStress,
     }),
+    activities: createInMemoryActivityRepository(),
     chatMessages: createInMemoryChatMessageRepository(stores.chatMessages),
     chatConversations: createInMemoryChatConversationRepository(
       stores.chatConversations
