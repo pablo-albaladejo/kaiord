@@ -19,9 +19,10 @@ const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 const PASSPHRASE = "kaiord-spa-v1";
 // Current head version KaiordDatabase opens at; v24 added the device-local
 // `connections` store (excluded from the snapshot), v25 added chatConversations
-// + the conversationId FK, and v26 added the device-local energy-balance stores
-// (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded.
-const SCHEMA_HEAD = 30;
+// + the conversationId FK, v26 added the device-local energy-balance stores
+// (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded, and v31
+// added the lab-analytics stores (`labReports`, `labValues`, included).
+const SCHEMA_HEAD = 31;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;

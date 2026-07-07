@@ -270,3 +270,6 @@ export {
 
 // Ingest utilities
 export { deriveExternalId } from "./domain";
+
+// Lab analytics domain (LabReport, LabValue, parameter catalog, conversion, flag)
+export * from "./domain/lab";

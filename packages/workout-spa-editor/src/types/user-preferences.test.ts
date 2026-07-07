@@ -80,4 +80,40 @@ describe("userPreferencesSchema", () => {
       userPreferencesSchema.parse(baseRow({ calendarView: "tight" }))
     ).toThrow();
   });
+
+  it("should accept a well-formed row with labDashboardParams (F5)", () => {
+    // Arrange
+    const row = baseRow({ labDashboardParams: ["glucose", "ferritin"] });
+
+    // Act
+    const parsed = userPreferencesSchema.parse(row);
+
+    // Assert
+    expect(parsed.labDashboardParams).toEqual(["glucose", "ferritin"]);
+  });
+
+  it("should accept a row without labDashboardParams — pre-F5 rows stay valid", () => {
+    // Arrange
+    const row = baseRow();
+
+    // Act
+    const parsed = userPreferencesSchema.parse(row);
+
+    // Assert
+    expect(parsed.labDashboardParams).toBeUndefined();
+  });
+
+  it("should reject a non-string labDashboardParams entry", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+    expect(() =>
+      userPreferencesSchema.parse(
+        // @ts-expect-error — verifying runtime rejection
+        baseRow({ labDashboardParams: [1] })
+      )
+    ).toThrow();
+  });
 });

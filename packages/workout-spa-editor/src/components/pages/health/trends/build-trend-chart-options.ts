@@ -1,6 +1,7 @@
 import type uPlot from "uplot";
 
 import type { Units } from "../../../../lib/units/units";
+import { timeXScale } from "../../../charts/uplot-base/uplot-base";
 import { formatPaneValue } from "./format-pane-value";
 import type { TrendMetricDef } from "./trend-metrics";
 
@@ -20,7 +21,7 @@ export const buildTrendChartOptions = (
   metrics: ReadonlyArray<TrendMetricDef>,
   units: Units = "metric"
 ): uPlot.Options => {
-  const scales: uPlot.Scales = { x: { time: true } };
+  const scales: uPlot.Scales = timeXScale();
   for (const m of metrics) scales[m.key] = { auto: true };
 
   const axes: uPlot.Axis[] = [{}];

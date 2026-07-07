@@ -2,6 +2,7 @@ export { convertLengthToMeters } from "./converters/length-unit.converter";
 export { createWorkoutKRD } from "./converters/workout-to-krd.converter";
 export { canonicalHash } from "./hash/canonical-hash";
 export { deriveExternalId } from "./ingest/derive-external-id";
+export * from "./lab";
 export type {
   BridgeId,
   HashProjection,

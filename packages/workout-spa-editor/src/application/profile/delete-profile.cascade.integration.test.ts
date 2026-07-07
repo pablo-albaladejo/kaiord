@@ -237,6 +237,28 @@ const makeSeedRow = (
         mode: "priority",
         sourceOrder: ["whoop-bridge"],
       };
+    case "labReports":
+      return {
+        id,
+        profileId,
+        date: WEEK_START,
+        provenance: { source: "manual" },
+      };
+    case "labValues":
+      return {
+        id,
+        profileId,
+        reportId: `lab-report-${profileId}`,
+        parameterKey: "glucose",
+        date: WEEK_START,
+        valueRaw: 90,
+        unitRaw: "mg/dL",
+        valueCanonical: 90,
+        unitCanonical: "mg/dL",
+        refSource: "none",
+        flag: "unknown",
+        provenance: { source: "manual" },
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
@@ -271,6 +293,7 @@ const performCascadeOrchestration = async (
         intakePresets: persistence.intakePresets,
         energyTargets: persistence.energyTargets,
         dataTypeSourcePolicy: persistence.dataTypeSourcePolicy,
+        labs: persistence.labs,
       },
       profileId
     );

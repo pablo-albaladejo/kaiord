@@ -27,6 +27,7 @@ import { createInMemoryEnergyBalanceRepositories } from "./in-memory-energy-bala
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
 import { createInMemoryImportedRecordRepository } from "./in-memory-imported-record-repository";
 import { createInMemoryIntegrationPolicyRepository } from "./in-memory-integration-policy-repository";
+import { createInMemoryLabRepository } from "./in-memory-lab-repository";
 import { createInMemoryMatchedSessionsReadModel } from "./in-memory-matched-sessions-read-model";
 import {
   captureSnapshot,
@@ -70,6 +71,8 @@ export function createInMemoryPersistence(): PersistencePort {
     chatConversations: new Map(),
     aiModelBindings: new Map(),
     tombstones: new Map(),
+    labReports: new Map(),
+    labValues: new Map(),
   };
   const profileActiveIdRef: ActiveIdRef = { current: null };
   const aiCustomPromptRef: CustomPromptRef = { current: null };
@@ -154,6 +157,7 @@ export function createInMemoryPersistence(): PersistencePort {
     ),
     ...createInMemoryEnergyBalanceRepositories(),
     tombstones: createInMemoryTombstoneRepository(stores.tombstones),
+    labs: createInMemoryLabRepository(stores.labReports, stores.labValues),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(
         stores,

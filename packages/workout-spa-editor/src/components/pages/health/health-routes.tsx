@@ -17,6 +17,7 @@ const HealthSleepPage = lazy(() => import("./HealthSleepPage"));
 const HealthWeightPage = lazy(() => import("./HealthWeightPage"));
 const HealthRecoveryPage = lazy(() => import("./HealthRecoveryPage"));
 const HealthActivityPage = lazy(() => import("./HealthActivityPage"));
+const LabEntryPage = lazy(() => import("./labs/LabEntryPage"));
 
 const normalize = (pathname: string): string =>
   pathname.length > 1 && pathname.endsWith("/")
@@ -30,6 +31,7 @@ const renderFor = (pathname: string) => {
   if (path === "/health/weight") return <HealthWeightPage />;
   if (path === "/health/recovery") return <HealthRecoveryPage />;
   if (path === "/health/activity") return <HealthActivityPage />;
+  if (path === "/health/labs") return <LabEntryPage />;
   return null;
 };
 
