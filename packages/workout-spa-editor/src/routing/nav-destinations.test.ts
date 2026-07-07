@@ -55,6 +55,17 @@ describe("NAV_DESTINATIONS", () => {
     expect(uniquePaths.size).toBe(paths.length);
   });
 
+  it("should register a dedicated Labs destination under the health section", () => {
+    // Arrange
+    const labs = NAV_DESTINATIONS.find((d) => d.id === "labs");
+
+    // Act
+
+    // Assert
+    expect(labs?.path).toBe("/health/labs");
+    expect(labs?.surfaces.header).toBe(true);
+  });
+
   it("should mark every destination reachable on both desktop and mobile", () => {
     // Arrange
     const destinations = NAV_DESTINATIONS;
