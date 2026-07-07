@@ -241,6 +241,11 @@ const fetchActivitiesWithBackoff = async (maxAttempts, backoffBaseMs) => {
   throw lastErr;
 };
 
+// Synchronous in-flight latch: chrome.storage has no compare-and-set, so the
+// async read/write throttle alone lets two overlapping "activities" actions
+// both pass the interval check. The latch is set before the first await.
+let activitiesPullInFlight = false;
+
 const listActivities = async (opts = {}) => {
   const {
     minIntervalMs = ACTIVITIES_MIN_INTERVAL_MS,
@@ -248,24 +253,32 @@ const listActivities = async (opts = {}) => {
     backoffBaseMs = ACTIVITIES_BACKOFF_BASE_MS,
   } = opts;
 
-  if (await isActivitiesPullDisabled()) {
-    return { activities: [], disabled: true, throttled: false };
-  }
-
-  const now = Date.now();
-  const { [ACTIVITIES_LAST_FETCH_KEY]: last = 0 } =
-    await chrome.storage.session.get(ACTIVITIES_LAST_FETCH_KEY);
-  if (now - last < minIntervalMs) {
+  if (activitiesPullInFlight) {
     return { activities: [], disabled: false, throttled: true };
   }
-  await chrome.storage.session.set({ [ACTIVITIES_LAST_FETCH_KEY]: now });
+  activitiesPullInFlight = true;
+  try {
+    if (await isActivitiesPullDisabled()) {
+      return { activities: [], disabled: true, throttled: false };
+    }
 
-  const data = await fetchActivitiesWithBackoff(maxAttempts, backoffBaseMs);
-  return {
-    activities: Array.isArray(data) ? data : [],
-    disabled: false,
-    throttled: false,
-  };
+    const now = Date.now();
+    const { [ACTIVITIES_LAST_FETCH_KEY]: last = 0 } =
+      await chrome.storage.session.get(ACTIVITIES_LAST_FETCH_KEY);
+    if (now - last < minIntervalMs) {
+      return { activities: [], disabled: false, throttled: true };
+    }
+    await chrome.storage.session.set({ [ACTIVITIES_LAST_FETCH_KEY]: now });
+
+    const data = await fetchActivitiesWithBackoff(maxAttempts, backoffBaseMs);
+    return {
+      activities: Array.isArray(data) ? data : [],
+      disabled: false,
+      throttled: false,
+    };
+  } finally {
+    activitiesPullInFlight = false;
+  }
 };
 
 const openGarmin = async () => {

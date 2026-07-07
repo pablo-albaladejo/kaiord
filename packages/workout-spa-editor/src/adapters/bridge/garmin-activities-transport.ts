@@ -6,10 +6,8 @@
  * (defense-in-depth against a Garmin API shape drift). The bridge already
  * enforces throttle/backoff/kill-switch; this layer only transports + parses.
  */
-import {
-  type GarminActivitiesResponse,
-  garminActivitiesResponseSchema,
-} from "../../application/import/garmin-activity-schema";
+import type { GarminActivitiesResponse } from "../../application/import/garmin-activity-schema";
+import { garminActivitiesResponseSchema } from "../../application/import/garmin-activity-schema";
 import { sendBridgeMessage } from "./bridge-transport";
 
 const ACTIVITIES_TIMEOUT_MS = 15_000;

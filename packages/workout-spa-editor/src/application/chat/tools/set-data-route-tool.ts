@@ -24,7 +24,7 @@ const routeFields = {
   direction: integrationPolicyDirectionSchema,
 };
 
-const setDataRouteSchema = z.discriminatedUnion("action", [
+const setDataRouteInputSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("enable_route"), ...routeFields }),
   z.object({ action: z.literal("disable_route"), ...routeFields }),
   z.object({
@@ -43,6 +43,20 @@ const setDataRouteSchema = z.discriminatedUnion("action", [
   }),
 ]);
 
+const setDataRouteSchema = setDataRouteInputSchema.superRefine((value, ctx) => {
+  if (
+    value.action === "set_source_policy" &&
+    value.mode === "priority" &&
+    (value.sourceOrder?.length ?? 0) === 0
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["sourceOrder"],
+      message: "priority mode requires a non-empty sourceOrder",
+    });
+  }
+});
+
 export const createSetDataRouteTool = (ops: ChatActionOps): ChatTool => ({
   name: "set_data_route",
   description:
@@ -52,7 +66,7 @@ export const createSetDataRouteTool = (ops: ChatActionOps): ChatTool => ({
     "source (union, the default) or reads a priority order with automatic " +
     "fallback (priority). Requires the user to confirm before running; " +
     "the result reflects the new persisted state.",
-  inputSchema: setDataRouteSchema,
+  inputSchema: setDataRouteInputSchema,
   requiresConfirmation: true,
   execute: (raw) => ops.setDataRoute(setDataRouteSchema.parse(raw)),
 });

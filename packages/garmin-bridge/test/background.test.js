@@ -535,6 +535,28 @@ describe("background.js", () => {
 
       expect(result.activities).toEqual([]);
     });
+
+    it("treats an overlapping pull as throttled without a second fetch", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      let release;
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => {
+        release = () => cb({ ok: true, status: 200, data: [] });
+      });
+
+      const first = listActivities();
+      const overlapping = await listActivities();
+      while (!release) await new Promise((r) => setTimeout(r, 0));
+      release();
+      const firstResult = await first;
+
+      expect(overlapping).toEqual({
+        activities: [],
+        disabled: false,
+        throttled: true,
+      });
+      expect(firstResult.throttled).toBe(false);
+      expect(chrome.tabs.sendMessage).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("fetchActivitiesWithBackoff", () => {

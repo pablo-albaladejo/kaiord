@@ -77,6 +77,25 @@ describe("createSetDataRouteTool", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("should reject a priority policy with an empty sourceOrder", () => {
+    // Arrange
+    const setDataRoute = vi.fn();
+    const tool = createSetDataRouteTool(makeOps({ setDataRoute }));
+
+    // Act
+    const act = () =>
+      tool.execute({
+        action: "set_source_policy",
+        dataType: "sleep",
+        mode: "priority",
+        sourceOrder: [],
+      });
+
+    // Assert
+    expect(act).toThrow();
+    expect(setDataRoute).not.toHaveBeenCalled();
+  });
+
   it("should reject enable_route input missing the direction field", () => {
     // Arrange
     const tool = createSetDataRouteTool(makeOps());
