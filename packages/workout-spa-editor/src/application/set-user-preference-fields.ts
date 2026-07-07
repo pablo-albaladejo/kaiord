@@ -23,6 +23,7 @@ export type UserPreferenceFieldsPatch = Partial<
     | "aiBannerExpanded"
     | "units"
     | "notificationsEnabled"
+    | "labDashboardParams"
   >
 >;
 
@@ -54,6 +55,7 @@ export async function setUserPreferenceFields(
     aiBannerExpanded: existing?.aiBannerExpanded,
     units: existing?.units,
     notificationsEnabled: existing?.notificationsEnabled,
+    labDashboardParams: existing?.labDashboardParams,
     ...input.patch,
     updatedAt: deps.clock(),
   };
