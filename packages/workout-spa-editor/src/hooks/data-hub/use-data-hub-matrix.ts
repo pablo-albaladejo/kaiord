@@ -23,12 +23,12 @@ import { useDiscoveredBridges } from "../use-discovered-bridges";
 
 const TRAIN2GO = "train2go";
 
-export const useDataHubMatrix = (profileId: string): DataHubRow[] => {
+export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
   const connections = useConnectionStatus(profileId);
   const discovered = useDiscoveredBridges();
-  const { byDataType } = useDataFlows(profileId);
+  const { byDataType } = useDataFlows(profileId ?? "");
   const persistence = usePersistence();
-  const train2goSyncedAt = useTrain2GoSyncState(persistence, profileId);
+  const train2goSyncedAt = useTrain2GoSyncState(persistence, profileId ?? "");
 
   return useMemo(
     () =>
