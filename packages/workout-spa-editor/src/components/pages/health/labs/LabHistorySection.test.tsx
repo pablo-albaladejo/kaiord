@@ -133,6 +133,23 @@ describe("LabHistorySection", () => {
     expect(within(review).getAllByTestId("lab-review-value").length).toBe(2);
   });
 
+  it("should open a parameter's evolution chart when its list item is clicked (DoD-2)", async () => {
+    // Arrange
+    render(<LabHistorySection profileId={PROFILE_ID} />, { wrapper: wrap });
+    const user = userEvent.setup();
+    const glucose = (await screen.findAllByTestId("lab-parameter-item")).find(
+      (el) => el.getAttribute("data-parameter-key") === "glucose"
+    ) as HTMLElement;
+
+    // Act
+    await user.click(within(glucose).getByTestId("lab-parameter-select"));
+
+    // Assert
+    const chart = await screen.findByTestId("lab-parameter-chart");
+    expect(chart).toHaveAttribute("data-parameter-key", "glucose");
+    expect(chart).toHaveAttribute("data-point-count", "2");
+  });
+
   it("should delete a report and its values reactively (F3.4)", async () => {
     // Arrange
     render(<LabHistorySection profileId={PROFILE_ID} />, { wrapper: wrap });

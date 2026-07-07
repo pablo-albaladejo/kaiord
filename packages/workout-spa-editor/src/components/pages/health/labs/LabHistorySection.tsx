@@ -1,22 +1,18 @@
 /**
  * LabHistorySection — the F3 read surface under the entry form: the
- * latest-per-parameter list (F3.1/F3.3), the dated reports with review (DoD-3)
- * and a minimal delete (F3.4). Selection + deletion are owned here; the reads
- * are reactive so both update after any save or delete.
+ * latest-per-parameter list with its evolution chart (F3.1/F3.3/DoD-2) and the
+ * dated reports with review (DoD-3) plus a minimal delete (F3.4). The reads are
+ * reactive so every section updates after any save or delete.
  */
 import { useState } from "react";
 
 import { deleteLabReport } from "../../../../application/lab/delete-lab-report.use-case";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
-import { LabLatestValuesList } from "./LabLatestValuesList";
+import { LabLatestValuesSection } from "./LabLatestValuesSection";
 import { LabReportReview } from "./LabReportReview";
 import { LabReportsList } from "./LabReportsList";
-import {
-  useLabParameterSummariesLive,
-  useLabReportDetailLive,
-  useLabReportsLive,
-} from "./use-lab-history";
+import { useLabReportDetailLive, useLabReportsLive } from "./use-lab-history";
 
 const LOADING = "Loading…";
 const DELETED_MSG = "Lab report deleted";
@@ -25,7 +21,6 @@ const DELETE_FAILED_MSG = "Could not delete the lab report";
 export const LabHistorySection = ({ profileId }: { profileId: string }) => {
   const persistence = usePersistence();
   const toast = useToastContext();
-  const summaries = useLabParameterSummariesLive(profileId);
   const reports = useLabReportsLive(profileId);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const detail = useLabReportDetailLive(selectedId);
@@ -45,14 +40,7 @@ export const LabHistorySection = ({ profileId }: { profileId: string }) => {
 
   return (
     <div data-testid="lab-history" className="mt-6 flex flex-col gap-6">
-      <section>
-        <h3 className="mb-2 text-sm font-semibold">Latest values</h3>
-        {summaries === undefined ? (
-          <p className="text-sm text-gray-600">{LOADING}</p>
-        ) : (
-          <LabLatestValuesList summaries={summaries} />
-        )}
-      </section>
+      <LabLatestValuesSection profileId={profileId} />
       <section>
         <h3 className="mb-2 text-sm font-semibold">Reports</h3>
         {reports === undefined ? (
