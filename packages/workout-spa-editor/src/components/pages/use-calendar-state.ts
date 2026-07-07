@@ -5,6 +5,7 @@
 import { useCallback, useState } from "react";
 import { useLocation } from "wouter";
 
+import { isProjectedWorkoutRecord } from "../../application/coaching/activity-to-workout-record";
 import { useGarminBridge } from "../../contexts";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { withOrigin } from "../../routing/with-origin";
@@ -40,7 +41,15 @@ export function useCalendarState() {
 
   const handleWorkoutClick = useCallback(
     (workout: WorkoutRecord) => {
-      if (workout.state === "raw" || workout.state === "skipped") {
+      // Projected activities (executions with no persisted WorkoutRecord)
+      // have no id in the `workouts` table — the editor can never resolve
+      // them, so they preview in place instead of navigating (kill test:
+      // no infinite editor spinner for a card that visibly exists).
+      if (
+        workout.state === "raw" ||
+        workout.state === "skipped" ||
+        isProjectedWorkoutRecord(workout)
+      ) {
         setSelectedWorkout(workout);
       } else {
         // Carry the originating week so Back returns to THIS grid.

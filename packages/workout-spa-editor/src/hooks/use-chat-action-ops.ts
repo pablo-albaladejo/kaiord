@@ -9,23 +9,17 @@
  */
 import { useCallback, useMemo } from "react";
 
-import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { createTrain2GoCoachingTransport } from "../adapters/train2go/train2go-coaching-transport";
 import type {
   ChatActionOps,
   CreateWorkoutInput,
-  LogHealthMetricInput,
-  LogIntakeInput,
 } from "../application/chat/tools/chat-tool-deps";
 import { usePersistence } from "../contexts/persistence-context";
 import type { LlmProviderConfig } from "../store/ai-store-types";
-import {
-  doCreateWorkout,
-  doLogHealthMetric,
-  doSyncCoaching,
-} from "./chat/chat-action-ops-impl";
-import { doLogIntake } from "./chat/do-log-intake";
+import { doCreateWorkout, doSyncCoaching } from "./chat/chat-action-ops-impl";
+import { useLogOps } from "./use-log-ops";
 import { usePushToGarminOp } from "./use-push-to-garmin-op";
+import { useSetDataRouteOp } from "./use-set-data-route-op";
+import { useTrain2GoCoachingTransport } from "./use-train2go-coaching-transport";
 
 const requireProfile = (profileId: string | null): string => {
   if (!profileId) throw new Error("No active profile");
@@ -43,13 +37,9 @@ export const useChatActionOps = (
 ): ChatActionOps => {
   const persistence = usePersistence();
   const pushToGarmin = usePushToGarminOp();
-  const transport = useMemo(
-    () =>
-      createTrain2GoCoachingTransport(
-        () => bridgeDiscovery.getExtensionId("train2go-bridge") ?? ""
-      ),
-    []
-  );
+  const setDataRoute = useSetDataRouteOp(profileId);
+  const { logHealthMetric, logIntake } = useLogOps(profileId);
+  const transport = useTrain2GoCoachingTransport();
 
   const syncCoaching = useCallback(
     () => doSyncCoaching(persistence, transport, requireProfile(profileId)),
@@ -69,16 +59,6 @@ export const useChatActionOps = (
     },
     [persistence, profileId, provider, modelId]
   );
-  const logHealthMetric = useCallback(
-    (input: LogHealthMetricInput) =>
-      doLogHealthMetric(persistence, requireProfile(profileId), input),
-    [persistence, profileId]
-  );
-  const logIntake = useCallback(
-    (input: LogIntakeInput) =>
-      doLogIntake(persistence, requireProfile(profileId), input),
-    [persistence, profileId]
-  );
 
   return useMemo(
     () => ({
@@ -87,7 +67,15 @@ export const useChatActionOps = (
       logHealthMetric,
       logIntake,
       pushToGarmin,
+      setDataRoute,
     }),
-    [syncCoaching, createWorkout, logHealthMetric, logIntake, pushToGarmin]
+    [
+      syncCoaching,
+      createWorkout,
+      logHealthMetric,
+      logIntake,
+      pushToGarmin,
+      setDataRoute,
+    ]
   );
 };

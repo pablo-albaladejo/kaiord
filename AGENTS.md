@@ -90,6 +90,12 @@ Before any non-trivial change:
   **camelCase** (`indoorCycling`).
 - Files: `kebab-case.ts`. Mappers `*.mapper.ts` (pure, no tests). Converters
   `*.converter.ts` (logic, requires tests).
+- **Worktree hygiene**: one worktree per feature/program under
+  `~/development/kaiord.worktrees/`. Remove a worktree as soon as its work is
+  finished (branch pushed/merged and no agent still working in it):
+  `git worktree remove <path> && git worktree prune`. Branches survive worktree
+  removal; regenerated `packages/*/icons/*.png` noise is safe to discard with
+  `--force`. Never leave finished worktrees around — keep the workspace clean.
 
 ### Testing requirements
 
@@ -158,13 +164,13 @@ repo). They open **labeled PRs**; a paired watcher drives each PR's CI to green.
 Recognize these bot-authored branches/labels — they appear without a human
 opening them.
 
-| launchd label                    | Schedule    | Script                          | Produces                                                    |
-| -------------------------------- | ----------- | ------------------------------- | ----------------------------------------------------------- |
-| `com.kaiord.nightly-test-review` | 03:15 daily | `~/.kaiord/nightly-test-review.sh` | `chore/nightly-test-review-*` → PR label `auto-test-review` |
-| `com.kaiord.watch-test-review`   | every 20m   | `~/.kaiord/watch-test-review-pr.sh` | drives `auto-test-review` PRs to green + merges          |
-| `com.kaiord.nightly-minify`      | 04:15 daily | `~/.kaiord/nightly-minify.sh`   | `chore/minify-<pkg>-*` → PR label `auto-minify`             |
-| `com.kaiord.watch-minify-pr`     | every 20m   | `~/.kaiord/watch-minify-pr.sh`  | drives `auto-minify` PRs to green (merges only if opted in) |
-| `com.kaiord.watch-main-green`    | every 20m   | `~/.kaiord/watch-main-green.sh`  | read-only guard: opens `needs-human` issue if the tip of `main` has a red **full-CI** run (any merge source) |
+| launchd label                    | Schedule    | Script                              | Produces                                                                                                     |
+| -------------------------------- | ----------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `com.kaiord.nightly-test-review` | 03:15 daily | `~/.kaiord/nightly-test-review.sh`  | `chore/nightly-test-review-*` → PR label `auto-test-review`                                                  |
+| `com.kaiord.watch-test-review`   | every 20m   | `~/.kaiord/watch-test-review-pr.sh` | drives `auto-test-review` PRs to green + merges                                                              |
+| `com.kaiord.nightly-minify`      | 04:15 daily | `~/.kaiord/nightly-minify.sh`       | `chore/minify-<pkg>-*` → PR label `auto-minify`                                                              |
+| `com.kaiord.watch-minify-pr`     | every 20m   | `~/.kaiord/watch-minify-pr.sh`      | drives `auto-minify` PRs to green (merges only if opted in)                                                  |
+| `com.kaiord.watch-main-green`    | every 20m   | `~/.kaiord/watch-main-green.sh`     | read-only guard: opens `needs-human` issue if the tip of `main` has a red **full-CI** run (any merge source) |
 
 Shared conventions: every script does `unset ANTHROPIC_API_KEY` to use the Claude
 **subscription** login (`~/.claude`, never the paid API), runs
@@ -175,7 +181,7 @@ fetch anchor, never merges from the nightly (only opens a labeled PR), and logs 
 
 **Invariant — "green" means the FULL CI run, not the required-checks subset.** The
 branch-protection-required checks (`detect-changes, lint, typecheck, test, build,
-round-trip, Check for Changeset, Link checker`) are a *subset* of what the `CI`
+round-trip, Check for Changeset, Link checker`) are a _subset_ of what the `CI`
 workflow runs. Non-required jobs (`test-frontend`, `e2e-frontend`, `e2e-prod-base`,
 `size-limit`, `jscpd`) still run on both the PR and the `main` push, and a
 dependency/SDK **major** bump can turn one red while every required check passes (e.g.

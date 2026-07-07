@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-sessions";
+import {
+  type ActivityRecord,
+  buildSourceActivityRecord,
+} from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import type { SessionMatch } from "../../types/session-match";
@@ -220,6 +224,89 @@ describe("buildCalendarBuckets", () => {
     // Assert
     expect(buckets.matchedByDay[DAY]).toHaveLength(1);
     expect(buckets.soloActualsByDay[DAY]).toEqual([]);
+  });
+
+  it("should render an unmatched source-only activity as a solo actual", () => {
+    // Arrange
+    const act = buildSourceActivityRecord({
+      profileId: "p1",
+      date: DAY,
+      sport: "running",
+      sourceBridgeId: "garmin-bridge",
+      externalId: "555",
+      durationSeconds: 1800,
+    });
+    const args = {
+      days: DAYS,
+      coachingByDay: {},
+      workoutsByDay: {},
+      activitiesByDay: { [DAY]: [act] },
+      matched: [],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    expect(buckets.soloActualsByDay[DAY]).toHaveLength(1);
+    expect(buckets.soloActualsByDay[DAY]?.[0]?.id).toBe(act.id);
+    expect(buckets.soloActualsByDay[DAY]?.[0]?.source).toBe("garmin-bridge");
+  });
+
+  it("should not render a matched source-only activity as a solo actual (no double render)", () => {
+    // Arrange
+    const act = buildSourceActivityRecord({
+      profileId: "p1",
+      date: DAY,
+      sport: "cycling",
+      sourceBridgeId: "garmin-bridge",
+      externalId: "9",
+    });
+    const ms = matched({
+      match: match({ executedWorkoutIds: [act.id] }),
+    });
+    const args = {
+      days: DAYS,
+      coachingByDay: { [DAY]: [activity()] },
+      workoutsByDay: { [DAY]: [workout()] },
+      activitiesByDay: { [DAY]: [act] },
+      matched: [ms],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    expect(buckets.soloActualsByDay[DAY]).toEqual([]);
+  });
+
+  it("should not project a twin activity whose WorkoutRecord already renders", () => {
+    // Arrange
+    const twin: ActivityRecord = {
+      ...buildSourceActivityRecord({
+        profileId: "p1",
+        date: DAY,
+        sport: "cycling",
+        sourceBridgeId: "fit-import",
+        externalId: "hash-1",
+      }),
+      linkedWorkoutId: "w-7",
+    };
+    const args = {
+      days: DAYS,
+      coachingByDay: {},
+      workoutsByDay: { [DAY]: [workout({ id: "w-7" })] },
+      activitiesByDay: { [DAY]: [twin] },
+      matched: [],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    // Only the twin WorkoutRecord renders; the activity is not projected.
+    expect(buckets.soloActualsByDay[DAY]).toHaveLength(1);
+    expect(buckets.soloActualsByDay[DAY]?.[0]?.id).toBe("w-7");
   });
 
   it("should produce empty buckets for days with no items in either lane", () => {

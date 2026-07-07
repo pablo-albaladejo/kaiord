@@ -21,4 +21,11 @@ export const createDexieActivityRepository = (
     await table.add(record);
     return { created: true };
   },
+
+  getByProfileAndDateRange: async (profileId, start, end) =>
+    db
+      .table<ActivityRecord>("activities")
+      .where("[profileId+date]")
+      .between([profileId, start], [profileId, end], true, true)
+      .toArray(),
 });

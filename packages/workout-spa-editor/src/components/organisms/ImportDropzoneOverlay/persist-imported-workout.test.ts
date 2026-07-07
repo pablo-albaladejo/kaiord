@@ -1,9 +1,9 @@
 /**
- * Transitional dual-write (F0 step 0.5). An imported file classified as an
- * executed activity lands as BOTH a first-class `activity` row (fit-import
- * provenance + content-hash externalId, deduped) and — transitionally — a
- * WorkoutRecord so the calendar keeps rendering it. A structured workout with
- * no executed data writes only the WorkoutRecord.
+ * An imported file classified as an executed activity lands as a first-class
+ * `activity` row only (fit-import provenance + content-hash externalId,
+ * deduped); the calendar renders it natively (F5 GATE A1), no twin
+ * WorkoutRecord. A structured workout with no executed data writes only the
+ * WorkoutRecord.
  */
 import "fake-indexeddb/auto";
 
@@ -40,7 +40,7 @@ const structuredKrd = (): KRD =>
     metadata: { created: "2026-04-29T06:30:00.000Z", sport: "cycling" },
   }) as KRD;
 
-describe("persistImportedWorkout dual-write", () => {
+describe("persistImportedWorkout", () => {
   let db: KaiordDatabase;
   let name: string;
 
@@ -55,12 +55,12 @@ describe("persistImportedWorkout dual-write", () => {
     await Dexie.delete(name);
   });
 
-  it("should write an activity row with provenance plus a WorkoutRecord for an execution", async () => {
+  it("should write only an activity row with provenance and no twin for an execution", async () => {
     // Arrange
     const persistence = createDexiePersistence(db);
 
     // Act
-    await persistImportedWorkout(persistence, {
+    const result = await persistImportedWorkout(persistence, {
       krd: activityKrd(),
       date: DATE,
       profileId: PROFILE,
@@ -70,16 +70,16 @@ describe("persistImportedWorkout dual-write", () => {
     const workouts = await db.table("workouts").toArray();
 
     // Assert
+    expect(result.kind).toBe("activity");
     expect(activities).toHaveLength(1);
     expect(activities[0]).toMatchObject({
       profileId: PROFILE,
       date: DATE,
       sourceBridgeId: "fit-import",
+      linkedWorkoutId: null,
     });
     expect(activities[0].externalId).toEqual(expect.any(String));
-    expect(workouts).toHaveLength(1);
-    // The activity links to its transitional twin WorkoutRecord.
-    expect(activities[0].linkedWorkoutId).toBe(workouts[0].id);
+    expect(workouts).toHaveLength(0);
   });
 
   it("should not duplicate the activity when the same file is re-imported", async () => {
@@ -110,7 +110,7 @@ describe("persistImportedWorkout dual-write", () => {
     const persistence = createDexiePersistence(db);
 
     // Act
-    await persistImportedWorkout(persistence, {
+    const result = await persistImportedWorkout(persistence, {
       krd: structuredKrd(),
       date: DATE,
       profileId: PROFILE,
@@ -120,6 +120,7 @@ describe("persistImportedWorkout dual-write", () => {
     const workouts = await db.table("workouts").toArray();
 
     // Assert
+    expect(result.kind).toBe("workout");
     expect(activities).toHaveLength(0);
     expect(workouts).toHaveLength(1);
   });

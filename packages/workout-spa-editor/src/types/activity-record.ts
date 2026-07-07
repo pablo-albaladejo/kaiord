@@ -65,3 +65,34 @@ export const buildActivityRecord = (
     createdAt: new Date().toISOString(),
   };
 };
+
+export type BuildSourceActivityRecordInput = {
+  profileId: string;
+  date: string;
+  sport: string;
+  sourceBridgeId: string;
+  externalId: string;
+  durationSeconds?: number;
+  distanceMeters?: number;
+};
+
+/**
+ * Build a summary-only ActivityRecord for a source pull (e.g. Garmin): no
+ * recorded KRD and no twin WorkoutRecord (`linkedWorkoutId: null`). The
+ * calendar renders it natively from the summary fields.
+ */
+export const buildSourceActivityRecord = (
+  input: BuildSourceActivityRecordInput
+): ActivityRecord => ({
+  id: crypto.randomUUID(),
+  profileId: input.profileId,
+  date: input.date,
+  sport: input.sport,
+  sourceBridgeId: input.sourceBridgeId,
+  externalId: input.externalId,
+  durationSeconds: input.durationSeconds,
+  distanceMeters: input.distanceMeters,
+  linkedWorkoutId: null,
+  krd: null,
+  createdAt: new Date().toISOString(),
+});

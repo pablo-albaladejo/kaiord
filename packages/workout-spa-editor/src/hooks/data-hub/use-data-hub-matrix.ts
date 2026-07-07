@@ -20,8 +20,11 @@ import { usePersistence } from "../../contexts/persistence-context";
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
 import { useConnectionStatus } from "../use-connection-status";
 import { useDiscoveredBridges } from "../use-discovered-bridges";
+import { useSourceSyncState } from "./use-source-sync-state";
 
 const TRAIN2GO = "train2go";
+const GARMIN = "garmin";
+const GARMIN_BRIDGE = "garmin-bridge";
 
 export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
   const connections = useConnectionStatus(profileId);
@@ -29,6 +32,11 @@ export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
   const { byDataType } = useDataFlows(profileId ?? "");
   const persistence = usePersistence();
   const train2goSyncedAt = useTrain2GoSyncState(persistence, profileId ?? "");
+  const garminSyncedAt = useSourceSyncState(
+    persistence,
+    GARMIN_BRIDGE,
+    profileId
+  );
 
   return useMemo(
     () =>
@@ -42,7 +50,12 @@ export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
           (byDataType.get(dataType)?.[direction] ?? []).some(
             (p) => p.bridgeId === bridgeId && p.enabled
           ),
-        lastSyncedAt: (id) => (id === TRAIN2GO ? train2goSyncedAt : undefined),
+        lastSyncedAt: (id) =>
+          id === TRAIN2GO
+            ? train2goSyncedAt
+            : id === GARMIN
+              ? garminSyncedAt
+              : undefined,
         findRoute: (dataType, direction, bridgeId) => {
           const match = (byDataType.get(dataType)?.[direction] ?? []).find(
             (p) => p.bridgeId === bridgeId
@@ -50,6 +63,6 @@ export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
           return match ? { id: match.id, mode: match.mode } : undefined;
         },
       }),
-    [connections, discovered, byDataType, train2goSyncedAt]
+    [connections, discovered, byDataType, train2goSyncedAt, garminSyncedAt]
   );
 };

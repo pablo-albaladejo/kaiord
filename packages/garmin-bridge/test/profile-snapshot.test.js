@@ -5,11 +5,17 @@ import {
   validateSnapshot,
   isAllowedSenderOrigin,
 } from "../profile-snapshot.js";
-import * as bridge from "../background.js";
 import {
   positiveSnapshotFixtures,
   negativeSnapshotFixtures,
 } from "@kaiord/core/test-utils";
+
+// Load background.js via require (not import) to match background.test.js.
+// A require/import split loads background.js as two module instances, which
+// makes the v8 per-function coverage merge non-deterministic (Functions
+// oscillated 58%↔86% across identical runs). Unifying on require collapses
+// it to a single instrumented instance and stabilises coverage.
+const bridge = require("../background.js");
 
 beforeEach(() => {
   globalThis.__resetChromeMock();

@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { matchExecutedWorkouts } from "../application/coaching/match-executed-workouts";
 import { usePersistence } from "../contexts/persistence-context";
 import { canonicalizeSport } from "../lib/canonicalize-sport";
+import type { ActivityRecord } from "../types/activity-record";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { SessionMatch } from "../types/session-match";
 import { logger } from "../utils/logger";
@@ -44,7 +45,8 @@ const fireAppend = (
 
 export const useExecutedMatchAutoForCalendar = (
   rawMatched: readonly MatchedSessionWithMetadata[] | undefined,
-  workoutsByDay: Readonly<Record<string, WorkoutRecord[]>>
+  workoutsByDay: Readonly<Record<string, WorkoutRecord[]>>,
+  activities: readonly ActivityRecord[]
 ): void => {
   const matches = useMemo(
     () => (rawMatched ?? []).map((m) => m.match),
@@ -54,22 +56,25 @@ export const useExecutedMatchAutoForCalendar = (
     () => Object.values(workoutsByDay).flat(),
     [workoutsByDay]
   );
-  useExecutedMatchAuto(matches, workouts);
+  useExecutedMatchAuto(matches, workouts, activities);
 };
 
 export const useExecutedMatchAuto = (
   matches: readonly SessionMatch[] | null,
-  workouts: readonly WorkoutRecord[] | null
+  workouts: readonly WorkoutRecord[] | null,
+  activities: readonly ActivityRecord[] = []
 ): void => {
   const persistence = usePersistence();
   const firedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!matches || matches.length === 0 || !workouts || workouts.length === 0)
-      return;
+    if (!matches || matches.length === 0) return;
+    const hasExecuted = (workouts?.length ?? 0) > 0 || activities.length > 0;
+    if (!hasExecuted) return;
     const appends = matchExecutedWorkouts({
       sessionMatches: matches,
-      workouts,
+      workouts: workouts ?? [],
+      activities,
       canonicalSport: canonicalizeSport,
     });
     for (const { matchId, toAppend } of appends) {
@@ -85,5 +90,5 @@ export const useExecutedMatchAuto = (
         firedRef
       );
     }
-  }, [matches, workouts, persistence]);
+  }, [matches, workouts, activities, persistence]);
 };
