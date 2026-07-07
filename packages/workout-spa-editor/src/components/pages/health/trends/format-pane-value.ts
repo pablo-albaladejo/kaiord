@@ -4,9 +4,8 @@
 
 import type { Units } from "../../../../lib/units/units";
 import { formatWeightKg } from "../../../../lib/units/units";
+import { formatOrEmpty } from "../../../charts/uplot-base/uplot-base";
 import type { TrendMetricDef, TrendMetricKey } from "./trend-metrics";
-
-const EMPTY = "—";
 
 const STEPS_FORMATTER = new Intl.NumberFormat("en-US");
 
@@ -23,9 +22,10 @@ export const formatPaneValue = (
   metric: TrendMetricDef,
   v: number | null | undefined,
   units: Units = "metric"
-): string => {
-  if (v === null || v === undefined || !Number.isFinite(v)) return EMPTY;
-  // Weight values are stored in kilograms; relabel in the active units.
-  if (metric.key === "weight") return formatWeightKg(v, units);
-  return FORMATTERS[metric.key](v);
-};
+): string =>
+  formatOrEmpty(v, (n) =>
+    // Weight values are stored in kilograms; relabel in the active units.
+    metric.key === "weight"
+      ? formatWeightKg(n, units)
+      : FORMATTERS[metric.key](n)
+  );

@@ -42,14 +42,22 @@ const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 const byParamThenDateThenId = (a: LabValue, b: LabValue): number =>
   cmp(a.parameterKey, b.parameterKey) || cmp(a.date, b.date) || cmp(a.id, b.id);
 
-export const getLatestValues = async (
-  labs: LabRepository,
-  profileId: string
-): Promise<LabValue[]> => {
-  const all = await labs.getValuesByProfile(profileId);
+/**
+ * Reduce a flat value list to the latest value PER PARAMETER. Sorting ascending
+ * and overwriting keeps the greatest `(date, id)` per key. Exported so the F3
+ * list view can derive latest-per-parameter and the sparkline series from a
+ * single `getValuesByProfile` read without re-deriving the tie-break rule.
+ */
+export const latestByParameter = (values: readonly LabValue[]): LabValue[] => {
   const latestByKey = new Map<string, LabValue>();
-  for (const value of [...all].sort(byParamThenDateThenId)) {
+  for (const value of [...values].sort(byParamThenDateThenId)) {
     latestByKey.set(value.parameterKey, value);
   }
   return [...latestByKey.values()];
 };
+
+export const getLatestValues = async (
+  labs: LabRepository,
+  profileId: string
+): Promise<LabValue[]> =>
+  latestByParameter(await labs.getValuesByProfile(profileId));

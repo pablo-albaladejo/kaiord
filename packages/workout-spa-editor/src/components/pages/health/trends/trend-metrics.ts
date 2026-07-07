@@ -1,10 +1,8 @@
+import type { ChartMetricDef } from "../../../charts/uplot-base/uplot-base";
+
 export type TrendMetricKey = "sleep" | "hrv" | "weight" | "steps";
 
-export type TrendMetricDef = {
-  key: TrendMetricKey;
-  label: string;
-  unit: string;
-};
+export type TrendMetricDef = ChartMetricDef<TrendMetricKey>;
 
 export const TREND_METRICS: ReadonlyArray<TrendMetricDef> = [
   { key: "sleep", label: "Sleep", unit: "score" },
