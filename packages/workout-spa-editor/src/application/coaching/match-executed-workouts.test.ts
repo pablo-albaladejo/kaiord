@@ -24,7 +24,7 @@ const workout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
     id: "w-x",
     date: DAY,
     sport: "cycling",
-    source: "garmin",
+    source: "train2go",
     state: "ready",
     raw: { title: "Ride", duration: { value: 3600, unit: "s" } },
     ...overrides,
@@ -36,7 +36,7 @@ const activity = (overrides: Partial<ActivityRecord> = {}): ActivityRecord =>
     profileId: "p1",
     date: DAY,
     sport: "cycling",
-    sourceBridgeId: "fit-import",
+    sourceBridgeId: "garmin-bridge",
     externalId: "hash-x",
     linkedWorkoutId: null,
     krd: null,
@@ -58,6 +58,7 @@ describe("matchExecutedWorkouts", () => {
     const input = {
       sessionMatches: [] as SessionMatch[],
       workouts: [workout({ id: "w-1" })],
+      activities: [activity()],
       canonicalSport: canonical,
     };
 
@@ -68,49 +69,33 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([]);
   });
 
-  it("should append a same-day same-sport executed workout to a match", () => {
+  it("should append a same-day same-sport executed activity to a match", () => {
     // Arrange
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
-    const executed = workout({ id: "w-exec-1", source: "garmin" });
-    const input = {
-      sessionMatches: [baseMatch()],
-      workouts: [structured, executed],
-      canonicalSport: canonical,
-    };
-
-    // Act
-    const result = matchExecutedWorkouts(input);
-
-    // Assert
-    expect(result).toEqual([{ matchId: "m-1", toAppend: ["w-exec-1"] }]);
-  });
-
-  it("should skip a workout already listed in executedWorkoutIds (dedup)", () => {
-    // Arrange
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
-    const executed = workout({ id: "w-exec-1", source: "garmin" });
-    const match = baseMatch({ executedWorkoutIds: ["w-exec-1"] });
-    const input = {
-      sessionMatches: [match],
-      workouts: [structured, executed],
-      canonicalSport: canonical,
-    };
-
-    // Act
-    const result = matchExecutedWorkouts(input);
-
-    // Assert
-    expect(result).toEqual([]);
-  });
-
-  it("should never append the structured workoutId itself", () => {
-    // Arrange
-    // The structured side is the matched workout — exclude it even
-    // when its source is non-train2go (defensive).
-    const structured = workout({ id: "w-structured-1", source: "garmin" });
+    const structured = workout({ id: "w-structured-1" });
+    const executed = activity({ id: "a-exec-1" });
     const input = {
       sessionMatches: [baseMatch()],
       workouts: [structured],
+      activities: [executed],
+      canonicalSport: canonical,
+    };
+
+    // Act
+    const result = matchExecutedWorkouts(input);
+
+    // Assert
+    expect(result).toEqual([{ matchId: "m-1", toAppend: ["a-exec-1"] }]);
+  });
+
+  it("should skip an activity already listed in executedWorkoutIds (dedup)", () => {
+    // Arrange
+    const structured = workout({ id: "w-structured-1" });
+    const executed = activity({ id: "a-exec-1" });
+    const match = baseMatch({ executedWorkoutIds: ["a-exec-1"] });
+    const input = {
+      sessionMatches: [match],
+      workouts: [structured],
+      activities: [executed],
       canonicalSport: canonical,
     };
 
@@ -121,14 +106,35 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([]);
   });
 
-  it("should append multiple executeds on the same day for the same match (1-N)", () => {
+  it("should never append the match's own structured workoutId", () => {
     // Arrange
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
-    const executed1 = workout({ id: "w-exec-1", source: "garmin" });
-    const executed2 = workout({ id: "w-exec-2", source: "fit" });
+    // An activity whose renderable id collides with the structured slot
+    // must be skipped by the `taken` guard.
+    const structured = workout({ id: "w-structured-1" });
+    const collide = activity({ id: "w-structured-1" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [structured, executed1, executed2],
+      workouts: [structured],
+      activities: [collide],
+      canonicalSport: canonical,
+    };
+
+    // Act
+    const result = matchExecutedWorkouts(input);
+
+    // Assert
+    expect(result).toEqual([]);
+  });
+
+  it("should append multiple executed activities on the same day for one match (1-N)", () => {
+    // Arrange
+    const structured = workout({ id: "w-structured-1" });
+    const e1 = activity({ id: "a-exec-1" });
+    const e2 = activity({ id: "a-exec-2" });
+    const input = {
+      sessionMatches: [baseMatch()],
+      workouts: [structured],
+      activities: [e1, e2],
       canonicalSport: canonical,
     };
 
@@ -137,25 +143,18 @@ describe("matchExecutedWorkouts", () => {
 
     // Assert
     expect(result).toEqual([
-      { matchId: "m-1", toAppend: ["w-exec-1", "w-exec-2"] },
+      { matchId: "m-1", toAppend: ["a-exec-1", "a-exec-2"] },
     ]);
   });
 
-  it("should reject an executed whose canonical sport differs from the match", () => {
+  it("should reject an executed activity whose canonical sport differs", () => {
     // Arrange
-    const structured = workout({
-      id: "w-structured-1",
-      sport: "cycling",
-      source: "train2go",
-    });
-    const wrongSport = workout({
-      id: "w-exec-run",
-      sport: "running",
-      source: "garmin",
-    });
+    const structured = workout({ id: "w-structured-1", sport: "cycling" });
+    const wrongSport = activity({ id: "a-run", sport: "running" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [structured, wrongSport],
+      workouts: [structured],
+      activities: [wrongSport],
       canonicalSport: canonical,
     };
 
@@ -166,13 +165,14 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([]);
   });
 
-  it("should reject an executed whose canonical sport is null (unknown)", () => {
+  it("should reject an executed activity whose canonical sport is null", () => {
     // Arrange
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
-    const unknown = workout({ id: "w-exec-?", sport: "kayak" });
+    const structured = workout({ id: "w-structured-1" });
+    const unknown = activity({ id: "a-?", sport: "kayak" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [structured, unknown],
+      workouts: [structured],
+      activities: [unknown],
       canonicalSport: canonical,
     };
 
@@ -185,15 +185,12 @@ describe("matchExecutedWorkouts", () => {
 
   it("should skip the match when the structured workout's sport is unknown", () => {
     // Arrange
-    const structured = workout({
-      id: "w-structured-1",
-      sport: "kayak",
-      source: "train2go",
-    });
-    const executed = workout({ id: "w-exec-1", source: "garmin" });
+    const structured = workout({ id: "w-structured-1", sport: "kayak" });
+    const executed = activity({ id: "a-exec-1" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [structured, executed],
+      workouts: [structured],
+      activities: [executed],
       canonicalSport: canonical,
     };
 
@@ -206,10 +203,11 @@ describe("matchExecutedWorkouts", () => {
 
   it("should skip the match when its structured workout is missing", () => {
     // Arrange
-    const executed = workout({ id: "w-exec-1", source: "garmin" });
+    const executed = activity({ id: "a-exec-1" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [executed],
+      workouts: [],
+      activities: [executed],
       canonicalSport: canonical,
     };
 
@@ -220,17 +218,14 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([]);
   });
 
-  it("should reject an executed on a different date", () => {
+  it("should reject an executed activity on a different date", () => {
     // Arrange
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
-    const otherDay = workout({
-      id: "w-exec-1",
-      date: "2026-04-30",
-      source: "garmin",
-    });
+    const structured = workout({ id: "w-structured-1" });
+    const otherDay = activity({ id: "a-exec-1", date: "2026-04-30" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [structured, otherDay],
+      workouts: [structured],
+      activities: [otherDay],
       canonicalSport: canonical,
     };
 
@@ -241,12 +236,11 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([]);
   });
 
-  it("should dedup an activity against its co-written executed workout", () => {
+  it("should append a twin activity's linked WorkoutRecord id, not its own id", () => {
     // Arrange
-    // New drop: the FIT file produced BOTH an activity and its twin
-    // WorkoutRecord (linkedWorkoutId). The twin is excluded from the legacy
-    // scan so the event is matched exactly once (test d).
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
+    // Historical dual-write: the activity carries the twin WorkoutRecord id,
+    // so the renderable executed slot is the twin (matched exactly once).
+    const structured = workout({ id: "w-structured-1" });
     const twin = workout({ id: "w-exec-1", source: "kaiord" });
     const input = {
       sessionMatches: [baseMatch()],
@@ -262,10 +256,9 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([{ matchId: "m-1", toAppend: ["w-exec-1"] }]);
   });
 
-  it("should append an activity's own id when no executed workout represents it", () => {
+  it("should append a source-only activity's own id when it has no twin", () => {
     // Arrange
-    // Forward-ready (F5): a garmin-only activity with no co-written workout.
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
+    const structured = workout({ id: "w-structured-1" });
     const input = {
       sessionMatches: [baseMatch()],
       workouts: [structured],
@@ -280,13 +273,13 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([{ matchId: "m-1", toAppend: ["a-garmin"] }]);
   });
 
-  it("should match a legacy executed workout when no activity exists", () => {
+  it("should NOT match a bare executed workout with no activity (heuristic retired)", () => {
     // Arrange
-    const structured = workout({ id: "w-structured-1", source: "train2go" });
-    const executed = workout({ id: "w-exec-1", source: "garmin" });
+    const structured = workout({ id: "w-structured-1" });
+    const bareExecuted = workout({ id: "w-exec-1", source: "garmin" });
     const input = {
       sessionMatches: [baseMatch()],
-      workouts: [structured, executed],
+      workouts: [structured, bareExecuted],
       activities: [],
       canonicalSport: canonical,
     };
@@ -295,6 +288,6 @@ describe("matchExecutedWorkouts", () => {
     const result = matchExecutedWorkouts(input);
 
     // Assert
-    expect(result).toEqual([{ matchId: "m-1", toAppend: ["w-exec-1"] }]);
+    expect(result).toEqual([]);
   });
 });

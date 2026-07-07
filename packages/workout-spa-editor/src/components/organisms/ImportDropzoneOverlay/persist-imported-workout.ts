@@ -11,7 +11,10 @@ import { deriveExternalId } from "@kaiord/core";
 
 import { stampProvenance } from "../../../application/import/stamp-provenance";
 import type { PersistencePort } from "../../../ports/persistence-port";
-import { buildActivityRecord } from "../../../types/activity-record";
+import {
+  type ActivityRecord,
+  buildActivityRecord,
+} from "../../../types/activity-record";
 import {
   createStructuredWorkoutRecord,
   type WorkoutRecord,
@@ -28,43 +31,47 @@ export type PersistImportedInput = {
   sport: string;
 };
 
+export type PersistImportedResult =
+  | { kind: "workout"; workout: WorkoutRecord }
+  | { kind: "activity"; activity: ActivityRecord };
+
 const persistActivity = async (
   persistence: PersistencePort,
-  input: PersistImportedInput,
-  linkedWorkoutId: string
-): Promise<void> => {
+  input: PersistImportedInput
+): Promise<ActivityRecord> => {
   const externalId = deriveExternalId({
     payload: input.krd as unknown as Record<string, unknown>,
     measuredAt: input.krd.metadata.created,
   });
   const provenance = stampProvenance(FIT_IMPORT_SOURCE, externalId);
-  await persistence.activities.upsertByExternalId(
-    buildActivityRecord({
-      profileId: input.profileId,
-      date: input.date,
-      sport: input.sport,
-      sourceBridgeId: provenance.sourceBridgeId,
-      externalId: provenance.externalId,
-      linkedWorkoutId,
-      krd: input.krd,
-    })
-  );
+  const activity = buildActivityRecord({
+    profileId: input.profileId,
+    date: input.date,
+    sport: input.sport,
+    sourceBridgeId: provenance.sourceBridgeId,
+    externalId: provenance.externalId,
+    linkedWorkoutId: null,
+    krd: input.krd,
+  });
+  await persistence.activities.upsertByExternalId(activity);
+  return activity;
 };
 
 export async function persistImportedWorkout(
   persistence: PersistencePort,
   input: PersistImportedInput
-): Promise<WorkoutRecord> {
-  // Transitional dual-write: a file classified as an executed activity is
-  // persisted as a first-class `activity` row (fit-import provenance +
-  // content-hash externalId, deduped) AND — for now — as a WorkoutRecord so
-  // the calendar/library keep rendering it unchanged. The activity row
-  // stores `linkedWorkoutId` = the twin WorkoutRecord id so the
-  // executed-match union excludes that workout from the legacy scan (one
-  // event is never matched twice). The WorkoutRecord is TRANSITIONAL: it
-  // retires once the calendar consumes `activities` natively.
-  // Structured workouts write only the WorkoutRecord.
-  const record = createStructuredWorkoutRecord({
+): Promise<PersistImportedResult> {
+  // A file classified as an executed activity (records/laps) is persisted as a
+  // first-class `activity` row only — the calendar renders it natively (F5
+  // GATE A1), deduped by fit-import provenance + content-hash externalId.
+  // A structured workout with no execution stays a library WorkoutRecord.
+  if (classifyImportedKrd(input.krd).kind === "activity") {
+    return {
+      kind: "activity",
+      activity: await persistActivity(persistence, input),
+    };
+  }
+  const workout = createStructuredWorkoutRecord({
     profileId: input.profileId,
     date: input.date,
     sport: input.sport,
@@ -73,9 +80,6 @@ export async function persistImportedWorkout(
     tags: [],
     raw: null,
   });
-  await persistence.workouts.put(record);
-  if (classifyImportedKrd(input.krd).kind === "activity") {
-    await persistActivity(persistence, input, record.id);
-  }
-  return record;
+  await persistence.workouts.put(workout);
+  return { kind: "workout", workout };
 }

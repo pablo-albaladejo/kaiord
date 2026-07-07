@@ -20,6 +20,7 @@ import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAppHandlers } from "../../../hooks/use-app-handlers";
 import { parseBackOrigin } from "../../../routing/back-origin";
+import { calendarWeekHref } from "../../../routing/calendar-week-href";
 import { withOrigin } from "../../../routing/with-origin";
 import type { KRD } from "../../../types/krd";
 import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
@@ -62,17 +63,22 @@ export function useImportOnLoad(date: string | null, from: string | null) {
       .getActiveId()
       .then(async (profileId) => {
         if (!profileId) return;
-        const record = await persistImportedWorkout(persistence, {
+        const result = await persistImportedWorkout(persistence, {
           krd,
           date,
           profileId,
           sport,
         });
+        // Executed activities have no editable workout document — land on the
+        // calendar week where the activity renders (F5 GATE A1); structured
+        // workouts open in the editor.
         navigate(
-          withOrigin(
-            `/workout/${record.id}`,
-            parseBackOrigin(from) ?? "calendar"
-          )
+          result.kind === "workout"
+            ? withOrigin(
+                `/workout/${result.workout.id}`,
+                parseBackOrigin(from) ?? "calendar"
+              )
+            : calendarWeekHref(date)
         );
       })
       .catch(() => {
