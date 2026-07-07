@@ -86,7 +86,7 @@ const PARAMS: ParamRow[] = [
     refLow: "0.6",
     refHigh: "1.1",
   },
-  { label: "TSH (TSH)", value: "2.1" },
+  { label: "Thyroid-stimulating hormone (TSH)", value: "2.1" },
   { label: "Sodium (Na)", value: "140" },
   { label: "Potassium (K)", value: "4.2" },
   { mode: "custom", label: "Apo-E Genotype", value: "3.1", unit: "ratio" },
