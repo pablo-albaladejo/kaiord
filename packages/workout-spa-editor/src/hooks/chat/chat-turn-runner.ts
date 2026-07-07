@@ -10,6 +10,7 @@ import { recordsToModelMessages } from "../../application/chat/chat-message-mapp
 import { ensureConversationForTurn } from "../../application/chat/ensure-conversation";
 import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
 import { buildChatAgent } from "./build-chat-agent";
+import { buildDataRouteSignals } from "./build-data-route-signals";
 import { runAgent } from "./chat-turn-context";
 import type { ChatTurnCtx } from "./chat-turn-types";
 
@@ -38,6 +39,8 @@ export const sendTurn = async (
       provider: ctx.provider,
       modelId: ctx.modelId,
       actions: ctx.ops,
+      getMatrixSignals: () =>
+        buildDataRouteSignals(ctx.persistence, ctx.profileId),
       onTextDelta: (d) => ctx.set.streamingText((p) => p + d),
     });
     ctx.agentRef.current = built.agent;
