@@ -1,6 +1,14 @@
 import { useCallback } from "react";
 
+import { executeWorkoutPush } from "../../../application/export/execute-workout-push";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
+import {
+  BridgePushFailedError,
+  buildGarminPushFn,
+  GARMIN_BRIDGE_ID,
+  ledgerRepo,
+  policyRepo,
+} from "../../../hooks/garmin-push-fn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
 
@@ -17,6 +25,11 @@ import { exportGcnWorkout } from "../../../utils/export-workout-formats";
  * (spa-workout-state-machine), so a quick push from the detail footer or
  * the coaching dialog does not flip state out from under an open editor.
  *
+ * The push is governed by `executeWorkoutPush`: no active, enabled export
+ * route to Garmin ⇒ the push never reaches the bridge (fail-closed,
+ * visible cause in `pushing.message`). On success it's recorded in the
+ * export ledger (idempotent re-push).
+ *
  * Callers:
  * - `GarminPushButton.tsx` — reads the workout via `useLiveQuery` and passes
  *   the record. The editor pushes the last-persisted state.
@@ -32,19 +45,23 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
 
     try {
       const gcn = await exportGcnWorkout(workout.krd);
-      // pushWorkout never rejects on a bridge-reported failure — it
-      // resolves { success: false } and sets the error state itself.
-      // Reading the result keeps this analytics event honest instead of
-      // always reporting "success" once the promise settles.
-      const outcome = await pushWorkout(gcn);
-      analytics.event("garmin-synced", {
-        result: outcome.success ? "success" : "failure",
-      });
+      await executeWorkoutPush(
+        { policyRepo, ledgerRepo },
+        {
+          profileId: workout.profileId,
+          kaiordRecordId: workout.id,
+          destinationBridgeId: GARMIN_BRIDGE_ID,
+          payload: gcn as Record<string, unknown>,
+          pushFn: buildGarminPushFn(pushWorkout),
+        }
+      );
+      analytics.event("garmin-synced", { result: "success" });
     } catch (error: unknown) {
+      analytics.event("garmin-synced", { result: "failure" });
+      if (error instanceof BridgePushFailedError) return;
       const message =
         error instanceof Error ? error.message : "Conversion failed";
       setPushing({ status: "error", message });
-      analytics.event("garmin-synced", { result: "failure" });
     }
   }, [workout, sessionActive, pushWorkout, setPushing, analytics]);
 

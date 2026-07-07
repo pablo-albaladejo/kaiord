@@ -9,11 +9,20 @@
  * inside `persistence.transaction(...)`; note this alone is NOT
  * concurrency-safe (the in-memory transaction has no mutual exclusion),
  * so the form-submit lock in Phase 2 closes the un-awaited race.
+ *
+ * Every write is stamped with provenance via the shared
+ * `stampProvenance` constructor: `sourceBridgeId: "manual"` and an
+ * `externalId` hashed from metric+day. This path intentionally does
+ * NOT go through `upsertImportedRecord` — that use case is
+ * insert-or-ignore, which would turn a value edit (e.g. 70kg -> 71kg)
+ * into a silent no-op instead of an update.
  */
 import type { DailyWellness } from "@kaiord/core";
+import { canonicalHash } from "@kaiord/core";
 
 import type { HealthRecord } from "../../ports/health-record-repository";
 import type { PersistencePort } from "../../ports/persistence-port";
+import { stampProvenance } from "../import/stamp-provenance";
 import type { ManualHealthMetric } from "./manual-health-metric";
 import { repoForMetric, schemaForMetric } from "./manual-health-metric";
 import {
@@ -22,6 +31,8 @@ import {
   buildStepsPayload,
   buildWeightPayload,
 } from "./manual-health-payload.mapper";
+
+const MANUAL_SOURCE_BRIDGE_ID = "manual";
 
 export type SaveManualHealthMetricDeps = {
   persistence: PersistencePort;
@@ -74,7 +85,17 @@ export const saveManualHealthMetric = async (
     const krd = buildPayload(input.metric, input.value, input.day, rows[0]);
     const parsed = schemaForMetric(input.metric).safeParse(krd);
     if (!parsed.success) return undefined;
-    await repo.put({ id, profileId, date: input.day, krd: parsed.data });
+    const provenance = stampProvenance(
+      MANUAL_SOURCE_BRIDGE_ID,
+      canonicalHash({ metric: input.metric, day: input.day })
+    );
+    await repo.put({
+      id,
+      profileId,
+      date: input.day,
+      krd: parsed.data,
+      ...provenance,
+    });
     return { recordId: id };
   });
 };

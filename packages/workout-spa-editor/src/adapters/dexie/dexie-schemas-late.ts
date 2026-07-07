@@ -7,6 +7,15 @@
 
 type Stores = Record<string, string>;
 
+// v22 — additive `aiModelBindings` store for per-profile model bindings.
+// Composite PK `[profileId+purpose]` keeps one row per purpose per profile;
+// the `profileId` index drives the cascade and makes the table a cascade
+// target (also auto-discovered by `isPerProfileTable`).
+export const buildCoreV22 = (prev: Stores): Stores => ({
+  ...prev,
+  aiModelBindings: "[profileId+purpose], profileId",
+});
+
 // v24 — additive `connections` store for per-(profile, provider) account
 // linkage (#714). PK `[profileId+providerId]`; the `profileId` index drives the
 // profile-delete cascade and makes `isPerProfileTable` auto-discover it. Dexie
@@ -29,4 +38,31 @@ export const buildCoreV26 = (prev: Stores): Stores => ({
   intakeEntries: "id, [profileId+date]",
   intakePresets: "id, profileId",
   energyTargets: "profileId",
+});
+
+// v27 — Data Hub domain tables. `plannedSessions` receives the migrated
+// `coachingActivities` rows (ids preserved, same index shape) so the routable
+// unit is the individual coach-prescribed session. `activities` is the
+// executed-session store, auto-created empty until the FIT-import classifier
+// and the Garmin activity pull populate it. `coachingActivities` is
+// retained this version for reversibility (see dexie-v27-migration).
+export const buildCoreV27 = (prev: Stores): Stores => ({
+  ...prev,
+  plannedSessions:
+    "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
+  // `activities` dedups by provenance (sourceBridgeId, externalId) mirroring
+  // the health stores, so a re-imported FIT file (same content-hash) is a
+  // no-op; `[profileId+date]` drives calendar reads and the profile cascade.
+  activities: "id, [profileId+date], [profileId+sourceBridgeId+externalId]",
+});
+
+// v30 — additive `dataTypeSourcePolicy` companion table: per-(profile,
+// dataType) multi-source semantics (union|priority + sourceOrder), consumed by
+// resolveEffectiveSource. PK is the compound `[profileId+dataType]` —
+// exactly one row per type per profile; the `profileId` index drives the
+// profile-delete cascade. Auto-created empty on upgrade: no row means the
+// implicit "union" default, so there is nothing to seed.
+export const buildCoreV30 = (prev: Stores): Stores => ({
+  ...prev,
+  dataTypeSourcePolicy: "[profileId+dataType], profileId",
 });

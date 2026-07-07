@@ -14,6 +14,7 @@ import type { SyncWeekResult } from "../../application/coaching/sync-week";
 
 const SYNC_FAILURE_KIND = (reason: string): string => {
   switch (reason) {
+    case "route-inactive":
     case "not-linked":
     case "session-expired":
     case "transport-error":

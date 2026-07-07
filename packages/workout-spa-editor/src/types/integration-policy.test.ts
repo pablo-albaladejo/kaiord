@@ -51,7 +51,7 @@ describe("integrationPolicySchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should accept each of the 9 managed data types", () => {
+  it("should accept each of the 10 managed data types", () => {
     // Arrange
 
     // Act

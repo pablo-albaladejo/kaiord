@@ -110,4 +110,39 @@ describe("buildReadinessModel", () => {
     // Assert
     expect(model.battery.value).toBe("—");
   });
+
+  it("should surface the resolver's source and fallback flag for hrv/sleep when provided", () => {
+    // Arrange
+    const hrvSource = { sourceBridgeId: "whoop-bridge", usedFallback: false };
+    const sleepSource = { sourceBridgeId: "garmin-bridge", usedFallback: true };
+
+    // Act
+    const model = buildReadinessModel(
+      HRV,
+      SLEEP,
+      STRESS,
+      true,
+      hrvSource,
+      sleepSource
+    );
+
+    // Assert
+    expect(model.hrv.source).toBe("whoop-bridge");
+    expect(model.hrv.usedFallback).toBe(false);
+    expect(model.sleep.source).toBe("garmin-bridge");
+    expect(model.sleep.usedFallback).toBe(true);
+  });
+
+  it("should leave source and usedFallback undefined when not provided", () => {
+    // Arrange
+
+    // Act
+    const model = buildReadinessModel(HRV, SLEEP, STRESS, true);
+
+    // Assert
+    expect(model.hrv.source).toBeUndefined();
+    expect(model.hrv.usedFallback).toBeUndefined();
+    expect(model.sleep.source).toBeUndefined();
+    expect(model.sleep.usedFallback).toBeUndefined();
+  });
 });

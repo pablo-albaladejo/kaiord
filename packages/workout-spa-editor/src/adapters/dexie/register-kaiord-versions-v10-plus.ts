@@ -17,6 +17,9 @@ import { applyV15Upgrade } from "./dexie-v15-migration";
 import { applyV17Upgrade } from "./dexie-v17-migration";
 import { applyV22Upgrade } from "./dexie-v22-migration";
 import { applyV25Upgrade } from "./dexie-v25-migration";
+import { applyV27Upgrade } from "./dexie-v27-migration";
+import { applyV28Upgrade } from "./dexie-v28-migration";
+import { applyV29Upgrade } from "./dexie-v29-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -119,4 +122,33 @@ export const registerV25 = (db: DexieVersionHost): void => {
   // v26 — additive energy-balance device-local stores (`intakeEntries`,
   // `intakePresets`, `energyTargets`); auto-created empty, no upgrade fn.
   db.version(26).stores(SCHEMAS.v26);
+};
+
+export const registerV27 = (db: DexieVersionHost): void => {
+  // v27 — Data Hub domain tables. Adds `plannedSessions` (migrated from
+  // `coachingActivities`, ids preserved) and `activities` (empty), and
+  // rewrites `integrationPolicies.dataType` "training-plan" → "planned-session".
+  // `coachingActivities` is retained this version for reversibility.
+  db.version(27).stores(SCHEMAS.v27).upgrade(applyV27Upgrade);
+};
+
+export const registerV28 = (db: DexieVersionHost): void => {
+  // v28 — data-only (schema unchanged from v27): backfill provenance
+  // `sourceBridgeId:"unknown"` on historical health/activities rows lacking a
+  // source, and seed a default enabled planned-session import policy for
+  // Train2Go-linked profiles (partial fail-open seeding — see dexie-v28-migration).
+  db.version(28).stores(SCHEMAS.v27).upgrade(applyV28Upgrade);
+};
+
+export const registerV29 = (db: DexieVersionHost): void => {
+  // v29 — data-only: full fail-open policy seeding. Seeds enabled routes for
+  // everything live today (planned-session←train2go import, workout→garmin
+  // export) so a working profile survives the governance gates.
+  // Idempotent superset of v28 — see dexie-v29-migration.
+  db.version(29).stores(SCHEMAS.v27).upgrade(applyV29Upgrade);
+  // v30 — additive `dataTypeSourcePolicy` companion table. Dexie auto-creates
+  // the store empty on upgrade; no data migration, no rows to seed (absent
+  // row means the implicit "union" default). Folded into this function
+  // rather than a standalone registerV30.
+  db.version(30).stores(SCHEMAS.v30);
 };

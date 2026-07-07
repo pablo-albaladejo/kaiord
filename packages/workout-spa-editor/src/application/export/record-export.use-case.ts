@@ -68,7 +68,7 @@ export const recordExport = async (
     );
     return result;
   }
-  await postAndCommit({
+  const externalId = await postAndCommit({
     ledgerRepo,
     analytics: deps.analytics,
     dataType,
@@ -78,5 +78,5 @@ export const recordExport = async (
     postFn,
     t0,
   });
-  return { ledgerId, outcome: "created" };
+  return { ledgerId, outcome: "created", externalId };
 };

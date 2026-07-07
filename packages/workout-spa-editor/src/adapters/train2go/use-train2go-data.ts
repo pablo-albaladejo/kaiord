@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 
+import { hasEnabledPlannedSessionImportRoute } from "../../application/coaching/planned-session-import-route";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { toCoachingActivity } from "./coaching-record-to-activity.converter";
@@ -38,4 +39,23 @@ export const useTrain2GoSyncState = (
     );
   }, [activeProfileId]);
   return row?.lastSyncedAt;
+};
+
+/**
+ * Live "is the planned-session import route active?" flag (F1.3). Defaults to
+ * `true` while loading / with no profile so the button never flashes an
+ * incorrect "route inactive" state.
+ */
+export const useTrain2GoRouteActive = (
+  persistence: PersistencePort,
+  activeProfileId: string | null
+): boolean => {
+  const active = useLiveQuery(() => {
+    if (!activeProfileId) return Promise.resolve(true);
+    return hasEnabledPlannedSessionImportRoute(
+      persistence.integrationPolicy,
+      activeProfileId
+    );
+  }, [activeProfileId]);
+  return active ?? true;
 };

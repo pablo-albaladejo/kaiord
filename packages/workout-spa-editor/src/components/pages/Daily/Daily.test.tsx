@@ -8,6 +8,7 @@ import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistenc
 import { renderWithProviders } from "../../../test-utils";
 import type { Profile } from "../../../types/profile";
 import Daily from "./Daily";
+import { toIsoDate } from "./today-dates";
 
 const PROFILE_ID = "22222222-2222-2222-2222-222222222222";
 
@@ -69,6 +70,38 @@ describe("Daily", () => {
     // Assert
     await waitFor(() => {
       expect(screen.getByText("No readiness data yet")).toBeInTheDocument();
+    });
+  });
+
+  it("should show the health record's real source badge on the HRV stat (F3.2/F3.3 resolver wiring)", async () => {
+    // Arrange
+    await db.table<Profile>("profiles").put(PROFILE);
+    await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
+    const today = toIsoDate(new Date());
+    await db.table("healthHrv").add({
+      id: "hrv-1",
+      profileId: PROFILE_ID,
+      date: today,
+      krd: {
+        kind: "hrv",
+        version: "2.0",
+        measuredAt: `${today}T06:00:00.000Z`,
+        rMSSD: 55,
+        measurementWindow: "overnight",
+      },
+      sourceBridgeId: "whoop-bridge",
+      externalId: "ext-1",
+    });
+
+    // Act
+    renderPage();
+
+    // Assert
+    // The readiness card's HRV stat shows the record's real source,
+    // resolved through resolveEffectiveSource rather than a direct
+    // table read.
+    await waitFor(() => {
+      expect(screen.getByText("WHOOP")).toBeInTheDocument();
     });
   });
 

@@ -34,6 +34,10 @@ export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [
     rows: [{ icon: "sync", label: "Google Drive sync", to: "/settings/sync" }],
   },
   {
+    eyebrow: "Data routing",
+    rows: [{ icon: "route", label: "Data Hub", to: "/settings/data-hub" }],
+  },
+  {
     eyebrow: "Preferences",
     rows: [
       { icon: "target", label: "Units", to: "/settings/preferences" },

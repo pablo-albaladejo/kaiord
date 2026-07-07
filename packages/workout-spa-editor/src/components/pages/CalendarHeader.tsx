@@ -81,6 +81,7 @@ export function CalendarHeader({
                 onConnect={src.connect}
                 label={src.label}
                 lastSyncedAt={src.lastSyncedAt}
+                routeInactive={src.routeActive === false}
               />
             ))}
         </div>

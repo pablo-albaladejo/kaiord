@@ -87,6 +87,19 @@ const seedProfile = async (
       // any prior policy, then mirror the test's syncZones intent onto a
       // policy so the auto-sync fan-out fires (or not) accordingly.
       await db.table("integrationPolicies").clear();
+      // Coaching sync (read-week) is governed by an enabled planned-session
+      // import route (F1.3). Seed it so the Sync button is active and
+      // syncWeek proceeds; the syncZones flag only gates the zones fan-out.
+      await db.table("integrationPolicies").put({
+        id: "zones-sync-planned-session-route",
+        profileId,
+        dataType: "planned-session",
+        bridgeId: "train2go-bridge",
+        direction: "import",
+        mode: "auto",
+        enabled: true,
+        updatedAt: ts,
+      });
       if (syncZonesFlag) {
         await db.table("integrationPolicies").put({
           id: "zones-sync-auto-policy",
@@ -433,6 +446,16 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
           updatedAt: ts,
         });
         await db.table("integrationPolicies").put({
+          id: "zones-sync-planned-session-route",
+          profileId,
+          dataType: "planned-session",
+          bridgeId: "train2go-bridge",
+          direction: "import",
+          mode: "auto",
+          enabled: true,
+          updatedAt: ts,
+        });
+        await db.table("integrationPolicies").put({
           id: "zones-sync-auto-policy",
           profileId,
           dataType: "training-zones",
@@ -722,6 +745,16 @@ const seedTemplateDefaultsProfile = async (page: Page): Promise<void> => {
         updatedAt: ts,
       });
       await db.table("integrationPolicies").put({
+        id: "zones-sync-planned-session-route",
+        profileId,
+        dataType: "planned-session",
+        bridgeId: "train2go-bridge",
+        direction: "import",
+        mode: "auto",
+        enabled: true,
+        updatedAt: ts,
+      });
+      await db.table("integrationPolicies").put({
         id: "zones-sync-auto-policy",
         profileId,
         dataType: "training-zones",
@@ -894,6 +927,16 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
           },
         ],
         createdAt: ts,
+        updatedAt: ts,
+      });
+      await db.table("integrationPolicies").put({
+        id: "zones-sync-planned-session-route",
+        profileId,
+        dataType: "planned-session",
+        bridgeId: "train2go-bridge",
+        direction: "import",
+        mode: "auto",
+        enabled: true,
         updatedAt: ts,
       });
       await db.table("integrationPolicies").put({

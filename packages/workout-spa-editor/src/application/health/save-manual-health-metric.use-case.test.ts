@@ -83,6 +83,57 @@ describe("saveManualHealthMetric", () => {
     expect(rows[0]?.krd.weightKilograms).toBe(SAMPLE_WEIGHT_KG_2);
   });
 
+  it("should stamp sourceBridgeId 'manual' and an externalId on a new record", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "weight", day: DAY, value: SAMPLE_WEIGHT_KG }
+    );
+
+    // Assert
+    const rows = await persistence.healthWeight.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(rows[0]?.sourceBridgeId).toBe("manual");
+    expect(rows[0]?.externalId).toBeTruthy();
+  });
+
+  it("should keep the same externalId when editing the day's value (one updated row, not a duplicate)", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "weight", day: DAY, value: SAMPLE_WEIGHT_KG }
+    );
+    const before = await persistence.healthWeight.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+
+    // Act
+    await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "weight", day: DAY, value: SAMPLE_WEIGHT_KG_2 }
+    );
+
+    // Assert
+    const after = await persistence.healthWeight.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(after).toHaveLength(1);
+    expect(after[0]?.id).toBe(before[0]?.id);
+    expect(after[0]?.externalId).toBe(before[0]?.externalId);
+    expect(after[0]?.krd.weightKilograms).toBe(SAMPLE_WEIGHT_KG_2);
+  });
+
   it("should insert two rows when the unlocked use case is called concurrently", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
