@@ -120,6 +120,29 @@ describe("buildLabValue", () => {
     expect(female?.flag).toBe("high");
   });
 
+  it("should flag unknown when the entered unit is not convertible to canonical", () => {
+    // Arrange
+    // glucose 5.5 mmol/L is a passthrough (no known mmol/L unit); the mg/dL
+    // catalog range must not be applied, so the flag stays unknown, not low.
+    const input = row({
+      parameterKey: "glucose",
+      valueRaw: "5.5",
+      unitRaw: "mmol/L",
+    });
+
+    // Act
+    const value = buildLabValue(input, CTX);
+
+    // Assert
+    expect(value).toMatchObject({
+      valueCanonical: 5.5,
+      unitCanonical: "mmol/L",
+      refSource: "none",
+      flag: "unknown",
+    });
+    expect(value?.refLowCanonical).toBeUndefined();
+  });
+
   it("should store a custom parameter's value and unit as entered, without conversion", () => {
     // Arrange
     const input = row({

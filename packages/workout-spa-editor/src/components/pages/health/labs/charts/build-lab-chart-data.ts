@@ -2,8 +2,9 @@
  * Aligned uPlot data for a parameter's evolution chart. Five rows: the x axis
  * (real dates as Unix seconds, ascending), the canonical value line, the
  * out-of-range points (canonical value where `flag` is low/high, else null),
- * and the two flat band edges (high/low) the reference region fills between.
- * When there is no band the edge rows are all null so nothing renders.
+ * and the two flat reference edges (high/low). A two-sided band fills between
+ * both edges; a one-sided threshold leaves the absent edge null so only its
+ * limit line renders. When there is no reference the edge rows are all null.
  */
 import type { LabValue } from "@kaiord/core";
 import type uPlot from "uplot";
@@ -34,8 +35,8 @@ export const buildLabChartData = (
     const v = byX.get(x)!;
     return isOutOfRange(v.flag) ? v.valueCanonical : null;
   });
-  const high = xs.map(() => (band ? band.high : null));
-  const low = xs.map(() => (band ? band.low : null));
+  const high = xs.map(() => band?.high ?? null);
+  const low = xs.map(() => band?.low ?? null);
 
   return [xs, line, outliers, high, low];
 };

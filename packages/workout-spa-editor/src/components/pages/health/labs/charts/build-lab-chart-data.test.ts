@@ -87,7 +87,11 @@ describe("buildLabChartData", () => {
 
   it("should fill the band edge rows with the constant canonical bounds (C1)", () => {
     // Arrange
-    const band: ReferenceBand = { low: VIT_D_LOW, high: VIT_D_HIGH };
+    const band: ReferenceBand = {
+      kind: "band",
+      low: VIT_D_LOW,
+      high: VIT_D_HIGH,
+    };
     const values = [
       value({
         id: "v1",
@@ -126,9 +130,28 @@ describe("buildLabChartData", () => {
     expect(data[4]).toEqual([null]);
   });
 
+  it("should fill only the high edge for a one-sided threshold and null the low edge", () => {
+    // Arrange
+    const band: ReferenceBand = { kind: "threshold", high: VIT_D_HIGH };
+    const values = [
+      value({ id: "v1", date: "2026-03-01", valueCanonical: PLOT_A }),
+    ];
+
+    // Act
+    const data = buildLabChartData(values, band);
+
+    // Assert
+    expect(data[3]).toEqual([VIT_D_HIGH]);
+    expect(data[4]).toEqual([null]);
+  });
+
   it("should still plot every point when only some carry a range", () => {
     // Arrange
-    const band: ReferenceBand = { low: VIT_D_LOW, high: VIT_D_HIGH };
+    const band: ReferenceBand = {
+      kind: "band",
+      low: VIT_D_LOW,
+      high: VIT_D_HIGH,
+    };
     const values = [
       value({ id: "v1", date: "2026-01-01", valueCanonical: PLOT_A }),
       value({

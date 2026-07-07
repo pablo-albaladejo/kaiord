@@ -134,14 +134,14 @@ describe("SCHEMAS.v27 (Data Hub domain stores)", () => {
 });
 
 describe("SCHEMAS.v31 (lab-analytics stores)", () => {
-  it("should declare labReports with the date-listing + per-profile indexes", () => {
+  it("should declare labReports with the date-listing index", () => {
     // Arrange
     const stores = SCHEMAS.v31 as Record<string, string>;
 
     // Act
 
     // Assert
-    expect(stores.labReports).toBe("id, [profileId+date], [profileId+id]");
+    expect(stores.labReports).toBe("id, [profileId+date]");
   });
 
   it("should declare labValues with the series + report indexes", () => {

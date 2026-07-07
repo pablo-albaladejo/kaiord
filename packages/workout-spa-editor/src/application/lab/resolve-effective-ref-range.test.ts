@@ -51,6 +51,24 @@ describe("resolveEffectiveRefRange", () => {
     });
   });
 
+  it("should not apply the canonical catalog fallback when the entered unit is not convertible", () => {
+    // Arrange
+    // glucose has no known mmol/L unit, so the value stays a passthrough; the
+    // mg/dL catalog fallback (70-99) must not be applied against it.
+    const row = {
+      refLowRaw: "",
+      refHighRaw: "",
+      refTouched: false,
+      unitRaw: "mmol/L",
+    };
+
+    // Act
+    const range = resolveEffectiveRefRange(glucose, row, undefined);
+
+    // Assert
+    expect(range).toEqual({ refSource: "none" });
+  });
+
   it("should resolve to none for a custom parameter with no entered range", () => {
     // Arrange
     const row = {

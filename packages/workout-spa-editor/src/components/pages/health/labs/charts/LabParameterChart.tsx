@@ -1,8 +1,9 @@
 /**
  * LabParameterChart — a parameter's evolution over several analyses (DoD-2):
- * canonical points across real dates, a reference band, and out-of-range
+ * canonical points across real dates, a reference region, and out-of-range
  * points marked from `flag`. Data attributes expose the point/outlier counts
- * and whether a band was drawn so the E2E can assert the band + outliers.
+ * and the reference kind (`band` two-sided, `threshold` one-sided, or `none`)
+ * so the E2E can assert the reference + outliers.
  */
 import type { LabValue } from "@kaiord/core";
 import { useMemo } from "react";
@@ -45,6 +46,7 @@ export const LabParameterChart = ({
       data-testid="lab-parameter-chart"
       data-parameter-key={parameterKey}
       data-has-band={band ? "true" : "false"}
+      data-band-kind={band?.kind ?? "none"}
       data-point-count={data[0]?.length ?? 0}
       data-outlier-count={countOutliers(data)}
       className="rounded-lg border border-gray-200 p-4 dark:border-slate-800"

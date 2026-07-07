@@ -12,6 +12,7 @@ import {
   convertBound,
   type LabParameter,
   type LabRefSource,
+  resolveAffineUnit,
 } from "@kaiord/core";
 
 import { parseOptionalNumber } from "./parse-optional-number";
@@ -50,6 +51,12 @@ export function resolveEffectiveRefRange(
   }
   const fallback = param ? resolveCatalogRefRange(param, sex) : undefined;
   if (!fallback) return { refSource: "none" };
+  // The catalog fallback is expressed in the parameter's CANONICAL unit, but a
+  // free-text unit that does not resolve to canonical leaves the value a
+  // passthrough in a foreign unit (e.g. glucose in mmol/L). Applying the
+  // canonical fallback then would mis-flag it, so gate the fallback on the
+  // entered unit being convertible; otherwise report no reference.
+  if (!resolveAffineUnit(param, row.unitRaw)) return { refSource: "none" };
   return {
     refLowCanonical: fallback.low,
     refHighCanonical: fallback.high,

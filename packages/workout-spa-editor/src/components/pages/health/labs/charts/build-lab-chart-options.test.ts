@@ -9,11 +9,14 @@ const DEF: ChartMetricDef = {
   label: "Vitamin D",
   unit: "ng/mL",
 };
-const BAND: ReferenceBand = { low: 30, high: 50 };
+const BAND: ReferenceBand = { kind: "band", low: 30, high: 50 };
+const THRESHOLD: ReferenceBand = { kind: "threshold", high: 100 };
 const REF_HIGH_IDX = 3;
 const REF_LOW_IDX = 4;
 const EXPECTED_SERIES = 5; // x + line + outliers + 2 band edges
 const EXPECTED_AXES = 2; // x + one y
+const BAND_EDGE = "rgba(37, 99, 235, 0.30)";
+const THRESHOLD_STROKE = "rgba(37, 99, 235, 0.55)";
 
 describe("buildLabChartOptions", () => {
   it("should key the y scale, axis and value series to the parameter", () => {
@@ -72,5 +75,18 @@ describe("buildLabChartOptions", () => {
 
     // Assert
     expect(options.bands).toBeUndefined();
+    expect(options.series?.[REF_HIGH_IDX]?.stroke).toBe(BAND_EDGE);
+  });
+
+  it("should draw a stronger edge line and no fill for a one-sided threshold", () => {
+    // Arrange
+
+    // Act
+    const options = buildLabChartOptions(DEF, THRESHOLD);
+
+    // Assert
+    expect(options.bands).toBeUndefined();
+    expect(options.series?.[REF_HIGH_IDX]?.stroke).toBe(THRESHOLD_STROKE);
+    expect(options.series?.[REF_LOW_IDX]?.stroke).toBe(THRESHOLD_STROKE);
   });
 });

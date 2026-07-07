@@ -45,9 +45,31 @@ describe("LabParameterChart", () => {
     // Assert
     const chart = screen.getByTestId("lab-parameter-chart");
     expect(chart).toHaveAttribute("data-has-band", "true");
+    expect(chart).toHaveAttribute("data-band-kind", "band");
     expect(chart).toHaveAttribute("data-point-count", "2");
     expect(chart).toHaveAttribute("data-outlier-count", "1");
     expect(screen.getByTestId("uplot-chart-mock")).toBeInTheDocument();
+  });
+
+  it("should mark the reference kind as threshold for a one-sided range", () => {
+    // Arrange
+    const values = [
+      value({
+        id: "v1",
+        date: "2026-03-01",
+        valueCanonical: 130,
+        flag: "high",
+        refHighCanonical: 100,
+      }),
+    ];
+
+    // Act
+    render(<LabParameterChart parameterKey="ldl" values={values} />);
+
+    // Assert
+    const chart = screen.getByTestId("lab-parameter-chart");
+    expect(chart).toHaveAttribute("data-has-band", "true");
+    expect(chart).toHaveAttribute("data-band-kind", "threshold");
   });
 
   it("should render the empty message with no values", () => {

@@ -44,7 +44,11 @@ describe("resolveReferenceBand", () => {
     const band = resolveReferenceBand(values);
 
     // Assert
-    expect(band).toEqual({ low: VIT_D_CANON_LOW, high: VIT_D_CANON_HIGH });
+    expect(band).toEqual({
+      kind: "band",
+      low: VIT_D_CANON_LOW,
+      high: VIT_D_CANON_HIGH,
+    });
   });
 
   it("should use the most recent value's range when the range varies between reports", () => {
@@ -68,7 +72,11 @@ describe("resolveReferenceBand", () => {
     const band = resolveReferenceBand(values);
 
     // Assert
-    expect(band).toEqual({ low: VIT_D_CANON_LOW, high: VIT_D_CANON_HIGH });
+    expect(band).toEqual({
+      kind: "band",
+      low: VIT_D_CANON_LOW,
+      high: VIT_D_CANON_HIGH,
+    });
   });
 
   it("should fall back to an older value that carries a range when the newest lacks one", () => {
@@ -87,14 +95,64 @@ describe("resolveReferenceBand", () => {
     const band = resolveReferenceBand(values);
 
     // Assert
-    expect(band).toEqual({ low: OLD_LOW, high: OLD_HIGH });
+    expect(band).toEqual({ kind: "band", low: OLD_LOW, high: OLD_HIGH });
   });
 
-  it("should return null when no value carries both canonical bounds", () => {
+  it("should resolve a high-only threshold from the newest value carrying a single bound", () => {
+    // Arrange
+    // One-sided lipids (LDL, cholesterol, triglycerides) carry only a high
+    // bound, so the reference is a single limit line, not a two-sided band.
+    const values = [
+      value({
+        id: "v1",
+        date: "2026-03-01",
+        refHighCanonical: VIT_D_CANON_HIGH,
+      }),
+    ];
+
+    // Act
+    const band = resolveReferenceBand(values);
+
+    // Assert
+    expect(band).toEqual({
+      kind: "threshold",
+      low: undefined,
+      high: VIT_D_CANON_HIGH,
+    });
+  });
+
+  it("should prefer the newest single bound over an older two-sided range", () => {
+    // Arrange
+    const values = [
+      value({
+        id: "v-old",
+        date: "2025-06-01",
+        refLowCanonical: OLD_LOW,
+        refHighCanonical: OLD_HIGH,
+      }),
+      value({
+        id: "v-new",
+        date: "2026-03-01",
+        refLowCanonical: VIT_D_CANON_LOW,
+      }),
+    ];
+
+    // Act
+    const band = resolveReferenceBand(values);
+
+    // Assert
+    expect(band).toEqual({
+      kind: "threshold",
+      low: VIT_D_CANON_LOW,
+      high: undefined,
+    });
+  });
+
+  it("should return null when no value carries any canonical bound", () => {
     // Arrange
     const values = [
       value({ id: "v1", date: "2026-03-01" }),
-      value({ id: "v2", date: "2026-01-01", refLowCanonical: OLD_LOW }),
+      value({ id: "v2", date: "2026-01-01" }),
     ];
 
     // Act

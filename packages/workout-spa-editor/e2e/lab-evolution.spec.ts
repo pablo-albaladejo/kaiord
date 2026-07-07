@@ -52,9 +52,15 @@ const VALUES: SeedValue[] = [
   },
 ];
 
-async function seed(page: Page) {
+type SeedOpts = {
+  parameterKey: string;
+  refLow: number | null;
+  refHigh: number | null;
+};
+
+async function seed(page: Page, opts: SeedOpts) {
   await page.evaluate(
-    async ({ profileId, reports, values, refLow, refHigh }) => {
+    async ({ profileId, reports, values, parameterKey, refLow, refHigh }) => {
       const db = (window as unknown as Record<string, unknown>)
         .__KAIORD_DB__ as {
         table: (n: string) => {
@@ -89,14 +95,14 @@ async function seed(page: Page) {
       await db.table("labValues").bulkPut(
         values.map((v) => ({
           profileId,
-          parameterKey: "glucose",
+          parameterKey,
           unitRaw: "mg/dL",
           valueRaw: v.valueCanonical,
           unitCanonical: "mg/dL",
           provenance: { source: "manual" },
           refSource: "report",
-          refLowCanonical: refLow,
-          refHighCanonical: refHigh,
+          ...(refLow != null ? { refLowCanonical: refLow } : {}),
+          ...(refHigh != null ? { refHighCanonical: refHigh } : {}),
           ...v,
         }))
       );
@@ -105,19 +111,20 @@ async function seed(page: Page) {
       profileId: PROFILE_ID,
       reports: REPORTS,
       values: VALUES,
-      refLow: REF_LOW,
-      refHigh: REF_HIGH,
+      parameterKey: opts.parameterKey,
+      refLow: opts.refLow,
+      refHigh: opts.refHigh,
     }
   );
 }
 
-async function gotoLabs(page: Page) {
+async function gotoLabs(page: Page, opts: SeedOpts) {
   await page.goto("/health/labs");
   await page.waitForFunction(
     () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
     { timeout: 10_000 }
   );
-  await seed(page);
+  await seed(page, opts);
   await page.goto("/health/labs");
   await expect(page.getByTestId("lab-history")).toBeVisible({
     timeout: 10_000,
@@ -129,7 +136,11 @@ test.describe("Lab parameter evolution (F4 / DoD-2)", () => {
     page,
   }) => {
     // Arrange
-    await gotoLabs(page);
+    await gotoLabs(page, {
+      parameterKey: "glucose",
+      refLow: REF_LOW,
+      refHigh: REF_HIGH,
+    });
 
     // Act
     await page
@@ -142,11 +153,37 @@ test.describe("Lab parameter evolution (F4 / DoD-2)", () => {
     const chart = page.getByTestId("lab-parameter-chart");
     await expect(chart).toBeVisible();
     await expect(chart).toHaveAttribute("data-has-band", "true");
+    await expect(chart).toHaveAttribute("data-band-kind", "band");
     await expect(chart).toHaveAttribute(
       "data-point-count",
       String(EXPECTED_POINTS)
     );
     await expect(chart).toHaveAttribute("data-outlier-count", "1");
     await expect(chart.getByTestId("uplot-chart")).toBeVisible();
+  });
+
+  test("should draw a one-sided threshold reference for a high-only lipid", async ({
+    page,
+  }) => {
+    // Arrange
+    await gotoLabs(page, {
+      parameterKey: "ldl",
+      refLow: null,
+      refHigh: REF_HIGH,
+    });
+
+    // Act
+    await page
+      .locator(
+        '[data-parameter-key="ldl"] [data-testid="lab-parameter-select"]'
+      )
+      .click();
+
+    // Assert
+    const chart = page.getByTestId("lab-parameter-chart");
+    await expect(chart).toBeVisible();
+    await expect(chart).toHaveAttribute("data-has-band", "true");
+    await expect(chart).toHaveAttribute("data-band-kind", "threshold");
+    await expect(chart).toHaveAttribute("data-outlier-count", "1");
   });
 });

@@ -68,17 +68,17 @@ export const buildCoreV30 = (prev: Stores): Stores => ({
 });
 
 // v31 — additive lab-analytics stores (health-labs, F1). `labReports` keys on
-// `id` with `[profileId+date]` (report listing by date) and `[profileId+id]`
-// (per-profile report lookup). `labValues` keys on `id` with
-// `[profileId+parameterKey+date]` — which serves BOTH the per-parameter series
-// and the latest-per-parameter prefix-scan — plus `[profileId+reportId]` (all
-// values of one report). `date` + `profileId` are denormalized onto each
-// LabValue. Both tables carry provenance mirror columns and profileId-leading
-// indexes, so `isPerProfileTable` auto-discovers them for the profile-delete
-// cascade. Auto-created empty on upgrade — no data transform.
+// `id` with `[profileId+date]` (report listing by date; also drives the profile
+// cascade). `labValues` keys on `id` with `[profileId+parameterKey+date]` —
+// which serves BOTH the per-parameter series and the latest-per-parameter
+// prefix-scan — plus `[profileId+reportId]` (all values of one report). `date`
+// + `profileId` are denormalized onto each LabValue. Both tables carry
+// provenance mirror columns and profileId-leading indexes, so
+// `isPerProfileTable` auto-discovers them for the profile-delete cascade.
+// Auto-created empty on upgrade — no data transform.
 export const buildCoreV31 = (prev: Stores): Stores => ({
   ...prev,
-  labReports: "id, [profileId+date], [profileId+id]",
+  labReports: "id, [profileId+date]",
   labValues: "id, [profileId+parameterKey+date], [profileId+reportId]",
 });
 
