@@ -19,6 +19,7 @@ import type {
 import type { EnergyBalanceRepositories } from "./energy-balance-repositories";
 import type { HealthCleanupRepository } from "./health-cleanup-repository";
 import type { HealthRepositories } from "./health-repositories";
+import type { LabRepository } from "./lab-repository";
 import type { MatchedSessionsReadModel } from "./matched-sessions-read-model";
 import type { SessionMatchRepository } from "./session-match-repository";
 import type {
@@ -40,9 +41,8 @@ export type {
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
-// EnergyBalanceRepositories + its granular types are re-exported from
-// ./energy-balance-repositories; import them from there directly.
-export type { HealthCleanupRepository } from "./health-cleanup-repository";
+// EnergyBalanceRepositories + HealthCleanupRepository + LabRepository granular
+// types are re-exported from their own modules; import them from there directly.
 export type {
   HealthRecord,
   HealthRecordRepository,
@@ -108,6 +108,8 @@ export type PersistencePort = HealthRepositories &
     // Delete markers for cross-device sync. Written by the `withTombstones`
     // decorator on every delete; read by the snapshot/merge use cases.
     tombstones: TombstoneRepository;
+    // Lab-analytics stores (labReports + labValues); per-profile, cascade-deleted.
+    labs: LabRepository;
     // Atomic commit-or-rollback wrapper for multi-write or read-modify-write
     // use cases. Dexie adapter delegates to db.transaction("rw", db.tables, fn);
     // in-memory adapter implements snapshot/revert. Application code MUST NOT

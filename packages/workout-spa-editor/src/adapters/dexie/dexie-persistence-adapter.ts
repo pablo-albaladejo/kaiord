@@ -22,6 +22,7 @@ import { createDexieHealthCleanupRepository } from "./dexie-health-cleanup-repos
 import { createDexieHealthRecordRepositories } from "./dexie-health-repositories";
 import { createDexieImportedRecordRepository } from "./dexie-imported-record-repository";
 import { createDexieIntegrationPolicyRepository } from "./dexie-integration-policy-repository";
+import { createDexieLabRepository } from "./dexie-lab-repository";
 import { createDexieMatchedSessionsReadModel } from "./dexie-matched-sessions-read-model";
 import { createDexieProfileRepository } from "./dexie-profile-repository";
 import { createDexieSessionMatchRepository } from "./dexie-session-match-repository";
@@ -62,6 +63,7 @@ export function createDexiePersistence(
     chatConversations: createDexieChatConversationRepository(database),
     aiModelBindings: createDexieAiModelBindingRepository(database),
     tombstones: createDexieTombstoneRepository(database),
+    labs: createDexieLabRepository(database),
     transaction: createTransactionRunner(database),
   };
 }

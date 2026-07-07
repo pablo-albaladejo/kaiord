@@ -14,6 +14,7 @@ import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-m
 import { createInMemoryConnectionRepository } from "../../test-utils/in-memory-connection-repository";
 import { createInMemoryDataTypeSourcePolicyRepository } from "../../test-utils/in-memory-data-type-source-policy-repository";
 import { createInMemoryEnergyBalanceRepositories } from "../../test-utils/in-memory-energy-balance-repositories";
+import { createInMemoryLabRepository } from "../../test-utils/in-memory-lab-repository";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryUserPreferencesRepository } from "../../test-utils/in-memory-user-preferences-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
@@ -94,6 +95,7 @@ const makeDeps = (
   dataTypeSourcePolicy:
     overrides.dataTypeSourcePolicy ??
     createInMemoryDataTypeSourcePolicyRepository(),
+  labs: overrides.labs ?? createInMemoryLabRepository(),
   ...((): Pick<
     DeleteProfileWithCascadeDeps,
     "intakeEntries" | "intakePresets" | "energyTargets"
@@ -328,6 +330,55 @@ describe("deleteProfileWithCascade", () => {
     // Assert
     expect(await deps.userPreferences.get("p1")).toBeUndefined();
     expect(await deps.userPreferences.get("p2")).toBeDefined();
+  });
+
+  it("should cascade both lab stores for the deleted profile only", async () => {
+    // Arrange
+    const labs = createInMemoryLabRepository();
+    await labs.putReport({
+      id: "r1",
+      profileId: "p1",
+      date: "2026-04-13",
+      provenance: { source: "manual" },
+    });
+    await labs.putValues([
+      {
+        id: "v1",
+        profileId: "p1",
+        reportId: "r1",
+        parameterKey: "glucose",
+        date: "2026-04-13",
+        valueRaw: 90,
+        unitRaw: "mg/dL",
+        valueCanonical: 90,
+        unitCanonical: "mg/dL",
+        refSource: "none",
+        flag: "unknown",
+        provenance: { source: "manual" },
+      },
+      {
+        id: "v2",
+        profileId: "p2",
+        reportId: "r2",
+        parameterKey: "glucose",
+        date: "2026-04-13",
+        valueRaw: 88,
+        unitRaw: "mg/dL",
+        valueCanonical: 88,
+        unitCanonical: "mg/dL",
+        refSource: "none",
+        flag: "unknown",
+        provenance: { source: "manual" },
+      },
+    ]);
+
+    // Act
+    await deleteProfileWithCascade(makeDeps({ labs }), "p1");
+
+    // Assert
+    expect(await labs.listReports("p1")).toHaveLength(0);
+    expect(await labs.getValuesByProfile("p1")).toHaveLength(0);
+    expect(await labs.getValuesByProfile("p2")).toHaveLength(1);
   });
 
   it("should cascade the energy-balance stores for the deleted profile", async () => {

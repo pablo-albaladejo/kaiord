@@ -151,4 +151,9 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // row means the implicit "union" default). Folded into this function
   // rather than a standalone registerV30.
   db.version(30).stores(SCHEMAS.v30);
+  // v31 — additive lab-analytics stores (`labReports`, `labValues`) for the
+  // health-labs feature. Auto-created empty on upgrade; existing tables
+  // untouched. Their profileId-leading indexes make `isPerProfileTable`
+  // auto-discover them for the profile-delete cascade. Folded here (as v30).
+  db.version(31).stores(SCHEMAS.v31);
 };

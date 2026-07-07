@@ -133,6 +133,30 @@ describe("SCHEMAS.v27 (Data Hub domain stores)", () => {
   });
 });
 
+describe("SCHEMAS.v31 (lab-analytics stores)", () => {
+  it("should declare labReports with the date-listing + per-profile indexes", () => {
+    // Arrange
+    const stores = SCHEMAS.v31 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    expect(stores.labReports).toBe("id, [profileId+date], [profileId+id]");
+  });
+
+  it("should declare labValues with the series + report indexes", () => {
+    // Arrange
+    const stores = SCHEMAS.v31 as Record<string, string>;
+
+    // Act
+
+    // Assert
+    expect(stores.labValues).toBe(
+      "id, [profileId+parameterKey+date], [profileId+reportId]"
+    );
+  });
+});
+
 describe("SCHEMAS cross-version drift guards", () => {
   const byteEquivalentPairs: ReadonlyArray<{
     prev: SchemaVersion;
@@ -142,6 +166,7 @@ describe("SCHEMAS cross-version drift guards", () => {
     { prev: "v20", next: "v21" },
     { prev: "v23", next: "v24" },
     { prev: "v26", next: "v27" },
+    { prev: "v30", next: "v31" },
   ];
 
   it.each(byteEquivalentPairs)(
@@ -171,6 +196,7 @@ describe("SCHEMAS cross-version drift guards", () => {
     { prev: "v23", next: "v24", added: ["connections"] },
     { prev: "v24", next: "v25", added: ["chatConversations"] },
     { prev: "v26", next: "v27", added: ["activities", "plannedSessions"] },
+    { prev: "v30", next: "v31", added: ["labReports", "labValues"] },
   ];
 
   it.each(addedStoreCases)(

@@ -36,6 +36,7 @@ import type {
   IntakePresetRepository,
 } from "../../ports/energy-balance-repositories";
 import type { HealthCleanupRepository } from "../../ports/health-cleanup-repository";
+import type { LabRepository } from "../../ports/lab-repository";
 import type {
   CoachingRepository,
   CoachingSyncStateRepository,
@@ -74,6 +75,9 @@ export type DeleteProfileWithCascadeDeps = {
   // Per-(profile, dataType) multi-source policy rows (F3.1); device-local
   // (today), bulk delete on profile removal.
   dataTypeSourcePolicy: DataTypeSourcePolicyRepository;
+  // Lab-analytics stores (labReports + labValues); a single deleteByProfile
+  // clears BOTH tables for the removed profile.
+  labs: LabRepository;
 };
 
 export const deleteProfileWithCascade = async (
@@ -97,5 +101,6 @@ export const deleteProfileWithCascade = async (
     deps.intakePresets.deleteByProfile(deletedProfileId),
     deps.energyTargets.deleteByProfile(deletedProfileId),
     deps.dataTypeSourcePolicy.deleteByProfile(deletedProfileId),
+    deps.labs.deleteByProfile(deletedProfileId),
   ]);
 };
