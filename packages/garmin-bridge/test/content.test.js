@@ -97,6 +97,27 @@ describe("content.js", () => {
     it("rejects GET /workout-service/workout (singular without POST)", () => {
       expect(isAllowed("GET", "/workout-service/workout")).toBe(false);
     });
+
+    it("allows GET /activitylist-service/activities/search/activities", () => {
+      expect(
+        isAllowed("GET", "/activitylist-service/activities/search/activities")
+      ).toBe(true);
+    });
+
+    it("allows GET activities search with query params", () => {
+      expect(
+        isAllowed(
+          "GET",
+          "/activitylist-service/activities/search/activities?start=0&limit=20"
+        )
+      ).toBe(true);
+    });
+
+    it("rejects POST to the activities search endpoint (read-only)", () => {
+      expect(
+        isAllowed("POST", "/activitylist-service/activities/search/activities")
+      ).toBe(false);
+    });
   });
 
   describe("handleGarminFetch", () => {

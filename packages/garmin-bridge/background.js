@@ -193,6 +193,81 @@ const pushWorkout = async (gcn) => {
   return res.data;
 };
 
+// ── Garmin activities pull (F5) ──
+//
+// Read-only pull of the athlete's recent Garmin Connect activities via
+// the user's authenticated session. Governed SPA-side by a DataRoute
+// (activity←garmin — the SPA never asks unless the route is active). This
+// handler adds bridge-side safety: a throttle so rapid re-syncs cannot
+// hammer Garmin (ToS), retry-with-backoff for transient session hiccups,
+// and a kill-switch (chrome.storage.local flag) so the pull can be
+// disabled — degrading the SPA to manual FIT import — if Garmin changes
+// the endpoint shape. The raw activity feed is returned as-is; mapping to
+// the domain `activity` type happens SPA-side where the Zod schema lives.
+const ACTIVITIES_PATH =
+  "/activitylist-service/activities/search/activities?start=0&limit=20";
+const ACTIVITIES_KILL_SWITCH_KEY = "activitiesPullDisabled";
+const ACTIVITIES_LAST_FETCH_KEY = "lastActivitiesFetchAt";
+const ACTIVITIES_MIN_INTERVAL_MS = 30000;
+const ACTIVITIES_MAX_ATTEMPTS = 3;
+const ACTIVITIES_BACKOFF_BASE_MS = 500;
+
+const isActivitiesPullDisabled = () =>
+  chrome.storage.local
+    .get(ACTIVITIES_KILL_SWITCH_KEY)
+    .then((r) => r[ACTIVITIES_KILL_SWITCH_KEY] === true);
+
+const sleep = (ms) =>
+  ms > 0
+    ? new Promise((resolve) => setTimeout(resolve, ms))
+    : Promise.resolve();
+
+const fetchActivitiesOnce = async () => {
+  const res = await garminFetch(ACTIVITIES_PATH, "GET");
+  if (!res?.ok) throw toBridgeError("Activities pull failed", res);
+  return res.data;
+};
+
+const fetchActivitiesWithBackoff = async (maxAttempts, backoffBaseMs) => {
+  let lastErr;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      return await fetchActivitiesOnce();
+    } catch (e) {
+      lastErr = e;
+      if (attempt < maxAttempts - 1) await sleep(backoffBaseMs * 2 ** attempt);
+    }
+  }
+  throw lastErr;
+};
+
+const listActivities = async (opts = {}) => {
+  const {
+    minIntervalMs = ACTIVITIES_MIN_INTERVAL_MS,
+    maxAttempts = ACTIVITIES_MAX_ATTEMPTS,
+    backoffBaseMs = ACTIVITIES_BACKOFF_BASE_MS,
+  } = opts;
+
+  if (await isActivitiesPullDisabled()) {
+    return { activities: [], disabled: true, throttled: false };
+  }
+
+  const now = Date.now();
+  const { [ACTIVITIES_LAST_FETCH_KEY]: last = 0 } =
+    await chrome.storage.session.get(ACTIVITIES_LAST_FETCH_KEY);
+  if (now - last < minIntervalMs) {
+    return { activities: [], disabled: false, throttled: true };
+  }
+  await chrome.storage.session.set({ [ACTIVITIES_LAST_FETCH_KEY]: now });
+
+  const data = await fetchActivitiesWithBackoff(maxAttempts, backoffBaseMs);
+  return {
+    activities: Array.isArray(data) ? data : [],
+    disabled: false,
+    throttled: false,
+  };
+};
+
 const openGarmin = async () => {
   await chrome.tabs.create({ url: GARMIN_DASHBOARD });
 };
@@ -227,6 +302,8 @@ const handleAction = async (message) => {
       return await checkSession();
     case "list":
       return await listWorkouts();
+    case "activities":
+      return await listActivities();
     case "push":
       if (!message.gcn) throw new Error("Missing gcn payload");
       return await pushWorkout(message.gcn);
@@ -340,8 +417,15 @@ if (typeof module !== "undefined") {
     garminFetch,
     checkSession,
     listWorkouts,
+    listActivities,
+    fetchActivitiesWithBackoff,
+    isActivitiesPullDisabled,
     pushWorkout,
     openGarmin,
+    ACTIVITIES_PATH,
+    ACTIVITIES_KILL_SWITCH_KEY,
+    ACTIVITIES_LAST_FETCH_KEY,
+    ACTIVITIES_MIN_INTERVAL_MS,
     persistSnapshot,
     clearSnapshot,
     reinjectContentScripts,
