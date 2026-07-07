@@ -75,21 +75,21 @@ type ParamRow = {
 };
 
 const PARAMS: ParamRow[] = [
-  { label: "Glucosa (ayunas) (GLU)", value: "90" },
-  { label: "Hemoglobina glicada (HbA1c)", value: "48", unit: "mmol/mol" },
-  { label: "Vitamina D (25-OH) (25-OH-D)", value: "60", unit: "nmol/L" },
-  { label: "Neutrófilos % (NEU%)", value: "55" },
-  { label: "Neutrófilos absolutos (NEU#)", value: "3.5" },
+  { label: "Glucose (fasting) (GLU)", value: "90" },
+  { label: "Glycated hemoglobin (HbA1c)", value: "48", unit: "mmol/mol" },
+  { label: "Vitamin D (25-OH) (25-OH-D)", value: "60", unit: "nmol/L" },
+  { label: "Neutrophils % (NEU%)", value: "55" },
+  { label: "Neutrophils absolute (NEU#)", value: "3.5" },
   {
-    label: "Creatinina (CREA)",
+    label: "Creatinine (CREA)",
     value: "1.2",
     refLow: "0.6",
     refHigh: "1.1",
   },
   { label: "TSH (TSH)", value: "2.1" },
-  { label: "Sodio (Na)", value: "140" },
-  { label: "Potasio (K)", value: "4.2" },
-  { mode: "custom", label: "Apo-E Genotipo", value: "3.1", unit: "ratio" },
+  { label: "Sodium (Na)", value: "140" },
+  { label: "Potassium (K)", value: "4.2" },
+  { mode: "custom", label: "Apo-E Genotype", value: "3.1", unit: "ratio" },
 ];
 
 async function fillRow(page: Page, index: number, spec: ParamRow) {
@@ -177,7 +177,7 @@ test.describe("Lab analytics entry (DoD-1)", () => {
       refHighCanonical: 1.1,
       flag: "high",
     });
-    expect(byKey["custom:apo-e-genotipo"]).toMatchObject({
+    expect(byKey["custom:apo-e-genotype"]).toMatchObject({
       valueRaw: 3.1,
       valueCanonical: 3.1,
       unitRaw: "ratio",

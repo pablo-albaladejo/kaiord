@@ -33,8 +33,6 @@ export type LabPanel = z.infer<typeof labPanelSchema>;
 /** Static reference-data descriptor for a core lab parameter. */
 export const labParameterSchema = z.object({
   key: z.string(),
-  nameES: z.string(),
-  abbrev: z.string(),
   canonicalUnit: z.string(),
   knownUnits: z.array(knownUnitSchema).optional(),
   canonicalRefLow: z.number().optional(),

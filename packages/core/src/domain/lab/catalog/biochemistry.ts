@@ -8,8 +8,6 @@ import type { LabParameter } from "../lab-parameter";
 export const BIOCHEMISTRY: readonly LabParameter[] = [
   {
     key: "glucose",
-    nameES: "Glucosa (ayunas)",
-    abbrev: "GLU",
     canonicalUnit: "mg/dL",
     canonicalRefLow: 70,
     canonicalRefHigh: 99,
@@ -17,8 +15,6 @@ export const BIOCHEMISTRY: readonly LabParameter[] = [
   },
   {
     key: "hba1c",
-    nameES: "Hemoglobina glicada",
-    abbrev: "HbA1c",
     canonicalUnit: "%",
     knownUnits: [
       { unit: "mmol/mol", factorToCanonical: 0.0915, offsetToCanonical: 2.15 },
@@ -28,8 +24,6 @@ export const BIOCHEMISTRY: readonly LabParameter[] = [
   },
   {
     key: "creatinine",
-    nameES: "Creatinina",
-    abbrev: "CREA",
     canonicalUnit: "mg/dL",
     refBySex: {
       male: { low: 0.7, high: 1.3 },
@@ -39,8 +33,6 @@ export const BIOCHEMISTRY: readonly LabParameter[] = [
   },
   {
     key: "urea",
-    nameES: "Urea",
-    abbrev: "UREA",
     canonicalUnit: "mg/dL",
     canonicalRefLow: 15,
     canonicalRefHigh: 45,
@@ -48,8 +40,6 @@ export const BIOCHEMISTRY: readonly LabParameter[] = [
   },
   {
     key: "uric_acid",
-    nameES: "Ácido úrico",
-    abbrev: "URIC",
     canonicalUnit: "mg/dL",
     refBySex: {
       male: { low: 3.5, high: 7.2 },
@@ -59,8 +49,6 @@ export const BIOCHEMISTRY: readonly LabParameter[] = [
   },
   {
     key: "egfr",
-    nameES: "Filtrado glomerular estimado",
-    abbrev: "eGFR",
     canonicalUnit: "mL/min/1.73m²",
     canonicalRefLow: 90,
     panel: "biochemistry",

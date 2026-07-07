@@ -16,7 +16,7 @@ describe("selectCatalogParameter", () => {
     // Act
     const next = selectCatalogParameter(
       row,
-      "Glucosa (ayunas) (GLU)",
+      "Glucose (fasting) (GLU)",
       glucose,
       undefined
     );
@@ -39,7 +39,7 @@ describe("selectCatalogParameter", () => {
     // Act
     const next = selectCatalogParameter(
       row,
-      "Creatinina (CREA)",
+      "Creatinine (CREA)",
       creatinine,
       "female"
     );
@@ -66,10 +66,10 @@ describe("setCustomName", () => {
     const row = createEmptyRow("row-1");
 
     // Act
-    const next = setCustomName(row, "Apo-E Genotipo");
+    const next = setCustomName(row, "Apo-E Genotype");
 
     // Assert
-    expect(next.parameterKey).toBe("custom:apo-e-genotipo");
+    expect(next.parameterKey).toBe("custom:apo-e-genotype");
   });
 
   it("should clear the parameter key when the name is blank", () => {
