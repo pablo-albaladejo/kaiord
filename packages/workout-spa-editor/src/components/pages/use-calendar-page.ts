@@ -23,6 +23,7 @@ import { useAutoMatchSuggestions } from "../../hooks/use-auto-match-suggestions"
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
 import { useExecutedMatchAutoForCalendar } from "../../hooks/use-executed-match-auto";
+import { useGarminActivitiesPull } from "../../hooks/use-garmin-activities-pull";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { useSetCalendarView } from "../../hooks/use-set-calendar-view";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
@@ -66,6 +67,7 @@ export function useCalendarPage(): CalendarPageState {
     weekStart,
     s.data.days.at(-1) ?? ""
   );
+  useGarminActivitiesPull(profileId);
   const rawMatched = useMatchedSessions(profileId, s.data.days);
   useExecutedMatchAutoForCalendar(rawMatched, s.data.workoutsByDay);
   const suggestions = useAutoMatchSuggestions(profileId, weekStart);
