@@ -1,6 +1,9 @@
 /**
  * DataFlowsGroup — one managed data type with Sources + Destinations subsections.
  * Default-collapsed when both subsections have zero policies; expanded otherwise.
+ * Read/edit only — creating a new route lives exclusively in the Data Hub
+ * matrix (F4.2); the old "+ Add source/destination" dialog was retired since
+ * the matrix covers the same create-by-(dataType, bridge, direction) surface.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
@@ -8,28 +11,18 @@ import { useState } from "react";
 
 import type { DiscoveredBridge } from "../../../../hooks/use-discovered-bridges";
 import type { IntegrationPolicy } from "../../../../types/integration-policy";
-import { DataFlowsAddDialog } from "./DataFlowsAddDialog";
 import { DataFlowsSubsection } from "./DataFlowsSubsection";
 
-type AddTarget = { direction: "import" | "export" } | null;
-
 type Props = {
-  profileId: string;
   dataType: ManagedDataType;
   policies: { import: IntegrationPolicy[]; export: IntegrationPolicy[] };
   allBridges: readonly DiscoveredBridge[];
 };
 
-export function DataFlowsGroup({
-  profileId,
-  dataType,
-  policies,
-  allBridges,
-}: Props) {
+export function DataFlowsGroup({ dataType, policies, allBridges }: Props) {
   const reg = MANAGED_DATA_REGISTRY[dataType];
   const hasAny = policies.import.length > 0 || policies.export.length > 0;
   const [open, setOpen] = useState(hasAny);
-  const [adding, setAdding] = useState<AddTarget>(null);
 
   return (
     <div
@@ -54,8 +47,6 @@ export function DataFlowsGroup({
               rows={policies.import}
               allBridges={allBridges}
               emptyText="No source configured."
-              onAdd={() => setAdding({ direction: "import" })}
-              addLabel="+ Add source"
             />
           )}
           {reg.capabilities.export !== undefined && (
@@ -64,21 +55,9 @@ export function DataFlowsGroup({
               rows={policies.export}
               allBridges={allBridges}
               emptyText="No destination configured."
-              onAdd={() => setAdding({ direction: "export" })}
-              addLabel="+ Add destination"
             />
           )}
         </div>
-      )}
-
-      {adding && (
-        <DataFlowsAddDialog
-          profileId={profileId}
-          dataType={dataType}
-          direction={adding.direction}
-          discoveredBridges={allBridges}
-          onClose={() => setAdding(null)}
-        />
       )}
     </div>
   );

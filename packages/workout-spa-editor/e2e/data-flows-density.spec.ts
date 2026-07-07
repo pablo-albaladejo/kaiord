@@ -3,9 +3,13 @@
  *
  * Post-redesign the legacy Settings → Profile → "Data Flows" tab was
  * removed; the linked-accounts + data-flows UI merged into the Athlete
- * page's "Connections" section. A connected bridge (here, the Garmin
- * stub) renders an expandable row with "What syncs" flow toggles; brands
- * without a discovered bridge render as "Not connected" available rows.
+ * page's "Connections" section. Brands without a discovered bridge render
+ * as "Not connected" available rows.
+ *
+ * F4.2: per-flow "What syncs" toggles were retired from this page — routing
+ * lives exclusively in the Data Hub matrix (/settings/data-hub, see
+ * e2e/data-hub.spec.ts). A connected bridge card here only surfaces
+ * connection state, a "Data routing" link to that matrix, and disconnect.
  *
  * Playwright Chromium runs without extension runtimes, so the Garmin
  * bridge is injected via addInitScript before page.goto (see helpers/).
@@ -74,7 +78,7 @@ test.describe("Athlete Connections", () => {
     await expect(page.getByText("Not connected").first()).toBeVisible();
   });
 
-  test("should expand a connected bridge to reveal What-syncs flow toggles", async ({
+  test("should link a connected bridge to the Data Hub matrix instead of showing per-flow toggles", async ({
     page,
   }) => {
     // Arrange — install the Garmin bridge stub BEFORE goto so discovery
@@ -89,24 +93,25 @@ test.describe("Athlete Connections", () => {
     await seedProfile(page);
     await page.goto("/athlete");
 
-    // Act — Garmin appears connected; expand its row.
-    const garminRow = page.getByRole("button", { name: /garmin/i }).first();
-    await expect(garminRow).toBeVisible({ timeout: 10_000 });
+    // Act — Garmin appears connected.
+    await expect(page.getByText("Garmin").first()).toBeVisible({
+      timeout: 10_000,
+    });
     await expect(page.getByText("Connected").first()).toBeVisible();
-    await garminRow.click();
 
-    // Assert — the "What syncs" group with per-flow toggles is revealed.
-    // The stub announces both read:workouts and write:workouts, so both
-    // directions derive as operational flows (see deriveConnectionFlows).
-    await expect(page.getByText("What syncs")).toBeVisible();
-    await expect(
-      page.getByRole("switch", { name: "Import Workout" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("switch", { name: "Export Workout" })
-    ).toBeVisible();
+    // Assert — no more per-flow "What syncs" toggles on this page; routing
+    // is a link out to the Data Hub matrix, plus disconnect stays available.
+    await expect(page.getByText("What syncs")).not.toBeVisible();
+    const routingLink = page.getByRole("button", { name: /data routing/i });
+    await expect(routingLink).toBeVisible();
     await expect(
       page.getByRole("button", { name: /disconnect/i })
     ).toBeVisible();
+
+    // Act — the link navigates to the Data Hub matrix.
+    await routingLink.click();
+
+    // Assert
+    await expect(page).toHaveURL(/\/settings\/data-hub/);
   });
 });

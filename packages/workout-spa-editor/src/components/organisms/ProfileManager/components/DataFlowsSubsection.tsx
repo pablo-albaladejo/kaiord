@@ -1,5 +1,7 @@
 /**
  * DataFlowsSubsection — Sources or Destinations list within a DataFlowsGroup.
+ * Read/edit only (mode, enabled, remove) — creating a new route lives
+ * exclusively in the Data Hub matrix (F4.2, /settings/data-hub).
  */
 import type { DiscoveredBridge } from "../../../../hooks/use-discovered-bridges";
 import type { IntegrationPolicy } from "../../../../types/integration-policy";
@@ -10,8 +12,6 @@ type Props = {
   rows: IntegrationPolicy[];
   allBridges: readonly DiscoveredBridge[];
   emptyText: string;
-  onAdd: () => void;
-  addLabel: string;
 };
 
 export function DataFlowsSubsection({
@@ -19,8 +19,6 @@ export function DataFlowsSubsection({
   rows,
   allBridges,
   emptyText,
-  onAdd,
-  addLabel,
 }: Props) {
   return (
     <div>
@@ -34,13 +32,6 @@ export function DataFlowsSubsection({
           ))}
         </div>
       )}
-      <button
-        type="button"
-        onClick={onAdd}
-        className="mt-1 text-xs text-blue-600 hover:underline"
-      >
-        {addLabel}
-      </button>
     </div>
   );
 }

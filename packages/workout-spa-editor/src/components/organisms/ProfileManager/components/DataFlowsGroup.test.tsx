@@ -10,10 +10,6 @@ vi.mock("./DataFlowsRow", () => ({
   ),
 }));
 
-vi.mock("./DataFlowsAddDialog", () => ({
-  DataFlowsAddDialog: () => <div data-testid="add-dialog" />,
-}));
-
 import { DataFlowsGroup } from "./DataFlowsGroup";
 
 const NO_BRIDGES = [] as const;
@@ -40,7 +36,6 @@ describe("DataFlowsGroup", () => {
     // Act
     render(
       <DataFlowsGroup
-        profileId="p1"
         dataType="planned-session"
         policies={{ import: [], export: [] }}
         allBridges={NO_BRIDGES}
@@ -63,7 +58,6 @@ describe("DataFlowsGroup", () => {
     // Act
     render(
       <DataFlowsGroup
-        profileId="p1"
         dataType="workout"
         policies={{ import: [], export: [] }}
         allBridges={NO_BRIDGES}
@@ -81,7 +75,6 @@ describe("DataFlowsGroup", () => {
     // Act
     render(
       <DataFlowsGroup
-        profileId="p1"
         dataType="workout"
         policies={{ import: [], export: [] }}
         allBridges={NO_BRIDGES}
@@ -100,7 +93,6 @@ describe("DataFlowsGroup", () => {
     // Act
     render(
       <DataFlowsGroup
-        profileId="p1"
         dataType="workout"
         policies={{ import: [], export: [policy] }}
         allBridges={NO_BRIDGES}
@@ -118,7 +110,6 @@ describe("DataFlowsGroup", () => {
     // Act
     render(
       <DataFlowsGroup
-        profileId="p1"
         dataType="workout"
         policies={{ import: [], export: [policy] }}
         allBridges={NO_BRIDGES}

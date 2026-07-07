@@ -1,11 +1,10 @@
 /**
  * DataFlowsSection — top-level section rendered on the "Data Flows" tab.
  * Renders one DataFlowsGroup per managed data type whenever at least one
- * bridge has been discovered, so the "+ Add source/destination" affordances
- * are reachable even before any policy exists. The zero-state banner is keyed
- * on bridge presence (not policy count): it shows only when no bridge is
- * connected — otherwise a fresh profile would dead-end with no way to create
- * its first data flow.
+ * bridge has been discovered, listing existing routes (mode, enabled, remove)
+ * for review — creating a new route lives exclusively in the Data Hub matrix
+ * (F4.2, /settings/data-hub). The zero-state banner is keyed on bridge
+ * presence (not policy count): it shows only when no bridge is connected.
  */
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 
@@ -42,7 +41,6 @@ export function DataFlowsSection({ profileId }: Props) {
           return (
             <DataFlowsGroup
               key={dt}
-              profileId={profileId}
               dataType={dt}
               policies={byDataType.get(dt) ?? { import: [], export: [] }}
               allBridges={allBridges}
