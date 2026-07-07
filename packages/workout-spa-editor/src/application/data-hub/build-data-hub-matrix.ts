@@ -43,10 +43,8 @@ export type DataHubRow = {
   cells: DataHubCell[];
 };
 
-/** Shared cell-callback shapes (F4.2), threaded through DataHubTab →
-    DataHubMatrix → DataHubMatrixRow → DataHubCell — kept here so those
-    components each stay a one-line prop type instead of repeating the
-    full signature under the per-file line cap. */
+/** Shared cell-callback shapes, threaded through DataHubTab → DataHubMatrix
+    → DataHubMatrixRow → DataHubCell. */
 export type DataHubToggleHandler = (
   dataType: ManagedDataType,
   bridgeId: string,

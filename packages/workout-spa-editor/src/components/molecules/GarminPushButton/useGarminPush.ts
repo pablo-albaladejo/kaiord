@@ -1,21 +1,16 @@
 import { useCallback } from "react";
 
-import { db } from "../../../adapters/dexie/dexie-database";
-import { createDexieExportLedgerRepository } from "../../../adapters/dexie/dexie-export-ledger-repository";
-import { createDexieIntegrationPolicyRepository } from "../../../adapters/dexie/dexie-integration-policy-repository";
 import { executeWorkoutPush } from "../../../application/export/execute-workout-push";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
+import {
+  BridgePushFailedError,
+  buildGarminPushFn,
+  GARMIN_BRIDGE_ID,
+  ledgerRepo,
+  policyRepo,
+} from "../../../hooks/garmin-push-fn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
-
-const policyRepo = createDexieIntegrationPolicyRepository(db);
-const ledgerRepo = createDexieExportLedgerRepository(db);
-const GARMIN_BRIDGE_ID = "garmin-bridge";
-
-/** Marks that the bridge itself reported failure (runPush already set the
-    specific `pushing` error message) — the outer catch must not
-    overwrite it with a generic one. */
-class BridgePushFailedError extends Error {}
 
 /**
  * Pushes a persisted workout to Garmin Connect.
@@ -57,17 +52,7 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
           kaiordRecordId: workout.id,
           destinationBridgeId: GARMIN_BRIDGE_ID,
           payload: gcn as Record<string, unknown>,
-          // pushWorkout never rejects on a bridge-reported failure — it
-          // resolves { success: false } and sets the error state itself,
-          // so this adapter throws a marker instead of a message-bearing
-          // error (the outer catch must not stomp on that message).
-          pushFn: async (payload) => {
-            const outcome = await pushWorkout(payload);
-            if (!outcome.success) throw new BridgePushFailedError();
-            return {
-              externalId: outcome.garminWorkoutId ?? `garmin-${Date.now()}`,
-            };
-          },
+          pushFn: buildGarminPushFn(pushWorkout),
         }
       );
       analytics.event("garmin-synced", { result: "success" });

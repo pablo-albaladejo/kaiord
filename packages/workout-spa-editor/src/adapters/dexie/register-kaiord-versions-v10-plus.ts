@@ -143,13 +143,12 @@ export const registerV28 = (db: DexieVersionHost): void => {
 export const registerV29 = (db: DexieVersionHost): void => {
   // v29 — data-only: full fail-open policy seeding. Seeds enabled routes for
   // everything live today (planned-session←train2go import, workout→garmin
-  // export) so a working profile survives the governance gates (F1.3/F2).
+  // export) so a working profile survives the governance gates.
   // Idempotent superset of v28 — see dexie-v29-migration.
   db.version(29).stores(SCHEMAS.v27).upgrade(applyV29Upgrade);
-  // v30 — additive `dataTypeSourcePolicy` companion table (F3.1). Dexie
-  // auto-creates the store empty on upgrade; no data migration, no rows to
-  // seed (absent row means the implicit "union" default). Folded into this
-  // function (rather than a standalone registerV30) to keep
-  // register-kaiord-versions.ts under the per-file line cap.
+  // v30 — additive `dataTypeSourcePolicy` companion table. Dexie auto-creates
+  // the store empty on upgrade; no data migration, no rows to seed (absent
+  // row means the implicit "union" default). Folded into this function
+  // rather than a standalone registerV30.
   db.version(30).stores(SCHEMAS.v30);
 };

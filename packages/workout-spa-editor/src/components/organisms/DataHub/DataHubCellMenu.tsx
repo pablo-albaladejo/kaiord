@@ -1,7 +1,7 @@
 /**
- * DataHubCellMenu — mode edit + remove popover for an existing matrix route
- * (F4.2). Only rendered when a cell has a route (see DataHubCell); the
- * matrix's plain toggle handles create/enable/disable.
+ * DataHubCellMenu — mode edit + remove popover for an existing matrix route.
+ * Only rendered when a cell has a route (see DataHubCell); the matrix's
+ * plain toggle handles create/enable/disable.
  */
 import { useState } from "react";
 

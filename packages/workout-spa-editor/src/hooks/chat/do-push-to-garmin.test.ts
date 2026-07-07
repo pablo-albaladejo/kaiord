@@ -124,7 +124,7 @@ describe("doPushToGarmin", () => {
     expect(put).not.toHaveBeenCalled();
   });
 
-  it("should persist a locally-generated id when the response carries none", async () => {
+  it("should persist a stable sentinel id when the response carries none", async () => {
     // Arrange
     mockPolicies = [ENABLED_GARMIN_POLICY];
     const { persistence, put } = makePersistence(makeRecord());
@@ -137,7 +137,7 @@ describe("doPushToGarmin", () => {
 
     // Assert
     const persisted = put.mock.calls[0]?.[0] as { garminPushId: string };
-    expect(persisted.garminPushId).toMatch(/^garmin-\d+$/);
+    expect(persisted.garminPushId).toBe("garmin-unconfirmed");
   });
 
   it("should report no_active_export_route with a clear message and never call pushWorkout when no export route is active", async () => {

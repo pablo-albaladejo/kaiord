@@ -1,7 +1,6 @@
 /**
- * Connected-state icon button for CoachingSyncButton. Split out to keep the
- * parent under the per-file line cap. `routeInactive` swaps the slate chrome
- * for an amber "route off" treatment (F1.3 visible state).
+ * Connected-state icon button for CoachingSyncButton. `routeInactive` swaps
+ * the slate chrome for an amber "route off" treatment.
  */
 import { Loader2, RefreshCw } from "lucide-react";
 

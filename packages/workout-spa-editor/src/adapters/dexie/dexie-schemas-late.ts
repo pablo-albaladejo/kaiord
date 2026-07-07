@@ -10,9 +10,7 @@ type Stores = Record<string, string>;
 // v22 — additive `aiModelBindings` store for per-profile model bindings.
 // Composite PK `[profileId+purpose]` keeps one row per purpose per profile;
 // the `profileId` index drives the cascade and makes the table a cascade
-// target (also auto-discovered by `isPerProfileTable`). Moved here (rather
-// than dexie-schemas.ts, where it originated) to keep that file under the
-// per-file line cap.
+// target (also auto-discovered by `isPerProfileTable`).
 export const buildCoreV22 = (prev: Stores): Stores => ({
   ...prev,
   aiModelBindings: "[profileId+purpose], profileId",
@@ -46,7 +44,7 @@ export const buildCoreV26 = (prev: Stores): Stores => ({
 // `coachingActivities` rows (ids preserved, same index shape) so the routable
 // unit is the individual coach-prescribed session. `activities` is the
 // executed-session store, auto-created empty until the FIT-import classifier
-// and the Garmin activity pull (F5) populate it. `coachingActivities` is
+// and the Garmin activity pull populate it. `coachingActivities` is
 // retained this version for reversibility (see dexie-v27-migration).
 export const buildCoreV27 = (prev: Stores): Stores => ({
   ...prev,
@@ -58,9 +56,9 @@ export const buildCoreV27 = (prev: Stores): Stores => ({
   activities: "id, [profileId+date], [profileId+sourceBridgeId+externalId]",
 });
 
-// v30 — additive `dataTypeSourcePolicy` companion table (F3.1): per-(profile,
+// v30 — additive `dataTypeSourcePolicy` companion table: per-(profile,
 // dataType) multi-source semantics (union|priority + sourceOrder), consumed by
-// resolveEffectiveSource (F3.2). PK is the compound `[profileId+dataType]` —
+// resolveEffectiveSource. PK is the compound `[profileId+dataType]` —
 // exactly one row per type per profile; the `profileId` index drives the
 // profile-delete cascade. Auto-created empty on upgrade: no row means the
 // implicit "union" default, so there is nothing to seed.

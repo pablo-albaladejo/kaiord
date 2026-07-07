@@ -55,14 +55,14 @@ export async function persistImportedWorkout(
   persistence: PersistencePort,
   input: PersistImportedInput
 ): Promise<WorkoutRecord> {
-  // Transitional dual-write (F0 step 0.5): a file classified as an executed
-  // activity is persisted as a first-class `activity` row (fit-import
-  // provenance + content-hash externalId, deduped) AND — for now — as a
-  // WorkoutRecord so the calendar/library keep rendering it unchanged. The
-  // activity row stores `linkedWorkoutId` = the twin WorkoutRecord id so the
-  // executed-match union excludes that workout from the legacy scan (one event
-  // is never matched twice). The WorkoutRecord is TRANSITIONAL: it retires once
-  // the calendar consumes `activities` natively (plan follow-up, F5/V2).
+  // Transitional dual-write: a file classified as an executed activity is
+  // persisted as a first-class `activity` row (fit-import provenance +
+  // content-hash externalId, deduped) AND — for now — as a WorkoutRecord so
+  // the calendar/library keep rendering it unchanged. The activity row
+  // stores `linkedWorkoutId` = the twin WorkoutRecord id so the
+  // executed-match union excludes that workout from the legacy scan (one
+  // event is never matched twice). The WorkoutRecord is TRANSITIONAL: it
+  // retires once the calendar consumes `activities` natively.
   // Structured workouts write only the WorkoutRecord.
   const record = createStructuredWorkoutRecord({
     profileId: input.profileId,

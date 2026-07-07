@@ -1,8 +1,7 @@
 /**
- * Persistence tail of `syncWeek`, split out to keep that file under the
- * per-file line cap. Stamps provenance on every fetched row (F1.3), upserts,
- * deletes coach-removed orphans within the window, and bumps the staleness
- * gate unconditionally. Returns the number of orphans deleted.
+ * Persistence tail of `syncWeek`. Stamps provenance on every fetched row,
+ * upserts, deletes coach-removed orphans within the window, and bumps the
+ * staleness gate unconditionally. Returns the number of orphans deleted.
  */
 import type {
   CoachingRepository,

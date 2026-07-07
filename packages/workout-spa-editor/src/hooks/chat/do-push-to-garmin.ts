@@ -7,9 +7,6 @@
  * throws for it. On success the record is re-persisted with the push id
  * so the calendar lifecycle badge reflects the push.
  */
-import { db } from "../../adapters/dexie/dexie-database";
-import { createDexieExportLedgerRepository } from "../../adapters/dexie/dexie-export-ledger-repository";
-import { createDexieIntegrationPolicyRepository } from "../../adapters/dexie/dexie-integration-policy-repository";
 import {
   executeWorkoutPush,
   NoActiveExportRouteError,
@@ -18,15 +15,12 @@ import { recordGarminPush } from "../../application/record-garmin-push";
 import type { GarminPushOutcome } from "../../contexts/garmin-bridge-types";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { exportGcnWorkout } from "../../utils/export-workout-formats";
-
-const policyRepo = createDexieIntegrationPolicyRepository(db);
-const ledgerRepo = createDexieExportLedgerRepository(db);
-const GARMIN_BRIDGE_ID = "garmin-bridge";
-
-/** Marks a bridge-reported push failure (never rejects on its own, so
-    this is the adapter's way of telling executeWorkoutPush to abort the
-    ledger commit and roll back the pending row). */
-class BridgePushFailedError extends Error {}
+import {
+  buildGarminPushFn,
+  GARMIN_BRIDGE_ID,
+  ledgerRepo,
+  policyRepo,
+} from "../garmin-push-fn";
 
 export const doPushToGarmin = async (
   persistence: PersistencePort,
@@ -46,13 +40,7 @@ export const doPushToGarmin = async (
         kaiordRecordId: record.id,
         destinationBridgeId: GARMIN_BRIDGE_ID,
         payload: gcn as Record<string, unknown>,
-        pushFn: async (payload) => {
-          const outcome = await pushWorkout(payload);
-          if (!outcome.success) throw new BridgePushFailedError();
-          return {
-            externalId: outcome.garminWorkoutId ?? `garmin-${Date.now()}`,
-          };
-        },
+        pushFn: buildGarminPushFn(pushWorkout),
       }
     );
     if (!result.externalId) return { error: "push_failed" };

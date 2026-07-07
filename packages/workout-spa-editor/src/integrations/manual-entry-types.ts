@@ -6,10 +6,7 @@
  * chat entry), and `training-zones` (profile zone editing). `planned-session`
  * is deliberately absent — there is no manual way to author a coach session, so
  * the Manual column renders it n/a (honest state over a fake always-active
- * cell). Consumed by the Data Hub matrix (F4.1).
- *
- * Co-located beside `integration-registry.ts` (kept a separate module so the
- * registry stays under the per-file line cap).
+ * cell). Consumed by the Data Hub matrix.
  */
 import type { ManagedDataType } from "@kaiord/core";
 

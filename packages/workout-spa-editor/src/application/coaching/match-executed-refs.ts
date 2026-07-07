@@ -1,6 +1,5 @@
 /**
- * Executed-reference indexing for the auto-match use case. Split out of
- * `match-executed-workouts.ts` to keep both files under the per-file line cap.
+ * Executed-reference indexing for the auto-match use case.
  */
 import type { ActivityRecord } from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";

@@ -138,7 +138,7 @@ export const SCHEMAS = {
   v25: CORE_V25,
   v26: CORE_V26,
   v27: CORE_V27,
-  // v30 — additive dataTypeSourcePolicy companion table (F3.1); built in
+  // v30 — additive dataTypeSourcePolicy companion table; built in
   // dexie-schemas-late.ts. v28/v29 (data-only) reused SCHEMAS.v27.
   v30: buildCoreV30(CORE_V27),
 } as const;

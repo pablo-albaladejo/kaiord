@@ -1,7 +1,6 @@
 /**
- * Cell-state derivation for the Data Hub matrix (F4.1). Split out of
- * `build-data-hub-matrix.ts` to keep both files under the per-file line cap.
- * Every state is derived from injected live signals — never guessed.
+ * Cell-state derivation for the Data Hub matrix. Every state is derived
+ * from injected live signals — never guessed.
  */
 import type { ManagedDataType } from "@kaiord/core";
 

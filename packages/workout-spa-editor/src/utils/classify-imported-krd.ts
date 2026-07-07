@@ -1,6 +1,6 @@
 /**
  * Classify an imported KRD as an executed `activity` or a structured
- * `workout` (F0 step 0.5). The rule is explicit and testable:
+ * `workout`. The rule is explicit and testable:
  *   - `recorded_activity`, or any file carrying executed records/laps/
  *     sessions ⇒ `activity`;
  *   - `structured_workout` with no executed data ⇒ `workout`;

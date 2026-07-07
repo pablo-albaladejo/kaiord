@@ -1,6 +1,6 @@
 /**
  * DataHubCellModeButtons — the Auto/Manual segmented control inside
- * DataHubCellMenu. Split out to keep that file under the per-file line cap.
+ * DataHubCellMenu.
  */
 import type { IntegrationPolicyMode } from "../../../types/integration-policy";
 

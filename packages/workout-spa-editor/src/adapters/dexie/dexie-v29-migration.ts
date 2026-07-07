@@ -1,11 +1,11 @@
 /**
- * v28 → v29 migration — fail-open policy seeding (F1.5).
+ * v28 → v29 migration — fail-open policy seeding.
  *
  * Seeds `enabled` IntegrationPolicy rows for every route that is live TODAY, so
- * that once the governance gates are wired (F1.3 train2go import, F2 garmin
- * export) a currently-working profile keeps working without touching anything
- * (day-1 continuity; kill-test pre-mortem #2). Routes are derived from the
- * INTEGRATION_REGISTRY bridge ids intersected with the live path inventory:
+ * that once the governance gates are wired (train2go import, garmin export) a
+ * currently-working profile keeps working without touching anything (day-1
+ * continuity). Routes are derived from the INTEGRATION_REGISTRY bridge ids
+ * intersected with the live path inventory:
  *   - `planned-session ← train2go-bridge` (import) for coaching-linked profiles
  *     (idempotent superset of the v28 partial seed);
  *   - `workout → garmin-bridge` (export) for profiles with a live garmin
