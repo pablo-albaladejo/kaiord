@@ -10,9 +10,27 @@ import { DataHubMatrix } from "./DataHubMatrix";
 const NOW = "2026-05-01T00:00:00.000Z";
 
 const INTEGRATIONS: IntegrationRegistryEntry[] = [
-  { id: "garmin", name: "Garmin", mark: "G", mechanism: "bridge", bridgeId: "garmin-bridge" },
-  { id: "strava", name: "Strava", mark: "S", mechanism: "not-supported", bridgeId: null },
-  { id: "manual", name: "Manual", mark: "M", mechanism: "manual", bridgeId: null },
+  {
+    id: "garmin",
+    name: "Garmin",
+    mark: "G",
+    mechanism: "bridge",
+    bridgeId: "garmin-bridge",
+  },
+  {
+    id: "strava",
+    name: "Strava",
+    mark: "S",
+    mechanism: "not-supported",
+    bridgeId: null,
+  },
+  {
+    id: "manual",
+    name: "Manual",
+    mark: "M",
+    mechanism: "manual",
+    bridgeId: null,
+  },
 ];
 
 const ROWS: DataHubRow[] = [
@@ -20,10 +38,47 @@ const ROWS: DataHubRow[] = [
     dataType: "workout",
     label: "Workout",
     cells: [
-      { integrationId: "garmin", direction: "export", state: "active", enabled: true, lastSyncedAt: NOW },
-      { integrationId: "garmin", direction: "import", state: "na", enabled: false },
-      { integrationId: "strava", direction: "export", state: "aspirational", enabled: false },
-      { integrationId: "manual", direction: "import", state: "manual", enabled: false },
+      {
+        integrationId: "garmin",
+        direction: "export",
+        state: "active",
+        enabled: true,
+        lastSyncedAt: NOW,
+        routeId: "route-1",
+        routeMode: "auto",
+      },
+      {
+        integrationId: "garmin",
+        direction: "import",
+        state: "na",
+        enabled: false,
+      },
+      {
+        integrationId: "strava",
+        direction: "export",
+        state: "aspirational",
+        enabled: false,
+      },
+      {
+        integrationId: "manual",
+        direction: "import",
+        state: "manual",
+        enabled: false,
+      },
+    ],
+  },
+  {
+    dataType: "sleep",
+    label: "Sleep",
+    cells: [
+      // "available" with no routeId — a fresh cell with no policy row yet,
+      // so no mode-edit/remove menu should render for it.
+      {
+        integrationId: "garmin",
+        direction: "import",
+        state: "available",
+        enabled: false,
+      },
     ],
   },
 ];
@@ -32,7 +87,13 @@ const connections = (): ReadonlyMap<string, ConnectionRecord> =>
   new Map([
     [
       "garmin",
-      { profileId: "p", providerId: "garmin", status: "connected", mechanism: "bridge", updatedAt: NOW },
+      {
+        profileId: "p",
+        providerId: "garmin",
+        status: "connected",
+        mechanism: "bridge",
+        updatedAt: NOW,
+      },
     ],
   ]);
 
@@ -47,6 +108,8 @@ describe("DataHubMatrix", () => {
         integrations={INTEGRATIONS}
         connections={connections()}
         onToggle={vi.fn()}
+        onSetMode={vi.fn()}
+        onRemove={vi.fn()}
       />
     );
 
@@ -67,6 +130,8 @@ describe("DataHubMatrix", () => {
         integrations={INTEGRATIONS}
         connections={connections()}
         onToggle={onToggle}
+        onSetMode={vi.fn()}
+        onRemove={vi.fn()}
       />
     );
 
@@ -94,6 +159,8 @@ describe("DataHubMatrix", () => {
         integrations={INTEGRATIONS}
         connections={connections()}
         onToggle={vi.fn()}
+        onSetMode={vi.fn()}
+        onRemove={vi.fn()}
       />
     );
 
@@ -113,6 +180,8 @@ describe("DataHubMatrix", () => {
         integrations={INTEGRATIONS}
         connections={connections()}
         onToggle={vi.fn()}
+        onSetMode={vi.fn()}
+        onRemove={vi.fn()}
       />
     );
 
@@ -132,6 +201,8 @@ describe("DataHubMatrix", () => {
         integrations={INTEGRATIONS}
         connections={connections()}
         onToggle={vi.fn()}
+        onSetMode={vi.fn()}
+        onRemove={vi.fn()}
       />
     );
 
@@ -141,5 +212,88 @@ describe("DataHubMatrix", () => {
       "true"
     );
     expect(screen.getByTestId("data-hub-conn-strava")).toHaveTextContent("—");
+  });
+
+  it("should render the route options menu only when a route already exists", () => {
+    // Arrange
+
+    // Act
+    render(
+      <DataHubMatrix
+        rows={ROWS}
+        integrations={INTEGRATIONS}
+        connections={connections()}
+        onToggle={vi.fn()}
+        onSetMode={vi.fn()}
+        onRemove={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(
+      screen.getByTestId("data-hub-cell-workout-garmin-export-menu-button")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("data-hub-cell-sleep-garmin-import-menu-button")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should call onSetMode with the clicked mode from a route's menu", async () => {
+    // Arrange
+    const onSetMode = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <DataHubMatrix
+        rows={ROWS}
+        integrations={INTEGRATIONS}
+        connections={connections()}
+        onToggle={vi.fn()}
+        onSetMode={onSetMode}
+        onRemove={vi.fn()}
+      />
+    );
+
+    // Act
+    await user.click(
+      screen.getByTestId("data-hub-cell-workout-garmin-export-menu-button")
+    );
+    await user.click(
+      screen.getByTestId("data-hub-cell-workout-garmin-export-mode-manual")
+    );
+
+    // Assert
+    expect(onSetMode).toHaveBeenCalledWith(
+      "workout",
+      "garmin-bridge",
+      expect.objectContaining({ direction: "export", routeId: "route-1" }),
+      "manual"
+    );
+  });
+
+  it("should call onRemove with the route id from a route's menu", async () => {
+    // Arrange
+    const onRemove = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <DataHubMatrix
+        rows={ROWS}
+        integrations={INTEGRATIONS}
+        connections={connections()}
+        onToggle={vi.fn()}
+        onSetMode={vi.fn()}
+        onRemove={onRemove}
+      />
+    );
+
+    // Act
+    await user.click(
+      screen.getByTestId("data-hub-cell-workout-garmin-export-menu-button")
+    );
+    await user.click(
+      screen.getByTestId("data-hub-cell-workout-garmin-export-remove")
+    );
+
+    // Assert
+    expect(onRemove).toHaveBeenCalledWith("route-1");
   });
 });

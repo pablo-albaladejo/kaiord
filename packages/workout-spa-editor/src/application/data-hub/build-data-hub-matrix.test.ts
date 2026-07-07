@@ -56,6 +56,7 @@ const signals = (
   bridgeAnnounces: () => false,
   isRouteEnabled: () => false,
   lastSyncedAt: () => undefined,
+  findRoute: () => undefined,
   ...o,
 });
 
@@ -112,7 +113,10 @@ describe("buildDataHubMatrix", () => {
   it("should read a bridge as not-connected from discovery, not policies", () => {
     // Arrange
     // An enabled policy must NOT make a cell active while the bridge is offline.
-    const s = signals({ isRouteEnabled: () => true, isBridgeOnline: () => false });
+    const s = signals({
+      isRouteEnabled: () => true,
+      isBridgeOnline: () => false,
+    });
 
     // Act
     const rows = buildDataHubMatrix(INTEGRATIONS, s);
@@ -189,6 +193,71 @@ describe("buildDataHubMatrix", () => {
     expect(cell(rows, "planned-session", "garmin", "import")?.state).toBe("na");
   });
 
+  it("should surface the existing route id and mode on an active cell", () => {
+    // Arrange
+    const s = signals({
+      isBridgeOnline: (b) => b === "garmin-bridge",
+      bridgeAnnounces: (b, t) =>
+        b === "garmin-bridge" && t === "write:workouts",
+      isRouteEnabled: (dt, dir, b) =>
+        dt === "workout" && dir === "export" && b === "garmin-bridge",
+      findRoute: (dt, dir, b) =>
+        dt === "workout" && dir === "export" && b === "garmin-bridge"
+          ? { id: "route-1", mode: "manual" }
+          : undefined,
+    });
+
+    // Act
+    const rows = buildDataHubMatrix(INTEGRATIONS, s);
+    const c = cell(rows, "workout", "garmin", "export");
+
+    // Assert
+    expect(c?.state).toBe("active");
+    expect(c?.routeId).toBe("route-1");
+    expect(c?.routeMode).toBe("manual");
+  });
+
+  it("should surface a disabled route's id and mode on an available cell", () => {
+    // Arrange
+    // isRouteEnabled defaults to false, so the cell stays "available" even
+    // though a (disabled) route already exists with its own mode.
+    const s = signals({
+      isBridgeOnline: (b) => b === "garmin-bridge",
+      bridgeAnnounces: (b, t) =>
+        b === "garmin-bridge" && t === "write:workouts",
+      findRoute: (dt, dir, b) =>
+        dt === "workout" && dir === "export" && b === "garmin-bridge"
+          ? { id: "route-2", mode: "auto" }
+          : undefined,
+    });
+
+    // Act
+    const rows = buildDataHubMatrix(INTEGRATIONS, s);
+    const c = cell(rows, "workout", "garmin", "export");
+
+    // Assert
+    expect(c?.state).toBe("available");
+    expect(c?.routeId).toBe("route-2");
+    expect(c?.routeMode).toBe("auto");
+  });
+
+  it("should leave routeId/routeMode undefined when no route exists yet", () => {
+    // Arrange
+    const s = signals({
+      isBridgeOnline: (b) => b === "garmin-bridge",
+      bridgeAnnounces: (b, t) =>
+        b === "garmin-bridge" && t === "write:workouts",
+    });
+
+    // Act
+    const rows = buildDataHubMatrix(INTEGRATIONS, s);
+    const c = cell(rows, "workout", "garmin", "export");
+
+    // Assert
+    expect(c?.routeId).toBeUndefined();
+    expect(c?.routeMode).toBeUndefined();
+  });
+
   it("should surface an api-key provider state from the connections store", () => {
     // Arrange
     const linked = signals({ isConnected: (id) => id === "intervals" });
@@ -199,7 +268,9 @@ describe("buildDataHubMatrix", () => {
     const unlinkedRows = buildDataHubMatrix(INTEGRATIONS, unlinked);
 
     // Assert
-    expect(cell(linkedRows, "workout", "intervals", "import")?.state).toBe("na");
+    expect(cell(linkedRows, "workout", "intervals", "import")?.state).toBe(
+      "na"
+    );
     expect(cell(unlinkedRows, "workout", "intervals", "import")?.state).toBe(
       "not-connected"
     );

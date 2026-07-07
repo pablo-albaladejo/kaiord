@@ -43,6 +43,12 @@ export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
             (p) => p.bridgeId === bridgeId && p.enabled
           ),
         lastSyncedAt: (id) => (id === TRAIN2GO ? train2goSyncedAt : undefined),
+        findRoute: (dataType, direction, bridgeId) => {
+          const match = (byDataType.get(dataType)?.[direction] ?? []).find(
+            (p) => p.bridgeId === bridgeId
+          );
+          return match ? { id: match.id, mode: match.mode } : undefined;
+        },
       }),
     [connections, discovered, byDataType, train2goSyncedAt]
   );

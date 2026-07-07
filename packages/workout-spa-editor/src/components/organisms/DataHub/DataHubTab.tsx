@@ -1,8 +1,13 @@
+import type { ManagedDataType } from "@kaiord/core";
+
+import type { DataHubCell } from "../../../application/data-hub/build-data-hub-matrix";
 import { useDataHubMatrix } from "../../../hooks/data-hub/use-data-hub-matrix";
+import { useDataHubRouteEditor } from "../../../hooks/data-hub/use-data-hub-route-editor";
 import { useDataHubToggle } from "../../../hooks/data-hub/use-data-hub-toggle";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useConnectionStatus } from "../../../hooks/use-connection-status";
 import { INTEGRATION_REGISTRY } from "../../../integrations/integration-registry";
+import type { IntegrationPolicyMode } from "../../../types/integration-policy";
 import { DataHubLegend } from "./DataHubLegend";
 import { DataHubMatrix } from "./DataHubMatrix";
 import { DataHubSourcePriority } from "./DataHubSourcePriority";
@@ -13,6 +18,19 @@ export const DataHubTab: React.FC = () => {
   const connections = useConnectionStatus(profileId);
   const rows = useDataHubMatrix(profileId);
   const onToggle = useDataHubToggle(profileId);
+  const routeEditor = useDataHubRouteEditor(profileId);
+
+  const onSetMode = (
+    dataType: ManagedDataType,
+    bridgeId: string,
+    cell: DataHubCell,
+    mode: IntegrationPolicyMode
+  ) => {
+    void routeEditor.setMode(dataType, cell.direction, bridgeId, mode);
+  };
+  const onRemove = (routeId: string) => {
+    void routeEditor.remove(routeId);
+  };
 
   if (!profileId)
     return (
@@ -35,6 +53,8 @@ export const DataHubTab: React.FC = () => {
         integrations={INTEGRATION_REGISTRY}
         connections={connections}
         onToggle={onToggle}
+        onSetMode={onSetMode}
+        onRemove={onRemove}
       />
       <DataHubLegend />
       <DataHubSourcePriority profileId={profileId} />

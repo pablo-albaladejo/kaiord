@@ -11,7 +11,10 @@ import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
-import type { IntegrationPolicyDirection } from "../../types/integration-policy";
+import type {
+  IntegrationPolicyDirection,
+  IntegrationPolicyMode,
+} from "../../types/integration-policy";
 import { cellState, type DataHubMatrixSignals } from "./data-hub-cell-state";
 
 export type {
@@ -27,6 +30,11 @@ export type DataHubCell = {
   enabled: boolean;
   /** ISO timestamp of the last successful sync, when the source has one. */
   lastSyncedAt?: string;
+  /** Existing route id (active or disabled-available) — undefined when no
+      policy row exists yet. Backs the mode-edit/remove menu (F4.2). */
+  routeId?: string;
+  /** The route's persisted mode, when it exists. */
+  routeMode?: IntegrationPolicyMode;
 };
 
 export type DataHubRow = {
@@ -34,6 +42,23 @@ export type DataHubRow = {
   label: string;
   cells: DataHubCell[];
 };
+
+/** Shared cell-callback shapes (F4.2), threaded through DataHubTab →
+    DataHubMatrix → DataHubMatrixRow → DataHubCell — kept here so those
+    components each stay a one-line prop type instead of repeating the
+    full signature under the per-file line cap. */
+export type DataHubToggleHandler = (
+  dataType: ManagedDataType,
+  bridgeId: string,
+  cell: DataHubCell
+) => void;
+export type DataHubSetModeHandler = (
+  dataType: ManagedDataType,
+  bridgeId: string,
+  cell: DataHubCell,
+  mode: IntegrationPolicyMode
+) => void;
+export type DataHubRemoveHandler = (routeId: string) => void;
 
 const DIRECTIONS: readonly IntegrationPolicyDirection[] = ["import", "export"];
 
@@ -55,6 +80,9 @@ export const buildDataHubMatrix = (
           signals,
           dataType
         );
+        const route = integration.bridgeId
+          ? signals.findRoute(dataType, direction, integration.bridgeId)
+          : undefined;
         cells.push({
           integrationId: integration.id,
           direction,
@@ -64,6 +92,8 @@ export const buildDataHubMatrix = (
             state === "active"
               ? signals.lastSyncedAt(integration.id)
               : undefined,
+          routeId: route?.id,
+          routeMode: route?.mode,
         });
       }
     }

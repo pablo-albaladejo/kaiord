@@ -7,15 +7,13 @@ import type { ManagedDataType } from "@kaiord/core";
 
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
 import { MANUAL_ENTRY_TYPES } from "../../integrations/manual-entry-types";
-import type { IntegrationPolicyDirection } from "../../types/integration-policy";
+import type {
+  IntegrationPolicyDirection,
+  IntegrationPolicyMode,
+} from "../../types/integration-policy";
 
 export type DataHubCellState =
-  | "active"
-  | "available"
-  | "not-connected"
-  | "aspirational"
-  | "manual"
-  | "na";
+  "active" | "available" | "not-connected" | "aspirational" | "manual" | "na";
 
 export type DataHubMatrixSignals = {
   /** api-key provider linked (v24 connections store, status="connected"). */
@@ -35,6 +33,18 @@ export type DataHubMatrixSignals = {
     bridgeId: string
   ) => boolean;
   lastSyncedAt: (integrationId: string) => string | undefined;
+  /**
+   * The existing route (id + persisted mode) for this exact
+   * (dataType, direction, bridgeId), regardless of enabled — undefined when
+   * no policy row exists yet. Backs the matrix's mode-edit/remove menu
+   * (F4.2): a disabled "available" cell can still have a row (and a mode)
+   * from before it was toggled off.
+   */
+  findRoute: (
+    dataType: ManagedDataType,
+    direction: IntegrationPolicyDirection,
+    bridgeId: string
+  ) => { id: string; mode: IntegrationPolicyMode } | undefined;
 };
 
 const bridgeCellState = (

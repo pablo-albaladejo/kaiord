@@ -1,8 +1,8 @@
-import type { ManagedDataType } from "@kaiord/core";
-
 import type {
-  DataHubCell as Cell,
+  DataHubRemoveHandler,
   DataHubRow,
+  DataHubSetModeHandler,
+  DataHubToggleHandler,
 } from "../../../application/data-hub/build-data-hub-matrix";
 import type { IntegrationRegistryEntry } from "../../../integrations/integration-registry";
 import type { ConnectionRecord } from "../../../types/connection";
@@ -13,7 +13,9 @@ type Props = {
   rows: readonly DataHubRow[];
   integrations: readonly IntegrationRegistryEntry[];
   connections: ReadonlyMap<string, ConnectionRecord>;
-  onToggle: (dataType: ManagedDataType, bridgeId: string, cell: Cell) => void;
+  onToggle: DataHubToggleHandler;
+  onSetMode: DataHubSetModeHandler;
+  onRemove: DataHubRemoveHandler;
 };
 
 export const DataHubMatrix: React.FC<Props> = ({
@@ -21,6 +23,8 @@ export const DataHubMatrix: React.FC<Props> = ({
   integrations,
   connections,
   onToggle,
+  onSetMode,
+  onRemove,
 }) => (
   <div className="overflow-x-auto" data-testid="data-hub-matrix">
     <table className="w-full min-w-max border-collapse text-sm">
@@ -47,6 +51,8 @@ export const DataHubMatrix: React.FC<Props> = ({
             row={row}
             integrations={integrations}
             onToggle={onToggle}
+            onSetMode={onSetMode}
+            onRemove={onRemove}
           />
         ))}
       </tbody>

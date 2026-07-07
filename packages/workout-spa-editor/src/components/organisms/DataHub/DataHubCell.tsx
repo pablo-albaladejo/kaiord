@@ -1,14 +1,22 @@
 import type { ManagedDataType } from "@kaiord/core";
 
-import type { DataHubCell as Cell } from "../../../application/data-hub/build-data-hub-matrix";
+import type {
+  DataHubCell as Cell,
+  DataHubRemoveHandler,
+  DataHubSetModeHandler,
+  DataHubToggleHandler,
+} from "../../../application/data-hub/build-data-hub-matrix";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { CELL_VISUALS } from "./data-hub-cell-visuals";
+import { DataHubCellMenu } from "./DataHubCellMenu";
 
 type Props = {
   dataType: ManagedDataType;
   bridgeId: string | null;
   cell: Cell;
-  onToggle: (dataType: ManagedDataType, bridgeId: string, cell: Cell) => void;
+  onToggle: DataHubToggleHandler;
+  onSetMode: DataHubSetModeHandler;
+  onRemove: DataHubRemoveHandler;
 };
 
 const BASE =
@@ -19,6 +27,8 @@ export const DataHubCell: React.FC<Props> = ({
   bridgeId,
   cell,
   onToggle,
+  onSetMode,
+  onRemove,
 }) => {
   const visual = CELL_VISUALS[cell.state];
   if (cell.state === "na") return null;
@@ -35,21 +45,33 @@ export const DataHubCell: React.FC<Props> = ({
     </>
   );
 
+  const routeId = cell.routeId;
+
   if (visual.actionable && bridgeId)
     return (
-      <button
-        type="button"
-        aria-label={label}
-        title={label}
-        data-testid={testId}
-        data-state={cell.state}
-        onClick={() => {
-          void onToggle(dataType, bridgeId, cell);
-        }}
-        className={`${BASE} ${visual.className}`}
-      >
-        {body}
-      </button>
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          aria-label={label}
+          title={label}
+          data-testid={testId}
+          data-state={cell.state}
+          onClick={() => {
+            void onToggle(dataType, bridgeId, cell);
+          }}
+          className={`${BASE} ${visual.className}`}
+        >
+          {body}
+        </button>
+        {routeId && (
+          <DataHubCellMenu
+            testId={testId}
+            mode={cell.routeMode ?? "auto"}
+            onSetMode={(mode) => onSetMode(dataType, bridgeId, cell, mode)}
+            onRemove={() => onRemove(routeId)}
+          />
+        )}
+      </div>
     );
 
   return (
