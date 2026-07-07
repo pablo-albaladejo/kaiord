@@ -58,7 +58,8 @@ const resolvePriority = <T>(
 ): ResolveEffectiveSourceResult<T> => {
   for (let i = 0; i < order.length; i++) {
     const match = recordsForDay.find((r) => r.sourceBridgeId === order[i]);
-    if (match) return { mode: "priority", effective: match, usedFallback: i > 0 };
+    if (match)
+      return { mode: "priority", effective: match, usedFallback: i > 0 };
   }
   return { mode: "priority", effective: undefined, usedFallback: false };
 };
@@ -68,7 +69,11 @@ export const resolveEffectiveSource = async <T>(
   input: ResolveEffectiveSourceInput
 ): Promise<ResolveEffectiveSourceResult<T>> => {
   const { profileId, dataType, day } = input;
-  const recordsForDay = await deps.getRecordsForDay({ profileId, dataType, day });
+  const recordsForDay = await deps.getRecordsForDay({
+    profileId,
+    dataType,
+    day,
+  });
   const sourcePolicy = await deps.sourcePolicyRepo.findByProfileAndType({
     profileId,
     dataType,

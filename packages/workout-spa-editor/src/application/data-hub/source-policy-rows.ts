@@ -45,7 +45,11 @@ export const reorderSources = (
   const to = from + delta;
   if (from < 0 || to < 0 || to >= order.length) return [...order];
   const next = [...order];
-  [next[from], next[to]] = [next[to], next[from]];
+  const a = next[from];
+  const b = next[to];
+  if (a === undefined || b === undefined) return [...order];
+  next[from] = b;
+  next[to] = a;
   return next;
 };
 

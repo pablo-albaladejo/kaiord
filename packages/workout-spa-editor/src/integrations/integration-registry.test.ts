@@ -70,7 +70,11 @@ describe("INTEGRATION_REGISTRY", () => {
 describe("KNOWN_BRIDGE_IDS", () => {
   it("should include every bridge-mechanism integration, including whoop", () => {
     // Arrange
-    const expectedBridgeIds = ["garmin-bridge", "whoop-bridge", "train2go-bridge"];
+    const expectedBridgeIds = [
+      "garmin-bridge",
+      "whoop-bridge",
+      "train2go-bridge",
+    ];
 
     // Act
 

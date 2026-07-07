@@ -123,7 +123,9 @@ describe("resolveEffectiveSource — priority mode", () => {
 
   it("should fall back to the next source in order when the preferred one has no record that day", async () => {
     // Arrange
-    const records = [{ sourceBridgeId: "garmin-bridge", record: { score: 75 } }];
+    const records = [
+      { sourceBridgeId: "garmin-bridge", record: { score: 75 } },
+    ];
     const deps = makeDeps(
       sourcePolicy("priority", ["whoop-bridge", "garmin-bridge"]),
       [importPolicy("whoop-bridge", true), importPolicy("garmin-bridge", true)],
@@ -178,7 +180,10 @@ describe("resolveEffectiveSource — priority mode", () => {
     ];
     const deps = makeDeps(
       sourcePolicy("priority", ["whoop-bridge", "garmin-bridge"]),
-      [importPolicy("whoop-bridge", false), importPolicy("garmin-bridge", true)],
+      [
+        importPolicy("whoop-bridge", false),
+        importPolicy("garmin-bridge", true),
+      ],
       records
     );
 

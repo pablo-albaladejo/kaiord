@@ -17,7 +17,11 @@ export function pickEffectiveHealthRecord<T>(
   result: ResolveEffectiveSourceResult<T> | undefined
 ): EffectiveHealthPick<T> {
   if (!result) {
-    return { record: undefined, sourceBridgeId: undefined, usedFallback: false };
+    return {
+      record: undefined,
+      sourceBridgeId: undefined,
+      usedFallback: false,
+    };
   }
   if (result.mode === "priority") {
     return {

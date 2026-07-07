@@ -9,13 +9,26 @@
  */
 import type { ManagedDataType } from "@kaiord/core";
 
-import type { HealthRecord } from "../../ports/health-record-repository";
+import type {
+  HealthRecord,
+  HealthRecordRepository,
+} from "../../ports/health-record-repository";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { SourcedRecord } from "./resolve-effective-source.use-case";
 
 const UNKNOWN_SOURCE_BRIDGE_ID = "unknown";
 
-const HEALTH_REPO_KEY_FOR_TYPE: Partial<Record<ManagedDataType, keyof PersistencePort>> = {
+type HealthMetricRepoKey =
+  | "healthWeight"
+  | "healthSleep"
+  | "healthHrv"
+  | "healthDaily"
+  | "healthBodyComposition"
+  | "healthStress";
+
+const HEALTH_REPO_KEY_FOR_TYPE: Partial<
+  Record<ManagedDataType, HealthMetricRepoKey>
+> = {
   weight: "healthWeight",
   sleep: "healthSleep",
   hrv: "healthHrv",
@@ -30,13 +43,15 @@ export const getHealthRecordsForDay = async <T>(
 ): Promise<SourcedRecord<T>[]> => {
   const repoKey = HEALTH_REPO_KEY_FOR_TYPE[input.dataType];
   if (!repoKey) return [];
-  const repo = persistence[repoKey] as {
-    getByProfileAndDateRange: (
-      profileId: string,
-      start: string,
-      end: string
-    ) => Promise<HealthRecord<T>[]>;
-  };
+  // repoKey is narrowed to the six health-metric keys (not `keyof
+  // PersistencePort` at large), so this indexed access is exactly the
+  // union of the six typed HealthRecordRepository<X> members — each
+  // structurally identical to HealthRecordRepository<HealthRecord<T>>,
+  // just parameterized on this call's own T. The double-assertion is
+  // required because T is unconstrained, not because the shapes differ.
+  const repo = persistence[repoKey] as unknown as HealthRecordRepository<
+    HealthRecord<T>
+  >;
   const rows = await repo.getByProfileAndDateRange(
     input.profileId,
     input.day,

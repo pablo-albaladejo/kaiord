@@ -33,7 +33,12 @@ export const useDataHubRouteEditor = (
   profileId: string | null
 ): DataHubRouteEditor => {
   const setMode = useCallback(
-    async (dataType, direction, bridgeId, mode) => {
+    async (
+      dataType: ManagedDataType,
+      direction: IntegrationPolicyDirection,
+      bridgeId: string,
+      mode: IntegrationPolicyMode
+    ) => {
       if (!profileId) return;
       const existing = await policyRepo.findByNaturalKey({
         profileId,

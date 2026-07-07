@@ -71,13 +71,16 @@ export function useTodayData(focusDate: Date, realTodayIso: string): TodayData {
   const { planned, weekSummary, coachingByDay, expandActivity } =
     useTodayPlannedBuckets(profileId, dayIsos, focusIso, weekWorkouts, profile);
   const isFocusToday = focusIso === realTodayIso;
+  // hrvPick/sleepPick already carry {sourceBridgeId, usedFallback} (plus
+  // `record`, structurally ignored here) — passed straight through as the
+  // source-meta args, no need to reshape into ReadinessMetricSource.
   const readiness = buildReadinessModel(
     hrvPick.record,
     sleepPick.record,
     stressRecords?.map((record) => record.krd),
     isFocusToday,
-    { sourceBridgeId: hrvPick.sourceBridgeId, usedFallback: hrvPick.usedFallback },
-    { sourceBridgeId: sleepPick.sourceBridgeId, usedFallback: sleepPick.usedFallback }
+    hrvPick,
+    sleepPick
   );
 
   return {

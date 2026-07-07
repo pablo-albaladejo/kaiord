@@ -21,21 +21,17 @@ export const useSourcePolicies = (
   profileId: string | null
 ): SourcePolicyRow[] => {
   const { byDataType } = useDataFlows(profileId ?? "");
-  const policies = useLiveQuery<DataTypeSourcePolicy[]>(
-    async () => {
-      if (!profileId) return EMPTY;
-      return db
-        .table<DataTypeSourcePolicy>("dataTypeSourcePolicy")
-        .where("profileId")
-        .equals(profileId)
-        .toArray();
-    },
-    [profileId],
-    EMPTY
-  );
+  const policies = useLiveQuery(async (): Promise<DataTypeSourcePolicy[]> => {
+    if (!profileId) return EMPTY;
+    return db
+      .table<DataTypeSourcePolicy>("dataTypeSourcePolicy")
+      .where("profileId")
+      .equals(profileId)
+      .toArray();
+  }, [profileId]);
 
   return useMemo(
-    () => buildSourcePolicyRows(byDataType, policies),
+    () => buildSourcePolicyRows(byDataType, policies ?? EMPTY),
     [byDataType, policies]
   );
 };

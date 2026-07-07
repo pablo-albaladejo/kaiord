@@ -19,7 +19,11 @@ const repo = createDexieDataTypeSourcePolicyRepository(db);
 
 export type SourcePolicyEditor = {
   setMode: (row: SourcePolicyRow, mode: DataTypeSourceMode) => Promise<void>;
-  move: (row: SourcePolicyRow, bridgeId: string, delta: number) => Promise<void>;
+  move: (
+    row: SourcePolicyRow,
+    bridgeId: string,
+    delta: number
+  ) => Promise<void>;
 };
 
 export const useSourcePolicyEditor = (

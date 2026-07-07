@@ -25,7 +25,9 @@ function readManifestCapabilities(bridgePackage: string): readonly string[] {
   );
   const match = /capabilities:\s*(\[[^\]]*\])/.exec(source);
   if (!match) {
-    throw new Error(`No BRIDGE_MANIFEST.capabilities found in ${bridgePackage}`);
+    throw new Error(
+      `No BRIDGE_MANIFEST.capabilities found in ${bridgePackage}`
+    );
   }
   return JSON.parse(match[1]) as string[];
 }

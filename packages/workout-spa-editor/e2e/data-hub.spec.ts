@@ -22,8 +22,7 @@ import {
 
 const PROFILE_ID = "00000000-0000-4000-8000-0000000000d4";
 const DATA_HUB_PATH = "/settings/data-hub";
-const PLANNED_TRAIN2GO_IMPORT =
-  "data-hub-cell-planned-session-train2go-import";
+const PLANNED_TRAIN2GO_IMPORT = "data-hub-cell-planned-session-train2go-import";
 
 type DexieDb = {
   table: (n: string) => { put: (r: unknown) => Promise<void> };

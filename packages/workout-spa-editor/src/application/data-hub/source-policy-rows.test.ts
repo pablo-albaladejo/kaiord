@@ -29,7 +29,10 @@ const flows = (imports: IntegrationPolicy[]): DataFlowsByType =>
 describe("buildSourcePolicyRows", () => {
   it("should skip a data type with fewer than two enabled sources", () => {
     // Arrange
-    const byDataType = flows([pol("garmin-bridge", true), pol("whoop-bridge", false)]);
+    const byDataType = flows([
+      pol("garmin-bridge", true),
+      pol("whoop-bridge", false),
+    ]);
 
     // Act
     const rows = buildSourcePolicyRows(byDataType, []);
@@ -40,7 +43,10 @@ describe("buildSourcePolicyRows", () => {
 
   it("should include a two-source type defaulting to union", () => {
     // Arrange
-    const byDataType = flows([pol("garmin-bridge", true), pol("whoop-bridge", true)]);
+    const byDataType = flows([
+      pol("garmin-bridge", true),
+      pol("whoop-bridge", true),
+    ]);
 
     // Act
     const rows = buildSourcePolicyRows(byDataType, []);
@@ -58,7 +64,12 @@ describe("buildSourcePolicyRows", () => {
       pol("whoop-bridge", true),
     ]);
     const saved: DataTypeSourcePolicy[] = [
-      { profileId: PID, dataType: "sleep", mode: "priority", sourceOrder: ["whoop-bridge"] },
+      {
+        profileId: PID,
+        dataType: "sleep",
+        mode: "priority",
+        sourceOrder: ["whoop-bridge"],
+      },
     ];
 
     // Act

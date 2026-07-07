@@ -14,7 +14,12 @@ describe("getHealthRecordsForDay", () => {
       id: "row-1",
       profileId: PROFILE_ID,
       date: DAY,
-      krd: { kind: "hrv", version: "2.0", rMSSD: 45, measurementWindow: "spot" },
+      krd: {
+        kind: "hrv",
+        version: "2.0",
+        rMSSD: 45,
+        measurementWindow: "spot",
+      },
       sourceBridgeId: "whoop-bridge",
       externalId: "ext-1",
     });
@@ -30,7 +35,12 @@ describe("getHealthRecordsForDay", () => {
     expect(result).toEqual([
       {
         sourceBridgeId: "whoop-bridge",
-        record: { kind: "hrv", version: "2.0", rMSSD: 45, measurementWindow: "spot" },
+        record: {
+          kind: "hrv",
+          version: "2.0",
+          rMSSD: 45,
+          measurementWindow: "spot",
+        },
       },
     ]);
   });
@@ -42,7 +52,12 @@ describe("getHealthRecordsForDay", () => {
       id: "row-1",
       profileId: PROFILE_ID,
       date: DAY,
-      krd: { kind: "hrv", version: "2.0", rMSSD: 45, measurementWindow: "spot" },
+      krd: {
+        kind: "hrv",
+        version: "2.0",
+        rMSSD: 45,
+        measurementWindow: "spot",
+      },
     });
 
     // Act
