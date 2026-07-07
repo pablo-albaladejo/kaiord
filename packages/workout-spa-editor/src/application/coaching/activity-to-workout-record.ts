@@ -7,10 +7,26 @@
  * the render components stay unchanged and one event is stored once. Only
  * source-only activities (no twin, `linkedWorkoutId === null`) are projected;
  * historical twins still render through their own WorkoutRecord.
+ *
+ * The projected record's `id` lives in the `activities` table, not
+ * `workouts` — it was never persisted as a workout, so it cannot be
+ * opened in the editor (which reads `workouts` by id) nor rescheduled
+ * (`rescheduleWorkout` reads the same table). `projectedFromActivity`
+ * marks that, so callers can route clicks/drag away from those flows
+ * without changing `WorkoutRecord`'s own persisted schema.
  */
 import type { ActivityRecord } from "../../types/activity-record";
 import type { WorkoutRaw } from "../../types/calendar-fragments";
 import type { WorkoutRecord } from "../../types/calendar-record";
+
+export type ProjectedWorkoutRecord = WorkoutRecord & {
+  readonly projectedFromActivity: true;
+};
+
+export const isProjectedWorkoutRecord = (
+  workout: WorkoutRecord
+): workout is ProjectedWorkoutRecord =>
+  (workout as Partial<ProjectedWorkoutRecord>).projectedFromActivity === true;
 
 const buildRaw = (activity: ActivityRecord): WorkoutRaw => ({
   title: activity.sport,
@@ -30,7 +46,7 @@ const buildRaw = (activity: ActivityRecord): WorkoutRaw => ({
 
 export const activityToWorkoutRecord = (
   activity: ActivityRecord
-): WorkoutRecord => ({
+): ProjectedWorkoutRecord => ({
   id: activity.id,
   profileId: activity.profileId,
   date: activity.date,
@@ -50,4 +66,5 @@ export const activityToWorkoutRecord = (
   createdAt: activity.createdAt,
   modifiedAt: null,
   updatedAt: activity.createdAt,
+  projectedFromActivity: true,
 });

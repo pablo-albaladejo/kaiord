@@ -14,6 +14,7 @@
 
 import type { PointerEvent } from "react";
 
+import { isProjectedWorkoutRecord } from "../../../application/coaching/activity-to-workout-record";
 import type { MatchedSessionWithMetadata } from "../../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
@@ -59,7 +60,10 @@ export function renderDayCards(buckets: DayCardBuckets) {
         />
       ))}
       {buckets.soloActuals.map((w) =>
-        bindCardDrag ? (
+        // Projected activities have no WorkoutRecord to reschedule (F5
+        // gate A1) — never wire drag for them, so there is no failed
+        // persistence call to catch/toast in the first place.
+        bindCardDrag && !isProjectedWorkoutRecord(w) ? (
           <div key={w.id} onPointerDown={bindCardDrag(w.id)}>
             <WorkoutCard workout={w} onClick={buckets.onWorkoutClick} />
           </div>
