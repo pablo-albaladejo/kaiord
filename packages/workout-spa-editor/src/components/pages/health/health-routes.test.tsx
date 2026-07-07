@@ -106,4 +106,16 @@ describe("Health Hub routes (§8.1)", () => {
       expect(screen.getByTestId("health-activity")).toBeInTheDocument();
     });
   });
+
+  it("should mount LabEntryPage for /health/labs", async () => {
+    // Arrange
+    renderAtPath("/health/labs");
+
+    // Act
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByTestId("health-labs")).toBeInTheDocument();
+    });
+  });
 });

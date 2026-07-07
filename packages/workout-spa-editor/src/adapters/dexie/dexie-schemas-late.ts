@@ -66,3 +66,27 @@ export const buildCoreV30 = (prev: Stores): Stores => ({
   ...prev,
   dataTypeSourcePolicy: "[profileId+dataType], profileId",
 });
+
+// v31 — additive lab-analytics stores (health-labs, F1). `labReports` keys on
+// `id` with `[profileId+date]` (report listing by date; also drives the profile
+// cascade). `labValues` keys on `id` with `[profileId+parameterKey+date]` —
+// which serves BOTH the per-parameter series and the latest-per-parameter
+// prefix-scan — plus `[profileId+reportId]` (all values of one report). `date`
+// + `profileId` are denormalized onto each LabValue. Both tables carry
+// provenance mirror columns and profileId-leading indexes, so
+// `isPerProfileTable` auto-discovers them for the profile-delete cascade.
+// Auto-created empty on upgrade — no data transform.
+export const buildCoreV31 = (prev: Stores): Stores => ({
+  ...prev,
+  labReports: "id, [profileId+date]",
+  labValues: "id, [profileId+parameterKey+date], [profileId+reportId]",
+});
+
+// Assemble the latest schema pair (v30 → v31) from the v27 base so
+// `dexie-schemas.ts` composes them in one spread and stays under its line cap.
+export const buildCoreV30AndV31 = (
+  prev: Stores
+): { v30: Stores; v31: Stores } => {
+  const v30 = buildCoreV30(prev);
+  return { v30, v31: buildCoreV31(v30) };
+};

@@ -32,6 +32,11 @@ export const userPreferencesSchema = z.object({
   units: unitsSchema.optional(),
   /** User intent to enable browser notifications; absent defaults to off. */
   notificationsEnabled: z.boolean().optional(),
+  /**
+   * Parameter keys pinned to the F5 labs dashboard; absent means none
+   * pinned yet. Optional and unindexed — no Dexie version bump (OQ2/S3).
+   */
+  labDashboardParams: z.array(z.string()).optional(),
   updatedAt: z.iso.datetime(),
 });
 

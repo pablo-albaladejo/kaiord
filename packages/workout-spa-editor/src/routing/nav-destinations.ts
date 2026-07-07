@@ -82,6 +82,7 @@ const NAV_ROWS: readonly NavRow[] = [
     true,
   ],
   ["trends", "/health", "Trends", "Open wellness trends", "trend", true, false],
+  ["labs", "/health/labs", "Labs", "Open lab analytics", "labs", true, false],
   ["chat", "/chat", "Chat", "Open chat assistant", "chat", true, false],
   ["new", "/workout/new", "New workout", undefined, "plus", true, false],
   ["settings", "/settings", "Settings", "Open settings", "gear", true, false],

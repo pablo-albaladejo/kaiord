@@ -6,6 +6,8 @@
  * collects every repo's underlying Map plus the profile active-id ref.
  */
 
+import type { LabReport, LabValue } from "@kaiord/core";
+
 import type { AiModelBinding } from "../types/ai-model-binding";
 import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
@@ -57,6 +59,8 @@ export type Stores = {
   chatConversations: Map<string, ChatConversationRecord>;
   aiModelBindings: Map<string, AiModelBinding>;
   tombstones: Map<string, Tombstone>;
+  labReports: Map<string, LabReport>;
+  labValues: Map<string, LabValue>;
 };
 
 export type Snapshot = {
@@ -96,6 +100,8 @@ export const captureSnapshot = (
   chatConversations: new Map(stores.chatConversations),
   aiModelBindings: new Map(stores.aiModelBindings),
   tombstones: new Map(stores.tombstones),
+  labReports: new Map(stores.labReports),
+  labValues: new Map(stores.labValues),
   profileActiveId: activeIdRef.current,
   aiCustomPrompt: customPromptRef.current,
 });

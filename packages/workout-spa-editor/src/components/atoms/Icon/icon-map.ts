@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Clock,
   Flame,
+  FlaskConical,
   Footprints,
   Heart,
   LayoutGrid,
@@ -76,13 +77,7 @@ export const ICON_MAP = {
   upload: Upload,
   nutrition: Utensils,
   chat: MessageCircle,
+  labs: FlaskConical,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICON_MAP;
-
-/** Maps a sport key to its redesign icon name. */
-export const SPORT_ICON_NAME = {
-  cycling: "bike",
-  running: "run",
-  swimming: "swim",
-} as const satisfies Record<string, IconName>;
