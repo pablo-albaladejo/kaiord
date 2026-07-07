@@ -26,8 +26,10 @@ export function useDataFlowsAdd({
   discoveredBridges,
   onClose,
 }: Params) {
-  const eligible = eligibleBridgeIds(dataType, direction, (bridgeId) =>
-    bridgeDiscovery.getCapabilities(bridgeId) ?? []
+  const eligible = eligibleBridgeIds(
+    dataType,
+    direction,
+    (bridgeId) => bridgeDiscovery.getCapabilities(bridgeId) ?? []
   );
   const [bridgeId, setBridgeId] = useState<string>(eligible[0] ?? "");
   const [mode, setMode] = useState<"manual" | "auto">("manual");

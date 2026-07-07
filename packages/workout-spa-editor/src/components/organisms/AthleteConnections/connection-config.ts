@@ -20,12 +20,13 @@ export type ConnectionConfig = {
 // derive the flow list straight from MANAGED_DATA_REGISTRY intersected
 // with the connected bridge's announced capabilities — see
 // `deriveConnectionFlows`.
-export const CONNECTIONS: readonly ConnectionConfig[] = INTEGRATION_REGISTRY.filter(
-  (entry) => entry.mechanism !== "manual"
-).map((entry) => ({
-  id: entry.id,
-  name: entry.name,
-  mark: entry.mark,
-  bridgeId: entry.bridgeId,
-  mechanism: entry.mechanism,
-}));
+export const CONNECTIONS: readonly ConnectionConfig[] =
+  INTEGRATION_REGISTRY.filter((entry) => entry.mechanism !== "manual").map(
+    (entry) => ({
+      id: entry.id,
+      name: entry.name,
+      mark: entry.mark,
+      bridgeId: entry.bridgeId,
+      mechanism: entry.mechanism,
+    })
+  );
