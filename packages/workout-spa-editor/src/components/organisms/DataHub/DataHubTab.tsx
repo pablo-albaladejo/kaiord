@@ -5,6 +5,7 @@ import { useConnectionStatus } from "../../../hooks/use-connection-status";
 import { INTEGRATION_REGISTRY } from "../../../integrations/integration-registry";
 import { DataHubLegend } from "./DataHubLegend";
 import { DataHubMatrix } from "./DataHubMatrix";
+import { DataHubSourcePriority } from "./DataHubSourcePriority";
 
 export const DataHubTab: React.FC = () => {
   const active = useActiveProfileLive();
@@ -36,6 +37,7 @@ export const DataHubTab: React.FC = () => {
         onToggle={onToggle}
       />
       <DataHubLegend />
+      <DataHubSourcePriority profileId={profileId} />
     </div>
   );
 };
