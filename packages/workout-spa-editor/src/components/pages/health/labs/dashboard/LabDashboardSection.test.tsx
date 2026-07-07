@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 
 import type { LabValue } from "@kaiord/core";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -132,9 +132,11 @@ describe("LabDashboardSection", () => {
 
     // Assert
     const grid = await screen.findByTestId("lab-dashboard-grid");
-    expect(
-      within(grid).getAllByTestId("lab-parameter-chart-card")
-    ).toHaveLength(items.length);
+    await waitFor(() =>
+      expect(
+        within(grid).getAllByTestId("lab-parameter-chart-card")
+      ).toHaveLength(items.length)
+    );
   });
 
   it("should remove a chart card when its parameter is unpinned", async () => {
