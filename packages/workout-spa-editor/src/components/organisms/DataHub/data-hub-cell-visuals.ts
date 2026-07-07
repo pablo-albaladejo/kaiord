@@ -24,12 +24,6 @@ export const CELL_VISUALS: Record<DataHubCellState, CellVisual> = {
     className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
     actionable: true,
   },
-  "not-operational": {
-    label: "Offline",
-    className:
-      "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-    actionable: false,
-  },
   "not-connected": {
     label: "Connect",
     className:

@@ -4,7 +4,6 @@ import { CELL_VISUALS } from "./data-hub-cell-visuals";
 const LEGEND: ReadonlyArray<{ state: DataHubCellState; hint: string }> = [
   { state: "active", hint: "Syncing — click to turn off" },
   { state: "available", hint: "Ready — click to turn on" },
-  { state: "not-operational", hint: "Connected, but the extension is offline" },
   { state: "not-connected", hint: "Connect this integration first" },
   { state: "manual", hint: "Entered by hand in the app" },
   { state: "aspirational", hint: "Not supported yet" },

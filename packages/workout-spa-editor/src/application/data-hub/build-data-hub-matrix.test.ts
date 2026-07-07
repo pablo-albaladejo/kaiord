@@ -109,22 +109,24 @@ describe("buildDataHubMatrix", () => {
     );
   });
 
-  it("should read not-connected from the connection signal, not policies", () => {
+  it("should read a bridge as not-connected from discovery, not policies", () => {
     // Arrange
-    const s = signals({ isRouteEnabled: () => true });
+    // An enabled policy must NOT make a cell active while the bridge is offline.
+    const s = signals({ isRouteEnabled: () => true, isBridgeOnline: () => false });
 
     // Act
     const rows = buildDataHubMatrix(INTEGRATIONS, s);
 
     // Assert
-    // Even with an enabled policy, no connection ⇒ not-connected.
     expect(cell(rows, "workout", "garmin", "export")?.state).toBe(
       "not-connected"
     );
   });
 
-  it("should mark a linked-but-offline bridge not-operational", () => {
+  it("should ignore the connections store for a bridge cell", () => {
     // Arrange
+    // A connections-store row (isConnected) is irrelevant to bridges — only
+    // discovery (isBridgeOnline) counts, so it stays not-connected.
     const s = signals({ isConnected: () => true, isBridgeOnline: () => false });
 
     // Act
@@ -132,15 +134,14 @@ describe("buildDataHubMatrix", () => {
 
     // Assert
     expect(cell(rows, "workout", "garmin", "export")?.state).toBe(
-      "not-operational"
+      "not-connected"
     );
   });
 
-  it("should mark an eligible connected bridge available without a policy", () => {
+  it("should mark an eligible online bridge available without a policy", () => {
     // Arrange
     const s = signals({
-      isConnected: (id) => id === "garmin",
-      isBridgeOnline: () => true,
+      isBridgeOnline: (b) => b === "garmin-bridge",
       bridgeAnnounces: (b, t) =>
         b === "garmin-bridge" && t === "write:workouts",
     });
@@ -155,8 +156,7 @@ describe("buildDataHubMatrix", () => {
   it("should mark an enabled route active and surface its freshness", () => {
     // Arrange
     const s = signals({
-      isConnected: (id) => id === "garmin",
-      isBridgeOnline: () => true,
+      isBridgeOnline: (b) => b === "garmin-bridge",
       bridgeAnnounces: (b, t) =>
         b === "garmin-bridge" && t === "write:workouts",
       isRouteEnabled: (dt, dir, b) =>
@@ -174,11 +174,10 @@ describe("buildDataHubMatrix", () => {
     expect(c?.lastSyncedAt).toBe("2026-05-01T10:00:00.000Z");
   });
 
-  it("should mark a connected bridge n/a for a capability it never announces", () => {
+  it("should mark an online bridge n/a for a capability it never announces", () => {
     // Arrange
-    // garmin is connected + online but never announces the flow token.
+    // garmin is online but never announces the planned-session import token.
     const s = signals({
-      isConnected: () => true,
       isBridgeOnline: () => true,
       bridgeAnnounces: () => false,
     });
@@ -188,5 +187,21 @@ describe("buildDataHubMatrix", () => {
 
     // Assert
     expect(cell(rows, "planned-session", "garmin", "import")?.state).toBe("na");
+  });
+
+  it("should surface an api-key provider state from the connections store", () => {
+    // Arrange
+    const linked = signals({ isConnected: (id) => id === "intervals" });
+    const unlinked = signals();
+
+    // Act
+    const linkedRows = buildDataHubMatrix(INTEGRATIONS, linked);
+    const unlinkedRows = buildDataHubMatrix(INTEGRATIONS, unlinked);
+
+    // Assert
+    expect(cell(linkedRows, "workout", "intervals", "import")?.state).toBe("na");
+    expect(cell(unlinkedRows, "workout", "intervals", "import")?.state).toBe(
+      "not-connected"
+    );
   });
 });

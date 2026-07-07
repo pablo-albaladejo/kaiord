@@ -12,16 +12,19 @@ import type { IntegrationPolicyDirection } from "../../types/integration-policy"
 export type DataHubCellState =
   | "active"
   | "available"
-  | "not-operational"
   | "not-connected"
   | "aspirational"
   | "manual"
   | "na";
 
 export type DataHubMatrixSignals = {
-  /** Real provider linked (v24 connections store, status="connected"). */
+  /** api-key provider linked (v24 connections store, status="connected"). */
   isConnected: (integrationId: string) => boolean;
-  /** Bridge extension currently discovered/announcing anything. */
+  /**
+   * Bridge extension currently discovered + announcing (its live session).
+   * This — not the connections store — is a bridge's "connected" signal,
+   * matching AthleteConnections: bridges never sit in the connections store.
+   */
   isBridgeOnline: (bridgeId: string) => boolean;
   /** Bridge currently announces the wire token for this flow. */
   bridgeAnnounces: (bridgeId: string, token: string) => boolean;
@@ -41,10 +44,11 @@ const bridgeCellState = (
   dataType: ManagedDataType,
   direction: IntegrationPolicyDirection
 ): DataHubCellState => {
-  if (!s.isConnected(entry.id)) return "not-connected";
   const bridgeId = entry.bridgeId;
   if (bridgeId === null) return "na";
-  if (!s.isBridgeOnline(bridgeId)) return "not-operational";
+  // A bridge is "connected" only while its extension is discovered — read
+  // discovery, never the connections store (which holds no bridge rows).
+  if (!s.isBridgeOnline(bridgeId)) return "not-connected";
   if (!s.bridgeAnnounces(bridgeId, token)) return "na";
   return s.isRouteEnabled(dataType, direction, bridgeId)
     ? "active"
