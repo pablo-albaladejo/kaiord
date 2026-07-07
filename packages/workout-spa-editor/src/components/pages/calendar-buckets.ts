@@ -1,4 +1,6 @@
+import { activityToWorkoutRecord } from "../../application/coaching/activity-to-workout-record";
 import type { MatchedSessionWithMetadata as PageMatchedSession } from "../../hooks/use-matched-sessions";
+import type { ActivityRecord } from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 
@@ -6,8 +8,23 @@ export type BuildBucketsArgs = {
   days: string[];
   workoutsByDay: Record<string, WorkoutRecord[]>;
   coachingByDay: Record<string, CoachingActivity[]>;
+  /** Executed activities (v27) rendered natively; defaults to none. */
+  activitiesByDay?: Record<string, ActivityRecord[]>;
   matched: PageMatchedSession[];
 };
+
+/**
+ * Unmatched source-only activities (no twin WorkoutRecord), projected for the
+ * calendar's solo-actual lane. Twin activities are skipped — their own
+ * WorkoutRecord already renders. Matched activities are absorbed by the card.
+ */
+const soloActivityActuals = (
+  activities: ActivityRecord[],
+  matchedWorkoutIds: ReadonlySet<string>
+): WorkoutRecord[] =>
+  activities
+    .filter((a) => a.linkedWorkoutId === null && !matchedWorkoutIds.has(a.id))
+    .map(activityToWorkoutRecord);
 
 export type CalendarBuckets = {
   matchedByDay: Record<string, PageMatchedSession[]>;
@@ -32,6 +49,7 @@ export function buildCalendarBuckets({
   days,
   workoutsByDay,
   coachingByDay,
+  activitiesByDay = {},
   matched,
 }: BuildBucketsArgs): CalendarBuckets {
   const matchedActivityIds = new Set(matched.map((m) => m.activity.id));
@@ -48,9 +66,10 @@ export function buildCalendarBuckets({
     soloPlansByDay[day] = (coachingByDay[day] ?? []).filter(
       (a) => !matchedActivityIds.has(a.id)
     );
-    soloActualsByDay[day] = (workoutsByDay[day] ?? []).filter(
-      (w) => !matchedWorkoutIds.has(w.id)
-    );
+    soloActualsByDay[day] = [
+      ...(workoutsByDay[day] ?? []).filter((w) => !matchedWorkoutIds.has(w.id)),
+      ...soloActivityActuals(activitiesByDay[day] ?? [], matchedWorkoutIds),
+    ];
   }
   return { matchedByDay, soloPlansByDay, soloActualsByDay };
 }

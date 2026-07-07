@@ -2,12 +2,10 @@
  * Auto-match use case for the Train2Go three-slot grouping.
  *
  * For every existing `sessionMatch`, pick up executed activities on the same
- * `(profileId, date, canonical sport)` slot. The executed side is the UNION
- * of the v27 `activities` table and the legacy heuristic ("a workout whose
- * source is not train2go") — the latter still covers historical data and the
- * transitional dual-written WorkoutRecords. See `match-executed-refs` for how
- * an activity resolves to its renderable id and dedups against the legacy scan
- * (no double-match of one event).
+ * `(profileId, date, canonical sport)` slot. The executed side is the v27
+ * `activities` table — see `match-executed-refs` for how an activity resolves
+ * to its renderable id (twin WorkoutRecord id, or its own id when source-only).
+ * `workouts` supplies only the planned side (the match's structured workout).
  *
  * Pure: no IO, no clock — the caller supplies the week slice and the
  * `canonicalSport` function. Returns the per-match ids to append.
@@ -24,8 +22,9 @@ import {
 
 export type MatchExecutedWorkoutsInput = {
   sessionMatches: readonly SessionMatch[];
+  /** Planned side only — the structured workout each match points at. */
   workouts: readonly WorkoutRecord[];
-  /** Executed activities (v27); unioned with the legacy workout heuristic. */
+  /** Executed activities (v27) — the sole source of executed refs. */
   activities?: readonly ActivityRecord[];
   /** Returns the canonical sport key or `null` for "unknown — skip". */
   canonicalSport: CanonicalSport;
@@ -67,7 +66,6 @@ export const matchExecutedWorkouts = (
   input: MatchExecutedWorkoutsInput
 ): MatchExecutedWorkoutsAppend[] => {
   const refsByDate = indexExecutedRefsByDate(
-    input.workouts,
     input.activities ?? [],
     input.canonicalSport
   );

@@ -8,6 +8,7 @@ import { type ChatAgent, type ChatTool, createChatAgent } from "@kaiord/ai";
 import { buildChatSystemPrompt } from "../../application/chat/chat-system-prompt";
 import { buildChatTools } from "../../application/chat/tools/build-chat-tools";
 import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
+import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
 import {
   createLanguageModel,
   type ProviderCredential,
@@ -23,6 +24,7 @@ export type BuildChatAgentArgs = {
   provider: ProviderCredential;
   modelId: string;
   actions: ChatActionOps;
+  getMatrixSignals: () => Promise<DataHubMatrixSignals>;
   onTextDelta: (delta: string) => void;
 };
 
@@ -34,6 +36,7 @@ export const buildChatAgent = async (
     profileId: args.profileId,
     today: args.today,
     actions: args.actions,
+    getMatrixSignals: args.getMatrixSignals,
   });
   const model = await createLanguageModel(args.provider, args.modelId);
   const agent = createChatAgent({

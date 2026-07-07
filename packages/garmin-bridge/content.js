@@ -15,6 +15,12 @@ const FETCH_TIMEOUT_MS = 30000;
 const ALLOWED = [
   { method: "GET", pattern: /^\/workout-service\/workouts(\?.*)?$/ },
   { method: "POST", pattern: /^\/workout-service\/workout$/ },
+  // Read-only pull of the athlete's recent activities (F5). GET only —
+  // the executed-activity feed is never mutated through the bridge.
+  {
+    method: "GET",
+    pattern: /^\/activitylist-service\/activities\/search\/activities(\?.*)?$/,
+  },
 ];
 
 const isAllowed = (method, path) =>

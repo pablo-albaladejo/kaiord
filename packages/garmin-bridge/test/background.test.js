@@ -7,6 +7,8 @@ const {
   handleAction,
   getCsrfToken,
   checkSession,
+  listActivities,
+  fetchActivitiesWithBackoff,
   reinjectContentScripts,
   logSwallowed,
   TELEMETRY_KEY,
@@ -38,7 +40,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
 
@@ -82,6 +84,8 @@ describe("background.js", () => {
       "read:body",
       "read:sleep",
       "read:training-plan",
+      "read:training-zones",
+      "read:activities",
     ]);
     return (m) => {
       const errors = [];
@@ -241,7 +245,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
   });
@@ -292,7 +296,7 @@ describe("background.js", () => {
         id: "garmin-bridge",
         name: "Garmin Connect",
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
 
@@ -320,7 +324,7 @@ describe("background.js", () => {
           name: "Garmin Connect",
           version: pkg.version,
           protocolVersion: 1,
-          capabilities: ["write:workouts"],
+          capabilities: ["write:workouts", "read:activities"],
           csrfCaptured: true,
           gcApi: { ok: true, data: [{ workoutId: 1 }] },
         },
@@ -358,7 +362,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
 
@@ -441,6 +445,145 @@ describe("background.js", () => {
       const result = await handleAction({ action: "push", gcn });
 
       expect(result).toEqual({ workoutId: 123 });
+    });
+
+    it("routes the activities action to listActivities", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: [{ activityId: 5 }] })
+      );
+
+      const result = await handleAction({ action: "activities" });
+
+      expect(result).toEqual({
+        activities: [{ activityId: 5 }],
+        disabled: false,
+        throttled: false,
+      });
+    });
+  });
+
+  describe("listActivities", () => {
+    it("returns the raw feed and stamps the throttle timestamp on the happy path", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: [{ activityId: 111 }] })
+      );
+
+      const result = await listActivities();
+
+      expect(result).toEqual({
+        activities: [{ activityId: 111 }],
+        disabled: false,
+        throttled: false,
+      });
+      expect(chrome.storage.session.set).toHaveBeenCalledWith(
+        expect.objectContaining({ lastActivitiesFetchAt: expect.any(Number) })
+      );
+    });
+
+    it("requests the read-only activities search endpoint", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => {
+        expect(msg.method).toBe("GET");
+        expect(msg.path).toBe(
+          "/activitylist-service/activities/search/activities?start=0&limit=20"
+        );
+        cb({ ok: true, status: 200, data: [] });
+      });
+
+      await listActivities();
+
+      expect(chrome.tabs.sendMessage).toHaveBeenCalled();
+    });
+
+    it("short-circuits without fetching when the kill-switch flag is set", async () => {
+      await chrome.storage.local.set({ activitiesPullDisabled: true });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+
+      const result = await listActivities();
+
+      expect(result).toEqual({
+        activities: [],
+        disabled: true,
+        throttled: false,
+      });
+      expect(chrome.tabs.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it("throttles a second pull within the minimum interval", async () => {
+      await chrome.storage.session.set({ lastActivitiesFetchAt: Date.now() });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+
+      const result = await listActivities();
+
+      expect(result).toEqual({
+        activities: [],
+        disabled: false,
+        throttled: true,
+      });
+      expect(chrome.tabs.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it("returns an empty feed when the endpoint yields a non-array payload", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: null })
+      );
+
+      const result = await listActivities();
+
+      expect(result.activities).toEqual([]);
+    });
+
+    it("treats an overlapping pull as throttled without a second fetch", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      let release;
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => {
+        release = () => cb({ ok: true, status: 200, data: [] });
+      });
+
+      const first = listActivities();
+      const overlapping = await listActivities();
+      while (!release) await new Promise((r) => setTimeout(r, 0));
+      release();
+      const firstResult = await first;
+
+      expect(overlapping).toEqual({
+        activities: [],
+        disabled: false,
+        throttled: true,
+      });
+      expect(firstResult.throttled).toBe(false);
+      expect(chrome.tabs.sendMessage).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("fetchActivitiesWithBackoff", () => {
+    it("retries a transient failure then returns the payload", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      let calls = 0;
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => {
+        calls += 1;
+        if (calls === 1) cb({ ok: false, status: 503 });
+        else cb({ ok: true, status: 200, data: [{ activityId: 9 }] });
+      });
+
+      const result = await fetchActivitiesWithBackoff(3, 0);
+
+      expect(result).toEqual([{ activityId: 9 }]);
+      expect(calls).toBe(2);
+    });
+
+    it("throws after exhausting all attempts", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: false, status: 503 })
+      );
+
+      await expect(fetchActivitiesWithBackoff(2, 0)).rejects.toThrow(
+        "Activities pull failed: 503"
+      );
     });
   });
 

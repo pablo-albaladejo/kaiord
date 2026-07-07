@@ -26,7 +26,9 @@ type HealthMetricRepoKey =
   | "healthBodyComposition"
   | "healthStress";
 
-const HEALTH_REPO_KEY_FOR_TYPE: Partial<
+/** Exported so callers can test "does this data type have a health-table
+    reader?" (e.g. the chat hub tools) without duplicating this mapping. */
+export const HEALTH_REPO_KEY_FOR_TYPE: Partial<
   Record<ManagedDataType, HealthMetricRepoKey>
 > = {
   weight: "healthWeight",

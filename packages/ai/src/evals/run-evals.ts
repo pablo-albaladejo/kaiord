@@ -1,27 +1,13 @@
 #!/usr/bin/env tsx
 import { createTextToWorkout } from "../index";
 import { evaluateBenchmark } from "./assertions";
+import { loadAnthropicModel } from "./load-anthropic-model";
 import { createReport, formatReport } from "./reporter";
 import benchmarks from "./benchmarks.json";
 import type { Benchmark, EvalResult } from "./types";
-import type { LanguageModel } from "ai";
-
-const loadModel = async (): Promise<{
-  model: LanguageModel;
-  provider: string;
-  modelName: string;
-}> => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("Set ANTHROPIC_API_KEY env variable");
-
-  const { createAnthropic } = await import("@ai-sdk/anthropic");
-  const modelName = process.env.EVAL_MODEL ?? "claude-sonnet-4-5-20241022";
-  const provider = createAnthropic({ apiKey });
-  return { model: provider(modelName), provider: "anthropic", modelName };
-};
 
 const runEvals = async () => {
-  const { model, provider, modelName } = await loadModel();
+  const { model, provider, modelName } = await loadAnthropicModel();
   const textToWorkout = createTextToWorkout({ model });
 
   console.log(

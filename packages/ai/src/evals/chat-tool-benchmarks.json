@@ -1,0 +1,20 @@
+[
+  {
+    "id": "hub-read-planned-session-source",
+    "userText": "¿De dónde vienen mis planificaciones?",
+    "category": "read",
+    "expectedTool": "get_data_routes",
+    "expectedAnswerIncludes": ["train2go"]
+  },
+  {
+    "id": "hub-action-sleep-whoop-only",
+    "userText": "Lee el sueño solo de Whoop a partir de ahora.",
+    "category": "action",
+    "expectedTool": "set_data_route",
+    "expectedActionInput": {
+      "action": "set_source_policy",
+      "dataType": "sleep",
+      "mode": "priority"
+    }
+  }
+]

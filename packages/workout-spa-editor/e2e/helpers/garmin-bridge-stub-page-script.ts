@@ -13,6 +13,8 @@ export type GarminStubScriptArgs = {
   extensionId: string;
   bridgeId: string;
   caps: readonly string[];
+  /** Raw activity feed returned by the read-only `activities` action (F5). */
+  activities?: readonly unknown[];
 };
 
 export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
@@ -37,6 +39,12 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
     ping: () => wrap({ ...m, gcApi: { ok: true } }),
     push: () => wrap({ workoutId: "stub-garmin-id" }),
     list: () => wrap([]),
+    activities: () =>
+      wrap({
+        activities: args.activities ?? [],
+        disabled: false,
+        throttled: false,
+      }),
   };
   (window as unknown as Record<string, unknown>).chrome = {
     runtime: {

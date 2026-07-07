@@ -3,22 +3,25 @@ import { describe, expect, it, vi } from "vitest";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { buildChatTools } from "./build-chat-tools";
 
+const makeDeps = () => ({
+  persistence: createInMemoryPersistence(),
+  profileId: "p1",
+  today: "2026-06-13",
+  actions: {
+    syncCoaching: vi.fn(),
+    createWorkout: vi.fn(),
+    logHealthMetric: vi.fn(),
+    logIntake: vi.fn(),
+    pushToGarmin: vi.fn(),
+    setDataRoute: vi.fn(),
+  },
+  getMatrixSignals: vi.fn(),
+});
+
 describe("buildChatTools", () => {
   it("should assemble the full read + action tool registry", () => {
     // Arrange
-    const persistence = createInMemoryPersistence();
-    const deps = {
-      persistence,
-      profileId: "p1",
-      today: "2026-06-13",
-      actions: {
-        syncCoaching: vi.fn(),
-        createWorkout: vi.fn(),
-        logHealthMetric: vi.fn(),
-        logIntake: vi.fn(),
-        pushToGarmin: vi.fn(),
-      },
-    };
+    const deps = makeDeps();
 
     // Act
     const tools = buildChatTools(deps);
@@ -26,6 +29,7 @@ describe("buildChatTools", () => {
     // Assert
     expect(tools.map((t) => t.name).sort()).toEqual([
       "create_workout",
+      "get_data_routes",
       "get_today",
       "log_health_metric",
       "log_intake",
@@ -34,25 +38,14 @@ describe("buildChatTools", () => {
       "query_energy_balance",
       "query_health",
       "query_workouts",
+      "set_data_route",
       "sync_coaching",
     ]);
   });
 
-  it("should mark exactly the five action tools as requiring confirmation", () => {
+  it("should mark exactly the six action tools as requiring confirmation", () => {
     // Arrange
-    const persistence = createInMemoryPersistence();
-    const deps = {
-      persistence,
-      profileId: "p1",
-      today: "2026-06-13",
-      actions: {
-        syncCoaching: vi.fn(),
-        createWorkout: vi.fn(),
-        logHealthMetric: vi.fn(),
-        logIntake: vi.fn(),
-        pushToGarmin: vi.fn(),
-      },
-    };
+    const deps = makeDeps();
 
     // Act
     const confirmed = buildChatTools(deps)
@@ -66,6 +59,7 @@ describe("buildChatTools", () => {
       "log_health_metric",
       "log_intake",
       "push_to_garmin",
+      "set_data_route",
       "sync_coaching",
     ]);
   });

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Route, Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
@@ -7,7 +8,9 @@ import { db } from "../../adapters/dexie/dexie-database";
 import { CoachingRegistryProvider } from "../../contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
+import type { PersistencePort } from "../../ports/persistence-port";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
+import { buildSourceActivityRecord } from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { AppToastProvider } from "../providers/AppToastProvider";
 import CalendarPage from "./CalendarPage";
@@ -47,10 +50,13 @@ function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   };
 }
 
-function renderCalendar(path = "/calendar/2026-W15") {
-  const { hook } = memoryLocation({ path, record: true });
-  return render(
-    <PersistenceProvider persistence={createInMemoryPersistence()}>
+function renderCalendar(
+  path = "/calendar/2026-W15",
+  persistence: PersistencePort = createInMemoryPersistence()
+) {
+  const { hook, history } = memoryLocation({ path, record: true });
+  const rendered = render(
+    <PersistenceProvider persistence={persistence}>
       <GarminBridgeProvider>
         <CoachingRegistryProvider factories={[]}>
           <AppToastProvider>
@@ -64,6 +70,7 @@ function renderCalendar(path = "/calendar/2026-W15") {
       </GarminBridgeProvider>
     </PersistenceProvider>
   );
+  return { ...rendered, history };
 }
 
 describe("CalendarPage", () => {
@@ -210,5 +217,34 @@ describe("CalendarPage", () => {
     expect(screen.getByLabelText("Previous week")).toBeInTheDocument();
     expect(screen.getByLabelText("Next week")).toBeInTheDocument();
     expect(screen.getByText("Today")).toBeInTheDocument();
+  });
+
+  it("should preview a projected activity card instead of opening the editor", async () => {
+    // Arrange
+
+    const persistence = createInMemoryPersistence();
+    const activity = buildSourceActivityRecord({
+      profileId: PROFILE_ID,
+      date: "2026-04-06",
+      sport: "running",
+      sourceBridgeId: "garmin-bridge",
+      externalId: "ext-1",
+      durationSeconds: 1800,
+    });
+    await persistence.activities.upsertByExternalId(activity);
+    const user = userEvent.setup();
+
+    // Act
+
+    const { history } = renderCalendar("/calendar/2026-W15", persistence);
+    const card = await screen.findByTestId(`workout-card-${activity.id}`);
+    await user.click(card);
+
+    // Assert
+
+    expect(
+      await screen.findByTestId("executed-activity-dialog")
+    ).toBeInTheDocument();
+    expect(history.at(-1)).toBe("/calendar/2026-W15");
   });
 });

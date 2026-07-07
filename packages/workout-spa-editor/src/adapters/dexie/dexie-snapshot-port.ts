@@ -20,6 +20,14 @@ import type { KaiordDatabase } from "./dexie-database";
 
 const TOMBSTONES = "tombstones";
 // Device-local; never exported to / imported from a remote snapshot.
+//
+// The v27 `activities` store (executed sessions) is intentionally NOT listed
+// here: it rides the cloud snapshot like `workouts`, `plannedSessions`, and
+// the health stores — it is user fitness data that must sync cross-device. F5
+// retired the transitional dual-write (executed FIT drops used to also write a
+// twin WorkoutRecord, which syncs), so `activities` staying in the snapshot set
+// preserves cross-device parity. Snapshot-at-rest encryption of this fitness
+// data is tracked as a separate epic (Phase-4 security note, LOW).
 const DEVICE_LOCAL = new Set([
   TOMBSTONES,
   "connections",

@@ -7,6 +7,7 @@
 import { useCallback, useState } from "react";
 import { useLocation } from "wouter";
 
+import { isProjectedWorkoutRecord } from "../../../application/coaching/activity-to-workout-record";
 import { withOrigin } from "../../../routing/with-origin";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
@@ -36,7 +37,13 @@ export function useDailyEntryOpen(
     (workout: WorkoutRecord) => {
       // Clear the opposite selection so the two dialogs never overlap.
       setSelectedActivity(null);
-      if (workout.state === "raw" || workout.state === "skipped") {
+      // Projected activities have no id in `workouts` — preview in place
+      // instead of navigating to an editor that can never resolve them.
+      if (
+        workout.state === "raw" ||
+        workout.state === "skipped" ||
+        isProjectedWorkoutRecord(workout)
+      ) {
         setSelectedWorkout(workout);
       } else {
         setSelectedWorkout(null);

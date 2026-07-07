@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
+import { activityToWorkoutRecord } from "../../../application/coaching/activity-to-workout-record";
+import { buildSourceActivityRecord } from "../../../types/activity-record";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { useDailyEntryOpen } from "./use-daily-entry-open";
@@ -23,6 +25,17 @@ const ACTIVITY: CoachingActivity = {
 
 const workout = (o: Partial<WorkoutRecord>): WorkoutRecord =>
   ({ id: "w-1", date: FOCUS, sport: "cycling", ...o }) as WorkoutRecord;
+
+const projectedActivityWorkout = () =>
+  activityToWorkoutRecord(
+    buildSourceActivityRecord({
+      profileId: "p1",
+      date: FOCUS,
+      sport: "running",
+      sourceBridgeId: "garmin-bridge",
+      externalId: "ext-1",
+    })
+  );
 
 function setup() {
   const { hook, history } = memoryLocation({ path: "/daily", record: true });
@@ -71,6 +84,19 @@ describe("useDailyEntryOpen", () => {
 
     // Assert
     expect(history.at(-1)).toBe("/workout/w-1?from=daily&date=2026-06-10");
+  });
+
+  it("should preview a projected activity instead of navigating to the editor", () => {
+    // Arrange
+    const { result, history } = setup();
+    const activityWorkout = projectedActivityWorkout();
+
+    // Act
+    act(() => result.current.handleWorkoutClick(activityWorkout));
+
+    // Assert
+    expect(result.current.selectedWorkout?.id).toBe(activityWorkout.id);
+    expect(history.at(-1)).toBe("/daily");
   });
 
   it("should clear the opposite selection so dialogs never overlap", () => {

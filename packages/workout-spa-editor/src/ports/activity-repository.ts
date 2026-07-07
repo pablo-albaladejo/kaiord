@@ -14,4 +14,13 @@ export type ActivityRepository = {
    * Returns `{ created: false }` on a dedup hit (no second write).
    */
   upsertByExternalId: (record: ActivityRecord) => Promise<{ created: boolean }>;
+  /**
+   * All executed activities for a profile within an inclusive date range —
+   * backs the calendar's native activity render (`[profileId+date]` index).
+   */
+  getByProfileAndDateRange: (
+    profileId: string,
+    start: string,
+    end: string
+  ) => Promise<ActivityRecord[]>;
 };
