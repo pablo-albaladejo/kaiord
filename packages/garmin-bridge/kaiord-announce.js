@@ -19,7 +19,7 @@
 const BRIDGE_ID = "garmin-bridge";
 const BRIDGE_NAME = "Garmin Connect";
 const PROTOCOL_VERSION = 1;
-const CAPABILITIES = ["write:workouts"];
+const CAPABILITIES = ["write:workouts", "read:activities"];
 
 const isContextValid = () => {
   try {

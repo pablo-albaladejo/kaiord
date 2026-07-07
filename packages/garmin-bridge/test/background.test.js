@@ -38,7 +38,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
 
@@ -82,6 +82,8 @@ describe("background.js", () => {
       "read:body",
       "read:sleep",
       "read:training-plan",
+      "read:training-zones",
+      "read:activities",
     ]);
     return (m) => {
       const errors = [];
@@ -241,7 +243,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
   });
@@ -292,7 +294,7 @@ describe("background.js", () => {
         id: "garmin-bridge",
         name: "Garmin Connect",
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
 
@@ -320,7 +322,7 @@ describe("background.js", () => {
           name: "Garmin Connect",
           version: pkg.version,
           protocolVersion: 1,
-          capabilities: ["write:workouts"],
+          capabilities: ["write:workouts", "read:activities"],
           csrfCaptured: true,
           gcApi: { ok: true, data: [{ workoutId: 1 }] },
         },
@@ -358,7 +360,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts"],
+        capabilities: ["write:workouts", "read:activities"],
       });
     });
 

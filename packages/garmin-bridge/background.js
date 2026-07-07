@@ -14,7 +14,7 @@ const BRIDGE_MANIFEST = {
   name: "Garmin Connect",
   version: "7.2.0",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["write:workouts"],
+  capabilities: ["write:workouts", "read:activities"],
 };
 
 // ── Swallowed-error telemetry ──
