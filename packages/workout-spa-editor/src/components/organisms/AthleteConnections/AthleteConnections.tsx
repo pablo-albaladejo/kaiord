@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { useConnectionStatus } from "../../../hooks/use-connection-status";
 import { useDiscoveredBridges } from "../../../hooks/use-discovered-bridges";
 import { SectionHead } from "../../molecules/SectionHead";
@@ -25,7 +23,6 @@ export function AthleteConnections({ profileId }: AthleteConnectionsProps) {
   const bridges = useDiscoveredBridges();
   const { byDataType } = useDataFlows(profileId);
   const status = useConnectionStatus(profileId);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const bridgeIds = new Set(bridges.map((bridge) => bridge.bridgeId));
 
   const renderRow = (config: ConnectionConfig) => {
@@ -48,12 +45,6 @@ export function AthleteConnections({ profileId }: AthleteConnectionsProps) {
           config={config}
           bridgeId={config.bridgeId}
           byDataType={byDataType}
-          expanded={expandedId === config.id}
-          onToggleExpanded={() =>
-            setExpandedId((current) =>
-              current === config.id ? null : config.id
-            )
-          }
         />
       );
     return <AvailableRow key={config.id} config={config} />;

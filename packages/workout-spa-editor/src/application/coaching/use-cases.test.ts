@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-memory-coaching-day-notes-repository";
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
+import { createInMemoryIntegrationPolicyRepository } from "../../test-utils/in-memory-integration-policy-repository";
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
@@ -176,19 +177,79 @@ describe("unlinkAccount", () => {
   });
 });
 
+const plannedImportPolicy = (profileId: string, enabled: boolean) => ({
+  id: `00000000-0000-4000-8000-00000000000${enabled ? 1 : 2}`,
+  profileId,
+  dataType: "planned-session" as const,
+  bridgeId: "train2go-bridge",
+  direction: "import" as const,
+  mode: "auto" as const,
+  enabled,
+  updatedAt: NOW,
+});
+
 describe("syncWeek", () => {
   let deps: Parameters<typeof syncWeek>[0];
 
   beforeEach(async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("p1", [T2G_LINK]));
+    const integrationPolicy = createInMemoryIntegrationPolicyRepository();
+    await integrationPolicy.put(plannedImportPolicy("p1", true));
     deps = {
       profiles,
       coaching: createInMemoryCoachingRepository(),
       coachingSyncState: createInMemoryCoachingSyncStateRepository(),
+      integrationPolicy,
       transport: makeTransport(),
       now: () => NOW,
     };
+  });
+
+  it("should not sync when no planned-session import route is active", async () => {
+    // Arrange
+    const integrationPolicy = createInMemoryIntegrationPolicyRepository();
+    const t = makeTransport({ readWeek: vi.fn(async () => []) });
+    deps = { ...deps, integrationPolicy, transport: t };
+
+    // Act
+    const result = await syncWeek(deps, "p1", "2026-04-13");
+
+    // Assert
+    expect(result).toEqual({ ok: false, reason: "route-inactive" });
+    expect(t.readWeek).not.toHaveBeenCalled();
+  });
+
+  it("should not sync when the planned-session import route is disabled", async () => {
+    // Arrange
+    const integrationPolicy = createInMemoryIntegrationPolicyRepository();
+    await integrationPolicy.put(plannedImportPolicy("p1", false));
+    deps = { ...deps, integrationPolicy };
+
+    // Act
+    const result = await syncWeek(deps, "p1", "2026-04-13");
+
+    // Assert
+    expect(result).toEqual({ ok: false, reason: "route-inactive" });
+  });
+
+  it("should stamp train2go-bridge provenance on every synced row", async () => {
+    // Arrange
+    const t = makeTransport({
+      readWeek: vi.fn(async () => [makeRecord({ sourceId: "1" })]),
+    });
+    deps = { ...deps, transport: t };
+
+    // Act
+    await syncWeek(deps, "p1", "2026-04-13");
+    const stored = await deps.coaching.getByProfileAndDateRange(
+      "p1",
+      "2026-04-13",
+      "2026-04-19"
+    );
+
+    // Assert
+    expect(stored[0]).toMatchObject({ sourceBridgeId: "train2go-bridge" });
   });
 
   it("should error when the profile has no link for the source", async () => {

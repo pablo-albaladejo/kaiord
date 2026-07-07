@@ -9,6 +9,7 @@
  */
 
 import type { PersistencePort } from "../ports/persistence-port";
+import { createInMemoryActivityRepository } from "./in-memory-activity-repository";
 import { createInMemoryAiModelBindingRepository } from "./in-memory-ai-model-binding-repository";
 import {
   createInMemoryAiProviderRepository,
@@ -21,8 +22,10 @@ import { createInMemoryCoachingDayNotesRepository } from "./in-memory-coaching-d
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import { createInMemoryConnectionRepository } from "./in-memory-connection-repository";
+import { createInMemoryDataTypeSourcePolicyRepository } from "./in-memory-data-type-source-policy-repository";
 import { createInMemoryEnergyBalanceRepositories } from "./in-memory-energy-balance-repositories";
 import { createInMemoryHealthRecordRepository } from "./in-memory-health-record-repository";
+import { createInMemoryImportedRecordRepository } from "./in-memory-imported-record-repository";
 import { createInMemoryIntegrationPolicyRepository } from "./in-memory-integration-policy-repository";
 import { createInMemoryMatchedSessionsReadModel } from "./in-memory-matched-sessions-read-model";
 import {
@@ -132,6 +135,16 @@ export function createInMemoryPersistence(): PersistencePort {
       stores.healthBodyComposition
     ),
     healthStress: createInMemoryHealthRecordRepository(stores.healthStress),
+    importedRecords: createInMemoryImportedRecordRepository({
+      weight: stores.healthWeight,
+      sleep: stores.healthSleep,
+      hrv: stores.healthHrv,
+      "daily-wellness": stores.healthDaily,
+      "body-composition": stores.healthBodyComposition,
+      stress: stores.healthStress,
+    }),
+    activities: createInMemoryActivityRepository(),
+    dataTypeSourcePolicy: createInMemoryDataTypeSourcePolicyRepository(),
     chatMessages: createInMemoryChatMessageRepository(stores.chatMessages),
     chatConversations: createInMemoryChatConversationRepository(
       stores.chatConversations

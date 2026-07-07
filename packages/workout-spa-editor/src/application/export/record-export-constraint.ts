@@ -29,7 +29,11 @@ export const handleConstraintResult = async (
   }
 
   if (existing.contentHash === contentHash) {
-    return { ledgerId: existing.id, outcome: "skipped" };
+    return {
+      ledgerId: existing.id,
+      outcome: "skipped",
+      externalId: existing.destinationExternalId,
+    };
   }
   if (existing.destinationExternalId === "pending") {
     return { ledgerId: existing.id, outcome: "lost-race" };
@@ -42,5 +46,5 @@ export const handleConstraintResult = async (
     contentHash,
     exportedAt: now,
   });
-  return { ledgerId: existing.id, outcome: "updated" };
+  return { ledgerId: existing.id, outcome: "updated", externalId };
 };

@@ -11,8 +11,7 @@
 import { useSyncExternalStore } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-
-const KNOWN_BRIDGE_IDS = ["garmin-bridge", "train2go-bridge"] as const;
+import { KNOWN_BRIDGE_IDS } from "../integrations/integration-registry";
 
 export type DiscoveredBridge = {
   readonly bridgeId: string;

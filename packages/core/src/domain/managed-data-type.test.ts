@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { canonicalHash } from "./hash/canonical-hash";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "./managed-data-type";
 
-const EXPECTED_TYPE_COUNT = 9;
+const EXPECTED_TYPE_COUNT = 10;
 
 describe("managedDataTypes", () => {
-  it("should enumerate exactly nine managed data types", () => {
+  it("should enumerate exactly ten managed data types", () => {
     // Arrange
     const types = managedDataTypes;
 
@@ -15,6 +15,18 @@ describe("managedDataTypes", () => {
 
     // Assert
     expect(count).toBe(EXPECTED_TYPE_COUNT);
+  });
+
+  it("should replace training-plan with planned-session and activity", () => {
+    // Arrange
+    const types = [...managedDataTypes] as string[];
+
+    // Act
+
+    // Assert
+    expect(types).not.toContain("training-plan");
+    expect(types).toContain("planned-session");
+    expect(types).toContain("activity");
   });
 });
 
@@ -34,6 +46,34 @@ describe("MANAGED_DATA_REGISTRY", () => {
 
     // Assert
     expect(valid).toBe(true);
+  });
+
+  it("should back every entry with a real schema (no z.unknown passthrough)", () => {
+    // Arrange
+    // A z.unknown()/z.any() passthrough accepts `undefined`; every real
+    // object/enum schema rejects it. Mechanical proxy for the "0 z.unknown()
+    // in the registry" invariant.
+    const entries = Object.values(MANAGED_DATA_REGISTRY);
+
+    // Act
+    const accepting = entries.filter(
+      (e) => e.schema.safeParse(undefined).success
+    );
+
+    // Assert
+    expect(accepting).toEqual([]);
+  });
+
+  it("should map planned-session and activity to their wire tokens", () => {
+    // Arrange
+
+    // Act
+    const planned = MANAGED_DATA_REGISTRY["planned-session"];
+    const activity = MANAGED_DATA_REGISTRY["activity"];
+
+    // Assert
+    expect(planned.capabilities.import).toBe("read:training-plan");
+    expect(activity.capabilities.import).toBe("read:activities");
   });
 
   it("should use opaque-string capability tokens (no Zod-enum import from SPA)", () => {

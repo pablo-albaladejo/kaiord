@@ -62,6 +62,9 @@ const makeSeedRow = (
         updatedAt: NOW,
       };
     case "coachingActivities":
+    case "plannedSessions":
+      // plannedSessions mirrors the coachingActivities row shape (v27 migrated
+      // rows preserve it), so the same seed shape round-trips both stores.
       return {
         id,
         profileId,
@@ -72,6 +75,17 @@ const makeSeedRow = (
         title: "T",
         status: "pending",
         fetchedAt: NOW,
+      };
+    case "activities":
+      return {
+        id,
+        profileId,
+        date: WEEK_START,
+        sport: "cycling",
+        sourceBridgeId: "garmin",
+        externalId: id,
+        linkedWorkoutId: null,
+        createdAt: NOW,
       };
     case "coachingDayNotes":
       return {
@@ -216,6 +230,13 @@ const makeSeedRow = (
         createdAt: NOW,
         updatedAt: NOW,
       };
+    case "dataTypeSourcePolicy":
+      return {
+        profileId,
+        dataType: "sleep",
+        mode: "priority",
+        sourceOrder: ["whoop-bridge"],
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,
@@ -249,6 +270,7 @@ const performCascadeOrchestration = async (
         intakeEntries: persistence.intakeEntries,
         intakePresets: persistence.intakePresets,
         energyTargets: persistence.energyTargets,
+        dataTypeSourcePolicy: persistence.dataTypeSourcePolicy,
       },
       profileId
     );

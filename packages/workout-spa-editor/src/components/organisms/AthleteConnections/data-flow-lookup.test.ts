@@ -2,17 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import type { IntegrationPolicy } from "../../../types/integration-policy";
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
-import type { ConnectionFlow } from "./connection-config";
-import { bridgePolicies, isFlowEnabled } from "./data-flow-lookup";
+import { bridgePolicies } from "./data-flow-lookup";
 
 const BRIDGE = "garmin-bridge";
-
-const FLOW: ConnectionFlow = {
-  label: "Completed activities",
-  sublabel: "Import finished workouts",
-  dataType: "workout",
-  direction: "import",
-};
 
 function policy(over: Partial<IntegrationPolicy>): IntegrationPolicy {
   return {
@@ -33,30 +25,6 @@ function flowsMap(policies: IntegrationPolicy[]): DataFlowsByType {
   map.set("workout", { import: policies, export: [] });
   return map;
 }
-
-describe("isFlowEnabled", () => {
-  it("should be true when an enabled policy matches the bridge", () => {
-    // Arrange
-    const map = flowsMap([policy({})]);
-
-    // Act
-    const enabled = isFlowEnabled(map, FLOW, BRIDGE);
-
-    // Assert
-    expect(enabled).toBe(true);
-  });
-
-  it("should be false when the matching policy is disabled", () => {
-    // Arrange
-    const map = flowsMap([policy({ enabled: false })]);
-
-    // Act
-    const enabled = isFlowEnabled(map, FLOW, BRIDGE);
-
-    // Assert
-    expect(enabled).toBe(false);
-  });
-});
 
 describe("bridgePolicies", () => {
   it("should collect only policies belonging to the bridge", () => {

@@ -241,6 +241,30 @@ const seedMatchedReadyWorkout = async (
   }, args);
 };
 
+/**
+ * Seed an enabled `(workout, export)` IntegrationPolicy to garmin-bridge so
+ * the F2 push gate (`executeWorkoutPush` → resolveExportPolicies) admits the
+ * push. Without an active export route the push is fail-closed by design and
+ * never reaches the bridge stub.
+ */
+const seedGarminExportPolicy = async (page: Page, profileId: string) => {
+  await page.evaluate(async (pid) => {
+    const db = (window as unknown as Record<string, unknown>)
+      .__KAIORD_DB__ as Db;
+    const now = new Date().toISOString();
+    await db.table("integrationPolicies").put({
+      id: "policy-garmin-bridge-workout-export",
+      profileId: pid,
+      dataType: "workout",
+      bridgeId: "garmin-bridge",
+      direction: "export",
+      mode: "manual",
+      enabled: true,
+      updatedAt: now,
+    });
+  }, profileId);
+};
+
 test.describe("Coaching activity dialog redesign", () => {
   test.beforeEach(async ({ page }) => {
     await disableOnboardingTutorial(page);
@@ -771,6 +795,7 @@ test.describe("Coaching activity dialog redesign", () => {
       workoutId: "push-flow-workout",
       matchId: "M-push-flow",
     });
+    await seedGarminExportPolicy(page, PROFILE_ID);
 
     // Act — open dialog, then click Push to Garmin. The push is a no-op
     // until the Garmin bridge stub is detected (`sessionActive=true`),

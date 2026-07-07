@@ -90,7 +90,8 @@ export type PersistencePort = HealthRepositories &
     // Cross-table cleanup for the six v16 health-domain stores —
     // single-shot deleteByProfile invoked by the profile-delete cascade.
     healthCleanup: HealthCleanupRepository;
-    // (The six per-metric health repos are intersected in via HealthRepositories.)
+    // (The six per-metric health repos + `importedRecords` +
+    // `dataTypeSourcePolicy` are intersected in via HealthRepositories.)
     // Per-profile AI chat transcript; append-only, cascade-deleted on profile
     // removal. Delete-conversation tombstones each message via its use case.
     chatMessages: ChatMessageRepository;

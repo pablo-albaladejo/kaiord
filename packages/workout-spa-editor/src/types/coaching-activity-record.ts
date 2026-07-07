@@ -52,6 +52,13 @@ export const coachingActivityRecordSchema = z
     completionPercent: z.number().min(0).max(100).optional(),
     description: z.string().optional(),
     fetchedAt: z.iso.datetime(),
+    /**
+     * Provenance stamped on every synced row (F1.3): the bridge that produced
+     * it (`train2go-bridge`) + its external identity. Optional so legacy rows
+     * written before governance still parse.
+     */
+    sourceBridgeId: z.string().optional(),
+    externalId: z.string().optional(),
   })
   .refine(
     (rec) => rec.id === `${rec.profileId}:${rec.source}:${rec.sourceId}`,

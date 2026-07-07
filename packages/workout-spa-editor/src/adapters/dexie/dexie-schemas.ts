@@ -16,7 +16,13 @@ import {
   CORE_V13,
   CORE_V16,
 } from "./dexie-schemas-early";
-import { buildCoreV24, buildCoreV26 } from "./dexie-schemas-late";
+import {
+  buildCoreV22,
+  buildCoreV24,
+  buildCoreV26,
+  buildCoreV27,
+  buildCoreV30,
+} from "./dexie-schemas-late";
 
 const HEALTH_SUFFIX =
   ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
@@ -74,14 +80,9 @@ const CORE_V21 = {
   chatMessages: "id, profileId, [profileId+createdAt]",
 };
 
-// v22 — additive `aiModelBindings` store for per-profile model bindings.
-// Composite PK `[profileId+purpose]` keeps one row per purpose per profile;
-// the `profileId` index drives the cascade and makes the table a cascade
-// target (also auto-discovered by `isPerProfileTable`).
-const CORE_V22 = {
-  ...CORE_V21,
-  aiModelBindings: "[profileId+purpose], profileId",
-};
+// v22 — additive `aiModelBindings` store for per-profile model bindings;
+// built in `dexie-schemas-late.ts`.
+const CORE_V22 = buildCoreV22(CORE_V21);
 
 // v23 — index `updatedAt` on the auto-push synced tables (#725) so the cloud
 // change token reads `count` + `max(updatedAt)` per table via an index instead
@@ -113,6 +114,11 @@ const CORE_V25 = {
 // `intakePresets`, `energyTargets`); built in `dexie-schemas-late.ts`.
 const CORE_V26 = buildCoreV26(CORE_V25);
 
+// v27 — Data Hub domain tables (`plannedSessions`, `activities`); built in
+// `dexie-schemas-late.ts`. The v27 upgrade migrates coachingActivities into
+// plannedSessions and rewrites integrationPolicies.dataType.
+const CORE_V27 = buildCoreV27(CORE_V26);
+
 export const SCHEMAS = {
   v1: CORE_V1,
   v2: CORE_V2,
@@ -131,4 +137,8 @@ export const SCHEMAS = {
   v24: CORE_V24,
   v25: CORE_V25,
   v26: CORE_V26,
+  v27: CORE_V27,
+  // v30 — additive dataTypeSourcePolicy companion table; built in
+  // dexie-schemas-late.ts. v28/v29 (data-only) reused SCHEMAS.v27.
+  v30: buildCoreV30(CORE_V27),
 } as const;

@@ -38,6 +38,7 @@ export const doSyncCoaching = (
       coaching: persistence.coaching,
       transport,
       coachingSyncState: persistence.coachingSyncState,
+      integrationPolicy: persistence.integrationPolicy,
     },
     profileId,
     weekStart

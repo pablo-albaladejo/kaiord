@@ -27,6 +27,7 @@ import {
 } from "./use-train2go-actions";
 import {
   useCoachingActivities,
+  useTrain2GoRouteActive,
   useTrain2GoSyncState,
 } from "./use-train2go-data";
 import type { ZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
@@ -55,6 +56,7 @@ export function useTrain2GoSource(
   );
   const activities = useCoachingActivities(persistence, activeProfileId, days);
   const lastSyncedAt = useTrain2GoSyncState(persistence, activeProfileId);
+  const routeActive = useTrain2GoRouteActive(persistence, activeProfileId);
 
   const sync = useSyncCallback(
     persistence,
@@ -89,6 +91,7 @@ export function useTrain2GoSource(
     badge: "T2G",
     available: store.extensionInstalled,
     connected: store.sessionActive,
+    routeActive,
     loading: store.loading,
     error: store.lastError,
     activities,

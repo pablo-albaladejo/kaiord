@@ -22,6 +22,7 @@ export type ConnectionStatus = z.infer<typeof connectionStatusSchema>;
 export const connectionMechanismSchema = z.enum([
   "bridge",
   "api-key",
+  "manual",
   "not-supported",
 ]);
 

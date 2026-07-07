@@ -9,6 +9,9 @@ export type RecordExportOutcome =
 export type RecordExportResult = {
   ledgerId: string;
   outcome: RecordExportOutcome;
+  /** Destination-assigned id from the push response. Absent for
+      "lost-race" (another caller owns the in-flight POST). */
+  externalId?: string;
 };
 
 export type PostAndCommitInput = {

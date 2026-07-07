@@ -1,21 +1,19 @@
 /**
- * Dispatch table for `importHealthFitFile` — one entry per health
- * metric, exposing the right repo + date extraction rule. Lives in
- * its own file so the use-case stays small.
+ * Extraction table for `importHealthFitFile` — one entry per health
+ * metric, producing the natural-key inputs `upsertImportedRecord`
+ * needs (dataType/date/measuredAt/payload). Lives in its own file so
+ * the use-case stays small.
  */
 import type {
   BodyComposition,
   DailyWellness,
   HealthFileType,
   HrvSummary,
+  ManagedDataType,
   SleepRecord,
   StressEpisode,
   WeightMeasurement,
 } from "@kaiord/core";
-
-import type { HealthRecordRepository } from "../../ports/health-record-repository";
-import type { PersistencePort } from "../../ports/persistence-port";
-import { MissingHealthPayloadError } from "./import-health-errors";
 
 export type HealthExtensions = {
   sleep?: SleepRecord;
@@ -26,47 +24,65 @@ export type HealthExtensions = {
   stress?: StressEpisode;
 };
 
-type RowBase = { id: string; profileId: string };
+export type ExtractedHealthMetric = {
+  dataType: ManagedDataType;
+  payload: Record<string, unknown>;
+  date: string;
+  measuredAt: string;
+};
 
 const datePart = (iso: string): string => iso.slice(0, 10);
 
-type Handler = (
-  p: PersistencePort,
-  health: HealthExtensions,
-  base: RowBase
-) => Promise<void> | undefined;
+type Extractor = (
+  health: HealthExtensions
+) => ExtractedHealthMetric | undefined;
 
-const put = <T>(
-  repo: HealthRecordRepository<RowBase & { date: string; krd: T }>,
-  base: RowBase,
-  payload: T | undefined,
-  toDate: (p: T) => string
-): Promise<void> | undefined =>
-  payload && repo.put({ ...base, date: toDate(payload), krd: payload });
-
-const HANDLERS: Record<HealthFileType, Handler> = {
-  sleep_record: (p, h, b) =>
-    put(p.healthSleep, b, h.sleep, (s) => datePart(s.startTime)),
-  weight_measurement: (p, h, b) =>
-    put(p.healthWeight, b, h.weight, (w) => datePart(w.measuredAt)),
-  hrv_summary: (p, h, b) =>
-    put(p.healthHrv, b, h.hrv, (x) => datePart(x.measuredAt)),
-  daily_wellness: (p, h, b) => put(p.healthDaily, b, h.daily, (d) => d.date),
-  body_composition: (p, h, b) =>
-    put(p.healthBodyComposition, b, h.bodyComposition, (c) =>
-      datePart(c.measuredAt)
-    ),
-  stress_episode: (p, h, b) =>
-    put(p.healthStress, b, h.stress, (s) => datePart(s.startTime)),
+const EXTRACTORS: Record<HealthFileType, Extractor> = {
+  sleep_record: (h) =>
+    h.sleep && {
+      dataType: "sleep",
+      payload: h.sleep,
+      date: datePart(h.sleep.startTime),
+      measuredAt: h.sleep.startTime,
+    },
+  weight_measurement: (h) =>
+    h.weight && {
+      dataType: "weight",
+      payload: h.weight,
+      date: datePart(h.weight.measuredAt),
+      measuredAt: h.weight.measuredAt,
+    },
+  hrv_summary: (h) =>
+    h.hrv && {
+      dataType: "hrv",
+      payload: h.hrv,
+      date: datePart(h.hrv.measuredAt),
+      measuredAt: h.hrv.measuredAt,
+    },
+  daily_wellness: (h) =>
+    h.daily && {
+      dataType: "daily-wellness",
+      payload: h.daily,
+      date: h.daily.date,
+      measuredAt: `${h.daily.date}T00:00:00.000Z`,
+    },
+  body_composition: (h) =>
+    h.bodyComposition && {
+      dataType: "body-composition",
+      payload: h.bodyComposition,
+      date: datePart(h.bodyComposition.measuredAt),
+      measuredAt: h.bodyComposition.measuredAt,
+    },
+  stress_episode: (h) =>
+    h.stress && {
+      dataType: "stress",
+      payload: h.stress,
+      date: datePart(h.stress.startTime),
+      measuredAt: h.stress.startTime,
+    },
 };
 
-export const persistHealthByType = async (
-  p: PersistencePort,
+export const extractHealthMetric = (
   type: HealthFileType,
-  health: HealthExtensions,
-  base: RowBase
-): Promise<void> => {
-  const result = HANDLERS[type](p, health, base);
-  if (!result) throw new MissingHealthPayloadError(type);
-  await result;
-};
+  health: HealthExtensions
+): ExtractedHealthMetric | undefined => EXTRACTORS[type](health);

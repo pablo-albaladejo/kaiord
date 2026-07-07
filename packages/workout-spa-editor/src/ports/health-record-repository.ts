@@ -18,6 +18,16 @@ export type HealthRecord<TPayload> = {
   profileId: string;
   date: string;
   krd: TPayload;
+  /**
+   * Provenance stamp (v17 schema columns) — set on every write via
+   * `stampProvenance`, regardless of entry path (FIT import, manual
+   * entry). Optional only because legacy pre-v17 rows may lack them
+   * until backfilled.
+   */
+  sourceBridgeId?: string;
+  externalId?: string;
+  /** Precise measurement instant backing `externalId`'s content-hash; `date` is just the day-bucket for the range-query index. */
+  measuredAt?: string;
 };
 
 export type HealthRecordRepository<T extends HealthRecord<unknown>> = {

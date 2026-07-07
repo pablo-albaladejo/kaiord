@@ -16,7 +16,7 @@ const SCHEMA_V16 = 16;
 // Current head version KaiordDatabase opens at; later versions add stores
 // (v24 connections, v25 chat conversations, v26 energy-balance), so a seeded
 // db lands at head.
-const SCHEMA_HEAD = 26;
+const SCHEMA_HEAD = 30;
 const STORES_V16 = {
   profiles: "id",
   linkedAccounts: "id",
@@ -236,8 +236,11 @@ describe("Dexie v16 → v17 migration", () => {
     db.close();
 
     // Assert
-    expect(policies).toHaveLength(1);
-    expect(policies[0]).toMatchObject({
+    // v28 also seeds a planned-session import policy for this train2go-linked
+    // profile, so scope the assertion to the v17 training-zones policy.
+    const zones = policies.filter((p) => p.dataType === "training-zones");
+    expect(zones).toHaveLength(1);
+    expect(zones[0]).toMatchObject({
       profileId: PROFILE_ID,
       dataType: "training-zones",
       direction: "import",
@@ -272,7 +275,9 @@ describe("Dexie v16 → v17 migration", () => {
     db2.close();
 
     // Assert
-    expect(policies).toHaveLength(1);
+    // Scope to the v17 training-zones policy (v28 adds a planned-session one).
+    const zones = policies.filter((p) => p.dataType === "training-zones");
+    expect(zones).toHaveLength(1);
   });
 
   it("should retain syncZones column on linkedAccounts as a rollback buffer", async () => {

@@ -5,6 +5,7 @@
  */
 
 import type { PersistencePort } from "../../ports/persistence-port";
+import { createDexieActivityRepository } from "./dexie-activity-repository";
 import { createDexieAiModelBindingRepository } from "./dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
@@ -14,10 +15,12 @@ import { createDexieCoachingDayNotesRepository } from "./dexie-coaching-day-note
 import { createDexieCoachingRepository } from "./dexie-coaching-repository";
 import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
 import { createDexieConnectionRepository } from "./dexie-connection-repository";
+import { createDexieDataTypeSourcePolicyRepository } from "./dexie-data-type-source-policy-repository";
 import { db as defaultDb, type KaiordDatabase } from "./dexie-database";
 import { createDexieEnergyBalanceRepositories } from "./dexie-energy-balance-repositories";
 import { createDexieHealthCleanupRepository } from "./dexie-health-cleanup-repository";
 import { createDexieHealthRecordRepositories } from "./dexie-health-repositories";
+import { createDexieImportedRecordRepository } from "./dexie-imported-record-repository";
 import { createDexieIntegrationPolicyRepository } from "./dexie-integration-policy-repository";
 import { createDexieMatchedSessionsReadModel } from "./dexie-matched-sessions-read-model";
 import { createDexieProfileRepository } from "./dexie-profile-repository";
@@ -50,6 +53,9 @@ export function createDexiePersistence(
     autoMatchDismissal: createDexieAutoMatchDismissalRepository(database),
     userPreferences: createDexieUserPreferencesRepository(database),
     healthCleanup: createDexieHealthCleanupRepository(database),
+    activities: createDexieActivityRepository(database),
+    importedRecords: createDexieImportedRecordRepository(database),
+    dataTypeSourcePolicy: createDexieDataTypeSourcePolicyRepository(database),
     ...createDexieHealthRecordRepositories(database),
     ...createDexieEnergyBalanceRepositories(database),
     chatMessages: createDexieChatMessageRepository(database),

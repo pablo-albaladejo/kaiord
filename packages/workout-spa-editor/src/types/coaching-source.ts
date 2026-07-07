@@ -20,6 +20,12 @@ export type CoachingSource = {
   badge: string;
   available: boolean;
   connected: boolean;
+  /**
+   * Whether an enabled import route governs this source (F1.3). `false` means
+   * the route is turned off — sync is a no-op and the UI shows "route inactive".
+   * `undefined` for sources with no route concept (treated as active).
+   */
+  routeActive?: boolean;
   loading: boolean;
   error: string | null;
   /** Activities for the supplied (profileId, days), live-queried. */

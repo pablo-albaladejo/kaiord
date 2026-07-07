@@ -75,6 +75,7 @@ describe("recordExport", () => {
     // Assert
     expect(postFn).toHaveBeenCalledOnce();
     expect(result.outcome).toBe("created");
+    expect(result.externalId).toBe("ext-001");
     expect(ledgerRepo.store.size).toBe(1);
     const entry = [...ledgerRepo.store.values()][0];
     expect(entry?.destinationExternalId).toBe("ext-001");

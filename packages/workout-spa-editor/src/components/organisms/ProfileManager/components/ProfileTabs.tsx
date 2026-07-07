@@ -2,9 +2,11 @@
  * ProfileTabs Component
  *
  * Top-level tab selector: Training Zones | Personal Data | Linked Accounts.
+ * The former "Data Flows" tab was retired (F4.2): routing now lives
+ * exclusively in the Data Hub matrix (/settings/data-hub).
  */
 
-type ProfileTab = "zones" | "personal" | "linked-accounts" | "data-flows";
+type ProfileTab = "zones" | "personal" | "linked-accounts";
 
 type ProfileTabsProps = {
   activeTab: ProfileTab;
@@ -15,7 +17,6 @@ const TABS: Array<{ id: ProfileTab; label: string }> = [
   { id: "zones", label: "Training Zones" },
   { id: "personal", label: "Personal Data" },
   { id: "linked-accounts", label: "Linked Accounts" },
-  { id: "data-flows", label: "Data Flows" },
 ];
 
 export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {

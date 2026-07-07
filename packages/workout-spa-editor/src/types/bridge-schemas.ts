@@ -14,6 +14,9 @@ export const bridgeCapabilitySchema = z.enum([
   "read:sleep",
   "read:training-plan",
   "read:training-zones",
+  // Garmin executed-activity pull (F5). The domain `activity` type maps to
+  // this token; the garmin-bridge announcers gain it in lockstep in V2.
+  "read:activities",
 ]);
 
 export type BridgeCapability = z.infer<typeof bridgeCapabilitySchema>;

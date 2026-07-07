@@ -223,6 +223,32 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
 
     expect(onSync).toHaveBeenCalledTimes(1);
   });
+
+  it("should surface a route-inactive title when the import route is off", () => {
+    // Arrange
+
+    render(
+      <CoachingSyncButton
+        connected={true}
+        loading={false}
+        error={null}
+        onSync={vi.fn()}
+        onConnect={vi.fn()}
+        label="Train2Go"
+        routeInactive
+      />
+    );
+
+    // Act
+
+    const button = screen.getByRole("button", {
+      name: "Train2Go — route inactive",
+    });
+
+    // Assert
+
+    expect(button.getAttribute("title")).toBe("Train2Go · route inactive");
+  });
 });
 
 describe("CoachingSyncButton — prefers-reduced-motion", () => {

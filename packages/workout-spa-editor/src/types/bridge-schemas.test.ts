@@ -225,3 +225,82 @@ describe("bridgeCapabilitySchema coverage against MANAGED_DATA_REGISTRY", () => 
     expect(missing).toEqual([]);
   });
 });
+
+// Contract test (plan F0.3): pins the EXACT dataType↔capability-token
+// mapping, not just enum membership. Guards against silent drift between
+// @kaiord/core (the registry) and the SPA (the announced-capability enum),
+// including the deliberate N:1 mappings (read:body → 5 health types,
+// read:training-plan → planned-session).
+describe("core↔SPA capability contract", () => {
+  const EXPECTED_CAPABILITIES: Record<
+    string,
+    { import?: string; export?: string }
+  > = {
+    workout: { import: "read:workouts", export: "write:workouts" },
+    "planned-session": { import: "read:training-plan" },
+    activity: { import: "read:activities" },
+    "training-zones": { import: "read:training-zones" },
+    weight: { import: "read:body" },
+    sleep: { import: "read:sleep" },
+    hrv: { import: "read:body" },
+    "daily-wellness": { import: "read:body" },
+    "body-composition": { import: "read:body" },
+    stress: { import: "read:body" },
+  };
+
+  it("should match the exact expected token mapping for every managed type", () => {
+    // Arrange
+    const actual = Object.fromEntries(
+      Object.entries(MANAGED_DATA_REGISTRY).map(([type, entry]) => [
+        type,
+        entry.capabilities,
+      ])
+    );
+
+    // Act
+
+    // Assert
+    expect(actual).toEqual(EXPECTED_CAPABILITIES);
+  });
+
+  it("should map read:body N:1 onto the five body-derived health types", () => {
+    // Arrange
+    const readBodyTypes = Object.entries(MANAGED_DATA_REGISTRY)
+      .filter(([, entry]) => entry.capabilities.import === "read:body")
+      .map(([type]) => type)
+      .sort();
+
+    // Act
+
+    // Assert
+    expect(readBodyTypes).toEqual(
+      ["body-composition", "daily-wellness", "hrv", "stress", "weight"].sort()
+    );
+  });
+
+  it("should keep read:training-plan mapped N:1 onto planned-session", () => {
+    // Arrange
+    const trainingPlanTypes = Object.entries(MANAGED_DATA_REGISTRY)
+      .filter(([, entry]) => entry.capabilities.import === "read:training-plan")
+      .map(([type]) => type);
+
+    // Act
+
+    // Assert
+    expect(trainingPlanTypes).toEqual(["planned-session"]);
+  });
+
+  it("should declare every registry token in the announced-capability enum", () => {
+    // Arrange
+    const schemaTokens = new Set(bridgeCapabilitySchema.options);
+    const tokens = Object.values(EXPECTED_CAPABILITIES).flatMap((c) =>
+      [c.import, c.export].filter((t): t is string => typeof t === "string")
+    );
+
+    // Act
+    const missing = tokens.filter((t) => !schemaTokens.has(t));
+
+    // Assert
+    expect(missing).toEqual([]);
+  });
+});

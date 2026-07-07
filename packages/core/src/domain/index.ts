@@ -10,6 +10,8 @@ export type {
 } from "./managed-data-type";
 export { MANAGED_DATA_REGISTRY, managedDataTypes } from "./managed-data-type";
 export type {
+  Activity,
+  ActivitySummary,
   BodyComposition,
   CadenceValue,
   DailyWellness,
@@ -38,6 +40,8 @@ export type {
   MacroNutrients,
   MealSlot,
   PaceValue,
+  PlannedSession,
+  PlannedSessionStatus,
   PowerValue,
   RepetitionBlock,
   SleepRecord,
@@ -51,11 +55,16 @@ export type {
   Target,
   TargetType,
   TargetUnit,
+  TrainingZoneBand,
+  TrainingZones,
+  TrainingZoneSet,
   WeightMeasurement,
   Workout,
   WorkoutStep,
 } from "./schemas";
 export {
+  activitySchema,
+  activitySummarySchema,
   BODY_FAT_TOLERANCE_PERCENT,
   bodyCompositionSchema,
   DAILY_KCAL_TOLERANCE,
@@ -87,6 +96,8 @@ export {
   lengthUnitSchema,
   macroNutrientsSchema,
   mealSlotSchema,
+  plannedSessionSchema,
+  plannedSessionStatusSchema,
   repetitionBlockSchema,
   SLEEP_STAGE_TOLERANCE_SECONDS,
   SLEEP_TOTAL_DURATION_TOLERANCE_SECONDS,
@@ -102,6 +113,9 @@ export {
   targetSchema,
   targetTypeSchema,
   targetUnitSchema,
+  trainingZoneBandSchema,
+  trainingZoneSetSchema,
+  trainingZonesSchema,
   WEIGHT_TOLERANCE_KG,
   weightMeasurementSchema,
   workoutLikeFileTypes,

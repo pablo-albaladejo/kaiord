@@ -44,6 +44,7 @@ import type {
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { UserPreferencesRepository } from "../../ports/user-preferences-repository";
 import type { ConnectionRepository } from "../connections/connection-repository.port";
+import type { DataTypeSourcePolicyRepository } from "../data-source-policy/data-type-source-policy-repository.port";
 
 export type DeleteProfileWithCascadeDeps = {
   workouts: WorkoutRepository;
@@ -70,6 +71,9 @@ export type DeleteProfileWithCascadeDeps = {
   intakeEntries: IntakeEntryRepository;
   intakePresets: IntakePresetRepository;
   energyTargets: EnergyTargetRepository;
+  // Per-(profile, dataType) multi-source policy rows (F3.1); device-local
+  // (today), bulk delete on profile removal.
+  dataTypeSourcePolicy: DataTypeSourcePolicyRepository;
 };
 
 export const deleteProfileWithCascade = async (
@@ -92,5 +96,6 @@ export const deleteProfileWithCascade = async (
     deps.intakeEntries.deleteByProfile(deletedProfileId),
     deps.intakePresets.deleteByProfile(deletedProfileId),
     deps.energyTargets.deleteByProfile(deletedProfileId),
+    deps.dataTypeSourcePolicy.deleteByProfile(deletedProfileId),
   ]);
 };

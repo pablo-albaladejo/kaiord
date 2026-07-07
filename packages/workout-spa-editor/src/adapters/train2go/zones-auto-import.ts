@@ -6,6 +6,13 @@
  * 'auto')` policy — not by a per-account flag. These helpers centralise
  * that predicate so both the mount-time import lifecycle and the
  * post-sync/connect fan-out share one source of truth.
+ *
+ * P3 provenance carve-out (F1.4): `training-zones` is the documented
+ * exception to per-record provenance. The imported zones mutate the
+ * aggregate `Profile.sportZones` (no per-row `sourceBridgeId`), so freshness
+ * is tracked at the sync-event level: the fan-out runs immediately after a
+ * Train2Go sync, whose `coachingSyncState[source, profileId].lastSyncedAt`
+ * already records the source + timestamp of the same event — no new table.
  */
 import type { ManagedDataType } from "@kaiord/core";
 

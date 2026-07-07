@@ -8,10 +8,13 @@ import { resolveExportPolicies } from "../../../application/integration-policy/r
 import { useGarminBridge } from "../../../contexts";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
+import { GarminExportDisabledButton } from "./GarminExportDisabledButton";
+import { GarminNoSessionButton } from "./GarminNoSessionButton";
 import { PushFeedback } from "./PushFeedback";
 import { useGarminPush } from "./useGarminPush";
 
 const policyRepo = createDexieIntegrationPolicyRepository(db);
+const GARMIN_BRIDGE_ID = "garmin-bridge";
 
 export const GarminPushButton: React.FC<{ profileId?: string }> = ({
   profileId,
@@ -37,28 +40,23 @@ export const GarminPushButton: React.FC<{ profileId?: string }> = ({
   const isLoading = pushing.status === "loading";
 
   const hasEnabledPolicy =
-    Array.isArray(exportPolicies) && exportPolicies.some((p) => p.enabled);
+    Array.isArray(exportPolicies) &&
+    exportPolicies.some((p) => p.enabled && p.bridgeId === GARMIN_BRIDGE_ID);
 
-  if (!extensionInstalled || !hasEnabledPolicy) {
+  if (!extensionInstalled) {
     return null;
   }
 
+  if (!hasEnabledPolicy) {
+    return <GarminExportDisabledButton />;
+  }
+
   if (!sessionActive) {
-    // A failed push can invalidate the session (redetect on 401/403),
-    // which flips `sessionActive` to false right after `pushing` was set
-    // to "error". Still rendering `PushFeedback` here keeps that cause
-    // visible instead of it being replaced by this disabled button.
     return (
-      <div className="flex items-center gap-2">
-        <Button size="sm" variant="secondary" disabled>
-          <Upload className="h-4 w-4" />
-          Garmin (no session)
-        </Button>
-        <PushFeedback
-          push={pushing}
-          onReset={() => setPushing({ status: "idle" })}
-        />
-      </div>
+      <GarminNoSessionButton
+        pushing={pushing}
+        onReset={() => setPushing({ status: "idle" })}
+      />
     );
   }
 

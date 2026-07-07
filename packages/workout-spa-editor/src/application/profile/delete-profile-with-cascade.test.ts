@@ -12,6 +12,7 @@ import { createInMemoryCoachingDayNotesRepository } from "../../test-utils/in-me
 import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
 import { createInMemoryConnectionRepository } from "../../test-utils/in-memory-connection-repository";
+import { createInMemoryDataTypeSourcePolicyRepository } from "../../test-utils/in-memory-data-type-source-policy-repository";
 import { createInMemoryEnergyBalanceRepositories } from "../../test-utils/in-memory-energy-balance-repositories";
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryUserPreferencesRepository } from "../../test-utils/in-memory-user-preferences-repository";
@@ -90,6 +91,9 @@ const makeDeps = (
   aiModelBindings:
     overrides.aiModelBindings ?? createInMemoryAiModelBindingRepository(),
   connections: overrides.connections ?? createInMemoryConnectionRepository(),
+  dataTypeSourcePolicy:
+    overrides.dataTypeSourcePolicy ??
+    createInMemoryDataTypeSourcePolicyRepository(),
   ...((): Pick<
     DeleteProfileWithCascadeDeps,
     "intakeEntries" | "intakePresets" | "energyTargets"

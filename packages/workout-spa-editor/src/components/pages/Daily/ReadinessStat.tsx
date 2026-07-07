@@ -1,4 +1,5 @@
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import { HealthSourceBadge } from "../health/HealthSourceBadge";
 import type { ReadinessMetric } from "./today-readiness";
 
 export type ReadinessStatProps = {
@@ -22,6 +23,14 @@ export function ReadinessStat({ metric }: ReadinessStatProps) {
       <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mt-px">
         {metric.label}
       </div>
+      {metric.source !== undefined && (
+        <div className="mt-0.5">
+          <HealthSourceBadge
+            sourceBridgeId={metric.source}
+            usedFallback={metric.usedFallback}
+          />
+        </div>
+      )}
     </div>
   );
 }

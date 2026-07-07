@@ -9,8 +9,6 @@ import {
 } from "./import-health-fit-file.use-case";
 
 const PROFILE_ID = "p-1";
-const FIXED_ID = "id-fixed";
-const FIXED_NEW_ID = () => FIXED_ID;
 const SAMPLE_WEIGHT_KG = 75;
 const SAMPLE_STEPS = 8000;
 const SAMPLE_ACTIVE_KCAL = 400;
@@ -38,6 +36,22 @@ const sleepKrd = (): KRD => ({
   },
 });
 
+const weightKrd = (weightKilograms: number): KRD => ({
+  version: "2.0",
+  type: "weight_measurement",
+  metadata: baseMeta,
+  extensions: {
+    health: {
+      weight: {
+        kind: "weight",
+        version: "2.0",
+        measuredAt: "2026-05-23T08:00:00.000Z",
+        weightKilograms,
+      },
+    },
+  },
+});
+
 describe("importHealthFitFile", () => {
   it("should persist a sleep KRD into healthSleep with date derived from startTime", async () => {
     // Arrange
@@ -45,13 +59,13 @@ describe("importHealthFitFile", () => {
 
     // Act
     const result = await importHealthFitFile(
-      { persistence, profileId: PROFILE_ID, newId: FIXED_NEW_ID },
+      { persistence, profileId: PROFILE_ID },
       sleepKrd()
     );
 
     // Assert
-    expect(result).toEqual({ type: "sleep_record", recordId: FIXED_ID });
-    const row = await persistence.healthSleep.getById(FIXED_ID);
+    expect(result.type).toBe("sleep_record");
+    const row = await persistence.healthSleep.getById(result.recordId);
     expect(row?.profileId).toBe(PROFILE_ID);
     expect(row?.date).toBe("2026-05-23");
   });
@@ -79,13 +93,13 @@ describe("importHealthFitFile", () => {
     };
 
     // Act
-    await importHealthFitFile(
-      { persistence, profileId: PROFILE_ID, newId: FIXED_NEW_ID },
+    const result = await importHealthFitFile(
+      { persistence, profileId: PROFILE_ID },
       krd
     );
 
     // Assert
-    const row = await persistence.healthDaily.getById(FIXED_ID);
+    const row = await persistence.healthDaily.getById(result.recordId);
     expect(row?.date).toBe("2026-05-22");
   });
 
@@ -111,43 +125,28 @@ describe("importHealthFitFile", () => {
     };
 
     // Act
-    await importHealthFitFile(
-      { persistence, profileId: PROFILE_ID, newId: FIXED_NEW_ID },
+    const result = await importHealthFitFile(
+      { persistence, profileId: PROFILE_ID },
       krd
     );
 
     // Assert
-    const row = await persistence.healthStress.getById(FIXED_ID);
+    const row = await persistence.healthStress.getById(result.recordId);
     expect(row?.date).toBe("2026-05-23");
   });
 
   it("should persist a weight KRD into healthWeight", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    const krd: KRD = {
-      version: "2.0",
-      type: "weight_measurement",
-      metadata: baseMeta,
-      extensions: {
-        health: {
-          weight: {
-            kind: "weight",
-            version: "2.0",
-            measuredAt: "2026-05-23T08:00:00.000Z",
-            weightKilograms: SAMPLE_WEIGHT_KG,
-          },
-        },
-      },
-    };
 
     // Act
-    await importHealthFitFile(
-      { persistence, profileId: PROFILE_ID, newId: FIXED_NEW_ID },
-      krd
+    const result = await importHealthFitFile(
+      { persistence, profileId: PROFILE_ID },
+      weightKrd(SAMPLE_WEIGHT_KG)
     );
 
     // Assert
-    const row = await persistence.healthWeight.getById(FIXED_ID);
+    const row = await persistence.healthWeight.getById(result.recordId);
     expect(row?.krd.weightKilograms).toBe(SAMPLE_WEIGHT_KG);
   });
 
@@ -172,14 +171,55 @@ describe("importHealthFitFile", () => {
     };
 
     // Act
-    await importHealthFitFile(
-      { persistence, profileId: PROFILE_ID, newId: FIXED_NEW_ID },
+    const result = await importHealthFitFile(
+      { persistence, profileId: PROFILE_ID },
       krd
     );
 
     // Assert
-    const row = await persistence.healthHrv.getById(FIXED_ID);
+    const row = await persistence.healthHrv.getById(result.recordId);
     expect(row?.krd.rMSSD).toBe(SAMPLE_RMSSD);
+  });
+
+  it("should stamp sourceBridgeId 'fit-import' and a content-hash externalId", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    const result = await importHealthFitFile(
+      { persistence, profileId: PROFILE_ID },
+      weightKrd(SAMPLE_WEIGHT_KG)
+    );
+
+    // Assert
+    const row = await persistence.healthWeight.getById(result.recordId);
+    expect(row?.sourceBridgeId).toBe("fit-import");
+    expect(row?.externalId).toBeTruthy();
+  });
+
+  it("should produce zero new rows when the same FIT weight KRD is imported twice", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const krd = weightKrd(SAMPLE_WEIGHT_KG);
+
+    // Act
+    const first = await importHealthFitFile(
+      { persistence, profileId: PROFILE_ID },
+      krd
+    );
+    const second = await importHealthFitFile(
+      { persistence, profileId: PROFILE_ID },
+      krd
+    );
+
+    // Assert
+    expect(second.recordId).toBe(first.recordId);
+    const rows = await persistence.healthWeight.getByProfileAndDateRange(
+      PROFILE_ID,
+      "2026-05-23",
+      "2026-05-23"
+    );
+    expect(rows).toHaveLength(1);
   });
 
   it("should throw UnsupportedHealthKrdError when the KRD type is not a health type", async () => {

@@ -1,11 +1,17 @@
-// Training-plan and training-zones have no dedicated KRD schemas yet;
-// a passthrough z.unknown() stands in until their schemas are introduced.
-import { z } from "zod";
-
+import {
+  activityHashProjection,
+  bodyCompositionHashProjection,
+  dailyWellnessHashProjection,
+  hrvHashProjection,
+  plannedSessionHashProjection,
+  sleepHashProjection,
+  weightHashProjection,
+} from "./managed-data-hash-projections";
 import type {
   ManagedDataRegistryEntry,
   ManagedDataType,
 } from "./managed-data-type";
+import { activitySchema } from "./schemas/activity";
 import {
   bodyCompositionSchema,
   dailyWellnessSchema,
@@ -14,6 +20,8 @@ import {
   stressEpisodeSchema,
   weightMeasurementSchema,
 } from "./schemas/health";
+import { plannedSessionSchema } from "./schemas/planned-session";
+import { trainingZonesSchema } from "./schemas/training-zones";
 import { workoutSchema } from "./schemas/workout";
 
 export const MANAGED_DATA_REGISTRY: Record<
@@ -25,72 +33,54 @@ export const MANAGED_DATA_REGISTRY: Record<
     schema: workoutSchema,
     capabilities: { export: "write:workouts", import: "read:workouts" },
   },
-  "training-plan": {
-    label: "Training Plan",
-    schema: z.unknown(),
+  "planned-session": {
+    label: "Planned Session",
+    schema: plannedSessionSchema,
+    // `read:training-plan` is the train2go-bridge wire token, kept mapped
+    // N:1 to planned-session (permanent — no rename; see consensus MAJOR-C).
     capabilities: { import: "read:training-plan" },
+    hashProjection: plannedSessionHashProjection,
+  },
+  activity: {
+    label: "Activity",
+    schema: activitySchema,
+    capabilities: { import: "read:activities" },
+    hashProjection: activityHashProjection,
   },
   "training-zones": {
     label: "Training Zones",
-    schema: z.unknown(),
+    schema: trainingZonesSchema,
     capabilities: { import: "read:training-zones" },
   },
   weight: {
     label: "Weight",
     schema: weightMeasurementSchema,
     capabilities: { import: "read:body" },
-    hashProjection: (p) => {
-      const payload = p as { weightKilograms?: unknown; measuredAt?: unknown };
-      return { kg: payload.weightKilograms, measuredAt: payload.measuredAt };
-    },
+    hashProjection: weightHashProjection,
   },
   sleep: {
     label: "Sleep",
     schema: sleepRecordSchema,
     capabilities: { import: "read:sleep" },
-    hashProjection: (p) => {
-      const payload = p as {
-        totalDurationSeconds?: unknown;
-        startTime?: unknown;
-      };
-      return {
-        totalMinutes: payload.totalDurationSeconds,
-        startedAt: payload.startTime,
-      };
-    },
+    hashProjection: sleepHashProjection,
   },
   hrv: {
     label: "HRV",
     schema: hrvSummarySchema,
     capabilities: { import: "read:body" },
-    hashProjection: (p) => {
-      const payload = p as { rMSSD?: unknown; measuredAt?: unknown };
-      return { rMSSD: payload.rMSSD, measuredAt: payload.measuredAt };
-    },
+    hashProjection: hrvHashProjection,
   },
   "daily-wellness": {
     label: "Daily Wellness",
     schema: dailyWellnessSchema,
     capabilities: { import: "read:body" },
-    hashProjection: (p) => {
-      const payload = p as { steps?: unknown; date?: unknown };
-      return { steps: payload.steps, date: payload.date };
-    },
+    hashProjection: dailyWellnessHashProjection,
   },
   "body-composition": {
     label: "Body Composition",
     schema: bodyCompositionSchema,
     capabilities: { import: "read:body" },
-    hashProjection: (p) => {
-      const payload = p as {
-        bodyFatPercent?: unknown;
-        measuredAt?: unknown;
-      };
-      return {
-        bodyFatPercent: payload.bodyFatPercent,
-        measuredAt: payload.measuredAt,
-      };
-    },
+    hashProjection: bodyCompositionHashProjection,
   },
   stress: {
     label: "Stress",
