@@ -14,4 +14,9 @@ export const createInMemoryActivityRepository = (
     store.set(key, record);
     return { created: true };
   },
+
+  getByProfileAndDateRange: async (profileId, start, end) =>
+    [...store.values()].filter(
+      (a) => a.profileId === profileId && a.date >= start && a.date <= end
+    ),
 });

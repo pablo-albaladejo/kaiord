@@ -6,7 +6,9 @@
  * `useLiveQuery` reactivity is preserved when the hooks read through the port.
  */
 
+import { activityToWorkoutRecord } from "../../application/coaching/activity-to-workout-record";
 import type { MatchedSessionsReadModel } from "../../ports/matched-sessions-read-model";
+import type { ActivityRecord } from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { SessionMatch } from "../../types/session-match";
@@ -17,24 +19,39 @@ export function createDexieMatchedSessionsReadModel(
 ): MatchedSessionsReadModel {
   const activities = () =>
     db.table<CoachingActivityRecord>("coachingActivities");
+  const executedActivities = () => db.table<ActivityRecord>("activities");
   const workouts = () => db.table<WorkoutRecord>("workouts");
   const sessionMatches = () => db.table<SessionMatch>("sessionMatches");
 
   return {
     loadJoinSources: async (activityIds, workoutIds) => {
-      const [activityRows, workoutRows] = await Promise.all([
-        activities()
-          .where("id")
-          .anyOf([...activityIds])
-          .toArray(),
-        workouts()
-          .where("id")
-          .anyOf([...workoutIds])
-          .toArray(),
-      ]);
+      const [activityRows, workoutRows, executedActivityRows] =
+        await Promise.all([
+          activities()
+            .where("id")
+            .anyOf([...activityIds])
+            .toArray(),
+          workouts()
+            .where("id")
+            .anyOf([...workoutIds])
+            .toArray(),
+          executedActivities()
+            .where("id")
+            .anyOf([...workoutIds])
+            .toArray(),
+        ]);
+      const workoutsById = new Map(workoutRows.map((w) => [w.id, w]));
+      // No-twin executed activities (e.g. the Garmin pull) have no
+      // WorkoutRecord; project one so the executed slot renders through the
+      // unchanged resolveExecuted join. Real WorkoutRecords win on id clash.
+      for (const a of executedActivityRows) {
+        if (!workoutsById.has(a.id)) {
+          workoutsById.set(a.id, activityToWorkoutRecord(a));
+        }
+      }
       return {
         activitiesById: new Map(activityRows.map((a) => [a.id, a])),
-        workoutsById: new Map(workoutRows.map((w) => [w.id, w])),
+        workoutsById,
       };
     },
 

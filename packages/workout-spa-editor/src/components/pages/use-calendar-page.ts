@@ -20,10 +20,9 @@ import {
   useAutoMatchBannerActions,
 } from "../../hooks/use-auto-match-banner-actions";
 import { useAutoMatchSuggestions } from "../../hooks/use-auto-match-suggestions";
+import { useCalendarExecuted } from "../../hooks/use-calendar-executed";
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
-import { useExecutedMatchAutoForCalendar } from "../../hooks/use-executed-match-auto";
-import { useGarminActivitiesPull } from "../../hooks/use-garmin-activities-pull";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { useSetCalendarView } from "../../hooks/use-set-calendar-view";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
@@ -67,9 +66,8 @@ export function useCalendarPage(): CalendarPageState {
     weekStart,
     s.data.days.at(-1) ?? ""
   );
-  useGarminActivitiesPull(profileId);
   const rawMatched = useMatchedSessions(profileId, s.data.days);
-  useExecutedMatchAutoForCalendar(rawMatched, s.data.workoutsByDay);
+  const activitiesByDay = useCalendarExecuted(profileId, rawMatched, s.data);
   const suggestions = useAutoMatchSuggestions(profileId, weekStart);
   const bannerActions = useAutoMatchBannerActions(profileId, weekStart);
   const prefs = useUserPreferences({ profileId, defaultView: defaultView() });
@@ -77,6 +75,7 @@ export function useCalendarPage(): CalendarPageState {
     days: s.data.days,
     workoutsByDay: s.data.workoutsByDay,
     coachingByDay: coaching.byDay,
+    activitiesByDay,
     matched: rawMatched ?? [],
   });
   const onViewChange = useSetCalendarView(profileId);
