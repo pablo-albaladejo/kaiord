@@ -7,6 +7,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { HelpSection } from "../../../pages/HelpSection/HelpSection";
 
 type HelpDialogProps = {
@@ -20,6 +21,7 @@ export function HelpDialog({
   onOpenChange,
   onReplayTutorial,
 }: HelpDialogProps) {
+  const t = useTranslate("common");
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -30,12 +32,12 @@ export function HelpDialog({
         >
           <div className="mb-4 flex items-center justify-between">
             <Dialog.Title className="text-2xl font-bold text-gray-900 dark:text-white">
-              Help & Documentation
+              {t("help.documentation")}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 className="rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:ring-offset-gray-950 dark:focus:ring-primary-400 dark:data-[state=open]:bg-gray-800"
-                aria-label="Close"
+                aria-label={t("actions.close")}
               >
                 <X className="h-4 w-4" />
               </button>

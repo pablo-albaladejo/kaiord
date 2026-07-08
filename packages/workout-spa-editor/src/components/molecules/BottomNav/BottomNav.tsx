@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { BAR_STYLE, FAB_NOTCH_WIDTH } from "./bottom-nav-styles";
 import { BOTTOM_NAV_TABS, isTabActive } from "./bottom-nav-tabs";
 import { BottomNavFab } from "./BottomNavFab";
@@ -17,9 +18,10 @@ const NOTCH_INDEX = 3;
  */
 export function BottomNav() {
   const [location, navigate] = useLocation();
+  const t = useTranslate("common");
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t("a11y.primary")}
       data-testid="bottom-nav"
       style={BAR_STYLE}
       className="fixed inset-x-[14px] bottom-[14px] z-30 mx-auto flex max-w-md items-stretch rounded-[24px] border border-slate-700/60 md:hidden"
