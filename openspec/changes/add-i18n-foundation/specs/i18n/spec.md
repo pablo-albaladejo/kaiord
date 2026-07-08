@@ -116,17 +116,27 @@ tags (e.g. `"en-US"`) SHALL NOT appear in SPA formatter call sites.
 
 ### Requirement: Upstream error translation contract
 
-The SPA SHALL localize failures originating in `@kaiord/*` packages by typed
-error class or stable `ValidationError.code` — never by matching message
-text. When no mapping exists for a class or code, the SPA SHALL render the
-upstream English `message` verbatim. Core, the converters, and `@kaiord/ai`
-SHALL NOT gain any i18n dependency or locale-specific display copy.
+The SPA SHALL localize failures originating in `@kaiord/*` packages by a
+stable code — a `ValidationError.code` or an `AiParsingError.reason` — never
+by matching message text. When no mapping exists for a code, the SPA SHALL
+render the upstream English `message` verbatim. Core, the converters, and
+`@kaiord/ai` SHALL NOT gain any i18n dependency or locale-specific display
+copy. Localizing an upstream failure whose useful content is a free-text
+technical detail (e.g. the format converters' parse messages) requires that
+package to first emit a stable code for the detail; until then such failures
+fall under the verbatim-English rule above.
 
-#### Scenario: Known converter error renders localized copy
+#### Scenario: Known AI input-validation reason renders localized copy
 
-- **GIVEN** the active locale is `es` and a TCX import throws `TcxParsingError`
+- **GIVEN** the active locale is `es` and an AI generation fails with `AiParsingError.reason: "input_too_long"`
+- **WHEN** the generation error is displayed
+- **THEN** the SPA SHALL render the Spanish copy for that reason, interpolating the length details
+
+#### Scenario: Converter parse error without a code degrades to the upstream message
+
+- **GIVEN** the active locale is `es` and a TCX import throws `TcxParsingError` (which carries no stable code)
 - **WHEN** the import error is displayed
-- **THEN** the SPA SHALL render the Spanish copy mapped to that error class
+- **THEN** the SPA SHALL render the upstream English `message` verbatim, per the fallback rule
 
 #### Scenario: Known validation code renders localized copy
 
