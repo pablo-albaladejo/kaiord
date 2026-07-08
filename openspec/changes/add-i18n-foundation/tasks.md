@@ -1,7 +1,7 @@
-> Status: foundation + locale-preference domain + pilot dictionaries landed and
-> green (sections 1, 2, 3, 7.1/7.3/7.4, 8, 4.1). Remaining: SPA runtime wiring
-> (provider/switcher), formatters, error mapping, labs live-locale rendering,
-> full quality gates (sections 4.2–4.4, 5, 6, 7.2, 9).
+> Status: foundation + locale-preference domain + pilot dictionaries + SPA
+> runtime wiring (provider, switcher, formatters, labs live-locale) landed and
+> green (sections 1, 2, 3, 4.1–4.3, 5, 7, 8). Remaining: e2e locale pin (4.4),
+> upstream error mapping (6), full quality gates (9).
 
 ## 1. `@kaiord/i18n` package (mechanism)
 
@@ -27,14 +27,14 @@
 ## 4. SPA: i18n wiring
 
 - [x] 4.1 Create `src/i18n/`: `resources.ts` (namespaces per locale from JSON), `i18n.ts` (react-i18next instance + `setActiveLocale` updating `<html lang>`).
-- [ ] 4.2 Add a `useLocaleSync` hook + mount it under a provider in `App.tsx`: read the active profile's preference via `useLiveQuery`, `resolveLocale`, `setActiveLocale` on change. Test: switch re-renders consumers and updates `lang`.
-- [ ] 4.3 Add the language switcher to `SettingsPanel/PreferencesTab` (Auto / English / Español) wired through `useSetUserPreferenceFields({ locale })`; UI tests.
+- [x] 4.2 `LocaleProvider` (`src/i18n/LocaleProvider.tsx`) mounted in `main.tsx`: wraps `I18nextProvider` + a `LocaleSync` that reads the active profile's preference via `useLiveQuery`, `resolveLocale`, `setActiveLocale` on change, and publishes the active locale through a context (`useActiveLocale`, defaults `en` outside a provider). Tested: resolves `es` + sets `<html lang>`; defaults `en` unwrapped.
+- [x] 4.3 Language switcher (`LanguageRow`) in `SettingsPanel/PreferencesTab` (Auto / English / Español) wired through `useSetUserPreferenceFields({ locale })`; UI tests (reflects Auto default, persists `es` on change).
 - [ ] 4.4 e2e: pin locale explicitly in Playwright config/fixtures so existing English assertions stay deterministic.
 
 ## 5. SPA: locale-aware formatting
 
-- [ ] 5.1 Replace hardcoded `"en-US"` with the active locale in `pages/health/trends/format-pane-value.ts`, `molecules/TemplatePickerDialog/format-date-label.ts`, `pages/DateBanner.tsx` (inject locale from the i18n context).
-- [ ] 5.2 Unit tests: the three formatters honor an `es` locale and default to `en`.
+- [x] 5.1 Replaced hardcoded `"en-US"` with the active locale: `format-pane-value.ts` (+ `build-trend-chart-options.ts`/`TrendSingleChartCard.tsx` thread it), `format-date-label.ts` (callers `WellnessEntryDialog`/`AddEntryChooser` pass `useActiveLocale()`), `DateBanner.tsx` (reads `useActiveLocale()`). Formatters take `locale: Locale = "en"` so unwrapped/pure tests stay in `en`.
+- [x] 5.2 Unit tests: steps group with the `es` separator (`94.321`); `formatDateLabel` renders `lunes, 4 de mayo` for `es`; both default to `en`.
 
 ## 6. SPA: upstream error mapping
 
@@ -46,7 +46,7 @@
 ## 7. Pilot: `labs` namespace (en + es)
 
 - [x] 7.1 `locales/en/labs.json` from the display map + `locales/es/labs.json` seeded from the pre-#863 `nameES` catalog (`git show d2276ad1^`); abbreviations extracted to a language-neutral `lab-abbreviations.ts`.
-- [ ] 7.2 Wire the active locale through to the labs UI so names render in `es` at runtime. (Done so far: `getLabParameterDisplay(key, locale)` sources names from the dictionary and takes a locale, defaulting to `en` — non-breaking; remaining: thread the active locale into `lab-parameter-options.ts`/`lab-parameter-label.ts` and their component consumers via a hook.)
+- [x] 7.2 Wired the active locale through the labs UI: `labParameterLabel(key, locale)` and `labParameterOptions(locale)`/`findParameterByLabel(label, locale)` are locale-aware (default `en`); the display consumers (`LabParameterListItem`, `LabReportValueRow`, `LabParameterChart`, `LabParameterChartCard`) and the entry autocomplete (`LabParameterIdentityField`) pass `useActiveLocale()`. Names now render in `es` at runtime. (`LAB_PARAMETER_OPTIONS` constant → `labParameterOptions()` function; test updated + `es` case added.)
 - [x] 7.3 Wire the en/es parity test (`src/i18n/resource-parity.test.ts`) over all SPA namespaces.
 - [x] 7.4 Existing labs tests run under `en` (unchanged) + `es` smoke tests (Spanish name renders; abbreviation identical across locales).
 
