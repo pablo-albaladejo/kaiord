@@ -32,3 +32,36 @@ export function localizeValidationMessage(
   const enTable = ERRORS.en.validation as Record<string, string>;
   return table[entry.code] ?? enTable[entry.code] ?? entry.message;
 }
+
+const interpolate = (
+  template: string,
+  details?: Record<string, number>
+): string =>
+  template.replace(/\{\{(\w+)\}\}/g, (_match, key: string) => {
+    const value = details?.[key];
+    return value === undefined ? `{{${key}}}` : String(value);
+  });
+
+type AiErrorLike = {
+  reason?: unknown;
+  message?: unknown;
+  details?: Record<string, number>;
+};
+
+/**
+ * Localized copy for an AI failure by its stable `reason` (e.g. from
+ * `@kaiord/ai`'s `AiParsingError`), interpolating any structured `details`.
+ * Falls back to the upstream English message, then to a generic string.
+ */
+export function localizeAiError(error: unknown, locale: Locale = "en"): string {
+  const err = (error ?? {}) as AiErrorLike;
+  const message = typeof err.message === "string" ? err.message : undefined;
+  const reason = typeof err.reason === "string" ? err.reason : undefined;
+  const ai = ERRORS[locale].ai as Record<string, string>;
+  if (!reason) return message ?? ai.generationFailed;
+  const template =
+    ai[reason] ?? (ERRORS.en.ai as Record<string, string>)[reason] ?? message;
+  return template === undefined
+    ? (message ?? ai.generationFailed)
+    : interpolate(template, err.details);
+}

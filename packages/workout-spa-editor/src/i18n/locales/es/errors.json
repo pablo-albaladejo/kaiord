@@ -4,5 +4,10 @@
     "min_gt_max": "el mínimo debe ser menor o igual que el máximo",
     "duration_type_mismatch": "durationType debe coincidir con duration.type",
     "target_type_mismatch": "targetType debe coincidir con target.type"
+  },
+  "ai": {
+    "generationFailed": "No se pudo generar",
+    "input_empty": "El texto de entrada está vacío",
+    "input_too_long": "El texto supera los {{maxLength}} caracteres (introducidos {{actualLength}})"
   }
 }

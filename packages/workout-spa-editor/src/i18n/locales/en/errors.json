@@ -4,5 +4,10 @@
     "min_gt_max": "min must be less than or equal to max",
     "duration_type_mismatch": "durationType must match duration.type",
     "target_type_mismatch": "targetType must match target.type"
+  },
+  "ai": {
+    "generationFailed": "Generation failed",
+    "input_empty": "Input text is empty",
+    "input_too_long": "Input text exceeds {{maxLength}} characters (got {{actualLength}})"
   }
 }
