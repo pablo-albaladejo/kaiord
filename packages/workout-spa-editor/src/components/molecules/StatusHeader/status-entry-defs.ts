@@ -6,7 +6,6 @@ import { ICON_MAP } from "../../atoms/Icon/icon-map";
 export type EntryDef = {
   id: string;
   icon: ComponentType<{ className?: string }>;
-  label: string;
   ariaLabel?: string;
   to: string;
   variant?: "primary" | "tertiary";
@@ -29,7 +28,6 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = NAV_DESTINATIONS.filter(
 ).map((destination) => ({
   id: destination.id,
   icon: ICON_MAP[destination.icon],
-  label: destination.labelKey,
   ariaLabel: destination.ariaLabel,
   to: destination.path,
   variant: PRIMARY_VARIANT_IDS.has(destination.id) ? "primary" : undefined,

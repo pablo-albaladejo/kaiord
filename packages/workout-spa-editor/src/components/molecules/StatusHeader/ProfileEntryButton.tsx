@@ -2,16 +2,18 @@ import { User } from "lucide-react";
 import { useLocation } from "wouter";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 
 export function ProfileEntryButton() {
   const [, navigate] = useLocation();
+  const t = useTranslate("common");
   const activeProfile = useActiveProfileLive()?.profile ?? null;
-  const label = activeProfile?.name ?? "No profile";
+  const label = activeProfile?.name ?? t("status.noProfile");
 
   const ariaLabel = activeProfile
-    ? `Open athlete profile (active profile: ${activeProfile.name})`
-    : "Open athlete profile (no active profile)";
+    ? t("a11y.openAthleteProfile", { name: activeProfile.name })
+    : t("a11y.openAthleteProfileEmpty");
 
   return (
     <Button
