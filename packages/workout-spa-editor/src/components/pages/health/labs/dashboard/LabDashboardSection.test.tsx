@@ -18,13 +18,14 @@ vi.mock("../../../../charts/uplot-base/uplot-chart", () => ({
 const PROFILE_ID = "p1";
 const NOW = "2026-07-07T12:00:00.000Z";
 // Pinning several parameters fires one Dexie live query per card; under full-
-// suite CPU contention their re-renders can exceed the 1s waitFor default.
-const CHART_RENDER_TIMEOUT_MS = 4000;
+// suite CPU contention their re-renders can exceed the 1s waitFor default, so
+// the assertion polls longer for the cards to appear (value from #874).
+const CHART_RENDER_TIMEOUT_MS = 10_000;
 
-// This integration test drives real Dexie + useLiveQuery through several
-// pin/unpin interactions. It runs in ~0.7s in isolation but can exceed the 5s
-// default under CPU-starved parallel CI; the generous ceiling absorbs that
-// scheduling jitter without masking a real hang (the test always completes).
+// The interaction tests run in ~0.7s in isolation but the whole test can exceed
+// the 5s per-test default under CPU-starved parallel CI. This ceiling raises the
+// it-level wall (which the waitFor timeout above cannot) without masking a real
+// hang — the tests always complete. Both bounds are load headroom, not logic.
 const CI_TIMEOUT_MS = 20_000;
 
 const wrap = ({ children }: { children: ReactNode }) => (
