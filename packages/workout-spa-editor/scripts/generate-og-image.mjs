@@ -1,19 +1,39 @@
 import sharp from "sharp";
-import { statSync, mkdirSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { statSync, mkdirSync, readFileSync } from "node:fs";
+import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { readBrandTokenColor } from "../.vitepress/brand-tokens.mjs";
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const docsRoot = join(__dirname, "..");
-const publicDir = join(docsRoot, "public");
+const editorRoot = join(__dirname, "..");
+const publicDir = join(editorRoot, "public");
+
+// Read a brand token straight from the shared source of truth so the OG card
+// stays in lockstep with the landing and docs surfaces.
+const BRAND_TOKENS_PATH = resolve(
+  editorRoot,
+  "..",
+  "..",
+  "styles",
+  "brand-tokens.css"
+);
+
+function readBrandTokenColor(name) {
+  const source = readFileSync(BRAND_TOKENS_PATH, "utf8");
+  const pattern = new RegExp(
+    `${name.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}\\s*:\\s*([^;]+?)\\s*(?:;|\\n)`
+  );
+  const match = source.match(pattern);
+  if (!match) {
+    throw new Error(`Brand token ${name} not found in ${BRAND_TOKENS_PATH}`);
+  }
+  return match[1].trim();
+}
 
 const BRAND_BG = readBrandTokenColor("--brand-bg-primary");
 const BRAND_ACCENT = readBrandTokenColor("--brand-accent-blue");
 const ACCENT_SKY = "#38bdf8"; // sky-400 — matches the landing OG subtitle accent
 
-function createDocsOgSvg() {
+function createEditorOgSvg() {
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="600" cy="205" r="430">
@@ -43,7 +63,7 @@ function createDocsOgSvg() {
   <!-- Wordmark -->
   <text x="600" y="360" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" letter-spacing="-1" fill="#f8fafc">kaiord</text>
   <!-- Subtitle -->
-  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="500" fill="${ACCENT_SKY}">Documentation</text>
+  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="500" fill="${ACCENT_SKY}">Editor</text>
   <!-- Author -->
   <text x="600" y="560" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#64748b">by Pablo Albaladejo</text>
 </svg>`);
@@ -52,9 +72,9 @@ function createDocsOgSvg() {
 async function main() {
   mkdirSync(publicDir, { recursive: true });
 
-  console.log("Generating docs OG image...");
-  const svg = createDocsOgSvg();
-  const outputPath = join(publicDir, "og-image-docs.png");
+  console.log("Generating editor OG image...");
+  const svg = createEditorOgSvg();
+  const outputPath = join(publicDir, "og-image-editor.png");
 
   await sharp(svg)
     .resize(1200, 630)
@@ -63,7 +83,7 @@ async function main() {
 
   const stats = statSync(outputPath);
   const sizeKB = Math.round(stats.size / 1024);
-  console.log(`  og-image-docs.png (${sizeKB}KB)`);
+  console.log(`  og-image-editor.png (${sizeKB}KB)`);
 
   if (sizeKB > 100) {
     console.warn(`  WARNING: OG image is ${sizeKB}KB, target is < 100KB`);
