@@ -11,16 +11,36 @@ import enCommon from "./locales/en/common.json";
 import enErrors from "./locales/en/errors.json";
 import enLabs from "./locales/en/labs.json";
 import enNav from "./locales/en/nav.json";
+import enSettings from "./locales/en/settings.json";
 import esCommon from "./locales/es/common.json";
 import esErrors from "./locales/es/errors.json";
 import esLabs from "./locales/es/labs.json";
 import esNav from "./locales/es/nav.json";
+import esSettings from "./locales/es/settings.json";
 
-export const NAMESPACES = ["common", "errors", "labs", "nav"] as const;
+export const NAMESPACES = [
+  "common",
+  "errors",
+  "labs",
+  "nav",
+  "settings",
+] as const;
 
 export const DEFAULT_NAMESPACE = "common";
 
 export const resources: LocaleResources = {
-  en: { common: enCommon, errors: enErrors, labs: enLabs, nav: enNav },
-  es: { common: esCommon, errors: esErrors, labs: esLabs, nav: esNav },
+  en: {
+    common: enCommon,
+    errors: enErrors,
+    labs: enLabs,
+    nav: enNav,
+    settings: enSettings,
+  },
+  es: {
+    common: esCommon,
+    errors: esErrors,
+    labs: esLabs,
+    nav: esNav,
+    settings: esSettings,
+  },
 };
