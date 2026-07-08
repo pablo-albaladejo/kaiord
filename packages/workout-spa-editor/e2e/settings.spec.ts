@@ -21,7 +21,7 @@ test.describe("Settings Panel", () => {
     // Open the grouped settings index, then enter the AI Provider section.
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings$/);
-    await page.getByTestId("settings-row-Provider").click();
+    await page.getByTestId("settings-row-provider").click();
     await page.waitForURL(/\/settings\/ai/);
     const settingsPage = page.getByTestId("settings-page");
     await expect(settingsPage).toBeVisible({ timeout: 5000 });
@@ -83,7 +83,7 @@ test.describe("Settings Panel", () => {
     // its own route. Navigate to it via the grouped-list row.
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings$/);
-    await page.getByTestId("settings-row-Extensions").click();
+    await page.getByTestId("settings-row-extensions").click();
     await page.waitForURL(/\/settings\/extensions$/);
 
     const extensionsPanel = page.getByTestId("settings-panel-extensions");

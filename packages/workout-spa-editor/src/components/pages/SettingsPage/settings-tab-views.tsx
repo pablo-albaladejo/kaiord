@@ -17,16 +17,6 @@ const TAB_ORDER: ReadonlyArray<SettingsTab> = [
   "preferences",
 ];
 
-const TAB_LABELS: Record<SettingsTab, string> = {
-  ai: "AI",
-  sync: "Sync",
-  "data-hub": "Data Hub",
-  extensions: "Extensions",
-  usage: "Usage",
-  privacy: "Privacy",
-  preferences: "Preferences",
-};
-
 const TAB_VIEWS: Record<SettingsTab, React.FC> = {
   ai: AiTab,
   sync: SyncTab,
@@ -37,7 +27,6 @@ const TAB_VIEWS: Record<SettingsTab, React.FC> = {
   preferences: PreferencesTab,
 };
 
-export const SETTINGS_TAB_LABELS = TAB_LABELS;
 export const SETTINGS_TAB_VIEWS = TAB_VIEWS;
 export const DEFAULT_SETTINGS_TAB: SettingsTab = "ai";
 

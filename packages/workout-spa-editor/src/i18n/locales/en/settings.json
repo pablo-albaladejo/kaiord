@@ -1,0 +1,34 @@
+{
+  "title": "Settings",
+  "back": "Settings",
+  "groups": {
+    "aiGeneration": "AI generation",
+    "crossDeviceSync": "Cross-device sync",
+    "dataRouting": "Data routing",
+    "preferences": "Preferences",
+    "privacyData": "Privacy & data",
+    "advanced": "Advanced"
+  },
+  "rows": {
+    "provider": "Provider",
+    "customInstructions": "Custom instructions",
+    "googleDriveSync": "Google Drive sync",
+    "dataHub": "Data Hub",
+    "units": "Units",
+    "language": "Language",
+    "notifications": "Notifications",
+    "dataPrivacy": "Data & privacy",
+    "manageYourData": "Manage your data",
+    "extensions": "Extensions",
+    "usage": "Usage"
+  },
+  "tabs": {
+    "ai": "AI",
+    "sync": "Sync",
+    "data-hub": "Data Hub",
+    "extensions": "Extensions",
+    "usage": "Usage",
+    "privacy": "Privacy",
+    "preferences": "Preferences"
+  }
+}

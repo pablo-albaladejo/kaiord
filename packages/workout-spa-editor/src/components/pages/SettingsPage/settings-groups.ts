@@ -2,65 +2,67 @@ import type { IconName } from "../../atoms/Icon";
 
 export type SettingsRowDef = {
   icon: IconName;
-  label: string;
+  /** Stable identity: i18n key under `settings.rows.*`, React key, and testid. */
+  key: string;
   to?: string;
   detailKey?: "defaultProvider";
 };
 
 export type SettingsGroupDef = {
-  eyebrow: string;
+  /** Stable identity: i18n key under `settings.groups.*` and React key. */
+  key: string;
   rows: ReadonlyArray<SettingsRowDef>;
 };
 
 export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [
   {
-    eyebrow: "AI generation",
+    key: "aiGeneration",
     rows: [
       {
         icon: "sparkle",
-        label: "Provider",
+        key: "provider",
         to: "/settings/ai?section=providers",
         detailKey: "defaultProvider",
       },
       {
         icon: "edit",
-        label: "Custom instructions",
+        key: "customInstructions",
         to: "/settings/ai?section=custom-instructions",
       },
     ],
   },
   {
-    eyebrow: "Cross-device sync",
-    rows: [{ icon: "sync", label: "Google Drive sync", to: "/settings/sync" }],
+    key: "crossDeviceSync",
+    rows: [{ icon: "sync", key: "googleDriveSync", to: "/settings/sync" }],
   },
   {
-    eyebrow: "Data routing",
-    rows: [{ icon: "route", label: "Data Hub", to: "/settings/data-hub" }],
+    key: "dataRouting",
+    rows: [{ icon: "route", key: "dataHub", to: "/settings/data-hub" }],
   },
   {
-    eyebrow: "Preferences",
+    key: "preferences",
     rows: [
-      { icon: "target", label: "Units", to: "/settings/preferences" },
-      { icon: "chat", label: "Language", to: "/settings/preferences" },
-      { icon: "bell", label: "Notifications", to: "/settings/preferences" },
+      { icon: "target", key: "units", to: "/settings/preferences" },
+      { icon: "chat", key: "language", to: "/settings/preferences" },
+      { icon: "bell", key: "notifications", to: "/settings/preferences" },
     ],
   },
   {
-    eyebrow: "Privacy & data",
+    key: "privacyData",
     rows: [
-      { icon: "shield", label: "Data & privacy", to: "/settings/privacy" },
+      { icon: "shield", key: "dataPrivacy", to: "/settings/privacy" },
       {
         icon: "shield",
-        label: "Manage your data",
+        key: "manageYourData",
         to: "/settings/privacy?section=data-management",
       },
     ],
   },
   {
-    eyebrow: "Advanced",
+    key: "advanced",
     rows: [
-      { icon: "link", label: "Extensions", to: "/settings/extensions" },
-      { icon: "trend", label: "Usage", to: "/settings/usage" },
+      { icon: "link", key: "extensions", to: "/settings/extensions" },
+      { icon: "trend", key: "usage", to: "/settings/usage" },
     ],
   },
 ];

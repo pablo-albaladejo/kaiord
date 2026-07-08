@@ -3,6 +3,8 @@ import { Icon, ICON_MAP, type IconName } from "../../atoms/Icon";
 export type SettingsRowProps = {
   icon: IconName;
   label: string;
+  /** Locale-independent testid suffix; falls back to the label. */
+  testId?: string;
   detail?: string;
   to?: string;
   onNavigate?: (to: string) => void;
@@ -14,11 +16,13 @@ const TILE_CLASS =
 export const SettingsRow = ({
   icon,
   label,
+  testId,
   detail,
   to,
   onNavigate,
 }: SettingsRowProps) => {
   const interactive = to !== undefined && onNavigate !== undefined;
+  const rowTestId = `settings-row-${testId ?? label}`;
 
   const body = (
     <>
@@ -42,7 +46,7 @@ export const SettingsRow = ({
 
   if (!interactive) {
     return (
-      <div className={base} data-testid={`settings-row-${label}`}>
+      <div className={base} data-testid={rowTestId}>
         {body}
       </div>
     );
@@ -53,7 +57,7 @@ export const SettingsRow = ({
       type="button"
       onClick={() => onNavigate(to)}
       className={`${base} transition-colors hover:bg-gray-50 dark:hover:bg-slate-800`}
-      data-testid={`settings-row-${label}`}
+      data-testid={rowTestId}
     >
       {body}
     </button>

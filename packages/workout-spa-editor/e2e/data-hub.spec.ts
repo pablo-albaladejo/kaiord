@@ -175,7 +175,7 @@ test.describe("Data Hub matrix", () => {
     await page.goto("/settings");
 
     // Act
-    await page.getByTestId("settings-row-Data Hub").click();
+    await page.getByTestId("settings-row-dataHub").click();
 
     // Assert
     await expect(page).toHaveURL(/\/settings\/data-hub$/, { timeout: 8_000 });

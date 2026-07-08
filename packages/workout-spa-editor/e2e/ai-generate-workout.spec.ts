@@ -99,7 +99,7 @@ async function addTestProvider(
 ): Promise<void> {
   await openHeaderAction(page, /open settings/i);
   await page.waitForURL(/\/settings$/);
-  await page.getByTestId("settings-row-Provider").click();
+  await page.getByTestId("settings-row-provider").click();
   await page.waitForURL(/\/settings\/ai/);
 
   const settingsPage = page.getByTestId("settings-page");

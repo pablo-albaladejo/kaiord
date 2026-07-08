@@ -1,4 +1,5 @@
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { SectionHead } from "../../molecules/SectionHead/SectionHead";
 import {
   SETTINGS_GROUPS,
@@ -22,18 +23,20 @@ const useRowDetail = () => {
 
 export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
   const detailFor = useRowDetail();
+  const t = useTranslate("settings");
 
   return (
     <div className="space-y-6" data-testid="settings-group-list">
       {SETTINGS_GROUPS.map((group) => (
-        <section key={group.eyebrow}>
-          <SectionHead title={group.eyebrow} />
+        <section key={group.key}>
+          <SectionHead title={t(`groups.${group.key}`)} />
           <div className="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-900 [&>*+*]:border-t [&>*+*]:border-gray-100 dark:[&>*+*]:border-slate-800">
             {group.rows.map((row) => (
               <SettingsRow
-                key={row.label}
+                key={row.key}
                 icon={row.icon}
-                label={row.label}
+                label={t(`rows.${row.key}`)}
+                testId={row.key}
                 detail={detailFor(row)}
                 to={row.to}
                 onNavigate={row.to !== undefined ? onNavigate : undefined}

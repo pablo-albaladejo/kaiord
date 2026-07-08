@@ -100,7 +100,7 @@ describe("SettingsPage", () => {
       const { memory } = renderAtPath("/settings");
 
       // Act
-      await user.click(screen.getByTestId("settings-row-Extensions"));
+      await user.click(screen.getByTestId("settings-row-extensions"));
 
       // Assert
       await waitFor(() => {
@@ -114,7 +114,7 @@ describe("SettingsPage", () => {
       const { memory } = renderAtPath("/settings");
 
       // Act
-      await user.click(screen.getByTestId("settings-row-Units"));
+      await user.click(screen.getByTestId("settings-row-units"));
 
       // Assert
       await waitFor(() => {
@@ -128,7 +128,7 @@ describe("SettingsPage", () => {
       const { memory } = renderAtPath("/settings");
 
       // Act
-      await user.click(screen.getByTestId("settings-row-Language"));
+      await user.click(screen.getByTestId("settings-row-language"));
 
       // Assert
       await waitFor(() => {
@@ -270,7 +270,7 @@ describe("SettingsPage", () => {
       const { memory } = renderAtPath("/settings");
 
       // Act
-      await user.click(screen.getByTestId("settings-row-Manage your data"));
+      await user.click(screen.getByTestId("settings-row-manageYourData"));
 
       // Assert
       await waitFor(() => {
