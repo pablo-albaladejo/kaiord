@@ -1,0 +1,8 @@
+{
+  "validationHeading": "Validation errors:",
+  "validation": {
+    "min_gt_max": "min must be less than or equal to max",
+    "duration_type_mismatch": "durationType must match duration.type",
+    "target_type_mismatch": "targetType must match target.type"
+  }
+}
