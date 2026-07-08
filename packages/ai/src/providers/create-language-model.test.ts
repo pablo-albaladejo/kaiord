@@ -81,4 +81,17 @@ describe("createLanguageModel", () => {
     });
     expect(result).toEqual({ modelId: "google-model" });
   });
+
+  it("should reject a credential whose provider type is unsupported", async () => {
+    // Arrange
+    const credential = { type: "bogus", apiKey: "k" } as unknown as Parameters<
+      typeof createLanguageModel
+    >[0];
+
+    // Act
+    const act = () => createLanguageModel(credential, "m");
+
+    // Assert
+    await expect(act()).rejects.toThrow(/Unsupported provider type/);
+  });
 });

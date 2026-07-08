@@ -39,5 +39,11 @@ export const createLanguageModel = async (
       const provider = createGoogleGenerativeAI({ apiKey: credential.apiKey });
       return provider(modelId);
     }
+    default: {
+      // Compile-time exhaustiveness plus a runtime guard against a corrupted
+      // stored credential type that bypassed the type system.
+      const exhaustive: never = credential.type;
+      throw new Error(`Unsupported provider type: ${String(exhaustive)}`);
+    }
   }
 };
