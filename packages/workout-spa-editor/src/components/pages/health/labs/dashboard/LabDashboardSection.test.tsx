@@ -17,9 +17,10 @@ vi.mock("../../../../charts/uplot-base/uplot-chart", () => ({
 
 const PROFILE_ID = "p1";
 const NOW = "2026-07-07T12:00:00.000Z";
-// Pinning several parameters fires one Dexie live query per card; under full-
-// suite CPU contention their re-renders can exceed the 1s waitFor default.
-const CHART_RENDER_TIMEOUT_MS = 4000;
+// Pinning parameters chains Dexie writes → live-query re-renders → per-card
+// live queries; under CI CPU contention this can outrun a short waitFor, so
+// use the repo's Dexie-slow budget (matches playwright/expect 10s).
+const CHART_RENDER_TIMEOUT_MS = 10_000;
 
 const wrap = ({ children }: { children: ReactNode }) => (
   <PersistenceProvider persistence={createDexiePersistence(db)}>
@@ -126,11 +127,19 @@ describe("LabDashboardSection", () => {
     // Arrange
     render(<LabDashboardSection profileId={PROFILE_ID} />, { wrapper: wrap });
     const user = userEvent.setup();
-    const items = await screen.findAllByTestId("lab-parameter-item");
+    const total = (await screen.findAllByTestId("lab-parameter-item")).length;
 
     // Act
-    for (const item of items) {
-      await user.click(within(item).getByTestId("lab-parameter-select"));
+
+    // Pin each row, re-querying fresh every iteration: the list is driven by
+    // `summaries` (stable order across pins), but an awaited click triggers a
+    // re-render that can detach a previously-captured node, so a reused
+    // reference would silently click a stale element and skip the pin.
+    for (let i = 0; i < total; i += 1) {
+      const rows = await screen.findAllByTestId("lab-parameter-item");
+      const row = rows[i];
+      if (!row) throw new Error(`lab-parameter-item ${i} disappeared`);
+      await user.click(within(row).getByTestId("lab-parameter-select"));
     }
 
     // Assert
@@ -139,7 +148,7 @@ describe("LabDashboardSection", () => {
       () =>
         expect(
           within(grid).getAllByTestId("lab-parameter-chart-card")
-        ).toHaveLength(items.length),
+        ).toHaveLength(total),
       { timeout: CHART_RENDER_TIMEOUT_MS }
     );
   });
