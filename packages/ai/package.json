@@ -10,6 +10,14 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./providers": {
+      "import": "./dist/providers.js",
+      "types": "./dist/providers.d.ts"
+    },
+    "./prompts": {
+      "import": "./dist/prompts.js",
+      "types": "./dist/prompts.d.ts"
     }
   },
   "files": [
@@ -24,6 +32,7 @@
     "lint:fix": "eslint . --fix && prettier --write src",
     "eval": "tsx src/evals/run-evals.ts",
     "eval:chat-tools": "tsx src/evals/run-chat-tool-evals.ts",
+    "generate:model-catalog": "node scripts/generate-model-catalog.mjs",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -31,10 +40,26 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
+    "@ai-sdk/anthropic": "^4.0.7",
+    "@ai-sdk/google": "^4.0.8",
+    "@ai-sdk/openai": "^4.0.7",
     "ai": "^7.0.14"
+  },
+  "peerDependenciesMeta": {
+    "@ai-sdk/anthropic": {
+      "optional": true
+    },
+    "@ai-sdk/google": {
+      "optional": true
+    },
+    "@ai-sdk/openai": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^4.0.7",
+    "@ai-sdk/google": "^4.0.8",
+    "@ai-sdk/openai": "^4.0.7",
     "@types/node": "^26.1.0",
     "@vitest/coverage-v8": "^4.1.9",
     "ai": "^7.0.14",

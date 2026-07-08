@@ -6,8 +6,8 @@
  * provider type's catalog default. Generation always uses the
  * `workout_generation` resolution untouched by the selector.
  */
-import { resolveModelForPurpose } from "../../application/ai/resolve-model-for-purpose";
-import { getDefaultModel } from "../../lib/provider-models";
+import { getDefaultModel, resolveModelForPurpose } from "@kaiord/ai/providers";
+
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { AiModelBinding } from "../../types/ai-model-binding";
 

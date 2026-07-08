@@ -1,7 +1,7 @@
+import { resolveModelForPurpose } from "@kaiord/ai/providers";
 import type { Sport } from "@kaiord/core";
 import { useCallback } from "react";
 
-import { resolveModelForPurpose } from "../../../application/ai/resolve-model-for-purpose";
 import { useAnalytics } from "../../../contexts";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";

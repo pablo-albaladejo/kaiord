@@ -1,4 +1,6 @@
-export type LlmProviderType = "anthropic" | "openai" | "google";
+import type { LlmProviderType } from "@kaiord/ai/providers";
+
+export type { LlmProviderType } from "@kaiord/ai/providers";
 
 export type LlmProviderConfig = {
   id: string;

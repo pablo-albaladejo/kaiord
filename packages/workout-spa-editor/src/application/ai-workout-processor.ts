@@ -5,10 +5,11 @@
  * call LLM, validate output, retry on failure.
  */
 
+import { buildUserPrompt, PROMPT_VERSION } from "@kaiord/ai/prompts";
+
 import type { AiMeta } from "../types/calendar-fragments";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { KRD } from "../types/schemas";
-import { buildUserPrompt, PROMPT_VERSION } from "./ai-prompts";
 import { validateSanity } from "./sanity-checks";
 
 export type GenerateFn = (prompt: string, sport: string) => Promise<KRD>;

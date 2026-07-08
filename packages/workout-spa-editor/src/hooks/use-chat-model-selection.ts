@@ -4,11 +4,11 @@
  * volatile runtime selection so the page-level resolver reflects it until the
  * first message persists the conversation.
  */
+import { getDefaultModel } from "@kaiord/ai/providers";
 import { useCallback } from "react";
 
 import { setConversationModel } from "../application/chat/set-conversation-model";
 import { usePersistence } from "../contexts/persistence-context";
-import { getDefaultModel } from "../lib/provider-models";
 import { useAiRuntimeStore } from "../store/ai-runtime-store";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import { logger } from "../utils/logger";

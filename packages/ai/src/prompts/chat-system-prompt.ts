@@ -7,7 +7,7 @@
  * disclose the `range_used` window; never invent data), and the
  * confirmation contract for action tools.
  */
-import { UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./tools/fence";
+import { UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./fence";
 
 export const CHAT_PROMPT_VERSION = "1.0.0";
 

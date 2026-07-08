@@ -6,8 +6,9 @@
  * the assistant. `status` and `completionPercent` carry the
  * planned-vs-done / compliance signal. The row list is capped.
  */
+import { fenceUntrusted } from "@kaiord/ai/prompts";
+
 import type { CoachingActivityRecord } from "../../../types/coaching-activity-record";
-import { fenceUntrusted } from "./fence";
 
 const ROW_BUDGET = 60;
 

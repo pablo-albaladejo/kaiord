@@ -1,9 +1,9 @@
 import { createTextToWorkout } from "@kaiord/ai";
+import { createLanguageModel } from "@kaiord/ai/providers";
 import type { KRD, Sport } from "@kaiord/core";
 import { createWorkoutKRD } from "@kaiord/core";
 
 import type { LlmProviderConfig } from "../store/ai-store-types";
-import { createLanguageModel } from "./provider-factory";
 
 export type GenerateWorkoutOptions = {
   text: string;
@@ -17,7 +17,9 @@ export type GenerateWorkoutOptions = {
 export const generateWorkoutKrd = async (
   options: GenerateWorkoutOptions
 ): Promise<KRD> => {
-  const model = await createLanguageModel(options.provider, options.modelId);
+  const model = await createLanguageModel(options.provider, options.modelId, {
+    browser: true,
+  });
   const textToWorkout = createTextToWorkout({ model });
 
   const prompt = buildPrompt(options);

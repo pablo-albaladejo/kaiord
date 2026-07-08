@@ -6,10 +6,10 @@
  * so the R-PIIInterpolation guard finds the literal alongside its
  * caller; this helper only invokes the bound `onFailureToast` callback.
  */
+import { resolveModelForPurpose } from "@kaiord/ai/providers";
 import type { Analytics } from "@kaiord/core";
 import type { MutableRefObject } from "react";
 
-import { resolveModelForPurpose } from "../../../application/ai/resolve-model-for-purpose";
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import type { PersistencePort } from "../../../ports/persistence-port";
 import { withOrigin } from "../../../routing/with-origin";
