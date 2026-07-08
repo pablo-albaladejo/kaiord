@@ -27,6 +27,7 @@ export const SCOPE_ENUM = [
   "ai",
   "cli",
   "mcp",
+  "i18n",
   "spa-editor",
   "garmin-bridge",
   "train2go-bridge",

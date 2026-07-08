@@ -48,6 +48,7 @@ garmin-connect
 ai
 cli
 mcp
+i18n
 spa-editor
 garmin-bridge
 train2go-bridge
