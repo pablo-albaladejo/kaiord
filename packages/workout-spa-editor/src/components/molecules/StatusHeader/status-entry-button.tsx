@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import type { EntryDef } from "./status-entry-defs";
 
@@ -12,6 +13,7 @@ type EntryButtonProps = {
 };
 
 export function EntryButton({ entry, active, onClick }: EntryButtonProps) {
+  const t = useTranslate("nav");
   const classes =
     [
       active ? ACTIVE_ENTRY_CLASS : undefined,
@@ -26,14 +28,14 @@ export function EntryButton({ entry, active, onClick }: EntryButtonProps) {
       variant={entry.variant ?? "tertiary"}
       size="sm"
       onClick={onClick}
-      aria-label={entry.ariaLabel}
+      aria-label={entry.ariaLabel ? t(`aria.${entry.id}`) : undefined}
       aria-current={active ? "page" : undefined}
       className={classes}
       data-testid={`status-header-${entry.id}-button`}
     >
       <entry.icon className="h-4 w-4" />
       <span className={entry.id === "new" ? "" : "hidden sm:inline"}>
-        {entry.label}
+        {t(entry.id)}
       </span>
     </Button>
   );

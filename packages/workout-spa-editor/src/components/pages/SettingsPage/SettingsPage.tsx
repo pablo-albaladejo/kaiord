@@ -1,14 +1,11 @@
 import { Redirect, useLocation, useParams } from "wouter";
 
 import { useFocusOnSectionChange } from "../../../hooks/use-focus-on-section-change";
+import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Button } from "../../atoms/Button/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
-import {
-  isSettingsTab,
-  SETTINGS_TAB_LABELS,
-  SETTINGS_TAB_VIEWS,
-} from "./settings-tab-views";
+import { isSettingsTab, SETTINGS_TAB_VIEWS } from "./settings-tab-views";
 import { SettingsGroupList } from "./SettingsGroupList";
 
 type SettingsPageParams = { tab?: string };
@@ -18,6 +15,7 @@ const SETTINGS_ROOT = "/settings" as const;
 export default function SettingsPage() {
   const { tab } = useParams<SettingsPageParams>();
   const [, navigate] = useLocation();
+  const t = useTranslate("settings");
   useFocusOnSectionChange();
 
   if (tab !== undefined && !isSettingsTab(tab))
@@ -25,7 +23,7 @@ export default function SettingsPage() {
 
   const ActiveView = tab === undefined ? null : SETTINGS_TAB_VIEWS[tab];
   const heading =
-    tab === undefined ? "Settings" : `Settings · ${SETTINGS_TAB_LABELS[tab]}`;
+    tab === undefined ? t("title") : `${t("title")} · ${t(`tabs.${tab}`)}`;
 
   return (
     <div className="space-y-6 p-4" data-testid="settings-page">
@@ -37,7 +35,7 @@ export default function SettingsPage() {
           data-testid="settings-back"
         >
           <Icon icon={ICON_MAP.chevL} size="sm" color="inherit" />
-          Settings
+          {t("back")}
         </Button>
       )}
       <h1
