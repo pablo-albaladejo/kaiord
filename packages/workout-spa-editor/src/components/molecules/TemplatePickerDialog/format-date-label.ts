@@ -7,11 +7,13 @@
  * dialog") so screen-reader users hear the cell context the dialog
  * is bound to.
  */
-export function formatDateLabel(date: string): string {
+import type { Locale } from "@kaiord/i18n";
+
+export function formatDateLabel(date: string, locale: Locale = "en"): string {
   if (!date) return "";
   const parsed = new Date(`${date}T12:00:00Z`);
   if (Number.isNaN(parsed.getTime())) return date;
-  return parsed.toLocaleDateString("en-US", {
+  return parsed.toLocaleDateString(locale, {
     weekday: "long",
     month: "long",
     day: "numeric",

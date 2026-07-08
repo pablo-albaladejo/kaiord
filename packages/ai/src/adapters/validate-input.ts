@@ -20,7 +20,9 @@ export const validateInput = (text: string): string => {
     throw createAiParsingError(
       "Input text is empty",
       truncate(sanitized, MAX_ERROR_TEXT_LENGTH),
-      0
+      0,
+      undefined,
+      { reason: "input_empty" }
     );
   }
 
@@ -28,7 +30,15 @@ export const validateInput = (text: string): string => {
     throw createAiParsingError(
       `Input text exceeds ${MAX_INPUT_LENGTH} characters (got ${sanitized.length})`,
       truncate(sanitized, MAX_ERROR_TEXT_LENGTH),
-      0
+      0,
+      undefined,
+      {
+        reason: "input_too_long",
+        details: {
+          maxLength: MAX_INPUT_LENGTH,
+          actualLength: sanitized.length,
+        },
+      }
     );
   }
 

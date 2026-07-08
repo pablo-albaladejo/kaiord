@@ -41,4 +41,27 @@ describe("lab parameter display map", () => {
     // Assert
     expect(display).toEqual({ name: "Ferritin", abbrev: "FERR" });
   });
+
+  it("should render the Spanish name for a known parameter", () => {
+    // Arrange
+    const key = "glucose";
+
+    // Act
+    const display = getLabParameterDisplay(key, "es");
+
+    // Assert
+    expect(display).toEqual({ name: "Glucosa (ayunas)", abbrev: "GLU" });
+  });
+
+  it("should keep the abbreviation identical across locales", () => {
+    // Arrange
+    const key = "hdl";
+
+    // Act
+    const en = getLabParameterDisplay(key, "en");
+    const es = getLabParameterDisplay(key, "es");
+
+    // Assert
+    expect(es?.abbrev).toBe(en?.abbrev);
+  });
 });

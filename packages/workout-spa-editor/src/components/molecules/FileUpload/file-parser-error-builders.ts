@@ -18,11 +18,12 @@ type ErrorState = {
 };
 
 const convertToValidationErrors = (
-  errors: Array<{ field: string; message: string }>
+  errors: Array<{ field: string; message: string; code?: string }>
 ): Array<ValidationError> => {
   return errors.map((err) => ({
     path: err.field.split("."),
     message: err.message,
+    code: err.code,
   }));
 };
 

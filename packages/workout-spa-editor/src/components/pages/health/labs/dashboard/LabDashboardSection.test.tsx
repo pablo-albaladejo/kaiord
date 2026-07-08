@@ -17,6 +17,9 @@ vi.mock("../../../../charts/uplot-base/uplot-chart", () => ({
 
 const PROFILE_ID = "p1";
 const NOW = "2026-07-07T12:00:00.000Z";
+// Pinning several parameters fires one Dexie live query per card; under full-
+// suite CPU contention their re-renders can exceed the 1s waitFor default.
+const CHART_RENDER_TIMEOUT_MS = 4000;
 
 // This integration test drives real Dexie + useLiveQuery through several
 // pin/unpin interactions. It runs in ~0.7s in isolation but can exceed the 5s
@@ -144,10 +147,12 @@ describe("LabDashboardSection", () => {
 
       // Assert
       const grid = await screen.findByTestId("lab-dashboard-grid");
-      await waitFor(() =>
-        expect(
-          within(grid).getAllByTestId("lab-parameter-chart-card")
-        ).toHaveLength(items.length)
+      await waitFor(
+        () =>
+          expect(
+            within(grid).getAllByTestId("lab-parameter-chart-card")
+          ).toHaveLength(items.length),
+        { timeout: CHART_RENDER_TIMEOUT_MS }
       );
     },
     CI_TIMEOUT_MS
