@@ -1,0 +1,3 @@
+# Generated: SDK-sourced model catalog. Regenerate via
+# `pnpm --filter @kaiord/ai generate:model-catalog`.
+src/providers/generated/

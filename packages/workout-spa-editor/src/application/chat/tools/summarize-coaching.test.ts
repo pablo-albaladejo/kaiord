@@ -1,7 +1,7 @@
+import { UNTRUSTED_OPEN } from "@kaiord/ai/prompts";
 import { describe, expect, it } from "vitest";
 
 import type { CoachingActivityRecord } from "../../../types/coaching-activity-record";
-import { UNTRUSTED_OPEN } from "./fence";
 import { summarizeCoaching } from "./summarize-coaching";
 
 const activity = (date: string, description: string): CoachingActivityRecord =>

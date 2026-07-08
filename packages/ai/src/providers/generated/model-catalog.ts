@@ -2,9 +2,7 @@
 // Sourced from the installed @ai-sdk/* model-id type unions, filtered to
 // chat/text models. Regenerate with `pnpm generate:model-catalog` after
 // bumping @ai-sdk/*. A free-text field in the UI covers ids newer than the pin.
-import type { LlmProviderType } from "../../store/ai-store-types";
-
-export type ModelOption = { id: string; label: string };
+import type { LlmProviderType, ModelOption } from "../types";
 
 export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
   anthropic: [

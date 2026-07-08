@@ -18,16 +18,17 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 
-import { createLanguageModel } from "./provider-factory";
+import { createLanguageModel } from "./create-language-model";
 
 describe("createLanguageModel", () => {
-  it("should create an Anthropic model with browser access header", async () => {
+  it("should add the browser-access header for Anthropic when browser is true", async () => {
     // Arrange
 
     // Act
     const result = await createLanguageModel(
       { type: "anthropic", apiKey: "test-key" },
-      "claude-sonnet-4-5-20241022"
+      "claude-sonnet-4-5-20241022",
+      { browser: true }
     );
 
     // Assert
@@ -36,6 +37,19 @@ describe("createLanguageModel", () => {
       headers: { "anthropic-dangerous-direct-browser-access": "true" },
     });
     expect(result).toEqual({ modelId: "anthropic-model" });
+  });
+
+  it("should omit the browser-access header when browser is not set", async () => {
+    // Arrange
+
+    // Act
+    await createLanguageModel(
+      { type: "anthropic", apiKey: "node-key" },
+      "claude-sonnet-4-5-20241022"
+    );
+
+    // Assert
+    expect(createAnthropic).toHaveBeenLastCalledWith({ apiKey: "node-key" });
   });
 
   it("should create an OpenAI model", async () => {
@@ -66,5 +80,18 @@ describe("createLanguageModel", () => {
       apiKey: "test-key",
     });
     expect(result).toEqual({ modelId: "google-model" });
+  });
+
+  it("should reject a credential whose provider type is unsupported", async () => {
+    // Arrange
+    const credential = { type: "bogus", apiKey: "k" } as unknown as Parameters<
+      typeof createLanguageModel
+    >[0];
+
+    // Act
+    const act = () => createLanguageModel(credential, "m");
+
+    // Assert
+    await expect(act()).rejects.toThrow(/Unsupported provider type/);
   });
 });

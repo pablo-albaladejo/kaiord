@@ -4,15 +4,15 @@
  * Async because `createLanguageModel` dynamically imports the provider SDK.
  */
 import { type ChatAgent, type ChatTool, createChatAgent } from "@kaiord/ai";
-
-import { buildChatSystemPrompt } from "../../application/chat/chat-system-prompt";
-import { buildChatTools } from "../../application/chat/tools/build-chat-tools";
-import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
-import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
+import { buildChatSystemPrompt } from "@kaiord/ai/prompts";
 import {
   createLanguageModel,
   type ProviderCredential,
-} from "../../lib/provider-factory";
+} from "@kaiord/ai/providers";
+
+import { buildChatTools } from "../../application/chat/tools/build-chat-tools";
+import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
+import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
 import type { PersistencePort } from "../../ports/persistence-port";
 
 export type BuiltChatAgent = { agent: ChatAgent; tools: ChatTool[] };
@@ -38,7 +38,9 @@ export const buildChatAgent = async (
     actions: args.actions,
     getMatrixSignals: args.getMatrixSignals,
   });
-  const model = await createLanguageModel(args.provider, args.modelId);
+  const model = await createLanguageModel(args.provider, args.modelId, {
+    browser: true,
+  });
   const agent = createChatAgent({
     model,
     tools,

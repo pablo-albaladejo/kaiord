@@ -4,9 +4,9 @@
  * `GenerateKrdPort` adapter from a concrete `LlmProviderConfig` and
  * runs the use case end-to-end behind a single async function.
  */
+import { PROMPT_VERSION } from "@kaiord/ai/prompts";
 import type { Analytics } from "@kaiord/core";
 
-import { PROMPT_VERSION } from "../../../application/ai-prompts";
 import type { GenerateKrdPort } from "../../../application/coaching/convert-coaching-activity-with-ai";
 import { convertCoachingActivityWithAi } from "../../../application/coaching/convert-coaching-activity-with-ai";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";

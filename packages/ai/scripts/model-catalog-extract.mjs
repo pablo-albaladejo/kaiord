@@ -1,9 +1,9 @@
 /**
  * Extracts chat/text model ids from the installed `@ai-sdk/*` type unions and
- * renders the runtime model catalog consumed by the SPA. Sourcing from the
- * pinned SDK means model lists track `@ai-sdk/*` bumps instead of a
- * hand-maintained enum. A free-text field in the UI covers ids newer than the
- * pin.
+ * renders the runtime model catalog consumed via `@kaiord/ai/providers`.
+ * Sourcing from the pinned SDK means model lists track `@ai-sdk/*` bumps
+ * instead of a hand-maintained enum. A free-text field in the UI covers ids
+ * newer than the pin.
  */
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -88,9 +88,7 @@ export const renderCatalogModule = (catalog) =>
 // Sourced from the installed @ai-sdk/* model-id type unions, filtered to
 // chat/text models. Regenerate with \`pnpm generate:model-catalog\` after
 // bumping @ai-sdk/*. A free-text field in the UI covers ids newer than the pin.
-import type { LlmProviderType } from "../../store/ai-store-types";
-
-export type ModelOption = { id: string; label: string };
+import type { LlmProviderType, ModelOption } from "../types";
 
 export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
   anthropic: [

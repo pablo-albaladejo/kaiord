@@ -4,7 +4,7 @@ import {
   buildChatSystemPrompt,
   CHAT_PROMPT_VERSION,
 } from "./chat-system-prompt";
-import { UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./tools/fence";
+import { UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./fence";
 
 describe("buildChatSystemPrompt", () => {
   it("should declare the untrusted-data fence so injected text is treated as data", () => {

@@ -1,6 +1,6 @@
+import { PROVIDER_MODELS } from "@kaiord/ai/providers";
 import { useState } from "react";
 
-import { PROVIDER_MODELS } from "../../../lib/provider-models";
 import type { LlmProviderType } from "../../../store/ai-store-types";
 
 const CUSTOM_SENTINEL = "__custom__";
