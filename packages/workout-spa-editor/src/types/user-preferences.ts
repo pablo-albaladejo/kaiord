@@ -19,6 +19,15 @@ export const unitsSchema = z.enum(["metric", "imperial"]);
 
 export type Units = z.infer<typeof unitsSchema>;
 
+/**
+ * UI language preference. `auto` resolves the active locale from
+ * `navigator.language` (see `resolve-locale`); `en`/`es` pin it explicitly.
+ * Absent (pre-i18n rows) reads as `auto`.
+ */
+export const localePreferenceSchema = z.enum(["auto", "en", "es"]);
+
+export type LocalePreference = z.infer<typeof localePreferenceSchema>;
+
 export const userPreferencesSchema = z.object({
   profileId: z.string().min(1),
   calendarView: calendarViewSchema,
@@ -37,6 +46,8 @@ export const userPreferencesSchema = z.object({
    * pinned yet. Optional and unindexed — no Dexie version bump (OQ2/S3).
    */
   labDashboardParams: z.array(z.string()).optional(),
+  /** UI language preference; absent reads as `auto`. Optional, unindexed — no Dexie version bump. */
+  locale: localePreferenceSchema.optional(),
   updatedAt: z.iso.datetime(),
 });
 

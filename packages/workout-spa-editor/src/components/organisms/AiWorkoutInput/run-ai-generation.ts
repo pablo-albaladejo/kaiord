@@ -7,7 +7,9 @@
  */
 
 import type { Analytics, Sport } from "@kaiord/core";
+import type { Locale } from "@kaiord/i18n";
 
+import { localizeAiError } from "../../../i18n/error-copy";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import type { GenerationState } from "../../../store/ai-store-types";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
@@ -23,6 +25,7 @@ export type GenerateRunArgs = {
   modelId: string;
   profile: Profile | null;
   customPrompt: string | null;
+  locale: Locale;
   setGeneration: (state: GenerationState) => void;
   loadWorkout: (krd: KRD) => void;
   analytics: Analytics;
@@ -35,6 +38,7 @@ export const runAiGeneration = async ({
   modelId,
   profile,
   customPrompt,
+  locale,
   setGeneration,
   loadWorkout,
   analytics,
@@ -57,9 +61,7 @@ export const runAiGeneration = async ({
       zonesContext,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Generation failed";
-    setGeneration({ status: "error", message });
+    setGeneration({ status: "error", message: localizeAiError(error, locale) });
     return;
   }
 

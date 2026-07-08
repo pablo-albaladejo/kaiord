@@ -1,3 +1,4 @@
+import type { Locale } from "@kaiord/i18n";
 import type uPlot from "uplot";
 
 import type { Units } from "../../../../lib/units/units";
@@ -8,18 +9,19 @@ import type { TrendMetricDef } from "./trend-metrics";
 const STROKE = "#2563eb";
 
 const tickFormatter =
-  (metric: TrendMetricDef, units: Units) =>
+  (metric: TrendMetricDef, units: Units, locale: Locale) =>
   (_u: uPlot, splits: number[]): string[] =>
-    splits.map((v) => formatPaneValue(metric, v, units));
+    splits.map((v) => formatPaneValue(metric, v, units, locale));
 
 const legendFormatter =
-  (metric: TrendMetricDef, units: Units) =>
+  (metric: TrendMetricDef, units: Units, locale: Locale) =>
   (_u: uPlot, v: number | null | undefined): string =>
-    formatPaneValue(metric, v, units);
+    formatPaneValue(metric, v, units, locale);
 
 export const buildTrendChartOptions = (
   metrics: ReadonlyArray<TrendMetricDef>,
-  units: Units = "metric"
+  units: Units = "metric",
+  locale: Locale = "en"
 ): uPlot.Options => {
   const scales: uPlot.Scales = timeXScale();
   for (const m of metrics) scales[m.key] = { auto: true };
@@ -30,7 +32,7 @@ export const buildTrendChartOptions = (
       scale: m.key,
       side: 1,
       label: m.label,
-      values: tickFormatter(m, units),
+      values: tickFormatter(m, units, locale),
     });
 
   const series: uPlot.Series[] = [{}];
@@ -39,7 +41,7 @@ export const buildTrendChartOptions = (
       label: m.label,
       scale: m.key,
       stroke: STROKE,
-      value: legendFormatter(m, units),
+      value: legendFormatter(m, units, locale),
     });
 
   return {

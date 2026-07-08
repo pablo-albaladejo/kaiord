@@ -29,10 +29,12 @@ export const workoutStepSchema = z
   .refine((s) => s.durationType === s.duration.type, {
     message: "durationType must match duration.type",
     path: ["durationType"],
+    params: { code: "duration_type_mismatch" },
   })
   .refine((s) => s.targetType === s.target.type, {
     message: "targetType must match target.type",
     path: ["targetType"],
+    params: { code: "target_type_mismatch" },
   });
 
 /**

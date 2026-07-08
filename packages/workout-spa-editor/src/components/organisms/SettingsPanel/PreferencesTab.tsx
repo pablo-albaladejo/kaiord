@@ -1,10 +1,11 @@
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useSetUserPreferenceFields } from "../../../hooks/use-set-user-preference-fields";
 import { useUserPreferences } from "../../../hooks/use-user-preferences";
-import type { Units } from "../../../types/user-preferences";
+import type { LocalePreference, Units } from "../../../types/user-preferences";
 import { logger } from "../../../utils/logger";
 import { Segmented, type SegmentedOption } from "../../atoms/Segmented";
 import { SectionHead } from "../../molecules/SectionHead";
+import { LanguageRow } from "./LanguageRow";
 import { NotificationsRow } from "./NotificationsRow";
 
 const UNIT_OPTIONS: SegmentedOption<Units>[] = [
@@ -18,10 +19,17 @@ export const PreferencesTab: React.FC = () => {
   const prefs = useUserPreferences({ profileId, defaultView: "grid" });
   const setPrefs = useSetUserPreferenceFields(profileId);
   const units: Units = prefs?.units ?? "metric";
+  const locale: LocalePreference = prefs?.locale ?? "auto";
 
   const handleUnits = (next: Units) => {
     void setPrefs({ units: next }).catch((error: unknown) => {
       logger.warn("Failed to persist units preference", { error });
+    });
+  };
+
+  const handleLocale = (next: LocalePreference) => {
+    void setPrefs({ locale: next }).catch((error: unknown) => {
+      logger.warn("Failed to persist locale preference", { error });
     });
   };
 
@@ -42,6 +50,7 @@ export const PreferencesTab: React.FC = () => {
           ariaLabel="Units"
         />
       </section>
+      <LanguageRow value={locale} onChange={handleLocale} />
       <section>
         <SectionHead title="Notifications" />
         <NotificationsRow

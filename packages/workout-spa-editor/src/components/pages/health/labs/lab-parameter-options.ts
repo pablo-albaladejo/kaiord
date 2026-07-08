@@ -1,11 +1,11 @@
 /**
  * Catalog options for the parameter autocomplete, plus the small text
  * utilities the entry form needs: a stable `"Name (ABBREV)"` label per
- * option (from the English display map), reverse label -> parameter lookup,
- * unit choices for one parameter, and a slug builder for free
- * `custom:<slug>` parameters.
+ * option (localized), reverse label -> parameter lookup, unit choices for
+ * one parameter, and a slug builder for free `custom:<slug>` parameters.
  */
 import { LAB_PARAMETER_CATALOG, type LabParameter } from "@kaiord/core";
+import type { Locale } from "@kaiord/i18n";
 
 import {
   formatLabParameterLabel,
@@ -14,23 +14,28 @@ import {
 
 export type LabParameterOption = { key: string; label: string };
 
-const labelFor = (p: LabParameter): string => {
-  const display = getLabParameterDisplay(p.key);
+const labelFor = (p: LabParameter, locale: Locale): string => {
+  const display = getLabParameterDisplay(p.key, locale);
   return display ? formatLabParameterLabel(display) : p.key;
 };
 
-export const LAB_PARAMETER_OPTIONS: readonly LabParameterOption[] =
-  LAB_PARAMETER_CATALOG.map((p) => ({ key: p.key, label: labelFor(p) })).sort(
-    (a, b) => a.label.localeCompare(b.label)
-  );
-
-const BY_LABEL: ReadonlyMap<string, LabParameter> = new Map(
-  LAB_PARAMETER_CATALOG.map((p) => [labelFor(p), p])
-);
+/** Autocomplete options for the active locale, sorted by localized label. */
+export function labParameterOptions(
+  locale: Locale = "en"
+): readonly LabParameterOption[] {
+  return LAB_PARAMETER_CATALOG.map((p) => ({
+    key: p.key,
+    label: labelFor(p, locale),
+  })).sort((a, b) => a.label.localeCompare(b.label));
+}
 
 /** Resolve a typed/selected catalog label back to its parameter (exact match only). */
-export function findParameterByLabel(label: string): LabParameter | undefined {
-  return BY_LABEL.get(label.trim());
+export function findParameterByLabel(
+  label: string,
+  locale: Locale = "en"
+): LabParameter | undefined {
+  const target = label.trim();
+  return LAB_PARAMETER_CATALOG.find((p) => labelFor(p, locale) === target);
 }
 
 /** Unit choices for one parameter: canonical first, then its known alternates. */

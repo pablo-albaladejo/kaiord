@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { MIN_LTE_MAX_MESSAGE, minLteMax } from "./range-refinement";
+import {
+  MIN_LTE_MAX_CODE,
+  MIN_LTE_MAX_MESSAGE,
+  minLteMax,
+} from "./range-refinement";
 import { targetUnitSchema } from "./unit";
 
 /**
@@ -32,7 +36,11 @@ export const cadenceValueSchema = z.discriminatedUnion("unit", [
       min: z.number().min(0).max(300),
       max: z.number().min(0).max(300),
     })
-    .refine(minLteMax, { message: MIN_LTE_MAX_MESSAGE, path: ["min"] }),
+    .refine(minLteMax, {
+      message: MIN_LTE_MAX_MESSAGE,
+      path: ["min"],
+      params: { code: MIN_LTE_MAX_CODE },
+    }),
 ]);
 
 /**
