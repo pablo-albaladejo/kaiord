@@ -124,7 +124,11 @@ test.describe("Lab analytics entry (DoD-1)", () => {
       await fillRow(page, i, PARAMS[i]);
     }
     await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.getByText("Lab report saved")).toBeVisible();
+    // Saving ~10 parameters + toast can exceed the 10s default on the loaded
+    // mobile CI runners; give it generous headroom (passes in ~8s locally).
+    await expect(page.getByText("Lab report saved")).toBeVisible({
+      timeout: 20_000,
+    });
     await page.reload();
     await page.waitForFunction(
       () =>
