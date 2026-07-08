@@ -7,8 +7,6 @@ import type { LabParameter } from "../lab-parameter";
 export const THYROID_VITAMINS: readonly LabParameter[] = [
   {
     key: "tsh",
-    nameES: "TSH",
-    abbrev: "TSH",
     canonicalUnit: "mUI/L",
     canonicalRefLow: 0.4,
     canonicalRefHigh: 4.0,
@@ -16,8 +14,6 @@ export const THYROID_VITAMINS: readonly LabParameter[] = [
   },
   {
     key: "free_t4",
-    nameES: "Tiroxina libre",
-    abbrev: "T4L",
     canonicalUnit: "ng/dL",
     canonicalRefLow: 0.8,
     canonicalRefHigh: 1.8,
@@ -25,8 +21,6 @@ export const THYROID_VITAMINS: readonly LabParameter[] = [
   },
   {
     key: "vitamin_d",
-    nameES: "Vitamina D (25-OH)",
-    abbrev: "25-OH-D",
     canonicalUnit: "ng/mL",
     knownUnits: [{ unit: "nmol/L", factorToCanonical: 0.4 }],
     canonicalRefLow: 30,
@@ -34,8 +28,6 @@ export const THYROID_VITAMINS: readonly LabParameter[] = [
   },
   {
     key: "vitamin_b12",
-    nameES: "Vitamina B12",
-    abbrev: "B12",
     canonicalUnit: "pg/mL",
     canonicalRefLow: 200,
     canonicalRefHigh: 900,
@@ -43,8 +35,6 @@ export const THYROID_VITAMINS: readonly LabParameter[] = [
   },
   {
     key: "folate",
-    nameES: "Ácido fólico",
-    abbrev: "FOL",
     canonicalUnit: "ng/mL",
     canonicalRefLow: 3,
     canonicalRefHigh: 17,

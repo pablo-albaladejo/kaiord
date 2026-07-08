@@ -4,8 +4,6 @@ import type { LabParameter } from "../lab-parameter";
 export const HEMOGRAM_DIFFERENTIAL: readonly LabParameter[] = [
   {
     key: "monocytes_pct",
-    nameES: "Monocitos %",
-    abbrev: "MON%",
     canonicalUnit: "%",
     canonicalRefLow: 2,
     canonicalRefHigh: 10,
@@ -13,8 +11,6 @@ export const HEMOGRAM_DIFFERENTIAL: readonly LabParameter[] = [
   },
   {
     key: "monocytes_abs",
-    nameES: "Monocitos absolutos",
-    abbrev: "MON#",
     canonicalUnit: "×10³/µL",
     canonicalRefLow: 0.2,
     canonicalRefHigh: 1.0,
@@ -22,8 +18,6 @@ export const HEMOGRAM_DIFFERENTIAL: readonly LabParameter[] = [
   },
   {
     key: "eosinophils_pct",
-    nameES: "Eosinófilos %",
-    abbrev: "EOS%",
     canonicalUnit: "%",
     canonicalRefLow: 1,
     canonicalRefHigh: 6,
@@ -31,8 +25,6 @@ export const HEMOGRAM_DIFFERENTIAL: readonly LabParameter[] = [
   },
   {
     key: "eosinophils_abs",
-    nameES: "Eosinófilos absolutos",
-    abbrev: "EOS#",
     canonicalUnit: "×10³/µL",
     canonicalRefLow: 0.0,
     canonicalRefHigh: 0.5,
@@ -40,8 +32,6 @@ export const HEMOGRAM_DIFFERENTIAL: readonly LabParameter[] = [
   },
   {
     key: "basophils_pct",
-    nameES: "Basófilos %",
-    abbrev: "BAS%",
     canonicalUnit: "%",
     canonicalRefLow: 0,
     canonicalRefHigh: 2,
@@ -49,8 +39,6 @@ export const HEMOGRAM_DIFFERENTIAL: readonly LabParameter[] = [
   },
   {
     key: "basophils_abs",
-    nameES: "Basófilos absolutos",
-    abbrev: "BAS#",
     canonicalUnit: "×10³/µL",
     canonicalRefLow: 0.0,
     canonicalRefHigh: 0.2,

@@ -4,8 +4,6 @@ import type { LabParameter } from "../lab-parameter";
 export const HEMOGRAM_RED: readonly LabParameter[] = [
   {
     key: "rbc",
-    nameES: "Hematíes",
-    abbrev: "RBC",
     canonicalUnit: "×10⁶/µL",
     refBySex: {
       male: { low: 4.5, high: 5.9 },
@@ -15,8 +13,6 @@ export const HEMOGRAM_RED: readonly LabParameter[] = [
   },
   {
     key: "hemoglobin",
-    nameES: "Hemoglobina",
-    abbrev: "Hb",
     canonicalUnit: "g/dL",
     refBySex: {
       male: { low: 13.5, high: 17.5 },
@@ -26,16 +22,12 @@ export const HEMOGRAM_RED: readonly LabParameter[] = [
   },
   {
     key: "hematocrit",
-    nameES: "Hematocrito",
-    abbrev: "Hct",
     canonicalUnit: "%",
     refBySex: { male: { low: 41, high: 53 }, female: { low: 36, high: 46 } },
     panel: "hemogram",
   },
   {
     key: "mcv",
-    nameES: "Volumen corpuscular medio",
-    abbrev: "VCM",
     canonicalUnit: "fL",
     canonicalRefLow: 80,
     canonicalRefHigh: 100,
@@ -43,8 +35,6 @@ export const HEMOGRAM_RED: readonly LabParameter[] = [
   },
   {
     key: "mch",
-    nameES: "Hemoglobina corpuscular media",
-    abbrev: "HCM",
     canonicalUnit: "pg",
     canonicalRefLow: 27,
     canonicalRefHigh: 33,
@@ -52,8 +42,6 @@ export const HEMOGRAM_RED: readonly LabParameter[] = [
   },
   {
     key: "mchc",
-    nameES: "Concentración de Hb corpuscular media",
-    abbrev: "CHCM",
     canonicalUnit: "g/dL",
     canonicalRefLow: 32,
     canonicalRefHigh: 36,
@@ -61,8 +49,6 @@ export const HEMOGRAM_RED: readonly LabParameter[] = [
   },
   {
     key: "rdw",
-    nameES: "Amplitud de distribución eritrocitaria",
-    abbrev: "ADE",
     canonicalUnit: "%",
     canonicalRefLow: 11.5,
     canonicalRefHigh: 14.5,

@@ -4,8 +4,6 @@ import type { LabParameter } from "../lab-parameter";
 export const IRON: readonly LabParameter[] = [
   {
     key: "iron",
-    nameES: "Hierro sérico",
-    abbrev: "Fe",
     canonicalUnit: "µg/dL",
     refBySex: {
       male: { low: 65, high: 175 },
@@ -15,8 +13,6 @@ export const IRON: readonly LabParameter[] = [
   },
   {
     key: "ferritin",
-    nameES: "Ferritina",
-    abbrev: "FERR",
     canonicalUnit: "ng/mL",
     refBySex: {
       male: { low: 20, high: 250 },
@@ -26,8 +22,6 @@ export const IRON: readonly LabParameter[] = [
   },
   {
     key: "transferrin",
-    nameES: "Transferrina",
-    abbrev: "TRF",
     canonicalUnit: "mg/dL",
     canonicalRefLow: 200,
     canonicalRefHigh: 360,
@@ -35,8 +29,6 @@ export const IRON: readonly LabParameter[] = [
   },
   {
     key: "tsat",
-    nameES: "Índice de saturación de transferrina",
-    abbrev: "IST",
     canonicalUnit: "%",
     canonicalRefLow: 20,
     canonicalRefHigh: 50,

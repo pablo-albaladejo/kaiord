@@ -1,7 +1,7 @@
 /**
  * LabParameterRow — one parameter entry: identity (catalog/custom) +
  * measurement fields + a remove button. The differential leukocyte pair
- * (e.g. "Neutrófilos %" vs "Neutrófilos absolutos") is disambiguated by the
+ * (e.g. "Neutrophils %" vs "Neutrophils absolute") is disambiguated by the
  * catalog's own distinct labels — no special-casing needed here.
  */
 import type { BiologicalSex } from "@kaiord/core";

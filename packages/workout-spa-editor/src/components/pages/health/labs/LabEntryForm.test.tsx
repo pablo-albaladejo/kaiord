@@ -59,7 +59,7 @@ describe("LabEntryForm", () => {
     // Act
     await user.type(
       screen.getByLabelText("Parameter"),
-      "Vitamina D (25-OH) (25-OH-D)"
+      "Vitamin D (25-OH) (25-OH-D)"
     );
     await user.type(screen.getByLabelText("Value"), "60");
     await user.clear(screen.getByLabelText("Unit"));
@@ -80,7 +80,7 @@ describe("LabEntryForm", () => {
     await user.type(screen.getByLabelText("Date"), "2026-03-05");
     await user.type(
       screen.getByLabelText("Parameter"),
-      "Glucosa (ayunas) (GLU)"
+      "Glucose (fasting) (GLU)"
     );
     await user.type(screen.getByLabelText("Value"), "110");
     await user.click(screen.getByRole("button", { name: "Save" }));
