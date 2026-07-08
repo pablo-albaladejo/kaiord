@@ -74,6 +74,8 @@ jobs:
               - 'packages/mcp/**'
             ai:
               - 'packages/ai/**'
+            i18n:
+              - 'packages/i18n/**'
             garmin_bridge:
               - 'packages/garmin-bridge/**'
             frontend:
@@ -184,6 +186,7 @@ jobs:
              [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.mcp_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.i18n_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_bridge_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
@@ -503,6 +506,7 @@ jobs:
             "garmin-connect",
             "mcp",
             "ai",
+            "i18n",
             "garmin-bridge",
           ]
     steps:
@@ -585,7 +589,7 @@ jobs:
         # source — they have no `build` script and produce no dist/, so
         # they are intentionally excluded.
         run: |
-          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor; do
+          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai i18n workout-spa-editor; do
             if [ ! -d "packages/$pkg/dist" ]; then
               echo "::error::@kaiord/$pkg build output not found"
               exit 1
