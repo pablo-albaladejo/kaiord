@@ -57,11 +57,12 @@ export function localizeAiError(error: unknown, locale: Locale = "en"): string {
   const err = (error ?? {}) as AiErrorLike;
   const message = typeof err.message === "string" ? err.message : undefined;
   const reason = typeof err.reason === "string" ? err.reason : undefined;
-  const ai = ERRORS[locale].ai as Record<string, string>;
-  if (!reason) return message ?? ai.generationFailed;
-  const template =
-    ai[reason] ?? (ERRORS.en.ai as Record<string, string>)[reason] ?? message;
+  const generic = ERRORS[locale].ai.generationFailed;
+  if (!reason) return message ?? generic;
+  const table = ERRORS[locale].ai as Record<string, string>;
+  const enTable = ERRORS.en.ai as Record<string, string>;
+  const template = table[reason] ?? enTable[reason] ?? message;
   return template === undefined
-    ? (message ?? ai.generationFailed)
+    ? (message ?? generic)
     : interpolate(template, err.details);
 }
