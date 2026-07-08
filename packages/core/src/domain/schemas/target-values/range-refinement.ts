@@ -9,3 +9,6 @@ type Range = { min: number; max: number };
 export const minLteMax = (range: Range): boolean => range.min <= range.max;
 
 export const MIN_LTE_MAX_MESSAGE = "min must be less than or equal to max";
+
+/** Stable, language-free code for an inverted min/max range. */
+export const MIN_LTE_MAX_CODE = "min_gt_max";

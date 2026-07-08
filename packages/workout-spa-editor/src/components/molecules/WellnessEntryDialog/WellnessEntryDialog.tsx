@@ -10,6 +10,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useId } from "react";
 
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import {
   DIALOG_CONTENT_CLASSES,
   DIALOG_OVERLAY_CLASSES,
@@ -30,7 +31,7 @@ export function WellnessEntryDialog({
   date,
 }: WellnessEntryDialogProps) {
   const titleId = useId();
-  const dateLabel = formatDateLabel(date);
+  const dateLabel = formatDateLabel(date, useActiveLocale());
   const titleText = dateLabel
     ? `Add wellness for ${dateLabel}`
     : "Add wellness";

@@ -7,9 +7,10 @@
 import type { BiologicalSex } from "@kaiord/core";
 import { useId } from "react";
 
+import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import {
   findParameterByLabel,
-  LAB_PARAMETER_OPTIONS,
+  labParameterOptions,
 } from "./lab-parameter-options";
 import { type LabRowState, setRowMode } from "./lab-row-model";
 import {
@@ -32,6 +33,7 @@ export function LabParameterIdentityField({
   onChange,
 }: LabParameterIdentityFieldProps) {
   const datalistId = useId();
+  const locale = useActiveLocale();
 
   return (
     <div className="flex flex-1 flex-col gap-1">
@@ -58,12 +60,12 @@ export function LabParameterIdentityField({
             className={FIELD_CLASS}
             onChange={(e) => {
               const label = e.target.value;
-              const param = findParameterByLabel(label);
+              const param = findParameterByLabel(label, locale);
               onChange(selectCatalogParameter(row, label, param, sex));
             }}
           />
           <datalist id={datalistId}>
-            {LAB_PARAMETER_OPTIONS.map((option) => (
+            {labParameterOptions(locale).map((option) => (
               <option key={option.key} value={option.label} />
             ))}
           </datalist>

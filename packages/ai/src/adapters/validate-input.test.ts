@@ -91,4 +91,38 @@ describe("validateInput", () => {
       );
     }
   });
+
+  it("should tag an empty-input error with the input_empty reason", () => {
+    // Arrange
+    expect.assertions(1);
+
+    // Act
+
+    // Assert
+    try {
+      validateInput("   ");
+    } catch (error) {
+      expect((error as AiParsingError).reason).toBe("input_empty");
+    }
+  });
+
+  it("should tag a too-long-input error with reason and length details", () => {
+    // Arrange
+    expect.assertions(2);
+    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
+
+    // Act
+
+    // Assert
+    try {
+      validateInput(longInput);
+    } catch (error) {
+      const parsed = error as AiParsingError;
+      expect(parsed.reason).toBe("input_too_long");
+      expect(parsed.details).toEqual({
+        maxLength: INPUT_LEN_AT_LIMIT,
+        actualLength: INPUT_LEN_OVER_LIMIT,
+      });
+    }
+  });
 });

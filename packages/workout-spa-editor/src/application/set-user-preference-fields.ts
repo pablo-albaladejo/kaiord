@@ -24,6 +24,7 @@ export type UserPreferenceFieldsPatch = Partial<
     | "units"
     | "notificationsEnabled"
     | "labDashboardParams"
+    | "locale"
   >
 >;
 
@@ -56,6 +57,7 @@ export async function setUserPreferenceFields(
     units: existing?.units,
     notificationsEnabled: existing?.notificationsEnabled,
     labDashboardParams: existing?.labDashboardParams,
+    locale: existing?.locale,
     ...input.patch,
     updatedAt: deps.clock(),
   };

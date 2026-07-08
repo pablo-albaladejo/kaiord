@@ -51,6 +51,9 @@ export const PACKAGE_DEPS = {
   whoop: ["@kaiord/core"],
   "garmin-connect": ["@kaiord/core", "@kaiord/garmin"],
   ai: ["@kaiord/core"],
+  // Framework-agnostic i18n mechanism (translator factory, dictionary types,
+  // parity checker). Private, wraps i18next only — zero @kaiord/* deps.
+  i18n: [],
   mcp: [
     "@kaiord/core",
     "@kaiord/fit",
@@ -72,6 +75,7 @@ export const PACKAGE_DEPS = {
     "@kaiord/ai",
     "@kaiord/fit",
     "@kaiord/garmin",
+    "@kaiord/i18n",
     "@kaiord/tcx",
     "@kaiord/zwo",
   ],

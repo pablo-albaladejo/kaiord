@@ -16,6 +16,10 @@ export default defineConfig({
 
   use: {
     baseURL: "http://localhost:5173",
+    // Pin the browser locale so `navigator.language` is deterministic: the
+    // SPA's `auto` locale preference resolves to English regardless of the
+    // runner's system locale, keeping the English UI assertions stable.
+    locale: "en-US",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     actionTimeout: 10000, // 10 seconds for actions (click, fill, etc.)

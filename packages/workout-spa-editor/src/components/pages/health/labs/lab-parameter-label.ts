@@ -4,17 +4,21 @@
  * `custom:<slug>`.
  */
 import { CUSTOM_PARAMETER_PREFIX, isCustomParameterKey } from "@kaiord/core";
+import type { Locale } from "@kaiord/i18n";
 
 import {
   formatLabParameterLabel,
   getLabParameterDisplay,
 } from "./lab-parameter-display";
 
-export const labParameterLabel = (parameterKey: string): string => {
+export const labParameterLabel = (
+  parameterKey: string,
+  locale: Locale = "en"
+): string => {
   if (isCustomParameterKey(parameterKey)) {
     const slug = parameterKey.slice(CUSTOM_PARAMETER_PREFIX.length);
     return slug.replace(/-/g, " ").trim() || parameterKey;
   }
-  const display = getLabParameterDisplay(parameterKey);
+  const display = getLabParameterDisplay(parameterKey, locale);
   return display ? formatLabParameterLabel(display) : parameterKey;
 };

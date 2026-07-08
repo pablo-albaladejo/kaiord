@@ -132,6 +132,15 @@ const BARE_DOUBLE_LITERAL_RE = /^"(?:\\.|[^"\\])*"$/;
 const BARE_SINGLE_LITERAL_RE = /^'(?:\\.|[^'\\])*'$/;
 const SCREAMING_SNAKE_RE = /^[A-Z][A-Z0-9_]*$/;
 
+// A translation call whose FIRST argument is a bare string literal:
+//   t("errors.saveFailed")       i18n.t("errors.saveFailed")
+//   t("errors.saveFailed", { count })   (interpolation params allowed after)
+// The visible text is selected by a compile-time key, never interpolated
+// from a runtime field, so this is an accepted first-argument shape. Dynamic
+// keys — t(someVar), t(`a.${x}`) — do NOT match and remain violations.
+const TRANSLATE_CALL_RE =
+  /^(?:i18n\s*\.\s*)?t\s*\(\s*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')\s*(?:,[\s\S]*)?\)$/;
+
 function safeStat(p) {
   try {
     return statSync(p);
@@ -287,6 +296,8 @@ function checkArgument(argText) {
   // is part of the literal and must not trigger rejection.
   if (BARE_DOUBLE_LITERAL_RE.test(trimmed)) return null;
   if (BARE_SINGLE_LITERAL_RE.test(trimmed)) return null;
+  // Translation call with a static string-literal key (R-PIIInterpolation).
+  if (TRANSLATE_CALL_RE.test(trimmed)) return null;
   // SCREAMING_SNAKE_CASE identifier must resolve to a top-level
   // string-literal const declaration (depth-1).
   if (SCREAMING_SNAKE_RE.test(trimmed)) {

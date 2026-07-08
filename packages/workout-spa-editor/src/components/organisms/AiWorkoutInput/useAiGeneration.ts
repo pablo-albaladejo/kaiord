@@ -8,6 +8,7 @@ import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live"
 import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useLatestRef } from "../../../hooks/use-latest-ref";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import { useLoadWorkout } from "../../../store/selectors";
 import { runAiGeneration } from "./run-ai-generation";
@@ -31,6 +32,7 @@ export const useAiGeneration = () => {
   const providersRef = useLatestRef(providers);
   const bindingsRef = useLatestRef(bindings);
   const customPromptRef = useLatestRef(customPrompt);
+  const localeRef = useLatestRef(useActiveLocale());
   const loadWorkout = useLoadWorkout();
   const analytics = useAnalytics();
 
@@ -49,6 +51,7 @@ export const useAiGeneration = () => {
         modelId: resolved.modelId,
         profile: profileRef.current,
         customPrompt: customPromptRef.current ?? null,
+        locale: localeRef.current,
         setGeneration,
         loadWorkout,
         analytics,
@@ -58,6 +61,7 @@ export const useAiGeneration = () => {
       providersRef,
       bindingsRef,
       customPromptRef,
+      localeRef,
       setGeneration,
       profileRef,
       loadWorkout,
