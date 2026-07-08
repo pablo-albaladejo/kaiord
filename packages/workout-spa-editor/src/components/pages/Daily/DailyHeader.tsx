@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 
@@ -19,9 +20,10 @@ export function DailyHeader({
   isFocusToday,
   onBackToToday,
 }: DailyHeaderProps) {
+  const t = useTranslate("daily");
   const eyebrow = focusDate.toLocaleDateString(undefined, DATE_OPTIONS);
   const title = isFocusToday
-    ? "Today"
+    ? t("header.today")
     : focusDate.toLocaleDateString(undefined, TITLE_OPTIONS);
 
   return (
@@ -43,13 +45,13 @@ export function DailyHeader({
             onClick={onBackToToday}
             className="mt-1 rounded-md text-[13px] font-semibold text-sky-400 transition-colors hover:text-sky-300"
           >
-            ← Back to Today
+            {t("header.backToToday")}
           </button>
         )}
       </div>
       <button
         type="button"
-        aria-label="Notifications"
+        aria-label={t("header.notifications")}
         className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-slate-300"
       >
         <Icon icon={ICON_MAP.bell} size="md" color="inherit" />

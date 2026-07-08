@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { SectionHead } from "../../molecules/SectionHead";
@@ -18,9 +19,10 @@ export function PlannedSession({
   onWorkoutClick,
   onActivityClick,
 }: PlannedSessionProps) {
+  const t = useTranslate("daily");
   return (
     <section data-testid="daily-planned-session">
-      <SectionHead title="Planned" />
+      <SectionHead title={t("planned.title")} />
       {todayBucketsEmpty(buckets) ? (
         <PlannedEmpty />
       ) : (

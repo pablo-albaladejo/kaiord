@@ -1,0 +1,46 @@
+{
+  "header": {
+    "today": "Today",
+    "backToToday": "← Back to Today",
+    "notifications": "Notifications"
+  },
+  "readiness": {
+    "ready": "READY",
+    "noData": "NO DATA",
+    "noDataYet": "No readiness data yet",
+    "rationaleNoData": "Connect Garmin to sync HRV and sleep.",
+    "rationale": "Based on your overnight HRV and sleep.",
+    "headlinePushToday": "Good to push today",
+    "headlinePush": "Good to push",
+    "headlineEasyToday": "Take it easy today",
+    "headlineEasy": "Take it easy",
+    "hrv": "HRV",
+    "sleep": "Sleep",
+    "battery": "Battery"
+  },
+  "energyBalance": {
+    "title": "Energy balance",
+    "setGoal": "Set goal",
+    "logNutrition": "Log nutrition",
+    "gatedPrompt": "Complete your profile to estimate energy",
+    "intake": "Intake",
+    "net": "Net",
+    "target": "Target"
+  },
+  "weekStrip": {
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "openInCalendar": "Open week in calendar",
+    "calendar": "Calendar"
+  },
+  "trends": {
+    "title": "Trends",
+    "subtitle": "See your wellness history"
+  },
+  "planned": {
+    "title": "Planned",
+    "emptyTitle": "Nothing planned today",
+    "emptyBody": "Create a workout to fill your day.",
+    "planSession": "Plan a session"
+  }
+}

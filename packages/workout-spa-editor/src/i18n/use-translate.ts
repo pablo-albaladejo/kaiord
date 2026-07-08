@@ -43,11 +43,24 @@ const interpolate = (value: string, params?: TranslateParams): string =>
 
 export type Translate = (key: string, params?: TranslateParams) => string;
 
-export function useTranslate(ns: string): Translate {
-  const locale = useActiveLocale();
+/**
+ * Non-hook translator for a namespace at an explicit locale. Pure
+ * presentation-logic (view-model builders, formatters) that produces
+ * user-facing copy takes a `Translate` argument defaulting to this at
+ * `DEFAULT_LOCALE`, so their existing English-asserting unit tests stay
+ * byte-identical while hook callers thread a locale-aware translator.
+ */
+export function getTranslate(
+  ns: string,
+  locale: Locale = DEFAULT_LOCALE
+): Translate {
   return (key, params) =>
     interpolate(
       lookup(locale, ns, key) ?? lookup(DEFAULT_LOCALE, ns, key) ?? key,
       params
     );
+}
+
+export function useTranslate(ns: string): Translate {
+  return getTranslate(ns, useActiveLocale());
 }

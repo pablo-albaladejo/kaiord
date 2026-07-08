@@ -11,6 +11,7 @@
  */
 import type { HrvSummary, SleepRecord, StressEpisode } from "@kaiord/core";
 
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import {
   batteryValue,
   compositeScore,
@@ -20,14 +21,18 @@ import {
   sleepValue,
 } from "./readiness-metrics";
 
-const HEADLINE_PUSH_TODAY = "Good to push today";
-const HEADLINE_PUSH = "Good to push";
-const HEADLINE_EASY_TODAY = "Take it easy today";
-const HEADLINE_EASY = "Take it easy";
-
-function readyHeadline(ready: boolean, isFocusToday: boolean): string {
-  if (ready) return isFocusToday ? HEADLINE_PUSH_TODAY : HEADLINE_PUSH;
-  return isFocusToday ? HEADLINE_EASY_TODAY : HEADLINE_EASY;
+function readyHeadline(
+  ready: boolean,
+  isFocusToday: boolean,
+  t: Translate
+): string {
+  if (ready)
+    return t(
+      isFocusToday ? "readiness.headlinePushToday" : "readiness.headlinePush"
+    );
+  return t(
+    isFocusToday ? "readiness.headlineEasyToday" : "readiness.headlineEasy"
+  );
 }
 
 export type ReadinessMetric = {
@@ -61,7 +66,8 @@ export function buildReadinessModel(
   stress: StressEpisode[] | undefined,
   isFocusToday: boolean,
   hrvSource?: ReadinessMetricSource,
-  sleepSource?: ReadinessMetricSource
+  sleepSource?: ReadinessMetricSource,
+  t: Translate = getTranslate("daily")
 ): ReadinessModel {
   const score = compositeScore(hrv, sleep);
   const ready = score !== null && score >= SCORE_MAX / 2;
@@ -69,25 +75,25 @@ export function buildReadinessModel(
     score,
     headline:
       score === null
-        ? "No readiness data yet"
-        : readyHeadline(ready, isFocusToday),
+        ? t("readiness.noDataYet")
+        : readyHeadline(ready, isFocusToday, t),
     rationale:
       score === null
-        ? "Connect Garmin to sync HRV and sleep."
-        : "Based on your overnight HRV and sleep.",
+        ? t("readiness.rationaleNoData")
+        : t("readiness.rationale"),
     hrv: {
-      label: "HRV",
+      label: t("readiness.hrv"),
       value: hrv ? `${Math.round(hrv.rMSSD)}` : EM_DASH,
       trend: hrvTrend(hrv),
       source: hrvSource?.sourceBridgeId,
       usedFallback: hrvSource?.usedFallback,
     },
     sleep: {
-      label: "Sleep",
+      label: t("readiness.sleep"),
       value: sleepValue(sleep),
       source: sleepSource?.sourceBridgeId,
       usedFallback: sleepSource?.usedFallback,
     },
-    battery: { label: "Battery", value: batteryValue(stress) },
+    battery: { label: t("readiness.battery"), value: batteryValue(stress) },
   };
 }
