@@ -254,6 +254,40 @@ describe("check-no-pii-leakage", () => {
     );
   });
 
+  test("toast with a translation call using a static key is accepted", () => {
+    write(
+      "components/i18n-accept.ts",
+      "export function f(t) {\n" +
+        '  toast.error(t("errors.saveFailed"));\n' +
+        '  toast.success(t("library.deleted", { count: 3 }));\n' +
+        '  toast.error(i18n.t("errors.conversionFailed"));\n' +
+        "}\n"
+    );
+
+    const violations = sandboxRun();
+
+    assert.deepEqual(
+      violations.filter((v) => v.file.endsWith("i18n-accept.ts")),
+      []
+    );
+  });
+
+  test("toast with a translation call using a dynamic key is rejected", () => {
+    write(
+      "components/i18n-reject.ts",
+      "export function f(t, key) {\n" +
+        "  toast.error(t(key));\n" +
+        "  toast.error(t(`errors.${key}`));\n" +
+        "}\n"
+    );
+
+    const violations = sandboxRun().filter((v) =>
+      v.file.endsWith("i18n-reject.ts")
+    );
+
+    assert.equal(violations.length, 2, "expected both dynamic keys rejected");
+  });
+
   test("allowlisted file with a template literal passes (test-injected)", () => {
     // Use a hidden-prefix path within the real SPA tree so the script's
     // file-walk picks it up but the name is unlikely to collide with
