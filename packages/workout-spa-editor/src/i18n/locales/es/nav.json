@@ -1,0 +1,23 @@
+{
+  "daily": "Diario",
+  "calendar": "Calendario",
+  "library": "Biblioteca",
+  "nutrition": "Nutrición",
+  "athlete": "Atleta",
+  "trends": "Tendencias",
+  "labs": "Laboratorio",
+  "chat": "Chat",
+  "new": "Nuevo entreno",
+  "settings": "Ajustes",
+  "aria": {
+    "daily": "Ir a diario",
+    "calendar": "Ir a calendario",
+    "library": "Abrir biblioteca de entrenos",
+    "nutrition": "Abrir nutrición",
+    "athlete": "Abrir perfil de atleta",
+    "trends": "Abrir tendencias de bienestar",
+    "labs": "Abrir analíticas de laboratorio",
+    "chat": "Abrir asistente de chat",
+    "settings": "Abrir ajustes"
+  }
+}

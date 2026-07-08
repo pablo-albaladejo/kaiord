@@ -10,15 +10,17 @@ import type { LocaleResources } from "@kaiord/i18n";
 import enCommon from "./locales/en/common.json";
 import enErrors from "./locales/en/errors.json";
 import enLabs from "./locales/en/labs.json";
+import enNav from "./locales/en/nav.json";
 import esCommon from "./locales/es/common.json";
 import esErrors from "./locales/es/errors.json";
 import esLabs from "./locales/es/labs.json";
+import esNav from "./locales/es/nav.json";
 
-export const NAMESPACES = ["common", "errors", "labs"] as const;
+export const NAMESPACES = ["common", "errors", "labs", "nav"] as const;
 
 export const DEFAULT_NAMESPACE = "common";
 
 export const resources: LocaleResources = {
-  en: { common: enCommon, errors: enErrors, labs: enLabs },
-  es: { common: esCommon, errors: esErrors, labs: esLabs },
+  en: { common: enCommon, errors: enErrors, labs: enLabs, nav: enNav },
+  es: { common: esCommon, errors: esErrors, labs: esLabs, nav: esNav },
 };
