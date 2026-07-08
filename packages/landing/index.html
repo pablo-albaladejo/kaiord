@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Kaiord — One framework. Every fitness format.</title>
+    <title>Kaiord — Your training cockpit. Every fitness format.</title>
     <meta
       name="description"
-      content="Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
+      content="Open-source, local-first training platform: calendar, an AI assistant that acts on your data, Garmin &amp; WHOOP sync, health and lab analytics — plus a TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
     />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://kaiord.com/" />
@@ -32,11 +32,11 @@
     <!-- Open Graph -->
     <meta
       property="og:title"
-      content="Kaiord — One framework. Every fitness format."
+      content="Kaiord — Your training cockpit. Every fitness format."
     />
     <meta
       property="og:description"
-      content="Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
+      content="Open-source, local-first training platform: calendar, an AI assistant that acts on your data, Garmin &amp; WHOOP sync, health and lab analytics — plus a TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
     />
     <meta property="og:image" content="https://kaiord.com/og-image.png" />
     <meta property="og:url" content="https://kaiord.com/" />
@@ -48,11 +48,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Kaiord — One framework. Every fitness format."
+      content="Kaiord — Your training cockpit. Every fitness format."
     />
     <meta
       name="twitter:description"
-      content="Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
+      content="Open-source, local-first training platform: calendar, an AI assistant that acts on your data, Garmin &amp; WHOOP sync, health and lab analytics — plus a TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
     />
     <meta name="twitter:image" content="https://kaiord.com/og-image.png" />
 
@@ -60,21 +60,46 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareSourceCode",
-        "name": "Kaiord",
-        "description": "Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
-        "url": "https://kaiord.com",
-        "codeRepository": "https://github.com/pablo-albaladejo/kaiord",
-        "programmingLanguage": "TypeScript",
-        "license": "https://opensource.org/licenses/MIT",
-        "author": {
-          "@type": "Person",
-          "name": "Pablo Albaladejo",
-          "sameAs": [
-            "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
-            "https://github.com/pablo-albaladejo"
-          ]
-        }
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "name": "Kaiord Editor",
+            "description": "Local-first training platform: weekly calendar, an AI assistant that acts on your data, Garmin and WHOOP sync, health and lab analytics — all in your browser.",
+            "url": "https://kaiord.com/editor/",
+            "applicationCategory": "HealthApplication",
+            "operatingSystem": "Any",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Pablo Albaladejo",
+              "sameAs": [
+                "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
+                "https://github.com/pablo-albaladejo"
+              ]
+            }
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "name": "Kaiord",
+            "description": "Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
+            "url": "https://kaiord.com",
+            "codeRepository": "https://github.com/pablo-albaladejo/kaiord",
+            "programmingLanguage": "TypeScript",
+            "license": "https://opensource.org/licenses/MIT",
+            "author": {
+              "@type": "Person",
+              "name": "Pablo Albaladejo",
+              "sameAs": [
+                "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
+                "https://github.com/pablo-albaladejo"
+              ]
+            }
+          }
+        ]
       }
     </script>
 
@@ -193,6 +218,16 @@
             >Features</a
           >
           <a
+            href="#health"
+            class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
+            >Health</a
+          >
+          <a
+            href="#data-hub"
+            class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
+            >Data Hub</a
+          >
+          <a
             href="/docs/"
             class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
             >Docs</a
@@ -201,11 +236,6 @@
             href="#developers"
             class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
             >Developers</a
-          >
-          <a
-            href="#open-source"
-            class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
-            >Open Source</a
           >
           <a
             href="https://github.com/pablo-albaladejo/kaiord"
@@ -266,12 +296,12 @@
                 d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"
               />
             </svg>
-            Open-source training toolkit
+            Open-source training platform
           </span>
           <h1
             class="mx-auto mt-5 max-w-[760px] text-[40px] font-[850] leading-[1.05] tracking-[-0.03em] min-[860px]:text-[56px]"
           >
-            One framework.<br />
+            Your training cockpit.<br />
             <span class="text-sky-400">Every fitness format.</span>
           </h1>
           <p
@@ -299,13 +329,13 @@
                 >For athletes</span
               >
               <h2 class="mt-4 text-[27px] font-bold tracking-[-0.02em]">
-                Use the editor
+                Train with Kaiord
               </h2>
               <p
                 class="mt-2 text-[15.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
               >
-                Create, AI-generate, and sync structured workouts to Garmin. No
-                code, no account.
+                Plan your week on a calendar, talk to an assistant that acts,
+                sync Garmin &amp; WHOOP. No code, no account, no cloud.
               </p>
               <div class="my-5 flex flex-1 justify-center">
                 <div class="h-[320px] overflow-hidden">
@@ -313,7 +343,7 @@
                     <!-- Editor mock (compact, no glow) -->
                     <div
                       role="img"
-                      aria-label="Kaiord editor on mobile showing today's readiness score and a Sweet Spot workout ready to push to Garmin"
+                      aria-label="Kaiord editor on mobile showing the week at a glance, a WHOOP recovery score, a Sweet Spot workout ready to push to Garmin, and the assistant chat input"
                       class="relative w-[270px]"
                     >
                       <div
@@ -341,6 +371,66 @@
                               class="mb-3 text-[25px] font-bold tracking-[-0.02em]"
                             >
                               Today
+                            </div>
+                            <div
+                              class="mb-3 flex items-center justify-between rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2"
+                            >
+                              <div
+                                class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                              >
+                                <span>M</span>
+                                <span
+                                  class="h-[7px] w-[7px] rounded-full bg-emerald-400"
+                                ></span>
+                              </div>
+                              <div
+                                class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                              >
+                                <span>T</span>
+                                <span
+                                  class="h-[7px] w-[7px] rounded-full bg-[var(--brand-border)]"
+                                ></span>
+                              </div>
+                              <div
+                                class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                              >
+                                <span>W</span>
+                                <span
+                                  class="h-[7px] w-[7px] rounded-full bg-emerald-400"
+                                ></span>
+                              </div>
+                              <div
+                                class="flex flex-col items-center gap-1 text-[9px] font-semibold text-sky-400"
+                              >
+                                <span>T</span>
+                                <span
+                                  class="h-[7px] w-[7px] rounded-full bg-sky-400"
+                                ></span>
+                              </div>
+                              <div
+                                class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                              >
+                                <span>F</span>
+                                <span
+                                  class="h-[7px] w-[7px] rounded-full bg-amber-400"
+                                ></span>
+                              </div>
+                              <div
+                                class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                              >
+                                <span>S</span>
+                                <span
+                                  class="h-[7px] w-[7px] rounded-full bg-sky-400"
+                                ></span>
+                              </div>
+                              <div
+                                class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                              >
+                                <span>S</span>
+                                <span
+                                  class="h-[7px] w-[7px] rounded-full bg-[var(--brand-border)]"
+                                ></span>
+                              </div>
                             </div>
                             <div
                               class="mb-3 flex items-center gap-3 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-3"
@@ -380,6 +470,10 @@
                                 <div
                                   class="mt-0.5 text-[11px] text-[var(--brand-text-muted)]"
                                 >
+                                  <span
+                                    class="mr-0.5 rounded bg-sky-400/15 px-1 py-px align-middle text-[8px] font-bold uppercase tracking-[0.06em] text-sky-400"
+                                    >WHOOP</span
+                                  >
                                   Recovery on track — green light.
                                 </div>
                               </div>
@@ -513,24 +607,27 @@
                             </div>
                           </div>
                           <div
-                            class="absolute inset-x-3.5 bottom-3 flex h-[50px] items-center justify-around rounded-[18px] border border-[var(--brand-border)] bg-[rgba(15,23,42,0.82)] backdrop-blur"
+                            class="absolute inset-x-3.5 bottom-3 flex h-[50px] items-center gap-2 rounded-[18px] border border-[var(--brand-border)] bg-[rgba(15,23,42,0.82)] px-4 backdrop-blur"
                           >
                             <span
-                              class="h-[7px] w-[7px] rounded-full bg-sky-400"
-                            ></span>
-                            <span
-                              class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
-                            ></span>
-                            <span
-                              class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
-                            ></span>
-                            <span
-                              class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
-                            ></span>
-                            <span
-                              class="absolute -top-4 left-1/2 flex h-[42px] w-[42px] -translate-x-1/2 items-center justify-center rounded-[14px] bg-[linear-gradient(160deg,#38bdf8,#0284c7)] text-2xl font-light text-white shadow-[0_6px_16px_color-mix(in_srgb,#0284c7_40%,transparent)]"
-                              >+</span
+                              class="flex-1 truncate text-[11.5px] text-[var(--brand-text-muted)]"
+                              >Ask kaiord — “make tomorrow easier”</span
                             >
+                            <span
+                              class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[linear-gradient(160deg,#38bdf8,#0284c7)] text-white"
+                            >
+                              <svg
+                                class="h-3.5 w-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M12 19V5M5 12l7-7 7 7" />
+                              </svg>
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -659,13 +756,14 @@
             <h2
               class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
-              Plan, generate, sync.
+              Your week is the cockpit.
             </h2>
             <p
-              class="mx-auto mt-3.5 max-w-[520px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+              class="mx-auto mt-3.5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
             >
-              A complete toolkit for athletes and coaches — running entirely in
-              your browser.
+              Every session shows its whole story — planned by your coach,
+              adjusted by AI, pushed to your watch, matched against what you
+              actually did.
             </p>
           </div>
 
@@ -676,7 +774,7 @@
             <div class="flex shrink-0 justify-center min-[860px]:order-2">
               <div
                 role="img"
-                aria-label="Kaiord editor on mobile showing today's readiness score and a Sweet Spot workout ready to push to Garmin"
+                aria-label="Kaiord editor on mobile showing the week at a glance, a WHOOP recovery score, a Sweet Spot workout ready to push to Garmin, and the assistant chat input"
                 class="relative w-[270px]"
               >
                 <div
@@ -706,6 +804,66 @@
                         class="mb-3 text-[25px] font-bold tracking-[-0.02em]"
                       >
                         Today
+                      </div>
+                      <div
+                        class="mb-3 flex items-center justify-between rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-3 py-2"
+                      >
+                        <div
+                          class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                        >
+                          <span>M</span>
+                          <span
+                            class="h-[7px] w-[7px] rounded-full bg-emerald-400"
+                          ></span>
+                        </div>
+                        <div
+                          class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                        >
+                          <span>T</span>
+                          <span
+                            class="h-[7px] w-[7px] rounded-full bg-[var(--brand-border)]"
+                          ></span>
+                        </div>
+                        <div
+                          class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                        >
+                          <span>W</span>
+                          <span
+                            class="h-[7px] w-[7px] rounded-full bg-emerald-400"
+                          ></span>
+                        </div>
+                        <div
+                          class="flex flex-col items-center gap-1 text-[9px] font-semibold text-sky-400"
+                        >
+                          <span>T</span>
+                          <span
+                            class="h-[7px] w-[7px] rounded-full bg-sky-400"
+                          ></span>
+                        </div>
+                        <div
+                          class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                        >
+                          <span>F</span>
+                          <span
+                            class="h-[7px] w-[7px] rounded-full bg-amber-400"
+                          ></span>
+                        </div>
+                        <div
+                          class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                        >
+                          <span>S</span>
+                          <span
+                            class="h-[7px] w-[7px] rounded-full bg-sky-400"
+                          ></span>
+                        </div>
+                        <div
+                          class="flex flex-col items-center gap-1 text-[9px] font-semibold text-[var(--brand-text-muted)]"
+                        >
+                          <span>S</span>
+                          <span
+                            class="h-[7px] w-[7px] rounded-full bg-[var(--brand-border)]"
+                          ></span>
+                        </div>
                       </div>
                       <div
                         class="mb-3 flex items-center gap-3 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-3"
@@ -745,6 +903,10 @@
                           <div
                             class="mt-0.5 text-[11px] text-[var(--brand-text-muted)]"
                           >
+                            <span
+                              class="mr-0.5 rounded bg-sky-400/15 px-1 py-px align-middle text-[8px] font-bold uppercase tracking-[0.06em] text-sky-400"
+                              >WHOOP</span
+                            >
                             Recovery on track — green light.
                           </div>
                         </div>
@@ -878,24 +1040,27 @@
                       </div>
                     </div>
                     <div
-                      class="absolute inset-x-3.5 bottom-3 flex h-[50px] items-center justify-around rounded-[18px] border border-[var(--brand-border)] bg-[rgba(15,23,42,0.82)] backdrop-blur"
+                      class="absolute inset-x-3.5 bottom-3 flex h-[50px] items-center gap-2 rounded-[18px] border border-[var(--brand-border)] bg-[rgba(15,23,42,0.82)] px-4 backdrop-blur"
                     >
                       <span
-                        class="h-[7px] w-[7px] rounded-full bg-sky-400"
-                      ></span>
-                      <span
-                        class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
-                      ></span>
-                      <span
-                        class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
-                      ></span>
-                      <span
-                        class="h-[7px] w-[7px] rounded-full bg-[var(--brand-text-muted)]"
-                      ></span>
-                      <span
-                        class="absolute -top-4 left-1/2 flex h-[42px] w-[42px] -translate-x-1/2 items-center justify-center rounded-[14px] bg-[linear-gradient(160deg,#38bdf8,#0284c7)] text-2xl font-light text-white shadow-[0_6px_16px_color-mix(in_srgb,#0284c7_40%,transparent)]"
-                        >+</span
+                        class="flex-1 truncate text-[11.5px] text-[var(--brand-text-muted)]"
+                        >Ask kaiord — “make tomorrow easier”</span
                       >
+                      <span
+                        class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[linear-gradient(160deg,#38bdf8,#0284c7)] text-white"
+                      >
+                        <svg
+                          class="h-3.5 w-3.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M12 19V5M5 12l7-7 7 7" />
+                        </svg>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -948,13 +1113,147 @@
                     stroke-linejoin="round"
                     aria-hidden="true"
                   >
+                    <path d="M5 21V4" />
+                    <path d="M5 4c4.5-2 9 2 13.5 0v9C14 15 9.5 11 5 13" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">
+                    Session lifecycle at a glance
+                  </h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Badges trace each workout from plan to execution — coach
+                    origin, AI adjustments, on your watch, done and matched.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-emerald-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M6 4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17l-6-3.5L6 21V4z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Library &amp; templates</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Save any session as a template, schedule it from the
+                    library, and reuse it all season.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CONVERSATIONAL ASSISTANT ========== -->
+      <section
+        id="assistant"
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
+      >
+        <div class="mx-auto max-w-[1180px]">
+          <div class="mb-9 text-center min-[860px]:mb-14">
+            <p
+              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-sky-400"
+            >
+              Conversational-first
+            </p>
+            <h2
+              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            >
+              Don't fill forms. Just say it.
+            </h2>
+            <p
+              class="mx-auto mt-3.5 max-w-[520px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+            >
+              The assistant doesn't just answer — it acts on your data.
+            </p>
+          </div>
+
+          <div
+            class="flex flex-col items-center gap-9 min-[860px]:flex-row min-[860px]:gap-14"
+          >
+            <!-- Chat mock -->
+            <div
+              class="w-full max-w-[460px] shrink-0 min-[860px]:order-2 min-[860px]:w-[420px]"
+            >
+              <div
+                role="img"
+                aria-label="Chat with the Kaiord assistant: the athlete asks to make tomorrow easier and the assistant reschedules the week and pushes the change to Garmin"
+                class="rounded-[22px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-5"
+              >
+                <div aria-hidden="true" class="flex flex-col gap-3">
+                  <div
+                    class="max-w-[85%] self-end rounded-2xl rounded-br-md bg-[var(--brand-accent-blue)] px-4 py-2.5 text-[14px] text-white"
+                  >
+                    Make tomorrow easier — I slept badly.
+                  </div>
+                  <div
+                    class="max-w-[85%] self-start rounded-2xl rounded-bl-md border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] px-4 py-2.5 text-[14px] leading-[1.5] text-[var(--brand-text-secondary)]"
+                  >
+                    Swapped Thursday's Sweet Spot 3×12 for a 45-minute recovery
+                    spin and moved the intervals to Saturday.
+                    <span
+                      class="mt-2 flex w-fit items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11.5px] font-semibold text-emerald-400"
+                    >
+                      <svg
+                        class="h-3 w-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                      Pushed to Garmin
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Feature rows -->
+            <div class="flex flex-1 flex-col gap-6">
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-400/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-sky-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
                     <path
                       d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"
                     />
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">AI workout generation</h3>
+                  <h3 class="text-lg font-bold">Natural-language workouts</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
                   >
@@ -964,6 +1263,341 @@
                   </p>
                 </div>
               </div>
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-accent-purple)]/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-[var(--brand-accent-purple)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Actions, not just answers</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Push workouts to your watch, pull activities, reshuffle your
+                    week — straight from the conversation.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-emerald-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="8" cy="15" r="4" />
+                    <path d="M10.8 12.2 19 4m-3 1 3 3" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Your model, your key</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Bring your own API key. Conversations stay per-profile in
+                    your browser — and they're searchable.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== HEALTH HUB ========== -->
+      <section
+        id="health"
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
+      >
+        <div class="mx-auto max-w-[1180px]">
+          <div class="mb-9 text-center min-[860px]:mb-14">
+            <p
+              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-emerald-400"
+            >
+              Health hub
+            </p>
+            <h2
+              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            >
+              From sleep score to blood work.
+            </h2>
+            <p
+              class="mx-auto mt-3.5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+            >
+              Recovery, sleep, HRV, weight and activity flow in automatically
+              from WHOOP and Garmin — every data point wears its source. And
+              your lab reports live here too.
+            </p>
+          </div>
+
+          <div class="grid gap-5 min-[860px]:grid-cols-2">
+            <div
+              class="rounded-[22px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-6"
+            >
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-400/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-sky-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 3v10m0 0 4-4m-4 4-4-4" />
+                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Automatic ingestion</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    WHOOP recovery and sleep, Garmin activity, manual entry —
+                    merged with a source badge on every data point.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="rounded-[22px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-6"
+            >
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-accent-purple)]/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-[var(--brand-accent-purple)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 17l5-6 4 3 6-8" />
+                    <path d="M3 21h18" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Trends</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Time-series charts for every health metric — sleep, weight,
+                    HRV, recovery, activity.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="rounded-[22px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-6"
+            >
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-emerald-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 3h6" />
+                    <path
+                      d="M10 3v5.5L4.6 18a2 2 0 0 0 1.8 3h11.2a2 2 0 0 0 1.8-3L14 8.5V3"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Lab analytics</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Log blood panels — 55+ parameters with reference ranges,
+                    out-of-range flags, and evolution charts.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="rounded-[22px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-6"
+            >
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-amber-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 3c1 3.5 4.5 4.8 4.5 8.5A4.5 4.5 0 0 1 12 16a4.5 4.5 0 0 1-4.5-4.5C7.5 9.5 9 8 9 6c1.2.7 2.4 1.7 3 3 .3-2 .2-4 0-6z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">
+                    Nutrition &amp; energy balance
+                  </h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Track intake against expenditure and see your daily energy
+                    balance.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== DATA HUB ========== -->
+      <section
+        id="data-hub"
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
+      >
+        <div class="mx-auto max-w-[1180px]">
+          <div class="mb-9 text-center min-[860px]:mb-14">
+            <p
+              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--brand-text-muted)]"
+            >
+              The data hub
+            </p>
+            <h2
+              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            >
+              You decide where your data flows.
+            </h2>
+            <p
+              class="mx-auto mt-3.5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+            >
+              A routing matrix connects every source to every destination —
+              Garmin, WHOOP, Train2Go, manual entry. Pick priorities per data
+              type and see exactly what synced, when, and from where.
+            </p>
+          </div>
+
+          <div
+            class="flex flex-col items-center gap-9 min-[860px]:flex-row min-[860px]:gap-14"
+          >
+            <!-- Routing matrix mock -->
+            <div class="w-full max-w-[460px] shrink-0 min-[860px]:w-[420px]">
+              <div
+                role="img"
+                aria-label="Data routing matrix: Garmin syncs workouts and activities, WHOOP syncs health, Train2Go delivers coach workouts, and manual entry covers every data type"
+                class="rounded-[22px] border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] p-5"
+              >
+                <div
+                  aria-hidden="true"
+                  class="grid grid-cols-[minmax(76px,auto)_1fr_1fr_1fr] items-center gap-1.5"
+                >
+                  <span></span>
+                  <span
+                    class="text-center text-[10.5px] font-bold uppercase tracking-[0.06em] text-[var(--brand-text-muted)]"
+                    >Workouts</span
+                  >
+                  <span
+                    class="text-center text-[10.5px] font-bold uppercase tracking-[0.06em] text-[var(--brand-text-muted)]"
+                    >Activities</span
+                  >
+                  <span
+                    class="text-center text-[10.5px] font-bold uppercase tracking-[0.06em] text-[var(--brand-text-muted)]"
+                    >Health</span
+                  >
+                  <span class="pr-2 text-[12.5px] font-semibold">Garmin</span>
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm font-bold text-emerald-400"
+                    >✓</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm font-bold text-emerald-400"
+                    >✓</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm text-[var(--brand-text-muted)]"
+                    >—</span
+                  >
+                  <span class="pr-2 text-[12.5px] font-semibold">WHOOP</span>
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm text-[var(--brand-text-muted)]"
+                    >—</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm text-[var(--brand-text-muted)]"
+                    >—</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm font-bold text-emerald-400"
+                    >✓</span
+                  >
+                  <span class="pr-2 text-[12.5px] font-semibold">Train2Go</span>
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm font-bold text-emerald-400"
+                    >✓</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm text-[var(--brand-text-muted)]"
+                    >—</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm text-[var(--brand-text-muted)]"
+                    >—</span
+                  >
+                  <span class="pr-2 text-[12.5px] font-semibold">Manual</span>
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm font-bold text-emerald-400"
+                    >✓</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm font-bold text-emerald-400"
+                    >✓</span
+                  >
+                  <span
+                    class="flex items-center justify-center rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-deep)] py-2 text-sm font-bold text-emerald-400"
+                    >✓</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Feature rows -->
+            <div class="flex flex-1 flex-col gap-6">
               <div class="flex items-start gap-4">
                 <div
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
@@ -989,6 +1623,65 @@
                   >
                     Push planned workouts straight to your watch, and pull
                     completed activities back — no server in between.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-400/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-sky-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 3v5M15 3v5" />
+                    <path d="M7 8h10v3a5 5 0 0 1-10 0V8z" />
+                    <path d="M12 16v5" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Bridges, not middlemen</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Garmin, WHOOP and Train2Go connect through browser
+                    extensions using your own session — no OAuth proxy in the
+                    middle.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-accent-purple)]/10"
+                >
+                  <svg
+                    class="h-5 w-5 text-[var(--brand-accent-purple)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 8h9M17 8h3M4 16h3M11 16h9" />
+                    <circle cx="15" cy="8" r="2" />
+                    <circle cx="9" cy="16" r="2" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold">Source priorities</h3>
+                  <p
+                    class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--brand-text-secondary)]"
+                  >
+                    Several sources for the same data type? Set the order once —
+                    routing is enforced, with visible sync status.
                   </p>
                 </div>
               </div>
@@ -1332,8 +2025,8 @@
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--brand-text-secondary)]"
                 >
-                  AI-ready via Model Context Protocol — Claude, Cursor &amp;
-                  more.
+                  Convert, validate &amp; inspect via Model Context Protocol —
+                  Claude, Cursor &amp; more.
                 </p>
               </div>
             </div>
@@ -1398,10 +2091,11 @@
               <p
                 class="mt-3 text-base leading-[1.6] text-[var(--brand-text-secondary)]"
               >
-                Everything runs locally or in-browser. The CLI converts files on
-                your machine, the editor runs in your browser, the MCP server
-                plugs into your local AI tools. Your data never leaves your
-                device.
+                Everything runs locally or in-browser. Your data lives in
+                IndexedDB on your device; integrations run through browser
+                extensions using your own sessions; the CLI and MCP server run
+                on your machine. Nothing leaves your device unless you turn on
+                sync with your own Google Drive.
               </p>
               <div class="mt-5 flex flex-wrap gap-2">
                 <span
@@ -1410,7 +2104,7 @@
                 >
                 <span
                   class="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--brand-text-secondary)]"
-                  >SPA editor</span
+                  >Editor (PWA)</span
                 >
                 <span
                   class="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--brand-text-secondary)]"
@@ -1418,7 +2112,7 @@
                 >
                 <span
                   class="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--brand-text-secondary)]"
-                  >Browser extension</span
+                  >3 browser extensions</span
                 >
               </div>
             </div>
@@ -1499,10 +2193,10 @@
               <div
                 class="text-3xl font-extrabold tracking-[-0.02em] text-emerald-400"
               >
-                100%
+                3
               </div>
               <div class="mt-1 text-[12.5px] text-[var(--brand-text-muted)]">
-                Round-trip safe
+                Browser bridges
               </div>
             </div>
             <div
