@@ -18,6 +18,12 @@ vi.mock("../../../../charts/uplot-base/uplot-chart", () => ({
 const PROFILE_ID = "p1";
 const NOW = "2026-07-07T12:00:00.000Z";
 
+// This integration test drives real Dexie + useLiveQuery through several
+// pin/unpin interactions. It runs in ~0.7s in isolation but can exceed the 5s
+// default under CPU-starved parallel CI; the generous ceiling absorbs that
+// scheduling jitter without masking a real hang (the test always completes).
+const CI_TIMEOUT_MS = 20_000;
+
 const wrap = ({ children }: { children: ReactNode }) => (
   <PersistenceProvider persistence={createDexiePersistence(db)}>
     {children}
@@ -96,72 +102,84 @@ describe("LabDashboardSection", () => {
     expect(screen.queryByTestId("lab-dashboard-grid")).not.toBeInTheDocument();
   });
 
-  it("should add a chart card when a parameter is pinned", async () => {
-    // Arrange
-    render(<LabDashboardSection profileId={PROFILE_ID} />, { wrapper: wrap });
-    const user = userEvent.setup();
-    const glucoseItem = (
-      await screen.findAllByTestId("lab-parameter-item")
-    ).find(
-      (el) => el.getAttribute("data-parameter-key") === "glucose"
-    ) as HTMLElement;
+  it(
+    "should add a chart card when a parameter is pinned",
+    async () => {
+      // Arrange
+      render(<LabDashboardSection profileId={PROFILE_ID} />, { wrapper: wrap });
+      const user = userEvent.setup();
+      const glucoseItem = (
+        await screen.findAllByTestId("lab-parameter-item")
+      ).find(
+        (el) => el.getAttribute("data-parameter-key") === "glucose"
+      ) as HTMLElement;
 
-    // Act
-    await user.click(within(glucoseItem).getByTestId("lab-parameter-select"));
+      // Act
+      await user.click(within(glucoseItem).getByTestId("lab-parameter-select"));
 
-    // Assert
-    const grid = await screen.findByTestId("lab-dashboard-grid");
-    expect(
-      within(grid).getAllByTestId("lab-parameter-chart-card")
-    ).toHaveLength(1);
-    expect(
-      await within(grid).findByTestId("lab-parameter-chart")
-    ).toHaveAttribute("data-parameter-key", "glucose");
-  });
-
-  it("should render one chart card per pinned parameter, multiple at once", async () => {
-    // Arrange
-    render(<LabDashboardSection profileId={PROFILE_ID} />, { wrapper: wrap });
-    const user = userEvent.setup();
-    const items = await screen.findAllByTestId("lab-parameter-item");
-
-    // Act
-    for (const item of items) {
-      await user.click(within(item).getByTestId("lab-parameter-select"));
-    }
-
-    // Assert
-    const grid = await screen.findByTestId("lab-dashboard-grid");
-    await waitFor(() =>
+      // Assert
+      const grid = await screen.findByTestId("lab-dashboard-grid");
       expect(
         within(grid).getAllByTestId("lab-parameter-chart-card")
-      ).toHaveLength(items.length)
-    );
-  });
+      ).toHaveLength(1);
+      expect(
+        await within(grid).findByTestId("lab-parameter-chart")
+      ).toHaveAttribute("data-parameter-key", "glucose");
+    },
+    CI_TIMEOUT_MS
+  );
 
-  it("should remove a chart card when its parameter is unpinned", async () => {
-    // Arrange
-    render(<LabDashboardSection profileId={PROFILE_ID} />, { wrapper: wrap });
-    const user = userEvent.setup();
-    const glucoseItem = (
-      await screen.findAllByTestId("lab-parameter-item")
-    ).find(
-      (el) => el.getAttribute("data-parameter-key") === "glucose"
-    ) as HTMLElement;
-    const selectButton = within(glucoseItem).getByTestId(
-      "lab-parameter-select"
-    );
-    await user.click(selectButton);
-    await screen.findByTestId("lab-dashboard-grid");
+  it(
+    "should render one chart card per pinned parameter, multiple at once",
+    async () => {
+      // Arrange
+      render(<LabDashboardSection profileId={PROFILE_ID} />, { wrapper: wrap });
+      const user = userEvent.setup();
+      const items = await screen.findAllByTestId("lab-parameter-item");
 
-    // Act
-    await user.click(selectButton);
+      // Act
+      for (const item of items) {
+        await user.click(within(item).getByTestId("lab-parameter-select"));
+      }
 
-    // Assert
-    expect(
-      await screen.findByText(
-        "Pin a parameter above to see its evolution chart."
-      )
-    ).toBeInTheDocument();
-  });
+      // Assert
+      const grid = await screen.findByTestId("lab-dashboard-grid");
+      await waitFor(() =>
+        expect(
+          within(grid).getAllByTestId("lab-parameter-chart-card")
+        ).toHaveLength(items.length)
+      );
+    },
+    CI_TIMEOUT_MS
+  );
+
+  it(
+    "should remove a chart card when its parameter is unpinned",
+    async () => {
+      // Arrange
+      render(<LabDashboardSection profileId={PROFILE_ID} />, { wrapper: wrap });
+      const user = userEvent.setup();
+      const glucoseItem = (
+        await screen.findAllByTestId("lab-parameter-item")
+      ).find(
+        (el) => el.getAttribute("data-parameter-key") === "glucose"
+      ) as HTMLElement;
+      const selectButton = within(glucoseItem).getByTestId(
+        "lab-parameter-select"
+      );
+      await user.click(selectButton);
+      await screen.findByTestId("lab-dashboard-grid");
+
+      // Act
+      await user.click(selectButton);
+
+      // Assert
+      expect(
+        await screen.findByText(
+          "Pin a parameter above to see its evolution chart."
+        )
+      ).toBeInTheDocument();
+    },
+    CI_TIMEOUT_MS
+  );
 });
