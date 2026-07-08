@@ -13,7 +13,6 @@
       "@kaiord/garmin-connect",
       "@kaiord/cli",
       "@kaiord/mcp",
-      "@kaiord/ai",
       "@kaiord/garmin-bridge",
       "@kaiord/train2go-bridge",
       "@kaiord/whoop",

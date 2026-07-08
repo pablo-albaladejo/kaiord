@@ -34,10 +34,19 @@
       "ignore": ["src/**/*.test.ts"]
     },
     "packages/ai": {
-      "entry": ["src/index.ts"],
+      "entry": [
+        "src/index.ts",
+        "src/providers/index.ts",
+        "src/prompts/index.ts"
+      ],
       "project": ["src/**/*.ts"],
       "ignore": ["src/**/*.test.ts"],
-      "ignoreDependencies": ["@ai-sdk/anthropic", "ai"]
+      "ignoreDependencies": [
+        "@ai-sdk/anthropic",
+        "@ai-sdk/google",
+        "@ai-sdk/openai",
+        "ai"
+      ]
     },
     "packages/mcp": {
       "entry": ["src/index.ts", "src/bin/kaiord-mcp.ts"],

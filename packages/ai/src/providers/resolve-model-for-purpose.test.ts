@@ -4,16 +4,23 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { getDefaultModel } from "../../lib/provider-models";
-import type { LlmProviderConfig } from "../../store/ai-store-types";
-import type { AiModelBinding } from "../../types/ai-model-binding";
+import { getDefaultModel } from "./provider-models";
 import { resolveModelForPurpose } from "./resolve-model-for-purpose";
+import type { AiModelBinding, LlmProviderType } from "./types";
 
 const NOW = "2026-06-15T10:00:00.000Z";
 
-const provider = (
-  over: Partial<LlmProviderConfig> = {}
-): LlmProviderConfig => ({
+type TestProvider = {
+  id: string;
+  type: LlmProviderType;
+  apiKey: string;
+  model?: string;
+  label: string;
+  isDefault: boolean;
+  createdAt: number;
+};
+
+const provider = (over: Partial<TestProvider> = {}): TestProvider => ({
   id: "prov-1",
   type: "anthropic",
   apiKey: "k",
@@ -114,7 +121,7 @@ describe("resolveModelForPurpose", () => {
 
   it("should return null when no providers are configured", () => {
     // Arrange
-    const providers: LlmProviderConfig[] = [];
+    const providers: TestProvider[] = [];
 
     // Act
     const resolved = resolveModelForPurpose("chat", providers, []);

@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildSystemPrompt,
   buildUserPrompt,
   PROMPT_VERSION,
   SPANISH_ABBREVIATION_DICTIONARY,
-} from "./ai-prompts";
+} from "./user-prompt";
 
 describe("PROMPT_VERSION", () => {
   it("should follow semver format", () => {
@@ -28,41 +27,6 @@ describe("SPANISH_ABBREVIATION_DICTIONARY", () => {
     expect(SPANISH_ABBREVIATION_DICTIONARY).toContain("Z1-Z5");
     expect(SPANISH_ABBREVIATION_DICTIONARY).toContain("CV/VC");
     expect(SPANISH_ABBREVIATION_DICTIONARY).toContain("RI");
-  });
-});
-
-describe("buildSystemPrompt", () => {
-  it("should inject zones context into template", () => {
-    // Arrange
-    const zones = "Z1: 120-140bpm\nZ2: 140-160bpm";
-
-    // Act
-    const result = buildSystemPrompt(zones);
-
-    // Assert
-    expect(result).toContain("Z1: 120-140bpm");
-    expect(result).toContain("Z2: 140-160bpm");
-  });
-
-  it("should include prompt injection defense", () => {
-    // Arrange
-
-    // Act
-    const result = buildSystemPrompt("zones");
-
-    // Assert
-    expect(result).toContain("System instructions take priority");
-    expect(result).toContain("coach delimiters");
-  });
-
-  it("should include Spanish abbreviation dictionary", () => {
-    // Arrange
-
-    // Act
-    const result = buildSystemPrompt("zones");
-
-    // Assert
-    expect(result).toContain("vuelta a la calma");
   });
 });
 

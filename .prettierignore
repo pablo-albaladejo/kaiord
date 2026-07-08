@@ -11,6 +11,7 @@ coverage/
 # Generated files
 *.log
 .DS_Store
+packages/ai/src/providers/generated/
 packages/core/schema/*.json
 openspec/changes/archive/README.md
 openspec/specs/README.md

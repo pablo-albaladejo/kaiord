@@ -2,18 +2,17 @@ import type { Workout } from "@kaiord/core";
 import { sportSchema } from "@kaiord/core";
 import type { TextToWorkoutConfig, TextToWorkoutOptions } from "../types";
 import { validateInput } from "./validate-input";
-import { loadPrompt } from "../prompts/load-prompt";
+import { resolvePrompt } from "../prompts/registry";
+import { WORKOUT_PARSER_SYSTEM } from "../prompts/parse-workout-prompt";
 import { executeWithRetry } from "./execute-with-retry";
-import systemPromptRaw from "../prompts/parse-workout.md";
 
-const buildSystemPrompt = (
-  raw: string,
-  options?: TextToWorkoutOptions
-): string => {
+const buildSystemPrompt = (options?: TextToWorkoutOptions): string => {
   const sportLine = options?.sport
     ? `The sport for this workout is "${options.sport}". Use it for the sport field.`
     : "";
-  return loadPrompt(raw, { sport: sportLine });
+  return resolvePrompt(WORKOUT_PARSER_SYSTEM.id, {
+    vars: { sport: sportLine },
+  });
 };
 
 /**
@@ -38,7 +37,7 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
     if (options?.sport) sportSchema.parse(options.sport);
 
     const sanitized = validateInput(text);
-    const system = buildSystemPrompt(systemPromptRaw, options);
+    const system = buildSystemPrompt(options);
 
     logger?.debug("System prompt prepared", { length: system.length });
     logger?.info("Parsing workout text", { length: sanitized.length });

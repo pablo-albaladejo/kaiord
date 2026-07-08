@@ -44,6 +44,10 @@ test("linked[0] includes @kaiord/train2go-bridge", () => {
 test("linked[0] still includes the existing core publishables", () => {
   const cfg = loadConfig();
 
+  // @kaiord/ai is intentionally NOT in this list: it left the linked group
+  // (add-ai-platform-foundation) so its independent release cadence — and its
+  // eventual deprecation major — no longer ripples the format adapters' shared
+  // version line.
   for (const required of [
     "@kaiord/core",
     "@kaiord/fit",
@@ -53,11 +57,19 @@ test("linked[0] still includes the existing core publishables", () => {
     "@kaiord/garmin-connect",
     "@kaiord/cli",
     "@kaiord/mcp",
-    "@kaiord/ai",
   ]) {
     assert.ok(
       cfg.linked[0].includes(required),
       `linked[0] regressed — missing ${required}`
     );
   }
+});
+
+test("linked[0] excludes @kaiord/ai (decoupled release cadence)", () => {
+  const cfg = loadConfig();
+
+  assert.ok(
+    !cfg.linked[0].includes("@kaiord/ai"),
+    "@kaiord/ai must stay out of the linked group (add-ai-platform-foundation)"
+  );
 });

@@ -2,11 +2,16 @@
  * Stub for `@ai-sdk/gateway` exports referenced (statically) by the `ai` SDK.
  *
  * The SPA always passes a concrete `LanguageModel` instance from
- * `provider-factory.ts` (createAnthropic / createOpenAI / createGoogleGenerativeAI),
- * so the `globalThis.AI_SDK_DEFAULT_PROVIDER ?? gateway` fallback path is never
+ * `@kaiord/ai/providers` (createLanguageModel), so the
+ * `globalThis.AI_SDK_DEFAULT_PROVIDER ?? gateway` fallback path is never
  * reached at runtime. Aliasing `@ai-sdk/gateway` to this stub at the SPA build
  * boundary lets rolldown drop the full gateway package (~60 KB raw, includes
  * the entire GatewayModelId catalog and thousands of model name strings).
+ *
+ * LOAD-BEARING: this stub and its `vite.config.ts` alias are a bundle-size
+ * optimization, not dead code. The `@ai-sdk/*` deps stay in this package for
+ * the alias to resolve even though provider instantiation now lives in
+ * `@kaiord/ai/providers`. Do not remove as "unused".
  *
  * Same pattern as the round-5 zod/v3 stub.
  *
@@ -18,7 +23,7 @@
 const unreachable = (): never => {
   throw new Error(
     "@ai-sdk/gateway is intentionally stubbed in the SPA build. " +
-      "All AI calls must route through provider-factory.ts (concrete model instance)."
+      "All AI calls must route through @kaiord/ai/providers (concrete model instance)."
   );
 };
 

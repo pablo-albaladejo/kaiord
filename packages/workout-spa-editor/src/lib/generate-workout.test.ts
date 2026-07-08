@@ -13,16 +13,16 @@ vi.mock("@kaiord/core", () => ({
   })),
 }));
 
-vi.mock("./provider-factory", () => ({
+vi.mock("@kaiord/ai/providers", () => ({
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
 }));
 
 import { createTextToWorkout } from "@kaiord/ai";
+import { createLanguageModel } from "@kaiord/ai/providers";
 import { createWorkoutKRD } from "@kaiord/core";
 
 import type { GenerateWorkoutOptions } from "./generate-workout";
 import { generateWorkoutKrd } from "./generate-workout";
-import { createLanguageModel } from "./provider-factory";
 
 const OVER_LIMIT_PROMPT_LENGTH = 600;
 
@@ -55,7 +55,8 @@ describe("generateWorkoutKrd", () => {
     // Assert
     expect(createLanguageModel).toHaveBeenCalledWith(
       baseOptions.provider,
-      baseOptions.modelId
+      baseOptions.modelId,
+      { browser: true }
     );
   });
 

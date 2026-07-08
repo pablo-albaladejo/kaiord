@@ -5,11 +5,12 @@
  * either piece is missing.
  */
 
+import { resolveModelForPurpose } from "@kaiord/ai/providers";
+
 import { createDexieAiModelBindingRepository } from "../../adapters/dexie/dexie-ai-model-binding-repository";
 import { createDexieAiProviderRepository } from "../../adapters/dexie/dexie-ai-provider-repository";
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexieProfileRepository } from "../../adapters/dexie/dexie-profile-repository";
-import { resolveModelForPurpose } from "../../application/ai/resolve-model-for-purpose";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 

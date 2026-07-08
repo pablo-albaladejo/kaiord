@@ -1,8 +1,8 @@
+import { PROVIDER_MODELS } from "@kaiord/ai/providers";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { PROVIDER_MODELS } from "../../../lib/provider-models";
 import { ModelPicker } from "./ModelPicker";
 
 describe("ModelPicker", () => {

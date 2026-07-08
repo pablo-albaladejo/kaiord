@@ -1,8 +1,8 @@
+import { UNTRUSTED_OPEN } from "@kaiord/ai/prompts";
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { buildCoachingActivityId } from "../../../types/coaching-activity-record";
-import { UNTRUSTED_OPEN } from "./fence";
 import { createQueryCoachingTool } from "./query-coaching-tool";
 
 const TODAY = "2026-06-13";

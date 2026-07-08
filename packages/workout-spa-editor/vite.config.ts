@@ -32,6 +32,10 @@ export default defineConfig({
     },
   ],
   resolve: {
+    // LOAD-BEARING aliases: these two stubs are a bundle-size optimization
+    // (~146KB), not dead code. Provider instantiation now lives in
+    // `@kaiord/ai/providers`, but the `@ai-sdk/*` deps and these aliases MUST
+    // stay in this package for the stubs to resolve. Do not remove as "unused".
     alias: [
       { find: "@", replacement: path.resolve(__dirname, "./src") },
       // Stub zod/v3 to prune the v3 module from the SPA bundle.
@@ -48,7 +52,7 @@ export default defineConfig({
       // Stub @ai-sdk/gateway — the `ai` SDK statically imports `createGateway`,
       // `gateway`, and `GatewayAuthenticationError` for its
       // `globalThis.AI_SDK_DEFAULT_PROVIDER ?? gateway` fallback. We always pass
-      // a concrete model from provider-factory.ts, so this fallback is
+      // a concrete model from `@kaiord/ai/providers`, so this fallback is
       // unreachable. The stub lets rolldown drop the full gateway package
       // (~60KB raw, includes a multi-thousand-string GatewayModelId catalog).
       {

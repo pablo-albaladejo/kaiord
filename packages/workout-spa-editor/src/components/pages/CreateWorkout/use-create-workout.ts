@@ -1,8 +1,8 @@
+import { resolveModelForPurpose } from "@kaiord/ai/providers";
 import type { KRD } from "@kaiord/core";
 import { useCallback, useState } from "react";
 import { useSearch } from "wouter";
 
-import { resolveModelForPurpose } from "../../../application/ai/resolve-model-for-purpose";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
