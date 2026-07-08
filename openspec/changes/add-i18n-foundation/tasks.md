@@ -1,7 +1,8 @@
 > Status: foundation + locale-preference domain + pilot dictionaries + SPA
-> runtime wiring (provider, switcher, formatters, labs live-locale) landed and
-> green (sections 1, 2, 3, 4.1–4.3, 5, 7, 8). Remaining: e2e locale pin (4.4),
-> upstream error mapping (6), full quality gates (9).
+> runtime wiring (provider, switcher, formatters, labs live-locale) + validation
+> error localization landed and green (sections 1, 2, 3, 4.1–4.3, 5, 6.2/6.4, 7,
+> 8). Remaining: e2e locale pin (4.4), converter/ai error localization (6.1/6.3,
+> need upstream code/param changes), full quality gates (9).
 
 ## 1. `@kaiord/i18n` package (mechanism)
 
