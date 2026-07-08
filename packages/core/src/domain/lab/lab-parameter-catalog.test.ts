@@ -17,8 +17,6 @@ const DIFFERENTIAL_CELLS = [
 ];
 
 const EXPECTED_CORE_COUNT = 56;
-const MIN_CORE_COUNT = 50;
-const MAX_CORE_COUNT = 60;
 const HBA1C_FACTOR = 0.0915;
 const HBA1C_OFFSET = 2.15;
 const VITAMIN_D_FACTOR = 0.4;
@@ -30,12 +28,9 @@ describe("LAB_PARAMETER_CATALOG", () => {
     const count = LAB_PARAMETER_CATALOG.length;
 
     // Act
-    const withinExpectedCore =
-      count >= MIN_CORE_COUNT && count <= MAX_CORE_COUNT;
 
     // Assert
     expect(count).toBe(EXPECTED_CORE_COUNT);
-    expect(withinExpectedCore).toBe(true);
   });
 
   it("should have no duplicate keys", () => {
