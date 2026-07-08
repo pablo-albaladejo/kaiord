@@ -3,6 +3,7 @@
  * label, sparkline of the parameter's history, latest canonical value, and
  * the out-of-range flag (F3.3, highlighted border when low/high).
  */
+import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { Sparkline } from "../../../charts/uplot-base/Sparkline";
 import type { LabParameterSummary } from "./build-lab-parameter-summaries";
 import { isOutOfRange } from "./lab-flag-display";
@@ -22,7 +23,7 @@ export const LabParameterListItem = ({
 }: LabParameterListItemProps) => {
   const { latest, points } = summary;
   const outOfRange = isOutOfRange(latest.flag);
-  const label = labParameterLabel(summary.parameterKey);
+  const label = labParameterLabel(summary.parameterKey, useActiveLocale());
   return (
     <li
       data-testid="lab-parameter-item"

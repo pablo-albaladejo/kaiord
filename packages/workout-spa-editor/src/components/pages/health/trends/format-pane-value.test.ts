@@ -11,6 +11,7 @@ const WEIGHT_KG = 72.345;
 const HRV_MS = 48.4;
 const SLEEP_SCORE = 82;
 const STEPS_VALUE = 9432;
+const STEPS_VALUE_GROUPED = 94321;
 
 const byKey = (k: TrendMetricKey): TrendMetricDef =>
   TREND_METRICS.find((m) => m.key === k) as TrendMetricDef;
@@ -69,6 +70,17 @@ describe("formatPaneValue", () => {
 
     // Assert
     expect(out).toBe("9,432 steps");
+  });
+
+  it("should group steps with the es thousands separator", () => {
+    // Arrange
+    const metric = byKey("steps");
+
+    // Act
+    const out = formatPaneValue(metric, STEPS_VALUE_GROUPED, "metric", "es");
+
+    // Assert
+    expect(out).toBe("94.321 steps");
   });
 
   it("should return the em-dash sentinel for null values", () => {

@@ -8,6 +8,7 @@
 import type { LabValue } from "@kaiord/core";
 import { useMemo } from "react";
 
+import { useActiveLocale } from "../../../../../i18n/LocaleProvider";
 import type { ChartMetricDef } from "../../../../charts/uplot-base/uplot-base";
 import { UplotChart } from "../../../../charts/uplot-base/uplot-chart";
 import { labParameterLabel } from "../lab-parameter-label";
@@ -26,13 +27,14 @@ export const LabParameterChart = ({
   parameterKey: string;
   values: LabValue[];
 }) => {
+  const locale = useActiveLocale();
   const def: ChartMetricDef = useMemo(
     () => ({
       key: parameterKey,
-      label: labParameterLabel(parameterKey),
+      label: labParameterLabel(parameterKey, locale),
       unit: values[0]?.unitCanonical ?? "",
     }),
-    [parameterKey, values]
+    [parameterKey, values, locale]
   );
   const band = useMemo(() => resolveReferenceBand(values), [values]);
   const data = useMemo(() => buildLabChartData(values, band), [values, band]);

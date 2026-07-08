@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import { useUnits } from "../../../../contexts/units-context";
+import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import {
   buildTrendChartData,
   type PerMetricPoints,
@@ -33,6 +34,7 @@ export const TrendSingleChartCard = ({
   rangeDays,
 }: TrendSingleChartCardProps) => {
   const units = useUnits();
+  const locale = useActiveLocale();
   const selectedKeys = TREND_METRICS.map((m) => m.key).filter((k) =>
     selected.has(k)
   );
@@ -49,8 +51,8 @@ export const TrendSingleChartCard = ({
     return obj;
   }, [presentKeys, series]);
   const options = useMemo(
-    () => buildTrendChartOptions(metrics, units),
-    [metrics, units]
+    () => buildTrendChartOptions(metrics, units, locale),
+    [metrics, units, locale]
   );
   const data = useMemo(
     () => buildTrendChartData(presentKeys, seriesByKey),
