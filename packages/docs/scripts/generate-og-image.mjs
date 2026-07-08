@@ -11,10 +11,18 @@ const publicDir = join(docsRoot, "public");
 
 const BRAND_BG = readBrandTokenColor("--brand-bg-primary");
 const BRAND_ACCENT = readBrandTokenColor("--brand-accent-blue");
+const ACCENT_SKY = "#38bdf8"; // sky-400 — matches the landing OG subtitle accent
 
 function createDocsOgSvg() {
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="600" cy="205" r="430">
+      <stop offset="0%" stop-color="${BRAND_ACCENT}" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="${BRAND_ACCENT}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
   <rect width="1200" height="630" fill="${BRAND_BG}"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
   <!-- Logo symbol centered -->
   <g transform="translate(460, 100) scale(2.5)">
     <path d="M20 0L37.32 10L37.32 30L20 40L2.68 30L2.68 10Z" stroke="${BRAND_ACCENT}" stroke-width="2" fill="none"/>
@@ -35,7 +43,7 @@ function createDocsOgSvg() {
   <!-- Wordmark -->
   <text x="600" y="360" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" letter-spacing="-1" fill="#f8fafc">kaiord</text>
   <!-- Subtitle -->
-  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#cbd5e1">Documentation</text>
+  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="500" fill="${ACCENT_SKY}">Documentation</text>
   <!-- Author -->
   <text x="600" y="560" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#64748b">by Pablo Albaladejo</text>
 </svg>`);
@@ -64,4 +72,7 @@ async function main() {
   console.log("Done!");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exitCode = 1;
+});
