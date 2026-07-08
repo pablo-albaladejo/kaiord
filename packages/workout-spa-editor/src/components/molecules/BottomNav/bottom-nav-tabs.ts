@@ -4,7 +4,6 @@ import type { IconName } from "../../atoms/Icon";
 export type BottomNavTab = {
   /** Nav-destination id; also the `nav` i18n key for the tab label. */
   id: string;
-  label: string;
   icon: IconName;
   path: string;
 };
@@ -22,7 +21,6 @@ export const BOTTOM_NAV_TABS: readonly BottomNavTab[] = NAV_DESTINATIONS.filter(
   (destination) => destination.surfaces.bottomNav
 ).map((destination) => ({
   id: destination.id,
-  label: destination.labelKey,
   icon: destination.icon,
   path: destination.path,
 }));

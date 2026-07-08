@@ -2,6 +2,7 @@ import * as ToastPrimitive from "@radix-ui/react-toast";
 import { X } from "lucide-react";
 import { forwardRef } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { baseToastStyles, variantStyles } from "./Toast.styles";
 import type { ToastProps } from "./Toast.types";
 
@@ -29,6 +30,7 @@ export const Toast = forwardRef<HTMLLIElement, ToastProps>(
     },
     ref
   ) => {
+    const t = useTranslate("common");
     return (
       <ToastPrimitive.Root
         ref={ref}
@@ -51,13 +53,17 @@ export const Toast = forwardRef<HTMLLIElement, ToastProps>(
           )}
         </div>
         {action && (
-          <ToastPrimitive.Action altText="Action" className="shrink-0" asChild>
+          <ToastPrimitive.Action
+            altText={t("actions.action")}
+            className="shrink-0"
+            asChild
+          >
             {action}
           </ToastPrimitive.Action>
         )}
         <ToastPrimitive.Close
           className="absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100"
-          aria-label="Close"
+          aria-label={t("actions.close")}
         >
           <X className="h-4 w-4" />
         </ToastPrimitive.Close>
