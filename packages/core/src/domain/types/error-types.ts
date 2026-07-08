@@ -16,8 +16,15 @@
 export type ValidationError = {
   /** The field path that failed validation */
   field: string;
-  /** Human-readable error message */
+  /** Human-readable (English) error message */
   message: string;
+  /**
+   * Stable, language-free machine code for the failure (e.g. `min_gt_max`,
+   * `invalid_type`). Presentation layers localize by this code, never by
+   * matching `message` text (see the `failure-semantics` spec). Absent when
+   * the source issue carries no derivable code.
+   */
+  code?: string;
   /** Optional expected value or type */
   expected?: unknown;
   /** Optional actual value that failed validation */
