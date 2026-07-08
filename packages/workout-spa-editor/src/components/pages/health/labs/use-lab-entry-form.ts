@@ -1,22 +1,18 @@
 /**
- * useLabEntryForm — owns the DoD-1 entry form's ephemeral state (report
- * header + N parameter rows) and saves it as one `LabReport` + N `LabValue`
- * via `saveLabReport`. A report with zero usable rows is refused (nothing
- * to save) — see `buildLabReportSubmission`.
+ * useLabEntryForm — owns the entry form's ephemeral state (header + rows) and
+ * its provenance (manual entry vs an AI-extracted draft). Saving and reset
+ * delegate to `useLabEntrySave`; `loadDraft` pre-fills the form from an
+ * extraction and marks it as an AI draft for the review banner.
  */
 import { useState } from "react";
 
-import type { LabReportHeaderInput } from "../../../../application/lab/build-lab-report";
-import { buildLabReportSubmission } from "../../../../application/lab/build-lab-report-submission";
-import { saveLabReport } from "../../../../application/lab/save-lab-report.use-case";
-import { usePersistence } from "../../../../contexts/persistence-context";
-import { useToastContext } from "../../../../contexts/ToastContext";
-import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
+import type {
+  LabProvenanceSource,
+  LabReportHeaderInput,
+} from "../../../../application/lab/build-lab-report";
+import type { LabDraft } from "../../../../application/lab/extraction/map-extraction-to-draft";
 import { createEmptyRow, type LabRowState } from "./lab-row-model";
-
-const NO_VALUES_MSG = "Add at least one parameter value before saving";
-const SAVE_FAILED_MSG = "Could not save the lab report — please retry";
-const SAVED_MSG = "Lab report saved";
+import { useLabEntrySave } from "./use-lab-entry-save";
 
 const EMPTY_HEADER: LabReportHeaderInput = {
   date: "",
@@ -30,14 +26,18 @@ let rowSeq = 0;
 const nextRowId = (): string => `row-${++rowSeq}`;
 
 export function useLabEntryForm() {
-  const persistence = usePersistence();
-  const toast = useToastContext();
-  const active = useActiveProfileLive();
   const [header, setHeader] = useState<LabReportHeaderInput>(EMPTY_HEADER);
   const [rows, setRows] = useState<LabRowState[]>([
     createEmptyRow(nextRowId()),
   ]);
-  const [isSaving, setIsSaving] = useState(false);
+  const [provenance, setProvenance] = useState<LabProvenanceSource>("manual");
+
+  const reset = () => {
+    setHeader(EMPTY_HEADER);
+    setRows([createEmptyRow(nextRowId())]);
+    setProvenance("manual");
+  };
+  const { save, isSaving, sex } = useLabEntrySave(reset);
 
   const addRow = () =>
     setRows((prev) => [...prev, createEmptyRow(nextRowId())]);
@@ -46,33 +46,10 @@ export function useLabEntryForm() {
   const updateRow = (rowId: string, next: LabRowState) =>
     setRows((prev) => prev.map((r) => (r.rowId === rowId ? next : r)));
 
-  const save = async () => {
-    const profileId = active?.id;
-    if (!profileId) {
-      toast.error(SAVE_FAILED_MSG);
-      return;
-    }
-    const submission = buildLabReportSubmission(header, rows, {
-      profileId,
-      reportId: crypto.randomUUID(),
-      sex: active?.profile?.sex,
-      newId: () => crypto.randomUUID(),
-    });
-    if (!submission) {
-      toast.error(NO_VALUES_MSG);
-      return;
-    }
-    setIsSaving(true);
-    try {
-      await saveLabReport(persistence, submission.report, submission.values);
-      toast.success(SAVED_MSG);
-      setHeader(EMPTY_HEADER);
-      setRows([createEmptyRow(nextRowId())]);
-    } catch {
-      toast.error(SAVE_FAILED_MSG);
-    } finally {
-      setIsSaving(false);
-    }
+  const loadDraft = (draft: LabDraft) => {
+    setHeader(draft.header);
+    setRows(draft.rows.map((row) => ({ ...row, rowId: nextRowId() })));
+    setProvenance("ai-extracted");
   };
 
   return {
@@ -82,8 +59,11 @@ export function useLabEntryForm() {
     addRow,
     removeRow,
     updateRow,
-    save,
+    save: () => save(header, rows, provenance),
     isSaving,
-    sex: active?.profile?.sex,
+    sex,
+    loadDraft,
+    discardDraft: reset,
+    isAiDraft: provenance === "ai-extracted",
   };
 }

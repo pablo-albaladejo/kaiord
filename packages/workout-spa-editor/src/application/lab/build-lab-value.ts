@@ -15,6 +15,7 @@ import {
   type LabValue,
 } from "@kaiord/core";
 
+import type { LabProvenanceSource } from "./build-lab-report";
 import { parseOptionalNumber } from "./parse-optional-number";
 import { resolveEffectiveRefRange } from "./resolve-effective-ref-range";
 
@@ -33,6 +34,7 @@ export type BuildLabValueContext = {
   reportId: string;
   date: string;
   sex?: BiologicalSex;
+  provenance?: LabProvenanceSource;
 };
 
 export function buildLabValue(
@@ -71,6 +73,6 @@ export function buildLabValue(
     unitCanonical,
     ...range,
     flag,
-    provenance: { source: "manual" },
+    provenance: { source: ctx.provenance ?? "manual" },
   };
 }

@@ -13,7 +13,7 @@ export type ProviderCredential = {
 };
 
 export type AiModelPurpose =
-  "default" | "chat" | "workout_generation" | (string & {});
+  "default" | "chat" | "workout_generation" | "lab_extraction" | (string & {});
 
 export type AiModelBinding = {
   profileId: string;
