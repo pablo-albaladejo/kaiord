@@ -9,6 +9,15 @@ import { formatWeightKg } from "../../../../lib/units/units";
 import { formatOrEmpty } from "../../../charts/uplot-base/uplot-base";
 import type { TrendMetricDef, TrendMetricKey } from "./trend-metrics";
 
+// Module-cached formatters (2 locales) — `Intl.NumberFormat` construction is
+// costly and this runs per axis tick / legend value during chart render.
+const EN_NUMBER = new Intl.NumberFormat("en");
+const ES_NUMBER = new Intl.NumberFormat("es");
+const numberFormatter = (locale: Locale): Intl.NumberFormat =>
+  locale === "es" ? ES_NUMBER : EN_NUMBER;
+
+// No `default`: an exhaustive switch keeps a new `TrendMetricKey` a compile
+// error (via noImplicitReturns) until it is given an explicit formatter.
 const formatMetricValue = (
   key: TrendMetricKey,
   v: number,
@@ -20,9 +29,8 @@ const formatMetricValue = (
     case "weight":
       return `${v.toFixed(1)} kg`;
     case "steps":
-      return `${new Intl.NumberFormat(locale).format(Math.round(v))} steps`;
+      return `${numberFormatter(locale).format(Math.round(v))} steps`;
     case "sleep":
-    default:
       return `${Math.round(v)}`;
   }
 };
