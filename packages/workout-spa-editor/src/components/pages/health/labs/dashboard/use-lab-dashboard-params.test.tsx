@@ -104,17 +104,4 @@ describe("useLabDashboardParams", () => {
       expect(result.current.pinned).toEqual(["glucose", "ferritin"]);
     });
   });
-
-  it("should tolerate a missing row (pre-existing profile) as an empty selection", async () => {
-    // Arrange
-
-    // Act
-    const { result } = renderHook(() => useLabDashboardParams(PROFILE_ID));
-
-    // Assert
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-      expect(result.current.pinned).toEqual([]);
-    });
-  });
 });

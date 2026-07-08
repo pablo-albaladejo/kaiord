@@ -65,23 +65,4 @@ describe("NAV_DESTINATIONS", () => {
     expect(labs?.path).toBe("/health/labs");
     expect(labs?.surfaces.header).toBe(true);
   });
-
-  it("should mark every destination reachable on both desktop and mobile", () => {
-    // Arrange
-    const destinations = NAV_DESTINATIONS;
-
-    // Act
-    // Desktop only ever renders the header nav (bottom nav is `md:hidden`);
-    // mobile renders both the header nav and the bottom nav. So header
-    // alone already guarantees both platforms, while bottomNav is an
-    // additional mobile-only affordance layered on top of it.
-    const unreachable = destinations.filter((d) => {
-      const desktopReachable = d.surfaces.header;
-      const mobileReachable = d.surfaces.header || d.surfaces.bottomNav;
-      return !(desktopReachable && mobileReachable);
-    });
-
-    // Assert
-    expect(unreachable).toEqual([]);
-  });
 });

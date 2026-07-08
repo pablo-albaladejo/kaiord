@@ -10,50 +10,27 @@ const creatinineFallback = {
 };
 
 describe("computeFlag", () => {
-  it("should flag Vitamin D 24 below the report range 30-50 as low", () => {
-    // Arrange
-    const input = {
-      valueCanonical: 24,
-      refLowCanonical: 30,
-      refHighCanonical: 50,
-    };
+  it.each([
+    { valueCanonical: 24, expected: "low" },
+    { valueCanonical: 40, expected: "in" },
+    { valueCanonical: 60, expected: "high" },
+  ])(
+    "should flag $valueCanonical against the report range 30-50 as $expected",
+    ({ valueCanonical, expected }) => {
+      // Arrange
+      const input = {
+        valueCanonical,
+        refLowCanonical: 30,
+        refHighCanonical: 50,
+      };
 
-    // Act
-    const flag = computeFlag(input);
+      // Act
+      const flag = computeFlag(input);
 
-    // Assert
-    expect(flag).toBe("low");
-  });
-
-  it("should flag a value inside the report range as in", () => {
-    // Arrange
-    const input = {
-      valueCanonical: 40,
-      refLowCanonical: 30,
-      refHighCanonical: 50,
-    };
-
-    // Act
-    const flag = computeFlag(input);
-
-    // Assert
-    expect(flag).toBe("in");
-  });
-
-  it("should flag a value above the report range as high", () => {
-    // Arrange
-    const input = {
-      valueCanonical: 60,
-      refLowCanonical: 30,
-      refHighCanonical: 50,
-    };
-
-    // Act
-    const flag = computeFlag(input);
-
-    // Assert
-    expect(flag).toBe("high");
-  });
+      // Assert
+      expect(flag).toBe(expected);
+    }
+  );
 
   it("should prefer the report range over the catalog fallback", () => {
     // Arrange
