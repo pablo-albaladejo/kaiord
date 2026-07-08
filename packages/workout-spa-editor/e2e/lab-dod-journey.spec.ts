@@ -151,8 +151,13 @@ test.describe("Lab analytics DoD journey (F5.2 cohesion)", () => {
     await row.getByLabel("Value").fill("90");
     await page.getByRole("button", { name: "Save" }).click();
 
-    // Assert — DoD-1: the new report persisted.
-    await expect(page.getByText("Lab report saved")).toBeVisible();
+    // Assert — DoD-1: the new report persisted. Use .first() + generous
+    // timeout: on loaded mobile CI runners Radix pauses toast auto-dismiss
+    // (see ToastProvider note), so a prior toast can still be mounted and the
+    // bare getByText would hit a strict-mode "2 elements" violation.
+    await expect(page.getByText("Lab report saved").first()).toBeVisible({
+      timeout: 20_000,
+    });
 
     // Assert — DoD-4: ferritin (recorded only in the old report) is still
     // surfaced and flagged out-of-range in the latest-values list.
