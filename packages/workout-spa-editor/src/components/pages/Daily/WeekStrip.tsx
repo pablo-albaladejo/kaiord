@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { calendarWeekHref } from "../../../routing/calendar-week-href";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import type { DaySummary, WeekSummary } from "./build-week-summary";
@@ -26,6 +27,7 @@ const EMPTY: DaySummary = {
 };
 
 export function WeekStrip(props: WeekStripProps) {
+  const t = useTranslate("daily");
   const { days, weekSummary, onSelectDay } = props;
   const calendarHref =
     days.length > 0 ? calendarWeekHref(days[0]!.iso) : "/calendar";
@@ -38,7 +40,7 @@ export function WeekStrip(props: WeekStripProps) {
       <div className="flex items-center gap-1.5">
         <button
           type="button"
-          aria-label="Previous day"
+          aria-label={t("weekStrip.previousDay")}
           onClick={props.onPrev}
           className={ARROW}
         >
@@ -54,7 +56,7 @@ export function WeekStrip(props: WeekStripProps) {
         ))}
         <button
           type="button"
-          aria-label="Next day"
+          aria-label={t("weekStrip.nextDay")}
           onClick={props.onNext}
           className={ARROW}
         >
@@ -64,11 +66,11 @@ export function WeekStrip(props: WeekStripProps) {
       <div className="mt-2 flex justify-end">
         <Link
           href={calendarHref}
-          aria-label="Open week in calendar"
+          aria-label={t("weekStrip.openInCalendar")}
           className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold text-slate-400 transition-colors hover:bg-slate-800"
         >
           <Icon icon={ICON_MAP.calendar} size="sm" color="inherit" />
-          Calendar
+          {t("weekStrip.calendar")}
         </Link>
       </div>
     </div>

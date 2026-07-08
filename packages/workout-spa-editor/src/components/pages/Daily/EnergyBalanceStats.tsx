@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { EnergyBalanceViewModel } from "./energy-balance-view-model";
 
 const NET_TONE_CLASS: Record<EnergyBalanceViewModel["netTone"], string> = {
@@ -25,17 +26,20 @@ function Stat({ label, value, valueClass = "text-slate-50" }: StatProps) {
 export type EnergyBalanceStatsProps = { vm: EnergyBalanceViewModel };
 
 export function EnergyBalanceStats({ vm }: EnergyBalanceStatsProps) {
+  const t = useTranslate("daily");
   return (
     <>
       <div className="mt-4 flex gap-2 border-t border-slate-800 pt-4">
         <Stat label={vm.expenditureLabel} value={vm.expenditure} />
-        <Stat label="Intake" value={vm.intake} />
+        <Stat label={t("energyBalance.intake")} value={vm.intake} />
         <Stat
-          label="Net"
+          label={t("energyBalance.net")}
           value={vm.net}
           valueClass={NET_TONE_CLASS[vm.netTone]}
         />
-        {vm.target !== null && <Stat label="Target" value={vm.target} />}
+        {vm.target !== null && (
+          <Stat label={t("energyBalance.target")} value={vm.target} />
+        )}
       </div>
       {vm.capWarning !== null && (
         <p

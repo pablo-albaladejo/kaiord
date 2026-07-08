@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 
 import { useDayEnergyBalance } from "../../../hooks/energy/use-day-energy-balance";
+import { useTranslate } from "../../../i18n/use-translate";
 import { Card } from "../../atoms/Card";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { GoalSetupDialog } from "../../molecules/GoalSetupDialog/GoalSetupDialog";
@@ -25,6 +26,7 @@ export type EnergyBalanceCardProps = {
  * BMR inputs are missing for an uncovered day.
  */
 export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
+  const t = useTranslate("daily");
   const [goalOpen, setGoalOpen] = useState(false);
   const result = useDayEnergyBalance(profileId, date);
   if (result === undefined) return null;
@@ -42,7 +44,7 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.flame} size="md" color="inherit" />
         <p className="text-[15px] font-semibold text-slate-100 m-0">
-          Energy balance
+          {t("energyBalance.title")}
         </p>
         {profileId && (
           <button
@@ -51,7 +53,7 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
             data-testid="energy-balance-set-goal"
             className="ml-auto text-[13px] font-semibold text-blue-400"
           >
-            Set goal
+            {t("energyBalance.setGoal")}
           </button>
         )}
       </div>
@@ -70,7 +72,7 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
         data-testid="energy-balance-nutrition-link"
         className="mt-3 block text-[13px] font-semibold text-blue-400"
       >
-        Log nutrition
+        {t("energyBalance.logNutrition")}
       </Link>
       {profileId && (
         <GoalSetupDialog

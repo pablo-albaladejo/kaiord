@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Card } from "../../atoms/Card";
 import { ReadinessRing } from "../../molecules/ReadinessRing";
 import { ReadinessStat } from "./ReadinessStat";
@@ -7,9 +8,8 @@ export type ReadinessCardProps = {
   readiness: ReadinessModel;
 };
 
-const NO_DATA_LABEL = "NO DATA";
-
 export function ReadinessCard({ readiness }: ReadinessCardProps) {
+  const t = useTranslate("daily");
   const { score, headline, rationale, hrv, sleep, battery } = readiness;
 
   return (
@@ -17,7 +17,7 @@ export function ReadinessCard({ readiness }: ReadinessCardProps) {
       <div className="flex items-center gap-4">
         <ReadinessRing
           score={score ?? 0}
-          label={score === null ? NO_DATA_LABEL : "READY"}
+          label={score === null ? t("readiness.noData") : t("readiness.ready")}
         />
         <div className="min-w-0">
           <p className="text-[16px] font-bold text-slate-50 m-0">{headline}</p>
