@@ -1,0 +1,46 @@
+{
+  "header": {
+    "today": "Hoy",
+    "backToToday": "← Volver a hoy",
+    "notifications": "Notificaciones"
+  },
+  "readiness": {
+    "ready": "LISTO",
+    "noData": "SIN DATOS",
+    "noDataYet": "Aún no hay datos de preparación",
+    "rationaleNoData": "Conecta Garmin para sincronizar la VFC y el sueño.",
+    "rationale": "Según tu VFC nocturna y tu sueño.",
+    "headlinePushToday": "Buen día para exigirte",
+    "headlinePush": "Bien para exigirte",
+    "headlineEasyToday": "Tómatelo con calma hoy",
+    "headlineEasy": "Tómatelo con calma",
+    "hrv": "VFC",
+    "sleep": "Sueño",
+    "battery": "Batería"
+  },
+  "energyBalance": {
+    "title": "Balance energético",
+    "setGoal": "Definir objetivo",
+    "logNutrition": "Registrar nutrición",
+    "gatedPrompt": "Completa tu perfil para estimar la energía",
+    "intake": "Ingesta",
+    "net": "Neto",
+    "target": "Objetivo"
+  },
+  "weekStrip": {
+    "previousDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "openInCalendar": "Abrir la semana en el calendario",
+    "calendar": "Calendario"
+  },
+  "trends": {
+    "title": "Tendencias",
+    "subtitle": "Consulta tu historial de bienestar"
+  },
+  "planned": {
+    "title": "Planificado",
+    "emptyTitle": "Nada planificado hoy",
+    "emptyBody": "Crea un entreno para llenar tu día.",
+    "planSession": "Planificar sesión"
+  }
+}
