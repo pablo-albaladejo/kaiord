@@ -8,7 +8,7 @@ import {
 } from "./lab-parameter-options";
 
 describe("LAB_PARAMETER_OPTIONS", () => {
-  it("should build a nameES (abbrev) label per catalog option, sorted by name", () => {
+  it("should build a name (abbrev) label per catalog option, sorted by name", () => {
     // Arrange
 
     // Act
@@ -17,14 +17,14 @@ describe("LAB_PARAMETER_OPTIONS", () => {
 
     // Assert
     expect(labels).toEqual(sorted);
-    expect(labels).toContain("Glucosa (ayunas) (GLU)");
+    expect(labels).toContain("Glucose (fasting) (GLU)");
   });
 });
 
 describe("findParameterByLabel", () => {
   it("should resolve an exact catalog label back to its parameter", () => {
     // Arrange
-    const label = "Glucosa (ayunas) (GLU)";
+    const label = "Glucose (fasting) (GLU)";
 
     // Act
     const param = findParameterByLabel(label);
@@ -48,7 +48,7 @@ describe("findParameterByLabel", () => {
 describe("unitOptionsFor", () => {
   it("should list the canonical unit first, then known alternates", () => {
     // Arrange
-    const hba1c = findParameterByLabel("Hemoglobina glicada (HbA1c)")!;
+    const hba1c = findParameterByLabel("Glycated hemoglobin (HbA1c)")!;
 
     // Act
     const units = unitOptionsFor(hba1c);
@@ -61,12 +61,12 @@ describe("unitOptionsFor", () => {
 describe("slugify", () => {
   it("should lowercase, strip accents, and dasherize a free-text name", () => {
     // Arrange
-    const name = "  Apo-E (Genotipo) ";
+    const name = "  Apo-E (Genotype) ";
 
     // Act
     const slug = slugify(name);
 
     // Assert
-    expect(slug).toBe("apo-e-genotipo");
+    expect(slug).toBe("apo-e-genotype");
   });
 });

@@ -1,7 +1,7 @@
 /**
  * LabParameterIdentityField — mode toggle (catalog / custom) plus the
  * matching input: a catalog-search text field with a datalist of
- * `"nameES (ABBREV)"` options (auto-fills unit + ref range on selection),
+ * `"Name (ABBREV)"` options (auto-fills unit + ref range on selection),
  * or a free-text name for a custom parameter.
  */
 import type { BiologicalSex } from "@kaiord/core";

@@ -147,7 +147,7 @@ test.describe("Lab analytics DoD journey (F5.2 cohesion)", () => {
     const row = page.getByTestId("lab-parameter-row").first();
     await row
       .getByLabel("Parameter", { exact: true })
-      .fill("Glucosa (ayunas) (GLU)");
+      .fill("Glucose (fasting) (GLU)");
     await row.getByLabel("Value").fill("90");
     await page.getByRole("button", { name: "Save" }).click();
 
