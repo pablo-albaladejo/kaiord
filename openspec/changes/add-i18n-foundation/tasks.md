@@ -1,8 +1,8 @@
 > Status: foundation + locale-preference domain + pilot dictionaries + SPA
 > runtime wiring (provider, switcher, formatters, labs live-locale) + validation
-> error localization landed and green (sections 1, 2, 3, 4.1–4.3, 5, 6.2/6.4, 7,
-> 8). Remaining: e2e locale pin (4.4), converter/ai error localization (6.1/6.3,
-> need upstream code/param changes), full quality gates (9).
+> and AI-input error localization landed and green (sections 1, 2, 3, 4.1–4.3, 5,
+> 6.2/6.3/6.4, 7, 8). Remaining: e2e locale pin (4.4), converter parse-message
+> localization (6.1), full quality gates (9).
 
 ## 1. `@kaiord/i18n` package (mechanism)
 
@@ -41,7 +41,7 @@
 
 - [x] 6.2 Map `ValidationError.code` to dictionary keys in `ValidationErrorList`; codeless entries → upstream message. New `errors` namespace (en/es) + pure `error-copy.ts` (`localizeValidationMessage`, `validationHeading`); `convertToValidationErrors` now carries `code`; the list localizes the heading + per-error message by code, falling back to the upstream English message. Branches on `code` only, never message text. EN dictionary values equal the current messages so `en`-mode assertions are unchanged.
 - [ ] 6.1 Converter parse errors (follow-up): the KRD-validation path (`KrdValidationError` → `ValidationErrorList`) is localized via 6.2. The composed converter _parse_ messages (`FitParsingError`/`TcxParsingError`/… → "Failed to parse X file: <detail>") remain English — mapping the class to a generic localized string drops the upstream technical detail and would rewrite the message-asserting import tests; per the contract's fallback rule (unknown/unmapped → upstream English message) this is the designed graceful degradation.
-- [ ] 6.3 `@kaiord/ai` input-validation (follow-up): both `validateInput` failures share one class with a single fixed `code` (`AI_PARSING_ERROR`) and the "too long" message interpolates a count, so they cannot be distinguished or parameterized from the SPA without message-matching (contract-forbidden). Proper localization needs an upstream `@kaiord/ai` change: distinct stable codes (`input_empty`, `input_too_long`) + structured params (`max`, `got`) + changeset. Until then they render English per the fallback contract.
+- [x] 6.3 `@kaiord/ai` input-validation localized. Upstream (conflict-free with the incoming `ai-platform` branch — it does not touch `errors.ts`/`validate-input.ts`): `AiParsingError` gains optional `reason` (`input_empty`/`input_too_long`) + `details` (`{ maxLength, actualLength }`), set by `validateInput`; additive + backward-compatible (new `options` arg), minor changeset. SPA: `errors.json` gains an `ai` namespace (en/es) with `{{maxLength}}`/`{{actualLength}}` interpolation (EN interpolated == the original message), `error-copy.ts` gains `localizeAiError(error, locale)` (localizes by `reason`, interpolates `details`, falls back to the upstream message then a generic string), and `run-ai-generation.ts` renders it via a `locale` threaded from `useAiGeneration` (`useActiveLocale`). Branches on `reason`, never message text.
 - [x] 6.4 Unit tests: known code → `es` copy (`error-copy.test.ts`); unknown code and codeless → verbatim upstream message; component test (`ValidationErrorList.test.tsx`) proves a mapped code renders the dictionary copy (not the raw message) and a codeless error renders verbatim.
 
 ## 7. Pilot: `labs` namespace (en + es)
