@@ -121,6 +121,20 @@ describe("SettingsPage", () => {
         expect(memory.history.at(-1)).toBe("/settings/preferences");
       });
     });
+
+    it("should surface a Language row that opens the preferences tab", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const { memory } = renderAtPath("/settings");
+
+      // Act
+      await user.click(screen.getByTestId("settings-row-Language"));
+
+      // Assert
+      await waitFor(() => {
+        expect(memory.history.at(-1)).toBe("/settings/preferences");
+      });
+    });
   });
 
   describe("routing", () => {
