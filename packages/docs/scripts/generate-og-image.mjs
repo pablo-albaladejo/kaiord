@@ -72,4 +72,7 @@ async function main() {
   console.log("Done!");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exitCode = 1;
+});
