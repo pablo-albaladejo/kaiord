@@ -44,7 +44,7 @@ describe("useZoneValidation - power zones", () => {
     // Assert
     expect(errors).toContainEqual({
       zone: 1,
-      message: "Min must be less than max",
+      code: "min-max",
     });
   });
 
@@ -60,11 +60,7 @@ describe("useZoneValidation - power zones", () => {
     const errors = result.current.validateZones(zones);
 
     // Assert
-    expect(
-      errors.some(
-        (e) => e.zone === 1 && e.message === "Min must be less than max"
-      )
-    ).toBe(true);
+    expect(errors.some((e) => e.zone === 1 && e.code === "min-max")).toBe(true);
   });
 
   it("should flag overlap between consecutive power zones", () => {
@@ -81,7 +77,7 @@ describe("useZoneValidation - power zones", () => {
     // Assert
     expect(errors).toContainEqual({
       zone: 1,
-      message: "Overlaps with next zone",
+      code: "overlap",
     });
   });
 
@@ -97,9 +93,7 @@ describe("useZoneValidation - power zones", () => {
     const errors = result.current.validateZones(zones);
 
     // Assert
-    expect(
-      errors.filter((e) => e.message === "Overlaps with next zone")
-    ).toHaveLength(0);
+    expect(errors.filter((e) => e.code === "overlap")).toHaveLength(0);
   });
 });
 
@@ -133,7 +127,7 @@ describe("useZoneValidation - heart-rate zones", () => {
     // Assert
     expect(errors).toContainEqual({
       zone: 1,
-      message: "Min must be less than max",
+      code: "min-max",
     });
   });
 
@@ -151,7 +145,7 @@ describe("useZoneValidation - heart-rate zones", () => {
     // Assert
     expect(errors).toContainEqual({
       zone: 1,
-      message: "Overlaps with next zone",
+      code: "overlap",
     });
   });
 
