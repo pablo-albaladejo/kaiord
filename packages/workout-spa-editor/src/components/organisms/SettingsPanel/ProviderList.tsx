@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { ProviderEditRow } from "./ProviderEditRow";
 import { ProviderRow } from "./ProviderRow";
@@ -20,18 +21,23 @@ export const ProviderList: React.FC<ProviderListProps> = ({
   onSetDefault,
   onUpdate,
 }) => {
+  const t = useTranslate("settings");
   const [editingId, setEditingId] = useState<string | null>(null);
 
   if (providers.length === 0) {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        No providers configured. Add one below.
+        {t("providers.empty")}
       </p>
     );
   }
 
   return (
-    <ul role="list" aria-label="Configured LLM providers" className="space-y-2">
+    <ul
+      role="list"
+      aria-label={t("providers.listAriaLabel")}
+      className="space-y-2"
+    >
       {providers.map((p) => (
         <li key={p.id}>
           {editingId === p.id ? (

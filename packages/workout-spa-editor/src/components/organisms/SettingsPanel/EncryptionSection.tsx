@@ -8,13 +8,10 @@
  * uploaded in effectively cleartext form.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Input } from "../../atoms/Input";
 import { Toggle } from "../../atoms/Toggle";
 import { useEncryptionSection } from "./use-encryption-section";
-
-const WARNING_TEXT =
-  "Your saved AI API keys will be uploaded without end-to-end encryption. " +
-  "Enable encryption below to protect them.";
 
 export type EncryptionSectionProps = {
   /** Whether the database currently holds any AI provider keys. */
@@ -24,6 +21,7 @@ export type EncryptionSectionProps = {
 export const EncryptionSection: React.FC<EncryptionSectionProps> = ({
   hasAiKeys,
 }) => {
+  const t = useTranslate("settings");
   const { enabled, passphrase, showWarning, toggle, setPassphrase } =
     useEncryptionSection(hasAiKeys);
 
@@ -34,19 +32,19 @@ export const EncryptionSection: React.FC<EncryptionSectionProps> = ({
           data-testid="plaintext-warning"
           className="rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200"
         >
-          {WARNING_TEXT}
+          {t("sync.plaintextWarning")}
         </p>
       )}
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          End-to-end encryption
+          {t("sync.encryption")}
         </span>
         <Toggle checked={enabled} onCheckedChange={toggle} />
       </div>
       {enabled && (
         <Input
           type="password"
-          label="Passphrase"
+          label={t("sync.passphrase")}
           autoComplete="off"
           value={passphrase}
           onChange={(event) => setPassphrase(event.target.value)}

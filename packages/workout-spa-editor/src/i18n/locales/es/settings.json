@@ -30,5 +30,103 @@
     "usage": "Uso",
     "privacy": "Privacidad",
     "preferences": "Preferencias"
+  },
+  "ai": {
+    "llmProviders": "Proveedores LLM",
+    "addProvider": "Añadir proveedor",
+    "models": "Modelos",
+    "customSystemPrompt": "Prompt de sistema personalizado",
+    "customInstructionsLabel": "Instrucciones adicionales aplicadas a todas las generaciones",
+    "customInstructionsPlaceholder": "Instrucciones adicionales para todas las generaciones de IA (p. ej., 'Me estoy recuperando de una lesión de rodilla')"
+  },
+  "providers": {
+    "empty": "No hay proveedores configurados. Añade uno abajo.",
+    "listAriaLabel": "Proveedores LLM configurados",
+    "provider": "Proveedor",
+    "label": "Etiqueta",
+    "apiKey": "Clave de API",
+    "labelPlaceholder": "p. ej., Mi Claude",
+    "addProvider": "Añadir proveedor",
+    "default": "Predeterminado",
+    "edit": "Editar",
+    "setDefault": "Establecer predeterminado",
+    "remove": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "models": {
+    "default": "Modelo predeterminado",
+    "chat": "Chat",
+    "workoutGeneration": "Generación de entrenamientos",
+    "labExtraction": "Extracción de laboratorio",
+    "hint": "Añade al menos un proveedor y selecciona un perfil activo para elegir modelos.",
+    "model": "Modelo",
+    "custom": "Personalizado…",
+    "customModelIdAriaLabel": "ID de modelo personalizado",
+    "customModelIdPlaceholder": "Introduce un ID de modelo",
+    "reset": "Restablecer"
+  },
+  "sync": {
+    "description": "Sincroniza tus entrenamientos y ajustes entre dispositivos a través de tu propio Google Drive. Los datos residen en tu Drive; no interviene ningún servidor de Kaiord.",
+    "syncNow": "Sincronizar ahora",
+    "disconnect": "Desconectar",
+    "connect": "Conectar cuenta de Google",
+    "notConnected": "No conectado",
+    "syncing": "Sincronizando…",
+    "offline": "La última sincronización falló — trabajando sin conexión",
+    "lastSynced": "Última sincronización {{date}}",
+    "connectedNotSynced": "Conectado — aún sin sincronizar",
+    "encryption": "Cifrado de extremo a extremo",
+    "passphrase": "Frase de contraseña",
+    "plaintextWarning": "Tus claves de API de IA guardadas se subirán sin cifrado de extremo a extremo. Activa el cifrado abajo para protegerlas."
+  },
+  "privacy": {
+    "information": "Información de privacidad",
+    "infoNoServer": "No almacenamos tus credenciales en ningún servidor.",
+    "infoGarmin": "La integración con Garmin usa una extensión del navegador que se apoya en tu sesión existente de Garmin Connect. Ninguna credencial sale de tu navegador.",
+    "infoTrain2go": "La importación de Train2Go usa una extensión del navegador que lee el plan de entrenamiento mostrado en las páginas de Train2Go que ya estás viendo. No lee tu contraseña ni tus tokens de autenticación.",
+    "infoLlmKeys": "Las claves de API de LLM se envían directamente al proveedor (Anthropic, OpenAI o Google) — Kaiord no recibe ni retransmite estos datos.",
+    "infoNotResponsible": "No nos hacemos responsables de la seguridad de las credenciales en tu dispositivo.",
+    "privacyPolicyLink": "Lee la política de privacidad completa",
+    "analytics": "Analíticas",
+    "analyticsIntro": "Este editor usa",
+    "analyticsLink": "Cloudflare Web Analytics",
+    "analyticsOutro": "para hacer un seguimiento del uso agregado (visitas de página, generación de entrenamientos, exportaciones). No se establecen cookies ni se recopilan datos personales.",
+    "dataManagement": "Gestión de datos",
+    "clearAllApiKeys": "Borrar todas las claves de API",
+    "clearAllHint": "Esto elimina todas las claves de API almacenadas de tu navegador."
+  },
+  "usage": {
+    "title": "Uso de IA",
+    "heading": "Uso de IA — últimos {{count}} meses",
+    "empty": "Aún no hay uso de IA registrado en los últimos {{count}} meses. El panel se rellenará automáticamente tras tu primera ejecución por lotes.",
+    "month": "Mes",
+    "input": "Entrada",
+    "output": "Salida",
+    "total": "Total",
+    "cost": "Coste (USD)",
+    "footnoteBefore": "Los valores reflejan el uso real registrado por ejecución por lotes, no la estimación previa mostrada en el diálogo de confirmación. Las filas marcadas con",
+    "footnoteAfter": "provienen de un esquema heredado donde no se capturó la división entre entrada y salida."
+  },
+  "preferences": {
+    "units": "Unidades",
+    "metric": "Métrico",
+    "imperial": "Imperial",
+    "notifications": "Notificaciones"
+  },
+  "extensions": {
+    "bridge": "Puente",
+    "status": "Estado",
+    "garminHint": "Abre Garmin Connect y navega por la aplicación",
+    "train2goHint": "Abre Train2Go e inicia sesión",
+    "refreshStatus": "Actualizar estado",
+    "connected": "Conectado",
+    "sessionInactive": "Sesión inactiva",
+    "notDetected": "No detectado"
+  },
+  "notifications": {
+    "unsupported": "Las notificaciones no son compatibles con este navegador.",
+    "enable": "Activar notificaciones",
+    "blocked": "Las notificaciones están bloqueadas en la configuración de tu navegador."
   }
 }
