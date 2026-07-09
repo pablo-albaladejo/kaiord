@@ -9,6 +9,7 @@
 import { Bot } from "lucide-react";
 
 import type { BatchProgress } from "../../../application/batch-processor";
+import { useTranslate } from "../../../i18n/use-translate";
 import { ProcessingStatus } from "./ProcessingStatus";
 
 export type BatchProcessingBannerProps = {
@@ -50,17 +51,20 @@ function IdleStatus({
   rawCount: number;
   onProcess: () => void;
 }) {
+  const t = useTranslate("coaching");
   return (
     <>
       <span className="flex-1 text-sm">
-        {rawCount} raw workout{rawCount !== 1 ? "s" : ""} this week
+        {t(rawCount === 1 ? "batch.rawCount_one" : "batch.rawCount_other", {
+          count: rawCount,
+        })}
       </span>
       <button
         type="button"
         onClick={onProcess}
         className="rounded-md bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700"
       >
-        Process all with AI
+        {t("batch.processAll")}
       </button>
     </>
   );

@@ -1,0 +1,41 @@
+{
+  "banner": {
+    "title": "Auto-match suggestions ({{total}})",
+    "ariaLabel": "Auto-match suggestions",
+    "collapse": "Collapse",
+    "viewAll": "view all ({{total}})"
+  },
+  "suggestion": {
+    "accept": "Accept suggestion",
+    "reject": "Reject suggestion",
+    "sessionMatched": "Session matched.",
+    "suggestionDismissed": "Suggestion dismissed.",
+    "noneRemaining": "No suggestions remaining.",
+    "nRemaining": "{{count}} suggestions remaining."
+  },
+  "batchCost": {
+    "title_one": "Process {{count}} workout with AI?",
+    "title_other": "Process {{count}} workouts with AI?",
+    "description": "Review the estimate before dispatching the batch.",
+    "estimateNote": "This is an estimate — actual usage may differ. Real cost is recorded per run in Settings → Usage.",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "provider": "Provider",
+    "noProvider": "No provider selected",
+    "tokens": "Estimated tokens",
+    "cost": "Estimated cost",
+    "costValue": "${{amount}} USD"
+  },
+  "batch": {
+    "dismiss": "Dismiss",
+    "rawCount_one": "{{count}} raw workout this week",
+    "rawCount_other": "{{count}} raw workouts this week",
+    "processAll": "Process all with AI",
+    "progress": "Processing {{processed}} of {{total}}",
+    "queued": "Queued {{n}}",
+    "processing": "Processing {{n}}",
+    "succeeded": "Succeeded {{n}}",
+    "failed": "Failed {{n}}",
+    "cancelAria": "Cancel batch processing"
+  }
+}
