@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 
@@ -7,12 +8,13 @@ export type WorkoutDetailHeaderProps = {
 
 /** Sheet header: back chevron, the route-heading title, and an inert dots menu. */
 export function WorkoutDetailHeader({ onBack }: WorkoutDetailHeaderProps) {
+  const t = useTranslate("workout-detail");
   return (
     <div className="flex items-center justify-between">
       <button
         type="button"
         onClick={onBack}
-        aria-label="Back"
+        aria-label={t("header.back")}
         data-testid="workout-detail-back"
         className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-300 hover:bg-white/5"
       >
@@ -23,11 +25,11 @@ export function WorkoutDetailHeader({ onBack }: WorkoutDetailHeaderProps) {
         {...{ [ROUTE_HEADING_ATTR]: "" }}
         className="text-[15px] font-semibold text-slate-200"
       >
-        Workout
+        {t("header.title")}
       </h1>
       <button
         type="button"
-        aria-label="More options"
+        aria-label={t("header.moreOptions")}
         disabled
         className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500"
       >

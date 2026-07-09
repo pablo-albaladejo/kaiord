@@ -4,7 +4,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
-import { dndAnnouncements } from "./dnd-announcements";
+import { useTranslate } from "../../../i18n/use-translate";
+import { createDndAnnouncements } from "./dnd-announcements";
 import { useWorkoutListDnd } from "./hooks/use-workout-list-dnd";
 import type { WorkoutListProps } from "./WorkoutList.types";
 import { WorkoutListContent } from "./WorkoutListContent";
@@ -15,6 +16,7 @@ export type { WorkoutListProps };
 export const WorkoutList = (props: WorkoutListProps) => {
   const { workout, className = "", onStepReorder } = props;
 
+  const t = useTranslate("workout-detail");
   const baseClasses = "flex flex-col gap-4";
   const classes = [baseClasses, className].filter(Boolean).join(" ");
   const dnd = useWorkoutListDnd(workout, onStepReorder);
@@ -25,13 +27,13 @@ export const WorkoutList = (props: WorkoutListProps) => {
       collisionDetection={dnd.collisionDetection}
       onDragStart={dnd.handleDragStart}
       onDragEnd={dnd.handleDragEnd}
-      accessibility={{ announcements: dndAnnouncements }}
+      accessibility={{ announcements: createDndAnnouncements(t) }}
     >
       <SortableContext
         items={dnd.sortableIds}
         strategy={verticalListSortingStrategy}
       >
-        <div className={classes} role="list" aria-label="Workout steps">
+        <div className={classes} role="list" aria-label={t("list.steps")}>
           <WorkoutListContent
             workout={workout}
             selectedStepId={props.selectedStepId}

@@ -9,6 +9,7 @@
 
 import React, { useMemo } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Workout } from "../../../types/krd";
 import { calculateWorkoutStats } from "../../../utils/workout-stats";
 import { StatsContent } from "./StatsContent";
@@ -32,6 +33,7 @@ export const WorkoutStats: React.FC<WorkoutStatsProps> = ({
 }) => {
   // Calculate stats (memoized for performance - Requirement 9.5)
   const stats = useMemo(() => calculateWorkoutStats(workout), [workout]);
+  const t = useTranslate("workout-detail");
 
   // Don't render if no workout
   if (!workout) {
@@ -42,10 +44,10 @@ export const WorkoutStats: React.FC<WorkoutStatsProps> = ({
     <div
       className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 ${className}`}
       role="region"
-      aria-label="Workout statistics"
+      aria-label={t("stats.region")}
     >
       <h2 className="mb-3 text-lg font-semibold text-gray-900">
-        Workout Stats
+        {t("stats.heading")}
       </h2>
       <div className="space-y-2">
         <StatsContent stats={stats} />
