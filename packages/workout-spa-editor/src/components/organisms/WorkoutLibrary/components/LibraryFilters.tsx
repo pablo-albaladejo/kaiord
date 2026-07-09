@@ -4,6 +4,7 @@
  * Provides filtering and sorting controls for the workout library.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { Button } from "../../../atoms/Button/Button";
 import { DifficultyFilter } from "./filters/DifficultyFilter";
 import { SearchInput } from "./filters/SearchInput";
@@ -41,6 +42,7 @@ export function LibraryFilters({
   onSortOrderChange,
   onClearFilters,
 }: LibraryFiltersProps) {
+  const t = useTranslate("library");
   return (
     <div className="mb-6 space-y-4">
       <SearchInput value={searchTerm} onChange={onSearchChange} />
@@ -57,7 +59,7 @@ export function LibraryFilters({
 
       <div className="flex justify-end">
         <Button variant="secondary" onClick={onClearFilters}>
-          Clear Filters
+          {t("filters.clearFilters")}
         </Button>
       </div>
     </div>

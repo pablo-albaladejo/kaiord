@@ -4,6 +4,8 @@
  * Interactive buttons for filtering workouts by tags.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
+
 type TagFilterButtonsProps = {
   allTags: string[];
   selectedTags: string[];
@@ -15,12 +17,13 @@ export function TagFilterButtons({
   selectedTags,
   onTagToggle,
 }: TagFilterButtonsProps) {
+  const t = useTranslate("library");
   if (allTags.length === 0) return null;
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2">
       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-        Tags:
+        {t("filters.tagsLabel")}
       </span>
       {allTags.map((tag) => (
         <button

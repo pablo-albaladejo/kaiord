@@ -13,6 +13,7 @@
 import { BookmarkPlus } from "lucide-react";
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { SaveToLibraryDialog } from "./SaveToLibraryDialog";
@@ -31,6 +32,7 @@ export function SaveToLibraryButton({
   disabled,
   className,
 }: SaveToLibraryButtonProps) {
+  const t = useTranslate("library");
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -42,7 +44,7 @@ export function SaveToLibraryButton({
         className={className}
       >
         <BookmarkPlus className="h-4 w-4" />
-        Save to Library
+        {t("saveDialog.title")}
       </Button>
 
       <SaveToLibraryDialog

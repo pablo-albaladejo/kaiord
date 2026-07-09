@@ -1,0 +1,116 @@
+{
+  "page": {
+    "loading": "Cargando biblioteca..."
+  },
+  "header": {
+    "title": "Biblioteca",
+    "count_one": "{{count}} entrenamiento",
+    "count_other": "{{count}} entrenamientos"
+  },
+  "search": {
+    "placeholder": "Buscar entrenamientos...",
+    "ariaLabel": "Buscar entrenamientos"
+  },
+  "sport": {
+    "all": "Todos",
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swim": "Natación"
+  },
+  "empty": {
+    "title": "Tu biblioteca está vacía",
+    "message": "Guarda un entrenamiento en tu biblioteca para empezar.",
+    "createMessage": "Crea tu primer entrenamiento y guárdalo en tu biblioteca para empezar.",
+    "filteredTitle": "No se encontraron entrenamientos",
+    "filteredMessage": "Ningún entrenamiento coincide con tus filtros actuales."
+  },
+  "card": {
+    "schedule": "Programar",
+    "load": "Cargar",
+    "loadAria": "Cargar {{name}} en el editor",
+    "deleteAria": "Eliminar {{name}}",
+    "thumbnailAlt": "Vista previa de {{name}}"
+  },
+  "actions": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "save": "Guardar"
+  },
+  "deleteDialog": {
+    "title": "Eliminar entrenamiento",
+    "confirm": "¿Eliminar \"{{name}}\"? Esto no se puede deshacer.",
+    "description": "¿Seguro que quieres eliminar \"{{name}}\"? Esta acción no se puede deshacer."
+  },
+  "filters": {
+    "clearFilters": "Borrar filtros",
+    "tagsLabel": "Etiquetas:",
+    "sport": {
+      "label": "Deporte",
+      "all": "Todos los deportes",
+      "cycling": "Ciclismo",
+      "running": "Carrera",
+      "swimming": "Natación",
+      "generic": "Genérico"
+    },
+    "difficulty": {
+      "label": "Dificultad",
+      "all": "Todos los niveles",
+      "easy": "Fácil",
+      "medium": "Media",
+      "hard": "Difícil"
+    },
+    "sortBy": {
+      "label": "Ordenar por",
+      "name": "Nombre",
+      "dateCreated": "Fecha de creación",
+      "difficulty": "Dificultad"
+    },
+    "sortOrder": {
+      "label": "Orden",
+      "asc": "Ascendente",
+      "desc": "Descendente"
+    }
+  },
+  "saveDialog": {
+    "title": "Guardar en la biblioteca",
+    "description": "Añade detalles para organizar tu entrenamiento en la biblioteca.",
+    "saving": "Guardando...",
+    "name": {
+      "label": "Nombre del entrenamiento *",
+      "placeholder": "p. ej., Series de Sweet Spot"
+    },
+    "tags": {
+      "label": "Etiquetas (separadas por comas)",
+      "placeholder": "p. ej., series, resistencia"
+    },
+    "difficulty": {
+      "label": "Dificultad",
+      "placeholder": "Selecciona la dificultad",
+      "easy": "Fácil",
+      "moderate": "Moderada",
+      "hard": "Difícil",
+      "veryHard": "Muy difícil"
+    },
+    "notes": {
+      "label": "Notas",
+      "placeholder": "Añade notas sobre este entrenamiento...",
+      "charCount": "{{count}}/1000 caracteres"
+    }
+  },
+  "staleDialog": {
+    "title": "Conflicto de entrenamiento obsoleto",
+    "description": "La descripción de origen ha cambiado desde la última vez que editaste este entrenamiento. Tus cambios pueden entrar en conflicto con el nuevo contenido.",
+    "viewDiff": "Ver diferencias",
+    "reprocess": "Reprocesar de todos modos",
+    "keepVersion": "Mantener mi versión"
+  },
+  "toast": {
+    "deleteFailed": "Error al eliminar",
+    "deleteFailedDescription": "No se pudo eliminar la plantilla",
+    "templateLoaded": "Plantilla cargada",
+    "workoutSaved": "Entrenamiento guardado",
+    "workoutSavedDescription": "\"{{name}}\" se ha añadido a tu biblioteca",
+    "saveFailed": "Error al guardar",
+    "saveFailedDescription": "No se pudo guardar el entrenamiento"
+  }
+}

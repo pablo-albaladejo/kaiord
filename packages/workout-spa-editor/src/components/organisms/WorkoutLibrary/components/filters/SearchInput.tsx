@@ -4,6 +4,7 @@
  * Search input for filtering workouts.
  */
 
+import { useTranslate } from "../../../../../i18n/use-translate";
 import { Input } from "../../../../atoms/Input/Input";
 
 type SearchInputProps = {
@@ -12,11 +13,12 @@ type SearchInputProps = {
 };
 
 export function SearchInput({ value, onChange }: SearchInputProps) {
+  const t = useTranslate("library");
   return (
     <div>
       <Input
         type="text"
-        placeholder="Search workouts..."
+        placeholder={t("search.placeholder")}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full"
