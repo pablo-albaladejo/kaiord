@@ -1,0 +1,122 @@
+{
+  "header": {
+    "title": "Help & Documentation",
+    "subtitle": "Learn how to use the Kaiord Editor to create and manage structured workout files",
+    "replayTutorial": "Replay Tutorial"
+  },
+  "gettingStarted": {
+    "heading": "Getting Started",
+    "creating": {
+      "heading": "Creating a Workout",
+      "step1": "Click \"Create New Workout\" on the welcome screen",
+      "step2": "Enter a workout name and select a sport (cycling, running, swimming)",
+      "step3": "Add workout steps by clicking \"Add Step\"",
+      "step4": "Configure duration (time, distance, or open) for each step",
+      "step5": "Set target intensity (power, heart rate, pace, or cadence)",
+      "step6": "Save your workout using Ctrl+S (Cmd+S on Mac)"
+    },
+    "loading": {
+      "heading": "Loading a Workout",
+      "step1": "Click \"Load Workout\" or drag and drop a file",
+      "step2": "Supported formats: KRD, FIT, TCX, ZWO",
+      "step3": "The workout will load and display all steps",
+      "step4": "Edit any step by clicking on it"
+    },
+    "organizing": {
+      "heading": "Organizing Steps",
+      "step1": "Drag and drop steps to reorder them",
+      "step2": "Use Alt+Up/Down to move selected steps",
+      "step3": "Group steps into repetition blocks with Ctrl+G (Cmd+G on Mac)",
+      "step4": "Ungroup blocks with Ctrl+Shift+G (Cmd+Shift+G on Mac)",
+      "step5": "Copy steps with Ctrl+C and paste with Ctrl+V"
+    }
+  },
+  "shortcuts": {
+    "heading": "Keyboard Shortcuts",
+    "file": {
+      "heading": "File Operations",
+      "save": "Save workout"
+    },
+    "edit": {
+      "heading": "Edit Operations",
+      "undo": "Undo",
+      "redo": "Redo",
+      "copy": "Copy selected steps",
+      "paste": "Paste steps"
+    },
+    "step": {
+      "heading": "Step Management",
+      "moveUp": "Move step up",
+      "moveDown": "Move step down",
+      "createBlock": "Create repetition block",
+      "ungroup": "Ungroup block"
+    },
+    "selection": {
+      "heading": "Selection",
+      "selectAll": "Select all steps",
+      "clear": "Clear selection"
+    }
+  },
+  "examples": {
+    "heading": "Example Workouts",
+    "sweetSpot": {
+      "title": "Sweet Spot Intervals",
+      "sport": "Cycling",
+      "description": "Classic sweet spot training with 3x10 minute intervals at 88-93% FTP",
+      "step1": "10 min warmup at 50-60% FTP",
+      "step2": "3x (10 min at 88-93% FTP, 5 min recovery at 50% FTP)",
+      "step3": "10 min cooldown at 50% FTP"
+    },
+    "tempo": {
+      "title": "Tempo Run",
+      "sport": "Running",
+      "description": "Sustained tempo effort to build aerobic endurance",
+      "step1": "15 min easy warmup",
+      "step2": "20 min at tempo pace (Zone 3-4)",
+      "step3": "10 min easy cooldown"
+    },
+    "swim": {
+      "title": "Swim Intervals",
+      "sport": "Swimming",
+      "description": "High-intensity intervals with active recovery",
+      "step1": "400m easy warmup",
+      "step2": "8x (100m hard, 50m easy)",
+      "step3": "200m cooldown"
+    }
+  },
+  "faq": {
+    "heading": "Frequently Asked Questions",
+    "formats": {
+      "q": "What file formats are supported?",
+      "a": "The editor supports KRD (native format), FIT (Garmin), TCX (Training Center XML), and ZWO (Zwift) formats for both import and export."
+    },
+    "block": {
+      "q": "How do I create a repetition block?",
+      "a": "Select multiple steps by clicking while holding Shift or Ctrl, then press Ctrl+G (Cmd+G on Mac) or click the 'Create Block' button. You can also drag steps into an existing block."
+    },
+    "offline": {
+      "q": "Can I use this offline?",
+      "a": "Yes! The editor works offline once loaded. Your workouts are saved in your browser's local storage and will be available even without an internet connection."
+    },
+    "zones": {
+      "q": "What are training zones?",
+      "a": "Training zones are intensity ranges based on your FTP (power) or maximum heart rate. Configure your zones in the Profile Manager to see zone-based targets in your workouts."
+    },
+    "export": {
+      "q": "How do I export my workout?",
+      "a": "Click the 'Save' button and select your desired export format (KRD, FIT, TCX, or ZWO). The file will be downloaded to your device."
+    },
+    "undo": {
+      "q": "Can I undo changes?",
+      "a": "Yes! Use Ctrl+Z (Cmd+Z on Mac) to undo and Ctrl+Y (Cmd+Y on Mac) to redo. The editor maintains a full history of your changes."
+    },
+    "durations": {
+      "q": "What's the difference between duration types?",
+      "a": "Time-based durations use minutes/seconds, distance-based use meters/kilometers, and open durations continue until you manually advance (lap button press)."
+    },
+    "library": {
+      "q": "How do I save workouts to my library?",
+      "a": "Click the 'Save to Library' button to store your workout locally. You can add tags and notes for easy organization and retrieval."
+    }
+  }
+}

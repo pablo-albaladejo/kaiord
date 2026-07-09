@@ -1,0 +1,122 @@
+{
+  "header": {
+    "title": "Ayuda y documentación",
+    "subtitle": "Aprende a usar el Editor de Kaiord para crear y gestionar archivos de entrenamiento estructurados",
+    "replayTutorial": "Repetir tutorial"
+  },
+  "gettingStarted": {
+    "heading": "Primeros pasos",
+    "creating": {
+      "heading": "Crear un entrenamiento",
+      "step1": "Haz clic en «Crear entrenamiento nuevo» en la pantalla de bienvenida",
+      "step2": "Introduce un nombre de entrenamiento y selecciona un deporte (ciclismo, carrera, natación)",
+      "step3": "Añade pasos de entrenamiento haciendo clic en «Añadir paso»",
+      "step4": "Configura la duración (tiempo, distancia o abierta) de cada paso",
+      "step5": "Define la intensidad objetivo (potencia, frecuencia cardíaca, ritmo o cadencia)",
+      "step6": "Guarda tu entrenamiento con Ctrl+S (Cmd+S en Mac)"
+    },
+    "loading": {
+      "heading": "Cargar un entrenamiento",
+      "step1": "Haz clic en «Cargar entrenamiento» o arrastra y suelta un archivo",
+      "step2": "Formatos admitidos: KRD, FIT, TCX, ZWO",
+      "step3": "El entrenamiento se cargará y mostrará todos los pasos",
+      "step4": "Edita cualquier paso haciendo clic en él"
+    },
+    "organizing": {
+      "heading": "Organizar los pasos",
+      "step1": "Arrastra y suelta los pasos para reordenarlos",
+      "step2": "Usa Alt+Arriba/Abajo para mover los pasos seleccionados",
+      "step3": "Agrupa pasos en bloques de repetición con Ctrl+G (Cmd+G en Mac)",
+      "step4": "Desagrupa bloques con Ctrl+Shift+G (Cmd+Shift+G en Mac)",
+      "step5": "Copia pasos con Ctrl+C y pégalos con Ctrl+V"
+    }
+  },
+  "shortcuts": {
+    "heading": "Atajos de teclado",
+    "file": {
+      "heading": "Operaciones de archivo",
+      "save": "Guardar entrenamiento"
+    },
+    "edit": {
+      "heading": "Operaciones de edición",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "copy": "Copiar pasos seleccionados",
+      "paste": "Pegar pasos"
+    },
+    "step": {
+      "heading": "Gestión de pasos",
+      "moveUp": "Subir paso",
+      "moveDown": "Bajar paso",
+      "createBlock": "Crear bloque de repetición",
+      "ungroup": "Desagrupar bloque"
+    },
+    "selection": {
+      "heading": "Selección",
+      "selectAll": "Seleccionar todos los pasos",
+      "clear": "Borrar selección"
+    }
+  },
+  "examples": {
+    "heading": "Entrenamientos de ejemplo",
+    "sweetSpot": {
+      "title": "Series de sweet spot",
+      "sport": "Ciclismo",
+      "description": "Entrenamiento clásico de sweet spot con 3x10 minutos de series al 88-93 % del FTP",
+      "step1": "10 min de calentamiento al 50-60 % del FTP",
+      "step2": "3x (10 min al 88-93 % del FTP, 5 min de recuperación al 50 % del FTP)",
+      "step3": "10 min de vuelta a la calma al 50 % del FTP"
+    },
+    "tempo": {
+      "title": "Carrera a ritmo tempo",
+      "sport": "Carrera",
+      "description": "Esfuerzo sostenido a ritmo tempo para desarrollar la resistencia aeróbica",
+      "step1": "15 min de calentamiento suave",
+      "step2": "20 min a ritmo tempo (Zona 3-4)",
+      "step3": "10 min de vuelta a la calma suave"
+    },
+    "swim": {
+      "title": "Series de natación",
+      "sport": "Natación",
+      "description": "Series de alta intensidad con recuperación activa",
+      "step1": "400 m de calentamiento suave",
+      "step2": "8x (100 m fuerte, 50 m suave)",
+      "step3": "200 m de vuelta a la calma"
+    }
+  },
+  "faq": {
+    "heading": "Preguntas frecuentes",
+    "formats": {
+      "q": "¿Qué formatos de archivo son compatibles?",
+      "a": "El editor admite los formatos KRD (formato nativo), FIT (Garmin), TCX (Training Center XML) y ZWO (Zwift), tanto para importar como para exportar."
+    },
+    "block": {
+      "q": "¿Cómo creo un bloque de repetición?",
+      "a": "Selecciona varios pasos haciendo clic mientras mantienes pulsado Shift o Ctrl y, a continuación, pulsa Ctrl+G (Cmd+G en Mac) o haz clic en el botón «Crear bloque». También puedes arrastrar pasos a un bloque existente."
+    },
+    "offline": {
+      "q": "¿Puedo usarlo sin conexión?",
+      "a": "¡Sí! El editor funciona sin conexión una vez cargado. Tus entrenamientos se guardan en el almacenamiento local del navegador y estarán disponibles incluso sin conexión a internet."
+    },
+    "zones": {
+      "q": "¿Qué son las zonas de entrenamiento?",
+      "a": "Las zonas de entrenamiento son rangos de intensidad basados en tu FTP (potencia) o tu frecuencia cardíaca máxima. Configura tus zonas en el Gestor de perfiles para ver objetivos por zonas en tus entrenamientos."
+    },
+    "export": {
+      "q": "¿Cómo exporto mi entrenamiento?",
+      "a": "Haz clic en el botón «Guardar» y selecciona el formato de exportación que quieras (KRD, FIT, TCX o ZWO). El archivo se descargará en tu dispositivo."
+    },
+    "undo": {
+      "q": "¿Puedo deshacer cambios?",
+      "a": "¡Sí! Usa Ctrl+Z (Cmd+Z en Mac) para deshacer y Ctrl+Y (Cmd+Y en Mac) para rehacer. El editor mantiene un historial completo de tus cambios."
+    },
+    "durations": {
+      "q": "¿Cuál es la diferencia entre los tipos de duración?",
+      "a": "Las duraciones por tiempo usan minutos/segundos, las de distancia usan metros/kilómetros y las abiertas continúan hasta que avanzas manualmente (pulsando el botón de vuelta)."
+    },
+    "library": {
+      "q": "¿Cómo guardo entrenamientos en mi biblioteca?",
+      "a": "Haz clic en el botón «Guardar en la biblioteca» para almacenar tu entrenamiento localmente. Puedes añadir etiquetas y notas para organizarlos y recuperarlos fácilmente."
+    }
+  }
+}
