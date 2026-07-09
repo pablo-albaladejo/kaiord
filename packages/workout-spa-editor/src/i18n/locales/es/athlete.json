@@ -10,7 +10,7 @@
   "sportAria": "Deporte",
   "zonesTitle": "Zonas de {{sport}}",
   "noThreshold": "Establece un umbral de {{sport}} para ver tus zonas",
-  "zonesBlurb": "Estas zonas alimentan la generación de entrenos con IA y cada objetivo que envías a Garmin.",
+  "zonesBlurb": "Estas zonas alimentan la generación de entrenamientos con IA y cada objetivo que envías a Garmin.",
   "tagline": {
     "cycling": "Ciclista",
     "running": "Corredor",
