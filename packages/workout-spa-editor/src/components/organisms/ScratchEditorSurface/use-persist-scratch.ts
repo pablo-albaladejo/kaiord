@@ -3,17 +3,12 @@ import { useLocation } from "wouter";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { calendarWeekHref } from "../../../routing/calendar-week-href";
 import { useCurrentWorkout } from "../../../store/selectors/workout-selectors";
 import type { Workout } from "../../../types/krd";
 import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
 import { persistScratchWorkout } from "./persist-scratch-workout";
-
-const INVALID_TITLE = "Invalid date";
-const INVALID_DESC =
-  "Could not schedule — the date is not a valid calendar day.";
-const SAVE_FAIL_TITLE = "Save failed";
-const SAVE_FAIL_DESC = "Could not schedule the workout — please retry.";
 
 const DEFAULT_SPORT = "cycling";
 
@@ -29,6 +24,7 @@ export type UsePersistScratch = {
  * D6-rejects calendar-impossible dates (toast, no persist/nav).
  */
 export function usePersistScratch(date: string): UsePersistScratch {
+  const t = useTranslate("editor");
   const currentWorkout = useCurrentWorkout();
   const profileId = useActiveProfileLive()?.id ?? null;
   const persistence = usePersistence();
@@ -40,7 +36,7 @@ export function usePersistScratch(date: string): UsePersistScratch {
   const schedule = async (): Promise<void> => {
     if (!currentWorkout || !profileId) return;
     if (!isValidCalendarDate(date)) {
-      toast.error(INVALID_TITLE, INVALID_DESC);
+      toast.error(t("scratch.invalidTitle"), t("scratch.invalidDescription"));
       return;
     }
     const workout = currentWorkout.extensions?.structured_workout as
@@ -55,7 +51,10 @@ export function usePersistScratch(date: string): UsePersistScratch {
       });
       navigate(calendarWeekHref(date));
     } catch {
-      toast.error(SAVE_FAIL_TITLE, SAVE_FAIL_DESC);
+      toast.error(
+        t("scratch.saveFailedTitle"),
+        t("scratch.saveFailedDescription")
+      );
     }
   };
 

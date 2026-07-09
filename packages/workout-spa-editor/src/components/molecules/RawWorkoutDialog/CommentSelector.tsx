@@ -4,6 +4,7 @@
  * Pre-selects comments before noon on workout date.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutComment } from "../../../types/calendar-fragments";
 
 export type CommentSelectorProps = {
@@ -17,16 +18,17 @@ export function CommentSelector({
   selected,
   onToggle,
 }: CommentSelectorProps) {
+  const t = useTranslate("editor");
   if (comments.length === 0) {
     return (
-      <p className="text-xs text-muted-foreground">No comments available.</p>
+      <p className="text-xs text-muted-foreground">{t("raw.noComments")}</p>
     );
   }
 
   return (
     <div className="space-y-2" data-testid="comment-selector">
       <p className="text-xs font-medium text-muted-foreground">
-        Include comments:
+        {t("raw.includeComments")}
       </p>
       {comments.map((c, i) => (
         <label key={i} className="flex items-start gap-2 text-sm">

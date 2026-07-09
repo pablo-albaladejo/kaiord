@@ -1,0 +1,115 @@
+{
+  "loading": {
+    "loadingWorkout": "Cargando entreno...",
+    "noStructuredData": "Este entreno aún no tiene datos estructurados.",
+    "goToDaily": "Ir a diario"
+  },
+  "pageHeader": {
+    "newTitle": "Nuevo entreno",
+    "newDescription": "Crea desde cero, genera con IA o importa un archivo.",
+    "editTitle": "Editar entreno",
+    "editDescription": "Ajusta pasos, intervalos y objetivos."
+  },
+  "workflow": {
+    "acceptWorkout": "Aceptar entreno",
+    "pushToGarmin": "Enviar a Garmin"
+  },
+  "section": {
+    "untitledWorkout": "Entreno sin título",
+    "sport": "Deporte:",
+    "editMetadata": "Editar metadatos del entreno",
+    "editMetadataTitle": "Editar metadatos del entreno"
+  },
+  "actions": {
+    "discard": "Descartar",
+    "discardAria": "Descartar el entreno y volver a la pantalla de bienvenida",
+    "addStep": "Añadir paso",
+    "addRepetition": "Añadir repetición",
+    "addRepetitionAria": "Añadir bloque de repetición",
+    "addStepAria": "Añadir un nuevo paso al entreno",
+    "undo": "Deshacer"
+  },
+  "selection": {
+    "createBlockAria": "Crear bloque de repetición con los pasos seleccionados",
+    "createBlock": "Crear bloque de repetición ({{count}} pasos)",
+    "orPress": "o pulsa",
+    "ctrlG": "Ctrl+G",
+    "ctrlClickHint": "Ctrl+clic en otro paso para crear un bloque de repetición"
+  },
+  "discard": {
+    "title": "Descartar entreno",
+    "message": "¿Seguro que quieres descartar el entreno actual? Esta acción no se puede deshacer.",
+    "confirmLabel": "Descartar",
+    "cancelLabel": "Cancelar"
+  },
+  "deleteBlock": {
+    "title": "Eliminar bloque de repetición",
+    "message": "¿Seguro que quieres eliminar este bloque de repetición? Esta acción se puede deshacer.",
+    "confirmLabel": "Eliminar",
+    "cancelLabel": "Cancelar",
+    "toastTitle": "Bloque de repetición eliminado"
+  },
+  "deleteStep": {
+    "toastTitle": "Paso eliminado",
+    "toastDescription": "El paso se ha eliminado de tu entreno."
+  },
+  "clipboard": {
+    "copySuccess": "Paso copiado al portapapeles",
+    "copyFailure": "No se pudo copiar el paso",
+    "pasteSuccess": "Paso pegado correctamente",
+    "pasteFailure": "El portapapeles no contiene un paso válido"
+  },
+  "contextMenu": {
+    "actionsAria": "Acciones del editor de entrenos",
+    "cut": "Cortar",
+    "copy": "Copiar",
+    "paste": "Pegar",
+    "delete": "Eliminar",
+    "selectAll": "Seleccionar todo",
+    "group": "Agrupar",
+    "ungroup": "Desagrupar"
+  },
+  "empty": {
+    "title": "Añade tu primer paso",
+    "description": "Empieza a construir tu entreno añadiendo pasos",
+    "addFirstStepAria": "Añadir el primer paso al entreno"
+  },
+  "history": {
+    "controlsAria": "Controles de historial",
+    "undoTooltip": "Deshacer (Ctrl+Z)",
+    "undoAria": "Deshacer la última acción",
+    "redoTooltip": "Rehacer (Ctrl+Y)",
+    "redoAria": "Rehacer la última acción"
+  },
+  "save": {
+    "saveWorkout": "Guardar entreno",
+    "saving": "Guardando...",
+    "exportProgress": "Progreso de exportación: {{progress}}%",
+    "savedTitle": "Entreno guardado",
+    "savedDescription": "«{{name}}» se ha guardado como {{format}}",
+    "exportFailedTitle": "Error de exportación",
+    "exportFailedFallback": "No se pudo exportar el entreno"
+  },
+  "saveError": {
+    "title": "Error al guardar",
+    "body": "El entreno no se pudo guardar debido a errores de validación. Corrige los siguientes problemas e inténtalo de nuevo:",
+    "fixAndRetry": "Corregir y reintentar"
+  },
+  "scratch": {
+    "untitledName": "Entreno sin título",
+    "saveAndSchedule": "Guardar y programar",
+    "invalidTitle": "Fecha no válida",
+    "invalidDescription": "No se pudo programar — la fecha no es un día válido del calendario.",
+    "saveFailedTitle": "Error al guardar",
+    "saveFailedDescription": "No se pudo programar el entreno — inténtalo de nuevo."
+  },
+  "raw": {
+    "dialogDescription": "Detalles del entreno en bruto con la descripción del entrenador, la selección de comentarios y acciones para procesar o saltar.",
+    "processWithAi": "Procesar con IA",
+    "skip": "Saltar",
+    "unskip": "Deshacer salto",
+    "createWorkout": "Crear entreno",
+    "noComments": "No hay comentarios disponibles.",
+    "includeComments": "Incluir comentarios:"
+  }
+}
