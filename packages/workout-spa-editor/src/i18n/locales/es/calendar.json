@@ -1,0 +1,36 @@
+{
+  "page": {
+    "heading": "Calendario"
+  },
+  "gridHeader": {
+    "todaySuffix": " (hoy)",
+    "activities": "{{count}} actividades"
+  },
+  "weekList": {
+    "todaySuffix": " (hoy)",
+    "addTo": "Añadir a {{date}}",
+    "add": "+ Añadir"
+  },
+  "viewToggle": {
+    "switchToGridView": "Cambiar a vista de cuadrícula",
+    "switchToListView": "Cambiar a vista de lista"
+  },
+  "addEntry": {
+    "title": "¿Qué quieres añadir?",
+    "addTo": "Añadir a {{date}}",
+    "workout": "Entrenamiento",
+    "wellness": "Bienestar"
+  },
+  "dateBanner": {
+    "creatingWorkoutFor": "Creando entrenamiento para el {{date}}"
+  },
+  "batch": {
+    "processed": "Lote procesado",
+    "workoutsProcessed": "{{count}} entrenamientos",
+    "noProvider": "Configura un proveedor de IA en Ajustes para procesar entrenamientos.",
+    "error": "El procesamiento por lotes encontró un error inesperado."
+  },
+  "reschedule": {
+    "moveFailed": "No se pudo mover el entrenamiento"
+  }
+}
