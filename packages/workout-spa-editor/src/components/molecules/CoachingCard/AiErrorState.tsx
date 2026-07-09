@@ -6,19 +6,7 @@
  * points as the no-workout layout, just with the error context.
  */
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
-
-const REASON_TEXT: Record<
-  AiFailureReason | "not-found" | "no-provider",
-  string
-> = {
-  "ai-error": "AI returned an error",
-  "ai-cancelled": "AI request was cancelled",
-  "ai-timeout": "AI request timed out",
-  "ai-invalid-krd": "AI returned an invalid workout structure",
-  "transport-error": "Could not reach the AI service",
-  "not-found": "Coaching activity is no longer available",
-  "no-provider": "No AI provider is configured",
-};
+import { useTranslate } from "../../../i18n/use-translate";
 
 export type AiErrorStateProps = {
   reason: AiFailureReason | "not-found" | "no-provider";
@@ -30,13 +18,14 @@ export type AiErrorStateProps = {
 };
 
 export function AiErrorState(props: AiErrorStateProps) {
+  const t = useTranslate("coaching");
   return (
     <div
       data-testid="coaching-dialog-ai-error"
       className="space-y-3 rounded border border-rose-200 bg-rose-50/60 p-3 text-sm dark:border-rose-800 dark:bg-rose-950/30"
     >
       <p className="text-rose-700 dark:text-rose-300">
-        ⚠ AI processing failed: {REASON_TEXT[props.reason]}
+        ⚠ {t("aiError.heading")}: {t(`aiError.${props.reason}`)}
         {props.detail ? ` (${props.detail})` : ""}
       </p>
       <div className="flex flex-wrap justify-end gap-2">
@@ -45,21 +34,21 @@ export function AiErrorState(props: AiErrorStateProps) {
           onClick={props.onClose}
           className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
         >
-          Close
+          {t("actions.close")}
         </button>
         <button
           type="button"
           onClick={props.onMatchExisting}
           className="rounded-md border border-slate-300 px-3 py-1 text-xs hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
         >
-          Match existing
+          {t("actions.matchExisting")}
         </button>
         <button
           type="button"
           onClick={props.onEditManually}
           className="rounded-md border border-slate-300 px-3 py-1 text-xs hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
         >
-          Edit manually
+          {t("actions.editManually")}
         </button>
         <button
           type="button"
@@ -67,7 +56,7 @@ export function AiErrorState(props: AiErrorStateProps) {
           onClick={props.onRetry}
           className="rounded-md bg-rose-600 px-3 py-1 text-xs text-white hover:bg-rose-700"
         >
-          Retry AI
+          {t("actions.retryAi")}
         </button>
       </div>
     </div>

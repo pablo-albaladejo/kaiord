@@ -37,5 +37,54 @@
     "succeeded": "Completados {{n}}",
     "failed": "Fallidos {{n}}",
     "cancelAria": "Cancelar el procesamiento por lotes"
+  },
+  "aiError": {
+    "heading": "El procesamiento con IA falló",
+    "ai-error": "La IA devolvió un error",
+    "ai-cancelled": "Se canceló la petición a la IA",
+    "ai-timeout": "La petición a la IA agotó el tiempo de espera",
+    "ai-invalid-krd": "La IA devolvió una estructura de entreno no válida",
+    "transport-error": "No se pudo contactar con el servicio de IA",
+    "not-found": "La actividad de coaching ya no está disponible",
+    "no-provider": "No hay ningún proveedor de IA configurado"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "skipped": "Omitido"
+  },
+  "dialog": {
+    "closeAria": "Cerrar",
+    "loadingDescription": "Cargando descripción…"
+  },
+  "actions": {
+    "close": "Cerrar",
+    "matchExisting": "Emparejar existente",
+    "editManually": "Editar manualmente",
+    "creating": "Creando…",
+    "retryAi": "Reintentar IA",
+    "aiProcess": "Procesar con IA",
+    "processWithAi": "Procesar con IA",
+    "openEditor": "Abrir editor",
+    "pushToGarmin": "Enviar a Garmin",
+    "split": "Separar",
+    "splitting": "Separando…"
+  },
+  "linked": {
+    "heading": "Entreno vinculado",
+    "fallbackTitle": "Entreno",
+    "untitled": "Entreno sin título",
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swimming": "Natación",
+    "strength": "Fuerza"
+  },
+  "picker": {
+    "ariaLabel": "Emparejar con entreno",
+    "empty": "No hay entrenos del mismo día y deporte disponibles para emparejar."
+  },
+  "sync": {
+    "defaultLabel": "Coach",
+    "connectTo": "Conectar con {{label}}"
   }
 }
