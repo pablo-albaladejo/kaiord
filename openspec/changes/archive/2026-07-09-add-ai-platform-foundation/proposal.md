@@ -1,5 +1,7 @@
 # Proposal: AI platform foundation (Wave 1)
 
+> Completed: 2026-07-09
+
 ## Why
 
 `@kaiord/ai` is today a thin engine (`createTextToWorkout`, `createChatAgent`)
