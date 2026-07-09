@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP, type IconName } from "../../atoms/Icon";
 
 export type CreateStartFromProps = {
@@ -16,10 +17,26 @@ export function CreateStartFrom({
   onBlank,
   onImport,
 }: CreateStartFromProps) {
+  const t = useTranslate("create-workout");
   const tiles: Tile[] = [
-    { key: "template", label: "Template", icon: "cards", onClick: onTemplate },
-    { key: "blank", label: "Blank", icon: "plus", onClick: onBlank },
-    { key: "import", label: "Import file", icon: "upload", onClick: onImport },
+    {
+      key: "template",
+      label: t("startFrom.template"),
+      icon: "cards",
+      onClick: onTemplate,
+    },
+    {
+      key: "blank",
+      label: t("startFrom.blank"),
+      icon: "plus",
+      onClick: onBlank,
+    },
+    {
+      key: "import",
+      label: t("startFrom.import"),
+      icon: "upload",
+      onClick: onImport,
+    },
   ];
 
   return (
@@ -27,7 +44,7 @@ export function CreateStartFrom({
       <div className="my-5 flex items-center gap-3">
         <span className="h-px flex-1 bg-slate-800" />
         <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-500">
-          or start from
+          {t("startFrom.divider")}
         </span>
         <span className="h-px flex-1 bg-slate-800" />
       </div>

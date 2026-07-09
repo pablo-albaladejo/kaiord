@@ -3,11 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { db } from "../../../adapters/dexie/dexie-database";
 import { useGarminBridge } from "../../../contexts";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { useGarminPush } from "../../molecules/GarminPushButton/useGarminPush";
-
-const SAVED_AND_PUSHED = "Saved & pushed to Garmin";
-const SAVED_ONLY = "Workout saved";
 
 export type SaveAndPushInput = {
   buildRecord: () => Promise<WorkoutRecord>;
@@ -25,6 +23,7 @@ export function useSaveAndPush({ buildRecord, onDone }: SaveAndPushInput) {
   const [saving, setSaving] = useState(false);
   const { sessionActive } = useGarminBridge();
   const toast = useToastContext();
+  const t = useTranslate("create-workout");
   const { push } = useGarminPush(record);
   const pendingRef = useRef(false);
 
@@ -42,14 +41,14 @@ export function useSaveAndPush({ buildRecord, onDone }: SaveAndPushInput) {
     void (async () => {
       if (sessionActive) {
         await push();
-        toast.success(SAVED_AND_PUSHED);
+        toast.success(t("toast.savedAndPushed"));
       } else {
-        toast.success(SAVED_ONLY);
+        toast.success(t("toast.savedOnly"));
       }
       setSaving(false);
       onDone(record);
     })();
-  }, [record, sessionActive, push, toast, onDone]);
+  }, [record, sessionActive, push, toast, onDone, t]);
 
   return { save, saving };
 }

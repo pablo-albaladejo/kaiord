@@ -8,14 +8,13 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
 import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import { ATHLETE_SPORTS } from "../../../lib/athlete";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import { formatZonesContext } from "../../organisms/AiWorkoutInput/zones-formatter";
 
 export type CreatePhase = "input" | "generating" | "result";
-
-const GENERATION_FAILED = "Workout generation failed";
 
 export function useCreateWorkout() {
   const [phase, setPhase] = useState<CreatePhase>("input");
@@ -28,6 +27,7 @@ export function useCreateWorkout() {
   const bindings = useAiModelBindingsLive(active?.id ?? null);
   const customPrompt = useAiCustomPromptLive();
   const toast = useToastContext();
+  const t = useTranslate("create-workout");
   const search = useSearch();
   const dateParam = new URLSearchParams(search).get("date");
 
@@ -58,9 +58,9 @@ export function useCreateWorkout() {
       setPhase("result");
     } catch {
       setPhase("input");
-      toast.error(GENERATION_FAILED);
+      toast.error(t("toast.generationFailed"));
     }
-  }, [promptText, resolved, active, sport, customPrompt, toast]);
+  }, [promptText, resolved, active, sport, customPrompt, toast, t]);
 
   return {
     phase,
