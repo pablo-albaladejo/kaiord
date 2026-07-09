@@ -36,19 +36,19 @@ export function useLabEntrySave(onSaved: () => void) {
       toast.error(SAVE_FAILED_MSG);
       return;
     }
-    const submission = buildLabReportSubmission(header, rows, {
-      profileId,
-      reportId: crypto.randomUUID(),
-      sex: active?.profile?.sex,
-      newId: () => crypto.randomUUID(),
-      provenance,
-    });
-    if (!submission) {
-      toast.error(NO_VALUES_MSG);
-      return;
-    }
     setIsSaving(true);
     try {
+      const submission = buildLabReportSubmission(header, rows, {
+        profileId,
+        reportId: crypto.randomUUID(),
+        sex: active?.profile?.sex,
+        newId: () => crypto.randomUUID(),
+        provenance,
+      });
+      if (!submission) {
+        toast.error(NO_VALUES_MSG);
+        return;
+      }
       await saveLabReport(persistence, submission.report, submission.values);
       toast.success(SAVED_MSG);
       onSaved();

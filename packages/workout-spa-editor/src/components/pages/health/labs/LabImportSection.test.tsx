@@ -19,6 +19,7 @@ import { LabEntryForm } from "./LabEntryForm";
 import { LabImportSection } from "./LabImportSection";
 
 const mockRunLabExtraction = vi.fn();
+const mockMapExtractionToDraft = vi.fn();
 
 vi.mock(
   "../../../../application/lab/extraction/run-lab-extraction.use-case",
@@ -26,6 +27,11 @@ vi.mock(
     runLabExtraction: (...args: unknown[]) => mockRunLabExtraction(...args),
   })
 );
+
+vi.mock("./map-extraction-to-draft", () => ({
+  mapExtractionToDraft: (...args: unknown[]) =>
+    mockMapExtractionToDraft(...args),
+}));
 
 let mockProviders: unknown[] = [];
 
@@ -109,7 +115,11 @@ describe("LabImportSection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockProviders = [PROVIDER];
-    mockRunLabExtraction.mockResolvedValue({ ok: true, draft: EMPTY_DRAFT });
+    mockRunLabExtraction.mockResolvedValue({
+      ok: true,
+      extraction: { values: [] },
+    });
+    mockMapExtractionToDraft.mockReturnValue(EMPTY_DRAFT);
   });
 
   it("should call onDraft with the mapped draft after a successful extraction", async () => {
@@ -152,7 +162,7 @@ describe("LabImportSection", () => {
 
   it("should show the review banner and discard it back to manual entry", async () => {
     // Arrange
-    mockRunLabExtraction.mockResolvedValue({ ok: true, draft: glucoseDraft() });
+    mockMapExtractionToDraft.mockReturnValue(glucoseDraft());
     renderWithI18n(<LabEntryForm />);
     await userEvent.upload(screen.getByLabelText(AFFORDANCE), pdfFile());
     await waitFor(() =>
@@ -170,7 +180,7 @@ describe("LabImportSection", () => {
 
   it("should persist an extracted draft with ai-extracted provenance", async () => {
     // Arrange
-    mockRunLabExtraction.mockResolvedValue({ ok: true, draft: glucoseDraft() });
+    mockMapExtractionToDraft.mockReturnValue(glucoseDraft());
     const persistence = createInMemoryPersistence();
     renderWithI18n(<LabEntryForm />, persistence);
     await userEvent.upload(screen.getByLabelText(AFFORDANCE), pdfFile());

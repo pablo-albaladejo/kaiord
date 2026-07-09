@@ -30,7 +30,6 @@ const makeInput = (): RunLabExtractionInput => ({
   file: { data: PDF_BYTES, mediaType: "application/pdf", filename: "labs.pdf" },
   providers: [],
   bindings: [],
-  locale: "en",
 });
 
 describe("runLabExtraction", () => {
@@ -47,7 +46,7 @@ describe("runLabExtraction", () => {
     });
   });
 
-  it("should resolve the lab_extraction model and return a mapped draft", async () => {
+  it("should resolve the lab_extraction model and return the raw extraction", async () => {
     // Arrange
     const input = makeInput();
 
@@ -62,7 +61,9 @@ describe("runLabExtraction", () => {
     );
     expect(result).toMatchObject({
       ok: true,
-      draft: { rows: [expect.objectContaining({ parameterKey: "glucose" })] },
+      extraction: {
+        values: [expect.objectContaining({ parameterKey: "glucose" })],
+      },
     });
   });
 

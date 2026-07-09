@@ -7,7 +7,7 @@
 import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { LabDraft } from "../../../../application/lab/extraction/map-extraction-to-draft";
+import type { LabDraft } from "./map-extraction-to-draft";
 import { useLabImport } from "./use-lab-import";
 
 export type LabImportSectionProps = {

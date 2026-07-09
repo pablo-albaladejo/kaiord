@@ -16,7 +16,7 @@ export const resolveSystemPrompt = (
 
 /** SDK provider string (OTel `gen_ai.system`); `unknown` for string models. */
 export const providerOf = (model: LanguageModel): string =>
-  typeof model === "string" ? model : (model.provider ?? "unknown");
+  typeof model === "string" ? "unknown" : (model.provider ?? "unknown");
 
 export const modelIdOf = (model: LanguageModel): string =>
   typeof model === "string" ? model : (model.modelId ?? "unknown");

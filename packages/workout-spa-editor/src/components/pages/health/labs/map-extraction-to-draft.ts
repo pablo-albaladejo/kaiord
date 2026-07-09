@@ -1,22 +1,24 @@
 /**
  * mapExtractionToDraft — turn a permissive AI lab extraction into the entry
- * form's draft shape (header + rows). Every extracted value yields exactly one
- * row; keys resolve model-proposed → localized label lookup → free custom key.
+ * form's draft shape (header + rows). A UI-layer concern: it produces
+ * `LabRowState` (form state), so it lives beside the form rather than in the
+ * application layer. Every extracted value yields exactly one row; keys resolve
+ * model-proposed → localized label lookup → free custom key.
  */
 import type { LabExtraction, LabExtractionValue } from "@kaiord/ai/agents";
 import { customParameterKey, getLabParameter } from "@kaiord/core";
 import { type Locale, normalizeLocale } from "@kaiord/i18n";
 
+import type {
+  FastingInput,
+  LabReportHeaderInput,
+} from "../../../../application/lab/build-lab-report";
 import {
   formatLabParameterLabel,
   getLabParameterDisplay,
-} from "../../../components/pages/health/labs/lab-parameter-display";
-import {
-  findParameterByLabel,
-  slugify,
-} from "../../../components/pages/health/labs/lab-parameter-options";
-import type { LabRowState } from "../../../components/pages/health/labs/lab-row-model";
-import type { FastingInput, LabReportHeaderInput } from "../build-lab-report";
+} from "./lab-parameter-display";
+import { findParameterByLabel, slugify } from "./lab-parameter-options";
+import type { LabRowState } from "./lab-row-model";
 
 export type LabDraftRow = Omit<LabRowState, "rowId">;
 

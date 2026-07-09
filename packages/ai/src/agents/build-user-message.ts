@@ -13,9 +13,10 @@ const toFilePart = (file: AgentFileInput): UserPart => ({
   ...(file.filename ? { filename: file.filename } : {}),
 });
 
-const withFeedback = (text: string | undefined, feedback: string): string =>
-  `${text ?? ""}\n\n[Previous attempt failed: ` +
-  `${truncate(feedback, MAX_ERROR_LENGTH)}. Fix the errors.]`.trimStart();
+const withFeedback = (text: string | undefined, feedback: string): string => {
+  const note = `[Previous attempt failed: ${truncate(feedback, MAX_ERROR_LENGTH)}. Fix the errors.]`;
+  return text ? `${text}\n\n${note}` : note;
+};
 
 /**
  * Builds a single user message from optional text and document attachments.

@@ -1,11 +1,14 @@
 /**
- * runLabExtraction — resolve the profile's lab-extraction model, run the frozen
- * lab-extractor agent over one uploaded document, and map its output to the
- * entry-form draft. Returns a typed no-provider result instead of throwing for
- * the expected "no model configured" case; a run failure propagates as a throw.
+ * runLabExtraction — resolve the profile's lab-extraction model and run the
+ * frozen lab-extractor agent over one uploaded document, returning the raw
+ * extraction. Mapping the extraction to the entry-form draft is a UI concern
+ * and stays in the labs component layer, so this use case never depends on it.
+ * Returns a typed no-provider result instead of throwing for the expected "no
+ * model configured" case; a run failure propagates as a throw.
  */
 import {
   type AgentFileInput,
+  type LabExtraction,
   labExtractorAgent,
   runGenerateAgent,
 } from "@kaiord/ai/agents";
@@ -16,18 +19,17 @@ import {
 
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { AiModelBinding } from "../../../types/ai-model-binding";
-import { type LabDraft, mapExtractionToDraft } from "./map-extraction-to-draft";
 
 export type RunLabExtractionInput = {
   file: AgentFileInput;
   providers: LlmProviderConfig[];
   bindings: AiModelBinding[];
-  locale: string;
   signal?: AbortSignal;
 };
 
 export type RunLabExtractionResult =
-  { ok: true; draft: LabDraft } | { ok: false; reason: "no_provider" };
+  | { ok: true; extraction: LabExtraction }
+  | { ok: false; reason: "no_provider" };
 
 export const runLabExtraction = async (
   input: RunLabExtractionInput
@@ -47,8 +49,5 @@ export const runLabExtraction = async (
     { files: [input.file] },
     { model, signal: input.signal }
   );
-  return {
-    ok: true,
-    draft: mapExtractionToDraft(output, { locale: input.locale }),
-  };
+  return { ok: true, extraction: output };
 };

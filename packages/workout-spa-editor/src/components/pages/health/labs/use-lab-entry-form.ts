@@ -10,8 +10,8 @@ import type {
   LabProvenanceSource,
   LabReportHeaderInput,
 } from "../../../../application/lab/build-lab-report";
-import type { LabDraft } from "../../../../application/lab/extraction/map-extraction-to-draft";
 import { createEmptyRow, type LabRowState } from "./lab-row-model";
+import type { LabDraft } from "./map-extraction-to-draft";
 import { useLabEntrySave } from "./use-lab-entry-save";
 
 const EMPTY_HEADER: LabReportHeaderInput = {

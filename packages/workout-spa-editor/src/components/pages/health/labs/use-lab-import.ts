@@ -7,7 +7,6 @@
 import { resolveModelForPurpose } from "@kaiord/ai/providers";
 import { useRef, useState } from "react";
 
-import type { LabDraft } from "../../../../application/lab/extraction/map-extraction-to-draft";
 import { runLabExtraction } from "../../../../application/lab/extraction/run-lab-extraction.use-case";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
@@ -15,6 +14,7 @@ import { useAiModelBindingsLive } from "../../../../hooks/use-ai-model-bindings-
 import { useAiProvidersLive } from "../../../../hooks/use-ai-providers-live";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { validateFileSize } from "../../../molecules/FileUpload/file-upload-constants";
+import { type LabDraft, mapExtractionToDraft } from "./map-extraction-to-draft";
 
 const TOO_LARGE_MSG = "File is too large — use a file under 10 MB";
 const RUN_FAILED_MSG = "Could not extract the lab report — please retry";
@@ -46,11 +46,10 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
         file: { data, mediaType: file.type, filename: file.name },
         providers,
         bindings,
-        locale,
         signal: controller.signal,
       });
       if (!result.ok) toast.error(NO_PROVIDER_MSG);
-      else onDraft(result.draft);
+      else onDraft(mapExtractionToDraft(result.extraction, { locale }));
     } catch {
       if (!controller.signal.aborted) toast.error(RUN_FAILED_MSG);
     } finally {
