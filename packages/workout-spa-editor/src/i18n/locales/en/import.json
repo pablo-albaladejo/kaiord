@@ -1,0 +1,22 @@
+{
+  "button": {
+    "loading": "Loading...",
+    "upload": "Upload Workout File"
+  },
+  "input": {
+    "ariaLabel": "Upload workout file"
+  },
+  "badge": {
+    "ariaLabel": "File format: {{format}}"
+  },
+  "status": {
+    "converting": "Converting {{fileName}}...",
+    "progressLabel": "Conversion progress: {{progress}}%",
+    "remaining": "{{time}} remaining",
+    "loaded": "Loaded: {{fileName}}"
+  },
+  "dropzone": {
+    "title": "Drop a FIT, TCX, ZWO, GCN, or KRD file",
+    "hint": "Or click below to choose one from your device."
+  }
+}
