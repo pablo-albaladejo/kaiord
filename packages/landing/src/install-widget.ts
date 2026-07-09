@@ -59,7 +59,9 @@ function wireCopy(root: Root, cmdEl: HTMLElement | null): void {
   btn?.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(cmdEl?.textContent ?? "");
-      if (feedback) feedback.textContent = "Copied!";
+      if (feedback)
+        feedback.textContent =
+          document.documentElement.lang === "es" ? "¡Copiado!" : "Copied!";
       copyIcon?.classList.add("hidden");
       checkIcon?.classList.remove("hidden");
       setTimeout(() => {
