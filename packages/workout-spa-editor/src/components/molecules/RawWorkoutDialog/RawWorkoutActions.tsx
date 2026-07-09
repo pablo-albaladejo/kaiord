@@ -4,6 +4,7 @@
 
 import { Bot, PenLine, SkipForward, Undo2 } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { ActionBtn } from "./ActionBtn";
 
@@ -26,20 +27,21 @@ export function RawWorkoutActions({
   onManual,
   disabled = false,
 }: RawWorkoutActionsProps) {
+  const t = useTranslate("editor");
   return (
     <div className="flex flex-wrap gap-2 pt-2">
       {workout.state === "raw" && (
         <>
           <ActionBtn
             icon={Bot}
-            label="Process with AI"
+            label={t("raw.processWithAi")}
             onClick={() => onProcess(workout.id, Array.from(selected))}
             primary
             disabled={disabled}
           />
           <ActionBtn
             icon={SkipForward}
-            label="Skip"
+            label={t("raw.skip")}
             onClick={() => onSkip(workout.id)}
             disabled={disabled}
           />
@@ -48,14 +50,14 @@ export function RawWorkoutActions({
       {workout.state === "skipped" && (
         <ActionBtn
           icon={Undo2}
-          label="Un-skip"
+          label={t("raw.unskip")}
           onClick={() => onUnskip(workout.id)}
           disabled={disabled}
         />
       )}
       <ActionBtn
         icon={PenLine}
-        label="Create workout"
+        label={t("raw.createWorkout")}
         onClick={onManual}
         disabled={disabled}
       />

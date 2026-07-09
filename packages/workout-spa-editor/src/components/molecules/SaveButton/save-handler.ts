@@ -1,3 +1,4 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
@@ -12,7 +13,8 @@ export function createSaveHandler(
   setExportProgress: (progress: number) => void,
   success: (title: string, description: string) => void,
   showError: (title: string, description: string) => void,
-  onExported?: (format: string) => void
+  onExported?: (format: string) => void,
+  t: Translate = getTranslate("editor")
 ) {
   return async () => {
     setIsSaving(true);
@@ -36,14 +38,14 @@ export function createSaveHandler(
       const workoutName = getStructuredWorkout(workout)?.name || "workout";
       const formatLabel = selectedFormat.toUpperCase();
       success(
-        "Workout Saved",
-        `"${workoutName}" has been saved as ${formatLabel}`
+        t("save.savedTitle"),
+        t("save.savedDescription", { name: workoutName, format: formatLabel })
       );
       onExported?.(selectedFormat);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to export workout";
-      showError("Export Failed", errorMessage);
+        err instanceof Error ? err.message : t("save.exportFailedFallback");
+      showError(t("save.exportFailedTitle"), errorMessage);
       setSaveErrors([
         {
           path: ["export"],
