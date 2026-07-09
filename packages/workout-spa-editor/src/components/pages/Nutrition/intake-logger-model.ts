@@ -7,6 +7,7 @@
 import type { MealSlot } from "@kaiord/core";
 
 import type { LogIntakeEntryInput } from "../../../application/nutrition/log-intake-entry.use-case";
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 
 export type IntakeLoggerFields = {
   kcal: string;
@@ -37,15 +38,16 @@ const invalid = (value: number): boolean =>
   !Number.isFinite(value) || value < 0;
 
 export const validateIntakeForm = (
-  fields: IntakeLoggerFields
+  fields: IntakeLoggerFields,
+  t: Translate = getTranslate("nutrition")
 ): IntakeLoggerResult => {
   const kcal = toNumber(fields.kcal);
   const proteinG = toNumber(fields.proteinG);
   const carbG = toNumber(fields.carbG);
   const fatG = toNumber(fields.fatG);
-  if (fields.kcal.trim() === "") return { error: "Enter the energy in kcal" };
+  if (fields.kcal.trim() === "") return { error: t("logger.errorKcal") };
   if ([kcal, proteinG, carbG, fatG].some(invalid)) {
-    return { error: "Values must be zero or greater" };
+    return { error: t("logger.errorNegative") };
   }
   const label = fields.label.trim();
   return {

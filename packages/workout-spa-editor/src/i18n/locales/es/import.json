@@ -1,0 +1,22 @@
+{
+  "button": {
+    "loading": "Cargando...",
+    "upload": "Subir archivo de entrenamiento"
+  },
+  "input": {
+    "ariaLabel": "Subir archivo de entrenamiento"
+  },
+  "badge": {
+    "ariaLabel": "Formato de archivo: {{format}}"
+  },
+  "status": {
+    "converting": "Convirtiendo {{fileName}}...",
+    "progressLabel": "Progreso de conversión: {{progress}} %",
+    "remaining": "{{time}} restante",
+    "loaded": "Cargado: {{fileName}}"
+  },
+  "dropzone": {
+    "title": "Suelta un archivo FIT, TCX, ZWO, GCN o KRD",
+    "hint": "O haz clic abajo para elegir uno de tu dispositivo."
+  }
+}

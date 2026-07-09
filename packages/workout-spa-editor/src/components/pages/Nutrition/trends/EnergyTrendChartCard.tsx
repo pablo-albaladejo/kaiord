@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { UplotChart } from "../../health/trends/UplotChart";
 import { buildEnergyTrendOptions } from "./build-energy-trend-options";
 import {
@@ -21,8 +22,9 @@ const presentKeys = (series: EnergyTrendSeries): EnergyTrendKey[] =>
 
 /** Renders the aligned multi-series Nutrition trends chart via uPlot. */
 export function EnergyTrendChartCard({ series }: EnergyTrendChartCardProps) {
+  const t = useTranslate("nutrition");
   const keys = useMemo(() => presentKeys(series), [series]);
-  const options = useMemo(() => buildEnergyTrendOptions(keys), [keys]);
+  const options = useMemo(() => buildEnergyTrendOptions(keys, t), [keys, t]);
   const data = useMemo(
     () => buildEnergyTrendData(keys, series),
     [keys, series]

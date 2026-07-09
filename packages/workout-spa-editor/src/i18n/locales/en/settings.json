@@ -30,5 +30,103 @@
     "usage": "Usage",
     "privacy": "Privacy",
     "preferences": "Preferences"
+  },
+  "ai": {
+    "llmProviders": "LLM Providers",
+    "addProvider": "Add Provider",
+    "models": "Models",
+    "customSystemPrompt": "Custom System Prompt",
+    "customInstructionsLabel": "Additional instructions applied to all generations",
+    "customInstructionsPlaceholder": "Additional instructions for all AI generations (e.g., 'I'm recovering from a knee injury')"
+  },
+  "providers": {
+    "empty": "No providers configured. Add one below.",
+    "listAriaLabel": "Configured LLM providers",
+    "provider": "Provider",
+    "label": "Label",
+    "apiKey": "API Key",
+    "labelPlaceholder": "e.g., My Claude",
+    "addProvider": "Add Provider",
+    "default": "Default",
+    "edit": "Edit",
+    "setDefault": "Set Default",
+    "remove": "Remove",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "models": {
+    "default": "Default model",
+    "chat": "Chat",
+    "workoutGeneration": "Workout generation",
+    "labExtraction": "Lab extraction",
+    "hint": "Add at least one provider and select an active profile to choose models.",
+    "model": "Model",
+    "custom": "Custom…",
+    "customModelIdAriaLabel": "Custom model id",
+    "customModelIdPlaceholder": "Enter a model id",
+    "reset": "Reset"
+  },
+  "sync": {
+    "description": "Sync your workouts and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved.",
+    "syncNow": "Sync now",
+    "disconnect": "Disconnect",
+    "connect": "Connect Google account",
+    "notConnected": "Not connected",
+    "syncing": "Syncing…",
+    "offline": "Last sync failed — working offline",
+    "lastSynced": "Last synced {{date}}",
+    "connectedNotSynced": "Connected — not synced yet",
+    "encryption": "End-to-end encryption",
+    "passphrase": "Passphrase",
+    "plaintextWarning": "Your saved AI API keys will be uploaded without end-to-end encryption. Enable encryption below to protect them."
+  },
+  "privacy": {
+    "information": "Privacy Information",
+    "infoNoServer": "We do not store your credentials on any server.",
+    "infoGarmin": "Garmin integration uses a browser extension that piggybacks on your existing Garmin Connect session. No credentials leave your browser.",
+    "infoTrain2go": "Train2Go import uses a browser extension that reads the coaching plan displayed on Train2Go pages you are already viewing. It does not read your password or authentication tokens.",
+    "infoLlmKeys": "LLM API keys are sent directly to the provider (Anthropic, OpenAI, or Google) — Kaiord does not receive or relay this data.",
+    "infoNotResponsible": "We are not responsible for credential security on your device.",
+    "privacyPolicyLink": "Read the full privacy policy",
+    "analytics": "Analytics",
+    "analyticsIntro": "This editor uses",
+    "analyticsLink": "Cloudflare Web Analytics",
+    "analyticsOutro": "to track aggregate usage (page views, workout generation, exports). No cookies are set and no personal data is collected.",
+    "dataManagement": "Data Management",
+    "clearAllApiKeys": "Clear All API Keys",
+    "clearAllHint": "This removes all stored API keys from your browser."
+  },
+  "usage": {
+    "title": "AI Usage",
+    "heading": "AI Usage — last {{count}} months",
+    "empty": "No AI usage recorded yet for the last {{count}} months. The panel will populate automatically after your first batch run.",
+    "month": "Month",
+    "input": "Input",
+    "output": "Output",
+    "total": "Total",
+    "cost": "Cost (USD)",
+    "footnoteBefore": "Values reflect actual usage recorded per batch run — not the pre-run estimate shown in the confirmation dialog. Rows marked",
+    "footnoteAfter": "are from a legacy schema where the input / output split was not captured."
+  },
+  "preferences": {
+    "units": "Units",
+    "metric": "Metric",
+    "imperial": "Imperial",
+    "notifications": "Notifications"
+  },
+  "extensions": {
+    "bridge": "Bridge",
+    "status": "Status",
+    "garminHint": "Open Garmin Connect and navigate around",
+    "train2goHint": "Open Train2Go and log in",
+    "refreshStatus": "Refresh Status",
+    "connected": "Connected",
+    "sessionInactive": "Session inactive",
+    "notDetected": "Not detected"
+  },
+  "notifications": {
+    "unsupported": "Notifications aren't supported in this browser.",
+    "enable": "Enable notifications",
+    "blocked": "Notifications are blocked in your browser settings."
   }
 }
