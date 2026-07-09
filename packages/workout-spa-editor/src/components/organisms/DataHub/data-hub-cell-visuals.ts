@@ -7,39 +7,33 @@
 import type { DataHubCellState } from "../../../application/data-hub/build-data-hub-matrix";
 
 export type CellVisual = {
-  label: string;
   className: string;
   actionable: boolean;
 };
 
 export const CELL_VISUALS: Record<DataHubCellState, CellVisual> = {
   active: {
-    label: "On",
     className:
       "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
     actionable: true,
   },
   available: {
-    label: "Off",
     className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
     actionable: true,
   },
   "not-connected": {
-    label: "Connect",
     className:
       "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
     actionable: false,
   },
   aspirational: {
-    label: "Soon",
     className: "bg-transparent text-gray-400 dark:text-gray-600",
     actionable: false,
   },
   manual: {
-    label: "Manual",
     className:
       "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
     actionable: false,
   },
-  na: { label: "", className: "", actionable: false },
+  na: { className: "", actionable: false },
 };
