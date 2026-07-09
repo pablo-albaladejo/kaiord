@@ -86,5 +86,13 @@
   "sync": {
     "defaultLabel": "Coach",
     "connectTo": "Connect to {{label}}"
+  },
+  "hooks": {
+    "aiProcessFailed": "Failed to process activity with AI",
+    "workoutMatched": "Workout matched",
+    "manualFailed": "Manual creation failed",
+    "conversionFailed": "Conversion failed",
+    "invalidActivityId": "Invalid activity id",
+    "activityNotFound": "Activity not found"
   }
 }

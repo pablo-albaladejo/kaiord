@@ -16,10 +16,9 @@ import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { runStartAi, type StartAiCtx } from "./use-coaching-ai-handler-helpers";
-
-const AI_PROCESS_ERROR_TOAST_MESSAGE = "Failed to process activity with AI";
 
 export type AiFailureState = {
   reason: AiFailureReason | "not-found" | "no-provider";
@@ -43,6 +42,7 @@ export const useCoachingAi = (
   const persistence = usePersistence();
   const analytics = useAnalytics();
   const toast = useToastContext();
+  const t = useTranslate("coaching");
   const providers = useAiProvidersLive();
   const bindings = useAiModelBindingsLive(profileId);
   const [, navigate] = useLocation();
@@ -64,10 +64,11 @@ export const useCoachingAi = (
       setProcessing,
       onClose,
       navigate,
-      onFailureToast: () => toast.error(AI_PROCESS_ERROR_TOAST_MESSAGE),
+      onFailureToast: () => toast.error(t("hooks.aiProcessFailed")),
     };
     await runStartAi(ctx);
   }, [
+    t,
     activity,
     profileId,
     providers,
