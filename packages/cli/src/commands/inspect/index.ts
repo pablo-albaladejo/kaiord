@@ -1,5 +1,6 @@
 import ora from "ora";
 
+import { t } from "../../i18n/index.js";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -48,11 +49,11 @@ export const inspectCommand = async (options: unknown): Promise<number> => {
     });
 
     spinner =
-      opts.quiet || opts.json ? null : ora("Inspecting file...").start();
+      opts.quiet || opts.json ? null : ora(t("output.inspectingFile")).start();
 
     const krd = await loadFileAsKrd(opts.input, opts.inputFormat, logger);
 
-    spinner?.succeed("File loaded successfully");
+    spinner?.succeed(t("output.fileLoaded"));
 
     if (opts.json) {
       console.log(JSON.stringify(krd, null, 2));

@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
+import { t } from "../i18n/index.js";
 import { mapErrorToExitCode } from "../utils/error-exit-code.js";
 import { formatError } from "../utils/error-formatter.js";
 import { ExitCode } from "../utils/exit-codes.js";
@@ -29,30 +30,30 @@ const main = async (): Promise<void> => {
     await registerCommands(cli)
       .option("verbose", {
         type: "boolean",
-        description: "Enable verbose logging",
+        description: t("options.global.verbose"),
         global: true,
       })
       .option("quiet", {
         type: "boolean",
-        description: "Suppress all output except errors",
+        description: t("options.global.quiet"),
         global: true,
       })
       .option("json", {
         type: "boolean",
-        description: "Output results in JSON format",
+        description: t("options.global.json"),
         global: true,
       })
       .option("log-format", {
         type: "string",
         choices: ["pretty", "structured"],
-        description: "Force specific log format",
+        description: t("options.global.logFormat"),
         global: true,
       })
       .version(version)
       .alias("version", "v")
       .help()
       .alias("help", "h")
-      .demandCommand(1, "You must specify a command")
+      .demandCommand(1, t("output.mustSpecifyCommand"))
       .strict()
       .parse();
   } catch (error) {

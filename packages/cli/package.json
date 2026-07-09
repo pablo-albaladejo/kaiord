@@ -57,6 +57,7 @@
     "@kaiord/fit": "workspace:^",
     "@kaiord/garmin": "workspace:^",
     "@kaiord/garmin-connect": "workspace:^",
+    "@kaiord/i18n": "workspace:^",
     "@kaiord/tcx": "workspace:^",
     "@kaiord/zwo": "workspace:^",
     "chalk": "^5.3.0",

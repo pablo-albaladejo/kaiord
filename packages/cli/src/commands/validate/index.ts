@@ -1,5 +1,6 @@
 import ora from "ora";
 
+import { t } from "../../i18n/index.js";
 import type { Config } from "../../utils/config-loader.js";
 import {
   loadConfigWithMetadata,
@@ -52,7 +53,7 @@ const updateSpinner = (
 ): void => {
   if (!spinner) return;
   if (violationCount === 0) {
-    spinner.succeed("Validation complete - no tolerance violations");
+    spinner.succeed(t("output.validationComplete"));
   } else {
     spinner.fail(
       `Validation failed - ${violationCount} tolerance violation(s)`
@@ -103,9 +104,7 @@ export const validateCommand = async (options: unknown): Promise<number> => {
       configResult.searchedPaths
     );
     spinner =
-      opts.quiet || opts.json
-        ? null
-        : ora("Validating round-trip conversion...").start();
+      opts.quiet || opts.json ? null : ora(t("output.validating")).start();
     return await runValidation(opts, logger, spinner);
   } catch (error) {
     logger?.error("Validation failed", { error });

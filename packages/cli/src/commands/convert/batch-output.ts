@@ -1,5 +1,6 @@
 import chalk from "chalk";
 
+import { t } from "../../i18n/index.js";
 import type { ConversionResult } from "./types";
 
 type BatchSummary = {
@@ -15,15 +16,23 @@ type BatchSummary = {
 export const printBatchSummary = (summary: BatchSummary): void => {
   const { total, successful, failed, totalTime } = summary;
 
-  console.log("\nBatch conversion complete:");
-  console.log(chalk.green(`  Successful: ${successful.length}/${total}`));
+  console.log(t("output.batchComplete"));
+  console.log(
+    chalk.green(
+      t("output.batchSuccessful", { count: successful.length, total })
+    )
+  );
   if (failed.length > 0) {
-    console.log(chalk.red(`  Failed: ${failed.length}/${total}`));
+    console.log(
+      chalk.red(t("output.batchFailed", { count: failed.length, total }))
+    );
   }
-  console.log(`  Total time: ${(totalTime / 1000).toFixed(2)}s`);
+  console.log(
+    t("output.batchTotalTime", { seconds: (totalTime / 1000).toFixed(2) })
+  );
 
   if (failed.length > 0) {
-    console.log(chalk.red("\nFailed conversions:"));
+    console.log(chalk.red(t("output.batchFailedHeading")));
     for (const result of failed) {
       console.log(chalk.red(`  ${result.inputFile}: ${result.error}`));
     }
