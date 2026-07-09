@@ -1,12 +1,11 @@
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { thresholdsForSport } from "../../../lib/athlete";
 import {
   buildReviewModel,
   type ReviewModel,
 } from "../../../lib/workout-review";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-
-const FALLBACK_TITLE = "Workout";
 
 /**
  * Derives the read-only review view-model for a workout record, selecting the
@@ -16,13 +15,14 @@ const FALLBACK_TITLE = "Workout";
 export function useWorkoutDetailModel(
   record: WorkoutRecord | undefined
 ): ReviewModel | null {
+  const t = useTranslate("workout-detail");
   const profile = useActiveProfileLive()?.profile;
   if (!record?.krd) return null;
 
   const thresholds = thresholdsForSport(profile, record.sport);
   const fallback =
     (record.raw as { description?: string } | null)?.description ??
-    FALLBACK_TITLE;
+    t("fallbackTitle");
 
   return buildReviewModel(record.krd, thresholds, fallback);
 }

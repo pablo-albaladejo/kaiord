@@ -1,0 +1,62 @@
+{
+  "header": {
+    "back": "Atrás",
+    "title": "Entrenamiento",
+    "moreOptions": "Más opciones"
+  },
+  "notFound": {
+    "title": "Entrenamiento no encontrado",
+    "backToCalendar": "Volver al calendario"
+  },
+  "structure": {
+    "eyebrow": "Estructura · tiempo en zona"
+  },
+  "sport": {
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swimming": "Natación",
+    "strength": "Fuerza"
+  },
+  "title": {
+    "planned": "Planificado"
+  },
+  "footer": {
+    "edit": "Editar",
+    "adjustWithAi": "Ajustar con IA"
+  },
+  "summary": {
+    "duration": "Duración",
+    "tss": "TSS",
+    "load": "Carga"
+  },
+  "fallbackTitle": "Entrenamiento",
+  "stats": {
+    "region": "Estadísticas del entrenamiento",
+    "heading": "Estadísticas del entrenamiento",
+    "totalDuration": "Duración total:",
+    "totalDistance": "Distancia total:",
+    "totalSteps": "Pasos totales:",
+    "repetitionBlocks": "Bloques de repetición:",
+    "steps_one": "{{n}} paso",
+    "steps_other": "{{n}} pasos",
+    "repetitions_one": "{{n}} repetición",
+    "repetitions_other": "{{n}} repeticiones",
+    "estimateNote": "* Los totales son estimaciones debido a pasos abiertos o condicionales",
+    "estimateIndicatorTitle": "Estimación debido a pasos abiertos"
+  },
+  "list": {
+    "steps": "Pasos del entrenamiento"
+  },
+  "dnd": {
+    "picked": "Elemento arrastrable {{id}} seleccionado. Pulsa las flechas para mover y espacio para soltar.",
+    "movedOver": "El elemento arrastrable {{id}} se movió sobre el área {{over}}.",
+    "noLongerOver": "El elemento arrastrable {{id}} ya no está sobre un área de destino.",
+    "dropped": "El elemento arrastrable {{id}} se soltó sobre el área {{over}}.",
+    "droppedNoTarget": "El elemento arrastrable {{id}} se soltó.",
+    "cancelled": "Se canceló el arrastre. El elemento arrastrable {{id}} se soltó."
+  },
+  "preview": {
+    "region": "Vista previa del entrenamiento",
+    "bars": "Barras de pasos del entrenamiento"
+  }
+}

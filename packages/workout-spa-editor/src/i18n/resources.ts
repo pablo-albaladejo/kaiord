@@ -19,6 +19,7 @@ import enLibrary from "./locales/en/library.json";
 import enNav from "./locales/en/nav.json";
 import enSettings from "./locales/en/settings.json";
 import enTargets from "./locales/en/targets.json";
+import enWorkoutDetail from "./locales/en/workout-detail.json";
 import esCalendar from "./locales/es/calendar.json";
 import esCommon from "./locales/es/common.json";
 import esCreateWorkout from "./locales/es/create-workout.json";
@@ -31,6 +32,7 @@ import esLibrary from "./locales/es/library.json";
 import esNav from "./locales/es/nav.json";
 import esSettings from "./locales/es/settings.json";
 import esTargets from "./locales/es/targets.json";
+import esWorkoutDetail from "./locales/es/workout-detail.json";
 
 export const NAMESPACES = [
   "calendar",
@@ -45,6 +47,7 @@ export const NAMESPACES = [
   "nav",
   "settings",
   "targets",
+  "workout-detail",
 ] as const;
 
 export const DEFAULT_NAMESPACE = "common";
@@ -63,6 +66,7 @@ export const resources: LocaleResources = {
     nav: enNav,
     settings: enSettings,
     targets: enTargets,
+    "workout-detail": enWorkoutDetail,
   },
   es: {
     calendar: esCalendar,
@@ -77,5 +81,6 @@ export const resources: LocaleResources = {
     nav: esNav,
     settings: esSettings,
     targets: esTargets,
+    "workout-detail": esWorkoutDetail,
   },
 };

@@ -1,3 +1,4 @@
+import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import type { ReviewModel } from "../../../lib/workout-review";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { SummaryStrip } from "../../molecules/SummaryStrip";
@@ -13,10 +14,14 @@ export type WorkoutDetailViewProps = {
   onEdit: () => void;
 };
 
-const buildSummary = (model: ReviewModel) => [
-  { icon: "clock" as const, value: model.duration, label: "Duration" },
-  { icon: "flame" as const, value: String(model.tss), label: "TSS" },
-  { icon: "zap" as const, value: model.load, label: "Load" },
+const buildSummary = (model: ReviewModel, t: Translate) => [
+  {
+    icon: "clock" as const,
+    value: model.duration,
+    label: t("summary.duration"),
+  },
+  { icon: "flame" as const, value: String(model.tss), label: t("summary.tss") },
+  { icon: "zap" as const, value: model.load, label: t("summary.load") },
 ];
 
 /** Read-only workout detail sheet with header, summary, structure, and footer. */
@@ -26,8 +31,9 @@ export function WorkoutDetailView({
   onBack,
   onEdit,
 }: WorkoutDetailViewProps) {
+  const t = useTranslate("workout-detail");
   const tag = record.tags[0];
-  const title = model?.title ?? "Workout";
+  const title = model?.title ?? t("fallbackTitle");
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-4 bg-surface-deep p-4">
@@ -35,7 +41,7 @@ export function WorkoutDetailView({
       <WorkoutDetailTitle sport={record.sport} title={title} tag={tag} />
       {model && (
         <>
-          <SummaryStrip items={buildSummary(model)} />
+          <SummaryStrip items={buildSummary(model, t)} />
           <WorkoutDetailStructure dist={model.dist} steps={model.steps} />
         </>
       )}

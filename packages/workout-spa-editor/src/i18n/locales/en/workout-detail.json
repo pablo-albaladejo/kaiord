@@ -1,0 +1,62 @@
+{
+  "header": {
+    "back": "Back",
+    "title": "Workout",
+    "moreOptions": "More options"
+  },
+  "notFound": {
+    "title": "Workout not found",
+    "backToCalendar": "Back to calendar"
+  },
+  "structure": {
+    "eyebrow": "Structure · time in zone"
+  },
+  "sport": {
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swimming",
+    "strength": "Strength"
+  },
+  "title": {
+    "planned": "Planned"
+  },
+  "footer": {
+    "edit": "Edit",
+    "adjustWithAi": "Adjust with AI"
+  },
+  "summary": {
+    "duration": "Duration",
+    "tss": "TSS",
+    "load": "Load"
+  },
+  "fallbackTitle": "Workout",
+  "stats": {
+    "region": "Workout statistics",
+    "heading": "Workout Stats",
+    "totalDuration": "Total Duration:",
+    "totalDistance": "Total Distance:",
+    "totalSteps": "Total Steps:",
+    "repetitionBlocks": "Repetition Blocks:",
+    "steps_one": "{{n}} step",
+    "steps_other": "{{n}} steps",
+    "repetitions_one": "{{n}} repetition",
+    "repetitions_other": "{{n}} repetitions",
+    "estimateNote": "* Totals are estimates due to open-ended or conditional steps",
+    "estimateIndicatorTitle": "Estimate due to open-ended steps"
+  },
+  "list": {
+    "steps": "Workout steps"
+  },
+  "dnd": {
+    "picked": "Picked up draggable item {{id}}. Press arrow keys to move, space to drop.",
+    "movedOver": "Draggable item {{id}} was moved over droppable area {{over}}.",
+    "noLongerOver": "Draggable item {{id}} is no longer over a droppable area.",
+    "dropped": "Draggable item {{id}} was dropped over droppable area {{over}}.",
+    "droppedNoTarget": "Draggable item {{id}} was dropped.",
+    "cancelled": "Dragging was cancelled. Draggable item {{id}} was dropped."
+  },
+  "preview": {
+    "region": "Workout preview",
+    "bars": "Workout step bars"
+  }
+}

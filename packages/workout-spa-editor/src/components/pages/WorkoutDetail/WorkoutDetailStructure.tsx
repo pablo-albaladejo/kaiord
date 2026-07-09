@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ReviewModel } from "../../../lib/workout-review";
 import { Card } from "../../atoms/Card";
 import { ZoneDist } from "../../molecules/ZoneDist";
@@ -15,10 +16,11 @@ export function WorkoutDetailStructure({
   dist,
   steps,
 }: WorkoutDetailStructureProps) {
+  const t = useTranslate("workout-detail");
   return (
     <Card className="border-slate-800 bg-surface p-4">
       <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-500">
-        Structure · time in zone
+        {t("structure.eyebrow")}
       </p>
       <ZoneDist dist={dist} height={ZONE_BAR_HEIGHT} className="mb-3" />
       <StepList steps={steps} />

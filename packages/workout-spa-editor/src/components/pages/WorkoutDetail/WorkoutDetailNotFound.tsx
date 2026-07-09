@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Button } from "../../atoms/Button";
 
@@ -7,6 +8,7 @@ export type WorkoutDetailNotFoundProps = {
 
 /** Empty state shown when no workout matches the route id. */
 export function WorkoutDetailNotFound({ onBack }: WorkoutDetailNotFoundProps) {
+  const t = useTranslate("workout-detail");
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-4 bg-surface-deep p-4 text-center">
       <h1
@@ -14,10 +16,10 @@ export function WorkoutDetailNotFound({ onBack }: WorkoutDetailNotFoundProps) {
         {...{ [ROUTE_HEADING_ATTR]: "" }}
         className="text-[18px] font-semibold text-slate-200"
       >
-        Workout not found
+        {t("notFound.title")}
       </h1>
       <Button variant="ghost" onClick={onBack}>
-        Back to calendar
+        {t("notFound.backToCalendar")}
       </Button>
     </div>
   );
