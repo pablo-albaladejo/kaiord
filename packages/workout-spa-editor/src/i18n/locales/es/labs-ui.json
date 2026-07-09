@@ -1,0 +1,71 @@
+{
+  "entry": {
+    "tabEntry": "Entrada e historial",
+    "tabDashboard": "Panel",
+    "title": "Analíticas",
+    "subtitle": "Añadir un nuevo informe de laboratorio",
+    "loading": "Cargando…",
+    "noProfile": "Crea primero un perfil de atleta para registrar analíticas."
+  },
+  "form": {
+    "addParameter": "Añadir parámetro",
+    "save": "Guardar",
+    "catalog": "Catálogo",
+    "custom": "Personalizado",
+    "parameterAria": "Parámetro",
+    "searchPlaceholder": "Buscar parámetro…",
+    "customNameAria": "Nombre de parámetro personalizado",
+    "customNamePlaceholder": "Nombre del parámetro",
+    "value": "Valor",
+    "unit": "Unidad",
+    "refLow": "Ref. baja",
+    "refHigh": "Ref. alta",
+    "referenceLow": "Referencia baja",
+    "referenceHigh": "Referencia alta",
+    "removeParameter": "Eliminar parámetro",
+    "remove": "Eliminar",
+    "fasting": "En ayunas",
+    "fastingUnspecified": "Sin especificar",
+    "yes": "Sí",
+    "no": "No",
+    "date": "Fecha",
+    "lab": "Laboratorio",
+    "drawTime": "Hora de extracción",
+    "notes": "Notas",
+    "reportDetails": "Detalles del informe"
+  },
+  "flag": {
+    "in": "En rango",
+    "low": "Bajo",
+    "high": "Alto",
+    "unknown": "Sin rango"
+  },
+  "history": {
+    "loading": "Cargando…",
+    "reports": "Informes",
+    "deleted": "Informe de laboratorio eliminado",
+    "deleteFailed": "No se pudo eliminar el informe de laboratorio"
+  },
+  "report": {
+    "fasting": "en ayunas",
+    "emptyValues": "Este informe no tiene parámetros.",
+    "hide": "Ocultar",
+    "view": "Ver",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "deleteAria": "Eliminar informe {{date}}",
+    "delete": "Eliminar",
+    "emptyList": "Aún no hay informes guardados."
+  },
+  "chart": {
+    "empty": "Aún no hay historial para este parámetro.",
+    "loading": "Cargando…",
+    "evolutionTitle": "Evolución de {{label}}"
+  },
+  "dashboard": {
+    "loading": "Cargando…",
+    "pinParameters": "Fijar parámetros",
+    "evolutionCharts": "Gráficos de evolución",
+    "emptyGrid": "Fija un parámetro arriba para ver su gráfico de evolución."
+  }
+}

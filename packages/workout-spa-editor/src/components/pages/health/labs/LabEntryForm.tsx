@@ -3,6 +3,7 @@
  * saved as one `LabReport` + N `LabValue` via `useLabEntryForm`. Also hosts the
  * AI import affordance and, once a draft is loaded, a review banner.
  */
+import { useTranslate } from "../../../../i18n/use-translate";
 import { LabAiDraftBanner } from "./LabAiDraftBanner";
 import { LabImportSection } from "./LabImportSection";
 import { LabParameterRow } from "./LabParameterRow";
@@ -10,6 +11,7 @@ import { LabReportHeaderFields } from "./LabReportHeaderFields";
 import { useLabEntryForm } from "./use-lab-entry-form";
 
 export function LabEntryForm() {
+  const t = useTranslate("labs-ui");
   const {
     header,
     setHeader,
@@ -47,7 +49,7 @@ export function LabEntryForm() {
           onClick={addRow}
           className="rounded border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600"
         >
-          Add parameter
+          {t("form.addParameter")}
         </button>
         <button
           type="button"
@@ -55,7 +57,7 @@ export function LabEntryForm() {
           onClick={save}
           className="rounded bg-blue-600 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
         >
-          Save
+          {t("form.save")}
         </button>
       </div>
     </div>
