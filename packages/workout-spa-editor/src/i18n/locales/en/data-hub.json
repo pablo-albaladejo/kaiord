@@ -1,0 +1,40 @@
+{
+  "cell": {
+    "active": "On",
+    "available": "Off",
+    "not-connected": "Connect",
+    "aspirational": "Soon",
+    "manual": "Manual",
+    "na": ""
+  },
+  "direction": { "import": "Import", "export": "Export" },
+  "mode": { "auto": "Auto", "manual": "Manual" },
+  "modeHeading": "Mode",
+  "removeRoute": "Remove route",
+  "routeOptions": "Route options",
+  "legend": {
+    "active": "Syncing — click to turn off",
+    "available": "Ready — click to turn on",
+    "not-connected": "Connect this integration first",
+    "manual": "Entered by hand in the app",
+    "aspirational": "Not supported yet"
+  },
+  "conn": {
+    "connected": "Connected",
+    "notSupported": "—",
+    "alwaysOn": "Always on",
+    "notConnected": "Not connected"
+  },
+  "sourceMode": { "union": "union", "priority": "priority" },
+  "sourceModeAria": "{{label}} source mode",
+  "moveUp": "Move {{name}} up",
+  "moveDown": "Move {{name}} down",
+  "tab": {
+    "emptyProfile": "Select or create a profile to route your health & fitness data.",
+    "description": "Choose where each type of data flows to and from. Every state reflects your live connections — never a guess."
+  },
+  "sourcePriority": {
+    "title": "Multiple sources",
+    "description": "When more than one integration imports the same data, keep them all (union) or rank a winner (priority)."
+  }
+}

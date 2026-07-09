@@ -1,0 +1,40 @@
+{
+  "cell": {
+    "active": "Activado",
+    "available": "Desactivado",
+    "not-connected": "Conectar",
+    "aspirational": "Pronto",
+    "manual": "Manual",
+    "na": ""
+  },
+  "direction": { "import": "Importar", "export": "Exportar" },
+  "mode": { "auto": "Auto", "manual": "Manual" },
+  "modeHeading": "Modo",
+  "removeRoute": "Quitar ruta",
+  "routeOptions": "Opciones de ruta",
+  "legend": {
+    "active": "Sincronizando — clic para desactivar",
+    "available": "Listo — clic para activar",
+    "not-connected": "Conecta esta integración primero",
+    "manual": "Introducido a mano en la app",
+    "aspirational": "Aún no compatible"
+  },
+  "conn": {
+    "connected": "Conectado",
+    "notSupported": "—",
+    "alwaysOn": "Siempre activo",
+    "notConnected": "No conectado"
+  },
+  "sourceMode": { "union": "unión", "priority": "prioridad" },
+  "sourceModeAria": "modo de fuente de {{label}}",
+  "moveUp": "Subir {{name}}",
+  "moveDown": "Bajar {{name}}",
+  "tab": {
+    "emptyProfile": "Selecciona o crea un perfil para enrutar tus datos de salud y fitness.",
+    "description": "Elige a dónde fluye cada tipo de dato y desde dónde. Cada estado refleja tus conexiones reales — nunca una suposición."
+  },
+  "sourcePriority": {
+    "title": "Múltiples fuentes",
+    "description": "Cuando más de una integración importa el mismo dato, mantenlas todas (unión) o elige un ganador (prioridad)."
+  }
+}

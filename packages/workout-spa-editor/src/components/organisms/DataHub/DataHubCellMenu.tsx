@@ -5,6 +5,7 @@
  */
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { IntegrationPolicyMode } from "../../../types/integration-policy";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { DataHubCellModeButtons } from "./DataHubCellModeButtons";
@@ -22,13 +23,14 @@ export const DataHubCellMenu: React.FC<Props> = ({
   onSetMode,
   onRemove,
 }) => {
+  const t = useTranslate("data-hub");
   const [open, setOpen] = useState(false);
 
   return (
     <div className="relative">
       <button
         type="button"
-        aria-label="Route options"
+        aria-label={t("routeOptions")}
         aria-haspopup="menu"
         aria-expanded={open}
         data-testid={`${testId}-menu-button`}
@@ -44,7 +46,7 @@ export const DataHubCellMenu: React.FC<Props> = ({
           className="absolute right-0 z-10 mt-1 w-36 rounded border border-gray-200 bg-white p-2 text-xs shadow-lg dark:border-gray-700 dark:bg-gray-800"
         >
           <p className="mb-1 font-medium text-gray-500 dark:text-gray-400">
-            Mode
+            {t("modeHeading")}
           </p>
           <DataHubCellModeButtons
             testId={testId}
@@ -63,7 +65,7 @@ export const DataHubCellMenu: React.FC<Props> = ({
             }}
             className="w-full rounded px-1.5 py-1 text-left text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
           >
-            Remove route
+            {t("removeRoute")}
           </button>
         </div>
       )}
