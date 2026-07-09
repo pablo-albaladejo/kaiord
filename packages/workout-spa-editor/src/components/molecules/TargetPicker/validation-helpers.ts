@@ -1,12 +1,16 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { ValidationResult } from "./validation-types";
 
-export function validateValueString(value: string): ValidationResult | null {
+export function validateValueString(
+  value: string,
+  t: Translate = getTranslate("targets")
+): ValidationResult | null {
   const valueStr = String(value || "");
 
   if (!valueStr || valueStr.trim() === "") {
     return {
       isValid: false,
-      error: "Value is required",
+      error: t("validation.valueRequired"),
     };
   }
 
@@ -15,14 +19,14 @@ export function validateValueString(value: string): ValidationResult | null {
   if (isNaN(numericValue)) {
     return {
       isValid: false,
-      error: "Must be a valid number",
+      error: t("validation.mustBeValidNumber"),
     };
   }
 
   if (numericValue <= 0) {
     return {
       isValid: false,
-      error: "Must be greater than 0",
+      error: t("validation.mustBeGreaterThanZero"),
     };
   }
 

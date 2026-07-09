@@ -1,3 +1,4 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import { validateHeartRateRange } from "./validation-heart-rate";
 import {
   validateCadenceRange,
@@ -13,15 +14,16 @@ import type { ValidationResult } from "./validation-types";
 export const validateRangeInput = (
   type: "power" | "heart_rate" | "pace" | "cadence" | "open",
   minValue?: string,
-  maxValue?: string
+  maxValue?: string,
+  t: Translate = getTranslate("targets")
 ): ValidationResult => {
-  const stringError = validateRangeStrings(minValue, maxValue);
+  const stringError = validateRangeStrings(minValue, maxValue, t);
   if (stringError) return stringError;
 
   const min = Number(minValue);
   const max = Number(maxValue);
 
-  const numberError = validateRangeNumbers(min, max);
+  const numberError = validateRangeNumbers(min, max, t);
   if (numberError) return numberError;
 
   if (type === "power") return validatePowerRange(min, max);
@@ -31,6 +33,6 @@ export const validateRangeInput = (
 
   return {
     isValid: false,
-    error: "Invalid target type",
+    error: t("validation.invalidTargetType"),
   };
 };

@@ -1,3 +1,4 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import {
   validateHeartRateBpm,
   validateHeartRatePercent,
@@ -7,16 +8,17 @@ import type { ValidationResult } from "./validation-types";
 
 export const validateHeartRateTarget = (
   unit: string,
-  numericValue: number
+  numericValue: number,
+  t: Translate = getTranslate("targets")
 ): ValidationResult => {
   if (unit === "zone") {
-    const error = validateHeartRateZone(numericValue);
+    const error = validateHeartRateZone(numericValue, t);
     if (error) return error;
   } else if (unit === "bpm") {
-    const error = validateHeartRateBpm(numericValue);
+    const error = validateHeartRateBpm(numericValue, t);
     if (error) return error;
   } else if (unit === "percent_max") {
-    const error = validateHeartRatePercent(numericValue);
+    const error = validateHeartRatePercent(numericValue, t);
     if (error) return error;
   }
 
