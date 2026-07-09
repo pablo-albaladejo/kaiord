@@ -6,6 +6,7 @@ import { useDataHubRouteEditor } from "../../../hooks/data-hub/use-data-hub-rout
 import { useDataHubToggle } from "../../../hooks/data-hub/use-data-hub-toggle";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useConnectionStatus } from "../../../hooks/use-connection-status";
+import { useTranslate } from "../../../i18n/use-translate";
 import { INTEGRATION_REGISTRY } from "../../../integrations/integration-registry";
 import type { IntegrationPolicyMode } from "../../../types/integration-policy";
 import { DataHubLegend } from "./DataHubLegend";
@@ -13,6 +14,7 @@ import { DataHubMatrix } from "./DataHubMatrix";
 import { DataHubSourcePriority } from "./DataHubSourcePriority";
 
 export const DataHubTab: React.FC = () => {
+  const t = useTranslate("data-hub");
   const active = useActiveProfileLive();
   const profileId = active?.id ?? null;
   const connections = useConnectionStatus(profileId);
@@ -38,15 +40,14 @@ export const DataHubTab: React.FC = () => {
         className="text-sm text-gray-500 dark:text-gray-400"
         data-testid="data-hub-no-profile"
       >
-        Select or create a profile to route your health &amp; fitness data.
+        {t("tab.emptyProfile")}
       </p>
     );
 
   return (
     <div className="space-y-4" data-testid="data-hub-tab">
       <p className="text-sm text-gray-600 dark:text-gray-300">
-        Choose where each type of data flows to and from. Every state reflects
-        your live connections — never a guess.
+        {t("tab.description")}
       </p>
       <DataHubMatrix
         rows={rows}
