@@ -1,0 +1,65 @@
+{
+  "header": {
+    "powerTitle": "Power Zones",
+    "heartRateTitle": "Heart Rate Zones",
+    "powerDescription": "Configure {{count}} power zones based on FTP{{suffix}}",
+    "heartRateDescription": "Configure {{count}} heart rate zones based on LTHR{{suffix}}",
+    "ftpSuffix": " ({{ftp}}W)",
+    "lthrSuffix": " ({{lthr}} bpm)"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "saveZones": "Save Zones"
+  },
+  "inputs": {
+    "namePlaceholder": "Zone name",
+    "minPercent": "Min %",
+    "maxPercent": "Max %",
+    "minBpm": "Min BPM",
+    "maxBpm": "Max BPM"
+  },
+  "method": {
+    "ariaLabel": "{{type}} zone method",
+    "confirmTitle": "Change Zone Method",
+    "confirmMessage": "This will replace your current zones with calculated values. Continue?",
+    "confirmLabel": "Change Method",
+    "keepLabel": "Keep Current"
+  },
+  "table": {
+    "noZones": "No zones configured",
+    "addZone": "+ Add Zone",
+    "zoneNameAria": "{{prefix}} Zone {{zone}} name",
+    "zoneMinAria": "{{prefix}} Zone {{zone}} min",
+    "zoneMaxAria": "{{prefix}} Zone {{zone}} max",
+    "removeZoneAria": "Remove {{prefix}} zone {{zone}}"
+  },
+  "tabs": {
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swimming",
+    "generic": "Generic"
+  },
+  "threshold": {
+    "pace": "Threshold Pace",
+    "ariaLabel": "{{label}} threshold"
+  },
+  "section": {
+    "heartRate": "Heart Rate Zones",
+    "power": "Power Zones",
+    "pace": "Pace Zones"
+  },
+  "validation": {
+    "heading": "Validation Errors",
+    "zoneLabel": "Zone {{zone}}: {{message}}",
+    "min-max": "Min must be less than max",
+    "overlap": "Overlaps with next zone"
+  },
+  "zoneType": {
+    "hr": "HR",
+    "power": "Power",
+    "pace": "Pace"
+  },
+  "empty": {
+    "noSportConfig": "No zone configuration for this sport."
+  }
+}
