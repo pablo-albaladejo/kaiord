@@ -1,6 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Profile } from "../../../types/profile";
 import { ProfileManagerDialog } from "../../organisms/ProfileManager/components/ProfileManagerDialog";
 import { useProfileManager } from "../../organisms/ProfileManager/useProfileManager";
@@ -20,6 +21,7 @@ export function ProfileEditDialog({
   profile,
   onClose,
 }: ProfileEditDialogProps) {
+  const t = useTranslate("athlete");
   const manager = useProfileManager();
   const { handleEdit } = manager;
 
@@ -44,7 +46,7 @@ export function ProfileEditDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[85vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          <Dialog.Title className="sr-only">Edit profile</Dialog.Title>
+          <Dialog.Title className="sr-only">{t("editProfile")}</Dialog.Title>
           <ProfileManagerDialog {...manager} />
         </Dialog.Content>
       </Dialog.Portal>

@@ -1,4 +1,5 @@
-import { type ActiveSport, ATHLETE_SPORTS } from "../../../lib/athlete";
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
+import { ATHLETE_SPORTS } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
 
 const MAX_INITIAL_WORDS = 2;
@@ -14,16 +15,13 @@ export function deriveInitials(name: string): string {
   return letters.join("") || "?";
 }
 
-const SPORT_NOUN: Record<ActiveSport, string> = {
-  cycling: "Cyclist",
-  running: "Runner",
-  swimming: "Swimmer",
-};
-
 /** Tagline like "Cyclist · Runner" for sports that have a stored config. */
-export function deriveTagline(profile: Profile): string {
+export function deriveTagline(
+  profile: Profile,
+  t: Translate = getTranslate("athlete")
+): string {
   const nouns = ATHLETE_SPORTS.filter(
     (sport) => profile.sportZones[sport.value] !== undefined
-  ).map((sport) => SPORT_NOUN[sport.value]);
-  return nouns.join(" · ") || "Athlete";
+  ).map((sport) => t(`tagline.${sport.value}`));
+  return nouns.join(" · ") || t("tagline.fallback");
 }
