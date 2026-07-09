@@ -17,6 +17,7 @@ const PURPOSE_ROWS: ReadonlyArray<{
     label: "Workout generation",
     resettable: true,
   },
+  { purpose: "lab_extraction", label: "Lab extraction", resettable: true },
 ];
 
 const HINT =

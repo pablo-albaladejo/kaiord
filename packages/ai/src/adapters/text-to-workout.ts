@@ -2,24 +2,34 @@ import type { Workout } from "@kaiord/core";
 import { sportSchema } from "@kaiord/core";
 import type { TextToWorkoutConfig, TextToWorkoutOptions } from "../types";
 import { validateInput } from "./validate-input";
-import { resolvePrompt } from "../prompts/registry";
-import { WORKOUT_PARSER_SYSTEM } from "../prompts/parse-workout-prompt";
-import { executeWithRetry } from "./execute-with-retry";
+import { runGenerateAgent } from "../agents/runtime";
+import { createWorkoutParserAgent } from "../agents/workout-parser-agent";
+import { AiAgentError } from "../agents/errors";
+import { createAiParsingError } from "../errors";
 
-const buildSystemPrompt = (options?: TextToWorkoutOptions): string => {
-  const sportLine = options?.sport
+const MAX_INPUT_ECHO = 200;
+
+const sportLineFor = (options?: TextToWorkoutOptions): string =>
+  options?.sport
     ? `The sport for this workout is "${options.sport}". Use it for the sport field.`
     : "";
-  return resolvePrompt(WORKOUT_PARSER_SYSTEM.id, {
-    vars: { sport: sportLine },
-  });
-};
+
+const toDomainError = (error: unknown, inputText: string): unknown =>
+  error instanceof AiAgentError
+    ? createAiParsingError(
+        error.message,
+        inputText.slice(0, MAX_INPUT_ECHO),
+        error.attempts,
+        error.lastError
+      )
+    : error;
 
 /**
- * Creates a function that converts natural language text into a typed Workout.
+ * Converts natural-language text into a typed Workout.
  *
- * No pre-built singleton is exported because `model` is required.
- * The consumer provides a LanguageModel from their chosen AI SDK provider.
+ * @deprecated Prefer `runGenerateAgent` from `@kaiord/ai/agents` with the
+ * workout-parser definition. This wrapper preserves the original signature and
+ * `AiParsingError` semantics while delegating to the shared runtime.
  */
 export const createTextToWorkout = (config: TextToWorkoutConfig) => {
   const {
@@ -35,26 +45,30 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
     options?: TextToWorkoutOptions
   ): Promise<Workout> => {
     if (options?.sport) sportSchema.parse(options.sport);
-
     const sanitized = validateInput(text);
-    const system = buildSystemPrompt(options);
-
-    logger?.debug("System prompt prepared", { length: system.length });
-    logger?.info("Parsing workout text", { length: sanitized.length });
-
-    const workout = await executeWithRetry(
-      model,
-      system,
-      sanitized,
+    const agent = {
+      ...createWorkoutParserAgent(sportLineFor(options)),
       maxRetries,
       maxOutputTokens,
       temperature,
-      logger
-    );
+    };
 
-    if (options?.name) workout.name = options.name;
+    logger?.debug("Workout parse requested", { length: sanitized.length });
+    logger?.info("Parsing workout text", { length: sanitized.length });
 
-    logger?.info("Workout parsed", { steps: workout.steps.length });
-    return workout;
+    try {
+      const { output } = await runGenerateAgent(
+        agent,
+        { text: sanitized },
+        { model, logger }
+      );
+      const workout = options?.name
+        ? { ...output, name: options.name }
+        : output;
+      logger?.info("Workout parsed", { steps: workout.steps.length });
+      return workout;
+    } catch (error) {
+      throw toDomainError(error, sanitized);
+    }
   };
 };

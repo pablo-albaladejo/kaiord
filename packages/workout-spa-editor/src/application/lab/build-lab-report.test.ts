@@ -61,4 +61,18 @@ describe("buildLabReport", () => {
     expect(no.fasting).toBe(false);
     expect(unspecified.fasting).toBeUndefined();
   });
+
+  it("should carry ai-extracted provenance when the context requests it", () => {
+    // Arrange
+    const input = header({});
+
+    // Act
+    const report = buildLabReport(input, {
+      ...CTX,
+      provenance: "ai-extracted",
+    });
+
+    // Assert
+    expect(report.provenance).toEqual({ source: "ai-extracted" });
+  });
 });

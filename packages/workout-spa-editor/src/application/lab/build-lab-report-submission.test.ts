@@ -82,4 +82,27 @@ describe("buildLabReportSubmission", () => {
     expect(submission?.values).toHaveLength(1);
     expect(submission?.values[0].parameterKey).toBe("glucose");
   });
+
+  it("should thread ai-extracted provenance onto the report and every value", () => {
+    // Arrange
+    const ctx = {
+      profileId: "p1",
+      reportId: "r1",
+      newId: () => "v1",
+      provenance: "ai-extracted" as const,
+    };
+
+    // Act
+    const submission = buildLabReportSubmission(
+      HEADER,
+      [row({ parameterKey: "glucose" })],
+      ctx
+    );
+
+    // Assert
+    expect(submission?.report.provenance).toEqual({ source: "ai-extracted" });
+    expect(submission?.values[0].provenance).toEqual({
+      source: "ai-extracted",
+    });
+  });
 });

@@ -175,4 +175,15 @@ describe("buildLabValue", () => {
     // Assert
     expect(value).toBeUndefined();
   });
+
+  it("should carry ai-extracted provenance when the context requests it", () => {
+    // Arrange
+    const input = row({});
+
+    // Act
+    const value = buildLabValue(input, { ...CTX, provenance: "ai-extracted" });
+
+    // Assert
+    expect(value?.provenance).toEqual({ source: "ai-extracted" });
+  });
 });

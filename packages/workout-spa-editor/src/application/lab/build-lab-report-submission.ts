@@ -5,7 +5,11 @@
  */
 import type { BiologicalSex, LabReport, LabValue } from "@kaiord/core";
 
-import { buildLabReport, type LabReportHeaderInput } from "./build-lab-report";
+import {
+  buildLabReport,
+  type LabProvenanceSource,
+  type LabReportHeaderInput,
+} from "./build-lab-report";
 import { buildLabValue, type LabValueRowInput } from "./build-lab-value";
 
 export type LabReportSubmission = { report: LabReport; values: LabValue[] };
@@ -15,6 +19,7 @@ export type BuildSubmissionContext = {
   reportId: string;
   sex?: BiologicalSex;
   newId: () => string;
+  provenance?: LabProvenanceSource;
 };
 
 export function buildLabReportSubmission(
@@ -30,6 +35,7 @@ export function buildLabReportSubmission(
         reportId: ctx.reportId,
         date: header.date,
         sex: ctx.sex,
+        provenance: ctx.provenance,
       })
     )
     .filter((value): value is LabValue => value !== undefined);
@@ -38,6 +44,7 @@ export function buildLabReportSubmission(
   const report = buildLabReport(header, {
     id: ctx.reportId,
     profileId: ctx.profileId,
+    provenance: ctx.provenance,
   });
   return { report, values };
 }
