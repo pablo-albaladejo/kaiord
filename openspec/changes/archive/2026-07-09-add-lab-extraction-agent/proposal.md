@@ -1,5 +1,7 @@
 # Proposal: Lab-report AI extraction on the agent runtime (Wave 2 kickoff)
 
+> Completed: 2026-07-09
+
 ## Why
 
 Labs V1 shipped manual form entry only. The program docs define V2 as

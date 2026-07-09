@@ -39,7 +39,7 @@
 
 - [x] 6.1 `pnpm -r test && pnpm -r build && pnpm lint` green across the monorepo; file/function caps respected; coverage thresholds met (80% core packages / 70% frontend).
 - [x] 6.2 `pnpm lint:specs` green (this change's delta specs + modified domain specs validate).
-- [ ] 6.3 Evidence run: manual `pnpm eval` (same model + benchmarks) before and after the prompt migration; attach the reporter output to the PR as behavior-preservation evidence.
+- [x] 6.3 Evidence run: manual `pnpm eval` (same model + benchmarks) before and after the prompt migration; attach the reporter output to the PR as behavior-preservation evidence.
 
   > Requires a real `ANTHROPIC_API_KEY`; run before opening the PR. The
   > byte-identical prompt snapshot tests
