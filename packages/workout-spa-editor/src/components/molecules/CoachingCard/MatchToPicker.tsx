@@ -16,6 +16,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { MatchToPickerItem } from "./MatchToPickerItem";
 
@@ -26,15 +27,18 @@ export type MatchToPickerProps = {
   onClose: () => void;
 };
 
-const Empty = () => (
-  <div
-    role="listbox"
-    aria-label="Match to workout"
-    className="rounded border border-slate-200 p-3 text-sm text-slate-500 dark:border-slate-700"
-  >
-    No same-day, same-sport workouts available to match.
-  </div>
-);
+const Empty = () => {
+  const t = useTranslate("coaching");
+  return (
+    <div
+      role="listbox"
+      aria-label={t("picker.ariaLabel")}
+      className="rounded border border-slate-200 p-3 text-sm text-slate-500 dark:border-slate-700"
+    >
+      {t("picker.empty")}
+    </div>
+  );
+};
 
 export function MatchToPicker({
   workouts,
@@ -42,6 +46,7 @@ export function MatchToPicker({
   onSelect,
   onClose,
 }: MatchToPickerProps) {
+  const t = useTranslate("coaching");
   const [focusIndex, setFocusIndex] = useState(0);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -69,7 +74,7 @@ export function MatchToPicker({
   return (
     <div
       role="listbox"
-      aria-label="Match to workout"
+      aria-label={t("picker.ariaLabel")}
       onKeyDown={onKeyDown}
       className="space-y-1 rounded border border-slate-200 p-2 dark:border-slate-700"
     >

@@ -37,5 +37,54 @@
     "succeeded": "Succeeded {{n}}",
     "failed": "Failed {{n}}",
     "cancelAria": "Cancel batch processing"
+  },
+  "aiError": {
+    "heading": "AI processing failed",
+    "ai-error": "AI returned an error",
+    "ai-cancelled": "AI request was cancelled",
+    "ai-timeout": "AI request timed out",
+    "ai-invalid-krd": "AI returned an invalid workout structure",
+    "transport-error": "Could not reach the AI service",
+    "not-found": "Coaching activity is no longer available",
+    "no-provider": "No AI provider is configured"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "skipped": "Skipped"
+  },
+  "dialog": {
+    "closeAria": "Close",
+    "loadingDescription": "Loading description…"
+  },
+  "actions": {
+    "close": "Close",
+    "matchExisting": "Match existing",
+    "editManually": "Edit manually",
+    "creating": "Creating…",
+    "retryAi": "Retry AI",
+    "aiProcess": "AI process",
+    "processWithAi": "Process with AI",
+    "openEditor": "Open editor",
+    "pushToGarmin": "Push to Garmin",
+    "split": "Split",
+    "splitting": "Splitting…"
+  },
+  "linked": {
+    "heading": "Linked workout",
+    "fallbackTitle": "Workout",
+    "untitled": "Untitled workout",
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swimming",
+    "strength": "Strength"
+  },
+  "picker": {
+    "ariaLabel": "Match to workout",
+    "empty": "No same-day, same-sport workouts available to match."
+  },
+  "sync": {
+    "defaultLabel": "Coach",
+    "connectTo": "Connect to {{label}}"
   }
 }

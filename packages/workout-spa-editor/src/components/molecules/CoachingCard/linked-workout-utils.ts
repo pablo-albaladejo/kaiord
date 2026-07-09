@@ -5,14 +5,8 @@
  * formatting and the per-file line caps stay satisfied.
  */
 
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-
-const SPORT_LABELS: Record<string, string> = {
-  cycling: "Cycling",
-  running: "Running",
-  swimming: "Swimming",
-  strength: "Strength",
-};
 
 export const formatDurationMinutes = (seconds: number | undefined): string => {
   if (!seconds) return "";
@@ -20,12 +14,19 @@ export const formatDurationMinutes = (seconds: number | undefined): string => {
   return `${min}min`;
 };
 
-export const sportLabel = (sport: string | null | undefined): string => {
-  if (!sport) return "Workout";
-  return SPORT_LABELS[sport] ?? sport;
+export const sportLabel = (
+  sport: string | null | undefined,
+  t: Translate = getTranslate("coaching")
+): string => {
+  if (!sport) return t("linked.fallbackTitle");
+  const label = t(`linked.${sport}`);
+  return label === `linked.${sport}` ? sport : label;
 };
 
-export const workoutTitle = (workout: WorkoutRecord): string => {
+export const workoutTitle = (
+  workout: WorkoutRecord,
+  t: Translate = getTranslate("coaching")
+): string => {
   const raw = workout.raw as { title?: string; description?: string } | null;
-  return raw?.title || raw?.description?.slice(0, 60) || "Untitled workout";
+  return raw?.title || raw?.description?.slice(0, 60) || t("linked.untitled");
 };

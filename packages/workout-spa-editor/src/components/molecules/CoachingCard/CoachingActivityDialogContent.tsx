@@ -10,6 +10,7 @@
  *                    contextual buttons.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import {
   type CoachingDialogBodyProps,
   renderMatchedBody,
@@ -19,7 +20,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogMeta,
-  STATUS_LABEL,
 } from "./coaching-dialog-parts";
 import { CoachingDayComments } from "./CoachingDayComments";
 import { useCoachingDayComments } from "./use-coaching-day-comments";
@@ -34,6 +34,7 @@ export function CoachingActivityDialogContent(
   props: CoachingActivityDialogContentProps
 ) {
   const { activity, dialogState, profileId } = props;
+  const t = useTranslate("coaching");
   const matched = dialogState?.kind === "matched" ? dialogState : null;
   const comments = useCoachingDayComments(
     profileId,
@@ -45,9 +46,7 @@ export function CoachingActivityDialogContent(
       <DialogHeader activity={activity} />
       <DialogMeta activity={activity} />
       <div className="text-xs text-muted-foreground">
-        <span className="font-medium">
-          {STATUS_LABEL[activity.status] ?? activity.status}
-        </span>
+        <span className="font-medium">{t(`status.${activity.status}`)}</span>
       </div>
       <DialogDescription activity={activity} />
       {matched
