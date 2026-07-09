@@ -86,5 +86,13 @@
   "sync": {
     "defaultLabel": "Coach",
     "connectTo": "Conectar con {{label}}"
+  },
+  "hooks": {
+    "aiProcessFailed": "No se pudo procesar la actividad con IA",
+    "workoutMatched": "Entreno emparejado",
+    "manualFailed": "La creación manual falló",
+    "conversionFailed": "La conversión falló",
+    "invalidActivityId": "ID de actividad no válido",
+    "activityNotFound": "Actividad no encontrada"
   }
 }
