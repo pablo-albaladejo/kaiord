@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Input } from "../../atoms/Input/Input";
 import { TARGET_TYPE_OPTIONS } from "./constants";
 
@@ -12,18 +13,20 @@ export const TargetTypeSelect = ({
   onChange,
   disabled,
 }: TargetTypeSelectProps) => {
+  const t = useTranslate("targets");
+
   return (
     <Input
       variant="select"
-      label="Target Type"
+      label={t("typeLabel")}
       value={value}
       onChange={onChange}
       disabled={disabled}
       options={TARGET_TYPE_OPTIONS.map((opt) => ({
         value: opt.value,
-        label: opt.label,
+        label: t(`type.${opt.value}`),
       }))}
-      aria-label="Select target type"
+      aria-label={t("typeAria")}
     />
   );
 };

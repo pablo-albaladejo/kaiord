@@ -1,37 +1,41 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
+
 export const getValueLabel = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
-  unit: string
+  unit: string,
+  t: Translate = getTranslate("targets")
 ): string => {
   if (unit === "range") {
-    return "Range";
+    return t("valueLabel.range");
   }
 
   switch (targetType) {
     case "power":
-      if (unit === "watts") return "Power (watts)";
-      if (unit === "percent_ftp") return "Power (% FTP)";
-      if (unit === "zone") return "Power Zone (1-7)";
-      return "Power Value";
+      if (unit === "watts") return t("valueLabel.powerWatts");
+      if (unit === "percent_ftp") return t("valueLabel.powerPercentFtp");
+      if (unit === "zone") return t("valueLabel.powerZone");
+      return t("valueLabel.powerValue");
     case "heart_rate":
-      if (unit === "bpm") return "Heart Rate (BPM)";
-      if (unit === "zone") return "HR Zone (1-5)";
-      if (unit === "percent_max") return "Heart Rate (% Max)";
-      return "Heart Rate Value";
+      if (unit === "bpm") return t("valueLabel.hrBpm");
+      if (unit === "zone") return t("valueLabel.hrZone");
+      if (unit === "percent_max") return t("valueLabel.hrPercentMax");
+      return t("valueLabel.hrValue");
     case "pace":
-      if (unit === "mps") return "Pace (m/s)";
-      if (unit === "zone") return "Pace Zone (1-5)";
-      return "Pace Value";
+      if (unit === "mps") return t("valueLabel.paceMps");
+      if (unit === "zone") return t("valueLabel.paceZone");
+      return t("valueLabel.paceValue");
     case "cadence":
-      if (unit === "rpm") return "Cadence (RPM)";
-      return "Cadence Value";
+      if (unit === "rpm") return t("valueLabel.cadenceRpm");
+      return t("valueLabel.cadenceValue");
     default:
-      return "Value";
+      return t("valueLabel.value");
   }
 };
 
 export const getValuePlaceholder = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
-  unit: string
+  unit: string,
+  t: Translate = getTranslate("targets")
 ): string => {
   if (unit === "range") {
     return "";
@@ -39,23 +43,23 @@ export const getValuePlaceholder = (
 
   switch (targetType) {
     case "power":
-      if (unit === "watts") return "e.g., 250";
-      if (unit === "percent_ftp") return "e.g., 85";
-      if (unit === "zone") return "1-7";
-      return "Enter value";
+      if (unit === "watts") return t("placeholder.powerWatts");
+      if (unit === "percent_ftp") return t("placeholder.powerPercentFtp");
+      if (unit === "zone") return t("placeholder.powerZone");
+      return t("placeholder.enterValue");
     case "heart_rate":
-      if (unit === "bpm") return "e.g., 150";
-      if (unit === "zone") return "1-5";
-      if (unit === "percent_max") return "e.g., 85";
-      return "Enter value";
+      if (unit === "bpm") return t("placeholder.hrBpm");
+      if (unit === "zone") return t("placeholder.hrZone");
+      if (unit === "percent_max") return t("placeholder.hrPercentMax");
+      return t("placeholder.enterValue");
     case "pace":
-      if (unit === "mps") return "e.g., 3.5";
-      if (unit === "zone") return "1-5";
-      return "Enter value";
+      if (unit === "mps") return t("placeholder.paceMps");
+      if (unit === "zone") return t("placeholder.paceZone");
+      return t("placeholder.enterValue");
     case "cadence":
-      if (unit === "rpm") return "e.g., 90";
-      return "Enter value";
+      if (unit === "rpm") return t("placeholder.cadenceRpm");
+      return t("placeholder.enterValue");
     default:
-      return "Enter value";
+      return t("placeholder.enterValue");
   }
 };
