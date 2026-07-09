@@ -4,6 +4,7 @@ import { useSearch } from "wouter";
 
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { useAppHandlers } from "../../../hooks/use-app-handlers";
+import { useTranslate } from "../../../i18n/use-translate";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { FileUpload } from "../../molecules/FileUpload/FileUpload";
 import { useImportOnLoad } from "./use-import-on-load";
@@ -22,6 +23,7 @@ import { useImportOnLoad } from "./use-import-on-load";
  * non-persisting behaviour (load into store, let the user decide).
  */
 export function ImportDropzoneOverlay() {
+  const t = useTranslate("import");
   const { handleFileError } = useAppHandlers();
   const analytics = useAnalytics();
   const search = useSearch();
@@ -61,10 +63,10 @@ export function ImportDropzoneOverlay() {
       <div className="mx-auto flex max-w-md flex-col items-center gap-3">
         <Upload className="h-8 w-8 text-gray-400" />
         <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-          Drop a FIT, TCX, ZWO, GCN, or KRD file
+          {t("dropzone.title")}
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Or click below to choose one from your device.
+          {t("dropzone.hint")}
         </p>
         <FileUpload
           onFileLoad={onFileLoad}

@@ -1,5 +1,7 @@
 import type { RefObject } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
+
 type FileUploadInputProps = {
   fileInputRef: RefObject<HTMLInputElement | null>;
   accept: string;
@@ -15,6 +17,7 @@ export function FileUploadInput({
   isLoading,
   onFileChange,
 }: FileUploadInputProps) {
+  const t = useTranslate("import");
   return (
     <input
       ref={fileInputRef}
@@ -23,7 +26,7 @@ export function FileUploadInput({
       onChange={(e) => onFileChange(e.target.files?.[0])}
       className="hidden"
       disabled={disabled || isLoading}
-      aria-label="Upload workout file"
+      aria-label={t("input.ariaLabel")}
       data-testid="file-upload-input"
     />
   );

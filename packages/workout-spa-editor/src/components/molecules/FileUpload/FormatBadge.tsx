@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFormatName } from "../../../utils/file-format-metadata";
 
@@ -15,6 +16,7 @@ const formatColors: Record<WorkoutFileFormat, string> = {
 };
 
 export function FormatBadge({ format, className = "" }: FormatBadgeProps) {
+  const t = useTranslate("import");
   const colorClass = formatColors[format];
   const formatName = getFormatName(format);
 
@@ -22,7 +24,7 @@ export function FormatBadge({ format, className = "" }: FormatBadgeProps) {
     <span
       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass} ${className}`}
       role="status"
-      aria-label={`File format: ${formatName}`}
+      aria-label={t("badge.ariaLabel", { format: formatName })}
     >
       {formatName}
     </span>
