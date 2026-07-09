@@ -4,6 +4,7 @@
  * Input fields for zone ranges.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import { Input } from "../../../atoms/Input/Input";
 
@@ -24,11 +25,12 @@ export function ZoneInputs({
   isPowerZones,
   onZoneChange,
 }: ZoneInputsProps) {
+  const t = useTranslate("zones");
   if (isPowerZones) {
     return (
       <>
         <Input
-          label="Min %"
+          label={t("inputs.minPercent")}
           type="number"
           value={(zone as PowerZone).minPercent}
           onChange={(e) => onZoneChange(index, "minPercent", e.target.value)}
@@ -36,7 +38,7 @@ export function ZoneInputs({
           max={200}
         />
         <Input
-          label="Max %"
+          label={t("inputs.maxPercent")}
           type="number"
           value={(zone as PowerZone).maxPercent}
           onChange={(e) => onZoneChange(index, "maxPercent", e.target.value)}
@@ -50,7 +52,7 @@ export function ZoneInputs({
   return (
     <>
       <Input
-        label="Min BPM"
+        label={t("inputs.minBpm")}
         type="number"
         value={(zone as HeartRateZone).minBpm}
         onChange={(e) => onZoneChange(index, "minBpm", e.target.value)}
@@ -58,7 +60,7 @@ export function ZoneInputs({
         max={250}
       />
       <Input
-        label="Max BPM"
+        label={t("inputs.maxBpm")}
         type="number"
         value={(zone as HeartRateZone).maxBpm}
         onChange={(e) => onZoneChange(index, "maxBpm", e.target.value)}

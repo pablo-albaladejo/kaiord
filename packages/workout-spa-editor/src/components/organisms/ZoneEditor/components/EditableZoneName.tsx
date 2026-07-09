@@ -4,7 +4,7 @@
  * Inline editable text cell for a zone name.
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type EditableZoneNameProps = {
   name: string;
@@ -26,8 +26,15 @@ export function EditableZoneName({
     cancelledRef.current = false;
     setDraft(name);
     setEditing(true);
-    requestAnimationFrame(() => inputRef.current?.select());
   }, [name]);
+
+  // Select the field's contents once editing begins so the name can be
+  // overtyped. Using an effect (not requestAnimationFrame) keeps this
+  // deterministic: a deferred rAF could fire mid-keystroke and reselect,
+  // dropping the first typed character.
+  useEffect(() => {
+    if (editing) inputRef.current?.select();
+  }, [editing]);
 
   const handleBlur = useCallback(() => {
     setEditing(false);

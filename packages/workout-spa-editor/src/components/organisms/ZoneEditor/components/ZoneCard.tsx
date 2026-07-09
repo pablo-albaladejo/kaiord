@@ -4,6 +4,7 @@
  * Single zone editor card.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type {
   HeartRateZone,
   PowerZone,
@@ -35,6 +36,7 @@ export function ZoneCard({
   profile,
   onZoneChange,
 }: ZoneCardProps) {
+  const t = useTranslate("zones");
   return (
     <div
       className={`rounded-lg border p-4 ${
@@ -52,7 +54,7 @@ export function ZoneCard({
         <Input
           value={zone.name}
           onChange={(e) => onZoneChange(index, "name", e.target.value)}
-          placeholder="Zone name"
+          placeholder={t("inputs.namePlaceholder")}
           className="flex-1"
         />
       </div>

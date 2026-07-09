@@ -6,9 +6,9 @@
 
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 
-type ZoneValidationError = {
+export type ZoneValidationError = {
   zone: number;
-  message: string;
+  code: "min-max" | "overlap";
 };
 
 export function useZoneValidation(isPowerZones: boolean) {
@@ -22,17 +22,11 @@ export function useZoneValidation(isPowerZones: boolean) {
 
       if (isPowerZones && "minPercent" in zone && "maxPercent" in zone) {
         if (zone.minPercent >= zone.maxPercent) {
-          errors.push({
-            zone: zone.zone,
-            message: "Min must be less than max",
-          });
+          errors.push({ zone: zone.zone, code: "min-max" });
         }
       } else if (!isPowerZones && "minBpm" in zone && "maxBpm" in zone) {
         if (zone.minBpm >= zone.maxBpm) {
-          errors.push({
-            zone: zone.zone,
-            message: "Min must be less than max",
-          });
+          errors.push({ zone: zone.zone, code: "min-max" });
         }
       }
 
@@ -40,17 +34,11 @@ export function useZoneValidation(isPowerZones: boolean) {
         const nextZone = zonesToValidate[i + 1]!;
         if (isPowerZones && "maxPercent" in zone && "minPercent" in nextZone) {
           if (zone.maxPercent >= nextZone.minPercent) {
-            errors.push({
-              zone: zone.zone,
-              message: "Overlaps with next zone",
-            });
+            errors.push({ zone: zone.zone, code: "overlap" });
           }
         } else if (!isPowerZones && "maxBpm" in zone && "minBpm" in nextZone) {
           if (zone.maxBpm >= nextZone.minBpm) {
-            errors.push({
-              zone: zone.zone,
-              message: "Overlaps with next zone",
-            });
+            errors.push({ zone: zone.zone, code: "overlap" });
           }
         }
       }

@@ -12,12 +12,8 @@ import type {
   PowerZone,
   Profile,
 } from "../../../../types/profile";
+import type { ZoneValidationError } from "./useZoneValidation";
 import { useZoneValidation } from "./useZoneValidation";
-
-type ZoneValidationError = {
-  zone: number;
-  message: string;
-};
 
 export function useZoneEditor(
   profile: Profile,

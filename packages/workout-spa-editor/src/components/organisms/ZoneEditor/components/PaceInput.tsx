@@ -4,6 +4,7 @@
  * Input for pace values in mm:ss format, converting to/from total seconds.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { secondsToMmSs } from "../utils/pace-format";
 
 type PaceInputProps = {
@@ -21,6 +22,7 @@ export function PaceInput({
   onChange,
   disabled = false,
 }: PaceInputProps) {
+  const t = useTranslate("zones");
   const displayValue = value !== undefined ? secondsToMmSs(value) : "";
 
   const handleChange = (raw: string) => {
@@ -43,7 +45,7 @@ export function PaceInput({
       </label>
       <input
         type="text"
-        aria-label={`${label} threshold`}
+        aria-label={t("threshold.ariaLabel", { label })}
         value={displayValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder="mm:ss"

@@ -5,6 +5,7 @@
  */
 
 import type { ZoneType } from "../../../../application/profile/zones/zone-types";
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { SportZoneConfig } from "../../../../types/sport-zones";
 import type { ZoneRowData } from "../types/zone-table";
 import { ZoneTypeSection } from "./ZoneTypeSection";
@@ -26,11 +27,12 @@ export function SportZoneSections({
   onAddZone,
   ftp,
 }: SportZoneSectionsProps) {
+  const t = useTranslate("zones");
   return (
     <div className="space-y-4">
       {capabilities.hr && (
         <ZoneTypeSection
-          title="Heart Rate Zones"
+          title={t("section.heartRate")}
           method={config.heartRateZones.method}
           zones={config.heartRateZones.zones}
           zoneDisplayType="heartRate"
@@ -42,7 +44,7 @@ export function SportZoneSections({
       )}
       {capabilities.power && config.powerZones && (
         <ZoneTypeSection
-          title="Power Zones"
+          title={t("section.power")}
           method={config.powerZones.method}
           zones={config.powerZones.zones}
           zoneDisplayType="power"
@@ -54,7 +56,7 @@ export function SportZoneSections({
       )}
       {capabilities.pace && config.paceZones && (
         <ZoneTypeSection
-          title="Pace Zones"
+          title={t("section.pace")}
           method={config.paceZones.method}
           zones={config.paceZones.zones}
           zoneDisplayType="pace"

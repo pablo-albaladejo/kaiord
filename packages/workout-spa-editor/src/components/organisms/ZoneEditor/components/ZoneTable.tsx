@@ -4,6 +4,7 @@
  * Renders editable zone rows with inline editing for names and values.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { ZoneRowData, ZoneTableCallbacks } from "../types/zone-table";
 import { ZoneRow } from "./ZoneRow";
 
@@ -24,10 +25,11 @@ export function ZoneTable({
   callbacks,
   onAddZone,
 }: ZoneTableProps) {
+  const t = useTranslate("zones");
   if (zones.length === 0) {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        No zones configured
+        {t("table.noZones")}
       </p>
     );
   }
@@ -53,7 +55,7 @@ export function ZoneTable({
             py-1 text-xs text-gray-500 hover:border-blue-400 hover:text-blue-500
             dark:border-gray-600 dark:text-gray-400"
         >
-          + Add Zone
+          {t("table.addZone")}
         </button>
       )}
     </div>
