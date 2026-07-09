@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../../i18n/use-translate";
 import { TREND_RANGES, type TrendRangeDays } from "./trend-metrics";
 
 export type TrendRangeSelectorProps = {
@@ -13,27 +14,30 @@ const offClass =
 export const TrendRangeSelector = ({
   selected,
   onSelect,
-}: TrendRangeSelectorProps) => (
-  <div
-    role="radiogroup"
-    aria-label="Date range"
-    className="flex gap-2"
-    data-testid="trend-range-select"
-  >
-    {TREND_RANGES.map((r) => {
-      const isOn = r.days === selected;
-      return (
-        <button
-          key={r.days}
-          type="button"
-          role="radio"
-          aria-checked={isOn}
-          onClick={() => onSelect(r.days)}
-          className={`${baseClass} ${isOn ? onClass : offClass}`}
-        >
-          {r.label}
-        </button>
-      );
-    })}
-  </div>
-);
+}: TrendRangeSelectorProps) => {
+  const t = useTranslate("health");
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t("trends.rangeAria")}
+      className="flex gap-2"
+      data-testid="trend-range-select"
+    >
+      {TREND_RANGES.map((r) => {
+        const isOn = r.days === selected;
+        return (
+          <button
+            key={r.days}
+            type="button"
+            role="radio"
+            aria-checked={isOn}
+            onClick={() => onSelect(r.days)}
+            className={`${baseClass} ${isOn ? onClass : offClass}`}
+          >
+            {r.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};

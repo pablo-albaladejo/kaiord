@@ -8,6 +8,7 @@ import type { BiologicalSex } from "@kaiord/core";
 import { useId } from "react";
 
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
+import { useTranslate } from "../../../../i18n/use-translate";
 import {
   findParameterByLabel,
   labParameterOptions,
@@ -34,6 +35,7 @@ export function LabParameterIdentityField({
 }: LabParameterIdentityFieldProps) {
   const datalistId = useId();
   const locale = useActiveLocale();
+  const t = useTranslate("labs-ui");
 
   return (
     <div className="flex flex-1 flex-col gap-1">
@@ -46,7 +48,7 @@ export function LabParameterIdentityField({
             onClick={() => onChange(setRowMode(row, mode))}
             className={row.mode === mode ? "font-semibold underline" : ""}
           >
-            {mode === "catalog" ? "Catalog" : "Custom"}
+            {t(mode === "catalog" ? "form.catalog" : "form.custom")}
           </button>
         ))}
       </div>
@@ -54,8 +56,8 @@ export function LabParameterIdentityField({
         <>
           <input
             list={datalistId}
-            aria-label="Parameter"
-            placeholder="Search parameter…"
+            aria-label={t("form.parameterAria")}
+            placeholder={t("form.searchPlaceholder")}
             value={row.catalogLabel}
             className={FIELD_CLASS}
             onChange={(e) => {
@@ -72,8 +74,8 @@ export function LabParameterIdentityField({
         </>
       ) : (
         <input
-          aria-label="Custom parameter name"
-          placeholder="Parameter name"
+          aria-label={t("form.customNameAria")}
+          placeholder={t("form.customNamePlaceholder")}
           value={row.customName}
           className={FIELD_CLASS}
           onChange={(e) => onChange(setCustomName(row, e.target.value))}

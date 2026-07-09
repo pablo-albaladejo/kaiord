@@ -1,6 +1,8 @@
 import type { Logger } from "@kaiord/core";
 import type { Ora } from "ora";
 
+import { t } from "../../i18n/index.js";
+
 type ReportArgs = {
   input: string;
   output: string;
@@ -42,7 +44,7 @@ export const reportConversionSuccess = ({
   }
 
   if (spinner) {
-    spinner.succeed(`Conversion complete: ${input} -> ${output}`);
+    spinner.succeed(t("output.conversionComplete", { input, output }));
     return;
   }
 
