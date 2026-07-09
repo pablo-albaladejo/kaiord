@@ -2,6 +2,7 @@ import type { Logger } from "@kaiord/core";
 import ora from "ora";
 import { basename } from "path";
 
+import { t } from "../../i18n/index.js";
 import { ExitCode } from "../../utils/exit-codes";
 import { findFiles } from "../../utils/file-handler";
 import { convertBatchFile, validateBatchOptions } from "./batch-helpers";
@@ -24,7 +25,11 @@ const reportProgress = (
   logger: Logger,
   ctx: ProgressContext
 ): void => {
-  const label = `Converting ${ctx.index + 1}/${ctx.total}: ${basename(ctx.file)}`;
+  const label = t("output.batchProgress", {
+    current: ctx.index + 1,
+    total: ctx.total,
+    file: basename(ctx.file),
+  });
   if (spinner) {
     spinner.text = label;
   } else {
@@ -71,7 +76,7 @@ export const executeBatchConversion = async (
   });
 
   const isTTY = process.stdout.isTTY && !options.quiet && !options.json;
-  const spinner = isTTY ? ora("Processing batch conversion...").start() : null;
+  const spinner = isTTY ? ora(t("output.processingBatch")).start() : null;
   const results: Array<ConversionResult> = [];
 
   for (const [index, file] of files.entries()) {
