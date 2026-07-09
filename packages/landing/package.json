@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/build-locales.mjs",
+    "i18n:extract": "node scripts/extract-strings.mjs",
     "preview": "vite preview",
     "test": "vitest --run",
     "lint:fix": "prettier --write src public index.html"
@@ -17,6 +18,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.2",
     "jsdom": "^29.1.1",
+    "node-html-parser": "^9.0.0",
     "tailwindcss": "^4.3.2",
     "typescript": "~6.0.3",
     "vite": "^8.1.3",
