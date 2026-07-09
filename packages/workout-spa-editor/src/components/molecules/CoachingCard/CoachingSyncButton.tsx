@@ -16,6 +16,7 @@
  * CoachingSyncIconButton.tsx.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import {
   buildSyncTooltip,
   usePrefersReducedMotion,
@@ -45,6 +46,7 @@ export function CoachingSyncButton({
   lastSyncedAt,
   routeInactive = false,
 }: CoachingSyncButtonProps) {
+  const t = useTranslate("coaching");
   const reducedMotion = usePrefersReducedMotion();
 
   if (!connected) {
@@ -55,7 +57,7 @@ export function CoachingSyncButton({
           onClick={onConnect}
           className="rounded border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
         >
-          Connect to {label}
+          {t("sync.connectTo", { label })}
         </button>
         {error && <span className="text-xs text-red-500">{error}</span>}
       </div>
