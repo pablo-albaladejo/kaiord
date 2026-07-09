@@ -1,17 +1,49 @@
-import { findParityViolations } from "@kaiord/i18n";
+import {
+  DEFAULT_LOCALE,
+  findParityViolations,
+  type LocaleNamespaces,
+  type NamespaceDictionary,
+  SUPPORTED_LOCALES,
+} from "@kaiord/i18n";
 import { describe, expect, it } from "vitest";
 
-import { resources } from "./resources";
+// Eagerly load every catalog here (test-only bundle) to assert parity against
+// English without going through the app's lazy locale loader.
+const MODULES = import.meta.glob<NamespaceDictionary>("./locales/*/*.json", {
+  eager: true,
+  import: "default",
+});
+
+const namespaceOf = (path: string): string =>
+  path.slice(path.lastIndexOf("/") + 1, -".json".length);
+
+const localeOf = (path: string): string => {
+  const dir = path.slice(0, path.lastIndexOf("/"));
+  return dir.slice(dir.lastIndexOf("/") + 1);
+};
+
+const catalogFor = (locale: string): LocaleNamespaces =>
+  Object.fromEntries(
+    Object.entries(MODULES)
+      .filter(([path]) => localeOf(path) === locale)
+      .map(([path, dict]) => [namespaceOf(path), dict])
+  );
 
 describe("SPA i18n resource parity", () => {
-  it("should keep en and es catalogs at key parity across every namespace", () => {
-    // Arrange
-    const { en, es } = resources;
+  const en = catalogFor(DEFAULT_LOCALE);
+  const others = SUPPORTED_LOCALES.filter((l) => l !== DEFAULT_LOCALE);
 
-    // Act
-    const violations = findParityViolations(en, es);
+  it.each(others)(
+    "should keep %s at key parity with en across every namespace",
+    (locale) => {
+      // Arrange
+      const catalog = catalogFor(locale);
 
-    // Assert
-    expect(violations).toEqual([]);
-  });
+      // Act
+      const violations = findParityViolations(en, catalog);
+
+      // Assert
+      expect(violations).toEqual([]);
+    }
+  );
 });

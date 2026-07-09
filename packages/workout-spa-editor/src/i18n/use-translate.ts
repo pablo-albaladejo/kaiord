@@ -13,7 +13,7 @@
 import { DEFAULT_LOCALE, type Locale } from "@kaiord/i18n";
 
 import { useActiveLocale } from "./LocaleProvider";
-import { resources } from "./resources";
+import { getLocaleNamespaces } from "./resources";
 
 type TranslateParams = Record<string, string | number>;
 
@@ -22,8 +22,9 @@ const lookup = (
   ns: string,
   key: string
 ): string | undefined => {
-  const namespaces = resources[locale] ?? resources[DEFAULT_LOCALE];
-  let current: unknown = namespaces[ns];
+  const namespaces =
+    getLocaleNamespaces(locale) ?? getLocaleNamespaces(DEFAULT_LOCALE);
+  let current: unknown = namespaces?.[ns];
   for (const segment of key.split(".")) {
     if (current && typeof current === "object") {
       current = (current as Record<string, unknown>)[segment];

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { LocaleProvider, useActiveLocale } from "./LocaleProvider";
@@ -22,7 +22,7 @@ vi.mock("../hooks/use-user-preferences", () => ({
 const Probe = () => <span data-testid="loc">{useActiveLocale()}</span>;
 
 describe("LocaleProvider", () => {
-  it("should resolve an explicit es preference and set the document language", () => {
+  it("should resolve an explicit es preference and set the document language", async () => {
     // Arrange
     prefsMock.locale = "es";
 
@@ -34,7 +34,11 @@ describe("LocaleProvider", () => {
     );
 
     // Assert
-    expect(screen.getByTestId("loc")).toHaveTextContent("es");
+    // The es catalog is code-split and loaded on demand; the context holds at
+    // en until it is live, then flips.
+    await waitFor(() =>
+      expect(screen.getByTestId("loc")).toHaveTextContent("es")
+    );
     expect(document.documentElement.lang).toBe("es");
   });
 

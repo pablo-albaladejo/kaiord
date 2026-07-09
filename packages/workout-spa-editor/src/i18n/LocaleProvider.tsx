@@ -5,7 +5,13 @@
  * keeps both in sync with the persisted per-profile locale preference.
  */
 import { DEFAULT_LOCALE, type Locale } from "@kaiord/i18n";
-import { createContext, type ReactNode, useContext, useEffect } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { I18nextProvider } from "react-i18next";
 
 import { resolveLocale } from "../application/resolve-locale";
@@ -28,13 +34,25 @@ const LocaleSync = ({ children }: { children: ReactNode }) => {
     defaultView: "grid",
   });
   const locale = resolveLocale(prefs?.locale, readNavigatorLanguage());
+  // Hold the previous locale until the target's catalog is loaded and live, so
+  // the subtree never renders the active locale before its strings exist (it
+  // falls back to English meanwhile). Lazy locales load a code-split chunk.
+  const [activeLocale, setResolvedLocale] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
-    setActiveLocale(locale);
+    let cancelled = false;
+    void setActiveLocale(locale).then(() => {
+      if (!cancelled) setResolvedLocale(locale);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [locale]);
 
   return (
-    <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
+    <LocaleContext.Provider value={activeLocale}>
+      {children}
+    </LocaleContext.Provider>
   );
 };
 
