@@ -4,6 +4,8 @@
  * Number input with unit label for threshold values.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
+
 type ThresholdInputProps = {
   label: string;
   unit: string;
@@ -19,6 +21,7 @@ export function ThresholdInput({
   onChange,
   disabled = false,
 }: ThresholdInputProps) {
+  const t = useTranslate("zones");
   return (
     <div className="flex items-center gap-2">
       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -26,7 +29,7 @@ export function ThresholdInput({
       </label>
       <input
         type="number"
-        aria-label={`${label} threshold`}
+        aria-label={t("threshold.ariaLabel", { label })}
         value={value ?? ""}
         onChange={(e) =>
           onChange(e.target.value ? Number(e.target.value) : undefined)
