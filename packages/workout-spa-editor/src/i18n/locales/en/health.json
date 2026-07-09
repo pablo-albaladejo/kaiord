@@ -1,0 +1,59 @@
+{
+  "common": {
+    "loading": "Loading…"
+  },
+  "dashboard": {
+    "title": "Trends",
+    "activeProfile": "Active profile"
+  },
+  "activity": {
+    "title": "Activity",
+    "empty": "No activity recorded today yet.",
+    "steps": "Steps",
+    "activeKcal": "Active kcal",
+    "restingKcal": "Resting kcal"
+  },
+  "recovery": {
+    "title": "Recovery",
+    "subtitle": "HRV {{start}} → {{end}} · Stress {{today}}",
+    "hrvHistory": "HRV history",
+    "stressToday": "Stress today"
+  },
+  "sleep": {
+    "title": "Sleep",
+    "empty": "No sleep records yet for the last 7 days."
+  },
+  "weight": {
+    "title": "Weight",
+    "empty": "No weight records yet for the last 90 days.",
+    "bodyComposition": "Body composition (latest)"
+  },
+  "hrv": {
+    "empty": "No HRV records yet."
+  },
+  "stress": {
+    "empty": "No stress episodes recorded today.",
+    "avgPeak": "Avg {{avg}} · Peak {{peak}}"
+  },
+  "nav": {
+    "ariaLabel": "Health detail pages",
+    "sleep": "Sleep",
+    "recovery": "Recovery",
+    "weight": "Weight",
+    "activity": "Activity"
+  },
+  "source": {
+    "fallbackActive": "Fallback active"
+  },
+  "trends": {
+    "metricsLegend": "Metrics",
+    "rangeAria": "Date range",
+    "selectMetric": "Select at least one metric to see its trend.",
+    "metric": {
+      "sleep": "Sleep",
+      "hrv": "HRV",
+      "weight": "Weight",
+      "steps": "Steps"
+    }
+  }
+}

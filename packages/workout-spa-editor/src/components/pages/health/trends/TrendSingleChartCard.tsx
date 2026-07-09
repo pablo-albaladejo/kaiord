@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import { useUnits } from "../../../../contexts/units-context";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
+import { useTranslate } from "../../../../i18n/use-translate";
 import {
   buildTrendChartData,
   type PerMetricPoints,
@@ -13,8 +14,6 @@ import type { TrendSeriesByMetric } from "./use-trend-series";
 
 const CHART_WIDTH = 880;
 const CHART_HEIGHT = 360;
-const EMPTY_MSG = "Select at least one metric to see its trend.";
-const LOADING_MSG = "Loading…";
 
 const BY_KEY: Record<TrendMetricKey, (typeof TREND_METRICS)[number]> =
   Object.fromEntries(TREND_METRICS.map((m) => [m.key, m])) as Record<
@@ -33,6 +32,7 @@ export const TrendSingleChartCard = ({
   series,
   rangeDays,
 }: TrendSingleChartCardProps) => {
+  const t = useTranslate("health");
   const units = useUnits();
   const locale = useActiveLocale();
   const selectedKeys = TREND_METRICS.map((m) => m.key).filter((k) =>
@@ -60,11 +60,11 @@ export const TrendSingleChartCard = ({
   );
 
   if (selected.size === 0)
-    return <p className="text-sm text-gray-600">{EMPTY_MSG}</p>;
+    return <p className="text-sm text-gray-600">{t("trends.selectMetric")}</p>;
   if (anyLoading && presentKeys.length === 0)
     return (
       <p className="text-sm text-gray-600" data-testid="trend-loading">
-        {LOADING_MSG}
+        {t("common.loading")}
       </p>
     );
 

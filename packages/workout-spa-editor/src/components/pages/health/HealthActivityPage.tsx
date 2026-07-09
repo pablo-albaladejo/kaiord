@@ -4,25 +4,33 @@
  */
 import { useHealthDailyTodayLive } from "../../../hooks/health/use-health-daily-today-live";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { todayIso } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 
-const EMPTY_MSG = "No activity recorded today yet.";
-
 export default function HealthActivityPage() {
+  const t = useTranslate("health");
   const active = useActiveProfileLive();
   const today = todayIso();
   const record = useHealthDailyTodayLive(active?.id ?? "", today);
   const loading = record === undefined;
   return (
     <section data-testid="health-activity">
-      <HealthPageHeader title="Activity" subtitle={today} />
-      {loading && <p className="text-sm text-gray-600">{EMPTY_MSG}</p>}
+      <HealthPageHeader title={t("activity.title")} subtitle={today} />
+      {loading && (
+        <p className="text-sm text-gray-600">{t("activity.empty")}</p>
+      )}
       {!loading && (
         <dl className="grid gap-3 sm:grid-cols-3">
-          <Stat label="Steps" value={record.krd.steps} />
-          <Stat label="Active kcal" value={record.krd.activeCalories} />
-          <Stat label="Resting kcal" value={record.krd.restingCalories} />
+          <Stat label={t("activity.steps")} value={record.krd.steps} />
+          <Stat
+            label={t("activity.activeKcal")}
+            value={record.krd.activeCalories}
+          />
+          <Stat
+            label={t("activity.restingKcal")}
+            value={record.krd.restingCalories}
+          />
         </dl>
       )}
     </section>

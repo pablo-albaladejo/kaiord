@@ -3,13 +3,13 @@
  */
 import { useHealthSleepWeekLive } from "../../../hooks/health/use-health-sleep-week-live";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { lastSevenDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 import { HealthSourceBadge } from "./HealthSourceBadge";
 
-const EMPTY_MSG = "No sleep records yet for the last 7 days.";
-
 export default function HealthSleepPage() {
+  const t = useTranslate("health");
   // Computed per render so the window stays current across day rollovers.
   const range = lastSevenDays();
   const active = useActiveProfileLive();
@@ -19,12 +19,14 @@ export default function HealthSleepPage() {
   return (
     <section data-testid="health-sleep">
       <HealthPageHeader
-        title="Sleep"
+        title={t("sleep.title")}
         subtitle={`${range.start} → ${range.end}`}
       />
-      {loading && <p className="text-sm text-gray-600">Loading…</p>}
+      {loading && (
+        <p className="text-sm text-gray-600">{t("common.loading")}</p>
+      )}
       {!loading && records.length === 0 && (
-        <p className="text-sm text-gray-600">{EMPTY_MSG}</p>
+        <p className="text-sm text-gray-600">{t("sleep.empty")}</p>
       )}
       {!loading && records.length > 0 && (
         <ul className="space-y-2">
