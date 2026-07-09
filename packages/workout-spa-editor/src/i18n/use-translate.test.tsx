@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { LocaleProvider } from "./LocaleProvider";
@@ -35,7 +35,7 @@ describe("useTranslate", () => {
     expect(screen.getByTestId("out")).toHaveTextContent("Daily");
   });
 
-  it("should return the Spanish value under an es locale provider", () => {
+  it("should return the Spanish value under an es locale provider", async () => {
     // Arrange
     prefsMock.locale = "es";
 
@@ -47,7 +47,11 @@ describe("useTranslate", () => {
     );
 
     // Assert
-    expect(screen.getByTestId("out")).toHaveTextContent("Diario");
+    // The es catalog loads on demand; the seam falls back to en until it is
+    // live, then resolves to the Spanish value.
+    await waitFor(() =>
+      expect(screen.getByTestId("out")).toHaveTextContent("Diario")
+    );
   });
 
   it("should fall back to the key when it is missing", () => {

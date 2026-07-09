@@ -1,85 +1,76 @@
 /**
- * Assembles the SPA i18n resource tree from per-locale, per-namespace JSON.
- * English is the source-of-truth catalog; `es` must maintain key parity
- * (enforced by `resource-parity.test.ts`). Add a namespace by importing its
- * `en`/`es` JSON and listing it in both maps plus `NAMESPACES`.
+ * SPA i18n resource registry, discovered from `locales/<locale>/<ns>.json`.
+ *
+ * English is bundled eagerly — it is the synchronous source-of-truth, the
+ * fallback for every missing key/locale, and the default that keeps the
+ * thousands of unwrapped component tests rendering in `en`. Every other locale
+ * is code-split and pulled in on demand by `loadLocaleNamespaces`, so a catalog
+ * of N languages ships only English plus the active locale's chunk — never all
+ * of them.
+ *
+ * Add a namespace: drop `locales/<locale>/<name>.json`. Add a language: drop a
+ * `locales/<locale>/` folder. Neither requires editing this file.
  */
 
-import type { LocaleResources } from "@kaiord/i18n";
-
-import enAthlete from "./locales/en/athlete.json";
-import enCalendar from "./locales/en/calendar.json";
-import enChat from "./locales/en/chat.json";
-import enCoaching from "./locales/en/coaching.json";
-import enCommon from "./locales/en/common.json";
-import enCreateWorkout from "./locales/en/create-workout.json";
-import enDaily from "./locales/en/daily.json";
-import enEditor from "./locales/en/editor.json";
-import enErrors from "./locales/en/errors.json";
-import enLabImport from "./locales/en/labImport.json";
-import enLabs from "./locales/en/labs.json";
-import enLibrary from "./locales/en/library.json";
-import enNav from "./locales/en/nav.json";
-import enSettings from "./locales/en/settings.json";
-import enTargets from "./locales/en/targets.json";
-import enWorkoutDetail from "./locales/en/workout-detail.json";
-import esAthlete from "./locales/es/athlete.json";
-import esCalendar from "./locales/es/calendar.json";
-import esChat from "./locales/es/chat.json";
-import esCoaching from "./locales/es/coaching.json";
-import esCommon from "./locales/es/common.json";
-import esCreateWorkout from "./locales/es/create-workout.json";
-import esDaily from "./locales/es/daily.json";
-import esEditor from "./locales/es/editor.json";
-import esErrors from "./locales/es/errors.json";
-import esLabImport from "./locales/es/labImport.json";
-import esLabs from "./locales/es/labs.json";
-import esLibrary from "./locales/es/library.json";
-import esNav from "./locales/es/nav.json";
-import esSettings from "./locales/es/settings.json";
-import esTargets from "./locales/es/targets.json";
-import esWorkoutDetail from "./locales/es/workout-detail.json";
+import {
+  DEFAULT_LOCALE,
+  type Locale,
+  type LocaleNamespaces,
+  type NamespaceDictionary,
+} from "@kaiord/i18n";
 
 export const DEFAULT_NAMESPACE = "common";
 
-export const resources: LocaleResources = {
-  en: {
-    athlete: enAthlete,
-    calendar: enCalendar,
-    chat: enChat,
-    coaching: enCoaching,
-    common: enCommon,
-    "create-workout": enCreateWorkout,
-    daily: enDaily,
-    editor: enEditor,
-    errors: enErrors,
-    labs: enLabs,
-    labImport: enLabImport,
-    library: enLibrary,
-    nav: enNav,
-    settings: enSettings,
-    targets: enTargets,
-    "workout-detail": enWorkoutDetail,
-  },
-  es: {
-    athlete: esAthlete,
-    calendar: esCalendar,
-    chat: esChat,
-    coaching: esCoaching,
-    common: esCommon,
-    "create-workout": esCreateWorkout,
-    daily: esDaily,
-    editor: esEditor,
-    errors: esErrors,
-    labs: esLabs,
-    labImport: esLabImport,
-    library: esLibrary,
-    nav: esNav,
-    settings: esSettings,
-    targets: esTargets,
-    "workout-detail": esWorkoutDetail,
-  },
+const EN_MODULES = import.meta.glob<NamespaceDictionary>(
+  "./locales/en/*.json",
+  { eager: true, import: "default" }
+);
+
+const LOCALE_MODULES = import.meta.glob<NamespaceDictionary>(
+  "./locales/*/*.json",
+  { import: "default" }
+);
+
+const namespaceOf = (path: string): string =>
+  path.slice(path.lastIndexOf("/") + 1, -".json".length);
+
+const localeOf = (path: string): string => {
+  const dir = path.slice(0, path.lastIndexOf("/"));
+  return dir.slice(dir.lastIndexOf("/") + 1);
 };
 
-/** Namespace list for i18next, derived from the resource tree (single source). */
-export const NAMESPACES = Object.keys(resources.en);
+/** The eager, always-bundled English catalog: fallback and test default. */
+export const DEFAULT_CATALOG: LocaleNamespaces = Object.fromEntries(
+  Object.entries(EN_MODULES).map(([path, dict]) => [namespaceOf(path), dict])
+);
+
+const cache: Partial<Record<Locale, LocaleNamespaces>> = {
+  [DEFAULT_LOCALE]: DEFAULT_CATALOG,
+};
+
+/** Namespace list for i18next, derived from the eager English catalog. */
+export const NAMESPACES = Object.keys(DEFAULT_CATALOG);
+
+/** Already-loaded namespaces for a locale, or `undefined` if not yet loaded. */
+export const getLocaleNamespaces = (
+  locale: Locale
+): LocaleNamespaces | undefined => cache[locale];
+
+/** Code-split-load and cache a locale's namespaces (no-op once cached). */
+export const loadLocaleNamespaces = async (
+  locale: Locale
+): Promise<LocaleNamespaces> => {
+  const cached = cache[locale];
+  if (cached) return cached;
+  const entries = Object.entries(LOCALE_MODULES).filter(
+    ([path]) => localeOf(path) === locale
+  );
+  const loaded = await Promise.all(
+    entries.map(
+      async ([path, load]) => [namespaceOf(path), await load()] as const
+    )
+  );
+  const namespaces = Object.fromEntries(loaded);
+  cache[locale] = namespaces;
+  return namespaces;
+};
