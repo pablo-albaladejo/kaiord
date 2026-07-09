@@ -10,6 +10,7 @@
 
 import { LayoutGrid, List } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { CalendarView } from "../../../types/user-preferences";
 
 export type CalendarViewToggleProps = {
@@ -31,8 +32,12 @@ export function CalendarViewToggle({
   view,
   onToggle,
 }: CalendarViewToggleProps) {
+  const t = useTranslate("calendar");
   const next = nextView(view);
-  const label = `Switch to ${next} view`;
+  const label =
+    next === "grid"
+      ? t("viewToggle.switchToGridView")
+      : t("viewToggle.switchToListView");
   const Icon = next === "grid" ? LayoutGrid : List;
   const handleClick = () => {
     // View-write failure is non-fatal whether it surfaces synchronously

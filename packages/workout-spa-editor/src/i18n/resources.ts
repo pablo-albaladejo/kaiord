@@ -7,6 +7,7 @@
 
 import type { LocaleResources } from "@kaiord/i18n";
 
+import enCalendar from "./locales/en/calendar.json";
 import enCommon from "./locales/en/common.json";
 import enDaily from "./locales/en/daily.json";
 import enEditor from "./locales/en/editor.json";
@@ -16,6 +17,7 @@ import enLabs from "./locales/en/labs.json";
 import enNav from "./locales/en/nav.json";
 import enSettings from "./locales/en/settings.json";
 import enTargets from "./locales/en/targets.json";
+import esCalendar from "./locales/es/calendar.json";
 import esCommon from "./locales/es/common.json";
 import esDaily from "./locales/es/daily.json";
 import esEditor from "./locales/es/editor.json";
@@ -27,6 +29,7 @@ import esSettings from "./locales/es/settings.json";
 import esTargets from "./locales/es/targets.json";
 
 export const NAMESPACES = [
+  "calendar",
   "common",
   "daily",
   "editor",
@@ -42,6 +45,7 @@ export const DEFAULT_NAMESPACE = "common";
 
 export const resources: LocaleResources = {
   en: {
+    calendar: enCalendar,
     common: enCommon,
     daily: enDaily,
     editor: enEditor,
@@ -53,6 +57,7 @@ export const resources: LocaleResources = {
     targets: enTargets,
   },
   es: {
+    calendar: esCalendar,
     common: esCommon,
     daily: esDaily,
     editor: esEditor,
