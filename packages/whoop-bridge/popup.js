@@ -7,6 +7,53 @@
  * background.js via internal runtime messages.
  */
 
+// ── i18n ──
+// Byte-identical English fallback for environments without chrome.i18n. At
+// runtime the browser's chrome.i18n.getMessage returns the active-locale
+// string from _locales/. Positional $1 tokens mirror the named placeholders
+// declared in _locales/*/messages.json.
+const EN_FALLBACK = {
+  checking: "Checking…",
+  checkingAria: "Checking",
+  addCredentials: "Add WHOOP credentials to connect",
+  reconnectNeeded: "Reconnect needed",
+  connectedToWhoop: "Connected to WHOOP",
+  notConnected: "Not connected",
+  openingWhoop: "Opening WHOOP…",
+  connectionFailed: "Connection failed",
+  couldNotSave: "Could not save credentials",
+  reconnectNeededError: "Reconnect needed — $1",
+  reconnectToImport: "Reconnect needed to keep importing.",
+  lastImport: "Last import · $1",
+  reconnect: "Reconnect",
+  connectWhoop: "Connect WHOOP",
+  disconnect: "Disconnect",
+  justNow: "just now",
+  minuteAgo: "$1 minute ago",
+  minutesAgo: "$1 minutes ago",
+  hourAgo: "$1 hour ago",
+  hoursAgo: "$1 hours ago",
+  dayAgo: "$1 day ago",
+  daysAgo: "$1 days ago",
+  clientId: "Client ID",
+  clientSecret: "Client secret",
+  saveCredentials: "Save credentials",
+  credsHint:
+    "Register your own WHOOP app at developer.whoop.com and paste its credentials. They stay in this extension and never reach the web page.",
+};
+
+const applySubs = (template, subs) => {
+  if (subs == null) return template;
+  const list = Array.isArray(subs) ? subs : [subs];
+  return template.replace(/\$(\d)/g, (_, i) =>
+    String(list[Number(i) - 1] ?? "")
+  );
+};
+
+const msg = (key, subs) =>
+  globalThis.chrome?.i18n?.getMessage?.(key, subs) ||
+  applySubs(EN_FALLBACK[key], subs);
+
 const $ = (id) => document.getElementById(id);
 
 const sendMessage = (message) =>
@@ -25,14 +72,17 @@ const setStatus = (kind, glyph, text) => {
 };
 
 const formatRelative = (iso) => {
-  const ageMs = Date.now() - new Date(iso).getTime();
-  const min = Math.floor(ageMs / 60_000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min} minute${min === 1 ? "" : "s"} ago`;
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
+  if (min < 1) return msg("justNow");
+  if (min < 60) {
+    return msg(min === 1 ? "minuteAgo" : "minutesAgo", [String(min)]);
+  }
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr} hour${hr === 1 ? "" : "s"} ago`;
+  if (hr < 24) {
+    return msg(hr === 1 ? "hourAgo" : "hoursAgo", [String(hr)]);
+  }
   const day = Math.floor(hr / 24);
-  return `${day} day${day === 1 ? "" : "s"} ago`;
+  return msg(day === 1 ? "dayAgo" : "daysAgo", [String(day)]);
 };
 
 const renderSync = (state) => {
@@ -40,12 +90,12 @@ const renderSync = (state) => {
   region.innerHTML = "";
   if (state.needsReauth) {
     region.textContent = state.lastError
-      ? `Reconnect needed — ${state.lastError}`
-      : "Reconnect needed to keep importing.";
+      ? msg("reconnectNeededError", [state.lastError])
+      : msg("reconnectToImport");
     return;
   }
   if (state.lastSyncAt) {
-    region.textContent = `Last import · ${formatRelative(state.lastSyncAt)}`;
+    region.textContent = msg("lastImport", [formatRelative(state.lastSyncAt)]);
   }
 };
 
@@ -55,7 +105,9 @@ const renderFooter = (state) => {
   const primary = document.createElement("button");
   primary.type = "button";
   primary.className = "cta-primary";
-  primary.textContent = state.authenticated ? "Reconnect" : "Connect WHOOP";
+  primary.textContent = state.authenticated
+    ? msg("reconnect")
+    : msg("connectWhoop");
   primary.disabled = !state.hasCredentials;
   primary.addEventListener("click", () => runConnect());
   region.appendChild(primary);
@@ -64,7 +116,7 @@ const renderFooter = (state) => {
     const secondary = document.createElement("button");
     secondary.type = "button";
     secondary.className = "cta-secondary";
-    secondary.textContent = "Disconnect";
+    secondary.textContent = msg("disconnect");
     secondary.addEventListener("click", () => runDisconnect());
     region.appendChild(secondary);
   }
@@ -72,13 +124,13 @@ const renderFooter = (state) => {
 
 const applyState = (state) => {
   if (!state.hasCredentials) {
-    setStatus("no", "✗", "Add WHOOP credentials to connect");
+    setStatus("no", "✗", msg("addCredentials"));
   } else if (state.needsReauth) {
-    setStatus("warn", "!", "Reconnect needed");
+    setStatus("warn", "!", msg("reconnectNeeded"));
   } else if (state.authenticated) {
-    setStatus("ok", "✓", "Connected to WHOOP");
+    setStatus("ok", "✓", msg("connectedToWhoop"));
   } else {
-    setStatus("no", "✗", "Not connected");
+    setStatus("no", "✗", msg("notConnected"));
   }
   $("creds-region").hidden = state.hasCredentials && state.authenticated;
   renderSync(state);
@@ -91,9 +143,9 @@ const refresh = async () => {
 };
 
 const runConnect = async () => {
-  setStatus("checking", "…", "Opening WHOOP…");
+  setStatus("checking", "…", msg("openingWhoop"));
   const res = await sendMessage({ action: "connect" });
-  if (!res.ok) setStatus("no", "✗", res.error || "Connection failed");
+  if (!res.ok) setStatus("no", "✗", res.error || msg("connectionFailed"));
   await refresh();
 };
 
@@ -111,12 +163,28 @@ const runSaveCreds = async () => {
     clientSecret,
   });
   if (!res.ok) {
-    setStatus("no", "✗", res.error || "Could not save credentials");
+    setStatus("no", "✗", res.error || msg("couldNotSave"));
     return;
   }
   $("client-secret").value = "";
   await refresh();
 };
 
+// Chrome does not expand __MSG__ tokens in popup HTML, so the static
+// credential-form strings are localized here on load.
+const localizeStatic = () => {
+  $("status").setAttribute("aria-label", msg("checkingAria"));
+  $("status-text").textContent = msg("checking");
+  document.querySelector('label[for="client-id"]').textContent =
+    msg("clientId");
+  document.querySelector('label[for="client-secret"]').textContent =
+    msg("clientSecret");
+  $("save-creds").textContent = msg("saveCredentials");
+  document.querySelector(".creds__hint").textContent = msg("credsHint");
+};
+
 $("save-creds").addEventListener("click", () => runSaveCreds());
-window.addEventListener("DOMContentLoaded", () => refresh());
+window.addEventListener("DOMContentLoaded", () => {
+  localizeStatic();
+  refresh();
+});

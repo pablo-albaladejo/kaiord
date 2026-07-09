@@ -25,7 +25,10 @@ describe("isAllowedPath", () => {
   });
 
   it.each([
-    { label: "dot-segment traversal", path: "/v2/recovery/../../oauth/oauth2/token" },
+    {
+      label: "dot-segment traversal",
+      path: "/v2/recovery/../../oauth/oauth2/token",
+    },
     { label: "prefix-string trick", path: "/v2/recoveryX" },
     { label: "unlisted endpoint", path: "/v2/workout" },
     { label: "empty path", path: "" },
@@ -55,8 +58,14 @@ describe("isAllowedSenderOrigin", () => {
   });
 
   it.each([
-    { label: "arbitrary https origin", sender: { origin: "https://evil.example" } },
-    { label: "kaiord lookalike", sender: { origin: "https://kaiord.com.evil.example" } },
+    {
+      label: "arbitrary https origin",
+      sender: { origin: "https://evil.example" },
+    },
+    {
+      label: "kaiord lookalike",
+      sender: { origin: "https://kaiord.com.evil.example" },
+    },
     { label: "missing origin", sender: {} },
     { label: "undefined sender", sender: undefined },
   ])("should reject $label", ({ sender }) => {
@@ -76,7 +85,11 @@ describe("dispatchExternal", () => {
     const respond = vi.fn();
 
     // Act
-    dispatchExternal({ action: "ping" }, { origin: "https://evil.example" }, respond);
+    dispatchExternal(
+      { action: "ping" },
+      { origin: "https://evil.example" },
+      respond
+    );
 
     // Assert
     expect(respond).toHaveBeenCalledWith({
@@ -102,7 +115,10 @@ describe("dispatchExternal", () => {
     // Assert
     expect(EXTERNAL_ACTIONS.has("set-credentials")).toBe(false);
     expect(respond).toHaveBeenCalledWith(
-      expect.objectContaining({ ok: false, error: "Origin or action not permitted" })
+      expect.objectContaining({
+        ok: false,
+        error: "Origin or action not permitted",
+      })
     );
   });
 

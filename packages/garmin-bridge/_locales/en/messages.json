@@ -1,0 +1,158 @@
+{
+  "extName": {
+    "message": "Kaiord Garmin Bridge",
+    "description": "Extension name shown in the Chrome Web Store and toolbar."
+  },
+  "extDescription": {
+    "message": "Connects the Kaiord workout editor to Garmin Connect via your browser session",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Checking…",
+    "description": "Status text while the popup probes the connection."
+  },
+  "checkingConnection": {
+    "message": "Checking connection",
+    "description": "Accessible label for the checking status pill."
+  },
+  "notConnected": {
+    "message": "Not connected",
+    "description": "Status text/label when the bridge is not connected."
+  },
+  "notConnectedGarmin": {
+    "message": "Not connected — open Garmin Connect and refresh",
+    "description": "Status text when the Garmin Connect session is missing."
+  },
+  "connectedToGarmin": {
+    "message": "Connected to Garmin Connect",
+    "description": "Status text when the bridge is connected."
+  },
+  "connected": {
+    "message": "Connected",
+    "description": "Accessible label for the connected status pill."
+  },
+  "profileStale": {
+    "message": "Profile snapshot is stale. Open Kaiord to refresh.",
+    "description": "Athlete-card placeholder when the cached snapshot is stale."
+  },
+  "noProfile": {
+    "message": "No profile yet. Open Kaiord to set FTP, pace, and HR.",
+    "description": "Athlete-card placeholder when no snapshot exists."
+  },
+  "noThresholds": {
+    "message": "Profile has no thresholds yet. Open Kaiord to set FTP, pace, and HR.",
+    "description": "Athlete-card placeholder when the snapshot has no threshold fields."
+  },
+  "labelSport": {
+    "message": "Sport",
+    "description": "Athlete-card field label for the active sport."
+  },
+  "labelPace": {
+    "message": "Pace",
+    "description": "Athlete-card field label for threshold running pace."
+  },
+  "labelMaxHr": {
+    "message": "Max HR",
+    "description": "Athlete-card field label for maximum heart rate."
+  },
+  "labelWeight": {
+    "message": "Weight",
+    "description": "Athlete-card field label for body weight."
+  },
+  "workoutLibrary": {
+    "message": "Workout library · $count$ workouts",
+    "description": "Rollup line showing the total number of stored workouts.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "47" }
+    }
+  },
+  "lastPush": {
+    "message": "Last push",
+    "description": "Rollup line prefix for the most recent workout push."
+  },
+  "captionSync": {
+    "message": "Sync",
+    "description": "Caption above the sync rollup section."
+  },
+  "updatedAgo": {
+    "message": "Updated $phrase$",
+    "description": "Athlete-card freshness line, e.g. 'Updated 10 minutes ago'.",
+    "placeholders": {
+      "phrase": { "content": "$1", "example": "10 minutes ago" }
+    }
+  },
+  "updatedJustNow": {
+    "message": "Updated just now",
+    "description": "Athlete-card freshness line for a very recent update."
+  },
+  "momentsAgo": {
+    "message": "moments ago",
+    "description": "Relative time used in the last-push rollup line."
+  },
+  "minuteAgo": {
+    "message": "$count$ minute ago",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "minutesAgo": {
+    "message": "$count$ minutes ago",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "10" }
+    }
+  },
+  "hourAgo": {
+    "message": "$count$ hour ago",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "hoursAgo": {
+    "message": "$count$ hours ago",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "dayAgo": {
+    "message": "$count$ day ago",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "daysAgo": {
+    "message": "$count$ days ago",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "openEditor": {
+    "message": "Open editor",
+    "description": "Primary footer button opening the Kaiord editor."
+  },
+  "openEditorAria": {
+    "message": "Open Kaiord editor",
+    "description": "Accessible label for the open-editor button."
+  },
+  "openGarmin": {
+    "message": "Open Garmin Connect ↗",
+    "description": "Secondary footer button opening Garmin Connect."
+  },
+  "openGarminAria": {
+    "message": "Open Garmin Connect",
+    "description": "Accessible label for the open-Garmin button."
+  },
+  "retry": {
+    "message": "Retry",
+    "description": "Button that retries the connection check."
+  },
+  "refresh": {
+    "message": "Refresh",
+    "description": "Accessible label for the header refresh button."
+  }
+}
