@@ -1,0 +1,59 @@
+{
+  "common": {
+    "loading": "Cargando…"
+  },
+  "dashboard": {
+    "title": "Tendencias",
+    "activeProfile": "Perfil activo"
+  },
+  "activity": {
+    "title": "Actividad",
+    "empty": "No hay actividad registrada hoy todavía.",
+    "steps": "Pasos",
+    "activeKcal": "kcal activas",
+    "restingKcal": "kcal en reposo"
+  },
+  "recovery": {
+    "title": "Recuperación",
+    "subtitle": "VFC {{start}} → {{end}} · Estrés {{today}}",
+    "hrvHistory": "Historial de VFC",
+    "stressToday": "Estrés de hoy"
+  },
+  "sleep": {
+    "title": "Sueño",
+    "empty": "No hay registros de sueño de los últimos 7 días."
+  },
+  "weight": {
+    "title": "Peso",
+    "empty": "No hay registros de peso de los últimos 90 días.",
+    "bodyComposition": "Composición corporal (última)"
+  },
+  "hrv": {
+    "empty": "No hay registros de VFC todavía."
+  },
+  "stress": {
+    "empty": "No hay episodios de estrés registrados hoy.",
+    "avgPeak": "Media {{avg}} · Pico {{peak}}"
+  },
+  "nav": {
+    "ariaLabel": "Páginas de detalle de salud",
+    "sleep": "Sueño",
+    "recovery": "Recuperación",
+    "weight": "Peso",
+    "activity": "Actividad"
+  },
+  "source": {
+    "fallbackActive": "Reserva activa"
+  },
+  "trends": {
+    "metricsLegend": "Métricas",
+    "rangeAria": "Intervalo de fechas",
+    "selectMetric": "Selecciona al menos una métrica para ver su tendencia.",
+    "metric": {
+      "sleep": "Sueño",
+      "hrv": "VFC",
+      "weight": "Peso",
+      "steps": "Pasos"
+    }
+  }
+}
