@@ -1,0 +1,174 @@
+{
+  "extName": {
+    "message": "Kaiord Train2Go Bridge",
+    "description": "Extension name shown in the Chrome Web Store and toolbar."
+  },
+  "extDescription": {
+    "message": "Reads training plans from Train2Go and bridges them to the Kaiord workout editor",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Checking…",
+    "description": "Status text while the popup probes the connection."
+  },
+  "checkingConnection": {
+    "message": "Checking connection",
+    "description": "Accessible label for the checking status pill."
+  },
+  "notConnected": {
+    "message": "Not connected",
+    "description": "Status text/label when the bridge is not connected."
+  },
+  "notConnectedLogin": {
+    "message": "Not connected. Log in to Train2Go.",
+    "description": "Status text when the Train2Go session is inactive."
+  },
+  "connectedAs": {
+    "message": "Connected as $name$",
+    "description": "Status text when connected, naming the signed-in user.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "Pablo" }
+    }
+  },
+  "connectedToTrain2go": {
+    "message": "Connected to Train2Go",
+    "description": "Status text when connected but no user name is available."
+  },
+  "connected": {
+    "message": "Connected",
+    "description": "Accessible label for the connected status pill."
+  },
+  "coachSub": {
+    "message": "Coach · $name$",
+    "description": "Status sub-line naming the athlete's coach.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "Aritz Mardaras" }
+    }
+  },
+  "profileStale": {
+    "message": "Profile snapshot is stale. Open Kaiord to refresh.",
+    "description": "Athlete-card placeholder when the cached snapshot is stale."
+  },
+  "noProfile": {
+    "message": "No profile yet. Open Kaiord to set FTP, pace, and HR.",
+    "description": "Athlete-card placeholder when no snapshot exists."
+  },
+  "noThresholds": {
+    "message": "Profile has no thresholds yet. Open Kaiord to set FTP, pace, and HR.",
+    "description": "Athlete-card placeholder when the snapshot has no threshold fields."
+  },
+  "labelSport": {
+    "message": "Sport",
+    "description": "Athlete-card field label for the active sport."
+  },
+  "labelPace": {
+    "message": "Pace",
+    "description": "Athlete-card field label for threshold running pace."
+  },
+  "labelMaxHr": {
+    "message": "Max HR",
+    "description": "Athlete-card field label for maximum heart rate."
+  },
+  "labelWeight": {
+    "message": "Weight",
+    "description": "Athlete-card field label for body weight."
+  },
+  "captionThisWeek": {
+    "message": "This week",
+    "description": "Caption above the weekly rollup section."
+  },
+  "rollupSummary": {
+    "message": "$planned$ sessions planned · $done$ done · workload $workload$",
+    "description": "Weekly rollup summary line.",
+    "placeholders": {
+      "planned": { "content": "$1", "example": "3" },
+      "done": { "content": "$2", "example": "2" },
+      "workload": { "content": "$3", "example": "287" }
+    }
+  },
+  "rollupUnavailable": {
+    "message": "Rollup unavailable — try again",
+    "description": "Shown when the weekly rollup could not be fetched."
+  },
+  "coachNotes": {
+    "message": "Coach notes",
+    "description": "Summary label for the collapsible coach-notes box."
+  },
+  "updatedAgo": {
+    "message": "Updated $phrase$",
+    "description": "Athlete-card freshness line, e.g. 'Updated 10 minutes ago'.",
+    "placeholders": {
+      "phrase": { "content": "$1", "example": "10 minutes ago" }
+    }
+  },
+  "updatedJustNow": {
+    "message": "Updated just now",
+    "description": "Athlete-card freshness line for a very recent update."
+  },
+  "minuteAgo": {
+    "message": "$count$ minute ago",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "minutesAgo": {
+    "message": "$count$ minutes ago",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "10" }
+    }
+  },
+  "hourAgo": {
+    "message": "$count$ hour ago",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "hoursAgo": {
+    "message": "$count$ hours ago",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "dayAgo": {
+    "message": "$count$ day ago",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "daysAgo": {
+    "message": "$count$ days ago",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "openEditor": {
+    "message": "Open editor",
+    "description": "Primary footer button opening the Kaiord editor."
+  },
+  "openEditorAria": {
+    "message": "Open Kaiord editor",
+    "description": "Accessible label for the open-editor button."
+  },
+  "openTrain2go": {
+    "message": "Open Train2Go ↗",
+    "description": "Secondary footer button opening Train2Go."
+  },
+  "openTrain2goAria": {
+    "message": "Open Train2Go",
+    "description": "Accessible label for the open-Train2Go button."
+  },
+  "retry": {
+    "message": "Retry",
+    "description": "Button that retries the connection check."
+  },
+  "refresh": {
+    "message": "Refresh",
+    "description": "Accessible label for the header refresh button."
+  }
+}

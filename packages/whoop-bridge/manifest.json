@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Kaiord WHOOP Bridge",
+  "name": "__MSG_extName__",
   "version": "0.1.0",
-  "description": "Connects the Kaiord editor to your WHOOP recovery & sleep data via OAuth (bring your own WHOOP developer app)",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
 
   "permissions": ["storage", "identity"],
 

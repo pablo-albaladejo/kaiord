@@ -1,0 +1,138 @@
+{
+  "extName": {
+    "message": "Kaiord WHOOP Bridge",
+    "description": "Extension name shown in the Chrome Web Store and toolbar."
+  },
+  "extDescription": {
+    "message": "Conecta el editor de Kaiord con tus datos de recuperación y sueño de WHOOP mediante OAuth (usa tu propia app de desarrollador de WHOOP)",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Comprobando…",
+    "description": "Status text while the popup probes the connection."
+  },
+  "checkingAria": {
+    "message": "Comprobando",
+    "description": "Accessible label for the checking status pill."
+  },
+  "addCredentials": {
+    "message": "Añade credenciales de WHOOP para conectar",
+    "description": "Status text when no WHOOP credentials are stored."
+  },
+  "reconnectNeeded": {
+    "message": "Reconexión necesaria",
+    "description": "Status text when the WHOOP session needs re-authentication."
+  },
+  "connectedToWhoop": {
+    "message": "Conectado a WHOOP",
+    "description": "Status text when the bridge is connected."
+  },
+  "notConnected": {
+    "message": "Sin conexión",
+    "description": "Status text when credentials exist but there is no session."
+  },
+  "openingWhoop": {
+    "message": "Abriendo WHOOP…",
+    "description": "Status text while the OAuth flow is launching."
+  },
+  "connectionFailed": {
+    "message": "Error de conexión",
+    "description": "Fallback status text when connecting fails."
+  },
+  "couldNotSave": {
+    "message": "No se pudieron guardar las credenciales",
+    "description": "Fallback status text when saving credentials fails."
+  },
+  "reconnectNeededError": {
+    "message": "Reconexión necesaria — $reason$",
+    "description": "Sync line when re-auth is needed, with the failure reason.",
+    "placeholders": {
+      "reason": { "content": "$1", "example": "token expired" }
+    }
+  },
+  "reconnectToImport": {
+    "message": "Reconexión necesaria para seguir importando.",
+    "description": "Sync line when re-auth is needed and no reason is available."
+  },
+  "lastImport": {
+    "message": "Última importación · $when$",
+    "description": "Sync line showing when the last import happened.",
+    "placeholders": {
+      "when": { "content": "$1", "example": "hace 5 minutos" }
+    }
+  },
+  "reconnect": {
+    "message": "Reconectar",
+    "description": "Primary button label when already authenticated."
+  },
+  "connectWhoop": {
+    "message": "Conectar WHOOP",
+    "description": "Primary button label when not yet authenticated."
+  },
+  "disconnect": {
+    "message": "Desconectar",
+    "description": "Secondary button that revokes the WHOOP connection."
+  },
+  "justNow": {
+    "message": "hace un momento",
+    "description": "Relative time for a very recent import."
+  },
+  "minuteAgo": {
+    "message": "hace $count$ minuto",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "minutesAgo": {
+    "message": "hace $count$ minutos",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "hourAgo": {
+    "message": "hace $count$ hora",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "hoursAgo": {
+    "message": "hace $count$ horas",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "dayAgo": {
+    "message": "hace $count$ día",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "daysAgo": {
+    "message": "hace $count$ días",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "clientId": {
+    "message": "ID de cliente",
+    "description": "Label for the WHOOP OAuth client ID input."
+  },
+  "clientSecret": {
+    "message": "Secreto de cliente",
+    "description": "Label for the WHOOP OAuth client secret input."
+  },
+  "saveCredentials": {
+    "message": "Guardar credenciales",
+    "description": "Button that stores the entered WHOOP credentials."
+  },
+  "credsHint": {
+    "message": "Registra tu propia app de WHOOP en developer.whoop.com y pega sus credenciales. Se quedan en esta extensión y nunca llegan a la página web.",
+    "description": "Explanatory hint below the credential inputs."
+  }
+}
