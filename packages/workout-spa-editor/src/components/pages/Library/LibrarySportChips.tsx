@@ -1,5 +1,6 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Pill } from "../../atoms/Pill";
-import { SPORT_CHIPS, type SportFilter } from "./library-filter";
+import { getSportChips, type SportFilter } from "./library-filter";
 
 export type LibrarySportChipsProps = {
   active: SportFilter;
@@ -10,9 +11,10 @@ export function LibrarySportChips({
   active,
   onChange,
 }: LibrarySportChipsProps) {
+  const t = useTranslate("library");
   return (
     <div className="flex gap-2 overflow-x-auto pb-1">
-      {SPORT_CHIPS.map((chip) => (
+      {getSportChips(t).map((chip) => (
         <button
           key={chip.value}
           type="button"

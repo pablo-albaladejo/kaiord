@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 
 export type LibrarySearchFieldProps = {
@@ -9,6 +10,7 @@ export function LibrarySearchField({
   value,
   onChange,
 }: LibrarySearchFieldProps) {
+  const t = useTranslate("library");
   return (
     <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-primary-900 px-3 py-2">
       <Icon icon={ICON_MAP.target} size="sm" color="muted" />
@@ -16,8 +18,8 @@ export function LibrarySearchField({
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search workouts..."
-        aria-label="Search workouts"
+        placeholder={t("search.placeholder")}
+        aria-label={t("search.ariaLabel")}
         className="w-full bg-transparent text-[14px] text-slate-100 placeholder:text-slate-500 focus:outline-none"
       />
     </div>

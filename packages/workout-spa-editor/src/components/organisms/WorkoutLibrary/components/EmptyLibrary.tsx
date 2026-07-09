@@ -6,6 +6,7 @@
 
 import { BookOpen } from "lucide-react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { Button } from "../../../atoms/Button";
 
 type EmptyLibraryProps = {
@@ -17,19 +18,20 @@ export function EmptyLibrary({
   isFiltered,
   onClearFilters,
 }: EmptyLibraryProps) {
+  const t = useTranslate("library");
   if (isFiltered) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <BookOpen className="mb-4 h-12 w-12 text-gray-400" />
         <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-          No workouts found
+          {t("empty.filteredTitle")}
         </h3>
         <p className="mb-4 text-gray-600 dark:text-gray-400">
-          No workouts match your current filters.
+          {t("empty.filteredMessage")}
         </p>
         {onClearFilters && (
           <Button variant="secondary" onClick={onClearFilters}>
-            Clear Filters
+            {t("filters.clearFilters")}
           </Button>
         )}
       </div>
@@ -40,10 +42,10 @@ export function EmptyLibrary({
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <BookOpen className="mb-4 h-12 w-12 text-gray-400" />
       <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-        Your library is empty
+        {t("empty.title")}
       </h3>
       <p className="mb-4 text-gray-600 dark:text-gray-400">
-        Create your first workout and save it to your library to get started.
+        {t("empty.createMessage")}
       </p>
     </div>
   );

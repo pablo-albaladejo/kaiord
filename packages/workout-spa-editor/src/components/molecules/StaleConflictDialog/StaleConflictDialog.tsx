@@ -9,6 +9,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { AlertTriangle, X } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 
 type StaleConflictDialogProps = {
@@ -26,6 +27,8 @@ export function StaleConflictDialog({
   onKeepVersion,
   onViewDiff,
 }: StaleConflictDialogProps) {
+  const t = useTranslate("library");
+  const tCommon = useTranslate("common");
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
@@ -37,25 +40,24 @@ export function StaleConflictDialog({
           <div className="flex items-center justify-between mb-4">
             <Dialog.Title className="flex items-center gap-2 text-lg font-semibold">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Stale Workout Conflict
+              {t("staleDialog.title")}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button aria-label="Close">
+              <button aria-label={tCommon("actions.close")}>
                 <X className="h-4 w-4" />
               </button>
             </Dialog.Close>
           </div>
           <Dialog.Description className="text-sm text-muted-foreground mb-6">
-            The source description has changed since you last edited this
-            workout. Your edits may conflict with the new content.
+            {t("staleDialog.description")}
           </Dialog.Description>
           <div className="flex flex-col gap-2">
             <Button variant="secondary" onClick={onViewDiff}>
-              View Diff
+              {t("staleDialog.viewDiff")}
             </Button>
-            <Button onClick={onReprocess}>Re-process Anyway</Button>
+            <Button onClick={onReprocess}>{t("staleDialog.reprocess")}</Button>
             <Button variant="tertiary" onClick={onKeepVersion}>
-              Keep My Version
+              {t("staleDialog.keepVersion")}
             </Button>
           </div>
         </Dialog.Content>
