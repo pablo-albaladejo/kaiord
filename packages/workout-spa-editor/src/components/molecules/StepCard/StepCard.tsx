@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 
 import { useFocusRegistration } from "../../../hooks/focus/use-focus-registration";
+import { useTranslate } from "../../../i18n/use-translate";
 import { mergeRefs } from "../../../lib/merge-refs";
 import { SelectionIndicator } from "../SelectionIndicator";
 import { DragHandle } from "./DragHandle";
@@ -26,8 +27,9 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
       dragHandleProps,
       isDragging = false,
     } = props;
+    const t = useTranslate("editor");
     const { selected, displayIndex, intensity, label, classes } =
-      deriveStepCardData(props);
+      deriveStepCardData(props, t);
     const handlers = useStepCardHandlers({
       step,
       onSelect,
@@ -65,7 +67,9 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
           onCopy={onCopy}
         />
         <StepHeader
-          stepName={step.name || `Step ${displayIndex + 1}`}
+          stepName={
+            step.name || t("stepCard.stepFallback", { n: displayIndex + 1 })
+          }
           intensity={intensity}
         />
         <StepDetails step={step} />

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Duration, Target } from "../../../types/krd";
 import { DurationPicker } from "../../molecules/DurationPicker/DurationPicker";
 import { StepNotesEditor } from "../../molecules/StepNotesEditor";
@@ -33,10 +34,11 @@ export const StepEditorContent = ({
   onSave,
   onCancel,
 }: StepEditorContentProps) => {
+  const t = useTranslate("editor");
   return (
     <>
       <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">
-        Edit Step {stepIndex + 1}
+        {t("stepEditor.editStep", { n: stepIndex + 1 })}
       </h2>
       <div className="space-y-6">
         <DurationPicker
