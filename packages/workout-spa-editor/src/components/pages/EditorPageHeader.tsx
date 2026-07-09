@@ -1,5 +1,6 @@
 import { PenLine } from "lucide-react";
 
+import { useTranslate } from "../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import { BackButton } from "../atoms/BackButton/BackButton";
 
@@ -10,16 +11,17 @@ export type EditorPageHeaderProps = {
 
 const COPY = {
   new: {
-    title: "New workout",
-    description: "Create from scratch, generate with AI, or import a file.",
+    title: "pageHeader.newTitle",
+    description: "pageHeader.newDescription",
   },
   edit: {
-    title: "Edit workout",
-    description: "Refine steps, intervals, and targets.",
+    title: "pageHeader.editTitle",
+    description: "pageHeader.editDescription",
   },
 } as const;
 
 export function EditorPageHeader({ mode, onBack }: EditorPageHeaderProps) {
+  const t = useTranslate("editor");
   const { title, description } = COPY[mode];
 
   return (
@@ -32,10 +34,12 @@ export function EditorPageHeader({ mode, onBack }: EditorPageHeaderProps) {
           {...{ [ROUTE_HEADING_ATTR]: "" }}
           className="text-xl font-semibold text-gray-900 dark:text-white"
         >
-          {title}
+          {t(title)}
         </h1>
       </div>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        {t(description)}
+      </p>
     </div>
   );
 }

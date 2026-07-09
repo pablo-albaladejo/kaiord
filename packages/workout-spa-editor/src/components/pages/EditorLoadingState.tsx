@@ -6,22 +6,24 @@
 
 import { Link } from "wouter";
 
+import { useTranslate } from "../../i18n/use-translate";
+
 export function EditorLoading() {
+  const t = useTranslate("editor");
   return (
     <div className="flex items-center justify-center py-16 text-muted-foreground">
-      Loading workout...
+      {t("loading.loadingWorkout")}
     </div>
   );
 }
 
 export function EditorNoData() {
+  const t = useTranslate("editor");
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <p className="text-muted-foreground">
-        This workout has no structured data yet.
-      </p>
+      <p className="text-muted-foreground">{t("loading.noStructuredData")}</p>
       <Link href="/daily" className="text-primary underline mt-2">
-        Go to Daily
+        {t("loading.goToDaily")}
       </Link>
     </div>
   );

@@ -12,6 +12,7 @@
 
 import { Download } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { ExportFormatSelector } from "../ExportFormatSelector/ExportFormatSelector";
@@ -27,6 +28,7 @@ export type SaveButtonProps = {
 };
 
 export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
+  const t = useTranslate("editor");
   const {
     saveErrors,
     isSaving,
@@ -65,7 +67,7 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
           className="w-full sm:w-auto"
         >
           {icon}
-          {isSaving ? "Saving..." : "Save Workout"}
+          {isSaving ? t("save.saving") : t("save.saveWorkout")}
         </Button>
       </div>
 
