@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 
 type FileUploadButtonProps = {
@@ -11,6 +12,7 @@ export function FileUploadButton({
   disabled,
   isLoading,
 }: FileUploadButtonProps) {
+  const t = useTranslate("import");
   return (
     <Button
       onClick={onClick}
@@ -19,7 +21,7 @@ export function FileUploadButton({
       variant="primary"
       size="md"
     >
-      {isLoading ? "Loading..." : "Upload Workout File"}
+      {isLoading ? t("button.loading") : t("button.upload")}
     </Button>
   );
 }

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { IntakeLoggerFields as Fields } from "./intake-logger-model";
 import { IntakeNumberField } from "./IntakeNumberField";
 import { MealSlotField } from "./MealSlotField";
@@ -15,13 +16,14 @@ export function IntakeLoggerFields({
   fields,
   onChange,
 }: IntakeLoggerFieldsProps) {
+  const t = useTranslate("nutrition");
   const set = (key: keyof Fields) => (value: string) =>
     onChange({ ...fields, [key]: value });
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-2">
         <IntakeNumberField
-          label="Energy (kcal)"
+          label={t("logger.energy")}
           value={fields.kcal}
           onChange={set("kcal")}
         />
@@ -32,27 +34,27 @@ export function IntakeLoggerFields({
       </div>
       <div className="flex gap-2">
         <IntakeNumberField
-          label="Protein (g)"
+          label={t("logger.protein")}
           value={fields.proteinG}
           onChange={set("proteinG")}
         />
         <IntakeNumberField
-          label="Carbs (g)"
+          label={t("logger.carbs")}
           value={fields.carbG}
           onChange={set("carbG")}
         />
         <IntakeNumberField
-          label="Fat (g)"
+          label={t("logger.fat")}
           value={fields.fatG}
           onChange={set("fatG")}
         />
       </div>
       <label className="text-xs font-medium text-slate-300">
-        Label (optional)
+        {t("logger.labelOptional")}
         <input
           type="text"
           value={fields.label}
-          aria-label="Label"
+          aria-label={t("logger.label")}
           maxLength={120}
           onChange={(event) => set("label")(event.target.value)}
           className={LABEL_CLASS}
