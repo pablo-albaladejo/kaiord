@@ -5,6 +5,7 @@
  * `—` under "Output" to avoid presenting a fabricated zero as fact.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { UsageRecord } from "../../../types/usage-schemas";
 
 export type UsageTableProps = {
@@ -17,19 +18,20 @@ function formatOutput(row: UsageRecord): string {
 }
 
 export function UsageTable({ rows, monthsWindow }: UsageTableProps) {
+  const t = useTranslate("settings");
   return (
     <div className="space-y-3">
       <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-        AI Usage — last {monthsWindow} months
+        {t("usage.heading", { count: monthsWindow })}
       </h3>
       <table className="w-full text-sm" data-testid="usage-table">
         <thead>
           <tr className="border-b border-gray-200 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            <th className="py-2 pr-4 font-medium">Month</th>
-            <th className="py-2 pr-4 font-medium">Input</th>
-            <th className="py-2 pr-4 font-medium">Output</th>
-            <th className="py-2 pr-4 font-medium">Total</th>
-            <th className="py-2 font-medium">Cost (USD)</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.month")}</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.input")}</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.output")}</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.total")}</th>
+            <th className="py-2 font-medium">{t("usage.cost")}</th>
           </tr>
         </thead>
         <tbody>
@@ -65,10 +67,8 @@ export function UsageTable({ rows, monthsWindow }: UsageTableProps) {
         </tbody>
       </table>
       <p className="text-xs text-gray-500 dark:text-gray-400">
-        Values reflect actual usage recorded per batch run — not the pre-run
-        estimate shown in the confirmation dialog. Rows marked{" "}
-        <span aria-hidden="true">—</span> are from a legacy schema where the
-        input / output split was not captured.
+        {t("usage.footnoteBefore")} <span aria-hidden="true">—</span>{" "}
+        {t("usage.footnoteAfter")}
       </p>
     </div>
   );

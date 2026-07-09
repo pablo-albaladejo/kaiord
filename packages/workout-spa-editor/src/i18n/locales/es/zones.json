@@ -1,0 +1,65 @@
+{
+  "header": {
+    "powerTitle": "Zonas de potencia",
+    "heartRateTitle": "Zonas de frecuencia cardíaca",
+    "powerDescription": "Configura {{count}} zonas de potencia según el FTP{{suffix}}",
+    "heartRateDescription": "Configura {{count}} zonas de frecuencia cardíaca según el LTHR{{suffix}}",
+    "ftpSuffix": " ({{ftp}} W)",
+    "lthrSuffix": " ({{lthr}} bpm)"
+  },
+  "actions": {
+    "cancel": "Cancelar",
+    "saveZones": "Guardar zonas"
+  },
+  "inputs": {
+    "namePlaceholder": "Nombre de la zona",
+    "minPercent": "Mín %",
+    "maxPercent": "Máx %",
+    "minBpm": "Mín BPM",
+    "maxBpm": "Máx BPM"
+  },
+  "method": {
+    "ariaLabel": "método de zona {{type}}",
+    "confirmTitle": "Cambiar método de zona",
+    "confirmMessage": "Esto reemplazará tus zonas actuales con valores calculados. ¿Continuar?",
+    "confirmLabel": "Cambiar método",
+    "keepLabel": "Mantener actual"
+  },
+  "table": {
+    "noZones": "No hay zonas configuradas",
+    "addZone": "+ Añadir zona",
+    "zoneNameAria": "{{prefix}} Zona {{zone}} nombre",
+    "zoneMinAria": "{{prefix}} Zona {{zone}} mín",
+    "zoneMaxAria": "{{prefix}} Zona {{zone}} máx",
+    "removeZoneAria": "Eliminar zona {{prefix}} {{zone}}"
+  },
+  "tabs": {
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swimming": "Natación",
+    "generic": "Genérico"
+  },
+  "threshold": {
+    "pace": "Ritmo umbral",
+    "ariaLabel": "umbral {{label}}"
+  },
+  "section": {
+    "heartRate": "Zonas de frecuencia cardíaca",
+    "power": "Zonas de potencia",
+    "pace": "Zonas de ritmo"
+  },
+  "validation": {
+    "heading": "Errores de validación",
+    "zoneLabel": "Zona {{zone}}: {{message}}",
+    "min-max": "El mínimo debe ser menor que el máximo",
+    "overlap": "Se solapa con la zona siguiente"
+  },
+  "zoneType": {
+    "hr": "FC",
+    "power": "Potencia",
+    "pace": "Ritmo"
+  },
+  "empty": {
+    "noSportConfig": "No hay configuración de zonas para este deporte."
+  }
+}

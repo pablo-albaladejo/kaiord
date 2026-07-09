@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 
@@ -19,31 +20,34 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
   onEdit,
   onRemove,
   onSetDefault,
-}) => (
-  <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
-    <div>
-      <span className="font-medium">{p.label}</span>
-      <span className="ml-2 text-xs text-gray-500">
-        {PROVIDER_LABELS[p.type]}
-      </span>
-      {p.isDefault && (
-        <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-          Default
+}) => {
+  const t = useTranslate("settings");
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+      <div>
+        <span className="font-medium">{p.label}</span>
+        <span className="ml-2 text-xs text-gray-500">
+          {PROVIDER_LABELS[p.type]}
         </span>
-      )}
-    </div>
-    <div className="flex gap-2">
-      <Button size="sm" variant="secondary" onClick={onEdit}>
-        Edit
-      </Button>
-      {!p.isDefault && (
-        <Button size="sm" variant="secondary" onClick={onSetDefault}>
-          Set Default
+        {p.isDefault && (
+          <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+            {t("providers.default")}
+          </span>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" variant="secondary" onClick={onEdit}>
+          {t("providers.edit")}
         </Button>
-      )}
-      <Button size="sm" variant="danger" onClick={onRemove}>
-        Remove
-      </Button>
+        {!p.isDefault && (
+          <Button size="sm" variant="secondary" onClick={onSetDefault}>
+            {t("providers.setDefault")}
+          </Button>
+        )}
+        <Button size="sm" variant="danger" onClick={onRemove}>
+          {t("providers.remove")}
+        </Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
