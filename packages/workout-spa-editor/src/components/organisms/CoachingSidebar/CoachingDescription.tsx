@@ -6,6 +6,7 @@
  * `dangerouslySetInnerHTML` so the sidebar is safe even if the
  * upstream description carries unexpected markup.
  */
+import { useTranslate } from "../../../i18n/use-translate";
 import { renderCoachingInline } from "./coaching-inline";
 import { formatCoachingDescription } from "./format-coaching-description";
 
@@ -14,13 +15,14 @@ export type CoachingDescriptionProps = {
 };
 
 export function CoachingDescription({ description }: CoachingDescriptionProps) {
+  const t = useTranslate("chat");
   if (!description) {
     return (
       <p
         data-testid="coaching-sidebar-empty"
         className="text-xs italic text-slate-500 dark:text-slate-400"
       >
-        No description provided.
+        {t("coaching.noDescription")}
       </p>
     );
   }

@@ -1,5 +1,6 @@
 import { useChatPrefill } from "../../../hooks/use-chat-prefill";
 import type { UseChatSearchPanel } from "../../../hooks/use-chat-search-panel";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { ChatConversationRecord } from "../../../types/chat/chat-conversation-record";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
@@ -28,6 +29,7 @@ export type ChatWorkspaceProps = {
 /** Two-column chat surface: the conversation list and the active thread (or a
  * prompt to pick/start one when no thread is selected). */
 export function ChatWorkspace(props: ChatWorkspaceProps) {
+  const t = useTranslate("chat");
   const prefill = useChatPrefill();
   return (
     <div className="grid gap-4 md:grid-cols-[240px_1fr]">
@@ -64,7 +66,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
           />
         ) : (
           <p className="p-4 text-sm text-slate-400">
-            Select a conversation or start a new one.
+            {t("workspace.selectOrStart")}
           </p>
         )}
       </div>

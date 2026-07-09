@@ -39,7 +39,7 @@ export function ChatTurnExtras({
           busy={busy}
         />
       )}
-      {error !== null && <ChatErrorNotice message={error} onRetry={onRetry} />}
+      {error !== null && <ChatErrorNotice category={error} onRetry={onRetry} />}
     </>
   );
 }

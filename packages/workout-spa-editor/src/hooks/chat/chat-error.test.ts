@@ -11,9 +11,7 @@ describe("categorizeChatError", () => {
     const category = categorizeChatError(error);
 
     // Assert
-    expect(category).toBe(
-      "Authentication failed — check your API key in settings."
-    );
+    expect(category).toBe("auth");
   });
 
   it("should map rate/quota failures to a fixed category", () => {
@@ -24,7 +22,7 @@ describe("categorizeChatError", () => {
     const category = categorizeChatError(error);
 
     // Assert
-    expect(category).toContain("Rate limit");
+    expect(category).toBe("rate");
   });
 
   it("should map network failures to a fixed category", () => {
@@ -35,7 +33,7 @@ describe("categorizeChatError", () => {
     const category = categorizeChatError(error);
 
     // Assert
-    expect(category).toContain("Network error");
+    expect(category).toBe("network");
   });
 
   it("should fall back to a generic category for unknown errors", () => {
@@ -46,7 +44,7 @@ describe("categorizeChatError", () => {
     const category = categorizeChatError(error);
 
     // Assert
-    expect(category).toBe("The assistant hit an error. Try again.");
+    expect(category).toBe("generic");
   });
 
   it("should never leak the original message into the category", () => {
