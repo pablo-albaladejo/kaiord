@@ -9,6 +9,7 @@ import type { LabValue } from "@kaiord/core";
 import { useMemo } from "react";
 
 import { useActiveLocale } from "../../../../../i18n/LocaleProvider";
+import { useTranslate } from "../../../../../i18n/use-translate";
 import type { ChartMetricDef } from "../../../../charts/uplot-base/uplot-base";
 import { UplotChart } from "../../../../charts/uplot-base/uplot-chart";
 import { labParameterLabel } from "../lab-parameter-label";
@@ -18,7 +19,6 @@ import { resolveReferenceBand } from "./reference-band";
 
 const CHART_WIDTH = 720;
 const CHART_HEIGHT = 300;
-const EMPTY_MSG = "No history for this parameter yet.";
 
 export const LabParameterChart = ({
   parameterKey,
@@ -28,6 +28,7 @@ export const LabParameterChart = ({
   values: LabValue[];
 }) => {
   const locale = useActiveLocale();
+  const t = useTranslate("labs-ui");
   const def: ChartMetricDef = useMemo(
     () => ({
       key: parameterKey,
@@ -41,7 +42,7 @@ export const LabParameterChart = ({
   const options = useMemo(() => buildLabChartOptions(def, band), [def, band]);
 
   if (values.length === 0)
-    return <p className="text-sm text-gray-600">{EMPTY_MSG}</p>;
+    return <p className="text-sm text-gray-600">{t("chart.empty")}</p>;
 
   return (
     <div
