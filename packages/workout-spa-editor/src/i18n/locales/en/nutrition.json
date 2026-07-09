@@ -1,0 +1,101 @@
+{
+  "page": {
+    "heading": "Nutrition"
+  },
+  "empty": {
+    "title": "Nutrition",
+    "body": "Create an athlete profile to start logging intake"
+  },
+  "goal": {
+    "title": "Goal",
+    "edit": "Edit goal",
+    "set": "Set goal",
+    "target": "Target {{value}}",
+    "none": "No goal set yet"
+  },
+  "adaptive": {
+    "title": "Adaptive maintenance",
+    "explanation": "Estimated from your logged intake versus your smoothed weight trend. It is an estimate and will refine as you log more."
+  },
+  "macros": {
+    "title": "Macros",
+    "energy": "Energy",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat"
+  },
+  "logger": {
+    "title": "Log intake",
+    "energy": "Energy (kcal)",
+    "protein": "Protein (g)",
+    "carbs": "Carbs (g)",
+    "fat": "Fat (g)",
+    "labelOptional": "Label (optional)",
+    "label": "Label",
+    "meal": "Meal",
+    "mealSlot": "Meal slot",
+    "slotAny": "Any",
+    "addEntry": "Add entry",
+    "savePreset": "Save preset",
+    "errorKcal": "Enter the energy in kcal",
+    "errorNegative": "Values must be zero or greater",
+    "slots": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    }
+  },
+  "intake": {
+    "loggedToday": "Logged today",
+    "empty": "No entries logged yet",
+    "entryFallback": "Entry",
+    "deleteEntry": "Delete entry",
+    "macroSummary": "{{kcal}} kcal · {{protein}}P {{carb}}C {{fat}}F"
+  },
+  "presets": {
+    "title": "Presets",
+    "empty": "Save a labeled entry as a preset to reuse it",
+    "delete": "Delete preset"
+  },
+  "plan": {
+    "title": "This week",
+    "burnTarget": "burn / target",
+    "workoutScheduled": "Workout scheduled"
+  },
+  "toast": {
+    "entryLogged": "Entry logged",
+    "entryRejected": "Could not log entry — check the values",
+    "presetSaved": "Preset saved",
+    "presetApplied": "Preset applied",
+    "deleted": "Entry removed"
+  },
+  "trends": {
+    "title": "Trends",
+    "rangeLabel": "Trend range",
+    "loading": "Loading…",
+    "empty": "Log weigh-ins to see your weight trend and balance overlays.",
+    "avgBurn": "Avg burn {{value}}",
+    "avgIntake": "Avg intake {{value}}",
+    "net": "Net {{value}}",
+    "untracked": "Untracked",
+    "deficit": "{{value}} deficit",
+    "surplus": "{{value}} surplus",
+    "balanced": "balanced",
+    "daysTracked": "{{tracked}}/{{range}} days tracked",
+    "weightAxis": "Weight (kg)",
+    "range": {
+      "d30": "30d",
+      "d90": "90d",
+      "d365": "365d"
+    },
+    "series": {
+      "weightRaw": "Weight",
+      "weightEma": "Weight trend",
+      "goal": "Goal",
+      "steps": "Steps",
+      "sleep": "Sleep",
+      "training": "Weekly training (min)"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "page": {
+    "heading": "Nutrición"
+  },
+  "empty": {
+    "title": "Nutrición",
+    "body": "Crea un perfil de atleta para empezar a registrar la ingesta"
+  },
+  "goal": {
+    "title": "Objetivo",
+    "edit": "Editar objetivo",
+    "set": "Definir objetivo",
+    "target": "Objetivo {{value}}",
+    "none": "Aún no hay objetivo definido"
+  },
+  "adaptive": {
+    "title": "Mantenimiento adaptativo",
+    "explanation": "Estimado a partir de tu ingesta registrada frente a tu tendencia de peso suavizada. Es una estimación y se irá afinando a medida que registres más."
+  },
+  "macros": {
+    "title": "Macros",
+    "energy": "Calorías",
+    "protein": "Proteínas",
+    "carbs": "Carbohidratos",
+    "fat": "Grasas"
+  },
+  "logger": {
+    "title": "Registrar ingesta",
+    "energy": "Energía (kcal)",
+    "protein": "Proteínas (g)",
+    "carbs": "Carbohidratos (g)",
+    "fat": "Grasas (g)",
+    "labelOptional": "Etiqueta (opcional)",
+    "label": "Etiqueta",
+    "meal": "Comida",
+    "mealSlot": "Franja de comida",
+    "slotAny": "Cualquiera",
+    "addEntry": "Añadir entrada",
+    "savePreset": "Guardar preajuste",
+    "errorKcal": "Introduce la energía en kcal",
+    "errorNegative": "Los valores deben ser cero o mayores",
+    "slots": {
+      "breakfast": "Desayuno",
+      "lunch": "Almuerzo",
+      "dinner": "Cena",
+      "snack": "Tentempié"
+    }
+  },
+  "intake": {
+    "loggedToday": "Registrado hoy",
+    "empty": "Aún no hay entradas registradas",
+    "entryFallback": "Entrada",
+    "deleteEntry": "Eliminar entrada",
+    "macroSummary": "{{kcal}} kcal · {{protein}}P {{carb}}C {{fat}}G"
+  },
+  "presets": {
+    "title": "Preajustes",
+    "empty": "Guarda una entrada con etiqueta como preajuste para reutilizarla",
+    "delete": "Eliminar preajuste"
+  },
+  "plan": {
+    "title": "Esta semana",
+    "burnTarget": "gasto / objetivo",
+    "workoutScheduled": "Entrenamiento programado"
+  },
+  "toast": {
+    "entryLogged": "Entrada registrada",
+    "entryRejected": "No se pudo registrar la entrada: revisa los valores",
+    "presetSaved": "Preajuste guardado",
+    "presetApplied": "Preajuste aplicado",
+    "deleted": "Entrada eliminada"
+  },
+  "trends": {
+    "title": "Tendencias",
+    "rangeLabel": "Rango de tendencia",
+    "loading": "Cargando…",
+    "empty": "Registra pesajes para ver tu tendencia de peso y las superposiciones de balance.",
+    "avgBurn": "Gasto medio {{value}}",
+    "avgIntake": "Ingesta media {{value}}",
+    "net": "Neto {{value}}",
+    "untracked": "Sin registrar",
+    "deficit": "{{value}} de déficit",
+    "surplus": "{{value}} de superávit",
+    "balanced": "equilibrado",
+    "daysTracked": "{{tracked}}/{{range}} días registrados",
+    "weightAxis": "Peso (kg)",
+    "range": {
+      "d30": "30 d",
+      "d90": "90 d",
+      "d365": "365 d"
+    },
+    "series": {
+      "weightRaw": "Peso",
+      "weightEma": "Tendencia de peso",
+      "goal": "Objetivo",
+      "steps": "Pasos",
+      "sleep": "Sueño",
+      "training": "Entrenamiento semanal (min)"
+    }
+  }
+}

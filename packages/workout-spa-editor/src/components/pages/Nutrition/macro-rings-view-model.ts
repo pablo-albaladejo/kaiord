@@ -10,6 +10,8 @@
 
 import type { MacroNutrients } from "@kaiord/core";
 
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
+
 export type MacroRingKey = "energy" | "protein" | "carb" | "fat";
 
 export type MacroRing = {
@@ -25,15 +27,15 @@ export type MacroRing = {
 
 type RingSpec = {
   key: MacroRingKey;
-  label: string;
+  labelKey: string;
   field: keyof MacroNutrients;
 };
 
 const RING_SPECS: readonly RingSpec[] = [
-  { key: "energy", label: "Energy", field: "kcal" },
-  { key: "protein", label: "Protein", field: "protein_g" },
-  { key: "carb", label: "Carbs", field: "carb_g" },
-  { key: "fat", label: "Fat", field: "fat_g" },
+  { key: "energy", labelKey: "macros.energy", field: "kcal" },
+  { key: "protein", labelKey: "macros.protein", field: "protein_g" },
+  { key: "carb", labelKey: "macros.carbs", field: "carb_g" },
+  { key: "fat", labelKey: "macros.fat", field: "fat_g" },
 ] as const;
 
 const ringUnit = (key: MacroRingKey): MacroRing["unit"] =>
@@ -42,14 +44,15 @@ const ringUnit = (key: MacroRingKey): MacroRing["unit"] =>
 const buildRing = (
   spec: RingSpec,
   actuals: MacroNutrients,
-  targets: MacroNutrients | null
+  targets: MacroNutrients | null,
+  t: Translate
 ): MacroRing => {
   const actual = actuals[spec.field];
   const target = targets ? targets[spec.field] : null;
   const fraction = target && target > 0 ? Math.min(actual / target, 1) : null;
   return {
     key: spec.key,
-    label: spec.label,
+    label: t(spec.labelKey),
     unit: ringUnit(spec.key),
     actual,
     target,
@@ -62,6 +65,9 @@ const EMPTY: MacroNutrients = { kcal: 0, protein_g: 0, carb_g: 0, fat_g: 0 };
 
 export const toMacroRings = (
   actuals: MacroNutrients | undefined,
-  targets: MacroNutrients | undefined
+  targets: MacroNutrients | undefined,
+  t: Translate = getTranslate("nutrition")
 ): MacroRing[] =>
-  RING_SPECS.map((spec) => buildRing(spec, actuals ?? EMPTY, targets ?? null));
+  RING_SPECS.map((spec) =>
+    buildRing(spec, actuals ?? EMPTY, targets ?? null, t)
+  );

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 
 import { useEnergyRollup } from "../../../../hooks/energy/use-energy-rollup";
+import { useTranslate } from "../../../../i18n/use-translate";
 import { Card } from "../../../atoms/Card";
 import { Icon, ICON_MAP } from "../../../atoms/Icon";
 import {
@@ -18,9 +19,6 @@ const EnergyTrendChartCard = lazy(() => import("./EnergyTrendChartCard"));
 
 export type EnergyTrendsSectionProps = { profileId: string; date: string };
 
-const EMPTY_MSG =
-  "Log weigh-ins to see your weight trend and balance overlays.";
-
 /**
  * Trends view: the weight EMA trend + goal line with steps / sleep / weekly
  * training overlaid, plus the range roll-up. Reads live from Dexie.
@@ -29,6 +27,7 @@ export function EnergyTrendsSection({
   profileId,
   date,
 }: EnergyTrendsSectionProps) {
+  const t = useTranslate("nutrition");
   const [days, setDays] = useState<EnergyTrendRangeDays>(30);
   const range = useMemo(() => resolveTrendRange(date, days), [date, days]);
   const { series, loading } = useEnergyTrendSeries(profileId, range);
@@ -42,7 +41,9 @@ export function EnergyTrendsSection({
     >
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.trend} size="md" color="inherit" />
-        <p className="m-0 text-[15px] font-semibold text-slate-100">Trends</p>
+        <p className="m-0 text-[15px] font-semibold text-slate-100">
+          {t("trends.title")}
+        </p>
         <div className="ml-auto">
           <EnergyTrendRangeSelector selected={days} onSelect={setDays} />
         </div>
@@ -58,7 +59,7 @@ export function EnergyTrendsSection({
             className="text-[13px] text-slate-400"
             data-testid="energy-trends-loading"
           >
-            Loading…
+            {t("trends.loading")}
           </p>
         ) : hasWeight ? (
           <Suspense fallback={null}>
@@ -69,7 +70,7 @@ export function EnergyTrendsSection({
             className="text-[13px] text-slate-400"
             data-testid="energy-trends-empty"
           >
-            {EMPTY_MSG}
+            {t("trends.empty")}
           </p>
         )}
       </div>

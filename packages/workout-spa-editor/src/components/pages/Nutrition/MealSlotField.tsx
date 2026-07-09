@@ -1,11 +1,13 @@
 import type { MealSlot } from "@kaiord/core";
 import { useId } from "react";
 
-const SLOTS: readonly { value: MealSlot; label: string }[] = [
-  { value: "breakfast", label: "Breakfast" },
-  { value: "lunch", label: "Lunch" },
-  { value: "dinner", label: "Dinner" },
-  { value: "snack", label: "Snack" },
+import { useTranslate } from "../../../i18n/use-translate";
+
+const SLOTS: readonly MealSlot[] = [
+  "breakfast",
+  "lunch",
+  "dinner",
+  "snack",
 ] as const;
 
 export type MealSlotFieldProps = {
@@ -16,20 +18,21 @@ export type MealSlotFieldProps = {
 /** Optional meal-slot selector for the intake logger ("Any" = unset). */
 export function MealSlotField({ value, onChange }: MealSlotFieldProps) {
   const id = useId();
+  const t = useTranslate("nutrition");
   return (
     <label htmlFor={id} className="flex-1 text-xs font-medium text-slate-300">
-      Meal
+      {t("logger.meal")}
       <select
         id={id}
         value={value}
-        aria-label="Meal slot"
+        aria-label={t("logger.mealSlot")}
         onChange={(event) => onChange(event.target.value as MealSlot | "")}
         className="mt-1 block w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100"
       >
-        <option value="">Any</option>
+        <option value="">{t("logger.slotAny")}</option>
         {SLOTS.map((slot) => (
-          <option key={slot.value} value={slot.value}>
-            {slot.label}
+          <option key={slot} value={slot}>
+            {t(`logger.slots.${slot}`)}
           </option>
         ))}
       </select>

@@ -11,13 +11,8 @@ import { logIntakeEntry } from "../../../application/nutrition/log-intake-entry.
 import { saveIntakePreset } from "../../../application/nutrition/save-intake-preset.use-case";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { IntakeLoggerEntry } from "./intake-logger-model";
-
-const TOAST_ENTRY_LOGGED = "Entry logged";
-const TOAST_ENTRY_REJECTED = "Could not log entry — check the values";
-const TOAST_PRESET_SAVED = "Preset saved";
-const TOAST_PRESET_APPLIED = "Preset applied";
-const TOAST_DELETED = "Entry removed";
 
 export type UseIntakeActionsResult = {
   logEntry: (date: string, entry: IntakeLoggerEntry) => Promise<boolean>;
@@ -30,14 +25,15 @@ export type UseIntakeActionsResult = {
 export function useIntakeActions(profileId: string): UseIntakeActionsResult {
   const persistence = usePersistence();
   const toast = useToastContext();
+  const t = useTranslate("nutrition");
 
   const logEntry = async (date: string, entry: IntakeLoggerEntry) => {
     const saved = await logIntakeEntry(
       { persistence, profileId },
       { date, ...entry }
     );
-    if (saved) toast.success(TOAST_ENTRY_LOGGED);
-    else toast.error(TOAST_ENTRY_REJECTED);
+    if (saved) toast.success(t("toast.entryLogged"));
+    else toast.error(t("toast.entryRejected"));
     return saved !== undefined;
   };
 
@@ -53,8 +49,8 @@ export function useIntakeActions(profileId: string): UseIntakeActionsResult {
         defaultMealSlot: entry.mealSlot,
       }
     );
-    if (saved) toast.success(TOAST_PRESET_SAVED);
-    else toast.error(TOAST_ENTRY_REJECTED);
+    if (saved) toast.success(t("toast.presetSaved"));
+    else toast.error(t("toast.entryRejected"));
     return saved !== undefined;
   };
 
@@ -63,13 +59,13 @@ export function useIntakeActions(profileId: string): UseIntakeActionsResult {
       { persistence, profileId },
       { presetId, date }
     );
-    if (applied) toast.success(TOAST_PRESET_APPLIED);
-    else toast.error(TOAST_ENTRY_REJECTED);
+    if (applied) toast.success(t("toast.presetApplied"));
+    else toast.error(t("toast.entryRejected"));
   };
 
   const deleteEntry = async (id: string) => {
     await deleteIntakeEntry({ persistence }, id);
-    toast.success(TOAST_DELETED);
+    toast.success(t("toast.deleted"));
   };
 
   const removePreset = (id: string) => deleteIntakePreset({ persistence }, id);

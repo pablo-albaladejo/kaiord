@@ -1,5 +1,6 @@
 import type { MacroNutrients } from "@kaiord/core";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { toMacroRings } from "./macro-rings-view-model";
 import { MacroRing } from "./MacroRing";
 
@@ -15,7 +16,8 @@ export type MacroRingsProps = {
  * EnergyBalanceCard.
  */
 export function MacroRings({ actuals, targets, size }: MacroRingsProps) {
-  const rings = toMacroRings(actuals, targets);
+  const t = useTranslate("nutrition");
+  const rings = toMacroRings(actuals, targets, t);
   return (
     <div className="flex justify-between gap-2" data-testid="macro-rings">
       {rings.map((ring) => (

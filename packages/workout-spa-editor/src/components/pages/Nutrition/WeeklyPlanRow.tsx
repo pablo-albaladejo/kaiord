@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import type { WeekEnergyPlanRowView } from "./week-energy-plan-view-model";
 
@@ -5,6 +6,7 @@ export type WeeklyPlanRowProps = { row: WeekEnergyPlanRowView };
 
 /** One day of the weekly energy plan: weekday, expenditure, target, sport flag. */
 export function WeeklyPlanRow({ row }: WeeklyPlanRowProps) {
+  const t = useTranslate("nutrition");
   return (
     <div
       className="flex items-center gap-3 py-1.5 text-[13px]"
@@ -17,7 +19,7 @@ export function WeeklyPlanRow({ row }: WeeklyPlanRowProps) {
           size="sm"
           color="inherit"
           data-testid="weekly-plan-workout"
-          aria-label="Workout scheduled"
+          aria-label={t("plan.workoutScheduled")}
         />
       ) : (
         <span className="w-4" aria-hidden="true" />

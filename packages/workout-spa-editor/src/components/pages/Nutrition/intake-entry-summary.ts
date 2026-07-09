@@ -4,15 +4,12 @@
  */
 import type { MealSlot } from "@kaiord/core";
 
-const SLOT_LABEL: Record<MealSlot, string> = {
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
-  snack: "Snack",
-};
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 
-export const mealSlotLabel = (slot: MealSlot | undefined): string | null =>
-  slot ? SLOT_LABEL[slot] : null;
+export const mealSlotLabel = (
+  slot: MealSlot | undefined,
+  t: Translate = getTranslate("nutrition")
+): string | null => (slot ? t(`logger.slots.${slot}`) : null);
 
 export type MacroLine = {
   kcal: number;
@@ -21,6 +18,13 @@ export type MacroLine = {
   fatG: number;
 };
 
-export const macroSummary = (line: MacroLine): string =>
-  `${Math.round(line.kcal)} kcal · ${Math.round(line.proteinG)}P ` +
-  `${Math.round(line.carbG)}C ${Math.round(line.fatG)}F`;
+export const macroSummary = (
+  line: MacroLine,
+  t: Translate = getTranslate("nutrition")
+): string =>
+  t("intake.macroSummary", {
+    kcal: Math.round(line.kcal),
+    protein: Math.round(line.proteinG),
+    carb: Math.round(line.carbG),
+    fat: Math.round(line.fatG),
+  });
