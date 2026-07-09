@@ -6,6 +6,8 @@
  * to override.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
+
 export type AutoMatchBannerHeaderProps = {
   total: number;
   expanded: boolean;
@@ -19,9 +21,10 @@ export function AutoMatchBannerHeader({
   overflow,
   onToggleExpanded,
 }: AutoMatchBannerHeaderProps) {
+  const t = useTranslate("coaching");
   return (
     <div className="mb-2 flex items-center justify-between">
-      <span className="font-medium">Auto-match suggestions ({total})</span>
+      <span className="font-medium">{t("banner.title", { total })}</span>
       {overflow && (
         <button
           type="button"
@@ -29,7 +32,7 @@ export function AutoMatchBannerHeader({
           onClick={onToggleExpanded}
           className="text-xs text-primary-600 hover:underline"
         >
-          {expanded ? "Collapse" : `view all (${total})`}
+          {expanded ? t("banner.collapse") : t("banner.viewAll", { total })}
         </button>
       )}
     </div>

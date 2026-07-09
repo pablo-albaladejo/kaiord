@@ -12,6 +12,7 @@
 import { useState } from "react";
 
 import type { MatchSuggestion } from "../../../application/match-suggestion";
+import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { AutoMatchBannerHeader } from "./AutoMatchBannerHeader";
 import { AutoMatchSuggestionRow } from "./AutoMatchSuggestionRow";
@@ -26,10 +27,12 @@ export type AutoMatchBannerProps = {
 
 const VISIBLE_ROW_CAP = 2;
 
-const remainingMessage = (verb: string, after: number): string =>
-  after === 0
-    ? `${verb}. No suggestions remaining.`
-    : `${verb}. ${after} suggestions remaining.`;
+const statusMessage = (t: Translate, verbKey: string, after: number): string =>
+  `${t(verbKey)} ${
+    after === 0
+      ? t("suggestion.noneRemaining")
+      : t("suggestion.nRemaining", { count: after })
+  }`;
 
 export function AutoMatchBanner({
   suggestions,
@@ -38,6 +41,7 @@ export function AutoMatchBanner({
   resolveActivity,
   resolveWorkoutTitle,
 }: AutoMatchBannerProps) {
+  const t = useTranslate("coaching");
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState("");
 
@@ -46,20 +50,21 @@ export function AutoMatchBanner({
     ? suggestions
     : suggestions.slice(0, VISIBLE_ROW_CAP);
   const overflow = suggestions.length > VISIBLE_ROW_CAP;
+  const after = suggestions.length - 1;
 
   const onAcceptRow = async (s: MatchSuggestion) => {
     await onAccept(s);
-    setStatus(remainingMessage("Session matched", suggestions.length - 1));
+    setStatus(statusMessage(t, "suggestion.sessionMatched", after));
   };
   const onRejectRow = async (s: MatchSuggestion) => {
     await onReject(s);
-    setStatus(remainingMessage("Suggestion dismissed", suggestions.length - 1));
+    setStatus(statusMessage(t, "suggestion.suggestionDismissed", after));
   };
 
   return (
     <section
       role="region"
-      aria-label="Auto-match suggestions"
+      aria-label={t("banner.ariaLabel")}
       data-testid="auto-match-banner"
       className={`overflow-y-auto rounded-md border border-slate-200 bg-slate-50 p-2 text-sm dark:border-slate-700 dark:bg-slate-900 ${expanded ? "max-h-64" : "max-h-32"}`}
     >
