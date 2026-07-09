@@ -12,6 +12,7 @@ import { useCallback, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
 import { usePersistence } from "../../../contexts/persistence-context";
+import { useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { namespaceSourceId } from "../../../types/coaching-activity-record";
@@ -30,6 +31,7 @@ export const useCoachingManual = (
   expandActivity: (activity: CoachingActivity) => void
 ): UseCoachingManual => {
   const persistence = usePersistence();
+  const t = useTranslate("coaching");
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,12 +80,12 @@ export const useCoachingManual = (
         )
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Manual creation failed");
+      setError(err instanceof Error ? err.message : t("hooks.manualFailed"));
     } finally {
       setCreating(false);
       inFlight.current = false;
     }
-  }, [activity, profileId, persistence, navigate, onClose, expandActivity]);
+  }, [activity, profileId, persistence, navigate, onClose, expandActivity, t]);
 
   return {
     creating,
