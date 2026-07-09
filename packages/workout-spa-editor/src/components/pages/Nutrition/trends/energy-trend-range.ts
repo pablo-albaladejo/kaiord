@@ -12,12 +12,7 @@ export type EnergyTrendRangeDays = 30 | 90 | 365;
 
 export const ENERGY_TREND_RANGES: ReadonlyArray<{
   days: EnergyTrendRangeDays;
-  label: string;
-}> = [
-  { days: 30, label: "30d" },
-  { days: 90, label: "90d" },
-  { days: 365, label: "365d" },
-];
+}> = [{ days: 30 }, { days: 90 }, { days: 365 }];
 
 export const resolveTrendRange = (
   anchor: string,

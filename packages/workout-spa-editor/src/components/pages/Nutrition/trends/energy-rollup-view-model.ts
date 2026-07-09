@@ -5,6 +5,7 @@
  */
 
 import type { EnergyRollup } from "../../../../application/energy/build-energy-rollup";
+import { getTranslate, type Translate } from "../../../../i18n/use-translate";
 
 export type EnergyRollupView = {
   avgExpenditure: string;
@@ -26,18 +27,26 @@ const netTone = (
   return "even";
 };
 
-const netLabel = (total: number, daysTracked: number): string => {
+const netLabel = (total: number, daysTracked: number, t: Translate): string => {
   if (daysTracked === 0) return "—";
-  if (total < 0) return `${kcal(-total)} deficit`;
-  if (total > 0) return `${kcal(total)} surplus`;
-  return "balanced";
+  if (total < 0) return t("trends.deficit", { value: kcal(-total) });
+  if (total > 0) return t("trends.surplus", { value: kcal(total) });
+  return t("trends.balanced");
 };
 
-export const toEnergyRollupView = (rollup: EnergyRollup): EnergyRollupView => ({
+export const toEnergyRollupView = (
+  rollup: EnergyRollup,
+  t: Translate = getTranslate("nutrition")
+): EnergyRollupView => ({
   avgExpenditure: kcal(rollup.avgExpenditureKcal),
   avgIntake:
-    rollup.avgIntakeKcal === null ? "Untracked" : kcal(rollup.avgIntakeKcal),
-  net: netLabel(rollup.totalNetKcal, rollup.daysTracked),
+    rollup.avgIntakeKcal === null
+      ? t("trends.untracked")
+      : kcal(rollup.avgIntakeKcal),
+  net: netLabel(rollup.totalNetKcal, rollup.daysTracked, t),
   netTone: netTone(rollup.totalNetKcal, rollup.daysTracked),
-  daysTracked: `${rollup.daysTracked}/${rollup.daysInRange} days tracked`,
+  daysTracked: t("trends.daysTracked", {
+    tracked: rollup.daysTracked,
+    range: rollup.daysInRange,
+  }),
 });
