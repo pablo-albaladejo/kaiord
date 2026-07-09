@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Profile } from "../../../types/profile";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { AvatarRing } from "../../molecules/AvatarRing";
@@ -13,6 +14,7 @@ type AthleteIdentityProps = {
 };
 
 export function AthleteIdentity({ profile }: AthleteIdentityProps) {
+  const t = useTranslate("athlete");
   const [editing, setEditing] = useState(false);
 
   return (
@@ -23,12 +25,12 @@ export function AthleteIdentity({ profile }: AthleteIdentityProps) {
           {profile.name}
         </div>
         <div className="text-[13.5px] text-slate-400">
-          {deriveTagline(profile)}
+          {deriveTagline(profile, t)}
         </div>
       </div>
       <button
         type="button"
-        aria-label="Edit profile"
+        aria-label={t("editProfile")}
         onClick={() => setEditing(true)}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-700/60 bg-white/5 text-slate-300"
       >

@@ -7,6 +7,7 @@
 
 import type { LocaleResources } from "@kaiord/i18n";
 
+import enAthlete from "./locales/en/athlete.json";
 import enCalendar from "./locales/en/calendar.json";
 import enChat from "./locales/en/chat.json";
 import enCoaching from "./locales/en/coaching.json";
@@ -22,6 +23,7 @@ import enNav from "./locales/en/nav.json";
 import enSettings from "./locales/en/settings.json";
 import enTargets from "./locales/en/targets.json";
 import enWorkoutDetail from "./locales/en/workout-detail.json";
+import esAthlete from "./locales/es/athlete.json";
 import esCalendar from "./locales/es/calendar.json";
 import esChat from "./locales/es/chat.json";
 import esCoaching from "./locales/es/coaching.json";
@@ -42,6 +44,7 @@ export const DEFAULT_NAMESPACE = "common";
 
 export const resources: LocaleResources = {
   en: {
+    athlete: enAthlete,
     calendar: enCalendar,
     chat: enChat,
     coaching: enCoaching,
@@ -59,6 +62,7 @@ export const resources: LocaleResources = {
     "workout-detail": enWorkoutDetail,
   },
   es: {
+    athlete: esAthlete,
     calendar: esCalendar,
     chat: esChat,
     coaching: esCoaching,

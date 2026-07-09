@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useSetUserPreferenceFields } from "../../../hooks/use-set-user-preference-fields";
 import { useUserPreferences } from "../../../hooks/use-user-preferences";
+import { useTranslate } from "../../../i18n/use-translate";
 import {
   type ActiveSport,
   ATHLETE_SPORTS,
@@ -22,6 +23,7 @@ type AthletePageBodyProps = {
 };
 
 export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
+  const t = useTranslate("athlete");
   const prefs = useUserPreferences({ profileId, defaultView: "grid" });
   const setPrefs = useSetUserPreferenceFields(profileId);
   const [sport, setSport] = useState<ActiveSport>(() => defaultSport(profile));
@@ -52,7 +54,7 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
         options={[...ATHLETE_SPORTS]}
         value={sport}
         onChange={handleSportChange}
-        ariaLabel="Sport"
+        ariaLabel={t("sportAria")}
       />
       <ThresholdCard
         profile={profile}
