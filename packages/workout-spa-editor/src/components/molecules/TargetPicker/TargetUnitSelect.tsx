@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Input } from "../../atoms/Input/Input";
 
 type TargetUnitSelectProps = {
@@ -13,10 +14,12 @@ export const TargetUnitSelect = ({
   disabled,
   options,
 }: TargetUnitSelectProps) => {
+  const t = useTranslate("targets");
+
   return (
     <Input
       variant="select"
-      label="Unit"
+      label={t("unitLabel")}
       value={value}
       onChange={onChange}
       disabled={disabled}
@@ -24,7 +27,7 @@ export const TargetUnitSelect = ({
         value: opt.value,
         label: opt.label,
       }))}
-      aria-label="Select target unit"
+      aria-label={t("unitAria")}
     />
   );
 };

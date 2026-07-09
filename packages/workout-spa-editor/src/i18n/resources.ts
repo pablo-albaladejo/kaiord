@@ -15,6 +15,7 @@ import enLabImport from "./locales/en/labImport.json";
 import enLabs from "./locales/en/labs.json";
 import enNav from "./locales/en/nav.json";
 import enSettings from "./locales/en/settings.json";
+import enTargets from "./locales/en/targets.json";
 import esCommon from "./locales/es/common.json";
 import esDaily from "./locales/es/daily.json";
 import esEditor from "./locales/es/editor.json";
@@ -23,6 +24,7 @@ import esLabImport from "./locales/es/labImport.json";
 import esLabs from "./locales/es/labs.json";
 import esNav from "./locales/es/nav.json";
 import esSettings from "./locales/es/settings.json";
+import esTargets from "./locales/es/targets.json";
 
 export const NAMESPACES = [
   "common",
@@ -33,6 +35,7 @@ export const NAMESPACES = [
   "labImport",
   "nav",
   "settings",
+  "targets",
 ] as const;
 
 export const DEFAULT_NAMESPACE = "common";
@@ -47,6 +50,7 @@ export const resources: LocaleResources = {
     labImport: enLabImport,
     nav: enNav,
     settings: enSettings,
+    targets: enTargets,
   },
   es: {
     common: esCommon,
@@ -57,5 +61,6 @@ export const resources: LocaleResources = {
     labImport: esLabImport,
     nav: esNav,
     settings: esSettings,
+    targets: esTargets,
   },
 };
