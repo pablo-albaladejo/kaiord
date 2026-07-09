@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import { db } from "../../adapters/dexie/dexie-database";
 import type { BatchProgress } from "../../application/batch-processor";
 import { processBatch } from "../../application/batch-processor";
+import { useTranslate } from "../../i18n/use-translate";
 import { createProcessOne } from "./batch-process-one";
 import type { BatchPending } from "./use-batch-state";
 
@@ -10,6 +11,7 @@ export function useBatchRunner(
   setMessage: (msg: string | null) => void,
   onSuccess?: (count: number) => void
 ) {
+  const t = useTranslate("calendar");
   const [progress, setProgress] = useState<BatchProgress | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -34,12 +36,12 @@ export function useBatchRunner(
         // this hook free of React-context coupling.
         onSuccess?.(batch.workouts.length);
       } catch {
-        setMessage("Batch processing encountered an unexpected error.");
+        setMessage(t("batch.error"));
       } finally {
         setIsProcessing(false);
       }
     },
-    [setMessage, onSuccess]
+    [setMessage, onSuccess, t]
   );
 
   const cancel = useCallback(() => {

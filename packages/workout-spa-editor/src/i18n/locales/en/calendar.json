@@ -1,0 +1,36 @@
+{
+  "page": {
+    "heading": "Calendar"
+  },
+  "gridHeader": {
+    "todaySuffix": " (today)",
+    "activities": "{{count}} activities"
+  },
+  "weekList": {
+    "todaySuffix": " (today)",
+    "addTo": "Add to {{date}}",
+    "add": "+ Add"
+  },
+  "viewToggle": {
+    "switchToGridView": "Switch to grid view",
+    "switchToListView": "Switch to list view"
+  },
+  "addEntry": {
+    "title": "What do you want to add?",
+    "addTo": "Add to {{date}}",
+    "workout": "Workout",
+    "wellness": "Wellness"
+  },
+  "dateBanner": {
+    "creatingWorkoutFor": "Creating workout for {{date}}"
+  },
+  "batch": {
+    "processed": "Batch processed",
+    "workoutsProcessed": "{{count}} workouts",
+    "noProvider": "Configure an AI provider in Settings to process workouts.",
+    "error": "Batch processing encountered an unexpected error."
+  },
+  "reschedule": {
+    "moveFailed": "Could not move workout"
+  }
+}
