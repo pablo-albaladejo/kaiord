@@ -10,6 +10,7 @@
 import { Info, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { DEFAULT_STORAGE_KEY } from "./hints/constants";
 import { HintProgressDots } from "./hints/HintProgressDots";
 import {
@@ -29,6 +30,7 @@ export const FirstTimeHints: React.FC<FirstTimeHintsProps> = ({
   onDismiss,
 }) => {
   const [visible, setVisible] = useState(false);
+  const t = useTranslate("editor");
 
   useEffect(() => {
     const shouldShow = !hasCompletedFirstWorkout(storageKey);
@@ -59,16 +61,16 @@ export const FirstTimeHints: React.FC<FirstTimeHintsProps> = ({
         />
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
-            {currentHint?.title}
+            {currentHint && t(`firstTimeHints.${currentHint.id}.title`)}
           </h3>
           <p className="mt-1 text-sm text-primary-700 dark:text-primary-300">
-            {currentHint?.message}
+            {currentHint && t(`firstTimeHints.${currentHint.id}.message`)}
           </p>
         </div>
         <button
           onClick={handleDismiss}
           className="flex-shrink-0 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none dark:ring-offset-gray-950"
-          aria-label="Dismiss hints"
+          aria-label={t("firstTimeHints.dismiss")}
         >
           <X className="h-4 w-4 text-primary-600 dark:text-primary-400" />
         </button>

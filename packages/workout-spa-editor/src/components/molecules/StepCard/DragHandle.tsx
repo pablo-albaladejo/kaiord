@@ -1,6 +1,7 @@
 import { GripVertical } from "lucide-react";
 import type { HTMLAttributes } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Tooltip } from "../../atoms/Tooltip/Tooltip";
 
 export type DragHandleProps = HTMLAttributes<HTMLDivElement> & {
@@ -12,6 +13,7 @@ export const DragHandle = ({
   className = "",
   ...props
 }: DragHandleProps) => {
+  const t = useTranslate("editor");
   const baseClasses =
     "absolute left-0 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing touch-none min-h-[44px] min-w-[44px] flex items-center justify-center rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700";
   const colorClasses = isDragging
@@ -22,10 +24,10 @@ export const DragHandle = ({
     .join(" ");
 
   return (
-    <Tooltip content="Drag to reorder" side="left">
+    <Tooltip content={t("stepCard.dragTooltip")} side="left">
       <div
         className={classes}
-        aria-label="Drag to reorder step"
+        aria-label={t("stepCard.dragAria")}
         data-testid="drag-handle"
         {...props}
       >
