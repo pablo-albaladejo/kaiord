@@ -6,9 +6,10 @@ import type {
   DataHubSetModeHandler,
   DataHubToggleHandler,
 } from "../../../application/data-hub/build-data-hub-matrix";
+import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { CELL_VISUALS } from "./data-hub-cell-visuals";
-import { DataHubCellMenu } from "./DataHubCellMenu";
+import { DataHubActionableCell } from "./DataHubActionableCell";
 
 type Props = {
   dataType: ManagedDataType;
@@ -30,48 +31,37 @@ export const DataHubCell: React.FC<Props> = ({
   onSetMode,
   onRemove,
 }) => {
+  const t = useTranslate("data-hub");
   const visual = CELL_VISUALS[cell.state];
   if (cell.state === "na") return null;
 
   const arrow =
     cell.direction === "import" ? ICON_MAP.arrowDown : ICON_MAP.arrowUp;
-  const verb = cell.direction === "import" ? "Import" : "Export";
-  const label = `${verb} — ${visual.label}`;
+  const cellLabel = t(`cell.${cell.state}`);
+  const label = `${t(`direction.${cell.direction}`)} — ${cellLabel}`;
   const testId = `data-hub-cell-${dataType}-${cell.integrationId}-${cell.direction}`;
   const body = (
     <>
       <Icon icon={arrow} size="xs" color="inherit" />
-      <span>{visual.label}</span>
+      <span>{cellLabel}</span>
     </>
   );
 
-  const routeId = cell.routeId;
-
   if (visual.actionable && bridgeId)
     return (
-      <div className="flex items-center gap-0.5">
-        <button
-          type="button"
-          aria-label={label}
-          title={label}
-          data-testid={testId}
-          data-state={cell.state}
-          onClick={() => {
-            void onToggle(dataType, bridgeId, cell);
-          }}
-          className={`${BASE} ${visual.className}`}
-        >
-          {body}
-        </button>
-        {routeId && (
-          <DataHubCellMenu
-            testId={testId}
-            mode={cell.routeMode ?? "auto"}
-            onSetMode={(mode) => onSetMode(dataType, bridgeId, cell, mode)}
-            onRemove={() => onRemove(routeId)}
-          />
-        )}
-      </div>
+      <DataHubActionableCell
+        className={`${BASE} ${visual.className}`}
+        label={label}
+        testId={testId}
+        state={cell.state}
+        onClick={() => void onToggle(dataType, bridgeId, cell)}
+        routeId={cell.routeId}
+        mode={cell.routeMode ?? "auto"}
+        onSetMode={(mode) => onSetMode(dataType, bridgeId, cell, mode)}
+        onRemove={onRemove}
+      >
+        {body}
+      </DataHubActionableCell>
     );
 
   return (
