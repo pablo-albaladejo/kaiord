@@ -6,6 +6,7 @@
 
 import { Check, Upload } from "lucide-react";
 
+import { useTranslate } from "../../i18n/use-translate";
 import type { WorkoutState } from "../../types/calendar-enums";
 import { Button } from "../atoms/Button/Button";
 import { ModifiedIndicator } from "../molecules/ModifiedIndicator";
@@ -23,12 +24,13 @@ export function EditorWorkflowBar({
   onPush,
   onRepush,
 }: EditorWorkflowBarProps) {
+  const t = useTranslate("editor");
   if (state === "structured") {
     return (
       <div className="flex items-center gap-3" data-testid="workflow-bar">
         <Button onClick={onAccept}>
           <Check className="mr-2 h-4 w-4" />
-          Accept Workout
+          {t("workflow.acceptWorkout")}
         </Button>
       </div>
     );
@@ -39,7 +41,7 @@ export function EditorWorkflowBar({
       <div className="flex items-center gap-3" data-testid="workflow-bar">
         <Button onClick={onPush}>
           <Upload className="mr-2 h-4 w-4" />
-          Push to Garmin
+          {t("workflow.pushToGarmin")}
         </Button>
       </div>
     );

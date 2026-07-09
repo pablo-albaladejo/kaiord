@@ -1,0 +1,115 @@
+{
+  "loading": {
+    "loadingWorkout": "Loading workout...",
+    "noStructuredData": "This workout has no structured data yet.",
+    "goToDaily": "Go to Daily"
+  },
+  "pageHeader": {
+    "newTitle": "New workout",
+    "newDescription": "Create from scratch, generate with AI, or import a file.",
+    "editTitle": "Edit workout",
+    "editDescription": "Refine steps, intervals, and targets."
+  },
+  "workflow": {
+    "acceptWorkout": "Accept Workout",
+    "pushToGarmin": "Push to Garmin"
+  },
+  "section": {
+    "untitledWorkout": "Untitled Workout",
+    "sport": "Sport:",
+    "editMetadata": "Edit workout metadata",
+    "editMetadataTitle": "Edit Workout Metadata"
+  },
+  "actions": {
+    "discard": "Discard",
+    "discardAria": "Discard workout and return to welcome screen",
+    "addStep": "Add Step",
+    "addRepetition": "Add Repetition",
+    "addRepetitionAria": "Add repetition block",
+    "addStepAria": "Add new step to workout",
+    "undo": "Undo"
+  },
+  "selection": {
+    "createBlockAria": "Create repetition block from selected steps",
+    "createBlock": "Create Repetition Block ({{count}} steps)",
+    "orPress": "or press",
+    "ctrlG": "Ctrl+G",
+    "ctrlClickHint": "Ctrl+click another step to create a repetition block"
+  },
+  "discard": {
+    "title": "Discard Workout",
+    "message": "Are you sure you want to discard the current workout? This action cannot be undone.",
+    "confirmLabel": "Discard",
+    "cancelLabel": "Cancel"
+  },
+  "deleteBlock": {
+    "title": "Delete Repetition Block",
+    "message": "Are you sure you want to delete this repetition block? This action can be undone.",
+    "confirmLabel": "Delete",
+    "cancelLabel": "Cancel",
+    "toastTitle": "Repetition block deleted"
+  },
+  "deleteStep": {
+    "toastTitle": "Step deleted",
+    "toastDescription": "The step has been removed from your workout."
+  },
+  "clipboard": {
+    "copySuccess": "Step copied to clipboard",
+    "copyFailure": "Failed to copy step",
+    "pasteSuccess": "Step pasted successfully",
+    "pasteFailure": "Clipboard does not contain a valid step"
+  },
+  "contextMenu": {
+    "actionsAria": "Workout editor actions",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "delete": "Delete",
+    "selectAll": "Select All",
+    "group": "Group",
+    "ungroup": "Ungroup"
+  },
+  "empty": {
+    "title": "Add your first step",
+    "description": "Start building your workout by adding steps",
+    "addFirstStepAria": "Add first step to workout"
+  },
+  "history": {
+    "controlsAria": "History controls",
+    "undoTooltip": "Undo (Ctrl+Z)",
+    "undoAria": "Undo last action",
+    "redoTooltip": "Redo (Ctrl+Y)",
+    "redoAria": "Redo last action"
+  },
+  "save": {
+    "saveWorkout": "Save Workout",
+    "saving": "Saving...",
+    "exportProgress": "Export progress: {{progress}}%",
+    "savedTitle": "Workout Saved",
+    "savedDescription": "\"{{name}}\" has been saved as {{format}}",
+    "exportFailedTitle": "Export Failed",
+    "exportFailedFallback": "Failed to export workout"
+  },
+  "saveError": {
+    "title": "Save Failed",
+    "body": "The workout could not be saved due to validation errors. Please fix the following issues and try again:",
+    "fixAndRetry": "Fix and Retry"
+  },
+  "scratch": {
+    "untitledName": "Untitled workout",
+    "saveAndSchedule": "Save & schedule",
+    "invalidTitle": "Invalid date",
+    "invalidDescription": "Could not schedule — the date is not a valid calendar day.",
+    "saveFailedTitle": "Save failed",
+    "saveFailedDescription": "Could not schedule the workout — please retry."
+  },
+  "raw": {
+    "dialogDescription": "Raw workout details with coach description, comment selection, and actions to process or skip.",
+    "processWithAi": "Process with AI",
+    "skip": "Skip",
+    "unskip": "Un-skip",
+    "createWorkout": "Create workout",
+    "noComments": "No comments available.",
+    "includeComments": "Include comments:"
+  }
+}

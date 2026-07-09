@@ -6,6 +6,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { RawWorkoutContent } from "./RawWorkoutContent";
 
@@ -26,6 +27,7 @@ export function RawWorkoutDialog({
   onUnskip,
   isSubmitting = false,
 }: RawWorkoutDialogProps) {
+  const t = useTranslate("editor");
   return (
     <Dialog.Root
       open={workout !== null}
@@ -35,8 +37,7 @@ export function RawWorkoutDialog({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <Dialog.Description className="sr-only">
-            Raw workout details with coach description, comment selection, and
-            actions to process or skip.
+            {t("raw.dialogDescription")}
           </Dialog.Description>
           {workout && (
             <RawWorkoutContent

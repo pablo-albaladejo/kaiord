@@ -1,5 +1,6 @@
 import { ListPlus } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 
 export type EmptyWorkoutStateProps = {
@@ -7,6 +8,7 @@ export type EmptyWorkoutStateProps = {
 };
 
 export function EmptyWorkoutState({ onAddStep }: EmptyWorkoutStateProps) {
+  const t = useTranslate("editor");
   return (
     <div
       className="flex flex-col items-center justify-center py-12 text-center"
@@ -17,19 +19,19 @@ export function EmptyWorkoutState({ onAddStep }: EmptyWorkoutStateProps) {
         aria-hidden="true"
       />
       <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-        Add your first step
+        {t("empty.title")}
       </h3>
       <p className="mt-1 mb-6 text-sm text-gray-500 dark:text-gray-400">
-        Start building your workout by adding steps
+        {t("empty.description")}
       </p>
       <Button
         variant="primary"
         onClick={onAddStep}
-        aria-label="Add first step to workout"
+        aria-label={t("empty.addFirstStepAria")}
         data-testid="add-first-step-button"
       >
         <ListPlus className="mr-2 h-4 w-4" aria-hidden="true" />
-        Add Step
+        {t("actions.addStep")}
       </Button>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { usePersistScratch } from "./use-persist-scratch";
 
@@ -10,6 +11,7 @@ export type ScratchScheduleButtonProps = { date: string };
  * active and a workout is loaded; the click is the only persist trigger.
  */
 export function ScratchScheduleButton({ date }: ScratchScheduleButtonProps) {
+  const t = useTranslate("editor");
   const { canSchedule, schedule } = usePersistScratch(date);
 
   return (
@@ -19,7 +21,7 @@ export function ScratchScheduleButton({ date }: ScratchScheduleButtonProps) {
       onClick={() => void schedule()}
       data-testid="scratch-schedule-button"
     >
-      Save &amp; schedule
+      {t("scratch.saveAndSchedule")}
     </Button>
   );
 }

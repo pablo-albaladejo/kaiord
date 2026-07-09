@@ -1,16 +1,15 @@
 import { useCallback } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import { useWorkoutStore } from "../../../store/workout-store";
-
-const COPY_SUCCESS_TOAST = "Step copied to clipboard";
-const COPY_FAILURE_TOAST = "Failed to copy step";
 
 /**
  * Hook for copying a step to clipboard with toast notification
  * Requirement 39.2: Copy step data as JSON to clipboard and show notification
  */
 export function useCopyStep() {
+  const t = useTranslate("editor");
   const copyStep = useWorkoutStore((state) => state.copyStep);
   const { success, error } = useToastContext();
 
@@ -19,11 +18,11 @@ export function useCopyStep() {
       const result = await copyStep(stepIndex);
 
       if (result.success) {
-        success(COPY_SUCCESS_TOAST);
+        success(t("clipboard.copySuccess"));
       } else {
-        error(COPY_FAILURE_TOAST);
+        error(t("clipboard.copyFailure"));
       }
     },
-    [copyStep, success, error]
+    [copyStep, success, error, t]
   );
 }

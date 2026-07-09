@@ -8,11 +8,13 @@
 import { useCallback } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import { UNDO_DELETE_WINDOW_MS } from "../../../store/actions/delete-undo-constants";
 import { useDeleteStep, useUndoDelete } from "../../../store/selectors";
 import { useWorkoutStore } from "../../../store/workout-store";
 
 export function useDeleteStepWithToast() {
+  const t = useTranslate("editor");
   const storeDeleteStep = useDeleteStep();
   const undoDelete = useUndoDelete();
   const { toast } = useToastContext();
@@ -27,8 +29,8 @@ export function useDeleteStepWithToast() {
 
         if (mostRecentDelete) {
           toast({
-            title: "Step deleted",
-            description: "The step has been removed from your workout.",
+            title: t("deleteStep.toastTitle"),
+            description: t("deleteStep.toastDescription"),
             variant: "info",
             duration: UNDO_DELETE_WINDOW_MS,
             action: (
@@ -37,13 +39,13 @@ export function useDeleteStepWithToast() {
                 data-testid="undo-delete-button"
                 className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent px-3 text-sm font-medium transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:pointer-events-none disabled:opacity-50"
               >
-                Undo
+                {t("actions.undo")}
               </button>
             ),
           });
         }
       }, 0);
     },
-    [storeDeleteStep, undoDelete, toast]
+    [storeDeleteStep, undoDelete, toast, t]
   );
 }

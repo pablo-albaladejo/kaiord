@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useRef } from "react";
 
 import { useEditorContextMenu } from "../../../hooks/use-editor-context-menu";
+import { useTranslate } from "../../../i18n/use-translate";
 import { EditorContextMenuContent } from "./EditorContextMenuContent";
 
 type EditorContextMenuProps = {
@@ -10,6 +11,7 @@ type EditorContextMenuProps = {
 };
 
 export const EditorContextMenu = ({ children }: EditorContextMenuProps) => {
+  const t = useTranslate("editor");
   const ctx = useEditorContextMenu();
   const targetStepId = useRef<string | null>(null);
 
@@ -40,7 +42,7 @@ export const EditorContextMenu = ({ children }: EditorContextMenuProps) => {
     <ContextMenu.Root onOpenChange={handleOpen}>
       <ContextMenu.Trigger
         asChild
-        aria-label="Workout editor actions"
+        aria-label={t("contextMenu.actionsAria")}
         onContextMenu={handleContextMenu}
       >
         {children}

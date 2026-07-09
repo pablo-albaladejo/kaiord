@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import { findById } from "../../../store/find-by-id";
 import {
   useDeleteRepetitionBlock,
@@ -29,6 +30,7 @@ export function extractStepIndices(
 }
 
 export function useDeleteWithConfirmation() {
+  const t = useTranslate("editor");
   const deleteAction = useDeleteRepetitionBlock();
   const undoDelete = useUndoDelete();
   const showModal = useShowConfirmationModal();
@@ -37,18 +39,17 @@ export function useDeleteWithConfirmation() {
   return useCallback(
     (blockId: string) => {
       showModal({
-        title: "Delete Repetition Block",
-        message:
-          "Are you sure you want to delete this repetition block? This action can be undone.",
-        confirmLabel: "Delete",
-        cancelLabel: "Cancel",
+        title: t("deleteBlock.title"),
+        message: t("deleteBlock.message"),
+        confirmLabel: t("deleteBlock.confirmLabel"),
+        cancelLabel: t("deleteBlock.cancelLabel"),
         variant: "destructive",
         onConfirm: () => {
-          executeDeleteWithToast(blockId, deleteAction, toast, undoDelete);
+          executeDeleteWithToast(blockId, deleteAction, toast, undoDelete, t);
         },
       });
     },
-    [deleteAction, toast, undoDelete, showModal]
+    [deleteAction, toast, undoDelete, showModal, t]
   );
 }
 

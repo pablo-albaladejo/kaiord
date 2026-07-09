@@ -10,6 +10,7 @@
 
 import { AlertCircle, X } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ValidationError } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 
@@ -23,18 +24,20 @@ export type SaveErrorDialogProps = {
  * Dialog header with title and close button
  */
 function DialogHeader({ onClose }: { onClose: () => void }) {
+  const t = useTranslate("editor");
+  const tc = useTranslate("common");
   return (
     <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
       <div className="flex items-center gap-2">
         <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Save Failed
+          {t("saveError.title")}
         </h2>
       </div>
       <button
         onClick={onClose}
         className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-        aria-label="Close"
+        aria-label={tc("actions.close")}
       >
         <X className="h-5 w-5" />
       </button>
@@ -74,6 +77,8 @@ export function SaveErrorDialog({
   onClose,
   onRetry,
 }: SaveErrorDialogProps) {
+  const t = useTranslate("editor");
+  const tc = useTranslate("common");
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800">
@@ -81,18 +86,17 @@ export function SaveErrorDialog({
 
         <div className="p-4">
           <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            The workout could not be saved due to validation errors. Please fix
-            the following issues and try again:
+            {t("saveError.body")}
           </p>
           <ErrorList errors={errors} />
         </div>
 
         <div className="flex justify-end gap-2 border-t border-gray-200 p-4 dark:border-gray-700">
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {tc("actions.close")}
           </Button>
           <Button variant="primary" onClick={onRetry}>
-            Fix and Retry
+            {t("saveError.fixAndRetry")}
           </Button>
         </div>
       </div>

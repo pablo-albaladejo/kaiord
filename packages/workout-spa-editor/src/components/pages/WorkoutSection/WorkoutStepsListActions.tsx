@@ -1,6 +1,7 @@
 import { Plus, Repeat } from "lucide-react";
 import type { RefObject } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { PasteButton } from "../../molecules/PasteButton";
 import { MultiSelectionHint, SingleSelectionHint } from "./SelectionHints";
@@ -30,6 +31,7 @@ export function WorkoutStepsListActions({
   onPasteStep,
   addStepButtonRef,
 }: WorkoutStepsListActionsProps) {
+  const t = useTranslate("editor");
   const hasSingleSelection = selectedStepCount === 1;
 
   return (
@@ -45,23 +47,23 @@ export function WorkoutStepsListActions({
         <Button
           variant="secondary"
           onClick={onCreateEmptyRepetitionBlock}
-          aria-label="Add repetition block"
+          aria-label={t("actions.addRepetitionAria")}
           data-testid="create-empty-repetition-block-button"
           className="w-full sm:w-auto"
         >
           <Repeat className="mr-2 h-4 w-4" aria-hidden="true" />
-          Add Repetition
+          {t("actions.addRepetition")}
         </Button>
         <Button
           ref={addStepButtonRef}
           variant="secondary"
           onClick={onAddStep}
-          aria-label="Add new step to workout"
+          aria-label={t("actions.addStepAria")}
           data-testid="add-step-button"
           className="w-full sm:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-          Add Step
+          {t("actions.addStep")}
         </Button>
         {onPasteStep && (
           <PasteButton onPaste={onPasteStep} className="w-full sm:w-auto" />
