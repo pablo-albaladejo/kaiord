@@ -1,0 +1,9 @@
+{
+  "title": "Import from a lab report",
+  "affordance": "Upload a PDF or image",
+  "progress": "Extracting lab values…",
+  "cancel": "Cancel",
+  "noProviderHint": "Configure a lab-extraction model in Settings to import from a file.",
+  "reviewBanner": "AI-extracted draft — review before saving",
+  "discard": "Discard draft"
+}
