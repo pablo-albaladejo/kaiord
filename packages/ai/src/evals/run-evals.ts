@@ -1,13 +1,13 @@
 #!/usr/bin/env tsx
 import { createTextToWorkout } from "../index";
 import { evaluateBenchmark } from "./assertions";
-import { loadAnthropicModel } from "./load-anthropic-model";
+import { loadEvalModel } from "./load-eval-model";
 import { createReport, formatReport } from "./reporter";
 import benchmarks from "./benchmarks.json";
 import type { Benchmark, EvalResult } from "./types";
 
 const runEvals = async () => {
-  const { model, provider, modelName } = await loadAnthropicModel();
+  const { model, provider, modelName } = await loadEvalModel();
   const textToWorkout = createTextToWorkout({ model });
 
   console.log(

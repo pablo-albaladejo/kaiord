@@ -1,0 +1,9 @@
+{
+  "title": "Importar desde una analítica",
+  "affordance": "Sube un PDF o una imagen",
+  "progress": "Extrayendo valores de la analítica…",
+  "cancel": "Cancelar",
+  "noProviderHint": "Configura un modelo de extracción de analíticas en Ajustes para importar desde un archivo.",
+  "reviewBanner": "Borrador extraído por IA: revísalo antes de guardar",
+  "discard": "Descartar borrador"
+}

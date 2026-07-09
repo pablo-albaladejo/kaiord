@@ -18,6 +18,14 @@
     "./prompts": {
       "import": "./dist/prompts.js",
       "types": "./dist/prompts.d.ts"
+    },
+    "./agents": {
+      "import": "./dist/agents.js",
+      "types": "./dist/agents.d.ts"
+    },
+    "./observability": {
+      "import": "./dist/observability.js",
+      "types": "./dist/observability.d.ts"
     }
   },
   "files": [
@@ -32,6 +40,7 @@
     "lint:fix": "eslint . --fix && prettier --write src",
     "eval": "tsx src/evals/run-evals.ts",
     "eval:chat-tools": "tsx src/evals/run-chat-tool-evals.ts",
+    "eval:labs": "tsx src/evals/run-lab-extraction-evals.ts",
     "generate:model-catalog": "node scripts/generate-model-catalog.mjs",
     "clean": "rm -rf dist"
   },

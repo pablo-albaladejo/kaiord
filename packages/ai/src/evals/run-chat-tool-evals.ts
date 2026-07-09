@@ -2,7 +2,7 @@
 import { createChatAgent } from "../index";
 import { evaluateChatToolBenchmark } from "./chat-tool-assertions";
 import { createHubChatToolFixtures } from "./chat-tool-fixtures";
-import { loadAnthropicModel } from "./load-anthropic-model";
+import { loadEvalModel } from "./load-eval-model";
 import { createReport, formatReport } from "./reporter";
 import benchmarks from "./chat-tool-benchmarks.json";
 import type { ChatToolBenchmark, ChatToolEvalResult } from "./chat-tool-types";
@@ -16,7 +16,7 @@ const SYSTEM_PROMPT = [
 ].join("\n");
 
 const runEvals = async () => {
-  const { model, provider, modelName } = await loadAnthropicModel();
+  const { model, provider, modelName } = await loadEvalModel();
   const agent = createChatAgent({
     model,
     tools: createHubChatToolFixtures(),
