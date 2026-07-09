@@ -65,6 +65,7 @@ export const PACKAGE_DEPS = {
   cli: [
     "@kaiord/core",
     "@kaiord/fit",
+    "@kaiord/i18n",
     "@kaiord/tcx",
     "@kaiord/zwo",
     "@kaiord/garmin",
