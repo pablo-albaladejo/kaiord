@@ -7,6 +7,8 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-07-09 | [`add-ai-platform-foundation`](./2026-07-09-add-ai-platform-foundation/) | AI platform foundation (Wave 1) |
+| 2026-07-09 | [`add-lab-extraction-agent`](./2026-07-09-add-lab-extraction-agent/) | Lab-report AI extraction on the agent runtime (Wave 2 kickoff) |
 | 2026-06-27 | [`train2go-coach-links`](./2026-06-27-train2go-coach-links/) | Coach instructions imported from Train2Go — including the YouTube/Dropbox links |
 | 2026-06-22 | [`energy-balance-tracking`](./2026-06-22-energy-balance-tracking/) | Athletes can already see ingested wellness data (steps, sleep, HRV, weight, and |
 | 2026-06-22 | [`energy-expenditure-activity-factor`](./2026-06-22-energy-expenditure-activity-factor/) | resolveDayExpenditure's predicted path is BMR + expectedActivityKcal. On a |
