@@ -1,6 +1,7 @@
 import { useSync } from "../../../contexts/sync-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 import { EncryptionSection } from "./EncryptionSection";
 import { SyncStatusLine } from "./SyncStatusLine";
@@ -10,6 +11,7 @@ const SYNC_FAILED_TOAST = "Sync failed — your data is safe and stays local.";
 const SYNC_OK_TOAST = "Sync complete.";
 
 export const SyncTab: React.FC = () => {
+  const t = useTranslate("settings");
   const sync = useSync();
   const toast = useToastContext();
   const providers = useAiProvidersLive();
@@ -32,8 +34,7 @@ export const SyncTab: React.FC = () => {
   return (
     <div className="space-y-4" data-testid="sync-tab">
       <p className="text-sm text-gray-600 dark:text-gray-400">
-        Sync your workouts and settings across devices through your own Google
-        Drive. Data lives on your Drive; no Kaiord server is involved.
+        {t("sync.description")}
       </p>
       <SyncStatusLine
         connected={sync.connected}
@@ -49,15 +50,15 @@ export const SyncTab: React.FC = () => {
               loading={sync.status === "syncing"}
               onClick={handleSyncNow}
             >
-              Sync now
+              {t("sync.syncNow")}
             </Button>
             <Button size="sm" variant="tertiary" onClick={sync.disconnect}>
-              Disconnect
+              {t("sync.disconnect")}
             </Button>
           </>
         ) : (
           <Button size="sm" variant="primary" onClick={handleConnect}>
-            Connect Google account
+            {t("sync.connect")}
           </Button>
         )}
       </div>
