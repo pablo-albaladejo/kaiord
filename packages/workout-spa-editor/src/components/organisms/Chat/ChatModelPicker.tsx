@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 
 export type ChatModelPickerProps = {
@@ -13,6 +14,7 @@ export function ChatModelPicker({
   value,
   onChange,
 }: ChatModelPickerProps) {
+  const t = useTranslate("chat");
   if (providers.length === 0) return null;
   const current =
     value ?? providers.find((p) => p.isDefault)?.id ?? providers[0]!.id;
@@ -22,7 +24,7 @@ export function ChatModelPicker({
         htmlFor="chat-model-select"
         className="mb-1 block text-xs font-medium text-slate-400"
       >
-        Model
+        {t("model.label")}
       </label>
       <select
         id="chat-model-select"

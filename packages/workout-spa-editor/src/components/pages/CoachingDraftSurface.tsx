@@ -8,6 +8,7 @@
  * persisted SessionMatch that does not exist for a draft.
  */
 import { useAppHandlers } from "../../hooks/use-app-handlers";
+import { useTranslate } from "../../i18n/use-translate";
 import { useCurrentWorkout } from "../../store/selectors/workout-selectors";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
@@ -28,6 +29,7 @@ export function CoachingDraftSurface({
   coachingDraftId,
   onBack,
 }: CoachingDraftSurfaceProps) {
+  const t = useTranslate("chat");
   const { activity, noStructured } = useCoachingDraft(coachingDraftId);
   const { canSave, save } = useCoachingDraftSave(activity);
   const currentWorkout = useCurrentWorkout();
@@ -50,7 +52,7 @@ export function CoachingDraftSurface({
           onClick={() => void save()}
           data-testid="coaching-draft-save-button"
         >
-          Save workout
+          {t("draft.saveWorkout")}
         </Button>
       )}
       {workout && currentWorkout && (

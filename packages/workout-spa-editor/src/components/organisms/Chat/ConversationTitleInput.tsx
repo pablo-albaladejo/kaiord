@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
+
 export type ConversationTitleInputProps = {
   initialTitle: string;
   onCommit: (title: string) => void;
@@ -13,13 +15,14 @@ export function ConversationTitleInput({
   onCommit,
   onCancel,
 }: ConversationTitleInputProps) {
+  const t = useTranslate("chat");
   const [draft, setDraft] = useState(initialTitle);
   // Escape sets this so the trailing blur (focus loss on unmount) does not
   // commit. Enter blurs to commit exactly once via onBlur.
   const suppressBlurCommitRef = useRef(false);
   return (
     <input
-      aria-label="Conversation title"
+      aria-label={t("titleInput.label")}
       className="w-full rounded-md bg-slate-800 px-2 py-1 text-sm text-slate-100"
       value={draft}
       autoFocus

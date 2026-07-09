@@ -188,6 +188,6 @@ describe("chat-turn-runner", () => {
 
     // Assert
     expect(states.at(-1)).toBe("error");
-    expect(errors.at(-1)).toContain("Authentication failed");
+    expect(errors.at(-1)).toBe("auth");
   });
 });

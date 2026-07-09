@@ -1,0 +1,80 @@
+{
+  "page": {
+    "loading": "Cargando…"
+  },
+  "header": {
+    "title": "Asistente",
+    "subtitle": "Pregunta sobre tu entrenamiento y tu historial de salud, o ejecuta una acción."
+  },
+  "composer": {
+    "messageLabel": "Mensaje",
+    "placeholder": "Pregunta sobre tu entrenamiento o tu salud…",
+    "send": "Enviar"
+  },
+  "empty": {
+    "startConversation": "Inicia una conversación: pregunta por tus entrenamientos recientes o tu sueño."
+  },
+  "role": {
+    "user": "Tú",
+    "assistant": "Asistente",
+    "tool": "Acción"
+  },
+  "model": {
+    "label": "Modelo"
+  },
+  "search": {
+    "placeholder": "Buscar chats…",
+    "label": "Buscar chats",
+    "clear": "Borrar búsqueda",
+    "noMatches": "Sin coincidencias."
+  },
+  "workspace": {
+    "selectOrStart": "Selecciona una conversación o inicia una nueva."
+  },
+  "list": {
+    "ariaLabel": "Conversaciones",
+    "newConversation": "+ Nueva conversación"
+  },
+  "item": {
+    "rename": "Renombrar conversación",
+    "delete": "Eliminar conversación",
+    "confirmDelete": "Confirmar eliminación"
+  },
+  "titleInput": {
+    "label": "Título de la conversación"
+  },
+  "pendingAction": {
+    "confirm": "Confirmar: {{action}}",
+    "approve": "Aprobar",
+    "decline": "Rechazar"
+  },
+  "action": {
+    "sync_coaching": "Sincronizar actividades del entrenador",
+    "create_workout": "Crear un entrenamiento",
+    "log_health_metric": "Registrar una métrica de salud"
+  },
+  "toolLinks": {
+    "viewWorkout": "Ver entrenamiento",
+    "viewCalendar": "Ver en el calendario"
+  },
+  "errors": {
+    "retry": "Reintentar",
+    "auth": "Error de autenticación: comprueba tu clave de API en los ajustes.",
+    "rate": "Se alcanzó el límite de peticiones o la cuota: inténtalo de nuevo en breve.",
+    "network": "Error de red al contactar con el proveedor: inténtalo de nuevo.",
+    "generic": "El asistente tuvo un error. Inténtalo de nuevo."
+  },
+  "draft": {
+    "saveWorkout": "Guardar entrenamiento"
+  },
+  "coaching": {
+    "noDescription": "No se proporcionó descripción.",
+    "coach": "Entrenador",
+    "collapse": "Contraer barra del entrenador"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "skipped": "Omitido"
+  }
+}

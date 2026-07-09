@@ -1,4 +1,5 @@
 import type { ChatSearchResult } from "../../../application/chat/search-conversations";
+import { useTranslate } from "../../../i18n/use-translate";
 import { SnippetText } from "./SnippetText";
 
 export type ChatSearchResultsProps = {
@@ -17,13 +18,14 @@ export function ChatSearchResults({
   onSelect,
   onResultSelect,
 }: ChatSearchResultsProps) {
+  const t = useTranslate("chat");
   if (results.length === 0) {
     return (
       <p
         data-testid="chat-search-empty"
         className="px-2 py-4 text-sm text-slate-400"
       >
-        No matches.
+        {t("search.noMatches")}
       </p>
     );
   }

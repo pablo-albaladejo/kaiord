@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ChatConversationRecord } from "../../../types/chat/chat-conversation-record";
 import { ConversationTitleInput } from "./ConversationTitleInput";
 
@@ -19,6 +20,7 @@ export function ConversationListItem({
   onRename,
   onDelete,
 }: ConversationListItemProps) {
+  const t = useTranslate("chat");
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -50,7 +52,7 @@ export function ConversationListItem({
       </button>
       <button
         type="button"
-        aria-label="Rename conversation"
+        aria-label={t("item.rename")}
         className="shrink-0 px-1 text-slate-500 hover:text-slate-200"
         onClick={() => setEditing(true)}
       >
@@ -58,7 +60,7 @@ export function ConversationListItem({
       </button>
       <button
         type="button"
-        aria-label={confirmDelete ? "Confirm delete" : "Delete conversation"}
+        aria-label={confirmDelete ? t("item.confirmDelete") : t("item.delete")}
         className="shrink-0 px-1 text-slate-500 hover:text-red-400"
         onClick={() =>
           confirmDelete ? onDelete(conversation.id) : setConfirmDelete(true)

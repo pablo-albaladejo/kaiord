@@ -19,6 +19,7 @@ import { useChatModelSelection } from "../../hooks/use-chat-model-selection";
 import { useChatSearchPanel } from "../../hooks/use-chat-search-panel";
 import { useAiRuntimeStore } from "../../store/ai-runtime-store";
 import { ChatHeader } from "../organisms/Chat/ChatHeader";
+import { ChatLoading } from "../organisms/Chat/ChatLoading";
 import { ChatWorkspace } from "../organisms/Chat/ChatWorkspace";
 import { CreateProvidersEmpty } from "./CreateWorkout/CreateProvidersEmpty";
 import { resolveActiveChatModel } from "./resolve-active-chat-model";
@@ -62,9 +63,7 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
     <div className="space-y-4 p-4" data-testid="chat-page">
       <ChatHeader />
       {providers === undefined ? (
-        <div className="flex items-center justify-center p-8 text-slate-400">
-          Loading…
-        </div>
+        <ChatLoading />
       ) : providers.length === 0 ? (
         <CreateProvidersEmpty />
       ) : (
