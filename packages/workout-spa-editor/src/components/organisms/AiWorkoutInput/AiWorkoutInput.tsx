@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react";
 
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { AiWorkoutForm } from "./AiWorkoutForm";
 import { AiWorkoutInputEmpty } from "./AiWorkoutInputEmpty";
 
@@ -11,6 +12,7 @@ type AiWorkoutInputProps = {
 export const AiWorkoutInput: React.FC<AiWorkoutInputProps> = ({
   onSettingsClick,
 }) => {
+  const t = useTranslate("create-workout");
   const providers = useAiProvidersLive();
 
   // `undefined` is the loading phase. Render nothing so the gradient
@@ -23,11 +25,11 @@ export const AiWorkoutInput: React.FC<AiWorkoutInputProps> = ({
       <div className="mb-3 flex items-center gap-2">
         <Sparkles className="h-6 w-6 text-blue-600 dark:text-blue-400" />
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          AI Workout Generator
+          {t("generator.title")}
         </h2>
       </div>
       <p className="mb-5 text-sm text-gray-600 dark:text-gray-400">
-        Describe your workout in natural language and let AI create it.
+        {t("generator.subtitle")}
       </p>
       {providers.length === 0 ? (
         <AiWorkoutInputEmpty onSettingsClick={onSettingsClick} />

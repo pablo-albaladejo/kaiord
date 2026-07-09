@@ -2,6 +2,7 @@ import { ChevronDown, Sparkles } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { useAiBannerState } from "./use-ai-banner-state";
 
 const AiWorkoutInput = lazy(() =>
@@ -19,6 +20,7 @@ const AiWorkoutInput = lazy(() =>
  * and runs the one-shot auto-collapse-on-first-success rule.
  */
 export function AiBanner() {
+  const t = useTranslate("create-workout");
   const [, navigate] = useLocation();
   const { open, toggle } = useAiBannerState();
 
@@ -36,7 +38,7 @@ export function AiBanner() {
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-blue-300">
           <Sparkles className="h-4 w-4" />
-          Generate with AI
+          {t("banner.toggle")}
         </span>
         <ChevronDown
           className={`h-4 w-4 text-blue-600 transition-transform dark:text-blue-400 ${open ? "rotate-180" : ""}`}

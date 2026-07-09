@@ -9,6 +9,7 @@ import type { LocaleResources } from "@kaiord/i18n";
 
 import enCalendar from "./locales/en/calendar.json";
 import enCommon from "./locales/en/common.json";
+import enCreateWorkout from "./locales/en/create-workout.json";
 import enDaily from "./locales/en/daily.json";
 import enEditor from "./locales/en/editor.json";
 import enErrors from "./locales/en/errors.json";
@@ -20,6 +21,7 @@ import enSettings from "./locales/en/settings.json";
 import enTargets from "./locales/en/targets.json";
 import esCalendar from "./locales/es/calendar.json";
 import esCommon from "./locales/es/common.json";
+import esCreateWorkout from "./locales/es/create-workout.json";
 import esDaily from "./locales/es/daily.json";
 import esEditor from "./locales/es/editor.json";
 import esErrors from "./locales/es/errors.json";
@@ -33,6 +35,7 @@ import esTargets from "./locales/es/targets.json";
 export const NAMESPACES = [
   "calendar",
   "common",
+  "create-workout",
   "daily",
   "editor",
   "errors",
@@ -50,6 +53,7 @@ export const resources: LocaleResources = {
   en: {
     calendar: enCalendar,
     common: enCommon,
+    "create-workout": enCreateWorkout,
     daily: enDaily,
     editor: enEditor,
     errors: enErrors,
@@ -63,6 +67,7 @@ export const resources: LocaleResources = {
   es: {
     calendar: esCalendar,
     common: esCommon,
+    "create-workout": esCreateWorkout,
     daily: esDaily,
     editor: esEditor,
     errors: esErrors,
