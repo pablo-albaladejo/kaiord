@@ -1,0 +1,12 @@
+{
+  "es": {
+    "lang": "es",
+    "title": "Kaiord — Tu cabina de entrenamiento. Todos los formatos deportivos.",
+    "description": "Plataforma de entrenamiento de código abierto y local-first: calendario, un asistente de IA que actúa sobre tus datos, sincronización con Garmin y WHOOP, analíticas de salud y de laboratorio — además de un SDK de TypeScript para los formatos FIT, TCX, ZWO y Garmin Connect. Por Pablo Albaladejo.",
+    "canonical": "https://kaiord.com/es/",
+    "ogUrl": "https://kaiord.com/es/",
+    "ogLocale": "es_ES",
+    "ogTitle": "Kaiord — Tu cabina de entrenamiento. Todos los formatos deportivos.",
+    "ogDescription": "Plataforma de entrenamiento de código abierto y local-first: calendario, un asistente de IA que actúa sobre tus datos, sincronización con Garmin y WHOOP, analíticas de salud y de laboratorio — además de un SDK de TypeScript para los formatos FIT, TCX, ZWO y Garmin Connect. Por Pablo Albaladejo."
+  }
+}
