@@ -14,6 +14,7 @@ import enCoaching from "./locales/en/coaching.json";
 import enCommon from "./locales/en/common.json";
 import enCreateWorkout from "./locales/en/create-workout.json";
 import enDaily from "./locales/en/daily.json";
+import enDataHub from "./locales/en/data-hub.json";
 import enEditor from "./locales/en/editor.json";
 import enErrors from "./locales/en/errors.json";
 import enLabImport from "./locales/en/labImport.json";
@@ -30,6 +31,7 @@ import esCoaching from "./locales/es/coaching.json";
 import esCommon from "./locales/es/common.json";
 import esCreateWorkout from "./locales/es/create-workout.json";
 import esDaily from "./locales/es/daily.json";
+import esDataHub from "./locales/es/data-hub.json";
 import esEditor from "./locales/es/editor.json";
 import esErrors from "./locales/es/errors.json";
 import esLabImport from "./locales/es/labImport.json";
@@ -51,6 +53,7 @@ export const resources: LocaleResources = {
     common: enCommon,
     "create-workout": enCreateWorkout,
     daily: enDaily,
+    "data-hub": enDataHub,
     editor: enEditor,
     errors: enErrors,
     labs: enLabs,
@@ -69,6 +72,7 @@ export const resources: LocaleResources = {
     common: esCommon,
     "create-workout": esCreateWorkout,
     daily: esDaily,
+    "data-hub": esDataHub,
     editor: esEditor,
     errors: esErrors,
     labs: esLabs,
