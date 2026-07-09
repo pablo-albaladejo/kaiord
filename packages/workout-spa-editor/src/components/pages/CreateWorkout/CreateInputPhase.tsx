@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import { ATHLETE_SPORTS } from "../../../lib/athlete";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
@@ -34,18 +35,19 @@ export function CreateInputPhase({
   onGenerate,
   onClose,
 }: CreateInputPhaseProps) {
+  const t = useTranslate("create-workout");
   const [, navigate] = useLocation();
   const sportLabel =
     SPORT_OPTIONS.find((o) => o.value === sport)?.label.toLowerCase() ?? "";
 
   return (
     <div className="flex flex-col gap-4">
-      <CreateSheetHeader title="New session" onClose={onClose} />
+      <CreateSheetHeader title={t("sheet.newSession")} onClose={onClose} />
       <Segmented
         options={SPORT_OPTIONS}
         value={sport}
         onChange={onSportChange}
-        ariaLabel="Sport"
+        ariaLabel={t("sport")}
       />
       {provider ? (
         <CreateInputHero

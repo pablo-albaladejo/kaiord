@@ -1,0 +1,82 @@
+{
+  "sheet": {
+    "newSession": "New session",
+    "reviewSession": "Review session"
+  },
+  "sport": "Sport",
+  "hero": {
+    "describe": "Describe it in plain words",
+    "placeholder": "e.g. 4×4 VO₂ max intervals with a long warm-up…",
+    "generate": "Generate workout",
+    "builtAround": "Built around your {{sport}} zones"
+  },
+  "examples": {
+    "enduranceRide": "45 min Z2 endurance ride",
+    "vo2Intervals": "4×4 VO₂ max intervals",
+    "sweetSpot": "Sweet spot 3×12 @ 90%",
+    "tempoRun": "10k tempo run with strides"
+  },
+  "generating": {
+    "title": "Designing your session…"
+  },
+  "result": {
+    "aiBadge": "AI",
+    "tapToTune": "Tap any step to fine-tune",
+    "timeInZone": "Time in zone",
+    "redo": "Redo",
+    "savePush": "Save & push"
+  },
+  "summary": {
+    "duration": "Duration",
+    "tss": "TSS",
+    "load": "Load"
+  },
+  "startFrom": {
+    "divider": "or start from",
+    "template": "Template",
+    "blank": "Blank",
+    "import": "Import file"
+  },
+  "providersEmpty": {
+    "title": "Configure an AI provider to get started",
+    "supports": "Supports Anthropic, OpenAI, and Google",
+    "openSettings": "Open AI settings"
+  },
+  "fallbackTitle": "AI session",
+  "generator": {
+    "title": "AI Workout Generator",
+    "subtitle": "Describe your workout in natural language and let AI create it."
+  },
+  "form": {
+    "descriptionLabel": "Workout description",
+    "placeholder": "e.g., '45min sweet spot cycling: 10min warmup, 3x10min at 90% FTP with 2min recovery, 5min cooldown'",
+    "generate": "Generate Workout"
+  },
+  "empty": {
+    "supports": "Supports Anthropic (Claude), OpenAI (GPT), and Google (Gemini)",
+    "openSettings": "Open Settings"
+  },
+  "model": {
+    "label": "Model"
+  },
+  "sportOptions": {
+    "autoDetect": "Auto-detect",
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swimming",
+    "generic": "Generic"
+  },
+  "zoneIndicator": {
+    "noProfile": "No profile selected. Set up a profile to include training zones.",
+    "noZones": "No {{sport}} zones configured for {{name}}.",
+    "profile": "Profile: {{name}}"
+  },
+  "banner": {
+    "toggle": "Generate with AI"
+  },
+  "toast": {
+    "generationFailed": "Workout generation failed",
+    "savedAndPushed": "Saved & pushed to Garmin",
+    "savedOnly": "Workout saved"
+  }
+}

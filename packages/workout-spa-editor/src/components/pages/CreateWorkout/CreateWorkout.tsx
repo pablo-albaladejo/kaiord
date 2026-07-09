@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { thresholdsForSport } from "../../../lib/athlete";
 import { buildReviewModel } from "../../../lib/workout-review";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
@@ -6,8 +7,6 @@ import { CreateInputPhase } from "./CreateInputPhase";
 import { CreateResultPhase } from "./CreateResultPhase";
 import { useCreateSave } from "./use-create-save";
 import { useCreateWorkout } from "./use-create-workout";
-
-const FALLBACK_TITLE = "AI session";
 
 export type CreateWorkoutProps = {
   onClose: () => void;
@@ -19,6 +18,8 @@ export default function CreateWorkout({
   onClose,
   onSaved,
 }: CreateWorkoutProps) {
+  const t = useTranslate("create-workout");
+  const FALLBACK_TITLE = t("fallbackTitle");
   const create = useCreateWorkout();
   const { phase, sport, profile, activeProfileId, generatedKrd, promptText } =
     create;
@@ -50,7 +51,7 @@ export default function CreateWorkout({
           heading — exposes a focus target for useFocusOnRouteChange. Copy is
           stable across phases; phase-specific titles live in CreateSheetHeader. */}
       <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">
-        New session
+        {t("sheet.newSession")}
       </h1>
       {phase === "input" && (
         <CreateInputPhase

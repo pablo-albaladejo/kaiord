@@ -2,6 +2,7 @@ import type { Sport } from "@kaiord/core";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import { Button } from "../../atoms/Button";
 import { AiSuccessActionsContainer } from "./AiSuccessActionsContainer";
@@ -11,6 +12,7 @@ import { useAiGeneration } from "./useAiGeneration";
 import { ZoneIndicator } from "./ZoneIndicator";
 
 export const AiWorkoutForm: React.FC = () => {
+  const t = useTranslate("create-workout");
   const [text, setText] = useState("");
   const [sport, setSport] = useState("");
   const generation = useAiRuntimeStore((s) => s.generation);
@@ -26,15 +28,15 @@ export const AiWorkoutForm: React.FC = () => {
   return (
     <div className="space-y-4">
       <label htmlFor="ai-workout-description" className="sr-only">
-        Workout description
+        {t("form.descriptionLabel")}
       </label>
       <textarea
         id="ai-workout-description"
-        aria-label="Workout description"
+        aria-label={t("form.descriptionLabel")}
         className="w-full rounded-lg border border-blue-200 bg-white p-4 text-sm shadow-inner placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:border-blue-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-800"
         rows={4}
         maxLength={2000}
-        placeholder="e.g., '45min sweet spot cycling: 10min warmup, 3x10min at 90% FTP with 2min recovery, 5min cooldown'"
+        placeholder={t("form.placeholder")}
         value={text}
         onChange={(e) => setText(e.target.value)}
         disabled={isLoading}
@@ -50,7 +52,7 @@ export const AiWorkoutForm: React.FC = () => {
           className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
         >
           <Sparkles className="mr-1.5 h-4 w-4" />
-          Generate Workout
+          {t("form.generate")}
         </Button>
       </div>
       {generation.status === "error" && (

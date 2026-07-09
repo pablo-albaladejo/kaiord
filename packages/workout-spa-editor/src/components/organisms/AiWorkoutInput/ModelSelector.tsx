@@ -1,7 +1,9 @@
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 
 export const ModelSelector: React.FC = () => {
+  const t = useTranslate("create-workout");
   const providers = useAiProvidersLive();
   const selectedProviderId = useAiRuntimeStore((s) => s.selectedProviderId);
   const selectForGeneration = useAiRuntimeStore((s) => s.selectForGeneration);
@@ -19,7 +21,7 @@ export const ModelSelector: React.FC = () => {
         htmlFor="ai-model-select"
         className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
       >
-        Model
+        {t("model.label")}
       </label>
       <select
         id="ai-model-select"
