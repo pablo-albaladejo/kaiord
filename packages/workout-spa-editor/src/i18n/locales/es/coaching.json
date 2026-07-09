@@ -1,0 +1,41 @@
+{
+  "banner": {
+    "title": "Sugerencias de emparejamiento ({{total}})",
+    "ariaLabel": "Sugerencias de emparejamiento",
+    "collapse": "Contraer",
+    "viewAll": "ver todas ({{total}})"
+  },
+  "suggestion": {
+    "accept": "Aceptar sugerencia",
+    "reject": "Rechazar sugerencia",
+    "sessionMatched": "Sesión emparejada.",
+    "suggestionDismissed": "Sugerencia descartada.",
+    "noneRemaining": "No quedan sugerencias.",
+    "nRemaining": "Quedan {{count}} sugerencias."
+  },
+  "batchCost": {
+    "title_one": "¿Procesar {{count}} entreno con IA?",
+    "title_other": "¿Procesar {{count}} entrenos con IA?",
+    "description": "Revisa la estimación antes de lanzar el lote.",
+    "estimateNote": "Es una estimación — el uso real puede variar. El coste real se registra por ejecución en Ajustes → Uso.",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "provider": "Proveedor",
+    "noProvider": "Ningún proveedor seleccionado",
+    "tokens": "Tokens estimados",
+    "cost": "Coste estimado",
+    "costValue": "${{amount}} USD"
+  },
+  "batch": {
+    "dismiss": "Descartar",
+    "rawCount_one": "{{count}} entreno sin procesar esta semana",
+    "rawCount_other": "{{count}} entrenos sin procesar esta semana",
+    "processAll": "Procesar todo con IA",
+    "progress": "Procesando {{processed}} de {{total}}",
+    "queued": "En cola {{n}}",
+    "processing": "Procesando {{n}}",
+    "succeeded": "Completados {{n}}",
+    "failed": "Fallidos {{n}}",
+    "cancelAria": "Cancelar el procesamiento por lotes"
+  }
+}
