@@ -14,6 +14,7 @@ import enEditor from "./locales/en/editor.json";
 import enErrors from "./locales/en/errors.json";
 import enLabImport from "./locales/en/labImport.json";
 import enLabs from "./locales/en/labs.json";
+import enLibrary from "./locales/en/library.json";
 import enNav from "./locales/en/nav.json";
 import enSettings from "./locales/en/settings.json";
 import enTargets from "./locales/en/targets.json";
@@ -24,6 +25,7 @@ import esEditor from "./locales/es/editor.json";
 import esErrors from "./locales/es/errors.json";
 import esLabImport from "./locales/es/labImport.json";
 import esLabs from "./locales/es/labs.json";
+import esLibrary from "./locales/es/library.json";
 import esNav from "./locales/es/nav.json";
 import esSettings from "./locales/es/settings.json";
 import esTargets from "./locales/es/targets.json";
@@ -36,6 +38,7 @@ export const NAMESPACES = [
   "errors",
   "labs",
   "labImport",
+  "library",
   "nav",
   "settings",
   "targets",
@@ -52,6 +55,7 @@ export const resources: LocaleResources = {
     errors: enErrors,
     labs: enLabs,
     labImport: enLabImport,
+    library: enLibrary,
     nav: enNav,
     settings: enSettings,
     targets: enTargets,
@@ -64,6 +68,7 @@ export const resources: LocaleResources = {
     errors: esErrors,
     labs: esLabs,
     labImport: esLabImport,
+    library: esLibrary,
     nav: esNav,
     settings: esSettings,
     targets: esTargets,

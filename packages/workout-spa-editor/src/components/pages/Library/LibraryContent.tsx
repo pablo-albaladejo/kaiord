@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal";
 import { filterTemplates, type SportFilter } from "./library-filter";
@@ -24,6 +25,7 @@ export function LibraryContent({
   onSchedule,
   onDelete,
 }: LibraryContentProps) {
+  const t = useTranslate("library");
   const profile = useActiveProfileLive()?.profile ?? null;
   const [query, setQuery] = useState("");
   const [sport, setSport] = useState<SportFilter>("all");
@@ -65,10 +67,10 @@ export function LibraryContent({
       )}
       <ConfirmationModal
         isOpen={deleteTarget !== null}
-        title="Delete Workout"
-        message={`Delete "${deleteTarget?.name ?? ""}"? This cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
+        title={t("deleteDialog.title")}
+        message={t("deleteDialog.confirm", { name: deleteTarget?.name ?? "" })}
+        confirmLabel={t("actions.delete")}
+        cancelLabel={t("actions.cancel")}
         variant="destructive"
         onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}
