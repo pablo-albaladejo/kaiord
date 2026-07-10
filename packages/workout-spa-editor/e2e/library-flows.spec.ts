@@ -172,13 +172,20 @@ test.describe("Library flows", () => {
     await expect(page.getByText(/Template/i).first()).toBeVisible();
   });
 
-  test("Test D: mobile viewport — header Library tap navigates (no modal)", async ({
+  test("Test D: mobile viewport — Library opens as a routed page (no modal)", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/calendar");
 
-    await openHeaderAction(page, /open workout library/i);
+    // Below md the header hides the Library entry; BottomNav owns it.
+    await expect(
+      page.getByRole("button", { name: /open workout library/i })
+    ).toBeHidden();
+    await page
+      .getByTestId("bottom-nav")
+      .getByRole("button", { name: /library/i })
+      .click();
     await page.waitForURL(/\/library$/);
 
     await expect(page.getByTestId("library-page")).toBeVisible();
