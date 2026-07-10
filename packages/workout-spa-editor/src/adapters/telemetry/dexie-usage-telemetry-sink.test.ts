@@ -68,6 +68,20 @@ describe("createDexieUsageTelemetrySink", () => {
     expect(rows).toHaveLength(0);
   });
 
+  it("should not append anything for a finished run without usage", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const sink = createDexieUsageTelemetrySink(persistence);
+
+    // Act
+    sink.emit(finished({ usage: undefined }));
+    await flush();
+    const rows = await persistence.usageEvents.listByMonth(currentMonth());
+
+    // Assert
+    expect(rows).toHaveLength(0);
+  });
+
   it("should swallow a persistence rejection instead of throwing out of emit", async () => {
     // Arrange
     const logger = fakeLogger();

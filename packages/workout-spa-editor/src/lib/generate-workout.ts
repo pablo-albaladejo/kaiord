@@ -4,6 +4,8 @@ import { createLanguageModel } from "@kaiord/ai/providers";
 import type { KRD, Sport } from "@kaiord/core";
 import { createWorkoutKRD } from "@kaiord/core";
 
+import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adapter";
+import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 
 export type GenerateWorkoutOptions = {
@@ -13,7 +15,8 @@ export type GenerateWorkoutOptions = {
   sport?: Sport;
   customPrompt?: string;
   zonesContext?: string;
-  // Optional usage-telemetry sink; when supplied the run emits through the port.
+  // Telemetry sink override; defaults to the Dexie usage sink over the app db so
+  // every generation call site is accounted without bolting on its own writer.
   telemetry?: AiTelemetrySink;
 };
 
@@ -23,10 +26,10 @@ export const generateWorkoutKrd = async (
   const model = await createLanguageModel(options.provider, options.modelId, {
     browser: true,
   });
-  const textToWorkout = createTextToWorkout({
-    model,
-    telemetry: options.telemetry,
-  });
+  const telemetry =
+    options.telemetry ??
+    createDexieUsageTelemetrySink(createDexiePersistence());
+  const textToWorkout = createTextToWorkout({ model, telemetry });
 
   const prompt = buildPrompt(options);
   const workout = await textToWorkout(prompt, {

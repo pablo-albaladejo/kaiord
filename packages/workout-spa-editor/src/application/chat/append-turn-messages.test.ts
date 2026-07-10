@@ -50,6 +50,27 @@ describe("appendAssistantTurn dual-write", () => {
     });
   });
 
+  it("should still commit the turn when the telemetry mirror write fails", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    persistence.usageEvents.append = () => Promise.reject(new Error("boom"));
+
+    // Act
+    const act = appendAssistantTurn(
+      persistence,
+      "p-1",
+      "c-1",
+      completeResult({ promptTokens: 200, completionTokens: 100 }),
+      "google",
+      gen
+    );
+
+    // Assert
+    await expect(act).resolves.toBeUndefined();
+    const row = await persistence.usage.getByMonth(month());
+    expect(row).toMatchObject({ inputTokens: 200, outputTokens: 100 });
+  });
+
   it("should write neither store for a turn without usage", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();

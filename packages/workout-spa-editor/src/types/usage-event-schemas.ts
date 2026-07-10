@@ -30,6 +30,7 @@ export const usageEventSchema = z
     cost: z.number().nonnegative(),
     createdAt: z.string(),
   })
+  .strict()
   .refine((v) => v.tokens === v.promptTokens + v.completionTokens, {
     message: "tokens MUST equal promptTokens + completionTokens",
     path: ["tokens"],

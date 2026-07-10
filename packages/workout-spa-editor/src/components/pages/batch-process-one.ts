@@ -6,8 +6,6 @@
  */
 
 import type { KaiordDatabase } from "../../adapters/dexie/dexie-database";
-import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
-import { createDexieUsageTelemetrySink } from "../../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { ProcessResult } from "../../application/ai-workout-processor";
 import { processWorkoutWithAi } from "../../application/ai-workout-processor";
 import type { ProcessOneFn } from "../../application/batch-processor";
@@ -21,18 +19,17 @@ export function createProcessOne(
   modelId: string,
   db: KaiordDatabase
 ): ProcessOneFn {
-  const telemetry = createDexieUsageTelemetrySink(createDexiePersistence(db));
   return async (
     workout: WorkoutRecord,
     allowRetry: boolean
   ): Promise<ProcessResult> => {
+    // Usage telemetry is emitted by `generateWorkoutKrd` (default Dexie sink).
     const generateFn = (prompt: string, sport: string) =>
       generateWorkoutKrd({
         text: prompt,
         provider,
         modelId,
         sport: sport as Parameters<typeof generateWorkoutKrd>[0]["sport"],
-        telemetry,
       });
 
     const result = await processWorkoutWithAi({

@@ -55,6 +55,27 @@ describe("foldUsageEvents", () => {
     expect(totals.inputTokens).toBe(100);
   });
 
+  it("should sum in createdAt order regardless of input order", () => {
+    // Arrange
+    const late = event({
+      id: "late",
+      createdAt: "2026-07-10T12:00:00.000Z",
+      cost: 0.002,
+    });
+    const early = event({
+      id: "early",
+      createdAt: "2026-07-10T08:00:00.000Z",
+      cost: 0.001,
+    });
+
+    // Act
+    const ascending = foldUsageEvents([early, late]);
+    const descending = foldUsageEvents([late, early]);
+
+    // Assert
+    expect(descending).toEqual(ascending);
+  });
+
   it("should return zeros for an empty log", () => {
     // Arrange
     const events: UsageEventRecord[] = [];

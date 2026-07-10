@@ -9,7 +9,7 @@
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderType } from "../../store/ai-store-types";
 import type { AiModelPurpose } from "../../types/ai-model-binding";
-import type { UsageEventRecord } from "../../types/usage-event-schemas";
+import { usageEventSchema } from "../../types/usage-event-schemas";
 import { estimateCost } from "../cost-estimation";
 import { getProviderRate } from "../provider-rates";
 
@@ -35,7 +35,10 @@ export const appendUsageEvent = async (
     ? estimateCost(tokens, getProviderRate(input.providerType))
     : 0;
 
-  await persistence.usageEvents.append({
+  // Parse at the single write boundary: `.strict()` rejects any stray field, so
+  // the redaction guarantee (ids and metrics only) is enforced at runtime, not
+  // by the TypeScript type alone.
+  const record = usageEventSchema.parse({
     id: newId(),
     ...(input.traceId !== undefined ? { traceId: input.traceId } : {}),
     yearMonth: iso.slice(0, 7),
@@ -50,5 +53,6 @@ export const appendUsageEvent = async (
     tokens,
     cost,
     createdAt: iso,
-  } satisfies UsageEventRecord);
+  });
+  await persistence.usageEvents.append(record);
 };

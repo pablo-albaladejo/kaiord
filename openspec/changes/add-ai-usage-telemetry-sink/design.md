@@ -98,7 +98,7 @@ fire-and-forget `emit`.
 The event's `provider` is an SDK string, but the rate table is keyed by
 `LlmProviderType`. A single tested helper `providerTypeFromSdk(provider):
 LlmProviderType | undefined` maps by prefix (`anthropic*` → `anthropic`,
-`openai*`/`azure*` → `openai`, `google*`/`gemini*` → `google`). In the SPA the
+`openai*`/`azure*` → `openai`, `google*`/`gemini*`/`vertex*` → `google`). In the SPA the
 model is always a real provider instance, so generation/lab events map cleanly.
 Unmapped providers record the row with `cost: 0` (usage stays visible) and a
 logged warning rather than dropping the event. Chat does not go through this

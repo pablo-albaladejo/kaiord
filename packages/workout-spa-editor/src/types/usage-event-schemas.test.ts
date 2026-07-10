@@ -64,4 +64,15 @@ describe("usageEventSchema", () => {
     // Assert
     expect(result.success).toBe(false);
   });
+
+  it("should reject a payload-bearing row so redaction holds at runtime", () => {
+    // Arrange
+    const row = { ...validRow, promptText: "secret user prompt" };
+
+    // Act
+    const result = usageEventSchema.safeParse(row);
+
+    // Assert
+    expect(result.success).toBe(false);
+  });
 });

@@ -18,9 +18,14 @@ export const recordTurnUsage = async (
   usage: TurnUsage
 ): Promise<void> => {
   await recordChatUsage(persistence, { providerType, ...usage });
-  await appendUsageEvent(persistence, {
-    purpose: "chat",
-    providerType,
-    ...usage,
-  });
+  try {
+    await appendUsageEvent(persistence, {
+      purpose: "chat",
+      providerType,
+      ...usage,
+    });
+  } catch {
+    // Best-effort mirror: the event log is non-authoritative during the
+    // migration, so a failed telemetry write must never fail a committed turn.
+  }
 };
