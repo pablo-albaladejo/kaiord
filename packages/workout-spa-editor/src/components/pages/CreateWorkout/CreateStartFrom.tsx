@@ -10,7 +10,7 @@ export type CreateStartFromProps = {
 type Tile = { key: string; label: string; icon: IconName; onClick: () => void };
 
 const TILE_CLASS =
-  "flex flex-1 flex-col items-center gap-2 rounded-[14px] border border-edge bg-surface-deep px-3 py-4 text-ink-body transition-colors hover:border-edge";
+  "flex flex-1 flex-col items-center gap-2 rounded-[14px] border border-edge bg-surface-deep px-3 py-4 text-ink-body transition-colors hover:border-edge-strong";
 
 export function CreateStartFrom({
   onTemplate,

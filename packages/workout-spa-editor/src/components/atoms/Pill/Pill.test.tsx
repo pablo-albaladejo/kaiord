@@ -24,7 +24,7 @@ describe("Pill", () => {
     const pill = screen.getByText("AI");
 
     // Assert
-    expect(pill).toHaveClass("bg-primary-800");
+    expect(pill).toHaveClass("bg-accent/15");
     expect(pill).toHaveClass("text-accent");
   });
 

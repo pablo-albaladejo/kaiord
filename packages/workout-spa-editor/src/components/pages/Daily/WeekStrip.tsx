@@ -35,7 +35,7 @@ export function WeekStrip(props: WeekStripProps) {
   return (
     <div
       data-testid="daily-week-strip"
-      className="rounded-lg bg-surface border-edge p-3"
+      className="rounded-lg border border-edge bg-surface p-3"
     >
       <div className="flex items-center gap-1.5">
         <button

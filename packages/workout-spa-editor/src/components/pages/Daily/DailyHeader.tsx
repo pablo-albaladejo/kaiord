@@ -43,7 +43,7 @@ export function DailyHeader({
           <button
             type="button"
             onClick={onBackToToday}
-            className="mt-1 rounded-md text-[13px] font-semibold text-accent transition-colors hover:text-accent"
+            className="mt-1 rounded-md text-[13px] font-semibold text-accent transition-colors hover:text-accent/80"
           >
             {t("header.backToToday")}
           </button>

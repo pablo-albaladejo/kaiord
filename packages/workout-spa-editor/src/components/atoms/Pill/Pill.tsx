@@ -11,7 +11,7 @@ export type PillProps = HTMLAttributes<HTMLSpanElement> & {
 
 const toneClasses: Record<PillTone, string> = {
   neutral: "bg-ink-strong/5 text-ink-body border-edge",
-  accent: "bg-primary-800 text-accent border-transparent",
+  accent: "bg-accent/15 text-accent border-transparent",
   accentSolid: "bg-primary-500 text-white border-transparent",
 };
 

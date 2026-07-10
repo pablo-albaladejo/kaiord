@@ -38,6 +38,7 @@
 
   --edge: #e2e8f0;
   --edge-soft: #f1f5f9;
+  --edge-strong: #cbd5e1;
 
   --accent: #0284c7;
 
@@ -62,6 +63,7 @@
 
   --edge: rgba(51, 65, 85, 0.6);
   --edge-soft: var(--brand-border-soft);
+  --edge-strong: #475569;
 
   --accent: #38bdf8;
 
@@ -138,6 +140,7 @@
 
   --color-edge: var(--edge);
   --color-edge-soft: var(--edge-soft);
+  --color-edge-strong: var(--edge-strong);
 
   --color-accent: var(--accent);
 

@@ -10,7 +10,8 @@
  *      parent route.
  *   C) Header click while editor has an active workout → page renders
  *      the "Load into editor" CTA; clicking it loads the template.
- *   D) Mobile viewport — header tap navigates (no modal mounts).
+ *   D) Mobile viewport — BottomNav tab navigates; the header entry is
+ *      hidden below md and no modal mounts.
  */
 
 import { expect, test } from "./fixtures/base";

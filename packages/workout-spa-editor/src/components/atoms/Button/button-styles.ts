@@ -13,7 +13,7 @@ export const variantClasses: Record<ButtonVariant, string> = {
   // hairline; soft = accent-on-soft-accent. Both read on the deep page bg.
   ghost:
     "bg-ink-strong/5 text-ink-strong border border-edge hover:bg-ink-strong/10 focus:ring-primary-500 disabled:opacity-60",
-  soft: "bg-primary-800 text-accent hover:bg-primary-800/80 focus:ring-primary-500 disabled:opacity-60",
+  soft: "bg-accent/15 text-accent hover:bg-accent/25 focus:ring-primary-500 disabled:opacity-60",
 };
 
 export const sizeClasses: Record<ButtonSize, string> = {

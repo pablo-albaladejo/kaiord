@@ -51,6 +51,8 @@ const TS_EXTENSIONS = [".ts", ".tsx"];
 const SKIP_EXTENSIONS = [
   ".test.ts",
   ".test.tsx",
+  ".spec.ts",
+  ".spec.tsx",
   ".stories.ts",
   ".stories.tsx",
 ];
@@ -61,8 +63,10 @@ const SKIP_EXTENSIONS = [
 const DARK_ONLY_RE =
   /((?:(?:[a-zA-Z-]+|\[[^\]]*\]):)*)(bg-slate-(?:700|800|900|950)|bg-primary-900|text-slate-(?:50|100|200)|(?:border|divide)-slate-(?:700|800)|text-sky-400)(?:\/\d+)?(?![\w-])/g;
 
-const CLASSNAME_LITERAL_RE = /className\s*=\s*(?:"([^"]*)"|\{\s*`([^`]*)`\s*\})/g;
-const BARE_BORDER_RE = /(?:^|\s)(?:[a-zA-Z-]+:)*border(?:-[tblrxy])?(?=\s|$)/;
+const CLASSNAME_LITERAL_RE =
+  /className\s*=\s*(?:"([^"]*)"|\{\s*`([^`]*)`\s*\})/g;
+const BARE_BORDER_RE =
+  /(?:^|\s)(?:[a-zA-Z-]+:)*border(?:-[tblrxy])?(?:-[248])?(?=\s|$)/;
 const BORDER_COLOR_RE =
   /border-(?:[a-z]+-\d{1,3}(?:\/\d+)?|edge(?:-soft)?|accent|primary|white|black|transparent|current|inherit|\[)/;
 

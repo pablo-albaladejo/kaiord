@@ -8,7 +8,7 @@ export function TrendsCard() {
   const t = useTranslate("daily");
   return (
     <Link href="/health" data-testid="daily-trends-card" className="block">
-      <Card className="bg-surface border-edge p-4 transition-colors hover:border-edge">
+      <Card className="bg-surface border-edge p-4 transition-colors hover:border-edge-strong">
         <div className="flex items-center gap-3">
           <Icon icon={ICON_MAP.trend} size="md" color="inherit" />
           <div className="min-w-0 flex-1">

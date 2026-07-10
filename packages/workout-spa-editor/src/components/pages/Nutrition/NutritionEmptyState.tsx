@@ -12,7 +12,7 @@ export function NutritionEmptyState() {
   return (
     <div className="px-4 py-4" data-testid="nutrition-empty">
       <Link href={ATHLETE_HREF} className="block">
-        <Card className="border-edge bg-surface p-4 transition-colors hover:border-edge">
+        <Card className="border-edge bg-surface p-4 transition-colors hover:border-edge-strong">
           <div className="flex items-center gap-3">
             <Icon icon={ICON_MAP.nutrition} size="md" color="inherit" />
             <div className="min-w-0 flex-1">
