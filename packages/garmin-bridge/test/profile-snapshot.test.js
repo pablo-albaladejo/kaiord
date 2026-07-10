@@ -1,10 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import "./chrome-mock.js";
-import {
-  validateSnapshot,
-  isAllowedSenderOrigin,
-} from "../profile-snapshot.js";
+import { validateSnapshot } from "../profile-snapshot.js";
 import {
   positiveSnapshotFixtures,
   negativeSnapshotFixtures,
@@ -66,95 +63,6 @@ describe("validateSnapshot — parity with @kaiord/core fixtures", () => {
   });
 });
 
-describe("isAllowedSenderOrigin", () => {
-  it("accepts production kaiord origins", () => {
-    expect(isAllowedSenderOrigin({ origin: "https://app.kaiord.com" })).toBe(
-      true
-    );
-    expect(
-      isAllowedSenderOrigin({ origin: "https://staging.kaiord.com" })
-    ).toBe(true);
-  });
-
-  it("accepts dev localhost origins on the documented ports", () => {
-    expect(isAllowedSenderOrigin({ origin: "http://localhost:5173" })).toBe(
-      true
-    );
-    expect(isAllowedSenderOrigin({ origin: "http://localhost:5174" })).toBe(
-      true
-    );
-  });
-
-  it("rejects undefined origin", () => {
-    expect(isAllowedSenderOrigin({})).toBe(false);
-    expect(isAllowedSenderOrigin(undefined)).toBe(false);
-  });
-
-  it("rejects unauthorized origins", () => {
-    expect(isAllowedSenderOrigin({ origin: "https://attacker.example" })).toBe(
-      false
-    );
-    expect(isAllowedSenderOrigin({ origin: "http://localhost:9999" })).toBe(
-      false
-    );
-  });
-});
-
-describe("background — profile-snapshot action", () => {
-  it("persists a valid snapshot to chrome.storage.local with receivedAt", async () => {
-    const valid = positiveSnapshotFixtures[0];
-
-    const result = await bridge.persistSnapshot(valid);
-
-    expect(result.storedAt).toBeTypeOf("number");
-    const stored = globalThis.__chromeLocalStore.profileSnapshot;
-    expect(stored).toMatchObject(valid);
-    expect(stored.receivedAt).toBe(result.storedAt);
-  });
-
-  it("writes lastPushReceipt atomically with the snapshot", async () => {
-    const valid = positiveSnapshotFixtures[0];
-
-    const result = await bridge.persistSnapshot(valid);
-
-    const receipt = globalThis.__chromeLocalStore.lastPushReceipt;
-    expect(receipt).toBeDefined();
-    expect(receipt.at).toBe(result.storedAt);
-    expect(receipt.name).toBe(valid.profile.name);
-  });
-
-  it("rejects an invalid payload as non-retryable error", async () => {
-    await expect(bridge.persistSnapshot({ schemaVersion: 99 })).rejects.toThrow(
-      "Unsupported snapshot schema version"
-    );
-    expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
-  });
-
-  it("clearSnapshot removes profileSnapshot, lastWeeklyRollup and lastPushReceipt", async () => {
-    globalThis.__chromeLocalStore.profileSnapshot = { keep: "no" };
-    globalThis.__chromeLocalStore.lastWeeklyRollup = { keep: "no" };
-    globalThis.__chromeLocalStore.lastPushReceipt = { at: 1, name: "x" };
-    globalThis.__chromeLocalStore.somethingElse = "untouched";
-
-    const result = await bridge.clearSnapshot();
-
-    expect(result).toBeNull();
-    expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
-    expect(globalThis.__chromeLocalStore.lastWeeklyRollup).toBeUndefined();
-    expect(globalThis.__chromeLocalStore.lastPushReceipt).toBeUndefined();
-    expect(globalThis.__chromeLocalStore.somethingElse).toBe("untouched");
-  });
-
-  it("does not call garminFetch for snapshot actions", async () => {
-    const fetchSpy = vi.spyOn(bridge, "garminFetch");
-
-    await bridge.persistSnapshot(positiveSnapshotFixtures[0]);
-    await bridge.clearSnapshot();
-
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
-});
-
 describe("background — handleExternalMessage origin gate", () => {
   const validSnapshot = positiveSnapshotFixtures[0];
 
@@ -171,7 +79,7 @@ describe("background — handleExternalMessage origin gate", () => {
     expect(sendResponse).toHaveBeenCalledWith({
       ok: false,
       protocolVersion: 1,
-      error: "Origin not permitted",
+      error: "Origin or action not permitted",
       retryable: false,
     });
     expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
@@ -188,7 +96,10 @@ describe("background — handleExternalMessage origin gate", () => {
 
     await new Promise((r) => setTimeout(r, 10));
     expect(sendResponse).toHaveBeenCalledWith(
-      expect.objectContaining({ ok: false, error: "Origin not permitted" })
+      expect.objectContaining({
+        ok: false,
+        error: "Origin or action not permitted",
+      })
     );
   });
 
@@ -207,7 +118,7 @@ describe("background — handleExternalMessage origin gate", () => {
     );
   });
 
-  it("non-snapshot actions bypass the origin gate (existing actions unaffected)", async () => {
+  it("origin-gates every external action, not only snapshot writes", async () => {
     const sendResponse = vi.fn();
 
     bridge.handleExternalMessage(
@@ -218,7 +129,10 @@ describe("background — handleExternalMessage origin gate", () => {
 
     await new Promise((r) => setTimeout(r, 10));
     expect(sendResponse).toHaveBeenCalledWith(
-      expect.objectContaining({ ok: true, protocolVersion: 1 })
+      expect.objectContaining({
+        ok: false,
+        error: "Origin or action not permitted",
+      })
     );
   });
 

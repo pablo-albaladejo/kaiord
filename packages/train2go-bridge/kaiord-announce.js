@@ -1,9 +1,15 @@
 /**
- * Kaiord Train2Go Bridge — Announce Content Script
+ * Kaiord Bridge Core — Announce Content Script (vendored)
  *
- * Injected at document_start on SPA origins (*.kaiord.com, localhost).
- * Posts KAIORD_BRIDGE_ANNOUNCE to the page so the SPA can discover the
- * extension ID at runtime. Re-announces on KAIORD_BRIDGE_DISCOVER.
+ * Master: packages/_shared/bridge-core/kaiord-announce.js. Never edit a
+ * vendored copy — edit the master and run `pnpm bridge:sync`.
+ *
+ * Injected at document_start on SPA origins (*.kaiord.com, localhost),
+ * after the per-bridge `bridge-identity.js` (manifest content_scripts
+ * order), whose globalThis.KAIORD_BRIDGE_IDENTITY provides id, name, and
+ * capabilities. Posts KAIORD_BRIDGE_ANNOUNCE to the page so the SPA can
+ * discover the extension ID at runtime. Re-announces on
+ * KAIORD_BRIDGE_DISCOVER.
  *
  * Resilience to extension reload: when the bridge is updated/reloaded,
  * Chrome terminates this script's runtime context but does NOT remove
@@ -16,10 +22,9 @@
  * host_permissions).
  */
 
-const BRIDGE_ID = "train2go-bridge";
-const BRIDGE_NAME = "Train2Go";
 const PROTOCOL_VERSION = 1;
-const CAPABILITIES = ["read:training-plan"];
+
+const bridgeIdentity = () => globalThis.KAIORD_BRIDGE_IDENTITY ?? {};
 
 const isContextValid = () => {
   try {
@@ -29,15 +34,18 @@ const isContextValid = () => {
   }
 };
 
-const buildAnnouncement = () => ({
-  type: "KAIORD_BRIDGE_ANNOUNCE",
-  bridgeId: BRIDGE_ID,
-  extensionId: chrome.runtime.id,
-  name: BRIDGE_NAME,
-  version: chrome.runtime.getManifest().version,
-  protocolVersion: PROTOCOL_VERSION,
-  capabilities: CAPABILITIES,
-});
+const buildAnnouncement = () => {
+  const identity = bridgeIdentity();
+  return {
+    type: "KAIORD_BRIDGE_ANNOUNCE",
+    bridgeId: identity.id,
+    extensionId: chrome.runtime.id,
+    name: identity.name,
+    version: chrome.runtime.getManifest().version,
+    protocolVersion: PROTOCOL_VERSION,
+    capabilities: identity.capabilities,
+  };
+};
 
 const announce = () => {
   if (!isContextValid()) {

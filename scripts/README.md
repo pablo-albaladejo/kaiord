@@ -40,7 +40,7 @@ Every non-trivial script ships with a co-located `*.test.mjs` exercised by
 | `check-no-zustand-writethrough.mjs`                       | `R-DexieImport` — Zustand stores MUST NOT touch Dexie.                               | `pnpm test:scripts`                                                           |
 | `check-overrides-stale.mjs`                               | `R-OverridesStale` — every `pnpm.overrides` entry is required or allowlisted.        | `pnpm lint:overrides-stale`                                                   |
 | `check-package-deps.mjs`                                  | `R-ArchPackageDeps` — `@kaiord/*` cross-package allowlist.                           | `pnpm lint:package-deps`                                                      |
-| `check-popup-css-parity.test.mjs`                         | Test-only parity on extension popup CSS.                                             | `pnpm test:scripts`                                                           |
+| `check-bridge-core-parity.test.mjs`                       | Test-only parity on vendored bridge-core copies (byte, purity, identity↔manifest).   | `pnpm test:scripts`                                                           |
 | `check-scripts-orphans.mjs`                               | `R-ScriptsNoOrphans` — every `scripts/*` file is wired or allowlisted.               | `pnpm lint:scripts-orphans`                                                   |
 | `check-spec-format.mjs`                                   | Spec format (template + structural).                                                 | `pnpm lint:specs`                                                             |
 | `check-test-aaa.mjs`                                      | `R-ItBodyAAA` — test bodies in Arrange/Act/Assert sections.                          | `pnpm test:scripts`                                                           |
@@ -59,7 +59,7 @@ Every non-trivial script ships with a co-located `*.test.mjs` exercised by
 | `measure-it-titles-histogram.mjs`                         | Diagnostic histogram of `it()` title prefixes.                                       | `pnpm test:scripts`                                                           |
 | `package-extension.sh`                                    | Package an extension into a Chrome Web Store `.zip`.                                 | `.github/workflows/cws-publish.yml`                                           |
 | `sync-extension-version.mjs`                              | Sync extension `manifest.json` version with package.json.                            | `.github/workflows/cws-publish.yml`                                           |
-| `sync-popup-css.mjs`                                      | Sync extension popup CSS across surfaces.                                            | `pnpm popup:sync`                                                             |
+| `sync-bridge-core.mjs`                                    | Sync `_shared/bridge-core` masters into each extension.                              | `pnpm bridge:sync`                                                            |
 
 ## Manual maintainer tools
 
@@ -73,6 +73,7 @@ tree — keep the format `- \`<filename>\` — When to run: <reason>`.
 - `create-release.sh` — When to run: when shipping a manual hotfix release with a package-scoped tag (bypasses the normal Changesets flow). Documented in `DEPLOYMENT.md`.
 - `parse-release-tag.sh` — When to run: when validating a `@kaiord/<pkg>@<version>` tag locally; used by `create-release.sh`.
 - `validate-package.sh` — When to run: when validating that a package version matches its `package.json` before pushing a tag; used by `create-release.sh`.
+
 <!-- manual-tools:end -->
 
 ## Subdirectories

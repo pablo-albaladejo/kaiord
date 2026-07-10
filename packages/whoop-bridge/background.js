@@ -43,6 +43,16 @@ try {
       : undefined;
 }
 
+// ── Shared envelope/dispatch (vendored bridge-core) ──
+let bridgeEnvelope;
+try {
+  importScripts("bridge-envelope.js");
+  bridgeEnvelope = globalThis;
+} catch {
+  bridgeEnvelope =
+    typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
+}
+
 // ── chrome.storage.local promise wrapper ──
 const storage = {
   get: (keys) => chrome.storage.local.get(keys),
@@ -155,59 +165,21 @@ const handleAction = async (message) => {
   }
 };
 
-const sendResult = (data, sendResponse) => {
-  sendResponse({ ok: true, protocolVersion: PROTOCOL_VERSION, data });
-};
-
-const sendError = (err, sendResponse) => {
-  sendResponse({
-    ok: false,
-    protocolVersion: PROTOCOL_VERSION,
-    error: String(err?.message ?? err),
-    ...(typeof err?.status === "number" ? { status: err.status } : {}),
-    ...(err?.retryable ? { retryable: true } : {}),
-    ...(err?.needsReauth ? { needsReauth: true } : {}),
-    ...(typeof err?.resetSeconds === "number"
-      ? { resetSeconds: err.resetSeconds }
-      : {}),
-  });
-};
-
-const dispatch = (message, sendResponse) => {
-  handleAction(message)
-    .then((data) => sendResult(data, sendResponse))
-    .catch((err) => sendError(err, sendResponse));
-  return true;
-};
-
 // External (web) callers get a reduced action surface: credential writes
-// stay popup-only, and the sender origin is pinned in runtime as a second
-// layer over the manifest's externally_connectable (same defense as
-// garmin-bridge's snapshot actions).
+// stay popup-only, and the sender origin is pinned by the vendored guard
+// as a second layer over the manifest's externally_connectable.
 const EXTERNAL_ACTIONS = new Set(["ping", "status", "connect", "whoop-fetch"]);
 
-const ALLOWED_ORIGIN_REGEX =
-  /^(https:\/\/[a-z0-9-]+\.kaiord\.com|http:\/\/localhost:(5173|5174))$/;
+const dispatch = bridgeEnvelope.createDispatch({
+  handleAction,
+  protocolVersion: PROTOCOL_VERSION,
+});
 
-const isAllowedSenderOrigin = (sender) =>
-  typeof sender?.origin === "string" &&
-  ALLOWED_ORIGIN_REGEX.test(sender.origin);
-
-const dispatchExternal = (message, sender, sendResponse) => {
-  if (
-    !isAllowedSenderOrigin(sender) ||
-    !EXTERNAL_ACTIONS.has(message?.action)
-  ) {
-    sendResponse({
-      ok: false,
-      protocolVersion: PROTOCOL_VERSION,
-      error: "Origin or action not permitted",
-      retryable: false,
-    });
-    return true;
-  }
-  return dispatch(message, sendResponse);
-};
+const dispatchExternal = bridgeEnvelope.createExternalDispatch({
+  dispatch,
+  externalActions: EXTERNAL_ACTIONS,
+  protocolVersion: PROTOCOL_VERSION,
+});
 
 if (typeof chrome !== "undefined" && chrome.runtime?.onMessageExternal) {
   chrome.runtime.onMessageExternal.addListener((message, sender, respond) =>
@@ -230,9 +202,8 @@ if (typeof module !== "undefined") {
     whoopFetch,
     dispatch,
     dispatchExternal,
-    isAllowedSenderOrigin,
+    isAllowedSenderOrigin: bridgeEnvelope.isAllowedSenderOrigin,
     EXTERNAL_ACTIONS,
-    sendError,
     auth,
   };
 }

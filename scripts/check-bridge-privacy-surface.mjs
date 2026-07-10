@@ -16,7 +16,7 @@
  * Any drift fails the lint job. Updates require explicit golden refresh.
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -25,10 +25,15 @@ const GOLDEN_PATH = join(
   REPO_ROOT,
   "scripts/fixtures/bridge-privacy-surface.json"
 );
-const BRIDGES = ["garmin-bridge", "train2go-bridge"];
+const BRIDGES = ["garmin-bridge", "train2go-bridge", "whoop-bridge"];
 
+// manifest.prod.json and content.js exist only for bridges that are
+// published / ship a site content script (whoop has neither yet); their
+// sections are omitted from the surface rather than failing the read.
 const readManifest = (bridge, file) => {
-  const raw = readFileSync(join(REPO_ROOT, "packages", bridge, file), "utf8");
+  const path = join(REPO_ROOT, "packages", bridge, file);
+  if (!existsSync(path)) return null;
+  const raw = readFileSync(path, "utf8");
   const m = JSON.parse(raw);
   return {
     permissions: m.permissions ?? [],
@@ -41,10 +46,9 @@ const readManifest = (bridge, file) => {
 };
 
 const extractAllowed = (bridge) => {
-  const src = readFileSync(
-    join(REPO_ROOT, "packages", bridge, "content.js"),
-    "utf8"
-  );
+  const path = join(REPO_ROOT, "packages", bridge, "content.js");
+  if (!existsSync(path)) return [];
+  const src = readFileSync(path, "utf8");
   const start = src.indexOf("const ALLOWED");
   if (start === -1) return [];
   const end = src.indexOf("];", start);
@@ -98,9 +102,10 @@ const checkPopupRelativeUrls = (bridge) => {
 const buildSurface = () => {
   const out = {};
   for (const bridge of BRIDGES) {
+    const manifestProd = readManifest(bridge, "manifest.prod.json");
     out[bridge] = {
       manifest: readManifest(bridge, "manifest.json"),
-      manifest_prod: readManifest(bridge, "manifest.prod.json"),
+      ...(manifestProd ? { manifest_prod: manifestProd } : {}),
       allowed_paths: extractAllowed(bridge),
     };
   }
