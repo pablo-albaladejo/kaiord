@@ -12,6 +12,7 @@ import {
   labExtractorAgent,
   runGenerateAgent,
 } from "@kaiord/ai/agents";
+import type { AiTelemetrySink } from "@kaiord/ai/observability";
 import {
   createLanguageModel,
   resolveModelForPurpose,
@@ -25,6 +26,7 @@ export type RunLabExtractionInput = {
   providers: LlmProviderConfig[];
   bindings: AiModelBinding[];
   signal?: AbortSignal;
+  telemetry?: AiTelemetrySink;
 };
 
 export type RunLabExtractionResult =
@@ -47,7 +49,7 @@ export const runLabExtraction = async (
   const { output } = await runGenerateAgent(
     labExtractorAgent,
     { files: [input.file] },
-    { model, signal: input.signal }
+    { model, signal: input.signal, telemetry: input.telemetry }
   );
   return { ok: true, extraction: output };
 };

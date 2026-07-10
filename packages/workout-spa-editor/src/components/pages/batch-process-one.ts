@@ -6,6 +6,8 @@
  */
 
 import type { KaiordDatabase } from "../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { createDexieUsageTelemetrySink } from "../../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { ProcessResult } from "../../application/ai-workout-processor";
 import { processWorkoutWithAi } from "../../application/ai-workout-processor";
 import type { ProcessOneFn } from "../../application/batch-processor";
@@ -19,6 +21,7 @@ export function createProcessOne(
   modelId: string,
   db: KaiordDatabase
 ): ProcessOneFn {
+  const telemetry = createDexieUsageTelemetrySink(createDexiePersistence(db));
   return async (
     workout: WorkoutRecord,
     allowRetry: boolean
@@ -29,6 +32,7 @@ export function createProcessOne(
         provider,
         modelId,
         sport: sport as Parameters<typeof generateWorkoutKrd>[0]["sport"],
+        telemetry,
       });
 
     const result = await processWorkoutWithAi({

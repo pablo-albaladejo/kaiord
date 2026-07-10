@@ -1,4 +1,5 @@
 import { createTextToWorkout } from "@kaiord/ai";
+import type { AiTelemetrySink } from "@kaiord/ai/observability";
 import { createLanguageModel } from "@kaiord/ai/providers";
 import type { KRD, Sport } from "@kaiord/core";
 import { createWorkoutKRD } from "@kaiord/core";
@@ -12,6 +13,8 @@ export type GenerateWorkoutOptions = {
   sport?: Sport;
   customPrompt?: string;
   zonesContext?: string;
+  // Optional usage-telemetry sink; when supplied the run emits through the port.
+  telemetry?: AiTelemetrySink;
 };
 
 export const generateWorkoutKrd = async (
@@ -20,7 +23,10 @@ export const generateWorkoutKrd = async (
   const model = await createLanguageModel(options.provider, options.modelId, {
     browser: true,
   });
-  const textToWorkout = createTextToWorkout({ model });
+  const textToWorkout = createTextToWorkout({
+    model,
+    telemetry: options.telemetry,
+  });
 
   const prompt = buildPrompt(options);
   const workout = await textToWorkout(prompt, {
