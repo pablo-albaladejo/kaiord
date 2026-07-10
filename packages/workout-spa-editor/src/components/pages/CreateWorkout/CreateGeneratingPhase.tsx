@@ -7,14 +7,14 @@ export function CreateGeneratingPhase() {
   const t = useTranslate("create-workout");
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-center text-[16px] font-semibold text-slate-200">
+      <p className="text-center text-[16px] font-semibold text-ink-body">
         {t("generating.title")}
       </p>
       <div className="flex flex-col gap-3">
         {SKELETON_ROWS.map((row) => (
           <div
             key={row}
-            className="h-14 animate-pulse rounded-[14px] border border-slate-800 bg-surface-deep"
+            className="h-14 animate-pulse rounded-[14px] border border-edge bg-surface-deep"
           />
         ))}
       </div>

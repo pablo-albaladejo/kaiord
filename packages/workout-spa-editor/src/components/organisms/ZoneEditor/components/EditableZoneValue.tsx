@@ -68,7 +68,7 @@ export function EditableZoneValue({
       onKeyDown={handleKeyDown}
       aria-label={ariaLabel}
       className="w-16 rounded border border-blue-400 bg-white px-1
-        font-mono text-sm dark:bg-gray-800"
+        font-mono text-sm dark:border-blue-500 dark:bg-gray-800"
     />
   );
 }

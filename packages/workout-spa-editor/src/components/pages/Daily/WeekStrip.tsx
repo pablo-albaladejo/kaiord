@@ -16,7 +16,7 @@ export type WeekStripProps = {
 };
 
 const ARROW =
-  "flex h-8 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800";
+  "flex h-8 w-7 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-elevated";
 
 const EMPTY: DaySummary = {
   count: 0,
@@ -35,7 +35,7 @@ export function WeekStrip(props: WeekStripProps) {
   return (
     <div
       data-testid="daily-week-strip"
-      className="rounded-lg bg-primary-900 border border-slate-800 p-3"
+      className="rounded-lg bg-surface border-edge p-3"
     >
       <div className="flex items-center gap-1.5">
         <button
@@ -67,7 +67,7 @@ export function WeekStrip(props: WeekStripProps) {
         <Link
           href={calendarHref}
           aria-label={t("weekStrip.openInCalendar")}
-          className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold text-slate-400 transition-colors hover:bg-slate-800"
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold text-ink-muted transition-colors hover:bg-surface-elevated"
         >
           <Icon icon={ICON_MAP.calendar} size="sm" color="inherit" />
           {t("weekStrip.calendar")}

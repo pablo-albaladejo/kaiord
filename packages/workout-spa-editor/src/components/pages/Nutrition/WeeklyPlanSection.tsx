@@ -16,19 +16,19 @@ export function WeeklyPlanSection({ profileId, date }: WeeklyPlanSectionProps) {
   const t = useTranslate("nutrition");
   return (
     <Card
-      className="border-slate-800 bg-primary-900 p-4"
+      className="border-edge bg-surface p-4"
       data-testid="weekly-plan"
     >
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.calendar} size="md" color="inherit" />
-        <p className="m-0 text-[15px] font-semibold text-slate-100">
+        <p className="m-0 text-[15px] font-semibold text-ink-strong">
           {t("plan.title")}
         </p>
-        <span className="ml-auto text-[12px] font-medium text-slate-500">
+        <span className="ml-auto text-[12px] font-medium text-ink-muted">
           {t("plan.burnTarget")}
         </span>
       </div>
-      <div className="mt-3 divide-y divide-slate-800">
+      <div className="mt-3 divide-y divide-edge-soft">
         {(rows ?? []).map((row) => (
           <WeeklyPlanRow key={row.date} row={toWeekEnergyPlanRowView(row)} />
         ))}

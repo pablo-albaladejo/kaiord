@@ -12,8 +12,8 @@ export const variantClasses: Record<ButtonVariant, string> = {
   // Redesign surfaces (dark slate). Ghost = translucent neutral fill with a
   // hairline; soft = accent-on-soft-accent. Both read on the deep page bg.
   ghost:
-    "bg-white/5 text-slate-50 border border-slate-700/60 hover:bg-white/10 focus:ring-primary-500 disabled:opacity-60",
-  soft: "bg-primary-800 text-sky-400 hover:bg-primary-800/80 focus:ring-primary-500 disabled:opacity-60",
+    "bg-ink-strong/5 text-ink-strong border border-edge hover:bg-ink-strong/10 focus:ring-primary-500 disabled:opacity-60",
+  soft: "bg-primary-800 text-accent hover:bg-primary-800/80 focus:ring-primary-500 disabled:opacity-60",
 };
 
 export const sizeClasses: Record<ButtonSize, string> = {

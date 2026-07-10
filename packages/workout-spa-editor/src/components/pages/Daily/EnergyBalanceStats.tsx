@@ -4,19 +4,19 @@ import type { EnergyBalanceViewModel } from "./energy-balance-view-model";
 const NET_TONE_CLASS: Record<EnergyBalanceViewModel["netTone"], string> = {
   deficit: "text-emerald-400",
   surplus: "text-amber-400",
-  even: "text-slate-200",
-  unknown: "text-slate-500",
+  even: "text-ink-body",
+  unknown: "text-ink-muted",
 };
 
 type StatProps = { label: string; value: string; valueClass?: string };
 
-function Stat({ label, value, valueClass = "text-slate-50" }: StatProps) {
+function Stat({ label, value, valueClass = "text-ink-strong" }: StatProps) {
   return (
     <div className="flex-1 min-w-0">
       <div className={`text-[16px] font-bold tabular-nums ${valueClass}`}>
         {value}
       </div>
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mt-px">
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted mt-px">
         {label}
       </div>
     </div>
@@ -29,7 +29,7 @@ export function EnergyBalanceStats({ vm }: EnergyBalanceStatsProps) {
   const t = useTranslate("daily");
   return (
     <>
-      <div className="mt-4 flex gap-2 border-t border-slate-800 pt-4">
+      <div className="mt-4 flex gap-2 border-t border-edge pt-4">
         <Stat label={vm.expenditureLabel} value={vm.expenditure} />
         <Stat label={t("energyBalance.intake")} value={vm.intake} />
         <Stat

@@ -42,10 +42,10 @@ export function WorkoutDetailTitle({
         <Icon icon={ICON_MAP[sportIcon(sport)]} size="lg" color="muted" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[18px] font-bold text-slate-50">
+        <div className="truncate text-[18px] font-bold text-ink-strong">
           {title}
         </div>
-        <p className="text-[12.5px] text-slate-500">
+        <p className="text-[12.5px] text-ink-muted">
           {sportLabel} · {tag || t("title.planned")}
         </p>
       </div>

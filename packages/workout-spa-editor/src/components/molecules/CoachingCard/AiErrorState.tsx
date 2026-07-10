@@ -32,7 +32,7 @@ export function AiErrorState(props: AiErrorStateProps) {
         <button
           type="button"
           onClick={props.onClose}
-          className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
+          className="rounded-md border border-edge px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
         >
           {t("actions.close")}
         </button>

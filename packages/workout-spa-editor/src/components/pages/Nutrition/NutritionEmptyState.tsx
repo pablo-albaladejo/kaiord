@@ -12,14 +12,14 @@ export function NutritionEmptyState() {
   return (
     <div className="px-4 py-4" data-testid="nutrition-empty">
       <Link href={ATHLETE_HREF} className="block">
-        <Card className="border-slate-800 bg-primary-900 p-4 transition-colors hover:border-slate-700">
+        <Card className="border-edge bg-surface p-4 transition-colors hover:border-edge">
           <div className="flex items-center gap-3">
             <Icon icon={ICON_MAP.nutrition} size="md" color="inherit" />
             <div className="min-w-0 flex-1">
-              <p className="m-0 text-[15px] font-semibold text-slate-100">
+              <p className="m-0 text-[15px] font-semibold text-ink-strong">
                 {t("empty.title")}
               </p>
-              <p className="m-0 mt-0.5 text-[13px] text-slate-400">
+              <p className="m-0 mt-0.5 text-[13px] text-ink-muted">
                 {t("empty.body")}
               </p>
             </div>

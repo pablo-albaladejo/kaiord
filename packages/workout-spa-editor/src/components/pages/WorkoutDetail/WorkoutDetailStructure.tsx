@@ -18,8 +18,8 @@ export function WorkoutDetailStructure({
 }: WorkoutDetailStructureProps) {
   const t = useTranslate("workout-detail");
   return (
-    <Card className="border-slate-800 bg-surface p-4">
-      <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+    <Card className="border-edge bg-surface p-4">
+      <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
         {t("structure.eyebrow")}
       </p>
       <ZoneDist dist={dist} height={ZONE_BAR_HEIGHT} className="mb-3" />

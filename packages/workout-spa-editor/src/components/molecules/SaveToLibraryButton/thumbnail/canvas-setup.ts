@@ -2,6 +2,8 @@
  * Canvas Setup Utilities
  *
  * Functions for setting up the canvas for thumbnail generation.
+ * Palette is fixed/theme-neutral by design — thumbnails must render
+ * consistently regardless of the app's light/dark theme.
  */
 
 import type { ThumbnailConfig } from "./types";

@@ -12,7 +12,7 @@ export function ThresholdMetricsRow({
 }: ThresholdMetricsRowProps) {
   if (metrics.length === 0) {
     return (
-      <p className="text-[13.5px] text-slate-400">
+      <p className="text-[13.5px] text-ink-muted">
         Add your {sportLabel.toLowerCase()} thresholds
       </p>
     );
@@ -24,7 +24,7 @@ export function ThresholdMetricsRow({
         <div
           key={metric.label}
           className={
-            index === 0 ? "flex-1" : "flex-1 border-l border-slate-800 pl-4"
+            index === 0 ? "flex-1" : "flex-1 border-l border-edge pl-4"
           }
         >
           <Metric

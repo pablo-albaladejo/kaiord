@@ -25,7 +25,7 @@ export function LinkedAccountRow({
   return (
     <div
       data-testid={`linked-account-row-${sourceMeta.id}`}
-      className="flex flex-col gap-2 rounded border p-3"
+      className="flex flex-col gap-2 rounded border border-edge p-3"
     >
       <div className="flex items-center justify-between">
         <RowInfo label={sourceMeta.label} linked={linked} />
@@ -34,7 +34,7 @@ export function LinkedAccountRow({
             type="button"
             disabled={busy}
             onClick={handleDisconnect}
-            className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50 dark:hover:bg-gray-800"
+            className="rounded-md border border-edge px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50 dark:hover:bg-gray-800"
           >
             Disconnect
           </button>

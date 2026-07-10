@@ -11,10 +11,10 @@ export function MacroSummaryCard({ balance }: MacroSummaryCardProps) {
   const t = useTranslate("nutrition");
   return (
     <Card
-      className="border-slate-800 bg-primary-900 p-4"
+      className="border-edge bg-surface p-4"
       data-testid="macro-summary"
     >
-      <p className="m-0 mb-3 text-[15px] font-semibold text-slate-100">
+      <p className="m-0 mb-3 text-[15px] font-semibold text-ink-strong">
         {t("macros.title")}
       </p>
       <MacroRings

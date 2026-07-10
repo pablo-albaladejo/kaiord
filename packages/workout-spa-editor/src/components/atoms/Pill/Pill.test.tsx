@@ -12,8 +12,8 @@ describe("Pill", () => {
     const pill = screen.getByText("All");
 
     // Assert
-    expect(pill).toHaveClass("bg-white/5");
-    expect(pill).toHaveClass("text-slate-300");
+    expect(pill).toHaveClass("bg-ink-strong/5");
+    expect(pill).toHaveClass("text-ink-body");
   });
 
   it("should render the accent tone", () => {
@@ -25,7 +25,7 @@ describe("Pill", () => {
 
     // Assert
     expect(pill).toHaveClass("bg-primary-800");
-    expect(pill).toHaveClass("text-sky-400");
+    expect(pill).toHaveClass("text-accent");
   });
 
   it("should render the accentSolid tone", () => {

@@ -31,7 +31,7 @@ export function ThresholdCard({
   const metrics = deriveThresholdMetrics(profile, sport, units);
 
   return (
-    <Card className="rounded-[20px] border border-slate-700/60 bg-surface p-4">
+    <Card className="rounded-[20px] border border-edge bg-surface p-4">
       <ThresholdCardHeader auto={auto} onAutoChange={setAuto} />
       <div className="my-4">
         <ThresholdMetricsRow metrics={metrics} sportLabel={sportLabel} />

@@ -56,7 +56,7 @@ export function DayColumn({
       data-drop-target={dropTargetActive ? "true" : undefined}
       aria-current={isToday ? "date" : undefined}
       role="group"
-      className={`flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0 ${tint} ${dropRing}`}
+      className={`flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border border-edge p-2 sm:min-w-0 ${tint} ${dropRing}`}
     >
       <WellnessBand wellness={wellness} resolved={wellnessResolved} />
       <div className="flex flex-1 flex-col gap-1.5">

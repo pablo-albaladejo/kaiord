@@ -19,14 +19,14 @@ export function AvailableRow({ config }: AvailableRowProps) {
       type="button"
       onClick={() => navigate("/settings/extensions")}
       aria-label={`Manage ${config.name} in Extensions settings`}
-      className="flex w-full items-center gap-3 rounded-2xl border border-slate-700/60 bg-surface p-3 text-left"
+      className="flex w-full items-center gap-3 rounded-2xl border border-edge bg-surface p-3 text-left"
     >
       <ConnectionMark mark={config.mark} />
       <div className="min-w-0 flex-1">
-        <div className="text-[14.5px] font-semibold text-slate-50">
+        <div className="text-[14.5px] font-semibold text-ink-strong">
           {config.name}
         </div>
-        <div className="text-[12.5px] text-slate-500">Not connected</div>
+        <div className="text-[12.5px] text-ink-muted">Not connected</div>
       </div>
       <Pill tone="accent" icon="link">
         Manage

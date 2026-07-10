@@ -36,12 +36,12 @@ export function EnergyTrendsSection({
 
   return (
     <Card
-      className="border-slate-800 bg-primary-900 p-4"
+      className="border-edge bg-surface p-4"
       data-testid="energy-trends"
     >
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.trend} size="md" color="inherit" />
-        <p className="m-0 text-[15px] font-semibold text-slate-100">
+        <p className="m-0 text-[15px] font-semibold text-ink-strong">
           {t("trends.title")}
         </p>
         <div className="ml-auto">
@@ -56,7 +56,7 @@ export function EnergyTrendsSection({
       <div className="mt-3">
         {loading ? (
           <p
-            className="text-[13px] text-slate-400"
+            className="text-[13px] text-ink-muted"
             data-testid="energy-trends-loading"
           >
             {t("trends.loading")}
@@ -67,7 +67,7 @@ export function EnergyTrendsSection({
           </Suspense>
         ) : (
           <p
-            className="text-[13px] text-slate-400"
+            className="text-[13px] text-ink-muted"
             data-testid="energy-trends-empty"
           >
             {t("trends.empty")}

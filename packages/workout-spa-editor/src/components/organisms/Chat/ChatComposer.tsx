@@ -41,7 +41,7 @@ export function ChatComposer({
           }
         }}
         placeholder={t("composer.placeholder")}
-        className="flex-1 resize-none rounded-2xl border border-slate-700 bg-surface-deep px-3 py-2 text-[14px] text-slate-50 placeholder:text-slate-500"
+        className="flex-1 resize-none rounded-2xl border border-edge bg-surface-deep px-3 py-2 text-[14px] text-ink-strong placeholder:text-ink-muted"
       />
       <Button onClick={submit} disabled={disabled || text.trim() === ""}>
         {t("composer.send")}

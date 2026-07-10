@@ -34,7 +34,7 @@ export const ReadinessRing = forwardRef<
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="#243244"
+          stroke="var(--ring-track)"
           strokeWidth={6}
         />
         <circle
@@ -51,10 +51,10 @@ export const ReadinessRing = forwardRef<
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[22px] font-bold text-slate-50 leading-none tabular-nums">
+        <span className="text-[22px] font-bold text-ink-strong leading-none tabular-nums">
           {clampedScore}
         </span>
-        <span className="text-[9.5px] font-semibold text-slate-500 mt-px">
+        <span className="text-[9.5px] font-semibold text-ink-muted mt-px">
           {label}
         </span>
       </div>

@@ -24,7 +24,7 @@ export const StepList = forwardRef<HTMLDivElement, StepListProps>(
           const isLast = i === steps.length - 1;
           const rowClasses = [
             "flex items-center gap-[13px] py-3 px-0.5",
-            isLast ? "" : "border-b border-slate-800",
+            isLast ? "" : "border-b border-edge-soft",
           ]
             .filter(Boolean)
             .join(" ");
@@ -35,18 +35,18 @@ export const StepList = forwardRef<HTMLDivElement, StepListProps>(
                 className={`w-1 self-stretch rounded-[9px] ${zoneBgClass(step.zone)}`}
               />
               <div className="flex-1 min-w-0">
-                <div className="text-[14.5px] font-semibold text-slate-50">
+                <div className="text-[14.5px] font-semibold text-ink-strong">
                   {step.kind}
                 </div>
-                <div className="text-[12.5px] text-slate-400 mt-px">
+                <div className="text-[12.5px] text-ink-muted mt-px">
                   {step.detail}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-semibold text-slate-300 tabular-nums">
+                <div className="text-sm font-semibold text-ink-body tabular-nums">
                   {step.dur}
                 </div>
-                <div className="text-[11px] text-slate-500">Z{step.zone}</div>
+                <div className="text-[11px] text-ink-muted">Z{step.zone}</div>
               </div>
             </div>
           );
