@@ -1,5 +1,7 @@
 # Proposal: Migrate usage accounting onto the telemetry port (dual-write + parity)
 
+> Completed: 2026-07-10
+
 ## Why
 
 Wave 2 (`add-lab-extraction-agent`) shipped the telemetry port
