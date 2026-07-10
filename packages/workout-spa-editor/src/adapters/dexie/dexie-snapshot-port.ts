@@ -34,6 +34,11 @@ const DEVICE_LOCAL = new Set([
   "intakeEntries",
   "intakePresets",
   "energyTargets",
+  // usageEvents is a transition/verification artifact for the usage-accounting
+  // migration (redaction-safe per-run telemetry). Excluded from the snapshot to
+  // avoid unbounded per-run row growth; cross-device authority is deferred to
+  // the follow-up cutover (see add-ai-usage-telemetry-sink design.md).
+  "usageEvents",
 ]);
 
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive

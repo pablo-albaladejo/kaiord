@@ -22,7 +22,7 @@ const PASSPHRASE = "kaiord-spa-v1";
 // + the conversationId FK, v26 added the device-local energy-balance stores
 // (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded, and v31
 // added the lab-analytics stores (`labReports`, `labValues`, included).
-const SCHEMA_HEAD = 31;
+const SCHEMA_HEAD = 32;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -116,6 +116,32 @@ describe("createDexieSnapshotPort", () => {
     expect(snapshot.tables).not.toHaveProperty("intakeEntries");
     expect(snapshot.tables).not.toHaveProperty("intakePresets");
     expect(snapshot.tables).not.toHaveProperty("energyTargets");
+  });
+
+  it("should exclude the device-local usageEvents store from the export", async () => {
+    // Arrange
+    const db = new KaiordDatabase(name);
+    await db.open();
+    await db.table("usageEvents").add({
+      id: "evt-1",
+      yearMonth: "2026-07",
+      date: "2026-07-10",
+      purpose: "chat",
+      providerType: "anthropic",
+      promptTokens: 120,
+      completionTokens: 80,
+      tokens: 200,
+      cost: 0.0006,
+      createdAt: "2026-07-10T10:00:00.000Z",
+    });
+    const port = createDexieSnapshotPort(db);
+
+    // Act
+    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+    db.close();
+
+    // Assert
+    expect(snapshot.tables).not.toHaveProperty("usageEvents");
   });
 
   it("should include the chatMessages store in the export", async () => {

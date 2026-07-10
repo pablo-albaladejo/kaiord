@@ -23,6 +23,7 @@ export function createProcessOne(
     workout: WorkoutRecord,
     allowRetry: boolean
   ): Promise<ProcessResult> => {
+    // Usage telemetry is emitted by `generateWorkoutKrd` (default Dexie sink).
     const generateFn = (prompt: string, sport: string) =>
       generateWorkoutKrd({
         text: prompt,
