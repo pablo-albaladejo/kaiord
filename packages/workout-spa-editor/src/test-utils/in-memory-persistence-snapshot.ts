@@ -26,6 +26,7 @@ import type {
 } from "../types/health/health-records";
 import type { Profile } from "../types/profile";
 import type { Tombstone } from "../types/snapshot";
+import type { UsageEventRecord } from "../types/usage-event-schemas";
 import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 import type { LlmProviderConfig } from "../store/ai-store-types";
@@ -42,6 +43,7 @@ export type Stores = {
   aiProviders: Map<string, LlmProviderConfig>;
   syncState: Map<string, SyncState>;
   usage: Map<string, UsageRecord>;
+  usageEvents: Map<string, UsageEventRecord>;
   coaching: Map<string, CoachingActivityRecord>;
   coachingSyncState: Map<string, CoachingSyncStateRecord>;
   coachingDayNotes: Map<string, CoachingDayNotesRecord>;
@@ -83,6 +85,7 @@ export const captureSnapshot = (
   aiProviders: new Map(stores.aiProviders),
   syncState: new Map(stores.syncState),
   usage: new Map(stores.usage),
+  usageEvents: new Map(stores.usageEvents),
   coaching: new Map(stores.coaching),
   coachingSyncState: new Map(stores.coachingSyncState),
   coachingDayNotes: new Map(stores.coachingDayNotes),

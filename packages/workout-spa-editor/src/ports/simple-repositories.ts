@@ -12,6 +12,7 @@
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { SyncState } from "../types/bridge-schemas";
 import type { Profile } from "../types/profile";
+import type { UsageEventRecord } from "../types/usage-event-schemas";
 import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 
@@ -57,4 +58,18 @@ export type SyncStateRepository = {
 export type UsageRepository = {
   getByMonth: (yearMonth: string) => Promise<UsageRecord | undefined>;
   put: (record: UsageRecord) => Promise<void>;
+};
+
+// Append-only telemetry log of per-run token usage; folded into monthly totals
+// by `foldUsageEvents`. `listByMonth` reads via the `[yearMonth+purpose]` index.
+export type UsageEventRepository = {
+  append: (record: UsageEventRecord) => Promise<void>;
+  listByMonth: (yearMonth: string) => Promise<UsageEventRecord[]>;
+};
+
+// Grouped usage-accounting repos: the authoritative monthly `usage` row plus
+// the append-only telemetry event log written alongside it during the migration.
+export type UsageRepositories = {
+  usage: UsageRepository;
+  usageEvents: UsageEventRepository;
 };
