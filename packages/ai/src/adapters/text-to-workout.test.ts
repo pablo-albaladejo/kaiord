@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Workout } from "@kaiord/core";
 import { createTextToWorkout } from "./text-to-workout";
 import { AiParsingError } from "../errors";
+import { createRingBufferTelemetrySink } from "../observability/ring-buffer-sink";
 import {
   EXPECTED_STEP_COUNT_THREE,
   INPUT_LEN_OVER_LIMIT,
@@ -253,5 +254,27 @@ describe("createTextToWorkout", () => {
     // Assert
     expect(callArgs.maxOutputTokens).toBe(MAX_OUTPUT_TOKENS_DEFAULT);
     expect(callArgs.temperature).toBe(0);
+  });
+
+  it("should forward the telemetry sink so a generation run emits usage", async () => {
+    // Arrange
+    mockGenerateText.mockResolvedValueOnce({
+      output: RUNNING_WORKOUT,
+      usage: { inputTokens: 100, outputTokens: 50 },
+    } as never);
+    const telemetry = createRingBufferTelemetrySink();
+    const parse = createTextToWorkout({ model: mockModel, telemetry });
+
+    // Act
+    await parse("test");
+
+    // Assert
+    expect(telemetry.events()).toMatchObject([
+      {
+        type: "run_finished",
+        purpose: "workout_generation",
+        usage: { promptTokens: 100, completionTokens: 50 },
+      },
+    ]);
   });
 });

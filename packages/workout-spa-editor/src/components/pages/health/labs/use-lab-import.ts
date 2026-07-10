@@ -5,8 +5,10 @@
  * section can disable itself when no lab-extraction model is configured.
  */
 import { resolveModelForPurpose } from "@kaiord/ai/providers";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
+import { createDexiePersistence } from "../../../../adapters/dexie/dexie-persistence-adapter";
+import { createDexieUsageTelemetrySink } from "../../../../adapters/telemetry/dexie-usage-telemetry-sink";
 import { runLabExtraction } from "../../../../application/lab/extraction/run-lab-extraction.use-case";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
@@ -28,6 +30,10 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const bindings = useAiModelBindingsLive(active?.id ?? null) ?? [];
   const [isRunning, setIsRunning] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
+  const telemetry = useMemo(
+    () => createDexieUsageTelemetrySink(createDexiePersistence()),
+    []
+  );
 
   const canImport =
     resolveModelForPurpose("lab_extraction", providers, bindings) !== null;
@@ -47,6 +53,7 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
         providers,
         bindings,
         signal: controller.signal,
+        telemetry,
       });
       if (!result.ok) toast.error(NO_PROVIDER_MSG);
       else onDraft(mapExtractionToDraft(result.extraction, { locale }));

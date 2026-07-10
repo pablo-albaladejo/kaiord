@@ -9,7 +9,7 @@ import type { ChatTurnResult } from "@kaiord/ai";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderType } from "../../store/ai-store-types";
 import { newChatMessage } from "./chat-message-mapper";
-import { recordChatUsage } from "./record-chat-usage";
+import { recordTurnUsage } from "./record-turn-usage";
 
 export type IdGen = { newId: () => string; now: () => string };
 
@@ -82,9 +82,5 @@ export const appendAssistantTurn = async (
     })
   );
   if (result.usage)
-    await recordChatUsage(persistence, {
-      providerType,
-      promptTokens: result.usage.promptTokens,
-      completionTokens: result.usage.completionTokens,
-    });
+    await recordTurnUsage(persistence, providerType, result.usage);
 };

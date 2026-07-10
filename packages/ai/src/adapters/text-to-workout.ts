@@ -35,6 +35,7 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
   const {
     model,
     logger,
+    telemetry,
     maxRetries = 2,
     maxOutputTokens = 4096,
     temperature = 0,
@@ -60,7 +61,7 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
       const { output } = await runGenerateAgent(
         agent,
         { text: sanitized },
-        { model, logger }
+        { model, logger, telemetry }
       );
       const workout = options?.name
         ? { ...output, name: options.name }

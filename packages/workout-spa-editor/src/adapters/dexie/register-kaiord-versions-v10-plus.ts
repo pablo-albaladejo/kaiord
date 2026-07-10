@@ -156,4 +156,8 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // untouched. Their profileId-leading indexes make `isPerProfileTable`
   // auto-discover them for the profile-delete cascade. Folded here (as v30).
   db.version(31).stores(SCHEMAS.v31);
+  // v32 — additive `usageEvents` telemetry log (redaction-safe per-run usage).
+  // Auto-created empty on upgrade; existing tables untouched. No profileId, so
+  // it is not a profile-delete cascade target (mirrors `usage`). Folded here.
+  db.version(32).stores(SCHEMAS.v32);
 };

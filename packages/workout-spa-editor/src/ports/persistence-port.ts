@@ -27,7 +27,7 @@ import type {
   ProfileRepository,
   SyncStateRepository,
   TemplateRepository,
-  UsageRepository,
+  UsageRepositories,
 } from "./simple-repositories";
 import type { TombstoneRepository } from "./tombstone-repository";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
@@ -65,13 +65,13 @@ export type { UserPreferencesRepository } from "./user-preferences-repository";
 export type { WorkoutRepository } from "./workout-repository";
 
 export type PersistencePort = HealthRepositories &
-  EnergyBalanceRepositories & {
+  EnergyBalanceRepositories &
+  UsageRepositories & {
     workouts: WorkoutRepository;
     templates: TemplateRepository;
     profiles: ProfileRepository;
     aiProviders: AiProviderRepository;
     syncState: SyncStateRepository;
-    usage: UsageRepository;
     coaching: CoachingRepository;
     coachingSyncState: CoachingSyncStateRepository;
     // Day-scoped coaching comment threads (Train2Go coach/athlete notes).
@@ -90,8 +90,7 @@ export type PersistencePort = HealthRepositories &
     // Cross-table cleanup for the six v16 health-domain stores —
     // single-shot deleteByProfile invoked by the profile-delete cascade.
     healthCleanup: HealthCleanupRepository;
-    // (The six per-metric health repos + `importedRecords` +
-    // `dataTypeSourcePolicy` are intersected in via HealthRepositories.)
+    // (Per-metric health repos + `importedRecords` + `dataTypeSourcePolicy` via HealthRepositories.)
     // Per-profile AI chat transcript; append-only, cascade-deleted on profile
     // removal. Delete-conversation tombstones each message via its use case.
     chatMessages: ChatMessageRepository;
