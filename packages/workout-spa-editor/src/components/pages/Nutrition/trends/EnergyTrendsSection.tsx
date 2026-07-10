@@ -35,10 +35,7 @@ export function EnergyTrendsSection({
   const hasWeight = series.weightRaw.length > 0;
 
   return (
-    <Card
-      className="border-edge bg-surface p-4"
-      data-testid="energy-trends"
-    >
+    <Card className="border-edge bg-surface p-4" data-testid="energy-trends">
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.trend} size="md" color="inherit" />
         <p className="m-0 text-[15px] font-semibold text-ink-strong">

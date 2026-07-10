@@ -10,10 +10,7 @@ export type MacroSummaryCardProps = { balance: DayEnergyBalance | null };
 export function MacroSummaryCard({ balance }: MacroSummaryCardProps) {
   const t = useTranslate("nutrition");
   return (
-    <Card
-      className="border-edge bg-surface p-4"
-      data-testid="macro-summary"
-    >
+    <Card className="border-edge bg-surface p-4" data-testid="macro-summary">
       <p className="m-0 mb-3 text-[15px] font-semibold text-ink-strong">
         {t("macros.title")}
       </p>

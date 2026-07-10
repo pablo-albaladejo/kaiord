@@ -29,10 +29,7 @@ export function NutritionGoalSection({
       ? toEnergyBalanceViewModel(result.balance, result.goal)
       : null;
   return (
-    <Card
-      className="border-edge bg-surface p-4"
-      data-testid="nutrition-goal"
-    >
+    <Card className="border-edge bg-surface p-4" data-testid="nutrition-goal">
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.target} size="md" color="inherit" />
         <p className="m-0 text-[15px] font-semibold text-ink-strong">

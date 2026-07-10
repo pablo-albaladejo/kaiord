@@ -15,10 +15,7 @@ export function WeeklyPlanSection({ profileId, date }: WeeklyPlanSectionProps) {
   const rows = useWeeklyEnergyPlan(profileId, date);
   const t = useTranslate("nutrition");
   return (
-    <Card
-      className="border-edge bg-surface p-4"
-      data-testid="weekly-plan"
-    >
+    <Card className="border-edge bg-surface p-4" data-testid="weekly-plan">
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.calendar} size="md" color="inherit" />
         <p className="m-0 text-[15px] font-semibold text-ink-strong">

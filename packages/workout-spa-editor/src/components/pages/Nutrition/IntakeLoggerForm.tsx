@@ -40,10 +40,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
   };
 
   return (
-    <Card
-      className="border-edge bg-surface p-4"
-      data-testid="intake-logger"
-    >
+    <Card className="border-edge bg-surface p-4" data-testid="intake-logger">
       <p className="m-0 mb-3 text-[15px] font-semibold text-ink-strong">
         {t("logger.title")}
       </p>

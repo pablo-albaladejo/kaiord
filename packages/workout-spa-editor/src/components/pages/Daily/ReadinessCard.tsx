@@ -20,7 +20,9 @@ export function ReadinessCard({ readiness }: ReadinessCardProps) {
           label={score === null ? t("readiness.noData") : t("readiness.ready")}
         />
         <div className="min-w-0">
-          <p className="text-[16px] font-bold text-ink-strong m-0">{headline}</p>
+          <p className="text-[16px] font-bold text-ink-strong m-0">
+            {headline}
+          </p>
           <p className="text-[13px] text-ink-muted m-0 mt-1">{rationale}</p>
         </div>
       </div>
