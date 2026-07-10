@@ -5,6 +5,8 @@
 import type { LabReport } from "@kaiord/core";
 import { useState } from "react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
+
 const BTN = "rounded border px-2 py-1 text-xs";
 
 export type LabReportRowProps = {
@@ -20,6 +22,7 @@ export const LabReportRow = ({
   onToggle,
   onDelete,
 }: LabReportRowProps) => {
+  const t = useTranslate("labs-ui");
   const [confirming, setConfirming] = useState(false);
   return (
     <li
@@ -31,7 +34,7 @@ export const LabReportRow = ({
         <span className="font-medium">{report.date}</span>
         {report.labName ? ` · ${report.labName}` : ""}
         <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">
-          {isSelected ? "Hide" : "View"}
+          {isSelected ? t("report.hide") : t("report.view")}
         </span>
       </button>
       {confirming ? (
@@ -41,24 +44,24 @@ export const LabReportRow = ({
             onClick={onDelete}
             className={`${BTN} border-red-300 text-red-700 dark:border-red-800 dark:text-red-300`}
           >
-            Confirm
+            {t("report.confirm")}
           </button>
           <button
             type="button"
             onClick={() => setConfirming(false)}
             className={`${BTN} border-gray-300 dark:border-gray-600`}
           >
-            Cancel
+            {t("report.cancel")}
           </button>
         </span>
       ) : (
         <button
           type="button"
-          aria-label={`Delete report ${report.date}`}
+          aria-label={t("report.deleteAria", { date: report.date })}
           onClick={() => setConfirming(true)}
           className={`${BTN} border-gray-300 dark:border-gray-600`}
         >
-          Delete
+          {t("report.delete")}
         </button>
       )}
     </li>

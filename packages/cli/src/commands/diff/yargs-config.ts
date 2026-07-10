@@ -1,5 +1,6 @@
 import type { Argv } from "yargs";
 
+import { t } from "../../i18n/index.js";
 import { ExitCode } from "../../utils/exit-codes";
 import { FORMAT_CODES } from "../../utils/format-registry";
 import { diffCommand } from "./index";
@@ -7,30 +8,30 @@ import type { DiffOptions } from "./types";
 
 export const diffYargsConfig = {
   command: "diff",
-  describe: "Compare two workout files and show differences",
+  describe: t("commands.diff"),
   builder: (yargs: Argv) => {
     return yargs
       .option("file1", {
         alias: "1",
         type: "string" as const,
-        description: "First file to compare",
+        description: t("options.diff.file1"),
         demandOption: true,
       })
       .option("file2", {
         alias: "2",
         type: "string" as const,
-        description: "Second file to compare",
+        description: t("options.diff.file2"),
         demandOption: true,
       })
       .option("format1", {
         type: "string" as const,
         choices: FORMAT_CODES,
-        description: "Override format detection for first file",
+        description: t("options.diff.format1"),
       })
       .option("format2", {
         type: "string" as const,
         choices: FORMAT_CODES,
-        description: "Override format detection for second file",
+        description: t("options.diff.format2"),
       })
       .example(
         "$0 diff --file1 workout1.fit --file2 workout2.fit",

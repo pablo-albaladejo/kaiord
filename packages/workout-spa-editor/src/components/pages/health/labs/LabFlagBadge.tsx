@@ -4,17 +4,19 @@
  */
 import type { LabFlag } from "@kaiord/core";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { LAB_FLAG_STYLES } from "./lab-flag-display";
 
 export const LabFlagBadge = ({ flag }: { flag: LabFlag }) => {
-  const { label, className } = LAB_FLAG_STYLES[flag];
+  const t = useTranslate("labs-ui");
+  const { className } = LAB_FLAG_STYLES[flag];
   return (
     <span
       data-testid="lab-flag-badge"
       data-flag={flag}
       className={`rounded px-1.5 py-0.5 text-xs font-medium ${className}`}
     >
-      {label}
+      {t(`flag.${flag}`)}
     </span>
   );
 };

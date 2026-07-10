@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Card } from "../../atoms/Card";
 import {
   EMPTY_INTAKE_FIELDS,
@@ -19,8 +20,9 @@ export type IntakeLoggerFormProps = {
  * (when a label is present) optionally saves the same values as a preset.
  */
 export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
+  const t = useTranslate("nutrition");
   const [fields, setFields] = useState<Fields>(EMPTY_INTAKE_FIELDS);
-  const result = validateIntakeForm(fields);
+  const result = validateIntakeForm(fields, t);
   const error = "error" in result ? result.error : null;
 
   const handleLog = async () => {
@@ -43,7 +45,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
       data-testid="intake-logger"
     >
       <p className="m-0 mb-3 text-[15px] font-semibold text-slate-100">
-        Log intake
+        {t("logger.title")}
       </p>
       <IntakeLoggerFields fields={fields} onChange={setFields} />
       {error !== null && (
@@ -59,7 +61,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
           data-testid="intake-log-submit"
           className="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
-          Add entry
+          {t("logger.addEntry")}
         </button>
         <button
           type="button"
@@ -68,7 +70,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
           data-testid="intake-save-preset"
           className="rounded border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 disabled:opacity-40"
         >
-          Save preset
+          {t("logger.savePreset")}
         </button>
       </div>
     </Card>

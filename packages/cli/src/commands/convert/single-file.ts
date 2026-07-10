@@ -1,6 +1,7 @@
 import type { Logger } from "@kaiord/core";
 import ora from "ora";
 
+import { t } from "../../i18n/index.js";
 import { writeFile } from "../../utils/file-handler";
 import type { FileFormat } from "../../utils/format-detector";
 import { convertFromKrd, loadFileAsKrd } from "../../utils/krd-converter";
@@ -43,7 +44,7 @@ export const executeSingleFileConversion = async (
   });
 
   const isTTY = process.stdout.isTTY && !options.quiet && !options.json;
-  const spinner = isTTY ? ora("Converting...").start() : null;
+  const spinner = isTTY ? ora(t("output.converting")).start() : null;
 
   try {
     await convertSingleFile(

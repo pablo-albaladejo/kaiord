@@ -7,6 +7,7 @@
 import { useState } from "react";
 
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../../i18n/use-translate";
 import { HealthPageHeader } from "../HealthPageHeader";
 import { LabDashboardSection } from "./dashboard/LabDashboardSection";
 import { LabEntryForm } from "./LabEntryForm";
@@ -14,12 +15,13 @@ import { LabHistorySection } from "./LabHistorySection";
 
 type LabTab = "entry" | "dashboard";
 
-const TABS: { id: LabTab; label: string }[] = [
-  { id: "entry", label: "Entry & history" },
-  { id: "dashboard", label: "Dashboard" },
+const TABS: { id: LabTab; labelKey: string }[] = [
+  { id: "entry", labelKey: "entry.tabEntry" },
+  { id: "dashboard", labelKey: "entry.tabDashboard" },
 ];
 
 export default function LabEntryPage() {
+  const t = useTranslate("labs-ui");
   const active = useActiveProfileLive();
   const loading = active === undefined;
   const profileId = active?.id ?? null;
@@ -27,12 +29,13 @@ export default function LabEntryPage() {
 
   return (
     <section data-testid="health-labs">
-      <HealthPageHeader title="Lab analytics" subtitle="Add a new lab report" />
-      {loading && <p className="text-sm text-gray-600">Loading…</p>}
+      <HealthPageHeader
+        title={t("entry.title")}
+        subtitle={t("entry.subtitle")}
+      />
+      {loading && <p className="text-sm text-gray-600">{t("entry.loading")}</p>}
       {!loading && !profileId && (
-        <p className="text-sm text-gray-600">
-          Create an athlete profile first to log lab analytics.
-        </p>
+        <p className="text-sm text-gray-600">{t("entry.noProfile")}</p>
       )}
       {!loading && profileId && (
         <>
@@ -40,7 +43,7 @@ export default function LabEntryPage() {
             role="tablist"
             className="mb-4 flex gap-2 border-b border-gray-200 dark:border-slate-800"
           >
-            {TABS.map(({ id, label }) => (
+            {TABS.map(({ id, labelKey }) => (
               <button
                 key={id}
                 type="button"
@@ -54,7 +57,7 @@ export default function LabEntryPage() {
                     : "text-gray-600 dark:text-gray-400"
                 }`}
               >
-                {label}
+                {t(labelKey)}
               </button>
             ))}
           </div>

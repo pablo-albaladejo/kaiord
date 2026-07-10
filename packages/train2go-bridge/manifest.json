@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Kaiord Train2Go Bridge",
+  "name": "__MSG_extName__",
   "version": "9.2.0",
-  "description": "Reads training plans from Train2Go and bridges them to the Kaiord workout editor",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
 
   "permissions": ["tabs", "storage", "scripting"],
 

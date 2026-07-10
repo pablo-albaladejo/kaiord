@@ -119,6 +119,7 @@ jobs:
         run: |
           set -e
           test -f merged-dist/index.html          || { echo "❌ Missing landing index.html"; exit 1; }
+          test -f merged-dist/es/index.html       || { echo "❌ Missing landing es/index.html"; exit 1; }
           test -f merged-dist/editor/index.html    || { echo "❌ Missing editor index.html"; exit 1; }
           test -f merged-dist/docs/index.html      || { echo "❌ Missing docs index.html"; exit 1; }
           test -f merged-dist/CNAME                || { echo "❌ Missing CNAME"; exit 1; }

@@ -1,0 +1,158 @@
+{
+  "extName": {
+    "message": "Kaiord Garmin Bridge",
+    "description": "Extension name shown in the Chrome Web Store and toolbar."
+  },
+  "extDescription": {
+    "message": "Conecta el editor de entrenamientos de Kaiord con Garmin Connect mediante la sesión de tu navegador",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Comprobando…",
+    "description": "Status text while the popup probes the connection."
+  },
+  "checkingConnection": {
+    "message": "Comprobando conexión",
+    "description": "Accessible label for the checking status pill."
+  },
+  "notConnected": {
+    "message": "Sin conexión",
+    "description": "Status text/label when the bridge is not connected."
+  },
+  "notConnectedGarmin": {
+    "message": "Sin conexión — abre Garmin Connect y actualiza",
+    "description": "Status text when the Garmin Connect session is missing."
+  },
+  "connectedToGarmin": {
+    "message": "Conectado a Garmin Connect",
+    "description": "Status text when the bridge is connected."
+  },
+  "connected": {
+    "message": "Conectado",
+    "description": "Accessible label for the connected status pill."
+  },
+  "profileStale": {
+    "message": "La instantánea del perfil está obsoleta. Abre Kaiord para actualizar.",
+    "description": "Athlete-card placeholder when the cached snapshot is stale."
+  },
+  "noProfile": {
+    "message": "Aún no hay perfil. Abre Kaiord para definir FTP, ritmo y FC.",
+    "description": "Athlete-card placeholder when no snapshot exists."
+  },
+  "noThresholds": {
+    "message": "El perfil aún no tiene umbrales. Abre Kaiord para definir FTP, ritmo y FC.",
+    "description": "Athlete-card placeholder when the snapshot has no threshold fields."
+  },
+  "labelSport": {
+    "message": "Deporte",
+    "description": "Athlete-card field label for the active sport."
+  },
+  "labelPace": {
+    "message": "Ritmo",
+    "description": "Athlete-card field label for threshold running pace."
+  },
+  "labelMaxHr": {
+    "message": "FC máx",
+    "description": "Athlete-card field label for maximum heart rate."
+  },
+  "labelWeight": {
+    "message": "Peso",
+    "description": "Athlete-card field label for body weight."
+  },
+  "workoutLibrary": {
+    "message": "Biblioteca de entrenamientos · $count$ entrenamientos",
+    "description": "Rollup line showing the total number of stored workouts.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "47" }
+    }
+  },
+  "lastPush": {
+    "message": "Última subida",
+    "description": "Rollup line prefix for the most recent workout push."
+  },
+  "captionSync": {
+    "message": "Sincronización",
+    "description": "Caption above the sync rollup section."
+  },
+  "updatedAgo": {
+    "message": "Actualizado $phrase$",
+    "description": "Athlete-card freshness line, e.g. 'Updated 10 minutes ago'.",
+    "placeholders": {
+      "phrase": { "content": "$1", "example": "hace 10 minutos" }
+    }
+  },
+  "updatedJustNow": {
+    "message": "Actualizado hace un momento",
+    "description": "Athlete-card freshness line for a very recent update."
+  },
+  "momentsAgo": {
+    "message": "hace un momento",
+    "description": "Relative time used in the last-push rollup line."
+  },
+  "minuteAgo": {
+    "message": "hace $count$ minuto",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "minutesAgo": {
+    "message": "hace $count$ minutos",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "10" }
+    }
+  },
+  "hourAgo": {
+    "message": "hace $count$ hora",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "hoursAgo": {
+    "message": "hace $count$ horas",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "dayAgo": {
+    "message": "hace $count$ día",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "daysAgo": {
+    "message": "hace $count$ días",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "openEditor": {
+    "message": "Abrir editor",
+    "description": "Primary footer button opening the Kaiord editor."
+  },
+  "openEditorAria": {
+    "message": "Abrir el editor de Kaiord",
+    "description": "Accessible label for the open-editor button."
+  },
+  "openGarmin": {
+    "message": "Abrir Garmin Connect ↗",
+    "description": "Secondary footer button opening Garmin Connect."
+  },
+  "openGarminAria": {
+    "message": "Abrir Garmin Connect",
+    "description": "Accessible label for the open-Garmin button."
+  },
+  "retry": {
+    "message": "Reintentar",
+    "description": "Button that retries the connection check."
+  },
+  "refresh": {
+    "message": "Actualizar",
+    "description": "Accessible label for the header refresh button."
+  }
+}

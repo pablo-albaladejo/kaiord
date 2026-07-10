@@ -4,6 +4,7 @@
  * Sport-specific zone editor with tabs, thresholds, and zone sections.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal/ConfirmationModal";
 import { SportZoneSections } from "./components/SportZoneSections";
 import { SportZoneTabs } from "./components/SportZoneTabs";
@@ -15,6 +16,7 @@ type SportZoneEditorProps = {
 };
 
 export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
+  const t = useTranslate("zones");
   const {
     activeSport,
     setActiveSport,
@@ -30,11 +32,7 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
   } = useSportZoneEditor(profileId);
 
   if (!sportConfig) {
-    return (
-      <p className="text-sm text-gray-500">
-        No zone configuration for this sport.
-      </p>
-    );
+    return <p className="text-sm text-gray-500">{t("empty.noSportConfig")}</p>;
   }
 
   return (
@@ -55,10 +53,10 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
       />
       <ConfirmationModal
         isOpen={!!confirmMethod}
-        title="Change Zone Method"
-        message="This will replace your current zones with calculated values. Continue?"
-        confirmLabel="Change Method"
-        cancelLabel="Keep Current"
+        title={t("method.confirmTitle")}
+        message={t("method.confirmMessage")}
+        confirmLabel={t("method.confirmLabel")}
+        cancelLabel={t("method.keepLabel")}
         onConfirm={confirmMethodSwitch}
         onCancel={cancelMethodSwitch}
         variant="default"
