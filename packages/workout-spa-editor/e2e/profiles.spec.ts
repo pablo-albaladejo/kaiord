@@ -171,6 +171,30 @@ test.describe("Athlete page", () => {
     await dialog.getByLabel(/FTP threshold/i).fill("280");
     await page.keyboard.press("Escape");
     await expect(page.getByText("300", { exact: true })).toBeHidden();
+    // The editor persists on change in the background (fire-and-forget
+    // Dexie put); wait for the write to commit or the reload can win the
+    // race and hydrate the pre-edit profile.
+
+    const editedFtp = 280;
+    await page.waitForFunction(
+      async ({ profileId, ftp }) => {
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as {
+          table: (n: string) => { get: (k: string) => Promise<unknown> };
+        };
+        if (!db) return false;
+        const row = (await db.table("profiles").get(profileId)) as
+          | {
+              sportZones?: {
+                cycling?: { thresholds?: { ftp?: number } };
+              };
+            }
+          | undefined;
+        return row?.sportZones?.cycling?.thresholds?.ftp === ftp;
+      },
+      { profileId: PROFILE_ID, ftp: editedFtp },
+      { timeout: 10_000 }
+    );
     await page.reload();
     await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible();
 
