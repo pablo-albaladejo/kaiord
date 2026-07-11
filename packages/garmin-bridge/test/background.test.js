@@ -15,6 +15,10 @@ const {
 } = require("../background.js");
 const pkg = require("../package.json");
 
+// External senders are origin-pinned by the vendored guard (spec:
+// bridge-core, D4 tightening) — positive paths use an allowed SPA origin.
+const SPA_SENDER = { origin: "https://app.kaiord.com" };
+
 const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
 const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
@@ -154,7 +158,7 @@ describe("background.js", () => {
     it("returns true for async response", () => {
       const sendResponse = vi.fn();
 
-      const result = externalCb({ action: "ping" }, {}, sendResponse);
+      const result = externalCb({ action: "ping" }, SPA_SENDER, sendResponse);
 
       expect(result).toBe(true);
     });
@@ -163,7 +167,7 @@ describe("background.js", () => {
       chrome.tabs.create.mockResolvedValue({ id: 1 });
       const sendResponse = vi.fn();
 
-      externalCb({ action: "open-garmin" }, {}, sendResponse);
+      externalCb({ action: "open-garmin" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
       expect(sendResponse).toHaveBeenCalledWith({
@@ -173,16 +177,60 @@ describe("background.js", () => {
       });
     });
 
-    it("sends error result on rejected action", async () => {
+    it("should reject a non-allowlisted action before the handler runs", async () => {
+      // Arrange
       const sendResponse = vi.fn();
 
-      externalCb({ action: "unknown" }, {}, sendResponse);
+      // Act
+      externalCb({ action: "unknown" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
+      // Assert
       expect(sendResponse).toHaveBeenCalledWith({
         ok: false,
         protocolVersion: 1,
-        error: "Unknown action: unknown",
+        error: "Origin or action not permitted",
+        retryable: false,
+      });
+    });
+
+    it("should reject an empty sender for every external action", async () => {
+      // Arrange
+      const sendResponse = vi.fn();
+
+      // Act
+      externalCb({ action: "ping" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      // Assert
+      expect(chrome.tabs.query).not.toHaveBeenCalled();
+      expect(sendResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ok: false,
+          error: "Origin or action not permitted",
+        })
+      );
+    });
+
+    it("should reject a foreign origin without invoking the action handler", async () => {
+      // Arrange
+      const sendResponse = vi.fn();
+
+      // Act
+      externalCb(
+        { action: "list" },
+        { origin: "https://attacker.example" },
+        sendResponse
+      );
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      // Assert
+      expect(chrome.tabs.query).not.toHaveBeenCalled();
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: false,
+        protocolVersion: 1,
+        error: "Origin or action not permitted",
+        retryable: false,
       });
     });
   });
@@ -209,6 +257,22 @@ describe("background.js", () => {
         data: null,
       });
     });
+
+    it("should surface unknown-action errors on the internal channel", async () => {
+      // Arrange
+      const sendResponse = vi.fn();
+
+      // Act
+      internalCb({ action: "unknown" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      // Assert
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: false,
+        protocolVersion: 1,
+        error: "Unknown action: unknown",
+      });
+    });
   });
 
   describe("ping response backward compatibility", () => {
@@ -216,7 +280,7 @@ describe("background.js", () => {
       chrome.tabs.query.mockImplementation((q, cb) => cb([]));
       const sendResponse = vi.fn();
 
-      externalCb({ action: "ping" }, {}, sendResponse);
+      externalCb({ action: "ping" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
       const response = sendResponse.mock.calls[0][0];
@@ -235,7 +299,7 @@ describe("background.js", () => {
       chrome.tabs.query.mockImplementation((q, cb) => cb([]));
       const sendResponse = vi.fn();
 
-      externalCb({ action: "ping" }, {}, sendResponse);
+      externalCb({ action: "ping" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
       const response = sendResponse.mock.calls[0][0];
@@ -308,7 +372,7 @@ describe("background.js", () => {
       });
       const sendResponse = vi.fn();
 
-      externalCb({ action: "ping" }, {}, sendResponse);
+      externalCb({ action: "ping" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
       const response = sendResponse.mock.calls[0][0];
@@ -421,7 +485,7 @@ describe("background.js", () => {
       );
       const sendResponse = vi.fn();
 
-      externalCb({ action: "list" }, {}, sendResponse);
+      externalCb({ action: "list" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
       expect(sendResponse).toHaveBeenCalledWith(

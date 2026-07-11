@@ -53,6 +53,25 @@ const logSwallowed = (level, action, cause) => {
   return telemetryWrite;
 };
 
+// ── Shared envelope/dispatch (vendored bridge-core) ──
+let bridgeEnvelope;
+try {
+  importScripts("bridge-envelope.js");
+  bridgeEnvelope = globalThis;
+} catch (e) {
+  bridgeEnvelope =
+    typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
+  // In the packaged extension this only fires if the bundled file is
+  // missing or fails to parse — a real misconfiguration. Under Node
+  // (tests, build tooling) it fires on every load and is expected, so
+  // it's logged at "debug" rather than "error".
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-bridge-envelope",
+    e
+  );
+}
+
 // ── Profile snapshot validator (plain JS, parity-tested via shared fixtures) ──
 let snapshotValidator;
 try {
@@ -61,21 +80,12 @@ try {
 } catch (e) {
   snapshotValidator =
     typeof require !== "undefined" ? require("./profile-snapshot.js") : {};
-  // In the packaged extension this only fires if the bundled file is
-  // missing or fails to parse — a real misconfiguration. Under Node
-  // (tests, build tooling) it fires on every load and is expected, so
-  // it's logged at "debug" rather than "error".
   void logSwallowed(
     typeof require !== "undefined" ? "debug" : "error",
     "load-profile-snapshot",
     e
   );
 }
-
-const SNAPSHOT_ACTIONS = new Set([
-  "profile-snapshot",
-  "profile-snapshot-clear",
-]);
 
 // ── CSRF token capture ──
 
@@ -332,54 +342,39 @@ const handleAction = async (message) => {
   }
 };
 
-const sendResult = (data, sendResponse) => {
-  sendResponse({
-    ok: true,
-    protocolVersion: PROTOCOL_VERSION,
-    data,
-  });
-};
-
-const sendError = (err, sendResponse) => {
-  sendResponse({
-    ok: false,
-    protocolVersion: PROTOCOL_VERSION,
-    error: String(err?.message ?? err),
-    ...(typeof err?.status === "number" ? { status: err.status } : {}),
-  });
-};
-
 // ── External messages (SPA ↔ Extension) ──
+// Every external message is origin-pinned and action-allowlisted by the
+// vendored guard (spec: bridge-core). The allowlist equals this bridge's
+// full action surface — the popup uses the internal channel.
 
-const handleExternalMessage = (message, sender, sendResponse) => {
-  if (
-    SNAPSHOT_ACTIONS.has(message?.action) &&
-    !snapshotValidator.isAllowedSenderOrigin(sender)
-  ) {
-    sendResponse({
-      ok: false,
-      protocolVersion: PROTOCOL_VERSION,
-      error: "Origin not permitted",
-      retryable: false,
-    });
-    return true;
-  }
-  handleAction(message)
-    .then((data) => sendResult(data, sendResponse))
-    .catch((err) => sendError(err, sendResponse));
-  return true;
-};
+const EXTERNAL_ACTIONS = new Set([
+  "ping",
+  "list",
+  "activities",
+  "push",
+  "open-garmin",
+  "profile-snapshot",
+  "profile-snapshot-clear",
+]);
+
+const dispatch = bridgeEnvelope.createDispatch({
+  handleAction,
+  protocolVersion: PROTOCOL_VERSION,
+});
+
+const handleExternalMessage = bridgeEnvelope.createExternalDispatch({
+  dispatch,
+  externalActions: EXTERNAL_ACTIONS,
+  protocolVersion: PROTOCOL_VERSION,
+});
 
 chrome.runtime.onMessageExternal.addListener(handleExternalMessage);
 
 // ── Internal messages (popup) ──
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  handleAction(message)
-    .then((data) => sendResult(data, sendResponse))
-    .catch((err) => sendError(err, sendResponse));
-  return true;
-});
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) =>
+  dispatch(message, sendResponse)
+);
 
 // ── Content-script re-inject after extension reload ──
 //
@@ -423,6 +418,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
+    EXTERNAL_ACTIONS,
     handleAction,
     handleExternalMessage,
     getCsrfToken,

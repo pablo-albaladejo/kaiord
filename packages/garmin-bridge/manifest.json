@@ -35,7 +35,7 @@
     },
     {
       "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
-      "js": ["kaiord-announce.js"],
+      "js": ["bridge-identity.js", "kaiord-announce.js"],
       "run_at": "document_start"
     }
   ],

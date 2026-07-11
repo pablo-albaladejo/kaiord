@@ -5,14 +5,13 @@
  * the real auth lifecycle: no credentials → connected → needs re-auth (a
  * failed/expired refresh surfaces here, never silently). All logic talks to
  * background.js via internal runtime messages.
+ *
+ * Shared helpers (msg/applySubs/$/setStatus/relativeAgo) load first from the
+ * vendored bridge-popup-utils.js (see popup.html script order).
  */
 
-// ── i18n ──
-// Byte-identical English fallback for environments without chrome.i18n. At
-// runtime the browser's chrome.i18n.getMessage returns the active-locale
-// string from _locales/. Positional $1 tokens mirror the named placeholders
-// declared in _locales/*/messages.json.
-const EN_FALLBACK = {
+// English fallback table consumed by the vendored msg() helper.
+globalThis.KAIORD_POPUP_MESSAGES = {
   checking: "Checking…",
   checkingAria: "Checking",
   addCredentials: "Add WHOOP credentials to connect",
@@ -42,20 +41,6 @@ const EN_FALLBACK = {
     "Register your own WHOOP app at developer.whoop.com and paste its credentials. They stay in this extension and never reach the web page.",
 };
 
-const applySubs = (template, subs) => {
-  if (subs == null) return template;
-  const list = Array.isArray(subs) ? subs : [subs];
-  return template.replace(/\$(\d)/g, (_, i) =>
-    String(list[Number(i) - 1] ?? "")
-  );
-};
-
-const msg = (key, subs) =>
-  globalThis.chrome?.i18n?.getMessage?.(key, subs) ||
-  applySubs(EN_FALLBACK[key], subs);
-
-const $ = (id) => document.getElementById(id);
-
 const sendMessage = (message) =>
   new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (res) =>
@@ -63,27 +48,8 @@ const sendMessage = (message) =>
     );
   });
 
-const setStatus = (kind, glyph, text) => {
-  const el = $("status");
-  el.className = `status status--${kind}`;
-  el.setAttribute("aria-label", text);
-  el.querySelector(".status__glyph").textContent = glyph;
-  $("status-text").textContent = text;
-};
-
-const formatRelative = (iso) => {
-  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (min < 1) return msg("justNow");
-  if (min < 60) {
-    return msg(min === 1 ? "minuteAgo" : "minutesAgo", [String(min)]);
-  }
-  const hr = Math.floor(min / 60);
-  if (hr < 24) {
-    return msg(hr === 1 ? "hourAgo" : "hoursAgo", [String(hr)]);
-  }
-  const day = Math.floor(hr / 24);
-  return msg(day === 1 ? "dayAgo" : "daysAgo", [String(day)]);
-};
+const formatRelativeIso = (iso) =>
+  relativeAgo(new Date(iso).getTime()) ?? msg("justNow");
 
 const renderSync = (state) => {
   const region = $("sync-region");
@@ -95,7 +61,9 @@ const renderSync = (state) => {
     return;
   }
   if (state.lastSyncAt) {
-    region.textContent = msg("lastImport", [formatRelative(state.lastSyncAt)]);
+    region.textContent = msg("lastImport", [
+      formatRelativeIso(state.lastSyncAt),
+    ]);
   }
 };
 

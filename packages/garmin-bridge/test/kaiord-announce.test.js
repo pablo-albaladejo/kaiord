@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+// The identity file provides globalThis.KAIORD_BRIDGE_IDENTITY, which the
+// vendored announce core reads (manifest loads it first for the same reason).
+require("../bridge-identity.js");
 const {
   buildAnnouncement,
   onDiscoverRequest,
@@ -19,9 +22,9 @@ describe("kaiord-announce.js (garmin-bridge)", () => {
       expect(ann).toEqual({
         type: "KAIORD_BRIDGE_ANNOUNCE",
         bridgeId: "garmin-bridge",
-        extensionId: "garmin-test-extension-id",
+        extensionId: "test-extension-id",
         name: "Garmin Connect",
-        version: "0.2.0",
+        version: "0.0.0",
         protocolVersion: 1,
         capabilities: ["write:workouts", "read:activities"],
       });
@@ -34,7 +37,7 @@ describe("kaiord-announce.js (garmin-bridge)", () => {
 
       expect(ann.extensionId).toBe("another-id");
 
-      chrome.runtime.id = "garmin-test-extension-id";
+      chrome.runtime.id = "test-extension-id";
     });
   });
 

@@ -1,40 +1,16 @@
-export type Train2GoExtensionResponse = {
-  ok: boolean;
-  protocolVersion?: number;
-  data?: unknown;
-  error?: string;
-  status?: number;
-};
+/**
+ * Train2Go extension messaging for the store layer, delegating to the
+ * shared `sendBridgeMessage` (adapters/bridge — the only module allowed
+ * to touch chrome.runtime, per spa-integration-adapters).
+ */
+import type { ExtensionResponse } from "../adapters/bridge/bridge-transport";
+import { sendBridgeMessage } from "../adapters/bridge/bridge-transport";
+
+export type Train2GoExtensionResponse = ExtensionResponse;
 
 export const train2goSendMessage = (
   extensionId: string,
   message: unknown,
   timeoutMs: number
 ): Promise<Train2GoExtensionResponse> =>
-  new Promise((resolve) => {
-    if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
-      resolve({ ok: false, error: "Chrome runtime not available" });
-      return;
-    }
-    const timer = setTimeout(() => {
-      resolve({ ok: false, error: "Extension did not respond" });
-    }, timeoutMs);
-    try {
-      chrome.runtime.sendMessage(extensionId, message, (raw) => {
-        clearTimeout(timer);
-        if (chrome.runtime.lastError) {
-          resolve({ ok: false, error: chrome.runtime.lastError.message });
-        } else {
-          resolve(
-            (raw as Train2GoExtensionResponse) ?? {
-              ok: false,
-              error: "No response",
-            }
-          );
-        }
-      });
-    } catch {
-      clearTimeout(timer);
-      resolve({ ok: false, error: "Extension not available" });
-    }
-  });
+  sendBridgeMessage(extensionId, message, timeoutMs);

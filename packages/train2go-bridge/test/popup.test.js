@@ -7,7 +7,13 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PKG = dirname(HERE);
 const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
-const POPUP_JS = readFileSync(join(PKG, "popup.js"), "utf8");
+// Mirror popup.html script order: the vendored utils and snapshot modules
+// load before the site popup.js and share the page's global scope.
+const POPUP_SCRIPTS = [
+  "bridge-popup-utils.js",
+  "bridge-popup-snapshot.js",
+  "popup.js",
+].map((file) => readFileSync(join(PKG, file), "utf8"));
 
 const FRESH_NOW = new Date("2026-05-02T10:00:00Z").getTime();
 
@@ -23,7 +29,9 @@ const setupDom = (chromeMock) => {
   // both so the staleness check (Date.now() - snapshot.receivedAt) sees a
   // deterministic "now" relative to the fixture timestamps.
   dom.window.Date.now = () => FRESH_NOW;
-  dom.window.eval(POPUP_JS);
+  // Concatenated into ONE eval: real <script> tags share the page's global
+  // lexical scope, but separate indirect evals do not.
+  dom.window.eval(POPUP_SCRIPTS.join("\n;\n"));
   return dom;
 };
 

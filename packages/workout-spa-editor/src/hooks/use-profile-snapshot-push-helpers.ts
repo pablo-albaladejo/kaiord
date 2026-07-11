@@ -7,10 +7,9 @@
  * SPA Bridge Protocol spec.
  */
 
-import type { ProfileSnapshot } from "@kaiord/core";
-
 import { sendBridgeMessage } from "../adapters/bridge/bridge-transport";
 import { BRIDGE_QUEUE } from "../adapters/bridge/shared-operation-queue";
+import type { PushProfileSnapshot } from "../application/integrations/integration-ports";
 import type { Profile } from "../types/profile";
 import type { DiscoveredBridge } from "./use-discovered-bridges";
 
@@ -36,11 +35,11 @@ export const pickActiveSport = (
   return undefined;
 };
 
-export const sendSnapshot = (
-  bridge: DiscoveredBridge,
-  snapshot: ProfileSnapshot,
-  fingerprint: string,
-  fingerprintMap: Map<string, string>
+export const sendSnapshot: PushProfileSnapshot = (
+  bridge,
+  snapshot,
+  fingerprint,
+  fingerprintMap
 ): Promise<void> =>
   QUEUE.enqueue({
     bridgeId: bridge.bridgeId,

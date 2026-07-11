@@ -54,6 +54,7 @@ garmin-bridge
 train2go-bridge
 whoop
 whoop-bridge
+bridge-core
 analytics
 landing
 docs-site

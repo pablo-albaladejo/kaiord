@@ -78,6 +78,12 @@ jobs:
               - 'packages/i18n/**'
             garmin_bridge:
               - 'packages/garmin-bridge/**'
+            train2go_bridge:
+              - 'packages/train2go-bridge/**'
+            whoop_bridge:
+              - 'packages/whoop-bridge/**'
+            bridge_core:
+              - 'packages/_shared/bridge-core/**'
             frontend:
               - 'packages/workout-spa-editor/**'
             root_deps:
@@ -188,6 +194,9 @@ jobs:
              [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.i18n_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_bridge_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.train2go_bridge_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.whoop_bridge_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.bridge_core_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
             echo "should-test=false" >> $GITHUB_OUTPUT
@@ -508,6 +517,8 @@ jobs:
             "ai",
             "i18n",
             "garmin-bridge",
+            "train2go-bridge",
+            "whoop-bridge",
           ]
     steps:
       - name: Checkout code
@@ -548,7 +559,7 @@ jobs:
           # privacy-surface and icon-distinct mechanical guards remain
           # the load-bearing checks for these packages.
           case "${{ matrix.package }}" in
-            garmin-bridge|train2go-bridge) THRESHOLD=60 ;;
+            garmin-bridge|train2go-bridge|whoop-bridge) THRESHOLD=60 ;;
             *) THRESHOLD=80 ;;
           esac
           node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json $THRESHOLD

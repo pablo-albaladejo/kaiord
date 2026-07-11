@@ -1,42 +1,18 @@
-type ExtensionResponse = {
-  ok: boolean;
-  protocolVersion?: number;
-  data?: unknown;
-  error?: string;
-  status?: number;
-};
+/**
+ * Garmin extension messaging for the store layer. The wire transport is
+ * the shared `sendBridgeMessage` (adapters/bridge — the only module
+ * allowed to touch chrome.runtime, per spa-integration-adapters); this
+ * file adds garmin's ping retry policy on top.
+ */
+import type { ExtensionResponse } from "../adapters/bridge/bridge-transport";
+import { sendBridgeMessage } from "../adapters/bridge/bridge-transport";
 
 export const sendMessage = (
   extensionId: string,
   message: unknown,
   timeoutMs: number
 ): Promise<ExtensionResponse> =>
-  new Promise((resolve) => {
-    if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
-      resolve({ ok: false, error: "Chrome runtime not available" });
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      resolve({ ok: false, error: "Extension did not respond" });
-    }, timeoutMs);
-
-    try {
-      chrome.runtime.sendMessage(extensionId, message, (raw) => {
-        clearTimeout(timer);
-        if (chrome.runtime.lastError) {
-          resolve({ ok: false, error: chrome.runtime.lastError.message });
-        } else {
-          resolve(
-            (raw as ExtensionResponse) ?? { ok: false, error: "No response" }
-          );
-        }
-      });
-    } catch {
-      clearTimeout(timer);
-      resolve({ ok: false, error: "Extension not available" });
-    }
-  });
+  sendBridgeMessage(extensionId, message, timeoutMs);
 
 type PingData = { gcApi?: { ok: boolean } };
 

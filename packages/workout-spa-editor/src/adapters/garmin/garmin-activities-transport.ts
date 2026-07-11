@@ -8,11 +8,12 @@
  */
 import type { GarminActivitiesResponse } from "../../application/import/garmin-activity-schema";
 import { garminActivitiesResponseSchema } from "../../application/import/garmin-activity-schema";
-import { sendBridgeMessage } from "./bridge-transport";
+import type { FetchActivities } from "../../application/integrations/integration-ports";
+import { sendBridgeMessage } from "../bridge/bridge-transport";
 
 const ACTIVITIES_TIMEOUT_MS = 15_000;
 
-export const readGarminActivities = async (
+export const readGarminActivities: FetchActivities = async (
   extensionId: string
 ): Promise<GarminActivitiesResponse> => {
   const res = await sendBridgeMessage(

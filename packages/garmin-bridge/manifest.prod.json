@@ -4,21 +4,16 @@
   "version": "7.2.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
-
   "permissions": ["storage", "tabs", "webRequest", "scripting"],
-
   "host_permissions": ["https://connect.garmin.com/*"],
-
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-
   "background": {
     "service_worker": "background.js"
   },
-
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -26,7 +21,6 @@
       "128": "icons/icon128.png"
     }
   },
-
   "content_scripts": [
     {
       "matches": ["https://connect.garmin.com/*"],
@@ -35,11 +29,10 @@
     },
     {
       "matches": ["https://*.kaiord.com/*"],
-      "js": ["kaiord-announce.js"],
+      "js": ["bridge-identity.js", "kaiord-announce.js"],
       "run_at": "document_start"
     }
   ],
-
   "externally_connectable": {
     "matches": ["https://*.kaiord.com/*"]
   }

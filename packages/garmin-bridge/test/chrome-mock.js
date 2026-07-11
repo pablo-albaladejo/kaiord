@@ -1,5 +1,13 @@
 /**
- * Minimal Chrome Extension API mock for vitest
+ * Kaiord Bridge Core — Chrome Extension API mock for vitest (vendored)
+ *
+ * Master: packages/_shared/bridge-core/test/chrome-mock.js. Never edit a
+ * vendored copy — edit the master and run `pnpm bridge:sync`.
+ *
+ * Superset of every bridge's API surface (storage.local/session, identity,
+ * tabs, scripting, webRequest, runtime messaging); each suite uses the
+ * slice its manifest grants. Identity values are deliberately neutral —
+ * the real permission surface is locked by check-bridge-privacy-surface.
  */
 
 const sessionStore = {};
@@ -7,21 +15,26 @@ const localStore = {};
 
 const chromeMock = {
   runtime: {
-    id: "garmin-test-extension-id",
+    id: "test-extension-id",
     lastError: null,
-    getManifest: vi.fn(() => ({ version: "0.2.0" })),
-    onMessage: {
-      addListener: vi.fn(),
-    },
-    onMessageExternal: {
-      addListener: vi.fn(),
-    },
-    onInstalled: {
-      addListener: vi.fn(),
-    },
+    getManifest: vi.fn(() => ({ version: "0.0.0" })),
+    onMessage: { addListener: vi.fn() },
+    onMessageExternal: { addListener: vi.fn() },
+    onInstalled: { addListener: vi.fn() },
     sendMessage: vi.fn(),
   },
+  identity: {
+    getRedirectURL: vi.fn(() => "https://test-extension-id.chromiumapp.org/"),
+    launchWebAuthFlow: vi.fn((details, cb) => {
+      const state = new URL(details.url).searchParams.get("state");
+      cb(
+        `https://test-extension-id.chromiumapp.org/?code=auth-code&state=${state}`
+      );
+    }),
+  },
   tabs: {
+    // The query callback form is used elsewhere in the codebase; the
+    // promise form is what reinjectContentScripts uses. Support both.
     query: vi.fn((q, cb) =>
       typeof cb === "function" ? cb([]) : Promise.resolve([])
     ),
@@ -32,9 +45,7 @@ const chromeMock = {
     executeScript: vi.fn(() => Promise.resolve([])),
   },
   webRequest: {
-    onBeforeSendHeaders: {
-      addListener: vi.fn(),
-    },
+    onBeforeSendHeaders: { addListener: vi.fn() },
   },
   storage: {
     session: {

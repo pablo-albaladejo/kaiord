@@ -11,7 +11,7 @@
 import { useEffect, useRef } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { readGarminActivities } from "../adapters/bridge/garmin-activities-transport";
+import { readGarminActivities } from "../adapters/garmin/garmin-activities-transport";
 import { pullGarminActivities } from "../application/import/pull-garmin-activities.use-case";
 import { usePersistence } from "../contexts/persistence-context";
 import { useDiscoveredBridges } from "./use-discovered-bridges";

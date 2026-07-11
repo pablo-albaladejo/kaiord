@@ -1,4 +1,4 @@
-type ExtensionResponse = {
+export type ExtensionResponse = {
   ok: boolean;
   protocolVersion?: number;
   data?: unknown;
