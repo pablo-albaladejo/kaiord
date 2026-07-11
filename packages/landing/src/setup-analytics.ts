@@ -1,25 +1,17 @@
 import { analytics } from "./analytics";
 
+function trackClicks(selector: string, event: string): void {
+  document
+    .querySelectorAll<HTMLAnchorElement>(selector)
+    .forEach((a) => a.addEventListener("click", () => analytics.event(event)));
+}
+
 export function setupAnalytics() {
   analytics.pageView(window.location.pathname);
-
-  document
-    .querySelectorAll<HTMLAnchorElement>('a[href="/editor/"]')
-    .forEach((a) => {
-      a.addEventListener("click", () => analytics.event("editor-opened"));
-    });
-
-  document
-    .querySelectorAll<HTMLAnchorElement>(
-      'a[href^="https://github.com/pablo-albaladejo/kaiord"]'
-    )
-    .forEach((a) => {
-      a.addEventListener("click", () => analytics.event("github-opened"));
-    });
-
-  document
-    .querySelectorAll<HTMLAnchorElement>('a[href="/docs/"]')
-    .forEach((a) => {
-      a.addEventListener("click", () => analytics.event("docs-opened"));
-    });
+  trackClicks('a[href="/editor/"]', "editor-opened");
+  trackClicks(
+    'a[href^="https://github.com/pablo-albaladejo/kaiord"]',
+    "github-opened"
+  );
+  trackClicks('a[href="/docs/"]', "docs-opened");
 }
