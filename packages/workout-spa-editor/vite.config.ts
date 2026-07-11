@@ -3,10 +3,10 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 
-// The Cloudflare Web Analytics token is no longer baked at build time. It is
-// injected at deploy time into the placeholder in index.html and read at
-// runtime via window.__KAIORD_CONFIG__. See packages/workout-spa-editor/docs/
-// analytics.md and src/lib/runtime-config.ts.
+// The Umami website id is not baked at build time. It is injected at deploy
+// time into the placeholder in index.html and read at runtime via
+// window.__KAIORD_CONFIG__. See packages/workout-spa-editor/docs/analytics.md
+// and src/lib/runtime-config.ts.
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [

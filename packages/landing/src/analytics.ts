@@ -1,5 +1,5 @@
-import { createCloudflareAnalytics } from "./adapters/analytics/cloudflare-analytics";
+import { createUmamiAnalytics } from "./adapters/analytics/umami-analytics";
 
-export const analytics = createCloudflareAnalytics(
-  import.meta.env.VITE_CF_ANALYTICS_TOKEN as string | undefined
+export const analytics = createUmamiAnalytics(
+  import.meta.env.VITE_UMAMI_WEBSITE_ID as string | undefined
 );
