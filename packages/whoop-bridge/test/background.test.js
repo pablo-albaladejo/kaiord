@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   isAllowedPath,
@@ -6,6 +6,7 @@ const {
   isAllowedSenderOrigin,
   EXTERNAL_ACTIONS,
   PROTOCOL_VERSION,
+  handleAction,
 } = require("../background.js");
 
 describe("isAllowedPath", () => {
@@ -135,5 +136,98 @@ describe("dispatchExternal", () => {
     expect(respond).toHaveBeenCalledWith(
       expect.objectContaining({ ok: true, protocolVersion: PROTOCOL_VERSION })
     );
+  });
+});
+
+describe("handleAction", () => {
+  beforeEach(() => {
+    globalThis.__resetChromeMock();
+  });
+
+  it("should reject an unknown action", async () => {
+    // Arrange
+
+    // Act
+    const attempt = handleAction({ action: "no-such-action" });
+
+    // Assert
+    await expect(attempt).rejects.toThrow("Unknown action: no-such-action");
+  });
+
+  it("should reject set-credentials without both fields", async () => {
+    // Arrange
+
+    // Act
+    const attempt = handleAction({ action: "set-credentials", clientId: "x" });
+
+    // Assert
+    await expect(attempt).rejects.toThrow("Missing clientId or clientSecret");
+  });
+
+  it("should persist credentials when both fields are present", async () => {
+    // Arrange
+    const message = {
+      action: "set-credentials",
+      clientId: "id-1",
+      clientSecret: "secret-1",
+    };
+
+    // Act
+    const result = await handleAction(message);
+
+    // Assert
+    expect(result).toEqual({ hasCredentials: true });
+    expect(globalThis.__chromeLocalStore.whoopCredentials).toEqual({
+      clientId: "id-1",
+      clientSecret: "secret-1",
+    });
+  });
+
+  it("should reject whoop-fetch without a path", async () => {
+    // Arrange
+
+    // Act
+    const attempt = handleAction({ action: "whoop-fetch" });
+
+    // Assert
+    await expect(attempt).rejects.toThrow("Missing path");
+  });
+
+  it("should report no credentials in the status action by default", async () => {
+    // Arrange
+
+    // Act
+    const status = await handleAction({ action: "status" });
+
+    // Assert
+    expect(status).toMatchObject({ hasCredentials: false });
+  });
+
+  it("should merge the bridge manifest into the ping response", async () => {
+    // Arrange
+
+    // Act
+    const result = await handleAction({ action: "ping" });
+
+    // Assert
+    expect(result).toMatchObject({
+      id: "whoop-bridge",
+      name: "WHOOP",
+      protocolVersion: 1,
+      capabilities: ["read:body", "read:sleep"],
+      hasCredentials: false,
+    });
+  });
+});
+
+describe("isAllowedPath input hardening", () => {
+  it("should reject a non-string path via the URL-parse guard", () => {
+    // Arrange
+
+    // Act
+    const allowed = isAllowedPath(123);
+
+    // Assert
+    expect(allowed).toBe(false);
   });
 });
