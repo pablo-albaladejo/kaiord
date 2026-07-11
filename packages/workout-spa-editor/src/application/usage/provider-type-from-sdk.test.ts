@@ -3,47 +3,21 @@ import { describe, expect, it } from "vitest";
 import { providerTypeFromSdk } from "./provider-type-from-sdk";
 
 describe("providerTypeFromSdk", () => {
-  it("should map an anthropic SDK provider to the anthropic rate type", () => {
+  it.each([
+    { sdk: "anthropic.messages", expected: "anthropic" },
+    { sdk: "openai.chat", expected: "openai" },
+    { sdk: "azure.openai", expected: "openai" },
+    { sdk: "google.generative-ai", expected: "google" },
+    { sdk: "gemini", expected: "google" },
+    { sdk: "vertex.ai", expected: "google" },
+    { sdk: "unknown", expected: undefined },
+  ])("should map SDK provider $sdk to $expected", ({ sdk, expected }) => {
     // Arrange
-    const provider = "anthropic.messages";
 
     // Act
-    const type = providerTypeFromSdk(provider);
+    const type = providerTypeFromSdk(sdk);
 
     // Assert
-    expect(type).toBe("anthropic");
-  });
-
-  it("should map openai and azure providers to openai", () => {
-    // Arrange
-    const providers = ["openai.chat", "azure.openai"];
-
-    // Act
-    const types = providers.map(providerTypeFromSdk);
-
-    // Assert
-    expect(types).toEqual(["openai", "openai"]);
-  });
-
-  it("should map google, gemini, and vertex providers to google", () => {
-    // Arrange
-    const providers = ["google.generative-ai", "gemini", "vertex.ai"];
-
-    // Act
-    const types = providers.map(providerTypeFromSdk);
-
-    // Assert
-    expect(types).toEqual(["google", "google", "google"]);
-  });
-
-  it("should return undefined for an unrecognized provider", () => {
-    // Arrange
-    const provider = "unknown";
-
-    // Act
-    const type = providerTypeFromSdk(provider);
-
-    // Assert
-    expect(type).toBeUndefined();
+    expect(type).toBe(expected);
   });
 });

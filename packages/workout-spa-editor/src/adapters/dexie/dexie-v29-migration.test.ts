@@ -113,7 +113,7 @@ describe("Dexie fail-open seeding (v29) migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump the database schema to head version 29", async () => {
+  it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name);
 
