@@ -21,7 +21,7 @@ pnpm lint` green. No legacy `usage` code survives.
       each `usage` row's `entries[]` into `usageEvents` (one row per entry:
       `purpose:"chat"`, no `providerType`, `cost`/`date` carried, id
       `usage-migrated:<yearMonth>:<i>`), then `db.version(33).stores({ ...v32,
-    usage: null })` drops the store. Schema builder `buildCoreV33` in
+  usage: null })` drops the store. Schema builder `buildCoreV33` in
       `dexie-schemas-late.ts` composed into `dexie-schemas.ts`.
 - [ ] 2.2 `dexie-v33-migration.test.ts`: seed a v32 db with a `usage` row (2
       entries) + existing `usageEvents`; open at head → `usage` store gone, 2
@@ -57,7 +57,7 @@ pnpm lint` green. No legacy `usage` code survives.
 
 - [ ] 4.1 `application/chat/append-turn-messages.ts`: replace the
       `recordTurnUsage` call with a direct `appendUsageEvent(persistence, {
-    purpose:"chat", providerType, promptTokens, completionTokens })` (kept
+  purpose:"chat", providerType, promptTokens, completionTokens })` (kept
       best-effort — the log is now authoritative but a write must still not break
       a committed turn). Update `append-turn-messages.test.ts`.
 
@@ -68,7 +68,7 @@ pnpm lint` green. No legacy `usage` code survives.
       in `adapters/with-tombstones.ts` so a delete records a `[usageEvents+id]`
       tombstone.
 - [ ] 5.2 `application/usage/prune-usage-events.ts`: `pruneUsageEvents(port, {
-    now, retentionMonths = 12 })` — computes the cutoff yearMonth, lists events
+  now, retentionMonths = 12 })` — computes the cutoff yearMonth, lists events
       older than it, deletes each by id (tombstoned). Unit test: old events
       deleted + tombstoned, in-window events kept, empty log no-ops.
 - [ ] 5.3 Invoke the prune from the existing `db.on("ready")` maintenance hook —
@@ -97,5 +97,5 @@ pnpm lint` green. No legacy `usage` code survives.
       dangling reference to `usage` / `UsageRecord` / `recordChatUsage` remains
       (`grep`).
 - [ ] 7.2 `pnpm lint:specs` green; `npx openspec validate --strict
-    cutover-usage-accounting-to-event-log` green.
+  cutover-usage-accounting-to-event-log` green.
 - [ ] 7.3 `/opsx:verify` against the modified spec scenarios; then PR.

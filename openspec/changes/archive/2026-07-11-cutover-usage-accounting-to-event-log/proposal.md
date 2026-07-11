@@ -1,5 +1,7 @@
 # Proposal: Cut usage accounting over to the event log (retire the legacy `usage` table)
 
+> Completed: 2026-07-11
+
 ## Why
 
 #899 shipped the `usageEvents` event log, wired every AI run to it, and proved —

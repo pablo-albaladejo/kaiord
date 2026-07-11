@@ -1,63 +1,41 @@
-> Synced: 2026-07-10 (add-ai-usage-telemetry-sink)
+> Synced: 2026-07-11 (cutover-usage-accounting-to-event-log)
 
 # spa-ai-usage-telemetry Specification
 
 ## Purpose
 
-The SPA usage event log and its Dexie telemetry sink: a redaction-safe, append-only `usageEvents` store fed by the `@kaiord/ai` telemetry port, the shared `appendUsageEvent` writer and `foldUsageEvents` fold, run-site instrumentation (generation, batch, lab extraction), the chat dual-write that keeps `recordChatUsage` authoritative for the live `usage` row, and the fold-vs-legacy parity invariant that gates the future reader cutover.
+The SPA usage event log: a redaction-safe, append-only, **synced** `usageEvents` store that is the single authoritative record of AI token usage — fed by the `@kaiord/ai` telemetry port (Dexie sink) for agent runs and directly by the chat path, both through the shared `appendUsageEvent` writer. It aggregates cross-device by append-only union-by-id, is rendered per month with a per-purpose breakdown in Settings via `foldUsageEvents`, and is retention-pruned to stay bounded. There is no legacy `usage` table or dual-write.
 
 ## Requirements
 
 ### Requirement: Redaction-safe usage event log
 
-The SPA SHALL persist AI token usage as an append-only Dexie event log
-(`usageEvents`, added at schema v32) that carries identifiers and metrics only —
-never prompts, document bytes, model output, or API keys. Each row SHALL record
-`{ id, traceId, yearMonth, date, purpose, providerType, modelId, promptTokens,
-completionTokens, tokens, cost, createdAt }`, where `tokens` equals
-`promptTokens + completionTokens` and all counts are non-negative integers. The
-store SHALL be excluded from the cloud snapshot (device-local) for this
-transition.
+The SPA SHALL persist AI token usage as an append-only Dexie event log (`usageEvents`) that carries identifiers and metrics only — never prompts, document bytes, model output, or API keys. Each row records `{ id, traceId, yearMonth, date, purpose, providerType, modelId, promptTokens, completionTokens, tokens, cost, createdAt }`, with `tokens = promptTokens + completionTokens` and non-negative integer counts, enforced by a `.strict()` schema parsed at the single write boundary. The log is the authoritative usage store and is **synced** across devices (it is NOT in the snapshot device-local set); there is no separate `usage` table.
 
-#### Scenario: Event row is shape-valid
+#### Scenario: Event row is shape-valid and payload-free
 
 - **WHEN** a usage event is appended with `promptTokens: 120` and `completionTokens: 80`
-- **THEN** the persisted row SHALL have `tokens` equal to `200` and SHALL be accepted by the usage-event schema
+- **THEN** the row SHALL have `tokens` equal to `200`, and the schema SHALL reject any row carrying prompt text, document bytes, model output, or credential fields
 
-#### Scenario: Payload fields are impossible by construction
-
-- **WHEN** the usage-event schema is applied to any candidate row
-- **THEN** it SHALL reject rows carrying prompt text, document bytes, model output, or credential fields, because the schema defines no such fields
-
-#### Scenario: Store is created empty on upgrade
-
-- **GIVEN** a database at schema v31 with existing `usage` rows
-- **WHEN** the database upgrades to v32
-- **THEN** the `usageEvents` store SHALL exist and be empty, and the existing `usage` rows SHALL be unchanged
-
-#### Scenario: Event log is excluded from the snapshot
+#### Scenario: The log participates in the cloud snapshot
 
 - **WHEN** a cloud snapshot is exported
-- **THEN** the `usageEvents` store SHALL NOT be included in the exported tables
+- **THEN** the `usageEvents` store SHALL be included (synced), unlike the device-local stores
 
 ### Requirement: Single writer applied through a repository port
 
-The SPA SHALL write `usageEvents` only through a `UsageEventRepository` port
-(`append`, `listByMonth`) via a single application-layer writer
-`appendUsageEvent`. The writer SHALL compute cost with the same formula as the
-legacy chat writer — `estimateCost(tokens, getProviderRate(providerType))` — and
-SHALL skip a run whose total token count is zero.
+The SPA SHALL write `usageEvents` only through `appendUsageEvent`, the single application-layer writer, over the `UsageEventRepository` port. It is THE authoritative usage writer — there is no legacy `usage` row and no dual-write. It computes cost as `estimateCost(tokens, getProviderRate(providerType))` and skips a run whose total token count is zero. Chat turns call it directly with `purpose: "chat"`; agent runs reach it via the Dexie telemetry sink.
 
-#### Scenario: Cost matches the legacy formula
+#### Scenario: Cost formula and zero-token skip
 
-- **GIVEN** a `providerType` of `anthropic` and a run of `1_000_000` total tokens
-- **WHEN** `appendUsageEvent` records the run
-- **THEN** the stored `cost` SHALL equal `estimateCost(1_000_000, getProviderRate("anthropic"))`
+- **WHEN** `appendUsageEvent` records a `1_000_000`-token `anthropic` run
+- **THEN** the stored `cost` SHALL equal `estimateCost(1_000_000, getProviderRate("anthropic"))`, and a zero-token run SHALL write nothing
 
-#### Scenario: Zero-token run is skipped
+#### Scenario: A chat turn writes one usage event directly
 
-- **WHEN** `appendUsageEvent` is called with `promptTokens: 0` and `completionTokens: 0`
-- **THEN** no row SHALL be written, mirroring the legacy writer's zero-token skip
+- **GIVEN** a chat turn with usage `{ promptTokens: 200, completionTokens: 100 }` on provider type `google`
+- **WHEN** the assistant turn is persisted
+- **THEN** exactly one `usageEvents` row with `purpose: "chat"` SHALL be appended, and no legacy `usage` row SHALL be written (none exists)
 
 ### Requirement: Telemetry sink folds runtime events into the log
 
@@ -107,43 +85,38 @@ the `createTextToWorkout` configuration.
 - **WHEN** a workout-generation run completes with reported token usage
 - **THEN** a `usageEvents` row with `purpose: "workout_generation"` SHALL be appended
 
-### Requirement: Chat dual-write keeps the legacy writer authoritative
+### Requirement: Usage aggregates cross-device by append-only union
 
-During this transition the chat turn writer SHALL continue to call
-`recordChatUsage` as the sole writer of the live `usage` row, and SHALL, in
-parallel, call `appendUsageEvent` with `purpose: "chat"` using the same provider
-type and token counts. The Settings usage panel SHALL keep reading the live
-`usage` store; user-visible totals SHALL NOT change.
+The synced `usageEvents` log SHALL aggregate across devices by append-only union: each run is one row with a unique id, so the generic snapshot merge unions rows by id (last-write-wins per `createdAt`, tombstone-suppressed) rather than overwriting one device's totals with another's.
 
-#### Scenario: A chat turn writes both stores
+#### Scenario: Two devices' events union
 
-- **GIVEN** a chat turn with usage `{ promptTokens: 200, completionTokens: 100 }` on provider type `google`
-- **WHEN** the assistant turn is persisted
-- **THEN** the live `usage` row SHALL be updated by `recordChatUsage` AND a `usageEvents` row with `purpose: "chat"` SHALL be appended with the same counts
+- **GIVEN** device A and device B each recorded distinct usage events in the same month
+- **WHEN** their snapshots merge
+- **THEN** the merged log SHALL contain every event from both devices (deduplicated by id), so the folded month reflects both devices
 
-#### Scenario: The live usage row keeps a single writer
+#### Scenario: A tombstoned event is suppressed
 
-- **WHEN** any non-chat run (generation, batch, lab extraction) emits a usage event
-- **THEN** only the `usageEvents` log SHALL be written, and the live `usage` row SHALL be unchanged, so it is never double-counted
+- **GIVEN** an event id that has a tombstone
+- **WHEN** snapshots merge
+- **THEN** that event SHALL NOT appear in the merged log
 
-### Requirement: Chat fold-vs-legacy parity
+### Requirement: The usage panel renders the monthly fold with a per-purpose breakdown
 
-The pure `foldUsageEvents` reduction SHALL reduce a month's events, ordered by
-`createdAt` ascending, into `{ inputTokens, outputTokens, totalTokens,
-totalCost }`. For events scoped to `purpose: "chat"` over a session, the fold SHALL equal the
-live `usage` row produced by `recordChatUsage`: token counts exactly, and
-`totalCost` within an absolute tolerance of `1e-9` (floating-point sum order is
-matched; cost is an estimate). Parity SHALL hold before any change proposes
-retiring the legacy writer.
+The Settings usage panel SHALL read `usageEvents` for the current month plus the previous five and render each month's folded totals (input, output, total tokens, cost), plus a per-purpose breakdown (chat, workout_generation, lab_extraction). It SHALL read live via `useLiveQuery`; months with no events SHALL NOT render.
 
-#### Scenario: Fold equals the legacy usage row over a session
+#### Scenario: Panel folds the log per month
 
-- **GIVEN** a session of several chat turns, each persisted through the dual-write path
-- **WHEN** `foldUsageEvents(events, { purpose: "chat" })` is compared to the live `usage` row for that month
-- **THEN** `inputTokens`, `outputTokens`, and `totalTokens` SHALL be exactly equal AND `totalCost` SHALL differ by at most `1e-9`
+- **GIVEN** a month with chat and workout_generation events
+- **WHEN** the usage panel renders that month
+- **THEN** the row SHALL show the summed input/output/total tokens and cost, AND a per-purpose breakdown attributing tokens to `chat` and `workout_generation`
 
-#### Scenario: Non-chat events do not affect chat parity
+### Requirement: Usage events are retention-pruned
 
-- **GIVEN** a month whose log also contains `workout_generation` and `lab_extraction` events
-- **WHEN** the chat-scoped fold is computed
-- **THEN** those non-chat events SHALL be excluded and SHALL NOT change the chat parity result
+The SPA SHALL bound the synced log by pruning events older than a retention window (12 months) through a tombstoning delete, so the delete propagates cross-device and the snapshot stays bounded. Pruning runs from the once-per-session database maintenance hook.
+
+#### Scenario: Old events are pruned and tombstoned
+
+- **GIVEN** the log contains events older than the retention window and events within it
+- **WHEN** the maintenance prune runs
+- **THEN** the out-of-window events SHALL be deleted and tombstoned, and the in-window events SHALL remain
