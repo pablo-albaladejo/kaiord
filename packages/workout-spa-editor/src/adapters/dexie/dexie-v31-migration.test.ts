@@ -51,7 +51,7 @@ describe("Dexie lab-analytics (v31) migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump the database schema to head version 31", async () => {
+  it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seedV30(name);
 

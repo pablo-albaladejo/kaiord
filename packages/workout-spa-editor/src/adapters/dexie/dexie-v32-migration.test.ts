@@ -52,7 +52,7 @@ describe("Dexie usageEvents (v32) migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump the database schema to head version 32", async () => {
+  it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seedV31(name);
 
