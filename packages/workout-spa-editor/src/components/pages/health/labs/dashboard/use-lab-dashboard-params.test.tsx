@@ -85,6 +85,28 @@ describe("useLabDashboardParams", () => {
     });
   });
 
+  it("should keep both parameters when two pins race before the live query re-emits", async () => {
+    // Arrange
+    const { result } = renderHook(() => useLabDashboardParams(PROFILE_ID));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Act
+    // No waitFor between the pins: the second toggle fires before the
+    // live query re-emits the first write (the CI lost-update scenario).
+    await act(async () => {
+      await Promise.all([
+        result.current.toggle("glucose"),
+        result.current.toggle("ferritin"),
+      ]);
+    });
+
+    // Assert
+    const row = await db
+      .table<UserPreferences>("userPreferences")
+      .get(PROFILE_ID);
+    expect(row?.labDashboardParams).toEqual(["glucose", "ferritin"]);
+  });
+
   it("should keep other pinned parameters when pinning a new one", async () => {
     // Arrange
     const { result } = renderHook(() => useLabDashboardParams(PROFILE_ID));
