@@ -159,13 +159,28 @@ const assertNoResidualEnglish = (root, outFile, inventory, translations) => {
   }
 };
 
+// The parse→serialize round-trip has silently dropped the <body> element
+// before (node-html-parser with pre/code as block-text elements), shipping
+// pages whose body classes — page background, text color, font — vanished.
+// Fail the build loudly if the structural tags do not survive.
+const assertDocumentStructure = (html, outFile) => {
+  for (const tag of ["<html", "<body", "</body>", "</html>"]) {
+    if (!html.includes(tag)) {
+      console.error(`build-locales: serialized ${outFile} lost ${tag}`);
+      process.exit(1);
+    }
+  }
+};
+
 const buildEnglish = (rawHtml) => {
   const root = parseHtml(rawHtml);
   const before = collectText(root);
   injectHreflang(root);
   injectSwitchers(root, SWITCH.en);
   assertEnglishCopyUnchanged(before, collectText(root), SWITCH.en);
-  writeFileSync(EN_HTML, root.toString(), "utf8");
+  const out = root.toString();
+  assertDocumentStructure(out, EN_HTML);
+  writeFileSync(EN_HTML, out, "utf8");
   return EN_HTML;
 };
 
@@ -184,7 +199,9 @@ const buildSpanish = (rawHtml, meta, translations, inventory) => {
   assertNoResidualEnglish(root, outFile, inventory, translations);
   injectHreflang(root);
   injectSwitchers(root, SWITCH.es);
-  writeFileSync(outFile, root.toString(), "utf8");
+  const out = root.toString();
+  assertDocumentStructure(out, outFile);
+  writeFileSync(outFile, out, "utf8");
   return outFile;
 };
 

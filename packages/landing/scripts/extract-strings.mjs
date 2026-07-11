@@ -135,15 +135,17 @@ export const walkTranslatable = (root, visit) => {
 export const encodeText = (text) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+// blockTextElements MUST stay limited to script/style: registering pre/code
+// (or noscript) makes node-html-parser drop the <body> element of this
+// document — its children get reparented and the serialized page loses the
+// body tag and every class on it (page background, text color, font).
+// Translation safety for pre/code/noscript is already enforced by SKIP_TAGS.
 export const parseHtml = (html) =>
   parse(html, {
     comment: true,
     blockTextElements: {
       script: true,
       style: true,
-      pre: true,
-      code: true,
-      noscript: true,
     },
   });
 
