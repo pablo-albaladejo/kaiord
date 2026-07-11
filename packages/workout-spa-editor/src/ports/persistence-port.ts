@@ -27,7 +27,7 @@ import type {
   ProfileRepository,
   SyncStateRepository,
   TemplateRepository,
-  UsageRepositories,
+  UsageEventRepositories,
 } from "./simple-repositories";
 import type { TombstoneRepository } from "./tombstone-repository";
 import type { UserPreferencesRepository } from "./user-preferences-repository";
@@ -58,7 +58,7 @@ export type {
   ProfileRepository,
   SyncStateRepository,
   TemplateRepository,
-  UsageRepository,
+  UsageEventRepository,
 } from "./simple-repositories";
 export type { TombstoneRepository } from "./tombstone-repository";
 export type { UserPreferencesRepository } from "./user-preferences-repository";
@@ -66,7 +66,7 @@ export type { WorkoutRepository } from "./workout-repository";
 
 export type PersistencePort = HealthRepositories &
   EnergyBalanceRepositories &
-  UsageRepositories & {
+  UsageEventRepositories & {
     workouts: WorkoutRepository;
     templates: TemplateRepository;
     profiles: ProfileRepository;

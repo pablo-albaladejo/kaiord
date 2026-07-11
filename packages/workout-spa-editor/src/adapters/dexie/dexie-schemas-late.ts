@@ -95,12 +95,28 @@ export const buildCoreV32 = (prev: Stores): Stores => ({
   usageEvents: "id, [yearMonth+purpose]",
 });
 
-// Assemble the latest schemas (v30 → v31 → v32) from the v27 base so
+// v33 — usage-accounting cutover: DROP the legacy monthly `usage` store
+// (`usage: null`) after its rows are folded into `usageEvents` by the v33
+// upgrade (see dexie-v33-migration). `usageEvents` is unchanged here; it just
+// becomes the single, synced source of truth. A `null` value type widens the
+// map, so this builder returns `Record<string, string | null>`.
+export const buildCoreV33 = (prev: Stores): Record<string, string | null> => ({
+  ...prev,
+  usage: null,
+});
+
+// Assemble the latest schemas (v30 → v31 → v32 → v33) from the v27 base so
 // `dexie-schemas.ts` composes them in one spread and stays under its line cap.
-export const buildCoreV30ThroughV32 = (
+export const buildCoreV30ThroughV33 = (
   prev: Stores
-): { v30: Stores; v31: Stores; v32: Stores } => {
+): {
+  v30: Stores;
+  v31: Stores;
+  v32: Stores;
+  v33: Record<string, string | null>;
+} => {
   const v30 = buildCoreV30(prev);
   const v31 = buildCoreV31(v30);
-  return { v30, v31, v32: buildCoreV32(v31) };
+  const v32 = buildCoreV32(v31);
+  return { v30, v31, v32, v33: buildCoreV33(v32) };
 };

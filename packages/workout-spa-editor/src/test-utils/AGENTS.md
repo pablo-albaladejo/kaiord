@@ -17,7 +17,7 @@ In-memory port implementations + console-spy + fixture loaders. The seam tests u
 - `in-memory-profile-repository.ts` — `ProfileRepository`.
 - `in-memory-ai-provider-repository.ts` — `AiProviderRepository`.
 - `in-memory-sync-state-repository.ts` — `SyncStateRepository`.
-- `in-memory-usage-repository.ts` — `UsageRepository`.
+- `in-memory-usage-event-repository.ts` — `UsageEventRepository`.
 - `in-memory-coaching-repository.ts` / `.test.ts` — `CoachingRepository`.
 - `in-memory-coaching-sync-state-repository.ts` / `.test.ts` — `CoachingSyncStateRepository`.
 - `in-memory-session-match-repository.ts` / `.test.ts` + `in-memory-session-match-{append-executed,conflicts,readers}.ts` — `SessionMatchRepository` split into focused files per file-size cap.

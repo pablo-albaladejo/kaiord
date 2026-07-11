@@ -105,8 +105,11 @@
     "output": "Salida",
     "total": "Total",
     "cost": "Coste (USD)",
-    "footnoteBefore": "Los valores reflejan el uso real registrado por ejecución por lotes, no la estimación previa mostrada en el diálogo de confirmación. Las filas marcadas con",
-    "footnoteAfter": "provienen de un esquema heredado donde no se capturó la división entre entrada y salida."
+    "purpose": {
+      "chat": "Chat",
+      "workout_generation": "Generación de entrenamientos",
+      "lab_extraction": "Extracción de laboratorio"
+    }
   },
   "preferences": {
     "units": "Unidades",
