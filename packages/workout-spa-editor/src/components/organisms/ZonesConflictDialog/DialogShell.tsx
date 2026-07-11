@@ -31,7 +31,7 @@ export const DialogShell = ({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+          className="rounded-md border border-edge px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
         >
           Cancel
         </button>

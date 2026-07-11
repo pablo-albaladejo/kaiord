@@ -36,7 +36,7 @@ export function AutoMatchSuggestionRow({
         <strong>{activity?.title ?? suggestion.activityId}</strong>
         {" → "}
         {workoutTitle ?? suggestion.workoutId}
-        <span className="ml-2 text-slate-500">
+        <span className="ml-2 text-ink-muted">
           · {formatPercent(suggestion.score)}
         </span>
       </span>
@@ -52,7 +52,7 @@ export function AutoMatchSuggestionRow({
         type="button"
         aria-label={t("suggestion.reject")}
         onClick={onReject}
-        className="rounded p-1 text-slate-500 hover:bg-slate-100"
+        className="rounded p-1 text-ink-muted hover:bg-slate-100"
       >
         <X className="h-4 w-4" />
       </button>

@@ -11,11 +11,11 @@ export function PlannedEmpty() {
   const [, navigate] = useLocation();
 
   return (
-    <Card className="bg-primary-900 border-slate-800 p-6 text-center">
-      <p className="text-[15px] font-semibold text-slate-300 m-0">
+    <Card className="bg-surface border-edge p-6 text-center">
+      <p className="text-[15px] font-semibold text-ink-body m-0">
         {t("planned.emptyTitle")}
       </p>
-      <p className="text-[13px] text-slate-500 m-0 mt-1">
+      <p className="text-[13px] text-ink-muted m-0 mt-1">
         {t("planned.emptyBody")}
       </p>
       <Button

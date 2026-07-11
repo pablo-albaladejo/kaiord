@@ -7,8 +7,8 @@ import { ToolResultLinks } from "./ToolResultLinks";
 
 const ROLE_STYLE: Record<string, string> = {
   user: "self-end bg-sky-600 text-white",
-  assistant: "self-start bg-slate-800 text-slate-50",
-  tool: "self-start bg-slate-900 text-slate-400 italic",
+  assistant: "self-start bg-surface text-ink-strong",
+  tool: "self-start bg-surface-deep text-ink-muted italic",
 };
 
 const ROLE_LABEL_KEY: Record<string, string> = {
@@ -39,7 +39,7 @@ export function ChatMessageList({
 
   if (messages.length === 0) {
     return (
-      <p className="p-8 text-center text-[13px] text-slate-500">
+      <p className="p-8 text-center text-[13px] text-ink-muted">
         {t("empty.startConversation")}
       </p>
     );

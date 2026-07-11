@@ -33,7 +33,7 @@ export function EnergyTrendChartCard({ series }: EnergyTrendChartCardProps) {
   return (
     <div
       data-testid="energy-trend-chart"
-      className="rounded-lg border border-slate-800 p-3"
+      className="rounded-lg border border-edge p-3"
     >
       <UplotChart
         key={keys.join("-")}

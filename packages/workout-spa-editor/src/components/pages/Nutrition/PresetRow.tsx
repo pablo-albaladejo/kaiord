@@ -23,10 +23,10 @@ export function PresetRow({ preset, onApply, onRemove }: PresetRowProps) {
         data-testid="intake-preset-apply"
         className="min-w-0 flex-1 text-left"
       >
-        <p className="m-0 truncate text-[14px] font-semibold text-slate-100">
+        <p className="m-0 truncate text-[14px] font-semibold text-ink-strong">
           {preset.label}
         </p>
-        <p className="m-0 text-[12px] text-slate-400">
+        <p className="m-0 text-[12px] text-ink-muted">
           {macroSummary(preset, t)}
         </p>
       </button>
@@ -34,7 +34,7 @@ export function PresetRow({ preset, onApply, onRemove }: PresetRowProps) {
         type="button"
         onClick={() => onRemove(preset.id)}
         aria-label={t("presets.delete")}
-        className="text-slate-500 hover:text-red-400"
+        className="text-ink-muted hover:text-red-400"
       >
         <Icon icon={ICON_MAP.x} size="sm" color="inherit" />
       </button>

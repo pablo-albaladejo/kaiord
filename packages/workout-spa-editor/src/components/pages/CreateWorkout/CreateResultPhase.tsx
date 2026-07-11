@@ -48,8 +48,8 @@ export function CreateResultPhase({
       <CreateSheetHeader title={t("sheet.reviewSession")} onClose={onClose} />
       <CreateResultHeader sport={sport} title={model.title} />
       <SummaryStrip items={summary} />
-      <div className="rounded-[16px] border border-slate-800 bg-surface p-4">
-        <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+      <div className="rounded-[16px] border border-edge bg-surface p-4">
+        <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
           {t("result.timeInZone")}
         </p>
         <ZoneDist dist={model.dist} height={ZONE_BAR_HEIGHT} className="mb-3" />

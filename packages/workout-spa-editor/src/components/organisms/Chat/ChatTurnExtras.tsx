@@ -27,7 +27,7 @@ export function ChatTurnExtras({
   return (
     <>
       {busy && streamingText !== "" && (
-        <p className="max-w-[80%] self-start whitespace-pre-wrap rounded-2xl bg-slate-800 px-3 py-2 text-[14px] text-slate-50">
+        <p className="max-w-[80%] self-start whitespace-pre-wrap rounded-2xl bg-surface px-3 py-2 text-[14px] text-ink-strong">
           {streamingText}
         </p>
       )}

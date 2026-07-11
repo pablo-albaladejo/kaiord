@@ -24,7 +24,7 @@ export function BottomNav() {
       aria-label={t("a11y.primary")}
       data-testid="bottom-nav"
       style={BAR_STYLE}
-      className="fixed inset-x-[14px] bottom-[14px] z-30 mx-auto flex max-w-md items-stretch rounded-[24px] border border-slate-700/60 md:hidden"
+      className="fixed inset-x-[14px] bottom-[14px] z-30 mx-auto flex max-w-md items-stretch rounded-[24px] border border-edge md:hidden"
     >
       {BOTTOM_NAV_TABS.map((tab, index) => (
         <span key={tab.path} className="contents">

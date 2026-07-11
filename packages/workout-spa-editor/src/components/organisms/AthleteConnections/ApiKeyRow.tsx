@@ -20,7 +20,7 @@ export function ApiKeyRow({ profileId, config, connected }: ApiKeyRowProps) {
   return (
     <div
       data-testid={`connection-${config.id}`}
-      className="rounded-2xl border border-slate-700/60 bg-surface p-3"
+      className="rounded-2xl border border-edge bg-surface p-3"
     >
       <ApiKeyRowHeader
         config={config}

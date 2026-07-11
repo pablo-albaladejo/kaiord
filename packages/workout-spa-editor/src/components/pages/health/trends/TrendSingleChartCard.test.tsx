@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ThemeProvider } from "../../../../contexts/ThemeContext";
 import type { TrendMetricKey } from "./trend-metrics";
 import { TrendSingleChartCard } from "./TrendSingleChartCard";
 import type { TrendSeriesByMetric } from "./use-trend-series";
@@ -76,7 +77,8 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={EMPTY_SERIES}
         rangeDays={30}
-      />
+      />,
+      { wrapper: ThemeProvider }
     );
 
     // Assert
@@ -100,7 +102,8 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={loadingSeries}
         rangeDays={30}
-      />
+      />,
+      { wrapper: ThemeProvider }
     );
 
     // Assert
@@ -118,7 +121,8 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={30}
-      />
+      />,
+      { wrapper: ThemeProvider }
     );
     const firstCallOptions = uplotMock.mock.calls[0][0].options;
 
@@ -148,7 +152,8 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={30}
-      />
+      />,
+      { wrapper: ThemeProvider }
     );
 
     // Assert
@@ -170,7 +175,8 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={30}
-      />
+      />,
+      { wrapper: ThemeProvider }
     );
 
     // Assert

@@ -33,7 +33,7 @@ const Empty = () => {
     <div
       role="listbox"
       aria-label={t("picker.ariaLabel")}
-      className="rounded border border-slate-200 p-3 text-sm text-slate-500 dark:border-slate-700"
+      className="rounded border border-slate-200 p-3 text-sm text-ink-muted dark:border-slate-700"
     >
       {t("picker.empty")}
     </div>

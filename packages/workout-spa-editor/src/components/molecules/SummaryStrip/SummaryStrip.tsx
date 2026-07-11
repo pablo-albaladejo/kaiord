@@ -18,7 +18,7 @@ export const SummaryStrip = forwardRef<HTMLDivElement, SummaryStripProps>(
         {items.map((item) => (
           <div
             key={item.label}
-            className="flex-1 bg-surface-deep border border-slate-700/60 rounded-[14px] px-[10px] py-3 text-center"
+            className="flex-1 bg-surface-deep border border-edge rounded-[14px] px-[10px] py-3 text-center"
           >
             <Icon
               icon={ICON_MAP[item.icon]}
@@ -26,10 +26,10 @@ export const SummaryStrip = forwardRef<HTMLDivElement, SummaryStripProps>(
               color="muted"
               className="mx-auto mb-[5px]"
             />
-            <div className="text-base font-bold text-slate-50">
+            <div className="text-base font-bold text-ink-strong">
               {item.value}
             </div>
-            <div className="text-[11px] text-slate-500 mt-px">{item.label}</div>
+            <div className="text-[11px] text-ink-muted mt-px">{item.label}</div>
           </div>
         ))}
       </div>

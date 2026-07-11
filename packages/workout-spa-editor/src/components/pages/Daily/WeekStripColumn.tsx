@@ -28,10 +28,10 @@ export function WeekStripColumn({
   onSelect,
 }: WeekStripColumnProps) {
   const column = day.isFocused
-    ? "bg-sky-500/15 border border-sky-500 text-sky-400"
-    : "text-slate-500";
+    ? "bg-accent/15 border border-accent text-accent"
+    : "text-ink-muted";
   const number = day.isRealToday
-    ? "flex h-5 w-5 items-center justify-center rounded-full border border-sky-400 text-sky-400"
+    ? "flex h-5 w-5 items-center justify-center rounded-full border border-accent text-accent"
     : "";
 
   return (
@@ -41,7 +41,7 @@ export function WeekStripColumn({
       aria-pressed={day.isFocused}
       aria-current={day.isRealToday ? "date" : undefined}
       aria-label={ariaLabel(day, summary)}
-      className={`flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 transition-colors hover:bg-slate-800 ${column}`}
+      className={`flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 transition-colors hover:bg-surface-elevated ${column}`}
     >
       <span className="text-[11px] font-semibold">{day.letter}</span>
       <span className={`text-[13px] font-bold tabular-nums ${number}`}>

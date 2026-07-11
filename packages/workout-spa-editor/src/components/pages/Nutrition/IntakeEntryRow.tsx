@@ -16,10 +16,10 @@ export function IntakeEntryRow({ entry, onDelete }: IntakeEntryRowProps) {
   return (
     <li className="flex items-center gap-3 py-2" data-testid="intake-entry-row">
       <div className="min-w-0 flex-1">
-        <p className="m-0 truncate text-[14px] font-semibold text-slate-100">
+        <p className="m-0 truncate text-[14px] font-semibold text-ink-strong">
           {title}
         </p>
-        <p className="m-0 text-[12px] text-slate-400">
+        <p className="m-0 text-[12px] text-ink-muted">
           {macroSummary(entry, t)}
         </p>
       </div>
@@ -27,7 +27,7 @@ export function IntakeEntryRow({ entry, onDelete }: IntakeEntryRowProps) {
         type="button"
         onClick={() => onDelete(entry.id)}
         aria-label={t("intake.deleteEntry")}
-        className="text-slate-500 hover:text-red-400"
+        className="text-ink-muted hover:text-red-400"
       >
         <Icon icon={ICON_MAP.x} size="sm" color="inherit" />
       </button>

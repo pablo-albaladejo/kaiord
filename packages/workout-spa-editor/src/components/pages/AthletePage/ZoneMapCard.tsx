@@ -21,16 +21,16 @@ export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
   return (
     <div>
       <SectionHead title={t("zonesTitle", { sport: sportLabel })} />
-      <Card className="rounded-[20px] border border-slate-700/60 bg-surface p-4">
+      <Card className="rounded-[20px] border border-edge bg-surface p-4">
         {zones ? (
           <ZoneMap zones={zones} />
         ) : (
-          <p className="text-[13.5px] text-slate-400">
+          <p className="text-[13.5px] text-ink-muted">
             {t("noThreshold", { sport: sportLabel.toLowerCase() })}
           </p>
         )}
-        <div className="mt-3 flex items-start gap-2 rounded-xl border border-sky-400/15 bg-sky-400/5 p-3">
-          <span className="mt-px text-sky-400">
+        <div className="mt-3 flex items-start gap-2 rounded-xl border border-accent/15 bg-accent/5 p-3">
+          <span className="mt-px text-accent">
             <Icon
               icon={ICON_MAP.sparkle}
               size="sm"
@@ -38,7 +38,7 @@ export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
               strokeWidth={1.9}
             />
           </span>
-          <p className="text-[12.5px] text-slate-300">{t("zonesBlurb")}</p>
+          <p className="text-[12.5px] text-ink-body">{t("zonesBlurb")}</p>
         </div>
       </Card>
     </div>

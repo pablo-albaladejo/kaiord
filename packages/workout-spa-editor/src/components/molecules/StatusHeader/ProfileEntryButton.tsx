@@ -24,7 +24,7 @@ export function ProfileEntryButton() {
       data-testid="status-header-profile-button"
     >
       <User className="h-4 w-4" />
-      <span className="hidden sm:inline">{label}</span>
+      <span className="hidden md:inline">{label}</span>
     </Button>
   );
 }

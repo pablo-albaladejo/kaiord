@@ -8,6 +8,7 @@
 import type { LabValue } from "@kaiord/core";
 import { useMemo } from "react";
 
+import { useTheme } from "../../../../../contexts/ThemeContext";
 import { useActiveLocale } from "../../../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../../../i18n/use-translate";
 import type { ChartMetricDef } from "../../../../charts/uplot-base/uplot-base";
@@ -29,6 +30,7 @@ export const LabParameterChart = ({
 }) => {
   const locale = useActiveLocale();
   const t = useTranslate("labs-ui");
+  const { resolvedTheme } = useTheme();
   const def: ChartMetricDef = useMemo(
     () => ({
       key: parameterKey,
@@ -39,7 +41,12 @@ export const LabParameterChart = ({
   );
   const band = useMemo(() => resolveReferenceBand(values), [values]);
   const data = useMemo(() => buildLabChartData(values, band), [values, band]);
-  const options = useMemo(() => buildLabChartOptions(def, band), [def, band]);
+  const options = useMemo(
+    () => buildLabChartOptions(def, band),
+    // resolvedTheme forces a rebuild so axis/grid colors follow the .dark class.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [def, band, resolvedTheme]
+  );
 
   if (values.length === 0)
     return <p className="text-sm text-gray-600">{t("chart.empty")}</p>;

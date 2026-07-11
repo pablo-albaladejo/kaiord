@@ -8,6 +8,10 @@ const HRV: TrendMetricDef = { key: "hrv", label: "HRV", unit: "ms" };
 const WEIGHT: TrendMetricDef = { key: "weight", label: "Weight", unit: "kg" };
 
 const EXPECTED_AXES_COUNT_3_METRICS = 4; // 1 X + 3 Y
+// Fallback theme colors from chart-theme.ts (no DOM custom properties set in
+// this pure-function test, so getChartAxisColors returns its defaults).
+const AXIS_STROKE = "#64748b";
+const GRID_STROKE = "#e2e8f0";
 
 describe("buildTrendChartOptions", () => {
   it("should produce one X axis plus one Y axis per metric in the input order", () => {
@@ -70,5 +74,20 @@ describe("buildTrendChartOptions", () => {
     // Assert
     const sides = (options.axes ?? []).slice(1).map((a) => a.side);
     expect(sides).toEqual([1, 1, 1]);
+  });
+
+  it("should theme every axis with the current stroke/grid/tick colors", () => {
+    // Arrange
+    const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV];
+
+    // Act
+    const options = buildTrendChartOptions(metrics);
+
+    // Assert
+    for (const axis of options.axes ?? []) {
+      expect(axis.stroke).toBe(AXIS_STROKE);
+      expect(axis.grid).toEqual({ stroke: GRID_STROKE });
+      expect(axis.ticks).toEqual({ stroke: GRID_STROKE });
+    }
   });
 });

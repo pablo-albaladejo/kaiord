@@ -20,6 +20,60 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/* Semantic theme tokens — light defaults on :root, dark overrides under .dark.
+   The dark values reuse the --brand-* tokens (which are dark-mode-specific by
+   design, see styles/brand-tokens.css). Components must consume these through
+   the Tailwind utilities mapped in @theme below (bg-surface*, text-ink-*,
+   border-edge*, text-accent) instead of raw slate utilities, so every surface
+   adapts to both themes from one place. */
+:root {
+  --surface-page: #f8fafc;
+  --surface-deep: #f1f5f9;
+  --surface-card: #ffffff;
+  --surface-elevated: #f1f5f9;
+
+  --ink-strong: #0f172a;
+  --ink-body: #334155;
+  --ink-muted: #64748b;
+
+  --edge: #e2e8f0;
+  --edge-soft: #f1f5f9;
+  --edge-strong: #cbd5e1;
+
+  --accent: #0284c7;
+
+  /* Glass chrome (BottomNav) — consumed via inline style var() references. */
+  --glass-bg: rgba(248, 250, 252, 0.85);
+  --glass-border: rgba(226, 232, 240, 0.7);
+  --glass-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
+
+  /* Track color for progress rings (ReadinessRing, MacroRing). */
+  --ring-track: #e2e8f0;
+}
+
+.dark {
+  --surface-page: var(--brand-bg-primary);
+  --surface-deep: var(--brand-bg-deep);
+  --surface-card: var(--brand-bg-surface);
+  --surface-elevated: var(--brand-bg-elevated);
+
+  --ink-strong: var(--brand-text-primary);
+  --ink-body: var(--brand-text-secondary);
+  --ink-muted: var(--brand-text-muted);
+
+  --edge: rgba(51, 65, 85, 0.6);
+  --edge-soft: var(--brand-border-soft);
+  --edge-strong: #475569;
+
+  --accent: #38bdf8;
+
+  --glass-bg: rgba(15, 23, 42, 0.82);
+  --glass-border: rgba(51, 65, 85, 0.6);
+  --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+
+  --ring-track: #243244;
+}
+
 @theme {
   /* Primary scale — smoothed ramp centered on brand accent #0284c7.
      Must match --brand-accent-blue in styles/brand-tokens.css */
@@ -72,12 +126,29 @@
   --color-zone-4: var(--zone-4);
   --color-zone-5: var(--zone-5);
 
-  /* Brand surfaces/text as Tailwind utilities so redesign components can
-     reach the exact dark-slate palette (bg-surface, text-faint, …) without
-     re-declaring hex values. */
-  --color-surface-deep: var(--brand-bg-deep);
-  --color-surface: var(--brand-bg-surface);
-  --color-surface-elevated: var(--brand-bg-elevated);
+  /* Theme-adaptive semantic utilities. Surfaces/ink/edges resolve through
+     the :root/.dark vars above, so bg-surface*, text-ink-*, border-edge*
+     and text-accent render correctly in BOTH themes without dark: pairs. */
+  --color-surface-page: var(--surface-page);
+  --color-surface-deep: var(--surface-deep);
+  --color-surface: var(--surface-card);
+  --color-surface-elevated: var(--surface-elevated);
+
+  --color-ink-strong: var(--ink-strong);
+  --color-ink-body: var(--ink-body);
+  --color-ink-muted: var(--ink-muted);
+
+  --color-edge: var(--edge);
+  --color-edge-soft: var(--edge-soft);
+  --color-edge-strong: var(--edge-strong);
+
+  --color-accent: var(--accent);
+
+  /* shadcn-style semantic names used across the app; without these the
+     utilities emit an undefined var() and the declaration is dropped. */
+  --color-muted-foreground: var(--ink-muted);
+  --color-primary: var(--color-primary-600);
+  --color-primary-foreground: #ffffff;
 
   --font-sans: var(--brand-font-sans);
 }
@@ -88,6 +159,13 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Keep native UA chrome (scrollbars, date/number pickers, checkboxes,
+       autofill) in sync with the app-controlled theme class. */
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
   }
 
   /* Smooth theme transitions - Requirement 13 */

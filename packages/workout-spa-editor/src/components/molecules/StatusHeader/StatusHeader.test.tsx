@@ -138,9 +138,13 @@ describe("StatusHeader", () => {
     expect(divider).toBeInTheDocument();
     const parent = divider.parentElement;
     expect(parent).not.toBeNull();
+    // "new" is wrapped in a mobile-hidden span (see EntryButton), so walk up
+    // to the ancestor that is actually a direct child of `parent`.
+    const directChild = (el: Element): Element =>
+      el.parentElement === parent ? el : directChild(el.parentElement!);
     const children = Array.from(parent!.children);
     const dividerIndex = children.indexOf(divider);
-    const newButtonIndex = children.indexOf(newButton);
+    const newButtonIndex = children.indexOf(directChild(newButton));
     const profileButtonIndex = children.indexOf(profileButton);
     expect(dividerIndex).toBeGreaterThan(newButtonIndex);
     expect(dividerIndex).toBeLessThan(profileButtonIndex);

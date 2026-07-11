@@ -9,7 +9,7 @@ export type ChatSearchBoxProps = {
 export function ChatSearchBox({ value, onChange }: ChatSearchBoxProps) {
   const t = useTranslate("chat");
   return (
-    <div className="flex items-center gap-1 rounded-md border border-slate-700 px-2 py-1">
+    <div className="flex items-center gap-1 rounded-md border border-edge px-2 py-1">
       <input
         type="search"
         value={value}
@@ -17,13 +17,13 @@ export function ChatSearchBox({ value, onChange }: ChatSearchBoxProps) {
         placeholder={t("search.placeholder")}
         aria-label={t("search.label")}
         data-testid="chat-search-input"
-        className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+        className="w-full bg-transparent text-sm text-ink-strong placeholder:text-ink-muted focus:outline-none"
       />
       {value && (
         <button
           type="button"
           aria-label={t("search.clear")}
-          className="shrink-0 px-1 text-slate-500 hover:text-slate-200"
+          className="shrink-0 px-1 text-ink-muted hover:text-ink-body"
           onClick={() => onChange("")}
         >
           ✕

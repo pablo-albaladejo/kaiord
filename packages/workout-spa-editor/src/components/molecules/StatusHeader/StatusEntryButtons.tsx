@@ -35,7 +35,7 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
       ))}
       <span
         data-testid="status-header-divider"
-        className="hidden h-6 w-px bg-gray-200 dark:bg-slate-700 sm:inline-block"
+        className="hidden h-6 w-px bg-gray-200 dark:bg-slate-700 md:inline-block"
         aria-hidden="true"
       />
       <StatusIndicators />
@@ -56,7 +56,7 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
         data-testid="status-header-help-button"
       >
         <HelpCircle className="h-4 w-4" />
-        <span className="hidden sm:inline">{t("actions.help")}</span>
+        <span className="hidden md:inline">{t("actions.help")}</span>
       </Button>
     </>
   );

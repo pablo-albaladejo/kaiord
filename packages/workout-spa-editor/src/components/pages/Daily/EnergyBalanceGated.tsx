@@ -19,14 +19,14 @@ export function EnergyBalanceGated() {
       data-testid="energy-balance-gated"
       className="block"
     >
-      <Card className="bg-primary-900 border-slate-800 p-4 transition-colors hover:border-slate-700">
+      <Card className="bg-surface border-edge p-4 transition-colors hover:border-edge-strong">
         <div className="flex items-center gap-3">
           <Icon icon={ICON_MAP.flame} size="md" color="inherit" />
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold text-slate-100 m-0">
+            <p className="text-[15px] font-semibold text-ink-strong m-0">
               {t("energyBalance.title")}
             </p>
-            <p className="text-[13px] text-slate-400 m-0 mt-0.5">
+            <p className="text-[13px] text-ink-muted m-0 mt-0.5">
               {t("energyBalance.gatedPrompt")}
             </p>
           </div>

@@ -3,10 +3,10 @@ import type { CSSProperties } from "react";
 /** Exact glass blur from the redesign handoff. */
 export const BAR_STYLE: CSSProperties = {
   height: 64,
-  backgroundColor: "rgba(15,23,42,0.82)",
+  backgroundColor: "var(--glass-bg)",
   backdropFilter: "blur(20px) saturate(180%)",
   WebkitBackdropFilter: "blur(20px) saturate(180%)",
-  boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
+  boxShadow: "var(--glass-shadow)",
 };
 
 /** Raised gradient FAB centered over the bar notch. */

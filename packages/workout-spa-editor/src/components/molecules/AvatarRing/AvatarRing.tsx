@@ -23,9 +23,9 @@ export const AvatarRing = forwardRef<
       }}
       {...props}
     >
-      <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-900">
+      <div className="flex h-full w-full items-center justify-center rounded-full bg-surface-deep">
         <span
-          className="font-bold text-slate-50"
+          className="font-bold text-ink-strong"
           style={{ fontSize: size * 0.34 }}
         >
           {initials}

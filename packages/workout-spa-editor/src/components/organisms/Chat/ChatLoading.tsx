@@ -4,7 +4,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 export function ChatLoading() {
   const t = useTranslate("chat");
   return (
-    <div className="flex items-center justify-center p-8 text-slate-400">
+    <div className="flex items-center justify-center p-8 text-ink-muted">
       {t("page.loading")}
     </div>
   );

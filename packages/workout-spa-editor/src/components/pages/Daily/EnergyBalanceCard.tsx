@@ -38,12 +38,12 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
     result.balance.macro_targets !== undefined;
   return (
     <Card
-      className="bg-primary-900 border-slate-800 p-4"
+      className="bg-surface border-edge p-4"
       data-testid="energy-balance-card"
     >
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.flame} size="md" color="inherit" />
-        <p className="text-[15px] font-semibold text-slate-100 m-0">
+        <p className="text-[15px] font-semibold text-ink-strong m-0">
           {t("energyBalance.title")}
         </p>
         {profileId && (
@@ -51,7 +51,7 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
             type="button"
             onClick={() => setGoalOpen(true)}
             data-testid="energy-balance-set-goal"
-            className="ml-auto text-[13px] font-semibold text-blue-400"
+            className="ml-auto text-[13px] font-semibold text-accent"
           >
             {t("energyBalance.setGoal")}
           </button>
@@ -59,7 +59,7 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
       </div>
       <EnergyBalanceStats vm={vm} />
       {hasMacros && (
-        <div className="mt-4 border-t border-slate-800 pt-4">
+        <div className="mt-4 border-t border-edge pt-4">
           <MacroRings
             actuals={result.balance.macro_actuals}
             targets={result.balance.macro_targets}
@@ -70,7 +70,7 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
       <Link
         href="/nutrition"
         data-testid="energy-balance-nutrition-link"
-        className="mt-3 block text-[13px] font-semibold text-blue-400"
+        className="mt-3 block text-[13px] font-semibold text-accent"
       >
         {t("energyBalance.logNutrition")}
       </Link>

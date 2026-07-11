@@ -26,7 +26,7 @@ const OPACITY: Record<IntensityBucket, string> = {
 };
 
 function dotClass(summary: DaySummary): string {
-  if (!summary.intensity) return "border border-slate-500";
+  if (!summary.intensity) return "border border-edge";
   return summary.estimated ? RING[summary.intensity] : FILL[summary.intensity];
 }
 
@@ -40,13 +40,13 @@ export function WeekStripMark({ summary }: { summary: DaySummary }) {
       <span
         data-testid="weekstrip-empty"
         aria-hidden="true"
-        className="h-px w-3 rounded-full bg-slate-700"
+        className="h-px w-3 rounded-full bg-edge"
       />
     );
   }
   const size = durationMarkSize(summary.durationSec);
   const count = summary.count >= 2 && (
-    <span className="text-[9px] font-semibold leading-none text-slate-500">
+    <span className="text-[9px] font-semibold leading-none text-ink-muted">
       {summary.count}
     </span>
   );

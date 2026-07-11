@@ -28,21 +28,21 @@ export function ConnectedRow(props: ConnectedRowProps) {
   const [, navigate] = useLocation();
 
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-surface p-3">
+    <div className="rounded-2xl border border-edge bg-surface p-3">
       <div className="flex items-center gap-3">
         <ConnectionMark mark={config.mark} />
         <div className="min-w-0 flex-1">
-          <div className="text-[14.5px] font-semibold text-slate-50">
+          <div className="text-[14.5px] font-semibold text-ink-strong">
             {config.name}
           </div>
           <div className="text-[12.5px] text-emerald-400">Connected</div>
         </div>
       </div>
-      <div className="mt-2 flex items-center justify-between border-t border-slate-800 pt-2">
+      <div className="mt-2 flex items-center justify-between border-t border-edge-soft pt-2">
         <button
           type="button"
           onClick={() => navigate("/settings/data-hub")}
-          className="flex items-center gap-1 text-[13px] font-semibold text-sky-400"
+          className="flex items-center gap-1 text-[13px] font-semibold text-accent"
         >
           <Icon
             icon={ICON_MAP.route}

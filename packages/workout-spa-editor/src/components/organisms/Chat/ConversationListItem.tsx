@@ -40,12 +40,12 @@ export function ConversationListItem({
   return (
     <div
       className={`group flex items-center gap-1 rounded-md px-2 py-1 text-sm ${
-        active ? "bg-slate-800 text-slate-100" : "text-slate-300"
+        active ? "bg-surface-elevated text-ink-strong" : "text-ink-body"
       }`}
     >
       <button
         type="button"
-        className="min-w-0 flex-1 truncate text-left hover:text-slate-100"
+        className="min-w-0 flex-1 truncate text-left hover:text-ink-strong"
         onClick={() => onSelect(conversation.id)}
       >
         {conversation.title}
@@ -53,7 +53,7 @@ export function ConversationListItem({
       <button
         type="button"
         aria-label={t("item.rename")}
-        className="shrink-0 px-1 text-slate-500 hover:text-slate-200"
+        className="shrink-0 px-1 text-ink-muted hover:text-ink-body"
         onClick={() => setEditing(true)}
       >
         ✎
@@ -61,7 +61,7 @@ export function ConversationListItem({
       <button
         type="button"
         aria-label={confirmDelete ? t("item.confirmDelete") : t("item.delete")}
-        className="shrink-0 px-1 text-slate-500 hover:text-red-400"
+        className="shrink-0 px-1 text-ink-muted hover:text-red-400"
         onClick={() =>
           confirmDelete ? onDelete(conversation.id) : setConfirmDelete(true)
         }

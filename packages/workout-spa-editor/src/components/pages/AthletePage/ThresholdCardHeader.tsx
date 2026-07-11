@@ -14,20 +14,20 @@ export function ThresholdCardHeader({
   const t = useTranslate("athlete");
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-sky-400">
+      <div className="flex items-center gap-2 text-accent">
         <Icon
           icon={ICON_MAP.target}
           size="sm"
           color="inherit"
           strokeWidth={1.9}
         />
-        <span className="text-[15px] font-semibold text-slate-50">
+        <span className="text-[15px] font-semibold text-ink-strong">
           {t("thresholds")}
         </span>
       </div>
       <div className="flex items-center gap-2.5">
         <span
-          className={`text-[13px] ${auto ? "text-sky-400" : "text-slate-400"}`}
+          className={`text-[13px] ${auto ? "text-accent" : "text-ink-muted"}`}
         >
           {auto ? t("autoZones") : t("manualZones")}
         </span>

@@ -19,7 +19,7 @@ export function NoAiProviderState() {
       <button
         type="button"
         onClick={() => navigate("/settings/ai")}
-        className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
+        className="rounded-md border border-edge px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
       >
         Configure
       </button>

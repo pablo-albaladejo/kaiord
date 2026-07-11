@@ -62,7 +62,7 @@ export function CardShell({
       ) : null}
       {footerRow}
       {originChip ? (
-        <div className="mt-1 text-[10px] text-slate-500">· {originChip}</div>
+        <div className="mt-1 text-[10px] text-ink-muted">· {originChip}</div>
       ) : null}
     </button>
   );

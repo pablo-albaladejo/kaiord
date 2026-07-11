@@ -45,6 +45,7 @@ Every non-trivial script ships with a co-located `*.test.mjs` exercised by
 | `check-spec-format.mjs`                                   | Spec format (template + structural).                                                 | `pnpm lint:specs`                                                             |
 | `check-test-aaa.mjs`                                      | `R-ItBodyAAA` — test bodies in Arrange/Act/Assert sections.                          | `pnpm test:scripts`                                                           |
 | `check-test-title-should.mjs`                             | `R-ItTitleShould` — test titles begin with `should `.                                | `pnpm test:scripts`                                                           |
+| `check-theme-dialect.mjs`                                 | `R-ThemeDarkOnly` / `R-ThemeBareBorder` — SPA classes must adapt to both themes.     | `pnpm lint:theme-dialect`                                                     |
 | `check-tsup-ignoredeprecations.mjs`                       | Tsup deprecation watchdog.                                                           | `pnpm lint:tsup-watchdog`                                                     |
 | `ci-failure-issue.mjs` (+ `ci-failure-issue-helpers.mjs`) | Open / close CI failure issues.                                                      | `.github/workflows/ci*.yml`                                                   |
 | `create-github-releases.js`                               | Create GitHub releases after Changesets publish.                                     | `.github/workflows/release.yml`                                               |
@@ -73,6 +74,7 @@ tree — keep the format `- \`<filename>\` — When to run: <reason>`.
 - `create-release.sh` — When to run: when shipping a manual hotfix release with a package-scoped tag (bypasses the normal Changesets flow). Documented in `DEPLOYMENT.md`.
 - `parse-release-tag.sh` — When to run: when validating a `@kaiord/<pkg>@<version>` tag locally; used by `create-release.sh`.
 - `validate-package.sh` — When to run: when validating that a package version matches its `package.json` before pushing a tag; used by `create-release.sh`.
+
 <!-- manual-tools:end -->
 
 ## Subdirectories

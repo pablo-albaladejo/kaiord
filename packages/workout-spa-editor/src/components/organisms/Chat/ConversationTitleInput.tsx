@@ -23,7 +23,7 @@ export function ConversationTitleInput({
   return (
     <input
       aria-label={t("titleInput.label")}
-      className="w-full rounded-md bg-slate-800 px-2 py-1 text-sm text-slate-100"
+      className="w-full rounded-md bg-surface px-2 py-1 text-sm text-ink-strong"
       value={draft}
       autoFocus
       onChange={(e) => setDraft(e.target.value)}

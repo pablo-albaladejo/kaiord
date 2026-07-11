@@ -2,6 +2,7 @@ import type { LabValue } from "@kaiord/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ThemeProvider } from "../../../../../contexts/ThemeContext";
 import { LabParameterChart } from "./LabParameterChart";
 
 vi.mock("../../../../charts/uplot-base/uplot-chart", () => ({
@@ -40,7 +41,9 @@ describe("LabParameterChart", () => {
     ];
 
     // Act
-    render(<LabParameterChart parameterKey="vitamin_d" values={values} />);
+    render(<LabParameterChart parameterKey="vitamin_d" values={values} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     const chart = screen.getByTestId("lab-parameter-chart");
@@ -64,7 +67,9 @@ describe("LabParameterChart", () => {
     ];
 
     // Act
-    render(<LabParameterChart parameterKey="ldl" values={values} />);
+    render(<LabParameterChart parameterKey="ldl" values={values} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     const chart = screen.getByTestId("lab-parameter-chart");
@@ -77,7 +82,9 @@ describe("LabParameterChart", () => {
     const values: LabValue[] = [];
 
     // Act
-    render(<LabParameterChart parameterKey="vitamin_d" values={values} />);
+    render(<LabParameterChart parameterKey="vitamin_d" values={values} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     expect(

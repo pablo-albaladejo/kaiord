@@ -32,7 +32,7 @@ export function PendingActionCard({
       <p className="text-[13px] font-semibold text-amber-200">
         {t("pendingAction.confirm", { action: label })}
       </p>
-      <pre className="my-2 overflow-x-auto rounded-lg bg-slate-900 p-2 text-[12px] text-slate-300">
+      <pre className="my-2 overflow-x-auto rounded-lg bg-surface-deep p-2 text-[12px] text-ink-body">
         {JSON.stringify(action.input, null, 2)}
       </pre>
       <div className="flex gap-2">
@@ -43,7 +43,7 @@ export function PendingActionCard({
           type="button"
           onClick={onDeny}
           disabled={busy}
-          className="rounded-xl px-3 py-1.5 text-[13px] text-slate-300 hover:text-slate-100 disabled:opacity-50"
+          className="rounded-xl px-3 py-1.5 text-[13px] text-ink-body hover:text-ink-strong disabled:opacity-50"
         >
           {t("pendingAction.decline")}
         </button>

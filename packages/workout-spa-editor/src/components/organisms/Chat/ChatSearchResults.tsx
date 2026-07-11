@@ -23,7 +23,7 @@ export function ChatSearchResults({
     return (
       <p
         data-testid="chat-search-empty"
-        className="px-2 py-4 text-sm text-slate-400"
+        className="px-2 py-4 text-sm text-ink-muted"
       >
         {t("search.noMatches")}
       </p>
@@ -39,7 +39,7 @@ export function ChatSearchResults({
         <div key={result.conversationId} className="flex flex-col gap-1">
           <button
             type="button"
-            className="truncate text-left text-sm font-medium text-slate-200 hover:text-slate-50"
+            className="truncate text-left text-sm font-medium text-ink-body hover:text-ink-strong"
             onClick={() => onSelect(result.conversationId)}
           >
             {result.title}
@@ -49,7 +49,7 @@ export function ChatSearchResults({
               key={match.messageId}
               type="button"
               data-testid={`chat-search-result-${match.messageId}`}
-              className="rounded px-2 py-1 text-left text-xs text-slate-400 hover:bg-slate-800"
+              className="rounded px-2 py-1 text-left text-xs text-ink-muted hover:bg-surface-elevated"
               onClick={() =>
                 onResultSelect(result.conversationId, match.messageId)
               }

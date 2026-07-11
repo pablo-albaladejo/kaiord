@@ -15,7 +15,7 @@ type BottomNavTabProps = {
 
 export function BottomNavTab({ tab, active, onActivate }: BottomNavTabProps) {
   const t = useTranslate("nav");
-  const color = active ? "text-sky-400" : "text-slate-500";
+  const color = active ? "text-accent" : "text-ink-muted";
   return (
     <button
       type="button"
