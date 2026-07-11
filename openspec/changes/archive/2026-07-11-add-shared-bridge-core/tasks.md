@@ -1,3 +1,5 @@
+> Tasks: 43 completed, 0 deferred
+
 ## 1. Sync + parity tooling (repo scripts)
 
 - [x] 1.1 Write failing `scripts/sync-bridge-core.test.mjs` (node:test): given a fixture master set and bridge dirs, sync copies every master byte-for-byte to every target (top-level files; `test/` masters into each bridge's `test/`); targets missing from a bridge's file list are skipped; exit non-zero on missing master (RED)
