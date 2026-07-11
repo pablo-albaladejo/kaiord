@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toggleDashboardParam } from "./lab-dashboard-selection";
+import { toggleDashboardParam } from "./toggle-dashboard-param";
 
 describe("toggleDashboardParam", () => {
   it("should pin a parameter when the current selection is undefined", () => {
