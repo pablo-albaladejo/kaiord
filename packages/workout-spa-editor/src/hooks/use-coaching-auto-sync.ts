@@ -40,15 +40,20 @@ export const useCoachingAutoSync = (
     const now = Date.now();
     const key = `${activeProfileId}:${weekStart}`;
     if (lastFiredKey.current === key) return;
-    const trigger =
-      lastFiredKey.current === null ? "auto-mount" : "auto-week-change";
-    lastFiredKey.current = key;
 
     const linkedSourceIds = new Set(
       profile.linkedAccounts.map((a) => a.source)
     );
     const targets = syncSources.filter((s) => linkedSourceIds.has(s.id));
+    // Bridge detection can resolve AFTER profile/week state settles, so an
+    // empty-sources run must not stamp the fired key — otherwise the re-run
+    // that arrives with real sources hits the key guard and this week's
+    // auto-sync is permanently skipped.
     if (targets.length === 0) return;
+
+    const trigger =
+      lastFiredKey.current === null ? "auto-mount" : "auto-week-change";
+    lastFiredKey.current = key;
 
     void (async () => {
       const outcomes: { source: string; outcome: SourceSyncOutcome }[] = [];
