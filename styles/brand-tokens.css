@@ -1,8 +1,15 @@
 /* Kaiord Brand Tokens — shared across landing, docs, and editor.
    Changes here affect all three surfaces.
 
-   NOTE: All values are dark-mode-specific.
-   When adding light mode, move these under .dark and add :root light defaults.
+   NOTE: Themed tokens carry light defaults on :root and dark values under
+   `.dark`. Dark-only surfaces (landing; docs' default view) opt in via a
+   `dark` class on <html>; the editor SPA toggles that class at runtime.
+   Theme-invariant tokens (zones, fonts, decorative purple) live on :root
+   only. Node-side readers that need the DARK brand identity (OG images,
+   <meta theme-color>) must parse the `.dark` block, not the first match.
+   INVARIANT: keep `.dark` a SINGLE FLAT block (no compound selector, no
+   nesting, no second block) — those readers regex-match the first
+   `.dark { … }` and would silently fall back to light values otherwise.
 
    --------------------------------------------------------------------------
    @font-face SHARED-INVARIANT NOTE — read before editing the block below.
@@ -40,10 +47,82 @@
 }
 
 :root {
+  /* ----- Theme-invariant tokens (identical in light and dark) ----- */
+
+  /* Training zones — 5-zone functional intensity ramp.
+     Powers zone bars, step rails, and the athlete zone map. Index n maps
+     to zone Zn. Used via the Tailwind `zone-1..5` color utilities mapped
+     in packages/workout-spa-editor/src/index.css @theme. */
+  --zone-1: #64748b; /* Z1 Recovery  (slate-500) */
+  --zone-2: #0ea5e9; /* Z2 Endurance (sky-500) */
+  --zone-3: #22c55e; /* Z3 Tempo     (green-500) */
+  --zone-4: #f59e0b; /* Z4 Threshold (amber-500) */
+  --zone-5: #ef4444; /* Z5 VO2 / Max (red-500) */
+
+  /* Secondary accent — DECORATIVE ONLY.
+     3.9:1 on slate-900: fails AA for normal text.
+     Use only for large decorative elements, gradients, or icons. */
+  --brand-accent-purple: #9333ea;
+
+  /* Font stacks */
+  --brand-font-sans:
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --brand-font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ----- Light theme defaults (overridden under .dark below) -----
+     Values mirror the editor SPA's light palette so the SPA can alias
+     brand tokens directly on both themes. Dark-only surfaces (landing,
+     docs default view) opt in via a `dark` class on <html>. */
+
+  /* Backgrounds — page, cards, elevated, deep */
+  --brand-bg-primary: #f8fafc; /* Page background (slate-50) */
+  --brand-bg-surface: #ffffff; /* Cards, sidebars (white) */
+  --brand-bg-elevated: #f1f5f9; /* Code blocks, tooltips (slate-100) */
+  --brand-bg-deep: #f1f5f9; /* Full-bleed redesign surfaces (slate-100) */
+
+  /* Text — 3 hierarchy levels */
+  --brand-text-primary: #0f172a; /* Headings, body (slate-900) */
+  --brand-text-secondary: #334155; /* Descriptions (slate-700) */
+  --brand-text-muted: #64748b; /* Captions, metadata (slate-500) */
+
+  /* Accent — blue with 3 distinct interactive states.
+     The interactive ramp already darkens, so it carries to light as-is. */
+  --brand-accent-blue: #0284c7; /* Default (sky-600) */
+  --brand-accent-blue-hover: #0369a1; /* Hover (sky-700) */
+  --brand-accent-blue-active: #075985; /* Active/pressed (sky-800) */
+  --brand-accent-blue-soft: #e0f2fe; /* Soft bg for badges/pills (sky-100) */
+
+  /* Semantic — for callouts/alerts (-600 text on -100 soft tints) */
+  --brand-semantic-tip: #059669; /* emerald-600 */
+  --brand-semantic-tip-soft: #d1fae5; /* emerald-100 */
+  --brand-semantic-warning: #d97706; /* amber-600 */
+  --brand-semantic-warning-soft: #fef3c7; /* amber-100 */
+  --brand-semantic-danger: #dc2626; /* red-600 */
+  --brand-semantic-danger-soft: #fee2e2; /* red-100 */
+
+  /* Borders */
+  --brand-border: #e2e8f0; /* Default (slate-200) */
+  --brand-border-soft: #f1f5f9; /* Subtle (slate-100) */
+
+  /* Code */
+  --brand-code-bg: #f1f5f9; /* Inline code background (slate-100) */
+  --brand-code-block-bg: #f8fafc; /* Fenced code (slate-50) */
+}
+
+/* Dark theme — the original brand palette. Activated by a `dark` class
+   on <html>: toggled at runtime by the editor SPA and VitePress, and
+   pinned statically by the landing page. */
+.dark {
   /* Backgrounds — 3 elevation levels */
   --brand-bg-primary: #0f172a; /* Page background (slate-900) */
   --brand-bg-surface: #1e293b; /* Cards, sidebars (slate-800) */
   --brand-bg-elevated: #334155; /* Code blocks, tooltips (slate-700) */
+
+  /* Deepened page background used by the mobile redesign surfaces
+     (one notch darker than --brand-bg-primary). */
+  --brand-bg-deep: #0b1220;
 
   /* Text — 3 hierarchy levels */
   --brand-text-primary: #f8fafc; /* Headings, body (slate-50) */
@@ -56,11 +135,6 @@
   --brand-accent-blue-active: #075985; /* Active/pressed (sky-800) */
   --brand-accent-blue-soft: #0c4a6e; /* Soft bg for badges/pills (sky-900) */
 
-  /* Secondary accent — DECORATIVE ONLY.
-     3.9:1 on slate-900: fails AA for normal text.
-     Use only for large decorative elements, gradients, or icons. */
-  --brand-accent-purple: #9333ea;
-
   /* Semantic — for callouts/alerts (all -400 variants, WCAG AA verified).
      Accent-blue on surface (#1e293b) is ~2.8:1 — mitigated via
      underline on content links that appear on elevated surfaces. */
@@ -71,20 +145,6 @@
   --brand-semantic-danger: #f87171; /* red-400 — 5.8:1 on page, 4.7:1 on danger-soft */
   --brand-semantic-danger-soft: #2d1216; /* Pre-computed: red-400 12% over slate-900 */
 
-  /* Training zones — 5-zone functional intensity ramp.
-     Powers zone bars, step rails, and the athlete zone map. Index n maps
-     to zone Zn. Used via the Tailwind `zone-1..5` color utilities mapped
-     in packages/workout-spa-editor/src/index.css @theme. */
-  --zone-1: #64748b; /* Z1 Recovery  (slate-500) */
-  --zone-2: #0ea5e9; /* Z2 Endurance (sky-500) */
-  --zone-3: #22c55e; /* Z3 Tempo     (green-500) */
-  --zone-4: #f59e0b; /* Z4 Threshold (amber-500) */
-  --zone-5: #ef4444; /* Z5 VO2 / Max (red-500) */
-
-  /* Deepened page background used by the mobile redesign surfaces
-     (one notch darker than --brand-bg-primary). */
-  --brand-bg-deep: #0b1220;
-
   /* Borders */
   --brand-border: #334155; /* Default (slate-700) */
   --brand-border-soft: #1e293b; /* Subtle (slate-800) */
@@ -93,11 +153,4 @@
   --brand-code-bg: #1e293b; /* Inline code background (surface) */
   --brand-code-block-bg: #131c2e; /* Fenced code — custom blend halfway between
                                      slate-900 and slate-800. No Tailwind equivalent. */
-
-  /* Font stacks */
-  --brand-font-sans:
-    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
-  --brand-font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
