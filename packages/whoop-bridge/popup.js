@@ -1,60 +1,33 @@
 /**
  * Kaiord WHOOP Bridge — Popup
  *
- * BYOK credential entry + OAuth connect + honest freshness. Status reflects
- * the real auth lifecycle: no credentials → connected → needs re-auth (a
- * failed/expired refresh surfaces here, never silently). All logic talks to
- * background.js via internal runtime messages.
+ * Session-piggyback status only: it reports whether a WHOOP session bearer has
+ * been captured and offers a single deep link to open WHOOP. There is no
+ * credential entry and no OAuth flow — the bridge rides the user's own session.
+ * All logic talks to background.js via internal runtime messages.
  */
 
 // ── i18n ──
 // Byte-identical English fallback for environments without chrome.i18n. At
-// runtime the browser's chrome.i18n.getMessage returns the active-locale
-// string from _locales/. Positional $1 tokens mirror the named placeholders
-// declared in _locales/*/messages.json.
+// runtime the browser's chrome.i18n.getMessage returns the active-locale string
+// from _locales/.
 const EN_FALLBACK = {
   checking: "Checking…",
   checkingAria: "Checking",
-  addCredentials: "Add WHOOP credentials to connect",
-  reconnectNeeded: "Reconnect needed",
   connectedToWhoop: "Connected to WHOOP",
-  notConnected: "Not connected",
-  openingWhoop: "Opening WHOOP…",
-  connectionFailed: "Connection failed",
-  couldNotSave: "Could not save credentials",
-  reconnectNeededError: "Reconnect needed — $1",
-  reconnectToImport: "Reconnect needed to keep importing.",
-  lastImport: "Last import · $1",
-  reconnect: "Reconnect",
-  connectWhoop: "Connect WHOOP",
-  disconnect: "Disconnect",
-  justNow: "just now",
-  minuteAgo: "$1 minute ago",
-  minutesAgo: "$1 minutes ago",
-  hourAgo: "$1 hour ago",
-  hoursAgo: "$1 hours ago",
-  dayAgo: "$1 day ago",
-  daysAgo: "$1 days ago",
-  clientId: "Client ID",
-  clientSecret: "Client secret",
-  saveCredentials: "Save credentials",
-  credsHint:
-    "Register your own WHOOP app at developer.whoop.com and paste its credentials. They stay in this extension and never reach the web page.",
+  connectedHint: "Reading your WHOOP data through your open session.",
+  noSession: "No WHOOP session",
+  noSessionHint: "Open WHOOP and reload the tab, then reopen this popup.",
+  openWhoop: "Open WHOOP",
+  openWhoopAria: "Open WHOOP",
 };
 
-const applySubs = (template, subs) => {
-  if (subs == null) return template;
-  const list = Array.isArray(subs) ? subs : [subs];
-  return template.replace(/\$(\d)/g, (_, i) =>
-    String(list[Number(i) - 1] ?? "")
-  );
-};
-
-const msg = (key, subs) =>
-  globalThis.chrome?.i18n?.getMessage?.(key, subs) ||
-  applySubs(EN_FALLBACK[key], subs);
+const msg = (key) =>
+  globalThis.chrome?.i18n?.getMessage?.(key) || EN_FALLBACK[key];
 
 const $ = (id) => document.getElementById(id);
+
+const OPEN_WHOOP_URL = "https://app.whoop.com/";
 
 const sendMessage = (message) =>
   new Promise((resolve) => {
@@ -71,119 +44,46 @@ const setStatus = (kind, glyph, text) => {
   $("status-text").textContent = text;
 };
 
-const formatRelative = (iso) => {
-  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (min < 1) return msg("justNow");
-  if (min < 60) {
-    return msg(min === 1 ? "minuteAgo" : "minutesAgo", [String(min)]);
-  }
-  const hr = Math.floor(min / 60);
-  if (hr < 24) {
-    return msg(hr === 1 ? "hourAgo" : "hoursAgo", [String(hr)]);
-  }
-  const day = Math.floor(hr / 24);
-  return msg(day === 1 ? "dayAgo" : "daysAgo", [String(day)]);
+const renderHint = (connected) => {
+  $("sync-region").textContent = connected
+    ? msg("connectedHint")
+    : msg("noSessionHint");
 };
 
-const renderSync = (state) => {
-  const region = $("sync-region");
-  region.innerHTML = "";
-  if (state.needsReauth) {
-    region.textContent = state.lastError
-      ? msg("reconnectNeededError", [state.lastError])
-      : msg("reconnectToImport");
-    return;
-  }
-  if (state.lastSyncAt) {
-    region.textContent = msg("lastImport", [formatRelative(state.lastSyncAt)]);
-  }
-};
-
-const renderFooter = (state) => {
+const renderFooter = () => {
   const region = $("footer-region");
   region.innerHTML = "";
-  const primary = document.createElement("button");
-  primary.type = "button";
-  primary.className = "cta-primary";
-  primary.textContent = state.authenticated
-    ? msg("reconnect")
-    : msg("connectWhoop");
-  primary.disabled = !state.hasCredentials;
-  primary.addEventListener("click", () => runConnect());
-  region.appendChild(primary);
-
-  if (state.authenticated || state.needsReauth) {
-    const secondary = document.createElement("button");
-    secondary.type = "button";
-    secondary.className = "cta-secondary";
-    secondary.textContent = msg("disconnect");
-    secondary.addEventListener("click", () => runDisconnect());
-    region.appendChild(secondary);
-  }
+  const link = document.createElement("a");
+  link.href = OPEN_WHOOP_URL;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.className = "cta-primary";
+  link.textContent = msg("openWhoop");
+  link.setAttribute("aria-label", msg("openWhoopAria"));
+  region.appendChild(link);
 };
 
-const applyState = (state) => {
-  if (!state.hasCredentials) {
-    setStatus("no", "✗", msg("addCredentials"));
-  } else if (state.needsReauth) {
-    setStatus("warn", "!", msg("reconnectNeeded"));
-  } else if (state.authenticated) {
+const applyState = (status) => {
+  const connected = !!status.connected;
+  if (connected) {
     setStatus("ok", "✓", msg("connectedToWhoop"));
   } else {
-    setStatus("no", "✗", msg("notConnected"));
+    setStatus("no", "✗", msg("noSession"));
   }
-  $("creds-region").hidden = state.hasCredentials && state.authenticated;
-  renderSync(state);
-  renderFooter(state);
+  renderHint(connected);
+  renderFooter();
 };
 
 const refresh = async () => {
   const res = await sendMessage({ action: "status" });
-  applyState(res.ok ? res.data : { hasCredentials: false });
+  applyState(res.ok ? res.data : { connected: false });
 };
 
-const runConnect = async () => {
-  setStatus("checking", "…", msg("openingWhoop"));
-  const res = await sendMessage({ action: "connect" });
-  if (!res.ok) setStatus("no", "✗", res.error || msg("connectionFailed"));
-  await refresh();
-};
-
-const runDisconnect = async () => {
-  await sendMessage({ action: "disconnect" });
-  await refresh();
-};
-
-const runSaveCreds = async () => {
-  const clientId = $("client-id").value.trim();
-  const clientSecret = $("client-secret").value.trim();
-  const res = await sendMessage({
-    action: "set-credentials",
-    clientId,
-    clientSecret,
-  });
-  if (!res.ok) {
-    setStatus("no", "✗", res.error || msg("couldNotSave"));
-    return;
-  }
-  $("client-secret").value = "";
-  await refresh();
-};
-
-// Chrome does not expand __MSG__ tokens in popup HTML, so the static
-// credential-form strings are localized here on load.
 const localizeStatic = () => {
   $("status").setAttribute("aria-label", msg("checkingAria"));
   $("status-text").textContent = msg("checking");
-  document.querySelector('label[for="client-id"]').textContent =
-    msg("clientId");
-  document.querySelector('label[for="client-secret"]').textContent =
-    msg("clientSecret");
-  $("save-creds").textContent = msg("saveCredentials");
-  document.querySelector(".creds__hint").textContent = msg("credsHint");
 };
 
-$("save-creds").addEventListener("click", () => runSaveCreds());
 window.addEventListener("DOMContentLoaded", () => {
   localizeStatic();
   refresh();

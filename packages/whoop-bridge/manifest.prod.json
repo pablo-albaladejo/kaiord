@@ -43,17 +43,13 @@
       "run_at": "document_start"
     },
     {
-      "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
+      "matches": ["https://*.kaiord.com/*"],
       "js": ["kaiord-announce.js"],
       "run_at": "document_start"
     }
   ],
 
   "externally_connectable": {
-    "matches": [
-      "http://localhost:5173/*",
-      "http://localhost:5174/*",
-      "https://*.kaiord.com/*"
-    ]
+    "matches": ["https://*.kaiord.com/*"]
   }
 }

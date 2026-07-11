@@ -1,9 +1,35 @@
 /**
  * Minimal Chrome Extension API mock for the WHOOP bridge (vitest).
- * Covers storage.local, identity (OAuth), and runtime messaging.
+ * Session-piggyback model: storage.session + local, tabs, webRequest,
+ * scripting, and runtime messaging. No identity (OAuth) surface.
  */
 
+const sessionStore = {};
 const localStore = {};
+
+const readStore = (store, key) => {
+  const list =
+    typeof key === "string"
+      ? [key]
+      : Array.isArray(key)
+        ? key
+        : Object.keys(key);
+  const result = {};
+  for (const k of list) result[k] = store[k];
+  return Promise.resolve(result);
+};
+
+const makeArea = (store) => ({
+  get: vi.fn((key) => readStore(store, key)),
+  set: vi.fn((obj) => {
+    Object.assign(store, obj);
+    return Promise.resolve();
+  }),
+  remove: vi.fn((keys) => {
+    for (const k of Array.isArray(keys) ? keys : [keys]) delete store[k];
+    return Promise.resolve();
+  }),
+});
 
 const chromeMock = {
   runtime: {
@@ -15,40 +41,22 @@ const chromeMock = {
     onInstalled: { addListener: vi.fn() },
     sendMessage: vi.fn(),
   },
-  identity: {
-    getRedirectURL: vi.fn(
-      () => "https://whoop-test-extension-id.chromiumapp.org/"
+  tabs: {
+    query: vi.fn((q, cb) =>
+      typeof cb === "function" ? cb([]) : Promise.resolve([])
     ),
-    launchWebAuthFlow: vi.fn((details, cb) => {
-      const state = new URL(details.url).searchParams.get("state");
-      cb(
-        `https://whoop-test-extension-id.chromiumapp.org/?code=auth-code&state=${state}`
-      );
-    }),
+    sendMessage: vi.fn((tabId, msg, cb) => cb(undefined)),
+    create: vi.fn(() => Promise.resolve({ id: 1 })),
+  },
+  scripting: {
+    executeScript: vi.fn(() => Promise.resolve([])),
+  },
+  webRequest: {
+    onBeforeSendHeaders: { addListener: vi.fn() },
   },
   storage: {
-    local: {
-      get: vi.fn((key) => {
-        if (typeof key === "string") {
-          return Promise.resolve({ [key]: localStore[key] });
-        }
-        const result = {};
-        for (const k of Array.isArray(key) ? key : Object.keys(key)) {
-          result[k] = localStore[k];
-        }
-        return Promise.resolve(result);
-      }),
-      set: vi.fn((obj) => {
-        Object.assign(localStore, obj);
-        return Promise.resolve();
-      }),
-      remove: vi.fn((keys) => {
-        for (const k of Array.isArray(keys) ? keys : [keys]) {
-          delete localStore[k];
-        }
-        return Promise.resolve();
-      }),
-    },
+    session: makeArea(sessionStore),
+    local: makeArea(localStore),
   },
 };
 
@@ -64,10 +72,12 @@ const windowMock = {
 globalThis.window = windowMock;
 
 globalThis.__resetChromeMock = () => {
+  for (const key of Object.keys(sessionStore)) delete sessionStore[key];
   for (const key of Object.keys(localStore)) delete localStore[key];
   chromeMock.runtime.lastError = null;
   vi.clearAllMocks();
 };
 
 globalThis.__chromeMock = chromeMock;
+globalThis.__chromeSessionStore = sessionStore;
 globalThis.__chromeLocalStore = localStore;
