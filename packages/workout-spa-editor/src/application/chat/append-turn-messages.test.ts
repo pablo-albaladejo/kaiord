@@ -7,6 +7,9 @@ import { appendAssistantTurn } from "./append-turn-messages";
 const YEAR_MONTH_LENGTH = 7;
 const month = () => new Date().toISOString().slice(0, YEAR_MONTH_LENGTH);
 
+const PROMPT_TOKENS = 200;
+const COMPLETION_TOKENS = 100;
+
 let counter = 0;
 const gen = {
   newId: () => `id-${(counter += 1)}`,
@@ -23,8 +26,8 @@ const completeResult = (usage?: {
   usage,
 });
 
-describe("appendAssistantTurn dual-write", () => {
-  it("should write both the legacy usage row and a chat usage event", async () => {
+describe("appendAssistantTurn usage logging", () => {
+  it("should write a chat usage event for a turn carrying usage", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
@@ -33,24 +36,25 @@ describe("appendAssistantTurn dual-write", () => {
       persistence,
       "p-1",
       "c-1",
-      completeResult({ promptTokens: 200, completionTokens: 100 }),
+      completeResult({
+        promptTokens: PROMPT_TOKENS,
+        completionTokens: COMPLETION_TOKENS,
+      }),
       "google",
       gen
     );
-    const row = await persistence.usage.getByMonth(month());
     const events = await persistence.usageEvents.listByMonth(month());
 
     // Assert
-    expect(row).toMatchObject({ inputTokens: 200, outputTokens: 100 });
     expect(events).toHaveLength(1);
     expect(events[0]).toMatchObject({
       purpose: "chat",
-      promptTokens: 200,
-      completionTokens: 100,
+      promptTokens: PROMPT_TOKENS,
+      completionTokens: COMPLETION_TOKENS,
     });
   });
 
-  it("should still commit the turn when the telemetry mirror write fails", async () => {
+  it("should still commit the turn when the usage write fails", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     persistence.usageEvents.append = () => Promise.reject(new Error("boom"));
@@ -60,18 +64,22 @@ describe("appendAssistantTurn dual-write", () => {
       persistence,
       "p-1",
       "c-1",
-      completeResult({ promptTokens: 200, completionTokens: 100 }),
+      completeResult({
+        promptTokens: PROMPT_TOKENS,
+        completionTokens: COMPLETION_TOKENS,
+      }),
       "google",
       gen
     );
 
     // Assert
     await expect(act).resolves.toBeUndefined();
-    const row = await persistence.usage.getByMonth(month());
-    expect(row).toMatchObject({ inputTokens: 200, outputTokens: 100 });
+    const messages = await persistence.chatMessages.listByProfile("p-1");
+    expect(messages).toHaveLength(1);
+    expect(messages[0]?.role).toBe("assistant");
   });
 
-  it("should write neither store for a turn without usage", async () => {
+  it("should write no usage event for a turn without usage", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
@@ -84,11 +92,9 @@ describe("appendAssistantTurn dual-write", () => {
       "google",
       gen
     );
-    const row = await persistence.usage.getByMonth(month());
     const events = await persistence.usageEvents.listByMonth(month());
 
     // Assert
-    expect(row).toBeUndefined();
     expect(events).toHaveLength(0);
   });
 });

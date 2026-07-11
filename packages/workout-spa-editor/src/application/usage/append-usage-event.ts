@@ -1,10 +1,11 @@
 /**
- * appendUsageEvent — the single writer of the `usageEvents` telemetry log,
- * shared by the Dexie telemetry sink (generation/batch/lab runs) and the chat
- * turn writer. Applies the SAME guards as the legacy `recordChatUsage`: skip a
- * zero-token run, and price with `estimateCost(tokens, getProviderRate(type))`.
- * An event without a mappable provider type records usage with zero cost.
- * Ids/timestamps are injected for deterministic tests.
+ * appendUsageEvent — the single writer of the synced `usageEvents` log, shared
+ * by the Dexie telemetry sink (generation/batch/lab runs) and the chat turn
+ * writer. It IS the usage writer after the cutover (no legacy authoritative
+ * row): skip a zero-token run, and price with
+ * `estimateCost(tokens, getProviderRate(type))`. An event without a mappable
+ * provider type records usage with zero cost. Ids/timestamps are injected for
+ * deterministic tests.
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderType } from "../../store/ai-store-types";

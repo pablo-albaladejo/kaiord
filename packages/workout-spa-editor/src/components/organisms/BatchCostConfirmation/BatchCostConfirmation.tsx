@@ -2,7 +2,7 @@
  * BatchCostConfirmation — dialog shown before dispatching a batch
  * AI run. Renders provider, estimated tokens, estimated USD cost, and
  * an explicit "estimate, not a bill" disclaimer. Confirm → dispatch;
- * Cancel → abort without any UsageRecord write.
+ * Cancel → abort without any usage write.
  *
  * Presentation-only: parent owns batch state and actual dispatch.
  */

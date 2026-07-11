@@ -12,7 +12,7 @@ const state = () => ({
     templates: [{ id: "t-1" }],
     profiles: [{ id: "p-1" }],
     aiProviders: [{ id: "ai-1" }],
-    usage: [{ yearMonth: "2026-05" }],
+    syncState: [{ source: "garmin" }],
   },
   tombstones: [
     { table: "workouts", id: "gone", deletedAt: "2026-05-19T00:00:00Z" },
@@ -31,8 +31,8 @@ describe("exportSnapshot", () => {
     expect(Object.keys(snapshot.tables).sort()).toEqual([
       "aiProviders",
       "profiles",
+      "syncState",
       "templates",
-      "usage",
       "workouts",
     ]);
     expect(snapshot.tables.workouts).toHaveLength(1);

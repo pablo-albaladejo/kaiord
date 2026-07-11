@@ -20,6 +20,7 @@ import { applyV25Upgrade } from "./dexie-v25-migration";
 import { applyV27Upgrade } from "./dexie-v27-migration";
 import { applyV28Upgrade } from "./dexie-v28-migration";
 import { applyV29Upgrade } from "./dexie-v29-migration";
+import { applyV33Upgrade } from "./dexie-v33-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -160,4 +161,9 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // Auto-created empty on upgrade; existing tables untouched. No profileId, so
   // it is not a profile-delete cascade target (mirrors `usage`). Folded here.
   db.version(32).stores(SCHEMAS.v32);
+  // v33 — usage-accounting cutover. `applyV33Upgrade` folds each `usage` row's
+  // `entries[]` into `usageEvents` (chat events, cost carried), then the v33
+  // schema drops the store (`usage: null`). The fold runs before the drop within
+  // the same upgrade (Dexie keeps the deleted table readable in the callback).
+  db.version(33).stores(SCHEMAS.v33).upgrade(applyV33Upgrade);
 };

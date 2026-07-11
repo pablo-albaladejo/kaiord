@@ -1,8 +1,10 @@
 /**
- * Forward migration to v32 — additive `usageEvents` telemetry log. Seeding a
- * real v31 database with a `usage` row, then opening KaiordDatabase, runs the
- * v32 upgrade: Dexie auto-creates the new store empty and leaves every
- * prior-version row untouched (additive, no data transform).
+ * Upgrade path from v31 to head. v32 adds the `usageEvents` telemetry store;
+ * v33 (usage-accounting cutover) folds every legacy `usage` row into it and
+ * drops the `usage` store. Seeding a real v31 database with a `usage` row (one
+ * entry) and opening KaiordDatabase runs both: the `usage` store is gone and its
+ * entry lands in `usageEvents` as a migrated `chat` event, while the store keeps
+ * its `[yearMonth+purpose]` fold index.
  */
 import "fake-indexeddb/auto";
 
@@ -16,8 +18,14 @@ const dbName = (suffix: string) =>
   `kaiord-test-v32-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 31;
-const SCHEMA_HEAD = 32;
-const SEED_TOTAL_TOKENS = 800;
+const SCHEMA_HEAD = 33;
+const SEED_ENTRY = {
+  date: "2026-06-04",
+  inputTokens: 500,
+  outputTokens: 300,
+  tokens: 800,
+  cost: 0.0024,
+};
 
 const seedV31 = async (name: string): Promise<void> => {
   const older = new Dexie(name);
@@ -25,11 +33,11 @@ const seedV31 = async (name: string): Promise<void> => {
   await older.open();
   await older.table("usage").add({
     yearMonth: "2026-06",
-    inputTokens: 500,
-    outputTokens: 300,
-    totalTokens: SEED_TOTAL_TOKENS,
-    totalCost: 0.0024,
-    entries: [],
+    inputTokens: SEED_ENTRY.inputTokens,
+    outputTokens: SEED_ENTRY.outputTokens,
+    totalTokens: SEED_ENTRY.tokens,
+    totalCost: SEED_ENTRY.cost,
+    entries: [SEED_ENTRY],
   });
   older.close();
 };
@@ -41,7 +49,7 @@ const indexKeyPaths = (db: KaiordDatabase, store: string): string[] =>
       Array.isArray(i.keyPath) ? i.keyPath.join("+") : (i.keyPath ?? "")
     );
 
-describe("Dexie usageEvents (v32) migration", () => {
+describe("Dexie usageEvents (v32) migration to head", () => {
   let name: string;
 
   beforeEach(() => {
@@ -66,32 +74,37 @@ describe("Dexie usageEvents (v32) migration", () => {
     expect(version).toBe(SCHEMA_HEAD);
   });
 
-  it("should create the usageEvents store empty", async () => {
+  it("should drop the legacy usage store at head", async () => {
     // Arrange
     await seedV31(name);
 
     // Act
     const db = new KaiordDatabase(name);
     await db.open();
-    const count = await db.table("usageEvents").count();
+    const tableNames = db.tables.map((t) => t.name);
     db.close();
 
     // Assert
-    expect(count).toBe(0);
+    expect(tableNames).not.toContain("usage");
   });
 
-  it("should preserve prior-version usage rows through the additive upgrade", async () => {
+  it("should fold the seeded usage entry into a migrated chat usageEvents row", async () => {
     // Arrange
     await seedV31(name);
 
     // Act
     const db = new KaiordDatabase(name);
     await db.open();
-    const usage = await db.table("usage").get("2026-06");
+    const events = await db.table("usageEvents").toArray();
     db.close();
 
     // Assert
-    expect(usage?.totalTokens).toBe(SEED_TOTAL_TOKENS);
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      purpose: "chat",
+      tokens: SEED_ENTRY.tokens,
+      cost: SEED_ENTRY.cost,
+    });
   });
 
   it("should index usageEvents by the monthly-purpose fold index", async () => {
