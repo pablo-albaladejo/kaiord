@@ -13,7 +13,6 @@ import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { SyncState } from "../types/bridge-schemas";
 import type { Profile } from "../types/profile";
 import type { UsageEventRecord } from "../types/usage-event-schemas";
-import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 
 export type TemplateRepository = {
@@ -55,21 +54,21 @@ export type SyncStateRepository = {
   delete: (source: string) => Promise<void>;
 };
 
-export type UsageRepository = {
-  getByMonth: (yearMonth: string) => Promise<UsageRecord | undefined>;
-  put: (record: UsageRecord) => Promise<void>;
-};
-
-// Append-only telemetry log of per-run token usage; folded into monthly totals
-// by `foldUsageEvents`. `listByMonth` reads via the `[yearMonth+purpose]` index.
+// Append-only, synced telemetry log of per-run token usage; folded into monthly
+// totals by `foldUsageEvents`. `listByMonth`/`listByMonths` read via the
+// `[yearMonth+purpose]` index (panel window); `listOlderThan` backs the
+// retention prune. `getById`/`delete(id)` let the tombstone decorator propagate
+// a pruned event's removal cross-device.
 export type UsageEventRepository = {
   append: (record: UsageEventRecord) => Promise<void>;
   listByMonth: (yearMonth: string) => Promise<UsageEventRecord[]>;
+  listByMonths: (yearMonths: string[]) => Promise<UsageEventRecord[]>;
+  listOlderThan: (yearMonth: string) => Promise<UsageEventRecord[]>;
+  getById: (id: string) => Promise<UsageEventRecord | undefined>;
+  delete: (id: string) => Promise<void>;
 };
 
-// Grouped usage-accounting repos: the authoritative monthly `usage` row plus
-// the append-only telemetry event log written alongside it during the migration.
-export type UsageRepositories = {
-  usage: UsageRepository;
+// The usage event log is the single usage-accounting store after the cutover.
+export type UsageEventRepositories = {
   usageEvents: UsageEventRepository;
 };

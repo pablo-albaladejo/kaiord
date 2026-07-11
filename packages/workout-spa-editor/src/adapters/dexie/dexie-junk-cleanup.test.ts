@@ -19,6 +19,19 @@ const dbName = (suffix: string) =>
   `kaiord-test-junk-cleanup-${suffix}-${Date.now()}-${Math.random()}`;
 
 const NOW = "2026-01-01T10:00:00.000Z";
+const YEAR_MONTH_LENGTH = 7;
+
+const usageEvent = (id: string, yearMonth: string) => ({
+  id,
+  yearMonth,
+  date: `${yearMonth}-01`,
+  purpose: "chat",
+  promptTokens: 10,
+  completionTokens: 5,
+  tokens: 15,
+  cost: 0,
+  createdAt: `${yearMonth}-01T00:00:00.000Z`,
+});
 
 const WARMUP_STEP = {
   stepIndex: 0,
@@ -133,6 +146,24 @@ describe("runJunkCleanupOnce", () => {
     // Assert
     const workout = await db.table("workouts").get("w-edited");
     expect(workout).toBeDefined();
+  });
+
+  it("should prune usage events older than the retention window and tombstone them", async () => {
+    // Arrange
+    await db.open();
+    const currentMonth = new Date().toISOString().slice(0, YEAR_MONTH_LENGTH);
+    await db.table("usageEvents").add(usageEvent("evt-old", "2000-01"));
+    await db.table("usageEvents").add(usageEvent("evt-recent", currentMonth));
+
+    // Act
+    await runJunkCleanupOnce(db);
+
+    // Assert
+    expect(await db.table("usageEvents").get("evt-old")).toBeUndefined();
+    expect(await db.table("usageEvents").get("evt-recent")).toBeDefined();
+    expect(
+      await db.table("tombstones").get(["usageEvents", "evt-old"])
+    ).toBeDefined();
   });
 
   it("should not throw when an error occurs inside the cleanup", async () => {

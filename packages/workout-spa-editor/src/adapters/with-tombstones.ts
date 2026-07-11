@@ -22,6 +22,9 @@ const TOMBSTONED_TABLES = [
   "aiProviders",
   "coaching",
   "sessionMatch",
+  // Retention prune deletes old usage events by id; the tombstone suppresses
+  // them in merge so a dormant device cannot resurrect them (see D5).
+  "usageEvents",
 ] as const;
 
 type TombstonedTable = (typeof TOMBSTONED_TABLES)[number];

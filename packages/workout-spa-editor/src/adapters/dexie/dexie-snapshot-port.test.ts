@@ -20,9 +20,10 @@ const PASSPHRASE = "kaiord-spa-v1";
 // Current head version KaiordDatabase opens at; v24 added the device-local
 // `connections` store (excluded from the snapshot), v25 added chatConversations
 // + the conversationId FK, v26 added the device-local energy-balance stores
-// (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded, and v31
-// added the lab-analytics stores (`labReports`, `labValues`, included).
-const SCHEMA_HEAD = 32;
+// (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded, v31 added
+// the lab-analytics stores (`labReports`, `labValues`, included), and v33 dropped
+// the legacy `usage` store, making `usageEvents` the synced usage source.
+const SCHEMA_HEAD = 33;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -118,7 +119,7 @@ describe("createDexieSnapshotPort", () => {
     expect(snapshot.tables).not.toHaveProperty("energyTargets");
   });
 
-  it("should exclude the device-local usageEvents store from the export", async () => {
+  it("should include the synced usageEvents store in the export", async () => {
     // Arrange
     const db = new KaiordDatabase(name);
     await db.open();
@@ -141,7 +142,7 @@ describe("createDexieSnapshotPort", () => {
     db.close();
 
     // Assert
-    expect(snapshot.tables).not.toHaveProperty("usageEvents");
+    expect(snapshot.tables.usageEvents).toHaveLength(1);
   });
 
   it("should include the chatMessages store in the export", async () => {

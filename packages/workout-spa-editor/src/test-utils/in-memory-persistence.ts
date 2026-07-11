@@ -43,7 +43,6 @@ import { createInMemorySyncStateRepository } from "./in-memory-sync-state-reposi
 import { createInMemoryTombstoneRepository } from "./in-memory-tombstone-repository";
 import { createInMemoryTemplateRepository } from "./in-memory-template-repository";
 import { createInMemoryUsageEventRepository } from "./in-memory-usage-event-repository";
-import { createInMemoryUsageRepository } from "./in-memory-usage-repository";
 import { createInMemoryUserPreferencesRepository } from "./in-memory-user-preferences-repository";
 import { createInMemoryWorkoutRepository } from "./in-memory-workout-repository";
 
@@ -54,7 +53,6 @@ export function createInMemoryPersistence(): PersistencePort {
     profiles: new Map(),
     aiProviders: new Map(),
     syncState: new Map(),
-    usage: new Map(),
     usageEvents: new Map(),
     coaching: new Map(),
     coachingSyncState: new Map(),
@@ -91,7 +89,6 @@ export function createInMemoryPersistence(): PersistencePort {
       aiCustomPromptRef
     ),
     syncState: createInMemorySyncStateRepository(stores.syncState),
-    usage: createInMemoryUsageRepository(stores.usage),
     usageEvents: createInMemoryUsageEventRepository(stores.usageEvents),
     coaching: createInMemoryCoachingRepository(stores.coaching),
     coachingSyncState: createInMemoryCoachingSyncStateRepository(

@@ -79,4 +79,46 @@ describe("createDexieUsageEventRepository", () => {
     // Assert
     expect(rows.map((r) => r.id)).toEqual(["e1"]);
   });
+
+  it("should list events across several months with listByMonths", async () => {
+    // Arrange
+    const repo = createDexieUsageEventRepository(db);
+    await repo.append(event({ id: "e1", yearMonth: "2026-07" }));
+    await repo.append(event({ id: "e2", yearMonth: "2026-06" }));
+    await repo.append(event({ id: "e3", yearMonth: "2026-05" }));
+
+    // Act
+    const rows = await repo.listByMonths(["2026-07", "2026-06"]);
+
+    // Assert
+    expect(rows.map((r) => r.id).sort()).toEqual(["e1", "e2"]);
+  });
+
+  it("should list only events whose month is strictly older than the cutoff", async () => {
+    // Arrange
+    const repo = createDexieUsageEventRepository(db);
+    await repo.append(event({ id: "old", yearMonth: "2025-06" }));
+    await repo.append(event({ id: "cutoff", yearMonth: "2026-07" }));
+    await repo.append(event({ id: "new", yearMonth: "2026-08" }));
+
+    // Act
+    const rows = await repo.listOlderThan("2026-07");
+
+    // Assert
+    expect(rows.map((r) => r.id)).toEqual(["old"]);
+  });
+
+  it("should get an event by id and delete it", async () => {
+    // Arrange
+    const repo = createDexieUsageEventRepository(db);
+    await repo.append(event({ id: "e1" }));
+
+    // Act
+    const found = await repo.getById("e1");
+    await repo.delete("e1");
+
+    // Assert
+    expect(found?.id).toBe("e1");
+    expect(await repo.getById("e1")).toBeUndefined();
+  });
 });

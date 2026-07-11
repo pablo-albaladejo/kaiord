@@ -3,10 +3,10 @@
  *
  * Merges a local and remote `Snapshot` per table, per record (keyed by
  * primary key) keeping the side whose `updatedAt`/`createdAt` is newer.
- * Timestampless tables (`meta`, `usage`) merge whole-record using the
- * manifest `exportedAt`. Tombstones are unioned (newest `deletedAt` per
- * key) and suppress any record whose clock is older. No Drive or Dexie
- * dependency — testable with plain objects.
+ * Timestampless tables (`meta`) merge whole-record using the manifest
+ * `exportedAt`. Tombstones are unioned (newest `deletedAt` per key) and
+ * suppress any record whose clock is older. No Drive or Dexie dependency —
+ * testable with plain objects.
  */
 
 import type { Snapshot } from "../../types/snapshot";

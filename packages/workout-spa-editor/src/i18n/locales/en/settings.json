@@ -105,8 +105,11 @@
     "output": "Output",
     "total": "Total",
     "cost": "Cost (USD)",
-    "footnoteBefore": "Values reflect actual usage recorded per batch run — not the pre-run estimate shown in the confirmation dialog. Rows marked",
-    "footnoteAfter": "are from a legacy schema where the input / output split was not captured."
+    "purpose": {
+      "chat": "Chat",
+      "workout_generation": "Workout generation",
+      "lab_extraction": "Lab extraction"
+    }
   },
   "preferences": {
     "units": "Units",

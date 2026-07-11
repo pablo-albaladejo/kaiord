@@ -1,9 +1,9 @@
 /**
- * foldUsageEvents — pure reduction of a month's usage events into the same
- * totals shape the legacy `usage` row carries. Events are summed in `createdAt`
- * ascending order so the floating-point cost accumulation matches the order the
- * live writer used, which is what the fold-vs-legacy parity check relies on. An
- * optional `purpose` filter scopes the fold (e.g. chat-only for parity).
+ * foldUsageEvents — pure reduction of a month's usage events into per-month
+ * totals for the usage panel. Events are summed in `createdAt` ascending order
+ * so the floating-point cost accumulation is deterministic regardless of read
+ * order. An optional `purpose` filter scopes the fold (e.g. chat-only) for the
+ * per-purpose breakdown.
  */
 import type { AiModelPurpose } from "../../types/ai-model-binding";
 import type { UsageEventRecord } from "../../types/usage-event-schemas";

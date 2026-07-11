@@ -10,7 +10,7 @@ let counter = 0;
 const seqId = () => `evt-${(counter += 1)}`;
 
 describe("appendUsageEvent", () => {
-  it("should append one event with the legacy cost formula", async () => {
+  it("should append one event with the provider-rate cost formula", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
