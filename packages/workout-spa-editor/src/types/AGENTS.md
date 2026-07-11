@@ -37,7 +37,7 @@ Domain types, Zod schemas, type guards, validators, and module-augmentation decl
 ### Sync + usage
 
 - `sync.ts`, `bridge-schemas.ts` / `.test.ts` — bridge protocol shapes (`SyncState`, `ProfileSnapshot`, etc.).
-- `usage-schemas.ts` / `.test.ts` — `UsageRecord` (monthly AI usage).
+- `usage-event-schemas.ts` / `.test.ts` — `UsageEventRecord` (append-only, synced per-run AI usage; the single usage-accounting store after the cutover).
 
 ### Settings
 

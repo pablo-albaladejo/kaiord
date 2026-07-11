@@ -7,8 +7,8 @@ export type EnergyRollupSummaryProps = { rollup: EnergyRollup };
 const NET_TONE_CLASS: Record<string, string> = {
   deficit: "text-emerald-400",
   surplus: "text-amber-400",
-  even: "text-slate-200",
-  unknown: "text-slate-400",
+  even: "text-ink-body",
+  unknown: "text-ink-muted",
 };
 
 /** Compact range roll-up: average burn/intake, net deficit/surplus, coverage. */
@@ -18,7 +18,7 @@ export function EnergyRollupSummary({ rollup }: EnergyRollupSummaryProps) {
   return (
     <div
       data-testid="energy-rollup-summary"
-      className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-slate-300"
+      className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-ink-body"
     >
       <span data-testid="rollup-avg-expenditure">
         {t("trends.avgBurn", { value: vm.avgExpenditure })}
@@ -29,7 +29,7 @@ export function EnergyRollupSummary({ rollup }: EnergyRollupSummaryProps) {
       <span data-testid="rollup-net" className={NET_TONE_CLASS[vm.netTone]}>
         {t("trends.net", { value: vm.net })}
       </span>
-      <span className="text-slate-500">{vm.daysTracked}</span>
+      <span className="text-ink-muted">{vm.daysTracked}</span>
     </div>
   );
 }

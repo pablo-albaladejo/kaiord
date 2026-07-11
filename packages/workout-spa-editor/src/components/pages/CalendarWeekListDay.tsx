@@ -50,7 +50,7 @@ export function CalendarWeekListDay({
       data-testid={`calendar-list-day-${date}`}
       data-today={isToday ? "true" : undefined}
       aria-current={isToday ? "date" : undefined}
-      className="rounded-lg border p-3"
+      className="rounded-lg border border-edge p-3"
     >
       <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
         {heading}

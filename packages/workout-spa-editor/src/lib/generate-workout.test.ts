@@ -17,10 +17,21 @@ vi.mock("@kaiord/ai/providers", () => ({
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
 }));
 
+const mockSink = { emit: vi.fn() };
+
+vi.mock("../adapters/dexie/dexie-persistence-adapter", () => ({
+  createDexiePersistence: vi.fn(() => ({})),
+}));
+
+vi.mock("../adapters/telemetry/dexie-usage-telemetry-sink", () => ({
+  createDexieUsageTelemetrySink: vi.fn(() => mockSink),
+}));
+
 import { createTextToWorkout } from "@kaiord/ai";
 import { createLanguageModel } from "@kaiord/ai/providers";
 import { createWorkoutKRD } from "@kaiord/core";
 
+import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { GenerateWorkoutOptions } from "./generate-workout";
 import { generateWorkoutKrd } from "./generate-workout";
 
@@ -67,9 +78,35 @@ describe("generateWorkoutKrd", () => {
     await generateWorkoutKrd(baseOptions);
 
     // Assert
-    expect(createTextToWorkout).toHaveBeenCalledWith({
-      model: { modelId: "test-model" },
-    });
+    expect(createTextToWorkout).toHaveBeenCalledWith(
+      expect.objectContaining({ model: { modelId: "test-model" } })
+    );
+  });
+
+  it("should build and forward a default usage-telemetry sink so the run is accounted", async () => {
+    // Arrange
+
+    // Act
+    await generateWorkoutKrd(baseOptions);
+
+    // Assert
+    expect(createDexieUsageTelemetrySink).toHaveBeenCalled();
+    expect(createTextToWorkout).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetry: mockSink })
+    );
+  });
+
+  it("should prefer an explicitly supplied telemetry sink over the default", async () => {
+    // Arrange
+    const explicit = { emit: vi.fn() };
+
+    // Act
+    await generateWorkoutKrd({ ...baseOptions, telemetry: explicit });
+
+    // Assert
+    expect(createTextToWorkout).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetry: explicit })
+    );
   });
 
   it("should pass user text as prompt", async () => {

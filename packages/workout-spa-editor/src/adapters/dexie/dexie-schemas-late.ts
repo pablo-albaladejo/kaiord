@@ -82,11 +82,41 @@ export const buildCoreV31 = (prev: Stores): Stores => ({
   labValues: "id, [profileId+parameterKey+date], [profileId+reportId]",
 });
 
-// Assemble the latest schema pair (v30 → v31) from the v27 base so
+// v32 — additive `usageEvents` store: an append-only, redaction-safe log of
+// per-run AI token usage (ids and metrics only), fed by the telemetry port.
+// PK `id` (uuid); the `[yearMonth+purpose]` index drives the monthly fold and
+// the chat-scoped parity query. No `profileId` — usage is account/device-scoped
+// (mirroring the existing `usage` store), so `isPerProfileTable` does not
+// classify it as a cascade target. Auto-created empty on upgrade — no data
+// transform. Excluded from the cloud snapshot (device-local) for this
+// transition; see dexie-snapshot-port DEVICE_LOCAL.
+export const buildCoreV32 = (prev: Stores): Stores => ({
+  ...prev,
+  usageEvents: "id, [yearMonth+purpose]",
+});
+
+// v33 — usage-accounting cutover: DROP the legacy monthly `usage` store
+// (`usage: null`) after its rows are folded into `usageEvents` by the v33
+// upgrade (see dexie-v33-migration). `usageEvents` is unchanged here; it just
+// becomes the single, synced source of truth. A `null` value type widens the
+// map, so this builder returns `Record<string, string | null>`.
+export const buildCoreV33 = (prev: Stores): Record<string, string | null> => ({
+  ...prev,
+  usage: null,
+});
+
+// Assemble the latest schemas (v30 → v31 → v32 → v33) from the v27 base so
 // `dexie-schemas.ts` composes them in one spread and stays under its line cap.
-export const buildCoreV30AndV31 = (
+export const buildCoreV30ThroughV33 = (
   prev: Stores
-): { v30: Stores; v31: Stores } => {
+): {
+  v30: Stores;
+  v31: Stores;
+  v32: Stores;
+  v33: Record<string, string | null>;
+} => {
   const v30 = buildCoreV30(prev);
-  return { v30, v31: buildCoreV31(v30) };
+  const v31 = buildCoreV31(v30);
+  const v32 = buildCoreV32(v31);
+  return { v30, v31, v32, v33: buildCoreV33(v32) };
 };

@@ -29,7 +29,7 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={[
-        "flex gap-1 rounded-[14px] border border-slate-700/60 bg-surface-deep p-1",
+        "flex gap-1 rounded-[14px] border border-edge bg-surface-deep p-1",
         className,
       ]
         .filter(Boolean)
@@ -48,7 +48,7 @@ export function Segmented<T extends string>({
               "flex flex-1 items-center justify-center gap-[7px] rounded-[10px] px-1.5 py-[9px] text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
               active
                 ? "bg-primary-500 text-white"
-                : "bg-transparent text-slate-400",
+                : "bg-transparent text-ink-muted",
             ].join(" ")}
           >
             {option.icon && (

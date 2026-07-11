@@ -38,7 +38,7 @@ export const Default: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[320px] bg-slate-900 p-4 rounded-xl">
+      <div className="w-[320px] bg-surface-deep p-4 rounded-xl">
         <Story />
       </div>
     ),
@@ -51,7 +51,7 @@ export const EqualWeights: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[320px] bg-slate-900 p-4 rounded-xl">
+      <div className="w-[320px] bg-surface-deep p-4 rounded-xl">
         <Story />
       </div>
     ),
@@ -68,7 +68,7 @@ export const ThreeZones: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[320px] bg-slate-900 p-4 rounded-xl">
+      <div className="w-[320px] bg-surface-deep p-4 rounded-xl">
         <Story />
       </div>
     ),

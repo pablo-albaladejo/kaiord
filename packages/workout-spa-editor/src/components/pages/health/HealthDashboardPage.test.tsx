@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { ThemeProvider } from "../../../contexts/ThemeContext";
 import HealthDashboardPage from "./HealthDashboardPage";
 import type { TrendSeriesByMetric } from "./trends/use-trend-series";
 
@@ -29,7 +30,7 @@ vi.mock("./trends/UplotChart", () => ({
 describe("HealthDashboardPage trends hub", () => {
   it("should render the trends hub for the active profile", () => {
     // Arrange
-    render(<HealthDashboardPage />);
+    render(<HealthDashboardPage />, { wrapper: ThemeProvider });
 
     // Act
     const heading = screen.getByRole("heading", { name: "Trends" });
@@ -41,7 +42,7 @@ describe("HealthDashboardPage trends hub", () => {
 
   it("should render metric and range selectors", () => {
     // Arrange
-    render(<HealthDashboardPage />);
+    render(<HealthDashboardPage />, { wrapper: ThemeProvider });
 
     // Act
     const metrics = screen.getByTestId("trend-metric-select");
@@ -54,7 +55,7 @@ describe("HealthDashboardPage trends hub", () => {
 
   it("should render the single canvas when at least one metric is selected", () => {
     // Arrange
-    render(<HealthDashboardPage />);
+    render(<HealthDashboardPage />, { wrapper: ThemeProvider });
 
     // Act
     const card = screen.queryByTestId("trend-single-chart-card");
@@ -66,7 +67,7 @@ describe("HealthDashboardPage trends hub", () => {
   it("should show the bare empty message when all metrics are toggled off", async () => {
     // Arrange
     const user = userEvent.setup();
-    render(<HealthDashboardPage />);
+    render(<HealthDashboardPage />, { wrapper: ThemeProvider });
 
     // Act
     await user.click(screen.getByRole("button", { name: "Sleep" }));
@@ -81,7 +82,7 @@ describe("HealthDashboardPage trends hub", () => {
   it("should omit a metric with zero points from the canvas while keeping the canvas mounted", async () => {
     // Arrange
     const user = userEvent.setup();
-    render(<HealthDashboardPage />);
+    render(<HealthDashboardPage />, { wrapper: ThemeProvider });
 
     // Act
     await user.click(screen.getByRole("button", { name: "Weight" }));
@@ -93,7 +94,7 @@ describe("HealthDashboardPage trends hub", () => {
   it("should select a different date range", async () => {
     // Arrange
     const user = userEvent.setup();
-    render(<HealthDashboardPage />);
+    render(<HealthDashboardPage />, { wrapper: ThemeProvider });
 
     // Act
     await user.click(screen.getByRole("radio", { name: "30d" }));

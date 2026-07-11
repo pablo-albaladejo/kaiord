@@ -13,11 +13,11 @@ export function ChatHeader() {
       <h1
         tabIndex={-1}
         {...{ [ROUTE_HEADING_ATTR]: "" }}
-        className="m-0 text-[26px] font-extrabold tracking-[-0.02em] text-slate-50"
+        className="m-0 text-[26px] font-extrabold tracking-[-0.02em] text-ink-strong"
       >
         {t("header.title")}
       </h1>
-      <p className="mt-1 text-[13.5px] text-slate-400">
+      <p className="mt-1 text-[13.5px] text-ink-muted">
         {t("header.subtitle")}
       </p>
     </div>

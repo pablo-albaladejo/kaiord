@@ -17,7 +17,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v31-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 30;
-const SCHEMA_HEAD = 31;
+const SCHEMA_HEAD = 33;
 
 const seedV30 = async (name: string): Promise<void> => {
   const older = new Dexie(name);
@@ -51,7 +51,7 @@ describe("Dexie lab-analytics (v31) migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump the database schema to head version 31", async () => {
+  it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seedV30(name);
 

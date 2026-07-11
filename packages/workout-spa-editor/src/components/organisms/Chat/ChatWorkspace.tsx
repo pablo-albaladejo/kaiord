@@ -65,7 +65,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
             composerInitialText={prefill}
           />
         ) : (
-          <p className="p-4 text-sm text-slate-400">
+          <p className="p-4 text-sm text-ink-muted">
             {t("workspace.selectOrStart")}
           </p>
         )}

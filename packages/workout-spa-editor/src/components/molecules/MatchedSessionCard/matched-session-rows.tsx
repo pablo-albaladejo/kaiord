@@ -31,11 +31,11 @@ export const renderTitleRow = (s: MatchedSession) => (
 
 export const renderComfortableMetadata = (s: MatchedSession) => (
   <>
-    <span className="text-[10px] text-slate-500">Plan ·</span>
+    <span className="text-[10px] text-ink-muted">Plan ·</span>
     <span>{planDurationText(s)}</span>
     <SessionLifecycleBadges flags={lifecycleOf(s)} />
     {hasFiniteCompliance(s.complianceScore) && (
-      <span className="ml-auto text-[10px] text-slate-600">
+      <span className="ml-auto text-[10px] text-ink-body">
         {formatPercent(s.complianceScore)}
       </span>
     )}
@@ -44,7 +44,7 @@ export const renderComfortableMetadata = (s: MatchedSession) => (
 
 export const renderComfortableSecondary = (s: MatchedSession) => (
   <>
-    <span className="text-[10px] text-slate-500">Actual ·</span>
+    <span className="text-[10px] text-ink-muted">Actual ·</span>
     <span>{actualDurationText(s)}</span>
   </>
 );
@@ -54,7 +54,7 @@ export const renderCompactMetadata = (s: MatchedSession) => (
     <span>{actualDurationText(s)}</span>
     <SessionLifecycleBadges flags={lifecycleOf(s)} />
     {hasFiniteCompliance(s.complianceScore) && (
-      <span className="ml-auto text-[10px] text-slate-600">
+      <span className="ml-auto text-[10px] text-ink-body">
         {formatPercent(s.complianceScore)}
       </span>
     )}

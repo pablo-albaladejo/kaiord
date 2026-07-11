@@ -20,7 +20,7 @@ export function WorkoutDetailFooter({
   const t = useTranslate("workout-detail");
   const [, navigate] = useLocation();
   return (
-    <div className="sticky bottom-0 -mx-4 flex gap-3 border-t border-slate-800 bg-surface-deep px-4 py-3">
+    <div className="sticky bottom-0 -mx-4 flex gap-3 border-t border-edge bg-surface-deep px-4 py-3">
       <Button variant="ghost" onClick={onEdit}>
         <Icon icon={ICON_MAP.edit} size="sm" color="inherit" />
         {t("footer.edit")}

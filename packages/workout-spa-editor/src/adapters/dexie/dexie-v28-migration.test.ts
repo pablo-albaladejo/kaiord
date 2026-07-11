@@ -16,7 +16,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v28-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_SEED = 27;
-const SCHEMA_HEAD = 31;
+const SCHEMA_HEAD = 33;
 const HEALTH_SUFFIX =
   ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
 const STORES_SEED = {
@@ -79,7 +79,7 @@ describe("Dexie provenance backfill + seeding (v28) migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump the database schema to head version 29", async () => {
+  it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name);
 

@@ -12,7 +12,7 @@ export function ZoneMapLegend({ zones }: ZoneMapLegendProps) {
         const isLast = i === zones.length - 1;
         const rowClasses = [
           "flex items-center gap-[11px] py-2 px-1",
-          isLast ? "" : "border-b border-slate-800",
+          isLast ? "" : "border-b border-edge-soft",
         ]
           .filter(Boolean)
           .join(" ");
@@ -25,11 +25,11 @@ export function ZoneMapLegend({ zones }: ZoneMapLegendProps) {
                 zoneBgClass(z.n),
               ].join(" ")}
             />
-            <span className="text-[14.5px] font-semibold text-slate-50 w-[86px]">
+            <span className="text-[14.5px] font-semibold text-ink-strong w-[86px]">
               {z.name}
             </span>
-            <span className="text-[13px] text-slate-500 flex-1">{z.pct}</span>
-            <span className="text-[13.5px] font-semibold text-slate-300 tabular-nums">
+            <span className="text-[13px] text-ink-muted flex-1">{z.pct}</span>
+            <span className="text-[13.5px] font-semibold text-ink-body tabular-nums">
               {z.range}
             </span>
           </div>

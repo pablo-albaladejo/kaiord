@@ -1,5 +1,5 @@
 /**
- * UsageTab empty state — shown when no UsageRecord rows fall inside
+ * UsageTab empty state — shown when no usage events fall inside
  * the month-window.
  */
 

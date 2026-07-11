@@ -21,11 +21,16 @@ export const useThemeProvider = (defaultTheme: Theme = "system") => {
     return resolveTheme(initialTheme);
   });
 
-  // Update theme and persist to localStorage
+  // Update theme and persist to localStorage. The document class flips
+  // BEFORE the state update: consumers that read CSS custom properties
+  // during render (uPlot option builders) must see the new variables on
+  // the very render the resolved theme changes.
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     storeTheme(newTheme);
-    setResolvedTheme(resolveTheme(newTheme));
+    const resolved = resolveTheme(newTheme);
+    applyTheme(resolved);
+    setResolvedTheme(resolved);
   };
 
   // Apply theme to document on mount and when resolved theme changes
@@ -41,6 +46,7 @@ export const useThemeProvider = (defaultTheme: Theme = "system") => {
 
     const handleChange = (e: MediaQueryListEvent) => {
       const newResolvedTheme = e.matches ? "dark" : "light";
+      applyTheme(newResolvedTheme);
       setResolvedTheme(newResolvedTheme);
     };
 

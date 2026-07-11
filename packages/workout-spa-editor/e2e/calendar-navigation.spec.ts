@@ -50,7 +50,12 @@ test.describe("Calendar Navigation", () => {
 
   test('Header "Daily" button navigates to the Daily page', async ({
     page,
+    isMobile,
   }) => {
+    // The header hides this entry below `md` — it duplicates a BottomNav
+    // tab there, so on real mobile viewports it's reachable from BottomNav
+    // instead.
+    test.skip(isMobile, "Duplicated by BottomNav below md");
     await page.goto("/workout/new?source=scratch");
     await page.getByTestId("status-header-daily-button").click();
     await page.waitForURL(/\/daily$/);
@@ -59,7 +64,9 @@ test.describe("Calendar Navigation", () => {
 
   test('Header "Calendar" button navigates to the current week grid', async ({
     page,
+    isMobile,
   }) => {
+    test.skip(isMobile, "Duplicated by BottomNav below md");
     await page.goto("/workout/new?source=scratch");
     await page.getByTestId("status-header-calendar-button").click();
     await page.waitForURL(/\/calendar\/\d{4}-W\d{2}$/);

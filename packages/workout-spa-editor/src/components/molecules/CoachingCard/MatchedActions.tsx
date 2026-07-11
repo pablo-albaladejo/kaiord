@@ -40,7 +40,7 @@ export function MatchedActions(props: MatchedActionsProps) {
       <button
         type="button"
         onClick={props.onClose}
-        className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+        className="rounded-md border border-edge px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
       >
         {t("actions.close")}
       </button>
@@ -77,7 +77,7 @@ export function MatchedActions(props: MatchedActionsProps) {
         type="button"
         data-testid="coaching-dialog-open-editor"
         onClick={props.onOpenEditor}
-        className="rounded-md bg-slate-700 px-3 py-1 text-sm text-white hover:bg-slate-800"
+        className="rounded-md bg-surface-elevated px-3 py-1 text-sm text-ink-strong hover:bg-surface"
       >
         {t("actions.openEditor")}
       </button>

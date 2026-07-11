@@ -8,8 +8,8 @@ import type { ChatTurnResult } from "@kaiord/ai";
 
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderType } from "../../store/ai-store-types";
+import { appendUsageEvent } from "../usage/append-usage-event";
 import { newChatMessage } from "./chat-message-mapper";
-import { recordChatUsage } from "./record-chat-usage";
 
 export type IdGen = { newId: () => string; now: () => string };
 
@@ -82,9 +82,12 @@ export const appendAssistantTurn = async (
     })
   );
   if (result.usage)
-    await recordChatUsage(persistence, {
+    await appendUsageEvent(persistence, {
+      purpose: "chat",
       providerType,
-      promptTokens: result.usage.promptTokens,
-      completionTokens: result.usage.completionTokens,
+      ...result.usage,
+    }).catch(() => {
+      // Best-effort: the event log is authoritative, but a failed usage write
+      // must never fail a turn whose messages already committed.
     });
 };

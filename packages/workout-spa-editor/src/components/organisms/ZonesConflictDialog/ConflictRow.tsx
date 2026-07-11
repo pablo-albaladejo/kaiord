@@ -52,7 +52,7 @@ export const ConflictRow = ({
 }: ConflictRowProps) => (
   <li
     data-testid={`zones-conflict-row-${conflict.field}`}
-    className="rounded border p-2"
+    className="rounded border border-edge p-2"
   >
     <div className="text-sm font-medium">{FIELD_LABELS[conflict.field]}</div>
     <div className="mt-1 text-xs text-muted-foreground">

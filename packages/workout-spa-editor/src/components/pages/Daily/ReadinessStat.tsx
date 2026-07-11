@@ -10,7 +10,7 @@ export function ReadinessStat({ metric }: ReadinessStatProps) {
   return (
     <div className="flex-1 min-w-0">
       <div className="flex items-baseline gap-1">
-        <span className="text-[20px] font-bold tabular-nums text-slate-50">
+        <span className="text-[20px] font-bold tabular-nums text-ink-strong">
           {metric.value}
         </span>
         {metric.trend !== undefined && (
@@ -20,7 +20,7 @@ export function ReadinessStat({ metric }: ReadinessStatProps) {
           </span>
         )}
       </div>
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mt-px">
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted mt-px">
         {metric.label}
       </div>
       {metric.source !== undefined && (

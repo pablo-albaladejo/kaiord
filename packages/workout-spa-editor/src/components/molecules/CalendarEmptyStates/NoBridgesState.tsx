@@ -24,7 +24,7 @@ export function NoBridgesState() {
         href={BRIDGE_DOCS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="rounded-md border px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
+        className="rounded-md border border-edge px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
       >
         Learn more
       </a>
