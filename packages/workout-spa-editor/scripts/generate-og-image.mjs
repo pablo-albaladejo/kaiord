@@ -8,7 +8,9 @@ const editorRoot = join(__dirname, "..");
 const publicDir = join(editorRoot, "public");
 
 // Read a brand token straight from the shared source of truth so the OG card
-// stays in lockstep with the landing and docs surfaces.
+// stays in lockstep with the landing and docs surfaces. The OG card uses the
+// DARK brand identity, so tokens resolve as under `.dark` (dark block first,
+// full file for the theme-invariant tokens that only exist on :root).
 const BRAND_TOKENS_PATH = resolve(
   editorRoot,
   "..",
@@ -17,16 +19,21 @@ const BRAND_TOKENS_PATH = resolve(
   "brand-tokens.css"
 );
 
-function readBrandTokenColor(name) {
-  const source = readFileSync(BRAND_TOKENS_PATH, "utf8");
+function matchToken(source, name) {
   const pattern = new RegExp(
     `${name.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}\\s*:\\s*([^;]+?)\\s*(?:;|\\n)`
   );
-  const match = source.match(pattern);
-  if (!match) {
+  return source.match(pattern)?.[1].trim();
+}
+
+function readBrandTokenColor(name) {
+  const source = readFileSync(BRAND_TOKENS_PATH, "utf8");
+  const darkBlock = source.match(/\.dark\s*\{([^}]*)\}/)?.[1] ?? "";
+  const value = matchToken(darkBlock, name) ?? matchToken(source, name);
+  if (!value) {
     throw new Error(`Brand token ${name} not found in ${BRAND_TOKENS_PATH}`);
   }
-  return match[1].trim();
+  return value;
 }
 
 const BRAND_BG = readBrandTokenColor("--brand-bg-primary");
