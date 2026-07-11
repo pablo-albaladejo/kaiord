@@ -128,6 +128,44 @@ describe("Dexie usage-accounting cutover (v33) migration", () => {
     );
   });
 
+  it("should not double-count chat when a v32 dual-write mirror already exists", async () => {
+    // Arrange
+    const older = new Dexie(name);
+    older.version(SEED_VERSION).stores(SCHEMAS.v32);
+    await older.open();
+    await older.table("usage").add({
+      yearMonth: "2026-05",
+      entries: [ENTRY_ONE, ENTRY_TWO],
+    });
+    await older.table("usageEvents").add({
+      id: "mirror-chat-1",
+      yearMonth: "2026-05",
+      date: ENTRY_ONE.date,
+      purpose: "chat",
+      promptTokens: ENTRY_ONE.inputTokens,
+      completionTokens: ENTRY_ONE.outputTokens,
+      tokens: ENTRY_ONE.tokens,
+      cost: ENTRY_ONE.cost,
+      createdAt: `${ENTRY_ONE.date}T10:00:00.000Z`,
+    });
+    await older.table("usageEvents").add(PRIOR_EVENT);
+    older.close();
+
+    // Act
+    const db = new KaiordDatabase(name);
+    await db.open();
+    const all = await db.table("usageEvents").toArray();
+    db.close();
+
+    // Assert
+    const chat = all.filter((e) => e.purpose === "chat");
+    expect(chat).toHaveLength(MIGRATED_COUNT);
+    expect(chat.every((e) => String(e.id).startsWith("usage-migrated:"))).toBe(
+      true
+    );
+    expect(all.some((e) => e.id === PRIOR_EVENT.id)).toBe(true);
+  });
+
   it("should preserve prior usageEvents rows through the cutover", async () => {
     // Arrange
     await seedV32(name);

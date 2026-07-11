@@ -69,6 +69,15 @@ const eventsForRow = (row: UsageRow): Record<string, unknown>[] => {
 };
 
 export const applyV33Upgrade = async (tx: Transaction): Promise<void> => {
+  // The v32 dual-write already mirrored chat turns into `usageEvents` (purpose
+  // "chat"). `usage.entries[]` is the complete, authoritative chat history, so
+  // folding it in without first removing that partial mirror would double-count
+  // recent-month chat tokens and cost. Drop the chat mirror, then fold; non-chat
+  // events (workout_generation, lab_extraction) were never in `usage` and stay.
+  await tx
+    .table("usageEvents")
+    .filter((e) => (e as { purpose?: string }).purpose === "chat")
+    .delete();
   const rows = (await tx.table("usage").toArray()) as UsageRow[];
   const events = rows.flatMap(eventsForRow);
   if (events.length > 0) await tx.table("usageEvents").bulkPut(events);
