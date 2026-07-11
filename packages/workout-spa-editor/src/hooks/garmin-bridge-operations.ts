@@ -1,6 +1,10 @@
 /**
  * Garmin Bridge Operations - Transport-level helpers for the bridge hook.
  */
+import type {
+  PushWorkout,
+  PushWorkoutResult,
+} from "../application/integrations/integration-ports";
 import type { PushState } from "../contexts/garmin-bridge-types";
 import { sendMessage } from "../store/garmin-extension-transport";
 import { parseGarminWorkoutId } from "./garmin-push-id";
@@ -8,15 +12,10 @@ import { parseGarminWorkoutId } from "./garmin-push-id";
 const PUSH_TIMEOUT = 15_000;
 const LIST_TIMEOUT = 10_000;
 
-export type PushResult =
-  | { status: "success"; garminWorkoutId: string | null }
-  | { status: "error"; message: string; redetect: boolean }
-  | { status: "invalidated" };
-
-export async function executePush(
+export const executePush: PushWorkout = async function executePush(
   extensionId: string,
   gcn: unknown
-): Promise<PushResult> {
+): Promise<PushWorkoutResult> {
   const res = await sendMessage(
     extensionId,
     { action: "push", gcn },
@@ -37,7 +36,7 @@ export async function executePush(
   }
 
   return { status: "success", garminWorkoutId: parseGarminWorkoutId(res.data) };
-}
+};
 
 export async function executeList(
   extensionId: string

@@ -165,3 +165,13 @@ Non-generated files beyond the AI agent's responsibility:
 - `TESTING.md` — Manual integration test checklist (not automated)
 - `store-listing.md` — Chrome Web Store listing copy (category, description, features)
 - `privacy-justification.md` — Privacy rationale for host permissions (required by Chrome Web Store)
+
+### Vendored bridge-core files
+
+`bridge-envelope.js`, `kaiord-announce.js`, `bridge-popup-utils.js`,
+`bridge-popup-snapshot.js`, `popup.css`, `profile-snapshot.js`, and
+`test/{chrome-mock,bridge-envelope.test}.js` are byte-identical vendored
+copies of `packages/_shared/bridge-core/` masters — never edit them here;
+edit the master and run `pnpm bridge:sync` (guard:
+`scripts/check-bridge-core-parity.test.mjs`). Per-bridge identity lives in
+`bridge-identity.js` and must match `BRIDGE_MANIFEST` in `background.js`.

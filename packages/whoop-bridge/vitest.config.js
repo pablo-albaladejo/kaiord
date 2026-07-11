@@ -10,6 +10,8 @@ export default defineConfig({
         "content.js",
         "inject-main.js",
         "kaiord-announce.js",
+        "bridge-envelope.js",
+        "bridge-identity.js",
       ],
       exclude: ["popup.js"],
     },

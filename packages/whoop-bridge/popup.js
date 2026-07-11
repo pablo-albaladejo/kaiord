@@ -5,13 +5,15 @@
  * been captured and offers a single deep link to open WHOOP. There is no
  * credential entry and no OAuth flow — the bridge rides the user's own session.
  * All logic talks to background.js via internal runtime messages.
+ *
+ * Shared helpers (msg/$/setStatus) load first from the vendored
+ * bridge-popup-utils.js (see popup.html script order).
  */
 
-// ── i18n ──
-// Byte-identical English fallback for environments without chrome.i18n. At
-// runtime the browser's chrome.i18n.getMessage returns the active-locale string
-// from _locales/.
-const EN_FALLBACK = {
+const OPEN_WHOOP_URL = "https://app.whoop.com/";
+
+// English fallback table consumed by the vendored msg() helper.
+globalThis.KAIORD_POPUP_MESSAGES = {
   checking: "Checking…",
   checkingAria: "Checking",
   connectedToWhoop: "Connected to WHOOP",
@@ -22,27 +24,12 @@ const EN_FALLBACK = {
   openWhoopAria: "Open WHOOP",
 };
 
-const msg = (key) =>
-  globalThis.chrome?.i18n?.getMessage?.(key) || EN_FALLBACK[key];
-
-const $ = (id) => document.getElementById(id);
-
-const OPEN_WHOOP_URL = "https://app.whoop.com/";
-
 const sendMessage = (message) =>
   new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (res) =>
       resolve(res ?? { ok: false, error: "No response" })
     );
   });
-
-const setStatus = (kind, glyph, text) => {
-  const el = $("status");
-  el.className = `status status--${kind}`;
-  el.setAttribute("aria-label", text);
-  el.querySelector(".status__glyph").textContent = glyph;
-  $("status-text").textContent = text;
-};
 
 const renderHint = (connected) => {
   $("sync-region").textContent = connected

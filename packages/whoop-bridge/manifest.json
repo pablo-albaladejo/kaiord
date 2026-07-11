@@ -21,7 +21,6 @@
   "background": {
     "service_worker": "background.js"
   },
-
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -29,7 +28,6 @@
       "128": "icons/icon128.png"
     }
   },
-
   "content_scripts": [
     {
       "matches": ["https://app.whoop.com/*"],
@@ -44,11 +42,10 @@
     },
     {
       "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
-      "js": ["kaiord-announce.js"],
+      "js": ["bridge-identity.js", "kaiord-announce.js"],
       "run_at": "document_start"
     }
   ],
-
   "externally_connectable": {
     "matches": [
       "http://localhost:5173/*",

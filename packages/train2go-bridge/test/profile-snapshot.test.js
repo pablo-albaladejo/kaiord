@@ -1,10 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import "./chrome-mock.js";
-import {
-  validateSnapshot,
-  isAllowedSenderOrigin,
-} from "../profile-snapshot.js";
+import { validateSnapshot } from "../profile-snapshot.js";
 import {
   positiveSnapshotFixtures,
   negativeSnapshotFixtures,
@@ -60,40 +57,6 @@ describe("validateSnapshot — parity with @kaiord/core fixtures", () => {
     validateSnapshot(polluted);
 
     expect("isAdmin" in Object.prototype).toBe(before);
-  });
-});
-
-describe("isAllowedSenderOrigin", () => {
-  it("accepts production kaiord origins", () => {
-    expect(isAllowedSenderOrigin({ origin: "https://app.kaiord.com" })).toBe(
-      true
-    );
-    expect(
-      isAllowedSenderOrigin({ origin: "https://staging.kaiord.com" })
-    ).toBe(true);
-  });
-
-  it("accepts dev localhost origins on the documented ports", () => {
-    expect(isAllowedSenderOrigin({ origin: "http://localhost:5173" })).toBe(
-      true
-    );
-    expect(isAllowedSenderOrigin({ origin: "http://localhost:5174" })).toBe(
-      true
-    );
-  });
-
-  it("rejects undefined origin", () => {
-    expect(isAllowedSenderOrigin({})).toBe(false);
-    expect(isAllowedSenderOrigin(undefined)).toBe(false);
-  });
-
-  it("rejects unauthorized origins", () => {
-    expect(isAllowedSenderOrigin({ origin: "https://attacker.example" })).toBe(
-      false
-    );
-    expect(isAllowedSenderOrigin({ origin: "http://localhost:9999" })).toBe(
-      false
-    );
   });
 });
 
@@ -168,7 +131,7 @@ describe("background — handleExternalMessage origin gate", () => {
     expect(sendResponse).toHaveBeenCalledWith({
       ok: false,
       protocolVersion: 1,
-      error: "Origin not permitted",
+      error: "Origin or action not permitted",
       retryable: false,
     });
     expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
@@ -185,7 +148,10 @@ describe("background — handleExternalMessage origin gate", () => {
 
     await new Promise((r) => setTimeout(r, 10));
     expect(sendResponse).toHaveBeenCalledWith(
-      expect.objectContaining({ ok: false, error: "Origin not permitted" })
+      expect.objectContaining({
+        ok: false,
+        error: "Origin or action not permitted",
+      })
     );
   });
 

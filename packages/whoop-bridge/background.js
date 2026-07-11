@@ -16,15 +16,23 @@ const APP_PATTERN = "https://app.whoop.com/*";
 const API_PATTERN = "https://api.prod.whoop.com/*";
 const WHOOP_DASHBOARD = "https://app.whoop.com/";
 
-const MANIFEST_VERSION = chrome.runtime.getManifest?.()?.version ?? "0.0.0";
-
 const BRIDGE_MANIFEST = {
   id: "whoop-bridge",
   name: "WHOOP",
-  version: MANIFEST_VERSION,
+  version: "0.1.0",
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["read:body", "read:sleep"],
 };
+
+// ── Shared envelope/dispatch (vendored bridge-core) ──
+let bridgeEnvelope;
+try {
+  importScripts("bridge-envelope.js");
+  bridgeEnvelope = globalThis;
+} catch {
+  bridgeEnvelope =
+    typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
+}
 
 // ── Session bearer capture ──
 //
@@ -47,6 +55,8 @@ const decodeUserId = (jwt) => {
     return null;
   }
 };
+
+const SESSION_KEYS = ["whoopToken", "whoopUserId", "whoopCapturedAt"];
 
 const storeToken = async (token) => {
   if (!token || typeof token !== "string") return;
@@ -73,8 +83,15 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
   ["requestHeaders", "extraHeaders"]
 );
 
-const getSession = () =>
-  chrome.storage.session.get(["whoopToken", "whoopUserId", "whoopCapturedAt"]);
+// Read session keys individually so the wrapper works against both the real
+// chrome.storage.session (which supports array reads) and the vendored test
+// mock (which resolves a single string key per call).
+const getSession = async () => {
+  const parts = await Promise.all(
+    SESSION_KEYS.map((key) => chrome.storage.session.get(key))
+  );
+  return Object.assign({}, ...parts);
+};
 
 const getSessionStatus = async () => {
   const session = await getSession();
@@ -147,56 +164,23 @@ const handleAction = async (message) => {
   }
 };
 
-const sendResult = (data, sendResponse) => {
-  sendResponse({ ok: true, protocolVersion: PROTOCOL_VERSION, data });
-};
-
-const sendError = (err, sendResponse) => {
-  sendResponse({
-    ok: false,
-    protocolVersion: PROTOCOL_VERSION,
-    error: String(err?.message ?? err),
-    ...(typeof err?.status === "number" ? { status: err.status } : {}),
-  });
-};
-
-const dispatch = (message, sendResponse) => {
-  handleAction(message)
-    .then((data) => sendResult(data, sendResponse))
-    .catch((err) => sendError(err, sendResponse));
-  return true;
-};
-
 // ── External messages (SPA ↔ Extension) ──
 //
 // Web callers get a reduced action surface (reads + status only). Token capture
-// stays internal (content script / popup). The sender origin is pinned in
-// runtime as a second layer over the manifest's externally_connectable.
+// stays internal (content script / popup). The sender origin is pinned by the
+// vendored guard as a second layer over the manifest's externally_connectable.
 const EXTERNAL_ACTIONS = new Set(["ping", "status", "whoop-fetch"]);
 
-const ALLOWED_ORIGIN_REGEX =
-  /^(https:\/\/[a-z0-9-]+\.kaiord\.com|http:\/\/localhost:(5173|5174))$/;
+const dispatch = bridgeEnvelope.createDispatch({
+  handleAction,
+  protocolVersion: PROTOCOL_VERSION,
+});
 
-const isAllowedSenderOrigin = (sender) =>
-  typeof sender?.origin === "string" &&
-  ALLOWED_ORIGIN_REGEX.test(sender.origin);
-
-const dispatchExternal = (message, sender, sendResponse) => {
-  if (!isAllowedSenderOrigin(sender)) {
-    sendResponse({
-      ok: false,
-      protocolVersion: PROTOCOL_VERSION,
-      error: "Origin or action not permitted",
-      retryable: false,
-    });
-    return true;
-  }
-  if (!EXTERNAL_ACTIONS.has(message?.action)) {
-    sendError(new Error(`Unknown action: ${message?.action}`), sendResponse);
-    return true;
-  }
-  return dispatch(message, sendResponse);
-};
+const dispatchExternal = bridgeEnvelope.createExternalDispatch({
+  dispatch,
+  externalActions: EXTERNAL_ACTIONS,
+  protocolVersion: PROTOCOL_VERSION,
+});
 
 if (typeof chrome !== "undefined" && chrome.runtime?.onMessageExternal) {
   chrome.runtime.onMessageExternal.addListener((message, sender, respond) =>
@@ -261,9 +245,8 @@ if (typeof module !== "undefined") {
     handleAction,
     dispatch,
     dispatchExternal,
-    isAllowedSenderOrigin,
+    isAllowedSenderOrigin: bridgeEnvelope.isAllowedSenderOrigin,
     EXTERNAL_ACTIONS,
     reinjectContentScripts,
-    sendError,
   };
 }

@@ -8,15 +8,19 @@ const {
   getSessionStatus,
   whoopFetch,
   handleAction,
+  dispatch,
   dispatchExternal,
   isAllowedSenderOrigin,
   EXTERNAL_ACTIONS,
+  reinjectContentScripts,
 } = require("../background.js");
 const pkg = require("../package.json");
 
-// Listener callbacks registered at import time (before any reset).
+// Listener callbacks registered at import time (captured before any reset,
+// which clears the mock call history).
 const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
+const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 const webRequestCb =
   chrome.webRequest.onBeforeSendHeaders.addListener.mock.calls[0][0];
 
@@ -202,12 +206,12 @@ describe("whoopFetch tab dependency", () => {
   });
 });
 
-describe("handleAction ping", () => {
+describe("handleAction", () => {
   beforeEach(() => {
     __resetChromeMock();
   });
 
-  it("should return the bridge manifest plus a boolean session status", async () => {
+  it("should return the bridge manifest plus a boolean session status on ping", async () => {
     // Arrange
 
     // Act
@@ -248,6 +252,39 @@ describe("handleAction ping", () => {
     expect(chrome.storage.session.set).toHaveBeenCalledWith(
       expect.objectContaining({ whoopToken: jwt })
     );
+  });
+
+  it("should open the WHOOP dashboard tab and return null on open-whoop", async () => {
+    // Arrange
+
+    // Act
+    const result = await handleAction({ action: "open-whoop" });
+
+    // Assert
+    expect(result).toBeNull();
+    expect(chrome.tabs.create).toHaveBeenCalledWith({
+      url: "https://app.whoop.com/",
+    });
+  });
+
+  it("should reject whoop-fetch without a path", async () => {
+    // Arrange
+
+    // Act
+    const attempt = handleAction({ action: "whoop-fetch" });
+
+    // Assert
+    await expect(attempt).rejects.toThrow("Missing path");
+  });
+
+  it("should reject an unknown action", async () => {
+    // Arrange
+
+    // Act
+    const attempt = handleAction({ action: "no-such-action" });
+
+    // Assert
+    await expect(attempt).rejects.toThrow("Unknown action: no-such-action");
   });
 });
 
@@ -305,6 +342,7 @@ describe("dispatchExternal origin pinning", () => {
     );
 
     // Assert
+    expect(chrome.tabs.query).not.toHaveBeenCalled();
     expect(respond).toHaveBeenCalledWith({
       ok: false,
       protocolVersion: PROTOCOL_VERSION,
@@ -313,21 +351,25 @@ describe("dispatchExternal origin pinning", () => {
     });
   });
 
-  it("should reject an unknown action from a pinned origin", () => {
+  it("should reject a non-allowlisted action from a pinned origin", () => {
     // Arrange
     const respond = vi.fn();
 
     // Act
     dispatchExternal(
-      { action: "push" },
+      { action: "open-whoop" },
       { origin: "https://app.kaiord.com" },
       respond
     );
 
     // Assert
-    expect(respond).toHaveBeenCalledWith(
-      expect.objectContaining({ ok: false, error: "Unknown action: push" })
-    );
+    expect(chrome.tabs.create).not.toHaveBeenCalled();
+    expect(respond).toHaveBeenCalledWith({
+      ok: false,
+      protocolVersion: PROTOCOL_VERSION,
+      error: "Origin or action not permitted",
+      retryable: false,
+    });
   });
 
   it("should keep token capture off the external surface", () => {
@@ -347,7 +389,7 @@ describe("dispatchExternal origin pinning", () => {
     expect(respond).toHaveBeenCalledWith(
       expect.objectContaining({
         ok: false,
-        error: "Unknown action: capture-token",
+        error: "Origin or action not permitted",
       })
     );
   });
@@ -367,6 +409,70 @@ describe("dispatchExternal origin pinning", () => {
     // Assert
     expect(respond).toHaveBeenCalledWith(
       expect.objectContaining({ ok: true, protocolVersion: PROTOCOL_VERSION })
+    );
+  });
+});
+
+describe("internal dispatch", () => {
+  beforeEach(() => {
+    __resetChromeMock();
+  });
+
+  it("should return true and answer the popup status request", async () => {
+    // Arrange
+    const respond = vi.fn();
+
+    // Act
+    const kept = internalCb({ action: "status" }, {}, respond);
+    await vi.waitFor(() => expect(respond).toHaveBeenCalled());
+
+    // Assert
+    expect(kept).toBe(true);
+    expect(respond).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, protocolVersion: PROTOCOL_VERSION })
+    );
+  });
+});
+
+describe("reinjectContentScripts", () => {
+  beforeEach(() => {
+    __resetChromeMock();
+  });
+
+  it("should re-inject only host-permission-covered scripts, preserving the MAIN world", async () => {
+    // Arrange
+    chrome.runtime.getManifest.mockReturnValue({
+      host_permissions: ["https://app.whoop.com/*"],
+      content_scripts: [
+        {
+          matches: ["https://app.whoop.com/*"],
+          js: ["inject-main.js"],
+          world: "MAIN",
+        },
+        { matches: ["https://app.whoop.com/*"], js: ["content.js"] },
+        {
+          matches: ["https://*.kaiord.com/*"],
+          js: ["bridge-identity.js", "kaiord-announce.js"],
+        },
+      ],
+    });
+    chrome.tabs.query.mockImplementation((q, cb) =>
+      typeof cb === "function" ? cb([{ id: 7 }]) : Promise.resolve([{ id: 7 }])
+    );
+
+    // Act
+    await reinjectContentScripts();
+
+    // Assert
+    expect(chrome.scripting.executeScript).toHaveBeenCalledWith(
+      expect.objectContaining({ files: ["inject-main.js"], world: "MAIN" })
+    );
+    expect(chrome.scripting.executeScript).toHaveBeenCalledWith(
+      expect.objectContaining({ files: ["content.js"] })
+    );
+    // The kaiord.com announce entry is not covered by host_permissions.
+    expect(chrome.scripting.executeScript).not.toHaveBeenCalledWith(
+      expect.objectContaining({ files: ["bridge-identity.js", "kaiord-announce.js"] })
     );
   });
 });
