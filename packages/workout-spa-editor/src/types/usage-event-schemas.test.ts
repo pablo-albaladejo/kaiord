@@ -43,31 +43,16 @@ describe("usageEventSchema", () => {
     expect(parsed.providerType).toBeUndefined();
   });
 
-  it("should reject a row whose tokens do not equal the split sum", () => {
+  it.each([
+    { case: "tokens that disagree with the split sum", over: { tokens: 199 } },
+    { case: "a malformed year-month key", over: { yearMonth: "2026-13" } },
+    {
+      case: "a payload-bearing field (redaction must hold at runtime)",
+      over: { promptText: "secret user prompt" },
+    },
+  ])("should reject a row with $case", ({ over }) => {
     // Arrange
-    const row = { ...validRow, tokens: 199 };
-
-    // Act
-    const result = usageEventSchema.safeParse(row);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject a malformed year-month key", () => {
-    // Arrange
-    const row = { ...validRow, yearMonth: "2026-13" };
-
-    // Act
-    const result = usageEventSchema.safeParse(row);
-
-    // Assert
-    expect(result.success).toBe(false);
-  });
-
-  it("should reject a payload-bearing row so redaction holds at runtime", () => {
-    // Arrange
-    const row = { ...validRow, promptText: "secret user prompt" };
+    const row = { ...validRow, ...over };
 
     // Act
     const result = usageEventSchema.safeParse(row);
