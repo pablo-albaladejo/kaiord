@@ -15,49 +15,71 @@ const {
 
 describe("bridge-envelope (vendored)", () => {
   describe("isAllowedSenderOrigin", () => {
-    it("accepts kaiord.com subdomains over https", () => {
-      expect(isAllowedSenderOrigin({ origin: "https://app.kaiord.com" })).toBe(
-        true
-      );
-      expect(
-        isAllowedSenderOrigin({ origin: "https://staging.kaiord.com" })
-      ).toBe(true);
+    it("should accept kaiord.com subdomains over https", () => {
+      // Arrange
+      const senders = [
+        { origin: "https://app.kaiord.com" },
+        { origin: "https://staging.kaiord.com" },
+      ];
+
+      // Act
+      const allowed = senders.map(isAllowedSenderOrigin);
+
+      // Assert
+      expect(allowed).toEqual([true, true]);
     });
 
-    it("accepts localhost dev ports 5173 and 5174", () => {
-      expect(isAllowedSenderOrigin({ origin: "http://localhost:5173" })).toBe(
-        true
-      );
-      expect(isAllowedSenderOrigin({ origin: "http://localhost:5174" })).toBe(
-        true
-      );
+    it("should accept localhost dev ports 5173 and 5174", () => {
+      // Arrange
+      const senders = [
+        { origin: "http://localhost:5173" },
+        { origin: "http://localhost:5174" },
+      ];
+
+      // Act
+      const allowed = senders.map(isAllowedSenderOrigin);
+
+      // Assert
+      expect(allowed).toEqual([true, true]);
     });
 
-    it("rejects a missing or undefined origin", () => {
-      expect(isAllowedSenderOrigin({})).toBe(false);
-      expect(isAllowedSenderOrigin(undefined)).toBe(false);
+    it("should reject a missing or undefined origin", () => {
+      // Arrange
+      const senders = [{}, undefined];
+
+      // Act
+      const allowed = senders.map(isAllowedSenderOrigin);
+
+      // Assert
+      expect(allowed).toEqual([false, false]);
     });
 
-    it("rejects foreign origins and other localhost ports", () => {
-      expect(
-        isAllowedSenderOrigin({ origin: "https://attacker.example" })
-      ).toBe(false);
-      expect(isAllowedSenderOrigin({ origin: "http://localhost:9999" })).toBe(
-        false
-      );
-      expect(isAllowedSenderOrigin({ origin: "http://app.kaiord.com" })).toBe(
-        false
-      );
+    it("should reject foreign origins and other localhost ports", () => {
+      // Arrange
+      const senders = [
+        { origin: "https://attacker.example" },
+        { origin: "http://localhost:9999" },
+        { origin: "http://app.kaiord.com" },
+      ];
+
+      // Act
+      const allowed = senders.map(isAllowedSenderOrigin);
+
+      // Assert
+      expect(allowed).toEqual([false, false, false]);
     });
   });
 
   describe("createEnvelope", () => {
-    it("wraps success results with the protocol version", () => {
+    it("should wrap success results with the protocol version", () => {
+      // Arrange
       const { sendResult } = createEnvelope(1);
       const respond = vi.fn();
 
+      // Act
       sendResult({ hello: true }, respond);
 
+      // Assert
       expect(respond).toHaveBeenCalledWith({
         ok: true,
         protocolVersion: 1,
@@ -65,7 +87,8 @@ describe("bridge-envelope (vendored)", () => {
       });
     });
 
-    it("serializes error fields, keeping optional markers only when set", () => {
+    it("should serialize error fields, keeping optional markers only when set", () => {
+      // Arrange
       const { sendError } = createEnvelope(1);
       const respond = vi.fn();
       const err = new Error("boom");
@@ -73,8 +96,10 @@ describe("bridge-envelope (vendored)", () => {
       err.retryable = true;
       err.resetSeconds = 30;
 
+      // Act
       sendError(err, respond);
 
+      // Assert
       expect(respond).toHaveBeenCalledWith({
         ok: false,
         protocolVersion: 1,
@@ -85,12 +110,15 @@ describe("bridge-envelope (vendored)", () => {
       });
     });
 
-    it("omits optional error fields when absent", () => {
+    it("should omit optional error fields when absent", () => {
+      // Arrange
       const { sendError } = createEnvelope(1);
       const respond = vi.fn();
 
+      // Act
       sendError(new Error("plain"), respond);
 
+      // Assert
       expect(respond).toHaveBeenCalledWith({
         ok: false,
         protocolVersion: 1,
@@ -98,27 +126,33 @@ describe("bridge-envelope (vendored)", () => {
       });
     });
 
-    it("carries retryable: false explicitly when the thrower sets it", () => {
+    it("should carry retryable: false explicitly when the thrower sets it", () => {
+      // Arrange
       const { sendError } = createEnvelope(1);
       const respond = vi.fn();
       const err = new Error("no retry");
       err.retryable = false;
 
+      // Act
       sendError(err, respond);
 
+      // Assert
       expect(respond).toHaveBeenCalledWith(
         expect.objectContaining({ retryable: false })
       );
     });
 
-    it("marks reauth conditions", () => {
+    it("should mark reauth conditions", () => {
+      // Arrange
       const { sendError } = createEnvelope(1);
       const respond = vi.fn();
       const err = new Error("expired");
       err.needsReauth = true;
 
+      // Act
       sendError(err, respond);
 
+      // Assert
       expect(respond).toHaveBeenCalledWith(
         expect.objectContaining({ needsReauth: true })
       );
@@ -126,16 +160,19 @@ describe("bridge-envelope (vendored)", () => {
   });
 
   describe("createDispatch", () => {
-    it("resolves the action handler into a success envelope", async () => {
+    it("should resolve the action handler into a success envelope", async () => {
+      // Arrange
       const dispatch = createDispatch({
         handleAction: vi.fn().mockResolvedValue({ pong: true }),
         protocolVersion: 1,
       });
       const respond = vi.fn();
 
+      // Act
       const returns = dispatch({ action: "ping" }, respond);
       await vi.waitFor(() => expect(respond).toHaveBeenCalled());
 
+      // Assert
       expect(returns).toBe(true);
       expect(respond).toHaveBeenCalledWith({
         ok: true,
@@ -144,16 +181,19 @@ describe("bridge-envelope (vendored)", () => {
       });
     });
 
-    it("routes handler rejections through the error envelope", async () => {
+    it("should route handler rejections through the error envelope", async () => {
+      // Arrange
       const dispatch = createDispatch({
         handleAction: vi.fn().mockRejectedValue(new Error("nope")),
         protocolVersion: 1,
       });
       const respond = vi.fn();
 
+      // Act
       dispatch({ action: "ping" }, respond);
       await vi.waitFor(() => expect(respond).toHaveBeenCalled());
 
+      // Assert
       expect(respond).toHaveBeenCalledWith({
         ok: false,
         protocolVersion: 1,
@@ -174,10 +214,12 @@ describe("bridge-envelope (vendored)", () => {
       return { handleAction, external };
     };
 
-    it("dispatches allowlisted actions from an allowed origin", async () => {
+    it("should dispatch allowlisted actions from an allowed origin", async () => {
+      // Arrange
       const { handleAction, external } = setup();
       const respond = vi.fn();
 
+      // Act
       external(
         { action: "ping" },
         { origin: "https://app.kaiord.com" },
@@ -185,22 +227,26 @@ describe("bridge-envelope (vendored)", () => {
       );
       await vi.waitFor(() => expect(respond).toHaveBeenCalled());
 
+      // Assert
       expect(handleAction).toHaveBeenCalledWith({ action: "ping" });
       expect(respond).toHaveBeenCalledWith(
         expect.objectContaining({ ok: true })
       );
     });
 
-    it("rejects a foreign origin without invoking the handler", () => {
+    it("should reject a foreign origin without invoking the handler", () => {
+      // Arrange
       const { handleAction, external } = setup();
       const respond = vi.fn();
 
+      // Act
       const returns = external(
         { action: "ping" },
         { origin: "https://attacker.example" },
         respond
       );
 
+      // Assert
       expect(returns).toBe(true);
       expect(handleAction).not.toHaveBeenCalled();
       expect(respond).toHaveBeenCalledWith({
@@ -211,28 +257,34 @@ describe("bridge-envelope (vendored)", () => {
       });
     });
 
-    it("rejects an empty sender without invoking the handler", () => {
+    it("should reject an empty sender without invoking the handler", () => {
+      // Arrange
       const { handleAction, external } = setup();
       const respond = vi.fn();
 
+      // Act
       external({ action: "ping" }, {}, respond);
 
+      // Assert
       expect(handleAction).not.toHaveBeenCalled();
       expect(respond).toHaveBeenCalledWith(
         expect.objectContaining({ ok: false })
       );
     });
 
-    it("rejects actions outside the allowlist even from an allowed origin", () => {
+    it("should reject actions outside the allowlist even from an allowed origin", () => {
+      // Arrange
       const { handleAction, external } = setup();
       const respond = vi.fn();
 
+      // Act
       external(
         { action: "set-credentials" },
         { origin: "https://app.kaiord.com" },
         respond
       );
 
+      // Assert
       expect(handleAction).not.toHaveBeenCalled();
       expect(respond).toHaveBeenCalledWith(
         expect.objectContaining({

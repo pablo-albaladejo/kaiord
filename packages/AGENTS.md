@@ -27,6 +27,7 @@ types, schemas, ports, and use cases; every other package is an outer adapter
 | `mcp/`                | `@kaiord/mcp` — Model Context Protocol server exposing conversions to AI clients (see `mcp/AGENTS.md`)                      |
 | `tcx/`                | `@kaiord/tcx` — TCX XML adapter via `fast-xml-parser` (see `tcx/AGENTS.md`)                                                 |
 | `train2go-bridge/`    | Private Chrome extension reading Train2Go coaching plans (see `train2go-bridge/AGENTS.md`)                                  |
+| `whoop-bridge/`       | Private Chrome extension bridging SPA editor to WHOOP data (see `whoop-bridge/AGENTS.md`)                                   |
 | `workout-spa-editor/` | React workout editor SPA (Zustand + Dexie + Tailwind) (see `workout-spa-editor/AGENTS.md`)                                  |
 | `zwo/`                | `@kaiord/zwo` — Zwift Workout XML adapter with XSD validation (see `zwo/AGENTS.md`)                                         |
 
@@ -37,8 +38,8 @@ types, schemas, ports, and use cases; every other package is an outer adapter
 - **Hexagonal direction**: `core/` depends on nothing. Adapter packages
   (`fit/`, `tcx/`, `zwo/`, `garmin/`, `garmin-connect/`, `mcp/`, `cli/`,
   `ai/`) depend on `@kaiord/core` only. Applications (`workout-spa-editor/`,
-  `landing/`, `docs/`, `garmin-bridge/`, `train2go-bridge/`) compose
-  adapter packages.
+  `landing/`, `docs/`, `garmin-bridge/`, `train2go-bridge/`,
+  `whoop-bridge/`) compose adapter packages.
 - **Never import upward**: a format adapter MUST NOT import the SPA editor;
   `core/` MUST NOT import any adapter. `eslint-plugin-boundaries` and
   `dependency-cruiser` enforce this — failures are lint errors.

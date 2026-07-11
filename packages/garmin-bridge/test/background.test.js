@@ -177,12 +177,15 @@ describe("background.js", () => {
       });
     });
 
-    it("rejects a non-allowlisted action before the handler runs", async () => {
+    it("should reject a non-allowlisted action before the handler runs", async () => {
+      // Arrange
       const sendResponse = vi.fn();
 
+      // Act
       externalCb({ action: "unknown" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
+      // Assert
       expect(sendResponse).toHaveBeenCalledWith({
         ok: false,
         protocolVersion: 1,
@@ -191,12 +194,15 @@ describe("background.js", () => {
       });
     });
 
-    it("rejects an empty sender for every external action", async () => {
+    it("should reject an empty sender for every external action", async () => {
+      // Arrange
       const sendResponse = vi.fn();
 
+      // Act
       externalCb({ action: "ping" }, {}, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
+      // Assert
       expect(chrome.tabs.query).not.toHaveBeenCalled();
       expect(sendResponse).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -206,9 +212,11 @@ describe("background.js", () => {
       );
     });
 
-    it("rejects a foreign origin without invoking the action handler", async () => {
+    it("should reject a foreign origin without invoking the action handler", async () => {
+      // Arrange
       const sendResponse = vi.fn();
 
+      // Act
       externalCb(
         { action: "list" },
         { origin: "https://attacker.example" },
@@ -216,6 +224,7 @@ describe("background.js", () => {
       );
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
+      // Assert
       expect(chrome.tabs.query).not.toHaveBeenCalled();
       expect(sendResponse).toHaveBeenCalledWith({
         ok: false,
@@ -249,12 +258,15 @@ describe("background.js", () => {
       });
     });
 
-    it("surfaces unknown-action errors on the internal channel", async () => {
+    it("should surface unknown-action errors on the internal channel", async () => {
+      // Arrange
       const sendResponse = vi.fn();
 
+      // Act
       internalCb({ action: "unknown" }, {}, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
+      // Assert
       expect(sendResponse).toHaveBeenCalledWith({
         ok: false,
         protocolVersion: 1,

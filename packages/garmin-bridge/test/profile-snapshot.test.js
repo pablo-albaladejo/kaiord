@@ -118,9 +118,11 @@ describe("background — handleExternalMessage origin gate", () => {
     );
   });
 
-  it("origin-gates every external action, not only snapshot writes", async () => {
+  it("should origin-gate every external action, not only snapshot writes", async () => {
+    // Arrange
     const sendResponse = vi.fn();
 
+    // Act
     bridge.handleExternalMessage(
       { action: "open-garmin" },
       { origin: "anything" },
@@ -128,6 +130,8 @@ describe("background — handleExternalMessage origin gate", () => {
     );
 
     await new Promise((r) => setTimeout(r, 10));
+
+    // Assert
     expect(sendResponse).toHaveBeenCalledWith(
       expect.objectContaining({
         ok: false,
