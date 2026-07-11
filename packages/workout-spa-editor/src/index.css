@@ -20,27 +20,27 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Semantic theme tokens — light defaults on :root, dark overrides under .dark.
-   The dark values reuse the --brand-* tokens (which are dark-mode-specific by
-   design, see styles/brand-tokens.css). Components must consume these through
-   the Tailwind utilities mapped in @theme below (bg-surface*, text-ink-*,
-   border-edge*, text-accent) instead of raw slate utilities, so every surface
-   adapts to both themes from one place. */
+/* Semantic theme tokens. Surfaces, ink, and soft edges alias the shared
+   --brand-* tokens, which carry light defaults on :root and dark values
+   under .dark (see styles/brand-tokens.css) — so they adapt without local
+   re-declaration. Components must consume these through the Tailwind
+   utilities mapped in @theme below (bg-surface*, text-ink-*, border-edge*,
+   text-accent) instead of raw slate utilities. */
 :root {
-  --surface-page: #f8fafc;
-  --surface-deep: #f1f5f9;
-  --surface-card: #ffffff;
-  --surface-elevated: #f1f5f9;
+  --surface-page: var(--brand-bg-primary);
+  --surface-deep: var(--brand-bg-deep);
+  --surface-card: var(--brand-bg-surface);
+  --surface-elevated: var(--brand-bg-elevated);
 
-  --ink-strong: #0f172a;
-  --ink-body: #334155;
-  --ink-muted: #64748b;
+  --ink-strong: var(--brand-text-primary);
+  --ink-body: var(--brand-text-secondary);
+  --ink-muted: var(--brand-text-muted);
 
-  --edge: #e2e8f0;
-  --edge-soft: #f1f5f9;
+  --edge: var(--brand-border);
+  --edge-soft: var(--brand-border-soft);
   --edge-strong: #cbd5e1;
 
-  --accent: #0284c7;
+  --accent: var(--brand-accent-blue);
 
   /* Glass chrome (BottomNav) — consumed via inline style var() references. */
   --glass-bg: rgba(248, 250, 252, 0.85);
@@ -51,18 +51,12 @@
   --ring-track: #e2e8f0;
 }
 
+/* SPA-specific deviations from the brand palette in dark mode: hairlines
+   use a translucent slate instead of the solid brand border, the accent
+   brightens to sky-400 (the brand blue is tuned for light bg), and the
+   glass chrome and ring track carry their own dark values. */
 .dark {
-  --surface-page: var(--brand-bg-primary);
-  --surface-deep: var(--brand-bg-deep);
-  --surface-card: var(--brand-bg-surface);
-  --surface-elevated: var(--brand-bg-elevated);
-
-  --ink-strong: var(--brand-text-primary);
-  --ink-body: var(--brand-text-secondary);
-  --ink-muted: var(--brand-text-muted);
-
   --edge: rgba(51, 65, 85, 0.6);
-  --edge-soft: var(--brand-border-soft);
   --edge-strong: #475569;
 
   --accent: #38bdf8;
