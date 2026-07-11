@@ -1,4 +1,8 @@
 # Dependencies
+# Match both directories and symlinks named node_modules: a trailing-slash
+# pattern ignores only directories, so a node_modules SYMLINK (e.g. one that
+# leaks in from a sibling worktree via `git add -A`) would slip past it.
+node_modules
 node_modules/
 
 # Build outputs
