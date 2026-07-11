@@ -33,6 +33,7 @@ export const SCOPE_ENUM = [
   "train2go-bridge",
   "whoop",
   "whoop-bridge",
+  "bridge-core",
   "analytics",
   "landing",
   "docs-site",

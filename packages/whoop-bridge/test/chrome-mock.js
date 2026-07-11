@@ -1,32 +1,63 @@
 /**
- * Minimal Chrome Extension API mock for the WHOOP bridge (vitest).
- * Covers storage.local, identity (OAuth), and runtime messaging.
+ * Kaiord Bridge Core — Chrome Extension API mock for vitest (vendored)
+ *
+ * Master: packages/_shared/bridge-core/test/chrome-mock.js. Never edit a
+ * vendored copy — edit the master and run `pnpm bridge:sync`.
+ *
+ * Superset of every bridge's API surface (storage.local/session, identity,
+ * tabs, scripting, webRequest, runtime messaging); each suite uses the
+ * slice its manifest grants. Identity values are deliberately neutral —
+ * the real permission surface is locked by check-bridge-privacy-surface.
  */
 
+const sessionStore = {};
 const localStore = {};
 
 const chromeMock = {
   runtime: {
-    id: "whoop-test-extension-id",
+    id: "test-extension-id",
     lastError: null,
-    getManifest: vi.fn(() => ({ version: "0.1.0" })),
+    getManifest: vi.fn(() => ({ version: "0.0.0" })),
     onMessage: { addListener: vi.fn() },
     onMessageExternal: { addListener: vi.fn() },
     onInstalled: { addListener: vi.fn() },
     sendMessage: vi.fn(),
   },
   identity: {
-    getRedirectURL: vi.fn(
-      () => "https://whoop-test-extension-id.chromiumapp.org/"
-    ),
+    getRedirectURL: vi.fn(() => "https://test-extension-id.chromiumapp.org/"),
     launchWebAuthFlow: vi.fn((details, cb) => {
       const state = new URL(details.url).searchParams.get("state");
       cb(
-        `https://whoop-test-extension-id.chromiumapp.org/?code=auth-code&state=${state}`
+        `https://test-extension-id.chromiumapp.org/?code=auth-code&state=${state}`
       );
     }),
   },
+  tabs: {
+    // The query callback form is used elsewhere in the codebase; the
+    // promise form is what reinjectContentScripts uses. Support both.
+    query: vi.fn((q, cb) =>
+      typeof cb === "function" ? cb([]) : Promise.resolve([])
+    ),
+    sendMessage: vi.fn((tabId, msg, cb) => cb(undefined)),
+    create: vi.fn(() => Promise.resolve({ id: 1 })),
+  },
+  scripting: {
+    executeScript: vi.fn(() => Promise.resolve([])),
+  },
+  webRequest: {
+    onBeforeSendHeaders: { addListener: vi.fn() },
+  },
   storage: {
+    session: {
+      get: vi.fn((key) => {
+        const k = typeof key === "string" ? key : Object.keys(key)[0];
+        return Promise.resolve({ [k]: sessionStore[k] ?? undefined });
+      }),
+      set: vi.fn((obj) => {
+        Object.assign(sessionStore, obj);
+        return Promise.resolve();
+      }),
+    },
     local: {
       get: vi.fn((key) => {
         if (typeof key === "string") {
@@ -63,8 +94,14 @@ const windowMock = {
 };
 globalThis.window = windowMock;
 
+// Helper to reset state between tests
 globalThis.__resetChromeMock = () => {
-  for (const key of Object.keys(localStore)) delete localStore[key];
+  for (const key of Object.keys(sessionStore)) {
+    delete sessionStore[key];
+  }
+  for (const key of Object.keys(localStore)) {
+    delete localStore[key];
+  }
   chromeMock.runtime.lastError = null;
   vi.clearAllMocks();
 };
