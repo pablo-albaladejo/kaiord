@@ -52,8 +52,9 @@
 }
 
 /* SPA-specific deviations from the brand palette in dark mode: hairlines
-   use a translucent slate instead of the solid brand border, and the
-   accent brightens to sky-400 (the brand blue is tuned for light bg). */
+   use a translucent slate instead of the solid brand border, the accent
+   brightens to sky-400 (the brand blue is tuned for light bg), and the
+   glass chrome and ring track carry their own dark values. */
 .dark {
   --edge: rgba(51, 65, 85, 0.6);
   --edge-strong: #475569;

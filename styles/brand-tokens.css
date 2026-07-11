@@ -7,6 +7,9 @@
    Theme-invariant tokens (zones, fonts, decorative purple) live on :root
    only. Node-side readers that need the DARK brand identity (OG images,
    <meta theme-color>) must parse the `.dark` block, not the first match.
+   INVARIANT: keep `.dark` a SINGLE FLAT block (no compound selector, no
+   nesting, no second block) — those readers regex-match the first
+   `.dark { … }` and would silently fall back to light values otherwise.
 
    --------------------------------------------------------------------------
    @font-face SHARED-INVARIANT NOTE — read before editing the block below.
