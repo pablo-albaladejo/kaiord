@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-07-11 | [`add-shared-bridge-core`](./2026-07-11-add-shared-bridge-core/) | Three Chrome extension bridges (garmin-bridge, train2go-bridge, |
 | 2026-07-11 | [`cutover-usage-accounting-to-event-log`](./2026-07-11-cutover-usage-accounting-to-event-log/) | Cut usage accounting over to the event log (retire the legacy `usage` table) |
 | 2026-07-10 | [`add-ai-usage-telemetry-sink`](./2026-07-10-add-ai-usage-telemetry-sink/) | Migrate usage accounting onto the telemetry port (dual-write + parity) |
 | 2026-07-09 | [`add-ai-platform-foundation`](./2026-07-09-add-ai-platform-foundation/) | AI platform foundation (Wave 1) |

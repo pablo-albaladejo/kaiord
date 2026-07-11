@@ -1,3 +1,5 @@
+> Completed: 2026-07-11
+
 ## Why
 
 Three Chrome extension bridges (`garmin-bridge`, `train2go-bridge`,
