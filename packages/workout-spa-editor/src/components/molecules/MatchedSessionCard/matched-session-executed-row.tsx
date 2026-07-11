@@ -28,7 +28,7 @@ export function ExecutedRows({ executed }: ExecutedRowsProps) {
       data-testid="matched-card-executed-group"
       className="mt-1 border-t border-slate-200 pt-1 dark:border-slate-700"
     >
-      <div className="flex items-center gap-1 text-[10px] text-slate-500">
+      <div className="flex items-center gap-1 text-[10px] text-ink-muted">
         <span>Executed</span>
         {executed.length > 1 ? (
           <span
@@ -47,7 +47,7 @@ export function ExecutedRows({ executed }: ExecutedRowsProps) {
             className="flex min-w-0 items-center gap-1 text-xs"
           >
             <span className="min-w-0 flex-1 truncate">{titleOf(w)}</span>
-            <span className="text-[10px] text-slate-500">
+            <span className="text-[10px] text-ink-muted">
               {durationText(w)}
             </span>
           </div>

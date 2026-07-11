@@ -39,7 +39,7 @@ export function CoachingDayComments({
   return (
     <div
       data-testid="coaching-day-comments"
-      className="space-y-3 border-t pt-3"
+      className="space-y-3 border-t border-edge pt-3"
     >
       <h3 className="text-xs font-semibold uppercase text-muted-foreground">
         Comments

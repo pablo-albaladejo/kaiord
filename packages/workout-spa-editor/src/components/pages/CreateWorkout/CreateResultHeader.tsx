@@ -18,14 +18,14 @@ export function CreateResultHeader({ sport, title }: CreateResultHeaderProps) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate text-[16px] font-bold text-slate-50">
+          <span className="truncate text-[16px] font-bold text-ink-strong">
             {title}
           </span>
           <Pill tone="accent" icon="sparkle">
             {t("result.aiBadge")}
           </Pill>
         </div>
-        <p className="text-[12.5px] text-slate-500">{t("result.tapToTune")}</p>
+        <p className="text-[12.5px] text-ink-muted">{t("result.tapToTune")}</p>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ export function AthleteEmptyState({ onCreate }: AthleteEmptyStateProps) {
   const t = useTranslate("athlete");
   return (
     <div className="flex flex-col items-center gap-4 py-16 text-center">
-      <p className="text-[15px] text-slate-300">{t("emptyTitle")}</p>
+      <p className="text-[15px] text-ink-body">{t("emptyTitle")}</p>
       <Button variant="primary" onClick={onCreate}>
         {t("createProfile")}
       </Button>

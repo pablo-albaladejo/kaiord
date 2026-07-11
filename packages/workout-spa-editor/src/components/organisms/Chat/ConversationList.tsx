@@ -30,7 +30,7 @@ export function ConversationList({
     >
       <button
         type="button"
-        className="mb-1 rounded-md border border-slate-700 px-2 py-1.5 text-sm font-medium text-slate-200 hover:bg-slate-800"
+        className="mb-1 rounded-md border border-edge px-2 py-1.5 text-sm font-medium text-ink-body hover:bg-surface-elevated"
         onClick={onNew}
       >
         {t("list.newConversation")}

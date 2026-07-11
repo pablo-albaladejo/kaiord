@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "../../../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../../../adapters/dexie/dexie-persistence-adapter";
 import { PersistenceProvider } from "../../../../../contexts/persistence-context";
+import { ThemeProvider } from "../../../../../contexts/ThemeContext";
 import { LabDashboardSection } from "./LabDashboardSection";
 
 vi.mock("../../../../charts/uplot-base/uplot-chart", () => ({
@@ -29,9 +30,11 @@ const CHART_RENDER_TIMEOUT_MS = 10_000;
 const CI_TIMEOUT_MS = 20_000;
 
 const wrap = ({ children }: { children: ReactNode }) => (
-  <PersistenceProvider persistence={createDexiePersistence(db)}>
-    {children}
-  </PersistenceProvider>
+  <ThemeProvider>
+    <PersistenceProvider persistence={createDexiePersistence(db)}>
+      {children}
+    </PersistenceProvider>
+  </ThemeProvider>
 );
 
 const value = (

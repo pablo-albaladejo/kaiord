@@ -11,7 +11,7 @@ export function RouteSpinner() {
       role="status"
       aria-label={t("a11y.loadingPage")}
     >
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-edge border-t-primary" />
     </div>
   );
 }

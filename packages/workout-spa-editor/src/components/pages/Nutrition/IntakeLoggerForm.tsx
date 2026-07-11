@@ -40,11 +40,8 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
   };
 
   return (
-    <Card
-      className="border-slate-800 bg-primary-900 p-4"
-      data-testid="intake-logger"
-    >
-      <p className="m-0 mb-3 text-[15px] font-semibold text-slate-100">
+    <Card className="border-edge bg-surface p-4" data-testid="intake-logger">
+      <p className="m-0 mb-3 text-[15px] font-semibold text-ink-strong">
         {t("logger.title")}
       </p>
       <IntakeLoggerFields fields={fields} onChange={setFields} />
@@ -68,7 +65,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
           disabled={!("entry" in result) || fields.label.trim() === ""}
           onClick={handleSavePreset}
           data-testid="intake-save-preset"
-          className="rounded border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 disabled:opacity-40"
+          className="rounded border border-edge px-3 py-2 text-sm font-semibold text-ink-body disabled:opacity-40"
         >
           {t("logger.savePreset")}
         </button>

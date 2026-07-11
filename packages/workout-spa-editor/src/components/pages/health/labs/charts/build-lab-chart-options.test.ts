@@ -17,6 +17,10 @@ const EXPECTED_SERIES = 5; // x + line + outliers + 2 band edges
 const EXPECTED_AXES = 2; // x + one y
 const BAND_EDGE = "rgba(37, 99, 235, 0.30)";
 const THRESHOLD_STROKE = "rgba(37, 99, 235, 0.55)";
+// Fallback theme colors from chart-theme.ts (no DOM custom properties set in
+// this pure-function test, so getChartAxisColors returns its defaults).
+const AXIS_STROKE = "#64748b";
+const GRID_STROKE = "#e2e8f0";
 
 describe("buildLabChartOptions", () => {
   it("should key the y scale, axis and value series to the parameter", () => {
@@ -88,5 +92,19 @@ describe("buildLabChartOptions", () => {
     expect(options.bands).toBeUndefined();
     expect(options.series?.[REF_HIGH_IDX]?.stroke).toBe(THRESHOLD_STROKE);
     expect(options.series?.[REF_LOW_IDX]?.stroke).toBe(THRESHOLD_STROKE);
+  });
+
+  it("should theme both axes with the current stroke/grid/tick colors", () => {
+    // Arrange
+
+    // Act
+    const options = buildLabChartOptions(DEF, null);
+
+    // Assert
+    for (const axis of options.axes ?? []) {
+      expect(axis.stroke).toBe(AXIS_STROKE);
+      expect(axis.grid).toEqual({ stroke: GRID_STROKE });
+      expect(axis.ticks).toEqual({ stroke: GRID_STROKE });
+    }
   });
 });

@@ -17,7 +17,7 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="mx-auto flex min-h-16 max-w-7xl flex-col items-center justify-between gap-2 px-4 py-2 sm:flex-row sm:gap-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-14 max-w-7xl flex-col items-center justify-between gap-2 px-4 py-2 md:min-h-16 md:gap-3 md:px-6 lg:flex-row lg:gap-4 lg:px-8">
         <HeaderLogo />
         <StatusHeader onHelpClick={help.show} />
       </div>

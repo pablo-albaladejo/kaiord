@@ -4,7 +4,7 @@ import { IntakeNumberField } from "./IntakeNumberField";
 import { MealSlotField } from "./MealSlotField";
 
 const LABEL_CLASS =
-  "mt-1 block w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100";
+  "mt-1 block w-full rounded border border-edge bg-surface-deep px-2 py-1.5 text-sm text-ink-strong";
 
 export type IntakeLoggerFieldsProps = {
   fields: Fields;
@@ -49,7 +49,7 @@ export function IntakeLoggerFields({
           onChange={set("fatG")}
         />
       </div>
-      <label className="text-xs font-medium text-slate-300">
+      <label className="text-xs font-medium text-ink-body">
         {t("logger.labelOptional")}
         <input
           type="text"

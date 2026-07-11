@@ -14,7 +14,7 @@ export function WorkoutDetailNotFound({ onBack }: WorkoutDetailNotFoundProps) {
       <h1
         tabIndex={-1}
         {...{ [ROUTE_HEADING_ATTR]: "" }}
-        className="text-[18px] font-semibold text-slate-200"
+        className="text-[18px] font-semibold text-ink-body"
       >
         {t("notFound.title")}
       </h1>

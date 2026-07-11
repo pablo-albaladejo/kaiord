@@ -14,7 +14,7 @@ export type CreateInputHeroProps = {
 };
 
 const TEXTAREA_CLASS =
-  "w-full bg-surface-deep border border-slate-800 rounded-[13px] p-3 text-slate-50 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500";
+  "w-full bg-surface-deep border border-edge rounded-[13px] p-3 text-ink-strong resize-none focus:outline-none focus:ring-2 focus:ring-primary-500";
 
 export function CreateInputHero({
   sportLabel,
@@ -28,10 +28,10 @@ export function CreateInputHero({
     onPromptChange(e.target.value);
 
   return (
-    <div className="rounded-[16px] border border-slate-800 bg-surface p-4">
+    <div className="rounded-[16px] border border-edge bg-surface p-4">
       <div className="mb-3 flex items-center gap-2">
-        <Icon icon={ICON_MAP.sparkle} size="sm" className="text-sky-400" />
-        <span className="text-[15px] font-semibold text-slate-50">
+        <Icon icon={ICON_MAP.sparkle} size="sm" className="text-accent" />
+        <span className="text-[15px] font-semibold text-ink-strong">
           {t("hero.describe")}
         </span>
       </div>
@@ -64,7 +64,7 @@ export function CreateInputHero({
         <Icon icon={ICON_MAP.sparkle} size="sm" color="inherit" />
         {t("hero.generate")}
       </Button>
-      <p className="mt-2 text-center text-[12.5px] text-slate-500">
+      <p className="mt-2 text-center text-[12.5px] text-ink-muted">
         {t("hero.builtAround", { sport: sportLabel })}
       </p>
     </div>

@@ -10,8 +10,8 @@ export type EnergyTrendRangeSelectorProps = {
 };
 
 const base = "rounded-md border px-2.5 py-1 text-[12px] transition-colors";
-const on = "border-blue-500 bg-blue-950 text-blue-300";
-const off = "border-slate-700 text-slate-400";
+const on = "border-accent bg-accent/15 text-accent";
+const off = "border-edge text-ink-muted";
 
 export function EnergyTrendRangeSelector({
   selected,

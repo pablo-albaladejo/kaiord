@@ -61,7 +61,7 @@ export const DialogDescription = ({
   if (!activity.description) return null;
   const paragraphs = formatCoachingDescription(activity.description);
   return (
-    <div className="space-y-2 border-t pt-3 text-sm leading-relaxed">
+    <div className="space-y-2 border-t border-edge pt-3 text-sm leading-relaxed">
       {paragraphs.map((p, pi) => (
         <p key={pi}>
           {p.inlines.map((inline, ii) =>

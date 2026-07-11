@@ -33,7 +33,7 @@ describe("Metric", () => {
 
     // Assert
 
-    expect(value).toHaveClass("text-sky-400");
+    expect(value).toHaveClass("text-accent");
   });
 
   it("should apply default color class when accent is not set", () => {
@@ -47,7 +47,7 @@ describe("Metric", () => {
 
     // Assert
 
-    expect(value).toHaveClass("text-slate-50");
+    expect(value).toHaveClass("text-ink-strong");
   });
 
   it("should render without unit", () => {

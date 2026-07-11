@@ -11,7 +11,7 @@ export function StatusHeader({ onHelpClick }: StatusHeaderProps) {
   return (
     <nav
       aria-label={t("a11y.mainNavigation")}
-      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm sm:justify-end"
+      className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm md:gap-x-3 md:gap-y-2 lg:justify-end"
       data-testid="status-header"
     >
       <StatusEntryButtons onHelpClick={onHelpClick} />

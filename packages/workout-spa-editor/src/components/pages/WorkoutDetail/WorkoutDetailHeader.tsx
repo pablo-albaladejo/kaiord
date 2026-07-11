@@ -16,14 +16,14 @@ export function WorkoutDetailHeader({ onBack }: WorkoutDetailHeaderProps) {
         onClick={onBack}
         aria-label={t("header.back")}
         data-testid="workout-detail-back"
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-300 hover:bg-white/5"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink-body hover:bg-ink-strong/5"
       >
         <Icon icon={ICON_MAP.chevL} size="md" color="inherit" />
       </button>
       <h1
         tabIndex={-1}
         {...{ [ROUTE_HEADING_ATTR]: "" }}
-        className="text-[15px] font-semibold text-slate-200"
+        className="text-[15px] font-semibold text-ink-body"
       >
         {t("header.title")}
       </h1>
@@ -31,7 +31,7 @@ export function WorkoutDetailHeader({ onBack }: WorkoutDetailHeaderProps) {
         type="button"
         aria-label={t("header.moreOptions")}
         disabled
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink-muted"
       >
         <Icon icon={ICON_MAP.dots} size="md" color="inherit" />
       </button>
