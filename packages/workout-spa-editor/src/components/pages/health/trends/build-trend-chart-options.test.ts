@@ -28,18 +28,6 @@ describe("buildTrendChartOptions", () => {
     expect(options.axes?.[3]?.scale).toBe("weight");
   });
 
-  it("should set each Y axis scale key to the metric key", () => {
-    // Arrange
-    const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV];
-
-    // Act
-    const options = buildTrendChartOptions(metrics);
-
-    // Assert
-    const yAxisScales = (options.axes ?? []).slice(1).map((a) => a.scale);
-    expect(yAxisScales).toEqual(["sleep", "hrv"]);
-  });
-
   it("should set each Y series scale key to the metric key", () => {
     // Arrange
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV];

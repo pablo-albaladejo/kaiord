@@ -83,37 +83,27 @@ describe("Dexie energy-balance (v26) migration", () => {
     });
   });
 
-  it("should index intakeEntries by id with a [profileId+date] index", async () => {
-    // Arrange
-    await seed(name);
+  it.each([
+    { store: "intakeEntries", index: "profileId+date" },
+    { store: "intakePresets", index: "profileId" },
+  ])(
+    "should index $store by id with a $index index",
+    async ({ store, index }) => {
+      // Arrange
+      await seed(name);
 
-    // Act
-    const db = new KaiordDatabase(name);
-    await db.open();
-    const schema = db.table("intakeEntries").schema;
-    const indexes = indexKeyPaths(db, "intakeEntries");
-    db.close();
+      // Act
+      const db = new KaiordDatabase(name);
+      await db.open();
+      const schema = db.table(store).schema;
+      const indexes = indexKeyPaths(db, store);
+      db.close();
 
-    // Assert
-    expect(schema.primKey.keyPath).toBe("id");
-    expect(indexes).toContain("profileId+date");
-  });
-
-  it("should index intakePresets by id with a profileId index", async () => {
-    // Arrange
-    await seed(name);
-
-    // Act
-    const db = new KaiordDatabase(name);
-    await db.open();
-    const schema = db.table("intakePresets").schema;
-    const indexes = indexKeyPaths(db, "intakePresets");
-    db.close();
-
-    // Assert
-    expect(schema.primKey.keyPath).toBe("id");
-    expect(indexes).toContain("profileId");
-  });
+      // Assert
+      expect(schema.primKey.keyPath).toBe("id");
+      expect(indexes).toContain(index);
+    }
+  );
 
   it("should key energyTargets on profileId (one goal per profile)", async () => {
     // Arrange

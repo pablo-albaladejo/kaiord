@@ -3,36 +3,33 @@ import { describe, expect, it } from "vitest";
 import { toggleDashboardParam } from "./toggle-dashboard-param";
 
 describe("toggleDashboardParam", () => {
-  it("should pin a parameter when the current selection is undefined", () => {
+  it.each([
+    {
+      scenario: "pin a parameter when the current selection is undefined",
+      current: undefined,
+      parameterKey: "glucose",
+      expected: ["glucose"],
+    },
+    {
+      scenario: "pin a parameter not yet selected, appending it",
+      current: ["glucose"],
+      parameterKey: "ferritin",
+      expected: ["glucose", "ferritin"],
+    },
+    {
+      scenario: "unpin an already pinned parameter",
+      current: ["glucose", "ferritin"],
+      parameterKey: "glucose",
+      expected: ["ferritin"],
+    },
+  ])("should $scenario", ({ current, parameterKey, expected }) => {
     // Arrange
 
     // Act
-    const next = toggleDashboardParam(undefined, "glucose");
+    const next = toggleDashboardParam(current, parameterKey);
 
     // Assert
-    expect(next).toEqual(["glucose"]);
-  });
-
-  it("should pin a parameter not yet selected, appending it", () => {
-    // Arrange
-    const current = ["glucose"];
-
-    // Act
-    const next = toggleDashboardParam(current, "ferritin");
-
-    // Assert
-    expect(next).toEqual(["glucose", "ferritin"]);
-  });
-
-  it("should unpin an already pinned parameter", () => {
-    // Arrange
-    const current = ["glucose", "ferritin"];
-
-    // Act
-    const next = toggleDashboardParam(current, "glucose");
-
-    // Assert
-    expect(next).toEqual(["ferritin"]);
+    expect(next).toEqual(expected);
   });
 
   it("should not mutate the input array", () => {

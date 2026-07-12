@@ -53,140 +53,127 @@ describe("createDexieSnapshotPort", () => {
     expect(snapshot.tables).toHaveProperty("templates");
   });
 
-  it("should exclude the device-local connections store from the export", async () => {
-    // Arrange
-    const db = new KaiordDatabase(name);
-    await db.open();
-    await db.table("connections").add({
-      profileId: "p-1",
-      providerId: "intervals",
-      status: "connected",
-      mechanism: "api-key",
-      updatedAt: "2026-06-19T00:00:00.000Z",
-    });
-    const port = createDexieSnapshotPort(db);
+  it.each([
+    {
+      store: "connections",
+      row: {
+        profileId: "p-1",
+        providerId: "intervals",
+        status: "connected",
+        mechanism: "api-key",
+        updatedAt: "2026-06-19T00:00:00.000Z",
+      },
+    },
+    {
+      store: "intakeEntries",
+      row: {
+        id: "i-1",
+        profileId: "p-1",
+        date: "2026-06-21",
+        loggedAt: "2026-06-21T08:00:00.000Z",
+        kcal: 600,
+        proteinG: 40,
+        carbG: 60,
+        fatG: 20,
+      },
+    },
+    {
+      store: "intakePresets",
+      row: {
+        id: "pre-1",
+        profileId: "p-1",
+        label: "breakfast",
+        kcal: 400,
+        proteinG: 20,
+        carbG: 50,
+        fatG: 10,
+        createdAt: "2026-06-21T08:00:00.000Z",
+      },
+    },
+    {
+      store: "energyTargets",
+      row: {
+        profileId: "p-1",
+        goalType: "fat_loss",
+        startWeightKg: 80,
+        targetWeightKg: 75,
+        targetDate: "2026-09-01",
+        createdAt: "2026-06-21T08:00:00.000Z",
+        updatedAt: "2026-06-21T08:00:00.000Z",
+      },
+    },
+  ])(
+    "should exclude the device-local $store store from the export",
+    async ({ store, row }) => {
+      // Arrange
+      const db = new KaiordDatabase(name);
+      await db.open();
+      await db.table(store).add(row);
+      const port = createDexieSnapshotPort(db);
 
-    // Act
-    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
-    db.close();
+      // Act
+      const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+      db.close();
 
-    // Assert
-    expect(snapshot.tables).not.toHaveProperty("connections");
-  });
+      // Assert
+      expect(snapshot.tables).not.toHaveProperty(store);
+    }
+  );
 
-  it("should exclude the device-local energy-balance stores from the export", async () => {
-    // Arrange
-    const db = new KaiordDatabase(name);
-    await db.open();
-    await db.table("intakeEntries").add({
-      id: "i-1",
-      profileId: "p-1",
-      date: "2026-06-21",
-      loggedAt: "2026-06-21T08:00:00.000Z",
-      kcal: 600,
-      proteinG: 40,
-      carbG: 60,
-      fatG: 20,
-    });
-    await db.table("intakePresets").add({
-      id: "pre-1",
-      profileId: "p-1",
-      label: "breakfast",
-      kcal: 400,
-      proteinG: 20,
-      carbG: 50,
-      fatG: 10,
-      createdAt: "2026-06-21T08:00:00.000Z",
-    });
-    await db.table("energyTargets").add({
-      profileId: "p-1",
-      goalType: "fat_loss",
-      startWeightKg: 80,
-      targetWeightKg: 75,
-      targetDate: "2026-09-01",
-      createdAt: "2026-06-21T08:00:00.000Z",
-      updatedAt: "2026-06-21T08:00:00.000Z",
-    });
-    const port = createDexieSnapshotPort(db);
+  it.each([
+    {
+      store: "usageEvents",
+      row: {
+        id: "evt-1",
+        yearMonth: "2026-07",
+        date: "2026-07-10",
+        purpose: "chat",
+        providerType: "anthropic",
+        promptTokens: 120,
+        completionTokens: 80,
+        tokens: 200,
+        cost: 0.0006,
+        createdAt: "2026-07-10T10:00:00.000Z",
+      },
+    },
+    {
+      store: "chatMessages",
+      row: {
+        id: "c-1",
+        profileId: "p-1",
+        conversationId: "conv-1",
+        role: "user",
+        content: "hi",
+        createdAt: "2026-06-13T10:00:00.000Z",
+      },
+    },
+    {
+      store: "chatConversations",
+      row: {
+        id: "conv-1",
+        profileId: "p-1",
+        title: "Cycling",
+        createdAt: "2026-06-13T10:00:00.000Z",
+        updatedAt: "2026-06-13T10:00:00.000Z",
+      },
+    },
+  ])(
+    "should include the $store store in the export",
+    async ({ store, row }) => {
+      // Arrange
+      const db = new KaiordDatabase(name);
+      await db.open();
+      await db.table(store).add(row);
+      const port = createDexieSnapshotPort(db);
 
-    // Act
-    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
-    db.close();
+      // Act
+      const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
+      db.close();
 
-    // Assert
-    expect(snapshot.tables).not.toHaveProperty("intakeEntries");
-    expect(snapshot.tables).not.toHaveProperty("intakePresets");
-    expect(snapshot.tables).not.toHaveProperty("energyTargets");
-  });
-
-  it("should include the synced usageEvents store in the export", async () => {
-    // Arrange
-    const db = new KaiordDatabase(name);
-    await db.open();
-    await db.table("usageEvents").add({
-      id: "evt-1",
-      yearMonth: "2026-07",
-      date: "2026-07-10",
-      purpose: "chat",
-      providerType: "anthropic",
-      promptTokens: 120,
-      completionTokens: 80,
-      tokens: 200,
-      cost: 0.0006,
-      createdAt: "2026-07-10T10:00:00.000Z",
-    });
-    const port = createDexieSnapshotPort(db);
-
-    // Act
-    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
-    db.close();
-
-    // Assert
-    expect(snapshot.tables.usageEvents).toHaveLength(1);
-  });
-
-  it("should include the chatMessages store in the export", async () => {
-    // Arrange
-    const db = new KaiordDatabase(name);
-    await db.open();
-    await db.table("chatMessages").add({
-      id: "c-1",
-      profileId: "p-1",
-      conversationId: "conv-1",
-      role: "user",
-      content: "hi",
-      createdAt: "2026-06-13T10:00:00.000Z",
-    });
-    const port = createDexieSnapshotPort(db);
-
-    // Act
-    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
-    db.close();
-
-    // Assert
-    expect(snapshot.tables.chatMessages).toHaveLength(1);
-  });
-
-  it("should include the chatConversations store in the export", async () => {
-    // Arrange
-    const db = new KaiordDatabase(name);
-    await db.open();
-    await db.table("chatConversations").add({
-      id: "conv-1",
-      profileId: "p-1",
-      title: "Cycling",
-      createdAt: "2026-06-13T10:00:00.000Z",
-      updatedAt: "2026-06-13T10:00:00.000Z",
-    });
-    const port = createDexieSnapshotPort(db);
-
-    // Act
-    const snapshot = await exportSnapshot({ port, deviceId: "dev-1" });
-    db.close();
-
-    // Assert
-    expect(snapshot.tables.chatConversations).toHaveLength(1);
-  });
+      // Assert
+      expect(snapshot.tables[store]).toHaveLength(1);
+    }
+  );
 
   it("should round-trip a cleared database back to its original rows", async () => {
     // Arrange

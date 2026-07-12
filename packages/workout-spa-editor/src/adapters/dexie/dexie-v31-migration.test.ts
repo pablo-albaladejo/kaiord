@@ -98,36 +98,28 @@ describe("Dexie lab-analytics (v31) migration", () => {
     expect(policyCount).toBe(1);
   });
 
-  it("should index labValues by the series and report compound indexes", async () => {
-    // Arrange
-    await seedV30(name);
+  it.each([
+    {
+      store: "labValues",
+      compoundIndexes: ["profileId+parameterKey+date", "profileId+reportId"],
+    },
+    { store: "labReports", compoundIndexes: ["profileId+date"] },
+  ])(
+    "should index $store by its compound indexes with an id primary key",
+    async ({ store, compoundIndexes }) => {
+      // Arrange
+      await seedV30(name);
 
-    // Act
-    const db = new KaiordDatabase(name);
-    await db.open();
-    const schema = db.table("labValues").schema;
-    const indexes = indexKeyPaths(db, "labValues");
-    db.close();
+      // Act
+      const db = new KaiordDatabase(name);
+      await db.open();
+      const primKey = db.table(store).schema.primKey.keyPath;
+      const indexes = indexKeyPaths(db, store);
+      db.close();
 
-    // Assert
-    expect(schema.primKey.keyPath).toBe("id");
-    expect(indexes).toContain("profileId+parameterKey+date");
-    expect(indexes).toContain("profileId+reportId");
-  });
-
-  it("should index labReports by the profile date-listing index", async () => {
-    // Arrange
-    await seedV30(name);
-
-    // Act
-    const db = new KaiordDatabase(name);
-    await db.open();
-    const schema = db.table("labReports").schema;
-    const indexes = indexKeyPaths(db, "labReports");
-    db.close();
-
-    // Assert
-    expect(schema.primKey.keyPath).toBe("id");
-    expect(indexes).toContain("profileId+date");
-  });
+      // Assert
+      expect(primKey).toBe("id");
+      expect(indexes).toEqual(expect.arrayContaining(compoundIndexes));
+    }
+  );
 });
