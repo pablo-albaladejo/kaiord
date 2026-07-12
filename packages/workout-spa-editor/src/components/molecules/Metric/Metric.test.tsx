@@ -22,33 +22,39 @@ describe("Metric", () => {
     expect(label).toBeInTheDocument();
   });
 
-  it("should apply accent color class when accent is true", () => {
-    // Arrange
+  it.each([
+    {
+      accent: true,
+      value: "185",
+      unit: "bpm",
+      label: "Max HR",
+      expectedClass: "text-accent",
+    },
+    {
+      accent: undefined,
+      value: "95",
+      unit: "rpm",
+      label: "Cadence",
+      expectedClass: "text-ink-strong",
+    },
+  ])(
+    "should color the value $expectedClass when accent is $accent",
+    ({ accent, value, unit, label, expectedClass }) => {
+      // Arrange
 
-    render(<Metric value="185" unit="bpm" label="Max HR" accent />);
+      render(
+        <Metric value={value} unit={unit} label={label} accent={accent} />
+      );
 
-    // Act
+      // Act
 
-    const value = screen.getByText("185");
+      const el = screen.getByText(value);
 
-    // Assert
+      // Assert
 
-    expect(value).toHaveClass("text-accent");
-  });
-
-  it("should apply default color class when accent is not set", () => {
-    // Arrange
-
-    render(<Metric value="95" unit="rpm" label="Cadence" />);
-
-    // Act
-
-    const value = screen.getByText("95");
-
-    // Assert
-
-    expect(value).toHaveClass("text-ink-strong");
-  });
+      expect(el).toHaveClass(expectedClass);
+    }
+  );
 
   it("should render without unit", () => {
     // Arrange
