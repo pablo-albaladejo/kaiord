@@ -43,31 +43,23 @@ describe("StatusHeader", () => {
     ).toHaveTextContent("No profile");
   });
 
-  it("should hide the Garmin indicator when no extension is installed", () => {
-    // Arrange
+  it.each([
+    { label: "Garmin", testId: "status-header-garmin" },
+    { label: "Train2Go", testId: "status-header-sync" },
+  ])(
+    "should hide the $label indicator when no extension is installed",
+    ({ testId }) => {
+      // Arrange
 
-    // Act
+      // Act
 
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+      renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
-    // Assert
+      // Assert
 
-    expect(
-      screen.queryByTestId("status-header-garmin")
-    ).not.toBeInTheDocument();
-  });
-
-  it("should hide the Train2Go indicator when no extension is installed", () => {
-    // Arrange
-
-    // Act
-
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
-
-    // Assert
-
-    expect(screen.queryByTestId("status-header-sync")).not.toBeInTheDocument();
-  });
+      expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+    }
+  );
 
   it("should show Train2Go 'Synced' when the extension is installed", () => {
     // Arrange
