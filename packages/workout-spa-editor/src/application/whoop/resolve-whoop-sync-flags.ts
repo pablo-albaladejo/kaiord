@@ -25,9 +25,13 @@ const isEnabled = async (
 export const resolveWhoopSyncFlags = async (
   policyRepo: IntegrationPolicyRepository,
   profileId: string
-): Promise<WhoopSyncFlags> => ({
-  hrv: await isEnabled(policyRepo, profileId, "hrv"),
-  sleep: await isEnabled(policyRepo, profileId, "sleep"),
-  strain: await isEnabled(policyRepo, profileId, "strain"),
-  vitals: await isEnabled(policyRepo, profileId, "vitals"),
-});
+): Promise<WhoopSyncFlags> => {
+  // The four policy lookups are independent — resolve them concurrently.
+  const [hrv, sleep, strain, vitals] = await Promise.all([
+    isEnabled(policyRepo, profileId, "hrv"),
+    isEnabled(policyRepo, profileId, "sleep"),
+    isEnabled(policyRepo, profileId, "strain"),
+    isEnabled(policyRepo, profileId, "vitals"),
+  ]);
+  return { hrv, sleep, strain, vitals };
+};

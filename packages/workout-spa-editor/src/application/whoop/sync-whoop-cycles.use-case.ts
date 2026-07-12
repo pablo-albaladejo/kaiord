@@ -44,6 +44,17 @@ const transportError = (error?: string): SyncWhoopCyclesResult => ({
   error,
 });
 
+const mergeCounts = (
+  totals: WhoopPersistCounts,
+  counts: WhoopPersistCounts
+): void => {
+  totals.hrvImported += counts.hrvImported;
+  totals.sleepImported += counts.sleepImported;
+  totals.strainImported += counts.strainImported;
+  totals.vitalsImported += counts.vitalsImported;
+  totals.skipped += counts.skipped;
+};
+
 export const syncWhoopCycles = async (
   deps: SyncWhoopCyclesDeps,
   input: SyncWhoopCyclesInput
@@ -78,11 +89,7 @@ export const syncWhoopCycles = async (
       parsed.data,
       flags
     );
-    totals.hrvImported += counts.hrvImported;
-    totals.sleepImported += counts.sleepImported;
-    totals.strainImported += counts.strainImported;
-    totals.vitalsImported += counts.vitalsImported;
-    totals.skipped += counts.skipped;
+    mergeCounts(totals, counts);
   }
   return { ok: true, ...totals };
 };
