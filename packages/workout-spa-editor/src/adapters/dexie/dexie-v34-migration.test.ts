@@ -17,7 +17,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v34-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 33;
-const SCHEMA_HEAD = 34;
+const SCHEMA_HEAD = 35;
 
 const seedV33 = async (name: string): Promise<void> => {
   const older = new Dexie(name);

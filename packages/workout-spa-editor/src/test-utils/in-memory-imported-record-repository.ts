@@ -14,6 +14,7 @@ import type { HealthRecord } from "../ports/health-record-repository";
 import type {
   HealthBodyCompositionRecord,
   HealthDailyRecord,
+  HealthHeartRateSeriesRecord,
   HealthHrvRecord,
   HealthSleepRecord,
   HealthStrainRecord,
@@ -34,6 +35,7 @@ export type HealthMetricStores = {
   // wire them; only WHOOP-sync tests exercise these.
   strain?: Map<string, HealthStrainRecord>;
   vitals?: Map<string, HealthVitalsRecord>;
+  "heart-rate-series"?: Map<string, HealthHeartRateSeriesRecord>;
 };
 
 type Row = HealthRecord<Record<string, unknown>>;

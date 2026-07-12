@@ -17,7 +17,7 @@ const SCHEMA_V18 = 18;
 // Opening KaiordDatabase always migrates to the latest registered version,
 // so a seeded v18 db lands at the current head (v24 connections, v25 chat
 // conversations, v26 energy-balance stores), not exactly v19.
-const SCHEMA_HEAD = 34;
+const SCHEMA_HEAD = 35;
 const STORES_V18 = {
   workouts: "id, profileId, [profileId+date], date",
   meta: "key",

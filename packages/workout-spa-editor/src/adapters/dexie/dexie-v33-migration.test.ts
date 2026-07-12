@@ -17,7 +17,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v33-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 32;
-const SCHEMA_HEAD = 34;
+const SCHEMA_HEAD = 35;
 const MIGRATED_COUNT = 2;
 const AGG_INPUT_TOKENS = 700;
 const AGG_COST = 0.0021;

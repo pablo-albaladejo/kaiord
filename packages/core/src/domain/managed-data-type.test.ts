@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { canonicalHash } from "./hash/canonical-hash";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "./managed-data-type";
 
-const EXPECTED_TYPE_COUNT = 12;
+const EXPECTED_TYPE_COUNT = 13;
 
 describe("managedDataTypes", () => {
-  it("should enumerate exactly twelve managed data types", () => {
+  it("should enumerate exactly thirteen managed data types", () => {
     // Arrange
     const types = managedDataTypes;
 

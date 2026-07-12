@@ -21,7 +21,7 @@ import {
   buildCoreV24,
   buildCoreV26,
   buildCoreV27,
-  buildCoreV30ThroughV34,
+  buildCoreV30ThroughV35,
   HEALTH_SUFFIX,
 } from "./dexie-schemas-late";
 
@@ -139,6 +139,7 @@ export const SCHEMAS = {
   // v30 (dataTypeSourcePolicy) + v31 (lab-analytics stores) + v32 (usageEvents
   // telemetry log) + v33 (drops the legacy `usage` store, usage-accounting
   // cutover) + v34 (additive healthStrain + healthVitals stores, WHOOP wave
-  // 2), built together in dexie-schemas-late.ts. v28/v29 reused v27.
-  ...buildCoreV30ThroughV34(CORE_V27),
+  // 2) + v35 (additive healthHeartRateSeries store, WHOOP wave 3a), built
+  // together in dexie-schemas-late.ts. v28/v29 reused v27.
+  ...buildCoreV30ThroughV35(CORE_V27),
 } as const;
