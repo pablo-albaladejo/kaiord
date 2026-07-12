@@ -50,7 +50,7 @@ Domain types, Zod schemas, type guards, validators, and module-augmentation decl
 
 ### Ambient
 
-- `cf-beacon.d.ts` — Cloudflare Web Analytics global types.
+- `umami.d.ts` — Umami analytics global types (`UmamiTracker`, `UmamiEventData`, `UmamiPayloadModifier`).
 - `chrome.d.ts` — `chrome.runtime` ambient types.
 
 - `index.ts` — public export surface.

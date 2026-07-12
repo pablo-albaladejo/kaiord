@@ -5,11 +5,11 @@
 
 ## Purpose
 
-Production source for the SPA. Internally follows the same hexagonal split the monorepo uses at the package level: `types → ports → adapters → application → store + hooks → components → routing → main`. `main.tsx` wires Cloudflare analytics + Dexie persistence + Wouter into a provider tree that bootstraps `App.tsx`.
+Production source for the SPA. Internally follows the same hexagonal split the monorepo uses at the package level: `types → ports → adapters → application → store + hooks → components → routing → main`. `main.tsx` wires Umami analytics + Dexie persistence + Wouter into a provider tree that bootstraps `App.tsx`.
 
 ## Key Files
 
-- `main.tsx` — React root. Composes `AnalyticsProvider`, `PersistenceProvider`, `ThemeProvider`, `SettingsDialogProvider`, `GarminBridgeProvider`, `CoachingRegistryBootstrap`, and the Wouter `Router` around `<App />`. Reads the CF token from `window.__KAIORD_CONFIG__` via `getCfAnalyticsToken()` so the bundle stays env-agnostic.
+- `main.tsx` — React root. Composes `AnalyticsProvider`, `PersistenceProvider`, `ThemeProvider`, `SettingsDialogProvider`, `GarminBridgeProvider`, `CoachingRegistryBootstrap`, and the Wouter `Router` around `<App />`. Reads the Umami website id from `window.__KAIORD_CONFIG__` via `getUmamiWebsiteId()` so the bundle stays env-agnostic.
 - `App.tsx` — top-level routes (Wouter `Switch`/`Route`): `/` → redirect to `/calendar`, `/calendar/:weekId?`, `/library`, `/chat` (AI chat assistant), `/workout/new`, `/workout/:id`. Each route is wrapped in `RouteErrorBoundary`. Lazy-loads `CalendarPage` / `LibraryPage` / `ChatPage` / `EditorPage`. Fires `editor-loaded` analytics event on mount and a `pageView` per real route.
 - `index.css` — Tailwind v4 entry + design tokens.
 - `router-base.ts` — single source of truth for the Wouter `base` prop. Reads `import.meta.env.BASE_URL` so the SPA works at `/kaiord/` on GitHub Pages.

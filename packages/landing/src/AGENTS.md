@@ -11,13 +11,13 @@ TypeScript source files for the landing page. Includes the main entry point, CSS
 
 - **`main.ts`** (100 LOC) — Entrypoint. Initializes DOM setup: package manager tabs, copy button, smooth scrolling, and calls `setupAnalytics()`. Uses WAI-ARIA tabs pattern with arrow key support on desktop.
 - **`main.css`** (68 LOC) — Tailwind directives + custom animations. Imports brand tokens. Defines fade-in-left, fade-in-right, pulse-slow animations. Unified focus-visible ring styling.
-- **`analytics.ts`** (6 LOC) — Creates Cloudflare analytics client, conditionally noop.
+- **`analytics.ts`** (6 LOC) — Creates Umami analytics client, conditionally noop.
 - **`setup-analytics.ts`** (30 LOC) — Wires up analytics: pageView on load, click handlers for editor/docs/github links.
 
 ## Subdirectories
 
 - **`adapters/`** — Analytics adapter implementations.
-- **`types/`** — TypeScript declarations (Cloudflare beacon types).
+- **`types/`** — TypeScript declarations (Umami tracker types).
 
 ## For AI Agents
 
@@ -30,10 +30,10 @@ TypeScript source files for the landing page. Includes the main entry point, CSS
 
 ### Testing Requirements
 
-- **jsdom + vitest** — DOM tests in `adapters/analytics/cloudflare-analytics.test.ts`.
+- **jsdom + vitest** — DOM tests in `adapters/analytics/umami-analytics.test.ts`.
 - **AAA pattern** — every test must have `// Arrange`, `// Act`, `// Assert`.
 - **Titles start with "should "** — enforced at IDE and pre-commit.
-- **Mocking `window` objects** — use `Object.defineProperty()` to mock `window.cfBeacon`.
+- **Mocking `window` objects** — use `Object.defineProperty()` to mock `window.umami`.
 
 ### Common Patterns
 
@@ -57,7 +57,7 @@ TypeScript source files for the landing page. Includes the main entry point, CSS
 ## Notes
 
 - **Brand tokens** — defines CSS custom properties (--brand-bg-primary, --brand-accent-blue, etc.). Loaded from shared workspace resource, not packaged with landing.
-- **Analytics fallback** — if Cloudflare beacon unavailable, errors are caught and suppressed (never surfaces to app).
+- **Analytics fallback** — if Umami tracker unavailable, errors are caught and suppressed (never surfaces to app).
 - **Smooth scroll behavior** — respects `prefers-reduced-motion` media query; disables animations if user preference set.
 
 <!-- MANUAL: -->

@@ -11,7 +11,7 @@ Leaf libraries: small, focused, mostly-pure modules used across the SPA. No Reac
 
 ### Runtime + config
 
-- `runtime-config.ts` / `.test.ts` — reads `window.__KAIORD_CONFIG__` (the inline-script seam from `index.html`) — exposes `getCfAnalyticsToken()` and similar accessors.
+- `runtime-config.ts` / `.test.ts` — reads `window.__KAIORD_CONFIG__` (the inline-script seam from `index.html`) — exposes `getUmamiWebsiteId()` and similar accessors.
 - `provider-factory.ts` / `.test.ts`, `provider-models.ts` — AI-provider factory that maps `LlmProviderConfig` → a Vercel-AI-SDK language model instance.
 
 ### AI

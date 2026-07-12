@@ -40,7 +40,7 @@ export const PrivacyTab: React.FC = () => {
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {t("privacy.analyticsIntro")}{" "}
           <a
-            href="https://www.cloudflare.com/web-analytics/"
+            href="https://umami.is/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline underline-offset-2 hover:text-gray-800 dark:hover:text-gray-200"

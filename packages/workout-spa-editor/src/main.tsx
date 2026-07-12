@@ -4,7 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
 
-import { createCloudflareAnalytics } from "./adapters/analytics/cloudflare-analytics";
+import { createUmamiAnalytics } from "./adapters/analytics/umami-analytics";
 import { withEncryption } from "./adapters/cloud-sync/encrypting-cloud-sync";
 import { createGoogleDriveCloudSync } from "./adapters/cloud-sync/google-drive-cloud-sync-adapter";
 import { db } from "./adapters/dexie/dexie-database";
@@ -25,7 +25,7 @@ import { reloadOnceForChunkError } from "./lib/chunk-reload";
 import { getDeviceId } from "./lib/cloud-sync/device-id";
 import { getSyncPassphrase } from "./lib/cloud-sync/encryption-runtime";
 import { isEncryptionEnabled } from "./lib/cloud-sync/sync-encryption-pref";
-import { getCfAnalyticsToken } from "./lib/runtime-config";
+import { getUmamiWebsiteId } from "./lib/runtime-config";
 import { computeRouterBase } from "./router-base";
 
 // Recover from stale lazy chunks after a deploy: Vite fires `vite:preloadError`
@@ -36,7 +36,7 @@ window.addEventListener("vite:preloadError", (event) => {
   reloadOnceForChunkError();
 });
 
-const analytics = createCloudflareAnalytics(getCfAnalyticsToken());
+const analytics = createUmamiAnalytics(getUmamiWebsiteId());
 
 const persistence = createDexiePersistence();
 

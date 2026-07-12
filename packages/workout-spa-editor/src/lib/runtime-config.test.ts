@@ -1,16 +1,16 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
-  CF_ANALYTICS_TOKEN_PLACEHOLDER,
-  getCfAnalyticsToken,
+  getUmamiWebsiteId,
+  UMAMI_WEBSITE_ID_PLACEHOLDER,
 } from "./runtime-config";
 
 type WindowWithConfig = Window &
   typeof globalThis & {
-    __KAIORD_CONFIG__?: { cfAnalyticsToken?: string };
+    __KAIORD_CONFIG__?: { umamiWebsiteId?: string };
   };
 
-describe("getCfAnalyticsToken", () => {
+describe("getUmamiWebsiteId", () => {
   afterEach(() => {
     delete (window as WindowWithConfig).__KAIORD_CONFIG__;
   });
@@ -20,46 +20,46 @@ describe("getCfAnalyticsToken", () => {
     delete (window as WindowWithConfig).__KAIORD_CONFIG__;
 
     // Act
-    const token = getCfAnalyticsToken();
+    const websiteId = getUmamiWebsiteId();
 
     // Assert
-    expect(token).toBeUndefined();
+    expect(websiteId).toBeUndefined();
   });
 
-  it("should return undefined when cfAnalyticsToken is empty string", () => {
+  it("should return undefined when umamiWebsiteId is empty string", () => {
     // Arrange
-    (window as WindowWithConfig).__KAIORD_CONFIG__ = { cfAnalyticsToken: "" };
+    (window as WindowWithConfig).__KAIORD_CONFIG__ = { umamiWebsiteId: "" };
 
     // Act
-    const token = getCfAnalyticsToken();
+    const websiteId = getUmamiWebsiteId();
 
     // Assert
-    expect(token).toBeUndefined();
+    expect(websiteId).toBeUndefined();
   });
 
   it("should return undefined when the un-substituted placeholder is present", () => {
     // Arrange
     (window as WindowWithConfig).__KAIORD_CONFIG__ = {
-      cfAnalyticsToken: CF_ANALYTICS_TOKEN_PLACEHOLDER,
+      umamiWebsiteId: UMAMI_WEBSITE_ID_PLACEHOLDER,
     };
 
     // Act
-    const token = getCfAnalyticsToken();
+    const websiteId = getUmamiWebsiteId();
 
     // Assert
-    expect(token).toBeUndefined();
+    expect(websiteId).toBeUndefined();
   });
 
-  it("should return the real token when deploy-time substitution has run", () => {
+  it("should return the real website id when deploy-time substitution has run", () => {
     // Arrange
     (window as WindowWithConfig).__KAIORD_CONFIG__ = {
-      cfAnalyticsToken: "abc123-real-token",
+      umamiWebsiteId: "a5b4bf9b-real-website-id",
     };
 
     // Act
-    const token = getCfAnalyticsToken();
+    const websiteId = getUmamiWebsiteId();
 
     // Assert
-    expect(token).toBe("abc123-real-token");
+    expect(websiteId).toBe("a5b4bf9b-real-website-id");
   });
 });

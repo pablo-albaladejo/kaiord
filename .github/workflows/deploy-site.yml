@@ -53,7 +53,7 @@ jobs:
       # Targeted filters build only required transitive dependencies.
       - name: Build Landing Page
         env:
-          VITE_CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+          VITE_UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
         run: pnpm --filter @kaiord/landing... build
 
       - name: Build SPA Editor
@@ -61,34 +61,42 @@ jobs:
           VITE_BASE_PATH: /editor/
         run: pnpm --filter @kaiord/workout-spa-editor... build
 
-      # Inject the Cloudflare Web Analytics token at deploy time (runtime
-      # config). The bundle itself is environment-agnostic per 12-factor
-      # III + V — see packages/workout-spa-editor/docs/analytics.md. When the
-      # secret is absent the placeholder remains and the SPA's noop analytics
-      # adapter wins.
-      - name: Substitute analytics token in SPA index.html
+      # Inject the Umami website id at deploy time (runtime config). The
+      # bundles are environment-agnostic per 12-factor III + V — see
+      # packages/workout-spa-editor/docs/analytics.md. When the secret is
+      # absent the placeholders remain and the noop analytics adapter wins.
+      # Two artifacts carry the __UMAMI_WEBSITE_ID__ placeholder: the editor
+      # SPA index.html (runtime config) and the landing 404.html (a public/
+      # file that bypasses Vite's build-time replacement). The landing
+      # index.html is already substituted at build time via
+      # VITE_UMAMI_WEBSITE_ID.
+      - name: Substitute analytics website id
         env:
-          CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+          UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
         run: |
           set -e
-          if [ -z "${CF_ANALYTICS_TOKEN:-}" ]; then
-            echo "CF_ANALYTICS_TOKEN unset; leaving placeholder in index.html (analytics disabled)"
+          if [ -z "${UMAMI_WEBSITE_ID:-}" ]; then
+            echo "UMAMI_WEBSITE_ID unset; leaving placeholders (analytics disabled)"
             exit 0
           fi
-          INDEX="packages/workout-spa-editor/dist/index.html"
-          test -f "$INDEX" || { echo "::error::SPA build artifact missing: $INDEX"; exit 1; }
-          # Use | as the delimiter to avoid escaping issues if the token
-          # contains slashes.
-          sed -i "s|__CF_ANALYTICS_TOKEN__|${CF_ANALYTICS_TOKEN}|g" "$INDEX"
-          # Verify substitution actually replaced the placeholder so a
-          # silent failure does not ship a no-analytics build.
-          if grep -q "__CF_ANALYTICS_TOKEN__" "$INDEX"; then
-            echo "::error::Placeholder __CF_ANALYTICS_TOKEN__ still present after sed"
-            exit 1
-          fi
-          echo "Analytics token injected at runtime"
+          for f in \
+            packages/workout-spa-editor/dist/index.html \
+            packages/landing/dist/404.html; do
+            test -f "$f" || { echo "::error::Build artifact missing: $f"; exit 1; }
+            # Use | as the delimiter to avoid escaping issues.
+            sed -i "s|__UMAMI_WEBSITE_ID__|${UMAMI_WEBSITE_ID}|g" "$f"
+            # Verify substitution actually replaced the placeholder so a
+            # silent failure does not ship a no-analytics build.
+            if grep -q "__UMAMI_WEBSITE_ID__" "$f"; then
+              echo "::error::Placeholder __UMAMI_WEBSITE_ID__ still present in $f after sed"
+              exit 1
+            fi
+          done
+          echo "Analytics website id injected at runtime"
 
       - name: Build Docs
+        env:
+          UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
         run: pnpm --filter @kaiord/docs... build
 
       - name: Merge dist outputs

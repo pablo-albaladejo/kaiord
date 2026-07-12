@@ -105,13 +105,13 @@
 
     <link rel="stylesheet" href="/src/main.css" />
 
-    <!-- CF_BEACON_START -->
+    <!-- UMAMI_START -->
     <script
       defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "%VITE_CF_ANALYTICS_TOKEN%"}'
+      src="https://cloud.umami.is/script.js"
+      data-website-id="%VITE_UMAMI_WEBSITE_ID%"
     ></script>
-    <!-- CF_BEACON_END -->
+    <!-- UMAMI_END -->
   </head>
   <body
     class="bg-[var(--brand-bg-primary)] text-[var(--brand-text-primary)] font-sans antialiased"
@@ -2318,13 +2318,13 @@
         <p class="mt-6 text-center text-xs text-[var(--brand-text-muted)]">
           This site uses
           <a
-            href="https://www.cloudflare.com/web-analytics/"
+            href="https://umami.is/"
             target="_blank"
             rel="noopener noreferrer"
             class="underline underline-offset-2 hover:text-[var(--brand-text-secondary)]"
-            >Cloudflare Web Analytics</a
+            >Umami</a
           >
-          — cookieless, no personal data collected.
+          — open-source, cookieless, no personal data collected.
         </p>
       </div>
     </footer>

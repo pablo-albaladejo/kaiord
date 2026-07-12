@@ -8,13 +8,13 @@
 import { readBrandTokenColor } from "./brand-tokens.mjs";
 
 /**
- * @param {{ docsBase: string; ogImage: string }} options
+ * @param {{ docsBase: string; ogImage: string; umamiWebsiteId?: string }} options
  * @returns {Array<[string, Record<string, string>]>}
  */
-export function buildStaticHead({ docsBase, ogImage }) {
+export function buildStaticHead({ docsBase, ogImage, umamiWebsiteId }) {
   const themeColor = readBrandTokenColor("--brand-bg-primary");
 
-  return [
+  const head = [
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:image", content: ogImage }],
     ["meta", { property: "og:image:width", content: "1200" }],
@@ -41,4 +41,21 @@ export function buildStaticHead({ docsBase, ogImage }) {
       },
     ],
   ];
+
+  // Umami analytics — loaded only when a website id is provided at build time
+  // (via the UMAMI_WEBSITE_ID env var in the deploy workflow). Auto-track is
+  // left on: the docs site is server-rendered multi-page, so the tracker's
+  // History-API page views are correct.
+  if (umamiWebsiteId) {
+    head.push([
+      "script",
+      {
+        defer: "",
+        src: "https://cloud.umami.is/script.js",
+        "data-website-id": umamiWebsiteId,
+      },
+    ]);
+  }
+
+  return head;
 }

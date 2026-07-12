@@ -94,7 +94,11 @@ const config = {
   // sitemap, llmstxt) but keep them on disk for AI agents to read.
   srcExclude: ["**/AGENTS.md"],
 
-  head: buildStaticHead({ docsBase: DOCS_BASE, ogImage: OG_IMAGE }),
+  head: buildStaticHead({
+    docsBase: DOCS_BASE,
+    ogImage: OG_IMAGE,
+    umamiWebsiteId: process.env.UMAMI_WEBSITE_ID,
+  }),
 
   sitemap: {
     hostname: SITE_URL,

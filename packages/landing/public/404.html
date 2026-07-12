@@ -66,6 +66,25 @@
         outline-offset: 2px;
       }
     </style>
+    <!--
+      Umami analytics. The __UMAMI_WEBSITE_ID__ placeholder is substituted at
+      deploy time (public/ files bypass Vite's transformIndexHtml, so this
+      cannot use %VITE_...% build-time replacement like index.html). The guard
+      checks the first character rather than comparing against the placeholder
+      literal — a global deploy-time sed would rewrite such a literal too,
+      breaking the check. A real website id (UUID) never starts with "_".
+    -->
+    <script>
+      (function () {
+        var id = "__UMAMI_WEBSITE_ID__";
+        if (!id || id.charAt(0) === "_") return;
+        var s = document.createElement("script");
+        s.defer = true;
+        s.src = "https://cloud.umami.is/script.js";
+        s.setAttribute("data-website-id", id);
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body>
     <main>
