@@ -13,16 +13,13 @@ import { whoopCyclesResponseSchema } from "@kaiord/whoop";
 
 import type { ImportedRecordRepository } from "../import/imported-record-repository.port";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
-import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 import {
   persistWhoopCycleRecords,
   type WhoopPersistCounts,
-  type WhoopSyncFlags,
 } from "./persist-whoop-cycle-records";
+import { resolveWhoopSyncFlags } from "./resolve-whoop-sync-flags";
 import { buildCyclesPath, chunkWindow } from "./whoop-cycles-window";
 import type { WhoopFetchResult } from "./whoop-fetch-result";
-
-const WHOOP_BRIDGE_SOURCE = "whoop-bridge";
 
 export type SyncWhoopCyclesDeps = {
   policyRepo: IntegrationPolicyRepository;
@@ -41,18 +38,6 @@ export type SyncWhoopCyclesResult =
   | ({ ok: true } & WhoopPersistCounts)
   | { ok: false; reason: "no-policy" | "transport-error"; error?: string };
 
-const isEnabled = async (
-  policyRepo: IntegrationPolicyRepository,
-  profileId: string,
-  dataType: "hrv" | "sleep"
-): Promise<boolean> => {
-  const policies = await resolveImportPolicies(
-    { policyRepo },
-    { profileId, dataType }
-  );
-  return policies.some((p) => p.enabled && p.bridgeId === WHOOP_BRIDGE_SOURCE);
-};
-
 const transportError = (error?: string): SyncWhoopCyclesResult => ({
   ok: false,
   reason: "transport-error",
@@ -63,15 +48,16 @@ export const syncWhoopCycles = async (
   deps: SyncWhoopCyclesDeps,
   input: SyncWhoopCyclesInput
 ): Promise<SyncWhoopCyclesResult> => {
-  const flags: WhoopSyncFlags = {
-    hrv: await isEnabled(deps.policyRepo, input.profileId, "hrv"),
-    sleep: await isEnabled(deps.policyRepo, input.profileId, "sleep"),
-  };
-  if (!flags.hrv && !flags.sleep) return { ok: false, reason: "no-policy" };
+  const flags = await resolveWhoopSyncFlags(deps.policyRepo, input.profileId);
+  if (!flags.hrv && !flags.sleep && !flags.strain && !flags.vitals) {
+    return { ok: false, reason: "no-policy" };
+  }
 
   const totals: WhoopPersistCounts = {
     hrvImported: 0,
     sleepImported: 0,
+    strainImported: 0,
+    vitalsImported: 0,
     skipped: 0,
   };
   for (const window of chunkWindow(input.startTime, input.endTime)) {
@@ -94,6 +80,8 @@ export const syncWhoopCycles = async (
     );
     totals.hrvImported += counts.hrvImported;
     totals.sleepImported += counts.sleepImported;
+    totals.strainImported += counts.strainImported;
+    totals.vitalsImported += counts.vitalsImported;
     totals.skipped += counts.skipped;
   }
   return { ok: true, ...totals };

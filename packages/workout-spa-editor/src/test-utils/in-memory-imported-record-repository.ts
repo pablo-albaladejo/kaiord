@@ -16,7 +16,9 @@ import type {
   HealthDailyRecord,
   HealthHrvRecord,
   HealthSleepRecord,
+  HealthStrainRecord,
   HealthStressRecord,
+  HealthVitalsRecord,
   HealthWeightRecord,
 } from "../types/health/health-records";
 
@@ -27,6 +29,11 @@ export type HealthMetricStores = {
   "daily-wellness": Map<string, HealthDailyRecord>;
   "body-composition": Map<string, HealthBodyCompositionRecord>;
   stress: Map<string, HealthStressRecord>;
+  // Read-only WHOOP-derived types (no manual-entry / FIT-import path yet),
+  // so existing callers (e.g. in-memory-persistence.ts) aren't forced to
+  // wire them; only WHOOP-sync tests exercise these.
+  strain?: Map<string, HealthStrainRecord>;
+  vitals?: Map<string, HealthVitalsRecord>;
 };
 
 type Row = HealthRecord<Record<string, unknown>>;

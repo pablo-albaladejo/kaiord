@@ -17,7 +17,9 @@ import {
   dailyWellnessSchema,
   hrvSummarySchema,
   sleepRecordSchema,
+  strainSummarySchema,
   stressEpisodeSchema,
+  vitalsSummarySchema,
   weightMeasurementSchema,
 } from "./schemas/health";
 import { plannedSessionSchema } from "./schemas/planned-session";
@@ -85,6 +87,16 @@ export const MANAGED_DATA_REGISTRY: Record<
   stress: {
     label: "Stress",
     schema: stressEpisodeSchema,
+    capabilities: { import: "read:body" },
+  },
+  strain: {
+    label: "Strain",
+    schema: strainSummarySchema,
+    capabilities: { import: "read:body" },
+  },
+  vitals: {
+    label: "Vitals",
+    schema: vitalsSummarySchema,
     capabilities: { import: "read:body" },
   },
 };

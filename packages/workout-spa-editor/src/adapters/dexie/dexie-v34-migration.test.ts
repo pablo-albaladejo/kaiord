@@ -1,9 +1,9 @@
 /**
- * Forward migration to v31 — additive lab-analytics stores (`labReports`,
- * `labValues`). Seeding a real v30 database with rows, then opening
- * KaiordDatabase, runs ONLY the v31 upgrade: Dexie auto-creates the two new
- * stores empty and leaves every prior-version row untouched (additive, no data
- * transform).
+ * Forward migration to v34 — additive health stores (`healthStrain`,
+ * `healthVitals`, WHOOP wave 2). Seeding a real v33 database with rows, then
+ * opening KaiordDatabase, runs ONLY the v34 upgrade: Dexie auto-creates the
+ * two new stores empty and leaves every prior-version row untouched
+ * (additive, no data transform).
  */
 import "fake-indexeddb/auto";
 
@@ -14,21 +14,20 @@ import { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
 
 const dbName = (suffix: string) =>
-  `kaiord-test-v31-${suffix}-${Date.now()}-${Math.random()}`;
+  `kaiord-test-v34-${suffix}-${Date.now()}-${Math.random()}`;
 
-const SEED_VERSION = 30;
+const SEED_VERSION = 33;
 const SCHEMA_HEAD = 34;
 
-const seedV30 = async (name: string): Promise<void> => {
+const seedV33 = async (name: string): Promise<void> => {
   const older = new Dexie(name);
-  older.version(SEED_VERSION).stores(SCHEMAS.v30);
+  older.version(SEED_VERSION).stores(SCHEMAS.v33);
   await older.open();
   await older.table("profiles").add({ id: "p-1", name: "Athlete" });
-  await older.table("dataTypeSourcePolicy").add({
+  await older.table("healthHrv").add({
+    id: "h-1",
     profileId: "p-1",
-    dataType: "sleep",
-    mode: "priority",
-    sourceOrder: ["whoop-bridge"],
+    date: "2026-07-10",
   });
   older.close();
 };
@@ -40,7 +39,7 @@ const indexKeyPaths = (db: KaiordDatabase, store: string): string[] =>
       Array.isArray(i.keyPath) ? i.keyPath.join("+") : (i.keyPath ?? "")
     );
 
-describe("Dexie lab-analytics (v31) migration", () => {
+describe("Dexie health-strain-vitals (v34) migration", () => {
   let name: string;
 
   beforeEach(() => {
@@ -53,7 +52,7 @@ describe("Dexie lab-analytics (v31) migration", () => {
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
-    await seedV30(name);
+    await seedV33(name);
 
     // Act
     const db = new KaiordDatabase(name);
@@ -65,50 +64,44 @@ describe("Dexie lab-analytics (v31) migration", () => {
     expect(version).toBe(SCHEMA_HEAD);
   });
 
-  it("should create both lab stores empty", async () => {
+  it("should create both health stores empty", async () => {
     // Arrange
-    await seedV30(name);
+    await seedV33(name);
 
     // Act
     const db = new KaiordDatabase(name);
     await db.open();
     const counts = {
-      labReports: await db.table("labReports").count(),
-      labValues: await db.table("labValues").count(),
+      healthStrain: await db.table("healthStrain").count(),
+      healthVitals: await db.table("healthVitals").count(),
     };
     db.close();
 
     // Assert
-    expect(counts).toEqual({ labReports: 0, labValues: 0 });
+    expect(counts).toEqual({ healthStrain: 0, healthVitals: 0 });
   });
 
   it("should preserve prior-version rows through the additive upgrade", async () => {
     // Arrange
-    await seedV30(name);
+    await seedV33(name);
 
     // Act
     const db = new KaiordDatabase(name);
     await db.open();
     const profile = await db.table("profiles").get("p-1");
-    const policyCount = await db.table("dataTypeSourcePolicy").count();
+    const hrvCount = await db.table("healthHrv").count();
     db.close();
 
     // Assert
     expect(profile?.name).toBe("Athlete");
-    expect(policyCount).toBe(1);
+    expect(hrvCount).toBe(1);
   });
 
-  it.each([
-    {
-      store: "labValues",
-      compoundIndexes: ["profileId+parameterKey+date", "profileId+reportId"],
-    },
-    { store: "labReports", compoundIndexes: ["profileId+date"] },
-  ])(
-    "should index $store by its compound indexes with an id primary key",
-    async ({ store, compoundIndexes }) => {
+  it.each([{ store: "healthStrain" }, { store: "healthVitals" }])(
+    "should index $store with the shared health provenance shape and an id primary key",
+    async ({ store }) => {
       // Arrange
-      await seedV30(name);
+      await seedV33(name);
 
       // Act
       const db = new KaiordDatabase(name);
@@ -119,7 +112,16 @@ describe("Dexie lab-analytics (v31) migration", () => {
 
       // Assert
       expect(primKey).toBe("id");
-      expect(indexes).toEqual(expect.arrayContaining(compoundIndexes));
+      expect(indexes).toEqual(
+        expect.arrayContaining([
+          "profileId",
+          "profileId+date",
+          "date",
+          "sourceBridgeId",
+          "externalId",
+          "profileId+sourceBridgeId+externalId",
+        ])
+      );
     }
   );
 });

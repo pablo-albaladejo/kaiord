@@ -11,12 +11,14 @@ export const CYCLES_DETAILS_RECORDS = [
       id: 1629599351,
       days: "['2026-07-10','2026-07-11')",
       scaled_strain: 5.36,
+      kilojoule: 8123.4,
     },
     recovery: {
       hrv_rmssd: 0.0571,
       recovery_score: 66,
       resting_heart_rate: 55,
       spo2: 96,
+      skin_temp_celsius: 33.4,
       created_at: "2026-07-10T17:59:12.250Z",
     },
     sleeps: [
