@@ -126,10 +126,23 @@ export const buildCoreV34 = (
   healthVitals: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
 });
 
-// Assemble the latest schemas (v30 → v31 → v32 → v33 → v34) from the v27
-// base so `dexie-schemas.ts` composes them in one spread and stays under its
-// line cap.
-export const buildCoreV30ThroughV34 = (
+// v35 — additive health store `healthHeartRateSeries` (WHOOP wave 3a). Same
+// index shape as the other health stores (v17/v34): `id` primary key,
+// `profileId` + `[profileId+date]` + `date` for the calendar reads and the
+// profile-delete cascade, plus the shared provenance suffix for natural-key
+// dedup on ingest. Read-only, source-agnostic per-day HR trace (no
+// manual-entry path) — auto-created empty on upgrade, no data transform.
+export const buildCoreV35 = (
+  prev: Record<string, string | null>
+): Record<string, string | null> => ({
+  ...prev,
+  healthHeartRateSeries: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+});
+
+// Assemble the latest schemas (v30 → v31 → v32 → v33 → v34 → v35) from the
+// v27 base so `dexie-schemas.ts` composes them in one spread and stays under
+// its line cap.
+export const buildCoreV30ThroughV35 = (
   prev: Stores
 ): {
   v30: Stores;
@@ -137,10 +150,12 @@ export const buildCoreV30ThroughV34 = (
   v32: Stores;
   v33: Record<string, string | null>;
   v34: Record<string, string | null>;
+  v35: Record<string, string | null>;
 } => {
   const v30 = buildCoreV30(prev);
   const v31 = buildCoreV31(v30);
   const v32 = buildCoreV32(v31);
   const v33 = buildCoreV33(v32);
-  return { v30, v31, v32, v33, v34: buildCoreV34(v33) };
+  const v34 = buildCoreV34(v33);
+  return { v30, v31, v32, v33, v34, v35: buildCoreV35(v34) };
 };

@@ -19,6 +19,7 @@ export const managedDataTypes = [
   "stress",
   "strain",
   "vitals",
+  "heart-rate-series",
 ] as const;
 
 export type ManagedDataType = (typeof managedDataTypes)[number];

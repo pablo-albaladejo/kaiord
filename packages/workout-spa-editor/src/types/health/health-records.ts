@@ -9,6 +9,7 @@
 import type {
   BodyComposition,
   DailyWellness,
+  HeartRateSeries,
   HrvSummary,
   SleepRecord,
   StrainSummary,
@@ -27,3 +28,4 @@ export type HealthBodyCompositionRecord = HealthRecord<BodyComposition>;
 export type HealthStressRecord = HealthRecord<StressEpisode>;
 export type HealthStrainRecord = HealthRecord<StrainSummary>;
 export type HealthVitalsRecord = HealthRecord<VitalsSummary>;
+export type HealthHeartRateSeriesRecord = HealthRecord<HeartRateSeries>;

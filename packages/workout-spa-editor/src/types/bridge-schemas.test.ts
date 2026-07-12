@@ -248,6 +248,7 @@ describe("core↔SPA capability contract", () => {
     stress: { import: "read:body" },
     strain: { import: "read:body" },
     vitals: { import: "read:body" },
+    "heart-rate-series": { import: "read:body" },
   };
 
   it("should match the exact expected token mapping for every managed type", () => {
@@ -265,7 +266,7 @@ describe("core↔SPA capability contract", () => {
     expect(actual).toEqual(EXPECTED_CAPABILITIES);
   });
 
-  it("should map read:body N:1 onto the seven body-derived health types", () => {
+  it("should map read:body N:1 onto the eight body-derived health types", () => {
     // Arrange
     const readBodyTypes = Object.entries(MANAGED_DATA_REGISTRY)
       .filter(([, entry]) => entry.capabilities.import === "read:body")
@@ -279,6 +280,7 @@ describe("core↔SPA capability contract", () => {
       [
         "body-composition",
         "daily-wellness",
+        "heart-rate-series",
         "hrv",
         "strain",
         "stress",

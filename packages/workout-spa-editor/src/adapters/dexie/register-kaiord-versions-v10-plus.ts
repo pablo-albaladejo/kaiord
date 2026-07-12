@@ -170,4 +170,8 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // Auto-created empty; profileId-leading indexes make isPerProfileTable
   // auto-discover them for the profile-delete cascade.
   db.version(34).stores(SCHEMAS.v34);
+  // v35 — additive healthHeartRateSeries store, WHOOP wave 3a. Auto-created
+  // empty; profileId-leading indexes make isPerProfileTable auto-discover it
+  // for the profile-delete cascade.
+  db.version(35).stores(SCHEMAS.v35);
 };

@@ -152,7 +152,8 @@ const makeSeedRow = (
     case "healthStress":
     case "healthStrain":
     case "healthVitals":
-      // All eight health stores share the same `id, profileId, [profileId+date], date`
+    case "healthHeartRateSeries":
+      // All nine health stores share the same `id, profileId, [profileId+date], date`
       // index shape. The cascade-fan-out test only needs the primary key
       // and the per-profile + date indexed columns to round-trip a write.
       return { id, profileId, date: WEEK_START };

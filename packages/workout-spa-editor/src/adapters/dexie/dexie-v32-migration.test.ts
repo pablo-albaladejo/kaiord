@@ -18,7 +18,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v32-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 31;
-const SCHEMA_HEAD = 34;
+const SCHEMA_HEAD = 35;
 const SEED_ENTRY = {
   date: "2026-06-04",
   inputTokens: 500,

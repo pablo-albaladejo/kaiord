@@ -11,15 +11,14 @@ import type {
   ManagedDataRegistryEntry,
   ManagedDataType,
 } from "./managed-data-type";
+import { WEARABLE_SESSION_REGISTRY_ENTRIES } from "./managed-data-wearable-registry";
 import { activitySchema } from "./schemas/activity";
 import {
   bodyCompositionSchema,
   dailyWellnessSchema,
   hrvSummarySchema,
   sleepRecordSchema,
-  strainSummarySchema,
   stressEpisodeSchema,
-  vitalsSummarySchema,
   weightMeasurementSchema,
 } from "./schemas/health";
 import { plannedSessionSchema } from "./schemas/planned-session";
@@ -89,14 +88,5 @@ export const MANAGED_DATA_REGISTRY: Record<
     schema: stressEpisodeSchema,
     capabilities: { import: "read:body" },
   },
-  strain: {
-    label: "Strain",
-    schema: strainSummarySchema,
-    capabilities: { import: "read:body" },
-  },
-  vitals: {
-    label: "Vitals",
-    schema: vitalsSummarySchema,
-    capabilities: { import: "read:body" },
-  },
+  ...WEARABLE_SESSION_REGISTRY_ENTRIES,
 };
