@@ -4,135 +4,39 @@
     "description": "Extension name shown in the Chrome Web Store and toolbar."
   },
   "extDescription": {
-    "message": "Connects the Kaiord editor to your WHOOP recovery & sleep data via OAuth (bring your own WHOOP developer app)",
+    "message": "Connects the Kaiord editor to your WHOOP recovery & sleep data through your open WHOOP session — no developer app, no passwords.",
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {
     "message": "Checking…",
-    "description": "Status text while the popup probes the connection."
+    "description": "Status text while the popup probes the session."
   },
   "checkingAria": {
     "message": "Checking",
     "description": "Accessible label for the checking status pill."
   },
-  "addCredentials": {
-    "message": "Add WHOOP credentials to connect",
-    "description": "Status text when no WHOOP credentials are stored."
-  },
-  "reconnectNeeded": {
-    "message": "Reconnect needed",
-    "description": "Status text when the WHOOP session needs re-authentication."
-  },
   "connectedToWhoop": {
     "message": "Connected to WHOOP",
-    "description": "Status text when the bridge is connected."
+    "description": "Status text when a WHOOP session bearer has been captured."
   },
-  "notConnected": {
-    "message": "Not connected",
-    "description": "Status text when credentials exist but there is no session."
+  "connectedHint": {
+    "message": "Reading your WHOOP data through your open session.",
+    "description": "Hint shown below the status when connected."
   },
-  "openingWhoop": {
-    "message": "Opening WHOOP…",
-    "description": "Status text while the OAuth flow is launching."
+  "noSession": {
+    "message": "No WHOOP session",
+    "description": "Status text when no WHOOP session bearer has been captured."
   },
-  "connectionFailed": {
-    "message": "Connection failed",
-    "description": "Fallback status text when connecting fails."
+  "noSessionHint": {
+    "message": "Open WHOOP and reload the tab, then reopen this popup.",
+    "description": "Hint telling the user how to establish a session."
   },
-  "couldNotSave": {
-    "message": "Could not save credentials",
-    "description": "Fallback status text when saving credentials fails."
+  "openWhoop": {
+    "message": "Open WHOOP",
+    "description": "Button that opens app.whoop.com in a new tab."
   },
-  "reconnectNeededError": {
-    "message": "Reconnect needed — $reason$",
-    "description": "Sync line when re-auth is needed, with the failure reason.",
-    "placeholders": {
-      "reason": { "content": "$1", "example": "token expired" }
-    }
-  },
-  "reconnectToImport": {
-    "message": "Reconnect needed to keep importing.",
-    "description": "Sync line when re-auth is needed and no reason is available."
-  },
-  "lastImport": {
-    "message": "Last import · $when$",
-    "description": "Sync line showing when the last import happened.",
-    "placeholders": {
-      "when": { "content": "$1", "example": "5 minutes ago" }
-    }
-  },
-  "reconnect": {
-    "message": "Reconnect",
-    "description": "Primary button label when already authenticated."
-  },
-  "connectWhoop": {
-    "message": "Connect WHOOP",
-    "description": "Primary button label when not yet authenticated."
-  },
-  "disconnect": {
-    "message": "Disconnect",
-    "description": "Secondary button that revokes the WHOOP connection."
-  },
-  "justNow": {
-    "message": "just now",
-    "description": "Relative time for a very recent import."
-  },
-  "minuteAgo": {
-    "message": "$count$ minute ago",
-    "description": "Relative time, singular minutes.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" }
-    }
-  },
-  "minutesAgo": {
-    "message": "$count$ minutes ago",
-    "description": "Relative time, plural minutes.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "5" }
-    }
-  },
-  "hourAgo": {
-    "message": "$count$ hour ago",
-    "description": "Relative time, singular hours.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" }
-    }
-  },
-  "hoursAgo": {
-    "message": "$count$ hours ago",
-    "description": "Relative time, plural hours.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "5" }
-    }
-  },
-  "dayAgo": {
-    "message": "$count$ day ago",
-    "description": "Relative time, singular days.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "1" }
-    }
-  },
-  "daysAgo": {
-    "message": "$count$ days ago",
-    "description": "Relative time, plural days.",
-    "placeholders": {
-      "count": { "content": "$1", "example": "3" }
-    }
-  },
-  "clientId": {
-    "message": "Client ID",
-    "description": "Label for the WHOOP OAuth client ID input."
-  },
-  "clientSecret": {
-    "message": "Client secret",
-    "description": "Label for the WHOOP OAuth client secret input."
-  },
-  "saveCredentials": {
-    "message": "Save credentials",
-    "description": "Button that stores the entered WHOOP credentials."
-  },
-  "credsHint": {
-    "message": "Register your own WHOOP app at developer.whoop.com and paste its credentials. They stay in this extension and never reach the web page.",
-    "description": "Explanatory hint below the credential inputs."
+  "openWhoopAria": {
+    "message": "Open WHOOP",
+    "description": "Accessible label for the Open WHOOP button."
   }
 }

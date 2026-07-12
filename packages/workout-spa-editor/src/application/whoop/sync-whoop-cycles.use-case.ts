@@ -1,0 +1,100 @@
+/**
+ * syncWhoopCycles — governed import of WHOOP recovery→HRV and sleep→sleep for
+ * a bounded date window (Wave 1, D9).
+ *
+ * Gates each data type on the import policy resolver BEFORE fetching: with no
+ * enabled `hrv←whoop-bridge` / `sleep←whoop-bridge` route the pull never
+ * touches the bridge and persists nothing. The window is chunked to the BFF's
+ * ~200-day cap; each record is converted via `@kaiord/whoop` and upserted by
+ * its stable `(sourceBridgeId, externalId)` identity through the shared
+ * inbound path. Pure application layer: the bridge read is injected.
+ */
+import { whoopCyclesResponseSchema } from "@kaiord/whoop";
+
+import type { ImportedRecordRepository } from "../import/imported-record-repository.port";
+import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
+import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
+import {
+  persistWhoopCycleRecords,
+  type WhoopPersistCounts,
+  type WhoopSyncFlags,
+} from "./persist-whoop-cycle-records";
+import { buildCyclesPath, chunkWindow } from "./whoop-cycles-window";
+import type { WhoopFetchResult } from "./whoop-fetch-result";
+
+const WHOOP_BRIDGE_SOURCE = "whoop-bridge";
+
+export type SyncWhoopCyclesDeps = {
+  policyRepo: IntegrationPolicyRepository;
+  importedRecords: ImportedRecordRepository;
+  fetchCycles: (path: string) => Promise<WhoopFetchResult>;
+};
+
+export type SyncWhoopCyclesInput = {
+  profileId: string;
+  userId: number;
+  startTime: string;
+  endTime: string;
+};
+
+export type SyncWhoopCyclesResult =
+  | ({ ok: true } & WhoopPersistCounts)
+  | { ok: false; reason: "no-policy" | "transport-error"; error?: string };
+
+const isEnabled = async (
+  policyRepo: IntegrationPolicyRepository,
+  profileId: string,
+  dataType: "hrv" | "sleep"
+): Promise<boolean> => {
+  const policies = await resolveImportPolicies(
+    { policyRepo },
+    { profileId, dataType }
+  );
+  return policies.some((p) => p.enabled && p.bridgeId === WHOOP_BRIDGE_SOURCE);
+};
+
+const transportError = (error?: string): SyncWhoopCyclesResult => ({
+  ok: false,
+  reason: "transport-error",
+  error,
+});
+
+export const syncWhoopCycles = async (
+  deps: SyncWhoopCyclesDeps,
+  input: SyncWhoopCyclesInput
+): Promise<SyncWhoopCyclesResult> => {
+  const flags: WhoopSyncFlags = {
+    hrv: await isEnabled(deps.policyRepo, input.profileId, "hrv"),
+    sleep: await isEnabled(deps.policyRepo, input.profileId, "sleep"),
+  };
+  if (!flags.hrv && !flags.sleep) return { ok: false, reason: "no-policy" };
+
+  const totals: WhoopPersistCounts = {
+    hrvImported: 0,
+    sleepImported: 0,
+    skipped: 0,
+  };
+  for (const window of chunkWindow(input.startTime, input.endTime)) {
+    let result: WhoopFetchResult;
+    try {
+      result = await deps.fetchCycles(buildCyclesPath(input.userId, window));
+    } catch (err) {
+      return transportError(err instanceof Error ? err.message : String(err));
+    }
+    if (!result.ok) return transportError(result.error);
+    const parsed = whoopCyclesResponseSchema.safeParse(result.data);
+    if (!parsed.success) {
+      return transportError("Malformed WHOOP cycles response");
+    }
+    const counts = await persistWhoopCycleRecords(
+      deps.importedRecords,
+      input.profileId,
+      parsed.data,
+      flags
+    );
+    totals.hrvImported += counts.hrvImported;
+    totals.sleepImported += counts.sleepImported;
+    totals.skipped += counts.skipped;
+  }
+  return { ok: true, ...totals };
+};
