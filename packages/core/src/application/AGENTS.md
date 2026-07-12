@@ -13,7 +13,6 @@ Hexagonal application layer. Holds the four strategy-pattern conversion use case
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `from-format.ts` | Defines `fromBinary(buffer, reader, logger?)` and `fromText(text, reader, logger?)` — reads via the injected port, then validates the produced KRD against `krdSchema`. |
 | `to-format.ts`   | Defines `toBinary(krd, writer, logger?)` and `toText(krd, writer, logger?)` — validates KRD first, then writes via the injected port.                                   |
-| `index.ts`       | Barrel re-exporting all four use cases.                                                                                                                                 |
 
 ## For AI Agents
 
