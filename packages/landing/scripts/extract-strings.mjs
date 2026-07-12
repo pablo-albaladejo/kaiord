@@ -51,7 +51,7 @@ const EXCLUDE = new Set([
   "kaiord",
   "GitHub",
   "Pablo Albaladejo",
-  "Cloudflare Web Analytics",
+  "Umami",
   // Acronyms kept in English
   "AI",
   "TS",

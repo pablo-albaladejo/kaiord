@@ -90,7 +90,7 @@
     "privacyPolicyLink": "Read the full privacy policy",
     "analytics": "Analytics",
     "analyticsIntro": "This editor uses",
-    "analyticsLink": "Cloudflare Web Analytics",
+    "analyticsLink": "Umami",
     "analyticsOutro": "to track aggregate usage (page views, workout generation, exports). No cookies are set and no personal data is collected.",
     "dataManagement": "Data Management",
     "clearAllApiKeys": "Clear All API Keys",
