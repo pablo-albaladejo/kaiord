@@ -1,4 +1,4 @@
-> Synced: 2026-05-29
+> Synced: 2026-07-11
 
 # Analytics Port & Adapter
 
@@ -8,11 +8,11 @@
 
 ## Purpose
 
-Provide a hexagonal-architecture-conformant analytics seam: a single `Analytics` port in `@kaiord/core` consumed by client apps, with concrete adapters (Cloudflare Web Analytics today; alternatives in the future) injected at the application boundary. No adapter-specific imports leak into domain or application layers.
+Provide a hexagonal-architecture-conformant analytics seam: a single `Analytics` port in `@kaiord/core` consumed by client apps, with concrete adapters (Umami today; alternatives in the future) injected at the application boundary. No adapter-specific imports leak into domain or application layers.
 
 ## Overview
 
-A lightweight, injectable analytics abstraction that follows the hexagonal architecture pattern. The `Analytics` port is defined in core (no external dependencies), with a noop default adapter and a Cloudflare Web Analytics adapter in each consumer package.
+A lightweight, injectable analytics abstraction that follows the hexagonal architecture pattern. The `Analytics` port is defined in core (no external dependencies), with a noop default adapter and a Umami adapter in each consumer package. Umami is an open-source, cookieless, privacy-first analytics service; the whole product uses a single analytics service.
 
 ## Requirements
 
@@ -38,43 +38,45 @@ The system SHALL provide `createNoopAnalytics(): Analytics` in `@kaiord/core/ada
 
 ---
 
-### Requirement: Cloudflare adapter wraps the beacon API
+### Requirement: Umami adapter wraps the tracker API
 
-The system SHALL provide `createCloudflareAnalytics(token: string | undefined): Analytics` in both `@kaiord/landing` and `@kaiord/workout-spa-editor`. The adapter MUST return a noop when the token is falsy (empty string or undefined), and MUST guard against `window.cfBeacon` being unavailable (e.g., blocked by an ad blocker) when the token is present.
+The system SHALL provide `createUmamiAnalytics(websiteId: string | undefined): Analytics` in both `@kaiord/landing` and `@kaiord/workout-spa-editor`. The adapter MUST return a noop when the website id is falsy (empty string or undefined), and MUST guard against `window.umami` being unavailable (e.g., blocked by an ad blocker, or the async tracker script not yet loaded) when the website id is present.
 
-#### Scenario: pageView is forwarded to beacon when available
+The two consumer packages differ in how they submit page views:
 
-- **WHEN** `pageView('/editor/')` is called and `window.cfBeacon` is present
-- **THEN** the adapter forwards the path to the beacon API without throwing
+- `@kaiord/landing` loads the Umami tracker with automatic tracking ON (a static multi-page site), so `pageView` is a no-op — submitting one would double-count the auto-tracked view.
+- `@kaiord/workout-spa-editor` loads the tracker with `data-auto-track="false"` (client-side wouter routes), so `pageView(path)` forwards to `window.umami.track` using the payload-modifier form to set the base-relative `url`.
 
-#### Scenario: Event is sent when beacon is available
+Both packages forward `event(name, props)` to `window.umami.track(name, props)`.
 
-- **WHEN** `event('workout-generated', { sport: 'cycling' })` is called and `window.cfBeacon` is present
-- **THEN** the adapter calls `window.cfBeacon.pushEvent` with the event name and properties
+#### Scenario: Event is sent when the tracker is available
 
-#### Scenario: pageView is silently dropped when beacon is blocked
+- **WHEN** `event('workout-generated', { sport: 'cycling' })` is called and `window.umami` is present
+- **THEN** the adapter calls `window.umami.track` with the event name and properties
 
-- **WHEN** `pageView` is called and `window.cfBeacon` is undefined
+#### Scenario: Editor pageView is forwarded via the payload modifier
+
+- **WHEN** `pageView('/calendar')` is called on the editor adapter and `window.umami` is present
+- **THEN** the adapter calls `window.umami.track` with a payload-modifier function that sets `url` to `/calendar`
+
+#### Scenario: Landing pageView does not double-count auto-tracked views
+
+- **WHEN** `pageView('/')` is called on the landing adapter and `window.umami` is present
+- **THEN** the adapter does not call `window.umami.track` (automatic tracking already recorded the view)
+
+#### Scenario: Event is silently dropped when the tracker is blocked
+
+- **WHEN** `event` is called and `window.umami` is undefined
 - **THEN** no error is thrown and execution continues normally
 
-#### Scenario: Event is silently dropped when beacon is blocked
+#### Scenario: track error is silently swallowed
 
-- **WHEN** `event` is called and `window.cfBeacon` is undefined
-- **THEN** no error is thrown and execution continues normally
-
-#### Scenario: Event called before beacon initializes is silently dropped
-
-- **WHEN** `event` is called synchronously before the async beacon script has loaded (`window.cfBeacon` not yet set)
-- **THEN** no error is thrown and execution continues normally
-
-#### Scenario: pushEvent error is silently swallowed
-
-- **WHEN** `event` is called and `window.cfBeacon.pushEvent` throws
+- **WHEN** `event` is called and `window.umami.track` throws
 - **THEN** the error is caught internally and execution continues normally without propagating to the caller
 
-#### Scenario: Adapter is noop when token is not set
+#### Scenario: Adapter is noop when website id is not set
 
-- **WHEN** `createCloudflareAnalytics(undefined)` or `createCloudflareAnalytics('')` is called
+- **WHEN** `createUmamiAnalytics(undefined)` or `createUmamiAnalytics('')` is called
 - **THEN** the returned adapter is functionally equivalent to `createNoopAnalytics()` — no network requests, no console errors
 
 Note: each consumer package (`@kaiord/landing` and `@kaiord/workout-spa-editor`) has its own independent adapter implementation and test suite verifying these scenarios.
@@ -249,7 +251,7 @@ Payload shape:
 
 ### Requirement: Editor tracks SPA route changes as page views
 
-The system SHALL call `analytics.pageView(path)` every time the wouter location changes inside the editor SPA, so that navigations to `/calendar`, `/library`, `/workout/new`, and `/workout/:id` are recorded as custom `pageView` events in Cloudflare Web Analytics.
+The system SHALL call `analytics.pageView(path)` every time the wouter location changes inside the editor SPA, so that navigations to `/calendar`, `/library`, `/workout/new`, and `/workout/:id` are recorded as page views in Umami. Because the editor disables Umami auto-tracking (`data-auto-track="false"`), these page views are submitted manually by the adapter with the base-relative path as the `url`.
 
 #### Scenario: Initial route fires a page view on mount
 
@@ -319,7 +321,7 @@ The system SHALL call `analytics.event('route-error', payload)` when `RouteError
 
 Truncation MUST occur AFTER scrubbing, so placeholders are never chopped mid-token.
 
-The scrubber explicitly does NOT cover IPv4 / IPv6 addresses, phone numbers, or filesystem pathnames. These are documented out-of-scope: the Cloudflare beacon adapter is not yet wired in production, and this gap is revisited when it is.
+The scrubber explicitly does NOT cover IPv4 / IPv6 addresses, phone numbers, or filesystem pathnames. These are documented out-of-scope and revisited if `route-error` telemetry surfaces such values in the Umami dashboard.
 
 The analytics call SHALL remain wrapped in `try/catch` so a failure in the scrubber, the truncator, or the analytics adapter cannot trigger a secondary failure inside the error boundary.
 

@@ -9,7 +9,7 @@ Package-local documentation. The monorepo's general docs (architecture, KRD form
 
 ## Key Files
 
-- `analytics.md` — Cloudflare Analytics adapter wiring, the events emitted, PII-scrub guarantees, and the staging-verification procedure.
+- `analytics.md` — Umami analytics adapter wiring, the events emitted, PII-scrub guarantees, and the staging-verification procedure.
 - `block-id-system.md` — `ItemId` lifecycle, hydration, and the strip-ids chokepoint.
 - `delete-button-styling-comparison.md` — visual/styling rules for delete buttons across molecules (pinned by `delete-button-styling.test.tsx`).
 - `keyboard-shortcuts.md` — user-facing keyboard-shortcut reference (mirrored by `HelpSection/`).
