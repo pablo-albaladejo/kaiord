@@ -55,27 +55,30 @@ describe("readGarminActivities", () => {
     );
   });
 
-  it("should throw the bridge error on a failed envelope", async () => {
-    // Arrange
-    mockedSend.mockResolvedValue({ ok: false, error: "No Garmin tab" });
+  it.each([
+    {
+      label: "surfaces the bridge error",
+      envelope: { ok: false as const, error: "No Garmin tab" },
+      message: "No Garmin tab",
+    },
+    {
+      label: "falls back to a generic message when there is no error",
+      envelope: { ok: false as const },
+      message: "Garmin activities pull failed",
+    },
+  ])(
+    "should reject a failed envelope and $label",
+    async ({ envelope, message }) => {
+      // Arrange
+      mockedSend.mockResolvedValue(envelope);
 
-    // Act
-    const attempt = readGarminActivities("ext-1");
+      // Act
+      const attempt = readGarminActivities("ext-1");
 
-    // Assert
-    await expect(attempt).rejects.toThrow("No Garmin tab");
-  });
-
-  it("should fall back to a generic message when the envelope has no error", async () => {
-    // Arrange
-    mockedSend.mockResolvedValue({ ok: false });
-
-    // Act
-    const attempt = readGarminActivities("ext-1");
-
-    // Assert
-    await expect(attempt).rejects.toThrow("Garmin activities pull failed");
-  });
+      // Assert
+      await expect(attempt).rejects.toThrow(message);
+    }
+  );
 
   it("should reject a malformed payload instead of passing it downstream", async () => {
     // Arrange
