@@ -196,4 +196,59 @@ describe("syncWhoopCycles", () => {
       error: "Extension did not respond",
     });
   });
+
+  it("should return a transport error when the cycles response fails schema validation", async () => {
+    // Arrange
+    const { deps } = makeDeps([makePolicy("hrv")], {
+      ok: true,
+      status: 200,
+      data: { unexpected: "shape" },
+    });
+
+    // Act
+    const result = await syncWhoopCycles(deps, input);
+
+    // Assert
+    expect(result).toEqual({
+      ok: false,
+      reason: "transport-error",
+      error: "Malformed WHOOP cycles response",
+    });
+  });
+
+  it("should return a transport error when the fetch result itself reports failure", async () => {
+    // Arrange
+    const { deps, stores } = makeDeps([makePolicy("hrv")], {
+      ok: false,
+      status: 401,
+      error: "Unauthorized",
+    });
+
+    // Act
+    const result = await syncWhoopCycles(deps, input);
+
+    // Assert
+    expect(result).toEqual({
+      ok: false,
+      reason: "transport-error",
+      error: "Unauthorized",
+    });
+    expect(stores.hrv.size).toBe(0);
+  });
+
+  it("should stringify a non-Error value thrown by the bridge read", async () => {
+    // Arrange
+    const { deps, fetchCycles } = makeDeps([makePolicy("hrv")]);
+    fetchCycles.mockRejectedValue("connection reset");
+
+    // Act
+    const result = await syncWhoopCycles(deps, input);
+
+    // Assert
+    expect(result).toEqual({
+      ok: false,
+      reason: "transport-error",
+      error: "connection reset",
+    });
+  });
 });

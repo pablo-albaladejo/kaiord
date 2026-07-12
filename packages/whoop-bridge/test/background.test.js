@@ -23,6 +23,7 @@ const externalCb =
 const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 const webRequestCb =
   chrome.webRequest.onBeforeSendHeaders.addListener.mock.calls[0][0];
+const onInstalledCb = chrome.runtime.onInstalled.addListener.mock.calls[0][0];
 
 // A JWT is header.payload.signature, base64url, no signature verification here.
 const makeJwt = (payload) => {
@@ -78,6 +79,41 @@ describe("decodeUserId", () => {
     // Assert
     expect(userId).toBeNull();
   });
+
+  it("should return null when the custom:user_id claim is absent", () => {
+    // Arrange
+    const jwt = makeJwt({ sub: "cognito-uuid-only" });
+
+    // Act
+    const userId = decodeUserId(jwt);
+
+    // Assert
+    expect(userId).toBeNull();
+  });
+
+  it("should return null when the custom:user_id claim is not numeric", () => {
+    // Arrange
+    const jwt = makeJwt({ "custom:user_id": "not-a-number" });
+
+    // Act
+    const userId = decodeUserId(jwt);
+
+    // Assert
+    expect(userId).toBeNull();
+  });
+
+  it("should return null when the payload segment cannot be parsed as JSON", () => {
+    // Arrange
+    const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+    const malformedPayload = Buffer.from("not-json").toString("base64url");
+    const jwt = `${b64({ alg: "none" })}.${malformedPayload}.sig`;
+
+    // Act
+    const userId = decodeUserId(jwt);
+
+    // Assert
+    expect(userId).toBeNull();
+  });
 });
 
 describe("storeToken and getSessionStatus", () => {
@@ -121,6 +157,20 @@ describe("storeToken and getSessionStatus", () => {
     // Assert
     expect(status.connected).toBe(false);
     expect(status.userId).toBeNull();
+  });
+
+  it.each([
+    { label: "null", token: null },
+    { label: "undefined", token: undefined },
+    { label: "a non-string", token: 42 },
+  ])("should ignore a $label token without touching storage", async ({ token }) => {
+    // Arrange
+
+    // Act
+    await storeToken(token);
+
+    // Assert
+    expect(chrome.storage.session.set).not.toHaveBeenCalled();
   });
 });
 
@@ -204,6 +254,20 @@ describe("whoopFetch tab dependency", () => {
     );
     expect(result).toEqual({ ok: true, status: 200, data: { records: [] } });
   });
+
+  it("should reject when chrome.runtime.lastError is set during the tab relay", async () => {
+    // Arrange
+    await storeToken(makeJwt({ "custom:user_id": "1" }));
+    chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 5 }]));
+    chrome.runtime.lastError = { message: "Receiving end does not exist" };
+    chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => cb(undefined));
+
+    // Act
+    const failure = whoopFetch("/core-details-bff/v0/cycles/details");
+
+    // Assert
+    await expect(failure).rejects.toThrow("Receiving end does not exist");
+  });
 });
 
 describe("handleAction", () => {
@@ -275,6 +339,24 @@ describe("handleAction", () => {
 
     // Assert
     await expect(attempt).rejects.toThrow("Missing path");
+  });
+
+  it("should delegate a whoop-fetch action with a path to whoopFetch", async () => {
+    // Arrange
+    await storeToken(makeJwt({ "custom:user_id": "1" }));
+    chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 99 }]));
+    chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+      cb({ ok: true, status: 200, data: { records: [] } })
+    );
+
+    // Act
+    const result = await handleAction({
+      action: "whoop-fetch",
+      path: "/core-details-bff/v0/cycles/details",
+    });
+
+    // Assert
+    expect(result).toEqual({ ok: true, status: 200, data: { records: [] } });
   });
 
   it("should reject an unknown action", async () => {
@@ -411,6 +493,20 @@ describe("dispatchExternal origin pinning", () => {
       expect.objectContaining({ ok: true, protocolVersion: PROTOCOL_VERSION })
     );
   });
+
+  it("should route through the registered onMessageExternal listener wrapper", async () => {
+    // Arrange
+    const respond = vi.fn();
+
+    // Act
+    externalCb({ action: "status" }, { origin: "https://app.kaiord.com" }, respond);
+    await vi.waitFor(() => expect(respond).toHaveBeenCalled());
+
+    // Assert
+    expect(respond).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, protocolVersion: PROTOCOL_VERSION })
+    );
+  });
 });
 
 describe("internal dispatch", () => {
@@ -474,5 +570,16 @@ describe("reinjectContentScripts", () => {
     expect(chrome.scripting.executeScript).not.toHaveBeenCalledWith(
       expect.objectContaining({ files: ["bridge-identity.js", "kaiord-announce.js"] })
     );
+  });
+
+  it("should invoke reinjectContentScripts through the registered onInstalled wrapper", async () => {
+    // Arrange
+
+    // Act
+    onInstalledCb();
+    await vi.waitFor(() => expect(chrome.runtime.getManifest).toHaveBeenCalled());
+
+    // Assert
+    expect(chrome.runtime.getManifest).toHaveBeenCalled();
   });
 });

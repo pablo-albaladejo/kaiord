@@ -1,10 +1,15 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   isAllowed,
   handleWhoopFetch,
   onWindowMessage,
+  scanCognitoStorage,
 } = require("../content.js");
+
+// Captured at import time (before any reset clears the mock call history),
+// mirroring the background.js test pattern for the registered listener.
+const messageCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 
 const WHOOP_ORIGIN = "https://app.whoop.com";
 
@@ -64,6 +69,17 @@ describe("content.js allowlist", () => {
 
     // Act
     const allowed = isAllowed("GET", "/core-details-bff/v0/cycles/detailsX");
+
+    // Assert
+    expect(allowed).toBe(false);
+  });
+
+  it("should reject a path that cannot be parsed as a URL", () => {
+    // Arrange
+    const unparseable = Symbol("bad-path");
+
+    // Act
+    const allowed = isAllowed("GET", unparseable);
 
     // Assert
     expect(allowed).toBe(false);
@@ -161,6 +177,68 @@ describe("content.js handleWhoopFetch", () => {
     // Assert
     expect(result).toEqual({ ok: false, status: 401, data: null });
   });
+
+  it("should fall back to a truncated raw body when the response is not JSON", async () => {
+    // Arrange
+    fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve("not-json-body"),
+    });
+
+    // Act
+    const result = await handleWhoopFetch({
+      action: "whoop-fetch",
+      path: "/core-details-bff/v0/cycles/details",
+      token: "t",
+    });
+
+    // Assert
+    expect(result).toEqual({ ok: true, status: 200, data: "not-json-body" });
+  });
+
+  it("should report a timeout when the request is aborted after 30s", async () => {
+    // Arrange
+    vi.useFakeTimers();
+    fetch.mockImplementation(
+      (_url, opts) =>
+        new Promise((_resolve, reject) => {
+          opts.signal.addEventListener("abort", () => {
+            const err = new Error("This operation was aborted");
+            err.name = "AbortError";
+            reject(err);
+          });
+        })
+    );
+
+    // Act
+    const pending = handleWhoopFetch({
+      action: "whoop-fetch",
+      path: "/core-details-bff/v0/cycles/details",
+      token: "t",
+    });
+    await vi.advanceTimersByTimeAsync(30000);
+    const result = await pending;
+
+    // Assert
+    expect(result).toEqual({ ok: false, error: "Timed out" });
+    vi.useRealTimers();
+  });
+
+  it("should surface a non-abort network failure by its message", async () => {
+    // Arrange
+    fetch.mockRejectedValue(new Error("Network down"));
+
+    // Act
+    const result = await handleWhoopFetch({
+      action: "whoop-fetch",
+      path: "/core-details-bff/v0/cycles/details",
+      token: "t",
+    });
+
+    // Assert
+    expect(result).toEqual({ ok: false, error: "Network down" });
+  });
 });
 
 describe("content.js token relay", () => {
@@ -214,5 +292,172 @@ describe("content.js token relay", () => {
 
     // Assert
     expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a same-window WHOOP-origin message with no data payload", () => {
+    // Arrange
+    const event = { source: window, origin: WHOOP_ORIGIN, data: undefined };
+
+    // Act
+    onWindowMessage(event);
+
+    // Assert
+    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a same-window WHOOP-origin message with the wrong marker", () => {
+    // Arrange
+    const event = {
+      source: window,
+      origin: WHOOP_ORIGIN,
+      data: { __whoopPoc: "not-token", token: "x" },
+    };
+
+    // Act
+    onWindowMessage(event);
+
+    // Assert
+    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a same-window WHOOP-origin token message with no token value", () => {
+    // Arrange
+    const event = {
+      source: window,
+      origin: WHOOP_ORIGIN,
+      data: { __whoopPoc: "token" },
+    };
+
+    // Act
+    onWindowMessage(event);
+
+    // Assert
+    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe("content.js scanCognitoStorage", () => {
+  beforeEach(() => {
+    __resetChromeMock();
+  });
+
+  afterEach(() => {
+    delete globalThis.localStorage;
+  });
+
+  it("should relay the Cognito access token found in localStorage", () => {
+    // Arrange
+    const keys = ["unrelated-key", "CognitoIdentityServiceProvider.abc.accessToken"];
+    globalThis.localStorage = {
+      length: keys.length,
+      key: (i) => keys[i],
+      getItem: (key) =>
+        key === "CognitoIdentityServiceProvider.abc.accessToken"
+          ? "cognito-token"
+          : null,
+    };
+
+    // Act
+    const token = scanCognitoStorage();
+
+    // Assert
+    expect(token).toBe("cognito-token");
+    expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+      action: "capture-token",
+      token: "cognito-token",
+    });
+  });
+
+  it("should skip a matching key whose stored value is empty", () => {
+    // Arrange
+    globalThis.localStorage = {
+      length: 1,
+      key: () => "CognitoIdentityServiceProvider.abc.accessToken",
+      getItem: () => "",
+    };
+
+    // Act
+    const token = scanCognitoStorage();
+
+    // Assert
+    expect(token).toBeNull();
+    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("should return null when no key matches the Cognito pattern", () => {
+    // Arrange
+    globalThis.localStorage = {
+      length: 2,
+      key: (i) => [null, "some-other-key"][i],
+      getItem: () => null,
+    };
+
+    // Act
+    const token = scanCognitoStorage();
+
+    // Assert
+    expect(token).toBeNull();
+    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("should swallow a throwing localStorage access and return null", () => {
+    // Arrange
+    globalThis.localStorage = {
+      get length() {
+        throw new Error("SecurityError");
+      },
+    };
+
+    // Act
+    const token = scanCognitoStorage();
+
+    // Assert
+    expect(token).toBeNull();
+  });
+});
+
+describe("content.js registered onMessage listener", () => {
+  beforeEach(() => {
+    __resetChromeMock();
+  });
+
+  it("should keep the channel open and relay a whoop-fetch action to handleWhoopFetch", async () => {
+    // Arrange
+    fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(JSON.stringify({ records: [] })),
+    });
+    const sendResponse = vi.fn();
+
+    // Act
+    const kept = messageCb(
+      {
+        action: "whoop-fetch",
+        path: "/core-details-bff/v0/cycles/details",
+        token: "t",
+      },
+      {},
+      sendResponse
+    );
+    await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+    // Assert
+    expect(kept).toBe(true);
+    expect(sendResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, status: 200 })
+    );
+  });
+
+  it("should ignore a message whose action is not whoop-fetch", () => {
+    // Arrange
+    const sendResponse = vi.fn();
+
+    // Act
+    const kept = messageCb({ action: "something-else" }, {}, sendResponse);
+
+    // Assert
+    expect(kept).toBeUndefined();
+    expect(sendResponse).not.toHaveBeenCalled();
   });
 });
