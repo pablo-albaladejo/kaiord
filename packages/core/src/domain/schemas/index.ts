@@ -109,7 +109,9 @@ export type {
   MealSlot,
   SleepRecord,
   SleepStage,
+  StrainSummary,
   StressEpisode,
+  VitalsSummary,
   WeightMeasurement,
 } from "./health";
 export {
@@ -131,8 +133,14 @@ export {
   SLEEP_TOTAL_DURATION_TOLERANCE_SECONDS,
   sleepRecordSchema,
   sleepStageSchema,
+  STRAIN_SCORE_TOLERANCE,
+  strainSummarySchema,
   STRESS_TOLERANCE,
   stressEpisodeSchema,
+  VITALS_RESPIRATORY_RATE_TOLERANCE,
+  VITALS_RESTING_HEART_RATE_TOLERANCE,
+  VITALS_SPO2_TOLERANCE,
+  vitalsSummarySchema,
   WEIGHT_TOLERANCE_KG,
   weightMeasurementSchema,
 } from "./health";

@@ -13,3 +13,10 @@ export const DAILY_STEPS_TOLERANCE = 0;
 export const DAILY_KCAL_TOLERANCE = 1;
 export const BODY_FAT_TOLERANCE_PERCENT = 0.1;
 export const STRESS_TOLERANCE = 0;
+
+// Read-only wearable-session metric source → KRD conversion tolerances.
+// Applied by source-adapter converter tests, not by a FIT round-trip.
+export const STRAIN_SCORE_TOLERANCE = 0.1;
+export const VITALS_RESPIRATORY_RATE_TOLERANCE = 0.1;
+export const VITALS_SPO2_TOLERANCE = 0;
+export const VITALS_RESTING_HEART_RATE_TOLERANCE = 0;
