@@ -42,6 +42,7 @@
     "@kaiord/garmin": "workspace:^",
     "@kaiord/i18n": "workspace:^",
     "@kaiord/tcx": "workspace:^",
+    "@kaiord/whoop": "workspace:^",
     "@kaiord/zwo": "workspace:^",
     "i18next": "^26.3.4",
     "react-i18next": "^17.0.8",
