@@ -25,6 +25,8 @@ const BPM_61 = 61;
 const BPM_59 = 59;
 const BPM_300 = 300;
 const MS_PER_SECOND = 1000;
+const MS_PER_DAY = 86_400_000;
+const OUTLIER_OFFSET_DAYS = 400;
 const ONE_STEP_MS = STEP_SECONDS * MS_PER_SECOND;
 const TWO_STEPS_MS = ONE_STEP_MS * 2;
 const LARGE_STEP_SECONDS = 60;
@@ -132,6 +134,34 @@ describe("metricsToHeartRateSeries", () => {
     expect(Math.abs((series?.samples[0] ?? 0) - BPM_59)).toBeLessThanOrEqual(
       HEART_RATE_SERIES_BPM_TOLERANCE
     );
+  });
+
+  it("should drop an out-of-window outlier sample rather than exploding the array", () => {
+    // Arrange
+    // A single sample with a wildly out-of-range `time` (400 days out) must
+    // not materialize a multi-million-element array; it is dropped as
+    // out-of-window noise, leaving just the in-window first sample.
+    const farFutureMs = OUTLIER_OFFSET_DAYS * MS_PER_DAY;
+    const response: WhoopMetricsResponse = {
+      values: [
+        { data: BPM_58, time: HEART_RATE_METRICS_FIRST_SAMPLE_TIME },
+        {
+          data: BPM_60,
+          time: HEART_RATE_METRICS_FIRST_SAMPLE_TIME + farFutureMs,
+        },
+      ],
+    };
+
+    // Act
+    const series = metricsToHeartRateSeries(response, {
+      userId: USER_ID,
+      date: DATE,
+      stepSeconds: STEP_SECONDS,
+    });
+
+    // Assert
+    expect(series?.samples).toEqual([BPM_58]);
+    expect(heartRateSeriesSchema.safeParse(series).success).toBe(true);
   });
 
   it("should return null when values is empty", () => {

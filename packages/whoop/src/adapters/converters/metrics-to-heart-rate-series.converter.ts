@@ -6,6 +6,7 @@ const KRD_VERSION = "2.0" as const;
 const SOURCE_BRIDGE_ID = "whoop-bridge";
 const MIN_BPM = 0;
 const MAX_BPM = 300;
+const SECONDS_PER_DAY = 86_400;
 
 const clampRoundBpm = (value: number): number =>
   Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(value)));
@@ -32,9 +33,16 @@ export const metricsToHeartRateSeries = (
   }
 
   const stepMs = opts.stepSeconds * 1000;
+  // This is a per-day series, so cap the slot count at one day's worth of
+  // slots. WHOOP `time` is unvalidated: without this bound a single outlier
+  // sample would make `slot` enormous and force the gap-fill loop to
+  // materialize a multi-million-element sparse array. Out-of-window samples
+  // are dropped rather than allowed to blow up memory/time.
+  const maxSlot = Math.ceil(SECONDS_PER_DAY / opts.stepSeconds);
   const bucketed: Array<number | null> = [];
   for (const sample of samples) {
     const slot = Math.round((sample.time - first.time) / stepMs);
+    if (slot < 0 || slot > maxSlot) continue;
     bucketed[slot] = clampRoundBpm(sample.data);
   }
   for (let slot = 0; slot < bucketed.length; slot += 1) {

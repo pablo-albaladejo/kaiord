@@ -36,7 +36,16 @@ export type SyncWhoopHeartRateInput = {
 
 export type SyncWhoopHeartRateResult =
   | { ok: true; seriesImported: number; skipped: number }
-  | { ok: false; reason: "no-policy" | "transport-error"; error?: string };
+  | {
+      ok: false;
+      reason: "no-policy" | "transport-error";
+      error?: string;
+      // Partial progress before a mid-window transport error. Upserts are
+      // already persisted and idempotent, so callers can report/resume from
+      // how many days actually landed rather than assuming zero.
+      seriesImported?: number;
+      skipped?: number;
+    };
 
 const isEnabled = async (
   policyRepo: IntegrationPolicyRepository,
@@ -70,7 +79,13 @@ export const syncWhoopHeartRate = async (
       stepSeconds
     );
     if (outcome.status === "transport-error") {
-      return { ok: false, reason: "transport-error", error: outcome.error };
+      return {
+        ok: false,
+        reason: "transport-error",
+        error: outcome.error,
+        seriesImported,
+        skipped,
+      };
     }
     if (outcome.status === "imported") seriesImported += 1;
     else skipped += 1;

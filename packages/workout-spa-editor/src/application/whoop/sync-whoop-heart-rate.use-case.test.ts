@@ -181,6 +181,36 @@ describe("syncWhoopHeartRate", () => {
       ok: false,
       reason: "transport-error",
       error: "Extension did not respond",
+      seriesImported: 0,
+      skipped: 0,
+    });
+  });
+
+  it("should preserve counts accumulated before a mid-window transport error", async () => {
+    // Arrange
+    // `input` spans two days: the first imports a series, the second throws.
+    // Day one's upsert is already persisted, so the failure must report that
+    // partial progress rather than dropping it to zero.
+    const fetchMetrics = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        data: { values: [sampleAt(input.startTime, SAMPLE_HOUR)] },
+      })
+      .mockRejectedValueOnce(new Error("Extension did not respond"));
+    const { deps } = makeDeps([makePolicy()], fetchMetrics);
+
+    // Act
+    const result = await syncWhoopHeartRate(deps, input);
+
+    // Assert
+    expect(result).toEqual({
+      ok: false,
+      reason: "transport-error",
+      error: "Extension did not respond",
+      seriesImported: 1,
+      skipped: 0,
     });
   });
 
