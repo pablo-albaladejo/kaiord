@@ -17,7 +17,6 @@ Interface-only definitions ("ports" in hexagonal terminology). Pure `type` decla
 | `token-store.ts` | `TokenStore` port (`save`/`load`/`clear`) for persisting `TokenData` between sessions. |
 | `workout-service.ts` | `WorkoutService` port (`push`/`pull`/`list`/`remove`) plus `WorkoutSummary`, `PushResult`, `ListOptions` DTOs for remote services like Garmin Connect. |
 | `analytics.ts` | `Analytics` port (`pageView`/`event`) and `AnalyticsEvent = Record<string, string                                                                      | number | boolean>`. |
-| `index.ts` | Barrel re-export of all port types. |
 | `logger.test.ts` | Smoke test against a stub `Logger` to lock the shape. |
 
 ## For AI Agents

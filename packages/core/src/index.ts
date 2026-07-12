@@ -163,26 +163,26 @@ export {
 // Ports
 export { createNoopAnalytics } from "./adapters/analytics/noop-analytics";
 export { createConsoleLogger } from "./adapters/logger/console-logger";
+export type { Analytics, AnalyticsEvent } from "./ports/analytics";
+export type { AuthProvider, TokenData } from "./ports/auth-provider";
 export type {
-  AuthProvider,
   BinaryReader,
   BinaryWriter,
-  ListOptions,
-  Logger,
-  LogLevel,
-  PushResult,
   TextReader,
   TextWriter,
-  TokenData,
-  TokenStore,
+} from "./ports/format-strategy";
+export type { Logger, LogLevel } from "./ports/logger";
+export type { TokenStore } from "./ports/token-store";
+export type {
+  ListOptions,
+  PushResult,
   WorkoutService,
   WorkoutSummary,
-} from "./ports";
-export type { Analytics, AnalyticsEvent } from "./ports/analytics";
+} from "./ports/workout-service";
 
 // Application: Conversion Functions
-export { fromBinary, fromText } from "./application";
-export { toBinary, toText } from "./application";
+export { fromBinary, fromText } from "./application/from-format";
+export { toBinary, toText } from "./application/to-format";
 
 // Application: Energy calculators (pure)
 export type { ActivityLevel } from "./application/energy/activity-factor";
