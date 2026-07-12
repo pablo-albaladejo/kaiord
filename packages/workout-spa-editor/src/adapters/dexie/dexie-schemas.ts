@@ -22,10 +22,8 @@ import {
   buildCoreV26,
   buildCoreV27,
   buildCoreV30ThroughV34,
+  HEALTH_SUFFIX,
 } from "./dexie-schemas-late";
-
-const HEALTH_SUFFIX =
-  ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
 
 // v17 — integrationPolicies + exportLedger stores; health stores gain
 // provenance fields (sourceBridgeId, externalId) and a unique compound

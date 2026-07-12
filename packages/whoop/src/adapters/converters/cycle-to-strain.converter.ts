@@ -34,9 +34,7 @@ export const cycleToStrain = (
     version: KRD_VERSION,
     date: dateMatch[0],
     strainScore: cycle.scaled_strain,
-    ...(cycle.kilojoule !== undefined
-      ? { energyKilojoules: cycle.kilojoule }
-      : {}),
+    ...(cycle.kilojoule != null ? { energyKilojoules: cycle.kilojoule } : {}),
     sourceBridgeId: SOURCE_BRIDGE_ID,
     externalId: `cycle:${cycle.id}:strain`,
   };

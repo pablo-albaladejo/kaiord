@@ -6,7 +6,10 @@ import {
 } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import { CYCLES_DETAILS_WRAPPED } from "../../test-utils/cycles-fixture";
+import {
+  CYCLES_DETAILS_RECORDS,
+  CYCLES_DETAILS_WRAPPED,
+} from "../../test-utils/cycles-fixture";
 import { whoopCyclesResponseSchema } from "../schemas/whoop-cycles.schema";
 import { cycleToVitals } from "./cycle-to-vitals.converter";
 
@@ -87,5 +90,58 @@ describe("cycleToVitals", () => {
     // Assert
     expect(vitals).not.toBeNull();
     expect(vitals && "skinTempCelsius" in vitals).toBe(false);
+  });
+
+  it("should parse the window and skip fields when metrics are explicitly null", () => {
+    // Arrange
+    // WHOOP may send `null` (not omission) for an unrecorded metric; that must
+    // not fail the whole-window parse (which would drop Wave-1 hrv/sleep too)
+    // and must not emit a KRD-invalid `null`.
+    const rawRecovery = CYCLES_DETAILS_RECORDS[0].recovery as Record<
+      string,
+      unknown
+    >;
+    const rawSleep = CYCLES_DETAILS_RECORDS[0].sleeps[0] as Record<
+      string,
+      unknown
+    >;
+    const raw = {
+      records: [
+        {
+          cycle: CYCLES_DETAILS_RECORDS[0].cycle,
+          recovery: { ...rawRecovery, spo2: null, skin_temp_celsius: null },
+          sleeps: [{ ...rawSleep, respiratory_rate: null }],
+        },
+      ],
+    };
+
+    // Act
+    const parsed = whoopCyclesResponseSchema.safeParse(raw);
+
+    // Assert
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    const vitals = cycleToVitals(parsed.data[0]);
+    expect(vitals).not.toBeNull();
+    expect(vitals && "spo2Percent" in vitals).toBe(false);
+    expect(vitals && "skinTempCelsius" in vitals).toBe(false);
+    expect(vitals && "respiratoryRate" in vitals).toBe(false);
+    expect(vitals?.restingHeartRate).toBe(EXPECTED_RESTING_HEART_RATE);
+  });
+
+  it("should treat a resting_heart_rate of 0 as absent", () => {
+    // Arrange
+    // 0 is WHOOP's "no reading" sentinel, not a real resting HR, and would
+    // violate the KRD `restingHeartRate` positivity invariant.
+    const record = {
+      ...RECORD,
+      recovery: { ...RECORD.recovery, resting_heart_rate: 0 },
+    };
+
+    // Act
+    const vitals = cycleToVitals(record);
+
+    // Assert
+    expect(vitals && "restingHeartRate" in vitals).toBe(false);
   });
 });

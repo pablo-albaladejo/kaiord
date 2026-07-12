@@ -19,16 +19,24 @@ export const cycleToVitals = (
   record: WhoopCycleRecord
 ): VitalsSummary | null => {
   const { cycle, recovery, sleeps } = record;
+  // WHOOP may send these as omitted OR explicit `null` for an unrecorded
+  // metric (`.nullish()` in the schema), so `!= null` treats both as absent
+  // rather than emitting a KRD-invalid `null`. A `resting_heart_rate` of 0 is
+  // WHOOP's "no reading" sentinel, not a real vital, and would violate the KRD
+  // `restingHeartRate` positivity invariant — treat non-positive as absent.
   const respiratoryRate = sleeps[0]?.respiratory_rate;
   const spo2Percent = recovery.spo2;
   const skinTempCelsius = recovery.skin_temp_celsius;
-  const restingHeartRate = recovery.resting_heart_rate;
+  const restingHeartRate =
+    recovery.resting_heart_rate != null && recovery.resting_heart_rate > 0
+      ? recovery.resting_heart_rate
+      : undefined;
 
   const hasAny =
-    respiratoryRate !== undefined ||
-    spo2Percent !== undefined ||
-    skinTempCelsius !== undefined ||
-    restingHeartRate !== undefined;
+    respiratoryRate != null ||
+    spo2Percent != null ||
+    skinTempCelsius != null ||
+    restingHeartRate != null;
   if (!hasAny) {
     return null;
   }
@@ -37,10 +45,10 @@ export const cycleToVitals = (
     kind: "vitals",
     version: KRD_VERSION,
     measuredAt: recovery.created_at,
-    ...(respiratoryRate !== undefined ? { respiratoryRate } : {}),
-    ...(spo2Percent !== undefined ? { spo2Percent } : {}),
-    ...(skinTempCelsius !== undefined ? { skinTempCelsius } : {}),
-    ...(restingHeartRate !== undefined ? { restingHeartRate } : {}),
+    ...(respiratoryRate != null ? { respiratoryRate } : {}),
+    ...(spo2Percent != null ? { spo2Percent } : {}),
+    ...(skinTempCelsius != null ? { skinTempCelsius } : {}),
+    ...(restingHeartRate != null ? { restingHeartRate } : {}),
     sourceBridgeId: SOURCE_BRIDGE_ID,
     externalId: `cycle:${cycle.id}:vitals`,
   };

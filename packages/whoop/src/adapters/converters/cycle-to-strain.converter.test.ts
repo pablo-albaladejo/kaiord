@@ -1,7 +1,10 @@
 import { STRAIN_SCORE_TOLERANCE, strainSummarySchema } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import { CYCLES_DETAILS_WRAPPED } from "../../test-utils/cycles-fixture";
+import {
+  CYCLES_DETAILS_RECORDS,
+  CYCLES_DETAILS_WRAPPED,
+} from "../../test-utils/cycles-fixture";
 import { whoopCyclesResponseSchema } from "../schemas/whoop-cycles.schema";
 import { cycleToStrain } from "./cycle-to-strain.converter";
 
@@ -92,5 +95,31 @@ describe("cycleToStrain", () => {
 
     // Assert
     expect(strain).toBeNull();
+  });
+
+  it("should parse the window and omit energyKilojoules when kilojoule is null", () => {
+    // Arrange
+    // An explicit `null` kilojoule must not fail the whole-window parse nor
+    // emit a KRD-invalid `null` energy value.
+    const rawCycle = CYCLES_DETAILS_RECORDS[0].cycle as Record<string, unknown>;
+    const raw = {
+      records: [
+        {
+          cycle: { ...rawCycle, kilojoule: null },
+          recovery: CYCLES_DETAILS_RECORDS[0].recovery,
+          sleeps: CYCLES_DETAILS_RECORDS[0].sleeps,
+        },
+      ],
+    };
+
+    // Act
+    const parsed = whoopCyclesResponseSchema.safeParse(raw);
+
+    // Assert
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    const strain = cycleToStrain(parsed.data[0]);
+    expect(strain).not.toBeNull();
+    expect(strain && "energyKilojoules" in strain).toBe(false);
   });
 });

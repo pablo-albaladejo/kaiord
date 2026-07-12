@@ -105,7 +105,11 @@ export const buildCoreV33 = (prev: Stores): Record<string, string | null> => ({
   usage: null,
 });
 
-const HEALTH_SUFFIX_V34 =
+// Shared health-store index suffix (provenance columns + the unique
+// natural-key dedup index). Single source of truth: `dexie-schemas.ts`
+// imports this for the v17 health stores and `buildCoreV34` reuses it, so the
+// index shape can never drift between the two files.
+export const HEALTH_SUFFIX =
   ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
 
 // v34 — additive health stores `healthStrain` + `healthVitals` (WHOOP wave
@@ -118,8 +122,8 @@ export const buildCoreV34 = (
   prev: Record<string, string | null>
 ): Record<string, string | null> => ({
   ...prev,
-  healthStrain: `id, profileId, [profileId+date], date${HEALTH_SUFFIX_V34}`,
-  healthVitals: `id, profileId, [profileId+date], date${HEALTH_SUFFIX_V34}`,
+  healthStrain: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+  healthVitals: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
 });
 
 // Assemble the latest schemas (v30 → v31 → v32 → v33 → v34) from the v27
