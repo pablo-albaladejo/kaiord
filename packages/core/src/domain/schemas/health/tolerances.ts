@@ -20,3 +20,6 @@ export const STRAIN_SCORE_TOLERANCE = 0.1;
 export const VITALS_RESPIRATORY_RATE_TOLERANCE = 0.1;
 export const VITALS_SPO2_TOLERANCE = 0;
 export const VITALS_RESTING_HEART_RATE_TOLERANCE = 0;
+// heart-rate-series samples are exact integer bpm readings straight off the
+// source device — no fuzzy rounding tolerance applies.
+export const HEART_RATE_SERIES_BPM_TOLERANCE = 0;

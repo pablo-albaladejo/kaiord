@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { bodyCompositionSchema } from "./body-composition";
 import { dailyWellnessSchema } from "./daily";
+import { heartRateSeriesSchema } from "./heart-rate-series";
 import { hrvSummarySchema } from "./hrv";
 import { sleepRecordSchema } from "./sleep";
 import { strainSummarySchema } from "./strain";
@@ -12,7 +13,8 @@ import { weightMeasurementSchema } from "./weight";
 /**
  * Tagged discriminated union of the health-metric payloads carried under
  * `extensions.health.<metric>` in KRD v2.0: the six bidirectional FIT-core
- * types plus the read-only wearable-session metrics `strain` and `vitals`.
+ * types plus the read-only wearable-session metrics `strain`, `vitals`, and
+ * `heart-rate-series`.
  *
  * The `kind` discriminator selects the variant; sub-schemas validate
  * their own per-metric invariants.
@@ -26,6 +28,7 @@ export const healthExtensionPayloadSchema = z.discriminatedUnion("kind", [
   stressEpisodeSchema,
   strainSummarySchema,
   vitalsSummarySchema,
+  heartRateSeriesSchema,
 ]);
 
 export type HealthExtensionPayload = z.infer<
@@ -49,6 +52,10 @@ export {
   type GoalType,
   goalTypeSchema,
 } from "./energy-goal";
+export {
+  type HeartRateSeries,
+  heartRateSeriesSchema,
+} from "./heart-rate-series";
 export { type HrvSummary, hrvSummarySchema } from "./hrv";
 export {
   type MacroNutrients,
@@ -68,6 +75,7 @@ export {
   BODY_FAT_TOLERANCE_PERCENT,
   DAILY_KCAL_TOLERANCE,
   DAILY_STEPS_TOLERANCE,
+  HEART_RATE_SERIES_BPM_TOLERANCE,
   HRV_TOLERANCE_MS,
   SLEEP_STAGE_TOLERANCE_SECONDS,
   SLEEP_TOTAL_DURATION_TOLERANCE_SECONDS,

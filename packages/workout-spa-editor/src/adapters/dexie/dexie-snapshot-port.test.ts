@@ -22,9 +22,10 @@ const PASSPHRASE = "kaiord-spa-v1";
 // + the conversationId FK, v26 added the device-local energy-balance stores
 // (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded, v31 added
 // the lab-analytics stores (`labReports`, `labValues`, included), v33 dropped
-// the legacy `usage` store, making `usageEvents` the synced usage source, and
-// v34 added the healthStrain + healthVitals stores (included).
-const SCHEMA_HEAD = 34;
+// the legacy `usage` store, making `usageEvents` the synced usage source, v34
+// added the healthStrain + healthVitals stores (included), and v35 added the
+// healthHeartRateSeries store (included).
+const SCHEMA_HEAD = 35;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
