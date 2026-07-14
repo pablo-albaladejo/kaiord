@@ -53,6 +53,9 @@ export type DescriptionLoad = {
   retry: () => void;
 };
 
+/** Failure bound to the activity it came from, so stale errors never leak. */
+type DescriptionFailure = { id: string; reason: ExpandFailureReason };
+
 /**
  * Lazy-load the activity description on dialog open. Skipped when the
  * description is already known (including known-empty `""`). Auto-fires
@@ -64,7 +67,7 @@ export const useExpandActivityOnOpen = (
   expandActivity: ExpandActivity
 ): DescriptionLoad => {
   const activeProfileId = useActiveProfileLive()?.id ?? null;
-  const [reason, setReason] = useState<ExpandFailureReason | null>(null);
+  const [failure, setFailure] = useState<DescriptionFailure | null>(null);
   const mounted = useRef(true);
   const firedFor = useRef<string | null>(null);
   useEffect(() => {
@@ -77,15 +80,16 @@ export const useExpandActivityOnOpen = (
   const run = useCallback(async () => {
     if (!activity || !activeProfileId) return;
     if (activity.description !== undefined) return;
-    setReason(null);
+    setFailure(null);
     const result = await expandActivity(activity);
-    if (mounted.current && result && !result.ok) setReason(result.reason);
+    if (mounted.current && result && !result.ok)
+      setFailure({ id: activity.id, reason: result.reason });
   }, [activity, activeProfileId, expandActivity]);
 
   useEffect(() => {
     if (!activity) {
       firedFor.current = null;
-      setReason(null);
+      setFailure(null);
       return;
     }
     if (activity.description !== undefined) return;
@@ -94,5 +98,9 @@ export const useExpandActivityOnOpen = (
     void run();
   }, [activity, run]);
 
+  // Match the failure to the current activity at render time: switching
+  // activities hides a stale error synchronously, and a late failure from a
+  // previous activity's in-flight fetch cannot paint an error on this one.
+  const reason = failure && failure.id === activity?.id ? failure.reason : null;
   return { reason, retry: run };
 };
