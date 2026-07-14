@@ -23,17 +23,19 @@ import {
 } from "./coaching-dialog-parts";
 import { CoachingDayComments } from "./CoachingDayComments";
 import { useCoachingDayComments } from "./use-coaching-day-comments";
+import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
 export type CoachingActivityDialogContentProps = CoachingDialogBodyProps & {
   dialogState: CoachingDialogState | undefined;
+  descriptionLoad: DescriptionLoad;
   profileId: string | null;
 };
 
 export function CoachingActivityDialogContent(
   props: CoachingActivityDialogContentProps
 ) {
-  const { activity, dialogState, profileId } = props;
+  const { activity, dialogState, descriptionLoad, profileId } = props;
   const t = useTranslate("coaching");
   const matched = dialogState?.kind === "matched" ? dialogState : null;
   const comments = useCoachingDayComments(
@@ -48,7 +50,7 @@ export function CoachingActivityDialogContent(
       <div className="text-xs text-muted-foreground">
         <span className="font-medium">{t(`status.${activity.status}`)}</span>
       </div>
-      <DialogDescription activity={activity} />
+      <DialogDescription activity={activity} load={descriptionLoad} />
       {matched
         ? renderMatchedBody(props, matched.workout, matched.executed)
         : renderNoWorkoutBody(props)}

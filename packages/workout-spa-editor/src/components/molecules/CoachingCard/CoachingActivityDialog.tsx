@@ -14,6 +14,7 @@ import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
 import { withOrigin } from "../../../routing/with-origin";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { ExpandActivity } from "../../../types/coaching-expand-result";
 import { useGarminPush } from "../GarminPushButton/useGarminPush";
 import { buildCoachingDialogCloseHandler } from "./build-coaching-dialog-close-handler";
 import { CoachingDialogShell } from "./coaching-dialog-shell";
@@ -24,7 +25,7 @@ import { useOpenExecutedHandler } from "./use-open-executed-handler";
 export type CoachingActivityDialogProps = {
   activity: CoachingActivity | null;
   onClose: () => void;
-  expandActivity: (activity: CoachingActivity) => void;
+  expandActivity: ExpandActivity;
   onOpenExecuted?: (workout: WorkoutRecord) => void;
 };
 
@@ -66,6 +67,7 @@ export function CoachingActivityDialog({
       <CoachingActivityDialogContent
         activity={activity}
         dialogState={dialog.dialogState}
+        descriptionLoad={dialog.descriptionLoad}
         profileId={dialog.targetProfileId}
         pickerOpen={dialog.pickerOpen}
         pickerWorkouts={pickable ?? []}

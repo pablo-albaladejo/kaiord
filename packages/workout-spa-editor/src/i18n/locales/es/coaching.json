@@ -55,7 +55,13 @@
   },
   "dialog": {
     "closeAria": "Cerrar",
-    "loadingDescription": "Cargando descripción…"
+    "loadingDescription": "Cargando descripción…",
+    "retryDescription": "Reintentar",
+    "descriptionError": {
+      "not-linked": "Este coach no está vinculado a tu perfil.",
+      "session-expired": "Tu sesión de coaching caducó: reconéctate y reintenta.",
+      "transport-error": "No se pudo cargar la descripción. Revisa que la extensión del navegador esté instalada y activa."
+    }
   },
   "actions": {
     "close": "Cerrar",

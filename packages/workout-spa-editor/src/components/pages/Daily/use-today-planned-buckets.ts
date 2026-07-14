@@ -15,6 +15,7 @@ import { useCoachingActivities } from "../../../hooks/use-coaching-activities";
 import { useMatchedSessions } from "../../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { ExpandActivity } from "../../../types/coaching-expand-result";
 import type { Profile } from "../../../types/profile";
 import { buildTodayBuckets, type TodayBuckets } from "./build-today-buckets";
 import { buildWeekSummary, type WeekSummary } from "./build-week-summary";
@@ -23,7 +24,7 @@ export type TodayPlanned = {
   planned: TodayBuckets;
   weekSummary: WeekSummary;
   coachingByDay: Record<string, CoachingActivity[]>;
-  expandActivity: (activity: CoachingActivity) => void;
+  expandActivity: ExpandActivity;
 };
 
 export function useTodayPlannedBuckets(

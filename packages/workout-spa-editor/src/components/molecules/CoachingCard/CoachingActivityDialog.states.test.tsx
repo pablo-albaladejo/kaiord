@@ -98,6 +98,37 @@ describe("CoachingActivityDialog — states", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("should surface a retryable error when the description fetch fails", async () => {
+    // Arrange
+    const activity = { ...baseActivity, description: undefined };
+    const expandActivity = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, reason: "transport-error" })
+      .mockResolvedValueOnce({ ok: true, activityCount: 1 });
+
+    // Act
+    render(
+      wrap(
+        <CoachingActivityDialog
+          activity={activity}
+          onClose={vi.fn()}
+          expandActivity={expandActivity}
+        />
+      )
+    );
+
+    // Assert
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("coaching-dialog-description-error")
+      ).toBeInTheDocument()
+    );
+    await userEvent.click(
+      screen.getByTestId("coaching-dialog-description-retry")
+    );
+    await waitFor(() => expect(expandActivity).toHaveBeenCalledTimes(2));
+  });
+
   it("should render the AI failure inline state when no provider is configured", async () => {
     // Arrange
     render(

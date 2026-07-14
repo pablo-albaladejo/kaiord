@@ -7,13 +7,14 @@
  *   4. does NOT trigger expandActivity when description is known-empty ("")
  *   5. handleConvert: surfaces "Activity not found" on missing repo record
  *   6. handleConvert: navigates to /workout/:id on success
+ *   7. ignores a late failure from a previously-open activity's fetch
  *
  * Cases 2/3/4 changed semantics post-fix: they assert the
  * `expandActivity` callback prop is invoked (or not), not the
  * registry-mocked source.expand. Cases 1/5/6 are unchanged in intent;
  * they pass an `expandActivity={vi.fn()}` to compile.
  */
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -173,6 +174,46 @@ describe("useCoachingDialog", () => {
     // Assert
 
     expect(expandActivity).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a late failure from a previously-open activity's fetch", async () => {
+    // Arrange
+    let resolveA!: (r: { ok: false; reason: "transport-error" }) => void;
+    const pendingA = new Promise<{ ok: false; reason: "transport-error" }>(
+      (res) => {
+        resolveA = res;
+      }
+    );
+    const expandActivity = vi
+      .fn()
+      .mockReturnValueOnce(pendingA)
+      .mockResolvedValue({ ok: true, activityCount: 1 });
+    const activityA = {
+      id: "train2go:A",
+      source: "train2go",
+      sourceBadge: "T2G",
+      date: "2026-04-13",
+      sport: { label: "Cycling", icon: "🚴" },
+      title: "A",
+      status: "pending" as const,
+    };
+    const activityB = { ...activityA, id: "train2go:B", title: "B" };
+
+    // Act
+    const { result, rerender } = renderHook(
+      ({ activity }) => useCoachingDialog(activity, vi.fn(), expandActivity),
+      {
+        wrapper: ({ children }) => wrap(children),
+        initialProps: { activity: activityA },
+      }
+    );
+    rerender({ activity: activityB });
+    await act(async () => {
+      resolveA({ ok: false, reason: "transport-error" });
+    });
+
+    // Assert
+    expect(result.current.descriptionLoad.reason).toBeNull();
   });
 
   it("should surface 'Activity not found' via handleConvert when record is missing in repo", async () => {

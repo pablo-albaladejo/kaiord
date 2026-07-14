@@ -10,11 +10,13 @@
 
 import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { ExpandActivity } from "../../../types/coaching-expand-result";
 import type { UseCoachingAi } from "./use-coaching-ai-handler";
 import { useCoachingAi } from "./use-coaching-ai-handler";
 import { useCoachingAutoHeal } from "./use-coaching-auto-heal";
 import { useCoachingConvert } from "./use-coaching-convert";
 import { useCoachingDialogActions } from "./use-coaching-dialog-actions";
+import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
 import {
   toMatchState,
   useExpandActivityOnOpen,
@@ -29,6 +31,7 @@ import { useCoachingDialogStateObserved } from "./use-coaching-state-observed";
 export type UseCoachingDialog = {
   error: string | null;
   converting: boolean;
+  descriptionLoad: DescriptionLoad;
   matchState: ActivityMatchState | undefined;
   dialogState: CoachingDialogState | undefined;
   matching: boolean;
@@ -47,10 +50,10 @@ export type UseCoachingDialog = {
 export const useCoachingDialog = (
   activity: CoachingActivity | null,
   onClose: () => void,
-  expandActivity: (activity: CoachingActivity) => void
+  expandActivity: ExpandActivity
 ): UseCoachingDialog => {
   const targetProfileId = useTargetProfileId(activity);
-  useExpandActivityOnOpen(activity, expandActivity);
+  const descriptionLoad = useExpandActivityOnOpen(activity, expandActivity);
   const dialogState = useCoachingDialogState(targetProfileId, activity);
   const matchState = toMatchState(dialogState);
   useCoachingAutoHeal(activity, targetProfileId, dialogState);
@@ -71,6 +74,7 @@ export const useCoachingDialog = (
   return {
     error: convert.error,
     converting: convert.converting,
+    descriptionLoad,
     matchState,
     dialogState,
     targetProfileId,

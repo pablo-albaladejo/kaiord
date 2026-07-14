@@ -9,6 +9,7 @@
 import { isProjectedWorkoutRecord } from "../../application/coaching/activity-to-workout-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
+import type { ExpandActivity } from "../../types/coaching-expand-result";
 import { CoachingActivityDialog } from "../molecules/CoachingCard/CoachingActivityDialog";
 import { ExecutedActivityDialog } from "../molecules/ExecutedActivityDialog/ExecutedActivityDialog";
 import { RawWorkoutDialog } from "../molecules/RawWorkoutDialog/RawWorkoutDialog";
@@ -19,7 +20,7 @@ export type CalendarDialogsProps = {
   selectedCoachingActivity?: CoachingActivity | null;
   onCloseWorkout: () => void;
   onCloseCoaching?: () => void;
-  expandActivity: (activity: CoachingActivity) => void;
+  expandActivity: ExpandActivity;
   onOpenExecuted?: (workout: WorkoutRecord) => void;
   /** Override the "Process" target (Daily passes a `daily`-origin builder). */
   buildProcessHref?: (id: string) => string;

@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { ExpandActivity } from "../../../types/coaching-expand-result";
 import type { Profile } from "../../../types/profile";
 import type { TodayBuckets } from "./build-today-buckets";
 import type { WeekSummary } from "./build-week-summary";
@@ -28,7 +29,7 @@ export type TodayData = {
   planned: TodayBuckets;
   weekSummary: WeekSummary;
   coachingByDay: Record<string, CoachingActivity[]>;
-  expandActivity: (activity: CoachingActivity) => void;
+  expandActivity: ExpandActivity;
   readiness: ReadinessModel;
 };
 

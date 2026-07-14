@@ -2,11 +2,15 @@
  * Helpers for `useCoachingDialog`. Lives in its own file so the parent
  * hook stays under the line caps.
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type {
+  ExpandActivity,
+  ExpandFailureReason,
+} from "../../../types/coaching-expand-result";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
 export const toMatchState = (
@@ -42,18 +46,61 @@ export const useTargetProfileId = (
   return targetProfileId;
 };
 
+export type DescriptionLoad = {
+  /** Failure reason when the lazy fetch failed; `null` while loading or done. */
+  reason: ExpandFailureReason | null;
+  /** Re-fire the fetch (wired to the "Retry" button in the error state). */
+  retry: () => void;
+};
+
+/** Failure bound to the activity it came from, so stale errors never leak. */
+type DescriptionFailure = { id: string; reason: ExpandFailureReason };
+
 /**
  * Lazy-load the activity description on dialog open. Skipped when the
- * description is already known (including known-empty `""`).
+ * description is already known (including known-empty `""`). Auto-fires
+ * once per activity id; a failed fetch surfaces `reason` so the dialog can
+ * render a retryable error instead of hanging on "Loading description…".
  */
 export const useExpandActivityOnOpen = (
   activity: CoachingActivity | null,
-  expandActivity: (activity: CoachingActivity) => void
-): void => {
+  expandActivity: ExpandActivity
+): DescriptionLoad => {
   const activeProfileId = useActiveProfileLive()?.id ?? null;
+  const [failure, setFailure] = useState<DescriptionFailure | null>(null);
+  const mounted = useRef(true);
+  const firedFor = useRef<string | null>(null);
   useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  const run = useCallback(async () => {
     if (!activity || !activeProfileId) return;
     if (activity.description !== undefined) return;
-    expandActivity(activity);
+    setFailure(null);
+    const result = await expandActivity(activity);
+    if (mounted.current && result && !result.ok)
+      setFailure({ id: activity.id, reason: result.reason });
   }, [activity, activeProfileId, expandActivity]);
+
+  useEffect(() => {
+    if (!activity) {
+      firedFor.current = null;
+      setFailure(null);
+      return;
+    }
+    if (activity.description !== undefined) return;
+    if (firedFor.current === activity.id) return;
+    firedFor.current = activity.id;
+    void run();
+  }, [activity, run]);
+
+  // Match the failure to the current activity at render time: switching
+  // activities hides a stale error synchronously, and a late failure from a
+  // previous activity's in-flight fetch cannot paint an error on this one.
+  const reason = failure && failure.id === activity?.id ? failure.reason : null;
+  return { reason, retry: run };
 };
