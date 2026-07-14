@@ -59,30 +59,37 @@
     />
 
     <!--
-      Runtime configuration. The placeholder __CF_ANALYTICS_TOKEN__ is
+      Runtime configuration. The placeholder __UMAMI_WEBSITE_ID__ is
       substituted by the deploy step (NOT by Vite). When the placeholder is
-      still in place — local dev, preview builds, or deploys without a
-      token — the conditional loader below treats it as "no token" and the
-      Cloudflare beacon is never injected. 12-factor III + V: the build
-      artifact is environment-agnostic.
+      still in place — local dev, preview builds, or deploys without a website
+      id — the conditional loader below treats it as "no id" and the Umami
+      tracker is never injected. 12-factor III + V: the build artifact is
+      environment-agnostic.
     -->
     <script>
       // Defaults; the deploy step substitutes the placeholder. Earlier scripts
       // (e.g., test fixtures using Playwright's addInitScript) may pre-seed
       // window.__KAIORD_CONFIG__ — preserve their values.
       window.__KAIORD_CONFIG__ = window.__KAIORD_CONFIG__ || {
-        cfAnalyticsToken: "__CF_ANALYTICS_TOKEN__",
+        umamiWebsiteId: "__UMAMI_WEBSITE_ID__",
       };
     </script>
     <script>
       (function () {
         var cfg = window.__KAIORD_CONFIG__ || {};
-        var token = cfg.cfAnalyticsToken;
-        if (!token || token === "__CF_ANALYTICS_TOKEN__") return;
+        var id = cfg.umamiWebsiteId;
+        // Guard on the first character rather than the placeholder literal:
+        // the deploy-time sed rewrites every "__UMAMI_WEBSITE_ID__" in this
+        // file, so a literal comparison here would be rewritten too and always
+        // match. A real website id (UUID) never starts with "_".
+        if (!id || id.charAt(0) === "_") return;
         var s = document.createElement("script");
         s.defer = true;
-        s.src = "https://static.cloudflareinsights.com/beacon.min.js";
-        s.setAttribute("data-cf-beacon", JSON.stringify({ token: token }));
+        s.src = "https://cloud.umami.is/script.js";
+        s.setAttribute("data-website-id", id);
+        // Editor routes are client-side (wouter); disable auto-track and
+        // submit page views manually with the base-relative path.
+        s.setAttribute("data-auto-track", "false");
         document.head.appendChild(s);
       })();
     </script>

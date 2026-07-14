@@ -21,11 +21,9 @@ import {
   buildCoreV24,
   buildCoreV26,
   buildCoreV27,
-  buildCoreV30ThroughV33,
+  buildCoreV30ThroughV35,
+  HEALTH_SUFFIX,
 } from "./dexie-schemas-late";
-
-const HEALTH_SUFFIX =
-  ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
 
 // v17 — integrationPolicies + exportLedger stores; health stores gain
 // provenance fields (sourceBridgeId, externalId) and a unique compound
@@ -140,6 +138,8 @@ export const SCHEMAS = {
   v27: CORE_V27,
   // v30 (dataTypeSourcePolicy) + v31 (lab-analytics stores) + v32 (usageEvents
   // telemetry log) + v33 (drops the legacy `usage` store, usage-accounting
-  // cutover), built together in dexie-schemas-late.ts. v28/v29 reused v27.
-  ...buildCoreV30ThroughV33(CORE_V27),
+  // cutover) + v34 (additive healthStrain + healthVitals stores, WHOOP wave
+  // 2) + v35 (additive healthHeartRateSeries store, WHOOP wave 3a), built
+  // together in dexie-schemas-late.ts. v28/v29 reused v27.
+  ...buildCoreV30ThroughV35(CORE_V27),
 } as const;

@@ -1,6 +1,0 @@
-export type CfBeacon = {
-  pushEvent: (
-    name: string,
-    props?: Record<string, string | number | boolean>
-  ) => void;
-};

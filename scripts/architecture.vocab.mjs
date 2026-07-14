@@ -78,6 +78,7 @@ export const PACKAGE_DEPS = {
     "@kaiord/garmin",
     "@kaiord/i18n",
     "@kaiord/tcx",
+    "@kaiord/whoop",
     "@kaiord/zwo",
   ],
   docs: [

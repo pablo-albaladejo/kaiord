@@ -105,18 +105,57 @@ export const buildCoreV33 = (prev: Stores): Record<string, string | null> => ({
   usage: null,
 });
 
-// Assemble the latest schemas (v30 → v31 → v32 → v33) from the v27 base so
-// `dexie-schemas.ts` composes them in one spread and stays under its line cap.
-export const buildCoreV30ThroughV33 = (
+// Shared health-store index suffix (provenance columns + the unique
+// natural-key dedup index). Single source of truth: `dexie-schemas.ts`
+// imports this for the v17 health stores and `buildCoreV34` reuses it, so the
+// index shape can never drift between the two files.
+export const HEALTH_SUFFIX =
+  ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
+
+// v34 — additive health stores `healthStrain` + `healthVitals` (WHOOP wave
+// 2). Same index shape as the other health stores (v17): `id` primary key,
+// `profileId` + `[profileId+date]` + `date` for the calendar reads and the
+// profile-delete cascade, plus the shared provenance suffix for
+// natural-key dedup on ingest. Both are read-only, source-agnostic summaries
+// (no manual-entry path) — auto-created empty on upgrade, no data transform.
+export const buildCoreV34 = (
+  prev: Record<string, string | null>
+): Record<string, string | null> => ({
+  ...prev,
+  healthStrain: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+  healthVitals: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+});
+
+// v35 — additive health store `healthHeartRateSeries` (WHOOP wave 3a). Same
+// index shape as the other health stores (v17/v34): `id` primary key,
+// `profileId` + `[profileId+date]` + `date` for the calendar reads and the
+// profile-delete cascade, plus the shared provenance suffix for natural-key
+// dedup on ingest. Read-only, source-agnostic per-day HR trace (no
+// manual-entry path) — auto-created empty on upgrade, no data transform.
+export const buildCoreV35 = (
+  prev: Record<string, string | null>
+): Record<string, string | null> => ({
+  ...prev,
+  healthHeartRateSeries: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
+});
+
+// Assemble the latest schemas (v30 → v31 → v32 → v33 → v34 → v35) from the
+// v27 base so `dexie-schemas.ts` composes them in one spread and stays under
+// its line cap.
+export const buildCoreV30ThroughV35 = (
   prev: Stores
 ): {
   v30: Stores;
   v31: Stores;
   v32: Stores;
   v33: Record<string, string | null>;
+  v34: Record<string, string | null>;
+  v35: Record<string, string | null>;
 } => {
   const v30 = buildCoreV30(prev);
   const v31 = buildCoreV31(v30);
   const v32 = buildCoreV32(v31);
-  return { v30, v31, v32, v33: buildCoreV33(v32) };
+  const v33 = buildCoreV33(v32);
+  const v34 = buildCoreV34(v33);
+  return { v30, v31, v32, v33, v34, v35: buildCoreV35(v34) };
 };

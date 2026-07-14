@@ -166,4 +166,12 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // schema drops the store (`usage: null`). The fold runs before the drop within
   // the same upgrade (Dexie keeps the deleted table readable in the callback).
   db.version(33).stores(SCHEMAS.v33).upgrade(applyV33Upgrade);
+  // v34 — additive health stores healthStrain + healthVitals (WHOOP wave 2).
+  // Auto-created empty; profileId-leading indexes make isPerProfileTable
+  // auto-discover them for the profile-delete cascade.
+  db.version(34).stores(SCHEMAS.v34);
+  // v35 — additive healthHeartRateSeries store, WHOOP wave 3a. Auto-created
+  // empty; profileId-leading indexes make isPerProfileTable auto-discover it
+  // for the profile-delete cascade.
+  db.version(35).stores(SCHEMAS.v35);
 };

@@ -2,7 +2,7 @@
  * Dexie profile-store cleanup repository.
  *
  * Deletes profile-scoped rows from the stores that have no dedicated
- * per-record repository yet: the six KRD v2.0 health stores, the v17
+ * per-record repository yet: the nine KRD v2.0 health stores, the v17
  * `integrationPolicies` store, and the v27 Data Hub stores
  * (`plannedSessions`, `activities`). Health + policy stores expose a bare
  * `profileId` index and are cleared by an equality scan; the Data Hub
@@ -21,6 +21,13 @@ const PROFILE_ID_TABLES = [
   "healthDaily",
   "healthBodyComposition",
   "healthStress",
+  // v34 — healthStrain + healthVitals (WHOOP wave 2), same bare profileId
+  // index shape as the other health stores.
+  "healthStrain",
+  "healthVitals",
+  // v35 — healthHeartRateSeries (WHOOP wave 3a), same bare profileId index
+  // shape as the other health stores.
+  "healthHeartRateSeries",
   // v17 — integrationPolicies is profile-scoped and cascades with cleanup.
   "integrationPolicies",
 ] as const;

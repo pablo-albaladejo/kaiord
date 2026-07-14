@@ -1,45 +1,37 @@
 /**
- * @kaiord/whoop — WHOOP API (v2) health adapter for Kaiord.
+ * @kaiord/whoop — WHOOP internal-API health adapter for Kaiord.
  *
- * A PURE adapter: it maps WHOOP recovery/sleep JSON to the frozen KRD health
- * sub-schemas (`hrv_summary`, `sleep_record`) and never performs OAuth. The
- * HTTP/auth transport is injected via `WhoopHttpClient`; the OAuth mechanics
- * (token exchange, refresh-token rotation, rate-limit back-off) live in the
- * `@kaiord/whoop-bridge` Chrome extension at the composition edge.
+ * A PURE adapter over the WHOOP internal `core-details-bff` cycles/details
+ * and `metrics-service` responses. It never performs OAuth and never targets
+ * the developer API; the SPA injects the read transport. Wave 1 exposes the
+ * cycles schema and the recovery→hrv and sleep→sleep converters; Wave 2 adds
+ * the read-only cycle→strain and cycle→vitals converters; Wave 3a adds the
+ * metrics-service schema and the metrics→heart-rate-series converter.
  */
 
-// Injected transport port
-export type { WhoopHttpClient } from "./adapters/http/types";
+// Internal-API response schema & inferred types
 export {
-  buildCollectionPath,
-  RECOVERY_PATH,
-  SLEEP_PATH,
-  WHOOP_MAX_LIMIT,
-  type WhoopQuery,
-} from "./adapters/http/urls";
+  whoopCycleSchema,
+  whoopCycleRecoverySchema,
+  whoopCycleSleepSchema,
+  whoopCycleRecordSchema,
+  whoopCyclesResponseSchema,
+  type WhoopCycle,
+  type WhoopCycleRecovery,
+  type WhoopCycleSleep,
+  type WhoopCycleRecord,
+  type WhoopCyclesResponse,
+} from "./adapters/schemas/whoop-cycles.schema";
+export {
+  whoopMetricSampleSchema,
+  whoopMetricsResponseSchema,
+  type WhoopMetricSample,
+  type WhoopMetricsResponse,
+} from "./adapters/schemas/whoop-metrics.schema";
 
-// Pure converters (WHOOP JSON → KRD health)
-export { mapWhoopRecoveryToKrd } from "./adapters/converters/recovery-to-krd.converter";
-export {
-  mapWhoopSleepToKrd,
-  type WhoopSleepMapOptions,
-} from "./adapters/converters/sleep-to-krd.converter";
-export { buildSleepStages } from "./adapters/converters/sleep-stages.builder";
-
-// Response schemas & types
-export {
-  type WhoopRecoveryRecord,
-  whoopRecoveryRecordSchema,
-} from "./adapters/schemas/whoop-recovery.schema";
-export {
-  type WhoopSleepRecord,
-  whoopSleepRecordSchema,
-} from "./adapters/schemas/whoop-sleep.schema";
-export { whoopPaginatedSchema } from "./adapters/schemas/whoop-paginated.schema";
-
-// Composition-edge service (uses the injected transport)
-export {
-  createWhoopHealthService,
-  type WhoopHealthImport,
-  type WhoopHealthService,
-} from "./adapters/client/whoop-health-service";
+// Pure converters (WHOOP cycle/metrics → KRD health extensions)
+export { recoveryToHrv } from "./adapters/converters/recovery-to-hrv.converter";
+export { sleepsToSleep } from "./adapters/converters/sleeps-to-sleep.converter";
+export { cycleToStrain } from "./adapters/converters/cycle-to-strain.converter";
+export { cycleToVitals } from "./adapters/converters/cycle-to-vitals.converter";
+export { metricsToHeartRateSeries } from "./adapters/converters/metrics-to-heart-rate-series.converter";

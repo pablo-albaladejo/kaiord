@@ -1,18 +1,20 @@
 /**
  * Kaiord WHOOP Bridge — Background Service Worker
  *
- * Owns the WHOOP OAuth lifecycle (via whoop-oauth.js) and relays authorized
- * reads to the SPA. Unlike garmin-bridge (which piggybacks a web session), the
- * WHOOP data API has no browser session — the extension holds the confidential
- * client, so host_permissions on api.prod.whoop.com bypass CORS and the
- * background performs the fetch directly.
+ * Piggybacks the user's logged-in app.whoop.com session (same model as
+ * garmin-bridge). It captures the session bearer the WHOOP web app attaches to
+ * its own api.prod.whoop.com requests, holds it in memory-only session storage,
+ * and relays read requests to the content script inside the WHOOP tab so the
+ * fetch carries that tab's origin. No OAuth, no developer app, no credentials.
  *
- * Message envelope matches the shared bridge contract:
- *   { ok, protocolVersion, data? , error?, status?, retryable?, needsReauth? }
+ * The token is never logged and never leaves the extension; session presence is
+ * reported to callers as a boolean.
  */
 
 const PROTOCOL_VERSION = 1;
-const API_BASE = "https://api.prod.whoop.com/developer";
+const APP_PATTERN = "https://app.whoop.com/*";
+const API_PATTERN = "https://api.prod.whoop.com/*";
+const WHOOP_DASHBOARD = "https://app.whoop.com/";
 
 const BRIDGE_MANIFEST = {
   id: "whoop-bridge",
@@ -21,27 +23,6 @@ const BRIDGE_MANIFEST = {
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["read:body", "read:sleep"],
 };
-
-// Read-only allowlist (adapter-contracts: path/method allowlist in the fetch
-// layer). Every WHOOP path kaiord reads is a GET under one of these prefixes.
-const ALLOWED_PREFIXES = [
-  "/v2/recovery",
-  "/v2/activity/sleep",
-  "/v2/cycle",
-  "/v2/user/profile",
-];
-
-// ── whoop-oauth.js (importScripts in the worker, require() in tests) ──
-let createWhoopAuth;
-try {
-  importScripts("whoop-oauth.js");
-  createWhoopAuth = globalThis.createWhoopAuth;
-} catch {
-  createWhoopAuth =
-    typeof require !== "undefined"
-      ? require("./whoop-oauth.js").createWhoopAuth
-      : undefined;
-}
 
 // ── Shared envelope/dispatch (vendored bridge-core) ──
 let bridgeEnvelope;
@@ -53,85 +34,110 @@ try {
     typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
 }
 
-// ── chrome.storage.local promise wrapper ──
-const storage = {
-  get: (keys) => chrome.storage.local.get(keys),
-  set: (obj) => chrome.storage.local.set(obj),
-  remove: (keys) => chrome.storage.local.remove(keys),
+// ── Session bearer capture ──
+//
+// The internal API authenticates with a Cognito bearer JWT (not cookies). We
+// hold it in chrome.storage.session (memory-only, survives SW restart, never
+// logged) and decode the numeric `custom:user_id` claim every path needs.
+
+const decodeUserId = (jwt) => {
+  try {
+    const seg = String(jwt).split(".")[1];
+    if (!seg) return null;
+    let b64 = seg.replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4) b64 += "=";
+    const payload = JSON.parse(atob(b64));
+    const raw = payload["custom:user_id"];
+    if (raw == null) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
 };
 
-const launchWebAuthFlow = (details) =>
-  new Promise((resolve, reject) => {
-    chrome.identity.launchWebAuthFlow(details, (redirect) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-      } else if (!redirect) {
-        reject(new Error("Authorization was cancelled"));
-      } else {
-        resolve(redirect);
-      }
-    });
+const SESSION_KEYS = ["whoopToken", "whoopUserId", "whoopCapturedAt"];
+
+const storeToken = async (token) => {
+  if (!token || typeof token !== "string") return;
+  await chrome.storage.session.set({
+    whoopToken: token,
+    whoopUserId: decodeUserId(token),
+    whoopCapturedAt: Date.now(),
+  });
+};
+
+// Secondary capture path: read the header via webRequest in case the
+// content-script interceptor missed the live request.
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  (details) => {
+    const auth = details.requestHeaders?.find(
+      (h) => h.name.toLowerCase() === "authorization"
+    );
+    if (auth?.value && /^bearer\s/i.test(auth.value)) {
+      const token = auth.value.replace(/^bearer\s/i, "").trim();
+      void storeToken(token);
+    }
+  },
+  { urls: [API_PATTERN] },
+  ["requestHeaders", "extraHeaders"]
+);
+
+// Read session keys individually so the wrapper works against both the real
+// chrome.storage.session (which supports array reads) and the vendored test
+// mock (which resolves a single string key per call).
+const getSession = async () => {
+  const parts = await Promise.all(
+    SESSION_KEYS.map((key) => chrome.storage.session.get(key))
+  );
+  return Object.assign({}, ...parts);
+};
+
+const getSessionStatus = async () => {
+  const session = await getSession();
+  return {
+    connected: !!session.whoopToken,
+    userId: session.whoopUserId ?? null,
+    capturedAt: session.whoopCapturedAt ?? null,
+  };
+};
+
+// ── Tab relay ──
+
+const findWhoopTab = () =>
+  new Promise((resolve) => {
+    chrome.tabs.query({ url: APP_PATTERN }, (tabs) =>
+      resolve(tabs?.[0] ?? null)
+    );
   });
 
-const auth = createWhoopAuth({
-  storage,
-  fetchFn: (...args) => fetch(...args),
-  getRedirectURL: () => chrome.identity.getRedirectURL(),
-  launchWebAuthFlow,
-});
-
-// ── Data relay ──
-
-// Normalize before checking so `..` segments cannot escape the allowlist
-// (the URL parser collapses dot-segments the same way fetch will).
-const isAllowedPath = (path) => {
-  let normalized;
-  try {
-    normalized = new URL(path, "https://x").pathname;
-  } catch {
-    return false;
-  }
-  return ALLOWED_PREFIXES.some(
-    (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`)
-  );
-};
-
-const rateLimitError = (res) => {
-  const reset = Number(res.headers.get("X-RateLimit-Reset")) || undefined;
-  const err = new Error("WHOOP rate limit reached");
-  err.status = 429;
-  err.retryable = true;
-  err.resetSeconds = reset;
-  return err;
-};
-
 const whoopFetch = async (path) => {
-  if (!isAllowedPath(path)) throw new Error(`Path not allowed: ${path}`);
-  const request = async (token) =>
-    fetch(`${API_BASE}${path}`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    });
+  const { whoopToken } = await getSession();
+  if (!whoopToken) {
+    throw new Error(
+      "no session token captured — open app.whoop.com and reload it"
+    );
+  }
+  const tab = await findWhoopTab();
+  if (!tab) throw new Error("No app.whoop.com tab open.");
 
-  let res = await request(await auth.getAccessToken());
-  if (res.status === 401) {
-    res = await request(await auth.refreshAccessToken());
-    if (res.status === 401) {
-      // A freshly refreshed token was still rejected — surface it as a
-      // reauth condition instead of a generic request failure.
-      const err = new Error("WHOOP authorization required");
-      err.status = 401;
-      err.needsReauth = true;
-      throw err;
-    }
-  }
-  if (res.status === 429) throw rateLimitError(res);
-  if (!res.ok) {
-    const err = new Error(`WHOOP request failed: ${res.status}`);
-    err.status = res.status;
-    throw err;
-  }
-  await auth.setState({ lastSyncAt: new Date().toISOString() });
-  return res.json();
+  return new Promise((resolve, reject) => {
+    chrome.tabs.sendMessage(
+      tab.id,
+      { action: "whoop-fetch", path, token: whoopToken },
+      (res) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          resolve(res);
+        }
+      }
+    );
+  });
+};
+
+const openWhoop = async () => {
+  await chrome.tabs.create({ url: WHOOP_DASHBOARD });
 };
 
 // ── Actions ──
@@ -139,24 +145,17 @@ const whoopFetch = async (path) => {
 const handleAction = async (message) => {
   switch (message.action) {
     case "ping":
-      return { ...BRIDGE_MANIFEST, ...(await auth.getAuthState()) };
+      // Manifest identity keys are spread LAST so they win on collision and
+      // no upstream value can spoof the bridge identity.
+      return { ...(await getSessionStatus()), ...BRIDGE_MANIFEST };
     case "status":
-      return auth.getAuthState();
-    case "set-credentials":
-      if (!message.clientId || !message.clientSecret) {
-        throw new Error("Missing clientId or clientSecret");
-      }
-      await storage.set({
-        whoopCredentials: {
-          clientId: message.clientId,
-          clientSecret: message.clientSecret,
-        },
-      });
-      return { hasCredentials: true };
-    case "connect":
-      return auth.connect();
-    case "disconnect":
-      return auth.disconnect();
+      return getSessionStatus();
+    case "capture-token":
+      await storeToken(message.token);
+      return { captured: true };
+    case "open-whoop":
+      await openWhoop();
+      return null;
     case "whoop-fetch":
       if (!message.path) throw new Error("Missing path");
       return whoopFetch(message.path);
@@ -165,10 +164,12 @@ const handleAction = async (message) => {
   }
 };
 
-// External (web) callers get a reduced action surface: credential writes
-// stay popup-only, and the sender origin is pinned by the vendored guard
-// as a second layer over the manifest's externally_connectable.
-const EXTERNAL_ACTIONS = new Set(["ping", "status", "connect", "whoop-fetch"]);
+// ── External messages (SPA ↔ Extension) ──
+//
+// Web callers get a reduced action surface (reads + status only). Token capture
+// stays internal (content script / popup). The sender origin is pinned by the
+// vendored guard as a second layer over the manifest's externally_connectable.
+const EXTERNAL_ACTIONS = new Set(["ping", "status", "whoop-fetch"]);
 
 const dispatch = bridgeEnvelope.createDispatch({
   handleAction,
@@ -190,20 +191,62 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onMessageExternal) {
   );
 }
 
+// ── Content-script re-inject after extension reload ──
+//
+// Chrome terminates content scripts in existing tabs when the extension is
+// reloaded but does NOT re-inject them, leaving stale dead listeners. Re-inject
+// programmatically on onInstalled so app.whoop.com tabs keep working without a
+// manual reload. Only scripts whose match patterns are covered by
+// host_permissions are re-injected; kaiord-announce.js on the SPA origin is out
+// of scope (kept as the standard MV3 dev flow).
+const reinjectContentScripts = async () => {
+  const manifest = chrome.runtime.getManifest();
+  const hostPermissions = manifest.host_permissions ?? [];
+  for (const script of manifest.content_scripts ?? []) {
+    const matches = (script.matches ?? []).filter((m) =>
+      hostPermissions.includes(m)
+    );
+    if (matches.length === 0) continue;
+    const tabs = await chrome.tabs.query({ url: matches });
+    for (const tab of tabs) {
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id, allFrames: !!script.all_frames },
+          files: script.js,
+          ...(script.world ? { world: script.world } : {}),
+        });
+      } catch {
+        // Tab may be restricted or already injected; ignore.
+      }
+    }
+  }
+};
+
+if (typeof chrome !== "undefined" && chrome.runtime?.onInstalled) {
+  chrome.runtime.onInstalled.addListener(() => {
+    void reinjectContentScripts();
+  });
+}
+
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
-    API_BASE,
-    ALLOWED_PREFIXES,
-    isAllowedPath,
-    handleAction,
+    APP_PATTERN,
+    API_PATTERN,
+    decodeUserId,
+    storeToken,
+    getSession,
+    getSessionStatus,
+    findWhoopTab,
     whoopFetch,
+    openWhoop,
+    handleAction,
     dispatch,
     dispatchExternal,
     isAllowedSenderOrigin: bridgeEnvelope.isAllowedSenderOrigin,
     EXTERNAL_ACTIONS,
-    auth,
+    reinjectContentScripts,
   };
 }

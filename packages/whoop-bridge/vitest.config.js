@@ -7,8 +7,9 @@ export default defineConfig({
     coverage: {
       include: [
         "background.js",
+        "content.js",
+        "inject-main.js",
         "kaiord-announce.js",
-        "whoop-oauth.js",
         "bridge-envelope.js",
         "bridge-identity.js",
       ],
