@@ -65,6 +65,9 @@ describe("readWhoopFetch", () => {
   });
 });
 
+// Epoch-millis, matching the extension's `whoopCapturedAt: Date.now()`.
+const CAPTURED_AT_MS = 1_720_000_000_000;
+
 describe("readWhoopStatus", () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -72,7 +75,7 @@ describe("readWhoopStatus", () => {
 
   it("should relay a status read and resolve with the parsed status", async () => {
     // Arrange
-    const status = { connected: true, userId: 42, capturedAt: "2026-07-01" };
+    const status = { connected: true, userId: 42, capturedAt: CAPTURED_AT_MS };
     mockedSend.mockResolvedValue({
       ok: true,
       protocolVersion: 1,

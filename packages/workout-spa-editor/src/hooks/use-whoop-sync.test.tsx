@@ -50,10 +50,13 @@ const wrap = (children: ReactNode) => (
   </PersistenceProvider>
 );
 
+// Epoch-millis, matching the extension's `whoopCapturedAt: Date.now()`.
+const CAPTURED_AT_MS = 1_720_000_000_000;
+
 const connectedStatus = {
   connected: true,
   userId: 42,
-  capturedAt: "2026-07-01",
+  capturedAt: CAPTURED_AT_MS,
 };
 
 describe("useWhoopSync", () => {

@@ -22,7 +22,11 @@ const WHOOP_STATUS_TIMEOUT_MS = 5_000;
 const whoopStatusSchema = z.object({
   connected: z.boolean(),
   userId: z.number().nullable(),
-  capturedAt: z.string().nullable(),
+  // The extension stores `whoopCapturedAt: Date.now()` and returns it verbatim,
+  // so this is an epoch-millis NUMBER (or null before a session is captured) —
+  // NOT a string. Getting this wrong makes safeParse reject a real connected
+  // envelope, which would throw in readWhoopStatus and silently kill the sync.
+  capturedAt: z.number().nullable(),
 });
 
 export type WhoopStatus = z.infer<typeof whoopStatusSchema>;
