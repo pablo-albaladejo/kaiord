@@ -17,7 +17,7 @@ export const useExpandCallback = (
         source: t.source,
         profileId,
       });
-      await expandDay(
+      return expandDay(
         {
           profiles: p.profiles,
           coaching: p.coaching,

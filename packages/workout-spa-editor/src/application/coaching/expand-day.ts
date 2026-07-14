@@ -25,8 +25,14 @@ import type {
 } from "../../ports/persistence-port";
 import type { CoachingDayComment } from "../../types/coaching-day-notes-record";
 import { buildCoachingDayNotesId } from "../../types/coaching-day-notes-record";
+import type { ExpandDayResult } from "../../types/coaching-expand-result";
 import { logger } from "../../utils/logger";
 import type { CoachingTransport } from "./coaching-transport-port";
+
+export type {
+  ExpandDayResult,
+  ExpandFailureReason,
+} from "../../types/coaching-expand-result";
 
 export type ExpandDayDeps = {
   profiles: ProfileRepository;
@@ -34,14 +40,6 @@ export type ExpandDayDeps = {
   coachingDayNotes: CoachingDayNotesRepository;
   transport: CoachingTransport;
 };
-
-export type ExpandDayResult =
-  | { ok: true; activityCount: number }
-  | {
-      ok: false;
-      reason: "not-linked" | "session-expired" | "transport-error";
-      error?: string;
-    };
 
 const persistDayNotes = async (
   deps: ExpandDayDeps,

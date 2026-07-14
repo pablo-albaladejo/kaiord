@@ -10,6 +10,8 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { renderCoachingInline } from "../../organisms/CoachingSidebar/coaching-inline";
 import { formatCoachingDescription } from "../../organisms/CoachingSidebar/format-coaching-description";
+import { DialogDescriptionError } from "./coaching-dialog-description-error";
+import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
 
 export const DialogHeader = ({ activity }: { activity: CoachingActivity }) => {
   const t = useTranslate("coaching");
@@ -44,11 +46,17 @@ export const DialogMeta = ({ activity }: { activity: CoachingActivity }) => (
 
 export const DialogDescription = ({
   activity,
+  load,
 }: {
   activity: CoachingActivity;
+  load: DescriptionLoad;
 }) => {
   const t = useTranslate("coaching");
   if (activity.description === undefined) {
+    if (load.reason)
+      return (
+        <DialogDescriptionError reason={load.reason} onRetry={load.retry} />
+      );
     return (
       <p
         data-testid="coaching-dialog-description-loading"
