@@ -55,7 +55,13 @@
   },
   "dialog": {
     "closeAria": "Close",
-    "loadingDescription": "Loading description…"
+    "loadingDescription": "Loading description…",
+    "retryDescription": "Retry",
+    "descriptionError": {
+      "not-linked": "This coach isn't linked to your profile.",
+      "session-expired": "Your coaching session expired — reconnect and retry.",
+      "transport-error": "Couldn't load the description. Check the browser extension is installed and running."
+    }
   },
   "actions": {
     "close": "Close",

@@ -15,7 +15,7 @@ vi.mock("../adapters/train2go/use-train2go-source", () => ({
     error: null,
     activities: [],
     sync: vi.fn(async () => undefined),
-    expand: vi.fn(async () => undefined),
+    expand: vi.fn(async () => ({ ok: true as const, activityCount: 0 })),
     connect: vi.fn(async () => undefined),
   })),
 }));

@@ -13,6 +13,7 @@
  */
 
 import type { CoachingActivity } from "./coaching-activity";
+import type { ExpandDayResult } from "./coaching-expand-result";
 
 export type CoachingSource = {
   id: string;
@@ -37,7 +38,12 @@ export type CoachingSource = {
    */
   lastSyncedAt: string | undefined;
   sync: (profileId: string, weekStart: string) => Promise<void>;
-  expand: (profileId: string, date: string) => Promise<void>;
+  /**
+   * Lazily fetch a day's descriptions + comment thread. Returns the
+   * `ExpandDayResult` so the dialog can surface a retryable failure state
+   * instead of hanging on "Loading description…" forever.
+   */
+  expand: (profileId: string, date: string) => Promise<ExpandDayResult>;
   connect: (profileId: string) => Promise<void>;
 };
 
