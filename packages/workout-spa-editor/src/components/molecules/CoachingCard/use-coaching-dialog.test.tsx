@@ -1,18 +1,6 @@
 /**
- * Tests for useCoachingDialog. The 6 cases (preserved from the
- * pre-fix file, never delete a test):
- *   1. does nothing when activity is null
- *   2. triggers expandActivity when description is undefined
- *   3. does NOT trigger expandActivity when description is populated
- *   4. does NOT trigger expandActivity when description is known-empty ("")
- *   5. handleConvert: surfaces "Activity not found" on missing repo record
- *   6. handleConvert: navigates to /workout/:id on success
- *   7. ignores a late failure from a previously-open activity's fetch
- *
- * Cases 2/3/4 changed semantics post-fix: they assert the
- * `expandActivity` callback prop is invoked (or not), not the
- * registry-mocked source.expand. Cases 1/5/6 are unchanged in intent;
- * they pass an `expandActivity={vi.fn()}` to compile.
+ * Tests for useCoachingDialog: lazy description load via the
+ * `expandActivity` prop, late-fetch guarding, and handleConvert.
  */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -21,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
+import type { CoachingActivity } from "../../../types/coaching-activity";
 import {
   buildCoachingActivityId,
   type CoachingActivityRecord,
@@ -63,6 +52,19 @@ const makeRecord = (
   ...overrides,
 });
 
+const makeActivity = (
+  overrides: Partial<CoachingActivity> = {}
+): CoachingActivity => ({
+  id: "train2go:12345",
+  source: "train2go",
+  sourceBadge: "T2G",
+  date: "2026-04-13",
+  sport: { label: "Cycling", icon: "🚴" },
+  title: "x",
+  status: "pending",
+  ...overrides,
+});
+
 const wrap = (children: ReactNode) => {
   const persistence = createInMemoryPersistence();
   return (
@@ -79,18 +81,15 @@ describe("useCoachingDialog", () => {
 
   it("should do nothing when activity is null", () => {
     // Arrange
-
     const expandActivity = vi.fn();
 
     // Act
-
     const { result } = renderHook(
       () => useCoachingDialog(null, vi.fn(), expandActivity),
       { wrapper: ({ children }) => wrap(children) }
     );
 
     // Assert
-
     expect(result.current.error).toBeNull();
     expect(result.current.converting).toBe(false);
     expect(expandActivity).not.toHaveBeenCalled();
@@ -98,83 +97,39 @@ describe("useCoachingDialog", () => {
 
   it("should trigger expandActivity when activity has undefined description", async () => {
     // Arrange
-
     const expandActivity = vi.fn();
-    const activity = {
-      id: "train2go:12345",
-      source: "train2go",
-      sourceBadge: "T2G",
-      date: "2026-04-13",
-      sport: { label: "Cycling", icon: "🚴" },
-      title: "x",
-      status: "pending" as const,
-      // description: undefined
-    };
+    const activity = makeActivity();
 
     // Act
-
     renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
       wrapper: ({ children }) => wrap(children),
     });
 
     // Assert
-
     await waitFor(() => {
       expect(expandActivity).toHaveBeenCalledWith(activity);
     });
   });
 
-  it("should do NOT trigger expandActivity when description is already populated", () => {
-    // Arrange
+  it.each([
+    { scenario: "already populated", description: "Already there" },
+    { scenario: "known-empty ('')", description: "" },
+  ])(
+    "should not trigger expandActivity when description is $scenario",
+    ({ description }) => {
+      // Arrange
+      const expandActivity = vi.fn();
+      const activity = makeActivity({ description });
 
-    const expandActivity = vi.fn();
-    const activity = {
-      id: "train2go:12345",
-      source: "train2go",
-      sourceBadge: "T2G",
-      date: "2026-04-13",
-      sport: { label: "Cycling", icon: "🚴" },
-      title: "x",
-      status: "pending" as const,
-      description: "Already there",
-    };
+      // Act
+      renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
+        wrapper: ({ children }) => wrap(children),
+      });
 
-    // Act
-
-    renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Assert
-
-    expect(expandActivity).not.toHaveBeenCalled();
-  });
-
-  it("should not trigger expandActivity when description is known-empty ('')", () => {
-    // Arrange
-
-    const expandActivity = vi.fn();
-    const activity = {
-      id: "train2go:12345",
-      source: "train2go",
-      sourceBadge: "T2G",
-      date: "2026-04-13",
-      sport: { label: "Cycling", icon: "🚴" },
-      title: "x",
-      status: "pending" as const,
-      description: "",
-    };
-
-    // Act
-
-    renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Assert
-
-    expect(expandActivity).not.toHaveBeenCalled();
-  });
+      // Assert
+      expect(expandActivity).not.toHaveBeenCalled();
+    }
+  );
 
   it("should ignore a late failure from a previously-open activity's fetch", async () => {
     // Arrange
@@ -188,16 +143,8 @@ describe("useCoachingDialog", () => {
       .fn()
       .mockReturnValueOnce(pendingA)
       .mockResolvedValue({ ok: true, activityCount: 1 });
-    const activityA = {
-      id: "train2go:A",
-      source: "train2go",
-      sourceBadge: "T2G",
-      date: "2026-04-13",
-      sport: { label: "Cycling", icon: "🚴" },
-      title: "A",
-      status: "pending" as const,
-    };
-    const activityB = { ...activityA, id: "train2go:B", title: "B" };
+    const activityA = makeActivity({ id: "train2go:A", title: "A" });
+    const activityB = makeActivity({ id: "train2go:B", title: "B" });
 
     // Act
     const { result, rerender } = renderHook(
@@ -218,23 +165,11 @@ describe("useCoachingDialog", () => {
 
   it("should surface 'Activity not found' via handleConvert when record is missing in repo", async () => {
     // Arrange
-
     const onClose = vi.fn();
-    const expandActivity = vi.fn();
-    const activity = {
-      id: "train2go:99999",
-      source: "train2go",
-      sourceBadge: "T2G",
-      date: "2026-04-13",
-      sport: { label: "Cycling", icon: "🚴" },
-      title: "x",
-      status: "pending" as const,
-      description: "x",
-    };
+    const activity = makeActivity({ id: "train2go:99999", description: "x" });
     const persistence = createInMemoryPersistence();
-
     const { result } = renderHook(
-      () => useCoachingDialog(activity, onClose, expandActivity),
+      () => useCoachingDialog(activity, onClose, vi.fn()),
       {
         wrapper: ({ children }) => (
           <PersistenceProvider persistence={persistence}>
@@ -245,11 +180,9 @@ describe("useCoachingDialog", () => {
     );
 
     // Act
-
     await result.current.handleConvert();
 
     // Assert
-
     await waitFor(() => {
       expect(result.current.error).toBe("Activity not found");
     });
@@ -259,24 +192,12 @@ describe("useCoachingDialog", () => {
 
   it("should navigate to /workout/:id on successful conversion via handleConvert", async () => {
     // Arrange
-
     const onClose = vi.fn();
-    const expandActivity = vi.fn();
-    const activity = {
-      id: "train2go:12345",
-      source: "train2go",
-      sourceBadge: "T2G",
-      date: "2026-04-13",
-      sport: { label: "Cycling", icon: "🚴" },
-      title: "x",
-      status: "pending" as const,
-      description: "x",
-    };
+    const activity = makeActivity({ description: "x" });
     const persistence = createInMemoryPersistence();
     await persistence.coaching.put(makeRecord());
-
     const { result } = renderHook(
-      () => useCoachingDialog(activity, onClose, expandActivity),
+      () => useCoachingDialog(activity, onClose, vi.fn()),
       {
         wrapper: ({ children }) => (
           <PersistenceProvider persistence={persistence}>
@@ -287,11 +208,9 @@ describe("useCoachingDialog", () => {
     );
 
     // Act
-
     await result.current.handleConvert();
 
     // Assert
-
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith(

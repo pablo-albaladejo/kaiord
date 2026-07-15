@@ -37,7 +37,7 @@ vi.mock("./coaching-registry-context", () => ({
 import { CoachingRegistryBootstrap } from "./coaching-registry-bootstrap";
 
 describe("CoachingRegistryBootstrap", () => {
-  it("should render children inside the provider", () => {
+  it("should wrap children in a provider wired with the source factories", () => {
     // Arrange
 
     // Act
@@ -51,23 +51,9 @@ describe("CoachingRegistryBootstrap", () => {
     // Assert
 
     expect(screen.getByText("Child content")).toBeInTheDocument();
-  });
-
-  it("should pass the factory array to the provider", () => {
-    // Arrange
-
-    render(
-      <CoachingRegistryBootstrap>
-        <span>Test</span>
-      </CoachingRegistryBootstrap>
+    expect(screen.getByTestId("provider")).toHaveAttribute(
+      "data-factories",
+      "1"
     );
-
-    // Act
-
-    const provider = screen.getByTestId("provider");
-
-    // Assert
-
-    expect(provider).toHaveAttribute("data-factories", "1");
   });
 });
