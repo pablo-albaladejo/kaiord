@@ -92,84 +92,58 @@ describe("useWhoopSync", () => {
     });
   });
 
-  it("should do NOT fire when profileId is null", async () => {
+  it.each([
+    {
+      scenario: "profileId is null",
+      bridges: WHOOP_DISCOVERED,
+      extensionId: "ext-1",
+      profileId: null,
+    },
+    {
+      scenario: "whoop-bridge is not discovered",
+      bridges: [] as DiscoveredBridge[],
+      extensionId: "ext-1",
+      profileId: "p1",
+    },
+    {
+      scenario: "getExtensionId returns null",
+      bridges: WHOOP_DISCOVERED,
+      extensionId: null,
+      profileId: "p1",
+    },
+  ])(
+    "should not read status when $scenario",
+    async ({ bridges, extensionId, profileId }) => {
+      // Arrange
+      mockedUseDiscoveredBridges.mockReturnValue(bridges);
+      mockedGetExtensionId.mockReturnValue(extensionId);
+      mockedReadStatus.mockResolvedValue(connectedStatus);
+      renderHook(() => useWhoopSync(profileId), {
+        wrapper: ({ children }) => wrap(children),
+      });
+
+      // Act
+      await settle();
+
+      // Assert
+      expect(mockedReadStatus).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    {
+      scenario: "status.connected is false",
+      status: { connected: false, userId: 42, capturedAt: null },
+    },
+    {
+      scenario: "status.userId is null",
+      status: { connected: true, userId: null, capturedAt: null },
+    },
+  ])("should not sync when $scenario", async ({ status }) => {
     // Arrange
     mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
     mockedGetExtensionId.mockReturnValue("ext-1");
-    mockedReadStatus.mockResolvedValue(connectedStatus);
-    renderHook(() => useWhoopSync(null), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Act
-    await settle();
-
-    // Assert
-    expect(mockedReadStatus).not.toHaveBeenCalled();
-  });
-
-  it("should do NOT fire when whoop-bridge is not discovered", async () => {
-    // Arrange
-    mockedUseDiscoveredBridges.mockReturnValue([]);
-    renderHook(() => useWhoopSync("p1"), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Act
-    await settle();
-
-    // Assert
-    expect(mockedReadStatus).not.toHaveBeenCalled();
-  });
-
-  it("should do NOT fire when getExtensionId returns null", async () => {
-    // Arrange
-    mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
-    mockedGetExtensionId.mockReturnValue(null);
-    renderHook(() => useWhoopSync("p1"), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Act
-    await settle();
-
-    // Assert
-    expect(mockedReadStatus).not.toHaveBeenCalled();
-  });
-
-  it("should do NOT sync when status.connected is false", async () => {
-    // Arrange
-    mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
-    mockedGetExtensionId.mockReturnValue("ext-1");
-    mockedReadStatus.mockResolvedValue({
-      connected: false,
-      userId: 42,
-      capturedAt: null,
-    });
-    renderHook(() => useWhoopSync("p1"), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Act
-    await waitFor(() => {
-      expect(mockedReadStatus).toHaveBeenCalledTimes(1);
-    });
-    await settle();
-
-    // Assert
-    expect(mockedSyncCycles).not.toHaveBeenCalled();
-    expect(mockedSyncHeartRate).not.toHaveBeenCalled();
-  });
-
-  it("should do NOT sync when status.userId is null", async () => {
-    // Arrange
-    mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
-    mockedGetExtensionId.mockReturnValue("ext-1");
-    mockedReadStatus.mockResolvedValue({
-      connected: true,
-      userId: null,
-      capturedAt: null,
-    });
+    mockedReadStatus.mockResolvedValue(status);
     renderHook(() => useWhoopSync("p1"), {
       wrapper: ({ children }) => wrap(children),
     });

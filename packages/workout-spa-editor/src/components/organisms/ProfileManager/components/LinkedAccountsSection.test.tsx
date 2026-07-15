@@ -24,12 +24,6 @@ vi.mock("../../../../adapters/train2go/use-train2go-source", () => ({
     sync: vi.fn(async () => undefined),
     expand: vi.fn(async () => ({ ok: true as const, activityCount: 0 })),
     connect: mockConnect,
-    zonesSync: {
-      pending: null,
-      runSync: vi.fn(async () => undefined),
-      confirmDecisions: vi.fn(async () => undefined),
-      cancel: vi.fn(),
-    },
   }),
 }));
 
@@ -105,25 +99,5 @@ describe("LinkedAccountsSection", () => {
     // Assert
 
     expect(mockConnect).toHaveBeenCalledWith("p1");
-  });
-
-  it("should NOT render a Sync zones toggle after SyncZonesToggle removal", () => {
-    // Arrange
-
-    // Act
-
-    render(
-      wrap(
-        <LinkedAccountsSection
-          profile={makeProfile({ linkedAccounts: [T2G_LINK] })}
-        />
-      )
-    );
-
-    // Assert
-
-    expect(
-      screen.queryByTestId("sync-zones-toggle-train2go")
-    ).not.toBeInTheDocument();
   });
 });
