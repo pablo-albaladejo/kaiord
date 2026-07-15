@@ -43,7 +43,7 @@ test.describe("Library flows", () => {
 
     // Use the mobile-aware helper so the test works on mobile
     // emulators where the Library button lives behind the hamburger menu.
-    await openHeaderAction(page, /open workout library/i);
+    await openHeaderAction(page, /open workout library/i, /library/i);
     await page.waitForURL(/\/library$/);
 
     await expect(page.getByTestId("library-page")).toBeVisible();
@@ -151,7 +151,7 @@ test.describe("Library flows", () => {
     // state survives the route transition. `page.goto('/library')`
     // would force a full reload and drop Zustand. The mobile-aware
     // helper opens the hamburger menu first on small viewports.
-    await openHeaderAction(page, /open workout library/i);
+    await openHeaderAction(page, /open workout library/i, /library/i);
     await page.waitForURL(/\/library$/);
     await expect(page.getByTestId("library-page")).toBeVisible();
 

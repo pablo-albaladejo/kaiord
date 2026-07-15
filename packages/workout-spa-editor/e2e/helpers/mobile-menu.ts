@@ -16,14 +16,21 @@ export async function openMobileMenuIfNeeded(page: Page): Promise<void> {
 }
 
 /**
- * Opens a header nav action, handling the hamburger menu on mobile.
+ * Opens a header nav action, resilient to the responsive nav surfaces.
  *
- * On desktop: the button is directly visible, just click it.
- * On mobile: open the hamburger menu first, then click the item.
+ * - Desktop: the header button is directly visible — click it.
+ * - Legacy hamburger surfaces: open the "Menu" panel, then click the item.
+ * - Mobile (post-redesign): the header entry is hidden below `md` and the
+ *   destination lives in the floating BottomNav, whose tabs use their short
+ *   visible label as the accessible name and ignore the header's aria
+ *   override (see `nav-destinations.ts`). Pass `bottomNavName` (e.g.
+ *   /library/i) so the helper can reach the tab when the header entry is
+ *   hidden.
  */
 export async function openHeaderAction(
   page: Page,
-  actionName: string | RegExp
+  actionName: string | RegExp,
+  bottomNavName?: string | RegExp
 ): Promise<void> {
   // Both DesktopNav and MobileMenuPanel render buttons with the same
   // aria-label. Filter to visible ones to avoid strict mode violations.
@@ -36,7 +43,7 @@ export async function openHeaderAction(
     return;
   }
 
-  // On mobile, open the hamburger menu first
+  // Legacy hamburger surface, if one is still mounted.
   const menuButton = page.getByLabel("Menu");
   if (await menuButton.isVisible().catch(() => false)) {
     await menuButton.click();
@@ -47,5 +54,14 @@ export async function openHeaderAction(
       .first();
     await menuItem.waitFor({ state: "visible" });
     await menuItem.click();
+    return;
+  }
+
+  // Mobile: the header entry is hidden; reach the destination via BottomNav.
+  if (bottomNavName) {
+    await page
+      .getByTestId("bottom-nav")
+      .getByRole("button", { name: bottomNavName })
+      .click();
   }
 }
