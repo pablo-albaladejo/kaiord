@@ -103,7 +103,7 @@ test.describe("Library-Calendar Integration", () => {
 
     // Per surface-classification rule, Library is a routed page —
     // the header click navigates, it does not open a modal.
-    await openHeaderAction(page, /open workout library/i);
+    await openHeaderAction(page, /open workout library/i, /library/i);
     await page.waitForURL(/\/library$/);
 
     await expect(page.getByTestId("library-page")).toBeVisible();
