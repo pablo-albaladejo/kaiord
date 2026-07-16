@@ -27,7 +27,6 @@ export {
   targetTypeKeySchema,
 } from "./target-type.schema";
 export {
-  type GarminUnit,
   garminUnitInputSchema,
   garminUnitSchema,
   unitKeySchema,
