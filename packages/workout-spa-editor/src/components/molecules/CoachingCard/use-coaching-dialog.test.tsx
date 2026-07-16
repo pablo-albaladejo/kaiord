@@ -79,22 +79,6 @@ describe("useCoachingDialog", () => {
     vi.clearAllMocks();
   });
 
-  it("should do nothing when activity is null", () => {
-    // Arrange
-    const expandActivity = vi.fn();
-
-    // Act
-    const { result } = renderHook(
-      () => useCoachingDialog(null, vi.fn(), expandActivity),
-      { wrapper: ({ children }) => wrap(children) }
-    );
-
-    // Assert
-    expect(result.current.error).toBeNull();
-    expect(result.current.converting).toBe(false);
-    expect(expandActivity).not.toHaveBeenCalled();
-  });
-
   it("should trigger expandActivity when activity has undefined description", async () => {
     // Arrange
     const expandActivity = vi.fn();
@@ -112,24 +96,27 @@ describe("useCoachingDialog", () => {
   });
 
   it.each([
-    { scenario: "already populated", description: "Already there" },
-    { scenario: "known-empty ('')", description: "" },
-  ])(
-    "should not trigger expandActivity when description is $scenario",
-    ({ description }) => {
-      // Arrange
-      const expandActivity = vi.fn();
-      const activity = makeActivity({ description });
+    { scenario: "activity is null", activity: null },
+    {
+      scenario: "description is already populated",
+      activity: makeActivity({ description: "Already there" }),
+    },
+    {
+      scenario: "description is known-empty ('')",
+      activity: makeActivity({ description: "" }),
+    },
+  ])("should not trigger expandActivity when $scenario", ({ activity }) => {
+    // Arrange
+    const expandActivity = vi.fn();
 
-      // Act
-      renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
-        wrapper: ({ children }) => wrap(children),
-      });
+    // Act
+    renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
+      wrapper: ({ children }) => wrap(children),
+    });
 
-      // Assert
-      expect(expandActivity).not.toHaveBeenCalled();
-    }
-  );
+    // Assert
+    expect(expandActivity).not.toHaveBeenCalled();
+  });
 
   it("should ignore a late failure from a previously-open activity's fetch", async () => {
     // Arrange
