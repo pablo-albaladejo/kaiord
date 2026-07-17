@@ -154,16 +154,9 @@ describe("useCoachingDialog", () => {
     // Arrange
     const onClose = vi.fn();
     const activity = makeActivity({ id: "train2go:99999", description: "x" });
-    const persistence = createInMemoryPersistence();
     const { result } = renderHook(
       () => useCoachingDialog(activity, onClose, vi.fn()),
-      {
-        wrapper: ({ children }) => (
-          <PersistenceProvider persistence={persistence}>
-            <ToastContextProvider>{children}</ToastContextProvider>
-          </PersistenceProvider>
-        ),
-      }
+      { wrapper: ({ children }) => wrap(children) }
     );
 
     // Act
