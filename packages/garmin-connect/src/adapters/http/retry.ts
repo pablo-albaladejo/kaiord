@@ -16,11 +16,7 @@ export type RetryOptions = {
   logger?: Logger;
 };
 
-type ResolvedOptions = {
-  maxRetries: number;
-  baseDelay: number;
-  maxDelay: number;
-  randomFn: () => number;
+type ResolvedOptions = Required<Omit<RetryOptions, "logger">> & {
   logger?: Logger;
 };
 
