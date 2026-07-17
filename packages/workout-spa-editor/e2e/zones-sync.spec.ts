@@ -36,6 +36,16 @@ const FIXTURE_SWIMMING_THRESHOLD_PACE_S = 92;
 const MANUAL_HR_BAND_Z4_MAX_BPM = 180;
 const STABILITY_REREAD_TICK_MS = 50;
 const ORCHESTRATOR_PUT_SETTLE_MS = 150;
+// The first bridge action (read-week) only fires once bridge discovery has
+// resolved. On a cold CI runner the SPA's discovery machinery can lag: the
+// self-healing KAIORD_BRIDGE_DISCOVER handshake is emitted 3 s after
+// `bridgeDiscovery.start()`, which itself waits on cold Vite module
+// compilation under load. That chain (start → +3 s DISCOVER → verify ping →
+// effect re-run → syncWeek → readWeek) can crest a tight 10 s deadline even
+// though production has no such deadline and self-heals indefinitely. Give the
+// discovery-gated first action a generous budget so the wait is not racing the
+// runner. Well under the 60 s per-test timeout.
+const AUTOSYNC_FIRST_ACTION_TIMEOUT_MS = 30_000;
 
 type SyncZonesFlag = boolean;
 type CyclingFtp = number | undefined;
@@ -207,7 +217,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
             { action: string }[] | undefined) ?? [];
         return calls.some((c) => c.action === "read-week");
       },
-      { timeout: 10_000 }
+      { timeout: AUTOSYNC_FIRST_ACTION_TIMEOUT_MS }
     );
 
     // One extra tick to let any racing fan-out queue if it were going to.
