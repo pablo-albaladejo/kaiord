@@ -52,6 +52,7 @@ exclude_path = [
   "packages/docs/guide",
   "packages/docs/formats",
   "packages/docs/cli",
+  "packages/docs/convert",
   "packages/docs/mcp",
   "packages/docs/legal",
   "packages/docs/index.md",
