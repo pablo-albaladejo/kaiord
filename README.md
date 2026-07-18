@@ -9,6 +9,8 @@
 [![codecov](https://codecov.io/gh/pablo-albaladejo/kaiord/branch/main/graph/badge.svg)](https://codecov.io/gh/pablo-albaladejo/kaiord)
 [![npm version](https://badge.fury.io/js/@kaiord%2Fcore.svg)](https://www.npmjs.com/package/@kaiord/core)
 [![npm version](https://badge.fury.io/js/@kaiord%2Fcli.svg)](https://www.npmjs.com/package/@kaiord/cli)
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.pablo--albaladejo%2Fkaiord-8A2BE2)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord)
+[![Glama MCP server](https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord/badges/score.svg)](https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord)
 [![Sponsor](https://img.shields.io/badge/Sponsor-❤️-pink?logo=github-sponsors)](https://github.com/sponsors/pablo-albaladejo)
 
 **Kaiord** is an open-source framework for creating, converting, and managing health & fitness data.
@@ -17,7 +19,7 @@ It provides:
 
 - `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, and **.krd** (Kaiord) files, plus Garmin Connect API integration.
 - `@kaiord/cli`: a command-line tool to convert, validate, and compare files across formats.
-- `@kaiord/mcp`: an MCP server exposing Kaiord tools to AI agents (Claude Desktop, Claude Code, etc.).
+- `@kaiord/mcp`: an MCP server exposing Kaiord tools to AI agents (Claude Desktop, Claude Code, etc.). Published in the [official MCP registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord) as `io.github.pablo-albaladejo/kaiord`.
 - **[Workout Editor](https://kaiord.com/editor/)**: a web application to create and edit workout files visually.
 
 ---
