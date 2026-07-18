@@ -1,5 +1,38 @@
 # @kaiord/landing
 
+## 4.2.0
+
+### Minor Changes
+
+- f334931: Reposition the landing around the training platform: new calendar cockpit, conversational assistant, health hub, and data hub sections; updated hero, nav, phone mock (week strip, WHOOP badge, chat input), SEO metadata and JSON-LD, zero-infrastructure copy, and open-source metrics.
+
+### Patch Changes
+
+- 36efe53: Optimize the site for AI agents and answer engines (GEO). Add a curated root
+  `llms.txt` pointing at the product pages and the docs markdown corpus, stop
+  blocking `/editor/` in `robots.txt`, and replace the root sitemap with a
+  sitemap index covering the landing (with hreflang alternates), the editor,
+  and the VitePress docs sitemap (which now stays at `/docs/sitemap.xml`).
+  Enrich the editor shell for non-JS crawlers: descriptive title and meta
+  description, `WebApplication` JSON-LD with a feature list, and `noscript`
+  content linking back to the landing and docs. Add a `WebSite` node to the
+  landing JSON-LD graph, plus a visible FAQ section (six questions, EN + ES)
+  with a matching `FAQPage` JSON-LD node.
+- 2ddc8cb: Regenerate og-image.png to match the platform repositioning: tagline updated from "One framework. Every fitness format." to "Your training cockpit. Every fitness format."
+- Updated dependencies [6025135]
+- Updated dependencies [e167efe]
+- Updated dependencies [32c4c1c]
+- Updated dependencies [95da9fa]
+- Updated dependencies [372db2c]
+- Updated dependencies [dfa21e6]
+- Updated dependencies [9f08136]
+- Updated dependencies [d777295]
+- Updated dependencies [0841993]
+- Updated dependencies [63c4cb6]
+- Updated dependencies [a2a5b12]
+- Updated dependencies [78c1866]
+  - @kaiord/core@10.0.0
+
 ## 4.1.2
 
 ### Patch Changes

@@ -1,5 +1,107 @@
 # @kaiord/workout-spa-editor
 
+## 1.3.0
+
+### Minor Changes
+
+- c9d769f: Make light mode consistent across the whole editor. A theme-adaptive semantic
+  token layer (light defaults on `:root`, dark overrides under `.dark`) now backs
+  the `bg-surface*` utilities and new `text-ink-*`, `border-edge*`, and
+  `text-accent` utilities, and the redesign page families (Daily, Nutrition,
+  Create, Workout Detail, Athlete, Library, Chat) plus shared atoms and the
+  bottom navigation are migrated off the dark-only slate dialect. `color-scheme`
+  now follows the active theme so native controls match; the previously unmapped
+  `text-muted-foreground`/`bg-primary` semantic utilities resolve to real colors;
+  uPlot chart axes/grids react to theme changes; the mobile header collapses to a
+  slim bar (BottomNav owns primary navigation) and the 768px header wrap is
+  fixed. A new mechanical guard (`pnpm lint:theme-dialect`) pins the adaptive
+  dialect going forward.
+- 63c4cb6: Preserve Train2Go coach instructions (including YouTube/Dropbox links) through
+  import → KRD → export.
+
+  - **KRD**: `workoutSchema` gains an optional workout-level `notes` field for
+    coach instructions (distinct from per-step `notes`), documented in the KRD
+    format spec. No length cap in KRD; adapters truncate best-effort.
+  - **ZWO**: workout-level `notes` round-trips as the ZWO workout `description`
+    (legacy `extensions.zwift.description` still read for backward compatibility).
+  - **FIT/Garmin**: workout-level `notes` are attached best-effort to the first
+    step's note, truncated to the 256-char FIT limit (an acknowledged
+    format constraint, surfaced via the existing truncation warning).
+  - **SPA editor**: the coach description now flows into the converted workout's
+    KRD `notes` (not just the sidebar `raw.description`), is prefetched on demand
+    before AI/manual conversion when a weekly import left it unloaded, and is
+    viewable/editable in the workout metadata editor.
+
+### Patch Changes
+
+- 2b82559: Adopt the now theme-adaptive shared brand tokens: `styles/brand-tokens.css`
+  carries light defaults on `:root` with the original dark palette under
+  `.dark`, so the editor's semantic surface/ink/edge tokens alias brand tokens
+  directly instead of re-declaring per-theme hex values. No visual change in
+  either theme; landing stays pinned dark via a static `dark` class and the
+  docs' Node-side token readers now resolve the dark brand identity explicitly.
+- df1537c: Fix a race in the coaching auto-sync hook: when bridge detection resolved
+  after profile/week state settled, the first effect run saw zero sync sources
+  and stamped the fired-week key anyway, permanently skipping that week's
+  auto-sync. The key is now only stamped once real targets exist, so the re-run
+  triggered by the source list populating fires the sync as intended.
+- 33e43ec: Surface a retryable error when a coaching activity's lazy description fetch
+  (`read-day`) fails, instead of hanging on "Loading description…" forever. The
+  `expandDay` result now flows through `CoachingSource.expand` and
+  `expandActivity` to the activity dialog, which renders a reason-specific message
+  (not-linked / session-expired / transport-error) and a "Retry" button that
+  re-fires the fetch. The auto-fetch still fires once per activity; only the
+  button retries.
+- 36efe53: Optimize the site for AI agents and answer engines (GEO). Add a curated root
+  `llms.txt` pointing at the product pages and the docs markdown corpus, stop
+  blocking `/editor/` in `robots.txt`, and replace the root sitemap with a
+  sitemap index covering the landing (with hreflang alternates), the editor,
+  and the VitePress docs sitemap (which now stays at `/docs/sitemap.xml`).
+  Enrich the editor shell for non-JS crawlers: descriptive title and meta
+  description, `WebApplication` JSON-LD with a feature list, and `noscript`
+  content linking back to the landing and docs. Add a `WebSite` node to the
+  landing JSON-LD graph, plus a visible FAQ section (six questions, EN + ES)
+  with a matching `FAQPage` JSON-LD node.
+- 6855944: Fix a lost-update race when pinning lab dashboard parameters in quick
+  succession: the toggle computed the new selection from the rendered
+  live-query snapshot, so a second pin arriving before the re-emission
+  overwrote the first. Pins now read the current persisted selection through
+  a dedicated use case and rapid toggles are serialized. Also stabilize the
+  Athlete threshold-persistence e2e by waiting for the background Dexie write
+  to commit before reloading.
+- 7764f5d: Refresh the docs and editor OG images to match the platform brand: add the ambient radial glow and a sky-accented subtitle. The editor now ships its own OG card (og-image-editor.png, subtitle "Editor") instead of reusing the landing image, with its meta tags repointed accordingly. Both are reproducible via each package's generate-og-image.mjs script.
+- Updated dependencies [c29b9cf]
+- Updated dependencies [8e6b497]
+- Updated dependencies [e4dad42]
+- Updated dependencies [6025135]
+- Updated dependencies [e167efe]
+- Updated dependencies [32c4c1c]
+- Updated dependencies [95da9fa]
+- Updated dependencies [372db2c]
+- Updated dependencies [dfa21e6]
+- Updated dependencies [9f08136]
+- Updated dependencies [5618bf6]
+- Updated dependencies [9de0335]
+- Updated dependencies [d777295]
+- Updated dependencies [d777295]
+- Updated dependencies [b40f4a0]
+- Updated dependencies [0841993]
+- Updated dependencies [34e1a07]
+- Updated dependencies [63c4cb6]
+- Updated dependencies [7c15906]
+- Updated dependencies [a2a5b12]
+- Updated dependencies [78c1866]
+- Updated dependencies [5f677ae]
+- Updated dependencies [a2a5b12]
+- Updated dependencies [78c1866]
+  - @kaiord/ai@9.3.0
+  - @kaiord/core@10.0.0
+  - @kaiord/fit@10.0.0
+  - @kaiord/tcx@10.0.0
+  - @kaiord/zwo@10.0.0
+  - @kaiord/garmin@10.0.0
+  - @kaiord/whoop@10.0.0
+
 ## 1.2.0
 
 ### Minor Changes
