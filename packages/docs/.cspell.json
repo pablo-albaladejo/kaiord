@@ -63,7 +63,9 @@
     "affordances",
     "frontmatter",
     "openspec",
-    "CCPA"
+    "CCPA",
+    "Strava",
+    "untargeted"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
 }
