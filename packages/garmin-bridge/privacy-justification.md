@@ -22,6 +22,12 @@ This document explains why each Chrome extension permission is required, for Chr
 
 **Usage**: `chrome.webRequest.onBeforeSendHeaders` with `["requestHeaders"]` on `https://connect.garmin.com/*`.
 
+### `scripting`
+
+**Why**: Re-inject the extension's own declared content scripts into Garmin Connect tabs that were already open before the extension was installed/updated, and after MV3 service worker cold starts leave stale message listeners in those tabs. Without this, the bridge silently breaks until the user manually reloads every Garmin tab.
+
+**Usage**: `chrome.scripting.executeScript({ target: { tabId }, files: script.js })` in `background.js`, injecting only files bundled with the extension (the same `content.js` declared in the manifest), restricted to tabs matching the already-granted host permission (`https://connect.garmin.com/*`). No remote code is ever fetched or executed.
+
 ## Host Permissions
 
 ### `https://connect.garmin.com/*`
