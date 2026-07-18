@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy — Kaiord</title>
+    <meta
+      name="description"
+      content="Privacy policy for kaiord.com, the Kaiord workout editor, and the Kaiord browser extensions (Garmin Bridge, Train2Go Bridge)."
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0f172a;
+        color: #f8fafc;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        line-height: 1.7;
+        padding: 3rem 1.5rem 4rem;
+      }
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+      }
+      .meta {
+        color: #94a3b8;
+        margin-bottom: 2rem;
+      }
+      h2 {
+        font-size: 1.3rem;
+        margin: 2.2rem 0 0.6rem;
+      }
+      h3 {
+        font-size: 1.05rem;
+        margin: 1.4rem 0 0.4rem;
+      }
+      p,
+      li {
+        color: #cbd5e1;
+      }
+      ul {
+        padding-left: 1.3rem;
+        margin: 0.5rem 0;
+      }
+      li {
+        margin: 0.3rem 0;
+      }
+      strong {
+        color: #f8fafc;
+      }
+      a {
+        color: #38bdf8;
+      }
+      .summary {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.9em;
+        background: #1e293b;
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+      }
+      footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #334155;
+        color: #94a3b8;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Kaiord Privacy Policy</h1>
+      <p class="meta">Effective date: July 18, 2026</p>
+
+      <div class="summary">
+        <p>
+          <strong>Short version:</strong> Kaiord does not collect, store, sell, or share any
+          personal data. There are no Kaiord servers processing your data — the website is
+          static, the workout editor runs entirely in your browser, and the browser
+          extensions only connect your own browser tabs together.
+        </p>
+      </div>
+
+      <h2>Who we are</h2>
+      <p>
+        Kaiord is an open-source health &amp; fitness data toolkit maintained by Pablo
+        Albaladejo. This policy covers the <a href="https://kaiord.com">kaiord.com</a>
+        website, the <a href="https://kaiord.com/editor/">Kaiord Workout Editor</a>, and the
+        Kaiord browser extensions: <strong>Kaiord Garmin Bridge</strong> and
+        <strong>Kaiord Train2Go Bridge</strong>. The source code for all of them is public at
+        <a href="https://github.com/pablo-albaladejo/kaiord"
+          >github.com/pablo-albaladejo/kaiord</a
+        >.
+      </p>
+
+      <h2>Website and Workout Editor</h2>
+      <ul>
+        <li>kaiord.com is a static site. It has no user accounts and sets no tracking cookies.</li>
+        <li>We use no analytics, advertising, or fingerprinting of any kind.</li>
+        <li>
+          Workout files you open or create in the editor (.fit, .tcx, .zwo, .krd) are
+          processed <strong>entirely in your browser</strong>. They are never uploaded to us —
+          we have no backend to upload them to.
+        </li>
+      </ul>
+
+      <h2>Browser extensions (Garmin Bridge, Train2Go Bridge)</h2>
+      <p>
+        The extensions exist for a single purpose: to let the Kaiord Workout Editor exchange
+        workouts with your own account on a third-party service (Garmin Connect or Train2Go)
+        using the session already open <strong>in your own browser</strong>, so that your
+        credentials never have to be shared with Kaiord.
+      </p>
+      <h3>What they access</h3>
+      <ul>
+        <li>
+          A short-lived session token (e.g. a CSRF token) captured from the third-party
+          service's own pages, kept in <code>chrome.storage.session</code> — in-memory
+          storage that is cleared when you close the browser. It is never written to disk
+          and never leaves your machine.
+        </li>
+        <li>
+          Workout data in transit between the editor tab and the third-party service tab.
+          This data moves from one tab to another <strong>inside your browser</strong> only.
+        </li>
+      </ul>
+      <h3>What they never do</h3>
+      <ul>
+        <li>They never read, store, or transmit your passwords or OAuth tokens.</li>
+        <li>
+          They never send any data to Kaiord or to any other server operated by us — none
+          exists.
+        </li>
+        <li>They include no analytics, telemetry, or tracking of any kind.</li>
+        <li>They never sell or share data with third parties.</li>
+        <li>
+          They only accept messages from Kaiord-controlled origins
+          (<code>https://*.kaiord.com</code>) and only operate on the specific third-party
+          domains declared in their manifests.
+        </li>
+      </ul>
+
+      <h2>Third-party services</h2>
+      <p>
+        When you use the extensions to interact with Garmin Connect or Train2Go, your
+        relationship with those services is governed by their own privacy policies. Kaiord
+        only automates, inside your browser, actions you could perform manually on their
+        sites while logged in.
+      </p>
+
+      <h2>Changes to this policy</h2>
+      <p>
+        Any change to this policy is published on this page and versioned in the public
+        repository, so its full history is auditable in git.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions or concerns:
+        <a href="mailto:pablo.albaladejo.mestre@gmail.com">pablo.albaladejo.mestre@gmail.com</a>
+        or open an issue at
+        <a href="https://github.com/pablo-albaladejo/kaiord/issues"
+          >github.com/pablo-albaladejo/kaiord/issues</a
+        >.
+      </p>
+
+      <footer>
+        © 2026 Pablo Albaladejo · <a href="https://kaiord.com">kaiord.com</a> ·
+        <a href="https://github.com/pablo-albaladejo/kaiord">Source</a>
+      </footer>
+    </main>
+  </body>
+</html>
