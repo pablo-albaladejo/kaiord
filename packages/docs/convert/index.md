@@ -17,17 +17,16 @@ stay within tight tolerances (time ±1 s, power ±1 W or ±1 % FTP, heart rate
 
 ## Pick a conversion
 
-| From ↓ / To → | FIT                              | TCX                              | ZWO (Zwift)                            | Garmin                                 |
-| ------------- | -------------------------------- | -------------------------------- | -------------------------------------- | -------------------------------------- |
-| **FIT**       | —                                | [FIT → TCX](/convert/fit-to-tcx) | [FIT → ZWO](/convert/fit-to-zwo)       | via CLI/SDK                            |
-| **TCX**       | [TCX → FIT](/convert/tcx-to-fit) | —                                | via CLI/SDK                            | via CLI/SDK                            |
-| **ZWO**       | [ZWO → FIT](/convert/zwo-to-fit) | via CLI/SDK                      | —                                      | [ZWO → Garmin](/convert/zwo-to-garmin) |
-| **Garmin**    | via CLI/SDK                      | via CLI/SDK                      | [Garmin → ZWO](/convert/garmin-to-zwo) | —                                      |
+| From ↓ / To → | FIT                                    | TCX                                    | ZWO (Zwift)                            | Garmin                                 |
+| ------------- | -------------------------------------- | -------------------------------------- | -------------------------------------- | -------------------------------------- |
+| **FIT**       | —                                      | [FIT → TCX](/convert/fit-to-tcx)       | [FIT → ZWO](/convert/fit-to-zwo)       | [FIT → Garmin](/convert/fit-to-garmin) |
+| **TCX**       | [TCX → FIT](/convert/tcx-to-fit)       | —                                      | [TCX → ZWO](/convert/tcx-to-zwo)       | [TCX → Garmin](/convert/tcx-to-garmin) |
+| **ZWO**       | [ZWO → FIT](/convert/zwo-to-fit)       | [ZWO → TCX](/convert/zwo-to-tcx)       | —                                      | [ZWO → Garmin](/convert/zwo-to-garmin) |
+| **Garmin**    | [Garmin → FIT](/convert/garmin-to-fit) | [Garmin → TCX](/convert/garmin-to-tcx) | [Garmin → ZWO](/convert/garmin-to-zwo) | —                                      |
 
-The six pairs above are the guided walkthroughs. Any other direction
-(`fit-to-garmin`, `tcx-to-zwo`, and so on) works today with the same
-[`kaiord convert`](/cli/commands#convert) command and SDK calls — format is
-detected from the file extension.
+All twelve directed pairs have a guided walkthrough. Every conversion uses the
+same [`kaiord convert`](/cli/commands#convert) command and SDK calls — the
+format is detected from the file extension.
 
 ## Three ways to convert
 
