@@ -42,7 +42,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/tcx"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/tcx",
+  "homepage": "https://kaiord.com/docs/formats/tcx",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -54,7 +54,11 @@
     "tcx",
     "workout",
     "converter",
-    "fitness"
+    "fitness",
+    "tcx-parser",
+    "tcx-converter",
+    "training-center-xml",
+    "garmin"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",
