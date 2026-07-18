@@ -58,6 +58,18 @@ It provides:
 
 ---
 
+## 🔒 Local-first architecture
+
+Kaiord is local-first: your data lives on your device, because there is no Kaiord server to send it to. There are no accounts and no backend.
+
+- **Storage is your browser's IndexedDB.** The [Workout Editor](https://kaiord.com/editor/) persists every workout, template, profile, and setting in a local Dexie.js / IndexedDB database (`new KaiordDatabase()` in [`dexie-database.ts`](./packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts)), and the UI reads it reactively through `useLiveQuery`. Nothing is written to a remote database — see the "Persisted data → Dexie" rule in [State Management](./CLAUDE.md).
+- **Conversions run entirely on your machine.** FIT / TCX / ZWO / GCN ↔ KRD conversion happens in-process — client-side in the editor ([`import-workout-formats.ts`](./packages/workout-spa-editor/src/utils/import-workout-formats.ts), [`export-workout-formats.ts`](./packages/workout-spa-editor/src/utils/export-workout-formats.ts)) or locally in the [`@kaiord/cli`](./packages/cli). Files never leave your device to be converted.
+- **Sync is opt-in and goes to _your_ cloud.** Data leaves the device only if you connect Google Drive. The [cloud-sync adapter](./packages/workout-spa-editor/src/adapters/cloud-sync) uses the Google Identity Services `drive.appdata` scope, so synced data lands in your own Drive's app folder; the access token lives only in memory for the session and is never persisted by Kaiord.
+- **Integrations use _your_ logged-in session — no credential proxy.** Garmin, WHOOP, and Train2Go connect through browser-extension "bridges" ([`garmin-bridge`](./packages/garmin-bridge), [`whoop-bridge`](./packages/whoop-bridge), [`train2go-bridge`](./packages/train2go-bridge)) that piggyback on your existing browser session. Per [`openspec/specs/adapter-contracts/spec.md`](./openspec/specs/adapter-contracts/spec.md), a bridge "SHALL NOT store, transmit, or manage user credentials"; authentication is "delegated entirely to the browser's cookie jar." No third-party server proxies your credentials or your data.
+- **Works offline.** Because all logic and storage are client-side, the editor keeps working with no network connection once loaded.
+
+---
+
 ## 📚 Documentation
 
 Comprehensive documentation is available in the `/docs` directory:
