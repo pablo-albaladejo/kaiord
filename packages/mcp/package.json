@@ -53,7 +53,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/mcp"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/mcp",
+  "homepage": "https://kaiord.com/docs/mcp/tools",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -73,7 +73,9 @@
     "converter",
     "claude",
     "llm",
-    "ai"
+    "ai",
+    "mcp-server",
+    "ai-agents"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",

@@ -48,7 +48,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/zwo"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/zwo",
+  "homepage": "https://kaiord.com/docs/formats/zwo",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -61,7 +61,10 @@
     "zwift",
     "workout",
     "converter",
-    "fitness"
+    "fitness",
+    "zwo-parser",
+    "zwift-workout",
+    "workout-file"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",

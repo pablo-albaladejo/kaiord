@@ -18,13 +18,13 @@ It provides:
 - `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, and **.krd** (Kaiord) files, plus Garmin Connect API integration.
 - `@kaiord/cli`: a command-line tool to convert, validate, and compare files across formats.
 - `@kaiord/mcp`: an MCP server exposing Kaiord tools to AI agents (Claude Desktop, Claude Code, etc.).
-- **[Workout Editor](https://pablo-albaladejo.github.io/kaiord)**: a web application to create and edit workout files visually.
+- **[Workout Editor](https://kaiord.com/editor/)**: a web application to create and edit workout files visually.
 
 ---
 
 ## ✨ Features
 
-- **[Visual Workout Editor](https://pablo-albaladejo.github.io/kaiord)** - Create and edit workouts in your browser
+- **[Visual Workout Editor](https://kaiord.com/editor/)** - Create and edit workouts in your browser
 - Unified JSON-based format `.krd` (Kaiord Representation Definition)
 - Schema validation (Zod)
 - Round-trip safe conversions between FIT / TCX / ZWO / GCN / KRD
@@ -94,7 +94,7 @@ kaiord/
 │  ├─ garmin/              → Garmin Connect API adapter
 │  ├─ cli/                 → command-line interface
 │  ├─ mcp/                 → MCP server for AI/LLM integration
-│  └─ workout-spa-editor/  → web application (https://pablo-albaladejo.github.io/kaiord)
+│  └─ workout-spa-editor/  → web application (https://kaiord.com/editor/)
 ├─ docs/   → documentation
 ├─ LICENSE
 ├─ README.md
@@ -107,7 +107,7 @@ kaiord/
 
 ### Try the Web App
 
-**[Launch Workout Editor →](https://pablo-albaladejo.github.io/kaiord)**
+**[Launch Workout Editor →](https://kaiord.com/editor/)**
 
 Create and edit workouts visually in your browser. No installation required.
 

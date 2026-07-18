@@ -45,7 +45,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/garmin-connect"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/garmin-connect",
+  "homepage": "https://kaiord.com/docs/api/garmin-connect/",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -58,7 +58,10 @@
     "garmin-connect",
     "workout",
     "api-client",
-    "fitness"
+    "fitness",
+    "garmin-api",
+    "garmin-connect-api",
+    "workout-upload"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",
