@@ -27,6 +27,8 @@ Key facts:
 - [Docs home](https://kaiord.com/docs/): guides, format specs, API reference
 - [Quick start](https://kaiord.com/docs/guide/quick-start.md): convert a FIT
   file to TCX in 4 lines of TypeScript
+- [Converters](https://kaiord.com/docs/convert/): how to convert workout files
+  between FIT, TCX, ZWO, and Garmin Connect (with per-pair fidelity notes)
 - [Why Kaiord?](https://kaiord.com/docs/guide/why-kaiord.md): one SDK for
   every workout file format
 - [KRD format](https://kaiord.com/docs/formats/krd.md): the canonical JSON
