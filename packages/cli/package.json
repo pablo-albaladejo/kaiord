@@ -36,7 +36,11 @@
     "garmin",
     "zwift",
     "cli",
-    "converter"
+    "converter",
+    "fit-to-tcx",
+    "workout-converter",
+    "fitness",
+    "command-line"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",
@@ -45,7 +49,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/cli",
+  "homepage": "https://kaiord.com/docs/cli/commands",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },

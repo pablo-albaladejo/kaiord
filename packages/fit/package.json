@@ -45,7 +45,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/fit"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/fit",
+  "homepage": "https://kaiord.com/docs/formats/fit",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -58,7 +58,11 @@
     "garmin",
     "workout",
     "converter",
-    "fitness"
+    "fitness",
+    "fit-parser",
+    "fit-converter",
+    "garmin-fit",
+    "fit-file"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",

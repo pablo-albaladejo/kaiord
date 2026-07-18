@@ -52,7 +52,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/core"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/core",
+  "homepage": "https://kaiord.com/docs/",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -68,7 +68,12 @@
     "garmin",
     "zwift",
     "converter",
-    "fitness"
+    "fitness",
+    "fit-parser",
+    "tcx-parser",
+    "zwift-workout",
+    "workout-converter",
+    "training"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",

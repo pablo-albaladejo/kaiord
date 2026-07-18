@@ -41,7 +41,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/garmin"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/garmin",
+  "homepage": "https://kaiord.com/docs/formats/gcn",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -54,7 +54,10 @@
     "garmin-connect",
     "workout",
     "converter",
-    "fitness"
+    "fitness",
+    "gcn",
+    "workout-converter",
+    "garmin-workout"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",
