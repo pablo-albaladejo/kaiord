@@ -1,9 +1,7 @@
 import type { HrvSummary, SleepRecord } from "@kaiord/core";
 
-export type RecoveryStatus = "ready" | "moderate" | "fatigued" | "unknown";
-
 export type RecoveryResult = {
-  status: RecoveryStatus;
+  status: "ready" | "moderate" | "fatigued" | "unknown";
   reason: string;
 };
 
