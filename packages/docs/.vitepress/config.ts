@@ -120,6 +120,7 @@ const config = {
 
     nav: [
       { text: "Quick Start", link: "/guide/quick-start" },
+      { text: "Convert", link: "/convert/" },
       { text: "Formats", link: "/formats/krd" },
       { text: "API Reference", link: "/api/" },
     ],
@@ -140,6 +141,19 @@ const config = {
           { text: "Architecture", link: "/guide/architecture" },
           { text: "Testing", link: "/guide/testing" },
           { text: "Contributing", link: "/guide/contributing" },
+        ],
+      },
+      {
+        text: "Convert",
+        collapsed: false,
+        items: [
+          { text: "All converters", link: "/convert/" },
+          { text: "FIT to ZWO", link: "/convert/fit-to-zwo" },
+          { text: "ZWO to FIT", link: "/convert/zwo-to-fit" },
+          { text: "FIT to TCX", link: "/convert/fit-to-tcx" },
+          { text: "TCX to FIT", link: "/convert/tcx-to-fit" },
+          { text: "ZWO to Garmin", link: "/convert/zwo-to-garmin" },
+          { text: "Garmin to ZWO", link: "/convert/garmin-to-zwo" },
         ],
       },
       {
