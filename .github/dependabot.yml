@@ -18,13 +18,16 @@ updates:
       - "dependencies"
       - "automated"
 
-  # GitHub Actions
+  # GitHub Actions (workflows + composite actions, which "/" alone does not scan)
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/setup-pnpm"
+      - "/.github/actions/consume-build-artifacts"
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 10
     reviewers:
       - "pablo-albaladejo"
     labels:
