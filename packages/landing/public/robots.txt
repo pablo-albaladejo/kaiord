@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /editor/
 
 Sitemap: https://kaiord.com/sitemap.xml
+
+# AI agents: a curated map of this site lives at https://kaiord.com/llms.txt
+# Full docs corpus in markdown: https://kaiord.com/docs/llms-full.txt

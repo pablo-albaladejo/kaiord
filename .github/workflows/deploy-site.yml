@@ -115,10 +115,10 @@ jobs:
           mkdir -p merged-dist/docs
           cp -r packages/docs/.vitepress/dist/* merged-dist/docs/
 
-          # Merge sitemaps: use VitePress sitemap as the single sitemap
-          if [ -f merged-dist/docs/sitemap.xml ]; then
-            mv merged-dist/docs/sitemap.xml merged-dist/sitemap.xml
-          fi
+          # Sitemaps: the landing ships a root sitemap.xml that is a sitemap
+          # index referencing /sitemap-landing.xml (landing + editor pages)
+          # and /docs/sitemap.xml (VitePress). Keep the VitePress sitemap in
+          # place under /docs/ — do NOT move it to the root.
 
           echo "✅ Merged dist structure:"
           ls -la merged-dist/
@@ -135,6 +135,11 @@ jobs:
           test -f merged-dist/404.html             || { echo "❌ Missing 404.html"; exit 1; }
           test -f merged-dist/robots.txt           || { echo "❌ Missing robots.txt"; exit 1; }
           test -f merged-dist/sitemap.xml          || { echo "❌ Missing sitemap.xml"; exit 1; }
+          test -f merged-dist/sitemap-landing.xml  || { echo "❌ Missing sitemap-landing.xml"; exit 1; }
+          test -f merged-dist/docs/sitemap.xml     || { echo "❌ Missing docs/sitemap.xml"; exit 1; }
+          test -f merged-dist/llms.txt             || { echo "❌ Missing llms.txt"; exit 1; }
+          test -f merged-dist/docs/llms.txt        || { echo "❌ Missing docs/llms.txt"; exit 1; }
+          test -f merged-dist/docs/llms-full.txt   || { echo "❌ Missing docs/llms-full.txt"; exit 1; }
           echo "✅ All required files present in merged artifact"
 
       - name: Inject SPA route fallback
