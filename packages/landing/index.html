@@ -98,6 +98,59 @@
             }
           },
           {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is Kaiord?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Kaiord is an open-source, local-first training platform: a weekly training calendar, a visual workout editor, an AI assistant that acts on your data, Garmin and WHOOP sync, and health and lab analytics. It also ships a TypeScript SDK, a CLI, and an MCP server for the FIT, TCX, ZWO, and Garmin Connect workout formats."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Kaiord free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The editor is free to use, requires no account, and the entire platform is MIT-licensed open source."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where is my training data stored?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Locally, in your browser's IndexedDB. Nothing leaves your device unless you enable sync with your own Google Drive."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Which fitness file formats does Kaiord support?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "FIT, TCX, ZWO, and Garmin Connect (GCN), plus KRD — Kaiord's canonical JSON format that every conversion goes through. Conversions are round-trip safe."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does Kaiord sync with Garmin and WHOOP?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Browser extensions bridge Garmin Connect, WHOOP, and Train2Go using your own logged-in sessions — no third-party server sits in the middle."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can AI assistants work with Kaiord?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The editor has a built-in AI assistant that edits and plans workouts, and the @kaiord/mcp package exposes the same tools to any MCP-compatible assistant, such as Claude or ChatGPT."
+                }
+              }
+            ]
+          },
+          {
             "@type": "SoftwareSourceCode",
             "name": "Kaiord",
             "description": "Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
@@ -2258,6 +2311,124 @@
             </svg>
             Star on GitHub
           </a>
+        </div>
+      </section>
+
+      <!-- ========== FAQ ========== -->
+      <section
+        id="faq"
+        class="border-t border-[var(--brand-border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
+      >
+        <div class="mx-auto max-w-[760px]">
+          <p
+            class="mb-3.5 text-center text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--brand-text-muted)]"
+          >
+            FAQ
+          </p>
+          <h2
+            class="text-center text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+          >
+            Frequently asked questions
+          </h2>
+          <div class="mt-9 space-y-3.5">
+            <details
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-5 py-4"
+            >
+              <summary
+                class="cursor-pointer text-base font-semibold marker:text-[var(--brand-accent-blue)]"
+              >
+                What is Kaiord?
+              </summary>
+              <p
+                class="mt-3 text-[15px] leading-[1.6] text-[var(--brand-text-secondary)]"
+              >
+                Kaiord is an open-source, local-first training platform: a
+                weekly training calendar, a visual workout editor, an AI
+                assistant that acts on your data, Garmin and WHOOP sync, and
+                health and lab analytics. It also ships a TypeScript SDK, a CLI,
+                and an MCP server for the FIT, TCX, ZWO, and Garmin Connect
+                workout formats.
+              </p>
+            </details>
+            <details
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-5 py-4"
+            >
+              <summary
+                class="cursor-pointer text-base font-semibold marker:text-[var(--brand-accent-blue)]"
+              >
+                Is Kaiord free?
+              </summary>
+              <p
+                class="mt-3 text-[15px] leading-[1.6] text-[var(--brand-text-secondary)]"
+              >
+                Yes. The editor is free to use, requires no account, and the
+                entire platform is MIT-licensed open source.
+              </p>
+            </details>
+            <details
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-5 py-4"
+            >
+              <summary
+                class="cursor-pointer text-base font-semibold marker:text-[var(--brand-accent-blue)]"
+              >
+                Where is my training data stored?
+              </summary>
+              <p
+                class="mt-3 text-[15px] leading-[1.6] text-[var(--brand-text-secondary)]"
+              >
+                Locally, in your browser's IndexedDB. Nothing leaves your device
+                unless you enable sync with your own Google Drive.
+              </p>
+            </details>
+            <details
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-5 py-4"
+            >
+              <summary
+                class="cursor-pointer text-base font-semibold marker:text-[var(--brand-accent-blue)]"
+              >
+                Which fitness file formats does Kaiord support?
+              </summary>
+              <p
+                class="mt-3 text-[15px] leading-[1.6] text-[var(--brand-text-secondary)]"
+              >
+                FIT, TCX, ZWO, and Garmin Connect (GCN), plus KRD — Kaiord's
+                canonical JSON format that every conversion goes through.
+                Conversions are round-trip safe.
+              </p>
+            </details>
+            <details
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-5 py-4"
+            >
+              <summary
+                class="cursor-pointer text-base font-semibold marker:text-[var(--brand-accent-blue)]"
+              >
+                Does Kaiord sync with Garmin and WHOOP?
+              </summary>
+              <p
+                class="mt-3 text-[15px] leading-[1.6] text-[var(--brand-text-secondary)]"
+              >
+                Yes. Browser extensions bridge Garmin Connect, WHOOP, and
+                Train2Go using your own logged-in sessions — no third-party
+                server sits in the middle.
+              </p>
+            </details>
+            <details
+              class="rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-bg-surface)] px-5 py-4"
+            >
+              <summary
+                class="cursor-pointer text-base font-semibold marker:text-[var(--brand-accent-blue)]"
+              >
+                Can AI assistants work with Kaiord?
+              </summary>
+              <p
+                class="mt-3 text-[15px] leading-[1.6] text-[var(--brand-text-secondary)]"
+              >
+                Yes. The editor has a built-in AI assistant that edits and plans
+                workouts, and the @kaiord/mcp package exposes the same tools to
+                any MCP-compatible assistant, such as Claude or ChatGPT.
+              </p>
+            </details>
+          </div>
         </div>
       </section>
     </main>
