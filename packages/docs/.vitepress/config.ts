@@ -154,6 +154,12 @@ const config = {
           { text: "TCX to FIT", link: "/convert/tcx-to-fit" },
           { text: "ZWO to Garmin", link: "/convert/zwo-to-garmin" },
           { text: "Garmin to ZWO", link: "/convert/garmin-to-zwo" },
+          { text: "FIT to Garmin", link: "/convert/fit-to-garmin" },
+          { text: "Garmin to FIT", link: "/convert/garmin-to-fit" },
+          { text: "TCX to ZWO", link: "/convert/tcx-to-zwo" },
+          { text: "ZWO to TCX", link: "/convert/zwo-to-tcx" },
+          { text: "TCX to Garmin", link: "/convert/tcx-to-garmin" },
+          { text: "Garmin to TCX", link: "/convert/garmin-to-tcx" },
         ],
       },
       {
