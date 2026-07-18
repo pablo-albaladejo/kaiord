@@ -1,18 +1,18 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.pablo-albaladejo/kaiord",
-  "description": "Convert, validate, and inspect workout files (FIT, TCX, ZWO, Garmin Connect, KRD) for AI agents. Round-trip-safe conversions through the KRD canonical format.",
+  "description": "Convert, validate, and inspect workout files (FIT, TCX, ZWO, Garmin Connect) for AI agents.",
   "repository": {
     "url": "https://github.com/pablo-albaladejo/kaiord",
     "source": "github"
   },
   "websiteUrl": "https://kaiord.com/docs/mcp/tools",
-  "version": "9.2.1",
+  "version": "10.0.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@kaiord/mcp",
-      "version": "9.2.1",
+      "version": "10.0.0",
       "transport": {
         "type": "stdio"
       }
