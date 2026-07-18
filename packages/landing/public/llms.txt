@@ -1,0 +1,46 @@
+# Kaiord
+
+> Open-source, local-first training platform: a weekly training calendar, an
+> AI assistant that acts on your data, Garmin & WHOOP sync, and health/lab
+> analytics — plus a TypeScript SDK for the FIT, TCX, ZWO, and Garmin Connect
+> workout formats. Everything runs in the browser; no account or server is
+> required. MIT licensed, by Pablo Albaladejo.
+
+Key facts:
+
+- The web app (Kaiord Editor) is free and stores all data locally in the
+  browser (IndexedDB). No sign-up.
+- The SDK converts workout files between FIT, TCX, ZWO, GCN (Garmin Connect),
+  and KRD (Kaiord's canonical JSON format). Conversions are round-trip safe.
+- A CLI (`kaiord convert`) and an MCP server (`@kaiord/mcp`) expose the same
+  conversion pipeline to scripts and AI agents.
+
+## Product
+
+- [Landing page](https://kaiord.com/): product overview in English
+- [Landing page (Spanish)](https://kaiord.com/es/): product overview in Spanish
+- [Kaiord Editor](https://kaiord.com/editor/): the web app — training
+  calendar, visual workout editor, AI assistant, Garmin & WHOOP sync
+
+## Documentation
+
+- [Docs home](https://kaiord.com/docs/): guides, format specs, API reference
+- [Quick start](https://kaiord.com/docs/guide/quick-start.md): convert a FIT
+  file to TCX in 4 lines of TypeScript
+- [Why Kaiord?](https://kaiord.com/docs/guide/why-kaiord.md): one SDK for
+  every workout file format
+- [KRD format](https://kaiord.com/docs/formats/krd.md): the canonical JSON
+  workout format all conversions go through
+- [MCP tools](https://kaiord.com/docs/mcp/tools.md): use Kaiord tools from
+  AI assistants via the Model Context Protocol
+- [Docs index for LLMs](https://kaiord.com/docs/llms.txt): per-page markdown
+  mirrors of every docs page
+- [Full docs corpus](https://kaiord.com/docs/llms-full.txt): the entire
+  documentation as a single markdown file
+
+## Source & packages
+
+- [GitHub repository](https://github.com/pablo-albaladejo/kaiord): monorepo
+  with SDK, CLI, MCP server, and web app
+- [npm packages](https://www.npmjs.com/org/kaiord): @kaiord/core, @kaiord/fit,
+  @kaiord/tcx, @kaiord/zwo, @kaiord/garmin, @kaiord/cli, @kaiord/mcp
