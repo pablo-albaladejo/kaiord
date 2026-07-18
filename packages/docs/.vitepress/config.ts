@@ -100,9 +100,17 @@ const config = {
     umamiWebsiteId: process.env.UMAMI_WEBSITE_ID,
   }),
 
+  // VitePress does not prepend `base` to sitemap entries, so the base must
+  // be part of the hostname or every URL points at the site root
+  // (kaiord.com/CHANGELOG instead of kaiord.com/docs/CHANGELOG).
   sitemap: {
-    hostname: SITE_URL,
+    hostname: `${SITE_URL}${DOCS_BASE}`,
   },
+
+  // Extensionless URLs (GitHub Pages resolves /page to page.html). Cleaner
+  // canonical URLs for search engines and AI-agent citations; the .html
+  // files are still emitted, so old links keep working.
+  cleanUrls: true,
 
   appearance: "dark",
 

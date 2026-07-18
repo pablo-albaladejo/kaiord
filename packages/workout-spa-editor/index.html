@@ -7,11 +7,14 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
 
-    <title>Kaiord Editor</title>
+    <title>
+      Kaiord Editor — Training calendar, workout editor & fitness file converter
+    </title>
     <meta
       name="description"
-      content="Visual workout editor for creating and converting FIT, TCX, ZWO, and Garmin Connect files. By Pablo Albaladejo."
+      content="Free, local-first training app: weekly calendar, visual workout editor, an AI assistant that acts on your data, Garmin &amp; WHOOP sync, and health analytics. Create and convert FIT, TCX, ZWO, and Garmin Connect files in your browser — no account needed. By Pablo Albaladejo."
     />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://kaiord.com/editor/" />
 
     <!-- Font -->
@@ -32,10 +35,13 @@
     <meta name="theme-color" content="#0f172a" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Kaiord Editor" />
+    <meta
+      property="og:title"
+      content="Kaiord Editor — Training calendar, workout editor & fitness file converter"
+    />
     <meta
       property="og:description"
-      content="Visual workout editor for creating and converting FIT, TCX, ZWO, and Garmin Connect files. By Pablo Albaladejo."
+      content="Free, local-first training app: weekly calendar, visual workout editor, AI assistant, Garmin &amp; WHOOP sync, and health analytics — all in your browser, no account needed."
     />
     <meta
       property="og:image"
@@ -48,15 +54,55 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Kaiord Editor" />
+    <meta
+      name="twitter:title"
+      content="Kaiord Editor — Training calendar, workout editor & fitness file converter"
+    />
     <meta
       name="twitter:description"
-      content="Visual workout editor for creating and converting FIT, TCX, ZWO, and Garmin Connect files. By Pablo Albaladejo."
+      content="Free, local-first training app: weekly calendar, visual workout editor, AI assistant, Garmin &amp; WHOOP sync, and health analytics — all in your browser, no account needed."
     />
     <meta
       name="twitter:image"
       content="https://kaiord.com/editor/og-image-editor.png"
     />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Kaiord Editor",
+        "description": "Free, local-first training app: weekly calendar, visual workout editor, an AI assistant that acts on your data, Garmin and WHOOP sync, and health analytics. Creates and converts FIT, TCX, ZWO, and Garmin Connect workout files entirely in the browser.",
+        "url": "https://kaiord.com/editor/",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript. Works in any modern browser.",
+        "isAccessibleForFree": true,
+        "featureList": [
+          "Weekly training calendar",
+          "Visual structured-workout editor",
+          "AI assistant that edits and plans workouts",
+          "Garmin Connect and WHOOP sync",
+          "Health and lab analytics",
+          "FIT, TCX, ZWO, and Garmin Connect file conversion",
+          "Local-first storage — data never leaves the browser"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Pablo Albaladejo",
+          "sameAs": [
+            "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
+            "https://github.com/pablo-albaladejo"
+          ]
+        }
+      }
+    </script>
 
     <!--
       Runtime configuration. The placeholder __UMAMI_WEBSITE_ID__ is
@@ -96,6 +142,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Kaiord Editor</h1>
+      <p>
+        Kaiord Editor is a free, local-first training app: a weekly training
+        calendar, a visual workout editor, an AI assistant that acts on your
+        data, Garmin &amp; WHOOP sync, and health analytics. It creates and
+        converts FIT, TCX, ZWO, and Garmin Connect workout files entirely in
+        your browser — no account needed. JavaScript is required to run the app.
+      </p>
+      <p>
+        Learn more on the
+        <a href="https://kaiord.com/">Kaiord landing page</a> or read the
+        <a href="https://kaiord.com/docs/">documentation</a>.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
