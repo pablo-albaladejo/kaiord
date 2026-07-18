@@ -1,5 +1,17 @@
 # @kaiord/docs
 
+## 0.0.2
+
+### Patch Changes
+
+- 36efe53: Enable VitePress `cleanUrls` so canonical docs URLs are extensionless
+  (better for search-engine and AI-agent citations; the `.html` files are
+  still emitted, so existing links keep working), and fix the docs sitemap
+  to include the `/docs/` base — VitePress does not prepend `base` to
+  sitemap entries, so every URL pointed at the site root
+  (`kaiord.com/CHANGELOG` instead of `kaiord.com/docs/CHANGELOG`).
+- 7764f5d: Refresh the docs and editor OG images to match the platform brand: add the ambient radial glow and a sky-accented subtitle. The editor now ships its own OG card (og-image-editor.png, subtitle "Editor") instead of reusing the landing image, with its meta tags repointed accordingly. Both are reproducible via each package's generate-og-image.mjs script.
+
 ## 0.0.1
 
 ### Patch Changes
