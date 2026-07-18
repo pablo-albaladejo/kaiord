@@ -5,10 +5,16 @@ type ZwiftWorkoutFile = {
   "@_kaiord:timeCreated"?: string;
   "@_kaiord:manufacturer"?: string;
   "@_kaiord:product"?: string;
-  "@_kaiord:serialNumber"?: string;
+  // `parseAttributeValue: true` in the XML parser coerces a numeric serial
+  // (e.g. `serialNumber="1234"`) to a number, but KRD types it as a string.
+  "@_kaiord:serialNumber"?: string | number;
   "@_kaiord:fitType"?: string;
   "@_kaiord:hrmFitProductId"?: number;
 };
+
+const toOptionalString = (
+  value: string | number | undefined
+): string | undefined => (value === undefined ? undefined : String(value));
 
 export const extractMetadata = (
   workoutFile: ZwiftWorkoutFile,
@@ -18,7 +24,7 @@ export const extractMetadata = (
   sport,
   manufacturer: workoutFile["@_kaiord:manufacturer"],
   product: workoutFile["@_kaiord:product"],
-  serialNumber: workoutFile["@_kaiord:serialNumber"],
+  serialNumber: toOptionalString(workoutFile["@_kaiord:serialNumber"]),
 });
 
 export const extractFitExtensions = (
