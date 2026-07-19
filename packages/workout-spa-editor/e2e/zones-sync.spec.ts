@@ -176,16 +176,37 @@ const waitForSyncButton = async (page: Page): Promise<void> => {
   await syncBtn.waitFor({ state: "visible", timeout: 15_000 });
 };
 
+/**
+ * Wait for a bridge action to be recorded by the stub, on the generous
+ * discovery-gated budget. The timeout MUST ride in the 3rd positional slot —
+ * `waitForFunction(fn, arg, options)`. Passing `{ timeout }` as the 2nd arg
+ * silently swallows it as the page-function argument, leaving the wait on the
+ * ~10 s default; that is what let the first (cold-Vite) action race and flake.
+ */
+const waitForBridgeAction = (page: Page, action: string): Promise<unknown> =>
+  page.waitForFunction(
+    (name) => {
+      const calls =
+        ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
+          { action: string }[] | undefined) ?? [];
+      return calls.some((c) => c.action === name);
+    },
+    action,
+    { timeout: AUTOSYNC_FIRST_ACTION_TIMEOUT_MS }
+  );
+
 test.describe("Train2Go zones-sync — auto-sync flows", () => {
-  // Firefox has a known timing issue where the bridge-announce handshake
-  // and the useCoachingAutoSync hook race differently, causing the
-  // waitForFunction polls for __T2G_STUB_CALLS__ to time out at 10 s.
-  // The underlying bridge-discovery mechanism relies on window.postMessage
-  // timing that differs on firefox vs chromium/webkit. Tracked for
-  // investigation separately; tests are marked fixme so they don't block CI.
+  // Firefox-only: on a cold first page load the bridge-discovery handshake
+  // (window.postMessage ANNOUNCE ↔ the SPA listener + its +3 s self-heal
+  // DISCOVER) does not resolve, so the auto-sync hook never issues its first
+  // `read-week` — the wait exhausts even the 30 s budget, and a denser stub
+  // re-announce did not help. This is a firefox postMessage-timing quirk,
+  // distinct from the chromium timeout-arg flake fixed here (the timeout used
+  // to ride the wrong `waitForFunction` slot), and needs its own
+  // investigation. Skipped so it does not block CI.
   test.fixme(
     ({ browserName }) => browserName === "firefox",
-    "Bridge announce / auto-sync race on firefox — tracked for investigation"
+    "Bridge discovery does not resolve on cold firefox — tracked separately"
   );
 
   test.beforeEach(async ({ page }) => {
@@ -194,6 +215,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     await page.waitForFunction(
       () =>
         Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      undefined,
       { timeout: 10_000 }
     );
     await clearDexie(page);
@@ -210,15 +232,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // Wait for read-week to settle (the auto-sync hook fires it on
     // calendar mount). With syncZones=false the fan-out check returns
     // false BEFORE read-details would queue.
-    await page.waitForFunction(
-      () => {
-        const calls =
-          ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-            { action: string }[] | undefined) ?? [];
-        return calls.some((c) => c.action === "read-week");
-      },
-      { timeout: AUTOSYNC_FIRST_ACTION_TIMEOUT_MS }
-    );
+    await waitForBridgeAction(page, "read-week");
 
     // One extra tick to let any racing fan-out queue if it were going to.
     await page.waitForTimeout(200);
@@ -241,15 +255,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // The auto-sync hook fires on calendar mount → runs syncZones after
     // read-week → reads every Kaiord field empty → writes silently.
     // Wait for read-details to land (the marker for fan-out completion).
-    await page.waitForFunction(
-      () => {
-        const calls =
-          ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-            { action: string }[] | undefined) ?? [];
-        return calls.some((c) => c.action === "read-details");
-      },
-      { timeout: 10_000 }
-    );
+    await waitForBridgeAction(page, "read-details");
 
     // Wait for the orchestrator's profile.put to settle. Polling Dexie
     // is more deterministic than a fixed sleep because the put is
