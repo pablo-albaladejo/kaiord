@@ -10,8 +10,7 @@ const OG_IMAGE = `${SITE_URL}${DOCS_BASE}og-image-docs.png`;
 
 const AUTHOR = {
   name: "Pablo Albaladejo",
-  linkedin:
-    "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
+  linkedin: "https://www.linkedin.com/in/pabloalbaladejomestre",
   github: "https://github.com/pablo-albaladejo",
 };
 
@@ -204,7 +203,7 @@ const config = {
 
     footer: {
       message:
-        'Built by <a href="https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/" target="_blank" rel="noopener">Pablo Albaladejo</a>',
+        'Built by <a href="https://www.linkedin.com/in/pabloalbaladejomestre" target="_blank" rel="noopener">Pablo Albaladejo</a>',
       copyright:
         '<a href="https://github.com/pablo-albaladejo/kaiord/releases" target="_blank" rel="noopener">GitHub Releases</a>',
     },
