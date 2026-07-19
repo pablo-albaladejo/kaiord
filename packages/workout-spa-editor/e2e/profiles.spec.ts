@@ -18,6 +18,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "athlete-e2e-profile";
 const PROFILE_NAME = "E2E Athlete";
@@ -67,10 +68,7 @@ async function gotoAthlete(page: Page) {
   // Boot once to expose the Dexie singleton, seed the active profile,
   // then load the populated Athlete page.
   await page.goto("/athlete");
-  await page.waitForFunction(
-    () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-    { timeout: 10_000 }
-  );
+  await waitForDexieReady(page);
   await seedAthleteProfile(page);
   await page.goto("/athlete");
   await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible({

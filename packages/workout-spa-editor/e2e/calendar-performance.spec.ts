@@ -28,6 +28,7 @@
  */
 
 import { expect, test } from "./fixtures/base";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 // FCP budget is the CI-calibrated envelope (ubuntu-latest runner with
 // CDP throttle 4×). The archived design D11 named 200ms as the
@@ -116,11 +117,7 @@ test.describe("CalendarPage performance budget", () => {
   }, testInfo) => {
     // 1. Boot the SPA (no throttling — only the calendar nav is measured).
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
 
     // 2/3. Bootstrap a perf profile + seed the 30-card week.
     await page.evaluate(

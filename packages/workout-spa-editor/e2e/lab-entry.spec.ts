@@ -10,6 +10,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "labs-e2e-profile";
 const PROFILE_NAME = "Labs E2E Athlete";
@@ -54,10 +55,7 @@ async function seedProfile(page: Page) {
 
 async function gotoLabEntry(page: Page) {
   await page.goto("/health/labs");
-  await page.waitForFunction(
-    () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-    { timeout: 10_000 }
-  );
+  await waitForDexieReady(page);
   await seedProfile(page);
   await page.goto("/health/labs");
   await expect(page.getByTestId("health-labs")).toBeVisible({
@@ -132,11 +130,7 @@ test.describe("Lab analytics entry (DoD-1)", () => {
       timeout: 20_000,
     });
     await page.reload();
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
 
     // Assert — read the persisted rows straight from Dexie (no list UI yet).
     const { reports, values } = await page.evaluate(async (profileId) => {

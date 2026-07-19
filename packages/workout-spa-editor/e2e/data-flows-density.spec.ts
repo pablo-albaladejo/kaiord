@@ -19,6 +19,7 @@ import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
 import { installGarminBridgeStub } from "./helpers/garmin-bridge-stub";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "connections-profile";
 
@@ -60,11 +61,7 @@ test.describe("Athlete Connections", () => {
   }) => {
     // Arrange
     await page.goto("/athlete");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await seedProfile(page);
 
     // Act
@@ -85,11 +82,7 @@ test.describe("Athlete Connections", () => {
     // marks Garmin as connected.
     await installGarminBridgeStub(page);
     await page.goto("/athlete");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await seedProfile(page);
     await page.goto("/athlete");
 
