@@ -20,6 +20,7 @@
 import { expect, test } from "@playwright/test";
 
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "t2g-click-profile";
@@ -37,11 +38,7 @@ test.describe("Coaching activity dialog — Train2Go click path", () => {
   }) => {
     // 1. Boot the SPA so Dexie is initialised.
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
 
     // 2. Pick a deterministic day inside the visible week.

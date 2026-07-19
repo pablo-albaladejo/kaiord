@@ -45,6 +45,7 @@ import {
 } from "./helpers/garmin-bridge-stub";
 import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "coaching-redesign-profile";
@@ -275,11 +276,7 @@ test.describe("Coaching activity dialog redesign", () => {
   }) => {
     // Arrange — boot SPA, clear Dexie, seed profile + activity
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();
@@ -337,11 +334,7 @@ test.describe("Coaching activity dialog redesign", () => {
   }) => {
     // Arrange — seed an activity AND a workout (sourceId matched) but NO session_match
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();
@@ -384,11 +377,7 @@ test.describe("Coaching activity dialog redesign", () => {
   }) => {
     // Arrange — boot SPA, clear Dexie, seed profile + activity + AI provider
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     await mockLlmSuccess(page, LLM_CYCLING_RESPONSE);
     await seedAiProvider(page);
@@ -437,11 +426,7 @@ test.describe("Coaching activity dialog redesign", () => {
   }) => {
     // Arrange — capture the LLM request body via a custom route handler
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const capturedBodies: string[] = [];
     const captureAndRespond = async (route: Route) => {
@@ -499,11 +484,7 @@ test.describe("Coaching activity dialog redesign", () => {
     // Arrange — first call fails, second succeeds (handler swaps via
     // an atomic counter so each interception is deterministic).
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     let calls = 0;
     const handler = async (route: Route) => {
@@ -590,11 +571,7 @@ test.describe("Coaching activity dialog redesign", () => {
     // Arrange — every LLM call returns 401 (non-retryable, so the AI SDK
     // surfaces the error instead of backing off through `maxRetries`).
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     await mockLlmFailure(page, { status: 401 });
     await seedAiProvider(page);
@@ -654,11 +631,7 @@ test.describe("Coaching activity dialog redesign", () => {
   }) => {
     // Arrange — seed a matched workout in `state="raw"` AND its session_match
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     await mockLlmSuccess(page, LLM_CYCLING_RESPONSE);
     await seedAiProvider(page);
@@ -766,11 +739,7 @@ test.describe("Coaching activity dialog redesign", () => {
     // bridge-discovery sees the announce on boot.
     await installGarminBridgeStub(page);
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();
@@ -831,11 +800,7 @@ test.describe("Coaching activity dialog redesign", () => {
     // workout reaches `state="pushed"` the Push button is hidden.
     await installGarminBridgeStub(page);
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();
@@ -895,11 +860,7 @@ test.describe("Coaching activity dialog redesign", () => {
   }) => {
     // Arrange — seed activity with empty description
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();

@@ -19,6 +19,7 @@ import {
   installTrain2GoBridgeStub,
   TRAIN2GO_BRIDGE_ID,
 } from "./helpers/train2go-bridge-stub";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "00000000-0000-4000-8000-0000000000d4";
 const DATA_HUB_PATH = "/settings/data-hub";
@@ -28,11 +29,7 @@ type DexieDb = {
   table: (n: string) => { put: (r: unknown) => Promise<void> };
 };
 
-const waitForDb = (page: Page): Promise<unknown> =>
-  page.waitForFunction(
-    () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-    { timeout: 10_000 }
-  );
+const waitForDb = (page: Page): Promise<unknown> => waitForDexieReady(page);
 
 const seedProfile = async (page: Page): Promise<void> => {
   await page.evaluate(async (pid) => {
