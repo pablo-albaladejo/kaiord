@@ -31,7 +31,10 @@ function matchToken(source, name) {
 }
 
 function extractDarkBlock(source) {
-  const match = source.match(/\.dark\s*\{([^}]*)\}/);
+  // Anchor `.dark` to the start of a line so the real rule block is matched,
+  // not a `.dark { … }` reference inside a comment (which would capture an
+  // ellipsis and silently fall back to the light `:root` values).
+  const match = source.match(/^\.dark\s*\{([^}]*)\}/m);
   return match?.[1] ?? "";
 }
 
