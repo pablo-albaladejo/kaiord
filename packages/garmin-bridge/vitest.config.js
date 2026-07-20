@@ -7,7 +7,7 @@ export default defineConfig({
     coverage: {
       include: [
         "background.js",
-        "content.js",
+        "garmin-oauth.js",
         "kaiord-announce.js",
         "bridge-envelope.js",
         "bridge-identity.js",

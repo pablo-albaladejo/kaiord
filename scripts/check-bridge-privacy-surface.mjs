@@ -46,8 +46,14 @@ const readManifest = (bridge, file) => {
 };
 
 const extractAllowed = (bridge) => {
-  const path = join(REPO_ROOT, "packages", bridge, "content.js");
-  if (!existsSync(path)) return [];
+  // The ALLOWED path-allowlist lives in content.js for relay-based bridges,
+  // or background.js for token-based bridges (garmin) that call the API
+  // directly from the service worker. content.js wins when both exist.
+  const dir = join(REPO_ROOT, "packages", bridge);
+  const path = [join(dir, "content.js"), join(dir, "background.js")].find(
+    (p) => existsSync(p)
+  );
+  if (!path) return [];
   const src = readFileSync(path, "utf8");
   const start = src.indexOf("const ALLOWED");
   if (start === -1) return [];

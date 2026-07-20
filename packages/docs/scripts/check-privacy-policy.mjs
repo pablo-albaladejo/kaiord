@@ -40,7 +40,11 @@ const GARMIN_MANIFEST = join(
 
 // Hosts the policy claims each production extension may contact.
 const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
-const GARMIN_ALLOWED_HOSTS = new Set(["https://connect.garmin.com/*"]);
+const GARMIN_ALLOWED_HOSTS = new Set([
+  "https://connect.garmin.com/*",
+  "https://connectapi.garmin.com/*",
+  "https://sso.garmin.com/*",
+]);
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
 // dev-server match patterns the policy discloses explicitly.
@@ -102,8 +106,8 @@ const REQUIRED_RULES = [
     re: /\*\.kaiord\.com/,
   },
   {
-    label: "CSRF-token session-storage disclosure",
-    re: /CSRF token.*chrome\.storage\.session/is,
+    label: "OAuth-token local-storage disclosure",
+    re: /OAuth token[\s\S]*?chrome\.storage\.local/i,
   },
   {
     label: "Host-permission narrowing stated (no <all_urls>)",
