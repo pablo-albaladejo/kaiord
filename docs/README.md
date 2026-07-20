@@ -17,6 +17,10 @@ Welcome to the Kaiord documentation. This directory contains comprehensive guide
 - **[Contributing Guide](../CONTRIBUTING.md)** - Development workflow, code style, commit conventions, PR process
 - **[AI Agents Guide](../AGENTS.md)** - Guidelines for AI/code agents (GPT, Claude, etc.)
 
+### Connector Research
+
+- **[Connector research](connectors-research/README.md)** - Auth model, session renewal (no re-login), and read/write endpoint catalogs for each fitness platform (Garmin, Whoop, TrainingPeaks, Strava, Train2Go, Tanita)
+
 ### Package Documentation
 
 - **[Core Library](../packages/core/README.md)** - @kaiord/core package documentation
