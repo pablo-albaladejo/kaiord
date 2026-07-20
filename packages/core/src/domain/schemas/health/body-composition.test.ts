@@ -32,6 +32,27 @@ describe("bodyCompositionSchema", () => {
       boneMassKilograms: 3.1,
       bodyWaterPercent: 56.1,
       bmi: 22.7,
+      visceralFatRating: 12,
+      basalMetabolicRateKcal: 1500,
+    };
+
+    // Act
+    const result = bodyCompositionSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(true);
+  });
+
+  it("should accept a payload carrying only visceralFatRating and basalMetabolicRateKcal", () => {
+    // Arrange
+    // The superRefine hasAny check must count the new fields, else a scale
+    // reporting only visceral fat + BMR is wrongly rejected as empty.
+    const input = {
+      kind: "bodyComposition" as const,
+      version: "2.0",
+      measuredAt: baseMeasuredAt,
+      visceralFatRating: 12,
+      basalMetabolicRateKcal: 1500,
     };
 
     // Act
