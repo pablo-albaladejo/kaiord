@@ -27,6 +27,15 @@ const collectMeasurements = (
   if (boneMassKilograms !== undefined)
     out.boneMassKilograms = boneMassKilograms;
   if (fit.bmi !== undefined) out.bmi = fit.bmi;
+  // visceralFatRating (profile scale 1) and basalMet (profile scale 4,
+  // kcal/day) are pass-throughs: the @garmin/fitsdk Decoder/Encoder
+  // auto-applies their profile scale, so the mapper carries REAL values
+  // (like percentFat/bmi) and must NOT scale them itself. Verified by an
+  // encode→decode probe against the SDK (weight_scale carries the same
+  // basalMet field definition). See basal-met-sdk-scale.test.ts.
+  if (fit.visceralFatRating !== undefined)
+    out.visceralFatRating = fit.visceralFatRating;
+  if (fit.basalMet !== undefined) out.basalMetabolicRateKcal = fit.basalMet;
   return out;
 };
 
@@ -70,4 +79,10 @@ export const mapKrdBodyCompositionToFit = (
     boneMass: toScaledKg(body.boneMassKilograms),
   }),
   ...(body.bmi !== undefined && { bmi: body.bmi }),
+  ...(body.visceralFatRating !== undefined && {
+    visceralFatRating: body.visceralFatRating,
+  }),
+  ...(body.basalMetabolicRateKcal !== undefined && {
+    basalMet: body.basalMetabolicRateKcal,
+  }),
 });
