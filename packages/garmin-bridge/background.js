@@ -1,12 +1,13 @@
 /**
  * Kaiord Garmin Bridge — Background Service Worker
  *
- * Captures CSRF token via webRequest, coordinates messaging between
- * SPA ↔ background ↔ content script on connect.garmin.com.
+ * Authenticates to Garmin with an OAuth token minted from the user's browser
+ * session (see garmin-oauth.js) and calls connectapi.garmin.com directly with
+ * `Authorization: Bearer`. No Garmin tab, content script, or CSRF capture is
+ * involved. Routes SPA ↔ background messages for list/push/activities/snapshot.
  */
 
 const PROTOCOL_VERSION = 1;
-const GARMIN_URL_PATTERN = "https://connect.garmin.com/*";
 const GARMIN_DASHBOARD = "https://connect.garmin.com/modern/";
 
 const BRIDGE_MANIFEST = {
@@ -21,11 +22,10 @@ const BRIDGE_MANIFEST = {
 //
 // Several catch{} blocks below intentionally swallow errors so a single
 // failure doesn't break the whole bridge (see the comment at each call
-// site). That used to make root-causing "why doesn't X work" impossible
-// without opening the service worker's devtools console. This keeps the
-// swallow behavior but records a structured, capped log so the cause is
-// inspectable — e.g. `chrome.storage.local.get("bridgeTelemetry")` from
-// the popup or chrome://extensions devtools.
+// site). This keeps the swallow behavior but records a structured, capped
+// log so the cause is inspectable — e.g.
+// `chrome.storage.local.get("bridgeTelemetry")` from the popup or
+// chrome://extensions devtools.
 const TELEMETRY_KEY = "bridgeTelemetry";
 const TELEMETRY_MAX_ENTRIES = 25;
 
@@ -61,13 +61,24 @@ try {
 } catch (e) {
   bridgeEnvelope =
     typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
-  // In the packaged extension this only fires if the bundled file is
-  // missing or fails to parse — a real misconfiguration. Under Node
-  // (tests, build tooling) it fires on every load and is expected, so
-  // it's logged at "debug" rather than "error".
   void logSwallowed(
     typeof require !== "undefined" ? "debug" : "error",
     "load-bridge-envelope",
+    e
+  );
+}
+
+// ── OAuth token minting + connectapi Bearer calls (bridge-specific) ──
+let garminOAuth;
+try {
+  importScripts("garmin-oauth.js");
+  garminOAuth = globalThis.garminOAuth;
+} catch (e) {
+  garminOAuth =
+    typeof require !== "undefined" ? require("./garmin-oauth.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-garmin-oauth",
     e
   );
 }
@@ -87,96 +98,62 @@ try {
   );
 }
 
-// ── CSRF token capture ──
-
-chrome.webRequest.onBeforeSendHeaders.addListener(
-  (details) => {
-    const header = details.requestHeaders?.find(
-      (h) => h.name.toLowerCase() === "connect-csrf-token"
-    );
-    if (header?.value) {
-      chrome.storage.session.set({ csrfToken: header.value });
-    }
+// ── Garmin call surface ──
+//
+// Defense-in-depth allowlist: even though the SPA can only trigger fixed
+// paths (list/push/activities never take a caller-supplied path), the bridge
+// still refuses to hit any Garmin endpoint outside this set. Locked against
+// drift by scripts/check-bridge-privacy-surface.mjs.
+const ALLOWED = [
+  { method: "GET", pattern: /^\/workout-service\/workouts(\?.*)?$/ },
+  { method: "POST", pattern: /^\/workout-service\/workout$/ },
+  // Read-only pull of the athlete's recent activities (F5). GET only —
+  // the executed-activity feed is never mutated through the bridge.
+  {
+    method: "GET",
+    pattern: /^\/activitylist-service\/activities\/search\/activities(\?.*)?$/,
   },
-  { urls: [GARMIN_URL_PATTERN] },
-  ["requestHeaders"]
-);
+];
 
-const getCsrfToken = () =>
-  chrome.storage.session.get("csrfToken").then((r) => r.csrfToken ?? null);
+const isAllowed = (method, path) =>
+  ALLOWED.some(
+    (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
+  );
 
-// ── Tab helpers ──
-
-const findGarminTab = () =>
-  new Promise((resolve) => {
-    chrome.tabs.query({ url: GARMIN_URL_PATTERN }, (tabs) => {
-      resolve(tabs?.[0] ?? null);
-    });
-  });
-
-// ── Content script messaging ──
-
+// Bearer call against connectapi.garmin.com. Returns the same envelope the
+// old content-script relay did: { ok, status, data } | { ok:false, ... }.
 const garminFetch = async (path, method, body) => {
-  const tab = await findGarminTab();
-  if (!tab) {
-    throw new Error(
-      "No Garmin Connect tab open. Open connect.garmin.com first."
-    );
+  if (!isAllowed(method, path)) {
+    return { ok: false, error: "Blocked: disallowed path or method" };
   }
-
-  const csrfToken = await getCsrfToken();
-
-  return new Promise((resolve, reject) => {
-    chrome.tabs.sendMessage(
-      tab.id,
-      { action: "garmin-fetch", path, method, body, csrfToken },
-      (res) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(res);
-        }
-      }
-    );
-  });
+  return garminOAuth.connectapiFetch(path, method || "GET", body, fetch);
 };
 
 // ── Actions ──
 
 /**
  * Ping handler. Response data shape:
- *   BridgeManifest ∪ { csrfCaptured: boolean, gcApi: object }
+ *   BridgeManifest ∪ { authenticated: boolean, gcApi: object }
  *
- * The outer envelope sent to the SPA via `sendResult` is
- *   { ok: true, protocolVersion: 1, data: <this object> }
- *
- * The SPA reads `response.data` and passes it to
- * `bridgeManifestSchema.safeParse` (defined in
- * `packages/workout-spa-editor/src/types/bridge-schemas.ts`, called
- * from `parseManifestFromPing` in
- * `packages/workout-spa-editor/src/adapters/bridge/bridge-registry-helpers.ts`).
- * Zod strips the session-status fields (csrfCaptured, gcApi); they
- * stay available to popup/UI consumers that read `response.data`
- * directly. Manifest keys (id, name, version, protocolVersion,
- * capabilities) take precedence on collision (the spread
- * `{ ...BRIDGE_MANIFEST, csrfCaptured, gcApi }` writes them last so
- * any rogue id/version coming back from the upstream API cannot
- * spoof the manifest).
+ * The SPA reads `response.data` and passes it to `bridgeManifestSchema`
+ * (Zod strips the session-status fields authenticated/gcApi). The popup
+ * reads `data.gcApi.ok` for the connection pill. Manifest keys take
+ * precedence on collision — the spread writes them last so a rogue
+ * id/version from the upstream API cannot spoof the manifest.
  */
 const checkSession = async () => {
-  const csrfToken = await getCsrfToken();
-  const results = { ...BRIDGE_MANIFEST, csrfCaptured: csrfToken !== null };
-
+  const results = { ...BRIDGE_MANIFEST };
   try {
     const res = await garminFetch(
       "/workout-service/workouts?start=0&limit=1",
       "GET"
     );
     results.gcApi = res;
+    results.authenticated = res.ok === true;
   } catch (e) {
     results.gcApi = { ok: false, error: e.message };
+    results.authenticated = false;
   }
-
   return results;
 };
 
@@ -185,6 +162,7 @@ const toBridgeError = (fallback, res) => {
     res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
   const err = new Error(msg);
   if (typeof res?.status === "number") err.status = res.status;
+  if (res?.needsReauth) err.needsReauth = true;
   return err;
 };
 
@@ -205,15 +183,14 @@ const pushWorkout = async (gcn) => {
 
 // ── Garmin activities pull (F5) ──
 //
-// Read-only pull of the athlete's recent Garmin Connect activities via
-// the user's authenticated session. Governed SPA-side by a DataRoute
-// (activity←garmin — the SPA never asks unless the route is active). This
-// handler adds bridge-side safety: a throttle so rapid re-syncs cannot
-// hammer Garmin (ToS), retry-with-backoff for transient session hiccups,
-// and a kill-switch (chrome.storage.local flag) so the pull can be
-// disabled — degrading the SPA to manual FIT import — if Garmin changes
-// the endpoint shape. The raw activity feed is returned as-is; mapping to
-// the domain `activity` type happens SPA-side where the Zod schema lives.
+// Read-only pull of the athlete's recent Garmin Connect activities. Governed
+// SPA-side by a DataRoute (activity←garmin — the SPA never asks unless the
+// route is active). This handler adds bridge-side safety: a throttle so rapid
+// re-syncs cannot hammer Garmin (ToS), retry-with-backoff for transient
+// hiccups, and a kill-switch (chrome.storage.local flag) so the pull can be
+// disabled — degrading the SPA to manual FIT import — if Garmin changes the
+// endpoint shape. The raw feed is returned as-is; mapping to the domain
+// `activity` type happens SPA-side where the Zod schema lives.
 const ACTIVITIES_PATH =
   "/activitylist-service/activities/search/activities?start=0&limit=20";
 const ACTIVITIES_KILL_SWITCH_KEY = "activitiesPullDisabled";
@@ -376,53 +353,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) =>
   dispatch(message, sendResponse)
 );
 
-// ── Content-script re-inject after extension reload ──
-//
-// Chrome terminates content scripts in existing tabs when the extension
-// is reloaded but does NOT re-inject them. Tabs at connect.garmin.com
-// keep stale, dead listeners — chrome.tabs.sendMessage to them fails
-// with "Receiving end does not exist". Re-inject programmatically on
-// onInstalled so the user does not have to reload every Garmin tab
-// after touching the extension. Only re-inject scripts whose match
-// patterns are covered by host_permissions; `kaiord-announce.js` on
-// the SPA origin is out of scope (kept as the standard MV3 dev flow).
-const reinjectContentScripts = async () => {
-  const manifest = chrome.runtime.getManifest();
-  const hostPermissions = manifest.host_permissions ?? [];
-  for (const script of manifest.content_scripts ?? []) {
-    const matches = script.matches.filter((m) => hostPermissions.includes(m));
-    if (matches.length === 0) continue;
-    const tabs = await chrome.tabs.query({ url: matches });
-    for (const tab of tabs) {
-      try {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id, allFrames: !!script.all_frames },
-          files: script.js,
-        });
-      } catch (e) {
-        // Tab may be in a restricted context or already injected; ignore.
-        void logSwallowed("warn", "reinject-content-script", e);
-      }
-    }
-  }
-};
-
-if (typeof chrome !== "undefined" && chrome.runtime?.onInstalled) {
-  chrome.runtime.onInstalled.addListener(() => {
-    void reinjectContentScripts();
-  });
-}
-
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     EXTERNAL_ACTIONS,
+    ALLOWED,
+    isAllowed,
     handleAction,
     handleExternalMessage,
-    getCsrfToken,
-    findGarminTab,
     garminFetch,
     checkSession,
     listWorkouts,
@@ -437,7 +377,6 @@ if (typeof module !== "undefined") {
     ACTIVITIES_MIN_INTERVAL_MS,
     persistSnapshot,
     clearSnapshot,
-    reinjectContentScripts,
     TELEMETRY_KEY,
     logSwallowed,
   };

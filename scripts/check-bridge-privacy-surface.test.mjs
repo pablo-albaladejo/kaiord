@@ -87,10 +87,15 @@ describe("bridge privacy surface guard", () => {
     // train2go-zones-sync change.
     const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
     for (const bridge of Object.keys(golden)) {
-      const contentPath = join(REPO, "packages", bridge, "content.js");
-      if (!existsSync(contentPath)) {
-        // Bridges without a site content script (whoop) declare an empty
-        // allowlist in the golden; nothing to cross-count.
+      // Mirror the guard: the allowlist lives in content.js (relay bridges)
+      // or background.js (token bridges like garmin). content.js wins.
+      const dir = join(REPO, "packages", bridge);
+      const contentPath = [
+        join(dir, "content.js"),
+        join(dir, "background.js"),
+      ].find((p) => existsSync(p));
+      if (!contentPath) {
+        // Bridges with neither declare an empty allowlist in the golden.
         assert.deepEqual(golden[bridge].allowed_paths, []);
         continue;
       }

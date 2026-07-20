@@ -29,10 +29,9 @@ When you use the in-app chat assistant, summaries of your locally stored history
 
 The Kaiord Garmin Bridge Chrome extension connects the Kaiord workout editor to Garmin Connect via your browser session. Here is how it handles data:
 
-- **CSRF Token**: The extension captures a CSRF token from Garmin Connect requests and stores it in `chrome.storage.session`. This storage is memory-only, isolated from page scripts, and cleared when you close your browser (Chrome additionally encrypts it when OS-level key material is available). The token is never persisted to disk.
-- **Read-Only Header Observation**: The extension observes the `connect-csrf-token` header via `chrome.webRequest` but does not modify requests. It never reads response bodies for the purpose of collection.
-- **No Credentials**: The extension never reads, stores, or transmits your Garmin Connect password or OAuth tokens. Authentication relies entirely on your existing browser session cookies.
-- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `connect.garmin.com` (to execute API calls) and allowed Kaiord origins (to receive workout data from the editor).
+- **OAuth Token**: The extension mints an OAuth token by reusing your existing Garmin single-sign-on session — it exchanges that session for a short-lived service ticket, then for an OAuth token — and stores the token in `chrome.storage.local` so it can call Garmin's API on your behalf across service-worker restarts. The token is sent only to Garmin (as a Bearer credential) and never leaves your device otherwise.
+- **No Password**: The extension never reads, stores, or transmits your Garmin Connect password, and never sees it. Authentication reuses the session you already established by signing in to Garmin Connect in your browser.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with Garmin (`sso.garmin.com`, `connectapi.garmin.com`, `connect.garmin.com`) and allowed Kaiord origins (to receive workout data from the editor).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
 ## Kaiord Train2Go Bridge Extension
@@ -49,13 +48,15 @@ The Kaiord Train2Go Bridge Chrome extension imports coaching plans from Train2Go
 
 The extensions only communicate with the following domains:
 
-- `https://connect.garmin.com/*` — Garmin Bridge content script (runs on that domain) proxies API requests using your existing session
+- `https://sso.garmin.com/*` — Garmin Bridge exchanges your existing Garmin sign-in session for a short-lived service ticket (no password is entered or seen)
+- `https://connectapi.garmin.com/*` — Garmin Bridge exchanges the ticket for an OAuth token and makes the workout/activity API calls with it
+- `https://connect.garmin.com/*` — where you sign in to Garmin Connect; the Garmin Bridge `open-garmin` action opens this page
 - `https://app.train2go.com/*` — Train2Go Bridge content script (runs on that domain) reads the coaching plan from the page
 - `https://*.kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.
 
 Each extension also injects a minimal **announce-only** content script (`kaiord-announce.js`) into `https://*.kaiord.com/*` so the editor can discover which extension IDs are installed at runtime. This content script only calls `window.postMessage` to publish a fixed announcement object (bridge id, extension id, version, declared capabilities) and re-announces on request. It does **not** read the editor's DOM, cookies, storage, or network traffic, does **not** modify the page, and does **not** enable any inbound data path from kaiord.com into the extension beyond what `externally_connectable` already allows.
 
-Each extension declares `host_permissions` limited to the single host listed above — no wildcard or `<all_urls>` access.
+Each extension declares `host_permissions` limited to the hosts listed above — no wildcard or `<all_urls>` access.
 
 No other domains are contacted in production builds. During local development, both extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server), and the announce-only content script is also injected on `http://localhost/*` so locally-served editor builds can discover the extensions. These development-only matches are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
 
