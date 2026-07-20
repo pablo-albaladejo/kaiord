@@ -22,6 +22,7 @@ export const SCOPE_ENUM = [
   "fit",
   "tcx",
   "zwo",
+  "tanita",
   "garmin",
   "garmin-connect",
   "ai",
