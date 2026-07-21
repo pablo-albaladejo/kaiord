@@ -36,7 +36,12 @@ export const stressBffToEpisode = (
 
   const averageLevel = clampRoundLevel(avgFraction);
   const points = extractStressPoints(bff);
-  const peakFraction = points.length ? Math.max(...points) : avgFraction;
+  // reduce (not Math.max(...points)) so a pathologically large point array
+  // can't blow the argument-count limit — this converter must never throw on
+  // a garbled BFF, and a full day is already ~816 points.
+  const peakFraction = points.length
+    ? points.reduce((max, v) => (v > max ? v : max), avgFraction)
+    : avgFraction;
   const peakLevel = Math.max(clampRoundLevel(peakFraction), averageLevel);
 
   return {

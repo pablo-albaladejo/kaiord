@@ -57,6 +57,26 @@ describe("stressBffToEpisode", () => {
     expect(episode?.peakLevel).toBe(CLAMPED_LEVEL);
   });
 
+  it("should clamp peakLevel to 100 when a point fraction exceeds 1.0", () => {
+    // Arrange
+    // A malformed/out-of-range point must not produce a peakLevel above the
+    // KRD 0–100 ceiling.
+    const bff: WhoopStressResponse = {
+      gauge: { gauge_fill_percentage: 0.5 },
+      stress_graph: {
+        graph: {
+          plots: [{ plot: { segments: [{ points: [{ position_y: 1.5 }] }] } }],
+        },
+      },
+    };
+
+    // Act
+    const episode = stressBffToEpisode(bff, { userId: USER_ID, date: DATE });
+
+    // Assert
+    expect(episode?.peakLevel).toBe(100);
+  });
+
   it("should return null when the gauge is absent", () => {
     // Arrange
     const bff: WhoopStressResponse = { stress_graph: null };
