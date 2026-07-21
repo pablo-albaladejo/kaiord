@@ -16,7 +16,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const REPO = dirname(dirname(fileURLToPath(import.meta.url)));
 
-const ALL_BRIDGES = ["garmin-bridge", "train2go-bridge", "whoop-bridge"];
+const ALL_BRIDGES = [
+  "garmin-bridge",
+  "train2go-bridge",
+  "whoop-bridge",
+  "tanita-bridge",
+];
 const SNAPSHOT_BRIDGES = ["garmin-bridge", "train2go-bridge"];
 
 export const BRIDGE_CORE_MASTERS = [
@@ -24,6 +29,14 @@ export const BRIDGE_CORE_MASTERS = [
     master: "bridge-envelope.js",
     dest: "bridge-envelope.js",
     bridges: ALL_BRIDGES,
+  },
+  // Identity-free cookie transport for SW-direct bridges. Single consumer
+  // for now; a later PR appends train2go-bridge once it moves off its
+  // content-script relay.
+  {
+    master: "session-fetch.js",
+    dest: "session-fetch.js",
+    bridges: ["tanita-bridge"],
   },
   {
     master: "kaiord-announce.js",

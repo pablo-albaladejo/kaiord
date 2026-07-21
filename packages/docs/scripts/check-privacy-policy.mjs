@@ -37,6 +37,12 @@ const GARMIN_MANIFEST = join(
   "garmin-bridge",
   "manifest.json"
 );
+const TANITA_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "tanita-bridge",
+  "manifest.json"
+);
 
 // Hosts the policy claims each production extension may contact.
 const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
@@ -45,6 +51,7 @@ const GARMIN_ALLOWED_HOSTS = new Set([
   "https://connectapi.garmin.com/*",
   "https://sso.garmin.com/*",
 ]);
+const TANITA_ALLOWED_HOSTS = new Set(["https://mytanita.eu/*"]);
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
 // dev-server match patterns the policy discloses explicitly.
@@ -94,12 +101,28 @@ const REQUIRED_RULES = [
     re: /Kaiord Train2Go Bridge/i,
   },
   {
+    label: "Tanita Bridge extension covered",
+    re: /Kaiord Tanita Bridge/i,
+  },
+  {
     label: "Garmin host disclosed",
     re: /connect\.garmin\.com/,
   },
   {
     label: "Train2Go host disclosed",
     re: /app\.train2go\.com/,
+  },
+  {
+    label: "Tanita host disclosed",
+    re: /mytanita\.eu/,
+  },
+  {
+    label: "Tanita body-composition read scope disclosed (read:body)",
+    re: /body[- ]composition/i,
+  },
+  {
+    label: "Tanita no-password cookie-session nature disclosed",
+    re: /no password/i,
   },
   {
     label: "Kaiord origin disclosed",
@@ -279,6 +302,13 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       GARMIN_MANIFEST,
       "garmin-bridge",
       GARMIN_ALLOWED_HOSTS
+    )
+  );
+  all.push(
+    ...checkManifestPermissions(
+      TANITA_MANIFEST,
+      "tanita-bridge",
+      TANITA_ALLOWED_HOSTS
     )
   );
   if (existsSync(VITEPRESS_CONFIG)) {

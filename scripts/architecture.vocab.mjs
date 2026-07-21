@@ -101,6 +101,7 @@ export const PACKAGE_DEPS = {
   "garmin-bridge": ["@kaiord/core"],
   "train2go-bridge": ["@kaiord/core"],
   "whoop-bridge": ["@kaiord/core"],
+  "tanita-bridge": ["@kaiord/core"],
   // Static-asset package — SVG icon master + popup CSS master shared
   // across both bridges. Private, never published, zero deps.
   _shared: [],

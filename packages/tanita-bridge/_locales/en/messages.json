@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Kaiord Tanita Bridge",
+    "description": "Extension name shown in the Chrome Web Store and toolbar."
+  },
+  "extDescription": {
+    "message": "Reads your MyTANITA body-composition CSV export through your own logged-in session — no password, no API key — and hands it to the Kaiord editor.",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Checking…",
+    "description": "Status text while the popup probes the session."
+  },
+  "checkingAria": {
+    "message": "Checking",
+    "description": "Accessible label for the checking status pill."
+  },
+  "connectedToTanita": {
+    "message": "Connected to MyTANITA",
+    "description": "Status text when the MyTANITA session can reach the export."
+  },
+  "connectedHint": {
+    "message": "Reading your body-composition export through your session.",
+    "description": "Hint shown below the status when connected."
+  },
+  "noSession": {
+    "message": "No MyTANITA session",
+    "description": "Status text when the MyTANITA session cannot reach the export."
+  },
+  "noSessionHint": {
+    "message": "Open MyTANITA and sign in, then reopen this popup.",
+    "description": "Hint telling the user how to establish a session."
+  },
+  "openTanita": {
+    "message": "Open MyTANITA",
+    "description": "Button that opens mytanita.eu in a new tab."
+  },
+  "openTanitaAria": {
+    "message": "Open MyTANITA",
+    "description": "Accessible label for the Open MyTANITA button."
+  }
+}
