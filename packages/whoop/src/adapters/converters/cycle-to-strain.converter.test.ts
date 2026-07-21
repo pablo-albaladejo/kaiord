@@ -11,7 +11,9 @@ import { cycleToStrain } from "./cycle-to-strain.converter";
 const [RECORD] = whoopCyclesResponseSchema.parse(CYCLES_DETAILS_WRAPPED);
 
 const EXPECTED_STRAIN_SCORE = 5.36;
-const EXPECTED_ENERGY_KILOJOULES = 8123.4;
+const EXPECTED_ENERGY_KILOJOULES = 8597.02;
+const EXPECTED_DAY_AVERAGE_HEART_RATE = 60;
+const EXPECTED_DAY_MAX_HEART_RATE = 122;
 const EXPECTED_DATE = "2026-07-10";
 
 describe("cycleToStrain", () => {
@@ -44,11 +46,33 @@ describe("cycleToStrain", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should not set day-level heart-rate fields", () => {
+  it("should set day-level heart-rate fields from day_avg_heart_rate and day_max_heart_rate", () => {
     // Arrange
 
     // Act
     const strain = cycleToStrain(RECORD);
+
+    // Assert
+    expect(strain?.dayAverageHeartRate).toBe(EXPECTED_DAY_AVERAGE_HEART_RATE);
+    expect(strain?.dayMaxHeartRate).toBe(EXPECTED_DAY_MAX_HEART_RATE);
+  });
+
+  it("should omit both day heart-rate fields when day_max_heart_rate is below day_avg_heart_rate", () => {
+    // Arrange
+    // WHOOP computes the two day-HR aggregates independently and they can
+    // occasionally invert; the KRD refine requires dayMax >= dayAverage, so
+    // an inverted pair must be dropped entirely rather than emitted invalid.
+    const record = {
+      ...RECORD,
+      cycle: {
+        ...RECORD.cycle,
+        day_avg_heart_rate: EXPECTED_DAY_MAX_HEART_RATE,
+        day_max_heart_rate: EXPECTED_DAY_AVERAGE_HEART_RATE,
+      },
+    };
+
+    // Act
+    const strain = cycleToStrain(record);
 
     // Assert
     expect(strain?.dayAverageHeartRate).toBeUndefined();
@@ -97,15 +121,15 @@ describe("cycleToStrain", () => {
     expect(strain).toBeNull();
   });
 
-  it("should parse the window and omit energyKilojoules when kilojoule is null", () => {
+  it("should parse the window and omit energyKilojoules when day_kilojoules is null", () => {
     // Arrange
-    // An explicit `null` kilojoule must not fail the whole-window parse nor
-    // emit a KRD-invalid `null` energy value.
+    // An explicit `null` day_kilojoules must not fail the whole-window parse
+    // nor emit a KRD-invalid `null` energy value.
     const rawCycle = CYCLES_DETAILS_RECORDS[0].cycle as Record<string, unknown>;
     const raw = {
       records: [
         {
-          cycle: { ...rawCycle, kilojoule: null },
+          cycle: { ...rawCycle, day_kilojoules: null },
           recovery: CYCLES_DETAILS_RECORDS[0].recovery,
           sleeps: CYCLES_DETAILS_RECORDS[0].sleeps,
         },

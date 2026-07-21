@@ -30,7 +30,7 @@ describe("kaiord-announce.js (whoop-bridge)", () => {
         name: "WHOOP",
         version: "0.0.0",
         protocolVersion: 1,
-        capabilities: ["read:body", "read:sleep"],
+        capabilities: ["read:body", "read:sleep", "read:activities"],
       });
     });
 

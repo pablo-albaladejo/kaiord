@@ -23,6 +23,10 @@ export const activityRecordSchema = z.object({
   externalId: z.string().min(1),
   durationSeconds: z.number().nonnegative().optional(),
   distanceMeters: z.number().nonnegative().optional(),
+  /** bpm; carried by sources (e.g. WHOOP) that report a workout average. */
+  avgHeartRate: z.number().int().min(0).max(300).optional(),
+  /** kcal; carried by sources (e.g. WHOOP) that report workout energy. */
+  totalCalories: z.number().int().nonnegative().optional(),
   /**
    * Id of the transitional twin WorkoutRecord written for the same event
    * (dual-write). The executed-match union excludes this workout from the
@@ -74,11 +78,13 @@ export type BuildSourceActivityRecordInput = {
   externalId: string;
   durationSeconds?: number;
   distanceMeters?: number;
+  avgHeartRate?: number;
+  totalCalories?: number;
 };
 
 /**
- * Build a summary-only ActivityRecord for a source pull (e.g. Garmin): no
- * recorded KRD and no twin WorkoutRecord (`linkedWorkoutId: null`). The
+ * Build a summary-only ActivityRecord for a source pull (e.g. Garmin, WHOOP):
+ * no recorded KRD and no twin WorkoutRecord (`linkedWorkoutId: null`). The
  * calendar renders it natively from the summary fields.
  */
 export const buildSourceActivityRecord = (
@@ -92,6 +98,8 @@ export const buildSourceActivityRecord = (
   externalId: input.externalId,
   durationSeconds: input.durationSeconds,
   distanceMeters: input.distanceMeters,
+  avgHeartRate: input.avgHeartRate,
+  totalCalories: input.totalCalories,
   linkedWorkoutId: null,
   krd: null,
   createdAt: new Date().toISOString(),
