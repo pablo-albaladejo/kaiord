@@ -1,0 +1,65 @@
+{
+  "name": "@kaiord/tanita",
+  "version": "10.0.0",
+  "description": "MyTANITA export-csv health adapter for the Kaiord health & fitness data framework",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit && eslint . && prettier --check src",
+    "lint:fix": "eslint . --fix && prettier --write src",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@kaiord/core": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "@vitest/coverage-v8": "^4.1.9",
+    "tsup": "^8.5.1",
+    "tsx": "^4.22.5",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
+    "directory": "packages/tanita"
+  },
+  "homepage": "https://www.npmjs.com/package/@kaiord/tanita",
+  "bugs": {
+    "url": "https://github.com/pablo-albaladejo/kaiord/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "kaiord",
+    "tanita",
+    "mytanita",
+    "body-composition",
+    "weight",
+    "health",
+    "fitness"
+  ],
+  "author": "Kaiord Contributors",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

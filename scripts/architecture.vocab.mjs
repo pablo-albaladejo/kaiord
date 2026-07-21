@@ -49,6 +49,7 @@ export const PACKAGE_DEPS = {
   zwo: ["@kaiord/core"],
   garmin: ["@kaiord/core"],
   whoop: ["@kaiord/core"],
+  tanita: ["@kaiord/core"],
   "garmin-connect": ["@kaiord/core", "@kaiord/garmin"],
   ai: ["@kaiord/core"],
   // Framework-agnostic i18n mechanism (translator factory, dictionary types,
