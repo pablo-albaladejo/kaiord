@@ -202,6 +202,8 @@ If you find Kaiord useful, consider supporting its development:
 
 Your support helps maintain and improve Kaiord for the fitness community!
 
+Built by **[Pablo Albaladejo](https://pabloalbaladejo.com)**
+
 ---
 
 ## 📜 License

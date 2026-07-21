@@ -203,7 +203,7 @@ const config = {
 
     footer: {
       message:
-        'Built by <a href="https://www.linkedin.com/in/pabloalbaladejomestre" target="_blank" rel="noopener">Pablo Albaladejo</a>',
+        'Built by <a href="https://pabloalbaladejo.com" target="_blank" rel="noopener">Pablo Albaladejo</a>',
       copyright:
         '<a href="https://github.com/pablo-albaladejo/kaiord/releases" target="_blank" rel="noopener">GitHub Releases</a>',
     },

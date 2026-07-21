@@ -24,6 +24,8 @@ const buildOriginalBody = (): BodyComposition =>
     leanMassKilograms: 33.5,
     boneMassKilograms: 3.1,
     bmi: 23.5,
+    visceralFatRating: 12,
+    basalMetabolicRateKcal: 1500,
   });
 
 const buildOriginalKrd = (body: BodyComposition): KRD => ({
@@ -72,5 +74,7 @@ describe("body composition KRD → FIT → KRD round-trip", () => {
     expect(boneDelta).toBeLessThanOrEqual(WEIGHT_TOLERANCE_KG);
     expect(replayed.bodyWaterPercent).toBe(body.bodyWaterPercent);
     expect(replayed.bmi).toBe(body.bmi);
+    expect(replayed.visceralFatRating).toBe(body.visceralFatRating);
+    expect(replayed.basalMetabolicRateKcal).toBe(body.basalMetabolicRateKcal);
   });
 });

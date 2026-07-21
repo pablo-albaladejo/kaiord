@@ -21,6 +21,7 @@ import {
   installGarminBridgeStub,
 } from "./helpers/garmin-bridge-stub";
 import { getWeekDates, makeWorkout, seedWorkouts } from "./helpers/seed-dexie";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "garmin-push-policy-e2e";
 
@@ -108,11 +109,7 @@ test.describe("GarminPushButton resolver gating (AC-5)", () => {
     const WORKOUT_ID = "garmin-push-editor-workout";
     await installGarminBridgeStub(page);
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await seedProfileBase(page, PROFILE_ID);
     await addExportPolicy(page, PROFILE_ID, GARMIN_BRIDGE_ID);
     await seedWorkouts(page, [
@@ -143,11 +140,7 @@ test.describe("GarminPushButton resolver gating (AC-5)", () => {
     const WORKOUT_ID = "garmin-push-detail-workout";
     await installGarminBridgeStub(page);
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await seedProfileBase(page, PROFILE_ID);
     await addExportPolicy(page, PROFILE_ID, GARMIN_BRIDGE_ID);
     await seedWorkouts(page, [
