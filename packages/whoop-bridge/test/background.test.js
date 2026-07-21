@@ -52,7 +52,7 @@ describe("PROTOCOL_VERSION and BRIDGE_MANIFEST", () => {
       name: "WHOOP",
       version: pkg.version,
       protocolVersion: 1,
-      capabilities: ["read:body", "read:sleep"],
+      capabilities: ["read:body", "read:sleep", "read:activities"],
     });
   });
 });
@@ -287,7 +287,7 @@ describe("handleAction", () => {
       name: "WHOOP",
       version: pkg.version,
       protocolVersion: 1,
-      capabilities: ["read:body", "read:sleep"],
+      capabilities: ["read:body", "read:sleep", "read:activities"],
       connected: false,
     });
   });
