@@ -7,6 +7,7 @@ import { readWhoopStatus } from "../adapters/bridge/whoop-transport";
 import { syncWhoopActivities } from "../application/whoop/sync-whoop-activities.use-case";
 import { syncWhoopCycles } from "../application/whoop/sync-whoop-cycles.use-case";
 import { syncWhoopHeartRate } from "../application/whoop/sync-whoop-heart-rate.use-case";
+import { syncWhoopStress } from "../application/whoop/sync-whoop-stress.use-case";
 import { PersistenceProvider } from "../contexts/persistence-context";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import type { DiscoveredBridge } from "./use-discovered-bridges";
@@ -29,6 +30,9 @@ vi.mock("../application/whoop/sync-whoop-heart-rate.use-case", () => ({
 vi.mock("../application/whoop/sync-whoop-activities.use-case", () => ({
   syncWhoopActivities: vi.fn(),
 }));
+vi.mock("../application/whoop/sync-whoop-stress.use-case", () => ({
+  syncWhoopStress: vi.fn(),
+}));
 vi.mock("./use-discovered-bridges", () => ({
   useDiscoveredBridges: vi.fn(),
 }));
@@ -41,6 +45,7 @@ const mockedReadStatus = vi.mocked(readWhoopStatus);
 const mockedSyncCycles = vi.mocked(syncWhoopCycles);
 const mockedSyncHeartRate = vi.mocked(syncWhoopHeartRate);
 const mockedSyncActivities = vi.mocked(syncWhoopActivities);
+const mockedSyncStress = vi.mocked(syncWhoopStress);
 const mockedUseDiscoveredBridges = vi.mocked(useDiscoveredBridges);
 
 const WHOOP_DISCOVERED: readonly DiscoveredBridge[] = [
@@ -69,7 +74,7 @@ describe("useWhoopSync", () => {
     vi.clearAllMocks();
   });
 
-  it("should fire all three syncs once when the bridge is discovered and a session is captured", async () => {
+  it("should fire all four syncs once when the bridge is discovered and a session is captured", async () => {
     // Arrange
     mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
     mockedGetExtensionId.mockReturnValue("ext-1");
@@ -80,6 +85,7 @@ describe("useWhoopSync", () => {
       ok: false,
       reason: "route-inactive",
     });
+    mockedSyncStress.mockResolvedValue({ ok: false, reason: "no-policy" });
 
     // Act
     renderHook(() => useWhoopSync("p1"), {
@@ -91,6 +97,7 @@ describe("useWhoopSync", () => {
       expect(mockedSyncCycles).toHaveBeenCalledTimes(1);
       expect(mockedSyncHeartRate).toHaveBeenCalledTimes(1);
       expect(mockedSyncActivities).toHaveBeenCalledTimes(1);
+      expect(mockedSyncStress).toHaveBeenCalledTimes(1);
     });
     expect(mockedSyncCycles.mock.calls[0]?.[1]).toMatchObject({
       profileId: "p1",
@@ -101,6 +108,10 @@ describe("useWhoopSync", () => {
       userId: 42,
     });
     expect(mockedSyncActivities.mock.calls[0]?.[1]).toMatchObject({
+      profileId: "p1",
+      userId: 42,
+    });
+    expect(mockedSyncStress.mock.calls[0]?.[1]).toMatchObject({
       profileId: "p1",
       userId: 42,
     });
@@ -172,6 +183,7 @@ describe("useWhoopSync", () => {
     expect(mockedSyncCycles).not.toHaveBeenCalled();
     expect(mockedSyncHeartRate).not.toHaveBeenCalled();
     expect(mockedSyncActivities).not.toHaveBeenCalled();
+    expect(mockedSyncStress).not.toHaveBeenCalled();
   });
 
   it("should stay single-shot per profile across re-renders, then fire again for a new profileId", async () => {
@@ -185,6 +197,7 @@ describe("useWhoopSync", () => {
       ok: false,
       reason: "route-inactive",
     });
+    mockedSyncStress.mockResolvedValue({ ok: false, reason: "no-policy" });
     const { rerender } = renderHook(
       ({ profileId }: { profileId: string | null }) => useWhoopSync(profileId),
       {
@@ -230,5 +243,6 @@ describe("useWhoopSync", () => {
     expect(mockedSyncCycles).not.toHaveBeenCalled();
     expect(mockedSyncHeartRate).not.toHaveBeenCalled();
     expect(mockedSyncActivities).not.toHaveBeenCalled();
+    expect(mockedSyncStress).not.toHaveBeenCalled();
   });
 });
