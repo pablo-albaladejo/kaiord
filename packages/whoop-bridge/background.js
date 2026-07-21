@@ -21,7 +21,7 @@ const BRIDGE_MANIFEST = {
   name: "WHOOP",
   version: "10.0.0",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["read:body", "read:sleep"],
+  capabilities: ["read:body", "read:sleep", "read:activities"],
 };
 
 // ── Shared envelope/dispatch (vendored bridge-core) ──

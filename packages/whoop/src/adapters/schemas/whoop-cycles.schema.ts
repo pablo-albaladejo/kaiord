@@ -1,22 +1,27 @@
 import { z } from "zod";
 
+import { whoopWorkoutSchema } from "./whoop-workout.schema";
+
 /**
  * Schemas for the WHOOP internal `core-details-bff/v0/cycles/details`
- * response. Only the fields the Wave-1 (hrv/sleep) and Wave-2 (strain/vitals)
- * converters read are modelled; unknown fields are tolerated (the objects are
- * not strict). All Wave-2 fields are `.nullish()` (accept both omission AND
- * an explicit `null`) since in-progress cycles may omit strain/vitals data or
- * send `null` for an unrecorded metric — either way they must not fail the
- * whole-window parse and regress Wave-1 hrv/sleep import. Converters treat
- * `null` as absent (`!= null`). The response is either a bare array of records
- * or a `{ records: [...] }` wrapper — both normalize to an array of records.
+ * response. Only the fields the Wave-1 (hrv/sleep), Wave-2 (strain/vitals)
+ * and Wave-3b (workouts) converters read are modelled; unknown fields are
+ * tolerated (the objects are not strict). All Wave-2 fields are `.nullish()`
+ * (accept both omission AND an explicit `null`) since in-progress cycles may
+ * omit strain/vitals data or send `null` for an unrecorded metric — either
+ * way they must not fail the whole-window parse and regress Wave-1 hrv/sleep
+ * import. Converters treat `null` as absent (`!= null`). The response is
+ * either a bare array of records or a `{ records: [...] }` wrapper — both
+ * normalize to an array of records.
  */
 
 export const whoopCycleSchema = z.object({
   id: z.number(),
   days: z.string().nullish(),
   scaled_strain: z.number().nullish(),
-  kilojoule: z.number().nonnegative().nullish(),
+  day_kilojoules: z.number().nonnegative().nullish(),
+  day_avg_heart_rate: z.number().int().min(0).max(300).nullish(),
+  day_max_heart_rate: z.number().int().min(0).max(300).nullish(),
 });
 
 export const whoopCycleRecoverySchema = z.object({
@@ -44,6 +49,7 @@ export const whoopCycleRecordSchema = z.object({
   cycle: whoopCycleSchema,
   recovery: whoopCycleRecoverySchema,
   sleeps: z.array(whoopCycleSleepSchema),
+  workouts: z.array(whoopWorkoutSchema).optional(),
 });
 
 export const whoopCyclesResponseSchema = z
