@@ -5,14 +5,6 @@ import type { FitBodyComposition } from "./fit-body-composition.schema";
 
 const HEALTH_VERSION = "2.0";
 
-const FIT_KG_SCALE = 100;
-
-const fromScaledKg = (value: number | undefined): number | undefined =>
-  value === undefined ? undefined : value / FIT_KG_SCALE;
-
-const toScaledKg = (value: number | undefined): number | undefined =>
-  value === undefined ? undefined : Math.round(value * FIT_KG_SCALE);
-
 const collectMeasurements = (
   fit: FitBodyComposition
 ): Partial<BodyComposition> => {
@@ -20,19 +12,17 @@ const collectMeasurements = (
   if (fit.percentFat !== undefined) out.bodyFatPercent = fit.percentFat;
   if (fit.percentHydration !== undefined)
     out.bodyWaterPercent = fit.percentHydration;
-  const leanMassKilograms = fromScaledKg(fit.muscleMass);
-  if (leanMassKilograms !== undefined)
-    out.leanMassKilograms = leanMassKilograms;
-  const boneMassKilograms = fromScaledKg(fit.boneMass);
-  if (boneMassKilograms !== undefined)
-    out.boneMassKilograms = boneMassKilograms;
+  // boneMass/muscleMass (profile scale 100, kg), visceralFatRating (scale 1)
+  // and basalMet (scale 4, kcal/day) are pass-throughs: the @garmin/fitsdk
+  // Decoder/Encoder auto-applies their profile scale, so the mapper carries
+  // REAL values (like percentFat/bmi) and must NOT scale them itself. A manual
+  // x100 double-scales bone/muscle and overflows the uint16 raw — a real
+  // encode→decode probe decodes 58.2 kg back as 577.12. Verified by an
+  // encode→decode probe against the SDK (weight_scale carries the same field
+  // definitions). See basal-met-sdk-scale.test.ts.
+  if (fit.muscleMass !== undefined) out.leanMassKilograms = fit.muscleMass;
+  if (fit.boneMass !== undefined) out.boneMassKilograms = fit.boneMass;
   if (fit.bmi !== undefined) out.bmi = fit.bmi;
-  // visceralFatRating (profile scale 1) and basalMet (profile scale 4,
-  // kcal/day) are pass-throughs: the @garmin/fitsdk Decoder/Encoder
-  // auto-applies their profile scale, so the mapper carries REAL values
-  // (like percentFat/bmi) and must NOT scale them itself. Verified by an
-  // encode→decode probe against the SDK (weight_scale carries the same
-  // basalMet field definition). See basal-met-sdk-scale.test.ts.
   if (fit.visceralFatRating !== undefined)
     out.visceralFatRating = fit.visceralFatRating;
   if (fit.basalMet !== undefined) out.basalMetabolicRateKcal = fit.basalMet;
@@ -42,10 +32,11 @@ const collectMeasurements = (
 /**
  * Maps a single FIT `body_composition` message into the KRD payload.
  *
- * Returns `undefined` when none of the measurement fields are
- * present (the KRD schema requires at-least-one). Garmin scales bone
- * and muscle mass by 100 (uint16 raw 1234 = 12.34 kg); the SDK does
- * not auto-unscale these custom fields so the mapper divides.
+ * Returns `undefined` when none of the measurement fields are present
+ * (the KRD schema requires at-least-one). Bone and muscle mass are
+ * carried as REAL kilograms: the @garmin/fitsdk auto-applies the FIT
+ * profile scale (100) on both encode and decode, so the mapper never
+ * scales them itself.
  */
 export const mapFitBodyCompositionToKrd = (
   fit: FitBodyComposition
@@ -73,10 +64,10 @@ export const mapKrdBodyCompositionToFit = (
     percentHydration: body.bodyWaterPercent,
   }),
   ...(body.leanMassKilograms !== undefined && {
-    muscleMass: toScaledKg(body.leanMassKilograms),
+    muscleMass: body.leanMassKilograms,
   }),
   ...(body.boneMassKilograms !== undefined && {
-    boneMass: toScaledKg(body.boneMassKilograms),
+    boneMass: body.boneMassKilograms,
   }),
   ...(body.bmi !== undefined && { bmi: body.bmi }),
   ...(body.visceralFatRating !== undefined && {

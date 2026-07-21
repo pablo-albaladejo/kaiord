@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
 import { convertKrdToFitHealthWeightMessages } from "./krd-health-weight-to-fit.converter";
 
-const FIT_RAW_WEIGHT = 7580;
 const KRD_WEIGHT_KG = 75.8;
 
 const buildWeightKrd = (): KRD => ({
@@ -25,7 +24,7 @@ const buildWeightKrd = (): KRD => ({
 });
 
 describe("convertKrdToFitHealthWeightMessages", () => {
-  it("should emit file_id followed by a single weight_scale message with scaled value", () => {
+  it("should emit file_id followed by a single weight_scale message with the real kilogram value", () => {
     // Arrange
     const krd = buildWeightKrd();
     const logger = createMockLogger();
@@ -37,7 +36,7 @@ describe("convertKrdToFitHealthWeightMessages", () => {
     expect(messages).toHaveLength(2);
     expect(messages[0].mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
     expect(messages[1].mesgNum).toBe(FIT_MESSAGE_NUMBERS.WEIGHT_SCALE);
-    expect(messages[1].weight).toBe(FIT_RAW_WEIGHT);
+    expect(messages[1].weight).toBe(KRD_WEIGHT_KG);
   });
 
   it("should emit no messages when extensions.health.weight is absent", () => {

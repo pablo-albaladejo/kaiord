@@ -8,7 +8,6 @@ import {
 const MEASURED_AT = "2026-05-22T07:15:00.000Z";
 const BODY_FAT_PERCENT = 18.4;
 const MUSCLE_MASS_KG = 58.2;
-const MUSCLE_MASS_RAW = 5820;
 const BONE_MASS_KG = 3.1;
 const VISCERAL_FAT_RATING = 12;
 // basalMet has FIT profile scale 4 (kcal/day), but the @garmin/fitsdk
@@ -39,11 +38,12 @@ describe("mapFitBodyCompositionToKrd", () => {
     });
   });
 
-  it("should divide raw scaled muscle mass and bone mass by 100 to yield kilograms", () => {
+  it("should map muscle mass and bone mass as real kilograms without scaling", () => {
     // Arrange
     const fit = {
       timestamp: new Date(MEASURED_AT),
-      muscleMass: MUSCLE_MASS_RAW,
+      muscleMass: MUSCLE_MASS_KG,
+      boneMass: BONE_MASS_KG,
     };
 
     // Act
@@ -51,6 +51,7 @@ describe("mapFitBodyCompositionToKrd", () => {
 
     // Assert
     expect(krd?.leanMassKilograms).toBe(MUSCLE_MASS_KG);
+    expect(krd?.boneMassKilograms).toBe(BONE_MASS_KG);
   });
 
   it("should pass through visceralFatRating and map basalMet to basalMetabolicRateKcal without scaling", () => {
@@ -82,7 +83,7 @@ describe("mapFitBodyCompositionToKrd", () => {
 });
 
 describe("mapKrdBodyCompositionToFit", () => {
-  it("should round-trip bodyFatPercent and scale leanMass back to FIT raw", () => {
+  it("should map bodyFatPercent and lean and bone mass to FIT as real kilograms", () => {
     // Arrange
     const body = {
       kind: "bodyComposition" as const,
@@ -98,7 +99,8 @@ describe("mapKrdBodyCompositionToFit", () => {
 
     // Assert
     expect(fit.percentFat).toBe(BODY_FAT_PERCENT);
-    expect(fit.muscleMass).toBe(MUSCLE_MASS_RAW);
+    expect(fit.muscleMass).toBe(MUSCLE_MASS_KG);
+    expect(fit.boneMass).toBe(BONE_MASS_KG);
     expect((fit.timestamp as Date).toISOString()).toBe(MEASURED_AT);
   });
 
