@@ -40,7 +40,7 @@ in your own cloud snapshot — never on a Kaiord server.
 
 ## Kaiord Garmin Bridge Extension
 
-- **CSRF Token**: stored in \`chrome.storage.session\`.
+- **OAuth Token**: minted from your Garmin session and stored in \`chrome.storage.local\`.
 - Host: https://connect.garmin.com/*
 - Kaiord origin: https://*.kaiord.com/*
 

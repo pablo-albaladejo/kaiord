@@ -6,21 +6,9 @@ This document explains why each Chrome extension permission is required, for Chr
 
 ### `storage`
 
-**Why**: Persist the CSRF token in `chrome.storage.session` across MV3 service worker restarts. Without this, the token captured from Garmin's requests is lost when Chrome terminates the idle service worker (~30s), requiring the user to navigate Garmin Connect again.
+**Why**: Persist the Garmin OAuth token pair (and cached profile snapshot) so the bridge can call Garmin on the user's behalf across MV3 service worker restarts without re-authenticating every time.
 
-**Data stored**: A single CSRF token string in session storage (not persisted to disk, cleared on browser close).
-
-### `tabs`
-
-**Why**: Query for open Garmin Connect tabs to route API requests to the content script, and open new Garmin Connect tabs via the `open-garmin` action.
-
-**Usage**: `chrome.tabs.query({ url: "https://connect.garmin.com/*" })` and `chrome.tabs.create()`.
-
-### `webRequest`
-
-**Why**: Intercept outgoing requests from Garmin Connect pages to capture the `connect-csrf-token` header. This token is required for authenticated API calls. The extension only reads headers (observation), never modifies them.
-
-**Usage**: `chrome.webRequest.onBeforeSendHeaders` with `["requestHeaders"]` on `https://connect.garmin.com/*`.
+**Data stored** (`chrome.storage.local`): the OAuth1 token (long-lived) and OAuth2 access/refresh token minted from the user's own Garmin session, plus the cached profile snapshot pushed by the Kaiord SPA. All data stays on the user's device; nothing is transmitted anywhere except to Garmin's own servers.
 
 ### `scripting`
 
@@ -32,13 +20,21 @@ This document explains why each Chrome extension permission is required, for Chr
 
 ### `https://connect.garmin.com/*`
 
-**Why**: Required for the content script to execute on Garmin Connect pages (same-origin API calls) and for `webRequest` to observe request headers on this domain.
+**Why**: The user signs in to Garmin Connect here; the `open-garmin` action opens this page so the user can establish the session the bridge mints a token from.
+
+### `https://sso.garmin.com/*`
+
+**Why**: Exchange the user's existing Garmin single-sign-on session for a short-lived service ticket (no password is entered or seen by the extension).
+
+### `https://connectapi.garmin.com/*`
+
+**Why**: Exchange the ticket for an OAuth token and make the actual workout/activity API calls with `Authorization: Bearer` — this is Garmin's API host.
 
 ## externally_connectable
 
 ### `http://localhost:5173/*`, `http://localhost:5174/*`
 
-**Why**: Development origins for the Kaiord SPA (Vite dev server). Allows the SPA to communicate with the extension during development.
+**Why**: Development origins for the Kaiord SPA (Vite dev server).
 
 ### `https://*.kaiord.com/*`
 
@@ -46,7 +42,7 @@ This document explains why each Chrome extension permission is required, for Chr
 
 ## Data Handling
 
-- **No credentials stored**: The extension never reads, stores, or transmits user passwords or OAuth tokens.
-- **No data persistence**: Only a CSRF token in session storage (cleared on browser close).
-- **No external communication**: The extension only communicates with `connect.garmin.com` (via content script) and allowed SPA origins (via `externally_connectable`).
-- **No analytics or tracking**: No telemetry of any kind.
+- **No passwords**: The extension never reads, stores, or transmits the user's Garmin password. It reuses the browser's existing signed-in session to mint a token.
+- **Tokens stay local**: OAuth tokens live in `chrome.storage.local` on the user's device and are sent only to Garmin (`connectapi.garmin.com`) as a Bearer credential.
+- **No external communication**: The extension talks only to Garmin hosts and the allowed Kaiord SPA origins (via `externally_connectable`). No third-party servers.
+- **No analytics or tracking**: No telemetry of any kind leaves the device.
