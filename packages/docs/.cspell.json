@@ -66,7 +66,9 @@
     "openspec",
     "CCPA",
     "Strava",
-    "untargeted"
+    "untargeted",
+    "tanita",
+    "mytanita"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
 }

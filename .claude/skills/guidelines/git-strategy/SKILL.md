@@ -43,6 +43,7 @@ core
 fit
 tcx
 zwo
+tanita
 garmin
 garmin-connect
 ai

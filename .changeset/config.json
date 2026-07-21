@@ -16,7 +16,8 @@
       "@kaiord/garmin-bridge",
       "@kaiord/train2go-bridge",
       "@kaiord/whoop",
-      "@kaiord/whoop-bridge"
+      "@kaiord/whoop-bridge",
+      "@kaiord/tanita"
     ]
   ],
   "access": "public",
