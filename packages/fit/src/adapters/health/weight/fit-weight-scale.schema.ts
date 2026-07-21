@@ -3,9 +3,10 @@ import { z } from "zod";
 /**
  * FIT-side schema for a single `weight_scale` message (mesgNum 30).
  *
- * Garmin encodes weight as uint16 with scale 100 (raw 7580 = 75.80 kg).
- * The @garmin/fitsdk Decoder leaves the raw value un-scaled for the
- * special `weight` field type — the field-level mapper divides by 100.
+ * Garmin encodes weight as uint16 with profile scale 100, but the
+ * @garmin/fitsdk Decoder auto-applies that scale, so the decoded value
+ * is already REAL kilograms (a real fixture decodes `weight: 75.8`).
+ * The field-level mapper carries it through unscaled.
  */
 export const fitWeightScaleSchema = z.object({
   timestamp: z.union([z.date(), z.string(), z.number()]),
