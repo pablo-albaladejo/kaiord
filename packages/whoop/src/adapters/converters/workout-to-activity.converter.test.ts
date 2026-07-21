@@ -88,6 +88,52 @@ describe("workoutToActivity", () => {
     expect(activity).toBeNull();
   });
 
+  it("should date the activity in the workout's local timezone, not UTC", () => {
+    // Arrange
+    // A 9pm-local workout in a western timezone starts after UTC midnight
+    // (05:00Z next day); applying the -08:00 offset keeps it on the local day.
+    const workout: WhoopWorkout = {
+      ...WORKOUT_FIXTURE,
+      during: "['2026-07-11T05:00:00.000Z','2026-07-11T06:00:00.000Z')",
+      timezone_offset: "-08:00",
+    };
+
+    // Act
+    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
+
+    // Assert
+    expect(activity?.summary.date).toBe("2026-07-10");
+    expect(activity?.summary.start_time).toBe("2026-07-11T05:00:00.000Z");
+  });
+
+  it("should return null when during matches the shape but endpoints are not valid dates", () => {
+    // Arrange
+    const workout: WhoopWorkout = {
+      ...WORKOUT_FIXTURE,
+      during: "['not-a-date','also-not-a-date')",
+    };
+
+    // Act
+    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
+
+    // Assert
+    expect(activity).toBeNull();
+  });
+
+  it("should return null when the during window is inverted (end before start)", () => {
+    // Arrange
+    const workout: WhoopWorkout = {
+      ...WORKOUT_FIXTURE,
+      during: "['2026-07-10T09:00:00.000Z','2026-07-10T08:00:00.000Z')",
+    };
+
+    // Act
+    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
+
+    // Assert
+    expect(activity).toBeNull();
+  });
+
   it("should omit total_calories and avg_heart_rate when kilojoules and average_heart_rate are absent", () => {
     // Arrange
     const workout: WhoopWorkout = {

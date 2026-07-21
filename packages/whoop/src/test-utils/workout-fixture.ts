@@ -13,6 +13,7 @@ export const WORKOUT_SPORT_NAME = "Swimming";
 
 export const WORKOUT_FIXTURE: WhoopWorkout = {
   during: `['${WORKOUT_START_TIME}','${WORKOUT_END_TIME}')`,
+  timezone_offset: "+02:00",
   sport_id: WORKOUT_SPORT_ID,
   activity_id: WORKOUT_ACTIVITY_ID,
   kilojoules: 1250.5,
