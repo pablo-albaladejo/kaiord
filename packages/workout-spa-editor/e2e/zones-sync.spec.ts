@@ -196,19 +196,6 @@ const waitForBridgeAction = (page: Page, action: string): Promise<unknown> =>
   );
 
 test.describe("Train2Go zones-sync — auto-sync flows", () => {
-  // Firefox-only: on a cold first page load the bridge-discovery handshake
-  // (window.postMessage ANNOUNCE ↔ the SPA listener + its +3 s self-heal
-  // DISCOVER) does not resolve, so the auto-sync hook never issues its first
-  // `read-week` — the wait exhausts even the 30 s budget, and a denser stub
-  // re-announce did not help. This is a firefox postMessage-timing quirk,
-  // distinct from the chromium timeout-arg flake fixed here (the timeout used
-  // to ride the wrong `waitForFunction` slot), and needs its own
-  // investigation. Skipped so it does not block CI.
-  test.fixme(
-    ({ browserName }) => browserName === "firefox",
-    "Bridge discovery does not resolve on cold firefox — tracked separately"
-  );
-
   test.beforeEach(async ({ page }) => {
     await installTrain2GoBridgeStub(page);
     await page.goto("/calendar");
