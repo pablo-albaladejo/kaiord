@@ -25,7 +25,12 @@ const GOLDEN_PATH = join(
   REPO_ROOT,
   "scripts/fixtures/bridge-privacy-surface.json"
 );
-const BRIDGES = ["garmin-bridge", "train2go-bridge", "whoop-bridge"];
+const BRIDGES = [
+  "garmin-bridge",
+  "train2go-bridge",
+  "whoop-bridge",
+  "tanita-bridge",
+];
 
 // manifest.prod.json and content.js exist only for bridges that are
 // published / ship a site content script (whoop has neither yet); their

@@ -100,7 +100,7 @@ describe("BRIDGE_CORE_MASTERS table", () => {
       assert.ok(entry.dest, "dest path required");
       assert.ok(entry.bridges.length > 0, `${entry.master} has no bridges`);
       for (const bridge of entry.bridges) {
-        assert.match(bridge, /^(garmin|train2go|whoop)-bridge$/);
+        assert.match(bridge, /^(garmin|train2go|whoop|tanita)-bridge$/);
       }
     }
   });

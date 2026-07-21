@@ -3,7 +3,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ALL_EXTENSIONS = ["garmin-bridge", "train2go-bridge"];
+const ALL_EXTENSIONS = ["garmin-bridge", "train2go-bridge", "tanita-bridge"];
 
 const requested = process.argv[2];
 const extensions = requested ? [requested] : ALL_EXTENSIONS;
