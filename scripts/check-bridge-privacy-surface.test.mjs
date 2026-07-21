@@ -87,14 +87,19 @@ describe("bridge privacy surface guard", () => {
     // train2go-zones-sync change.
     const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
     for (const bridge of Object.keys(golden)) {
+      // Content-script bridges keep ALLOWED in content.js; SW-direct bridges
+      // (tanita) keep it in background.js. Cross-count against whichever the
+      // guard reads.
       const contentPath = join(REPO, "packages", bridge, "content.js");
-      if (!existsSync(contentPath)) {
-        // Bridges without a site content script (whoop) declare an empty
-        // allowlist in the golden; nothing to cross-count.
+      const backgroundPath = join(REPO, "packages", bridge, "background.js");
+      const sourcePath = existsSync(contentPath) ? contentPath : backgroundPath;
+      if (!existsSync(sourcePath)) {
+        // Bridges without any ALLOWED source declare an empty allowlist in
+        // the golden; nothing to cross-count.
         assert.deepEqual(golden[bridge].allowed_paths, []);
         continue;
       }
-      const contentSrc = readFileSync(contentPath, "utf8");
+      const contentSrc = readFileSync(sourcePath, "utf8");
       const start = contentSrc.indexOf("const ALLOWED");
       assert.ok(start >= 0, `${bridge}: content.js has no ALLOWED const`);
       const end = contentSrc.indexOf("];", start);

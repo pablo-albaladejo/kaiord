@@ -184,5 +184,48 @@
       ]
     },
     "allowed_paths": []
+  },
+  "tanita-bridge": {
+    "manifest": {
+      "permissions": [
+        "storage"
+      ],
+      "host_permissions": [
+        "https://mytanita.eu/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://*.kaiord.com/*",
+          "http://localhost/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "manifest_prod": {
+      "permissions": [
+        "storage"
+      ],
+      "host_permissions": [
+        "https://mytanita.eu/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://*.kaiord.com/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "allowed_paths": [
+      {
+        "method": "GET",
+        "pattern": "^\\/en\\/user\\/export-csv$"
+      }
+    ]
   }
 }

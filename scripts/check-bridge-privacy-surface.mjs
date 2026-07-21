@@ -25,7 +25,12 @@ const GOLDEN_PATH = join(
   REPO_ROOT,
   "scripts/fixtures/bridge-privacy-surface.json"
 );
-const BRIDGES = ["garmin-bridge", "train2go-bridge", "whoop-bridge"];
+const BRIDGES = [
+  "garmin-bridge",
+  "train2go-bridge",
+  "whoop-bridge",
+  "tanita-bridge",
+];
 
 // manifest.prod.json and content.js exist only for bridges that are
 // published / ship a site content script (whoop has neither yet); their
@@ -46,7 +51,12 @@ const readManifest = (bridge, file) => {
 };
 
 const extractAllowed = (bridge) => {
-  const path = join(REPO_ROOT, "packages", bridge, "content.js");
+  // Content-script bridges declare their call allowlist in content.js;
+  // SW-direct bridges (no site content script, e.g. tanita-bridge) declare
+  // it in background.js. Prefer content.js, fall back to background.js.
+  const contentPath = join(REPO_ROOT, "packages", bridge, "content.js");
+  const backgroundPath = join(REPO_ROOT, "packages", bridge, "background.js");
+  const path = existsSync(contentPath) ? contentPath : backgroundPath;
   if (!existsSync(path)) return [];
   const src = readFileSync(path, "utf8");
   const start = src.indexOf("const ALLOWED");

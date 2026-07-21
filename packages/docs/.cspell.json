@@ -67,7 +67,8 @@
     "Strava",
     "untargeted",
     "tanita",
-    "mytanita"
+    "mytanita",
+    "TANITASESS"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
 }

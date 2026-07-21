@@ -18,12 +18,15 @@ const IDENTITY_TOKENS = [
   "garmin-bridge",
   "train2go-bridge",
   "whoop-bridge",
+  "tanita-bridge",
   "Garmin Connect",
   "Train2Go",
   "WHOOP",
+  "Tanita",
   "connect.garmin.com",
   "app.train2go.com",
   "api.prod.whoop.com",
+  "mytanita.eu",
   "write:workouts",
   "read:activities",
   "read:training-plan",
@@ -32,7 +35,12 @@ const IDENTITY_TOKENS = [
   "read:sleep",
 ];
 
-const IDENTITY_BRIDGES = ["garmin-bridge", "train2go-bridge", "whoop-bridge"];
+const IDENTITY_BRIDGES = [
+  "garmin-bridge",
+  "train2go-bridge",
+  "whoop-bridge",
+  "tanita-bridge",
+];
 
 const extractField = (src, field, file) => {
   const match = src.match(new RegExp(`${field}:\\s*"([^"]+)"`));
