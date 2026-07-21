@@ -10,5 +10,5 @@
 globalThis.KAIORD_BRIDGE_IDENTITY = {
   id: "whoop-bridge",
   name: "WHOOP",
-  capabilities: ["read:body", "read:sleep"],
+  capabilities: ["read:body", "read:sleep", "read:activities"],
 };
