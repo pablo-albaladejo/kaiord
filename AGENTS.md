@@ -157,6 +157,21 @@ Before any non-trivial change:
 5. Update docs if public API changes.
 6. After merge: `/opsx:archive`; then `pnpm archive:index` to refresh the index.
 
+### llms.txt / GEO surfaces
+
+The site serves `llms.txt` files for AI answer engines per the
+[llms.txt spec](https://llmstxt.org/): `packages/landing/public/llms.txt`
+(served at `https://kaiord.com/llms.txt`) plus the VitePress-generated
+`/docs/llms.txt` and `/docs/llms-full.txt` corpus mirrors. Format rules the
+hand-maintained landing file MUST keep (Lighthouse's "Agent Accessibility"
+audit enforces them):
+
+- A single H1 title followed by a `>` blockquote summary.
+- H2 sections listing **markdown links** — `- [Name](https://url): description`.
+  Bare URLs are not recognized as links by the spec or the audit.
+- New product surfaces (packages, docs sections, the Chrome extension) get a
+  link entry when they ship.
+
 ## Automated nightly maintenance (maintainer machine)
 
 Autonomous **launchd jobs** run on the maintainer's Mac (not CI, not part of the
