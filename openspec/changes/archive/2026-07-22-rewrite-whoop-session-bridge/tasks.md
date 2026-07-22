@@ -112,4 +112,4 @@ sub-schema and converter ships with valid/rejection/refinement unit tests (AAA,
 - [ ] Q.3 End-to-end verification against a live account (manual): load the
       extension unpacked, open `app.whoop.com`, run the wave's WHOOP sync from
       the SPA, and confirm the wave's records land with `sourceBridgeId:
-    "whoop-bridge"`; attach evidence to the PR.
+  "whoop-bridge"`; attach evidence to the PR.

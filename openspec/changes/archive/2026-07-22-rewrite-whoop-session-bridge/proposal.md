@@ -1,3 +1,5 @@
+> Completed: 2026-07-22
+
 # Proposal: Rewrite the WHOOP bridge to session piggyback (internal API)
 
 ## Why
