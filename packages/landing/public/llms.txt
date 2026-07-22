@@ -21,6 +21,8 @@ Key facts:
 - [Landing page (Spanish)](https://kaiord.com/es/): product overview in Spanish
 - [Kaiord Editor](https://kaiord.com/editor/): the web app — training
   calendar, visual workout editor, AI assistant, Garmin & WHOOP sync
+- [Kaiord Garmin Bridge (Chrome extension)](https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe):
+  one-tap sync of Kaiord workouts into Garmin Connect
 
 ## Documentation
 
