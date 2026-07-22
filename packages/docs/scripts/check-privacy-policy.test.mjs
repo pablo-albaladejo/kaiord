@@ -48,6 +48,12 @@ in your own cloud snapshot — never on a Kaiord server.
 
 - Host: https://app.train2go.com/*
 
+## Kaiord Tanita Bridge Extension
+
+- Host: https://mytanita.eu/*
+- Reads your body-composition CSV export using your existing logged-in
+  session — no password is stored or transmitted.
+
 ## Communication Scope
 
 \`externally_connectable\` is a one-way inbound channel.
