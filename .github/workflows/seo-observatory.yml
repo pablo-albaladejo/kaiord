@@ -1,0 +1,92 @@
+# Weekly SEO/GEO measurement for kaiord.com.
+#
+# Collectors write time series to reports/seo/timeseries/*.jsonl and this
+# workflow opens a metrics PR with the refreshed dashboard for the owner to
+# review (reviewing the DASHBOARD.md diff IS the weekly SEO review). Every
+# collector no-ops gracefully when its secret is missing:
+#   GSC_SERVICE_ACCOUNT_JSON   Google Search Console (service account)
+#   BING_WEBMASTER_API_KEY     Bing Webmaster Tools
+#   PERPLEXITY_API_KEY         Perplexity (AI answer-engine visibility)
+# The DDG SERP snapshot needs no secret and always runs. The collectors are
+# stdlib-only Node scripts, so no pnpm install / workspace build is required.
+name: SEO Observatory
+
+on:
+  schedule:
+    # Mondays 07:37 UTC (staggered after sibling repos' observatory runs).
+    - cron: "37 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  observe:
+    name: Collect SEO/GEO metrics
+    runs-on: ubuntu-latest
+    # Network-bound collectors with widely-spaced requests (SERP + AI probe
+    # sleep between calls); 15m bounds a stuck run well under the family
+    # ceiling. Calibration is a human decision per PR.
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+
+      - name: Google Search Console snapshot
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: node scripts/geo/gsc-snapshot.mjs
+
+      - name: Bing Webmaster snapshot
+        env:
+          BING_WEBMASTER_API_KEY: ${{ secrets.BING_WEBMASTER_API_KEY }}
+        run: node scripts/geo/bing-snapshot.mjs
+
+      - name: SERP snapshot (DDG, keyless)
+        run: node scripts/geo/serp-snapshot.mjs
+
+      - name: AI answer-engine visibility probe
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: node scripts/geo/ai-visibility-probe.mjs
+
+      - name: Regenerate dashboard
+        run: node scripts/geo/seo-dashboard.mjs
+
+      - name: Detect changes
+        id: detect
+        run: |
+          if git status --porcelain reports/seo/ | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No metric changes this week."
+          fi
+
+      - name: Open metrics PR
+        if: steps.detect.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="auto/seo-observatory-${{ github.run_id }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add reports/seo/
+          git commit -m "chore(seo): weekly SEO/GEO observatory snapshot"
+          git push origin "$BRANCH"
+          gh label create seo --color 0e8a16 --description "SEO/GEO observatory" 2>/dev/null || true
+          gh label create automated --color ededed --description "Automated PR" 2>/dev/null || true
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore(seo): weekly SEO/GEO observatory snapshot" \
+            --body "Automated weekly snapshot from the SEO/GEO observatory (\`.github/workflows/seo-observatory.yml\`). Review \`reports/seo/DASHBOARD.md\` in this diff for week-over-week movement; raw data lands in \`reports/seo/timeseries/\` and \`reports/seo/snapshots/\`." \
+            --label seo \
+            --label automated

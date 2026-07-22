@@ -1,0 +1,64 @@
+{
+  "site": "https://kaiord.com",
+  "serpQueries": [
+    { "id": "brand", "lang": "en", "q": "kaiord" },
+    { "id": "fit-converter", "lang": "en", "q": "fit file converter" },
+    { "id": "fit-to-tcx", "lang": "en", "q": "convert fit to tcx" },
+    { "id": "fit-to-zwo", "lang": "en", "q": "fit to zwo converter" },
+    {
+      "id": "workout-converter-oss",
+      "lang": "en",
+      "q": "workout file converter open source"
+    },
+    {
+      "id": "garmin-workout-format",
+      "lang": "en",
+      "q": "garmin workout file format"
+    },
+    { "id": "zwo-editor", "lang": "en", "q": "zwo workout editor" },
+    { "id": "ts-fit-parser", "lang": "en", "q": "typescript fit file parser" },
+    { "id": "mcp-fitness", "lang": "en", "q": "mcp server fitness workouts" },
+    {
+      "id": "garmin-sync-extension",
+      "lang": "en",
+      "q": "garmin connect workout sync chrome extension"
+    },
+    { "id": "whoop-garmin-sync", "lang": "en", "q": "whoop garmin sync" },
+    {
+      "id": "training-calendar-local",
+      "lang": "en",
+      "q": "training calendar local first"
+    }
+  ],
+  "aiQuestions": [
+    {
+      "id": "convert-fit",
+      "q": "What tools can convert FIT files to TCX or ZWO?"
+    },
+    { "id": "mcp-workout", "q": "Is there an MCP server for workout files?" },
+    {
+      "id": "ts-fit-lib",
+      "q": "What open-source library parses Garmin FIT files in TypeScript?"
+    },
+    {
+      "id": "garmin-connect-sync",
+      "q": "How can I sync workouts from Garmin Connect to other platforms?"
+    },
+    {
+      "id": "workout-toolkit",
+      "q": "What is the best open-source toolkit for converting and editing workout files?"
+    }
+  ],
+  "competitors": [
+    { "name": "tapiriik", "match": ["tapiriik"] },
+    { "name": "GoldenCheetah", "match": ["goldencheetah", "golden cheetah"] },
+    { "name": "python-fitparse", "match": ["fitparse", "python-fitparse"] },
+    { "name": "fit-file-parser", "match": ["fit-file-parser"] },
+    { "name": "sports-lib", "match": ["sports-lib", "sports-alliance"] },
+    {
+      "name": "Garmin FIT SDK",
+      "match": ["fit sdk", "garmin/fit-javascript-sdk"]
+    },
+    { "name": "RunGap", "match": ["rungap"] }
+  ]
+}

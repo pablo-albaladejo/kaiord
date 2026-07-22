@@ -17,6 +17,14 @@ openspec/changes/archive/README.md
 openspec/specs/README.md
 scripts/fixtures/bridge-privacy-surface.json
 
+# SEO/GEO observatory: script-generated dashboard + append-only time series.
+# The weekly workflow regenerates these without Prettier, so keep the raw
+# `scripts/geo/*.mjs` output canonical and avoid formatting-only churn.
+# (queries.json / directory-status.json are hand-edited and stay formatted.)
+reports/seo/DASHBOARD.md
+reports/seo/timeseries/
+reports/seo/snapshots/
+
 # Tooling state (OMC, agent caches)
 .omc/
 
