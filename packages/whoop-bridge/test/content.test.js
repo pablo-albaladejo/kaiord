@@ -33,7 +33,8 @@ describe("content.js allowlist", () => {
     "/metrics-service/v1/metrics/user/123?name=heart_rate",
     "/activities-service/v1/sports/history?apiVersion=7",
     "/advanced-labs-service/v1/biomarker-tests",
-    "/health-service/v2/stress-bff?id=1",
+    // Real stress-bff shape (live-probed): a date path segment, no query.
+    "/health-service/v2/stress-bff/2026-07-10",
   ])("should allow the read-only path %s", (path) => {
     // Arrange
 
