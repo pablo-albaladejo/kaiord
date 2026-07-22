@@ -30,13 +30,12 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "bridge-envelope.js",
     bridges: ALL_BRIDGES,
   },
-  // Identity-free cookie transport for SW-direct bridges. Single consumer
-  // for now; a later PR appends train2go-bridge once it moves off its
-  // content-script relay.
+  // Identity-free cookie transport for SW-direct bridges. Consumed by every
+  // cookie-session bridge; each supplies its own origin + path allowlist.
   {
     master: "session-fetch.js",
     dest: "session-fetch.js",
-    bridges: ["tanita-bridge"],
+    bridges: ["tanita-bridge", "train2go-bridge"],
   },
   // Identity-free Bearer transport for token-based SW-direct bridges. Single
   // consumer for now; whoop-bridge appends once it moves onto the OAuth

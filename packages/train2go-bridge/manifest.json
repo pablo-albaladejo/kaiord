@@ -4,7 +4,7 @@
   "version": "10.0.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
-  "permissions": ["tabs", "storage", "scripting"],
+  "permissions": ["storage"],
   "host_permissions": ["https://app.train2go.com/*"],
   "icons": {
     "16": "icons/icon16.png",
@@ -22,11 +22,6 @@
     }
   },
   "content_scripts": [
-    {
-      "matches": ["https://app.train2go.com/*"],
-      "js": ["content.js"],
-      "run_at": "document_start"
-    },
     {
       "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
       "js": ["bridge-identity.js", "kaiord-announce.js"],

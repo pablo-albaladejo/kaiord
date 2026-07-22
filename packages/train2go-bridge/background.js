@@ -1,12 +1,19 @@
 /**
  * Kaiord Train2Go Bridge — Background Service Worker
  *
- * Routes messages between SPA ↔ content script on app.train2go.com.
- * Parses Train2Go HTML responses into structured activity data.
+ * SW-direct Train2Go read bridge: the service worker fetches the user's
+ * training-plan endpoints on app.train2go.com directly with
+ * `credentials:"include"`, so the site's HttpOnly session cookie travels
+ * automatically. No content script on app.train2go.com, no `tabs` or
+ * `scripting` permission, and no credentials ever handled by the extension.
+ *
+ * The raw response body is parsed into structured activity data via
+ * parser.js. The session cookie is never read or exposed; a dead session
+ * (redirect / login response) is surfaced to callers as needsReauth.
  */
 
 const PROTOCOL_VERSION = 1;
-const TRAIN2GO_URL_PATTERN = "https://app.train2go.com/*";
+const TRAIN2GO_ORIGIN = "https://app.train2go.com";
 const TRAIN2GO_DASHBOARD = "https://app.train2go.com/user/index";
 
 const BRIDGE_MANIFEST = {
@@ -102,36 +109,79 @@ try {
   );
 }
 
-// ── Tab helpers ──
+// ── Identity-free cookie transport (vendored bridge-core) ──
+let sessionFetch;
+try {
+  importScripts("session-fetch.js");
+  sessionFetch = globalThis;
+} catch (e) {
+  sessionFetch =
+    typeof require !== "undefined" ? require("./session-fetch.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-session-fetch",
+    e
+  );
+}
 
-const findTrain2GoTab = () =>
-  new Promise((resolve) => {
-    chrome.tabs.query({ url: TRAIN2GO_URL_PATTERN }, (tabs) => {
-      resolve(tabs?.[0] ?? null);
-    });
-  });
+// ── Train2Go call surface ──
+//
+// Defense-in-depth path allowlist, enforced in the service worker before any
+// fetch runs (it used to live in the now-deleted content-script relay). Locked
+// against drift by scripts/check-bridge-privacy-surface.mjs, which parses
+// `method: "..."` and `pattern: /.../` off each single physical line — don't
+// let prettier wrap the long regexes.
+const ALLOWED = [
+  { method: "GET", pattern: /^\/api\/v2\/profile\/ping$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
+  { method: "GET", pattern: /^\/api\/v2\/workplan\/tooltip\/activity\/\d+$/ },
+  // Server-rendered HTML page used by the zones-sync feature; data is
+  // extracted by parseDetailsHtml below.
+  { method: "GET", pattern: /^\/user\/details$/ },
+];
 
-// ── Content script messaging ──
+const isAllowed = (method, path) =>
+  sessionFetch.isPathAllowed(ALLOWED, method, path);
 
-const train2goFetch = async (path) => {
-  const tab = await findTrain2GoTab();
-  if (!tab) {
-    throw new Error("No Train2Go tab open. Open app.train2go.com first.");
+// Reads the response body dispatching by Content-Type: text/html pages are
+// returned verbatim (the details page is parsed downstream by
+// parseDetailsHtml); everything else is a JSON API payload.
+const parseBody = (contentType, body) =>
+  /^\s*text\/html\b/i.test(contentType || "") ? body : JSON.parse(body);
+
+// ── SW-direct cookie fetch ──
+//
+// GET a first-party Train2Go endpoint on the user's existing cookie session
+// via the identity-free session-fetch master. Returns the same envelope the
+// callers below already consume: { ok, status, data } on success, or
+// { ok:false, needsReauth?, status?, error } on a dead session / failure.
+const train2goFetch = async (path, method = "GET") => {
+  if (!isAllowed(method, path)) {
+    return { ok: false, error: "Blocked: disallowed path or method" };
   }
-
-  return new Promise((resolve, reject) => {
-    chrome.tabs.sendMessage(
-      tab.id,
-      { action: "train2go-fetch", path, method: "GET" },
-      (res) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(res);
-        }
-      }
-    );
+  const res = await sessionFetch.cookieSessionFetch({
+    url: `${TRAIN2GO_ORIGIN}${path}`,
+    method,
+    fetchImpl: fetch,
   });
+  if (!res.ok) {
+    return {
+      ok: false,
+      ...(res.needsReauth ? { needsReauth: true } : {}),
+      ...(typeof res.status === "number" ? { status: res.status } : {}),
+      error: res.error,
+    };
+  }
+  let data;
+  try {
+    data = parseBody(res.contentType, res.body);
+  } catch {
+    return { ok: false, status: res.status, error: "Malformed response body" };
+  }
+  return { ok: true, status: res.status, data };
 };
 
 // ── Actions ──
@@ -174,6 +224,9 @@ const toBridgeError = (fallback, res) => {
     res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
   const err = new Error(msg);
   if (typeof res?.status === "number") err.status = res.status;
+  // Preserve the session-expiry signal end-to-end: the envelope surfaces
+  // needsReauth so the SPA can prompt a re-login.
+  if (res?.needsReauth) err.needsReauth = true;
   return err;
 };
 
@@ -214,7 +267,7 @@ const readDay = async (date, userId) => {
 const readDetails = async () => {
   const res = await train2goFetch("/user/details");
   if (!res?.ok) throw toBridgeError("Read details failed", res);
-  // The content script returns the raw HTML body for text/html responses.
+  // train2goFetch returns the raw HTML body for text/html responses.
   const html = typeof res.data === "string" ? res.data : "";
   return parser.parseDetailsHtml(html);
 };
@@ -301,63 +354,22 @@ chrome.runtime.onMessageExternal.addListener(handleExternalMessage);
 
 // ── Internal messages (popup) ──
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.action === "train2go-fetch") return; // handled by content script
-  return dispatch(message, sendResponse);
-});
-
-// ── Content-script re-inject after extension reload ──
-//
-// When the extension is reloaded (DevTools, update, install), Chrome
-// terminates content scripts in existing tabs but does NOT re-inject
-// them automatically. Tabs that were already open at app.train2go.com
-// keep stale, dead listeners — chrome.tabs.sendMessage to them fails
-// with "Receiving end does not exist", and the bridge's `train2goFetch`
-// silently returns sessionActive: false. Re-inject programmatically on
-// onInstalled so the user does not have to reload every Train2Go tab
-// after touching the extension.
-//
-// Only patterns covered by `host_permissions` are re-injected.
-// `kaiord-announce.js` runs on `*.kaiord.com` (production) and on
-// `localhost` in dev — those are NOT in host_permissions, so the SPA
-// tab still needs a manual reload after a bridge update. That is the
-// standard MV3 dev experience and out of scope for this fix.
-const reinjectContentScripts = async () => {
-  const manifest = chrome.runtime.getManifest();
-  const hostPermissions = manifest.host_permissions ?? [];
-  for (const script of manifest.content_scripts ?? []) {
-    const matches = script.matches.filter((m) => hostPermissions.includes(m));
-    if (matches.length === 0) continue;
-    const tabs = await chrome.tabs.query({ url: matches });
-    for (const tab of tabs) {
-      try {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id, allFrames: !!script.all_frames },
-          files: script.js,
-        });
-      } catch (e) {
-        // Tab may be in a restricted context or already injected; ignore.
-        void logSwallowed("warn", "reinject-content-script", e);
-      }
-    }
-  }
-};
-
-if (typeof chrome !== "undefined" && chrome.runtime?.onInstalled) {
-  chrome.runtime.onInstalled.addListener(() => {
-    void reinjectContentScripts();
-  });
-}
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) =>
+  dispatch(message, sendResponse)
+);
 
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
+    TRAIN2GO_ORIGIN,
     EXTERNAL_ACTIONS,
+    ALLOWED,
+    isAllowed,
+    parseBody,
     handleAction,
     handleExternalMessage,
-    findTrain2GoTab,
     train2goFetch,
     ping,
     readWeek,
@@ -366,7 +378,6 @@ if (typeof module !== "undefined") {
     openTrain2Go,
     persistSnapshot,
     clearSnapshot,
-    reinjectContentScripts,
     TELEMETRY_KEY,
     logSwallowed,
   };
