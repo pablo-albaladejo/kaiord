@@ -80,7 +80,7 @@ export const MANAGED_DATA_REGISTRY: Record<
   "body-composition": {
     label: "Body Composition",
     schema: bodyCompositionSchema,
-    capabilities: { import: "read:body" },
+    capabilities: { import: "read:body", export: "write:body" },
     hashProjection: bodyCompositionHashProjection,
   },
   stress: {

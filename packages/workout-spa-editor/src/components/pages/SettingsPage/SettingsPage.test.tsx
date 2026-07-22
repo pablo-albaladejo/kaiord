@@ -180,7 +180,9 @@ describe("SettingsPage", () => {
       renderAtPath("/settings/extensions");
 
       // Assert
-      expect(screen.getByText("Garmin Connect")).toBeInTheDocument();
+      // "Garmin Connect" appears twice: the bridge table row and the
+      // Tanita → Garmin sync card's status row.
+      expect(screen.getAllByText("Garmin Connect").length).toBeGreaterThan(0);
       expect(screen.getByText("Train2Go")).toBeInTheDocument();
     });
 

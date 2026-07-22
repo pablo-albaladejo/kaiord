@@ -733,6 +733,9 @@ importers:
       '@kaiord/i18n':
         specifier: workspace:^
         version: link:../i18n
+      '@kaiord/tanita':
+        specifier: workspace:^
+        version: link:../tanita
       '@kaiord/tcx':
         specifier: workspace:^
         version: link:../tcx
