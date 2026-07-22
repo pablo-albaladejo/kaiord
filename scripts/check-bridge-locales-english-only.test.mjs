@@ -41,18 +41,27 @@ function nonEnglishLocales(bridge) {
 // Exported so a unit test (or a future full-tree runner) can reuse the scan.
 export { bridgePackages, nonEnglishLocales };
 
-test("every bridge _locales directory contains only English (en)", () => {
-  const offenders = bridgePackages()
-    .map((bridge) => ({ bridge, extra: nonEnglishLocales(bridge) }))
-    .filter(({ extra }) => extra.length > 0)
-    .map(({ bridge, extra }) => `${bridge}: ${extra.join(", ")}`);
+// Cap how many offending paths we print so a broad regression fails with a
+// readable message instead of dumping every locale directory.
+const MAX_LISTED_OFFENDERS = 3;
 
-  assert.deepEqual(
-    offenders,
-    [],
-    `Bridge extensions are English-only. Remove these non-en _locales:\n  ${offenders.join(
-      "\n  "
-    )}`
+test("every bridge _locales directory contains only English (en)", () => {
+  const offenders = bridgePackages().flatMap((bridge) =>
+    nonEnglishLocales(bridge).map(
+      (locale) => `packages/${bridge}/_locales/${locale}`
+    )
+  );
+
+  const listed = offenders.slice(0, MAX_LISTED_OFFENDERS);
+  const remaining = offenders.length - listed.length;
+  const detail =
+    listed.join("\n  ") +
+    (remaining > 0 ? `\n  ...and ${remaining} more` : "");
+
+  assert.equal(
+    offenders.length,
+    0,
+    `Bridge extensions are English-only. Remove these non-en _locales:\n  ${detail}`
   );
 });
 
