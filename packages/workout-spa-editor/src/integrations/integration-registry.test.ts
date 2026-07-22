@@ -7,15 +7,20 @@ import {
 } from "./integration-registry";
 
 // Real announced capability tokens, mirroring each bridge's manifest
-// (background.js / kaiord-announce.js CAPABILITIES).
-const GARMIN_CAPS = ["write:workouts"];
+// (background.js / kaiord-announce.js CAPABILITIES). `read:activities` is
+// intentionally omitted from GARMIN_CAPS here to keep the F1.3b activity-import
+// assertion meaningful; the authoritative full-manifest parity check lives in
+// integration-registry-capability-parity.test.ts.
+const GARMIN_CAPS = ["write:workouts", "write:body"];
 const WHOOP_CAPS = ["read:body", "read:sleep"];
 const TRAIN2GO_CAPS = ["read:training-plan", "read:training-zones"];
+const TANITA_CAPS = ["read:body"];
 
 const realCapabilities = (bridgeId: string): readonly string[] => {
   if (bridgeId === "garmin-bridge") return GARMIN_CAPS;
   if (bridgeId === "whoop-bridge") return WHOOP_CAPS;
   if (bridgeId === "train2go-bridge") return TRAIN2GO_CAPS;
+  if (bridgeId === "tanita-bridge") return TANITA_CAPS;
   return [];
 };
 
@@ -68,12 +73,13 @@ describe("INTEGRATION_REGISTRY", () => {
 });
 
 describe("KNOWN_BRIDGE_IDS", () => {
-  it("should include every bridge-mechanism integration, including whoop", () => {
+  it("should include every bridge-mechanism integration, including whoop and tanita", () => {
     // Arrange
     const expectedBridgeIds = [
       "garmin-bridge",
       "whoop-bridge",
       "train2go-bridge",
+      "tanita-bridge",
     ];
 
     // Act
@@ -109,6 +115,38 @@ describe("eligibleBridgeIds", () => {
 
     // Assert
     expect(result).toEqual(["garmin-bridge"]);
+  });
+
+  it("should offer garmin-bridge for body-composition export via its write:body capability", () => {
+    // Arrange
+    // body-composition now declares export: "write:body" — only garmin-bridge
+    // announces it, so it is the single eligible export sink (tanita reads only).
+
+    // Act
+    const result = eligibleBridgeIds(
+      "body-composition",
+      "export",
+      realCapabilities
+    );
+
+    // Assert
+    expect(result).toEqual(["garmin-bridge"]);
+  });
+
+  it("should offer both whoop-bridge and tanita-bridge for body-composition import via read:body", () => {
+    // Arrange
+
+    // Act
+    const result = eligibleBridgeIds(
+      "body-composition",
+      "import",
+      realCapabilities
+    );
+
+    // Assert
+    expect(result).toEqual(
+      expect.arrayContaining(["whoop-bridge", "tanita-bridge"])
+    );
   });
 
   it("should return an empty list for a direction the data type has no capability token for", () => {
