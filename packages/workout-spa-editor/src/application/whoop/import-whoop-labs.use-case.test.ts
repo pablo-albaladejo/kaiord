@@ -272,4 +272,63 @@ describe("importWhoopLabs", () => {
       error: "Malformed WHOOP biomarker tests list",
     });
   });
+
+  it("should return a transport error when the dedup read (listReports) rejects", async () => {
+    // Arrange
+    // A persistence read failure must stay inside the typed result, not escape.
+    const persistence: LabPersistence = {
+      labs: {
+        ...createInMemoryLabRepository(new Map(), new Map()),
+        listReports: async () => {
+          throw new Error("db read failed");
+        },
+      },
+      transaction: async (fn) => fn(),
+    };
+    const deps: ImportWhoopLabsDeps = {
+      persistence,
+      fetchLabs: makeFetchLabs(),
+      profileId: PROFILE_ID,
+      newId: () => "id",
+    };
+
+    // Act
+    const result = await importWhoopLabs(deps);
+
+    // Assert
+    expect(result).toEqual({
+      ok: false,
+      reason: "transport-error",
+      error: "db read failed",
+    });
+  });
+
+  it("should skip a test whose save rejects and keep the overall import ok", async () => {
+    // Arrange
+    // A persistence write failure on one test is tallied as skipped and the
+    // batch continues — it must not escape as an unhandled rejection.
+    let seq = 0;
+    const persistence: LabPersistence = {
+      labs: createInMemoryLabRepository(new Map(), new Map()),
+      transaction: async () => {
+        throw new Error("db write failed");
+      },
+    };
+    const deps: ImportWhoopLabsDeps = {
+      persistence,
+      fetchLabs: makeFetchLabs(),
+      profileId: PROFILE_ID,
+      newId: () => `id-${++seq}`,
+    };
+
+    // Act
+    const result = await importWhoopLabs(deps);
+
+    // Assert
+    expect(result).toEqual({
+      ok: true,
+      imported: 0,
+      skipped: TESTS_LIST.length,
+    });
+  });
 });

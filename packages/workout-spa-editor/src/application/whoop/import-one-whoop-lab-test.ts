@@ -63,6 +63,16 @@ export const importOneWhoopLabTest = async (
   if (!submission) return { kind: "skipped" };
 
   stampWhoopSubmissionProvenance(submission, testId);
-  await saveLabReport(deps.persistence, submission.report, submission.values);
+  try {
+    await saveLabReport(deps.persistence, submission.report, submission.values);
+  } catch (err) {
+    // A persistence (transaction) failure must stay inside the typed outcome
+    // — the orchestrator tallies it as skipped and continues; re-import is
+    // idempotent so this test self-heals next run.
+    return {
+      kind: "error",
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
   return { kind: "imported" };
 };

@@ -39,10 +39,15 @@ export const importWhoopLabs = async (
     return transportError("Malformed WHOOP biomarker tests list");
   }
 
-  const existingIds = await existingWhoopExternalIds(
-    deps.persistence,
-    deps.profileId
-  );
+  let existingIds: Set<string>;
+  try {
+    existingIds = await existingWhoopExternalIds(
+      deps.persistence,
+      deps.profileId
+    );
+  } catch (err) {
+    return transportError(err instanceof Error ? err.message : String(err));
+  }
   let imported = 0;
   let skipped = 0;
   for (const test of parsedList.data) {
