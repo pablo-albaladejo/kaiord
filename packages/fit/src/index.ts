@@ -10,6 +10,11 @@ import {
   createGarminFitSdkWriter,
 } from "./adapters/garmin-fitsdk";
 
+export {
+  encodeBodyCompositionFit,
+  encodeFitMessages,
+} from "./adapters/garmin-fitsdk";
+
 export const createFitReader = (logger?: Logger): BinaryReader =>
   createGarminFitSdkReader(logger || createConsoleLogger());
 

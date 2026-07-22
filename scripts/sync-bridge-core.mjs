@@ -38,6 +38,14 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "session-fetch.js",
     bridges: ["tanita-bridge"],
   },
+  // Identity-free Bearer transport for token-based SW-direct bridges. Single
+  // consumer for now; whoop-bridge appends once it moves onto the OAuth
+  // template.
+  {
+    master: "bearer-fetch.js",
+    dest: "bearer-fetch.js",
+    bridges: ["garmin-bridge"],
+  },
   {
     master: "kaiord-announce.js",
     dest: "kaiord-announce.js",
@@ -68,6 +76,11 @@ export const BRIDGE_CORE_MASTERS = [
     master: "test/bridge-envelope.test.js",
     dest: "test/bridge-envelope.test.js",
     bridges: ALL_BRIDGES,
+  },
+  {
+    master: "test/bearer-fetch.test.js",
+    dest: "test/bearer-fetch.test.js",
+    bridges: ["garmin-bridge"],
   },
 ];
 
