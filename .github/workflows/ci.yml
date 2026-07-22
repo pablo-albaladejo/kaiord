@@ -496,9 +496,14 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    # P95 = 69s (worst matrix shard); ceil(P95 × 1.5 / 60) = 2; capped at
-    # test-family ceiling 30.
-    timeout-minutes: 2
+    # Test execution is a few seconds per shard; wall-clock is dominated by
+    # setup (~30s) and, on the 22.18.0 shard only, a best-effort Codecov
+    # upload whose network tail (observed 90s+) previously cancelled the
+    # shard at the old 2min cap. The upload is now bounded (its own
+    # timeout-minutes + continue-on-error) so it can neither hang nor fail
+    # the shard; 4min leaves headroom above setup + test + the bounded
+    # upload. Capped at test-family ceiling 30.
+    timeout-minutes: 4
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
@@ -538,6 +543,10 @@ jobs:
       - name: Upload coverage to Codecov
         # Only upload coverage from the minimum supported Node version to avoid duplicate reports
         if: matrix.node-version == '22.18.0'
+        # Best-effort upload: bound the network tail so a slow/hung Codecov
+        # can neither cancel the shard (timeout) nor fail it (continue-on-error).
+        timeout-minutes: 2
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -660,6 +669,10 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == '22.18.0'
+        # Best-effort upload: bound the network tail so a slow/hung Codecov
+        # can neither cancel the shard (timeout) nor fail it (continue-on-error).
+        timeout-minutes: 2
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -707,6 +720,10 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == '22.18.0'
+        # Best-effort upload: bound the network tail so a slow/hung Codecov
+        # can neither cancel the shard (timeout) nor fail it (continue-on-error).
+        timeout-minutes: 2
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
