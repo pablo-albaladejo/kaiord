@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-07-22",
+  "directories": {
+    "MCP registry listing (registry.modelcontextprotocol.io)": {
+      "present": true,
+      "url": "https://registry.modelcontextprotocol.io"
+    },
+    "mcp.so listing": { "present": false, "url": null },
+    "awesome-mcp-servers list entry": { "present": false, "url": null },
+    "npm @kaiord/* packages discoverable": {
+      "present": false,
+      "url": "https://www.npmjs.com/org/kaiord"
+    },
+    "GitHub repo topics set (fit, tcx, zwo, garmin, mcp, workout)": {
+      "present": false,
+      "url": "https://github.com/pablo-albaladejo/kaiord"
+    },
+    "Chrome Web Store: Garmin bridge extension": {
+      "present": false,
+      "url": null
+    },
+    "Product Hunt launch": { "present": false, "url": null }
+  }
+}
