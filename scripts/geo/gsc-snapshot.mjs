@@ -88,6 +88,16 @@ const api = async (url, body) => {
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+  // A 403 means the credentials are valid but the service account is not yet a
+  // user on the property — a setup state, not a code failure. kaiord has no GSC
+  // property yet, so skip cleanly instead of failing the weekly run.
+  if (response.status === 403) {
+    console.warn(
+      `[gsc] 403 from ${url} — service account ${credentials.client_email} is not authorized on ${property}. ` +
+        "Add it under Search Console → Settings → Users and permissions, then this collector will run. Skipping."
+    );
+    process.exit(0);
+  }
   if (!response.ok)
     throw new Error(`${url} -> ${response.status} ${await response.text()}`);
   return response.json();
