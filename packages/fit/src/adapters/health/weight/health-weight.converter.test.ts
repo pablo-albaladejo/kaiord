@@ -5,17 +5,17 @@ import {
   mapKrdWeightToFit,
 } from "./health-weight.converter";
 
-const FIT_WEIGHT_RAW = 7580;
 const KRD_WEIGHT_KG = 75.8;
+const BODY_FAT_PERCENT = 22.3;
 const FIT_TIMESTAMP_ISO = "2024-12-31T23:00:00.000Z";
 
 describe("mapFitWeightScaleToKrd", () => {
-  it("should divide the raw FIT scaled weight by 100 to yield kilograms", () => {
+  it("should carry the SDK-scaled weight through as kilograms without scaling", () => {
     // Arrange
     const fit = {
       timestamp: new Date(FIT_TIMESTAMP_ISO),
-      weight: FIT_WEIGHT_RAW,
-      percentFat: 22.3,
+      weight: KRD_WEIGHT_KG,
+      percentFat: BODY_FAT_PERCENT,
     };
 
     // Act
@@ -46,7 +46,7 @@ describe("mapFitWeightScaleToKrd", () => {
 });
 
 describe("mapKrdWeightToFit", () => {
-  it("should multiply kilograms by 100 and round to the scaled uint16", () => {
+  it("should carry kilograms through to FIT unscaled for the encoder to scale", () => {
     // Arrange
     const weight = {
       kind: "weight" as const,
@@ -59,7 +59,7 @@ describe("mapKrdWeightToFit", () => {
     const fit = mapKrdWeightToFit(weight);
 
     // Assert
-    expect(fit.weight).toBe(FIT_WEIGHT_RAW);
+    expect(fit.weight).toBe(KRD_WEIGHT_KG);
     expect((fit.timestamp as Date).toISOString()).toBe(FIT_TIMESTAMP_ISO);
   });
 });

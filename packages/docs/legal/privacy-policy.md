@@ -7,9 +7,9 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-06-13
+**Last updated:** 2026-07-21
 
-This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, and the Kaiord Train2Go Bridge Chrome extension.
+This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, and the Kaiord Tanita Bridge Chrome extension.
 
 ## Data Controller
 
@@ -31,7 +31,8 @@ The Kaiord Garmin Bridge Chrome extension connects the Kaiord workout editor to 
 
 - **OAuth Token**: The extension mints an OAuth token by reusing your existing Garmin single-sign-on session — it exchanges that session for a short-lived service ticket, then for an OAuth token — and stores the token in `chrome.storage.local` so it can call Garmin's API on your behalf across service-worker restarts. The token is sent only to Garmin (as a Bearer credential) and never leaves your device otherwise.
 - **No Password**: The extension never reads, stores, or transmits your Garmin Connect password, and never sees it. Authentication reuses the session you already established by signing in to Garmin Connect in your browser.
-- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with Garmin (`sso.garmin.com`, `connectapi.garmin.com`, `connect.garmin.com`) and allowed Kaiord origins (to receive workout data from the editor).
+- **Body-Composition Upload**: When you choose to sync a measurement, the extension uploads a body-composition record (your weight plus derived metrics such as body-fat percentage) to Garmin Connect as a FIT file, using the `write:body` capability. It only ever sends the data you supply from the editor; it never reads your Garmin body-composition history.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with Garmin (`sso.garmin.com`, `connectapi.garmin.com`, `connect.garmin.com`) and allowed Kaiord origins (to exchange workout and body-composition data with the editor).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
 ## Kaiord Train2Go Bridge Extension
@@ -44,6 +45,16 @@ The Kaiord Train2Go Bridge Chrome extension imports coaching plans from Train2Go
 - **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `app.train2go.com` (via its content script) and allowed Kaiord origins (to deliver imported workouts to the editor).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
+## Kaiord Tanita Bridge Extension
+
+The Kaiord Tanita Bridge Chrome extension reads your MyTANITA body-composition CSV export and hands it to the Kaiord workout editor. Here is how it handles data:
+
+- **No Data Persistence**: The extension stores no measurement data locally. Its service worker fetches your own CSV export from `mytanita.eu` on demand and passes the raw text directly to the Kaiord workout editor (running in your browser). Nothing is transmitted to a Kaiord server; nothing is written to `chrome.storage`, cookies, or disk. Only the `read:body` capability is declared — the extension reads your body-composition export and nothing else.
+- **No Credentials, No Password**: The extension never asks for, reads, stores, or transmits your MyTANITA password or any authentication token. It rides your existing logged-in browser session: the request is sent with `credentials:"include"` so your own HttpOnly `TANITASESS` session cookie is attached by the browser. The extension cannot read that cookie's value (it does not declare the `cookies` permission), and it reports session presence to the editor only as a boolean. If the session has expired, the extension surfaces a re-authentication prompt rather than any credential.
+- **No mytanita.eu DOM Access**: The extension injects no content script on `mytanita.eu`. It only performs a single, fixed, read-only `GET` of your CSV export; it does not modify the page, submit forms, or call any other endpoint.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `mytanita.eu` (to fetch your export) and allowed Kaiord origins (to deliver the export to the editor). The raw CSV is parsed in the editor, not by the extension.
+- **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
+
 ## Communication Scope
 
 The extensions only communicate with the following domains:
@@ -52,13 +63,14 @@ The extensions only communicate with the following domains:
 - `https://connectapi.garmin.com/*` — Garmin Bridge exchanges the ticket for an OAuth token and makes the workout/activity API calls with it
 - `https://connect.garmin.com/*` — where you sign in to Garmin Connect; the Garmin Bridge `open-garmin` action opens this page
 - `https://app.train2go.com/*` — Train2Go Bridge content script (runs on that domain) reads the coaching plan from the page
+- `https://mytanita.eu/*` — Tanita Bridge service worker fetches your body-composition CSV export using your existing session cookie
 - `https://*.kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.
 
 Each extension also injects a minimal **announce-only** content script (`kaiord-announce.js`) into `https://*.kaiord.com/*` so the editor can discover which extension IDs are installed at runtime. This content script only calls `window.postMessage` to publish a fixed announcement object (bridge id, extension id, version, declared capabilities) and re-announces on request. It does **not** read the editor's DOM, cookies, storage, or network traffic, does **not** modify the page, and does **not** enable any inbound data path from kaiord.com into the extension beyond what `externally_connectable` already allows.
 
 Each extension declares `host_permissions` limited to the hosts listed above — no wildcard or `<all_urls>` access.
 
-No other domains are contacted in production builds. During local development, both extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server), and the announce-only content script is also injected on `http://localhost/*` so locally-served editor builds can discover the extensions. These development-only matches are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
+No other domains are contacted in production builds. During local development, the extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server), and the announce-only content script is also injected on `http://localhost/*` so locally-served editor builds can discover the extensions. These development-only matches are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
 
 ## Regulatory Compliance
 

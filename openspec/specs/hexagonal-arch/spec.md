@@ -123,6 +123,7 @@ Each package SHALL respect the following dependency rules:
 | `@kaiord/train2go-bridge`                                     | No workspace deps (Chrome extension, communicates via `externally_connectable`)                                              |
 | `@kaiord/whoop`                                               | `@kaiord/core`                                                                                                               |
 | `@kaiord/whoop-bridge`                                        | No workspace deps (Chrome extension, communicates via `externally_connectable`)                                              |
+| `@kaiord/tanita`                                              | `@kaiord/core`                                                                                                               |
 
 #### Scenario: Core declares no workspace dependencies
 

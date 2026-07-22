@@ -43,6 +43,7 @@ core
 fit
 tcx
 zwo
+tanita
 garmin
 garmin-connect
 ai
@@ -52,6 +53,7 @@ i18n
 spa-editor
 garmin-bridge
 train2go-bridge
+tanita-bridge
 whoop
 whoop-bridge
 bridge-core

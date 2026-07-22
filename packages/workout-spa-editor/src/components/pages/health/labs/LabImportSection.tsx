@@ -1,14 +1,17 @@
 /**
- * LabImportSection — entry-tab affordance to extract a lab report from an
- * uploaded PDF/image. Disabled with a hint when no lab-extraction model is
- * configured; shows a cancelable progress state while extracting and hands the
- * resulting draft to the form via `onDraft`.
+ * LabImportSection — entry-tab affordances to bring a lab report in: extract
+ * one from an uploaded PDF/image, or (D6) pull WHOOP biomarker tests
+ * directly from a connected whoop-bridge session. The AI path is disabled
+ * with a hint when no lab-extraction model is configured; the WHOOP button
+ * only renders once the bridge is discovered and its session reports
+ * connected — it is a user-initiated action, never auto-pulled.
  */
 import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { LabDraft } from "./map-extraction-to-draft";
 import { useLabImport } from "./use-lab-import";
+import { useWhoopLabImport } from "./use-whoop-lab-import";
 
 export type LabImportSectionProps = {
   onDraft: (draft: LabDraft) => void;
@@ -19,6 +22,7 @@ const ACCEPT = "application/pdf,image/jpeg,image/png,image/webp";
 export function LabImportSection({ onDraft }: LabImportSectionProps) {
   const { t } = useTranslation("labImport");
   const { canImport, isRunning, run, cancel } = useLabImport(onDraft);
+  const whoop = useWhoopLabImport();
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -62,6 +66,16 @@ export function LabImportSection({ onDraft }: LabImportSectionProps) {
             className="text-sm"
           />
         </label>
+      )}
+      {whoop.canImport && (
+        <button
+          type="button"
+          disabled={whoop.isRunning}
+          onClick={() => void whoop.run()}
+          className="self-start rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-gray-600"
+        >
+          {whoop.isRunning ? t("whoopImporting") : t("whoopButton")}
+        </button>
       )}
     </section>
   );
