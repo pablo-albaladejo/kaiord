@@ -28,6 +28,10 @@ const domainOf = (url) => {
   }
 };
 
+// Exact host or subdomain only — a bare endsWith would also match
+// unrelated hosts like "notkaiord.com".
+const isTargetHost = (host) => host === TARGET || host.endsWith(`.${TARGET}`);
+
 // DDG's HTML endpoint wraps result links as /l/?uddg=<encoded-target-url>.
 const resultUrls = (html) =>
   Array.from(
@@ -64,7 +68,7 @@ for (const { id, q, lang } of serpQueries) {
     console.warn(`[serp] blocked or failed for "${q}" — recording null`);
     results.push({ id, q, position: null, blocked: true, top: [] });
   } else {
-    const index = urls.findIndex((url) => domainOf(url).endsWith(TARGET));
+    const index = urls.findIndex((url) => isTargetHost(domainOf(url)));
     results.push({
       id,
       q,

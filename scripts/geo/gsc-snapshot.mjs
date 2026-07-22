@@ -93,8 +93,9 @@ const api = async (url, body) => {
   // property yet, so skip cleanly instead of failing the weekly run.
   if (response.status === 403) {
     console.warn(
-      `[gsc] 403 from ${url} — service account ${credentials.client_email} is not authorized on ${property}. ` +
-        "Add it under Search Console → Settings → Users and permissions, then this collector will run. Skipping."
+      `[gsc] 403 from ${url} — the service account is not authorized on ${property}. ` +
+        "Add the client_email from the GSC_SERVICE_ACCOUNT_JSON key under " +
+        "Search Console → Settings → Users and permissions, then this collector will run. Skipping."
     );
     process.exit(0);
   }

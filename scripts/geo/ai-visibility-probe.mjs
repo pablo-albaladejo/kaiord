@@ -84,6 +84,17 @@ if (providers.length === 0) {
 
 const { aiQuestions, competitors } = loadQueries();
 
+// Exact host or subdomain only — substring matching would also count
+// citations on unrelated hosts that merely contain "kaiord.com".
+const isKaiordUrl = (value) => {
+  try {
+    const host = new URL(String(value)).hostname.replace(/^www\./, "");
+    return host === "kaiord.com" || host.endsWith(".kaiord.com");
+  } catch {
+    return false;
+  }
+};
+
 for (const provider of providers) {
   const runs = [];
   for (const { id, q } of aiQuestions) {
@@ -97,9 +108,7 @@ for (const provider of providers) {
         id,
         q,
         kaiordMentioned: haystack.includes("kaiord"),
-        kaiordCited: citations.some((url) =>
-          String(url).includes("kaiord.com")
-        ),
+        kaiordCited: citations.some(isKaiordUrl),
         competitorsMentioned,
         answer,
         citations,
