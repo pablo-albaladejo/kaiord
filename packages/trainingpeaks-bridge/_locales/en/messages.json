@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Kaiord TrainingPeaks Bridge",
+    "description": "Extension name shown in the Chrome Web Store and toolbar."
+  },
+  "extDescription": {
+    "message": "Reads your TrainingPeaks body metrics through your own logged-in session — no password, no API key — and hands them to the Kaiord editor.",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Checking…",
+    "description": "Status text while the popup probes the session."
+  },
+  "checkingAria": {
+    "message": "Checking",
+    "description": "Accessible label for the checking status pill."
+  },
+  "connectedToTrainingPeaks": {
+    "message": "Connected to TrainingPeaks",
+    "description": "Status text when the TrainingPeaks session can mint a token."
+  },
+  "connectedHint": {
+    "message": "Reading your body metrics through your session.",
+    "description": "Hint shown below the status when connected."
+  },
+  "noSession": {
+    "message": "No TrainingPeaks session",
+    "description": "Status text when the TrainingPeaks session cannot mint a token."
+  },
+  "noSessionHint": {
+    "message": "Open TrainingPeaks and sign in, then reopen this popup.",
+    "description": "Hint telling the user how to establish a session."
+  },
+  "openTrainingPeaks": {
+    "message": "Open TrainingPeaks",
+    "description": "Button that opens app.trainingpeaks.com in a new tab."
+  },
+  "openTrainingPeaksAria": {
+    "message": "Open TrainingPeaks",
+    "description": "Accessible label for the Open TrainingPeaks button."
+  }
+}

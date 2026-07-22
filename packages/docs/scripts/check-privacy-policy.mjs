@@ -43,6 +43,12 @@ const TANITA_MANIFEST = join(
   "tanita-bridge",
   "manifest.json"
 );
+const TRAININGPEAKS_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "trainingpeaks-bridge",
+  "manifest.json"
+);
 
 // Hosts the policy claims each production extension may contact.
 const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
@@ -52,6 +58,9 @@ const GARMIN_ALLOWED_HOSTS = new Set([
   "https://sso.garmin.com/*",
 ]);
 const TANITA_ALLOWED_HOSTS = new Set(["https://mytanita.eu/*"]);
+const TRAININGPEAKS_ALLOWED_HOSTS = new Set([
+  "https://tpapi.trainingpeaks.com/*",
+]);
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
 // dev-server match patterns the policy discloses explicitly.
@@ -123,6 +132,18 @@ const REQUIRED_RULES = [
   {
     label: "Tanita no-password cookie-session nature disclosed",
     re: /no password/i,
+  },
+  {
+    label: "TrainingPeaks Bridge extension covered",
+    re: /Kaiord TrainingPeaks Bridge/i,
+  },
+  {
+    label: "TrainingPeaks host disclosed",
+    re: /tpapi\.trainingpeaks\.com/,
+  },
+  {
+    label: "TrainingPeaks no-password cookie→token nature disclosed",
+    re: /cookie for a short-lived access token/i,
   },
   {
     label: "Kaiord origin disclosed",
@@ -309,6 +330,13 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       TANITA_MANIFEST,
       "tanita-bridge",
       TANITA_ALLOWED_HOSTS
+    )
+  );
+  all.push(
+    ...checkManifestPermissions(
+      TRAININGPEAKS_MANIFEST,
+      "trainingpeaks-bridge",
+      TRAININGPEAKS_ALLOWED_HOSTS
     )
   );
   if (existsSync(VITEPRESS_CONFIG)) {
