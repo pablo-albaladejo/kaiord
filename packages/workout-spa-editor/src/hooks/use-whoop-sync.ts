@@ -1,15 +1,15 @@
 /**
  * useWhoopSync — live, once-per-mount governed pull of WHOOP cycles (HRV,
- * sleep, strain, vitals), heart-rate series, and executed workouts into
- * their persisted stores.
+ * sleep, strain, vitals), heart-rate series, stress episodes, and executed
+ * workouts into their persisted stores.
  *
  * Mirrors useGarminActivitiesPull: gates on a discovered whoop-bridge with an
  * active captured session (status.connected + userId present), then defers
  * all governance (route-inactive → no fetch) to the pure
- * `syncWhoopCycles`/`syncWhoopHeartRate`/`syncWhoopActivities` use cases.
- * Errors are swallowed so a failed pull never breaks the calendar mount. The
- * `firedRef` guard keeps it single-shot per profile so re-renders never
- * re-fire the network call.
+ * `syncWhoopCycles`/`syncWhoopHeartRate`/`syncWhoopStress`/`syncWhoopActivities`
+ * use cases. Errors are swallowed so a failed pull never breaks the
+ * calendar mount. The `firedRef` guard keeps it single-shot per profile so
+ * re-renders never re-fire the network call.
  */
 import { useEffect, useRef } from "react";
 
@@ -21,6 +21,7 @@ import {
 import { syncWhoopActivities } from "../application/whoop/sync-whoop-activities.use-case";
 import { syncWhoopCycles } from "../application/whoop/sync-whoop-cycles.use-case";
 import { syncWhoopHeartRate } from "../application/whoop/sync-whoop-heart-rate.use-case";
+import { syncWhoopStress } from "../application/whoop/sync-whoop-stress.use-case";
 import { usePersistence } from "../contexts/persistence-context";
 import type { PersistencePort } from "../ports/persistence-port";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
@@ -28,9 +29,14 @@ import { useDiscoveredBridges } from "./use-discovered-bridges";
 const WHOOP_BRIDGE_ID = "whoop-bridge";
 const CYCLES_WINDOW_DAYS = 30;
 const HR_WINDOW_DAYS = 7;
+// stress-bff is ~1.7MB/day (UI-shaped BFF), so the window stays short like HR.
+const STRESS_WINDOW_DAYS = 7;
 const DAY_MS = 86_400_000;
 const SPORTS_HISTORY_PATH =
   "/activities-service/v1/sports/history?countryCode=US";
+
+const isoDaysAgo = (days: number): string =>
+  new Date(Date.now() - days * DAY_MS).toISOString();
 
 const runWhoopSync = async (
   persistence: PersistencePort,
@@ -41,28 +47,21 @@ const runWhoopSync = async (
   if (!status.connected || status.userId == null) return;
 
   const endTime = new Date().toISOString();
-  const startTime = new Date(
-    Date.now() - CYCLES_WINDOW_DAYS * DAY_MS
-  ).toISOString();
-  const hrStartTime = new Date(
-    Date.now() - HR_WINDOW_DAYS * DAY_MS
-  ).toISOString();
+  const startTime = isoDaysAgo(CYCLES_WINDOW_DAYS);
+  const hrStartTime = isoDaysAgo(HR_WINDOW_DAYS);
+  const stressStartTime = isoDaysAgo(STRESS_WINDOW_DAYS);
   const fetch = (path: string) => readWhoopFetch(extensionId, path);
+  const importDeps = {
+    policyRepo: persistence.integrationPolicy,
+    importedRecords: persistence.importedRecords,
+  };
 
   await syncWhoopCycles(
-    {
-      policyRepo: persistence.integrationPolicy,
-      importedRecords: persistence.importedRecords,
-      fetchCycles: fetch,
-    },
+    { ...importDeps, fetchCycles: fetch },
     { profileId, userId: status.userId, startTime, endTime }
   );
   await syncWhoopHeartRate(
-    {
-      policyRepo: persistence.integrationPolicy,
-      importedRecords: persistence.importedRecords,
-      fetchMetrics: fetch,
-    },
+    { ...importDeps, fetchMetrics: fetch },
     { profileId, userId: status.userId, startTime: hrStartTime, endTime }
   );
   await syncWhoopActivities(
@@ -74,6 +73,10 @@ const runWhoopSync = async (
       fetchSports: () => readWhoopFetch(extensionId, SPORTS_HISTORY_PATH),
     },
     { profileId, userId: status.userId, startTime, endTime }
+  );
+  await syncWhoopStress(
+    { ...importDeps, fetchStress: fetch },
+    { profileId, userId: status.userId, startTime: stressStartTime, endTime }
   );
 };
 
