@@ -7,7 +7,7 @@ export default defineConfig({
     coverage: {
       include: [
         "background.js",
-        "content.js",
+        "session-fetch.js",
         "kaiord-announce.js",
         "parser.js",
         "bridge-envelope.js",
