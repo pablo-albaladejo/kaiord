@@ -39,6 +39,12 @@
       content="Open-source, local-first training platform: calendar, an AI assistant that acts on your data, Garmin &amp; WHOOP sync, health and lab analytics — plus a TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
     />
     <meta property="og:image" content="https://kaiord.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Kaiord — Your training cockpit. Every fitness format."
+    />
     <meta property="og:url" content="https://kaiord.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
@@ -55,6 +61,10 @@
       content="Open-source, local-first training platform: calendar, an AI assistant that acts on your data, Garmin &amp; WHOOP sync, health and lab analytics — plus a TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect formats. By Pablo Albaladejo."
     />
     <meta name="twitter:image" content="https://kaiord.com/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="Kaiord — Your training cockpit. Every fitness format."
+    />
 
     <!-- JSON-LD -->
     <script type="application/ld+json">
@@ -63,22 +73,17 @@
         "@graph": [
           {
             "@type": "WebSite",
+            "@id": "https://kaiord.com/#website",
             "name": "Kaiord",
             "url": "https://kaiord.com/",
             "description": "Open-source, local-first training platform and TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
             "inLanguage": ["en", "es"],
-            "author": {
-              "@type": "Person",
-              "name": "Pablo Albaladejo",
-              "sameAs": [
-                "https://www.linkedin.com/in/pabloalbaladejomestre",
-                "https://pabloalbaladejo.com",
-                "https://github.com/pablo-albaladejo"
-              ]
-            }
+            "publisher": { "@id": "https://kaiord.com/#organization" },
+            "author": { "@id": "https://kaiord.com/#pablo" }
           },
           {
             "@type": "WebApplication",
+            "@id": "https://kaiord.com/#editor",
             "name": "Kaiord Editor",
             "description": "Local-first training platform: weekly calendar, an AI assistant that acts on your data, Garmin and WHOOP sync, health and lab analytics — all in your browser.",
             "url": "https://kaiord.com/editor/",
@@ -89,15 +94,8 @@
               "price": "0",
               "priceCurrency": "USD"
             },
-            "author": {
-              "@type": "Person",
-              "name": "Pablo Albaladejo",
-              "sameAs": [
-                "https://www.linkedin.com/in/pabloalbaladejomestre",
-                "https://pabloalbaladejo.com",
-                "https://github.com/pablo-albaladejo"
-              ]
-            }
+            "publisher": { "@id": "https://kaiord.com/#organization" },
+            "author": { "@id": "https://kaiord.com/#pablo" }
           },
           {
             "@type": "FAQPage",
@@ -154,21 +152,57 @@
           },
           {
             "@type": "SoftwareSourceCode",
+            "@id": "https://kaiord.com/#sourcecode",
             "name": "Kaiord",
             "description": "Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
             "url": "https://kaiord.com",
             "codeRepository": "https://github.com/pablo-albaladejo/kaiord",
             "programmingLanguage": "TypeScript",
             "license": "https://opensource.org/licenses/MIT",
-            "author": {
-              "@type": "Person",
-              "name": "Pablo Albaladejo",
-              "sameAs": [
-                "https://www.linkedin.com/in/pabloalbaladejomestre",
-                "https://pabloalbaladejo.com",
-                "https://github.com/pablo-albaladejo"
-              ]
-            }
+            "publisher": { "@id": "https://kaiord.com/#organization" },
+            "author": { "@id": "https://kaiord.com/#pablo" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://kaiord.com/#organization",
+            "name": "Kaiord",
+            "url": "https://kaiord.com",
+            "logo": "https://kaiord.com/apple-touch-icon.png",
+            "description": "Open-source, local-first training platform and TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
+            "founder": { "@id": "https://kaiord.com/#pablo" },
+            "sameAs": [
+              "https://github.com/pablo-albaladejo/kaiord",
+              "https://www.npmjs.com/org/kaiord",
+              "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe"
+            ]
+          },
+          {
+            "@type": "Person",
+            "@id": "https://kaiord.com/#pablo",
+            "name": "Pablo Albaladejo",
+            "url": "https://pabloalbaladejo.com",
+            "sameAs": [
+              "https://www.linkedin.com/in/pabloalbaladejomestre",
+              "https://pabloalbaladejo.com",
+              "https://github.com/pablo-albaladejo"
+            ]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://kaiord.com/#garmin-bridge",
+            "name": "Kaiord Garmin Bridge",
+            "description": "Chrome extension that syncs Kaiord workouts into Garmin Connect through your own logged-in session — no third-party server in the middle.",
+            "applicationCategory": "BrowserApplication",
+            "operatingSystem": "Chrome",
+            "url": "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe",
+            "installUrl": "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "publisher": { "@id": "https://kaiord.com/#organization" },
+            "author": { "@id": "https://kaiord.com/#pablo" }
           }
         ]
       }
@@ -2488,6 +2522,13 @@
               rel="noopener noreferrer"
               class="transition-colors hover:text-[var(--brand-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-blue)]"
               >npm</a
+            >
+            <a
+              href="https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="transition-colors hover:text-[var(--brand-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-blue)]"
+              >Chrome Extension</a
             >
             <span>MIT License</span>
           </div>
