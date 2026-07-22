@@ -76,6 +76,17 @@ describe("MANAGED_DATA_REGISTRY", () => {
     expect(activity.capabilities.import).toBe("read:activities");
   });
 
+  it("should expose body-composition as both a read:body import and a write:body export", () => {
+    // Arrange
+
+    // Act
+    const bodyComposition = MANAGED_DATA_REGISTRY["body-composition"];
+
+    // Assert
+    expect(bodyComposition.capabilities.import).toBe("read:body");
+    expect(bodyComposition.capabilities.export).toBe("write:body");
+  });
+
   it("should use opaque-string capability tokens (no Zod-enum import from SPA)", () => {
     // Arrange
     const definedTokens = Object.values(MANAGED_DATA_REGISTRY)
