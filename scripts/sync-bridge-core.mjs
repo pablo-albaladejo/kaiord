@@ -21,6 +21,7 @@ const ALL_BRIDGES = [
   "train2go-bridge",
   "whoop-bridge",
   "tanita-bridge",
+  "trainingpeaks-bridge",
 ];
 const SNAPSHOT_BRIDGES = ["garmin-bridge", "train2go-bridge"];
 
@@ -31,19 +32,21 @@ export const BRIDGE_CORE_MASTERS = [
     bridges: ALL_BRIDGES,
   },
   // Identity-free cookie transport for SW-direct bridges. Consumed by every
-  // cookie-session bridge; each supplies its own origin + path allowlist.
+  // cookie-session bridge; each supplies its own origin + path allowlist
+  // (tanita-bridge: CSV export; train2go-bridge: workplan reads;
+  // trainingpeaks-bridge: cookie-only token exchange via GET /users/v3/token).
   {
     master: "session-fetch.js",
     dest: "session-fetch.js",
-    bridges: ["tanita-bridge", "train2go-bridge"],
+    bridges: ["tanita-bridge", "train2go-bridge", "trainingpeaks-bridge"],
   },
-  // Identity-free Bearer transport for token-based SW-direct bridges. Single
-  // consumer for now; whoop-bridge appends once it moves onto the OAuth
-  // template.
+  // Identity-free Bearer transport for token-based SW-direct bridges.
+  // garmin-bridge calls connectapi with an OAuth Bearer; trainingpeaks-bridge
+  // calls the metrics API with the Bearer minted from the cookie exchange.
   {
     master: "bearer-fetch.js",
     dest: "bearer-fetch.js",
-    bridges: ["garmin-bridge"],
+    bridges: ["garmin-bridge", "trainingpeaks-bridge"],
   },
   {
     master: "kaiord-announce.js",
@@ -79,7 +82,7 @@ export const BRIDGE_CORE_MASTERS = [
   {
     master: "test/bearer-fetch.test.js",
     dest: "test/bearer-fetch.test.js",
-    bridges: ["garmin-bridge"],
+    bridges: ["garmin-bridge", "trainingpeaks-bridge"],
   },
 ];
 

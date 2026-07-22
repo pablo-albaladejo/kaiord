@@ -18,7 +18,9 @@
       "@kaiord/whoop",
       "@kaiord/whoop-bridge",
       "@kaiord/tanita",
-      "@kaiord/tanita-bridge"
+      "@kaiord/tanita-bridge",
+      "@kaiord/trainingpeaks",
+      "@kaiord/trainingpeaks-bridge"
     ]
   ],
   "access": "public",
