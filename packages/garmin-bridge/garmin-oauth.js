@@ -238,36 +238,60 @@ const ensureToken = async (fetchImpl) => {
   return tokens;
 };
 
-const bearerFetch = async (path, method, body, oauth2, fetchImpl) => {
-  const headers = { Authorization: `Bearer ${oauth2.access_token}` };
-  if (body) headers["Content-Type"] = "application/json";
-  const r = await fetchImpl(`${CONNECTAPI}${path}`, {
-    method: method || "GET",
-    headers,
-    credentials: "omit", // token-only; no ambient cookies
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  });
-  if (r.status === 204) return { ok: true, status: 204, data: null };
-  if (r.ok) return { ok: true, status: r.status, data: await r.json() };
-  const text = await r.text().catch(() => "");
-  return { ok: false, status: r.status, body: text.slice(0, 300) };
+// ── Bearer transport (shared identity-free master) ──
+//
+// The raw Bearer fetch + 401→re-mint retry live in the vendored bridge-core
+// `bearer-fetch.js` master; this module injects only the Garmin base URL and
+// the token lifecycle. In the service worker the master is loaded via
+// importScripts and exposed on `self`; in Node tests it resolves via require.
+let bearerCoreCache;
+const bearerCore = () => {
+  if (bearerCoreCache) return bearerCoreCache;
+  bearerCoreCache =
+    typeof require !== "undefined"
+      ? require("./bearer-fetch.js")
+      : { bearerFetch: self.bearerFetch, bearerRequest: self.bearerRequest };
+  return bearerCoreCache;
 };
 
+const accessTokenAfterEnsure = async (fetchImpl) =>
+  (await ensureToken(fetchImpl)).oauth2.access_token;
+const accessTokenAfterMint = async (fetchImpl) =>
+  (await mintAndSave(fetchImpl)).oauth2.access_token;
+
 /**
- * The bridge's Garmin call surface. Returns the same envelope the old
+ * The bridge's Garmin JSON call surface. Returns the same envelope the old
  * content-script relay did: { ok, status, data } | { ok:false, status, body }.
  * A 401 (token rejected despite not being expired) triggers one re-mint and
- * retry before surfacing the failure.
+ * retry; a still-401 retry surfaces `needsReauth` so the SPA can prompt a
+ * Garmin re-login.
  */
-const connectapiFetch = async (path, method, body, fetchImpl) => {
-  let tokens = await ensureToken(fetchImpl);
-  let res = await bearerFetch(path, method, body, tokens.oauth2, fetchImpl);
-  if (res.status === 401) {
-    tokens = await mintAndSave(fetchImpl);
-    res = await bearerFetch(path, method, body, tokens.oauth2, fetchImpl);
-  }
-  return res;
-};
+const connectapiFetch = (path, method, body, fetchImpl) =>
+  bearerCore().bearerRequest({
+    baseUrl: CONNECTAPI,
+    path,
+    method,
+    body,
+    getToken: accessTokenAfterEnsure,
+    refreshToken: accessTokenAfterMint,
+    fetchImpl,
+  });
+
+/**
+ * Multipart upload surface: POSTs a `FormData` (e.g. a FIT file) through the
+ * SAME Bearer + 401→re-mint lifecycle as `connectapiFetch`. The master leaves
+ * the Content-Type unset so the runtime attaches the multipart boundary.
+ */
+const connectapiUpload = (path, formData, fetchImpl) =>
+  bearerCore().bearerRequest({
+    baseUrl: CONNECTAPI,
+    path,
+    method: "POST",
+    body: formData,
+    getToken: accessTokenAfterEnsure,
+    refreshToken: accessTokenAfterMint,
+    fetchImpl,
+  });
 
 const api = {
   CONSUMER,
@@ -284,6 +308,7 @@ const api = {
   isOAuth2Expired,
   ensureToken,
   connectapiFetch,
+  connectapiUpload,
 };
 
 if (typeof module !== "undefined") {
