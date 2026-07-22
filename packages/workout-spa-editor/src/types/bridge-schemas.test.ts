@@ -244,7 +244,7 @@ describe("core↔SPA capability contract", () => {
     sleep: { import: "read:sleep" },
     hrv: { import: "read:body" },
     "daily-wellness": { import: "read:body" },
-    "body-composition": { import: "read:body" },
+    "body-composition": { import: "read:body", export: "write:body" },
     stress: { import: "read:body" },
     strain: { import: "read:body" },
     vitals: { import: "read:body" },

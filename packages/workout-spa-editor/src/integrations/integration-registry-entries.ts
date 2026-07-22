@@ -32,6 +32,13 @@ export const INTEGRATION_REGISTRY_ENTRIES: readonly IntegrationRegistryEntry[] =
       bridgeId: "train2go-bridge",
     },
     {
+      id: "tanita",
+      name: "Tanita",
+      mark: "Ta",
+      mechanism: "bridge",
+      bridgeId: "tanita-bridge",
+    },
+    {
       id: "manual",
       name: "Manual Entry",
       mark: "M",

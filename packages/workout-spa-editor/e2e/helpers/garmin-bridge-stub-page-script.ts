@@ -38,6 +38,7 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
   const responses: Record<string, () => unknown> = {
     ping: () => wrap({ ...m, gcApi: { ok: true } }),
     push: () => wrap({ workoutId: "stub-garmin-id" }),
+    "push-body-composition": () => wrap({ uploadId: "stub-body-composition" }),
     list: () => wrap([]),
     activities: () =>
       wrap({

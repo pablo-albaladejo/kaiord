@@ -41,6 +41,7 @@
     "@kaiord/fit": "workspace:^",
     "@kaiord/garmin": "workspace:^",
     "@kaiord/i18n": "workspace:^",
+    "@kaiord/tanita": "workspace:^",
     "@kaiord/tcx": "workspace:^",
     "@kaiord/whoop": "workspace:^",
     "@kaiord/zwo": "workspace:^",

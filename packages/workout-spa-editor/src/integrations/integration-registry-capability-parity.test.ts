@@ -54,6 +54,21 @@ describe("integration registry — real bridge manifest parity", () => {
     expect(result).toContain("garmin-bridge");
   });
 
+  it("should make garmin-bridge eligible for body-composition export via its real write:body capability", () => {
+    // Arrange
+
+    // Act
+    const result = eligibleBridgeIds(
+      "body-composition",
+      "export",
+      capabilitiesFor
+    );
+
+    // Assert
+    expect(result).toContain("garmin-bridge");
+    expect(garminCaps).toContain("write:body");
+  });
+
   it("should make whoop-bridge eligible for hrv and sleep import via its real capabilities", () => {
     // Arrange
 

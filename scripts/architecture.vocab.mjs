@@ -79,6 +79,7 @@ export const PACKAGE_DEPS = {
     "@kaiord/fit",
     "@kaiord/garmin",
     "@kaiord/i18n",
+    "@kaiord/tanita",
     "@kaiord/tcx",
     "@kaiord/whoop",
     "@kaiord/zwo",
