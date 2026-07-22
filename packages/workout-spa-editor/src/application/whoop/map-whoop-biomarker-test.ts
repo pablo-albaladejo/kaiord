@@ -22,23 +22,35 @@ export type WhoopLabSubmissionInput = {
   rows: LabValueRowInput[];
 };
 
-const buildHeader = (
+const ISO_DATE_LENGTH = 10;
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * The report's calendar date, or `null` when neither the test nor its summary
+ * carries a resolvable ISO date. `labReportSchema`/`labValueSchema` require a
+ * valid `z.iso.date()`, and there is NO runtime schema validation on the lab
+ * write path, so an empty/invalid date would otherwise persist as a broken
+ * index key — the caller skips the test instead.
+ */
+const resolveDate = (
   test: WhoopBiomarkerTest,
   summary: WhoopBiomarkerSummary
-): LabReportHeaderInput => ({
-  date: (test.test_date ?? summary.test_date ?? "").slice(0, 10),
-  labName: test.upload_source ?? test.display_name ?? "",
-  fasting: "unspecified",
-  drawTime: "",
-  notes: "",
-});
+): string | null => {
+  const date = (test.test_date ?? summary.test_date ?? "").slice(
+    0,
+    ISO_DATE_LENGTH
+  );
+  return ISO_DATE.test(date) ? date : null;
+};
 
 const buildRow = (biomarker: WhoopBiomarker): LabValueRowInput => ({
   parameterKey: resolveWhoopLabParameterKey(
     biomarker.biomarker_name,
     biomarker.biomarker_display_name
   ),
-  valueRaw: String(biomarker.value),
+  // Express "no value" as "" rather than the literal string "null": a nullish
+  // value is a not-really-measured biomarker, and parseOptionalNumber drops it.
+  valueRaw: biomarker.value == null ? "" : String(biomarker.value),
   unitRaw: biomarker.units ?? "",
   refLowRaw: String(biomarker.optimal_range?.lower_endpoint ?? ""),
   refHighRaw: String(biomarker.optimal_range?.upper_endpoint ?? ""),
@@ -48,7 +60,17 @@ const buildRow = (biomarker: WhoopBiomarker): LabValueRowInput => ({
 export const mapWhoopTestToSubmissionInput = (
   test: WhoopBiomarkerTest,
   summary: WhoopBiomarkerSummary
-): WhoopLabSubmissionInput => ({
-  header: buildHeader(test, summary),
-  rows: measuredBiomarkers(summary).map(buildRow),
-});
+): WhoopLabSubmissionInput | null => {
+  const date = resolveDate(test, summary);
+  if (date === null) return null;
+  return {
+    header: {
+      date,
+      labName: test.upload_source ?? test.display_name ?? "",
+      fasting: "unspecified",
+      drawTime: "",
+      notes: "",
+    },
+    rows: measuredBiomarkers(summary).map(buildRow),
+  };
+};

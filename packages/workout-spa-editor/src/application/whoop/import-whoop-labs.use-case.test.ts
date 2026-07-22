@@ -230,8 +230,11 @@ describe("importWhoopLabs", () => {
     });
   });
 
-  it("should return a transport error when a test summary read reports failure", async () => {
+  it("should skip (not abort) a test whose summary read fails and continue the batch", async () => {
     // Arrange
+    // A per-test summary failure must not discard reports already committed nor
+    // report the whole import as failed — the failing tests are tallied as
+    // skipped (re-import is idempotent, so they self-heal next run).
     const fetchLabs = vi.fn(async (path: string): Promise<WhoopFetchResult> => {
       if (path === TESTS_PATH)
         return { ok: true, status: 200, data: TESTS_LIST };
@@ -244,9 +247,9 @@ describe("importWhoopLabs", () => {
 
     // Assert
     expect(result).toEqual({
-      ok: false,
-      reason: "transport-error",
-      error: "Unauthorized",
+      ok: true,
+      imported: 0,
+      skipped: TESTS_LIST.length,
     });
   });
 

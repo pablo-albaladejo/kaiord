@@ -49,7 +49,9 @@ export const importOneWhoopLabTest = async (
     return { kind: "error", error: "Malformed WHOOP biomarker summary" };
   }
 
-  const { header, rows } = mapWhoopTestToSubmissionInput(test, parsed.data);
+  const input = mapWhoopTestToSubmissionInput(test, parsed.data);
+  if (input === null) return { kind: "skipped" };
+  const { header, rows } = input;
   const newId = deps.newId ?? (() => crypto.randomUUID());
   const submission = buildLabReportSubmission(header, rows, {
     profileId: deps.profileId,

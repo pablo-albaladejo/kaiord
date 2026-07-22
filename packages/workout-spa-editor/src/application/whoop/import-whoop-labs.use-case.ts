@@ -47,11 +47,14 @@ export const importWhoopLabs = async (
   let skipped = 0;
   for (const test of parsedList.data) {
     const outcome = await importOneWhoopLabTest(deps, test, existingIds);
-    if (outcome.kind === "error") return transportError(outcome.error);
     if (outcome.kind === "imported") {
       imported += 1;
       existingIds.add(String(test.id));
     } else {
+      // A per-test error (summary fetch/parse) is tallied as skipped and the
+      // batch continues rather than aborting — one bad test must not discard
+      // the reports already committed nor report the whole import as failed.
+      // Re-import is idempotent, so a skipped test self-heals on the next run.
       skipped += 1;
     }
   }
