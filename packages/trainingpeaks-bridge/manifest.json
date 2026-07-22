@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "version": "10.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
+
+  "permissions": ["storage"],
+
+  "host_permissions": ["https://tpapi.trainingpeaks.com/*"],
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
+      "js": ["bridge-identity.js", "kaiord-announce.js"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:5173/*",
+      "http://localhost:5174/*",
+      "https://*.kaiord.com/*"
+    ]
+  }
+}
