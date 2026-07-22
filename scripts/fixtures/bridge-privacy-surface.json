@@ -47,6 +47,10 @@
       {
         "method": "POST",
         "pattern": "^\\/workout-service\\/workout$"
+      },
+      {
+        "method": "POST",
+        "pattern": "^\\/upload-service\\/upload(\\/.*)?$"
       }
     ]
   },

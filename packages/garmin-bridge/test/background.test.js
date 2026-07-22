@@ -3,12 +3,15 @@ import { describe, it, expect, beforeEach } from "vitest";
 const {
   PROTOCOL_VERSION,
   BRIDGE_MANIFEST,
+  EXTERNAL_ACTIONS,
   handleAction,
   isAllowed,
   garminFetch,
   checkSession,
   listActivities,
   fetchActivitiesWithBackoff,
+  pushBodyComposition,
+  toUint8Array,
   logSwallowed,
   TELEMETRY_KEY,
 } = require("../background.js");
@@ -62,7 +65,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts", "read:activities"],
+        capabilities: ["write:workouts", "read:activities", "write:body"],
       });
     });
 
@@ -98,6 +101,7 @@ describe("background.js", () => {
       "read:workouts",
       "write:workouts",
       "read:body",
+      "write:body",
       "read:sleep",
       "read:training-plan",
       "read:training-zones",
@@ -149,6 +153,18 @@ describe("background.js", () => {
       expect(isAllowed("GET", "/userprofile-service/usersettings")).toBe(false);
       expect(isAllowed("DELETE", "/workout-service/workout/123")).toBe(false);
       expect(isAllowed("POST", "/workout-service/workouts")).toBe(false);
+    });
+
+    it("should allow POST to the FIT upload endpoint with and without the /.fit suffix", () => {
+      expect(isAllowed("POST", "/upload-service/upload")).toBe(true);
+      expect(isAllowed("POST", "/upload-service/upload/.fit")).toBe(true);
+    });
+
+    it("should deny upload look-alike paths and non-POST methods on the upload endpoint", () => {
+      expect(isAllowed("GET", "/upload-service/upload/.fit")).toBe(false);
+      expect(isAllowed("POST", "/upload-service/uploads")).toBe(false);
+      expect(isAllowed("POST", "/upload-service/upload-malicious")).toBe(false);
+      expect(isAllowed("POST", "/upload-service/download/.fit")).toBe(false);
     });
   });
 
@@ -295,7 +311,7 @@ describe("background.js", () => {
         name: "Garmin Connect",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["write:workouts", "read:activities"],
+        capabilities: ["write:workouts", "read:activities", "write:body"],
       });
     });
 
@@ -339,7 +355,7 @@ describe("background.js", () => {
           name: "Garmin Connect",
           version: pkg.version,
           protocolVersion: 1,
-          capabilities: ["write:workouts", "read:activities"],
+          capabilities: ["write:workouts", "read:activities", "write:body"],
           authenticated: true,
           gcApi: { ok: true, status: 200, data: [{ workoutId: 1 }] },
         },
@@ -431,6 +447,97 @@ describe("background.js", () => {
         disabled: false,
         throttled: false,
       });
+    });
+  });
+
+  describe("push-body-composition", () => {
+    const UPLOAD_URL =
+      "https://connectapi.garmin.com/upload-service/upload/.fit";
+
+    it("should upload a base64 FIT payload as multipart with a Bearer header and no cookies", async () => {
+      // Arrange
+      seedTokens();
+      const importResult = { detailedImportResult: { uploadId: 99 } };
+      fetch.mockResolvedValueOnce(jsonResp(importResult));
+
+      // Act
+      const result = await handleAction({
+        action: "push-body-composition",
+        fit: btoa("FITDATA"),
+      });
+
+      // Assert
+      expect(result).toEqual(importResult);
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(UPLOAD_URL);
+      expect(init.method).toBe("POST");
+      expect(init.headers.Authorization).toBe("Bearer bear");
+      expect(init.credentials).toBe("omit");
+      expect(init.headers["Content-Type"]).toBeUndefined();
+      expect(init.body).toBeInstanceOf(FormData);
+    });
+
+    it("should accept a byte-array FIT payload and post it as multipart", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(jsonResp({ uploaded: true }));
+
+      // Act
+      const result = await handleAction({
+        action: "push-body-composition",
+        fit: [12, 34, 56],
+      });
+
+      // Assert
+      expect(result).toEqual({ uploaded: true });
+      expect(fetch.mock.calls[0][1].body).toBeInstanceOf(FormData);
+    });
+
+    it("should reject push-body-composition without a fit payload", async () => {
+      // Arrange
+      const message = { action: "push-body-composition" };
+
+      // Act
+      const call = handleAction(message);
+
+      // Assert
+      await expect(call).rejects.toThrow("Missing fit payload");
+    });
+
+    it("should surface the upload failure status through the error envelope", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(textResp("Payload Too Large", false, 413));
+
+      // Act
+      const call = handleAction({
+        action: "push-body-composition",
+        fit: btoa("x"),
+      });
+
+      // Assert
+      await expect(call).rejects.toThrow("Body composition upload failed: 413");
+    });
+
+    it("should expose push-body-composition as an allowlisted external action", () => {
+      // Arrange
+
+      // Act
+      const allowed = EXTERNAL_ACTIONS.has("push-body-composition");
+
+      // Assert
+      expect(allowed).toBe(true);
+    });
+
+    it("should reject a FIT payload that is neither a string nor an array", () => {
+      // Arrange
+      const badPayload = { not: "valid" };
+
+      // Act
+      const call = () => toUint8Array(badPayload);
+
+      // Assert
+      expect(call).toThrow("Invalid FIT payload");
     });
   });
 

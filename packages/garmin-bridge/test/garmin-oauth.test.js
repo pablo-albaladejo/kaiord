@@ -335,4 +335,61 @@ describe("garmin-oauth.js", () => {
       expect(res).toEqual({ ok: true, status: 204, data: null });
     });
   });
+
+  describe("connectapiUpload", () => {
+    it("should POST a FormData body with Bearer auth, no cookies, and no JSON content-type", async () => {
+      // Arrange
+      await garminOAuth.saveTokens({
+        oauth1: { oauth_token: "t", oauth_token_secret: "s" },
+        oauth2: { access_token: "bear", expires_at: nowSec() + 3600 },
+      });
+      const importResult = { detailedImportResult: { uploadId: 7 } };
+      fetch.mockResolvedValueOnce(jsonResp(importResult));
+      const form = new FormData();
+      form.append("file", new Blob([new Uint8Array([1, 2, 3])]), "x.fit");
+
+      // Act
+      const res = await garminOAuth.connectapiUpload(
+        "/upload-service/upload/.fit",
+        form,
+        fetch
+      );
+
+      // Assert
+      expect(res.data).toEqual(importResult);
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(
+        "https://connectapi.garmin.com/upload-service/upload/.fit"
+      );
+      expect(init.method).toBe("POST");
+      expect(init.headers.Authorization).toBe("Bearer bear");
+      expect(init.credentials).toBe("omit");
+      expect(init.headers["Content-Type"]).toBeUndefined();
+      expect(init.body).toBeInstanceOf(FormData);
+    });
+
+    it("re-mints and retries once on a 401 before the upload succeeds", async () => {
+      // Arrange
+      await garminOAuth.saveTokens({
+        oauth1: { oauth_token: "t", oauth_token_secret: "s" },
+        oauth2: { access_token: "stale", expires_at: nowSec() + 3600 },
+      });
+      fetch.mockResolvedValueOnce(textResp("unauthorized", false, 401));
+      queueMint("fresh", "OT4/OS4");
+      fetch.mockResolvedValueOnce(jsonResp({ uploadId: 8 }));
+      const form = new FormData();
+      form.append("file", new Blob([new Uint8Array([9])]), "x.fit");
+
+      // Act
+      const res = await garminOAuth.connectapiUpload(
+        "/upload-service/upload/.fit",
+        form,
+        fetch
+      );
+
+      // Assert
+      expect(res).toEqual({ ok: true, status: 200, data: { uploadId: 8 } });
+      expect(fetch.mock.calls[4][1].headers.Authorization).toBe("Bearer fresh");
+    });
+  });
 });

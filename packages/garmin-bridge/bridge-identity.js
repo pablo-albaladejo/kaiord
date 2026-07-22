@@ -10,5 +10,5 @@
 globalThis.KAIORD_BRIDGE_IDENTITY = {
   id: "garmin-bridge",
   name: "Garmin Connect",
-  capabilities: ["write:workouts", "read:activities"],
+  capabilities: ["write:workouts", "read:activities", "write:body"],
 };

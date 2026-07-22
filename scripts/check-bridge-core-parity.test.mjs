@@ -32,6 +32,7 @@ const IDENTITY_TOKENS = [
   "read:training-plan",
   "read:training-zones",
   "read:body",
+  "write:body",
   "read:sleep",
 ];
 

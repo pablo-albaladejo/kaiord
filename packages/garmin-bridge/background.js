@@ -15,7 +15,7 @@ const BRIDGE_MANIFEST = {
   name: "Garmin Connect",
   version: "10.0.0",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["write:workouts", "read:activities"],
+  capabilities: ["write:workouts", "read:activities", "write:body"],
 };
 
 // ── Swallowed-error telemetry ──
@@ -68,6 +68,18 @@ try {
   );
 }
 
+// ── Bearer transport (vendored bridge-core; consumed by garmin-oauth.js) ──
+// Loaded before garmin-oauth so the SW exposes self.bearerFetch/bearerRequest.
+try {
+  importScripts("bearer-fetch.js");
+} catch (e) {
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-bearer-fetch",
+    e
+  );
+}
+
 // ── OAuth token minting + connectapi Bearer calls (bridge-specific) ──
 let garminOAuth;
 try {
@@ -107,6 +119,9 @@ try {
 const ALLOWED = [
   { method: "GET", pattern: /^\/workout-service\/workouts(\?.*)?$/ },
   { method: "POST", pattern: /^\/workout-service\/workout$/ },
+  // Multipart FIT upload (body composition → weight_scale). POST only — the
+  // write surface is a single fixed upload endpoint (optionally `/.fit`).
+  { method: "POST", pattern: /^\/upload-service\/upload(\/.*)?$/ },
   // Read-only pull of the athlete's recent activities (F5). GET only —
   // the executed-activity feed is never mutated through the bridge.
   {
@@ -178,6 +193,47 @@ const listWorkouts = async () => {
 const pushWorkout = async (gcn) => {
   const res = await garminFetch("/workout-service/workout", "POST", gcn);
   if (!res?.ok) throw toBridgeError("Push failed", res);
+  return res.data;
+};
+
+// ── Body-composition upload (multipart FIT) ──
+//
+// The SPA encodes the FIT bytes (a weight_scale/mesgNum-30 message carrying
+// weight + composition) and hands them here as a base64 string or a byte
+// array. The bridge wraps them in a FormData `file` field and POSTs them to
+// Garmin's upload endpoint with Bearer auth (never cookies). The multipart
+// boundary is set by the runtime — no JSON content-type.
+const UPLOAD_PATH = "/upload-service/upload/.fit";
+const UPLOAD_FILE_NAME = "body-composition.fit";
+
+const toUint8Array = (fit) => {
+  if (typeof fit === "string") {
+    const binary = atob(fit);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+  if (Array.isArray(fit)) return Uint8Array.from(fit);
+  throw new Error("Invalid FIT payload: expected base64 string or byte array");
+};
+
+const garminUpload = async (formData) => {
+  if (!isAllowed("POST", UPLOAD_PATH)) {
+    return { ok: false, error: "Blocked: disallowed path or method" };
+  }
+  return garminOAuth.connectapiUpload(UPLOAD_PATH, formData, fetch);
+};
+
+const pushBodyComposition = async (fit) => {
+  const bytes = toUint8Array(fit);
+  const form = new FormData();
+  form.append(
+    "file",
+    new Blob([bytes], { type: "application/octet-stream" }),
+    UPLOAD_FILE_NAME
+  );
+  const res = await garminUpload(form);
+  if (!res?.ok) throw toBridgeError("Body composition upload failed", res);
   return res.data;
 };
 
@@ -307,6 +363,9 @@ const handleAction = async (message) => {
     case "push":
       if (!message.gcn) throw new Error("Missing gcn payload");
       return await pushWorkout(message.gcn);
+    case "push-body-composition":
+      if (!message.fit) throw new Error("Missing fit payload");
+      return await pushBodyComposition(message.fit);
     case "open-garmin":
       await openGarmin();
       return null;
@@ -329,6 +388,7 @@ const EXTERNAL_ACTIONS = new Set([
   "list",
   "activities",
   "push",
+  "push-body-composition",
   "open-garmin",
   "profile-snapshot",
   "profile-snapshot-clear",
@@ -364,12 +424,16 @@ if (typeof module !== "undefined") {
     handleAction,
     handleExternalMessage,
     garminFetch,
+    garminUpload,
     checkSession,
     listWorkouts,
     listActivities,
     fetchActivitiesWithBackoff,
     isActivitiesPullDisabled,
     pushWorkout,
+    pushBodyComposition,
+    toUint8Array,
+    UPLOAD_PATH,
     openGarmin,
     ACTIVITIES_PATH,
     ACTIVITIES_KILL_SWITCH_KEY,

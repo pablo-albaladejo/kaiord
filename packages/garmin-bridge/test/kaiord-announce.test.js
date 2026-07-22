@@ -26,7 +26,7 @@ describe("kaiord-announce.js (garmin-bridge)", () => {
         name: "Garmin Connect",
         version: "0.0.0",
         protocolVersion: 1,
-        capabilities: ["write:workouts", "read:activities"],
+        capabilities: ["write:workouts", "read:activities", "write:body"],
       });
     });
 
