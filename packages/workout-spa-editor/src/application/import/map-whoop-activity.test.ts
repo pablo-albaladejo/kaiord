@@ -43,20 +43,12 @@ describe("mapWhoopActivity", () => {
     });
   });
 
-  it("should return null when the summary has no usable date", () => {
+  it.each([
+    { scenario: "no usable date", override: { date: "" } },
+    { scenario: "no source id", override: { source_id: "" } },
+  ])("should return null when the summary has $scenario", ({ override }) => {
     // Arrange
-    const activity = makeActivity({ date: "" });
-
-    // Act
-    const record = mapWhoopActivity(activity, "profile-1");
-
-    // Assert
-    expect(record).toBeNull();
-  });
-
-  it("should return null when the summary has no source id", () => {
-    // Arrange
-    const activity = makeActivity({ source_id: "" });
+    const activity = makeActivity(override);
 
     // Act
     const record = mapWhoopActivity(activity, "profile-1");
