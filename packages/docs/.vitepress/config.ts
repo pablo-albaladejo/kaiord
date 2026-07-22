@@ -8,6 +8,15 @@ const SITE_URL = "https://kaiord.com";
 const DOCS_BASE = "/docs/";
 const OG_IMAGE = `${SITE_URL}${DOCS_BASE}og-image-docs.png`;
 
+// One canonical URL per page, matching what cleanUrls actually serves
+// (extensionless, directory-style for index pages). Every docs page renders
+// under three reachable variants (clean, .html, and the .md mirror for LLMs);
+// without a canonical, engines pick arbitrarily.
+function pageCanonicalUrl(relativePath: string): string {
+  const path = relativePath.replace(/\.md$/, "").replace(/(^|\/)index$/, "$1");
+  return `${SITE_URL}${DOCS_BASE}${path}`;
+}
+
 const AUTHOR = {
   name: "Pablo Albaladejo",
   linkedin: "https://www.linkedin.com/in/pabloalbaladejomestre",
@@ -18,7 +27,7 @@ function buildJsonLd(
   pageData: { relativePath: string; title: string; description: string },
   isHome: boolean
 ): string[] {
-  const pageUrl = `${SITE_URL}${DOCS_BASE}${pageData.relativePath.replace(/\.md$/, ".html").replace(/index\.html$/, "")}`;
+  const pageUrl = pageCanonicalUrl(pageData.relativePath);
   const segments = pageData.relativePath
     .replace(/\.md$/, "")
     .replace(/\/index$/, "")
@@ -257,6 +266,11 @@ const config = {
   transformHead({ pageData }: TransformContext) {
     const head: HeadConfig[] = [];
     const isHome = pageData.relativePath === "index.md";
+
+    head.push([
+      "link",
+      { rel: "canonical", href: pageCanonicalUrl(pageData.relativePath) },
+    ]);
 
     if (pageData.frontmatter.title) {
       head.push([
