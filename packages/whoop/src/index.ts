@@ -10,7 +10,10 @@
  * schema and the metrics→heart-rate-series converter; Wave 3b adds the
  * workout schema, the sports catalog, and the workout→activity converter;
  * Wave 4a adds the BFF-tolerant `health-service/v2/stress-bff` schema and
- * the stress-bff→stress-episode converter.
+ * the stress-bff→stress-episode converter. Wave 4b adds the
+ * `advanced-labs-service` biomarker-tests/summary schemas and
+ * `measuredBiomarkers`, filtering the per-test catalog down to what WHOOP
+ * actually measured.
  */
 
 // Internal-API response schema & inferred types
@@ -48,6 +51,17 @@ export {
   extractStressPoints,
   type WhoopStressResponse,
 } from "./adapters/schemas/whoop-stress.schema";
+export {
+  whoopBiomarkerTestSchema,
+  whoopBiomarkerTestsResponseSchema,
+  whoopBiomarkerSchema,
+  whoopBiomarkerSummarySchema,
+  measuredBiomarkers,
+  type WhoopBiomarkerTest,
+  type WhoopBiomarkerTestsResponse,
+  type WhoopBiomarker,
+  type WhoopBiomarkerSummary,
+} from "./adapters/schemas/whoop-biomarkers.schema";
 
 // Pure converters (WHOOP cycle/metrics → KRD health extensions)
 export { recoveryToHrv } from "./adapters/converters/recovery-to-hrv.converter";

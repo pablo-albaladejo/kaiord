@@ -5,5 +5,9 @@
   "cancel": "Cancelar",
   "noProviderHint": "Configura un modelo de extracción de analíticas en Ajustes para importar desde un archivo.",
   "reviewBanner": "Borrador extraído por IA: revísalo antes de guardar",
-  "discard": "Descartar borrador"
+  "discard": "Descartar borrador",
+  "whoopButton": "Importar desde WHOOP",
+  "whoopImporting": "Importando desde WHOOP…",
+  "whoopImportedToast": "Importados {{imported}}, omitidos {{skipped}}",
+  "whoopImportFailed": "No se pudieron importar los resultados de WHOOP — inténtalo de nuevo"
 }

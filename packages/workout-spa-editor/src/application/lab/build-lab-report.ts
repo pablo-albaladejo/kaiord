@@ -1,8 +1,8 @@
 /** buildLabReport — assemble one `LabReport` from the form's header fields. */
 import type { LabReport } from "@kaiord/core";
 
-/** Who authored the record: manual entry or an AI-extracted draft. */
-export type LabProvenanceSource = "manual" | "ai-extracted";
+/** Who authored the record: manual entry, an AI-extracted draft, or a WHOOP import. */
+export type LabProvenanceSource = "manual" | "ai-extracted" | "whoop";
 
 export type FastingInput = "unspecified" | "yes" | "no";
 
