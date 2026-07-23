@@ -3,31 +3,13 @@ import { describe, expect, it } from "vitest";
 import { labProvenanceSchema } from "./lab-provenance";
 
 describe("labProvenanceSchema", () => {
-  it("should accept the manual source", () => {
+  it.each([
+    { source: "manual" },
+    { source: "ai-extracted" },
+    { source: "whoop" },
+  ])("should accept the $source source", ({ source }) => {
     // Arrange
-    const input = { source: "manual" };
-
-    // Act
-    const result = labProvenanceSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(true);
-  });
-
-  it("should accept the ai-extracted source", () => {
-    // Arrange
-    const input = { source: "ai-extracted" };
-
-    // Act
-    const result = labProvenanceSchema.safeParse(input);
-
-    // Assert
-    expect(result.success).toBe(true);
-  });
-
-  it("should accept the whoop source", () => {
-    // Arrange
-    const input = { source: "whoop" };
+    const input = { source };
 
     // Act
     const result = labProvenanceSchema.safeParse(input);

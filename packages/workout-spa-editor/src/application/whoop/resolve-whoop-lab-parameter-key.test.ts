@@ -14,49 +14,46 @@ describe("resolveWhoopLabParameterKey", () => {
     expect(key).toBe("alt");
   });
 
-  it("should resolve by display name when the slug does not match a catalog key", () => {
-    // Arrange
-    const slug = "hdl_cholesterol";
-    const displayName = "HDL cholesterol";
+  it.each([
+    { displayName: "HDL cholesterol" },
+    { displayName: "hdl CHOLESTEROL" },
+  ])(
+    "should resolve the unmatched slug by its $displayName display name, case-insensitively",
+    ({ displayName }) => {
+      // Arrange
+      const slug = "hdl_cholesterol";
 
-    // Act
-    const key = resolveWhoopLabParameterKey(slug, displayName);
+      // Act
+      const key = resolveWhoopLabParameterKey(slug, displayName);
 
-    // Assert
-    expect(key).toBe("hdl");
-  });
+      // Assert
+      expect(key).toBe("hdl");
+    }
+  );
 
-  it("should match the display name case-insensitively", () => {
-    // Arrange
-    const slug = "hdl_cholesterol";
-    const displayName = "hdl CHOLESTEROL";
+  it.each([
+    {
+      scenario: "neither slug nor label resolve",
+      slug: "custom_marker",
+      displayName: "Custom Marker" as string | null,
+      expected: "custom:custom_marker",
+    },
+    {
+      scenario: "the display name is missing",
+      slug: "unknown_thing",
+      displayName: null as string | null,
+      expected: "custom:unknown_thing",
+    },
+  ])(
+    "should fall back to a custom key when $scenario",
+    ({ slug, displayName, expected }) => {
+      // Arrange
 
-    // Act
-    const key = resolveWhoopLabParameterKey(slug, displayName);
+      // Act
+      const key = resolveWhoopLabParameterKey(slug, displayName);
 
-    // Assert
-    expect(key).toBe("hdl");
-  });
-
-  it("should fall back to a custom key when neither slug nor label resolve", () => {
-    // Arrange
-    const slug = "custom_marker";
-
-    // Act
-    const key = resolveWhoopLabParameterKey(slug, "Custom Marker");
-
-    // Assert
-    expect(key).toBe("custom:custom_marker");
-  });
-
-  it("should fall back to a custom key when the display name is missing", () => {
-    // Arrange
-    const slug = "unknown_thing";
-
-    // Act
-    const key = resolveWhoopLabParameterKey(slug, null);
-
-    // Assert
-    expect(key).toBe("custom:unknown_thing");
-  });
+      // Assert
+      expect(key).toBe(expected);
+    }
+  );
 });

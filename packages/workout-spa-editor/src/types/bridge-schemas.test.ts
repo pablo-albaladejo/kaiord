@@ -8,37 +8,16 @@ import {
   syncStateSchema,
 } from "./bridge-schemas";
 
-const MULTI_CAPABILITIES_COUNT = 3;
-
 describe("bridgeCapabilitySchema", () => {
-  it("should accept all valid capabilities", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-
-    const capabilities = [
-      "read:workouts",
-      "write:workouts",
-      "read:body",
-      "read:sleep",
-      "read:training-plan",
-      "read:training-zones",
-    ];
-
-    for (const cap of capabilities) {
-      expect(bridgeCapabilitySchema.parse(cap)).toBe(cap);
-    }
-  });
-
   it("should reject invalid capability", () => {
     // Arrange
+    const unknown = "write:sleep";
 
     // Act
+    const result = bridgeCapabilitySchema.safeParse(unknown);
 
     // Assert
-    expect(() => bridgeCapabilitySchema.parse("write:sleep")).toThrow();
+    expect(result.success).toBe(false);
   });
 });
 
@@ -55,26 +34,10 @@ describe("bridgeManifestSchema", () => {
     // Arrange
 
     // Act
+    const parsed = bridgeManifestSchema.parse(validManifest);
 
     // Assert
-    expect(bridgeManifestSchema.parse(validManifest)).toEqual(validManifest);
-  });
-
-  it("should accept multiple capabilities", () => {
-    // Arrange
-
-    // Act
-
-    const manifest = {
-      ...validManifest,
-      capabilities: ["read:workouts", "write:workouts", "read:body"],
-    };
-
-    // Assert
-
-    expect(bridgeManifestSchema.parse(manifest).capabilities).toHaveLength(
-      MULTI_CAPABILITIES_COUNT
-    );
+    expect(parsed).toEqual(validManifest);
   });
 
   it.each([
@@ -87,68 +50,63 @@ describe("bridgeManifestSchema", () => {
       // Arrange
 
       // Act
+      const result = bridgeManifestSchema.safeParse({
+        ...validManifest,
+        protocolVersion,
+      });
 
       // Assert
-      expect(() =>
-        bridgeManifestSchema.parse({ ...validManifest, protocolVersion })
-      ).toThrow();
+      expect(result.success).toBe(false);
     }
   );
 
-  it("should reject empty capabilities with invalid entry", () => {
+  it("should reject an unknown capability entry", () => {
     // Arrange
 
     // Act
+    const result = bridgeManifestSchema.safeParse({
+      ...validManifest,
+      capabilities: ["unknown"],
+    });
 
     // Assert
-    expect(() =>
-      bridgeManifestSchema.parse({
-        ...validManifest,
-        capabilities: ["unknown"],
-      })
-    ).toThrow();
+    expect(result.success).toBe(false);
   });
 });
 
 describe("bridgeErrorResponseSchema", () => {
-  it("should accept minimal error response", () => {
+  it.each([
+    { shape: "minimal", error: { ok: false, error: "Connection failed" } },
+    {
+      shape: "full",
+      error: {
+        ok: false,
+        error: "Rate limited",
+        code: "RATE_LIMIT",
+        retryable: true,
+      },
+    },
+  ])("should accept a $shape error response", ({ error }) => {
     // Arrange
 
     // Act
-
-    const error = { ok: false, error: "Connection failed" };
-
-    // Assert
-
-    expect(bridgeErrorResponseSchema.parse(error)).toEqual(error);
-  });
-
-  it("should accept full error response", () => {
-    // Arrange
-
-    // Act
-
-    const error = {
-      ok: false,
-      error: "Rate limited",
-      code: "RATE_LIMIT",
-      retryable: true,
-    };
+    const parsed = bridgeErrorResponseSchema.parse(error);
 
     // Assert
-
-    expect(bridgeErrorResponseSchema.parse(error)).toEqual(error);
+    expect(parsed).toEqual(error);
   });
 
   it("should reject ok: true", () => {
     // Arrange
 
     // Act
+    const result = bridgeErrorResponseSchema.safeParse({
+      ok: true,
+      error: "Something",
+    });
 
     // Assert
-    expect(() =>
-      bridgeErrorResponseSchema.parse({ ok: true, error: "Something" })
-    ).toThrow();
+    expect(result.success).toBe(false);
   });
 });
 
@@ -165,72 +123,33 @@ describe("syncStateSchema", () => {
     // Arrange
 
     // Act
+    const parsed = syncStateSchema.parse(validState);
 
     // Assert
-    expect(syncStateSchema.parse(validState)).toEqual(validState);
+    expect(parsed).toEqual(validState);
   });
 
-  it("should reject non-ISO lastSeen", () => {
+  it.each([
+    { field: "a non-ISO lastSeen", patch: { lastSeen: "yesterday" } },
+    { field: "a non-positive protocolVersion", patch: { protocolVersion: 0 } },
+    {
+      field: "an unknown capability in the array",
+      patch: { capabilities: ["delete:workouts"] },
+    },
+  ])("should reject $field", ({ patch }) => {
     // Arrange
 
     // Act
+    const result = syncStateSchema.safeParse({ ...validState, ...patch });
 
     // Assert
-    expect(() =>
-      syncStateSchema.parse({ ...validState, lastSeen: "yesterday" })
-    ).toThrow();
-  });
-
-  it("should reject non-positive protocolVersion", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(() =>
-      syncStateSchema.parse({ ...validState, protocolVersion: 0 })
-    ).toThrow();
-  });
-
-  it("should reject invalid capability in array", () => {
-    // Arrange
-
-    // Act
-
-    // Assert
-    expect(() =>
-      syncStateSchema.parse({
-        ...validState,
-        capabilities: ["delete:workouts"],
-      })
-    ).toThrow();
-  });
-});
-
-describe("bridgeCapabilitySchema coverage against MANAGED_DATA_REGISTRY", () => {
-  it("should keep bridgeCapabilitySchema in sync with MANAGED_DATA_REGISTRY tokens", () => {
-    // Arrange
-    const schemaTokens = new Set(bridgeCapabilitySchema.options);
-    const registryTokens = Object.values(MANAGED_DATA_REGISTRY)
-      .flatMap((entry) => [
-        entry.capabilities.import,
-        entry.capabilities.export,
-      ])
-      .filter((t): t is string => typeof t === "string");
-
-    // Act
-    const missing = registryTokens.filter((t) => !schemaTokens.has(t));
-
-    // Assert
-    expect(missing).toEqual([]);
+    expect(result.success).toBe(false);
   });
 });
 
 // Contract test (plan F0.3): pins the EXACT dataType↔capability-token
-// mapping, not just enum membership. Guards against silent drift between
-// @kaiord/core (the registry) and the SPA (the announced-capability enum),
-// including the deliberate N:1 mappings (read:body → 5 health types,
-// read:training-plan → planned-session).
+// mapping, not just enum membership, so @kaiord/core (the registry) and the
+// SPA (the announced-capability enum) cannot drift apart silently.
 describe("core↔SPA capability contract", () => {
   const EXPECTED_CAPABILITIES: Record<
     string,
@@ -264,42 +183,6 @@ describe("core↔SPA capability contract", () => {
 
     // Assert
     expect(actual).toEqual(EXPECTED_CAPABILITIES);
-  });
-
-  it("should map read:body N:1 onto the eight body-derived health types", () => {
-    // Arrange
-    const readBodyTypes = Object.entries(MANAGED_DATA_REGISTRY)
-      .filter(([, entry]) => entry.capabilities.import === "read:body")
-      .map(([type]) => type)
-      .sort();
-
-    // Act
-
-    // Assert
-    expect(readBodyTypes).toEqual(
-      [
-        "body-composition",
-        "daily-wellness",
-        "heart-rate-series",
-        "hrv",
-        "strain",
-        "stress",
-        "vitals",
-        "weight",
-      ].sort()
-    );
-  });
-
-  it("should keep read:training-plan mapped N:1 onto planned-session", () => {
-    // Arrange
-    const trainingPlanTypes = Object.entries(MANAGED_DATA_REGISTRY)
-      .filter(([, entry]) => entry.capabilities.import === "read:training-plan")
-      .map(([type]) => type);
-
-    // Act
-
-    // Assert
-    expect(trainingPlanTypes).toEqual(["planned-session"]);
   });
 
   it("should declare every registry token in the announced-capability enum", () => {

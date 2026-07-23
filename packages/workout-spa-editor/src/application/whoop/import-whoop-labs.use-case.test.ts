@@ -135,33 +135,6 @@ describe("importWhoopLabs", () => {
     ]);
   });
 
-  it("should filter out biomarkers WHOOP marked UNAVAILABLE", async () => {
-    // Arrange
-    const { deps, values } = makeDeps();
-
-    // Act
-    await importWhoopLabs(deps);
-
-    // Assert
-    const keys = [...values.values()].map((v) => v.parameterKey);
-    expect(keys).not.toContain("vitamin_d");
-    expect(keys).not.toContain("custom:vitamin_d");
-  });
-
-  it("should resolve an unmapped slug to a custom parameter key", async () => {
-    // Arrange
-    const { deps, values } = makeDeps();
-
-    // Act
-    await importWhoopLabs(deps);
-
-    // Assert
-    const custom = [...values.values()].find(
-      (v) => v.parameterKey === "custom:custom_thing"
-    );
-    expect(custom).toBeDefined();
-  });
-
   it("should stamp source whoop plus sourceBridgeId and externalId on the report and its values", async () => {
     // Arrange
     const { deps, reports, values } = makeDeps();

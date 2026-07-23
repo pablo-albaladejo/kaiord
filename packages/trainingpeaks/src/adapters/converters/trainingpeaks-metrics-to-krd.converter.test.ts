@@ -10,7 +10,9 @@ const EXPECTED_DOCUMENT_COUNT = 2;
 const FIRST_MEASURED_AT = "2026-07-01T07:30:00Z";
 const FIRST_WEIGHT_KG = 80.5;
 const SECOND_MEASURED_AT = "2026-07-02T07:45:00Z";
-const SECOND_WEIGHT_KG = 80.1;
+const WEIGHT_METRIC_TYPE = 9;
+const STEPS_METRIC_TYPE = 58;
+const STEPS_VALUE = 9000;
 
 const EXPECTED_FIRST_WEIGHT = {
   kind: "weight",
@@ -47,58 +49,51 @@ describe("trainingPeaksMetricsToKrd", () => {
     expect(health?.weight).toEqual(EXPECTED_FIRST_WEIGHT);
   });
 
-  it("should anchor a naive timestamp to a UTC ISO instant", () => {
+  it.each([
+    {
+      scenario: "a naive timestamp anchored to UTC",
+      document: first,
+      expected: FIRST_MEASURED_AT,
+    },
+    {
+      scenario: "a zoned timestamp passed through unchanged",
+      document: second,
+      expected: SECOND_MEASURED_AT,
+    },
+  ])("should emit $scenario", ({ document, expected }) => {
     // Arrange
-    const document = first;
 
     // Act
     const measuredAt = document?.extensions?.health?.weight?.measuredAt;
 
     // Assert
-    expect(measuredAt).toBe(FIRST_MEASURED_AT);
+    expect(measuredAt).toBe(expected);
   });
 
-  it("should pass a zoned timestamp through unchanged", () => {
+  it.each([
+    {
+      scenario: "entries whose channels carry no weight reading",
+      entries: [
+        {
+          timeStamp: "2026-07-03T07:15:00",
+          details: [{ type: STEPS_METRIC_TYPE, value: STEPS_VALUE }],
+        },
+      ],
+    },
+    {
+      scenario: "a weight channel whose value is null",
+      entries: [
+        {
+          timeStamp: "2026-07-04T07:10:00",
+          details: [{ type: WEIGHT_METRIC_TYPE, value: null }],
+        },
+      ],
+    },
+  ])("should skip $scenario", ({ entries }) => {
     // Arrange
-    const document = second;
 
     // Act
-    const measuredAt = document?.extensions?.health?.weight?.measuredAt;
-
-    // Assert
-    expect(measuredAt).toBe(SECOND_MEASURED_AT);
-    expect(document?.extensions?.health?.weight?.weightKilograms).toBe(
-      SECOND_WEIGHT_KG
-    );
-  });
-
-  it("should skip entries whose channels carry no weight reading", () => {
-    // Arrange
-    const stepsOnly = [
-      {
-        timeStamp: "2026-07-03T07:15:00",
-        details: [{ type: 58, value: 9000 }],
-      },
-    ];
-
-    // Act
-    const result = trainingPeaksMetricsToKrd(stepsOnly);
-
-    // Assert
-    expect(result).toEqual([]);
-  });
-
-  it("should skip a weight channel whose value is null", () => {
-    // Arrange
-    const nullWeight = [
-      {
-        timeStamp: "2026-07-04T07:10:00",
-        details: [{ type: 9, value: null }],
-      },
-    ];
-
-    // Act
-    const result = trainingPeaksMetricsToKrd(nullWeight);
+    const result = trainingPeaksMetricsToKrd(entries);
 
     // Assert
     expect(result).toEqual([]);

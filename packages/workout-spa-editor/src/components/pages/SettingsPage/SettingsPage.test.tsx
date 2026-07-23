@@ -94,47 +94,30 @@ describe("SettingsPage", () => {
       }
     });
 
-    it("should navigate to a tab when clicking a navigating row", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      const { memory } = renderAtPath("/settings");
+    it.each([
+      { row: "extensions", destination: "/settings/extensions" },
+      { row: "units", destination: "/settings/preferences" },
+      { row: "language", destination: "/settings/preferences" },
+      {
+        row: "manageYourData",
+        destination: "/settings/privacy?section=data-management",
+      },
+    ])(
+      "should navigate to $destination when clicking the $row row",
+      async ({ row, destination }) => {
+        // Arrange
+        const user = userEvent.setup();
+        const { memory } = renderAtPath("/settings");
 
-      // Act
-      await user.click(screen.getByTestId("settings-row-extensions"));
+        // Act
+        await user.click(screen.getByTestId(`settings-row-${row}`));
 
-      // Assert
-      await waitFor(() => {
-        expect(memory.history.at(-1)).toBe("/settings/extensions");
-      });
-    });
-
-    it("should navigate to the preferences tab from the Units row", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      const { memory } = renderAtPath("/settings");
-
-      // Act
-      await user.click(screen.getByTestId("settings-row-units"));
-
-      // Assert
-      await waitFor(() => {
-        expect(memory.history.at(-1)).toBe("/settings/preferences");
-      });
-    });
-
-    it("should surface a Language row that opens the preferences tab", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      const { memory } = renderAtPath("/settings");
-
-      // Act
-      await user.click(screen.getByTestId("settings-row-language"));
-
-      // Assert
-      await waitFor(() => {
-        expect(memory.history.at(-1)).toBe("/settings/preferences");
-      });
-    });
+        // Assert
+        await waitFor(() => {
+          expect(memory.history.at(-1)).toBe(destination);
+        });
+      }
+    );
   });
 
   describe("routing", () => {
@@ -163,15 +146,21 @@ describe("SettingsPage", () => {
       );
     });
 
-    it("should render the ai tab content at /settings/ai", () => {
-      // Arrange
+    it.each([
+      { tab: "ai", content: "LLM Providers" },
+      { tab: "privacy", content: "Clear All API Keys" },
+    ])(
+      "should render the $tab tab content at /settings/$tab",
+      ({ tab, content }) => {
+        // Arrange
 
-      // Act
-      renderAtPath("/settings/ai");
+        // Act
+        renderAtPath(`/settings/${tab}`);
 
-      // Assert
-      expect(screen.getByText("LLM Providers")).toBeInTheDocument();
-    });
+        // Assert
+        expect(screen.getByText(content)).toBeInTheDocument();
+      }
+    );
 
     it("should render the extensions tab content at /settings/extensions", () => {
       // Arrange
@@ -197,16 +186,6 @@ describe("SettingsPage", () => {
         await screen.findByTestId("settings-panel-usage")
       ).toBeInTheDocument();
     });
-
-    it("should render the privacy tab content at /settings/privacy", () => {
-      // Arrange
-
-      // Act
-      renderAtPath("/settings/privacy");
-
-      // Assert
-      expect(screen.getByText("Clear All API Keys")).toBeInTheDocument();
-    });
   });
 
   describe("back navigation", () => {
@@ -231,55 +210,35 @@ describe("SettingsPage", () => {
         "data-settings-section"
       ) ?? null;
 
-    it("should focus the providers section for the providers query", async () => {
-      // Arrange
+    it.each([
+      { path: "/settings/ai?section=providers", section: "providers" },
+      {
+        path: "/settings/privacy?section=data-management",
+        section: "data-management",
+      },
+    ])(
+      "should focus the $section section for its query",
+      async ({ path, section }) => {
+        // Arrange
 
-      // Act
-      renderAtPath("/settings/ai?section=providers");
+        // Act
+        renderAtPath(path);
 
-      // Assert
-      await waitFor(() => {
-        expect(sectionOf()).toBe("providers");
-      });
-    });
+        // Assert
+        await waitFor(() => {
+          expect(sectionOf()).toBe(section);
+        });
+      }
+    );
 
-    it("should focus the data management section for the data-management query", async () => {
-      // Arrange
-
-      // Act
-      renderAtPath("/settings/privacy?section=data-management");
-
-      // Assert
-      await waitFor(() => {
-        expect(sectionOf()).toBe("data-management");
-      });
-    });
-
-    it("should still render the ai tab top with no section query", () => {
+    it("should focus no section when the query is absent", () => {
       // Arrange
 
       // Act
       renderAtPath("/settings/ai");
 
       // Assert
-      expect(screen.getByText("LLM Providers")).toBeInTheDocument();
       expect(sectionOf()).toBeNull();
-    });
-
-    it("should point the manage-your-data row at the privacy data-management section", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      const { memory } = renderAtPath("/settings");
-
-      // Act
-      await user.click(screen.getByTestId("settings-row-manageYourData"));
-
-      // Assert
-      await waitFor(() => {
-        expect(memory.history.at(-1)).toBe(
-          "/settings/privacy?section=data-management"
-        );
-      });
     });
   });
 });
