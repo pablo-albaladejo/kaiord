@@ -1,5 +1,41 @@
 # @kaiord/fit
 
+## 10.1.0
+
+### Minor Changes
+
+- 23974fe: Carry visceral fat rating and basal metabolic rate through body composition.
+  The KRD `bodyComposition` schema gains optional `visceralFatRating` (unitless)
+  and `basalMetabolicRateKcal` (kcal/day) fields, and the FIT `body_composition`
+  converter now maps both directions (FIT `visceralFatRating`/`basalMet` ↔ KRD),
+  so scales reporting them no longer silently drop the values. BMR is carried as
+  real kcal because the @garmin/fitsdk Encoder/Decoder auto-applies the FIT
+  profile scale (4) for `basal_met`.
+- f3aed23: Add an encodable Garmin body-composition upload path. `encodeBodyCompositionFit`
+  turns a KRD carrying weight and/or body composition into real FIT file bytes by
+  emitting a `weight_scale` (mesgNum 30) message: the `@garmin/fitsdk` v21.208.0
+  Profile has no `body_composition` (mesgNum 41), so a real `Encoder` throws on it.
+  The `weight_scale` message carries weight plus the composition fields
+  (percentFat, percentHydration, visceralFatRating, boneMass, muscleMass, basalMet,
+  bmi) at real values — proven by a real-SDK byte round-trip. The FIT-encode entry
+  now exposes a shared `encodeFitMessages` used by both the workout writer and this
+  upload path.
+
+### Patch Changes
+
+- 3ef9b7f: Stop double-scaling bone/muscle/weight in the FIT body-composition and
+  weight-scale converters. The `@garmin/fitsdk` Encoder/Decoder auto-applies the
+  FIT profile scale (100) for the `weight`, `muscleMass`, and `boneMass` fields,
+  so the mappers now carry real kilograms end-to-end. The previous manual ×100
+  was a double scale that overflowed the uint16 raw and corrupted the value on a
+  real byte encode (e.g. 58.2 kg decoded back as 577.12) — verified and locked
+  with a live `@garmin/fitsdk` encode→decode probe.
+- Updated dependencies [23974fe]
+- Updated dependencies [e33f860]
+- Updated dependencies [07a4939]
+- Updated dependencies [ec4b349]
+  - @kaiord/core@10.1.0
+
 ## 10.0.0
 
 ### Minor Changes

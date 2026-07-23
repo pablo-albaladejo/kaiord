@@ -1,5 +1,36 @@
 # @kaiord/landing
 
+## 4.2.1
+
+### Patch Changes
+
+- 8defa1c: Add a "Convert" section to the docs site with a hub and six long-tail
+  "how to convert X to Y" pages (FIT↔ZWO, FIT↔TCX, ZWO↔Garmin). Each page
+  covers the Editor, CLI, and SDK paths plus a grounded "what survives the
+  conversion" table and per-pair gotchas. Link the hub from the sidebar, top
+  nav, and the landing `llms.txt`.
+- 6116b3a: Extend the JSON-LD @graph with an Organization node (Kaiord, founded by Pablo
+  Albaladejo) and a SoftwareApplication node for the "Kaiord Garmin Bridge" Chrome
+  extension, and cross-link every node through @id anchors (publisher/author/
+  founder). This consolidates the site's entities for search engines and LLMs —
+  tying the npm org, GitHub repo, and Chrome Web Store listing to a single
+  Organization, and surfacing the extension as a discoverable, free application.
+- d3bbc0c: Mention the official MCP registry listing on the landing (developers card
+  and FAQ, EN + ES) now that `io.github.pablo-albaladejo/kaiord` is published
+  to registry.modelcontextprotocol.io.
+- 7cbb5f3: Complete the social-card metadata (og:image width/height/alt,
+  twitter:image:alt) and make the Chrome extension discoverable: the Web Store
+  listing was linked nowhere on the site, so search engines and LLMs could not
+  associate it with Kaiord. Footer gains the store link and llms.txt lists it.
+- 1607faf: Add privacy policy page at /privacy/ covering the website, the workout
+  editor, and the browser extensions (Garmin Bridge, Train2Go Bridge).
+  Required by the Chrome Web Store "Privacy practices" tab.
+- Updated dependencies [23974fe]
+- Updated dependencies [e33f860]
+- Updated dependencies [07a4939]
+- Updated dependencies [ec4b349]
+  - @kaiord/core@10.1.0
+
 ## 4.2.0
 
 ### Minor Changes

@@ -1,5 +1,20 @@
 # @kaiord/zwo
 
+## 10.1.0
+
+### Patch Changes
+
+- 74af51d: Fix `zwo → *` conversions failing on a numeric serial number (#976). The ZWO
+  reader emitted `serialNumber` as a number when the source attribute was numeric
+  (e.g. `serialNumber="1234"`), which the KRD domain schema rejects because it
+  types `serialNumber` as a string. The reader now coerces the value to a string
+  at the KRD boundary, keeping the domain schema strict.
+- Updated dependencies [23974fe]
+- Updated dependencies [e33f860]
+- Updated dependencies [07a4939]
+- Updated dependencies [ec4b349]
+  - @kaiord/core@10.1.0
+
 ## 10.0.0
 
 ### Minor Changes

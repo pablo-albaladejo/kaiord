@@ -1,5 +1,24 @@
 # @kaiord/mcp
 
+## 10.1.0
+
+### Patch Changes
+
+- 38ed8d0: Sync `server.json` with the released 10.0.0 version and shorten its
+  description to the MCP registry 100-character limit.
+- Updated dependencies [23974fe]
+- Updated dependencies [e33f860]
+- Updated dependencies [07a4939]
+- Updated dependencies [f3aed23]
+- Updated dependencies [3ef9b7f]
+- Updated dependencies [74af51d]
+- Updated dependencies [74af51d]
+- Updated dependencies [ec4b349]
+  - @kaiord/core@10.1.0
+  - @kaiord/fit@10.1.0
+  - @kaiord/tcx@10.1.0
+  - @kaiord/zwo@10.1.0
+
 ## 10.0.0
 
 ### Patch Changes
