@@ -1,4 +1,4 @@
-import type { LabExtraction } from "@kaiord/ai/agents";
+import type { LabExtraction, LabExtractionValue } from "@kaiord/ai/agents";
 import { describe, expect, it } from "vitest";
 
 import { mapExtractionToDraft } from "./map-extraction-to-draft";
@@ -41,42 +41,28 @@ describe("mapExtractionToDraft", () => {
     });
   });
 
-  it("should resolve a catalog row by its English display label", () => {
+  it.each<{ scenario: string; value: LabExtractionValue; locale: string }>([
+    {
+      scenario: "an English display label",
+      value: { label: "Ferritin (FERR)" },
+      locale: "en",
+    },
+    {
+      scenario: "a Spanish display label",
+      value: { label: "Ferritina (FERR)" },
+      locale: "es",
+    },
+    {
+      scenario: "an unknown proposed key falling back to the label",
+      value: { label: "Ferritin (FERR)", parameterKey: "not_a_catalog_key" },
+      locale: "en",
+    },
+  ])("should resolve a catalog row by $scenario", ({ value, locale }) => {
     // Arrange
-    const input = extraction({ values: [{ label: "Ferritin (FERR)" }] });
+    const input = extraction({ values: [value] });
 
     // Act
-    const { rows } = mapExtractionToDraft(input, EN);
-
-    // Assert
-    expect(rows[0]).toMatchObject({
-      mode: "catalog",
-      parameterKey: "ferritin",
-    });
-  });
-
-  it("should resolve a catalog row by its Spanish display label", () => {
-    // Arrange
-    const input = extraction({ values: [{ label: "Ferritina (FERR)" }] });
-
-    // Act
-    const { rows } = mapExtractionToDraft(input, { locale: "es" });
-
-    // Assert
-    expect(rows[0]).toMatchObject({
-      mode: "catalog",
-      parameterKey: "ferritin",
-    });
-  });
-
-  it("should ignore an unknown proposed key and fall back to the label", () => {
-    // Arrange
-    const input = extraction({
-      values: [{ label: "Ferritin (FERR)", parameterKey: "not_a_catalog_key" }],
-    });
-
-    // Act
-    const { rows } = mapExtractionToDraft(input, EN);
+    const { rows } = mapExtractionToDraft(input, { locale });
 
     // Assert
     expect(rows[0]).toMatchObject({
