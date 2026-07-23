@@ -1,5 +1,32 @@
 # @kaiord/core
 
+## 10.1.0
+
+### Minor Changes
+
+- 23974fe: Carry visceral fat rating and basal metabolic rate through body composition.
+  The KRD `bodyComposition` schema gains optional `visceralFatRating` (unitless)
+  and `basalMetabolicRateKcal` (kcal/day) fields, and the FIT `body_composition`
+  converter now maps both directions (FIT `visceralFatRating`/`basalMet` ↔ KRD),
+  so scales reporting them no longer silently drop the values. BMR is carried as
+  real kcal because the @garmin/fitsdk Encoder/Decoder auto-applies the FIT
+  profile scale (4) for `basal_met`.
+- e33f860: Add a `write:body` export capability to the `body-composition` managed data
+  type. Previously it declared only `import: "read:body"`, so
+  `eligibleBridgeIds("body-composition", "export", …)` resolved to no bridges and
+  no governed body-composition export route could be declared. With
+  `export: "write:body"`, garmin-bridge (which announces `write:body`) becomes an
+  eligible export sink, unblocking the Data Hub export route and
+  `resolveExportPolicies` for the Tanita → Garmin body-composition sync.
+- ec4b349: Add `"whoop"` to the lab provenance `source` enum (`manual | ai-extracted |
+whoop`), so a WHOOP Advanced Labs import can be attributed the same way an
+  AI-extracted lab report is. Additive: `sourceBridgeId`/`externalId` were
+  already optional on `labProvenanceSchema`.
+
+### Patch Changes
+
+- 07a4939: Internal code reduction, no behavior change.
+
 ## 10.0.0
 
 ### Minor Changes

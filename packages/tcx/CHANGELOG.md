@@ -1,5 +1,21 @@
 # @kaiord/tcx
 
+## 10.1.0
+
+### Patch Changes
+
+- 74af51d: Fix `fit → tcx` (and any `* → tcx`) conversions throwing `TcxParsingError` on
+  workouts with repeat/interval blocks (#976). The KRD→TCX writer treated every
+  step as a leaf, so a repetition block had no `duration`/`target` and the
+  encoder threw. The writer now serializes repetition blocks to a TCX `Repeat_t`
+  step carrying `Repetitions` and `Child` steps, assigning contiguous `StepId`s
+  across the flattened tree.
+- Updated dependencies [23974fe]
+- Updated dependencies [e33f860]
+- Updated dependencies [07a4939]
+- Updated dependencies [ec4b349]
+  - @kaiord/core@10.1.0
+
 ## 10.0.0
 
 ### Patch Changes

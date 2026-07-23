@@ -13,7 +13,7 @@ const GARMIN_DASHBOARD = "https://connect.garmin.com/modern/";
 const BRIDGE_MANIFEST = {
   id: "garmin-bridge",
   name: "Garmin Connect",
-  version: "10.0.0",
+  version: "10.1.0",
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["write:workouts", "read:activities", "write:body"],
 };
