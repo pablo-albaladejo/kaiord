@@ -59,46 +59,27 @@ describe("computeFlag", () => {
     expect(flag).toBe("low");
   });
 
-  it("should apply the female catalog range when sex is female", () => {
-    // Arrange
-    const input = {
-      valueCanonical: 1.2,
-      catalogFallback: creatinineFallback,
-      sex: "female" as const,
-    };
+  it.each<{ sex?: "male" | "female"; expected: string }>([
+    { sex: "female", expected: "high" },
+    { sex: "male", expected: "in" },
+    { sex: undefined, expected: "unknown" },
+  ])(
+    "should resolve the sex-aware catalog range for sex $sex as $expected",
+    ({ sex, expected }) => {
+      // Arrange
+      const input = {
+        valueCanonical: 1.2,
+        catalogFallback: creatinineFallback,
+        sex,
+      };
 
-    // Act
-    const flag = computeFlag(input);
+      // Act
+      const flag = computeFlag(input);
 
-    // Assert
-    expect(flag).toBe("high");
-  });
-
-  it("should apply the male catalog range when sex is male", () => {
-    // Arrange
-    const input = {
-      valueCanonical: 1.2,
-      catalogFallback: creatinineFallback,
-      sex: "male" as const,
-    };
-
-    // Act
-    const flag = computeFlag(input);
-
-    // Assert
-    expect(flag).toBe("in");
-  });
-
-  it("should return unknown for a sex-only fallback when sex is absent", () => {
-    // Arrange
-    const input = { valueCanonical: 1.2, catalogFallback: creatinineFallback };
-
-    // Act
-    const flag = computeFlag(input);
-
-    // Assert
-    expect(flag).toBe("unknown");
-  });
+      // Assert
+      expect(flag).toBe(expected);
+    }
+  );
 
   it("should return unknown when there is no range at all", () => {
     // Arrange
@@ -111,47 +92,22 @@ describe("computeFlag", () => {
     expect(flag).toBe("unknown");
   });
 
-  it("should return unknown for a non-numeric refText", () => {
-    // Arrange
-    const input = { valueCanonical: 1, refText: "Negativo" };
+  it.each([
+    { refText: "30-50", valueCanonical: 24, expected: "low" },
+    { refText: "<200", valueCanonical: 250, expected: "high" },
+    { refText: ">40", valueCanonical: 30, expected: "low" },
+    { refText: "Negativo", valueCanonical: 1, expected: "unknown" },
+  ])(
+    "should parse refText $refText and flag $valueCanonical as $expected",
+    ({ refText, valueCanonical, expected }) => {
+      // Arrange
+      const input = { valueCanonical, refText };
 
-    // Act
-    const flag = computeFlag(input);
+      // Act
+      const flag = computeFlag(input);
 
-    // Assert
-    expect(flag).toBe("unknown");
-  });
-
-  it("should parse a numeric refText range and flag accordingly", () => {
-    // Arrange
-    const input = { valueCanonical: 24, refText: "30-50" };
-
-    // Act
-    const flag = computeFlag(input);
-
-    // Assert
-    expect(flag).toBe("low");
-  });
-
-  it("should parse a less-than refText as an upper bound", () => {
-    // Arrange
-    const input = { valueCanonical: 250, refText: "<200" };
-
-    // Act
-    const flag = computeFlag(input);
-
-    // Assert
-    expect(flag).toBe("high");
-  });
-
-  it("should parse a greater-than refText as a lower bound", () => {
-    // Arrange
-    const input = { valueCanonical: 30, refText: ">40" };
-
-    // Act
-    const flag = computeFlag(input);
-
-    // Assert
-    expect(flag).toBe("low");
-  });
+      // Assert
+      expect(flag).toBe(expected);
+    }
+  );
 });

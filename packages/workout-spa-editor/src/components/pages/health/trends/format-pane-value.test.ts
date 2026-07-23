@@ -17,80 +17,74 @@ const byKey = (k: TrendMetricKey): TrendMetricDef =>
   TREND_METRICS.find((m) => m.key === k) as TrendMetricDef;
 
 describe("formatPaneValue", () => {
-  it("should format weight values to one decimal kilogram", () => {
-    // Arrange
-    const metric = byKey("weight");
+  it.each([
+    {
+      scenario: "weight to one decimal kilogram",
+      key: "weight",
+      value: WEIGHT_KG,
+      units: "metric",
+      locale: "en",
+      expected: "72.3 kg",
+    },
+    {
+      scenario: "weight in pounds for imperial units",
+      key: "weight",
+      value: WEIGHT_KG,
+      units: "imperial",
+      locale: "en",
+      expected: "159.5 lb",
+    },
+    {
+      scenario: "HRV as integer milliseconds",
+      key: "hrv",
+      value: HRV_MS,
+      units: "metric",
+      locale: "en",
+      expected: "48 ms",
+    },
+    {
+      scenario: "sleep score as a plain integer",
+      key: "sleep",
+      value: SLEEP_SCORE,
+      units: "metric",
+      locale: "en",
+      expected: "82",
+    },
+    {
+      scenario: "steps with the en-US thousands separator",
+      key: "steps",
+      value: STEPS_VALUE,
+      units: "metric",
+      locale: "en",
+      expected: "9,432 steps",
+    },
+    {
+      scenario: "steps with the es thousands separator",
+      key: "steps",
+      value: STEPS_VALUE_GROUPED,
+      units: "metric",
+      locale: "es",
+      expected: "94.321 steps",
+    },
+    {
+      scenario: "the em-dash sentinel for null values",
+      key: "weight",
+      value: null,
+      units: "metric",
+      locale: "en",
+      expected: "—",
+    },
+  ] as const)(
+    "should format $scenario",
+    ({ key, value, units, locale, expected }) => {
+      // Arrange
+      const metric = byKey(key);
 
-    // Act
-    const out = formatPaneValue(metric, WEIGHT_KG);
+      // Act
+      const out = formatPaneValue(metric, value, units, locale);
 
-    // Assert
-    expect(out).toBe("72.3 kg");
-  });
-
-  it("should format weight values in pounds for imperial units", () => {
-    // Arrange
-    const metric = byKey("weight");
-
-    // Act
-    const out = formatPaneValue(metric, WEIGHT_KG, "imperial");
-
-    // Assert
-    expect(out).toBe("159.5 lb");
-  });
-
-  it("should format HRV values as integer milliseconds", () => {
-    // Arrange
-    const metric = byKey("hrv");
-
-    // Act
-    const out = formatPaneValue(metric, HRV_MS);
-
-    // Assert
-    expect(out).toBe("48 ms");
-  });
-
-  it("should format sleep score as a plain integer", () => {
-    // Arrange
-    const metric = byKey("sleep");
-
-    // Act
-    const out = formatPaneValue(metric, SLEEP_SCORE);
-
-    // Assert
-    expect(out).toBe("82");
-  });
-
-  it("should format steps with en-US thousands separator", () => {
-    // Arrange
-    const metric = byKey("steps");
-
-    // Act
-    const out = formatPaneValue(metric, STEPS_VALUE);
-
-    // Assert
-    expect(out).toBe("9,432 steps");
-  });
-
-  it("should group steps with the es thousands separator", () => {
-    // Arrange
-    const metric = byKey("steps");
-
-    // Act
-    const out = formatPaneValue(metric, STEPS_VALUE_GROUPED, "metric", "es");
-
-    // Assert
-    expect(out).toBe("94.321 steps");
-  });
-
-  it("should return the em-dash sentinel for null values", () => {
-    // Arrange
-    const metric = byKey("weight");
-
-    // Act
-    const out = formatPaneValue(metric, null);
-
-    // Assert
-    expect(out).toBe("—");
-  });
+      // Assert
+      expect(out).toBe(expected);
+    }
+  );
 });

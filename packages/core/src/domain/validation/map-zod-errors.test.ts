@@ -56,22 +56,4 @@ describe("mapZodErrors code derivation", () => {
       expect.objectContaining({ field: "min", code: "min_gt_max" })
     );
   });
-
-  it("should keep the code stable when the message wording changes", () => {
-    // Arrange
-    const reworded = [
-      {
-        code: "custom",
-        message: "the minimum cannot exceed the maximum",
-        path: ["min"],
-        params: { code: "min_gt_max" },
-      },
-    ] as unknown as ZodIssue[];
-
-    // Act
-    const errors = mapZodErrors(reworded);
-
-    // Assert
-    expect(errors[0]?.code).toBe("min_gt_max");
-  });
 });

@@ -1,60 +1,31 @@
 import { describe, expect, it } from "vitest";
 
+import type { LocalePreference } from "../types/user-preferences";
 import { resolveLocale } from "./resolve-locale";
 
+const cases: Array<{
+  preference: LocalePreference | undefined;
+  browser: string;
+  expected: "en" | "es";
+}> = [
+  { preference: "es", browser: "en-US", expected: "es" },
+  { preference: "en", browser: "es-ES", expected: "en" },
+  { preference: "auto", browser: "es-419", expected: "es" },
+  { preference: "auto", browser: "fr-FR", expected: "en" },
+  { preference: undefined, browser: "es-ES", expected: "es" },
+];
+
 describe("resolveLocale", () => {
-  it("should honor an explicit es preference over the browser language", () => {
-    // Arrange
-    const preference = "es" as const;
+  it.each(cases)(
+    "should resolve preference $preference with browser $browser to $expected",
+    ({ preference, browser, expected }) => {
+      // Arrange
 
-    // Act
-    const result = resolveLocale(preference, "en-US");
+      // Act
+      const result = resolveLocale(preference, browser);
 
-    // Assert
-    expect(result).toBe("es");
-  });
-
-  it("should honor an explicit en preference over a Spanish browser", () => {
-    // Arrange
-    const preference = "en" as const;
-
-    // Act
-    const result = resolveLocale(preference, "es-ES");
-
-    // Assert
-    expect(result).toBe("en");
-  });
-
-  it("should resolve auto to es for a Spanish browser language", () => {
-    // Arrange
-    const preference = "auto" as const;
-
-    // Act
-    const result = resolveLocale(preference, "es-419");
-
-    // Assert
-    expect(result).toBe("es");
-  });
-
-  it("should resolve auto to en for a non-Spanish browser language", () => {
-    // Arrange
-    const preference = "auto" as const;
-
-    // Act
-    const result = resolveLocale(preference, "fr-FR");
-
-    // Assert
-    expect(result).toBe("en");
-  });
-
-  it("should treat an absent preference as auto", () => {
-    // Arrange
-    const preference = undefined;
-
-    // Act
-    const result = resolveLocale(preference, "es-ES");
-
-    // Assert
-    expect(result).toBe("es");
-  });
+      // Assert
+      expect(result).toBe(expected);
+    }
+  );
 });
