@@ -2,7 +2,6 @@ export { convertLengthToMeters } from "./converters/length-unit.converter";
 export { createWorkoutKRD } from "./converters/workout-to-krd.converter";
 export { canonicalHash } from "./hash/canonical-hash";
 export { deriveExternalId } from "./ingest/derive-external-id";
-export * from "./lab";
 export type {
   BridgeId,
   HashProjection,
@@ -159,25 +158,25 @@ export {
   ZwiftParsingError,
   ZwiftValidationError,
 } from "./types/errors";
+export { extractWorkout } from "./validation/extract-workout";
+export type { SchemaValidator } from "./validation/schema-validator";
+export { createSchemaValidator } from "./validation/schema-validator";
 export type {
-  SchemaValidator,
   ToleranceChecker,
   ToleranceConfig,
-} from "./validation";
+} from "./validation/tolerance-checker";
 export {
-  createSchemaValidator,
   createToleranceChecker,
   DEFAULT_TOLERANCES,
-  extractWorkout,
   toleranceConfigSchema,
   toleranceViolationSchema,
-  validateKrd,
-} from "./validation";
-export type { PowerZone } from "./zones";
+} from "./validation/tolerance-checker";
+export { validateKrd } from "./validation/validate-krd";
+export type { PowerZone } from "./zones/power-zones";
 export {
   isPowerZone,
   percentFtpToZone,
   POWER_ZONE_PERCENT_FTP,
   POWER_ZONES,
   zoneToPercentFtp,
-} from "./zones";
+} from "./zones/power-zones";
