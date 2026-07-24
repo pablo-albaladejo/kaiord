@@ -85,8 +85,9 @@ until its secret exists):
 4. **Weekly PR token** — add `SEO_OBSERVATORY_PR_TOKEN`, a fine-grained PAT
    scoped to this repo with _Contents_ and _Pull requests_ write. With the
    default `github.token` the metrics PR is authored by `github-actions[bot]`:
-   `pull_request` workflows never fire, the required "Check for Changeset"
-   context stays `expected`, and code-owner review blocks the merge (the
+   its `pull_request` workflow runs are held in an approval-required state, so
+   the required "Check for Changeset" context stays `expected` until someone
+   approves the runs, and code-owner review blocks the merge (the
    2026-07-24 smoke-run needed a manual approve plus an empty retrigger
    commit to land). Without the secret the workflow still runs and falls back
    to `github.token`; only the PR merge becomes manual.
