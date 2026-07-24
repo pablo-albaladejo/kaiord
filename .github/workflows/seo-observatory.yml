@@ -72,7 +72,12 @@ jobs:
       - name: Open metrics PR
         if: steps.detect.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # A PAT makes the weekly PR user-authored, so pull_request workflows,
+          # the required changeset check, and code-owner review behave like on
+          # any normal PR. With github.token the PR's workflow runs are held in
+          # an approval-required state, so required checks sit pending and the
+          # PR cannot merge without manual intervention.
+          GH_TOKEN: ${{ secrets.SEO_OBSERVATORY_PR_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           BRANCH="auto/seo-observatory-${{ github.run_id }}"
           git config user.name "github-actions[bot]"
