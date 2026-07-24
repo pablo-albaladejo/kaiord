@@ -82,6 +82,15 @@ until its secret exists):
    user and store its key JSON as `GSC_SERVICE_ACCOUNT_JSON`.
 3. **Bing Webmaster Tools** — import from GSC, then add
    `BING_WEBMASTER_API_KEY` (Settings → API access).
+4. **Weekly PR token** — add `SEO_OBSERVATORY_PR_TOKEN`, a fine-grained PAT
+   scoped to this repo with _Contents_ and _Pull requests_ write. With the
+   default `github.token` the metrics PR is authored by `github-actions[bot]`:
+   its `pull_request` workflow runs are held in an approval-required state, so
+   the required "Check for Changeset" context stays `expected` until someone
+   approves the runs, and code-owner review blocks the merge (the
+   2026-07-24 smoke-run needed a manual approve plus an empty retrigger
+   commit to land). Without the secret the workflow still runs and falls back
+   to `github.token`; only the PR merge becomes manual.
 
 The GEO entity checklist lives in `reports/seo/directory-status.json` — update
 it as MCP-registry, npm, and directory listings go live.
