@@ -1,6 +1,7 @@
 import type { HrvSummary, KRD, Logger } from "@kaiord/core";
 
 import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
+import { buildHealthFileIdMessage } from "../shared/health-file-id.builder";
 import { mapKrdHrvToFit } from "./health-hrv.converter";
 
 const HEALTH_HRV_FILE_TYPE = "monitoringDaily" as const;
@@ -27,17 +28,7 @@ export const convertKrdToFitHealthHrvMessages = (
     return [];
   }
 
-  const fileIdMesg: Record<string, unknown> = {
-    mesgNum: FIT_MESSAGE_NUMBERS.FILE_ID,
-    type: HEALTH_HRV_FILE_TYPE,
-    timeCreated: new Date(krd.metadata.created),
-  };
-  if (krd.metadata.manufacturer) {
-    fileIdMesg.manufacturer = krd.metadata.manufacturer;
-  }
-  if (krd.metadata.product && /^\d+$/.test(krd.metadata.product)) {
-    fileIdMesg.product = Number(krd.metadata.product);
-  }
+  const fileIdMesg = buildHealthFileIdMessage(krd, HEALTH_HRV_FILE_TYPE);
 
   const summary = mapKrdHrvToFit(hrv);
   const summaryMesg = {
