@@ -77,25 +77,21 @@ describe("stressBffToEpisode", () => {
     expect(episode?.peakLevel).toBe(100);
   });
 
-  it("should return null when the gauge is absent", () => {
+  it.each([
+    { scenario: "the gauge is absent", bff: { stress_graph: null } },
+    {
+      scenario: "gauge_fill_percentage is null",
+      bff: { gauge: { gauge_fill_percentage: null } },
+    },
+  ])("should return null when $scenario", ({ bff }) => {
     // Arrange
-    const bff: WhoopStressResponse = { stress_graph: null };
+    const response: WhoopStressResponse = bff;
 
     // Act
-    const episode = stressBffToEpisode(bff, { userId: USER_ID, date: DATE });
-
-    // Assert
-    expect(episode).toBeNull();
-  });
-
-  it("should return null when gauge_fill_percentage is null", () => {
-    // Arrange
-    const bff: WhoopStressResponse = {
-      gauge: { gauge_fill_percentage: null },
-    };
-
-    // Act
-    const episode = stressBffToEpisode(bff, { userId: USER_ID, date: DATE });
+    const episode = stressBffToEpisode(response, {
+      userId: USER_ID,
+      date: DATE,
+    });
 
     // Assert
     expect(episode).toBeNull();

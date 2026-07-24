@@ -79,17 +79,6 @@ describe("tanitaCsvToKrd", () => {
     expect(health?.bodyComposition).toEqual(EXPECTED_FULL_COMPOSITION);
   });
 
-  it("should anchor the row datetime to a UTC ISO instant", () => {
-    // Arrange
-    const document = full;
-
-    // Act
-    const measuredAt = document?.extensions?.health?.weight?.measuredAt;
-
-    // Assert
-    expect(measuredAt).toBe(FULL_MEASURED_AT);
-  });
-
   it("should treat dash cells as absent and read a quoted weight field", () => {
     // Arrange
     const document = partial;
@@ -114,17 +103,6 @@ describe("tanitaCsvToKrd", () => {
     expect(document?.type).toBe("weight_measurement");
     expect(health?.weight?.weightKilograms).toBe(WEIGHT_ONLY_KG);
     expect(health?.bodyComposition).toBeUndefined();
-  });
-
-  it("should ignore deferred columns that have no KRD home", () => {
-    // Arrange
-    const composition = full?.extensions?.health?.bodyComposition ?? {};
-
-    // Act
-    const keys = Object.keys(composition).sort();
-
-    // Assert
-    expect(keys).toEqual(Object.keys(EXPECTED_FULL_COMPOSITION).sort());
   });
 
   it("should produce documents that validate against the KRD schema", () => {

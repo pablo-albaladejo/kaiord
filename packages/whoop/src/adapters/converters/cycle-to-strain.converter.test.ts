@@ -79,39 +79,21 @@ describe("cycleToStrain", () => {
     expect(strain?.dayMaxHeartRate).toBeUndefined();
   });
 
-  it("should return null when scaled_strain is missing", () => {
+  it.each([
+    {
+      scenario: "scaled_strain is missing",
+      cycleOverride: { scaled_strain: undefined },
+    },
+    { scenario: "days is missing", cycleOverride: { days: undefined } },
+    {
+      scenario: "days does not contain a parseable date",
+      cycleOverride: { days: "not-a-date-range" },
+    },
+  ])("should return null when $scenario", ({ cycleOverride }) => {
     // Arrange
     const record = {
       ...RECORD,
-      cycle: { ...RECORD.cycle, scaled_strain: undefined },
-    };
-
-    // Act
-    const strain = cycleToStrain(record);
-
-    // Assert
-    expect(strain).toBeNull();
-  });
-
-  it("should return null when days is missing", () => {
-    // Arrange
-    const record = {
-      ...RECORD,
-      cycle: { ...RECORD.cycle, days: undefined },
-    };
-
-    // Act
-    const strain = cycleToStrain(record);
-
-    // Assert
-    expect(strain).toBeNull();
-  });
-
-  it("should return null when days does not contain a parseable date", () => {
-    // Arrange
-    const record = {
-      ...RECORD,
-      cycle: { ...RECORD.cycle, days: "not-a-date-range" },
+      cycle: { ...RECORD.cycle, ...cycleOverride },
     };
 
     // Act
