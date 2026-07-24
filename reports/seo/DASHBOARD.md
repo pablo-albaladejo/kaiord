@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-07-22 21:00 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-07-24 17:46 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
@@ -12,25 +12,25 @@ _Generated 2026-07-22 21:00 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 | Google avg position | — | top 10 on 3+ non-brand queries | gsc.jsonl |
 | Bing pages in index | — (needs Bing key) | all pages | bing.jsonl |
 | Bing impressions (7d) | — | growing | bing.jsonl |
-| Tracked queries where site appears (DDG/Bing proxy) | 1/12 | 12/12 | serp.jsonl |
+| Tracked queries where site appears (DDG/Bing proxy) | 0/12 (-1) | 12/12 | serp.jsonl |
 | AI answer-engine mention rate | perplexity 0 | growing | ai-visibility.jsonl |
 
 ## Tracked query positions (DDG — Bing-index proxy)
 
 | Query | Position | Prev | History (last 5) |
 | --- | --- | --- | --- |
-| kaiord | #1 | ABSENT | #1 |
-| fit file converter | ABSENT | ABSENT | · |
-| convert fit to tcx | ABSENT | ABSENT | · |
-| fit to zwo converter | ABSENT | ABSENT | · |
-| workout file converter open source | ABSENT | ABSENT | · |
-| garmin workout file format | ABSENT | ABSENT | · |
-| zwo workout editor | ABSENT | ABSENT | · |
-| typescript fit file parser | ABSENT | ABSENT | · |
-| mcp server fitness workouts | ABSENT | ABSENT | · |
-| garmin connect workout sync chrome extension | ABSENT | ABSENT | · |
-| whoop garmin sync | ABSENT | ABSENT | · |
-| training calendar local first | ABSENT | ABSENT | · |
+| kaiord | ABSENT | #1 | #1 · |
+| fit file converter | ABSENT | ABSENT | · · |
+| convert fit to tcx | ABSENT | ABSENT | · · |
+| fit to zwo converter | ABSENT | ABSENT | · · |
+| workout file converter open source | ABSENT | ABSENT | · · |
+| garmin workout file format | ABSENT | ABSENT | · · |
+| zwo workout editor | ABSENT | ABSENT | · · |
+| typescript fit file parser | ABSENT | ABSENT | · · |
+| mcp server fitness workouts | ABSENT | ABSENT | · · |
+| garmin connect workout sync chrome extension | ABSENT | ABSENT | · · |
+| whoop garmin sync | ABSENT | ABSENT | · · |
+| training calendar local first | ABSENT | ABSENT | · · |
 
 ## Top Google queries (latest GSC window)
 
@@ -40,7 +40,7 @@ _No GSC query data yet (needs credentials and impressions)._
 
 | Provider | Date | Mentions | Rate | Cited | Top competitors |
 | --- | --- | --- | --- | --- | --- |
-| perplexity | 2026-07-22 | 0/5 | 0 | 0 | Garmin FIT SDK (1) |
+| perplexity | 2026-07-24 | 0/5 | 0 | 0 | Garmin FIT SDK (1) |
 
 ## Directory / entity presence (GEO substrate)
 
