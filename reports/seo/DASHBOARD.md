@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-07-24 17:46 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-07-24 20:34 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
