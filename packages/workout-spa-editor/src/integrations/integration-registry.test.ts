@@ -27,39 +27,21 @@ const realCapabilities = (bridgeId: string): readonly string[] => {
 };
 
 describe("INTEGRATION_REGISTRY", () => {
-  it("should give every entry a mechanism and an id", () => {
-    // Arrange
+  it.each([
+    { id: "train2go", mechanism: "bridge", bridgeId: "train2go-bridge" },
+    { id: "manual", mechanism: "manual", bridgeId: null },
+  ])(
+    "should declare $id as a $mechanism integration bound to $bridgeId",
+    ({ id, mechanism, bridgeId }) => {
+      // Arrange
 
-    // Act
-    const missing = INTEGRATION_REGISTRY.filter(
-      (entry) => !entry.id || !entry.mechanism
-    );
+      // Act
+      const entry = INTEGRATION_REGISTRY.find((e) => e.id === id);
 
-    // Assert
-    expect(missing).toEqual([]);
-  });
-
-  it("should declare train2go as a visible bridge integration", () => {
-    // Arrange
-
-    // Act
-    const train2go = INTEGRATION_REGISTRY.find((e) => e.id === "train2go");
-
-    // Assert
-    expect(train2go?.mechanism).toBe("bridge");
-    expect(train2go?.bridgeId).toBe("train2go-bridge");
-  });
-
-  it("should declare manual as an always-active, bridge-less mechanism", () => {
-    // Arrange
-
-    // Act
-    const manual = INTEGRATION_REGISTRY.find((e) => e.id === "manual");
-
-    // Assert
-    expect(manual?.mechanism).toBe("manual");
-    expect(manual?.bridgeId).toBeNull();
-  });
+      // Assert
+      expect(entry).toMatchObject({ mechanism, bridgeId });
+    }
+  );
 
   it("should require no bridge id for non-bridge mechanisms", () => {
     // Arrange

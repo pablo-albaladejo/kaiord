@@ -7,42 +7,45 @@ import {
   INPUT_TEXT_TRUNCATED_MAX_LEN,
 } from "../test-utils/constants";
 
+/** Runs validateInput expecting rejection, returning the thrown error. */
+const rejectionOf = (input: string): AiParsingError => {
+  try {
+    validateInput(input);
+  } catch (error) {
+    return error as AiParsingError;
+  }
+  throw new Error("expected validateInput to reject");
+};
+
 describe("validateInput", () => {
   it("should return trimmed text for valid input", () => {
     // Arrange
+    const input = "  4x(8' a 5'15\")  ";
 
     // Act
+    const result = validateInput(input);
 
     // Assert
-    expect(validateInput("  4x(8' a 5'15\")  ")).toBe("4x(8' a 5'15\")");
+    expect(result).toBe("4x(8' a 5'15\")");
   });
 
   it.each([
-    ["empty string", ""],
-    ["whitespace only", "   "],
-    ["control characters only", "\x00\x01\x02"],
+    { scenario: "an empty string", input: "" },
+    { scenario: "whitespace only", input: "   " },
+    { scenario: "control characters only", input: "\x00\x01\x02" },
   ])(
-    "should throw AiParsingError for effectively-empty input (%s)",
-    (_case, input) => {
+    "should reject $scenario with an input_empty AiParsingError",
+    ({ input }) => {
       // Arrange
 
       // Act
+      const error = rejectionOf(input);
 
       // Assert
-      expect(() => validateInput(input)).toThrow(AiParsingError);
+      expect(error).toBeInstanceOf(AiParsingError);
+      expect(error.reason).toBe("input_empty");
     }
   );
-
-  it("should throw on input exceeding 2000 characters", () => {
-    // Arrange
-
-    // Act
-    const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
-
-    // Assert
-    expect(() => validateInput(longInput)).toThrow(AiParsingError);
-    expect(() => validateInput(longInput)).toThrow("exceeds");
-  });
 
   it.each([
     [
@@ -61,64 +64,43 @@ describe("validateInput", () => {
     expect(result).toBe(expected);
   });
 
-  it("should accept exactly 2000 characters", () => {
+  it("should accept input of exactly the maximum length", () => {
     // Arrange
-
-    // Act
     const input = "a".repeat(INPUT_LEN_AT_LIMIT);
 
+    // Act
+    const result = validateInput(input);
+
     // Assert
-    expect(validateInput(input)).toBe(input);
+    expect(result).toBe(input);
   });
 
-  it("should truncate inputText in error for long inputs", () => {
+  it("should reject over-limit input with an input_too_long AiParsingError carrying both lengths", () => {
     // Arrange
-    expect.assertions(1);
     const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
 
     // Act
+    const error = rejectionOf(longInput);
 
     // Assert
-    try {
-      validateInput(longInput);
-    } catch (error) {
-      expect((error as AiParsingError).inputText.length).toBeLessThanOrEqual(
-        INPUT_TEXT_TRUNCATED_MAX_LEN
-      );
-    }
+    expect(error).toBeInstanceOf(AiParsingError);
+    expect(error.reason).toBe("input_too_long");
+    expect(error.details).toEqual({
+      maxLength: INPUT_LEN_AT_LIMIT,
+      actualLength: INPUT_LEN_OVER_LIMIT,
+    });
   });
 
-  it("should tag an empty-input error with the input_empty reason", () => {
+  it("should truncate inputText in the error for long inputs", () => {
     // Arrange
-    expect.assertions(1);
-
-    // Act
-
-    // Assert
-    try {
-      validateInput("   ");
-    } catch (error) {
-      expect((error as AiParsingError).reason).toBe("input_empty");
-    }
-  });
-
-  it("should tag a too-long-input error with reason and length details", () => {
-    // Arrange
-    expect.assertions(2);
     const longInput = "a".repeat(INPUT_LEN_OVER_LIMIT);
 
     // Act
+    const error = rejectionOf(longInput);
 
     // Assert
-    try {
-      validateInput(longInput);
-    } catch (error) {
-      const parsed = error as AiParsingError;
-      expect(parsed.reason).toBe("input_too_long");
-      expect(parsed.details).toEqual({
-        maxLength: INPUT_LEN_AT_LIMIT,
-        actualLength: INPUT_LEN_OVER_LIMIT,
-      });
-    }
+    expect(error.inputText.length).toBeLessThanOrEqual(
+      INPUT_TEXT_TRUNCATED_MAX_LEN
+    );
   });
 });

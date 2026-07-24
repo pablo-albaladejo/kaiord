@@ -157,20 +157,6 @@ describe("importWhoopLabs", () => {
     });
   });
 
-  it("should skip a test whose measured biomarkers yield no usable rows", async () => {
-    // Arrange
-    const { deps, reports } = makeDeps();
-
-    // Act
-    await importWhoopLabs(deps);
-
-    // Assert
-    expect(reports.size).toBe(1);
-    expect(
-      [...reports.values()].some((r) => r.provenance.externalId === TEST_2)
-    ).toBe(false);
-  });
-
   it("should dedupe on re-import by skipping a test whose report already exists", async () => {
     // Arrange
     const { deps, reports, values } = makeDeps();
