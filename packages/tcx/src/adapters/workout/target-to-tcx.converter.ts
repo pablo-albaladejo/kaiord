@@ -2,12 +2,11 @@ import type { Sport, WorkoutStep } from "@kaiord/core";
 
 import { convertCadenceToTcx } from "./cadence-to-tcx.converter";
 
-export const convertHeartRateToTcx = (value: {
-  unit: string;
-  value?: number;
-  min?: number;
-  max?: number;
-}): Record<string, unknown> => {
+type TargetValue = { unit: string; value?: number; min?: number; max?: number };
+
+export const convertHeartRateToTcx = (
+  value: TargetValue
+): Record<string, unknown> => {
   if (value.unit === "zone") {
     return {
       "@_xsi:type": "HeartRate_t",
@@ -34,12 +33,9 @@ export const convertHeartRateToTcx = (value: {
   return { "@_xsi:type": "None_t" };
 };
 
-export const convertPaceToTcx = (value: {
-  unit: string;
-  value?: number;
-  min?: number;
-  max?: number;
-}): Record<string, unknown> => {
+export const convertPaceToTcx = (
+  value: TargetValue
+): Record<string, unknown> => {
   if (value.unit === "mps" || value.unit === "range") {
     const min = "min" in value ? value.min : value.value;
     const max = "max" in value ? value.max : value.value;
@@ -60,7 +56,7 @@ const NONE_TCX = { "@_xsi:type": "None_t" };
 
 const convertTargetValueToTcx = (
   type: string,
-  value: { unit: string; value?: number; min?: number; max?: number },
+  value: TargetValue,
   sport: Sport
 ): Record<string, unknown> => {
   if (type === "heart_rate") return convertHeartRateToTcx(value);
