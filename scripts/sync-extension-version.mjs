@@ -8,6 +8,7 @@ const ALL_EXTENSIONS = [
   "train2go-bridge",
   "tanita-bridge",
   "trainingpeaks-bridge",
+  "whoop-bridge",
 ];
 
 const requested = process.argv[2];

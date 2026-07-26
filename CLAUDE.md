@@ -18,6 +18,9 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
 - `@kaiord/garmin-bridge` - Chrome extension for SPA-to-Garmin Connect integration (private)
 - `@kaiord/train2go-bridge` - Chrome extension for reading Train2Go coaching plans (private)
+- `@kaiord/whoop-bridge` - Chrome extension for WHOOP health data via session piggyback (private)
+- `@kaiord/trainingpeaks-bridge` - Chrome extension for TrainingPeaks body metrics (private)
+- `@kaiord/tanita-bridge` - Chrome extension for MyTANITA body-composition export (private)
 - `@kaiord/workout-spa-editor` - React web application (private)
 
 ## Commands
@@ -132,8 +135,9 @@ import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 ## Code Style
 
 - **TypeScript strict mode** - No implicit `any`
-  - **Documented exception — bridge extensions**: `packages/garmin-bridge`,
-    `packages/train2go-bridge`, and `packages/whoop-bridge` are plain
+  - **Documented exception — bridge extensions**: the `packages/*-bridge`
+    packages (`garmin-bridge`, `train2go-bridge`, `whoop-bridge`,
+    `trainingpeaks-bridge`, `tanita-bridge`) are plain
     JavaScript. Chrome extensions ship as flat, unbundled files that the
     packager copies verbatim, with shared code vendored by byte-copy (see
     `openspec/specs/bridge-core/spec.md` for the packaging/vendoring

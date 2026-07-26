@@ -3,9 +3,9 @@
  * Mechanical guard: extension icons MUST be visually distinct.
  *
  * Two checks per size:
- *   (a) Inter-bridge mean per-pixel color delta MUST exceed a fixed
- *       threshold so the user can tell Garmin from Train2Go in the
- *       browser toolbar at every size (especially 16x16).
+ *   (a) For every bridge pair, the mean per-pixel color delta MUST
+ *       exceed a fixed threshold so the user can tell the bridges
+ *       apart in the browser toolbar at every size (especially 16x16).
  *   (b) At 16x16, the bridge's accent color (within ±15° hue tolerance
  *       of the bridge's accent token) MUST occupy ≥25% of the
  *       non-transparent pixel mass — guards against a thin-stripe
@@ -26,6 +26,9 @@ const REPO_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const BRIDGES = [
   { name: "garmin-bridge", accent: "#007cc3" },
   { name: "train2go-bridge", accent: "#f74464" },
+  { name: "whoop-bridge", accent: "#7c3aed" },
+  { name: "trainingpeaks-bridge", accent: "#eab308" },
+  { name: "tanita-bridge", accent: "#4ade80" },
 ];
 const SIZES = [16, 48, 128];
 const MEAN_COLOR_DELTA_THRESHOLD = 8;
@@ -101,17 +104,20 @@ const accentMassPct = (raw, accentHex) => {
 const main = async () => {
   const violations = [];
   for (const size of SIZES) {
-    const a = await loadRaw(
-      join(REPO_ROOT, "packages", BRIDGES[0].name, "icons", `icon${size}.png`)
+    const raws = await Promise.all(
+      BRIDGES.map(({ name }) =>
+        loadRaw(join(REPO_ROOT, "packages", name, "icons", `icon${size}.png`))
+      )
     );
-    const b = await loadRaw(
-      join(REPO_ROOT, "packages", BRIDGES[1].name, "icons", `icon${size}.png`)
-    );
-    const delta = meanColorDelta(a, b);
-    if (delta < MEAN_COLOR_DELTA_THRESHOLD) {
-      violations.push(
-        `icons at ${size}x${size}: mean color delta ${delta.toFixed(2)} < ${MEAN_COLOR_DELTA_THRESHOLD}`
-      );
+    for (let i = 0; i < BRIDGES.length; i += 1) {
+      for (let j = i + 1; j < BRIDGES.length; j += 1) {
+        const delta = meanColorDelta(raws[i], raws[j]);
+        if (delta < MEAN_COLOR_DELTA_THRESHOLD) {
+          violations.push(
+            `${BRIDGES[i].name} vs ${BRIDGES[j].name} icons at ${size}x${size}: mean color delta ${delta.toFixed(2)} < ${MEAN_COLOR_DELTA_THRESHOLD}`
+          );
+        }
+      }
     }
   }
   // Pixel-mass check at the smallest size only — the threshold is most
