@@ -21,9 +21,6 @@ const EXPECTED_FIRST_WEIGHT = {
   weightKilograms: FIRST_WEIGHT_KG,
 };
 
-const documents = trainingPeaksMetricsToKrd(TRAININGPEAKS_METRICS_FIXTURE);
-const [first, second] = documents;
-
 describe("trainingPeaksMetricsToKrd", () => {
   it("should emit one KRD document per entry that carries a weight reading", () => {
     // Arrange
@@ -38,36 +35,39 @@ describe("trainingPeaksMetricsToKrd", () => {
 
   it("should map a weight detail to a KRD weight_measurement document", () => {
     // Arrange
-    const document = first;
+    const response = TRAININGPEAKS_METRICS_FIXTURE;
 
     // Act
-    const health = document?.extensions?.health;
+    const [document] = trainingPeaksMetricsToKrd(response);
 
     // Assert
     expect(document?.type).toBe("weight_measurement");
     expect(document?.metadata.manufacturer).toBe("trainingpeaks");
-    expect(health?.weight).toEqual(EXPECTED_FIRST_WEIGHT);
+    expect(document?.extensions?.health?.weight).toEqual(EXPECTED_FIRST_WEIGHT);
   });
 
   it.each([
     {
       scenario: "a naive timestamp anchored to UTC",
-      document: first,
+      index: 0,
       expected: FIRST_MEASURED_AT,
     },
     {
       scenario: "a zoned timestamp passed through unchanged",
-      document: second,
+      index: 1,
       expected: SECOND_MEASURED_AT,
     },
-  ])("should emit $scenario", ({ document, expected }) => {
+  ])("should emit $scenario", ({ index, expected }) => {
     // Arrange
+    const response = TRAININGPEAKS_METRICS_FIXTURE;
 
     // Act
-    const measuredAt = document?.extensions?.health?.weight?.measuredAt;
+    const documents = trainingPeaksMetricsToKrd(response);
 
     // Assert
-    expect(measuredAt).toBe(expected);
+    expect(documents[index]?.extensions?.health?.weight?.measuredAt).toBe(
+      expected
+    );
   });
 
   it.each([
@@ -112,10 +112,10 @@ describe("trainingPeaksMetricsToKrd", () => {
 
   it("should produce documents that validate against the KRD schema", () => {
     // Arrange
-    const candidates = documents;
+    const response = TRAININGPEAKS_METRICS_FIXTURE;
 
     // Act
-    const allValid = candidates.every(
+    const allValid = trainingPeaksMetricsToKrd(response).every(
       (document) => krdSchema.safeParse(document).success
     );
 

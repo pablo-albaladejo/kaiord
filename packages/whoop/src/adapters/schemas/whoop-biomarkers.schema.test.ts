@@ -8,7 +8,6 @@ import {
 } from "./whoop-biomarkers.schema";
 
 const FIXTURE_BIOMARKER_COUNT = 4;
-const MEASURED_BIOMARKER_COUNT = 3;
 const TEST_ENTRY = { id: "1", display_name: "Blood" };
 
 describe("whoopBiomarkerTestsResponseSchema", () => {
@@ -95,7 +94,6 @@ describe("measuredBiomarkers", () => {
     const measured = measuredBiomarkers(summary);
 
     // Assert
-    expect(measured).toHaveLength(MEASURED_BIOMARKER_COUNT);
     expect(measured.map((b) => b.biomarker_name)).toEqual([
       "alt",
       "hdl_cholesterol",
