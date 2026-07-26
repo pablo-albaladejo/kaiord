@@ -6,28 +6,32 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { renderCoachingInline } from "../../organisms/CoachingSidebar/coaching-inline";
 import { formatCoachingDescription } from "../../organisms/CoachingSidebar/format-coaching-description";
+import { DialogDescriptionError } from "./coaching-dialog-description-error";
+import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
 
-export const STATUS_LABEL: Record<string, string> = {
-  pending: "Pending",
-  completed: "Completed",
-  skipped: "Skipped",
+export const DialogHeader = ({ activity }: { activity: CoachingActivity }) => {
+  const t = useTranslate("coaching");
+  return (
+    <div className="flex items-center justify-between">
+      <Dialog.Title className="text-lg font-semibold">
+        {activity.title}
+      </Dialog.Title>
+      <Dialog.Close asChild>
+        <button
+          type="button"
+          aria-label={t("dialog.closeAria")}
+          className="p-1"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </Dialog.Close>
+    </div>
+  );
 };
-
-export const DialogHeader = ({ activity }: { activity: CoachingActivity }) => (
-  <div className="flex items-center justify-between">
-    <Dialog.Title className="text-lg font-semibold">
-      {activity.title}
-    </Dialog.Title>
-    <Dialog.Close asChild>
-      <button type="button" aria-label="Close" className="p-1">
-        <X className="h-4 w-4" />
-      </button>
-    </Dialog.Close>
-  </div>
-);
 
 export const DialogMeta = ({ activity }: { activity: CoachingActivity }) => (
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -42,23 +46,30 @@ export const DialogMeta = ({ activity }: { activity: CoachingActivity }) => (
 
 export const DialogDescription = ({
   activity,
+  load,
 }: {
   activity: CoachingActivity;
+  load: DescriptionLoad;
 }) => {
+  const t = useTranslate("coaching");
   if (activity.description === undefined) {
+    if (load.reason)
+      return (
+        <DialogDescriptionError reason={load.reason} onRetry={load.retry} />
+      );
     return (
       <p
         data-testid="coaching-dialog-description-loading"
         className="text-xs italic text-muted-foreground"
       >
-        Loading description…
+        {t("dialog.loadingDescription")}
       </p>
     );
   }
   if (!activity.description) return null;
   const paragraphs = formatCoachingDescription(activity.description);
   return (
-    <div className="space-y-2 border-t pt-3 text-sm leading-relaxed">
+    <div className="space-y-2 border-t border-edge pt-3 text-sm leading-relaxed">
       {paragraphs.map((p, pi) => (
         <p key={pi}>
           {p.inlines.map((inline, ii) =>

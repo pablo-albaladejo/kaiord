@@ -1,8 +1,10 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { ValidationResult } from "./validation-types";
 
 export const validatePaceTarget = (
   unit: string,
-  numericValue: number
+  numericValue: number,
+  t: Translate = getTranslate("targets")
 ): ValidationResult => {
   if (unit === "zone") {
     if (
@@ -12,14 +14,14 @@ export const validatePaceTarget = (
     ) {
       return {
         isValid: false,
-        error: "Pace zone must be between 1 and 5",
+        error: t("validation.paceZoneRange"),
       };
     }
   } else if (unit === "mps") {
     if (numericValue > 20) {
       return {
         isValid: false,
-        error: "Pace cannot exceed 20 m/s",
+        error: t("validation.paceMaxMps"),
       };
     }
   }
@@ -48,13 +50,14 @@ export const validatePaceRange = (
 
 export const validateCadenceTarget = (
   unit: string,
-  numericValue: number
+  numericValue: number,
+  t: Translate = getTranslate("targets")
 ): ValidationResult => {
   if (unit === "rpm") {
     if (numericValue > 300) {
       return {
         isValid: false,
-        error: "Cadence cannot exceed 300 RPM",
+        error: t("validation.cadenceMaxRpm"),
       };
     }
   }

@@ -43,7 +43,7 @@ export function WeekNavigation({ weekId, weekLabel }: WeekNavigationProps) {
       <button
         type="button"
         onClick={goToday}
-        className="rounded border px-3 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+        className="rounded border border-edge px-3 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
       >
         Today
       </button>

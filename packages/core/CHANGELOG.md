@@ -1,5 +1,74 @@
 # @kaiord/core
 
+## 10.0.0
+
+### Minor Changes
+
+- 9f08136: feat(core): add `planned-session` and `activity` managed data types
+
+  Replace the decorative `training-plan` type with first-class `planned-session`
+  (a single coach-prescribed session) and add `activity` (an executed session:
+  mandatory summary + optional recorded KRD). Give `training-zones` a real schema
+  so `MANAGED_DATA_REGISTRY` carries zero `z.unknown()` passthroughs. The
+  `read:training-plan` capability token stays mapped N:1 to `planned-session`
+  (no rename); `read:activities` is introduced for the executed-activity pull.
+
+- d777295: feat(core): add stable, language-free `code` to `ValidationError`
+
+  Validation failures now carry an optional machine `code` (e.g. `min_gt_max`,
+  `duration_type_mismatch`, or the native Zod issue code) alongside the English
+  `message`, so presentation layers can localize by code instead of matching
+  message text. Additive and backward-compatible: `code` is optional and the
+  `message` wording is unchanged.
+
+- 63c4cb6: Preserve Train2Go coach instructions (including YouTube/Dropbox links) through
+  import → KRD → export.
+
+  - **KRD**: `workoutSchema` gains an optional workout-level `notes` field for
+    coach instructions (distinct from per-step `notes`), documented in the KRD
+    format spec. No length cap in KRD; adapters truncate best-effort.
+  - **ZWO**: workout-level `notes` round-trips as the ZWO workout `description`
+    (legacy `extensions.zwift.description` still read for backward compatibility).
+  - **FIT/Garmin**: workout-level `notes` are attached best-effort to the first
+    step's note, truncated to the 256-char FIT limit (an acknowledged
+    format constraint, surfaced via the existing truncation warning).
+  - **SPA editor**: the coach description now flows into the converted workout's
+    KRD `notes` (not just the sidebar `raw.description`), is prefetched on demand
+    before AI/manual conversion when a weekly import left it unloaded, and is
+    viewable/editable in the workout metadata editor.
+
+- a2a5b12: feat(core): add read-only `heart-rate-series` health sub-schema for uniform-interval daily HR traces
+- 78c1866: feat(core): add read-only `strain` and `vitals` health sub-schemas for wearable-session metrics
+
+### Patch Changes
+
+- 6025135: chore(deps): bump the minor-and-patch group across 1 directory with 47 updates
+- e167efe: chore(deps): bump @noble/hashes from 1.8.0 to 2.2.0
+- 32c4c1c: chore(deps-dev): bump @types/node from 25.7.0 to 26.1.0
+- 95da9fa: Internal code-reduction sweep: remove dead files, unused re-exports and types,
+  consolidate genuine duplication, and drop redundant constructs across packages.
+
+  No public API or runtime behavior change — every removed symbol was unused
+  (grep-confirmed across the monorepo) and none belonged to a package's published
+  `src/index.ts` surface. The `@kaiord/zwo` `zod` dependency is dropped (its only
+  users were the deleted schemas). All test suites stay green and coverage is at
+  or above baseline in every package.
+
+- 372db2c: Internal code reduction, no behavior change.
+- dfa21e6: Internal code reduction, no behavior change.
+
+  Inline two single-use pass-through re-export barrels (`ports/index.ts` and
+  `application/index.ts`) into the package entry point. The public `@kaiord/core`
+  API surface is unchanged.
+
+- 0841993: Point every package's `homepage` at its kaiord.com docs page instead of the
+  package's own npm page (a circular link), and broaden `keywords` with the
+  search terms people actually use (fit-parser, fit-converter, zwift-workout,
+  tcx-parser, garmin-connect-api, mcp-server, fit-to-tcx, …) so the packages
+  surface in npm and search-engine queries. `@kaiord/mcp` also gains the
+  `mcpName` field and a `server.json` so it can be published to the official
+  MCP registry (registry.modelcontextprotocol.io).
+
 ## 9.2.0
 
 ### Minor Changes

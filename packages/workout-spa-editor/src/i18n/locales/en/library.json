@@ -1,0 +1,116 @@
+{
+  "page": {
+    "loading": "Loading library..."
+  },
+  "header": {
+    "title": "Library",
+    "count_one": "{{count}} workout",
+    "count_other": "{{count}} workouts"
+  },
+  "search": {
+    "placeholder": "Search workouts...",
+    "ariaLabel": "Search workouts"
+  },
+  "sport": {
+    "all": "All",
+    "cycling": "Cycling",
+    "running": "Running",
+    "swim": "Swim"
+  },
+  "empty": {
+    "title": "Your library is empty",
+    "message": "Save a workout to your library to get started.",
+    "createMessage": "Create your first workout and save it to your library to get started.",
+    "filteredTitle": "No workouts found",
+    "filteredMessage": "No workouts match your current filters."
+  },
+  "card": {
+    "schedule": "Schedule",
+    "load": "Load",
+    "loadAria": "Load {{name}} into editor",
+    "deleteAria": "Delete {{name}}",
+    "thumbnailAlt": "{{name}} preview"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save"
+  },
+  "deleteDialog": {
+    "title": "Delete Workout",
+    "confirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+  },
+  "filters": {
+    "clearFilters": "Clear Filters",
+    "tagsLabel": "Tags:",
+    "sport": {
+      "label": "Sport",
+      "all": "All Sports",
+      "cycling": "Cycling",
+      "running": "Running",
+      "swimming": "Swimming",
+      "generic": "Generic"
+    },
+    "difficulty": {
+      "label": "Difficulty",
+      "all": "All Levels",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "sortBy": {
+      "label": "Sort By",
+      "name": "Name",
+      "dateCreated": "Date Created",
+      "difficulty": "Difficulty"
+    },
+    "sortOrder": {
+      "label": "Order",
+      "asc": "Ascending",
+      "desc": "Descending"
+    }
+  },
+  "saveDialog": {
+    "title": "Save to Library",
+    "description": "Add details to organize your workout in the library.",
+    "saving": "Saving...",
+    "name": {
+      "label": "Workout Name *",
+      "placeholder": "e.g., Sweet Spot Intervals"
+    },
+    "tags": {
+      "label": "Tags (comma-separated)",
+      "placeholder": "e.g., intervals, endurance"
+    },
+    "difficulty": {
+      "label": "Difficulty",
+      "placeholder": "Select difficulty",
+      "easy": "Easy",
+      "moderate": "Moderate",
+      "hard": "Hard",
+      "veryHard": "Very Hard"
+    },
+    "notes": {
+      "label": "Notes",
+      "placeholder": "Add notes about this workout...",
+      "charCount": "{{count}}/1000 characters"
+    }
+  },
+  "staleDialog": {
+    "title": "Stale Workout Conflict",
+    "description": "The source description has changed since you last edited this workout. Your edits may conflict with the new content.",
+    "viewDiff": "View Diff",
+    "reprocess": "Re-process Anyway",
+    "keepVersion": "Keep My Version"
+  },
+  "toast": {
+    "deleteFailed": "Delete Failed",
+    "deleteFailedDescription": "Failed to delete template",
+    "templateLoaded": "Template loaded",
+    "workoutSaved": "Workout Saved",
+    "workoutSavedDescription": "\"{{name}}\" has been added to your library",
+    "saveFailed": "Save Failed",
+    "saveFailedDescription": "Failed to save workout"
+  }
+}

@@ -7,6 +7,7 @@
 
 import React, { useMemo } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { flattenWorkoutSteps } from "./flatten-steps";
 import type { PreviewBar, WorkoutPreviewProps } from "./workout-preview-types";
 import { WorkoutPreviewBar } from "./WorkoutPreviewBar";
@@ -53,6 +54,7 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   className = "",
   height = 80,
 }) => {
+  const t = useTranslate("workout-detail");
   const layout = useMemo(() => {
     const bars = flattenWorkoutSteps(workout);
     const total = bars.reduce((s, b) => s + b.durationSeconds, 0);
@@ -66,7 +68,7 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
     <div
       className={`overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 ${className}`}
       role="region"
-      aria-label="Workout preview"
+      aria-label={t("preview.region")}
       data-testid="workout-preview"
     >
       <svg
@@ -75,7 +77,7 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
         viewBox={`0 0 ${VIEWBOX_WIDTH} ${height}`}
         preserveAspectRatio="none"
         role="group"
-        aria-label="Workout step bars"
+        aria-label={t("preview.bars")}
       >
         {layout.map((bar) => (
           <WorkoutPreviewBar

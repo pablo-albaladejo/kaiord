@@ -6,6 +6,8 @@
 
 import React from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
+
 export type StatValueProps = {
   value: string | number | null;
   hasEstimate?: boolean;
@@ -17,6 +19,7 @@ export const StatValue: React.FC<StatValueProps> = ({
   hasEstimate = false,
   emptyText = "—",
 }) => {
+  const t = useTranslate("workout-detail");
   if (value === null || value === undefined) {
     return <span className="text-gray-500">{emptyText}</span>;
   }
@@ -27,7 +30,7 @@ export const StatValue: React.FC<StatValueProps> = ({
       {hasEstimate && (
         <span
           className="ml-1 text-xs text-gray-500"
-          title="Estimate due to open-ended steps"
+          title={t("stats.estimateIndicatorTitle")}
         >
           *
         </span>

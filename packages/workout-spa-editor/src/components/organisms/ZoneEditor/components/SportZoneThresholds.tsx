@@ -4,6 +4,7 @@
  * Threshold inputs for a sport based on its capabilities.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { SportThresholds } from "../../../../types/sport-zones";
 import { PaceInput } from "./PaceInput";
 import { ThresholdInput } from "./ThresholdInput";
@@ -19,6 +20,7 @@ export function SportZoneThresholds({
   capabilities,
   onChange,
 }: SportZoneThresholdsProps) {
+  const t = useTranslate("zones");
   return (
     <div className="mb-4 flex flex-wrap gap-4">
       {capabilities.hr && (
@@ -39,7 +41,7 @@ export function SportZoneThresholds({
       )}
       {capabilities.pace && (
         <PaceInput
-          label="Threshold Pace"
+          label={t("threshold.pace")}
           unit={thresholds.paceUnit === "min_per_100m" ? "/100m" : "/km"}
           value={thresholds.thresholdPace}
           onChange={(v) =>

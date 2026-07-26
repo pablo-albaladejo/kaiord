@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { convertCoachingActivity } from "../../../application/coaching/convert-coaching-activity";
 import { useAnalytics } from "../../../contexts";
 import { usePersistence } from "../../../contexts/persistence-context";
+import { useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 
@@ -28,6 +29,7 @@ export const useCoachingConvert = (
 ): UseCoachingConvert => {
   const persistence = usePersistence();
   const analytics = useAnalytics();
+  const t = useTranslate("coaching");
   const [, navigate] = useLocation();
   const [error, setError] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
@@ -40,7 +42,7 @@ export const useCoachingConvert = (
     try {
       const sourceId = parseSourceId(activity);
       if (!sourceId) {
-        setError("Invalid activity id");
+        setError(t("hooks.invalidActivityId"));
         return;
       }
       const record = await persistence.coaching.getByProfileAndSourceId(
@@ -49,7 +51,7 @@ export const useCoachingConvert = (
         sourceId
       );
       if (!record) {
-        setError("Activity not found");
+        setError(t("hooks.activityNotFound"));
         return;
       }
       const result = await convertCoachingActivity(
@@ -64,11 +66,13 @@ export const useCoachingConvert = (
       onClose();
       navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Conversion failed");
+      setError(
+        err instanceof Error ? err.message : t("hooks.conversionFailed")
+      );
     } finally {
       setConverting(false);
     }
-  }, [activity, targetProfileId, analytics, persistence, navigate, onClose]);
+  }, [activity, targetProfileId, analytics, persistence, navigate, onClose, t]);
 
   return { error, converting, setError, handleConvert };
 };

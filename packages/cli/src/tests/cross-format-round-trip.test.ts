@@ -145,6 +145,28 @@ describe("Cross-format round-trip: FIT → KRD → TCX → KRD", () => {
     }
   });
 
+  it("should serialize FIT repeat blocks to a TCX Repeat_t without throwing", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const fitReader = createFitReader(logger);
+    const tcxWriter = createTcxWriter(logger);
+    const fitBuffer = loadFitFixture("WorkoutRepeatSteps.fit");
+
+    // Act
+    const krdFromFit = await fitReader(fitBuffer);
+    const tcxXml = await tcxWriter(krdFromFit);
+
+    // Assert
+    const repeatBlock = extractWorkout(krdFromFit).steps.find(
+      (step): step is RepetitionBlock => "repeatCount" in step
+    );
+    expect(repeatBlock).toBeDefined();
+    expect(tcxXml).toContain('xsi:type="Repeat_t"');
+    expect(tcxXml).toContain(
+      `<Repetitions>${repeatBlock?.repeatCount}</Repetitions>`
+    );
+  });
+
   it("should keep representable target values within round-trip tolerances", async () => {
     // Arrange
     const logger = createMockLogger();

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Profile } from "../../../types/profile";
 import { getUnitOptions, getValueLabel, getValuePlaceholder } from "./helpers";
 import type { TargetPickerState } from "./useTargetPickerState";
@@ -7,8 +8,9 @@ export function useTargetPickerProps(
   error?: string,
   activeProfile?: Profile | null
 ) {
+  const t = useTranslate("targets");
   const displayError = error || state.validationError;
-  const unitOptions = getUnitOptions(state.targetType, activeProfile) || [];
+  const unitOptions = getUnitOptions(state.targetType, activeProfile, t) || [];
 
   return {
     targetType: state.targetType,
@@ -18,8 +20,14 @@ export function useTargetPickerProps(
     maxValue: state.maxValue,
     displayError,
     unitOptions,
-    getValueLabel,
-    getValuePlaceholder,
+    getValueLabel: (
+      type: "power" | "heart_rate" | "pace" | "cadence" | "open",
+      unit: string
+    ) => getValueLabel(type, unit, t),
+    getValuePlaceholder: (
+      type: "power" | "heart_rate" | "pace" | "cadence" | "open",
+      unit: string
+    ) => getValuePlaceholder(type, unit, t),
     activeProfile,
   };
 }

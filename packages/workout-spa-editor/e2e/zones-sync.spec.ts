@@ -36,6 +36,16 @@ const FIXTURE_SWIMMING_THRESHOLD_PACE_S = 92;
 const MANUAL_HR_BAND_Z4_MAX_BPM = 180;
 const STABILITY_REREAD_TICK_MS = 50;
 const ORCHESTRATOR_PUT_SETTLE_MS = 150;
+// The first bridge action (read-week) only fires once bridge discovery has
+// resolved. On a cold CI runner the SPA's discovery machinery can lag: the
+// self-healing KAIORD_BRIDGE_DISCOVER handshake is emitted 3 s after
+// `bridgeDiscovery.start()`, which itself waits on cold Vite module
+// compilation under load. That chain (start → +3 s DISCOVER → verify ping →
+// effect re-run → syncWeek → readWeek) can crest a tight 10 s deadline even
+// though production has no such deadline and self-heals indefinitely. Give the
+// discovery-gated first action a generous budget so the wait is not racing the
+// runner. Well under the 60 s per-test timeout.
+const AUTOSYNC_FIRST_ACTION_TIMEOUT_MS = 30_000;
 
 type SyncZonesFlag = boolean;
 type CyclingFtp = number | undefined;
@@ -166,24 +176,33 @@ const waitForSyncButton = async (page: Page): Promise<void> => {
   await syncBtn.waitFor({ state: "visible", timeout: 15_000 });
 };
 
-test.describe("Train2Go zones-sync — auto-sync flows", () => {
-  // Firefox has a known timing issue where the bridge-announce handshake
-  // and the useCoachingAutoSync hook race differently, causing the
-  // waitForFunction polls for __T2G_STUB_CALLS__ to time out at 10 s.
-  // The underlying bridge-discovery mechanism relies on window.postMessage
-  // timing that differs on firefox vs chromium/webkit. Tracked for
-  // investigation separately; tests are marked fixme so they don't block CI.
-  test.fixme(
-    ({ browserName }) => browserName === "firefox",
-    "Bridge announce / auto-sync race on firefox — tracked for investigation"
+/**
+ * Wait for a bridge action to be recorded by the stub, on the generous
+ * discovery-gated budget. The timeout MUST ride in the 3rd positional slot —
+ * `waitForFunction(fn, arg, options)`. Passing `{ timeout }` as the 2nd arg
+ * silently swallows it as the page-function argument, leaving the wait on the
+ * ~10 s default; that is what let the first (cold-Vite) action race and flake.
+ */
+const waitForBridgeAction = (page: Page, action: string): Promise<unknown> =>
+  page.waitForFunction(
+    (name) => {
+      const calls =
+        ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
+          { action: string }[] | undefined) ?? [];
+      return calls.some((c) => c.action === name);
+    },
+    action,
+    { timeout: AUTOSYNC_FIRST_ACTION_TIMEOUT_MS }
   );
 
+test.describe("Train2Go zones-sync — auto-sync flows", () => {
   test.beforeEach(async ({ page }) => {
     await installTrain2GoBridgeStub(page);
     await page.goto("/calendar");
     await page.waitForFunction(
       () =>
         Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      undefined,
       { timeout: 10_000 }
     );
     await clearDexie(page);
@@ -200,15 +219,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // Wait for read-week to settle (the auto-sync hook fires it on
     // calendar mount). With syncZones=false the fan-out check returns
     // false BEFORE read-details would queue.
-    await page.waitForFunction(
-      () => {
-        const calls =
-          ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-            { action: string }[] | undefined) ?? [];
-        return calls.some((c) => c.action === "read-week");
-      },
-      { timeout: 10_000 }
-    );
+    await waitForBridgeAction(page, "read-week");
 
     // One extra tick to let any racing fan-out queue if it were going to.
     await page.waitForTimeout(200);
@@ -231,15 +242,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // The auto-sync hook fires on calendar mount → runs syncZones after
     // read-week → reads every Kaiord field empty → writes silently.
     // Wait for read-details to land (the marker for fan-out completion).
-    await page.waitForFunction(
-      () => {
-        const calls =
-          ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
-            { action: string }[] | undefined) ?? [];
-        return calls.some((c) => c.action === "read-details");
-      },
-      { timeout: 10_000 }
-    );
+    await waitForBridgeAction(page, "read-details");
 
     // Wait for the orchestrator's profile.put to settle. Polling Dexie
     // is more deterministic than a fixed sleep because the put is

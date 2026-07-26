@@ -40,13 +40,23 @@ in your own cloud snapshot — never on a Kaiord server.
 
 ## Kaiord Garmin Bridge Extension
 
-- **CSRF Token**: stored in \`chrome.storage.session\`.
+- **OAuth Token**: minted from your Garmin session and stored in \`chrome.storage.local\`.
 - Host: https://connect.garmin.com/*
 - Kaiord origin: https://*.kaiord.com/*
 
 ## Kaiord Train2Go Bridge Extension
 
 - Host: https://app.train2go.com/*
+
+## Kaiord Tanita Bridge Extension
+
+- Host: https://mytanita.eu/*
+- Reads your body-composition CSV export with no password.
+
+## Kaiord TrainingPeaks Bridge Extension
+
+- Host: https://tpapi.trainingpeaks.com/*
+- No password: it exchanges your session cookie for a short-lived access token.
 
 ## Communication Scope
 

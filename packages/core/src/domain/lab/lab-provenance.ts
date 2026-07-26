@@ -7,7 +7,7 @@ import { z } from "zod";
  * than a migration. V1 always writes `source: "manual"`.
  */
 export const labProvenanceSchema = z.object({
-  source: z.enum(["manual", "ai-extracted"]),
+  source: z.enum(["manual", "ai-extracted", "whoop"]),
   sourceBridgeId: z.string().optional(),
   externalId: z.string().optional(),
 });

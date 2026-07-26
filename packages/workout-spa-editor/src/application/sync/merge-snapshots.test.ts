@@ -101,22 +101,66 @@ describe("mergeSnapshots — timestampless tables", () => {
     // Assert
     expect(rows("meta", merged)).toEqual([{ key: "theme", value: "dark" }]);
   });
+});
 
-  it("should keep the usage row from the later manifest exportedAt", () => {
+describe("mergeSnapshots — usageEvents (synced append-only log)", () => {
+  it("should union distinct usageEvents rows from both devices in the same month", () => {
     // Arrange
-    const winningCount = 9;
-    const local = snap("2026-05-01T00:00:00Z", {
-      usage: [{ yearMonth: "2026-05", count: 1 }],
+    const local = snap("2026-07-01T00:00:00Z", {
+      usageEvents: [
+        { id: "a", yearMonth: "2026-07", createdAt: "2026-07-01T00:00:00Z" },
+      ],
     });
-    const remote = snap("2026-05-30T00:00:00Z", {
-      usage: [{ yearMonth: "2026-05", count: winningCount }],
+    const remote = snap("2026-07-02T00:00:00Z", {
+      usageEvents: [
+        { id: "b", yearMonth: "2026-07", createdAt: "2026-07-02T00:00:00Z" },
+      ],
     });
 
     // Act
     const merged = mergeSnapshots(local, remote);
 
     // Assert
-    expect(rows("usage", merged)[0].count).toBe(winningCount);
+    expect(
+      rows("usageEvents", merged)
+        .map((r) => r.id)
+        .sort()
+    ).toEqual(["a", "b"]);
+  });
+
+  it("should dedupe a usageEvents row present on both devices by id", () => {
+    // Arrange
+    const shared = {
+      id: "a",
+      yearMonth: "2026-07",
+      createdAt: "2026-07-01T00:00:00Z",
+    };
+    const local = snap("2026-07-01T00:00:00Z", { usageEvents: [shared] });
+    const remote = snap("2026-07-02T00:00:00Z", { usageEvents: [shared] });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    expect(rows("usageEvents", merged)).toHaveLength(1);
+  });
+
+  it("should suppress a tombstoned usageEvents row", () => {
+    // Arrange
+    const local = snap("2026-07-03T00:00:00Z", { usageEvents: [] }, [
+      { table: "usageEvents", id: "a", deletedAt: "2026-07-03T00:00:00Z" },
+    ]);
+    const remote = snap("2026-07-02T00:00:00Z", {
+      usageEvents: [
+        { id: "a", yearMonth: "2026-07", createdAt: "2026-07-01T00:00:00Z" },
+      ],
+    });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    expect(rows("usageEvents", merged)).toHaveLength(0);
   });
 });
 

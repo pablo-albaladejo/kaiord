@@ -1,6 +1,7 @@
 import { HelpCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { ProfileEntryButton } from "./ProfileEntryButton";
 import { isEntryActive } from "./status-entry-active";
@@ -14,6 +15,7 @@ type StatusEntryButtonsProps = {
 
 export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
   const [location, navigate] = useLocation();
+  const t = useTranslate("common");
   // Athlete is reachable through ProfileEntryButton below, and settings
   // renders in its dedicated trailing slot — rendering either here would
   // duplicate the destination in the same bar.
@@ -33,7 +35,7 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
       ))}
       <span
         data-testid="status-header-divider"
-        className="hidden h-6 w-px bg-gray-200 dark:bg-slate-700 sm:inline-block"
+        className="hidden h-6 w-px bg-gray-200 dark:bg-slate-700 md:inline-block"
         aria-hidden="true"
       />
       <StatusIndicators />
@@ -49,12 +51,12 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
         variant="tertiary"
         size="sm"
         onClick={onHelpClick}
-        aria-label="Open help"
-        title="Help (?)"
+        aria-label={t("a11y.openHelp")}
+        title={t("help.hint")}
         data-testid="status-header-help-button"
       >
         <HelpCircle className="h-4 w-4" />
-        <span className="hidden sm:inline">Help</span>
+        <span className="hidden md:inline">{t("actions.help")}</span>
       </Button>
     </>
   );

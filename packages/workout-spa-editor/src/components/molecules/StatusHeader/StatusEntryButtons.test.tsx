@@ -61,4 +61,28 @@ describe("StatusEntryButtons", () => {
     // Assert
     expect(athlete).toBeNull();
   });
+
+  it("should wrap bottom-nav-duplicated and FAB-covered entries so they hide below md", () => {
+    // Arrange
+    renderAt("/daily");
+
+    // Act
+    const daily = screen.getByTestId("status-header-daily-button");
+    const newButton = screen.getByTestId("status-header-new-button");
+
+    // Assert
+    expect(daily.parentElement).toHaveClass("hidden", "md:inline-flex");
+    expect(newButton.parentElement).toHaveClass("hidden", "md:inline-flex");
+  });
+
+  it("should not wrap entries that have no mobile duplicate", () => {
+    // Arrange
+    renderAt("/daily");
+
+    // Act
+    const trends = screen.getByTestId("status-header-trends-button");
+
+    // Assert
+    expect(trends.parentElement).not.toHaveClass("hidden");
+  });
 });

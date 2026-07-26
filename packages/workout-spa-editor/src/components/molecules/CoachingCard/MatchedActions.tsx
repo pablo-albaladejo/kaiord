@@ -17,6 +17,7 @@
  * Dexie-backed `WorkoutRecord` directly (Option α) so the dialog
  * pushes the persisted state.
  */
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 
 export type MatchedActionsProps = {
@@ -30,6 +31,7 @@ export type MatchedActionsProps = {
 };
 
 export function MatchedActions(props: MatchedActionsProps) {
+  const t = useTranslate("coaching");
   const state = props.workout.state;
   const showAi = state === "raw";
   const showPush = state === "structured" || state === "ready";
@@ -38,9 +40,9 @@ export function MatchedActions(props: MatchedActionsProps) {
       <button
         type="button"
         onClick={props.onClose}
-        className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+        className="rounded-md border border-edge px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
       >
-        Close
+        {t("actions.close")}
       </button>
       <button
         type="button"
@@ -49,7 +51,7 @@ export function MatchedActions(props: MatchedActionsProps) {
         onClick={props.onSplit}
         className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
       >
-        {props.splitting ? "Splitting…" : "Split"}
+        {props.splitting ? t("actions.splitting") : t("actions.split")}
       </button>
       {showPush && (
         <button
@@ -58,7 +60,7 @@ export function MatchedActions(props: MatchedActionsProps) {
           onClick={props.onPushToGarmin}
           className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
         >
-          Push to Garmin
+          {t("actions.pushToGarmin")}
         </button>
       )}
       {showAi && (
@@ -68,16 +70,16 @@ export function MatchedActions(props: MatchedActionsProps) {
           onClick={props.onAiProcess}
           className="rounded-md bg-rose-600 px-3 py-1 text-sm text-white hover:bg-rose-700"
         >
-          Process with AI
+          {t("actions.processWithAi")}
         </button>
       )}
       <button
         type="button"
         data-testid="coaching-dialog-open-editor"
         onClick={props.onOpenEditor}
-        className="rounded-md bg-slate-700 px-3 py-1 text-sm text-white hover:bg-slate-800"
+        className="rounded-md bg-surface-elevated px-3 py-1 text-sm text-ink-strong hover:bg-surface"
       >
-        Open editor
+        {t("actions.openEditor")}
       </button>
     </div>
   );

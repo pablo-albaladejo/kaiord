@@ -1,7 +1,7 @@
 import { useId } from "react";
 
 const FIELD_CLASS =
-  "mt-1 block w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100";
+  "mt-1 block w-full rounded border border-edge bg-surface-deep px-2 py-1.5 text-sm text-ink-strong";
 
 export type IntakeNumberFieldProps = {
   label: string;
@@ -17,7 +17,7 @@ export function IntakeNumberField({
 }: IntakeNumberFieldProps) {
   const id = useId();
   return (
-    <label htmlFor={id} className="flex-1 text-xs font-medium text-slate-300">
+    <label htmlFor={id} className="flex-1 text-xs font-medium text-ink-body">
       {label}
       <input
         id={id}

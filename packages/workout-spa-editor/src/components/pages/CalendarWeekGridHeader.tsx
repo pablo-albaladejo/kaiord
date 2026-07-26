@@ -7,7 +7,11 @@
  * scrolls a tall column body.
  */
 
-const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import type { Locale } from "@kaiord/i18n";
+
+import { useActiveLocale } from "../../i18n/LocaleProvider";
+import { useTranslate } from "../../i18n/use-translate";
+import { shortWeekdayName } from "./calendar-day-labels";
 
 const TODAY_TINT = "bg-primary-50/40 dark:bg-primary-900/20";
 const TODAY_PILL =
@@ -15,13 +19,13 @@ const TODAY_PILL =
 
 const MULTI_WORKOUT_THRESHOLD = 3;
 
-const getDayLabel = (date: string): { name: string; num: number } => {
-  const d = new Date(date + "T12:00:00Z");
-  return {
-    name: DAY_NAMES[(d.getUTCDay() + 6) % 7] ?? "",
-    num: d.getUTCDate(),
-  };
-};
+const getDayLabel = (
+  date: string,
+  locale: Locale
+): { name: string; num: number } => ({
+  name: shortWeekdayName(date, locale),
+  num: new Date(date + "T12:00:00Z").getUTCDate(),
+});
 
 export type CalendarWeekGridHeaderProps = {
   days: string[];
@@ -34,13 +38,15 @@ export function CalendarWeekGridHeader({
   todayDate,
   countFor,
 }: CalendarWeekGridHeaderProps) {
+  const t = useTranslate("calendar");
+  const locale = useActiveLocale();
   return (
     <div
       data-testid="calendar-week-grid-header"
       className="sticky top-0 z-10 mb-2 hidden bg-background sm:grid sm:grid-cols-7 sm:gap-2"
     >
       {days.map((date) => {
-        const label = getDayLabel(date);
+        const label = getDayLabel(date, locale);
         const isToday = date === todayDate;
         const count = countFor(date);
         return (
@@ -55,13 +61,15 @@ export function CalendarWeekGridHeader({
             <span className={isToday ? TODAY_PILL : ""}>
               {label.name} {label.num}
             </span>
-            {isToday && <span className="sr-only"> (today)</span>}
+            {isToday && (
+              <span className="sr-only">{t("gridHeader.todaySuffix")}</span>
+            )}
             {count >= MULTI_WORKOUT_THRESHOLD && (
               <span
                 data-testid={`multi-workout-badge-${date}`}
                 className="ml-auto rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200"
               >
-                {count} activities
+                {t("gridHeader.activities", { count })}
               </span>
             )}
           </div>

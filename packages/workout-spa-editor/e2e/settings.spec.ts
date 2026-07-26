@@ -21,7 +21,7 @@ test.describe("Settings Panel", () => {
     // Open the grouped settings index, then enter the AI Provider section.
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings$/);
-    await page.getByTestId("settings-row-Provider").click();
+    await page.getByTestId("settings-row-provider").click();
     await page.waitForURL(/\/settings\/ai/);
     const settingsPage = page.getByTestId("settings-page");
     await expect(settingsPage).toBeVisible({ timeout: 5000 });
@@ -83,18 +83,23 @@ test.describe("Settings Panel", () => {
     // its own route. Navigate to it via the grouped-list row.
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings$/);
-    await page.getByTestId("settings-row-Extensions").click();
+    await page.getByTestId("settings-row-extensions").click();
     await page.waitForURL(/\/settings\/extensions$/);
 
     const extensionsPanel = page.getByTestId("settings-panel-extensions");
     await expect(extensionsPanel).toBeVisible();
 
+    // The panel renders two bridge tables: the top-level status table and
+    // the body-composition sync card's own table, which repeats the Garmin
+    // Connect row. Scope to the first table so the locator stays unique.
+    const bridgeStatusTable = extensionsPanel.locator("table").first();
+
     // Should show both bridges in the status table
     await expect(
-      extensionsPanel.getByText("Garmin Connect", { exact: true })
+      bridgeStatusTable.getByText("Garmin Connect", { exact: true })
     ).toBeVisible();
     await expect(
-      extensionsPanel.getByText("Train2Go", { exact: true })
+      bridgeStatusTable.getByText("Train2Go", { exact: true })
     ).toBeVisible();
 
     // Should have a refresh button

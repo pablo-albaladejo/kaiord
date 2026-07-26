@@ -1,5 +1,6 @@
 import type { ToleranceViolation } from "@kaiord/core";
 
+import { t } from "../../i18n/index.js";
 import { formatToleranceViolations } from "../../utils/error-formatter.js";
 
 export const formatValidationSuccess = (
@@ -16,7 +17,7 @@ export const formatValidationSuccess = (
       )
     );
   } else if (!opts.quiet) {
-    console.log("Round-trip validation passed");
+    console.log(t("output.roundTripPassed"));
   }
 };
 

@@ -17,7 +17,7 @@ const snapshot = (): Snapshot => ({
     templates: [],
     profiles: [{ id: "p-2" }],
     aiProviders: [],
-    usage: [],
+    syncState: [],
   },
   tombstones: [
     { table: "templates", id: "t-old", deletedAt: "2026-05-20T00:00:00Z" },
@@ -34,7 +34,7 @@ describe("importSnapshot", () => {
         templates: [{ id: "stale-t" }],
         profiles: [],
         aiProviders: [],
-        usage: [],
+        syncState: [],
       },
       tombstones: [] as Snapshot["tombstones"] extends infer T ? T : never,
     };
@@ -60,7 +60,7 @@ describe("importSnapshot", () => {
         templates: [],
         profiles: [],
         aiProviders: [],
-        usage: [],
+        syncState: [],
       },
       tombstones: [],
     };
@@ -95,7 +95,7 @@ describe("importSnapshot", () => {
         templates: [],
         profiles: [],
         aiProviders: [],
-        usage: [],
+        syncState: [],
       },
       tombstones: [],
     } as never);

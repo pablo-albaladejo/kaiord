@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { HealthStressRecord } from "../../../types/health/health-records";
 import { HealthSourceBadge } from "./HealthSourceBadge";
 
@@ -7,13 +8,11 @@ type Props = {
 };
 
 export function TodayStressList({ loading, records }: Props) {
-  if (loading) return <p className="text-sm text-gray-600">Loading…</p>;
+  const t = useTranslate("health");
+  if (loading)
+    return <p className="text-sm text-gray-600">{t("common.loading")}</p>;
   if (!records || records.length === 0) {
-    return (
-      <p className="text-sm text-gray-600">
-        No stress episodes recorded today.
-      </p>
-    );
+    return <p className="text-sm text-gray-600">{t("stress.empty")}</p>;
   }
   return (
     <ul className="space-y-1">
@@ -23,7 +22,10 @@ export function TodayStressList({ loading, records }: Props) {
           className="flex items-center justify-between gap-2 rounded border border-gray-200 p-2 text-sm dark:border-slate-800"
         >
           <span>
-            Avg {r.krd.averageLevel} · Peak {r.krd.peakLevel}
+            {t("stress.avgPeak", {
+              avg: r.krd.averageLevel,
+              peak: r.krd.peakLevel,
+            })}
           </span>
           <HealthSourceBadge sourceBridgeId={r.sourceBridgeId} />
         </li>

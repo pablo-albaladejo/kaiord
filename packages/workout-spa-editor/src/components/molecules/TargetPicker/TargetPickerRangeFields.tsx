@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { TargetPickerRangeInput } from "./TargetPickerRangeInput";
 
 type TargetPickerRangeFieldsProps = {
@@ -17,26 +18,27 @@ export const TargetPickerRangeFields = ({
   onMinChange,
   onMaxChange,
 }: TargetPickerRangeFieldsProps) => {
+  const t = useTranslate("targets");
   const hasError = Boolean(displayError);
 
   return (
     <div className="space-y-3">
       <TargetPickerRangeInput
-        label="Minimum"
+        label={t("range.minLabel")}
         value={minValue}
         onChange={onMinChange}
         disabled={disabled}
-        placeholder="Enter minimum value"
-        ariaLabel="Minimum value"
+        placeholder={t("range.minPlaceholder")}
+        ariaLabel={t("range.minAria")}
         hasError={hasError}
       />
       <TargetPickerRangeInput
-        label="Maximum"
+        label={t("range.maxLabel")}
         value={maxValue}
         onChange={onMaxChange}
         disabled={disabled}
-        placeholder="Enter maximum value"
-        ariaLabel="Maximum value"
+        placeholder={t("range.maxPlaceholder")}
+        ariaLabel={t("range.maxAria")}
         hasError={hasError}
       />
       {displayError && (

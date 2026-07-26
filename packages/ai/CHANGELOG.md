@@ -1,5 +1,84 @@
 # @kaiord/ai
 
+## 9.3.0
+
+### Minor Changes
+
+- c29b9cf: feat(ai): centralize provider and prompt plumbing behind subpath exports
+
+  Adds two additive subpath exports to `@kaiord/ai`:
+
+  - `@kaiord/ai/providers` — provider model factory (`createLanguageModel`, with
+    an opt-in `{ browser }` flag for the Anthropic direct-browser-access header),
+    the SDK-sourced model catalog and its generation/freshness machinery,
+    `resolveModelForPurpose`, and the provider/credential/binding types.
+    `@ai-sdk/anthropic|openai|google` are now optional peer dependencies.
+  - `@kaiord/ai/prompts` — a versioned prompt registry (`definePrompt`/
+    `resolvePrompt`), the workout-parser and chat system prompts, the generation
+    user-prompt builder with its Spanish coaching dictionary, and the
+    untrusted-data fence utility.
+
+  Existing root exports (`createTextToWorkout`, `createChatAgent`, `ChatTool`, …)
+  are unchanged. No breaking change.
+
+- d777295: feat(ai): tag input-validation errors with a stable reason and details
+
+  `AiParsingError` gains optional `reason` (`input_empty` | `input_too_long`)
+  and `details` (e.g. `{ maxLength, actualLength }`) fields, set by
+  `validateInput`, so consumers can localize or branch on the specific failure
+  by code instead of matching the English message. Additive and
+  backward-compatible: both fields are optional and the constructor's new
+  `options` argument defaults to none.
+
+- b40f4a0: Add the agent runtime (Wave 2 kickoff). New `@kaiord/ai/agents` subpath ships a
+  declarative `AgentDefinition` and a generate-mode runtime with multimodal
+  document input, a validate-and-retry-with-feedback loop, token-usage reporting,
+  and cancellation. New `@kaiord/ai/observability` subpath ships a minimal,
+  redaction-safe telemetry port (`run_finished`/`run_failed`) with console and
+  ring-buffer sinks. A new shipped `lab-extractor` agent extracts structured lab
+  values from a report document, and a deterministic keyless eval lane on
+  `MockLanguageModelV4` exercises the real runtime in CI. `createTextToWorkout`
+  becomes a behavior-preserving deprecated wrapper over the runtime. All additive;
+  no breaking changes.
+- 7c15906: feat(ai): forward an optional telemetry sink through the text-to-workout wrapper
+
+  `TextToWorkoutConfig` gains an optional `telemetry?: AiTelemetrySink` field. When
+  supplied, `createTextToWorkout` forwards it to the generate-mode runtime it
+  already delegates to, so a workout-generation run emits `run_finished`/
+  `run_failed` through the same observability port as the agent runtime. Additive
+  and behavior-preserving: the field is optional, the deprecated wrapper keeps its
+  signature and `AiParsingError` semantics, and omitting it is unchanged. No
+  breaking change.
+
+### Patch Changes
+
+- 8e6b497: chore(deps): bump ai from 6.0.177 to 7.0.14
+- e4dad42: chore(deps): bump @ai-sdk/anthropic from 3.0.85 to 4.0.7
+- 6025135: chore(deps): bump the minor-and-patch group across 1 directory with 47 updates
+- 32c4c1c: chore(deps-dev): bump @types/node from 25.7.0 to 26.1.0
+- 95da9fa: Internal code-reduction sweep: remove dead files, unused re-exports and types,
+  consolidate genuine duplication, and drop redundant constructs across packages.
+
+  No public API or runtime behavior change — every removed symbol was unused
+  (grep-confirmed across the monorepo) and none belonged to a package's published
+  `src/index.ts` surface. The `@kaiord/zwo` `zod` dependency is dropped (its only
+  users were the deleted schemas). All test suites stay green and coverage is at
+  or above baseline in every package.
+
+- Updated dependencies [6025135]
+- Updated dependencies [e167efe]
+- Updated dependencies [32c4c1c]
+- Updated dependencies [95da9fa]
+- Updated dependencies [372db2c]
+- Updated dependencies [dfa21e6]
+- Updated dependencies [9f08136]
+- Updated dependencies [d777295]
+- Updated dependencies [0841993]
+- Updated dependencies [63c4cb6]
+- Updated dependencies [a2a5b12]
+- Updated dependencies [78c1866]
+  - @kaiord/core@10.0.0
+
 ## 9.2.0
 
 ### Minor Changes

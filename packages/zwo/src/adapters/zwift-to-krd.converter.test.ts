@@ -101,8 +101,22 @@ describe("convertZwiftToKRD (characterization)", () => {
 
     // Assert
     expect(krd.metadata.manufacturer).toBe("dynastream");
-    expect(krd.metadata.serialNumber).toBe(PARSER_NUMERICS.ID_1234);
+    expect(krd.metadata.serialNumber).toBe(String(PARSER_NUMERICS.ID_1234));
     expect(krd.metadata.created).toBe("2009-09-09T20:38:00.000Z");
+  });
+
+  it("should coerce a numeric ZWO serialNumber to a string in KRD", () => {
+    // Arrange
+    const zwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
+    const zwoData = parseZwiftXml(zwoXml);
+    const logger = createMockLogger();
+
+    // Act
+    const krd = convertZwiftToKRD(zwoData, logger);
+
+    // Assert
+    expect(typeof krd.metadata.serialNumber).toBe("string");
+    expect(krd.metadata.serialNumber).toBe(String(PARSER_NUMERICS.ID_1234));
   });
 
   it("should emit a non-empty steps array for the repeat fixture", () => {

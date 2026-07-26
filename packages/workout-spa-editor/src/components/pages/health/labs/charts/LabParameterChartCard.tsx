@@ -4,11 +4,10 @@
  * reference band and out-of-range markers.
  */
 import { useActiveLocale } from "../../../../../i18n/LocaleProvider";
+import { useTranslate } from "../../../../../i18n/use-translate";
 import { labParameterLabel } from "../lab-parameter-label";
 import { LabParameterChart } from "./LabParameterChart";
 import { useLabValueSeriesLive } from "./use-lab-value-series";
-
-const LOADING = "Loading…";
 
 export const LabParameterChartCard = ({
   profileId,
@@ -19,13 +18,16 @@ export const LabParameterChartCard = ({
 }) => {
   const values = useLabValueSeriesLive(profileId, parameterKey);
   const locale = useActiveLocale();
+  const t = useTranslate("labs-ui");
   return (
     <div data-testid="lab-parameter-chart-card" className="mt-3">
       <h4 className="mb-2 text-sm font-semibold">
-        {labParameterLabel(parameterKey, locale)} evolution
+        {t("chart.evolutionTitle", {
+          label: labParameterLabel(parameterKey, locale),
+        })}
       </h4>
       {values === undefined ? (
-        <p className="text-sm text-gray-600">{LOADING}</p>
+        <p className="text-sm text-gray-600">{t("chart.loading")}</p>
       ) : (
         <LabParameterChart parameterKey={parameterKey} values={values} />
       )}

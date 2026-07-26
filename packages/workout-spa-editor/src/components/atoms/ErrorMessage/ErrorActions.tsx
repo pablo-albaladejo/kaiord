@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../Button/Button";
 
 type ErrorActionsProps = {
@@ -6,6 +7,7 @@ type ErrorActionsProps = {
 };
 
 export const ErrorActions = ({ onRetry, onDismiss }: ErrorActionsProps) => {
+  const t = useTranslate("common");
   if (!onRetry && !onDismiss) return null;
 
   return (
@@ -17,7 +19,7 @@ export const ErrorActions = ({ onRetry, onDismiss }: ErrorActionsProps) => {
           size="sm"
           className="text-red-700 hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-900"
         >
-          Try Again
+          {t("actions.tryAgain")}
         </Button>
       )}
       {onDismiss && (
@@ -27,7 +29,7 @@ export const ErrorActions = ({ onRetry, onDismiss }: ErrorActionsProps) => {
           size="sm"
           className="text-red-700 hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-900"
         >
-          Dismiss
+          {t("actions.dismiss")}
         </Button>
       )}
     </div>

@@ -5,16 +5,16 @@
 
 ## Purpose
 
-Adapter implementations for external integrations. Currently holds the Cloudflare Web Analytics adapter, which wraps the `window.cfBeacon` API and implements the core `Analytics` interface with error handling.
+Adapter implementations for external integrations. Currently holds the Umami analytics adapter, which wraps the `window.umami` API and implements the core `Analytics` interface with error handling.
 
 ## Key Files
 
-- **`analytics/cloudflare-analytics.ts`** (18 LOC) — Factory function `createCloudflareAnalytics()` that returns an `Analytics` object. When token is falsy, returns noop. When token exists, calls `window.cfBeacon.pushEvent()` with error suppression.
-- **`analytics/cloudflare-analytics.test.ts`** (72 LOC) — vitest suite covering both noop (undefined, empty string) and beacon scenarios (event calls, pageView, beacon absent, pushEvent throwing).
+- **`analytics/umami-analytics.ts`** (18 LOC) — Factory function `createUmamiAnalytics(websiteId?: string)` that returns an `Analytics` object. When website id is falsy, returns noop. When website id exists, calls `window.umami.track()` with error suppression.
+- **`analytics/umami-analytics.test.ts`** (72 LOC) — vitest suite covering both noop (undefined, empty string) and tracker scenarios (event calls, pageView, tracker absent, track throwing).
 
 ## Subdirectories
 
-- **`analytics/`** — Cloudflare Web Analytics adapter.
+- **`analytics/`** — Umami analytics adapter.
 
 ## For AI Agents
 
@@ -51,7 +51,7 @@ Adapter implementations for external integrations. Currently holds the Cloudflar
 
 ## Notes
 
-- **Cloudflare Web Analytics** — beacon is injected into the page by a `<script>` tag in `index.html` (controlled by the `conditionalBeacon` Vite plugin). This adapter assumes the beacon is available on `window.cfBeacon` if the token was provided.
-- **No analytics on token missing** — if `VITE_CF_ANALYTICS_TOKEN` is not set at build time, the beacon script is stripped from HTML and the adapter returns noop.
+- **Umami** — tracker script is injected into the page by a `<script>` tag in `index.html` (controlled by the `conditionalUmami` Vite plugin). This adapter assumes the tracker is available on `window.umami` if the website id was provided.
+- **No analytics on website id missing** — if `VITE_UMAMI_WEBSITE_ID` is not set at build time, the tracker script is stripped from HTML and the adapter returns noop.
 
 <!-- MANUAL: -->

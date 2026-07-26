@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 
 import { useDayEnergyBalance } from "../../../hooks/energy/use-day-energy-balance";
+import { useTranslate } from "../../../i18n/use-translate";
 import { Card } from "../../atoms/Card";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { GoalSetupDialog } from "../../molecules/GoalSetupDialog/GoalSetupDialog";
@@ -25,6 +26,7 @@ export type EnergyBalanceCardProps = {
  * BMR inputs are missing for an uncovered day.
  */
 export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
+  const t = useTranslate("daily");
   const [goalOpen, setGoalOpen] = useState(false);
   const result = useDayEnergyBalance(profileId, date);
   if (result === undefined) return null;
@@ -36,28 +38,28 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
     result.balance.macro_targets !== undefined;
   return (
     <Card
-      className="bg-primary-900 border-slate-800 p-4"
+      className="bg-surface border-edge p-4"
       data-testid="energy-balance-card"
     >
       <div className="flex items-center gap-3">
         <Icon icon={ICON_MAP.flame} size="md" color="inherit" />
-        <p className="text-[15px] font-semibold text-slate-100 m-0">
-          Energy balance
+        <p className="text-[15px] font-semibold text-ink-strong m-0">
+          {t("energyBalance.title")}
         </p>
         {profileId && (
           <button
             type="button"
             onClick={() => setGoalOpen(true)}
             data-testid="energy-balance-set-goal"
-            className="ml-auto text-[13px] font-semibold text-blue-400"
+            className="ml-auto text-[13px] font-semibold text-accent"
           >
-            Set goal
+            {t("energyBalance.setGoal")}
           </button>
         )}
       </div>
       <EnergyBalanceStats vm={vm} />
       {hasMacros && (
-        <div className="mt-4 border-t border-slate-800 pt-4">
+        <div className="mt-4 border-t border-edge pt-4">
           <MacroRings
             actuals={result.balance.macro_actuals}
             targets={result.balance.macro_targets}
@@ -68,9 +70,9 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
       <Link
         href="/nutrition"
         data-testid="energy-balance-nutrition-link"
-        className="mt-3 block text-[13px] font-semibold text-blue-400"
+        className="mt-3 block text-[13px] font-semibold text-accent"
       >
-        Log nutrition
+        {t("energyBalance.logNutrition")}
       </Link>
       {profileId && (
         <GoalSetupDialog

@@ -16,8 +16,25 @@ export type T2GStubScriptArgs = {
 // eslint-disable-next-line max-lines-per-function -- self-contained on purpose; Playwright `.toString()` serialisation precludes referencing module-level helpers from inside.
 export const installStubScript = (args: T2GStubScriptArgs): void => {
   type Call = { action: string; payload: unknown };
-  const calls: Call[] = [];
-  (window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ = calls;
+  const win = window as unknown as Record<string, unknown>;
+  // Persist call tracking across in-test navigations. `addInitScript` re-runs
+  // on every page load with a fresh `window`, so a per-load array would drop
+  // calls that fired before a navigation — e.g. an auto-sync `read-week` that
+  // fires on `/calendar` right after the profile seed, before the test
+  // navigates to the target week. sessionStorage survives same-tab
+  // navigations, so those actions stay visible to the assertion (this is the
+  // flake `zones-sync (a)` hit on slow/cold engines that synced pre-nav).
+  // The script can also run on an opaque origin (initial about:blank) where
+  // storage access throws, so both paths fall back to the in-memory array.
+  const STORE_KEY = "__T2G_STUB_CALLS_STORE__";
+  win.__T2G_STUB_CALLS__ = [];
+  try {
+    win.__T2G_STUB_CALLS__ = JSON.parse(
+      window.sessionStorage.getItem(STORE_KEY) ?? "[]"
+    ) as Call[];
+  } catch {
+    // opaque-origin storage unavailable — keep the empty in-memory log.
+  }
   // BridgeManifest shape (`id` etc.) — the wire announcement adds
   // `type`, `bridgeId`, `extensionId` on top of these same fields.
   const m = {
@@ -51,7 +68,7 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
     "profile-snapshot": () => wrap(null),
     "profile-snapshot-clear": () => wrap(null),
   };
-  (window as unknown as Record<string, unknown>).chrome = {
+  win.chrome = {
     runtime: {
       lastError: null,
       sendMessage: (
@@ -60,7 +77,14 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
         cb?: (r: unknown) => void
       ): void => {
         const action = String(msg?.action ?? "");
-        calls.push({ action, payload: msg });
+        const arr = (win.__T2G_STUB_CALLS__ as Call[] | undefined) ?? [];
+        arr.push({ action, payload: msg });
+        win.__T2G_STUB_CALLS__ = arr;
+        try {
+          window.sessionStorage.setItem(STORE_KEY, JSON.stringify(arr));
+        } catch {
+          // storage unavailable — the in-memory array still tracks the call.
+        }
         const r = responses[action]?.() ?? {
           ok: false,
           protocolVersion: 1,
@@ -75,12 +99,8 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
   // listen for DISCOVER, AND post repeatedly during the first 6 seconds.
   const post = (): void => void window.postMessage(ann, "*");
   window.addEventListener("message", (e: MessageEvent) => {
-    if (
-      e.source === window &&
-      (e.data as { type?: string } | null)?.type === "KAIORD_BRIDGE_DISCOVER"
-    )
-      post();
+    const d = e.data as { type?: string } | null;
+    if (e.source === window && d?.type === "KAIORD_BRIDGE_DISCOVER") post();
   });
-  for (const delayMs of [0, 250, 500, 1000, 2000, 4000, 6000])
-    setTimeout(post, delayMs);
+  [0, 250, 500, 1000, 2000, 4000, 6000].forEach((d) => setTimeout(post, d));
 };

@@ -4,6 +4,7 @@
  * result: a link to the workout and, when dated, to its calendar week.
  * Any other tool, or a failed run with no `toolResult`, yields no links.
  */
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import { calendarWeekHref } from "../../../routing/calendar-week-href";
 import { withOrigin } from "../../../routing/with-origin";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
@@ -24,7 +25,8 @@ function isWorkoutToolResult(value: unknown): value is WorkoutToolResult {
 }
 
 export function buildToolResultLinks(
-  message: ChatMessageRecord
+  message: ChatMessageRecord,
+  t: Translate = getTranslate("chat")
 ): ToolResultLink[] {
   if (!message.toolName || !LINKABLE_TOOLS.has(message.toolName)) return [];
   if (!isWorkoutToolResult(message.toolResult)) return [];
@@ -33,10 +35,13 @@ export function buildToolResultLinks(
   const links: ToolResultLink[] = [
     {
       href: withOrigin(`/workout/view/${workoutId}`, "chat"),
-      label: "View workout",
+      label: t("toolLinks.viewWorkout"),
     },
   ];
   if (date)
-    links.push({ href: calendarWeekHref(date), label: "View on calendar" });
+    links.push({
+      href: calendarWeekHref(date),
+      label: t("toolLinks.viewCalendar"),
+    });
   return links;
 }

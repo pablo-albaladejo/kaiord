@@ -17,7 +17,10 @@ body {
   width: 320px;
   margin: 0;
   padding: 16px;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   background: var(--bg);
   color: var(--fg);
 }
@@ -63,33 +66,6 @@ body {
   font-size: 14px;
 }
 
-.creds {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-
-.creds__label {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.creds__input {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--fg);
-}
-
-.creds__hint {
-  margin: 4px 0 0;
-  font-size: 11px;
-  color: var(--muted);
-}
-
 .sync {
   min-height: 18px;
   font-size: 12px;
@@ -109,6 +85,8 @@ body {
   border-radius: 10px;
   border: 1px solid var(--line);
   font-weight: 600;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -116,11 +94,6 @@ body {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
-}
-
-.cta-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .cta-secondary {

@@ -20,6 +20,7 @@ export type {
   GoalType,
   HealthExtensionPayload,
   HealthFileType,
+  HeartRateSeries,
   HeartRateValue,
   HrvSummary,
   Intensity,
@@ -45,6 +46,7 @@ export type {
   SleepStage,
   Sport,
   SportCategory,
+  StrainSummary,
   StressEpisode,
   StrokeTypeValue,
   SubSport,
@@ -59,6 +61,7 @@ export type {
   TrainingZones,
   TrainingZoneSet,
   ValidationError,
+  VitalsSummary,
   WeightMeasurement,
   Workout,
   WorkoutStep,
@@ -100,6 +103,8 @@ export {
   goalTypeSchema,
   healthExtensionPayloadSchema,
   healthFileTypes,
+  HEART_RATE_SERIES_BPM_TOLERANCE,
+  heartRateSeriesSchema,
   HRV_TOLERANCE_MS,
   hrvSummarySchema,
   intensitySchema,
@@ -132,6 +137,8 @@ export {
   sleepStageSchema,
   sportCategory,
   sportSchema,
+  STRAIN_SCORE_TOLERANCE,
+  strainSummarySchema,
   STRESS_TOLERANCE,
   stressEpisodeSchema,
   subSportSchema,
@@ -150,6 +157,10 @@ export {
   trainingZonesSchema,
   UnsupportedKrdTypeError,
   validateKrd,
+  VITALS_RESPIRATORY_RATE_TOLERANCE,
+  VITALS_RESTING_HEART_RATE_TOLERANCE,
+  VITALS_SPO2_TOLERANCE,
+  vitalsSummarySchema,
   WEIGHT_TOLERANCE_KG,
   weightMeasurementSchema,
   workoutLikeFileTypes,
@@ -163,26 +174,26 @@ export {
 // Ports
 export { createNoopAnalytics } from "./adapters/analytics/noop-analytics";
 export { createConsoleLogger } from "./adapters/logger/console-logger";
+export type { Analytics, AnalyticsEvent } from "./ports/analytics";
+export type { AuthProvider, TokenData } from "./ports/auth-provider";
 export type {
-  AuthProvider,
   BinaryReader,
   BinaryWriter,
-  ListOptions,
-  Logger,
-  LogLevel,
-  PushResult,
   TextReader,
   TextWriter,
-  TokenData,
-  TokenStore,
+} from "./ports/format-strategy";
+export type { Logger, LogLevel } from "./ports/logger";
+export type { TokenStore } from "./ports/token-store";
+export type {
+  ListOptions,
+  PushResult,
   WorkoutService,
   WorkoutSummary,
-} from "./ports";
-export type { Analytics, AnalyticsEvent } from "./ports/analytics";
+} from "./ports/workout-service";
 
 // Application: Conversion Functions
-export { fromBinary, fromText } from "./application";
-export { toBinary, toText } from "./application";
+export { fromBinary, fromText } from "./application/from-format";
+export { toBinary, toText } from "./application/to-format";
 
 // Application: Energy calculators (pure)
 export type { ActivityLevel } from "./application/energy/activity-factor";

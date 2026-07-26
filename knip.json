@@ -37,7 +37,9 @@
       "entry": [
         "src/index.ts",
         "src/providers/index.ts",
-        "src/prompts/index.ts"
+        "src/prompts/index.ts",
+        "src/agents/index.ts",
+        "src/observability/index.ts"
       ],
       "project": ["src/**/*.ts"],
       "ignore": ["src/**/*.test.ts"],

@@ -4,16 +4,16 @@ import { fitTimestampToIso } from "../../shared/fit-timestamp";
 import type { FitWeightScale } from "./fit-weight-scale.schema";
 
 const HEALTH_VERSION = "2.0";
-const FIT_WEIGHT_SCALE = 100;
 
 /**
  * Converts a single FIT `weight_scale` message into a KRD weight payload.
  *
- * The FIT field is uint16 scaled by 100 (raw 7580 = 75.80 kg); the
- * Decoder leaves the value un-scaled for the special `weight` field
- * type so we divide here.
+ * The FIT field is uint16 with profile scale 100, but the @garmin/fitsdk
+ * Decoder auto-applies that scale, so it already yields REAL kilograms
+ * (a real fixture decodes `weight: 75.8`). The mapper therefore carries
+ * the value through unscaled — a manual ÷100 would corrupt it to 0.758.
  *
- * Returns `undefined` if the raw weight is non-positive (Garmin uses
+ * Returns `undefined` if the weight is non-positive (Garmin uses
  * 0xFFFE as a "calculating" sentinel and 0xFFFF as invalid).
  */
 export const mapFitWeightScaleToKrd = (
@@ -24,17 +24,19 @@ export const mapFitWeightScaleToKrd = (
     kind: "weight",
     version: HEALTH_VERSION,
     measuredAt: fitTimestampToIso(fit.timestamp),
-    weightKilograms: fit.weight / FIT_WEIGHT_SCALE,
+    weightKilograms: fit.weight,
   };
 };
 
 /**
  * Inverse mapper — KRD weight payload → FIT `weight_scale` shape ready
- * for the FIT encoder.
+ * for the FIT encoder. The value stays in REAL kilograms; the encoder
+ * applies the profile scale 100 itself (a manual ×100 double-scales and
+ * overflows the uint16 raw).
  */
 export const mapKrdWeightToFit = (
   weight: WeightMeasurement
 ): FitWeightScale => ({
   timestamp: new Date(weight.measuredAt),
-  weight: Math.round(weight.weightKilograms * FIT_WEIGHT_SCALE),
+  weight: weight.weightKilograms,
 });

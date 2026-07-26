@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { IntakePresetRecord } from "../../../types/intake-preset-record";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { macroSummary } from "./intake-entry-summary";
@@ -10,6 +11,7 @@ export type PresetRowProps = {
 
 /** One saved preset: tap the body to apply it to the day; trash to remove. */
 export function PresetRow({ preset, onApply, onRemove }: PresetRowProps) {
+  const t = useTranslate("nutrition");
   return (
     <li
       className="flex items-center gap-2 py-2"
@@ -21,16 +23,18 @@ export function PresetRow({ preset, onApply, onRemove }: PresetRowProps) {
         data-testid="intake-preset-apply"
         className="min-w-0 flex-1 text-left"
       >
-        <p className="m-0 truncate text-[14px] font-semibold text-slate-100">
+        <p className="m-0 truncate text-[14px] font-semibold text-ink-strong">
           {preset.label}
         </p>
-        <p className="m-0 text-[12px] text-slate-400">{macroSummary(preset)}</p>
+        <p className="m-0 text-[12px] text-ink-muted">
+          {macroSummary(preset, t)}
+        </p>
       </button>
       <button
         type="button"
         onClick={() => onRemove(preset.id)}
-        aria-label="Delete preset"
-        className="text-slate-500 hover:text-red-400"
+        aria-label={t("presets.delete")}
+        className="text-ink-muted hover:text-red-400"
       >
         <Icon icon={ICON_MAP.x} size="sm" color="inherit" />
       </button>

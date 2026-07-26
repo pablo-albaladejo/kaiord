@@ -10,7 +10,8 @@
  *      parent route.
  *   C) Header click while editor has an active workout → page renders
  *      the "Load into editor" CTA; clicking it loads the template.
- *   D) Mobile viewport — header tap navigates (no modal mounts).
+ *   D) Mobile viewport — BottomNav tab navigates; the header entry is
+ *      hidden below md and no modal mounts.
  */
 
 import { expect, test } from "./fixtures/base";
@@ -42,7 +43,7 @@ test.describe("Library flows", () => {
 
     // Use the mobile-aware helper so the test works on mobile
     // emulators where the Library button lives behind the hamburger menu.
-    await openHeaderAction(page, /open workout library/i);
+    await openHeaderAction(page, /open workout library/i, /library/i);
     await page.waitForURL(/\/library$/);
 
     await expect(page.getByTestId("library-page")).toBeVisible();
@@ -150,7 +151,7 @@ test.describe("Library flows", () => {
     // state survives the route transition. `page.goto('/library')`
     // would force a full reload and drop Zustand. The mobile-aware
     // helper opens the hamburger menu first on small viewports.
-    await openHeaderAction(page, /open workout library/i);
+    await openHeaderAction(page, /open workout library/i, /library/i);
     await page.waitForURL(/\/library$/);
     await expect(page.getByTestId("library-page")).toBeVisible();
 
@@ -172,13 +173,20 @@ test.describe("Library flows", () => {
     await expect(page.getByText(/Template/i).first()).toBeVisible();
   });
 
-  test("Test D: mobile viewport — header Library tap navigates (no modal)", async ({
+  test("Test D: mobile viewport — Library opens as a routed page (no modal)", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/calendar");
 
-    await openHeaderAction(page, /open workout library/i);
+    // Below md the header hides the Library entry; BottomNav owns it.
+    await expect(
+      page.getByRole("button", { name: /open workout library/i })
+    ).toBeHidden();
+    await page
+      .getByTestId("bottom-nav")
+      .getByRole("button", { name: /library/i })
+      .click();
     await page.waitForURL(/\/library$/);
 
     await expect(page.getByTestId("library-page")).toBeVisible();

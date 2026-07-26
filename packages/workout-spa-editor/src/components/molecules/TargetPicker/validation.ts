@@ -1,3 +1,4 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import { validateHeartRateTarget } from "./validation-heart-rate";
 import { validateValueString } from "./validation-helpers";
 import {
@@ -15,7 +16,8 @@ export const validateTargetValue = (
   unit: string,
   value: string,
   minValue?: string,
-  maxValue?: string
+  maxValue?: string,
+  t: Translate = getTranslate("targets")
 ): ValidationResult => {
   if (type === "open") {
     return {
@@ -25,21 +27,22 @@ export const validateTargetValue = (
   }
 
   if (unit === "range") {
-    return validateRangeInput(type, minValue, maxValue);
+    return validateRangeInput(type, minValue, maxValue, t);
   }
 
-  const valueError = validateValueString(value);
+  const valueError = validateValueString(value, t);
   if (valueError) return valueError;
 
   const numericValue = Number(value);
 
-  if (type === "power") return validatePowerTarget(unit, numericValue);
-  if (type === "heart_rate") return validateHeartRateTarget(unit, numericValue);
-  if (type === "pace") return validatePaceTarget(unit, numericValue);
-  if (type === "cadence") return validateCadenceTarget(unit, numericValue);
+  if (type === "power") return validatePowerTarget(unit, numericValue, t);
+  if (type === "heart_rate")
+    return validateHeartRateTarget(unit, numericValue, t);
+  if (type === "pace") return validatePaceTarget(unit, numericValue, t);
+  if (type === "cadence") return validateCadenceTarget(unit, numericValue, t);
 
   return {
     isValid: false,
-    error: "Invalid target type",
+    error: t("validation.invalidTargetType"),
   };
 };

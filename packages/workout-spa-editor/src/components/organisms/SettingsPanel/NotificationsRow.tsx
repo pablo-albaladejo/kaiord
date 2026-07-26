@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Toggle } from "../../atoms/Toggle";
 import { useNotificationPermission } from "./use-notification-permission";
 
@@ -10,6 +11,7 @@ export const NotificationsRow = ({
   enabled,
   onChange,
 }: NotificationsRowProps) => {
+  const t = useTranslate("settings");
   const { permission, request } = useNotificationPermission();
   const checked = enabled && permission === "granted";
 
@@ -25,7 +27,7 @@ export const NotificationsRow = ({
   if (permission === "unsupported") {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Notifications aren&apos;t supported in this browser.
+        {t("notifications.unsupported")}
       </p>
     );
   }
@@ -34,17 +36,17 @@ export const NotificationsRow = ({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-sm text-gray-900 dark:text-white">
-          Enable notifications
+          {t("notifications.enable")}
         </span>
         <Toggle
           checked={checked}
           onCheckedChange={(next) => void handleChange(next)}
-          aria-label="Enable notifications"
+          aria-label={t("notifications.enable")}
         />
       </div>
       {permission === "denied" && (
         <p className="text-sm text-amber-600 dark:text-amber-400">
-          Notifications are blocked in your browser settings.
+          {t("notifications.blocked")}
         </p>
       )}
     </div>

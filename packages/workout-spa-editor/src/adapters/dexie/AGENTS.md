@@ -25,7 +25,7 @@ The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 →
 - `dexie-profile-repository.ts` — sport profiles.
 - `dexie-ai-provider-repository.ts` — AI provider configs + custom prompt meta-row.
 - `dexie-sync-state-repository.ts` — per-source sync state.
-- `dexie-usage-repository.ts` — monthly AI usage records.
+- `dexie-usage-event-repository.ts` — append-only, synced per-run AI usage log (the single usage-accounting store after the v33 cutover); `listByMonth`/`listByMonths`/`listOlderThan` range-scan the `[yearMonth+purpose]` index, `delete(id)` is tombstoned for retention pruning.
 - `dexie-coaching-repository.ts` — coaching activities (composite key `${profileId}:${source}:${sourceId}`).
 - `dexie-coaching-sync-state-repository.ts` — per `[source+profileId]` sync state.
 - `dexie-session-match-repository.ts` + `dexie-session-match-append-executed.ts` + `dexie-session-match-update.ts` — links between coaching activities and executed workouts; enforces uniqueness per `(profileId, coachingActivityId)` and `(profileId, workoutId)`.
@@ -66,7 +66,7 @@ The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 →
 ### Internal
 
 - `../../ports/*` (port contracts).
-- `../../types/{calendar-schemas,coaching-activity-record,session-match,profile,user-preferences,usage-schemas,workout-library,bridge-schemas}`.
+- `../../types/{calendar-schemas,coaching-activity-record,session-match,profile,user-preferences,usage-event-schemas,workout-library,bridge-schemas}`.
 
 ### External
 

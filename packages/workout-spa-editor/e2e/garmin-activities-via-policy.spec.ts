@@ -18,6 +18,7 @@ import {
   getGarminBridgeCallActions,
   installGarminBridgeStub,
 } from "./helpers/garmin-bridge-stub";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "garmin-activities-policy-e2e";
 
@@ -36,11 +37,7 @@ const stubActivity = () => ({
   distance: 30000,
 });
 
-const waitForDb = (page: Page): Promise<unknown> =>
-  page.waitForFunction(
-    () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-    { timeout: 10_000 }
-  );
+const waitForDb = (page: Page): Promise<unknown> => waitForDexieReady(page);
 
 const seedProfile = async (page: Page): Promise<void> => {
   await page.evaluate(async (pid) => {

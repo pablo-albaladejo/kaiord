@@ -64,7 +64,7 @@ export async function clearDexie(page: Page) {
       "profiles",
       "aiProviders",
       "syncState",
-      "usage",
+      "usageEvents",
       "meta",
       "userPreferences",
     ];

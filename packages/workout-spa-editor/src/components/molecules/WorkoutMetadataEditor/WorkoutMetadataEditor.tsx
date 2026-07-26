@@ -4,6 +4,7 @@
  * Editor for workout metadata (name, sport, sub-sport).
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
@@ -24,6 +25,7 @@ export function WorkoutMetadataEditor({
   onSave,
   onCancel,
 }: WorkoutMetadataEditorProps) {
+  const t = useTranslate("editor");
   const {
     name,
     sport,
@@ -43,22 +45,22 @@ export function WorkoutMetadataEditor({
       className="space-y-4"
       data-testid="workout-metadata-editor"
       role="form"
-      aria-label="Edit workout metadata"
+      aria-label={t("metadata.editAria")}
     >
       <div>
         <label
           htmlFor="workout-name"
           className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
-          Workout Name
+          {t("metadata.nameLabel")}
         </label>
         <Input
           id="workout-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter workout name"
-          aria-label="Workout name"
+          placeholder={t("metadata.namePlaceholder")}
+          aria-label={t("metadata.nameAria")}
           data-testid="workout-name-input"
         />
       </div>
@@ -73,10 +75,10 @@ export function WorkoutMetadataEditor({
           onClick={onCancel}
           data-testid="cancel-metadata-button"
         >
-          Cancel
+          {t("metadata.cancel")}
         </Button>
         <Button onClick={handleSave} data-testid="save-metadata-button">
-          Save
+          {t("metadata.save")}
         </Button>
       </div>
     </div>

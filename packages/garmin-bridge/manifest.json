@@ -1,12 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Kaiord Garmin Bridge",
-  "version": "7.2.0",
-  "description": "Connects the Kaiord workout editor to Garmin Connect via your browser session",
+  "name": "__MSG_extName__",
+  "version": "10.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
 
-  "permissions": ["storage", "tabs", "webRequest", "scripting"],
+  "permissions": ["storage"],
 
-  "host_permissions": ["https://connect.garmin.com/*"],
+  "host_permissions": [
+    "https://connect.garmin.com/*",
+    "https://connectapi.garmin.com/*",
+    "https://sso.garmin.com/*"
+  ],
 
   "icons": {
     "16": "icons/icon16.png",
@@ -28,13 +33,8 @@
 
   "content_scripts": [
     {
-      "matches": ["https://connect.garmin.com/*"],
-      "js": ["content.js"],
-      "run_at": "document_start"
-    },
-    {
       "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
-      "js": ["kaiord-announce.js"],
+      "js": ["bridge-identity.js", "kaiord-announce.js"],
       "run_at": "document_start"
     }
   ],

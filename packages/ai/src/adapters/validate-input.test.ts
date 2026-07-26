@@ -17,15 +17,21 @@ describe("validateInput", () => {
     expect(validateInput("  4x(8' a 5'15\")  ")).toBe("4x(8' a 5'15\")");
   });
 
-  it("should throw on empty string", () => {
-    // Arrange
+  it.each([
+    ["empty string", ""],
+    ["whitespace only", "   "],
+    ["control characters only", "\x00\x01\x02"],
+  ])(
+    "should throw AiParsingError for effectively-empty input (%s)",
+    (_case, input) => {
+      // Arrange
 
-    // Act
+      // Act
 
-    // Assert
-    expect(() => validateInput("")).toThrow(AiParsingError);
-    expect(() => validateInput("   ")).toThrow(AiParsingError);
-  });
+      // Assert
+      expect(() => validateInput(input)).toThrow(AiParsingError);
+    }
+  );
 
   it("should throw on input exceeding 2000 characters", () => {
     // Arrange
@@ -63,16 +69,6 @@ describe("validateInput", () => {
 
     // Assert
     expect(validateInput(input)).toBe(input);
-  });
-
-  it("should throw when input is only control characters", () => {
-    // Arrange
-
-    // Act
-    const input = "\x00\x01\x02";
-
-    // Assert
-    expect(() => validateInput(input)).toThrow(AiParsingError);
   });
 
   it("should truncate inputText in error for long inputs", () => {

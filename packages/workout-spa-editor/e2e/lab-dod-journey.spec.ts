@@ -11,6 +11,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "labs-dod-journey-profile";
 const OLD_DATE = "2026-01-01";
@@ -122,10 +123,7 @@ async function seedHistory(page: Page) {
 
 async function gotoLabs(page: Page) {
   await page.goto("/health/labs");
-  await page.waitForFunction(
-    () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-    { timeout: 10_000 }
-  );
+  await waitForDexieReady(page);
   await seedHistory(page);
   await page.goto("/health/labs");
   await expect(page.getByTestId("health-labs")).toBeVisible({

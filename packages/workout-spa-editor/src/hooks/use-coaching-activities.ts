@@ -13,6 +13,7 @@ import { useCallback, useMemo } from "react";
 
 import { useCoachingSourceFactories } from "../contexts/coaching-registry-context";
 import type { CoachingActivity } from "../types/coaching-activity";
+import type { ExpandDayResult } from "../types/coaching-expand-result";
 import { useActiveProfileLive } from "./use-active-profile-live";
 
 export type CoachingSyncState = {
@@ -58,13 +59,14 @@ export function useCoachingActivities(days: string[]) {
   }, [sources, days]);
 
   const expandActivity = useCallback(
-    (activity: CoachingActivity) => {
-      if (!activeProfileId) return;
+    async (
+      activity: CoachingActivity
+    ): Promise<ExpandDayResult | undefined> => {
+      if (!activeProfileId) return undefined;
       const source = sources.find((s) => s.id === activity.source);
-      // Return (not discard) the expand promise so callers that must wait for
-      // the description before acting (e.g. convert) can `await` it. The public
-      // type stays `=> void`; awaiting a void-typed call is valid and resolves
-      // the real promise at runtime.
+      // Return the ExpandDayResult so the dialog can surface a retryable
+      // failure (instead of a stuck "Loading description…") and so convert
+      // callers can still `await` completion before acting.
       return source?.expand(activeProfileId, activity.date);
     },
     [sources, activeProfileId]

@@ -6,6 +6,7 @@
  */
 
 import type { useToastContext } from "../../../contexts/ToastContext";
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import { UNDO_DELETE_WINDOW_MS } from "../../../store/actions/delete-undo-constants";
 import { useWorkoutStore } from "../../../store/workout-store";
 
@@ -13,7 +14,8 @@ export function executeDeleteWithToast(
   blockId: string,
   deleteAction: (blockId: string) => void,
   toast: ReturnType<typeof useToastContext>["toast"],
-  undoDelete: (timestamp: number) => void
+  undoDelete: (timestamp: number) => void,
+  t: Translate = getTranslate("editor")
 ) {
   deleteAction(blockId);
   setTimeout(() => {
@@ -21,7 +23,7 @@ export function executeDeleteWithToast(
     const mostRecentDelete = deletedSteps[deletedSteps.length - 1];
     if (mostRecentDelete) {
       toast({
-        title: "Repetition block deleted",
+        title: t("deleteBlock.toastTitle"),
         variant: "info",
         duration: UNDO_DELETE_WINDOW_MS,
         action: (
@@ -30,7 +32,7 @@ export function executeDeleteWithToast(
             className="px-3 py-1 text-sm font-medium rounded-md bg-white/10 hover:bg-white/20 transition-colors"
             data-testid="undo-delete-block-button"
           >
-            Undo
+            {t("actions.undo")}
           </button>
         ),
       });

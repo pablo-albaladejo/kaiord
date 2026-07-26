@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ChatConversationRecord } from "../../../types/chat/chat-conversation-record";
 import { ConversationTitleInput } from "./ConversationTitleInput";
 
@@ -19,6 +20,7 @@ export function ConversationListItem({
   onRename,
   onDelete,
 }: ConversationListItemProps) {
+  const t = useTranslate("chat");
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -38,28 +40,28 @@ export function ConversationListItem({
   return (
     <div
       className={`group flex items-center gap-1 rounded-md px-2 py-1 text-sm ${
-        active ? "bg-slate-800 text-slate-100" : "text-slate-300"
+        active ? "bg-surface-elevated text-ink-strong" : "text-ink-body"
       }`}
     >
       <button
         type="button"
-        className="min-w-0 flex-1 truncate text-left hover:text-slate-100"
+        className="min-w-0 flex-1 truncate text-left hover:text-ink-strong"
         onClick={() => onSelect(conversation.id)}
       >
         {conversation.title}
       </button>
       <button
         type="button"
-        aria-label="Rename conversation"
-        className="shrink-0 px-1 text-slate-500 hover:text-slate-200"
+        aria-label={t("item.rename")}
+        className="shrink-0 px-1 text-ink-muted hover:text-ink-body"
         onClick={() => setEditing(true)}
       >
         ✎
       </button>
       <button
         type="button"
-        aria-label={confirmDelete ? "Confirm delete" : "Delete conversation"}
-        className="shrink-0 px-1 text-slate-500 hover:text-red-400"
+        aria-label={confirmDelete ? t("item.confirmDelete") : t("item.delete")}
+        className="shrink-0 px-1 text-ink-muted hover:text-red-400"
         onClick={() =>
           confirmDelete ? onDelete(conversation.id) : setConfirmDelete(true)
         }

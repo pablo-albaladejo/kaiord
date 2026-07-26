@@ -5,24 +5,25 @@
  * `LabParameterChartCard` per pinned parameter in a grid. The selection is
  * persisted in `userPreferences.labDashboardParams` and survives reload.
  */
+import { useTranslate } from "../../../../../i18n/use-translate";
 import { LabParameterChartCard } from "../charts/LabParameterChartCard";
 import { LabLatestValuesList } from "../LabLatestValuesList";
 import { useLabParameterSummariesLive } from "../use-lab-history";
 import { useLabDashboardParams } from "./use-lab-dashboard-params";
 
-const LOADING = "Loading…";
-const EMPTY_GRID_MSG = "Pin a parameter above to see its evolution chart.";
-
 export const LabDashboardSection = ({ profileId }: { profileId: string }) => {
+  const t = useTranslate("labs-ui");
   const summaries = useLabParameterSummariesLive(profileId);
   const { pinned, toggle } = useLabDashboardParams(profileId);
   const pinnedKeys = new Set(pinned);
 
   return (
     <section data-testid="lab-dashboard">
-      <h3 className="mb-2 text-sm font-semibold">Pin parameters</h3>
+      <h3 className="mb-2 text-sm font-semibold">
+        {t("dashboard.pinParameters")}
+      </h3>
       {summaries === undefined ? (
-        <p className="text-sm text-gray-600">{LOADING}</p>
+        <p className="text-sm text-gray-600">{t("dashboard.loading")}</p>
       ) : (
         <LabLatestValuesList
           summaries={summaries}
@@ -30,9 +31,11 @@ export const LabDashboardSection = ({ profileId }: { profileId: string }) => {
           selectedKeys={pinnedKeys}
         />
       )}
-      <h3 className="mt-6 mb-2 text-sm font-semibold">Evolution charts</h3>
+      <h3 className="mt-6 mb-2 text-sm font-semibold">
+        {t("dashboard.evolutionCharts")}
+      </h3>
       {pinned.length === 0 ? (
-        <p className="text-sm text-gray-600">{EMPTY_GRID_MSG}</p>
+        <p className="text-sm text-gray-600">{t("dashboard.emptyGrid")}</p>
       ) : (
         <div
           data-testid="lab-dashboard-grid"

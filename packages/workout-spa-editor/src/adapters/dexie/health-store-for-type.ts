@@ -11,4 +11,7 @@ export const HEALTH_STORE_FOR_TYPE: Partial<Record<ManagedDataType, string>> = {
   "daily-wellness": "healthDaily",
   "body-composition": "healthBodyComposition",
   stress: "healthStress",
+  strain: "healthStrain",
+  vitals: "healthVitals",
+  "heart-rate-series": "healthHeartRateSeries",
 };

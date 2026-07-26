@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "../../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../../adapters/dexie/dexie-persistence-adapter";
 import { PersistenceProvider } from "../../../../contexts/persistence-context";
+import { ThemeProvider } from "../../../../contexts/ThemeContext";
 import { ToastContextProvider } from "../../../../contexts/ToastContext";
 import { LabHistorySection } from "./LabHistorySection";
 
@@ -19,11 +20,13 @@ vi.mock("../../../charts/uplot-base/uplot-chart", () => ({
 const PROFILE_ID = "p1";
 
 const wrap = ({ children }: { children: ReactNode }) => (
-  <ToastContextProvider>
-    <PersistenceProvider persistence={createDexiePersistence(db)}>
-      {children}
-    </PersistenceProvider>
-  </ToastContextProvider>
+  <ThemeProvider>
+    <ToastContextProvider>
+      <PersistenceProvider persistence={createDexiePersistence(db)}>
+        {children}
+      </PersistenceProvider>
+    </ToastContextProvider>
+  </ThemeProvider>
 );
 
 const report = (id: string, date: string, labName: string): LabReport => ({

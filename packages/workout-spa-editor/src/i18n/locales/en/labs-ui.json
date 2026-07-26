@@ -1,0 +1,71 @@
+{
+  "entry": {
+    "tabEntry": "Entry & history",
+    "tabDashboard": "Dashboard",
+    "title": "Lab analytics",
+    "subtitle": "Add a new lab report",
+    "loading": "Loading…",
+    "noProfile": "Create an athlete profile first to log lab analytics."
+  },
+  "form": {
+    "addParameter": "Add parameter",
+    "save": "Save",
+    "catalog": "Catalog",
+    "custom": "Custom",
+    "parameterAria": "Parameter",
+    "searchPlaceholder": "Search parameter…",
+    "customNameAria": "Custom parameter name",
+    "customNamePlaceholder": "Parameter name",
+    "value": "Value",
+    "unit": "Unit",
+    "refLow": "Ref low",
+    "refHigh": "Ref high",
+    "referenceLow": "Reference low",
+    "referenceHigh": "Reference high",
+    "removeParameter": "Remove parameter",
+    "remove": "Remove",
+    "fasting": "Fasting",
+    "fastingUnspecified": "Not specified",
+    "yes": "Yes",
+    "no": "No",
+    "date": "Date",
+    "lab": "Lab",
+    "drawTime": "Draw time",
+    "notes": "Notes",
+    "reportDetails": "Report details"
+  },
+  "flag": {
+    "in": "In range",
+    "low": "Low",
+    "high": "High",
+    "unknown": "No range"
+  },
+  "history": {
+    "loading": "Loading…",
+    "reports": "Reports",
+    "deleted": "Lab report deleted",
+    "deleteFailed": "Could not delete the lab report"
+  },
+  "report": {
+    "fasting": "fasting",
+    "emptyValues": "This report has no parameters.",
+    "hide": "Hide",
+    "view": "View",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "deleteAria": "Delete report {{date}}",
+    "delete": "Delete",
+    "emptyList": "No reports saved yet."
+  },
+  "chart": {
+    "empty": "No history for this parameter yet.",
+    "loading": "Loading…",
+    "evolutionTitle": "{{label}} evolution"
+  },
+  "dashboard": {
+    "loading": "Loading…",
+    "pinParameters": "Pin parameters",
+    "evolutionCharts": "Evolution charts",
+    "emptyGrid": "Pin a parameter above to see its evolution chart."
+  }
+}

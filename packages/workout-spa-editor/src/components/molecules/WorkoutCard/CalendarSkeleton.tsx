@@ -8,7 +8,7 @@ function SkeletonColumn({ index }: { index: number }) {
   return (
     <div
       data-testid={`skeleton-column-${index}`}
-      className="flex min-h-[120px] flex-col rounded-lg border p-2"
+      className="flex min-h-[120px] flex-col rounded-lg border border-edge p-2"
     >
       <div className="mb-2 h-4 w-12 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
       <div className="h-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />

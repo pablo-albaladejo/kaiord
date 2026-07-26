@@ -32,7 +32,7 @@ export const ConflictGroup = ({
 }: ConflictGroupProps) => (
   <li
     data-testid={`zones-conflict-group-${groupKey}`}
-    className="rounded border p-2"
+    className="rounded border border-edge p-2"
   >
     <ConflictGroupHeader
       label={label}

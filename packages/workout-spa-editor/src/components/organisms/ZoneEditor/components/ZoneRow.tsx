@@ -4,16 +4,17 @@
  * Single zone row with editable name, min/max values, and optional delete.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { ZoneRowData, ZoneTableCallbacks } from "../types/zone-table";
 import { getZoneColor } from "../utils/zone-colors";
 import { extractValues, formatSecondary } from "../utils/zone-values";
 import { EditableZoneName } from "./EditableZoneName";
 import { EditableZoneValue } from "./EditableZoneValue";
 
-const TYPE_LABELS = {
-  heartRate: "HR",
-  power: "Power",
-  pace: "Pace",
+const TYPE_KEYS = {
+  heartRate: "hr",
+  power: "power",
+  pace: "pace",
 } as const;
 
 type ZoneRowProps = {
@@ -33,9 +34,10 @@ export function ZoneRow({
   isCustom,
   callbacks,
 }: ZoneRowProps) {
+  const t = useTranslate("zones");
   const { minStr, maxStr } = extractValues(zone, type, threshold);
   const secondary = formatSecondary(zone, type, threshold);
-  const prefix = TYPE_LABELS[type];
+  const prefix = t(`zoneType.${TYPE_KEYS[type]}`);
 
   return (
     <div
@@ -47,25 +49,25 @@ export function ZoneRow({
       <EditableZoneName
         name={zone.name}
         onSave={(n) => callbacks.onNameChange(index, n)}
-        ariaLabel={`${prefix} Zone ${zone.zone} name`}
+        ariaLabel={t("table.zoneNameAria", { prefix, zone: zone.zone })}
       />
       <EditableZoneValue
         value={minStr}
         onSave={(v) => callbacks.onMinChange(index, v)}
-        ariaLabel={`${prefix} Zone ${zone.zone} min`}
+        ariaLabel={t("table.zoneMinAria", { prefix, zone: zone.zone })}
       />
       <span className="text-xs text-gray-500">-</span>
       <EditableZoneValue
         value={maxStr}
         onSave={(v) => callbacks.onMaxChange(index, v)}
-        ariaLabel={`${prefix} Zone ${zone.zone} max`}
+        ariaLabel={t("table.zoneMaxAria", { prefix, zone: zone.zone })}
       />
       {secondary && <span className="text-xs text-gray-400">{secondary}</span>}
       {isCustom && (
         <button
           type="button"
           onClick={() => callbacks.onRemove(index)}
-          aria-label={`Remove ${prefix} zone ${zone.zone}`}
+          aria-label={t("table.removeZoneAria", { prefix, zone: zone.zone })}
           className="ml-1 text-xs text-red-500 hover:text-red-700"
         >
           x

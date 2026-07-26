@@ -6,6 +6,7 @@
 
 import { CalendarPlus } from "lucide-react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { Button } from "../../../atoms/Button/Button";
 
 type CardScheduleActionProps = {
@@ -13,6 +14,7 @@ type CardScheduleActionProps = {
 };
 
 export function CardScheduleAction({ onSchedule }: CardScheduleActionProps) {
+  const t = useTranslate("library");
   return (
     <Button
       onClick={onSchedule}
@@ -21,7 +23,7 @@ export function CardScheduleAction({ onSchedule }: CardScheduleActionProps) {
       size="sm"
     >
       <CalendarPlus className="mr-2 h-4 w-4" />
-      Schedule
+      {t("card.schedule")}
     </Button>
   );
 }

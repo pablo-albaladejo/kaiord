@@ -1,0 +1,23 @@
+{
+  "daily": "Daily",
+  "calendar": "Calendar",
+  "library": "Library",
+  "nutrition": "Nutrition",
+  "athlete": "Athlete",
+  "trends": "Trends",
+  "labs": "Labs",
+  "chat": "Chat",
+  "new": "New workout",
+  "settings": "Settings",
+  "aria": {
+    "daily": "Go to daily",
+    "calendar": "Go to calendar",
+    "library": "Open workout library",
+    "nutrition": "Open nutrition",
+    "athlete": "Open athlete profile",
+    "trends": "Open wellness trends",
+    "labs": "Open lab analytics",
+    "chat": "Open chat assistant",
+    "settings": "Open settings"
+  }
+}

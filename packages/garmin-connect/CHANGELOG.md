@@ -1,5 +1,44 @@
 # @kaiord/garmin-connect
 
+## 10.0.0
+
+### Patch Changes
+
+- 6025135: chore(deps): bump the minor-and-patch group across 1 directory with 47 updates
+- 32c4c1c: chore(deps-dev): bump @types/node from 25.7.0 to 26.1.0
+- 95da9fa: Internal code-reduction sweep: remove dead files, unused re-exports and types,
+  consolidate genuine duplication, and drop redundant constructs across packages.
+
+  No public API or runtime behavior change — every removed symbol was unused
+  (grep-confirmed across the monorepo) and none belonged to a package's published
+  `src/index.ts` surface. The `@kaiord/zwo` `zod` dependency is dropped (its only
+  users were the deleted schemas). All test suites stay green and coverage is at
+  or above baseline in every package.
+
+- fb4f13f: Internal code reduction, no behavior change.
+- 0841993: Point every package's `homepage` at its kaiord.com docs page instead of the
+  package's own npm page (a circular link), and broaden `keywords` with the
+  search terms people actually use (fit-parser, fit-converter, zwift-workout,
+  tcx-parser, garmin-connect-api, mcp-server, fit-to-tcx, …) so the packages
+  surface in npm and search-engine queries. `@kaiord/mcp` also gains the
+  `mcpName` field and a `server.json` so it can be published to the official
+  MCP registry (registry.modelcontextprotocol.io).
+- Updated dependencies [6025135]
+- Updated dependencies [e167efe]
+- Updated dependencies [32c4c1c]
+- Updated dependencies [95da9fa]
+- Updated dependencies [372db2c]
+- Updated dependencies [dfa21e6]
+- Updated dependencies [9f08136]
+- Updated dependencies [9de0335]
+- Updated dependencies [d777295]
+- Updated dependencies [0841993]
+- Updated dependencies [63c4cb6]
+- Updated dependencies [a2a5b12]
+- Updated dependencies [78c1866]
+  - @kaiord/core@10.0.0
+  - @kaiord/garmin@10.0.0
+
 ## 9.2.0
 
 ### Patch Changes

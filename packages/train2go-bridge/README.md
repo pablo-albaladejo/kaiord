@@ -11,18 +11,20 @@ workflow packages it as a Chrome Web Store artifact.
 
 ## Purpose
 
-- Run as a content script on `https://app.train2go.com/*`, scrape the
-  current user's training-plan view, and parse activities into a normalized
-  shape (see `parser.js`).
-- Expose a small message-passing surface (`checkSession`, `readThisWeek`,
-  ...) that the SPA reaches via `chrome.runtime.sendMessage` once it has
-  discovered the extension ID at runtime through the `kaiord-announce.js`
-  content script.
+- Fetch the current user's training-plan endpoints on
+  `https://app.train2go.com/*` directly from the service worker with
+  `credentials:"include"` (SW-direct) — the site's HttpOnly session cookie
+  travels automatically, with no content script on `app.train2go.com` — and
+  parse activities into a normalized shape (see `parser.js`).
+- Expose a small message-passing surface (`ping`, `read-week`, `read-day`,
+  `read-details`, ...) that the SPA reaches via `chrome.runtime.sendMessage`
+  once it has discovered the extension ID at runtime through the
+  `kaiord-announce.js` content script.
 - Restrict communication to Kaiord-controlled origins
   (`https://*.kaiord.com/*` and `http://localhost/*` in dev) so other
   websites cannot drive the bridge.
-- Survive service-worker cold starts: the popup's "Check Session" action
-  re-wakes the worker and re-runs session detection.
+- Surface a dead session (redirect / login response) as `needsReauth` so the
+  editor can prompt a re-login.
 
 There is no JavaScript public API exported from this package — the only
 contract is the `chrome.runtime` message shape, documented inline in
@@ -39,8 +41,10 @@ Manifest entrypoints:
 - `manifest.json` — development manifest (used for "Load unpacked").
 - `manifest.prod.json` — production manifest used when packaging for the
   Chrome Web Store.
-- `background.js` — service worker (session detection, message router).
-- `content.js` — content script injected into `app.train2go.com`.
+- `background.js` — service worker (SW-direct cookie fetch, path allowlist,
+  message router).
+- `session-fetch.js` — vendored bridge-core cookie transport
+  (`credentials:"include"` fetch + redirect/`needsReauth` detection).
 - `parser.js` — DOM-to-domain parser for the Train2Go training-plan view.
 - `kaiord-announce.js` — content script injected into Kaiord origins that
   announces the extension's presence and ID to the SPA.
@@ -62,10 +66,10 @@ pnpm --filter @kaiord/train2go-bridge test:watch
 pnpm --filter @kaiord/train2go-bridge test:coverage
 ```
 
-Unit tests live in `test/` and cover `background.js`, `content.js`,
-`popup.js`, `parser.js`, `kaiord-announce.js`, and `profile-snapshot.js`
-against the chrome-API mock in `test/chrome-mock.js`. Parser fixtures live
-under `test/fixtures/`.
+Unit tests live in `test/` and cover `background.js`, `popup.js`,
+`parser.js`, `kaiord-announce.js`, and `profile-snapshot.js` against the
+chrome-API mock in `test/chrome-mock.js`. Parser fixtures live under
+`test/fixtures/`.
 
 For end-to-end / integration smoke checks against a real Train2Go session,
 see [TESTING.md](./TESTING.md).

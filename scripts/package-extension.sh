@@ -59,6 +59,12 @@ mkdir -p "$DIST_DIR"
 cp "$PKG_DIR/manifest.prod.json" "$TMP_DIR/manifest.json"
 cp "$PKG_DIR/icons"/*.png "$TMP_DIR/icons/"
 
+# Copy the i18n message catalogs (required when the manifest declares
+# default_locale / __MSG__ tokens).
+if [ -d "$PKG_DIR/_locales" ]; then
+  cp -R "$PKG_DIR/_locales" "$TMP_DIR/_locales"
+fi
+
 # Copy extension JS and HTML files (exclude dev/test config)
 EXCLUDE_PATTERN="vitest.config"
 for f in "$PKG_DIR"/*.js "$PKG_DIR"/*.html; do

@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/cli",
-  "version": "9.2.0",
+  "version": "10.0.0",
   "description": "Command-line interface for Kaiord workout file conversion",
   "type": "module",
   "sideEffects": false,
@@ -36,7 +36,11 @@
     "garmin",
     "zwift",
     "cli",
-    "converter"
+    "converter",
+    "fit-to-tcx",
+    "workout-converter",
+    "fitness",
+    "command-line"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",
@@ -45,7 +49,7 @@
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/cli",
+  "homepage": "https://kaiord.com/docs/cli/commands",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -57,6 +61,7 @@
     "@kaiord/fit": "workspace:^",
     "@kaiord/garmin": "workspace:^",
     "@kaiord/garmin-connect": "workspace:^",
+    "@kaiord/i18n": "workspace:^",
     "@kaiord/tcx": "workspace:^",
     "@kaiord/zwo": "workspace:^",
     "chalk": "^5.3.0",
@@ -68,15 +73,15 @@
   },
   "devDependencies": {
     "@types/yargs": "^17.0.32",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "^4.1.10",
     "execa": "^9.6.1",
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.2.0",
     "tmp-promise": "^3.0.3",
     "tsup": "^8.5.1",
-    "tsx": "^4.22.5",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=22.12.0"

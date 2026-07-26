@@ -1,0 +1,42 @@
+{
+  "extName": {
+    "message": "Kaiord WHOOP Bridge",
+    "description": "Extension name shown in the Chrome Web Store and toolbar."
+  },
+  "extDescription": {
+    "message": "Connects the Kaiord editor to your WHOOP recovery & sleep data through your open WHOOP session — no developer app, no passwords.",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Checking…",
+    "description": "Status text while the popup probes the session."
+  },
+  "checkingAria": {
+    "message": "Checking",
+    "description": "Accessible label for the checking status pill."
+  },
+  "connectedToWhoop": {
+    "message": "Connected to WHOOP",
+    "description": "Status text when a WHOOP session bearer has been captured."
+  },
+  "connectedHint": {
+    "message": "Reading your WHOOP data through your open session.",
+    "description": "Hint shown below the status when connected."
+  },
+  "noSession": {
+    "message": "No WHOOP session",
+    "description": "Status text when no WHOOP session bearer has been captured."
+  },
+  "noSessionHint": {
+    "message": "Open WHOOP and reload the tab, then reopen this popup.",
+    "description": "Hint telling the user how to establish a session."
+  },
+  "openWhoop": {
+    "message": "Open WHOOP",
+    "description": "Button that opens app.whoop.com in a new tab."
+  },
+  "openWhoopAria": {
+    "message": "Open WHOOP",
+    "description": "Accessible label for the Open WHOOP button."
+  }
+}

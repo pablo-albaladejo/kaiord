@@ -43,31 +43,23 @@ describe("StatusHeader", () => {
     ).toHaveTextContent("No profile");
   });
 
-  it("should hide the Garmin indicator when no extension is installed", () => {
-    // Arrange
+  it.each([
+    { label: "Garmin", testId: "status-header-garmin" },
+    { label: "Train2Go", testId: "status-header-sync" },
+  ])(
+    "should hide the $label indicator when no extension is installed",
+    ({ testId }) => {
+      // Arrange
 
-    // Act
+      // Act
 
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+      renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
 
-    // Assert
+      // Assert
 
-    expect(
-      screen.queryByTestId("status-header-garmin")
-    ).not.toBeInTheDocument();
-  });
-
-  it("should hide the Train2Go indicator when no extension is installed", () => {
-    // Arrange
-
-    // Act
-
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
-
-    // Assert
-
-    expect(screen.queryByTestId("status-header-sync")).not.toBeInTheDocument();
-  });
+      expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+    }
+  );
 
   it("should show Train2Go 'Synced' when the extension is installed", () => {
     // Arrange
@@ -138,9 +130,13 @@ describe("StatusHeader", () => {
     expect(divider).toBeInTheDocument();
     const parent = divider.parentElement;
     expect(parent).not.toBeNull();
+    // "new" is wrapped in a mobile-hidden span (see EntryButton), so walk up
+    // to the ancestor that is actually a direct child of `parent`.
+    const directChild = (el: Element): Element =>
+      el.parentElement === parent ? el : directChild(el.parentElement!);
     const children = Array.from(parent!.children);
     const dividerIndex = children.indexOf(divider);
-    const newButtonIndex = children.indexOf(newButton);
+    const newButtonIndex = children.indexOf(directChild(newButton));
     const profileButtonIndex = children.indexOf(profileButton);
     expect(dividerIndex).toBeGreaterThan(newButtonIndex);
     expect(dividerIndex).toBeLessThan(profileButtonIndex);

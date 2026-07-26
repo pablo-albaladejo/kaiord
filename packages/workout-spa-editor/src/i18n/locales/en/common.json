@@ -4,5 +4,39 @@
     "auto": "Auto",
     "en": "English",
     "es": "Spanish"
+  },
+  "actions": {
+    "close": "Close",
+    "action": "Action",
+    "tryAgain": "Try Again",
+    "dismiss": "Dismiss",
+    "back": "Back",
+    "help": "Help"
+  },
+  "status": {
+    "connected": "Connected",
+    "offline": "Offline",
+    "conflict": "Conflict",
+    "synced": "Synced",
+    "noProfile": "No profile"
+  },
+  "a11y": {
+    "mainNavigation": "Main navigation",
+    "primary": "Primary",
+    "createWorkout": "Create workout",
+    "loadingPage": "Loading page",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode",
+    "openHelp": "Open help",
+    "openAthleteProfile": "Open athlete profile (active profile: {{name}})",
+    "openAthleteProfileEmpty": "Open athlete profile (no active profile)"
+  },
+  "help": {
+    "documentation": "Help & Documentation",
+    "hint": "Help (?)"
+  },
+  "bridge": {
+    "garmin": "Garmin: {{label}}",
+    "train2go": "Train2Go: {{label}}"
   }
 }

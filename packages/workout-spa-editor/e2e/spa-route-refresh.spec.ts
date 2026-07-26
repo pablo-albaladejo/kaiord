@@ -23,10 +23,10 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
   let mergedDist: string;
 
   test.beforeAll(async () => {
-    // The build is now token-agnostic: the Cloudflare analytics token is no
-    // longer a Vite build-time env var. Test 4 exercises the real adapter
-    // path by injecting `window.__KAIORD_CONFIG__` (and a fake `cfBeacon`)
-    // via `page.addInitScript` before navigation — matching the deploy-time
+    // The build is website-id-agnostic: the Umami website id is not a Vite
+    // build-time env var. Test 4 exercises the real adapter path by injecting
+    // `window.__KAIORD_CONFIG__` (and a fake `umami` tracker) via
+    // `page.addInitScript` before navigation — matching the deploy-time
     // runtime-config injection model.
     execSync("pnpm --filter @kaiord/workout-spa-editor build", {
       cwd: repoRoot,
@@ -125,22 +125,28 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       captured.push(path);
     });
     await page.addInitScript(() => {
-      // Inject a runtime-config token so the Cloudflare analytics adapter
-      // selects its real path (instead of the noop fallback). The token value
-      // is irrelevant — the adapter only checks for non-empty.
+      // Inject a runtime-config website id so the Umami analytics adapter
+      // selects its real path (instead of the noop fallback). The value is
+      // irrelevant — the adapter only checks for non-empty.
       Object.defineProperty(window, "__KAIORD_CONFIG__", {
-        value: { cfAnalyticsToken: "e2e-test-token" },
+        value: { umamiWebsiteId: "e2e-test-website-id" },
         writable: true,
         configurable: true,
       });
-      // Plant a fake cfBeacon so the production Cloudflare analytics adapter
-      // routes pushEvent calls into our capture instead of the network.
-      Object.defineProperty(window, "cfBeacon", {
+      // Plant a fake umami tracker so the production adapter routes track()
+      // calls into our capture instead of the network. pageView uses the
+      // payload-modifier form: track(props => ({ ...props, url })).
+      Object.defineProperty(window, "umami", {
         value: {
-          pushEvent: (name: string, props?: { path?: string }) => {
-            if (name === "pageView" && props?.path) {
+          track: (
+            nameOrModifier:
+              string | ((props: { url?: string }) => { url?: string })
+          ) => {
+            if (typeof nameOrModifier !== "function") return;
+            const payload = nameOrModifier({ url: window.location.pathname });
+            if (payload?.url) {
               // @ts-expect-error — exposed via exposeFunction
-              window.__captureAnalytics(props.path);
+              window.__captureAnalytics(payload.url);
             }
           },
         },

@@ -37,7 +37,7 @@ const fakeSource: CoachingSource = {
     },
   ],
   sync: vi.fn(async () => undefined),
-  expand: vi.fn(async () => undefined),
+  expand: vi.fn(async () => ({ ok: true as const, activityCount: 0 })),
   connect: vi.fn(async () => undefined),
 };
 

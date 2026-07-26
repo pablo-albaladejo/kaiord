@@ -7,7 +7,6 @@ import type { SyncState } from "../../types/bridge-schemas";
 import type { WorkoutRecord } from "../../types/calendar-schemas";
 import type { Profile } from "../../types/profile";
 import type { KRD } from "../../types/schemas";
-import type { UsageRecord } from "../../types/usage-schemas";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexiePersistence } from "./dexie-persistence-adapter";
@@ -120,7 +119,7 @@ beforeEach(async () => {
     testDb.table("profiles").clear(),
     testDb.table("aiProviders").clear(),
     testDb.table("syncState").clear(),
-    testDb.table("usage").clear(),
+    testDb.table("usageEvents").clear(),
     testDb.table("meta").clear(),
   ]);
 });
@@ -557,85 +556,6 @@ describe("DexieSyncStateRepository", () => {
 
     // Assert
     expect(result?.protocolVersion).toBe(2);
-  });
-});
-
-// --- UsageRepository ---
-
-describe("DexieUsageRepository", () => {
-  it("should put and getByMonth", async () => {
-    // Arrange
-    const { usage } = createDexiePersistence(testDb);
-    const record: UsageRecord = {
-      yearMonth: "2026-04",
-      inputTokens: 1200,
-      outputTokens: 300,
-      totalTokens: 1500,
-      totalCost: 0.03,
-      entries: [
-        {
-          date: "2026-04-07",
-          inputTokens: 1200,
-          outputTokens: 300,
-          tokens: 1500,
-          cost: 0.03,
-        },
-      ],
-    };
-    await usage.put(record);
-
-    // Act
-    const result = await usage.getByMonth("2026-04");
-
-    // Assert
-    expect(result).toEqual(record);
-  });
-
-  it("should return undefined for non-existent month", async () => {
-    // Arrange
-    const { usage } = createDexiePersistence(testDb);
-
-    // Act
-    const result = await usage.getByMonth("2025-01");
-
-    // Assert
-    expect(result).toBeUndefined();
-  });
-
-  it("should overwrite on put with same yearMonth", async () => {
-    // Arrange
-    const { usage } = createDexiePersistence(testDb);
-    await usage.put({
-      yearMonth: "2026-04",
-      inputTokens: 80,
-      outputTokens: 20,
-      totalTokens: 100,
-      totalCost: 0.01,
-      entries: [],
-    });
-    await usage.put({
-      yearMonth: "2026-04",
-      inputTokens: 160,
-      outputTokens: 40,
-      totalTokens: 200,
-      totalCost: 0.02,
-      entries: [
-        {
-          date: "2026-04-11",
-          inputTokens: 160,
-          outputTokens: 40,
-          tokens: 200,
-          cost: 0.02,
-        },
-      ],
-    });
-
-    // Act
-    const result = await usage.getByMonth("2026-04");
-
-    // Assert
-    expect(result?.totalTokens).toBe(200);
-    expect(result?.entries).toHaveLength(1);
   });
 });
 

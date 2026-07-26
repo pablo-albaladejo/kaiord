@@ -1,5 +1,6 @@
 import type { Argv } from "yargs";
 
+import { t } from "../../i18n/index.js";
 import { ExitCode } from "../../utils/exit-codes";
 import { FORMAT_CODES } from "../../utils/format-registry";
 import { createLogger } from "../../utils/logger-factory";
@@ -16,19 +17,19 @@ const buildLogger = (argv: Record<string, unknown>) =>
 
 export const loginSubcommand = {
   command: "login",
-  describe: "Authenticate with Garmin Connect",
+  describe: t("commands.garminLogin"),
   builder: (yargs: Argv) =>
     yargs
       .option("email", {
         alias: "e",
         type: "string" as const,
-        description: "Garmin Connect email",
+        description: t("options.garminLogin.email"),
         demandOption: true,
       })
       .option("password", {
         alias: "p",
         type: "string" as const,
-        description: "Garmin Connect password",
+        description: t("options.garminLogin.password"),
         demandOption: true,
       }),
   handler: async (argv: Record<string, unknown>) => {
@@ -40,7 +41,7 @@ export const loginSubcommand = {
 
 export const logoutSubcommand = {
   command: "logout",
-  describe: "Log out from Garmin Connect",
+  describe: t("commands.garminLogout"),
   builder: (yargs: Argv) => yargs,
   handler: async (argv: Record<string, unknown>) => {
     const logger = await buildLogger(argv);
@@ -51,18 +52,18 @@ export const logoutSubcommand = {
 
 export const listSubcommand = {
   command: "list",
-  describe: "List workouts from Garmin Connect",
+  describe: t("commands.garminList"),
   builder: (yargs: Argv) =>
     yargs
       .option("limit", {
         alias: "l",
         type: "number" as const,
-        description: "Maximum number of workouts to list",
+        description: t("options.garminList.limit"),
         default: 20,
       })
       .option("offset", {
         type: "number" as const,
-        description: "Number of workouts to skip",
+        description: t("options.garminList.offset"),
         default: 0,
       }),
   handler: async (argv: Record<string, unknown>) => {
@@ -74,19 +75,19 @@ export const listSubcommand = {
 
 export const pushSubcommand = {
   command: "push",
-  describe: "Push a workout file to Garmin Connect",
+  describe: t("commands.garminPush"),
   builder: (yargs: Argv) =>
     yargs
       .option("input", {
         alias: "i",
         type: "string" as const,
-        description: "Input workout file path",
+        description: t("options.garminPush.input"),
         demandOption: true,
       })
       .option("input-format", {
         type: "string" as const,
         choices: FORMAT_CODES,
-        description: "Override input format detection",
+        description: t("options.garminPush.inputFormat"),
       }),
   handler: async (argv: Record<string, unknown>) => {
     const logger = await buildLogger(argv);

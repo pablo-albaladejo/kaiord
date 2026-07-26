@@ -5,11 +5,11 @@
 
 ## Purpose
 
-Port implementations. Each subdirectory holds the runtime code that satisfies a contract from `src/ports/` (Dexie tables, browser-extension bridges, an analytics backend, the Train2Go coaching scrape). Adapters are the only place in the SPA that's allowed to depend on `dexie`, `chrome.runtime`, or the Cloudflare analytics global.
+Port implementations. Each subdirectory holds the runtime code that satisfies a contract from `src/ports/` (Dexie tables, browser-extension bridges, an analytics backend, the Train2Go coaching scrape). Adapters are the only place in the SPA that's allowed to depend on `dexie`, `chrome.runtime`, or the Umami analytics global.
 
 ## Subdirectories
 
-- `analytics/` — `createCloudflareAnalytics(token)`, the `Analytics` port impl wired by `main.tsx`.
+- `analytics/` — `createUmamiAnalytics(websiteId)`, the `Analytics` port impl wired by `main.tsx`.
 - `bridge/` — discovery, ping/verify, transport, and operation-queue plumbing for the in-page extension bridges (Garmin + Train2Go).
 - `dexie/` — `KaiordDatabase` class, schema versions v1–v13, per-table repositories, migrations, and a `createDexiePersistence()` factory that returns a `PersistencePort`.
 - `train2go/` — Train2Go-specific record converters, coaching transport, sport map, fan-out and zones-sync orchestration (separate from `bridge/` because it sits on top of the bridge transport).
@@ -29,7 +29,7 @@ Port implementations. Each subdirectory holds the runtime code that satisfies a 
 
 ### Common Patterns
 
-- Factory exports: `createCloudflareAnalytics(token)`, `createDexiePersistence()`, etc. — never default exports.
+- Factory exports: `createUmamiAnalytics(websiteId)`, `createDexiePersistence()`, etc. — never default exports.
 - Side-effect-free top level: file load MUST NOT open IndexedDB or post bridge messages; that happens only when the factory is called.
 
 ## Dependencies

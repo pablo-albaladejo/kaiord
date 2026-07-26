@@ -1,5 +1,6 @@
 import { Redo2, Undo2 } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { Tooltip } from "../../atoms/Tooltip/Tooltip";
 
@@ -16,32 +17,33 @@ export function UndoRedoButtons({
   onUndo,
   onRedo,
 }: UndoRedoButtonsProps) {
+  const t = useTranslate("editor");
   return (
     <div
       className="flex w-full gap-1 sm:w-auto"
       role="group"
-      aria-label="History controls"
+      aria-label={t("history.controlsAria")}
     >
-      <Tooltip content="Undo (Ctrl+Z)" disabled={!canUndo}>
+      <Tooltip content={t("history.undoTooltip")} disabled={!canUndo}>
         <Button
           variant="secondary"
           size="sm"
           onClick={onUndo}
           disabled={!canUndo}
-          aria-label="Undo last action"
+          aria-label={t("history.undoAria")}
           data-testid="undo-button"
           className="w-full sm:w-auto"
         >
           <Undo2 className="h-4 w-4" aria-hidden="true" />
         </Button>
       </Tooltip>
-      <Tooltip content="Redo (Ctrl+Y)" disabled={!canRedo}>
+      <Tooltip content={t("history.redoTooltip")} disabled={!canRedo}>
         <Button
           variant="secondary"
           size="sm"
           onClick={onRedo}
           disabled={!canRedo}
-          aria-label="Redo last action"
+          aria-label={t("history.redoAria")}
           data-testid="redo-button"
           className="w-full sm:w-auto"
         >

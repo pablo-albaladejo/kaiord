@@ -1,8 +1,12 @@
 /**
- * Plain-JS Profile Snapshot Validator
+ * Kaiord Bridge Core — Plain-JS Profile Snapshot Validator (vendored)
+ *
+ * Master: packages/_shared/bridge-core/profile-snapshot.js. Never edit a
+ * vendored copy — edit the master and run `pnpm bridge:sync`. Vendored
+ * only by bridges with a profile-snapshot feature.
  *
  * Mirrors the Zod schema in @kaiord/core/types/profile-snapshot for the
- * SPA → bridge protocol. Kept hand-rolled (not vendored) so the bridge
+ * SPA → bridge protocol. Kept hand-rolled (not imported) so the bridge
  * has zero runtime dependency on @kaiord/core; parity with the Zod
  * schema is enforced by a shared fixture set loaded in tests.
  *
@@ -92,50 +96,49 @@ const validateThresholdsBlock = (
   return out;
 };
 
+// Per-sport threshold specs. A Map (not a plain object) so `.get(key)`
+// never resolves inherited keys (toString, etc.), preserving the original
+// Set-based allow-list's rejection of any unsupported sport key.
+const THRESHOLD_SPECS = new Map([
+  ["cycling", { keys: new Set(["ftp"]), validators: { ftp: isPositiveInt } }],
+  [
+    "running",
+    {
+      keys: new Set(["thresholdPaceSecPerKm", "lthr"]),
+      validators: { thresholdPaceSecPerKm: isPositiveInt, lthr: isPositiveInt },
+    },
+  ],
+  [
+    "swimming",
+    {
+      keys: new Set(["cssPaceSecPer100m"]),
+      validators: { cssPaceSecPer100m: isPositiveInt },
+    },
+  ],
+]);
+
 const validateThresholds = (thresholds, errors) => {
   if (thresholds === undefined) return Object.create(null);
   if (!thresholds || typeof thresholds !== "object") {
     errors.push("thresholds must be an object");
     return null;
   }
-  const allowed = new Set(["cycling", "running", "swimming"]);
   const out = Object.create(null);
   for (const key of Object.getOwnPropertyNames(thresholds)) {
-    if (!allowed.has(key)) {
+    const spec = THRESHOLD_SPECS.get(key);
+    if (!spec) {
       errors.push(`thresholds has unknown key: ${key}`);
       return null;
     }
-    if (key === "cycling") {
-      const r = validateThresholdsBlock(
-        thresholds.cycling,
-        new Set(["ftp"]),
-        { ftp: isPositiveInt },
-        errors,
-        "thresholds.cycling"
-      );
-      if (errors.length > 0) return null;
-      if (r !== undefined) out.cycling = r;
-    } else if (key === "running") {
-      const r = validateThresholdsBlock(
-        thresholds.running,
-        new Set(["thresholdPaceSecPerKm", "lthr"]),
-        { thresholdPaceSecPerKm: isPositiveInt, lthr: isPositiveInt },
-        errors,
-        "thresholds.running"
-      );
-      if (errors.length > 0) return null;
-      if (r !== undefined) out.running = r;
-    } else if (key === "swimming") {
-      const r = validateThresholdsBlock(
-        thresholds.swimming,
-        new Set(["cssPaceSecPer100m"]),
-        { cssPaceSecPer100m: isPositiveInt },
-        errors,
-        "thresholds.swimming"
-      );
-      if (errors.length > 0) return null;
-      if (r !== undefined) out.swimming = r;
-    }
+    const r = validateThresholdsBlock(
+      thresholds[key],
+      spec.keys,
+      spec.validators,
+      errors,
+      `thresholds.${key}`
+    );
+    if (errors.length > 0) return null;
+    if (r !== undefined) out[key] = r;
   }
   return out;
 };
@@ -211,22 +214,12 @@ const validateSnapshot = (input) => {
   return { ok: true, value: out };
 };
 
-const ALLOWED_ORIGIN_REGEX =
-  /^(https:\/\/[a-z0-9-]+\.kaiord\.com|http:\/\/localhost:(5173|5174))$/;
-
-const isAllowedSenderOrigin = (sender) =>
-  typeof sender?.origin === "string" &&
-  ALLOWED_ORIGIN_REGEX.test(sender.origin);
-
 if (typeof module !== "undefined") {
   module.exports = {
     validateSnapshot,
-    isAllowedSenderOrigin,
-    ALLOWED_ORIGIN_REGEX,
   };
 }
 
 if (typeof self !== "undefined" && typeof module === "undefined") {
   self.validateSnapshot = validateSnapshot;
-  self.isAllowedSenderOrigin = isAllowedSenderOrigin;
 }

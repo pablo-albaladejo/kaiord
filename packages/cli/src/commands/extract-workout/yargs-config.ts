@@ -1,23 +1,23 @@
 import type { Argv } from "yargs";
 
+import { t } from "../../i18n/index.js";
 import { ExitCode } from "../../utils/exit-codes";
 import { extractWorkoutCommand } from "./index";
 
 export const extractWorkoutYargsConfig = {
   command: "extract-workout",
-  describe: "Extract structured workout from a fitness file as JSON",
+  describe: t("commands.extractWorkout"),
   builder: (yargs: Argv) => {
     return yargs
       .option("input", {
         alias: "i",
         type: "string" as const,
-        description: "Input file path",
+        description: t("options.extractWorkout.input"),
         demandOption: true,
       })
       .option("input-format", {
         type: "string" as const,
-        description:
-          "Override input format detection (fit, tcx, zwo, gcn, krd)",
+        description: t("options.extractWorkout.inputFormat"),
       })
       .example(
         "$0 extract-workout -i workout.fit",

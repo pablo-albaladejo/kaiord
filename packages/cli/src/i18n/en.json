@@ -1,0 +1,79 @@
+{
+  "commands": {
+    "convert": "Convert workout files between formats",
+    "validate": "Validate round-trip conversion of FIT files (FIT only)",
+    "diff": "Compare two workout files and show differences",
+    "inspect": "Inspect a fitness file and display a summary or full KRD JSON",
+    "extractWorkout": "Extract structured workout from a fitness file as JSON",
+    "garmin": "Garmin Connect operations (login, logout, list, push)",
+    "garminLogin": "Authenticate with Garmin Connect",
+    "garminLogout": "Log out from Garmin Connect",
+    "garminList": "List workouts from Garmin Connect",
+    "garminPush": "Push a workout file to Garmin Connect"
+  },
+  "options": {
+    "convert": {
+      "input": "Input file path or glob pattern",
+      "output": "Output file path",
+      "outputDir": "Output directory for batch conversion",
+      "inputFormat": "Override input format detection",
+      "outputFormat": "Override output format detection"
+    },
+    "validate": {
+      "input": "Input file path",
+      "toleranceConfig": "Path to custom tolerance configuration JSON"
+    },
+    "diff": {
+      "file1": "First file to compare",
+      "file2": "Second file to compare",
+      "format1": "Override format detection for first file",
+      "format2": "Override format detection for second file"
+    },
+    "inspect": {
+      "input": "Input file path",
+      "inputFormat": "Override input format detection (fit, tcx, zwo, gcn, krd)"
+    },
+    "extractWorkout": {
+      "input": "Input file path",
+      "inputFormat": "Override input format detection (fit, tcx, zwo, gcn, krd)"
+    },
+    "garminLogin": {
+      "email": "Garmin Connect email",
+      "password": "Garmin Connect password"
+    },
+    "garminList": {
+      "limit": "Maximum number of workouts to list",
+      "offset": "Number of workouts to skip"
+    },
+    "garminPush": {
+      "input": "Input workout file path",
+      "inputFormat": "Override input format detection"
+    },
+    "global": {
+      "verbose": "Enable verbose logging",
+      "quiet": "Suppress all output except errors",
+      "json": "Output results in JSON format",
+      "logFormat": "Force specific log format"
+    }
+  },
+  "output": {
+    "converting": "Converting...",
+    "conversionComplete": "Conversion complete: {{input}} -> {{output}}",
+    "processingBatch": "Processing batch conversion...",
+    "batchProgress": "Converting {{current}}/{{total}}: {{file}}",
+    "batchComplete": "\nBatch conversion complete:",
+    "batchSuccessful": "  Successful: {{count}}/{{total}}",
+    "batchFailed": "  Failed: {{count}}/{{total}}",
+    "batchTotalTime": "  Total time: {{seconds}}s",
+    "batchFailedHeading": "\nFailed conversions:",
+    "validating": "Validating round-trip conversion...",
+    "validationComplete": "Validation complete - no tolerance violations",
+    "roundTripPassed": "Round-trip validation passed",
+    "inspectingFile": "Inspecting file...",
+    "fileLoaded": "File loaded successfully",
+    "extractingWorkout": "Extracting workout...",
+    "workoutExtracted": "Workout extracted successfully",
+    "mustSpecifyCommand": "You must specify a command",
+    "specifyGarminSubcommand": "Specify a garmin subcommand"
+  }
+}

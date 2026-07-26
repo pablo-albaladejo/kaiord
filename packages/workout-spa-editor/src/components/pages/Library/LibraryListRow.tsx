@@ -1,5 +1,6 @@
 import { Play } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Profile } from "../../../types/profile";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 import { Button } from "../../atoms/Button";
@@ -24,6 +25,7 @@ export function LibraryListRow({
   onSchedule,
   onDelete,
 }: LibraryListRowProps) {
+  const t = useTranslate("library");
   const model = buildLibraryCardModel(template, profile);
 
   return (
@@ -37,7 +39,7 @@ export function LibraryListRow({
           onClick={onSchedule}
         >
           <Icon icon={ICON_MAP.calendar} size="sm" color="inherit" />
-          Schedule
+          {t("card.schedule")}
         </Button>
         {hasCurrentWorkout && (
           <Button
@@ -45,18 +47,18 @@ export function LibraryListRow({
             size="sm"
             className="flex-1"
             onClick={onLoad}
-            aria-label={`Load ${template.name} into editor`}
+            aria-label={t("card.loadAria", { name: template.name })}
             data-testid="card-load-into-editor"
           >
             <Play className="h-4 w-4" />
-            Load
+            {t("card.load")}
           </Button>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={onDelete}
-          aria-label={`Delete ${template.name}`}
+          aria-label={t("card.deleteAria", { name: template.name })}
         >
           <Icon icon={ICON_MAP.x} size="sm" color="inherit" />
         </Button>

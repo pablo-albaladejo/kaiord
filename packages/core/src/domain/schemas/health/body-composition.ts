@@ -21,6 +21,8 @@ export const bodyCompositionSchema = z
     boneMassKilograms: z.number().positive().optional(),
     bodyWaterPercent: z.number().min(0).max(100).optional(),
     bmi: z.number().positive().optional(),
+    visceralFatRating: z.number().nonnegative().optional(),
+    basalMetabolicRateKcal: z.number().positive().optional(),
     kaiordRecordId: z.string().uuid().optional(),
     sourceBridgeId: z.string().optional(),
     externalId: z.string().optional(),
@@ -31,12 +33,14 @@ export const bodyCompositionSchema = z
       value.leanMassKilograms !== undefined ||
       value.boneMassKilograms !== undefined ||
       value.bodyWaterPercent !== undefined ||
-      value.bmi !== undefined;
+      value.bmi !== undefined ||
+      value.visceralFatRating !== undefined ||
+      value.basalMetabolicRateKcal !== undefined;
     if (!hasAny) {
       ctx.addIssue({
         code: "custom",
         message:
-          "At least one body-composition field (bodyFatPercent, leanMassKilograms, boneMassKilograms, bodyWaterPercent, bmi) must be present.",
+          "At least one body-composition field (bodyFatPercent, leanMassKilograms, boneMassKilograms, bodyWaterPercent, bmi, visceralFatRating, basalMetabolicRateKcal) must be present.",
       });
     }
   });

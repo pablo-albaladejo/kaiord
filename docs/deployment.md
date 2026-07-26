@@ -26,7 +26,7 @@ All deployments are triggered automatically when changes are pushed to the `main
 
 ### Live URL
 
-The Workout SPA Editor is deployed at: https://pablo-albaladejo.github.io/kaiord/
+The Workout SPA Editor is deployed at: https://kaiord.com/editor/
 
 ### Automated Deployment
 

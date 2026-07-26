@@ -5,6 +5,8 @@ export default defineConfig({
     index: "src/index.ts",
     providers: "src/providers/index.ts",
     prompts: "src/prompts/index.ts",
+    agents: "src/agents/index.ts",
+    observability: "src/observability/index.ts",
   },
   format: ["esm"],
   dts: true,

@@ -2,7 +2,6 @@ export { convertLengthToMeters } from "./converters/length-unit.converter";
 export { createWorkoutKRD } from "./converters/workout-to-krd.converter";
 export { canonicalHash } from "./hash/canonical-hash";
 export { deriveExternalId } from "./ingest/derive-external-id";
-export * from "./lab";
 export type {
   BridgeId,
   HashProjection,
@@ -26,6 +25,7 @@ export type {
   GoalType,
   HealthExtensionPayload,
   HealthFileType,
+  HeartRateSeries,
   HeartRateValue,
   HrvSummary,
   Intensity,
@@ -49,6 +49,7 @@ export type {
   SleepStage,
   Sport,
   SportCategory,
+  StrainSummary,
   StressEpisode,
   StrokeTypeValue,
   SubSport,
@@ -59,6 +60,7 @@ export type {
   TrainingZoneBand,
   TrainingZones,
   TrainingZoneSet,
+  VitalsSummary,
   WeightMeasurement,
   Workout,
   WorkoutStep,
@@ -82,6 +84,8 @@ export {
   goalTypeSchema,
   healthExtensionPayloadSchema,
   healthFileTypes,
+  HEART_RATE_SERIES_BPM_TOLERANCE,
+  heartRateSeriesSchema,
   HRV_TOLERANCE_MS,
   hrvSummarySchema,
   intensitySchema,
@@ -106,6 +110,8 @@ export {
   sleepStageSchema,
   sportCategory,
   sportSchema,
+  STRAIN_SCORE_TOLERANCE,
+  strainSummarySchema,
   STRESS_TOLERANCE,
   stressEpisodeSchema,
   subSportSchema,
@@ -117,6 +123,10 @@ export {
   trainingZoneBandSchema,
   trainingZoneSetSchema,
   trainingZonesSchema,
+  VITALS_RESPIRATORY_RATE_TOLERANCE,
+  VITALS_RESTING_HEART_RATE_TOLERANCE,
+  VITALS_SPO2_TOLERANCE,
+  vitalsSummarySchema,
   WEIGHT_TOLERANCE_KG,
   weightMeasurementSchema,
   workoutLikeFileTypes,
@@ -148,25 +158,25 @@ export {
   ZwiftParsingError,
   ZwiftValidationError,
 } from "./types/errors";
+export { extractWorkout } from "./validation/extract-workout";
+export type { SchemaValidator } from "./validation/schema-validator";
+export { createSchemaValidator } from "./validation/schema-validator";
 export type {
-  SchemaValidator,
   ToleranceChecker,
   ToleranceConfig,
-} from "./validation";
+} from "./validation/tolerance-checker";
 export {
-  createSchemaValidator,
   createToleranceChecker,
   DEFAULT_TOLERANCES,
-  extractWorkout,
   toleranceConfigSchema,
   toleranceViolationSchema,
-  validateKrd,
-} from "./validation";
-export type { PowerZone } from "./zones";
+} from "./validation/tolerance-checker";
+export { validateKrd } from "./validation/validate-krd";
+export type { PowerZone } from "./zones/power-zones";
 export {
   isPowerZone,
   percentFtpToZone,
   POWER_ZONE_PERCENT_FTP,
   POWER_ZONES,
   zoneToPercentFtp,
-} from "./zones";
+} from "./zones/power-zones";

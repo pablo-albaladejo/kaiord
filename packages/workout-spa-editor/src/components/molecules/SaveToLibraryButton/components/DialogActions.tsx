@@ -6,6 +6,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { Button } from "../../../atoms/Button/Button";
 
 type DialogActionsProps = {
@@ -19,15 +20,16 @@ export function DialogActions({
   isSaving,
   isValid,
 }: DialogActionsProps) {
+  const t = useTranslate("library");
   return (
     <div className="flex justify-end gap-3">
       <Dialog.Close asChild>
         <Button variant="secondary" disabled={isSaving}>
-          Cancel
+          {t("actions.cancel")}
         </Button>
       </Dialog.Close>
       <Button onClick={onSave} disabled={!isValid || isSaving}>
-        {isSaving ? "Saving..." : "Save"}
+        {isSaving ? t("saveDialog.saving") : t("actions.save")}
       </Button>
     </div>
   );

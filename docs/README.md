@@ -14,8 +14,13 @@ Welcome to the Kaiord documentation. This directory contains comprehensive guide
 - **[Architecture Guide](architecture.md)** - Hexagonal architecture, ports and adapters, design patterns
 - **[Testing Guide](testing.md)** - Unit testing, integration testing, round-trip testing, TDD workflow
 - **[Deployment Guide](deployment.md)** - CI/CD workflows, GitHub Pages, npm publishing
+- **[SEO/GEO Observatory](seo-observatory.md)** - Weekly search + answer-engine visibility measurement (`scripts/geo/`, `reports/seo/`)
 - **[Contributing Guide](../CONTRIBUTING.md)** - Development workflow, code style, commit conventions, PR process
 - **[AI Agents Guide](../AGENTS.md)** - Guidelines for AI/code agents (GPT, Claude, etc.)
+
+### Connector Research
+
+- **[Connector research](connectors-research/README.md)** - Auth model, session renewal (no re-login), and read/write endpoint catalogs for each fitness platform (Garmin, Whoop, TrainingPeaks, Strava, Train2Go, Tanita)
 
 ### Package Documentation
 

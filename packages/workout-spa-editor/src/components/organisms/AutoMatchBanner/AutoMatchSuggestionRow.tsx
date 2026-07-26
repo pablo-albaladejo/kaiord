@@ -6,6 +6,7 @@
 import { Check, X } from "lucide-react";
 
 import type { MatchSuggestion } from "../../../application/match-suggestion";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 
 const formatPercent = (score: number | null): string =>
@@ -26,6 +27,7 @@ export function AutoMatchSuggestionRow({
   resolveActivity,
   resolveWorkoutTitle,
 }: AutoMatchSuggestionRowProps) {
+  const t = useTranslate("coaching");
   const activity = resolveActivity?.(suggestion.activityId);
   const workoutTitle = resolveWorkoutTitle?.(suggestion.workoutId);
   return (
@@ -34,13 +36,13 @@ export function AutoMatchSuggestionRow({
         <strong>{activity?.title ?? suggestion.activityId}</strong>
         {" → "}
         {workoutTitle ?? suggestion.workoutId}
-        <span className="ml-2 text-slate-500">
+        <span className="ml-2 text-ink-muted">
           · {formatPercent(suggestion.score)}
         </span>
       </span>
       <button
         type="button"
-        aria-label="Accept suggestion"
+        aria-label={t("suggestion.accept")}
         onClick={onAccept}
         className="rounded p-1 text-emerald-600 hover:bg-emerald-50"
       >
@@ -48,9 +50,9 @@ export function AutoMatchSuggestionRow({
       </button>
       <button
         type="button"
-        aria-label="Reject suggestion"
+        aria-label={t("suggestion.reject")}
         onClick={onReject}
-        className="rounded p-1 text-slate-500 hover:bg-slate-100"
+        className="rounded p-1 text-ink-muted hover:bg-slate-100"
       >
         <X className="h-4 w-4" />
       </button>

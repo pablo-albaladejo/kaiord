@@ -1,5 +1,6 @@
 import type { Argv } from "yargs";
 
+import { t } from "../../i18n/index.js";
 import {
   listSubcommand,
   loginSubcommand,
@@ -9,13 +10,13 @@ import {
 
 export const garminYargsConfig = {
   command: "garmin",
-  describe: "Garmin Connect operations (login, logout, list, push)",
+  describe: t("commands.garmin"),
   builder: (yargs: Argv) =>
     yargs
       .command(loginSubcommand)
       .command(logoutSubcommand)
       .command(listSubcommand)
       .command(pushSubcommand)
-      .demandCommand(1, "Specify a garmin subcommand"),
+      .demandCommand(1, t("output.specifyGarminSubcommand")),
   handler: () => {},
 };

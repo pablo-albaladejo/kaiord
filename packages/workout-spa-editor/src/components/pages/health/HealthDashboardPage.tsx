@@ -10,6 +10,7 @@
 import { useMemo } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { lastNDays } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 import { HealthSubRouteLinks } from "./HealthSubRouteLinks";
@@ -20,14 +21,15 @@ import { useTrendSelection } from "./trends/use-trend-selection";
 import { useTrendSeries } from "./trends/use-trend-series";
 
 export default function HealthDashboardPage() {
+  const t = useTranslate("health");
   const active = useActiveProfileLive();
-  const profileLabel = active?.profile?.name ?? "Active profile";
+  const profileLabel = active?.profile?.name ?? t("dashboard.activeProfile");
   const { selected, toggle, rangeDays, setRangeDays } = useTrendSelection();
   const range = useMemo(() => lastNDays(rangeDays), [rangeDays]);
   const series = useTrendSeries(active?.id ?? "", range);
   return (
     <section data-testid="health-dashboard">
-      <HealthPageHeader title="Trends" subtitle={profileLabel} />
+      <HealthPageHeader title={t("dashboard.title")} subtitle={profileLabel} />
       <div className="mb-4 flex flex-col gap-3">
         <TrendMetricSelector selected={selected} onToggle={toggle} />
         <TrendRangeSelector selected={rangeDays} onSelect={setRangeDays} />

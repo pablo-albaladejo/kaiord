@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+// The identity file provides globalThis.KAIORD_BRIDGE_IDENTITY, which the
+// vendored announce core reads (manifest loads it first for the same reason).
+require("../bridge-identity.js");
 const {
   buildAnnouncement,
   onDiscoverRequest,
@@ -19,11 +22,11 @@ describe("kaiord-announce.js (train2go-bridge)", () => {
       expect(ann).toEqual({
         type: "KAIORD_BRIDGE_ANNOUNCE",
         bridgeId: "train2go-bridge",
-        extensionId: "train2go-test-extension-id",
-        name: "Train2Go",
-        version: "0.1.1",
+        extensionId: "test-extension-id",
+        name: "Kaiord Train2Go Bridge",
+        version: "0.0.0",
         protocolVersion: 1,
-        capabilities: ["read:training-plan"],
+        capabilities: ["read:training-plan", "read:training-zones"],
       });
     });
   });

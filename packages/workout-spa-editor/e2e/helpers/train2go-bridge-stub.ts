@@ -105,8 +105,13 @@ export const getBridgeCallActions = async (page: Page): Promise<string[]> =>
     return calls.map((c) => c.action);
   });
 
-/** Reset the call tracker (useful when an action fires during navigation). */
+/** Reset the call tracker, including the navigation-surviving sessionStorage. */
 export const clearBridgeCalls = (page: Page): Promise<void> =>
   page.evaluate(() => {
     (window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ = [];
+    try {
+      window.sessionStorage.removeItem("__T2G_STUB_CALLS_STORE__");
+    } catch {
+      // sessionStorage unavailable — nothing to clear.
+    }
   });

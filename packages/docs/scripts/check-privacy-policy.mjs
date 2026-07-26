@@ -37,10 +37,30 @@ const GARMIN_MANIFEST = join(
   "garmin-bridge",
   "manifest.json"
 );
+const TANITA_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "tanita-bridge",
+  "manifest.json"
+);
+const TRAININGPEAKS_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "trainingpeaks-bridge",
+  "manifest.json"
+);
 
 // Hosts the policy claims each production extension may contact.
 const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
-const GARMIN_ALLOWED_HOSTS = new Set(["https://connect.garmin.com/*"]);
+const GARMIN_ALLOWED_HOSTS = new Set([
+  "https://connect.garmin.com/*",
+  "https://connectapi.garmin.com/*",
+  "https://sso.garmin.com/*",
+]);
+const TANITA_ALLOWED_HOSTS = new Set(["https://mytanita.eu/*"]);
+const TRAININGPEAKS_ALLOWED_HOSTS = new Set([
+  "https://tpapi.trainingpeaks.com/*",
+]);
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
 // dev-server match patterns the policy discloses explicitly.
@@ -90,6 +110,10 @@ const REQUIRED_RULES = [
     re: /Kaiord Train2Go Bridge/i,
   },
   {
+    label: "Tanita Bridge extension covered",
+    re: /Kaiord Tanita Bridge/i,
+  },
+  {
     label: "Garmin host disclosed",
     re: /connect\.garmin\.com/,
   },
@@ -98,12 +122,36 @@ const REQUIRED_RULES = [
     re: /app\.train2go\.com/,
   },
   {
+    label: "Tanita host disclosed",
+    re: /mytanita\.eu/,
+  },
+  {
+    label: "Tanita body-composition read scope disclosed (read:body)",
+    re: /body[- ]composition/i,
+  },
+  {
+    label: "Tanita no-password cookie-session nature disclosed",
+    re: /no password/i,
+  },
+  {
+    label: "TrainingPeaks Bridge extension covered",
+    re: /Kaiord TrainingPeaks Bridge/i,
+  },
+  {
+    label: "TrainingPeaks host disclosed",
+    re: /tpapi\.trainingpeaks\.com/,
+  },
+  {
+    label: "TrainingPeaks no-password cookie→token nature disclosed",
+    re: /cookie for a short-lived access token/i,
+  },
+  {
     label: "Kaiord origin disclosed",
     re: /\*\.kaiord\.com/,
   },
   {
-    label: "CSRF-token session-storage disclosure",
-    re: /CSRF token.*chrome\.storage\.session/is,
+    label: "OAuth-token local-storage disclosure",
+    re: /OAuth token[\s\S]*?chrome\.storage\.local/i,
   },
   {
     label: "Host-permission narrowing stated (no <all_urls>)",
@@ -275,6 +323,20 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       GARMIN_MANIFEST,
       "garmin-bridge",
       GARMIN_ALLOWED_HOSTS
+    )
+  );
+  all.push(
+    ...checkManifestPermissions(
+      TANITA_MANIFEST,
+      "tanita-bridge",
+      TANITA_ALLOWED_HOSTS
+    )
+  );
+  all.push(
+    ...checkManifestPermissions(
+      TRAININGPEAKS_MANIFEST,
+      "trainingpeaks-bridge",
+      TRAININGPEAKS_ALLOWED_HOSTS
     )
   );
   if (existsSync(VITEPRESS_CONFIG)) {

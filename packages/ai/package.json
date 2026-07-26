@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/ai",
-  "version": "9.2.0",
+  "version": "9.3.0",
   "description": "AI/LLM integration for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,6 +18,14 @@
     "./prompts": {
       "import": "./dist/prompts.js",
       "types": "./dist/prompts.d.ts"
+    },
+    "./agents": {
+      "import": "./dist/agents.js",
+      "types": "./dist/agents.d.ts"
+    },
+    "./observability": {
+      "import": "./dist/observability.js",
+      "types": "./dist/observability.d.ts"
     }
   },
   "files": [
@@ -32,6 +40,7 @@
     "lint:fix": "eslint . --fix && prettier --write src",
     "eval": "tsx src/evals/run-evals.ts",
     "eval:chat-tools": "tsx src/evals/run-chat-tool-evals.ts",
+    "eval:labs": "tsx src/evals/run-lab-extraction-evals.ts",
     "generate:model-catalog": "node scripts/generate-model-catalog.mjs",
     "clean": "rm -rf dist"
   },
@@ -40,10 +49,10 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@ai-sdk/anthropic": "^4.0.7",
-    "@ai-sdk/google": "^4.0.8",
-    "@ai-sdk/openai": "^4.0.7",
-    "ai": "^7.0.14"
+    "@ai-sdk/anthropic": "^4.0.18",
+    "@ai-sdk/google": "^4.0.21",
+    "@ai-sdk/openai": "^4.0.17",
+    "ai": "^7.0.34"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -57,16 +66,16 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^4.0.7",
-    "@ai-sdk/google": "^4.0.8",
-    "@ai-sdk/openai": "^4.0.7",
-    "@types/node": "^26.1.0",
-    "@vitest/coverage-v8": "^4.1.9",
-    "ai": "^7.0.14",
+    "@ai-sdk/anthropic": "^4.0.18",
+    "@ai-sdk/google": "^4.0.21",
+    "@ai-sdk/openai": "^4.0.17",
+    "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "ai": "^7.0.34",
     "tsup": "^8.5.1",
-    "tsx": "^4.22.5",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",

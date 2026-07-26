@@ -6,6 +6,7 @@
  */
 import type { BiologicalSex } from "@kaiord/core";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { LabRowState } from "./lab-row-model";
 import { LabParameterIdentityField } from "./LabParameterIdentityField";
 import { LabParameterMeasurementFields } from "./LabParameterMeasurementFields";
@@ -23,6 +24,7 @@ export function LabParameterRow({
   onChange,
   onRemove,
 }: LabParameterRowProps) {
+  const t = useTranslate("labs-ui");
   return (
     <div
       className="flex flex-col gap-2 rounded border border-gray-200 p-3 dark:border-slate-800"
@@ -32,11 +34,11 @@ export function LabParameterRow({
         <LabParameterIdentityField row={row} sex={sex} onChange={onChange} />
         <button
           type="button"
-          aria-label="Remove parameter"
+          aria-label={t("form.removeParameter")}
           onClick={onRemove}
           className="text-sm text-gray-500 hover:text-red-600"
         >
-          Remove
+          {t("form.remove")}
         </button>
       </div>
       <LabParameterMeasurementFields row={row} onChange={onChange} />

@@ -6,8 +6,8 @@
  *
  * Failures are non-fatal: the optimistic UI reverts via the underlying
  * `useLiveQuery` re-fetch, and a static error toast surfaces a single
- * line of feedback. The toast first argument is the bare module-top
- * constant `TOAST_MOVE_WORKOUT_FAILED` so the `R-PIIInterpolation`
+ * line of feedback. The toast first argument is a static translation
+ * key (`t("reschedule.moveFailed")`) so the `R-PIIInterpolation`
  * mechanical guard stays green.
  */
 
@@ -17,21 +17,21 @@ import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexieWorkoutRepository } from "../../../adapters/dexie/dexie-workout-repository";
 import { rescheduleWorkout } from "../../../application/reschedule-workout";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import { usePointerDrag } from "./use-pointer-drag";
 
-const TOAST_MOVE_WORKOUT_FAILED = "Could not move workout";
-
 export function useGridReschedule() {
+  const t = useTranslate("calendar");
   const toast = useToastContext();
 
   const onDrop = useCallback(
     (workoutId: string, targetDayISO: string): void => {
       const repo = createDexieWorkoutRepository(db);
       rescheduleWorkout(repo, workoutId, targetDayISO).catch(() => {
-        toast.error(TOAST_MOVE_WORKOUT_FAILED);
+        toast.error(t("reschedule.moveFailed"));
       });
     },
-    [toast]
+    [toast, t]
   );
 
   return usePointerDrag({ onDrop });

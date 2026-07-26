@@ -10,6 +10,7 @@ import {
 } from "@kaiord/core";
 import { useId } from "react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { unitOptionsFor } from "./lab-parameter-options";
 import {
   type LabRowState,
@@ -28,6 +29,7 @@ type FieldsProps = {
 };
 
 function ValueUnitFields({ row, onChange }: FieldsProps) {
+  const t = useTranslate("labs-ui");
   const unitListId = useId();
   const param = isCustomParameterKey(row.parameterKey)
     ? undefined
@@ -42,21 +44,21 @@ function ValueUnitFields({ row, onChange }: FieldsProps) {
   return (
     <>
       <label className="flex flex-col gap-1 text-xs">
-        Value
+        {t("form.value")}
         <input
           type="number"
           step="any"
-          aria-label="Value"
+          aria-label={t("form.value")}
           value={row.valueRaw}
           className={FIELD_CLASS}
           onChange={(e) => onChange(setValueRaw(row, e.target.value))}
         />
       </label>
       <label className="flex flex-col gap-1 text-xs">
-        Unit
+        {t("form.unit")}
         <input
           list={param ? unitListId : undefined}
-          aria-label="Unit"
+          aria-label={t("form.unit")}
           value={row.unitRaw}
           className={FIELD_CLASS}
           onChange={(e) => onChange(setUnitRaw(row, e.target.value))}
@@ -79,26 +81,27 @@ function ValueUnitFields({ row, onChange }: FieldsProps) {
 }
 
 export function LabParameterMeasurementFields({ row, onChange }: FieldsProps) {
+  const t = useTranslate("labs-ui");
   return (
     <div className="flex flex-wrap items-end gap-2">
       <ValueUnitFields row={row} onChange={onChange} />
       <label className="flex flex-col gap-1 text-xs">
-        Ref low
+        {t("form.refLow")}
         <input
           type="number"
           step="any"
-          aria-label="Reference low"
+          aria-label={t("form.referenceLow")}
           value={row.refLowRaw}
           className={FIELD_CLASS}
           onChange={(e) => onChange(setRefLowRaw(row, e.target.value))}
         />
       </label>
       <label className="flex flex-col gap-1 text-xs">
-        Ref high
+        {t("form.refHigh")}
         <input
           type="number"
           step="any"
-          aria-label="Reference high"
+          aria-label={t("form.referenceHigh")}
           value={row.refHighRaw}
           className={FIELD_CLASS}
           onChange={(e) => onChange(setRefHighRaw(row, e.target.value))}

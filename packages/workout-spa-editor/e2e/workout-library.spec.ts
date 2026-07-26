@@ -100,7 +100,7 @@ test.describe("Workout Library", () => {
       // the Zustand current-workout state, hiding the CTA). The
       // mobile-aware helper opens the hamburger menu first on small
       // viewports (Pixel 5 / iPhone 12 in Playwright).
-      await openHeaderAction(page, /open workout library/i);
+      await openHeaderAction(page, /open workout library/i, /library/i);
       await page.waitForURL(/\/library$/);
       await expect(page.getByTestId("library-page")).toBeVisible();
 

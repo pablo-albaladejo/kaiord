@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/tcx",
-  "version": "9.2.0",
+  "version": "10.0.0",
   "description": "TCX format adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,23 +26,23 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "fast-xml-parser": "^5.9.3",
+    "fast-xml-parser": "^5.10.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "tsup": "^8.5.1",
-    "tsx": "^4.22.5",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/tcx"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/tcx",
+  "homepage": "https://kaiord.com/docs/formats/tcx",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -54,7 +54,11 @@
     "tcx",
     "workout",
     "converter",
-    "fitness"
+    "fitness",
+    "tcx-parser",
+    "tcx-converter",
+    "training-center-xml",
+    "garmin"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",

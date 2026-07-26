@@ -10,7 +10,7 @@ export type MetricProps = HTMLAttributes<HTMLDivElement> & {
 
 export const Metric = forwardRef<HTMLDivElement, MetricProps>(
   ({ value, unit, label, accent = false, className = "", ...props }, ref) => {
-    const valueColor = accent ? "text-sky-400" : "text-slate-50";
+    const valueColor = accent ? "text-accent" : "text-ink-strong";
 
     return (
       <div
@@ -25,12 +25,12 @@ export const Metric = forwardRef<HTMLDivElement, MetricProps>(
             {value}
           </span>
           {unit !== undefined && (
-            <span className="text-[13px] font-semibold text-slate-400">
+            <span className="text-[13px] font-semibold text-ink-muted">
               {unit}
             </span>
           )}
         </div>
-        <div className="text-xs text-slate-500 mt-px truncate whitespace-nowrap overflow-hidden">
+        <div className="text-xs text-ink-muted mt-px truncate whitespace-nowrap overflow-hidden">
           {label}
         </div>
       </div>

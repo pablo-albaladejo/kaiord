@@ -6,18 +6,18 @@ import { convertFitToKrdHealthWeight } from "./fit-to-krd-health-weight.converte
 
 const TIME_CREATED = new Date("2024-12-31T23:00:00.000Z");
 const TIMESTAMP_ISO = "2024-12-31T23:00:00.000Z";
-const FIT_RAW_WEIGHT = 7580;
 const EXPECTED_KG = 75.8;
+const SECOND_WEIGHT_KG = 58.2;
 
 describe("convertFitToKrdHealthWeight", () => {
-  it("should produce a weight_measurement KRD with kg derived from the FIT scaled value", () => {
+  it("should produce a weight_measurement KRD carrying the SDK-scaled weight kg", () => {
     // Arrange
     const messages: FitMessages = {
       fileIdMesgs: [{ timeCreated: TIME_CREATED }],
       weightScaleMesgs: [
         {
           timestamp: new Date(TIMESTAMP_ISO),
-          weight: FIT_RAW_WEIGHT,
+          weight: EXPECTED_KG,
         },
       ],
     };
@@ -55,8 +55,8 @@ describe("convertFitToKrdHealthWeight", () => {
     const messages: FitMessages = {
       fileIdMesgs: [{ timeCreated: TIME_CREATED }],
       weightScaleMesgs: [
-        { timestamp: new Date(TIMESTAMP_ISO), weight: FIT_RAW_WEIGHT },
-        { timestamp: new Date(TIMESTAMP_ISO), weight: 5820 },
+        { timestamp: new Date(TIMESTAMP_ISO), weight: EXPECTED_KG },
+        { timestamp: new Date(TIMESTAMP_ISO), weight: SECOND_WEIGHT_KG },
       ],
     };
     const logger = createMockLogger();

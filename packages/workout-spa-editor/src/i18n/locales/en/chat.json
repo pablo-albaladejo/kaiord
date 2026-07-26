@@ -1,0 +1,80 @@
+{
+  "page": {
+    "loading": "Loading…"
+  },
+  "header": {
+    "title": "Assistant",
+    "subtitle": "Ask about your training and health history, or run an action."
+  },
+  "composer": {
+    "messageLabel": "Message",
+    "placeholder": "Ask about your training or health…",
+    "send": "Send"
+  },
+  "empty": {
+    "startConversation": "Start a conversation — ask about your recent workouts or sleep."
+  },
+  "role": {
+    "user": "You",
+    "assistant": "Assistant",
+    "tool": "Action"
+  },
+  "model": {
+    "label": "Model"
+  },
+  "search": {
+    "placeholder": "Search chats…",
+    "label": "Search chats",
+    "clear": "Clear search",
+    "noMatches": "No matches."
+  },
+  "workspace": {
+    "selectOrStart": "Select a conversation or start a new one."
+  },
+  "list": {
+    "ariaLabel": "Conversations",
+    "newConversation": "+ New conversation"
+  },
+  "item": {
+    "rename": "Rename conversation",
+    "delete": "Delete conversation",
+    "confirmDelete": "Confirm delete"
+  },
+  "titleInput": {
+    "label": "Conversation title"
+  },
+  "pendingAction": {
+    "confirm": "Confirm: {{action}}",
+    "approve": "Approve",
+    "decline": "Decline"
+  },
+  "action": {
+    "sync_coaching": "Sync coaching activities",
+    "create_workout": "Create a workout",
+    "log_health_metric": "Log a health metric"
+  },
+  "toolLinks": {
+    "viewWorkout": "View workout",
+    "viewCalendar": "View on calendar"
+  },
+  "errors": {
+    "retry": "Retry",
+    "auth": "Authentication failed — check your API key in settings.",
+    "rate": "Rate limit or quota reached — try again shortly.",
+    "network": "Network error reaching the provider — try again.",
+    "generic": "The assistant hit an error. Try again."
+  },
+  "draft": {
+    "saveWorkout": "Save workout"
+  },
+  "coaching": {
+    "noDescription": "No description provided.",
+    "coach": "Coach",
+    "collapse": "Collapse coach sidebar"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "skipped": "Skipped"
+  }
+}

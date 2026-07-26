@@ -28,6 +28,10 @@ const TOMBSTONES = "tombstones";
 // twin WorkoutRecord, which syncs), so `activities` staying in the snapshot set
 // preserves cross-device parity. Snapshot-at-rest encryption of this fitness
 // data is tracked as a separate epic (Phase-4 security note, LOW).
+// `usageEvents` is intentionally NOT listed: after the usage-accounting cutover
+// it is the synced, authoritative usage store. Its uuid `id` + `createdAt` drop
+// into the generic append-only merge (union by id, tombstone-suppressed), and a
+// 12-month tombstoning prune bounds its growth (see prune-usage-events).
 const DEVICE_LOCAL = new Set([
   TOMBSTONES,
   "connections",

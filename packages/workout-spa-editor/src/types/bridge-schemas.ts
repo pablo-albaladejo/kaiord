@@ -11,6 +11,10 @@ export const bridgeCapabilitySchema = z.enum([
   "read:workouts",
   "write:workouts",
   "read:body",
+  // Body-composition/weight upload to the connector (garmin-bridge writes a
+  // weight_scale FIT file). Announced by the bridge manifest; the export
+  // data-flow wiring lands with the SPA integration.
+  "write:body",
   "read:sleep",
   "read:training-plan",
   "read:training-zones",

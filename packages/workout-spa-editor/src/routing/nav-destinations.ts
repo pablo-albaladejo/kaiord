@@ -7,6 +7,9 @@ export type NavSurfaces = {
   /** Mobile-only fast-access tab (hidden on desktop via `md:hidden`).
    *  Capped at 5 by the floating bar's fixed layout. */
   bottomNav: boolean;
+  /** True when the create-workout FAB already covers this destination below
+   *  `md` — header hides it there too, without counting toward the cap above. */
+  mobileFab: boolean;
 };
 
 export type NavDestination = {
@@ -95,6 +98,7 @@ export const NAV_DESTINATIONS: readonly NavDestination[] = NAV_ROWS.map(
     labelKey,
     ariaLabel,
     icon,
-    surfaces: { header, bottomNav },
+    // Only the FAB (id "new") is mobile-fab-covered today; see NavSurfaces.
+    surfaces: { header, bottomNav, mobileFab: id === "new" },
   })
 );

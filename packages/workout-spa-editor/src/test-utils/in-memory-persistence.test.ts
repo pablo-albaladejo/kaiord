@@ -4,7 +4,6 @@ import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { Profile } from "../types/profile";
-import type { UsageRecord } from "../types/usage-schemas";
 import type { KRD } from "../types/schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 import { createInMemoryPersistence } from "./in-memory-persistence";
@@ -473,73 +472,5 @@ describe("InMemoryPersistence.transaction", () => {
 
     expect(await persistence.profiles.getAll()).toEqual([]);
     expect(await persistence.templates.getAll()).toEqual([]);
-  });
-});
-
-// --- UsageRepository ---
-
-describe("UsageRepository", () => {
-  it("should put and getByMonth", async () => {
-    const { usage } = createInMemoryPersistence();
-    const record: UsageRecord = {
-      yearMonth: "2026-04",
-      inputTokens: 1200,
-      outputTokens: 300,
-      totalTokens: 1500,
-      totalCost: 0.03,
-      entries: [
-        {
-          date: "2026-04-07",
-          inputTokens: 1200,
-          outputTokens: 300,
-          tokens: 1500,
-          cost: 0.03,
-        },
-      ],
-    };
-
-    await usage.put(record);
-    const result = await usage.getByMonth("2026-04");
-
-    expect(result).toEqual(record);
-  });
-
-  it("should return undefined for non-existent month", async () => {
-    const { usage } = createInMemoryPersistence();
-
-    expect(await usage.getByMonth("2025-01")).toBeUndefined();
-  });
-
-  it("should overwrite on put with same yearMonth", async () => {
-    const { usage } = createInMemoryPersistence();
-    await usage.put({
-      yearMonth: "2026-04",
-      inputTokens: 80,
-      outputTokens: 20,
-      totalTokens: 100,
-      totalCost: 0.01,
-      entries: [],
-    });
-
-    await usage.put({
-      yearMonth: "2026-04",
-      inputTokens: 160,
-      outputTokens: 40,
-      totalTokens: 200,
-      totalCost: 0.02,
-      entries: [
-        {
-          date: "2026-04-11",
-          inputTokens: 160,
-          outputTokens: 40,
-          tokens: 200,
-          cost: 0.02,
-        },
-      ],
-    });
-    const result = await usage.getByMonth("2026-04");
-
-    expect(result?.totalTokens).toBe(200);
-    expect(result?.entries).toHaveLength(1);
   });
 });

@@ -1,6 +1,9 @@
 /** buildLabReport — assemble one `LabReport` from the form's header fields. */
 import type { LabReport } from "@kaiord/core";
 
+/** Who authored the record: manual entry, an AI-extracted draft, or a WHOOP import. */
+export type LabProvenanceSource = "manual" | "ai-extracted" | "whoop";
+
 export type FastingInput = "unspecified" | "yes" | "no";
 
 export type LabReportHeaderInput = {
@@ -14,6 +17,7 @@ export type LabReportHeaderInput = {
 export type BuildLabReportContext = {
   id: string;
   profileId: string;
+  provenance?: LabProvenanceSource;
 };
 
 export function buildLabReport(
@@ -29,6 +33,6 @@ export function buildLabReport(
       header.fasting === "unspecified" ? undefined : header.fasting === "yes",
     drawTime: header.drawTime.trim() || undefined,
     notes: header.notes.trim() || undefined,
-    provenance: { source: "manual" },
+    provenance: { source: ctx.provenance ?? "manual" },
   };
 }

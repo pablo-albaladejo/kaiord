@@ -7,6 +7,7 @@
 
 import type uPlot from "uplot";
 
+import { getTranslate, type Translate } from "../../../../i18n/use-translate";
 import { ENERGY_TREND_METRIC_BY_KEY } from "./energy-trend-metrics";
 import type { EnergyTrendKey } from "./energy-trend-series";
 
@@ -22,12 +23,15 @@ const buildScales = (keys: ReadonlyArray<EnergyTrendKey>): uPlot.Scales => {
   return scales;
 };
 
-const buildSeries = (keys: ReadonlyArray<EnergyTrendKey>): uPlot.Series[] => [
+const buildSeries = (
+  keys: ReadonlyArray<EnergyTrendKey>,
+  t: Translate
+): uPlot.Series[] => [
   {},
   ...keys.map((key) => {
     const def = ENERGY_TREND_METRIC_BY_KEY[key];
     return {
-      label: def.label,
+      label: t(`trends.series.${key}`),
       scale: def.scale,
       stroke: def.stroke,
       width: def.width ?? 1,
@@ -38,13 +42,14 @@ const buildSeries = (keys: ReadonlyArray<EnergyTrendKey>): uPlot.Series[] => [
 ];
 
 export const buildEnergyTrendOptions = (
-  keys: ReadonlyArray<EnergyTrendKey>
+  keys: ReadonlyArray<EnergyTrendKey>,
+  t: Translate = getTranslate("nutrition")
 ): uPlot.Options => ({
   width: 0,
   height: 0,
   scales: buildScales(keys),
-  axes: [{}, { scale: WEIGHT_SCALE, side: 3, label: "Weight (kg)" }],
-  series: buildSeries(keys),
+  axes: [{}, { scale: WEIGHT_SCALE, side: 3, label: t("trends.weightAxis") }],
+  series: buildSeries(keys, t),
   legend: { show: true, live: true },
   cursor: { x: true, y: true },
 });

@@ -6,12 +6,12 @@ import { ICON_MAP } from "../../atoms/Icon/icon-map";
 export type EntryDef = {
   id: string;
   icon: ComponentType<{ className?: string }>;
-  label: string;
   ariaLabel?: string;
   to: string;
   variant?: "primary" | "tertiary";
-  /** True when the destination also lives in the mobile bottom nav — the
-      header hides it below `md` so mobile never shows duplicate entries. */
+  /** True when the destination also lives in the mobile bottom nav, or is
+      already covered by the mobile create-workout FAB — the header hides
+      it below `md` so mobile never shows a duplicate entry. */
   mobileHidden?: boolean;
 };
 
@@ -29,9 +29,9 @@ export const ENTRY_DEFS: ReadonlyArray<EntryDef> = NAV_DESTINATIONS.filter(
 ).map((destination) => ({
   id: destination.id,
   icon: ICON_MAP[destination.icon],
-  label: destination.labelKey,
   ariaLabel: destination.ariaLabel,
   to: destination.path,
   variant: PRIMARY_VARIANT_IDS.has(destination.id) ? "primary" : undefined,
-  mobileHidden: destination.surfaces.bottomNav,
+  mobileHidden:
+    destination.surfaces.bottomNav || destination.surfaces.mobileFab,
 }));

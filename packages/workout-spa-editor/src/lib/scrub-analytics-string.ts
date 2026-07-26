@@ -1,6 +1,6 @@
 /**
  * Scrubs PII / opaque secret material from a string before forwarding
- * it to a third-party telemetry sink (e.g., Cloudflare beacon).
+ * it to a third-party telemetry sink (e.g., the Umami tracker).
  *
  * Five replacements applied in order:
  *   1. UUID v4/v5 → <uuid>

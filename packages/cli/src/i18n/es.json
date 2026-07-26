@@ -1,0 +1,79 @@
+{
+  "commands": {
+    "convert": "Convierte archivos de entrenamiento entre formatos",
+    "validate": "Valida la conversión de ida y vuelta de archivos FIT (solo FIT)",
+    "diff": "Compara dos archivos de entrenamiento y muestra las diferencias",
+    "inspect": "Inspecciona un archivo de fitness y muestra un resumen o el JSON KRD completo",
+    "extractWorkout": "Extrae el entrenamiento estructurado de un archivo de fitness como JSON",
+    "garmin": "Operaciones de Garmin Connect (login, logout, list, push)",
+    "garminLogin": "Autentícate en Garmin Connect",
+    "garminLogout": "Cierra sesión en Garmin Connect",
+    "garminList": "Lista entrenamientos de Garmin Connect",
+    "garminPush": "Envía un archivo de entrenamiento a Garmin Connect"
+  },
+  "options": {
+    "convert": {
+      "input": "Ruta del archivo de entrada o patrón glob",
+      "output": "Ruta del archivo de salida",
+      "outputDir": "Directorio de salida para conversión por lotes",
+      "inputFormat": "Anular la detección del formato de entrada",
+      "outputFormat": "Anular la detección del formato de salida"
+    },
+    "validate": {
+      "input": "Ruta del archivo de entrada",
+      "toleranceConfig": "Ruta a un archivo JSON de configuración de tolerancias personalizado"
+    },
+    "diff": {
+      "file1": "Primer archivo a comparar",
+      "file2": "Segundo archivo a comparar",
+      "format1": "Anular la detección de formato del primer archivo",
+      "format2": "Anular la detección de formato del segundo archivo"
+    },
+    "inspect": {
+      "input": "Ruta del archivo de entrada",
+      "inputFormat": "Anular la detección del formato de entrada (fit, tcx, zwo, gcn, krd)"
+    },
+    "extractWorkout": {
+      "input": "Ruta del archivo de entrada",
+      "inputFormat": "Anular la detección del formato de entrada (fit, tcx, zwo, gcn, krd)"
+    },
+    "garminLogin": {
+      "email": "Correo electrónico de Garmin Connect",
+      "password": "Contraseña de Garmin Connect"
+    },
+    "garminList": {
+      "limit": "Número máximo de entrenamientos a listar",
+      "offset": "Número de entrenamientos a omitir"
+    },
+    "garminPush": {
+      "input": "Ruta del archivo de entrenamiento de entrada",
+      "inputFormat": "Anular la detección del formato de entrada"
+    },
+    "global": {
+      "verbose": "Habilita el registro detallado",
+      "quiet": "Suprime toda la salida excepto los errores",
+      "json": "Muestra los resultados en formato JSON",
+      "logFormat": "Fuerza un formato de registro específico"
+    }
+  },
+  "output": {
+    "converting": "Convirtiendo...",
+    "conversionComplete": "Conversión completada: {{input}} -> {{output}}",
+    "processingBatch": "Procesando conversión por lotes...",
+    "batchProgress": "Convirtiendo {{current}}/{{total}}: {{file}}",
+    "batchComplete": "\nConversión por lotes completada:",
+    "batchSuccessful": "  Correctas: {{count}}/{{total}}",
+    "batchFailed": "  Fallidas: {{count}}/{{total}}",
+    "batchTotalTime": "  Tiempo total: {{seconds}}s",
+    "batchFailedHeading": "\nConversiones fallidas:",
+    "validating": "Validando conversión de ida y vuelta...",
+    "validationComplete": "Validación completada - sin violaciones de tolerancia",
+    "roundTripPassed": "Validación de ida y vuelta superada",
+    "inspectingFile": "Inspeccionando archivo...",
+    "fileLoaded": "Archivo cargado correctamente",
+    "extractingWorkout": "Extrayendo entrenamiento...",
+    "workoutExtracted": "Entrenamiento extraído correctamente",
+    "mustSpecifyCommand": "Debes especificar un comando",
+    "specifyGarminSubcommand": "Especifica un subcomando de garmin"
+  }
+}

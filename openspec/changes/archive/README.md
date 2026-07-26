@@ -7,6 +7,12 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-07-22 | [`rewrite-whoop-session-bridge`](./2026-07-22-rewrite-whoop-session-bridge/) | Rewrite the WHOOP bridge to session piggyback (internal API) |
+| 2026-07-11 | [`add-shared-bridge-core`](./2026-07-11-add-shared-bridge-core/) | Three Chrome extension bridges (garmin-bridge, train2go-bridge, |
+| 2026-07-11 | [`cutover-usage-accounting-to-event-log`](./2026-07-11-cutover-usage-accounting-to-event-log/) | Cut usage accounting over to the event log (retire the legacy `usage` table) |
+| 2026-07-10 | [`add-ai-usage-telemetry-sink`](./2026-07-10-add-ai-usage-telemetry-sink/) | Migrate usage accounting onto the telemetry port (dual-write + parity) |
+| 2026-07-09 | [`add-ai-platform-foundation`](./2026-07-09-add-ai-platform-foundation/) | AI platform foundation (Wave 1) |
+| 2026-07-09 | [`add-lab-extraction-agent`](./2026-07-09-add-lab-extraction-agent/) | Lab-report AI extraction on the agent runtime (Wave 2 kickoff) |
 | 2026-06-27 | [`train2go-coach-links`](./2026-06-27-train2go-coach-links/) | Coach instructions imported from Train2Go — including the YouTube/Dropbox links |
 | 2026-06-22 | [`energy-balance-tracking`](./2026-06-22-energy-balance-tracking/) | Athletes can already see ingested wellness data (steps, sleep, HRV, weight, and |
 | 2026-06-22 | [`energy-expenditure-activity-factor`](./2026-06-22-energy-expenditure-activity-factor/) | resolveDayExpenditure's predicted path is BMR + expectedActivityKcal. On a |

@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/garmin-connect",
-  "version": "9.2.0",
+  "version": "10.0.0",
   "description": "Garmin Connect API client for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
@@ -33,19 +33,19 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "tsup": "^8.5.1",
-    "tsx": "^4.22.5",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/garmin-connect"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/garmin-connect",
+  "homepage": "https://kaiord.com/docs/api/garmin-connect/",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -58,7 +58,10 @@
     "garmin-connect",
     "workout",
     "api-client",
-    "fitness"
+    "fitness",
+    "garmin-api",
+    "garmin-connect-api",
+    "workout-upload"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",

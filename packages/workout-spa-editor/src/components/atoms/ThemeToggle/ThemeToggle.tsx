@@ -1,6 +1,7 @@
 import { Moon, Sun } from "lucide-react";
 
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";
 
@@ -15,6 +16,7 @@ import { Icon } from "../Icon/Icon";
  */
 export const ThemeToggle = () => {
   const { theme, resolvedTheme, setTheme } = useTheme();
+  const t = useTranslate("common");
 
   const handleToggle = () => {
     // Cycle through themes: light → dark → light
@@ -31,7 +33,9 @@ export const ThemeToggle = () => {
   // Determine icon and label based on resolved theme
   const currentIcon = resolvedTheme === "dark" ? Moon : Sun;
   const ariaLabel =
-    resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    resolvedTheme === "dark"
+      ? t("a11y.switchToLightMode")
+      : t("a11y.switchToDarkMode");
 
   return (
     <Button

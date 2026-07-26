@@ -17,6 +17,7 @@ const DEFAULT_CAPS = [
   "write:workouts",
   "read:workouts",
   "read:activities",
+  "write:body",
 ] as const;
 
 export type GarminStubOptions = {

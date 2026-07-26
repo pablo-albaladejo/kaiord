@@ -4,9 +4,8 @@
  */
 import type { LabReport } from "@kaiord/core";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { LabReportRow } from "./LabReportRow";
-
-const EMPTY_MSG = "No reports saved yet.";
 
 export type LabReportsListProps = {
   reports: LabReport[];
@@ -21,8 +20,9 @@ export const LabReportsList = ({
   onToggle,
   onDelete,
 }: LabReportsListProps) => {
+  const t = useTranslate("labs-ui");
   if (reports.length === 0)
-    return <p className="text-sm text-gray-600">{EMPTY_MSG}</p>;
+    return <p className="text-sm text-gray-600">{t("report.emptyList")}</p>;
   return (
     <ul data-testid="lab-reports-list" className="flex flex-col gap-2">
       {reports.map((report) => (

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import {
   ACTIVE_STROKE_WIDTH,
@@ -13,7 +14,8 @@ type BottomNavTabProps = {
 };
 
 export function BottomNavTab({ tab, active, onActivate }: BottomNavTabProps) {
-  const color = active ? "text-sky-400" : "text-slate-500";
+  const t = useTranslate("nav");
+  const color = active ? "text-accent" : "text-ink-muted";
   return (
     <button
       type="button"
@@ -27,7 +29,7 @@ export function BottomNavTab({ tab, active, onActivate }: BottomNavTabProps) {
         strokeWidth={active ? ACTIVE_STROKE_WIDTH : INACTIVE_STROKE_WIDTH}
         style={{ width: TAB_ICON_SIZE, height: TAB_ICON_SIZE }}
       />
-      <span className="text-[10.5px] font-semibold">{tab.label}</span>
+      <span className="text-[10.5px] font-semibold">{t(tab.id)}</span>
     </button>
   );
 }

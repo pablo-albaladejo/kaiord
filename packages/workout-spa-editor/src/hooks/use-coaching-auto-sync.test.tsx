@@ -150,6 +150,31 @@ describe("useCoachingAutoSync", () => {
     expect(src.sync).not.toHaveBeenCalled();
   });
 
+  it("should fire sync when sources populate after an initial empty-sources run", async () => {
+    // Arrange
+    // Bridge detection lands AFTER profile/week settle: the first effect
+    // run sees zero sources and must not burn the week key.
+    const src = makeSource();
+    const { rerender } = renderHook(
+      ({ sources }: { sources: CoachingSyncState[] }) =>
+        useCoachingAutoSync(sources, "2026-04-13"),
+      {
+        initialProps: { sources: [] as CoachingSyncState[] },
+        wrapper: ({ children }) => wrap(children),
+      }
+    );
+    await new Promise((r) => setTimeout(r, NO_FIRE_SETTLE_MS));
+
+    // Act
+    // The bridge announces itself and the source list re-emits.
+    rerender({ sources: [src] });
+
+    // Assert
+    await waitFor(() => {
+      expect(src.sync).toHaveBeenCalledWith("2026-04-13");
+    });
+  });
+
   it("should invalidate staleness on profile switch — A's fresh row does NOT suppress sync for B", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();

@@ -8,10 +8,18 @@ const SITE_URL = "https://kaiord.com";
 const DOCS_BASE = "/docs/";
 const OG_IMAGE = `${SITE_URL}${DOCS_BASE}og-image-docs.png`;
 
+// One canonical URL per page, matching what cleanUrls actually serves
+// (extensionless, directory-style for index pages). Every docs page renders
+// under three reachable variants (clean, .html, and the .md mirror for LLMs);
+// without a canonical, engines pick arbitrarily.
+function pageCanonicalUrl(relativePath: string): string {
+  const path = relativePath.replace(/\.md$/, "").replace(/(^|\/)index$/, "$1");
+  return `${SITE_URL}${DOCS_BASE}${path}`;
+}
+
 const AUTHOR = {
   name: "Pablo Albaladejo",
-  linkedin:
-    "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
+  linkedin: "https://www.linkedin.com/in/pabloalbaladejomestre",
   github: "https://github.com/pablo-albaladejo",
 };
 
@@ -19,7 +27,7 @@ function buildJsonLd(
   pageData: { relativePath: string; title: string; description: string },
   isHome: boolean
 ): string[] {
-  const pageUrl = `${SITE_URL}${DOCS_BASE}${pageData.relativePath.replace(/\.md$/, ".html").replace(/index\.html$/, "")}`;
+  const pageUrl = pageCanonicalUrl(pageData.relativePath);
   const segments = pageData.relativePath
     .replace(/\.md$/, "")
     .replace(/\/index$/, "")
@@ -94,11 +102,23 @@ const config = {
   // sitemap, llmstxt) but keep them on disk for AI agents to read.
   srcExclude: ["**/AGENTS.md"],
 
-  head: buildStaticHead({ docsBase: DOCS_BASE, ogImage: OG_IMAGE }),
+  head: buildStaticHead({
+    docsBase: DOCS_BASE,
+    ogImage: OG_IMAGE,
+    umamiWebsiteId: process.env.UMAMI_WEBSITE_ID,
+  }),
 
+  // VitePress does not prepend `base` to sitemap entries, so the base must
+  // be part of the hostname or every URL points at the site root
+  // (kaiord.com/CHANGELOG instead of kaiord.com/docs/CHANGELOG).
   sitemap: {
-    hostname: SITE_URL,
+    hostname: `${SITE_URL}${DOCS_BASE}`,
   },
+
+  // Extensionless URLs (GitHub Pages resolves /page to page.html). Cleaner
+  // canonical URLs for search engines and AI-agent citations; the .html
+  // files are still emitted, so old links keep working.
+  cleanUrls: true,
 
   appearance: "dark",
 
@@ -108,6 +128,7 @@ const config = {
 
     nav: [
       { text: "Quick Start", link: "/guide/quick-start" },
+      { text: "Convert", link: "/convert/" },
       { text: "Formats", link: "/formats/krd" },
       { text: "API Reference", link: "/api/" },
     ],
@@ -128,6 +149,25 @@ const config = {
           { text: "Architecture", link: "/guide/architecture" },
           { text: "Testing", link: "/guide/testing" },
           { text: "Contributing", link: "/guide/contributing" },
+        ],
+      },
+      {
+        text: "Convert",
+        collapsed: false,
+        items: [
+          { text: "All converters", link: "/convert/" },
+          { text: "FIT to ZWO", link: "/convert/fit-to-zwo" },
+          { text: "ZWO to FIT", link: "/convert/zwo-to-fit" },
+          { text: "FIT to TCX", link: "/convert/fit-to-tcx" },
+          { text: "TCX to FIT", link: "/convert/tcx-to-fit" },
+          { text: "ZWO to Garmin", link: "/convert/zwo-to-garmin" },
+          { text: "Garmin to ZWO", link: "/convert/garmin-to-zwo" },
+          { text: "FIT to Garmin", link: "/convert/fit-to-garmin" },
+          { text: "Garmin to FIT", link: "/convert/garmin-to-fit" },
+          { text: "TCX to ZWO", link: "/convert/tcx-to-zwo" },
+          { text: "ZWO to TCX", link: "/convert/zwo-to-tcx" },
+          { text: "TCX to Garmin", link: "/convert/tcx-to-garmin" },
+          { text: "Garmin to TCX", link: "/convert/garmin-to-tcx" },
         ],
       },
       {
@@ -172,7 +212,7 @@ const config = {
 
     footer: {
       message:
-        'Built by <a href="https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/" target="_blank" rel="noopener">Pablo Albaladejo</a>',
+        'Built by <a href="https://pabloalbaladejo.com" target="_blank" rel="noopener">Pablo Albaladejo</a>',
       copyright:
         '<a href="https://github.com/pablo-albaladejo/kaiord/releases" target="_blank" rel="noopener">GitHub Releases</a>',
     },
@@ -226,6 +266,11 @@ const config = {
   transformHead({ pageData }: TransformContext) {
     const head: HeadConfig[] = [];
     const isHome = pageData.relativePath === "index.md";
+
+    head.push([
+      "link",
+      { rel: "canonical", href: pageCanonicalUrl(pageData.relativePath) },
+    ]);
 
     if (pageData.frontmatter.title) {
       head.push([

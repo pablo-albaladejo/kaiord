@@ -12,10 +12,10 @@
  * unconfigured deploys silently fall back to the no-op analytics adapter.
  */
 
-export const CF_ANALYTICS_TOKEN_PLACEHOLDER = "__CF_ANALYTICS_TOKEN__";
+export const UMAMI_WEBSITE_ID_PLACEHOLDER = "__UMAMI_WEBSITE_ID__";
 
 export type RuntimeConfig = {
-  cfAnalyticsToken?: string;
+  umamiWebsiteId?: string;
 };
 
 type WindowWithConfig = Window &
@@ -24,15 +24,15 @@ type WindowWithConfig = Window &
   };
 
 /**
- * Returns the Cloudflare Web Analytics token if a real value has been injected
- * at deploy time. Returns `undefined` when the placeholder is still in place,
- * the field is empty, or `window` is unavailable (SSR / tests without DOM).
+ * Returns the Umami website id if a real value has been injected at deploy
+ * time. Returns `undefined` when the placeholder is still in place, the field
+ * is empty, or `window` is unavailable (SSR / tests without DOM).
  */
-export const getCfAnalyticsToken = (): string | undefined => {
+export const getUmamiWebsiteId = (): string | undefined => {
   if (typeof window === "undefined") return undefined;
   const cfg = (window as WindowWithConfig).__KAIORD_CONFIG__;
-  const token = cfg?.cfAnalyticsToken;
-  if (!token) return undefined;
-  if (token === CF_ANALYTICS_TOKEN_PLACEHOLDER) return undefined;
-  return token;
+  const websiteId = cfg?.umamiWebsiteId;
+  if (!websiteId) return undefined;
+  if (websiteId === UMAMI_WEBSITE_ID_PLACEHOLDER) return undefined;
+  return websiteId;
 };

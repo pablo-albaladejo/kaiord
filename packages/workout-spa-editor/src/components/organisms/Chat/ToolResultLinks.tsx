@@ -14,7 +14,7 @@ export function ToolResultLinks({ links }: ToolResultLinksProps) {
         <Link
           key={link.href}
           href={link.href}
-          className="rounded-lg bg-slate-800 px-2 py-1 text-[12px] font-medium text-sky-300 hover:text-sky-200"
+          className="rounded-lg bg-surface px-2 py-1 text-[12px] font-medium text-accent hover:text-accent/80"
         >
           {link.label}
         </Link>

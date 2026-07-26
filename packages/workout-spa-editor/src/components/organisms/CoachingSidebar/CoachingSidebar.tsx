@@ -11,14 +11,15 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { toCoachingActivity } from "../../../adapters/train2go/coaching-record-to-activity.converter";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivityRecord } from "../../../types/coaching-activity-record";
 import { CoachingDescription } from "./CoachingDescription";
 import { useSidebarCollapse } from "./use-sidebar-collapse";
 
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Pending",
-  completed: "Completed",
-  skipped: "Skipped",
+const STATUS_LABEL_KEY: Record<string, string> = {
+  pending: "status.pending",
+  completed: "status.completed",
+  skipped: "status.skipped",
 };
 
 export type CoachingSidebarProps = {
@@ -26,6 +27,7 @@ export type CoachingSidebarProps = {
 };
 
 export function CoachingSidebar({ activity }: CoachingSidebarProps) {
+  const t = useTranslate("chat");
   const { collapsed, toggle } = useSidebarCollapse();
   if (collapsed) {
     return (
@@ -36,13 +38,14 @@ export function CoachingSidebar({ activity }: CoachingSidebarProps) {
         className="flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
       >
         <ChevronRight className="h-3 w-3" aria-hidden="true" />
-        Coach
+        {t("coaching.coach")}
       </button>
     );
   }
   const view = toCoachingActivity(activity);
   const sport = view.sport;
-  const status = STATUS_LABEL[activity.status] ?? activity.status;
+  const statusKey = STATUS_LABEL_KEY[activity.status];
+  const status = statusKey ? t(statusKey) : activity.status;
   return (
     <aside
       data-testid="coaching-sidebar"
@@ -59,7 +62,7 @@ export function CoachingSidebar({ activity }: CoachingSidebarProps) {
           type="button"
           data-testid="coaching-sidebar-collapse"
           onClick={toggle}
-          aria-label="Collapse coach sidebar"
+          aria-label={t("coaching.collapse")}
           className="rounded p-1 text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />

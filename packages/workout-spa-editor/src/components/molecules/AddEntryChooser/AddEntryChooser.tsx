@@ -11,6 +11,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useId } from "react";
 
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
+import { useTranslate } from "../../../i18n/use-translate";
 import {
   DIALOG_CONTENT_CLASSES,
   DIALOG_OVERLAY_CLASSES,
@@ -35,11 +36,12 @@ export function AddEntryChooser({
   date,
   onChoose,
 }: AddEntryChooserProps) {
+  const t = useTranslate("calendar");
   const titleId = useId();
   const dateLabel = formatDateLabel(date, useActiveLocale());
   const titleText = dateLabel
-    ? `Add to ${dateLabel}`
-    : "What do you want to add?";
+    ? t("addEntry.addTo", { date: dateLabel })
+    : t("addEntry.title");
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -64,7 +66,7 @@ export function AddEntryChooser({
               className={TILE_CLASSES}
               onClick={() => onChoose("workout")}
             >
-              Workout
+              {t("addEntry.workout")}
             </button>
             <button
               type="button"
@@ -72,7 +74,7 @@ export function AddEntryChooser({
               className={TILE_CLASSES}
               onClick={() => onChoose("wellness")}
             >
-              Wellness
+              {t("addEntry.wellness")}
             </button>
           </div>
         </Dialog.Content>

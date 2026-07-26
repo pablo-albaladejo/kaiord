@@ -1,5 +1,6 @@
 import type { HTMLAttributes } from "react";
 
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import { formatDuration } from "./format-duration";
 import type { StepCardProps } from "./StepCard.types";
 import { getStepCardClasses } from "./use-step-card-classes";
@@ -29,7 +30,10 @@ export function extractHtmlProps(
 }
 
 /** Derive the StepCard's rendered data (label, classes, selection state). */
-export function deriveStepCardData(props: StepCardProps) {
+export function deriveStepCardData(
+  props: StepCardProps,
+  t: Translate = getTranslate("editor")
+) {
   const {
     step,
     visualIndex,
@@ -47,7 +51,10 @@ export function deriveStepCardData(props: StepCardProps) {
     selected,
     displayIndex,
     intensity: step.intensity ?? "other",
-    label: `Step ${displayIndex + 1}: ${step.name || formatDuration(step)}`,
+    label: t("stepCard.ariaLabel", {
+      n: displayIndex + 1,
+      detail: step.name || formatDuration(step, t),
+    }),
     classes: getStepCardClasses(
       selected,
       Boolean(onDelete || onDuplicate || onCopy),

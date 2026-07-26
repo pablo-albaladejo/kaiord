@@ -18,6 +18,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "athlete-e2e-profile";
 const PROFILE_NAME = "E2E Athlete";
@@ -67,10 +68,7 @@ async function gotoAthlete(page: Page) {
   // Boot once to expose the Dexie singleton, seed the active profile,
   // then load the populated Athlete page.
   await page.goto("/athlete");
-  await page.waitForFunction(
-    () => Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-    { timeout: 10_000 }
-  );
+  await waitForDexieReady(page);
   await seedAthleteProfile(page);
   await page.goto("/athlete");
   await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible({
@@ -171,6 +169,30 @@ test.describe("Athlete page", () => {
     await dialog.getByLabel(/FTP threshold/i).fill("280");
     await page.keyboard.press("Escape");
     await expect(page.getByText("300", { exact: true })).toBeHidden();
+    // The editor persists on change in the background (fire-and-forget
+    // Dexie put); wait for the write to commit or the reload can win the
+    // race and hydrate the pre-edit profile.
+
+    const editedFtp = 280;
+    await page.waitForFunction(
+      async ({ profileId, ftp }) => {
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as {
+          table: (n: string) => { get: (k: string) => Promise<unknown> };
+        };
+        if (!db) return false;
+        const row = (await db.table("profiles").get(profileId)) as
+          | {
+              sportZones?: {
+                cycling?: { thresholds?: { ftp?: number } };
+              };
+            }
+          | undefined;
+        return row?.sportZones?.cycling?.thresholds?.ftp === ftp;
+      },
+      { profileId: PROFILE_ID, ftp: editedFtp },
+      { timeout: 10_000 }
+    );
     await page.reload();
     await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible();
 

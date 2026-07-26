@@ -31,15 +31,15 @@ export function LibraryCard({
     <Card
       variant="interactive"
       onClick={onClick}
-      className="cursor-pointer bg-primary-900 border-slate-800 p-4"
+      className="cursor-pointer bg-surface border-edge p-4"
       data-testid="library-card"
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400">
+        <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent">
           <Icon icon={ICON_MAP[sportIcon]} size="md" color="inherit" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="m-0 truncate text-[15px] font-bold text-slate-50">
+          <p className="m-0 truncate text-[15px] font-bold text-ink-strong">
             {title}
           </p>
           <LibraryCardMeta duration={duration} tss={tss} />
@@ -66,7 +66,7 @@ function LibraryCardMeta({ duration, tss }: LibraryCardMetaProps) {
   if (duration === undefined && tss === undefined) return null;
 
   return (
-    <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-slate-400">
+    <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-ink-muted">
       {duration !== undefined && (
         <span className="flex items-center gap-1">
           <Icon icon={ICON_MAP.clock} size="xs" color="inherit" />

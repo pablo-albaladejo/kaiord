@@ -1,75 +1,45 @@
 /**
- * UsageTab rendered table — one row per UsageRecord, reverse-chron
- * sorted by the caller. Tokens are shown split into input / output
- * columns; legacy rows (migrated from the pre-split schema) display
- * `—` under "Output" to avoid presenting a fabricated zero as fact.
+ * UsageTab rendered table — one bold total row per month (reverse-chron sorted
+ * by the caller) plus an indented per-purpose breakdown, all folded from the
+ * synced `usageEvents` log. No legacy `—` handling: every row is a real fold, so
+ * the input/output split is always present.
  */
 
-import type { UsageRecord } from "../../../types/usage-schemas";
+import { useTranslate } from "../../../i18n/use-translate";
+import type { MonthUsage } from "./usage-table-types";
+import { UsageMonthRow } from "./UsageMonthRow";
+
+export type { MonthUsage, UsagePurpose } from "./usage-table-types";
+export { USAGE_PURPOSES } from "./usage-table-types";
 
 export type UsageTableProps = {
-  rows: UsageRecord[];
+  rows: MonthUsage[];
   monthsWindow: number;
 };
 
-function formatOutput(row: UsageRecord): string {
-  return row.legacy ? "—" : row.outputTokens.toLocaleString();
-}
-
 export function UsageTable({ rows, monthsWindow }: UsageTableProps) {
+  const t = useTranslate("settings");
   return (
     <div className="space-y-3">
       <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-        AI Usage — last {monthsWindow} months
+        {t("usage.heading", { count: monthsWindow })}
       </h3>
       <table className="w-full text-sm" data-testid="usage-table">
         <thead>
           <tr className="border-b border-gray-200 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            <th className="py-2 pr-4 font-medium">Month</th>
-            <th className="py-2 pr-4 font-medium">Input</th>
-            <th className="py-2 pr-4 font-medium">Output</th>
-            <th className="py-2 pr-4 font-medium">Total</th>
-            <th className="py-2 font-medium">Cost (USD)</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.month")}</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.input")}</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.output")}</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.total")}</th>
+            <th className="py-2 pr-4 font-medium">{t("usage.cost")}</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr
-              key={r.yearMonth}
-              data-testid={`usage-row-${r.yearMonth}`}
-              className="border-b border-gray-100 last:border-0 dark:border-gray-800"
-            >
-              <td className="py-2 pr-4 text-gray-900 dark:text-gray-100">
-                {r.yearMonth}
-              </td>
-              <td
-                className="py-2 pr-4 text-gray-900 dark:text-gray-100"
-                data-testid={`usage-input-${r.yearMonth}`}
-              >
-                {r.inputTokens.toLocaleString()}
-              </td>
-              <td
-                className="py-2 pr-4 text-gray-900 dark:text-gray-100"
-                data-testid={`usage-output-${r.yearMonth}`}
-              >
-                {formatOutput(r)}
-              </td>
-              <td className="py-2 pr-4 text-gray-900 dark:text-gray-100">
-                {r.totalTokens.toLocaleString()}
-              </td>
-              <td className="py-2 text-gray-900 dark:text-gray-100">
-                ${r.totalCost.toFixed(4)}
-              </td>
-            </tr>
+          {rows.map((row) => (
+            <UsageMonthRow key={row.yearMonth} row={row} />
           ))}
         </tbody>
       </table>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
-        Values reflect actual usage recorded per batch run — not the pre-run
-        estimate shown in the confirmation dialog. Rows marked{" "}
-        <span aria-hidden="true">—</span> are from a legacy schema where the
-        input / output split was not captured.
-      </p>
     </div>
   );
 }

@@ -5,6 +5,7 @@
  */
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { SportKey } from "../../../types/sport-zones";
 import { formatThresholdSummary } from "./zone-indicator-helpers";
 
@@ -13,6 +14,7 @@ type ZoneIndicatorProps = {
 };
 
 export function ZoneIndicator({ sport }: ZoneIndicatorProps) {
+  const t = useTranslate("create-workout");
   // Live read of the active profile via the Dexie singleton (D1).
   // `undefined` while loading collapses to `null` so the "No profile
   // selected" branch renders during the initial paint, matching the
@@ -22,7 +24,7 @@ export function ZoneIndicator({ sport }: ZoneIndicatorProps) {
   if (!profile) {
     return (
       <p className="text-xs text-gray-400 dark:text-gray-500">
-        No profile selected. Set up a profile to include training zones.
+        {t("zoneIndicator.noProfile")}
       </p>
     );
   }
@@ -33,14 +35,14 @@ export function ZoneIndicator({ sport }: ZoneIndicatorProps) {
   if (sportKey && !config) {
     return (
       <p className="text-xs text-amber-600 dark:text-amber-400">
-        No {sportKey} zones configured for {profile.name}.
+        {t("zoneIndicator.noZones", { sport: sportKey, name: profile.name })}
       </p>
     );
   }
 
   const summary = config
     ? formatThresholdSummary(config.thresholds)
-    : `Profile: ${profile.name}`;
+    : t("zoneIndicator.profile", { name: profile.name });
 
   return (
     <p className="text-xs text-gray-600 dark:text-gray-400">

@@ -1,0 +1,20 @@
+{
+  "emptyTitle": "No athlete profile yet",
+  "createProfile": "Create profile",
+  "createProfileTitle": "Create athlete profile",
+  "editProfile": "Edit profile",
+  "editThresholds": "Edit thresholds",
+  "thresholds": "Thresholds",
+  "autoZones": "Auto zones",
+  "manualZones": "Manual zones",
+  "sportAria": "Sport",
+  "zonesTitle": "{{sport}} zones",
+  "noThreshold": "Set a {{sport}} threshold to see your zones",
+  "zonesBlurb": "These zones power AI workout generation and every target you push to Garmin.",
+  "tagline": {
+    "cycling": "Cyclist",
+    "running": "Runner",
+    "swimming": "Swimmer",
+    "fallback": "Athlete"
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { HealthHrvRecord } from "../../../types/health/health-records";
 import { HealthSourceBadge } from "./HealthSourceBadge";
 
@@ -7,9 +8,11 @@ type Props = {
 };
 
 export function HrvHistoryList({ loading, records }: Props) {
-  if (loading) return <p className="text-sm text-gray-600">Loading…</p>;
+  const t = useTranslate("health");
+  if (loading)
+    return <p className="text-sm text-gray-600">{t("common.loading")}</p>;
   if (!records || records.length === 0) {
-    return <p className="mb-4 text-sm text-gray-600">No HRV records yet.</p>;
+    return <p className="mb-4 text-sm text-gray-600">{t("hrv.empty")}</p>;
   }
   return (
     <ul className="mb-4 space-y-1">

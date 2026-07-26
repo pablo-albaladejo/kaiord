@@ -126,11 +126,18 @@
   }
 }
 
-/* Content link accessibility — underline for accent-blue contrast */
+/* Content link accessibility — underline for accent-blue contrast.
+   Light underlines with the link's own brand color: the soft accent is
+   a badge/pill BACKGROUND tint there (sky-100) and would be invisible
+   on white. Dark keeps the original soft-navy underline. */
 .vp-doc a {
   text-decoration: underline;
-  text-decoration-color: var(--brand-accent-blue-soft);
+  text-decoration-color: var(--vp-c-brand-1);
   text-underline-offset: 2px;
+}
+
+.dark .vp-doc a {
+  text-decoration-color: var(--brand-accent-blue-soft);
 }
 
 .vp-doc a:hover {

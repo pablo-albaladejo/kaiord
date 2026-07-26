@@ -4,17 +4,7 @@ import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-session
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import type { DayWellness } from "../../types/health/day-wellness";
-import { renderDayCards } from "../molecules/WorkoutCard/day-column-cards";
-import { WellnessBand } from "../molecules/WorkoutCard/WellnessBand/WellnessBand";
-
-const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-// prettier-ignore
-const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-const formatHeading = (date: string): string => {
-  const d = new Date(date + "T12:00:00Z");
-  return `${DAY_NAMES[(d.getUTCDay() + 6) % 7] ?? ""} ${MONTH_NAMES[d.getUTCMonth()] ?? ""} ${d.getUTCDate()}`;
-};
+import { CalendarWeekListDay } from "./CalendarWeekListDay";
 
 export type CalendarWeekListProps = {
   days: string[];
@@ -41,49 +31,21 @@ export function CalendarWeekList({
 }: CalendarWeekListProps) {
   return (
     <div data-testid="calendar-week-list" className="flex flex-col gap-3">
-      {days.map((date) => {
-        const matched = matchedByDay[date] ?? [];
-        const plans = soloPlansByDay[date] ?? [];
-        const actuals = soloActualsByDay[date] ?? [];
-        const isToday = date === todayDate;
-        return (
-          <section
-            key={date}
-            data-testid={`calendar-list-day-${date}`}
-            data-today={isToday ? "true" : undefined}
-            aria-current={isToday ? "date" : undefined}
-            className="rounded-lg border p-3"
-          >
-            <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
-              {formatHeading(date)}
-              {isToday && <span className="sr-only"> (today)</span>}
-            </h2>
-            <WellnessBand
-              wellness={wellnessByDay?.[date]}
-              resolved={wellnessByDay !== undefined}
-            />
-            <div className="flex flex-col gap-2">
-              {renderDayCards({
-                matchedSessions: matched,
-                soloPlans: plans,
-                soloActuals: actuals,
-                view: "list",
-                onWorkoutClick,
-                onActivityClick,
-              })}
-            </div>
-            <button
-              type="button"
-              data-testid={`calendar-list-add-${date}`}
-              aria-label={`Add to ${formatHeading(date)}`}
-              onClick={() => onAddClick(date)}
-              className="mt-2 w-full rounded border border-dashed border-gray-300 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary-400 hover:text-primary-600 dark:border-gray-600"
-            >
-              + Add
-            </button>
-          </section>
-        );
-      })}
+      {days.map((date) => (
+        <CalendarWeekListDay
+          key={date}
+          date={date}
+          matched={matchedByDay[date] ?? []}
+          plans={soloPlansByDay[date] ?? []}
+          actuals={soloActualsByDay[date] ?? []}
+          isToday={date === todayDate}
+          wellness={wellnessByDay?.[date]}
+          wellnessResolved={wellnessByDay !== undefined}
+          onWorkoutClick={onWorkoutClick}
+          onAddClick={onAddClick}
+          onActivityClick={onActivityClick}
+        />
+      ))}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
@@ -15,18 +16,19 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
   onSave,
   onCancel,
 }) => {
+  const t = useTranslate("settings");
   const [label, setLabel] = useState(provider.label);
   const [apiKey, setApiKey] = useState(provider.apiKey);
 
   return (
     <div className="space-y-2 rounded-lg border border-blue-200 p-3 dark:border-blue-700">
       <Input
-        label="Label"
+        label={t("providers.label")}
         value={label}
         onChange={(e) => setLabel(e.target.value)}
       />
       <Input
-        label="API Key"
+        label={t("providers.apiKey")}
         type="password"
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
@@ -37,10 +39,10 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
           onClick={() => onSave(provider.id, { label, apiKey })}
           disabled={!label || !apiKey}
         >
-          Save
+          {t("providers.save")}
         </Button>
         <Button size="sm" variant="secondary" onClick={onCancel}>
-          Cancel
+          {t("providers.cancel")}
         </Button>
       </div>
     </div>

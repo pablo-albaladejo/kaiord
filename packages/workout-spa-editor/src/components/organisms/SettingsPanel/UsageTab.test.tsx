@@ -1,113 +1,91 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { UsageRecord } from "../../../types/usage-schemas";
+import type { UsageEventRecord } from "../../../types/usage-event-schemas";
 import { UsageTab } from "./UsageTab";
 
-let mockRows: UsageRecord[] = [];
+let mockEvents: UsageEventRecord[] = [];
 
 vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: () => mockRows,
+  useLiveQuery: () => mockEvents,
 }));
 
 vi.mock("../../../adapters/dexie/dexie-database", () => ({
-  db: {
-    table: () => ({
-      where: () => ({
-        anyOf: () => ({
-          toArray: async () => mockRows,
-        }),
-      }),
-    }),
-  },
+  db: {},
 }));
+
+const YEAR_MONTH_LENGTH = 7;
+const currentMonth = () => new Date().toISOString().slice(0, YEAR_MONTH_LENGTH);
+
+const makeEvent = (over: Partial<UsageEventRecord>): UsageEventRecord => ({
+  id: "e",
+  yearMonth: currentMonth(),
+  date: `${currentMonth()}-01`,
+  purpose: "chat",
+  promptTokens: 100,
+  completionTokens: 50,
+  tokens: 150,
+  cost: 0.001,
+  createdAt: `${currentMonth()}-01T00:00:00.000Z`,
+  ...over,
+});
 
 describe("UsageTab", () => {
   beforeEach(() => {
-    mockRows = [];
+    mockEvents = [];
   });
 
-  it("should render the empty state when no records exist", () => {
+  it("should render the empty state when no events exist", () => {
     // Arrange
 
     // Act
-
     render(<UsageTab />);
 
     // Assert
-
     expect(screen.getByText(/No AI usage recorded yet/i)).toBeInTheDocument();
     expect(screen.queryByTestId("usage-table")).toBeNull();
   });
 
-  it("should render rows in reverse-chronological order when records exist", () => {
+  it("should fold events of a month into a single total row", () => {
     // Arrange
-
-    mockRows = [
-      {
-        yearMonth: "2026-02",
-        inputTokens: 800,
-        outputTokens: 200,
-        totalTokens: 1000,
-        totalCost: 0.003,
-        entries: [],
-      },
-      {
-        yearMonth: "2026-04",
-        inputTokens: 4000,
-        outputTokens: 1000,
-        totalTokens: 5000,
-        totalCost: 0.015,
-        entries: [],
-      },
-      {
-        yearMonth: "2026-03",
-        inputTokens: 1600,
-        outputTokens: 400,
-        totalTokens: 2000,
-        totalCost: 0.006,
-        entries: [],
-      },
+    const ym = currentMonth();
+    mockEvents = [
+      makeEvent({ id: "a", purpose: "chat", tokens: 150 }),
+      makeEvent({
+        id: "b",
+        purpose: "workout_generation",
+        promptTokens: 400,
+        completionTokens: 100,
+        tokens: 500,
+        cost: 0.004,
+      }),
     ];
 
+    // Act
     render(<UsageTab />);
 
-    const table = screen.getByTestId("usage-table");
-
-    // Act
-
-    const rows = table.querySelectorAll("tbody tr");
-
     // Assert
-
-    expect(rows[0].getAttribute("data-testid")).toBe("usage-row-2026-04");
-    expect(rows[1].getAttribute("data-testid")).toBe("usage-row-2026-03");
-    expect(rows[2].getAttribute("data-testid")).toBe("usage-row-2026-02");
+    expect(screen.getByTestId(`usage-row-${ym}`)).toHaveTextContent("650");
   });
 
-  it("should format totals with thousands separator and 4-decimal USD", () => {
+  it("should render a breakdown sub-row for each active purpose only", () => {
     // Arrange
-
-    mockRows = [
-      {
-        yearMonth: "2026-04",
-        inputTokens: 10000,
-        outputTokens: 2345,
-        totalTokens: 12345,
-        totalCost: 0.01234567,
-        entries: [],
-      },
+    const ym = currentMonth();
+    mockEvents = [
+      makeEvent({ id: "a", purpose: "chat" }),
+      makeEvent({ id: "b", purpose: "lab_extraction" }),
     ];
 
+    // Act
     render(<UsageTab />);
 
-    // Act
-
-    const row = screen.getByTestId("usage-row-2026-04");
-
     // Assert
-
-    expect(row).toHaveTextContent("12,345");
-    expect(row).toHaveTextContent("$0.0123");
+    expect(screen.getByTestId(`usage-purpose-${ym}-chat`)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`usage-purpose-${ym}-lab_extraction`)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`usage-purpose-${ym}-workout_generation`)
+    ).toBeNull();
   });
 });

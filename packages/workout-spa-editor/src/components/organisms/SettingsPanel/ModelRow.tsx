@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
@@ -22,6 +23,7 @@ export const ModelRow: React.FC<ModelRowProps> = ({
   onModelChange,
   onReset,
 }) => {
+  const t = useTranslate("settings");
   const selectedProvider =
     providers.find((p) => p.id === providerId) ?? providers[0];
 
@@ -31,7 +33,7 @@ export const ModelRow: React.FC<ModelRowProps> = ({
         {rowLabel}
       </p>
       <Input
-        label="Provider"
+        label={t("providers.provider")}
         variant="select"
         value={selectedProvider?.id ?? ""}
         onChange={(e) => onProviderChange(e.target.value)}
@@ -46,7 +48,7 @@ export const ModelRow: React.FC<ModelRowProps> = ({
       )}
       {onReset && (
         <Button size="sm" variant="secondary" onClick={onReset}>
-          Reset
+          {t("models.reset")}
         </Button>
       )}
     </div>

@@ -9,6 +9,7 @@
  */
 import type uPlot from "uplot";
 
+import { themedAxis } from "../../../../charts/uplot-base/chart-theme";
 import {
   type ChartMetricDef,
   formatOrEmpty,
@@ -16,6 +17,8 @@ import {
 } from "../../../../charts/uplot-base/uplot-base";
 import type { ReferenceBand } from "./reference-band";
 
+// Series strokes stay explicit constants — legible on both light and dark
+// surfaces (see chart-theme.ts). Only axis/grid colors adapt per theme.
 const LINE_STROKE = "#2563eb";
 const OUTLIER_STROKE = "#dc2626";
 const BAND_EDGE = "rgba(37, 99, 235, 0.30)";
@@ -49,12 +52,12 @@ export const buildLabChartOptions = (
     height: 0,
     scales,
     axes: [
-      {},
-      {
+      themedAxis(),
+      themedAxis({
         scale: def.key,
         side: 1,
         label: def.unit ? `${def.label} (${def.unit})` : def.label,
-      },
+      }),
     ],
     series: [
       {},

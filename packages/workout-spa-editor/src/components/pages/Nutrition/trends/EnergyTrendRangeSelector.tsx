@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../../i18n/use-translate";
 import {
   ENERGY_TREND_RANGES,
   type EnergyTrendRangeDays,
@@ -9,17 +10,18 @@ export type EnergyTrendRangeSelectorProps = {
 };
 
 const base = "rounded-md border px-2.5 py-1 text-[12px] transition-colors";
-const on = "border-blue-500 bg-blue-950 text-blue-300";
-const off = "border-slate-700 text-slate-400";
+const on = "border-accent bg-accent/15 text-accent";
+const off = "border-edge text-ink-muted";
 
 export function EnergyTrendRangeSelector({
   selected,
   onSelect,
 }: EnergyTrendRangeSelectorProps) {
+  const t = useTranslate("nutrition");
   return (
     <div
       role="radiogroup"
-      aria-label="Trend range"
+      aria-label={t("trends.rangeLabel")}
       className="flex gap-2"
       data-testid="energy-trend-range-select"
     >
@@ -34,7 +36,7 @@ export function EnergyTrendRangeSelector({
             onClick={() => onSelect(r.days)}
             className={`${base} ${isOn ? on : off}`}
           >
-            {r.label}
+            {t(`trends.range.d${r.days}`)}
           </button>
         );
       })}

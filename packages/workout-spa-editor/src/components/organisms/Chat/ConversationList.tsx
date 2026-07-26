@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ChatConversationRecord } from "../../../types/chat/chat-conversation-record";
 import { ConversationListItem } from "./ConversationListItem";
 
@@ -20,18 +21,19 @@ export function ConversationList({
   onRename,
   onDelete,
 }: ConversationListProps) {
+  const t = useTranslate("chat");
   return (
     <nav
-      aria-label="Conversations"
+      aria-label={t("list.ariaLabel")}
       className="flex w-full flex-col gap-1"
       data-testid="conversation-list"
     >
       <button
         type="button"
-        className="mb-1 rounded-md border border-slate-700 px-2 py-1.5 text-sm font-medium text-slate-200 hover:bg-slate-800"
+        className="mb-1 rounded-md border border-edge px-2 py-1.5 text-sm font-medium text-ink-body hover:bg-surface-elevated"
         onClick={onNew}
       >
-        + New conversation
+        {t("list.newConversation")}
       </button>
       {conversations.map((c) => (
         <ConversationListItem

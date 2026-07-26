@@ -16,7 +16,7 @@ const dbName = (suffix: string) =>
   `kaiord-test-v29-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_SEED = 28;
-const SCHEMA_HEAD = 31;
+const SCHEMA_HEAD = 35;
 const STORES_SEED = {
   profiles: "id",
   meta: "key",
@@ -113,7 +113,7 @@ describe("Dexie fail-open seeding (v29) migration", () => {
     await Dexie.delete(name);
   });
 
-  it("should bump the database schema to head version 29", async () => {
+  it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name);
 
@@ -141,34 +141,26 @@ describe("Dexie fail-open seeding (v29) migration", () => {
     expect(routes).toHaveLength(1);
   });
 
-  it("should seed a garmin export route from a connected connections row", async () => {
-    // Arrange
-    await seed(name);
+  it.each([
+    { profileId: "p-conn", signal: "a connected connections row" },
+    { profileId: "p-push", signal: "push history (garminPushId)" },
+  ])(
+    "should seed a garmin export route from $signal",
+    async ({ profileId }) => {
+      // Arrange
+      await seed(name);
 
-    // Act
-    const db = new KaiordDatabase(name);
-    await db.open();
-    const routes = await workoutExport(db, "p-conn");
-    db.close();
+      // Act
+      const db = new KaiordDatabase(name);
+      await db.open();
+      const routes = await workoutExport(db, profileId);
+      db.close();
 
-    // Assert
-    expect(routes).toHaveLength(1);
-    expect(routes[0]).toMatchObject({ enabled: true });
-  });
-
-  it("should seed a garmin export route from push history (garminPushId)", async () => {
-    // Arrange
-    await seed(name);
-
-    // Act
-    const db = new KaiordDatabase(name);
-    await db.open();
-    const routes = await workoutExport(db, "p-push");
-    db.close();
-
-    // Assert
-    expect(routes).toHaveLength(1);
-  });
+      // Assert
+      expect(routes).toHaveLength(1);
+      expect(routes[0]).toMatchObject({ enabled: true });
+    }
+  );
 
   it("should give a train2go+garmin profile BOTH routes enabled (day-1 continuity)", async () => {
     // Arrange

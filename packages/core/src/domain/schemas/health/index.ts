@@ -2,14 +2,19 @@ import { z } from "zod";
 
 import { bodyCompositionSchema } from "./body-composition";
 import { dailyWellnessSchema } from "./daily";
+import { heartRateSeriesSchema } from "./heart-rate-series";
 import { hrvSummarySchema } from "./hrv";
 import { sleepRecordSchema } from "./sleep";
+import { strainSummarySchema } from "./strain";
 import { stressEpisodeSchema } from "./stress";
+import { vitalsSummarySchema } from "./vitals";
 import { weightMeasurementSchema } from "./weight";
 
 /**
- * Tagged discriminated union of the six health-metric payloads carried
- * under `extensions.health.<metric>` in KRD v2.0.
+ * Tagged discriminated union of the health-metric payloads carried under
+ * `extensions.health.<metric>` in KRD v2.0: the six bidirectional FIT-core
+ * types plus the read-only wearable-session metrics `strain`, `vitals`, and
+ * `heart-rate-series`.
  *
  * The `kind` discriminator selects the variant; sub-schemas validate
  * their own per-metric invariants.
@@ -21,6 +26,9 @@ export const healthExtensionPayloadSchema = z.discriminatedUnion("kind", [
   dailyWellnessSchema,
   bodyCompositionSchema,
   stressEpisodeSchema,
+  strainSummarySchema,
+  vitalsSummarySchema,
+  heartRateSeriesSchema,
 ]);
 
 export type HealthExtensionPayload = z.infer<
@@ -44,6 +52,10 @@ export {
   type GoalType,
   goalTypeSchema,
 } from "./energy-goal";
+export {
+  type HeartRateSeries,
+  heartRateSeriesSchema,
+} from "./heart-rate-series";
 export { type HrvSummary, hrvSummarySchema } from "./hrv";
 export {
   type MacroNutrients,
@@ -57,15 +69,22 @@ export {
   type SleepStage,
   sleepStageSchema,
 } from "./sleep";
+export { type StrainSummary, strainSummarySchema } from "./strain";
 export { type StressEpisode, stressEpisodeSchema } from "./stress";
 export {
   BODY_FAT_TOLERANCE_PERCENT,
   DAILY_KCAL_TOLERANCE,
   DAILY_STEPS_TOLERANCE,
+  HEART_RATE_SERIES_BPM_TOLERANCE,
   HRV_TOLERANCE_MS,
   SLEEP_STAGE_TOLERANCE_SECONDS,
   SLEEP_TOTAL_DURATION_TOLERANCE_SECONDS,
+  STRAIN_SCORE_TOLERANCE,
   STRESS_TOLERANCE,
+  VITALS_RESPIRATORY_RATE_TOLERANCE,
+  VITALS_RESTING_HEART_RATE_TOLERANCE,
+  VITALS_SPO2_TOLERANCE,
   WEIGHT_TOLERANCE_KG,
 } from "./tolerances";
+export { type VitalsSummary, vitalsSummarySchema } from "./vitals";
 export { type WeightMeasurement, weightMeasurementSchema } from "./weight";

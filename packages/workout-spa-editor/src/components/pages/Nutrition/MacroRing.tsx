@@ -2,7 +2,7 @@ import type { MacroRing as MacroRingModel } from "./macro-rings-view-model";
 
 const RADIUS = 18;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const TRACK_COLOR = "#1e293b";
+const TRACK_COLOR = "var(--ring-track)";
 
 const RING_COLOR: Record<MacroRingModel["key"], string> = {
   energy: "#f97316",
@@ -54,12 +54,12 @@ export function MacroRing({ ring, size = 56 }: MacroRingProps) {
           x="22"
           y="25"
           textAnchor="middle"
-          className="fill-slate-100 text-[9px] font-bold"
+          className="fill-ink-strong text-[9px] font-bold"
         >
           {Math.round(ring.actual)}
         </text>
       </svg>
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
         {ring.label}
       </span>
     </div>

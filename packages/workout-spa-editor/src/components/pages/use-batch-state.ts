@@ -12,6 +12,7 @@ import { useCallback, useState } from "react";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { useToastContext } from "../../contexts/ToastContext";
+import { useTranslate } from "../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { prepareBatch } from "./batch-prepare";
@@ -24,20 +25,23 @@ export type BatchPending = {
 };
 
 export function useBatchState(weekStart: string, weekEnd: string) {
+  const t = useTranslate("calendar");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState<BatchPending | null>(null);
   const { success: showSuccess } = useToastContext();
-  // Static title satisfies the R-PIIInterpolation guard; the dynamic
-  // count flows through the description field.
+  // The static translation-key title satisfies the R-PIIInterpolation
+  // guard; the dynamic count flows through the description field.
   const runner = useBatchRunner(setMessage, (count) =>
-    showSuccess("Batch processed", `${count} workouts`, { duration: 3000 })
+    showSuccess(t("batch.processed"), t("batch.workoutsProcessed", { count }), {
+      duration: 3000,
+    })
   );
 
   const providerCount = useLiveQuery(() => db.table("aiProviders").count(), []);
 
   const requestStart = useCallback(async () => {
     if (!providerCount || providerCount === 0) {
-      setMessage("Configure an AI provider in Settings to process workouts.");
+      setMessage(t("batch.noProvider"));
       return;
     }
     const prep = await prepareBatch(weekStart, weekEnd);
@@ -51,7 +55,7 @@ export function useBatchState(weekStart: string, weekEnd: string) {
       modelId: prep.modelId,
       workouts: prep.workouts,
     });
-  }, [weekStart, weekEnd, providerCount]);
+  }, [weekStart, weekEnd, providerCount, t]);
 
   const confirmStart = useCallback(async () => {
     const staged = pending;

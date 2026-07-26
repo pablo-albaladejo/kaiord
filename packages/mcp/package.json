@@ -1,6 +1,7 @@
 {
   "name": "@kaiord/mcp",
-  "version": "9.2.0",
+  "version": "10.0.0",
+  "mcpName": "io.github.pablo-albaladejo/kaiord",
   "description": "MCP server for Kaiord fitness data conversion (FIT, TCX, ZWO, GCN, KRD)",
   "type": "module",
   "sideEffects": false,
@@ -41,19 +42,19 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "tsup": "^8.5.1",
-    "tsx": "^4.22.5",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/mcp"
   },
-  "homepage": "https://www.npmjs.com/package/@kaiord/mcp",
+  "homepage": "https://kaiord.com/docs/mcp/tools",
   "bugs": {
     "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
@@ -73,7 +74,9 @@
     "converter",
     "claude",
     "llm",
-    "ai"
+    "ai",
+    "mcp-server",
+    "ai-agents"
   ],
   "author": "Kaiord Contributors",
   "license": "MIT",

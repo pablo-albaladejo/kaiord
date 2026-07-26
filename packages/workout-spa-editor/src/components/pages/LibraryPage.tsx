@@ -31,6 +31,7 @@ import { deleteTemplate } from "../../application/library/delete-template";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live";
+import { useTranslate } from "../../i18n/use-translate";
 import { withOrigin } from "../../routing/with-origin";
 import { useCurrentWorkout, useLoadWorkout } from "../../store/selectors";
 import type { WorkoutTemplate } from "../../types/workout-library";
@@ -41,6 +42,7 @@ import { useLibrarySchedule } from "./use-library-schedule";
 import { useScheduleTemplate } from "./use-schedule-template";
 
 export default function LibraryPage() {
+  const t = useTranslate("library");
   const templates = useLibraryTemplatesLive();
   const persistence = usePersistence();
   const { error: showError, success: showSuccess } = useToastContext();
@@ -57,8 +59,8 @@ export default function LibraryPage() {
       await deleteTemplate(persistence, id);
     } catch (err) {
       showError(
-        "Delete Failed",
-        err instanceof Error ? err.message : "Failed to delete template",
+        t("toast.deleteFailed"),
+        err instanceof Error ? err.message : t("toast.deleteFailedDescription"),
         { duration: 5000 }
       );
     }
@@ -71,7 +73,7 @@ export default function LibraryPage() {
     // Title is a static literal (PII guard R-PIIInterpolation);
     // template.name flows through the description field which the
     // guard intentionally does not constrain.
-    showSuccess("Template loaded", template.name, { duration: 3000 });
+    showSuccess(t("toast.templateLoaded"), template.name, { duration: 3000 });
     // SPA navigation (no full reload) so the freshly-loaded workout
     // survives the route transition. Hard reload would drop Zustand.
     // `?source=scratch` mounts the editor directly with the
@@ -87,7 +89,7 @@ export default function LibraryPage() {
       <LibraryHeader count={templates?.length ?? 0} />
       {templates === undefined ? (
         <div className="flex items-center justify-center p-8 text-slate-400">
-          Loading library...
+          {t("page.loading")}
         </div>
       ) : (
         <>

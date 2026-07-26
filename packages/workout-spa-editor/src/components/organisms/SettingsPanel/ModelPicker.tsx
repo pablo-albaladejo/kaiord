@@ -1,6 +1,7 @@
 import { PROVIDER_MODELS } from "@kaiord/ai/providers";
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderType } from "../../../store/ai-store-types";
 
 const CUSTOM_SENTINEL = "__custom__";
@@ -16,6 +17,7 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
   value,
   onChange,
 }) => {
+  const t = useTranslate("settings");
   const models = PROVIDER_MODELS[type];
   const isKnown = models.some((m) => m.id === value);
   const valueIsCustom = value !== "" && !isKnown;
@@ -35,7 +37,7 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
   return (
     <div className="w-full">
       <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-        Model
+        {t("models.model")}
       </label>
       <select
         data-testid="model-picker-select"
@@ -48,14 +50,14 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
             {m.label}
           </option>
         ))}
-        <option value={CUSTOM_SENTINEL}>Custom…</option>
+        <option value={CUSTOM_SENTINEL}>{t("models.custom")}</option>
       </select>
       {showCustom && (
         <input
           data-testid="model-picker-custom"
-          aria-label="Custom model id"
+          aria-label={t("models.customModelIdAriaLabel")}
           className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          placeholder="Enter a model id"
+          placeholder={t("models.customModelIdPlaceholder")}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />

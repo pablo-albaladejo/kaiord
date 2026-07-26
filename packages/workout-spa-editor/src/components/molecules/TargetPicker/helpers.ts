@@ -1,3 +1,4 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { Target } from "../../../types/krd";
 import type { Profile } from "../../../types/profile";
 import { getValueLabel, getValuePlaceholder } from "./helpers-labels";
@@ -29,39 +30,42 @@ export const getTargetTypeFromValue = (
 
 export const getUnitOptions = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
-  activeProfile?: Profile | null
+  activeProfile?: Profile | null,
+  t: Translate = getTranslate("targets")
 ): Array<TargetUnitOption> => {
   switch (targetType) {
     case "power":
       return [
-        { value: "watts", label: "Watts" },
-        { value: "percent_ftp", label: "% FTP" },
+        { value: "watts", label: t("unit.watts") },
+        { value: "percent_ftp", label: t("unit.percentFtp") },
         {
           value: "zone",
-          label: activeProfile ? "Power Zone" : "Power Zone (no profile)",
+          label: activeProfile
+            ? t("unit.powerZone")
+            : t("unit.powerZoneNoProfile"),
         },
-        { value: "range", label: "Range" },
+        { value: "range", label: t("unit.range") },
       ];
     case "heart_rate":
       return [
-        { value: "bpm", label: "BPM" },
+        { value: "bpm", label: t("unit.bpm") },
         {
           value: "zone",
-          label: activeProfile ? "HR Zone" : "HR Zone (no profile)",
+          label: activeProfile ? t("unit.hrZone") : t("unit.hrZoneNoProfile"),
         },
-        { value: "percent_max", label: "% Max HR" },
-        { value: "range", label: "Range" },
+        { value: "percent_max", label: t("unit.percentMaxHr") },
+        { value: "range", label: t("unit.range") },
       ];
     case "pace":
       return [
-        { value: "mps", label: "m/s" },
-        { value: "zone", label: "Pace Zone" },
-        { value: "range", label: "Range" },
+        { value: "mps", label: t("unit.mps") },
+        { value: "zone", label: t("unit.paceZone") },
+        { value: "range", label: t("unit.range") },
       ];
     case "cadence":
       return [
-        { value: "rpm", label: "RPM" },
-        { value: "range", label: "Range" },
+        { value: "rpm", label: t("unit.rpm") },
+        { value: "range", label: t("unit.range") },
       ];
     case "open":
       return [];

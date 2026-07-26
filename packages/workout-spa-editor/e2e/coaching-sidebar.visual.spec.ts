@@ -12,6 +12,7 @@ import { expect, test } from "@playwright/test";
 
 import { clearDexie, getWeekDates } from "./helpers/seed-dexie";
 import { seedMatchedCoachingWorkout } from "./helpers/seed-matched-coaching-workout";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "visual-sidebar-profile";
@@ -38,11 +39,7 @@ test.describe("CoachingSidebar visual regression", () => {
     // Arrange
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();
@@ -71,11 +68,7 @@ test.describe("CoachingSidebar visual regression", () => {
     // Arrange
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.goto("/calendar");
-    await page.waitForFunction(
-      () =>
-        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
-      { timeout: 10_000 }
-    );
+    await waitForDexieReady(page);
     await clearDexie(page);
     const day = getWeekDates(0)[2];
     const ts = new Date(day + "T08:00:00Z").toISOString();

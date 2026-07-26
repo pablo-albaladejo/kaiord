@@ -5,7 +5,14 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./test/chrome-mock.js"],
     coverage: {
-      include: ["background.js", "kaiord-announce.js", "whoop-oauth.js"],
+      include: [
+        "background.js",
+        "content.js",
+        "inject-main.js",
+        "kaiord-announce.js",
+        "bridge-envelope.js",
+        "bridge-identity.js",
+      ],
       exclude: ["popup.js"],
     },
   },

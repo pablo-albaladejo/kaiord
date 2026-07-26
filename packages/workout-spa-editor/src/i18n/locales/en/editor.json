@@ -1,0 +1,276 @@
+{
+  "loading": {
+    "loadingWorkout": "Loading workout...",
+    "noStructuredData": "This workout has no structured data yet.",
+    "goToDaily": "Go to Daily"
+  },
+  "pageHeader": {
+    "newTitle": "New workout",
+    "newDescription": "Create from scratch, generate with AI, or import a file.",
+    "editTitle": "Edit workout",
+    "editDescription": "Refine steps, intervals, and targets."
+  },
+  "workflow": {
+    "acceptWorkout": "Accept Workout",
+    "pushToGarmin": "Push to Garmin"
+  },
+  "section": {
+    "untitledWorkout": "Untitled Workout",
+    "sport": "Sport:",
+    "editMetadata": "Edit workout metadata",
+    "editMetadataTitle": "Edit Workout Metadata"
+  },
+  "actions": {
+    "discard": "Discard",
+    "discardAria": "Discard workout and return to welcome screen",
+    "addStep": "Add Step",
+    "addRepetition": "Add Repetition",
+    "addRepetitionAria": "Add repetition block",
+    "addStepAria": "Add new step to workout",
+    "undo": "Undo"
+  },
+  "selection": {
+    "createBlockAria": "Create repetition block from selected steps",
+    "createBlock": "Create Repetition Block ({{count}} steps)",
+    "orPress": "or press",
+    "ctrlG": "Ctrl+G",
+    "ctrlClickHint": "Ctrl+click another step to create a repetition block"
+  },
+  "discard": {
+    "title": "Discard Workout",
+    "message": "Are you sure you want to discard the current workout? This action cannot be undone.",
+    "confirmLabel": "Discard",
+    "cancelLabel": "Cancel"
+  },
+  "deleteBlock": {
+    "title": "Delete Repetition Block",
+    "message": "Are you sure you want to delete this repetition block? This action can be undone.",
+    "confirmLabel": "Delete",
+    "cancelLabel": "Cancel",
+    "toastTitle": "Repetition block deleted"
+  },
+  "deleteStep": {
+    "toastTitle": "Step deleted",
+    "toastDescription": "The step has been removed from your workout."
+  },
+  "clipboard": {
+    "copySuccess": "Step copied to clipboard",
+    "copyFailure": "Failed to copy step",
+    "pasteSuccess": "Step pasted successfully",
+    "pasteFailure": "Clipboard does not contain a valid step"
+  },
+  "contextMenu": {
+    "actionsAria": "Workout editor actions",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "delete": "Delete",
+    "selectAll": "Select All",
+    "group": "Group",
+    "ungroup": "Ungroup"
+  },
+  "empty": {
+    "title": "Add your first step",
+    "description": "Start building your workout by adding steps",
+    "addFirstStepAria": "Add first step to workout"
+  },
+  "history": {
+    "controlsAria": "History controls",
+    "undoTooltip": "Undo (Ctrl+Z)",
+    "undoAria": "Undo last action",
+    "redoTooltip": "Redo (Ctrl+Y)",
+    "redoAria": "Redo last action"
+  },
+  "save": {
+    "saveWorkout": "Save Workout",
+    "saving": "Saving...",
+    "exportProgress": "Export progress: {{progress}}%",
+    "savedTitle": "Workout Saved",
+    "savedDescription": "\"{{name}}\" has been saved as {{format}}",
+    "exportFailedTitle": "Export Failed",
+    "exportFailedFallback": "Failed to export workout"
+  },
+  "saveError": {
+    "title": "Save Failed",
+    "body": "The workout could not be saved due to validation errors. Please fix the following issues and try again:",
+    "fixAndRetry": "Fix and Retry"
+  },
+  "scratch": {
+    "untitledName": "Untitled workout",
+    "saveAndSchedule": "Save & schedule",
+    "invalidTitle": "Invalid date",
+    "invalidDescription": "Could not schedule — the date is not a valid calendar day.",
+    "saveFailedTitle": "Save failed",
+    "saveFailedDescription": "Could not schedule the workout — please retry."
+  },
+  "raw": {
+    "dialogDescription": "Raw workout details with coach description, comment selection, and actions to process or skip.",
+    "processWithAi": "Process with AI",
+    "skip": "Skip",
+    "unskip": "Un-skip",
+    "createWorkout": "Create workout",
+    "noComments": "No comments available.",
+    "includeComments": "Include comments:"
+  },
+  "stepCard": {
+    "copyTitle": "Copy step to clipboard",
+    "copyAria": "Copy step {{n}}",
+    "deleteTitle": "Delete step",
+    "deleteAria": "Delete step {{n}}",
+    "duplicateTitle": "Duplicate step",
+    "duplicateAria": "Duplicate step {{n}}",
+    "dragTooltip": "Drag to reorder",
+    "dragAria": "Drag to reorder step",
+    "stepFallback": "Step {{n}}",
+    "ariaLabel": "Step {{n}}: {{detail}}"
+  },
+  "duration": {
+    "time": "Time",
+    "distance": "Distance",
+    "calories": "Calories",
+    "open": "Open"
+  },
+  "target": {
+    "power": "Power",
+    "heartRate": "Heart Rate",
+    "cadence": "Cadence",
+    "pace": "Pace",
+    "open": "Open",
+    "zone": "Zone {{n}}"
+  },
+  "stepEditor": {
+    "editStep": "Edit Step {{n}}",
+    "fixErrors": "Please fix the errors above before saving",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveAria": "Save step changes",
+    "fixErrorsTitle": "Fix validation errors first",
+    "saveTitle": "Save changes"
+  },
+  "firstTimeHints": {
+    "dismiss": "Dismiss hints",
+    "progressDot": "Hint {{n}} of {{total}}",
+    "progressDotCurrent": "Hint {{n}} of {{total}} (current)",
+    "duration": {
+      "title": "Set Duration",
+      "message": "Choose how long this step should last - by time, distance, or open-ended."
+    },
+    "target": {
+      "title": "Set Target",
+      "message": "Define your training intensity using power, heart rate, pace, or cadence zones."
+    },
+    "save": {
+      "title": "Save Your Step",
+      "message": "Click Save to add this step to your workout. You can edit it anytime."
+    }
+  },
+  "metadata": {
+    "editAria": "Edit workout metadata",
+    "nameLabel": "Workout Name",
+    "namePlaceholder": "Enter workout name",
+    "nameAria": "Workout name",
+    "notesLabel": "Coach Notes",
+    "notesPlaceholder": "Coach instructions, links, etc.",
+    "notesAria": "Workout coach notes",
+    "sportLabel": "Sport",
+    "sportAria": "Sport type",
+    "subSportLabel": "Sub-Sport",
+    "subSportAria": "Sub-sport type",
+    "cancel": "Cancel",
+    "save": "Save",
+    "sport": {
+      "generic": "Generic",
+      "running": "Running",
+      "cycling": "Cycling",
+      "transition": "Transition",
+      "fitness_equipment": "Fitness Equipment",
+      "swimming": "Swimming",
+      "basketball": "Basketball",
+      "soccer": "Soccer",
+      "tennis": "Tennis",
+      "american_football": "American Football",
+      "training": "Training",
+      "walking": "Walking",
+      "cross_country_skiing": "Cross Country Skiing",
+      "alpine_skiing": "Alpine Skiing",
+      "snowboarding": "Snowboarding",
+      "rowing": "Rowing",
+      "mountaineering": "Mountaineering",
+      "hiking": "Hiking",
+      "multisport": "Multisport",
+      "paddling": "Paddling",
+      "flying": "Flying",
+      "e_biking": "E Biking",
+      "motorcycling": "Motorcycling",
+      "boating": "Boating",
+      "driving": "Driving",
+      "golf": "Golf",
+      "hang_gliding": "Hang Gliding",
+      "horseback_riding": "Horseback Riding",
+      "hunting": "Hunting",
+      "fishing": "Fishing",
+      "inline_skating": "Inline Skating",
+      "rock_climbing": "Rock Climbing",
+      "sailing": "Sailing",
+      "ice_skating": "Ice Skating",
+      "sky_diving": "Sky Diving",
+      "snowshoeing": "Snowshoeing",
+      "snowmobiling": "Snowmobiling",
+      "stand_up_paddleboarding": "Stand Up Paddleboarding",
+      "surfing": "Surfing",
+      "wakeboarding": "Wakeboarding",
+      "water_skiing": "Water Skiing",
+      "kayaking": "Kayaking",
+      "rafting": "Rafting",
+      "windsurfing": "Windsurfing",
+      "kitesurfing": "Kitesurfing",
+      "tactical": "Tactical",
+      "jumpmaster": "Jumpmaster",
+      "boxing": "Boxing",
+      "floor_climbing": "Floor Climbing",
+      "baseball": "Baseball",
+      "diving": "Diving",
+      "shooting": "Shooting",
+      "winter_sport": "Winter Sport",
+      "grinding": "Grinding",
+      "hiit": "Hiit",
+      "video_gaming": "Video Gaming",
+      "racket": "Racket",
+      "wheelchair_push_walk": "Wheelchair Push Walk",
+      "wheelchair_push_run": "Wheelchair Push Run",
+      "meditation": "Meditation",
+      "para_sport": "Para Sport",
+      "disc_golf": "Disc Golf",
+      "team_sport": "Team Sport",
+      "cricket": "Cricket",
+      "rugby": "Rugby",
+      "hockey": "Hockey",
+      "lacrosse": "Lacrosse",
+      "volleyball": "Volleyball",
+      "water_tubing": "Water Tubing",
+      "wakesurfing": "Wakesurfing",
+      "water_sport": "Water Sport",
+      "archery": "Archery",
+      "mixed_martial_arts": "Mixed Martial Arts",
+      "motor_sports": "Motor Sports",
+      "snorkeling": "Snorkeling",
+      "dance": "Dance",
+      "jump_rope": "Jump Rope",
+      "pool_apnea": "Pool Apnea",
+      "mobility": "Mobility",
+      "geocaching": "Geocaching",
+      "canoeing": "Canoeing"
+    },
+    "subSport": {
+      "generic": "Generic",
+      "indoor_cycling": "Indoor cycling",
+      "mountain": "Mountain",
+      "road": "Road",
+      "track": "Track",
+      "trail": "Trail",
+      "treadmill": "Treadmill",
+      "lap_swimming": "Lap swimming",
+      "open_water": "Open water"
+    }
+  }
+}

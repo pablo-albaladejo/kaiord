@@ -11,6 +11,7 @@ import type {
   ManagedDataRegistryEntry,
   ManagedDataType,
 } from "./managed-data-type";
+import { WEARABLE_SESSION_REGISTRY_ENTRIES } from "./managed-data-wearable-registry";
 import { activitySchema } from "./schemas/activity";
 import {
   bodyCompositionSchema,
@@ -79,7 +80,7 @@ export const MANAGED_DATA_REGISTRY: Record<
   "body-composition": {
     label: "Body Composition",
     schema: bodyCompositionSchema,
-    capabilities: { import: "read:body" },
+    capabilities: { import: "read:body", export: "write:body" },
     hashProjection: bodyCompositionHashProjection,
   },
   stress: {
@@ -87,4 +88,5 @@ export const MANAGED_DATA_REGISTRY: Record<
     schema: stressEpisodeSchema,
     capabilities: { import: "read:body" },
   },
+  ...WEARABLE_SESSION_REGISTRY_ENTRIES,
 };

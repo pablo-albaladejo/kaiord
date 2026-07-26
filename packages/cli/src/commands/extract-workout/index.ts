@@ -1,6 +1,7 @@
 import { extractWorkout } from "@kaiord/core";
 import ora from "ora";
 
+import { t } from "../../i18n/index.js";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -44,12 +45,12 @@ export const extractWorkoutCommand = async (
       quiet: opts.quiet,
     });
 
-    spinner = opts.quiet ? null : ora("Extracting workout...").start();
+    spinner = opts.quiet ? null : ora(t("output.extractingWorkout")).start();
 
     const krd = await loadFileAsKrd(opts.input, opts.inputFormat, logger);
     const workout = extractWorkout(krd);
 
-    spinner?.succeed("Workout extracted successfully");
+    spinner?.succeed(t("output.workoutExtracted"));
     console.log(JSON.stringify(workout, null, 2));
 
     return ExitCode.SUCCESS;

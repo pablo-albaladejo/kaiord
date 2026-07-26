@@ -1,13 +1,11 @@
 import { useUnits } from "../../../contexts/units-context";
+import { useTranslate } from "../../../i18n/use-translate";
 import { type ActiveSport, deriveZoneMap } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
 import { Card } from "../../atoms/Card";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { SectionHead } from "../../molecules/SectionHead";
 import { ZoneMap } from "../../organisms/ZoneMap";
-
-const ZONE_INFO_COPY =
-  "These zones power AI workout generation and every target you push to Garmin.";
 
 type ZoneMapCardProps = {
   profile: Profile;
@@ -16,22 +14,23 @@ type ZoneMapCardProps = {
 };
 
 export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
+  const t = useTranslate("athlete");
   const units = useUnits();
   const zones = deriveZoneMap(profile, sport, units);
 
   return (
     <div>
-      <SectionHead title={`${sportLabel} zones`} />
-      <Card className="rounded-[20px] border border-slate-700/60 bg-surface p-4">
+      <SectionHead title={t("zonesTitle", { sport: sportLabel })} />
+      <Card className="rounded-[20px] border border-edge bg-surface p-4">
         {zones ? (
           <ZoneMap zones={zones} />
         ) : (
-          <p className="text-[13.5px] text-slate-400">
-            Set a {sportLabel.toLowerCase()} threshold to see your zones
+          <p className="text-[13.5px] text-ink-muted">
+            {t("noThreshold", { sport: sportLabel.toLowerCase() })}
           </p>
         )}
-        <div className="mt-3 flex items-start gap-2 rounded-xl border border-sky-400/15 bg-sky-400/5 p-3">
-          <span className="mt-px text-sky-400">
+        <div className="mt-3 flex items-start gap-2 rounded-xl border border-accent/15 bg-accent/5 p-3">
+          <span className="mt-px text-accent">
             <Icon
               icon={ICON_MAP.sparkle}
               size="sm"
@@ -39,7 +38,7 @@ export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
               strokeWidth={1.9}
             />
           </span>
-          <p className="text-[12.5px] text-slate-300">{ZONE_INFO_COPY}</p>
+          <p className="text-[12.5px] text-ink-body">{t("zonesBlurb")}</p>
         </div>
       </Card>
     </div>

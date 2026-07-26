@@ -1,9 +1,13 @@
-type ExtensionResponse = {
+export type ExtensionResponse = {
   ok: boolean;
   protocolVersion?: number;
   data?: unknown;
   error?: string;
   status?: number;
+  // Bridges surface a dead cookie session (e.g. tanita `read-export-csv` when
+  // the mytanita.eu login expired) by setting this on the error envelope so the
+  // SPA can prompt a re-login instead of retrying. Emitted by bridge-envelope.js.
+  needsReauth?: boolean;
 };
 
 const PING_TIMEOUT_MS = 3_000;

@@ -13,6 +13,7 @@
     "typedoc",
     "minisearch",
     "garmin",
+    "connectapi",
     "zwift",
     "pnpm",
     "pnpx",
@@ -63,7 +64,15 @@
     "affordances",
     "frontmatter",
     "openspec",
-    "CCPA"
+    "CCPA",
+    "Strava",
+    "untargeted",
+    "tanita",
+    "mytanita",
+    "TANITASESS",
+    "trainingpeaks",
+    "tpapi",
+    "tpAuth"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
 }

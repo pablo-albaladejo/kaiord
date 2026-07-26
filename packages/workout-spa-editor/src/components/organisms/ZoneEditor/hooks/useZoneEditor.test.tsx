@@ -165,9 +165,7 @@ describe("useZoneEditor - handleZoneChange", () => {
     // Assert
     expect(result.current.validationErrors.length).toBeGreaterThan(0);
     expect(
-      result.current.validationErrors.some(
-        (e) => e.message === "Overlaps with next zone"
-      )
+      result.current.validationErrors.some((e) => e.code === "overlap")
     ).toBe(true);
   });
 

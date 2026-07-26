@@ -12,12 +12,12 @@ Marketing landing page for kaiord.com — a static single-page site built with V
 - **`index.html`** - Main page structure, hero, features grid, format hub diagram, code example, differentiators, and footer. Hand-authored, semantic HTML. Includes JSON-LD schema and OG meta tags.
 - **`src/main.ts`** - Entrypoint. Manages package manager tabs (desktop WAI-ARIA tabs with arrow key navigation + mobile select), copy-to-clipboard, smooth anchor link scrolling, and analytics initialization.
 - **`src/main.css`** - Tailwind imports + custom animations (fade-in-left, fade-in-right, pulse-slow). Imports shared brand tokens from `styles/brand-tokens.css`. Focus-visible ring styling unified across landing/docs/editor.
-- **`src/analytics.ts`** - Creates the Cloudflare analytics client, conditionally noop when no token.
+- **`src/analytics.ts`** - Creates the Umami analytics client, conditionally noop when no website id.
 - **`src/setup-analytics.ts`** - Wires up analytics: tracks page views and click events (editor-opened, docs-opened, github-opened) on link selectors.
-- **`vite.config.ts`** - Defines `conditionalBeacon` plugin: strips CF_BEACON markers if no token, otherwise inlines token in the script tag.
-- **`src/adapters/analytics/cloudflare-analytics.ts`** - Factory to create Analytics from core, wraps window.cfBeacon with error handling.
-- **`src/adapters/analytics/cloudflare-analytics.test.ts`** - vitest tests for token falsy, beacon available, beacon absent, and pushEvent throwing.
-- **`src/types/cf-beacon.d.ts`** - TypeScript ambient types for window.cfBeacon.
+- **`vite.config.ts`** - Defines `conditionalUmami` plugin: strips UMAMI markers if no website id, otherwise inlines website id in the script tag.
+- **`src/adapters/analytics/umami-analytics.ts`** - Factory to create Analytics from core, wraps window.umami with error handling.
+- **`src/adapters/analytics/umami-analytics.test.ts`** - vitest tests for website id falsy, tracker available, tracker absent, and track throwing.
+- **`src/types/umami.d.ts`** - TypeScript ambient types for window.umami.
 - **`public/`** - Static assets: favicon (svg + png), apple-touch-icon, robots.txt, sitemap.xml, og-image.png, CNAME, 404.html, .nojekyll.
 - **`public/fonts/`** - Inter variable font (latin subset, WOFF2).
 
@@ -26,7 +26,7 @@ Marketing landing page for kaiord.com — a static single-page site built with V
 See:
 
 - **`src/AGENTS.md`** - TypeScript source files structure.
-- **`src/adapters/`** - Analytics adapter (Cloudflare).
+- **`src/adapters/`** - Analytics adapter (Umami).
 - **`src/types/`** - TypeScript declarations.
 - **`public/`** - Static assets and fonts.
 
@@ -37,7 +37,7 @@ See:
 - **Zero backend** — this is a static site. No API routes, no server. All functionality client-side.
 - **Vite + Tailwind v4** — modern SPA build tooling. Build target: `dist/` (HTML + CSS + JS).
 - **Brand tokens** — import `@import "../../../styles/brand-tokens.css"` in CSS to access design system (colors, fonts, spacing). Do NOT hardcode colors.
-- **Environment variable** — `VITE_CF_ANALYTICS_TOKEN` controls whether the Cloudflare beacon is inlined or stripped. Accessed via `import.meta.env.VITE_CF_ANALYTICS_TOKEN` in TypeScript.
+- **Environment variable** — `VITE_UMAMI_WEBSITE_ID` controls whether the Umami tracker is inlined or stripped. Accessed via `import.meta.env.VITE_UMAMI_WEBSITE_ID` in TypeScript.
 - **Monorepo reference** — depends on `@kaiord/core` (type-only: `Analytics`, `AnalyticsEvent`, `createNoopAnalytics`). No runtime conversion or data processing happens here.
 
 ### Testing Requirements
@@ -73,8 +73,8 @@ See:
 
 ## Notes
 
-- **Vite plugin: conditionalBeacon** — Custom plugin in `vite.config.ts`. Uses regex to strip `<!-- CF_BEACON_START -->...<!-- CF_BEACON_END -->` if no token, or remove comments and substitute token if present. Runs during HTML transform.
+- **Vite plugin: conditionalUmami** — Custom plugin in `vite.config.ts`. Uses regex to strip `<!-- UMAMI_START -->...<!-- UMAMI_END -->` if no website id, or remove comments and substitute `%VITE_UMAMI_WEBSITE_ID%` if present. Runs during HTML transform.
 - **Focus-visible styling** — Unified with docs and editor via shared CSS in `src/main.css`. 2px outline, currentColor, 2px offset.
-- **No personal data** — Site uses Cloudflare Web Analytics (cookieless, no personal data collected). Disclosure in footer.
+- **No personal data** — Site uses Umami (open-source, cookieless, no personal data collected). Disclosure in footer.
 
 <!-- MANUAL: -->

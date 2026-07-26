@@ -2,7 +2,7 @@
 
 A mobile-first single-page application for creating, editing, and managing KRD (Kaiord Representation Definition) workout files. Built with React, TypeScript, and modern web technologies.
 
-**Live Demo**: [https://pablo-albaladejo.github.io/kaiord/](https://pablo-albaladejo.github.io/kaiord/)
+**Live Demo**: [https://kaiord.com/editor/](https://kaiord.com/editor/)
 
 ## ✨ Features
 

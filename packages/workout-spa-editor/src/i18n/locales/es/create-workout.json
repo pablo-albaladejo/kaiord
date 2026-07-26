@@ -1,0 +1,82 @@
+{
+  "sheet": {
+    "newSession": "Nueva sesión",
+    "reviewSession": "Revisar sesión"
+  },
+  "sport": "Deporte",
+  "hero": {
+    "describe": "Descríbelo con tus palabras",
+    "placeholder": "p. ej. 4×4 intervalos de VO₂ máx con un calentamiento largo…",
+    "generate": "Generar entreno",
+    "builtAround": "Basado en tus zonas de {{sport}}"
+  },
+  "examples": {
+    "enduranceRide": "Rodaje de resistencia Z2 de 45 min",
+    "vo2Intervals": "4×4 intervalos de VO₂ máx",
+    "sweetSpot": "Sweet spot 3×12 al 90%",
+    "tempoRun": "Carrera tempo de 10k con rectas"
+  },
+  "generating": {
+    "title": "Diseñando tu sesión…"
+  },
+  "result": {
+    "aiBadge": "IA",
+    "tapToTune": "Toca cualquier paso para ajustarlo",
+    "timeInZone": "Tiempo en zona",
+    "redo": "Rehacer",
+    "savePush": "Guardar y enviar"
+  },
+  "summary": {
+    "duration": "Duración",
+    "tss": "TSS",
+    "load": "Carga"
+  },
+  "startFrom": {
+    "divider": "o empieza desde",
+    "template": "Plantilla",
+    "blank": "En blanco",
+    "import": "Importar archivo"
+  },
+  "providersEmpty": {
+    "title": "Configura un proveedor de IA para empezar",
+    "supports": "Compatible con Anthropic, OpenAI y Google",
+    "openSettings": "Abrir ajustes de IA"
+  },
+  "fallbackTitle": "Sesión de IA",
+  "generator": {
+    "title": "Generador de entrenos con IA",
+    "subtitle": "Describe tu entreno en lenguaje natural y deja que la IA lo cree."
+  },
+  "form": {
+    "descriptionLabel": "Descripción del entreno",
+    "placeholder": "p. ej., '45min sweet spot ciclismo: 10min calentamiento, 3x10min al 90% FTP con 2min recuperación, 5min enfriamiento'",
+    "generate": "Generar entreno"
+  },
+  "empty": {
+    "supports": "Compatible con Anthropic (Claude), OpenAI (GPT) y Google (Gemini)",
+    "openSettings": "Abrir ajustes"
+  },
+  "model": {
+    "label": "Modelo"
+  },
+  "sportOptions": {
+    "autoDetect": "Detección automática",
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swimming": "Natación",
+    "generic": "Genérico"
+  },
+  "zoneIndicator": {
+    "noProfile": "Ningún perfil seleccionado. Configura un perfil para incluir zonas de entrenamiento.",
+    "noZones": "No hay zonas de {{sport}} configuradas para {{name}}.",
+    "profile": "Perfil: {{name}}"
+  },
+  "banner": {
+    "toggle": "Generar con IA"
+  },
+  "toast": {
+    "generationFailed": "No se pudo generar el entreno",
+    "savedAndPushed": "Guardado y enviado a Garmin",
+    "savedOnly": "Entreno guardado"
+  }
+}

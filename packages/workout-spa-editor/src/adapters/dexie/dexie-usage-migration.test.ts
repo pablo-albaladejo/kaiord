@@ -102,8 +102,8 @@ describe("backfillUsageRow (unit)", () => {
   });
 });
 
-describe("Dexie v2 → v3 upgrade (integration)", () => {
-  it("should migrate legacy usage rows in-place on open", async () => {
+describe("Dexie legacy usage → head upgrade (integration)", () => {
+  it("should backfill then fold a legacy usage row into usageEvents on open at head", async () => {
     // Arrange
     const dbName = `kaiord-usage-migration-${Date.now()}-${Math.random()}`;
     const v2 = new Dexie(dbName);
@@ -131,31 +131,25 @@ describe("Dexie v2 → v3 upgrade (integration)", () => {
       ],
     });
     v2.close();
-    const v3 = new KaiordDatabase(dbName);
-    await v3.open();
-    const migrated = await v3
-      .table<{
-        yearMonth: string;
-        totalTokens: number;
-        inputTokens: number;
-        outputTokens: number;
-        legacy?: boolean;
-        entries: Array<Record<string, unknown>>;
-      }>("usage")
-      .get("2026-03");
-    expect(migrated).toBeDefined();
-    expect(migrated!.inputTokens).toBe(LEGACY_USAGE_LARGE_TOKEN_TOTAL);
-    expect(migrated!.outputTokens).toBe(0);
-    expect(migrated!.totalTokens).toBe(LEGACY_USAGE_LARGE_TOKEN_TOTAL);
-    expect(migrated!.legacy).toBe(true);
-    expect(migrated!.entries[0].inputTokens).toBe(
-      LEGACY_USAGE_LARGE_TOKEN_TOTAL
-    );
-    expect(migrated!.entries[0].outputTokens).toBe(0);
 
     // Act
-    v3.close();
+    const head = new KaiordDatabase(dbName);
+    await head.open();
+    const tableNames = head.tables.map((t) => t.name);
+    const events = await head.table("usageEvents").toArray();
+    head.close();
 
     // Assert
+    expect(tableNames).not.toContain("usage");
+    expect(events).toHaveLength(1);
+    // The v3 backfill sets inputTokens = totalTokens, outputTokens = 0; the v33
+    // fold carries those into the migrated chat event's prompt/completion split.
+    expect(events[0]).toMatchObject({
+      purpose: "chat",
+      promptTokens: LEGACY_USAGE_LARGE_TOKEN_TOTAL,
+      completionTokens: 0,
+      tokens: LEGACY_USAGE_LARGE_TOKEN_TOTAL,
+      cost: 0.015,
+    });
   });
 });
