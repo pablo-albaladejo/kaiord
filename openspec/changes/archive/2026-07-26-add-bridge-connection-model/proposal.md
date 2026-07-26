@@ -1,3 +1,5 @@
+> Completed: 2026-07-26
+
 ## Why
 
 Five bridges ship today and each answers "am I connected?" its own way. Garmin

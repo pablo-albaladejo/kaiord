@@ -1,3 +1,5 @@
+> Completed: 2026-07-26
+
 ## Why
 
 The SPA's keyboard bindings live in two places that nothing keeps in agreement.
