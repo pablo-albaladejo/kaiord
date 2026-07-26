@@ -55,38 +55,36 @@ describe("workoutToActivity", () => {
     expect(activity?.summary.sport).toBe(FALLBACK_SPORT_NAME);
   });
 
-  it("should return null when activity_id is missing", () => {
-    // Arrange
-    const workout: WhoopWorkout = { ...WORKOUT_FIXTURE, activity_id: null };
+  it.each([
+    { scenario: "activity_id is missing", override: { activity_id: null } },
+    { scenario: "during is missing", override: { during: null } },
+    {
+      scenario: "during does not match the expected range shape",
+      override: { during: "not-a-range" },
+    },
+    {
+      scenario: "during matches the shape but endpoints are not valid dates",
+      override: { during: "['not-a-date','also-not-a-date')" },
+    },
+    {
+      scenario: "the during window is inverted (end before start)",
+      override: {
+        during: "['2026-07-10T09:00:00.000Z','2026-07-10T08:00:00.000Z')",
+      },
+    },
+  ])(
+    "should return null when $scenario",
+    ({ override }: { override: Partial<WhoopWorkout> }) => {
+      // Arrange
+      const workout: WhoopWorkout = { ...WORKOUT_FIXTURE, ...override };
 
-    // Act
-    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
+      // Act
+      const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
 
-    // Assert
-    expect(activity).toBeNull();
-  });
-
-  it("should return null when during is missing", () => {
-    // Arrange
-    const workout: WhoopWorkout = { ...WORKOUT_FIXTURE, during: null };
-
-    // Act
-    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
-
-    // Assert
-    expect(activity).toBeNull();
-  });
-
-  it("should return null when during does not match the expected range shape", () => {
-    // Arrange
-    const workout: WhoopWorkout = { ...WORKOUT_FIXTURE, during: "not-a-range" };
-
-    // Act
-    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
-
-    // Assert
-    expect(activity).toBeNull();
-  });
+      // Assert
+      expect(activity).toBeNull();
+    }
+  );
 
   it("should date the activity in the workout's local timezone, not UTC", () => {
     // Arrange
@@ -104,34 +102,6 @@ describe("workoutToActivity", () => {
     // Assert
     expect(activity?.summary.date).toBe("2026-07-10");
     expect(activity?.summary.start_time).toBe("2026-07-11T05:00:00.000Z");
-  });
-
-  it("should return null when during matches the shape but endpoints are not valid dates", () => {
-    // Arrange
-    const workout: WhoopWorkout = {
-      ...WORKOUT_FIXTURE,
-      during: "['not-a-date','also-not-a-date')",
-    };
-
-    // Act
-    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
-
-    // Assert
-    expect(activity).toBeNull();
-  });
-
-  it("should return null when the during window is inverted (end before start)", () => {
-    // Arrange
-    const workout: WhoopWorkout = {
-      ...WORKOUT_FIXTURE,
-      during: "['2026-07-10T09:00:00.000Z','2026-07-10T08:00:00.000Z')",
-    };
-
-    // Act
-    const activity = workoutToActivity(workout, WORKOUT_SPORT_NAME);
-
-    // Assert
-    expect(activity).toBeNull();
   });
 
   it("should omit total_calories and avg_heart_rate when kilojoules and average_heart_rate are absent", () => {

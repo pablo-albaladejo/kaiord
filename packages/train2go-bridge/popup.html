@@ -2,7 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="popup.css" />
+    <title>Kaiord Train2Go Bridge</title>
     <style>
       :root {
         --accent: #f74464;
@@ -13,7 +15,7 @@
   <body>
     <header class="popup-header">
       <span class="popup-header__dot" aria-hidden="true"></span>
-      <h1 class="popup-header__title">Kaiord Train2Go Bridge</h1>
+      <h1 class="popup-header__title">Kaiord · Train2Go</h1>
       <button
         id="refresh-btn"
         class="popup-header__refresh popup-header__refresh--hidden"
@@ -24,24 +26,31 @@
       </button>
     </header>
 
-    <div
-      id="status"
-      class="status status--checking"
-      role="status"
-      aria-live="polite"
-      aria-label="Checking connection"
-    >
-      <span class="status__glyph" aria-hidden="true">…</span>
-      <span id="status-text">Checking…</span>
-      <span class="status__sub" id="status-sub" hidden></span>
-    </div>
+    <main class="popup-main">
+      <div
+        id="status"
+        class="status-block status-block--muted"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="status-block__dot" aria-hidden="true"></span>
+        <span class="status-block__body">
+          <span class="status-block__verdict" id="status-text"
+            >Checking your session…</span
+          >
+          <span class="status-block__cause" id="status-sub" hidden></span>
+        </span>
+      </div>
 
-    <div id="athlete-region"></div>
-    <div id="rollup-region"></div>
-    <div id="notes-region"></div>
-    <div id="footer-region"></div>
+      <div id="chips-region"></div>
+      <div id="athlete-region"></div>
+      <div id="rollup-region"></div>
+      <div id="notes-region"></div>
+      <div id="footer-region"></div>
+    </main>
 
     <script src="bridge-popup-utils.js"></script>
+    <script src="bridge-popup-shell.js"></script>
     <script src="bridge-popup-snapshot.js"></script>
     <script src="popup.js"></script>
   </body>

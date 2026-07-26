@@ -14,18 +14,19 @@ verbatim; parsing lives in `@kaiord/tanita`, called SPA-side.
 
 ## Key Files
 
-| File                                    | Description                                                          |
-| --------------------------------------- | -------------------------------------------------------------------- |
-| `background.js`                         | Service worker: SW-direct CSV fetch, path allowlist, action routing. |
-| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).        |
-| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.          |
-| `popup.js` / `popup.html` / `popup.css` | Session-status popup + a deep link to MyTANITA.                      |
-| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://mytanita.eu/*`).        |
+| File                                    | Description                                                              |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| `background.js`                         | Service worker: SW-direct CSV fetch, path allowlist, action routing.     |
+| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).            |
+| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.              |
+| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair. |
+| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://mytanita.eu/*`).            |
 
 ### Vendored bridge-core files
 
 `bridge-envelope.js`, `session-fetch.js`, `kaiord-announce.js`,
-`bridge-popup-utils.js`, and `test/{chrome-mock,bridge-envelope.test}.js` are
+`bridge-popup-utils.js`, `bridge-popup-shell.js`, `popup.css`, and
+`test/{chrome-mock,bridge-envelope.test,bridge-popup-shell.test}.js` are
 byte-identical vendored copies of `packages/_shared/bridge-core/` masters —
 never edit them here; edit the master and run `pnpm bridge:sync` (guard:
 `scripts/check-bridge-core-parity.test.mjs`). The `session-fetch.js` master is

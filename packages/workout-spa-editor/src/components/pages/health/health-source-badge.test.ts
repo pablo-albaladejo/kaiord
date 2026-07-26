@@ -8,6 +8,8 @@ describe("healthSourceBadge", () => {
     { sourceBridgeId: "fit-import", expected: "FIT" },
     { sourceBridgeId: "garmin-bridge", expected: "Garmin" },
     { sourceBridgeId: "whoop-bridge", expected: "WHOOP" },
+    { sourceBridgeId: "tanita-bridge", expected: "Tanita" },
+    { sourceBridgeId: "trainingpeaks-bridge", expected: "TrainingPeaks" },
     { sourceBridgeId: "unknown", expected: "Unknown" },
   ])(
     "should map $sourceBridgeId to the label $expected",
