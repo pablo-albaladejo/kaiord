@@ -42,9 +42,11 @@
       "undo": "Deshacer",
       "redo": "Rehacer",
       "copy": "Copiar pasos seleccionados",
-      "paste": "Pegar pasos"
+      "cut": "Cortar pasos seleccionados",
+      "paste": "Pegar pasos",
+      "delete": "Eliminar pasos seleccionados"
     },
-    "step": {
+    "steps": {
       "heading": "Gestión de pasos",
       "moveUp": "Subir paso",
       "moveDown": "Bajar paso",
@@ -55,6 +57,10 @@
       "heading": "Selección",
       "selectAll": "Seleccionar todos los pasos",
       "clear": "Borrar selección"
+    },
+    "help": {
+      "heading": "Ayuda",
+      "showShortcuts": "Mostrar atajos de teclado"
     }
   },
   "examples": {

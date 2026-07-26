@@ -1,16 +1,14 @@
 /**
  * KeyboardShortcutsSection Component
  *
- * Keyboard shortcuts reference.
+ * Keyboard shortcuts reference, rendered from the shortcut catalog.
  */
 
 import { Keyboard } from "lucide-react";
 
+import { SHORTCUT_GROUPS } from "../../../../constants/shortcut-catalog";
 import { useTranslate } from "../../../../i18n/use-translate";
-import { EditOperationsShortcuts } from "./shortcuts/EditOperationsShortcuts";
-import { FileOperationsShortcuts } from "./shortcuts/FileOperationsShortcuts";
-import { SelectionShortcuts } from "./shortcuts/SelectionShortcuts";
-import { StepManagementShortcuts } from "./shortcuts/StepManagementShortcuts";
+import { ShortcutGroupSection } from "./shortcuts/ShortcutGroupSection";
 
 export function KeyboardShortcutsSection() {
   const t = useTranslate("help");
@@ -24,10 +22,9 @@ export function KeyboardShortcutsSection() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <FileOperationsShortcuts />
-        <EditOperationsShortcuts />
-        <StepManagementShortcuts />
-        <SelectionShortcuts />
+        {SHORTCUT_GROUPS.map((group) => (
+          <ShortcutGroupSection key={group} group={group} />
+        ))}
       </div>
     </div>
   );

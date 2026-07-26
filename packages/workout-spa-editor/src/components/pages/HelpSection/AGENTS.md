@@ -22,7 +22,7 @@ In-app help drawer surfaced from the editor: keyboard-shortcuts reference + feat
 ### Working In This Directory
 
 1. **Content is static.** Help text lives in `sections/*` as ordinary JSX, not in a CMS.
-2. **Keep keyboard-shortcut docs in sync** with `useKeyboardShortcuts.ts` — the shortcuts list here is the user-facing documentation of that surface.
+2. **Do not hand-write shortcut rows.** `sections/shortcuts/ShortcutGroupSection.tsx` renders `src/constants/shortcut-catalog.ts`, the single source of truth for every binding. Add a shortcut by adding a catalog row (and its `help` i18n label); `src/constants/shortcut-catalog.test.ts` fails when a row and `KeyboardShortcutHandlers` disagree, so there is no manual sync step.
 
 ## Dependencies
 

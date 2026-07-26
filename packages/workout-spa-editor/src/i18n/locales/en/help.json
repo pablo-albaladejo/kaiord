@@ -42,9 +42,11 @@
       "undo": "Undo",
       "redo": "Redo",
       "copy": "Copy selected steps",
-      "paste": "Paste steps"
+      "cut": "Cut selected steps",
+      "paste": "Paste steps",
+      "delete": "Delete selected steps"
     },
-    "step": {
+    "steps": {
       "heading": "Step Management",
       "moveUp": "Move step up",
       "moveDown": "Move step down",
@@ -55,6 +57,10 @@
       "heading": "Selection",
       "selectAll": "Select all steps",
       "clear": "Clear selection"
+    },
+    "help": {
+      "heading": "Help",
+      "showShortcuts": "Show keyboard shortcuts"
     }
   },
   "examples": {

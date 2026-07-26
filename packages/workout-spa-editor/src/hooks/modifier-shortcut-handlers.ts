@@ -48,3 +48,17 @@ export function handleModifierShortcuts(
   if (handled) event.preventDefault();
   return handled;
 }
+
+/** Dispatch unmodified keys: the `?` sheet and Delete/Backspace. */
+export function handlePlainKeys(
+  event: KeyboardEvent,
+  handlers: KeyboardShortcutHandlers
+): void {
+  // `?` is Shift+/ on most layouts, so match the character it produces.
+  if (event.key === "?") {
+    if (handlers.onShowShortcuts?.()) event.preventDefault();
+    return;
+  }
+  if (event.key !== "Delete" && event.key !== "Backspace") return;
+  if (handlers.onDelete?.()) event.preventDefault();
+}
