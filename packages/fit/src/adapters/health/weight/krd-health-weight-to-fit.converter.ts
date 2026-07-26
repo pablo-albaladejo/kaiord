@@ -1,6 +1,7 @@
 import type { KRD, Logger, WeightMeasurement } from "@kaiord/core";
 
 import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
+import { buildHealthFileIdMessage } from "../shared/health-file-id.builder";
 import { mapKrdWeightToFit } from "./health-weight.converter";
 
 const HEALTH_WEIGHT_FILE_TYPE = "weight" as const;
@@ -27,17 +28,7 @@ export const convertKrdToFitHealthWeightMessages = (
     return [];
   }
 
-  const fileIdMesg: Record<string, unknown> = {
-    mesgNum: FIT_MESSAGE_NUMBERS.FILE_ID,
-    type: HEALTH_WEIGHT_FILE_TYPE,
-    timeCreated: new Date(krd.metadata.created),
-  };
-  if (krd.metadata.manufacturer) {
-    fileIdMesg.manufacturer = krd.metadata.manufacturer;
-  }
-  if (krd.metadata.product && /^\d+$/.test(krd.metadata.product)) {
-    fileIdMesg.product = Number(krd.metadata.product);
-  }
+  const fileIdMesg = buildHealthFileIdMessage(krd, HEALTH_WEIGHT_FILE_TYPE);
 
   const fitWeight = mapKrdWeightToFit(weight);
   const weightMesg = {

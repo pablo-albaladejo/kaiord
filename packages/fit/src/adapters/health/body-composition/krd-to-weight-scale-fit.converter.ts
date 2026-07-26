@@ -6,6 +6,7 @@ import type {
 } from "@kaiord/core";
 
 import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
+import { buildHealthFileIdMessage } from "../shared/health-file-id.builder";
 import type { FitWeightScale } from "../weight/fit-weight-scale.schema";
 import { mapKrdWeightToFit } from "../weight/health-weight.converter";
 import type { FitBodyComposition } from "./fit-body-composition.schema";
@@ -28,21 +29,6 @@ const getHealth = (
         }
       | undefined
   )?.health;
-
-const buildFileIdMesg = (krd: KRD): Record<string, unknown> => {
-  const fileIdMesg: Record<string, unknown> = {
-    mesgNum: FIT_MESSAGE_NUMBERS.FILE_ID,
-    type: HEALTH_WEIGHT_FILE_TYPE,
-    timeCreated: new Date(krd.metadata.created),
-  };
-  if (krd.metadata.manufacturer) {
-    fileIdMesg.manufacturer = krd.metadata.manufacturer;
-  }
-  if (krd.metadata.product && /^\d+$/.test(krd.metadata.product)) {
-    fileIdMesg.product = Number(krd.metadata.product);
-  }
-  return fileIdMesg;
-};
 
 const buildWeightScaleMesg = (
   fitWeight: FitWeightScale | undefined,
@@ -93,5 +79,8 @@ export const convertKrdToWeightScaleUploadMessages = (
   const fitWeight = weight ? mapKrdWeightToFit(weight) : undefined;
   const fitBody = body ? mapKrdBodyCompositionToFit(body) : undefined;
 
-  return [buildFileIdMesg(krd), buildWeightScaleMesg(fitWeight, fitBody)];
+  return [
+    buildHealthFileIdMessage(krd, HEALTH_WEIGHT_FILE_TYPE),
+    buildWeightScaleMesg(fitWeight, fitBody),
+  ];
 };

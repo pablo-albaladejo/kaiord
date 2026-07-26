@@ -1,6 +1,7 @@
 import type { BodyComposition, KRD, Logger } from "@kaiord/core";
 
 import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
+import { buildHealthFileIdMessage } from "../shared/health-file-id.builder";
 import { mapKrdBodyCompositionToFit } from "./health-body-composition.converter";
 
 const HEALTH_BODY_COMPOSITION_FILE_TYPE = "weight" as const;
@@ -28,17 +29,10 @@ export const convertKrdToFitHealthBodyCompositionMessages = (
     return [];
   }
 
-  const fileIdMesg: Record<string, unknown> = {
-    mesgNum: FIT_MESSAGE_NUMBERS.FILE_ID,
-    type: HEALTH_BODY_COMPOSITION_FILE_TYPE,
-    timeCreated: new Date(krd.metadata.created),
-  };
-  if (krd.metadata.manufacturer) {
-    fileIdMesg.manufacturer = krd.metadata.manufacturer;
-  }
-  if (krd.metadata.product && /^\d+$/.test(krd.metadata.product)) {
-    fileIdMesg.product = Number(krd.metadata.product);
-  }
+  const fileIdMesg = buildHealthFileIdMessage(
+    krd,
+    HEALTH_BODY_COMPOSITION_FILE_TYPE
+  );
 
   const fit = mapKrdBodyCompositionToFit(body);
   const bodyMesg: Record<string, unknown> = {
