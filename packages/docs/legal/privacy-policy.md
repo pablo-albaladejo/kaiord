@@ -7,9 +7,9 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-07-21
+**Last updated:** 2026-07-22
 
-This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, and the Kaiord Tanita Bridge Chrome extension.
+This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, and the Kaiord TrainingPeaks Bridge Chrome extension.
 
 ## Data Controller
 
@@ -55,6 +55,16 @@ The Kaiord Tanita Bridge Chrome extension reads your MyTANITA body-composition C
 - **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `mytanita.eu` (to fetch your export) and allowed Kaiord origins (to deliver the export to the editor). The raw CSV is parsed in the editor, not by the extension.
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
+## Kaiord TrainingPeaks Bridge Extension
+
+The Kaiord TrainingPeaks Bridge Chrome extension reads your TrainingPeaks body metrics and hands them to the Kaiord workout editor. Here is how it handles data:
+
+- **No Credentials, No Password**: The extension never asks for, reads, stores, or transmits your TrainingPeaks password. It rides your existing logged-in browser session: it exchanges your session cookie for a short-lived access token by issuing a single cookie-only `GET https://tpapi.trainingpeaks.com/users/v3/token` request (`credentials:"include"`, no `Authorization` header). The `Production_tpAuth` session cookie is a domain-wide `.trainingpeaks.com` cookie, so it reaches `tpapi.trainingpeaks.com` automatically; the extension cannot read that cookie's value (it does not declare the `cookies` permission). Only the minted access token is stored — locally, in `chrome.storage.local` — and it is sent only to TrainingPeaks as a Bearer credential.
+- **Body-Metric Read/Write**: Using the access token, the extension reads your consolidated timed metrics (weight and related body-composition channels) from `https://tpapi.trainingpeaks.com/metrics/v3/...` and, only when you choose to sync, writes a single weight measurement back (the `read:body` and `write:body` capabilities). The raw metric JSON is parsed in the editor, not by the extension. Session presence is reported to the editor only as a boolean.
+- **No TrainingPeaks DOM Access**: The extension injects no content script on TrainingPeaks. All requests are made from its background service worker against a fixed, disclosed set of `tpapi.trainingpeaks.com` endpoints; it does not modify any page or submit forms.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` (to exchange the token and read/write metrics) and allowed Kaiord origins (to deliver the metrics to the editor).
+- **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
+
 ## Communication Scope
 
 The extensions only communicate with the following domains:
@@ -64,6 +74,7 @@ The extensions only communicate with the following domains:
 - `https://connect.garmin.com/*` — where you sign in to Garmin Connect; the Garmin Bridge `open-garmin` action opens this page
 - `https://app.train2go.com/*` — Train2Go Bridge content script (runs on that domain) reads the coaching plan from the page
 - `https://mytanita.eu/*` — Tanita Bridge service worker fetches your body-composition CSV export using your existing session cookie
+- `https://tpapi.trainingpeaks.com/*` — TrainingPeaks Bridge service worker exchanges your existing session cookie for a short-lived access token and reads/writes your body metrics with it
 - `https://*.kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.
 
 Each extension also injects a minimal **announce-only** content script (`kaiord-announce.js`) into `https://*.kaiord.com/*` so the editor can discover which extension IDs are installed at runtime. This content script only calls `window.postMessage` to publish a fixed announcement object (bridge id, extension id, version, declared capabilities) and re-announces on request. It does **not** read the editor's DOM, cookies, storage, or network traffic, does **not** modify the page, and does **not** enable any inbound data path from kaiord.com into the extension beyond what `externally_connectable` already allows.

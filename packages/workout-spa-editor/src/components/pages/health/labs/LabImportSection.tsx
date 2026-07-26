@@ -1,14 +1,17 @@
 /**
- * LabImportSection — entry-tab affordance to extract a lab report from an
- * uploaded PDF/image. Disabled with a hint when no lab-extraction model is
- * configured; shows a cancelable progress state while extracting and hands the
- * resulting draft to the form via `onDraft`.
+ * LabImportSection — entry-tab affordances to bring a lab report in: extract
+ * one from an uploaded PDF/image, or (D6) pull WHOOP biomarker tests
+ * directly from a connected whoop-bridge session. The AI path is disabled
+ * with a hint when no lab-extraction model is configured; the WHOOP button
+ * only renders once the bridge is discovered and its session reports
+ * connected — it is a user-initiated action, never auto-pulled.
  */
 import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { LabDraft } from "./map-extraction-to-draft";
 import { useLabImport } from "./use-lab-import";
+import { WhoopImportButton } from "./WhoopImportButton";
 
 export type LabImportSectionProps = {
   onDraft: (draft: LabDraft) => void;
@@ -63,6 +66,7 @@ export function LabImportSection({ onDraft }: LabImportSectionProps) {
           />
         </label>
       )}
+      <WhoopImportButton />
     </section>
   );
 }

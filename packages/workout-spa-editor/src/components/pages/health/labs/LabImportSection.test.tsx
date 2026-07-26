@@ -7,6 +7,11 @@
 import { I18nextProvider } from "react-i18next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { bridgeDiscovery } from "../../../../adapters/bridge/bridge-discovery";
+import { readWhoopStatus } from "../../../../adapters/bridge/whoop-transport";
+import { importWhoopLabs } from "../../../../application/whoop/import-whoop-labs.use-case";
+import type { DiscoveredBridge } from "../../../../hooks/use-discovered-bridges";
+import { useDiscoveredBridges } from "../../../../hooks/use-discovered-bridges";
 import { appI18n } from "../../../../i18n/i18n";
 import {
   renderWithProviders,
@@ -32,6 +37,29 @@ vi.mock("./map-extraction-to-draft", () => ({
   mapExtractionToDraft: (...args: unknown[]) =>
     mockMapExtractionToDraft(...args),
 }));
+
+vi.mock("../../../../adapters/bridge/bridge-discovery", () => ({
+  bridgeDiscovery: { getExtensionId: vi.fn() },
+}));
+vi.mock("../../../../adapters/bridge/whoop-transport", () => ({
+  readWhoopStatus: vi.fn(),
+  readWhoopFetch: vi.fn(),
+}));
+vi.mock("../../../../hooks/use-discovered-bridges", () => ({
+  useDiscoveredBridges: vi.fn(),
+}));
+vi.mock("../../../../application/whoop/import-whoop-labs.use-case", () => ({
+  importWhoopLabs: vi.fn(),
+}));
+
+const mockedGetExtensionId = vi.mocked(bridgeDiscovery.getExtensionId);
+const mockedReadWhoopStatus = vi.mocked(readWhoopStatus);
+const mockedUseDiscoveredBridges = vi.mocked(useDiscoveredBridges);
+const mockedImportWhoopLabs = vi.mocked(importWhoopLabs);
+
+const WHOOP_DISCOVERED: readonly DiscoveredBridge[] = [
+  { bridgeId: "whoop-bridge", extensionId: "ext-1" },
+];
 
 let mockProviders: unknown[] = [];
 
@@ -120,6 +148,8 @@ describe("LabImportSection", () => {
       extraction: { values: [] },
     });
     mockMapExtractionToDraft.mockReturnValue(EMPTY_DRAFT);
+    mockedUseDiscoveredBridges.mockReturnValue([]);
+    mockedGetExtensionId.mockReturnValue(null);
   });
 
   it("should call onDraft with the mapped draft after a successful extraction", async () => {
@@ -198,5 +228,100 @@ describe("LabImportSection", () => {
     });
     const reports = await persistence.labs.listReports("p1");
     expect(reports[0].provenance).toEqual({ source: "ai-extracted" });
+  });
+
+  describe("WHOOP import", () => {
+    it("should not render the WHOOP import button when the bridge is not discovered", () => {
+      // Arrange
+      mockedUseDiscoveredBridges.mockReturnValue([]);
+
+      // Act
+      renderWithI18n(<LabImportSection onDraft={vi.fn()} />);
+
+      // Assert
+      expect(
+        screen.queryByRole("button", { name: "Import from WHOOP" })
+      ).toBeNull();
+    });
+
+    it("should not render the WHOOP import button when discovered but not connected", async () => {
+      // Arrange
+      mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
+      mockedGetExtensionId.mockReturnValue("ext-1");
+      mockedReadWhoopStatus.mockResolvedValue({
+        connected: false,
+        userId: null,
+        capturedAt: null,
+      });
+
+      // Act
+      renderWithI18n(<LabImportSection onDraft={vi.fn()} />);
+      await waitFor(() => expect(mockedReadWhoopStatus).toHaveBeenCalled());
+
+      // Assert
+      expect(
+        screen.queryByRole("button", { name: "Import from WHOOP" })
+      ).toBeNull();
+    });
+
+    it("should run the import and toast the imported/skipped counts once connected", async () => {
+      // Arrange
+      mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
+      mockedGetExtensionId.mockReturnValue("ext-1");
+      mockedReadWhoopStatus.mockResolvedValue({
+        connected: true,
+        userId: 42,
+        capturedAt: 1,
+      });
+      mockedImportWhoopLabs.mockResolvedValue({
+        ok: true,
+        imported: 2,
+        skipped: 1,
+      });
+      renderWithI18n(<LabImportSection onDraft={vi.fn()} />);
+      const button = await screen.findByRole("button", {
+        name: "Import from WHOOP",
+      });
+
+      // Act
+      await userEvent.click(button);
+
+      // Assert
+      await waitFor(() =>
+        expect(screen.getByText("Imported 2, skipped 1")).toBeInTheDocument()
+      );
+      expect(mockedImportWhoopLabs).toHaveBeenCalledWith(
+        expect.objectContaining({ profileId: "p1" })
+      );
+    });
+
+    it("should toast a static failure message when the import reports ok:false", async () => {
+      // Arrange
+      mockedUseDiscoveredBridges.mockReturnValue(WHOOP_DISCOVERED);
+      mockedGetExtensionId.mockReturnValue("ext-1");
+      mockedReadWhoopStatus.mockResolvedValue({
+        connected: true,
+        userId: 42,
+        capturedAt: 1,
+      });
+      mockedImportWhoopLabs.mockResolvedValue({
+        ok: false,
+        reason: "transport-error",
+      });
+      renderWithI18n(<LabImportSection onDraft={vi.fn()} />);
+      const button = await screen.findByRole("button", {
+        name: "Import from WHOOP",
+      });
+
+      // Act
+      await userEvent.click(button);
+
+      // Assert
+      await waitFor(() =>
+        expect(
+          screen.getByText("Could not import WHOOP lab results — please retry")
+        ).toBeInTheDocument()
+      );
+    });
   });
 });

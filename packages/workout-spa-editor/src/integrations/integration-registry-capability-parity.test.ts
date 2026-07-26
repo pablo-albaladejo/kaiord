@@ -11,8 +11,10 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import type { ManagedDataType } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import type { IntegrationPolicyDirection } from "../types/integration-policy";
 import { eligibleBridgeIds } from "./integration-registry";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -36,49 +38,66 @@ describe("integration registry — real bridge manifest parity", () => {
   const garminCaps = readManifestCapabilities("garmin-bridge");
   const whoopCaps = readManifestCapabilities("whoop-bridge");
   const train2goCaps = readManifestCapabilities("train2go-bridge");
+  const trainingPeaksCaps = readManifestCapabilities("trainingpeaks-bridge");
+  const tanitaCaps = readManifestCapabilities("tanita-bridge");
 
   const capabilitiesFor = (bridgeId: string): readonly string[] => {
     if (bridgeId === "garmin-bridge") return garminCaps;
     if (bridgeId === "whoop-bridge") return whoopCaps;
     if (bridgeId === "train2go-bridge") return train2goCaps;
+    if (bridgeId === "trainingpeaks-bridge") return trainingPeaksCaps;
+    if (bridgeId === "tanita-bridge") return tanitaCaps;
     return [];
   };
 
-  it("should make garmin-bridge eligible for workout export via its real write:workouts capability", () => {
-    // Arrange
+  it.each([
+    {
+      bridgeId: "garmin-bridge",
+      dataType: "workout" as ManagedDataType,
+      direction: "export" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "garmin-bridge",
+      dataType: "body-composition" as ManagedDataType,
+      direction: "export" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "whoop-bridge",
+      dataType: "hrv" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "whoop-bridge",
+      dataType: "sleep" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "train2go-bridge",
+      dataType: "planned-session" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "trainingpeaks-bridge",
+      dataType: "weight" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "tanita-bridge",
+      dataType: "weight" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+  ])(
+    "should make $bridgeId eligible for $dataType $direction via its real manifest capabilities",
+    ({ bridgeId, dataType, direction }) => {
+      // Arrange
 
-    // Act
-    const result = eligibleBridgeIds("workout", "export", capabilitiesFor);
+      // Act
+      const result = eligibleBridgeIds(dataType, direction, capabilitiesFor);
 
-    // Assert
-    expect(result).toContain("garmin-bridge");
-  });
-
-  it("should make whoop-bridge eligible for hrv and sleep import via its real capabilities", () => {
-    // Arrange
-
-    // Act
-    const hrv = eligibleBridgeIds("hrv", "import", capabilitiesFor);
-    const sleep = eligibleBridgeIds("sleep", "import", capabilitiesFor);
-
-    // Assert
-    expect(hrv).toContain("whoop-bridge");
-    expect(sleep).toContain("whoop-bridge");
-  });
-
-  it("should make train2go-bridge eligible for planned-session import via its real read:training-plan capability", () => {
-    // Arrange
-
-    // Act
-    const result = eligibleBridgeIds(
-      "planned-session",
-      "import",
-      capabilitiesFor
-    );
-
-    // Assert
-    expect(result).toEqual(["train2go-bridge"]);
-  });
+      // Assert
+      expect(result).toContain(bridgeId);
+    }
+  );
 
   it("should keep train2go-bridge ineligible for activity import — its real manifest has no execution capability (F1.3b)", () => {
     // Arrange

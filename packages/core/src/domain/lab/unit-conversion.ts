@@ -52,7 +52,7 @@ export function convertMeasurement(
   valueRaw: number,
   unitRaw: string
 ): CanonicalMeasurement {
-  const affine = param ? resolveAffineUnit(param, unitRaw) : null;
+  const affine = resolveAffineUnit(param, unitRaw);
   if (!param || !affine) {
     return { valueCanonical: valueRaw, unitCanonical: unitRaw };
   }

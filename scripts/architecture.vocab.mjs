@@ -50,6 +50,7 @@ export const PACKAGE_DEPS = {
   garmin: ["@kaiord/core"],
   whoop: ["@kaiord/core"],
   tanita: ["@kaiord/core"],
+  trainingpeaks: ["@kaiord/core"],
   "garmin-connect": ["@kaiord/core", "@kaiord/garmin"],
   ai: ["@kaiord/core"],
   // Framework-agnostic i18n mechanism (translator factory, dictionary types,
@@ -78,7 +79,9 @@ export const PACKAGE_DEPS = {
     "@kaiord/fit",
     "@kaiord/garmin",
     "@kaiord/i18n",
+    "@kaiord/tanita",
     "@kaiord/tcx",
+    "@kaiord/trainingpeaks",
     "@kaiord/whoop",
     "@kaiord/zwo",
   ],
@@ -102,6 +105,7 @@ export const PACKAGE_DEPS = {
   "train2go-bridge": ["@kaiord/core"],
   "whoop-bridge": ["@kaiord/core"],
   "tanita-bridge": ["@kaiord/core"],
+  "trainingpeaks-bridge": ["@kaiord/core"],
   // Static-asset package — SVG icon master + popup CSS master shared
   // across both bridges. Private, never published, zero deps.
   _shared: [],

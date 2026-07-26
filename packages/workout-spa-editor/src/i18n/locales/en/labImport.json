@@ -5,5 +5,9 @@
   "cancel": "Cancel",
   "noProviderHint": "Configure a lab-extraction model in Settings to import from a file.",
   "reviewBanner": "AI-extracted draft — review before saving",
-  "discard": "Discard draft"
+  "discard": "Discard draft",
+  "whoopButton": "Import from WHOOP",
+  "whoopImporting": "Importing from WHOOP…",
+  "whoopImportedToast": "Imported {{imported}}, skipped {{skipped}}",
+  "whoopImportFailed": "Could not import WHOOP lab results — please retry"
 }

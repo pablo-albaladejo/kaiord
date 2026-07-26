@@ -69,7 +69,10 @@
     "untargeted",
     "tanita",
     "mytanita",
-    "TANITASESS"
+    "TANITASESS",
+    "trainingpeaks",
+    "tpapi",
+    "tpAuth"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
 }

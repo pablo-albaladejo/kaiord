@@ -44,6 +44,17 @@ export type DataHubMatrixSignals = {
     direction: IntegrationPolicyDirection,
     bridgeId: string
   ) => { id: string; mode: IntegrationPolicyMode } | undefined;
+  /**
+   * Narrows an announced-but-shared token (read:body spans weight, hrv,
+   * daily-wellness, body-composition and stress) to the routes the SPA
+   * actually serves. REQUIRED so the compiler enumerates every construction
+   * site — an optional field lets a caller silently bypass the filter.
+   */
+  supportsRoute: (
+    bridgeId: string,
+    dataType: ManagedDataType,
+    direction: IntegrationPolicyDirection
+  ) => boolean;
 };
 
 const bridgeCellState = (
@@ -55,6 +66,10 @@ const bridgeCellState = (
 ): DataHubCellState => {
   const bridgeId = entry.bridgeId;
   if (bridgeId === null) return "na";
+  // Support is a STATIC property of the bridge, not of its session, so this
+  // precedes the online check: a route the bridge can never serve reads "na"
+  // whether or not the extension happens to be running.
+  if (!s.supportsRoute(bridgeId, dataType, direction)) return "na";
   // A bridge is "connected" only while its extension is discovered — read
   // discovery, never the connections store (which holds no bridge rows).
   if (!s.isBridgeOnline(bridgeId)) return "not-connected";
