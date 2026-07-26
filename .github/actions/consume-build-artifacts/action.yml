@@ -33,7 +33,7 @@ runs:
       # `core/dist/...`, `core/package.json`, etc. (NO leading
       # `packages/`). Extracting to `path: packages` re-introduces the
       # prefix so consumers see `packages/core/dist/...` as expected.
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         name: build-artifacts
         path: packages
