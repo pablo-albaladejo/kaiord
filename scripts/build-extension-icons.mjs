@@ -12,7 +12,7 @@
  * Source-of-truth: the SVG master. Hand-editing the produced PNGs is
  * forbidden; the privacy-surface guard does NOT cover icons, but the
  * distinctness guard at scripts/check-extension-icons-distinct.mjs
- * fails the lint job if either bridge's icons drift from the
+ * fails the lint job if any bridge's icons drift from the
  * inter-bridge / accent-mass thresholds.
  */
 
@@ -28,6 +28,9 @@ const MASTER = join(REPO_ROOT, "packages/_shared/extension-icon/master.svg");
 const BRIDGES = [
   { name: "garmin-bridge", accent: "#007cc3" },
   { name: "train2go-bridge", accent: "#f74464" },
+  { name: "whoop-bridge", accent: "#7c3aed" },
+  { name: "trainingpeaks-bridge", accent: "#eab308" },
+  { name: "tanita-bridge", accent: "#4ade80" },
 ];
 const SIZES = [16, 48, 128];
 
