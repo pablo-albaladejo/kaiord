@@ -12,14 +12,20 @@ const REPO = dirname(HERE);
 const BUILD = join(HERE, "build-extension-icons.mjs");
 const MASTER = join(REPO, "packages/_shared/extension-icon/master.svg");
 
-const BRIDGES = ["garmin-bridge", "train2go-bridge"];
+const BRIDGES = [
+  "garmin-bridge",
+  "train2go-bridge",
+  "whoop-bridge",
+  "trainingpeaks-bridge",
+  "tanita-bridge",
+];
 const SIZES = [16, 48, 128];
 
 const iconPath = (bridge, size) =>
   join(REPO, "packages", bridge, "icons", `icon${size}.png`);
 
 describe("build-extension-icons", () => {
-  it("produces six PNGs at expected dimensions and non-zero sizes", async () => {
+  it("produces a PNG per bridge and size at expected dimensions", async () => {
     execFileSync("node", [BUILD], { cwd: REPO });
 
     for (const bridge of BRIDGES) {
