@@ -1,3 +1,5 @@
+> Completed: 2026-07-26
+
 ## Why
 
 The five bridge extensions ship two unrelated popups. Garmin and Train2Go share

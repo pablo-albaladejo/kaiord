@@ -7,6 +7,10 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-07-26 | [`add-bridge-connection-model`](./2026-07-26-add-bridge-connection-model/) | Five bridges ship today and each answers "am I connected?" its own way. Garmin |
+| 2026-07-26 | [`add-shortcut-catalog-and-sheet`](./2026-07-26-add-shortcut-catalog-and-sheet/) | The SPA's keyboard bindings live in two places that nothing keeps in agreement. |
+| 2026-07-26 | [`promote-trainingpeaks-and-tanita-import`](./2026-07-26-promote-trainingpeaks-and-tanita-import/) | The trainingpeaks-bridge extension shipped in #1008 (session capture, |
+| 2026-07-26 | [`unify-bridge-popup-shell`](./2026-07-26-unify-bridge-popup-shell/) | The five bridge extensions ship two unrelated popups. Garmin and Train2Go share |
 | 2026-07-22 | [`rewrite-whoop-session-bridge`](./2026-07-22-rewrite-whoop-session-bridge/) | Rewrite the WHOOP bridge to session piggyback (internal API) |
 | 2026-07-11 | [`add-shared-bridge-core`](./2026-07-11-add-shared-bridge-core/) | Three Chrome extension bridges (garmin-bridge, train2go-bridge, |
 | 2026-07-11 | [`cutover-usage-accounting-to-event-log`](./2026-07-11-cutover-usage-accounting-to-event-log/) | Cut usage accounting over to the event log (retire the legacy `usage` table) |
