@@ -117,6 +117,12 @@ shortcut.
 - **WHEN** the user presses `Ctrl+?` or `Cmd+?`
 - **THEN** the sheet SHALL NOT open, because the binding is unmodified `?` only
 
+#### Scenario: AltGr layouts still open the sheet
+
+- **GIVEN** a keyboard layout where `?` is produced with AltGr (reported as `ctrlKey+altKey` or the `AltGraph` modifier state)
+- **WHEN** the user types `?`
+- **THEN** the sheet SHALL open, because AltGr-produced characters dispatch as plain keys, never as Ctrl shortcuts
+
 #### Scenario: Existing bindings are unaffected
 
 - **GIVEN** both `onDelete` and the `?` handler are bound

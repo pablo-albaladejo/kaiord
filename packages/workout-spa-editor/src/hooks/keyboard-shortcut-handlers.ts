@@ -1,7 +1,9 @@
+import { isAltGraphEvent } from "../utils/is-alt-graph-event";
 import { isFormElement } from "../utils/is-form-element";
 import {
   handleAltShortcuts,
   handleModifierShortcuts,
+  handlePlainKeys,
 } from "./modifier-shortcut-handlers";
 
 export type KeyboardShortcutHandlers = {
@@ -46,25 +48,18 @@ export const HANDLER_KEYS = Object.keys(HANDLER_KEY_MAP) as ReadonlyArray<
   keyof KeyboardShortcutHandlers
 >;
 
-function handlePlainKeys(
-  event: KeyboardEvent,
-  handlers: KeyboardShortcutHandlers
-): void {
-  // `?` is Shift+/ on most layouts, so match the character it produces.
-  if (event.key === "?") {
-    if (handlers.onShowShortcuts?.()) event.preventDefault();
-    return;
-  }
-  if (event.key !== "Delete" && event.key !== "Backspace") return;
-  if (handlers.onDelete?.()) event.preventDefault();
-}
-
 /** Create a keydown handler for modifier-based shortcuts. */
 export function createKeyDownHandler(
   handlers: KeyboardShortcutHandlers
 ): (event: KeyboardEvent) => void {
   return (event: KeyboardEvent) => {
     if (isFormElement(event.target)) return;
+    // AltGr characters (e.g. "?" on layouts that produce it that way)
+    // dispatch as plain keys ONLY — see isAltGraphEvent.
+    if (isAltGraphEvent(event)) {
+      handlePlainKeys(event, handlers);
+      return;
+    }
     const isModifier = event.ctrlKey || event.metaKey;
     if (event.altKey && !isModifier) {
       if (handleAltShortcuts(event, handlers)) return;

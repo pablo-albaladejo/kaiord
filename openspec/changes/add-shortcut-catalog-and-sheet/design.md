@@ -113,9 +113,13 @@ label + chips.
 ## Risks / Trade-offs
 
 - **`?` on non-US layouts** → Matching the produced character rather than
-  `Shift`+`Slash` is the portable choice, but on layouts where `?` needs AltGr
-  the event still reports `key === "?"`, so it works; on layouts where `?` is
-  unshifted it fires without Shift, which is harmless.
+  `Shift`+`Slash` is the portable choice. On layouts where `?` needs AltGr the
+  browser reports `ctrlKey+altKey` (and, where supported, the `AltGraph`
+  modifier state), which a naive modifier check would misclassify as a Ctrl
+  shortcut and swallow — so the handler classifies AltGr events as plain keys
+  before the modifier branch. Side benefit: AltGr-produced characters can no
+  longer trigger Ctrl shortcuts like undo. On layouts where `?` is unshifted
+  it fires without Shift, which is harmless.
 - **A second `useKeyboardShortcuts` subscription** → Two extra window listeners
   for the lifetime of the header. Measured cost is nil and the alternative was
   four levels of prop threading; if a third subscriber ever appears, promoting

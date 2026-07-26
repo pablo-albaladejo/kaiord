@@ -868,6 +868,44 @@ describe("useKeyboardShortcuts", () => {
       }
     );
 
+    it("should call onShowShortcuts when ? arrives via AltGr (ctrl+alt reported)", () => {
+      // Arrange
+      const onShowShortcuts = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowShortcuts }));
+      const event = new KeyboardEvent("keydown", {
+        key: "?",
+        ctrlKey: true,
+        altKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onShowShortcuts).toHaveBeenCalledTimes(1);
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it("should not treat an AltGr-produced character as a Ctrl shortcut", () => {
+      // Arrange
+      const onUndo = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onUndo }));
+      const event = new KeyboardEvent("keydown", {
+        key: "z",
+        ctrlKey: true,
+        altKey: true,
+        bubbles: true,
+      });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onUndo).not.toHaveBeenCalled();
+    });
+
     it.each([
       { tag: "input" as const },
       { tag: "textarea" as const },
