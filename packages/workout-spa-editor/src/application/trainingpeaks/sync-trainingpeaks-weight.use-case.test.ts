@@ -69,15 +69,23 @@ const emptyStores = () => ({
   stress: new Map(),
 });
 
+const makeSyncStateRepo = () => ({
+  getBySourceAndProfile: vi.fn().mockResolvedValue(undefined),
+  put: vi.fn().mockResolvedValue(undefined),
+  deleteByProfile: vi.fn().mockResolvedValue(undefined),
+});
+
 const makeDeps = (
   policies: IntegrationPolicy[],
   readMetrics: SyncTrainingPeaksWeightDeps["readMetrics"],
   stores = emptyStores(),
-  checkSession = vi.fn().mockResolvedValue(true)
+  checkSession = vi.fn().mockResolvedValue(true),
+  coachingSyncState = makeSyncStateRepo()
 ): {
   deps: SyncTrainingPeaksWeightDeps;
   stores: ReturnType<typeof emptyStores>;
   checkSession: ReturnType<typeof vi.fn>;
+  coachingSyncState: ReturnType<typeof makeSyncStateRepo>;
 } => ({
   deps: {
     policyRepo: makePolicyRepo(policies),
@@ -85,9 +93,11 @@ const makeDeps = (
     checkSession,
     readMetrics,
     parse: () => [weightKrd(MEASURED_AT)],
+    coachingSyncState,
   },
   stores,
   checkSession,
+  coachingSyncState,
 });
 
 const input = { profileId: PROFILE_ID, start: START, end: END };
@@ -198,5 +208,53 @@ describe("syncTrainingPeaksWeight", () => {
       error: "Session expired",
     });
     expect(stores.weight.size).toBe(0);
+  });
+
+  it("should record the import freshness after a successful run", async () => {
+    // Arrange
+    const { deps, coachingSyncState } = makeDeps(
+      [makePolicy()],
+      vi.fn().mockResolvedValue([])
+    );
+
+    // Act
+    await syncTrainingPeaksWeight(deps, input);
+
+    // Assert
+    expect(coachingSyncState.put).toHaveBeenCalledWith({
+      source: "trainingpeaks-bridge",
+      profileId: PROFILE_ID,
+      lastSyncedAt: expect.any(String),
+    });
+  });
+
+  it("should not record freshness when no import route is enabled", async () => {
+    // Arrange
+    const { deps, coachingSyncState } = makeDeps(
+      [makePolicy({ enabled: false })],
+      vi.fn()
+    );
+
+    // Act
+    await syncTrainingPeaksWeight(deps, input);
+
+    // Assert
+    expect(coachingSyncState.put).not.toHaveBeenCalled();
+  });
+
+  it("should not record freshness when the session is signed out", async () => {
+    // Arrange
+    const { deps, coachingSyncState } = makeDeps(
+      [makePolicy()],
+      vi.fn(),
+      emptyStores(),
+      vi.fn().mockResolvedValue(false)
+    );
+
+    // Act
+    await syncTrainingPeaksWeight(deps, input);
+
+    // Assert
+    expect(coachingSyncState.put).not.toHaveBeenCalled();
   });
 });
