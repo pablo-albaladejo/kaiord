@@ -149,6 +149,8 @@ describe("SettingsPage", () => {
     it.each([
       { tab: "ai", content: "LLM Providers" },
       { tab: "privacy", content: "Clear All API Keys" },
+      { tab: "extensions", content: "Garmin Connect" },
+      { tab: "extensions", content: "Train2Go" },
     ])(
       "should render the $tab tab content at /settings/$tab",
       ({ tab, content }) => {
@@ -158,22 +160,11 @@ describe("SettingsPage", () => {
         renderAtPath(`/settings/${tab}`);
 
         // Assert
-        expect(screen.getByText(content)).toBeInTheDocument();
+        // getAllByText: the extensions tab also renders "Garmin Connect"
+        // inside the Tanita sync card's instructional copy.
+        expect(screen.getAllByText(content)[0]).toBeInTheDocument();
       }
     );
-
-    it("should render the extensions tab content at /settings/extensions", () => {
-      // Arrange
-
-      // Act
-      renderAtPath("/settings/extensions");
-
-      // Assert
-      // "Garmin Connect" appears twice: the bridge table row and the
-      // Tanita → Garmin sync card's status row.
-      expect(screen.getAllByText("Garmin Connect").length).toBeGreaterThan(0);
-      expect(screen.getByText("Train2Go")).toBeInTheDocument();
-    });
 
     it("should render the usage tab content at /settings/usage", async () => {
       // Arrange

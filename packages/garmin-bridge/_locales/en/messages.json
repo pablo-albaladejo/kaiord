@@ -8,28 +8,52 @@
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {
-    "message": "Checking…",
-    "description": "Status text while the popup probes the connection."
+    "message": "Checking your session…",
+    "description": "Status verdict while the popup probes the connection."
   },
-  "checkingConnection": {
-    "message": "Checking connection",
-    "description": "Accessible label for the checking status pill."
-  },
-  "notConnected": {
-    "message": "Not connected",
-    "description": "Status text/label when the bridge is not connected."
-  },
-  "notConnectedGarmin": {
-    "message": "Not connected — open Garmin Connect and refresh",
-    "description": "Status text when the Garmin Connect session is missing."
-  },
-  "connectedToGarmin": {
-    "message": "Connected to Garmin Connect",
-    "description": "Status text when the bridge is connected."
+  "checkingCause": {
+    "message": "Usually under a second.",
+    "description": "Status cause sentence shown while the probe runs."
   },
   "connected": {
     "message": "Connected",
-    "description": "Accessible label for the connected status pill."
+    "description": "Status verdict when the bridge is connected."
+  },
+  "connectedCause": {
+    "message": "Riding your Garmin Connect session.",
+    "description": "Status cause sentence for the connected state."
+  },
+  "sessionSignedOut": {
+    "message": "Session signed out",
+    "description": "Status verdict when the Garmin Connect session is missing."
+  },
+  "sessionSignedOutCause": {
+    "message": "Your Garmin Connect tab is signed out, so nothing is reaching Kaiord right now.",
+    "description": "Status cause sentence naming the consequence of a signed-out session."
+  },
+  "bridgeNotResponding": {
+    "message": "Bridge not responding",
+    "description": "Status verdict when the extension's background worker times out."
+  },
+  "bridgeNotRespondingCause": {
+    "message": "The extension's background worker did not answer. Try again.",
+    "description": "Status cause sentence for a background-worker timeout."
+  },
+  "captionFeeds": {
+    "message": "Feeds Kaiord",
+    "description": "Caption above the capability chips."
+  },
+  "typeActivity": {
+    "message": "Activity",
+    "description": "Capability chip for the Activity data type imported into Kaiord."
+  },
+  "typeWorkoutBack": {
+    "message": "Workout ↑ to Garmin",
+    "description": "Capability chip for the Workout data type Kaiord pushes to Garmin Connect."
+  },
+  "typeBodyCompositionBack": {
+    "message": "Body Composition ↑ to Garmin",
+    "description": "Capability chip for the Body Composition data type Kaiord pushes to Garmin Connect."
   },
   "profileStale": {
     "message": "Profile snapshot is stale. Open Kaiord to refresh.",
@@ -132,20 +156,16 @@
     }
   },
   "openEditor": {
-    "message": "Open editor",
-    "description": "Primary footer button opening the Kaiord editor."
-  },
-  "openEditorAria": {
     "message": "Open Kaiord editor",
-    "description": "Accessible label for the open-editor button."
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "signInGarmin": {
+    "message": "Sign in to Garmin Connect",
+    "description": "Primary footer link that fixes a signed-out Garmin Connect session."
   },
   "openGarmin": {
     "message": "Open Garmin Connect ↗",
-    "description": "Secondary footer button opening Garmin Connect."
-  },
-  "openGarminAria": {
-    "message": "Open Garmin Connect",
-    "description": "Accessible label for the open-Garmin button."
+    "description": "Secondary footer link opening Garmin Connect."
   },
   "retry": {
     "message": "Retry",

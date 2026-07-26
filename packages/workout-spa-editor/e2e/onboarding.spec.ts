@@ -354,7 +354,7 @@ test.describe("Help Section", () => {
     }
   });
 
-  test("should display keyboard shortcuts reference", async ({ page }) => {
+  test("should open the shortcut sheet with the ? key", async ({ page }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
@@ -365,18 +365,19 @@ test.describe("Help Section", () => {
       await skipButton.click();
     }
 
-    // Act - Open keyboard shortcuts (usually Ctrl+/ or Cmd+/)
-    const isMac = await page.evaluate(() => navigator.platform.includes("Mac"));
-    if (isMac) {
-      await page.keyboard.press("Meta+/");
-    } else {
-      await page.keyboard.press("Control+/");
-    }
+    // Act - "?" is the global shortcut-sheet binding
+    await page.keyboard.press("Shift+Slash");
 
-    // Assert - Keyboard shortcuts dialog should appear
-    // Note: This assumes keyboard shortcuts dialog exists
-    // Implementation may vary
-    await page.waitForTimeout(500);
+    // Assert - the sheet renders its title, groups and key chips
+    const sheet = page.getByTestId("shortcut-sheet");
+    await expect(sheet).toBeVisible();
+    await expect(
+      sheet.getByRole("heading", { name: "Keyboard Shortcuts" })
+    ).toBeVisible();
+    await expect(
+      sheet.getByRole("heading", { name: "File Operations" })
+    ).toBeVisible();
+    await expect(sheet.locator("kbd").first()).toBeVisible();
   });
 });
 

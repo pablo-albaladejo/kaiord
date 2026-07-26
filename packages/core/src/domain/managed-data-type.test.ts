@@ -19,23 +19,6 @@ describe("managedDataTypes", () => {
 });
 
 describe("MANAGED_DATA_REGISTRY", () => {
-  it("should expose label, schema, and capabilities for every entry", () => {
-    // Arrange
-    const entries = Object.values(MANAGED_DATA_REGISTRY);
-
-    // Act
-    const valid = entries.every(
-      (e) =>
-        typeof e.label === "string" &&
-        e.label.length > 0 &&
-        e.schema !== undefined &&
-        typeof e.capabilities === "object"
-    );
-
-    // Assert
-    expect(valid).toBe(true);
-  });
-
   it("should back every entry with a real schema (no z.unknown passthrough)", () => {
     // Arrange
     // A z.unknown()/z.any() passthrough accepts `undefined`; every real

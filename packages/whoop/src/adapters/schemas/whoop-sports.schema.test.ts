@@ -9,21 +9,14 @@ const SWIMMING_ID = 33;
 const CYCLING_ID = 1;
 
 describe("whoopSportsResponseSchema", () => {
-  it("should normalize a bare-array sports/history response", () => {
+  it.each([
+    { shape: "bare-array", payload: [{ id: SWIMMING_ID, name: "Swimming" }] },
+    {
+      shape: "sports-wrapped",
+      payload: { sports: [{ id: SWIMMING_ID, name: "Swimming" }] },
+    },
+  ])("should normalize a $shape sports/history response", ({ payload }) => {
     // Arrange
-    const payload = [{ id: SWIMMING_ID, name: "Swimming" }];
-
-    // Act
-    const result = whoopSportsResponseSchema.safeParse(payload);
-
-    // Assert
-    expect(result.success).toBe(true);
-    expect(result.data?.[0].name).toBe("Swimming");
-  });
-
-  it("should normalize a sports-wrapped sports/history response", () => {
-    // Arrange
-    const payload = { sports: [{ id: SWIMMING_ID, name: "Swimming" }] };
 
     // Act
     const result = whoopSportsResponseSchema.safeParse(payload);
