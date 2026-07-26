@@ -1,0 +1,108 @@
+{
+  "entry": {
+    "date": "2026-07-24",
+    "source": "serp-ddg",
+    "queries": 12,
+    "found": 0,
+    "positions": {
+      "brand": null,
+      "fit-converter": null,
+      "fit-to-tcx": null,
+      "fit-to-zwo": null,
+      "workout-converter-oss": null,
+      "garmin-workout-format": null,
+      "zwo-editor": null,
+      "ts-fit-parser": null,
+      "mcp-fitness": null,
+      "garmin-sync-extension": null,
+      "whoop-garmin-sync": null,
+      "training-calendar-local": null
+    }
+  },
+  "results": [
+    {
+      "id": "brand",
+      "q": "kaiord",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "fit-converter",
+      "q": "fit file converter",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "fit-to-tcx",
+      "q": "convert fit to tcx",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "fit-to-zwo",
+      "q": "fit to zwo converter",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "workout-converter-oss",
+      "q": "workout file converter open source",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "garmin-workout-format",
+      "q": "garmin workout file format",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "zwo-editor",
+      "q": "zwo workout editor",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "ts-fit-parser",
+      "q": "typescript fit file parser",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "mcp-fitness",
+      "q": "mcp server fitness workouts",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "garmin-sync-extension",
+      "q": "garmin connect workout sync chrome extension",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "whoop-garmin-sync",
+      "q": "whoop garmin sync",
+      "position": null,
+      "blocked": false,
+      "top": []
+    },
+    {
+      "id": "training-calendar-local",
+      "q": "training calendar local first",
+      "position": null,
+      "blocked": false,
+      "top": []
+    }
+  ]
+}
