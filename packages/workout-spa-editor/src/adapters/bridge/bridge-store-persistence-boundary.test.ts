@@ -6,9 +6,10 @@
  *     would create a second source of truth and re-introduce the bug
  *     where the SPA reads from one place and the discovery layer
  *     writes to another.
- *   - `train2go-store` and any `garmin-store` / bridge runtime store
- *     MUST remain in-memory Zustand — no `persist(` middleware import
- *     and no direct Dexie writes.
+ *   - `train2go-store`, any `garmin-store`, and the bridge connection /
+ *     session-probe modules MUST remain in-memory — no `persist(`
+ *     middleware import and no direct Dexie writes. Session state is
+ *     derived per boot, never a second copy of the truth on disk.
  *
  * See `CLAUDE.md` rule: "Editor runtime → Zustand. Persisted data →
  * Dexie. Local UI → React state."
@@ -19,17 +20,45 @@ import { join, resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-const STORE_ROOT = resolve(__dirname, "..", "..", "store");
+const SRC_ROOT = resolve(__dirname, "..", "..");
 
+// Paths are relative to `src/`: bridge runtime state lives both in
+// `store/` (Zustand) and in `adapters/bridge/` (plain singletons).
+// Files that MUST exist. A rename or a typo here has to fail the suite —
+// silently skipping a missing path would disarm the guard for that module.
 const BRIDGE_RUNTIME_STORES = [
-  "train2go-store.ts",
-  "train2go-store-actions.ts",
-  "train2go-extension-transport.ts",
-  // Future-proof: if a dedicated garmin-store lands, enforce the same
-  // rule there too.
-  "garmin-store.ts",
-  "garmin-store-actions.ts",
+  "store/train2go-store.ts",
+  "store/train2go-store-actions.ts",
+  "store/train2go-extension-transport.ts",
+  "adapters/bridge/bridge-connection-store.ts",
+  "adapters/bridge/bridge-connection-entries.ts",
+  "adapters/bridge/bridge-connection-refresh.ts",
+  "adapters/bridge/bridge-connection-probe.ts",
+  "adapters/bridge/bridge-connection-context.ts",
+  "adapters/bridge/bridge-connection-lifecycle.ts",
+  "adapters/bridge/bridge-connection-types.ts",
+  "adapters/bridge/bridge-session-probes.ts",
+  "adapters/bridge/bridge-session-probe-types.ts",
+  "adapters/bridge/bridge-ping-session-probes.ts",
 ];
+
+// Not written yet: if a dedicated garmin-store ever lands, the same rules
+// apply to it on arrival. Scanned when present, never asserted to exist.
+const FUTURE_BRIDGE_RUNTIME_STORES = [
+  "store/garmin-store.ts",
+  "store/garmin-store-actions.ts",
+];
+
+const readGuardedSources = (): { name: string; source: string }[] =>
+  [...BRIDGE_RUNTIME_STORES, ...FUTURE_BRIDGE_RUNTIME_STORES].flatMap(
+    (name) => {
+      try {
+        return [{ name, source: readFileSync(join(SRC_ROOT, name), "utf8") }];
+      } catch {
+        return [];
+      }
+    }
+  );
 
 function walk(dir: string): string[] {
   const out: string[] = [];
@@ -42,23 +71,28 @@ function walk(dir: string): string[] {
 }
 
 describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
-  it("should not have any bridge-runtime store import zustand/middleware persist", () => {
+  it("should have every guarded bridge-runtime store present on disk", () => {
     // Arrange
-    const offenders: string[] = [];
+    const expected = [...BRIDGE_RUNTIME_STORES].sort();
 
     // Act
-    for (const name of BRIDGE_RUNTIME_STORES) {
-      const path = join(STORE_ROOT, name);
-      let source: string;
-      try {
-        source = readFileSync(path, "utf8");
-      } catch {
-        continue; // file may not exist yet
-      }
-      if (/from\s+["']zustand\/middleware["']/.test(source)) {
-        offenders.push(name);
-      }
-    }
+    const found = readGuardedSources()
+      .map((f) => f.name)
+      .filter((name) => BRIDGE_RUNTIME_STORES.includes(name))
+      .sort();
+
+    // Assert
+    expect(found).toEqual(expected);
+  });
+
+  it("should not have any bridge-runtime store import zustand/middleware persist", () => {
+    // Arrange
+    const files = readGuardedSources();
+
+    // Act
+    const offenders = files
+      .filter((f) => /from\s+["']zustand\/middleware["']/.test(f.source))
+      .map((f) => f.name);
 
     // Assert
     expect(offenders).toEqual([]);
@@ -66,24 +100,16 @@ describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
 
   it("should not have any bridge-runtime store write to Dexie directly", () => {
     // Arrange
-    const offenders: string[] = [];
+    const files = readGuardedSources();
 
     // Act
-    for (const name of BRIDGE_RUNTIME_STORES) {
-      const path = join(STORE_ROOT, name);
-      let source: string;
-      try {
-        source = readFileSync(path, "utf8");
-      } catch {
-        continue;
-      }
-      if (
-        /from\s+["'][^"']*adapters\/dexie/.test(source) ||
-        /createDexiePersistence|KaiordDatabase|dexie-database/i.test(source)
-      ) {
-        offenders.push(name);
-      }
-    }
+    const offenders = files
+      .filter(
+        (f) =>
+          /from\s+["'][^"']*adapters\/dexie/.test(f.source) ||
+          /createDexiePersistence|KaiordDatabase|dexie-database/i.test(f.source)
+      )
+      .map((f) => f.name);
 
     // Assert
     expect(offenders).toEqual([]);

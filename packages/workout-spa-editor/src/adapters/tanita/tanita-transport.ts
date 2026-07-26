@@ -14,8 +14,15 @@ import { z } from "zod";
 import { sendBridgeMessage } from "../bridge/bridge-transport";
 
 const READ_EXPORT_CSV_TIMEOUT_MS = 30_000;
+const CHECK_SESSION_TIMEOUT_MS = 5_000;
 
 const tanitaExportSchema = z.object({ csv: z.string() });
+
+// The bridge answers `checkSession` with its whole BRIDGE_MANIFEST plus this
+// key; the non-strict object drops the manifest noise.
+const tanitaSessionSchema = z.object({ authenticated: z.boolean() });
+
+export type TanitaSession = z.infer<typeof tanitaSessionSchema>;
 
 export class TanitaBridgeError extends Error {
   readonly needsReauth: boolean;
@@ -25,6 +32,34 @@ export class TanitaBridgeError extends Error {
     this.needsReauth = needsReauth;
   }
 }
+
+/**
+ * EXPENSIVE — the bridge implements `checkSession` as a full
+ * `GET /en/user/export-csv` and discards the body, so every call re-downloads
+ * the user's entire MyTANITA history. Call it only on an explicit user action
+ * (connect, manual import). It MUST NOT be polled, which is why tanita-bridge
+ * is absent from `SESSION_PROBES`.
+ */
+export const checkTanitaSession = async (
+  extensionId: string
+): Promise<TanitaSession> => {
+  const res = await sendBridgeMessage(
+    extensionId,
+    { action: "checkSession" },
+    CHECK_SESSION_TIMEOUT_MS
+  );
+  if (!res.ok) {
+    throw new TanitaBridgeError(
+      res.error ?? "Tanita session check failed",
+      res.needsReauth === true
+    );
+  }
+  const parsed = tanitaSessionSchema.safeParse(res.data);
+  if (!parsed.success) {
+    throw new TanitaBridgeError("Malformed Tanita session response");
+  }
+  return parsed.data;
+};
 
 export const readTanitaExportCsv = async (
   extensionId: string

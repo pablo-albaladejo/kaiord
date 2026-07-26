@@ -75,6 +75,33 @@ describe("buildDataRouteSignals", () => {
     expect(signals.lastSyncedAt("garmin")).toBeUndefined();
   });
 
+  it("should expose freshness for every bridge integration, not just train2go", async () => {
+    // Arrange
+    getExtensionId.mockReturnValue(null);
+    getCapabilities.mockReturnValue(null);
+    const persistence = createInMemoryPersistence();
+    await persistence.coachingSyncState.put({
+      source: "tanita-bridge",
+      profileId: PROFILE_ID,
+      lastSyncedAt: "2026-07-24T06:00:00.000Z",
+    });
+    await persistence.coachingSyncState.put({
+      source: "trainingpeaks-bridge",
+      profileId: PROFILE_ID,
+      lastSyncedAt: "2026-07-25T06:00:00.000Z",
+    });
+
+    // Act
+    const signals = await buildDataRouteSignals(persistence, PROFILE_ID);
+
+    // Assert
+    expect(signals.lastSyncedAt("tanita")).toBe("2026-07-24T06:00:00.000Z");
+    expect(signals.lastSyncedAt("trainingpeaks")).toBe(
+      "2026-07-25T06:00:00.000Z"
+    );
+    expect(signals.lastSyncedAt("whoop")).toBeUndefined();
+  });
+
   it("should read connection status from the connections store", async () => {
     // Arrange
     getExtensionId.mockReturnValue(null);

@@ -2,11 +2,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 
 import { hasEnabledPlannedSessionImportRoute } from "../../application/coaching/planned-session-import-route";
+import { syncSourceFor } from "../../integrations/bridge-sync-sources";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { toCoachingActivity } from "./coaching-record-to-activity.converter";
 
-const TRAIN2GO = "train2go";
+const TRAIN2GO_SYNC_SOURCE = syncSourceFor("train2go-bridge");
 
 export const useCoachingActivities = (
   persistence: PersistencePort,
@@ -34,7 +35,7 @@ export const useTrain2GoSyncState = (
   const row = useLiveQuery(() => {
     if (!activeProfileId) return Promise.resolve(undefined);
     return persistence.coachingSyncState.getBySourceAndProfile(
-      TRAIN2GO,
+      TRAIN2GO_SYNC_SOURCE,
       activeProfileId
     );
   }, [activeProfileId]);

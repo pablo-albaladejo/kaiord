@@ -76,19 +76,32 @@ const emptyStores = () => ({
   stress: new Map(),
 });
 
+const makeSyncStateRepo = () => ({
+  getBySourceAndProfile: vi.fn().mockResolvedValue(undefined),
+  put: vi.fn().mockResolvedValue(undefined),
+  deleteByProfile: vi.fn().mockResolvedValue(undefined),
+});
+
 const makeDeps = (
   policies: IntegrationPolicy[],
   readCsv: SyncTanitaImportDeps["readCsv"],
-  stores = emptyStores()
-): { deps: SyncTanitaImportDeps; stores: ReturnType<typeof emptyStores> } => {
+  stores = emptyStores(),
+  coachingSyncState = makeSyncStateRepo()
+): {
+  deps: SyncTanitaImportDeps;
+  stores: ReturnType<typeof emptyStores>;
+  coachingSyncState: ReturnType<typeof makeSyncStateRepo>;
+} => {
   return {
     deps: {
       policyRepo: makePolicyRepo(policies),
       importedRecords: createInMemoryImportedRecordRepository(stores),
       readCsv,
       parse: () => [tanitaKrd()],
+      coachingSyncState,
     },
     stores,
+    coachingSyncState,
   };
 };
 
@@ -208,5 +221,51 @@ describe("syncTanitaImport", () => {
       error: "Session expired",
     });
     expect(stores.weight.size).toBe(0);
+  });
+
+  it("should record the import freshness after a successful run", async () => {
+    // Arrange
+    const { deps, coachingSyncState } = makeDeps(
+      [makePolicy(), bodyCompositionPolicy],
+      vi.fn().mockResolvedValue("csv")
+    );
+
+    // Act
+    await syncTanitaImport(deps, input);
+
+    // Assert
+    expect(coachingSyncState.put).toHaveBeenCalledWith({
+      source: "tanita-bridge",
+      profileId: PROFILE_ID,
+      lastSyncedAt: expect.any(String),
+    });
+  });
+
+  it("should not record freshness when no import route is enabled", async () => {
+    // Arrange
+    const { deps, coachingSyncState } = makeDeps(
+      [makePolicy({ enabled: false })],
+      vi.fn()
+    );
+
+    // Act
+    await syncTanitaImport(deps, input);
+
+    // Assert
+    expect(coachingSyncState.put).not.toHaveBeenCalled();
+  });
+
+  it("should not record freshness when the bridge read fails", async () => {
+    // Arrange
+    const { deps, coachingSyncState } = makeDeps(
+      [makePolicy(), bodyCompositionPolicy],
+      vi.fn().mockRejectedValue(new Error("Session expired"))
+    );
+
+    // Act
+    await syncTanitaImport(deps, input);
+
+    // Assert
+    expect(coachingSyncState.put).not.toHaveBeenCalled();
   });
 });
