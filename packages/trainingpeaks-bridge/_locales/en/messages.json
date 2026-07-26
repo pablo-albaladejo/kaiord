@@ -8,35 +8,59 @@
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {
-    "message": "Checking…",
-    "description": "Status text while the popup probes the session."
+    "message": "Checking your session…",
+    "description": "Status verdict while the popup probes the session."
   },
-  "checkingAria": {
-    "message": "Checking",
-    "description": "Accessible label for the checking status pill."
+  "checkingCause": {
+    "message": "Usually under a second.",
+    "description": "Status cause sentence shown while the probe runs."
   },
-  "connectedToTrainingPeaks": {
-    "message": "Connected to TrainingPeaks",
-    "description": "Status text when the TrainingPeaks session can mint a token."
+  "connected": {
+    "message": "Connected",
+    "description": "Status verdict when the TrainingPeaks session can mint a token."
   },
-  "connectedHint": {
+  "connectedCause": {
     "message": "Reading your body metrics through your session.",
-    "description": "Hint shown below the status when connected."
+    "description": "Status cause sentence for the connected state."
   },
-  "noSession": {
-    "message": "No TrainingPeaks session",
-    "description": "Status text when the TrainingPeaks session cannot mint a token."
+  "notSignedIn": {
+    "message": "Not signed in",
+    "description": "Status verdict when the TrainingPeaks session cannot mint a token."
   },
-  "noSessionHint": {
-    "message": "Open TrainingPeaks and sign in, then reopen this popup.",
-    "description": "Hint telling the user how to establish a session."
+  "notSignedInCause": {
+    "message": "Sign in at trainingpeaks.com once — the bridge mints its token from that session, no password stored.",
+    "description": "Status cause sentence explaining how to establish a session."
+  },
+  "captionFeeds": {
+    "message": "Feeds Kaiord",
+    "description": "Caption above the capability chips in the connected state."
+  },
+  "captionWillFeed": {
+    "message": "Will feed Kaiord",
+    "description": "Caption above the capability chips before the bridge is connected."
+  },
+  "typeWeight": {
+    "message": "Weight",
+    "description": "Capability chip for the Weight data type imported into Kaiord."
+  },
+  "typeWeightBack": {
+    "message": "Weight ↑ back to TrainingPeaks",
+    "description": "Capability chip for the Weight push-back this bridge supports but that no Kaiord export route drives yet; shown dashed under \"Will feed Kaiord\"."
+  },
+  "openEditor": {
+    "message": "Open Kaiord editor",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "signInTrainingPeaks": {
+    "message": "Sign in to TrainingPeaks",
+    "description": "Primary footer link that fixes a missing TrainingPeaks session."
   },
   "openTrainingPeaks": {
-    "message": "Open TrainingPeaks",
-    "description": "Button that opens app.trainingpeaks.com in a new tab."
+    "message": "Open TrainingPeaks ↗",
+    "description": "Secondary footer link opening app.trainingpeaks.com in a new tab."
   },
-  "openTrainingPeaksAria": {
-    "message": "Open TrainingPeaks",
-    "description": "Accessible label for the Open TrainingPeaks button."
+  "refresh": {
+    "message": "Refresh",
+    "description": "Accessible label for the header refresh button."
   }
 }

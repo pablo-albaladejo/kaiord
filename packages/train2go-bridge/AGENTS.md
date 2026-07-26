@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-07-26 -->
 
 # @kaiord/train2go-bridge
 
@@ -17,17 +17,17 @@
 
 ## Key Files
 
-| File                                    | Role                                                                                         |
-| --------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `manifest.json`                         | Development manifest (MV3, Load Unpacked mode)                                               |
-| `manifest.prod.json`                    | Production manifest (Chrome Web Store)                                                       |
-| `background.js`                         | Service worker; SW-direct cookie fetch, path allowlist, message router, parser orchestration |
-| `session-fetch.js`                      | Vendored bridge-core cookie transport (`credentials:"include"` fetch + redirect detection)   |
-| `parser.js`                             | DOM-to-domain parser; extracts activities from Train2Go HTML fragments                       |
-| `kaiord-announce.js`                    | Content script on Kaiord origins; announces extension ID to SPA via `window.postMessage`     |
-| `profile-snapshot.js`                   | Validates + persists user profile state (ID, name, zones)                                    |
-| `popup.html` / `popup.js` / `popup.css` | Extension toolbar popup; "Check Session" action re-wakes service worker                      |
-| `vitest.config.js`                      | Vitest configuration; jsdom environment for DOM mocking                                      |
+| File                                    | Role                                                                                                                                                                                                      |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `manifest.json`                         | Development manifest (MV3, Load Unpacked mode)                                                                                                                                                            |
+| `manifest.prod.json`                    | Production manifest (Chrome Web Store)                                                                                                                                                                    |
+| `background.js`                         | Service worker; SW-direct cookie fetch, path allowlist, message router, parser orchestration                                                                                                              |
+| `session-fetch.js`                      | Vendored bridge-core cookie transport (`credentials:"include"` fetch + redirect detection)                                                                                                                |
+| `parser.js`                             | DOM-to-domain parser; extracts activities from Train2Go HTML fragments                                                                                                                                    |
+| `kaiord-announce.js`                    | Content script on Kaiord origins; announces extension ID to SPA via `window.postMessage`                                                                                                                  |
+| `profile-snapshot.js`                   | Validates + persists user profile state (ID, name, zones)                                                                                                                                                 |
+| `popup.html` / `popup.js` / `popup.css` | Toolbar popup on the shared bridge shell: status block, capability chips, athlete card, weekly rollup with completion bar, coach notes, fix-first CTA pair. Its session probe re-wakes the service worker |
+| `vitest.config.js`                      | Vitest configuration; jsdom environment for DOM mocking                                                                                                                                                   |
 
 ## Manifest Entries (MV3)
 
@@ -215,8 +215,10 @@ const validateSnapshot = (obj) => {
 ### Vendored bridge-core files
 
 `bridge-envelope.js`, `session-fetch.js`, `kaiord-announce.js`,
-`bridge-popup-utils.js`, `bridge-popup-snapshot.js`, `popup.css`,
-`profile-snapshot.js`, and `test/{chrome-mock,bridge-envelope.test}.js` are
+`bridge-popup-utils.js`, `bridge-popup-shell.js`,
+`bridge-popup-snapshot.js`, `popup.css`,
+`profile-snapshot.js`, and
+`test/{chrome-mock,bridge-envelope.test,bridge-popup-shell.test}.js` are
 byte-identical vendored copies of `packages/_shared/bridge-core/` masters —
 never edit them here;
 edit the master and run `pnpm bridge:sync` (guard:

@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-07-10 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-07-26 -->
 
 # bridge-core
 
@@ -20,18 +20,26 @@ two agree and that no master contains identity values. Bridge-specific
 accent colors (`--accent`, `--accent-hover`) stay in each bridge's
 `popup.html` `<style>` block, not in the shared `popup.css`.
 
+All five bridges share ONE 340px dark popup shell (`popup.css` +
+`bridge-popup-shell.js`); the header dot accent is the only per-bridge
+variable. The shell's `--kd-*` palette is copied from the `.dark` block of
+`styles/brand-tokens.css` and pinned by
+`scripts/check-bridge-popup-tokens-parity.test.mjs`.
+
 ## Key Files
 
-| File                           | Consumers        | Description                                                                                                |
-| ------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| `bridge-envelope.js`           | all bridges      | Response envelope builders + `createDispatch`/`createExternalDispatch` factories + SPA-origin guard.       |
-| `kaiord-announce.js`           | all bridges      | Announce content script core; reads `globalThis.KAIORD_BRIDGE_IDENTITY`.                                   |
-| `bridge-popup-utils.js`        | all bridges      | Popup i18n machinery (`msg` over `KAIORD_POPUP_MESSAGES`), `$`, `withTimeout`, `relativeAgo`, `setStatus`. |
-| `bridge-popup-snapshot.js`     | garmin, train2go | Athlete card + snapshot freshness (`STALE_SNAPSHOT_THRESHOLD_DAYS` vendored literal).                      |
-| `popup.css`                    | garmin, train2go | Shared structural popup CSS (layout, typography, components).                                              |
-| `profile-snapshot.js`          | garmin, train2go | Plain-JS snapshot validator mirroring the @kaiord/core Zod schema.                                         |
-| `test/chrome-mock.js`          | all bridges      | Superset chrome API mock for vitest (neutral identity values).                                             |
-| `test/bridge-envelope.test.js` | all bridges      | Vendored unit tests for the envelope module.                                                               |
+| File                              | Consumers        | Description                                                                                                  |
+| --------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `bridge-envelope.js`              | all bridges      | Response envelope builders + `createDispatch`/`createExternalDispatch` factories + SPA-origin guard.         |
+| `kaiord-announce.js`              | all bridges      | Announce content script core; reads `globalThis.KAIORD_BRIDGE_IDENTITY`.                                     |
+| `bridge-popup-utils.js`           | all bridges      | Popup i18n machinery (`msg` over `KAIORD_POPUP_MESSAGES`), `$`, `withTimeout`, `relativeAgo`, `renderRetry`. |
+| `bridge-popup-shell.js`           | all bridges      | Shell renderers: `renderStatusBlock`, `renderChips`, `renderSkeleton`, `renderCtas`.                         |
+| `bridge-popup-snapshot.js`        | garmin, train2go | Athlete card + snapshot freshness (`STALE_SNAPSHOT_THRESHOLD_DAYS` vendored literal).                        |
+| `popup.css`                       | all bridges      | The unified 340px dark popup shell (`--kd-*` brand palette, layout, components).                             |
+| `profile-snapshot.js`             | garmin, train2go | Plain-JS snapshot validator mirroring the @kaiord/core Zod schema.                                           |
+| `test/chrome-mock.js`             | all bridges      | Superset chrome API mock for vitest (neutral identity values).                                               |
+| `test/bridge-envelope.test.js`    | all bridges      | Vendored unit tests for the envelope module.                                                                 |
+| `test/bridge-popup-shell.test.js` | all bridges      | Vendored unit tests for the shell renderers (jsdom env, CJS `require`).                                      |
 
 ## For AI Agents
 
@@ -46,12 +54,20 @@ accent colors (`--accent`, `--accent-hover`) stay in each bridge's
   `scripts/sync-bridge-core.mjs` (declare the consumer set), sync, and keep
   the bridge-core spec's master list in step.
 - **Load order matters:** popup masters assume classic-script global scoping
-  (utils before snapshot before the site `popup.js`); the announce core
-  assumes `bridge-identity.js` loaded first.
+  (utils before shell before snapshot before the site `popup.js`); the
+  announce core assumes `bridge-identity.js` loaded first. The shell
+  renderers take `$`/`msg` as arguments so each is also unit-testable
+  through a CJS `require`.
+- **Popup strings live per bridge.** Every string a shell renderer displays
+  arrives as a message key from that bridge's `KAIORD_POPUP_MESSAGES` table,
+  which must stay key-for-key identical to its `_locales/en/messages.json`
+  (`scripts/check-bridge-popup-message-parity.test.mjs`).
 
 ### Testing Requirements
 
 - `pnpm test:scripts` — parity (byte, purity, identity↔manifest) + sync unit
   tests.
 - Each consumer bridge's vitest suite exercises its vendored copies
-  (including the vendored `test/bridge-envelope.test.js`).
+  (including the vendored `test/bridge-envelope.test.js` and
+  `test/bridge-popup-shell.test.js`), so a drifted copy fails where it is
+  actually used, not only in the parity guard.

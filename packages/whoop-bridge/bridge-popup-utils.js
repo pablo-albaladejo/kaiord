@@ -6,9 +6,9 @@
  *
  * i18n machinery over a per-bridge message table
  * (globalThis.KAIORD_POPUP_MESSAGES, assigned by each popup.js before any
- * helper runs), plus the DOM/status/timing/relative-time helpers every
- * bridge popup shares. Loaded from popup.html before the site-specific
- * popup.js (classic scripts share the page's global scope).
+ * helper runs), plus the DOM/timing/relative-time helpers every bridge
+ * popup shares. Loaded from popup.html before bridge-popup-shell.js and the
+ * site-specific popup.js (classic scripts share the page's global scope).
  */
 
 const applySubs = (template, subs) => {
@@ -53,26 +53,10 @@ const relativeAgo = (epochMs) => {
   return msg(day === 1 ? "dayAgo" : "daysAgo", [String(day)]);
 };
 
-const setStatus = (kind, glyph, text, { sub, ariaLabel } = {}) => {
-  const el = $("status");
-  el.className = `status status--${kind}`;
-  el.setAttribute("aria-label", ariaLabel ?? text);
-  el.querySelector(".status__glyph").textContent = glyph;
-  $("status-text").textContent = text;
-  const subEl = $("status-sub");
-  if (!subEl) return;
-  if (sub) {
-    subEl.textContent = sub;
-    subEl.hidden = false;
-  } else {
-    subEl.textContent = "";
-    subEl.hidden = true;
-  }
-};
-
+// Appended to the footer so the state's own CTAs stay reachable: a retry is
+// an extra affordance, never a replacement for the fix-first primary link.
 const renderRetry = (onClick) => {
   const region = $("footer-region");
-  region.innerHTML = "";
   const btn = document.createElement("button");
   btn.id = "retry-btn";
   btn.type = "button";
@@ -80,7 +64,12 @@ const renderRetry = (onClick) => {
   btn.textContent = msg("retry");
   btn.addEventListener("click", onClick);
   region.appendChild(btn);
-  btn.focus();
+  // Claim focus only when nothing else holds it. Rebuilding the footer detaches
+  // the previous retry button, so focus falls back to <body> and lands here —
+  // but a reload triggered from the header refresh must keep its own focus
+  // instead of being yanked to the bottom of the popup on every cycle.
+  const active = document.activeElement;
+  if (!active || active === document.body) btn.focus();
 };
 
 if (typeof module !== "undefined") {
@@ -90,7 +79,6 @@ if (typeof module !== "undefined") {
     $,
     withTimeout,
     relativeAgo,
-    setStatus,
     renderRetry,
   };
 }

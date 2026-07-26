@@ -1,18 +1,25 @@
 /**
  * Kaiord Train2Go Bridge — Popup
  *
- * Identity-card layout: status pill (with optional coach sub-line),
+ * Shell layout: status block (verdict + coach line), capability chips,
  * athlete card from cached profile-snapshot, weekly rollup
- * "<N> sessions planned · <M> done · workload <X>" with a 5-minute
- * `lastWeeklyRollup` TTL cache, deep-link footer. Auto-fetches on
- * open with bounded per-phase timeouts (snapshot 1 s, ping 3 s,
- * rollup 8 s). Retry only appears on user-resolvable failures;
+ * "<N> sessions planned · <M> done · workload <X>" with a completion bar and
+ * a 5-minute `lastWeeklyRollup` TTL cache, collapsible coach notes, CTA pair.
+ * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s, ping
+ * 3 s, rollup 8 s). Retry only appears on user-resolvable failures;
  * rollup-only timeout preserves the connected state.
  *
- * Shared helpers (msg/$/withTimeout/relativeAgo/setStatus/renderRetry and
- * the athlete card) load first from the vendored bridge-popup-utils.js and
- * bridge-popup-snapshot.js (see popup.html script order).
+ * The primary CTA is whatever fixes the current state: logging back in at
+ * Train2Go when the session is gone, opening the Kaiord editor when the plan
+ * is flowing.
+ *
+ * Shared helpers load first from the vendored bridge-popup-utils.js,
+ * bridge-popup-shell.js and bridge-popup-snapshot.js (see popup.html script
+ * order).
  */
+
+/* global msg, $, withTimeout, renderRetry, renderStatusBlock, renderChips,
+   renderSkeleton, renderCtas, renderAthleteCard */
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
@@ -24,14 +31,20 @@ const OPEN_TRAIN2GO_URL = "https://app.train2go.com/user/index";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
-  checking: "Checking…",
-  checkingConnection: "Checking connection",
-  notConnected: "Not connected",
-  notConnectedLogin: "Not connected. Log in to Train2Go.",
-  connectedAs: "Connected as $1",
-  connectedToTrain2go: "Connected to Train2Go",
+  checking: "Checking your session…",
+  checkingCause: "Usually under a second.",
   connected: "Connected",
+  connectedAs: "Connected as $1",
   coachSub: "Coach · $1",
+  sessionSignedOut: "Session signed out",
+  sessionSignedOutCause:
+    "Your Train2Go tab is logged out, so no new plan is reaching Kaiord.",
+  bridgeNotResponding: "Bridge not responding",
+  bridgeNotRespondingCause:
+    "The extension's background worker did not answer. Try again.",
+  captionFeeds: "Feeds Kaiord",
+  typePlannedSession: "Planned Session",
+  typeTrainingZones: "Training Zones",
   profileStale: "Profile snapshot is stale. Open Kaiord to refresh.",
   noProfile: "No profile yet. Open Kaiord to set FTP, pace, and HR.",
   noThresholds:
@@ -52,13 +65,16 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   hoursAgo: "$1 hours ago",
   dayAgo: "$1 day ago",
   daysAgo: "$1 days ago",
-  openEditor: "Open editor",
-  openEditorAria: "Open Kaiord editor",
+  openEditor: "Open Kaiord editor",
+  signInTrain2go: "Log in to Train2Go",
   openTrain2go: "Open Train2Go ↗",
-  openTrain2goAria: "Open Train2Go",
   retry: "Retry",
   refresh: "Refresh",
 };
+
+// Managed data types this bridge imports, named exactly as the Connections
+// page names them (@kaiord/core MANAGED_DATA_REGISTRY labels).
+const FEED_KEYS = ["typePlannedSession", "typeTrainingZones"];
 
 const sendMessage = (message) =>
   new Promise((resolve) => {
@@ -106,14 +122,23 @@ const summariseRollup = (activities) => {
   return { planned, done, workload };
 };
 
-const renderRollup = (rollup) => {
-  const region = $("rollup-region");
-  region.innerHTML = "";
-  if (!rollup) return;
+const feedChips = (modifier) =>
+  FEED_KEYS.map((key) => ({ label: msg(key), modifier }));
+
+const rollupCaption = (region) => {
   const caption = document.createElement("div");
   caption.className = "caption";
   caption.textContent = msg("captionThisWeek");
   region.appendChild(caption);
+};
+
+const renderRollup = (rollup) => {
+  const region = $("rollup-region");
+  region.innerHTML = "";
+  if (!rollup) return;
+  rollupCaption(region);
+  const week = document.createElement("div");
+  week.className = "week";
   const line = document.createElement("div");
   line.className = "rollup";
   line.textContent = msg("rollupSummary", [
@@ -121,16 +146,21 @@ const renderRollup = (rollup) => {
     String(rollup.done),
     String(rollup.workload),
   ]);
-  region.appendChild(line);
+  const bar = document.createElement("div");
+  bar.className = "week__bar";
+  const fill = document.createElement("span");
+  fill.className = "week__bar-fill";
+  const pct = rollup.planned > 0 ? (rollup.done / rollup.planned) * 100 : 0;
+  fill.style.width = `${Math.round(pct)}%`;
+  bar.appendChild(fill);
+  week.append(line, bar);
+  region.appendChild(week);
 };
 
 const renderRollupUnavailable = () => {
   const region = $("rollup-region");
   region.innerHTML = "";
-  const caption = document.createElement("div");
-  caption.className = "caption";
-  caption.textContent = msg("captionThisWeek");
-  region.appendChild(caption);
+  rollupCaption(region);
   const el = document.createElement("div");
   el.className = "rollup rollup--unavailable";
   el.textContent = msg("rollupUnavailable");
@@ -163,28 +193,22 @@ const renderNotes = (notes) => {
   region.appendChild(details);
 };
 
-const renderFooter = () => {
-  const region = $("footer-region");
-  region.innerHTML = "";
-  const primary = document.createElement("a");
-  primary.href = OPEN_EDITOR_URL;
-  primary.target = "_blank";
-  primary.rel = "noopener";
-  primary.className = "cta-primary";
-  primary.textContent = msg("openEditor");
-  primary.setAttribute("aria-label", msg("openEditorAria"));
-  const secondary = document.createElement("a");
-  secondary.href = OPEN_TRAIN2GO_URL;
-  secondary.target = "_blank";
-  secondary.rel = "noopener";
-  secondary.className = "cta-secondary";
-  secondary.textContent = msg("openTrain2go");
-  secondary.setAttribute("aria-label", msg("openTrain2goAria"));
-  region.append(primary, secondary);
-};
-
 const showRefresh = (visible) => {
   $("refresh-btn").classList.toggle("popup-header__refresh--hidden", !visible);
+};
+
+// Any non-connected state pauses the plan feed, so the chips go muted and the
+// primary CTA becomes the fix rather than the editor link.
+const renderBroken = ({ verdictKey, causeKey }) => {
+  renderStatusBlock($, msg, { tone: "warn", verdictKey, causeKey });
+  renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
+  renderCtas($, {
+    primaryLabel: msg("signInTrain2go"),
+    primaryHref: OPEN_TRAIN2GO_URL,
+    secondaryLabel: msg("openEditor"),
+    secondaryHref: OPEN_EDITOR_URL,
+  });
+  renderRetry(() => loadPopupData());
 };
 
 const fetchRollup = async (userId, bypassTtl) => {
@@ -203,20 +227,41 @@ const fetchRollup = async (userId, bypassTtl) => {
   return summary;
 };
 
+const renderConnected = ({ userName, coachName }) => {
+  renderStatusBlock($, msg, {
+    tone: "ok",
+    verdictKey: userName ? "connectedAs" : "connected",
+    verdictSubs: userName ? [userName] : undefined,
+    causeKey: coachName ? "coachSub" : undefined,
+    causeSubs: coachName ? [coachName] : undefined,
+  });
+  renderChips($, feedChips(), { caption: msg("captionFeeds") });
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openTrain2go"),
+    secondaryHref: OPEN_TRAIN2GO_URL,
+  });
+};
+
 const loadPopupData = async ({ bypassTtl = false } = {}) => {
   showRefresh(false);
-  setStatus("checking", "…", msg("checking"), {
-    ariaLabel: msg("checkingConnection"),
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    verdictKey: "checking",
+    causeKey: "checkingCause",
   });
+  renderSkeleton($);
 
   let storage;
   try {
     storage = await withTimeout(readStorage(), SNAPSHOT_TIMEOUT_MS, "snapshot");
   } catch {
-    setStatus("no", "✗", msg("notConnected"));
     renderAthleteCard(undefined);
-    renderFooter();
-    renderRetry(() => loadPopupData());
+    renderBroken({
+      verdictKey: "bridgeNotResponding",
+      causeKey: "bridgeNotRespondingCause",
+    });
     return;
   }
 
@@ -228,38 +273,26 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
       "ping"
     );
   } catch {
-    setStatus("no", "✗", msg("notConnected"));
     renderAthleteCard(storage.profileSnapshot);
-    renderFooter();
-    renderRetry(() => loadPopupData());
-    return;
-  }
-
-  const sessionActive = ping?.data?.sessionActive;
-  if (!ping?.ok || !sessionActive) {
-    setStatus("no", "✗", msg("notConnectedLogin"), {
-      ariaLabel: msg("notConnected"),
+    renderBroken({
+      verdictKey: "bridgeNotResponding",
+      causeKey: "bridgeNotRespondingCause",
     });
-    renderAthleteCard(storage.profileSnapshot);
-    renderFooter();
-    renderRetry(() => loadPopupData());
     return;
   }
 
-  const userName = ping.data.userName;
-  const coachName = ping.data.coachName;
-  setStatus(
-    "ok",
-    "✓",
-    userName ? msg("connectedAs", [userName]) : msg("connectedToTrain2go"),
-    {
-      sub: coachName ? msg("coachSub", [coachName]) : null,
-      ariaLabel: msg("connected"),
-    }
-  );
+  if (!ping?.ok || !ping?.data?.sessionActive) {
+    renderAthleteCard(storage.profileSnapshot);
+    renderBroken({
+      verdictKey: "sessionSignedOut",
+      causeKey: "sessionSignedOutCause",
+    });
+    return;
+  }
+
+  renderConnected(ping.data);
   renderAthleteCard(storage.profileSnapshot);
   renderNotes(ping.data.notes);
-  renderFooter();
 
   // Rollup phase — failure here keeps the connected state.
   const userId = ping.data.userId;

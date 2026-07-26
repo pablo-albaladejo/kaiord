@@ -58,7 +58,15 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "bridge-popup-utils.js",
     bridges: ALL_BRIDGES,
   },
-  { master: "popup.css", dest: "popup.css", bridges: SNAPSHOT_BRIDGES },
+  // The popup shell — CSS + the status/chips/skeleton/CTA renderers — is one
+  // design for all five bridges; only `--accent` varies, set per-bridge in
+  // popup.html.
+  {
+    master: "bridge-popup-shell.js",
+    dest: "bridge-popup-shell.js",
+    bridges: ALL_BRIDGES,
+  },
+  { master: "popup.css", dest: "popup.css", bridges: ALL_BRIDGES },
   {
     master: "bridge-popup-snapshot.js",
     dest: "bridge-popup-snapshot.js",
@@ -77,6 +85,11 @@ export const BRIDGE_CORE_MASTERS = [
   {
     master: "test/bridge-envelope.test.js",
     dest: "test/bridge-envelope.test.js",
+    bridges: ALL_BRIDGES,
+  },
+  {
+    master: "test/bridge-popup-shell.test.js",
+    dest: "test/bridge-popup-shell.test.js",
     bridges: ALL_BRIDGES,
   },
   {

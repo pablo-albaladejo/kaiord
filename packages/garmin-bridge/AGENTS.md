@@ -1,5 +1,5 @@
 <!-- Parent: ../../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-07-15 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-07-26 -->
 
 # @kaiord/garmin-bridge AGENTS.md
 
@@ -21,7 +21,7 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
 - `garmin-oauth.js` — OAuth token minting (bridge-specific, NOT vendored). OAuth1 HMAC-SHA1 signer, session→ticket→OAuth1→OAuth2 mint, refresh-and-persist, `connectapiFetch`.
 - `kaiord-announce.js` — Content script injected on SPA origins (`https://*.kaiord.com/*`, `http://localhost/*`). Announces extension ID and capabilities to the page via window message.
 - `profile-snapshot.js` — Hand-rolled validator for profile snapshot objects (plain JS, parity-tested against `@kaiord/core` Zod schema).
-- `popup.html` / `popup.js` / `popup.css` — Extension toolbar popup. Status indicator, athlete card, workout sync count, deep-link footer.
+- `popup.html` / `popup.js` / `popup.css` — Extension toolbar popup on the shared bridge shell. Status block (verdict + cause), "Feeds Kaiord" capability chips, athlete card, workout sync rollup, fix-first CTA pair.
 - `package.json` — npm metadata; scripts: test, test:watch, test:coverage.
 - `vitest.config.js` — Test setup (globals, chrome-mock.js setupFile, coverage config).
 - `TESTING.md` — Manual integration test checklist.
@@ -139,8 +139,10 @@ Non-generated files beyond the AI agent's responsibility:
 ### Vendored bridge-core files
 
 `bridge-envelope.js`, `kaiord-announce.js`, `bridge-popup-utils.js`,
-`bridge-popup-snapshot.js`, `popup.css`, `profile-snapshot.js`, and
-`test/{chrome-mock,bridge-envelope.test}.js` are byte-identical vendored
+`bridge-popup-shell.js`, `bridge-popup-snapshot.js`, `popup.css`,
+`profile-snapshot.js`, and
+`test/{chrome-mock,bridge-envelope.test,bridge-popup-shell.test}.js` are
+byte-identical vendored
 copies of `packages/_shared/bridge-core/` masters — never edit them here;
 edit the master and run `pnpm bridge:sync` (guard:
 `scripts/check-bridge-core-parity.test.mjs`). Per-bridge identity lives in

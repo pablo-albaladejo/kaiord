@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { BRIDGE_CORE_MASTERS } from "./sync-bridge-core.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = dirname(HERE);
@@ -26,10 +27,28 @@ if (!sourceMatch) {
 }
 const STALE_SNAPSHOT_THRESHOLD_DAYS = Number.parseInt(sourceMatch[1], 10);
 
-const BRIDGES = ["garmin-bridge", "train2go-bridge"];
+// Derived from the sync table rather than hardcoded: the bridges that vendor
+// bridge-popup-snapshot.js are exactly the ones carrying the literal, so
+// onboarding a snapshot bridge cannot silently escape this guard.
+const snapshotMaster = BRIDGE_CORE_MASTERS.find(
+  (entry) => entry.master === "bridge-popup-snapshot.js"
+);
+if (!snapshotMaster) {
+  throw new Error(
+    "BRIDGE_CORE_MASTERS lost its bridge-popup-snapshot.js entry"
+  );
+}
+const BRIDGES = snapshotMaster.bridges;
 const REGEX = /STALE_SNAPSHOT_THRESHOLD_DAYS\s*=\s*(\d+)/;
 
 describe("STALE_SNAPSHOT_THRESHOLD_DAYS parity", () => {
+  it("covers at least the two snapshot bridges", () => {
+    assert.ok(
+      BRIDGES.length >= 2,
+      `expected the snapshot bridges from BRIDGE_CORE_MASTERS, got ${BRIDGES}`
+    );
+  });
+
   it("each snapshot bridge vendors the same value as @kaiord/core", () => {
     for (const bridge of BRIDGES) {
       const popup = readFileSync(

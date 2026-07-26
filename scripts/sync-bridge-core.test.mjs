@@ -114,4 +114,19 @@ describe("BRIDGE_CORE_MASTERS table", () => {
     );
     assert.deepEqual(snapshot.bridges, ["garmin-bridge", "train2go-bridge"]);
   });
+
+  it("vendors popup.css to every bridge", () => {
+    // One popup shell for all five extensions: the only per-bridge variable is
+    // --accent, set in each popup.html <style> block.
+    const css = BRIDGE_CORE_MASTERS.find((e) => e.master === "popup.css");
+    const shell = BRIDGE_CORE_MASTERS.find(
+      (e) => e.master === "bridge-popup-shell.js"
+    );
+    const utils = BRIDGE_CORE_MASTERS.find(
+      (e) => e.master === "bridge-popup-utils.js"
+    );
+    assert.deepEqual([...css.bridges].sort(), [...utils.bridges].sort());
+    assert.deepEqual([...shell.bridges].sort(), [...utils.bridges].sort());
+    assert.equal(css.bridges.length, 5);
+  });
 });

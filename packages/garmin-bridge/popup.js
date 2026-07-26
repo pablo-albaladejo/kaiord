@@ -1,18 +1,25 @@
 /**
  * Kaiord Garmin Bridge — Popup
  *
- * Identity-card layout: status pill, athlete card (from cached
- * profile-snapshot), sync rollup (workout-library count), deep-link
- * footer. Auto-fetches on open with bounded per-phase timeouts;
- * Retry only appears on user-resolvable failures.
+ * Shell layout: status block, capability chips, athlete card (from cached
+ * profile-snapshot), sync rollup (workout-library count + last push), CTA
+ * pair. Auto-fetches on open with bounded per-phase timeouts; Retry only
+ * appears on user-resolvable failures.
  *
- * Shared helpers (msg/$/withTimeout/relativeAgo/setStatus/renderRetry and
- * the athlete card) load first from the vendored bridge-popup-utils.js and
- * bridge-popup-snapshot.js (see popup.html script order).
+ * The primary CTA is whatever fixes the current state: signing back in at
+ * Garmin Connect when the session is gone, opening the Kaiord editor when
+ * data flows.
+ *
+ * Shared helpers load first from the vendored bridge-popup-utils.js,
+ * bridge-popup-shell.js and bridge-popup-snapshot.js (see popup.html script
+ * order).
  *
  * No new outbound URLs introduced — privacy-surface guard covers
  * popup.js fetch sites and asserts only relative paths.
  */
+
+/* global msg, $, withTimeout, relativeAgo, renderRetry, renderStatusBlock,
+   renderChips, renderSkeleton, renderCtas, renderAthleteCard */
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
@@ -21,12 +28,20 @@ const OPEN_GARMIN_URL = "https://connect.garmin.com/modern/";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
-  checking: "Checking…",
-  checkingConnection: "Checking connection",
-  notConnected: "Not connected",
-  notConnectedGarmin: "Not connected — open Garmin Connect and refresh",
-  connectedToGarmin: "Connected to Garmin Connect",
+  checking: "Checking your session…",
+  checkingCause: "Usually under a second.",
   connected: "Connected",
+  connectedCause: "Riding your Garmin Connect session.",
+  sessionSignedOut: "Session signed out",
+  sessionSignedOutCause:
+    "Your Garmin Connect tab is signed out, so nothing is reaching Kaiord right now.",
+  bridgeNotResponding: "Bridge not responding",
+  bridgeNotRespondingCause:
+    "The extension's background worker did not answer. Try again.",
+  captionFeeds: "Feeds Kaiord",
+  typeActivity: "Activity",
+  typeWorkoutBack: "Workout ↑ to Garmin",
+  typeBodyCompositionBack: "Body Composition ↑ to Garmin",
   profileStale: "Profile snapshot is stale. Open Kaiord to refresh.",
   noProfile: "No profile yet. Open Kaiord to set FTP, pace, and HR.",
   noThresholds:
@@ -47,13 +62,21 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   hoursAgo: "$1 hours ago",
   dayAgo: "$1 day ago",
   daysAgo: "$1 days ago",
-  openEditor: "Open editor",
-  openEditorAria: "Open Kaiord editor",
+  openEditor: "Open Kaiord editor",
+  signInGarmin: "Sign in to Garmin Connect",
   openGarmin: "Open Garmin Connect ↗",
-  openGarminAria: "Open Garmin Connect",
   retry: "Retry",
   refresh: "Refresh",
 };
+
+// Managed data types this bridge moves, named exactly as the Connections page
+// names them (@kaiord/core MANAGED_DATA_REGISTRY labels). `read:activities`
+// imports; `write:workouts` and `write:body` push back out.
+const FEED_KEYS = [
+  { key: "typeActivity" },
+  { key: "typeWorkoutBack", modifier: "out" },
+  { key: "typeBodyCompositionBack", modifier: "out" },
+];
 
 const sendMessage = (action) =>
   new Promise((resolve) => {
@@ -68,6 +91,12 @@ const getSnapshot = () =>
       resolve(rs ?? {});
     });
   });
+
+const feedChips = (modifier) =>
+  FEED_KEYS.map((entry) => ({
+    label: msg(entry.key),
+    modifier: modifier ?? entry.modifier,
+  }));
 
 const renderRollup = (pingData, lastPush) => {
   const region = $("rollup-region");
@@ -95,45 +124,42 @@ const renderRollup = (pingData, lastPush) => {
   }
 };
 
-const renderFooter = () => {
-  const region = $("footer-region");
-  region.innerHTML = "";
-  const primary = document.createElement("a");
-  primary.href = OPEN_EDITOR_URL;
-  primary.target = "_blank";
-  primary.rel = "noopener";
-  primary.className = "cta-primary";
-  primary.textContent = msg("openEditor");
-  primary.setAttribute("aria-label", msg("openEditorAria"));
-  const secondary = document.createElement("a");
-  secondary.href = OPEN_GARMIN_URL;
-  secondary.target = "_blank";
-  secondary.rel = "noopener";
-  secondary.className = "cta-secondary";
-  secondary.textContent = msg("openGarmin");
-  secondary.setAttribute("aria-label", msg("openGarminAria"));
-  region.append(primary, secondary);
+const showRefresh = (visible) => {
+  $("refresh-btn").classList.toggle("popup-header__refresh--hidden", !visible);
 };
 
-const showRefresh = (visible) => {
-  const btn = $("refresh-btn");
-  btn.classList.toggle("popup-header__refresh--hidden", !visible);
+// Any non-connected state pauses the flow, so the chips go muted and the
+// primary CTA becomes the fix rather than the editor link.
+const renderBroken = ({ verdictKey, causeKey }) => {
+  renderStatusBlock($, msg, { tone: "warn", verdictKey, causeKey });
+  renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
+  renderCtas($, {
+    primaryLabel: msg("signInGarmin"),
+    primaryHref: OPEN_GARMIN_URL,
+    secondaryLabel: msg("openEditor"),
+    secondaryHref: OPEN_EDITOR_URL,
+  });
+  renderRetry(() => loadPopupData());
 };
 
 const loadPopupData = async () => {
   showRefresh(false);
-  setStatus("checking", "…", msg("checking"), {
-    ariaLabel: msg("checkingConnection"),
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    verdictKey: "checking",
+    causeKey: "checkingCause",
   });
+  renderSkeleton($);
 
   let storage;
   try {
     storage = await withTimeout(getSnapshot(), SNAPSHOT_TIMEOUT_MS, "snapshot");
   } catch {
-    setStatus("no", "✗", msg("notConnected"));
     renderAthleteCard(undefined);
-    renderFooter();
-    renderRetry(() => loadPopupData());
+    renderBroken({
+      verdictKey: "bridgeNotResponding",
+      causeKey: "bridgeNotRespondingCause",
+    });
     return;
   }
 
@@ -141,35 +167,43 @@ const loadPopupData = async () => {
   try {
     ping = await withTimeout(sendMessage("ping"), PHASE_TIMEOUT_MS, "ping");
   } catch {
-    setStatus("no", "✗", msg("notConnected"));
     renderAthleteCard(storage.profileSnapshot);
     // lastPushReceipt is independent of the Garmin Connect session;
     // it tells the user when the SPA last synced their profile, which
     // is useful even when Garmin Connect is unreachable.
     renderRollup(undefined, storage.lastPushReceipt);
-    renderFooter();
-    renderRetry(() => loadPopupData());
+    renderBroken({
+      verdictKey: "bridgeNotResponding",
+      causeKey: "bridgeNotRespondingCause",
+    });
     return;
   }
 
   const apiOk = ping?.data?.gcApi?.ok;
   if (!ping?.ok || !apiOk) {
-    setStatus("no", "✗", msg("notConnectedGarmin"), {
-      ariaLabel: msg("notConnected"),
-    });
     renderAthleteCard(storage.profileSnapshot);
     renderRollup(ping?.data, storage.lastPushReceipt);
-    renderFooter();
-    renderRetry(() => loadPopupData());
+    renderBroken({
+      verdictKey: "sessionSignedOut",
+      causeKey: "sessionSignedOutCause",
+    });
     return;
   }
 
-  setStatus("ok", "✓", msg("connectedToGarmin"), {
-    ariaLabel: msg("connected"),
+  renderStatusBlock($, msg, {
+    tone: "ok",
+    verdictKey: "connected",
+    causeKey: "connectedCause",
   });
+  renderChips($, feedChips(), { caption: msg("captionFeeds") });
   renderAthleteCard(storage.profileSnapshot);
   renderRollup(ping.data, storage.lastPushReceipt);
-  renderFooter();
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openGarmin"),
+    secondaryHref: OPEN_GARMIN_URL,
+  });
   showRefresh(true);
 };
 

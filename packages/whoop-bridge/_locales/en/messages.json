@@ -8,35 +8,135 @@
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {
-    "message": "Checking…",
-    "description": "Status text while the popup probes the session."
+    "message": "Checking your session…",
+    "description": "Status verdict while the popup probes the session."
   },
-  "checkingAria": {
-    "message": "Checking",
-    "description": "Accessible label for the checking status pill."
+  "checkingCause": {
+    "message": "Usually under a second.",
+    "description": "Status cause sentence shown while the probe runs."
   },
-  "connectedToWhoop": {
-    "message": "Connected to WHOOP",
-    "description": "Status text when a WHOOP session bearer has been captured."
+  "connected": {
+    "message": "Connected",
+    "description": "Status verdict when a WHOOP session bearer has been captured."
   },
-  "connectedHint": {
+  "connectedCause": {
     "message": "Reading your WHOOP data through your open session.",
-    "description": "Hint shown below the status when connected."
+    "description": "Status cause sentence for the connected state."
   },
-  "noSession": {
-    "message": "No WHOOP session",
-    "description": "Status text when no WHOOP session bearer has been captured."
+  "connectedCauseAgo": {
+    "message": "Reading your WHOOP data through your open session. Captured $phrase$.",
+    "description": "Status cause sentence for the connected state, naming when the session token was captured.",
+    "placeholders": {
+      "phrase": { "content": "$1", "example": "3 hours ago" }
+    }
   },
-  "noSessionHint": {
-    "message": "Open WHOOP and reload the tab, then reopen this popup.",
-    "description": "Hint telling the user how to establish a session."
+  "sessionSignedOut": {
+    "message": "Session signed out",
+    "description": "Status verdict when no WHOOP session bearer is available."
+  },
+  "sessionSignedOutCause": {
+    "message": "Your WHOOP tab is signed out, so nothing is reaching Kaiord right now.",
+    "description": "Status cause sentence naming the consequence of a signed-out session."
+  },
+  "captionFeeds": {
+    "message": "Feeds Kaiord",
+    "description": "Caption above the capability chips."
+  },
+  "captionMissing": {
+    "message": "What Kaiord is missing",
+    "description": "Caption above the paused-capability chips in the signed-out state."
+  },
+  "typeSleep": {
+    "message": "Sleep",
+    "description": "Capability chip for the Sleep data type imported into Kaiord."
+  },
+  "typeHrv": {
+    "message": "HRV",
+    "description": "Capability chip for the HRV data type imported into Kaiord."
+  },
+  "typeStrain": {
+    "message": "Strain",
+    "description": "Capability chip for the Strain data type imported into Kaiord."
+  },
+  "typeVitals": {
+    "message": "Vitals",
+    "description": "Capability chip for the Vitals data type imported into Kaiord."
+  },
+  "typeStress": {
+    "message": "Stress",
+    "description": "Capability chip for the Stress data type imported into Kaiord."
+  },
+  "typeHeartRateSeries": {
+    "message": "Heart Rate Series",
+    "description": "Capability chip for the Heart Rate Series data type imported into Kaiord."
+  },
+  "typeActivity": {
+    "message": "Activity",
+    "description": "Capability chip for the Activity data type imported into Kaiord."
+  },
+  "moreTypes": {
+    "message": "+$count$ more",
+    "description": "Chip collapsing the data types that do not fit the popup width.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "minuteAgo": {
+    "message": "$count$ minute ago",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "minutesAgo": {
+    "message": "$count$ minutes ago",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "10" }
+    }
+  },
+  "hourAgo": {
+    "message": "$count$ hour ago",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "hoursAgo": {
+    "message": "$count$ hours ago",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "dayAgo": {
+    "message": "$count$ day ago",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "1" }
+    }
+  },
+  "daysAgo": {
+    "message": "$count$ days ago",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "openEditor": {
+    "message": "Open Kaiord editor",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "signInWhoop": {
+    "message": "Sign in to WHOOP",
+    "description": "Primary footer link that fixes a signed-out WHOOP session."
   },
   "openWhoop": {
-    "message": "Open WHOOP",
-    "description": "Button that opens app.whoop.com in a new tab."
+    "message": "Open WHOOP ↗",
+    "description": "Secondary footer link opening app.whoop.com in a new tab."
   },
-  "openWhoopAria": {
-    "message": "Open WHOOP",
-    "description": "Accessible label for the Open WHOOP button."
+  "refresh": {
+    "message": "Refresh",
+    "description": "Accessible label for the header refresh button."
   }
 }

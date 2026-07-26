@@ -31,14 +31,16 @@ called SPA-side.
 | `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).                  |
 | `bearer-fetch.js`                       | Vendored identity-free Bearer transport (bridge-core master).                  |
 | `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                    |
-| `popup.js` / `popup.html` / `popup.css` | Session-status popup + a deep link to TrainingPeaks.                           |
+| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair.       |
 | `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://tpapi.trainingpeaks.com/*`).      |
 
 ### Vendored bridge-core files
 
 `bridge-envelope.js`, `session-fetch.js`, `bearer-fetch.js`,
-`kaiord-announce.js`, `bridge-popup-utils.js`, and
-`test/{chrome-mock,bridge-envelope.test,bearer-fetch.test}.js` are
+`kaiord-announce.js`, `bridge-popup-utils.js`, `bridge-popup-shell.js`,
+`popup.css`, and
+`test/{chrome-mock,bridge-envelope.test,bearer-fetch.test,bridge-popup-shell.test}.js`
+are
 byte-identical vendored copies of `packages/_shared/bridge-core/` masters —
 never edit them here; edit the master and run `pnpm bridge:sync` (guard:
 `scripts/check-bridge-core-parity.test.mjs`). The masters are identity-free: the

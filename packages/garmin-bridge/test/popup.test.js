@@ -11,6 +11,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 // load before the site popup.js and share the page's global scope.
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
+  "bridge-popup-shell.js",
   "bridge-popup-snapshot.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
@@ -95,10 +96,21 @@ describe("Garmin popup", () => {
     await flushAsync();
 
     const status = dom.window.document.getElementById("status");
-    expect(status.className).toContain("status--ok");
+    expect(status.className).toContain("status-block--ok");
     expect(dom.window.document.getElementById("status-text").textContent).toBe(
-      "Connected to Garmin Connect"
+      "Connected"
     );
+    const chips = dom.window.document.getElementById("chips-region");
+    expect(chips.textContent).toContain("Feeds Kaiord");
+    expect(chips.textContent).toContain("Activity");
+    expect(chips.querySelectorAll(".chip--out").length).toBe(2);
+    expect(chips.querySelectorAll(".chip--muted").length).toBe(0);
+    expect(dom.window.document.querySelector(".cta-primary").textContent).toBe(
+      "Open Kaiord editor"
+    );
+    expect(
+      dom.window.document.querySelector(".cta-secondary").textContent
+    ).toBe("Open Garmin Connect ↗");
     const athleteText =
       dom.window.document.getElementById("athlete-region").textContent;
     expect(athleteText).toContain("FTP");
@@ -127,10 +139,105 @@ describe("Garmin popup", () => {
     await flushAsync();
 
     const status = dom.window.document.getElementById("status");
-    expect(status.className).toContain("status--no");
+    expect(status.className).toContain("status-block--warn");
     const retry = dom.window.document.getElementById("retry-btn");
     expect(retry).not.toBeNull();
     expect(retry.textContent).toBe("Retry");
+  });
+
+  it("makes signing back in the primary CTA and mutes the chips when the session is gone", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Session signed out"
+    );
+    expect(doc.getElementById("status-sub").textContent).toContain(
+      "nothing is reaching Kaiord"
+    );
+    expect(doc.querySelector(".cta-primary").textContent).toBe(
+      "Sign in to Garmin Connect"
+    );
+    expect(doc.querySelector(".cta-secondary").textContent).toBe(
+      "Open Kaiord editor"
+    );
+    expect(
+      doc.getElementById("chips-region").querySelectorAll(".chip--muted").length
+    ).toBe(3);
+  });
+
+  it("does not accumulate a retry button or CTA set across failure cycles", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    const doc = dom.window.document;
+    doc.getElementById("retry-btn").click();
+    await flushAsync();
+    await flushAsync();
+
+    // The skeleton and CTA renders each clear the footer; losing BOTH
+    // clears duplicates controls, and losing only the CTA clear leaves
+    // skeleton bars behind — the zero-skeleton assert catches that half.
+    expect(doc.querySelectorAll("#retry-btn").length).toBe(1);
+    const footer = doc.getElementById("footer-region");
+    expect(footer.querySelectorAll(".cta-primary").length).toBe(1);
+    expect(footer.querySelectorAll(".cta-secondary").length).toBe(1);
+    expect(footer.querySelectorAll(".cta-retry").length).toBe(1);
+    expect(footer.querySelectorAll(".skeleton").length).toBe(0);
+    // Focus follows the control the user just activated, not a stale node.
+    expect(doc.activeElement.id).toBe("retry-btn");
+  });
+
+  it("keeps focus on the header refresh button when the reload starts there", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    const doc = dom.window.document;
+    const refreshBtn = doc.getElementById("refresh-btn");
+    refreshBtn.focus();
+    refreshBtn.click();
+    await flushAsync();
+    await flushAsync();
+
+    expect(doc.activeElement.id).toBe("refresh-btn");
+    expect(doc.querySelectorAll("#retry-btn").length).toBe(1);
+  });
+
+  it("renders the checking skeleton before the probe resolves", () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: true } } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Checking your session…"
+    );
+    expect(doc.querySelectorAll(".skeleton--chip").length).toBe(3);
+    expect(doc.querySelectorAll(".skeleton--cta").length).toBe(1);
   });
 
   it("renders Last push line in disconnected state when receipt is present", async () => {

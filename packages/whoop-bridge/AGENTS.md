@@ -16,19 +16,21 @@ vendored bridge-core announce script.
 
 ## Key Files
 
-| File                                    | Description                                                                                       |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `background.js`                         | Service worker: session state + allowlisted WHOOP API relay (`whoop-fetch`).                      |
-| `inject-main.js`                        | MAIN-world interceptor on app.whoop.com; captures the session bearer.                             |
-| `content.js`                            | Isolated-world relay between the MAIN-world interceptor and the service worker.                   |
-| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                       |
-| `popup.js` / `popup.html` / `popup.css` | Status-only UI (session detected / not detected + "Open WHOOP" CTA).                              |
-| `manifest.json` / `manifest.prod.json`  | MV3 manifests (`tabs`, `webRequest`, `scripting`, `storage`; WHOOP hosts). Prod strips localhost. |
+| File                                    | Description                                                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `background.js`                         | Service worker: session state + allowlisted WHOOP API relay (`whoop-fetch`).                                               |
+| `inject-main.js`                        | MAIN-world interceptor on app.whoop.com; captures the session bearer.                                                      |
+| `content.js`                            | Isolated-world relay between the MAIN-world interceptor and the service worker.                                            |
+| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                |
+| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, "Feeds Kaiord" chips, "What Kaiord is missing" box when signed out, fix-first CTA pair. |
+| `manifest.json` / `manifest.prod.json`  | MV3 manifests (`tabs`, `webRequest`, `scripting`, `storage`; WHOOP hosts). Prod strips localhost.                          |
 
 ## Vendored bridge-core files
 
-`bridge-envelope.js`, `kaiord-announce.js`, `bridge-popup-utils.js`, and
-`test/{chrome-mock,bridge-envelope.test}.js` are byte-identical vendored
+`bridge-envelope.js`, `kaiord-announce.js`, `bridge-popup-utils.js`,
+`bridge-popup-shell.js`, `popup.css`, and
+`test/{chrome-mock,bridge-envelope.test,bridge-popup-shell.test}.js` are
+byte-identical vendored
 copies of `packages/_shared/bridge-core/` masters — never edit them here;
 edit the master and run `pnpm bridge:sync` (guard:
 `scripts/check-bridge-core-parity.test.mjs`). Identity values must match
