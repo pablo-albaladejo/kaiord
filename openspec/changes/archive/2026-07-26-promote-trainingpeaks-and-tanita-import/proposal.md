@@ -1,3 +1,5 @@
+> Completed: 2026-07-26
+
 ## Why
 
 The `trainingpeaks-bridge` extension shipped in #1008 (session capture,
