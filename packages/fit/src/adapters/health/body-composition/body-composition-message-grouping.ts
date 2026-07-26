@@ -1,4 +1,5 @@
 import { fitMessageKeySchema } from "../../schemas/fit-message-keys";
+import { groupMessagesByNumber } from "../../shared/message-grouping";
 import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
 
 const BODY_COMPOSITION_MESG_NUM_TO_KEY: Record<number, string> = {
@@ -14,16 +15,5 @@ const BODY_COMPOSITION_MESG_NUM_TO_KEY: Record<number, string> = {
  */
 export const groupBodyCompositionMessages = (
   rawMessages: Record<string, unknown>[]
-): Record<string, unknown[]> => {
-  const result: Record<string, unknown[]> = {};
-  for (const message of rawMessages) {
-    const mesgNum =
-      typeof message.mesgNum === "number" ? message.mesgNum : undefined;
-    if (mesgNum === undefined) continue;
-    const key = BODY_COMPOSITION_MESG_NUM_TO_KEY[mesgNum];
-    if (key) {
-      result[key] = [...(result[key] || []), message];
-    }
-  }
-  return result;
-};
+): Record<string, unknown[]> =>
+  groupMessagesByNumber(rawMessages, BODY_COMPOSITION_MESG_NUM_TO_KEY);
