@@ -13,12 +13,6 @@ import { useTanitaGarminSync } from "./use-tanita-garmin-sync";
 vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: vi.fn() },
 }));
-vi.mock("../adapters/tanita/tanita-transport", () => ({
-  readTanitaExportCsv: vi.fn(),
-}));
-vi.mock("../adapters/garmin/garmin-body-composition-transport", () => ({
-  pushGarminBodyComposition: vi.fn(),
-}));
 vi.mock("../application/health/sync-tanita-body-composition.use-case", () => ({
   syncTanitaBodyComposition: vi.fn(),
 }));

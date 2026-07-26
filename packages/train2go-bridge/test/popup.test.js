@@ -11,6 +11,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 // load before the site popup.js and share the page's global scope.
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
+  "bridge-popup-shell.js",
   "bridge-popup-snapshot.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
@@ -121,18 +122,33 @@ describe("Train2Go popup", () => {
     await flushAsync();
 
     const status = dom.window.document.getElementById("status");
-    expect(status.className).toContain("status--ok");
+    expect(status.className).toContain("status-block--ok");
     expect(dom.window.document.getElementById("status-text").textContent).toBe(
       "Connected as Pablo"
     );
     expect(dom.window.document.getElementById("status-sub").textContent).toBe(
       "Coach · Aritz Mardaras"
     );
+    const chips = dom.window.document.getElementById("chips-region");
+    expect(chips.textContent).toContain("Feeds Kaiord");
+    expect(chips.textContent).toContain("Planned Session");
+    expect(chips.textContent).toContain("Training Zones");
+    expect(chips.querySelectorAll(".chip--muted").length).toBe(0);
+    expect(dom.window.document.querySelector(".cta-primary").textContent).toBe(
+      "Open Kaiord editor"
+    );
+    expect(
+      dom.window.document.querySelector(".cta-secondary").textContent
+    ).toBe("Open Train2Go ↗");
     const rollup =
       dom.window.document.getElementById("rollup-region").textContent;
     expect(rollup).toContain("3 sessions planned");
     expect(rollup).toContain("2 done");
     expect(rollup).toContain("workload 287");
+    // Completion bar mirrors the same numbers: 2 of 3 done.
+    expect(
+      dom.window.document.querySelector(".week__bar-fill").style.width
+    ).toBe("67%");
     expect(
       dom.window.document
         .getElementById("athlete-region")
@@ -152,8 +168,86 @@ describe("Train2Go popup", () => {
     await flushAsync();
 
     const status = dom.window.document.getElementById("status");
-    expect(status.className).toContain("status--no");
+    expect(status.className).toContain("status-block--warn");
     expect(dom.window.document.getElementById("retry-btn")).not.toBeNull();
+  });
+
+  it("makes logging back in the primary CTA and mutes the chips when the session is inactive", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { sessionActive: false } },
+      })
+    );
+
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Session signed out"
+    );
+    expect(doc.getElementById("status-sub").textContent).toContain(
+      "no new plan is reaching Kaiord"
+    );
+    expect(doc.querySelector(".cta-primary").textContent).toBe(
+      "Log in to Train2Go"
+    );
+    expect(doc.querySelector(".cta-secondary").textContent).toBe(
+      "Open Kaiord editor"
+    );
+    expect(
+      doc.getElementById("chips-region").querySelectorAll(".chip--muted").length
+    ).toBe(2);
+  });
+
+  it("does not accumulate a retry button or CTA set across failure cycles", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { sessionActive: false } },
+      })
+    );
+
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+    const doc = dom.window.document;
+    doc.getElementById("retry-btn").click();
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    // The skeleton and CTA renders each clear the footer; losing BOTH
+    // clears duplicates controls, and losing only the CTA clear leaves
+    // skeleton bars behind — the zero-skeleton assert catches that half.
+    expect(doc.querySelectorAll("#retry-btn").length).toBe(1);
+    const footer = doc.getElementById("footer-region");
+    expect(footer.querySelectorAll(".cta-primary").length).toBe(1);
+    expect(footer.querySelectorAll(".cta-secondary").length).toBe(1);
+    expect(footer.querySelectorAll(".cta-retry").length).toBe(1);
+    expect(footer.querySelectorAll(".skeleton").length).toBe(0);
+    expect(doc.activeElement.id).toBe("retry-btn");
+  });
+
+  it("renders the checking skeleton before the probe resolves", () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: {
+          ok: true,
+          data: { sessionActive: true, userName: "P", userId: 1 },
+        },
+        readWeekResponse: { ok: true, data: { activities: [] } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Checking your session…"
+    );
+    expect(doc.querySelectorAll(".skeleton--chip").length).toBe(3);
+    expect(doc.querySelectorAll(".skeleton--cta").length).toBe(1);
   });
 
   it("hides coach sub-line when ping payload omits coachName", async () => {
@@ -314,7 +408,7 @@ describe("Train2Go popup", () => {
     expect(
       dom.window.document
         .getElementById("status")
-        .className.includes("status--ok")
+        .className.includes("status-block--ok")
     ).toBe(true);
     expect(
       dom.window.document.getElementById("rollup-region").textContent

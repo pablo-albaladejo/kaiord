@@ -1,19 +1,50 @@
 /*
- * Shared Bridge Popup CSS — single source of truth for both bridges.
+ * Kaiord Bridge Popup Shell — one 340px dark popup for every bridge.
  *
- * Sync target: copied byte-for-byte into packages/{garmin,train2go}-bridge/
- * popup.css by `pnpm popup:sync`. The parity guard at
- * scripts/check-popup-css-parity.test.mjs fails the lint job if either
- * destination drifts from this master.
+ * Master: packages/_shared/bridge-core/popup.css. Never edit a vendored
+ * copy — edit the master and run `pnpm bridge:sync`. The parity guard at
+ * scripts/check-bridge-core-parity.test.mjs fails the lint job if any
+ * vendored copy drifts from this master.
  *
- * Color tokens (--accent, --accent-hover) are defined per-bridge in
- * popup.html's <style> block — only divergence between the two popups.
+ * The `--kd-*` custom properties below are copied from the `.dark` block of
+ * styles/brand-tokens.css so every popup and the web app render the same
+ * palette. scripts/check-bridge-popup-tokens-parity.test.mjs fails when a
+ * value here diverges from its brand-token source.
  *
- * Layout tokens follow design D6 of openspec/changes/bridge-popup-
- * redesign/design.md. Font sizes are in `px` (not `rem`) because the
- * Chrome popup has its own rendering context independent of the host
- * page's root font.
+ * `--accent` / `--accent-hover` are the ONLY per-bridge variables: each
+ * popup.html sets them in its own <style> block, and they tint the header
+ * dot alone. Everything else is shared.
+ *
+ * Font sizes are in `px` (not `rem`) because the Chrome popup has its own
+ * rendering context independent of the host page's root font.
  */
+
+:root {
+  /* Backgrounds */
+  --kd-bg-primary: #0f172a;
+  --kd-bg-surface: #1e293b;
+  --kd-bg-elevated: #334155;
+
+  /* Text */
+  --kd-text-primary: #f8fafc;
+  --kd-text-secondary: #cbd5e1;
+  --kd-text-muted: #94a3b8;
+
+  /* Accent */
+  --kd-accent-blue: #0284c7;
+  --kd-accent-blue-hover: #0369a1;
+  --kd-accent-blue-active: #075985;
+  --kd-accent-blue-soft: #0c4a6e;
+
+  /* Semantic */
+  --kd-semantic-tip: #34d399;
+  --kd-semantic-warning: #fbbf24;
+  --kd-semantic-warning-soft: #2d2305;
+
+  /* Borders */
+  --kd-border: #334155;
+  --kd-border-soft: #1e293b;
+}
 
 * {
   box-sizing: border-box;
@@ -22,96 +53,178 @@
 body {
   width: 340px;
   margin: 0;
-  padding: 16px;
+  padding: 0;
   font-family: system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.4;
-  color: #0f172a;
-  background: #ffffff;
+  color: var(--kd-text-primary);
+  background: var(--kd-bg-primary);
 }
 
-/* ── Header (3-column grid; reserves a 16x16 slot for the refresh icon
-       so the title row never reflows between loading and success). ── */
+/* ── Header (3-column grid; reserves a 20x20 slot for the refresh icon
+       so the title row never reflows between checking and resolved). ── */
 .popup-header {
   display: grid;
-  grid-template-columns: 8px 1fr 16px;
+  grid-template-columns: 8px 1fr 20px;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 9px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--kd-border-soft);
 }
 
 .popup-header__dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent, var(--kd-accent-blue));
 }
 
 .popup-header__title {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--kd-text-primary);
 }
 
 .popup-header__refresh {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--accent);
+  color: var(--kd-text-muted);
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
+}
+
+.popup-header__refresh:hover {
+  color: var(--kd-text-secondary);
 }
 
 .popup-header__refresh--hidden {
   visibility: hidden;
 }
 
-/* ── Status pill ── */
-.status {
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 12px;
+.popup-main {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px;
 }
 
-.status__glyph {
+/* ── Status block: dot + verdict + one cause sentence. Always rendered at
+       the same height so resolving a state never reflows the popup. ── */
+.status-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.status-block__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--kd-text-muted);
+}
+
+.status-block__body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.status-block__verdict {
+  font-size: 14px;
   font-weight: 700;
+  color: var(--kd-text-secondary);
 }
 
-.status--ok {
-  background: #d4edda;
-  color: #155724;
-}
-.status--no {
-  background: #f8d7da;
-  color: #721c24;
-}
-.status--checking {
-  background: #fff3cd;
-  color: #856404;
+.status-block__cause {
+  font-size: 12.5px;
+  color: var(--kd-text-muted);
 }
 
-.status__sub {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  opacity: 0.85;
+.status-block--ok .status-block__dot {
+  background: var(--kd-semantic-tip);
+}
+.status-block--ok .status-block__verdict {
+  color: var(--kd-semantic-tip);
+}
+
+.status-block--warn .status-block__dot {
+  background: var(--kd-semantic-warning);
+}
+.status-block--warn .status-block__verdict {
+  color: var(--kd-semantic-warning);
+}
+
+.status-block--muted .status-block__dot {
+  background: var(--kd-text-muted);
+}
+.status-block--muted .status-block__verdict {
+  color: var(--kd-text-secondary);
 }
 
 /* ── Section caption ── */
 .caption {
-  font-size: 11px;
+  margin: 0 0 7px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #475569;
-  margin: 12px 0 6px;
+  letter-spacing: 0.1em;
+  color: var(--kd-text-muted);
+}
+
+/* ── Capability chips ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.chip {
+  padding: 3px 8px;
+  border: 1px solid var(--kd-accent-blue-active);
+  border-radius: 999px;
+  background: var(--kd-accent-blue-soft);
+  font-size: 11px;
+  color: var(--kd-text-primary);
+}
+
+/* Data Kaiord pushes back out to the source. */
+.chip--out {
+  border-color: var(--kd-border);
+  background: var(--kd-bg-surface);
+  color: var(--kd-text-secondary);
+}
+
+/* Paused: the type is known but nothing is flowing right now. */
+.chip--muted {
+  border-color: var(--kd-border);
+  background: var(--kd-bg-surface);
+  color: var(--kd-text-muted);
+}
+
+/* Not connected yet: the type is what the user would gain. */
+.chip--dashed {
+  border: 1px dashed var(--kd-border);
+  background: transparent;
+  color: var(--kd-text-muted);
+}
+
+/* Warning-tinted container for the chips of a broken state. */
+.chips-box {
+  padding: 11px 12px;
+  border: 1px solid var(--kd-semantic-warning);
+  border-radius: 9px;
+  background: var(--kd-semantic-warning-soft);
+}
+
+.chips-box .caption {
+  color: var(--kd-semantic-warning);
 }
 
 /* ── Athlete card grid (2-column micro-grid; switches to single full-width
@@ -119,8 +232,7 @@ body {
 .athlete {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 12px;
-  margin-bottom: 12px;
+  gap: 4px 14px;
 }
 
 .athlete--single {
@@ -130,11 +242,12 @@ body {
 .athlete__cell {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   font-size: 13px;
 }
 
 .athlete__label {
-  color: #475569;
+  color: var(--kd-text-muted);
 }
 
 .athlete__value {
@@ -143,45 +256,61 @@ body {
 
 .athlete__updated {
   grid-column: 1 / -1;
-  font-size: 11px;
-  color: #64748b;
   margin-top: 4px;
+  font-size: 11px;
+  color: var(--kd-text-muted);
 }
 
 .athlete--placeholder {
   padding: 12px;
-  border: 1px dashed #cbd5e1;
-  border-radius: 4px;
+  border: 1px dashed var(--kd-border);
+  border-radius: 6px;
   font-size: 12px;
-  color: #475569;
-  margin-bottom: 12px;
+  color: var(--kd-text-muted);
 }
 
-/* ── Rollup line ── */
+/* ── Rollup line + weekly progress bar ── */
 .rollup {
   font-size: 12px;
-  color: #334155;
-  margin-bottom: 12px;
+  color: var(--kd-text-secondary);
 }
 
 .rollup--unavailable {
-  color: #94a3b8;
+  color: var(--kd-text-muted);
   font-style: italic;
+}
+
+.week {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.week__bar {
+  height: 5px;
+  border-radius: 99px;
+  background: var(--kd-bg-surface);
+  overflow: hidden;
+}
+
+.week__bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--kd-semantic-tip);
 }
 
 /* ── Coach notes (collapsible) ── */
 .notes {
-  margin-bottom: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: #fafafa;
+  border: 1px solid var(--kd-border);
+  border-radius: 9px;
+  background: var(--kd-bg-surface);
 }
 
 .notes__summary {
-  padding: 8px 10px;
+  padding: 9px 11px;
   font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  color: var(--kd-text-secondary);
   cursor: pointer;
   list-style: none;
   user-select: none;
@@ -195,6 +324,7 @@ body {
   content: "▸ ";
   display: inline-block;
   margin-right: 4px;
+  color: var(--kd-text-muted);
   transition: transform 0.15s ease;
 }
 
@@ -203,26 +333,25 @@ body {
 }
 
 .notes__body {
-  padding: 0 10px 10px;
+  padding: 0 11px 10px;
   font-size: 12px;
   line-height: 1.45;
-  color: #334155;
+  color: var(--kd-text-secondary);
   white-space: pre-wrap;
   overflow-wrap: break-word;
   max-height: 200px;
   overflow-y: auto;
 }
 
-/* ── Footer (primary CTA + secondary link) ── */
+/* ── Footer: the primary CTA is whatever fixes the current state ── */
 .cta-primary {
   display: block;
   width: 100%;
-  padding: 8px;
-  margin: 8px 0 6px;
+  padding: 9px;
   border: none;
-  border-radius: 4px;
-  background: var(--accent);
-  color: #ffffff;
+  border-radius: 9px;
+  background: var(--kd-accent-blue);
+  color: var(--kd-text-primary);
   font-size: 13px;
   font-weight: 600;
   text-align: center;
@@ -231,42 +360,87 @@ body {
 }
 
 .cta-primary:hover {
-  background: var(--accent-hover);
+  background: var(--kd-accent-blue-hover);
 }
 
 .cta-secondary {
   display: block;
+  margin-top: 8px;
   font-size: 12px;
-  color: var(--accent);
-  text-decoration: underline;
+  color: var(--kd-accent-blue);
   text-align: center;
+  text-decoration: none;
+}
+
+.cta-secondary:hover {
+  text-decoration: underline;
 }
 
 .cta-retry {
   display: block;
   width: 100%;
-  padding: 8px;
-  margin: 8px 0;
-  border: none;
-  border-radius: 4px;
-  background: var(--accent);
-  color: #ffffff;
+  padding: 9px;
+  margin-top: 8px;
+  border: 1px solid var(--kd-border);
+  border-radius: 9px;
+  background: var(--kd-bg-surface);
+  color: var(--kd-text-secondary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
-  }
+.cta-retry:hover {
+  background: var(--kd-bg-elevated);
 }
 
+/* ── Checking skeleton, sized to the resolved layout so nothing moves ── */
 .skeleton {
-  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background: linear-gradient(
+    90deg,
+    var(--kd-bg-surface) 0%,
+    var(--kd-bg-elevated) 50%,
+    var(--kd-bg-surface) 100%
+  );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s ease-in-out infinite;
   border-radius: 4px;
+}
+
+.skeleton--caption {
+  height: 11px;
+  width: 84px;
+  margin-bottom: 7px;
+}
+
+.skeleton--chip {
+  height: 20px;
+  border-radius: 999px;
+}
+
+.skeleton--chip:nth-of-type(1) {
+  width: 78px;
+}
+.skeleton--chip:nth-of-type(2) {
+  width: 104px;
+}
+.skeleton--chip:nth-of-type(3) {
+  width: 62px;
+}
+
+.skeleton--line {
+  height: 12px;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.skeleton--line-short {
+  width: 64%;
+}
+
+.skeleton--cta {
+  height: 36px;
+  border-radius: 9px;
 }
 
 @keyframes skeleton-shimmer {
@@ -275,5 +449,11 @@ body {
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
   }
 }

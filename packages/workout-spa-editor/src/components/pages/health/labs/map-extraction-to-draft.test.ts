@@ -87,55 +87,43 @@ describe("mapExtractionToDraft", () => {
     });
   });
 
-  it("should set the reference fields and mark refTouched when a range is printed", () => {
+  it.each<{
+    scenario: string;
+    value: LabExtractionValue;
+    expected: { refLowRaw: string; refHighRaw: string; refTouched: boolean };
+  }>([
+    {
+      scenario: "a numeric range printed on the report",
+      value: {
+        label: "Glucose (fasting) (GLU)",
+        refLow: REF_LOW,
+        refHigh: REF_HIGH,
+      },
+      expected: {
+        refLowRaw: String(REF_LOW),
+        refHighRaw: String(REF_HIGH),
+        refTouched: true,
+      },
+    },
+    {
+      scenario: "a text-only range without numeric bounds",
+      value: { label: "TSH", refText: "0.4-4.0 mIU/L" },
+      expected: { refLowRaw: "", refHighRaw: "", refTouched: true },
+    },
+    {
+      scenario: "no range at all",
+      value: { label: "Glucose (fasting) (GLU)" },
+      expected: { refLowRaw: "", refHighRaw: "", refTouched: false },
+    },
+  ])("should map the reference fields for $scenario", ({ value, expected }) => {
     // Arrange
-    const input = extraction({
-      values: [
-        {
-          label: "Glucose (fasting) (GLU)",
-          refLow: REF_LOW,
-          refHigh: REF_HIGH,
-        },
-      ],
-    });
+    const input = extraction({ values: [value] });
 
     // Act
     const { rows } = mapExtractionToDraft(input, EN);
 
     // Assert
-    expect(rows[0]).toMatchObject({
-      refLowRaw: String(REF_LOW),
-      refHighRaw: String(REF_HIGH),
-      refTouched: true,
-    });
-  });
-
-  it("should mark refTouched for a text-only range without numeric bounds", () => {
-    // Arrange
-    const input = extraction({
-      values: [{ label: "TSH", refText: "0.4-4.0 mIU/L" }],
-    });
-
-    // Act
-    const { rows } = mapExtractionToDraft(input, EN);
-
-    // Assert
-    expect(rows[0].refTouched).toBe(true);
-    expect(rows[0].refLowRaw).toBe("");
-    expect(rows[0].refHighRaw).toBe("");
-  });
-
-  it("should leave refTouched false when no range is printed", () => {
-    // Arrange
-    const input = extraction({
-      values: [{ label: "Glucose (fasting) (GLU)" }],
-    });
-
-    // Act
-    const { rows } = mapExtractionToDraft(input, EN);
-
-    // Assert
-    expect(rows[0].refTouched).toBe(false);
+    expect(rows[0]).toMatchObject(expected);
   });
 
   it("should stringify an already-normalized numeric value", () => {
@@ -151,36 +139,45 @@ describe("mapExtractionToDraft", () => {
     expect(rows[0].valueRaw).toBe(String(DECIMAL_VALUE));
   });
 
-  it("should keep a valid ISO date and blank an invalid one", () => {
+  it.each([
+    {
+      scenario: "keep a valid ISO date",
+      date: "2026-03-05",
+      expected: "2026-03-05",
+    },
+    {
+      scenario: "blank an unparseable date",
+      date: "March 5, 2026",
+      expected: "",
+    },
+  ])("should $scenario", ({ date, expected }) => {
     // Arrange
-    const valid = extraction({ date: "2026-03-05" });
-    const invalid = extraction({ date: "March 5, 2026" });
+    const input = extraction({ date });
 
     // Act
-    const validDraft = mapExtractionToDraft(valid, EN);
-    const invalidDraft = mapExtractionToDraft(invalid, EN);
+    const { header } = mapExtractionToDraft(input, EN);
 
     // Assert
-    expect(validDraft.header.date).toBe("2026-03-05");
-    expect(invalidDraft.header.date).toBe("");
+    expect(header.date).toBe(expected);
   });
 
-  it("should map fasting booleans and absence to the form tri-state", () => {
-    // Arrange
-    const yes = extraction({ fasting: true });
-    const no = extraction({ fasting: false });
-    const unset = extraction({});
+  it.each<{ fasting?: boolean; expected: string }>([
+    { fasting: true, expected: "yes" },
+    { fasting: false, expected: "no" },
+    { fasting: undefined, expected: "unspecified" },
+  ])(
+    "should map the fasting flag $fasting to the $expected tri-state",
+    ({ fasting, expected }) => {
+      // Arrange
+      const input = extraction({ fasting });
 
-    // Act
-    const yesDraft = mapExtractionToDraft(yes, EN);
-    const noDraft = mapExtractionToDraft(no, EN);
-    const unsetDraft = mapExtractionToDraft(unset, EN);
+      // Act
+      const { header } = mapExtractionToDraft(input, EN);
 
-    // Assert
-    expect(yesDraft.header.fasting).toBe("yes");
-    expect(noDraft.header.fasting).toBe("no");
-    expect(unsetDraft.header.fasting).toBe("unspecified");
-  });
+      // Assert
+      expect(header.fasting).toBe(expected);
+    }
+  );
 
   it("should pass lab metadata through and blank absent fields", () => {
     // Arrange

@@ -21,7 +21,7 @@
     "test:e2e:flakiness:ios": "node scripts/measure-flakiness.js 100 'Mobile Safari'",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "lint": "tsc -b && eslint . && prettier --check src e2e",
+    "lint": "tsc -b --noEmit && eslint . && prettier --check src e2e",
     "lint:fix": "eslint . --fix && prettier --write src e2e",
     "generate:fitsdk-minimal": "node scripts/generate-fitsdk-minimal.mjs",
     "format": "prettier --write src e2e",
