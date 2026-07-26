@@ -149,6 +149,7 @@ describe("SettingsPage", () => {
     it.each([
       { tab: "ai", content: "LLM Providers" },
       { tab: "privacy", content: "Clear All API Keys" },
+      { tab: "extensions", content: "Garmin Connect" },
       { tab: "extensions", content: "Train2Go" },
     ])(
       "should render the $tab tab content at /settings/$tab",
@@ -159,7 +160,9 @@ describe("SettingsPage", () => {
         renderAtPath(`/settings/${tab}`);
 
         // Assert
-        expect(screen.getByText(content)).toBeInTheDocument();
+        // getAllByText: the extensions tab also renders "Garmin Connect"
+        // inside the Tanita sync card's instructional copy.
+        expect(screen.getAllByText(content)[0]).toBeInTheDocument();
       }
     );
 

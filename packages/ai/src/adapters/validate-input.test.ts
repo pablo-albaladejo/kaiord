@@ -12,7 +12,8 @@ const rejectionOf = (input: string): AiParsingError => {
   try {
     validateInput(input);
   } catch (error) {
-    return error as AiParsingError;
+    if (error instanceof AiParsingError) return error;
+    throw error;
   }
   throw new Error("expected validateInput to reject");
 };
