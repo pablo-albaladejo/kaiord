@@ -43,6 +43,7 @@
     "@kaiord/i18n": "workspace:^",
     "@kaiord/tanita": "workspace:^",
     "@kaiord/tcx": "workspace:^",
+    "@kaiord/trainingpeaks": "workspace:^",
     "@kaiord/whoop": "workspace:^",
     "@kaiord/zwo": "workspace:^",
     "i18next": "^26.3.6",

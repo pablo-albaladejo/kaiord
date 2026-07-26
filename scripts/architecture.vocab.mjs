@@ -81,6 +81,7 @@ export const PACKAGE_DEPS = {
     "@kaiord/i18n",
     "@kaiord/tanita",
     "@kaiord/tcx",
+    "@kaiord/trainingpeaks",
     "@kaiord/whoop",
     "@kaiord/zwo",
   ],

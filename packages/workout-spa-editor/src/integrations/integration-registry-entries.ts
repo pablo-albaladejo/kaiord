@@ -70,7 +70,7 @@ export const INTEGRATION_REGISTRY_ENTRIES: readonly IntegrationRegistryEntry[] =
       id: "trainingpeaks",
       name: "TrainingPeaks",
       mark: "TP",
-      mechanism: "not-supported",
-      bridgeId: null,
+      mechanism: "bridge",
+      bridgeId: "trainingpeaks-bridge",
     },
   ];
