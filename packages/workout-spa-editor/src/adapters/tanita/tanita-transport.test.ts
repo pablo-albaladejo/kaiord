@@ -1,12 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sendBridgeMessage } from "../bridge/bridge-transport";
-import { readTanitaExportCsv, TanitaBridgeError } from "./tanita-transport";
+import {
+  checkTanitaSession,
+  readTanitaExportCsv,
+  TanitaBridgeError,
+} from "./tanita-transport";
 
 vi.mock("../bridge/bridge-transport", () => ({ sendBridgeMessage: vi.fn() }));
 
 const mockedSend = vi.mocked(sendBridgeMessage);
 const READ_EXPORT_CSV_TIMEOUT_MS = 30_000;
+const CHECK_SESSION_TIMEOUT_MS = 5_000;
 
 describe("readTanitaExportCsv", () => {
   afterEach(() => {
@@ -75,5 +80,84 @@ describe("readTanitaExportCsv", () => {
 
     // Assert
     await expect(act).rejects.toThrow("Malformed Tanita bridge response");
+  });
+});
+
+describe("checkTanitaSession", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should relay checkSession and drop the manifest noise", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: true,
+      protocolVersion: 1,
+      data: {
+        id: "tanita-bridge",
+        name: "Tanita",
+        version: "10.0.0",
+        protocolVersion: 1,
+        capabilities: ["read:body"],
+        authenticated: true,
+      },
+    });
+
+    // Act
+    const result = await checkTanitaSession("ext-123");
+
+    // Assert
+    expect(mockedSend).toHaveBeenCalledWith(
+      "ext-123",
+      { action: "checkSession" },
+      CHECK_SESSION_TIMEOUT_MS
+    );
+    expect(result).toEqual({ authenticated: true });
+  });
+
+  it("should report a signed-out session as authenticated false", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: true,
+      protocolVersion: 1,
+      data: { id: "tanita-bridge", authenticated: false },
+    });
+
+    // Act
+    const result = await checkTanitaSession("ext-123");
+
+    // Assert
+    expect(result.authenticated).toBe(false);
+  });
+
+  it("should carry needsReauth on the session check error", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: false,
+      needsReauth: true,
+      error: "Session expired",
+    });
+
+    // Act
+    const act = checkTanitaSession("ext-123");
+
+    // Assert
+    await expect(act).rejects.toMatchObject({ needsReauth: true });
+  });
+
+  it("should reject a malformed session response envelope", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: true,
+      protocolVersion: 1,
+      data: { authenticated: "yes" },
+    });
+
+    // Act
+    const act = checkTanitaSession("ext-123");
+
+    // Assert
+    await expect(act).rejects.toBeInstanceOf(TanitaBridgeError);
+    await expect(act).rejects.toThrow("Malformed Tanita session response");
   });
 });
