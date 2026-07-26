@@ -1,4 +1,5 @@
 import { fitMessageKeySchema } from "../../schemas/fit-message-keys";
+import { groupMessagesByNumber } from "../../shared/message-grouping";
 import { FIT_MESSAGE_NUMBERS } from "../../shared/message-numbers";
 
 const WEIGHT_MESG_NUM_TO_KEY: Record<number, string> = {
@@ -12,16 +13,5 @@ const WEIGHT_MESG_NUM_TO_KEY: Record<number, string> = {
  */
 export const groupWeightMessages = (
   rawMessages: Record<string, unknown>[]
-): Record<string, unknown[]> => {
-  const result: Record<string, unknown[]> = {};
-  for (const message of rawMessages) {
-    const mesgNum =
-      typeof message.mesgNum === "number" ? message.mesgNum : undefined;
-    if (mesgNum === undefined) continue;
-    const key = WEIGHT_MESG_NUM_TO_KEY[mesgNum];
-    if (key) {
-      result[key] = [...(result[key] || []), message];
-    }
-  }
-  return result;
-};
+): Record<string, unknown[]> =>
+  groupMessagesByNumber(rawMessages, WEIGHT_MESG_NUM_TO_KEY);
