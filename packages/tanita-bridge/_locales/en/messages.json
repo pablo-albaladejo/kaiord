@@ -8,35 +8,59 @@
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {
-    "message": "Checking…",
-    "description": "Status text while the popup probes the session."
+    "message": "Checking your session…",
+    "description": "Status verdict while the popup probes the session."
   },
-  "checkingAria": {
-    "message": "Checking",
-    "description": "Accessible label for the checking status pill."
+  "checkingCause": {
+    "message": "Usually under a second.",
+    "description": "Status cause sentence shown while the probe runs."
   },
-  "connectedToTanita": {
-    "message": "Connected to MyTANITA",
-    "description": "Status text when the MyTANITA session can reach the export."
+  "connected": {
+    "message": "Connected",
+    "description": "Status verdict when the MyTANITA session can reach the export."
   },
-  "connectedHint": {
+  "connectedCause": {
     "message": "Reading your body-composition export through your session.",
-    "description": "Hint shown below the status when connected."
+    "description": "Status cause sentence for the connected state."
   },
-  "noSession": {
-    "message": "No MyTANITA session",
-    "description": "Status text when the MyTANITA session cannot reach the export."
+  "notSignedIn": {
+    "message": "Not signed in",
+    "description": "Status verdict when the MyTANITA session cannot reach the export."
   },
-  "noSessionHint": {
-    "message": "Open MyTANITA and sign in, then reopen this popup.",
-    "description": "Hint telling the user how to establish a session."
+  "notSignedInCause": {
+    "message": "Sign in at mytanita.eu once — the bridge reads your export from that session, no password stored.",
+    "description": "Status cause sentence explaining how to establish a session."
+  },
+  "captionFeeds": {
+    "message": "Feeds Kaiord",
+    "description": "Caption above the capability chips in the connected state."
+  },
+  "captionWillFeed": {
+    "message": "Will feed Kaiord",
+    "description": "Caption above the capability chips before the bridge is connected."
+  },
+  "typeWeight": {
+    "message": "Weight",
+    "description": "Capability chip for the Weight data type imported into Kaiord."
+  },
+  "typeBodyComposition": {
+    "message": "Body Composition",
+    "description": "Capability chip for the Body Composition data type imported into Kaiord."
+  },
+  "openEditor": {
+    "message": "Open Kaiord editor",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "signInTanita": {
+    "message": "Sign in to MyTANITA",
+    "description": "Primary footer link that fixes a missing MyTANITA session."
   },
   "openTanita": {
-    "message": "Open MyTANITA",
-    "description": "Button that opens mytanita.eu in a new tab."
+    "message": "Open MyTANITA ↗",
+    "description": "Secondary footer link opening mytanita.eu in a new tab."
   },
-  "openTanitaAria": {
-    "message": "Open MyTANITA",
-    "description": "Accessible label for the Open MyTANITA button."
+  "refresh": {
+    "message": "Refresh",
+    "description": "Accessible label for the header refresh button."
   }
 }
