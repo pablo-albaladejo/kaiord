@@ -9,6 +9,7 @@ export const groupMessagesByNumber = (
 ): Record<string, unknown[]> => {
   const result: Record<string, unknown[]> = {};
   for (const message of rawMessages) {
+    if (message === null || typeof message !== "object") continue;
     const { mesgNum } = message as { mesgNum?: number };
     if (typeof mesgNum !== "number") continue;
     const key = mesgNumToKey[mesgNum];
