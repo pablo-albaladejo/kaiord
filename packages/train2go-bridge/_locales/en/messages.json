@@ -8,42 +8,58 @@
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {
-    "message": "Checking…",
-    "description": "Status text while the popup probes the connection."
+    "message": "Checking your session…",
+    "description": "Status verdict while the popup probes the connection."
   },
-  "checkingConnection": {
-    "message": "Checking connection",
-    "description": "Accessible label for the checking status pill."
+  "checkingCause": {
+    "message": "Usually under a second.",
+    "description": "Status cause sentence shown while the probe runs."
   },
-  "notConnected": {
-    "message": "Not connected",
-    "description": "Status text/label when the bridge is not connected."
-  },
-  "notConnectedLogin": {
-    "message": "Not connected. Log in to Train2Go.",
-    "description": "Status text when the Train2Go session is inactive."
+  "connected": {
+    "message": "Connected",
+    "description": "Status verdict when connected but no user name is available."
   },
   "connectedAs": {
     "message": "Connected as $name$",
-    "description": "Status text when connected, naming the signed-in user.",
+    "description": "Status verdict when connected, naming the signed-in user.",
     "placeholders": {
       "name": { "content": "$1", "example": "Pablo" }
     }
   },
-  "connectedToTrain2go": {
-    "message": "Connected to Train2Go",
-    "description": "Status text when connected but no user name is available."
-  },
-  "connected": {
-    "message": "Connected",
-    "description": "Accessible label for the connected status pill."
-  },
   "coachSub": {
     "message": "Coach · $name$",
-    "description": "Status sub-line naming the athlete's coach.",
+    "description": "Status cause line naming the athlete's coach.",
     "placeholders": {
       "name": { "content": "$1", "example": "Aritz Mardaras" }
     }
+  },
+  "sessionSignedOut": {
+    "message": "Session signed out",
+    "description": "Status verdict when the Train2Go session is inactive."
+  },
+  "sessionSignedOutCause": {
+    "message": "Your Train2Go tab is logged out, so no new plan is reaching Kaiord.",
+    "description": "Status cause sentence naming the consequence of a logged-out session."
+  },
+  "bridgeNotResponding": {
+    "message": "Bridge not responding",
+    "description": "Status verdict when the extension's background worker times out."
+  },
+  "bridgeNotRespondingCause": {
+    "message": "The extension's background worker did not answer. Try again.",
+    "description": "Status cause sentence for a background-worker timeout."
+  },
+  "captionFeeds": {
+    "message": "Feeds Kaiord",
+    "description": "Caption above the capability chips."
+  },
+  "typePlannedSession": {
+    "message": "Planned Session",
+    "description": "Capability chip for the Planned Session data type imported into Kaiord."
+  },
+  "typeTrainingZones": {
+    "message": "Training Zones",
+    "description": "Capability chip for the Training Zones data type imported into Kaiord."
   },
   "profileStale": {
     "message": "Profile snapshot is stale. Open Kaiord to refresh.",
@@ -79,20 +95,20 @@
   },
   "rollupSummary": {
     "message": "$planned$ sessions planned · $done$ done · workload $workload$",
-    "description": "Weekly rollup summary line.",
+    "description": "Weekly rollup line summarising the current training week.",
     "placeholders": {
-      "planned": { "content": "$1", "example": "3" },
-      "done": { "content": "$2", "example": "2" },
-      "workload": { "content": "$3", "example": "287" }
+      "planned": { "content": "$1", "example": "5" },
+      "done": { "content": "$2", "example": "3" },
+      "workload": { "content": "$3", "example": "412" }
     }
   },
   "rollupUnavailable": {
     "message": "Rollup unavailable — try again",
-    "description": "Shown when the weekly rollup could not be fetched."
+    "description": "Weekly rollup fallback when the week read fails."
   },
   "coachNotes": {
     "message": "Coach notes",
-    "description": "Summary label for the collapsible coach-notes box."
+    "description": "Summary label of the collapsible coach-notes box."
   },
   "updatedAgo": {
     "message": "Updated $phrase$",
@@ -148,20 +164,16 @@
     }
   },
   "openEditor": {
-    "message": "Open editor",
-    "description": "Primary footer button opening the Kaiord editor."
-  },
-  "openEditorAria": {
     "message": "Open Kaiord editor",
-    "description": "Accessible label for the open-editor button."
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "signInTrain2go": {
+    "message": "Log in to Train2Go",
+    "description": "Primary footer link that fixes a logged-out Train2Go session."
   },
   "openTrain2go": {
     "message": "Open Train2Go ↗",
-    "description": "Secondary footer button opening Train2Go."
-  },
-  "openTrain2goAria": {
-    "message": "Open Train2Go",
-    "description": "Accessible label for the open-Train2Go button."
+    "description": "Secondary footer link opening Train2Go."
   },
   "retry": {
     "message": "Retry",
