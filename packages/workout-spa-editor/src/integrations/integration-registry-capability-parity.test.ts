@@ -38,11 +38,15 @@ describe("integration registry — real bridge manifest parity", () => {
   const garminCaps = readManifestCapabilities("garmin-bridge");
   const whoopCaps = readManifestCapabilities("whoop-bridge");
   const train2goCaps = readManifestCapabilities("train2go-bridge");
+  const trainingPeaksCaps = readManifestCapabilities("trainingpeaks-bridge");
+  const tanitaCaps = readManifestCapabilities("tanita-bridge");
 
   const capabilitiesFor = (bridgeId: string): readonly string[] => {
     if (bridgeId === "garmin-bridge") return garminCaps;
     if (bridgeId === "whoop-bridge") return whoopCaps;
     if (bridgeId === "train2go-bridge") return train2goCaps;
+    if (bridgeId === "trainingpeaks-bridge") return trainingPeaksCaps;
+    if (bridgeId === "tanita-bridge") return tanitaCaps;
     return [];
   };
 
@@ -70,6 +74,16 @@ describe("integration registry — real bridge manifest parity", () => {
     {
       bridgeId: "train2go-bridge",
       dataType: "planned-session" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "trainingpeaks-bridge",
+      dataType: "weight" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+    {
+      bridgeId: "tanita-bridge",
+      dataType: "weight" as ManagedDataType,
       direction: "import" as IntegrationPolicyDirection,
     },
   ])(
