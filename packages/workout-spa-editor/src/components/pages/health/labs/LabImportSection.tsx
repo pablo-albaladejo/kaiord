@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 
 import type { LabDraft } from "./map-extraction-to-draft";
 import { useLabImport } from "./use-lab-import";
-import { useWhoopLabImport } from "./use-whoop-lab-import";
+import { WhoopImportButton } from "./WhoopImportButton";
 
 export type LabImportSectionProps = {
   onDraft: (draft: LabDraft) => void;
@@ -22,7 +22,6 @@ const ACCEPT = "application/pdf,image/jpeg,image/png,image/webp";
 export function LabImportSection({ onDraft }: LabImportSectionProps) {
   const { t } = useTranslation("labImport");
   const { canImport, isRunning, run, cancel } = useLabImport(onDraft);
-  const whoop = useWhoopLabImport();
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -67,16 +66,7 @@ export function LabImportSection({ onDraft }: LabImportSectionProps) {
           />
         </label>
       )}
-      {whoop.canImport && (
-        <button
-          type="button"
-          disabled={whoop.isRunning}
-          onClick={() => void whoop.run()}
-          className="self-start rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-gray-600"
-        >
-          {whoop.isRunning ? t("whoopImporting") : t("whoopButton")}
-        </button>
-      )}
+      <WhoopImportButton />
     </section>
   );
 }

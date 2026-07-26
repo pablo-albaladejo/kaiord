@@ -7,16 +7,15 @@ Unit test suite for the train2go-bridge Chrome extension. All tests run in **vit
 
 ## Key Files
 
-| File                       | Role                                                                               |
-| -------------------------- | ---------------------------------------------------------------------------------- |
-| `chrome-mock.js`           | Mock implementation of `chrome.tabs`, `chrome.runtime`, `chrome.storage` APIs      |
-| `background.test.js`       | Tests for service-worker message routing, session validation, parser orchestration |
-| `content.test.js`          | Tests for fetch allowlist enforcement and Train2Go API message handling            |
-| `parser.test.js`           | Tests for HTML parsing: weekly, daily, tooltip, zones extraction                   |
-| `popup.test.js`            | Tests for popup UI: session display, "Check Session" action                        |
-| `kaiord-announce.test.js`  | Tests for SPA discovery and extension announcement resilience                      |
-| `profile-snapshot.test.js` | Tests for profile state validation and persistence                                 |
-| `fixtures/`                | Test data: HTML and JSON responses from Train2Go                                   |
+| File                       | Role                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| `chrome-mock.js`           | Mock implementation of `chrome.runtime`, `chrome.storage`, `fetch` APIs                 |
+| `background.test.js`       | Tests for SW-direct cookie fetch, path allowlist, message routing, parser orchestration |
+| `parser.test.js`           | Tests for HTML parsing: weekly, daily, tooltip, zones extraction                        |
+| `popup.test.js`            | Tests for popup UI: session display, "Check Session" action                             |
+| `kaiord-announce.test.js`  | Tests for SPA discovery and extension announcement resilience                           |
+| `profile-snapshot.test.js` | Tests for profile state validation and persistence                                      |
+| `fixtures/`                | Test data: HTML and JSON responses from Train2Go                                        |
 
 ## Test Structure
 
@@ -106,7 +105,7 @@ const activities = parseWeeklyHtml(html);
 - **Focus areas:**
   - Parser: 90%+ (critical for data integrity)
   - Background routing: 85%+ (message handling)
-  - Content script allowlist: 100% (privacy critical)
+  - `background.js` fetch allowlist: 100% (privacy critical)
 
 ## For AI Agents
 
@@ -141,15 +140,24 @@ pnpm --filter @kaiord/train2go-bridge test:watch
 
 ### Mocking chrome.\* APIs
 
-chrome-mock registers a global mock; no imports needed. If you need custom behavior:
+chrome-mock registers a global mock (and a `globalThis.fetch` vi.fn); no
+imports needed. SW-direct tests drive the network by stubbing `fetch` with a
+`Response` double:
 
 ```javascript
-beforeEach(() => {
-  setupChromeMock();
-  // Customize behavior
-  globalThis.chrome.tabs.query = vi.fn((_, cb) =>
-    cb([{ id: 1, url: "https://app.train2go.com/user/index" }])
-  );
+beforeEach(() => __resetChromeMock());
+
+it("should return the raw HTML body for a text/html response", async () => {
+  // Arrange
+  fetch.mockResolvedValueOnce({
+    ok: true,
+    status: 200,
+    type: "basic",
+    redirected: false,
+    headers: { get: () => "text/html" },
+    text: () => Promise.resolve("<main>details</main>"),
+  });
+  // Act / Assert ...
 });
 ```
 

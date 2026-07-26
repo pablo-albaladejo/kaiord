@@ -19,14 +19,17 @@ const IDENTITY_TOKENS = [
   "train2go-bridge",
   "whoop-bridge",
   "tanita-bridge",
+  "trainingpeaks-bridge",
   "Garmin Connect",
   "Train2Go",
   "WHOOP",
   "Tanita",
+  "TrainingPeaks",
   "connect.garmin.com",
   "app.train2go.com",
   "api.prod.whoop.com",
   "mytanita.eu",
+  "tpapi.trainingpeaks.com",
   "write:workouts",
   "read:activities",
   "read:training-plan",
@@ -41,6 +44,7 @@ const IDENTITY_BRIDGES = [
   "train2go-bridge",
   "whoop-bridge",
   "tanita-bridge",
+  "trainingpeaks-bridge",
 ];
 
 const extractField = (src, field, file) => {

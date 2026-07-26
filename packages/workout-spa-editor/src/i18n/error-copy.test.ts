@@ -10,48 +10,39 @@ const MAX_LEN = 2000;
 const OVER_LEN = 2050;
 
 describe("localizeValidationMessage", () => {
-  it("should localize a known code to Spanish", () => {
+  it.each([
+    {
+      name: "localize a known code to Spanish",
+      entry: { code: "min_gt_max", message: "min must be <= max" },
+      locale: "es" as const,
+      expected: "el mínimo debe ser menor o igual que el máximo",
+    },
+    {
+      name: "return the English dictionary copy for a known code under en",
+      entry: { code: "duration_type_mismatch", message: "upstream text" },
+      locale: "en" as const,
+      expected: "durationType must match duration.type",
+    },
+    {
+      name: "fall back to the upstream message for an unmapped code",
+      entry: { code: "invalid_type", message: "Invalid input" },
+      locale: "es" as const,
+      expected: "Invalid input",
+    },
+    {
+      name: "fall back to the upstream message when there is no code",
+      entry: { message: "Some raw validation message" },
+      locale: "es" as const,
+      expected: "Some raw validation message",
+    },
+  ])("should $name", ({ entry, locale, expected }) => {
     // Arrange
-    const entry = { code: "min_gt_max", message: "min must be <= max" };
 
     // Act
-    const out = localizeValidationMessage(entry, "es");
+    const out = localizeValidationMessage(entry, locale);
 
     // Assert
-    expect(out).toBe("el mínimo debe ser menor o igual que el máximo");
-  });
-
-  it("should return the English dictionary copy for a known code under en", () => {
-    // Arrange
-    const entry = { code: "duration_type_mismatch", message: "upstream text" };
-
-    // Act
-    const out = localizeValidationMessage(entry, "en");
-
-    // Assert
-    expect(out).toBe("durationType must match duration.type");
-  });
-
-  it("should fall back to the upstream message for an unmapped code", () => {
-    // Arrange
-    const entry = { code: "invalid_type", message: "Invalid input" };
-
-    // Act
-    const out = localizeValidationMessage(entry, "es");
-
-    // Assert
-    expect(out).toBe("Invalid input");
-  });
-
-  it("should fall back to the upstream message when there is no code", () => {
-    // Arrange
-    const entry = { message: "Some raw validation message" };
-
-    // Act
-    const out = localizeValidationMessage(entry, "es");
-
-    // Assert
-    expect(out).toBe("Some raw validation message");
+    expect(out).toBe(expected);
   });
 });
 
@@ -79,66 +70,52 @@ describe("validationHeading", () => {
 });
 
 describe("localizeAiError", () => {
-  it("should localize the empty-input reason to Spanish", () => {
+  it.each([
+    {
+      name: "localize the empty-input reason to Spanish",
+      error: { reason: "input_empty", message: "Input text is empty" },
+      locale: "es" as const,
+      expected: "El texto de entrada está vacío",
+    },
+    {
+      name: "interpolate details into the too-long reason for es",
+      error: {
+        reason: "input_too_long",
+        message: "raw",
+        details: { maxLength: MAX_LEN, actualLength: OVER_LEN },
+      },
+      locale: "es" as const,
+      expected: "El texto supera los 2000 caracteres (introducidos 2050)",
+    },
+    {
+      name: "reproduce the English message for the too-long reason under en",
+      error: {
+        reason: "input_too_long",
+        message: "orig",
+        details: { maxLength: MAX_LEN, actualLength: OVER_LEN },
+      },
+      locale: "en" as const,
+      expected: "Input text exceeds 2000 characters (got 2050)",
+    },
+    {
+      name: "fall back to the upstream message for a reasonless error",
+      error: new Error("Provider timeout"),
+      locale: "es" as const,
+      expected: "Provider timeout",
+    },
+    {
+      name: "return the generic generation-failed copy for a non-error",
+      error: "weird failure",
+      locale: "es" as const,
+      expected: "No se pudo generar",
+    },
+  ])("should $name", ({ error, locale, expected }) => {
     // Arrange
-    const error = { reason: "input_empty", message: "Input text is empty" };
 
     // Act
-    const out = localizeAiError(error, "es");
+    const out = localizeAiError(error, locale);
 
     // Assert
-    expect(out).toBe("El texto de entrada está vacío");
-  });
-
-  it("should interpolate details into the too-long reason for es", () => {
-    // Arrange
-    const error = {
-      reason: "input_too_long",
-      message: "raw",
-      details: { maxLength: MAX_LEN, actualLength: OVER_LEN },
-    };
-
-    // Act
-    const out = localizeAiError(error, "es");
-
-    // Assert
-    expect(out).toBe("El texto supera los 2000 caracteres (introducidos 2050)");
-  });
-
-  it("should reproduce the English message for the too-long reason under en", () => {
-    // Arrange
-    const error = {
-      reason: "input_too_long",
-      message: "orig",
-      details: { maxLength: MAX_LEN, actualLength: OVER_LEN },
-    };
-
-    // Act
-    const out = localizeAiError(error, "en");
-
-    // Assert
-    expect(out).toBe("Input text exceeds 2000 characters (got 2050)");
-  });
-
-  it("should fall back to the upstream message for a reasonless error", () => {
-    // Arrange
-    const error = new Error("Provider timeout");
-
-    // Act
-    const out = localizeAiError(error, "es");
-
-    // Assert
-    expect(out).toBe("Provider timeout");
-  });
-
-  it("should return the generic generation-failed copy for a non-error", () => {
-    // Arrange
-    const error = "weird failure";
-
-    // Act
-    const out = localizeAiError(error, "es");
-
-    // Assert
-    expect(out).toBe("No se pudo generar");
+    expect(out).toBe(expected);
   });
 });
