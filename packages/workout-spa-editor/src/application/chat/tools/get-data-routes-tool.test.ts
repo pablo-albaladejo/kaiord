@@ -13,6 +13,7 @@ const signals = (): DataHubMatrixSignals => ({
   isBridgeOnline: (bridgeId) => bridgeId === "train2go-bridge",
   bridgeAnnounces: (bridgeId, token) =>
     bridgeId === "train2go-bridge" && token === "read:training-plan",
+  supportsRoute: () => true,
   isRouteEnabled: (dataType, direction, bridgeId) =>
     dataType === "planned-session" &&
     direction === "import" &&

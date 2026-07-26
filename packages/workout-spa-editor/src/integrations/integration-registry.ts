@@ -21,6 +21,7 @@ import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
 
 import type { IntegrationPolicyDirection } from "../types/integration-policy";
+import { bridgeSupportsRoute } from "./bridge-supported-routes";
 import { INTEGRATION_REGISTRY_ENTRIES } from "./integration-registry-entries";
 
 export type { IntegrationRegistryEntry } from "./integration-registry-entries";
@@ -43,6 +44,11 @@ export const KNOWN_BRIDGE_IDS: readonly string[] = INTEGRATION_REGISTRY.filter(
  * `capabilitiesFor` is injected so this stays a pure, adapter-free
  * function — callers pass `bridgeDiscovery.getCapabilities` (or a test
  * double).
+ *
+ * This guards policy-ELIGIBILITY derivations (which routes may be created).
+ * The live UI chokepoint is the Data Hub cell-state signal `supportsRoute`
+ * in application/data-hub/data-hub-cell-state.ts — both must apply the same
+ * filter, so neither is the single place to change it.
  */
 export function eligibleBridgeIds(
   dataType: ManagedDataType,
@@ -51,7 +57,11 @@ export function eligibleBridgeIds(
 ): string[] {
   const token = MANAGED_DATA_REGISTRY[dataType].capabilities[direction];
   if (token === undefined) return [];
-  return KNOWN_BRIDGE_IDS.filter((bridgeId) =>
-    capabilitiesFor(bridgeId).includes(token)
+  return KNOWN_BRIDGE_IDS.filter(
+    (bridgeId) =>
+      capabilitiesFor(bridgeId).includes(token) &&
+      // A shared token (read:body) over-claims: narrow to routes the SPA
+      // actually serves so no phantom flow is ever offered.
+      bridgeSupportsRoute(bridgeId, dataType, direction)
   );
 }

@@ -17,6 +17,7 @@ import {
 } from "../../application/data-hub/build-data-hub-matrix";
 import { useDataFlows } from "../../components/organisms/ProfileManager/components/useDataFlows";
 import { usePersistence } from "../../contexts/persistence-context";
+import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
 import { useConnectionStatus } from "../use-connection-status";
 import { useDiscoveredBridges } from "../use-discovered-bridges";
@@ -46,6 +47,7 @@ export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
           discovered.some((d) => d.bridgeId === bridgeId),
         bridgeAnnounces: (bridgeId, token) =>
           (bridgeDiscovery.getCapabilities(bridgeId) ?? []).includes(token),
+        supportsRoute: bridgeSupportsRoute,
         isRouteEnabled: (dataType, direction, bridgeId) =>
           (byDataType.get(dataType)?.[direction] ?? []).some(
             (p) => p.bridgeId === bridgeId && p.enabled

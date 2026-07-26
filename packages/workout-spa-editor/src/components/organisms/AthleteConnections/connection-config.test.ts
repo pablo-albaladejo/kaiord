@@ -30,13 +30,15 @@ describe("CONNECTIONS catalog", () => {
     expect(train2go?.bridgeId).toBe("train2go-bridge");
   });
 
-  it("should declare trainingpeaks as an aspirational not-supported provider", () => {
+  it("should declare trainingpeaks as a bridge connection", () => {
     // Arrange
 
     // Act
+    const trainingpeaks = CONNECTIONS.find((c) => c.id === "trainingpeaks");
 
     // Assert
-    expect(mechanismOf("trainingpeaks")).toBe("not-supported");
+    expect(trainingpeaks?.mechanism).toBe("bridge");
+    expect(trainingpeaks?.bridgeId).toBe("trainingpeaks-bridge");
   });
 
   it("should exclude manual entry — it has no connect/disconnect UI on this page", () => {

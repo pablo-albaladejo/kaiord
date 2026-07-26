@@ -57,6 +57,9 @@ const signals = (
   isRouteEnabled: () => false,
   lastSyncedAt: () => undefined,
   findRoute: () => undefined,
+  // Unrestricted by default — the supported-route filter has its own suite
+  // (data-hub-cell-state.test.ts); these cases are about the other signals.
+  supportsRoute: () => true,
   ...o,
 });
 

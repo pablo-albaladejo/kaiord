@@ -21,6 +21,7 @@ import { fingerprintSnapshot } from "@kaiord/core";
 import { useEffect, useRef } from "react";
 
 import { profileToSnapshot } from "../lib/profile-snapshot/profile-to-snapshot";
+import { SNAPSHOT_CAPABLE_BRIDGE_IDS } from "../lib/profile-snapshot/snapshot-capable-bridges";
 import { useActiveProfileLive } from "./use-active-profile-live";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
 import {
@@ -44,22 +45,28 @@ export const useProfileSnapshotPush = (): void => {
     }
     lastProfileIdRef.current = active.id;
 
+    // Only garmin/train2go vendored the snapshot handler; every other
+    // discovered bridge would answer "unknown action" and burn rate budget.
+    const snapshotBridges = bridges.filter((b) =>
+      SNAPSHOT_CAPABLE_BRIDGE_IDS.includes(b.bridgeId)
+    );
+
     // Drain pending clear and fall through so the currently-active
     // profile (if any) still gets pushed in the same effect run; both
     // active and bridges may not change again before the user notices.
     // QUEUE serialises per-bridgeId so the clear lands before the push.
-    if (pendingClearRef.current && bridges.length > 0) {
-      for (const bridge of bridges)
+    if (pendingClearRef.current && snapshotBridges.length > 0) {
+      for (const bridge of snapshotBridges)
         void sendClear(bridge, lastFingerprintRef.current);
       pendingClearRef.current = false;
     }
 
-    if (!active.profile || bridges.length === 0) return;
+    if (!active.profile || snapshotBridges.length === 0) return;
 
     const profile = active.profile;
     const snapshot = profileToSnapshot(profile, pickActiveSport(profile));
     const fp = fingerprintSnapshot(profile.id, snapshot);
-    for (const bridge of bridges) {
+    for (const bridge of snapshotBridges) {
       if (lastFingerprintRef.current.get(bridge.extensionId) === fp) continue;
       void sendSnapshot(bridge, snapshot, fp, lastFingerprintRef.current);
     }

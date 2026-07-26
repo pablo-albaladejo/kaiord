@@ -12,6 +12,8 @@ const HEALTH_SOURCE_BADGE_BY_ID: Record<string, string> = {
   "fit-import": "FIT",
   "garmin-bridge": "Garmin",
   "whoop-bridge": "WHOOP",
+  "tanita-bridge": "Tanita",
+  "trainingpeaks-bridge": "TrainingPeaks",
   unknown: "Unknown",
 };
 

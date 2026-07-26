@@ -11,6 +11,8 @@ import { useCalendarActivities } from "./use-calendar-activities";
 import { useExecutedMatchAutoForCalendar } from "./use-executed-match-auto";
 import { useGarminActivitiesPull } from "./use-garmin-activities-pull";
 import type { MatchedSessionWithMetadata } from "./use-matched-sessions";
+import { useTanitaImport } from "./use-tanita-import";
+import { useTrainingPeaksSync } from "./use-trainingpeaks-sync";
 import { useWhoopSync } from "./use-whoop-sync";
 
 export type CalendarExecutedData = {
@@ -25,6 +27,8 @@ export const useCalendarExecuted = (
 ): Record<string, ActivityRecord[]> => {
   useGarminActivitiesPull(profileId);
   useWhoopSync(profileId);
+  useTrainingPeaksSync(profileId);
+  useTanitaImport(profileId);
   const { activities, byDay } = useCalendarActivities(profileId, data.days);
   useExecutedMatchAutoForCalendar(rawMatched, data.workoutsByDay, activities);
   return byDay;

@@ -11,6 +11,7 @@ import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
 import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
+import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 
@@ -68,6 +69,7 @@ export const buildDataRouteSignals = async (
       bridgeDiscovery.getExtensionId(bridgeId) !== null,
     bridgeAnnounces: (bridgeId, token) =>
       (bridgeDiscovery.getCapabilities(bridgeId) ?? []).includes(token),
+    supportsRoute: bridgeSupportsRoute,
     isRouteEnabled: (dataType, direction, bridgeId) =>
       (byDataType.get(dataType)?.[direction] ?? []).some(
         (p) => p.bridgeId === bridgeId && p.enabled

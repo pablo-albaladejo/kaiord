@@ -740,6 +740,9 @@ importers:
       '@kaiord/tcx':
         specifier: workspace:^
         version: link:../tcx
+      '@kaiord/trainingpeaks':
+        specifier: workspace:^
+        version: link:../trainingpeaks
       '@kaiord/whoop':
         specifier: workspace:^
         version: link:../whoop
