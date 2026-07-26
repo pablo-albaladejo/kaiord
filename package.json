@@ -25,7 +25,6 @@
       "ajv@>=8.0.0 <8.18.0": ">=8.18.0",
       "hono@<4.12.25": ">=4.12.25",
       "@hono/node-server@<1.19.13": ">=1.19.13",
-      "fast-uri@<3.1.2": ">=3.1.2",
       "ip-address@<10.1.1": ">=10.1.1",
       "rollup@>=4.0.0 <4.59.0": ">=4.59.0",
       "minimatch@>=9.0.0 <9.0.7": ">=9.0.7",
@@ -41,7 +40,9 @@
       "smol-toml@<1.6.1": ">=1.6.1",
       "brace-expansion@>=4.0.0 <5.0.6": ">=5.0.6",
       "yaml@>=2.0.0 <2.8.3": ">=2.8.3",
-      "vite": "^8.0.5"
+      "vite": "^8.0.5",
+      "brace-expansion@>=3.0.0 <5.0.8": ">=5.0.8",
+      "fast-uri@<4.1.1": ">=4.1.1"
     },
     "peerDependencyRules": {
       "allowedVersions": {
@@ -109,31 +110,31 @@
     ]
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
-    "@commitlint/cli": "^21.2.0",
+    "@changesets/cli": "^2.31.1",
+    "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
     "@eslint/js": "^10.0.1",
-    "@fission-ai/openspec": "^1.5.0",
+    "@fission-ai/openspec": "^1.6.0",
     "@resvg/resvg-js": "^2.6.2",
     "@size-limit/esbuild": "^12.1.0",
     "@size-limit/file": "^12.1.0",
-    "@types/node": "^26.1.0",
-    "@vitest/eslint-plugin": "^1.6.20",
-    "dependency-cruiser": "^18.0.0",
-    "eslint": "^10.6.0",
+    "@types/node": "^26.1.1",
+    "@vitest/eslint-plugin": "^1.6.23",
+    "dependency-cruiser": "^18.1.0",
+    "eslint": "^10.7.0",
     "eslint-plugin-boundaries": "^6.0.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "husky": "^9.1.7",
-    "jscpd": "^5.0.11",
-    "knip": "^6.24.0",
-    "lint-staged": "^17.0.8",
+    "jscpd": "^5.0.12",
+    "knip": "^6.27.0",
+    "lint-staged": "^17.1.1",
     "npm-run-all2": "^9.0.2",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.6",
     "sharp": "^0.35.3",
     "size-limit": "^12.1.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.1",
+    "typescript-eslint": "^8.65.0",
     "yaml": "^2.9.0"
   }
 }
