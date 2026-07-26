@@ -5,22 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="popup.css" />
     <title>Kaiord Tanita Bridge</title>
+    <style>
+      :root {
+        --accent: #0284c7;
+        --accent-hover: #0369a1;
+      }
+    </style>
   </head>
   <body>
     <header class="popup-header">
-      <span class="popup-header__title">Tanita</span>
-      <span id="status" class="status status--checking" aria-label="Checking">
-        <span class="status__glyph">…</span>
-      </span>
+      <span class="popup-header__dot" aria-hidden="true"></span>
+      <h1 class="popup-header__title">Kaiord · Tanita</h1>
+      <button
+        id="refresh-btn"
+        class="popup-header__refresh popup-header__refresh--hidden"
+        aria-label="Refresh"
+        type="button"
+      >
+        ⟳
+      </button>
     </header>
 
-    <p id="status-text" class="status-text">Checking…</p>
+    <main class="popup-main">
+      <div
+        id="status"
+        class="status-block status-block--muted"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="status-block__dot" aria-hidden="true"></span>
+        <span class="status-block__body">
+          <span class="status-block__verdict" id="status-text"
+            >Checking your session…</span
+          >
+          <span class="status-block__cause" id="status-sub" hidden></span>
+        </span>
+      </div>
 
-    <section id="sync-region" class="sync" aria-live="polite"></section>
-
-    <footer id="footer-region" class="footer"></footer>
+      <div id="chips-region"></div>
+      <div id="footer-region"></div>
+    </main>
 
     <script src="bridge-popup-utils.js"></script>
+    <script src="bridge-popup-shell.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
