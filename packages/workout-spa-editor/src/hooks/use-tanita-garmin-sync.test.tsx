@@ -31,9 +31,17 @@ const mockedGetExtensionId = vi.mocked(bridgeDiscovery.getExtensionId);
 const mockedSync = vi.mocked(syncTanitaBodyComposition);
 const mockedUseDiscoveredBridges = vi.mocked(useDiscoveredBridges);
 
+type SyncResult = Awaited<ReturnType<typeof syncTanitaBodyComposition>>;
+
 const BOTH_DISCOVERED: readonly DiscoveredBridge[] = [
   { bridgeId: "tanita-bridge", extensionId: "tanita-ext" },
   { bridgeId: "garmin-bridge", extensionId: "garmin-ext" },
+];
+const GARMIN_ONLY: readonly DiscoveredBridge[] = [
+  { bridgeId: "garmin-bridge", extensionId: "garmin-ext" },
+];
+const TANITA_ONLY: readonly DiscoveredBridge[] = [
+  { bridgeId: "tanita-bridge", extensionId: "tanita-ext" },
 ];
 
 const wrap = (children: ReactNode) => (
@@ -55,31 +63,32 @@ describe("useTanitaGarminSync", () => {
     vi.clearAllMocks();
   });
 
-  it("should report canSync when both bridges are discovered and a profile is active", () => {
-    // Arrange
-    discover(BOTH_DISCOVERED);
+  it.each([
+    {
+      scenario: "both bridges are discovered and a profile is active",
+      bridges: BOTH_DISCOVERED,
+      expected: true,
+    },
+    {
+      scenario: "the tanita bridge is missing",
+      bridges: GARMIN_ONLY,
+      expected: false,
+    },
+  ])(
+    "should report canSync $expected when $scenario",
+    ({ bridges, expected }) => {
+      // Arrange
+      discover(bridges);
 
-    // Act
-    const { result } = renderHook(() => useTanitaGarminSync("p1"), {
-      wrapper: ({ children }) => wrap(children),
-    });
+      // Act
+      const { result } = renderHook(() => useTanitaGarminSync("p1"), {
+        wrapper: ({ children }) => wrap(children),
+      });
 
-    // Assert
-    expect(result.current.canSync).toBe(true);
-  });
-
-  it("should not report canSync when the tanita bridge is missing", () => {
-    // Arrange
-    discover([{ bridgeId: "garmin-bridge", extensionId: "garmin-ext" }]);
-
-    // Act
-    const { result } = renderHook(() => useTanitaGarminSync("p1"), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Assert
-    expect(result.current.canSync).toBe(false);
-  });
+      // Assert
+      expect(result.current.canSync).toBe(expected);
+    }
+  );
 
   it("should run the governed sync and land on done for a successful result", async () => {
     // Arrange
@@ -99,48 +108,47 @@ describe("useTanitaGarminSync", () => {
     expect(result.current.status).toBe("done");
   });
 
-  it("should land on needsReauth when the sync reports a dead session", async () => {
-    // Arrange
-    discover(BOTH_DISCOVERED);
-    mockedSync.mockResolvedValue({ ok: false, reason: "needs-reauth" });
-    const { result } = renderHook(() => useTanitaGarminSync("p1"), {
-      wrapper: ({ children }) => wrap(children),
-    });
+  it.each([
+    {
+      scenario: "a dead session",
+      syncResult: { ok: false, reason: "needs-reauth" } as SyncResult,
+      status: "needsReauth",
+      lastError: null,
+    },
+    {
+      scenario: "a transport failure",
+      syncResult: {
+        ok: false,
+        reason: "transport-error",
+        error: "boom",
+      } as SyncResult,
+      status: "error",
+      lastError: "boom",
+    },
+  ])(
+    "should land on $status and expose lastError $lastError for $scenario",
+    async ({ syncResult, status, lastError }) => {
+      // Arrange
+      discover(BOTH_DISCOVERED);
+      mockedSync.mockResolvedValue(syncResult);
+      const { result } = renderHook(() => useTanitaGarminSync("p1"), {
+        wrapper: ({ children }) => wrap(children),
+      });
 
-    // Act
-    await act(async () => {
-      await result.current.sync();
-    });
+      // Act
+      await act(async () => {
+        await result.current.sync();
+      });
 
-    // Assert
-    expect(result.current.status).toBe("needsReauth");
-  });
-
-  it("should land on error and expose lastError for a transport failure", async () => {
-    // Arrange
-    discover(BOTH_DISCOVERED);
-    mockedSync.mockResolvedValue({
-      ok: false,
-      reason: "transport-error",
-      error: "boom",
-    });
-    const { result } = renderHook(() => useTanitaGarminSync("p1"), {
-      wrapper: ({ children }) => wrap(children),
-    });
-
-    // Act
-    await act(async () => {
-      await result.current.sync();
-    });
-
-    // Assert
-    expect(result.current.status).toBe("error");
-    expect(result.current.lastError).toBe("boom");
-  });
+      // Assert
+      expect(result.current.status).toBe(status);
+      expect(result.current.lastError).toBe(lastError);
+    }
+  );
 
   it("should not run the sync when a bridge is not discovered", async () => {
     // Arrange
-    discover([{ bridgeId: "tanita-bridge", extensionId: "tanita-ext" }]);
+    discover(TANITA_ONLY);
     const { result } = renderHook(() => useTanitaGarminSync("p1"), {
       wrapper: ({ children }) => wrap(children),
     });

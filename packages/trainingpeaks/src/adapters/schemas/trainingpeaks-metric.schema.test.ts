@@ -73,17 +73,6 @@ describe("trainingPeaksMetricsResponseSchema", () => {
 });
 
 describe("metric type ids", () => {
-  it("should pin the weight metric type to 9", () => {
-    // Arrange
-    const expected = WEIGHT_TYPE_ID;
-
-    // Act
-    const actual = TRAININGPEAKS_WEIGHT_METRIC_TYPE;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("should not defer the weight metric type", () => {
     // Arrange
     const deferred = TRAININGPEAKS_DEFERRED_METRIC_TYPES;

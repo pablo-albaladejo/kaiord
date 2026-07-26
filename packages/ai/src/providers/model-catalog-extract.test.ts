@@ -40,23 +40,16 @@ describe("parseModelIds", () => {
 });
 
 describe("chatModelIds", () => {
-  it("should drop non-text OpenAI variants", () => {
+  it.each([
+    { type: "openai", dts: OPENAI_DTS, expected: ["gpt-4o", "gpt-5"] },
+    { type: "google", dts: GOOGLE_DTS, expected: ["gemini-2.5-pro"] },
+  ])("should drop non-text $type variants", ({ type, dts, expected }) => {
     // Arrange
 
     // Act
-    const ids = chatModelIds("openai", OPENAI_DTS);
+    const ids = chatModelIds(type, dts);
 
     // Assert
-    expect(ids).toEqual(["gpt-4o", "gpt-5"]);
-  });
-
-  it("should drop non-text Google variants", () => {
-    // Arrange
-
-    // Act
-    const ids = chatModelIds("google", GOOGLE_DTS);
-
-    // Assert
-    expect(ids).toEqual(["gemini-2.5-pro"]);
+    expect(ids).toEqual(expected);
   });
 });

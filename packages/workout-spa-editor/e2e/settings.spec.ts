@@ -89,12 +89,17 @@ test.describe("Settings Panel", () => {
     const extensionsPanel = page.getByTestId("settings-panel-extensions");
     await expect(extensionsPanel).toBeVisible();
 
+    // The panel renders two bridge tables: the top-level status table and
+    // the body-composition sync card's own table, which repeats the Garmin
+    // Connect row. Scope to the first table so the locator stays unique.
+    const bridgeStatusTable = extensionsPanel.locator("table").first();
+
     // Should show both bridges in the status table
     await expect(
-      extensionsPanel.getByText("Garmin Connect", { exact: true })
+      bridgeStatusTable.getByText("Garmin Connect", { exact: true })
     ).toBeVisible();
     await expect(
-      extensionsPanel.getByText("Train2Go", { exact: true })
+      bridgeStatusTable.getByText("Train2Go", { exact: true })
     ).toBeVisible();
 
     // Should have a refresh button

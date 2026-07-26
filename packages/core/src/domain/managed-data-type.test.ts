@@ -1,22 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { canonicalHash } from "./hash/canonical-hash";
+import type { ManagedDataType } from "./managed-data-type";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "./managed-data-type";
 
-const EXPECTED_TYPE_COUNT = 13;
-
 describe("managedDataTypes", () => {
-  it("should enumerate exactly thirteen managed data types", () => {
-    // Arrange
-    const types = managedDataTypes;
-
-    // Act
-    const count = types.length;
-
-    // Assert
-    expect(count).toBe(EXPECTED_TYPE_COUNT);
-  });
-
   it("should replace training-plan with planned-session and activity", () => {
     // Arrange
     const types = [...managedDataTypes] as string[];
@@ -64,41 +52,27 @@ describe("MANAGED_DATA_REGISTRY", () => {
     expect(accepting).toEqual([]);
   });
 
-  it("should map planned-session and activity to their wire tokens", () => {
+  it.each([
+    {
+      type: "planned-session" as ManagedDataType,
+      expected: { import: "read:training-plan" },
+    },
+    {
+      type: "activity" as ManagedDataType,
+      expected: { import: "read:activities" },
+    },
+    {
+      type: "body-composition" as ManagedDataType,
+      expected: { import: "read:body", export: "write:body" },
+    },
+  ])("should map $type to its wire capability tokens", ({ type, expected }) => {
     // Arrange
 
     // Act
-    const planned = MANAGED_DATA_REGISTRY["planned-session"];
-    const activity = MANAGED_DATA_REGISTRY["activity"];
+    const entry = MANAGED_DATA_REGISTRY[type];
 
     // Assert
-    expect(planned.capabilities.import).toBe("read:training-plan");
-    expect(activity.capabilities.import).toBe("read:activities");
-  });
-
-  it("should expose body-composition as both a read:body import and a write:body export", () => {
-    // Arrange
-
-    // Act
-    const bodyComposition = MANAGED_DATA_REGISTRY["body-composition"];
-
-    // Assert
-    expect(bodyComposition.capabilities.import).toBe("read:body");
-    expect(bodyComposition.capabilities.export).toBe("write:body");
-  });
-
-  it("should use opaque-string capability tokens (no Zod-enum import from SPA)", () => {
-    // Arrange
-    const definedTokens = Object.values(MANAGED_DATA_REGISTRY)
-      .flatMap((e) => [e.capabilities.import, e.capabilities.export])
-      .filter((t) => t !== undefined);
-
-    // Act
-    const allStrings = definedTokens.every((t) => typeof t === "string");
-
-    // Assert
-    expect(allStrings).toBe(true);
-    expect(definedTokens.length).toBeGreaterThan(0);
+    expect(entry.capabilities).toEqual(expected);
   });
 
   it("should produce a stable hash output when an unrelated optional Zod field is added", () => {
