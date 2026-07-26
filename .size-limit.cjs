@@ -82,8 +82,10 @@ module.exports = [
     // adds the multi-step tool-calling loop and pulls in `streamText`, taking
     // the bundle just past the prior 50 kB baseline; 55 kB restores headroom
     // as the regression-detection baseline. Bumped to 60 kB when `ai` moved
-    // 6 -> 7 (the v7 core adds ~2.2 kB, taking the bundle to ~57.2 kB).
-    limit: "60 kB",
+    // 6 -> 7 (the v7 core adds ~2.2 kB, taking the bundle to ~57.2 kB). Bumped
+    // to 63 kB for the `ai` 7.0.14 -> 7.0.34 patch range (bundle now ~60.5 kB),
+    // restoring headroom as the regression-detection baseline.
+    limit: "63 kB",
     import: "*",
     modifyEsbuildConfig: externalize(["zod", "@kaiord/core"]),
   },
