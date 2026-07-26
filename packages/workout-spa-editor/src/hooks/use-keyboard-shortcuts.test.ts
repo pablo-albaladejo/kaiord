@@ -825,6 +825,124 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
+  describe("show shortcuts sheet shortcut", () => {
+    it("should call onShowShortcuts when ? is pressed", () => {
+      // Arrange
+      const onShowShortcuts = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowShortcuts }));
+      const event = new KeyboardEvent("keydown", {
+        key: "?",
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onShowShortcuts).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it.each([
+      { label: "Ctrl", init: { ctrlKey: true } },
+      { label: "Cmd", init: { metaKey: true } },
+    ])(
+      "should not call onShowShortcuts when $label+? is pressed",
+      ({ init }) => {
+        // Arrange
+        const onShowShortcuts = vi.fn().mockReturnValue(true);
+        renderHook(() => useKeyboardShortcuts({ onShowShortcuts }));
+        const event = new KeyboardEvent("keydown", {
+          key: "?",
+          bubbles: true,
+          ...init,
+        });
+
+        // Act
+        window.dispatchEvent(event);
+
+        // Assert
+        expect(onShowShortcuts).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      { tag: "input" as const },
+      { tag: "textarea" as const },
+      { tag: "select" as const },
+    ])("should not call onShowShortcuts while typing in a $tag", ({ tag }) => {
+      // Arrange
+      const onShowShortcuts = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowShortcuts }));
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      const event = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+      Object.defineProperty(event, "target", { value: el });
+
+      // Act
+      window.dispatchEvent(event);
+      el.remove();
+
+      // Assert
+      expect(onShowShortcuts).not.toHaveBeenCalled();
+    });
+
+    it("should not call onShowShortcuts when target is contentEditable", () => {
+      // Arrange
+      const onShowShortcuts = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowShortcuts }));
+      const el = document.createElement("div");
+      el.contentEditable = "true";
+      document.body.appendChild(el);
+      const event = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+
+      // Act
+      el.dispatchEvent(event);
+      el.remove();
+
+      // Assert
+      expect(onShowShortcuts).not.toHaveBeenCalled();
+    });
+
+    it("should not preventDefault when onShowShortcuts returns false", () => {
+      // Arrange
+      const onShowShortcuts = vi.fn().mockReturnValue(false);
+      renderHook(() => useKeyboardShortcuts({ onShowShortcuts }));
+      const event = new KeyboardEvent("keydown", {
+        key: "?",
+        bubbles: true,
+        cancelable: true,
+      });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onShowShortcuts).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("should not swallow Delete when ? is bound", () => {
+      // Arrange
+      const onDelete = vi.fn().mockReturnValue(true);
+      const onShowShortcuts = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onDelete, onShowShortcuts }));
+      const event = new KeyboardEvent("keydown", {
+        key: "Delete",
+        bubbles: true,
+      });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onDelete).toHaveBeenCalledOnce();
+      expect(onShowShortcuts).not.toHaveBeenCalled();
+    });
+  });
+
   describe("contentEditable passthrough", () => {
     it("should not intercept Ctrl+C when target is contentEditable", () => {
       // Arrange

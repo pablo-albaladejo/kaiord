@@ -1,3 +1,4 @@
+import { isFormElement } from "../utils/is-form-element";
 import {
   handleAltShortcuts,
   handleModifierShortcuts,
@@ -17,16 +18,45 @@ export type KeyboardShortcutHandlers = {
   onUngroupBlock?: () => boolean;
   onSelectAll?: () => boolean;
   onClearSelection?: () => boolean;
+  onShowShortcuts?: () => boolean;
 };
 
-function isFormElement(target: EventTarget | null): boolean {
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target instanceof HTMLSelectElement ||
-    (target instanceof HTMLElement &&
-      (target.isContentEditable || target.contentEditable === "true"))
-  );
+// `Record<keyof …, true>` is exhaustive in both directions at compile time:
+// a new handler without an entry fails to type-check, and an entry for a
+// removed handler does too. HANDLER_KEYS is the runtime mirror the shortcut
+// catalog is paired against.
+const HANDLER_KEY_MAP: Record<keyof KeyboardShortcutHandlers, true> = {
+  onSave: true,
+  onUndo: true,
+  onRedo: true,
+  onMoveStepUp: true,
+  onMoveStepDown: true,
+  onCopy: true,
+  onPaste: true,
+  onCut: true,
+  onDelete: true,
+  onCreateBlock: true,
+  onUngroupBlock: true,
+  onSelectAll: true,
+  onClearSelection: true,
+  onShowShortcuts: true,
+};
+
+export const HANDLER_KEYS = Object.keys(HANDLER_KEY_MAP) as ReadonlyArray<
+  keyof KeyboardShortcutHandlers
+>;
+
+function handlePlainKeys(
+  event: KeyboardEvent,
+  handlers: KeyboardShortcutHandlers
+): void {
+  // `?` is Shift+/ on most layouts, so match the character it produces.
+  if (event.key === "?") {
+    if (handlers.onShowShortcuts?.()) event.preventDefault();
+    return;
+  }
+  if (event.key !== "Delete" && event.key !== "Backspace") return;
+  if (handlers.onDelete?.()) event.preventDefault();
 }
 
 /** Create a keydown handler for modifier-based shortcuts. */
@@ -40,14 +70,10 @@ export function createKeyDownHandler(
       if (handleAltShortcuts(event, handlers)) return;
     }
     if (!isModifier) {
-      if (event.key === "Delete" || event.key === "Backspace") {
-        const handled = handlers.onDelete?.() ?? false;
-        if (handled) event.preventDefault();
-      }
+      handlePlainKeys(event, handlers);
       return;
     }
-    const handled = handleModifierShortcuts(event, handlers);
-    if (handled) return;
+    handleModifierShortcuts(event, handlers);
   };
 }
 
