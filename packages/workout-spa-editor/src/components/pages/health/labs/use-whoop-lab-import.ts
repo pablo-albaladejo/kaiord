@@ -15,13 +15,12 @@ import {
   readWhoopStatus,
 } from "../../../../adapters/bridge/whoop-transport";
 import { importWhoopLabs } from "../../../../application/whoop/import-whoop-labs.use-case";
+import { WHOOP_BRIDGE_ID } from "../../../../application/whoop/whoop-lab-provenance";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
 import { useDiscoveredBridges } from "../../../../hooks/use-discovered-bridges";
 import { useTranslate } from "../../../../i18n/use-translate";
-
-const WHOOP_BRIDGE_ID = "whoop-bridge";
 
 const useWhoopConnected = (isDiscovered: boolean): boolean => {
   const [connected, setConnected] = useState(false);
@@ -70,7 +69,7 @@ export function useWhoopLabImport() {
         persistence,
         fetchLabs: (path) => readWhoopFetch(extensionId, path),
         profileId,
-        sex: active.profile?.sex,
+        sex: active?.profile?.sex,
       });
       if (!result.ok) toast.error(t("whoopImportFailed"));
       else

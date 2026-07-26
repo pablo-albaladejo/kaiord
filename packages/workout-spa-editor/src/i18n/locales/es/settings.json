@@ -127,6 +127,22 @@
     "sessionInactive": "Sesión inactiva",
     "notDetected": "No detectado"
   },
+  "bodyCompositionSync": {
+    "title": "Sincronización de composición corporal",
+    "syncTanitaToGarmin": "Sincronizar Tanita → Garmin",
+    "tanitaHint": "Abre mytanita.eu e inicia sesión",
+    "reauthHint": "Tu sesión de mytanita.eu ha caducado: abre mytanita.eu, inicia sesión e inténtalo de nuevo.",
+    "sync": {
+      "idle": "Listo para sincronizar",
+      "reading": "Leyendo mediciones de Tanita…",
+      "parsing": "Analizando mediciones…",
+      "encoding": "Codificando para Garmin…",
+      "uploading": "Subiendo a Garmin…",
+      "done": "Sincronización completada",
+      "needsReauth": "La sesión de Tanita ha caducado",
+      "error": "La sincronización ha fallado"
+    }
+  },
   "notifications": {
     "unsupported": "Las notificaciones no son compatibles con este navegador.",
     "enable": "Activar notificaciones",

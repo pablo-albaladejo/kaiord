@@ -127,6 +127,22 @@
     "sessionInactive": "Session inactive",
     "notDetected": "Not detected"
   },
+  "bodyCompositionSync": {
+    "title": "Body composition sync",
+    "syncTanitaToGarmin": "Sync Tanita → Garmin",
+    "tanitaHint": "Open mytanita.eu and sign in",
+    "reauthHint": "Your mytanita.eu session expired — open mytanita.eu, sign in, and try again.",
+    "sync": {
+      "idle": "Ready to sync",
+      "reading": "Reading measurements from Tanita…",
+      "parsing": "Parsing measurements…",
+      "encoding": "Encoding for Garmin…",
+      "uploading": "Uploading to Garmin…",
+      "done": "Sync complete",
+      "needsReauth": "Tanita session expired",
+      "error": "Sync failed"
+    }
+  },
   "notifications": {
     "unsupported": "Notifications aren't supported in this browser.",
     "enable": "Enable notifications",

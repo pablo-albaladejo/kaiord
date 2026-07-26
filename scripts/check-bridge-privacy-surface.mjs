@@ -30,6 +30,7 @@ const BRIDGES = [
   "train2go-bridge",
   "whoop-bridge",
   "tanita-bridge",
+  "trainingpeaks-bridge",
 ];
 
 // manifest.prod.json and content.js exist only for bridges that are
