@@ -65,9 +65,11 @@ if [ -d "$PKG_DIR/_locales" ]; then
   cp -R "$PKG_DIR/_locales" "$TMP_DIR/_locales"
 fi
 
-# Copy extension JS and HTML files (exclude dev/test config)
+# Copy extension JS, HTML and CSS files (exclude dev/test config).
+# CSS matters: every popup.html links popup.css, so a zip without it
+# ships an unstyled popup to the store.
 EXCLUDE_PATTERN="vitest.config"
-for f in "$PKG_DIR"/*.js "$PKG_DIR"/*.html; do
+for f in "$PKG_DIR"/*.js "$PKG_DIR"/*.html "$PKG_DIR"/*.css; do
   [ -f "$f" ] || continue
   case "$(basename "$f")" in
     $EXCLUDE_PATTERN*) continue ;;
@@ -88,7 +90,18 @@ if grep -q "localhost" "$TMP_DIR/manifest.json"; then
   exit 1
 fi
 
-FILE_COUNT=$(unzip -l "$DIST_DIR/$ZIP_NAME" | grep -c "\.png\|\.js\|\.html\|\.json")
+# Capture the listing once and grep via herestrings: any pipe into
+# grep -q can end in SIGPIPE for the writer under pipefail, and the
+# early exit makes that racy. The anchored pattern rejects decoys such
+# as not-popup.css while matching root or nested popup.css entries.
+ZIP_LISTING=$(unzip -l "$DIST_DIR/$ZIP_NAME")
+
+if ! grep -Eq '[ /]popup\.css$' <<< "$ZIP_LISTING"; then
+  echo "ERROR: packaged zip is missing popup.css — the popup would render unstyled!" >&2
+  exit 1
+fi
+
+FILE_COUNT=$(grep -c "\.png\|\.js\|\.html\|\.json\|\.css" <<< "$ZIP_LISTING")
 echo "Zip contains $FILE_COUNT files"
 
 echo "Done! Package: $DIST_DIR/$ZIP_NAME"
