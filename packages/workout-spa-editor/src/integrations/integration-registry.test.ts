@@ -17,12 +17,14 @@ const GARMIN_CAPS = ["write:workouts", "write:body"];
 const WHOOP_CAPS = ["read:body", "read:sleep"];
 const TRAIN2GO_CAPS = ["read:training-plan", "read:training-zones"];
 const TANITA_CAPS = ["read:body"];
+const TRAININGPEAKS_CAPS = ["read:body", "write:body"];
 
 const realCapabilities = (bridgeId: string): readonly string[] => {
   if (bridgeId === "garmin-bridge") return GARMIN_CAPS;
   if (bridgeId === "whoop-bridge") return WHOOP_CAPS;
   if (bridgeId === "train2go-bridge") return TRAIN2GO_CAPS;
   if (bridgeId === "tanita-bridge") return TANITA_CAPS;
+  if (bridgeId === "trainingpeaks-bridge") return TRAININGPEAKS_CAPS;
   return [];
 };
 
@@ -82,6 +84,7 @@ describe("KNOWN_BRIDGE_IDS", () => {
       "whoop-bridge",
       "train2go-bridge",
       "tanita-bridge",
+      "trainingpeaks-bridge",
     ];
 
     // Act
@@ -109,10 +112,17 @@ describe("eligibleBridgeIds", () => {
       direction: "export" as IntegrationPolicyDirection,
       expected: ["garmin-bridge"],
     },
+    // `read:body` is shared, so trainingpeaks-bridge announces it too — but it
+    // only serves the weight channel, so it must stay out of body-composition.
     {
       dataType: "body-composition" as ManagedDataType,
       direction: "import" as IntegrationPolicyDirection,
       expected: ["tanita-bridge", "whoop-bridge"],
+    },
+    {
+      dataType: "weight" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+      expected: ["tanita-bridge", "trainingpeaks-bridge", "whoop-bridge"],
     },
     // "planned-session" declares no export token at all.
     {
