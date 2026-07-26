@@ -2,7 +2,18 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { SHORTCUT_CATALOG } from "../../../constants/shortcut-catalog";
+import enHelp from "../../../i18n/locales/en/help.json";
 import { HelpSection } from "./HelpSection";
+
+const resolveHelpLabel = (key: string): string =>
+  key
+    .split(".")
+    .reduce<Record<string, unknown> | string>(
+      (acc, segment) =>
+        (acc as Record<string, unknown>)[segment] as Record<string, unknown>,
+      enHelp as unknown as Record<string, unknown>
+    ) as string;
 
 describe("HelpSection", () => {
   describe("rendering", () => {
@@ -100,7 +111,36 @@ describe("HelpSection", () => {
       expect(screen.getAllByText(/undo/i).length).toBeGreaterThan(0);
       expect(screen.getAllByText(/redo/i).length).toBeGreaterThan(0);
       expect(screen.getByText(/copy selected steps/i)).toBeInTheDocument();
+      expect(screen.getByText(/cut selected steps/i)).toBeInTheDocument();
       expect(screen.getByText(/paste steps/i)).toBeInTheDocument();
+      expect(screen.getByText(/delete selected steps/i)).toBeInTheDocument();
+    });
+
+    it("should display the help shortcuts documented by the catalog", () => {
+      // Arrange
+
+      // Act
+      render(<HelpSection />);
+
+      // Assert
+
+      expect(
+        screen.getByRole("heading", { name: /^help$/i })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/show keyboard shortcuts/i)).toBeInTheDocument();
+    });
+
+    it("should render one row per catalog shortcut", () => {
+      // Arrange
+
+      // Act
+      render(<HelpSection />);
+
+      // Assert
+      for (const def of SHORTCUT_CATALOG) {
+        const label = resolveHelpLabel(def.labelKey);
+        expect(screen.getByText(label)).toBeInTheDocument();
+      }
     });
 
     it("should display step management shortcuts", () => {
