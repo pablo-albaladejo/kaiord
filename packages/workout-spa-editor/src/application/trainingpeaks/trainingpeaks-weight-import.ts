@@ -5,6 +5,7 @@
 import type { KRD, ManagedDataType } from "@kaiord/core";
 import { canonicalHash } from "@kaiord/core";
 
+import type { CoachingSyncStateRepository } from "../../ports/persistence-port";
 import type { ImportedRecordRepository } from "../import/imported-record-repository.port";
 import { stampProvenance } from "../import/stamp-provenance";
 import { upsertImportedRecord } from "../import/upsert-imported-record.use-case";
@@ -27,6 +28,12 @@ export type SyncTrainingPeaksWeightDeps = {
   readMetrics: (start: string, end: string) => Promise<unknown>;
   /** Injected so this layer never imports @kaiord/trainingpeaks directly. */
   parse: (response: unknown) => KRD[];
+  /**
+   * Freshness ledger. Required, not optional: an optional dep silently
+   * no-ops at any future call site that forgets it, and the missing row
+   * only surfaces as a blank "last synced" cell much later.
+   */
+  coachingSyncState: CoachingSyncStateRepository;
 };
 
 export type SyncTrainingPeaksWeightInput = {

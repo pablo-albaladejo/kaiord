@@ -2,7 +2,7 @@
  * buildDataRouteSignals — one-shot (non-reactive) `DataHubMatrixSignals`
  * snapshot for the `get_data_routes` chat tool. Mirrors
  * `useDataHubMatrix`'s signal wiring (bridge discovery, the v24
- * connections store, IntegrationPolicy rows, Train2Go sync freshness) as
+ * connections store, IntegrationPolicy rows, per-bridge sync freshness) as
  * a plain async function, so the application-layer tool never imports
  * adapters directly (patrón do-push-to-garmin.ts).
  */
@@ -11,11 +11,13 @@ import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
 import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
+import {
+  byIntegrationId,
+  readBridgeSyncStates,
+} from "../../application/data-hub/read-bridge-sync-states";
 import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { IntegrationPolicy } from "../../types/integration-policy";
-
-const TRAIN2GO = "train2go";
 
 type ByDataType = Map<
   ManagedDataType,
@@ -54,10 +56,12 @@ export const buildDataRouteSignals = async (
   persistence: PersistencePort,
   profileId: string
 ): Promise<DataHubMatrixSignals> => {
-  const [connections, byDataType, train2goState] = await Promise.all([
+  const [connections, byDataType, syncStates] = await Promise.all([
     persistence.connections.getByProfile(profileId),
     fetchPoliciesByDataType(persistence, profileId),
-    persistence.coachingSyncState.getBySourceAndProfile(TRAIN2GO, profileId),
+    readBridgeSyncStates(persistence.coachingSyncState, profileId).then(
+      byIntegrationId
+    ),
   ]);
   const connectionByProvider = new Map(
     connections.map((c) => [c.providerId, c])
@@ -74,8 +78,7 @@ export const buildDataRouteSignals = async (
       (byDataType.get(dataType)?.[direction] ?? []).some(
         (p) => p.bridgeId === bridgeId && p.enabled
       ),
-    lastSyncedAt: (id) =>
-      id === TRAIN2GO ? train2goState?.lastSyncedAt : undefined,
+    lastSyncedAt: (id) => syncStates.get(id),
     findRoute: (dataType, direction, bridgeId) => {
       const match = (byDataType.get(dataType)?.[direction] ?? []).find(
         (p) => p.bridgeId === bridgeId

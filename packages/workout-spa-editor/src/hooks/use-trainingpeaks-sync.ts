@@ -45,6 +45,7 @@ const runTrainingPeaksSync = async (
       readMetrics: (start, end) =>
         readTrainingPeaksMetrics(extensionId, start, end),
       parse: trainingPeaksMetricsToKrd,
+      coachingSyncState: persistence.coachingSyncState,
     },
     {
       profileId,

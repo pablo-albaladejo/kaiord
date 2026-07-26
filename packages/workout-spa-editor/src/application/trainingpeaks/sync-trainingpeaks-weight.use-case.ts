@@ -14,12 +14,14 @@
  */
 import type { KRD } from "@kaiord/core";
 
+import { syncSourceFor } from "../../integrations/bridge-sync-sources";
 import {
   isTrainingPeaksWeightEnabled,
   persistWeightDocuments,
   type SyncTrainingPeaksWeightDeps,
   type SyncTrainingPeaksWeightInput,
   type SyncTrainingPeaksWeightResult,
+  TRAININGPEAKS_BRIDGE_ID,
 } from "./trainingpeaks-weight-import";
 
 export type {
@@ -58,5 +60,10 @@ export const syncTrainingPeaksWeight = async (
     input.profileId,
     documents
   );
+  await deps.coachingSyncState.put({
+    source: syncSourceFor(TRAININGPEAKS_BRIDGE_ID),
+    profileId: input.profileId,
+    lastSyncedAt: new Date().toISOString(),
+  });
   return { ok: true, ...counts };
 };

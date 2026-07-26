@@ -30,6 +30,7 @@ const runTanitaImport = async (
       importedRecords: persistence.importedRecords,
       readCsv: () => readTanitaExportCsv(extensionId),
       parse: tanitaCsvToKrd,
+      coachingSyncState: persistence.coachingSyncState,
     },
     { profileId }
   );

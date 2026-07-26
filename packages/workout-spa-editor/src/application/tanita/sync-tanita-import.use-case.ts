@@ -13,6 +13,7 @@
  */
 import type { KRD } from "@kaiord/core";
 
+import { syncSourceFor } from "../../integrations/bridge-sync-sources";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 import {
   persistPendingRecords,
@@ -75,5 +76,10 @@ export const syncTanitaImport = async (
     documents,
     flags
   );
+  await deps.coachingSyncState.put({
+    source: syncSourceFor(TANITA_BRIDGE_ID),
+    profileId: input.profileId,
+    lastSyncedAt: new Date().toISOString(),
+  });
   return { ok: true, ...counts };
 };
