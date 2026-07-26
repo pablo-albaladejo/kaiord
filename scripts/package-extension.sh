@@ -90,16 +90,18 @@ if grep -q "localhost" "$TMP_DIR/manifest.json"; then
   exit 1
 fi
 
-# Capture the listing once: grep -q on a pipe exits early and, under
-# pipefail, unzip's resulting SIGPIPE would fail the check racily.
+# Capture the listing once and grep via herestrings: any pipe into
+# grep -q can end in SIGPIPE for the writer under pipefail, and the
+# early exit makes that racy. The anchored pattern rejects decoys such
+# as not-popup.css while matching root or nested popup.css entries.
 ZIP_LISTING=$(unzip -l "$DIST_DIR/$ZIP_NAME")
 
-if ! printf '%s' "$ZIP_LISTING" | grep -q "popup\.css"; then
+if ! grep -Eq '[ /]popup\.css$' <<< "$ZIP_LISTING"; then
   echo "ERROR: packaged zip is missing popup.css — the popup would render unstyled!" >&2
   exit 1
 fi
 
-FILE_COUNT=$(printf '%s' "$ZIP_LISTING" | grep -c "\.png\|\.js\|\.html\|\.json\|\.css")
+FILE_COUNT=$(grep -c "\.png\|\.js\|\.html\|\.json\|\.css" <<< "$ZIP_LISTING")
 echo "Zip contains $FILE_COUNT files"
 
 echo "Done! Package: $DIST_DIR/$ZIP_NAME"

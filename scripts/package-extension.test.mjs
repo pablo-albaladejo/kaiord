@@ -45,7 +45,10 @@ before(() => {
   mkdirSync(join(pkgDir, "icons"), { recursive: true });
   mkdirSync(join(pkgDir, "test"), { recursive: true });
   mkdirSync(join(pkgDir, "_locales", "en"), { recursive: true });
-  writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ version: VERSION }));
+  writeFileSync(
+    join(pkgDir, "package.json"),
+    JSON.stringify({ version: VERSION })
+  );
   writeFileSync(
     join(pkgDir, "manifest.prod.json"),
     JSON.stringify({ name: "x", version: VERSION })
@@ -53,7 +56,7 @@ before(() => {
   writeFileSync(join(pkgDir, "icons", "icon16.png"), FAKE_PNG);
   writeFileSync(join(pkgDir, "_locales", "en", "messages.json"), "{}");
   writeFileSync(join(pkgDir, "background.js"), "// bg\n");
-  writeFileSync(join(pkgDir, "popup.html"), "<link href=\"popup.css\">\n");
+  writeFileSync(join(pkgDir, "popup.html"), '<link href="popup.css">\n');
   writeFileSync(join(pkgDir, "popup.css"), ".status {}\n");
   writeFileSync(join(pkgDir, "vitest.config.js"), "export default {}\n");
   writeFileSync(join(pkgDir, "test", "popup.test.js"), "// never packaged\n");
@@ -65,7 +68,13 @@ before(() => {
   );
   assert.equal(run.status, 0, run.stderr || run.stdout);
 
-  const zip = join(root, "packages", EXT, "dist", `kaiord-${EXT}-${VERSION}.zip`);
+  const zip = join(
+    root,
+    "packages",
+    EXT,
+    "dist",
+    `kaiord-${EXT}-${VERSION}.zip`
+  );
   zipListing = execFileSync("unzip", ["-l", zip], { encoding: "utf8" });
 });
 
@@ -92,4 +101,32 @@ test("zip contains the runtime whitelist: manifest, js, html, icons, locales", (
 test("zip excludes dev/test files: vitest.config and test/", () => {
   assert.doesNotMatch(zipListing, /vitest\.config/);
   assert.doesNotMatch(zipListing, /test\/popup\.test\.js/);
+});
+
+test("build fails loudly when popup.css is missing — a decoy not-popup.css must not satisfy the check", () => {
+  const ext = "nocss-bridge";
+  const pkgDir = join(root, "packages", ext);
+  mkdirSync(join(pkgDir, "icons"), { recursive: true });
+  writeFileSync(
+    join(pkgDir, "package.json"),
+    JSON.stringify({ version: VERSION })
+  );
+  writeFileSync(
+    join(pkgDir, "manifest.prod.json"),
+    JSON.stringify({ name: "x", version: VERSION })
+  );
+  writeFileSync(join(pkgDir, "icons", "icon16.png"), FAKE_PNG);
+  writeFileSync(join(pkgDir, "background.js"), "// bg\n");
+  writeFileSync(join(pkgDir, "popup.html"), '<link href="popup.css">\n');
+  // The decoy matches a naive substring check but is not popup.css.
+  writeFileSync(join(pkgDir, "not-popup.css"), ".decoy {}\n");
+
+  const run = spawnSync(
+    "bash",
+    [join(root, "scripts", "package-extension.sh"), ext],
+    { cwd: root, encoding: "utf8" }
+  );
+
+  assert.notEqual(run.status, 0, "packaging must fail without popup.css");
+  assert.match(run.stderr, /missing popup\.css/);
 });
