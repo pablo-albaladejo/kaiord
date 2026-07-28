@@ -55,20 +55,17 @@ jobs:
           CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
         run: node scripts/cws-api.mjs check ${{ secrets.CWS_EXTENSION_ID }}
 
-      - name: Open cws-auth-broken issue on failure
-        if: failure() && steps.check.conclusion == 'failure'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          node scripts/cws-notify-issue.mjs cws-auth-broken "" \
-            "Pre-flight failed at $(date -u +%FT%TZ). See workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
       - name: Ensure issue labels exist
+        # MUST precede any step that files an issue. The very run that trips
+        # the auth check is the run that needs `cws-auth-broken` to exist, so
+        # `if: always()` keeps this step alive after a failed auth check.
+        #
         # Idempotent: `gh label create --force` updates the description
         # if the label already exists. Without these, downstream
         # `gh issue create --label` calls fail with non-zero exit and
         # block the decide/act jobs even when the rest of the flow is
         # healthy.
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -83,6 +80,14 @@ jobs:
           gh label create cws-auth-broken --color D7263D --description "CWS service-account authentication is failing" --force
           gh label create cws-publish-verification-timeout --color FF9F1C --description "CWS publish did not reach PUBLISHED within the wait budget" --force
           gh label create cws-publish-rejected --color D7263D --description "CWS rejected the submitted extension version" --force
+
+      - name: Open cws-auth-broken issue on failure
+        if: failure() && steps.check.conclusion == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/cws-notify-issue.mjs cws-auth-broken "" \
+            "Pre-flight failed at $(date -u +%FT%TZ). See workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Write summary header
         if: always()

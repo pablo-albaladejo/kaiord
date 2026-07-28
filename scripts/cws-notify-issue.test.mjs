@@ -60,10 +60,13 @@ function ghFake(store) {
           );
         }
         const label = flag(args, "--label");
+        // No --label and no --search: an unfiltered scan of open issues.
+        const matched =
+          label === null
+            ? store.issues
+            : store.issues.filter((i) => i.labels.includes(label));
         return JSON.stringify(
-          store.issues
-            .filter((i) => i.labels.includes(label))
-            .map(({ number, title }) => ({ number, title }))
+          matched.map(({ number, title }) => ({ number, title }))
         );
       }
       if (verb === "label create") {
@@ -83,6 +86,14 @@ function ghFake(store) {
         });
         return `https://github.com/owner/repo/issues/${number}\n`;
       }
+      if (verb === "issue edit") {
+        const add = flag(args, "--add-label");
+        const target = store.issues.find((i) => i.number === Number(args[2]));
+        if (add !== null && target && !target.labels.includes(add)) {
+          target.labels.push(add);
+        }
+        return "";
+      }
       if (verb === "issue comment") {
         store.comments.push({
           issue: Number(args[2]),
@@ -91,6 +102,19 @@ function ghFake(store) {
         return "";
       }
       throw new Error(`unexpected gh call: ${args.join(" ")}`);
+    },
+  };
+}
+
+// A gh whose token cannot write labels (e.g. a restricted GITHUB_TOKEN).
+function labelDenied(store) {
+  const inner = ghFake(store);
+  return {
+    exec: (cmd, args) => {
+      if (`${args[0]} ${args[1]}` === "label create") {
+        throw new Error("HTTP 403: Resource not accessible by integration");
+      }
+      return inner.exec(cmd, args);
     },
   };
 }
@@ -189,8 +213,9 @@ describe("findOpenIssue", () => {
 describe("openOrBump", () => {
   it("creates a new issue when none exists", () => {
     const deps = fakeDeps([
-      () => JSON.stringify([]), // findOpenIssue list returns empty
+      () => JSON.stringify([]), // findOpenIssue: list by label, empty
       () => "", // gh label create --force
+      () => JSON.stringify([]), // title scan: no unlabelled orphan
       () => "https://github.com/owner/repo/issues/123\n", // create returns URL
     ]);
 
@@ -203,9 +228,9 @@ describe("openOrBump", () => {
 
     strictEqual(result.action, "created");
     strictEqual(result.issue, 123);
-    strictEqual(deps.calls.length, 3);
-    strictEqual(deps.calls[2].args[0], "issue");
-    strictEqual(deps.calls[2].args[1], "create");
+    strictEqual(deps.calls.length, 4);
+    strictEqual(deps.calls[3].args[0], "issue");
+    strictEqual(deps.calls[3].args[1], "create");
   });
 
   it("bumps existing issue with comment when title matches", () => {
@@ -230,6 +255,7 @@ describe("openOrBump", () => {
     const deps = fakeDeps([
       () => JSON.stringify([]),
       () => "",
+      () => JSON.stringify([]),
       () => "https://github.com/owner/repo/issues/200",
     ]);
 
@@ -240,7 +266,7 @@ describe("openOrBump", () => {
       deps
     );
 
-    const createArgs = deps.calls[2].args;
+    const createArgs = deps.calls[3].args;
     const titleIdx = createArgs.indexOf("--title");
     strictEqual(
       createArgs[titleIdx + 1],
@@ -253,6 +279,7 @@ describe("openOrBump", () => {
     const writerA = fakeDeps([
       () => JSON.stringify([]),
       () => "",
+      () => JSON.stringify([]),
       () => "https://github.com/owner/repo/issues/50",
     ]);
     const a = openOrBump(
@@ -355,26 +382,56 @@ describe("openOrBump — missing label must not swallow the alert", () => {
 
   it("still files the issue unlabelled if the label cannot be created", () => {
     const store = ghStore({ labels: [] });
-    const deps = ghFake(store);
-    const guarded = {
-      exec: (cmd, args) => {
-        // Simulate a token without label-write permission.
-        if (`${args[0]} ${args[1]}` === "label create") {
-          throw new Error("HTTP 403: Resource not accessible by integration");
-        }
-        return deps.exec(cmd, args);
-      },
-    };
-
     const result = openOrBump(
       "cws-publish-rejected",
       "@kaiord/whoop-bridge@1.2.3",
       "rejected by review",
-      guarded
+      labelDenied(store)
     );
 
     strictEqual(result.action, "created");
     strictEqual(result.labeled, false);
+    strictEqual(store.issues.length, 1);
+  });
+
+  it("does not re-duplicate across runs while label writes stay denied", () => {
+    // The degraded path cannot dedupe by label (there is no label), so without
+    // a title-scan fallback the cycle list-by-label → empty → file unlabelled
+    // repeats unbounded, silently, at exit 0.
+    const store = ghStore({ labels: [] });
+    const runs = [];
+    for (let i = 0; i < 3; i++) {
+      runs.push(
+        openOrBump(
+          "cws-publish-rejected",
+          "@kaiord/whoop-bridge@1.2.3",
+          "rejected by review",
+          labelDenied(store)
+        ).action
+      );
+    }
+
+    deepStrictEqual(runs, ["created", "bumped", "bumped"]);
+    strictEqual(store.issues.length, 1);
+  });
+
+  it("recovers onto the labelled path once label writes succeed again", () => {
+    const store = ghStore({ labels: [] });
+    openOrBump(
+      "cws-publish-rejected",
+      "@kaiord/x@1.0.0",
+      "a",
+      labelDenied(store)
+    );
+
+    const recovered = openOrBump(
+      "cws-publish-rejected",
+      "@kaiord/x@1.0.0",
+      "b",
+      ghFake(store)
+    );
+
+    strictEqual(recovered.action, "bumped");
     strictEqual(store.issues.length, 1);
   });
 });

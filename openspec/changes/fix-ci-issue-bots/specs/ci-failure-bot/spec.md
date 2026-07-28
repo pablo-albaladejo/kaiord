@@ -1,3 +1,86 @@
+## MODIFIED Requirements
+
+### Requirement: Bot logic lives in a tested script, not inline workflow JS
+
+The CI-failure issue automation SHALL be implemented in `scripts/ci-failure-issue.mjs` with a co-located `scripts/ci-failure-issue.test.mjs` covering every decision branch. The workflow YAML SHALL invoke the script via `node scripts/ci-failure-issue.mjs <create|close>`. Inline `actions/github-script` blocks SHALL NOT carry decision logic; they MAY only marshal environment and dispatch to the script.
+
+The script SHALL follow the project's repo-script convention: entry-point check via `pathToFileURL(process.argv[1]) === import.meta.url`, exported pure functions for testability, structured one-line log lines for greppable workflow output. Tests SHALL mock the `gh` CLI boundary via dependency-injection (`deps.exec`) and exercise every branch enumerated in the requirements below.
+
+#### Scenario: Workflow invokes the script
+
+- **WHEN** the `notify-failure` job runs on a red main build
+- **THEN** the job's main step SHALL be `node scripts/ci-failure-issue.mjs create '<failed-jobs-json>'`; no inline JS performs `gh` API calls
+
+#### Scenario: Tests cover all decision branches
+
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the suite SHALL include at least 12 tests for `ci-failure-issue.mjs` covering create, comment-dedupe, close-on-covered-run, skip-on-uncovered-run, missing-footer, malformed-footer, race-closed, unknown-schema, absent-schema-back-compat, in-process dedupe, no-op-on-no-issue, and `--canary` flag behavior
+- **AND** the suite SHALL cover the per-job coverage rule: display-name aliasing, matrix-shard collection, aggregator/real-job name collision, empty job set, and an unreadable job list
+
+### Requirement: Footer marker grammar with explicit schema versioning
+
+A created issue body SHALL embed a single machine-readable HTML-comment footer in this exact form:
+
+```
+<!-- ci-failure-bot
+     failed-jobs: ["<job-1>","<job-2>", ...]
+     schema: 1
+-->
+```
+
+`failed-jobs` SHALL be a JSON array of strings; each string is a stable job identifier emitted by the `notify-failure` aggregation step. `schema` SHALL be an optional integer; if absent, parsers SHALL treat the footer as `schema: 1` (back-compat for v1 issues filed before schema versioning).
+
+The close-pass SHALL parse the footer with these failure modes, in order:
+
+| Footer state                                                       | Action                                                                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| Absent                                                             | Do not close. Log `skipped: missing-footer`.                                                            |
+| Present, malformed JSON                                            | Do not close. Log `skipped: malformed-footer`. Bot MUST NOT throw.                                      |
+| Present, `schema` field absent                                     | Treat as `schema: 1`. Proceed.                                                                          |
+| Present, `schema: 1`, `failed-jobs` valid                          | Proceed.                                                                                                |
+| Present, `failed-jobs` contains the synthetic `"canary-job"` token | Do not close. Log `skipped: canary-issue` (canary issues stay open until manually resolved by the DRI). |
+| Present, `schema: N` where N ≠ 1 and N is unknown to this bot      | Do not close. Log `skipped: unknown-schema`.                                                            |
+
+`failed-jobs` is the close-pass's operative input: the bot matches each identifier against the green run's jobs per the per-job coverage rule. Identifiers are job IDs, reconciled to workflow_run display names by the close-pass; see "Footer job identifiers reconcile to workflow_run display names".
+
+Every job named in the `notify-failure` job's `if:` trigger condition SHALL also be recorded by its aggregation step. A trigger that is never recorded yields a footer no green run can satisfy, leaving a permanently unclosable issue. An empty failure set SHALL serialise as `[]`, never as `[""]`.
+
+#### Scenario: Footer absent → do not close
+
+- **GIVEN** an open `ci,automated` issue with no HTML-comment footer present
+- **WHEN** any green main run completes
+- **THEN** the close-pass SHALL NOT close the issue; SHALL log `skipped: missing-footer`
+
+#### Scenario: Malformed footer JSON does not crash the bot
+
+- **GIVEN** an open issue with footer `<!-- ci-failure-bot failed-jobs: not-json schema: 1 -->`
+- **WHEN** the close-pass runs
+- **THEN** the bot SHALL log `skipped: malformed-footer`; SHALL NOT throw; SHALL exit zero
+
+#### Scenario: Unknown schema is forward-compatible
+
+- **GIVEN** an open issue with footer `failed-jobs: ["lint"]`, `schema: 2`
+- **WHEN** the current bot (which only understands schema 1) runs the close-pass
+- **THEN** the bot SHALL log `skipped: unknown-schema`; SHALL NOT close; SHALL NOT throw
+
+#### Scenario: Absent schema field is treated as schema 1
+
+- **GIVEN** an open issue with footer `failed-jobs: ["lint"]` and no `schema:` line
+- **WHEN** the close-pass runs against a green run covering `lint`
+- **THEN** the bot SHALL parse as schema 1 and SHALL close the issue
+
+#### Scenario: Canary issue is preserved across green runs
+
+- **GIVEN** an open `ci,automated,canary` issue with footer `failed-jobs: ["canary-job"]`, `schema: 1`
+- **WHEN** any subsequent green main run completes
+- **THEN** the close-pass SHALL log `skipped: canary-issue` and SHALL NOT close the issue; only the DRI's manual close resolves it
+
+#### Scenario: Every notify-failure trigger is recordable
+
+- **GIVEN** the `notify-failure` job's `if:` condition names a job as a failure trigger
+- **WHEN** that job is the only one that failed
+- **THEN** the aggregation step SHALL emit a footer naming it; the footer SHALL NOT be empty and SHALL NOT be `[""]`
+
 ## REMOVED Requirements
 
 ### Requirement: v1 close-rule — close only on a fully-green run

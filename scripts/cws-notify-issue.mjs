@@ -114,11 +114,35 @@ export function openOrBump(kind, suffix, body, deps = defaultDeps()) {
       "comment",
       String(existing),
       "--body",
-      `Re-detected at ${new Date().toISOString()}\n\n${body}`,
+      bumpBody(body),
     ]);
     return { issue: existing, action: "bumped", labeled: true };
   }
   const labeled = ensureLabel(kind, deps);
+  // Before creating anything, scan open issues by title with no label filter.
+  // A previous run whose label write was denied filed an UNLABELLED issue that
+  // the labelled lookup above can never see; without this the cycle
+  // (list-by-label → empty → file unlabelled) repeats unbounded and silent.
+  const orphan = findOpenIssueByTitleScan(title, deps);
+  if (orphan != null) {
+    deps.exec("gh", [
+      "issue",
+      "comment",
+      String(orphan),
+      "--body",
+      bumpBody(body),
+    ]);
+    // Once label writes work again, adopt the orphan so subsequent runs find
+    // it on the fast labelled path. `--add-label` is idempotent.
+    if (labeled) {
+      try {
+        deps.exec("gh", ["issue", "edit", String(orphan), "--add-label", kind]);
+      } catch {
+        // Bumping already succeeded; adoption is best-effort.
+      }
+    }
+    return { issue: orphan, action: "bumped", labeled };
+  }
   const base = ["issue", "create", "--title", title, "--body", body];
   const out = labeled
     ? deps.exec("gh", [...base, "--label", kind])
@@ -128,6 +152,27 @@ export function openOrBump(kind, suffix, body, deps = defaultDeps()) {
     action: "created",
     labeled,
   };
+}
+
+// Fallback for the unlabelled degraded path only. Scans open issues without a
+// label filter and matches the title exactly; still no search-query parsing.
+export function findOpenIssueByTitleScan(title, deps = defaultDeps()) {
+  const out = deps.exec("gh", [
+    "issue",
+    "list",
+    "--state",
+    "open",
+    "--json",
+    "number,title",
+    "--limit",
+    "100",
+  ]);
+  const exact = JSON.parse(out || "[]").find((i) => i.title === title);
+  return exact ? exact.number : null;
+}
+
+function bumpBody(body) {
+  return `Re-detected at ${new Date().toISOString()}\n\n${body}`;
 }
 
 function parseIssueNumberFromUrl(url) {

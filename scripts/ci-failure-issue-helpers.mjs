@@ -152,7 +152,15 @@ export function runCreate({ failedJobs, isCanary, ctx }, deps) {
 // (`lint-summary` → `lint`, etc.) are never emitted into a footer, so they
 // need no alias — but they DO collide by name, which matchRunJobs handles by
 // requiring every same-named job to be green.
-const JOB_DISPLAY_NAMES = { "check-links": "Link checker" };
+// Null-prototype: footer content comes from an issue body, which anyone able
+// to edit a `ci`+`automated` issue can rewrite. A plain object literal would
+// resolve `failed-jobs: ["constructor"]` to a function via the prototype
+// chain instead of falling through to the identifier.
+// Exported so scripts/check-ci-failure-bot-contract.mjs can assert it against
+// ci.yml's actual `name:` overrides.
+export const JOB_DISPLAY_NAMES = Object.assign(Object.create(null), {
+  "check-links": "Link checker",
+});
 
 // A footer job maps to the run's exact-name job plus every matrix shard,
 // which the API renders as `<name> (<matrix values>)`.

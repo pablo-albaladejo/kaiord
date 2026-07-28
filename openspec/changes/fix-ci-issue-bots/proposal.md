@@ -93,6 +93,23 @@ notifier itself depends on.
   uncertainty cases also skip: an empty footer job set and an unreadable job
   list.
 
+### CI-failure bot — repairing the create side too
+
+The close rule is only as good as the footer it reads, and the writer had two
+defects of its own:
+
+- `jscpd` is listed as a `notify-failure` failure trigger but was never
+  appended by the aggregation step. A jscpd-only red main therefore filed an
+  issue whose footer named no job — permanently unclosable under the v2 rule.
+  It is now recorded (no alias needed; it has no `name:` override).
+- `printf '%s\n' "${jobs[@]}" | jq -R . | jq -sc .` serialises an **empty**
+  bash array as `[""]`, not `[]` — a footer naming a job that cannot exist.
+  Replaced with `jq -nc '$ARGS.positional' --args`.
+- New guard `scripts/check-ci-failure-bot-contract.mjs`
+  (`R-CiFailureBotContract`) asserts the writer and reader stay in agreement:
+  triggers ⇄ recordings, and the alias table ⇄ `ci.yml`'s `name:` overrides.
+  Both defects above are drift of exactly this kind, and neither failed loudly.
+
 ### CWS notifier — label-based dedupe
 
 - Dedupe by listing the kind's own label and comparing titles exactly,
@@ -112,7 +129,8 @@ notifier itself depends on.
 - Affected specs: `ci-failure-bot`, `cws-auto-publish`
 - Affected code: `scripts/ci-failure-issue-helpers.mjs`,
   `scripts/ci-failure-issue.mjs`, `scripts/cws-notify-issue.mjs`,
-  `.github/workflows/ci-issue-bot-success.yml`,
+  new `scripts/check-ci-failure-bot-contract.mjs`,
+  `.github/workflows/ci.yml`, `.github/workflows/ci-issue-bot-success.yml`,
   `.github/workflows/cws-publish.yml`
 - No package source touched; no changeset required (repo tooling only).
 - The existing duplicate issues are **not** cleaned up here — cleanup happens
