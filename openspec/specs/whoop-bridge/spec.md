@@ -4,7 +4,13 @@
 
 ## Purpose
 
-TBD - created by archiving change rewrite-whoop-session-bridge. Update Purpose after archive.
+Chrome extension that gives the Kaiord SPA read-only access to a signed-in
+WHOOP web session by piggybacking on `app.whoop.com`'s own authenticated
+requests — no OAuth flow, no developer API key, and no stored WHOOP
+credential. A main-world interceptor captures the session bearer the WHOOP
+web app already attaches to its `api.prod.whoop.com` calls, holds it only in
+memory-only session storage, and relays a fixed allowlist of read-only
+internal-API paths back to the SPA.
 
 ## Requirements
 

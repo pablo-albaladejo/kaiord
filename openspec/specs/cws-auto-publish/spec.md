@@ -4,7 +4,15 @@
 
 ## Purpose
 
-Automated Chrome Web Store publishing for every extension in the monorepo, triggered by a version bump in the extension's `package.json`.
+Automated Chrome Web Store publishing for the extensions currently
+registered with the Chrome Web Store — today `garmin-bridge` and
+`train2go-bridge` — triggered by a version bump in each extension's
+`package.json`. Three other bridge extensions ship in the monorepo
+(`whoop-bridge`, `trainingpeaks-bridge`, `tanita-bridge`) but have no Chrome
+Web Store Developer Dashboard listing, extension ID, or publish secret yet,
+so they are absent from this workflow's matrix and are not published by it.
+See Requirement "Onboarding a new bridge extension to automated publishing"
+for the steps a maintainer must complete to add one.
 
 ## Requirements
 
@@ -260,6 +268,31 @@ NOTE: changesets excludes private packages from linked-group bumps by default. T
 - **GIVEN** an extension has `private: true` in `package.json`
 - **WHEN** `pnpm exec changeset publish` is run
 - **THEN** the package SHALL NOT be published to npm
+
+### Requirement: Onboarding a new bridge extension to automated publishing
+
+Only `garmin-bridge` and `train2go-bridge` are wired into `cws-publish.yml`'s matrix today. Before a third extension (`whoop-bridge`, `trainingpeaks-bridge`, `tanita-bridge`, or any future bridge) can be automatically published, a maintainer SHALL perform the following one-time, human-only steps — none of them can be automated by this workflow:
+
+1. **Create the Chrome Web Store Developer Dashboard listing**: upload an initial build of the extension zip as a new item in the dashboard and complete the store-listing fields (see the extension's `store-listing.md`). The shared service account (Requirement "Service-account authentication") is linked to the publisher account, not to an individual item, so this step does not require re-linking the service account.
+2. **Record the extension ID**: the Developer Dashboard assigns a permanent extension ID on creation. Capture it.
+3. **Add a repository secret**: create a new GitHub Actions secret holding that extension ID, following the `CWS_EXTENSION_ID` / `CWS_TRAIN2GO_EXTENSION_ID` naming pattern (e.g. `CWS_WHOOP_EXTENSION_ID`). The shared `CWS_SERVICE_ACCOUNT_KEY` secret does not change — one service account authenticates for every extension linked to the publisher.
+4. **Widen the `cws-publish.yml` matrix**: add a `{ name: "<extension>-bridge", extension_id_secret: "CWS_<EXTENSION>_EXTENSION_ID" }` entry to both the `decide` and `act` job matrices, and add `packages/<extension>-bridge/**` to the workflow's `on.push.paths` trigger.
+5. **Add the extension to changesets versioning** per Requirement "Changesets configuration for extensions" above, so a version bump can reach the new matrix entry.
+
+Until all five steps are complete for an extension, its `package.json` version bumps are inert as far as Chrome Web Store publishing is concerned — the workflow simply never runs for that extension's changed paths.
+
+#### Scenario: Unregistered bridge extension version bump is a no-op for CWS
+
+- **GIVEN** `whoop-bridge`, `trainingpeaks-bridge`, or `tanita-bridge` — none registered in the Developer Dashboard, none present in the `cws-publish.yml` matrix
+- **WHEN** a version bump lands on `main` for one of them
+- **THEN** `cws-publish.yml` SHALL NOT trigger for that change (its path is not in `on.push.paths` and it has no matrix entry)
+- **AND** no Chrome Web Store upload, publish, or git tag SHALL occur for that extension
+
+#### Scenario: Registering a new bridge extension
+
+- **GIVEN** a maintainer has created the Chrome Web Store Developer Dashboard listing for a new bridge and recorded its extension ID
+- **WHEN** the maintainer adds the corresponding repository secret and widens the `decide`/`act` matrices and `on.push.paths`
+- **THEN** the next version bump to that extension's `package.json` SHALL be picked up by the existing upload → publish → verify flow with no other workflow changes required
 
 ### Requirement: Version sync script
 
