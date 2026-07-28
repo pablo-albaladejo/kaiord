@@ -314,9 +314,12 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
       expect(modalBox.width).toBeLessThanOrEqual(viewportWidth + tolerance);
     }
 
-    // Verify buttons are accessible on mobile
-    const cancelButton = page.getByRole("button", { name: /cancel/i });
-    const confirmButton = page.getByRole("button", { name: /delete/i });
+    // Verify buttons are accessible on mobile. Scope to the dialog: the
+    // cards behind it also carry delete buttons, and whether those are
+    // hidden from the a11y tree depends on incidental aria-hidden left by
+    // the dropdown that opened this modal.
+    const cancelButton = modal.getByRole("button", { name: /cancel/i });
+    const confirmButton = modal.getByRole("button", { name: /delete/i });
 
     await expect(cancelButton).toBeVisible();
     await expect(confirmButton).toBeVisible();
