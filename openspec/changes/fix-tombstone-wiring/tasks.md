@@ -62,8 +62,8 @@
 
 ## 9. Verification
 
-- [x] 7.1 `tsc -p tsconfig.app.json --noEmit` clean.
-- [x] 7.2 `pnpm --filter @kaiord/workout-spa-editor lint` clean.
-- [x] 7.3 Full SPA vitest suite green.
-- [x] 7.4 Prettier clean; `pnpm test:scripts` unchanged-green.
-- [x] 7.5 `npx openspec validate fix-tombstone-wiring` passes.
+- [x] 9.1 `tsc -p tsconfig.app.json --noEmit` clean.
+- [x] 9.2 `pnpm --filter @kaiord/workout-spa-editor lint` clean.
+- [x] 9.3 Full SPA vitest suite green.
+- [x] 9.4 Prettier clean; `pnpm test:scripts` unchanged-green.
+- [x] 9.5 `npx openspec validate fix-tombstone-wiring` passes.

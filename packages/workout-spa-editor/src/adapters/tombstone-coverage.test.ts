@@ -1,11 +1,8 @@
 /**
- * Coverage guard for delete-propagation.
- *
- * The tombstone wiring bug survived because nothing forced a decision when a
- * synced table grew a delete. This suite enumerates every id-deletable
- * repository on `PersistencePort` at runtime and requires each one to be
- * either decorated by `withTombstones`, device-local, or on an explicitly
- * reasoned exception list. Adding a repo without classifying it fails here.
+ * Coverage guard for delete-propagation: every id-deletable repository on
+ * `PersistencePort` must be decorated by `withTombstones`, device-local, or
+ * on an explicitly reasoned exception list. Adding a repo without
+ * classifying it fails here.
  */
 import "fake-indexeddb/auto";
 

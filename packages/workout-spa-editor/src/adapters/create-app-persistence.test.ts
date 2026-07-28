@@ -1,13 +1,8 @@
 /**
- * The join nobody was testing.
- *
- * Both halves of delete-propagation had unit suites — `withTombstones` records
- * markers, `mergeSnapshots` honours them — and the wiring between them was
- * still broken, because `main.tsx` handed the app a bare
- * `createDexiePersistence()`. These are application-level round trips composed
- * exactly the way production composes persistence (`createAppPersistence`),
- * against real Dexie (fake-indexeddb) and a shared fake cloud, so the
- * decorator/merge join is asserted as behaviour rather than as source text.
+ * Application-level round trips composed exactly the way production
+ * composes persistence (`createAppPersistence`), against real Dexie and a
+ * shared fake cloud, so the decorator/merge join is asserted as behaviour
+ * rather than as source text.
  */
 import "fake-indexeddb/auto";
 
