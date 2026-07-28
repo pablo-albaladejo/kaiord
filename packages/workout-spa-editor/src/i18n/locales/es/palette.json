@@ -1,0 +1,83 @@
+{
+  "title": "Paleta de comandos",
+  "searchLabel": "Buscar comandos",
+  "searchPlaceholder": "Buscar comandos…",
+  "listLabel": "Comandos",
+  "empty": "No hay coincidencias para esa búsqueda.",
+  "groups": {
+    "do": "Hazlo",
+    "learn": "Aprende"
+  },
+  "footer": {
+    "run": "↵ ejecutar",
+    "shortcuts": "? todos los atajos",
+    "docs": "Documentación completa ↗"
+  },
+  "commands": {
+    "cut": {
+      "title": "Cortar el paso seleccionado",
+      "subtitle": "Lo elimina y lo deja en el portapapeles",
+      "requires": "Selecciona un único paso de la lista principal"
+    },
+    "copy": {
+      "title": "Copiar el paso seleccionado",
+      "subtitle": "Lo deja en el portapapeles",
+      "requires": "Selecciona un paso de la lista principal"
+    },
+    "paste": {
+      "title": "Pegar el paso copiado",
+      "subtitle": "Lo inserta tras la selección actual",
+      "requires": "Copia o corta antes un paso"
+    },
+    "delete": {
+      "title": "Eliminar el paso seleccionado",
+      "subtitle": "Lo quita del entrenamiento",
+      "requires": "Selecciona un paso de la lista principal"
+    },
+    "select-all": {
+      "title": "Seleccionar todos los pasos",
+      "subtitle": "Selecciona todos los pasos del entrenamiento",
+      "requires": "Añade antes un paso"
+    },
+    "create-block": {
+      "title": "Agrupar los pasos seleccionados en un bloque",
+      "titleCount": "Agrupar los {{count}} pasos seleccionados en un bloque",
+      "subtitle": "Abre el diálogo de bloque de repeticiones",
+      "requires": "Selecciona 2 pasos o más"
+    },
+    "ungroup-block": {
+      "title": "Desagrupar el bloque seleccionado",
+      "subtitle": "Sustituye el bloque por sus pasos",
+      "requires": "Selecciona un bloque de repeticiones"
+    },
+    "undo": {
+      "title": "Deshacer el último cambio",
+      "subtitle": "Retrocede en el historial de edición",
+      "requires": "No hay nada que deshacer"
+    },
+    "redo": {
+      "title": "Rehacer el último cambio deshecho",
+      "subtitle": "Avanza en el historial de edición",
+      "requires": "No hay nada que rehacer"
+    },
+    "save": {
+      "title": "Guardar el entrenamiento",
+      "subtitle": "Lo descarga como archivo .krd",
+      "requires": "Abre antes un entrenamiento"
+    }
+  },
+  "learn": {
+    "quick-start": {
+      "title": "Guía de inicio rápido",
+      "subtitle": "Abre la documentación en una pestaña nueva"
+    },
+    "formats": {
+      "title": "Cómo se guardan los entrenamientos (KRD)",
+      "subtitle": "Abre la documentación en una pestaña nueva"
+    },
+    "convert": {
+      "title": "Convertir entre formatos de archivo",
+      "subtitle": "Abre la documentación en una pestaña nueva"
+    }
+  }
+}
