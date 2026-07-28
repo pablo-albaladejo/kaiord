@@ -1,0 +1,22 @@
+{
+  "marks": {
+    "create-block": {
+      "title": "Puedes agrupar estos pasos",
+      "body": "Los pasos seguidos con la misma forma suelen querer ser un bloque de repeticiones.",
+      "shortcutHint": "abre el diálogo de bloque",
+      "action": "Abrir el diálogo de bloque"
+    },
+    "ungroup-block": {
+      "title": "Este bloque se puede deshacer",
+      "body": "Al desagrupar, el bloque se sustituye por sus pasos y cada uno vuelve a ser editable por separado.",
+      "shortcutHint": "lo desagrupa",
+      "action": "Desagrupar"
+    }
+  },
+  "actions": {
+    "notNow": "Ahora no"
+  },
+  "a11y": {
+    "coachMark": "Consejo"
+  }
+}

@@ -20,7 +20,8 @@
     "manageYourData": "Manage your data",
     "extensions": "Extensions",
     "usage": "Usage",
-    "helpDocs": "Help & docs"
+    "helpDocs": "Help & docs",
+    "replayTips": "Show tips again"
   },
   "values": {
     "sync": {
