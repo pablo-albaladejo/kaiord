@@ -12,9 +12,8 @@
 import { removeUntouchedCoachingTemplates } from "../../application/coaching/remove-untouched-coaching-templates";
 import { pruneUsageEvents } from "../../application/usage/prune-usage-events";
 import { logger } from "../../utils/logger";
-import { withTombstones } from "../with-tombstones";
+import { createAppPersistence } from "../create-app-persistence";
 import type { KaiordDatabase } from "./dexie-database";
-import { createDexiePersistence } from "./dexie-persistence-adapter";
 import { createDexieSessionMatchRepository } from "./dexie-session-match-repository";
 import { createDexieWorkoutRepository } from "./dexie-workout-repository";
 
@@ -24,7 +23,7 @@ const META_KEY = "junk-cleanup-v1";
 // propagates cross-device. Runs opportunistically; swallows its own errors.
 const pruneOldUsageEvents = async (db: KaiordDatabase): Promise<void> => {
   try {
-    await pruneUsageEvents(withTombstones(createDexiePersistence(db)));
+    await pruneUsageEvents(createAppPersistence(db));
   } catch (err) {
     logger.warn("[usage-prune] failed, skipping", { err });
   }
@@ -36,6 +35,9 @@ export const runJunkCleanupOnce = async (db: KaiordDatabase): Promise<void> => {
     const already = await db.table("meta").get(META_KEY);
     if (already !== undefined) return;
 
+    // Safe to pass the composed port here too: `removeUntouchedCoachingTemplates`
+    // asks for `deleteLocalOrphan`, which `withTombstones` does not decorate.
+    // The junk verdict is local, so it must never tombstone (see D2).
     const workouts = createDexieWorkoutRepository(db);
     const sessionMatch = createDexieSessionMatchRepository(db);
     await removeUntouchedCoachingTemplates(workouts, sessionMatch);

@@ -29,6 +29,7 @@ const buildWriters = (
   | "updateCoachingActivityId"
   | "appendExecutedWorkoutIds"
   | "delete"
+  | "deleteLocalOrphan"
   | "deleteByActivityId"
   | "deleteByWorkoutId"
   | "deleteByProfile"
@@ -64,6 +65,9 @@ const buildWriters = (
     appendExecutedWorkoutIdsInMemory(store, id, workoutIds);
   },
   delete: async (id) => {
+    store.delete(id);
+  },
+  deleteLocalOrphan: async (id) => {
     store.delete(id);
   },
   deleteByActivityId: async (coachingActivityId) => {
