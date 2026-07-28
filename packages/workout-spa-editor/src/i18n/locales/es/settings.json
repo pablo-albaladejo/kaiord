@@ -2,25 +2,42 @@
   "title": "Ajustes",
   "back": "Ajustes",
   "groups": {
-    "aiGeneration": "Generación con IA",
-    "crossDeviceSync": "Sincronización entre dispositivos",
-    "dataRouting": "Enrutamiento de datos",
+    "yourData": "Tus datos",
+    "ai": "IA",
     "preferences": "Preferencias",
-    "privacyData": "Privacidad y datos",
-    "advanced": "Avanzado"
+    "about": "Acerca de"
   },
   "rows": {
-    "provider": "Proveedor",
+    "connections": "Conexiones",
+    "provider": "Proveedor y modelos",
     "customInstructions": "Instrucciones personalizadas",
-    "googleDriveSync": "Sincronización con Google Drive",
+    "googleDriveSync": "Sincronización entre dispositivos",
     "dataHub": "Data Hub",
     "units": "Unidades",
     "language": "Idioma",
     "notifications": "Notificaciones",
-    "dataPrivacy": "Datos y privacidad",
+    "dataPrivacy": "Privacidad y datos",
     "manageYourData": "Gestiona tus datos",
     "extensions": "Extensiones",
-    "usage": "Uso"
+    "usage": "Uso",
+    "helpDocs": "Ayuda y documentación"
+  },
+  "values": {
+    "sync": {
+      "connected": "Drive · {{relative}}"
+    },
+    "usage": {
+      "tokens": "{{tokens}} tokens · {{month}}"
+    },
+    "notifications": {
+      "on": "Activadas",
+      "off": "Desactivadas",
+      "blocked": "Bloqueadas",
+      "unsupported": "No compatible"
+    },
+    "privacy": {
+      "localFirst": "Guardado en este navegador"
+    }
   },
   "tabs": {
     "ai": "IA",
@@ -76,13 +93,13 @@
     "offline": "La última sincronización falló — trabajando sin conexión",
     "lastSynced": "Última sincronización {{date}}",
     "connectedNotSynced": "Conectado — aún sin sincronizar",
-    "encryption": "Cifrado de extremo a extremo",
+    "encryption": "Cifrado de extremo a extremo de las copias de sincronización",
     "passphrase": "Frase de contraseña",
     "plaintextWarning": "Tus claves de API de IA guardadas se subirán sin cifrado de extremo a extremo. Activa el cifrado abajo para protegerlas."
   },
   "privacy": {
     "information": "Información de privacidad",
-    "infoNoServer": "No almacenamos tus credenciales en ningún servidor.",
+    "infoNoServer": "No operamos ningún servidor que almacene tus credenciales. Cuando la sincronización entre dispositivos está activada, tus claves de API de IA guardadas se suben a tu propio Google Drive salvo que actives el cifrado.",
     "infoGarmin": "La integración con Garmin usa una extensión del navegador que se apoya en tu sesión existente de Garmin Connect. Ninguna credencial sale de tu navegador.",
     "infoTrain2go": "La importación de Train2Go usa una extensión del navegador que lee el plan de entrenamiento mostrado en las páginas de Train2Go que ya estás viendo. No lee tu contraseña ni tus tokens de autenticación.",
     "infoLlmKeys": "Las claves de API de LLM se envían directamente al proveedor (Anthropic, OpenAI o Google) — Kaiord no recibe ni retransmite estos datos.",
@@ -94,7 +111,7 @@
     "analyticsOutro": "para hacer un seguimiento del uso agregado (visitas de página, generación de entrenamientos, exportaciones). No se establecen cookies ni se recopilan datos personales.",
     "dataManagement": "Gestión de datos",
     "clearAllApiKeys": "Borrar todas las claves de API",
-    "clearAllHint": "Esto elimina todas las claves de API almacenadas de tu navegador."
+    "clearAllHint": "Esto elimina todas las claves de API almacenadas de tu navegador. Las claves que la sincronización entre dispositivos ya haya subido a tu Google Drive no se eliminan con esta acción."
   },
   "usage": {
     "title": "Uso de IA",
@@ -147,5 +164,8 @@
     "unsupported": "Las notificaciones no son compatibles con este navegador.",
     "enable": "Activar notificaciones",
     "blocked": "Las notificaciones están bloqueadas en la configuración de tu navegador."
+  },
+  "rowStatus": {
+    "attention": "Requiere atención"
   }
 }
