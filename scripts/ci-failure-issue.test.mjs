@@ -7,10 +7,59 @@ import { describe, it } from "node:test";
 
 import {
   buildIssueBody,
+  evaluateJobCoverage,
+  matchRunJobs,
   parseFooter,
   runClose,
   runCreate,
 } from "./ci-failure-issue-helpers.mjs";
+import { parseRunJobs } from "./ci-failure-issue.mjs";
+
+// Job lists below mirror `repos/{owner}/{repo}/actions/runs/{id}/jobs`
+// output captured from the live repo on 2026-07-29.
+
+// Run 30348079209 — an "everything ran" green run. 54 jobs; the ONLY two
+// skipped are structural and can never run on a green build:
+//   log-bot-skip      → `if: github.actor == 'github-actions[bot]'`
+//   Notify on Failure → `if:` requires some job to have failed
+const GREEN_ALL_RAN = [
+  { name: "log-bot-skip", conclusion: "skipped" },
+  { name: "Notify on Failure", conclusion: "skipped" },
+  { name: "detect-changes", conclusion: "success" },
+  { name: "Link checker", conclusion: "success" },
+  { name: "build", conclusion: "success" },
+  { name: "typecheck", conclusion: "success" },
+  { name: "lint (22.18.0)", conclusion: "success" },
+  { name: "lint (24.x)", conclusion: "success" },
+  { name: "lint", conclusion: "success" },
+  { name: "test (22.18.0, core)", conclusion: "success" },
+  { name: "test (24.x, core)", conclusion: "success" },
+  { name: "test", conclusion: "success" },
+  { name: "test-cli (22.18.0)", conclusion: "success" },
+  { name: "test-cli (24.x)", conclusion: "success" },
+  { name: "e2e-frontend (1)", conclusion: "success" },
+  { name: "e2e-frontend (2)", conclusion: "success" },
+  { name: "e2e-frontend (3)", conclusion: "success" },
+  { name: "e2e-frontend (4)", conclusion: "success" },
+  { name: "e2e-prod-base", conclusion: "success" },
+];
+
+// Run 30387496718 — a docs-only green run. `build` is skipped, so the
+// aggregator jobs (`name: lint|test|round-trip|test-frontend`) short-circuit
+// to exit 0 while the REAL matrix jobs are skipped. Both carry the same
+// display name, which is what makes a naive exact-name match unsafe.
+const GREEN_DOCS_ONLY = [
+  { name: "log-bot-skip", conclusion: "skipped" },
+  { name: "Notify on Failure", conclusion: "skipped" },
+  { name: "detect-changes", conclusion: "success" },
+  { name: "Link checker", conclusion: "success" },
+  { name: "build", conclusion: "skipped" },
+  { name: "typecheck", conclusion: "skipped" },
+  { name: "test", conclusion: "success" }, // test-summary aggregator
+  { name: "test", conclusion: "skipped" }, // real matrix job, never expanded
+  { name: "lint", conclusion: "success" }, // lint-summary aggregator
+  { name: "lint", conclusion: "skipped" }, // real matrix job
+];
 
 const CTX = {
   sha: "abcdef1234567890",
@@ -78,7 +127,7 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
 
   it("[3] no-open-issue + close → no-op", () => {
     const deps = fakeDeps([() => JSON.stringify([])]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     deepStrictEqual(result, []);
   });
 
@@ -100,7 +149,7 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
         }),
       () => "",
     ]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     strictEqual(result.length, 1);
     strictEqual(result[0].action, "closed");
     strictEqual(result[0].issue, 50);
@@ -108,7 +157,9 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
     ok(result[0].comment.includes("lint, test"));
   });
 
-  it("[5] open-issue + close on partial-green run (any job skipped) → skipped: jobs-skipped-on-green-run", () => {
+  it("[5] open-issue + close on a run that did not re-run the footer's jobs → skipped", () => {
+    // v2 replaces v1's "any job anywhere was skipped" veto with a check
+    // scoped to this issue's own jobs.
     const deps = fakeDeps([
       () =>
         JSON.stringify([
@@ -119,9 +170,9 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
           },
         ]),
     ]);
-    const result = runClose({ anyJobsSkipped: true, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_DOCS_ONLY, ctx: CTX }, deps);
     strictEqual(result[0].action, "skipped");
-    strictEqual(result[0].reason, "jobs-skipped-on-green-run");
+    strictEqual(result[0].reason, "job-not-green-on-run");
   });
 
   it("[6] sequential creates: second sees first's issue, dedupes via comment", () => {
@@ -164,7 +215,7 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
           },
         ]),
     ]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     deepStrictEqual(result[0], {
       issue: 11,
       action: "skipped",
@@ -185,7 +236,7 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
           },
         ]),
     ]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     deepStrictEqual(result[0], {
       issue: 12,
       action: "skipped",
@@ -210,7 +261,7 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
           body: issueBody(["lint"]),
         }),
     ]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     deepStrictEqual(result[0], {
       issue: 13,
       action: "skipped",
@@ -226,7 +277,7 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
           { number: 14, title: "🚨 CI Failure on main branch", body: future },
         ]),
     ]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     deepStrictEqual(result[0], {
       issue: 14,
       action: "skipped",
@@ -244,7 +295,7 @@ describe("ci-failure-issue.mjs — 12 branches", () => {
       () => JSON.stringify({ number: 15, state: "OPEN", body: v0 }),
       () => "",
     ]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     strictEqual(result[0].action, "closed");
   });
 
@@ -304,12 +355,179 @@ describe("ci-failure-issue.mjs — canary issues are not deduped against", () =>
           },
         ]),
     ]);
-    const result = runClose({ anyJobsSkipped: false, ctx: CTX }, deps);
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
     deepStrictEqual(result[0], {
       issue: 9,
       action: "skipped",
       reason: "canary-issue",
     });
+  });
+});
+
+describe("v2 close-rule — per-job coverage on the green run", () => {
+  const openIssue = (failedJobs, number = 500) => [
+    () =>
+      JSON.stringify([
+        {
+          number,
+          title: "🚨 CI Failure on main branch",
+          body: issueBody(failedJobs),
+        },
+      ]),
+    () =>
+      JSON.stringify({
+        number,
+        state: "OPEN",
+        body: issueBody(failedJobs),
+      }),
+    () => "",
+  ];
+
+  it("closes when the two structural always-skipped jobs are the only skips", () => {
+    // The v1 boolean gate vetoed on exactly this run shape, which is why the
+    // bot never closed a single issue: `log-bot-skip` and `Notify on Failure`
+    // are skipped on EVERY green run by construction.
+    const deps = fakeDeps(openIssue(["lint", "test"]));
+
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
+
+    strictEqual(result[0].action, "closed");
+    ok(result[0].comment.includes("lint, test"));
+  });
+
+  it("does NOT close when a footer job's real matrix run was skipped", () => {
+    // The aggregator named `test` succeeded (build was skipped, so it exits 0)
+    // but the real `test` matrix job was skipped. Closing here would discard a
+    // failure that was never actually re-run.
+    const deps = fakeDeps([openIssue(["test"])[0]]);
+
+    const result = runClose({ runJobs: GREEN_DOCS_ONLY, ctx: CTX }, deps);
+
+    deepStrictEqual(result[0], {
+      issue: 500,
+      action: "skipped",
+      reason: "job-not-green-on-run",
+    });
+  });
+
+  it("does NOT close when a footer job is absent from the green run", () => {
+    const deps = fakeDeps([openIssue(["round-trip"])[0]]);
+
+    const result = runClose({ runJobs: GREEN_DOCS_ONLY, ctx: CTX }, deps);
+
+    strictEqual(result[0].reason, "job-missing-on-run");
+  });
+
+  it("does NOT close when the run's job list is unavailable", () => {
+    const deps = fakeDeps([openIssue(["lint"])[0]]);
+
+    const result = runClose({ runJobs: [], ctx: CTX }, deps);
+
+    strictEqual(result[0].reason, "run-jobs-unavailable");
+  });
+
+  it("does NOT close on an empty footer job set", () => {
+    const deps = fakeDeps([openIssue([])[0]]);
+
+    const result = runClose({ runJobs: GREEN_ALL_RAN, ctx: CTX }, deps);
+
+    strictEqual(result[0].reason, "empty-job-set");
+  });
+
+  it("closes a path-filtered green run when the footer's own jobs all ran", () => {
+    // Partial coverage is fine as long as it covers THIS issue's jobs — the
+    // v1 rule threw away every such run.
+    const deps = fakeDeps(openIssue(["lint"]));
+
+    const result = runClose(
+      {
+        runJobs: [
+          ...GREEN_ALL_RAN,
+          { name: "bundle-analysis", conclusion: "skipped" },
+          { name: "e2e-prod-base", conclusion: "skipped" },
+        ],
+        ctx: CTX,
+      },
+      deps
+    );
+
+    strictEqual(result[0].action, "closed");
+  });
+});
+
+describe("matchRunJobs — display-name and matrix reconciliation", () => {
+  it("resolves the check-links job id to its 'Link checker' display name", () => {
+    // ci.yml declares `check-links:` with `name: Link checker`; the create
+    // pass records the job ID, the jobs API reports the display name.
+    const matches = matchRunJobs("check-links", GREEN_ALL_RAN);
+
+    deepStrictEqual(matches, [{ name: "Link checker", conclusion: "success" }]);
+  });
+
+  it("collects every shard of a matrix job", () => {
+    const matches = matchRunJobs("e2e-frontend", GREEN_ALL_RAN);
+
+    strictEqual(matches.length, 4);
+    ok(matches.every((m) => m.conclusion === "success"));
+  });
+
+  it("collects both the aggregator and the real job when names collide", () => {
+    const matches = matchRunJobs("test", GREEN_DOCS_ONLY);
+
+    deepStrictEqual(matches.map((m) => m.conclusion).sort(), [
+      "skipped",
+      "success",
+    ]);
+  });
+
+  it("does not match a job whose name merely shares a prefix", () => {
+    const runJobs = [{ name: "test-cli", conclusion: "success" }];
+
+    deepStrictEqual(matchRunJobs("test", runJobs), []);
+  });
+});
+
+describe("evaluateJobCoverage — direct unit coverage", () => {
+  it("covers every real footer job on an all-ran green run", () => {
+    const jobs = ["lint", "check-links", "typecheck", "test", "test-cli"];
+
+    deepStrictEqual(evaluateJobCoverage(jobs, GREEN_ALL_RAN), {
+      covered: true,
+    });
+  });
+
+  it("reports the first uncovered job", () => {
+    deepStrictEqual(evaluateJobCoverage(["lint", "test"], GREEN_DOCS_ONLY), {
+      covered: false,
+      reason: "job-not-green-on-run",
+    });
+  });
+});
+
+describe("parseRunJobs — GREEN_RUN_JOBS env decoding", () => {
+  it("decodes the workflow's jq output", () => {
+    const raw = '[{"name":"lint (24.x)","conclusion":"success"}]';
+
+    deepStrictEqual(parseRunJobs(raw), [
+      { name: "lint (24.x)", conclusion: "success" },
+    ]);
+  });
+
+  it("degrades to an empty list instead of throwing", () => {
+    // An empty list makes the close-rule report run-jobs-unavailable, so a
+    // broken collection step closes nothing rather than closing everything.
+    deepStrictEqual(parseRunJobs(undefined), []);
+    deepStrictEqual(parseRunJobs(""), []);
+    deepStrictEqual(parseRunJobs("not json"), []);
+    deepStrictEqual(parseRunJobs('{"jobs":[]}'), []);
+  });
+
+  it("drops entries missing a name or conclusion", () => {
+    const raw = '[{"name":"lint"},{"name":"test","conclusion":"success"}]';
+
+    deepStrictEqual(parseRunJobs(raw), [
+      { name: "test", conclusion: "success" },
+    ]);
   });
 });
 

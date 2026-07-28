@@ -75,6 +75,14 @@ jobs:
           gh label create cws-stuck --color FF9F1C --description "CWS draft uploaded but not live" --force
           gh label create cws-untrusted-state --color D7263D --description "git tag and PUBLISHED projection disagree; force-dispatch required" --force
           gh label create needs-human --color 6A0572 --description "Auto-retry exhausted; human action required" --force
+          # cws-notify-issue.mjs dedupes by listing its own label, so these
+          # three must exist or every run opens a duplicate. The script also
+          # self-heals them at call time; this step keeps them present even
+          # when no notification fires. (cws-publish-rejected was missing
+          # from the repo entirely until 2026-07-29.)
+          gh label create cws-auth-broken --color D7263D --description "CWS service-account authentication is failing" --force
+          gh label create cws-publish-verification-timeout --color FF9F1C --description "CWS publish did not reach PUBLISHED within the wait budget" --force
+          gh label create cws-publish-rejected --color D7263D --description "CWS rejected the submitted extension version" --force
 
       - name: Write summary header
         if: always()
