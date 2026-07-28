@@ -4,10 +4,10 @@
 
 ## Purpose
 
-SPA-side integration for `whoop-bridge`: discovers the extension through the
-shared bridge-runtime-discovery protocol, relays allowed reads through it,
-converts WHOOP's internal-API responses via `@kaiord/whoop` into KRD health
-and activity records, and gates each managed data type behind its own
+SPA-side integration for `whoop-bridge`: it discovers the extension, relays allowed reads through it, and converts WHOOP's responses into KRD records.
+Discovery uses the shared bridge-runtime-discovery protocol; conversion runs
+through `@kaiord/whoop` into KRD health
+and activity records. Each managed data type is gated behind its own
 `IntegrationPolicy` (Advanced-Labs biomarker import is the one exception,
 outside policy-resolver gating). No WHOOP credential or session token is
 ever held in SPA persistence.

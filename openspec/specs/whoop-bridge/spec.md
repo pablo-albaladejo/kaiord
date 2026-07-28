@@ -4,7 +4,8 @@
 
 ## Purpose
 
-Chrome extension that gives the Kaiord SPA read-only access to a signed-in WHOOP web session by piggybacking on `app.whoop.com`'s own credentials, with no OAuth flow, no developer API key, and no stored WHOOP password.
+Chrome extension that gives the Kaiord SPA read-only access to a signed-in WHOOP web session by piggybacking on `app.whoop.com`'s own credentials.
+There is no OAuth flow, no developer API key, and no stored WHOOP password.
 The bridge captures the session bearer through three disclosed paths — a
 main-world request interceptor, a read-only `webRequest` header listener, and
 a scan of the Cognito access token WHOOP's sign-in library persists in

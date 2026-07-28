@@ -4,10 +4,10 @@
 
 ## Purpose
 
-`@kaiord/whoop` is a pure, offline adapter that validates WHOOP's
-internal-API response shapes (cycles/details, metrics-service heart-rate
-series, the sports catalog, and Advanced-Labs biomarker tests) and converts
-them into KRD extension records — HRV, sleep, vitals, strain, heart-rate
+`@kaiord/whoop` is a pure, offline adapter that validates WHOOP internal-API response shapes and converts them into KRD extension records.
+It covers cycles/details, metrics-service heart-rate
+series, the sports catalog, and Advanced-Labs biomarker tests, converting
+them into HRV, sleep, vitals, strain, heart-rate
 series, activity summaries, and lab reports — each stamped with a stable
 `externalId` and `sourceBridgeId: "whoop-bridge"`. It performs no I/O, no
 OAuth, and never targets WHOOP's developer API; any transport is injected by

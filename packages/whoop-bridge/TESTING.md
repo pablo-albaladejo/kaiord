@@ -70,9 +70,30 @@
 - [ ] Verify: still "Connected" — the bearer was reloaded from
       `chrome.storage.session`
 
+## Test: Action Allowlist (reduced external surface)
+
+`chrome.runtime` is only injected into pages matching
+`externally_connectable`, so sending from a non-Kaiord origin throws a
+`TypeError` in the page rather than returning the rejection envelope — that
+proves the manifest gate, not the dispatch gate. To exercise the dispatch
+gate, send a **disallowed action** from an allowed origin.
+
+- [ ] From `http://localhost:5173` (an allowed origin), run:
+      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "open-whoop" }, console.log)`
+- [ ] Verify: response is
+      `{ ok: false, protocolVersion: 1, error: "Origin or action not permitted", retryable: false }`
+      and no WHOOP tab opens — `open-whoop` is internal-only and absent from
+      `EXTERNAL_ACTIONS`
+- [ ] Repeat with `{ action: "capture-token", token: "x" }` and verify the
+      same envelope, and that the popup still shows "Session signed out"
+      (no token was stored)
+
 ## Test: Origin Pinning
 
-- [ ] From a non-Kaiord origin (e.g. `https://example.com` console), send
-      any external action to the extension ID
-- [ ] Verify: response is
-      `{ ok: false, error: "Origin or action not permitted" }`
+- [ ] From a non-Kaiord origin (e.g. the `https://example.com` console), run
+      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "ping" }, console.log)`
+- [ ] Verify: the call throws `TypeError: Cannot read properties of undefined`
+      (or similar) because `chrome.runtime` is not injected on that origin —
+      the message never reaches the extension at all. This is the manifest's
+      `externally_connectable` gate; the dispatch-level origin check in
+      `bridge-envelope.js` is the second layer behind it
