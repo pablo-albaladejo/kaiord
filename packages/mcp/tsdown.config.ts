@@ -1,5 +1,5 @@
 import { writeFileSync } from "fs";
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsdown";
 
 export default defineConfig([
   {
@@ -8,8 +8,8 @@ export default defineConfig([
     dts: true,
     clean: true,
     shims: true,
-    splitting: true,
     treeshake: true,
+    outExtensions: () => ({ js: ".js", dts: ".d.ts" }),
     onSuccess: async () => {
       writeFileSync(
         "dist/package.json",
@@ -20,9 +20,11 @@ export default defineConfig([
   {
     entry: { "bin/kaiord-mcp": "src/bin/kaiord-mcp.ts" },
     format: ["esm"],
+    // tsdown cleans by default; keep the library build's output intact.
+    clean: false,
     shims: true,
-    splitting: true,
     treeshake: true,
-    banner: { js: "#!/usr/bin/env node" },
+    outExtensions: () => ({ js: ".js" }),
+    banner: "#!/usr/bin/env node",
   },
 ]);
