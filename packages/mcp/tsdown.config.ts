@@ -20,7 +20,13 @@ export default defineConfig([
   {
     entry: { "bin/kaiord-mcp": "src/bin/kaiord-mcp.ts" },
     format: ["esm"],
+    // tsdown auto-enables dts when package.json declares `types`; the bin
+    // entry ships no type surface.
+    dts: false,
     // tsdown cleans by default; keep the library build's output intact.
+    // The build script passes --concurrency 1 so this build cannot start
+    // before the first one's clean+write finishes (tsdown runs array
+    // configs in parallel by default).
     clean: false,
     shims: true,
     treeshake: true,

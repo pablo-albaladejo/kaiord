@@ -141,10 +141,12 @@ Excludes Garmin FIT SDK if not imported.
 ### tsdown.config.ts
 
 ```typescript
-{
+import { defineConfig } from "tsdown";
+
+export default defineConfig({
   format: ["esm"],
   treeshake: true,
-}
+});
 ```
 
 - **`format: ["esm"]`**: ES modules for tree-shaking

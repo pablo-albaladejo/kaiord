@@ -22,7 +22,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown --concurrency 1",
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",

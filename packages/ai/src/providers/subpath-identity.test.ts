@@ -5,20 +5,15 @@
  * singleton created in one subpath is the same instance seen in the other.
  * Identity would regress if the entries were split into separate builds
  * (a `defineConfig([...])` array), where each build inlines its own copy of
- * shared modules. This test fails the moment the config regresses to that
- * shape, and asserts the providers barrel does not duplicate the catalog
- * module through divergent import paths.
+ * shared modules. This test imports the actual config object and fails the
+ * moment it regresses to that shape, and asserts the providers barrel does
+ * not duplicate the catalog module through divergent import paths.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { describe, expect, it } from "vitest";
 
+import aiBuildConfig from "../../tsdown.config";
 import { MODEL_CATALOG, PROVIDER_MODELS } from "./index";
 import { MODEL_CATALOG as DIRECT_CATALOG } from "./provider-models";
-
-const here = dirname(fileURLToPath(import.meta.url));
 
 const SUBPATH_ENTRIES = [
   "src/index.ts",
@@ -31,20 +26,18 @@ const SUBPATH_ENTRIES = [
 describe("subpath module identity", () => {
   it("should build all subpath entries in one config so shared modules stay singletons", () => {
     // Arrange
-    const config = readFileSync(
-      join(here, "..", "..", "tsdown.config.ts"),
-      "utf8"
-    );
+    const config = aiBuildConfig;
 
     // Act
-    const isSingleBuild = !config.includes("defineConfig([");
-    const hasAllEntries = SUBPATH_ENTRIES.every((entry) =>
-      config.includes(entry)
-    );
+    const isSingleBuild = !Array.isArray(config);
+    const entryValues =
+      isSingleBuild && typeof config.entry === "object" && config.entry !== null
+        ? Object.values(config.entry)
+        : [];
 
     // Assert
     expect(isSingleBuild).toBe(true);
-    expect(hasAllEntries).toBe(true);
+    expect(entryValues).toEqual(expect.arrayContaining(SUBPATH_ENTRIES));
   });
 
   it("should resolve the catalog to a single module instance through the barrel", () => {
