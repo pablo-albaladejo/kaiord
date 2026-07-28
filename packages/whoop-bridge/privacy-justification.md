@@ -22,7 +22,15 @@ This document explains why each Chrome extension permission is required, for Chr
 
 **Why**: Hold the captured session bearer in `chrome.storage.session` — memory-only storage that survives service-worker restarts but is cleared when the browser closes. No password, developer API key, or long-lived token is ever stored.
 
-**Data stored**: the session bearer, the decoded numeric WHOOP user id, and the capture timestamp. All three live only in `chrome.storage.session` and are never written to disk or transmitted anywhere except back to WHOOP as part of an allowlisted read.
+**Data stored**: the session bearer, the decoded numeric WHOOP user id, and the capture timestamp. All three live only in `chrome.storage.session`. The bearer is never written to disk and is transmitted nowhere except back to WHOOP as part of an allowlisted read; the user id and capture timestamp are also returned to the allowed Kaiord SPA origins as part of the bridge's status response (see "Data Handling" below).
+
+## Website Access
+
+### `app.whoop.com` `localStorage` (no separate permission — granted by the host permission below)
+
+**Why**: Third and last session-bearer capture path. On every `app.whoop.com` page load the isolated content script (`scanCognitoStorage` in `content.js`) enumerates that origin's `localStorage` looking for the key WHOOP's own Amazon Cognito sign-in library writes — `CognitoIdentityServiceProvider.<client-id>.accessToken` — and reads the access token stored there. This is a credential **at rest**, unlike the two header-capture paths above, and it exists so the bridge is usable the moment the page loads rather than only after the WHOOP app happens to issue an authenticated request.
+
+**Scope**: read-only, and only that one key pattern on that one origin. No other `localStorage` key is read, and the extension never writes, modifies, or removes anything in `localStorage`.
 
 ## Host Permissions
 
@@ -46,8 +54,10 @@ This document explains why each Chrome extension permission is required, for Chr
 
 ## Data Handling
 
-- **No OAuth, no developer API key, no password**: The extension performs no OAuth flow, never asks for a WHOOP client id or secret, and never reads, stores, or transmits the user's WHOOP password. It reuses the browser's existing signed-in `app.whoop.com` session by capturing the bearer that session already attaches to its own requests.
-- **Session bearer stays local and in memory**: The captured bearer lives only in `chrome.storage.session` on the user's device and is sent only to WHOOP (`api.prod.whoop.com`) as part of an allowlisted read. It is never logged, even truncated; session presence is reported to callers only as a boolean.
+- **No OAuth, no developer API key, no password**: The extension performs no OAuth flow, never asks for a WHOOP client id or secret, and never reads, stores, or transmits the user's WHOOP password. It reuses the browser's existing signed-in `app.whoop.com` session by capturing the bearer that session already holds.
+- **Three capture paths, all local**: the main-world request interceptor (`inject-main.js`), the `chrome.webRequest.onBeforeSendHeaders` header reader (`background.js`), and the `localStorage` Cognito-token scan (`content.js`). The first two read a credential in flight; the third reads one at rest. All three are justified above, and all three feed the same memory-only session store.
+- **Session bearer stays local and in memory**: The captured bearer lives only in `chrome.storage.session` on the user's device and is sent only to WHOOP (`api.prod.whoop.com`) as part of an allowlisted read. It is never logged, even truncated, and its value is never returned to the SPA.
+- **What the SPA does receive**: the bridge's status response carries a boolean `connected` flag, the numeric WHOOP user id decoded from the bearer's JWT `custom:user_id` claim, and the capture timestamp — plus, for an allowlisted read, the parsed WHOOP response body. Never the token itself.
 - **Read-only, allowlisted**: Only a fixed set of `GET` paths under the `/core-details-bff`, `/metrics-service`, `/activities-service`, `/advanced-labs-service`, and `/health-service` internal-API prefixes are ever requested. The bridge exposes no path to write to WHOOP.
 - **No external communication**: The extension talks only to WHOOP hosts and the allowed Kaiord SPA origins (via `externally_connectable`). No third-party servers.
 - **No analytics or tracking**: No telemetry of any kind leaves the device.

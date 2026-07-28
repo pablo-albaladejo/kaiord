@@ -4,13 +4,12 @@
 
 ## Purpose
 
-Chrome extension that gives the Kaiord SPA read-only access to a signed-in
-WHOOP web session by piggybacking on `app.whoop.com`'s own authenticated
-requests — no OAuth flow, no developer API key, and no stored WHOOP
-credential. A main-world interceptor captures the session bearer the WHOOP
-web app already attaches to its `api.prod.whoop.com` calls, holds it only in
-memory-only session storage, and relays a fixed allowlist of read-only
-internal-API paths back to the SPA.
+Chrome extension that gives the Kaiord SPA read-only access to a signed-in WHOOP web session by piggybacking on `app.whoop.com`'s own credentials, with no OAuth flow, no developer API key, and no stored WHOOP password.
+The bridge captures the session bearer through three disclosed paths — a
+main-world request interceptor, a read-only `webRequest` header listener, and
+a scan of the Cognito access token WHOOP's sign-in library persists in
+`localStorage` — holds it only in memory-only session storage, and relays a
+fixed allowlist of read-only internal-API paths back to the SPA.
 
 ## Requirements
 
@@ -50,25 +49,60 @@ requests, held in memory-only session storage.
 - **WHEN** the user opens the extension popup
 - **THEN** there SHALL be no client-id or client-secret input, and no OAuth "connect" that opens a WHOOP authorization page
 
-### Requirement: Session bearer capture via main-world interceptor
+### Requirement: Session bearer capture paths
 
-The `world: "MAIN"` content script SHALL wrap `window.fetch` and
-`XMLHttpRequest.prototype.setRequestHeader` at `document_start` to read the
-`Authorization: bearer <token>` header WHOOP attaches to its
-`api.prod.whoop.com` requests, and SHALL forward the token to the isolated
-content script via `window.postMessage` **targeted at the page origin**
-(`https://app.whoop.com`, not `"*"`). The isolated content-script listener SHALL
-accept the message only when `event.source === window` and `event.origin ===
-"https://app.whoop.com"`, then relay it to the background, which SHALL store it
-in `chrome.storage.session` and decode the numeric user id from the JWT
-`custom:user_id` claim. The background SHALL also capture the header via
-`chrome.webRequest.onBeforeSendHeaders` as a secondary path. The extension SHALL
-NOT log the token value; session status SHALL be reported as a boolean.
+The extension SHALL obtain the WHOOP session bearer through exactly three
+paths, and no other. Every path SHALL be disclosed in
+`packages/docs/legal/privacy-policy.md`,
+`packages/whoop-bridge/privacy-justification.md`, and
+`packages/whoop-bridge/README.md`; adding a fourth SHALL mean amending this
+enumeration and all three documents in the same change.
+
+1. **Main-world request interceptor (in flight).** The `world: "MAIN"` content
+   script SHALL wrap `window.fetch` and
+   `XMLHttpRequest.prototype.setRequestHeader` at `document_start` to read the
+   `Authorization: bearer <token>` header WHOOP attaches to its
+   `api.prod.whoop.com` requests, and SHALL forward the token to the isolated
+   content script via `window.postMessage` **targeted at the page origin**
+   (`https://app.whoop.com`, not `"*"`). The isolated content-script listener
+   SHALL accept the message only when `event.source === window` and
+   `event.origin === "https://app.whoop.com"`, then relay it to the background.
+2. **`webRequest` header listener (in flight).** The background SHALL register
+   `chrome.webRequest.onBeforeSendHeaders` with the `requestHeaders` and
+   `extraHeaders` options, scoped to `https://api.prod.whoop.com/*`, and read
+   the `Authorization` header from the WHOOP web app's own requests. This path
+   covers requests issued before the main-world script finished injecting. The
+   listener SHALL be read-only: the extension SHALL NOT declare
+   `webRequestBlocking` or any `declarativeNetRequest*` permission and SHALL
+   NOT modify, redirect, or cancel any request.
+3. **Cognito `localStorage` scan (at rest).** On every `app.whoop.com` page
+   load the isolated content script SHALL enumerate that origin's
+   `localStorage` and, for a key matching
+   `/CognitoIdentityServiceProvider\..+\.accessToken$/`, SHALL read the stored
+   access token and relay it to the background. This path reads a credential at
+   rest so a read succeeds immediately on page load rather than only after the
+   WHOOP app issues a request. The extension SHALL read no other `localStorage`
+   key and SHALL NOT write, modify, or remove any `localStorage` entry.
+
+The background SHALL store the token from any path in `chrome.storage.session`
+and decode the numeric user id from the JWT `custom:user_id` claim. The
+extension SHALL NOT log the token value and SHALL NOT return it to the SPA; the
+status response SHALL carry only `{ connected, userId, capturedAt }`.
 
 #### Scenario: Token captured from a WHOOP API call
 
 - **WHEN** the WHOOP web app issues an authenticated request to `api.prod.whoop.com` while the interceptor is installed
 - **THEN** the extension SHALL store the bearer in `chrome.storage.session` and decode and store the numeric user id
+
+#### Scenario: Token captured from the Cognito localStorage entry
+
+- **WHEN** the isolated content script runs on an `app.whoop.com` page whose `localStorage` holds a `CognitoIdentityServiceProvider.<client-id>.accessToken` key and no request has yet been intercepted
+- **THEN** the extension SHALL relay that stored token to the background and store it in `chrome.storage.session`, without waiting for a live WHOOP request
+
+#### Scenario: webRequest listener never mutates a request
+
+- **WHEN** the `onBeforeSendHeaders` listener observes an `api.prod.whoop.com` request
+- **THEN** it SHALL read the `Authorization` header and return no blocking response, leaving the request headers, destination, and outcome unchanged
 
 #### Scenario: Token not yet captured
 
@@ -80,10 +114,10 @@ NOT log the token value; session status SHALL be reported as a boolean.
 - **WHEN** the MV3 service worker is terminated on idle and restarted
 - **THEN** the token SHALL be retrieved from `chrome.storage.session` and read operations SHALL continue to work
 
-#### Scenario: Token is never logged
+#### Scenario: Token is never logged and never returned to the SPA
 
 - **WHEN** any diagnostic or status response is produced
-- **THEN** it SHALL report session presence as a boolean and SHALL NOT contain the token value, even truncated
+- **THEN** it SHALL contain at most `{ connected, userId, capturedAt }` and SHALL NOT contain the token value, even truncated
 
 #### Scenario: Spoofed or wrong-origin token message rejected
 
@@ -185,10 +219,14 @@ No new capability token is introduced. It SHALL re-announce on
 
 ### Requirement: Origin-pinned external message API
 
-The extension SHALL handle SPA messages via `chrome.runtime.onMessageExternal`
-for the actions `ping` (returns the bridge manifest plus a boolean session
-status), `status` (returns the session status), and `whoop-fetch` (relays an
-allowed read). It SHALL accept external messages only from sender origins
+The extension SHALL expose exactly `ping`, `status`, and `whoop-fetch` to
+external (SPA) callers via `chrome.runtime.onMessageExternal` — `ping` returns
+the bridge manifest plus the session status, `status` returns the session status
+(`{ connected, userId, capturedAt }` — never the token), and `whoop-fetch`
+relays an allowed read. The `capture-token` and `open-whoop` actions SHALL be
+reachable only over the internal `chrome.runtime.onMessage` channel (the
+extension's own content script and popup) and SHALL NOT appear in the external
+action allowlist. It SHALL accept external messages only from sender origins
 matching `https://*.kaiord.com` or `http://localhost:5173|5174`, rejecting
 others with `{ ok: false, error: "Origin or action not permitted" }`. All
 responses SHALL use `{ ok, protocolVersion, data?, error? }`, and manifest
@@ -203,6 +241,11 @@ identity keys SHALL take precedence over any upstream values on collision.
 
 - **WHEN** a page whose origin is not an allowed SPA origin sends any external message
 - **THEN** the extension returns `{ ok: false, error: "Origin or action not permitted" }` and performs no read
+
+#### Scenario: Internal-only action is rejected from an allowed origin
+
+- **WHEN** an allowed SPA origin sends `{ action: "open-whoop" }` or `{ action: "capture-token" }`
+- **THEN** the extension returns `{ ok: false, error: "Origin or action not permitted" }` and does not run the handler
 
 #### Scenario: Unknown action is rejected
 
