@@ -27,6 +27,12 @@ export default defineConfig({
 
   expect: {
     timeout: 10_000, // 10s for assertions (Dexie clear + reload is slow on Mobile Safari)
+    toHaveScreenshot: {
+      // Absorb CI font-hinting/anti-aliasing jitter between runs (observed:
+      // ~0.01% of pixels on coaching-sidebar.visual.spec.ts) without masking
+      // real visual regressions.
+      maxDiffPixelRatio: 0.01,
+    },
   },
 
   // Global timeout for tests
