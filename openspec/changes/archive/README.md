@@ -10,6 +10,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | 2026-07-28 | [`add-command-palette`](./2026-07-28-add-command-palette/) | The SPA's editor actions exist twice and are enumerable nowhere. The right-click |
 | 2026-07-28 | [`add-settings-row-values`](./2026-07-28-add-settings-row-values/) | The SPA's Settings index is a list of eleven labels that answer nothing. To find |
 | 2026-07-28 | [`add-setup-checklist`](./2026-07-28-add-setup-checklist/) | First-run guidance in the SPA is a six-step centred modal (OnboardingTutorial) |
+| 2026-07-28 | [`fix-tombstone-wiring`](./2026-07-28-fix-tombstone-wiring/) | withTombstones never wrapped the application's persistence port. main.tsx |
 | 2026-07-26 | [`add-bridge-connection-model`](./2026-07-26-add-bridge-connection-model/) | Five bridges ship today and each answers "am I connected?" its own way. Garmin |
 | 2026-07-26 | [`add-shortcut-catalog-and-sheet`](./2026-07-26-add-shortcut-catalog-and-sheet/) | The SPA's keyboard bindings live in two places that nothing keeps in agreement. |
 | 2026-07-26 | [`promote-trainingpeaks-and-tanita-import`](./2026-07-26-promote-trainingpeaks-and-tanita-import/) | The trainingpeaks-bridge extension shipped in #1008 (session capture, |
