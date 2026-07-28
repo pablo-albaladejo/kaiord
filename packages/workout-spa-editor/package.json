@@ -86,7 +86,7 @@
     "fake-indexeddb": "^6.2.5",
     "fast-check": "^4.9.0",
     "globals": "^17.8.0",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.0",
     "postcss": "^8.5.24",
     "prettier": "^3.9.6",
     "storybook": "^10.5.5",
