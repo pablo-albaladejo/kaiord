@@ -81,6 +81,13 @@ The privacy policy SHALL cover the following topics:
 - **WHEN** an extension's `## Kaiord <Name> Bridge Extension` section is deleted in full
 - **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail, reporting that extension's section as missing rather than passing on the intro mention
 
+#### Scenario: Credential-access permission requires a documented exemption
+
+- **GIVEN** the policy lint treats `cookies` and `webRequest` as credential-access permissions, because both expose a credential the user never handed to the extension (session cookie values, and `Authorization` headers via `extraHeaders` respectively)
+- **WHEN** an extension's manifest declares either one
+- **THEN** the lint SHALL fail unless that extension has a written exemption recorded in the lint script naming the permission and the reason
+- **AND** the request-mutation permissions (`webRequestBlocking`, `declarativeNetRequest*`) SHALL remain unconditionally forbidden, with no exemption possible
+
 #### Scenario: Policy includes regulatory compliance statement
 
 - **WHEN** the privacy policy is read
