@@ -7,9 +7,9 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-07-22
+**Last updated:** 2026-07-29
 
-This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, and the Kaiord TrainingPeaks Bridge Chrome extension.
+This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
 ## Data Controller
 
@@ -65,6 +65,16 @@ The Kaiord TrainingPeaks Bridge Chrome extension reads your TrainingPeaks body m
 - **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` (to exchange the token and read/write metrics) and allowed Kaiord origins (to deliver the metrics to the editor).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
+## Kaiord WHOOP Bridge Extension
+
+The Kaiord WHOOP Bridge Chrome extension reads your WHOOP recovery, sleep, HRV, vitals, strain, stress, heart-rate, activity, and Advanced-Labs biomarker data and hands it to the Kaiord workout editor. This extension is not yet published to the Chrome Web Store. Here is how it handles data:
+
+- **No OAuth, No Developer API Key, No Stored Credential**: The extension performs no OAuth flow and never asks for a WHOOP client id or secret. It piggybacks on your existing signed-in `app.whoop.com` session: a main-world script captures the session bearer the WHOOP web app already attaches to its own `api.prod.whoop.com` requests and relays it, through an isolated content script, to the extension's background service worker.
+- **Memory-Only Token Storage**: The captured bearer is held only in `chrome.storage.session` (memory-only; cleared when the browser restarts) and is never logged, never written to disk, and never sent to a Kaiord-operated server. Session presence is reported to the editor only as a boolean.
+- **Read-Only, Allowlisted Access**: The extension reads a fixed allowlist of WHOOP internal-API endpoints — cycle details (recovery/HRV, sleep, strain, workouts), heart-rate and other metric series, the sports catalog, Advanced-Labs biomarker tests, and daily stress — declaring the `read:body`, `read:sleep`, and `read:activities` capabilities. It exposes no write path to WHOOP. Every read requires an open `app.whoop.com` tab; requests outside the allowlist are rejected without a network call.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `app.whoop.com` / `api.prod.whoop.com` (to read your own WHOOP data) and allowed Kaiord origins (to deliver it to the editor).
+- **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
+
 ## Communication Scope
 
 The extensions only communicate with the following domains:
@@ -75,6 +85,8 @@ The extensions only communicate with the following domains:
 - `https://app.train2go.com/*` — Train2Go Bridge content script (runs on that domain) reads the coaching plan from the page
 - `https://mytanita.eu/*` — Tanita Bridge service worker fetches your body-composition CSV export using your existing session cookie
 - `https://tpapi.trainingpeaks.com/*` — TrainingPeaks Bridge service worker exchanges your existing session cookie for a short-lived access token and reads/writes your body metrics with it
+- `https://app.whoop.com/*` — WHOOP Bridge's main-world and isolated content scripts capture the session bearer already attached to the WHOOP web app's own requests, and open this page when you sign in
+- `https://api.prod.whoop.com/*` — WHOOP Bridge relays allowlisted, read-only requests using that captured bearer
 - `https://*.kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.
 
 Each extension also injects a minimal **announce-only** content script (`kaiord-announce.js`) into `https://*.kaiord.com/*` so the editor can discover which extension IDs are installed at runtime. This content script only calls `window.postMessage` to publish a fixed announcement object (bridge id, extension id, version, declared capabilities) and re-announces on request. It does **not** read the editor's DOM, cookies, storage, or network traffic, does **not** modify the page, and does **not** enable any inbound data path from kaiord.com into the extension beyond what `externally_connectable` already allows.
