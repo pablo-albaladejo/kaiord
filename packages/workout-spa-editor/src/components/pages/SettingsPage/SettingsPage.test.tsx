@@ -78,12 +78,7 @@ describe("SettingsPage", () => {
 
     it("should render every group eyebrow", () => {
       // Arrange
-      const eyebrows = [
-        "AI generation",
-        "Preferences",
-        "Privacy & data",
-        "Advanced",
-      ];
+      const eyebrows = ["Your data", "AI", "Preferences", "About"];
 
       // Act
       renderAtPath("/settings");
@@ -94,8 +89,38 @@ describe("SettingsPage", () => {
       }
     });
 
+    it("should show the truthful local-storage value on the privacy row", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-row-dataPrivacy")).toHaveTextContent(
+        "Stored in this browser"
+      );
+    });
+
+    it("should link Help & docs out to the documentation site", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-row-helpDocs")).toHaveAttribute(
+        "href",
+        "https://kaiord.com/docs/"
+      );
+    });
+
     it.each([
+      // TODO(S3): destination becomes /settings/connections once it exists.
+      { row: "connections", destination: "/athlete" },
+      { row: "googleDriveSync", destination: "/settings/sync" },
       { row: "extensions", destination: "/settings/extensions" },
+      { row: "dataHub", destination: "/settings/data-hub" },
+      { row: "usage", destination: "/settings/usage" },
       { row: "units", destination: "/settings/preferences" },
       { row: "language", destination: "/settings/preferences" },
       {

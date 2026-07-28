@@ -1,28 +1,15 @@
-import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { SectionHead } from "../../molecules/SectionHead/SectionHead";
-import {
-  SETTINGS_GROUPS,
-  SETTINGS_VERSION_LABEL,
-  type SettingsRowDef,
-} from "./settings-groups";
+import { SETTINGS_GROUPS, SETTINGS_VERSION_LABEL } from "./settings-groups";
 import { SettingsRow } from "./SettingsRow";
+import { useSettingsRowValues } from "./use-settings-row-values";
 
 type SettingsGroupListProps = {
   onNavigate: (to: string) => void;
 };
 
-const useRowDetail = () => {
-  const providers = useAiProvidersLive() ?? [];
-  const defaultProvider =
-    providers.find((p) => p.isDefault)?.label ?? providers[0]?.label;
-
-  return (row: SettingsRowDef): string | undefined =>
-    row.detailKey === "defaultProvider" ? defaultProvider : undefined;
-};
-
 export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
-  const detailFor = useRowDetail();
+  const values = useSettingsRowValues();
   const t = useTranslate("settings");
 
   return (
@@ -37,8 +24,11 @@ export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
                 icon={row.icon}
                 label={t(`rows.${row.key}`)}
                 testId={row.key}
-                detail={detailFor(row)}
+                detail={
+                  row.valueKey === undefined ? undefined : values[row.valueKey]
+                }
                 to={row.to}
+                href={row.href}
                 onNavigate={row.to !== undefined ? onNavigate : undefined}
               />
             ))}
