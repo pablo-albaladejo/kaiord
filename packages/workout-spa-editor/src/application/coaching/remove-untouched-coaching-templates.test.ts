@@ -161,10 +161,13 @@ describe("isUntouchedCoachingTemplate", () => {
 describe("removeUntouchedCoachingTemplates", () => {
   const makeRepos = (records: WorkoutRecord[]) => {
     const store = new Map(records.map((r) => [r.id, r]));
-    const workouts: Pick<WorkoutRepository, "getByState" | "delete"> = {
+    const workouts: Pick<
+      WorkoutRepository,
+      "getByState" | "deleteLocalOrphan"
+    > = {
       getByState: async (state) =>
         [...store.values()].filter((r) => r.state === state),
-      delete: vi.fn(async (id: string) => {
+      deleteLocalOrphan: vi.fn(async (id: string) => {
         store.delete(id);
       }),
     };
@@ -188,7 +191,7 @@ describe("removeUntouchedCoachingTemplates", () => {
     // Assert
     expect(result.removed).toBe(1);
     expect(sessionMatch.deleteByWorkoutId).toHaveBeenCalledWith("w-junk");
-    expect(workouts.delete).toHaveBeenCalledWith("w-junk");
+    expect(workouts.deleteLocalOrphan).toHaveBeenCalledWith("w-junk");
   });
 
   const negativeCases: Array<{
@@ -226,7 +229,7 @@ describe("removeUntouchedCoachingTemplates", () => {
 
     // Assert
     expect(result.removed).toBe(0);
-    expect(workouts.delete).not.toHaveBeenCalled();
+    expect(workouts.deleteLocalOrphan).not.toHaveBeenCalled();
     expect(sessionMatch.deleteByWorkoutId).not.toHaveBeenCalled();
   });
 
@@ -244,6 +247,6 @@ describe("removeUntouchedCoachingTemplates", () => {
 
     // Assert
     expect(second.removed).toBe(0);
-    expect(workouts.delete).toHaveBeenCalledTimes(1);
+    expect(workouts.deleteLocalOrphan).toHaveBeenCalledTimes(1);
   });
 });
