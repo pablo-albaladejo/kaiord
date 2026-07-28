@@ -2,6 +2,7 @@ import { isAltGraphEvent } from "../utils/is-alt-graph-event";
 import { isFormElement } from "../utils/is-form-element";
 import {
   handleAltShortcuts,
+  handleCommandPaletteKey,
   handleModifierShortcuts,
   handlePlainKeys,
 } from "./modifier-shortcut-handlers";
@@ -21,6 +22,7 @@ export type KeyboardShortcutHandlers = {
   onSelectAll?: () => boolean;
   onClearSelection?: () => boolean;
   onShowShortcuts?: () => boolean;
+  onShowCommandPalette?: () => boolean;
 };
 
 // `Record<keyof …, true>` is exhaustive in both directions at compile time:
@@ -42,6 +44,7 @@ const HANDLER_KEY_MAP: Record<keyof KeyboardShortcutHandlers, true> = {
   onSelectAll: true,
   onClearSelection: true,
   onShowShortcuts: true,
+  onShowCommandPalette: true,
 };
 
 export const HANDLER_KEYS = Object.keys(HANDLER_KEY_MAP) as ReadonlyArray<
@@ -53,6 +56,9 @@ export function createKeyDownHandler(
   handlers: KeyboardShortcutHandlers
 ): (event: KeyboardEvent) => void {
   return (event: KeyboardEvent) => {
+    // Ctrl+K/⌘K sits IN FRONT of the form-field guard on purpose: the command
+    // palette is the one binding that must answer while the user is typing.
+    if (handleCommandPaletteKey(event, handlers)) return;
     if (isFormElement(event.target)) return;
     // AltGr characters (e.g. "?" on layouts that produce it that way)
     // dispatch as plain keys ONLY — see isAltGraphEvent.

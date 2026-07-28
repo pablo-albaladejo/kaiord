@@ -981,6 +981,172 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
+  describe("command palette shortcut", () => {
+    it.each([
+      { label: "Ctrl+K", init: { key: "k", ctrlKey: true } },
+      { label: "Cmd+K", init: { key: "k", metaKey: true } },
+      { label: "uppercase Ctrl+K", init: { key: "K", ctrlKey: true } },
+    ])("should call onShowCommandPalette on $label", ({ init }) => {
+      // Arrange
+      const onShowCommandPalette = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowCommandPalette }));
+      const event = new KeyboardEvent("keydown", {
+        ...init,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onShowCommandPalette).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    // The differentiator vs `?`: the palette must answer mid-typing.
+    it.each([{ tag: "input" as const }, { tag: "textarea" as const }])(
+      "should still fire while typing in a $tag",
+      ({ tag }) => {
+        // Arrange
+        const onShowCommandPalette = vi.fn().mockReturnValue(true);
+        renderHook(() => useKeyboardShortcuts({ onShowCommandPalette }));
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        const event = new KeyboardEvent("keydown", {
+          key: "k",
+          metaKey: true,
+          bubbles: true,
+        });
+
+        // Act
+        el.dispatchEvent(event);
+        el.remove();
+
+        // Assert
+        expect(onShowCommandPalette).toHaveBeenCalledOnce();
+      }
+    );
+
+    it("should still fire while typing in a contentEditable region", () => {
+      // Arrange
+      const onShowCommandPalette = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowCommandPalette }));
+      const el = document.createElement("div");
+      el.contentEditable = "true";
+      document.body.appendChild(el);
+      const event = new KeyboardEvent("keydown", {
+        key: "k",
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      // Act
+      el.dispatchEvent(event);
+      el.remove();
+
+      // Assert
+      expect(onShowCommandPalette).toHaveBeenCalledOnce();
+    });
+
+    it("should not fire on an unmodified k", () => {
+      // Arrange
+      const onShowCommandPalette = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowCommandPalette }));
+      const event = new KeyboardEvent("keydown", { key: "k", bubbles: true });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onShowCommandPalette).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      {
+        label: "Ctrl+Shift+K",
+        init: { key: "k", ctrlKey: true, shiftKey: true },
+      },
+      { label: "Ctrl+Alt+K", init: { key: "k", ctrlKey: true, altKey: true } },
+    ])("should not fire on $label", ({ init }) => {
+      // Arrange
+      const onShowCommandPalette = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onShowCommandPalette }));
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onShowCommandPalette).not.toHaveBeenCalled();
+    });
+
+    it("should not preventDefault when the handler returns false", () => {
+      // Arrange
+      const onShowCommandPalette = vi.fn().mockReturnValue(false);
+      renderHook(() => useKeyboardShortcuts({ onShowCommandPalette }));
+      const event = new KeyboardEvent("keydown", {
+        key: "k",
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      // Act
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it.each([
+      { label: "Ctrl+S", init: { key: "s", ctrlKey: true }, handler: "onSave" },
+      { label: "Ctrl+C", init: { key: "c", ctrlKey: true }, handler: "onCopy" },
+      {
+        label: "Ctrl+G",
+        init: { key: "g", ctrlKey: true },
+        handler: "onCreateBlock",
+      },
+    ])(
+      "should leave $label untouched while ⌘K is bound",
+      ({ init, handler }) => {
+        // Arrange
+        const other = vi.fn().mockReturnValue(true);
+        const onShowCommandPalette = vi.fn().mockReturnValue(true);
+        renderHook(() =>
+          useKeyboardShortcuts({ [handler]: other, onShowCommandPalette })
+        );
+        const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
+
+        // Act
+        window.dispatchEvent(event);
+
+        // Assert
+        expect(other).toHaveBeenCalledOnce();
+        expect(onShowCommandPalette).not.toHaveBeenCalled();
+      }
+    );
+
+    it("should keep ? behind the form-field guard while ⌘K is bound", () => {
+      // Arrange
+      const onShowShortcuts = vi.fn().mockReturnValue(true);
+      const onShowCommandPalette = vi.fn().mockReturnValue(true);
+      renderHook(() =>
+        useKeyboardShortcuts({ onShowShortcuts, onShowCommandPalette })
+      );
+      const el = document.createElement("input");
+      document.body.appendChild(el);
+      const event = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+
+      // Act
+      el.dispatchEvent(event);
+      el.remove();
+
+      // Assert
+      expect(onShowShortcuts).not.toHaveBeenCalled();
+    });
+  });
+
   describe("contentEditable passthrough", () => {
     it("should not intercept Ctrl+C when target is contentEditable", () => {
       // Arrange
