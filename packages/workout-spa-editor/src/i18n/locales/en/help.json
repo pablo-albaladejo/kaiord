@@ -60,7 +60,8 @@
     },
     "help": {
       "heading": "Help",
-      "showShortcuts": "Show keyboard shortcuts"
+      "showShortcuts": "Show keyboard shortcuts",
+      "showCommandPalette": "Open the command palette"
     }
   },
   "examples": {

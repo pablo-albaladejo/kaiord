@@ -48,22 +48,7 @@ export const EditorContextMenu = ({ children }: EditorContextMenuProps) => {
         {children}
       </ContextMenu.Trigger>
       <ContextMenu.Portal>
-        <EditorContextMenuContent
-          showCut={ctx.showCut}
-          showCopy={ctx.showCopy}
-          showPaste={ctx.showPaste}
-          showDelete={ctx.showDelete}
-          showSelectAll={ctx.showSelectAll}
-          showGroup={ctx.showGroup}
-          showUngroup={ctx.showUngroup}
-          onCut={() => ctx.handlers.onCut?.()}
-          onCopy={() => ctx.handlers.onCopy?.()}
-          onPaste={() => ctx.handlers.onPaste?.()}
-          onDelete={() => ctx.handlers.onDelete?.()}
-          onSelectAll={() => ctx.handlers.onSelectAll?.()}
-          onGroup={() => ctx.handlers.onCreateBlock?.()}
-          onUngroup={() => ctx.handlers.onUngroupBlock?.()}
-        />
+        <EditorContextMenuContent {...ctx.menu} />
       </ContextMenu.Portal>
     </ContextMenu.Root>
   );

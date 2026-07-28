@@ -1,41 +1,20 @@
-import { useCallback } from "react";
+import {
+  contextMenuPropsFrom,
+  hasAnyContextMenuAction,
+} from "../components/organisms/EditorContextMenu/context-menu-props-from-commands";
+import { useEditorCommands } from "./use-editor-commands";
 
-import { hasClipboardContent } from "../store/clipboard-store";
-import { useContextMenuStore } from "../store/selectors";
-import type { Workout } from "../types/krd";
-import { buildKeyboardHandlers } from "../utils/build-keyboard-handlers";
-import { getSelectedStepIndex } from "../utils/get-selected-step-index";
-
+/**
+ * Context-menu view of `useEditorCommands`. The menu is a projection of the
+ * shared command list, never a second copy of the action set.
+ */
 export function useEditorContextMenu() {
-  const store = useContextMenuStore();
-  const workout = store.currentWorkout?.extensions?.structured_workout as
-    Workout | undefined;
-
-  const stepIndex = useCallback(
-    () => getSelectedStepIndex(store.selectedStepId, workout),
-    [store.selectedStepId, workout]
-  );
-
-  const handlers = buildKeyboardHandlers({ ...store, workout, stepIndex });
-  const sid = store.selectedStepId;
-  const hasSingle = !!sid && !sid.startsWith("block-");
-  const hasSelection = !!sid || store.selectedStepIds.length > 0;
-  const hasSteps = !!workout && workout.steps.length > 0;
-  const hasClipboard = hasClipboardContent();
+  const { commands, ...selection } = useEditorCommands();
+  const menu = contextMenuPropsFrom(commands);
 
   return {
-    handlers,
-    hasAnyAction: hasSelection || hasClipboard || hasSteps,
-    showCut: hasSingle,
-    showCopy: hasSingle,
-    showPaste: hasClipboard,
-    showDelete: hasSelection,
-    showSelectAll: hasSteps,
-    showGroup: store.selectedStepIds.length >= 2,
-    showUngroup: !!sid?.startsWith("block-"),
-    selectedStepId: sid,
-    selectedStepIds: store.selectedStepIds,
-    selectStep: store.selectStep,
-    clearStepSelection: store.clearStepSelection,
+    menu,
+    hasAnyAction: hasAnyContextMenuAction(menu),
+    ...selection,
   };
 }

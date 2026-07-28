@@ -32,4 +32,12 @@ export const GLOBAL_SHORTCUT_ROWS: ReadonlyArray<ShortcutDef> = [
     labelKey: "shortcuts.help.showShortcuts",
     handlerKey: "onShowShortcuts",
   },
+  {
+    id: "show-command-palette",
+    group: "help",
+    keys: ["Ctrl", "K"],
+    macKeys: ["⌘", "K"],
+    labelKey: "shortcuts.help.showCommandPalette",
+    handlerKey: "onShowCommandPalette",
+  },
 ];

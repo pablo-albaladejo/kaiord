@@ -1,5 +1,22 @@
 import type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
 
+/**
+ * Ctrl+K/⌘K — the only binding dispatched before the form-field guard, so it
+ * opens the palette from inside an input too. Returns `true` for any matched
+ * chord (handled or not) so the caller stops: the combination has no other
+ * meaning in the app. `Shift` and `Alt` variants fall through untouched.
+ */
+export function handleCommandPaletteKey(
+  event: KeyboardEvent,
+  handlers: KeyboardShortcutHandlers
+): boolean {
+  if (event.altKey || event.shiftKey) return false;
+  if (!event.ctrlKey && !event.metaKey) return false;
+  if (event.key.toLowerCase() !== "k") return false;
+  if (handlers.onShowCommandPalette?.() ?? false) event.preventDefault();
+  return true;
+}
+
 export function handleAltShortcuts(
   event: KeyboardEvent,
   handlers: KeyboardShortcutHandlers
