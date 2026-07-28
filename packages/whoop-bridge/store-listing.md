@@ -55,7 +55,7 @@ Privacy:
 - [ ] Record the assigned extension ID
 - [ ] Add a `CWS_WHOOP_EXTENSION_ID` repository secret
 - [ ] Widen `cws-publish.yml`'s `decide`/`act` matrices and `on.push.paths` to include `whoop-bridge` (see `openspec/specs/cws-auto-publish/spec.md`)
-- [ ] Add `@kaiord/whoop-bridge` to changesets versioning
+- [x] Add `@kaiord/whoop-bridge` to changesets versioning — already done; `.changeset/config.json` links it
 - [ ] Fill in listing fields from this document
 - [ ] Upload icon (128x128 from `packages/whoop-bridge/icons/icon128.png`)
 - [ ] Upload at least one screenshot (1280x800 or 640x400)
