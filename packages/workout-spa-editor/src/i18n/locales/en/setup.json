@@ -1,0 +1,27 @@
+{
+  "checklist": {
+    "title": "Getting set up",
+    "progress": "{{done}} of {{total}} done",
+    "progressLabel": "Setup progress",
+    "dismiss": "Dismiss the setup checklist",
+    "footnote": "Ticks itself as you go. Nothing to replay, nothing to sit through."
+  },
+  "items": {
+    "createWorkout": {
+      "title": "Create your first workout",
+      "hint": "Build one step by step, or let the AI draft it"
+    },
+    "setThresholds": {
+      "title": "Set your FTP and zones",
+      "hint": "Your zones are derived from a threshold — 1 minute"
+    },
+    "connectSource": {
+      "title": "Connect a source",
+      "hint": "Garmin, Train2Go or WHOOP — 2 minutes"
+    },
+    "pushSession": {
+      "title": "Push a session to your watch",
+      "hint": "Open a planned session and send it to your device"
+    }
+  }
+}

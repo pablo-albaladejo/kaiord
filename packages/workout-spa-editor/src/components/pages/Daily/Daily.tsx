@@ -1,3 +1,4 @@
+import { SetupChecklist } from "../../molecules/SetupChecklist/SetupChecklist";
 import { CalendarDialogs } from "../CalendarDialogs";
 import { DailyHeader } from "./DailyHeader";
 import { EnergyBalanceCard } from "./EnergyBalanceCard";
@@ -32,6 +33,7 @@ export default function Daily() {
         isFocusToday={isFocusToday}
         onBackToToday={nav.backToToday}
       />
+      <SetupChecklist />
       <ReadinessCard readiness={readiness} />
       <EnergyBalanceCard profileId={profile?.id ?? null} date={focusIso} />
       <WeekStrip

@@ -1,0 +1,27 @@
+{
+  "checklist": {
+    "title": "Primeros pasos",
+    "progress": "{{done}} de {{total}} hechos",
+    "progressLabel": "Progreso de configuración",
+    "dismiss": "Descartar la lista de primeros pasos",
+    "footnote": "Se marca sola según avanzas. Nada que repetir, nada que aguantar."
+  },
+  "items": {
+    "createWorkout": {
+      "title": "Crea tu primer entrenamiento",
+      "hint": "Constrúyelo paso a paso o deja que la IA lo redacte"
+    },
+    "setThresholds": {
+      "title": "Configura tu FTP y tus zonas",
+      "hint": "Tus zonas se derivan de un umbral — 1 minuto"
+    },
+    "connectSource": {
+      "title": "Conecta una fuente",
+      "hint": "Garmin, Train2Go o WHOOP — 2 minutos"
+    },
+    "pushSession": {
+      "title": "Envía una sesión a tu reloj",
+      "hint": "Abre una sesión planificada y mándala a tu dispositivo"
+    }
+  }
+}
