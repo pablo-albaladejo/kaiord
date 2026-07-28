@@ -58,6 +58,11 @@ in your own cloud snapshot — never on a Kaiord server.
 - Host: https://tpapi.trainingpeaks.com/*
 - No password: it exchanges your session cookie for a short-lived access token.
 
+## Kaiord WHOOP Bridge Extension
+
+- No OAuth, no developer API key: captures the session bearer from your existing app.whoop.com session.
+- Host: https://app.whoop.com/*
+
 ## Communication Scope
 
 \`externally_connectable\` is a one-way inbound channel.

@@ -296,7 +296,7 @@ Until all five steps are complete for an extension, its `package.json` version b
 
 ### Requirement: Version sync script
 
-The project SHALL include a `scripts/sync-extension-version.mjs` script that accepts an optional extension name argument. When called with an argument (e.g., `train2go-bridge`), it SHALL sync only that extension. When called without arguments, it SHALL sync all extensions (`garmin-bridge`, `train2go-bridge`).
+The project SHALL include a `scripts/sync-extension-version.mjs` script that accepts an optional extension name argument. When called with an argument (e.g., `train2go-bridge`), it SHALL sync only that extension. When called without arguments, it SHALL sync all five bridge extensions (`garmin-bridge`, `train2go-bridge`, `tanita-bridge`, `trainingpeaks-bridge`, `whoop-bridge`). Note that version syncing is independent of Chrome Web Store publishing: an extension is version-synced whether or not it has a store listing.
 
 For each extension, the script SHALL read the version from `packages/<extension>/package.json` and write it to the `version` field in `packages/<extension>/manifest.json`, `packages/<extension>/manifest.prod.json`, AND the `BRIDGE_MANIFEST.version` literal inside `packages/<extension>/background.js`. The latter is the value the extension reports to the SPA via the `ping` action — keeping it in lockstep with the published manifest version is required for the SPA's "Update your extension" detection to work correctly.
 

@@ -49,6 +49,12 @@ const TRAININGPEAKS_MANIFEST = join(
   "trainingpeaks-bridge",
   "manifest.json"
 );
+const WHOOP_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "whoop-bridge",
+  "manifest.json"
+);
 
 // Hosts the policy claims each production extension may contact.
 const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
@@ -60,6 +66,10 @@ const GARMIN_ALLOWED_HOSTS = new Set([
 const TANITA_ALLOWED_HOSTS = new Set(["https://mytanita.eu/*"]);
 const TRAININGPEAKS_ALLOWED_HOSTS = new Set([
   "https://tpapi.trainingpeaks.com/*",
+]);
+const WHOOP_ALLOWED_HOSTS = new Set([
+  "https://api.prod.whoop.com/*",
+  "https://app.whoop.com/*",
 ]);
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
@@ -144,6 +154,18 @@ const REQUIRED_RULES = [
   {
     label: "TrainingPeaks no-password cookie→token nature disclosed",
     re: /cookie for a short-lived access token/i,
+  },
+  {
+    label: "WHOOP Bridge extension covered",
+    re: /Kaiord WHOOP Bridge/i,
+  },
+  {
+    label: "WHOOP host disclosed",
+    re: /app\.whoop\.com/,
+  },
+  {
+    label: "WHOOP no-OAuth session-bearer nature disclosed",
+    re: /No OAuth/i,
   },
   {
     label: "Kaiord origin disclosed",
@@ -337,6 +359,13 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       TRAININGPEAKS_MANIFEST,
       "trainingpeaks-bridge",
       TRAININGPEAKS_ALLOWED_HOSTS
+    )
+  );
+  all.push(
+    ...checkManifestPermissions(
+      WHOOP_MANIFEST,
+      "whoop-bridge",
+      WHOOP_ALLOWED_HOSTS
     )
   );
   if (existsSync(VITEPRESS_CONFIG)) {
