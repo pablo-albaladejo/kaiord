@@ -1,3 +1,5 @@
+> Completed: 2026-07-28
+
 ## Why
 
 `withTombstones` never wrapped the application's persistence port. `main.tsx`
