@@ -42,6 +42,14 @@ jobs:
           # the API pages at 30, so an unpaginated read silently truncated.
           # --jq emits one object per line per page; `jq -sc` slurps the pages
           # into a single array.
+          #
+          # pipefail is load-bearing: without it, a gh failure part-way through
+          # pagination still streams the pages it did fetch into jq, which exits
+          # 0, and the step would succeed with a silently truncated list. A
+          # short list does not look like an error to the close-pass — it looks
+          # like "those jobs did not run" for the missing ones and like a
+          # legitimate green run for the rest. Fail the step instead.
+          set -o pipefail
           jobs=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" --paginate \
             --jq '.jobs[] | {name, conclusion}' | jq -sc .)
           echo "GREEN_RUN_JOBS=$jobs" >> "$GITHUB_ENV"

@@ -15,11 +15,20 @@ import {
 } from "./ci-failure-issue-helpers.mjs";
 import { parseRunJobs } from "./ci-failure-issue.mjs";
 
-// Job lists below mirror `repos/{owner}/{repo}/actions/runs/{id}/jobs`
-// output captured from the live repo on 2026-07-29.
+// Job entries below use the exact `{name, conclusion}` shape and the exact
+// display names returned by `repos/{owner}/{repo}/actions/runs/{id}/jobs`,
+// sampled from the live repo on 2026-07-29.
 
-// Run 30348079209 — an "everything ran" green run. 54 jobs; the ONLY two
-// skipped are structural and can never run on a green build:
+// Modelled on run 30348079209, an "everything ran" green run. That run has 54
+// jobs; this is a hand-picked 19-entry SUBSET — one or two shards per matrix
+// rather than all 28 `test` shards — kept small enough to read.
+//
+// It deliberately OMITS `round-trip` and `test-frontend`, which the real run
+// does contain, so that the "footer job absent from the green run" case has a
+// target. Do not read this array as an inventory of what CI runs.
+//
+// The two skipped entries are the structural ones that can never run on a
+// green build, and are the whole reason the v1 gate was unsatisfiable:
 //   log-bot-skip      → `if: github.actor == 'github-actions[bot]'`
 //   Notify on Failure → `if:` requires some job to have failed
 const GREEN_ALL_RAN = [
@@ -44,10 +53,12 @@ const GREEN_ALL_RAN = [
   { name: "e2e-prod-base", conclusion: "success" },
 ];
 
-// Run 30387496718 — a docs-only green run. `build` is skipped, so the
-// aggregator jobs (`name: lint|test|round-trip|test-frontend`) short-circuit
-// to exit 0 while the REAL matrix jobs are skipped. Both carry the same
-// display name, which is what makes a naive exact-name match unsafe.
+// Modelled on run 30387496718, a docs-only green run (subset, same caveat).
+// `build` is skipped, so the aggregator jobs (`name: lint|test|round-trip|
+// test-frontend`) short-circuit to exit 0 while the REAL matrix jobs are
+// skipped. GitHub collapses a fully gated-off matrix job to its bare name, so
+// both land under the SAME display name with opposite conclusions — which is
+// what makes a naive exact-name match unsafe.
 const GREEN_DOCS_ONLY = [
   { name: "log-bot-skip", conclusion: "skipped" },
   { name: "Notify on Failure", conclusion: "skipped" },
@@ -411,9 +422,16 @@ describe("v2 close-rule — per-job coverage on the green run", () => {
   });
 
   it("does NOT close when a footer job is absent from the green run", () => {
+    // Explicit fixture: the point is a footer job with NO counterpart of any
+    // conclusion, so state it locally instead of leaning on what a shared
+    // fixture happens to omit.
+    const runJobs = [
+      { name: "lint", conclusion: "success" },
+      { name: "build", conclusion: "success" },
+    ];
     const deps = fakeDeps([openIssue(["round-trip"])[0]]);
 
-    const result = runClose({ runJobs: GREEN_DOCS_ONLY, ctx: CTX }, deps);
+    const result = runClose({ runJobs, ctx: CTX }, deps);
 
     strictEqual(result[0].reason, "job-missing-on-run");
   });
@@ -484,6 +502,14 @@ describe("matchRunJobs — display-name and matrix reconciliation", () => {
     const runJobs = [{ name: "test-cli", conclusion: "success" }];
 
     deepStrictEqual(matchRunJobs("test", runJobs), []);
+  });
+
+  it("treats inherited Object keys in a footer as plain identifiers", () => {
+    // Footer content is editable by anyone who can edit a ci+automated issue.
+    const runJobs = [{ name: "constructor", conclusion: "success" }];
+
+    deepStrictEqual(matchRunJobs("constructor", runJobs), runJobs);
+    deepStrictEqual(matchRunJobs("toString", runJobs), []);
   });
 });
 
