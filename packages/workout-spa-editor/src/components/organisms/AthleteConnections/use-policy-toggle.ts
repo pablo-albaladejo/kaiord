@@ -1,10 +1,7 @@
 import { useCallback } from "react";
 
-import { db } from "../../../adapters/dexie/dexie-database";
-import { createDexieIntegrationPolicyRepository } from "../../../adapters/dexie/dexie-integration-policy-repository";
+import { policyRepo as repo } from "../../../hooks/integration-policy-repo";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
-
-const repo = createDexieIntegrationPolicyRepository(db);
 
 /* Bridge-disable write for account disconnect. useLiveQuery (useDataFlows)
    re-renders on commit, so we never set local state here. Per-flow toggle
