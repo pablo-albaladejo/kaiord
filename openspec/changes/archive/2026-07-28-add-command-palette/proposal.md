@@ -1,3 +1,5 @@
+> Completed: 2026-07-28
+
 ## Why
 
 The SPA's editor actions exist twice and are enumerable nowhere. The right-click

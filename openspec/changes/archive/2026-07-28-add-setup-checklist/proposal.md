@@ -1,3 +1,5 @@
+> Completed: 2026-07-28
+
 ## Why
 
 First-run guidance in the SPA is a six-step centred modal (`OnboardingTutorial`)
