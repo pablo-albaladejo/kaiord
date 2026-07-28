@@ -404,6 +404,32 @@ describe("RepetitionBlockCard", () => {
       // Assert
       expect(onEditRepeatCount).not.toHaveBeenCalled();
     });
+
+    it("should open inline editor via the block-actions menu without also selecting the block", async () => {
+      // Arrange
+      // Radix menu items render through a Portal to document.body, outside
+      // the card's DOM subtree, so a regression here would let the click
+      // bubble (via React's synthetic event tree) up to the card's own
+      // onClick and misfire onBlockSelect.
+      const onBlockSelect = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <RepetitionBlockCard
+          block={mockBlock}
+          blockIndex={0}
+          onBlockSelect={onBlockSelect}
+          onDelete={vi.fn()}
+        />
+      );
+
+      // Act
+      await user.click(screen.getByTestId("block-actions-trigger"));
+      await user.click(screen.getByRole("menuitem", { name: /edit count/i }));
+
+      // Assert
+      expect(screen.getByTestId("repeat-count-input")).toBeInTheDocument();
+      expect(onBlockSelect).not.toHaveBeenCalled();
+    });
   });
 
   describe("step management", () => {

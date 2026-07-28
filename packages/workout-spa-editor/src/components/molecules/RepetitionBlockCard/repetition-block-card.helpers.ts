@@ -24,9 +24,18 @@ export function buildBlockClasses(
 
 /**
  * Determine if a click event originated from a control element.
+ *
+ * Radix dropdown menu items render through a Portal to `document.body`,
+ * so `target` sits outside the block card's DOM subtree even though React's
+ * synthetic event still bubbles the click up to the card's onClick. Without
+ * the `[role="menuitem"]` check, selecting any block-actions-menu item (Edit
+ * Count, Add Step, Ungroup, Delete) also fires the card's own block-select
+ * handler.
  */
 export function isControlClick(target: HTMLElement): boolean {
-  return !!target.closest("button, input, [data-testid='step-card']");
+  return !!target.closest(
+    "button, input, [role='menuitem'], [data-testid='step-card']"
+  );
 }
 
 /**
