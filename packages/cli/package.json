@@ -74,7 +74,7 @@
   "devDependencies": {
     "@types/yargs": "^17.0.32",
     "@vitest/coverage-v8": "^4.1.10",
-    "execa": "^9.6.1",
+    "execa": "^10.0.0",
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.2.0",
     "tmp-promise": "^3.0.3",
