@@ -124,7 +124,7 @@ today.
 
 ### D8 — Module layout is cap-driven
 
-The 80-line file cap splits the feature into five files: the pure model
+The 80-line file cap splits the feature into six files: the pure model
 (`lib/setup-checklist.ts` — item ids, i18n keys, hrefs, `hasAnyThreshold`), the
 aggregate query, the composing hook, and three components (card, progress rail,
 row). The pure model in `lib/` is what lets the card test build realistic item
