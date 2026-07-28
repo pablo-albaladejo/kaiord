@@ -7,8 +7,8 @@ import { Router } from "wouter";
 import { createUmamiAnalytics } from "./adapters/analytics/umami-analytics";
 import { withEncryption } from "./adapters/cloud-sync/encrypting-cloud-sync";
 import { createGoogleDriveCloudSync } from "./adapters/cloud-sync/google-drive-cloud-sync-adapter";
+import { createAppPersistence } from "./adapters/create-app-persistence";
 import { db } from "./adapters/dexie/dexie-database";
-import { createDexiePersistence } from "./adapters/dexie/dexie-persistence-adapter";
 import { createDexieSnapshotPort } from "./adapters/dexie/dexie-snapshot-port";
 import App from "./App.tsx";
 import {
@@ -38,7 +38,7 @@ window.addEventListener("vite:preloadError", (event) => {
 
 const analytics = createUmamiAnalytics(getUmamiWebsiteId());
 
-const persistence = createDexiePersistence();
+const persistence = createAppPersistence(db);
 
 const cloudSync = withEncryption(createGoogleDriveCloudSync(), {
   isEnabled: isEncryptionEnabled,

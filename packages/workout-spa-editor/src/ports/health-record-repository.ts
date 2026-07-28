@@ -39,6 +39,13 @@ export type HealthRecordRepository<T extends HealthRecord<unknown>> = {
   ) => Promise<T[]>;
   put: (record: T) => Promise<void>;
   upsertMany: (records: readonly T[]) => Promise<void>;
-  delete: (id: string) => Promise<void>;
+  /**
+   * There is deliberately no single-row `delete(id)` here. Adding one forces
+   * a decision: a user-facing "delete this measurement" MUST tombstone (add
+   * the repo to `TOMBSTONED_TABLES` in `adapters/with-tombstones.ts`), while
+   * a provider re-ingest that re-mirrors upstream MUST NOT (give it a
+   * distinct name, as `deleteMirrorOrphan` / `deleteLocalOrphan` do). See the
+   * user-intent-vs-mirror rule in the spa-persistence-port spec.
+   */
   deleteByProfile: (profileId: string) => Promise<void>;
 };

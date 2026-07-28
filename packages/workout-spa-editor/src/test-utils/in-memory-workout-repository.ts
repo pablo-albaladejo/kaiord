@@ -33,6 +33,9 @@ export function createInMemoryWorkoutRepository(
     delete: async (id) => {
       store.delete(id);
     },
+    deleteLocalOrphan: async (id) => {
+      store.delete(id);
+    },
 
     deleteByProfile: async (profileId) => {
       for (const [id, w] of store) {

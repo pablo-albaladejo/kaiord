@@ -36,7 +36,7 @@ const buildWriters = (
   store: Store
 ): Pick<
   CoachingRepository,
-  "upsertMany" | "put" | "delete" | "deleteByProfile"
+  "upsertMany" | "put" | "delete" | "deleteMirrorOrphan" | "deleteByProfile"
 > => ({
   upsertMany: async (records) => {
     for (const record of records) store.set(record.id, record);
@@ -46,6 +46,9 @@ const buildWriters = (
   },
   // No-op when missing — matches Dexie's behavior.
   delete: async (id) => {
+    store.delete(id);
+  },
+  deleteMirrorOrphan: async (id) => {
     store.delete(id);
   },
   deleteByProfile: async (profileId) => {

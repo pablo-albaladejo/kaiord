@@ -5,6 +5,8 @@
  * Encrypts API keys before storing, decrypts after reading.
  */
 
+import Dexie from "dexie";
+
 import { decrypt, encrypt } from "../../lib/crypto";
 import type { AiProviderRepository } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
@@ -15,16 +17,22 @@ import type { KaiordDatabase } from "./dexie-database";
 // is in the JS bundle). A user-supplied PIN could strengthen this in v2.
 const PASSPHRASE = "kaiord-spa-v1";
 
+// WebCrypto promises are not Dexie promises: awaiting one inside a Dexie
+// transaction lets the IDB transaction auto-commit first (PrematureCommitError).
+// `Dexie.waitFor` keeps the transaction alive across the await, and is a plain
+// pass-through when there is no transaction in scope. Required since these
+// repos are called from inside `PersistencePort.transaction` — e.g. the
+// `withTombstones` existence probe before a provider delete.
 async function encryptProvider(
   p: LlmProviderConfig
 ): Promise<LlmProviderConfig> {
-  return { ...p, apiKey: await encrypt(p.apiKey, PASSPHRASE) };
+  return { ...p, apiKey: await Dexie.waitFor(encrypt(p.apiKey, PASSPHRASE)) };
 }
 
 async function decryptProvider(
   p: LlmProviderConfig
 ): Promise<LlmProviderConfig> {
-  return { ...p, apiKey: await decrypt(p.apiKey, PASSPHRASE) };
+  return { ...p, apiKey: await Dexie.waitFor(decrypt(p.apiKey, PASSPHRASE)) };
 }
 
 const CUSTOM_PROMPT_KEY = "ai_custom_prompt";

@@ -8,16 +8,13 @@
 import type { ManagedDataType } from "@kaiord/core";
 import { useCallback } from "react";
 
-import { db } from "../../adapters/dexie/dexie-database";
-import { createDexieIntegrationPolicyRepository } from "../../adapters/dexie/dexie-integration-policy-repository";
 import { deleteIntegrationPolicy } from "../../application/integration-policy/delete-integration-policy.use-case";
 import { upsertIntegrationPolicy } from "../../application/integration-policy/upsert-integration-policy.use-case";
+import { usePersistence } from "../../contexts/persistence-context";
 import type {
   IntegrationPolicyDirection,
   IntegrationPolicyMode,
 } from "../../types/integration-policy";
-
-const policyRepo = createDexieIntegrationPolicyRepository(db);
 
 export type DataHubRouteEditor = {
   setMode: (
@@ -32,6 +29,12 @@ export type DataHubRouteEditor = {
 export const useDataHubRouteEditor = (
   profileId: string | null
 ): DataHubRouteEditor => {
+  // Through the composed port, not a locally built repo: removing a route has
+  // to write its tombstone against the same `tombstones` store and the same
+  // transaction runner the rest of the app uses.
+  const persistence = usePersistence();
+  const policyRepo = persistence.integrationPolicy;
+
   const setMode = useCallback(
     async (
       dataType: ManagedDataType,
@@ -49,12 +52,22 @@ export const useDataHubRouteEditor = (
       if (!existing) return;
       await upsertIntegrationPolicy({ policyRepo }, { ...existing, mode });
     },
-    [profileId]
+    [profileId, policyRepo]
   );
 
-  const remove = useCallback(async (routeId: string) => {
-    await deleteIntegrationPolicy({ policyRepo }, { id: routeId });
-  }, []);
+  const remove = useCallback(
+    async (routeId: string) => {
+      await deleteIntegrationPolicy(
+        {
+          policyRepo,
+          tombstones: persistence.tombstones,
+          transaction: persistence.transaction,
+        },
+        { id: routeId }
+      );
+    },
+    [persistence, policyRepo]
+  );
 
   return { setMode, remove };
 };

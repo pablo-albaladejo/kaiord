@@ -50,6 +50,12 @@ export function createDexieCoachingRepository(
       await table().delete(id);
     },
 
+    // Same primitive as `delete`; a distinct name is what keeps the
+    // mirror-reconciliation path off the `withTombstones` surface.
+    deleteMirrorOrphan: async (id) => {
+      await table().delete(id);
+    },
+
     deleteByProfile: async (profileId) => {
       await table()
         .where("[profileId+date]")

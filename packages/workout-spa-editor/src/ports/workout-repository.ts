@@ -18,5 +18,15 @@ export type WorkoutRepository = {
   ) => Promise<WorkoutRecord | undefined>;
   put: (workout: WorkoutRecord) => Promise<void>;
   delete: (id: string) => Promise<void>;
+  /**
+   * Local-repair reconciliation ONLY: drops a row local heuristics classify
+   * as junk (`removeUntouchedCoachingTemplates`). Behaviourally identical to
+   * `delete`, but deliberately OUTSIDE the `withTombstones` surface — the
+   * "is this untouched junk?" verdict reads `modifiedAt` / `createdAt` ===
+   * `updatedAt` on the LOCAL row, and a device that has not yet merged the
+   * user's edit still sees the pristine template. Tombstoning there would
+   * destroy the edited workout on every device, permanently.
+   */
+  deleteLocalOrphan: (id: string) => Promise<void>;
   deleteByProfile: (profileId: string) => Promise<void>;
 };

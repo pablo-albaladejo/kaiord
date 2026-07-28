@@ -31,7 +31,12 @@ const dropOrphan = async (
   canonicalMatchId: string,
   deps: HealSessionMatchIdShapeDeps
 ): Promise<HealOutcome> => {
-  await deps.sessionMatches.delete(match.id);
+  // `deleteLocalOrphan`, never `delete`: dropping the shadowed duplicate is a
+  // local repair, not user intent. Another device may not hold the canonical
+  // rows this verdict rests on and would heal this very row in place instead;
+  // a tombstone would suppress that healed row forever (heal does not advance
+  // `createdAt`, the only clock a SessionMatch has).
+  await deps.sessionMatches.deleteLocalOrphan(match.id);
   logger.info("[heal] session-match orphan dropped", {
     matchId: match.id,
     canonicalMatchId,

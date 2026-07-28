@@ -21,6 +21,7 @@ export const buildStubCoachingRepo = (
     upsertMany: async () => undefined,
     put: async () => undefined,
     delete: async () => undefined,
+    deleteMirrorOrphan: async () => undefined,
     deleteByProfile: async () => undefined,
   };
 };
@@ -48,6 +49,7 @@ export const buildStubWorkoutRepo = (
     getBySourceId: async () => next,
     put: async (w) => void store.set(w.id, w),
     delete: async (id) => void store.delete(id),
+    deleteLocalOrphan: async (id) => void store.delete(id),
     deleteByProfile: async (pid) => deleteFromStore(store, pid),
     setSourceLookup: (w) => {
       next = w;

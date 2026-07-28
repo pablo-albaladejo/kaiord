@@ -21,6 +21,8 @@ export type IntegrationPolicyRepository = {
     direction: "import" | "export";
     bridgeId: string;
   }) => Promise<IntegrationPolicy | undefined>;
+  /** One policy by primary key, or undefined. */
+  getById: (id: string) => Promise<IntegrationPolicy | undefined>;
   put: (policy: IntegrationPolicy) => Promise<void>;
   deleteById: (id: string) => Promise<void>;
 };

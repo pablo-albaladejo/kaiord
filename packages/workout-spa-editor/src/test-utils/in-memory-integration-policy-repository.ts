@@ -30,6 +30,8 @@ export function createInMemoryIntegrationPolicyRepository(
           p.bridgeId === bridgeId
       ),
 
+    getById: async (id) => store.get(id),
+
     put: async (policy) => {
       store.set(policy.id, policy);
     },

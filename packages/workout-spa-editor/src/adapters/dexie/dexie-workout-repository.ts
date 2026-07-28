@@ -48,6 +48,12 @@ export function createDexieWorkoutRepository(
       await table().delete(id);
     },
 
+    // Same primitive as `delete`; a distinct name is what keeps the
+    // junk-cleanup/local-repair path off the `withTombstones` surface.
+    deleteLocalOrphan: async (id) => {
+      await table().delete(id);
+    },
+
     deleteByProfile: async (profileId) => {
       await table().where("profileId").equals(profileId).delete();
     },

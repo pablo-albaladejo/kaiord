@@ -1,71 +1,83 @@
 /**
  * Tests for deleteIntegrationPolicy use case.
- * Uses in-memory port mocks — no Dexie dependency.
+ * Uses the in-memory persistence port — no Dexie dependency.
  */
 import { describe, expect, it } from "vitest";
 
+import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 import { deleteIntegrationPolicy } from "./delete-integration-policy.use-case";
-import type { IntegrationPolicyRepository } from "./integration-policy-repository.port";
+import type { DeleteIntegrationPolicyDeps } from "./delete-integration-policy-deps";
 
 const PROFILE_ID = "11111111-1111-4111-8111-111111111111";
 
-const makeRepo = (): IntegrationPolicyRepository & {
-  store: Map<string, IntegrationPolicy>;
+const policy = (id: string): IntegrationPolicy => ({
+  id,
+  profileId: PROFILE_ID,
+  dataType: "weight",
+  bridgeId: "garmin-bridge",
+  direction: "import",
+  mode: "manual",
+  enabled: true,
+  updatedAt: "2026-05-26T00:00:00.000Z",
+});
+
+const makeDeps = (): DeleteIntegrationPolicyDeps & {
+  port: ReturnType<typeof createInMemoryPersistence>;
 } => {
-  const store = new Map<string, IntegrationPolicy>();
+  const port = createInMemoryPersistence();
   return {
-    store,
-    findByProfileDirection: async () => [],
-    findByNaturalKey: async () => undefined,
-    put: async (p) => {
-      store.set(p.id, p);
-    },
-    deleteById: async (id) => {
-      store.delete(id);
-    },
+    port,
+    policyRepo: port.integrationPolicy,
+    tombstones: port.tombstones,
+    transaction: port.transaction,
   };
 };
 
 describe("deleteIntegrationPolicy", () => {
   it("should delete the policy row by id", async () => {
     // Arrange
-    const repo = makeRepo();
+    const deps = makeDeps();
     const policyId = crypto.randomUUID();
-    repo.store.set(policyId, {
-      id: policyId,
-      profileId: PROFILE_ID,
-      dataType: "weight",
-      bridgeId: "garmin-bridge",
-      direction: "import",
-      mode: "manual",
-      enabled: true,
-      updatedAt: "2026-05-26T00:00:00.000Z",
-    });
-    const deps = { policyRepo: repo };
+    await deps.policyRepo.put(policy(policyId));
 
     // Act
     await deleteIntegrationPolicy(deps, { id: policyId });
 
     // Assert
-    expect(repo.store.size).toBe(0);
+    expect(await deps.policyRepo.getById(policyId)).toBeUndefined();
+  });
+
+  it("should record a tombstone so the removed route does not resurrect on merge", async () => {
+    // Arrange
+    const deps = makeDeps();
+    const policyId = crypto.randomUUID();
+    await deps.policyRepo.put(policy(policyId));
+
+    // Act
+    await deleteIntegrationPolicy(deps, { id: policyId });
+
+    // Assert
+    expect(
+      await deps.tombstones.get("integrationPolicies", policyId)
+    ).toMatchObject({ table: "integrationPolicies", profileId: PROFILE_ID });
   });
 
   it("should be a no-op when the id does not exist", async () => {
     // Arrange
-    const repo = makeRepo();
-    const deps = { policyRepo: repo };
+    const deps = makeDeps();
+    const missingId = crypto.randomUUID();
 
     // Act
     let error: unknown;
     try {
-      await deleteIntegrationPolicy(deps, { id: crypto.randomUUID() });
+      await deleteIntegrationPolicy(deps, { id: missingId });
     } catch (e) {
       error = e;
     }
 
     // Assert
     expect(error).toBeUndefined();
-    expect(repo.store.size).toBe(0);
+    expect(await deps.tombstones.list()).toEqual([]);
   });
 });

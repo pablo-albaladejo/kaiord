@@ -29,9 +29,6 @@ export function createDexieHealthRecordRepository<
     upsertMany: async (records) => {
       await table().bulkPut([...records]);
     },
-    delete: async (id) => {
-      await table().delete(id);
-    },
     deleteByProfile: async (profileId) => {
       await table().where("profileId").equals(profileId).delete();
     },

@@ -61,7 +61,7 @@ export const isUntouchedCoachingTemplate = (record: WorkoutRecord): boolean => {
 export type RemoveResult = { removed: number };
 
 export const removeUntouchedCoachingTemplates = async (
-  workouts: Pick<WorkoutRepository, "getByState" | "delete">,
+  workouts: Pick<WorkoutRepository, "getByState" | "deleteLocalOrphan">,
   sessionMatch: Pick<SessionMatchRepository, "deleteByWorkoutId">
 ): Promise<RemoveResult> => {
   const structured = await workouts.getByState("structured");
@@ -69,7 +69,11 @@ export const removeUntouchedCoachingTemplates = async (
 
   for (const record of junk) {
     await sessionMatch.deleteByWorkoutId(record.id);
-    await workouts.delete(record.id);
+    // `deleteLocalOrphan`, never `delete`: "untouched junk" is a LOCAL
+    // verdict. A device that has not merged the user's edit yet still sees
+    // the pristine template, so a tombstone here would destroy the edited
+    // workout everywhere. The `Pick` deliberately withholds `delete`.
+    await workouts.deleteLocalOrphan(record.id);
   }
 
   if (junk.length > 0) {

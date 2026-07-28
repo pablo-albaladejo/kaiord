@@ -25,6 +25,10 @@ export const createDexieIntegrationPolicyRepository = (
       .equals([profileId, dataType, direction, bridgeId])
       .first()) as IntegrationPolicy | undefined,
 
+  getById: async (id: string) =>
+    (await db.table("integrationPolicies").get(id)) as
+      IntegrationPolicy | undefined,
+
   put: async (policy: IntegrationPolicy) => {
     await db.table("integrationPolicies").put(policy);
   },

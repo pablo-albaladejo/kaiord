@@ -84,17 +84,6 @@ describe("createInMemoryHealthRecordRepository", () => {
     expect(fetched?.krd.value).toBe(2);
   });
 
-  it("should treat delete of a missing id as a no-op", async () => {
-    // Arrange
-    const repo = buildRepo();
-
-    // Act
-    await repo.delete("nope");
-
-    // Assert (no throw)
-    expect(await repo.getById("nope")).toBeUndefined();
-  });
-
   it("should cascade deleteByProfile across rows of the given profile only", async () => {
     // Arrange
     const repo = buildRepo();

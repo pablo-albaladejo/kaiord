@@ -26,9 +26,6 @@ export function createInMemoryHealthRecordRepository<
     upsertMany: async (records) => {
       for (const r of records) store.set(r.id, r);
     },
-    delete: async (id) => {
-      store.delete(id);
-    },
     deleteByProfile: async (profileId) => {
       for (const [k, v] of store) {
         if (v.profileId === profileId) store.delete(k);
