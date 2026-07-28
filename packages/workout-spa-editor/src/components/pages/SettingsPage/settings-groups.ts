@@ -1,70 +1,77 @@
-import type { IconName } from "../../atoms/Icon";
+import type { SettingsGroupDef, SettingsRowDef } from "./settings-group-types";
 
-export type SettingsRowDef = {
-  icon: IconName;
-  /** Stable identity: i18n key under `settings.rows.*`, React key, and testid. */
-  key: string;
-  to?: string;
-  detailKey?: "defaultProvider";
-};
+const DOCS_URL = "https://kaiord.com/docs/";
 
-export type SettingsGroupDef = {
-  /** Stable identity: i18n key under `settings.groups.*` and React key. */
-  key: string;
-  rows: ReadonlyArray<SettingsRowDef>;
-};
+const YOUR_DATA_ROWS: ReadonlyArray<SettingsRowDef> = [
+  // TODO(S3): re-point at /settings/connections once that page exists;
+  // /athlete is the interim destination.
+  { icon: "link", key: "connections", to: "/athlete" },
+  {
+    icon: "sync",
+    key: "googleDriveSync",
+    to: "/settings/sync",
+    valueKey: "sync",
+  },
+  {
+    icon: "shield",
+    key: "dataPrivacy",
+    to: "/settings/privacy",
+    valueKey: "privacy",
+  },
+  {
+    icon: "shield",
+    key: "manageYourData",
+    to: "/settings/privacy?section=data-management",
+  },
+  { icon: "link", key: "extensions", to: "/settings/extensions" },
+  { icon: "route", key: "dataHub", to: "/settings/data-hub" },
+];
+
+const AI_ROWS: ReadonlyArray<SettingsRowDef> = [
+  {
+    icon: "sparkle",
+    key: "provider",
+    to: "/settings/ai?section=providers",
+    valueKey: "provider",
+  },
+  {
+    icon: "edit",
+    key: "customInstructions",
+    to: "/settings/ai?section=custom-instructions",
+  },
+  { icon: "trend", key: "usage", to: "/settings/usage", valueKey: "usage" },
+];
+
+const PREFERENCES_ROWS: ReadonlyArray<SettingsRowDef> = [
+  {
+    icon: "target",
+    key: "units",
+    to: "/settings/preferences",
+    valueKey: "units",
+  },
+  {
+    icon: "chat",
+    key: "language",
+    to: "/settings/preferences",
+    valueKey: "language",
+  },
+  {
+    icon: "bell",
+    key: "notifications",
+    to: "/settings/preferences",
+    valueKey: "notifications",
+  },
+];
+
+const ABOUT_ROWS: ReadonlyArray<SettingsRowDef> = [
+  { icon: "help", key: "helpDocs", href: DOCS_URL },
+];
 
 export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [
-  {
-    key: "aiGeneration",
-    rows: [
-      {
-        icon: "sparkle",
-        key: "provider",
-        to: "/settings/ai?section=providers",
-        detailKey: "defaultProvider",
-      },
-      {
-        icon: "edit",
-        key: "customInstructions",
-        to: "/settings/ai?section=custom-instructions",
-      },
-    ],
-  },
-  {
-    key: "crossDeviceSync",
-    rows: [{ icon: "sync", key: "googleDriveSync", to: "/settings/sync" }],
-  },
-  {
-    key: "dataRouting",
-    rows: [{ icon: "route", key: "dataHub", to: "/settings/data-hub" }],
-  },
-  {
-    key: "preferences",
-    rows: [
-      { icon: "target", key: "units", to: "/settings/preferences" },
-      { icon: "chat", key: "language", to: "/settings/preferences" },
-      { icon: "bell", key: "notifications", to: "/settings/preferences" },
-    ],
-  },
-  {
-    key: "privacyData",
-    rows: [
-      { icon: "shield", key: "dataPrivacy", to: "/settings/privacy" },
-      {
-        icon: "shield",
-        key: "manageYourData",
-        to: "/settings/privacy?section=data-management",
-      },
-    ],
-  },
-  {
-    key: "advanced",
-    rows: [
-      { icon: "link", key: "extensions", to: "/settings/extensions" },
-      { icon: "trend", key: "usage", to: "/settings/usage" },
-    ],
-  },
+  { key: "yourData", rows: YOUR_DATA_ROWS },
+  { key: "ai", rows: AI_ROWS },
+  { key: "preferences", rows: PREFERENCES_ROWS },
+  { key: "about", rows: ABOUT_ROWS },
 ];
 
 export const SETTINGS_VERSION_LABEL = "Kaiord";

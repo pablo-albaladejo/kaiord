@@ -1,9 +1,8 @@
-import { lazy, Suspense, useCallback } from "react";
+import { lazy, Suspense } from "react";
 
-import { useKeyboardShortcuts } from "../../../hooks/use-keyboard-shortcuts";
-import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { StatusHeader } from "../../molecules/StatusHeader/StatusHeader";
 import { HeaderLogo } from "./components/HeaderLogo";
+import { useHeaderOverlays } from "./use-header-overlays";
 
 const HelpDialog = lazy(() =>
   import("./components/HelpDialog").then((m) => ({ default: m.HelpDialog }))
@@ -15,21 +14,18 @@ const ShortcutSheet = lazy(() =>
   }))
 );
 
+const CommandPalette = lazy(() =>
+  import("../../organisms/CommandPalette/CommandPalette").then((m) => ({
+    default: m.CommandPalette,
+  }))
+);
+
 type LayoutHeaderProps = {
   onReplayTutorial?: () => void;
 };
 
 export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
-  const help = useLazyDialog();
-  const shortcuts = useLazyDialog();
-
-  const showShortcuts = shortcuts.show;
-  const onShowShortcuts = useCallback(() => {
-    showShortcuts();
-    return true;
-  }, [showShortcuts]);
-
-  useKeyboardShortcuts({ onShowShortcuts });
+  const { help, shortcuts, palette, onPaletteShortcuts } = useHeaderOverlays();
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -49,6 +45,13 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
           <ShortcutSheet
             open={shortcuts.open}
             onOpenChange={shortcuts.setOpen}
+          />
+        )}
+        {palette.mounted && (
+          <CommandPalette
+            open={palette.open}
+            onOpenChange={palette.setOpen}
+            onShowShortcuts={onPaletteShortcuts}
           />
         )}
       </Suspense>

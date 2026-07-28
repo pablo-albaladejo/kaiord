@@ -1,0 +1,83 @@
+{
+  "title": "Command palette",
+  "searchLabel": "Search commands",
+  "searchPlaceholder": "Search commands…",
+  "listLabel": "Commands",
+  "empty": "Nothing matches that search.",
+  "groups": {
+    "do": "Do it",
+    "learn": "Learn"
+  },
+  "footer": {
+    "run": "↵ run",
+    "shortcuts": "? all shortcuts",
+    "docs": "Full documentation ↗"
+  },
+  "commands": {
+    "cut": {
+      "title": "Cut the selected step",
+      "subtitle": "Removes it and puts it on the clipboard",
+      "requires": "Select a single step in the main list"
+    },
+    "copy": {
+      "title": "Copy the selected step",
+      "subtitle": "Puts it on the clipboard",
+      "requires": "Select a step in the main list"
+    },
+    "paste": {
+      "title": "Paste the copied step",
+      "subtitle": "Inserts it after the current selection",
+      "requires": "Copy or cut a step first"
+    },
+    "delete": {
+      "title": "Delete the selected step",
+      "subtitle": "Removes it from the workout",
+      "requires": "Select a step in the main list"
+    },
+    "select-all": {
+      "title": "Select every step",
+      "subtitle": "Selects all steps in the workout",
+      "requires": "Add a step first"
+    },
+    "create-block": {
+      "title": "Group the selected steps into a block",
+      "titleCount": "Group the {{count}} selected steps into a block",
+      "subtitle": "Opens the repetition-block dialog",
+      "requires": "Select 2 or more steps"
+    },
+    "ungroup-block": {
+      "title": "Ungroup the selected block",
+      "subtitle": "Replaces the block with its steps",
+      "requires": "Select a repetition block"
+    },
+    "undo": {
+      "title": "Undo the last change",
+      "subtitle": "Steps back through the edit history",
+      "requires": "Nothing to undo"
+    },
+    "redo": {
+      "title": "Redo the last undone change",
+      "subtitle": "Steps forward through the edit history",
+      "requires": "Nothing to redo"
+    },
+    "save": {
+      "title": "Save the workout",
+      "subtitle": "Downloads it as a .krd file",
+      "requires": "Open a workout first"
+    }
+  },
+  "learn": {
+    "quick-start": {
+      "title": "Quick start guide",
+      "subtitle": "Opens the documentation in a new tab"
+    },
+    "formats": {
+      "title": "How workouts are stored (KRD)",
+      "subtitle": "Opens the documentation in a new tab"
+    },
+    "convert": {
+      "title": "Convert between file formats",
+      "subtitle": "Opens the documentation in a new tab"
+    }
+  }
+}
