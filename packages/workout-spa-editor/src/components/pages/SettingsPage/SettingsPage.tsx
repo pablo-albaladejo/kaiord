@@ -6,32 +6,48 @@ import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Button } from "../../atoms/Button/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { isSettingsTab, SETTINGS_TAB_VIEWS } from "./settings-tab-views";
-import { SettingsGroupList } from "./SettingsGroupList";
+import { SettingsAttention } from "./SettingsAttention";
+import { SettingsSidebar } from "./SettingsSidebar";
+import { useSectionScrollReset } from "./use-section-scroll-reset";
 
-type SettingsPageParams = { tab?: string };
+/**
+ * `section` is the path segment naming the open panel (`/settings/ai`). It is
+ * distinct from the `?section=` query, which anchors a sub-section *inside* a
+ * panel and is handled by `useFocusOnSectionChange`.
+ */
+type SettingsPageParams = { section?: string };
 
 const SETTINGS_ROOT = "/settings" as const;
 
+/* Responsive is CSS-only — no viewport is measured in JS, so the index is
+   what renders wherever the `md` breakpoint does not apply. */
+const SPLIT_CLASS =
+  "md:grid md:grid-cols-[18rem_minmax(0,1fr)] md:items-start md:gap-6";
+
 export default function SettingsPage() {
-  const { tab } = useParams<SettingsPageParams>();
-  const [, navigate] = useLocation();
+  const { section } = useParams<SettingsPageParams>();
+  const [location, navigate] = useLocation();
   const t = useTranslate("settings");
   useFocusOnSectionChange();
+  useSectionScrollReset(section);
 
-  if (tab !== undefined && !isSettingsTab(tab))
+  if (section !== undefined && !isSettingsTab(section))
     return <Redirect to={SETTINGS_ROOT} />;
 
-  const ActiveView = tab === undefined ? null : SETTINGS_TAB_VIEWS[tab];
+  const ActiveView = section === undefined ? null : SETTINGS_TAB_VIEWS[section];
   const heading =
-    tab === undefined ? t("title") : `${t("title")} · ${t(`tabs.${tab}`)}`;
+    section === undefined
+      ? t("title")
+      : `${t("title")} · ${t(`tabs.${section}`)}`;
 
   return (
     <div className="space-y-6 p-4" data-testid="settings-page">
-      {tab !== undefined && (
+      {section !== undefined && (
         <Button
           variant="tertiary"
           size="sm"
           onClick={() => navigate(SETTINGS_ROOT)}
+          className="md:hidden"
           data-testid="settings-back"
         >
           <Icon icon={ICON_MAP.chevL} size="sm" color="inherit" />
@@ -45,17 +61,23 @@ export default function SettingsPage() {
       >
         {heading}
       </h1>
-      {ActiveView === null ? (
-        <SettingsGroupList onNavigate={(to) => navigate(to)} />
-      ) : (
-        <div
-          id={`settings-panel-${tab}`}
-          className="min-w-0"
-          data-testid={`settings-panel-${tab}`}
-        >
-          <ActiveView />
-        </div>
-      )}
+      <SettingsAttention attention={null} variant="banner" />
+      <div className={section === undefined ? undefined : SPLIT_CLASS}>
+        <SettingsSidebar
+          railed={section !== undefined}
+          activePath={location}
+          onNavigate={navigate}
+        />
+        {ActiveView !== null && (
+          <div
+            id={`settings-panel-${section}`}
+            className="min-w-0"
+            data-testid={`settings-panel-${section}`}
+          >
+            <ActiveView />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

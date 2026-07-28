@@ -40,7 +40,7 @@ function renderAtPath(path: string) {
   const memory = memoryLocation({ path, record: true });
   const result = renderWithProviders(
     <Router hook={memory.hook}>
-      <Route path="/settings/:tab?">
+      <Route path="/settings/:section?">
         <SettingsPage />
       </Route>
     </Router>,
@@ -218,6 +218,113 @@ describe("SettingsPage", () => {
         expect(memory.history.at(-1)).toBe("/settings");
       });
     });
+  });
+
+  describe("split shell", () => {
+    it("should render the index without the section rail at /settings", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-group-list")).toBeInTheDocument();
+      expect(screen.queryByTestId("settings-panel-ai")).not.toBeInTheDocument();
+      expect(screen.getByTestId("settings-sidebar")).not.toHaveClass(
+        "md:block"
+      );
+    });
+
+    it("should render the section rail beside the panel for a section", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/ai");
+
+      // Assert
+      expect(screen.getByTestId("settings-group-list")).toBeInTheDocument();
+      expect(screen.getByTestId("settings-panel-ai")).toBeInTheDocument();
+      // The rail is a CSS-only affordance: absent below `md`, present above.
+      expect(screen.getByTestId("settings-sidebar")).toHaveClass(
+        "hidden",
+        "md:block"
+      );
+    });
+
+    it("should drop row values from the section rail", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/ai");
+
+      // Assert
+      expect(
+        screen.getByTestId("settings-row-dataPrivacy")
+      ).not.toHaveTextContent("Stored in this browser");
+    });
+
+    it("should mark the open section's row as current", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/sync");
+
+      // Assert
+      expect(
+        screen.getByTestId("settings-row-googleDriveSync")
+      ).toHaveAttribute("aria-current", "page");
+      expect(screen.getByTestId("settings-row-usage")).not.toHaveAttribute(
+        "aria-current"
+      );
+    });
+
+    it.each([{ path: "/settings" }, { path: "/settings/extensions" }])(
+      "should expose exactly one route heading at $path",
+      ({ path }) => {
+        // Arrange
+
+        // Act
+        const { container } = renderAtPath(path);
+
+        // Assert
+        expect(container.querySelectorAll("[data-route-heading]")).toHaveLength(
+          1
+        );
+      }
+    );
+
+    it("should render no attention surface while nothing computes one", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/ai");
+
+      // Assert
+      expect(
+        screen.queryByTestId("settings-attention-banner")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("settings-attention-chip")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("legacy sections", () => {
+    it.each([{ section: "data-hub" }, { section: "extensions" }])(
+      "should keep /settings/$section resolving to its own panel",
+      ({ section }) => {
+        // Arrange
+
+        // Act
+        const { memory } = renderAtPath(`/settings/${section}`);
+
+        // Assert
+        expect(
+          screen.getByTestId(`settings-panel-${section}`)
+        ).toBeInTheDocument();
+        expect(memory.history.at(-1)).toBe(`/settings/${section}`);
+      }
+    );
   });
 
   describe("section deep-links", () => {
