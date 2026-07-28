@@ -15,6 +15,7 @@ import {
   FlaskConical,
   Footprints,
   Heart,
+  HelpCircle,
   LayoutGrid,
   Link,
   MessageCircle,
@@ -78,6 +79,7 @@ export const ICON_MAP = {
   nutrition: Utensils,
   chat: MessageCircle,
   labs: FlaskConical,
+  help: HelpCircle,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICON_MAP;
