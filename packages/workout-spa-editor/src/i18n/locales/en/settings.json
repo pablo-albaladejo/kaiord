@@ -2,25 +2,42 @@
   "title": "Settings",
   "back": "Settings",
   "groups": {
-    "aiGeneration": "AI generation",
-    "crossDeviceSync": "Cross-device sync",
-    "dataRouting": "Data routing",
+    "yourData": "Your data",
+    "ai": "AI",
     "preferences": "Preferences",
-    "privacyData": "Privacy & data",
-    "advanced": "Advanced"
+    "about": "About"
   },
   "rows": {
-    "provider": "Provider",
+    "connections": "Connections",
+    "provider": "Provider & models",
     "customInstructions": "Custom instructions",
-    "googleDriveSync": "Google Drive sync",
+    "googleDriveSync": "Cross-device sync",
     "dataHub": "Data Hub",
     "units": "Units",
     "language": "Language",
     "notifications": "Notifications",
-    "dataPrivacy": "Data & privacy",
+    "dataPrivacy": "Privacy & data",
     "manageYourData": "Manage your data",
     "extensions": "Extensions",
-    "usage": "Usage"
+    "usage": "Usage",
+    "helpDocs": "Help & docs"
+  },
+  "values": {
+    "sync": {
+      "connected": "Drive · {{relative}}"
+    },
+    "usage": {
+      "tokens": "{{tokens}} tokens · {{month}}"
+    },
+    "notifications": {
+      "on": "On",
+      "off": "Off",
+      "blocked": "Blocked",
+      "unsupported": "Unsupported"
+    },
+    "privacy": {
+      "localFirst": "Stored in this browser"
+    }
   },
   "tabs": {
     "ai": "AI",
@@ -76,13 +93,13 @@
     "offline": "Last sync failed — working offline",
     "lastSynced": "Last synced {{date}}",
     "connectedNotSynced": "Connected — not synced yet",
-    "encryption": "End-to-end encryption",
+    "encryption": "End-to-end encryption for sync snapshots",
     "passphrase": "Passphrase",
     "plaintextWarning": "Your saved AI API keys will be uploaded without end-to-end encryption. Enable encryption below to protect them."
   },
   "privacy": {
     "information": "Privacy Information",
-    "infoNoServer": "We do not store your credentials on any server.",
+    "infoNoServer": "We do not operate a server that stores your credentials. When cross-device sync is on, your saved AI API keys are uploaded to your own Google Drive unless you enable encryption.",
     "infoGarmin": "Garmin integration uses a browser extension that piggybacks on your existing Garmin Connect session. No credentials leave your browser.",
     "infoTrain2go": "Train2Go import uses a browser extension that reads the coaching plan displayed on Train2Go pages you are already viewing. It does not read your password or authentication tokens.",
     "infoLlmKeys": "LLM API keys are sent directly to the provider (Anthropic, OpenAI, or Google) — Kaiord does not receive or relay this data.",
@@ -94,7 +111,7 @@
     "analyticsOutro": "to track aggregate usage (page views, workout generation, exports). No cookies are set and no personal data is collected.",
     "dataManagement": "Data Management",
     "clearAllApiKeys": "Clear All API Keys",
-    "clearAllHint": "This removes all stored API keys from your browser."
+    "clearAllHint": "This removes all stored API keys from your browser. Keys already uploaded to your Google Drive by cross-device sync are not deleted by this action."
   },
   "usage": {
     "title": "AI Usage",
@@ -147,5 +164,8 @@
     "unsupported": "Notifications aren't supported in this browser.",
     "enable": "Enable notifications",
     "blocked": "Notifications are blocked in your browser settings."
+  },
+  "rowStatus": {
+    "attention": "Needs attention"
   }
 }
