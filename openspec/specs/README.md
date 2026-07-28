@@ -24,7 +24,7 @@ CI verifies freshness via `pnpm lint:specs-inventory`.
 | [`ci-failure-bot`](./ci-failure-bot/spec.md) | CI Failure Issue Bot | Tracks CI red/green state on `main` as GitHub issues with deduplication and auto-close, replacing the inline `actions/github-script` block at `.github/workflow… |
 | [`ci-release`](./ci-release/spec.md) | CI Release | Changeset-driven versioning and release workflow that publishes the npm packages from `packages/` and creates GitHub releases on every merge to `main`. |
 | [`conversion-loss-honesty`](./conversion-loss-honesty/spec.md) | Conversion Loss Honesty | Defines how every format adapter SHALL behave when the target format cannot |
-| [`cws-auto-publish`](./cws-auto-publish/spec.md) | CWS Auto Publish | Automated Chrome Web Store publishing for every extension in the monorepo, triggered by a version bump in the extension's `package.json`. |
+| [`cws-auto-publish`](./cws-auto-publish/spec.md) | CWS Auto Publish | Automated Chrome Web Store publishing for the extensions currently |
 | [`cws-train2go-listing`](./cws-train2go-listing/spec.md) | CWS Train2Go Listing | Chrome Web Store listing assets (store description, privacy justification, submission metadata) and CI/CD integration for the train2go-bridge extension. |
 | [`doc-drift-prevention`](./doc-drift-prevention/spec.md) | Doc Drift Prevention | Safeguards — type-checked code examples, TypeDoc generation, link checking, and spellcheck — that keep the documentation faithful to the code it describes. |
 | [`docs-site`](./docs-site/spec.md) | Docs Site | Structure, routing, navigation, and content requirements for the Kaiord documentation site served from `/docs`. |
@@ -63,12 +63,12 @@ CI verifies freshness via `pnpm lint:specs-inventory`.
 | [`spa-session-match`](./spa-session-match/spec.md) | spa-session-match Specification | Models the linkage between a planned coaching activity and the executed workout that fulfills it (`SessionMatch`), the application use cases that create / remo… |
 | [`spa-train2go-extension`](./spa-train2go-extension/spec.md) | SPA Train2Go Extension | SPA-side integration with the train2go-bridge extension — runtime discovery via content script announcement and read-only import of coaching plans rendered on … |
 | [`spa-user-preferences`](./spa-user-preferences/spec.md) | spa-user-preferences Specification | Persists per-profile user-facing preferences for the SPA (calendar density today; future fields land here without migration). Reads are lazy and viewport-aware… |
-| [`spa-whoop-extension`](./spa-whoop-extension/spec.md) | spa-whoop-extension Specification | TBD - created by archiving change rewrite-whoop-session-bridge. Update Purpose after archive. |
+| [`spa-whoop-extension`](./spa-whoop-extension/spec.md) | spa-whoop-extension Specification | SPA-side integration for `whoop-bridge`: discovers the extension through the |
 | [`spa-workout-state-machine`](./spa-workout-state-machine/spec.md) | SPA Workout State Machine | Workout lifecycle — raw, structured, ready, pushed, modified, stale, skipped — and the transitions (AI generation, explicit finalize, Garmin push, user edits, … |
 | [`test-conventions`](./test-conventions/spec.md) | Test Conventions | The `test-conventions` capability defines two structural invariants every Vitest test SHALL honor: titles begin with `should ` and bodies are organized into `/… |
 | [`test-minimality`](./test-minimality/spec.md) | Test Minimality | Defines the minimal-and-semantic test-suite invariants for every Vitest suite |
 | [`train2go-bridge`](./train2go-bridge/spec.md) | Train2Go Bridge | Chrome extension that imports coaching plans from Train2Go into the workout editor by read-only DOM access on `app.train2go.com` — no credentials stored, no pe… |
 | [`train2go-coach-links`](./train2go-coach-links/spec.md) | train2go-coach-links Specification | End-to-end preservation of Train2Go coach instructions and their embedded links |
 | [`train2go-zones-sync`](./train2go-zones-sync/spec.md) | train2go-zones-sync Specification | Opt-in propagation of athlete threshold and physiological values from Train2Go |
-| [`whoop-bridge`](./whoop-bridge/spec.md) | whoop-bridge Specification | TBD - created by archiving change rewrite-whoop-session-bridge. Update Purpose after archive. |
-| [`whoop-health-adapter`](./whoop-health-adapter/spec.md) | whoop-health-adapter Specification | TBD - created by archiving change rewrite-whoop-session-bridge. Update Purpose after archive. |
+| [`whoop-bridge`](./whoop-bridge/spec.md) | whoop-bridge Specification | Chrome extension that gives the Kaiord SPA read-only access to a signed-in |
+| [`whoop-health-adapter`](./whoop-health-adapter/spec.md) | whoop-health-adapter Specification | `@kaiord/whoop` is a pure, offline adapter that validates WHOOP's |
