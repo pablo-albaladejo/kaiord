@@ -36,6 +36,15 @@ export type CoachingRepository = {
   put: (record: CoachingActivityRecord) => Promise<void>;
   /** No-op when the row does not exist (concurrent-delete tolerance). */
   delete: (id: string) => Promise<void>;
+  /**
+   * Mirror reconciliation ONLY: drops a local row the upstream bridge no
+   * longer reports for the synced window. Behaviourally identical to
+   * `delete`, but deliberately OUTSIDE the `withTombstones` surface — a
+   * short, empty or failed upstream week is indistinguishable from a real
+   * coach removal, so tombstoning here would write a permanent cross-device
+   * delete marker over a live activity that re-syncing could never undo.
+   */
+  deleteMirrorOrphan: (id: string) => Promise<void>;
   deleteByProfile: (profileId: string) => Promise<void>;
 };
 

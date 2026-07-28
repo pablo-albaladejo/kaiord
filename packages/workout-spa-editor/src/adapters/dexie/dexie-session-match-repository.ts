@@ -47,6 +47,7 @@ const buildWriters = (
   | "updateCoachingActivityId"
   | "appendExecutedWorkoutIds"
   | "delete"
+  | "deleteLocalOrphan"
   | "deleteByActivityId"
   | "deleteByWorkoutId"
   | "deleteByProfile"
@@ -65,9 +66,10 @@ const buildWriters = (
     updateCoachingActivityIdTx(db, table, id, newCoachingActivityId),
   appendExecutedWorkoutIds: (id, workoutIds) =>
     appendExecutedWorkoutIdsTx(db, table, id, workoutIds),
-  delete: async (id) => {
-    await table().delete(id);
-  },
+  delete: (id) => table().delete(id),
+  // Same primitive as `delete`; a distinct name is what keeps the
+  // heal/local-repair path off the `withTombstones` surface.
+  deleteLocalOrphan: (id) => table().delete(id),
   deleteByActivityId: async (coachingActivityId) => {
     await table()
       .where("coachingActivityId")

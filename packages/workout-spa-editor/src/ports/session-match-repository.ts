@@ -60,6 +60,17 @@ export type SessionMatchRepository = {
   ) => Promise<SessionMatch[]>;
   /** No-op when the row does not exist. */
   delete: (id: string) => Promise<void>;
+  /**
+   * Local-repair reconciliation ONLY: drops a duplicate row that local state
+   * proves is shadowed by a canonical match (`healSessionMatchIdShape`).
+   * Behaviourally identical to `delete`, but deliberately OUTSIDE the
+   * `withTombstones` surface — the "is this the orphan?" verdict depends on
+   * rows that may not have synced to another device yet, where the very same
+   * row is instead healed in place. `SessionMatch` rows carry only
+   * `createdAt`, which heal does not advance, so a tombstone from this path
+   * would silently suppress the healed row on that device forever.
+   */
+  deleteLocalOrphan: (id: string) => Promise<void>;
   /** Cascade hook: deletes any matches whose `coachingActivityId` matches. */
   deleteByActivityId: (coachingActivityId: string) => Promise<void>;
   /** Cascade hook: deletes any matches whose `workoutId` matches. */
