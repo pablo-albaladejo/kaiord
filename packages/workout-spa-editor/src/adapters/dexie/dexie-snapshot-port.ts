@@ -32,7 +32,9 @@ const TOMBSTONES = "tombstones";
 // it is the synced, authoritative usage store. Its uuid `id` + `createdAt` drop
 // into the generic append-only merge (union by id, tombstone-suppressed), and a
 // 12-month tombstoning prune bounds its growth (see prune-usage-events).
-const DEVICE_LOCAL = new Set([
+// Exported so the tombstone-coverage guard can tell a table that never leaves
+// the device (no tombstone needed) from one that rides the snapshot.
+export const DEVICE_LOCAL = new Set([
   TOMBSTONES,
   "connections",
   "intakeEntries",

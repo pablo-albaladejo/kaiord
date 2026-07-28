@@ -36,7 +36,11 @@ export const persistSyncedWeek = async (
 
   const fetchedIds = new Set(stamped.map((r) => r.id));
   const orphans = input.localSameSource.filter((r) => !fetchedIds.has(r.id));
-  for (const orphan of orphans) await deps.coaching.delete(orphan.id);
+  // `deleteMirrorOrphan`, never `delete`: this re-mirrors the bridge's view of
+  // the week, it does not express user intent. A short/empty/failed upstream
+  // week must not write a cross-device tombstone over a real activity.
+  for (const orphan of orphans)
+    await deps.coaching.deleteMirrorOrphan(orphan.id);
 
   const now = deps.now ?? (() => new Date().toISOString());
   await deps.coachingSyncState.put({

@@ -1,4 +1,5 @@
-import { Icon, ICON_MAP, type IconName } from "../../atoms/Icon";
+import type { IconName } from "../../atoms/Icon";
+import { SettingsRowBody } from "./SettingsRowBody";
 
 export type SettingsRowProps = {
   icon: IconName;
@@ -6,47 +7,59 @@ export type SettingsRowProps = {
   /** Locale-independent testid suffix; falls back to the label. */
   testId?: string;
   detail?: string;
+  /** `"attention"` marks the row with an amber dot before the chevron. */
+  status?: "attention";
   to?: string;
+  /** External destination opened in a new tab; mutually exclusive with `to`. */
+  href?: string;
   onNavigate?: (to: string) => void;
 };
 
-const TILE_CLASS =
-  "flex h-7 w-7 items-center justify-center rounded-md bg-primary-600 text-white";
+const BASE_CLASS =
+  "flex w-full items-center gap-3 px-4 py-3 text-left first:rounded-t-xl last:rounded-b-xl";
+
+const LINK_CLASS = `${BASE_CLASS} transition-colors hover:bg-gray-50 dark:hover:bg-slate-800`;
 
 export const SettingsRow = ({
   icon,
   label,
   testId,
   detail,
+  status,
   to,
+  href,
   onNavigate,
 }: SettingsRowProps) => {
-  const interactive = to !== undefined && onNavigate !== undefined;
+  const navigable = to !== undefined && onNavigate !== undefined;
   const rowTestId = `settings-row-${testId ?? label}`;
-
   const body = (
-    <>
-      <span className={TILE_CLASS}>
-        <Icon icon={ICON_MAP[icon]} size="sm" color="inherit" />
-      </span>
-      <span className="min-w-0 flex-1 truncate text-sm text-gray-900 dark:text-white">
-        {label}
-      </span>
-      {detail !== undefined && (
-        <span className="truncate text-sm text-gray-500 dark:text-gray-400">
-          {detail}
-        </span>
-      )}
-      {interactive && <Icon icon={ICON_MAP.chevR} size="sm" color="muted" />}
-    </>
+    <SettingsRowBody
+      icon={icon}
+      label={label}
+      detail={detail}
+      status={status}
+      rowTestId={rowTestId}
+      chevron={navigable || href !== undefined}
+    />
   );
 
-  const base =
-    "flex w-full items-center gap-3 px-4 py-3 text-left first:rounded-t-xl last:rounded-b-xl";
-
-  if (!interactive) {
+  if (href !== undefined) {
     return (
-      <div className={base} data-testid={rowTestId}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={LINK_CLASS}
+        data-testid={rowTestId}
+      >
+        {body}
+      </a>
+    );
+  }
+
+  if (!navigable) {
+    return (
+      <div className={BASE_CLASS} data-testid={rowTestId}>
         {body}
       </div>
     );
@@ -56,7 +69,7 @@ export const SettingsRow = ({
     <button
       type="button"
       onClick={() => onNavigate(to)}
-      className={`${base} transition-colors hover:bg-gray-50 dark:hover:bg-slate-800`}
+      className={LINK_CLASS}
       data-testid={rowTestId}
     >
       {body}
