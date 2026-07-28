@@ -145,23 +145,69 @@ export function runCreate({ failedJobs, isCanary, ctx }, deps) {
   };
 }
 
-// Close-pass v1 rule: close iff (a) no real-CI jobs were skipped on the green run,
-// AND (b) the issue's footer is well-formed (or absent — see safety defaults below).
-// Per-job matching is deferred to v2 (the footer schema is forward-compatible).
-// The coarser rule sidesteps the workflow_run jobs API's display-name vs. job-id
-// mismatch and matrix-suffix complexity. Trade-off: a path-filtered green run
-// (any job skipped) leaves issues open until the next all-jobs-ran green run.
+// The create-pass records job IDs (from `needs.<id>.result`), but the
+// workflow_run jobs API reports each job's DISPLAY name (`name:`). They differ
+// only where ci.yml overrides `name:`. Of the ten job IDs the create-pass can
+// emit, exactly one overrides its display name today; the aggregator jobs
+// (`lint-summary` → `lint`, etc.) are never emitted into a footer, so they
+// need no alias — but they DO collide by name, which matchRunJobs handles by
+// requiring every same-named job to be green.
+const JOB_DISPLAY_NAMES = { "check-links": "Link checker" };
+
+// A footer job maps to the run's exact-name job plus every matrix shard,
+// which the API renders as `<name> (<matrix values>)`.
+export function matchRunJobs(footerJob, runJobs) {
+  const display = JOB_DISPLAY_NAMES[footerJob] ?? footerJob;
+  const prefix = `${display} (`;
+  return runJobs.filter(
+    (j) =>
+      j.name === display || (j.name.startsWith(prefix) && j.name.endsWith(")"))
+  );
+}
+
+// v2 close-rule: an issue is covered iff EVERY job named in its footer both
+// ran and succeeded on the green run. Anything else — a job absent from the
+// run, a shard skipped, an empty job set, an unreadable job list — is
+// uncertainty and leaves the issue open.
+export function evaluateJobCoverage(failedJobs, runJobs) {
+  if (!Array.isArray(runJobs) || runJobs.length === 0)
+    return { covered: false, reason: "run-jobs-unavailable" };
+  if (failedJobs.length === 0)
+    return { covered: false, reason: "empty-job-set" };
+  for (const job of failedJobs) {
+    const matches = matchRunJobs(job, runJobs);
+    if (matches.length === 0)
+      return { covered: false, reason: "job-missing-on-run" };
+    if (matches.some((m) => m.conclusion !== "success"))
+      return { covered: false, reason: "job-not-green-on-run" };
+  }
+  return { covered: true };
+}
+
+// Close-pass v2 rule: close iff every job in the issue's footer ran AND
+// succeeded on the green run (see evaluateJobCoverage).
+//
+// This replaces the v1 "no job anywhere on the run was skipped" gate, which
+// was unsatisfiable by construction: ci.yml's `log-bot-skip` is gated on
+// `github.actor == 'github-actions[bot]'` and `notify-failure` requires a
+// failed job, so at least one of the two is skipped on EVERY green run. The
+// gate was therefore always true and the bot never closed anything.
+//
+// Scoping the check to the footer's own jobs is also strictly safer than the
+// coarse gate: it refuses a docs-only green run where the `test` aggregator
+// exits 0 while the real `test` matrix job was skipped.
 //
 // Safety defaults — bot must never close on uncertainty:
 //   - Skipped issues with missing footer    → skip (legacy issues stay open)
 //   - Skipped issues with malformed footer  → skip (no throw)
 //   - Skipped issues with unknown schema    → skip (forward-compat)
 //   - Canary issues (failed-jobs ["canary-job"]) → skip (real green never covers)
+//   - Footer job absent / not green on the run → skip
 //   - Stale-race (issue closed between list and close) → skip
-export function runClose({ anyJobsSkipped, ctx }, deps) {
+export function runClose({ runJobs, ctx }, deps) {
   const open = listOpenBotIssues(deps);
   return open.map((issue) => {
-    const decision = decideClose(issue, anyJobsSkipped, ctx, deps);
+    const decision = decideClose(issue, runJobs, ctx, deps);
     if (decision.action === "closed") {
       deps.exec("gh", [
         "issue",
@@ -175,13 +221,7 @@ export function runClose({ anyJobsSkipped, ctx }, deps) {
   });
 }
 
-function decideClose(issue, anyJobsSkipped, ctx, deps) {
-  if (anyJobsSkipped)
-    return {
-      issue: issue.number,
-      action: "skipped",
-      reason: "jobs-skipped-on-green-run",
-    };
+function decideClose(issue, runJobs, ctx, deps) {
   const parsed = parseFooter(issue.body);
   if (!parsed)
     return { issue: issue.number, action: "skipped", reason: "missing-footer" };
@@ -191,6 +231,9 @@ function decideClose(issue, anyJobsSkipped, ctx, deps) {
     return { issue: issue.number, action: "skipped", reason: "unknown-schema" };
   if (parsed.failedJobs.includes("canary-job"))
     return { issue: issue.number, action: "skipped", reason: "canary-issue" };
+  const coverage = evaluateJobCoverage(parsed.failedJobs, runJobs);
+  if (!coverage.covered)
+    return { issue: issue.number, action: "skipped", reason: coverage.reason };
   const fresh = getIssue(issue.number, deps);
   if (fresh.state !== "OPEN")
     return { issue: issue.number, action: "skipped", reason: "race-closed" };
