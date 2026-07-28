@@ -1,3 +1,5 @@
+> Completed: 2026-07-28
+
 ## Why
 
 The SPA's Settings index is a list of eleven labels that answer nothing. To find
