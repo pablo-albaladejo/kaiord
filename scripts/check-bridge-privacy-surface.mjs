@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 /**
- * Mechanical guard: lock the Chrome Web Store-relevant surface of both
- * bridges against silent drift.
+ * Mechanical guard: lock the Chrome Web Store-relevant surface of every
+ * bridge against silent drift.
  *
  * Inputs (per bridge):
  *   - manifest.json + manifest.prod.json: `permissions`, `host_permissions`,
  *     `content_scripts.matches`, `externally_connectable.matches`.
- *   - content.js: the `ALLOWED` array (regex patterns + methods).
+ *   - content.js (or background.js): the read allowlist, in either of the
+ *     two shapes in use — `ALLOWED` (method + regex pattern) or
+ *     `ALLOWED_PREFIXES` (GET-only string path prefixes).
  *   - popup.js: every `fetch(...)` / `XMLHttpRequest` URL argument MUST
  *     be a relative path (no `http(s)://` literal).
  *
@@ -18,7 +20,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const REPO_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const GOLDEN_PATH = join(
@@ -33,9 +35,8 @@ const BRIDGES = [
   "trainingpeaks-bridge",
 ];
 
-// manifest.prod.json and content.js exist only for bridges that are
-// published / ship a site content script (whoop has neither yet); their
-// sections are omitted from the surface rather than failing the read.
+// manifest.prod.json exists only for bridges prepared for publishing; its
+// section is omitted from the surface rather than failing the read.
 const readManifest = (bridge, file) => {
   const path = join(REPO_ROOT, "packages", bridge, file);
   if (!existsSync(path)) return null;
@@ -51,26 +52,23 @@ const readManifest = (bridge, file) => {
   };
 };
 
-const extractAllowed = (bridge) => {
-  // The ALLOWED path-allowlist lives in content.js for relay-based bridges,
-  // or background.js for token-based bridges (garmin) that call the API
-  // directly from the service worker. content.js wins when both exist.
-  const dir = join(REPO_ROOT, "packages", bridge);
-  const path = [join(dir, "content.js"), join(dir, "background.js")].find(
-    (p) => existsSync(p)
-  );
-  if (!path) return [];
-  const src = readFileSync(path, "utf8");
-  const start = src.indexOf("const ALLOWED");
-  if (start === -1) return [];
+// Source text of an array literal declaration, `const <name> = [` through
+// the matching `];`. Returns null when the declaration is absent.
+const sliceArrayLiteral = (src, declaration) => {
+  const start = src.indexOf(declaration);
+  if (start === -1) return null;
   const end = src.indexOf("];", start);
-  const body = src.slice(start, end + 2);
-  // Walk character by character: when we see `pattern: /`, scan forward
-  // honoring escaped slashes until the closing `/`. Avoids regex
-  // ambiguity with patterns that contain literal `\/`.
+  if (end === -1) return null;
+  return src.slice(start, end + 2);
+};
+
+// Shape A — `const ALLOWED = [{ method: "GET", pattern: /…/ }]`.
+// Walk character by character: when we see `pattern: /`, scan forward
+// honoring escaped slashes until the closing `/`. Avoids regex ambiguity
+// with patterns that contain literal `\/`.
+const extractPatternAllowlist = (body) => {
   const out = [];
-  const lines = body.split("\n");
-  for (const line of lines) {
+  for (const line of body.split("\n")) {
     const methodMatch = line.match(/method:\s*"([A-Z]+)"/);
     if (!methodMatch) continue;
     const patternStart = line.indexOf("pattern: /");
@@ -93,6 +91,42 @@ const extractAllowed = (bridge) => {
   return out;
 };
 
+// Shape B — `const ALLOWED_PREFIXES = ["/path", …]`, a plain string array
+// whose entries are matched as path prefixes and gated to GET by the
+// bridge's own isAllowed(). whoop-bridge uses this shape; until the
+// extractor understood it, whoop's read allowlist was absent from the
+// golden entirely and could be widened with zero CI failure, while the
+// privacy policy asserted the allowlist as a durable property.
+//
+// Entries are recorded under `prefix` rather than `pattern` so the golden
+// also pins WHICH matching semantics is in force: swapping one allowlist
+// shape for the other is itself visible drift.
+const extractPrefixAllowlist = (body) =>
+  [...body.matchAll(/"([^"\\\n]+)"/g)].map((m) => ({
+    method: "GET",
+    prefix: m[1],
+  }));
+
+const extractAllowed = (bridge) => {
+  // The path allowlist lives in content.js for relay-based bridges, or
+  // background.js for token-based bridges that call the API directly from
+  // the service worker. content.js wins when both exist.
+  const dir = join(REPO_ROOT, "packages", bridge);
+  const path = [join(dir, "content.js"), join(dir, "background.js")].find(
+    (p) => existsSync(p)
+  );
+  if (!path) return [];
+  const src = readFileSync(path, "utf8");
+
+  const patternBody = sliceArrayLiteral(src, "const ALLOWED = [");
+  if (patternBody) return extractPatternAllowlist(patternBody);
+
+  const prefixBody = sliceArrayLiteral(src, "const ALLOWED_PREFIXES = [");
+  if (prefixBody) return extractPrefixAllowlist(prefixBody);
+
+  return [];
+};
+
 const FETCH_OR_XHR = /\b(fetch|XMLHttpRequest)\s*\(\s*([^)]*)\)/g;
 
 const checkPopupRelativeUrls = (bridge) => {
@@ -111,7 +145,7 @@ const checkPopupRelativeUrls = (bridge) => {
   return violations;
 };
 
-const buildSurface = () => {
+export const buildSurface = () => {
   const out = {};
   for (const bridge of BRIDGES) {
     const manifestProd = readManifest(bridge, "manifest.prod.json");
@@ -169,4 +203,8 @@ const main = () => {
   console.log("✅ Bridge privacy surface matches golden; no exfil URLs.");
 };
 
-main();
+// Run only when invoked directly. Importing the module (to regenerate the
+// golden, or from the test suite) must not exit the process.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}

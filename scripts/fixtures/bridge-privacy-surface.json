@@ -169,7 +169,28 @@
         "https://*.kaiord.com/*"
       ]
     },
-    "allowed_paths": []
+    "allowed_paths": [
+      {
+        "method": "GET",
+        "prefix": "/core-details-bff/v0/cycles/details"
+      },
+      {
+        "method": "GET",
+        "prefix": "/metrics-service/v1/metrics/user/"
+      },
+      {
+        "method": "GET",
+        "prefix": "/activities-service/v1/sports/history"
+      },
+      {
+        "method": "GET",
+        "prefix": "/advanced-labs-service/v1/biomarker-tests"
+      },
+      {
+        "method": "GET",
+        "prefix": "/health-service/v2/stress-bff"
+      }
+    ]
   },
   "tanita-bridge": {
     "manifest": {
