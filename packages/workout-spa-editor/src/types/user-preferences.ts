@@ -48,6 +48,12 @@ export const userPreferencesSchema = z.object({
   labDashboardParams: z.array(z.string()).optional(),
   /** UI language preference; absent reads as `auto`. Optional, unindexed — no Dexie version bump. */
   locale: localePreferenceSchema.optional(),
+  /**
+   * User dismissed the "Getting set up" checklist. Absent reads as not
+   * dismissed. Optional and unindexed — no Dexie version bump, and it rides
+   * the cloud snapshot so the dismissal follows the profile across devices.
+   */
+  setupChecklistDismissed: z.boolean().optional(),
   updatedAt: z.iso.datetime(),
 });
 
