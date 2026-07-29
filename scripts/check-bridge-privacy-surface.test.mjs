@@ -5,6 +5,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -99,13 +100,19 @@ const withTempRepo = (files, assertOn) => {
 // failure is attributable to the case under test rather than to unrelated
 // drift. Used for every case that would otherwise rewrite a real
 // `background.js` — check-bridge-core-parity reads those in full.
+// `authDeclaration` defaults to an empty, readable one so cases about OTHER
+// sections are not silently rewritten into auth-surface failures. Cases that
+// are about the handshake pass their own — including `""` for "declares
+// nothing at all".
 const syntheticBridge = ({
   background,
   allowedPaths,
   externalActions = [],
+  authDeclaration = "const AUTH_ENDPOINTS = [];\n",
+  authEndpoints = [],
 }) => ({
   "packages/acme-bridge/manifest.json": "{}",
-  "packages/acme-bridge/background.js": background,
+  "packages/acme-bridge/background.js": `${background}${authDeclaration}`,
   "scripts/fixtures/bridge-privacy-surface.json": JSON.stringify({
     "acme-bridge": {
       manifest: {
@@ -116,6 +123,7 @@ const syntheticBridge = ({
       },
       allowed_paths: allowedPaths,
       external_actions: externalActions,
+      auth_endpoints: authEndpoints,
     },
   }),
 });
@@ -254,7 +262,10 @@ describe("bridge privacy surface guard", () => {
               externally_connectable_matches: [],
             },
             allowed_paths: [],
+            // No root .js at all: this package executes nothing, so it
+            // reaches no endpoint and owes no declaration.
             external_actions: [],
+            auth_endpoints: [],
           },
         }),
       },
@@ -483,7 +494,8 @@ describe("bridge privacy surface guard", () => {
       {
         "packages/acme-bridge/manifest.json": "{}",
         "packages/acme-bridge/background.js":
-          'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n',
+          'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n' +
+          "const AUTH_ENDPOINTS = [];\n",
         "scripts/fixtures/bridge-privacy-surface.json": "{}",
       },
       (result) => {
@@ -616,6 +628,339 @@ describe("bridge privacy surface guard", () => {
         `${bridge}: golden external_actions differ from background.js`
       );
     }
+  });
+
+  // ---------- the credential-handshake surface ----------
+  //
+  // `allowed_paths` locks the DATA-call surface, gated by each bridge's
+  // `isAllowed`. A bridge's own handshake bypasses that gate by
+  // construction, and those endpoints are where the credentials travel.
+  // garmin's three hops call `fetchImpl` directly; trainingpeaks' token
+  // exchange calls `cookieSessionFetch` directly and reached the golden only
+  // because `/users/v3/token` ALSO sits in ALLOWED for the editor's session
+  // probe — a coincidence that would evaporate with that entry.
+  //
+  // Every case below stages its bridge with withTempRepo: garmin-oauth.js
+  // and tp-auth.js are not in MUTATED_REAL_FILES and that list is
+  // shrink-only.
+
+  const authBridge = (body, endpoints = []) =>
+    syntheticBridge({
+      background: 'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n',
+      allowedPaths: [{ method: "GET", pattern: "^\\/ok$" }],
+      authDeclaration: body,
+      authEndpoints: endpoints,
+    });
+
+  // Every refusal below must come from the specific defect it stages, not
+  // from an unrelated check firing first. These are the other checks'
+  // signatures.
+  const assertOnlyAuthFailure = (result) => {
+    assert.doesNotMatch(result.stderr, /absolute-URL fetch/);
+    assert.doesNotMatch(result.stderr, /declares no readable allowlist/);
+    assert.doesNotMatch(result.stdout, /matches golden/);
+  };
+
+  it("records each bridge's handshake endpoints, cross-counted from source", () => {
+    // Derived WITHOUT the guard's extractor, like the allowed_paths and
+    // external_actions cross-checks: a counter that calls the code it checks
+    // agrees with that code's mistakes.
+    const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
+
+    // The exact per-bridge sets, pinned. An extractor that under-reported
+    // would still satisfy a "shape" assertion; only the literal sets catch
+    // one of garmin's three going missing.
+    assert.deepEqual(golden["garmin-bridge"].auth_endpoints, [
+      "https://sso.garmin.com/sso/signin",
+      "https://connectapi.garmin.com/oauth-service/oauth/preauthorized",
+      "https://connectapi.garmin.com/oauth-service/oauth/exchange/user/2.0",
+    ]);
+    assert.deepEqual(golden["trainingpeaks-bridge"].auth_endpoints, [
+      "https://tpapi.trainingpeaks.com/users/v3/token",
+    ]);
+    for (const bridge of ["tanita-bridge", "train2go-bridge", "whoop-bridge"]) {
+      assert.deepEqual(
+        golden[bridge].auth_endpoints,
+        [],
+        `${bridge} rides its session cookie and mints nothing; a non-empty set here means it grew a handshake`
+      );
+    }
+
+    // And every bridge's golden entry equals what its source declares,
+    // counted here by hand.
+    for (const bridge of Object.keys(golden)) {
+      const dir = join(REPO, "packages", bridge);
+      const declaring = readdirSync(dir)
+        .filter((f) => f.endsWith(".js"))
+        .sort()
+        .map((f) => readFileSync(join(dir, f), "utf8"))
+        .filter((src) => src.includes("const AUTH_ENDPOINTS = ["));
+      assert.equal(
+        declaring.length,
+        1,
+        `${bridge}: expected exactly one root .js to declare AUTH_ENDPOINTS, found ${declaring.length}`
+      );
+      const src = declaring[0];
+      const start = src.indexOf("const AUTH_ENDPOINTS = [");
+      const end = src.indexOf("]", start);
+      const declared = [
+        ...src.slice(start, end).matchAll(/"([^"\n]+)"/g),
+      ].map((m) => m[1]);
+
+      assert.deepEqual(
+        golden[bridge].auth_endpoints,
+        declared,
+        `${bridge}: golden auth_endpoints differ from the source declaration`
+      );
+    }
+  });
+
+  it("fails when a declared handshake endpoint is changed", () => {
+    // The point of recording them: the host receiving the credential moves,
+    // the golden does not follow, CI says so.
+    withTempRepo(
+      authBridge(
+        'const AUTH_ENDPOINTS = ["https://evil.example/sso/signin"];\n',
+        ["https://sso.garmin.com/sso/signin"]
+      ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /drifted from golden/);
+        assert.match(result.stderr, /evil\.example/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("fails when a declared handshake endpoint is dropped", () => {
+    // The ratchet, guard half: deleting an entry moves the golden. The
+    // other half — deleting it while the call REMAINS — is caught by each
+    // bridge's own suite, which compares the declaration against the URLs
+    // its handshake actually requests through the mocked fetch. Neither
+    // half alone is enough: this one is satisfied by regenerating the
+    // golden, that one by never declaring the endpoint in the first place.
+    withTempRepo(
+      authBridge('const AUTH_ENDPOINTS = ["https://a.example/one"];\n', [
+        "https://a.example/one",
+        "https://a.example/two",
+      ]),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /drifted from golden/);
+        assert.match(result.stderr, /a\.example\/two/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses a template literal instead of recording placeholder text", () => {
+    // `scanQuoted` treats a backtick like any quote, so
+    // `` `${TPAPI}${TOKEN_PATH}` `` would reach the golden as the literal
+    // string "${TPAPI}${TOKEN_PATH}" — text that pins no host, sitting in
+    // the fixture looking exactly like a recorded endpoint. This is the
+    // shape tp-auth.js would take if written the obvious way.
+    withTempRepo(
+      authBridge("const AUTH_ENDPOINTS = [`${TPAPI}${TOKEN_PATH}`];\n"),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /template literal/);
+        assert.match(result.stderr, /\$\{TPAPI\}/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses an entry that pins no origin", () => {
+    // A bare path would record WHAT is requested but not WHO receives the
+    // credential, which is the entire privacy claim.
+    withTempRepo(
+      authBridge('const AUTH_ENDPOINTS = ["/users/v3/token"];\n'),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /not an absolute/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses a spread instead of recording only the inline endpoints", () => {
+    withTempRepo(
+      authBridge(
+        'const AUTH_ENDPOINTS = [...BASE, "https://a.example/one"];\n'
+      ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /not an object literal|BASE/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses endpoints appended after the literal", () => {
+    withTempRepo(
+      authBridge(
+        'const AUTH_ENDPOINTS = ["https://a.example/one"].concat(EXTRA);\n'
+      ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /does not end at its/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses an object literal where a URL string belongs", () => {
+    withTempRepo(
+      authBridge(
+        'const AUTH_ENDPOINTS = [{ url: "https://a.example/one" }];\n'
+      ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /object literal/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses a wrapped declaration instead of recording an empty surface", () => {
+    // Recording `[]` here is the precise failure: it reads as "this bridge
+    // sends credentials nowhere" while the wrapped list is still live.
+    withTempRepo(
+      authBridge(
+        'const AUTH_ENDPOINTS = Object.freeze(["https://a.example/one"]);\n'
+      ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /mention\(s\) AUTH_ENDPOINTS/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses a near-miss rename instead of recording an empty surface", () => {
+    // `AUTH_ENDPOINTS_LIST` still contains the name, so the mention path
+    // catches it — the same path as the wrapped case.
+    withTempRepo(
+      authBridge('const AUTH_ENDPOINTS_LIST = ["https://a.example/one"];\n'),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /mention\(s\) AUTH_ENDPOINTS/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses a full rename instead of recording an empty surface", () => {
+    // `OAUTH_HOSTS` shares no substring with the declaration, so the
+    // mention path CANNOT see it — this is the case the mention check does
+    // not cover, and it is exactly why absence itself has to be refused.
+    // Pinned separately because both renames must fail while failing for
+    // different, stated reasons: asserting only the exit code would not
+    // distinguish "the check I want fired" from "something else did".
+    withTempRepo(
+      authBridge('const OAUTH_HOSTS = ["https://a.example/one"];\n'),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /no `const AUTH_ENDPOINTS/);
+        assert.doesNotMatch(result.stderr, /mention\(s\) AUTH_ENDPOINTS/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("refuses a bridge that declares no handshake surface at all", () => {
+    // Absence is NOT read as "no handshake". Nothing tells this guard
+    // whether a bridge has one, so silence would let a new
+    // packages/foo-bridge that mints tokens lock `auth_endpoints: []` and
+    // pass review as sending credentials nowhere. Deriving the bridge list
+    // from disk buys nothing on its own — the new bridge gets enumerated
+    // and still locks an empty surface. This is the rule that makes the
+    // enumeration bite.
+    withTempRepo(authBridge(""), (result) => {
+      assert.equal(result.status, 1, result.stdout);
+      assert.match(result.stderr, /no `const AUTH_ENDPOINTS/);
+      assertOnlyAuthFailure(result);
+    });
+  });
+
+  it("refuses a second declaration in the same file", () => {
+    // `indexOf` finds the first; the rest would be invisible.
+    withTempRepo(
+      authBridge(
+        'const AUTH_ENDPOINTS = ["https://a.example/one"];\n' +
+          'const AUTH_ENDPOINTS = ["https://b.example/two"];\n'
+      ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /more than once/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("reads a handshake split across two files rather than the first only", () => {
+    // Positive control for the multi-file path: garmin keeps its
+    // declaration in garmin-oauth.js, not background.js, so the scan covers
+    // every root .js. If it stopped at the first match, a handshake split
+    // in two would be recorded at half its size — under-reporting that
+    // looks complete.
+    withTempRepo(
+      {
+        ...authBridge('const AUTH_ENDPOINTS = ["https://a.example/one"];\n', [
+          "https://a.example/one",
+          "https://z.example/two",
+        ]),
+        "packages/acme-bridge/z-auth.js":
+          'const AUTH_ENDPOINTS = ["https://z.example/two"];\n',
+      },
+      (result) => {
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stdout, /matches golden/);
+      }
+    );
+  });
+
+  it("refuses a wrapped declaration in a SECOND file", () => {
+    // garmin declares in garmin-oauth.js, not background.js. An extractor
+    // that stopped once one file read cleanly would let a wrapped
+    // declaration added to another file contribute nothing and say nothing —
+    // the same vanishing as a single wrapped declaration, hidden behind a
+    // sibling that happens to parse. Found by reading this extractor's own
+    // early return, not by a failing test.
+    withTempRepo(
+      {
+        ...authBridge('const AUTH_ENDPOINTS = ["https://a.example/one"];\n', [
+          "https://a.example/one",
+        ]),
+        "packages/acme-bridge/z-auth.js":
+          'const AUTH_ENDPOINTS = Object.freeze(["https://z.example/two"]);\n',
+      },
+      (result) => {
+        assert.equal(
+          result.status,
+          1,
+          `a wrapped second declaration was skipped in silence:\n${result.stdout}`
+        );
+        assert.match(result.stderr, /z-auth\.js/);
+        assert.match(result.stderr, /mention\(s\) AUTH_ENDPOINTS/);
+        assertOnlyAuthFailure(result);
+      }
+    );
+  });
+
+  it("accepts a correctly declared handshake surface", () => {
+    // The complement of every refusal above: they must come from the defect
+    // staged, not from refusing any declaration on sight.
+    withTempRepo(
+      authBridge(
+        'const AUTH_ENDPOINTS = [\n  "https://a.example/one",\n  "https://b.example/two",\n];\n',
+        ["https://a.example/one", "https://b.example/two"]
+      ),
+      (result) => {
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stdout, /matches golden/);
+      }
+    );
   });
 
   // ---------- the bridge list comes from disk ----------

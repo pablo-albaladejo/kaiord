@@ -123,6 +123,43 @@ describe("garmin-oauth.js", () => {
     });
   });
 
+  // The credential-handshake surface. These three endpoints receive the
+  // user's Garmin session and none of them passes through background.js's
+  // `isAllowed`, so scripts/check-bridge-privacy-surface.mjs records the
+  // AUTH_ENDPOINTS declaration into the golden fixture.
+  //
+  // The guard can only check that the DECLARATION has not moved. What keeps
+  // the declaration TRUE is the second test below, which compares it
+  // against the URLs the mint actually requests. Without that, dropping an
+  // endpoint from the list and regenerating the golden would be a clean,
+  // green way to un-record a live credential sink.
+  describe("AUTH_ENDPOINTS", () => {
+    it("pins the exact handshake surface", () => {
+      expect(garminOAuth.AUTH_ENDPOINTS).toEqual([
+        "https://sso.garmin.com/sso/signin",
+        "https://connectapi.garmin.com/oauth-service/oauth/preauthorized",
+        "https://connectapi.garmin.com/oauth-service/oauth/exchange/user/2.0",
+      ]);
+    });
+
+    it("matches every URL a full mint actually requests", async () => {
+      queueMint();
+
+      await garminOAuth.mintFromSession(fetch);
+
+      // Origin + pathname only: the query strings carry a per-run ticket
+      // and nonce, and what is being pinned is where the credential goes.
+      const requested = fetch.mock.calls.map((call) => {
+        const u = new URL(call[0]);
+        return u.origin + u.pathname;
+      });
+      expect(requested.length).toBe(3);
+      expect([...new Set(requested)].sort()).toEqual(
+        [...garminOAuth.AUTH_ENDPOINTS].sort()
+      );
+    });
+  });
+
   describe("exchange", () => {
     it("stamps expires_at from expires_in", async () => {
       vi.spyOn(Date, "now").mockReturnValue(1_000_000 * 1000);

@@ -11,6 +11,7 @@ const {
   dispatchExternal,
   isAllowedSenderOrigin,
   EXTERNAL_ACTIONS,
+  AUTH_ENDPOINTS,
   reinjectContentScripts,
 } = require("../background.js");
 const pkg = require("../package.json");
@@ -441,6 +442,23 @@ describe("tab-open", () => {
     // Assert
     expect(external).not.toContain("tab-open");
     expect(external).toEqual(["ping", "status", "whoop-fetch"]);
+  });
+
+  // The credential-handshake surface, recorded in the bridge privacy golden.
+  // This bridge mints and exchanges nothing: inject-main.js captures an
+  // Authorization header the WHOOP app already sends, and every read then
+  // goes through content.js's prefix gate. Pinned empty rather than left
+  // unstated, so growing a handshake has to change this assertion — and the
+  // golden with it.
+  it("should declare no credential handshake", () => {
+    // Arrange
+    const expected = [];
+
+    // Act
+    const actual = [...AUTH_ENDPOINTS];
+
+    // Assert
+    expect(actual).toEqual(expected);
   });
 });
 

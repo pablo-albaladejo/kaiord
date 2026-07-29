@@ -33,6 +33,23 @@ const OAUTH1_KEY = "garminOAuth1";
 const OAUTH2_KEY = "garminOAuth2";
 const EXPIRY_SKEW_SEC = 60;
 
+// The credential-handshake surface: every endpoint the three hops below send
+// the user's Garmin session to, in flow order. Read by
+// scripts/check-bridge-privacy-surface.mjs into the golden fixture, which
+// otherwise locks only the DATA-call allowlist in background.js — a gate
+// this handshake bypasses by construction.
+//
+// Written out in full rather than composed from CONNECTAPI/SSO_SIGNIN: the
+// guard records string literals, and an interpolated `${CONNECTAPI}/…` would
+// reach the golden as placeholder text. garmin-oauth.test.js pins this list
+// against the URLs the flow actually requests, so the duplication cannot
+// drift from the calls it describes.
+const AUTH_ENDPOINTS = [
+  "https://sso.garmin.com/sso/signin",
+  "https://connectapi.garmin.com/oauth-service/oauth/preauthorized",
+  "https://connectapi.garmin.com/oauth-service/oauth/exchange/user/2.0",
+];
+
 const nowSec = () => Math.floor(Date.now() / 1000);
 
 // ── OAuth1 HMAC-SHA1 signer (verified byte-for-byte against oauth-1.0a) ──
@@ -296,6 +313,7 @@ const connectapiUpload = (path, formData, fetchImpl) =>
 const api = {
   CONSUMER,
   CONNECTAPI,
+  AUTH_ENDPOINTS,
   sign,
   getTicketFromSession,
   preauthorized,
