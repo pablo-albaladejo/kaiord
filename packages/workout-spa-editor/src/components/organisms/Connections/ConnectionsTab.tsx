@@ -3,6 +3,7 @@ import { useConnectionSources } from "../../../hooks/connections/use-connection-
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { useDataFlows } from "../ProfileManager/components/useDataFlows";
+import { ConnectionsHealth } from "./ConnectionsHealth";
 import { ConnectionSourceCard } from "./ConnectionSourceCard";
 import { ConnectionsUnsupported } from "./ConnectionsUnsupported";
 import { DataTypeRoutingSection } from "./DataTypeRoutingSection";
@@ -32,7 +33,7 @@ export const ConnectionsTab: React.FC = () => {
 
   return (
     <div className="space-y-5" data-testid="connections-tab">
-      <p className="text-sm text-ink-body">{t("intro")}</p>
+      <ConnectionsHealth sources={sources} byDataType={byDataType} />
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-ink-muted">
