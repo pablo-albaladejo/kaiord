@@ -115,8 +115,7 @@ describe("SettingsPage", () => {
     });
 
     it.each([
-      // TODO(S3): destination becomes /settings/connections once it exists.
-      { row: "connections", destination: "/athlete" },
+      { row: "connections", destination: "/settings/connections" },
       { row: "googleDriveSync", destination: "/settings/sync" },
       { row: "extensions", destination: "/settings/extensions" },
       { row: "dataHub", destination: "/settings/data-hub" },
@@ -258,6 +257,7 @@ describe("SettingsPage", () => {
       const sections = [
         "ai",
         "sync",
+        "connections",
         "data-hub",
         "extensions",
         "usage",

@@ -1,0 +1,69 @@
+{
+  "intro": "Cada fuente que has vinculado y lo que está enviando a Kaiord ahora mismo.",
+  "sources": "Fuentes",
+  "sourcesHint": "Cada fuente lleva su propio puente de navegador y sus permisos",
+  "unsupported": "Todavía no disponibles",
+  "unsupportedHint": "Conectarlas necesita un servidor que Kaiord no tiene.",
+  "status": {
+    "connected": "Conectado",
+    "installed": "Extensión instalada",
+    "checking": "Comprobando…",
+    "attention": "Sesión cerrada",
+    "available": "Sin conectar",
+    "manual": "Siempre activo",
+    "unsupported": "Todavía no compatible"
+  },
+  "detail": {
+    "installed": "Kaiord ve la extensión, pero no puede comprobar la sesión sin descargar tu exportación completa, así que solo informa de que la extensión está ahí.",
+    "checking": "Preguntando a la extensión si todavía tiene sesión.",
+    "signedOut": "Abre la web del proveedor e inicia sesión; la extensión recupera la sesión sola.",
+    "needsReauth": "Hay que volver a conceder el acceso de la extensión. Inicia sesión en la web del proveedor.",
+    "notDetected": "La extensión del navegador no se está ejecutando en este navegador.",
+    "disconnected": "Desconectaste esta fuente en Kaiord. Puede que la extensión siga instalada.",
+    "manual": "Todo lo que escribes tú mismo en Kaiord. Nunca se desactiva.",
+    "unsupported": "Kaiord todavía no puede conectar esta cuenta."
+  },
+  "bridgeDetected": "Puente de navegador de {{name}} · detectado",
+  "bridgeMissing": "Puente de navegador de {{name}} · no detectado",
+  "lastSync": "Últimos datos recibidos {{when}}",
+  "neverSynced": "Todavía no se han recibido datos",
+  "chips": {
+    "inOne": "1 tipo entra",
+    "inMany": "{{count}} tipos entran",
+    "outOne": "1 tipo sale",
+    "outMany": "{{count}} tipos salen"
+  },
+  "manage": {
+    "open": "Gestionar",
+    "close": "Cerrar",
+    "sends": "Envía a Kaiord",
+    "receives": "Kaiord devuelve",
+    "nothing": "Nada",
+    "unknown": "Se sabrá cuando la extensión esté en marcha",
+    "syncNow": "Sincronizar ahora",
+    "syncing": "Sincronizando…",
+    "syncDone": "Sincronización terminada",
+    "syncFailed": "La sincronización ha fallado. Inténtalo dentro de un momento.",
+    "syncCooldown": "Acabas de sincronizar. Inténtalo dentro de un minuto.",
+    "disconnect": "Desconectar",
+    "disconnectMessage": "Esto desvincula la fuente en Kaiord y apaga todas las rutas que alimenta. La extensión del navegador sigue instalada.",
+    "reconnect": "Volver a conectar",
+    "connect": "Conectar",
+    "cancel": "Cancelar"
+  },
+  "dataTypes": {
+    "workout": "Entrenamiento",
+    "planned-session": "Sesión planificada",
+    "activity": "Actividad",
+    "training-zones": "Zonas de entrenamiento",
+    "weight": "Peso",
+    "sleep": "Sueño",
+    "hrv": "VFC",
+    "daily-wellness": "Bienestar diario",
+    "body-composition": "Composición corporal",
+    "stress": "Estrés",
+    "strain": "Esfuerzo",
+    "vitals": "Constantes vitales",
+    "heart-rate-series": "Serie de frecuencia cardiaca"
+  }
+}

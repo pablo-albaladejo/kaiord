@@ -1,0 +1,69 @@
+{
+  "intro": "Every source you have linked, and what it is sending to Kaiord right now.",
+  "sources": "Sources",
+  "sourcesHint": "Each source carries its own browser bridge and permissions",
+  "unsupported": "Not available yet",
+  "unsupportedHint": "Connecting these needs a server Kaiord does not run.",
+  "status": {
+    "connected": "Connected",
+    "installed": "Extension installed",
+    "checking": "Checking…",
+    "attention": "Session signed out",
+    "available": "Not connected",
+    "manual": "Always on",
+    "unsupported": "Not supported yet"
+  },
+  "detail": {
+    "installed": "Kaiord can see the extension but cannot check the session without downloading your whole export, so it only reports that the extension is there.",
+    "checking": "Asking the extension whether it still has a session.",
+    "signedOut": "Open the provider's site and sign in; the extension picks the session back up on its own.",
+    "needsReauth": "The extension's access has to be granted again. Sign in on the provider's site.",
+    "notDetected": "The browser extension is not running in this browser.",
+    "disconnected": "You disconnected this source in Kaiord. The extension may still be installed.",
+    "manual": "Anything you type into Kaiord yourself. Never switched off.",
+    "unsupported": "Kaiord has no way to connect this account yet."
+  },
+  "bridgeDetected": "{{name}} browser bridge · detected",
+  "bridgeMissing": "{{name}} browser bridge · not detected",
+  "lastSync": "Last data received {{when}}",
+  "neverSynced": "No data received yet",
+  "chips": {
+    "inOne": "1 type in",
+    "inMany": "{{count}} types in",
+    "outOne": "1 type out",
+    "outMany": "{{count}} types out"
+  },
+  "manage": {
+    "open": "Manage",
+    "close": "Close",
+    "sends": "Sends to Kaiord",
+    "receives": "Kaiord sends back",
+    "nothing": "Nothing",
+    "unknown": "Unknown until the extension is running",
+    "syncNow": "Sync now",
+    "syncing": "Syncing…",
+    "syncDone": "Sync finished",
+    "syncFailed": "Sync failed. Try again in a moment.",
+    "syncCooldown": "Just synced. Try again in a minute.",
+    "disconnect": "Disconnect",
+    "disconnectMessage": "This unlinks the source in Kaiord and switches off every route it feeds. The browser extension stays installed.",
+    "reconnect": "Reconnect",
+    "connect": "Connect",
+    "cancel": "Cancel"
+  },
+  "dataTypes": {
+    "workout": "Workout",
+    "planned-session": "Planned Session",
+    "activity": "Activity",
+    "training-zones": "Training Zones",
+    "weight": "Weight",
+    "sleep": "Sleep",
+    "hrv": "HRV",
+    "daily-wellness": "Daily Wellness",
+    "body-composition": "Body Composition",
+    "stress": "Stress",
+    "strain": "Strain",
+    "vitals": "Vitals",
+    "heart-rate-series": "Heart Rate Series"
+  }
+}
