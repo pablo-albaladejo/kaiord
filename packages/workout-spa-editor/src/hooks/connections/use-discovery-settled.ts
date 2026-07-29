@@ -1,18 +1,11 @@
 /**
  * Whether a count of detected bridges is worth rendering yet.
  *
- * The store's `hasRefreshed()` is the wrong gate for this, and reads as the
- * right one. A pass over a browser where nothing has announced completes in
- * microseconds — `getExtensionId` returns null for every bridge, no probe is
- * sent, and the pass settles on the next microtask — so it flips true long
- * before any extension could have answered. Meanwhile an announcement needs a
- * `postMessage` macrotask plus a verification round-trip, and discovery only
- * broadcasts a DISCOVER request after `DISCOVER_REQUEST_DELAY_MS` of silence.
- * Gating on the pass therefore renders a confident "0 of 5" to a fully
- * equipped reader for as long as discovery takes.
- *
- * So the question is not "have we asked" — nobody asks — but "has discovery
- * had its chance":
+ * The question is not "have we asked" — nobody asks, extensions announce
+ * themselves — but "has discovery had its chance". A refresh pass is not that
+ * signal: over a browser where nothing has announced it settles on the next
+ * microtask, long before any extension could answer, which would render a
+ * confident "0 of 5" to a fully equipped reader.
  *
  *   - Any bridge detected ends it immediately. That is positive evidence that
  *     announcements are arriving, and the count is explicitly of what has

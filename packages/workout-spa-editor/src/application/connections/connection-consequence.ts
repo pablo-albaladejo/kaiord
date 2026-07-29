@@ -2,14 +2,13 @@
  * The consequence banner above the source cards: what broke, and what stopped
  * arriving because of it.
  *
- * Three claims the reference design makes are absent, because no state backs
- * them. There is no "stopped syncing 3 days ago" — no transition timestamp is
- * recorded anywhere, so the date comes from the persisted `lastSyncAt` and is
- * phrased as the last data received. There is no "fell back to Garmin" —
- * `union` is the default multi-source mode and has no winner, so no source
- * ever "took over". And there is no "its access token expired" — only
- * `trainingpeaks-bridge` reports `needsReauth` at all, and no bridge can tell
- * an expired credential from one that was never issued.
+ * Three sentences this banner must never grow, because nothing can back them:
+ * a duration ("down for 3 days") — no transition timestamp exists, so the date
+ * is `lastSyncAt` and says when data last arrived; a hand-off ("fell back to
+ * Garmin") — `union` is the default and has no winner, so nothing takes over;
+ * and an expiry ("its token expired") — only `trainingpeaks-bridge` reports
+ * `needsReauth`, and no bridge distinguishes an expired credential from one
+ * that was never issued.
  */
 import type { Translate } from "../../i18n/use-translate";
 import { calendarDay } from "./calendar-day";
