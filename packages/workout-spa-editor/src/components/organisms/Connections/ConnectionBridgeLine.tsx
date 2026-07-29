@@ -3,6 +3,13 @@ import { useTranslate } from "../../../i18n/use-translate";
 
 type Props = { source: ConnectionSource };
 
+/** An unverifiable bridge only ever announced itself; saying it is "detected"
+    in the present tense would outlive any evidence for it. */
+const bridgeLineKey = (source: ConnectionSource): string => {
+  if (!source.bridgeDetected) return "bridgeMissing";
+  return source.sessionVerifiable ? "bridgeDetected" : "bridgeAnnounced";
+};
+
 /**
  * The browser bridge belongs inside its source's card, not in a separate
  * Extensions list: a bridge is never interesting on its own, only as the
@@ -26,7 +33,7 @@ export function ConnectionBridgeLine({ source }: Props) {
         aria-hidden
         className={`h-1.5 w-1.5 shrink-0 rounded-full ${detected ? "bg-emerald-500" : "bg-ink-muted"}`}
       />
-      {t(detected ? "bridgeDetected" : "bridgeMissing", { name: source.name })}
+      {t(bridgeLineKey(source), { name: source.name })}
     </div>
   );
 }

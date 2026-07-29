@@ -7,7 +7,7 @@
   "unsupportedHint": "Conectarlas necesita un servidor que Kaiord no tiene.",
   "status": {
     "connected": "Conectado",
-    "installed": "Extensión instalada",
+    "installed": "Detectada al cargar",
     "checking": "Comprobando…",
     "attention": "Sesión cerrada",
     "available": "Sin conectar",
@@ -15,7 +15,7 @@
     "unsupported": "Todavía no compatible"
   },
   "detail": {
-    "installed": "Kaiord ve la extensión, pero no puede comprobar la sesión sin descargar tu exportación completa, así que solo informa de que la extensión está ahí.",
+    "installed": "Esta extensión se anunció al cargar la página. Kaiord no puede volver a comprobarla sin descargar tu exportación completa, así que puede que se haya eliminado desde entonces.",
     "checking": "Preguntando a la extensión si todavía tiene sesión.",
     "signedOut": "Abre la web del proveedor e inicia sesión; la extensión recupera la sesión sola.",
     "needsReauth": "Hay que volver a conceder el acceso de la extensión. Inicia sesión en la web del proveedor.",
@@ -25,6 +25,7 @@
     "unsupported": "Kaiord todavía no puede conectar esta cuenta."
   },
   "bridgeDetected": "Puente de navegador de {{name}} · detectado",
+  "bridgeAnnounced": "Puente de navegador de {{name}} · detectado al cargar",
   "bridgeMissing": "Puente de navegador de {{name}} · no detectado",
   "lastSync": "Últimos datos recibidos {{when}}",
   "neverSynced": "Todavía no se han recibido datos",

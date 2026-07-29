@@ -13,8 +13,12 @@ type Props = { source: ConnectionSource };
  */
 export function ConnectionStatusLine({ source }: Props) {
   const t = useTranslate("connections");
+  // Shown for `attention` too: "no new data since X" is most useful exactly
+  // when a source is broken, and it is real state that survives a reload.
   const showSync =
-    source.status === "connected" || source.status === "installed";
+    source.status === "connected" ||
+    source.status === "installed" ||
+    source.status === "attention";
   const when =
     source.lastSyncAt === undefined
       ? undefined

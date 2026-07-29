@@ -35,6 +35,7 @@ const source = (over: Partial<ConnectionSource> = {}): ConnectionSource => ({
   disconnected: false,
   needsReauth: false,
   lastSyncAt: undefined,
+  sessionVerifiable: true,
   importTypes: ["activity"],
   exportTypes: [],
   ...over,
@@ -70,19 +71,6 @@ describe("ConnectionsTab", () => {
     expect(screen.getByTestId("connection-card-tanita")).toHaveAttribute(
       "data-status",
       "installed"
-    );
-  });
-
-  it("should call a discovered-but-never-probed source installed, not connected", () => {
-    // Arrange
-    setSources([source({ id: "tanita", name: "Tanita", status: "installed" })]);
-
-    // Act
-    render(<ConnectionsTab />);
-
-    // Assert
-    expect(screen.getByTestId("connection-status-tanita")).toHaveTextContent(
-      "Extension installed"
     );
   });
 
@@ -187,5 +175,34 @@ describe("ConnectionsTab", () => {
     expect(
       screen.queryByTestId("connection-reconnect-garmin")
     ).not.toBeInTheDocument();
+  });
+  it("should not assert an unverifiable extension is still present", () => {
+    // Arrange
+    // Tanita has no prober AND cannot be pinged — its background script routes
+    // `ping` into the whole-CSV `checkSession` — so after the initial
+    // announcement the SPA has no way to learn it was uninstalled. Present
+    // tense would be a claim it cannot support.
+    setSources([
+      source({
+        id: "tanita",
+        name: "Tanita",
+        status: "installed",
+        sessionVerifiable: false,
+      }),
+    ]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(screen.getByTestId("connection-status-tanita")).toHaveTextContent(
+      "Detected on load"
+    );
+    expect(screen.getByTestId("connection-bridge-tanita")).toHaveTextContent(
+      /detected on load/i
+    );
+    expect(
+      screen.getByText(/may have been removed since/i)
+    ).toBeInTheDocument();
   });
 });

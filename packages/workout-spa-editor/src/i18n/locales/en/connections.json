@@ -7,7 +7,7 @@
   "unsupportedHint": "Connecting these needs a server Kaiord does not run.",
   "status": {
     "connected": "Connected",
-    "installed": "Extension installed",
+    "installed": "Detected on load",
     "checking": "Checking…",
     "attention": "Session signed out",
     "available": "Not connected",
@@ -15,7 +15,7 @@
     "unsupported": "Not supported yet"
   },
   "detail": {
-    "installed": "Kaiord can see the extension but cannot check the session without downloading your whole export, so it only reports that the extension is there.",
+    "installed": "This extension announced itself when the page loaded. Kaiord cannot re-check it without downloading your whole export, so it may have been removed since.",
     "checking": "Asking the extension whether it still has a session.",
     "signedOut": "Open the provider's site and sign in; the extension picks the session back up on its own.",
     "needsReauth": "The extension's access has to be granted again. Sign in on the provider's site.",
@@ -25,6 +25,7 @@
     "unsupported": "Kaiord has no way to connect this account yet."
   },
   "bridgeDetected": "{{name}} browser bridge · detected",
+  "bridgeAnnounced": "{{name}} browser bridge · detected on load",
   "bridgeMissing": "{{name}} browser bridge · not detected",
   "lastSync": "Last data received {{when}}",
   "neverSynced": "No data received yet",

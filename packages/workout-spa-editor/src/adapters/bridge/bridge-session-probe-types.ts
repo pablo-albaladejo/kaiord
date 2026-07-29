@@ -7,6 +7,8 @@
  */
 
 export type SessionProbeResult = {
+  /** Did the extension answer? `false` means it is gone, not signed out. */
+  reachable: boolean;
   sessionActive: boolean;
   error: string | null;
   needsReauth: boolean;
@@ -19,10 +21,30 @@ export type SessionProber = (
 export const inactive = (
   error: string | null = null,
   needsReauth = false
-): SessionProbeResult => ({ sessionActive: false, error, needsReauth });
+): SessionProbeResult => ({
+  reachable: true,
+  sessionActive: false,
+  error,
+  needsReauth,
+});
 
 export const active = (): SessionProbeResult => ({
+  reachable: true,
   sessionActive: true,
   error: null,
+  needsReauth: false,
+});
+
+/**
+ * The extension did not answer. Reported apart from `inactive` because the
+ * two need opposite copy: a dead session says "sign in again", a missing
+ * extension cannot be fixed by signing in anywhere.
+ */
+export const unreachable = (
+  error: string | null = null
+): SessionProbeResult => ({
+  reachable: false,
+  sessionActive: false,
+  error,
   needsReauth: false,
 });
