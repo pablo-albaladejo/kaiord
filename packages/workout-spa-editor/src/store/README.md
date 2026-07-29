@@ -40,7 +40,12 @@ selection, history (undo/redo), and the focus-intent slice.
 - `deleteStep` / `deleteRepetitionBlock` — set `pendingFocusTarget` via
   `nextAfterDelete` (next sibling, previous sibling, empty-state, or
   block-cascade anchor).
+- `deleteSteps` — bulk main-list delete; sets `pendingFocusTarget` via
+  `nextAfterMultiDelete`.
 - `undoDelete` — set `pendingFocusTarget` via `restoredAfterUndoTarget`.
+  Addressed by `groupId`, never by `timestamp`: same-millisecond deletes
+  share a timestamp, so a clock-keyed undo restores one entry and
+  discards the rest. `timestamp` now only drives the TTL sweep.
 - `undo` / `redo` — set `pendingFocusTarget` via
   `preservedSelectionTarget`, reading the parallel `selectionHistory`.
 - `reorderStep` / `reorderStepsInBlock` — set `pendingFocusTarget` to
