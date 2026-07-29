@@ -43,6 +43,7 @@
     "checking": "Asking the extension whether it still has a session.",
     "signedOut": "Open the provider's site and sign in; the extension picks the session back up on its own.",
     "needsReauth": "The extension's access has to be granted again. Sign in on the provider's site.",
+    "outdated": "This extension's browser bridge is out of date. Update the extension to resume — signing in again will not help.",
     "notDetected": "The browser extension is not running in this browser.",
     "disconnected": "You disconnected this source in Kaiord. The extension may still be installed.",
     "manual": "Anything you type into Kaiord yourself. Never switched off.",

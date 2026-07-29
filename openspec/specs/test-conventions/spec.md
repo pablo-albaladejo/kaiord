@@ -264,3 +264,45 @@ The title-guard's allowlist SHALL be `new Set()` (empty). The AAA guard's allowl
 - **WHEN** CI runs `scripts/check-test-aaa.mjs`
 - **THEN** the guard SHALL fail with that file's path in stderr
 - **AND** the PR SHALL block until the regression is reverted
+
+### Requirement: A test measuring against a module-load origin SHALL place that origin
+
+A test whose behaviour depends on a clock stamped when a module was LOADED
+SHALL set that origin explicitly rather than inherit whatever the suite's boot
+left. Discovery settling is the instance the codebase has: `discovery-clock.ts`
+stamps `loadedAt` at module load and `useDiscoverySettled` compares `Date.now()`
+against it, so a suite that renders a gated surface without placing the clock
+passes or fails on how long the file took to reach the assertion — green under
+`pnpm test` and red under `test:coverage`, on the same code.
+
+The rule SHALL be enforced mechanically over static import edges
+(`scripts/check-discovery-clock-reset.mjs`, R-DiscoveryClockReset): a test file
+that can reach the reader SHALL call `resetDiscoveryClock`, or SHALL replace the
+reader with a mock when the gate is not what it is testing.
+
+The guard SHALL be rooted at the READER, not at the clock module. A module that
+only WRITES the clock cannot produce this failure, and rooting at the clock
+would oblige suites that merely boot the app to add a reset that protects
+nothing — which teaches the guard to be worked around.
+
+This requirement is about ABSOLUTE origins only. A test that depends on
+correlated timers — a debounce and the test's own wait sharing one event loop,
+where load delays both equally — is not in scope and SHALL NOT be flagged.
+
+#### Scenario: A page test reaching the gate without placing the clock fails CI
+
+- **GIVEN** a test file whose static imports reach `useDiscoverySettled`
+- **WHEN** it neither calls `resetDiscoveryClock` nor mocks the reader
+- **THEN** the guard SHALL fail with that file's path in stderr
+
+#### Scenario: A suite that only boots the clock is not flagged
+
+- **GIVEN** a test file that reaches `discovery-clock` solely through a module that calls `markDiscoveryStarted`
+- **WHEN** the guard runs
+- **THEN** it SHALL report no violation for that file
+
+#### Scenario: Replacing the reader is an accepted escape
+
+- **GIVEN** a test file that mocks the `use-discovery-settled` module
+- **WHEN** the guard runs
+- **THEN** it SHALL report no violation for that file, because the gate it would measure no longer runs
