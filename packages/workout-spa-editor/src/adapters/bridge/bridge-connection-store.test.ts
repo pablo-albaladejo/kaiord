@@ -385,33 +385,11 @@ describe("createBridgeConnectionStore", () => {
     expect(listener).toHaveBeenCalled();
   });
 
-  it("should report no completed refresh before the first pass", () => {
+  it("should not notify when a pass changes no row", async () => {
     // Arrange
-    const h = createHarness();
-
-    // Act
-    const refreshed = h.store.hasRefreshed();
-
-    // Assert
-    expect(refreshed).toBe(false);
-  });
-
-  it("should report a completed refresh once a pass finishes", async () => {
-    // Arrange
-    const h = createHarness();
-
-    // Act
-    await h.store.refresh();
-
-    // Assert
-    expect(h.store.hasRefreshed()).toBe(true);
-  });
-
-  it("should notify after the first pass even when no row changed", async () => {
-    // Arrange
-    // Nothing is discovered, so every row keeps its undiscovered default and
-    // no entry write notifies. A consumer distinguishing "not asked yet" from
-    // "not there" would otherwise never be told the answer had arrived.
+    // Nothing is discovered, so every row keeps its undiscovered default and no
+    // entry write notifies. `getSnapshot` is signature-cached, so waking every
+    // subscriber here would deliver the array they already hold.
     const h = createHarness();
     const listener = vi.fn();
     h.store.subscribe(listener);
@@ -420,7 +398,7 @@ describe("createBridgeConnectionStore", () => {
     await h.store.refresh();
 
     // Assert
-    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it("should stop notifying after unsubscribe", async () => {

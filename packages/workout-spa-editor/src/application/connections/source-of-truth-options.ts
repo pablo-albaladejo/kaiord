@@ -8,9 +8,9 @@
  *    candidates come from `availableSources`, the same set the row's pill
  *    counts, so the writer and the reader cannot disagree about "first".
  * 2. A source that CANNOT serve the type is not offered. Chat `enable_route`
- *    performs no capability check (issue #1085), so an enabled import route
- *    exists for pairings the Data Hub itself renders `na` — ranking one of
- *    those first would name a source that can never produce a record.
+ *    performs no capability check (issue #1085), so an enabled import route can
+ *    exist for a pairing the bridge never announces — ranking one of those
+ *    first would name a source that can never produce a record.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY } from "@kaiord/core";

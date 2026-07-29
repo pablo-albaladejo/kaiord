@@ -170,6 +170,40 @@ describe("SettingsPage", () => {
       // Assert
       expect(memory.history.at(-1)).toBe("/settings");
     });
+
+    it.each([
+      { segment: "toString" },
+      { segment: "constructor" },
+      { segment: "hasOwnProperty" },
+    ])(
+      "should send the inherited property name $segment to the index",
+      ({ segment }) => {
+        // Arrange
+        // The segment comes straight off the URL. Looked up on an object
+        // literal, every `Object.prototype` member answers with a function, so
+        // these resolved as "retired sections" and redirected to a path built
+        // by interpolating it.
+
+        // Act
+        const { memory } = renderAtPath(`/settings/${segment}`);
+
+        // Assert
+        expect(memory.history.at(-1)).toBe("/settings");
+      }
+    );
+
+    it.each([{ segment: "extensions" }, { segment: "data-hub" }])(
+      "should send the retired section $segment to Connections",
+      ({ segment }) => {
+        // Arrange
+
+        // Act
+        const { memory } = renderAtPath(`/settings/${segment}`);
+
+        // Assert
+        expect(memory.history.at(-1)).toBe("/settings/connections");
+      }
+    );
   });
 
   describe("detail views", () => {

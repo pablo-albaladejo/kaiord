@@ -58,9 +58,11 @@ export const integrationIdForBridge = (bridgeId: string): string | undefined =>
  * double).
  *
  * This guards policy-ELIGIBILITY derivations (which routes may be created).
- * The live UI chokepoint is the Data Hub cell-state signal `supportsRoute`
- * in application/data-hub/data-hub-cell-state.ts — both must apply the same
- * filter, so neither is the single place to change it.
+ * `bridgeSupportsRoute` is applied again by the Connections page's route
+ * toggles (application/connections/data-type-route-toggles.ts) and by the
+ * cell-state signal behind the `get_data_routes` chat tool
+ * (application/data-hub/data-hub-cell-state.ts) — all three must apply the same
+ * filter, so none of them is the single place to change it.
  */
 export function eligibleBridgeIds(
   dataType: ManagedDataType,

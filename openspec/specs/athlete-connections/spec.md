@@ -154,7 +154,7 @@ simulates a connection flow.
 
 #### Scenario: Strava and Wahoo rows
 
-- **WHEN** the Connections section renders Strava or Wahoo
+- **WHEN** a connection surface renders Strava or Wahoo
 - **THEN** the row shows a "not supported yet" state
 - **AND** there is no functional Connect action (no fake OAuth, no deep-link masquerading as connect)
 

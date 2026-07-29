@@ -38,24 +38,6 @@ section cannot be reachable under one name and addressable under another.
 - **WHEN** the route is entered with a segment naming no registered panel
 - **THEN** the shell SHALL redirect to the bare Settings path
 
-### Requirement: Sections retired by a later wave keep resolving
-
-Sections scheduled for retirement SHALL remain first-class members of the
-section set until the wave that retires them ships. Their URLs SHALL resolve to
-their own panels with no redirect and no interstitial, and their row test ids
-SHALL be unchanged, so surfaces and tests that link to them keep working while
-the replacement is built.
-
-#### Scenario: The legacy data-routing section still resolves
-
-- **WHEN** the Data Hub section's URL is entered directly
-- **THEN** its own panel SHALL render and no redirect SHALL occur
-
-#### Scenario: The legacy extensions section still resolves
-
-- **WHEN** the Extensions section's URL is entered directly
-- **THEN** its own panel SHALL render and no redirect SHALL occur
-
 ### Requirement: The index and the desktop split are one tree switched by CSS
 
 The shell SHALL express the difference between the narrow drill-in layout and

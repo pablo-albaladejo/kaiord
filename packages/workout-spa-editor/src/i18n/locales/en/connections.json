@@ -108,7 +108,9 @@
       "willRank": "Pick a source below and that changes: Kaiord will read {{type}} from the one you pick, and use the others only on days it has nothing. You can go back to keeping every source right here.",
       "ranked": "Kaiord reads {{type}} from {{name}} first, and falls back to the others on days it has nothing.",
       "stalled": "Nothing is being read for {{type}} — it is ranked to sources that are switched off. Pick one below, or go back to keeping every source.",
-      "keepAll": "Keep every source"
+      "keepAll": "Keep every source",
+      "switches": "Sources allowed to send {{type}}",
+      "switchesHint": "Switch one on and Kaiord starts reading {{type}} from it; switch it off and it stops. The browser extension stays installed either way."
     },
     "groups": {
       "training": "Training",

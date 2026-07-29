@@ -1,7 +1,8 @@
 /**
- * The two writes the row's "Change" control performs, through the same
- * `dataTypeSourcePolicy` port the chat tool and the Data Hub editor use — no
- * new write path.
+ * The two `dataTypeSourcePolicy` writes the row's "Change" control performs,
+ * through the same port the `set_data_route` chat tool writes — no new write
+ * path. Switching a source on or off is a different store entirely
+ * (`IntegrationPolicy`, see use-policy-toggle).
  *
  * `pick` stores `priority`, which genuinely changes how the type is READ: the
  * resolver stops returning every source's record and starts consulting the

@@ -29,8 +29,7 @@ export const availableSources = (
     (route) => route.enabled
   );
   const sources = [...new Set(enabled.map((route) => route.bridgeId))];
-  // Appended last so a saved priority order (which the Data Hub editor only
-  // ever fills with bridges) keeps deciding the head.
+  // Appended last so a saved priority order keeps deciding the head.
   //
   // ⚠ ASYMMETRY: this gate is MANUAL_ENTRY_TYPES, while
   // `resolveEffectiveSource` exempts "manual" from its enabled filter

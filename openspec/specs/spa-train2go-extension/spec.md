@@ -1,4 +1,4 @@
-> Synced: 2026-05-29
+> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
 
 # SPA Train2Go Extension
 
@@ -259,29 +259,35 @@ The calendar SHALL NOT host a Connect button. If the active profile has no linke
 - **WHEN** Profile P had a `train2go` link with N persisted activities, the user clicks Disconnect, and then re-renders the calendar
 - **THEN** the N activities continue to appear (read from `coachingActivities`); only profile deletion fully purges them. A user wanting full purge must delete the profile.
 
-### Requirement: Train2Go status in Settings panel
+### Requirement: Train2Go's status is presented with every other source
 
-The Extensions tab in the Settings panel SHALL display the Train2Go bridge status alongside the Garmin bridge. The status row SHALL show a colored dot indicator (green = connected, yellow = session inactive, gray = not detected) and a hint message when not connected. A "Refresh Status" button SHALL trigger re-detection of all bridges.
+Train2Go's status SHALL be presented on the Connections page
+(`/settings/connections`, see `spa-connections-page`) as one source card among
+every registered source, carrying that page's status vocabulary and its stated
+consequence rather than a bridge-table row of its own. The single refresh
+control on that page SHALL re-check every known bridge, Train2Go included. The
+`/settings/extensions` table this requirement previously described is retired
+and its path resolves to the Connections page.
+
+Where the two disagreed, the Connections page's rules govern: a bridge is
+connected iff its extension is discovered AND the user has not disconnected it,
+and a bridge with no session prober is reported as present rather than as
+verified — Train2Go has no prober, so its card may not claim a live session.
 
 #### Scenario: Train2Go not installed
 
-- **WHEN** the user opens the Extensions tab and the Train2Go extension is not installed
-- **THEN** the Train2Go row shows a gray dot with "Not detected" status
+- **WHEN** the user opens the Connections page and the Train2Go extension is not installed
+- **THEN** its card SHALL report the source as not connected
 
-#### Scenario: Train2Go installed but no session
+#### Scenario: Train2Go is present but unverifiable
 
-- **WHEN** the user opens the Extensions tab and the Train2Go extension is installed but session is not active
-- **THEN** the Train2Go row shows a yellow dot with "Session inactive" status and hint "Open Train2Go and log in"
+- **WHEN** the user opens the Connections page and the Train2Go extension announced itself on load
+- **THEN** its card SHALL report it as detected rather than claiming a verified session
 
-#### Scenario: Train2Go connected
+#### Scenario: One refresh re-checks Train2Go with the rest
 
-- **WHEN** the user opens the Extensions tab and the Train2Go extension is installed with an active session
-- **THEN** the Train2Go row shows a green dot with "Connected" status
-
-#### Scenario: Refresh button re-detects all bridges
-
-- **WHEN** the user clicks the "Refresh Status" button
-- **THEN** the SPA re-runs detection for both Garmin and Train2Go bridges and updates the status table
+- **WHEN** the user presses the Connections page's refresh control
+- **THEN** every known bridge SHALL be re-checked, Train2Go included
 
 ### Requirement: Platform-inclusive copy in empty states
 

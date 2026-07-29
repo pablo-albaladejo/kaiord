@@ -108,7 +108,9 @@
       "willRank": "Si eliges una fuente abajo eso cambia: Kaiord leerá {{type}} de la que elijas y solo usará las demás los días en que no tenga nada. Puedes volver a guardarlas todas desde aquí mismo.",
       "ranked": "Kaiord lee {{type}} de {{name}} primero y recurre a las demás los días en que no tenga nada.",
       "stalled": "No se está leyendo nada de {{type}}: está priorizado a fuentes que están apagadas. Elige una abajo o vuelve a guardarlas todas.",
-      "keepAll": "Guardar todas las fuentes"
+      "keepAll": "Guardar todas las fuentes",
+      "switches": "Fuentes que pueden enviar {{type}}",
+      "switchesHint": "Enciende una y Kaiord empieza a leer {{type}} de ella; apágala y deja de hacerlo. La extensión del navegador sigue instalada en ambos casos."
     },
     "groups": {
       "training": "Entrenamiento",

@@ -1,11 +1,10 @@
+import type { DataTypeRouteToggle } from "../../../application/connections/data-type-route-toggles";
 import type { DataTypeRoutingRow as RoutingRow } from "../../../application/connections/data-type-routing";
 import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
 import { canChooseSource } from "../../../application/connections/source-of-truth-options";
 import { useTranslate } from "../../../i18n/use-translate";
-import { Pill } from "../../atoms/Pill";
-import { originLabel, originNote, originSourceId } from "./routing-copy";
 import { RoutingExportTargets } from "./RoutingExportTargets";
-import { RoutingFreshness } from "./RoutingFreshness";
+import { RoutingOriginLine } from "./RoutingOriginLine";
 import { RoutingSourcePicker } from "./RoutingSourcePicker";
 
 type Props = {
@@ -13,10 +12,8 @@ type Props = {
   profileId: string;
   lastSyncedAt: ReadonlyMap<string, string | undefined>;
   options: SourceOfTruthOptions | undefined;
+  toggles: readonly DataTypeRouteToggle[];
 };
-
-const CAPTION =
-  "text-[10.5px] font-bold uppercase tracking-wider text-ink-muted";
 
 /* A ring, not a border tint: `border-edge` and an amber border are the same
    property at the same specificity, so which wins would depend on stylesheet
@@ -34,11 +31,15 @@ export function DataTypeRoutingRow({
   profileId,
   lastSyncedAt,
   options,
+  toggles,
 }: Props) {
   const t = useTranslate("connections");
-  const sourceId = originSourceId(row.origin);
-  const note = originNote(row.origin, t);
   const stalled = row.origin.kind === "rankedUnavailable";
+  // Either decision is enough to open the panel. Gating on `canChooseSource`
+  // alone is what made switching a route on unreachable: a type with no source
+  // has nothing to rank, which is exactly when it most needs a source.
+  const canChange =
+    options !== undefined && (toggles.length > 0 || canChooseSource(options));
 
   return (
     <div
@@ -55,39 +56,22 @@ export function DataTypeRoutingRow({
         </div>
       </div>
 
-      <div className="flex flex-[1_1_220px] flex-wrap items-center gap-2">
-        <span className={CAPTION}>{t("routing.from")}</span>
-        <Pill
-          tone={sourceId === undefined ? "neutral" : "accent"}
-          data-testid={`routing-from-${row.dataType}`}
-        >
-          {originLabel(row.origin, t)}
-        </Pill>
-        {sourceId !== undefined && (
-          <RoutingFreshness
-            sourceId={sourceId}
-            at={lastSyncedAt.get(sourceId)}
-          />
-        )}
-        {note !== undefined && (
-          <span
-            className="text-[12px] text-ink-muted"
-            data-testid={`routing-note-${row.dataType}`}
-          >
-            {note}
-          </span>
-        )}
-      </div>
+      <RoutingOriginLine
+        dataType={row.dataType}
+        origin={row.origin}
+        lastSyncedAt={lastSyncedAt}
+      />
 
       {row.exportable && (
         <RoutingExportTargets dataType={row.dataType} sentTo={row.sentTo} />
       )}
 
-      {options !== undefined && canChooseSource(options) && (
+      {canChange && options !== undefined && (
         <RoutingSourcePicker
           dataType={row.dataType}
           profileId={profileId}
           options={options}
+          toggles={toggles}
         />
       )}
     </div>

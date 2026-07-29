@@ -36,7 +36,7 @@ export type GetDataRoutesDeps = ReadToolDeps & {
 export const createGetDataRoutesTool = (deps: GetDataRoutesDeps): ChatTool => ({
   name: "get_data_routes",
   description:
-    "Read the Data Hub routing for the active profile: which integration " +
+    "Read the data routing for the active profile: which integration " +
     "each data type (planned sessions, activities, workouts, health " +
     "metrics, ...) is imported from or exported to, whether the route is " +
     "enabled, its multi-source semantics (union or priority order), " +

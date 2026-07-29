@@ -28,11 +28,15 @@ const TAB_VIEWS: Record<SettingsTab, React.FC> = {
  * Sections retired into Connections. Their paths were the Settings index's own
  * links, so they are in browser histories and bookmarks; they resolve to the
  * section that absorbed them rather than dropping to the index.
+ *
+ * A `Map`, not an object literal: the key comes straight off the URL, and an
+ * object would answer for every `Object.prototype` member — `/settings/toString`
+ * would resolve to a "section" and redirect to a path built from a function.
  */
-const RETIRED_SECTIONS: Readonly<Record<string, SettingsTab>> = {
-  "data-hub": "connections",
-  extensions: "connections",
-};
+const RETIRED_SECTIONS: ReadonlyMap<string, SettingsTab> = new Map([
+  ["data-hub", "connections"],
+  ["extensions", "connections"],
+]);
 
 export const SETTINGS_TAB_VIEWS = TAB_VIEWS;
 
@@ -50,4 +54,4 @@ export const isSettingsTab = (
 export const retiredSectionTarget = (
   value: string | undefined
 ): SettingsTab | undefined =>
-  value === undefined ? undefined : RETIRED_SECTIONS[value];
+  value === undefined ? undefined : RETIRED_SECTIONS.get(value);

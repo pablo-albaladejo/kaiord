@@ -510,6 +510,55 @@ between sources.
 - **WHEN** a row renders for a type with several sources
 - **THEN** it SHALL NOT state that any source has been replaced, has fallen back, or has been a backup since some date
 
+### Requirement: A row can switch each source's import route on and off
+
+The system SHALL let a data type's row switch an individual source's import
+route on or off, and SHALL treat this as a different decision from ranking: the
+ranking control orders the sources a type already has, so a type with no enabled
+route has nothing for it to act on. Without this control a source installed
+after the seeding migrations already ran can never begin sending, because no
+other surface creates an import route.
+
+A route that is switched on SHALL be offered on the row whatever its bridge is
+doing now, so it can always be switched back off; a route that is switched off
+SHALL be offered only where its bridge is connected and is announcing the
+capability the type requires, so the control never offers to create a route that
+could carry nothing. A source the user has explicitly disconnected SHALL NOT be
+offered a new route while its card on the same page reports it as not connected.
+
+Switching a route SHALL preserve its stored mode, so a route set to sync only on
+request does not silently become automatic by being switched off and on again.
+
+#### Scenario: A newly installed source can be switched on
+
+- **GIVEN** a connected source announcing a data type's capability and no import route for it
+- **WHEN** the type's row is opened
+- **THEN** that source SHALL be offered, switched off, and switching it on SHALL create the enabled import route
+
+#### Scenario: An enabled route stays switchable off while its bridge is absent
+
+- **GIVEN** an enabled import route whose bridge is announcing nothing
+- **WHEN** the type's row is opened
+- **THEN** that source SHALL still be offered, switched on
+
+#### Scenario: A source that announces nothing for the type is not offered
+
+- **GIVEN** a connected bridge announcing no capability for a data type and no route for it
+- **WHEN** the type's row is opened
+- **THEN** that source SHALL NOT be offered
+
+#### Scenario: A disconnected source is not offered a new route
+
+- **GIVEN** a source the user has disconnected
+- **WHEN** a data type's row is opened
+- **THEN** that source SHALL NOT be offered a route to switch on
+
+#### Scenario: Switching a route off keeps its mode
+
+- **GIVEN** an enabled import route stored with the manual mode
+- **WHEN** it is switched off from the row
+- **THEN** the stored mode SHALL still be manual
+
 ### Requirement: A row offers its source of truth to be changed only where that is a choice
 
 The system SHALL offer a source-of-truth control on a data type's row when the

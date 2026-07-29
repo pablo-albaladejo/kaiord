@@ -5,8 +5,8 @@
  * Bridges without an entry here are unrestricted: their capability tokens are
  * already precise enough to derive eligibility from. Entries exist only where
  * a SHARED token over-claims — `read:body` spans weight, hrv, daily-wellness,
- * body-composition and stress, so a bridge announcing it would otherwise light
- * up phantom Data Hub cells for types it can never deliver.
+ * body-composition and stress, so a bridge announcing it would otherwise be
+ * offered a route on the Connections page for types it can never deliver.
  *
  * INVARIANT — an ABSENT key and an EMPTY array mean opposite things: absent =
  * "every route this bridge's tokens allow", `[]` = "no route at all". Deleting

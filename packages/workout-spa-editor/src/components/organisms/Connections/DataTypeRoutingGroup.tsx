@@ -1,6 +1,7 @@
 import type { ManagedDataType } from "@kaiord/core";
 
 import type { DataTypeGroup } from "../../../application/connections/data-type-groups";
+import type { DataTypeRouteToggle } from "../../../application/connections/data-type-route-toggles";
 import type { DataTypeRoutingRow as RoutingRow } from "../../../application/connections/data-type-routing";
 import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -12,7 +13,10 @@ type Props = {
   byType: ReadonlyMap<ManagedDataType, RoutingRow>;
   lastSyncedAt: ReadonlyMap<string, string | undefined>;
   options: ReadonlyMap<ManagedDataType, SourceOfTruthOptions>;
+  toggles: ReadonlyMap<ManagedDataType, readonly DataTypeRouteToggle[]>;
 };
+
+const NO_TOGGLES: readonly DataTypeRouteToggle[] = [];
 
 export function DataTypeRoutingGroup({
   group,
@@ -20,6 +24,7 @@ export function DataTypeRoutingGroup({
   byType,
   lastSyncedAt,
   options,
+  toggles,
 }: Props) {
   const t = useTranslate("connections");
   const rows = group.types.flatMap((dataType) => byType.get(dataType) ?? []);
@@ -37,6 +42,7 @@ export function DataTypeRoutingGroup({
             profileId={profileId}
             lastSyncedAt={lastSyncedAt}
             options={options.get(row.dataType)}
+            toggles={toggles.get(row.dataType) ?? NO_TOGGLES}
           />
         ))}
       </div>
