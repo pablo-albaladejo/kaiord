@@ -5,6 +5,8 @@ import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { extractPatternAllowlist } from "./check-bridge-privacy-surface.mjs";
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = dirname(HERE);
 const SCRIPT = join(HERE, "check-bridge-privacy-surface.mjs");
@@ -147,13 +149,14 @@ describe("bridge privacy surface guard", () => {
       );
       const body = src.slice(start, end + 2);
 
+      // Call the guard's own extractor rather than reimplementing it. A second
+      // copy of the same assumption cannot catch the assumption being wrong:
+      // both used to require `method:` and `pattern:` on one source line, so a
+      // multi-line entry vanished from the golden AND from this count, and the
+      // test still passed. garmin-bridge had exactly such an entry.
       const sourceCount =
         patternStart >= 0
-          ? body
-              .split("\n")
-              .filter(
-                (l) => /method:\s*"[A-Z]+"/.test(l) && /pattern:\s*\//.test(l)
-              ).length
+          ? extractPatternAllowlist(body).length
           : [...body.matchAll(/"([^"\\\n]+)"/g)].length;
 
       const fixtureCount = golden[bridge].allowed_paths.length;

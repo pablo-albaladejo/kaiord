@@ -51,6 +51,10 @@
       {
         "method": "POST",
         "pattern": "^\\/upload-service\\/upload(\\/.*)?$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/activitylist-service\\/activities\\/search\\/activities(\\?.*)?$"
       }
     ]
   },

@@ -63,22 +63,31 @@ const sliceArrayLiteral = (src, declaration) => {
 };
 
 // Shape A — `const ALLOWED = [{ method: "GET", pattern: /…/ }]`.
-// Walk character by character: when we see `pattern: /`, scan forward
-// honoring escaped slashes until the closing `/`. Avoids regex ambiguity
-// with patterns that contain literal `\/`.
-const extractPatternAllowlist = (body) => {
+// Scans the whole array body, not line by line: an entry split across lines
+// would otherwise vanish from the golden with no CI failure, which is the
+// same silent-widening hole this guard exists to close. That is not
+// hypothetical — the trainingpeaks allowlist carries a `// prettier-ignore`
+// precisely because prettier would otherwise wrap it.
+// Character-wise from each `pattern: /` so a literal `\/` inside the source
+// cannot be mistaken for the closing delimiter.
+export const extractPatternAllowlist = (body) => {
   const out = [];
-  for (const line of body.split("\n")) {
-    const methodMatch = line.match(/method:\s*"([A-Z]+)"/);
-    if (!methodMatch) continue;
-    const patternStart = line.indexOf("pattern: /");
+  const methodRe = /method:\s*"([A-Z]+)"/g;
+  let methodMatch;
+  while ((methodMatch = methodRe.exec(body)) !== null) {
+    const patternStart = body.indexOf("pattern: /", methodMatch.index);
     if (patternStart === -1) continue;
+    // Guard against pairing a method with a LATER entry's pattern: if another
+    // `method:` sits between the two, this entry has no pattern of its own.
+    const nextMethod = methodRe.lastIndex;
+    if (body.slice(nextMethod, patternStart).match(/method:\s*"[A-Z]+"/))
+      continue;
     let i = patternStart + "pattern: /".length;
     let pattern = "";
-    while (i < line.length) {
-      const ch = line[i];
+    while (i < body.length) {
+      const ch = body[i];
       if (ch === "\\") {
-        pattern += ch + (line[i + 1] ?? "");
+        pattern += ch + (body[i + 1] ?? "");
         i += 2;
         continue;
       }
