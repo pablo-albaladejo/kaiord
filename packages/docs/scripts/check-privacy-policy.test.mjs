@@ -22,9 +22,7 @@ function dropSection(src, heading) {
   const lines = src.split("\n");
   const start = lines.findIndex((line) => line.trimEnd() === `## ${heading}`);
   if (start === -1) throw new Error(`fixture has no "## ${heading}" section`);
-  const after = lines
-    .slice(start + 1)
-    .findIndex((line) => /^## /.test(line));
+  const after = lines.slice(start + 1).findIndex((line) => /^## /.test(line));
   const end = after === -1 ? lines.length : start + 1 + after;
   return [...lines.slice(0, start), ...lines.slice(end)].join("\n");
 }

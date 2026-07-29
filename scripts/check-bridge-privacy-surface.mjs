@@ -112,8 +112,8 @@ const extractAllowed = (bridge) => {
   // background.js for token-based bridges that call the API directly from
   // the service worker. content.js wins when both exist.
   const dir = join(REPO_ROOT, "packages", bridge);
-  const path = [join(dir, "content.js"), join(dir, "background.js")].find(
-    (p) => existsSync(p)
+  const path = [join(dir, "content.js"), join(dir, "background.js")].find((p) =>
+    existsSync(p)
   );
   if (!path) return [];
   const src = readFileSync(path, "utf8");
@@ -205,6 +205,9 @@ const main = () => {
 
 // Run only when invoked directly. Importing the module (to regenerate the
 // golden, or from the test suite) must not exit the process.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main();
 }
