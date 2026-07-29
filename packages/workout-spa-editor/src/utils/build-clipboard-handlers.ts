@@ -1,5 +1,6 @@
 import type { KeyboardShortcutHandlers } from "../hooks/keyboard-shortcut-handlers";
 import type { KeyboardHandlerDeps } from "./keyboard-handler-deps";
+import { selectedTopLevelStepIndices } from "./selected-step-indices";
 
 type ClipboardHandlers = Pick<
   KeyboardShortcutHandlers,
@@ -41,8 +42,20 @@ export const buildClipboardHandlers = (
     return true;
   },
   onDelete: () => {
+    if (!deps.workout) return false;
+    // Multi-selection first: the scalar `selectedStepId` is null
+    // whenever `selectedStepIds` is populated, so reading only the
+    // scalar makes every bulk delete a silent no-op.
+    const bulk = selectedTopLevelStepIndices(
+      deps.workout,
+      deps.selectedStepIds
+    );
+    if (bulk) {
+      deps.deleteSteps(bulk);
+      return true;
+    }
     const selectedStepIndex = deps.stepIndex();
-    if (selectedStepIndex === null || !deps.workout) return false;
+    if (selectedStepIndex === null) return false;
     const step = deps.workout.steps[selectedStepIndex];
     if (!step || !("stepIndex" in step)) return false;
     deps.deleteStep(step.stepIndex);
