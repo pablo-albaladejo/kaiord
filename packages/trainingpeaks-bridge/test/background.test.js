@@ -15,9 +15,7 @@ const pkg = require("../package.json");
 
 // External senders are origin-pinned by the vendored envelope guard; the
 // positive paths use an allowed SPA origin, the negative paths a foreign one.
-const SPA_ORIGIN = "https://app.kaiord.com";
 const FOREIGN_ORIGIN = "https://attacker.example";
-const SPA_SENDER = { origin: SPA_ORIGIN };
 
 const EXPECTED_PROTOCOL_VERSION = 1;
 const HTTP_OK = 200;

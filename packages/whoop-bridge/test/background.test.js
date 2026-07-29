@@ -8,7 +8,6 @@ const {
   getSessionStatus,
   whoopFetch,
   handleAction,
-  dispatch,
   dispatchExternal,
   isAllowedSenderOrigin,
   EXTERNAL_ACTIONS,

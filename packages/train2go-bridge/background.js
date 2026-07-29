@@ -186,8 +186,6 @@ const train2goFetch = async (path, method = "GET") => {
 
 // ── Actions ──
 
-let lastPingedUserId = null;
-
 // Spread session FIRST, then BRIDGE_MANIFEST, so manifest fields
 // (id/name/version/protocolVersion/capabilities) cannot be spoofed by
 // a future Train2Go API change that returns its own keys with the same
@@ -200,7 +198,6 @@ const ping = async () => {
       return { ...BRIDGE_MANIFEST, sessionActive: false };
     }
     const session = parser.parsePingJson(res.data);
-    if (session.userId) lastPingedUserId = session.userId;
     return {
       ...session,
       ...BRIDGE_MANIFEST,
