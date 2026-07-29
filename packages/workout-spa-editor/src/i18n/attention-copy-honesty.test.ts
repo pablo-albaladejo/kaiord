@@ -95,18 +95,21 @@ describe("attention copy honesty", () => {
     }
   );
 
-  it.each(LOCALES)("should never claim a credential expired in %s", (locale) => {
-    // Arrange
-    const paths = ATTENTION_COPY.map(
-      ([ns, key]) => [`./locales/${locale}/${ns}.json`, key] as const
-    );
+  it.each(LOCALES)(
+    "should never claim a credential expired in %s",
+    (locale) => {
+      // Arrange
+      const paths = ATTENTION_COPY.map(
+        ([ns, key]) => [`./locales/${locale}/${ns}.json`, key] as const
+      );
 
-    // Act
-    const texts = paths.map(([path, key]) => read(path, key));
+      // Act
+      const texts = paths.map(([path, key]) => read(path, key));
 
-    // Assert
-    for (const text of texts) expect(text).not.toMatch(EXPIRED);
-  });
+      // Assert
+      for (const text of texts) expect(text).not.toMatch(EXPIRED);
+    }
+  );
 
   it.each(LOCALES)(
     "should never promise the extension recovers unattended in %s",
@@ -131,7 +134,10 @@ describe("attention copy honesty", () => {
       // Re-signing in genuinely re-mints Garmin's access, so it stays the
       // useful action — only the diagnosis attached to it was wrong. Naming
       // the outage beside it is what stops the action reading as a diagnosis.
-      const detail = read(`./locales/${locale}/connections.json`, "detail.noAccess");
+      const detail = read(
+        `./locales/${locale}/connections.json`,
+        "detail.noAccess"
+      );
 
       // Act
       const offersSignIn = SIGN_IN_ACTION.test(detail);

@@ -52,7 +52,9 @@ describe("ConnectionCardHeader", () => {
     // Assert
     // Pinned as the concept, not as one sentence: what the card owes the
     // reader is the failed read plus both possible causes, not a fixed string.
-    expect(screen.getByText(/could not read from this source/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/could not read from this source/i)
+    ).toBeInTheDocument();
     expect(screen.getByText(/temporarily unavailable/i)).toBeInTheDocument();
   });
 

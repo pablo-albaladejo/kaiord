@@ -80,7 +80,8 @@ describe("SettingsAttention", () => {
     // Arrange
     const attention = {
       title: "1 connection needs attention",
-      detail: "Kaiord cannot read from a source — signing in again may restore it",
+      detail:
+        "Kaiord cannot read from a source — signing in again may restore it",
     };
 
     // Act

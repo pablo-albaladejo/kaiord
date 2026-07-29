@@ -61,7 +61,8 @@ describe("useHeaderAttention", () => {
     // Assert
     expect(result.current).toEqual({
       title: "1 source down",
-      detail: "Kaiord cannot read from a source — signing in again may restore it",
+      detail:
+        "Kaiord cannot read from a source — signing in again may restore it",
     });
   });
 
