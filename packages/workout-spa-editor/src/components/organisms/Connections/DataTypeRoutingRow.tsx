@@ -1,13 +1,18 @@
 import type { DataTypeRoutingRow as RoutingRow } from "../../../application/connections/data-type-routing";
+import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
+import { canChooseSource } from "../../../application/connections/source-of-truth-options";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Pill } from "../../atoms/Pill";
 import { originLabel, originNote, originSourceId } from "./routing-copy";
 import { RoutingExportTargets } from "./RoutingExportTargets";
 import { RoutingFreshness } from "./RoutingFreshness";
+import { RoutingSourcePicker } from "./RoutingSourcePicker";
 
 type Props = {
   row: RoutingRow;
+  profileId: string;
   lastSyncedAt: ReadonlyMap<string, string | undefined>;
+  options: SourceOfTruthOptions | undefined;
 };
 
 const CAPTION =
@@ -24,7 +29,12 @@ const STALLED_RING = "ring-1 ring-amber-500/40";
  * design's "Nowhere" would there be describing an absence of something that
  * was never possible rather than a route the user has not switched on.
  */
-export function DataTypeRoutingRow({ row, lastSyncedAt }: Props) {
+export function DataTypeRoutingRow({
+  row,
+  profileId,
+  lastSyncedAt,
+  options,
+}: Props) {
   const t = useTranslate("connections");
   const sourceId = originSourceId(row.origin);
   const note = originNote(row.origin, t);
@@ -71,6 +81,14 @@ export function DataTypeRoutingRow({ row, lastSyncedAt }: Props) {
 
       {row.exportable && (
         <RoutingExportTargets dataType={row.dataType} sentTo={row.sentTo} />
+      )}
+
+      {options !== undefined && canChooseSource(options) && (
+        <RoutingSourcePicker
+          dataType={row.dataType}
+          profileId={profileId}
+          options={options}
+        />
       )}
     </div>
   );
