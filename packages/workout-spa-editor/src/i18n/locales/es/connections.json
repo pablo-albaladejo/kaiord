@@ -21,7 +21,7 @@
     "refreshCooldown": "Acabas de actualizar. Inténtalo dentro de un minuto."
   },
   "banner": {
-    "one": "{{name}} tiene la sesión cerrada",
+    "one": "Kaiord no puede leer de {{name}}",
     "oneOutdated": "El puente de navegador de {{name}} está desactualizado",
     "many": "{{count}} fuentes necesitan atención",
     "paused": "Ahora mismo ninguna fuente está enviando {{types}}.",
@@ -33,7 +33,7 @@
     "connected": "Conectado",
     "installed": "Detectada al cargar",
     "checking": "Comprobando…",
-    "attention": "Sesión cerrada",
+    "attention": "Sin acceso",
     "available": "Sin conectar",
     "manual": "Siempre activo",
     "unsupported": "Todavía no compatible"
@@ -41,8 +41,7 @@
   "detail": {
     "installed": "Esta extensión se anunció al cargar la página. Kaiord no puede volver a comprobarla sin descargar tu exportación completa, así que puede que se haya eliminado desde entonces.",
     "checking": "Preguntando a la extensión si todavía tiene sesión.",
-    "signedOut": "Abre la web del proveedor e inicia sesión; la extensión recupera la sesión sola.",
-    "needsReauth": "Hay que volver a conceder el acceso de la extensión. Inicia sesión en la web del proveedor.",
+    "noAccess": "Kaiord no pudo leer de esta fuente. Volver a iniciar sesión en su web puede restaurar el acceso; si ya has iniciado sesión, puede que la fuente no esté disponible temporalmente.",
     "outdated": "El puente de esta extensión está desactualizado. Actualiza la extensión para reanudar; volver a iniciar sesión no servirá de nada.",
     "notDetected": "La extensión del navegador no se está ejecutando en este navegador.",
     "disconnected": "Desconectaste esta fuente en Kaiord. Puede que la extensión siga instalada.",

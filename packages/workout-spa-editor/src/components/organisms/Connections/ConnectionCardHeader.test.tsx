@@ -50,9 +50,12 @@ describe("ConnectionCardHeader", () => {
     render(<ConnectionCardHeader source={source({ status: "attention" })} />);
 
     // Assert
+    // Pinned as the concept, not as one sentence: what the card owes the
+    // reader is the failed read plus both possible causes, not a fixed string.
     expect(
-      screen.getByText(/Open the provider's site and sign in/)
+      screen.getByText(/could not read from this source/i)
     ).toBeInTheDocument();
+    expect(screen.getByText(/temporarily unavailable/i)).toBeInTheDocument();
   });
 
   // `status` is the only input that reaches the link, so the fixtures vary

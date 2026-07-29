@@ -283,12 +283,15 @@ An unsupported protocol version SHALL NOT be reported as a session problem: the
 probe succeeded and produced a diagnosis, and signing in again would fix
 nothing, so the line SHALL say the extension is out of date.
 
-Every remaining affected source is a reachable extension without a usable
-session, so the line SHALL describe it as signed out — the same verdict its
-card states — and SHALL NOT claim that a credential expired or that the check
-itself failed. Only one bridge's probe distinguishes an expired credential from
-one that was never issued, and no probe reports a failure the card calls a
-session problem.
+Every remaining affected source is a reachable extension whose probe came back
+without a usable read, so the line SHALL say Kaiord cannot read from it — the
+same verdict its card states — and SHALL NOT claim that a credential expired or
+that the session is signed out. Only one bridge's probe distinguishes an expired
+credential from one that was never issued, and none distinguishes a provider
+outage from either; Garmin, whose bearer is minted from a stored OAuth1 token
+rather than a cookie, keeps reading after the user signs out of its website, so
+a failed read cannot be reported as a sign-out at all. The line MAY offer
+signing in again, which re-mints access where access is what lapsed.
 
 The time of the last probe SHALL NOT be presented as the time a source broke,
 and no duration of breakage SHALL be stated, because no transition timestamp is
@@ -306,7 +309,7 @@ the reader's calendar day rather than the UTC one.
 
 - **GIVEN** an affected connection demanding re-authorisation that also has a recorded last-sync time
 - **WHEN** the consequence line is built
-- **THEN** it SHALL state that the session is signed out, and SHALL NOT state that a credential expired
+- **THEN** it SHALL state that Kaiord cannot read from a source and offer signing in again, and SHALL NOT state that a credential expired or that the session is signed out
 
 #### Scenario: An outdated extension is told to update
 
@@ -318,7 +321,7 @@ the reader's calendar day rather than the UTC one.
 
 - **GIVEN** more than one source needs attention and none reports an actionable cause
 - **WHEN** the consequence line is built
-- **THEN** it SHALL state that the session is signed out and SHALL NOT state a date belonging to one of them
+- **THEN** it SHALL state that Kaiord cannot read from a source and SHALL NOT state a date belonging to one of them
 
 #### Scenario: An unusable timestamp is ignored
 

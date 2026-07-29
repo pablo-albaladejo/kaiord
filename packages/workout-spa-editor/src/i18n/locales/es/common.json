@@ -50,7 +50,7 @@
   },
   "sourceHealth": {
     "noNewDataSince": "Sin datos nuevos desde {{date}}",
-    "signedOut": "Sesión cerrada: vuelve a iniciar sesión para reanudar",
+    "noAccess": "Kaiord no puede leer de una fuente: volver a iniciar sesión puede restaurarlo",
     "extensionOutdated": "Una extensión está desactualizada: actualízala para reanudar"
   }
 }
