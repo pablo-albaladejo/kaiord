@@ -12,7 +12,6 @@ test.describe("Settings Panel", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.clear();
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
     await page.goto("/workout/new?source=scratch");
   });

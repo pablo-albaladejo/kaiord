@@ -30,9 +30,6 @@ test.describe("Focus management — fixture load", () => {
   test("loads the fixture and renders all named steps", async ({ page }) => {
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
-    const skip = page.getByRole("button", { name: /skip tutorial/i });
-    if (await skip.isVisible()) await skip.click();
-
     await loadFocusFixture(page);
 
     await expect(
@@ -57,8 +54,6 @@ test.describe("Focus management — Delete single", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
-    const skip = page.getByRole("button", { name: /skip tutorial/i });
-    if (await skip.isVisible()) await skip.click();
     await loadFocusFixture(page);
   });
 
@@ -120,8 +115,6 @@ test.describe("Focus management — Undo / Redo", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
-    const skip = page.getByRole("button", { name: /skip tutorial/i });
-    if (await skip.isVisible()) await skip.click();
     await loadFocusFixture(page);
   });
 
@@ -155,8 +148,6 @@ test.describe("Focus management — Duplicate", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
-    const skip = page.getByRole("button", { name: /skip tutorial/i });
-    if (await skip.isVisible()) await skip.click();
     await loadFocusFixture(page);
   });
 
@@ -174,8 +165,6 @@ test.describe("Focus management — form-field short-circuit", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
-    const skip = page.getByRole("button", { name: /skip tutorial/i });
-    if (await skip.isVisible()) await skip.click();
     await loadFocusFixture(page);
   });
 
