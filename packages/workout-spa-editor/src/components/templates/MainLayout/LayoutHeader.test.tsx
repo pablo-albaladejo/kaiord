@@ -41,10 +41,6 @@ describe("LayoutHeader", () => {
         () => screen.getByTestId("status-header-profile-button"),
       ],
       [
-        "help entry button",
-        () => screen.getByRole("button", { name: /open help/i }),
-      ],
-      [
         "settings entry button",
         () => screen.getByRole("button", { name: /open settings/i }),
       ],
@@ -147,8 +143,8 @@ describe("LayoutHeader", () => {
     });
   });
 
-  describe("help dialog", () => {
-    it("should not render the help dialog initially", () => {
+  describe("retired help surfaces", () => {
+    it("should not render a help entry button", () => {
       // Arrange
 
       // Act
@@ -156,36 +152,15 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        screen.queryByRole("heading", { name: /help & documentation/i })
+        screen.queryByTestId("status-header-help-button")
       ).not.toBeInTheDocument();
     });
 
-    it("should open the help dialog when the help button is clicked", async () => {
+    it("should not render the retired help dialog heading", () => {
       // Arrange
-      const user = userEvent.setup();
-      renderWithProviders(<LayoutHeader />);
 
       // Act
-      await user.click(screen.getByRole("button", { name: /open help/i }));
-
-      // Assert
-      const headings = await screen.findAllByRole("heading", {
-        name: /help & documentation/i,
-      });
-      expect(headings.length).toBeGreaterThan(0);
-    });
-
-    it("should close the help dialog when the close button is clicked", async () => {
-      // Arrange
-      const user = userEvent.setup();
       renderWithProviders(<LayoutHeader />);
-
-      // Act
-      await user.click(screen.getByRole("button", { name: /open help/i }));
-      const closeButtons = await screen.findAllByRole("button", {
-        name: /close/i,
-      });
-      await user.click(closeButtons[0]);
 
       // Assert
       expect(

@@ -21,11 +21,7 @@ const CENTERING_TOLERANCE_DIGITS = 50;
 
 test.describe("Modal Interactions", () => {
   test.beforeEach(async ({ page }) => {
-    // Skip onboarding tutorial for all tests
     await page.goto("/workout/new?source=scratch");
-    await page.evaluate(() => {
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
   });
 
   test("should display confirmation modal instead of browser alert when deleting block", async ({
@@ -275,9 +271,6 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
   }) => {
     // Requirement 6.9: Adapt to mobile screens
     await page.goto("/workout/new?source=scratch");
-    await page.evaluate(() => {
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Mobile Modal Test", [
@@ -351,9 +344,6 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     await page.setViewportSize({ width: 768, height: 1024 });
 
     await page.goto("/workout/new?source=scratch");
-    await page.evaluate(() => {
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Tablet Modal Test", [

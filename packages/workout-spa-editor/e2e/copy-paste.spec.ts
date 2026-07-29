@@ -22,7 +22,6 @@ test.describe("Copy/Paste Functionality", () => {
     // Clear localStorage but keep tutorial dismissed to prevent overlay blocking clicks
     await page.addInitScript(() => {
       localStorage.clear();
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");

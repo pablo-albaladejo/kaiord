@@ -1,0 +1,22 @@
+{
+  "marks": {
+    "create-block": {
+      "title": "You can group these",
+      "body": "Steps in a row with the same shape usually want to be a repetition block.",
+      "shortcutHint": "opens the block dialog",
+      "action": "Open the block dialog"
+    },
+    "ungroup-block": {
+      "title": "This block can be taken apart",
+      "body": "Ungrouping replaces the block with its steps, leaving each one editable on its own.",
+      "shortcutHint": "ungroups it",
+      "action": "Ungroup it"
+    }
+  },
+  "actions": {
+    "notNow": "Not now"
+  },
+  "a11y": {
+    "coachMark": "Tip"
+  }
+}

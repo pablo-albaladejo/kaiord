@@ -49,7 +49,6 @@ Page components mounted by Wouter routes in `App.tsx`. Each page composes organi
 
 ## Subdirectories
 
-- `HelpSection/` — keyboard-shortcuts + features help drawer.
 - `WorkoutSection/` — the editor body broken into per-concern files (handlers, hooks, selection hints, title, header, steps-list).
 
 ## For AI Agents

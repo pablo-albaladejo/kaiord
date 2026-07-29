@@ -21,7 +21,6 @@ import { expect, test } from "@playwright/test";
 
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
-import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "t2g-click-profile";
 const ACTIVITY_TITLE = "Tempo intervals";
@@ -29,10 +28,6 @@ const ACTIVITY_DESCRIPTION =
   "20 min warm-up, 4 × 8 min @ tempo with 3 min recovery, 15 min cool-down";
 
 test.describe("Coaching activity dialog — Train2Go click path", () => {
-  test.beforeEach(async ({ page }) => {
-    await disableOnboardingTutorial(page);
-  });
-
   test("clicking a T2G activity opens dialog with description; no error boundary", async ({
     page,
   }) => {

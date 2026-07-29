@@ -10,7 +10,6 @@ The UI tree. Follows Atomic Design (atoms → molecules → organisms → templa
 ## Key Files (top-level)
 
 - `AppKeyboardShortcuts.tsx` — wraps `useAppKeyboardHandlers` + `useKeyboardShortcuts` in a no-render component mounted by `<App />`.
-- `AppTutorial.tsx` — onboarding tutorial wrapper consumed by `<App />` via `useOnboardingTutorial`.
 - `MigrationBoot.tsx` — boot-time migration component; runs Dexie-version migrations on mount and surfaces the v10 toast via `use-v10-migration-toast`.
 
 ## Subdirectories

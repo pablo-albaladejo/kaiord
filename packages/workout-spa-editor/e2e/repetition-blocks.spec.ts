@@ -1281,11 +1281,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
 
 test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
   test.beforeEach(async ({ page }) => {
-    // Skip onboarding tutorial for all tests in this suite
     await page.goto("/workout/new?source=scratch");
-    await page.evaluate(() => {
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
   });
 
   test("should create block from selected steps and verify default step behavior", async ({
@@ -2047,11 +2043,7 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
 
 test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
   test.beforeEach(async ({ page }) => {
-    // Skip onboarding tutorial for all tests in this suite
     await page.goto("/workout/new?source=scratch");
-    await page.evaluate(() => {
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
   });
 
   test("should delete multiple blocks in various positions and verify correct blocks are deleted", async ({
@@ -2542,11 +2534,7 @@ test.describe("Repetition Blocks - Performance", () => {
 
 test.describe("Repetition Blocks - Button Styling Consistency (Task 18)", () => {
   test.beforeEach(async ({ page }) => {
-    // Skip onboarding tutorial for all tests in this suite
     await page.goto("/workout/new?source=scratch");
-    await page.evaluate(() => {
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
   });
 
   test("should have consistent delete button styling between step cards and block cards", async ({

@@ -54,6 +54,13 @@ export const userPreferencesSchema = z.object({
    * the cloud snapshot so the dismissal follows the profile across devices.
    */
   setupChecklistDismissed: z.boolean().optional(),
+  /**
+   * Coach-mark ids the profile already acted on or waved away. Absent reads
+   * as "none seen yet". Optional and unindexed — no Dexie version bump — and
+   * it rides the cloud snapshot, so a tip taught on one device stays taught.
+   * Settings → "Show tips again" empties the array rather than deleting it.
+   */
+  dismissedCoachMarks: z.array(z.string()).optional(),
   updatedAt: z.iso.datetime(),
 });
 

@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
@@ -10,7 +10,7 @@ function renderAt(path: string) {
   const { hook } = memoryLocation({ path, record: true });
   return renderWithProviders(
     <Router hook={hook}>
-      <StatusEntryButtons onHelpClick={vi.fn()} />
+      <StatusEntryButtons />
     </Router>
   );
 }

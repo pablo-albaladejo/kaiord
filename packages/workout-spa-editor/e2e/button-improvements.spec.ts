@@ -1,5 +1,3 @@
-import type { Page } from "@playwright/test";
-
 import { expect, test } from "./fixtures/base";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
@@ -26,22 +24,6 @@ const VERTICAL_GAP_MIN_PX = 8;
 const VERTICAL_GAP_MAX_PX = 20;
 const MOBILE_VIEWPORT_FALLBACK_WIDTH_PX = 375;
 
-/**
- * Helper function to dismiss the tutorial dialog if it appears
- */
-async function dismissTutorialIfPresent(page: Page) {
-  const skipButton = page.getByRole("button", { name: /skip tutorial/i });
-  try {
-    if (await skipButton.isVisible({ timeout: 2000 })) {
-      await skipButton.click();
-      // Wait for dialog to close
-      await page.waitForTimeout(500);
-    }
-  } catch {
-    // Dialog not present, continue
-  }
-}
-
 test.describe("Button Improvements - Desktop Layout", () => {
   test.use({ viewport: { width: 1280, height: 720 } }); // Desktop viewport
 
@@ -50,7 +32,6 @@ test.describe("Button Improvements - Desktop Layout", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     // Load a workout to display the action buttons
     await seedEmptyWorkout(page);
@@ -146,7 +127,6 @@ test.describe("Button Improvements - Desktop Layout", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -217,7 +197,6 @@ test.describe("Button Improvements - Desktop Layout", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -302,7 +281,6 @@ test.describe("Button Improvements - Mobile Layout", () => {
   test("should stack buttons vertically on mobile", async ({ page }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     // Load a workout
     await seedEmptyWorkout(page);
@@ -390,7 +368,6 @@ test.describe("Button Improvements - Mobile Layout", () => {
   test("should have full-width buttons on mobile", async ({ page }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -481,7 +458,6 @@ test.describe("Button Improvements - Mobile Layout", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -567,7 +543,6 @@ test.describe("Button Improvements - Capitalization", () => {
   test("should display all button labels in title case", async ({ page }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     // Load a workout
     await seedEmptyWorkout(page);
@@ -639,7 +614,6 @@ test.describe("Button Improvements - Capitalization", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');
@@ -705,7 +679,6 @@ test.describe("Button Improvements - Capitalization", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
-    await dismissTutorialIfPresent(page);
 
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');

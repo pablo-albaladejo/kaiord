@@ -1,17 +1,7 @@
 /**
- * Base test fixture that disables onboarding tutorial by default
+ * Base test fixture that retries `page.goto` on transient browser crashes.
  *
- * This fixture automatically sets localStorage to mark the tutorial as completed,
- * preventing it from blocking test execution.
- *
- * Tests can override this by clearing localStorage in beforeEach:
- * ```typescript
- * test.beforeEach(async ({ page }) => {
- *   await page.evaluate(() => localStorage.clear());
- * });
- * ```
- *
- * It also retries `page.goto` on transient browser-internal crashes (see
+ * It retries `page.goto` on transient browser-internal crashes (see
  * `TRANSIENT_NAV_CRASH`): WebKit on CI intermittently aborts a navigation
  * with "WebKit encountered an internal error" (and processes can crash).
  * These are not test failures — re-issuing the same navigation recovers —
@@ -29,12 +19,6 @@ const GOTO_CRASH_RETRIES = 2;
 
 export const test = base.extend({
   page: async ({ page }, use) => {
-    // Disable tutorial by default for all tests
-    // This runs before each page navigation
-    await page.addInitScript(() => {
-      localStorage.setItem("workout-spa-onboarding-completed", "true");
-    });
-
     const originalGoto = page.goto.bind(page);
     page.goto = (async (url, options) => {
       let lastError: unknown;

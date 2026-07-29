@@ -1,21 +1,13 @@
-import { HelpCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
-import { useTranslate } from "../../../i18n/use-translate";
-import { Button } from "../../atoms/Button/Button";
 import { ProfileEntryButton } from "./ProfileEntryButton";
 import { isEntryActive } from "./status-entry-active";
 import { EntryButton } from "./status-entry-button";
 import { ENTRY_DEFS } from "./status-entry-defs";
 import { StatusIndicators } from "./StatusIndicators";
 
-type StatusEntryButtonsProps = {
-  onHelpClick: () => void;
-};
-
-export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
+export function StatusEntryButtons() {
   const [location, navigate] = useLocation();
-  const t = useTranslate("common");
   // Athlete is reachable through ProfileEntryButton below, and settings
   // renders in its dedicated trailing slot — rendering either here would
   // duplicate the destination in the same bar.
@@ -47,17 +39,6 @@ export function StatusEntryButtons({ onHelpClick }: StatusEntryButtonsProps) {
           onClick={() => navigate(settingsEntry.to)}
         />
       )}
-      <Button
-        variant="tertiary"
-        size="sm"
-        onClick={onHelpClick}
-        aria-label={t("a11y.openHelp")}
-        title={t("help.hint")}
-        data-testid="status-header-help-button"
-      >
-        <HelpCircle className="h-4 w-4" />
-        <span className="hidden md:inline">{t("actions.help")}</span>
-      </Button>
     </>
   );
 }

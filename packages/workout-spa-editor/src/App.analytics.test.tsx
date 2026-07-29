@@ -68,7 +68,6 @@ describe("App analytics", () => {
       deletedSteps: [],
     });
     localStorage.clear();
-    localStorage.setItem("workout-spa-onboarding-completed", "true");
   });
 
   it("should fire pageView on initial mount with the current path", async () => {

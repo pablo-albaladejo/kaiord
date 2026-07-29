@@ -13,6 +13,8 @@ export type SettingsRowProps = {
   /** External destination opened in a new tab; mutually exclusive with `to`. */
   href?: string;
   onNavigate?: (to: string) => void;
+  /** Runs in place instead of navigating; mutually exclusive with `to`/`href`. */
+  onActivate?: () => void;
 };
 
 const BASE_CLASS =
@@ -29,8 +31,15 @@ export const SettingsRow = ({
   to,
   href,
   onNavigate,
+  onActivate,
 }: SettingsRowProps) => {
   const navigable = to !== undefined && onNavigate !== undefined;
+  // One click handler for both interactive shapes: a destination row hands the
+  // route to the router, an action row runs in place. Neither → an inert div.
+  const activate =
+    to !== undefined && onNavigate !== undefined
+      ? () => onNavigate(to)
+      : onActivate;
   const rowTestId = `settings-row-${testId ?? label}`;
   const body = (
     <SettingsRowBody
@@ -57,7 +66,7 @@ export const SettingsRow = ({
     );
   }
 
-  if (!navigable) {
+  if (activate === undefined) {
     return (
       <div className={BASE_CLASS} data-testid={rowTestId}>
         {body}
@@ -68,7 +77,7 @@ export const SettingsRow = ({
   return (
     <button
       type="button"
-      onClick={() => onNavigate(to)}
+      onClick={activate}
       className={LINK_CLASS}
       data-testid={rowTestId}
     >

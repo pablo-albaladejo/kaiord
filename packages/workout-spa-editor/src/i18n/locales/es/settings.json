@@ -21,7 +21,8 @@
     "manageYourData": "Gestiona tus datos",
     "extensions": "Extensiones",
     "usage": "Uso",
-    "helpDocs": "Ayuda y documentación"
+    "helpDocs": "Ayuda y documentación",
+    "replayTips": "Mostrar consejos otra vez"
   },
   "values": {
     "sync": {

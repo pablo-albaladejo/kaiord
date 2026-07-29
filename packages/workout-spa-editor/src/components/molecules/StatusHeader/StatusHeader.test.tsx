@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { useTrain2GoStore } from "../../../store/train2go-store";
 import { renderWithProviders } from "../../../test-utils";
@@ -18,7 +18,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+    renderWithProviders(<StatusHeader />);
 
     // Assert
 
@@ -34,7 +34,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+    renderWithProviders(<StatusHeader />);
 
     // Assert
 
@@ -53,7 +53,7 @@ describe("StatusHeader", () => {
 
       // Act
 
-      renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+      renderWithProviders(<StatusHeader />);
 
       // Assert
 
@@ -66,7 +66,7 @@ describe("StatusHeader", () => {
     useTrain2GoStore.setState({ extensionInstalled: true });
 
     // Act
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+    renderWithProviders(<StatusHeader />);
 
     // Assert
     expect(screen.getByTestId("status-header-sync")).toHaveTextContent(
@@ -79,7 +79,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+    renderWithProviders(<StatusHeader />);
 
     // Assert
 
@@ -94,7 +94,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+    renderWithProviders(<StatusHeader />);
 
     // Assert
 
@@ -108,7 +108,7 @@ describe("StatusHeader", () => {
 
     // Act
 
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+    renderWithProviders(<StatusHeader />);
 
     // Assert
 
@@ -121,7 +121,7 @@ describe("StatusHeader", () => {
     // Arrange
 
     // Act
-    renderWithProviders(<StatusHeader onHelpClick={vi.fn()} />);
+    renderWithProviders(<StatusHeader />);
 
     // Assert
     const divider = screen.getByTestId("status-header-divider");

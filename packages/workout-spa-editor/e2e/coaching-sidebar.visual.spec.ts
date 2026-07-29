@@ -13,7 +13,6 @@ import { expect, test } from "@playwright/test";
 import { clearDexie, getWeekDates } from "./helpers/seed-dexie";
 import { seedMatchedCoachingWorkout } from "./helpers/seed-matched-coaching-workout";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
-import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "visual-sidebar-profile";
 const SOURCE = "train2go";
@@ -21,7 +20,12 @@ const SOURCE_ID = "visual-sidebar-activity";
 const WORKOUT_ID = "visual-sidebar-workout";
 
 test.describe("CoachingSidebar visual regression", () => {
-  test.beforeEach(async ({ page }, testInfo) => {
+  // Playwright requires the first argument to be a destructuring pattern so it
+  // can read which fixtures the hook needs; this hook needs none. An empty
+  // pattern is the only way to say that, and `no-empty-pattern` cannot tell it
+  // apart from an accidental one.
+  // eslint-disable-next-line no-empty-pattern
+  test.beforeEach(async ({}, testInfo) => {
     // Baselines are generated on ubuntu-latest/chromium only (see
     // `update-visual-baselines.yml`). Snapshots are not maintained for
     // the other Playwright projects, so let them skip rather than fail
@@ -30,7 +34,6 @@ test.describe("CoachingSidebar visual regression", () => {
       testInfo.project.name !== "chromium",
       "Visual baselines are generated only for the chromium project."
     );
-    await disableOnboardingTutorial(page);
   });
 
   test("should match desktop screenshot at 1024px viewport for matched coaching workout", async ({
