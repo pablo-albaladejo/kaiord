@@ -3,8 +3,8 @@
  * the header pill.
  *
  * The strings live in the `common` namespace rather than in either surface's
- * own, because two catalogs holding the same sentence is how a banner and a
- * pill end up contradicting each other one locale at a time.
+ * own: one catalog entry per cause is what keeps the banner and the pill from
+ * diverging a locale at a time.
  */
 import type { Translate } from "../../i18n/use-translate";
 import type { AttentionCause } from "./source-attention";

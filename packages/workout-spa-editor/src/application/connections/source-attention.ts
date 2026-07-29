@@ -20,9 +20,8 @@
 import type { ConnectionSource } from "./connection-source";
 import { sourceNeedsAttention } from "./connection-source";
 
-// Aliased, not redefined: the summary, the banner and the header pill must be
-// answering the same question as the cards, and two copies of this predicate
-// is exactly how two surfaces came to disagree before.
+// Aliased, not redefined: the summary, the banner and the header pill answer
+// the same question as the cards, so there is one predicate to change.
 export const needsAttention = sourceNeedsAttention;
 
 /**
