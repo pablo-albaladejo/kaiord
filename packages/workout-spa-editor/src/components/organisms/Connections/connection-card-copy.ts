@@ -25,6 +25,12 @@ export const STATUS_TEXT: Record<ConnectionSourceStatus, string> = {
  * The second line under the status. `available` splits by cause: an explicit
  * disconnect and a missing extension look identical in the status word but
  * need opposite next steps, and only one of them has a control.
+ *
+ * A missing extension wins that split even when the source was also
+ * disconnected. Both are true, but the absent extension is the blocking one —
+ * telling a user they unlinked a source they cannot re-link yet points them at
+ * the wrong problem. Once the extension is back, the card reports the
+ * disconnect and offers Reconnect.
  */
 export const detailKeyFor = (source: ConnectionSource): string | null => {
   switch (source.status) {
@@ -40,7 +46,9 @@ export const detailKeyFor = (source: ConnectionSource): string | null => {
       return "detail.unsupported";
     case "available":
       if (source.mechanism !== "bridge") return null;
-      return source.disconnected ? "detail.disconnected" : "detail.notDetected";
+      return source.bridgeDetected
+        ? "detail.disconnected"
+        : "detail.notDetected";
     default:
       return null;
   }

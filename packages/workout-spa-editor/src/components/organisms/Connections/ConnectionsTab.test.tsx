@@ -164,4 +164,28 @@ describe("ConnectionsTab", () => {
       screen.queryByTestId("connection-manage-strava")
     ).not.toBeInTheDocument();
   });
+
+  it("should point a disconnected source at the missing extension first", () => {
+    // Arrange
+    // Both facts are true; the absent extension is the blocking one, and
+    // there is no Reconnect control while it is gone.
+    setSources([
+      source({
+        status: "available",
+        disconnected: true,
+        bridgeDetected: false,
+      }),
+    ]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(
+      screen.getByText(/extension is not running in this browser/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("connection-reconnect-garmin")
+    ).not.toBeInTheDocument();
+  });
 });
