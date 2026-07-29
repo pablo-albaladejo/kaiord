@@ -121,6 +121,56 @@ test.describe("Connections page content", () => {
     await expect(row).toHaveAttribute("data-origin", "none");
   });
 
+  test("should keep an enabled route switchable off once its extension is gone", async ({
+    page,
+  }) => {
+    // Arrange — switch the route on while the bridge is present.
+    await openWithBridge(page);
+    await page.getByTestId("routing-change-planned-session").click();
+    const toggle = page.getByTestId("routing-route-planned-session-train2go");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false", {
+      timeout: 15_000,
+    });
+    await toggle.click();
+    await expect(page.getByTestId("routing-from-planned-session")).toHaveText(
+      "Train2Go",
+      { timeout: 10_000 }
+    );
+
+    // Act — a second page in the SAME context: it shares the IndexedDB, so the
+    // route it finds is the one just written, but `installTrain2GoBridgeStub`
+    // is page-scoped (`page.addInitScript`), so this one boots with no
+    // extension at all. That is the user who uninstalls it and comes back.
+    const gone = await page.context().newPage();
+    await gone.goto(CONNECTIONS_ROUTE);
+    await expect(gone.getByTestId("connections-tab")).toBeVisible({
+      timeout: 15_000,
+    });
+    await gone.getByTestId("routing-change-planned-session").click();
+    const goneToggle = gone.getByTestId(
+      "routing-route-planned-session-train2go"
+    );
+
+    // Assert — the route is still read from, so it is still offered and still
+    // reads as on. Dropping it here would STRAND it: enabled, resolving, and
+    // with no control left anywhere that could switch it off.
+    await expect(goneToggle).toBeVisible({ timeout: 10_000 });
+    await expect(goneToggle).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      gone.getByTestId("connection-card-train2go")
+    ).not.toHaveAttribute("data-status", "connected");
+
+    // Act — and it must actually switch off from here.
+    await goneToggle.click();
+
+    // Assert
+    await expect(gone.getByTestId("routing-from-planned-session")).toHaveText(
+      "No source",
+      { timeout: 10_000 }
+    );
+    await gone.close();
+  });
+
   test("should offer no route on a type the discovered bridge cannot serve", async ({
     page,
   }) => {
