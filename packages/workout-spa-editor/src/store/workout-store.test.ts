@@ -1260,9 +1260,8 @@ describe("useWorkoutStore", () => {
       };
       useWorkoutStore.getState().loadWorkout(mockKrd);
       useWorkoutStore.getState().deleteStep(0);
-      const deletedTimestamp =
-        useWorkoutStore.getState().deletedSteps[0].timestamp;
-      useWorkoutStore.getState().undoDelete(deletedTimestamp);
+      const deletedGroupId = useWorkoutStore.getState().deletedSteps[0].groupId;
+      useWorkoutStore.getState().undoDelete(deletedGroupId);
       const state = useWorkoutStore.getState();
 
       // Act
@@ -1293,6 +1292,7 @@ describe("useWorkoutStore", () => {
             },
             index: 0,
             timestamp: now - EXPIRED_DELETE_AGE_MS, // 6 seconds ago (expired)
+            groupId: "group-expired",
           },
           {
             step: {
@@ -1307,6 +1307,7 @@ describe("useWorkoutStore", () => {
             },
             index: 1,
             timestamp: now - FRESH_DELETE_AGE_MS, // 2 seconds ago (not expired)
+            groupId: "group-fresh",
           },
         ],
       });

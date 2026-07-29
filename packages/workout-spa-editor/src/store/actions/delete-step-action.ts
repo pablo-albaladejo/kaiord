@@ -11,6 +11,7 @@ import { nextAfterDelete } from "../focus-rules";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import { extractStructuredWorkout } from "./_helpers/extract-workout";
+import { newDeleteGroupId } from "./delete-group-id";
 import {
   filterSteps,
   findStepToDelete,
@@ -49,6 +50,8 @@ export const deleteStepAction = (
           step: found.step as UIWorkoutItem,
           index: stepIndex,
           timestamp: Date.now(),
+          // A single delete is a delete group of one.
+          groupId: newDeleteGroupId(),
         },
       ]
     : deletedSteps;
