@@ -4,7 +4,7 @@ import type { BridgeConnectionState } from "../../../hooks/use-bridge-connection
 import { getTranslate } from "../../../i18n/use-translate";
 import {
   buildAttention,
-  countInstalled,
+  countDetected,
   needsAttention,
 } from "./connection-attention";
 
@@ -19,10 +19,19 @@ const connection = (
   checking: false,
   error: null,
   needsReauth: false,
+  outdated: false,
   lastCheckedAt: 1_700_000_000_000,
   lastSyncAt: undefined,
   ...overrides,
 });
+
+/**
+ * A date-time with no timezone designator parses as LOCAL time, so this is
+ * local noon on 2026-07-25 wherever the runner is. Both properties matter:
+ * the asserted calendar day holds in every timezone, and it is the LOCAL day
+ * being asserted, which is the point of the formatter.
+ */
+const LAST_SYNC_AT = new Date("2026-07-25T12:00:00").toISOString();
 
 describe("needsAttention", () => {
   it("should flag a connection whose last probe failed", () => {
@@ -77,7 +86,7 @@ describe("needsAttention", () => {
   });
 });
 
-describe("countInstalled", () => {
+describe("countDetected", () => {
   it("should count discovered bridges regardless of their session", () => {
     // Arrange
     const connections = [
@@ -87,10 +96,10 @@ describe("countInstalled", () => {
     ];
 
     // Act
-    const installed = countInstalled(connections);
+    const detected = countDetected(connections);
 
     // Assert
-    expect(installed).toBe(2);
+    expect(detected).toBe(2);
   });
 });
 
@@ -137,7 +146,7 @@ describe("buildAttention", () => {
   it("should date the consequence from the last data that arrived", () => {
     // Arrange
     const connections = [
-      connection({ error: "unreachable", lastSyncAt: "2026-07-25T10:00:00Z" }),
+      connection({ error: "unreachable", lastSyncAt: LAST_SYNC_AT }),
     ];
 
     // Act
@@ -157,6 +166,51 @@ describe("buildAttention", () => {
     // Assert
     expect(attention?.detail).toBe(
       "Session signed out — sign in again to resume"
+    );
+  });
+
+  it("should keep the sign-in instruction when a last-sync date also exists", () => {
+    // Arrange
+    // The ordinary case: you only get a re-auth demand for an account you
+    // were already syncing, so both facts are present and the actionable one
+    // must win.
+    const connections = [
+      connection({
+        bridgeId: "trainingpeaks-bridge",
+        needsReauth: true,
+        error: "Session expired",
+        lastSyncAt: LAST_SYNC_AT,
+      }),
+    ];
+
+    // Act
+    const attention = buildAttention(connections, t);
+
+    // Assert
+    expect(attention?.detail).toBe(
+      "Session signed out — sign in again to resume"
+    );
+  });
+
+  it("should tell an outdated extension to update instead of reporting a failure", () => {
+    // Arrange
+    // The probe SUCCEEDED here — the extension answered with an unsupported
+    // protocol version — so "the last check failed" would be untrue.
+    const connections = [
+      connection({
+        error: "Update your Kaiord Garmin Bridge extension",
+        outdated: true,
+        sessionActive: false,
+        lastSyncAt: LAST_SYNC_AT,
+      }),
+    ];
+
+    // Act
+    const attention = buildAttention(connections, t);
+
+    // Assert
+    expect(attention?.detail).toBe(
+      "An extension is out of date — update it to resume"
     );
   });
 

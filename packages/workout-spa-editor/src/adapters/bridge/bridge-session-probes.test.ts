@@ -64,6 +64,7 @@ describe("whoop-bridge prober", () => {
       sessionActive: true,
       error: null,
       needsReauth: false,
+      outdated: false,
     });
   });
 
@@ -97,6 +98,7 @@ describe("whoop-bridge prober", () => {
       sessionActive: false,
       error: "No session token captured",
       needsReauth: false,
+      outdated: false,
     });
   });
 });
@@ -137,6 +139,7 @@ describe("trainingpeaks-bridge prober", () => {
       sessionActive: false,
       error: "Session expired",
       needsReauth: true,
+      outdated: false,
     });
   });
 });
@@ -162,6 +165,7 @@ describe("transport-failure error reporting", () => {
       sessionActive: false,
       error: "Extension not available",
       needsReauth: false,
+      outdated: false,
     });
   });
 
@@ -181,6 +185,7 @@ describe("transport-failure error reporting", () => {
       sessionActive: false,
       error: null,
       needsReauth: false,
+      outdated: false,
     });
   });
 });

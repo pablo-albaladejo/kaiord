@@ -14,6 +14,7 @@ import { z } from "zod";
 import {
   active,
   inactive,
+  outdatedExtension,
   type SessionProbeResult,
 } from "./bridge-session-probe-types";
 import { sendBridgeMessage } from "./bridge-transport";
@@ -43,7 +44,7 @@ const probeByPing = async (
   const parsed = pingDataSchema.safeParse(res.data);
   const data: PingData = parsed.success ? parsed.data : {};
   if (data.protocolVersion !== SUPPORTED_PROTOCOL_VERSION) {
-    return inactive(outdatedMessage);
+    return outdatedExtension(outdatedMessage);
   }
   return readSession(data) ? active() : inactive();
 };

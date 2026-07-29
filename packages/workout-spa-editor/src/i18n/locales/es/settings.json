@@ -25,7 +25,7 @@
   },
   "values": {
     "connections": {
-      "installed": "{{found}} de {{total}} instaladas"
+      "detected": "{{found}} de {{total}} detectadas"
     },
     "sync": {
       "connected": "Drive · {{relative}}"
@@ -175,8 +175,9 @@
   "attention": {
     "title_one": "{{count}} conexión requiere atención",
     "title_other": "{{count}} conexiones requieren atención",
-    "noNewDataSince": "Sin datos nuevos desde el {{date}}",
+    "noNewDataSince": "Sin datos nuevos desde {{date}}",
     "signedOut": "Sesión cerrada: vuelve a iniciar sesión para reanudarla",
+    "extensionOutdated": "Una extensión está desactualizada: actualízala para reanudar",
     "lastCheckFailed": "La última comprobación ha fallado"
   }
 }

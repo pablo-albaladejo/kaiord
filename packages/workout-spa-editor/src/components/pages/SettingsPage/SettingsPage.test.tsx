@@ -29,6 +29,7 @@ const bridgeConnection = (
   checking: false,
   error: null,
   needsReauth: false,
+  outdated: false,
   lastCheckedAt: null,
   lastSyncAt: undefined,
   ...overrides,
@@ -36,10 +37,12 @@ const bridgeConnection = (
 
 const connections = vi.hoisted(() => ({
   value: [] as BridgeConnectionState[],
+  refreshed: true,
 }));
 
 vi.mock("../../../hooks/use-bridge-connections", () => ({
   useBridgeConnections: () => connections.value,
+  useBridgeConnectionsRefreshed: () => connections.refreshed,
 }));
 
 vi.mock("../../../contexts/garmin-bridge-context", async (importOriginal) => {
@@ -84,6 +87,7 @@ function renderAtPath(path: string) {
 describe("SettingsPage", () => {
   beforeEach(async () => {
     connections.value = KNOWN_BRIDGES.map((id) => bridgeConnection(id));
+    connections.refreshed = true;
     await Promise.all([
       db.table("aiProviders").clear(),
       db.table("meta").clear(),
@@ -437,7 +441,7 @@ describe("SettingsPage", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should count the installed bridges on the connections row", () => {
+    it("should count the detected bridges on the connections row", () => {
       // Arrange
       connections.value = KNOWN_BRIDGES.map((id, index) =>
         bridgeConnection(id, { discovered: index < 2 })
@@ -448,8 +452,23 @@ describe("SettingsPage", () => {
 
       // Assert
       expect(screen.getByTestId("settings-row-connections")).toHaveTextContent(
-        "2 of 5 installed"
+        "2 of 5 detected"
       );
+    });
+
+    it("should leave the connections row bare until the first pass completes", () => {
+      // Arrange
+      // Cold load: five rows exist and all read undiscovered because nothing
+      // has been asked yet. "0 of 5" would be wrong, not merely early.
+      connections.refreshed = false;
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(
+        screen.getByTestId("settings-row-connections")
+      ).not.toHaveTextContent("of 5");
     });
   });
 

@@ -25,10 +25,17 @@ const connection = (
   checking: false,
   error: null,
   needsReauth: false,
+  outdated: false,
   lastCheckedAt: 1_700_000_000_000,
   lastSyncAt: undefined,
   ...overrides,
 });
+
+/**
+ * No timezone designator, so this parses as local noon: the asserted calendar
+ * day holds in every timezone the runner might be in.
+ */
+const LAST_SYNC_AT = new Date("2026-07-20T12:00:00").toISOString();
 
 describe("useSettingsAttention", () => {
   it("should produce no attention while every connection is healthy", () => {
@@ -49,7 +56,7 @@ describe("useSettingsAttention", () => {
         bridgeId: "whoop-bridge",
         error: "unreachable",
         sessionActive: false,
-        lastSyncAt: "2026-07-20T08:00:00Z",
+        lastSyncAt: LAST_SYNC_AT,
       }),
     ];
 

@@ -25,7 +25,7 @@
   },
   "values": {
     "connections": {
-      "installed": "{{found}} of {{total}} installed"
+      "detected": "{{found}} of {{total}} detected"
     },
     "sync": {
       "connected": "Drive · {{relative}}"
@@ -177,6 +177,7 @@
     "title_other": "{{count}} connections need attention",
     "noNewDataSince": "No new data since {{date}}",
     "signedOut": "Session signed out — sign in again to resume",
+    "extensionOutdated": "An extension is out of date — update it to resume",
     "lastCheckFailed": "The last check failed"
   }
 }

@@ -14,38 +14,57 @@ import type { SettingsAttentionModel } from "./SettingsAttention";
 export const needsAttention = (connection: BridgeConnectionState): boolean =>
   connection.error !== null || connection.needsReauth;
 
-export const countInstalled = (
+/**
+ * How many bridges answered. A page cannot enumerate installed extensions:
+ * `discovered` means "announced itself and answered a ping this page-life",
+ * which is why the copy says detected rather than installed.
+ */
+export const countDetected = (
   connections: readonly BridgeConnectionState[]
 ): number => connections.filter((entry) => entry.discovered).length;
 
-/** `YYYY-MM-DD`, or nothing when the stored value does not parse as a date. */
+/**
+ * The user's calendar day, not `toISOString()`'s: a sync at 02:00Z happened
+ * the previous evening in New York, and the sentence is about their day.
+ * Nothing when the stored value does not parse as a date.
+ */
 const dayOf = (timestamp: string | undefined): string | undefined => {
   if (timestamp === undefined) return undefined;
   const at = new Date(timestamp);
-  return Number.isNaN(at.getTime()) ? undefined : at.toISOString().slice(0, 10);
+  if (Number.isNaN(at.getTime())) return undefined;
+  const month = String(at.getMonth() + 1).padStart(2, "0");
+  return `${at.getFullYear()}-${month}-${String(at.getDate()).padStart(2, "0")}`;
 };
 
 /**
- * Two facts back a consequence line: `lastSyncAt`, which survives a reload
- * and says when data last arrived, and `needsReauth`, which says the upstream
- * session must be signed in again. `lastCheckedAt` is not one of them — it
- * records when the SPA last probed, so after a reload it reads as seconds ago
- * however long a source has been down, and "broken since" is unsayable.
+ * Ranked by what the reader can do about it: an instruction outranks a date.
+ * A signed-out session and an out-of-date extension both name their own fix,
+ * and both routinely coexist with a `lastSyncAt` — you only get a re-auth
+ * demand for an account you were already syncing — so ranking the date first
+ * would hide the only actionable line in the most ordinary case.
  *
  * `needsReauth` is only ever set by the TrainingPeaks probe; for WHOOP the SPA
  * cannot tell an expired token from never having signed in, so the copy says
- * signed out rather than expired.
+ * signed out rather than expired. `outdated` means the extension answered with
+ * an unsupported protocol version — the probe succeeded, so "the check failed"
+ * would be untrue.
+ *
+ * The date comes from `lastSyncAt`, which is persisted. `lastCheckedAt` is
+ * when the SPA last probed, so after a reload it reads as seconds ago however
+ * long a source has been down, and "broken since" is unsayable.
  */
 const detailOf = (
   affected: readonly BridgeConnectionState[],
   t: Translate
 ): string => {
+  if (affected.some((entry) => entry.needsReauth))
+    return t("attention.signedOut");
+  if (affected.some((entry) => entry.outdated))
+    return t("attention.extensionOutdated");
   const since =
     affected.length === 1 ? dayOf(affected[0]?.lastSyncAt) : undefined;
   if (since !== undefined)
     return t("attention.noNewDataSince", { date: since });
-  if (affected.some((entry) => entry.needsReauth))
-    return t("attention.signedOut");
   return t("attention.lastCheckFailed");
 };
 

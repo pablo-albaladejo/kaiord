@@ -41,7 +41,13 @@ export function createBridgeConnectionStore(
   let lastRefreshAt: number | null = null;
   const refresh = async (opts: { force?: boolean } = {}) => {
     await refreshConnections(ctx, opts.force === true);
+    const first = lastRefreshAt === null;
     lastRefreshAt = ctx.now();
+    // A pass notifies only through rows that observably changed, and the
+    // first pass over an empty discovery map changes nothing at all. Without
+    // this edge, a consumer waiting for "we have asked" would never hear that
+    // the answer is in.
+    if (first) ctx.notify();
   };
 
   const { start, stop } = createLifecycle({
@@ -56,6 +62,7 @@ export function createBridgeConnectionStore(
     start,
     stop,
     refresh,
+    hasRefreshed: () => lastRefreshAt !== null,
     getSnapshot: createSnapshotReader(entries, ctx.bridgeIds),
     subscribe: (listener) => {
       listeners.add(listener);

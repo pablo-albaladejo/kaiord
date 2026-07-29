@@ -37,6 +37,7 @@ describe("probeGarminSession", () => {
       sessionActive: true,
       error: null,
       needsReauth: false,
+      outdated: false,
     });
   });
 
@@ -55,6 +56,7 @@ describe("probeGarminSession", () => {
       sessionActive: false,
       error: null,
       needsReauth: false,
+      outdated: false,
     });
   });
 
@@ -74,6 +76,7 @@ describe("probeGarminSession", () => {
       sessionActive: false,
       error: "Update your Kaiord Garmin Bridge extension",
       needsReauth: false,
+      outdated: true,
     });
   });
 
@@ -114,6 +117,7 @@ describe("probeTrain2GoSession", () => {
       sessionActive: true,
       error: null,
       needsReauth: false,
+      outdated: false,
     });
   });
 

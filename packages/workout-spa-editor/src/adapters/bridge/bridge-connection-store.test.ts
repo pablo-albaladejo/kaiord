@@ -20,11 +20,13 @@ const ACTIVE: SessionProbeResult = {
   sessionActive: true,
   error: null,
   needsReauth: false,
+  outdated: false,
 };
 const INACTIVE: SessionProbeResult = {
   sessionActive: false,
   error: null,
   needsReauth: false,
+  outdated: false,
 };
 
 type HarnessOptions = {
@@ -108,6 +110,7 @@ describe("createBridgeConnectionStore", () => {
       checking: false,
       error: null,
       needsReauth: false,
+      outdated: false,
       lastCheckedAt: null,
     });
   });
@@ -129,6 +132,7 @@ describe("createBridgeConnectionStore", () => {
       checking: false,
       error: null,
       needsReauth: false,
+      outdated: false,
       lastCheckedAt: null,
     });
   });
@@ -243,6 +247,7 @@ describe("createBridgeConnectionStore", () => {
       checking: false,
       error: null,
       needsReauth: false,
+      outdated: false,
       lastCheckedAt: null,
     });
   });
@@ -292,6 +297,7 @@ describe("createBridgeConnectionStore", () => {
         sessionActive: false,
         error: "Session expired",
         needsReauth: true,
+        outdated: false,
       },
     });
     h.ids.set("garmin-bridge", "ext-g");
@@ -331,6 +337,44 @@ describe("createBridgeConnectionStore", () => {
 
     // Assert
     expect(listener).toHaveBeenCalled();
+  });
+
+  it("should report no completed refresh before the first pass", () => {
+    // Arrange
+    const h = createHarness();
+
+    // Act
+    const refreshed = h.store.hasRefreshed();
+
+    // Assert
+    expect(refreshed).toBe(false);
+  });
+
+  it("should report a completed refresh once a pass finishes", async () => {
+    // Arrange
+    const h = createHarness();
+
+    // Act
+    await h.store.refresh();
+
+    // Assert
+    expect(h.store.hasRefreshed()).toBe(true);
+  });
+
+  it("should notify after the first pass even when no row changed", async () => {
+    // Arrange
+    // Nothing is discovered, so every row keeps its undiscovered default and
+    // no entry write notifies. A consumer distinguishing "not asked yet" from
+    // "not there" would otherwise never be told the answer had arrived.
+    const h = createHarness();
+    const listener = vi.fn();
+    h.store.subscribe(listener);
+
+    // Act
+    await h.store.refresh();
+
+    // Assert
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 
   it("should stop notifying after unsubscribe", async () => {
