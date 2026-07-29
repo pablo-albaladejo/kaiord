@@ -5,9 +5,15 @@
 // when the spec or the shipping extensions change without a
 // corresponding policy update.
 
-import { existsSync, readFileSync } from "node:fs";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..", "..");
@@ -25,52 +31,78 @@ const VITEPRESS_CONFIG = join(
   ".vitepress",
   "config.ts"
 );
-const TRAIN2GO_MANIFEST = join(
-  REPO_ROOT,
-  "packages",
-  "train2go-bridge",
-  "manifest.json"
-);
-const GARMIN_MANIFEST = join(
-  REPO_ROOT,
-  "packages",
-  "garmin-bridge",
-  "manifest.json"
-);
-const TANITA_MANIFEST = join(
-  REPO_ROOT,
-  "packages",
-  "tanita-bridge",
-  "manifest.json"
-);
-const TRAININGPEAKS_MANIFEST = join(
-  REPO_ROOT,
-  "packages",
-  "trainingpeaks-bridge",
-  "manifest.json"
-);
-const WHOOP_MANIFEST = join(
-  REPO_ROOT,
-  "packages",
-  "whoop-bridge",
-  "manifest.json"
-);
 
-// Hosts the policy claims each production extension may contact.
-const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
-const GARMIN_ALLOWED_HOSTS = new Set([
-  "https://connect.garmin.com/*",
-  "https://connectapi.garmin.com/*",
-  "https://sso.garmin.com/*",
-]);
-const TANITA_ALLOWED_HOSTS = new Set(["https://mytanita.eu/*"]);
-const TRAININGPEAKS_ALLOWED_HOSTS = new Set([
-  "https://tpapi.trainingpeaks.com/*",
-]);
-const WHOOP_ALLOWED_HOSTS = new Set([
-  "https://api.prod.whoop.com/*",
-  "https://app.whoop.com/*",
-]);
+// Per-extension policy section headings. A rule carrying `section` is
+// matched ONLY against that section's body (heading line exclusive, up to
+// the next `## `), never against the whole document — otherwise the intro
+// sentence at the top of the policy, which names every extension, and the
+// shared Communication Scope section, which names every host, silently
+// satisfy rules that are supposed to be about the section itself. Deleting
+// a whole section must fail the lint; before this anchoring it did not.
+const GARMIN_SECTION = "Kaiord Garmin Bridge Extension";
+const TRAIN2GO_SECTION = "Kaiord Train2Go Bridge Extension";
+const TANITA_SECTION = "Kaiord Tanita Bridge Extension";
+const TRAININGPEAKS_SECTION = "Kaiord TrainingPeaks Bridge Extension";
+const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
+
+// Bridge package -> its policy section and the hosts the policy claims the
+// extension may contact.
+//
+// The KEY SET is checked against `packages/*-bridge` on disk by
+// checkBridgeCoverage below. Hardcoding five manifest paths, five host sets
+// and five section constants meant `packages/foo-bridge` could ship with no
+// policy section, no host allowlist and — worse — no forbidden-permission
+// and no credential-permission check at all, entirely green. The host sets
+// themselves cannot be derived from the manifests: the manifest is the
+// thing being checked.
+export const BRIDGE_REGISTRY = {
+  "garmin-bridge": {
+    section: GARMIN_SECTION,
+    hosts: new Set([
+      "https://connect.garmin.com/*",
+      "https://connectapi.garmin.com/*",
+      "https://sso.garmin.com/*",
+    ]),
+  },
+  "train2go-bridge": {
+    section: TRAIN2GO_SECTION,
+    hosts: new Set(["https://app.train2go.com/*"]),
+  },
+  "tanita-bridge": {
+    section: TANITA_SECTION,
+    hosts: new Set(["https://mytanita.eu/*"]),
+  },
+  "trainingpeaks-bridge": {
+    section: TRAININGPEAKS_SECTION,
+    hosts: new Set(["https://tpapi.trainingpeaks.com/*"]),
+  },
+  "whoop-bridge": {
+    section: WHOOP_SECTION,
+    hosts: new Set(["https://api.prod.whoop.com/*", "https://app.whoop.com/*"]),
+  },
+};
+
+// A section that exists but is constrained by almost nothing is the same
+// defect as a section that is missing. "Covered" has to mean the rule set
+// still says as much about this extension as it did.
+//
+// Shrink-only ratchet, in the shape `BOUNDARIES_ALLOWLIST_MAX` already uses
+// in this repo: each number is that section's CURRENT rule count and may
+// only ever go up. A flat floor of 6 would have let TrainingPeaks lose 7 of
+// its 13 rules with the guard silent — a floor with no regression power,
+// which is most of what a floor is for.
+export const SECTION_RULE_FLOOR = {
+  [GARMIN_SECTION]: 9,
+  [TRAIN2GO_SECTION]: 8,
+  [TANITA_SECTION]: 11,
+  [TRAININGPEAKS_SECTION]: 13,
+  [WHOOP_SECTION]: 8,
+};
+
+// A section with no recorded floor is a bridge being onboarded. It has to
+// clear this before it can be recorded — the 0 → 6 barrier.
+export const MIN_NEW_SECTION_RULES = 6;
+
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
 // dev-server match patterns the policy discloses explicitly.
@@ -121,22 +153,21 @@ const CREDENTIAL_PERMISSION_EXEMPTIONS = {
   },
 };
 
-// Per-extension policy section headings. A rule carrying `section` is
-// matched ONLY against that section's body (heading line exclusive, up to
-// the next `## `), never against the whole document — otherwise the intro
-// sentence at the top of the policy, which names every extension, and the
-// shared Communication Scope section, which names every host, silently
-// satisfy rules that are supposed to be about the section itself. Deleting
-// a whole section must fail the lint; before this anchoring it did not.
-const GARMIN_SECTION = "Kaiord Garmin Bridge Extension";
-const TRAIN2GO_SECTION = "Kaiord Train2Go Bridge Extension";
-const TANITA_SECTION = "Kaiord Tanita Bridge Extension";
-const TRAININGPEAKS_SECTION = "Kaiord TrainingPeaks Bridge Extension";
-const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
+// Claims every bridge section must make, whatever the bridge does: the
+// extension talks to nobody else, and it phones nothing home.
+const NO_THIRD_PARTY = /No data is shared with any third party/i;
+const NO_TELEMETRY =
+  /does not include any analytics, error reporting, or telemetry/i;
 
 // Each rule = human-readable label + regex that MUST match, either the
 // whole file (no `section`) or one section's body (`section` set).
-const REQUIRED_RULES = [
+//
+// Per-bridge rules follow the shape WHOOP's already had: one rule per
+// capture path, one per sensitive permission, one per data destination,
+// each failing on its own. Four of the five sections used to be anchored by
+// one or two substrings, so replacing an entire section body with a single
+// line that happened to name the host produced zero violations.
+export const REQUIRED_RULES = [
   {
     label: "Last updated date in YYYY-MM-DD format",
     re: /\*\*Last updated:\*\*\s+\d{4}-\d{2}-\d{2}/,
@@ -149,56 +180,154 @@ const REQUIRED_RULES = [
     label: "Retention / deletion guidance present",
     re: /(clear site data|delete it from the editor)/i,
   },
-  {
-    label: "Garmin Bridge extension covered (own section, non-empty)",
-    section: GARMIN_SECTION,
-    re: /\S/,
-  },
-  {
-    label: "Train2Go Bridge extension covered (own section, non-empty)",
-    section: TRAIN2GO_SECTION,
-    re: /\S/,
-  },
-  {
-    label: "Tanita Bridge extension covered (own section, non-empty)",
-    section: TANITA_SECTION,
-    re: /\S/,
-  },
-  {
-    label: "TrainingPeaks Bridge extension covered (own section, non-empty)",
-    section: TRAININGPEAKS_SECTION,
-    re: /\S/,
-  },
-  {
-    label: "WHOOP Bridge extension covered (own section, non-empty)",
-    section: WHOOP_SECTION,
-    re: /\S/,
-  },
+
+  // ---------------------------- Garmin ----------------------------
   {
     label: "Garmin host disclosed",
     section: GARMIN_SECTION,
     re: /connect\.garmin\.com/,
   },
   {
+    label: "Garmin SSO host disclosed",
+    section: GARMIN_SECTION,
+    re: /sso\.garmin\.com/,
+  },
+  {
+    label: "Garmin API host disclosed",
+    section: GARMIN_SECTION,
+    re: /connectapi\.garmin\.com/,
+  },
+  {
+    label: "OAuth-token local-storage disclosure",
+    section: GARMIN_SECTION,
+    re: /OAuth token[\s\S]*?chrome\.storage\.local/i,
+  },
+  {
+    label: "Garmin capture path disclosed (existing single-sign-on session)",
+    section: GARMIN_SECTION,
+    re: /reusing your existing Garmin single-sign-on session/i,
+  },
+  {
+    label: "Garmin no-password guarantee stated",
+    section: GARMIN_SECTION,
+    re: /never reads, stores, or transmits your Garmin Connect password/i,
+  },
+  {
+    label: "Garmin write scope disclosed (write:body upload)",
+    section: GARMIN_SECTION,
+    re: /`write:body`/,
+  },
+  {
+    label: "Garmin no-third-party-sharing stated",
+    section: GARMIN_SECTION,
+    re: NO_THIRD_PARTY,
+  },
+  {
+    label: "Garmin no-telemetry stated",
+    section: GARMIN_SECTION,
+    re: NO_TELEMETRY,
+  },
+
+  // --------------------------- Train2Go ---------------------------
+  {
     label: "Train2Go host disclosed",
     section: TRAIN2GO_SECTION,
     re: /app\.train2go\.com/,
   },
+  {
+    label: "Train2Go capture path disclosed (on-demand page-DOM read)",
+    section: TRAIN2GO_SECTION,
+    re: /read on-demand from the Train2Go page DOM/i,
+  },
+  {
+    label: "Train2Go no-credentials guarantee stated",
+    section: TRAIN2GO_SECTION,
+    re: /never reads, stores, or transmits your Train2Go password/i,
+  },
+  {
+    label: "Train2Go non-declaration of the `cookies` permission stated",
+    section: TRAIN2GO_SECTION,
+    re: /does not declare the `cookies` permission/i,
+  },
+  {
+    label: "Train2Go read-only DOM access stated (no page mutation)",
+    section: TRAIN2GO_SECTION,
+    re: /does not modify the page, submit forms/i,
+  },
+  {
+    label: "Train2Go zero-persistence stated (nothing written to storage)",
+    section: TRAIN2GO_SECTION,
+    re: /nothing is written to `chrome\.storage`/i,
+  },
+  {
+    label: "Train2Go no-third-party-sharing stated",
+    section: TRAIN2GO_SECTION,
+    re: NO_THIRD_PARTY,
+  },
+  {
+    label: "Train2Go no-telemetry stated",
+    section: TRAIN2GO_SECTION,
+    re: NO_TELEMETRY,
+  },
+
+  // ---------------------------- Tanita ----------------------------
   {
     label: "Tanita host disclosed",
     section: TANITA_SECTION,
     re: /mytanita\.eu/,
   },
   {
-    label: "Tanita body-composition read scope disclosed (read:body)",
+    label: "Tanita read scope disclosed (read:body only)",
+    section: TANITA_SECTION,
+    re: /Only the `read:body` capability is declared/i,
+  },
+  {
+    label: "Tanita body-composition data class disclosed",
     section: TANITA_SECTION,
     re: /body[- ]composition/i,
   },
   {
-    label: "Tanita no-password cookie-session nature disclosed",
+    label: "Tanita no-password guarantee stated",
     section: TANITA_SECTION,
-    re: /no password/i,
+    re: /never asks for, reads, stores, or transmits your MyTANITA password/i,
   },
+  {
+    label: "Tanita capture path disclosed (existing session cookie ride)",
+    section: TANITA_SECTION,
+    re: /credentials:"include"/,
+  },
+  {
+    label: "Tanita session cookie named and stated unreadable (TANITASESS)",
+    section: TANITA_SECTION,
+    re: /HttpOnly `TANITASESS` session cookie/,
+  },
+  {
+    label: "Tanita non-declaration of the `cookies` permission stated",
+    section: TANITA_SECTION,
+    re: /does not declare the `cookies` permission/i,
+  },
+  {
+    label: "Tanita no-DOM-access stated (no content script on mytanita.eu)",
+    section: TANITA_SECTION,
+    re: /injects no content script/i,
+  },
+  {
+    label: "Tanita single fixed read-only GET disclosed",
+    section: TANITA_SECTION,
+    re: /single, fixed, read-only `GET`/i,
+  },
+  {
+    label: "Tanita no-third-party-sharing stated",
+    section: TANITA_SECTION,
+    re: NO_THIRD_PARTY,
+  },
+  {
+    label: "Tanita no-telemetry stated",
+    section: TANITA_SECTION,
+    re: NO_TELEMETRY,
+  },
+
+  // ------------------------- TrainingPeaks ------------------------
   {
     label: "TrainingPeaks host disclosed",
     section: TRAININGPEAKS_SECTION,
@@ -209,6 +338,63 @@ const REQUIRED_RULES = [
     section: TRAININGPEAKS_SECTION,
     re: /cookie for a short-lived access token/i,
   },
+  {
+    label: "TrainingPeaks no-password guarantee stated",
+    section: TRAININGPEAKS_SECTION,
+    re: /never asks for, reads, stores, or transmits your TrainingPeaks password/i,
+  },
+  {
+    label: "TrainingPeaks token endpoint disclosed (users/v3/token)",
+    section: TRAININGPEAKS_SECTION,
+    re: /users\/v3\/token/,
+  },
+  {
+    label: "TrainingPeaks session cookie named (Production_tpAuth)",
+    section: TRAININGPEAKS_SECTION,
+    re: /Production_tpAuth/,
+  },
+  {
+    label: "TrainingPeaks non-declaration of the `cookies` permission stated",
+    section: TRAININGPEAKS_SECTION,
+    re: /does not declare the `cookies` permission/i,
+  },
+  {
+    label: "TrainingPeaks token storage location disclosed",
+    section: TRAININGPEAKS_SECTION,
+    re: /chrome\.storage\.local/,
+  },
+  {
+    label: "TrainingPeaks read+write body scopes disclosed",
+    section: TRAININGPEAKS_SECTION,
+    re: /`read:body` and `write:body` capabilities/,
+  },
+  {
+    label: "TrainingPeaks write path disclosed (single weight measurement)",
+    section: TRAININGPEAKS_SECTION,
+    re: /writes a single weight measurement back/i,
+  },
+  {
+    label: "TrainingPeaks metrics read endpoint disclosed (metrics/v3)",
+    section: TRAININGPEAKS_SECTION,
+    re: /metrics\/v3/,
+  },
+  {
+    label: "TrainingPeaks no-DOM-access stated",
+    section: TRAININGPEAKS_SECTION,
+    re: /injects no content script/i,
+  },
+  {
+    label: "TrainingPeaks no-third-party-sharing stated",
+    section: TRAININGPEAKS_SECTION,
+    re: NO_THIRD_PARTY,
+  },
+  {
+    label: "TrainingPeaks no-telemetry stated",
+    section: TRAININGPEAKS_SECTION,
+    re: NO_TELEMETRY,
+  },
+
+  // ----------------------------- WHOOP ----------------------------
   {
     label: "WHOOP host disclosed",
     section: WHOOP_SECTION,
@@ -255,14 +441,11 @@ const REQUIRED_RULES = [
     section: WHOOP_SECTION,
     re: /custom:user_id/,
   },
+
+  // -------------------------- whole file --------------------------
   {
     label: "Kaiord origin disclosed",
     re: /\*\.kaiord\.com/,
-  },
-  {
-    label: "OAuth-token local-storage disclosure",
-    section: GARMIN_SECTION,
-    re: /OAuth token[\s\S]*?chrome\.storage\.local/i,
   },
   {
     label: "Host-permission narrowing stated (no <all_urls>)",
@@ -340,9 +523,9 @@ export function sectionBody(src, heading) {
   return (end === -1 ? rest : rest.slice(0, end)).join("\n");
 }
 
-export function checkPolicy(src) {
+export function checkPolicy(src, rules = REQUIRED_RULES) {
   const violations = [];
-  for (const { label, section, re } of REQUIRED_RULES) {
+  for (const { label, section, re } of rules) {
     if (section === undefined) {
       if (!re.test(src)) violations.push(label);
       continue;
@@ -354,6 +537,76 @@ export function checkPolicy(src) {
     }
     if (!re.test(body)) {
       violations.push(`${label} — not found inside "## ${section}"`);
+    }
+  }
+  return violations;
+}
+
+// Every `packages/*-bridge` on disk, sorted. Same derivation the CI-coverage
+// and locales guards already use.
+export function discoverBridgePackages(repoRoot = REPO_ROOT) {
+  return readdirSync(join(repoRoot, "packages"))
+    .filter(
+      (name) =>
+        name.endsWith("-bridge") &&
+        statSync(join(repoRoot, "packages", name)).isDirectory()
+    )
+    .sort();
+}
+
+// "<X> Bridge extension covered" used to be a rule whose regex was `/\S/`:
+// it fired only when a section was empty, which is a strict subset of when
+// its sibling rules fire, so it never once failed on its own. It named the
+// requirement and asserted nothing.
+//
+// The requirement is real, so it is kept — as a check that CAN fail alone.
+// Two independent mutations trip it and nothing else: shipping a bridge
+// package that no section and no host set describes, and gutting the rule
+// set for a section that still exists.
+export function checkBridgeCoverage(
+  src,
+  bridges,
+  registry = BRIDGE_REGISTRY,
+  rules = REQUIRED_RULES
+) {
+  const violations = [];
+  for (const bridge of bridges) {
+    const entry = registry[bridge];
+    if (!entry) {
+      violations.push(
+        `${bridge} Bridge extension covered — packages/${bridge} exists on disk but has no BRIDGE_REGISTRY entry, ` +
+          `so it has no policy section, no host allowlist, and no forbidden/credential permission check at all`
+      );
+      continue;
+    }
+    if (sectionBody(src, entry.section) === null) {
+      violations.push(
+        `${bridge} Bridge extension covered — section "## ${entry.section}" is missing entirely`
+      );
+      continue;
+    }
+    const count = rules.filter((r) => r.section === entry.section).length;
+    const floor = SECTION_RULE_FLOOR[entry.section];
+    if (floor === undefined) {
+      if (count < MIN_NEW_SECTION_RULES) {
+        violations.push(
+          `${bridge} Bridge extension covered — "## ${entry.section}" is constrained by ${count} rule(s); ` +
+            `a bridge needs at least ${MIN_NEW_SECTION_RULES} before it is recorded in SECTION_RULE_FLOOR`
+        );
+      }
+    } else if (count < floor) {
+      violations.push(
+        `${bridge} Bridge extension covered — "## ${entry.section}" is constrained by ${count} rule(s), ` +
+          `down from the recorded ${floor}. This floor is shrink-only: raise it when you add rules, ` +
+          `never lower it to accommodate deleting one`
+      );
+    }
+  }
+  for (const bridge of Object.keys(registry)) {
+    if (!bridges.includes(bridge)) {
+      violations.push(
+        `${bridge} Bridge extension covered — BRIDGE_REGISTRY names it but packages/${bridge} does not exist; the entry is stale`
+      );
     }
   }
   return violations;
@@ -444,49 +697,46 @@ export function checkSidebar(configSrc) {
   return [];
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Both sides resolved through realpath: comparing a raw
+// `pathToFileURL(process.argv[1])` against `import.meta.url` is false
+// whenever the invocation path contains a symlink (macOS `/tmp` →
+// `/private/tmp`, a CI checkout under a linked workdir, a container
+// bind-mount), because Node resolves module URLs to the real path but
+// leaves argv[1] exactly as typed. The guard then exited 0 having checked
+// nothing — and with no `argv[1]` guard at all it threw instead when the
+// module was loaded with no entry path.
+export function isDirectInvocation(moduleUrl, entryPath) {
+  if (!entryPath) return false;
+  try {
+    return realpathSync(fileURLToPath(moduleUrl)) === realpathSync(entryPath);
+  } catch {
+    return false;
+  }
+}
+
+function main() {
   if (!existsSync(POLICY)) {
     console.error(`[check-privacy-policy] ${POLICY} not found`);
     process.exit(2);
   }
   const policySrc = readFileSync(POLICY, "utf8");
+  const bridges = discoverBridgePackages();
   const all = [];
   all.push(...checkPolicy(policySrc));
-  all.push(
-    ...checkManifestPermissions(
-      TRAIN2GO_MANIFEST,
-      "train2go-bridge",
-      TRAIN2GO_ALLOWED_HOSTS
-    )
-  );
-  all.push(
-    ...checkManifestPermissions(
-      GARMIN_MANIFEST,
-      "garmin-bridge",
-      GARMIN_ALLOWED_HOSTS
-    )
-  );
-  all.push(
-    ...checkManifestPermissions(
-      TANITA_MANIFEST,
-      "tanita-bridge",
-      TANITA_ALLOWED_HOSTS
-    )
-  );
-  all.push(
-    ...checkManifestPermissions(
-      TRAININGPEAKS_MANIFEST,
-      "trainingpeaks-bridge",
-      TRAININGPEAKS_ALLOWED_HOSTS
-    )
-  );
-  all.push(
-    ...checkManifestPermissions(
-      WHOOP_MANIFEST,
-      "whoop-bridge",
-      WHOOP_ALLOWED_HOSTS
-    )
-  );
+  all.push(...checkBridgeCoverage(policySrc, bridges));
+  for (const bridge of bridges) {
+    const entry = BRIDGE_REGISTRY[bridge];
+    // An unregistered bridge is already reported by checkBridgeCoverage,
+    // and there is no host set to check its manifest against.
+    if (!entry) continue;
+    all.push(
+      ...checkManifestPermissions(
+        join(REPO_ROOT, "packages", bridge, "manifest.json"),
+        bridge,
+        entry.hosts
+      )
+    );
+  }
   if (existsSync(VITEPRESS_CONFIG)) {
     all.push(...checkSidebar(readFileSync(VITEPRESS_CONFIG, "utf8")));
   }
@@ -505,4 +755,8 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   console.log(
     "packages/docs/legal/privacy-policy.md: policy text, extension manifests, and sidebar are in sync with the spec."
   );
+}
+
+if (isDirectInvocation(import.meta.url, process.argv[1])) {
+  main();
 }

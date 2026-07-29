@@ -21,13 +21,13 @@ PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
 - [x] 2.1 Create `packages/workout-spa-editor/src/router-base.test.tsx` (TSX because the wouter contract test in 2.2 includes JSX). Vitest with table-driven cases:
 
       | input         | expected output | note |
-          | ------------- | --------------- | ---- |
-          | `"/"`         | `""`            | dev mode (Vite default) |
-          | `"/editor/"`  | `"/editor"`     | production base |
-          | `"/a/b/"`     | `"/a/b"`        | nested base |
-          | `""`          | `""`            | defensive: Vite normalises BASE_URL to start+end with `/`; this row guards against a future Vite contract regression |
+              | ------------- | --------------- | ---- |
+              | `"/"`         | `""`            | dev mode (Vite default) |
+              | `"/editor/"`  | `"/editor"`     | production base |
+              | `"/a/b/"`     | `"/a/b"`        | nested base |
+              | `""`          | `""`            | defensive: Vite normalises BASE_URL to start+end with `/`; this row guards against a future Vite contract regression |
 
-          AAA structure: arrange the input string, act `computeRouterBase`, assert against expected. The table drives a single `it.each` block. Add a comment next to the empty-string row recording the defensive intent so readers don't think it's a contract Vite emits.
+              AAA structure: arrange the input string, act `computeRouterBase`, assert against expected. The table drives a single `it.each` block. Add a comment next to the empty-string row recording the defensive intent so readers don't think it's a contract Vite emits.
 
 - [x] 2.2 Add a wouter contract test in the same file: mount `<Router base="/editor"><Route path="/x">{() => "ok"}</Route></Router>` via Testing Library (`@testing-library/react`'s `render`) and assert that visiting `/editor/x` matches the route. Pin the wouter `package.json` resolved version in the assertion so a major-version bump that changes the base contract trips this test.
 - [x] 2.3 Run `pnpm --filter @kaiord/workout-spa-editor test src/router-base.test.tsx` — passing.
