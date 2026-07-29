@@ -402,19 +402,33 @@ describe("tab-open", () => {
   });
 
   // The tab answer is independent of the bearer on purpose: the popup needs
-  // both to tell "readable" from "signed in but unreadable" apart.
-  it("should report a tab regardless of whether a token is stored", async () => {
-    // Arrange
-    chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+  // both signals to tell "readable" from "signed in but unreadable" apart.
+  //
+  // BOTH token states are exercised, because independence is a claim about
+  // two values and asserting it on one is not a weaker test — it is a
+  // different test wearing this one's title. An earlier version stored no
+  // token and asserted `connected === false`, so making `tab-open` consult
+  // the bearer would not have failed it: the state where that consultation
+  // changes the answer was never rendered.
+  it.each([
+    { label: "no bearer stored", storeBearer: false, connected: false },
+    { label: "a bearer stored", storeBearer: true, connected: true },
+  ])(
+    "should report the tab the same way with $label",
+    async ({ storeBearer, connected }) => {
+      // Arrange
+      if (storeBearer) await storeToken(makeJwt({ "custom:user_id": "42" }));
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
 
-    // Act
-    const data = await handleAction({ action: "tab-open" });
-    const status = await handleAction({ action: "status" });
+      // Act
+      const data = await handleAction({ action: "tab-open" });
+      const status = await handleAction({ action: "status" });
 
-    // Assert
-    expect(data.open).toBe(true);
-    expect(status.connected).toBe(false);
-  });
+      // Assert
+      expect(data).toEqual({ open: true });
+      expect(status.connected).toBe(connected);
+    }
+  );
 
   // Widening the external surface would mean a new disclosure in
   // privacy-justification.md and the published policy; this pins it shut.
