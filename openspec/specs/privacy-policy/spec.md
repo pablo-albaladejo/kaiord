@@ -81,6 +81,32 @@ The privacy policy SHALL cover the following topics:
 - **WHEN** an extension's `## Kaiord <Name> Bridge Extension` section is deleted in full
 - **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail, reporting that extension's section as missing rather than passing on the intro mention
 
+#### Scenario: Gutting an extension's section body fails the policy lint
+
+- **GIVEN** each bridge section is constrained by its own rule per capture path, per sensitive permission, and per data destination, so that removing any one disclosure fails on its own
+- **WHEN** an extension's section body is replaced by prose that merely names its host
+- **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail, reporting each removed disclosure as a separate violation
+
+#### Scenario: A section's rule count is shrink-only
+
+- **GIVEN** each bridge section has its current rule count recorded as a floor, in the shape `BOUNDARIES_ALLOWLIST_MAX` already uses
+- **WHEN** any rule anchored to a section is deleted without the requirement being deleted
+- **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail for that section, reporting the count it dropped from
+- **AND** a recorded floor SHALL equal that section's current rule count, so no section carries slack a later deletion could spend unnoticed
+- **AND** a section with no recorded floor SHALL need a minimum number of rules before it can be recorded
+
+#### Scenario: A new bridge package fails the lint until the policy covers it
+
+- **GIVEN** the policy lint derives its bridge list from `packages/*-bridge` on disk rather than from hardcoded manifest paths, host sets, and section names
+- **WHEN** a new `packages/<name>-bridge` package is added
+- **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail until that bridge has a policy section, a disclosed host set, and its own content rules — so it cannot ship without the forbidden-permission and credential-permission checks applying to it
+
+#### Scenario: The policy lint checks something when invoked through a symlink
+
+- **GIVEN** an invocation path containing a symlink, under which Node resolves the module URL to the real path but leaves `process.argv[1]` as typed
+- **WHEN** `check-privacy-policy.mjs` is executed through that path
+- **THEN** it SHALL run its checks and report the result, rather than exiting 0 having verified nothing
+
 #### Scenario: Credential-access permission requires a documented exemption
 
 - **GIVEN** the policy lint treats `cookies` and `webRequest` as credential-access permissions, because both expose a credential the user never handed to the extension (session cookie values, and `Authorization` headers via `extraHeaders` respectively)

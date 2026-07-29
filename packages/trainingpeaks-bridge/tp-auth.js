@@ -27,6 +27,22 @@ const TOKEN_PATH = "/users/v3/token";
 const TOKEN_KEY = "tpAccessToken";
 const EXPIRY_SKEW_SEC = 60;
 
+// The credential-handshake surface: the endpoint the session cookie is sent
+// to in exchange for a Bearer. Read by
+// scripts/check-bridge-privacy-surface.mjs into the golden fixture.
+//
+// This path also appears in background.js's ALLOWED, but only so the
+// editor's own session probe can reach it — a coincidence, not a guarantee.
+// `exchangeToken` below calls `cookieSessionFetch` directly and never
+// consults `isAllowed`, so removing that allowlist entry would drop the
+// endpoint from the golden while the credential kept travelling to it.
+//
+// Written out rather than composed from TPAPI/TOKEN_PATH: the guard records
+// string literals, and an interpolated `${TPAPI}${TOKEN_PATH}` would reach
+// the golden as placeholder text. tp-auth.test.js pins this list against
+// the URL the exchange actually requests.
+const AUTH_ENDPOINTS = ["https://tpapi.trainingpeaks.com/users/v3/token"];
+
 const nowSec = () => Math.floor(Date.now() / 1000);
 
 // ── Vendored masters (session-fetch cookie transport + bearer-fetch) ──
@@ -177,6 +193,7 @@ const api = {
   TPAPI,
   TOKEN_PATH,
   TOKEN_KEY,
+  AUTH_ENDPOINTS,
   EXPIRY_SKEW_SEC,
   nowSec,
   isExpired,

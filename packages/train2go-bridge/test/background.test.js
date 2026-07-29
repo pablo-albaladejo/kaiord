@@ -3,6 +3,7 @@ const {
   BRIDGE_MANIFEST,
   TRAIN2GO_ORIGIN,
   EXTERNAL_ACTIONS,
+  AUTH_ENDPOINTS,
   isAllowed,
   handleAction,
   train2goFetch,
@@ -609,6 +610,22 @@ describe("background service worker (SW-direct)", () => {
 
       // Act
       const actual = [...EXTERNAL_ACTIONS];
+
+      // Assert
+      expect(actual).toEqual(expected);
+    });
+
+    // The credential-handshake surface, recorded in the bridge privacy
+    // golden. This bridge mints and exchanges nothing: the Train2Go session
+    // cookie rides along on each read, and every read is `isAllowed`-gated.
+    // Pinned empty rather than left unstated, so growing a handshake has to
+    // change this assertion — and the golden with it.
+    it("should declare no credential handshake", () => {
+      // Arrange
+      const expected = [];
+
+      // Act
+      const actual = [...AUTH_ENDPOINTS];
 
       // Assert
       expect(actual).toEqual(expected);

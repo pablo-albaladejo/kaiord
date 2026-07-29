@@ -33,6 +33,23 @@ const OAUTH1_KEY = "garminOAuth1";
 const OAUTH2_KEY = "garminOAuth2";
 const EXPIRY_SKEW_SEC = 60;
 
+// The credential-handshake surface: every endpoint the three hops below send
+// the user's Garmin session to, in flow order. Read by
+// scripts/check-bridge-privacy-surface.mjs into the golden fixture, which
+// otherwise locks only the DATA-call allowlist in background.js — a gate
+// this handshake bypasses by construction.
+//
+// Written out in full rather than composed from CONNECTAPI/SSO_SIGNIN: the
+// guard records string literals, and an interpolated `${CONNECTAPI}/…` would
+// reach the golden as placeholder text. garmin-oauth.test.js pins this list
+// against the URLs the flow actually requests, so the duplication cannot
+// drift from the calls it describes.
+const AUTH_ENDPOINTS = [
+  "https://sso.garmin.com/sso/signin",
+  "https://connectapi.garmin.com/oauth-service/oauth/preauthorized",
+  "https://connectapi.garmin.com/oauth-service/oauth/exchange/user/2.0",
+];
+
 const nowSec = () => Math.floor(Date.now() / 1000);
 
 // ── OAuth1 HMAC-SHA1 signer (verified byte-for-byte against oauth-1.0a) ──
@@ -60,7 +77,11 @@ const hmacSha1B64 = async (keyStr, baseStr) => {
     false,
     ["sign"]
   );
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(baseStr));
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(baseStr)
+  );
   return btoa(String.fromCharCode(...new Uint8Array(sig)));
 };
 
@@ -156,7 +177,21 @@ const preauthorized = async (ticket, fetchImpl) => {
 };
 
 // Also serves as the OAuth2 refresh: re-exchanging the OAuth1 token mints a
-// fresh Bearer without touching the session.
+// fresh Bearer.
+//
+// This call carries TWO things Garmin could be authenticating it by, and
+// which one it accepts is unknown from here. It is signed with the OAuth1
+// token (the `Authorization` header built below). It is ALSO sent with
+// `credentials: "include"`, so the browser attaches whatever ambient Garmin
+// cookies it holds — the extension has no `cookies` permission and never
+// READS one, but not reading is not the same as not sending. #1102 is meant
+// to settle which is required; until then claim neither. (The data calls are
+// the deliberate contrast: bearer-fetch.js sends `credentials: "omit"` so the
+// Bearer really is the only credential there.)
+//
+// This comment used to say the refresh happened "without touching the
+// session". It was copied into the bridge spec on trust and shipped there
+// before anyone read the request ten lines below it.
 const exchange = async (oauth1, fetchImpl) => {
   const url = `${CONNECTAPI}/oauth-service/oauth/exchange/user/2.0`;
   const bodyParams = { audience: "GARMIN_CONNECT_MOBILE_ANDROID_DI" };
@@ -296,6 +331,7 @@ const connectapiUpload = (path, formData, fetchImpl) =>
 const api = {
   CONSUMER,
   CONNECTAPI,
+  AUTH_ENDPOINTS,
   sign,
   getTicketFromSession,
   preauthorized,
