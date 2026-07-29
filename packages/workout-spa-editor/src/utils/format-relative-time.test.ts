@@ -1,7 +1,8 @@
 /**
- * Tests for `formatRelativeTime` — exhaustive coverage of the seven
- * branches defined in design D17. `now` is injected so no fake timers
- * are needed.
+ * Tests for `formatRelativeTime` — exhaustive coverage of the branches
+ * defined in design D17. Asserts on the returned translation key + params
+ * (not a formatted string), since wording now lives in the i18n catalogs.
+ * `now` is injected so no fake timers are needed.
  */
 
 import { describe, expect, it } from "vitest";
@@ -18,17 +19,13 @@ const HOURS_NEAR_TWO_DAYS = 30;
 const DAYS_TWO = 2;
 const DAYS_THREE = 3;
 const DAYS_SIX = 6;
-const DAYS_EIGHT = 8;
 const DAYS_TEN = 10;
-const DAYS_THIRTY = 30;
 const MINUTES_ONE = 1;
 const MINUTES_FIVE = 5;
 const MINUTES_FIFTY_NINE = 59;
 const HOURS_ONE = 1;
 const HOURS_TWELVE = 12;
 const HOURS_TWENTY_THREE = 23;
-const PADDING_MIN_LENGTH = 2;
-const ISO_MONTH_OFFSET = 1;
 
 const NOW = new Date("2026-05-04T12:00:00.000Z");
 
@@ -50,16 +47,18 @@ const daysAgo = (n: number): Date =>
   );
 
 describe("formatRelativeTime", () => {
-  it("should return 'never synced' when date is undefined", () => {
+  it("should return the never-synced key when date is undefined", () => {
     // Arrange
 
     // Act
 
     // Assert
-    expect(formatRelativeTime(undefined, NOW)).toBe("never synced");
+    expect(formatRelativeTime(undefined, NOW)).toEqual({
+      key: "relativeTime.neverSynced",
+    });
   });
 
-  it("should return 'just now' under one minute", () => {
+  it("should return the just-now key under one minute", () => {
     // Arrange
 
     // Act
@@ -67,101 +66,123 @@ describe("formatRelativeTime", () => {
     // Assert
     expect(
       formatRelativeTime(new Date(NOW.getTime() - HALF_MINUTE_MS), NOW)
-    ).toBe("just now");
+    ).toEqual({ key: "relativeTime.justNow" });
     expect(
       formatRelativeTime(new Date(NOW.getTime() - ALMOST_ONE_MINUTE_MS), NOW)
-    ).toBe("just now");
+    ).toEqual({ key: "relativeTime.justNow" });
   });
 
-  it("should return 'Nm ago' between 1 minute and 1 hour", () => {
+  it("should return the minutes-ago key between 1 minute and 1 hour, singular vs plural", () => {
     // Arrange
 
     // Act
 
     // Assert
-    expect(formatRelativeTime(minutesAgo(MINUTES_ONE), NOW)).toBe("1m ago");
-    expect(formatRelativeTime(minutesAgo(MINUTES_FIVE), NOW)).toBe("5m ago");
-    expect(formatRelativeTime(minutesAgo(MINUTES_FIFTY_NINE), NOW)).toBe(
-      "59m ago"
-    );
+    expect(formatRelativeTime(minutesAgo(MINUTES_ONE), NOW)).toEqual({
+      key: "relativeTime.minutesAgo_one",
+      params: { count: 1 },
+    });
+    expect(formatRelativeTime(minutesAgo(MINUTES_FIVE), NOW)).toEqual({
+      key: "relativeTime.minutesAgo_other",
+      params: { count: 5 },
+    });
+    expect(formatRelativeTime(minutesAgo(MINUTES_FIFTY_NINE), NOW)).toEqual({
+      key: "relativeTime.minutesAgo_other",
+      params: { count: 59 },
+    });
   });
 
-  it("should return 'Nh ago' between 1 hour and 1 day", () => {
+  it("should return the hours-ago key between 1 hour and 1 day, singular vs plural", () => {
     // Arrange
 
     // Act
 
     // Assert
-    expect(formatRelativeTime(hoursAgo(HOURS_ONE), NOW)).toBe("1h ago");
-    expect(formatRelativeTime(hoursAgo(HOURS_TWELVE), NOW)).toBe("12h ago");
-    expect(formatRelativeTime(hoursAgo(HOURS_TWENTY_THREE), NOW)).toBe(
-      "23h ago"
-    );
+    expect(formatRelativeTime(hoursAgo(HOURS_ONE), NOW)).toEqual({
+      key: "relativeTime.hoursAgo_one",
+      params: { count: 1 },
+    });
+    expect(formatRelativeTime(hoursAgo(HOURS_TWELVE), NOW)).toEqual({
+      key: "relativeTime.hoursAgo_other",
+      params: { count: 12 },
+    });
+    expect(formatRelativeTime(hoursAgo(HOURS_TWENTY_THREE), NOW)).toEqual({
+      key: "relativeTime.hoursAgo_other",
+      params: { count: 23 },
+    });
   });
 
-  it("should return 'yesterday' for cross-day differences under 48h", () => {
+  it("should return the yesterday key for cross-day differences under 48h", () => {
     // 30h ago crosses a calendar boundary AND is under 48h.
     // Arrange
 
     // Act
 
     // Assert
-    expect(formatRelativeTime(hoursAgo(HOURS_NEAR_TWO_DAYS), NOW)).toBe(
-      "yesterday"
-    );
+    expect(formatRelativeTime(hoursAgo(HOURS_NEAR_TWO_DAYS), NOW)).toEqual({
+      key: "relativeTime.yesterday",
+    });
   });
 
-  it("should not return 'yesterday' when ≥48h has elapsed even if calendar diff is 1", () => {
+  it("should not return the yesterday key when ≥48h has elapsed even if calendar diff is 1", () => {
     // Exactly 2 days back — falls into the days-ago branch.
     // Arrange
 
     // Act
 
     // Assert
-    expect(formatRelativeTime(daysAgo(DAYS_TWO), NOW)).toBe("2d ago");
+    expect(formatRelativeTime(daysAgo(DAYS_TWO), NOW)).toEqual({
+      key: "relativeTime.daysAgo_other",
+      params: { count: 2 },
+    });
   });
 
-  it("should return 'Nd ago' between 2 days and 1 week", () => {
+  it("should return the days-ago key between 2 days and 1 week", () => {
     // Arrange
 
     // Act
 
     // Assert
-    expect(formatRelativeTime(daysAgo(DAYS_THREE), NOW)).toBe("3d ago");
-    expect(formatRelativeTime(daysAgo(DAYS_SIX), NOW)).toBe("6d ago");
+    expect(formatRelativeTime(daysAgo(DAYS_THREE), NOW)).toEqual({
+      key: "relativeTime.daysAgo_other",
+      params: { count: 3 },
+    });
+    expect(formatRelativeTime(daysAgo(DAYS_SIX), NOW)).toEqual({
+      key: "relativeTime.daysAgo_other",
+      params: { count: 6 },
+    });
   });
 
-  it("should return ISO YYYY-MM-DD for anything ≥ 1 week", () => {
+  it("should return the since key with a non-ISO, locale-formatted date for anything ≥ 1 week", () => {
     // Arrange
-
-    // Act
-
-    const eightDays = daysAgo(DAYS_EIGHT);
-
-    // Assert
-
-    expect(formatRelativeTime(eightDays, NOW)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(formatRelativeTime(daysAgo(DAYS_THIRTY), NOW)).toMatch(
-      /^\d{4}-\d{2}-\d{2}$/
-    );
-  });
-
-  it("should format the ISO fallback in local-calendar form (matches the date's components)", () => {
-    // Arrange
-
     const stamp = daysAgo(DAYS_TEN);
 
     // Act
-
-    const expected = `${stamp.getFullYear()}-${String(
-      stamp.getMonth() + ISO_MONTH_OFFSET
-    ).padStart(PADDING_MIN_LENGTH, "0")}-${String(stamp.getDate()).padStart(
-      PADDING_MIN_LENGTH,
-      "0"
-    )}`;
+    const result = formatRelativeTime(stamp, NOW, "en");
 
     // Assert
+    expect(result.key).toBe("relativeTime.since");
+    expect(result.params?.date).toBe(
+      stamp.toLocaleDateString("en", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    );
+    expect(result.params?.date).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
 
-    expect(formatRelativeTime(stamp, NOW)).toBe(expected);
+  it("should localize the since date for es differently than en (genuine localization, not a relabeled ISO string)", () => {
+    // Arrange
+    const stamp = daysAgo(DAYS_TEN);
+
+    // Act
+    const enResult = formatRelativeTime(stamp, NOW, "en");
+    const esResult = formatRelativeTime(stamp, NOW, "es");
+
+    // Assert
+    expect(esResult.params?.date).not.toBe(enResult.params?.date);
+    expect(esResult.params?.date).toMatch(/de/);
+    expect(esResult.params?.date).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
