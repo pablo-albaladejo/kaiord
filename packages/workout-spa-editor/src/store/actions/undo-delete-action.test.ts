@@ -25,11 +25,12 @@ describe("undoDeleteAction", () => {
       },
     };
 
-    const timestamp = Date.now();
+    const groupId = "group-restore-at-original-position";
     const deletedStepEntry: DeletedStep = {
       step: deletedStep,
       index: 1,
-      timestamp,
+      timestamp: Date.now(),
+      groupId,
     };
 
     const krd: KRD = {
@@ -82,7 +83,7 @@ describe("undoDeleteAction", () => {
     };
 
     // Act
-    const result = undoDeleteAction(krd, timestamp, state);
+    const result = undoDeleteAction(krd, groupId, state);
 
     // Assert
     expect(result.currentWorkout).toBeDefined();
@@ -120,13 +121,13 @@ describe("undoDeleteAction", () => {
     };
 
     // Act
-    const result = undoDeleteAction(krd, Date.now(), state);
+    const result = undoDeleteAction(krd, "group-absent", state);
 
     // Assert
     expect(result).toEqual({});
   });
 
-  it("should return empty object if timestamp not found", () => {
+  it("should return empty object if the group id is not found", () => {
     // Arrange
     const krd: KRD = {
       version: "1.0",
@@ -157,7 +158,7 @@ describe("undoDeleteAction", () => {
     };
 
     // Act
-    const result = undoDeleteAction(krd, Date.now(), state);
+    const result = undoDeleteAction(krd, "group-absent", state);
 
     // Assert
     expect(result).toEqual({});
@@ -176,11 +177,12 @@ describe("undoDeleteAction", () => {
       },
     };
 
-    const timestamp = Date.now();
+    const groupId = "group-recalculate-indices";
     const deletedStepEntry: DeletedStep = {
       step: deletedStep,
       index: 0,
-      timestamp,
+      timestamp: Date.now(),
+      groupId,
     };
 
     const krd: KRD = {
@@ -223,7 +225,7 @@ describe("undoDeleteAction", () => {
     };
 
     // Act
-    const result = undoDeleteAction(krd, timestamp, state);
+    const result = undoDeleteAction(krd, groupId, state);
 
     // Assert
     const workout = result.currentWorkout?.extensions?.structured_workout;

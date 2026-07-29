@@ -17,7 +17,9 @@ One file per workout-mutation action. Each action is a pure function that takes 
 - `duplicate-step-action.ts` / `.test.ts` — clone in place.
 - `duplicate-step-in-repetition-block-action.ts` — clone inside a block.
 - `delete-step-action.ts` / `.test.ts` + `delete-step-helpers.ts` — delete with focus-target via `nextAfterDelete`.
-- `undo-delete-action.ts` / `.test.ts` — restore a step popped from `deletedSteps`.
+- `delete-steps-action.ts` / `.test.ts` + `delete-steps-helpers.ts` — bulk (multi-selection) delete of main-list steps: one filter pass, one reindex, one history snapshot, one undo group, focus-target via `nextAfterMultiDelete`. Never loop `delete-step-action`, which reindexes between calls.
+- `delete-group-id.ts` — `newDeleteGroupId()`, the identity of a delete operation. Deliberately not a clock read.
+- `undo-delete-action.ts` / `.test.ts` + `undo-delete-helpers.ts` — restore every `deletedSteps` entry sharing a `groupId`, ascending by original index.
 - `reorder-step-action.ts` / `.test.ts` (+ `.test-fixtures.ts`) — main-list reorder.
 - `reorder-steps-in-block-action.ts` / `.test.ts` — within-block reorder.
 - `recalculate-step-indices.ts` — re-numbers `stepIndex` after any mutation.

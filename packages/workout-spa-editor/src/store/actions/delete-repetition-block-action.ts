@@ -19,6 +19,7 @@ import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import { buildKrdWithWorkout, extractStructuredWorkout } from "./_helpers";
+import { newDeleteGroupId } from "./delete-group-id";
 
 /**
  * Deletes a repetition block and all its contained steps.
@@ -72,6 +73,7 @@ export const deleteRepetitionBlockAction = (
       step: block as UIWorkoutItem,
       index: position,
       timestamp: Date.now(),
+      groupId: newDeleteGroupId(),
     },
   ];
 

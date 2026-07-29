@@ -12,7 +12,20 @@ import type { UndoHistory } from "./workout-state.types";
 export type DeletedStep = {
   step: UIWorkoutItem;
   index: number;
+  /**
+   * Wall-clock read, used *only* for the TTL sweep in
+   * `clearExpiredDeletesAction`. It is NOT an identity: N deletes inside
+   * one millisecond share a value, so keying undo on it restores one
+   * entry and discards the rest.
+   */
   timestamp: number;
+  /**
+   * Identity of the delete *operation* that produced this entry. A bulk
+   * delete emits one entry per removed item, all sharing one `groupId`,
+   * so `undoDelete` restores the whole operation atomically. A single
+   * delete is simply a group of one.
+   */
+  groupId: string;
 };
 
 export type ModalConfig = {

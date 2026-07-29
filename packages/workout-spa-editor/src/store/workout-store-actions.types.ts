@@ -17,7 +17,9 @@ export type WorkoutStoreActions = {
   updateWorkout: (workout: UIWorkout) => void;
   createStep: () => void;
   deleteStep: (stepIndex: number) => void;
-  undoDelete: (timestamp: number) => void;
+  /** Bulk delete: one state update, one history snapshot, one undo group. */
+  deleteSteps: (stepIndices: ReadonlyArray<number>) => void;
+  undoDelete: (groupId: string) => void;
   clearExpiredDeletes: () => void;
   duplicateStep: (stepIndex: number) => void;
   copyStep: (

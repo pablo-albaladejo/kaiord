@@ -525,11 +525,11 @@ describe("WorkoutSection", () => {
       );
 
       // Act
-      let deletedTimestamp: number;
+      let deletedGroupId: string;
       act(() => {
         useWorkoutStore.getState().deleteStep(0);
         const state = useWorkoutStore.getState();
-        deletedTimestamp = state.deletedSteps[0].timestamp;
+        deletedGroupId = state.deletedSteps[0].groupId;
       });
 
       // Verify step was deleted
@@ -540,7 +540,7 @@ describe("WorkoutSection", () => {
 
       // Undo the deletion
       act(() => {
-        useWorkoutStore.getState().undoDelete(deletedTimestamp);
+        useWorkoutStore.getState().undoDelete(deletedGroupId);
       });
 
       // Assert

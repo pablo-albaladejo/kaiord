@@ -28,6 +28,10 @@ const WORKOUT = {
 
 const BLOCKS_ONLY = { steps: [BLOCK] } as unknown as Workout;
 
+const MULTI_STEP_WORKOUT = {
+  steps: [step("step-uuid", 0), step("second-uuid", 1), BLOCK],
+} as unknown as Workout;
+
 const build = (overrides: Partial<EditorCommandGuardInput> = {}) =>
   buildEditorCommandGuards({
     currentWorkout: {} as KRD,
@@ -241,6 +245,63 @@ describe("buildEditorCommandGuards", () => {
 
       // Assert
       expect(guards.canSave).toBe(false);
+    });
+  });
+
+  // A multi-selection is *definitionally* `selectedStepId === null`
+  // (`toggleStepSelection` / `selectAllSteps` null the scalar), so a
+  // guard that only reads the scalar reports `canDelete: false` for
+  // every multi-selection and the command silently no-ops.
+  describe("delete under a multi-selection", () => {
+    it("should allow delete when several top-level steps are selected", () => {
+      // Arrange
+
+      // Act
+      const guards = build({
+        workout: MULTI_STEP_WORKOUT,
+        selectedStepId: null,
+        selectedStepIds: ["step-uuid", "second-uuid"],
+      });
+
+      // Assert
+      expect(guards).toMatchObject({ canDelete: true, selectedCount: 2 });
+    });
+
+    it("should allow delete when exactly one step is toggle-selected", () => {
+      // Arrange
+
+      // Act
+      const guards = build({
+        workout: MULTI_STEP_WORKOUT,
+        selectedStepId: null,
+        selectedStepIds: ["step-uuid"],
+      });
+
+      // Assert
+      expect(guards.canDelete).toBe(true);
+    });
+
+    it("should refuse delete when the multi-selection sits inside a block", () => {
+      // Arrange
+
+      // Act
+      const guards = build({
+        selectedStepId: null,
+        selectedStepIds: ["nested-uuid"],
+      });
+
+      // Assert
+      expect(guards.canDelete).toBe(false);
+    });
+
+    it("should refuse delete when no step is selected at all", () => {
+      // Arrange
+
+      // Act
+      const guards = build({ selectedStepId: null, selectedStepIds: [] });
+
+      // Assert
+      expect(guards.canDelete).toBe(false);
     });
   });
 });

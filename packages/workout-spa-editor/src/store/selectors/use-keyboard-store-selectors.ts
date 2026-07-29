@@ -16,7 +16,11 @@ import {
   useSelectedStepIds,
   useSelectStep,
 } from "./selection-selectors";
-import { useDeleteStep, useReorderStep } from "./step-selectors";
+import {
+  useDeleteStep,
+  useDeleteSteps,
+  useReorderStep,
+} from "./step-selectors";
 import { useCurrentWorkout } from "./workout-selectors";
 
 export function useKeyboardStoreSelectors() {
@@ -34,6 +38,7 @@ export function useKeyboardStoreSelectors() {
   const selectStep = useSelectStep();
   const clearStepSelection = useClearStepSelection();
   const deleteStep = useDeleteStep();
+  const deleteSteps = useDeleteSteps();
 
   return {
     currentWorkout,
@@ -50,5 +55,6 @@ export function useKeyboardStoreSelectors() {
     selectStep,
     clearStepSelection,
     deleteStep,
+    deleteSteps,
   };
 }

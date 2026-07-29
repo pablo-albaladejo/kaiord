@@ -19,7 +19,11 @@ import {
   useSelectedStepIds,
   useSelectStep,
 } from "./selection-selectors";
-import { useDeleteStep, useReorderStep } from "./step-selectors";
+import {
+  useDeleteStep,
+  useDeleteSteps,
+  useReorderStep,
+} from "./step-selectors";
 import { useCurrentWorkout } from "./workout-selectors";
 
 export function useContextMenuStore() {
@@ -29,6 +33,7 @@ export function useContextMenuStore() {
   const selectStep = useSelectStep();
   const clearStepSelection = useClearStepSelection();
   const deleteStep = useDeleteStep();
+  const deleteSteps = useDeleteSteps();
   const copyStep = useCopyStep();
   const pasteStep = usePasteStep();
   const openCreateBlockDialog = useOpenCreateBlockDialog();
@@ -47,6 +52,7 @@ export function useContextMenuStore() {
     selectStep,
     clearStepSelection,
     deleteStep,
+    deleteSteps,
     copyStep,
     pasteStep,
     openCreateBlockDialog,
