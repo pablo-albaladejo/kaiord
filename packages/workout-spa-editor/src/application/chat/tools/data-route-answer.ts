@@ -1,9 +1,9 @@
 /**
  * buildDataRouteAnswer — one managed-data-type's routing state, shared by
  * the `get_data_routes` read tool and the `set_data_route` confirmation
- * result. Reuses the exact Data Hub matrix cell derivation and the F3.2
- * multi-source resolver — the chat answer is never a second source of
- * truth against the Settings matrix.
+ * result. Reuses the exact cell derivation the retired routing matrix was built
+ * on (application/data-hub) plus the F3.2 multi-source resolver — the chat
+ * answer is never a second source of truth against the Connections page.
  */
 import type { ManagedDataType } from "@kaiord/core";
 

@@ -64,6 +64,25 @@ describe("AthletePage", () => {
     ).toBeInTheDocument();
   });
 
+  // The section moved to /settings/connections in full. Waiting for the body
+  // first matters: without it the absence would also hold on the spinner.
+  it("should render the profile body without a Connections section", async () => {
+    // Arrange
+    await db.table<Profile>("profiles").put(PROFILE);
+    await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
+
+    // Act
+    renderPage();
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText("Ana Gomez")).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByRole("heading", { name: "Connections" })
+    ).not.toBeInTheDocument();
+  });
+
   it("should render the empty state when no profile is active", async () => {
     // Arrange
     await db.table("meta").put({ key: "activeProfileId", value: null });

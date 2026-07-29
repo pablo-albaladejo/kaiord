@@ -14,6 +14,7 @@ delivered in six independently-shippable phases.
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Pure, fully-tested energy math in core (BMR/TDEE, goal delta, macros, expenditure).
 - Day energy balance computable from already-ingested data with a BMR fallback for
   uncovered/future days, distinguishing measured vs predicted.
@@ -22,6 +23,7 @@ delivered in six independently-shippable phases.
 - Chatbot can answer "am I in deficit today / kcal left / macro target".
 
 **Non-Goals:**
+
 - Food database, barcode scanning, recipe search, third-party intake import.
 - Any server-side component (PWA stays client-only; no OAuth nutrition sources).
 - Statistical correlation coefficients in v1 (trend overlays only).
@@ -31,44 +33,44 @@ delivered in six independently-shippable phases.
 
 - **Domain lives in `@kaiord/core` (domain + application + ports).** Energy/nutrition
   schemas join `domain/schemas/health/**`; BMR/TDEE/goal/macro/expenditure
-  calculators are pure functions in `application/`. *Why over SPA-local:* matches
+  calculators are pure functions in `application/`. _Why over SPA-local:_ matches
   where `DailyWellness`/`BodyComposition` already live, keeps math reusable + unit
   tested at 80%, and `application` imports no adapters/external libs. Layer: domain +
   application.
 - **New ports before adapters.** `IntakeRepository`, `IntakePresetRepository`, and
   `EnergyTargetRepository` (or a cohesive extension of the existing persistence port)
-  are declared in `core/ports`; Dexie implementations live in the SPA. *Why:*
+  are declared in `core/ports`; Dexie implementations live in the SPA. _Why:_
   hexagonal rule — I/O contract precedes the adapter. Layer: ports → adapters.
-- **BMR = Katch-McArdle when body-fat % is known, else Mifflin-St Jeor.** *Why over
-  always-Mifflin:* the SPA already ingests `BodyComposition`; lean-mass-based BMR is
+- **BMR = Katch-McArdle when body-fat % is known, else Mifflin-St Jeor.** _Why over
+  always-Mifflin:_ the SPA already ingests `BodyComposition`; lean-mass-based BMR is
   more accurate when present. The chosen formula is recorded on the result so the UI
   and chatbot can explain the number. Alternative (user-selectable formula) rejected
   as needless UI surface for v1.
 - **Expenditure resolution: measured wins.** A day with connection coverage uses
   `restingCalories + activeCalories`; uncovered/future days use
-  `BMR + expectedActivityKcal` and are labelled `predicted`. *Why:* ingested device
+  `BMR + expectedActivityKcal` and are labelled `predicted`. _Why:_ ingested device
   data beats a modeled estimate; the label keeps the distinction honest.
 - **Expected workout kcal is tiered** (power→kJ, then running distance ≈1 kcal/kg/km,
   then duration×MET×kg). MET values come from a vendored **Compendium of Physical
   Activities** data table plus a kaiord `sport`/`subSport`→activity-code mapping.
-  *Why over TSS:* power/MET are sport-agnostic and need no FTP per sport. The
+  _Why over TSS:_ power/MET are sport-agnostic and need no FTP per sport. The
   compendium is static vendored data (no runtime npm dependency).
 - **Goal math with conservative caps + override.** Fat loss uses 7700 kcal/kg; daily
   delta is clamped (deficit ≤~0.75%/week bodyweight, never below BMR/floor; muscle
-  gain ≤0.5 kg/month) but the user MAY override with an on-screen warning. *Why:*
+  gain ≤0.5 kg/month) but the user MAY override with an on-screen warning. _Why:_
   safety by default without paternalistically blocking informed users.
 - **Periodized daily target** holds the weekly net constant while shifting kcal toward
   higher-expenditure (sport) days: `target(day) = BMR + expectedActivityKcal(day) +
-  dailyDelta`. *Why:* directly answers "kcal per day given the sport."
-- **New top-level "Nutrition" destination.** *Why over sub-view:* it is the primary
+dailyDelta`. _Why:_ directly answers "kcal per day given the sport."
+- **New top-level "Nutrition" destination.** _Why over sub-view:_ it is the primary
   home for goals/logging/trends and warrants first-class navigation; Today/Calendar
   carry compact secondary surfaces. Layer: SPA routing/UI.
 - **Persistence: Dexie v25, device-local, snapshot-excluded.** New stores
   `intakeEntries`/`intakePresets`/`energyTargets` follow the `SCHEMAS.vN` +
-  `applyVNUpgrade` pattern with a co-located `*-migration.test.ts`. *Why:* intake,
+  `applyVNUpgrade` pattern with a co-located `*-migration.test.ts`. _Why:_ intake,
   goal, and weight data are PII; they must stay local and pass
   `check-no-pii-leakage.mjs`.
-- **Weight trend uses EMA; adaptive TDEE deferred to the last phase.** *Why:* daily
+- **Weight trend uses EMA; adaptive TDEE deferred to the last phase.** _Why:_ daily
   weigh-ins are noisy; the EMA trend is the progress source-of-truth. Adaptive TDEE
   needs accumulated paired intake+weight history, so it ships only after intake
   (Phase 3) and tracking (Phase 5).

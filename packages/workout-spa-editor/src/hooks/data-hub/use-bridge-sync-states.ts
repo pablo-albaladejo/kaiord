@@ -1,9 +1,9 @@
 /**
  * useBridgeSyncStates — live `lastSyncedAt` per bridge INTEGRATION id.
  *
- * One `useLiveQuery` wrapping the shared `readBridgeSyncStates` reader, so
- * the Data Hub matrix, the chat data-routes tool and the connection model all
- * derive freshness from the same N point-gets.
+ * One `useLiveQuery` wrapping the shared `readBridgeSyncStates` reader, so the
+ * Connections page's routing rows, the chat data-routes tool and the connection
+ * model all derive freshness from the same N point-gets.
  */
 import { useLiveQuery } from "dexie-react-hooks";
 

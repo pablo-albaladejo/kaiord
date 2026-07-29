@@ -5,8 +5,9 @@
  * `activity` (file drop / editor), the six health metrics (FIT drop + manual /
  * chat entry), and `training-zones` (profile zone editing). `planned-session`
  * is deliberately absent — there is no manual way to author a coach session, so
- * the Manual column renders it n/a (honest state over a fake always-active
- * cell). Consumed by the Data Hub matrix.
+ * it is never offered as a manual source (honest state over a fake
+ * always-active one). Consumed by the Connections page's source derivation and
+ * by the chat data-routes tool.
  */
 import type { ManagedDataType } from "@kaiord/core";
 

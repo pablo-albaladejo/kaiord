@@ -1,6 +1,6 @@
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useTranslate } from "../../../i18n/use-translate";
-import { ConnectionMark } from "../AthleteConnections/ConnectionMark";
+import { ConnectionMark } from "./ConnectionMark";
 
 type Props = { sources: readonly ConnectionSource[] };
 

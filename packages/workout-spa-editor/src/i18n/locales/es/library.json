@@ -97,13 +97,6 @@
       "charCount": "{{count}}/1000 caracteres"
     }
   },
-  "staleDialog": {
-    "title": "Conflicto de entrenamiento obsoleto",
-    "description": "La descripción de origen ha cambiado desde la última vez que editaste este entrenamiento. Tus cambios pueden entrar en conflicto con el nuevo contenido.",
-    "viewDiff": "Ver diferencias",
-    "reprocess": "Reprocesar de todos modos",
-    "keepVersion": "Mantener mi versión"
-  },
   "toast": {
     "deleteFailed": "Error al eliminar",
     "deleteFailedDescription": "No se pudo eliminar la plantilla",

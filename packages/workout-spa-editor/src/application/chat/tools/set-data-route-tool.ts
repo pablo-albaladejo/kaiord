@@ -1,11 +1,11 @@
 /**
- * set_data_route — action tool (confirmation-gated) for changing Data Hub
+ * set_data_route — action tool (confirmation-gated) for changing data
  * routing: enable/disable a (dataType, integration, direction) route, or
  * set a data type's multi-source semantics (union, or a priority order of
  * integrations with automatic fallback). Delegates to the injected
- * `ChatActionOps.setDataRoute`, which wraps the same IntegrationPolicy
- * upsert/delete and DataTypeSourcePolicy write paths the Settings matrix
- * uses — no new write path.
+ * `ChatActionOps.setDataRoute`, which wraps the same IntegrationPolicy upsert
+ * and DataTypeSourcePolicy write paths the Connections page's routing rows use
+ * — no new write path.
  */
 import type { ChatTool } from "@kaiord/ai";
 import { managedDataTypes } from "@kaiord/core";
@@ -60,7 +60,7 @@ const setDataRouteSchema = setDataRouteInputSchema.superRefine((value, ctx) => {
 export const createSetDataRouteTool = (ops: ChatActionOps): ChatTool => ({
   name: "set_data_route",
   description:
-    "Change Data Hub routing for the active profile. enable_route / " +
+    "Change data routing for the active profile. enable_route / " +
     "disable_route turn a (data type, integration, direction) route on or " +
     "off. set_source_policy sets whether a data type merges every enabled " +
     "source (union, the default) or reads a priority order with automatic " +

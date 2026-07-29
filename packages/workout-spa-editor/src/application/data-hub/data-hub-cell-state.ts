@@ -1,6 +1,7 @@
 /**
- * Cell-state derivation for the Data Hub matrix. Every state is derived
- * from injected live signals — never guessed.
+ * Cell-state derivation for the routing matrix behind the `get_data_routes`
+ * chat tool. Every state is derived from injected live signals — never
+ * guessed.
  */
 import type { ManagedDataType } from "@kaiord/core";
 

@@ -5,7 +5,9 @@
 ## Purpose
 
 Profile-anchored coaching platform linking, persisted coaching activities, auto-sync with staleness gate, and conversion of coaching activities into editable workouts. Generic across coaching sources (Train2Go today, TrainingPeaks/others later).
+
 ## Requirements
+
 ### Requirement: LinkedCoachingAccount domain semantics
 
 A `Profile` SHALL be able to carry zero or more `LinkedCoachingAccount` entries, each shaped as `{ source: string, externalUserId: string, externalUserName: string, linkedAt: string (ISO datetime) }`. At most one entry per `source` per profile MUST exist.
@@ -654,4 +656,3 @@ Existing behavior is preserved: `<p>` paragraphs and `**bold**`/`<strong>` marke
 
 - **WHEN** a coaching description contains `**Calentamiento:** 20' Z1\n6x(30" Z5)`
 - **THEN** rendering is identical to the pre-change behavior: a strong inline for `Calentamiento:` and two paragraphs, with no anchors
-

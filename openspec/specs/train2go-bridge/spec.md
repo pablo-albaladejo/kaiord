@@ -5,7 +5,9 @@
 ## Purpose
 
 Chrome extension that imports coaching plans from Train2Go into the workout editor by read-only DOM access on `app.train2go.com` — no credentials stored, no persistence, content-script-only communication.
+
 ## Requirements
+
 ### Requirement: Extension manifest
 
 The extension SHALL target Chrome (Chromium-based browsers) only using Manifest V3.
@@ -495,4 +497,3 @@ Comments SHALL be returned in DOM order. Avatar image URLs MUST NOT appear in th
 
 - **WHEN** a comment block contains `<img src="https://app.train2go.com/assets/16128/avatars/medium/x.png">`
 - **THEN** no field of the parsed entry contains the avatar URL
-

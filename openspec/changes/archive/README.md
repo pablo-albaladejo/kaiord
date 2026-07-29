@@ -7,6 +7,13 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-07-29 | [`add-connections-change-source`](./2026-07-29-add-connections-change-source/) | Wave 2a made every routing row answer "where does my sleep data come from", |
+| 2026-07-29 | [`add-connections-data-type-rows`](./2026-07-29-add-connections-data-type-rows/) | The Connections section answers "which sources are linked". It does not answer |
+| 2026-07-29 | [`add-connections-health-summary`](./2026-07-29-add-connections-health-summary/) | add-connections-page shipped the source cards. A reader who opens |
+| 2026-07-29 | [`add-connections-page`](./2026-07-29-add-connections-page/) | A user who wants to know whether Kaiord is receiving their data has to visit |
+| 2026-07-29 | [`add-settings-attention-model`](./2026-07-29-add-settings-attention-model/) | The Settings shell carries two attention surfaces — a banner above the index |
+| 2026-07-29 | [`add-settings-split-shell`](./2026-07-29-add-settings-split-shell/) | Settings answers itself row by row (shipped in add-settings-row-values) but it |
+| 2026-07-29 | [`retire-legacy-connection-surfaces`](./2026-07-29-retire-legacy-connection-surfaces/) | add-connections-page, add-connections-data-type-rows, |
 | 2026-07-28 | [`add-command-palette`](./2026-07-28-add-command-palette/) | The SPA's editor actions exist twice and are enumerable nowhere. The right-click |
 | 2026-07-28 | [`add-settings-row-values`](./2026-07-28-add-settings-row-values/) | The SPA's Settings index is a list of eleven labels that answer nothing. To find |
 | 2026-07-28 | [`add-setup-checklist`](./2026-07-28-add-setup-checklist/) | First-run guidance in the SPA is a six-step centred modal (OnboardingTutorial) |

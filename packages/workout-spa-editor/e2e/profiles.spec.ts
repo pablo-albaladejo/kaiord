@@ -100,9 +100,11 @@ test.describe("Athlete page", () => {
     await expect(sport.getByRole("radio", { name: "Running" })).toBeVisible();
     await expect(sport.getByRole("radio", { name: "Swim" })).toBeVisible();
     await expect(page.getByText("Thresholds", { exact: true })).toBeVisible();
+    // The Connections section was retired into /settings/connections; the
+    // Athlete page is identity + thresholds + zones and links nowhere.
     await expect(
       page.getByRole("heading", { name: /connections/i })
-    ).toBeVisible();
+    ).toHaveCount(0);
   });
 
   test("should set the cycling FTP threshold and reflect it on the card", async ({

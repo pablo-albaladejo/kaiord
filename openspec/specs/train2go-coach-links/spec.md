@@ -10,6 +10,7 @@ workout-level notes, export/push preservation (full fidelity to ZWO, best-effort
 to FIT/Garmin), and editor visibility/editability.
 
 ## Requirements
+
 ### Requirement: Coach description prefetched on demand
 
 The system SHALL fetch a coaching activity's `description` on demand before it is
@@ -109,4 +110,3 @@ coach description with its links.
 - **GIVEN** a coaching activity whose description contains a `[label](url)` link
 - **WHEN** the user views the activity/workout
 - **THEN** the sidebar renders the description with the link intact
-

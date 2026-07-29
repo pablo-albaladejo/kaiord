@@ -1,4 +1,4 @@
-> Synced: 2026-06-22 (energy-balance-tracking)
+> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
 
 # SPA Routing
 
@@ -67,8 +67,8 @@ The Workout Library is the canonical case: the `/library` page is the destinatio
 
 Examples in the SPA editor today (non-normative):
 
-- Routed pages: Calendar, Library, Workout (new and edit), Chat.
-- Meta modals: Settings, Help, Profile.
+- Routed pages: Calendar, Daily, Library, Workout (new and edit), Chat, Nutrition, Athlete, Settings, Health.
+- Meta modals: none. Settings, Help and Profile were the three; Settings became `/settings/:section?`, Profile became `/athlete`, and Help was replaced by the command palette and the shortcut sheet, which are header overlays bound to no content destination.
 - In-flow picker dialogs: the calendar's empty-day "Add from Library" picker.
 
 When a routed-page surface is reached, focus SHALL move deterministically to the page's primary heading on mount so keyboard and screen-reader users land in a predictable location, restoring the focus-management equity that the deleted header modal provided via Radix Dialog. The primary heading is the page's `<h1>` element marked with the route-heading attribute (`[data-route-heading]`); the attribute — not the element tag — is the contract. The element MUST be focusable via `tabIndex={-1}` and MUST suppress the default focus ring for non-keyboard activations (CSS `:focus:not(:focus-visible)`) so route-driven focus moves are silent visually but remain announced by assistive technology.
@@ -87,10 +87,10 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 - **WHEN** the user activates the Chat entry in the navigation
 - **THEN** the SPA SHALL navigate to the base-relative URL `/chat`, the chat page SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount as a result of the activation
 
-#### Scenario: Settings, Help, and Profile are classified as meta modals
+#### Scenario: Settings and Profile are classified as routed pages
 
-- **WHEN** the user clicks Settings, Help, or Profile in the navigation header
-- **THEN** the corresponding modal dialog SHALL open over the current route, the URL SHALL NOT change, the user's underlying route context (calendar, library, or workout editor) SHALL remain visible behind the modal so closing it returns the user to their work, and on close focus SHALL return to the triggering header button
+- **WHEN** the user activates Settings or Profile in the navigation header
+- **THEN** the SPA SHALL navigate to a base-relative URL (`/settings` and `/athlete` respectively), the page surface SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount as a result of the activation. Neither surface has a modal twin: a settings section is reached by its own URL segment, so it is bookmarkable and linkable — which is what let the three connection surfaces be collapsed into one linkable section rather than into a modal nobody could link to
 
 #### Scenario: Calendar in-flow template selection uses a narrow picker dialog
 

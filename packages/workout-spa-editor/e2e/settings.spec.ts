@@ -77,33 +77,57 @@ test.describe("Settings Panel", () => {
     await expect(settingsPage.getByText("My GPT")).toBeVisible();
   });
 
-  test("8.8: Extensions tab shows bridge status", async ({ page }) => {
-    // Post-redesign, Settings is a grouped list; the Extensions view is
-    // its own route. Navigate to it via the grouped-list row.
+  test("8.8: Connections is reachable from the settings index", async ({
+    page,
+  }) => {
+    // Arrange
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings$/);
-    await page.getByTestId("settings-row-extensions").click();
-    await page.waitForURL(/\/settings\/extensions$/);
 
-    const extensionsPanel = page.getByTestId("settings-panel-extensions");
-    await expect(extensionsPanel).toBeVisible();
+    // Act
+    await page.getByTestId("settings-row-connections").click();
 
-    // The panel renders two bridge tables: the top-level status table and
-    // the body-composition sync card's own table, which repeats the Garmin
-    // Connect row. Scope to the first table so the locator stays unique.
-    const bridgeStatusTable = extensionsPanel.locator("table").first();
+    // Assert
+    await page.waitForURL(/\/settings\/connections$/);
+    await expect(page.getByTestId("settings-panel-connections")).toBeVisible();
+  });
 
-    // Should show both bridges in the status table
-    await expect(
-      bridgeStatusTable.getByText("Garmin Connect", { exact: true })
-    ).toBeVisible();
-    await expect(
-      bridgeStatusTable.getByText("Train2Go", { exact: true })
-    ).toBeVisible();
+  // Entering at the OLD url is the assertion. Navigating to
+  // /settings/connections and checking it renders would pass with the
+  // redirect deleted.
+  test.describe("retired sections", () => {
+    for (const retired of ["extensions", "data-hub"]) {
+      test(`8.9: /settings/${retired} lands on Connections`, async ({
+        page,
+      }) => {
+        // Arrange
 
-    // Should have a refresh button
-    await expect(
-      extensionsPanel.getByRole("button", { name: /refresh status/i })
-    ).toBeVisible();
+        // Act
+        await page.goto(`/settings/${retired}`);
+
+        // Assert
+        await expect(page).toHaveURL(/\/settings\/connections$/, {
+          timeout: 8000,
+        });
+        await expect(
+          page.getByTestId("settings-panel-connections")
+        ).toBeVisible();
+      });
+    }
+
+    test("8.10: the settings index no longer offers the retired rows", async ({
+      page,
+    }) => {
+      // Arrange
+      await openHeaderAction(page, /open settings/i);
+
+      // Act
+      await page.waitForURL(/\/settings$/);
+
+      // Assert
+      await expect(page.getByTestId("settings-group-list")).toBeVisible();
+      await expect(page.getByTestId("settings-row-extensions")).toHaveCount(0);
+      await expect(page.getByTestId("settings-row-dataHub")).toHaveCount(0);
+    });
   });
 });

@@ -3,9 +3,9 @@
  *
  * `coachingSyncState`'s primary key is `[source+profileId]` and the table has
  * no `profileId` index, so this is N point-gets rather than a scan. Callers
- * index the result by whichever key they speak — the Data Hub matrix by
- * integration id, the connection model by bridge id — which is why the rows
- * carry both.
+ * index the result by whichever key they speak — the Connections page's
+ * routing rows by integration id, the connection model by bridge id — which is
+ * why the rows carry both.
  */
 import { syncSourceFor } from "../../integrations/bridge-sync-sources";
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";

@@ -136,8 +136,7 @@ export const powerZoneSchema = z
   .transform((val) => val as PowerZone);
 
 export type PowerValue =
-  | { type: "ftp_percent"; value: number }
-  | { type: "watts"; value: number };
+  { type: "ftp_percent"; value: number } | { type: "watts"; value: number };
 
 export function validatePowerZone(zone: number): PowerZone {
   return powerZoneSchema.parse(zone);

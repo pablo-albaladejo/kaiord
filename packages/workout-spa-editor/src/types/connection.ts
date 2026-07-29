@@ -1,6 +1,6 @@
 /**
  * Connection records — per-(profile, provider) account-linkage state for the
- * Athlete Connections section. Distinct from `IntegrationPolicy` (which governs
+ * Connections page. Distinct from `IntegrationPolicy` (which governs
  * individual import/export flows): a record here means "this account is linked".
  *
  * Stored device-local (excluded from the cloud snapshot) so provider

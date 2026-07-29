@@ -43,6 +43,7 @@
     "checking": "Asking the extension whether it still has a session.",
     "signedOut": "Open the provider's site and sign in; the extension picks the session back up on its own.",
     "needsReauth": "The extension's access has to be granted again. Sign in on the provider's site.",
+    "outdated": "This extension's browser bridge is out of date. Update the extension to resume — signing in again will not help.",
     "notDetected": "The browser extension is not running in this browser.",
     "disconnected": "You disconnected this source in Kaiord. The extension may still be installed.",
     "manual": "Anything you type into Kaiord yourself. Never switched off.",
@@ -72,6 +73,17 @@
     "syncDone": "Sync finished",
     "syncFailed": "Sync failed. Try again in a moment.",
     "syncCooldown": "Just synced. Try again in a minute.",
+    "bodyExport": "Sync Tanita → Garmin",
+    "bodyExportStatus": {
+      "idle": "Ready to sync",
+      "reading": "Reading measurements from Tanita…",
+      "parsing": "Parsing measurements…",
+      "encoding": "Encoding for Garmin…",
+      "uploading": "Uploading to Garmin…",
+      "done": "Sync complete",
+      "needsReauth": "Your mytanita.eu session expired — sign in there and try again.",
+      "error": "Sync failed"
+    },
     "disconnect": "Disconnect",
     "disconnectMessage": "This unlinks the source in Kaiord and switches off every route it feeds. The browser extension stays installed.",
     "reconnect": "Reconnect",
@@ -98,7 +110,9 @@
       "willRank": "Pick a source below and that changes: Kaiord will read {{type}} from the one you pick, and use the others only on days it has nothing. You can go back to keeping every source right here.",
       "ranked": "Kaiord reads {{type}} from {{name}} first, and falls back to the others on days it has nothing.",
       "stalled": "Nothing is being read for {{type}} — it is ranked to sources that are switched off. Pick one below, or go back to keeping every source.",
-      "keepAll": "Keep every source"
+      "keepAll": "Keep every source",
+      "switches": "Sources allowed to send {{type}}",
+      "switchesHint": "Switch one on and Kaiord starts reading {{type}} from it; switch it off and it stops. The browser extension stays installed either way."
     },
     "groups": {
       "training": "Training",

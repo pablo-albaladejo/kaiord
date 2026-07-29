@@ -1,6 +1,6 @@
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useConnectionActions } from "../../../hooks/use-connection-actions";
-import { ApiKeyConnectForm } from "../AthleteConnections/ApiKeyConnectForm";
+import { ApiKeyConnectForm } from "./ApiKeyConnectForm";
 
 type Props = {
   source: ConnectionSource;

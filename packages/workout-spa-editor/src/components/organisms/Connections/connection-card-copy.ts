@@ -39,6 +39,13 @@ export const detailKeyFor = (source: ConnectionSource): string | null => {
     case "checking":
       return "detail.checking";
     case "attention":
+      // `outdated` is read FIRST and is the one attention cause whose fix is
+      // not signing in. A bridge answering in an unreadable protocol version
+      // reaches `attention` through `error !== null`, so without this branch it
+      // fell to `signedOut` and told the reader to open the provider's site —
+      // an action that cannot resolve a version mismatch, beside a banner on
+      // the same screen already saying the extension is out of date.
+      if (source.outdated) return "detail.outdated";
       return source.needsReauth ? "detail.needsReauth" : "detail.signedOut";
     case "manual":
       return "detail.manual";
