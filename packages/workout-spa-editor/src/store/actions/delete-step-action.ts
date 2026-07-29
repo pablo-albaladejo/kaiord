@@ -48,7 +48,10 @@ export const deleteStepAction = (
         ...deletedSteps,
         {
           step: found.step as UIWorkoutItem,
-          index: stepIndex,
+          // The flat array position, NOT the domain `stepIndex`. Undo
+          // splices back by absolute position, and the two diverge as
+          // soon as a repetition block sits earlier in the list.
+          index: found.arrayIndex,
           timestamp: Date.now(),
           // A single delete is a delete group of one.
           groupId: newDeleteGroupId(),

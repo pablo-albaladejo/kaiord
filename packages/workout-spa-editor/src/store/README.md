@@ -195,7 +195,7 @@ without waiting for the focus hook's own scroll). Wrap the mutation:
 
 ```ts
 flushSync(() => {
-  deleteStep(arrayIndex);
+  deleteStep(stepIndex);
 });
 // `pendingFocusTarget` has been cleared by the hook. Read the new
 // active element synchronously.

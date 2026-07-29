@@ -9,4 +9,4 @@
 
 import { defaultIdProvider } from "../providers/id-provider";
 
-export const newDeleteGroupId = (): string => defaultIdProvider() as string;
+export const newDeleteGroupId = (): string => defaultIdProvider();

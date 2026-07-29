@@ -14,6 +14,68 @@ const ONE_SECOND_MS = 1000;
 const OUT_OF_RANGE_INDEX = 999;
 
 describe("deleteStepAction", () => {
+  // `undo-delete-helpers` splices restored items back by ABSOLUTE array
+  // position, so the trail must store that, not the domain `stepIndex`.
+  // The two coincide in an all-plain-steps list, so this fixture puts a
+  // repetition block first — the only shape that can tell them apart.
+  describe("undo-trail index space (block precedes the steps)", () => {
+    const BLOCK_CHILDREN = 2;
+    const nested = (stepIndex: number) => ({
+      stepIndex,
+      durationType: "time" as const,
+      duration: { type: "time" as const, seconds: 60 },
+      targetType: "open" as const,
+    });
+
+    const krdWithLeadingBlock = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: { created: "2025-01-15T10:30:00Z", sport: "cycling" },
+      extensions: {
+        structured_workout: {
+          name: "Leading block",
+          sport: "cycling",
+          steps: [
+            {
+              id: "block-uuid",
+              repeatCount: 3,
+              steps: [nested(0), nested(1)],
+            },
+            // stepIndex 2, but array position 1.
+            nested(BLOCK_CHILDREN),
+          ],
+        },
+      },
+    } as unknown as KRD;
+
+    it("should record the array position, not the domain stepIndex", () => {
+      // Arrange
+      const state: WorkoutState = {
+        currentWorkout: krdWithLeadingBlock,
+        undoHistory: [{ workout: krdWithLeadingBlock, selection: null }],
+        historyIndex: 0,
+        selectedStepId: null,
+        selectedStepIds: [],
+        isEditing: false,
+        safeMode: false,
+        lastBackup: null,
+        deletedSteps: [],
+      };
+
+      // Act
+      const result = deleteStepAction(
+        krdWithLeadingBlock,
+        BLOCK_CHILDREN,
+        state
+      );
+
+      // Assert
+      // Domain stepIndex is 2; the array position is 1. Storing 2 would
+      // splice the step back past the end of a 1-item list on undo.
+      expect(result.deletedSteps?.[0].index).toBe(1);
+    });
+  });
+
   describe("step deletion tracking", () => {
     it("should track deleted step in deletedSteps array", () => {
       // Arrange
