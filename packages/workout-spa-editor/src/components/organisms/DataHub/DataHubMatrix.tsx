@@ -1,3 +1,4 @@
+import { isSourceConnected } from "../../../application/connections/connected-source";
 import type {
   DataHubRemoveHandler,
   DataHubRow,
@@ -13,6 +14,11 @@ type Props = {
   rows: readonly DataHubRow[];
   integrations: readonly IntegrationRegistryEntry[];
   connections: ReadonlyMap<string, ConnectionRecord>;
+  /** Bridge ids whose extension is currently discovered. A header used to read
+      the connection record alone, which no code path ever sets to `connected`
+      for a bridge, so every bridge column said "Not connected" above cells the
+      same matrix was rendering as active. */
+  discovered: ReadonlySet<string>;
   onToggle: DataHubToggleHandler;
   onSetMode: DataHubSetModeHandler;
   onRemove: DataHubRemoveHandler;
@@ -22,6 +28,7 @@ export const DataHubMatrix: React.FC<Props> = ({
   rows,
   integrations,
   connections,
+  discovered,
   onToggle,
   onSetMode,
   onRemove,
@@ -37,9 +44,11 @@ export const DataHubMatrix: React.FC<Props> = ({
             <DataHubColumnHeader
               key={integration.id}
               integration={integration}
-              connected={
-                connections.get(integration.id)?.status === "connected"
-              }
+              connected={isSourceConnected(
+                integration,
+                connections.get(integration.id),
+                (bridgeId) => discovered.has(bridgeId)
+              )}
             />
           ))}
         </tr>

@@ -29,7 +29,7 @@ const signals = (
   o: Partial<DataHubMatrixSignals> = {}
 ): DataHubMatrixSignals => ({
   isConnected: () => false,
-  isBridgeOnline: () => true,
+  isBridgeConnected: () => true,
   bridgeAnnounces: () => true,
   isRouteEnabled: () => false,
   lastSyncedAt: () => undefined,
@@ -61,7 +61,7 @@ describe("cellState — supported-route filter", () => {
     // Support is a static property of the bridge, not of its session: an
     // offline unsupported cell must not read "not-connected" (it would invite
     // the user to install an extension that can never serve the route).
-    const s = signals({ isBridgeOnline: () => false });
+    const s = signals({ isBridgeConnected: () => false });
 
     // Act
     const result = cellState(
@@ -112,7 +112,7 @@ describe("cellState — supported-route filter", () => {
 
   it("should still report not-connected for a supported route on an offline bridge", () => {
     // Arrange
-    const s = signals({ isBridgeOnline: () => false });
+    const s = signals({ isBridgeConnected: () => false });
 
     // Act
     const result = cellState(

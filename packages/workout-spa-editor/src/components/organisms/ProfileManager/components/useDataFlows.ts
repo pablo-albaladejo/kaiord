@@ -28,6 +28,9 @@ const EMPTY: UseDataFlowsResult = {
 
 export function useDataFlows(profileId: string): UseDataFlowsResult {
   const result = useLiveQuery(async (): Promise<UseDataFlowsResult> => {
+    // Callers on a profile-less surface pass "", which no policy row can
+    // match: answer without issuing 26 queries for a key that cannot exist.
+    if (profileId === "") return EMPTY;
     const all: IntegrationPolicy[] = [];
     const byDataType: DataFlowsByType = new Map();
 

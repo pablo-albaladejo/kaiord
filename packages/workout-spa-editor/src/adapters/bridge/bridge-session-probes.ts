@@ -22,6 +22,7 @@ import {
   active,
   inactive,
   type SessionProber,
+  unreachable,
 } from "./bridge-session-probe-types";
 import { readWhoopStatus } from "./whoop-transport";
 
@@ -33,12 +34,19 @@ const messageOf = (err: unknown): string =>
 const needsReauthOf = (err: unknown): boolean =>
   (err as { needsReauth?: boolean } | null)?.needsReauth === true;
 
+/** Both transports stamp `delivered` on their typed error, mirroring how
+    TrainingPeaks already rides `needsReauth` out to the caller. */
+const wasDelivered = (err: unknown): boolean =>
+  (err as { delivered?: boolean } | null)?.delivered !== false;
+
 const probeWhoopSession: SessionProber = async (extensionId) => {
   try {
     const status = await readWhoopStatus(extensionId);
     return status.connected && status.userId !== null ? active() : inactive();
   } catch (err) {
-    return inactive(messageOf(err));
+    return wasDelivered(err)
+      ? inactive(messageOf(err))
+      : unreachable(messageOf(err));
   }
 };
 
@@ -47,7 +55,9 @@ const probeTrainingPeaksSession: SessionProber = async (extensionId) => {
     const { authenticated } = await checkTrainingPeaksSession(extensionId);
     return authenticated ? active() : inactive();
   } catch (err) {
-    return inactive(messageOf(err), needsReauthOf(err));
+    return wasDelivered(err)
+      ? inactive(messageOf(err), needsReauthOf(err))
+      : unreachable(messageOf(err));
   }
 };
 
@@ -57,3 +67,10 @@ export const SESSION_PROBES: Record<string, SessionProber> = {
   "whoop-bridge": probeWhoopSession,
   "trainingpeaks-bridge": probeTrainingPeaksSession,
 };
+
+/** Whether a bridge has a session prober at all. The Connections page needs
+    the fact itself: a bridge without one can never report a live session, and
+    inferring that from runtime state mislabels a probed bridge whose extension
+    id changed mid-probe. */
+export const hasSessionProbe = (bridgeId: string): boolean =>
+  SESSION_PROBES[bridgeId] !== undefined;

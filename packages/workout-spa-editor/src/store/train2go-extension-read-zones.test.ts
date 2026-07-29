@@ -62,7 +62,13 @@ describe("readZones", () => {
     const res = await readZones("ext-id", "99999", queue);
 
     // Assert
-    expect(res).toEqual({ ok: false, error: "No Train2Go tab open" });
+    // The extension answered — "no tab open" is a refusal, not a delivery
+    // failure, so the bridge is still present.
+    expect(res).toEqual({
+      delivered: true,
+      ok: false,
+      error: "No Train2Go tab open",
+    });
   });
 
   it("should short-circuit with Aborted when signal is already aborted", async () => {

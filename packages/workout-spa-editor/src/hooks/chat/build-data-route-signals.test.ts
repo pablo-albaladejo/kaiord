@@ -30,8 +30,8 @@ describe("buildDataRouteSignals", () => {
     const signals = await buildDataRouteSignals(persistence, PROFILE_ID);
 
     // Assert
-    expect(signals.isBridgeOnline("train2go-bridge")).toBe(true);
-    expect(signals.isBridgeOnline("garmin-bridge")).toBe(false);
+    expect(signals.isBridgeConnected("train2go-bridge")).toBe(true);
+    expect(signals.isBridgeConnected("garmin-bridge")).toBe(false);
     expect(
       signals.bridgeAnnounces("train2go-bridge", "read:training-plan")
     ).toBe(true);

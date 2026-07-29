@@ -115,8 +115,7 @@ describe("SettingsPage", () => {
     });
 
     it.each([
-      // TODO(S3): destination becomes /settings/connections once it exists.
-      { row: "connections", destination: "/athlete" },
+      { row: "connections", destination: "/settings/connections" },
       { row: "googleDriveSync", destination: "/settings/sync" },
       { row: "extensions", destination: "/settings/extensions" },
       { row: "dataHub", destination: "/settings/data-hub" },
@@ -191,6 +190,21 @@ describe("SettingsPage", () => {
       }
     );
 
+    it("should render the connections tab content at /settings/connections", async () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/connections");
+
+      // Assert
+      expect(
+        await screen.findByTestId("settings-panel-connections")
+      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "Settings · Connections"
+      );
+    });
+
     it("should render the usage tab content at /settings/usage", async () => {
       // Arrange
 
@@ -258,6 +272,7 @@ describe("SettingsPage", () => {
       const sections = [
         "ai",
         "sync",
+        "connections",
         "data-hub",
         "extensions",
         "usage",

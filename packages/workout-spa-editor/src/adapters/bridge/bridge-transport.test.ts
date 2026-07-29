@@ -24,6 +24,7 @@ describe("sendBridgeMessage", () => {
     // Assert
     expect(result).toEqual({
       ok: false,
+      delivered: false,
       error: "Chrome runtime not available",
     });
     globalThis.chrome = originalChrome;
@@ -53,7 +54,7 @@ describe("sendBridgeMessage", () => {
       { type: "ping" },
       expect.any(Function)
     );
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual({ delivered: true, ...mockResponse });
   });
 
   it("should return error when chrome.runtime.lastError is set", async () => {
@@ -76,6 +77,7 @@ describe("sendBridgeMessage", () => {
     // Assert
     expect(result).toEqual({
       ok: false,
+      delivered: false,
       error: "Extension not found",
     });
   });
@@ -98,7 +100,11 @@ describe("sendBridgeMessage", () => {
     const result = await sendBridgeMessage("ext-123", { type: "ping" });
 
     // Assert
-    expect(result).toEqual({ ok: false, error: "No response" });
+    expect(result).toEqual({
+      ok: false,
+      delivered: false,
+      error: "No response",
+    });
   });
 
   it("should resolve with timeout error when extension does not respond", async () => {
@@ -123,6 +129,7 @@ describe("sendBridgeMessage", () => {
     // Assert
     expect(result).toEqual({
       ok: false,
+      delivered: false,
       error: "Extension did not respond",
     });
   });
@@ -145,6 +152,7 @@ describe("sendBridgeMessage", () => {
     // Assert
     expect(result).toEqual({
       ok: false,
+      delivered: false,
       error: "Extension not available",
     });
   });

@@ -67,10 +67,13 @@ export const probeBridge = async (
     });
     return;
   }
+  // The probe is the only live evidence the extension still exists: discovery
+  // never expires an id, so a bridge that stopped answering would otherwise
+  // stay "discovered" for the life of the page.
   write(ctx, bridgeId, {
     ...result,
-    discovered: true,
+    discovered: result.reachable,
     checking: false,
-    lastCheckedAt: ctx.now(),
+    lastCheckedAt: result.reachable ? ctx.now() : null,
   });
 };

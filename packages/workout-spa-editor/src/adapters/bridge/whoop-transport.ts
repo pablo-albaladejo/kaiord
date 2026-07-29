@@ -32,8 +32,11 @@ const whoopStatusSchema = z.object({
 export type WhoopStatus = z.infer<typeof whoopStatusSchema>;
 
 export class WhoopBridgeError extends Error {
-  constructor(message: string) {
+  /** False when the extension never answered — it is gone, not signed out. */
+  readonly delivered: boolean;
+  constructor(message: string, delivered = true) {
     super(message);
+    this.delivered = delivered;
     this.name = "WhoopBridgeError";
   }
 }
@@ -48,7 +51,10 @@ export const readWhoopFetch = async (
     WHOOP_FETCH_TIMEOUT_MS
   );
   if (!res.ok) {
-    throw new WhoopBridgeError(res.error ?? "WHOOP bridge read failed");
+    throw new WhoopBridgeError(
+      res.error ?? "WHOOP bridge read failed",
+      res.delivered !== false
+    );
   }
   const parsed = whoopFetchResultSchema.safeParse(res.data);
   if (!parsed.success) {
@@ -66,7 +72,10 @@ export const readWhoopStatus = async (
     WHOOP_STATUS_TIMEOUT_MS
   );
   if (!res.ok) {
-    throw new WhoopBridgeError(res.error ?? "WHOOP status read failed");
+    throw new WhoopBridgeError(
+      res.error ?? "WHOOP status read failed",
+      res.delivered !== false
+    );
   }
   const parsed = whoopStatusSchema.safeParse(res.data);
   if (!parsed.success) {

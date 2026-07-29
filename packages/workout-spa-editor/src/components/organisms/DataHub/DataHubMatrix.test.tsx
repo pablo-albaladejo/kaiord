@@ -83,6 +83,10 @@ const ROWS: DataHubRow[] = [
   },
 ];
 
+/* The header's rule is discovery AND no `disconnected` record, so a bridge
+   column needs its extension present to read as connected. */
+const DISCOVERED: ReadonlySet<string> = new Set(["garmin-bridge"]);
+
 const connections = (): ReadonlyMap<string, ConnectionRecord> =>
   new Map([
     [
@@ -107,6 +111,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={vi.fn()}
         onSetMode={vi.fn()}
         onRemove={vi.fn()}
@@ -129,6 +134,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={onToggle}
         onSetMode={vi.fn()}
         onRemove={vi.fn()}
@@ -158,6 +164,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={vi.fn()}
         onSetMode={vi.fn()}
         onRemove={vi.fn()}
@@ -179,6 +186,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={vi.fn()}
         onSetMode={vi.fn()}
         onRemove={vi.fn()}
@@ -200,6 +208,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={vi.fn()}
         onSetMode={vi.fn()}
         onRemove={vi.fn()}
@@ -223,6 +232,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={vi.fn()}
         onSetMode={vi.fn()}
         onRemove={vi.fn()}
@@ -247,6 +257,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={vi.fn()}
         onSetMode={onSetMode}
         onRemove={vi.fn()}
@@ -279,6 +290,7 @@ describe("DataHubMatrix", () => {
         rows={ROWS}
         integrations={INTEGRATIONS}
         connections={connections()}
+        discovered={DISCOVERED}
         onToggle={vi.fn()}
         onSetMode={vi.fn()}
         onRemove={onRemove}

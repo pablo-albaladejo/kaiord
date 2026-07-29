@@ -46,7 +46,7 @@ describe("useBridgeConnectionsBootstrap", () => {
 });
 
 describe("bridge connections bootstrap wiring", () => {
-  it("should not be mounted by store hydration yet", () => {
+  it("should be mounted by store hydration", () => {
     // Arrange
     const source = readFileSync(join(HERE, "use-store-hydration.ts"), "utf8");
 
@@ -54,8 +54,9 @@ describe("bridge connections bootstrap wiring", () => {
     const mounted = /useBridgeConnectionsBootstrap\(\)/.test(source);
 
     // Assert
-    // Polling with no consumer is pure cost: the wave that ships the first
-    // connections UI mounts this. Flip the assertion then.
-    expect(mounted).toBe(false);
+    // The Connections page renders `useBridgeConnections`, so the store has a
+    // consumer and must be polling. An app-scoped mount keeps the cadence and
+    // the positive cache across navigations.
+    expect(mounted).toBe(true);
   });
 });

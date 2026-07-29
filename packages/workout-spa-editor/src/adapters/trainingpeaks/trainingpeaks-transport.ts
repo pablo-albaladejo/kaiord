@@ -26,10 +26,13 @@ export type TrainingPeaksSession = z.infer<typeof trainingPeaksSessionSchema>;
 
 export class TrainingPeaksBridgeError extends Error {
   readonly needsReauth: boolean;
-  constructor(message: string, needsReauth = false) {
+  /** False when the extension never answered — it is gone, not signed out. */
+  readonly delivered: boolean;
+  constructor(message: string, needsReauth = false, delivered = true) {
     super(message);
     this.name = "TrainingPeaksBridgeError";
     this.needsReauth = needsReauth;
+    this.delivered = delivered;
   }
 }
 
@@ -44,7 +47,8 @@ export const checkTrainingPeaksSession = async (
   if (!res.ok) {
     throw new TrainingPeaksBridgeError(
       res.error ?? "TrainingPeaks session check failed",
-      res.needsReauth === true
+      res.needsReauth === true,
+      res.delivered !== false
     );
   }
   const parsed = trainingPeaksSessionSchema.safeParse(res.data);
@@ -74,7 +78,8 @@ export const readTrainingPeaksMetrics = async (
   if (!res.ok) {
     throw new TrainingPeaksBridgeError(
       res.error ?? "TrainingPeaks metrics read failed",
-      res.needsReauth === true
+      res.needsReauth === true,
+      res.delivered !== false
     );
   }
   return res.data;

@@ -5,9 +5,10 @@
  * the polling interval and the visibility listener exist exactly once per
  * app boot. Repeated `start()` calls are no-ops.
  *
- * Not mounted yet: polling five bridges with no consumer rendering the
- * result is pure cost. The wave that ships the first connections UI mounts
- * this in `use-store-hydration`.
+ * Mounted by `use-store-hydration` rather than by the Connections page: the
+ * store's 30-second positive cache and 5-minute cadence only pay off across
+ * navigations, and a page-scoped mount would restart the poll — and re-probe
+ * every bridge — each time the user opened the page.
  */
 
 import { useEffect } from "react";

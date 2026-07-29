@@ -10,7 +10,7 @@ const TODAY = "2026-07-07";
 
 const signals = (): DataHubMatrixSignals => ({
   isConnected: () => false,
-  isBridgeOnline: (bridgeId) => bridgeId === "train2go-bridge",
+  isBridgeConnected: (bridgeId) => bridgeId === "train2go-bridge",
   bridgeAnnounces: (bridgeId, token) =>
     bridgeId === "train2go-bridge" && token === "read:training-plan",
   supportsRoute: () => true,

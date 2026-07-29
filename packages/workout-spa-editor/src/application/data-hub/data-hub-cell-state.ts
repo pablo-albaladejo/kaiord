@@ -18,11 +18,15 @@ export type DataHubMatrixSignals = {
   /** api-key provider linked (v24 connections store, status="connected"). */
   isConnected: (integrationId: string) => boolean;
   /**
-   * Bridge extension currently discovered + announcing (its live session).
-   * This — not the connections store — is a bridge's "connected" signal,
-   * matching AthleteConnections: bridges never sit in the connections store.
+   * Bridge linked AND its extension discovered. Both halves matter: the
+   * connections store only ever holds a `disconnected` row for a bridge (no
+   * code path writes `connected` on install), so discovery alone would ignore
+   * an explicit unlink and a record alone would report every working bridge
+   * as absent. `isBridgeConnected` in application/connections owns the rule;
+   * this signal and the Connections page's cards both call it, so a column
+   * header and a cell can no longer disagree about the same bridge.
    */
-  isBridgeOnline: (bridgeId: string) => boolean;
+  isBridgeConnected: (bridgeId: string) => boolean;
   /** Bridge currently announces the wire token for this flow. */
   bridgeAnnounces: (bridgeId: string, token: string) => boolean;
   /** An enabled IntegrationPolicy exists for this exact route. */
@@ -70,9 +74,7 @@ const bridgeCellState = (
   // precedes the online check: a route the bridge can never serve reads "na"
   // whether or not the extension happens to be running.
   if (!s.supportsRoute(bridgeId, dataType, direction)) return "na";
-  // A bridge is "connected" only while its extension is discovered — read
-  // discovery, never the connections store (which holds no bridge rows).
-  if (!s.isBridgeOnline(bridgeId)) return "not-connected";
+  if (!s.isBridgeConnected(bridgeId)) return "not-connected";
   if (!s.bridgeAnnounces(bridgeId, token)) return "na";
   return s.isRouteEnabled(dataType, direction, bridgeId)
     ? "active"

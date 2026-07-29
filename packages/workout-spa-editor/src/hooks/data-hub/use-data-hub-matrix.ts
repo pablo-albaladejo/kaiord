@@ -10,6 +10,7 @@
 import { useMemo } from "react";
 
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
+import { isBridgeConnected } from "../../application/connections/connected-source";
 import {
   buildDataHubMatrix,
   type DataHubRow,
@@ -17,7 +18,10 @@ import {
 import { useDataFlows } from "../../components/organisms/ProfileManager/components/useDataFlows";
 import { usePersistence } from "../../contexts/persistence-context";
 import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
-import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
+import {
+  INTEGRATION_REGISTRY,
+  integrationIdForBridge,
+} from "../../integrations/integration-registry";
 import { useConnectionStatus } from "../use-connection-status";
 import { useDiscoveredBridges } from "../use-discovered-bridges";
 import { useBridgeSyncStates } from "./use-bridge-sync-states";
@@ -33,8 +37,11 @@ export const useDataHubMatrix = (profileId: string | null): DataHubRow[] => {
     () =>
       buildDataHubMatrix(INTEGRATION_REGISTRY, {
         isConnected: (id) => connections.get(id)?.status === "connected",
-        isBridgeOnline: (bridgeId) =>
-          discovered.some((d) => d.bridgeId === bridgeId),
+        isBridgeConnected: (bridgeId) =>
+          isBridgeConnected(
+            discovered.some((d) => d.bridgeId === bridgeId),
+            connections.get(integrationIdForBridge(bridgeId) ?? "")
+          ),
         bridgeAnnounces: (bridgeId, token) =>
           (bridgeDiscovery.getCapabilities(bridgeId) ?? []).includes(token),
         supportsRoute: bridgeSupportsRoute,
