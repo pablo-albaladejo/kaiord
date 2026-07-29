@@ -87,6 +87,14 @@ The privacy policy SHALL cover the following topics:
 - **WHEN** an extension's section body is replaced by prose that merely names its host
 - **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail, reporting each removed disclosure as a separate violation
 
+#### Scenario: A section's rule count is shrink-only
+
+- **GIVEN** each bridge section has its current rule count recorded as a floor, in the shape `BOUNDARIES_ALLOWLIST_MAX` already uses
+- **WHEN** any rule anchored to a section is deleted without the requirement being deleted
+- **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail for that section, reporting the count it dropped from
+- **AND** a recorded floor SHALL equal that section's current rule count, so no section carries slack a later deletion could spend unnoticed
+- **AND** a section with no recorded floor SHALL need a minimum number of rules before it can be recorded
+
 #### Scenario: A new bridge package fails the lint until the policy covers it
 
 - **GIVEN** the policy lint derives its bridge list from `packages/*-bridge` on disk rather than from hardcoded manifest paths, host sets, and section names

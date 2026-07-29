@@ -83,10 +83,25 @@ export const BRIDGE_REGISTRY = {
 };
 
 // A section that exists but is constrained by almost nothing is the same
-// defect as a section that is missing: "covered" has to mean the rule set
-// actually says something about this extension's capture paths, sensitive
-// permissions and data destinations.
-const MIN_SECTION_RULES = 6;
+// defect as a section that is missing. "Covered" has to mean the rule set
+// still says as much about this extension as it did.
+//
+// Shrink-only ratchet, in the shape `BOUNDARIES_ALLOWLIST_MAX` already uses
+// in this repo: each number is that section's CURRENT rule count and may
+// only ever go up. A flat floor of 6 would have let TrainingPeaks lose 7 of
+// its 13 rules with the guard silent — a floor with no regression power,
+// which is most of what a floor is for.
+export const SECTION_RULE_FLOOR = {
+  [GARMIN_SECTION]: 9,
+  [TRAIN2GO_SECTION]: 8,
+  [TANITA_SECTION]: 11,
+  [TRAININGPEAKS_SECTION]: 13,
+  [WHOOP_SECTION]: 8,
+};
+
+// A section with no recorded floor is a bridge being onboarded. It has to
+// clear this before it can be recorded — the 0 → 6 barrier.
+export const MIN_NEW_SECTION_RULES = 6;
 
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
@@ -571,10 +586,19 @@ export function checkBridgeCoverage(
       continue;
     }
     const count = rules.filter((r) => r.section === entry.section).length;
-    if (count < MIN_SECTION_RULES) {
+    const floor = SECTION_RULE_FLOOR[entry.section];
+    if (floor === undefined) {
+      if (count < MIN_NEW_SECTION_RULES) {
+        violations.push(
+          `${bridge} Bridge extension covered — "## ${entry.section}" is constrained by ${count} rule(s); ` +
+            `a bridge needs at least ${MIN_NEW_SECTION_RULES} before it is recorded in SECTION_RULE_FLOOR`
+        );
+      }
+    } else if (count < floor) {
       violations.push(
-        `${bridge} Bridge extension covered — only ${count} rule(s) constrain "## ${entry.section}", ` +
-          `minimum is ${MIN_SECTION_RULES}: every capture path, sensitive permission and data destination needs its own rule`
+        `${bridge} Bridge extension covered — "## ${entry.section}" is constrained by ${count} rule(s), ` +
+          `down from the recorded ${floor}. This floor is shrink-only: raise it when you add rules, ` +
+          `never lower it to accommodate deleting one`
       );
     }
   }

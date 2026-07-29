@@ -297,6 +297,69 @@ describe("bridge privacy surface guard", () => {
     );
   });
 
+  // ---------- non-literal entries must not vanish either ----------
+  //
+  // The object split made key order irrelevant, but everything that is not
+  // an object literal was still dropped without a word: the extractor
+  // returned only the inline entries and the guard called that a match.
+  // Fail-loud for a malformed literal and fail-silent for a spread is the
+  // same disappearance one level up — and `discoverBridges` just widened
+  // the door a new bridge arrives through.
+
+  it("refuses a spread element instead of extracting only the inline entries", () => {
+    assert.throws(
+      () =>
+        extractPatternAllowlist(
+          'const ALLOWED = [...BASE_ALLOWED, { method: "GET", pattern: /^\\/inline$/ }];'
+        ),
+      /not an object literal[\s\S]*BASE_ALLOWED/
+    );
+  });
+
+  it("refuses a shared-constant element", () => {
+    assert.throws(
+      () =>
+        extractPatternAllowlist(
+          'const ALLOWED = [SHARED_ENTRY, { method: "GET", pattern: /^\\/inline$/ }];'
+        ),
+      /not an object literal[\s\S]*SHARED_ENTRY/
+    );
+  });
+
+  it("refuses entries appended after the literal with .concat()", () => {
+    withMutatedFile(
+      GARMIN_BACKGROUND,
+      (src) => src.replace("];\n", "].concat(EXTRA_READS);\n"),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /does not end at its/);
+      }
+    );
+  });
+
+  it("does not let a nested object shadow the entry's own pattern", () => {
+    // `{ alt: { pattern: /^\/DECOY$/ }, method, pattern }` recorded the
+    // decoy: the tokenizer split by depth correctly, but the key search ran
+    // over the FLATTENED text and took the first match at any depth.
+    assert.throws(
+      () =>
+        extractPatternAllowlist(
+          'const ALLOWED = [{ alt: { pattern: /^\\/DECOY$/ }, method: "GET", pattern: /^\\/real$/ }];'
+        ),
+      /field `alt` has a value this guard cannot read/
+    );
+  });
+
+  it("refuses an entry carrying a field it does not understand", () => {
+    assert.throws(
+      () =>
+        extractPatternAllowlist(
+          'const ALLOWED = [{ method: "GET", pattern: /^\\/a$/, note: "why" }];'
+        ),
+      /unrecognised field\(s\) `note`/
+    );
+  });
+
   it("keeps braces and brackets inside a regex out of the object split", () => {
     // `\\d{4}` and `[^\\/]+` carry the same characters the splitter uses as
     // structure, and both appear in the real allowlists.

@@ -179,6 +179,14 @@ non-membership.
 - **THEN** `check-bridge-privacy-surface.mjs` SHALL fail against the golden fixture
 - **AND** reversing the keys without changing any scope SHALL leave the extracted surface byte-identical
 
+#### Scenario: An entry the guard cannot read fails loudly rather than vanishing
+
+- **GIVEN** an allowlist whose elements are not all inline object literals — a spread (`[...BASE, {…}]`), a shared constant (`[SHARED, {…}]`), or entries appended after the literal (`[…].concat(EXTRA)`)
+- **WHEN** `check-bridge-privacy-surface.mjs` extracts that allowlist
+- **THEN** it SHALL fail naming the unreadable element, rather than recording only the inline entries as if they were the whole surface
+- **AND** an entry field whose value is not a string or regex literal, or whose key is not `method` or `pattern`, SHALL fail the same way
+- **AND** a nested object literal SHALL NOT be able to supply an entry's `method` or `pattern` in place of the entry's own
+
 #### Scenario: A new bridge package cannot ship unlocked
 
 - **WHEN** a new `packages/<name>-bridge` package is added

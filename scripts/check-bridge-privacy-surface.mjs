@@ -159,13 +159,57 @@ const findArrayEnd = (src, openIndex) => {
 };
 
 // Source text of an array literal declaration, `const <name> = [` through
-// the matching `]`. Returns null when the declaration is absent.
+// the matching `]`, plus the index just past that `]`. Returns null when
+// the declaration is absent.
 const sliceArrayLiteral = (src, declaration) => {
   const start = src.indexOf(declaration);
   if (start === -1) return null;
   const end = findArrayEnd(src, start + declaration.length - 1);
   if (end === -1) return null;
-  return src.slice(start, end);
+  return { source: src.slice(start, end), end };
+};
+
+// Next character that is neither whitespace nor comment.
+const nextMeaningful = (src, from) => {
+  let i = from;
+  while (i < src.length) {
+    const ch = src[i];
+    const next = src[i + 1];
+    if (ch === "/" && next === "/") {
+      i = skipLineComment(src, i);
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i = skipBlockComment(src, i);
+      continue;
+    }
+    if (/\s/.test(ch)) {
+      i += 1;
+      continue;
+    }
+    return { char: ch, index: i };
+  }
+  return { char: "", index: i };
+};
+
+// The declaration must END at its `]` (plus a `)` for the `new Set([…])`
+// form). `[…].concat(EXTRA)` appends entries after the literal that the
+// tokenizer never sees, so the golden would record a partial surface and
+// call it a match.
+const assertDeclarationEndsAtBracket = (src, end, declaration, closers) => {
+  let i = end;
+  for (const expected of closers) {
+    const found = nextMeaningful(src, i);
+    if (found.char !== expected) {
+      throw new Error(
+        `\`${declaration}…\` does not end at its \`]\` (expected \`${expected}\`, found \`${src
+          .slice(found.index, found.index + 24)
+          .split("\n")[0]
+          .trim()}\`) — entries appended after the literal are invisible to this guard`
+      );
+    }
+    i = found.index + 1;
+  }
 };
 
 // Split an array-literal body into its top-level `{…}` object literals
@@ -178,36 +222,54 @@ const sliceArrayLiteral = (src, declaration) => {
 // next one and the entry vanished from the extracted allowlist entirely —
 // a widened read scope that still matched the golden and passed CI. Key
 // order in JS is arbitrary and nothing in this repo normalises it.
+// `residue` collects every top-level character that is NOT part of an
+// object literal, string literal or comment — i.e. everything the two
+// extractors below would otherwise ignore. `[...BASE, {…}]`,
+// `[SHARED_ENTRY, {…}]` and any other non-literal element land there, and
+// the callers refuse them. Silently returning just the inline literal is
+// the same disappearance the object split exists to stop, one level up.
 export const tokenizeAllowlistBody = (body) => {
   const objects = [];
   const strings = [];
+  let residue = "";
   let depth = 0;
   let buffer = "";
-  let i = 0;
   const emit = (text) => {
     if (depth > 0) buffer += text;
+    else residue += text;
   };
-  while (i < body.length) {
-    const ch = body[i];
-    const next = body[i + 1];
+  // Scan only between the `[` and its matching `]`, so the `const … = [`
+  // prefix is not mistaken for a stray top-level element.
+  const open = body.indexOf("[");
+  const close = open === -1 ? -1 : findArrayEnd(body, open);
+  const inner =
+    open === -1
+      ? body
+      : body.slice(open + 1, close === -1 ? undefined : close - 1);
+  let i = 0;
+  while (i < inner.length) {
+    const ch = inner[i];
+    const next = inner[i + 1];
     if (ch === "/" && next === "/") {
-      i = skipLineComment(body, i);
+      i = skipLineComment(inner, i);
       continue;
     }
     if (ch === "/" && next === "*") {
-      i = skipBlockComment(body, i);
+      i = skipBlockComment(inner, i);
       continue;
     }
     if (ch === '"' || ch === "'" || ch === "`") {
-      const { value, end } = scanQuoted(body, i);
+      const { value, end } = scanQuoted(inner, i);
+      // A top-level string IS an element of the prefix shape, so it is
+      // recorded rather than treated as residue.
       if (depth === 0) strings.push(value);
-      emit(body.slice(i, end));
+      else emit(inner.slice(i, end));
       i = end;
       continue;
     }
     if (ch === "/") {
-      const { end } = scanRegex(body, i);
-      emit(body.slice(i, end));
+      const { end } = scanRegex(inner, i);
+      emit(inner.slice(i, end));
       i = end;
       continue;
     }
@@ -230,33 +292,113 @@ export const tokenizeAllowlistBody = (body) => {
     emit(ch);
     i += 1;
   }
-  return { objects, strings };
+  return { objects, strings, residue };
 };
 
-const METHOD_KEY = /method:\s*"([A-Z]+)"/;
-const PATTERN_KEY = /pattern:\s*\//;
+// Every top-level element must be an object literal. A spread, a shared
+// constant, or a call leaves its text in `residue`; returning just the
+// inline literals would record a partial allowlist and call it a match.
+const assertOnlyLiteralElements = (residue, declaration) => {
+  const stray = residue.replace(/[\s,]/g, "");
+  if (stray) {
+    throw new Error(
+      `\`${declaration}…\` has a top-level element that is not an object literal (\`${stray.slice(0, 40)}\`) — spreads, shared constants and calls hide entries from this guard`
+    );
+  }
+};
+
+const FIELD_KEY = /^[A-Za-z_$][\w$]*/;
+
+// Read one object literal's OWN fields. Scanning the flattened text for
+// `method:` / `pattern:` took the first match at any depth, so
+// `{ alt: { pattern: /^\/DECOY$/ }, method: "GET", pattern: /^\/real$/ }`
+// recorded the decoy and hid the real scope. This never descends: a nested
+// object is not a value it can read, so it is refused rather than entered.
+const parseEntryFields = (raw) => {
+  const fields = [];
+  let i = raw.indexOf("{") + 1;
+  while (i < raw.length) {
+    const ch = raw[i];
+    const next = raw[i + 1];
+    if (ch === "/" && next === "/") {
+      i = skipLineComment(raw, i);
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i = skipBlockComment(raw, i);
+      continue;
+    }
+    if (/[\s,]/.test(ch)) {
+      i += 1;
+      continue;
+    }
+    if (ch === "}") break;
+
+    const key = FIELD_KEY.exec(raw.slice(i));
+    if (!key) {
+      throw new Error(`unreadable field near \`${raw.slice(i, i + 30)}\``);
+    }
+    i += key[0].length;
+    while (i < raw.length && /\s/.test(raw[i])) i += 1;
+    if (raw[i] !== ":") {
+      throw new Error(`field \`${key[0]}\` is not a \`key: value\` pair`);
+    }
+    i += 1;
+    while (i < raw.length && /\s/.test(raw[i])) i += 1;
+
+    const value = raw[i];
+    if (value === '"' || value === "'" || value === "`") {
+      const quoted = scanQuoted(raw, i);
+      fields.push({ key: key[0], kind: "string", value: quoted.value });
+      i = quoted.end;
+    } else if (value === "/") {
+      const regex = scanRegex(raw, i);
+      fields.push({ key: key[0], kind: "regex", value: regex.body });
+      i = regex.end;
+    } else {
+      throw new Error(
+        `field \`${key[0]}\` has a value this guard cannot read (\`${raw.slice(i, i + 24)}\`) — only string and regex literals describe a scope unambiguously`
+      );
+    }
+  }
+  return fields;
+};
 
 // Shape A — `const ALLOWED = [{ method: "GET", pattern: /…/ }]`, in either
 // key order and across any number of lines.
-export const extractPatternAllowlist = (body) => {
-  const out = [];
-  for (const object of tokenizeAllowlistBody(body).objects) {
-    const method = METHOD_KEY.exec(object);
-    const pattern = PATTERN_KEY.exec(object);
-    if (!method || !pattern) {
-      // Loudly, never silently. An entry this extractor cannot read must
-      // not simply disappear from the golden: disappearing IS the silent
-      // widening the guard exists to prevent.
+export const extractPatternAllowlist = (
+  body,
+  declaration = "const ALLOWED = ["
+) => {
+  const { objects, residue } = tokenizeAllowlistBody(body);
+  assertOnlyLiteralElements(residue, declaration);
+
+  return objects.map((object) => {
+    // Loudly, never silently. An entry this extractor cannot read must not
+    // simply disappear from the golden: disappearing IS the silent
+    // widening the guard exists to prevent.
+    const fields = parseEntryFields(object);
+    const unknown = fields.filter(
+      (f) => f.key !== "method" && f.key !== "pattern"
+    );
+    if (unknown.length > 0) {
       throw new Error(
-        `unreadable allowlist entry (needs both \`method:\` and \`pattern:\`): ${object.trim()}`
+        `allowlist entry has unrecognised field(s) \`${unknown.map((f) => f.key).join(", ")}\`: ${object.trim()}`
       );
     }
-    out.push({
-      method: method[1],
-      pattern: scanRegex(object, pattern.index + pattern[0].length - 1).body,
-    });
-  }
-  return out;
+    const method = fields.find(
+      (f) => f.key === "method" && f.kind === "string"
+    );
+    const pattern = fields.find(
+      (f) => f.key === "pattern" && f.kind === "regex"
+    );
+    if (!method || !pattern || !/^[A-Z]+$/.test(method.value)) {
+      throw new Error(
+        `unreadable allowlist entry (needs \`method: "<VERB>"\` and \`pattern: /…/\`): ${object.trim()}`
+      );
+    }
+    return { method: method.value, pattern: pattern.value };
+  });
 };
 
 // Shape B — `const ALLOWED_PREFIXES = ["/path", …]`, a plain string array
@@ -266,11 +408,19 @@ export const extractPatternAllowlist = (body) => {
 // Entries are recorded under `prefix` rather than `pattern` so the golden
 // also pins WHICH matching semantics is in force: swapping one allowlist
 // shape for the other is itself visible drift.
-export const extractPrefixAllowlist = (body) =>
-  tokenizeAllowlistBody(body).strings.map((prefix) => ({
-    method: "GET",
-    prefix,
-  }));
+export const extractPrefixAllowlist = (
+  body,
+  declaration = "const ALLOWED_PREFIXES = ["
+) => {
+  const { objects, strings, residue } = tokenizeAllowlistBody(body);
+  assertOnlyLiteralElements(residue, declaration);
+  if (objects.length > 0) {
+    throw new Error(
+      `\`${declaration}…\` mixes object literals into a string-prefix array — the two shapes carry different matching semantics`
+    );
+  }
+  return strings.map((prefix) => ({ method: "GET", prefix }));
+};
 
 export const extractAllowed = (bridge) => {
   // The path allowlist lives in content.js for relay-based bridges, or
@@ -283,11 +433,19 @@ export const extractAllowed = (bridge) => {
   if (!path) return [];
   const src = readFileSync(path, "utf8");
 
-  const patternBody = sliceArrayLiteral(src, "const ALLOWED = [");
-  if (patternBody) return extractPatternAllowlist(patternBody);
+  const patternDecl = "const ALLOWED = [";
+  const patternBody = sliceArrayLiteral(src, patternDecl);
+  if (patternBody) {
+    assertDeclarationEndsAtBracket(src, patternBody.end, patternDecl, [";"]);
+    return extractPatternAllowlist(patternBody.source, patternDecl);
+  }
 
-  const prefixBody = sliceArrayLiteral(src, "const ALLOWED_PREFIXES = [");
-  if (prefixBody) return extractPrefixAllowlist(prefixBody);
+  const prefixDecl = "const ALLOWED_PREFIXES = [";
+  const prefixBody = sliceArrayLiteral(src, prefixDecl);
+  if (prefixBody) {
+    assertDeclarationEndsAtBracket(src, prefixBody.end, prefixDecl, [";"]);
+    return extractPrefixAllowlist(prefixBody.source, prefixDecl);
+  }
 
   return [];
 };
@@ -306,8 +464,19 @@ export const extractExternalActions = (bridge) => {
   if (!existsSync(path)) return [];
   const src = readFileSync(path, "utf8");
 
-  const body = sliceArrayLiteral(src, "const EXTERNAL_ACTIONS = new Set([");
-  if (body) return tokenizeAllowlistBody(body).strings;
+  const declaration = "const EXTERNAL_ACTIONS = new Set([";
+  const body = sliceArrayLiteral(src, declaration);
+  if (body) {
+    assertDeclarationEndsAtBracket(src, body.end, declaration, [")", ";"]);
+    const { objects, strings, residue } = tokenizeAllowlistBody(body.source);
+    assertOnlyLiteralElements(residue, declaration);
+    if (objects.length > 0) {
+      throw new Error(
+        `\`${declaration}…\` contains an object literal — an action name is a string`
+      );
+    }
+    return strings;
+  }
 
   // Absent is honest — a bridge may expose no external surface. Present but
   // unreadable is the vanishing failure this guard exists to prevent, so it

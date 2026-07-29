@@ -24,7 +24,9 @@ import {
   checkSidebar,
   discoverBridgePackages,
   isDirectInvocation,
+  MIN_NEW_SECTION_RULES,
   REQUIRED_RULES,
+  SECTION_RULE_FLOOR,
   sectionBody,
 } from "./check-privacy-policy.mjs";
 
@@ -639,7 +641,77 @@ test("gutting the rule set for a section that still exists is flagged", () => {
 
   assert.equal(v.length, 1, v.join(" | "));
   assert.match(v[0], /tanita-bridge Bridge extension covered/);
-  assert.match(v[0], /only 0 rule\(s\) constrain/);
+  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 11/);
+});
+
+test("the rule-count floor is shrink-only, not a flat minimum", () => {
+  // A flat floor of 6 let TrainingPeaks drop from 13 rules to 7 in silence.
+  // Removing ONE rule from each section must now fire for each section.
+  for (const [section, floor] of Object.entries(SECTION_RULE_FLOOR)) {
+    const firstOfSection = REQUIRED_RULES.findIndex(
+      (r) => r.section === section
+    );
+    assert.ok(firstOfSection >= 0, `no rules anchored to ${section}`);
+    const shrunk = REQUIRED_RULES.filter((_, i) => i !== firstOfSection);
+
+    const v = checkBridgeCoverage(
+      POLICY,
+      discoverBridgePackages(REPO_ROOT),
+      BRIDGE_REGISTRY,
+      shrunk
+    );
+
+    const coverage = v.filter((r) => r.includes("shrink-only"));
+    assert.equal(
+      coverage.length,
+      1,
+      `removing one rule from "${section}" (floor ${floor}) did not fire the ratchet alone: ${v.join(" | ")}`
+    );
+    assert.match(coverage[0], new RegExp(`down from the recorded ${floor}`));
+  }
+});
+
+test("each recorded floor equals that section's current rule count", () => {
+  // Keeps the ratchet honest in the other direction: a floor left below the
+  // real count is slack that a later deletion could spend without firing.
+  const actual = {};
+  for (const rule of REQUIRED_RULES) {
+    if (rule.section === undefined) continue;
+    actual[rule.section] = (actual[rule.section] ?? 0) + 1;
+  }
+
+  assert.deepEqual(SECTION_RULE_FLOOR, actual);
+});
+
+test("a section below the onboarding floor is flagged for a bridge with no recorded floor", () => {
+  const section = "Kaiord Acme Bridge Extension";
+  const registry = {
+    ...BRIDGE_REGISTRY,
+    "acme-bridge": { section, hosts: new Set(["https://acme.example/*"]) },
+  };
+  const policy = `${POLICY}\n## ${section}\n\n- Host: https://acme.example/*\n`;
+  const rules = [
+    ...REQUIRED_RULES,
+    ...Array.from({ length: MIN_NEW_SECTION_RULES - 1 }, (_, i) => ({
+      label: `Acme rule ${i}`,
+      section,
+      re: /acme\.example/,
+    })),
+  ];
+
+  const v = checkBridgeCoverage(
+    policy,
+    [...discoverBridgePackages(REPO_ROOT), "acme-bridge"].sort(),
+    registry,
+    rules
+  );
+
+  assert.equal(v.length, 1, v.join(" | "));
+  assert.match(v[0], /acme-bridge Bridge extension covered/);
+  assert.match(
+    v[0],
+    new RegExp(`at least ${MIN_NEW_SECTION_RULES} before it is recorded`)
+  );
 });
 
 test("the guard exits 1 when a new bridge package appears on disk", () => {
