@@ -33,6 +33,12 @@ const createStepActions = () => ({
     ),
 });
 
+/** The two (blockId, stepIndex) block-step actions share one shape. */
+const blockStepAction =
+  (name: "duplicateStepInRepetitionBlock" | "deleteStepInRepetitionBlock") =>
+  (blockId: string, stepIndex: number, state: WorkoutState) =>
+    createAllBlockActions(state)[name](blockId, stepIndex);
+
 const createBlockActions = () => ({
   createRepetitionBlock: (
     stepIndices: Array<number>,
@@ -52,15 +58,10 @@ const createBlockActions = () => ({
   ) => createAllBlockActions(state).editRepetitionBlock(blockId, repeatCount),
   addStepToRepetitionBlock: (blockId: string, state: WorkoutState) =>
     createAllBlockActions(state).addStepToRepetitionBlock(blockId),
-  duplicateStepInRepetitionBlock: (
-    blockId: string,
-    stepIndex: number,
-    state: WorkoutState
-  ) =>
-    createAllBlockActions(state).duplicateStepInRepetitionBlock(
-      blockId,
-      stepIndex
-    ),
+  duplicateStepInRepetitionBlock: blockStepAction(
+    "duplicateStepInRepetitionBlock"
+  ),
+  deleteStepInRepetitionBlock: blockStepAction("deleteStepInRepetitionBlock"),
   ungroupRepetitionBlock: (blockId: string, state: WorkoutState) =>
     createAllBlockActions(state).ungroupRepetitionBlock(blockId),
   deleteRepetitionBlock: (blockId: string, state: WorkoutState) =>

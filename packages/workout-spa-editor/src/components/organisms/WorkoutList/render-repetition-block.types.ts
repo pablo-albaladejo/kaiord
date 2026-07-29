@@ -9,11 +9,11 @@ export type RenderRepetitionBlockProps = {
   onStepSelect?: (stepId: string) => void;
   onBlockSelect?: (blockId: string) => void;
   onToggleStepSelection?: (stepId: string) => void;
-  onStepDelete?: (stepIndex: number) => void;
   onDuplicateStepInRepetitionBlock?: (
     blockId: string,
     stepIndex: number
   ) => void;
+  onDeleteStepInRepetitionBlock?: (blockId: string, stepIndex: number) => void;
   onEditRepetitionBlock?: (blockId: string, repeatCount: number) => void;
   onAddStepToRepetitionBlock?: (blockId: string) => void;
   onUngroupRepetitionBlock?: (blockId: string) => void;
