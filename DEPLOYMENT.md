@@ -1033,10 +1033,10 @@ git push origin main
    ls packages/core/dist/
    ```
 
-2. **Verify tsup configuration**:
-   - Check `packages/core/tsup.config.ts`
+2. **Verify tsdown configuration**:
+   - Check `packages/core/tsdown.config.ts`
    - Ensure `dts: true` for TypeScript declarations
-   - Ensure `format: ['esm', 'cjs']` for output formats
+   - Ensure `format: ["esm"]` for the output format
 
 3. **Check for build errors**:
    - Review workflow logs in Actions tab

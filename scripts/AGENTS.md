@@ -38,7 +38,6 @@ notes.
 | `check-bridge-stale-threshold-parity.test.mjs` | Bridge stale-threshold parity (test-only)                                                     |
 | `check-extension-icons-distinct.mjs`           | `lint:icons-distinct` — each extension has unique icon set                                    |
 | `check-allowlists-empty.mjs`                   | Allowlists are not silently growing                                                           |
-| `check-tsup-ignoredeprecations.mjs`            | Watch-dog for `tsup` ignored-deprecation flags                                                |
 | `check-build-portable.mjs`                     | Build artifacts are portable (no absolute paths)                                              |
 | `check-ci-fanout-invariants.mjs`               | CI fan-out matrix invariants                                                                  |
 | `check-scripts-orphans.mjs`                    | Every script under this folder has a sibling `*.test.mjs`                                     |
