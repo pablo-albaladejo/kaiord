@@ -53,26 +53,58 @@ completion reads as a defect rather than as a state.
 - **WHEN** the freshness counter is derived
 - **THEN** that source SHALL be skipped rather than rendered as an invalid value
 
-### Requirement: The counters claim nothing until the connection store has answered
+### Requirement: The counters claim nothing until discovery has had its window
 
-The counters SHALL render a placeholder, distinct from zero, until the
-connection store has completed a refresh pass. Every bridge row exists from the
-first render and reads undetected until then — because nothing has been asked
-yet, not because nothing is there — so a count rendered from that state would
-be wrong rather than merely early, and would tell a fully equipped reader that
-none of their sources are present on every cold load.
+The counters SHALL render a placeholder, distinct from zero, until bridge
+discovery has had the opportunity to hear from the extensions.
+
+The completion of a connection refresh pass SHALL NOT be treated as that
+opportunity. Nothing asks the extensions anything: they announce themselves
+when injected, and discovery only broadcasts a request after a delay of
+silence. A pass over a browser where nothing has yet announced therefore
+completes almost immediately, having sent no message at all, so a surface
+gated on it renders a confident zero to a fully equipped reader for as long as
+discovery actually takes.
+
+Discovery SHALL be treated as having had its window once any bridge is
+detected — positive evidence that announcements are arriving — or once a grace
+period has elapsed since discovery began listening. That period SHALL be
+derived from the delay before discovery requests announcements and the ceiling
+on verifying one, so it cannot drift from the behaviour it waits on. It SHALL
+be measured from the start of discovery for the application, not from the mount
+of the surface reading it, so a reader opening the surface later is not made to
+wait for a window that closed long ago.
+
+The placeholder SHALL NOT be permanent. A reader with no extensions installed
+SHALL eventually be told so, so the surface SHALL state the count once the
+grace period has elapsed even when nothing was ever detected.
+
+Every surface that counts detected bridges SHALL apply this same gate, so two
+surfaces counting the same thing cannot disagree while both are settling.
 
 #### Scenario: A cold load counts nothing
 
-- **GIVEN** the connection store has not completed a refresh pass
+- **GIVEN** discovery has just begun listening and no bridge has been detected
 - **WHEN** the counters render
 - **THEN** they SHALL render a placeholder and SHALL NOT render a count
 
-#### Scenario: The counters appear once the store has answered
+#### Scenario: A completed pass is not mistaken for an answer
 
-- **GIVEN** the connection store has completed a refresh pass
+- **GIVEN** a connection refresh pass has completed while discovery is still in its grace period and no bridge has been detected
 - **WHEN** the counters render
-- **THEN** they SHALL render counts derived from the resolved sources
+- **THEN** they SHALL still render a placeholder
+
+#### Scenario: A detection answers immediately
+
+- **GIVEN** at least one bridge has been detected, within the grace period
+- **WHEN** the counters render
+- **THEN** they SHALL render counts without waiting for the period to elapse
+
+#### Scenario: An empty browser is eventually told so
+
+- **GIVEN** no bridge was detected and the grace period has elapsed
+- **WHEN** the counters render
+- **THEN** they SHALL render the count, stating that none were detected
 
 ### Requirement: Coverage is counted over having a source, not over data in flight
 
@@ -154,6 +186,13 @@ reads as moments ago however long a source has been down. A date SHALL be
 attached only from a recorded last delivery, only when exactly one source is
 affected, and only in the reader's own calendar day.
 
+A date SHALL be attached ONLY to a statement that names a loss. It qualifies
+one, so appending it to either statement that nothing stopped arriving would
+contradict the sentence it is joined to — and that combination is ordinary
+rather than exotic, since an affected source whose types another source still
+covers has a recorded last delivery like any other. This precedence is
+required: the two rules are otherwise simultaneously satisfiable.
+
 A cause SHALL be named only when it holds for every affected source. With
 several affected, only the count holds for all of them; in particular one
 extension speaking an unsupported protocol version does not make the others
@@ -207,6 +246,12 @@ provider's own site, which this page cannot perform.
 - **GIVEN** more than one affected source, at least one with a recorded last delivery
 - **WHEN** the consequence is stated
 - **THEN** no date SHALL be stated
+
+#### Scenario: A statement that nothing stopped carries no date
+
+- **GIVEN** exactly one affected source with a recorded last delivery, whose types are all still served by a present source
+- **WHEN** the consequence is stated
+- **THEN** it SHALL state that nothing stopped arriving and SHALL NOT state a date
 
 #### Scenario: An outdated extension is told to update
 

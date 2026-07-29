@@ -124,22 +124,88 @@ names. `add-settings-attention-model` declined a CTA on the same reasoning, and
 "Refresh all" — which does act, on the one thing this page can act on — is
 already in the header.
 
-## D5. The cold-load window, again
+## D4c. The date attaches to a loss, or to nothing
 
-`add-settings-attention-model` shipped "0 of 5" on every cold load. Its guard
-was `connections.length === 0`, which never fires: `createSnapshotReader`
-synthesises a row per known bridge from the first render, so the list is never
-empty and the counter rendered zeros until the probes answered.
+`sinceOf` originally branched only on "exactly one affected source with a
+parseable date", and was joined to whichever sentence `consequenceOf` produced.
+Two of those three sentences say that nothing stopped arriving, so the banner
+could read:
 
-The reachable bad state is not "no rows", it is "rows that have not been asked
-yet". `useBridgeConnectionsRefreshed()` is the discriminator, and it is what
-gates the counters here. The placeholder is a distinct value, not a zero, so
-"we have not asked" and "the answer is none" no longer look the same.
+> Nothing has stopped: every affected type also has another source switched on.
+> **No new data since 2026-07-20.**
 
-The banner is deliberately NOT gated. Before the first pass every bridge is
-undiscovered, which makes every source `available` rather than `attention`, so
-the banner is silent for exactly the same reason a healthy browser leaves it
-silent. There is no window in which it can raise a false alarm.
+That is not exotic. A signed-out WHOOP whose only enabled route is `weight`,
+with Tanita also importing `weight` and installed, produces exactly it — and
+WHOOP has a `lastSyncAt` because any past import wrote one.
+
+The date qualifies a loss, so it is now attached only to the sentence that
+names one. The two spec requirements that produced this were simultaneously
+satisfiable with no precedence between them, which is a spec defect rather than
+only a code one; the precedence and its scenario are now stated.
+
+## D5. The cold-load window: "have we asked" is the wrong question
+
+`add-settings-attention-model` shipped "0 of 5" on every cold load behind a
+`connections.length === 0` guard that can never fire — `createSnapshotReader`
+synthesises a row per known bridge from the first render. This change first
+replaced it with `hasRefreshed()`, which is a better question and still the
+wrong one.
+
+Discovery is not request/response. `bridgeDiscovery.start()` installs a
+`message` listener and arms a timer; `ids` is empty and nothing has been sent.
+`lifecycle.start()` then calls `refresh()` immediately, `refreshBridge` reads
+`getExtensionId` → null for all five, writes `undiscoveredEntry` with no
+awaits, `allSettled` settles on the next microtask and `hasRefreshed()` flips
+true — all within microseconds of boot, with `detected: 0`. An announcement
+needs a `postMessage` macrotask plus an extension round-trip, so it cannot have
+happened. The gate protected a window microseconds wide and left the real one —
+discovery's — unguarded, so a hard reload with five extensions installed showed
+"0 of 5" and then climbed.
+
+The question is therefore not "have we asked" (nobody asks) but "has discovery
+had its chance", and there are two ways to know:
+
+- **Any bridge detected.** Positive evidence that announcements are arriving.
+  The count is explicitly of what has answered _so far this page-life_, and it
+  climbs in step with the cards beside it, each flipping as its own
+  announcement verifies. Waiting out the full window here would withhold an
+  answer already known.
+- **The grace period elapsed**, for the browser where nothing ever announces.
+  `DISCOVER_REQUEST_DELAY_MS + PING_TIMEOUT_MS` — the delay before discovery
+  broadcasts a request into silence, plus the ceiling on verifying an
+  announcement that answers it. Both derived from the constants that govern
+  them, so the window cannot drift from the behaviour it waits on.
+
+The clock is stamped at app boot, not at surface mount, so a reader opening the
+page ten minutes in waits for nothing. `loadedAt` is the floor because React
+runs child effects before parent ones: a cold boot straight onto this page can
+render before the root bootstrap stamps anything, and a reference slightly
+earlier than discovery's start can only delay the gate, never open it early.
+
+The placeholder is explicitly not permanent — a reader with no extensions has
+to be told so, which is why "any bridge detected" alone cannot be the gate.
+
+**The Settings index row is corrected in the same change.** It has the same bug
+from the same cause, and fixing only this surface would put a row reading
+"0 of 5" one click from a section reading "3 of 5" — reintroducing exactly the
+divergence D1 exists to prevent. Its unreachable `connections.length === 0`
+guard and the test covering it are removed rather than carried forward.
+
+The banner is deliberately NOT gated at all. Before a bridge is discovered
+every source reads `available` rather than `attention`, so the banner is silent
+for exactly the reason a healthy browser leaves it silent. There is no window
+in which it can raise a false alarm.
+
+## D5b. Why the counter and the banner may disagree about a type
+
+"Types covered 13 of 13" can render directly above "No source is sending Weight
+right now", and both are true: the tile counts _has a path_, the banner reports
+_is delivering_. Nothing on screen carried that distinction, so the pair read as
+a flat contradiction.
+
+The tile's note now says what makes the difference — "of 13 types · incl.
+manual entry" — which reconciles the two without enumerating which types are
+which, and without weakening either claim.
 
 ## D6. The refresh cooldown, and why 60 seconds
 

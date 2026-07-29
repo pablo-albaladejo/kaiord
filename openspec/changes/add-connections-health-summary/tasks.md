@@ -51,6 +51,22 @@
 - [x] 6.4 `ConnectionRefreshButton` in the header.
 - [x] 6.5 Give every new element a `data-testid`, following the section's `connections-*` convention.
 
+## 6b. Review round
+
+- [x] 6b.1 Attach the banner's date only when something is actually paused. Establish the reachable shape — one affected source, its types still covered elsewhere, a `lastSyncAt` from any past import — which read "Nothing has stopped … No new data since <date>". See design.md D4c.
+- [x] 6b.2 State the precedence in the spec too: the loss-vs-date requirements were simultaneously satisfiable with nothing ranking them, which is a spec defect and not only a code one.
+- [x] 6b.3 Replace the `hasRefreshed()` gate with a discovery-settled gate. Establish that `bridgeDiscovery.start()` only arms a timer, that the first pass writes five undiscovered rows with no awaits, and that `hasRefreshed()` therefore flips within microseconds of boot — so "0 of 5" was reachable and on screen for seconds. See design.md D5.
+- [x] 6b.4 Derive the grace window from `DISCOVER_REQUEST_DELAY_MS + PING_TIMEOUT_MS` rather than writing a literal; open early on any detection so an equipped reader is not made to wait out a window whose answer is already known.
+- [x] 6b.5 Stamp the clock at app boot in `use-bridge-discovery-bootstrap`, with module load as the floor — React runs child effects before parent ones, so a cold boot straight onto the page can render before the root has stamped.
+- [x] 6b.6 Guarantee the placeholder resolves: a reader with no extensions is told so once the window elapses, pinned by its own test.
+- [x] 6b.7 Apply the same gate to the Settings index row, and delete its `connections.length === 0` guard plus the test covering it — the snapshot reader synthesises a row per known bridge, so the empty list cannot occur. Fixing one surface alone would put "0 of 5" one click from "3 of 5".
+- [x] 6b.8 Assert the gate with the REAL hook: `ConnectionsTab.test.tsx` had mocked `useBridgeConnectionsRefreshed`, so it asserted its own stub rather than the behaviour.
+- [x] 6b.9 Mutation-check the round: guard removed → 2 consequence tests fail; gate forced open → 2 cold-load tests fail; gate forced never-open → the empty-browser test fails; cooldown effect removed → its test fails.
+- [x] 6b.10 Qualify the coverage tile's note ("incl. manual entry") so "13 of 13" above "No source is sending Weight" reconciles. See design.md D5b.
+- [x] 6b.11 Swap the paused-manual-type fixture from `tanita-bridge` to `trainingpeaks-bridge`: tanita has no prober, so it can only ever read `installed` and the test named the one scale bridge that cannot sign out.
+- [x] 6b.12 Make `banner.noRoutes` source-count neutral — it said "switched on for it" under a plural title.
+- [x] 6b.13 Clear the refresh cooldown message when the window passes, via `refreshCooldownRemaining`, so "Try again in a minute" does not outlive the minute.
+
 ## 7. Copy and verification
 
 - [x] 7.1 Sixteen keys in `en` AND `es` in the same commit (`resource-parity.test.ts` fails on an EN-only file).

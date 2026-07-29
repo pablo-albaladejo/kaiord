@@ -28,11 +28,21 @@ rather than softened.
   prober by design, since its only session call downloads the whole export CSV
   — so the counter would sit one short forever and read as a defect. This is
   the choice and the word the Settings index row already made.
-- **The counters render nothing until the store has answered.** Every bridge
-  row exists from the first render and reads undiscovered, because nothing has
-  been asked yet — a count rendered then tells a fully equipped user "0 of 5"
-  on every cold load. The row waits on `useBridgeConnectionsRefreshed()` and
-  renders a placeholder, which is a different claim from zero.
+- **The counters render nothing until discovery has had its window.** Nobody
+  asks the extensions anything — they announce themselves when injected, and
+  discovery only broadcasts a request after three seconds of silence. So a
+  connection refresh pass over a browser where nothing has announced completes
+  microseconds after boot having sent no message at all, and gating on it
+  states a confident "0 of 5" to a fully equipped reader for as long as
+  discovery actually takes. The gate is instead any bridge being detected, or a
+  grace window derived from `DISCOVER_REQUEST_DELAY_MS + PING_TIMEOUT_MS`. The
+  placeholder is a different claim from zero, and it is not permanent: a reader
+  with no extensions is told so once the window elapses.
+- **The Settings index row is corrected with it.** It counts the same thing
+  from the same store and had the same bug; fixing only the section would put a
+  row reading "0 of 5" one click from a section reading "3 of 5". Its
+  `connections.length === 0` guard is deleted as unreachable — the snapshot
+  reader synthesises a row per known bridge from the first render.
 - **"Types covered" counts manual entry; the label is written for that.** A
   type is covered when an enabled import route's source is present, OR the type
   has a real manual-entry path. Excluding manual would put the denominator out
@@ -113,6 +123,10 @@ sentence the product cannot honour.
 - `spa-connections-page`: the section gains a health header above the cards —
   counters, the consequence of a broken source, and a refresh covering every
   bridge — all derived from the per-source state the section already resolves.
+- `spa-settings-shell`: the connections row's cold-load gate is corrected to
+  the same discovery-settled gate, and its unreachable empty-list guard is
+  removed, so the row and the section it leads to cannot disagree while both
+  are settling.
 
 ## Impact
 
