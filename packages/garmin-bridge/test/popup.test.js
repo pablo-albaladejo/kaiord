@@ -149,7 +149,10 @@ describe("Garmin popup", () => {
     expect(doc.getElementById("status-text").textContent).toBe("Connected");
     const cause = doc.getElementById("status-sub").textContent;
     expect(cause).toContain("minted from an earlier sign-in");
-    expect(cause).not.toContain("session");
+    // Concept, not string: `not.toContain("session")` is case-sensitive, so a
+    // sentence-initial "Session" — the likeliest way the claim comes back —
+    // would have walked straight through it.
+    expect(cause).not.toMatch(/session/i);
   });
 
   it("renders disconnected state with Retry when ping fails", async () => {
@@ -193,7 +196,12 @@ describe("Garmin popup", () => {
     const cause = doc.getElementById("status-sub").textContent;
     expect(cause).toContain("could not read from Garmin Connect");
     expect(cause).toContain("if you are already signed in");
-    expect(cause).not.toContain("signed out,");
+    // The assertion this whole branch rests on, so it pins the CONCEPT: the
+    // previous form was `not.toContain("signed out,")` — with the comma — and
+    // passed happily on "You are signed out." or "signed out and…". A guard
+    // that excludes one punctuation variant of the regression is not guarding
+    // the regression.
+    expect(cause).not.toMatch(/signed out/i);
     expect(doc.querySelector(".cta-primary").textContent).toBe(
       "Sign in to Garmin Connect"
     );
