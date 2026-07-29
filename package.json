@@ -87,7 +87,7 @@
     "lint:links": "bash scripts/lint-links.sh",
     "icons:build": "node scripts/build-extension-icons.mjs",
     "bridge:sync": "node scripts/sync-bridge-core.mjs",
-    "test:scripts": "node --test scripts/*.test.mjs scripts/cws-api/*.test.mjs scripts/eslint-rules/*.test.mjs",
+    "test:scripts": "node --test scripts/*.test.mjs scripts/cws-api/*.test.mjs scripts/eslint-rules/*.test.mjs packages/docs/scripts/*.test.mjs",
     "archive:index": "node scripts/generate-archive-index.mjs",
     "specs:inventory": "node scripts/generate-specs-inventory.mjs",
     "format": "prettier --write .",

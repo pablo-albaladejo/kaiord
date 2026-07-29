@@ -518,16 +518,6 @@ describe("background.js", () => {
       await expect(call).rejects.toThrow("Body composition upload failed: 413");
     });
 
-    it("should expose push-body-composition as an allowlisted external action", () => {
-      // Arrange
-
-      // Act
-      const allowed = EXTERNAL_ACTIONS.has("push-body-composition");
-
-      // Assert
-      expect(allowed).toBe(true);
-    });
-
     it("should reject a FIT payload that is neither a string nor an array", () => {
       // Arrange
       const badPayload = { not: "valid" };
@@ -648,6 +638,34 @@ describe("background.js", () => {
       await expect(fetchActivitiesWithBackoff(2, 0)).rejects.toThrow(
         "Activities pull failed: 503"
       );
+    });
+  });
+
+  describe("EXTERNAL_ACTIONS origin pinning", () => {
+    // Pins the exact set, the way tanita/train2go/trainingpeaks do. The
+    // previous assertion here was `EXTERNAL_ACTIONS.has("push-body-composition")`,
+    // which says one action is present, not which actions exist — so a new
+    // externally reachable action passed this suite, the privacy-surface
+    // golden (blind to EXTERNAL_ACTIONS at the time) and `pnpm test:scripts`.
+    // garmin-bridge is the published extension.
+    it("should expose exactly the probe + read + write + navigation surface", () => {
+      // Arrange
+      const expected = [
+        "ping",
+        "list",
+        "activities",
+        "push",
+        "push-body-composition",
+        "open-garmin",
+        "profile-snapshot",
+        "profile-snapshot-clear",
+      ];
+
+      // Act
+      const actual = [...EXTERNAL_ACTIONS];
+
+      // Assert
+      expect(actual).toEqual(expected);
     });
   });
 

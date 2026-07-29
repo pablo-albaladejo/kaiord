@@ -56,6 +56,64 @@
         "method": "GET",
         "pattern": "^\\/activitylist-service\\/activities\\/search\\/activities(\\?.*)?$"
       }
+    ],
+    "external_actions": [
+      "ping",
+      "list",
+      "activities",
+      "push",
+      "push-body-composition",
+      "open-garmin",
+      "profile-snapshot",
+      "profile-snapshot-clear"
+    ]
+  },
+  "tanita-bridge": {
+    "manifest": {
+      "permissions": [
+        "storage"
+      ],
+      "host_permissions": [
+        "https://mytanita.eu/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://*.kaiord.com/*",
+          "http://localhost/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "manifest_prod": {
+      "permissions": [
+        "storage"
+      ],
+      "host_permissions": [
+        "https://mytanita.eu/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://*.kaiord.com/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "allowed_paths": [
+      {
+        "method": "GET",
+        "pattern": "^\\/en\\/user\\/export-csv$"
+      }
+    ],
+    "external_actions": [
+      "ping",
+      "checkSession",
+      "read-export-csv"
     ]
   },
   "train2go-bridge": {
@@ -115,6 +173,73 @@
         "method": "GET",
         "pattern": "^\\/user\\/details$"
       }
+    ],
+    "external_actions": [
+      "ping",
+      "read-week",
+      "read-day",
+      "read-details",
+      "open-train2go",
+      "profile-snapshot",
+      "profile-snapshot-clear"
+    ]
+  },
+  "trainingpeaks-bridge": {
+    "manifest": {
+      "permissions": [
+        "storage"
+      ],
+      "host_permissions": [
+        "https://tpapi.trainingpeaks.com/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://*.kaiord.com/*",
+          "http://localhost/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "manifest_prod": {
+      "permissions": [
+        "storage"
+      ],
+      "host_permissions": [
+        "https://tpapi.trainingpeaks.com/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://*.kaiord.com/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "allowed_paths": [
+      {
+        "method": "GET",
+        "pattern": "^\\/users\\/v3\\/token$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetrics\\/[^\\/]+\\/[^\\/]+$"
+      },
+      {
+        "method": "POST",
+        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetric$"
+      }
+    ],
+    "external_actions": [
+      "ping",
+      "checkSession",
+      "read-metrics",
+      "push-weight",
+      "open-trainingpeaks"
     ]
   },
   "whoop-bridge": {
@@ -194,100 +319,11 @@
         "method": "GET",
         "prefix": "/health-service/v2/stress-bff"
       }
-    ]
-  },
-  "tanita-bridge": {
-    "manifest": {
-      "permissions": [
-        "storage"
-      ],
-      "host_permissions": [
-        "https://mytanita.eu/*"
-      ],
-      "content_scripts_matches": [
-        [
-          "https://*.kaiord.com/*",
-          "http://localhost/*"
-        ]
-      ],
-      "externally_connectable_matches": [
-        "http://localhost:5173/*",
-        "http://localhost:5174/*",
-        "https://*.kaiord.com/*"
-      ]
-    },
-    "manifest_prod": {
-      "permissions": [
-        "storage"
-      ],
-      "host_permissions": [
-        "https://mytanita.eu/*"
-      ],
-      "content_scripts_matches": [
-        [
-          "https://*.kaiord.com/*"
-        ]
-      ],
-      "externally_connectable_matches": [
-        "https://*.kaiord.com/*"
-      ]
-    },
-    "allowed_paths": [
-      {
-        "method": "GET",
-        "pattern": "^\\/en\\/user\\/export-csv$"
-      }
-    ]
-  },
-  "trainingpeaks-bridge": {
-    "manifest": {
-      "permissions": [
-        "storage"
-      ],
-      "host_permissions": [
-        "https://tpapi.trainingpeaks.com/*"
-      ],
-      "content_scripts_matches": [
-        [
-          "https://*.kaiord.com/*",
-          "http://localhost/*"
-        ]
-      ],
-      "externally_connectable_matches": [
-        "http://localhost:5173/*",
-        "http://localhost:5174/*",
-        "https://*.kaiord.com/*"
-      ]
-    },
-    "manifest_prod": {
-      "permissions": [
-        "storage"
-      ],
-      "host_permissions": [
-        "https://tpapi.trainingpeaks.com/*"
-      ],
-      "content_scripts_matches": [
-        [
-          "https://*.kaiord.com/*"
-        ]
-      ],
-      "externally_connectable_matches": [
-        "https://*.kaiord.com/*"
-      ]
-    },
-    "allowed_paths": [
-      {
-        "method": "GET",
-        "pattern": "^\\/users\\/v3\\/token$"
-      },
-      {
-        "method": "GET",
-        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetrics\\/[^\\/]+\\/[^\\/]+$"
-      },
-      {
-        "method": "POST",
-        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetric$"
-      }
+    ],
+    "external_actions": [
+      "ping",
+      "status",
+      "whoop-fetch"
     ]
   }
 }
