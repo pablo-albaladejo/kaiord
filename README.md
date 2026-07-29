@@ -88,7 +88,7 @@ Comprehensive documentation is available in the `/docs` directory:
 
 | Layer           | Tooling                            |
 | --------------- | ---------------------------------- |
-| Core            | TypeScript, tsup, Zod              |
+| Core            | TypeScript, tsdown, Zod            |
 | CLI             | yargs                              |
 | Web App         | React, Zustand, Tailwind, Radix UI |
 | Testing         | Vitest, Playwright                 |
