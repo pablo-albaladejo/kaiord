@@ -66,6 +66,11 @@
       "open-garmin",
       "profile-snapshot",
       "profile-snapshot-clear"
+    ],
+    "auth_endpoints": [
+      "https://sso.garmin.com/sso/signin",
+      "https://connectapi.garmin.com/oauth-service/oauth/preauthorized",
+      "https://connectapi.garmin.com/oauth-service/oauth/exchange/user/2.0"
     ]
   },
   "tanita-bridge": {
@@ -114,7 +119,8 @@
       "ping",
       "checkSession",
       "read-export-csv"
-    ]
+    ],
+    "auth_endpoints": []
   },
   "train2go-bridge": {
     "manifest": {
@@ -182,7 +188,8 @@
       "open-train2go",
       "profile-snapshot",
       "profile-snapshot-clear"
-    ]
+    ],
+    "auth_endpoints": []
   },
   "trainingpeaks-bridge": {
     "manifest": {
@@ -240,6 +247,9 @@
       "read-metrics",
       "push-weight",
       "open-trainingpeaks"
+    ],
+    "auth_endpoints": [
+      "https://tpapi.trainingpeaks.com/users/v3/token"
     ]
   },
   "whoop-bridge": {
@@ -324,6 +334,7 @@
       "ping",
       "status",
       "whoop-fetch"
-    ]
+    ],
+    "auth_endpoints": []
   }
 }
