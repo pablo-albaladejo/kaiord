@@ -12,12 +12,13 @@
  * flag synchronously also settles the two-fast-clicks case that a captured
  * `status` could not.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { bridgeConnections } from "../../adapters/bridge/bridge-connection-store";
 import {
   isRefreshCoolingDown,
   isRefreshRunning,
+  refreshCooldownRemaining,
   startOrJoinRefresh,
 } from "./refresh-cooldown";
 
@@ -44,6 +45,17 @@ export const useConnectionsRefresh = (): ConnectionsRefresh => {
       () => setStatus("idle")
     );
   }, []);
+
+  // "Try again in a minute" has to stop being displayed when the minute is
+  // up, or it outlives the refusal it describes and reads as a dead control.
+  useEffect(() => {
+    if (status !== "cooldown") return;
+    const timer = setTimeout(
+      () => setStatus("idle"),
+      refreshCooldownRemaining(Date.now())
+    );
+    return () => clearTimeout(timer);
+  }, [status]);
 
   return { status, run };
 };

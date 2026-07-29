@@ -89,13 +89,21 @@ describe("buildConnectionCoverage", () => {
 
   it("should name a manual-entry type as paused while still counting it covered", () => {
     // Arrange
-    // Reachable whenever a scale bridge signs out: `weight` can be typed in,
-    // so it still has a source, but nobody types a weight in because a bridge
-    // broke — the automatic delivery stopped and the banner has to say so.
-    // Deriving `paused` as the complement of `covered` would silently drop
-    // every manual-entry type from the banner, which is 9 of the 13.
-    const sources = [source("tanita", "tanita-bridge", "attention")];
-    const byDataType = flows([["weight", [route("weight", "tanita-bridge")]]]);
+    // TrainingPeaks, not Tanita: `tanita-bridge` has no session prober, so
+    // `bridgeSourceStatus` can only ever call it `installed` and it cannot
+    // reach this state at all. `trainingpeaks-bridge` is probed, imports
+    // `weight`, and is the one bridge that reports `needsReauth`.
+    //
+    // `weight` can be typed in, so it still has a source — but nobody types a
+    // weight in because a bridge broke, so the delivery stopped and the banner
+    // has to say so. Deriving `paused` as the complement of `covered` would
+    // silently drop every manual-entry type from the banner, 9 of the 13.
+    const sources = [
+      source("trainingpeaks", "trainingpeaks-bridge", "attention"),
+    ];
+    const byDataType = flows([
+      ["weight", [route("weight", "trainingpeaks-bridge")]],
+    ]);
 
     // Act
     const coverage = buildConnectionCoverage(sources, byDataType);

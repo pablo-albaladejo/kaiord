@@ -22,7 +22,13 @@ let lastRefreshAt: number | null = null;
 let inFlight: Promise<void> | null = null;
 
 export const isRefreshCoolingDown = (now: number): boolean =>
-  lastRefreshAt !== null && now - lastRefreshAt < REFRESH_COOLDOWN_MS;
+  refreshCooldownRemaining(now) > 0;
+
+/** How long until a press would be accepted again; 0 once it would be. */
+export const refreshCooldownRemaining = (now: number): number =>
+  lastRefreshAt === null
+    ? 0
+    : Math.max(lastRefreshAt + REFRESH_COOLDOWN_MS - now, 0);
 
 export const isRefreshRunning = (): boolean => inFlight !== null;
 
