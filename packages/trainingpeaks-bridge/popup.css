@@ -227,6 +227,29 @@ body {
   color: var(--kd-semantic-warning);
 }
 
+/* ── Consequence block: what the current state costs, and what ends it.
+       Prose rather than chips — a chip names a thing that flows, these
+       lines name an outcome. Neutral-bordered, not warning-tinted: the
+       block states facts in every state, including the healthy one, so a
+       tint would cry wolf on a working bridge. ── */
+.consequence {
+  padding: 10px 12px;
+  border: 1px solid var(--kd-border);
+  border-radius: 9px;
+  background: var(--kd-bg-surface);
+}
+
+.consequence__line {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--kd-text-secondary);
+}
+
+.consequence__line + .consequence__line {
+  margin-top: 6px;
+}
+
 /* ── Athlete card grid (2-column micro-grid; switches to single full-width
        cell when only one field is rendered). ── */
 .athlete {
