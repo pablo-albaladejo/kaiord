@@ -292,6 +292,34 @@ export const extractAllowed = (bridge) => {
   return [];
 };
 
+// `const EXTERNAL_ACTIONS = new Set(["ping", …])` — the actions the SPA can
+// invoke across origins via `externally_connectable`. This is the bridge's
+// externally reachable command surface, and it was absent from the golden
+// entirely: adding an action widened what kaiord.com may ask an installed
+// extension to do, with the guard reporting "matches golden".
+//
+// The per-bridge suites were the only thing holding the line, and only
+// three of the five pinned the exact set — garmin (published) asserted one
+// membership, whoop one non-membership. Neither excludes a new action.
+export const extractExternalActions = (bridge) => {
+  const path = join(REPO_ROOT, "packages", bridge, "background.js");
+  if (!existsSync(path)) return [];
+  const src = readFileSync(path, "utf8");
+
+  const body = sliceArrayLiteral(src, "const EXTERNAL_ACTIONS = new Set([");
+  if (body) return tokenizeAllowlistBody(body).strings;
+
+  // Absent is honest — a bridge may expose no external surface. Present but
+  // unreadable is the vanishing failure this guard exists to prevent, so it
+  // is loud.
+  if (src.includes("EXTERNAL_ACTIONS")) {
+    throw new Error(
+      `${bridge}: background.js mentions EXTERNAL_ACTIONS but no \`const EXTERNAL_ACTIONS = new Set([…])\` declaration could be read`
+    );
+  }
+  return [];
+};
+
 const FETCH_OR_XHR = /\b(fetch|XMLHttpRequest)\s*\(\s*([^)]*)\)/g;
 
 const declaresPopup = (bridge) => {
@@ -331,6 +359,7 @@ export const buildSurface = () => {
       manifest: readManifest(bridge, "manifest.json"),
       ...(manifestProd ? { manifest_prod: manifestProd } : {}),
       allowed_paths: extractAllowed(bridge),
+      external_actions: extractExternalActions(bridge),
     };
   }
   return out;

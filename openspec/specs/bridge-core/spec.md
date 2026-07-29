@@ -159,6 +159,19 @@ extracted, and SHALL fail loudly on an entry it cannot read rather than
 omitting it from the surface. The guard SHALL run its checks whenever it is
 invoked, including through a path containing a symlink.
 
+The golden SHALL record each bridge's `EXTERNAL_ACTIONS` set — the actions
+the editor may invoke across origins — and every bridge's own suite SHALL
+pin that set exactly, not merely assert one membership or one
+non-membership.
+
+#### Scenario: A widened external-action surface is caught
+
+- **GIVEN** a bridge's `EXTERNAL_ACTIONS` set, which bounds what kaiord.com may ask the installed extension to do
+- **WHEN** an action is added to, removed from, or renamed in that set
+- **THEN** `check-bridge-privacy-surface.mjs` SHALL fail against the golden fixture
+- **AND** that bridge's own vitest suite SHALL fail on its exact-set pin
+- **AND** a declaration the guard cannot read SHALL fail loudly rather than being recorded as an empty surface
+
 #### Scenario: A widened allowlist written with reversed keys is caught
 
 - **GIVEN** an `ALLOWED` entry written `{ pattern, method }` instead of `{ method, pattern }`

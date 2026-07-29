@@ -27,6 +27,7 @@ const GOLDEN = join(HERE, "fixtures/bridge-privacy-surface.json");
 const POPUP = join(REPO, "packages/garmin-bridge/popup.js");
 const GARMIN_BACKGROUND = join(REPO, "packages/garmin-bridge/background.js");
 const WHOOP_POPUP = join(REPO, "packages/whoop-bridge/popup.js");
+const WHOOP_BACKGROUND = join(REPO, "packages/whoop-bridge/background.js");
 const WHOOP_CONTENT = join(REPO, "packages/whoop-bridge/content.js");
 
 const runGuard = () =>
@@ -189,6 +190,7 @@ describe("bridge privacy surface guard", () => {
               externally_connectable_matches: [],
             },
             allowed_paths: [],
+            external_actions: [],
           },
         }),
       },
@@ -309,6 +311,110 @@ describe("bridge privacy surface guard", () => {
     assert.deepEqual(extractPatternAllowlist(body), [
       { method: "GET", pattern: "^\\/plan\\/\\d{4}-\\d{2}-\\d{2}\\/[^\\/]+$" },
     ]);
+  });
+
+  // ---------- the external command surface is in the golden ----------
+  //
+  // `EXTERNAL_ACTIONS` is what kaiord.com may ask an installed extension to
+  // do across origins. It was absent from the golden, so widening it was
+  // invisible to this guard AND to `pnpm test:scripts`: only the per-bridge
+  // vitest suites held the line, and only three of the five pinned the
+  // exact set. Adding a bogus action to garmin (published) and to whoop
+  // passed the guard, all 733 script tests, and both bridges' own suites.
+
+  it("fails when a bridge gains an external action", () => {
+    withMutatedFile(
+      GARMIN_BACKGROUND,
+      (src) =>
+        src.replace(
+          'const EXTERNAL_ACTIONS = new Set([\n  "ping",',
+          'const EXTERNAL_ACTIONS = new Set([\n  "ping",\n  "exfiltrate-everything",'
+        ),
+      (result) => {
+        assert.equal(
+          result.status,
+          1,
+          `guard passed on a widened external surface:\n${result.stdout}`
+        );
+        assert.match(result.stderr, /drifted from golden/);
+        assert.match(result.stderr, /exfiltrate-everything/);
+      }
+    );
+  });
+
+  it("fails when a bridge loses an external action", () => {
+    // Narrowing is drift too: the golden records what the surface IS, so
+    // shrinking it is a deliberate act that has to be re-recorded.
+    withMutatedFile(
+      WHOOP_BACKGROUND,
+      // Anchored on the declaration: `"whoop-fetch"` also appears in the
+      // internal relay call and the dispatch switch, and replacing one of
+      // those leaves the external surface untouched.
+      (src) =>
+        src.replace(
+          'const EXTERNAL_ACTIONS = new Set(["ping", "status", "whoop-fetch"]);',
+          'const EXTERNAL_ACTIONS = new Set(["ping", "status", "whoop-fetch-renamed"]);'
+        ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /drifted from golden/);
+        assert.match(result.stderr, /whoop-fetch-renamed/);
+      }
+    );
+  });
+
+  it("refuses to silently record an empty external surface it could not read", () => {
+    // A declaration the extractor cannot parse must not read as "this
+    // bridge exposes nothing" — that is the same vanishing failure as a
+    // dropped allowlist entry, applied to the command surface.
+    withMutatedFile(
+      GARMIN_BACKGROUND,
+      (src) =>
+        src.replace(
+          "const EXTERNAL_ACTIONS = new Set([",
+          "const EXTERNAL_ACTIONS = buildActionSet(["
+        ),
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /EXTERNAL_ACTIONS/);
+        assert.match(
+          result.stderr,
+          /could not be read|no `const EXTERNAL_ACTIONS/
+        );
+      }
+    );
+  });
+
+  it("golden external_actions match each bridge's source Set, counted independently", () => {
+    // Derived without the guard's extractor, for the same reason the
+    // allowed_paths count is: a cross-check that calls the code it is
+    // checking agrees with that code's mistakes.
+    const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
+    for (const bridge of Object.keys(golden)) {
+      const path = join(REPO, "packages", bridge, "background.js");
+      if (!existsSync(path)) {
+        assert.deepEqual(golden[bridge].external_actions, []);
+        continue;
+      }
+      const src = readFileSync(path, "utf8");
+      const start = src.indexOf("const EXTERNAL_ACTIONS = new Set([");
+      assert.ok(start >= 0, `${bridge}: no EXTERNAL_ACTIONS Set declaration`);
+      const end = src.indexOf("])", start);
+      assert.ok(end >= 0, `${bridge}: EXTERNAL_ACTIONS Set is not closed`);
+      const declared = [...src.slice(start, end).matchAll(/"([^"\n]+)"/g)].map(
+        (m) => m[1]
+      );
+
+      assert.ok(
+        declared.length > 0,
+        `${bridge}: counted 0 external actions — this assertion would pass vacuously`
+      );
+      assert.deepEqual(
+        golden[bridge].external_actions,
+        declared,
+        `${bridge}: golden external_actions differ from background.js`
+      );
+    }
   });
 
   // ---------- the bridge list comes from disk ----------

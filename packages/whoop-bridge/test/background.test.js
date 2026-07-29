@@ -411,6 +411,22 @@ describe("dispatchExternal origin pinning", () => {
     __resetChromeMock();
   });
 
+  // Pins the exact set. The only other assertion about EXTERNAL_ACTIONS
+  // here is that `capture-token` is NOT in it — that excludes one name, not
+  // every name, so a new externally reachable action passed this suite, the
+  // privacy-surface golden (blind to EXTERNAL_ACTIONS at the time) and
+  // `pnpm test:scripts`.
+  it("should expose exactly the probe + status + relayed-read surface", () => {
+    // Arrange
+    const expected = ["ping", "status", "whoop-fetch"];
+
+    // Act
+    const actual = [...EXTERNAL_ACTIONS];
+
+    // Assert
+    expect(actual).toEqual(expected);
+  });
+
   it("should refuse messages from a non-pinned origin", () => {
     // Arrange
     const respond = vi.fn();
