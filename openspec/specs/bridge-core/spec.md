@@ -152,6 +152,31 @@ SHALL verify the vendored popup snapshot module's
 vendors that module. Every bridge's vitest suite SHALL run in the CI test
 matrix.
 
+The guard SHALL derive its bridge list from `packages/*-bridge` on disk
+rather than from a hardcoded array, SHALL extract allowlist entries by
+object literal so that `method` / `pattern` key order cannot change what is
+extracted, and SHALL fail loudly on an entry it cannot read rather than
+omitting it from the surface. The guard SHALL run its checks whenever it is
+invoked, including through a path containing a symlink.
+
+#### Scenario: A widened allowlist written with reversed keys is caught
+
+- **GIVEN** an `ALLOWED` entry written `{ pattern, method }` instead of `{ method, pattern }`
+- **WHEN** a new read scope is added to a bridge's allowlist in that key order
+- **THEN** `check-bridge-privacy-surface.mjs` SHALL fail against the golden fixture
+- **AND** reversing the keys without changing any scope SHALL leave the extracted surface byte-identical
+
+#### Scenario: A new bridge package cannot ship unlocked
+
+- **WHEN** a new `packages/<name>-bridge` package is added
+- **THEN** `check-bridge-privacy-surface.mjs` SHALL fail against the golden fixture until that bridge's manifest surface and read allowlist are recorded in it
+
+#### Scenario: The guard checks something when invoked through a symlink
+
+- **GIVEN** an invocation path containing a symlink, under which Node resolves the module URL to the real path but leaves `process.argv[1]` as typed
+- **WHEN** `check-bridge-privacy-surface.mjs` is executed through that path
+- **THEN** it SHALL run its checks and report the result, rather than exiting 0 having verified nothing
+
 #### Scenario: Whoop popup outbound URL is caught
 
 - **WHEN** an absolute `http(s)://` URL is introduced as a fetch argument in `packages/whoop-bridge/popup.js`
