@@ -1,4 +1,4 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsdown";
 
 export default defineConfig({
   entry: {
@@ -8,6 +8,6 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  splitting: false,
   treeshake: true,
+  outExtensions: () => ({ js: ".js", dts: ".d.ts" }),
 });

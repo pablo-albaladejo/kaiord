@@ -104,7 +104,8 @@ Its removal is deferred to the program's single scheduled major.
 ### Requirement: Module identity across the agents subpath
 
 The `./agents` and `./observability` entries SHALL share module instances
-with the other subpaths (tsup `splitting: true`), so a prompt registered via
+with the other subpaths (tsdown builds all entries in one config, so shared
+modules land in a common chunk), so a prompt registered via
 `./prompts` resolves inside the runtime and a sink created via
 `./observability` receives runtime events.
 

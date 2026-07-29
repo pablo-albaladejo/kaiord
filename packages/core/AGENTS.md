@@ -9,12 +9,12 @@
 
 ## Key Files
 
-| File             | Description                                                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/index.ts`   | Public API barrel — re-exports schemas, types, errors, ports, application functions, round-trip validator, and profile-snapshot DTO.  |
-| `package.json`   | Declares dual exports (`.` and `./test-utils`), `zod ^4.4.3` runtime dep, faker/rosie/tsup/vitest devDeps, schema/fixture generators. |
-| `README.md`      | Public-facing API documentation with quick-start, schema validation, error types, and tree-shaking guidance.                          |
-| `tsup.config.ts` | Build configuration (referenced by `package.json` build script — produces `dist/`).                                                   |
+| File               | Description                                                                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/index.ts`     | Public API barrel — re-exports schemas, types, errors, ports, application functions, round-trip validator, and profile-snapshot DTO.    |
+| `package.json`     | Declares dual exports (`.` and `./test-utils`), `zod ^4.4.3` runtime dep, faker/rosie/tsdown/vitest devDeps, schema/fixture generators. |
+| `README.md`        | Public-facing API documentation with quick-start, schema validation, error types, and tree-shaking guidance.                            |
+| `tsdown.config.ts` | Build configuration (referenced by `package.json` build script — produces `dist/`).                                                     |
 
 ## Subdirectories
 
@@ -59,6 +59,6 @@ None. This is the root of the dependency DAG.
 
 - `zod ^4.4.3` (runtime) — schema validation and type inference.
 - `@faker-js/faker`, `rosie` (devDep, but RE-EXPORTED for tests under `./test-utils` via rosie factories).
-- `tsup`, `tsx`, `typescript`, `vitest`, `@vitest/coverage-v8` (build/test only).
+- `tsdown`, `tsx`, `typescript`, `vitest`, `@vitest/coverage-v8` (build/test only).
 
 <!-- MANUAL: -->

@@ -17,6 +17,7 @@
     "zwift",
     "pnpm",
     "pnpx",
+    "tsdown",
     "tsup",
     "vitest",
     "zustand",

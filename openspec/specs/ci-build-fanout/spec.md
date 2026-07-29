@@ -184,7 +184,7 @@ If a single-package rebuild is required for tooling that instruments the build p
 
 ### Requirement: Workflow trigger SHALL NOT switch to pull_request_target
 
-The PR-time CI workflow SHALL be triggered by `pull_request` (or equivalent fork-safe events), NOT by `pull_request_target`. The latter exposes `secrets.*` to fork-controlled code (because it runs against the base branch's workflow but with the head ref's payload), which would defeat the bundle-analysis fork-PR skip and could leak `CODECOV_TOKEN` (or any future secret added to a consumer) to attacker-controlled `vite.config.ts`, `tsup.config.ts`, or test harness.
+The PR-time CI workflow SHALL be triggered by `pull_request` (or equivalent fork-safe events), NOT by `pull_request_target`. The latter exposes `secrets.*` to fork-controlled code (because it runs against the base branch's workflow but with the head ref's payload), which would defeat the bundle-analysis fork-PR skip and could leak `CODECOV_TOKEN` (or any future secret added to a consumer) to attacker-controlled `vite.config.ts`, `tsdown.config.ts`, or test harness.
 
 #### Scenario: Workflow does not use pull_request_target
 
@@ -237,7 +237,7 @@ The `build-artifacts` artifact SHALL be scoped to a single workflow run. No CI j
 
 The "artifact is environment-agnostic" invariant (Decision 10 in design.md) SHALL be enforced by a mechanical guard, not by documentation alone. The guard SHALL fail CI if any package introduces:
 
-1. A `tsup.config.*` or `vite.config.*` `define:` block that reads from an environment variable (other than the standard `process.env.NODE_ENV` for production/development build modes).
+1. A `tsdown.config.*` or `vite.config.*` `define:` block that reads from an environment variable (other than the standard `process.env.NODE_ENV` for production/development build modes).
 2. A `process.env.NODE_VERSION`-conditional code path inside a build script.
 3. A native binding artifact (`*.node`, `*.so`, `*.dylib`) under any package's `dist/`.
 
@@ -245,7 +245,7 @@ The guard SHALL live under `scripts/check-build-portable.mjs` with a co-located 
 
 #### Scenario: Guard fails on env-var define
 
-- **WHEN** a package's `tsup.config.ts` adds `define: { __API_URL__: process.env.API_URL }`
+- **WHEN** a package's `tsdown.config.ts` adds `define: { __API_URL__: process.env.API_URL }`
 - **THEN** `pnpm test:scripts` SHALL fail with a message naming the offending file and the violated trip-wire
 
 #### Scenario: Guard fails on native binding in dist

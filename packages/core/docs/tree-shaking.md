@@ -79,9 +79,7 @@ const validateKrd = (data: unknown): KRD => {
 import type { KRD, Workout, WorkoutStep } from "@kaiord/core";
 
 // Types are erased at runtime, 0 bytes in bundle
-const myWorkout: Workout = {
-  /* ... */
-};
+const myWorkout: Workout = {/* ... */};
 ```
 
 **Bundle size:** 0 bytes (types are compile-time only)
@@ -140,19 +138,19 @@ Excludes Garmin FIT SDK if not imported.
 - **`sideEffects: false`**: No side effects, safe to tree-shake
 - **`exports`**: Explicit entry points (main package + test utilities)
 
-### tsup.config.ts
+### tsdown.config.ts
 
 ```typescript
-{
+import { defineConfig } from "tsdown";
+
+export default defineConfig({
   format: ["esm"],
   treeshake: true,
-  splitting: false
-}
+});
 ```
 
 - **`format: ["esm"]`**: ES modules for tree-shaking
 - **`treeshake: true`**: Enable tree-shaking
-- **`splitting: false`**: Single bundle for predictable imports
 
 ## 📊 Bundle Size Examples
 

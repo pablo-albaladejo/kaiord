@@ -43,8 +43,8 @@ test("(a) clean repo passes", () => {
   try {
     const pkg = fixtures.addPackage("clean");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm'],
@@ -63,8 +63,8 @@ test("(b) define with JSON.stringify(process.env.X) fails", () => {
   try {
     const pkg = fixtures.addPackage("inject");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['src/index.ts'],
   define: { __X__: JSON.stringify(process.env.API_URL) },
@@ -84,8 +84,8 @@ test("(c) NODE_ENV as comparison operand passes (whitelist)", () => {
   try {
     const pkg = fixtures.addPackage("node-env-ok");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 const isProd = process.env.NODE_ENV === 'production';
 export default defineConfig({
   entry: ['src/index.ts'],
@@ -137,8 +137,8 @@ test("(f) computed property reading process.env fails", () => {
   try {
     const pkg = fixtures.addPackage("computed");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['src/index.ts'],
   define: { ['__X__']: process.env.API_URL },
@@ -157,8 +157,8 @@ test("(g) spread of object containing process.env fails", () => {
   try {
     const pkg = fixtures.addPackage("spread");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['src/index.ts'],
   define: { ...{ __X__: process.env.X } },
@@ -177,8 +177,8 @@ test("(h) template-literal key with env value fails", () => {
   try {
     const pkg = fixtures.addPackage("template");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 const suffix = 'BAR';
 export default defineConfig({
   entry: ['src/index.ts'],
@@ -198,8 +198,8 @@ test("(j) `process.env.X || 'default'` (BinaryExpression) fails", () => {
   try {
     const pkg = fixtures.addPackage("binexpr");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['src/index.ts'],
   define: { __X__: process.env.API_URL || 'http://default' },
@@ -219,8 +219,8 @@ test("(k) template-literal value reading process.env fails", () => {
   try {
     const pkg = fixtures.addPackage("templit");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['src/index.ts'],
   define: { __URL__: \`http://\${process.env.API_HOST}\` },
@@ -239,8 +239,8 @@ test("(l) factory-form defineConfig with arrow returning bare object fails", () 
   try {
     const pkg = fixtures.addPackage("factory-arrow");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig((env) => ({
   entry: ['src/index.ts'],
   define: { __X__: process.env.API_URL },
@@ -259,8 +259,8 @@ test("(m) factory-form defineConfig with block + return fails", () => {
   try {
     const pkg = fixtures.addPackage("factory-block");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig((env) => {
   return {
     entry: ['src/index.ts'],
@@ -281,8 +281,8 @@ test("(i) comment containing } inside define block does not false-negative", () 
   try {
     const pkg = fixtures.addPackage("comment");
     pkg.writeConfig(
-      "tsup.config.ts",
-      `import { defineConfig } from 'tsup';
+      "tsdown.config.ts",
+      `import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['src/index.ts'],
   define: {
