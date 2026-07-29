@@ -1,10 +1,6 @@
 /**
- * useDataTypeSourcePolicies — the profile's raw DataTypeSourcePolicy rows.
- *
- * One `useLiveQuery` shared by every surface that needs per-type multi-source
- * semantics: the Data Hub's priority editor (which then narrows to 2+ source
- * types) and the Connections page's routing rows (which do not). Keeping the
- * query in one place stops the two from drifting on what "no row" means.
+ * One `useLiveQuery` for the profile's raw policy rows, so the surfaces that
+ * read them cannot drift on what an absent row means.
  */
 import { useLiveQuery } from "dexie-react-hooks";
 

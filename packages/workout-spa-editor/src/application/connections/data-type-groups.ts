@@ -1,10 +1,7 @@
 /**
- * Training / Recovery / Body — a presentation grouping that exists nowhere in
- * `@kaiord/core`. `managedDataTypes` is a flat list, so a 14th type added
- * there would belong to no group and silently render on no surface at all.
- * `data-type-groups.test.ts` pins the partition instead of leaving that to
- * whoever notices; three types (strain, vitals, heart-rate-series) were
- * already added to the flat list exactly that way.
+ * `managedDataTypes` is a flat list, so a type added there belongs to no group
+ * and renders on no surface until it is placed here. The partition is pinned
+ * by test in both directions rather than left to whoever notices.
  */
 import type { ManagedDataType } from "@kaiord/core";
 
