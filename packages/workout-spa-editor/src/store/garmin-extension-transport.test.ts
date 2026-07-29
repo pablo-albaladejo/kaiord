@@ -38,7 +38,7 @@ describe("garmin-extension-transport", () => {
       );
 
       // Assert
-      expect(result).toEqual({ ok: true, data: "test" });
+      expect(result).toEqual({ delivered: true, ok: true, data: "test" });
     });
 
     it("should resolve with error when chrome.runtime is unavailable", async () => {
@@ -55,6 +55,7 @@ describe("garmin-extension-transport", () => {
       // Assert
       expect(result).toEqual({
         ok: false,
+        delivered: false,
         error: "Chrome runtime not available",
       });
     });
@@ -78,6 +79,7 @@ describe("garmin-extension-transport", () => {
       // Assert
       expect(result).toEqual({
         ok: false,
+        delivered: false,
         error: "Extension did not respond",
       });
     });
@@ -108,6 +110,7 @@ describe("garmin-extension-transport", () => {
       // Assert
       expect(result).toEqual({
         ok: false,
+        delivered: false,
         error: "Could not establish connection",
       });
     });
@@ -131,6 +134,7 @@ describe("garmin-extension-transport", () => {
       // Assert
       expect(result).toEqual({
         ok: false,
+        delivered: false,
         error: "Extension not available",
       });
     });

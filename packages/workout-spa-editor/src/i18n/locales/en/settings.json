@@ -44,6 +44,7 @@
   "tabs": {
     "ai": "AI",
     "sync": "Sync",
+    "connections": "Connections",
     "data-hub": "Data Hub",
     "extensions": "Extensions",
     "usage": "Usage",

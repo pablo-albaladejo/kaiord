@@ -39,7 +39,7 @@
       never recorded, so a jscpd-only red main produced a footer no green run
       could satisfy — a permanently unclosable issue.
 - [x] 3.2 Serialise the failed-jobs array with `jq -nc '$ARGS.positional'
-  --args`; the previous `printf | jq -R` emitted `[""]` for an empty set.
+--args`; the previous `printf | jq -R` emitted `[""]` for an empty set.
 - [x] 3.3 Add `scripts/check-ci-failure-bot-contract.mjs` +
       `.test.mjs` (R-CiFailureBotContract) asserting triggers ⇄ recordings,
       alias table ⇄ `ci.yml` `name:` overrides, and absence of the `[""]`

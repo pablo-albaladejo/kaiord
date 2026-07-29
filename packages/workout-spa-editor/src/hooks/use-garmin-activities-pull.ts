@@ -11,9 +11,8 @@
 import { useEffect, useRef } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { readGarminActivities } from "../adapters/garmin/garmin-activities-transport";
-import { pullGarminActivities } from "../application/import/pull-garmin-activities.use-case";
 import { usePersistence } from "../contexts/persistence-context";
+import { runGarminImport } from "./bridge-import/run-garmin-import";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
 
 const GARMIN_BRIDGE_ID = "garmin-bridge";
@@ -29,14 +28,8 @@ export const useGarminActivitiesPull = (profileId: string | null): void => {
     const extensionId = bridgeDiscovery.getExtensionId(GARMIN_BRIDGE_ID);
     if (!extensionId) return;
     firedRef.current = profileId;
-    void pullGarminActivities(
-      {
-        policyRepo: persistence.integrationPolicy,
-        activities: persistence.activities,
-        coachingSyncState: persistence.coachingSyncState,
-        readActivities: () => readGarminActivities(extensionId),
-      },
-      profileId
-    ).catch(() => undefined);
+    void runGarminImport(persistence, extensionId, profileId).catch(
+      () => undefined
+    );
   }, [profileId, discovered, persistence]);
 };

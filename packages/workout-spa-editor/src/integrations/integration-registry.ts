@@ -34,6 +34,18 @@ export const KNOWN_BRIDGE_IDS: readonly string[] = INTEGRATION_REGISTRY.filter(
   (entry) => entry.mechanism === "bridge" && entry.bridgeId !== null
 ).map((entry) => entry.bridgeId as string);
 
+const INTEGRATION_BY_BRIDGE: ReadonlyMap<string, string> = new Map(
+  INTEGRATION_REGISTRY.filter((entry) => entry.bridgeId !== null).map(
+    (entry) => [entry.bridgeId as string, entry.id]
+  )
+);
+
+/** The connection-record key (`providerId`) for a bridge. The `connections`
+    store is keyed by integration id, discovery by bridge id, so any rule that
+    reads both needs this one translation. */
+export const integrationIdForBridge = (bridgeId: string): string | undefined =>
+  INTEGRATION_BY_BRIDGE.get(bridgeId);
+
 /**
  * Bridge ids that actually announce the wire capability token required
  * for (dataType, direction) — corrects the eligibility bug where every

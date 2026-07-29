@@ -34,6 +34,7 @@ describe("probeGarminSession", () => {
       PING_TIMEOUT_MS
     );
     expect(result).toEqual({
+      reachable: true,
       sessionActive: true,
       error: null,
       needsReauth: false,
@@ -52,6 +53,7 @@ describe("probeGarminSession", () => {
 
     // Assert
     expect(result).toEqual({
+      reachable: true,
       sessionActive: false,
       error: null,
       needsReauth: false,
@@ -71,6 +73,7 @@ describe("probeGarminSession", () => {
 
     // Assert
     expect(result).toEqual({
+      reachable: true,
       sessionActive: false,
       error: "Update your Kaiord Garmin Bridge extension",
       needsReauth: false,
@@ -111,6 +114,7 @@ describe("probeTrain2GoSession", () => {
 
     // Assert
     expect(result).toEqual({
+      reachable: true,
       sessionActive: true,
       error: null,
       needsReauth: false,
