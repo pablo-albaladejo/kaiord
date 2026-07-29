@@ -67,11 +67,17 @@ try {
 // prettier-ignore — each entry MUST stay on one physical line so the privacy
 // surface guard (scripts/check-bridge-privacy-surface.mjs) can extract it.
 // prettier-ignore
+// The `\/` escapes inside the character classes are redundant to the regex
+// engine but not to us: `scripts/fixtures/bridge-privacy-surface.json` stores
+// each pattern's source verbatim, so normalising them here silently
+// invalidates the checked-in privacy golden.
+/* eslint-disable no-useless-escape */
 const ALLOWED = [
   { method: "GET", pattern: /^\/users\/v3\/token$/ },
   { method: "GET", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetrics\/[^\/]+\/[^\/]+$/ },
   { method: "POST", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetric$/ },
 ];
+/* eslint-enable no-useless-escape */
 
 const isAllowed = (method, path) =>
   ALLOWED.some(

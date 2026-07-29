@@ -63,6 +63,11 @@ const collectFields = (snapshot) => {
   return out;
 };
 
+// This is the module's cross-script export: bridges load it and `popup.js` as
+// separate classic <script> tags sharing one global scope, so `popup.js` calls
+// it by bare name (see its `/* global renderAthleteCard */` header). eslint
+// resolves no such edge, so it reads as unused here and only here.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const renderAthleteCard = (snapshot) => {
   const region = $("athlete-region");
   region.innerHTML = "";
