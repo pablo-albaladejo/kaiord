@@ -1,4 +1,4 @@
-import { render as rtlRender, screen } from "@testing-library/react";
+import { render as rtlRender, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -123,9 +123,12 @@ describe("ConnectionsTab", () => {
 
   it("should keep telling the reader to sign in again beside the failed read", () => {
     // Arrange
-    // The action was never the wrong part — re-signing in genuinely re-mints
-    // Garmin's access. Dropping it while removing the false diagnosis would
-    // leave the card naming a problem with no way out.
+    // Garmin has no fix link — `sourceFixUrl` only carries whoop — so the
+    // instruction IS the wording, and this asserts the wording on purpose. The
+    // instruction was never the wrong part: re-signing in genuinely re-mints
+    // Garmin's access, so removing the false diagnosis must not take it too.
+    // The card's actionable element is covered separately, for the one source
+    // that has one.
     setSources([source({ id: "garmin", name: "Garmin", status: "attention" })]);
 
     // Act
@@ -135,6 +138,28 @@ describe("ConnectionsTab", () => {
     const card = screen.getByTestId("connection-card-garmin");
     expect(card).toHaveTextContent(/sign(?:ing)?\s+in\b/i);
     expect(card).toHaveTextContent(/unavailable/i);
+  });
+
+  it("should render the fix link as a real link for a source that has one", () => {
+    // Arrange
+    // Asserting copy cannot distinguish a removed link, so the one source with
+    // an actionable fix is queried by role and destination instead.
+    setSources([
+      source({
+        id: "whoop",
+        name: "WHOOP",
+        bridgeId: "whoop-bridge",
+        status: "attention",
+      }),
+    ]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    const card = screen.getByTestId("connection-card-whoop");
+    const link = within(card).getByRole("link");
+    expect(link).toHaveAttribute("href", "https://app.whoop.com/");
   });
 
   it("should offer reconnect only for a disconnected source whose extension is present", () => {
