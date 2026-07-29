@@ -3,10 +3,8 @@ import { Link } from "wouter";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { SettingsTab } from "../../organisms/SettingsPanel/types";
 import { SETTINGS_TAB_ORDER } from "./settings-tab-views";
-import {
-  SettingsAttention,
-  type SettingsAttentionModel,
-} from "./SettingsAttention";
+import type { SettingsAttentionModel } from "./SettingsAttention";
+import { SettingsAttention } from "./SettingsAttention";
 
 export type SettingsSectionRailProps = {
   activeSection: SettingsTab;
