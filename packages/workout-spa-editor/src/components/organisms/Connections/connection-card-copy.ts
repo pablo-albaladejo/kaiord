@@ -46,6 +46,21 @@ export const ATTENTION_DETAIL_KEYS = [
 export type AttentionDetailKey = (typeof ATTENTION_DETAIL_KEYS)[number];
 
 /**
+ * Every key `detailKeyFor` may return. Narrowing its signature to this is what
+ * makes the list above binding at the CALL SITE too: typing only the helper left
+ * `case "attention":` free to return a key of its own one line before delegating
+ * — which is exactly where someone adding a cause writes it.
+ */
+export type DetailKey =
+  | AttentionDetailKey
+  | "detail.installed"
+  | "detail.checking"
+  | "detail.manual"
+  | "detail.unsupported"
+  | "detail.disconnected"
+  | "detail.notDetected";
+
+/**
  * `needsReauth` has no branch of its own on purpose. Its only producer is
  * TrainingPeaks (`bridge-session-probes.ts` is the sole `needsReauthOf` call
  * site), where `authError` forces the flag true for any non-2xx (#1105), so it
@@ -62,7 +77,7 @@ const attentionDetailKey = (source: ConnectionSource): AttentionDetailKey =>
   // saying the extension is out of date.
   source.outdated ? "detail.outdated" : "detail.noAccess";
 
-export const detailKeyFor = (source: ConnectionSource): string | null => {
+export const detailKeyFor = (source: ConnectionSource): DetailKey | null => {
   switch (source.status) {
     case "installed":
       return "detail.installed";
