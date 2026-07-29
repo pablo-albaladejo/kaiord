@@ -46,10 +46,18 @@ export const ATTENTION_DETAIL_KEYS = [
 export type AttentionDetailKey = (typeof ATTENTION_DETAIL_KEYS)[number];
 
 /**
- * Every key `detailKeyFor` may return. Narrowing its signature to this is what
- * makes the list above binding at the CALL SITE too: typing only the helper left
- * `case "attention":` free to return a key of its own one line before delegating
- * — which is exactly where someone adding a cause writes it.
+ * Every key `detailKeyFor` may return.
+ *
+ * WHAT THIS DOES AND DOES NOT BIND. Narrowing the signature stops
+ * `case "attention":` from returning an invented key one line before it
+ * delegates — typing only the helper left that open, and that line is exactly
+ * where someone adding a cause writes it. But `DetailKey` is a SUPERSET of
+ * `ATTENTION_DETAIL_KEYS`, so two routes around the honesty guard remain, both
+ * type-clean: reusing a non-attention key inside the attention case, or adding a
+ * new key here instead of to `ATTENTION_DETAIL_KEYS`. The second is the likely
+ * one, because the compiler's own message names `DetailKey` — the list the guard
+ * does not read. Closing them needs per-slot typing, so each status accepts only
+ * its own key space; tracked separately rather than claimed here.
  */
 export type DetailKey =
   | AttentionDetailKey
