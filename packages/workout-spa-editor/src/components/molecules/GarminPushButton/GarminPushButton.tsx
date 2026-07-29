@@ -3,9 +3,9 @@ import { Upload } from "lucide-react";
 import { useParams } from "wouter";
 
 import { db } from "../../../adapters/dexie/dexie-database";
-import { createDexieIntegrationPolicyRepository } from "../../../adapters/dexie/dexie-integration-policy-repository";
 import { resolveExportPolicies } from "../../../application/integration-policy/resolve-export-policies.use-case";
 import { useGarminBridge } from "../../../contexts";
+import { policyRepo } from "../../../hooks/integration-policy-repo";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
 import { GarminExportDisabledButton } from "./GarminExportDisabledButton";
@@ -13,7 +13,6 @@ import { GarminNoSessionButton } from "./GarminNoSessionButton";
 import { PushFeedback } from "./PushFeedback";
 import { useGarminPush } from "./useGarminPush";
 
-const policyRepo = createDexieIntegrationPolicyRepository(db);
 const GARMIN_BRIDGE_ID = "garmin-bridge";
 
 export const GarminPushButton: React.FC<{ profileId?: string }> = ({

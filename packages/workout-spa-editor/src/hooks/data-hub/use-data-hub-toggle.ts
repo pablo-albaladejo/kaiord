@@ -10,12 +10,9 @@
 import type { ManagedDataType } from "@kaiord/core";
 import { useCallback } from "react";
 
-import { db } from "../../adapters/dexie/dexie-database";
-import { createDexieIntegrationPolicyRepository } from "../../adapters/dexie/dexie-integration-policy-repository";
 import type { DataHubCell } from "../../application/data-hub/build-data-hub-matrix";
 import { upsertIntegrationPolicy } from "../../application/integration-policy/upsert-integration-policy.use-case";
-
-const policyRepo = createDexieIntegrationPolicyRepository(db);
+import { policyRepo } from "../integration-policy-repo";
 
 export type DataHubToggle = (
   dataType: ManagedDataType,

@@ -5,7 +5,20 @@ import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tseslint from "typescript-eslint";
 import vitest from "@vitest/eslint-plugin";
 
+import path from "node:path";
+
+import { boundariesAllowlistPaths } from "./scripts/boundaries-allowlist.mjs";
 import noNarrativeComments from "./scripts/eslint-rules/no-narrative-comments.mjs";
+
+/**
+ * `boundaries` resolves both its element patterns and its tsconfig path against
+ * the process CWD, not against this config file. `pnpm --filter <pkg> lint` runs
+ * eslint from the package directory, so CWD-relative values silently match
+ * nothing there and every policy becomes a no-op. Anchoring on the config
+ * directory keeps the guard identical from the repo root and from a package.
+ */
+const REPO_ROOT = import.meta.dirname;
+const fromRepoRoot = (...segments) => path.join(REPO_ROOT, ...segments);
 
 const adapterPackages = ["fit", "tcx", "zwo", "garmin", "garmin-connect"];
 
@@ -293,6 +306,14 @@ export default tseslint.config(
     files: ["packages/core/src/**/*.ts"],
     plugins: { boundaries },
     settings: {
+      // Without a TypeScript-aware resolver the plugin cannot map a relative
+      // import such as "../adapters/logger" onto a file, so every local
+      // dependency is classified as "unknown" and NO policy is ever applied.
+      // Omitting this makes the whole boundaries config silently vacuous.
+      "import/resolver": {
+        typescript: { project: fromRepoRoot("packages/core/tsconfig.json") },
+      },
+      "boundaries/root-path": REPO_ROOT,
       "boundaries/elements": [
         { type: "domain", pattern: "packages/core/src/domain/**" },
         { type: "application", pattern: "packages/core/src/application/**" },
@@ -301,28 +322,30 @@ export default tseslint.config(
       ],
     },
     rules: {
-      "boundaries/element-types": [
+      "boundaries/dependencies": [
         "error",
         {
           default: "allow",
-          rules: [
+          policies: [
             {
-              from: "domain",
-              disallow: ["application", "ports", "adapters"],
+              from: [{ element: { type: "domain" } }],
+              disallow: [
+                { element: { type: ["application", "ports", "adapters"] } },
+              ],
               message:
-                "Domain layer must not depend on {{target}}. Domain is pure and self-contained.",
+                "Domain layer must not depend on {{to.type}}. Domain is pure and self-contained.",
             },
             {
-              from: "application",
-              disallow: ["adapters"],
+              from: [{ element: { type: "application" } }],
+              disallow: [{ element: { type: ["adapters"] } }],
               message:
                 "Application layer must not depend on adapters. Use ports instead.",
             },
             {
-              from: "ports",
-              disallow: ["application", "adapters"],
+              from: [{ element: { type: "ports" } }],
+              disallow: [{ element: { type: ["application", "adapters"] } }],
               message:
-                "Ports must not depend on {{target}}. Ports define interfaces only.",
+                "Ports must not depend on {{to.type}}. Ports define interfaces only.",
             },
           ],
         },
@@ -334,8 +357,31 @@ export default tseslint.config(
     // components. Matches the convention used by @kaiord/core. Files in
     // a higher layer must not bypass the layer below them.
     files: ["packages/workout-spa-editor/src/**/*.{ts,tsx}"],
+    // Tests are not part of the production dependency graph: seeding or
+    // asserting against Dexie is test wiring, not a layering breach.
+    // The parked entries are the pre-existing debt uncovered when the guard
+    // was repaired; the list is shrink-only and enforced by
+    // scripts/check-boundaries-allowlist.mjs.
+    ignores: [
+      "packages/workout-spa-editor/src/**/*.test.ts",
+      "packages/workout-spa-editor/src/**/*.test.tsx",
+      ...boundariesAllowlistPaths(),
+    ],
     plugins: { boundaries },
     settings: {
+      // Required for the policies below to have any effect at all: the plugin
+      // resolves each import to a file before classifying it, and the default
+      // node resolver cannot resolve extensionless ".ts"/".tsx" imports nor
+      // the "@/*" tsconfig alias. Unresolvable imports are treated as unknown
+      // elements, which silently match no policy.
+      "import/resolver": {
+        typescript: {
+          project: fromRepoRoot(
+            "packages/workout-spa-editor/tsconfig.app.json"
+          ),
+        },
+      },
+      "boundaries/root-path": REPO_ROOT,
       "boundaries/elements": [
         {
           type: "spa-ports",
@@ -360,26 +406,26 @@ export default tseslint.config(
       ],
     },
     rules: {
-      "boundaries/element-types": [
+      "boundaries/dependencies": [
         "error",
         {
           default: "allow",
-          rules: [
+          policies: [
             {
-              from: "spa-ports",
-              disallow: ["spa-adapters"],
+              from: [{ element: { type: "spa-ports" } }],
+              disallow: [{ element: { type: ["spa-adapters"] } }],
               message:
                 "Ports must not depend on adapters. Ports define interfaces only.",
             },
             {
-              from: "spa-application",
-              disallow: ["spa-adapters"],
+              from: [{ element: { type: "spa-application" } }],
+              disallow: [{ element: { type: ["spa-adapters"] } }],
               message:
                 "Application use cases must not depend on adapters. Inject through ports instead.",
             },
             {
-              from: "spa-components",
-              disallow: ["spa-adapters"],
+              from: [{ element: { type: "spa-components" } }],
+              disallow: [{ element: { type: ["spa-adapters"] } }],
               message:
                 "Components must not import from adapters directly. Go through hooks (which compose use cases with injected ports).",
             },
