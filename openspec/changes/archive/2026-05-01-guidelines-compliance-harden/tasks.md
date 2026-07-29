@@ -85,43 +85,43 @@ export const SCOPE_ENUM = [
 - [x] 1.7.4 update `.claude/skills/guidelines/git-strategy/SKILL.md`: REPLACE the existing scope list at lines 24-28 with a fenced markdown block bracketed by `<!-- commitlint-source-of-truth:start -->` and `<!-- commitlint-source-of-truth:end -->`. The block uses a STRICTLY MACHINE-READABLE shape: one entry per line, no prefixes, no indentation, blank lines and lines starting with `#` are comments and ignored by the parser. Section headers `# types` and `# scopes` separate the two arrays. The block contents MUST be EXACTLY (line-for-line, order-preserved):
 
       ```
-          # types
-          feat
-          fix
-          chore
-          test
-          docs
-          refactor
-          perf
+              # types
+              feat
+              fix
+              chore
+              test
+              docs
+              refactor
+              perf
 
-          # scopes
-          core
-          fit
-          tcx
-          zwo
-          garmin
-          garmin-connect
-          ai
-          cli
-          mcp
-          spa-editor
-          garmin-bridge
-          train2go-bridge
-          analytics
-          landing
-          docs-site
-          openspec
-          ci
-          docs
-          scripts
-          deploy
-          release
-          deps
-          deps-dev
-          e2e
-          ```
+              # scopes
+              core
+              fit
+              tcx
+              zwo
+              garmin
+              garmin-connect
+              ai
+              cli
+              mcp
+              spa-editor
+              garmin-bridge
+              train2go-bridge
+              analytics
+              landing
+              docs-site
+              openspec
+              ci
+              docs
+              scripts
+              deploy
+              release
+              deps
+              deps-dev
+              e2e
+              ```
 
-          Add an explicit note above the block: "Source of truth: `commitlint.vocab.mjs` + this block. Drift between the two (insertion, deletion, or reorder) fails CI via `scripts/check-commitlint-config.test.mjs`."
+              Add an explicit note above the block: "Source of truth: `commitlint.vocab.mjs` + this block. Drift between the two (insertion, deletion, or reorder) fails CI via `scripts/check-commitlint-config.test.mjs`."
 
 - [x] 1.7.5 write `scripts/check-commitlint-config.test.mjs` (`node:test`): (a) parse the `<!-- commitlint-source-of-truth -->` block from `git-strategy/SKILL.md` with a trivial line-by-line parser — strip blank lines, strip lines starting with `#` BUT use the `# types`/`# scopes` markers as section separators; emit two arrays in document order; (b) dynamically import `commitlint.vocab.mjs`; (c) `assert.deepStrictEqual(parsedTypes, TYPE_ENUM)` and `assert.deepStrictEqual(parsedScopes, SCOPE_ENUM)` (array-equality, order-sensitive); (d) pipe four subjects through `pnpm exec commitlint` and assert exit codes: - `chore(openspec): archive cleanup-may-2026` → exit 0 - `feat(banana): add new flow` → non-zero (unknown scope) - `openspec: archive cleanup-may-2026` → non-zero (TYPE not allowed) - `refactor(core,fit,tcx): unify foo` → non-zero (multi-scope rejected)
       Parser tests: include a positive fixture (the canonical block) and three negative fixtures stressing parser correctness — block with extra blank lines (still parses correctly), block with extra non-`#` comment line (parser treats it as a list item, test FAILS — this is the desired strict behavior), block with reordered entries (test FAILS via `deepStrictEqual`). The parser MUST be ≤ 30 lines and unit-tested in isolation.

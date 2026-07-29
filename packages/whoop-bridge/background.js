@@ -191,6 +191,18 @@ const handleAction = async (message) => {
 // vendored guard as a second layer over the manifest's externally_connectable.
 const EXTERNAL_ACTIONS = new Set(["ping", "status", "whoop-fetch"]);
 
+// No credential handshake: this bridge mints nothing and exchanges nothing.
+// It piggybacks the page's own session — inject-main.js captures an
+// Authorization header the WHOOP app already sends — and every read it
+// then performs goes through content.js's `isAllowed` prefix gate, so the
+// whole network surface is already ALLOWED_PREFIXES.
+//
+// Declared empty rather than omitted. scripts/check-bridge-privacy-surface.mjs
+// cannot tell "has no handshake" from "has one nobody declared", so silence
+// would lock an empty surface reading as "sends credentials nowhere". This
+// is the claim, stated.
+const AUTH_ENDPOINTS = [];
+
 const dispatch = bridgeEnvelope.createDispatch({
   handleAction,
   protocolVersion: PROTOCOL_VERSION,
@@ -268,6 +280,7 @@ if (typeof module !== "undefined") {
     dispatchExternal,
     isAllowedSenderOrigin: bridgeEnvelope.isAllowedSenderOrigin,
     EXTERNAL_ACTIONS,
+    AUTH_ENDPOINTS,
     reinjectContentScripts,
   };
 }

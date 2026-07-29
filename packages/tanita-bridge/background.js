@@ -140,6 +140,17 @@ const handleAction = async (message) => {
 // surface — there is no popup-only action.
 const EXTERNAL_ACTIONS = new Set(["ping", "checkSession", "read-export-csv"]);
 
+// No credential handshake: this bridge mints nothing and exchanges nothing.
+// The MyTANITA session cookie rides along on the export fetch itself
+// (`credentials:"include"` in session-fetch.js), and that fetch is gated by
+// `isAllowed` above — so the whole network surface is already ALLOWED.
+//
+// Declared empty rather than omitted. scripts/check-bridge-privacy-surface.mjs
+// cannot tell "has no handshake" from "has one nobody declared", so silence
+// would lock an empty surface reading as "sends credentials nowhere". This
+// is the claim, stated.
+const AUTH_ENDPOINTS = [];
+
 const dispatch = bridgeEnvelope.createDispatch({
   handleAction,
   protocolVersion: PROTOCOL_VERSION,
@@ -178,5 +189,6 @@ if (typeof module !== "undefined") {
     dispatchExternal,
     isAllowedSenderOrigin: bridgeEnvelope.isAllowedSenderOrigin,
     EXTERNAL_ACTIONS,
+    AUTH_ENDPOINTS,
   };
 }
