@@ -52,7 +52,6 @@ describe("Routing", () => {
       deletedSteps: [],
     });
     localStorage.clear();
-    localStorage.setItem("workout-spa-onboarding-completed", "true");
   });
 
   it("should render the Today page at /today", async () => {

@@ -5,7 +5,13 @@
 // Usage:
 //   node scripts/ci-failure-issue.mjs create '["lint","test"]'           # create / dedupe-comment
 //   node scripts/ci-failure-issue.mjs create '["canary-job"]' --canary   # canary create
-//   node scripts/ci-failure-issue.mjs close <any-skipped:true|false>     # close on fully-green run
+//   node scripts/ci-failure-issue.mjs close                              # close on green run
+//
+// `close` reads the green run's job list from the GREEN_RUN_JOBS env var:
+// a JSON array of `{name, conclusion}` straight from the workflow_run jobs
+// API. It is passed via env rather than argv because job display names
+// contain spaces and parentheses. An unset/unparseable value yields an empty
+// list, which the close-rule treats as "cannot verify" and closes nothing.
 
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
@@ -19,6 +25,22 @@ export function defaultDeps() {
         stdio: ["ignore", "pipe", "pipe"],
       }),
   };
+}
+
+// Never throws: an unreadable job list must degrade to "cannot verify
+// coverage" (close nothing), not crash the close-pass.
+export function parseRunJobs(raw) {
+  if (!raw) return [];
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter(
+    (j) => j && typeof j.name === "string" && typeof j.conclusion === "string"
+  );
 }
 
 export function envCtx() {
@@ -46,8 +68,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const deps = defaultDeps();
   let result;
   if (mode === "close") {
-    const anyJobsSkipped = arg === "true";
-    result = runClose({ anyJobsSkipped, ctx }, deps);
+    result = runClose(
+      { runJobs: parseRunJobs(process.env.GREEN_RUN_JOBS), ctx },
+      deps
+    );
   } else {
     const jobs = JSON.parse(arg || "[]");
     result = runCreate({ failedJobs: jobs, isCanary, ctx }, deps);

@@ -4,11 +4,10 @@ import { useKeyboardShortcuts } from "../../../hooks/use-keyboard-shortcuts";
 import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 
 /**
- * The header's three lazy overlays and the global bindings that open them:
+ * The header's two lazy overlays and the global bindings that open them:
  * `?` for the shortcut sheet and Ctrl+K/⌘K for the command palette.
  */
 export function useHeaderOverlays() {
-  const help = useLazyDialog();
   const shortcuts = useLazyDialog();
   const palette = useLazyDialog();
 
@@ -34,5 +33,5 @@ export function useHeaderOverlays() {
 
   useKeyboardShortcuts({ onShowShortcuts, onShowCommandPalette });
 
-  return { help, shortcuts, palette, onPaletteShortcuts };
+  return { shortcuts, palette, onPaletteShortcuts };
 }

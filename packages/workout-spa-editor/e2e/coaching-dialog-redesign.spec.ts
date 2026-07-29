@@ -46,7 +46,6 @@ import {
 import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
-import { disableOnboardingTutorial } from "./test-setup";
 
 const PROFILE_ID = "coaching-redesign-profile";
 const SOURCE = "train2go";
@@ -267,10 +266,6 @@ const seedGarminExportPolicy = async (page: Page, profileId: string) => {
 };
 
 test.describe("Coaching activity dialog redesign", () => {
-  test.beforeEach(async ({ page }) => {
-    await disableOnboardingTutorial(page);
-  });
-
   test("flow (d): Edit manually opens a draft and persists only on Save", async ({
     page,
   }) => {
