@@ -5,7 +5,7 @@ const DOCS_URL = "https://kaiord.com/docs/";
 const YOUR_DATA_ROWS: ReadonlyArray<SettingsRowDef> = [
   // TODO(S3): re-point at /settings/connections once that page exists;
   // /athlete is the interim destination.
-  { icon: "link", key: "connections", to: "/athlete" },
+  { icon: "link", key: "connections", to: "/athlete", valueKey: "connections" },
   {
     icon: "sync",
     key: "googleDriveSync",

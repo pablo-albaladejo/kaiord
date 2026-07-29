@@ -6,9 +6,41 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import type { BridgeConnectionState } from "../../../hooks/use-bridge-connections";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import { renderWithProviders } from "../../../test-utils";
 import SettingsPage from "./SettingsPage";
+
+const KNOWN_BRIDGES = [
+  "garmin-bridge",
+  "whoop-bridge",
+  "train2go-bridge",
+  "tanita-bridge",
+  "trainingpeaks-bridge",
+];
+
+const bridgeConnection = (
+  bridgeId: string,
+  overrides: Partial<BridgeConnectionState> = {}
+): BridgeConnectionState => ({
+  bridgeId,
+  discovered: false,
+  sessionActive: false,
+  checking: false,
+  error: null,
+  needsReauth: false,
+  lastCheckedAt: null,
+  lastSyncAt: undefined,
+  ...overrides,
+});
+
+const connections = vi.hoisted(() => ({
+  value: [] as BridgeConnectionState[],
+}));
+
+vi.mock("../../../hooks/use-bridge-connections", () => ({
+  useBridgeConnections: () => connections.value,
+}));
 
 vi.mock("../../../contexts/garmin-bridge-context", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -51,6 +83,7 @@ function renderAtPath(path: string) {
 
 describe("SettingsPage", () => {
   beforeEach(async () => {
+    connections.value = KNOWN_BRIDGES.map((id) => bridgeConnection(id));
     await Promise.all([
       db.table("aiProviders").clear(),
       db.table("meta").clear(),
@@ -344,19 +377,79 @@ describe("SettingsPage", () => {
       }
     );
 
-    it("should render no attention surface while nothing computes one", () => {
+    it.each([{ path: "/settings" }, { path: "/settings/ai" }])(
+      "should render no attention surface at $path while every connection is healthy",
+      ({ path }) => {
+        // Arrange
+
+        // Act
+        renderAtPath(path);
+
+        // Assert
+        expect(
+          screen.queryByTestId("settings-attention-banner")
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId("settings-attention-chip")
+        ).not.toBeInTheDocument();
+      }
+    );
+  });
+
+  describe("attention", () => {
+    const broken = () => [
+      bridgeConnection("garmin-bridge", { discovered: true }),
+      bridgeConnection("whoop-bridge", {
+        discovered: true,
+        error: "unreachable",
+      }),
+    ];
+
+    it("should announce the affected count on the index banner", () => {
       // Arrange
+      connections.value = broken();
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-attention-banner")).toHaveTextContent(
+        "1 connection needs attention"
+      );
+      expect(
+        screen.queryByTestId("settings-attention-chip")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should move the announcement to the rail chip inside a section", () => {
+      // Arrange
+      connections.value = broken();
 
       // Act
       renderAtPath("/settings/ai");
 
       // Assert
+      expect(screen.getByTestId("settings-attention-chip")).toHaveTextContent(
+        "1 connection needs attention"
+      );
       expect(
         screen.queryByTestId("settings-attention-banner")
       ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId("settings-attention-chip")
-      ).not.toBeInTheDocument();
+    });
+
+    it("should count the installed bridges on the connections row", () => {
+      // Arrange
+      connections.value = KNOWN_BRIDGES.map((id, index) =>
+        bridgeConnection(id, { discovered: index < 2 })
+      );
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-row-connections")).toHaveTextContent(
+        "2 of 5 installed"
+      );
     });
   });
 

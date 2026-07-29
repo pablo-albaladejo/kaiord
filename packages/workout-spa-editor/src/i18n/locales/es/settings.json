@@ -24,6 +24,9 @@
     "helpDocs": "Ayuda y documentación"
   },
   "values": {
+    "connections": {
+      "installed": "{{found}} de {{total}} instaladas"
+    },
     "sync": {
       "connected": "Drive · {{relative}}"
     },
@@ -168,5 +171,12 @@
   },
   "rowStatus": {
     "attention": "Requiere atención"
+  },
+  "attention": {
+    "title_one": "{{count}} conexión requiere atención",
+    "title_other": "{{count}} conexiones requieren atención",
+    "noNewDataSince": "Sin datos nuevos desde el {{date}}",
+    "signedOut": "Sesión cerrada: vuelve a iniciar sesión para reanudarla",
+    "lastCheckFailed": "La última comprobación ha fallado"
   }
 }

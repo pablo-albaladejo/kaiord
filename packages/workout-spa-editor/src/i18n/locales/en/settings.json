@@ -24,6 +24,9 @@
     "helpDocs": "Help & docs"
   },
   "values": {
+    "connections": {
+      "installed": "{{found}} of {{total}} installed"
+    },
     "sync": {
       "connected": "Drive · {{relative}}"
     },
@@ -168,5 +171,12 @@
   },
   "rowStatus": {
     "attention": "Needs attention"
+  },
+  "attention": {
+    "title_one": "{{count}} connection needs attention",
+    "title_other": "{{count}} connections need attention",
+    "noNewDataSince": "No new data since {{date}}",
+    "signedOut": "Session signed out — sign in again to resume",
+    "lastCheckFailed": "The last check failed"
   }
 }
