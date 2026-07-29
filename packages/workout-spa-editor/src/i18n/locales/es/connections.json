@@ -5,6 +5,30 @@
   "sourcesHint": "Cada fuente lleva su propio puente de navegador y sus permisos",
   "unsupported": "Todavía no disponibles",
   "unsupportedHint": "Conectarlas necesita un servidor que Kaiord no tiene.",
+  "summary": {
+    "detected": "Fuentes detectadas",
+    "detectedNote": "de {{total}}",
+    "covered": "Tipos con fuente",
+    "coveredNote": "de {{total}} tipos · incl. entrada manual",
+    "attention": "Necesitan atención",
+    "attentionNote_one": "fuente",
+    "attentionNote_other": "fuentes",
+    "lastSync": "Últimos datos",
+    "lastSyncNever": "Todavía ninguno",
+    "pending": "—",
+    "refresh": "Actualizar todo",
+    "refreshing": "Actualizando…",
+    "refreshCooldown": "Acabas de actualizar. Inténtalo dentro de un minuto."
+  },
+  "banner": {
+    "one": "{{name}} tiene la sesión cerrada",
+    "oneOutdated": "El puente de navegador de {{name}} está desactualizado",
+    "many": "{{count}} fuentes necesitan atención",
+    "paused": "Ahora mismo ninguna fuente está enviando {{types}}.",
+    "covered": "No se ha parado nada: cada tipo afectado tiene otra fuente activada.",
+    "noRoutes": "No hay ninguna ruta de datos activada, así que no ha dejado de llegar nada.",
+    "since": "No llegan datos nuevos desde el {{date}}."
+  },
   "status": {
     "connected": "Conectado",
     "installed": "Detectada al cargar",
@@ -52,6 +76,39 @@
     "reconnect": "Volver a conectar",
     "connect": "Conectar",
     "cancel": "Cancelar"
+  },
+  "routing": {
+    "title": "De dónde viene cada tipo de dato",
+    "freshnessHint": "Las horas de abajo son por fuente: cuándo esa fuente envió algo a Kaiord por última vez, no solo este tipo.",
+    "from": "De",
+    "sentTo": "También se envía a",
+    "nowhere": "A ningún sitio",
+    "noSource": "Sin fuente",
+    "manySources": "{{count}} fuentes",
+    "unrankedNote": "se guardan a la vez, ninguna tiene prioridad",
+    "noUsableSource": "Sin fuente utilizable",
+    "rankedUnavailableNote": "prioriza fuentes que están apagadas: no se está leyendo nada",
+    "sourceLastSent": "{{name}} envió datos por última vez {{when}}",
+    "groups": {
+      "training": "Entrenamiento",
+      "recovery": "Recuperación",
+      "body": "Cuerpo"
+    }
+  },
+  "dataTypeHints": {
+    "workout": "Sesiones estructuradas completadas",
+    "planned-session": "Lo que ha programado tu entrenador",
+    "activity": "Salidas, carreras y paseos sin estructura",
+    "training-zones": "FTP, FC de umbral, FC máxima",
+    "weight": "Lecturas de la báscula",
+    "sleep": "Duración, fases y eficiencia",
+    "hrv": "Variabilidad cardiaca, nocturna o puntual",
+    "daily-wellness": "Pasos, calorías y minutos de intensidad",
+    "body-composition": "Grasa corporal, masa magra y agua corporal",
+    "stress": "Nivel de estrés de todo el día",
+    "strain": "Carga cardiovascular del día",
+    "vitals": "FC en reposo, SpO₂ y respiración",
+    "heart-rate-series": "Trazas de frecuencia cardiaca muestreadas"
   },
   "dataTypes": {
     "workout": "Entrenamiento",

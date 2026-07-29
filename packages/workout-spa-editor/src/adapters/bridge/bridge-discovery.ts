@@ -16,7 +16,9 @@ import {
 } from "./bridge-discovery-types";
 import { verifyAnnouncement } from "./bridge-discovery-verify";
 
-const DISCOVER_REQUEST_DELAY_MS = 3_000;
+/** Exported so callers can derive when a silent discovery has had its
+    opening chance: nothing is asked before this elapses. */
+export const DISCOVER_REQUEST_DELAY_MS = 3_000;
 
 type VerifyFn = (ann: BridgeAnnouncement) => Promise<BridgeManifest | null>;
 
