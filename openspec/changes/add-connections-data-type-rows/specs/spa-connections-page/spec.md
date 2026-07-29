@@ -3,13 +3,17 @@
 ### Requirement: A ranked source policy is never stored without its ranking
 
 A ranked multi-source mode is meaningless without an order: the read resolver
-consults the stored order and, finding nothing in it, resolves no record at all,
-while every display surface is left to invent a winner. The system SHALL
-therefore refuse to persist a ranked policy whose order, AFTER resolving the
-names given to storage keys, contains no usable source, and SHALL report that
-refusal to the caller rather than writing a policy it cannot honour. A
-partially-resolvable order SHALL still be stored, because one usable source
-ranks something.
+consults the stored order and, finding nothing usable in it, resolves no record
+at all, while every display surface is left to invent a winner. The system SHALL
+persist a ranked policy only when EVERY source named in the request resolves to
+a storage key, and SHALL otherwise report the refusal, naming the sources it
+could not resolve, without writing anything.
+
+Discarding the unresolvable names and storing the rest SHALL NOT be treated as
+success: dropping a leading name promotes a source the request ranked BELOW it,
+which the resolver then honours and every display surface then reports, so a
+partial failure would silently invert the user's stated preference while
+appearing to have worked.
 
 #### Scenario: An order that resolves to nothing is refused
 
@@ -18,11 +22,18 @@ ranks something.
 - **THEN** no policy SHALL be persisted
 - **AND** the caller SHALL be told the order could not be resolved
 
-#### Scenario: A partially resolvable order is kept
+#### Scenario: A partially resolvable order is refused too
 
-- **GIVEN** a request to set a ranked source policy naming one source that resolves and one that does not
+- **GIVEN** a request to set a ranked source policy whose first source does not resolve and whose second does
 - **WHEN** the request is applied
-- **THEN** the policy SHALL be persisted with the resolvable source alone
+- **THEN** no policy SHALL be persisted
+- **AND** the second source SHALL NOT become the ranked first
+
+#### Scenario: A fully resolvable order is stored
+
+- **GIVEN** a request to set a ranked source policy in which every named source resolves
+- **WHEN** the request is applied
+- **THEN** the policy SHALL be persisted in the order requested
 
 ### Requirement: The section names where every managed data type comes from
 
@@ -53,13 +64,15 @@ for that type, together with manual entry for the types that have a manual entry
 path. With no source it SHALL say so. With exactly one source it SHALL name that
 source.
 
-With two or more sources the system SHALL consult the type's stored multi-source
-mode. Under a ranked mode it SHALL name the first source in the effective order —
-the same one the read resolver consults — so the two cannot disagree. Under the
-default unranked mode every source keeps writing and nothing ranks them, so the
-system SHALL report HOW MANY sources there are and SHALL NOT name one; naming one
-would present the order records happened to be written in as a choice the user
-made.
+The stored multi-source mode SHALL be consulted whatever the number of sources,
+including one: a ranked order that excludes the lone available source makes the
+resolver read nothing, so naming that source would attribute the type to data
+that never surfaces. Under a ranked mode the system SHALL name the first source
+of the effective order — the same one the read resolver consults — so the two
+cannot disagree. Under the default unranked mode every source keeps writing and
+nothing ranks them, so with two or more sources the system SHALL report HOW MANY
+there are and SHALL NOT name one; naming one would present the order records
+happened to be written in as a choice the user made.
 
 #### Scenario: A type with no manual path and no route has no source
 
@@ -90,8 +103,30 @@ made.
 
 - **GIVEN** a data type in a ranked mode whose stored order names none of its currently available sources
 - **WHEN** its origin is derived
-- **THEN** the row SHALL report a count rather than naming a source
+- **THEN** the row SHALL report that it has no usable source
 - **AND** SHALL NOT fall back to whichever source happens to be first
+
+#### Scenario: A ranked order that excludes the only source
+
+- **GIVEN** a data type with exactly one available source and a stored ranked order that does not include it
+- **WHEN** its origin is derived
+- **THEN** the row SHALL report that it has no usable source rather than naming that source
+
+### Requirement: A row whose ranking cannot be honoured says so
+
+Where a ranked order names none of the currently available sources the resolver
+returns no record for that type at all — the data is not merely unranked, it is
+not being read. The system SHALL distinguish this from the unranked default in
+both its wording and its visual treatment, and SHALL NOT describe it with copy
+that implies the sources are being kept side by side. This is the one state on
+this read-only surface permitted to present itself as a problem.
+
+#### Scenario: The stalled state is not described as healthy redundancy
+
+- **GIVEN** a data type whose ranked order names no available source
+- **WHEN** its row renders
+- **THEN** the row SHALL state that nothing is being read for the type
+- **AND** SHALL NOT reuse the wording given to a type whose sources are all kept
 
 #### Scenario: A route the user switched off is not a source
 

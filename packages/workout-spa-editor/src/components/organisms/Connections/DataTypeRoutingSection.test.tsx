@@ -70,17 +70,101 @@ describe("DataTypeRoutingSection", () => {
 
   it("should count union-mode sources instead of naming one of them", () => {
     // Arrange
-    // One enabled Garmin route on a type that also has a manual path, with no
-    // stored policy — the DEFAULT union mode, which has no winner. This is the
-    // exact row on which the reference design shows a confident "From: Garmin".
-    renderSection(flows({ sleep: { import: [route("garmin-bridge")] } }));
+    // WHOOP is the only bridge announcing `read:sleep`; with the manual path
+    // that is two sources under the DEFAULT union mode, which has no winner.
+    // This is the exact row on which the design shows "From: Garmin".
+    renderSection(flows({ sleep: { import: [route("whoop-bridge")] } }));
 
     // Act
     const pill = screen.getByTestId("routing-from-sleep");
 
     // Assert
     expect(pill).toHaveTextContent("2 sources");
-    expect(pill).not.toHaveTextContent("Garmin");
+    expect(pill).not.toHaveTextContent("WHOOP");
+    expect(screen.getByTestId("routing-note-sleep")).toHaveTextContent(
+      "none ranked first"
+    );
+  });
+
+  it("should date a primary row by its head, not by another ranked source", () => {
+    // Arrange
+    // Both sources have a sync row, with different times. A regression that
+    // dated the row from `sources[0]` — or from whichever entry the map yields
+    // first — would show WHOOP's instead of the ranked head's.
+    state.syncedAt = new Map([
+      ["whoop", "2026-07-29T09:00:00.000Z"],
+      ["tanita", new Date().toISOString()],
+    ]);
+    state.policies = [
+      {
+        dataType: "weight",
+        mode: "priority",
+        sourceOrder: ["tanita-bridge", "whoop-bridge"],
+      } as DataTypeSourcePolicy,
+    ];
+    renderSection(
+      flows({
+        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
+      })
+    );
+
+    // Act
+    const row = screen.getByTestId("routing-row-weight");
+
+    // Assert
+    expect(row).toHaveTextContent("Tanita last sent data just now");
+    expect(
+      screen.queryByTestId("routing-synced-whoop")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should date no row that has no single owning source", () => {
+    // Arrange
+    // Both union-mode sources have a recorded sync, so a regression that
+    // started dating an unranked row from any of them would render a time
+    // here. The empty-map version of this test could not have caught it.
+    state.syncedAt = new Map([
+      ["whoop", new Date().toISOString()],
+      ["tanita", new Date().toISOString()],
+    ]);
+    renderSection(
+      flows({
+        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
+      })
+    );
+
+    // Act
+    const row = screen.getByTestId("routing-row-weight");
+
+    // Assert
+    expect(row).toHaveAttribute("data-origin", "unranked");
+    expect(row).not.toHaveTextContent("last sent data");
+  });
+
+  it("should report a ranked row whose sources are all switched off", () => {
+    // Arrange
+    // Chat can set stress priority to ["garmin"] — it resolves — but Garmin
+    // announces no `read:body`, so that import can never be enabled. The
+    // resolver returns NOTHING for stress; naming manual entry would say the
+    // opposite of what the user experiences on Daily.
+    state.policies = [
+      {
+        dataType: "stress",
+        mode: "priority",
+        sourceOrder: ["garmin-bridge"],
+      } as DataTypeSourcePolicy,
+    ];
+    renderSection();
+
+    // Act
+    const row = screen.getByTestId("routing-row-stress");
+
+    // Assert
+    expect(row).toHaveAttribute("data-origin", "rankedUnavailable");
+    expect(row).not.toHaveTextContent("Manual Entry");
+    expect(screen.getByTestId("routing-note-stress")).toHaveTextContent(
+      "nothing is being read"
+    );
   });
 
   it("should offer an export target only on a type that can be exported", () => {
@@ -119,8 +203,10 @@ describe("DataTypeRoutingSection", () => {
 
   it("should show no time for a source that has never written a sync row", () => {
     // Arrange
-    // Manual entry never writes to `coachingSyncState`, so there is no
-    // timestamp to render and none is invented.
+    // Manual entry never writes to `coachingSyncState`. Other sources DO have
+    // times here, so a regression that fell back to any available timestamp
+    // would surface rather than being masked by an empty map.
+    state.syncedAt = new Map([["whoop", new Date().toISOString()]]);
     renderSection();
 
     // Act

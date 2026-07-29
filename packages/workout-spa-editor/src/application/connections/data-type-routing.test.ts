@@ -73,12 +73,12 @@ describe("buildDataTypeRoutingRows", () => {
 
   it("should count sources rather than name one in the default union mode", () => {
     // Arrange
-    // One enabled Garmin sleep route plus the always-present manual path is
-    // already two sources, and union — the DEFAULT with no policy row — keeps
-    // both records with nothing ranking them. Naming Garmin here would be
-    // reporting write order as a choice the user never made.
+    // WHOOP is the ONLY bridge announcing `read:sleep`, so this is the whole
+    // reachable source set for sleep: one bridge plus the always-present manual
+    // path. Union — the DEFAULT with no policy row — keeps both records with
+    // nothing ranking them. Writer: the Data Hub sleep/WHOOP import toggle.
     const rows = buildDataTypeRoutingRows(
-      flows({ sleep: { import: [route("garmin-bridge")] } }),
+      flows({ sleep: { import: [route("whoop-bridge")] } }),
       []
     );
 
@@ -91,36 +91,33 @@ describe("buildDataTypeRoutingRows", () => {
 
   it("should name the priority head once the user has ranked the sources", () => {
     // Arrange
-    // The Data Hub's source-priority editor writes exactly this row, and the
-    // head it stores is the one resolveEffectiveSource consults first.
+    // WHOOP and Tanita both announce `read:body`, and Tanita's route filter
+    // allows weight, so weight genuinely reaches 2 enabled bridge imports —
+    // which is what makes the Data Hub's priority editor list it at all. That
+    // editor is the writer; the head it stores is the one
+    // resolveEffectiveSource consults first.
     const rows = buildDataTypeRoutingRows(
       flows({
-        weight: {
-          import: [route("garmin-bridge"), route("trainingpeaks-bridge")],
-        },
+        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
       }),
-      [priority("weight", ["trainingpeaks-bridge", "garmin-bridge"])]
+      [priority("weight", ["tanita-bridge", "whoop-bridge"])]
     );
 
     // Act
     const origin = rowFor(rows, "weight").origin;
 
     // Assert
-    expect(origin).toEqual({
-      kind: "primary",
-      sourceId: "trainingpeaks",
-      count: 3,
-    });
+    expect(origin).toEqual({ kind: "primary", sourceId: "tanita", count: 3 });
   });
 
-  it("should not name a head when a priority policy ranks nothing", () => {
+  it("should not name a head when a stored priority order is empty", () => {
     // Arrange
-    // Reachable through chat: `set_data_route` counts the RAW sourceOrder, so
-    // ["strava"] passes its length check and then resolves to nothing, leaving
-    // a persisted priority policy with an empty order. Naming sources[0] here
-    // would attribute sleep to whichever import route was created first.
+    // `applySourcePolicy` now refuses to mint this, but rows persisted by
+    // earlier builds survive in IndexedDB with no migration, so the reader
+    // still meets it. Naming sources[0] would attribute sleep to whichever
+    // import route happened to be created first.
     const rows = buildDataTypeRoutingRows(
-      flows({ sleep: { import: [route("garmin-bridge")] } }),
+      flows({ sleep: { import: [route("whoop-bridge")] } }),
       [priority("sleep", [])]
     );
 
@@ -128,32 +125,59 @@ describe("buildDataTypeRoutingRows", () => {
     const origin = rowFor(rows, "sleep").origin;
 
     // Assert
-    expect(origin).toEqual({ kind: "unranked", count: 2 });
+    expect(origin).toEqual({ kind: "rankedUnavailable", count: 2 });
   });
 
   it("should not name a head that is no longer an enabled source", () => {
     // Arrange
-    // The same shape reached through the Data Hub alone: rank Garmin, then
-    // switch Garmin's import off and WHOOP's on. The saved order still exists
-    // but pins nothing available, and WHOOP was never ranked.
+    // Live, post-guard path: chat `set_source_policy weight priority ["whoop"]`
+    // resolves cleanly and is accepted, then the Data Hub switches WHOOP's
+    // weight import off and Tanita's + TrainingPeaks' on. The saved order
+    // survives pinning nothing available, and neither remaining bridge was
+    // ever ranked.
     const rows = buildDataTypeRoutingRows(
-      flows({ sleep: { import: [route("whoop-bridge")] } }),
-      [priority("sleep", ["garmin-bridge"])]
+      flows({
+        weight: {
+          import: [route("tanita-bridge"), route("trainingpeaks-bridge")],
+        },
+      }),
+      [priority("weight", ["whoop-bridge"])]
     );
 
     // Act
-    const origin = rowFor(rows, "sleep").origin;
+    const origin = rowFor(rows, "weight").origin;
 
     // Assert
-    expect(origin).toEqual({ kind: "unranked", count: 2 });
+    expect(origin).toEqual({ kind: "rankedUnavailable", count: 3 });
+  });
+
+  it("should not name a lone source a ranked order excludes", () => {
+    // Arrange
+    // Chat `set_source_policy stress priority ["garmin"]` resolves fine, so no
+    // writer guard stops it — but Garmin announces only write:workouts,
+    // read:activities and write:body, so a Garmin stress import can never be
+    // enabled. Manual entry is then the lone source while the resolver's
+    // effective order is empty and it returns NOTHING: the pill must not
+    // attribute the type to manual entry while the user's typed stress is
+    // failing to surface.
+    const rows = buildDataTypeRoutingRows(flows({}), [
+      priority("stress", ["garmin-bridge"]),
+    ]);
+
+    // Act
+    const origin = rowFor(rows, "stress").origin;
+
+    // Assert
+    expect(origin).toEqual({ kind: "rankedUnavailable", count: 1 });
   });
 
   it("should drop an import route the user switched off", () => {
     // Arrange
-    // Toggling a Data Hub cell off writes enabled:false rather than deleting
-    // the row, so a disabled route stays visible to this derivation.
+    // Toggling the Data Hub's weight/WHOOP cell off writes enabled:false rather
+    // than deleting the row, so a disabled route stays visible to this
+    // derivation.
     const rows = buildDataTypeRoutingRows(
-      flows({ weight: { import: [route("garmin-bridge", false)] } }),
+      flows({ weight: { import: [route("whoop-bridge", false)] } }),
       []
     );
 
@@ -166,6 +190,8 @@ describe("buildDataTypeRoutingRows", () => {
 
   it("should list an export target only while its route is enabled", () => {
     // Arrange
+    // Garmin announces `write:workouts` with no route restriction, so this is
+    // the one export the Data Hub can genuinely switch on.
     const enabled = flows({ workout: { export: [route("garmin-bridge")] } });
     const off = flows({ workout: { export: [route("garmin-bridge", false)] } });
 

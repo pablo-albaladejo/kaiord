@@ -45,14 +45,49 @@ order pinning nothing available, through the Data Hub alone. In both states the
 pre-fix code named `sources[0]` — policy-table insertion order — which is the
 same overclaim union avoids, arriving through a different door.
 
-### D1b. The writer refuses what it cannot honour
+### D1b. The writer refuses what it cannot honour — including partially
 
 `applySourcePolicy` is where that state is minted, so it is fixed here rather
-than deferred: a ranked mode whose order resolves to nothing is refused and
-reported, following `applyRouteToggle`'s existing shape (return an `error`
-object, write nothing) rather than throwing. A partially-resolvable order is
-still stored — one usable source ranks something. Deferring this to Wave 2b
-would have meant its "Change" control inheriting a corrupt state class.
+than deferred: a ranked order is stored only when EVERY name resolves,
+following `applyRouteToggle`'s existing shape (return an `error` object, write
+nothing) rather than throwing.
+
+Refusing only TOTAL failure was the first attempt and was wrong. `.filter(id =>
+id !== undefined)` keeps the survivors, so `["whoop-bridge", "tanita"]` — where
+`whoop-bridge` is the storage key rather than the chat-facing id — drops WHOOP
+and durably ranks Tanita first. The resolver honours it and the pill names it.
+Partial failure is worse than total failure precisely because it looks like
+success, so it is refused on the same terms, with the unresolvable names
+reported back so the assistant can say which ones.
+
+### D1c. Mode is consulted for one source too
+
+`originOf` does not short-circuit on `length === 1`. A ranked order that
+excludes the lone available source leaves the resolver's effective order empty,
+so it returns nothing — and naming that source would attribute the type to
+records that never surface. Reachable without any legacy data: chat
+`set_source_policy stress priority ["garmin"]` resolves cleanly, so no writer
+guard stops it, but Garmin announces only `write:workouts`, `read:activities`
+and `write:body` — a Garmin stress import can never be enabled. Manual entry is
+then the only source, and the pre-fix code named it while the user's typed
+stress failed to reach Daily.
+
+### D1d. "Ranked but unavailable" is its own state, not unranked
+
+Folding it into `unranked` traded a false name for a false reassurance: the
+unranked note says the sources are kept side by side with none ranked first,
+which is the opposite of a row that is ranked and reading nothing.
+`rankedUnavailable` therefore has its own label ("No usable source"), its own
+note, and an amber ring — the one row on this read-only surface that presents
+itself as a problem. No CTA: acting on it needs Wave 2b's picker.
+
+### D1e. The explanatory copy is visible text, not a `title`
+
+The first version put the "N sources" explanation in a native `title` on a
+`<span>`, which no keyboard user can reach and which screen readers announce
+inconsistently. Both explained states now render their note as visible muted
+text in the slot the freshness line would occupy — which is free precisely
+because neither state has a single owning source to date the row by.
 
 ## D2. `buildSourcePolicyRows` is not widened
 
@@ -87,6 +122,23 @@ other eleven **by construction**, not because the user switched something off.
 Rendering "Nowhere" there would describe the absence of a route that cannot be
 created; the affordance is omitted instead. `workout` with no enabled export
 route does say "Nowhere", because there the sentence is true.
+
+## D4a. Test fixtures name the writer that can actually create them
+
+Four fixtures originally described routes the capability gate forbids — Garmin
+importing sleep or weight. Garmin announces `write:workouts`,
+`read:activities`, `write:body` and nothing else, so the Data Hub renders those
+cells `na` and its priority editor never lists the type. The assertions were
+right and the tests passed; the provenance comments were fiction, which is this
+programme's usual failure mode inverted, and it is what sent an earlier review
+down the wrong door.
+
+Fixtures now use capability-legal pairs — WHOOP for sleep (the only bridge
+announcing `read:sleep`), WHOOP + Tanita for weight (both announce `read:body`,
+both serve weight) — and each comment names the writer that creates the state:
+the Data Hub cell toggle, its priority editor, chat `set_source_policy`, or
+chat `enable_route`, which is the one writer with **no capability check at
+all**.
 
 ## D5. The grouping is new code, so it gets an invariant
 

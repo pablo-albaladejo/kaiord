@@ -31,7 +31,10 @@ export type RoutingOrigin =
       readonly sourceId: string;
       readonly count: number;
     }
-  | { readonly kind: "unranked"; readonly count: number };
+  | { readonly kind: "unranked"; readonly count: number }
+  /** Ranked mode whose order pins nothing available — the resolver reads NO
+      record at all here, so this is the one origin that reports a problem. */
+  | { readonly kind: "rankedUnavailable"; readonly count: number };
 
 export type DataTypeRoutingRow = {
   readonly dataType: ManagedDataType;
@@ -58,38 +61,39 @@ const enabledSources = (
 /**
  * The saved order's first entry that is still an available source — exactly
  * what `resolveEffectiveSource` consults, so the pill cannot name a source the
- * resolver would not read from. Undefined when the saved order pins none of
- * them, which is NOT a corner case: the chat `set_data_route` tool persists
- * `priority` with an order emptied by unresolvable ids, and disabling every
- * ranked route in the Data Hub leaves the same shape behind.
+ * resolver would not read from.
  */
 const rankedHead = (
   sources: readonly string[],
   saved: readonly string[]
 ): string | undefined => saved.find((sourceId) => sources.includes(sourceId));
 
+/**
+ * The mode is consulted for ONE source too, not just for several. A ranked
+ * order that excludes the lone available source makes the resolver read
+ * nothing, so short-circuiting on `length === 1` would name a source whose
+ * records never surface — e.g. stress ranked to garmin (which announces no
+ * `read:body`, so that route can never be enabled) leaves manual entry as the
+ * only source while the user's hand-typed stress resolves to nothing.
+ */
 const originOf = (
   sources: readonly string[],
   policy: DataTypeSourcePolicy | undefined
 ): RoutingOrigin => {
-  const [first, ...rest] = sources;
+  const count = sources.length;
+  const [first] = sources;
   if (first === undefined) return { kind: "none" };
-  if (rest.length === 0)
-    return { kind: "only", sourceId: toIntegrationId(first) };
-  const unranked = { kind: "unranked", count: sources.length } as const;
+  const only = (sourceId: string) =>
+    ({ kind: "only", sourceId: toIntegrationId(sourceId) }) as const;
   const mode = policy?.mode ?? DEFAULT_DATA_TYPE_SOURCE_MODE;
-  if (mode !== "priority") return unranked;
+  if (mode !== "priority") {
+    return count === 1 ? only(first) : { kind: "unranked", count };
+  }
   const head = rankedHead(sources, policy?.sourceOrder ?? []);
-  // "Priority selected, nothing ranked yet" is the honest reading. Naming
-  // `sources[0]` here would attribute the type to whichever import route
-  // happened to be created first — the same overclaim union avoids, arriving
-  // through a different door.
-  if (head === undefined) return unranked;
-  return {
-    kind: "primary",
-    sourceId: toIntegrationId(head),
-    count: sources.length,
-  };
+  if (head === undefined) return { kind: "rankedUnavailable", count };
+  return count === 1
+    ? only(head)
+    : { kind: "primary", sourceId: toIntegrationId(head), count };
 };
 
 export const buildDataTypeRoutingRows = (
@@ -102,6 +106,13 @@ export const buildDataTypeRoutingRows = (
     const sources = enabledSources(flows?.import ?? []);
     // Appended last so a saved priority order (which the Data Hub editor only
     // ever fills with bridges) keeps deciding the head.
+    //
+    // ⚠ ASYMMETRY: this gate is MANUAL_ENTRY_TYPES, while
+    // `resolveEffectiveSource` exempts "manual" from its enabled filter
+    // UNCONDITIONALLY. Giving a type a manual entry path without adding it here
+    // makes the pill and the resolver disagree silently. Widening this to every
+    // type is not the fix — it would claim a source for types with no way to
+    // enter one (`planned-session` has no manual authoring path at all).
     if (MANUAL_ENTRY_TYPES.has(dataType)) sources.push(MANUAL_SOURCE_ID);
     return {
       dataType,

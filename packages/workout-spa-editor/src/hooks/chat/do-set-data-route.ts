@@ -17,23 +17,31 @@ const applySourcePolicy = async (
   profileId: string,
   input: SourcePolicyInput
 ): Promise<unknown> => {
-  const sourceOrder =
-    input.mode === "priority"
-      ? (input.sourceOrder ?? [])
-          .map(resolveSourceKey)
-          .filter((id): id is string => id !== undefined)
-      : [];
-  // The tool schema already rejects `priority` with an empty sourceOrder; this
-  // is the same rule applied AFTER resolution, where ids the model plausibly
-  // emits drop out silently — "strava" and "wahoo" are real registry entries
-  // with no bridge id, and "whoop-bridge" is not a chat-facing id at all.
-  // Persisting the mode without its ordering stores a policy `resolveEffective
-  // Source` reads NO record through, and leaves every reader to invent a head.
-  if (input.mode === "priority" && sourceOrder.length === 0) {
+  const requested = input.mode === "priority" ? (input.sourceOrder ?? []) : [];
+  const resolved = requested.map((id) => ({ id, key: resolveSourceKey(id) }));
+  const unresolved = resolved.flatMap((r) =>
+    r.key === undefined ? [r.id] : []
+  );
+  const sourceOrder = resolved.flatMap((r) =>
+    r.key === undefined ? [] : [r.key]
+  );
+  // Dropping the ids that fail to resolve and keeping the rest would REORDER
+  // the request: "whoop-bridge" is not a chat-facing id, so
+  // ["whoop-bridge", "tanita"] would durably rank Tanita FIRST — the opposite
+  // of what was asked, stored as if it had succeeded, honoured by the resolver
+  // and then named by the Connections pill. Partial failure is refused for the
+  // same reason total failure is. An empty order is refused too, because
+  // `resolveEffectiveSource` reads NO record through a ranked policy whose
+  // order is empty.
+  if (
+    input.mode === "priority" &&
+    (unresolved.length > 0 || sourceOrder.length === 0)
+  ) {
     return {
       error: "unresolvable_source_order",
       dataType: input.dataType,
-      sourceOrder: input.sourceOrder ?? [],
+      requested,
+      unresolved,
     };
   }
   await persistence.dataTypeSourcePolicy.put({

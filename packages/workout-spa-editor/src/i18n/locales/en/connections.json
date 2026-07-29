@@ -61,7 +61,9 @@
     "nowhere": "Nowhere",
     "noSource": "No source",
     "manySources": "{{count}} sources",
-    "unrankedHint": "Kaiord keeps every source's record for this type. Nothing ranks them, so no single source is the one it comes from.",
+    "unrankedNote": "kept side by side, none ranked first",
+    "noUsableSource": "No usable source",
+    "rankedUnavailableNote": "ranked to sources that are switched off — nothing is being read",
     "sourceLastSent": "{{name}} last sent data {{when}}",
     "groups": {
       "training": "Training",

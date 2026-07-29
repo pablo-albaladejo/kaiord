@@ -32,7 +32,26 @@ export const originLabel = (origin: RoutingOrigin, t: Translate): string => {
       return t("routing.noSource");
     case "unranked":
       return t("routing.manySources", { count: origin.count });
+    case "rankedUnavailable":
+      return t("routing.noUsableSource");
     default:
       return sourceName(origin.sourceId);
   }
+};
+
+/**
+ * Visible, not a `title`: a native tooltip on a `<span>` is unreachable by
+ * keyboard and inconsistently announced, and these two states are exactly the
+ * ones a pill alone misreads. "N sources" without the note reads as healthy
+ * redundancy; `rankedUnavailable` without it reads as merely unconfigured,
+ * when in fact the resolver is returning nothing for the type.
+ */
+export const originNote = (
+  origin: RoutingOrigin,
+  t: Translate
+): string | undefined => {
+  if (origin.kind === "unranked") return t("routing.unrankedNote");
+  if (origin.kind === "rankedUnavailable")
+    return t("routing.rankedUnavailableNote");
+  return undefined;
 };

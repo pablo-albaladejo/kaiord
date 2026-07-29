@@ -4,24 +4,40 @@
       `sources = enabled import routes ∪ manual (where MANUAL_ENTRY_TYPES has
 the type)`, appending `manual` last so a saved bridge order keeps deciding
       the head. See design.md D1.
-- [x] 1.2 Report `none` / `only` / `primary` / `unranked`, taking the ranked
-      head as the first saved entry still available — the element
-      `resolveEffectiveSource` picks — so the pill and the resolver cannot
-      disagree.
+- [x] 1.2 Report `none` / `only` / `primary` / `unranked` /
+      `rankedUnavailable`, taking the ranked head as the first saved entry
+      still available — the element `resolveEffectiveSource` picks — so the
+      pill and the resolver cannot disagree.
 - [x] 1.3 Carry `exportable` from `MANAGED_DATA_REGISTRY[...].capabilities
 .export`, and `sentTo` from enabled export routes only. See design.md D4.
 - [x] 1.4 Leave `buildSourcePolicyRows` untouched — its `< 2 sources` skip is
       correct for gating a reorder control and is pinned by its test. See
       design.md D2.
-- [x] 1.5 Report `unranked` when a `priority` policy's saved order pins none of
-      the available sources, instead of naming `sources[0]`. Reachable through
-      the chat tool (raw-length refinement, ids that fail to resolve) and
-      through the Data Hub (rank a bridge, then switch its import off). See
-      design.md D1a.
+- [x] 1.5 Stop naming `sources[0]` when a `priority` policy's saved order pins
+      none of the available sources. Reachable through the chat tool (ids that
+      pass its raw-length check and then fail to resolve) and through the Data
+      Hub (rank a bridge, then switch its import off). See design.md D1a.
 - [x] 1.6 Refuse the write that mints that state: `applySourcePolicy` returns
-      `unresolvable_source_order` and persists nothing when a `priority` order
-      resolves empty, following `applyRouteToggle`'s error shape. See
-      design.md D1b.
+      `unresolvable_source_order` and persists nothing unless EVERY named source
+      resolves — a partial drop silently promotes a source the request ranked
+      lower. See design.md D1b.
+- [x] 1.7 Consult the mode for a single source too, so a ranked order excluding
+      the lone source reports `rankedUnavailable` instead of naming it. See
+      design.md D1c.
+- [x] 1.8 Give `rankedUnavailable` its own label, note and amber ring rather
+      than folding it into `unranked`, whose note says the opposite. See
+      design.md D1d.
+- [x] 1.9 Render both explanatory notes as visible text; drop the native
+      `title`, which no keyboard user can reach. See design.md D1e.
+- [x] 1.10 Comment the manual-source asymmetry: this derivation gates `manual`
+      on `MANUAL_ENTRY_TYPES` while `resolveEffectiveSource` exempts it
+      unconditionally, so adding a manual path without updating that set makes
+      pill and resolver diverge silently.
+- [x] 1.11 Rebuild the test fixtures on capability-legal routes and name the
+      writer that creates each state; four described routes the capability gate
+      forbids. See design.md D4a.
+- [x] 1.12 Populate `syncedAt` in the freshness tests — the spec'd "no owning
+      source, no time" scenario ran against an empty map and could not fail.
 
 ## 2. Grouping
 
