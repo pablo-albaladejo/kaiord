@@ -268,12 +268,20 @@ The title-guard's allowlist SHALL be `new Set()` (empty). The AAA guard's allowl
 ### Requirement: A test measuring against a module-load origin SHALL place that origin
 
 A test whose behaviour depends on a clock stamped when a module was LOADED
-SHALL set that origin explicitly rather than inherit whatever the suite's boot
-left. Discovery settling is the instance the codebase has: `discovery-clock.ts`
-stamps `loadedAt` at module load and `useDiscoverySettled` compares `Date.now()`
-against it, so a suite that renders a gated surface without placing the clock
-passes or fails on how long the file took to reach the assertion — green under
-`pnpm test` and red under `test:coverage`, on the same code.
+SHALL set that origin explicitly rather than inherit whatever its own file's
+load left. Discovery settling is the instance the codebase has:
+`discovery-clock.ts` stamps `loadedAt` at module load and `useDiscoverySettled`
+compares `Date.now()` against it, so a case that renders a gated surface without
+placing the clock passes or fails on how long its file took to reach it — green
+under `pnpm test` and red under `test:coverage`, on the same code.
+
+The scope of this requirement is WITHIN a single test file. Vitest runs with
+`isolate: true`, so each file receives its own module registry and a stamped
+origin cannot cross from one file to another. What SHALL be guarded is the
+elapsed time between a file's module load and each case in that same file: the
+later a case runs, the more of the settle window has already elapsed, so a case
+asserting the un-settled state degrades as the file grows or is reordered. This
+requirement SHALL NOT be described as protecting against cross-file leakage.
 
 The rule SHALL be enforced mechanically over static import edges
 (`scripts/check-discovery-clock-reset.mjs`, R-DiscoveryClockReset): a test file

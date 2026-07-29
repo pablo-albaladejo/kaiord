@@ -4,11 +4,19 @@
  * `useDiscoverySettled` must place the discovery clock.
  *
  * `hooks/discovery-clock.ts` stamps `loadedAt` at MODULE LOAD and
- * `useDiscoverySettled` compares `Date.now()` against it. That makes the gate
- * a measurement against an ABSOLUTE origin fixed when the suite booted, so a
- * test that renders a gated surface without calling `resetDiscoveryClock`
- * passes or fails on how long the file took to get there. That is the shape
- * that shipped green twice under `pnpm test` and red under `test:coverage`.
+ * `useDiscoverySettled` compares `Date.now()` against it, so the gate is a
+ * measurement against an origin the test never chose.
+ *
+ * SCOPE — WITHIN ONE FILE, NOT ACROSS FILES. `vitest.config.ts` sets no
+ * `isolate`/`pool`, so `isolate: true` applies and each test file gets its own
+ * module registry: `loadedAt` is stamped when THIS FILE loaded the module and
+ * cannot leak in from another. What this guard protects is therefore the
+ * elapsed time between that load and each case in the same file — the later a
+ * case runs, the more of DISCOVERY_SETTLE_MS has already burned, so a case
+ * asserting the un-settled state flips as the file grows, slows, or is
+ * reordered. That is the shape that shipped green under `pnpm test` and red
+ * under `test:coverage`. It does NOT protect against cross-file leakage; there
+ * is none to protect against.
  *
  * The distinction worth keeping: tests that depend on CORRELATED timers (a
  * debounce and the test's own `sleep` share an event loop, so load delays both
