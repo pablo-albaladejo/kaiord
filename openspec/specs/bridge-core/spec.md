@@ -164,18 +164,42 @@ the editor may invoke across origins — and every bridge's own suite SHALL
 pin that set exactly, not merely assert one membership or one
 non-membership.
 
-The authentication handshake surface is NOT yet recorded, and the golden
-SHALL NOT be read as covering it. `allowed_paths` governs the DATA-call
-surface: the paths a bridge will fetch on the editor's behalf, gated by
-that bridge's `isAllowed`. A bridge's own credential handshake bypasses
-that gate by construction — garmin's `sso/signin`,
+The golden SHALL also record each bridge's CREDENTIAL-HANDSHAKE surface.
+`allowed_paths` governs only the DATA-call surface: the paths a bridge will
+fetch on the editor's behalf, gated by that bridge's `isAllowed`. A bridge's
+own handshake bypasses that gate by construction — garmin's `sso/signin`,
 `/oauth-service/oauth/preauthorized` and
 `/oauth-service/oauth/exchange/user/2.0` go straight to `fetchImpl` in
 `garmin-oauth.js`, and trainingpeaks' `exchangeToken` calls
-`cookieSessionFetch` directly — so those endpoints can change without the
-golden moving. This is a known gap, not a decision; closing it needs a
-uniform per-bridge declaration to read, because two of garmin's three
-endpoints are inline template literals with no constant to key off.
+`cookieSessionFetch` directly — and those endpoints are where the
+credentials themselves travel.
+
+Every bridge SHALL declare that surface as `const AUTH_ENDPOINTS = [...]`,
+an array of absolute `https://host/path` string literals, in whichever root
+`.js` file makes the calls. The guard SHALL read the declaration rather than
+infer the surface from call sites: two of garmin's three URLs are built
+inline from `CONNECTAPI` with no constant to key off, so an extractor that
+scanned for URL-shaped constants would record one of three and report a
+complete surface.
+
+A bridge with no handshake SHALL declare `[]` explicitly; absence SHALL
+fail. This differs from `EXTERNAL_ACTIONS`, where absence is honest, and the
+difference is load-bearing: nothing tells the guard whether a bridge HAS a
+handshake, so permitting silence would let a new `packages/<name>-bridge`
+that mints tokens lock `auth_endpoints: []` and read in review as sending
+credentials nowhere. Deriving the bridge list from disk does not help on its
+own there — the new bridge is enumerated and still locks an empty surface.
+A declaration the guard cannot read — a template literal, a bare path, a
+wrapper, a rename, a spread, entries appended after the literal — SHALL
+fail loudly rather than be recorded as an empty surface.
+
+Because the guard can only verify that the DECLARATION has not moved, each
+bridge with a handshake SHALL ALSO pin that declaration against the URLs its
+handshake actually requests, in its own vitest suite, through the mocked
+fetch. Both halves are required and neither is sufficient: repointing a call
+while leaving the declaration untouched is invisible to the guard, and
+dropping an entry from the declaration is answered by regenerating the
+golden.
 
 The internal action surface (popup → background) is deliberately NOT
 recorded. The golden documents what a third party can reach; no origin
@@ -208,6 +232,22 @@ action ever becomes reachable from `externally_connectable`, it enters
 - **AND** an entry field whose value is not a string or regex literal, or whose key is not `method` or `pattern`, SHALL fail the same way
 - **AND** a nested object literal SHALL NOT be able to supply an entry's `method` or `pattern` in place of the entry's own
 - **AND** a bridge that ships a service worker or content script but whose allowlist declaration cannot be located at all — wrapped in `Object.freeze(…)`, or renamed — SHALL fail, rather than be recorded with an empty read surface that reads as "this bridge reads nothing"
+
+#### Scenario: A moved credential sink is caught
+
+- **GIVEN** a bridge's `AUTH_ENDPOINTS` declaration, which records where its credential handshake sends the user's own session
+- **WHEN** an endpoint is added to, removed from, or repointed in that declaration
+- **THEN** `check-bridge-privacy-surface.mjs` SHALL fail against the golden fixture
+- **AND** when instead the CALL is repointed while the declaration is left untouched — the guard cannot see this — that bridge's own vitest suite SHALL fail, because it compares the declaration against the URLs the handshake actually requests
+- **AND** a bridge that gains an additional handshake request SHALL fail that same comparison
+
+#### Scenario: An unreadable or absent handshake declaration fails loudly
+
+- **GIVEN** a bridge whose `AUTH_ENDPOINTS` the guard cannot read — a template literal such as ``[`${TPAPI}${TOKEN_PATH}`]``, a bare path with no origin, an `Object.freeze(…)` wrapper, a rename, a spread, a second declaration in the same file, or entries appended with `.concat(…)`
+- **WHEN** `check-bridge-privacy-surface.mjs` extracts that bridge's surface
+- **THEN** it SHALL fail naming the defect, rather than recording `auth_endpoints: []` — which would read as "this bridge sends credentials nowhere"
+- **AND** a bridge that declares nothing at all SHALL fail the same way, so that a bridge with no handshake states `[]` deliberately
+- **AND** a bridge shipping no root `.js` file at all SHALL be recorded `[]` without a declaration, since it executes nothing
 
 #### Scenario: A new bridge package cannot ship unlocked
 

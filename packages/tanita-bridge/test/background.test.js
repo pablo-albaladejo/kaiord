@@ -11,6 +11,7 @@ const {
   checkSession,
   handleAction,
   EXTERNAL_ACTIONS,
+  AUTH_ENDPOINTS,
 } = require("../background.js");
 const pkg = require("../package.json");
 
@@ -126,6 +127,22 @@ describe("background.js", () => {
 
       // Act
       const actual = [...EXTERNAL_ACTIONS];
+
+      // Assert
+      expect(actual).toEqual(expected);
+    });
+
+    // The credential-handshake surface, recorded in the bridge privacy
+    // golden. This bridge mints and exchanges nothing: the MyTANITA session
+    // cookie rides along on the export fetch itself, which `isAllowed`
+    // gates. Pinned empty rather than left unstated, so growing a handshake
+    // has to change this assertion — and the golden with it.
+    it("should declare no credential handshake", () => {
+      // Arrange
+      const expected = [];
+
+      // Act
+      const actual = [...AUTH_ENDPOINTS];
 
       // Assert
       expect(actual).toEqual(expected);

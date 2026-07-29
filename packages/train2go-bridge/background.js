@@ -336,6 +336,18 @@ const EXTERNAL_ACTIONS = new Set([
   "profile-snapshot-clear",
 ]);
 
+// No credential handshake: this bridge mints nothing and exchanges nothing.
+// The Train2Go session cookie rides along on each read
+// (`credentials:"include"` in session-fetch.js), and every one of those
+// reads is gated by `isAllowed` above — so the whole network surface is
+// already ALLOWED.
+//
+// Declared empty rather than omitted. scripts/check-bridge-privacy-surface.mjs
+// cannot tell "has no handshake" from "has one nobody declared", so silence
+// would lock an empty surface reading as "sends credentials nowhere". This
+// is the claim, stated.
+const AUTH_ENDPOINTS = [];
+
 const dispatch = bridgeEnvelope.createDispatch({
   handleAction,
   protocolVersion: PROTOCOL_VERSION,
@@ -362,6 +374,7 @@ if (typeof module !== "undefined") {
     BRIDGE_MANIFEST,
     TRAIN2GO_ORIGIN,
     EXTERNAL_ACTIONS,
+    AUTH_ENDPOINTS,
     ALLOWED,
     isAllowed,
     parseBody,

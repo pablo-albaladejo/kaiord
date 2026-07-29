@@ -11,6 +11,10 @@
  *     `ALLOWED_PREFIXES` (GET-only string path prefixes).
  *   - popup.js: every `fetch(...)` / `XMLHttpRequest` URL argument MUST
  *     be a relative path (no `http(s)://` literal).
+ *   - any root .js file: `AUTH_ENDPOINTS`, the credential-handshake
+ *     surface. Unlike the allowlist this is not gated by `isAllowed` —
+ *     it is where the credentials themselves travel — so every bridge
+ *     declares it, and a bridge with no handshake declares `[]`.
  *
  * The aggregated structure is compared byte-for-byte against the
  * checked-in golden at scripts/fixtures/bridge-privacy-surface.json.
@@ -516,6 +520,140 @@ export const extractExternalActions = (bridge) => {
   return [];
 };
 
+// `const AUTH_ENDPOINTS = ["https://…", …]` — the endpoints a bridge sends
+// the user's own credentials to during its CREDENTIAL HANDSHAKE.
+//
+// `allowed_paths` locks the DATA-call surface: what a bridge fetches on the
+// editor's behalf, gated by that bridge's `isAllowed`. A bridge's own
+// handshake bypasses that gate by construction — garmin's three OAuth hops
+// go straight to `fetchImpl` in garmin-oauth.js, trainingpeaks' token
+// exchange straight to `cookieSessionFetch` — so those endpoints, the ones
+// credentials actually travel to, could change with the golden unmoved.
+//
+// DECLARED, never inferred. Two of garmin's three URLs are built inline
+// from `CONNECTAPI` with no constant to key off, so an extractor that
+// scanned for URL-shaped constants would record ONE of the three and
+// report a complete surface — the same "covers less than its name
+// suggests" failure this guard has spent eight fixes closing.
+//
+// The declaration is what the guard records; each bridge's own suite is
+// what keeps it TRUE, by pinning it against the URLs its handshake
+// actually requests through the mocked fetch. Neither half is sufficient:
+// repointing a CALL while leaving the declaration untouched is invisible
+// here, and dropping an entry from the declaration is answered by
+// regenerating the golden.
+const AUTH_DECLARATION = "const AUTH_ENDPOINTS = [";
+
+// Root-level `.js` files only, so `node_modules` is never descended and a
+// vendored copy cannot masquerade as the bridge's own declaration.
+const bridgeSourceFiles = (bridge) => {
+  const dir = join(REPO_ROOT, "packages", bridge);
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".js") && statSync(join(dir, f)).isFile())
+    .sort()
+    .map((f) => ({ name: f, path: join(dir, f) }));
+};
+
+// A recorded endpoint must pin an ORIGIN — that is the whole privacy claim:
+// which host receives the credential. A template literal survives
+// `scanQuoted` as its raw source text, so `` `${TPAPI}${TOKEN_PATH}` ``
+// would land in the golden as the meaningless string "${TPAPI}${TOKEN_PATH}"
+// and read like a recorded endpoint. Refused rather than recorded.
+const assertRecordableEndpoint = (value, bridge, file) => {
+  const where = `${bridge}/${file}`;
+  if (value.includes("${")) {
+    throw new Error(
+      `${where}: \`${AUTH_DECLARATION}…\` entry \`${value}\` is a template literal — its interpolations are not resolved, so the golden would record placeholder text as if it were an endpoint. Write the absolute URL out.`
+    );
+  }
+  if (!/^https:\/\/[^/]+\//.test(value)) {
+    throw new Error(
+      `${where}: \`${AUTH_DECLARATION}…\` entry \`${value}\` is not an absolute \`https://host/path\` URL — a handshake endpoint is recorded to pin the ORIGIN credentials travel to.`
+    );
+  }
+};
+
+const readAuthDeclaration = ({ name, path }, bridge) => {
+  const src = readFileSync(path, "utf8");
+  if (src.split(AUTH_DECLARATION).length - 1 > 1) {
+    throw new Error(
+      `${bridge}/${name}: declares \`${AUTH_DECLARATION}…\` more than once — only the first would be read, so the rest would be invisible to this guard`
+    );
+  }
+  const body = sliceArrayLiteral(src, AUTH_DECLARATION);
+  if (!body) return null;
+  assertDeclarationEndsAtBracket(src, body.end, AUTH_DECLARATION, [";"]);
+
+  const { objects, strings, residue } = tokenizeAllowlistBody(body.source);
+  assertOnlyLiteralElements(residue, AUTH_DECLARATION);
+  if (objects.length > 0) {
+    throw new Error(
+      `${bridge}/${name}: \`${AUTH_DECLARATION}…\` contains an object literal — a handshake endpoint is a URL string`
+    );
+  }
+  for (const value of strings) assertRecordableEndpoint(value, bridge, name);
+  return strings;
+};
+
+// Absence is NOT honest here, and that is a deliberate departure from how
+// `EXTERNAL_ACTIONS` treats it.
+//
+// `EXTERNAL_ACTIONS` can be absent because an absent external surface is
+// verifiable another way — the manifest either declares
+// `externally_connectable` or it does not. Nothing equivalent tells this
+// guard whether a bridge has a handshake, so if silence were allowed, a new
+// `packages/foo-bridge` that mints tokens would be recorded
+// `auth_endpoints: []`, read in review as "this bridge sends credentials
+// nowhere", and pass. Deriving the bridge list from disk would buy nothing:
+// the new bridge would be enumerated and still lock an empty surface.
+//
+// So every bridge states its handshake surface, and the three that have
+// none state `[]` explicitly. That does not make a false `[]` impossible —
+// nothing here can — but it moves the failure from an omission nobody sees
+// to a written claim in a reviewed diff.
+export const extractAuthEndpoints = (bridge) => {
+  const files = bridgeSourceFiles(bridge);
+  // A package shipping no root .js at all executes nothing and so reaches no
+  // endpoint — `[]` is a fact about it, not a claim needing a declaration.
+  // Same line `extractAllowed` draws for a bridge with neither content.js
+  // nor background.js. Bridges ship flat, unbundled files (bridge-core
+  // spec), so "no root .js" really does mean "no code".
+  if (files.length === 0) return [];
+
+  const declared = files
+    .map((file) => ({ file, endpoints: readAuthDeclaration(file, bridge) }))
+    .filter((r) => r.endpoints !== null);
+
+  // Checked across EVERY file, and BEFORE the readable declarations are
+  // returned. Stopping as soon as one file read cleanly would let a second
+  // file's wrapped or renamed declaration disappear: garmin declares in
+  // garmin-oauth.js, so a `const AUTH_ENDPOINTS = Object.freeze([…])` added
+  // to background.js would contribute nothing and say nothing. A file that
+  // names the constant but yields no readable declaration is unreadable, not
+  // absent.
+  const unreadable = files.filter(
+    (f) =>
+      !declared.some((d) => d.file.name === f.name) &&
+      readFileSync(f.path, "utf8").includes("AUTH_ENDPOINTS")
+  );
+  if (unreadable.length > 0) {
+    throw new Error(
+      `${bridge}: ${unreadable.map((f) => f.name).join(", ")} mention(s) AUTH_ENDPOINTS but no \`${AUTH_DECLARATION}…];\` declaration could be read there — a wrapped (\`Object.freeze([…])\`) or renamed declaration would otherwise contribute nothing to the recorded handshake surface`
+    );
+  }
+
+  if (declared.length > 0) {
+    // Every declaration is read, not just the first: splitting the
+    // handshake across two files must widen the recorded surface, never
+    // silently truncate it to whichever file sorted first.
+    return declared.flatMap((r) => r.endpoints);
+  }
+
+  throw new Error(
+    `${bridge}: no \`${AUTH_DECLARATION}…];\` declaration found in any root .js file. Every bridge states its credential-handshake surface; a bridge with no handshake declares \`[]\` and says so. Silence would lock an empty surface that reads as "sends credentials nowhere".`
+  );
+};
+
 const FETCH_OR_XHR = /\b(fetch|XMLHttpRequest)\s*\(\s*([^)]*)\)/g;
 
 const declaresPopup = (bridge) => {
@@ -556,6 +694,7 @@ export const buildSurface = () => {
       ...(manifestProd ? { manifest_prod: manifestProd } : {}),
       allowed_paths: extractAllowed(bridge),
       external_actions: extractExternalActions(bridge),
+      auth_endpoints: extractAuthEndpoints(bridge),
     };
   }
   return out;
@@ -566,7 +705,9 @@ const main = () => {
   try {
     surface = buildSurface();
   } catch (error) {
-    console.error(`❌ Bridge allowlist could not be read: ${error.message}`);
+    console.error(
+      `❌ Bridge privacy surface could not be read: ${error.message}`
+    );
     process.exit(1);
     return;
   }
