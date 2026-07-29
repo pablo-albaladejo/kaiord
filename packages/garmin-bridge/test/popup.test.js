@@ -128,9 +128,9 @@ describe("Garmin popup", () => {
   });
 
   // Reachable falsehood the old copy shipped: sign out of Garmin Connect and
-  // the stored OAuth1 token keeps minting bearers, so `gcApi.ok` stays true and
-  // the popup went on claiming it was "riding your Garmin Connect session" —
-  // a session that no longer existed.
+  // the current bearer is still valid, so `gcApi.ok` stays true and the popup
+  // went on claiming it was "riding your Garmin Connect session" — a session
+  // that no longer existed.
   it("does not claim a live Garmin session while connected", async () => {
     const dom = setupDom(
       buildChromeMock({
