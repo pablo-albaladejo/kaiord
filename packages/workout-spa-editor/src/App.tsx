@@ -3,12 +3,10 @@ import { useLocation } from "wouter";
 
 import { AppRoutes } from "./AppRoutes";
 import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
-import { AppTutorial } from "./components/AppTutorial";
 import { MigrationBoot } from "./components/MigrationBoot";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
-import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
 import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useSyncAutoPush } from "./hooks/use-sync-auto-push";
@@ -17,7 +15,6 @@ function App() {
   useStoreHydration();
   useProfileSnapshotPush();
   useSyncAutoPush();
-  const { showTutorial, setShowTutorial } = useOnboardingTutorial();
   const analytics = useAnalytics();
   const [path] = useLocation();
 
@@ -37,10 +34,9 @@ function App() {
     <AppToastProvider>
       <MigrationBoot />
       <AppKeyboardShortcuts />
-      <MainLayout onReplayTutorial={() => setShowTutorial(true)}>
+      <MainLayout>
         <AppRoutes analytics={analytics} />
       </MainLayout>
-      <AppTutorial show={showTutorial} onOpenChange={setShowTutorial} />
     </AppToastProvider>
   );
 }

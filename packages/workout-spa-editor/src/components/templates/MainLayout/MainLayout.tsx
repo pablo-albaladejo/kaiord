@@ -10,15 +10,14 @@ import { LayoutHeader } from "./LayoutHeader";
 
 type MainLayoutProps = {
   children: ReactNode;
-  onReplayTutorial?: () => void;
 };
 
-export const MainLayout = ({ children, onReplayTutorial }: MainLayoutProps) => {
+export const MainLayout = ({ children }: MainLayoutProps) => {
   useFocusOnRouteChange();
   const routeLabel = useRouteAnnouncerLabel();
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-slate-900">
-      <LayoutHeader onReplayTutorial={onReplayTutorial} />
+      <LayoutHeader />
       {/*
         Route announcer.
         - `polite` because navigation announcements should not interrupt

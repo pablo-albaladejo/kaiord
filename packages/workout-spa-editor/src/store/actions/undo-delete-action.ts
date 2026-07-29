@@ -1,56 +1,35 @@
 /**
  * Undo Delete Action
  *
- * Action for restoring a deleted step at its original position.
+ * Restores every step removed by one delete operation, at its original
+ * position. The operation is addressed by `groupId` — never by
+ * `timestamp`, which collides across same-millisecond deletes.
  */
 
-import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
-import { isWorkoutStep } from "../../types/krd";
+import type { KRD } from "../../types/krd";
 import { restoredAfterUndoTarget } from "../focus-rules";
 import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import { extractStructuredWorkout } from "./_helpers/extract-workout";
+import { reindexSteps } from "./delete-step-helpers";
+import { restoreDeletedItems } from "./undo-delete-helpers";
 
 export const undoDeleteAction = (
   krd: KRD,
-  timestamp: number,
+  groupId: string,
   state: WorkoutState
 ): Partial<WorkoutState> => {
   const workout = extractStructuredWorkout(krd);
-  if (!workout) {
-    return {};
-  }
+  if (!workout) return {};
 
   const deletedSteps = state.deletedSteps || [];
-  const deletedStepEntry = deletedSteps.find((d) => d.timestamp === timestamp);
-
-  if (!deletedStepEntry) {
-    return {};
-  }
-
-  const { step, index } = deletedStepEntry;
-
-  // Insert the step back at its original position
-  const updatedSteps = [...workout.steps];
-  updatedSteps.splice(index, 0, step);
-
-  // Recalculate stepIndex for all steps
-  const reindexedSteps = updatedSteps.map(
-    (s: WorkoutStep | RepetitionBlock, idx: number) => {
-      if (isWorkoutStep(s)) {
-        return {
-          ...s,
-          stepIndex: idx,
-        };
-      }
-      return s; // Repetition blocks don't have stepIndex
-    }
-  );
+  const group = deletedSteps.filter((d) => d.groupId === groupId);
+  if (group.length === 0) return {};
 
   const updatedWorkout = {
     ...workout,
-    steps: reindexedSteps,
+    steps: reindexSteps(restoreDeletedItems(workout.steps, group)),
   };
 
   const updatedKrd: KRD = {
@@ -61,19 +40,17 @@ export const undoDeleteAction = (
     },
   };
 
-  // Remove the deleted step from tracking
-  const newDeletedSteps = deletedSteps.filter((d) => d.timestamp !== timestamp);
-
-  // Focus lands on the restored item so the user can immediately
+  // Focus lands on the first restored item so the user can immediately
   // continue editing what they just undid.
-  const restoredId = (step as { id?: string }).id;
+  const restoredId = (group[0]!.step as { id?: string }).id;
   const pendingFocusTarget = restoredId
     ? restoredAfterUndoTarget(updatedWorkout, restoredId as ItemId)
     : state.pendingFocusTarget;
 
   return {
     ...createUpdateWorkoutAction(updatedKrd, state),
-    deletedSteps: newDeletedSteps,
+    // The whole group is consumed by this one undo.
+    deletedSteps: deletedSteps.filter((d) => d.groupId !== groupId),
     pendingFocusTarget,
   };
 };
