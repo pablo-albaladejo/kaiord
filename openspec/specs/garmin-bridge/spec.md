@@ -1,236 +1,160 @@
-> Synced: 2026-05-29
+> Synced: 2026-07-29
 
 # Garmin Bridge
 
 ## Purpose
 
-Chrome extension that proxies Kaiord's workout-editor to Garmin Connect by piggybacking on the user's authenticated session — no credentials stored, CSRF token captured in memory-only session storage.
+Chrome extension that connects Kaiord's workout editor to Garmin Connect. It mints OAuth tokens **once** from the user's existing browser sign-in and thereafter calls `connectapi.garmin.com` directly from the service worker with a Bearer header — no password, no stored Garmin credential, no CSRF relay, no Garmin tab, and no content script on Garmin origins.
 
 ## Requirements
 
 ### Requirement: Extension manifest
 
-The extension v1 SHALL target Chrome (Chromium-based browsers) only. Firefox is not supported due to lack of `externally_connectable` API.
+The extension SHALL target Chrome (Chromium-based browsers) only. Firefox is not supported due to lack of the `externally_connectable` API.
 
-The extension SHALL use Manifest V3 with the following permissions:
+The extension SHALL use Manifest V3 and SHALL request `storage` as its ONLY `permissions` entry. It SHALL NOT request `webRequest` (nothing is intercepted) and SHALL NOT request `tabs` (nothing reads tab URLs; opening a tab needs no permission). Every additional permission is a Chrome Web Store review surface, so the set is deliberately minimal and any addition SHALL be justified in `privacy-justification.md`.
 
-- `storage` — persist CSRF token in `chrome.storage.session` across service worker restarts
-- `tabs` — query for Garmin Connect tabs and open new tabs
-- `webRequest` — intercept outgoing requests to capture CSRF tokens
+Host permissions SHALL be exactly `https://connect.garmin.com/*`, `https://connectapi.garmin.com/*` and `https://sso.garmin.com/*` — the sign-in origin the token is minted from, the API origin the reads and writes go to, and the dashboard the popup opens.
 
-Host permissions SHALL include `https://connect.garmin.com/*`.
+Content scripts SHALL be injected on SPA origins ONLY (`https://*.kaiord.com/*` and, in dev, `http://localhost/*`), loading `bridge-identity.js` before `kaiord-announce.js` at `document_start`. No content script SHALL be injected on any Garmin origin.
 
-The `externally_connectable` field SHALL declare SPA origins: `http://localhost:5173/*`, `http://localhost:5174/*`, and `https://*.kaiord.com/*`.
+The `externally_connectable` field SHALL declare `http://localhost:5173/*`, `http://localhost:5174/*` and `https://*.kaiord.com/*`.
 
-The manifest SHALL declare a top-level `icons` field with sizes 16, 48, and 128. The `action.default_icon` field SHALL reference sizes 48 and 128 (Chrome does not use 16px for the action icon).
+The manifest SHALL declare a top-level `icons` field with sizes 16, 48 and 128. The `action.default_icon` field SHALL reference sizes 48 and 128 (Chrome does not use 16px for the action icon).
 
-A production variant (`manifest.prod.json`) SHALL exist that excludes localhost origins from `externally_connectable` and is used for Chrome Web Store packaging.
+A production variant (`manifest.prod.json`) SHALL exist that strips every localhost origin — from both the announce content-script matches and `externally_connectable` — and is used for Chrome Web Store packaging.
 
-#### Scenario: Extension loads with required permissions
+#### Scenario: Extension requests only storage
 
-- **WHEN** the extension is installed
-- **THEN** it registers a `webRequest.onBeforeSendHeaders` listener for `https://connect.garmin.com/*`
+- **WHEN** the extension manifest is read
+- **THEN** `permissions` SHALL be exactly `["storage"]`, containing neither `webRequest` nor `tabs`
+
+#### Scenario: No content script runs on Garmin
+
+- **WHEN** the manifest's `content_scripts` matches are read
+- **THEN** every entry SHALL match a Kaiord SPA origin only, and none SHALL match a `garmin.com` origin
 
 #### Scenario: Extension declares icon sizes
 
 - **WHEN** the extension manifest is read
-- **THEN** the top-level `icons` field SHALL declare sizes 16, 48, and 128
+- **THEN** the top-level `icons` field SHALL declare sizes 16, 48 and 128
 - **AND** `action.default_icon` SHALL declare sizes 48 and 128
 
-### Requirement: CSRF token capture
+### Requirement: OAuth token minting from the browser sign-in
 
-The background service worker SHALL intercept all requests to `https://connect.garmin.com/*` via `chrome.webRequest.onBeforeSendHeaders` and extract the `connect-csrf-token` header value. The captured token SHALL be stored using `chrome.storage.session` (encrypted, memory-only, survives service worker restarts, not persisted to disk).
+The extension SHALL authenticate to Garmin with OAuth tokens minted from the user's existing `connect.garmin.com` sign-in, and SHALL NOT prompt for a password. The mint SHALL run once and follow three steps: obtain a service ticket from the SSO session without re-authenticating; sign that ticket (OAuth1, 2-legged) to obtain an OAuth1 token; exchange it (OAuth1, 3-legged) for an OAuth2 Bearer token.
 
-The extension SHALL NOT log CSRF token values (even truncated) to the console. Diagnostic responses SHALL report CSRF status as a boolean (`true`/`false`), never the token value.
+Tokens SHALL be held in `chrome.storage.local` so they survive service-worker cold starts. The OAuth1 token is long-lived (about a year). The OAuth2 access token SHALL be refreshed by re-running the exchange with the OAuth1 token alone; **that refresh reads no cookie and no browser session**. Only if the refresh fails SHALL the extension re-mint from the SSO session.
 
-#### Scenario: CSRF token captured from Garmin navigation
+It follows — and any surface reporting this bridge's state MUST respect it — that **reads continue after the user signs out of connect.garmin.com**, and that a failed call is NOT evidence the user is signed out. The consumer key and secret are Garmin's public reverse-engineered values, hardcoded so the bridge needs no additional host permission.
 
-- **WHEN** the user navigates Garmin Connect and the browser sends a request with a `connect-csrf-token` header
-- **THEN** the extension stores the token value in `chrome.storage.session`
+The extension SHALL NOT log token values, even truncated. Diagnostic responses SHALL report authentication as a boolean, never a token.
 
-#### Scenario: CSRF token not yet captured
+#### Scenario: Reads survive signing out of the website
 
-- **WHEN** the extension has just been installed and no Garmin requests have been intercepted
-- **THEN** the CSRF token is `null` and API calls will fail with 403
+- **GIVEN** the extension holds a valid OAuth1 token
+- **WHEN** the user signs out of connect.garmin.com and Kaiord requests a read
+- **THEN** the OAuth2 bearer SHALL be refreshed from the OAuth1 token and the read SHALL succeed
 
-#### Scenario: CSRF token survives service worker restart
+#### Scenario: Tokens survive a service-worker restart
 
-- **WHEN** the MV3 service worker is terminated due to idle timeout and then restarted
-- **THEN** the CSRF token is retrieved from `chrome.storage.session` and API calls continue to work
+- **WHEN** the MV3 service worker is terminated on idle and restarted
+- **THEN** the tokens SHALL be read back from `chrome.storage.local` and calls SHALL continue to work
 
-### Requirement: Content script path/method allowlist
+#### Scenario: A failed call is not reported as a signed-out session
 
-The content script SHALL only execute fetch requests to paths matching a predefined allowlist. The allowlist SHALL be:
+- **GIVEN** a session check that did not succeed
+- **WHEN** any surface explains it
+- **THEN** it SHALL NOT assert that the user is signed out, because the extension cannot distinguish an unusable token from a Garmin outage
 
-- `GET` requests matching `/workout-service/workouts` (with any query params)
-- `POST` requests matching `/workout-service/workout`
+### Requirement: Service-worker call surface with a path/method allowlist
 
-Requests to paths or methods outside the allowlist SHALL be rejected with `{ ok: false, error: "Blocked: disallowed path or method" }` without making any network call.
+All Garmin API calls SHALL be made from the background service worker against `https://connectapi.garmin.com` with an `Authorization: Bearer` header. No call SHALL be relayed through a page, a content script, or a Garmin tab.
 
-#### Scenario: Allowed GET request passes validation
+Every call SHALL be checked against an allowlist of (method, path-pattern) rules before any network request is made, as defence in depth: the SPA can only trigger fixed paths, and the bridge still refuses anything outside the set. The allowlist SHALL be:
 
-- **WHEN** a `garmin-fetch` message arrives with method `GET` and path `/workout-service/workouts?start=0&limit=20`
-- **THEN** the content script executes the fetch
+- `GET` `/workout-service/workouts` (with any query string)
+- `POST` `/workout-service/workout`
+- `POST` `/upload-service/upload` (with an optional sub-path, e.g. `/.fit`)
+- `GET` `/activitylist-service/activities/search/activities` (with any query string)
 
-#### Scenario: Allowed POST request passes validation
+A call outside the allowlist SHALL be rejected with `{ ok: false, error: "Blocked: disallowed path or method" }` and SHALL make no network request. The allowlist SHALL be locked against drift by `scripts/check-bridge-privacy-surface.mjs`.
 
-- **WHEN** a `garmin-fetch` message arrives with method `POST` and path `/workout-service/workout`
-- **THEN** the content script executes the fetch
+#### Scenario: Allowed workout read passes the allowlist
 
-#### Scenario: Disallowed path is rejected
+- **WHEN** a read is issued for `/workout-service/workouts?start=0&limit=20` with method `GET`
+- **THEN** the service worker performs the Bearer call against connectapi
 
-- **WHEN** a `garmin-fetch` message arrives with path `/userprofile-service/usersettings`
-- **THEN** the content script returns `{ ok: false, error: "Blocked: disallowed path or method" }` without making a network call
+#### Scenario: Disallowed path is rejected without a network call
 
-#### Scenario: Disallowed method is rejected
+- **WHEN** a call is issued for `/userprofile-service/usersettings`
+- **THEN** the extension returns `{ ok: false, error: "Blocked: disallowed path or method" }` and makes no network request
 
-- **WHEN** a `garmin-fetch` message arrives with method `DELETE` and path `/workout-service/workout/123`
-- **THEN** the content script returns `{ ok: false, error: "Blocked: disallowed path or method" }` without making a network call
+#### Scenario: Disallowed method is rejected without a network call
 
-### Requirement: Content script API proxy
-
-A content script injected into `connect.garmin.com` at `document_start` SHALL handle `garmin-fetch` messages by executing `fetch()` calls to `/gc-api/*` endpoints. The content script SHALL capture a pristine reference to `window.fetch` at load time to prevent interference from page scripts.
-
-The content script SHALL include the following headers on every request:
-
-- `nk: NT`
-- `x-requested-with: XMLHttpRequest`
-- `connect-csrf-token: {captured token}` (when provided)
-- `Content-Type: application/json` (for POST requests with a body)
-
-The `credentials` option SHALL be set to `"include"` so the browser attaches session cookies automatically.
-
-The content script SHALL use an `AbortController` with a 30-second timeout on every fetch to prevent indefinite hangs.
-
-For responses with status 204 (No Content), the content script SHALL return `null` as the data instead of attempting to parse JSON.
-
-#### Scenario: Successful GET request via content script
-
-- **WHEN** the background sends a `garmin-fetch` message with path `/workout-service/workouts?start=0&limit=20` and method `GET`
-- **THEN** the content script executes `fetch("/gc-api/workout-service/workouts?start=0&limit=20")` with required headers and returns `{ ok: true, status: 200, data: [...] }`
-
-#### Scenario: Successful POST request via content script
-
-- **WHEN** the background sends a `garmin-fetch` message with method `POST` and a JSON body
-- **THEN** the content script includes `Content-Type: application/json` and the serialized body
-
-#### Scenario: API returns error
-
-- **WHEN** the Garmin API returns a non-2xx status
-- **THEN** the content script returns `{ ok: false, status: <code>, body: <text> }`
-
-#### Scenario: API returns 204 No Content
-
-- **WHEN** the Garmin API returns status 204
-- **THEN** the content script returns `{ ok: true, status: 204, data: null }`
-
-#### Scenario: Request times out
-
-- **WHEN** the Garmin API does not respond within 30 seconds
-- **THEN** the fetch is aborted and the content script returns `{ ok: false, error: "Request timed out" }`
-
-### Requirement: Garmin tab dependency
-
-All API operations SHALL require an open Garmin Connect tab (`https://connect.garmin.com/*`). If no tab is found, the operation SHALL fail with a descriptive error message.
-
-#### Scenario: No Garmin Connect tab open
-
-- **WHEN** the SPA or popup requests an API operation and no `connect.garmin.com` tab exists
-- **THEN** the extension returns an error: "No Garmin Connect tab open. Open connect.garmin.com first."
+- **WHEN** a `DELETE` is issued for `/workout-service/workout/123`
+- **THEN** the extension returns `{ ok: false, error: "Blocked: disallowed path or method" }` and makes no network request
 
 ### Requirement: Runtime extension ID announcement on SPA origins
 
-The extension SHALL inject a content script (`kaiord-announce.js`) at `document_start` on SPA origins (`https://*.kaiord.com/*` and, in dev, `http://localhost/*`). The script SHALL post a `KAIORD_BRIDGE_ANNOUNCE` message via `window.postMessage` to the page's own origin so the SPA can discover the extension's runtime ID without hardcoding it.
+The extension SHALL inject `bridge-identity.js` followed by `kaiord-announce.js` at `document_start` on SPA origins, and the announce script SHALL post a `KAIORD_BRIDGE_ANNOUNCE` message via `window.postMessage` to the page's own origin so the SPA can discover the extension's runtime ID without hardcoding it.
 
-The announcement payload SHALL include: `type: "KAIORD_BRIDGE_ANNOUNCE"`, `bridgeId: "garmin-bridge"`, `extensionId: chrome.runtime.id`, `name: "Garmin Connect"`, `version` (from manifest), `protocolVersion: 1`, and `capabilities: ["write:workouts"]`.
+The announcement payload SHALL include `type: "KAIORD_BRIDGE_ANNOUNCE"`, `bridgeId: "garmin-bridge"`, `extensionId: chrome.runtime.id`, `name: "Garmin Connect"`, `version` (from the manifest), `protocolVersion: 1`, and `capabilities: ["write:workouts", "read:activities", "write:body"]`. The identity values SHALL match `BRIDGE_MANIFEST` in `background.js`, enforced by `scripts/check-bridge-core-parity.test.mjs`.
 
 The script SHALL re-announce when it receives a `KAIORD_BRIDGE_DISCOVER` message from the page (`event.source === window`).
 
-The production manifest (`manifest.prod.json`) SHALL only declare `https://*.kaiord.com/*` as the announce-script match; localhost origins SHALL NOT be present in the production build.
+The production manifest SHALL declare only `https://*.kaiord.com/*` as the announce-script match.
 
-The prior spec stated that the SPA shows "Push to Garmin" UI based on the presence of `write:workouts` in the detected manifest. This coupling is superseded by the policy resolver (see `spa-bridge-protocol` spec, Requirement: Policy resolution). The bridge protocol is unchanged; the SPA-side consumption is what changes.
+Capability presence alone SHALL NOT drive SPA affordances; the SPA additionally requires an enabled `IntegrationPolicy` row (see `spa-bridge-protocol`, Requirement: Policy resolution).
 
-#### Scenario: Garmin Bridge announces write:workouts capability
+#### Scenario: Garmin Bridge announces its three capabilities
 
-- **WHEN** the Garmin Bridge extension is installed and announces via content script
-- **THEN** the announcement SHALL include `capabilities: ["write:workouts"]`
+- **WHEN** the extension is installed and announces via its content script
+- **THEN** the announcement SHALL include `capabilities: ["write:workouts", "read:activities", "write:body"]`
 - **AND** the SPA SHALL register the bridge as VERIFIED via the existing ping/verify flow
-- **AND** the SPA SHALL NOT use capability presence alone to show the push affordance — it SHALL additionally require at least one enabled `IntegrationPolicy` row via `resolveExportPolicies(profileId, 'workout')`
 
 #### Scenario: SPA requests rediscovery
 
 - **WHEN** the SPA dispatches `window.postMessage({ type: "KAIORD_BRIDGE_DISCOVER" }, window.location.origin)`
 - **THEN** the announce script re-announces with the same payload
 
-### Requirement: Push workout via extension
+### Requirement: Origin-pinned external message API
 
-The `GarminPushButton` component SHALL gate its visibility on `resolveExportPolicies(activeProfileId, 'workout')` returning at least one enabled `IntegrationPolicy` row, in addition to requiring the bridge to be currently discovered (VERIFIED state). Consulting `extensionInstalled` directly for affordance visibility is superseded.
+The extension SHALL handle messages from allowed SPA origins via `chrome.runtime.onMessageExternal`. The externally reachable actions SHALL be exactly `ping`, `list`, `activities`, `push`, `push-body-composition`, `open-garmin`, `profile-snapshot` and `profile-snapshot-clear`:
 
-The push operation itself (`{ action: "push", gcn: payload }`) is unchanged.
+- `ping` — session check plus the bridge manifest
+- `list` — the workout list from Garmin Connect
+- `activities` — the athlete's recent activities (read-only)
+- `push` — a GCN workout payload (requires `message.gcn`)
+- `push-body-composition` — a FIT body-composition payload (requires `message.fit`)
+- `open-garmin` — opens the Garmin Connect dashboard in a new tab
+- `profile-snapshot` / `profile-snapshot-clear` — store or drop the SPA's pushed profile snapshot
 
-When a policy row exists but the `garmin-bridge` is not currently discovered (UNAVAILABLE or REMOVED), the push affordance SHALL render as disabled with a "Bridge not installed" hint rather than being hidden entirely. The `IntegrationPolicy` row is not deleted on bridge uninstall (C-8).
+All responses SHALL use the shape `{ ok: boolean, protocolVersion?: number, data?: unknown, error?: string }`, and `ping` SHALL include `protocolVersion: 1` (bumped only when the message contract changes).
 
-#### Scenario: Push affordance visible when policy row exists and bridge is discovered
+The `ping` response `data` envelope SHALL contain the full `BridgeManifest` fields (`id: "garmin-bridge"`, `name: "Garmin Connect"`, `version`, `protocolVersion: 1`, `capabilities`) alongside the session-status fields `authenticated` (boolean) and `gcApi` (the result envelope of the probing read). Manifest keys SHALL take precedence on collision, so no upstream Garmin response can spoof the bridge identity. The SPA validates `response.data` against `bridgeManifestSchema`, which strips the session-status fields so both consumers coexist.
 
-- **GIVEN** the active profile has an enabled `IntegrationPolicy` row for `(dataType: 'workout', direction: 'export', bridgeId: 'garmin-bridge')`
-- **AND** the Garmin Bridge is currently in VERIFIED state
-- **WHEN** the workout editor renders
-- **THEN** the `GarminPushButton` is visible and enabled
+#### Scenario: SPA pings the extension
 
-#### Scenario: Push affordance hidden when no policy row exists
-
-- **GIVEN** the active profile has no `IntegrationPolicy` row for `(dataType: 'workout', direction: 'export')`
-- **WHEN** the workout editor renders
-- **THEN** the `GarminPushButton` is NOT shown, even if the Garmin Bridge is VERIFIED
-
-#### Scenario: Push affordance disabled when policy row exists but bridge not installed
-
-- **GIVEN** the active profile has an enabled `IntegrationPolicy` row for `(dataType: 'workout', direction: 'export', bridgeId: 'garmin-bridge')`
-- **AND** the Garmin Bridge is not currently discovered (UNAVAILABLE or no announcement received)
-- **WHEN** the workout editor renders
-- **THEN** the `GarminPushButton` renders as disabled with a "Bridge not installed" hint
-
-### Requirement: External message API
-
-The extension SHALL handle messages from allowed SPA origins via `chrome.runtime.onMessageExternal` with the following actions:
-
-- `ping` — Returns the bridge manifest (id, name, version, protocolVersion, capabilities) along with session check results (CSRF boolean, API reachability)
-- `list` — Returns workout list from Garmin Connect (timeout: 10s)
-- `push` — Pushes a GCN workout payload to Garmin Connect (requires `message.gcn`, timeout: 15s)
-- `open-garmin` — Opens `https://connect.garmin.com/modern/` in a new tab
-
-All responses SHALL use the shape `{ ok: boolean, protocolVersion?: number, data?: unknown, error?: string }`.
-
-The `ping` response SHALL include `protocolVersion: 1` (integer, bumped only when the message contract changes).
-
-The `ping` response `data` envelope SHALL contain the full `BridgeManifest` fields (`id: "garmin-bridge"`, `name: "Garmin Connect"`, `version: <package.json version>`, `protocolVersion: 1`, `capabilities: ["write:workouts"]`) alongside session-status fields (`csrfCaptured`, `gcApi`). Manifest keys SHALL take precedence on collision — the extension MUST NOT allow upstream Garmin Connect API responses to overwrite the manifest identity. The SPA reads `response.data` and validates it against `bridgeManifestSchema` via `parseManifestFromPing`; Zod strips the session-status fields so both consumers coexist.
-
-#### Scenario: SPA pings extension
-
-- **WHEN** the SPA sends `{ action: "ping" }` to the extension
-- **THEN** the extension returns `{ ok: true, protocolVersion: 1, data: { id: "garmin-bridge", name: "Garmin Connect", version: "<pkg version>", protocolVersion: 1, capabilities: ["write:workouts"], csrfCaptured: true, gcApi: { ok: true, status: 200 } } }`
-
-#### Scenario: SPA lists workouts
-
-- **WHEN** the SPA sends `{ action: "list" }` to the extension
-- **THEN** the extension returns `{ ok: true, data: [{ workoutId, workoutName, sportType, ... }] }`
+- **WHEN** the SPA sends `{ action: "ping" }`
+- **THEN** the extension returns `{ ok: true, protocolVersion: 1, data: { id: "garmin-bridge", name: "Garmin Connect", version: "<pkg version>", protocolVersion: 1, capabilities: ["write:workouts", "read:activities", "write:body"], authenticated: true, gcApi: { ok: true, status: 200 } } }`
 
 #### Scenario: SPA pushes a workout
 
-- **WHEN** the SPA sends `{ action: "push", gcn: { workoutName: "...", steps: [...] } }` to the extension
-- **THEN** the extension pushes the GCN payload to Garmin Connect and returns `{ ok: true, data: { workoutId, ... } }`
+- **WHEN** the SPA sends `{ action: "push", gcn: { workoutName: "...", steps: [...] } }`
+- **THEN** the extension posts the GCN payload to Garmin Connect and returns `{ ok: true, data: { workoutId, ... } }`
 
-#### Scenario: SPA requests Garmin tab opening
+#### Scenario: SPA requests the Garmin dashboard
 
-- **WHEN** the SPA sends `{ action: "open-garmin" }` to the extension
+- **WHEN** the SPA sends `{ action: "open-garmin" }`
 - **THEN** the extension opens `https://connect.garmin.com/modern/` in a new tab and returns `{ ok: true }`
 
-#### Scenario: SPA sends unknown action
+#### Scenario: Unknown action is rejected
 
 - **WHEN** the SPA sends `{ action: "unknown" }`
 - **THEN** the extension returns `{ ok: false, error: "Unknown action: unknown" }`
 
-#### Scenario: SPA sends message with incompatible protocol
+#### Scenario: Incompatible protocol is surfaced
 
 - **WHEN** the SPA receives a ping response without `protocolVersion` or with an unsupported version
 - **THEN** the SPA shows "Update your Kaiord Garmin Bridge extension"
