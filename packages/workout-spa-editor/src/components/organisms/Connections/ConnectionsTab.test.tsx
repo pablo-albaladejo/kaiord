@@ -1,12 +1,24 @@
-import { render, screen } from "@testing-library/react";
+import { render as rtlRender, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsTab } from "./ConnectionsTab";
+
+// The routing rows read per-source sync freshness through the persistence
+// port, so the tab no longer renders outside a provider.
+const render = (ui: ReactElement) =>
+  rtlRender(
+    <PersistenceProvider persistence={createInMemoryPersistence()}>
+      {ui}
+    </PersistenceProvider>
+  );
 
 vi.mock("../../../hooks/connections/use-connection-sources", () => ({
   useConnectionSources: vi.fn(),

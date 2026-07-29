@@ -1,7 +1,8 @@
 import type { ManagedDataType } from "@kaiord/core";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
-import { type Translate, useTranslate } from "../../../i18n/use-translate";
+import type { Translate } from "../../../i18n/use-translate";
+import { useTranslate } from "../../../i18n/use-translate";
 
 type RowProps = {
   labelKey: string;
