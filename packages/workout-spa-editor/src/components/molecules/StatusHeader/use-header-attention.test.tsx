@@ -50,7 +50,8 @@ describe("useHeaderAttention", () => {
 
   it("should word one affected source in the singular", () => {
     // Arrange
-    // Reachable state: WHOOP installed and signed out — `probeWhoopSession`
+    // Reachable state: WHOOP installed, read did not come back —
+    // `probeWhoopSession`
     // writes `inactive()`, which `bridgeSourceStatus` reads as attention.
     store.value = [source({ id: "whoop", status: "attention" })];
 
@@ -60,7 +61,7 @@ describe("useHeaderAttention", () => {
     // Assert
     expect(result.current).toEqual({
       title: "1 source down",
-      detail: "Session signed out — sign in again to resume",
+      detail: "Kaiord cannot read from a source — signing in again may restore it",
     });
   });
 
@@ -92,7 +93,7 @@ describe("useHeaderAttention", () => {
 
     // Assert
     expect(result.current?.detail).toBe(
-      "Session signed out — sign in again to resume"
+      "Kaiord cannot read from a source — signing in again may restore it"
     );
   });
 });

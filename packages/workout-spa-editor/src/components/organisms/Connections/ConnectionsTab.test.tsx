@@ -102,19 +102,39 @@ describe("ConnectionsTab", () => {
     );
   });
 
-  it("should say a session is signed out rather than that a token expired", () => {
+  it("should state a failed read without diagnosing a sign-out or an expiry", () => {
     // Arrange
-    setSources([source({ id: "whoop", name: "WHOOP", status: "attention" })]);
+    // Garmin is the discriminating fixture, not WHOOP: its bearer is minted
+    // from a stored OAuth1 token, so its reads survive the user signing out of
+    // connect.garmin.com and "signed out" is not merely unproven here, it is
+    // false. Every bridge reaches this same shared status word.
+    setSources([source({ id: "garmin", name: "Garmin", status: "attention" })]);
 
     // Act
     render(<ConnectionsTab />);
 
     // Assert
-    // No bridge can tell an expired credential from one never issued, so the
-    // stronger claim is not available to make.
-    expect(screen.getByTestId("connection-status-whoop")).toHaveTextContent(
-      "Session signed out"
-    );
+    const status = screen.getByTestId("connection-status-garmin");
+    expect(status).not.toHaveTextContent(/sign(?:ed|ing)?[\s-]*out|signout/i);
+    expect(status).not.toHaveTextContent(/expir/i);
+    // Still a verdict, not a shrug: the card says access is missing.
+    expect(status).toHaveTextContent(/no access/i);
+  });
+
+  it("should keep telling the reader to sign in again beside the failed read", () => {
+    // Arrange
+    // The action was never the wrong part — re-signing in genuinely re-mints
+    // Garmin's access. Dropping it while removing the false diagnosis would
+    // leave the card naming a problem with no way out.
+    setSources([source({ id: "garmin", name: "Garmin", status: "attention" })]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    const card = screen.getByTestId("connection-card-garmin");
+    expect(card).toHaveTextContent(/sign(?:ing)?\s+in\b/i);
+    expect(card).toHaveTextContent(/unavailable/i);
   });
 
   it("should offer reconnect only for a disconnected source whose extension is present", () => {
@@ -281,7 +301,7 @@ describe("ConnectionsTab", () => {
 
     // Assert
     expect(screen.getByTestId("connections-banner-title")).toHaveTextContent(
-      "WHOOP is signed out"
+      "Kaiord cannot read from WHOOP"
     );
   });
 

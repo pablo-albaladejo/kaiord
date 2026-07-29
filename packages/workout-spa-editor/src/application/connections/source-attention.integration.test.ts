@@ -89,7 +89,9 @@ describe("connection attention over the real registry", () => {
 
   it("should count a probed bridge whose session came back inactive", () => {
     // Arrange
-    // Reachable state: WHOOP is installed but signed out. `probeWhoopSession`
+    // Reachable state: WHOOP is installed and its read did not come back.
+    // Which of the two possible reasons it was is not observable —
+    // `probeWhoopSession`
     // reads `readWhoopStatus`, gets `connected: false`, and writes
     // `inactive()` — sessionActive false, error null, needsReauth false —
     // stamped with `lastCheckedAt`.
@@ -107,7 +109,7 @@ describe("connection attention over the real registry", () => {
     const attention = attentionOf(signals);
 
     // Assert
-    expect(attention).toEqual({ count: 1, cause: { kind: "signedOut" } });
+    expect(attention).toEqual({ count: 1, cause: { kind: "noAccess" } });
   });
 
   it("should stay silent for a bridge whose extension id changed mid-probe", () => {

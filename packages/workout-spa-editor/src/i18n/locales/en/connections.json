@@ -21,7 +21,7 @@
     "refreshCooldown": "Just refreshed. Try again in a minute."
   },
   "banner": {
-    "one": "{{name}} is signed out",
+    "one": "Kaiord cannot read from {{name}}",
     "oneOutdated": "{{name}}'s browser bridge is out of date",
     "many": "{{count}} sources need attention",
     "paused": "No source is sending {{types}} right now.",
@@ -33,7 +33,7 @@
     "connected": "Connected",
     "installed": "Detected on load",
     "checking": "Checking…",
-    "attention": "Session signed out",
+    "attention": "No access",
     "available": "Not connected",
     "manual": "Always on",
     "unsupported": "Not supported yet"
@@ -41,7 +41,7 @@
   "detail": {
     "installed": "This extension announced itself when the page loaded. Kaiord cannot re-check it without downloading your whole export, so it may have been removed since.",
     "checking": "Asking the extension whether it still has a session.",
-    "signedOut": "Open the provider's site and sign in; the extension picks the session back up on its own.",
+    "noAccess": "Kaiord could not read from this source. Signing in again on its site restores access; if you are already signed in, the source may be temporarily unavailable.",
     "needsReauth": "The extension's access has to be granted again. Sign in on the provider's site.",
     "outdated": "This extension's browser bridge is out of date. Update the extension to resume — signing in again will not help.",
     "notDetected": "The browser extension is not running in this browser.",

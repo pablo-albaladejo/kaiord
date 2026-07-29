@@ -148,7 +148,7 @@ describe("buildConnectionAttention", () => {
     const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.cause).toEqual({ kind: "signedOut" });
+    expect(attention?.cause).toEqual({ kind: "noAccess" });
   });
 
   it("should report an outdated extension instead of blaming the session", () => {
@@ -166,7 +166,7 @@ describe("buildConnectionAttention", () => {
     expect(attention?.cause).toEqual({ kind: "extensionOutdated" });
   });
 
-  it("should fall back to the signed-out cause for several affected sources", () => {
+  it("should fall back to the cause-free read failure for several affected sources", () => {
     // Arrange
     const sources = [
       source({ status: "attention", lastSyncAt: LAST_SYNC_AT }),
@@ -177,7 +177,7 @@ describe("buildConnectionAttention", () => {
     const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.cause).toEqual({ kind: "signedOut" });
+    expect(attention?.cause).toEqual({ kind: "noAccess" });
   });
 
   it("should ignore a stored timestamp that does not parse as a date", () => {
@@ -188,6 +188,6 @@ describe("buildConnectionAttention", () => {
     const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.cause).toEqual({ kind: "signedOut" });
+    expect(attention?.cause).toEqual({ kind: "noAccess" });
   });
 });

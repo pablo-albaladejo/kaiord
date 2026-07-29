@@ -42,11 +42,22 @@ export const detailKeyFor = (source: ConnectionSource): string | null => {
       // `outdated` is read FIRST and is the one attention cause whose fix is
       // not signing in. A bridge answering in an unreadable protocol version
       // reaches `attention` through `error !== null`, so without this branch it
-      // fell to `signedOut` and told the reader to open the provider's site —
-      // an action that cannot resolve a version mismatch, beside a banner on
-      // the same screen already saying the extension is out of date.
+      // fell to the generic cause and told the reader to sign in — an action
+      // that cannot resolve a version mismatch, beside a banner on the same
+      // screen already saying the extension is out of date.
       if (source.outdated) return "detail.outdated";
-      return source.needsReauth ? "detail.needsReauth" : "detail.signedOut";
+      // `noAccess` is the fallback because it is the strongest claim the
+      // evidence supports. Every remaining case is a probe that came back
+      // without a usable read, and no bridge can say why: garmin, train2go and
+      // whoop all fold a provider outage into the same "no session" answer as a
+      // dead credential (`background.js` ping catch-alls, `probeWhoopSession`'s
+      // `inactive()`). Garmin makes the old "signed out" verdict outright
+      // false — its OAuth1 token in `chrome.storage.local` mints bearers with
+      // no cookie, so reads outlive signing out of connect.garmin.com and a
+      // failed read is no evidence about the user's session at all. The
+      // sign-in CTA stays: re-signing in genuinely re-mints. Only the
+      // diagnosis attached to it was wrong.
+      return source.needsReauth ? "detail.needsReauth" : "detail.noAccess";
     case "manual":
       return "detail.manual";
     case "unsupported":

@@ -47,17 +47,21 @@ export const countDetected = (
  * you were already syncing — so ranking the date first would hide the only
  * actionable line in the ordinary case.
  *
- * `signedOut` is the fallback rather than a failed-check line: every
- * remaining case is a reachable extension without a usable session, which is
- * the same verdict the source card states. It never says "expired" — no
- * bridge distinguishes an expired credential from one that was never issued.
+ * `noAccess` is the fallback, and it names no cause on purpose: every
+ * remaining case is a reachable extension whose probe came back without a
+ * usable read, and not one bridge can say why. It never says "expired" — no
+ * bridge distinguishes an expired credential from one that was never issued —
+ * and it never says "signed out" either, which is the stronger version of the
+ * same overreach: garmin mints bearers from a stored OAuth1 token rather than
+ * a cookie, so its reads survive signing out of connect.garmin.com and a
+ * failed read says nothing about the user's session.
  *
  * There is no "broken since": `lastSyncAt` is persisted, so the date is when
  * data last arrived; `lastCheckedAt` is when the SPA last probed and reads as
  * seconds ago after a reload however long a source has been down.
  */
 export type AttentionCause =
-  | { readonly kind: "signedOut" }
+  | { readonly kind: "noAccess" }
   | { readonly kind: "extensionOutdated" }
   | { readonly kind: "noNewDataSince"; readonly date: string };
 
@@ -82,13 +86,13 @@ const dayOf = (timestamp: string | undefined): string | undefined => {
 
 const causeOf = (affected: readonly ConnectionSource[]): AttentionCause => {
   if (affected.some((source) => source.needsReauth))
-    return { kind: "signedOut" };
+    return { kind: "noAccess" };
   if (affected.some((source) => source.outdated))
     return { kind: "extensionOutdated" };
   const date =
     affected.length === 1 ? dayOf(affected[0]?.lastSyncAt) : undefined;
   return date === undefined
-    ? { kind: "signedOut" }
+    ? { kind: "noAccess" }
     : { kind: "noNewDataSince", date };
 };
 
