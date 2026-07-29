@@ -77,6 +77,39 @@
     "connect": "Conectar",
     "cancel": "Cancelar"
   },
+  "routing": {
+    "title": "De dónde viene cada tipo de dato",
+    "freshnessHint": "Las horas de abajo son por fuente: cuándo esa fuente envió algo a Kaiord por última vez, no solo este tipo.",
+    "from": "De",
+    "sentTo": "También se envía a",
+    "nowhere": "A ningún sitio",
+    "noSource": "Sin fuente",
+    "manySources": "{{count}} fuentes",
+    "unrankedNote": "se guardan a la vez, ninguna tiene prioridad",
+    "noUsableSource": "Sin fuente utilizable",
+    "rankedUnavailableNote": "prioriza fuentes que están apagadas: no se está leyendo nada",
+    "sourceLastSent": "{{name}} envió datos por última vez {{when}}",
+    "groups": {
+      "training": "Entrenamiento",
+      "recovery": "Recuperación",
+      "body": "Cuerpo"
+    }
+  },
+  "dataTypeHints": {
+    "workout": "Sesiones estructuradas completadas",
+    "planned-session": "Lo que ha programado tu entrenador",
+    "activity": "Salidas, carreras y paseos sin estructura",
+    "training-zones": "FTP, FC de umbral, FC máxima",
+    "weight": "Lecturas de la báscula",
+    "sleep": "Duración, fases y eficiencia",
+    "hrv": "Variabilidad cardiaca, nocturna o puntual",
+    "daily-wellness": "Pasos, calorías y minutos de intensidad",
+    "body-composition": "Grasa corporal, masa magra y agua corporal",
+    "stress": "Nivel de estrés de todo el día",
+    "strain": "Carga cardiovascular del día",
+    "vitals": "FC en reposo, SpO₂ y respiración",
+    "heart-rate-series": "Trazas de frecuencia cardiaca muestreadas"
+  },
   "dataTypes": {
     "workout": "Entrenamiento",
     "planned-session": "Sesión planificada",

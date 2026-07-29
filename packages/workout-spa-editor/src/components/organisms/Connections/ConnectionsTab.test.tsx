@@ -1,17 +1,30 @@
-import { render, screen } from "@testing-library/react";
+import { render as rtlRender, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
 import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-settled";
 import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsTab } from "./ConnectionsTab";
 
+// The routing rows read per-source sync freshness through the persistence
+// port, so the tab no longer renders outside a provider.
+const render = (ui: ReactElement) =>
+  rtlRender(
+    <PersistenceProvider persistence={createInMemoryPersistence()}>
+      {ui}
+    </PersistenceProvider>
+  );
+
 // `use-discovery-settled` is deliberately NOT mocked: it is the gate these
 // tests are about, and mocking it would leave them asserting their own stub.
+
 vi.mock("../../../hooks/connections/use-connection-sources", () => ({
   useConnectionSources: vi.fn(),
 }));

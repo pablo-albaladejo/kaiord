@@ -6,6 +6,7 @@ import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsHealth } from "./ConnectionsHealth";
 import { ConnectionSourceCard } from "./ConnectionSourceCard";
 import { ConnectionsUnsupported } from "./ConnectionsUnsupported";
+import { DataTypeRoutingSection } from "./DataTypeRoutingSection";
 
 const isUnsupported = (source: ConnectionSource): boolean =>
   source.status === "unsupported";
@@ -55,6 +56,7 @@ export const ConnectionsTab: React.FC = () => {
             ))}
         </div>
       </section>
+      <DataTypeRoutingSection profileId={profileId} byDataType={byDataType} />
       <ConnectionsUnsupported sources={sources.filter(isUnsupported)} />
     </div>
   );

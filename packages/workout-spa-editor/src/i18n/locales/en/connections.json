@@ -77,6 +77,39 @@
     "connect": "Connect",
     "cancel": "Cancel"
   },
+  "routing": {
+    "title": "Where each data type comes from",
+    "freshnessHint": "Times below are per source — when that source last sent Kaiord anything, not this type alone.",
+    "from": "From",
+    "sentTo": "Also sent to",
+    "nowhere": "Nowhere",
+    "noSource": "No source",
+    "manySources": "{{count}} sources",
+    "unrankedNote": "kept side by side, none ranked first",
+    "noUsableSource": "No usable source",
+    "rankedUnavailableNote": "ranked to sources that are switched off — nothing is being read",
+    "sourceLastSent": "{{name}} last sent data {{when}}",
+    "groups": {
+      "training": "Training",
+      "recovery": "Recovery",
+      "body": "Body"
+    }
+  },
+  "dataTypeHints": {
+    "workout": "Completed structured sessions",
+    "planned-session": "What your coach scheduled",
+    "activity": "Unstructured rides, runs and walks",
+    "training-zones": "FTP, threshold HR, max HR",
+    "weight": "Scale readings",
+    "sleep": "Duration, stages, efficiency",
+    "hrv": "Heart-rate variability, overnight or spot",
+    "daily-wellness": "Steps, calories, intensity minutes",
+    "body-composition": "Body fat, lean mass, body water",
+    "stress": "All-day stress level",
+    "strain": "Cardiovascular load for the day",
+    "vitals": "Resting HR, SpO₂, respiration",
+    "heart-rate-series": "Sampled heart-rate traces"
+  },
   "dataTypes": {
     "workout": "Workout",
     "planned-session": "Planned Session",
