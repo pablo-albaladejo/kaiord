@@ -49,6 +49,7 @@
     "manual": "Anything you type into Kaiord yourself. Never switched off.",
     "unsupported": "Kaiord has no way to connect this account yet."
   },
+  "fixAtSource": "Sign in at {{name}} ↗",
   "bridgeDetected": "{{name}} browser bridge · detected",
   "bridgeAnnounced": "{{name}} browser bridge · detected on load",
   "bridgeMissing": "{{name}} browser bridge · not detected",
