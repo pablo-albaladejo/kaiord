@@ -89,17 +89,6 @@ describe("RepetitionBlockCard", () => {
       expect(screen.getByText("1 step")).toBeInTheDocument();
     });
 
-    it("should render nested steps when expanded", () => {
-      // Arrange
-
-      // Act
-      render(<RepetitionBlockCard block={mockBlock} />);
-      const stepCards = screen.getAllByTestId("step-card");
-
-      // Assert
-      expect(stepCards).toHaveLength(2);
-    });
-
     it("should render repeat icon", () => {
       // Arrange
 
@@ -617,98 +606,11 @@ describe("RepetitionBlockCard", () => {
       expect(stepCards).toHaveLength(THREE_STEP_BLOCK_CARD_COUNT);
     });
 
-    it("should render one step card per block regardless of blockIndex", () => {
+    it("should render one step card per single-step block for any blockIndex", () => {
       // Arrange
-      const block1Index = 1;
-      const block2Index = 3;
-
-      const block1: RepetitionBlock = {
-        repeatCount: 2,
-        steps: [
-          {
-            stepIndex: 0,
-            durationType: "time",
-            duration: { type: "time", seconds: 300 },
-            targetType: "power",
-            target: {
-              type: "power",
-              value: { unit: "watts", value: 200 },
-            },
-            intensity: "active",
-          },
-        ],
-      };
-
-      const block2: RepetitionBlock = {
-        repeatCount: 2,
-        steps: [
-          {
-            stepIndex: 0,
-            durationType: "time",
-            duration: { type: "time", seconds: 300 },
-            targetType: "power",
-            target: {
-              type: "power",
-              value: { unit: "watts", value: 200 },
-            },
-            intensity: "active",
-          },
-        ],
-      };
-
-      // Act
-      const { rerender } = render(
-        <RepetitionBlockCard block={block1} blockIndex={block1Index} />
-      );
-
-      // Assert
-      // block 1: one step card rendered.
-      let stepCards = screen.getAllByTestId("step-card");
-      expect(stepCards).toHaveLength(1);
-
-      // block 2: one step card rendered. Inner items carry stable ItemIds;
-      // no positional `block-N-step-M` string to verify.
-      rerender(<RepetitionBlockCard block={block2} blockIndex={block2Index} />);
-      stepCards = screen.getAllByTestId("step-card");
-      expect(stepCards).toHaveLength(1);
-    });
-
-    it("should handle block without blockIndex gracefully", () => {
-      // Arrange
-      const block: RepetitionBlock = {
-        repeatCount: 2,
-        steps: [
-          {
-            stepIndex: 0,
-            durationType: "time",
-            duration: { type: "time", seconds: 300 },
-            targetType: "power",
-            target: {
-              type: "power",
-              value: { unit: "watts", value: 200 },
-            },
-            intensity: "active",
-          },
-        ],
-      };
-
-      // Act
-      // Render without blockIndex; stable `ItemId`s on the inner items carry
-      // the identity that used to be encoded in the positional id.
-      render(<RepetitionBlockCard block={block} />);
-      const stepCards = screen.getAllByTestId("step-card");
-
-      // Assert
-      expect(stepCards).toHaveLength(1);
-      expect(stepCards[0]).toBeInTheDocument();
-    });
-
-    it("should render steps with the same stepIndex in different blocks independently", () => {
-      // Arrange
-      // Step identity is now a stable ItemId — two blocks containing
-      // steps with identical `stepIndex` are rendered independently
-      // because each step card binds to its own id, not the positional
-      // `block-N-step-M` string.
+      // Step identity is now a stable `ItemId`, not the positional
+      // `block-N-step-M` string, so the card count is independent of
+      // blockIndex — even when it is absent or changes across renders.
       const step: WorkoutStep = {
         stepIndex: 5,
         durationType: "time",
@@ -720,7 +622,6 @@ describe("RepetitionBlockCard", () => {
         },
         intensity: "active",
       };
-
       const block: RepetitionBlock = {
         repeatCount: 2,
         steps: [step],
@@ -733,8 +634,9 @@ describe("RepetitionBlockCard", () => {
 
       // Assert
       expect(screen.getAllByTestId("step-card")).toHaveLength(1);
-
       rerender(<RepetitionBlockCard block={block} blockIndex={1} />);
+      expect(screen.getAllByTestId("step-card")).toHaveLength(1);
+      rerender(<RepetitionBlockCard block={block} />);
       expect(screen.getAllByTestId("step-card")).toHaveLength(1);
     });
   });

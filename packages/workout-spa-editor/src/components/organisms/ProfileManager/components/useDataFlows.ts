@@ -6,11 +6,8 @@ import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { db } from "../../../../adapters/dexie/dexie-database";
-import { createDexieIntegrationPolicyRepository } from "../../../../adapters/dexie/dexie-integration-policy-repository";
+import { policyRepo } from "../../../../hooks/integration-policy-repo";
 import type { IntegrationPolicy } from "../../../../types/integration-policy";
-
-const policyRepo = createDexieIntegrationPolicyRepository(db);
 
 export type DataFlowsByType = Map<
   ManagedDataType,
