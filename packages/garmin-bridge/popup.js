@@ -12,11 +12,20 @@
  *
  * The copy deliberately does NOT say the bridge rides a Garmin Connect
  * session. It does not: garmin-oauth.js exchanges the browser SSO session ONCE
- * for OAuth tokens, keeps the OAuth1 token (~1 year) in chrome.storage.local,
- * and refreshes the OAuth2 bearer from it WITHOUT touching a cookie — so reads
- * keep working after the user signs out of the website, and a failed check is
- * not evidence that they are signed out. Signing in again is still the useful
- * action, because it lets the bridge re-mint; it is just not a diagnosis.
+ * for OAuth tokens and keeps the OAuth1 token (~1 year) in
+ * chrome.storage.local, so a data call carries that bearer alone under
+ * `credentials: "omit"` and reads keep working after the user signs out — for
+ * as long as the current bearer is valid. Past its expiry the bearer is
+ * refreshed through the exchange, which IS sent with `credentials: "include"`,
+ * so whether reads survive that far is not something this code establishes
+ * (#1102).
+ *
+ * The rule the copy follows does not rest on any of that. A failed check is
+ * not evidence the user is signed out for a simpler reason: a failure can
+ * always be Garmin being unavailable. That holds however the refresh turns out
+ * to authenticate, so softening the paragraph above must not be read as
+ * weakening the rule. Signing in again is still the useful action, because it
+ * lets the bridge re-mint; it is just not a diagnosis.
  *
  * Shared helpers load first from the vendored bridge-popup-utils.js,
  * bridge-popup-shell.js and bridge-popup-snapshot.js (see popup.html script

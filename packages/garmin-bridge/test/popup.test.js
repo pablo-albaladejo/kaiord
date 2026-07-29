@@ -185,10 +185,11 @@ describe("Garmin popup", () => {
     expect(doc.getElementById("status-text").textContent).toBe(
       "No access to Garmin Connect"
     );
-    // The cause must not diagnose. garmin-oauth.js refreshes the OAuth2 bearer
-    // from a ~1-year OAuth1 token without touching a cookie, so a failed check
-    // is NOT evidence the user is signed out — the old copy told a signed-in
-    // user that their "tab is signed out". Both possibilities, neither asserted.
+    // The cause must not diagnose. A failed check is not evidence the user is
+    // signed out, because a failure can always be Garmin being unavailable —
+    // which is true however the token refresh turns out to authenticate (see
+    // #1102). The old copy told a signed-in user that their "tab is signed
+    // out". Both possibilities, neither asserted.
     const cause = doc.getElementById("status-sub").textContent;
     expect(cause).toContain("could not read from Garmin Connect");
     expect(cause).toContain("if you are already signed in");
