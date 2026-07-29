@@ -2,16 +2,25 @@ import type { ManagedDataType } from "@kaiord/core";
 
 import type { DataTypeGroup } from "../../../application/connections/data-type-groups";
 import type { DataTypeRoutingRow as RoutingRow } from "../../../application/connections/data-type-routing";
+import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
 import { useTranslate } from "../../../i18n/use-translate";
 import { DataTypeRoutingRow } from "./DataTypeRoutingRow";
 
 type Props = {
   group: DataTypeGroup;
+  profileId: string;
   byType: ReadonlyMap<ManagedDataType, RoutingRow>;
   lastSyncedAt: ReadonlyMap<string, string | undefined>;
+  options: ReadonlyMap<ManagedDataType, SourceOfTruthOptions>;
 };
 
-export function DataTypeRoutingGroup({ group, byType, lastSyncedAt }: Props) {
+export function DataTypeRoutingGroup({
+  group,
+  profileId,
+  byType,
+  lastSyncedAt,
+  options,
+}: Props) {
   const t = useTranslate("connections");
   const rows = group.types.flatMap((dataType) => byType.get(dataType) ?? []);
 
@@ -25,7 +34,9 @@ export function DataTypeRoutingGroup({ group, byType, lastSyncedAt }: Props) {
           <DataTypeRoutingRow
             key={row.dataType}
             row={row}
+            profileId={profileId}
             lastSyncedAt={lastSyncedAt}
+            options={options.get(row.dataType)}
           />
         ))}
       </div>

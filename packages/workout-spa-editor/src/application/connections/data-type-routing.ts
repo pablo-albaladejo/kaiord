@@ -16,12 +16,16 @@ import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 
 import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
-import { integrationIdForBridge } from "../../integrations/integration-registry";
-import { MANUAL_ENTRY_TYPES } from "../../integrations/manual-entry-types";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import { DEFAULT_DATA_TYPE_SOURCE_MODE } from "../../types/data-type-source-policy";
+import {
+  availableSources,
+  MANUAL_SOURCE_ID,
+  rankedHead,
+  toIntegrationId,
+} from "./data-type-sources";
 
-export const MANUAL_SOURCE_ID = "manual";
+export { MANUAL_SOURCE_ID };
 
 export type RoutingOrigin =
   | { readonly kind: "none" }
@@ -46,27 +50,6 @@ export type DataTypeRoutingRow = {
       be created. */
   readonly exportable: boolean;
 };
-
-const toIntegrationId = (sourceId: string): string =>
-  sourceId === MANUAL_SOURCE_ID
-    ? MANUAL_SOURCE_ID
-    : (integrationIdForBridge(sourceId) ?? sourceId);
-
-const enabledSources = (
-  rows: readonly { bridgeId: string; enabled: boolean }[]
-): string[] => [
-  ...new Set(rows.filter((row) => row.enabled).map((row) => row.bridgeId)),
-];
-
-/**
- * The saved order's first entry that is still an available source — exactly
- * what `resolveEffectiveSource` consults, so the pill cannot name a source the
- * resolver would not read from.
- */
-const rankedHead = (
-  sources: readonly string[],
-  saved: readonly string[]
-): string | undefined => saved.find((sourceId) => sources.includes(sourceId));
 
 /**
  * The mode is consulted for ONE source too, not just for several. A ranked
@@ -101,25 +84,20 @@ export const buildDataTypeRoutingRows = (
   policies: readonly DataTypeSourcePolicy[]
 ): DataTypeRoutingRow[] => {
   const byType = new Map(policies.map((policy) => [policy.dataType, policy]));
-  return managedDataTypes.map((dataType) => {
-    const flows = byDataType.get(dataType);
-    const sources = enabledSources(flows?.import ?? []);
-    // Appended last so a saved priority order (which the Data Hub editor only
-    // ever fills with bridges) keeps deciding the head.
-    //
-    // ⚠ ASYMMETRY: this gate is MANUAL_ENTRY_TYPES, while
-    // `resolveEffectiveSource` exempts "manual" from its enabled filter
-    // UNCONDITIONALLY. Giving a type a manual entry path without adding it here
-    // makes the pill and the resolver disagree silently. Widening this to every
-    // type is not the fix — it would claim a source for types with no way to
-    // enter one (`planned-session` has no manual authoring path at all).
-    if (MANUAL_ENTRY_TYPES.has(dataType)) sources.push(MANUAL_SOURCE_ID);
-    return {
-      dataType,
-      origin: originOf(sources, byType.get(dataType)),
-      sentTo: enabledSources(flows?.export ?? []).map(toIntegrationId),
-      exportable:
-        MANAGED_DATA_REGISTRY[dataType].capabilities.export !== undefined,
-    };
-  });
+  return managedDataTypes.map((dataType) => ({
+    dataType,
+    origin: originOf(
+      availableSources(byDataType, dataType),
+      byType.get(dataType)
+    ),
+    sentTo: [
+      ...new Set(
+        (byDataType.get(dataType)?.export ?? [])
+          .filter((route) => route.enabled)
+          .map((route) => toIntegrationId(route.bridgeId))
+      ),
+    ],
+    exportable:
+      MANAGED_DATA_REGISTRY[dataType].capabilities.export !== undefined,
+  }));
 };
