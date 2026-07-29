@@ -7,7 +7,7 @@
 // Rule R-BuildPortable: the build-artifacts artifact (packages/*/dist)
 // MUST be byte-identical across the Node-version matrix. Trip-wires:
 //
-//   1. tsup.config.* / vite.config.* `define:` blocks whose VALUES
+//   1. tsdown.config.* / vite.config.* `define:` blocks whose VALUES
 //      read process.env.* (other than NODE_ENV as a comparison
 //      operand).
 //   2. process.env.NODE_VERSION references in build-time code under
@@ -27,7 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const PACKAGES_ROOT = resolve(REPO_ROOT, "packages");
 
-const CONFIG_FILE_RE = /^(tsup|vite)\.config\.(ts|mts|cts)$/;
+const CONFIG_FILE_RE = /^(tsdown|vite)\.config\.(ts|mts|cts)$/;
 const NATIVE_BINDING_RE = /\.(node|so|dylib)$/;
 const SOURCE_FILE_RE = /\.(ts|tsx|mjs|cjs)$/;
 
@@ -201,7 +201,7 @@ function findDefineCalls(node, file, violations) {
       (ts.isArrowFunction(arg) || ts.isFunctionExpression(arg))
     ) {
       // Factory form: defineConfig((env) => ({ define: {...} })).
-      // tsup and vite both document this as a first-class pattern for
+      // tsdown and vite both document this as a first-class pattern for
       // env-dependent config. The body is either an expression
       // (concise arrow) or a block whose return statement carries the
       // config object.
