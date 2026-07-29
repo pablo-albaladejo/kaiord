@@ -18,6 +18,8 @@
 import type { NamespaceDictionary } from "@kaiord/i18n";
 import { describe, expect, it } from "vitest";
 
+import { ATTENTION_DETAIL_KEYS } from "../components/organisms/Connections/connection-card-copy";
+
 const MODULES = import.meta.glob<NamespaceDictionary>("./locales/*/*.json", {
   eager: true,
   import: "default",
@@ -45,9 +47,20 @@ const LOCALES = [...new Set(Object.keys(MODULES).map(localeOf))];
 const ATTENTION_COPY: readonly (readonly [string, string])[] = [
   ["connections", "status.attention"],
   ["connections", "detail.noAccess"],
+  ["connections", "detail.needsReauth"],
   ["connections", "banner.one"],
   ["common", "sourceHealth.noAccess"],
 ];
+
+/**
+ * A key `detailKeyFor` can reach in `attention` and that is allowed to name its
+ * cause, with what earns it. `outdated` is the only one: nothing else in that
+ * branch rests on an observable signal.
+ */
+const UNGUARDED_DETAILS: Readonly<Record<string, string>> = {
+  "detail.outdated":
+    "Names an observable fact: `outdated` is set only by comparing the protocolVersion the bridge reports, so the cause is measured rather than guessed.",
+};
 
 /**
  * `attentionCauseText` renders `sourceHealth.<cause.kind>` for every member of
@@ -68,6 +81,13 @@ const UNGUARDED_CAUSES: Readonly<Record<string, string>> = {
 const SIGNED_OUT =
   /sign(?:ed|ing)?[\s-]*out|signout|sesi[oó]n\s+(?:cerrada|finalizada)|cerr\w*\s+(?:la\s+)?sesi[oó]n/i;
 const EXPIRED = /expir|caduc/i;
+// Watching a key is not the same as forbidding its claim: `detail.needsReauth`
+// said "access has to be granted again", which no probe observes — TrainingPeaks
+// reaches it from a 500 because `authError` forces `needsReauth` — and none of
+// the regexes above match a withdrawal claim. Adding the key without this only
+// looked like coverage.
+const REVOKED =
+  /granted again|revoke|withdraw|no longer authoris|volver a conceder|revocad|ya no est[aá]\s+autoriz/i;
 // The second falsehood in the sentence this replaced: it promised the
 // extension "picks the session back up on its own". Garmin's bridge holds no
 // browser session to pick back up, so nothing recovers unattended.
@@ -89,6 +109,8 @@ const REPLACED = [
   "this source is signed-out",
   "the session expired",
   "la sesión ha caducado",
+  "The extension's access has to be granted again",
+  "Hay que volver a conceder el acceso de la extensión",
 ];
 
 describe("attention copy honesty", () => {
@@ -121,6 +143,22 @@ describe("attention copy honesty", () => {
 
       // Assert
       for (const text of texts) expect(text).not.toMatch(EXPIRED);
+    }
+  );
+
+  it.each(LOCALES)(
+    "should never claim the source revoked its authorisation in %s",
+    (locale) => {
+      // Arrange
+      const paths = ATTENTION_COPY.map(
+        ([ns, key]) => [`./locales/${locale}/${ns}.json`, key] as const
+      );
+
+      // Act
+      const texts = paths.map(([path, key]) => read(path, key));
+
+      // Assert
+      for (const text of texts) expect(text).not.toMatch(REVOKED);
     }
   );
 
@@ -170,7 +208,10 @@ describe("attention copy honesty", () => {
     // Act
     const caught = causeClaims.filter(
       (text) =>
-        SIGNED_OUT.test(text) || EXPIRED.test(text) || SELF_RECOVERY.test(text)
+        SIGNED_OUT.test(text) ||
+        EXPIRED.test(text) ||
+        SELF_RECOVERY.test(text) ||
+        REVOKED.test(text)
     );
 
     // Assert
@@ -217,4 +258,25 @@ describe("attention copy honesty", () => {
       expect(unaccounted).toEqual([]);
     }
   );
+
+  it("should guard or exempt every detail key the attention branch reaches", () => {
+    // Arrange
+    // The cause axis above was complete while THIS one was not: `attention` has
+    // three detail branches and only two were read, so `detail.needsReauth`
+    // claimed a revoked credential that no probe observes. Reading the list the
+    // switch itself exports is what stops a fourth branch from repeating it.
+    const guarded = new Set(
+      ATTENTION_COPY.filter(([ns]) => ns === "connections").map(
+        ([, key]) => key
+      )
+    );
+
+    // Act
+    const unaccounted = ATTENTION_DETAIL_KEYS.filter(
+      (key) => !guarded.has(key) && UNGUARDED_DETAILS[key] === undefined
+    );
+
+    // Assert
+    expect(unaccounted).toEqual([]);
+  });
 });

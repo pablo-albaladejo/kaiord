@@ -32,6 +32,19 @@ export const STATUS_TEXT: Record<ConnectionSourceStatus, string> = {
  * the wrong problem. Once the extension is back, the card reports the
  * disconnect and offers Reconnect.
  */
+
+/**
+ * Every `detail.*` key the `attention` branch can reach. The copy-honesty guard
+ * enumerates this list, so a branch added below without wording that survives
+ * the guard fails the suite instead of shipping an unguarded claim about a cause
+ * no probe can observe.
+ */
+export const ATTENTION_DETAIL_KEYS = [
+  "detail.outdated",
+  "detail.needsReauth",
+  "detail.noAccess",
+] as const;
+
 export const detailKeyFor = (source: ConnectionSource): string | null => {
   switch (source.status) {
     case "installed":
