@@ -12,12 +12,12 @@
  * answered a ping this page-life.
  */
 
+import { countDetected } from "../../../application/connections/source-attention";
 import {
   useBridgeConnections,
   useBridgeConnectionsRefreshed,
 } from "../../../hooks/use-bridge-connections";
 import { useTranslate } from "../../../i18n/use-translate";
-import { countDetected } from "./connection-attention";
 
 export const useConnectionsValue = (): string | undefined => {
   const t = useTranslate("settings");
