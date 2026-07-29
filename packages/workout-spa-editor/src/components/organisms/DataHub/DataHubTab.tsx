@@ -6,6 +6,7 @@ import { useDataHubRouteEditor } from "../../../hooks/data-hub/use-data-hub-rout
 import { useDataHubToggle } from "../../../hooks/data-hub/use-data-hub-toggle";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useConnectionStatus } from "../../../hooks/use-connection-status";
+import { useDiscoveredBridges } from "../../../hooks/use-discovered-bridges";
 import { useTranslate } from "../../../i18n/use-translate";
 import { INTEGRATION_REGISTRY } from "../../../integrations/integration-registry";
 import type { IntegrationPolicyMode } from "../../../types/integration-policy";
@@ -18,6 +19,9 @@ export const DataHubTab: React.FC = () => {
   const active = useActiveProfileLive();
   const profileId = active?.id ?? null;
   const connections = useConnectionStatus(profileId);
+  const discovered = new Set(
+    useDiscoveredBridges().map((bridge) => bridge.bridgeId)
+  );
   const rows = useDataHubMatrix(profileId);
   const onToggle = useDataHubToggle(profileId);
   const routeEditor = useDataHubRouteEditor(profileId);
@@ -53,6 +57,7 @@ export const DataHubTab: React.FC = () => {
         rows={rows}
         integrations={INTEGRATION_REGISTRY}
         connections={connections}
+        discovered={discovered}
         onToggle={onToggle}
         onSetMode={onSetMode}
         onRemove={onRemove}
