@@ -1,7 +1,23 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import type { Align, Side } from "./compute-position";
 import { computeTooltipPosition } from "./compute-position";
+
+// jsdom performs no layout, so `documentElement.clientWidth` is 0 and
+// `computeTooltipPosition` falls back to `window.innerWidth`. Driving that is
+// how these tests emulate a narrow screen.
+const DEFAULT_INNER_WIDTH = window.innerWidth;
+
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+    writable: true,
+  });
+};
+
+const makeRect = (r: Partial<DOMRect>) =>
+  ({ ...r, toJSON: () => ({}) }) as DOMRect;
 
 // Fixture: triggerRect at (200,100), size 80x30 -> right=280, bottom=130.
 // Tooltip size 60x20. SIDE_OFFSET=5. jsdom default window.scrollX=scrollY=0.
@@ -64,4 +80,72 @@ describe("computeTooltipPosition", () => {
       expect(result).toEqual({ top, left });
     }
   );
+});
+
+/**
+ * Regression: an unclamped `side: "right"` coach mark rendered 125px past the
+ * right edge of a 393px Pixel 5 screen. A document wider than the screen makes
+ * Chrome grow the layout viewport away from the visual viewport, which
+ * desynchronises Playwright's click coordinates from the browser's hit test —
+ * the "Mobile Chrome only" repetition-block e2e failures.
+ */
+describe("computeTooltipPosition viewport clamping", () => {
+  const PIXEL_5_WIDTH = 393;
+  /** Mirrors `VIEWPORT_MARGIN` in compute-position.ts. */
+  const MARGIN = 8;
+  const MARK = makeRect({ width: 161, height: 120 });
+  /** Anchor right (100) + SIDE_OFFSET (5): fits, so the clamp is a no-op. */
+  const UNCLAMPED_LEFT = 105;
+
+  afterEach(() => setViewportWidth(DEFAULT_INNER_WIDTH));
+
+  it("should keep a right-side bubble inside a narrow viewport", () => {
+    // Arrange
+    setViewportWidth(PIXEL_5_WIDTH);
+    const anchor = makeRect({ top: 400, bottom: 446, left: 16, right: 352 });
+
+    // Act
+    const { left } = computeTooltipPosition(anchor, MARK, "right", "start");
+
+    // Assert
+    expect(left).toBe(PIXEL_5_WIDTH - MARK.width - MARGIN);
+    expect(left + MARK.width).toBeLessThanOrEqual(PIXEL_5_WIDTH);
+  });
+
+  it("should keep a left-side bubble off the left edge", () => {
+    // Arrange
+    setViewportWidth(PIXEL_5_WIDTH);
+    const anchor = makeRect({ top: 400, bottom: 446, left: 20, right: 120 });
+
+    // Act
+    const { left } = computeTooltipPosition(anchor, MARK, "left", "start");
+
+    // Assert
+    expect(left).toBe(MARGIN);
+  });
+
+  it("should pin a bubble wider than the viewport to the left margin", () => {
+    // Arrange
+    setViewportWidth(PIXEL_5_WIDTH);
+    const wide = makeRect({ width: 400, height: 120 });
+    const anchor = makeRect({ top: 400, bottom: 446, left: 16, right: 352 });
+
+    // Act
+    const { left } = computeTooltipPosition(anchor, wide, "right", "start");
+
+    // Assert
+    expect(left).toBe(MARGIN);
+  });
+
+  it("should leave a bubble that already fits untouched", () => {
+    // Arrange
+    setViewportWidth(PIXEL_5_WIDTH);
+    const anchor = makeRect({ top: 400, bottom: 446, left: 16, right: 100 });
+
+    // Act
+    const { left } = computeTooltipPosition(anchor, MARK, "right", "start");
+
+    // Assert
+    expect(left).toBe(UNCLAMPED_LEFT);
+  });
 });

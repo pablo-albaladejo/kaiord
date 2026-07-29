@@ -13,10 +13,8 @@
  */
 
 import { countDetected } from "../../../application/connections/source-attention";
-import {
-  useBridgeConnections,
-  useBridgeConnectionsRefreshed,
-} from "../../../hooks/use-bridge-connections";
+import { useDiscoverySettled } from "../../../hooks/connections/use-discovery-settled";
+import { useBridgeConnections } from "../../../hooks/use-bridge-connections";
 import { useTranslate } from "../../../i18n/use-translate";
 
 export const useConnectionsValue = (): string | undefined => {
@@ -24,14 +22,18 @@ export const useConnectionsValue = (): string | undefined => {
   // No profile is passed: the count reads `discovered` only, so the
   // per-profile sync timestamps this hook can join are not needed here.
   const connections = useBridgeConnections(null);
-  const refreshed = useBridgeConnectionsRefreshed();
+  const found = countDetected(connections);
+  // Gated on discovery having had its window, NOT on the store having
+  // completed a pass: that pass finishes microseconds after boot with every
+  // row undiscovered, because nothing has announced yet and nothing asked it
+  // to. Waiting on it rendered "0 of 5" to a fully equipped reader. The
+  // Connections section counts the same thing behind the same gate, so the
+  // row and the section it leads to cannot disagree while both are settling.
+  const settled = useDiscoverySettled(found);
 
-  // Every row exists from the first render and reads undiscovered, so a value
-  // rendered before the first pass completes would tell a fully equipped user
-  // "0 of 5" for as long as discovery takes.
-  if (!refreshed || connections.length === 0) return undefined;
+  if (!settled) return undefined;
   return t("values.connections.detected", {
-    found: countDetected(connections),
+    found,
     total: connections.length,
   });
 };

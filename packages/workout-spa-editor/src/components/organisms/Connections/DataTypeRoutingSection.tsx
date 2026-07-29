@@ -10,14 +10,18 @@ import { DataTypeRoutingGroup } from "./DataTypeRoutingGroup";
 type Props = { profileId: string; byDataType: DataFlowsByType };
 
 /**
- * Read-only. Choosing a source of truth is Wave 2b; until then the section
- * reports what the stored policies already decide and claims nothing about
- * fallbacks — `usedFallback` is priority-mode only, is per-(type, day), and
- * means "no record that day" rather than "this source broke".
+ * Rows report what the stored policies already decide, and — where the row has
+ * a decision to make — offer the source of truth to be changed. The section
+ * still claims nothing about fallbacks: `usedFallback` is priority-mode only,
+ * is per-(type, day), and means "no record that day" rather than "this source
+ * broke".
  */
 export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
   const t = useTranslate("connections");
-  const { rows, lastSyncedAt } = useDataTypeRouting(profileId, byDataType);
+  const { rows, lastSyncedAt, options } = useDataTypeRouting(
+    profileId,
+    byDataType
+  );
   const byType = useMemo(
     () =>
       new Map<ManagedDataType, (typeof rows)[number]>(
@@ -41,8 +45,10 @@ export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
           <DataTypeRoutingGroup
             key={group.id}
             group={group}
+            profileId={profileId}
             byType={byType}
             lastSyncedAt={lastSyncedAt}
+            options={options}
           />
         ))}
       </div>

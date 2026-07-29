@@ -5,6 +5,30 @@
   "sourcesHint": "Each source carries its own browser bridge and permissions",
   "unsupported": "Not available yet",
   "unsupportedHint": "Connecting these needs a server Kaiord does not run.",
+  "summary": {
+    "detected": "Sources detected",
+    "detectedNote": "of {{total}}",
+    "covered": "Types covered",
+    "coveredNote": "of {{total}} types · incl. manual entry",
+    "attention": "Needs attention",
+    "attentionNote_one": "source",
+    "attentionNote_other": "sources",
+    "lastSync": "Last data in",
+    "lastSyncNever": "None yet",
+    "pending": "—",
+    "refresh": "Refresh all",
+    "refreshing": "Refreshing…",
+    "refreshCooldown": "Just refreshed. Try again in a minute."
+  },
+  "banner": {
+    "one": "{{name}} is signed out",
+    "oneOutdated": "{{name}}'s browser bridge is out of date",
+    "many": "{{count}} sources need attention",
+    "paused": "No source is sending {{types}} right now.",
+    "covered": "Nothing has stopped: every affected type also has another source switched on.",
+    "noRoutes": "No data routes are switched on, so nothing has stopped arriving.",
+    "since": "No new data since {{date}}."
+  },
   "status": {
     "connected": "Connected",
     "installed": "Detected on load",
@@ -65,6 +89,16 @@
     "noUsableSource": "No usable source",
     "rankedUnavailableNote": "ranked to sources that are switched off — nothing is being read",
     "sourceLastSent": "{{name}} last sent data {{when}}",
+    "change": {
+      "open": "Change",
+      "close": "Done",
+      "title": "Where should Kaiord read {{type}} from?",
+      "unranked": "Right now Kaiord keeps every source's {{type}} and ranks none of them; when it needs a single value it uses whichever arrived last.",
+      "willRank": "Pick a source below and that changes: Kaiord will read {{type}} from the one you pick, and use the others only on days it has nothing. You can go back to keeping every source right here.",
+      "ranked": "Kaiord reads {{type}} from {{name}} first, and falls back to the others on days it has nothing.",
+      "stalled": "Nothing is being read for {{type}} — it is ranked to sources that are switched off. Pick one below, or go back to keeping every source.",
+      "keepAll": "Keep every source"
+    },
     "groups": {
       "training": "Training",
       "recovery": "Recovery",

@@ -18,9 +18,12 @@
  * pill word the same fact differently, and only the wording may differ.
  */
 import type { ConnectionSource } from "./connection-source";
+import { sourceNeedsAttention } from "./connection-source";
 
-export const needsAttention = (source: ConnectionSource): boolean =>
-  source.status === "attention";
+// Aliased, not redefined: the summary, the banner and the header pill must be
+// answering the same question as the cards, and two copies of this predicate
+// is exactly how two surfaces came to disagree before.
+export const needsAttention = sourceNeedsAttention;
 
 /**
  * The one field `countDetected` reads. Declared here rather than imported so
