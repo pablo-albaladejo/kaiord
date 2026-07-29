@@ -164,6 +164,19 @@ the editor may invoke across origins — and every bridge's own suite SHALL
 pin that set exactly, not merely assert one membership or one
 non-membership.
 
+The authentication handshake surface is NOT yet recorded, and the golden
+SHALL NOT be read as covering it. `allowed_paths` governs the DATA-call
+surface: the paths a bridge will fetch on the editor's behalf, gated by
+that bridge's `isAllowed`. A bridge's own credential handshake bypasses
+that gate by construction — garmin's `sso/signin`,
+`/oauth-service/oauth/preauthorized` and
+`/oauth-service/oauth/exchange/user/2.0` go straight to `fetchImpl` in
+`garmin-oauth.js`, and trainingpeaks' `exchangeToken` calls
+`cookieSessionFetch` directly — so those endpoints can change without the
+golden moving. This is a known gap, not a decision; closing it needs a
+uniform per-bridge declaration to read, because two of garmin's three
+endpoints are inline template literals with no constant to key off.
+
 The internal action surface (popup → background) is deliberately NOT
 recorded. The golden documents what a third party can reach; no origin
 outside the extension can invoke an internal action, so pinning that set
