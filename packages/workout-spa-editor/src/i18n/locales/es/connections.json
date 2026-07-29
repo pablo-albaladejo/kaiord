@@ -71,6 +71,17 @@
     "syncDone": "Sincronización terminada",
     "syncFailed": "La sincronización ha fallado. Inténtalo dentro de un momento.",
     "syncCooldown": "Acabas de sincronizar. Inténtalo dentro de un minuto.",
+    "bodyExport": "Sincronizar Tanita → Garmin",
+    "bodyExportStatus": {
+      "idle": "Listo para sincronizar",
+      "reading": "Leyendo mediciones de Tanita…",
+      "parsing": "Analizando mediciones…",
+      "encoding": "Codificando para Garmin…",
+      "uploading": "Subiendo a Garmin…",
+      "done": "Sincronización completada",
+      "needsReauth": "Tu sesión de mytanita.eu ha caducado: inicia sesión allí e inténtalo de nuevo.",
+      "error": "La sincronización ha fallado"
+    },
     "disconnect": "Desconectar",
     "disconnectMessage": "Esto desvincula la fuente en Kaiord y apaga todas las rutas que alimenta. La extensión del navegador sigue instalada.",
     "reconnect": "Volver a conectar",

@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useTranslate } from "../../../i18n/use-translate";
-import { ConnectionMark } from "../AthleteConnections/ConnectionMark";
 import { detailKeyFor } from "./connection-card-copy";
+import { ConnectionMark } from "./ConnectionMark";
 import { ConnectionStatusLine } from "./ConnectionStatusLine";
 
 type Props = { source: ConnectionSource; action?: ReactNode };

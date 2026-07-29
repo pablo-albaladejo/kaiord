@@ -97,13 +97,6 @@
       "charCount": "{{count}}/1000 characters"
     }
   },
-  "staleDialog": {
-    "title": "Stale Workout Conflict",
-    "description": "The source description has changed since you last edited this workout. Your edits may conflict with the new content.",
-    "viewDiff": "View Diff",
-    "reprocess": "Re-process Anyway",
-    "keepVersion": "Keep My Version"
-  },
   "toast": {
     "deleteFailed": "Delete Failed",
     "deleteFailedDescription": "Failed to delete template",

@@ -1,10 +1,14 @@
 /**
  * buildDataRouteSignals — one-shot (non-reactive) `DataHubMatrixSignals`
- * snapshot for the `get_data_routes` chat tool. Mirrors
- * `useDataHubMatrix`'s signal wiring (bridge discovery, the v24
- * connections store, IntegrationPolicy rows, per-bridge sync freshness) as
- * a plain async function, so the application-layer tool never imports
- * adapters directly (patrón do-push-to-garmin.ts).
+ * snapshot for the `get_data_routes` chat tool. Wires the live signals the
+ * matrix derivation needs (bridge discovery, the v24 connections store,
+ * IntegrationPolicy rows, per-bridge sync freshness) as a plain async
+ * function, so the application-layer tool never imports adapters directly
+ * (patrón do-push-to-garmin.ts).
+ *
+ * It was written to mirror the Settings matrix's own hook. That hook died with
+ * the matrix UI, so this is now the ONLY wiring of those signals — the chat
+ * tool's answers depend on it alone.
  */
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
 import { isBridgeConnected } from "../../application/connections/connected-source";

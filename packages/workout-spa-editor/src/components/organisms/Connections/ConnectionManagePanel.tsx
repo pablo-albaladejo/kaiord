@@ -4,11 +4,12 @@ import type { ConnectionSource } from "../../../application/connections/connecti
 import { useBridgeImport } from "../../../hooks/connections/use-bridge-import";
 import { useConnectionActions } from "../../../hooks/use-connection-actions";
 import { useTranslate } from "../../../i18n/use-translate";
-import { bridgePolicies } from "../AthleteConnections/data-flow-lookup";
-import { DisconnectConfirmation } from "../AthleteConnections/DisconnectConfirmation";
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
+import { ConnectionBodyExport } from "./ConnectionBodyExport";
 import { ConnectionRouteList } from "./ConnectionRouteList";
 import { ConnectionSyncButton } from "./ConnectionSyncButton";
+import { bridgePolicies } from "./data-flow-lookup";
+import { DisconnectConfirmation } from "./DisconnectConfirmation";
 
 type Props = {
   source: ConnectionSource;
@@ -16,11 +17,13 @@ type Props = {
   byDataType: DataFlowsByType;
 };
 
+/** The one source whose Manage panel carries the Tanita → Garmin push. */
+const BODY_EXPORT_BRIDGE = "tanita-bridge";
+
 /**
- * Disconnect is the same real unlink the Athlete page performs — it writes
- * the `disconnected` record and switches off every policy on the bridge. The
- * difference is that this page now READS that record, so the action finally
- * changes what the user sees.
+ * Disconnect writes the `disconnected` record and switches off every policy on
+ * the bridge. This page also READS that record, so the action changes what the
+ * user sees — which the retired Athlete-page version never did.
  */
 export function ConnectionManagePanel({
   source,
@@ -37,6 +40,9 @@ export function ConnectionManagePanel({
       {source.mechanism === "bridge" && <ConnectionRouteList source={source} />}
       <div className="flex flex-wrap items-start gap-2">
         <ConnectionSyncButton sourceId={source.id} state={importState} />
+        {source.bridgeId === BODY_EXPORT_BRIDGE && (
+          <ConnectionBodyExport sourceId={source.id} profileId={profileId} />
+        )}
         <button
           type="button"
           onClick={() => setConfirming(true)}

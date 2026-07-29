@@ -5,9 +5,10 @@
  * `useDataFlows` subscription, and a second would re-run its 26 queries for
  * the same answer.
  *
- * Freshness bypasses the Data Hub matrix entirely. The rows are per-TYPE and
- * each already resolves at most one source, so the per-source read is the one
- * that fits — and nothing here is stranded when Wave 4 deletes the matrix UI.
+ * Freshness bypasses the Data Hub matrix derivation entirely. The rows are
+ * per-TYPE and each already resolves at most one source, so the per-source read
+ * is the one that fits — which is why nothing here was stranded when the matrix
+ * UI was retired.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { managedDataTypes } from "@kaiord/core";

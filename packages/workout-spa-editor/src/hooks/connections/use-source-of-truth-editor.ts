@@ -6,8 +6,8 @@
  * `pick` stores `priority`, which genuinely changes how the type is READ: the
  * resolver stops returning every source's record and starts consulting the
  * order. That consequence is stated in the panel before either button is
- * reachable. `keepAll` is the way back, and clears the order the way
- * `useSourcePolicyEditor` already does, so a stale ranking cannot resurface.
+ * reachable. `keepAll` is the way back, and clears the stored order as it goes,
+ * so a stale ranking cannot resurface.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { useCallback } from "react";

@@ -7,6 +7,7 @@
 Day-scoped coach/athlete comment threads imported from coaching platforms (Train2Go today): the persisted record shape, the wholesale-replace sync semantics tied to the existing `read-day` lazy fetch, profile-scoped lifecycle (cascade delete on profile removal), and the read-only display with safe linkified comment bodies.
 
 ## Requirements
+
 ### Requirement: CoachingDayNotesRecord shape
 
 The SPA SHALL persist day-scoped comment threads in a dedicated Dexie table `coachingDayNotes` whose record shape is validated by a Zod schema:
@@ -89,4 +90,3 @@ When no record exists for the date, or the record's `comments` array is empty, t
 - **GIVEN** an open activity dialog for 2026-06-07 with 2 comments displayed
 - **WHEN** a background `read-day` upserts a thread with 3 comments for that date
 - **THEN** the panel re-renders showing 3 comments without reopening the dialog
-

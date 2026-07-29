@@ -71,6 +71,17 @@
     "syncDone": "Sync finished",
     "syncFailed": "Sync failed. Try again in a moment.",
     "syncCooldown": "Just synced. Try again in a minute.",
+    "bodyExport": "Sync Tanita → Garmin",
+    "bodyExportStatus": {
+      "idle": "Ready to sync",
+      "reading": "Reading measurements from Tanita…",
+      "parsing": "Parsing measurements…",
+      "encoding": "Encoding for Garmin…",
+      "uploading": "Uploading to Garmin…",
+      "done": "Sync complete",
+      "needsReauth": "Your mytanita.eu session expired — sign in there and try again.",
+      "error": "Sync failed"
+    },
     "disconnect": "Disconnect",
     "disconnectMessage": "This unlinks the source in Kaiord and switches off every route it feeds. The browser extension stays installed.",
     "reconnect": "Reconnect",

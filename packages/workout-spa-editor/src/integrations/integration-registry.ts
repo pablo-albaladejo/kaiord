@@ -4,11 +4,11 @@
  * and not-yet-supported aspirational brands).
  *
  * Collapses what used to be 3 independently hand-maintained,
- * mutually-inconsistent catalogs: `CONNECTIONS`
- * (AthleteConnections/connection-config.ts), and two separate
- * `KNOWN_BRIDGE_IDS` lists (hooks/use-discovered-bridges.ts and
- * ProfileManager/components/useDataFlowsAdd.ts — neither included
- * whoop-bridge, and train2go-bridge wasn't a connection at all).
+ * mutually-inconsistent catalogs: a `CONNECTIONS` catalog on the Athlete
+ * page, and two separate `KNOWN_BRIDGE_IDS` lists (hooks/use-discovered-
+ * bridges.ts and ProfileManager/components/useDataFlowsAdd.ts — neither
+ * included whoop-bridge, and train2go-bridge wasn't a connection at all).
+ * All three are gone; this is the only catalog left.
  *
  * Deliberately holds NO per-integration flow catalog: `eligibleBridgeIds`
  * derives which bridges can serve a (dataType, direction) flow from

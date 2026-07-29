@@ -21,8 +21,8 @@ import type {
 } from "../../types/data-type-source-policy";
 import { DEFAULT_DATA_TYPE_SOURCE_MODE } from "../../types/data-type-source-policy";
 import type { IntegrationPolicyDirection } from "../../types/integration-policy";
-import { orderSources } from "../data-hub/source-policy-rows";
 import { MANUAL_SOURCE_ID, rankedHead } from "./data-type-sources";
+import { orderSources } from "./order-sources";
 
 export type SourceCapabilitySignals = {
   /** Announced wire tokens, or `null` while the bridge is unverified. */
