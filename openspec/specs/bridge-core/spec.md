@@ -164,6 +164,14 @@ the editor may invoke across origins — and every bridge's own suite SHALL
 pin that set exactly, not merely assert one membership or one
 non-membership.
 
+The internal action surface (popup → background) is deliberately NOT
+recorded. The golden documents what a third party can reach; no origin
+outside the extension can invoke an internal action, so pinning that set
+would couple the guard to purely internal refactors and produce failures
+that carry no privacy meaning. This is a decision, not an omission: if an
+action ever becomes reachable from `externally_connectable`, it enters
+`EXTERNAL_ACTIONS` and the golden records it there.
+
 #### Scenario: A widened external-action surface is caught
 
 - **GIVEN** a bridge's `EXTERNAL_ACTIONS` set, which bounds what kaiord.com may ask the installed extension to do
