@@ -6,13 +6,15 @@
  * reads as installed rather than broken, an unlinked one as available, and one
  * whose first probe has not answered as checking rather than as failing.
  */
+import { calendarDay } from "../../../application/connections/calendar-day";
 import type { ConnectionSource } from "../../../application/connections/connection-source";
+import { sourceNeedsAttention } from "../../../application/connections/connection-source";
 import type { BridgeConnectionState } from "../../../hooks/use-bridge-connections";
 import type { Translate } from "../../../i18n/use-translate";
 import type { SettingsAttentionModel } from "./SettingsAttention";
 
-export const needsAttention = (source: ConnectionSource): boolean =>
-  source.status === "attention";
+/** Re-exported under this surface's own name; the derivation is shared. */
+export const needsAttention = sourceNeedsAttention;
 
 /**
  * How many bridges answered. A page cannot enumerate installed extensions:
@@ -22,19 +24,6 @@ export const needsAttention = (source: ConnectionSource): boolean =>
 export const countDetected = (
   connections: readonly BridgeConnectionState[]
 ): number => connections.filter((entry) => entry.discovered).length;
-
-/**
- * The user's calendar day, not `toISOString()`'s: a sync at 02:00Z happened
- * the previous evening in New York, and the sentence is about their day.
- * Nothing when the stored value does not parse as a date.
- */
-const dayOf = (timestamp: string | undefined): string | undefined => {
-  if (timestamp === undefined) return undefined;
-  const at = new Date(timestamp);
-  if (Number.isNaN(at.getTime())) return undefined;
-  const month = String(at.getMonth() + 1).padStart(2, "0");
-  return `${at.getFullYear()}-${month}-${String(at.getDate()).padStart(2, "0")}`;
-};
 
 /**
  * Ranked by what the reader can do about it: an instruction outranks a date.
@@ -60,7 +49,7 @@ const detailOf = (
   if (affected.some((source) => source.outdated))
     return t("attention.extensionOutdated");
   const since =
-    affected.length === 1 ? dayOf(affected[0]?.lastSyncAt) : undefined;
+    affected.length === 1 ? calendarDay(affected[0]?.lastSyncAt) : undefined;
   if (since !== undefined)
     return t("attention.noNewDataSince", { date: since });
   return t("attention.signedOut");
