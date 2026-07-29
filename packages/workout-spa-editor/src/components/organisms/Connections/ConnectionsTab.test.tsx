@@ -5,11 +5,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useBridgeConnectionsRefreshed } from "../../../hooks/use-bridge-connections";
 import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsTab } from "./ConnectionsTab";
 
 vi.mock("../../../hooks/connections/use-connection-sources", () => ({
   useConnectionSources: vi.fn(),
+}));
+vi.mock("../../../hooks/use-bridge-connections", () => ({
+  useBridgeConnectionsRefreshed: vi.fn(),
+}));
+vi.mock("../../../hooks/connections/use-connections-refresh", () => ({
+  useConnectionsRefresh: () => ({ status: "idle", run: vi.fn() }),
 }));
 vi.mock("../../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: vi.fn(),
@@ -55,6 +62,7 @@ describe("ConnectionsTab", () => {
       byDataType: new Map(),
       hasAny: false,
     });
+    vi.mocked(useBridgeConnectionsRefreshed).mockReturnValue(true);
   });
 
   it("should give every card an addressable test id and status", () => {
@@ -205,5 +213,79 @@ describe("ConnectionsTab", () => {
     expect(
       screen.getByText(/may have been removed since/i)
     ).toBeInTheDocument();
+  });
+
+  it("should claim no counts before the connection store has answered", () => {
+    // Arrange
+    // The reachable failure this guards: every bridge row exists from the
+    // first render and reads undiscovered because nothing has been asked yet,
+    // so a fully equipped user would be told "0 of 5" on every cold load.
+    vi.mocked(useBridgeConnectionsRefreshed).mockReturnValue(false);
+    setSources([source({ bridgeDetected: false, status: "available" })]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(screen.getByTestId("connections-summary")).toHaveAttribute(
+      "data-pending",
+      "true"
+    );
+    expect(
+      screen.getByTestId("connections-summary-detected")
+    ).not.toHaveTextContent("0");
+  });
+
+  it("should count detected sources once the store has answered", () => {
+    // Arrange
+    setSources([
+      source(),
+      source({ id: "whoop", bridgeId: "whoop-bridge", bridgeDetected: false }),
+    ]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(
+      screen.getByTestId("connections-summary-detected")
+    ).toHaveTextContent("1of 2");
+  });
+
+  it("should state the consequence of a source needing attention", () => {
+    // Arrange
+    setSources([source({ id: "whoop", name: "WHOOP", status: "attention" })]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(screen.getByTestId("connections-banner-title")).toHaveTextContent(
+      "WHOOP is signed out"
+    );
+  });
+
+  it("should stay silent while every source is healthy", () => {
+    // Arrange
+    // A banner that renders on a healthy page is a permanent false alarm, and
+    // this is the state most users are in most of the time.
+    setSources([source()]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(screen.queryByTestId("connections-banner")).not.toBeInTheDocument();
+  });
+
+  it("should offer one refresh covering every bridge", () => {
+    // Arrange
+    setSources([source()]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(screen.getByTestId("connections-refresh")).toBeInTheDocument();
   });
 });
