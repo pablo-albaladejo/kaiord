@@ -60,7 +60,11 @@ const hmacSha1B64 = async (keyStr, baseStr) => {
     false,
     ["sign"]
   );
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(baseStr));
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(baseStr)
+  );
   return btoa(String.fromCharCode(...new Uint8Array(sig)));
 };
 
@@ -156,7 +160,19 @@ const preauthorized = async (ticket, fetchImpl) => {
 };
 
 // Also serves as the OAuth2 refresh: re-exchanging the OAuth1 token mints a
-// fresh Bearer without touching the session.
+// fresh Bearer.
+//
+// What authenticates this call is the OAuth1 signature below, not a cookie —
+// the extension holds no `cookies` permission and never reads one. But note
+// `credentials: "include"` a few lines down: the request still TRAVELS with
+// whatever ambient Garmin cookies the browser holds. Whether the endpoint
+// needs them is unknown from here and is what #1102 is meant to settle, so
+// claim neither. (The data calls are the deliberate contrast: bearer-fetch.js
+// sends `credentials: "omit"` so the Bearer is the only credential.)
+//
+// This comment used to say the refresh happened "without touching the
+// session". It was copied into the bridge spec on trust and shipped there
+// before anyone read the request ten lines below it.
 const exchange = async (oauth1, fetchImpl) => {
   const url = `${CONNECTAPI}/oauth-service/oauth/exchange/user/2.0`;
   const bodyParams = { audience: "GARMIN_CONNECT_MOBILE_ANDROID_DI" };
