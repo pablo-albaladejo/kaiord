@@ -83,7 +83,13 @@ describe("bridgeSourceStatus", () => {
 
   it("should report an in-flight probe as checking", () => {
     // Arrange
-    const state = session({ checking: true, lastCheckedAt: null });
+    // A RE-probe, which is the state only this guard covers: `probeBridge`
+    // sets `{discovered: true, checking: true}` as a PATCH, so a bridge that
+    // has answered before keeps its `lastCheckedAt` while the next probe is
+    // in flight. With a previous inactive answer the row would otherwise
+    // read as attention, and the pill would shout about a source the app is
+    // in the middle of re-asking about.
+    const state = session({ checking: true, sessionActive: false });
 
     // Act
     const result = bridgeSourceStatus(state, LINKED, PROBED);

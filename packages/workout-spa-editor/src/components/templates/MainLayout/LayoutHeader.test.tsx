@@ -37,17 +37,12 @@ describe("LayoutHeader", () => {
     it.each<[string, () => HTMLElement]>([
       ["brand label", () => screen.getByLabelText(/kaiord editor/i)],
       [
-        "profile entry button",
-        () => screen.getByTestId("status-header-profile-button"),
+        "account menu trigger",
+        () => screen.getByTestId("status-header-account-button"),
       ],
       [
-        "settings entry button",
-        () => screen.getByRole("button", { name: /open settings/i }),
-      ],
-      [
-        "theme toggle",
-        () =>
-          screen.getByRole("button", { name: /switch to (light|dark) mode/i }),
+        "athlete entry button",
+        () => screen.getByTestId("status-header-athlete-button"),
       ],
     ])("should render the %s", (_label, query) => {
       // Arrange
@@ -75,7 +70,7 @@ describe("LayoutHeader", () => {
   });
 
   describe("active profile surface", () => {
-    it("should show 'No profile' in the profile button when no active profile is loaded", () => {
+    it("should name the account menu for no profile when none is loaded", () => {
       // Arrange
 
       // Act
@@ -83,11 +78,11 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        screen.getByTestId("status-header-profile-button")
-      ).toHaveTextContent("No profile");
+        screen.getByTestId("status-header-account-button")
+      ).toHaveAccessibleName("Account menu (no active profile)");
     });
 
-    it("should show the active profile name once Dexie hydrates", async () => {
+    it("should name the account menu for the active profile once Dexie hydrates", async () => {
       // Arrange
       const persistence = createDexiePersistence(db);
       await createProfile(persistence, "My Training Profile");
@@ -97,33 +92,34 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        await screen.findByText(/my training profile/i)
+        await screen.findByLabelText("Account menu (My Training Profile)")
       ).toBeInTheDocument();
     });
   });
 
   describe("entry-button navigation", () => {
-    it("should navigate to /athlete when the profile button is clicked", async () => {
+    it("should navigate to /athlete when the athlete entry is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
       const { ui, location } = withRouter(<LayoutHeader />);
       renderWithProviders(ui);
 
       // Act
-      await user.click(screen.getByTestId("status-header-profile-button"));
+      await user.click(screen.getByTestId("status-header-athlete-button"));
 
       // Assert
       expect(location.history).toContain("/athlete");
     });
 
-    it("should navigate to /settings when the settings button is clicked", async () => {
+    it("should navigate to /settings from the account menu", async () => {
       // Arrange
       const user = userEvent.setup();
       const { ui, location } = withRouter(<LayoutHeader />);
       renderWithProviders(ui);
 
       // Act
-      await user.click(screen.getByRole("button", { name: /open settings/i }));
+      await user.click(screen.getByTestId("status-header-account-button"));
+      await user.click(await screen.findByTestId("account-menu-item-settings"));
 
       // Assert
       expect(location.history).toContain("/settings");

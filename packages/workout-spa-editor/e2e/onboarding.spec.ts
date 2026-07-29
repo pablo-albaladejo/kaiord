@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { openAccountMenu } from "./helpers/mobile-menu";
+
 const TOOLTIP_HOVER_DEBOUNCE_MS = 300;
 
 /**
@@ -55,9 +57,8 @@ test.describe("Tooltips", () => {
     await page.waitForLoadState("networkidle");
 
     // Act — the theme toggle uses a native title attribute for its tooltip
-    const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark) mode/i,
-    });
+    await openAccountMenu(page);
+    const themeToggle = page.getByTestId("theme-toggle");
 
     // Assert
     await expect(themeToggle).toHaveAttribute(
@@ -71,9 +72,8 @@ test.describe("Tooltips", () => {
     // Arrange
     await page.goto("/workout/new?source=scratch");
     await page.waitForLoadState("networkidle");
-    const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark) mode/i,
-    });
+    await openAccountMenu(page);
+    const themeToggle = page.getByTestId("theme-toggle");
 
     // Act
     await themeToggle.hover();
