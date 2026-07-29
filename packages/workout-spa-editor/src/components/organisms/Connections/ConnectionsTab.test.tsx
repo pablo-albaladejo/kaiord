@@ -1,19 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
+import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-settled";
+import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
-import { useBridgeConnectionsRefreshed } from "../../../hooks/use-bridge-connections";
 import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsTab } from "./ConnectionsTab";
 
+// `use-discovery-settled` is deliberately NOT mocked: it is the gate these
+// tests are about, and mocking it would leave them asserting their own stub.
 vi.mock("../../../hooks/connections/use-connection-sources", () => ({
   useConnectionSources: vi.fn(),
-}));
-vi.mock("../../../hooks/use-bridge-connections", () => ({
-  useBridgeConnectionsRefreshed: vi.fn(),
 }));
 vi.mock("../../../hooks/connections/use-connections-refresh", () => ({
   useConnectionsRefresh: () => ({ status: "idle", run: vi.fn() }),
@@ -62,7 +62,13 @@ describe("ConnectionsTab", () => {
       byDataType: new Map(),
       hasAny: false,
     });
-    vi.mocked(useBridgeConnectionsRefreshed).mockReturnValue(true);
+    // Most cases are about what the section says once discovery has settled;
+    // the cold-load case places the clock itself.
+    resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS);
+  });
+
+  afterEach(() => {
+    resetDiscoveryClock();
   });
 
   it("should give every card an addressable test id and status", () => {
@@ -215,12 +221,13 @@ describe("ConnectionsTab", () => {
     ).toBeInTheDocument();
   });
 
-  it("should claim no counts before the connection store has answered", () => {
+  it("should claim no counts while discovery is still in its opening window", () => {
     // Arrange
-    // The reachable failure this guards: every bridge row exists from the
-    // first render and reads undiscovered because nothing has been asked yet,
-    // so a fully equipped user would be told "0 of 5" on every cold load.
-    vi.mocked(useBridgeConnectionsRefreshed).mockReturnValue(false);
+    // The reachable failure: a hard reload with the extensions installed.
+    // Discovery only installs a listener and arms a 3-second timer, so every
+    // row reads undiscovered — and the store's first pass, which asks nothing
+    // and settles microseconds later, must not be mistaken for an answer.
+    resetDiscoveryClock(Date.now());
     setSources([source({ bridgeDetected: false, status: "available" })]);
 
     // Act
@@ -236,7 +243,7 @@ describe("ConnectionsTab", () => {
     ).not.toHaveTextContent("0");
   });
 
-  it("should count detected sources once the store has answered", () => {
+  it("should count detected sources once discovery has settled", () => {
     // Arrange
     setSources([
       source(),

@@ -2,7 +2,7 @@ import { buildConnectionConsequence } from "../../../application/connections/con
 import { buildConnectionCoverage } from "../../../application/connections/connection-coverage";
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { buildConnectionSummary } from "../../../application/connections/connection-summary";
-import { useBridgeConnectionsRefreshed } from "../../../hooks/use-bridge-connections";
+import { useDiscoverySettled } from "../../../hooks/connections/use-discovery-settled";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import { ConnectionRefreshButton } from "./ConnectionRefreshButton";
@@ -20,15 +20,18 @@ type Props = {
  * Every number is derived from the same `sources` list the cards below are
  * rendered from, so the summary cannot contradict the surface it summarises.
  *
- * The counters wait for the store's first pass; the banner does not need to.
- * Before that pass every bridge reads undiscovered, which makes each source
- * "not connected" rather than broken — so the banner is silent for the same
- * reason a healthy browser leaves it silent, and no false alarm is possible.
+ * The counters wait for discovery to have had its window — NOT for the store
+ * to have completed a pass, which happens microseconds after boot and long
+ * before any extension could have announced. The banner needs no such wait:
+ * until a bridge is discovered every source reads "not connected" rather than
+ * broken, so it is silent for exactly the reason a healthy browser leaves it
+ * silent, and there is no window in which it can raise a false alarm.
  */
 export function ConnectionsHealth({ sources, byDataType }: Props) {
   const t = useTranslate("connections");
-  const refreshed = useBridgeConnectionsRefreshed();
   const coverage = buildConnectionCoverage(sources, byDataType);
+  const summary = buildConnectionSummary(sources, coverage);
+  const settled = useDiscoverySettled(summary.detected);
 
   return (
     <div className="space-y-4">
@@ -36,9 +39,7 @@ export function ConnectionsHealth({ sources, byDataType }: Props) {
         <p className="max-w-[58ch] text-sm text-ink-body">{t("intro")}</p>
         <ConnectionRefreshButton />
       </div>
-      <ConnectionSummaryRow
-        summary={refreshed ? buildConnectionSummary(sources, coverage) : null}
-      />
+      <ConnectionSummaryRow summary={settled ? summary : null} />
       <ConnectionsBanner
         consequence={buildConnectionConsequence(sources, coverage, t)}
       />
