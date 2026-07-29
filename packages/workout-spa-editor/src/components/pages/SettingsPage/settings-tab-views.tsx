@@ -28,6 +28,10 @@ const TAB_VIEWS: Record<SettingsTab, React.FC> = {
 };
 
 export const SETTINGS_TAB_VIEWS = TAB_VIEWS;
+
+/** Rail order. One entry per section, so a section is marked current once. */
+export const SETTINGS_TAB_ORDER = TAB_ORDER;
+
 export const DEFAULT_SETTINGS_TAB: SettingsTab = "ai";
 
 export const isSettingsTab = (

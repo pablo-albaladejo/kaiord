@@ -47,48 +47,6 @@ describe("SettingsRow", () => {
     expect(screen.queryByText("Needs attention")).toBeNull();
   });
 
-  it("should mark an active row as the current page", () => {
-    // Arrange
-
-    // Act
-    render(
-      <SettingsRow
-        icon="link"
-        label="Connections"
-        testId="connections"
-        active
-        to="/settings/connections"
-        onNavigate={vi.fn()}
-      />
-    );
-
-    // Assert
-    expect(screen.getByTestId("settings-row-connections")).toHaveAttribute(
-      "aria-current",
-      "page"
-    );
-  });
-
-  it("should leave a row uncurrent by default", () => {
-    // Arrange
-
-    // Act
-    render(
-      <SettingsRow
-        icon="link"
-        label="Connections"
-        testId="connections"
-        to="/settings/connections"
-        onNavigate={vi.fn()}
-      />
-    );
-
-    // Assert
-    expect(screen.getByTestId("settings-row-connections")).not.toHaveAttribute(
-      "aria-current"
-    );
-  });
-
   it("should render an external destination as a new-tab link", () => {
     // Arrange
 

@@ -16,34 +16,70 @@ structure therefore holds at both sizes.
 The consequence is that **both roles' markup is always mounted**, which drives
 D2.
 
-## D2. The rail is the index under a `variant`, and drops values
+## D2. The rail lists sections; the index list is not reused
 
-A split needs a section list beside the pane. The tempting shape — a purpose-
-built rail component listing the sections — duplicates every row: two elements
-with `data-testid="settings-row-provider"`, two with `settings-row-extensions`.
-Playwright resolves test ids in strict mode, so a duplicate is not a cosmetic
-problem, it fails six specs.
+A split needs a section list beside the pane. The first attempt reused
+`SettingsGroupList` under a `variant`, rendering the index's rows as the rail
+with their values suppressed. Review killed it, and the reason is worth keeping:
+**the index's rows are not sections.**
 
-So `SettingsGroupList` takes `variant: "index" | "sidebar"` and renders once.
-In `"sidebar"` it omits two things:
+```
+/settings/preferences ← units, language, notifications   (3 rows)
+/settings/ai          ← provider, customInstructions     (2 rows)
+/settings/privacy     ← dataPrivacy, manageYourData      (2 rows)
+the other four        ← 1 row each
+```
 
-- **the inline values**, because the open section's panel states them in full
-  a column away, and
-- **the version footer**, which belongs to the index's bottom, not a rail.
+A row-shaped rail therefore fails three ways at once:
 
-Dropping the values is also load-bearing for e2e. `e2e/settings.spec.ts` and
+1. **Several rows are "current" for one open section.** Marking by destination
+   marked three rows at `/settings/preferences` — three `aria-current="page"`
+   in one `<nav>`, and the whole group tinted. Matching on `location + search`
+   does not fix it either: those three rows carry byte-identical `to` values.
+2. **The rail repeats the panel's headings verbatim.** "Units", "Language" and
+   "Notifications" are exactly the strings `PreferencesTab` and `LanguageRow`
+   head their own groups with. Same screen, same words, twice.
+3. **Row test ids exist twice** once the panel is mounted beside the list.
+
+Entries are the **sections**, named with the `settings.tabs.*` labels the page
+heading already uses (`Settings · Preferences` ⇄ rail "Preferences"), addressed
+as `settings-section-<id>`. All three failures go away structurally rather than
+by rule: one entry per section means one possible current entry; the section
+names collide with no panel heading; `settings-row-*` now exists only on the
+index, which is the only thing rendered at `/settings`.
+
+`SettingsGroupList` and `SettingsRow` are consequently **untouched by this
+change** — their diff against `main` is empty.
+
+The e2e hazard that killed the value-carrying rail is worth recording, because
+it constrains any future rail: `e2e/settings.spec.ts` and
 `e2e/ai-generate-workout.spec.ts` add a provider named "My Claude" / "Test
-Claude" at `/settings/ai` and then assert
-`settingsPage.getByText(label, { exact: true })` is visible — scoped to
-`settings-page`, which now contains the rail. The rail's `provider` row value is
-the default provider's label, i.e. the same string. Keeping it would resolve two
-nodes and fail on strict mode. Hiding it with `md:hidden` would not help:
-Playwright's strict-mode check counts DOM matches before it evaluates
-visibility.
+Claude" at `/settings/ai`, then assert
+`settingsPage.getByText(label, { exact: true })` — scoped to `settings-page`,
+which contains the rail. A rail showing the `provider` row's value would render
+that same string and resolve two nodes. `md:hidden` would not have helped:
+Playwright's strict-mode check counts DOM matches before evaluating visibility.
 
-This lands on the same answer the reference design draws — its desktop sidebar
-is label-only, and the "every row answers itself" value treatment is the mobile
-index's device.
+The cost is that the rail drops `Connections`, `Manage your data` and
+`Help & docs`, which are index rows without a settings section behind them
+(`/athlete` and an external URL). Wave 1 turns Connections into a real section,
+at which point it appears in the rail for free.
+
+## D2a. Only the rendered surface reads its values
+
+Because the rail is a separate component, it does not call
+`useSettingsRowValues()` — so opening a section no longer mounts four
+`useLiveQuery` **subscriptions** whose output nothing renders. That matters more
+than it first looks: `useAiProvidersLive` performs a WebCrypto AES-GCM decrypt of
+every stored API key on each run, and all four hooks are already mounted by the
+panels themselves, so the variant approach had `/settings/ai` firing two
+independent `getAll()` subscriptions on every provider write, each decrypting
+every key, one of them to compute a string that was then discarded. It also
+breached `CLAUDE.md`'s "one query per page" on four of the seven section routes.
+
+Splitting the index into a values-fetching wrapper over a presentational list
+would have worked too, but deleting the second consumer is smaller and leaves
+`SettingsGroupList` exactly as it was.
 
 ## D3. `/settings` stays the index at every width
 
@@ -78,9 +114,14 @@ console — noise the repo's zero-warning policy does not accept. Writing
 `scrollTop` on the scroller is silent there and correct in a browser.
 
 `document.scrollingElement` is the standards-mode scroller but is **undefined**
-under the jsdom in this repo (verified, not assumed), so the hook falls back to
-`document.documentElement`. jsdom then ignores the write for want of layout,
-which is why the hook's own test stands a plain object in for the scroller.
+under the jsdom in this repo (`"scrollingElement" in document` is false —
+measured), so the hook falls back to `document.documentElement`. jsdom does
+store `scrollTop` writes on that element even though it has no layout to
+scroll, so the hook's test asserts on the real element and exercises the branch
+that actually runs. An earlier version of the test stubbed
+`document.scrollingElement` with a plain object, which meant all four cases
+asserted on the stub and the `?? document.documentElement` fallback — the only
+path jsdom takes — was never executed.
 
 The first render is skipped deliberately. A deep link like
 `/settings/privacy?section=data-management` is scrolled by

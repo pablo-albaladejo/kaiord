@@ -54,36 +54,54 @@ structure a browser does.
 
 Consequently the shell SHALL NOT mount a second copy of any row, panel or
 heading to serve the other layout: every test id in the shell SHALL resolve to
-exactly one element at any URL.
+exactly one element at any URL, and no string the shell renders SHALL duplicate
+a string the open panel renders.
 
 #### Scenario: No viewport is measured
 
 - **WHEN** the shell renders
 - **THEN** it SHALL NOT consult `matchMedia` or any viewport dimension to choose its layout
 
-#### Scenario: Row identity stays unambiguous while a section is open
+#### Scenario: Identity stays unambiguous while a section is open
 
 - **GIVEN** a section is open, so both the section rail and the section panel are mounted
-- **WHEN** a row test id is resolved
+- **WHEN** any test id the shell renders is resolved
 - **THEN** exactly one element SHALL match it
 
-### Requirement: The section rail is the index list without its values
+### Requirement: The rail lists sections, not index rows
 
-While a section is open, the section list SHALL also serve as the rail beside
-the panel, rendered from the same registry and the same component rather than a
-parallel list. In that role it SHALL omit each row's inline value and the
-version footer, because the open panel already states those values and a rail
-repeating them would state the same fact twice on one screen. The rail SHALL be
-hidden at narrow widths, where the panel takes the whole surface.
+While a section is open, the shell SHALL render a rail of the sections
+themselves, one entry per section, and SHALL NOT render the index's row list
+alongside the panel. The index's rows are not in one-to-one correspondence with
+sections — several rows may lead to the same section — so a row-shaped rail
+would mark more than one entry as current for a single open section and would
+repeat the panel's own headings word for word. Rail entries SHALL be named by
+the section, using the same names the page heading uses.
 
-The row leading to the open section SHALL be marked as the current page, and
+Exactly one entry SHALL be marked as the current page for any open section, and
 that mark SHALL be exposed to assistive technology, not only through colour.
 
-#### Scenario: The rail renders labels only
+The rail SHALL be hidden at narrow widths, where the panel takes the whole
+surface, and the index SHALL keep its inline row values when it is the surface
+being shown.
+
+#### Scenario: One entry per section
 
 - **GIVEN** a section is open
-- **WHEN** the rail renders a row that declares a value key
-- **THEN** the row SHALL render its label and no value
+- **WHEN** the rail renders
+- **THEN** it SHALL render exactly one entry per registered section, and no element carrying an index row's test id
+
+#### Scenario: Exactly one entry is current, including for a shared destination
+
+- **GIVEN** the preferences section is open, which three separate index rows lead to
+- **WHEN** the rail renders
+- **THEN** exactly one element in the shell SHALL carry `aria-current="page"`, and it SHALL be the preferences entry
+
+#### Scenario: The rail does not echo the panel's headings
+
+- **GIVEN** the preferences section is open, whose panel heads its groups "Units" and "Notifications"
+- **WHEN** the rail renders
+- **THEN** no rail entry SHALL render a string identical to one of those headings
 
 #### Scenario: The index keeps its values
 
@@ -91,11 +109,24 @@ that mark SHALL be exposed to assistive technology, not only through colour.
 - **WHEN** the index renders a row that declares a value key
 - **THEN** the row SHALL render its resolved value
 
-#### Scenario: The open section's row is marked current
+### Requirement: Only the surface being shown reads the values it displays
 
-- **GIVEN** the cross-device sync section is open
-- **WHEN** the rail renders
-- **THEN** the row leading to that section SHALL carry `aria-current="page"` and a row leading elsewhere SHALL carry no `aria-current`
+The index's row values SHALL be read only where they are rendered. A surface
+that displays no row value SHALL NOT mount the live queries that resolve them,
+so opening a section does not duplicate the panel's own subscriptions, and so no
+credential is decrypted to produce output that is discarded.
+
+#### Scenario: The rail subscribes to nothing
+
+- **GIVEN** a section is open, so the rail rather than the index is rendered
+- **WHEN** the shell renders
+- **THEN** the row-value queries SHALL NOT be mounted by the shell
+
+#### Scenario: The index subscribes once
+
+- **GIVEN** no section is open
+- **WHEN** the index renders
+- **THEN** the row-value queries SHALL be mounted exactly once for the page
 
 ### Requirement: The shell exposes exactly one route heading
 

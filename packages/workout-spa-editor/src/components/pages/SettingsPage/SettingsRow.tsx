@@ -9,8 +9,6 @@ export type SettingsRowProps = {
   detail?: string;
   /** `"attention"` marks the row with an amber dot before the chevron. */
   status?: "attention";
-  /** Marks the row as the section currently open in the desktop split. */
-  active?: boolean;
   to?: string;
   /** External destination opened in a new tab; mutually exclusive with `to`. */
   href?: string;
@@ -22,15 +20,12 @@ const BASE_CLASS =
 
 const LINK_CLASS = `${BASE_CLASS} transition-colors hover:bg-gray-50 dark:hover:bg-slate-800`;
 
-const ACTIVE_CLASS = `${LINK_CLASS} bg-primary-50 dark:bg-primary-900/20`;
-
 export const SettingsRow = ({
   icon,
   label,
   testId,
   detail,
   status,
-  active = false,
   to,
   href,
   onNavigate,
@@ -74,8 +69,7 @@ export const SettingsRow = ({
     <button
       type="button"
       onClick={() => onNavigate(to)}
-      aria-current={active ? "page" : undefined}
-      className={active ? ACTIVE_CLASS : LINK_CLASS}
+      className={LINK_CLASS}
       data-testid={rowTestId}
     >
       {body}

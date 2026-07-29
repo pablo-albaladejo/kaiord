@@ -7,7 +7,8 @@ import { Button } from "../../atoms/Button/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { isSettingsTab, SETTINGS_TAB_VIEWS } from "./settings-tab-views";
 import { SettingsAttention } from "./SettingsAttention";
-import { SettingsSidebar } from "./SettingsSidebar";
+import { SettingsGroupList } from "./SettingsGroupList";
+import { SettingsSectionRail } from "./SettingsSectionRail";
 import { useSectionScrollReset } from "./use-section-scroll-reset";
 
 /**
@@ -26,23 +27,22 @@ const SPLIT_CLASS =
 
 export default function SettingsPage() {
   const { section } = useParams<SettingsPageParams>();
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
   const t = useTranslate("settings");
   useFocusOnSectionChange();
   useSectionScrollReset(section);
 
-  if (section !== undefined && !isSettingsTab(section))
+  const open = isSettingsTab(section) ? section : undefined;
+  if (section !== undefined && open === undefined)
     return <Redirect to={SETTINGS_ROOT} />;
 
-  const ActiveView = section === undefined ? null : SETTINGS_TAB_VIEWS[section];
+  const ActiveView = open === undefined ? null : SETTINGS_TAB_VIEWS[open];
   const heading =
-    section === undefined
-      ? t("title")
-      : `${t("title")} · ${t(`tabs.${section}`)}`;
+    open === undefined ? t("title") : `${t("title")} · ${t(`tabs.${open}`)}`;
 
   return (
     <div className="space-y-6 p-4" data-testid="settings-page">
-      {section !== undefined && (
+      {open !== undefined && (
         <Button
           variant="tertiary"
           size="sm"
@@ -62,22 +62,20 @@ export default function SettingsPage() {
         {heading}
       </h1>
       <SettingsAttention attention={null} variant="banner" />
-      <div className={section === undefined ? undefined : SPLIT_CLASS}>
-        <SettingsSidebar
-          railed={section !== undefined}
-          activePath={location}
-          onNavigate={navigate}
-        />
-        {ActiveView !== null && (
+      {open === undefined || ActiveView === null ? (
+        <SettingsGroupList onNavigate={navigate} />
+      ) : (
+        <div className={SPLIT_CLASS}>
+          <SettingsSectionRail activeSection={open} onNavigate={navigate} />
           <div
-            id={`settings-panel-${section}`}
+            id={`settings-panel-${open}`}
             className="min-w-0"
-            data-testid={`settings-panel-${section}`}
+            data-testid={`settings-panel-${open}`}
           >
             <ActiveView />
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

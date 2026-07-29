@@ -229,53 +229,104 @@ describe("SettingsPage", () => {
 
       // Assert
       expect(screen.getByTestId("settings-group-list")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("settings-section-rail")
+      ).not.toBeInTheDocument();
       expect(screen.queryByTestId("settings-panel-ai")).not.toBeInTheDocument();
-      expect(screen.getByTestId("settings-sidebar")).not.toHaveClass(
-        "md:block"
-      );
     });
 
-    it("should render the section rail beside the panel for a section", () => {
+    it("should replace the index with the rail and the panel for a section", () => {
       // Arrange
 
       // Act
       renderAtPath("/settings/ai");
 
       // Assert
-      expect(screen.getByTestId("settings-group-list")).toBeInTheDocument();
       expect(screen.getByTestId("settings-panel-ai")).toBeInTheDocument();
       // The rail is a CSS-only affordance: absent below `md`, present above.
-      expect(screen.getByTestId("settings-sidebar")).toHaveClass(
+      expect(screen.getByTestId("settings-section-rail")).toHaveClass(
         "hidden",
         "md:block"
       );
+      expect(
+        screen.queryByTestId("settings-group-list")
+      ).not.toBeInTheDocument();
     });
 
-    it("should drop row values from the section rail", () => {
+    it("should render one rail entry per section", () => {
       // Arrange
+      const sections = [
+        "ai",
+        "sync",
+        "data-hub",
+        "extensions",
+        "usage",
+        "privacy",
+        "preferences",
+      ];
 
       // Act
       renderAtPath("/settings/ai");
 
       // Assert
-      expect(
-        screen.getByTestId("settings-row-dataPrivacy")
-      ).not.toHaveTextContent("Stored in this browser");
+      const rail = screen.getByTestId("settings-section-rail");
+      expect(rail.querySelectorAll("button")).toHaveLength(sections.length);
+      for (const id of sections) {
+        expect(
+          screen.getByTestId(`settings-section-${id}`)
+        ).toBeInTheDocument();
+      }
     });
 
-    it("should mark the open section's row as current", () => {
+    // `/settings/preferences` is the case that matters: three index rows
+    // (units, language, notifications) share that destination, so a
+    // row-shaped rail marked all three current at once.
+    it.each([
+      { path: "/settings/preferences", section: "preferences" },
+      { path: "/settings/ai", section: "ai" },
+      { path: "/settings/privacy", section: "privacy" },
+      { path: "/settings/sync", section: "sync" },
+    ])(
+      "should mark exactly one entry current at $path",
+      ({ path, section }) => {
+        // Arrange
+
+        // Act
+        const { container } = renderAtPath(path);
+
+        // Assert
+        const current = container.querySelectorAll('[aria-current="page"]');
+        expect(current).toHaveLength(1);
+        expect(current[0]).toBe(
+          screen.getByTestId(`settings-section-${section}`)
+        );
+      }
+    );
+
+    it("should navigate laterally from a rail entry", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const { memory } = renderAtPath("/settings/ai");
+
+      // Act
+      await user.click(screen.getByTestId("settings-section-privacy"));
+
+      // Assert
+      await waitFor(() => {
+        expect(memory.history.at(-1)).toBe("/settings/privacy");
+      });
+    });
+
+    it("should keep the rail free of the index's row test ids", () => {
       // Arrange
 
       // Act
-      renderAtPath("/settings/sync");
+      const { container } = renderAtPath("/settings/preferences");
 
       // Assert
       expect(
-        screen.getByTestId("settings-row-googleDriveSync")
-      ).toHaveAttribute("aria-current", "page");
-      expect(screen.getByTestId("settings-row-usage")).not.toHaveAttribute(
-        "aria-current"
-      );
+        container.querySelectorAll('[data-testid^="settings-row-"]')
+      ).toHaveLength(0);
     });
 
     it.each([{ path: "/settings" }, { path: "/settings/extensions" }])(
