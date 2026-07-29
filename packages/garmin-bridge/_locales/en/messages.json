@@ -20,16 +20,16 @@
     "description": "Status verdict when the bridge is connected."
   },
   "connectedCause": {
-    "message": "Riding your Garmin Connect session.",
-    "description": "Status cause sentence for the connected state."
+    "message": "Reading your Garmin Connect data with access Kaiord minted from an earlier sign-in.",
+    "description": "Status cause sentence for the connected state. Names the minted access rather than a live session: the bridge holds OAuth tokens, not a browser session."
   },
-  "sessionSignedOut": {
-    "message": "Session signed out",
-    "description": "Status verdict when the Garmin Connect session is missing."
+  "noGarminAccess": {
+    "message": "No access to Garmin Connect",
+    "description": "Status verdict when the bridge's last read of Garmin Connect did not succeed. Deliberately cause-neutral — the extension cannot tell an expired token from a Garmin outage."
   },
-  "sessionSignedOutCause": {
-    "message": "Your Garmin Connect tab is signed out, so nothing is reaching Kaiord right now.",
-    "description": "Status cause sentence naming the consequence of a signed-out session."
+  "noGarminAccessCause": {
+    "message": "Kaiord could not read from Garmin Connect. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
+    "description": "Status cause sentence for the no-access state. Names both possibilities without asserting either, and keeps the sign-in action meaningful."
   },
   "bridgeNotResponding": {
     "message": "Bridge not responding",
@@ -87,7 +87,10 @@
     "message": "Workout library · $count$ workouts",
     "description": "Rollup line showing the total number of stored workouts.",
     "placeholders": {
-      "count": { "content": "$1", "example": "47" }
+      "count": {
+        "content": "$1",
+        "example": "47"
+      }
     }
   },
   "lastPush": {
@@ -102,7 +105,10 @@
     "message": "Updated $phrase$",
     "description": "Athlete-card freshness line, e.g. 'Updated 10 minutes ago'.",
     "placeholders": {
-      "phrase": { "content": "$1", "example": "10 minutes ago" }
+      "phrase": {
+        "content": "$1",
+        "example": "10 minutes ago"
+      }
     }
   },
   "updatedJustNow": {
@@ -117,42 +123,60 @@
     "message": "$count$ minute ago",
     "description": "Relative time, singular minutes.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "minutesAgo": {
     "message": "$count$ minutes ago",
     "description": "Relative time, plural minutes.",
     "placeholders": {
-      "count": { "content": "$1", "example": "10" }
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
     }
   },
   "hourAgo": {
     "message": "$count$ hour ago",
     "description": "Relative time, singular hours.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "hoursAgo": {
     "message": "$count$ hours ago",
     "description": "Relative time, plural hours.",
     "placeholders": {
-      "count": { "content": "$1", "example": "5" }
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
     }
   },
   "dayAgo": {
     "message": "$count$ day ago",
     "description": "Relative time, singular days.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "daysAgo": {
     "message": "$count$ days ago",
     "description": "Relative time, plural days.",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "openEditor": {
@@ -161,7 +185,7 @@
   },
   "signInGarmin": {
     "message": "Sign in to Garmin Connect",
-    "description": "Primary footer link that fixes a signed-out Garmin Connect session."
+    "description": "Primary footer link in the no-access state. It is the useful action because signing in lets the bridge mint fresh OAuth access — NOT because the user is known to be signed out, which the extension cannot determine."
   },
   "openGarmin": {
     "message": "Open Garmin Connect ↗",
