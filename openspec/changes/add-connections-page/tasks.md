@@ -105,3 +105,34 @@
       and the renamed signal across four existing test modules.
 - [x] 8.5 `pnpm -r build`, SPA `test`, SPA `lint`, `pnpm test:scripts`, root
       `pnpm lint`, `pnpm lint:specs`, and `playwright test --list`.
+
+## 9. Review round — honesty and guard defects
+
+- [x] 9.1 Move the in-flight import guard out of hook state into
+      `import-cooldown`, joining an existing pull rather than refusing it, so a
+      card collapse cannot start a second concurrent whole-CSV download. See
+      design.md D12.
+- [x] 9.2 Add the unmount-while-PENDING test — the existing one awaited
+      completion before unmounting, so it only exercised the state where the
+      guard already held. Watched it fail (importer called twice) first.
+- [x] 9.3 Take `hasProbe` as a signal instead of inferring it from
+      `lastCheckedAt === null`, which a probed bridge also reaches. Watched the
+      new test fail ("expected 'installed' to be 'checking'") first. See
+      design.md D2.
+- [x] 9.4 Restructure the status fixtures so `hasProbe` is the axis under test
+      rather than a bridge chosen where the inference happened to be right.
+- [x] 9.5 Report delivery failure through `delivered` on the transport
+      envelope, map it to a new `unreachable()` probe result, and write
+      `discovered: result.reachable`, so an uninstalled extension stops being
+      reported as present. Watched the store test fail ("expected true to be
+      false") first. See design.md D11.
+- [x] 9.6 Establish by reading `tanita-bridge/background.js` that `ping` routes
+      into `checkSession` and downloads the whole export CSV, and therefore
+      that a liveness ping is NOT available for that bridge — the first
+      implementation of this fix would have re-downloaded the user's history
+      every five minutes.
+- [x] 9.7 Word the unverifiable bridge honestly ("Detected on load", plus a
+      detail line saying it may have been removed since), driven by
+      `sessionVerifiable` rather than a hardcoded bridge id.
+- [x] 9.8 Minors: keep last-sync visible on `attention`, and stop
+      `useDataFlows` issuing queries for an empty profile id.

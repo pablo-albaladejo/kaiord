@@ -30,23 +30,19 @@ whether an account is linked, and manual entry has none; callers render "always
 on" from the mechanism. Answering true would have flipped the Data Hub's manual
 column header from "Always on" to "Connected".
 
-## D2. Deriving "installed" from the store, not from a bridge allow-list
+## D2. "Has no prober" is asked, not inferred
 
-Tanita can never report a live session: its `checkSession` downloads the whole
-export CSV, so it is deliberately absent from `SESSION_PROBES` and the refresh
-pass writes it discovered-only. The card must say so, without the UI carrying a
-second copy of "which bridges have probers" that could drift from the probe map.
+A bridge with no session prober can never report a live session, so its card
+says "installed" rather than connected. The first implementation inferred that
+from runtime state — `discovered ∧ ¬checking ∧ lastCheckedAt === null`, which
+is what the refresh pass writes for a probe-less bridge.
 
-The store's own writes make it derivable. `probeBridge` sets `checking: true`
-_synchronously_ before awaiting, and stamps `lastCheckedAt` on completion;
-`refreshBridge` writes `{discovered: true, checking: false, lastCheckedAt: null}`
-for a bridge with no prober. So:
-
-> discovered ∧ ¬checking ∧ `lastCheckedAt === null` ⟺ this bridge is never probed
-
-The one other way to reach that shape is the extension-swapped-mid-probe branch,
-a transient in which the session state genuinely is unknown — so "installed" is
-the honest answer there too, and the next pass corrects it.
+That inference is wrong. `bridge-connection-probe` writes the SAME shape for a
+PROBED bridge whose extension id changes mid-probe, so a WHOOP or Garmin card
+could show Tanita-specific copy about not being able to check without
+downloading the whole export. The status now takes `hasProbe` — injected by the
+hook from `SESSION_PROBES` — and a probed bridge with no answer on record reads
+"checking", which is what is actually true of it.
 
 ## D3. Discovery is read from the store, not from `useDiscoveredBridges`
 
@@ -147,3 +143,59 @@ return values are static so `check-no-pii-leakage` stays green on its callers.
 Interpolated into the Spanish `lastSync` sentence it yields mixed language. This
 is pre-existing — `settings.values.sync.connected` does the same — and a
 locale-aware formatter is a separate change rather than something to fork here.
+
+## D11. Liveness comes from the probe, and Tanita has none
+
+`bridge-discovery` only ever `.set()`s an extension id — no delete, no TTL, and
+`stop()` does not reset — so `discovered` could never go false. Uninstalling an
+extension mid-session left the card asserting "detected" and "installed"
+permanently, offered Reconnect for something that could not be re-linked, and
+told the user to sign in when signing in fixes nothing.
+
+Three options were on the table.
+
+| Option                                                      | Verdict                                                                                                                                                                                                             |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Expire an id in `bridge-discovery` when a ping fails        | Rejected: re-discovery needs a fresh announcement, and the `KAIORD_BRIDGE_DISCOVER` broadcast only fires once at boot when nothing is known. A transient failure would drop a bridge unrecoverably for the session. |
+| A separate liveness `ping` for every bridge each pass       | Rejected after checking the extensions — see below.                                                                                                                                                                 |
+| **Derive liveness from the probe each bridge already runs** | Chosen.                                                                                                                                                                                                             |
+
+`sendBridgeMessage` now reports `delivered`, which is false only when the
+message never reached the extension. `ok: false` from an extension that
+answered still counts as delivered — it is there, it just said no. Probers map
+a delivery failure to a new `unreachable()` result, and `probeBridge` writes
+`discovered: result.reachable`. This costs no extra message: the probe was
+being sent anyway.
+
+The separate-ping option was rejected on evidence, not cost. `tanita-bridge`'s
+background script routes `ping` into the same handler as `checkSession`
+(`background.js`: `case "ping": case "checkSession": return await
+checkSession()`), and that fetches the entire export CSV. A liveness ping would
+therefore have re-downloaded the user's whole body-composition history every
+five minutes — exactly the harm Wave 0b excluded Tanita from the probe set to
+avoid. The other four bridges are already messaged every pass, so a second ping
+would only duplicate real network calls for garmin, train2go and trainingpeaks.
+
+**Residual, and it is a real limitation:** `tanita-bridge` is never messaged, so
+its presence cannot be re-checked after the initial announcement. Rather than
+assert something unobservable, its card says "Detected on load" and its detail
+line states that Kaiord cannot re-check it and it may have been removed since.
+`sessionVerifiable` on the card model carries this so the wording follows from
+state rather than from a hardcoded bridge id. Lifting it needs a one-line
+extension change — `case "ping"` returning the manifest without calling
+`checkSession` — plus a store republish, which is extension-side work outside
+this wave.
+
+## D12. Both import guards are module-scoped
+
+The in-flight guard was React state in `useBridgeImport`, which lives in the
+Manage panel and is destroyed when the card collapses. Since the cooldown is
+only stamped once a pull settles, collapsing and reopening mid-pull left
+nothing at all in the way: a second concurrent whole-CSV download for Tanita,
+repeatable without limit.
+
+Both guards now live in `import-cooldown`. A second caller JOINS the in-flight
+promise rather than being refused, so a card remounted mid-pull adopts the
+running state and settles with the real outcome instead of sitting idle. Reading
+the map synchronously also closes the two-fast-clicks gap that a captured
+`status` could not.

@@ -90,7 +90,14 @@ having received none.
 
 - **GIVEN** a discovered source that the system never probes for a session, because probing it would download the user's whole export
 - **WHEN** its card renders
-- **THEN** it SHALL be described as installed, and SHALL NOT be described as connected or as being checked
+- **THEN** it SHALL be described as detected when the page loaded, and SHALL NOT be described as connected or as being checked
+- **AND** it SHALL state that its presence cannot be re-checked and that it may have been removed since
+
+#### Scenario: Probe-less is a property of the source, not a shape its state reaches
+
+- **GIVEN** a source that IS session-probed but whose probe has not recorded an answer yet
+- **WHEN** its card renders
+- **THEN** it SHALL be described as being checked, and SHALL NOT borrow the copy that belongs to a source the system never probes
 
 #### Scenario: A probe in flight is distinguishable from one that never runs
 
@@ -202,6 +209,12 @@ rather than silently ignored.
 - **WHEN** the user triggers it again within the cooldown period
 - **THEN** no import SHALL run, and the user SHALL be told why
 
+#### Scenario: The guard outlives the control that renders it
+
+- **GIVEN** a source whose import is still running
+- **WHEN** the surface holding the control is dismissed and re-shown, and the import is triggered again
+- **THEN** no second import SHALL start, and the re-shown control SHALL report the running import and settle with its outcome
+
 #### Scenario: A failed import releases the control
 
 - **GIVEN** a source whose import fails
@@ -246,3 +259,39 @@ machinery.
 - **GIVEN** a source serving exactly one data type in a direction
 - **WHEN** its chip renders
 - **THEN** the wording SHALL be the singular form
+
+### Requirement: A source is reported present only while there is evidence it is
+
+The system SHALL NOT report a source as present on the strength of a past
+announcement alone. Bridge discovery records an extension the first time it
+announces itself and never expires that record, so presence SHALL be re-derived
+from live evidence: where a source is contacted at all, a delivery failure
+SHALL mean the extension is gone and the source SHALL be reported as not
+connected.
+
+A delivery failure and a refusal SHALL be distinguished. An extension that
+answers and reports no usable upstream session is present; only a message that
+never reached the extension means it is absent. The two SHALL NOT share copy,
+because signing in cannot fix a removed extension.
+
+Where a source cannot be contacted at all — because the only action it exposes
+is prohibitively expensive — the system SHALL NOT claim present-tense presence
+for it, and SHALL word its state as what was observed and when.
+
+#### Scenario: An uninstalled extension stops being reported as present
+
+- **GIVEN** a source that was discovered earlier in the session
+- **WHEN** contacting it fails to reach the extension
+- **THEN** the source SHALL be reported as not connected, and no re-link control SHALL be offered for it
+
+#### Scenario: A signed-out extension is still present
+
+- **GIVEN** a source whose extension answers and reports no usable upstream session
+- **WHEN** its state is derived
+- **THEN** it SHALL remain reported as present, and its state SHALL be the signed-out one rather than the absent one
+
+#### Scenario: An uncontactable source does not claim the present tense
+
+- **GIVEN** a source the system cannot contact cheaply enough to poll
+- **WHEN** its card renders
+- **THEN** its wording SHALL be limited to what was observed and when, and SHALL admit that the source may have been removed since
