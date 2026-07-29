@@ -44,7 +44,11 @@ A production variant (`manifest.prod.json`) SHALL exist that strips every localh
 
 The extension SHALL authenticate to Garmin with OAuth tokens minted from the user's existing `connect.garmin.com` sign-in, and SHALL NOT prompt for a password. The mint SHALL run once and follow three steps: obtain a service ticket from the SSO session without re-authenticating; sign that ticket (OAuth1, 2-legged) to obtain an OAuth1 token; exchange it (OAuth1, 3-legged) for an OAuth2 Bearer token.
 
-Tokens SHALL be held in `chrome.storage.local` so they survive service-worker cold starts. The OAuth1 token is long-lived (about a year). The OAuth2 access token SHALL be refreshed by re-running the exchange with the OAuth1 token alone; **that refresh reads no cookie and no browser session**. Only if the refresh fails SHALL the extension re-mint from the SSO session.
+Tokens SHALL be held in `chrome.storage.local` so they survive service-worker cold starts. The OAuth1 token is long-lived (about a year). The OAuth2 access token SHALL be refreshed by re-running the exchange signed with the OAuth1 token; only if that fails SHALL the extension re-mint from the SSO session.
+
+**What authenticates that refresh is the OAuth1 signature, not a cookie.** The extension holds no `cookies` permission, so it can never read a cookie value. It does not follow that the request is cookie-free: the exchange is issued with `credentials: "include"`, so the browser attaches whatever ambient Garmin cookies it holds. Whether Garmin's exchange endpoint requires them is not determinable from this source, and no claim is made here either way.
+
+The data calls are the deliberate contrast: the shared bearer transport sends `credentials: "omit"` precisely so the Bearer token is the only credential. A future change MAY align the exchange with that, but it is a runtime behaviour change validated only against the live API — not a documentation edit.
 
 It follows that **reads continue after the user signs out of connect.garmin.com**, and that a failed call is NOT evidence the user is signed out. Every surface this extension itself ships — its popup — MUST respect that: it SHALL NOT diagnose a signed-out session from a failed check.
 
@@ -139,7 +143,7 @@ The extension SHALL handle messages from allowed SPA origins via `chrome.runtime
 
 All responses SHALL use the shape `{ ok: boolean, protocolVersion?: number, data?: unknown, error?: string }`, and `ping` SHALL include `protocolVersion: 1` (bumped only when the message contract changes).
 
-The `ping` response `data` envelope SHALL contain the full `BridgeManifest` fields (`id: "garmin-bridge"`, `name: "Garmin Connect"`, `version`, `protocolVersion: 1`, `capabilities`) alongside the session-status fields `authenticated` (boolean) and `gcApi` (the result envelope of the probing read). Manifest keys SHALL take precedence on collision, so no upstream Garmin response can spoof the bridge identity. The SPA validates `response.data` against `bridgeManifestSchema`, which strips the session-status fields so both consumers coexist.
+The `ping` response `data` envelope SHALL contain the full `BridgeManifest` fields (`id: "garmin-bridge"`, `name: "Garmin Connect"`, `version`, `protocolVersion: 1`, `capabilities`) alongside the session-status fields `authenticated` (boolean) and `gcApi` (the result envelope of the probing read). The upstream Garmin response SHALL be NESTED under `gcApi` rather than spread into the envelope, so no key it carries can reach the identity level at all. That nesting — not a precedence rule — is what prevents an upstream response from spoofing the bridge identity: this handler builds its result by spreading the manifest first and then assigning the two status fields, so there is no collision surface, and if one were introduced by spreading the response afterwards the later spread would win. The SPA validates `response.data` against `bridgeManifestSchema`, which strips the session-status fields so both consumers coexist.
 
 #### Scenario: SPA pings the extension
 

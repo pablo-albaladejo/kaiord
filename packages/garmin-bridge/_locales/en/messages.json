@@ -185,7 +185,7 @@
   },
   "signInGarmin": {
     "message": "Sign in to Garmin Connect",
-    "description": "Primary footer link that fixes a signed-out Garmin Connect session."
+    "description": "Primary footer link in the no-access state. It is the useful action because signing in lets the bridge mint fresh OAuth access — NOT because the user is known to be signed out, which the extension cannot determine."
   },
   "openGarmin": {
     "message": "Open Garmin Connect ↗",
