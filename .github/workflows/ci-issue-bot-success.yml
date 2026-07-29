@@ -25,21 +25,36 @@ jobs:
         with:
           sparse-checkout: scripts
           sparse-checkout-cone-mode: false
-      - name: Detect skipped jobs on the green run
-        id: skipcheck
+      - name: Collect the green run's job results
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           REPO: ${{ github.repository }}
         run: |
-          # workflow_run jobs API: any job with conclusion = "skipped" means
-          # the green run did not exercise the full CI surface (path filter,
-          # matrix gating, etc.). v1 close-rule: never close on partial coverage.
-          # Filter out the "Auto Merge" wrapper which is path-filtered by design.
-          skipped=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" \
-            --jq '[.jobs[] | select(.conclusion == "skipped" and .name != "auto-merge")] | length')
-          [ "$skipped" -gt 0 ] && echo "any=true" >> "$GITHUB_OUTPUT" || echo "any=false" >> "$GITHUB_OUTPUT"
-      - name: Auto-close stale ci,automated issues on a fully-green run
+          # Hand the close-pass the full job list and let it decide per-issue
+          # whether THAT issue's failed jobs re-ran green (see the v2 close-rule
+          # in scripts/ci-failure-issue-helpers.mjs). The previous "was anything
+          # skipped?" boolean was unsatisfiable: ci.yml's `log-bot-skip` and
+          # `notify-failure` are skipped on every green run by construction, so
+          # the gate was always true and the bot never closed anything.
+          #
+          # --paginate is required: a full CI run has >30 jobs (54 observed) and
+          # the API pages at 30, so an unpaginated read silently truncated.
+          # --jq emits one object per line per page; `jq -sc` slurps the pages
+          # into a single array.
+          #
+          # pipefail is load-bearing: without it, a gh failure part-way through
+          # pagination still streams the pages it did fetch into jq, which exits
+          # 0, and the step would succeed with a silently truncated list. A
+          # short list does not look like an error to the close-pass — it looks
+          # like "those jobs did not run" for the missing ones and like a
+          # legitimate green run for the rest. Fail the step instead.
+          set -o pipefail
+          jobs=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" --paginate \
+            --jq '.jobs[] | {name, conclusion}' | jq -sc .)
+          echo "GREEN_RUN_JOBS=$jobs" >> "$GITHUB_ENV"
+          echo "collected $(echo "$jobs" | jq 'length') jobs from run $RUN_ID"
+      - name: Auto-close CI failure issues whose jobs re-ran green
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -47,4 +62,4 @@ jobs:
           GITHUB_RUN_ID: ${{ github.event.workflow_run.id }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
-        run: node scripts/ci-failure-issue.mjs close ${{ steps.skipcheck.outputs.any }}
+        run: node scripts/ci-failure-issue.mjs close
