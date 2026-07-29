@@ -7,9 +7,6 @@ const {
   handleAction,
   train2goFetch,
   ping,
-  readWeek,
-  readDetails,
-  openTrain2Go,
   logSwallowed,
   TELEMETRY_KEY,
 } = require("../background.js");
