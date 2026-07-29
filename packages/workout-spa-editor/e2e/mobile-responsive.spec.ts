@@ -8,6 +8,33 @@ const MOBILE_STEP_COUNT = 10;
 const TABLET_VIEWPORT_WIDTH_PX = 768;
 const STEP_BASE_WATTS = 200;
 const STEP_WATTS_INCREMENT = 10;
+const PIXEL_5_WIDTH_PX = 393;
+const COACH_MARK_STEP_COUNT = 4;
+const COACH_MARK_STEP_SECONDS = 300;
+
+/** Four uniform steps: enough to ctrl-select two and fire the create-block mark. */
+const buildCoachMarkWorkout = () => ({
+  version: "1.0",
+  type: "structured_workout",
+  metadata: { created: new Date().toISOString(), sport: "cycling" },
+  extensions: {
+    structured_workout: {
+      name: "Coach Mark Workout",
+      sport: "cycling",
+      steps: Array.from({ length: COACH_MARK_STEP_COUNT }, (_, stepIndex) => ({
+        stepIndex,
+        durationType: "time",
+        duration: { type: "time", seconds: COACH_MARK_STEP_SECONDS },
+        targetType: "power",
+        target: {
+          type: "power",
+          value: { unit: "watts", value: STEP_BASE_WATTS },
+        },
+        intensity: "active",
+      })),
+    },
+  },
+});
 
 /**
  * Critical Path: Mobile Responsiveness and Touch Interactions
@@ -381,5 +408,52 @@ test.describe("Workout Actions Overflow", () => {
     expect(discardBox!.x + discardBox!.width).toBeLessThanOrEqual(
       headerBox!.x + headerBox!.width + 1
     );
+  });
+});
+
+/**
+ * Regression guard for the coach-mark overflow that failed on Mobile Chrome
+ * only (issue #1084).
+ *
+ * An absolutely-positioned bubble placed past the right edge widens the
+ * document. Chrome then grows the layout viewport away from the visual
+ * viewport, so the page can be panned sideways and every coordinate-based
+ * click lands somewhere other than where the page paints its target — which is
+ * how this surfaced: Playwright reporting "element is visible, enabled and
+ * stable" and then hitting a sibling. The invariant is asserted directly
+ * because the symptom is several steps removed from the cause.
+ */
+test.describe("Viewport containment", () => {
+  test.use({ viewport: { width: PIXEL_5_WIDTH_PX, height: 727 } });
+
+  test("should not scroll horizontally while a coach mark is anchored", async ({
+    page,
+  }) => {
+    await seedEmptyWorkout(page, buildCoachMarkWorkout());
+
+    const stepCards = page.locator('[data-testid="step-card"]');
+    await expect(stepCards.first()).toBeVisible({ timeout: 10000 });
+
+    // Two selected steps is the precondition that fires the create-block mark.
+    for (const index of [1, 2]) {
+      await stepCards.nth(index).evaluate((el) => {
+        el.dispatchEvent(
+          new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+            ctrlKey: true,
+          })
+        );
+      });
+    }
+    await expect(page.getByTestId("coach-mark-create-block")).toBeVisible({
+      timeout: 10000,
+    });
+
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
   });
 });

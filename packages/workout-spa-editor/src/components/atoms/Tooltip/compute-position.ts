@@ -4,6 +4,31 @@ export type Align = "start" | "center" | "end";
 
 const SIDE_OFFSET = 5;
 
+/** Gap kept between a clamped bubble and the edge of the screen. */
+const VIEWPORT_MARGIN = 8;
+
+/**
+ * Keeps the bubble inside the viewport horizontally.
+ *
+ * Without this, `side: "right"` on a narrow screen places the bubble past the
+ * right edge. That widens the document, and a document wider than the screen
+ * makes Chrome grow the layout viewport away from the visual viewport, so the
+ * page can be panned sideways and every coordinate the page reports is offset
+ * from the coordinate the browser hit-tests.
+ *
+ * Measured against `documentElement.clientWidth`, not `window.innerWidth`:
+ * once the layout viewport has grown, `innerWidth` reports the grown value and
+ * would keep re-admitting the overflow that caused it. `clientWidth` stays at
+ * the real screen width.
+ */
+const clampLeft = (left: number, width: number): number => {
+  if (typeof document === "undefined") return left;
+  const viewport = document.documentElement.clientWidth || window.innerWidth;
+  const max = viewport - width - VIEWPORT_MARGIN;
+  if (max <= VIEWPORT_MARGIN) return VIEWPORT_MARGIN;
+  return Math.min(Math.max(left, VIEWPORT_MARGIN), max);
+};
+
 export const computeTooltipPosition = (
   triggerRect: DOMRect,
   tooltipRect: DOMRect,
@@ -30,5 +55,8 @@ export const computeTooltipPosition = (
     else if (align === "end") top = triggerRect.bottom - tooltipRect.height;
     else top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
   }
-  return { top: top + window.scrollY, left: left + window.scrollX };
+  return {
+    top: top + window.scrollY,
+    left: clampLeft(left, tooltipRect.width) + window.scrollX,
+  };
 };
