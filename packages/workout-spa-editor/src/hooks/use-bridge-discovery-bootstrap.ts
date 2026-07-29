@@ -9,9 +9,14 @@
 import { useEffect } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
+import { markDiscoveryStarted } from "./discovery-clock";
 
 export const useBridgeDiscoveryBootstrap = () => {
   useEffect(() => {
+    // Stamped here rather than inside the singleton because this is the point
+    // at which listening actually begins for this boot; surfaces that count
+    // detected bridges measure their grace window from it.
+    markDiscoveryStarted();
     bridgeDiscovery.start();
     return () => {
       bridgeDiscovery.stop();

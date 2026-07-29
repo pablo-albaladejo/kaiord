@@ -19,7 +19,9 @@ export type ExtensionResponse = {
   delivered?: boolean;
 };
 
-const PING_TIMEOUT_MS = 3_000;
+/** Exported so callers can derive how long an announcement's verification
+    ping may take before it can be treated as never arriving. */
+export const PING_TIMEOUT_MS = 3_000;
 
 export const sendBridgeMessage = (
   extensionId: string,
