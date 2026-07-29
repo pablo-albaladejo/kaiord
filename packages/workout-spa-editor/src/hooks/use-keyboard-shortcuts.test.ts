@@ -60,51 +60,21 @@ describe("useKeyboardShortcuts", () => {
   });
 
   describe("redo shortcut", () => {
-    it("should call onRedo when Ctrl+Y is pressed", () => {
+    it.each([
+      { label: "Ctrl+Y", init: { key: "y", ctrlKey: true } },
+      {
+        label: "Ctrl+Shift+Z",
+        init: { key: "z", ctrlKey: true, shiftKey: true },
+      },
+      {
+        label: "Cmd+Shift+Z",
+        init: { key: "z", metaKey: true, shiftKey: true },
+      },
+    ])("should call onRedo when $label is pressed", ({ init }) => {
       // Arrange
       const onRedo = vi.fn();
       renderHook(() => useKeyboardShortcuts({ onRedo }));
-      const event = new KeyboardEvent("keydown", {
-        key: "y",
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onRedo).toHaveBeenCalledOnce();
-    });
-
-    it("should call onRedo when Ctrl+Shift+Z is pressed", () => {
-      // Arrange
-      const onRedo = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onRedo }));
-      const event = new KeyboardEvent("keydown", {
-        key: "z",
-        ctrlKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onRedo).toHaveBeenCalledOnce();
-    });
-
-    it("should call onRedo when Cmd+Shift+Z is pressed", () => {
-      // Arrange
-      const onRedo = vi.fn();
-      renderHook(() => useKeyboardShortcuts({ onRedo }));
-      const event = new KeyboardEvent("keydown", {
-        key: "z",
-        metaKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true });
 
       // Act
       window.dispatchEvent(event);
@@ -691,42 +661,6 @@ describe("useKeyboardShortcuts", () => {
 
       // Assert
       expect(onSelectAll).not.toHaveBeenCalled();
-    });
-
-    it("should still call onUngroupBlock when Cmd+Shift+G is pressed", () => {
-      // Arrange
-      const onUngroupBlock = vi.fn().mockReturnValue(true);
-      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
-      const event = new KeyboardEvent("keydown", {
-        key: "g",
-        metaKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onUngroupBlock).toHaveBeenCalledOnce();
-    });
-
-    it("should still call onRedo when Cmd+Shift+Z is pressed", () => {
-      // Arrange
-      const onRedo = vi.fn().mockReturnValue(true);
-      renderHook(() => useKeyboardShortcuts({ onRedo }));
-      const event = new KeyboardEvent("keydown", {
-        key: "z",
-        metaKey: true,
-        shiftKey: true,
-        bubbles: true,
-      });
-
-      // Act
-      window.dispatchEvent(event);
-
-      // Assert
-      expect(onRedo).toHaveBeenCalledOnce();
     });
   });
 
