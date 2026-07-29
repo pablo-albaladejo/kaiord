@@ -68,13 +68,17 @@ export function CoachingSyncButton({
   }
 
   const title = routeInactive
-    ? `${label} · route inactive`
+    ? t("sync.routeInactiveTitle", { label })
     : buildSyncTooltip(label, loading, lastSyncedAt, tCommon, locale);
   return (
     <CoachingSyncIconButton
       loading={loading}
       reducedMotion={reducedMotion}
-      ariaLabel={routeInactive ? `${label} — route inactive` : `Sync ${label}`}
+      ariaLabel={
+        routeInactive
+          ? t("sync.routeInactiveAria", { label })
+          : t("sync.syncAria", { label })
+      }
       title={title}
       routeInactive={routeInactive}
       onSync={onSync}
