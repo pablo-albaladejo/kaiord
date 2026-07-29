@@ -10,8 +10,7 @@
     "action": "Action",
     "tryAgain": "Try Again",
     "dismiss": "Dismiss",
-    "back": "Back",
-    "help": "Help"
+    "back": "Back"
   },
   "status": {
     "connected": "Connected",
@@ -27,13 +26,8 @@
     "loadingPage": "Loading page",
     "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
-    "openHelp": "Open help",
     "openAthleteProfile": "Open athlete profile (active profile: {{name}})",
     "openAthleteProfileEmpty": "Open athlete profile (no active profile)"
-  },
-  "help": {
-    "documentation": "Help & Documentation",
-    "hint": "Help (?)"
   },
   "bridge": {
     "garmin": "Garmin: {{label}}",

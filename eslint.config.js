@@ -541,5 +541,90 @@ export default tseslint.config(
     // row markers). The rule is disabled here per spec §AC-3.
     files: ["packages/workout-spa-editor/src/adapters/dexie/**"],
     rules: { "local/no-narrative-comments": "off" },
+  },
+  {
+    /**
+     * Bridge extensions are plain JS running in an MV3 service worker or a
+     * content script, so nothing here declares the ambient names the browser
+     * and the extension API provide. Without them every file is wall-to-wall
+     * `no-undef` and eslint is useless on the one package family that ships
+     * to users as unbundled source. The list is explicit rather than pulled
+     * from a globals preset: it doubles as the documented surface a bridge
+     * is allowed to reach for.
+     */
+    files: [
+      "packages/*-bridge/**/*.js",
+      "packages/_shared/bridge-core/**/*.js",
+    ],
+    rules: {
+      // Bridges ship unbundled, so their CJS interop is deliberate: each file
+      // ends with a guarded `module.exports` and falls back to `require` when
+      // `importScripts` is unavailable, which is how vitest loads the very
+      // same flat file Chrome loads.
+      "@typescript-eslint/no-require-imports": "off",
+    },
+    languageOptions: {
+      globals: {
+        require: "readonly",
+        chrome: "readonly",
+        importScripts: "readonly",
+        self: "readonly",
+        window: "readonly",
+        document: "readonly",
+        localStorage: "readonly",
+        console: "readonly",
+        fetch: "readonly",
+        Request: "readonly",
+        Headers: "readonly",
+        FormData: "readonly",
+        Blob: "readonly",
+        AbortController: "readonly",
+        XMLHttpRequest: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        TextEncoder: "readonly",
+        crypto: "readonly",
+        atob: "readonly",
+        btoa: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        // Bridge source files end with a guarded
+        // `if (typeof module !== "undefined") module.exports = …` so their
+        // pure helpers can be required by the vitest suites. Chrome never
+        // defines it; the guard is what makes that safe.
+        module: "writable",
+      },
+    },
+  },
+  {
+    // Bridge test suites additionally run under vitest on Node, and reach the
+    // chrome-mock helpers the suites install on globalThis. The whole `test/`
+    // directory is covered, not just `*.test.js`: the shared `chrome-mock.js`
+    // is a sibling helper, not a suite.
+    files: [
+      "packages/*-bridge/test/**/*.js",
+      "packages/_shared/bridge-core/test/**/*.js",
+    ],
+    rules: {
+      // These suites are CommonJS by design — the bridges ship unbundled and
+      // their tests load the same flat files Chrome loads.
+      "@typescript-eslint/no-require-imports": "off",
+    },
+    languageOptions: {
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        expect: "readonly",
+        vi: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        require: "readonly",
+        module: "writable",
+        Buffer: "readonly",
+        __dirname: "readonly",
+        __resetChromeMock: "readonly",
+        __chromeLocalStore: "readonly",
+      },
+    },
   }
 );

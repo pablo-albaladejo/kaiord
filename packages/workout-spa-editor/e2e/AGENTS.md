@@ -12,7 +12,6 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 ### Configuration
 
 - `../playwright.config.ts` — base URL, 5 projects (Chromium / Firefox / WebKit / Mobile Chrome / Mobile Safari), webServer wiring (`pnpm dev`), 60s test timeout, 10s action/expect timeout, retries=2 in CI.
-- `test-setup.ts` — Playwright-level setup hook.
 - `README.md` — historical inventory of specs and run commands.
 
 ### Spec files (one per flow)

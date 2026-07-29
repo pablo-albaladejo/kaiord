@@ -13,6 +13,12 @@ export type SettingsValueKey =
   | "language"
   | "notifications";
 
+/**
+ * Identifies a row that runs something instead of navigating. Resolved by
+ * `useSettingsRowActions`; mutually exclusive with `to` and `href`.
+ */
+export type SettingsActionKey = "replayCoachMarks";
+
 export type SettingsRowDef = {
   icon: IconName;
   /** Stable identity: i18n key under `settings.rows.*`, React key, and testid. */
@@ -21,6 +27,8 @@ export type SettingsRowDef = {
   to?: string;
   /** External destination opened in a new tab; mutually exclusive with `to`. */
   href?: string;
+  /** In-place action; mutually exclusive with `to` and `href`. */
+  action?: SettingsActionKey;
   valueKey?: SettingsValueKey;
 };
 

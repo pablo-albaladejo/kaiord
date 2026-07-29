@@ -215,7 +215,7 @@ describe("undoDelete + undo/redo preserve item ids", () => {
     expect(deleted).toHaveLength(1);
     const [deletedEntry] = deleted;
     if (!deletedEntry) throw new Error("Expected one deleted step");
-    useWorkoutStore.getState().undoDelete(deletedEntry.timestamp);
+    useWorkoutStore.getState().undoDelete(deletedEntry.groupId);
 
     // Act
     const restoredIds = innerSteps().map((s) => (s as { id: string }).id);

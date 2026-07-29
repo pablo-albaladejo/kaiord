@@ -8,11 +8,20 @@
 Private (unpublished) Chrome extension bridging the SPA editor to WHOOP
 health data (recovery, sleep, HRV, vitals, strain, heart-rate series,
 workouts, stress, Advanced Labs). Plain-JS MV3 extension using **session
-piggyback**: a MAIN-world content script intercepts the WHOOP web app's own
-authenticated fetches to capture the session bearer; the background service
-worker then relays allowlisted `api.prod.whoop.com` reads with it. There is
-no OAuth flow and no stored credentials. Announces itself to the SPA via the
-vendored bridge-core announce script.
+piggyback**. The session bearer is captured through THREE paths, all three
+of which must stay disclosed in `privacy-justification.md`, `README.md`, and
+`packages/docs/legal/privacy-policy.md`:
+
+1. `inject-main.js` — MAIN-world wrap of `fetch`/`XHR` reading the
+   `Authorization` header off the WHOOP app's own requests (in flight);
+2. `background.js` — `chrome.webRequest.onBeforeSendHeaders` on
+   `api.prod.whoop.com`, read-only, no `webRequestBlocking` (in flight);
+3. `content.js` `scanCognitoStorage()` — the Cognito access token in
+   `app.whoop.com` `localStorage`, read on every page load (**at rest**).
+
+The background then relays allowlisted `api.prod.whoop.com` reads with the
+bearer. There is no OAuth flow and no stored long-lived credential.
+Announces itself to the SPA via the vendored bridge-core announce script.
 
 ## Key Files
 
@@ -49,4 +58,10 @@ edit the master and run `pnpm bridge:sync` (guard:
   publish pipeline (`cws-publish.yml`) — unpublished.
 - Covered by the privacy-surface guard
   (`scripts/check-bridge-privacy-surface.mjs`) including prod-manifest
-  sections, and by the icon pipeline + distinctness guard.
+  sections AND the `ALLOWED_PREFIXES` read allowlist, and by the icon
+  pipeline + distinctness guard. Widening `ALLOWED_PREFIXES` requires a
+  deliberate refresh of `scripts/fixtures/bridge-privacy-surface.json`.
+- `webRequest` is a credential-access permission under
+  `packages/docs/scripts/check-privacy-policy.mjs`; whoop passes only via
+  the written exemption in `CREDENTIAL_PERMISSION_EXEMPTIONS` there. Adding
+  another such permission means adding an exemption AND a policy disclosure.

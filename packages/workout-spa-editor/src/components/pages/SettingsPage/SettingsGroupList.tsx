@@ -2,6 +2,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { SectionHead } from "../../molecules/SectionHead/SectionHead";
 import { SETTINGS_GROUPS, SETTINGS_VERSION_LABEL } from "./settings-groups";
 import { SettingsRow } from "./SettingsRow";
+import { useSettingsRowActions } from "./use-settings-row-actions";
 import { useSettingsRowValues } from "./use-settings-row-values";
 
 type SettingsGroupListProps = {
@@ -10,6 +11,7 @@ type SettingsGroupListProps = {
 
 export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
   const values = useSettingsRowValues();
+  const actions = useSettingsRowActions();
   const t = useTranslate("settings");
 
   return (
@@ -30,6 +32,9 @@ export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
                 to={row.to}
                 href={row.href}
                 onNavigate={row.to !== undefined ? onNavigate : undefined}
+                onActivate={
+                  row.action === undefined ? undefined : actions[row.action]
+                }
               />
             ))}
           </div>

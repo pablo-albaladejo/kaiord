@@ -33,5 +33,6 @@ export type WorkoutState = {
     step: UIWorkoutItem;
     index: number;
     timestamp: number;
+    groupId: string;
   }>;
 };

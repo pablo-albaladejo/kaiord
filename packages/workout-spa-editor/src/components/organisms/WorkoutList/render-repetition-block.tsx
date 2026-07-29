@@ -36,6 +36,21 @@ const createHandlers = (
   };
 };
 
+/**
+ * Steps inside a block are addressed by their position *within the
+ * block*, so their trash affordance must go to the block-scoped store
+ * action. Falling back to the main-list `onStepDelete` would hand a
+ * block-local index to an action that resolves it against the top-level
+ * step list, deleting an unrelated step.
+ */
+const createDeleteStepHandler = (
+  blockId: string | undefined,
+  onDeleteStepInBlock?: (blockId: string, stepIndex: number) => void
+) => {
+  if (!blockId || !onDeleteStepInBlock) return undefined;
+  return (stepIndex: number) => onDeleteStepInBlock(blockId, stepIndex);
+};
+
 export const renderRepetitionBlock = (props: RenderRepetitionBlockProps) => {
   const handlers = createHandlers(
     props.item.id,
@@ -57,7 +72,10 @@ export const renderRepetitionBlock = (props: RenderRepetitionBlockProps) => {
       onStepSelect={props.onStepSelect}
       onBlockSelect={props.onBlockSelect}
       onToggleStepSelection={props.onToggleStepSelection}
-      onStepDelete={props.onStepDelete}
+      onStepDelete={createDeleteStepHandler(
+        props.item.id,
+        props.onDeleteStepInRepetitionBlock
+      )}
       generateStepId={props.generateStepId}
       parentBlockIndex={props.index}
       {...handlers}
