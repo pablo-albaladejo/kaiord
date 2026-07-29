@@ -6,13 +6,13 @@ import {
   useCreateEmptyRepetitionBlock,
   useCreateRepetitionBlock,
   useCurrentWorkout,
-  useDeleteStepInRepetitionBlock,
   useDuplicateStepInRepetitionBlock,
   useEditRepetitionBlock,
   useOpenCreateBlockDialog,
   useSelectedStepIds,
   useUngroupRepetitionBlock,
 } from "../../../store/selectors";
+import { useDeleteStepInRepetitionBlock } from "../../../store/selectors/repetition-block-selectors";
 import type { Workout } from "../../../types/krd";
 import {
   buildHandleConfirmCreateBlock,
