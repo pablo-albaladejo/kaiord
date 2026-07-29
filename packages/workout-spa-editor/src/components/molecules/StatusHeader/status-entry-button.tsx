@@ -1,10 +1,11 @@
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
+import { BAR_WRAPPER_CLASS } from "./header-menu-styles";
 import type { EntryDef } from "./status-entry-defs";
 
 /** Accent treatment for the active header entry, merged through the Button
     atom's existing `className` join (the atom is left untouched). */
-const ACTIVE_ENTRY_CLASS = "text-sky-500 dark:text-sky-400";
+const ACTIVE_ENTRY_CLASS = "text-accent";
 
 type EntryButtonProps = {
   entry: EntryDef;
@@ -30,11 +31,7 @@ export function EntryButton({ entry, active, onClick }: EntryButtonProps) {
       </span>
     </Button>
   );
-  if (!entry.mobileHidden) return button;
-  // Wrapped (instead of passed into the Button's own className) because
-  // the Button atom's `baseClasses` hardcodes `inline-flex` — combined on
-  // the same element, `hidden` and `inline-flex` are equal-specificity
-  // utilities and whichever Tailwind happens to emit last wins, which is
-  // NOT reliably `hidden`. A plain wrapper has no competing display class.
-  return <span className="hidden md:inline-flex">{button}</span>;
+  const wrapper = BAR_WRAPPER_CLASS[entry.barVisibility];
+  if (wrapper === null) return button;
+  return <span className={wrapper}>{button}</span>;
 }

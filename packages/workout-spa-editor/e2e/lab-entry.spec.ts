@@ -10,6 +10,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { gotoNavDestination } from "./helpers/nav";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const PROFILE_ID = "labs-e2e-profile";
@@ -192,8 +193,9 @@ test.describe("Lab analytics entry (DoD-1)", () => {
     await gotoLabEntry(page);
     await page.goto("/calendar");
 
-    // Act
-    await page.getByTestId("status-header-labs-button").click();
+    // Act — Labs is nested under Trends, so which chrome carries it depends
+    // on the viewport: the Trends dropdown at `lg`, the More menu below it.
+    await gotoNavDestination(page, "labs");
 
     // Assert
     await expect(page).toHaveURL(/\/health\/labs$/);

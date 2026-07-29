@@ -47,5 +47,10 @@
     "daysAgo_one": "hace {{count}} día",
     "daysAgo_other": "hace {{count}} días",
     "since": "desde el {{date}}"
+  },
+  "sourceHealth": {
+    "noNewDataSince": "Sin datos nuevos desde {{date}}",
+    "signedOut": "Sesión cerrada: vuelve a iniciar sesión para reanudar",
+    "extensionOutdated": "Una extensión está desactualizada: actualízala para reanudar"
   }
 }

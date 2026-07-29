@@ -5,7 +5,7 @@
 
 ## Purpose
 
-The single top-level layout used by every route. Sticky header with logo + theme toggle + onboarding-replay trigger, then a max-width content container for the route. See `README.md` (in this directory) for the visual structure and responsive breakpoints.
+The single top-level layout used by every route. Sticky header with logo + one nav row (`StatusHeader`), then a max-width content container for the route. The theme toggle and the onboarding-replay trigger are no longer here: the toggle moved into the header's avatar menu with the rest of the account-level chrome, and the tutorial was retired. See `README.md` (in this directory) for the visual structure and responsive breakpoints.
 
 ## Key Files
 
@@ -35,7 +35,7 @@ The single top-level layout used by every route. Sticky header with logo + theme
 
 ### Internal
 
-- `../../atoms/ThemeToggle`.
+- `../../molecules/StatusHeader` (the nav row; owns the avatar menu, which is where `atoms/ThemeToggle` now renders).
 - `../../../contexts/ThemeContext`.
 
 <!-- MANUAL: -->

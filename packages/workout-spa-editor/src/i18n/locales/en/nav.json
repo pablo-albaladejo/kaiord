@@ -9,6 +9,15 @@
   "chat": "Chat",
   "new": "New workout",
   "settings": "Settings",
+  "connections": "Connections",
+  "more": "More",
+  "helpDocs": "Help & docs",
+  "localAccount": "Local account",
+  "alert": {
+    "title_one": "{{count}} source down",
+    "title_other": "{{count}} sources down",
+    "viewAll": "All connections"
+  },
   "aria": {
     "daily": "Go to daily",
     "calendar": "Go to calendar",
@@ -18,6 +27,10 @@
     "trends": "Open wellness trends",
     "labs": "Open lab analytics",
     "chat": "Open chat assistant",
-    "settings": "Open settings"
+    "settings": "Open settings",
+    "connections": "Open connections",
+    "more": "More destinations",
+    "account": "Account menu ({{name}})",
+    "accountEmpty": "Account menu (no active profile)"
   }
 }

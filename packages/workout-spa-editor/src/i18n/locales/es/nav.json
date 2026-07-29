@@ -9,6 +9,15 @@
   "chat": "Chat",
   "new": "Nuevo entreno",
   "settings": "Ajustes",
+  "connections": "Conexiones",
+  "more": "Más",
+  "helpDocs": "Ayuda y documentación",
+  "localAccount": "Cuenta local",
+  "alert": {
+    "title_one": "{{count}} fuente caída",
+    "title_other": "{{count}} fuentes caídas",
+    "viewAll": "Todas las conexiones"
+  },
   "aria": {
     "daily": "Ir a diario",
     "calendar": "Ir a calendario",
@@ -18,6 +27,10 @@
     "trends": "Abrir tendencias de bienestar",
     "labs": "Abrir analíticas de laboratorio",
     "chat": "Abrir asistente de chat",
-    "settings": "Abrir ajustes"
+    "settings": "Abrir ajustes",
+    "connections": "Abrir conexiones",
+    "more": "Más destinos",
+    "account": "Menú de cuenta ({{name}})",
+    "accountEmpty": "Menú de cuenta (sin perfil activo)"
   }
 }

@@ -1,15 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { ConnectionSource } from "../../../application/connections/connection-source";
-import type { BridgeConnectionState } from "../../../hooks/use-bridge-connections";
-import { getTranslate } from "../../../i18n/use-translate";
+import type { ConnectionSource } from "./connection-source";
 import {
-  buildAttention,
+  buildConnectionAttention,
   countDetected,
   needsAttention,
-} from "./connection-attention";
-
-const t = getTranslate("settings");
+} from "./source-attention";
 
 const source = (
   overrides: Partial<ConnectionSource> = {}
@@ -28,21 +24,6 @@ const source = (
   lastSyncAt: undefined,
   importTypes: [],
   exportTypes: [],
-  ...overrides,
-});
-
-const connection = (
-  overrides: Partial<BridgeConnectionState> = {}
-): BridgeConnectionState => ({
-  bridgeId: "garmin-bridge",
-  discovered: true,
-  sessionActive: true,
-  checking: false,
-  error: null,
-  needsReauth: false,
-  outdated: false,
-  lastCheckedAt: 1_700_000_000_000,
-  lastSyncAt: undefined,
   ...overrides,
 });
 
@@ -71,7 +52,8 @@ describe("needsAttention", () => {
     { status: "installed" as const },
     // Probed, but its first answer has not arrived: not knowing is not broken.
     { status: "checking" as const },
-    // Unlinked, or its extension is not running.
+    // Unlinked, or its extension is not running — and, before the first
+    // discovery pass, every bridge in the app.
     { status: "available" as const },
     { status: "connected" as const },
     { status: "manual" as const },
@@ -91,9 +73,9 @@ describe("countDetected", () => {
   it("should count discovered bridges regardless of their session", () => {
     // Arrange
     const connections = [
-      connection({ bridgeId: "garmin-bridge" }),
-      connection({ bridgeId: "tanita-bridge", sessionActive: false }),
-      connection({ bridgeId: "whoop-bridge", discovered: false }),
+      { discovered: true },
+      { discovered: true },
+      { discovered: false },
     ];
 
     // Act
@@ -104,7 +86,7 @@ describe("countDetected", () => {
   });
 });
 
-describe("buildAttention", () => {
+describe("buildConnectionAttention", () => {
   it("should build no model when nothing needs attention", () => {
     // Arrange
     const sources = [
@@ -113,35 +95,25 @@ describe("buildAttention", () => {
     ];
 
     // Act
-    const attention = buildAttention(sources, t);
+    const attention = buildConnectionAttention(sources);
 
     // Assert
     expect(attention).toBeNull();
   });
 
-  it("should name the affected count in the singular", () => {
-    // Arrange
-    const sources = [source({ status: "attention" }), source({ id: "whoop" })];
-
-    // Act
-    const attention = buildAttention(sources, t);
-
-    // Assert
-    expect(attention?.title).toBe("1 connection needs attention");
-  });
-
-  it("should name the affected count in the plural", () => {
+  it("should count only the affected sources", () => {
     // Arrange
     const sources = [
       source({ status: "attention" }),
       source({ id: "whoop", status: "attention" }),
+      source({ id: "train2go" }),
     ];
 
     // Act
-    const attention = buildAttention(sources, t);
+    const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.title).toBe("2 connections need attention");
+    expect(attention?.count).toBe(2);
   });
 
   it("should date the consequence from the last data that arrived", () => {
@@ -149,13 +121,16 @@ describe("buildAttention", () => {
     const sources = [source({ status: "attention", lastSyncAt: LAST_SYNC_AT })];
 
     // Act
-    const attention = buildAttention(sources, t);
+    const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.detail).toBe("No new data since 2026-07-25");
+    expect(attention?.cause).toEqual({
+      kind: "noNewDataSince",
+      date: "2026-07-25",
+    });
   });
 
-  it("should keep the sign-in instruction when a last-sync date also exists", () => {
+  it("should keep the sign-in cause when a last-sync date also exists", () => {
     // Arrange
     // The ordinary case: you only get a re-auth demand for an account you
     // were already syncing, so both facts are present and the actionable one
@@ -170,15 +145,13 @@ describe("buildAttention", () => {
     ];
 
     // Act
-    const attention = buildAttention(sources, t);
+    const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.detail).toBe(
-      "Session signed out — sign in again to resume"
-    );
+    expect(attention?.cause).toEqual({ kind: "signedOut" });
   });
 
-  it("should tell an outdated extension to update instead of blaming the session", () => {
+  it("should report an outdated extension instead of blaming the session", () => {
     // Arrange
     // The probe SUCCEEDED here — the extension answered with an unsupported
     // protocol version — and signing in again would fix nothing.
@@ -187,15 +160,13 @@ describe("buildAttention", () => {
     ];
 
     // Act
-    const attention = buildAttention(sources, t);
+    const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.detail).toBe(
-      "An extension is out of date — update it to resume"
-    );
+    expect(attention?.cause).toEqual({ kind: "extensionOutdated" });
   });
 
-  it("should fall back to the signed-out line for several affected sources", () => {
+  it("should fall back to the signed-out cause for several affected sources", () => {
     // Arrange
     const sources = [
       source({ status: "attention", lastSyncAt: LAST_SYNC_AT }),
@@ -203,12 +174,10 @@ describe("buildAttention", () => {
     ];
 
     // Act
-    const attention = buildAttention(sources, t);
+    const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.detail).toBe(
-      "Session signed out — sign in again to resume"
-    );
+    expect(attention?.cause).toEqual({ kind: "signedOut" });
   });
 
   it("should ignore a stored timestamp that does not parse as a date", () => {
@@ -216,24 +185,9 @@ describe("buildAttention", () => {
     const sources = [source({ status: "attention", lastSyncAt: "not-a-date" })];
 
     // Act
-    const attention = buildAttention(sources, t);
+    const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.detail).toBe(
-      "Session signed out — sign in again to resume"
-    );
-  });
-
-  it("should declare no action, leaving the adjacent row to lead the way", () => {
-    // Arrange
-    // The banner renders only on the index, directly above the row that opens
-    // the Connections section, so a button would duplicate its neighbour.
-    const sources = [source({ status: "attention" })];
-
-    // Act
-    const attention = buildAttention(sources, t);
-
-    // Assert
-    expect(attention?.action).toBeUndefined();
+    expect(attention?.cause).toEqual({ kind: "signedOut" });
   });
 });
