@@ -22,12 +22,6 @@ test.describe("Delete with Undo Flow", () => {
     // Wait for the page to be fully loaded
     await page.waitForLoadState("networkidle");
 
-    // Close the tutorial modal if it appears
-    const skipButton = page.getByRole("button", { name: /skip tutorial/i });
-    if (await skipButton.isVisible()) {
-      await skipButton.click();
-    }
-
     // Load a test workout with multiple steps
     await seedEmptyWorkout(page);
     const fileInput = page.locator('input[type="file"]');

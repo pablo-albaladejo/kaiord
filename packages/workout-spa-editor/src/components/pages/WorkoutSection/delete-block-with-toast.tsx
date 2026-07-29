@@ -14,7 +14,7 @@ export function executeDeleteWithToast(
   blockId: string,
   deleteAction: (blockId: string) => void,
   toast: ReturnType<typeof useToastContext>["toast"],
-  undoDelete: (timestamp: number) => void,
+  undoDelete: (groupId: string) => void,
   t: Translate = getTranslate("editor")
 ) {
   deleteAction(blockId);
@@ -28,7 +28,7 @@ export function executeDeleteWithToast(
         duration: UNDO_DELETE_WINDOW_MS,
         action: (
           <button
-            onClick={() => undoDelete(mostRecentDelete.timestamp)}
+            onClick={() => undoDelete(mostRecentDelete.groupId)}
             className="px-3 py-1 text-sm font-medium rounded-md bg-white/10 hover:bg-white/20 transition-colors"
             data-testid="undo-delete-block-button"
           >

@@ -8,6 +8,7 @@ import type { KRD, Workout } from "../../../types/krd";
 import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
 import { WorkoutPreview } from "../../molecules/WorkoutPreview";
+import { CoachMarkHost } from "../../organisms/CoachMark/CoachMarkHost";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import { useWorkoutSectionFocus } from "./use-workout-section-focus";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
@@ -81,6 +82,8 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
         isOpen={state.showCreateBlockDialog}
       />
       <StoreConfirmationModal />
+      {/* Inside `FocusRegistryProvider` — the mark anchors by item id. */}
+      <CoachMarkHost />
     </div>
   );
 }

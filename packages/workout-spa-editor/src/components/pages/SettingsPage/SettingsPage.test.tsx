@@ -285,11 +285,14 @@ describe("SettingsPage", () => {
 
       // Assert
       const rail = screen.getByTestId("settings-section-rail");
-      expect(rail.querySelectorAll("button")).toHaveLength(sections.length);
+      // Anchors, not buttons: these navigate to URLs and expose
+      // `aria-current="page"`, so they must keep native link behaviour and
+      // must not be announced as buttons.
+      expect(rail.querySelectorAll("a[href]")).toHaveLength(sections.length);
       for (const id of sections) {
-        expect(
-          screen.getByTestId(`settings-section-${id}`)
-        ).toBeInTheDocument();
+        const entry = screen.getByTestId(`settings-section-${id}`);
+        expect(entry).toBeInTheDocument();
+        expect(entry).toHaveAttribute("href", `/settings/${id}`);
       }
     });
 

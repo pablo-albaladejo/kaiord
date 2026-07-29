@@ -22,8 +22,10 @@ export const createBasicMethods = (
   createStep: () => set((state) => actions.createStep(state)),
   deleteStep: (stepIndex: number) =>
     set((state) => actions.deleteStep(stepIndex, state)),
-  undoDelete: (timestamp: number) =>
-    set((state) => actions.undoDelete(timestamp, state)),
+  deleteSteps: (stepIndices: ReadonlyArray<number>) =>
+    set((state) => actions.deleteSteps(stepIndices, state)),
+  undoDelete: (groupId: string) =>
+    set((state) => actions.undoDelete(groupId, state)),
   clearExpiredDeletes: () => set((state) => actions.clearExpiredDeletes(state)),
   duplicateStep: (stepIndex: number) =>
     set((state) => actions.duplicateStep(stepIndex, state)),

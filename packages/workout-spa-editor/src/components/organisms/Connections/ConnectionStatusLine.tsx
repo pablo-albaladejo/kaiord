@@ -1,4 +1,5 @@
 import type { ConnectionSource } from "../../../application/connections/connection-source";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { formatRelativeTime } from "../../../utils/format-relative-time";
 import { STATUS_DOT, STATUS_TEXT } from "./connection-card-copy";
@@ -13,16 +14,23 @@ type Props = { source: ConnectionSource };
  */
 export function ConnectionStatusLine({ source }: Props) {
   const t = useTranslate("connections");
+  const tCommon = useTranslate("common");
+  const locale = useActiveLocale();
   // Shown for `attention` too: "no new data since X" is most useful exactly
   // when a source is broken, and it is real state that survives a reload.
   const showSync =
     source.status === "connected" ||
     source.status === "installed" ||
     source.status === "attention";
-  const when =
+  // `formatRelativeTime` returns a translation key plus its params rather than
+  // a formatted string, so the wording follows the active locale instead of
+  // leaking English into a Spanish surface.
+  const relative =
     source.lastSyncAt === undefined
       ? undefined
-      : formatRelativeTime(new Date(source.lastSyncAt), new Date());
+      : formatRelativeTime(new Date(source.lastSyncAt), new Date(), locale);
+  const when =
+    relative === undefined ? undefined : tCommon(relative.key, relative.params);
 
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">

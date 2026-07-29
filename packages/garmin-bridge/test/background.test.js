@@ -10,7 +10,6 @@ const {
   checkSession,
   listActivities,
   fetchActivitiesWithBackoff,
-  pushBodyComposition,
   toUint8Array,
   logSwallowed,
   TELEMETRY_KEY,

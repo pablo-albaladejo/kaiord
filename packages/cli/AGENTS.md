@@ -155,6 +155,6 @@ Non-generated files beyond the AI agent's responsibility:
 
 - `README.md` — User documentation (command examples, config, installation)
 - `.kaiordrc.example.json` — Configuration file template
-- `tsup.config.ts`, `vitest.config.ts`, `tsconfig.json` — Build and test config
+- `tsdown.config.ts`, `vitest.config.ts`, `tsconfig.json` — Build and test config
 - `package.json` — npm metadata and dependencies
 - `CHANGELOG.md` — Version history

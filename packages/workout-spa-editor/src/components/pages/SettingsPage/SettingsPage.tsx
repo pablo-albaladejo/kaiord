@@ -66,7 +66,7 @@ export default function SettingsPage() {
         <SettingsGroupList onNavigate={navigate} />
       ) : (
         <div className={SPLIT_CLASS}>
-          <SettingsSectionRail activeSection={open} onNavigate={navigate} />
+          <SettingsSectionRail activeSection={open} />
           <div
             id={`settings-panel-${open}`}
             className="min-w-0"

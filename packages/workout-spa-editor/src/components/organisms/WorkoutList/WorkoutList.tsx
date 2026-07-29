@@ -47,6 +47,7 @@ export const WorkoutList = (props: WorkoutListProps) => {
             onDuplicateStepInRepetitionBlock={
               props.onDuplicateStepInRepetitionBlock
             }
+            onDeleteStepInRepetitionBlock={props.onDeleteStepInRepetitionBlock}
             onEditRepetitionBlock={props.onEditRepetitionBlock}
             onAddStepToRepetitionBlock={props.onAddStepToRepetitionBlock}
             onUngroupRepetitionBlock={props.onUngroupRepetitionBlock}

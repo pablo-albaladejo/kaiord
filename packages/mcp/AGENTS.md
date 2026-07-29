@@ -28,7 +28,7 @@ on `@kaiord/core` plus format-adapter packages, and ships an executable
 - `src/index.ts` — public API barrel. Re-exports `createServer`,
   `createStderrLogger`, `formatSchema`/`FileFormat`, `formatError`/`formatSuccess`/
   `ToolResult`, `detectFormatFromPath`, `FORMAT_REGISTRY`.
-- `tsup.config.ts` — bundler config (dual build for library + bin).
+- `tsdown.config.ts` — bundler config (dual build for library + bin).
 - `vitest.config.ts` — test runner config.
 - `tsconfig.json` — TypeScript project config.
 

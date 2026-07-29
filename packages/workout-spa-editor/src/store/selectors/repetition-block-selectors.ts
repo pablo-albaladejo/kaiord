@@ -22,6 +22,9 @@ export const useAddStepToRepetitionBlock = () =>
 export const useDuplicateStepInRepetitionBlock = () =>
   useWorkoutStore((state) => state.duplicateStepInRepetitionBlock);
 
+export const useDeleteStepInRepetitionBlock = () =>
+  useWorkoutStore((state) => state.deleteStepInRepetitionBlock);
+
 export const useUngroupRepetitionBlock = () =>
   useWorkoutStore((state) => state.ungroupRepetitionBlock);
 

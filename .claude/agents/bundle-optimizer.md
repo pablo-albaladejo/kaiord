@@ -42,7 +42,7 @@ You optimize bundle output ONLY. You do not change functionality, add features, 
 
 For each oversized package:
 
-1. Check tsup/esbuild config for optimization gaps:
+1. Check tsdown/vite config for optimization gaps:
    - `treeshake: true` enabled?
    - `splitting: true` for code-splitting?
    - Unnecessary formats (CJS when only ESM needed)?
@@ -71,7 +71,7 @@ Apply optimizations in order of impact:
 3. **Enable tree-shaking in build config**
 
    ```typescript
-   // tsup.config.ts
+   // tsdown.config.ts
    treeshake: true,
    ```
 

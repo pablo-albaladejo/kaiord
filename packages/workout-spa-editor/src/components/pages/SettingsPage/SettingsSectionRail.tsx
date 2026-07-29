@@ -1,3 +1,5 @@
+import { Link } from "wouter";
+
 import { useTranslate } from "../../../i18n/use-translate";
 import type { SettingsTab } from "../../organisms/SettingsPanel/types";
 import { SETTINGS_TAB_ORDER } from "./settings-tab-views";
@@ -5,7 +7,6 @@ import { SettingsAttention } from "./SettingsAttention";
 
 export type SettingsSectionRailProps = {
   activeSection: SettingsTab;
-  onNavigate: (to: string) => void;
 };
 
 /* Desktop-only: below `md` the open section takes the whole surface and the
@@ -27,7 +28,6 @@ const ACTIVE_ENTRY_CLASS = `${ENTRY_CLASS} bg-primary-50 text-gray-900 dark:bg-p
  */
 export const SettingsSectionRail = ({
   activeSection,
-  onNavigate,
 }: SettingsSectionRailProps) => {
   const t = useTranslate("settings");
 
@@ -42,16 +42,15 @@ export const SettingsSectionRail = ({
         {SETTINGS_TAB_ORDER.map((section) => {
           const active = section === activeSection;
           return (
-            <button
+            <Link
               key={section}
-              type="button"
-              onClick={() => onNavigate(`/settings/${section}`)}
+              href={`/settings/${section}`}
               aria-current={active ? "page" : undefined}
               className={active ? ACTIVE_ENTRY_CLASS : ENTRY_CLASS}
               data-testid={`settings-section-${section}`}
             >
               {t(`tabs.${section}`)}
-            </button>
+            </Link>
           );
         })}
       </div>
