@@ -65,6 +65,16 @@
     "noUsableSource": "No usable source",
     "rankedUnavailableNote": "ranked to sources that are switched off — nothing is being read",
     "sourceLastSent": "{{name}} last sent data {{when}}",
+    "change": {
+      "open": "Change",
+      "close": "Done",
+      "title": "Where should Kaiord read {{type}} from?",
+      "unranked": "Right now Kaiord keeps every source's {{type}} and ranks none of them; when it needs a single value it uses whichever arrived last.",
+      "willRank": "Pick a source below and that changes: Kaiord will read {{type}} from the one you pick, and use the others only on days it has nothing. You can go back to keeping every source right here.",
+      "ranked": "Kaiord reads {{type}} from {{name}} first, and falls back to the others on days it has nothing.",
+      "stalled": "Nothing is being read for {{type}} — it is ranked to sources that are switched off. Pick one below, or go back to keeping every source.",
+      "keepAll": "Keep every source"
+    },
     "groups": {
       "training": "Training",
       "recovery": "Recovery",

@@ -65,6 +65,16 @@
     "noUsableSource": "Sin fuente utilizable",
     "rankedUnavailableNote": "prioriza fuentes que están apagadas: no se está leyendo nada",
     "sourceLastSent": "{{name}} envió datos por última vez {{when}}",
+    "change": {
+      "open": "Cambiar",
+      "close": "Hecho",
+      "title": "¿De dónde debería leer Kaiord {{type}}?",
+      "unranked": "Ahora mismo Kaiord guarda {{type}} de todas las fuentes y no prioriza ninguna; cuando necesita un solo valor usa el último que llegó.",
+      "willRank": "Si eliges una fuente abajo eso cambia: Kaiord leerá {{type}} de la que elijas y solo usará las demás los días en que no tenga nada. Puedes volver a guardarlas todas desde aquí mismo.",
+      "ranked": "Kaiord lee {{type}} de {{name}} primero y recurre a las demás los días en que no tenga nada.",
+      "stalled": "No se está leyendo nada de {{type}}: está priorizado a fuentes que están apagadas. Elige una abajo o vuelve a guardarlas todas.",
+      "keepAll": "Guardar todas las fuentes"
+    },
     "groups": {
       "training": "Entrenamiento",
       "recovery": "Recuperación",
