@@ -40,11 +40,14 @@ Privacy:
 - **Website**: https://kaiord.com
 - **Support URL**: https://github.com/pablo-albaladejo/kaiord/issues
 
-## Automated Publishing
+## Automated Publishing (not wired yet)
 
-After initial setup, updates are published automatically via GitHub Actions:
-
-1. Create a changeset: `pnpm exec changeset` (select `@kaiord/tanita-bridge`)
-2. Merge to main — changesets creates a "Version Packages" PR
-3. Merge the Version Packages PR — `cws-publish.yml` detects the version bump
-   and uploads to CWS
+`cws-publish.yml` currently only publishes `garmin-bridge` and
+`train2go-bridge`. This extension has no Chrome Web Store Developer
+Dashboard listing, extension ID, or publish secret yet, and is not in the
+workflow's matrix — see `openspec/specs/cws-auto-publish/spec.md`,
+Requirement "Onboarding a new bridge extension to automated publishing" for
+the registration steps a maintainer must complete first. Once those steps
+are done, a `package.json` version bump on `@kaiord/tanita-bridge` will be
+picked up by the same upload → publish → verify flow `garmin-bridge` and
+`train2go-bridge` already use.

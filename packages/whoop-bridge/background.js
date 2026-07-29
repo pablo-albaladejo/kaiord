@@ -7,8 +7,11 @@
  * and relays read requests to the content script inside the WHOOP tab so the
  * fetch carries that tab's origin. No OAuth, no developer app, no credentials.
  *
- * The token is never logged and never leaves the extension; session presence is
- * reported to callers as a boolean.
+ * The token is never logged and is never returned to the SPA; it leaves the
+ * extension only as the Authorization header of an allowlisted read back to
+ * WHOOP. getSessionStatus() does expose the decoded numeric user id and the
+ * capture timestamp alongside the boolean `connected` flag — all three are
+ * disclosed in privacy-justification.md and the published privacy policy.
  */
 
 const PROTOCOL_VERSION = 1;

@@ -49,6 +49,12 @@ const TRAININGPEAKS_MANIFEST = join(
   "trainingpeaks-bridge",
   "manifest.json"
 );
+const WHOOP_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "whoop-bridge",
+  "manifest.json"
+);
 
 // Hosts the policy claims each production extension may contact.
 const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
@@ -60,6 +66,10 @@ const GARMIN_ALLOWED_HOSTS = new Set([
 const TANITA_ALLOWED_HOSTS = new Set(["https://mytanita.eu/*"]);
 const TRAININGPEAKS_ALLOWED_HOSTS = new Set([
   "https://tpapi.trainingpeaks.com/*",
+]);
+const WHOOP_ALLOWED_HOSTS = new Set([
+  "https://api.prod.whoop.com/*",
+  "https://app.whoop.com/*",
 ]);
 // externally_connectable.matches entries allowed in each extension.
 // kaiord.com covers the production editor; localhost entries are the
@@ -77,17 +87,55 @@ const ALLOWED_ANNOUNCE_CONTENT_SCRIPT_MATCHES = new Set([
   "https://*.kaiord.com/*",
   "http://localhost/*",
 ]);
-// No extension may declare these: cookies (credential access),
-// webRequestBlocking / declarativeNetRequest* (request mutation).
+// No extension may declare these under any circumstance: they let the
+// extension mutate, redirect, or block the user's traffic, which the
+// policy claims none of them can do.
 const FORBIDDEN_PERMISSIONS = new Set([
-  "cookies",
   "webRequestBlocking",
   "declarativeNetRequest",
   "declarativeNetRequestWithHostAccess",
   "declarativeNetRequestFeedback",
 ]);
 
-// Each rule = human-readable label + regex that MUST match the file.
+// Permissions that grant direct read access to a credential the user never
+// handed to the extension. `cookies` exposes session cookie values;
+// `webRequest` + `extraHeaders` exposes Authorization headers, which is the
+// same class of access by a different mechanism — a guard that forbids the
+// first while silently permitting the second does not enforce its own
+// stated premise. Declaring one of these is a violation UNLESS the
+// extension appears in CREDENTIAL_PERMISSION_EXEMPTIONS below with a
+// written reason, so the exception is recorded and reviewable rather than
+// invisible.
+const CREDENTIAL_ACCESS_PERMISSIONS = new Set(["cookies", "webRequest"]);
+
+// extension name -> { permission -> why it is justified }.
+// Adding an entry here is a deliberate act that MUST be accompanied by a
+// matching disclosure in the extension's privacy-policy section.
+const CREDENTIAL_PERMISSION_EXEMPTIONS = {
+  "whoop-bridge": {
+    webRequest:
+      "read-only chrome.webRequest.onBeforeSendHeaders on api.prod.whoop.com; " +
+      "session-bearer capture path 2 of 3, disclosed in the policy's " +
+      "'Three Session-Bearer Capture Paths' bullet. No webRequestBlocking " +
+      "and no declarativeNetRequest*, so no request is ever modified.",
+  },
+};
+
+// Per-extension policy section headings. A rule carrying `section` is
+// matched ONLY against that section's body (heading line exclusive, up to
+// the next `## `), never against the whole document — otherwise the intro
+// sentence at the top of the policy, which names every extension, and the
+// shared Communication Scope section, which names every host, silently
+// satisfy rules that are supposed to be about the section itself. Deleting
+// a whole section must fail the lint; before this anchoring it did not.
+const GARMIN_SECTION = "Kaiord Garmin Bridge Extension";
+const TRAIN2GO_SECTION = "Kaiord Train2Go Bridge Extension";
+const TANITA_SECTION = "Kaiord Tanita Bridge Extension";
+const TRAININGPEAKS_SECTION = "Kaiord TrainingPeaks Bridge Extension";
+const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
+
+// Each rule = human-readable label + regex that MUST match, either the
+// whole file (no `section`) or one section's body (`section` set).
 const REQUIRED_RULES = [
   {
     label: "Last updated date in YYYY-MM-DD format",
@@ -102,48 +150,110 @@ const REQUIRED_RULES = [
     re: /(clear site data|delete it from the editor)/i,
   },
   {
-    label: "Garmin Bridge extension covered",
-    re: /Kaiord Garmin Bridge/i,
+    label: "Garmin Bridge extension covered (own section, non-empty)",
+    section: GARMIN_SECTION,
+    re: /\S/,
   },
   {
-    label: "Train2Go Bridge extension covered",
-    re: /Kaiord Train2Go Bridge/i,
+    label: "Train2Go Bridge extension covered (own section, non-empty)",
+    section: TRAIN2GO_SECTION,
+    re: /\S/,
   },
   {
-    label: "Tanita Bridge extension covered",
-    re: /Kaiord Tanita Bridge/i,
+    label: "Tanita Bridge extension covered (own section, non-empty)",
+    section: TANITA_SECTION,
+    re: /\S/,
+  },
+  {
+    label: "TrainingPeaks Bridge extension covered (own section, non-empty)",
+    section: TRAININGPEAKS_SECTION,
+    re: /\S/,
+  },
+  {
+    label: "WHOOP Bridge extension covered (own section, non-empty)",
+    section: WHOOP_SECTION,
+    re: /\S/,
   },
   {
     label: "Garmin host disclosed",
+    section: GARMIN_SECTION,
     re: /connect\.garmin\.com/,
   },
   {
     label: "Train2Go host disclosed",
+    section: TRAIN2GO_SECTION,
     re: /app\.train2go\.com/,
   },
   {
     label: "Tanita host disclosed",
+    section: TANITA_SECTION,
     re: /mytanita\.eu/,
   },
   {
     label: "Tanita body-composition read scope disclosed (read:body)",
+    section: TANITA_SECTION,
     re: /body[- ]composition/i,
   },
   {
     label: "Tanita no-password cookie-session nature disclosed",
+    section: TANITA_SECTION,
     re: /no password/i,
   },
   {
-    label: "TrainingPeaks Bridge extension covered",
-    re: /Kaiord TrainingPeaks Bridge/i,
-  },
-  {
     label: "TrainingPeaks host disclosed",
+    section: TRAININGPEAKS_SECTION,
     re: /tpapi\.trainingpeaks\.com/,
   },
   {
     label: "TrainingPeaks no-password cookie→token nature disclosed",
+    section: TRAININGPEAKS_SECTION,
     re: /cookie for a short-lived access token/i,
+  },
+  {
+    label: "WHOOP host disclosed",
+    section: WHOOP_SECTION,
+    re: /app\.whoop\.com/,
+  },
+  {
+    label: "WHOOP no-OAuth session-bearer nature disclosed",
+    section: WHOOP_SECTION,
+    re: /No OAuth/i,
+  },
+  // The WHOOP bridge has three distinct ways of obtaining the session
+  // bearer. Each gets its own rule: a section that describes only one or
+  // two of them is incomplete, and an incomplete disclosure is the defect
+  // this whole rule set exists to prevent.
+  {
+    label: "WHOOP capture path 1 disclosed (main-world request interceptor)",
+    section: WHOOP_SECTION,
+    re: /main-world script[\s\S]*?`?Authorization/i,
+  },
+  {
+    label: "WHOOP capture path 2 disclosed (read-only webRequest listener)",
+    section: WHOOP_SECTION,
+    re: /chrome\.webRequest\.onBeforeSendHeaders/,
+  },
+  {
+    label:
+      "WHOOP capture path 3 disclosed (Cognito access token at rest in localStorage)",
+    section: WHOOP_SECTION,
+    re: /localStorage[\s\S]*?CognitoIdentityServiceProvider/,
+  },
+  {
+    label: "WHOOP declared permissions named in its own section",
+    section: WHOOP_SECTION,
+    re: /`tabs`[\s\S]*?`webRequest`[\s\S]*?`scripting`[\s\S]*?`storage`/,
+  },
+  {
+    label: "WHOOP non-declaration of the `cookies` permission stated",
+    section: WHOOP_SECTION,
+    re: /not\*?\*? declare the `cookies` permission/i,
+  },
+  {
+    label:
+      "WHOOP account identifier egress disclosed (custom:user_id reaches the editor)",
+    section: WHOOP_SECTION,
+    re: /custom:user_id/,
   },
   {
     label: "Kaiord origin disclosed",
@@ -151,6 +261,7 @@ const REQUIRED_RULES = [
   },
   {
     label: "OAuth-token local-storage disclosure",
+    section: GARMIN_SECTION,
     re: /OAuth token[\s\S]*?chrome\.storage\.local/i,
   },
   {
@@ -216,11 +327,33 @@ const REQUIRED_RULES = [
   },
 ];
 
+// Body of the `## <heading>` section: everything after the heading line up
+// to the next top-level `## ` heading. Returns null when the heading is
+// absent. The heading must match a whole line exactly, so a mention of the
+// same words in running prose cannot stand in for the section.
+export function sectionBody(src, heading) {
+  const lines = src.split("\n");
+  const start = lines.findIndex((line) => line.trimEnd() === `## ${heading}`);
+  if (start === -1) return null;
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => /^## /.test(line));
+  return (end === -1 ? rest : rest.slice(0, end)).join("\n");
+}
+
 export function checkPolicy(src) {
   const violations = [];
-  for (const { label, re } of REQUIRED_RULES) {
-    if (!re.test(src)) {
-      violations.push(label);
+  for (const { label, section, re } of REQUIRED_RULES) {
+    if (section === undefined) {
+      if (!re.test(src)) violations.push(label);
+      continue;
+    }
+    const body = sectionBody(src, section);
+    if (body === null) {
+      violations.push(`${label} — section "## ${section}" is missing entirely`);
+      continue;
+    }
+    if (!re.test(body)) {
+      violations.push(`${label} — not found inside "## ${section}"`);
     }
   }
   return violations;
@@ -244,10 +377,18 @@ export function checkManifestPermissions(
     ...(manifest.permissions ?? []),
     ...(manifest.optional_permissions ?? []),
   ];
+  const exemptions = CREDENTIAL_PERMISSION_EXEMPTIONS[extensionName] ?? {};
   for (const p of allPerms) {
     if (FORBIDDEN_PERMISSIONS.has(p)) {
       violations.push(
-        `${extensionName}: forbidden permission "${p}" declared (policy claims no credential access and no request mutation)`
+        `${extensionName}: forbidden permission "${p}" declared (policy claims no request mutation)`
+      );
+    }
+    if (CREDENTIAL_ACCESS_PERMISSIONS.has(p) && !exemptions[p]) {
+      violations.push(
+        `${extensionName}: credential-access permission "${p}" declared with no documented exemption — ` +
+          `either drop it, or add it to CREDENTIAL_PERMISSION_EXEMPTIONS in this script with a written reason ` +
+          `AND disclose the use in the extension's privacy-policy section`
       );
     }
   }
@@ -337,6 +478,13 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       TRAININGPEAKS_MANIFEST,
       "trainingpeaks-bridge",
       TRAININGPEAKS_ALLOWED_HOSTS
+    )
+  );
+  all.push(
+    ...checkManifestPermissions(
+      WHOOP_MANIFEST,
+      "whoop-bridge",
+      WHOOP_ALLOWED_HOSTS
     )
   );
   if (existsSync(VITEPRESS_CONFIG)) {

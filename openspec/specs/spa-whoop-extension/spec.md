@@ -4,7 +4,13 @@
 
 ## Purpose
 
-TBD - created by archiving change rewrite-whoop-session-bridge. Update Purpose after archive.
+SPA-side integration for `whoop-bridge`: it discovers the extension, relays allowed reads through it, and converts WHOOP's responses into KRD records.
+Discovery uses the shared bridge-runtime-discovery protocol; conversion runs
+through `@kaiord/whoop` into KRD health
+and activity records. Each managed data type is gated behind its own
+`IntegrationPolicy` (Advanced-Labs biomarker import is the one exception,
+outside policy-resolver gating). No WHOOP credential or session token is
+ever held in SPA persistence.
 
 ## Requirements
 
