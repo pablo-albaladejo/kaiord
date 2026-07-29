@@ -7,8 +7,16 @@
  * appears on user-resolvable failures.
  *
  * The primary CTA is whatever fixes the current state: signing back in at
- * Garmin Connect when the session is gone, opening the Kaiord editor when
- * data flows.
+ * Garmin Connect when Kaiord has no working access, opening the Kaiord editor
+ * when data flows.
+ *
+ * The copy deliberately does NOT say the bridge rides a Garmin Connect
+ * session. It does not: garmin-oauth.js exchanges the browser SSO session ONCE
+ * for OAuth tokens, keeps the OAuth1 token (~1 year) in chrome.storage.local,
+ * and refreshes the OAuth2 bearer from it WITHOUT touching a cookie — so reads
+ * keep working after the user signs out of the website, and a failed check is
+ * not evidence that they are signed out. Signing in again is still the useful
+ * action, because it lets the bridge re-mint; it is just not a diagnosis.
  *
  * Shared helpers load first from the vendored bridge-popup-utils.js,
  * bridge-popup-shell.js and bridge-popup-snapshot.js (see popup.html script
@@ -31,10 +39,11 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   checking: "Checking your session…",
   checkingCause: "Usually under a second.",
   connected: "Connected",
-  connectedCause: "Riding your Garmin Connect session.",
-  sessionSignedOut: "Session signed out",
-  sessionSignedOutCause:
-    "Your Garmin Connect tab is signed out, so nothing is reaching Kaiord right now.",
+  connectedCause:
+    "Reading your Garmin Connect data with access Kaiord minted from an earlier sign-in.",
+  noGarminAccess: "No access to Garmin Connect",
+  noGarminAccessCause:
+    "Kaiord could not read from Garmin Connect. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
   bridgeNotResponding: "Bridge not responding",
   bridgeNotRespondingCause:
     "The extension's background worker did not answer. Try again.",
@@ -184,8 +193,8 @@ const loadPopupData = async () => {
     renderAthleteCard(storage.profileSnapshot);
     renderRollup(ping?.data, storage.lastPushReceipt);
     renderBroken({
-      verdictKey: "sessionSignedOut",
-      causeKey: "sessionSignedOutCause",
+      verdictKey: "noGarminAccess",
+      causeKey: "noGarminAccessCause",
     });
     return;
   }
