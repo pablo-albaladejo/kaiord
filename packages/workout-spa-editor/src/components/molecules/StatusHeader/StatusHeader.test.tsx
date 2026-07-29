@@ -13,111 +13,57 @@ describe("StatusHeader", () => {
     });
   });
 
-  it("should render the nav, profile button and new-workout button", () => {
+  it("should render one nav row with the account cluster", () => {
     // Arrange
 
     // Act
-
     renderWithProviders(<StatusHeader />);
 
     // Assert
-
     expect(screen.getByTestId("status-header")).toBeInTheDocument();
     expect(
-      screen.getByTestId("status-header-profile-button")
+      screen.getByTestId("status-header-account-button")
     ).toBeInTheDocument();
     expect(screen.getByTestId("status-header-new-button")).toBeInTheDocument();
-  });
-
-  it("should show 'No profile' in the profile button when no active profile is loaded", () => {
-    // Arrange
-
-    // Act
-
-    renderWithProviders(<StatusHeader />);
-
-    // Assert
-
-    expect(
-      screen.getByTestId("status-header-profile-button")
-    ).toHaveTextContent("No profile");
-  });
-
-  it.each([
-    { label: "Garmin", testId: "status-header-garmin" },
-    { label: "Train2Go", testId: "status-header-sync" },
-  ])(
-    "should hide the $label indicator when no extension is installed",
-    ({ testId }) => {
-      // Arrange
-
-      // Act
-
-      renderWithProviders(<StatusHeader />);
-
-      // Assert
-
-      expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
-    }
-  );
-
-  it("should show Train2Go 'Synced' when the extension is installed", () => {
-    // Arrange
-    useTrain2GoStore.setState({ extensionInstalled: true });
-
-    // Act
-    renderWithProviders(<StatusHeader />);
-
-    // Assert
-    expect(screen.getByTestId("status-header-sync")).toHaveTextContent(
-      "Train2Go: Synced"
-    );
   });
 
   it("should render the wellness trends entry pointing at the health hub", () => {
     // Arrange
 
     // Act
-
     renderWithProviders(<StatusHeader />);
 
     // Assert
-
     const trends = screen.getByTestId("status-header-trends-button");
-    expect(trends).toBeInTheDocument();
     expect(trends).toHaveTextContent("Trends");
     expect(trends).toHaveAccessibleName("Open wellness trends");
   });
 
-  it("should render the nutrition entry reachable from the header (desktop)", () => {
+  it("should render the nutrition entry reachable from the header", () => {
     // Arrange
 
     // Act
-
     renderWithProviders(<StatusHeader />);
 
     // Assert
-
-    const nutrition = screen.getByTestId("status-header-nutrition-button");
-    expect(nutrition).toBeInTheDocument();
-    expect(nutrition).toHaveAccessibleName("Open nutrition");
+    expect(
+      screen.getByTestId("status-header-nutrition-button")
+    ).toHaveAccessibleName("Open nutrition");
   });
 
   it("should label the new-workout button as 'New workout'", () => {
     // Arrange
 
     // Act
-
     renderWithProviders(<StatusHeader />);
 
     // Assert
-
     expect(screen.getByTestId("status-header-new-button")).toHaveTextContent(
       "New workout"
     );
   });
 
-  it("should render the zone divider between the primary nav and the account cluster", () => {
+  it("should render the zone divider between the nav and the account cluster", () => {
     // Arrange
 
     // Act
@@ -125,20 +71,40 @@ describe("StatusHeader", () => {
 
     // Assert
     const divider = screen.getByTestId("status-header-divider");
-    const newButton = screen.getByTestId("status-header-new-button");
-    const profileButton = screen.getByTestId("status-header-profile-button");
-    expect(divider).toBeInTheDocument();
     const parent = divider.parentElement;
     expect(parent).not.toBeNull();
-    // "new" is wrapped in a mobile-hidden span (see EntryButton), so walk up
-    // to the ancestor that is actually a direct child of `parent`.
-    const directChild = (el: Element): Element =>
-      el.parentElement === parent ? el : directChild(el.parentElement!);
     const children = Array.from(parent!.children);
-    const dividerIndex = children.indexOf(divider);
-    const newButtonIndex = children.indexOf(directChild(newButton));
-    const profileButtonIndex = children.indexOf(profileButton);
-    expect(dividerIndex).toBeGreaterThan(newButtonIndex);
-    expect(dividerIndex).toBeLessThan(profileButtonIndex);
+    const account = screen.getByTestId("status-header-account-button");
+    expect(children.indexOf(divider)).toBeLessThan(children.indexOf(account));
+  });
+
+  it("should show no source-health pill while nothing is down", () => {
+    // Arrange
+    // Reachable state: a browser with no extensions, or one where every
+    // probe answered with a live session. Both leave every card non-amber.
+
+    // Act
+    renderWithProviders(<StatusHeader />);
+
+    // Assert
+    expect(
+      screen.queryByTestId("status-header-source-health")
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([
+    { label: "Garmin", testId: "status-header-garmin" },
+    { label: "Train2Go", testId: "status-header-sync" },
+  ])("should no longer render the $label chip", ({ testId }) => {
+    // Arrange
+    // The chips rendered whenever their extension was installed — in the
+    // healthy case too, which is why they stopped being a signal.
+    useTrain2GoStore.setState({ extensionInstalled: true });
+
+    // Act
+    renderWithProviders(<StatusHeader />);
+
+    // Assert
+    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
   });
 });

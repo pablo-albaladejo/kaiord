@@ -27,9 +27,11 @@ describe("MainLayout", () => {
       finder: () => screen.getByRole("navigation", { name: "Primary" }),
     },
     {
-      label: "theme toggle button",
-      finder: () =>
-        screen.getByRole("button", { name: /switch to (light|dark) mode/i }),
+      // The theme toggle moved into the avatar menu with the rest of the
+      // account-level chrome, so the shell renders its trigger, not the
+      // toggle itself.
+      label: "account menu trigger",
+      finder: () => screen.getByTestId("status-header-account-button"),
     },
   ])("should render $label", ({ finder }) => {
     // Arrange

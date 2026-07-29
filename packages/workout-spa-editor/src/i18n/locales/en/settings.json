@@ -146,9 +146,6 @@
   },
   "attention": {
     "title_one": "{{count}} connection needs attention",
-    "title_other": "{{count}} connections need attention",
-    "noNewDataSince": "No new data since {{date}}",
-    "signedOut": "Session signed out — sign in again to resume",
-    "extensionOutdated": "An extension is out of date — update it to resume"
+    "title_other": "{{count}} connections need attention"
   }
 }

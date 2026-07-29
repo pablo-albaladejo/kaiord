@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures/base";
+import { openAccountMenu } from "./helpers/mobile-menu";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
@@ -213,23 +214,24 @@ test.describe("Accessibility", () => {
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
 
-    // Find the theme toggle button (first interactive element)
-    const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark) mode/i,
-    });
-    await expect(themeToggle).toBeVisible();
+    // The account-menu trigger, not the theme toggle: the toggle moved
+    // inside a Radix menu, whose FocusScope owns focus while it is open, so
+    // focusing it directly no longer tests this page's focus styles. The
+    // trigger is a plain header button at every width.
+    const focusTarget = page.getByTestId("status-header-account-button");
+    await expect(focusTarget).toBeVisible();
 
     // Explicitly focus the button using keyboard navigation
-    await themeToggle.focus();
+    await focusTarget.focus();
 
     // Wait a moment for focus styles to apply (webkit needs this)
     await page.waitForTimeout(100);
 
     // Verify the button is focused
-    await expect(themeToggle).toBeFocused();
+    await expect(focusTarget).toBeFocused();
 
     // Verify focus indicator is visible (outline or ring)
-    const styles = await themeToggle.evaluate((el) => {
+    const styles = await focusTarget.evaluate((el) => {
       const computed = window.getComputedStyle(el);
       return {
         outline: computed.outline,
@@ -328,9 +330,8 @@ test.describe("Accessibility", () => {
     );
 
     // Click theme toggle (force on mobile to bypass transition-colors instability)
-    const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark) mode/i,
-    });
+    await openAccountMenu(page);
+    const themeToggle = page.getByTestId("theme-toggle");
     if (isMobile) {
       await themeToggle.click({ force: true });
     } else {
@@ -361,9 +362,8 @@ test.describe("Accessibility", () => {
     );
 
     // Toggle theme (force on mobile to bypass transition-colors instability)
-    const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark) mode/i,
-    });
+    await openAccountMenu(page);
+    const themeToggle = page.getByTestId("theme-toggle");
     if (isMobile) {
       await themeToggle.click({ force: true });
     } else {
@@ -433,9 +433,8 @@ test.describe("Accessibility", () => {
     });
 
     // Toggle theme (force on mobile to bypass transition-colors instability)
-    const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark) mode/i,
-    });
+    await openAccountMenu(page);
+    const themeToggle = page.getByTestId("theme-toggle");
     if (isMobile) {
       await themeToggle.click({ force: true });
     } else {
@@ -469,9 +468,8 @@ test.describe("Accessibility", () => {
     expect(hasTransition).toBe(true);
 
     // Toggle theme
-    const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark) mode/i,
-    });
+    await openAccountMenu(page);
+    const themeToggle = page.getByTestId("theme-toggle");
     if (isMobile) {
       await themeToggle.click({ force: true });
     } else {

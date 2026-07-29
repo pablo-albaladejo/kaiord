@@ -1,104 +1,72 @@
 import type { IconName } from "../components/atoms/Icon/icon-map";
+import type { NavSurfaceCode } from "./nav-rows";
+import { NAV_ROWS } from "./nav-rows";
 
 export type NavSurfaces = {
-  /** The header nav renders on every breakpoint today, so this is the only
-   *  guarantee of desktop reachability — every destination MUST set it. */
-  header: boolean;
+  /** Rendered in the primary header row, at every width that row shows it. */
+  bar: boolean;
+  /** In the header row at `lg`, in the "More" menu below it. Together with
+   *  `bar` this is the whole desktop nav; nothing else reaches it. */
+  overflow: boolean;
+  /** In the avatar menu. Account-level destinations live only here — they
+   *  were a second nav row, which made them look like peers of Calendar. */
+  accountMenu: boolean;
   /** Mobile-only fast-access tab (hidden on desktop via `md:hidden`).
    *  Capped at 5 by the floating bar's fixed layout. */
   bottomNav: boolean;
   /** True when the create-workout FAB already covers this destination below
-   *  `md` — header hides it there too, without counting toward the cap above. */
+   *  `md` — the header hides it there too, without counting toward the cap. */
   mobileFab: boolean;
 };
 
 export type NavDestination = {
   id: string;
   path: string;
-  /** Display label. No i18n layer exists yet — this is the literal string
-   *  shown today, named for a future i18n lookup to replace without a
-   *  field rename. */
-  labelKey: string;
-  /** Accessible name override for the header entry. Bottom-nav tabs use
-   *  the visible label as their accessible name and ignore this. */
+  /** Present when this entry overrides its accessible name. The rendered
+   *  string is `aria.<id>` in the `nav` namespace; this is the English text
+   *  it resolves to, kept so the table documents which entries have one. */
   ariaLabel?: string;
   icon: IconName;
+  /** Set when this destination is reached through another one's dropdown
+   *  (`labs` under `trends`) rather than from a bar slot of its own. */
+  parentId?: string;
   surfaces: NavSurfaces;
 };
 
-/** Compact row form: [id, path, labelKey, ariaLabel, icon, header, bottomNav]. */
-type NavRow = [
-  string,
-  string,
-  string,
-  string | undefined,
-  IconName,
-  boolean,
-  boolean,
-];
+const FAB_COVERED = "new";
+
+const surfacesOf = (
+  id: string,
+  code: NavSurfaceCode,
+  bottomNav: boolean
+): NavSurfaces => ({
+  bar: code === "bar",
+  overflow: code === "overflow",
+  accountMenu: code === "account",
+  bottomNav,
+  mobileFab: id === FAB_COVERED,
+});
 
 /**
  * Single source of truth for every navigation destination in the app
- * shell. `status-entry-defs.ts` (header) and `bottom-nav-tabs.ts` (mobile
- * bottom nav) both derive from this instead of maintaining their own list
- * — that divergence previously left Nutrition unreachable on desktop with
- * no parity check for Trends/Chat/Settings on mobile.
+ * shell. The header bar, its "More" overflow menu, the avatar menu and the
+ * mobile bottom nav all derive from this instead of maintaining their own
+ * lists — that divergence previously left Nutrition unreachable on desktop
+ * with no parity check for Trends/Chat/Settings on mobile.
  *
  * See `nav-destinations.test.ts` for the enforced reachability invariant.
  */
-const NAV_ROWS: readonly NavRow[] = [
-  ["daily", "/daily", "Daily", "Go to daily", "today", true, true],
-  [
-    "calendar",
-    "/calendar",
-    "Calendar",
-    "Go to calendar",
-    "calendar",
-    true,
-    true,
-  ],
-  [
-    "library",
-    "/library",
-    "Library",
-    "Open workout library",
-    "cards",
-    true,
-    true,
-  ],
-  [
-    "nutrition",
-    "/nutrition",
-    "Nutrition",
-    "Open nutrition",
-    "nutrition",
-    true,
-    true,
-  ],
-  [
-    "athlete",
-    "/athlete",
-    "Athlete",
-    "Open athlete profile",
-    "athlete",
-    true,
-    true,
-  ],
-  ["trends", "/health", "Trends", "Open wellness trends", "trend", true, false],
-  ["labs", "/health/labs", "Labs", "Open lab analytics", "labs", true, false],
-  ["chat", "/chat", "Chat", "Open chat assistant", "chat", true, false],
-  ["new", "/workout/new", "New workout", undefined, "plus", true, false],
-  ["settings", "/settings", "Settings", "Open settings", "gear", true, false],
-];
-
 export const NAV_DESTINATIONS: readonly NavDestination[] = NAV_ROWS.map(
-  ([id, path, labelKey, ariaLabel, icon, header, bottomNav]) => ({
+  ([id, path, ariaLabel, icon, code, bottomNav, parentId]) => ({
     id,
     path,
-    labelKey,
     ariaLabel,
     icon,
-    // Only the FAB (id "new") is mobile-fab-covered today; see NavSurfaces.
-    surfaces: { header, bottomNav, mobileFab: id === "new" },
+    parentId,
+    surfaces: surfacesOf(id, code, bottomNav),
   })
 );
+
+/** Children of a header dropdown, in table order. */
+export const navChildrenOf = (parentId: string): readonly NavDestination[] =>
+  NAV_DESTINATIONS.filter((destination) => destination.parentId === parentId);
