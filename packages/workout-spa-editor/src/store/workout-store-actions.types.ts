@@ -42,6 +42,7 @@ export type WorkoutStoreActions = {
   editRepetitionBlock: (blockId: string, repeatCount: number) => void;
   addStepToRepetitionBlock: (blockId: string) => void;
   duplicateStepInRepetitionBlock: (blockId: string, stepIndex: number) => void;
+  deleteStepInRepetitionBlock: (blockId: string, stepIndex: number) => void;
   ungroupRepetitionBlock: (blockId: string) => void;
   deleteRepetitionBlock: (blockId: string) => void;
   selectStep: (id: string | null) => void;

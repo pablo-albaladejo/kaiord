@@ -51,6 +51,7 @@ export function WorkoutStepsListBinding({
       onDuplicateStepInRepetitionBlock={
         state.handleDuplicateStepInRepetitionBlock
       }
+      onDeleteStepInRepetitionBlock={state.handleDeleteStepInRepetitionBlock}
       editorRootRef={editorRootRef}
       addStepButtonRef={addStepButtonRef}
     />

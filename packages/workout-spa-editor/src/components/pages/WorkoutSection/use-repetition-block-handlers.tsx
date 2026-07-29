@@ -12,6 +12,7 @@ import {
   useSelectedStepIds,
   useUngroupRepetitionBlock,
 } from "../../../store/selectors";
+import { useDeleteStepInRepetitionBlock } from "../../../store/selectors/repetition-block-selectors";
 import type { Workout } from "../../../types/krd";
 import {
   buildHandleConfirmCreateBlock,
@@ -26,6 +27,10 @@ export function useRepetitionBlockHandlers() {
   const editRepetitionBlock = useEditRepetitionBlock();
   const addStep = useAddStepToRepetitionBlock();
   const duplicateStep = useDuplicateStepInRepetitionBlock();
+  // Deliberately the raw store action, not `useDeleteStepWithToast`:
+  // that hook reads the `deletedSteps` undo trail, which block-scoped
+  // deletes do not write (see delete-step-in-repetition-block-action).
+  const deleteStepInBlock = useDeleteStepInRepetitionBlock();
   const ungroupBlock = useUngroupRepetitionBlock();
   const clearSelection = useClearStepSelection();
   const dialogOpen = useCreateBlockDialogOpen();
@@ -54,6 +59,7 @@ export function useRepetitionBlockHandlers() {
     handleEditRepetitionBlock: editRepetitionBlock,
     handleAddStepToRepetitionBlock: addStep,
     handleDuplicateStepInRepetitionBlock: duplicateStep,
+    handleDeleteStepInRepetitionBlock: deleteStepInBlock,
     handleUngroup: ungroupBlock,
     handleDelete,
   };

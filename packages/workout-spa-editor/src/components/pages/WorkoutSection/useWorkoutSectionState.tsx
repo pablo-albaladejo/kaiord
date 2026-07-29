@@ -39,8 +39,8 @@ export function useWorkoutSectionState(
 
   const toggleStepSelection = useToggleStepSelection();
   const selectStep = useSelectStep();
-  const repetitionBlockHandlers = useRepetitionBlockHandlers();
-  const { selectedStepIds } = repetitionBlockHandlers;
+  const blocks = useRepetitionBlockHandlers();
+  const { selectedStepIds } = blocks;
 
   return {
     isEditing,
@@ -55,23 +55,20 @@ export function useWorkoutSectionState(
     reorderStepsInBlock: onReorderStepsInBlock,
     selectedStep,
     selectedStepIds,
-    showCreateBlockDialog: repetitionBlockHandlers.showCreateBlockDialog,
+    showCreateBlockDialog: blocks.showCreateBlockDialog,
     handleBlockSelect: selectStep,
     handleToggleStepSelection: toggleStepSelection,
-    handleCreateRepetitionBlock:
-      repetitionBlockHandlers.handleCreateRepetitionBlock,
-    handleCreateEmptyRepetitionBlock:
-      repetitionBlockHandlers.handleCreateEmptyRepetitionBlock,
-    handleConfirmCreateBlock: repetitionBlockHandlers.handleConfirmCreateBlock,
-    handleCancelCreateBlock: repetitionBlockHandlers.handleCancelCreateBlock,
-    handleEditRepetitionBlock:
-      repetitionBlockHandlers.handleEditRepetitionBlock,
-    handleAddStepToRepetitionBlock:
-      repetitionBlockHandlers.handleAddStepToRepetitionBlock,
-    handleUngroupRepetitionBlock: repetitionBlockHandlers.handleUngroup,
-    handleDeleteRepetitionBlock: repetitionBlockHandlers.handleDelete,
+    handleCreateRepetitionBlock: blocks.handleCreateRepetitionBlock,
+    handleCreateEmptyRepetitionBlock: blocks.handleCreateEmptyRepetitionBlock,
+    handleConfirmCreateBlock: blocks.handleConfirmCreateBlock,
+    handleCancelCreateBlock: blocks.handleCancelCreateBlock,
+    handleEditRepetitionBlock: blocks.handleEditRepetitionBlock,
+    handleAddStepToRepetitionBlock: blocks.handleAddStepToRepetitionBlock,
+    handleUngroupRepetitionBlock: blocks.handleUngroup,
+    handleDeleteRepetitionBlock: blocks.handleDelete,
     handleDuplicateStepInRepetitionBlock:
-      repetitionBlockHandlers.handleDuplicateStepInRepetitionBlock,
+      blocks.handleDuplicateStepInRepetitionBlock,
+    handleDeleteStepInRepetitionBlock: blocks.handleDeleteStepInRepetitionBlock,
     ...handlers,
   };
 }

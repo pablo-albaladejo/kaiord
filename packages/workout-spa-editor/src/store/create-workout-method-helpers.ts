@@ -26,6 +26,10 @@ export const createBlockMethods = (
     set((state) =>
       actions.duplicateStepInRepetitionBlock(blockId, stepIndex, state)
     ),
+  deleteStepInRepetitionBlock: (blockId: string, stepIndex: number) =>
+    set((state) =>
+      actions.deleteStepInRepetitionBlock(blockId, stepIndex, state)
+    ),
   ungroupRepetitionBlock: (blockId: string) =>
     set((state) => actions.ungroupRepetitionBlock(blockId, state)),
   deleteRepetitionBlock: (blockId: string) =>

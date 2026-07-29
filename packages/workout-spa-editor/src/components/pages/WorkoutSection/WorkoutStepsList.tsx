@@ -36,6 +36,10 @@ type WorkoutStepsListProps = {
     blockId: string,
     stepIndex: number
   ) => void;
+  readonly onDeleteStepInRepetitionBlock: (
+    blockId: string,
+    stepIndex: number
+  ) => void;
   /**
    * Ref to the outer editor root. `useFocusAfterAction` (§7.4) scopes
    * its overlay MutationObserver to this element, and `isFormFieldFocused`
