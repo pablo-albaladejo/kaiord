@@ -14,6 +14,7 @@ export const undiscoveredEntry = (
   checking: false,
   error: null,
   needsReauth: false,
+  outdated: false,
   lastCheckedAt: null,
 });
 
@@ -25,6 +26,7 @@ const signatureOf = (entry: BridgeConnectionRuntime): string =>
     entry.checking,
     entry.error,
     entry.needsReauth,
+    entry.outdated,
     entry.lastCheckedAt,
   ].join("|");
 

@@ -12,6 +12,13 @@ export type SessionProbeResult = {
   sessionActive: boolean;
   error: string | null;
   needsReauth: boolean;
+  /**
+   * The extension answered, but spoke an unsupported protocol version. The
+   * probe SUCCEEDED — this is a diagnosis, not a failure — so a consumer must
+   * be able to tell it apart from an unreachable bridge and say "update the
+   * extension" instead of "the check failed".
+   */
+  outdated: boolean;
 };
 
 export type SessionProber = (
@@ -26,6 +33,17 @@ export const inactive = (
   sessionActive: false,
   error,
   needsReauth,
+  outdated: false,
+});
+
+/** Reachable on purpose: the extension ANSWERED, just in a protocol this
+    build does not speak. Reporting it as gone would offer the wrong fix. */
+export const outdatedExtension = (error: string): SessionProbeResult => ({
+  reachable: true,
+  sessionActive: false,
+  error,
+  needsReauth: false,
+  outdated: true,
 });
 
 export const active = (): SessionProbeResult => ({
@@ -33,6 +51,7 @@ export const active = (): SessionProbeResult => ({
   sessionActive: true,
   error: null,
   needsReauth: false,
+  outdated: false,
 });
 
 /**
@@ -47,4 +66,5 @@ export const unreachable = (
   sessionActive: false,
   error,
   needsReauth: false,
+  outdated: false,
 });

@@ -33,6 +33,12 @@ export type ConnectionSource = {
   /** Only `trainingpeaks-bridge` ever propagates this today. */
   readonly needsReauth: boolean;
   /**
+   * The extension answered with a protocol version this build cannot read.
+   * A diagnosis, not a failure — the fix is updating the extension, which no
+   * other attention cause shares.
+   */
+  readonly outdated: boolean;
+  /**
    * Can this source's presence and session be re-checked at all? False for a
    * bridge with no prober: after its initial announcement nothing can learn it
    * was uninstalled, so its copy may not use the present tense.

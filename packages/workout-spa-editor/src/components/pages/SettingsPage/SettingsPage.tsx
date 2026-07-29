@@ -10,6 +10,7 @@ import { SettingsAttention } from "./SettingsAttention";
 import { SettingsGroupList } from "./SettingsGroupList";
 import { SettingsSectionRail } from "./SettingsSectionRail";
 import { useSectionScrollReset } from "./use-section-scroll-reset";
+import { useSettingsAttention } from "./use-settings-attention";
 
 /**
  * `section` is the path segment naming the open panel (`/settings/ai`). It is
@@ -29,6 +30,7 @@ export default function SettingsPage() {
   const { section } = useParams<SettingsPageParams>();
   const [, navigate] = useLocation();
   const t = useTranslate("settings");
+  const attention = useSettingsAttention();
   useFocusOnSectionChange();
   useSectionScrollReset(section);
 
@@ -61,12 +63,16 @@ export default function SettingsPage() {
       >
         {heading}
       </h1>
-      <SettingsAttention attention={null} variant="banner" />
+      {/* The index carries the banner, the rail carries the chip: never both. */}
+      <SettingsAttention
+        attention={open === undefined ? attention : null}
+        variant="banner"
+      />
       {open === undefined || ActiveView === null ? (
         <SettingsGroupList onNavigate={navigate} />
       ) : (
         <div className={SPLIT_CLASS}>
-          <SettingsSectionRail activeSection={open} />
+          <SettingsSectionRail activeSection={open} attention={attention} />
           <div
             id={`settings-panel-${open}`}
             className="min-w-0"

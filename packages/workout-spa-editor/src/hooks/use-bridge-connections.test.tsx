@@ -7,13 +7,21 @@ import type { BridgeConnectionRuntime } from "../adapters/bridge/bridge-connecti
 import { PersistenceProvider } from "../contexts/persistence-context";
 import type { PersistencePort } from "../ports/persistence-port";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
-import { useBridgeConnections } from "./use-bridge-connections";
+import {
+  useBridgeConnections,
+  useBridgeConnectionsRefreshed,
+} from "./use-bridge-connections";
 
 vi.mock("../adapters/bridge/bridge-connection-store", () => ({
-  bridgeConnections: { subscribe: vi.fn(() => () => {}), getSnapshot: vi.fn() },
+  bridgeConnections: {
+    subscribe: vi.fn(() => () => {}),
+    getSnapshot: vi.fn(),
+    hasRefreshed: vi.fn(() => false),
+  },
 }));
 
 const mockedGetSnapshot = vi.mocked(bridgeConnections.getSnapshot);
+const mockedHasRefreshed = vi.mocked(bridgeConnections.hasRefreshed);
 
 const LAST_CHECKED_AT = 1_700_000_000_000;
 
@@ -27,6 +35,7 @@ const runtimeEntry = (
   checking: false,
   error: null,
   needsReauth: false,
+  outdated: false,
   lastCheckedAt: LAST_CHECKED_AT,
   ...overrides,
 });
@@ -124,6 +133,37 @@ describe("useBridgeConnections", () => {
     renderHook(() => useBridgeConnections("p1"), {
       wrapper: wrap(persistence),
     });
+
+    // Assert
+    expect(bridgeConnections.subscribe).toHaveBeenCalled();
+  });
+});
+
+describe("useBridgeConnectionsRefreshed", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it.each([{ refreshed: false }, { refreshed: true }])(
+    "should report $refreshed while the store reports $refreshed",
+    ({ refreshed }) => {
+      // Arrange
+      mockedHasRefreshed.mockReturnValue(refreshed);
+
+      // Act
+      const { result } = renderHook(() => useBridgeConnectionsRefreshed());
+
+      // Assert
+      expect(result.current).toBe(refreshed);
+    }
+  );
+
+  it("should subscribe to the connection store", () => {
+    // Arrange
+    mockedHasRefreshed.mockReturnValue(false);
+
+    // Act
+    renderHook(() => useBridgeConnectionsRefreshed());
 
     // Assert
     expect(bridgeConnections.subscribe).toHaveBeenCalled();

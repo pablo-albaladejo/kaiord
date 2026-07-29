@@ -59,6 +59,7 @@ const buildOne = (
     disconnected: record?.status === "disconnected",
     sessionVerifiable: bridgeId !== null && s.hasSessionProbe(bridgeId),
     needsReauth: state?.needsReauth === true,
+    outdated: state?.outdated === true,
     lastSyncAt: bridgeId === null ? undefined : s.lastSyncAt(bridgeId),
     importTypes:
       detected && bridgeId !== null

@@ -34,6 +34,7 @@ const source = (over: Partial<ConnectionSource> = {}): ConnectionSource => ({
   bridgeDetected: true,
   disconnected: false,
   needsReauth: false,
+  outdated: false,
   lastSyncAt: undefined,
   sessionVerifiable: true,
   importTypes: ["activity"],

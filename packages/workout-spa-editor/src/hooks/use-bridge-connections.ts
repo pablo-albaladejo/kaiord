@@ -32,6 +32,16 @@ const subscribe = (listener: () => void) =>
   bridgeConnections.subscribe(listener);
 const getSnapshot = () => bridgeConnections.getSnapshot();
 const getServerSnapshot = () => EMPTY_RUNTIME;
+const getRefreshed = () => bridgeConnections.hasRefreshed();
+const getServerRefreshed = () => false;
+
+/**
+ * Whether the store has completed a pass. Every row reads undiscovered until
+ * it has — because nothing has been asked yet, not because nothing is there —
+ * so a surface that counts rows must wait for this.
+ */
+export const useBridgeConnectionsRefreshed = (): boolean =>
+  useSyncExternalStore(subscribe, getRefreshed, getServerRefreshed);
 
 export const useBridgeConnections = (
   profileId: string | null

@@ -10,10 +10,7 @@ export type SettingsAttentionModel = {
 };
 
 export type SettingsAttentionProps = {
-  /**
-   * `null` renders nothing. Nothing computes attention yet — the Settings
-   * shell passes `null` until the bridge connection model is mounted.
-   */
+  /** `null` renders nothing, which is the healthy state. */
   attention: SettingsAttentionModel | null;
   variant: "banner" | "chip";
 };
@@ -33,7 +30,11 @@ export const SettingsAttention = ({
   if (attention === null) return null;
 
   return (
+    // The surface appears asynchronously — seconds after mount, and again on
+    // any later poll — so it announces itself rather than waiting to be found.
     <div
+      role="status"
+      aria-live="polite"
       className={`${SHELL_CLASS} ${VARIANT_CLASS[variant]}`}
       data-testid={`settings-attention-${variant}`}
     >
@@ -42,11 +43,17 @@ export const SettingsAttention = ({
         className="mt-1 h-2 w-2 flex-none rounded-full bg-amber-500"
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+        <p
+          title={attention.title}
+          className="truncate text-sm font-semibold text-gray-900 dark:text-white"
+        >
           {attention.title}
         </p>
         {attention.detail !== undefined && (
-          <p className="truncate text-xs text-gray-600 dark:text-gray-400">
+          <p
+            title={attention.detail}
+            className="truncate text-xs text-gray-600 dark:text-gray-400"
+          >
             {attention.detail}
           </p>
         )}
