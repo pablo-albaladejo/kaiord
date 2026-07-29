@@ -127,6 +127,34 @@ describe("Garmin popup", () => {
     ).toBe(false);
   });
 
+  // Reachable falsehood the old copy shipped: sign out of Garmin Connect and
+  // the current bearer is still valid, so `gcApi.ok` stays true and the popup
+  // went on claiming it was "riding your Garmin Connect session" — a session
+  // that no longer existed.
+  it("does not claim a live Garmin session while connected", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: {
+          ok: true,
+          data: { gcApi: { ok: true, totalCount: 4 } },
+        },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe("Connected");
+    const cause = doc.getElementById("status-sub").textContent;
+    expect(cause).toContain("minted from an earlier sign-in");
+    // Concept, not string: `not.toContain("session")` is case-sensitive, so a
+    // sentence-initial "Session" — the likeliest way the claim comes back —
+    // would have walked straight through it.
+    expect(cause).not.toMatch(/session/i);
+  });
+
   it("renders disconnected state with Retry when ping fails", async () => {
     const dom = setupDom(
       buildChromeMock({
@@ -145,7 +173,7 @@ describe("Garmin popup", () => {
     expect(retry.textContent).toBe("Retry");
   });
 
-  it("makes signing back in the primary CTA and mutes the chips when the session is gone", async () => {
+  it("makes signing back in the primary CTA and mutes the chips when there is no access", async () => {
     const dom = setupDom(
       buildChromeMock({
         pingResponse: { ok: true, data: { gcApi: { ok: false } } },
@@ -158,11 +186,22 @@ describe("Garmin popup", () => {
 
     const doc = dom.window.document;
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "No access to Garmin Connect"
     );
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "nothing is reaching Kaiord"
-    );
+    // The cause must not diagnose. A failed check is not evidence the user is
+    // signed out, because a failure can always be Garmin being unavailable —
+    // which is true however the token refresh turns out to authenticate (see
+    // #1102). The old copy told a signed-in user that their "tab is signed
+    // out". Both possibilities, neither asserted.
+    const cause = doc.getElementById("status-sub").textContent;
+    expect(cause).toContain("could not read from Garmin Connect");
+    expect(cause).toContain("if you are already signed in");
+    // The assertion this whole branch rests on, so it pins the CONCEPT: the
+    // previous form was `not.toContain("signed out,")` — with the comma — and
+    // passed happily on "You are signed out." or "signed out and…". A guard
+    // that excludes one punctuation variant of the regression is not guarding
+    // the regression.
+    expect(cause).not.toMatch(/signed out/i);
     expect(doc.querySelector(".cta-primary").textContent).toBe(
       "Sign in to Garmin Connect"
     );
