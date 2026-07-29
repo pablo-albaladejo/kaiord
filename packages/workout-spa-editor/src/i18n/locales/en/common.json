@@ -32,5 +32,20 @@
   "bridge": {
     "garmin": "Garmin: {{label}}",
     "train2go": "Train2Go: {{label}}"
+  },
+  "sync": {
+    "syncing": "syncing…"
+  },
+  "relativeTime": {
+    "neverSynced": "never synced",
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}}m ago",
+    "minutesAgo_other": "{{count}}m ago",
+    "hoursAgo_one": "{{count}}h ago",
+    "hoursAgo_other": "{{count}}h ago",
+    "yesterday": "yesterday",
+    "daysAgo_one": "{{count}}d ago",
+    "daysAgo_other": "{{count}}d ago",
+    "since": "since {{date}}"
   }
 }
