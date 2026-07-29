@@ -55,15 +55,19 @@ describe("detailKeyFor", () => {
     expect(key).toBe("detail.noAccess");
   });
 
-  it("should ask for access to be granted again when the bridge says so", () => {
+  it("should not treat a re-auth flag as a cause of its own", () => {
     // Arrange
+    // Its only producer forces the flag true for any non-2xx (#1105), and that
+    // provider authenticates with a session cookie rather than a grant, so
+    // "authorise again" was both uninformative and less accurate than the
+    // sign-in `noAccess` already offers.
     const reauth = source("attention", { needsReauth: true });
 
     // Act
     const key = detailKeyFor(reauth);
 
     // Assert
-    expect(key).toBe("detail.needsReauth");
+    expect(key).toBe("detail.noAccess");
   });
 
   it("should say an absent extension is absent rather than disconnected", () => {

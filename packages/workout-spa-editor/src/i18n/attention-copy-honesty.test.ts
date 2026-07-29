@@ -47,10 +47,44 @@ const LOCALES = [...new Set(Object.keys(MODULES).map(localeOf))];
 const ATTENTION_COPY: readonly (readonly [string, string])[] = [
   ["connections", "status.attention"],
   ["connections", "detail.noAccess"],
-  ["connections", "detail.needsReauth"],
   ["connections", "banner.one"],
   ["common", "sourceHealth.noAccess"],
 ];
+
+/**
+ * The shipped wording, pinned per locale.
+ *
+ * WHAT THIS IS AND IS NOT. The regexes below forbid an enumerated set of false
+ * claims, so they are incomplete by construction: twice already a new claim
+ * arrived that none of them matched, and each time the fix was another regex.
+ * Exact equality is a TOTAL predicate instead — no new claim can appear without
+ * failing it — but it detects CHANGED, not FALSE. It converts "no automated
+ * check knows about this falsehood" into "a human must approve this string when
+ * it changes". That is a review gate, not semantic verification, and it is the
+ * same mechanism `scripts/fixtures/bridge-privacy-surface.json` already uses.
+ *
+ * The regexes stay because they catch a false claim IN THE DIFF, before anyone
+ * updates the pin. The pin alone would accept the falsehood the moment its
+ * author refreshed the expected value.
+ */
+const PINNED: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  en: {
+    "connections:status.attention": "No access",
+    "connections:detail.noAccess":
+      "Kaiord could not read from this source. Signing in again on its site can restore access; if you are already signed in, the source may be temporarily unavailable.",
+    "connections:banner.one": "Kaiord cannot read from {{name}}",
+    "common:sourceHealth.noAccess":
+      "Kaiord cannot read from a source — signing in again may restore it",
+  },
+  es: {
+    "connections:status.attention": "Sin acceso",
+    "connections:detail.noAccess":
+      "Kaiord no pudo leer de esta fuente. Volver a iniciar sesión en su web puede restaurar el acceso; si ya has iniciado sesión, puede que la fuente no esté disponible temporalmente.",
+    "connections:banner.one": "Kaiord no puede leer de {{name}}",
+    "common:sourceHealth.noAccess":
+      "Kaiord no puede leer de una fuente: volver a iniciar sesión puede restaurarlo",
+  },
+};
 
 /**
  * A key `detailKeyFor` can reach in `attention` and that is allowed to name its
@@ -258,6 +292,39 @@ describe("attention copy honesty", () => {
       expect(unaccounted).toEqual([]);
     }
   );
+
+  it.each(LOCALES)(
+    "should render exactly the approved wording in %s",
+    (locale) => {
+      // Arrange
+      // Total where the regexes are enumerative: any new claim changes a string
+      // and fails here, whether or not a regex knows the concept.
+      const expected = PINNED[locale];
+
+      // Act
+      const actual = Object.fromEntries(
+        ATTENTION_COPY.map(([ns, key]) => [
+          `${ns}:${key}`,
+          read(`./locales/${locale}/${ns}.json`, key),
+        ])
+      );
+
+      // Assert
+      expect(actual).toEqual(expected);
+    }
+  );
+
+  it("should pin every locale the app ships", () => {
+    // Arrange
+    // A locale added without pinning it would leave that language covered only
+    // by the enumerated regexes, which is the weaker half.
+
+    // Act
+    const unpinned = LOCALES.filter((locale) => PINNED[locale] === undefined);
+
+    // Assert
+    expect(unpinned).toEqual([]);
+  });
 
   it("should guard or exempt every detail key the attention branch reaches", () => {
     // Arrange

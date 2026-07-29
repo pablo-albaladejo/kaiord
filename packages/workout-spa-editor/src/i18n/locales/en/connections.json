@@ -41,8 +41,7 @@
   "detail": {
     "installed": "This extension announced itself when the page loaded. Kaiord cannot re-check it without downloading your whole export, so it may have been removed since.",
     "checking": "Asking the extension whether it still has a session.",
-    "noAccess": "Kaiord could not read from this source. Signing in again on its site restores access; if you are already signed in, the source may be temporarily unavailable.",
-    "needsReauth": "Kaiord could not read from this source. Authorising it again on the provider's site restores access; if it is already authorised, the source may be temporarily unavailable.",
+    "noAccess": "Kaiord could not read from this source. Signing in again on its site can restore access; if you are already signed in, the source may be temporarily unavailable.",
     "outdated": "This extension's browser bridge is out of date. Update the extension to resume — signing in again will not help.",
     "notDetected": "The browser extension is not running in this browser.",
     "disconnected": "You disconnected this source in Kaiord. The extension may still be installed.",

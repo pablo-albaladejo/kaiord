@@ -34,16 +34,33 @@ export const STATUS_TEXT: Record<ConnectionSourceStatus, string> = {
  */
 
 /**
- * Every `detail.*` key the `attention` branch can reach. The copy-honesty guard
- * enumerates this list, so a branch added below without wording that survives
- * the guard fails the suite instead of shipping an unguarded claim about a cause
- * no probe can observe.
+ * Every `detail.*` key the `attention` branch can reach. `attentionDetailKey`
+ * returns this type, so tsc rejects a branch returning a key absent here — the
+ * list cannot lag the switch, which is what a hand-kept copy of it did.
  */
 export const ATTENTION_DETAIL_KEYS = [
   "detail.outdated",
-  "detail.needsReauth",
   "detail.noAccess",
 ] as const;
+
+export type AttentionDetailKey = (typeof ATTENTION_DETAIL_KEYS)[number];
+
+/**
+ * `needsReauth` has no branch of its own on purpose. Its only producer is
+ * TrainingPeaks (`bridge-session-probes.ts` is the sole `needsReauthOf` call
+ * site), where `authError` forces the flag true for any non-2xx (#1105), so it
+ * carries no information. And TrainingPeaks has no authorisation to re-grant:
+ * its durable credential is the `Production_tpAuth` session cookie, so "sign in
+ * again" — what `noAccess` already says — is the more accurate remedy.
+ */
+const attentionDetailKey = (source: ConnectionSource): AttentionDetailKey =>
+  // `outdated` is read FIRST and is the one attention cause whose fix is not
+  // signing in. A bridge answering in an unreadable protocol version reaches
+  // `attention` through `error !== null`, so without this branch it fell to the
+  // generic cause and told the reader to sign in — an action that cannot
+  // resolve a version mismatch, beside a banner on the same screen already
+  // saying the extension is out of date.
+  source.outdated ? "detail.outdated" : "detail.noAccess";
 
 export const detailKeyFor = (source: ConnectionSource): string | null => {
   switch (source.status) {
@@ -52,13 +69,6 @@ export const detailKeyFor = (source: ConnectionSource): string | null => {
     case "checking":
       return "detail.checking";
     case "attention":
-      // `outdated` is read FIRST and is the one attention cause whose fix is
-      // not signing in. A bridge answering in an unreadable protocol version
-      // reaches `attention` through `error !== null`, so without this branch it
-      // fell to the generic cause and told the reader to sign in — an action
-      // that cannot resolve a version mismatch, beside a banner on the same
-      // screen already saying the extension is out of date.
-      if (source.outdated) return "detail.outdated";
       // `noAccess` is the fallback because it is the strongest claim the
       // evidence supports. Every remaining case is a probe that came back
       // without a usable read, and no bridge can say why: garmin, train2go and
@@ -70,7 +80,7 @@ export const detailKeyFor = (source: ConnectionSource): string | null => {
       // failed read is no evidence about the user's session at all. The
       // sign-in CTA stays: re-signing in genuinely re-mints. Only the
       // diagnosis attached to it was wrong.
-      return source.needsReauth ? "detail.needsReauth" : "detail.noAccess";
+      return attentionDetailKey(source);
     case "manual":
       return "detail.manual";
     case "unsupported":
