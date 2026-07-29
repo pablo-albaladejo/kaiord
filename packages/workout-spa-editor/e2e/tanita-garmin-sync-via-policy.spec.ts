@@ -13,6 +13,9 @@
  *
  * Bridge discovery + the stubbed reads use the tanita/garmin bridge-stub helpers
  * (chrome.runtime.sendMessage is not interceptable via page.route).
+ *
+ * The control moved out of the retired Extensions tab and into the Tanita
+ * card's Manage panel on /settings/connections.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -39,7 +42,7 @@ const FIXTURE_CSV = readFileSync(
 );
 
 const PROFILE_ID = "tanita-garmin-policy-e2e";
-const EXTENSIONS_ROUTE = "/settings/extensions";
+const CONNECTIONS_ROUTE = "/settings/connections";
 const EXPECTED_LEDGER_ROWS = 2;
 
 type DexieDb = {
@@ -50,7 +53,16 @@ type DexieDb = {
 };
 
 const syncButton = (page: Page) =>
-  page.getByRole("button", { name: /Sync Tanita/i });
+  page.getByTestId("connection-body-export-tanita");
+
+/* The Manage panel is collapsed on first paint; the export lives inside it.
+   Tanita has no session prober, so its card settles on "installed" — which is
+   still a manageable state, so the panel opens. */
+const openTanitaManage = async (page: Page): Promise<void> => {
+  const manage = page.getByTestId("connection-manage-tanita");
+  await expect(manage).toBeVisible({ timeout: 15_000 });
+  await manage.click();
+};
 
 const seedProfile = async (page: Page): Promise<void> => {
   await page.evaluate(async (pid) => {
@@ -111,13 +123,14 @@ test.describe("Tanita → Garmin body-composition sync governance", () => {
   }) => {
     // Arrange
     await installBothStubs(page);
-    await page.goto(EXTENSIONS_ROUTE);
+    await page.goto(CONNECTIONS_ROUTE);
     await waitForDexieReady(page);
     await seedProfile(page);
     await addBodyCompositionExportPolicy(page);
 
     // Act — re-enter with the route live and both bridges discoverable.
-    await page.goto(EXTENSIONS_ROUTE);
+    await page.goto(CONNECTIONS_ROUTE);
+    await openTanitaManage(page);
     await expect(syncButton(page)).toBeEnabled({ timeout: 10_000 });
     await syncButton(page).click();
 
@@ -140,12 +153,13 @@ test.describe("Tanita → Garmin body-composition sync governance", () => {
   }) => {
     // Arrange — both bridges online + discovered, but NO export policy.
     await installBothStubs(page);
-    await page.goto(EXTENSIONS_ROUTE);
+    await page.goto(CONNECTIONS_ROUTE);
     await waitForDexieReady(page);
     await seedProfile(page);
 
     // Act — the button enables on discovery; clicking runs the gated use case.
-    await page.goto(EXTENSIONS_ROUTE);
+    await page.goto(CONNECTIONS_ROUTE);
+    await openTanitaManage(page);
     await expect(syncButton(page)).toBeEnabled({ timeout: 10_000 });
     await syncButton(page).click();
     await expect

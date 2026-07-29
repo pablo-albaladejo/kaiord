@@ -1,4 +1,4 @@
-> Synced: 2026-07-22 (rewrite-whoop-session-bridge)
+> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
 
 # spa-whoop-extension Specification
 
@@ -104,17 +104,21 @@ path are shared across all of them.
 
 ### Requirement: WHOOP connect and disconnect via the bridge
 
-The Athlete Connections section SHALL treat WHOOP as a `bridge` provider:
-"Connect" SHALL open an `app.whoop.com` tab (so the user's session is present
-for capture) and the row SHALL reflect the bridge's discovered session status;
-"Disconnect" SHALL clear the local WHOOP bridge linkage, set the connection
-record to `disconnected`, and disable WHOOP's `IntegrationPolicy` flows. No
-WHOOP credential SHALL be stored at any point.
+The Connections page (`/settings/connections`, see `spa-connections-page`) SHALL
+treat WHOOP as a `bridge` provider: its card SHALL reflect the bridge's
+discovered session status, and "Disconnect" SHALL clear the local WHOOP bridge
+linkage, set the connection record to `disconnected`, and disable WHOOP's
+`IntegrationPolicy` flows. No WHOOP credential SHALL be stored at any point.
 
-#### Scenario: Connect opens the WHOOP tab
+A bridge provider SHALL NOT be offered a "Connect" action that opens the
+provider's site: installing an extension cannot be done from the page, and
+nothing captures a session as a result of the tab opening. Re-linking a WHOOP
+the user disconnected SHALL be offered only while the extension is present.
 
-- **WHEN** the user clicks Connect on the WHOOP row
-- **THEN** the SPA opens an `app.whoop.com` tab and the row reflects the bridge session status once discovery/ping resolves
+#### Scenario: A present WHOOP bridge reflects its session status
+
+- **WHEN** the WHOOP card renders and discovery/ping resolves
+- **THEN** the card SHALL reflect the bridge session status, and SHALL offer no action that opens `app.whoop.com`
 
 #### Scenario: Disconnect clears linkage and disables flows
 

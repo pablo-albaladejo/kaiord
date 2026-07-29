@@ -10,7 +10,7 @@ every export/Garmin push is a real data-fidelity defect.
 
 ## What Changes
 
-- **Prefetch-on-demand of coach descriptions.** Because the Train2Go *weekly*
+- **Prefetch-on-demand of coach descriptions.** Because the Train2Go _weekly_
   endpoint returns no descriptions (only the per-day `?source=sidebar` response
   does), opening or converting/exporting a coaching activity whose `description`
   is not yet populated triggers a single `expandDay`/`readDay` fetch so the
@@ -32,12 +32,14 @@ every export/Garmin push is a real data-fidelity defect.
 ## Capabilities
 
 ### New Capabilities
+
 - `train2go-coach-links`: end-to-end preservation of Train2Go coach instructions
   and embedded links — prefetch-on-demand availability, mapping into the canonical
   KRD workout-level notes, export/push preservation (full to ZWO, best-effort to
   FIT/Garmin), and editor visibility/editability.
 
 ### Modified Capabilities
+
 - `krd-format`: the workout schema gains an optional workout-level `notes` field
   (free text, distinct from step-level `notes`), with documented export semantics
   and round-trip expectations.

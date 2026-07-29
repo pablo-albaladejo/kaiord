@@ -45,6 +45,41 @@ describe("INTEGRATION_REGISTRY", () => {
     }
   );
 
+  // Backs the athlete-connections spec scenario "Mechanism per current
+  // provider". It was pinned on the Athlete page's own CONNECTIONS catalog
+  // until that catalog was retired; the registry is now the only one left.
+  it.each([
+    { id: "garmin", mechanism: "bridge" },
+    { id: "whoop", mechanism: "bridge" },
+    { id: "train2go", mechanism: "bridge" },
+    { id: "trainingpeaks", mechanism: "bridge" },
+    { id: "tanita", mechanism: "bridge" },
+    { id: "intervals", mechanism: "api-key" },
+    { id: "strava", mechanism: "not-supported" },
+    { id: "wahoo", mechanism: "not-supported" },
+    { id: "manual", mechanism: "manual" },
+  ])("should declare $id as $mechanism", ({ id, mechanism }) => {
+    // Arrange
+
+    // Act
+    const entry = INTEGRATION_REGISTRY.find((e) => e.id === id);
+
+    // Assert
+    expect(entry?.mechanism).toBe(mechanism);
+  });
+
+  it("should give every registry entry a mechanism", () => {
+    // Arrange
+
+    // Act
+    const missing = INTEGRATION_REGISTRY.filter(
+      (entry) => entry.mechanism === undefined
+    );
+
+    // Assert
+    expect(missing).toEqual([]);
+  });
+
   it("should require no bridge id for non-bridge mechanisms", () => {
     // Arrange
 

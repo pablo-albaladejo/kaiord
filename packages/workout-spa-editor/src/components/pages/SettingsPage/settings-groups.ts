@@ -26,8 +26,6 @@ const YOUR_DATA_ROWS: ReadonlyArray<SettingsRowDef> = [
     key: "manageYourData",
     to: "/settings/privacy?section=data-management",
   },
-  { icon: "link", key: "extensions", to: "/settings/extensions" },
-  { icon: "route", key: "dataHub", to: "/settings/data-hub" },
 ];
 
 const AI_ROWS: ReadonlyArray<SettingsRowDef> = [

@@ -4,7 +4,7 @@ Train2Go coach instructions — free text plus YouTube/Dropbox links — are los
 import. Two verified causes (see
 `.omc/specs/deep-dive-trace-train2go-import-drops-coach-links.md`):
 
-1. **Parse layer:** the Train2Go *weekly* response carries no descriptions; only
+1. **Parse layer:** the Train2Go _weekly_ response carries no descriptions; only
    the per-day `?source=sidebar` response does (`parseDailyHtml` →
    `extractDescription` → `anchorToMarkdown` produces `[label](url)`).
 2. **Model layer:** the description lives only in SPA `raw.description`
@@ -18,12 +18,14 @@ Hexagonal layers touched: **domain** (`@kaiord/core` workout schema), **adapters
 ## Goals / Non-Goals
 
 **Goals:**
+
 - A first-class, canonical home in KRD for workout-level coach instructions.
 - Coach description present after weekly import without a manual "open day" step.
 - Preserve instructions on export (full to ZWO; best-effort to FIT/Garmin) and make
   them visible/editable in the editor.
 
 **Non-Goals:**
+
 - Eager prefetch of every day on weekly sync (network cost).
 - Lossless FIT/Garmin round-trip of long descriptions (format-limited).
 - New Train2Go endpoints or weekly-parser changes.
@@ -32,9 +34,11 @@ Hexagonal layers touched: **domain** (`@kaiord/core` workout schema), **adapters
 ## Decisions
 
 ### D1 — Add optional `notes` to `workoutSchema` (domain)
+
 Add `notes: z.string().optional()` at the workout level in
 `packages/core/src/domain/schemas/workout.ts`, distinct from step `notes` and
 `name`. No length cap in the domain (adapters truncate at their boundary).
+
 - **Why `notes` over `description`:** symmetry with the existing step-level `notes`
   and FIT's `wkt_step.notes` semantics. ZWO maps it to its own `description`.
 - **Why not `extensions.coach.description`:** the escape hatch is for
@@ -44,12 +48,14 @@ Add `notes: z.string().optional()` at the workout level in
   `docs/krd-format.md`.
 
 ### D2 — Prefetch-on-demand in the application convert path
+
 Ensure the coach `description` is present **before** KRD is built. Reuse the
 existing `expandDay` use case (`expand-day.ts`). Place the guard in the application
 convert use cases (`convertCoachingActivity`, `convertCoachingActivityManual`,
 `convertCoachingActivityWithAi`) so every caller — not just the dialog — benefits:
 if `activity.description === undefined`, `await expandDay(...)` then re-read the
 activity. A persisted `""` is "known empty" and skips the fetch.
+
 - **Why application, not UI:** single source of truth; the dialog already
   lazy-loads on open, but convert/export must not depend on the dialog having been
   opened. Ports already available to these use cases: `CoachingTransport`,
@@ -59,27 +65,33 @@ activity. A persisted `""` is "known empty" and skips the fetch.
 - **Layer:** application; no new port (reuses `CoachingTransport`).
 
 ### D3 — ZWO maps workout `notes` ↔ ZWO `description` (canonicalize)
+
 ZWO currently round-trips its workout `description` via `extensions.zwift.description`.
 Promote it: the ZWO converter maps `description` ↔ KRD workout `notes` as the
 canonical home. `extensions.zwift.*` keeps ZWO-only metadata (author, tags) that
 has no KRD field.
+
 - **Why:** avoid two sources of truth for the same concept. Existing ZWO
   round-trip tests that assert `extensions.zwift.description` must be updated to
   assert workout-level `notes` (with a compatibility read if needed).
 - **Layer:** `@kaiord/zwo` adapter.
 
 ### D4 — FIT/Garmin best-effort step note (asymmetric)
+
 On **export**, if KRD workout `notes` is present, attach it (leading 256 chars)
 to the first workout step's `notes` when that step has none, so Garmin shows it.
 On **import** (FIT→KRD), do NOT lift step notes into workout `notes` (ambiguous —
 a step note may be genuinely step-scoped). The asymmetry is intentional and
 documented; the export loss is surfaced per `conversion-loss-honesty`.
+
 - **Layer:** `@kaiord/fit` (writer), inherited by `@kaiord/garmin*` push.
 
 ### D5 — Editor exposes workout-level notes
+
 Add a workout-level notes field to the editor that reads/writes `krd.workout.notes`
 through the existing workout-store → save → Dexie path (editor runtime in Zustand;
 persisted via the normal save). Sidebar continues to render `raw.description`.
+
 - **Layer:** SPA UI + workout-store.
 
 ## Risks / Trade-offs

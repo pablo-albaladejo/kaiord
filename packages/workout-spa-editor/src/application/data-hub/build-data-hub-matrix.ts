@@ -1,11 +1,14 @@
 /**
- * build-data-hub-matrix — pure assembly of the Data Hub matrix (F4.1).
+ * build-data-hub-matrix — pure assembly of the routing matrix (F4.1).
  *
  * Rows = the managed data types (registry labels); columns = the
  * INTEGRATION_REGISTRY entries; each applicable (dataType, integration,
  * direction) is one cell whose state is derived by `cellState` (see
  * data-hub-cell-state) — never guessed. Pure: all live signals are injected,
- * so the hook layer wires Dexie/discovery and this stays unit-testable.
+ * so the caller wires Dexie/discovery and this stays unit-testable.
+ *
+ * The matrix UI that named it was retired; the derivation is now read by the
+ * `get_data_routes` chat tool, which is its only caller.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
@@ -42,21 +45,6 @@ export type DataHubRow = {
   label: string;
   cells: DataHubCell[];
 };
-
-/** Shared cell-callback shapes, threaded through DataHubTab → DataHubMatrix
-    → DataHubMatrixRow → DataHubCell. */
-export type DataHubToggleHandler = (
-  dataType: ManagedDataType,
-  bridgeId: string,
-  cell: DataHubCell
-) => void;
-export type DataHubSetModeHandler = (
-  dataType: ManagedDataType,
-  bridgeId: string,
-  cell: DataHubCell,
-  mode: IntegrationPolicyMode
-) => void;
-export type DataHubRemoveHandler = (routeId: string) => void;
 
 const DIRECTIONS: readonly IntegrationPolicyDirection[] = ["import", "export"];
 

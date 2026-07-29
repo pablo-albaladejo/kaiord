@@ -1,4 +1,4 @@
-> Synced: 2026-06-22 (energy-balance-tracking)
+> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
 
 # SPA Persistence Port
 
@@ -608,5 +608,12 @@ Known gaps, not closed by this requirement: composite-primary-key tables (`aiMod
 
 #### Scenario: A delete outside the decorator's shape is tombstoned by its use case
 
-- **WHEN** a lab report, its lab values, or a Data Hub route is deleted by the user
+- **WHEN** a lab report or its lab values are deleted by the user
 - **THEN** the use case SHALL record the corresponding `[table+id]` tombstones in the same transaction, so those rows do not resurrect on the next merge
+
+#### Scenario: A hand-tombstoned delete with no producer claims no user action
+
+- **GIVEN** `deleteIntegrationPolicy`, whose only production caller was the retired routing matrix's per-route "Remove route" control
+- **WHEN** the requirement is read
+- **THEN** it SHALL be described as a port capability awaiting a producer, NOT as an action a user can take, because no surface can currently trigger it — turning a route off writes `enabled: false` and deletes nothing
+- **AND** any surface that later offers route removal SHALL route it through that use case, so the tombstone is written in the same transaction

@@ -18,7 +18,7 @@ type Props = { profileId: string; byDataType: DataFlowsByType };
  */
 export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
   const t = useTranslate("connections");
-  const { rows, lastSyncedAt, options } = useDataTypeRouting(
+  const { rows, lastSyncedAt, options, toggles } = useDataTypeRouting(
     profileId,
     byDataType
   );
@@ -49,6 +49,7 @@ export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
             byType={byType}
             lastSyncedAt={lastSyncedAt}
             options={options}
+            toggles={toggles}
           />
         ))}
       </div>
