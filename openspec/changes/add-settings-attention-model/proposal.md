@@ -30,22 +30,45 @@ inline value, with copy limited to what the state can actually support.
 - **The banner and the chip render the same model, never together.** The index
   carries the banner; the rail carries the chip. An open section states the
   consequence once.
-- **The Connections row counts installed bridges, not live sessions.** A
+- **The Connections row counts detected bridges, not live sessions.** A
   session count cannot reach its own denominator — Tanita is never probed — so
   "4 of 5" would be a permanent ceiling that reads as a defect. `discovered`
-  reaches 5 of 5.
-- **The consequence line says only what state backs.** `lastSyncAt` survives a
-  reload, so "No new data since <date>" is sayable; `lastCheckedAt` records
-  when the SPA last probed, so "down for three days" is not, and is not
-  shipped. A re-authorisation reads "Session signed out", the wording the
-  popups already use, because `needsReauth` is set by the TrainingPeaks probe
-  alone and WHOOP genuinely cannot distinguish an expired token from never
-  having signed in.
+  reaches 5 of 5. It says "detected", not "installed": a page cannot enumerate
+  installed extensions, only those that announced themselves and answered a
+  ping this page-life.
+- **The row stays bare until the first refresh pass completes.** All five rows
+  exist from the first render and read undiscovered because nothing has been
+  asked yet, so a value rendered then would tell a fully equipped user
+  "0 of 5" for as long as discovery takes. The store now exposes
+  `hasRefreshed()` and notifies once when the first pass completes — that pass
+  changes no row in an empty browser, so without the extra notification no
+  consumer would ever hear the answer arrive.
+- **The consequence line says only what state backs, ranked by what the reader
+  can act on.** A sign-in instruction and an out-of-date extension each name
+  their own fix and each routinely coexists with a `lastSyncAt` — you only get
+  a re-auth demand for an account you were already syncing — so both outrank
+  the date. `lastSyncAt` survives a reload, so "No new data since <date>" is
+  sayable, in the reader's calendar day; `lastCheckedAt` records when the SPA
+  last probed, so "down for three days" is not, and is not shipped. A
+  re-authorisation reads "Session signed out", the wording the popups already
+  use, because `needsReauth` is set by the TrainingPeaks probe alone and WHOOP
+  genuinely cannot distinguish an expired token from never having signed in.
+- **A protocol mismatch stops being reported as a failed check.** The ping
+  probers answer an unsupported `protocolVersion` with a precise diagnosis
+  ("Update your Kaiord … extension"), which the result type could not carry:
+  it looked exactly like an unreachable bridge. `SessionProbeResult` and the
+  runtime entry gain an `outdated` flag, so the banner says "An extension is
+  out of date — update it to resume" instead of the untrue "The last check
+  failed". With no CTA, that line is the only channel the diagnosis has.
+- **Both surfaces are polite live regions.** They appear seconds after the
+  page renders and can appear again on any later poll, so a reader who is not
+  looking at them is otherwise never told (WCAG 2.2 AA 4.1.3). Each truncated
+  line also carries its full text as a tooltip.
 - **The banner declares no action.** No surface in the SPA can fix a broken
   bridge today: `ExtensionsTab` lists three of the five bridges and offers a
   status refresh, not a fix. A CTA would be a dead end for WHOOP and
   TrainingPeaks. The action slot stays unfed until Wave 1's Connections page.
-- **Five keys are added in `en` and `es`** — one row value and four attention
+- **Six keys are added in `en` and `es`** — one row value and five attention
   strings. No bridge name is interpolated into any of them.
 
 Out of scope: the Connections page and per-source cards, a manual refresh
@@ -75,17 +98,24 @@ not the sibling's.
 ## Impact
 
 - **Package**: `@kaiord/workout-spa-editor` (private SPA) only. No domain,
-  application, port or adapter change; no dependency added; no Dexie schema
-  change and no new table — bridge runtime state stays in memory, and the
-  persistence boundary guard's file list is untouched.
+  application or port change; no dependency added; no Dexie schema change and
+  no new table — bridge runtime state stays in memory, and the persistence
+  boundary guard's file list is untouched (no bridge module was added, renamed
+  or split).
+- **Adapter change**: `SessionProbeResult` and `BridgeConnectionRuntime` each
+  gain a required `outdated: boolean`, with an `outdatedExtension()`
+  constructor beside `active()`/`inactive()`. Consumers of the model are
+  unaffected; every fixture that CONSTRUCTS a probe result or a runtime entry
+  gains one field. `BridgeConnectionStore` also gains `hasRefreshed()`.
 - **New files**: `connection-attention.ts`, `use-settings-attention.ts` and
   `use-connections-value.ts` under `components/pages/SettingsPage/`, plus
-  three test modules.
+  three test modules. `useBridgeConnectionsRefreshed()` joins
+  `hooks/use-bridge-connections.ts`.
 - **Runtime cost**: the connection store now polls four bridges (Tanita is
   never messaged) every five minutes for the whole session, outside
   `BRIDGE_QUEUE`. That is the cost the dormant model was deferred against, and
   it is now paid for by two rendered surfaces.
-- **i18n**: five keys added in both locales, none removed or re-worded.
+- **i18n**: six keys added in both locales, none removed or re-worded.
 - **e2e**: no test id and no URL change. `settings-attention-banner` and
   `settings-attention-chip` already exist; the Connections row gains an inline
   value, which no spec asserts on.
