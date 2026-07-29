@@ -52,7 +52,7 @@ const signals = (
   o: Partial<DataHubMatrixSignals> = {}
 ): DataHubMatrixSignals => ({
   isConnected: () => false,
-  isBridgeOnline: () => false,
+  isBridgeConnected: () => false,
   bridgeAnnounces: () => false,
   isRouteEnabled: () => false,
   lastSyncedAt: () => undefined,
@@ -118,7 +118,7 @@ describe("buildDataHubMatrix", () => {
     // An enabled policy must NOT make a cell active while the bridge is offline.
     const s = signals({
       isRouteEnabled: () => true,
-      isBridgeOnline: () => false,
+      isBridgeConnected: () => false,
     });
 
     // Act
@@ -130,11 +130,15 @@ describe("buildDataHubMatrix", () => {
     );
   });
 
-  it("should ignore the connections store for a bridge cell", () => {
+  it("should ignore the api-key connected signal for a bridge cell", () => {
     // Arrange
-    // A connections-store row (isConnected) is irrelevant to bridges — only
-    // discovery (isBridgeOnline) counts, so it stays not-connected.
-    const s = signals({ isConnected: () => true, isBridgeOnline: () => false });
+    // `isConnected` answers for api-key providers only. A bridge reads
+    // `isBridgeConnected`, which folds discovery and the connection record
+    // together, so an unrelated true here cannot rescue the cell.
+    const s = signals({
+      isConnected: () => true,
+      isBridgeConnected: () => false,
+    });
 
     // Act
     const rows = buildDataHubMatrix(INTEGRATIONS, s);
@@ -148,7 +152,7 @@ describe("buildDataHubMatrix", () => {
   it("should mark an eligible online bridge available without a policy", () => {
     // Arrange
     const s = signals({
-      isBridgeOnline: (b) => b === "garmin-bridge",
+      isBridgeConnected: (b) => b === "garmin-bridge",
       bridgeAnnounces: (b, t) =>
         b === "garmin-bridge" && t === "write:workouts",
     });
@@ -163,7 +167,7 @@ describe("buildDataHubMatrix", () => {
   it("should mark an enabled route active and surface its freshness", () => {
     // Arrange
     const s = signals({
-      isBridgeOnline: (b) => b === "garmin-bridge",
+      isBridgeConnected: (b) => b === "garmin-bridge",
       bridgeAnnounces: (b, t) =>
         b === "garmin-bridge" && t === "write:workouts",
       isRouteEnabled: (dt, dir, b) =>
@@ -185,7 +189,7 @@ describe("buildDataHubMatrix", () => {
     // Arrange
     // garmin is online but never announces the planned-session import token.
     const s = signals({
-      isBridgeOnline: () => true,
+      isBridgeConnected: () => true,
       bridgeAnnounces: () => false,
     });
 
@@ -199,7 +203,7 @@ describe("buildDataHubMatrix", () => {
   it("should surface the existing route id and mode on an active cell", () => {
     // Arrange
     const s = signals({
-      isBridgeOnline: (b) => b === "garmin-bridge",
+      isBridgeConnected: (b) => b === "garmin-bridge",
       bridgeAnnounces: (b, t) =>
         b === "garmin-bridge" && t === "write:workouts",
       isRouteEnabled: (dt, dir, b) =>
@@ -225,7 +229,7 @@ describe("buildDataHubMatrix", () => {
     // isRouteEnabled defaults to false, so the cell stays "available" even
     // though a (disabled) route already exists with its own mode.
     const s = signals({
-      isBridgeOnline: (b) => b === "garmin-bridge",
+      isBridgeConnected: (b) => b === "garmin-bridge",
       bridgeAnnounces: (b, t) =>
         b === "garmin-bridge" && t === "write:workouts",
       findRoute: (dt, dir, b) =>
@@ -247,7 +251,7 @@ describe("buildDataHubMatrix", () => {
   it("should leave routeId/routeMode undefined when no route exists yet", () => {
     // Arrange
     const s = signals({
-      isBridgeOnline: (b) => b === "garmin-bridge",
+      isBridgeConnected: (b) => b === "garmin-bridge",
       bridgeAnnounces: (b, t) =>
         b === "garmin-bridge" && t === "write:workouts",
     });

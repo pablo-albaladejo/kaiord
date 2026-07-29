@@ -6,51 +6,17 @@
  * a plain async function, so the application-layer tool never imports
  * adapters directly (patrón do-push-to-garmin.ts).
  */
-import type { ManagedDataType } from "@kaiord/core";
-import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
-
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
+import { isBridgeConnected } from "../../application/connections/connected-source";
 import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
 import {
   byIntegrationId,
   readBridgeSyncStates,
 } from "../../application/data-hub/read-bridge-sync-states";
 import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
+import { integrationIdForBridge } from "../../integrations/integration-registry";
 import type { PersistencePort } from "../../ports/persistence-port";
-import type { IntegrationPolicy } from "../../types/integration-policy";
-
-type ByDataType = Map<
-  ManagedDataType,
-  { import: IntegrationPolicy[]; export: IntegrationPolicy[] }
->;
-
-const fetchPoliciesByDataType = async (
-  persistence: PersistencePort,
-  profileId: string
-): Promise<ByDataType> => {
-  const byDataType: ByDataType = new Map();
-  for (const dataType of managedDataTypes) {
-    const reg = MANAGED_DATA_REGISTRY[dataType];
-    const [imports, exports] = await Promise.all([
-      reg.capabilities.import
-        ? persistence.integrationPolicy.findByProfileDirection({
-            profileId,
-            dataType,
-            direction: "import",
-          })
-        : Promise.resolve([]),
-      reg.capabilities.export
-        ? persistence.integrationPolicy.findByProfileDirection({
-            profileId,
-            dataType,
-            direction: "export",
-          })
-        : Promise.resolve([]),
-    ]);
-    byDataType.set(dataType, { import: imports, export: exports });
-  }
-  return byDataType;
-};
+import { fetchPoliciesByDataType } from "./fetch-policies-by-data-type";
 
 export const buildDataRouteSignals = async (
   persistence: PersistencePort,
@@ -69,8 +35,11 @@ export const buildDataRouteSignals = async (
 
   return {
     isConnected: (id) => connectionByProvider.get(id)?.status === "connected",
-    isBridgeOnline: (bridgeId) =>
-      bridgeDiscovery.getExtensionId(bridgeId) !== null,
+    isBridgeConnected: (bridgeId) =>
+      isBridgeConnected(
+        bridgeDiscovery.getExtensionId(bridgeId) !== null,
+        connectionByProvider.get(integrationIdForBridge(bridgeId) ?? "")
+      ),
     bridgeAnnounces: (bridgeId, token) =>
       (bridgeDiscovery.getCapabilities(bridgeId) ?? []).includes(token),
     supportsRoute: bridgeSupportsRoute,

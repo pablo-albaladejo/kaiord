@@ -14,7 +14,6 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 - `BatchCostConfirmation/` — confirmation dialog for AI batch conversion with rolled-up cost estimate.
 - `CoachingSidebar/` — left-side coaching list on the calendar.
 - `EditorContextMenu/` — Radix context menu over the workout list (copy, paste, duplicate, delete).
-- `OnboardingTutorial/` — first-run tutorial flow.
 - `ProfileManager/` — profile CRUD + sport-specific zones tabbed UI.
 - `SettingsPanel/` — settings dialog (AI, Extensions, Privacy, Usage tabs).
 - `StepEditor/` — main step-edit form (sport-aware fields, target picker, duration picker, notes).

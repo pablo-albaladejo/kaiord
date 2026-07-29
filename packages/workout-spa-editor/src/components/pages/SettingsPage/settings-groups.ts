@@ -3,9 +3,12 @@ import type { SettingsGroupDef, SettingsRowDef } from "./settings-group-types";
 const DOCS_URL = "https://kaiord.com/docs/";
 
 const YOUR_DATA_ROWS: ReadonlyArray<SettingsRowDef> = [
-  // TODO(S3): re-point at /settings/connections once that page exists;
-  // /athlete is the interim destination.
-  { icon: "link", key: "connections", to: "/athlete", valueKey: "connections" },
+  {
+    icon: "link",
+    key: "connections",
+    to: "/settings/connections",
+    valueKey: "connections",
+  },
   {
     icon: "sync",
     key: "googleDriveSync",
@@ -65,6 +68,9 @@ const PREFERENCES_ROWS: ReadonlyArray<SettingsRowDef> = [
 
 const ABOUT_ROWS: ReadonlyArray<SettingsRowDef> = [
   { icon: "help", key: "helpDocs", href: DOCS_URL },
+  // Replaces the retired "Replay Tutorial" button: there is no tour to
+  // replay, so this re-arms the coach marks the profile already dismissed.
+  { icon: "sparkle", key: "replayTips", action: "replayCoachMarks" },
 ];
 
 export const SETTINGS_GROUPS: ReadonlyArray<SettingsGroupDef> = [

@@ -72,43 +72,51 @@ action, and SHALL do so while no surface can act on the attention it reports.
 
 ## ADDED Requirements
 
-### Requirement: Attention is derived from failure, never from an absent session
+### Requirement: The shell counts exactly what the Connections section marks
 
-The shell SHALL derive its attention model from the unified bridge connection
-model, and SHALL treat a connection as needing attention when its last probe
-reported an error OR when it demands re-authorisation. An installed bridge that
-holds no live session SHALL NOT by itself need attention.
+The shell SHALL derive its attention model from the same per-source status the
+Connections section renders its cards from, and SHALL count a source as needing
+attention when — and only when — that status is the attention one. It SHALL NOT
+carry a second predicate over the raw connection rows: a summary that can
+disagree with the surface it summarises is worse than no summary, and the
+card-status derivation already resolves the cases a naive rule gets wrong.
 
-This rule is forced by the probe set, not chosen for taste: a bridge with no
-registered session prober is reported as discovered with no session and no
-error, permanently, so a session-shaped rule would report it as broken for as
-long as it stays installed. A bridge the user has simply signed out of is a
-state, not a fault.
+Those cases are the reason the rule is not "present but no session": a source
+that is never session-probed reads as installed rather than broken, one whose
+first probe has not answered reads as being checked, and one the user unlinked
+or whose extension is not running reads as available. None of them is a fault
+to announce.
 
-The model SHALL name how many connections are affected and SHALL NOT name which
+The model SHALL name how many sources are affected and SHALL NOT name which
 ones, so no source name is interpolated into the announcement.
 
-#### Scenario: A failed probe needs attention
+#### Scenario: An affected source is counted
 
-- **GIVEN** a connection whose last probe reported an error
+- **GIVEN** a source whose card is marked as needing attention
 - **WHEN** the attention model is derived
-- **THEN** that connection SHALL be counted as needing attention
+- **THEN** that source SHALL be counted, and the count SHALL equal the number of such cards
 
-#### Scenario: A re-authorisation demand needs attention
+#### Scenario: An unprobed present source is not attention
 
-- **GIVEN** a connection that reports it must be signed in again
-- **WHEN** the attention model is derived
-- **THEN** that connection SHALL be counted as needing attention
-
-#### Scenario: An unprobed installed bridge is not attention
-
-- **GIVEN** an installed bridge that has no session prober, and therefore reports no session and no error
+- **GIVEN** a source that is never session-probed, and therefore reports no session and no error
 - **WHEN** the attention model is derived
 - **THEN** it SHALL NOT be counted as needing attention
 
-#### Scenario: No affected connection produces no model
+#### Scenario: A source awaiting its first answer is not attention
 
-- **GIVEN** every known connection reports no error and no re-authorisation demand
+- **GIVEN** a probed source whose first probe has not recorded an answer
+- **WHEN** the attention model is derived
+- **THEN** it SHALL NOT be counted, because not knowing is not the same as broken
+
+#### Scenario: An absent or unlinked source is not attention
+
+- **GIVEN** a source the user unlinked, or whose extension is not running
+- **WHEN** the attention model is derived
+- **THEN** it SHALL NOT be counted as needing attention
+
+#### Scenario: No affected source produces no model
+
+- **GIVEN** no source is marked as needing attention
 - **WHEN** the attention model is derived
 - **THEN** the model SHALL be absent and both slots SHALL render nothing
 
@@ -121,14 +129,16 @@ sign in again and an extension speaking an unsupported protocol version each
 name their own fix, and each routinely coexists with a recorded last-sync time,
 so both SHALL outrank the date.
 
-An unsupported protocol version SHALL NOT be reported as a failed check: the
-probe succeeded and produced a diagnosis, so the line SHALL say the extension
-is out of date.
+An unsupported protocol version SHALL NOT be reported as a session problem: the
+probe succeeded and produced a diagnosis, and signing in again would fix
+nothing, so the line SHALL say the extension is out of date.
 
-A re-authorisation demand SHALL be described as a signed-out session rather
-than as an expired credential, because only one bridge's probe distinguishes
-the two and the others cannot tell an expired token from a session that never
-existed.
+Every remaining affected source is a reachable extension without a usable
+session, so the line SHALL describe it as signed out — the same verdict its
+card states — and SHALL NOT claim that a credential expired or that the check
+itself failed. Only one bridge's probe distinguishes an expired credential from
+one that was never issued, and no probe reports a failure the card calls a
+session problem.
 
 The time of the last probe SHALL NOT be presented as the time a source broke,
 and no duration of breakage SHALL be stated, because no transition timestamp is
@@ -150,19 +160,19 @@ the reader's calendar day rather than the UTC one.
 
 #### Scenario: An outdated extension is told to update
 
-- **GIVEN** an affected connection whose probe answered with an unsupported protocol version
+- **GIVEN** an affected source whose probe answered with an unsupported protocol version
 - **WHEN** the consequence line is built
-- **THEN** it SHALL state that an extension is out of date, and SHALL NOT state that the check failed
+- **THEN** it SHALL state that an extension is out of date, and SHALL NOT tell the user to sign in
 
 #### Scenario: Several affected sources state the cause, not a date
 
-- **GIVEN** more than one connection needs attention and none reports an actionable cause
+- **GIVEN** more than one source needs attention and none reports an actionable cause
 - **WHEN** the consequence line is built
-- **THEN** it SHALL state that the last check failed and SHALL NOT state a date
+- **THEN** it SHALL state that the session is signed out and SHALL NOT state a date belonging to one of them
 
 #### Scenario: An unusable timestamp is ignored
 
-- **GIVEN** an affected connection whose recorded last-sync value does not parse as a date
+- **GIVEN** an affected source whose recorded last-sync value does not parse as a date
 - **WHEN** the consequence line is built
 - **THEN** the date SHALL be omitted rather than rendered as an invalid value
 

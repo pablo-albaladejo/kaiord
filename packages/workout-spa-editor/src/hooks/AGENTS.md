@@ -22,7 +22,6 @@ Custom React hooks. This is where the SPA bridges the persistence layer (Dexie v
 ### Editor + workflow hooks
 
 - `use-store-hydration.ts` / `.test.ts` — boot-time Zustand → Dexie hydration trigger.
-- `use-onboarding-tutorial.ts` — tracks first-run tutorial visibility.
 - `use-app-keyboard-handlers.ts` — wires the global keyboard shortcuts at the `<App />` level.
 - `useKeyboardShortcuts.ts` / `.test.ts` (+ `keyboard-shortcut-handlers.ts` + `modifier-shortcut-handlers.ts`) — keyboard-shortcut machinery for the editor.
 - `useAppHandlers.ts` — top-level app handlers shared by header + workflow bar.

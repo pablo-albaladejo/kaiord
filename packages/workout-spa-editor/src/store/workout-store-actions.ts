@@ -1,4 +1,5 @@
 import { clearExpiredDeletesAction } from "./actions/clear-expired-deletes-action";
+import { deleteStepsAction } from "./actions/delete-steps-action";
 import { undoDeleteAction } from "./actions/undo-delete-action";
 import { createAllBlockActions } from "./create-all-block-actions";
 import { createAllStepActions } from "./create-all-step-actions";
@@ -9,10 +10,15 @@ const createStepActions = () => ({
   createStep: (state: WorkoutState) => createAllStepActions(state).createStep(),
   deleteStep: (stepIndex: number, state: WorkoutState) =>
     createAllStepActions(state).deleteStep(stepIndex),
-  undoDelete: (timestamp: number, state: WorkoutState) => {
+  deleteSteps: (stepIndices: ReadonlyArray<number>, state: WorkoutState) => {
     const currentWorkout = state.currentWorkout;
     if (!currentWorkout) return {};
-    return undoDeleteAction(currentWorkout, timestamp, state);
+    return deleteStepsAction(currentWorkout, stepIndices, state);
+  },
+  undoDelete: (groupId: string, state: WorkoutState) => {
+    const currentWorkout = state.currentWorkout;
+    if (!currentWorkout) return {};
+    return undoDeleteAction(currentWorkout, groupId, state);
   },
   clearExpiredDeletes: (state: WorkoutState) =>
     clearExpiredDeletesAction(state),
@@ -33,6 +39,12 @@ const createStepActions = () => ({
     ),
 });
 
+/** The two (blockId, stepIndex) block-step actions share one shape. */
+const blockStepAction =
+  (name: "duplicateStepInRepetitionBlock" | "deleteStepInRepetitionBlock") =>
+  (blockId: string, stepIndex: number, state: WorkoutState) =>
+    createAllBlockActions(state)[name](blockId, stepIndex);
+
 const createBlockActions = () => ({
   createRepetitionBlock: (
     stepIndices: Array<number>,
@@ -52,15 +64,10 @@ const createBlockActions = () => ({
   ) => createAllBlockActions(state).editRepetitionBlock(blockId, repeatCount),
   addStepToRepetitionBlock: (blockId: string, state: WorkoutState) =>
     createAllBlockActions(state).addStepToRepetitionBlock(blockId),
-  duplicateStepInRepetitionBlock: (
-    blockId: string,
-    stepIndex: number,
-    state: WorkoutState
-  ) =>
-    createAllBlockActions(state).duplicateStepInRepetitionBlock(
-      blockId,
-      stepIndex
-    ),
+  duplicateStepInRepetitionBlock: blockStepAction(
+    "duplicateStepInRepetitionBlock"
+  ),
+  deleteStepInRepetitionBlock: blockStepAction("deleteStepInRepetitionBlock"),
   ungroupRepetitionBlock: (blockId: string, state: WorkoutState) =>
     createAllBlockActions(state).ungroupRepetitionBlock(blockId),
   deleteRepetitionBlock: (blockId: string, state: WorkoutState) =>

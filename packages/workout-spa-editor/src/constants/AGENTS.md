@@ -9,7 +9,8 @@ Pure data constants shared across the SPA. No logic, no side effects.
 
 ## Key Files
 
-- `tutorial-steps.ts` — declarative tutorial step list consumed by `AppTutorial.tsx`.
+- `shortcut-catalog.ts` / `.test.ts` — the single source of truth for every keyboard binding the SPA ships; the test pairs it to `KeyboardShortcutHandlers`.
+- `shortcut-rows-{global,edit,steps}.ts` — the catalog's three row groups.
 
 ## For AI Agents
 

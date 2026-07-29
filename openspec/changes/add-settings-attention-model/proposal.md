@@ -22,11 +22,15 @@ inline value, with copy limited to what the state can actually support.
   `useBridgeConnectionsBootstrap`, so the five-minute poll, the discovery
   subscription and the visibility refresh exist once per boot. The test that
   pinned the store as unmounted now pins it as mounted.
-- **"Needs attention" is `error !== null || needsReauth`.** Not the
-  session-shaped rule (discovered, no session): `tanita-bridge` has no session
-  prober by design — its only session call downloads the whole export CSV — so
-  it is permanently session-inactive, and that rule would report a healthy
-  Tanita as broken forever.
+- **The banner counts exactly what the Connections section marks.** Attention
+  is `source.status === "attention"` over the same `useConnectionSources` list
+  the cards render, not a second predicate over the raw bridge rows. That
+  derivation already resolves the cases a naive rule gets wrong: a bridge with
+  no session prober (`tanita-bridge`, whose only session call downloads the
+  whole export CSV) reads as installed, one whose first probe has not answered
+  reads as checking, and an unlinked or absent one reads as available. A
+  summary that can disagree with the surface it summarises is worse than no
+  summary.
 - **The banner and the chip render the same model, never together.** The index
   carries the banner; the rail carries the chip. An open section states the
   consequence once.
@@ -49,25 +53,29 @@ inline value, with copy limited to what the state can actually support.
   a re-auth demand for an account you were already syncing — so both outrank
   the date. `lastSyncAt` survives a reload, so "No new data since <date>" is
   sayable, in the reader's calendar day; `lastCheckedAt` records when the SPA
-  last probed, so "down for three days" is not, and is not shipped. A
-  re-authorisation reads "Session signed out", the wording the popups already
-  use, because `needsReauth` is set by the TrainingPeaks probe alone and WHOOP
-  genuinely cannot distinguish an expired token from never having signed in.
-- **A protocol mismatch stops being reported as a failed check.** The ping
+  last probed, so "down for three days" is not, and is not shipped. Everything
+  else reads "Session signed out", the same verdict the card states and the
+  wording the popups already use, because `needsReauth` is set by the
+  TrainingPeaks probe alone and WHOOP genuinely cannot distinguish an expired
+  token from never having signed in.
+- **A protocol mismatch stops being reported as a session problem.** The ping
   probers answer an unsupported `protocolVersion` with a precise diagnosis
   ("Update your Kaiord … extension"), which the result type could not carry:
-  it looked exactly like an unreachable bridge. `SessionProbeResult` and the
-  runtime entry gain an `outdated` flag, so the banner says "An extension is
-  out of date — update it to resume" instead of the untrue "The last check
-  failed". With no CTA, that line is the only channel the diagnosis has.
+  it looked exactly like a dead session, and signing in again fixes nothing.
+  `SessionProbeResult`, the runtime entry and the card's `ConnectionSource`
+  gain an `outdated` flag, so the banner says "An extension is out of date —
+  update it to resume". With no CTA, that line is the only channel the
+  diagnosis has.
 - **Both surfaces are polite live regions.** They appear seconds after the
   page renders and can appear again on any later poll, so a reader who is not
   looking at them is otherwise never told (WCAG 2.2 AA 4.1.3). Each truncated
   line also carries its full text as a tooltip.
-- **The banner declares no action.** No surface in the SPA can fix a broken
-  bridge today: `ExtensionsTab` lists three of the five bridges and offers a
-  status refresh, not a fix. A CTA would be a dead end for WHOOP and
-  TrainingPeaks. The action slot stays unfed until Wave 1's Connections page.
+- **The banner declares no action.** The Connections section can now act on a
+  broken source — that was not true when this was first written, and it is why
+  the slot exists — but the banner renders only on the index, where the row
+  leading to that section sits directly beneath it. A button duplicating the
+  row immediately below it is noise, so the slot stays unfed and the model
+  keeps declaring it optional.
 - **Six keys are added in `en` and `es`** — one row value and five attention
   strings. No bridge name is interpolated into any of them.
 
@@ -104,9 +112,14 @@ not the sibling's.
   or split).
 - **Adapter change**: `SessionProbeResult` and `BridgeConnectionRuntime` each
   gain a required `outdated: boolean`, with an `outdatedExtension()`
-  constructor beside `active()`/`inactive()`. Consumers of the model are
-  unaffected; every fixture that CONSTRUCTS a probe result or a runtime entry
-  gains one field. `BridgeConnectionStore` also gains `hasRefreshed()`.
+  constructor beside `active()`/`inactive()`/`unreachable()` — reachable on
+  purpose, since the extension answered. `BridgeConnectionStore` also gains
+  `hasRefreshed()`.
+- **Application change**: `BridgeSessionSignal` and `ConnectionSource` carry
+  `outdated` through to the card, mirroring how `needsReauth` already travels.
+  Consumers are unaffected; every fixture that CONSTRUCTS one of these gains a
+  field — and `tsconfig.app.json` excludes `*.test.ts(x)`, so those were found
+  by hand, not by `tsc`.
 - **New files**: `connection-attention.ts`, `use-settings-attention.ts` and
   `use-connections-value.ts` under `components/pages/SettingsPage/`, plus
   three test modules. `useBridgeConnectionsRefreshed()` joins

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { ConnectionSource } from "../../../application/connections/connection-source";
 import type { BridgeConnectionState } from "../../../hooks/use-bridge-connections";
 import { getTranslate } from "../../../i18n/use-translate";
 import {
@@ -9,6 +10,26 @@ import {
 } from "./connection-attention";
 
 const t = getTranslate("settings");
+
+const source = (
+  overrides: Partial<ConnectionSource> = {}
+): ConnectionSource => ({
+  id: "garmin",
+  name: "Garmin",
+  mark: "G",
+  mechanism: "bridge",
+  bridgeId: "garmin-bridge",
+  status: "connected",
+  bridgeDetected: true,
+  disconnected: false,
+  needsReauth: false,
+  outdated: false,
+  sessionVerifiable: true,
+  lastSyncAt: undefined,
+  importTypes: [],
+  exportTypes: [],
+  ...overrides,
+});
 
 const connection = (
   overrides: Partial<BridgeConnectionState> = {}
@@ -34,9 +55,9 @@ const connection = (
 const LAST_SYNC_AT = new Date("2026-07-25T12:00:00").toISOString();
 
 describe("needsAttention", () => {
-  it("should flag a connection whose last probe failed", () => {
+  it("should flag a source the connections page marks for attention", () => {
     // Arrange
-    const entry = connection({ error: "unreachable", sessionActive: false });
+    const entry = source({ status: "attention" });
 
     // Act
     const flagged = needsAttention(entry);
@@ -45,38 +66,18 @@ describe("needsAttention", () => {
     expect(flagged).toBe(true);
   });
 
-  it("should flag a connection whose session must be signed in again", () => {
+  it.each([
+    // A bridge with no session prober; `tanita-bridge` lives here forever.
+    { status: "installed" as const },
+    // Probed, but its first answer has not arrived: not knowing is not broken.
+    { status: "checking" as const },
+    // Unlinked, or its extension is not running.
+    { status: "available" as const },
+    { status: "connected" as const },
+    { status: "manual" as const },
+  ])("should leave a $status source alone", ({ status }) => {
     // Arrange
-    const entry = connection({ needsReauth: true, sessionActive: false });
-
-    // Act
-    const flagged = needsAttention(entry);
-
-    // Assert
-    expect(flagged).toBe(true);
-  });
-
-  it("should leave a probe-less installed bridge alone", () => {
-    // Arrange
-    // `tanita-bridge` is never probed, so it is permanently session-inactive
-    // with no error: a `discovered && !sessionActive` rule would report it as
-    // broken for as long as it stays installed.
-    const tanita = connection({
-      bridgeId: "tanita-bridge",
-      sessionActive: false,
-      lastCheckedAt: null,
-    });
-
-    // Act
-    const flagged = needsAttention(tanita);
-
-    // Assert
-    expect(flagged).toBe(false);
-  });
-
-  it("should leave a signed-out bridge alone until a probe reports why", () => {
-    // Arrange
-    const entry = connection({ sessionActive: false });
+    const entry = source({ status });
 
     // Act
     const flagged = needsAttention(entry);
@@ -106,13 +107,13 @@ describe("countDetected", () => {
 describe("buildAttention", () => {
   it("should build no model when nothing needs attention", () => {
     // Arrange
-    const connections = [
-      connection(),
-      connection({ bridgeId: "tanita-bridge", sessionActive: false }),
+    const sources = [
+      source(),
+      source({ id: "tanita", status: "installed", sessionVerifiable: false }),
     ];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
     expect(attention).toBeNull();
@@ -120,10 +121,10 @@ describe("buildAttention", () => {
 
   it("should name the affected count in the singular", () => {
     // Arrange
-    const connections = [connection({ error: "unreachable" }), connection()];
+    const sources = [source({ status: "attention" }), source({ id: "whoop" })];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
     expect(attention?.title).toBe("1 connection needs attention");
@@ -131,13 +132,13 @@ describe("buildAttention", () => {
 
   it("should name the affected count in the plural", () => {
     // Arrange
-    const connections = [
-      connection({ error: "unreachable" }),
-      connection({ bridgeId: "whoop-bridge", error: "unreachable" }),
+    const sources = [
+      source({ status: "attention" }),
+      source({ id: "whoop", status: "attention" }),
     ];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
     expect(attention?.title).toBe("2 connections need attention");
@@ -145,28 +146,13 @@ describe("buildAttention", () => {
 
   it("should date the consequence from the last data that arrived", () => {
     // Arrange
-    const connections = [
-      connection({ error: "unreachable", lastSyncAt: LAST_SYNC_AT }),
-    ];
+    const sources = [source({ status: "attention", lastSyncAt: LAST_SYNC_AT })];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
     expect(attention?.detail).toBe("No new data since 2026-07-25");
-  });
-
-  it("should report a re-authorisation as signed out rather than expired", () => {
-    // Arrange
-    const connections = [connection({ needsReauth: true })];
-
-    // Act
-    const attention = buildAttention(connections, t);
-
-    // Assert
-    expect(attention?.detail).toBe(
-      "Session signed out — sign in again to resume"
-    );
   });
 
   it("should keep the sign-in instruction when a last-sync date also exists", () => {
@@ -174,17 +160,17 @@ describe("buildAttention", () => {
     // The ordinary case: you only get a re-auth demand for an account you
     // were already syncing, so both facts are present and the actionable one
     // must win.
-    const connections = [
-      connection({
-        bridgeId: "trainingpeaks-bridge",
+    const sources = [
+      source({
+        id: "trainingpeaks",
+        status: "attention",
         needsReauth: true,
-        error: "Session expired",
         lastSyncAt: LAST_SYNC_AT,
       }),
     ];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
     expect(attention?.detail).toBe(
@@ -192,21 +178,16 @@ describe("buildAttention", () => {
     );
   });
 
-  it("should tell an outdated extension to update instead of reporting a failure", () => {
+  it("should tell an outdated extension to update instead of blaming the session", () => {
     // Arrange
     // The probe SUCCEEDED here — the extension answered with an unsupported
-    // protocol version — so "the last check failed" would be untrue.
-    const connections = [
-      connection({
-        error: "Update your Kaiord Garmin Bridge extension",
-        outdated: true,
-        sessionActive: false,
-        lastSyncAt: LAST_SYNC_AT,
-      }),
+    // protocol version — and signing in again would fix nothing.
+    const sources = [
+      source({ status: "attention", outdated: true, lastSyncAt: LAST_SYNC_AT }),
     ];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
     expect(attention?.detail).toBe(
@@ -214,39 +195,43 @@ describe("buildAttention", () => {
     );
   });
 
-  it("should fall back to the failed check when no date backs a consequence", () => {
+  it("should fall back to the signed-out line for several affected sources", () => {
     // Arrange
-    const connections = [
-      connection({ error: "unreachable" }),
-      connection({ bridgeId: "whoop-bridge", error: "unreachable" }),
+    const sources = [
+      source({ status: "attention", lastSyncAt: LAST_SYNC_AT }),
+      source({ id: "whoop", status: "attention" }),
     ];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
-    expect(attention?.detail).toBe("The last check failed");
+    expect(attention?.detail).toBe(
+      "Session signed out — sign in again to resume"
+    );
   });
 
   it("should ignore a stored timestamp that does not parse as a date", () => {
     // Arrange
-    const connections = [
-      connection({ error: "unreachable", lastSyncAt: "not-a-date" }),
-    ];
+    const sources = [source({ status: "attention", lastSyncAt: "not-a-date" })];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
-    expect(attention?.detail).toBe("The last check failed");
+    expect(attention?.detail).toBe(
+      "Session signed out — sign in again to resume"
+    );
   });
 
-  it("should declare no action, because no surface can fix a bridge yet", () => {
+  it("should declare no action, leaving the adjacent row to lead the way", () => {
     // Arrange
-    const connections = [connection({ error: "unreachable" })];
+    // The banner renders only on the index, directly above the row that opens
+    // the Connections section, so a button would duplicate its neighbour.
+    const sources = [source({ status: "attention" })];
 
     // Act
-    const attention = buildAttention(connections, t);
+    const attention = buildAttention(sources, t);
 
     // Assert
     expect(attention?.action).toBeUndefined();

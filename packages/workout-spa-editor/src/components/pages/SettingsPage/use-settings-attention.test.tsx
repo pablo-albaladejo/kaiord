@@ -1,33 +1,38 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { BridgeConnectionState } from "../../../hooks/use-bridge-connections";
+import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useSettingsAttention } from "./use-settings-attention";
 
-const store = vi.hoisted(() => ({ value: [] as BridgeConnectionState[] }));
+const store = vi.hoisted(() => ({ value: [] as ConnectionSource[] }));
 const profile = vi.hoisted(() => ({ value: { id: "p1", profile: null } }));
-const useBridgeConnections = vi.hoisted(() => vi.fn(() => store.value));
+const useConnectionSources = vi.hoisted(() => vi.fn(() => store.value));
 
-vi.mock("../../../hooks/use-bridge-connections", () => ({
-  useBridgeConnections,
+vi.mock("../../../hooks/connections/use-connection-sources", () => ({
+  useConnectionSources,
 }));
 
 vi.mock("../../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: () => profile.value,
 }));
 
-const connection = (
-  overrides: Partial<BridgeConnectionState> = {}
-): BridgeConnectionState => ({
+const source = (
+  overrides: Partial<ConnectionSource> = {}
+): ConnectionSource => ({
+  id: "garmin",
+  name: "Garmin",
+  mark: "G",
+  mechanism: "bridge",
   bridgeId: "garmin-bridge",
-  discovered: true,
-  sessionActive: true,
-  checking: false,
-  error: null,
+  status: "connected",
+  bridgeDetected: true,
+  disconnected: false,
   needsReauth: false,
   outdated: false,
-  lastCheckedAt: 1_700_000_000_000,
+  sessionVerifiable: true,
   lastSyncAt: undefined,
+  importTypes: [],
+  exportTypes: [],
   ...overrides,
 });
 
@@ -40,7 +45,7 @@ const LAST_SYNC_AT = new Date("2026-07-20T12:00:00").toISOString();
 describe("useSettingsAttention", () => {
   it("should produce no attention while every connection is healthy", () => {
     // Arrange
-    store.value = [connection()];
+    store.value = [source()];
 
     // Act
     const { result } = renderHook(() => useSettingsAttention());
@@ -49,13 +54,13 @@ describe("useSettingsAttention", () => {
     expect(result.current).toBeNull();
   });
 
-  it("should produce the attention model from a failed connection", () => {
+  it("should produce the attention model from an affected source", () => {
     // Arrange
     store.value = [
-      connection({
+      source({
+        id: "whoop",
         bridgeId: "whoop-bridge",
-        error: "unreachable",
-        sessionActive: false,
+        status: "attention",
         lastSyncAt: LAST_SYNC_AT,
       }),
     ];
@@ -70,7 +75,7 @@ describe("useSettingsAttention", () => {
     });
   });
 
-  it("should read the connections of the active profile", () => {
+  it("should read the sources of the active profile", () => {
     // Arrange
     store.value = [];
     profile.value = { id: "p1", profile: null };
@@ -79,6 +84,6 @@ describe("useSettingsAttention", () => {
     renderHook(() => useSettingsAttention());
 
     // Assert
-    expect(useBridgeConnections).toHaveBeenCalledWith("p1");
+    expect(useConnectionSources).toHaveBeenCalledWith("p1");
   });
 });

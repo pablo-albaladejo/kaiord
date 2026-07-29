@@ -10,8 +10,7 @@
     "action": "Acción",
     "tryAgain": "Reintentar",
     "dismiss": "Descartar",
-    "back": "Atrás",
-    "help": "Ayuda"
+    "back": "Atrás"
   },
   "status": {
     "connected": "Conectado",
@@ -27,16 +26,26 @@
     "loadingPage": "Cargando página",
     "switchToLightMode": "Cambiar a modo claro",
     "switchToDarkMode": "Cambiar a modo oscuro",
-    "openHelp": "Abrir ayuda",
     "openAthleteProfile": "Abrir perfil de atleta (perfil activo: {{name}})",
     "openAthleteProfileEmpty": "Abrir perfil de atleta (sin perfil activo)"
-  },
-  "help": {
-    "documentation": "Ayuda y documentación",
-    "hint": "Ayuda (?)"
   },
   "bridge": {
     "garmin": "Garmin: {{label}}",
     "train2go": "Train2Go: {{label}}"
+  },
+  "sync": {
+    "syncing": "sincronizando…"
+  },
+  "relativeTime": {
+    "neverSynced": "nunca sincronizado",
+    "justNow": "ahora mismo",
+    "minutesAgo_one": "hace {{count}} minuto",
+    "minutesAgo_other": "hace {{count}} minutos",
+    "hoursAgo_one": "hace {{count}} hora",
+    "hoursAgo_other": "hace {{count}} horas",
+    "yesterday": "ayer",
+    "daysAgo_one": "hace {{count}} día",
+    "daysAgo_other": "hace {{count}} días",
+    "since": "desde el {{date}}"
   }
 }

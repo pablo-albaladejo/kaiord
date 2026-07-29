@@ -57,6 +57,17 @@
 - [x] 6.6 `bridge-connection-store.test.ts`: `hasRefreshed()` before and after a pass, and the first-pass notification when no row changed.
 - [x] 6.7 `use-bridge-connections.test.tsx`: `useBridgeConnectionsRefreshed()` reflects the store and subscribes to it.
 
+## 6b. Integration with the merged programme
+
+- [x] 6b.1 Take main's bootstrap mount wholesale — Wave 1 shipped the identical change — after verifying it mounts the hook and asserts `true`.
+- [x] 6b.2 Replace this change's own attention predicate with `status === "attention"` over `useConnectionSources`, so the banner and the cards cannot disagree. See design.md D0.
+- [x] 6b.3 Accept the two divergences that resolves: a reachable probed source with no session IS attention, and the fallback line is "Session signed out", not "The last check failed" (key deleted).
+- [x] 6b.4 Carry `outdated` through `BridgeSessionSignal` → `ConnectionSource` → the card, mirroring `needsReauth`, rather than keeping a Settings-only field.
+- [x] 6b.5 Give `outdatedExtension()` `reachable: true`: the extension answered, and reporting it as gone would offer the wrong fix.
+- [x] 6b.6 Keep main's `Link`-based rail entries (anchors with `href`, pinned by test) and this change's chip; keep main's `/settings/connections` destination and this change's `valueKey`.
+- [x] 6b.7 Fix every fixture constructing a probe result, a session signal or a `ConnectionSource` BY HAND: `tsconfig.app.json` excludes `*.test.ts(x)`, so a missing required field is silently `undefined` rather than a type error.
+- [x] 6b.8 Re-check the cold-load claim now that a second consumer reads `hasRefreshed()`, and re-check that `broken()` fixtures set `lastCheckedAt` — a probed bridge with none reads as checking, not attention, which would have made the page tests assert nothing.
+
 ## 7. Quality gates
 
 - [x] 7.1 `pnpm -r build` clean.

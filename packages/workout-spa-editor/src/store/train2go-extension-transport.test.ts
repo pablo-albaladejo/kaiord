@@ -200,7 +200,11 @@ describe("train2go-extension-transport", () => {
       const result = await promise;
 
       // Assert
-      expect(result).toEqual({ ok: false, error: "Extension did not respond" });
+      expect(result).toEqual({
+        ok: false,
+        delivered: false,
+        error: "Extension did not respond",
+      });
     });
   });
 

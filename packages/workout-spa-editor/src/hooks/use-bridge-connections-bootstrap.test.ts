@@ -54,8 +54,9 @@ describe("bridge connections bootstrap wiring", () => {
     const mounted = /useBridgeConnectionsBootstrap\(\)/.test(source);
 
     // Assert
-    // Settings reads the connection store, so the polling has a consumer and
-    // the store must run for the whole session, not per mounted page.
+    // The Connections page renders `useBridgeConnections`, so the store has a
+    // consumer and must be polling. An app-scoped mount keeps the cadence and
+    // the positive cache across navigations.
     expect(mounted).toBe(true);
   });
 });

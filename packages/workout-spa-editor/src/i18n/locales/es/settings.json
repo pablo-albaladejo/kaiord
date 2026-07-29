@@ -21,7 +21,8 @@
     "manageYourData": "Gestiona tus datos",
     "extensions": "Extensiones",
     "usage": "Uso",
-    "helpDocs": "Ayuda y documentación"
+    "helpDocs": "Ayuda y documentación",
+    "replayTips": "Mostrar consejos otra vez"
   },
   "values": {
     "connections": {
@@ -46,6 +47,7 @@
   "tabs": {
     "ai": "IA",
     "sync": "Sincronización",
+    "connections": "Conexiones",
     "data-hub": "Data Hub",
     "extensions": "Extensiones",
     "usage": "Uso",
@@ -177,7 +179,6 @@
     "title_other": "{{count}} conexiones requieren atención",
     "noNewDataSince": "Sin datos nuevos desde {{date}}",
     "signedOut": "Sesión cerrada: vuelve a iniciar sesión para reanudarla",
-    "extensionOutdated": "Una extensión está desactualizada: actualízala para reanudar",
-    "lastCheckFailed": "La última comprobación ha fallado"
+    "extensionOutdated": "Una extensión está desactualizada: actualízala para reanudar"
   }
 }

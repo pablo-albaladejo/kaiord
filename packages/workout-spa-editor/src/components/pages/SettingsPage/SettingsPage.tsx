@@ -72,11 +72,7 @@ export default function SettingsPage() {
         <SettingsGroupList onNavigate={navigate} />
       ) : (
         <div className={SPLIT_CLASS}>
-          <SettingsSectionRail
-            activeSection={open}
-            onNavigate={navigate}
-            attention={attention}
-          />
+          <SettingsSectionRail activeSection={open} attention={attention} />
           <div
             id={`settings-panel-${open}`}
             className="min-w-0"

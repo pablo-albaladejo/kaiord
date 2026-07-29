@@ -1,5 +1,34 @@
 # Design — Settings attention model
 
+## D0. Integration: one derivation, not two (added when Wave 1 merged)
+
+This change was written while the Connections section did not exist, so it
+carried its own predicate over the raw bridge rows: `error || needsReauth`.
+Wave 1 then shipped `bridgeSourceStatus`, which answers the same question for
+each card and answers it better — it knows which bridges have a prober at all,
+which have not answered yet, and which the user unlinked.
+
+Keeping both would have produced a banner that can contradict the cards it
+summarises. The shell now counts `status === "attention"` over the same
+`useConnectionSources` list the section renders. Two divergences were resolved
+in the process, both in Wave 1's favour:
+
+- **A reachable, probed source with no session is attention.** My predicate
+  said no (no error), the card says yes. The card is right: it is a source the
+  user can fix by signing in, and that is exactly what the banner should
+  announce. D1's tanita reasoning survives intact — it is preserved by
+  `hasProbe`, not by the error field.
+- **The generic fallback line is "Session signed out", not "The last check
+  failed".** Once the fallback set is "reachable extension without a usable
+  session", a failed-check line is simply false, and Wave 1's spec already
+  fixes the vocabulary ("A source whose session is not usable SHALL be
+  described as signed out"). The `attention.lastCheckFailed` key is gone.
+
+Wave 1's `discovered: result.reachable` also removes the hazard the old
+predicate had: an uninstalled-but-remembered extension keeps returning an error
+forever, which would have pinned the banner open. It now reads as absent, and
+absent is not attention.
+
 ## D1. "Needs attention" is a failure, not an absent session
 
 The obvious predicate is `discovered && !sessionActive`: the extension is here
@@ -15,15 +44,13 @@ outdated: false, lastCheckedAt: null }` — permanently, for as long as the
 extension is installed. A session-shaped predicate would report a perfectly healthy Tanita
 as broken forever, and no user action could ever clear it.
 
-The predicate is `error !== null || needsReauth`, which Tanita never trips.
-
-Its consequence is worth stating: a bridge the user has simply signed out of
-is **not** attention. `inactive()` defaults `error` to `null`, so a clean
-"not signed in" answer is a state, not a fault. Only a transport or protocol
-failure (`inactive(messageOf(err))`) or an explicit re-authorisation demand
-raises the surface. That is the honest reading — an unused source is not a
-problem — and it keeps the banner silent for the common case of a user who
-installed one bridge and never signed into another.
+This change first answered that with `error !== null || needsReauth`, which
+Tanita never trips. Since Wave 1 merged, the same exclusion is reached through
+a better fact — `hasSessionProbe(bridgeId)`, injected into `bridgeSourceStatus`
+— so the shell delegates rather than duplicating the rule (D0). The finding
+that forced it is unchanged and still load-bearing: **whatever decides
+attention may not be shaped like "present but no session"**, because the one
+bridge that can never have a session would live in that shape forever.
 
 ## D2. The counter counts something that can reach its denominator
 
@@ -36,12 +63,16 @@ The row counts `discovered` instead: "3 of 5 detected". Five of five is
 reachable.
 
 **"Detected", not "installed".** A page cannot enumerate installed extensions.
-`discovered` means "announced itself on `window` and passed a ping at some
-point this page-life", and it never goes back down — `bridge-discovery` only
-ever calls `ids.set`, with no `delete`, so an extension the user disables
-mid-session keeps being counted until the next reload. "Installed" would be a
-claim about the browser; "detected" is a claim about what answered, which is
-the one the SPA can actually make.
+`discovered` means "announced itself on `window` and its last probe reached
+it". "Installed" would be a claim about the browser; "detected" is a claim
+about what answered, which is the one the SPA can actually make.
+
+That second half is newer than the word: `bridge-discovery` still only ever
+calls `ids.set`, so discovery alone never forgets an extension, but Wave 1's
+probe writes `discovered: result.reachable`, so a probed bridge that stops
+answering does drop out of the count. `tanita-bridge` is the exception that
+keeps the caveat alive — it is never probed, so nothing can learn it was
+removed, and its card says so in as many words.
 
 `use-connections-value.ts` passes `null` as the profile id on purpose: the
 count reads `discovered` only, and `useBridgeConnections(null)` skips the
@@ -76,15 +107,15 @@ no-prober branch leaves it null forever.
 The banner's second line is where invention is cheapest, so it is restricted
 to state that survives a reload or to the connection's own reported cause:
 
-| Wanted copy                   | Backing state            | Shipped |
-| ----------------------------- | ------------------------ | ------- |
-| "Session signed out"          | `needsReauth`            | yes     |
-| "An extension is out of date" | `outdated`               | yes     |
-| "No new data since <date>"    | `lastSyncAt`             | yes     |
-| "The last check failed"       | `error`                  | yes     |
-| "Down for three days"         | none                     | no      |
-| "Sleep fell back to Garmin"   | none (union has no head) | no      |
-| "WHOOP token expired"         | none                     | no      |
+| Wanted copy                   | Backing state               | Shipped |
+| ----------------------------- | --------------------------- | ------- |
+| "Session signed out"          | `needsReauth`, or fallback  | yes     |
+| "An extension is out of date" | `outdated`                  | yes     |
+| "No new data since <date>"    | `lastSyncAt`                | yes     |
+| "The last check failed"       | nothing says a check FAILED | no      |
+| "Down for three days"         | none                        | no      |
+| "Sleep fell back to Garmin"   | none (union has no head)    | no      |
+| "WHOOP token expired"         | none                        | no      |
 
 The table is also the ranking, and the ranking is the point. The two
 actionable causes outrank the date because they routinely coexist with it: you
@@ -174,13 +205,17 @@ to be cut is the one carrying the instruction.
 ## D6. Two subscriptions, not one shared read
 
 `useSettingsAttention` (shell) and `useConnectionsValue` (row registry) both
-call `useBridgeConnections`. Hoisting one call into `SettingsPage` and drilling
-the result down would save one `useSyncExternalStore` subscription and — on the
-index only — one `useLiveQuery`, at the cost of routing a value around the row
-registry that `settings-group-types.ts` is built to resolve by key. The
-registry pattern wins: the row names `valueKey: "connections"` like every other
-row, and `useConnectionsValue` passes `null` for the profile (D2), so the
-duplicate read touches Dexie zero times.
+read the connection store. Hoisting one call into `SettingsPage` and drilling
+the result down would save a subscription, at the cost of routing a value
+around the row registry that `settings-group-types.ts` is built to resolve by
+key. The registry pattern wins: the row names `valueKey: "connections"` like
+every other row.
+
+The count deliberately does NOT go through `useConnectionSources`: it needs
+`discovered` and nothing else, so `useBridgeConnections(null)` skips both the
+per-profile sync-timestamp read and the connection-record read that the card
+list requires. The attention model pays for those because its verdict depends
+on them — an unlinked source is not attention.
 
 ## D7. The bootstrap moves into store hydration, not into the page
 

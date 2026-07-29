@@ -1,3 +1,4 @@
+import { ConnectionsTab } from "../../organisms/Connections/ConnectionsTab";
 import { DataHubTab } from "../../organisms/DataHub/DataHubTab";
 import { AiTab } from "../../organisms/SettingsPanel/AiTab";
 import { ExtensionsTab } from "../../organisms/SettingsPanel/ExtensionsTab";
@@ -10,6 +11,7 @@ import { UsageTab } from "../../organisms/SettingsPanel/UsageTab";
 const TAB_ORDER: ReadonlyArray<SettingsTab> = [
   "ai",
   "sync",
+  "connections",
   "data-hub",
   "extensions",
   "usage",
@@ -20,6 +22,7 @@ const TAB_ORDER: ReadonlyArray<SettingsTab> = [
 const TAB_VIEWS: Record<SettingsTab, React.FC> = {
   ai: AiTab,
   sync: SyncTab,
+  connections: ConnectionsTab,
   "data-hub": DataHubTab,
   extensions: ExtensionsTab,
   usage: UsageTab,

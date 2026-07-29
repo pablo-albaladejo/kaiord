@@ -17,12 +17,14 @@ const VISIBILITY_FLOOR_MS = 60_000;
 const HALF_VISIBILITY_FLOOR_MS = 30_000;
 
 const ACTIVE: SessionProbeResult = {
+  reachable: true,
   sessionActive: true,
   error: null,
   needsReauth: false,
   outdated: false,
 };
 const INACTIVE: SessionProbeResult = {
+  reachable: true,
   sessionActive: false,
   error: null,
   needsReauth: false,
@@ -112,6 +114,50 @@ describe("createBridgeConnectionStore", () => {
       needsReauth: false,
       outdated: false,
       lastCheckedAt: null,
+    });
+  });
+
+  it("should report a bridge whose extension stopped answering as undiscovered", async () => {
+    // Arrange
+    // Discovery never forgets an extension id — it only ever calls `.set()` —
+    // so the probe's delivery failure is the only evidence an extension was
+    // uninstalled. Without it the row stays "discovered" for the life of the
+    // page and every surface keeps asserting the extension is present.
+    const UNREACHABLE: SessionProbeResult = {
+      reachable: false,
+      sessionActive: false,
+      error: "Could not establish connection",
+      needsReauth: false,
+      outdated: false,
+    };
+    const h = createHarness({ result: UNREACHABLE });
+    h.ids.set(PROBED_BRIDGE_IDS[0] as string, "ext-g");
+
+    // Act
+    await h.store.refresh();
+
+    // Assert
+    expect(byId(h.store, PROBED_BRIDGE_IDS[0] as string)).toMatchObject({
+      discovered: false,
+      sessionActive: false,
+      lastCheckedAt: null,
+    });
+  });
+
+  it("should keep an answering-but-signed-out bridge discovered", async () => {
+    // Arrange
+    // The distinction the whole fix rests on: the extension replied, so it is
+    // installed; only the upstream session is dead.
+    const h = createHarness({ result: INACTIVE });
+    h.ids.set(PROBED_BRIDGE_IDS[0] as string, "ext-g");
+
+    // Act
+    await h.store.refresh();
+
+    // Assert
+    expect(byId(h.store, PROBED_BRIDGE_IDS[0] as string)).toMatchObject({
+      discovered: true,
+      sessionActive: false,
     });
   });
 

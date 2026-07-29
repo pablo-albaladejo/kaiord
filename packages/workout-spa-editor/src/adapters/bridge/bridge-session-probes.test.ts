@@ -61,6 +61,7 @@ describe("whoop-bridge prober", () => {
 
     // Assert
     expect(result).toEqual({
+      reachable: true,
       sessionActive: true,
       error: null,
       needsReauth: false,
@@ -95,6 +96,7 @@ describe("whoop-bridge prober", () => {
 
     // Assert
     expect(result).toEqual({
+      reachable: true,
       sessionActive: false,
       error: "No session token captured",
       needsReauth: false,
@@ -136,6 +138,7 @@ describe("trainingpeaks-bridge prober", () => {
 
     // Assert
     expect(result).toEqual({
+      reachable: true,
       sessionActive: false,
       error: "Session expired",
       needsReauth: true,
@@ -162,6 +165,7 @@ describe("transport-failure error reporting", () => {
     // Assert
     // The thrown WhoopBridgeError message is more useful than a bare null.
     expect(result).toEqual({
+      reachable: true,
       sessionActive: false,
       error: "Extension not available",
       needsReauth: false,
@@ -182,6 +186,7 @@ describe("transport-failure error reporting", () => {
 
     // Assert
     expect(result).toEqual({
+      reachable: true,
       sessionActive: false,
       error: null,
       needsReauth: false,

@@ -23,7 +23,7 @@ The single top-level layout used by every route. Sticky header with logo + theme
 ### Working In This Directory
 
 1. **Layout is mobile-first.** Tailwind utility classes break at 640px (tablet) and 1024px (desktop).
-2. **`onReplayTutorial` prop** is wired from `<App />` so the layout header can trigger the tutorial.
+2. **Header overlays are lazy.** `use-header-overlays.ts` owns the `?` shortcut sheet and the ⌘K command palette; both mount only after their first open.
 
 ### Testing Requirements
 

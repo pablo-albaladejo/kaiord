@@ -10,10 +10,7 @@ export type SettingsAttentionModel = {
 };
 
 export type SettingsAttentionProps = {
-  /**
-   * `null` renders nothing. Nothing computes attention yet — the Settings
-   * shell passes `null` until the bridge connection model is mounted.
-   */
+  /** `null` renders nothing, which is the healthy state. */
   attention: SettingsAttentionModel | null;
   variant: "banner" | "chip";
 };

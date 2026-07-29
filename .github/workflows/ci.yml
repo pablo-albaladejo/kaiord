@@ -1102,9 +1102,14 @@ jobs:
           sparse-checkout-cone-mode: false
       - name: Assemble failed-jobs JSON (uses job-IDs to match workflow_run jobs API)
         id: jobs
+        # Every job named in this job's `if:` trigger list MUST appear below.
+        # A trigger that is never recorded produces a footer the close-pass can
+        # never satisfy, leaving a permanently unclosable issue.
+        # scripts/check-ci-failure-bot-contract.mjs enforces the correspondence.
         run: |
           jobs=()
           [ "${{ needs.lint.result }}" = "failure" ] && jobs+=("lint")
+          [ "${{ needs.jscpd.result }}" = "failure" ] && jobs+=("jscpd")
           [ "${{ needs.check-links.result }}" = "failure" ] && jobs+=("check-links")
           [ "${{ needs.typecheck.result }}" = "failure" ] && jobs+=("typecheck")
           [ "${{ needs.test.result }}" = "failure" ] && jobs+=("test")
@@ -1114,7 +1119,10 @@ jobs:
           [ "${{ needs.e2e-prod-base.result }}" = "failure" ] && jobs+=("e2e-prod-base")
           [ "${{ needs.build.result }}" = "failure" ] && jobs+=("build")
           [ "${{ needs.round-trip.result }}" = "failure" ] && jobs+=("round-trip")
-          json=$(printf '%s\n' "${jobs[@]}" | jq -R . | jq -sc .)
+          # `printf '%s\n' "${jobs[@]}"` prints one EMPTY line for an empty
+          # array, which jq -R/-s turns into [""] — a footer naming a job that
+          # can never match. jq --args serialises an empty array as [].
+          json=$(jq -nc '$ARGS.positional' --args "${jobs[@]}")
           echo "json=$json" >> "$GITHUB_OUTPUT"
       - name: Create / dedupe failure issue
         env:

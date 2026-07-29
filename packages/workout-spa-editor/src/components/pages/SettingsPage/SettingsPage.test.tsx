@@ -11,6 +11,8 @@ import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import { renderWithProviders } from "../../../test-utils";
 import SettingsPage from "./SettingsPage";
 
+const CHECKED_AT = 1_700_000_000_000;
+
 const KNOWN_BRIDGES = [
   "garmin-bridge",
   "whoop-bridge",
@@ -152,8 +154,7 @@ describe("SettingsPage", () => {
     });
 
     it.each([
-      // TODO(S3): destination becomes /settings/connections once it exists.
-      { row: "connections", destination: "/athlete" },
+      { row: "connections", destination: "/settings/connections" },
       { row: "googleDriveSync", destination: "/settings/sync" },
       { row: "extensions", destination: "/settings/extensions" },
       { row: "dataHub", destination: "/settings/data-hub" },
@@ -228,6 +229,21 @@ describe("SettingsPage", () => {
       }
     );
 
+    it("should render the connections tab content at /settings/connections", async () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/connections");
+
+      // Assert
+      expect(
+        await screen.findByTestId("settings-panel-connections")
+      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "Settings · Connections"
+      );
+    });
+
     it("should render the usage tab content at /settings/usage", async () => {
       // Arrange
 
@@ -295,6 +311,7 @@ describe("SettingsPage", () => {
       const sections = [
         "ai",
         "sync",
+        "connections",
         "data-hub",
         "extensions",
         "usage",
@@ -307,11 +324,14 @@ describe("SettingsPage", () => {
 
       // Assert
       const rail = screen.getByTestId("settings-section-rail");
-      expect(rail.querySelectorAll("button")).toHaveLength(sections.length);
+      // Anchors, not buttons: these navigate to URLs and expose
+      // `aria-current="page"`, so they must keep native link behaviour and
+      // must not be announced as buttons.
+      expect(rail.querySelectorAll("a[href]")).toHaveLength(sections.length);
       for (const id of sections) {
-        expect(
-          screen.getByTestId(`settings-section-${id}`)
-        ).toBeInTheDocument();
+        const entry = screen.getByTestId(`settings-section-${id}`);
+        expect(entry).toBeInTheDocument();
+        expect(entry).toHaveAttribute("href", `/settings/${id}`);
       }
     });
 
@@ -401,11 +421,18 @@ describe("SettingsPage", () => {
   });
 
   describe("attention", () => {
+    // `lastCheckedAt` has to be set: a probed bridge with no answer on record
+    // is "checking", not broken, so a null here would silently assert nothing.
     const broken = () => [
-      bridgeConnection("garmin-bridge", { discovered: true }),
+      bridgeConnection("garmin-bridge", {
+        discovered: true,
+        sessionActive: true,
+        lastCheckedAt: CHECKED_AT,
+      }),
       bridgeConnection("whoop-bridge", {
         discovered: true,
-        error: "unreachable",
+        error: "Session expired",
+        lastCheckedAt: CHECKED_AT,
       }),
     ];
 

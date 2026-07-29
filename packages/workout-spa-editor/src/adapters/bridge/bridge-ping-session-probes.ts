@@ -16,6 +16,7 @@ import {
   inactive,
   outdatedExtension,
   type SessionProbeResult,
+  unreachable,
 } from "./bridge-session-probe-types";
 import { sendBridgeMessage } from "./bridge-transport";
 
@@ -40,7 +41,13 @@ const probeByPing = async (
     { action: "ping" },
     PING_TIMEOUT_MS
   );
-  if (!res.ok) return inactive();
+  // Delivery failure means the extension is gone; an `ok:false` envelope
+  // means it answered and the upstream session is the problem.
+  if (!res.ok) {
+    return res.delivered === false
+      ? unreachable(res.error ?? null)
+      : inactive();
+  }
   const parsed = pingDataSchema.safeParse(res.data);
   const data: PingData = parsed.success ? parsed.data : {};
   if (data.protocolVersion !== SUPPORTED_PROTOCOL_VERSION) {
