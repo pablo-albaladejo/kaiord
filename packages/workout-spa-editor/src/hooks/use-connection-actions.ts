@@ -9,11 +9,11 @@ import { useCallback, useMemo } from "react";
 import { createConnectionProvider } from "../adapters/connections/create-connection-provider";
 import { createDexieConnectionRepository } from "../adapters/dexie/dexie-connection-repository";
 import { db } from "../adapters/dexie/dexie-database";
-import { usePolicyToggle } from "../components/organisms/AthleteConnections/use-policy-toggle";
 import { getDeviceId } from "../lib/cloud-sync/device-id";
 import { createConnectionCredentials } from "../lib/connections/connection-credentials";
 import type { ConnectionMechanism } from "../types/connection";
 import type { IntegrationPolicy } from "../types/integration-policy";
+import { usePolicyToggle } from "./connections/use-policy-toggle";
 
 export function useConnectionActions(profileId: string | null) {
   const { disableBridge } = usePolicyToggle();

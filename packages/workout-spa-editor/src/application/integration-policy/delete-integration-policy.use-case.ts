@@ -4,10 +4,13 @@
  *
  * `integrationPolicies` rides the cloud snapshot, and the `withTombstones`
  * decorator cannot reach this repo (its delete is `deleteById`, not a
- * single-arg `delete(id)`), so the removed Data Hub route records its own
+ * single-arg `delete(id)`), so a removed route records its own
  * `[integrationPolicies+id]` tombstone here — the precedent `deleteConversation`
  * sets. Without it the route reappears at the next merge, on the deleting
- * device included. The read-then-delete-then-mark runs in one transaction so a
+ * device included. No production surface deletes a route today: the Connections
+ * page and the assistant both switch `enabled` instead, which keeps the row's
+ * stored mode. This stays because the tombstone contract is the hard part to
+ * rebuild, not the delete. The read-then-delete-then-mark runs in one transaction so a
  * failed delete leaves no tombstone, mirroring the decorator's guarantee.
  */
 import type { DeleteIntegrationPolicyDeps } from "./delete-integration-policy-deps";

@@ -13,13 +13,11 @@
     "provider": "Provider & models",
     "customInstructions": "Custom instructions",
     "googleDriveSync": "Cross-device sync",
-    "dataHub": "Data Hub",
     "units": "Units",
     "language": "Language",
     "notifications": "Notifications",
     "dataPrivacy": "Privacy & data",
     "manageYourData": "Manage your data",
-    "extensions": "Extensions",
     "usage": "Usage",
     "helpDocs": "Help & docs",
     "replayTips": "Show tips again"
@@ -48,8 +46,6 @@
     "ai": "AI",
     "sync": "Sync",
     "connections": "Connections",
-    "data-hub": "Data Hub",
-    "extensions": "Extensions",
     "usage": "Usage",
     "privacy": "Privacy",
     "preferences": "Preferences"
@@ -139,32 +135,6 @@
     "metric": "Metric",
     "imperial": "Imperial",
     "notifications": "Notifications"
-  },
-  "extensions": {
-    "bridge": "Bridge",
-    "status": "Status",
-    "garminHint": "Open Garmin Connect and navigate around",
-    "train2goHint": "Open Train2Go and log in",
-    "refreshStatus": "Refresh Status",
-    "connected": "Connected",
-    "sessionInactive": "Session inactive",
-    "notDetected": "Not detected"
-  },
-  "bodyCompositionSync": {
-    "title": "Body composition sync",
-    "syncTanitaToGarmin": "Sync Tanita → Garmin",
-    "tanitaHint": "Open mytanita.eu and sign in",
-    "reauthHint": "Your mytanita.eu session expired — open mytanita.eu, sign in, and try again.",
-    "sync": {
-      "idle": "Ready to sync",
-      "reading": "Reading measurements from Tanita…",
-      "parsing": "Parsing measurements…",
-      "encoding": "Encoding for Garmin…",
-      "uploading": "Uploading to Garmin…",
-      "done": "Sync complete",
-      "needsReauth": "Tanita session expired",
-      "error": "Sync failed"
-    }
   },
   "notifications": {
     "unsupported": "Notifications aren't supported in this browser.",

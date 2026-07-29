@@ -1,4 +1,4 @@
-> Synced: 2026-05-29
+> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
 
 # SPA Garmin Extension
 
@@ -50,19 +50,24 @@ If the browser is not Chrome-based (no `chrome.runtime.sendMessage` available), 
 - **WHEN** the SPA sends a message and receives "Extension context invalidated" error
 - **THEN** the SPA automatically re-runs detection and shows "Extension was updated. Reconnecting..."
 
-### Requirement: Settings tab labeled "Extensions"
+### Requirement: The Garmin bridge's status is presented with every other source
 
-The Settings panel SHALL have a tab labeled "Extensions" (not "Garmin") to accommodate multiple bridge extensions (Garmin Connect, Train2Go, and future bridges). The tab SHALL display all registered bridges in a status table.
+The Garmin bridge SHALL have no Settings surface of its own. Its status SHALL be
+presented on the Connections page (`/settings/connections`, see
+`spa-connections-page`) as one card among every registered source, so no surface
+is named after one vendor and no bridge can be reachable from a place the others
+are not. The `/settings/extensions` table this requirement previously described
+is retired and its path resolves to the Connections page.
 
-#### Scenario: Settings tab label
+#### Scenario: Garmin is one source card among the rest
 
-- **WHEN** the user opens the Settings panel
-- **THEN** the tab is labeled "Extensions" (not "Garmin")
+- **WHEN** the user opens the Connections page
+- **THEN** the Garmin bridge SHALL be presented as one source card alongside the other registered sources
 
-#### Scenario: Extensions tab shows all bridges
+#### Scenario: No Garmin-specific Settings section exists
 
-- **WHEN** the user opens the Extensions tab
-- **THEN** the tab displays a table with rows for each registered bridge (Garmin Connect, Train2Go) showing name and status
+- **WHEN** the Settings index is rendered
+- **THEN** it SHALL offer no Extensions row and no section dedicated to a single bridge
 
 ### Requirement: Extension install prompt
 

@@ -5,7 +5,9 @@
 ## Purpose
 
 KRD (Kaiord Representation Definition) — the canonical intermediate format through which every conversion (FIT ↔ TCX ↔ ZWO ↔ GCN) must flow. Defines schema, MIME type, and round-trip invariants.
+
 ## Requirements
+
 ### Requirement: Canonical Format
 
 All format conversions SHALL use KRD as the intermediate representation. Direct format-to-format conversion (e.g., FIT → TCX) without passing through KRD is forbidden.
@@ -212,4 +214,3 @@ governed by `conversion-loss-honesty` and the adapter contract.
 - **THEN** export succeeds and the workout-level instructions are attached
   best-effort as a step note truncated to 256 characters; no error is raised and
   the loss is surfaced per `conversion-loss-honesty`
-
