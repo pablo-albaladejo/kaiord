@@ -46,11 +46,13 @@ The extension SHALL authenticate to Garmin with OAuth tokens minted from the use
 
 Tokens SHALL be held in `chrome.storage.local` so they survive service-worker cold starts. The OAuth1 token is long-lived (about a year). The OAuth2 access token SHALL be refreshed by re-running the exchange signed with the OAuth1 token; only if that fails SHALL the extension re-mint from the SSO session.
 
-**What authenticates that refresh is the OAuth1 signature, not a cookie.** The extension holds no `cookies` permission, so it can never read a cookie value. It does not follow that the request is cookie-free: the exchange is issued with `credentials: "include"`, so the browser attaches whatever ambient Garmin cookies it holds. Whether Garmin's exchange endpoint requires them is not determinable from this source, and no claim is made here either way.
+The refresh request carries **two** things Garmin could be authenticating it by, and this spec does not know which one it uses. It is signed with the OAuth1 token, in an `Authorization` header the extension builds. It is ALSO issued with `credentials: "include"`, so the browser attaches whatever ambient Garmin cookies it holds. The extension holds no `cookies` permission and therefore never reads a cookie value — but not reading one is not the same as not sending one. Which credential the endpoint actually accepts is not determinable from this source; #1102 exists to settle it, and until it does this spec claims neither.
 
-The data calls are the deliberate contrast: the shared bearer transport sends `credentials: "omit"` precisely so the Bearer token is the only credential. A future change MAY align the exchange with that, but it is a runtime behaviour change validated only against the live API — not a documentation edit.
+The data calls are the deliberate contrast: the shared bearer transport sends `credentials: "omit"` precisely so the Bearer token is the only credential. A future change MAY align the exchange with that (#1102), but it is a runtime behaviour change validated only against the live API — not a documentation edit.
 
-It follows that **reads continue after the user signs out of connect.garmin.com**, and that a failed call is NOT evidence the user is signed out. Every surface this extension itself ships — its popup — MUST respect that: it SHALL NOT diagnose a signed-out session from a failed check.
+It follows that **reads continue after the user signs out of connect.garmin.com for as long as the current bearer is still valid**: a data call sends `credentials: "omit"` and carries that bearer alone, so no cookie the sign-out cleared takes part in it. Survival BEYOND that point is not established, because the first expiry triggers a refresh, and the refresh is exactly where the open question above lives.
+
+Separately, and on its own footing: **a failed call is NOT evidence the user is signed out.** That holds regardless of how the refresh is authenticated, because a failure can always be the service being unavailable. Every surface this extension itself ships — its popup — MUST respect it: it SHALL NOT diagnose a signed-out session from a failed check.
 
 The rule is deliberately scoped to this extension. It is a property of this bridge's auth model, and it holds for any consumer, but a bridge spec cannot legislate for surfaces it does not own — and at the time of writing the SPA's own connection card does exactly what this forbids. Widening the scope is worth doing once that is fixed, not before, because a `SHALL` the system already breaks is the defect this requirement exists to prevent.
 
@@ -58,11 +60,12 @@ The consumer key and secret are Garmin's public reverse-engineered values, hardc
 
 The extension SHALL NOT log token values, even truncated. Diagnostic responses SHALL report authentication as a boolean, never a token.
 
-#### Scenario: Reads survive signing out of the website
+#### Scenario: Reads survive signing out for the bearer's remaining life
 
-- **GIVEN** the extension holds a valid OAuth1 token
+- **GIVEN** the extension holds an OAuth2 bearer that has not expired
 - **WHEN** the user signs out of connect.garmin.com and Kaiord requests a read
-- **THEN** the OAuth2 bearer SHALL be refreshed from the OAuth1 token and the read SHALL succeed
+- **THEN** the read SHALL be issued carrying that bearer alone, under `credentials: "omit"`, and SHALL NOT depend on any cookie the sign-out cleared
+- **AND** no outcome is specified for a read whose bearer has already expired, because that path refreshes through the exchange (#1102)
 
 #### Scenario: Tokens survive a service-worker restart
 

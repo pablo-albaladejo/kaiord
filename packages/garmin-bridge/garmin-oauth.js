@@ -162,13 +162,15 @@ const preauthorized = async (ticket, fetchImpl) => {
 // Also serves as the OAuth2 refresh: re-exchanging the OAuth1 token mints a
 // fresh Bearer.
 //
-// What authenticates this call is the OAuth1 signature below, not a cookie —
-// the extension holds no `cookies` permission and never reads one. But note
-// `credentials: "include"` a few lines down: the request still TRAVELS with
-// whatever ambient Garmin cookies the browser holds. Whether the endpoint
-// needs them is unknown from here and is what #1102 is meant to settle, so
-// claim neither. (The data calls are the deliberate contrast: bearer-fetch.js
-// sends `credentials: "omit"` so the Bearer is the only credential.)
+// This call carries TWO things Garmin could be authenticating it by, and
+// which one it accepts is unknown from here. It is signed with the OAuth1
+// token (the `Authorization` header built below). It is ALSO sent with
+// `credentials: "include"`, so the browser attaches whatever ambient Garmin
+// cookies it holds — the extension has no `cookies` permission and never
+// READS one, but not reading is not the same as not sending. #1102 is meant
+// to settle which is required; until then claim neither. (The data calls are
+// the deliberate contrast: bearer-fetch.js sends `credentials: "omit"` so the
+// Bearer really is the only credential there.)
 //
 // This comment used to say the refresh happened "without touching the
 // session". It was copied into the bridge spec on trust and shipped there
