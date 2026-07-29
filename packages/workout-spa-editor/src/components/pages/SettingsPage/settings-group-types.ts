@@ -5,6 +5,7 @@ import type { IconName } from "../../atoms/Icon";
  * resolved by `useSettingsRowValues`; a row without one renders no value.
  */
 export type SettingsValueKey =
+  | "connections"
   | "provider"
   | "sync"
   | "privacy"

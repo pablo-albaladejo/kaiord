@@ -24,6 +24,7 @@ const session = (
     checking: false,
     error: null,
     needsReauth: false,
+    outdated: false,
     lastCheckedAt: CHECKED_AT,
     ...over,
   }) satisfies BridgeSessionSignal;

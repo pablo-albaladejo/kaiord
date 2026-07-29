@@ -15,6 +15,8 @@ export type BridgeConnectionRuntime = {
   readonly checking: boolean;
   readonly error: string | null;
   readonly needsReauth: boolean;
+  /** The extension answered with an unsupported protocol version. */
+  readonly outdated: boolean;
   readonly lastCheckedAt: number | null;
 };
 
@@ -26,6 +28,13 @@ export type BridgeConnectionStore = {
   start: () => void;
   stop: () => void;
   getSnapshot: () => readonly BridgeConnectionRuntime[];
+  /**
+   * Whether at least one refresh pass has completed. Until it has, every row
+   * reads undiscovered because nothing has been asked yet — which is not the
+   * same claim as "this bridge is not there", and a count rendered from it
+   * would be wrong rather than merely early.
+   */
+  hasRefreshed: () => boolean;
   subscribe: (listener: () => void) => () => void;
   refresh: (opts?: { force?: boolean }) => Promise<void>;
 };

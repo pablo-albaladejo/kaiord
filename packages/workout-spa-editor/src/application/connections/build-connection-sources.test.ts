@@ -40,6 +40,7 @@ const live: BridgeSessionSignal = {
   checking: false,
   error: null,
   needsReauth: false,
+  outdated: false,
   lastCheckedAt: CHECKED_AT,
 };
 
@@ -105,6 +106,24 @@ describe("buildConnectionSources", () => {
     expect(sources[0]?.id).toBe("tanita");
     expect(byId(sources, "garmin")?.status).toBe("available");
     expect(byId(sources, "garmin")?.disconnected).toBe(true);
+  });
+
+  it("should carry an outdated extension out to the card", () => {
+    // Arrange
+    // A protocol mismatch is a diagnosis, not a failed check, and the fix —
+    // update the extension — is shared by no other attention cause, so the
+    // card and the Settings banner both need the fact itself.
+    const outdated = { ...live, sessionActive: false, outdated: true };
+    const s = signals({
+      session: (id) => (id === "garmin-bridge" ? outdated : live),
+    });
+
+    // Act
+    const sources = buildConnectionSources(INTEGRATIONS, s);
+
+    // Assert
+    expect(byId(sources, "garmin")?.outdated).toBe(true);
+    expect(byId(sources, "tanita")?.outdated).toBe(false);
   });
 
   it("should claim no routes for an undiscovered extension", () => {

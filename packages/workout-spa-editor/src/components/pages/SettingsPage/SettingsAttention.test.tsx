@@ -57,6 +57,42 @@ describe("SettingsAttention", () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
+  it.each([{ variant: "banner" as const }, { variant: "chip" as const }])(
+    "should announce the $variant when it appears",
+    ({ variant }) => {
+      // Arrange
+      // The surface appears seconds after mount, once the first connection
+      // probe answers, so a reader who is not looking at it is only told by
+      // the live region.
+      const attention = { title: "1 connection needs attention" };
+
+      // Act
+      render(<SettingsAttention attention={attention} variant={variant} />);
+
+      // Assert
+      const surface = screen.getByTestId(`settings-attention-${variant}`);
+      expect(surface).toHaveAttribute("role", "status");
+      expect(surface).toHaveAttribute("aria-live", "polite");
+    }
+  );
+
+  it("should carry the full text of a truncated line in its tooltip", () => {
+    // Arrange
+    const attention = {
+      title: "1 connection needs attention",
+      detail: "Session signed out — sign in again to resume",
+    };
+
+    // Act
+    render(<SettingsAttention attention={attention} variant="chip" />);
+
+    // Assert
+    expect(screen.getByText(attention.detail)).toHaveAttribute(
+      "title",
+      attention.detail
+    );
+  });
+
   it("should omit the action on the chip", () => {
     // Arrange
     const attention = {

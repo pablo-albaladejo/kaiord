@@ -19,6 +19,8 @@ export type BridgeSessionSignal = {
   readonly checking: boolean;
   readonly error: string | null;
   readonly needsReauth: boolean;
+  /** The extension answered, in a protocol version this build cannot read. */
+  readonly outdated: boolean;
   readonly lastCheckedAt: number | null;
 };
 

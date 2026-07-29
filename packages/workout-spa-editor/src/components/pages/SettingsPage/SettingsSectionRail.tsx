@@ -3,10 +3,13 @@ import { Link } from "wouter";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { SettingsTab } from "../../organisms/SettingsPanel/types";
 import { SETTINGS_TAB_ORDER } from "./settings-tab-views";
+import type { SettingsAttentionModel } from "./SettingsAttention";
 import { SettingsAttention } from "./SettingsAttention";
 
 export type SettingsSectionRailProps = {
   activeSection: SettingsTab;
+  /** `null` renders no chip; the rail is the desktop attention surface. */
+  attention: SettingsAttentionModel | null;
 };
 
 /* Desktop-only: below `md` the open section takes the whole surface and the
@@ -28,6 +31,7 @@ const ACTIVE_ENTRY_CLASS = `${ENTRY_CLASS} bg-primary-50 text-gray-900 dark:bg-p
  */
 export const SettingsSectionRail = ({
   activeSection,
+  attention,
 }: SettingsSectionRailProps) => {
   const t = useTranslate("settings");
 
@@ -37,7 +41,7 @@ export const SettingsSectionRail = ({
       className={RAIL_CLASS}
       data-testid="settings-section-rail"
     >
-      <SettingsAttention attention={null} variant="chip" />
+      <SettingsAttention attention={attention} variant="chip" />
       <div className="space-y-1">
         {SETTINGS_TAB_ORDER.map((section) => {
           const active = section === activeSection;
