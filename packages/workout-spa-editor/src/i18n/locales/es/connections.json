@@ -5,6 +5,30 @@
   "sourcesHint": "Cada fuente lleva su propio puente de navegador y sus permisos",
   "unsupported": "Todavía no disponibles",
   "unsupportedHint": "Conectarlas necesita un servidor que Kaiord no tiene.",
+  "summary": {
+    "detected": "Fuentes detectadas",
+    "detectedNote": "de {{total}}",
+    "covered": "Tipos con fuente",
+    "coveredNote": "de {{total}} tipos",
+    "attention": "Necesitan atención",
+    "attentionNote_one": "fuente",
+    "attentionNote_other": "fuentes",
+    "lastSync": "Últimos datos",
+    "lastSyncNever": "Todavía ninguno",
+    "pending": "—",
+    "refresh": "Actualizar todo",
+    "refreshing": "Actualizando…",
+    "refreshCooldown": "Acabas de actualizar. Inténtalo dentro de un minuto."
+  },
+  "banner": {
+    "one": "{{name}} tiene la sesión cerrada",
+    "oneOutdated": "El puente de navegador de {{name}} está desactualizado",
+    "many": "{{count}} fuentes necesitan atención",
+    "paused": "Ahora mismo ninguna fuente está enviando {{types}}.",
+    "covered": "No se ha parado nada: cada tipo afectado tiene otra fuente activada.",
+    "noRoutes": "No hay ninguna ruta de datos activada para ella, así que no ha dejado de llegar nada.",
+    "since": "No llegan datos nuevos desde el {{date}}."
+  },
   "status": {
     "connected": "Conectado",
     "installed": "Detectada al cargar",

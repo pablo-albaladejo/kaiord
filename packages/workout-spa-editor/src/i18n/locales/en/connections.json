@@ -5,6 +5,30 @@
   "sourcesHint": "Each source carries its own browser bridge and permissions",
   "unsupported": "Not available yet",
   "unsupportedHint": "Connecting these needs a server Kaiord does not run.",
+  "summary": {
+    "detected": "Sources detected",
+    "detectedNote": "of {{total}}",
+    "covered": "Types covered",
+    "coveredNote": "of {{total}} types",
+    "attention": "Needs attention",
+    "attentionNote_one": "source",
+    "attentionNote_other": "sources",
+    "lastSync": "Last data in",
+    "lastSyncNever": "None yet",
+    "pending": "—",
+    "refresh": "Refresh all",
+    "refreshing": "Refreshing…",
+    "refreshCooldown": "Just refreshed. Try again in a minute."
+  },
+  "banner": {
+    "one": "{{name}} is signed out",
+    "oneOutdated": "{{name}}'s browser bridge is out of date",
+    "many": "{{count}} sources need attention",
+    "paused": "No source is sending {{types}} right now.",
+    "covered": "Nothing has stopped: every affected type also has another source switched on.",
+    "noRoutes": "No data routes are switched on for it, so nothing has stopped arriving.",
+    "since": "No new data since {{date}}."
+  },
   "status": {
     "connected": "Connected",
     "installed": "Detected on load",
