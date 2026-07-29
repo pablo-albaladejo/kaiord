@@ -6,11 +6,10 @@
  */
 import { db } from "../adapters/dexie/dexie-database";
 import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-export-ledger-repository";
-import { createDexieIntegrationPolicyRepository } from "../adapters/dexie/dexie-integration-policy-repository";
 import type { ExecuteWorkoutPushInput } from "../application/export/execute-workout-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 
-export const policyRepo = createDexieIntegrationPolicyRepository(db);
+export { policyRepo } from "./integration-policy-repo";
 export const ledgerRepo = createDexieExportLedgerRepository(db);
 export const GARMIN_BRIDGE_ID = "garmin-bridge";
 

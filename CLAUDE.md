@@ -74,6 +74,7 @@ When working on this codebase, ALL problems must be fixed, regardless of whether
   - `check-no-library-dual-mount.mjs` — no-dual-mount invariant for the Library content component (spec/spa-routing); only `LibraryPage.tsx` and `TemplatePickerDialog.tsx` may import `organisms/WorkoutLibrary` / `WorkoutLibrary/WorkoutLibrary` / `LibraryDialogContent` (R-LibraryNoDualMount)
   - `check-session-match-id-shape.mjs` — every `coachingActivityId:` literal in a `sessionMatches` write call site, plus every `[profileId+coachingActivityId]` Dexie reader, MUST be constructed via `buildCoachingActivityId(...)`, `toPersistedCoachingActivityId(...)`, or a `CoachingActivityRecord.id` property access; rule R-SessionMatchIdShape (see `.omc/autopilot/bug-trace.md` §H7 for the original SHORT/COMPOSITE divergence)
   - `check-no-barrel-test-suites.mjs` — no `*.test.{ts,tsx}` may target a subject module that is a pure re-export barrel; test the source modules instead (R-NoBarrelTestSuite, spec/test-minimality)
+  - `check-boundaries-allowlist.mjs` — the `boundaries/dependencies` allowlist in `scripts/boundaries-allowlist.mjs` is shrink-only: it may never grow past `BOUNDARIES_ALLOWLIST_MAX`, every entry needs a reason, and an entry whose file no longer imports `adapters/` is stale and must be deleted (R-BoundariesAllowlistShrinkOnly). Never park a _new_ violation here — fix the import instead
 
 If you encounter warnings or errors during your work:
 
