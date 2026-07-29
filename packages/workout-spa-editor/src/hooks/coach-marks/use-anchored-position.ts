@@ -3,10 +3,6 @@
  * `computeTooltipPosition` math the `Tooltip` atom uses, so a mark and a
  * tooltip on the same element land in the same place.
  *
- * The tutorial's `position-utils` returned fixed viewport percentages
- * (`left-[50%] top-[10%]`), which is why every step ended up `position:
- * "center"` — the classes never referenced a target. Real rects replace them.
- *
  * Both rects are measured live: the mark's own size decides `top`/`left` for
  * the `top`/`left` sides, so the effect must run after the mark has painted.
  */

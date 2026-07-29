@@ -1,7 +1,6 @@
 /**
  * `useAnchoredPosition` must produce the SAME numbers as the tooltip atom for
- * the same anchor — that shared math is the whole point of retiring
- * `position-utils`' fixed viewport percentages.
+ * the same anchor, so a mark and a tooltip on one element cannot disagree.
  */
 
 import { render } from "@testing-library/react";
