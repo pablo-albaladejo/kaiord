@@ -394,6 +394,64 @@ describe("ConfirmationModal - Accessibility", () => {
     });
   });
 
+  /**
+   * Radix's `hideOthers` exempts `[aria-live]` nodes *and their whole
+   * ancestor chain*. A route announcer rendered inside `#root` therefore
+   * spares `#root` and pushes the hide down onto its children. These
+   * tests assert the durable outcome — background controls leave the
+   * accessibility tree — rather than which node carries the attribute,
+   * so they survive changes in hiding depth.
+   *
+   * `getByRole` honours `aria-hidden`; `getByText` does not, which is
+   * why the role query is the meaningful probe here.
+   */
+  describe("background removal from the accessibility tree", () => {
+    it("should hide background controls while the dialog is open", () => {
+      // Arrange
+      const root = document.createElement("div");
+      root.id = "root";
+      document.body.appendChild(root);
+
+      // Act
+      render(
+        <div>
+          <button>Background Button</button>
+          <ConfirmationModal {...defaultProps} />
+        </div>,
+        { container: root }
+      );
+
+      // Assert
+      expect(
+        screen.queryByRole("button", { name: "Background Button" })
+      ).toBeNull();
+      expect(screen.getByRole("button", { name: "Confirm" })).toBeVisible();
+    });
+
+    it("should hide background controls even with a live region mounted", () => {
+      // Arrange
+      const root = document.createElement("div");
+      root.id = "root";
+      document.body.appendChild(root);
+
+      // Act
+      render(
+        <div>
+          <div role="status" aria-live="polite" data-testid="route-announcer" />
+          <button>Background Button</button>
+          <ConfirmationModal {...defaultProps} />
+        </div>,
+        { container: root }
+      );
+
+      // Assert
+      expect(
+        screen.queryByRole("button", { name: "Background Button" })
+      ).toBeNull();
+      expect(screen.getByRole("button", { name: "Confirm" })).toBeVisible();
+    });
+  });
+
   describe("color contrast", () => {
     it("should have sufficient contrast for title text", () => {
       // Arrange
