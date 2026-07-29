@@ -20,8 +20,14 @@ const TEST_SCRIPTS = JSON.parse(
 ).scripts["test:scripts"];
 
 // Every `packages/<pkg>/scripts` directory that holds a node:test suite.
+//
+// The relative path is joined with "/" rather than `path.join`: it is
+// matched against the `test:scripts` command string, which is always
+// POSIX-separated. Using the platform separator would report every
+// discovered suite as unwired on a non-POSIX system — a guard that fails
+// for a reason unrelated to what it checks.
 const suiteDirs = readdirSync(join(REPO_ROOT, "packages"))
-  .map((pkg) => join("packages", pkg, "scripts"))
+  .map((pkg) => ["packages", pkg, "scripts"].join("/"))
   .filter((rel) => {
     const abs = join(REPO_ROOT, rel);
     return (
