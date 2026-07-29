@@ -207,6 +207,7 @@ action ever becomes reachable from `externally_connectable`, it enters
 - **THEN** it SHALL fail naming the unreadable element, rather than recording only the inline entries as if they were the whole surface
 - **AND** an entry field whose value is not a string or regex literal, or whose key is not `method` or `pattern`, SHALL fail the same way
 - **AND** a nested object literal SHALL NOT be able to supply an entry's `method` or `pattern` in place of the entry's own
+- **AND** a bridge that ships a service worker or content script but whose allowlist declaration cannot be located at all — wrapped in `Object.freeze(…)`, or renamed — SHALL fail, rather than be recorded with an empty read surface that reads as "this bridge reads nothing"
 
 #### Scenario: A new bridge package cannot ship unlocked
 

@@ -378,6 +378,12 @@ export const extractPatternAllowlist = (
     // simply disappear from the golden: disappearing IS the silent
     // widening the guard exists to prevent.
     const fields = parseEntryFields(object);
+    // An unrecognised field is refused rather than ignored, deliberately.
+    // The golden pins `method` and `pattern` and nothing else, so a third
+    // field would carry meaning the golden does not record — it could
+    // narrow or widen what the entry actually permits, invisibly. That is
+    // the exact shape of hole this guard exists to close, so adding one has
+    // to be a decision: extend the golden, or drop the field.
     const unknown = fields.filter(
       (f) => f.key !== "method" && f.key !== "pattern"
     );
@@ -447,7 +453,28 @@ export const extractAllowed = (bridge) => {
     return extractPrefixAllowlist(prefixBody.source, prefixDecl);
   }
 
-  return [];
+  // Both declarations are located by literal text, so a wrapper
+  // (`const ALLOWED = Object.freeze([…])`) or a rename
+  // (`const ALLOWED_LIST = […]`) makes the whole list vanish — neither the
+  // residue check nor the terminator check ever runs, because nothing
+  // matched to run them on.
+  //
+  // Failing to FIND an allowlist must not be a way to DECLARE that there
+  // isn't one, the same reasoning `declaresPopup` applies one level down.
+  // On an existing bridge that shows up as entries leaving the golden; on a
+  // new one — which the on-disk bridge list now adopts by itself — there is
+  // no "before": the golden is written `allowed_paths: []` the first time,
+  // reads as "this bridge reads nothing", and passes review as safe while
+  // permitting every path in the list nobody parsed.
+  //
+  // No bridge ships an empty allowlist (today 4/1/5/3/5), so `[]` from a
+  // bridge that HAS a service worker or content script is not a legitimate
+  // state — it is an unreadable one.
+  throw new Error(
+    `${bridge}: ${path.slice(REPO_ROOT.length + 1)} declares no readable allowlist — expected \`${patternDecl}…]\` or \`${prefixDecl}…]\`. ` +
+      `A wrapped or renamed declaration would otherwise be recorded as an empty read surface. ` +
+      `If this bridge genuinely reads nothing, say so deliberately rather than by omission.`
+  );
 };
 
 // `const EXTERNAL_ACTIONS = new Set(["ping", …])` — the actions the SPA can

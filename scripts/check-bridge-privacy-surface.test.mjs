@@ -360,6 +360,65 @@ describe("bridge privacy surface guard", () => {
     );
   });
 
+  // ---------- not finding the list is not the same as no list ----------
+  //
+  // Both declarations are located by literal text, so a wrapper or a rename
+  // made the whole allowlist vanish with `allowed_paths: []` in the golden.
+  // Residue and terminator checks never fired — nothing matched to run them
+  // on. On an existing bridge that reads as entries leaving the golden; on a
+  // NEW one, which the on-disk bridge list now adopts by itself, there is no
+  // "before": `[]` is written once and reads as "this bridge reads nothing".
+
+  it("refuses a wrapped allowlist declaration instead of recording an empty surface", () => {
+    withTempRepo(
+      {
+        "packages/acme-bridge/manifest.json": "{}",
+        "packages/acme-bridge/background.js":
+          'const ALLOWED = Object.freeze([{ method: "GET", pattern: /^\\/secret$/ }]);\n',
+        "scripts/fixtures/bridge-privacy-surface.json": "{}",
+      },
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /declares no readable allowlist/);
+        assert.doesNotMatch(result.stdout, /matches golden/);
+      }
+    );
+  });
+
+  it("refuses a renamed allowlist declaration", () => {
+    withTempRepo(
+      {
+        "packages/acme-bridge/manifest.json": "{}",
+        "packages/acme-bridge/background.js":
+          'const ALLOWED_LIST = [{ method: "GET", pattern: /^\\/secret$/ }];\n',
+        "scripts/fixtures/bridge-privacy-surface.json": "{}",
+      },
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /declares no readable allowlist/);
+      }
+    );
+  });
+
+  it("still reads a properly declared allowlist in a fresh bridge", () => {
+    // The complement: the two refusals above must come from not finding the
+    // declaration, not from refusing every new bridge on sight.
+    withTempRepo(
+      {
+        "packages/acme-bridge/manifest.json": "{}",
+        "packages/acme-bridge/background.js":
+          'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n',
+        "scripts/fixtures/bridge-privacy-surface.json": "{}",
+      },
+      (result) => {
+        assert.equal(result.status, 1, result.stdout);
+        assert.match(result.stderr, /drifted from golden/);
+        assert.match(result.stderr, /\^\\\\\/ok\$/);
+        assert.doesNotMatch(result.stderr, /declares no readable allowlist/);
+      }
+    );
+  });
+
   it("keeps braces and brackets inside a regex out of the object split", () => {
     // `\\d{4}` and `[^\\/]+` carry the same characters the splitter uses as
     // structure, and both appear in the real allowlists.
