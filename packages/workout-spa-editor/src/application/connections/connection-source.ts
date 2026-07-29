@@ -32,6 +32,12 @@ export type ConnectionSource = {
   readonly disconnected: boolean;
   /** Only `trainingpeaks-bridge` ever propagates this today. */
   readonly needsReauth: boolean;
+  /**
+   * Can this source's presence and session be re-checked at all? False for a
+   * bridge with no prober: after its initial announcement nothing can learn it
+   * was uninstalled, so its copy may not use the present tense.
+   */
+  readonly sessionVerifiable: boolean;
   readonly lastSyncAt: string | undefined;
   /** Routes this source actually serves — announced token ∩ cabled route. */
   readonly importTypes: readonly ManagedDataType[];

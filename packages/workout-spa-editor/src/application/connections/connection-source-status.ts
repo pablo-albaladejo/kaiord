@@ -23,21 +23,24 @@ export type BridgeSessionSignal = {
 };
 
 /**
- * A discovered bridge that is not being probed and has never been probed has
- * no prober: the refresh pass writes it discovered-only and never messages
- * it. `tanita-bridge` is that bridge — its `checkSession` downloads the whole
- * export CSV — so it can only ever report that the extension is present.
+ * `hasProbe` is whether a session prober is registered for this bridge — the
+ * actual fact, injected by the hook layer. It is deliberately NOT inferred
+ * from `lastCheckedAt === null`: `probeBridge` writes that same shape for a
+ * PROBED bridge whose extension id changed mid-probe, which would put
+ * Tanita's "cannot check without downloading your whole export" copy on a
+ * WHOOP card.
  */
-const isProbeless = (state: BridgeSessionSignal): boolean =>
-  !state.checking && state.lastCheckedAt === null;
-
 export const bridgeSourceStatus = (
   state: BridgeSessionSignal | undefined,
-  connected: boolean
+  connected: boolean,
+  hasProbe: boolean
 ): ConnectionSourceStatus => {
   if (!connected || state === undefined) return "available";
   if (state.checking) return "checking";
-  if (isProbeless(state)) return "installed";
+  if (!hasProbe) return "installed";
+  // Probed, but no answer on record yet: what its session is doing is not
+  // known, and "checking" is the only state that says so.
+  if (state.lastCheckedAt === null) return "checking";
   if (state.error !== null || state.needsReauth) return "attention";
   return state.sessionActive ? "connected" : "attention";
 };
@@ -45,7 +48,8 @@ export const bridgeSourceStatus = (
 export const sourceStatus = (
   entry: IntegrationRegistryEntry,
   state: BridgeSessionSignal | undefined,
-  connected: boolean
+  connected: boolean,
+  hasProbe: boolean
 ): ConnectionSourceStatus => {
   switch (entry.mechanism) {
     case "manual":
@@ -53,7 +57,7 @@ export const sourceStatus = (
     case "not-supported":
       return "unsupported";
     case "bridge":
-      return bridgeSourceStatus(state, connected);
+      return bridgeSourceStatus(state, connected, hasProbe);
     default:
       return connected ? "connected" : "available";
   }

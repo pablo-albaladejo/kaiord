@@ -23,6 +23,8 @@ export type ConnectionSourceSignals = BridgeRouteSignals & {
   record: (integrationId: string) => ConnectionRecord | undefined;
   session: (bridgeId: string) => BridgeSessionSignal | undefined;
   isDiscovered: (bridgeId: string) => boolean;
+  /** Injected rather than inferred — see connection-source-status. */
+  hasSessionProbe: (bridgeId: string) => boolean;
   lastSyncAt: (bridgeId: string) => string | undefined;
 };
 
@@ -47,9 +49,15 @@ const buildOne = (
     mark: entry.mark,
     mechanism: entry.mechanism,
     bridgeId,
-    status: sourceStatus(entry, state, connected),
+    status: sourceStatus(
+      entry,
+      state,
+      connected,
+      bridgeId !== null && s.hasSessionProbe(bridgeId)
+    ),
     bridgeDetected: detected,
     disconnected: record?.status === "disconnected",
+    sessionVerifiable: bridgeId !== null && s.hasSessionProbe(bridgeId),
     needsReauth: state?.needsReauth === true,
     lastSyncAt: bridgeId === null ? undefined : s.lastSyncAt(bridgeId),
     importTypes:

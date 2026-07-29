@@ -49,12 +49,17 @@ const probeless: BridgeSessionSignal = {
   lastCheckedAt: null,
 };
 
+/* Which bridges have a session prober is a fact about the probe map, not
+   something the fixture may imply from a state shape. */
+const PROBED_BRIDGES = new Set(["garmin-bridge"]);
+
 const signals = (
   over: Partial<ConnectionSourceSignals> = {}
 ): ConnectionSourceSignals => ({
   record: () => undefined,
   session: (id) => (id === "tanita-bridge" ? probeless : live),
   isDiscovered: () => true,
+  hasSessionProbe: (bridgeId) => PROBED_BRIDGES.has(bridgeId),
   lastSyncAt: () => undefined,
   announces: () => true,
   supportsRoute: () => true,
