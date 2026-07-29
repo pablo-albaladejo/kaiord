@@ -12,6 +12,7 @@ export type KeyboardHandlerDeps = {
   copyStep: (stepIndex: number) => Promise<void>;
   pasteStep: (position: number) => Promise<void>;
   deleteStep: (stepIndex: number) => void;
+  deleteSteps: (stepIndices: ReadonlyArray<number>) => void;
   selectedStepId: string | null;
   selectedStepIds: Array<string>;
   openCreateBlockDialog: () => void;

@@ -40,7 +40,7 @@ function renderAtPath(path: string) {
   const memory = memoryLocation({ path, record: true });
   const result = renderWithProviders(
     <Router hook={memory.hook}>
-      <Route path="/settings/:tab?">
+      <Route path="/settings/:section?">
         <SettingsPage />
       </Route>
     </Router>,
@@ -218,6 +218,167 @@ describe("SettingsPage", () => {
         expect(memory.history.at(-1)).toBe("/settings");
       });
     });
+  });
+
+  describe("split shell", () => {
+    it("should render the index without the section rail at /settings", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-group-list")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("settings-section-rail")
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("settings-panel-ai")).not.toBeInTheDocument();
+    });
+
+    it("should replace the index with the rail and the panel for a section", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/ai");
+
+      // Assert
+      expect(screen.getByTestId("settings-panel-ai")).toBeInTheDocument();
+      // The rail is a CSS-only affordance: absent below `md`, present above.
+      expect(screen.getByTestId("settings-section-rail")).toHaveClass(
+        "hidden",
+        "md:block"
+      );
+      expect(
+        screen.queryByTestId("settings-group-list")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should render one rail entry per section", () => {
+      // Arrange
+      const sections = [
+        "ai",
+        "sync",
+        "data-hub",
+        "extensions",
+        "usage",
+        "privacy",
+        "preferences",
+      ];
+
+      // Act
+      renderAtPath("/settings/ai");
+
+      // Assert
+      const rail = screen.getByTestId("settings-section-rail");
+      // Anchors, not buttons: these navigate to URLs and expose
+      // `aria-current="page"`, so they must keep native link behaviour and
+      // must not be announced as buttons.
+      expect(rail.querySelectorAll("a[href]")).toHaveLength(sections.length);
+      for (const id of sections) {
+        const entry = screen.getByTestId(`settings-section-${id}`);
+        expect(entry).toBeInTheDocument();
+        expect(entry).toHaveAttribute("href", `/settings/${id}`);
+      }
+    });
+
+    // `/settings/preferences` is the case that matters: three index rows
+    // (units, language, notifications) share that destination, so a
+    // row-shaped rail marked all three current at once.
+    it.each([
+      { path: "/settings/preferences", section: "preferences" },
+      { path: "/settings/ai", section: "ai" },
+      { path: "/settings/privacy", section: "privacy" },
+      { path: "/settings/sync", section: "sync" },
+    ])(
+      "should mark exactly one entry current at $path",
+      ({ path, section }) => {
+        // Arrange
+
+        // Act
+        const { container } = renderAtPath(path);
+
+        // Assert
+        const current = container.querySelectorAll('[aria-current="page"]');
+        expect(current).toHaveLength(1);
+        expect(current[0]).toBe(
+          screen.getByTestId(`settings-section-${section}`)
+        );
+      }
+    );
+
+    it("should navigate laterally from a rail entry", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const { memory } = renderAtPath("/settings/ai");
+
+      // Act
+      await user.click(screen.getByTestId("settings-section-privacy"));
+
+      // Assert
+      await waitFor(() => {
+        expect(memory.history.at(-1)).toBe("/settings/privacy");
+      });
+    });
+
+    it("should keep the rail free of the index's row test ids", () => {
+      // Arrange
+
+      // Act
+      const { container } = renderAtPath("/settings/preferences");
+
+      // Assert
+      expect(
+        container.querySelectorAll('[data-testid^="settings-row-"]')
+      ).toHaveLength(0);
+    });
+
+    it.each([{ path: "/settings" }, { path: "/settings/extensions" }])(
+      "should expose exactly one route heading at $path",
+      ({ path }) => {
+        // Arrange
+
+        // Act
+        const { container } = renderAtPath(path);
+
+        // Assert
+        expect(container.querySelectorAll("[data-route-heading]")).toHaveLength(
+          1
+        );
+      }
+    );
+
+    it("should render no attention surface while nothing computes one", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/ai");
+
+      // Assert
+      expect(
+        screen.queryByTestId("settings-attention-banner")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("settings-attention-chip")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("legacy sections", () => {
+    it.each([{ section: "data-hub" }, { section: "extensions" }])(
+      "should keep /settings/$section resolving to its own panel",
+      ({ section }) => {
+        // Arrange
+
+        // Act
+        const { memory } = renderAtPath(`/settings/${section}`);
+
+        // Assert
+        expect(
+          screen.getByTestId(`settings-panel-${section}`)
+        ).toBeInTheDocument();
+        expect(memory.history.at(-1)).toBe(`/settings/${section}`);
+      }
+    );
   });
 
   describe("section deep-links", () => {
