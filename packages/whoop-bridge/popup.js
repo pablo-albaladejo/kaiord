@@ -42,7 +42,7 @@ globalThis.KAIORD_POPUP_MESSAGES = {
     "Reading your WHOOP data through your open session. Captured $1.",
   sessionSignedOut: "Session signed out",
   sessionSignedOutCause:
-    "Your WHOOP tab is signed out, so nothing is reaching Kaiord right now.",
+    "Kaiord is not holding a WHOOP session, so nothing is reaching it right now.",
   noTab: "No WHOOP tab open",
   noTabCause:
     "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
@@ -162,6 +162,12 @@ const renderNoTab = () => {
   });
 };
 
+/* The cause names Kaiord's own state, not the user's tab. This branch is
+   reached on `!connected` whatever the tab is doing, and its commonest trigger
+   is a browser restart emptying chrome.storage.session — after which there may
+   be no WHOOP tab at all, or one still signed in. "Your WHOOP tab is signed
+   out" was false in both. What `!connected` actually measures is that the
+   bridge holds no bearer, so that is what the sentence says. */
 const renderSignedOut = () => {
   renderStatusBlock($, msg, {
     tone: "warn",

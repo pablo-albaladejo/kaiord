@@ -10,10 +10,21 @@ allowed origin — learns whether the user has a WHOOP tab open, which is a new
 disclosure about browsing state, for a fact the SPA has no use for.
 
 So `tab-open` is a distinct action, deliberately absent from
-`EXTERNAL_ACTIONS`, pinned by a test that asserts the external set is exactly
-`["ping", "status", "whoop-fetch"]`. It uses `chrome.tabs.query` via the
-existing `findWhoopTab`, so it adds no permission and leaves the
-privacy-surface golden byte-identical.
+`EXTERNAL_ACTIONS`. It uses `chrome.tabs.query` via the existing
+`findWhoopTab`, so it adds no permission.
+
+**What holds that line is one test, not the privacy guard.** The
+privacy-surface golden is byte-identical here, and that fact proves nothing
+about the action set: the golden locks `manifest`, `manifest_prod` and
+`allowed_paths` only, and mutating `tab-open` INTO `EXTERNAL_ACTIONS` leaves
+both `check-bridge-privacy-surface.mjs` and the whole of `pnpm test:scripts`
+green. The single gate that fails is the assertion in
+`packages/whoop-bridge/test/background.test.js` that the external set is
+exactly `["ping", "status", "whoop-fetch"]`.
+
+Anyone extending this bridge should read that as: "`test:scripts` is green" is
+not evidence an action stayed internal. Widening the golden to cover each
+bridge's external allowlist is a worthwhile separate change.
 
 ## D2 — A failed probe reports the unreadable state
 
@@ -62,6 +73,29 @@ Deliberately **not** claimed: that reopening the tab needs no fresh sign-in.
 The extension never validates the held bearer — a stale token still reads as
 `connected` — so whether reads actually resume is not something this code
 knows.
+
+## D7 — The popup and the Connections card now answer different questions
+
+This change knowingly opens a divergence, and it must not be closed by
+widening the bridge.
+
+With a bearer held and no `app.whoop.com` tab, the popup reports "No WHOOP tab
+open" while the Connections card still reports "Connected". Before this change
+both surfaces were wrong together; now the popup is right and the card is
+**incomplete, not false**: `ConnectionStatusLine` renders the bare word
+"Connected" plus a factual freshness line, and makes no present-tense claim
+about reading. That is the difference from the bug this change fixes, where the
+copy asserted "through your open session" — the concrete fact that was false.
+
+**The popup is authoritative on readability; the card is authoritative on
+linkage.** Reconciling them would mean putting the tab fact into the externally
+reachable `status` payload, which would tell the SPA whether the user has a
+whoop.com tab open. That is browsing state, and keeping `tab-open` internal is
+exactly what avoids disclosing it. Privacy is not traded for cosmetic
+consistency.
+
+If a future change wants the two surfaces to agree, the supported direction is
+to soften the card's claim — never to widen the bridge.
 
 ## D6 — The fix link is offered in one state only
 

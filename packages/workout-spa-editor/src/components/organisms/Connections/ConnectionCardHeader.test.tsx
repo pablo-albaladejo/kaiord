@@ -55,31 +55,26 @@ describe("ConnectionCardHeader", () => {
     ).toBeInTheDocument();
   });
 
-  // The reachable regression: offering the sign-in page to someone whose
-  // extension is not installed. Signing in fixes nothing for them, and the
-  // card's own copy already tells them what does.
-  it("should offer no link when the extension is simply not running", () => {
-    // Arrange
-    const undetected = source({ status: "available", bridgeDetected: false });
+  // `status` is the only input that reaches the link, so the fixtures vary
+  // only that. An earlier version of this test set `bridgeDetected: false` and
+  // titled itself "when the extension is simply not running" — but that field
+  // steers nothing here, and a missing extension always resolves to
+  // `available`, never `attention`, so the scenario in the title could not
+  // have produced a link under any value. Which statuses are link-free is
+  // settled in source-fix-link.test.ts; what this pins is that the COMPONENT
+  // renders nothing when the derivation returns null.
+  it.each([{ status: "connected" as const }, { status: "available" as const }])(
+    "should render no link when the derivation returns null ($status)",
+    ({ status }) => {
+      // Arrange
 
-    // Act
-    render(<ConnectionCardHeader source={undetected} />);
+      // Act
+      render(<ConnectionCardHeader source={source({ status })} />);
 
-    // Assert
-    expect(
-      screen.queryByTestId("connection-fix-whoop")
-    ).not.toBeInTheDocument();
-  });
-
-  it("should offer no link while the source is healthy", () => {
-    // Arrange
-
-    // Act
-    render(<ConnectionCardHeader source={source({ status: "connected" })} />);
-
-    // Assert
-    expect(
-      screen.queryByTestId("connection-fix-whoop")
-    ).not.toBeInTheDocument();
-  });
+      // Assert
+      expect(
+        screen.queryByTestId("connection-fix-whoop")
+      ).not.toBeInTheDocument();
+    }
+  );
 });

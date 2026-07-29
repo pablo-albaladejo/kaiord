@@ -78,7 +78,14 @@ describe("sourceFixUrl", () => {
     expect(url).toBeNull();
   });
 
-  it("should offer no link for a source that has no bridge at all", () => {
+  // Scope, so nobody re-litigates this: deleting the `bridgeId === null`
+  // clause does NOT fail this test, because at runtime `FIX_URL[null]` misses
+  // and `?? null` already returns null — that clause exists for the type
+  // checker. What this DOES kill is a lookup that supplies a default for a
+  // bridgeless source: `FIX_URL[source.bridgeId ?? "whoop-bridge"]` is caught
+  // here and by nothing else, since the unlisted-bridge case above passes a
+  // real bridge id. The contract is the assertion, not the branch.
+  it("should never resolve a bridgeless source to another source's URL", () => {
     // Arrange
     const intervals = source({
       id: "intervals",

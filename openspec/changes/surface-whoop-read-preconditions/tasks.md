@@ -32,6 +32,13 @@ that can.
 - [x] 4.2 background: `hasWhoopTab` always true; `tab-open` added to `EXTERNAL_ACTIONS`.
 - [x] 4.3 fix link: attention gate dropped; unlisted bridge falls back to the WHOOP URL; `rel` removed; link replaces the detail sentence; link never rendered.
 
+## 4b. Review round
+
+- [x] 4b.1 Rewrite the privacy-golden claim in `proposal.md` and `design.md`. Both sentences were true and their juxtaposition was not: it read as though the untouched golden evidenced the untouched action set. It does not — the golden covers `manifest`, `manifest_prod` and `allowed_paths`, and stays byte-identical even with `tab-open` in `EXTERNAL_ACTIONS`. Both documents now name `background.test.js` as the only thing pinning it.
+- [x] 4b.2 `sessionSignedOutCause` no longer names a tab. The branch is reached on `!connected` whatever the tab is doing, and its commonest trigger — a browser restart emptying `chrome.storage.session` — routinely has no tab at all, so "Your WHOOP tab is signed out" was false in exactly the ordinary case. It now describes the bridge's own missing bearer, which is what `!connected` measures. Verdict and CTA unchanged; mutation-checked.
+- [x] 4b.3 Two fixtures that did not test their titles. The bridgeless-source case is retitled to the contract it actually holds, with the scope recorded inline: the `bridgeId === null` clause is type-only, but the assertion is the only thing that kills a lookup defaulting a bridgeless source to another source's URL. The component's "extension is simply not running" case is gone — `bridgeDetected` steered nothing there and a missing extension resolves to `available`, never `attention`, so the titled scenario could not have produced a link under any value; it is replaced by a status-driven pair pinning what the component actually owns.
+- [x] 4b.4 Record the popup/card division of authority in `design.md` D7, in the tree rather than in a PR body, including the direction a future reconciliation must take.
+
 ## 5. Spec sync
 
 - [x] 5.1 `whoop-bridge`: tab-dependency requirement gains what a surface owes the user; internal-action enumeration gains `tab-open`.

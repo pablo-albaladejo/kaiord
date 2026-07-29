@@ -38,8 +38,8 @@
     "description": "Status verdict when no WHOOP session bearer is available."
   },
   "sessionSignedOutCause": {
-    "message": "Your WHOOP tab is signed out, so nothing is reaching Kaiord right now.",
-    "description": "Status cause sentence naming the consequence of a signed-out session."
+    "message": "Kaiord is not holding a WHOOP session, so nothing is reaching it right now.",
+    "description": "Status cause sentence for the signed-out state. Names the bridge's own missing bearer, not a tab: this state is reached whether or not an app.whoop.com tab exists."
   },
   "noTab": {
     "message": "No WHOOP tab open",

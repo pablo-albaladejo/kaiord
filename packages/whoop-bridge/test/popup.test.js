@@ -123,7 +123,7 @@ describe("WHOOP popup", () => {
       "Session signed out"
     );
     expect(doc.getElementById("status-sub").textContent).toContain(
-      "nothing is reaching Kaiord"
+      "not holding a WHOOP session"
     );
     const paused = doc.getElementById("paused-region");
     expect(paused.className).toBe("chips-box");
@@ -219,9 +219,15 @@ describe("WHOOP popup", () => {
     await flushAsync();
     await flushAsync();
 
-    expect(dom.window.document.getElementById("status-text").textContent).toBe(
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
       "Session signed out"
     );
+    // The reachable falsehood this replaced: a browser restart empties
+    // chrome.storage.session, so the commonest way to reach this state has no
+    // WHOOP tab at all — and the old cause told the user their tab was signed
+    // out. The cause may describe the bridge, never a tab that is not there.
+    expect(doc.getElementById("status-sub").textContent).not.toContain("tab");
   });
 
   it("renders the checking skeleton before the probe resolves", () => {

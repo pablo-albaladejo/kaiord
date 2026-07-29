@@ -61,6 +61,13 @@ returns nothing. The card diagnoses and stops.
 - Affected code: `packages/_shared/bridge-core/{popup.css,bridge-popup-shell.js}`
   and their vendored copies in all five bridges, `packages/whoop-bridge/`,
   `packages/workout-spa-editor/src/{application,components,i18n}`
-- No manifest change, no new permission, no widening of `EXTERNAL_ACTIONS`, so
-  `privacy-justification.md` and the published privacy policy stay accurate and
-  the privacy-surface golden is untouched.
+- No manifest change, no new permission, and no widening of
+  `EXTERNAL_ACTIONS`, so `privacy-justification.md` and the published privacy
+  policy stay accurate.
+- The privacy-surface golden is untouched — but that is **not** evidence for
+  the sentence above, and must not be cited as such. The golden locks
+  `manifest`, `manifest_prod` and `allowed_paths`; it does **not** cover the
+  external action allowlist, and it would have stayed byte-identical even if
+  `tab-open` HAD been added to `EXTERNAL_ACTIONS` (demonstrated by mutation).
+  The only thing pinning that set is the assertion in
+  `packages/whoop-bridge/test/background.test.js`.
