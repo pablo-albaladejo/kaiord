@@ -91,7 +91,10 @@
   },
   "sync": {
     "defaultLabel": "Coach",
-    "connectTo": "Conectar con {{label}}"
+    "connectTo": "Conectar con {{label}}",
+    "routeInactiveTitle": "{{label}} · ruta inactiva",
+    "routeInactiveAria": "{{label}} — ruta inactiva",
+    "syncAria": "Sincronizar {{label}}"
   },
   "hooks": {
     "aiProcessFailed": "No se pudo procesar la actividad con IA",

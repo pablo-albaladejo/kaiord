@@ -5,16 +5,24 @@
  */
 
 import { useSync } from "../../../contexts/sync-context";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { formatRelativeTime } from "../../../utils/format-relative-time";
 
 export const useSyncValue = (): string => {
   const t = useTranslate("settings");
+  const tCommon = useTranslate("common");
+  const locale = useActiveLocale();
   const { connected, lastSyncedAt } = useSync();
 
   if (!connected) return t("sync.notConnected");
   if (lastSyncedAt === null) return t("sync.connectedNotSynced");
+  const relative = formatRelativeTime(
+    new Date(lastSyncedAt),
+    new Date(),
+    locale
+  );
   return t("values.sync.connected", {
-    relative: formatRelativeTime(new Date(lastSyncedAt), new Date()),
+    relative: tCommon(relative.key, relative.params),
   });
 };

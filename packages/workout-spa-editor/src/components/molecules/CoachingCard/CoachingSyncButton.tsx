@@ -16,6 +16,7 @@
  * CoachingSyncIconButton.tsx.
  */
 
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import {
   buildSyncTooltip,
@@ -47,6 +48,8 @@ export function CoachingSyncButton({
   routeInactive = false,
 }: CoachingSyncButtonProps) {
   const t = useTranslate("coaching");
+  const tCommon = useTranslate("common");
+  const locale = useActiveLocale();
   const reducedMotion = usePrefersReducedMotion();
 
   if (!connected) {
@@ -65,13 +68,17 @@ export function CoachingSyncButton({
   }
 
   const title = routeInactive
-    ? `${label} · route inactive`
-    : buildSyncTooltip(label, loading, lastSyncedAt);
+    ? t("sync.routeInactiveTitle", { label })
+    : buildSyncTooltip(label, loading, lastSyncedAt, tCommon, locale);
   return (
     <CoachingSyncIconButton
       loading={loading}
       reducedMotion={reducedMotion}
-      ariaLabel={routeInactive ? `${label} — route inactive` : `Sync ${label}`}
+      ariaLabel={
+        routeInactive
+          ? t("sync.routeInactiveAria", { label })
+          : t("sync.syncAria", { label })
+      }
       title={title}
       routeInactive={routeInactive}
       onSync={onSync}
