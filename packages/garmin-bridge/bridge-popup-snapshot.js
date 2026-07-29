@@ -65,9 +65,9 @@ const collectFields = (snapshot) => {
 
 // This is the module's cross-script export: bridges load it and `popup.js` as
 // separate classic <script> tags sharing one global scope, so `popup.js` calls
-// it by bare name (see its `/* global renderAthleteCard */` header). eslint
-// resolves no such edge, so it reads as unused here and only here.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// it by bare name (see its `/* global renderAthleteCard */` header). The
+// publication at the end of the file is what makes that contract explicit
+// rather than incidental.
 const renderAthleteCard = (snapshot) => {
   const region = $("athlete-region");
   region.innerHTML = "";
@@ -107,3 +107,7 @@ const renderAthleteCard = (snapshot) => {
   grid.appendChild(updated);
   region.appendChild(grid);
 };
+
+// Published so the cross-script dependency is a statement in the code rather
+// than a bare-name coincidence of classic-script scope.
+globalThis.renderAthleteCard = renderAthleteCard;
