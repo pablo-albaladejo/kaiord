@@ -23,6 +23,19 @@ const applySourcePolicy = async (
           .map(resolveSourceKey)
           .filter((id): id is string => id !== undefined)
       : [];
+  // The tool schema already rejects `priority` with an empty sourceOrder; this
+  // is the same rule applied AFTER resolution, where ids the model plausibly
+  // emits drop out silently — "strava" and "wahoo" are real registry entries
+  // with no bridge id, and "whoop-bridge" is not a chat-facing id at all.
+  // Persisting the mode without its ordering stores a policy `resolveEffective
+  // Source` reads NO record through, and leaves every reader to invent a head.
+  if (input.mode === "priority" && sourceOrder.length === 0) {
+    return {
+      error: "unresolvable_source_order",
+      dataType: input.dataType,
+      sourceOrder: input.sourceOrder ?? [],
+    };
+  }
   await persistence.dataTypeSourcePolicy.put({
     profileId,
     dataType: input.dataType,

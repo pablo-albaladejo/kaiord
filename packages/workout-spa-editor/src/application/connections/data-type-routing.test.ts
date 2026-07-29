@@ -113,6 +113,41 @@ describe("buildDataTypeRoutingRows", () => {
     });
   });
 
+  it("should not name a head when a priority policy ranks nothing", () => {
+    // Arrange
+    // Reachable through chat: `set_data_route` counts the RAW sourceOrder, so
+    // ["strava"] passes its length check and then resolves to nothing, leaving
+    // a persisted priority policy with an empty order. Naming sources[0] here
+    // would attribute sleep to whichever import route was created first.
+    const rows = buildDataTypeRoutingRows(
+      flows({ sleep: { import: [route("garmin-bridge")] } }),
+      [priority("sleep", [])]
+    );
+
+    // Act
+    const origin = rowFor(rows, "sleep").origin;
+
+    // Assert
+    expect(origin).toEqual({ kind: "unranked", count: 2 });
+  });
+
+  it("should not name a head that is no longer an enabled source", () => {
+    // Arrange
+    // The same shape reached through the Data Hub alone: rank Garmin, then
+    // switch Garmin's import off and WHOOP's on. The saved order still exists
+    // but pins nothing available, and WHOOP was never ranked.
+    const rows = buildDataTypeRoutingRows(
+      flows({ sleep: { import: [route("whoop-bridge")] } }),
+      [priority("sleep", ["garmin-bridge"])]
+    );
+
+    // Act
+    const origin = rowFor(rows, "sleep").origin;
+
+    // Assert
+    expect(origin).toEqual({ kind: "unranked", count: 2 });
+  });
+
   it("should drop an import route the user switched off", () => {
     // Arrange
     // Toggling a Data Hub cell off writes enabled:false rather than deleting

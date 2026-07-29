@@ -231,4 +231,48 @@ describe("doSetDataRoute — set_source_policy", () => {
       sourceOrder: [],
     });
   });
+
+  it("should refuse a priority order whose sources all fail to resolve", async () => {
+    // Arrange
+    // The tool schema rejects an ABSENT sourceOrder, but only counts the raw
+    // array — "strava" is a real registry entry with no bridge id, so it
+    // passes the length check and then drops out during resolution. Persisting
+    // the mode without its ordering stores a policy resolveEffectiveSource
+    // reads no record through, and leaves every reader to invent a head.
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    const result = await doSetDataRoute(persistence, PROFILE_ID, {
+      action: "set_source_policy",
+      dataType: "sleep",
+      mode: "priority",
+      sourceOrder: ["strava"],
+    });
+
+    // Assert
+    expect(result).toMatchObject({ error: "unresolvable_source_order" });
+    const stored = await persistence.dataTypeSourcePolicy.findByProfileAndType({
+      profileId: PROFILE_ID,
+      dataType: "sleep",
+    });
+    expect(stored).toBeUndefined();
+  });
+
+  it("should keep a priority order that resolves partially", async () => {
+    // Arrange
+    // Only a TOTAL resolution failure is refused: one usable source still
+    // ranks something, so the write is honest and goes through.
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    const result = await doSetDataRoute(persistence, PROFILE_ID, {
+      action: "set_source_policy",
+      dataType: "sleep",
+      mode: "priority",
+      sourceOrder: ["strava", "whoop"],
+    });
+
+    // Assert
+    expect(result).toMatchObject({ sourceOrder: ["whoop-bridge"] });
+  });
 });

@@ -2,16 +2,26 @@
 
 - [x] 1.1 `application/connections/data-type-routing.ts`: derive
       `sources = enabled import routes ∪ manual (where MANUAL_ENTRY_TYPES has
-    the type)`, appending `manual` last so a saved bridge order keeps deciding
+the type)`, appending `manual` last so a saved bridge order keeps deciding
       the head. See design.md D1.
 - [x] 1.2 Report `none` / `only` / `primary` / `unranked`, taking the ranked
-      head from the shared `orderSources` so the pill and
-      `resolveEffectiveSource` cannot disagree.
+      head as the first saved entry still available — the element
+      `resolveEffectiveSource` picks — so the pill and the resolver cannot
+      disagree.
 - [x] 1.3 Carry `exportable` from `MANAGED_DATA_REGISTRY[...].capabilities
-    .export`, and `sentTo` from enabled export routes only. See design.md D4.
+.export`, and `sentTo` from enabled export routes only. See design.md D4.
 - [x] 1.4 Leave `buildSourcePolicyRows` untouched — its `< 2 sources` skip is
       correct for gating a reorder control and is pinned by its test. See
       design.md D2.
+- [x] 1.5 Report `unranked` when a `priority` policy's saved order pins none of
+      the available sources, instead of naming `sources[0]`. Reachable through
+      the chat tool (raw-length refinement, ids that fail to resolve) and
+      through the Data Hub (rank a bridge, then switch its import off). See
+      design.md D1a.
+- [x] 1.6 Refuse the write that mints that state: `applySourcePolicy` returns
+      `unresolvable_source_order` and persists nothing when a `priority` order
+      resolves empty, following `applyRouteToggle`'s error shape. See
+      design.md D1b.
 
 ## 2. Grouping
 

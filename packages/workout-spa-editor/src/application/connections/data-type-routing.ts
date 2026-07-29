@@ -20,7 +20,6 @@ import { integrationIdForBridge } from "../../integrations/integration-registry"
 import { MANUAL_ENTRY_TYPES } from "../../integrations/manual-entry-types";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import { DEFAULT_DATA_TYPE_SOURCE_MODE } from "../../types/data-type-source-policy";
-import { orderSources } from "../data-hub/source-policy-rows";
 
 export const MANUAL_SOURCE_ID = "manual";
 
@@ -56,6 +55,19 @@ const enabledSources = (
   ...new Set(rows.filter((row) => row.enabled).map((row) => row.bridgeId)),
 ];
 
+/**
+ * The saved order's first entry that is still an available source — exactly
+ * what `resolveEffectiveSource` consults, so the pill cannot name a source the
+ * resolver would not read from. Undefined when the saved order pins none of
+ * them, which is NOT a corner case: the chat `set_data_route` tool persists
+ * `priority` with an order emptied by unresolvable ids, and disabling every
+ * ranked route in the Data Hub leaves the same shape behind.
+ */
+const rankedHead = (
+  sources: readonly string[],
+  saved: readonly string[]
+): string | undefined => saved.find((sourceId) => sources.includes(sourceId));
+
 const originOf = (
   sources: readonly string[],
   policy: DataTypeSourcePolicy | undefined
@@ -64,11 +76,15 @@ const originOf = (
   if (first === undefined) return { kind: "none" };
   if (rest.length === 0)
     return { kind: "only", sourceId: toIntegrationId(first) };
+  const unranked = { kind: "unranked", count: sources.length } as const;
   const mode = policy?.mode ?? DEFAULT_DATA_TYPE_SOURCE_MODE;
-  if (mode !== "priority") return { kind: "unranked", count: sources.length };
-  // `= first` is a type default, not a reachable branch: `orderSources`
-  // returns a permutation of a list already known to be non-empty here.
-  const [head = first] = orderSources(sources, policy?.sourceOrder ?? []);
+  if (mode !== "priority") return unranked;
+  const head = rankedHead(sources, policy?.sourceOrder ?? []);
+  // "Priority selected, nothing ranked yet" is the honest reading. Naming
+  // `sources[0]` here would attribute the type to whichever import route
+  // happened to be created first — the same overclaim union avoids, arriving
+  // through a different door.
+  if (head === undefined) return unranked;
   return {
     kind: "primary",
     sourceId: toIntegrationId(head),

@@ -29,6 +29,31 @@ bridge ids into it) deciding the head.
 silently changes read semantics for the type — a Wave 2b decision to state
 explicitly, not one to slip in under a read-only surface.
 
+### D1a. `priority` with nothing ranked is unranked, not primary
+
+The head is the first entry of the saved order that is still an available
+source — the same element `resolveEffectiveSource` picks. When the saved order
+pins none of them there is no head, and the row reports a count.
+
+This is not defensive coding; both doors are open today. The chat
+`set_data_route` tool's refinement counts the RAW `sourceOrder`, so `["strava"]`
+(a real registry entry with no bridge id) passes the length check and then
+resolves to nothing — review believed the ABSENT-order door was also open, but
+`setDataRouteSchema.superRefine` does close that one. Independently, ranking
+Garmin and then switching Garmin's import off and WHOOP's on leaves a saved
+order pinning nothing available, through the Data Hub alone. In both states the
+pre-fix code named `sources[0]` — policy-table insertion order — which is the
+same overclaim union avoids, arriving through a different door.
+
+### D1b. The writer refuses what it cannot honour
+
+`applySourcePolicy` is where that state is minted, so it is fixed here rather
+than deferred: a ranked mode whose order resolves to nothing is refused and
+reported, following `applyRouteToggle`'s existing shape (return an `error`
+object, write nothing) rather than throwing. A partially-resolvable order is
+still stored — one usable source ranks something. Deferring this to Wave 2b
+would have meant its "Change" control inheriting a corrupt state class.
+
 ## D2. `buildSourcePolicyRows` is not widened
 
 `source-policy-rows.ts` skips any type with fewer than two enabled import

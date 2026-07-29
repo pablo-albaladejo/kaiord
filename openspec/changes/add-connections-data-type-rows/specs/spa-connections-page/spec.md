@@ -1,5 +1,29 @@
 ## ADDED Requirements
 
+### Requirement: A ranked source policy is never stored without its ranking
+
+A ranked multi-source mode is meaningless without an order: the read resolver
+consults the stored order and, finding nothing in it, resolves no record at all,
+while every display surface is left to invent a winner. The system SHALL
+therefore refuse to persist a ranked policy whose order, AFTER resolving the
+names given to storage keys, contains no usable source, and SHALL report that
+refusal to the caller rather than writing a policy it cannot honour. A
+partially-resolvable order SHALL still be stored, because one usable source
+ranks something.
+
+#### Scenario: An order that resolves to nothing is refused
+
+- **GIVEN** a request to set a ranked source policy naming only sources that do not resolve to a storage key
+- **WHEN** the request is applied
+- **THEN** no policy SHALL be persisted
+- **AND** the caller SHALL be told the order could not be resolved
+
+#### Scenario: A partially resolvable order is kept
+
+- **GIVEN** a request to set a ranked source policy naming one source that resolves and one that does not
+- **WHEN** the request is applied
+- **THEN** the policy SHALL be persisted with the resolvable source alone
+
 ### Requirement: The section names where every managed data type comes from
 
 The system SHALL present every managed data type as a row in one section beneath
@@ -61,6 +85,13 @@ made.
 - **GIVEN** a data type with two or more sources and a stored ranked order
 - **WHEN** its origin is derived
 - **THEN** the row SHALL name the first source of that order
+
+#### Scenario: A ranked mode that ranks nothing names nothing
+
+- **GIVEN** a data type in a ranked mode whose stored order names none of its currently available sources
+- **WHEN** its origin is derived
+- **THEN** the row SHALL report a count rather than naming a source
+- **AND** SHALL NOT fall back to whichever source happens to be first
 
 #### Scenario: A route the user switched off is not a source
 
