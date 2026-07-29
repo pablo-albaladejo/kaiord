@@ -49,6 +49,19 @@ const ATTENTION_COPY: readonly (readonly [string, string])[] = [
   ["common", "sourceHealth.noAccess"],
 ];
 
+/**
+ * `attentionCauseText` renders `sourceHealth.<cause.kind>` for every member of
+ * `AttentionCause`, so the catalog grows whenever a cause does — while the list
+ * above does not. A cause exempted here must say what earns the exemption; the
+ * only two that do are the ones whose wording is not an inference.
+ */
+const UNGUARDED_CAUSES: Readonly<Record<string, string>> = {
+  extensionOutdated:
+    "Names an observable fact: `outdated` is set only by probeByPing comparing the reported protocolVersion, so the cause is measured rather than guessed.",
+  noNewDataSince:
+    "Reports the date of the last delivery and attributes the silence to nothing.",
+};
+
 // Punctuation-free and case-insensitive on purpose: a guard pinned to
 // "signed out," survives "…you may be signed out." unchanged, and one pinned
 // to "session" misses "Session".
@@ -179,4 +192,29 @@ describe("attention copy honesty", () => {
     // Assert
     expect(flagged).toEqual([]);
   });
+
+  it.each(LOCALES)(
+    "should guard or exempt every rendered attention cause in %s",
+    (locale) => {
+      // Arrange
+      // The guarded list is fixed while the causes are a union that can grow.
+      // Without this, a fourth cause ships copy no assertion above ever reads,
+      // and that omission looks exactly like coverage.
+      const guarded = new Set(
+        ATTENTION_COPY.filter(([ns]) => ns === "common").map(([, key]) =>
+          key.slice("sourceHealth.".length)
+        )
+      );
+      const catalog = MODULES[`./locales/${locale}/common.json`] as
+        Record<string, Record<string, string> | undefined> | undefined;
+
+      // Act
+      const unaccounted = Object.keys(catalog?.sourceHealth ?? {}).filter(
+        (cause) => !guarded.has(cause) && UNGUARDED_CAUSES[cause] === undefined
+      );
+
+      // Assert
+      expect(unaccounted).toEqual([]);
+    }
+  );
 });
