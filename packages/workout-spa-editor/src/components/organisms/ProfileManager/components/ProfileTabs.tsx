@@ -3,7 +3,7 @@
  *
  * Top-level tab selector: Training Zones | Personal Data | Linked Accounts.
  * The former "Data Flows" tab was retired (F4.2): routing now lives
- * exclusively in the Data Hub matrix (/settings/data-hub).
+ * exclusively on the Connections page (/settings/connections).
  */
 
 type ProfileTab = "zones" | "personal" | "linked-accounts";

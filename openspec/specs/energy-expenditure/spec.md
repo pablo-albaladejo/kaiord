@@ -5,7 +5,9 @@
 ## Purpose
 
 Defines per-day energy expenditure: basal metabolic rate (Mifflin-St Jeor, or Katch-McArdle when body-fat is known) plus activity, resolved as measured from ingested wellness or predicted from BMR plus a tiered expected-workout-kcal estimate. Anthropometric profile inputs (height, age, sex) gate the basal-derived path.
+
 ## Requirements
+
 ### Requirement: Anthropometric profile inputs
 
 The profile SHALL support `height` (cm), `birthDate` (from which age is derived),
@@ -104,4 +106,3 @@ is resolved from a MET compendium via a `sport`/`subSport`→activity-code mappi
 - **GIVEN** a planned strength session with only sport, intensity, and duration
 - **WHEN** expected activity kcal is estimated
 - **THEN** the MET tier is used with the sport's mapped compendium MET value and the bodyweight
-

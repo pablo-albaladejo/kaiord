@@ -11,7 +11,6 @@ import {
 import type { Profile } from "../../../types/profile";
 import { logger } from "../../../utils/logger";
 import { Segmented } from "../../atoms/Segmented";
-import { AthleteConnections } from "../../organisms/AthleteConnections";
 import { AthleteIdentity } from "./AthleteIdentity";
 import { ThresholdCard } from "./ThresholdCard";
 import { defaultSport } from "./use-default-sport";
@@ -63,7 +62,6 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
         sportLabel={sportLabel}
       />
       <ZoneMapCard profile={profile} sport={sport} sportLabel={sportLabel} />
-      <AthleteConnections profileId={profileId} />
     </div>
   );
 }

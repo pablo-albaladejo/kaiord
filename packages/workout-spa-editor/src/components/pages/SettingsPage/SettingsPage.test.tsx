@@ -6,6 +6,8 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-settled";
+import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import type { BridgeConnectionState } from "../../../hooks/use-bridge-connections";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import { renderWithProviders } from "../../../test-utils";
@@ -39,38 +41,10 @@ const bridgeConnection = (
 
 const connections = vi.hoisted(() => ({
   value: [] as BridgeConnectionState[],
-  refreshed: true,
 }));
 
 vi.mock("../../../hooks/use-bridge-connections", () => ({
   useBridgeConnections: () => connections.value,
-  useBridgeConnectionsRefreshed: () => connections.refreshed,
-}));
-
-vi.mock("../../../contexts/garmin-bridge-context", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    useGarminBridge: () => ({
-      extensionInstalled: false,
-      sessionActive: false,
-      pushing: { status: "idle" },
-      lastError: null,
-      detectExtension: vi.fn(),
-      pushWorkout: vi.fn(),
-      listWorkouts: vi.fn(),
-      setPushing: vi.fn(),
-    }),
-  };
-});
-
-vi.mock("../../../store/train2go-store", () => ({
-  useTrain2GoStore: () => ({
-    extensionInstalled: false,
-    sessionActive: false,
-    lastError: null,
-    detectExtension: vi.fn(),
-  }),
 }));
 
 function renderAtPath(path: string) {
@@ -89,7 +63,12 @@ function renderAtPath(path: string) {
 describe("SettingsPage", () => {
   beforeEach(async () => {
     connections.value = KNOWN_BRIDGES.map((id) => bridgeConnection(id));
-    connections.refreshed = true;
+    // The connections row is gated on discovery having had its window, and
+    // that window is wall-clock. Placing the clock per test is the difference
+    // between asserting the gate and asserting how fast the suite happens to
+    // run: left alone, the "still settling" case passes only while the file
+    // finishes inside DISCOVERY_SETTLE_MS, and fails under coverage.
+    resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS - 1);
     await Promise.all([
       db.table("aiProviders").clear(),
       db.table("meta").clear(),
@@ -156,8 +135,6 @@ describe("SettingsPage", () => {
     it.each([
       { row: "connections", destination: "/settings/connections" },
       { row: "googleDriveSync", destination: "/settings/sync" },
-      { row: "extensions", destination: "/settings/extensions" },
-      { row: "dataHub", destination: "/settings/data-hub" },
       { row: "usage", destination: "/settings/usage" },
       { row: "units", destination: "/settings/preferences" },
       { row: "language", destination: "/settings/preferences" },
@@ -193,6 +170,40 @@ describe("SettingsPage", () => {
       // Assert
       expect(memory.history.at(-1)).toBe("/settings");
     });
+
+    it.each([
+      { segment: "toString" },
+      { segment: "constructor" },
+      { segment: "hasOwnProperty" },
+    ])(
+      "should send the inherited property name $segment to the index",
+      ({ segment }) => {
+        // Arrange
+        // The segment comes straight off the URL. Looked up on an object
+        // literal, every `Object.prototype` member answers with a function, so
+        // these resolved as "retired sections" and redirected to a path built
+        // by interpolating it.
+
+        // Act
+        const { memory } = renderAtPath(`/settings/${segment}`);
+
+        // Assert
+        expect(memory.history.at(-1)).toBe("/settings");
+      }
+    );
+
+    it.each([{ segment: "extensions" }, { segment: "data-hub" }])(
+      "should send the retired section $segment to Connections",
+      ({ segment }) => {
+        // Arrange
+
+        // Act
+        const { memory } = renderAtPath(`/settings/${segment}`);
+
+        // Assert
+        expect(memory.history.at(-1)).toBe("/settings/connections");
+      }
+    );
   });
 
   describe("detail views", () => {
@@ -212,8 +223,6 @@ describe("SettingsPage", () => {
     it.each([
       { tab: "ai", content: "LLM Providers" },
       { tab: "privacy", content: "Clear All API Keys" },
-      { tab: "extensions", content: "Garmin Connect" },
-      { tab: "extensions", content: "Train2Go" },
     ])(
       "should render the $tab tab content at /settings/$tab",
       ({ tab, content }) => {
@@ -223,8 +232,6 @@ describe("SettingsPage", () => {
         renderAtPath(`/settings/${tab}`);
 
         // Assert
-        // getAllByText: the extensions tab also renders "Garmin Connect"
-        // inside the Tanita sync card's instructional copy.
         expect(screen.getAllByText(content)[0]).toBeInTheDocument();
       }
     );
@@ -312,8 +319,6 @@ describe("SettingsPage", () => {
         "ai",
         "sync",
         "connections",
-        "data-hub",
-        "extensions",
         "usage",
         "privacy",
         "preferences",
@@ -386,7 +391,7 @@ describe("SettingsPage", () => {
       ).toHaveLength(0);
     });
 
-    it.each([{ path: "/settings" }, { path: "/settings/extensions" }])(
+    it.each([{ path: "/settings" }, { path: "/settings/connections" }])(
       "should expose exactly one route heading at $path",
       ({ path }) => {
         // Arrange
@@ -483,11 +488,11 @@ describe("SettingsPage", () => {
       );
     });
 
-    it("should leave the connections row bare until the first pass completes", () => {
-      // Arrange
-      // Cold load: five rows exist and all read undiscovered because nothing
-      // has been asked yet. "0 of 5" would be wrong, not merely early.
-      connections.refreshed = false;
+    // Fails on the reachable regression: a reader with five working
+    // extensions opens Settings before any has announced and is told "0 of 5".
+    it("should leave the connections row bare while discovery has its window", () => {
+      // Arrange — cold load: five rows, none discovered, discovery just began.
+      resetDiscoveryClock(Date.now());
 
       // Act
       renderAtPath("/settings");
@@ -497,12 +502,29 @@ describe("SettingsPage", () => {
         screen.getByTestId("settings-row-connections")
       ).not.toHaveTextContent("of 5");
     });
+
+    // The companion: without it the test above would also pass if the gate
+    // never opened, leaving a reader with no extensions permanently blank.
+    it("should state a zero count once discovery's window has closed", () => {
+      // Arrange
+      resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS - 1);
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(screen.getByTestId("settings-row-connections")).toHaveTextContent(
+        "0 of 5 detected"
+      );
+    });
   });
 
-  describe("legacy sections", () => {
+  describe("retired sections", () => {
+    // Entering at the OLD path is the whole point: rendering the new one and
+    // asserting it works would pass with the redirect deleted.
     it.each([{ section: "data-hub" }, { section: "extensions" }])(
-      "should keep /settings/$section resolving to its own panel",
-      ({ section }) => {
+      "should land a visitor to /settings/$section on Connections",
+      async ({ section }) => {
         // Arrange
 
         // Act
@@ -510,11 +532,49 @@ describe("SettingsPage", () => {
 
         // Assert
         expect(
-          screen.getByTestId(`settings-panel-${section}`)
+          await screen.findByTestId("settings-panel-connections")
         ).toBeInTheDocument();
-        expect(memory.history.at(-1)).toBe(`/settings/${section}`);
+        expect(memory.history.at(-1)).toBe("/settings/connections");
       }
     );
+
+    it("should replace the retired entry so Back does not bounce onto it", () => {
+      // Arrange
+
+      // Act
+      const { memory } = renderAtPath("/settings/extensions");
+
+      // Assert
+      expect(memory.history).toEqual(["/settings/connections"]);
+    });
+
+    it("should keep a genuinely unknown section falling back to the index", () => {
+      // Arrange
+
+      // Act
+      const { memory } = renderAtPath("/settings/nope");
+
+      // Assert
+      expect(memory.history.at(-1)).toBe("/settings");
+      expect(
+        screen.queryByTestId("settings-panel-connections")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should drop the retired rows from the settings index", () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings");
+
+      // Assert
+      expect(
+        screen.queryByTestId("settings-row-extensions")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("settings-row-dataHub")
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe("section deep-links", () => {
