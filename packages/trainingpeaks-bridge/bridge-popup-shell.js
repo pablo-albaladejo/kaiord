@@ -4,10 +4,10 @@
  * Master: packages/_shared/bridge-core/bridge-popup-shell.js. Never edit a
  * vendored copy — edit the master and run `pnpm bridge:sync`.
  *
- * The four blocks every bridge popup is built from: the status block
+ * The blocks every bridge popup is built from: the status block
  * (dot + verdict + one cause sentence), the capability chips, the
- * fixed-height checking skeleton, and the CTA pair. Loaded from popup.html
- * right after bridge-popup-utils.js.
+ * consequence lines, the fixed-height checking skeleton, and the CTA pair.
+ * Loaded from popup.html right after bridge-popup-utils.js.
  *
  * `$` and `msg` are passed in rather than closed over: at runtime they are
  * page globals contributed by bridge-popup-utils.js, and passing them keeps
@@ -71,6 +71,31 @@ const renderChips = ($, items, { caption, region = "chips-region" } = {}) => {
   kdReplace(host, nodes);
 };
 
+// lines: [string] — one fact per line, rendered as its own paragraph so the
+// block reads as separate consequences rather than one run-on sentence. An
+// empty list clears the region.
+//
+// The region is optional: a popup that declares no consequence region is left
+// untouched rather than throwing, so this renderer can ship to every bridge
+// ahead of the copy that fills it.
+const renderConsequence = (
+  $,
+  lines,
+  { region = "consequence-region" } = {}
+) => {
+  const host = $(region);
+  if (!host) return;
+  if (lines.length === 0) {
+    kdReplace(host, []);
+    return;
+  }
+  const box = kdBlock("div", "consequence");
+  for (const line of lines) {
+    box.appendChild(kdBlock("p", "consequence__line", line));
+  }
+  kdReplace(host, [box]);
+};
+
 // Placeholders sized to the resolved layout (caption, three chips, two text
 // lines, one CTA) so the popup does not jump when the probe settles.
 const renderSkeleton = ($) => {
@@ -116,6 +141,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     renderStatusBlock,
     renderChips,
+    renderConsequence,
     renderSkeleton,
     renderCtas,
   };

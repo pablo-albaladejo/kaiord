@@ -143,6 +143,21 @@ const openWhoop = async () => {
   await chrome.tabs.create({ url: WHOOP_DASHBOARD });
 };
 
+/**
+ * Whether an app.whoop.com tab is open right now.
+ *
+ * `connected` alone cannot answer "is Kaiord able to read?": the bearer lives
+ * in chrome.storage.session and outlives the tab it was captured from, while
+ * every read is executed BY that tab (whoopFetch → findWhoopTab → the content
+ * script's own-origin fetch). With the token held and no tab open, the popup
+ * would otherwise report a healthy session over reads that all throw.
+ *
+ * Internal only — deliberately absent from EXTERNAL_ACTIONS. The SPA has no
+ * use for it, and adding a field to the externally reachable `status` payload
+ * would widen what this bridge discloses beyond privacy-justification.md.
+ */
+const hasWhoopTab = async () => ({ open: (await findWhoopTab()) !== null });
+
 // ── Actions ──
 
 const handleAction = async (message) => {
@@ -159,6 +174,8 @@ const handleAction = async (message) => {
     case "open-whoop":
       await openWhoop();
       return null;
+    case "tab-open":
+      return hasWhoopTab();
     case "whoop-fetch":
       if (!message.path) throw new Error("Missing path");
       return whoopFetch(message.path);
@@ -245,6 +262,7 @@ if (typeof module !== "undefined") {
     findWhoopTab,
     whoopFetch,
     openWhoop,
+    hasWhoopTab,
     handleAction,
     dispatch,
     dispatchExternal,

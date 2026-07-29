@@ -27,7 +27,10 @@
     "message": "Reading your WHOOP data through your open session. Captured $phrase$.",
     "description": "Status cause sentence for the connected state, naming when the session token was captured.",
     "placeholders": {
-      "phrase": { "content": "$1", "example": "3 hours ago" }
+      "phrase": {
+        "content": "$1",
+        "example": "3 hours ago"
+      }
     }
   },
   "sessionSignedOut": {
@@ -37,6 +40,30 @@
   "sessionSignedOutCause": {
     "message": "Your WHOOP tab is signed out, so nothing is reaching Kaiord right now.",
     "description": "Status cause sentence naming the consequence of a signed-out session."
+  },
+  "noTab": {
+    "message": "No WHOOP tab open",
+    "description": "Status verdict when a session bearer is held but no app.whoop.com tab is open to run reads in."
+  },
+  "noTabCause": {
+    "message": "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
+    "description": "Status cause sentence for the no-tab state."
+  },
+  "keepsImported": {
+    "message": "Everything already imported stays in Kaiord.",
+    "description": "Consequence line: losing the session or the tab deletes nothing that has already arrived."
+  },
+  "resumeOpenTab": {
+    "message": "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
+    "description": "Consequence line naming what ends the no-tab state."
+  },
+  "resumeSignIn": {
+    "message": "Sign in at app.whoop.com and leave the tab open; the bridge picks the session back up on its own.",
+    "description": "Consequence line naming what ends the signed-out state."
+  },
+  "readsNeedTab": {
+    "message": "Kaiord reads through that open tab. Close every app.whoop.com tab and reads stop until you open one again.",
+    "description": "Consequence line in the connected state naming what the reads depend on."
   },
   "captionFeeds": {
     "message": "Feeds Kaiord",
@@ -78,49 +105,70 @@
     "message": "+$count$ more",
     "description": "Chip collapsing the data types that do not fit the popup width.",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "minuteAgo": {
     "message": "$count$ minute ago",
     "description": "Relative time, singular minutes.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "minutesAgo": {
     "message": "$count$ minutes ago",
     "description": "Relative time, plural minutes.",
     "placeholders": {
-      "count": { "content": "$1", "example": "10" }
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
     }
   },
   "hourAgo": {
     "message": "$count$ hour ago",
     "description": "Relative time, singular hours.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "hoursAgo": {
     "message": "$count$ hours ago",
     "description": "Relative time, plural hours.",
     "placeholders": {
-      "count": { "content": "$1", "example": "5" }
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
     }
   },
   "dayAgo": {
     "message": "$count$ day ago",
     "description": "Relative time, singular days.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "daysAgo": {
     "message": "$count$ days ago",
     "description": "Relative time, plural days.",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "openEditor": {

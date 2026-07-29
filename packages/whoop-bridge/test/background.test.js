@@ -162,15 +162,18 @@ describe("storeToken and getSessionStatus", () => {
     { label: "null", token: null },
     { label: "undefined", token: undefined },
     { label: "a non-string", token: 42 },
-  ])("should ignore a $label token without touching storage", async ({ token }) => {
-    // Arrange
+  ])(
+    "should ignore a $label token without touching storage",
+    async ({ token }) => {
+      // Arrange
 
-    // Act
-    await storeToken(token);
+      // Act
+      await storeToken(token);
 
-    // Assert
-    expect(chrome.storage.session.set).not.toHaveBeenCalled();
-  });
+      // Assert
+      expect(chrome.storage.session.set).not.toHaveBeenCalled();
+    }
+  );
 });
 
 describe("webRequest secondary capture", () => {
@@ -259,7 +262,9 @@ describe("whoopFetch tab dependency", () => {
     await storeToken(makeJwt({ "custom:user_id": "1" }));
     chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 5 }]));
     chrome.runtime.lastError = { message: "Receiving end does not exist" };
-    chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => cb(undefined));
+    chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+      cb(undefined)
+    );
 
     // Act
     const failure = whoopFetch("/core-details-bff/v0/cycles/details");
@@ -366,6 +371,62 @@ describe("handleAction", () => {
 
     // Assert
     await expect(attempt).rejects.toThrow("Unknown action: no-such-action");
+  });
+});
+
+describe("tab-open", () => {
+  beforeEach(() => {
+    __resetChromeMock();
+  });
+
+  it("should report no tab when chrome.tabs.query finds none", async () => {
+    // Arrange
+    chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+
+    // Act
+    const data = await handleAction({ action: "tab-open" });
+
+    // Assert
+    expect(data).toEqual({ open: false });
+  });
+
+  it("should report a tab when chrome.tabs.query finds one", async () => {
+    // Arrange
+    chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+
+    // Act
+    const data = await handleAction({ action: "tab-open" });
+
+    // Assert
+    expect(data).toEqual({ open: true });
+  });
+
+  // The tab answer is independent of the bearer on purpose: the popup needs
+  // both to tell "readable" from "signed in but unreadable" apart.
+  it("should report a tab regardless of whether a token is stored", async () => {
+    // Arrange
+    chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+
+    // Act
+    const data = await handleAction({ action: "tab-open" });
+    const status = await handleAction({ action: "status" });
+
+    // Assert
+    expect(data.open).toBe(true);
+    expect(status.connected).toBe(false);
+  });
+
+  // Widening the external surface would mean a new disclosure in
+  // privacy-justification.md and the published policy; this pins it shut.
+  it("should stay out of the externally reachable action set", () => {
+    // Arrange
+
+    // Act
+    const external = [...EXTERNAL_ACTIONS];
+
+    // Assert
+    expect(external).not.toContain("tab-open");
+    expect(external).toEqual(["ping", "status", "whoop-fetch"]);
   });
 });
 
@@ -498,7 +559,11 @@ describe("dispatchExternal origin pinning", () => {
     const respond = vi.fn();
 
     // Act
-    externalCb({ action: "status" }, { origin: "https://app.kaiord.com" }, respond);
+    externalCb(
+      { action: "status" },
+      { origin: "https://app.kaiord.com" },
+      respond
+    );
     await vi.waitFor(() => expect(respond).toHaveBeenCalled());
 
     // Assert
@@ -567,7 +632,9 @@ describe("reinjectContentScripts", () => {
     );
     // The kaiord.com announce entry is not covered by host_permissions.
     expect(chrome.scripting.executeScript).not.toHaveBeenCalledWith(
-      expect.objectContaining({ files: ["bridge-identity.js", "kaiord-announce.js"] })
+      expect.objectContaining({
+        files: ["bridge-identity.js", "kaiord-announce.js"],
+      })
     );
   });
 
@@ -576,7 +643,9 @@ describe("reinjectContentScripts", () => {
 
     // Act
     onInstalledCb();
-    await vi.waitFor(() => expect(chrome.runtime.getManifest).toHaveBeenCalled());
+    await vi.waitFor(() =>
+      expect(chrome.runtime.getManifest).toHaveBeenCalled()
+    );
 
     // Assert
     expect(chrome.runtime.getManifest).toHaveBeenCalled();

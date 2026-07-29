@@ -11,11 +11,23 @@
  * A signed-out session names its consequence — the health types that stop
  * arriving — instead of only reporting the failure.
  *
+ * Three states, not two. A captured bearer is NOT the same as a readable
+ * bridge: the token lives in chrome.storage.session and outlives the tab it
+ * came from, while every read runs inside an app.whoop.com tab
+ * (background.js whoopFetch → findWhoopTab). Reporting "Connected" with no
+ * tab open would describe a bridge whose every read throws, so the popup asks
+ * for both signals and names the middle state on its own terms.
+ *
+ * Every consequence line below is a fact the code sustains: nothing in
+ * src/application/whoop/** deletes an imported record, so what has already
+ * arrived is kept; and the bearer is only ever captured on app.whoop.com, so
+ * that is where a lost session is regained.
+ *
  * Shared helpers load first from the vendored bridge-popup-utils.js and
  * bridge-popup-shell.js (see popup.html script order).
  */
 
-/* global msg, $, relativeAgo, renderStatusBlock, renderChips, renderSkeleton, renderCtas */
+/* global msg, $, relativeAgo, renderStatusBlock, renderChips, renderConsequence, renderSkeleton, renderCtas */
 
 const OPEN_WHOOP_URL = "https://app.whoop.com/";
 const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
@@ -31,6 +43,16 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   sessionSignedOut: "Session signed out",
   sessionSignedOutCause:
     "Your WHOOP tab is signed out, so nothing is reaching Kaiord right now.",
+  noTab: "No WHOOP tab open",
+  noTabCause:
+    "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
+  keepsImported: "Everything already imported stays in Kaiord.",
+  resumeOpenTab:
+    "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
+  resumeSignIn:
+    "Sign in at app.whoop.com and leave the tab open; the bridge picks the session back up on its own.",
+  readsNeedTab:
+    "Kaiord reads through that open tab. Close every app.whoop.com tab and reads stop until you open one again.",
   captionFeeds: "Feeds Kaiord",
   captionMissing: "What Kaiord is missing",
   typeSleep: "Sleep",
@@ -107,11 +129,36 @@ const renderConnected = (capturedAt) => {
   renderChips($, feedChips(), { caption: msg("captionFeeds") });
   setPausedBox(false);
   renderChips($, [], { region: "paused-region" });
+  renderConsequence($, [msg("readsNeedTab")]);
   renderCtas($, {
     primaryLabel: msg("openEditor"),
     primaryHref: OPEN_EDITOR_URL,
     secondaryLabel: msg("openWhoop"),
     secondaryHref: OPEN_WHOOP_URL,
+  });
+};
+
+/* Bearer held, no tab to run the read in. The fix is opening WHOOP, so that
+   is the primary CTA — the same fix-first rule the signed-out state follows,
+   pointed at the other half of what a working bridge needs. */
+const renderNoTab = () => {
+  renderStatusBlock($, msg, {
+    tone: "warn",
+    verdictKey: "noTab",
+    causeKey: "noTabCause",
+  });
+  renderChips($, []);
+  setPausedBox(true);
+  renderChips($, feedChips("muted"), {
+    caption: msg("captionMissing"),
+    region: "paused-region",
+  });
+  renderConsequence($, [msg("keepsImported"), msg("resumeOpenTab")]);
+  renderCtas($, {
+    primaryLabel: msg("openWhoop"),
+    primaryHref: OPEN_WHOOP_URL,
+    secondaryLabel: msg("openEditor"),
+    secondaryHref: OPEN_EDITOR_URL,
   });
 };
 
@@ -127,6 +174,7 @@ const renderSignedOut = () => {
     caption: msg("captionMissing"),
     region: "paused-region",
   });
+  renderConsequence($, [msg("keepsImported"), msg("resumeSignIn")]);
   renderCtas($, {
     primaryLabel: msg("signInWhoop"),
     primaryHref: OPEN_WHOOP_URL,
@@ -143,10 +191,18 @@ const refresh = async () => {
     causeKey: "checkingCause",
   });
   renderSkeleton($);
-  const res = await sendMessage({ action: "status" });
-  const status = res.ok ? (res.data ?? {}) : {};
-  if (status.connected) renderConnected(status.capturedAt);
-  else renderSignedOut();
+  renderConsequence($, []);
+  const [statusRes, tabRes] = await Promise.all([
+    sendMessage({ action: "status" }),
+    sendMessage({ action: "tab-open" }),
+  ]);
+  const status = statusRes.ok ? (statusRes.data ?? {}) : {};
+  // A failed tab probe is treated as "no tab": the read it stands for would
+  // fail too, so the cautious state is also the accurate one.
+  const tabOpen = tabRes.ok && tabRes.data?.open === true;
+  if (!status.connected) renderSignedOut();
+  else if (!tabOpen) renderNoTab();
+  else renderConnected(status.capturedAt);
   showRefresh(true);
 };
 
