@@ -51,6 +51,15 @@ export type ConnectionSource = {
 };
 
 /**
+ * The one attention predicate. Every surface that summarises this page — the
+ * Settings banner, the section's own counter and its consequence banner —
+ * calls this over the same list the cards are rendered from, so a summary can
+ * never contradict the cards beneath it.
+ */
+export const sourceNeedsAttention = (source: ConnectionSource): boolean =>
+  source.status === "attention";
+
+/**
  * Card order: what is working, then what needs a decision, then what is not
  * there. Manual entry and the unsupported brands sit last because neither is
  * ever actionable.
