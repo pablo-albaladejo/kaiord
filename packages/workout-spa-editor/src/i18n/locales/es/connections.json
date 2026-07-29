@@ -48,6 +48,7 @@
     "manual": "Todo lo que escribes tú mismo en Kaiord. Nunca se desactiva.",
     "unsupported": "Kaiord todavía no puede conectar esta cuenta."
   },
+  "fixAtSource": "Inicia sesión en {{name}} ↗",
   "bridgeDetected": "Puente de navegador de {{name}} · detectado",
   "bridgeAnnounced": "Puente de navegador de {{name}} · detectado al cargar",
   "bridgeMissing": "Puente de navegador de {{name}} · no detectado",
