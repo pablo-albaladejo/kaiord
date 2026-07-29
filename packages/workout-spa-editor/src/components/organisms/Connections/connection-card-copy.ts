@@ -34,9 +34,9 @@ export const STATUS_TEXT: Record<ConnectionSourceStatus, string> = {
  */
 
 /**
- * Every `detail.*` key the `attention` branch can reach. `attentionDetailKey`
- * returns this type, so tsc rejects a branch returning a key absent here — the
- * list cannot lag the switch, which is what a hand-kept copy of it did.
+ * Every `detail.*` key the `attention` branch can reach, and the list the copy
+ * honesty guard enumerates. `attentionDetailKey` returns this type, so tsc
+ * rejects a branch returning a key absent here.
  */
 export const ATTENTION_DETAIL_KEYS = [
   "detail.outdated",
@@ -46,22 +46,13 @@ export const ATTENTION_DETAIL_KEYS = [
 export type AttentionDetailKey = (typeof ATTENTION_DETAIL_KEYS)[number];
 
 /**
- * Every key `detailKeyFor` may return.
+ * Every key `detailKeyFor` may return, which is why the `attention` case cannot
+ * return an invented one.
  *
- * WHAT THIS DOES AND DOES NOT BIND. Narrowing the signature stops
- * `case "attention":` from returning an invented key one line before it
- * delegates — typing only the helper left that open, and that line is exactly
- * where someone adding a cause writes it. But `DetailKey` is a SUPERSET of
- * `ATTENTION_DETAIL_KEYS`, so WITH THE NARROWING INTACT two routes around the
- * honesty guard remain, both type-clean: reusing a non-attention key inside the
- * attention case, or adding a new key here instead of to
- * `ATTENTION_DETAIL_KEYS`. The second is the likely one, because the compiler's
- * own message names `DetailKey` — the list the guard does not read. The count is
- * deliberately conditional: widening `attentionDetailKey`'s own annotation also
- * compiles, but that removes the mechanism rather than routing around it, and no
- * type-level guarantee survives editing its type. Closing the two needs per-slot
- * typing, so each status accepts only its own key space; tracked separately
- * rather than claimed here.
+ * This is a SUPERSET of `ATTENTION_DETAIL_KEYS`, so it does not by itself keep
+ * an attention key under the honesty guard: a non-attention key reused in that
+ * case, or a new key added here rather than to `ATTENTION_DETAIL_KEYS`, both
+ * type-check. Typing each status with its own key space would close both.
  */
 export type DetailKey =
   | AttentionDetailKey
@@ -75,7 +66,7 @@ export type DetailKey =
 /**
  * `needsReauth` has no branch of its own on purpose. Its only producer is
  * TrainingPeaks (`bridge-session-probes.ts` is the sole `needsReauthOf` call
- * site), where `authError` forces the flag true for any non-2xx (#1105), so it
+ * site), where `authError` forces the flag true for any non-2xx, so it
  * carries no information. And TrainingPeaks has no authorisation to re-grant:
  * its durable credential is the `Production_tpAuth` session cookie, so "sign in
  * again" — what `noAccess` already says — is the more accurate remedy.
