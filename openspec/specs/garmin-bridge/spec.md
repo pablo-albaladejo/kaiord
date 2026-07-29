@@ -46,7 +46,11 @@ The extension SHALL authenticate to Garmin with OAuth tokens minted from the use
 
 Tokens SHALL be held in `chrome.storage.local` so they survive service-worker cold starts. The OAuth1 token is long-lived (about a year). The OAuth2 access token SHALL be refreshed by re-running the exchange with the OAuth1 token alone; **that refresh reads no cookie and no browser session**. Only if the refresh fails SHALL the extension re-mint from the SSO session.
 
-It follows — and any surface reporting this bridge's state MUST respect it — that **reads continue after the user signs out of connect.garmin.com**, and that a failed call is NOT evidence the user is signed out. The consumer key and secret are Garmin's public reverse-engineered values, hardcoded so the bridge needs no additional host permission.
+It follows that **reads continue after the user signs out of connect.garmin.com**, and that a failed call is NOT evidence the user is signed out. Every surface this extension itself ships — its popup — MUST respect that: it SHALL NOT diagnose a signed-out session from a failed check.
+
+The rule is deliberately scoped to this extension. It is a property of this bridge's auth model, and it holds for any consumer, but a bridge spec cannot legislate for surfaces it does not own — and at the time of writing the SPA's own connection card does exactly what this forbids. Widening the scope is worth doing once that is fixed, not before, because a `SHALL` the system already breaks is the defect this requirement exists to prevent.
+
+The consumer key and secret are Garmin's public reverse-engineered values, hardcoded so the bridge needs no additional host permission.
 
 The extension SHALL NOT log token values, even truncated. Diagnostic responses SHALL report authentication as a boolean, never a token.
 
@@ -64,21 +68,24 @@ The extension SHALL NOT log token values, even truncated. Diagnostic responses S
 #### Scenario: A failed call is not reported as a signed-out session
 
 - **GIVEN** a session check that did not succeed
-- **WHEN** any surface explains it
-- **THEN** it SHALL NOT assert that the user is signed out, because the extension cannot distinguish an unusable token from a Garmin outage
+- **WHEN** the extension's popup explains it
+- **THEN** it SHALL NOT assert that the user is signed out, and SHALL offer both an unusable token and a Garmin outage as possibilities
+- **AND** the reason is that the SURFACES cannot tell those apart: the ticket stage does raise a distinguishable "No Garmin session" error, but the session check flattens every failure into one result envelope and nothing reads that distinction back out
 
 ### Requirement: Service-worker call surface with a path/method allowlist
 
-All Garmin API calls SHALL be made from the background service worker against `https://connectapi.garmin.com` with an `Authorization: Bearer` header. No call SHALL be relayed through a page, a content script, or a Garmin tab.
+All Garmin **data** calls SHALL be made from the background service worker against `https://connectapi.garmin.com` with an `Authorization: Bearer` header. No call SHALL be relayed through a page, a content script, or a Garmin tab.
 
-Every call SHALL be checked against an allowlist of (method, path-pattern) rules before any network request is made, as defence in depth: the SPA can only trigger fixed paths, and the bridge still refuses anything outside the set. The allowlist SHALL be:
+Every **data** call SHALL be checked against an allowlist of (method, path-pattern) rules before any network request is made, as defence in depth: the SPA can only trigger fixed paths, and the bridge still refuses anything outside the set. The allowlist SHALL be:
 
 - `GET` `/workout-service/workouts` (with any query string)
 - `POST` `/workout-service/workout`
 - `POST` `/upload-service/upload` (with an optional sub-path, e.g. `/.fit`)
 - `GET` `/activitylist-service/activities/search/activities` (with any query string)
 
-A call outside the allowlist SHALL be rejected with `{ ok: false, error: "Blocked: disallowed path or method" }` and SHALL make no network request. The allowlist SHALL be locked against drift by `scripts/check-bridge-privacy-surface.mjs`.
+A data call outside the allowlist SHALL be rejected with `{ ok: false, error: "Blocked: disallowed path or method" }` and SHALL make no network request. The allowlist SHALL be locked against drift by `scripts/check-bridge-privacy-surface.mjs`.
+
+The token mint is OUTSIDE this allowlist and reaches three further endpoints across `https://sso.garmin.com` and `https://connectapi.garmin.com` — the SSO sign-in that issues a service ticket, and the OAuth pre-authorize and exchange endpoints. They are not caller-reachable: no SPA action and no popup control can name a path that reaches them, and they run only as part of minting or refreshing a token. The allowlist exists to bound what a _caller_ can ask for, so it does not govern them — and consequently neither does the golden that locks it, which covers the data patterns only.
 
 #### Scenario: Allowed workout read passes the allowlist
 
