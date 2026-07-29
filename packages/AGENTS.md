@@ -66,7 +66,7 @@ types, schemas, ports, and use cases; every other package is an outer adapter
 - **Strategy injection**: `@kaiord/core` exposes `fromBinary/fromText/
 toBinary/toText` that take a reader/writer port. Apps wire the concrete
   adapter at composition time only.
-- **Build**: each package builds with `tsup` (libraries) or `vite`
+- **Build**: each package builds with `tsdown` (libraries) or `vite`
   (apps/extensions). All emit ESM with separate `.d.ts`.
 
 ## Dependencies

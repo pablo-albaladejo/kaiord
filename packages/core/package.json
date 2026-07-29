@@ -24,7 +24,7 @@
     "generate:schema": "tsx scripts/generate-schema.ts",
     "generate:krd-fixtures": "tsx scripts/generate-krd-fixtures.ts",
     "prebuild": "pnpm run generate:schema",
-    "build": "pnpm run generate:schema && tsup",
+    "build": "pnpm run generate:schema && tsdown --concurrency 1",
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
@@ -42,7 +42,7 @@
     "@types/rosie": "^0.0.45",
     "@vitest/coverage-v8": "^4.1.10",
     "rosie": "^2.1.1",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.22.14",
     "tsx": "^4.23.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
