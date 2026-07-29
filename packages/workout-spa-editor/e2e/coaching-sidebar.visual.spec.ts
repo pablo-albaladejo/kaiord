@@ -20,7 +20,12 @@ const SOURCE_ID = "visual-sidebar-activity";
 const WORKOUT_ID = "visual-sidebar-workout";
 
 test.describe("CoachingSidebar visual regression", () => {
-  test.beforeEach(async (_fixtures, testInfo) => {
+  // Playwright requires the first argument to be a destructuring pattern so it
+  // can read which fixtures the hook needs; this hook needs none. An empty
+  // pattern is the only way to say that, and `no-empty-pattern` cannot tell it
+  // apart from an accidental one.
+  // eslint-disable-next-line no-empty-pattern
+  test.beforeEach(async ({}, testInfo) => {
     // Baselines are generated on ubuntu-latest/chromium only (see
     // `update-visual-baselines.yml`). Snapshots are not maintained for
     // the other Playwright projects, so let them skip rather than fail
