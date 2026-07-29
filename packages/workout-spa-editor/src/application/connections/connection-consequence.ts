@@ -50,13 +50,21 @@ const consequenceOf = (coverage: ConnectionCoverage, t: Translate): string => {
 };
 
 /**
- * The date is attached only for a lone affected source, so one source's last
+ * The date qualifies a loss, so it is attached ONLY to the paused sentence.
+ * The other two branches state that nothing stopped arriving, and "no new data
+ * since <date>" appended to them contradicts the sentence it is joined to —
+ * which is reachable and ordinary: a signed-out source whose types another
+ * source still covers has a last sync like any other.
+ *
+ * It is also attached only for a lone affected source, so one source's last
  * sync is never presented as a set's.
  */
 const sinceOf = (
   affected: readonly ConnectionSource[],
+  coverage: ConnectionCoverage,
   t: Translate
 ): string | undefined => {
+  if (coverage.paused.length === 0) return undefined;
   const day =
     affected.length === 1 ? calendarDay(affected[0]?.lastSyncAt) : undefined;
   return day === undefined ? undefined : t("banner.since", { date: day });
@@ -69,7 +77,7 @@ export const buildConnectionConsequence = (
 ): ConnectionConsequence | null => {
   const affected = sources.filter(sourceNeedsAttention);
   if (affected.length === 0) return null;
-  const detail = [consequenceOf(coverage, t), sinceOf(affected, t)]
+  const detail = [consequenceOf(coverage, t), sinceOf(affected, coverage, t)]
     .filter((line): line is string => line !== undefined)
     .join(" ");
   return { title: titleOf(affected, t), detail };

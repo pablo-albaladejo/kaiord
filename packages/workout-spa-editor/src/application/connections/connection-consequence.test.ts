@@ -169,9 +169,11 @@ describe("buildConnectionConsequence", () => {
 
   it("should say nothing stopped while another source still delivers", () => {
     // Arrange
-    // The broken source's types all have a second source switched on, so the
-    // reader is told the truth rather than left to assume the worst.
-    const sources = [source()];
+    // WHOOP is signed out with only its `weight` route on, and Tanita imports
+    // `weight` too and is installed — the shape of connection-coverage's own
+    // "pause a type only when no other source still delivers it" case. WHOOP
+    // has a last sync because any past import wrote one, which is ordinary.
+    const sources = [source({ lastSyncAt: LAST_SYNC_AT })];
 
     // Act
     const consequence = buildConnectionConsequence(
@@ -182,13 +184,17 @@ describe("buildConnectionConsequence", () => {
 
     // Assert
     expect(consequence?.detail).toContain("Nothing has stopped");
+    // The date qualifies a loss. Appended here it contradicts the sentence it
+    // is joined to: "Nothing has stopped … No new data since 2026-07-25."
+    expect(consequence?.detail).not.toContain("No new data since");
   });
 
   it("should say nothing stopped when the broken source feeds no route", () => {
     // Arrange
     // Reachable on a fresh profile: an extension is installed and signed out
-    // before any import route has ever been switched on for it.
-    const sources = [source()];
+    // before any import route has ever been switched on for it. It still
+    // carries a last sync from before the routes were switched off.
+    const sources = [source({ lastSyncAt: LAST_SYNC_AT })];
 
     // Act
     const consequence = buildConnectionConsequence(
@@ -199,5 +205,6 @@ describe("buildConnectionConsequence", () => {
 
     // Assert
     expect(consequence?.detail).toContain("No data routes are switched on");
+    expect(consequence?.detail).not.toContain("No new data since");
   });
 });
