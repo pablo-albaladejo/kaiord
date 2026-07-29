@@ -190,6 +190,21 @@ describe("SettingsPage", () => {
       }
     );
 
+    it("should render the connections tab content at /settings/connections", async () => {
+      // Arrange
+
+      // Act
+      renderAtPath("/settings/connections");
+
+      // Assert
+      expect(
+        await screen.findByTestId("settings-panel-connections")
+      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "Settings · Connections"
+      );
+    });
+
     it("should render the usage tab content at /settings/usage", async () => {
       // Arrange
 

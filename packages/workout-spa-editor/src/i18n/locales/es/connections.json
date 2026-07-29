@@ -1,5 +1,6 @@
 {
   "intro": "Cada fuente que has vinculado y lo que está enviando a Kaiord ahora mismo.",
+  "noProfile": "Crea un perfil de atleta para vincular una fuente de datos.",
   "sources": "Fuentes",
   "sourcesHint": "Cada fuente lleva su propio puente de navegador y sus permisos",
   "unsupported": "Todavía no disponibles",

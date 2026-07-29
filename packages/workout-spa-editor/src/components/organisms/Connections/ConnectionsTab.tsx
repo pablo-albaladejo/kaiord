@@ -24,7 +24,7 @@ export const ConnectionsTab: React.FC = () => {
         className="text-sm text-ink-muted"
         data-testid="connections-no-profile"
       >
-        {t("intro")}
+        {t("noProfile")}
       </p>
     );
   }

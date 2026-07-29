@@ -1,5 +1,6 @@
 {
   "intro": "Every source you have linked, and what it is sending to Kaiord right now.",
+  "noProfile": "Create an athlete profile to link a data source.",
   "sources": "Sources",
   "sourcesHint": "Each source carries its own browser bridge and permissions",
   "unsupported": "Not available yet",
