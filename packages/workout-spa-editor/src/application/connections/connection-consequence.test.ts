@@ -69,18 +69,22 @@ describe("buildConnectionConsequence", () => {
     expect(consequence?.detail).not.toMatch(/fell back|fallen back/i);
   });
 
-  it("should say a source is signed out rather than that its token expired", () => {
+  it("should name the source and the failed read without naming a cause", () => {
     // Arrange
     // No bridge distinguishes an expired credential from one never issued —
-    // `probeWhoopSession` leaves `needsReauth` false either way.
+    // `probeWhoopSession` leaves `needsReauth` false either way — and none
+    // distinguishes either from a provider outage.
     const sources = [source()];
 
     // Act
     const consequence = buildConnectionConsequence(sources, coverage([]), t);
 
     // Assert
-    expect(consequence?.title).toBe("WHOOP is signed out");
-    expect(consequence?.title).not.toMatch(/expired/i);
+    expect(consequence?.title).toBe("Kaiord cannot read from WHOOP");
+    // Stems, not whole punctuated words: /expired/ alone lets "expires" and
+    // "expiry" through, and /signed out,/ lets "signed out." through.
+    expect(consequence?.title).not.toMatch(/expir/i);
+    expect(consequence?.title).not.toMatch(/sign(?:ed|ing)?[\s-]*out|signout/i);
   });
 
   it("should date the consequence from the last data received", () => {

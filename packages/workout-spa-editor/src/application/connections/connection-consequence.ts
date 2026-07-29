@@ -2,13 +2,16 @@
  * The consequence banner above the source cards: what broke, and what stopped
  * arriving because of it.
  *
- * Three sentences this banner must never grow, because nothing can back them:
+ * Four sentences this banner must never grow, because nothing can back them:
  * a duration ("down for 3 days") — no transition timestamp exists, so the date
  * is `lastSyncAt` and says when data last arrived; a hand-off ("fell back to
  * Garmin") — `union` is the default and has no winner, so nothing takes over;
- * and an expiry ("its token expired") — only `trainingpeaks-bridge` reports
+ * an expiry ("its token expired") — only `trainingpeaks-bridge` reports
  * `needsReauth`, and no bridge distinguishes an expired credential from one
- * that was never issued.
+ * that was never issued; and a sign-out ("Garmin is signed out") — the probes
+ * fold provider outages into the same answer as a dead credential, and
+ * garmin's reads outlive the browser session outright, so the title states the
+ * failed read and leaves the cause to the card.
  */
 import type { Translate } from "../../i18n/use-translate";
 import { calendarDay } from "./calendar-day";

@@ -10,7 +10,7 @@ import type { HeaderAttention } from "./use-header-attention";
 
 const DOWN: HeaderAttention = {
   title: "1 source down",
-  detail: "Session signed out — sign in again to resume",
+  detail: "Kaiord cannot read from a source — signing in again may restore it",
 };
 
 function renderPill(attention: HeaderAttention | null) {
@@ -63,7 +63,7 @@ describe("SourceHealthPill", () => {
 
     // Assert
     expect(menu).toHaveTextContent(
-      "Session signed out — sign in again to resume"
+      "Kaiord cannot read from a source — signing in again may restore it"
     );
     expect(loc.history).toContain("/settings/connections");
   });

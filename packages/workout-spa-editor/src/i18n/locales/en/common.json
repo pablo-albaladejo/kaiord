@@ -50,7 +50,7 @@
   },
   "sourceHealth": {
     "noNewDataSince": "No new data since {{date}}",
-    "signedOut": "Session signed out — sign in again to resume",
+    "noAccess": "Kaiord cannot read from a source — signing in again may restore it",
     "extensionOutdated": "An extension is out of date — update it to resume"
   }
 }

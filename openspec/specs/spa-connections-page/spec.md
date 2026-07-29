@@ -93,9 +93,16 @@ statement SHALL be rendered rather than the stronger plausible one.
 
 Specifically: a source whose extension is present but which is never
 session-probed SHALL be described as installed, never as connected and never as
-being checked. A source whose session is not usable SHALL be described as signed
-out, and SHALL NOT claim that a credential expired, because no probe
-distinguishes an expired credential from one that was never issued. No card
+being checked. A source whose probe came back without a usable read SHALL be
+described as one Kaiord cannot read from, and SHALL NOT be described as signed
+out and SHALL NOT claim that a credential expired. Neither cause is observable:
+every probe folds a provider outage into the same answer as a dead credential,
+and one bridge makes the sign-out reading outright false — Garmin mints its
+bearer from a long-lived OAuth1 token in extension storage rather than from a
+cookie, so its reads survive the user signing out of the Garmin website and a
+failed read is no evidence about their session. The copy SHALL therefore name
+both possibilities and assert neither, and SHALL keep offering a sign-in as the
+action, which genuinely re-mints access where access is what lapsed. No card
 SHALL claim when a source stopped working, because no transition timestamp is
 recorded; freshness SHALL be expressed as when data was last received, or as
 having received none.
@@ -119,11 +126,12 @@ having received none.
 - **WHEN** its card renders
 - **THEN** it SHALL be described as being checked, not as installed
 
-#### Scenario: An unusable session
+#### Scenario: A probe that came back without a usable read
 
-- **GIVEN** a discovered source whose last probe found no usable session
+- **GIVEN** a discovered source whose last probe came back without a usable read
 - **WHEN** its card renders
-- **THEN** it SHALL be described as signed out, and no copy SHALL assert that a credential expired
+- **THEN** it SHALL state that Kaiord could not read from that source, and no copy SHALL assert that a credential expired or that the session is signed out
+- **AND** it SHALL name a provider outage as a possible cause alongside lapsed access, and SHALL still offer signing in again as the action
 
 #### Scenario: Freshness without a transition timestamp
 
@@ -889,7 +897,7 @@ extension speaking an unsupported protocol version does not make the others
 out of date.
 
 An extension speaking an unsupported protocol version SHALL be reported as out
-of date rather than as signed out, because the probe succeeded and signing in
+of date rather than as a failed read, because the probe succeeded and signing in
 again would fix nothing.
 
 The statement SHALL declare no call to action while the fix is a sign-in on the
@@ -919,11 +927,11 @@ provider's own site, which this page cannot perform.
 - **WHEN** the consequence is stated
 - **THEN** it SHALL state that nothing stopped arriving rather than naming a type
 
-#### Scenario: A session problem is described as signed out
+#### Scenario: A failed read is stated without naming its cause
 
-- **GIVEN** exactly one affected source whose probe reports no usable session
+- **GIVEN** exactly one affected source whose probe came back without a usable read
 - **WHEN** the consequence is stated
-- **THEN** it SHALL describe the source as signed out, and SHALL NOT claim a credential expired
+- **THEN** it SHALL state that Kaiord cannot read from that source, and SHALL NOT claim a credential expired or that the source is signed out
 
 #### Scenario: The date comes from the last delivery
 

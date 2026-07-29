@@ -1,10 +1,15 @@
 /**
  * Status derivation for one source card.
  *
- * The vocabulary is deliberately narrower than the reference design's. There
- * is no "token expired": no bridge distinguishes an expired credential from
- * one that was never issued (`probeWhoopSession` leaves `needsReauth` false),
- * so a discovered bridge without a usable session reads as signed out.
+ * The vocabulary is deliberately narrower than the reference design's, and
+ * `attention` is the narrowest word in it: it means the probe came back
+ * without a usable read, NOT that anyone is signed out. There is no "token
+ * expired" — no bridge distinguishes an expired credential from one that was
+ * never issued (`probeWhoopSession` leaves `needsReauth` false) — and there is
+ * no "signed out" either, because garmin's reads run off a stored OAuth1 token
+ * and outlive the browser session entirely. The copy keyed off this status
+ * states the failed read and offers both possible causes; see
+ * `connection-card-copy`.
  */
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
 import type { ConnectionSourceStatus } from "./connection-source";

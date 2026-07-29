@@ -7,15 +7,19 @@ import type { AttentionCause } from "./source-attention";
 const t = getTranslate("common");
 
 describe("attentionCauseText", () => {
-  it("should tell a signed-out source to sign in again", () => {
+  it("should state the failed read and offer a sign-in without diagnosing why", () => {
     // Arrange
-    const cause: AttentionCause = { kind: "signedOut" };
+    const cause: AttentionCause = { kind: "noAccess" };
 
     // Act
     const text = attentionCauseText(cause, t);
 
     // Assert
-    expect(text).toBe("Session signed out — sign in again to resume");
+    // Pinned as concepts, not as one punctuated sentence: the wording is free
+    // to change, the claim it may not make is not.
+    expect(text).toMatch(/cannot read/i);
+    expect(text).toMatch(/sign(?:ing)?\s+in\b/i);
+    expect(text).not.toMatch(/sign(?:ed|ing)?[\s-]*out|signout/i);
   });
 
   it("should tell an outdated extension to update", () => {
@@ -43,12 +47,13 @@ describe("attentionCauseText", () => {
     expect(text).toBe("No new data since 2026-07-25");
   });
 
-  it("should never claim a credential expired", () => {
+  it("should never claim a credential expired or a session was signed out", () => {
     // Arrange
     // WHOOP cannot distinguish an expired token from never having signed in,
-    // so no cause may word itself as an expiry.
+    // and Garmin's reads outlive the browser session entirely, so no cause may
+    // word itself as an expiry OR as a sign-out.
     const causes: readonly AttentionCause[] = [
-      { kind: "signedOut" },
+      { kind: "noAccess" },
       { kind: "extensionOutdated" },
       { kind: "noNewDataSince", date: "2026-07-25" },
     ];
@@ -57,6 +62,9 @@ describe("attentionCauseText", () => {
     const texts = causes.map((cause) => attentionCauseText(cause, t));
 
     // Assert
-    expect(texts.some((text) => /expir/i.test(text))).toBe(false);
+    for (const text of texts) {
+      expect(text).not.toMatch(/expir/i);
+      expect(text).not.toMatch(/sign(?:ed|ing)?[\s-]*out|signout/i);
+    }
   });
 });
