@@ -12,6 +12,7 @@
 import { useMemo } from "react";
 
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
+import { hasSessionProbe } from "../../adapters/bridge/bridge-session-probes";
 import { buildConnectionSources } from "../../application/connections/build-connection-sources";
 import type { ConnectionSource } from "../../application/connections/connection-source";
 import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
@@ -31,6 +32,7 @@ export const useConnectionSources = (
       record: (integrationId) => records.get(integrationId),
       session: (bridgeId) => byBridge.get(bridgeId),
       isDiscovered: (bridgeId) => byBridge.get(bridgeId)?.discovered === true,
+      hasSessionProbe,
       lastSyncAt: (bridgeId) => byBridge.get(bridgeId)?.lastSyncAt,
       announces: (bridgeId, token) =>
         (bridgeDiscovery.getCapabilities(bridgeId) ?? []).includes(token),

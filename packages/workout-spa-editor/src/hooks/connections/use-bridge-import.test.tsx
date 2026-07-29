@@ -125,4 +125,32 @@ describe("useBridgeImport", () => {
     expect(second.result.current.status).toBe("cooldown");
     expect(importer).toHaveBeenCalledTimes(1);
   });
+  it("should not start a second import while the first is still in flight", async () => {
+    // Arrange
+    // The panel holding the button unmounts when the card collapses, so a
+    // guard living in hook state is gone before the first pull resolves —
+    // and the cooldown is only stamped on settle, so it is not stamped yet.
+    let release: (() => void) | undefined;
+    const importer = vi.fn().mockReturnValue(
+      new Promise<void>((resolve) => {
+        release = resolve;
+      })
+    );
+    vi.mocked(bridgeImporterFor).mockReturnValue(importer);
+    const first = mountFor("tanita-bridge");
+    act(() => first.result.current.run());
+    first.unmount();
+
+    // Act
+    const second = mountFor("tanita-bridge");
+    act(() => second.result.current.run());
+
+    // Assert
+    expect(importer).toHaveBeenCalledTimes(1);
+    expect(second.result.current.status).toBe("running");
+    await act(async () => {
+      release?.();
+    });
+    await waitFor(() => expect(second.result.current.status).toBe("done"));
+  });
 });

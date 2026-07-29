@@ -1,19 +1,23 @@
 /**
  * useBridgeImport — the Connections page's per-source "Sync now".
  *
- * Two guards, both client-side, because nothing downstream provides
- * backpressure: bridge imports do not queue behind `BRIDGE_QUEUE`, and one of
- * them (Tanita) downloads a whole export CSV per call. `running` blocks
- * re-entry while a pull is in flight; the cooldown, kept per bridge for the
- * session rather than per mounted card, blocks a second pull for a minute
- * after one finishes.
+ * Both guards live in `import-cooldown`, not in this hook's state: nothing
+ * downstream provides backpressure (imports do not queue behind
+ * `BRIDGE_QUEUE`, and Tanita's downloads a whole export CSV per call), and
+ * hook state dies with the Manage panel that renders the button. Reading the
+ * in-flight map synchronously also settles the two-fast-clicks case that a
+ * captured `status` could not.
  */
 import { useCallback, useState } from "react";
 
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
 import { usePersistence } from "../../contexts/persistence-context";
 import { bridgeImporterFor } from "../bridge-import/bridge-importers";
-import { isCoolingDown, markImported } from "./import-cooldown";
+import {
+  isCoolingDown,
+  isImportRunning,
+  startOrJoinImport,
+} from "./import-cooldown";
 
 export type BridgeImportStatus =
   "idle" | "running" | "done" | "failed" | "cooldown";
@@ -36,8 +40,9 @@ export const useBridgeImport = (
     if (importer === undefined || bridgeId === null || profileId === null) {
       return;
     }
-    if (status === "running") return;
-    if (isCoolingDown(bridgeId, Date.now())) {
+    // Joining an in-flight pull rather than refusing it: a card remounted
+    // mid-pull adopts the running state and settles with the real outcome.
+    if (!isImportRunning(bridgeId) && isCoolingDown(bridgeId, Date.now())) {
       setStatus("cooldown");
       return;
     }
@@ -47,15 +52,13 @@ export const useBridgeImport = (
       return;
     }
     setStatus("running");
-    const settle = (next: BridgeImportStatus) => () => {
-      markImported(bridgeId, Date.now());
-      setStatus(next);
-    };
-    void importer(persistence, extensionId, profileId).then(
-      settle("done"),
-      settle("failed")
+    void startOrJoinImport(bridgeId, () =>
+      importer(persistence, extensionId, profileId)
+    ).then(
+      () => setStatus("done"),
+      () => setStatus("failed")
     );
-  }, [importer, bridgeId, profileId, persistence, status]);
+  }, [importer, bridgeId, profileId, persistence]);
 
   return { supported: importer !== undefined, status, run };
 };
