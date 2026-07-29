@@ -1,6 +1,7 @@
 {
   "title": "Ajustes",
   "back": "Ajustes",
+  "sectionsNav": "Secciones de ajustes",
   "groups": {
     "yourData": "Tus datos",
     "ai": "IA",

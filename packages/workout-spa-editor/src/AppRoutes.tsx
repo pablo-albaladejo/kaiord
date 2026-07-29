@@ -65,7 +65,11 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         <Route path="/settings/profile">
           <Redirect to="/athlete" />
         </Route>
-        <Route path="/settings/:tab?">{guard(<SettingsPage />)}</Route>
+        {/* One URL family for the whole Settings shell: the bare path is the
+            index, a section segment opens that section's panel (beside the
+            index on desktop). `/settings/data-hub` and `/settings/extensions`
+            stay in the section set until Wave 4 folds them into Connections. */}
+        <Route path="/settings/:section?">{guard(<SettingsPage />)}</Route>
         <Route path="/health/*?">
           <HealthSubRouter analytics={analytics} />
         </Route>

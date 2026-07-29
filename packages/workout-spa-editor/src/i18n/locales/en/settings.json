@@ -1,6 +1,7 @@
 {
   "title": "Settings",
   "back": "Settings",
+  "sectionsNav": "Settings sections",
   "groups": {
     "yourData": "Your data",
     "ai": "AI",

@@ -527,9 +527,7 @@ Two defects in the Settings index → detail flow, both instances of consistency
 export const SETTINGS_SECTION_ATTR = "data-settings-section" as const;
 export const SETTINGS_SECTION_SELECTOR = `[${SETTINGS_SECTION_ATTR}]` as const;
 export type SettingsSectionId =
-  | "providers"
-  | "custom-instructions"
-  | "data-management";
+  "providers" | "custom-instructions" | "data-management";
 
 // use-focus-on-section-change.ts (new) — no args, no return; self-contained side
 // effect, matching useFocusOnRouteChange(): void at use-focus-on-route-change.ts:40
@@ -548,9 +546,7 @@ The DOM-contract constant + selector + closed section-id union. Dependency-free 
 export const SETTINGS_SECTION_ATTR = "data-settings-section" as const;
 export const SETTINGS_SECTION_SELECTOR = `[${SETTINGS_SECTION_ATTR}]` as const;
 export type SettingsSectionId =
-  | "providers"
-  | "custom-instructions"
-  | "data-management";
+  "providers" | "custom-instructions" | "data-management";
 ```
 
 #### `src/hooks/use-focus-on-section-change.ts` (~30 lines, under the 100 cap; function under 40)
@@ -606,7 +602,7 @@ Mirrors the `use-focus-on-route-change.test.tsx` harness (`FAKE_RAF` + `memoryLo
 
 **Function-cap watch (AiTab):** the `AiTab` component is lines 7–56 (**49 lines** against the **60-line React cap** — only 11 lines of headroom). Dropping the `id` (per the review) and using the bare `{...{ [SETTINGS_SECTION_ATTR]: "..." }}` + `tabIndex={-1}` spread keeps each `<section>` open tag to ~2 added attribute lines after Prettier (~4 total across both sections), landing ~53. **If it crosses 60 after `pnpm format`, extract the two addressable sections into a tiny attribute-bearing wrapper.** This is a real constraint the draft missed (it only checked the file cap). The marker-spread `{...{ [ATTR]: "" }}` idiom is the same one already used for `ROUTE_HEADING_ATTR` at `SettingsPage.tsx:43`.
 
-**Routing note:** `SettingsRow.tsx:54` calls `onNavigate(to)` → wouter `navigate(to)` (`SettingsPage.tsx:49`). wouter's `navigate` accepts a full `path?query` string, so `"/settings/ai?section=providers"` routes correctly and `useSearch()` inside `SettingsPage` exposes `section=providers`. **No change to `SettingsRow.tsx` or the `<Route path="/settings/:tab?">` pattern** — wouter matches on pathname and ignores the query.
+**Routing note:** `SettingsRow.tsx:54` calls `onNavigate(to)` → wouter `navigate(to)` (`SettingsPage.tsx:49`). wouter's `navigate` accepts a full `path?query` string, so `"/settings/ai?section=providers"` routes correctly and `useSearch()` inside `SettingsPage` exposes `section=providers`. **No change to `SettingsRow.tsx` or the `<Route path="/settings/:section?">` pattern** — wouter matches on pathname and ignores the query. (The route parameter was named `:tab?` when this note was written; it was renamed to `:section?` in `add-settings-split-shell`. The URL shape is unchanged, and the `?section=` query described here is a different, panel-internal anchor.)
 
 ### Call sites to thread (settings anchors)
 
