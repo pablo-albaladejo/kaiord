@@ -6,6 +6,7 @@ import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import { bridgeImporterFor } from "../bridge-import/bridge-importers";
+import { resetImportCooldowns } from "./import-cooldown";
 import { useBridgeImport } from "./use-bridge-import";
 
 vi.mock("../../adapters/bridge/bridge-discovery", () => ({
@@ -30,6 +31,7 @@ describe("useBridgeImport", () => {
   beforeEach(() => {
     vi.mocked(bridgeDiscovery.getExtensionId).mockReturnValue("ext-1");
     vi.mocked(bridgeImporterFor).mockReset();
+    resetImportCooldowns();
   });
 
   it("should report a bridge with no importer as unsupported", () => {
@@ -103,5 +105,24 @@ describe("useBridgeImport", () => {
     // Assert
     expect(importer).not.toHaveBeenCalled();
     expect(result.current.status).toBe("failed");
+  });
+  it("should keep the cooldown when the card is unmounted and mounted again", async () => {
+    // Arrange
+    // The panel holding the button collapses on close, so a ref inside it
+    // would put "no cooldown" one click away.
+    const importer = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(bridgeImporterFor).mockReturnValue(importer);
+    const first = mountFor("garmin-bridge");
+    act(() => first.result.current.run());
+    await waitFor(() => expect(first.result.current.status).toBe("done"));
+    first.unmount();
+
+    // Act
+    const second = mountFor("garmin-bridge");
+    act(() => second.result.current.run());
+
+    // Assert
+    expect(second.result.current.status).toBe("cooldown");
+    expect(importer).toHaveBeenCalledTimes(1);
   });
 });

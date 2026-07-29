@@ -4,17 +4,16 @@
  * Two guards, both client-side, because nothing downstream provides
  * backpressure: bridge imports do not queue behind `BRIDGE_QUEUE`, and one of
  * them (Tanita) downloads a whole export CSV per call. `running` blocks
- * re-entry while a pull is in flight; the cooldown blocks a second pull for a
- * minute after one finishes, so holding the button cannot hammer the
- * extension.
+ * re-entry while a pull is in flight; the cooldown, kept per bridge for the
+ * session rather than per mounted card, blocks a second pull for a minute
+ * after one finishes.
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
 import { usePersistence } from "../../contexts/persistence-context";
 import { bridgeImporterFor } from "../bridge-import/bridge-importers";
-
-export const IMPORT_COOLDOWN_MS = 60_000;
+import { isCoolingDown, markImported } from "./import-cooldown";
 
 export type BridgeImportStatus =
   "idle" | "running" | "done" | "failed" | "cooldown";
@@ -31,7 +30,6 @@ export const useBridgeImport = (
 ): BridgeImport => {
   const persistence = usePersistence();
   const [status, setStatus] = useState<BridgeImportStatus>("idle");
-  const lastRunAt = useRef<number | null>(null);
   const importer = bridgeImporterFor(bridgeId);
 
   const run = useCallback(() => {
@@ -39,8 +37,7 @@ export const useBridgeImport = (
       return;
     }
     if (status === "running") return;
-    const last = lastRunAt.current;
-    if (last !== null && Date.now() - last < IMPORT_COOLDOWN_MS) {
+    if (isCoolingDown(bridgeId, Date.now())) {
       setStatus("cooldown");
       return;
     }
@@ -50,15 +47,13 @@ export const useBridgeImport = (
       return;
     }
     setStatus("running");
+    const settle = (next: BridgeImportStatus) => () => {
+      markImported(bridgeId, Date.now());
+      setStatus(next);
+    };
     void importer(persistence, extensionId, profileId).then(
-      () => {
-        lastRunAt.current = Date.now();
-        setStatus("done");
-      },
-      () => {
-        lastRunAt.current = Date.now();
-        setStatus("failed");
-      }
+      settle("done"),
+      settle("failed")
     );
   }, [importer, bridgeId, profileId, persistence, status]);
 
