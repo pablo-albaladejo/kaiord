@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/trainingpeaks-bridge",
-  "version": "10.0.0",
+  "version": "10.1.0",
   "private": true,
   "description": "Chrome extension that reads your TrainingPeaks body metrics through your own logged-in session (no password — a cookie→token exchange) and hands them to the Kaiord editor",
   "scripts": {

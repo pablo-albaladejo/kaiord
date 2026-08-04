@@ -1,5 +1,29 @@
 # @kaiord/docs
 
+## 0.0.3
+
+### Patch Changes
+
+- 8defa1c: Add a "Convert" section to the docs site with a hub and six long-tail
+  "how to convert X to Y" pages (FIT↔ZWO, FIT↔TCX, ZWO↔Garmin). Each page
+  covers the Editor, CLI, and SDK paths plus a grounded "what survives the
+  conversion" table and per-pair gotchas. Link the hub from the sidebar, top
+  nav, and the landing `llms.txt`.
+- 9dd3625: Add the wave-2 long-tail converter pages to the docs site: the remaining six
+  directed pairs (FIT↔Garmin, TCX↔ZWO, TCX↔Garmin). Each page covers the Editor,
+  CLI, and SDK paths plus a grounded "what survives the conversion" table and
+  per-pair gotchas. Every cell in the hub's conversion matrix is now a guided
+  walkthrough, and the six new pages are linked from the sidebar.
+- 42f3228: Emit `rel=canonical` on every docs page and align TechArticle URLs with the
+  clean URLs actually served. Each docs page is reachable under three variants
+  (clean, `.html`, and the `.md` LLM mirror); without a canonical, search
+  engines pick arbitrarily across ~330 pages.
+- a1ef519: Fix the docs theme-color helper reading the light `:root` value instead of
+  the dark palette: `extractDarkBlock` matched a `.dark { … }` reference inside
+  a comment (capturing an ellipsis) rather than the real `.dark` rule, so it
+  silently fell back to `:root`. Anchor the selector to the start of a line.
+  The brand-tokens tests (which pin the dark-first theme-color) pass again.
+
 ## 0.0.2
 
 ### Patch Changes
