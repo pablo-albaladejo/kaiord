@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/tanita-bridge",
-  "version": "10.0.0",
+  "version": "10.1.0",
   "private": true,
   "description": "Chrome extension that reads your MyTANITA body-composition CSV export through your own logged-in mytanita.eu session (no password) and hands it to the Kaiord editor",
   "scripts": {

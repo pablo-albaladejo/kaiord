@@ -1,5 +1,28 @@
 # @kaiord/train2go-bridge
 
+## 10.1.0
+
+### Minor Changes
+
+- 2cdca01: Migrate the Train2Go Bridge from a content-script relay to service-worker-direct.
+  The service worker now fetches the training-plan endpoints on `app.train2go.com`
+  itself with `credentials:"include"` via the shared identity-free `session-fetch`
+  transport, so the site's HttpOnly session cookie travels automatically — no
+  content script on `app.train2go.com` and no relay hop. Permissions shrink from
+  `["tabs","storage","scripting"]` to `["storage"]`. A dead session (redirect or
+  login response) is now reported as `needsReauth` so the editor can prompt a
+  re-login. The path allowlist, HTML parser, and profile-snapshot surface are
+  unchanged.
+
+### Patch Changes
+
+- a16c648: Ship English-only extension UI: remove the `_locales/es` (Spanish) locale from
+  the Garmin, Train2Go, and Whoop bridges so every bridge exposes a single,
+  audited English surface — matching each manifest's `default_locale: "en"`. A
+  new `scripts/check-bridge-locales-english-only.test.mjs` guard (run under
+  `test:scripts`) now fails CI if any `packages/*-bridge/_locales/` reintroduces a
+  non-`en` locale.
+
 ## 10.0.0
 
 ### Minor Changes

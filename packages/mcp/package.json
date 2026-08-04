@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/mcp",
-  "version": "10.0.0",
+  "version": "10.1.0",
   "mcpName": "io.github.pablo-albaladejo/kaiord",
   "description": "MCP server for Kaiord fitness data conversion (FIT, TCX, ZWO, GCN, KRD)",
   "type": "module",
