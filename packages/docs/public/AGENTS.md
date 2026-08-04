@@ -9,9 +9,9 @@ Static assets served by the VitePress documentation site. Contains logos and Ope
 
 ## Key Files
 
-- `logo-light.svg` — Kaiord logo for light theme (SVG)
-- `logo-dark.svg` — Kaiord logo for dark theme (SVG)
-- `logo.svg` — Generic Kaiord logo (SVG)
+- `favicon.svg` — the Kaiord mark, magenta on a dark plate (mirrored from `assets/`)
+- `logo-light.svg` — nav mark with light-theme ink baked in (generated)
+- `logo-dark.svg` — nav mark with dark-theme ink baked in (generated)
 - `og-image-docs.png` — Open Graph image for social media sharing (PNG)
 
 ## Subdirectories
@@ -22,7 +22,13 @@ None. All assets are in this directory.
 
 ### Working In This Directory
 
-Replace or add assets here as needed.
+`favicon.svg`, `logo-light.svg` and `logo-dark.svg` are GENERATED from the
+masters in `assets/` — edit the master and run `pnpm brand:images`. The two
+nav marks carry baked ink rather than `currentColor` because VitePress renders
+its logo through `<img>`, which inherits no color from the page.
+
+`og-image-docs.png` comes from `pnpm --filter @kaiord/docs exec node
+scripts/generate-og-image.mjs`.
 
 **Conventions:**
 

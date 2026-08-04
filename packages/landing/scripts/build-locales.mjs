@@ -33,9 +33,9 @@ const FOOTER_ANCHOR = 'a[href="https://www.npmjs.com/org/kaiord"]';
 // links so Tailwind (which generates CSS at Vite build time, before this script
 // runs) has already emitted them and the switcher inherits real styling.
 const HEADER_CLASS =
-  "text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]";
+  "text-[var(--text-secondary)] transition-colors hover:text-[var(--text)]";
 const FOOTER_CLASS =
-  "transition-colors hover:text-[var(--brand-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-blue)]";
+  "transition-colors hover:text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]";
 
 const setAttr = (root, selector, attr, value) => {
   const el = root.querySelector(selector);

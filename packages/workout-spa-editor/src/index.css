@@ -20,80 +20,59 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Semantic theme tokens. Surfaces, ink, and soft edges alias the shared
-   --brand-* tokens, which carry light defaults on :root and dark values
-   under .dark (see styles/brand-tokens.css) — so they adapt without local
-   re-declaration. Components must consume these through the Tailwind
-   utilities mapped in @theme below (bg-surface*, text-ink-*, border-edge*,
-   text-accent) instead of raw slate utilities. */
+/* Semantic theme tokens. Surfaces, ink and edges alias the role layer of
+   styles/brand-tokens.css, which carries light values on :root and dark
+   values under .dark — so every one of these adapts without a local
+   per-theme re-declaration. Components must consume them through the
+   Tailwind utilities mapped in @theme below (bg-surface*, text-ink-*,
+   border-edge*, text-accent) instead of raw slate utilities. */
 :root {
-  --surface-page: var(--brand-bg-primary);
-  --surface-deep: var(--brand-bg-deep);
-  --surface-card: var(--brand-bg-surface);
-  --surface-elevated: var(--brand-bg-elevated);
+  --surface-page: var(--bg-page);
+  --surface-deep: var(--bg-page);
+  --surface-card: var(--bg-surface);
+  --surface-elevated: var(--bg-elevated);
 
-  --ink-strong: var(--brand-text-primary);
-  --ink-body: var(--brand-text-secondary);
-  --ink-muted: var(--brand-text-muted);
+  --ink-strong: var(--text);
+  --ink-body: var(--text-secondary);
+  --ink-muted: var(--text-dim);
 
-  --edge: var(--brand-border);
-  --edge-soft: var(--brand-border-soft);
-  --edge-strong: #cbd5e1;
+  --edge: var(--border);
+  --edge-soft: var(--border-subtle);
+  /* One ramp step beyond --border in both themes: the role layer has no
+     "stronger hairline", and --text-disabled sits exactly there. */
+  --edge-strong: var(--text-disabled);
 
-  --accent: var(--brand-accent-blue);
+  /* Inside the login the brand is ink; --control is the interactive fill. */
+  --accent: var(--control);
 
-  /* Glass chrome (BottomNav) — consumed via inline style var() references. */
-  --glass-bg: rgba(248, 250, 252, 0.85);
-  --glass-border: rgba(226, 232, 240, 0.7);
-  --glass-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
+  /* Glass chrome (BottomNav) — consumed via inline style var() references.
+     Derived from the surface role, so the dark theme needs no second set. */
+  --glass-bg: color-mix(in oklab, var(--bg-surface) 85%, transparent);
+  --glass-border: color-mix(in oklab, var(--border) 70%, transparent);
+  --glass-shadow: var(--shadow-float);
 
   /* Track color for progress rings (ReadinessRing, MacroRing). */
-  --ring-track: #e2e8f0;
-}
-
-/* SPA-specific deviations from the brand palette in dark mode: hairlines
-   use a translucent slate instead of the solid brand border, the accent
-   brightens to sky-400 (the brand blue is tuned for light bg), and the
-   glass chrome and ring track carry their own dark values. */
-.dark {
-  --edge: rgba(51, 65, 85, 0.6);
-  --edge-strong: #475569;
-
-  --accent: #38bdf8;
-
-  --glass-bg: rgba(15, 23, 42, 0.82);
-  --glass-border: rgba(51, 65, 85, 0.6);
-  --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-
-  --ring-track: #243244;
+  --ring-track: var(--bg-sunken);
 }
 
 @theme {
-  /* Primary scale — smoothed ramp centered on brand accent #0284c7.
-     Must match --brand-accent-blue in styles/brand-tokens.css */
-  --color-primary-50: #f0f9ff;
-  --color-primary-100: #e0f2fe;
-  --color-primary-200: #bae6fd;
-  --color-primary-300: #67c9f5;
-  --color-primary-400: #2aabea;
-  --color-primary-500: #0284c7;
-  --color-primary-600: #0369a1;
-  --color-primary-700: #075985;
-  --color-primary-800: #0c4a6e;
-  --color-primary-900: #082f49;
-  --color-primary-950: #041e36;
-
-  --color-secondary-50: #faf5ff;
-  --color-secondary-100: #f3e8ff;
-  --color-secondary-200: #e9d5ff;
-  --color-secondary-300: #d8b4fe;
-  --color-secondary-400: #c084fc;
-  --color-secondary-500: #a855f7;
-  --color-secondary-600: #9333ea;
-  --color-secondary-700: #7e22ce;
-  --color-secondary-800: #6b21a8;
-  --color-secondary-900: #581c87;
-  --color-secondary-950: #3b0764;
+  /* Primary scale — a transitional bridge, not a role. It was the retired
+     accent blue smoothed into eleven steps; 179 component call sites and two
+     pinned test suites still name `bg-primary-600` and friends, so the steps
+     keep their names and give up their hue. 600/700 land deep enough that the
+     `bg-primary-600 text-white` button idiom reads at 16:1 instead of 4.6:1.
+     The screen waves replace these utilities with roles. */
+  --color-primary-50: var(--n-50);
+  --color-primary-100: var(--n-100);
+  --color-primary-200: var(--n-200);
+  --color-primary-300: var(--n-300);
+  --color-primary-400: var(--n-400);
+  --color-primary-500: var(--n-500);
+  --color-primary-600: var(--n-900);
+  --color-primary-700: var(--n-1000);
+  --color-primary-800: var(--n-1100);
+  --color-primary-900: var(--n-1200);
+  --color-primary-950: var(--n-1200);
 
   /* Remap gray-* to slate-* so legacy `dark:bg-gray-*` rules render
      with the cool slate undertone post-cosmetic-polish. The whole
@@ -142,9 +121,7 @@
      utilities emit an undefined var() and the declaration is dropped. */
   --color-muted-foreground: var(--ink-muted);
   --color-primary: var(--color-primary-600);
-  --color-primary-foreground: #ffffff;
-
-  --font-sans: var(--brand-font-sans);
+  --color-primary-foreground: var(--n-0);
 }
 
 @layer base {

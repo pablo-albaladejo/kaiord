@@ -21,29 +21,24 @@
 
 :root {
   /* Backgrounds */
-  --kd-bg-primary: #0f172a;
-  --kd-bg-surface: #1e293b;
-  --kd-bg-elevated: #334155;
+  --kd-bg-primary: #0d0d0d;
+  --kd-bg-surface: #171717;
+  --kd-bg-elevated: #232323;
 
   /* Text */
-  --kd-text-primary: #f8fafc;
-  --kd-text-secondary: #cbd5e1;
-  --kd-text-muted: #94a3b8;
+  --kd-text-primary: #ffffff;
+  --kd-text-secondary: #d4d4d4;
+  --kd-text-muted: #909090;
 
-  /* Accent */
-  --kd-accent-blue: #0284c7;
-  --kd-accent-blue-hover: #0369a1;
-  --kd-accent-blue-active: #075985;
-  --kd-accent-blue-soft: #0c4a6e;
-
-  /* Semantic */
-  --kd-semantic-tip: #34d399;
-  --kd-semantic-warning: #fbbf24;
-  --kd-semantic-warning-soft: #2d2305;
+  /* Interactive fill. Inside the product the brand is ink, so the control
+     ramp is what a button paints — and its label takes --kd-control-ink. */
+  --kd-control: #ffffff;
+  --kd-control-ink: #171717;
+  --kd-control-hover: #e4e4e4;
 
   /* Borders */
-  --kd-border: #334155;
-  --kd-border-soft: #1e293b;
+  --kd-border: #444444;
+  --kd-border-soft: #303030;
 }
 
 * {
@@ -76,7 +71,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent, var(--kd-accent-blue));
+  background: var(--accent, var(--kd-control));
 }
 
 .popup-header__title {
@@ -148,17 +143,17 @@ body {
 }
 
 .status-block--ok .status-block__dot {
-  background: var(--kd-semantic-tip);
+  background: var(--kd-text-muted);
 }
 .status-block--ok .status-block__verdict {
-  color: var(--kd-semantic-tip);
+  color: var(--kd-text-secondary);
 }
 
 .status-block--warn .status-block__dot {
-  background: var(--kd-semantic-warning);
+  background: var(--kd-text-primary);
 }
 .status-block--warn .status-block__verdict {
-  color: var(--kd-semantic-warning);
+  color: var(--kd-text-primary);
 }
 
 .status-block--muted .status-block__dot {
@@ -187,9 +182,9 @@ body {
 
 .chip {
   padding: 3px 8px;
-  border: 1px solid var(--kd-accent-blue-active);
+  border: 1px solid var(--kd-border);
   border-radius: 999px;
-  background: var(--kd-accent-blue-soft);
+  background: var(--kd-bg-elevated);
   font-size: 11px;
   color: var(--kd-text-primary);
 }
@@ -218,13 +213,13 @@ body {
 /* Warning-tinted container for the chips of a broken state. */
 .chips-box {
   padding: 11px 12px;
-  border: 1px solid var(--kd-semantic-warning);
+  border: 1px solid var(--kd-border);
   border-radius: 9px;
-  background: var(--kd-semantic-warning-soft);
+  background: var(--kd-bg-elevated);
 }
 
 .chips-box .caption {
-  color: var(--kd-semantic-warning);
+  color: var(--kd-text-primary);
 }
 
 /* ── Consequence block: what the current state costs, and what ends it.
@@ -319,7 +314,7 @@ body {
 .week__bar-fill {
   display: block;
   height: 100%;
-  background: var(--kd-semantic-tip);
+  background: var(--kd-text-secondary);
 }
 
 /* ── Coach notes (collapsible) ── */
@@ -373,8 +368,8 @@ body {
   padding: 9px;
   border: none;
   border-radius: 9px;
-  background: var(--kd-accent-blue);
-  color: var(--kd-text-primary);
+  background: var(--kd-control);
+  color: var(--kd-control-ink);
   font-size: 13px;
   font-weight: 600;
   text-align: center;
@@ -383,14 +378,14 @@ body {
 }
 
 .cta-primary:hover {
-  background: var(--kd-accent-blue-hover);
+  background: var(--kd-control-hover);
 }
 
 .cta-secondary {
   display: block;
   margin-top: 8px;
   font-size: 12px;
-  color: var(--kd-accent-blue);
+  color: var(--kd-text-primary);
   text-align: center;
   text-decoration: none;
 }
