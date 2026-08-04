@@ -39,7 +39,7 @@ export function RoutingPickerPanel({
       data-testid={`routing-picker-${dataType}`}
       className="space-y-2 rounded-xl border border-edge-soft bg-surface-page p-3"
     >
-      <p className="text-[12.5px] font-bold text-ink-strong">
+      <p className="text-[12.5px] font-semibold text-ink-strong">
         {t("routing.change.title", { type })}
       </p>
       {toggles.length > 0 && (

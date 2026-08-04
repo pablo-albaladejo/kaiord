@@ -15,10 +15,11 @@ type Props = {
   toggles: readonly DataTypeRouteToggle[];
 };
 
-/* A ring, not a border tint: `border-edge` and an amber border are the same
-   property at the same specificity, so which wins would depend on stylesheet
-   order (same reasoning as ConnectionSourceCard's attention ring). */
-const STALLED_RING = "ring-1 ring-amber-500/40";
+/* Raised rather than tinted, for the same reason the source card is: a row
+   nothing is being read for asks the reader for something, and the palette
+   answers that with elevation and a sentence rather than with a hue. */
+const STALLED = "border-edge bg-surface-elevated";
+const SETTLED = "border-edge-soft bg-surface";
 
 /**
  * "Also sent to" renders only when an export route could exist at all. Eleven
@@ -45,10 +46,10 @@ export function DataTypeRoutingRow({
     <div
       data-testid={`routing-row-${row.dataType}`}
       data-origin={row.origin.kind}
-      className={`flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-edge bg-surface px-4 py-3 ${stalled ? STALLED_RING : ""}`}
+      className={`flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border px-4 py-3 ${stalled ? STALLED : SETTLED}`}
     >
       <div className="min-w-0 flex-[1_1_180px]">
-        <div className="text-[14px] font-bold text-ink-strong">
+        <div className="text-[14px] font-semibold text-ink-strong">
           {t(`dataTypes.${row.dataType}`)}
         </div>
         <div className="text-[12px] text-ink-muted">

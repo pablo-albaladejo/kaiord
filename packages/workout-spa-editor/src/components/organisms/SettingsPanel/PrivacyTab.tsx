@@ -34,16 +34,16 @@ export const PrivacyTab: React.FC = () => {
       <PrivacyInformationSection />
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <h3 className="mb-3 text-sm font-semibold text-ink-body">
           {t("privacy.analytics")}
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-ink-body">
           {t("privacy.analyticsIntro")}{" "}
           <a
             href="https://umami.is/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-gray-800 dark:hover:text-gray-200"
+            className="underline underline-offset-2 hover:text-ink-body"
           >
             {t("privacy.analyticsLink")}
           </a>{" "}
@@ -55,13 +55,13 @@ export const PrivacyTab: React.FC = () => {
         tabIndex={-1}
         {...{ [SETTINGS_SECTION_ATTR]: "data-management" }}
       >
-        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <h3 className="mb-3 text-sm font-semibold text-ink-body">
           {t("privacy.dataManagement")}
         </h3>
         <Button variant="danger" size="sm" onClick={handleClearAll}>
           {t("privacy.clearAllApiKeys")}
         </Button>
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <p className="mt-2 text-xs text-ink-muted">
           {t("privacy.clearAllHint")}
         </p>
       </section>

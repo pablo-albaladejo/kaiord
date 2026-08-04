@@ -27,7 +27,7 @@ export function RoutingSourceSwitches({ dataType, toggles, onToggle }: Props) {
 
   return (
     <div className="space-y-1.5">
-      <p className="text-[12px] font-bold text-ink-strong">{label}</p>
+      <p className="text-[12px] font-semibold text-ink-strong">{label}</p>
       <p className="text-[12px] text-ink-muted">
         {t("routing.change.switchesHint", { type })}
       </p>
