@@ -95,7 +95,7 @@ test.describe("Calendar Workouts", () => {
     ).toHaveCount(2);
   });
 
-  test("RAW card shows warning indicator", async ({ page }) => {
+  test("RAW card names its state in a chip", async ({ page }) => {
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -105,12 +105,12 @@ test.describe("Calendar Workouts", () => {
     const card = page.locator('[data-testid^="workout-card-"]').first();
     await expect(card).toBeVisible();
 
-    // Raw state indicator has title "Raw"
+    // The lifecycle is a word in a chip, not a hue-coded glyph.
     const indicator = card.getByTestId("state-indicator");
-    await expect(indicator).toHaveAttribute("title", "Raw");
+    await expect(indicator).toHaveText("Raw");
   });
 
-  test("PUSHED card shows check indicator", async ({ page }) => {
+  test("PUSHED card names its state in a chip", async ({ page }) => {
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -123,7 +123,7 @@ test.describe("Calendar Workouts", () => {
       .locator('[data-testid^="workout-card-"]')
       .first()
       .getByTestId("state-indicator");
-    await expect(indicator).toHaveAttribute("title", "Pushed");
+    await expect(indicator).toHaveText("Pushed");
   });
 
   test("STRUCTURED card shows structured indicator", async ({ page }) => {
@@ -139,7 +139,7 @@ test.describe("Calendar Workouts", () => {
       .locator('[data-testid^="workout-card-"]')
       .first()
       .getByTestId("state-indicator");
-    await expect(indicator).toHaveAttribute("title", "Structured");
+    await expect(indicator).toHaveText("Structured");
   });
 
   test("Click RAW card opens dialog with title and description", async ({
