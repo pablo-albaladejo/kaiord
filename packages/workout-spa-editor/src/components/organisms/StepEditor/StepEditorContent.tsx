@@ -37,10 +37,10 @@ export const StepEditorContent = ({
   const t = useTranslate("editor");
   return (
     <>
-      <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">
+      <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.08em] text-ink-muted">
         {t("stepEditor.editStep", { n: stepIndex + 1 })}
       </h2>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <DurationPicker
           value={duration}
           onChange={onDurationChange}

@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 import type { Workout } from "../../../types/krd";
 
@@ -28,4 +28,8 @@ export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
     overIndex: number
   ) => void;
   onAddStep?: () => void;
+  /** Rendered directly beneath the row it belongs to. The step form used to
+      open in a separate card above the list, so editing a target meant
+      losing sight of the step being edited. */
+  renderAfterItem?: (itemId: string) => ReactNode;
 };

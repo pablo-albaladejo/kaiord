@@ -40,18 +40,16 @@ export const WorkoutStats: React.FC<WorkoutStatsProps> = ({
     return null;
   }
 
+  // Bare: `EditorCanvas` owns the one border on the screen. This used to be
+  // one of five sibling cards, which gave a summary the same weight as the
+  // thing being edited.
   return (
     <div
-      className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 ${className}`}
+      className={`space-y-2 ${className}`}
       role="region"
       aria-label={t("stats.region")}
     >
-      <h2 className="mb-3 text-lg font-semibold text-gray-900">
-        {t("stats.heading")}
-      </h2>
-      <div className="space-y-2">
-        <StatsContent stats={stats} />
-      </div>
+      <StatsContent stats={stats} />
     </div>
   );
 };

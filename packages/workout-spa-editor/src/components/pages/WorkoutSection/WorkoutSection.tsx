@@ -7,11 +7,13 @@ import {
 import type { KRD, Workout } from "../../../types/krd";
 import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
-import { WorkoutPreview } from "../../molecules/WorkoutPreview";
 import { CoachMarkHost } from "../../organisms/CoachMark/CoachMarkHost";
-import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
+import { CanvasShapeHead } from "./CanvasShapeHead";
+import { EditorCanvas } from "./EditorCanvas";
+import { useDiscardConfirmation } from "./use-discard-confirmation";
 import { useWorkoutSectionFocus } from "./use-workout-section-focus";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
+import { WorkoutActions } from "./WorkoutActions";
 import { WorkoutHeader } from "./WorkoutHeader";
 import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsListBinding } from "./WorkoutStepsListBinding";
@@ -35,6 +37,9 @@ export type WorkoutSectionProps = {
   startInEditMode?: boolean;
 };
 
+/* One canvas, not five cards. The chart indexes the rows beneath it, the
+   step form opens at the row it belongs to, and the only controls outside
+   the canvas are the three that end the task. */
 function WorkoutSectionInner(props: WorkoutSectionProps) {
   const state = useWorkoutSectionState(
     props.workout,
@@ -47,34 +52,43 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
 
   const { editorRootRef, addStepButtonRef, titleRef } =
     useWorkoutSectionFocus();
+  const handleDiscard = useDiscardConfirmation();
+
+  const renderStepForm = (itemId: string) => (
+    <WorkoutSectionEditor
+      itemId={itemId}
+      selectedStepId={props.selectedStepId}
+      isEditing={state.isEditing}
+      selectedStep={state.selectedStep}
+      onSave={state.handleSave}
+      onCancel={state.handleCancel}
+    />
+  );
 
   return (
-    <div className="space-y-6" data-testid="workout-section">
+    <div className="flex flex-col gap-4" data-testid="workout-section">
       <WorkoutHeader
         workout={props.workout}
         krd={props.krd}
         titleRef={titleRef}
         startInEditMode={props.startInEditMode}
       />
-      <WorkoutStats workout={props.workout} />
-      <WorkoutPreview
-        workout={props.workout}
-        selectedStepId={props.selectedStepId}
-        onStepSelect={props.onStepSelect}
-      />
-      <WorkoutSectionEditor
-        isEditing={state.isEditing}
-        selectedStep={state.selectedStep}
-        onSave={state.handleSave}
-        onCancel={state.handleCancel}
-      />
-      <WorkoutStepsListBinding
-        workout={props.workout}
-        selectedStepId={props.selectedStepId}
-        state={state}
-        editorRootRef={editorRootRef}
-        addStepButtonRef={addStepButtonRef}
-      />
+      <EditorCanvas>
+        <CanvasShapeHead
+          workout={props.workout}
+          selectedStepId={props.selectedStepId}
+          onStepSelect={props.onStepSelect}
+        />
+        <WorkoutStepsListBinding
+          workout={props.workout}
+          selectedStepId={props.selectedStepId}
+          state={state}
+          editorRootRef={editorRootRef}
+          addStepButtonRef={addStepButtonRef}
+          renderStepForm={renderStepForm}
+        />
+      </EditorCanvas>
+      <WorkoutActions krd={props.krd} onDiscard={handleDiscard} />
       <CreateRepetitionBlockDialog
         stepCount={state.blockStepCount}
         onConfirm={state.handleConfirmCreateBlock}

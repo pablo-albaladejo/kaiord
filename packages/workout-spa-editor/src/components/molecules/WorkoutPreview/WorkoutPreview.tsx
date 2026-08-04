@@ -66,7 +66,7 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
 
   return (
     <div
-      className={`overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 ${className}`}
+      className={`overflow-hidden ${className}`}
       role="region"
       aria-label={t("preview.region")}
       data-testid="workout-preview"
