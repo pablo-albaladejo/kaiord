@@ -19,63 +19,74 @@
     U+FFFD;
 }
 
-/* Font stacks */
+/* Font stack. The mono family is left on VitePress's own default: the shared
+   token layer no longer carries one, and a docs site is the one surface where
+   `mono` really means code rather than a number wanting to align. */
 :root {
-  --vp-font-family-base: var(--brand-font-sans);
-  --vp-font-family-mono: var(--brand-font-mono);
-}
-
-/* Map brand tokens to VitePress theme variables */
-:root {
-  --vp-c-brand-1: var(--brand-accent-blue);
-  --vp-c-brand-2: var(--brand-accent-blue-hover);
-  --vp-c-brand-3: var(--brand-accent-blue-active);
+  --vp-font-family-base: var(--font-sans);
 }
 
 /*
- * VitePress Dark Theme Overrides
+ * Map the shared role tokens to VitePress theme variables.
  * Verified against: vitepress@2.0.0-alpha.17
  * Variable source: node_modules/vitepress/dist/client/theme-default/styles/vars.css
  * On VitePress upgrade, grep the above file for these variable names.
  * Intentionally skipped: --vp-c-brand-dimm-* (unused in current layout),
  *   --vp-code-line-highlight-color (acceptable default), --vp-c-bg-elv (maps to bg-soft).
+ *
+ * One block, not a light one and a dark one: every role below already
+ * resolves per theme through :root / .dark in styles/brand-tokens.css, so a
+ * second block here would only be a chance to diverge.
  */
-.dark {
+:root {
   /* Backgrounds — 3 distinct elevation levels */
-  --vp-c-bg: var(--brand-bg-primary);
-  --vp-c-bg-soft: var(--brand-bg-surface);
-  --vp-c-bg-mute: var(--brand-bg-elevated);
-  --vp-c-gutter: var(--brand-bg-primary);
+  --vp-c-bg: var(--bg-page);
+  --vp-c-bg-soft: var(--bg-surface);
+  --vp-c-bg-mute: var(--bg-elevated);
+  --vp-c-gutter: var(--bg-page);
 
   /* Text */
-  --vp-c-text-1: var(--brand-text-primary);
-  --vp-c-text-2: var(--brand-text-secondary);
-  --vp-c-text-3: var(--brand-text-muted);
+  --vp-c-text-1: var(--text);
+  --vp-c-text-2: var(--text-secondary);
+  --vp-c-text-3: var(--text-dim);
 
   /* Borders */
-  --vp-c-divider: var(--brand-border);
-  --vp-c-border: var(--brand-border);
+  --vp-c-divider: var(--border);
+  --vp-c-border: var(--border);
 
-  /* Brand — 3 distinct interactive states */
-  --vp-c-brand-1: var(--brand-accent-blue); /* default (sky-600) */
-  --vp-c-brand-2: var(--brand-accent-blue-hover); /* hover (sky-700) */
-  --vp-c-brand-3: var(
-    --brand-accent-blue-active
-  ); /* active/pressed (sky-800) */
-  --vp-c-brand-soft: var(--brand-accent-blue-soft);
+  /* Brand — 3 interactive states. Outside the landing the brand is ink, so
+     the interactive ramp is the control ramp. */
+  --vp-c-brand-1: var(--control);
+  --vp-c-brand-2: var(--control-hover);
+  --vp-c-brand-3: var(--control-active);
+  --vp-c-brand-soft: var(--bg-elevated);
 
-  /* Semantic containers — all via tokens */
-  --vp-c-default-soft: var(--brand-bg-surface);
-  --vp-c-tip-1: var(--brand-semantic-tip);
-  --vp-c-tip-soft: var(--brand-semantic-tip-soft);
-  --vp-c-warning-1: var(--brand-semantic-warning);
-  --vp-c-warning-soft: var(--brand-semantic-warning-soft);
-  --vp-c-danger-1: var(--brand-semantic-danger);
-  --vp-c-danger-soft: var(--brand-semantic-danger-soft);
+  /* A brand button paints --control; without this its label keeps
+     VitePress's white and vanishes on the dark theme, where control IS white. */
+  --vp-button-brand-bg: var(--control);
+  --vp-button-brand-text: var(--control-ink);
+  --vp-button-brand-border: var(--control);
+  --vp-button-brand-hover-bg: var(--control-hover);
+  --vp-button-brand-hover-text: var(--control-ink);
+  --vp-button-brand-hover-border: var(--control-hover);
+  --vp-button-brand-active-bg: var(--control-active);
+  --vp-button-brand-active-text: var(--control-ink);
+  --vp-button-brand-active-border: var(--control-active);
+
+  /* Semantic containers. Tip and warning lost their hues with the palette
+     rebuild — they carried Z3's and Z4's — so a callout is an elevated
+     surface and a sentence, and the custom-block title carries the weight. */
+  --vp-c-default-soft: var(--bg-surface);
+  --vp-c-tip-1: var(--text-secondary);
+  --vp-c-tip-soft: var(--bg-elevated);
+  --vp-c-warning-1: var(--text);
+  --vp-c-warning-soft: var(--bg-elevated);
+  --vp-c-danger-1: var(--danger-text);
+  --vp-c-danger-soft: var(--danger-bg);
 
   /* Code blocks */
-  --vp-code-block-bg: var(--brand-code-block-bg);
-  --vp-code-bg: var(--brand-code-bg);
+  --vp-code-block-bg: var(--bg-sunken);
+  --vp-code-bg: var(--bg-elevated);
 }
 
 /* Sidebar padding — applies to desktop persistent and mobile drawer.
@@ -126,18 +137,15 @@
   }
 }
 
-/* Content link accessibility — underline for accent-blue contrast.
-   Light underlines with the link's own brand color: the soft accent is
-   a badge/pill BACKGROUND tint there (sky-100) and would be invisible
-   on white. Dark keeps the original soft-navy underline. */
+/* Content links carry an underline rather than a hue. With the brand reduced
+   to ink, colour alone no longer distinguishes a link from body text — and
+   that is WCAG 1.4.1 either way, which the old accent-blue rule was already
+   underlining to satisfy. --vp-c-brand-1 resolves per theme, so there is no
+   dark-mode counterpart to keep in step. */
 .vp-doc a {
   text-decoration: underline;
   text-decoration-color: var(--vp-c-brand-1);
   text-underline-offset: 2px;
-}
-
-.dark .vp-doc a {
-  text-decoration-color: var(--brand-accent-blue-soft);
 }
 
 .vp-doc a:hover {

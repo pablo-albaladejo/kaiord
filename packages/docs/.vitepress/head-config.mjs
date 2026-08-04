@@ -12,7 +12,7 @@ import { readBrandTokenColor } from "./brand-tokens.mjs";
  * @returns {Array<[string, Record<string, string>]>}
  */
 export function buildStaticHead({ docsBase, ogImage, umamiWebsiteId }) {
-  const themeColor = readBrandTokenColor("--brand-bg-primary");
+  const themeColor = readBrandTokenColor("--bg-page");
 
   const head = [
     ["meta", { property: "og:type", content: "website" }],
@@ -27,7 +27,7 @@ export function buildStaticHead({ docsBase, ogImage, umamiWebsiteId }) {
       {
         rel: "icon",
         type: "image/svg+xml",
-        href: `${docsBase}logo.svg`,
+        href: `${docsBase}favicon.svg`,
       },
     ],
     [

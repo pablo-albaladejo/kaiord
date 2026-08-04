@@ -1,6 +1,6 @@
 // Enforces the branding-spec invariant: no file under `packages/docs/`
-// hardcodes the `#0f172a` hex. The value SHALL come from the shared
-// `--brand-bg-primary` token in `styles/brand-tokens.css`.
+// hardcodes the `#0d0d0d` hex. The value SHALL come from the shared
+// `--bg-page` token in `styles/brand-tokens.css`.
 //
 // Fails if someone re-introduces a literal, including in generated API
 // docs (those are regenerated every build, so committing a hex would be
@@ -59,7 +59,7 @@ function walk(dir, relPrefix = "") {
   return files;
 }
 
-test("no file under packages/docs/ hardcodes #0f172a", () => {
+test("no file under packages/docs/ hardcodes #0d0d0d", () => {
   const offenders = [];
   for (const { full, rel } of walk(DOCS_ROOT)) {
     const ext = "." + rel.split(".").pop();
@@ -70,7 +70,7 @@ test("no file under packages/docs/ hardcodes #0f172a", () => {
     if (rel.endsWith(".test.mjs")) continue;
 
     const content = readFileSync(full, "utf8");
-    if (/#0f172a/i.test(content)) {
+    if (/#0d0d0d/i.test(content)) {
       offenders.push(rel);
     }
   }
@@ -78,8 +78,8 @@ test("no file under packages/docs/ hardcodes #0f172a", () => {
   assert.deepEqual(
     offenders,
     [],
-    `Found hardcoded #0f172a literals in packages/docs/. ` +
-      `Use readBrandTokenColor('--brand-bg-primary') instead. Files:\n` +
+    `Found hardcoded #0d0d0d literals in packages/docs/. ` +
+      `Use readBrandTokenColor('--bg-page') instead. Files:\n` +
       offenders.map((f) => `  - ${f}`).join("\n")
   );
 });

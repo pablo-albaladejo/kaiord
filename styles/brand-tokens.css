@@ -1,34 +1,40 @@
-/* Kaiord Brand Tokens — shared across landing, docs, and editor.
-   Changes here affect all three surfaces.
-
-   NOTE: Themed tokens carry light defaults on :root and dark values under
-   `.dark`. Dark-only surfaces (landing; docs' default view) opt in via a
-   `dark` class on <html>; the editor SPA toggles that class at runtime.
-   Theme-invariant tokens (zones, fonts, decorative purple) live on :root
-   only. Node-side readers that need the DARK brand identity (OG images,
-   <meta theme-color>) must parse the `.dark` block, not the first match.
-   INVARIANT: keep `.dark` a SINGLE FLAT block (no compound selector, no
-   nesting, no second block) — those readers regex-match the first
-   `.dark { … }` and would silently fall back to light values otherwise.
-
-   --------------------------------------------------------------------------
-   @font-face SHARED-INVARIANT NOTE — read before editing the block below.
-   --------------------------------------------------------------------------
-   The Inter @font-face declaration is duplicated across three files because
-   CSS does not allow `var()` inside `url()` for @font-face src declarations
-   (the at-rule is registered before custom-property substitution). The
-   three `src:` URLs differ because each surface deploys at a different
-   GitHub Pages base path:
-
-     - styles/brand-tokens.css                       → /fonts/...        (landing)
-     - packages/docs/.vitepress/theme/custom.css     → /docs/fonts/...   (docs)
-     - packages/workout-spa-editor/src/index.css     → /editor/fonts/... (editor)
-
-   ALL OTHER FIELDS — font-family, font-style, font-weight, font-display,
-   size-adjust, unicode-range — MUST stay byte-equal across the three
-   blocks. If you change one, change all three. A future contributor
-   may want to write a `pnpm lint:font-face` mechanical guard that
-   asserts the invariant; today the comment is the only enforcement. */
+/* Kaiord · brand-tokens.css
+ * ---------------------------------------------------------------------------
+ * Rebuilt from zero. See openspec/changes/rebrand-v2-foundation for the
+ * reasoning behind every value; this file is the compilable result.
+ *
+ * INVARIANT — ONE FLAT `.dark` BLOCK, AND ONLY ONE.
+ * The Node-side readers that generate the OG images and `<meta theme-color>`
+ * regex the FIRST `.dark { … }` in this file. A second block, or a compound
+ * selector like `:root, .dark`, and those surfaces fall silently back to the
+ * light values. Anything theme-dependent — including `--mkt-*` and
+ * `--core-live` — belongs inside the two blocks that already exist.
+ *
+ * THREE LAYERS, ONE DIRECTION.
+ *   1 · ramps   fixed scales. No component may reference these.
+ *   2 · roles   the only names the UI is allowed to use.
+ * A role may read a ramp. A ramp may never read a role.
+ *
+ * ---------------------------------------------------------------------------
+ * @font-face SHARED-INVARIANT NOTE — read before editing the block below.
+ * ---------------------------------------------------------------------------
+ * The Inter @font-face declaration is duplicated across three files because
+ * CSS does not allow `var()` inside `url()` for @font-face src declarations
+ * (the at-rule is registered before custom-property substitution). The
+ * three `src:` URLs differ because each surface deploys at a different
+ * GitHub Pages base path:
+ *
+ *   - styles/brand-tokens.css                       → /fonts/...        (landing)
+ *   - packages/docs/.vitepress/theme/custom.css     → /docs/fonts/...   (docs)
+ *   - packages/workout-spa-editor/src/index.css     → /editor/fonts/... (editor)
+ *
+ * ALL OTHER FIELDS — font-family, font-style, font-weight, font-display,
+ * size-adjust, unicode-range — MUST stay byte-equal across the three
+ * blocks. If you change one, change all three. A future contributor
+ * may want to write a `pnpm lint:font-face` mechanical guard that
+ * asserts the invariant; today the comment is the only enforcement.
+ * ---------------------------------------------------------------------------
+ */
 
 @font-face {
   font-family: Inter;
@@ -46,111 +52,180 @@
     U+FFFD;
 }
 
+/* ── Layer 1 · ramps. Fixed. No component references them. ── */
 :root {
-  /* ----- Theme-invariant tokens (identical in light and dark) ----- */
+  /* Neutrals — chroma 0. With five data hues spread across 232° of the
+     wheel there is no safe tint. */
+  --n-0: oklch(1 0 0);
+  --n-50: oklch(0.977 0 0);
+  --n-100: oklch(0.955 0 0);
+  --n-200: oklch(0.92 0 0);
+  --n-300: oklch(0.87 0 0);
+  --n-400: oklch(0.775 0 0);
+  --n-500: oklch(0.655 0 0);
+  --n-600: oklch(0.56 0 0);
+  --n-700: oklch(0.47 0 0);
+  --n-800: oklch(0.385 0 0);
+  --n-900: oklch(0.31 0 0);
+  --n-1000: oklch(0.255 0 0);
+  --n-1100: oklch(0.205 0 0);
+  --n-1200: oklch(0.16 0 0);
 
-  /* Training zones — 5-zone functional intensity ramp.
-     Powers zone bars, step rails, and the athlete zone map. Index n maps
-     to zone Zn. Used via the Tailwind `zone-1..5` color utilities mapped
-     in packages/workout-spa-editor/src/index.css @theme. */
-  --zone-1: #64748b; /* Z1 Recovery  (slate-500) */
-  --zone-2: #0ea5e9; /* Z2 Endurance (sky-500) */
-  --zone-3: #22c55e; /* Z3 Tempo     (green-500) */
-  --zone-4: #f59e0b; /* Z4 Threshold (amber-500) */
-  --zone-5: #ef4444; /* Z5 VO2 / Max (red-500) */
+  /* Zones — sport-convention hues, monotonic chroma. Two rows, because a
+     light theme is not a dark one inverted. */
+  --z1-dark: oklch(0.56 0.03 258);
+  --z1-light: oklch(0.5 0.028 258);
+  --z2-dark: oklch(0.64 0.115 248);
+  --z2-light: oklch(0.5 0.13 248);
+  --z3-dark: oklch(0.715 0.15 150);
+  --z3-light: oklch(0.5 0.125 150);
+  --z4-dark: oklch(0.8 0.15 78);
+  --z4-light: oklch(0.545 0.11 78);
+  --z5-dark: oklch(0.645 0.225 25);
+  --z5-light: oklch(0.505 0.205 25);
 
-  /* Secondary accent — DECORATIVE ONLY.
-     3.9:1 on slate-900: fails AA for normal text.
-     Use only for large decorative elements, gradients, or icons. */
-  --brand-accent-purple: #9333ea;
+  /* Soft zone backgrounds — for chips and rails, never for text. */
+  --z1-soft-dark: oklch(0.255 0.011 258);
+  --z1-soft-light: oklch(0.955 0.008 258);
+  --z2-soft-dark: oklch(0.255 0.04 248);
+  --z2-soft-light: oklch(0.955 0.035 248);
+  --z3-soft-dark: oklch(0.255 0.053 150);
+  --z3-soft-light: oklch(0.955 0.035 150);
+  --z4-soft-dark: oklch(0.255 0.053 78);
+  --z4-soft-light: oklch(0.955 0.033 78);
+  --z5-soft-dark: oklch(0.255 0.055 25);
+  --z5-soft-light: oklch(0.955 0.035 25);
 
-  /* Font stacks */
-  --brand-font-sans:
-    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
-  --brand-font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  /* Destruction — hue 25, chroma clipped to the sRGB ceiling per step. */
+  --da-50: oklch(0.965 0.017 25);
+  --da-100: oklch(0.93 0.035 25);
+  --da-200: oklch(0.865 0.072 25);
+  --da-300: oklch(0.78 0.128 25);
+  --da-400: oklch(0.68 0.185 25);
+  --da-500: oklch(0.59 0.215 25);
+  --da-600: oklch(0.505 0.204 25);
+  --da-700: oklch(0.42 0.17 25);
+  --da-800: oklch(0.32 0.13 25);
+  --da-900: oklch(0.235 0.09 25);
 
-  /* ----- Light theme defaults (overridden under .dark below) -----
-     Values mirror the editor SPA's light palette so the SPA can alias
-     brand tokens directly on both themes. Dark-only surfaces (landing,
-     docs default view) opt in via a `dark` class on <html>. */
+  /* Marketing — magenta 320: the only hue with 62°+ of separation from
+     every zone. Landing, favicon and OG only. NEVER inside the product. */
+  --mg-50: oklch(0.955 0.03 320);
+  --mg-100: oklch(0.925 0.058 320);
+  --mg-200: oklch(0.86 0.105 320);
+  --mg-300: oklch(0.775 0.16 320);
+  --mg-400: oklch(0.68 0.215 320);
+  --mg-500: oklch(0.585 0.255 320);
+  --mg-600: oklch(0.5 0.24 320);
+  --mg-700: oklch(0.415 0.199 320);
+  --mg-800: oklch(0.32 0.155 320);
+  --mg-900: oklch(0.235 0.11 320);
 
-  /* Backgrounds — page, cards, elevated, deep */
-  --brand-bg-primary: #f8fafc; /* Page background (slate-50) */
-  --brand-bg-surface: #ffffff; /* Cards, sidebars (white) */
-  --brand-bg-elevated: #f1f5f9; /* Code blocks, tooltips (slate-100) */
-  --brand-bg-deep: #f1f5f9; /* Full-bleed redesign surfaces (slate-100) */
-
-  /* Text — 3 hierarchy levels */
-  --brand-text-primary: #0f172a; /* Headings, body (slate-900) */
-  --brand-text-secondary: #334155; /* Descriptions (slate-700) */
-  --brand-text-muted: #64748b; /* Captions, metadata (slate-500) */
-
-  /* Accent — blue with 3 distinct interactive states.
-     The interactive ramp already darkens, so it carries to light as-is. */
-  --brand-accent-blue: #0284c7; /* Default (sky-600) */
-  --brand-accent-blue-hover: #0369a1; /* Hover (sky-700) */
-  --brand-accent-blue-active: #075985; /* Active/pressed (sky-800) */
-  --brand-accent-blue-soft: #e0f2fe; /* Soft bg for badges/pills (sky-100) */
-
-  /* Semantic — for callouts/alerts (-600 text on -100 soft tints) */
-  --brand-semantic-tip: #059669; /* emerald-600 */
-  --brand-semantic-tip-soft: #d1fae5; /* emerald-100 */
-  --brand-semantic-warning: #d97706; /* amber-600 */
-  --brand-semantic-warning-soft: #fef3c7; /* amber-100 */
-  --brand-semantic-danger: #dc2626; /* red-600 */
-  --brand-semantic-danger-soft: #fee2e2; /* red-100 */
-
-  /* Borders */
-  --brand-border: #e2e8f0; /* Default (slate-200) */
-  --brand-border-soft: #f1f5f9; /* Subtle (slate-100) */
-
-  /* Code */
-  --brand-code-bg: #f1f5f9; /* Inline code background (slate-100) */
-  --brand-code-block-bg: #f8fafc; /* Fenced code (slate-50) */
+  /* Type, space, radius, motion. */
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --step-1: 12px;
+  --step-2: 13px;
+  --step-3: 15px;
+  --step-4: 17px;
+  --step-5: 20px;
+  --step-6: 24px;
+  --step-7: 30px;
+  --step-8: 38px;
+  --radius-control: 8px;
+  --radius-field: 12px;
+  --radius-card: 16px;
+  --radius-sheet: 24px;
+  --radius-pill: 999px;
+  --dur-state: 120ms;
+  --dur-reveal: 200ms;
+  --dur-layout: 320ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Dark theme — the original brand palette. Activated by a `dark` class
-   on <html>: toggled at runtime by the editor SPA and VitePress, and
-   pinned statically by the landing page. */
+/* ── Layer 2 · roles. The only names the UI may reference. ── */
+:root {
+  --brand: var(--n-900); /* the brand. no hue. */
+  --bg-page: var(--n-50);
+  --bg-surface: var(--n-0);
+  --bg-elevated: var(--n-100);
+  --bg-sunken: var(--n-200); /* no longer collides with elevated */
+  --border: var(--n-300);
+  --border-subtle: var(--n-200);
+  --text: var(--n-900);
+  --text-secondary: var(--n-700);
+  --text-dim: var(--n-600);
+  --text-disabled: var(--n-400);
+  --control: var(--n-900);
+  --control-ink: var(--n-0);
+  --control-hover: var(--n-1000);
+  --control-active: var(--n-1100);
+  --focus-ring: var(--n-900);
+  --danger: var(--da-600);
+  --danger-text: var(--da-700);
+  --danger-bg: var(--da-50);
+  --danger-border: var(--da-200);
+  --zone-1: var(--z1-light);
+  --zone-2: var(--z2-light);
+  --zone-3: var(--z3-light);
+  --zone-4: var(--z4-light);
+  --zone-5: var(--z5-light);
+  /* Marketing — landing, favicon and OG only. Nothing under /editor may
+     reference these; the boundary is held by scripts/check-mkt-boundary.mjs
+     grepping for `--mkt-`, not by a separate file. */
+  --mkt-brand: var(--mg-700); /* 9.69:1 over n-0 */
+  --mkt-cta: var(--mg-600); /* 6.91:1 with n-0 on top */
+  --mkt-cta-ink: var(--n-0);
+  --core-live: var(--brand); /* the runtime rewrites it to --zone-N */
+  --shadow-float: 0 12px 32px -8px rgb(0 0 0 / 0.18);
+}
+
 .dark {
-  /* Backgrounds — 3 elevation levels */
-  --brand-bg-primary: #0f172a; /* Page background (slate-900) */
-  --brand-bg-surface: #1e293b; /* Cards, sidebars (slate-800) */
-  --brand-bg-elevated: #334155; /* Code blocks, tooltips (slate-700) */
-
-  /* Deepened page background used by the mobile redesign surfaces
-     (one notch darker than --brand-bg-primary). */
-  --brand-bg-deep: #0b1220;
-
-  /* Text — 3 hierarchy levels */
-  --brand-text-primary: #f8fafc; /* Headings, body (slate-50) */
-  --brand-text-secondary: #cbd5e1; /* Descriptions (slate-300) */
-  --brand-text-muted: #94a3b8; /* Captions, metadata (slate-400) */
-
-  /* Accent — blue with 3 distinct interactive states */
-  --brand-accent-blue: #0284c7; /* Default (sky-600) */
-  --brand-accent-blue-hover: #0369a1; /* Hover (sky-700) */
-  --brand-accent-blue-active: #075985; /* Active/pressed (sky-800) */
-  --brand-accent-blue-soft: #0c4a6e; /* Soft bg for badges/pills (sky-900) */
-
-  /* Semantic — for callouts/alerts (all -400 variants, WCAG AA verified).
-     Accent-blue on surface (#1e293b) is ~2.8:1 — mitigated via
-     underline on content links that appear on elevated surfaces. */
-  --brand-semantic-tip: #34d399; /* emerald-400 — 7.4:1 on page, 5.2:1 on tip-soft */
-  --brand-semantic-tip-soft: #0d3b2e; /* Pre-computed: emerald-400 12% over slate-900 */
-  --brand-semantic-warning: #fbbf24; /* amber-400 — 10.5:1 on page, 8.1:1 on warning-soft */
-  --brand-semantic-warning-soft: #2d2305; /* Pre-computed: amber-400 12% over slate-900 */
-  --brand-semantic-danger: #f87171; /* red-400 — 5.8:1 on page, 4.7:1 on danger-soft */
-  --brand-semantic-danger-soft: #2d1216; /* Pre-computed: red-400 12% over slate-900 */
-
-  /* Borders */
-  --brand-border: #334155; /* Default (slate-700) */
-  --brand-border-soft: #1e293b; /* Subtle (slate-800) */
-
-  /* Code */
-  --brand-code-bg: #1e293b; /* Inline code background (surface) */
-  --brand-code-block-bg: #131c2e; /* Fenced code — custom blend halfway between
-                                     slate-900 and slate-800. No Tailwind equivalent. */
+  --brand: var(--n-0);
+  --bg-page: var(--n-1200);
+  --bg-surface: var(--n-1100);
+  --bg-elevated: var(--n-1000);
+  --bg-sunken: var(--n-900);
+  --border: var(--n-800);
+  --border-subtle: var(--n-900);
+  --text: var(--n-0);
+  --text-secondary: var(--n-300);
+  --text-dim: var(--n-500);
+  --text-disabled: var(--n-600);
+  --control: var(--n-0);
+  --control-ink: var(--n-1100);
+  --control-hover: var(--n-200);
+  --control-active: var(--n-400);
+  --focus-ring: var(--n-0);
+  --danger: var(--da-600);
+  --danger-text: var(--da-400);
+  --danger-bg: var(--da-900);
+  --danger-border: var(--da-800);
+  --zone-1: var(--z1-dark);
+  --zone-2: var(--z2-dark);
+  --zone-3: var(--z3-dark);
+  --zone-4: var(--z4-dark);
+  --zone-5: var(--z5-dark);
+  --mkt-brand: var(--mg-300); /* 8.92:1 over n-1200 */
+  --mkt-cta: var(--mg-400); /* 5.61:1 with n-1100 on top */
+  --mkt-cta-ink: var(--n-1100);
+  --core-live: var(--brand); /* the runtime rewrites it to --zone-N */
+  --shadow-float: 0 12px 32px -8px rgb(0 0 0 / 0.75);
 }
+
+/* Deliberately retired, with no alias: --brand-accent-blue{,-hover,-active,
+   -soft}, --brand-accent-purple, --brand-semantic-tip{,-soft},
+   --brand-semantic-warning{,-soft}, --brand-font-mono, --brand-text-muted.
+
+   These are deletions, not renames — a broken call site is the point.
+   Aliasing them would reintroduce exactly the collisions this rebuild exists
+   to remove: accent blue sat 5° from Z2 and failed AA in both themes, accent
+   purple never passed AA, tip carried Z3's hue, warning carried Z4's,
+   text-muted was byte-identical to Z1, and there is no code in the SPA for a
+   mono stack to set.
+
+   The old purple (#9333ea, oklch 0.558 0.252 302) is not recycled as magenta:
+   it sits 18° off the chosen arc and its 0.252 chroma exceeds the gamut
+   ceiling at several lightnesses. The mg ramp is new.
+
+   A name that turns out to be missing gets added to BOTH role blocks, never
+   to layer 1. */
