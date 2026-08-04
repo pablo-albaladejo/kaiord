@@ -22,7 +22,8 @@
     "energy": "Calorías",
     "protein": "Proteínas",
     "carbs": "Carbohidratos",
-    "fat": "Grasas"
+    "fat": "Grasas",
+    "over": "{{macro}} · pasado"
   },
   "logger": {
     "title": "Registrar ingesta",

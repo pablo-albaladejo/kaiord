@@ -46,7 +46,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
       </p>
       <IntakeLoggerFields fields={fields} onChange={setFields} />
       {error !== null && (
-        <p role="alert" className="m-0 mt-2 text-[12px] text-red-400">
+        <p role="alert" className="m-0 mt-2 text-[12px] text-danger-text">
           {error}
         </p>
       )}
@@ -56,7 +56,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
           disabled={!("entry" in result)}
           onClick={handleLog}
           data-testid="intake-log-submit"
-          className="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="flex-1 rounded bg-accent px-4 py-2 text-sm font-semibold text-surface disabled:opacity-50"
         >
           {t("logger.addEntry")}
         </button>
