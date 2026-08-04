@@ -10,6 +10,10 @@ vi.mock("../../../charts/uplot-base/uplot-chart", () => ({
   UplotChart: () => <div data-testid="uplot-chart-mock" />,
 }));
 
+// The palette has no success or warning role, and the danger ramp shares zone
+// 5's hue — a lab result is not a training zone, so nothing here may tint.
+const HUE = /-(green|amber|red|yellow|emerald|blue|orange)-\d{2,3}/;
+
 const latest = (overrides: Partial<LabValue>): LabValue => ({
   id: "v1",
   profileId: "p1",
@@ -67,6 +71,37 @@ describe("LabLatestValuesList", () => {
     const item = screen.getByTestId("lab-parameter-item");
     expect(item).toHaveAttribute("data-flag", "high");
     expect(screen.getByTestId("lab-flag-badge")).toHaveTextContent("High");
+  });
+
+  it("should name an out-of-range value with a glyph and no tint", () => {
+    // Arrange
+    const summaries = [summary("creatinine", "high", [100, 200])];
+
+    // Act
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
+    const badge = screen.getByTestId("lab-flag-badge");
+
+    // Assert
+    expect(badge.querySelector("svg")).toBeInTheDocument();
+    expect(badge.className).not.toMatch(HUE);
+    expect(screen.getByTestId("lab-parameter-item").className).not.toMatch(HUE);
+  });
+
+  it("should stay silent for an in-range value", () => {
+    // Arrange
+    const summaries = [summary("glucose", "in", [100, 200])];
+
+    // Act
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
+    const badge = screen.getByTestId("lab-flag-badge");
+
+    // Assert
+    expect(badge.querySelector("svg")).not.toBeInTheDocument();
+    expect(badge.className).not.toMatch(HUE);
   });
 
   it("should show the empty message with no summaries", () => {
