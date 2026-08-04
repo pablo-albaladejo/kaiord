@@ -1,11 +1,12 @@
-import { Card } from "../../atoms/Card";
-import { Icon, ICON_MAP, SPORT_ICON_NAME } from "../../atoms/Icon";
+import { dominantZone } from "../../../lib/workout-review/zone-emphasis";
+import { zoneVar } from "../../../lib/zone-colors";
 import { Pill } from "../../atoms/Pill";
 import { ZoneDist } from "../ZoneDist";
 
 export type LibraryCardProps = {
   title: string;
-  sport: string;
+  /** Already-translated sport name; the row says the sport in words. */
+  sportLabel: string;
   duration?: string;
   tss?: number;
   dist?: number[];
@@ -13,75 +14,60 @@ export type LibraryCardProps = {
   onClick: () => void;
 };
 
-const SPORT_FALLBACK = "bike" as const;
+const ZONE_BAR_HEIGHT = 10;
+const ZONE_BORDER_WIDTH = 4;
+
+const CARD_CLASS =
+  "w-full cursor-pointer rounded-[16px] border border-edge-soft bg-surface p-4 text-left transition-colors duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] hover:border-edge-strong";
 
 export function LibraryCard({
   title,
-  sport,
+  sportLabel,
   duration,
   tss,
   dist,
   tag,
   onClick,
 }: LibraryCardProps) {
-  const sportIcon =
-    SPORT_ICON_NAME[sport as keyof typeof SPORT_ICON_NAME] ?? SPORT_FALLBACK;
+  /* A template with no classifiable structure gets no zone colour: it has no
+     dominant zone, and a neutral bar would claim it does. */
+  const zone = dist ? dominantZone(dist) : null;
+  const meta = [sportLabel, duration, tss === undefined ? null : `${tss} TSS`]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
 
   return (
-    <Card
-      variant="interactive"
+    <button
+      type="button"
       onClick={onClick}
-      className="cursor-pointer bg-surface border-edge p-4"
+      className={CARD_CLASS}
+      style={
+        zone === null
+          ? undefined
+          : { borderLeft: `${ZONE_BORDER_WIDTH}px solid ${zoneVar(zone)}` }
+      }
       data-testid="library-card"
     >
-      <div className="flex items-center gap-3">
-        <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent">
-          <Icon icon={ICON_MAP[sportIcon]} size="md" color="inherit" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="m-0 truncate text-[15px] font-bold text-ink-strong">
-            {title}
-          </p>
-          <LibraryCardMeta duration={duration} tss={tss} />
-        </div>
+      <div className="flex items-baseline gap-x-2 gap-y-1">
+        <span className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-[-0.02em] text-ink-strong">
+          {title}
+        </span>
         {tag && (
           <Pill tone="neutral" className="shrink-0">
             {tag}
           </Pill>
         )}
       </div>
+      {meta !== "" && (
+        <p className="mt-1 text-[12px] tabular-nums text-ink-muted">{meta}</p>
+      )}
       {dist && dist.length > 0 && (
-        <ZoneDist dist={dist} className="mt-3" height={8} />
+        <ZoneDist
+          dist={dist}
+          className="mt-2 max-w-[280px]"
+          height={ZONE_BAR_HEIGHT}
+        />
       )}
-    </Card>
-  );
-}
-
-type LibraryCardMetaProps = {
-  duration?: string;
-  tss?: number;
-};
-
-function LibraryCardMeta({ duration, tss }: LibraryCardMetaProps) {
-  if (duration === undefined && tss === undefined) return null;
-
-  return (
-    <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-ink-muted">
-      {duration !== undefined && (
-        <span className="flex items-center gap-1">
-          <Icon icon={ICON_MAP.clock} size="xs" color="inherit" />
-          {duration}
-        </span>
-      )}
-      {duration !== undefined && tss !== undefined && (
-        <span aria-hidden="true">·</span>
-      )}
-      {tss !== undefined && (
-        <span className="flex items-center gap-1">
-          <Icon icon={ICON_MAP.flame} size="xs" color="inherit" />
-          {tss} TSS
-        </span>
-      )}
-    </div>
+    </button>
   );
 }

@@ -8,7 +8,7 @@
     "describe": "Describe it in plain words",
     "placeholder": "e.g. 4×4 VO₂ max intervals with a long warm-up…",
     "generate": "Generate workout",
-    "builtAround": "Built around your {{sport}} zones"
+    "writtenAgainst": "Written against {{threshold}} and your five zones — from your athlete profile, {{relative}}."
   },
   "examples": {
     "enduranceRide": "45 min Z2 endurance ride",
@@ -29,7 +29,7 @@
   "summary": {
     "duration": "Duration",
     "tss": "TSS",
-    "load": "Load"
+    "hardestZone": "Hardest zone"
   },
   "startFrom": {
     "divider": "or start from",

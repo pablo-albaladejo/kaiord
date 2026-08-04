@@ -8,7 +8,7 @@
     "describe": "Descríbelo con tus palabras",
     "placeholder": "p. ej. 4×4 intervalos de VO₂ máx con un calentamiento largo…",
     "generate": "Generar entreno",
-    "builtAround": "Basado en tus zonas de {{sport}}"
+    "writtenAgainst": "Escrito contra {{threshold}} y tus cinco zonas — de tu perfil de atleta, {{relative}}."
   },
   "examples": {
     "enduranceRide": "Rodaje de resistencia Z2 de 45 min",
@@ -29,7 +29,7 @@
   "summary": {
     "duration": "Duración",
     "tss": "TSS",
-    "load": "Carga"
+    "hardestZone": "Zona más dura"
   },
   "startFrom": {
     "divider": "o empieza desde",
