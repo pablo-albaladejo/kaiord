@@ -18,6 +18,14 @@ const FALLBACK_EDGE = "#d4d4d4";
 // uPlot paints to a canvas, so the alpha has to be baked into the colour
 // string. `--edge` resolves to an oklch() literal off the ramp, so `color-mix`
 // (the same idiom --glass-bg uses in index.css) is what dilutes it.
+//
+// This is the one value form the repo had not previously handed to a canvas,
+// and the failure mode is silent: assigning an unparsable `fillStyle` is a
+// no-op that leaves the previous colour in place, so the band would render
+// opaque black rather than not at all. Checked before shipping — Chromium and
+// WebKit both accept it and resolve it to `oklab(L C H / alpha)`. Firefox was
+// not exercised locally (no Playwright binary installed); it has shipped both
+// `oklch()` and `color-mix()` since 113, the same release as the other two.
 const fade = (color: string, percent: number): string =>
   `color-mix(in oklab, ${color} ${percent}%, transparent)`;
 
