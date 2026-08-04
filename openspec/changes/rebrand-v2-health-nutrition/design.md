@@ -42,16 +42,17 @@ SSR/non-DOM fallback path.
 
 **The ladder is three steps, not four.** The obvious fourth rung is
 `--text-disabled` (exposed as `--edge-strong`), and it does not clear the bar:
-on the light theme it resolves to n-400 `#b6b6b6`, which is **2.1:1** on the
+on the light theme it resolves to n-400 `#b6b6b6`, which is **2.03:1** on the
 card surface — under the 3:1 floor WCAG 1.4.11 sets for a graphical object. A
 lone series drawn on it would be the only thing on the canvas and unreadable.
-The three rungs that ship clear 4.7:1 in both themes:
+The three rungs that ship clear 4.6:1 in both themes (WCAG 2.x relative
+luminance against `--bg-surface`: `#ffffff` light, `#171717` dark):
 
-| Rung           | Light (on `--bg-surface`) | Dark (on `--bg-surface`) |
-| -------------- | ------------------------- | ------------------------ |
-| `--ink-strong` | `#303030` · 11.6:1        | `#ffffff` · 18:1         |
-| `--ink-body`   | `#5b5b5b` · 6.6:1         | `#d4d4d4` · 11:1         |
-| `--ink-muted`  | `#747474` · 4.7:1         | `#909090` · 5.2:1        |
+| Rung           | Light  | Dark    |
+| -------------- | ------ | ------- |
+| `--ink-strong` | 13.2:1 | 17.93:1 |
+| `--ink-body`   | 6.79:1 | 12.09:1 |
+| `--ink-muted`  | 4.67:1 | 5.62:1  |
 
 So a surface with more series than rungs needs a second channel, and each of
 the three consumers already has one: the health hub's fourth metric (`steps`)
@@ -96,6 +97,20 @@ the over ring (`--edge-strong` instead of `--ring-track`) and putting the
 statement in the label: glyph + `<macro> · over`. Reading order therefore is
 label-first, which is the only channel that survives greyscale, low vision and
 the four-ring row being scanned at 58 px.
+
+The track step is the part worth checking, since both arc and track are now
+neutral and could in principle collapse into each other. Arc against track:
+
+| State             | Light                         | Dark                         |
+| ----------------- | ----------------------------- | ---------------------------- |
+| normal            | `#303030` / `#e4e4e4` 10.38:1 | `#ffffff` / `#303030` 13.2:1 |
+| over (sunk track) | `#303030` / `#b6b6b6` 6.51:1  | `#ffffff` / `#747474` 4.67:1 |
+
+The worst case is 4.67:1, comfortably over the 3:1 graphical floor, so the
+sunk track stays legible as a ring — but it is deliberately the _second_
+channel. The two tracks differ from each other by only ~1.6:1, which is why
+the over state is not allowed to rest on that difference and the label carries
+the statement.
 
 The view model is unchanged — this is entirely a rendering decision, and the
 existing `macro-rings-view-model.test.ts` assertions on `over` still hold.
