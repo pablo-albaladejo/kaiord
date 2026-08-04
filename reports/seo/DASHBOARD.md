@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-07-27 10:56 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-08-03 10:57 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
@@ -19,18 +19,18 @@ _Generated 2026-07-27 10:56 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 
 | Query | Position | Prev | History (last 5) |
 | --- | --- | --- | --- |
-| kaiord | ABSENT | ABSENT | #1 · · |
-| fit file converter | ABSENT | ABSENT | · · · |
-| convert fit to tcx | ABSENT | ABSENT | · · · |
-| fit to zwo converter | ABSENT | ABSENT | · · · |
-| workout file converter open source | ABSENT | ABSENT | · · · |
-| garmin workout file format | ABSENT | ABSENT | · · · |
-| zwo workout editor | ABSENT | ABSENT | · · · |
-| typescript fit file parser | ABSENT | ABSENT | · · · |
-| mcp server fitness workouts | ABSENT | ABSENT | · · · |
-| garmin connect workout sync chrome extension | ABSENT | ABSENT | · · · |
-| whoop garmin sync | ABSENT | ABSENT | · · · |
-| training calendar local first | ABSENT | ABSENT | · · · |
+| kaiord | ABSENT | ABSENT | #1 · · · |
+| fit file converter | ABSENT | ABSENT | · · · · |
+| convert fit to tcx | ABSENT | ABSENT | · · · · |
+| fit to zwo converter | ABSENT | ABSENT | · · · · |
+| workout file converter open source | ABSENT | ABSENT | · · · · |
+| garmin workout file format | ABSENT | ABSENT | · · · · |
+| zwo workout editor | ABSENT | ABSENT | · · · · |
+| typescript fit file parser | ABSENT | ABSENT | · · · · |
+| mcp server fitness workouts | ABSENT | ABSENT | · · · · |
+| garmin connect workout sync chrome extension | ABSENT | ABSENT | · · · · |
+| whoop garmin sync | ABSENT | ABSENT | · · · · |
+| training calendar local first | ABSENT | ABSENT | · · · · |
 
 ## Top Google queries (latest GSC window)
 
@@ -40,7 +40,7 @@ _No GSC query data yet (needs credentials and impressions)._
 
 | Provider | Date | Mentions | Rate | Cited | Top competitors |
 | --- | --- | --- | --- | --- | --- |
-| perplexity | 2026-07-27 | 0/5 | 0 | 0 | python-fitparse (1), Garmin FIT SDK (1) |
+| perplexity | 2026-08-03 | 0/5 | 0 | 0 | fit-file-parser (1), Garmin FIT SDK (1) |
 
 ## Directory / entity presence (GEO substrate)
 
