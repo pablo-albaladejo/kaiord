@@ -7,9 +7,8 @@
  */
 
 import { act, render, waitFor } from "@testing-library/react";
-import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Router } from "wouter";
+import { Router, useLocation } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { ROUTE_HEADING_ATTR } from "../routing/constants";
@@ -33,18 +32,18 @@ function PageWithoutHeading() {
 }
 
 type HarnessProps = {
-  initial: string;
   withHeading?: boolean;
 };
 
-function Harness({ initial, withHeading = true }: HarnessProps) {
+// The label is derived from the router, not from local state: a
+// `useState(initial)` does not re-initialise on rerender, so the heading would
+// keep reading "Calendar" after navigating and an assertion that only checks
+// for `[data-route-heading]` would accept the stale one.
+function Harness({ withHeading = true }: HarnessProps) {
   useFocusOnRouteChange();
-  const [path, setPath] = useState(initial);
+  const [path] = useLocation();
   return (
     <div>
-      <button type="button" onClick={() => setPath("/library")}>
-        go-library
-      </button>
       {withHeading ? (
         <PageWithHeading label={path === "/library" ? "Library" : "Calendar"} />
       ) : (
@@ -74,7 +73,7 @@ describe("useFocusOnRouteChange", () => {
     const loc = memoryLocation({ path: "/calendar" });
     const { rerender } = render(
       <Router hook={loc.hook}>
-        <Harness initial="/calendar" />
+        <Harness />
       </Router>
     );
     act(() => {
@@ -84,7 +83,7 @@ describe("useFocusOnRouteChange", () => {
     // Act
     rerender(
       <Router hook={loc.hook}>
-        <Harness initial="/library" />
+        <Harness />
       </Router>
     );
 
@@ -92,6 +91,7 @@ describe("useFocusOnRouteChange", () => {
     await waitFor(() => {
       const focused = document.activeElement as HTMLElement | null;
       expect(focused?.hasAttribute(ROUTE_HEADING_ATTR)).toBe(true);
+      expect(focused?.textContent).toBe("Library");
     });
   });
 
@@ -106,7 +106,7 @@ describe("useFocusOnRouteChange", () => {
       const { hook } = memoryLocation({ path: "/calendar" });
       render(
         <Router hook={hook}>
-          <Harness initial="/calendar" withHeading={false} />
+          <Harness withHeading={false} />
         </Router>
       );
       await waitFor(
@@ -147,7 +147,7 @@ describe("useFocusOnRouteChange", () => {
     const loc = memoryLocation({ path: "/calendar" });
     const { rerender } = render(
       <Router hook={loc.hook}>
-        <Harness initial="/calendar" />
+        <Harness />
       </Router>
     );
     (document.activeElement as HTMLElement | null)?.blur();
@@ -159,7 +159,7 @@ describe("useFocusOnRouteChange", () => {
     // Act
     rerender(
       <Router hook={loc.hook}>
-        <Harness initial="/library" />
+        <Harness />
       </Router>
     );
 
@@ -167,6 +167,7 @@ describe("useFocusOnRouteChange", () => {
     await waitFor(() => {
       const focused = document.activeElement as HTMLElement | null;
       expect(focused?.hasAttribute(ROUTE_HEADING_ATTR)).toBe(true);
+      expect(focused?.textContent).toBe("Library");
     });
     expect(dropsLeft).toBe(0);
   });
