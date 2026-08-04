@@ -4,14 +4,15 @@ export type MetricProps = HTMLAttributes<HTMLDivElement> & {
   value: string;
   unit?: string;
   label: string;
-  accent?: boolean;
   className?: string;
 };
 
+/* A figure and what it measures. The value carries no colour of its own: a
+   number is not a link, and the five hues in the palette belong to training
+   zones. `slashed-zero` alongside `tabular-nums` so a column of figures
+   aligns and 0 never reads as O. */
 export const Metric = forwardRef<HTMLDivElement, MetricProps>(
-  ({ value, unit, label, accent = false, className = "", ...props }, ref) => {
-    const valueColor = accent ? "text-accent" : "text-ink-strong";
-
+  ({ value, unit, label, className = "", ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -19,18 +20,16 @@ export const Metric = forwardRef<HTMLDivElement, MetricProps>(
         {...props}
       >
         <div className="flex items-baseline gap-[3px]">
-          <span
-            className={`text-[26px] font-bold tracking-[-0.02em] tabular-nums ${valueColor}`}
-          >
+          <span className="text-[24px] font-semibold tracking-[-0.026em] tabular-nums [font-variant-numeric:tabular-nums_slashed-zero] text-ink-strong">
             {value}
           </span>
           {unit !== undefined && (
-            <span className="text-[13px] font-semibold text-ink-muted">
+            <span className="text-[13px] font-medium text-ink-muted">
               {unit}
             </span>
           )}
         </div>
-        <div className="text-xs text-ink-muted mt-px truncate whitespace-nowrap overflow-hidden">
+        <div className="text-xs text-ink-muted mt-[5px] truncate whitespace-nowrap overflow-hidden">
           {label}
         </div>
       </div>
