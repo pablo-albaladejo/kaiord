@@ -5,11 +5,10 @@
  */
 import type uPlot from "uplot";
 
+import { seriesStroke } from "./series-strokes";
 import { timeXScale } from "./uplot-base";
 
 export type SparklinePoint = { x: number; y: number };
-
-const DEFAULT_STROKE = "#2563eb";
 
 /** Aligned `[xs, ys]` for a sparkline, x-sorted ascending. */
 export const buildSparklineData = (
@@ -32,7 +31,8 @@ export type SparklineStyle = {
 export const buildSparklineOptions = ({
   width,
   height,
-  stroke = DEFAULT_STROKE,
+  // Resolved at call time so a `.dark` flip is picked up on rebuild.
+  stroke = seriesStroke(0),
 }: SparklineStyle): uPlot.Options => ({
   width,
   height,
