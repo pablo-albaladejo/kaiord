@@ -64,7 +64,7 @@
     "@kaiord/i18n": "workspace:^",
     "@kaiord/tcx": "workspace:^",
     "@kaiord/zwo": "workspace:^",
-    "chalk": "^5.3.0",
+    "chalk": "^6.0.0",
     "glob": "^13.0.6",
     "ora": "^9.4.1",
     "winston": "^3.19.0",
@@ -74,7 +74,7 @@
   "devDependencies": {
     "@types/yargs": "^17.0.32",
     "@vitest/coverage-v8": "^4.1.10",
-    "execa": "^10.0.0",
+    "execa": "^10.0.1",
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.2.0",
     "tmp-promise": "^3.0.3",

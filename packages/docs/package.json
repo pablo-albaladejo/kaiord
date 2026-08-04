@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/docs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "description": "VitePress documentation site for Kaiord",
   "type": "module",
@@ -23,7 +23,7 @@
     "@kaiord/mcp": "workspace:*",
     "@kaiord/tcx": "workspace:*",
     "@kaiord/zwo": "workspace:*",
-    "@shikijs/vitepress-twoslash": "^4.3.1",
+    "@shikijs/vitepress-twoslash": "^4.4.1",
     "cspell": "^10.0.1",
     "oxc-minify": "^0.142.0",
     "typedoc": "^0.28.20",
