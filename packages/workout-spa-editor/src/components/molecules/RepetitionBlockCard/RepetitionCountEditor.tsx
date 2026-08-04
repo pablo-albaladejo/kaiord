@@ -1,8 +1,8 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
 
 type RepetitionCountEditorProps = {
-  repeatCount: number;
   isEditing: boolean;
   editValue: string;
   onEditClick: () => void;
@@ -13,7 +13,6 @@ type RepetitionCountEditorProps = {
 };
 
 export const RepetitionCountEditor = ({
-  repeatCount,
   isEditing,
   editValue,
   onEditClick,
@@ -22,6 +21,8 @@ export const RepetitionCountEditor = ({
   onEditValueChange,
   onKeyDown,
 }: RepetitionCountEditorProps) => {
+  const t = useTranslate("editor");
+
   if (isEditing) {
     return (
       <div className="flex items-center gap-2">
@@ -32,6 +33,7 @@ export const RepetitionCountEditor = ({
           onChange={(e) => onEditValueChange(e.target.value)}
           onKeyDown={onKeyDown}
           className="w-20"
+          aria-label={t("block.countAria")}
           autoFocus
           data-testid="repeat-count-input"
         />
@@ -41,7 +43,7 @@ export const RepetitionCountEditor = ({
           onClick={onSaveCount}
           data-testid="save-count-button"
         >
-          Save
+          {t("stepEditor.save")}
         </Button>
         <Button
           size="sm"
@@ -49,7 +51,7 @@ export const RepetitionCountEditor = ({
           onClick={onCancelEdit}
           data-testid="cancel-count-button"
         >
-          Cancel
+          {t("stepEditor.cancel")}
         </Button>
       </div>
     );
@@ -58,10 +60,11 @@ export const RepetitionCountEditor = ({
   return (
     <button
       onClick={onEditClick}
-      className="px-3 py-1 text-sm font-medium text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900 rounded transition-colors"
+      className="rounded px-2 py-1 text-sm font-medium text-ink-muted transition-colors hover:bg-[var(--bg-sunken)] hover:text-ink-strong motion-reduce:transition-none"
+      aria-label={t("block.editCount")}
       data-testid="edit-count-button"
     >
-      {repeatCount}x
+      {t("block.editCount")}
     </button>
   );
 };

@@ -20,8 +20,8 @@ export function HintProgressDots({ currentIndex }: HintProgressDotsProps) {
           key={hint.id}
           className={`h-2 w-2 rounded-full transition-colors ${
             index === currentIndex
-              ? "bg-primary-600 dark:bg-primary-400"
-              : "bg-primary-300 dark:bg-primary-700"
+              ? "bg-ink-strong"
+              : "bg-edge"
           }`}
           aria-label={
             index === currentIndex

@@ -107,7 +107,7 @@ describe("WorkoutList - Drag Integration", () => {
 
     // Assert
 
-    expect(screen.getByText("3x")).toBeInTheDocument();
+    expect(screen.getByText("Repeat 3\u00d7")).toBeInTheDocument();
     expect(onReorderStepsInBlock).not.toHaveBeenCalled();
   });
 

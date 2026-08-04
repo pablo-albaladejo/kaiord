@@ -23,7 +23,7 @@ export function StepCardFooter({ step }: StepCardFooterProps) {
       </div>
 
       {step.notes && (
-        <p className="mt-3 text-xs text-gray-600 dark:text-gray-400 italic">
+        <p className="mt-3 text-xs text-ink-muted italic">
           {step.notes}
         </p>
       )}

@@ -53,8 +53,8 @@ describe("WorkoutList", () => {
     render(<WorkoutList workout={workout} />);
 
     // Assert
-    expect(screen.getByText("3x")).toBeInTheDocument(); // RepetitionBlockCard shows count as "3x"
-    expect(screen.getByText("Repeat Block")).toBeInTheDocument(); // Badge text
+    expect(screen.getByText("Repeat 3\u00d7")).toBeInTheDocument(); // the neutral chip carries the count
+    expect(screen.getByText(/^Repeat \d+×$/)).toBeInTheDocument();
     expect(screen.getByText("Step 1")).toBeInTheDocument();
     expect(screen.getByText("Step 2")).toBeInTheDocument();
   });
@@ -83,7 +83,7 @@ describe("WorkoutList", () => {
 
     // Assert
     const selectedStep = screen.getByRole("button", { name: /Step 1/ });
-    expect(selectedStep).toHaveClass("border-primary-500");
+    expect(selectedStep).toHaveClass("border-edge-strong");
   });
 
   it("should render mixed steps and repetition blocks", () => {
@@ -103,8 +103,8 @@ describe("WorkoutList", () => {
 
     // Assert
     expect(screen.getByText("Step 1")).toBeInTheDocument();
-    expect(screen.getByText("2x")).toBeInTheDocument(); // RepetitionBlockCard shows count as "2x"
-    expect(screen.getByText("Repeat Block")).toBeInTheDocument(); // Badge text
+    expect(screen.getByText("Repeat 2\u00d7")).toBeInTheDocument(); // the neutral chip carries the count
+    expect(screen.getByText(/^Repeat \d+×$/)).toBeInTheDocument();
     expect(screen.getByText("Step 2")).toBeInTheDocument();
     expect(screen.getByText("Step 3")).toBeInTheDocument();
   });

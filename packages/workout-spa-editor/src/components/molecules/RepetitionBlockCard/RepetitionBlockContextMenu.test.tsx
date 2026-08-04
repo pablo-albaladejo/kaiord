@@ -88,7 +88,7 @@ describe("RepetitionBlockContextMenu", () => {
       await user.click(screen.getByTestId("block-actions-trigger"));
 
       // Assert
-      expect(screen.getByText("Edit Count")).toBeInTheDocument();
+      expect(screen.getByText("Edit count")).toBeInTheDocument();
       expect(screen.getByText("Add Step")).toBeInTheDocument();
       expect(screen.getByText("Ungroup")).toBeInTheDocument();
       expect(screen.getByText("Delete")).toBeInTheDocument();
@@ -266,7 +266,7 @@ describe("RepetitionBlockContextMenu", () => {
       const deleteAction = screen.getByTestId("delete-action");
 
       // Assert
-      expect(deleteAction).toHaveClass("text-red-600");
+      expect(deleteAction.className).toContain("--danger-text");
     });
 
     it("should have separator before delete action", async () => {

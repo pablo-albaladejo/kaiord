@@ -118,7 +118,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A to see its steps
-      const blockHeaders = screen.getAllByRole("button", { name: /\dx/ });
+      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
       await user.click(blockHeaders[0]); // Block A (2x)
 
       // Cmd/Ctrl+click on step in Block A (Step 1)
@@ -167,7 +167,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand both blocks
-      const blockHeaders = screen.getAllByRole("button", { name: /\dx/ });
+      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
       await user.click(blockHeaders[0]); // Block A
       await user.click(blockHeaders[1]); // Block B
 
@@ -237,7 +237,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       // Assert
 
       // Main workout step should be highlighted (multi-selected)
-      expect(mainWorkoutStep.className).toContain("border-primary-500");
+      expect(mainWorkoutStep.className).toContain("border-edge-strong");
 
       // Note: Block steps are not visible until expanded, but the IDs ensure
       // only the explicitly selected steps will be highlighted when expanded
@@ -269,7 +269,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       // Assert
 
       // Main workout step should NOT be highlighted
-      expect(mainWorkoutStep.className).not.toContain("border-primary-500");
+      expect(mainWorkoutStep.className).not.toContain("border-edge-strong");
     });
   });
 
@@ -301,7 +301,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A
-      const blockAHeader = screen.getAllByRole("button", { name: "2x" })[0];
+      const blockAHeader = screen.getAllByRole("button", { name: /edit count/i })[0];
       await user.click(blockAHeader);
 
       // Cmd/Ctrl+click on main workout step to deselect it
@@ -350,7 +350,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A
-      const blockHeaders = screen.getAllByRole("button", { name: /\dx/ });
+      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
       await user.click(blockHeaders[0]); // Block A
 
       // Cmd/Ctrl+click on Block A step to deselect it
@@ -407,7 +407,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand both blocks
-      const blockHeaders = screen.getAllByRole("button", { name: /\dx/ });
+      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
       await user.click(blockHeaders[0]); // Block A
       await user.click(blockHeaders[1]); // Block B
 
@@ -468,7 +468,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A
-      const blockAHeader = screen.getAllByRole("button", { name: "2x" })[0];
+      const blockAHeader = screen.getAllByRole("button", { name: /edit count/i })[0];
       await user.click(blockAHeader);
 
       // Wait for block to expand and get all Step 1 buttons
@@ -521,7 +521,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       const mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
-      expect(mainWorkoutStep.className).not.toContain("border-primary-500");
+      expect(mainWorkoutStep.className).not.toContain("border-edge-strong");
     });
   });
 });
