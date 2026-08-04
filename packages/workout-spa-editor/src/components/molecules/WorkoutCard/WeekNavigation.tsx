@@ -9,6 +9,9 @@ import { useLocation } from "wouter";
 
 import { getAdjacentWeekId, getCurrentWeekId } from "../../../utils/week-utils";
 
+const ARROW =
+  "flex rounded-lg p-1.5 text-ink-body motion-safe:transition-colors hover:bg-surface-elevated hover:text-ink-strong";
+
 export type WeekNavigationProps = {
   weekId: string;
   weekLabel: string;
@@ -27,23 +30,25 @@ export function WeekNavigation({ weekId, weekLabel }: WeekNavigationProps) {
         type="button"
         onClick={goPrev}
         aria-label="Previous week"
-        className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+        className={ARROW}
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
-      <span className="min-w-[140px] text-center font-medium">{weekLabel}</span>
+      <span className="min-w-[148px] text-center text-[15px] font-medium tabular-nums text-ink-strong">
+        {weekLabel}
+      </span>
       <button
         type="button"
         onClick={goNext}
         aria-label="Next week"
-        className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+        className={ARROW}
       >
         <ChevronRight className="h-5 w-5" />
       </button>
       <button
         type="button"
         onClick={goToday}
-        className="rounded border border-edge px-3 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+        className="rounded-lg border border-edge px-3.5 py-1.5 text-[13px] font-medium text-ink-strong motion-safe:transition-colors hover:border-edge-strong"
       >
         Today
       </button>

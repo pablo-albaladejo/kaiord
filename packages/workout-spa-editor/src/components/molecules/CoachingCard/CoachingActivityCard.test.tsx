@@ -59,12 +59,12 @@ describe("CoachingActivityCard", () => {
   });
 
   it.each([
-    { status: "pending", border: "border-amber-600" },
-    { status: "completed", border: "border-emerald-600" },
-    { status: "skipped", border: "border-slate-500" },
-  ] satisfies { status: CoachingActivity["status"]; border: string }[])(
-    "should drive the lateral border colour from status ($status → $border)",
-    ({ status, border }) => {
+    "pending",
+    "completed",
+    "skipped",
+  ] satisfies CoachingActivity["status"][])(
+    "should keep the lateral border neutral for a %s plan with no structure",
+    (status) => {
       // Arrange
       render(<CoachingActivityCard activity={{ ...baseActivity, status }} />);
 
@@ -73,11 +73,11 @@ describe("CoachingActivityCard", () => {
 
       // Assert
       expect(button.className).toContain("border-l-4");
-      expect(button.className).toContain(border);
+      expect(button.className).toContain("border-l-edge");
     }
   );
 
-  it("should render the status icon (Pending) with an accessible label", () => {
+  it("should never draw a zone bar from an effort rating", () => {
     // Arrange
 
     // Act
@@ -86,30 +86,15 @@ describe("CoachingActivityCard", () => {
 
     // Assert
 
-    expect(screen.getByRole("img", { name: "Pending" })).toBeInTheDocument();
+    expect(screen.queryByTestId("zone-profile-bar")).not.toBeInTheDocument();
   });
 
-  it("should hide status text in compact density (icon only)", () => {
+  it("should say the status in a word", () => {
     // Arrange
 
     // Act
 
-    render(<CoachingActivityCard activity={baseActivity} density="compact" />);
-    // Text 'PENDING' must NOT be in the metadata row
-
-    // Assert
-
-    expect(screen.queryByText(/^PENDING$/i)).not.toBeInTheDocument();
-  });
-
-  it("should show status text in comfortable density", () => {
-    // Arrange
-
-    // Act
-
-    render(
-      <CoachingActivityCard activity={baseActivity} density="comfortable" />
-    );
+    render(<CoachingActivityCard activity={baseActivity} />);
 
     // Assert
 

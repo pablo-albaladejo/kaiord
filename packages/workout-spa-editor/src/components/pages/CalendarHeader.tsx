@@ -1,18 +1,16 @@
 /**
- * Top-of-page banners + batch cost confirmation + week navigation row +
- * calendar view toggle. Kept out of CalendarPage so each render function
- * stays under the per-function line cap.
+ * Top-of-page banners + batch cost confirmation + the navigation row. Kept
+ * out of CalendarPage so each render function stays under the per-function
+ * line cap.
  */
 
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import type { CalendarView } from "../../types/user-preferences";
-import { formatWeekLabel } from "../../utils/format-week-label";
-import { CalendarViewToggle } from "../molecules/CalendarViewToggle/CalendarViewToggle";
-import { CoachingSyncButton } from "../molecules/CoachingCard/CoachingSyncButton";
-import { WeekNavigation } from "../molecules/WorkoutCard/WeekNavigation";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
+import { CalendarNavRow } from "./CalendarNavRow";
 import type { useCalendarState } from "./use-calendar-state";
+import { useLatestSessionDate } from "./use-latest-session-date";
 
 export type CalendarHeaderProps = {
   state: ReturnType<typeof useCalendarState>;
@@ -21,30 +19,24 @@ export type CalendarHeaderProps = {
   onViewChange?: (next: CalendarView) => void;
 };
 
-const syncFromFirstDay = <T,>(
-  sync: (day: T) => unknown,
-  days: readonly T[]
-): void => {
-  const firstDay = days[0];
-  if (firstDay !== undefined) sync(firstDay);
-};
-
 export function CalendarHeader({
   state: s,
   coaching,
   view,
   onViewChange,
 }: CalendarHeaderProps) {
+  const latestDate = useLatestSessionDate(s.latestWorkout?.date);
   return (
     <>
       <CalendarEmptyBanners
         weekId={s.data.weekId}
         hasAnyWorkouts={s.hasAnyWorkouts}
         hasWeekWorkouts={s.hasWeekWorkouts}
-        hasReadyWorkouts={s.hasReadyWorkouts}
+        readyCount={s.readyCount}
         hasAiProvider={s.hasAiProvider}
         extensionInstalled={s.extensionInstalled}
         rawCount={s.data.rawCount}
+        latestDate={latestDate}
         onGoToLatest={s.latestWorkout ? s.handleGoToLatest : undefined}
         batchMessage={s.batch.message}
         onDismissBatch={s.batch.dismissMessage}
@@ -60,32 +52,13 @@ export function CalendarHeader({
         onConfirm={s.batch.confirmStart}
         onCancel={s.batch.cancelRequest}
       />
-      <div className="flex items-center justify-between">
-        <WeekNavigation
-          weekId={s.data.weekId}
-          weekLabel={formatWeekLabel(s.data.weekId)}
-        />
-        <div className="flex items-center gap-2">
-          {view && onViewChange && (
-            <CalendarViewToggle view={view} onToggle={onViewChange} />
-          )}
-          {coaching.syncSources
-            .filter((src) => src.linked)
-            .map((src) => (
-              <CoachingSyncButton
-                key={src.id}
-                connected={src.connected}
-                loading={src.loading}
-                error={src.error}
-                onSync={() => syncFromFirstDay(src.sync, s.data.days)}
-                onConnect={src.connect}
-                label={src.label}
-                lastSyncedAt={src.lastSyncedAt}
-                routeInactive={src.routeActive === false}
-              />
-            ))}
-        </div>
-      </div>
+      <CalendarNavRow
+        weekId={s.data.weekId}
+        days={s.data.days}
+        coaching={coaching}
+        view={view}
+        onViewChange={onViewChange}
+      />
     </>
   );
 }

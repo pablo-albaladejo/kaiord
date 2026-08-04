@@ -193,7 +193,7 @@ describe("CalendarWeekGrid", () => {
     }
   });
 
-  it("should mark today's header cell with data-today and the today tint", () => {
+  it("should mark today's header cell with data-today and surface its column", () => {
     // Arrange
 
     // Act
@@ -212,10 +212,10 @@ describe("CalendarWeekGrid", () => {
       "calendar-week-grid-header-2026-04-09"
     );
     expect(todayHeader.getAttribute("data-today")).toBe("true");
-    expect(todayHeader.className).toContain("bg-primary-50/40");
     const todayBody = screen.getByTestId("day-column-2026-04-09");
     expect(todayBody.getAttribute("data-today")).toBe("true");
-    expect(todayBody.className).toContain("bg-primary-50/40");
+    expect(todayBody.className).toContain("bg-surface");
+    expect(todayBody.className).toContain("border-edge");
   });
 
   it("should not render an empty readiness marker while wellnessByDay is still loading", () => {

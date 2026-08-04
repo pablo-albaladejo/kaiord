@@ -1,33 +1,41 @@
 /**
- * NoBridgesState - No bridge extensions installed.
+ * Sessions are structured and ready, and nothing can carry them to the watch.
+ *
+ * The old copy named the missing component ("No bridge extensions detected")
+ * and offered "Learn more". This names what the sessions cannot do and why the
+ * bridge exists at all, and keeps the route that needs no extension.
  */
 
-import { Plug } from "lucide-react";
+import { pluralKey } from "../../../i18n/plural-key";
+import { useTranslate } from "../../../i18n/use-translate";
+import { PRIMARY } from "./banner-buttons";
+import { ConsequenceBanner } from "./ConsequenceBanner";
+import { BRIDGE_DOCS_URL } from "./first-run-steps";
 
-const BRIDGE_DOCS_URL = "https://kaiord.com/docs/bridges";
+export type NoBridgesStateProps = {
+  readyCount: number;
+};
 
-export function NoBridgesState() {
+export function NoBridgesState({ readyCount }: NoBridgesStateProps) {
+  const t = useTranslate("calendar");
+
   return (
-    <div
-      data-testid="no-bridges-state"
-      className="flex items-center gap-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950"
-    >
-      <Plug className="h-5 w-5 text-yellow-600" />
-      <div className="flex-1">
-        <p className="text-sm font-medium">No bridge extensions detected</p>
-        <p className="text-xs text-muted-foreground">
-          Install a bridge extension (e.g., Garmin Connect, Train2Go) to sync
-          workouts.
-        </p>
-      </div>
-      <a
-        href={BRIDGE_DOCS_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="rounded-md border border-edge px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
-      >
-        Learn more
-      </a>
-    </div>
+    <ConsequenceBanner
+      testId="no-bridges-state"
+      headline={t(pluralKey("noBridges.headline", readyCount), {
+        count: readyCount,
+      })}
+      consequence={t("noBridges.consequence")}
+      actions={
+        <a
+          href={BRIDGE_DOCS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={PRIMARY}
+        >
+          {t("noBridges.cta")}
+        </a>
+      }
+    />
   );
 }

@@ -1,23 +1,31 @@
 /**
  * CardShell — shared visual primitive for every calendar card variant.
  *
- * Owns the lateral border (4px graphical accent, ≥ 3:1 against white per
- * WCAG 1.4.11) and the metadata row layout (`flex flex-wrap min-w-0` so
- * no element overflows the card horizontally).
+ * The card's own border is neutral on all four sides; only the 4 px left edge
+ * takes a colour, and that colour is the session's dominant training zone (see
+ * `status-tokens`). Painting the whole outline with the accent — which is what
+ * a bare `border-<colour>` following `border-<neutral>` did — spent the card's
+ * border on a signal the left edge already carries.
  *
  * Title slot uses `line-clamp-2` — never `truncate` — so the most
  * important field on the card never gets reduced to an ellipsis.
+ *
+ * Hover moves the border colour rather than a shadow: one named property at
+ * `--dur-state`, never `all`.
  */
 
 import type { MouseEventHandler, ReactNode } from "react";
 
 export type CardShellProps = {
+  /** Left-edge colour class, from `zoneBorderClass`. */
   borderClass: string;
   ariaLabel?: string;
   tooltip?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   testId?: string;
   titleRow: ReactNode;
+  /** Zone-profile bar, rendered directly under the title row. */
+  zoneBar?: ReactNode;
   metadataRow: ReactNode;
   /** Optional second row (e.g., MatchedSessionCard's actual data row). */
   secondaryRow?: ReactNode;
@@ -28,6 +36,15 @@ export type CardShellProps = {
   originChip?: string;
 };
 
+const SHELL = [
+  "block w-full rounded-xl border border-edge-soft border-l-4 bg-surface",
+  "p-2.5 text-left text-sm hover:border-edge-strong",
+  "motion-safe:transition-colors motion-safe:duration-[--dur-state]",
+].join(" ");
+
+const META_ROW =
+  "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-muted";
+
 export function CardShell({
   borderClass,
   ariaLabel,
@@ -35,6 +52,7 @@ export function CardShell({
   onClick,
   testId,
   titleRow,
+  zoneBar,
   metadataRow,
   secondaryRow,
   footerRow,
@@ -46,19 +64,16 @@ export function CardShell({
       data-testid={testId}
       aria-label={ariaLabel}
       title={tooltip}
-      className={`block w-full rounded-md border border-slate-200 bg-white p-2 text-left text-sm shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-800 motion-safe:transition-shadow border-l-4 ${borderClass}`}
+      className={`${SHELL} ${borderClass}`}
       onClick={onClick}
     >
-      <div className="flex min-w-0 items-start gap-1.5 line-clamp-2 font-medium">
+      <div className="flex min-w-0 items-start gap-1.5 line-clamp-2 font-medium text-ink-strong">
         {titleRow}
       </div>
-      <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-        {metadataRow}
-      </div>
+      {zoneBar ? <div className="mt-1.5">{zoneBar}</div> : null}
+      <div className={`mt-1.5 ${META_ROW}`}>{metadataRow}</div>
       {secondaryRow ? (
-        <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-          {secondaryRow}
-        </div>
+        <div className={`mt-0.5 ${META_ROW}`}>{secondaryRow}</div>
       ) : null}
       {footerRow}
       {originChip ? (
