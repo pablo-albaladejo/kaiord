@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@kaiord/core": "workspace:*",
-    "jsdom": "^30.0.0",
+    "jsdom": "^30.0.1",
     "vitest": "^4.1.10"
   }
 }
