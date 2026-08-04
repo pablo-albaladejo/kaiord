@@ -42,7 +42,7 @@ describe("buildFtpProvenance", () => {
     );
 
     // Assert
-    expect(text).toBe("Zones from FTP 268 W · updated 4 days ago");
+    expect(text).toBe("Zones from FTP 268 W · updated 4d ago");
   });
 
   it("should never claim a source the profile does not record", () => {

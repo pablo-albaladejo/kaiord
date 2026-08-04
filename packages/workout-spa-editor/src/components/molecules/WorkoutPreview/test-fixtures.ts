@@ -71,6 +71,6 @@ export const PREVIEW_TEST = {
   BARS_SINGLE: 1,
   UNIQUE_IDS_REPEAT_3: 3,
   // Selection stroke colors
-  SELECTED_STROKE: "#2563eb",
+  SELECTED_STROKE: "var(--focus-ring)",
   UNSELECTED_STROKE: "transparent",
 } as const;
