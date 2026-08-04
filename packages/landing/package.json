@@ -17,11 +17,11 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "jsdom": "^30.0.0",
-    "node-html-parser": "^9.0.0",
+    "jsdom": "^30.0.1",
+    "node-html-parser": "^9.0.1",
     "tailwindcss": "^4.3.3",
     "typescript": "~7.0.2",
-    "vite": "^8.1.5",
+    "vite": "^8.2.0",
     "vitest": "^4.1.10"
   }
 }
