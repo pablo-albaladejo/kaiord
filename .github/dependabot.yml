@@ -12,6 +12,18 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      # packages/docs pins typescript 6.x on purpose: it renders samples through
+      # @shikijs/vitepress-twoslash, whose twoslash dependency declares
+      # `typescript: "^5.5.0 || ^6.0.0"` and drives the compiler API directly.
+      # On 7.x the docs build dies while *loading* .vitepress/config.ts
+      # ("Cannot read properties of undefined (reading 'readFile')"), so a type
+      # check never gets the chance to report it. The root pin stays on 6.x
+      # alongside it. Every published package already tracks 7.x, and minor and
+      # patch updates still flow everywhere — only the major is held back.
+      # Drop this entry once twoslash's peer range accepts typescript 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     reviewers:
       - "pablo-albaladejo"
     labels:
