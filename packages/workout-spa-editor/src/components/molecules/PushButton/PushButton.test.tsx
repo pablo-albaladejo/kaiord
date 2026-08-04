@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { PushButton } from "./PushButton";
 
-let deferred: { resolve: () => void; promise: Promise<void> };
+let deferred: { resolve: (sent: boolean) => void; promise: Promise<boolean> };
 const pushMock = vi.fn(() => deferred.promise);
 
 vi.mock("../GarminPushButton/useGarminPush", () => ({
@@ -14,8 +14,8 @@ vi.mock("../GarminPushButton/useGarminPush", () => ({
 const WORKOUT = { id: "w1" } as unknown as WorkoutRecord;
 
 const makeDeferred = () => {
-  let resolve: () => void = () => undefined;
-  const promise = new Promise<void>((r) => {
+  let resolve: (sent: boolean) => void = () => undefined;
+  const promise = new Promise<boolean>((r) => {
     resolve = r;
   });
   return { resolve, promise };
@@ -36,7 +36,7 @@ describe("PushButton", () => {
 
     // Assert
 
-    expect(screen.getByText("Push to Garmin")).toBeInTheDocument();
+    expect(screen.getByText("Send to Garmin")).toBeInTheDocument();
   });
 
   it("should transition to pushing then done on click", async () => {
@@ -46,12 +46,12 @@ describe("PushButton", () => {
 
     // Act
 
-    fireEvent.click(screen.getByText("Push to Garmin"));
+    fireEvent.click(screen.getByText("Send to Garmin"));
 
     // Assert
 
-    expect(await screen.findByText("Pushing…")).toBeInTheDocument();
-    deferred.resolve();
+    expect(await screen.findByText("Sending…")).toBeInTheDocument();
+    deferred.resolve(true);
     await waitFor(() => {
       expect(screen.getByText("On your Garmin")).toBeInTheDocument();
     });
@@ -66,12 +66,12 @@ describe("PushButton", () => {
 
     // Act
 
-    fireEvent.click(screen.getByText("Push to Garmin"));
+    fireEvent.click(screen.getByText("Send to Garmin"));
 
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByText("Push to Garmin")).toBeInTheDocument();
+      expect(screen.getByText("Send to Garmin")).toBeInTheDocument();
     });
   });
 });

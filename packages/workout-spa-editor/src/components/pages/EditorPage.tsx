@@ -13,13 +13,13 @@ import { useDeleteCleanup } from "../../hooks/use-delete-cleanup";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
+import { EditorStateRibbon } from "../organisms/EditorStateRibbon";
 import { CoachingDraftSurface } from "./CoachingDraftSurface";
 import { DateBanner } from "./DateBanner";
 import { parseEditorRouteParams } from "./editor-route-params";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
 import { EditorPageHeader } from "./EditorPageHeader";
 import { EditorPopulatedBody } from "./EditorPopulatedBody";
-import { EditorWorkflowBar } from "./EditorWorkflowBar";
 import { renderNewWorkoutSurface } from "./render-new-workout-surface";
 import { useBackHandler } from "./use-back-handler";
 import { useEditorActions } from "./use-editor-actions";
@@ -42,7 +42,7 @@ export default function EditorPage({ id }: EditorPageProps) {
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
 
   const { record, loading } = useWorkoutRecord(id);
-  const { acceptWorkout, pushWorkout } = useEditorActions(record);
+  const { pushWorkout } = useEditorActions(record);
   const profileId = useActiveProfileLive()?.id ?? null;
   const sidebarData = useCoachingSidebar(profileId, id);
 
@@ -73,11 +73,10 @@ export default function EditorPage({ id }: EditorPageProps) {
       />
       {!id && dateParam && <DateBanner date={dateParam} />}
       {record && (
-        <EditorWorkflowBar
+        <EditorStateRibbon
           state={record.state}
-          onAccept={acceptWorkout}
-          onPush={() => pushWorkout(`garmin-${Date.now()}`)}
-          onRepush={() => pushWorkout(`garmin-${Date.now()}`)}
+          profileId={profileId ?? undefined}
+          onSent={() => void pushWorkout(`garmin-${Date.now()}`)}
         />
       )}
       {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}

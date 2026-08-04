@@ -24,7 +24,7 @@
     "tapToTune": "Toca cualquier paso para ajustarlo",
     "timeInZone": "Tiempo en zona",
     "redo": "Rehacer",
-    "savePush": "Guardar y enviar"
+    "savePush": "Enviar a Garmin"
   },
   "summary": {
     "duration": "Duración",
@@ -76,7 +76,7 @@
   },
   "toast": {
     "generationFailed": "No se pudo generar el entreno",
-    "savedAndPushed": "Guardado y enviado a Garmin",
+    "savedAndPushed": "Enviado a Garmin",
     "savedOnly": "Entreno guardado"
   }
 }

@@ -2,8 +2,7 @@
  * Editor Workflow Actions
  *
  * Transition functions for the editor-calendar integration:
- * accept (structured->ready), push (ready->pushed),
- * and modify (pushed->modified).
+ * push (structured|ready|modified -> pushed) and modify (pushed->modified).
  *
  * All KRD-carrying persistence paths route through `onWorkoutMutation`
  * so `modifiedAt` advances on every user edit in STRUCTURED / READY
@@ -35,21 +34,25 @@ function saveEditedKrd(
   return onWorkoutMutation(record, { krd: editedKrd });
 }
 
+/* Sending implies accepting. `structured → ready` used to be a separate
+   button ("Accept Workout") on a bar that never showed it beside the push,
+   so the two halves of one decision were never visible together. The
+   transition still happens — it is just no longer something to click. */
+function readyForPush(record: WorkoutRecord): WorkoutRecord {
+  return record.state === "structured" ? transitionToReady(record) : record;
+}
+
 export function useEditorActions(record: WorkoutRecord | undefined) {
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
-
-  const acceptWorkout = useCallback(async () => {
-    if (!record) return;
-    const withEdits = saveEditedKrd(record, currentWorkout ?? undefined);
-    const updated = transitionToReady(withEdits);
-    await persistRecord(updated);
-  }, [record, currentWorkout]);
 
   const pushWorkout = useCallback(
     async (garminPushId: string) => {
       if (!record) return;
       const withEdits = saveEditedKrd(record, currentWorkout ?? undefined);
-      const updated = transitionToPushed(withEdits, garminPushId);
+      const updated = transitionToPushed(
+        readyForPush(withEdits),
+        garminPushId
+      );
       await persistRecord(updated);
     },
     [record, currentWorkout]
@@ -64,5 +67,5 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
     [record]
   );
 
-  return { acceptWorkout, pushWorkout, markModified };
+  return { pushWorkout, markModified };
 }

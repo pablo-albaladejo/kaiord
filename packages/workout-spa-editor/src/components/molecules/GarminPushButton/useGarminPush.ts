@@ -40,8 +40,8 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
   const { pushWorkout, setPushing, sessionActive } = useGarminBridge();
   const analytics = useAnalytics();
 
-  const push = useCallback(async () => {
-    if (!workout?.krd || !sessionActive) return;
+  const push = useCallback(async (): Promise<boolean> => {
+    if (!workout?.krd || !sessionActive) return false;
 
     try {
       const gcn = await exportGcnWorkout(workout.krd);
@@ -56,12 +56,14 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
         }
       );
       analytics.event("garmin-synced", { result: "success" });
+      return true;
     } catch (error: unknown) {
       analytics.event("garmin-synced", { result: "failure" });
-      if (error instanceof BridgePushFailedError) return;
+      if (error instanceof BridgePushFailedError) return false;
       const message =
         error instanceof Error ? error.message : "Conversion failed";
       setPushing({ status: "error", message });
+      return false;
     }
   }, [workout, sessionActive, pushWorkout, setPushing, analytics]);
 

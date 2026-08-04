@@ -49,7 +49,7 @@ describe("StepEditor", () => {
     expect(screen.getByLabelText("Select target type")).toBeInTheDocument();
   });
 
-  it("should render save and cancel buttons", () => {
+  it("should render done and cancel buttons", () => {
     // Arrange
 
     const onSave = vi.fn();
@@ -61,18 +61,18 @@ describe("StepEditor", () => {
 
     // Assert
 
-    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /close the step form/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });
 
-  it("should call onSave with updated step when save button is clicked", async () => {
+  it("should call onSave with the updated step when done is clicked", async () => {
     // Arrange
 
     const user = userEvent.setup();
     const onSave = vi.fn();
     const onCancel = vi.fn();
     render(<StepEditor step={mockStep} onSave={onSave} onCancel={onCancel} />);
-    const saveButton = screen.getByRole("button", { name: /save/i });
+    const saveButton = screen.getByRole("button", { name: /close the step form/i });
 
     // Act
 
@@ -126,7 +126,7 @@ describe("StepEditor", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("should disable save button when there are validation errors", () => {
+  it("should disable done when there are validation errors", () => {
     // Arrange
 
     const onSave = vi.fn();
@@ -135,7 +135,7 @@ describe("StepEditor", () => {
     // Act
 
     render(<StepEditor step={mockStep} onSave={onSave} onCancel={onCancel} />);
-    const saveButton = screen.getByRole("button", { name: /save/i });
+    const saveButton = screen.getByRole("button", { name: /close the step form/i });
 
     // Assert
     // Initially no errors, button should be enabled.

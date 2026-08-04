@@ -61,7 +61,7 @@
       "requires": "Nothing to redo"
     },
     "save": {
-      "title": "Save the workout",
+      "title": "Download a file",
       "subtitle": "Downloads it as a .krd file",
       "requires": "Open a workout first"
     }

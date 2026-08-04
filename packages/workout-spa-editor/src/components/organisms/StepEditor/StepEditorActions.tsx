@@ -15,23 +15,23 @@ export function StepEditorActions({
   onCancel,
 }: StepEditorActionsProps) {
   const t = useTranslate("editor");
+  // "Save" left with the other six verbs: a local-first editor already kept
+  // the change, so the button closes the form rather than asking permission.
   return (
-    <div className="flex flex-col items-end gap-2 border-t border-gray-200 pt-6 dark:border-gray-700">
+    <div className="flex flex-col gap-2 border-t border-edge-soft pt-4">
       {hasErrors && (
         <p
           id={ERROR_MESSAGE_ID}
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-[var(--danger-text)]"
           role="alert"
         >
           {t("stepEditor.fixErrors")}
         </p>
       )}
-      <div className="flex gap-3">
-        <Button variant="secondary" onClick={onCancel}>
-          {t("stepEditor.cancel")}
-        </Button>
+      <div className="flex gap-2">
         <Button
           variant="primary"
+          size="sm"
           onClick={onSave}
           disabled={hasErrors}
           aria-label={t("stepEditor.saveAria")}
@@ -43,6 +43,9 @@ export function StepEditorActions({
           }
         >
           {t("stepEditor.save")}
+        </Button>
+        <Button variant="tertiary" size="sm" onClick={onCancel}>
+          {t("stepEditor.cancel")}
         </Button>
       </div>
     </div>

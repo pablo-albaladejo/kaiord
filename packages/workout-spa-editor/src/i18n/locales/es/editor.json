@@ -10,10 +10,6 @@
     "editTitle": "Editar entreno",
     "editDescription": "Ajusta pasos, intervalos y objetivos."
   },
-  "workflow": {
-    "acceptWorkout": "Aceptar entreno",
-    "pushToGarmin": "Enviar a Garmin"
-  },
   "section": {
     "untitledWorkout": "Entreno sin título",
     "sport": "Deporte:",
@@ -21,7 +17,7 @@
     "editMetadataTitle": "Editar metadatos del entreno"
   },
   "actions": {
-    "discard": "Descartar",
+    "discard": "Descartar entreno",
     "discardAria": "Descartar el entreno y volver a la pantalla de bienvenida",
     "addStep": "Añadir paso",
     "addRepetition": "Añadir repetición",
@@ -82,7 +78,6 @@
     "redoAria": "Rehacer la última acción"
   },
   "save": {
-    "saveWorkout": "Guardar entreno",
     "saving": "Guardando...",
     "exportProgress": "Progreso de exportación: {{progress}}%",
     "savedTitle": "Entreno guardado",
@@ -142,10 +137,10 @@
     "editStep": "Editar paso {{n}}",
     "fixErrors": "Corrige los errores anteriores antes de guardar",
     "cancel": "Cancelar",
-    "save": "Guardar",
-    "saveAria": "Guardar los cambios del paso",
+    "save": "Hecho",
+    "saveAria": "Cerrar el formulario del paso",
     "fixErrorsTitle": "Corrige primero los errores de validación",
-    "saveTitle": "Guardar cambios"
+    "saveTitle": "Cerrar el formulario del paso"
   },
   "firstTimeHints": {
     "dismiss": "Descartar sugerencias",
@@ -272,5 +267,40 @@
       "lap_swimming": "Natación en piscina",
       "open_water": "Aguas abiertas"
     }
+  },
+  "ribbon": {
+    "sendReady": "Listo para enviar a tu reloj",
+    "sendReadyDetail": "Todavía no ha llegado nada a Garmin: este es el primer envío.",
+    "staleHeadline": "Tu reloj sigue con la versión anterior a estos cambios",
+    "staleDetail": "Garmin recibió una versión anterior; la has editado desde entonces.",
+    "noBridgeHeadline": "Nada puede llegar a tu reloj desde este navegador",
+    "noBridgeDetail": "Garmin no tiene API pública para entrenos, así que la extensión puente hace la entrega. Sin ella, la única vía es descargar el archivo e importarlo a mano.",
+    "noBridgeAction": "Instalar la extensión",
+    "exportOffHeadline": "Los entrenos no se envían a Garmin",
+    "exportOffDetail": "No se ha enviado nada, y no se enviará hasta que actives esa ruta. Hasta entonces, la única vía es descargar el archivo e importarlo a mano.",
+    "exportOffAction": "Activar el envío de entrenos",
+    "noSessionHeadline": "Garmin ha cerrado tu sesión, así que esto no puede llegar a tu reloj",
+    "noSessionDetail": "La extensión usa tu sesión de Garmin Connect, y esa sesión ha terminado. Vuelve a iniciar sesión, o descarga el archivo e impórtalo a mano.",
+    "noSessionAction": "Iniciar sesión en Garmin",
+    "region": "Estado de entrega del entreno"
+  },
+  "shape": {
+    "heading": "Forma",
+    "zonesFrom": "Zonas a partir de FTP {{ftp}} W · actualizado {{when}}",
+    "zonesFromNoDate": "Zonas a partir de FTP {{ftp}} W",
+    "noThreshold": "Sin FTP para {{sport}}: los objetivos no pueden decir de dónde salen"
+  },
+  "block": {
+    "dragAria": "Arrastra para reordenar el bloque",
+    "collapse": "Contraer bloque",
+    "expand": "Expandir bloque",
+    "repeat": "Repetir {{count}}×",
+    "steps_one": "{{count}} paso",
+    "steps_other": "{{count}} pasos",
+    "delete": "Eliminar bloque de repetición",
+    "editCount": "Editar repeticiones",
+    "countAria": "Número de repeticiones",
+    "ungroup": "Desagrupar",
+    "deleteShort": "Eliminar"
   }
 }

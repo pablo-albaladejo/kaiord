@@ -52,5 +52,10 @@
     "noNewDataSince": "Sin datos nuevos desde {{date}}",
     "noAccess": "Kaiord no puede leer de una fuente: volver a iniciar sesión puede restaurarlo",
     "extensionOutdated": "Una extensión está desactualizada: actualízala para reanudar"
+  },
+  "verbs": {
+    "send": "Enviar a Garmin",
+    "keep": "Guardar en la biblioteca",
+    "download": "Descargar un archivo"
   }
 }

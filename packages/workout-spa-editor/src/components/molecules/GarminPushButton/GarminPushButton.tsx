@@ -3,73 +3,50 @@ import { Upload } from "lucide-react";
 import { useParams } from "wouter";
 
 import { db } from "../../../adapters/dexie/dexie-database";
-import { resolveExportPolicies } from "../../../application/integration-policy/resolve-export-policies.use-case";
 import { useGarminBridge } from "../../../contexts";
-import { policyRepo } from "../../../hooks/integration-policy-repo";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
-import { GarminExportDisabledButton } from "./GarminExportDisabledButton";
-import { GarminNoSessionButton } from "./GarminNoSessionButton";
 import { PushFeedback } from "./PushFeedback";
 import { useGarminPush } from "./useGarminPush";
 
-const GARMIN_BRIDGE_ID = "garmin-bridge";
-
-export const GarminPushButton: React.FC<{ profileId?: string }> = ({
-  profileId,
+/**
+ * The editor's single send control.
+ *
+ * It no longer decides whether the watch is reachable — `useGarminGate` owns
+ * that, and `EditorStateRibbon` only mounts this button once the chain is
+ * intact. Returning `null` on a missing extension is what kept the most
+ * common failure off the screen.
+ */
+export const GarminPushButton: React.FC<{ onSent?: () => void }> = ({
+  onSent,
 }) => {
-  const { extensionInstalled, sessionActive, pushing, setPushing } =
-    useGarminBridge();
+  const t = useTranslate("common");
+  const { pushing, setPushing } = useGarminBridge();
   const { id } = useParams<{ id?: string }>();
   const workout = useLiveQuery(
     () => (id ? db.table<WorkoutRecord>("workouts").get(id) : undefined),
     [id]
   );
-  const exportPolicies = useLiveQuery(
-    () =>
-      profileId
-        ? resolveExportPolicies(
-            { policyRepo },
-            { profileId, dataType: "workout" }
-          )
-        : Promise.resolve([]),
-    [profileId]
-  );
   const { push } = useGarminPush(workout);
   const isLoading = pushing.status === "loading";
 
-  const hasEnabledPolicy =
-    Array.isArray(exportPolicies) &&
-    exportPolicies.some((p) => p.enabled && p.bridgeId === GARMIN_BRIDGE_ID);
-
-  if (!extensionInstalled) {
-    return null;
-  }
-
-  if (!hasEnabledPolicy) {
-    return <GarminExportDisabledButton />;
-  }
-
-  if (!sessionActive) {
-    return (
-      <GarminNoSessionButton
-        pushing={pushing}
-        onReset={() => setPushing({ status: "idle" })}
-      />
-    );
-  }
+  const handleSend = async () => {
+    if (await push()) onSent?.();
+  };
 
   return (
     <div className="flex items-center gap-2">
       <Button
         size="sm"
-        variant="secondary"
-        onClick={push}
+        variant="primary"
+        onClick={handleSend}
         loading={isLoading}
         disabled={isLoading}
+        data-testid="send-to-garmin-button"
       >
         <Upload className="h-4 w-4" />
-        Send to Garmin
+        {t("verbs.send")}
       </Button>
       <PushFeedback
         push={pushing}
