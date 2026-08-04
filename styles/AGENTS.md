@@ -58,9 +58,11 @@ snapshots and landing-page review.
   type scale, radii and motion. Layer 2 is roles — `--text`, `--bg-surface`,
   `--border`, `--control`, `--zone-3`, `--danger`. A role may read a ramp; a
   ramp may never read a role; **a component may only ever name a role**.
-- **Magenta is marketing-only.** `--mkt-brand` / `--mkt-cta` are legitimate on
-  `packages/landing/**` and in the OG card renderer, nowhere else.
-  `scripts/check-mkt-boundary.mjs` fails `pnpm lint` otherwise. Inside the
+- **Magenta is marketing-only.** This file DECLARES `--mkt-brand` /
+  `--mkt-cta`; the only consumers allowed to reference them are
+  `packages/landing/**` and the OG card renderer.
+  `scripts/check-mkt-boundary.mjs` fails `pnpm lint` on any other reference,
+  and its exemption list is the definition of "approved surface". Inside the
   product the brand is ink; the one live accent is `--core-live`, which takes
   a training-zone hue.
 - **Node reads this file too.** Import `scripts/brand-tokens.mjs` rather than

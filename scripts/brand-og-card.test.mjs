@@ -56,6 +56,16 @@ test("places the subtitle it was given", () => {
   );
 });
 
+test("escapes a subtitle that would otherwise break the XML", () => {
+  const svg = buildOgCardSvg({
+    subtitle: "Strength & Conditioning <beta>",
+  }).toString();
+
+  assert.match(svg, />Strength &amp; Conditioning &lt;beta&gt;</);
+  // One `<` per real element: an unescaped subtitle would add two more.
+  assert.equal(svg.split("<").length, svg.split(/<[/a-z?!]/i).length);
+});
+
 test("keeps every weight at 600 or below", () => {
   const weights = [...card().matchAll(/font-weight="(\d+)"/g)].map((m) =>
     Number(m[1])

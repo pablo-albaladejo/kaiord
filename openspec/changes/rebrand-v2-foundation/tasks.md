@@ -79,17 +79,26 @@
 ## 12. Deliberately out of scope
 
 Recorded here so the screen waves inherit them rather than rediscover them.
-No issue numbers yet — they are assigned when the follow-up is filed.
+The repaint of the SPA's remaining raw-Tailwind surfaces is tracked as #1121.
 
 - **`--core-live` is not wired to a zone.** No derivation of the week's
   dominant training zone exists; rolling per-session zone data up to a week is
   what the Calendar wave builds. The mark's own fallback renders ink, which is
   also the correct empty-week rendering.
+
+  > Deferred to: #1118
+
 - **The SPA's `primary-*` utilities survive as neutrals.** Retiring them means
   flipping `text-white` to `text-control-ink` at 179 call sites so a dark-theme
   primary button is light rather than dark-on-dark, plus two pinned suites.
+
+  > Deferred to: #1119
+
 - **The wordmark is not redrawn.** It needs the Inter 600 `.woff2` outlined;
   `assets/logo.svg` keeps the pre-rebrand geometry until then.
+
+  > Deferred to: #1120
+
 - **The landing keeps its emerald / amber format-support hues** and its
   `font-extrabold` display type. Those encode a separate semantic and belong to
   a landing redesign, not to a token migration.

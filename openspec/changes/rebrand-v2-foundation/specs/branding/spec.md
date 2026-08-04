@@ -136,10 +136,12 @@ SHALL be enforced mechanically as part of `pnpm lint`, not by review — the
 tokens live in the same role blocks as every other token, so no file boundary
 can hold the rule.
 
-The one exception inside the product is `--core-live`: the app-header mark's
-core takes the dominant training zone of the week, which is a zone hue, not a
-marketing hue. Where no dominant zone can be calculated, the core SHALL inherit
-ink.
+The one exception inside the product is `--core-live`, whose value is a
+training-zone hue rather than a marketing one. The app-header mark's core SHALL
+read it, and SHALL inherit ink wherever it is unset — which is the rendering
+for a week with no calculable dominant zone, and also the rendering until the
+weekly derivation exists. Supplying that value is Calendar work; this change
+delivers the mark, the token and the fallback, and no runtime writer.
 
 #### Scenario: A product component referencing a marketing token fails lint
 

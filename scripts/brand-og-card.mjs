@@ -49,6 +49,14 @@ const renderMark = (ink) =>
     `<circle cx="16" cy="16" r="4" fill="${ink}"/>`,
   ].join("\n      ");
 
+// The card is an XML document handed straight to a rasteriser, so a subtitle
+// like "Strength & Conditioning" would produce a document sharp refuses.
+const escapeXmlText = (text) =>
+  String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+
 /**
  * @param {{ subtitle: string }} options
  * @returns {Buffer} the card as an SVG document
@@ -72,7 +80,7 @@ export function buildOgCardSvg({ subtitle }) {
       ${renderMark(brand)}
   </g>
   <text x="600" y="360" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="600" letter-spacing="-2.7" fill="${ink}">kaiord</text>
-  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="500" fill="${brand}">${subtitle}</text>
+  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="500" fill="${brand}">${escapeXmlText(subtitle)}</text>
   <text x="600" y="560" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="${dim}">by Pablo Albaladejo</text>
 </svg>`);
 }

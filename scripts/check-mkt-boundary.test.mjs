@@ -123,8 +123,40 @@ test("ALLOWLIST ships empty", () => {
   assert.equal(ALLOWLIST.size, 0);
 });
 
-test("MARKETING_PATHS names the landing and the card, nothing broader", () => {
-  assert.ok(MARKETING_PATHS.includes("packages/landing/"));
-  assert.ok(MARKETING_PATHS.includes("scripts/brand-og-card.mjs"));
-  assert.ok(!MARKETING_PATHS.includes("packages/"));
+test("MARKETING_PATHS is exactly the landing, the card and the token file", () => {
+  assert.deepEqual([...MARKETING_PATHS].sort(), [
+    "packages/landing/",
+    "scripts/brand-og-card.mjs",
+    "styles/brand-tokens.css",
+  ]);
+});
+
+test("(l) a file that merely extends an approved file's name is not exempt", () => {
+  withTree(
+    {
+      "scripts/brand-og-card.mjs.ts": 'const c = "var(--mkt-brand)";\n',
+      "styles/brand-tokens.css.bak": ":root { --mkt-brand: red; }\n",
+    },
+    (found) => {
+      assert.deepEqual(
+        found.map((v) => v.file),
+        ["scripts/brand-og-card.mjs.ts"]
+      );
+    }
+  );
+});
+
+test("(m) .vitepress source is scanned, not skipped as tooling noise", () => {
+  withTree(
+    {
+      "packages/docs/.vitepress/theme/custom.css":
+        ":root {\n  --vp-c-brand-1: var(--mkt-brand);\n}\n",
+    },
+    (found) => {
+      assert.deepEqual(
+        found.map((v) => v.file),
+        ["packages/docs/.vitepress/theme/custom.css"]
+      );
+    }
+  );
 });

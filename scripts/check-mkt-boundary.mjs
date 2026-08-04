@@ -49,10 +49,14 @@ const ROOTS = ["packages", "scripts", "styles", "assets", "docs"];
 const SKIP_DIRS = new Set([
   "node_modules",
   "dist",
-  ".vitepress",
+  "cache",
   "coverage",
   "icons",
 ]);
+// Dot-directories are skipped as build/tooling noise, except the ones that
+// hold real source. `.vitepress/theme/custom.css` is the docs site's entire
+// stylesheet — precisely a product surface that could reach for magenta.
+const SCANNED_DOT_DIRS = new Set([".vitepress"]);
 const EXTENSIONS = [
   ".ts",
   ".tsx",
@@ -69,8 +73,11 @@ const EXTENSIONS = [
 
 const MKT_RE = /--mkt-[\w-]*/g;
 
+// A directory entry (trailing slash) covers everything beneath it; a file
+// entry must match exactly, so a `brand-og-card.mjs.ts` cannot inherit the
+// exemption by sharing a prefix with the approved file.
 const isMarketing = (rel) =>
-  MARKETING_PATHS.some((p) => rel === p || rel.startsWith(p));
+  MARKETING_PATHS.some((p) => (p.endsWith("/") ? rel.startsWith(p) : rel === p));
 
 function walk(dir, visit) {
   let entries;
@@ -80,7 +87,8 @@ function walk(dir, visit) {
     return;
   }
   for (const entry of entries) {
-    if (entry.name.startsWith(".") || SKIP_DIRS.has(entry.name)) continue;
+    const hidden = entry.name.startsWith(".") && !SCANNED_DOT_DIRS.has(entry.name);
+    if (hidden || SKIP_DIRS.has(entry.name)) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) walk(full, visit);
     else if (EXTENSIONS.some((ext) => entry.name.endsWith(ext))) visit(full);

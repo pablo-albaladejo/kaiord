@@ -35,12 +35,14 @@ these tokens existing.
   read a role. The single-flat-`.dark`-block invariant is preserved and
   restated, because three Node-side readers regex the first `.dark { … }`.
 
-- **Five tokens are deleted with no alias, on purpose.** `--brand-accent-blue`
-  (+ `-hover`/`-active`/`-soft`), `--brand-accent-purple`,
-  `--brand-semantic-tip` (+ `-soft`), `--brand-semantic-warning` (+ `-soft`)
-  and `--brand-font-mono`. Aliasing them would reintroduce the collisions this
-  rebuild exists to remove, so the call site is meant to break.
-  `--brand-text-muted` goes too — it was byte-identical to `--zone-1`.
+- **Five token groups are deleted with no alias, on purpose.**
+  `--brand-accent-blue` (with its `-hover` / `-active` / `-soft` variants),
+  `--brand-accent-purple`, `--brand-semantic-tip` (with `-soft`),
+  `--brand-semantic-warning` (with `-soft`) and `--brand-font-mono` — eleven
+  token names in all. Aliasing them would reintroduce the collisions this
+  rebuild exists to remove, so the call site is meant to break. A sixth token,
+  `--brand-text-muted`, is retired on its own: it was byte-identical to
+  `--zone-1`.
 
 - **Every `--brand-*` call site migrates to a role**, and the alias layer is
   then deleted from both role blocks. 263 references across the landing page,
@@ -65,16 +67,21 @@ these tokens existing.
   through `<img src>` is an isolated document that inherits neither
   `currentColor` nor `--core-live` and would render black.
 
-- **A mechanical guard holds the magenta boundary.** `--mkt-*` outside
-  `packages/landing/**` and the OG generators fails `pnpm lint`. A separate CSS
-  file would not hold this; a lint rule does.
+- **A mechanical guard holds the magenta boundary.** `styles/brand-tokens.css`
+  declares the `--mkt-*` roles and the landing and the OG card renderer consume
+  them; a reference from anywhere else fails `pnpm lint`. A separate CSS file
+  would not hold this, because any consumer that imports the tokens can reach
+  them; a lint rule does.
 
 ## What is deliberately NOT built
 
 - **The wordmark is not redrawn.** Outlining "Kaiord" needs the Inter 600
   `.woff2`, and a `<text>`-based logo breaks the moment it leaves a browser.
-  `assets/logo.svg` and `assets/logo-symbol.svg` keep the old geometry until
-  it is; their symbol-only call sites move to the new mark.
+  `assets/logo.svg` keeps the old geometry until the wordmark is redrawn, and
+  its call sites move to the new mark in the meantime. `assets/logo-symbol.svg`
+  is deleted outright — it was the symbol alone, which `mark.svg` now is.
+
+  > Deferred to: #1120
 
 - **The sixteen screens are untouched.** No component's layout, copy or
   information architecture changes here. Where a retired token was the only
@@ -86,6 +93,8 @@ these tokens existing.
   two test suites pin those exact class names. The ramp is repointed onto the
   chroma-0 neutrals so no blue survives inside the product, but the utilities
   keep their names until the screen waves replace them with roles.
+
+  > Deferred to: #1119
 
 - **The 192/512 manifest PNGs are not shipped**, and the derived favicon PNGs
   are not regenerated: the repo has no SVG→PNG rasteriser wired for

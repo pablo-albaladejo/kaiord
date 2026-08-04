@@ -49,9 +49,17 @@ are MV3-specific and follow a different rendering pipeline.
 
 ### Testing Requirements
 
-No automated tests. Visual regression is covered by the landing-page and
-docs-site review process; favicon presence is asserted by integration
-smoke tests in `packages/landing/`.
+`pnpm test:scripts` covers this directory through two suites:
+
+- `scripts/build-brand-images.test.mjs` — every generated raster is committed
+  at the size its name promises, every mirrored `public/` copy is byte-identical
+  to its master here, and the marks carry no baked colour.
+- `scripts/check-mark-geometry-parity.test.mjs` — the hand-written copies of the
+  mark (the OG card renderer, the SPA component, the landing header) still match
+  `mark.svg`.
+
+Everything else is visual: the landing-page and docs-site review process, plus
+the Playwright snapshots in `packages/workout-spa-editor/e2e/`.
 
 ### Common Patterns
 
