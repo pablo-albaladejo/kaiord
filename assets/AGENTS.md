@@ -12,30 +12,40 @@ are MV3-specific and follow a different rendering pipeline.
 
 ## Key Files
 
-| File                   | Description                                      |
-| ---------------------- | ------------------------------------------------ |
-| `logo.svg`             | Full logo (wordmark + symbol), vector master     |
-| `logo-symbol.svg`      | Symbol-only logo, vector                         |
-| `favicon.svg`          | Modern SVG favicon                               |
-| `favicon.png`          | PNG fallback favicon                             |
-| `favicon-16.png`       | 16×16 PNG favicon (legacy browsers, RSS readers) |
-| `favicon-32.png`       | 32×32 PNG favicon                                |
-| `favicon-48.png`       | 48×48 PNG favicon                                |
-| `apple-touch-icon.png` | iOS home-screen icon (180×180)                   |
-| `og-image.png`         | Open-Graph / Twitter Card preview image          |
+| File                   | Description                                                           |
+| ---------------------- | --------------------------------------------------------------------- |
+| `favicon.svg`          | **The mark.** Magenta on a baked dark plate; browser tab and OG cards |
+| `mark.svg`             | Product mark, pure `currentColor` — **inline it, never `<img src>`**  |
+| `mark-core-live.svg`   | App-header mark; core reads `var(--core-live, currentColor)`          |
+| `mark-app-icon.svg`    | Installed-app / dock icon, ink on a baked plate, ≥ 64 px              |
+| `logo.svg`             | Pre-rebrand wordmark + symbol. Kept until the wordmark is redrawn     |
+| `favicon.png`          | PNG fallback favicon (generated)                                      |
+| `favicon-16.png`       | 16×16 PNG favicon, legacy browsers and RSS readers (generated)        |
+| `favicon-32.png`       | 32×32 PNG favicon (generated)                                         |
+| `favicon-48.png`       | 48×48 PNG favicon (generated)                                         |
+| `apple-touch-icon.png` | iOS home-screen icon, 180×180, from `mark-app-icon.svg` (generated)   |
+| `og-image.png`         | Open-Graph / Twitter Card preview image (generated)                   |
 
 ## For AI Agents
 
 ### Working In This Directory
 
-- **SVG is canonical**: regenerate PNG variants from `logo.svg` /
-  `favicon.svg` whenever the master changes. Don't hand-edit a PNG.
-- **Pixel sizes are fixed** by the file name suffix; preserve aspect ratio
-  and the brand `--ka-color-*` tokens defined in `/styles/brand-tokens.css`.
+- **SVG is canonical**: every PNG here is generated. Edit the SVG master, run
+  `pnpm brand:images`, and commit the result. Never hand-edit a PNG.
+- **`pnpm brand:images` also mirrors** the assets each frontend serves into its
+  own `public/` directory, and bakes the docs nav marks (`logo-light.svg` /
+  `logo-dark.svg`) — VitePress renders its logo through `<img>`, which inherits
+  no `currentColor`. `scripts/build-brand-images.test.mjs` fails if a mirrored
+  copy drifts from its master here.
+- **`mark.svg` and `mark-core-live.svg` must be inlined.** An SVG behind
+  `<img src>` is an isolated document: it inherits neither `currentColor` nor
+  `--core-live`, so both would render black. The SPA inlines them through
+  `components/atoms/BrandMark/`; the landing inlines the geometry directly.
+- **Below 24 px, drop the spokes and nodes.** A 1.4-unit spoke at favicon size
+  is under one device pixel and reads as grey — which is why `favicon.svg` is
+  the hexagon and core alone.
 - **Branding contract** lives in `openspec/specs/branding/spec.md` — any
-  change to logo geometry or color SHOULD route through a proposal.
-- Frontend packages copy or reference these assets in their own `public/`
-  directories during build.
+  change to mark geometry or color SHOULD route through a proposal.
 
 ### Testing Requirements
 
