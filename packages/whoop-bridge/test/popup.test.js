@@ -12,10 +12,12 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "bridge-popup-health.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
 
 const MOCK_NOW_MS = new Date("2026-05-02T10:00:00Z").getTime();
+const BROKEN_AT_MS = new Date("2026-04-23T08:00:00Z").getTime();
 
 const setupDom = (chromeMock) => {
   const dom = new JSDOM(POPUP_HTML, {
@@ -39,16 +41,36 @@ const flushAsync = () => new Promise((r) => setTimeout(r, 0));
 // The popup asks TWO questions, and the second one decides between the
 // connected and no-tab states. `tabOpen` defaults to true so the pre-existing
 // cases keep meaning what they meant; the no-tab case sets it false.
-const buildChromeMock = ({ statusResponse, tabOpen = true } = {}) => ({
-  runtime: {
-    sendMessage: vi.fn((msg, cb) => {
-      if (msg.action === "status") cb(statusResponse);
-      else if (msg.action === "tab-open")
-        cb({ ok: true, data: { open: tabOpen } });
-      else cb({ ok: false, error: "unknown" });
-    }),
-  },
-});
+// `health` seeds chrome.storage.local as a previous popup open would have left
+// it; `__store` is readable afterwards so a test can assert what was written.
+const buildChromeMock = ({ statusResponse, tabOpen = true, health } = {}) => {
+  const store = health ? { bridgeHealth: health } : {};
+  return {
+    runtime: {
+      sendMessage: vi.fn((msg, cb) => {
+        if (msg.action === "status") cb(statusResponse);
+        else if (msg.action === "tab-open")
+          cb({ ok: true, data: { open: tabOpen } });
+        else cb({ ok: false, error: "unknown" });
+      }),
+      lastError: undefined,
+    },
+    storage: {
+      local: {
+        get: vi.fn((keys, cb) => {
+          const out = {};
+          for (const key of keys) if (key in store) out[key] = store[key];
+          cb(out);
+        }),
+        set: vi.fn((items, cb) => {
+          Object.assign(store, items);
+          if (cb) cb();
+        }),
+      },
+    },
+    __store: store,
+  };
+};
 
 describe("WHOOP popup", () => {
   let originalNow;
@@ -134,13 +156,96 @@ describe("WHOOP popup", () => {
       "Sign in to WHOOP"
     );
     expect(doc.querySelector(".cta-secondary").textContent).toBe(
-      "Open Kaiord editor"
+      "Review in Kaiord ↗"
     );
     const consequence = doc.getElementById("consequence-region").textContent;
     expect(consequence).toContain(
       "Everything already imported stays in Kaiord"
     );
     expect(consequence).toContain("Sign in at app.whoop.com");
+  });
+
+  it("dates the outage once an earlier open already recorded it", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        statusResponse: { ok: true, data: { connected: false } },
+        health: { brokenSince: BROKEN_AT_MS },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Session expired"
+    );
+    // The stamp records when KAIORD observed the failure, so the sentence is
+    // written about Kaiord's own intake — not about when the WHOOP session
+    // actually lapsed, which nothing here can establish.
+    expect(doc.getElementById("status-sub").textContent).toBe(
+      "Kaiord stopped receiving WHOOP data on 23 Apr and has held no session since."
+    );
+    const mark = doc.querySelector("[data-status-mark]");
+    expect(mark.tagName.toLowerCase()).toBe("svg");
+    expect(mark.querySelector("use").getAttribute("href")).toBe("#i-attn");
+  });
+
+  it("does not date an outage it has only just noticed", async () => {
+    const chromeMock = buildChromeMock({
+      statusResponse: { ok: true, data: { connected: false } },
+    });
+    const dom = setupDom(chromeMock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Session signed out"
+    );
+    expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
+      "span"
+    );
+    expect(chromeMock.__store.bridgeHealth.brokenSince).toBe(MOCK_NOW_MS);
+  });
+
+  // The bearer is what `connected` reports and what the health record tracks.
+  // A missing tab is one click from reading again, so folding it into the
+  // record would start an outage the user never had.
+  it("does not start an outage when only the tab is missing", async () => {
+    const chromeMock = buildChromeMock({
+      statusResponse: { ok: true, data: { connected: true } },
+      tabOpen: false,
+    });
+    const dom = setupDom(chromeMock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    expect(chromeMock.__store.bridgeHealth.brokenSince).toBeUndefined();
+    expect(chromeMock.__store.bridgeHealth.lastOkAt).toBe(MOCK_NOW_MS);
+  });
+
+  it("clears the outage when the session comes back", async () => {
+    const chromeMock = buildChromeMock({
+      statusResponse: { ok: true, data: { connected: true } },
+      health: { brokenSince: BROKEN_AT_MS },
+    });
+    const dom = setupDom(chromeMock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    expect(chromeMock.__store.bridgeHealth.brokenSince).toBeUndefined();
   });
 
   // The state the popup could not previously express. `connected` is
@@ -160,8 +265,14 @@ describe("WHOOP popup", () => {
     await flushAsync();
 
     const doc = dom.window.document;
+    // Muted, not warn: the session is intact and one click restores reads, so
+    // this is a paused bridge rather than a broken one. The alert mark is
+    // reserved for a state the user has actually lost something to.
     expect(doc.getElementById("status").className).toContain(
-      "status-block--warn"
+      "status-block--muted"
+    );
+    expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
+      "span"
     );
     expect(doc.getElementById("status-text").textContent).toBe(
       "No WHOOP tab open"
@@ -230,7 +341,7 @@ describe("WHOOP popup", () => {
     expect(doc.getElementById("status-sub").textContent).not.toContain("tab");
   });
 
-  it("renders the checking skeleton before the probe resolves", () => {
+  it("renders the checking skeleton in every region a resolved state fills", () => {
     const dom = setupDom(
       buildChromeMock({
         statusResponse: { ok: true, data: { connected: true } },
@@ -243,8 +354,48 @@ describe("WHOOP popup", () => {
     expect(doc.getElementById("status-text").textContent).toBe(
       "Checking your session…"
     );
+    // The consequence lines are the ones that used to appear out of nowhere
+    // when the probe settled.
+    for (const region of [
+      "chips-region",
+      "consequence-region",
+      "footer-region",
+    ]) {
+      expect(
+        doc.querySelectorAll(`#${region} .skeleton`).length
+      ).toBeGreaterThan(0);
+    }
     expect(doc.querySelectorAll(".skeleton--chip").length).toBe(3);
     expect(doc.querySelectorAll(".skeleton--cta").length).toBe(1);
+    // chips-region and paused-region are an either/or, so reserving both at
+    // once would make the checking state taller than anything that follows.
+    expect(doc.getElementById("paused-region").children.length).toBe(0);
+  });
+
+  it("still renders when chrome.storage is unavailable", async () => {
+    const chromeMock = buildChromeMock({
+      statusResponse: { ok: true, data: { connected: false } },
+    });
+    delete chromeMock.storage;
+    const dom = setupDom(chromeMock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    // Storage is best-effort: losing it costs the date, not the popup.
+    expect(dom.window.document.getElementById("status-text").textContent).toBe(
+      "Session signed out"
+    );
+  });
+
+  it("carries no provider hue in its markup", () => {
+    // WHOOP's #9333ea was one of the five brand-coloured header dots the V2
+    // repaint removed; the monogram replaced them.
+    expect(POPUP_HTML).not.toContain("--accent");
+    expect(POPUP_HTML).not.toMatch(/#[0-9a-fA-F]{6}/);
+    expect(POPUP_HTML).toContain(">Wh</span");
   });
 
   it("falls back to the signed-out state when the background answers with an error", async () => {

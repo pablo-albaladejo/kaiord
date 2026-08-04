@@ -2,8 +2,8 @@
  * Kaiord Garmin Bridge — Popup
  *
  * Shell layout: status block, capability chips, athlete card (from cached
- * profile-snapshot), sync rollup (workout-library count + last push), CTA
- * pair. Auto-fetches on open with bounded per-phase timeouts; Retry only
+ * profile-snapshot), sync section (workout-library count + a last-push card),
+ * CTA pair. Auto-fetches on open with bounded per-phase timeouts; Retry only
  * appears on user-resolvable failures.
  *
  * The primary CTA is whatever fixes the current state: signing back in at
@@ -27,16 +27,22 @@
  * weakening the rule. Signing in again is still the useful action, because it
  * lets the bridge re-mint; it is just not a diagnosis.
  *
+ * The health record follows the same discipline. Only the API verdict is
+ * folded into it — a background worker that did not answer says nothing about
+ * Garmin — and the dated sentence claims only that Kaiord has read nothing
+ * since, which is a fact about this extension rather than about Garmin.
+ *
  * Shared helpers load first from the vendored bridge-popup-utils.js,
- * bridge-popup-shell.js and bridge-popup-snapshot.js (see popup.html script
- * order).
+ * bridge-popup-shell.js, bridge-popup-health.js and bridge-popup-snapshot.js
+ * (see popup.html script order).
  *
  * No new outbound URLs introduced — privacy-surface guard covers
  * popup.js fetch sites and asserts only relative paths.
  */
 
-/* global msg, $, withTimeout, relativeAgo, renderRetry, renderStatusBlock,
-   renderChips, renderSkeleton, renderCtas, renderAthleteCard */
+/* global msg, $, withTimeout, relativeAgo, formatSinceDate, recordProbe,
+   renderRetry, renderStatusBlock, renderChips, renderSkeleton, renderCtas,
+   renderAthleteCard */
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
@@ -53,6 +59,8 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   noGarminAccess: "No access to Garmin Connect",
   noGarminAccessCause:
     "Kaiord could not read from Garmin Connect. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
+  noGarminAccessCauseSince:
+    "Kaiord has read nothing from Garmin Connect since $1. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
   bridgeNotResponding: "Bridge not responding",
   bridgeNotRespondingCause:
     "The extension's background worker did not answer. Try again.",
@@ -96,6 +104,15 @@ const FEED_KEYS = [
   { key: "typeBodyCompositionBack", modifier: "out" },
 ];
 
+// Every region any resolved state fills, so the checking layout is the
+// resolved layout's height.
+const SKELETON_REGIONS = [
+  { region: "chips-region", parts: ["caption", "chips"] },
+  { region: "athlete-region", parts: ["block"] },
+  { region: "rollup-region", parts: ["caption", "block-sm"] },
+  { region: "footer-region", parts: ["cta", "secondary"] },
+];
+
 const sendMessage = (action) =>
   new Promise((resolve) => {
     chrome.runtime.sendMessage({ action }, (res) =>
@@ -116,40 +133,62 @@ const feedChips = (modifier) =>
     modifier: modifier ?? entry.modifier,
   }));
 
+// The one card in the shell that carries a hue. Zone 4 edges it because it is
+// naming a real training session rather than a status.
+const lastPushCard = (lastPush) => {
+  const card = document.createElement("div");
+  card.className = "lastpush";
+  const meta = document.createElement("div");
+  meta.className = "lastpush__meta";
+  const rel = relativeAgo(lastPush.at) ?? msg("momentsAgo");
+  meta.textContent = `${msg("lastPush")} · ${rel}`;
+  card.appendChild(meta);
+  if (lastPush.name) {
+    const title = document.createElement("div");
+    title.className = "lastpush__title";
+    title.textContent = lastPush.name;
+    card.appendChild(title);
+  }
+  return card;
+};
+
 const renderRollup = (pingData, lastPush) => {
   const region = $("rollup-region");
   region.innerHTML = "";
   const total = pingData?.gcApi?.totalCount;
-  const lines = [];
-  if (typeof total === "number") {
-    lines.push(msg("workoutLibrary", [String(total)]));
-  }
-  if (lastPush?.at) {
-    const rel = relativeAgo(lastPush.at) ?? msg("momentsAgo");
-    const name = lastPush.name ? ` — “${lastPush.name}”` : "";
-    lines.push(`${msg("lastPush")} · ${rel}${name}`);
-  }
-  if (lines.length === 0) return;
+  const hasTotal = typeof total === "number";
+  if (!hasTotal && !lastPush?.at) return;
   const caption = document.createElement("div");
   caption.className = "caption";
   caption.textContent = msg("captionSync");
   region.appendChild(caption);
-  for (const line of lines) {
+  if (hasTotal) {
     const el = document.createElement("div");
     el.className = "rollup";
-    el.textContent = line;
+    el.textContent = msg("workoutLibrary", [String(total)]);
     region.appendChild(el);
   }
+  if (lastPush?.at) region.appendChild(lastPushCard(lastPush));
 };
 
 const showRefresh = (visible) => {
   $("refresh-btn").classList.toggle("popup-header__refresh--hidden", !visible);
 };
 
+const setMarkEstablished = (established) => {
+  $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
+};
+
 // Any non-connected state pauses the flow, so the chips go muted and the
 // primary CTA becomes the fix rather than the editor link.
-const renderBroken = ({ verdictKey, causeKey }) => {
-  renderStatusBlock($, msg, { tone: "warn", verdictKey, causeKey });
+const renderBroken = ({ verdictKey, causeKey, causeSubs, mark = "dot" }) => {
+  renderStatusBlock($, msg, {
+    tone: "warn",
+    mark,
+    verdictKey,
+    causeKey,
+    causeSubs,
+  });
   renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
   renderCtas($, {
     primaryLabel: msg("signInGarmin"),
@@ -160,14 +199,26 @@ const renderBroken = ({ verdictKey, causeKey }) => {
   renderRetry(() => loadPopupData());
 };
 
+const renderNoAccess = (since) => {
+  const dated = since !== null;
+  setMarkEstablished(dated);
+  renderBroken({
+    mark: dated ? "alert" : "dot",
+    verdictKey: "noGarminAccess",
+    causeKey: dated ? "noGarminAccessCauseSince" : "noGarminAccessCause",
+    causeSubs: dated ? [formatSinceDate(since)] : undefined,
+  });
+};
+
 const loadPopupData = async () => {
   showRefresh(false);
+  setMarkEstablished(false);
   renderStatusBlock($, msg, {
-    tone: "muted",
+    tone: "checking",
     verdictKey: "checking",
     causeKey: "checkingCause",
   });
-  renderSkeleton($);
+  renderSkeleton($, SKELETON_REGIONS);
 
   let storage;
   try {
@@ -197,17 +248,16 @@ const loadPopupData = async () => {
     return;
   }
 
-  const apiOk = ping?.data?.gcApi?.ok;
-  if (!ping?.ok || !apiOk) {
+  const apiOk = Boolean(ping?.ok && ping?.data?.gcApi?.ok);
+  const health = await recordProbe(apiOk);
+  if (!apiOk) {
     renderAthleteCard(storage.profileSnapshot);
     renderRollup(ping?.data, storage.lastPushReceipt);
-    renderBroken({
-      verdictKey: "noGarminAccess",
-      causeKey: "noGarminAccessCause",
-    });
+    renderNoAccess(health.since);
     return;
   }
 
+  setMarkEstablished(true);
   renderStatusBlock($, msg, {
     tone: "ok",
     verdictKey: "connected",
