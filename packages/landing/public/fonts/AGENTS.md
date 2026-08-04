@@ -28,7 +28,7 @@ None.
 
 - **Font loading verification** — manual only. Check browser DevTools Network tab: font should load with correct size and Content-Type (`font/woff2`).
 - **Preload link** — `index.html` includes `<link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>` to prioritize loading.
-- **CSS usage** — `src/main.css` defines `--font-sans: var(--brand-font-sans)` in `@theme` block; Tailwind applies it globally.
+- **CSS usage** — `styles/brand-tokens.css` declares `--font-sans` in an unlayered `:root`, which beats Tailwind's own `@layer theme` default; no `@theme` mapping is needed or wanted (it would compile to a self-reference).
 
 ### Common Patterns
 
@@ -41,8 +41,8 @@ None.
 ### Internal
 
 - `index.html` — preload link and CSS.
-- `src/main.css` — Tailwind theme references `--brand-font-sans`.
-- `styles/brand-tokens.css` — defines `--brand-font-sans` CSS custom property pointing to "Inter Var".
+- `src/main.css` — imports the shared tokens; declares no font of its own.
+- `styles/brand-tokens.css` — defines the `--font-sans` custom property pointing to "Inter Var", and carries the `@font-face` rule for the landing base path.
 
 ### External
 

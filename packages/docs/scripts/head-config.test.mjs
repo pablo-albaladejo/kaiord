@@ -1,5 +1,5 @@
 // The branding spec requires the docs surface to carry a `theme-color`
-// meta tag derived from the shared `--brand-bg-primary` token. These tests
+// meta tag derived from the shared `--bg-page` token. These tests
 // pin that invariant at the head-builder layer (upstream of VitePress) so
 // any drift fails before the site is rendered.
 
@@ -24,13 +24,13 @@ test("emits a theme-color meta tag", () => {
   assert.ok(themeColor, "head is missing <meta name='theme-color'>");
 });
 
-test("theme-color value equals --brand-bg-primary from the shared tokens", () => {
+test("theme-color value equals --bg-page from the shared tokens", () => {
   const head = buildStaticHead(SAMPLE_OPTIONS);
   const themeColor = head.find(
     ([tag, attrs]) => tag === "meta" && attrs.name === "theme-color"
   );
 
-  const expected = readBrandTokenColor("--brand-bg-primary");
+  const expected = readBrandTokenColor("--bg-page");
   assert.equal(themeColor[1].content, expected);
 });
 
@@ -42,6 +42,6 @@ test("theme-color parity is mechanical — it is never a literal hex", () => {
 
   // Exact match against the token; if someone hard-codes a hex in the
   // builder, this test fails when the token changes.
-  const fromToken = readBrandTokenColor("--brand-bg-primary");
+  const fromToken = readBrandTokenColor("--bg-page");
   assert.equal(themeColor[1].content, fromToken);
 });

@@ -1,39 +1,35 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { readBrandTokenColor } from "./brand-tokens.mjs";
 import { DEFAULT_MASTERS_DIR } from "./sync-bridge-core.mjs";
 
 // The bridge popups cannot import styles/brand-tokens.css — Chrome extensions
 // ship flat, unbundled files — so the popup-shell master re-declares the dark
-// palette as `--kd-*` literals. This guard pins each literal to the
-// `.dark` block it was copied from, so a brand-token repaint cannot leave the
-// five popups on a stale palette.
+// palette as `--kd-*` literals. This guard pins each literal to the role it was
+// copied from, so a brand-token repaint cannot leave the five popups on a stale
+// palette.
 //
-// Only the FIRST `.dark { … }` block is read: brand-tokens.css documents that
+// The comparison resolves rather than string-matches: a role is a `var()`
+// reference into an oklch ramp, and the popup master keeps hex so the file
+// still reads as a palette and so this guard's failure message stays legible.
+// Only the FIRST `.dark { … }` block is read — brand-tokens.css documents that
 // invariant (single flat block) for exactly this class of Node-side reader.
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO = dirname(HERE);
-
-// --kd-* token in the popup master → the brand token it is copied from.
+// --kd-* token in the popup master → the role it is copied from.
 const TOKEN_SOURCES = {
-  "--kd-bg-primary": "--brand-bg-primary",
-  "--kd-bg-surface": "--brand-bg-surface",
-  "--kd-bg-elevated": "--brand-bg-elevated",
-  "--kd-text-primary": "--brand-text-primary",
-  "--kd-text-secondary": "--brand-text-secondary",
-  "--kd-text-muted": "--brand-text-muted",
-  "--kd-accent-blue": "--brand-accent-blue",
-  "--kd-accent-blue-hover": "--brand-accent-blue-hover",
-  "--kd-accent-blue-active": "--brand-accent-blue-active",
-  "--kd-accent-blue-soft": "--brand-accent-blue-soft",
-  "--kd-semantic-tip": "--brand-semantic-tip",
-  "--kd-semantic-warning": "--brand-semantic-warning",
-  "--kd-semantic-warning-soft": "--brand-semantic-warning-soft",
-  "--kd-border": "--brand-border",
-  "--kd-border-soft": "--brand-border-soft",
+  "--kd-bg-primary": "--bg-page",
+  "--kd-bg-surface": "--bg-surface",
+  "--kd-bg-elevated": "--bg-elevated",
+  "--kd-text-primary": "--text",
+  "--kd-text-secondary": "--text-secondary",
+  "--kd-text-muted": "--text-dim",
+  "--kd-control": "--control",
+  "--kd-control-ink": "--control-ink",
+  "--kd-control-hover": "--control-hover",
+  "--kd-border": "--border",
+  "--kd-border-soft": "--border-subtle",
 };
 
 const readDeclarations = (src, prefix) =>
@@ -57,12 +53,6 @@ const readRuleBlock = (src, selector, file) => {
   return src.slice(start, end);
 };
 
-const readDarkBlock = () => {
-  const file = "styles/brand-tokens.css";
-  const src = readFileSync(join(REPO, file), "utf8");
-  return readDeclarations(readRuleBlock(src, ".dark", file), "--brand-");
-};
-
 const readPopupTokens = () => {
   const src = readFileSync(join(DEFAULT_MASTERS_DIR, "popup.css"), "utf8");
   const block = readRuleBlock(src, ":root", "popup.css master");
@@ -70,22 +60,18 @@ const readPopupTokens = () => {
 };
 
 describe("bridge popup token parity", () => {
-  it("every --kd-* literal equals its brand-token source", () => {
-    const dark = readDarkBlock();
+  it("every --kd-* literal equals its role's resolved dark value", () => {
     const popup = readPopupTokens();
-    for (const [kdToken, brandToken] of Object.entries(TOKEN_SOURCES)) {
+    for (const [kdToken, role] of Object.entries(TOKEN_SOURCES)) {
       assert.ok(
         popup[kdToken],
         `popup.css master does not declare ${kdToken} as a hex literal`
       );
-      assert.ok(
-        dark[brandToken],
-        `styles/brand-tokens.css .dark block does not declare ${brandToken}`
-      );
+      const resolved = readBrandTokenColor(role).toLowerCase();
       assert.equal(
         popup[kdToken],
-        dark[brandToken],
-        `${kdToken} is ${popup[kdToken]} but ${brandToken} is ${dark[brandToken]} — re-copy the dark palette into the popup master`
+        resolved,
+        `${kdToken} is ${popup[kdToken]} but ${role} resolves to ${resolved} — re-copy the dark palette into the popup master`
       );
     }
   });

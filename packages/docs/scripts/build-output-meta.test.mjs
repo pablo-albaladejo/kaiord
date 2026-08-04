@@ -1,6 +1,6 @@
 // End-to-end assertion: after `pnpm build`, the rendered `/docs/index.html`
 // contains the `<meta name="theme-color">` tag with the exact value parsed
-// from the shared `--brand-bg-primary` token.
+// from the shared `--bg-page` token.
 //
 // Skipped when `dist/` does not exist (local runs without a prior build).
 // CI runs `pnpm -r build` before `pnpm lint` (via lint:specs), so this
@@ -23,7 +23,7 @@ test(
   { skip: !existsSync(INDEX_HTML) && "dist/ not built" },
   () => {
     const html = readFileSync(INDEX_HTML, "utf8");
-    const expected = readBrandTokenColor("--brand-bg-primary");
+    const expected = readBrandTokenColor("--bg-page");
 
     const match = html.match(
       /<meta\s+name="theme-color"\s+content="([^"]+)"\s*\/?>/i
@@ -33,7 +33,7 @@ test(
     assert.equal(
       match[1],
       expected,
-      `theme-color in rendered HTML (${match[1]}) does not match --brand-bg-primary (${expected})`
+      `theme-color in rendered HTML (${match[1]}) does not match --bg-page (${expected})`
     );
   }
 );

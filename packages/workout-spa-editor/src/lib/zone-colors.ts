@@ -1,17 +1,12 @@
 /* Helpers for the 5-zone training ramp. The CSS variables --zone-1..5 (and
-   their Tailwind `zone-1..5` color utilities) are the source of truth; the
-   literal class arrays below exist so Tailwind can statically detect every
-   class (dynamic `bg-zone-${n}` would be purged). ZONE_HEX mirrors the same
-   tokens for cases that need a raw color in an inline gradient (zone bars),
-   which cannot be expressed with utilities. Index i maps to zone Z(i+1). */
+   their Tailwind `zone-1..5` color utilities) are the source of truth. The
+   literal class array below exists only so Tailwind can statically detect
+   every class — a dynamic `bg-zone-${n}` would be purged. Index i maps to
+   zone Z(i+1).
 
-export const ZONE_HEX = [
-  "#64748b",
-  "#0ea5e9",
-  "#22c55e",
-  "#f59e0b",
-  "#ef4444",
-] as const;
+   There is deliberately no hex mirror of the ramp. The palette carries a
+   separate row per theme, so a frozen copy renders one theme's zones on the
+   other, and has to be re-transcribed by hand every time the ramp moves. */
 
 export const ZONE_BG_CLASSES = [
   "bg-zone-1",
@@ -28,9 +23,9 @@ export function zoneBgClass(zone: ZoneNumber): string {
   return ZONE_BG_CLASSES[zone - 1]!;
 }
 
-/** Raw hex for a 1-based zone number (for inline gradients). */
-export function zoneHex(zone: ZoneNumber): string {
-  return ZONE_HEX[zone - 1]!;
+/** The zone's role token, for the inline styles utilities cannot express. */
+export function zoneVar(zone: ZoneNumber): string {
+  return `var(--zone-${zone})`;
 }
 
 /** Vertical zone gradient (solid top → 80% alpha bottom) with inset top
@@ -39,9 +34,9 @@ export function zoneGradient(zone: ZoneNumber): {
   background: string;
   boxShadow: string;
 } {
-  const hex = zoneHex(zone);
+  const color = zoneVar(zone);
   return {
-    background: `linear-gradient(180deg, ${hex}, ${hex}cc)`,
+    background: `linear-gradient(180deg, ${color}, color-mix(in oklab, ${color} 80%, transparent))`,
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
   };
 }

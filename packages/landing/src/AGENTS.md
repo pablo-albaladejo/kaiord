@@ -56,7 +56,7 @@ TypeScript source files for the landing page. Includes the main entry point, CSS
 
 ## Notes
 
-- **Brand tokens** — defines CSS custom properties (--brand-bg-primary, --brand-accent-blue, etc.). Loaded from shared workspace resource, not packaged with landing.
+- **Brand tokens** — defines the ramp and role layers (`--bg-page`, `--text`, `--border`, `--control`, `--mkt-brand`, …). Loaded from the shared workspace resource, not packaged with landing. The landing is the ONE surface allowed to reference the `--mkt-*` marketing roles; `scripts/check-mkt-boundary.mjs` fails `pnpm lint` if any other file does.
 - **Analytics fallback** — if Umami tracker unavailable, errors are caught and suppressed (never surfaces to app).
 - **Smooth scroll behavior** — respects `prefers-reduced-motion` media query; disables animations if user preference set.
 

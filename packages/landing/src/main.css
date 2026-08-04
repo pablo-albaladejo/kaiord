@@ -1,10 +1,12 @@
 @import "tailwindcss";
 @import "../../../styles/brand-tokens.css";
 
-@theme {
-  --font-sans: var(--brand-font-sans);
-  --font-mono: var(--brand-font-mono);
-}
+/* No @theme font mapping: the role token IS `--font-sans`, so mapping it here
+   would compile to `--font-sans: var(--font-sans)` and take the whole utility
+   down with it. brand-tokens.css declares it in an unlayered :root, which
+   beats Tailwind's own `@layer theme` default, so `font-sans` and the
+   preflight `--default-font-family` both resolve to Inter unaided. The mono
+   stack is Tailwind's default — the shared layer no longer carries one. */
 
 /* Scroll behavior */
 html {
