@@ -27,7 +27,7 @@ export const LabParameterChartCard = ({
         })}
       </h4>
       {values === undefined ? (
-        <p className="text-sm text-gray-600">{t("chart.loading")}</p>
+        <p className="text-sm text-ink-muted">{t("chart.loading")}</p>
       ) : (
         <LabParameterChart parameterKey={parameterKey} values={values} />
       )}

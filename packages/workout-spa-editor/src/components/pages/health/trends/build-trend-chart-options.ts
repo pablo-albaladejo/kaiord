@@ -3,13 +3,10 @@ import type uPlot from "uplot";
 
 import type { Units } from "../../../../lib/units/units";
 import { themedAxis } from "../../../charts/uplot-base/chart-theme";
+import { seriesStroke } from "../../../charts/uplot-base/series-strokes";
 import { timeXScale } from "../../../charts/uplot-base/uplot-base";
 import { formatPaneValue } from "./format-pane-value";
 import type { TrendMetricDef } from "./trend-metrics";
-
-// Series stroke stays an explicit constant — legible on both light and dark
-// surfaces (see chart-theme.ts). Only axis/grid colors adapt per theme.
-const STROKE = "#2563eb";
 
 const tickFormatter =
   (metric: TrendMetricDef, units: Units, locale: Locale) =>
@@ -40,12 +37,16 @@ export const buildTrendChartOptions = (
       })
     );
 
+  // A health metric is not a training zone, so the series are told apart by
+  // lightness, dash and label — never by hue. The step is the metric's own
+  // (see trend-metrics), so it does not shift as metrics are toggled.
   const series: uPlot.Series[] = [{}];
   for (const m of metrics)
     series.push({
       label: m.label,
       scale: m.key,
-      stroke: STROKE,
+      stroke: seriesStroke(m.strokeStep),
+      ...(m.dash ? { dash: m.dash } : {}),
       value: legendFormatter(m, units, locale),
     });
 

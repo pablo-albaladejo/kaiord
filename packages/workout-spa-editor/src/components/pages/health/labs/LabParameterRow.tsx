@@ -27,7 +27,7 @@ export function LabParameterRow({
   const t = useTranslate("labs-ui");
   return (
     <div
-      className="flex flex-col gap-2 rounded border border-gray-200 p-3 dark:border-slate-800"
+      className="flex flex-col gap-2 rounded border border-edge-soft p-3"
       data-testid="lab-parameter-row"
     >
       <div className="flex items-start justify-between gap-2">
@@ -36,7 +36,7 @@ export function LabParameterRow({
           type="button"
           aria-label={t("form.removeParameter")}
           onClick={onRemove}
-          className="text-sm text-gray-500 hover:text-red-600"
+          className="text-sm text-ink-muted hover:text-danger-text"
         >
           {t("form.remove")}
         </button>

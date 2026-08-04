@@ -2,6 +2,7 @@ import type { LabValue } from "@kaiord/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ThemeProvider } from "../../../../contexts/ThemeContext";
 import type { LabParameterSummary } from "./build-lab-parameter-summaries";
 import { LabLatestValuesList } from "./LabLatestValuesList";
 
@@ -44,7 +45,9 @@ describe("LabLatestValuesList", () => {
     ];
 
     // Act
-    render(<LabLatestValuesList summaries={summaries} />);
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     expect(screen.getAllByTestId("lab-parameter-item")).toHaveLength(2);
@@ -56,7 +59,9 @@ describe("LabLatestValuesList", () => {
     const summaries = [summary("creatinine", "high", [100, 200])];
 
     // Act
-    render(<LabLatestValuesList summaries={summaries} />);
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     const item = screen.getByTestId("lab-parameter-item");
@@ -69,7 +74,9 @@ describe("LabLatestValuesList", () => {
     const summaries: LabParameterSummary[] = [];
 
     // Act
-    render(<LabLatestValuesList summaries={summaries} />);
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     expect(

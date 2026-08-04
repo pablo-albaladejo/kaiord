@@ -20,7 +20,7 @@ import {
 } from "./lab-row-parameter-selection";
 
 const FIELD_CLASS =
-  "rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white";
+  "rounded-xl border border-edge bg-surface px-2 py-1 text-sm text-ink-strong";
 
 export type LabParameterIdentityFieldProps = {
   row: LabRowState;
