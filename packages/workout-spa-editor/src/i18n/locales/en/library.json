@@ -15,7 +15,9 @@
     "all": "All",
     "cycling": "Cycling",
     "running": "Running",
-    "swim": "Swim"
+    "swim": "Swim",
+    "strength": "Strength",
+    "generic": "Other"
   },
   "empty": {
     "title": "Your library is empty",

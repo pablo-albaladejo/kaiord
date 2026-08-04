@@ -4,12 +4,19 @@ import { dominantZone } from "../../../lib/workout-review/zone-emphasis";
 import { zoneVar } from "../../../lib/zone-colors";
 import { ZoneDist } from "../ZoneDist";
 
-/** `was` is the value this metric is replacing. Absent means there is nothing
-    to compare against — the metric then renders alone, with no dash and no
-    empty comparison row. */
+/**
+ * `comparison` is a COMPARABLE prior value, never a replaced one — no producer
+ * of this card removes anything. It renders as an extra line BELOW the label,
+ * so the label (which carries the unit: "TSS", "Duration") survives; folding
+ * the comparison into the label's slot made "78 / was 40 TSS" read as one
+ * session whose load changed, which is the opposite of what happened.
+ *
+ * Absent means there is nothing to compare against: the metric renders as
+ * value + label, with no dash and no empty row.
+ */
 export type ProposalMetric = {
   value: string;
-  was?: string;
+  comparison?: string;
   label: string;
 };
 
@@ -33,6 +40,9 @@ export function SessionProposalCard({
   children,
 }: SessionProposalCardProps) {
   const zone = dominantZone(dist);
+  /* `timeInZone` returns a length-5 all-zero array when nothing classifies, so
+     a length check would always pass and render an empty bar plus its gaps. */
+  const hasZones = dist.some((value) => value > 0);
 
   return (
     <div
@@ -59,13 +69,16 @@ export function SessionProposalCard({
               <span className="text-[20px] font-semibold tracking-[-0.02em] tabular-nums text-ink-strong">
                 {metric.value}
               </span>
-              <span className="text-[12px] tabular-nums text-ink-muted">
-                {metric.was ?? metric.label}
-              </span>
+              <span className="text-[12px] text-ink-muted">{metric.label}</span>
+              {metric.comparison && (
+                <span className="text-[12px] tabular-nums text-ink-muted">
+                  {metric.comparison}
+                </span>
+              )}
             </div>
           ))}
         </div>
-        {dist.length > 0 && <ZoneDist dist={dist} height={ZONE_BAR_HEIGHT} />}
+        {hasZones && <ZoneDist dist={dist} height={ZONE_BAR_HEIGHT} />}
       </div>
       {children && (
         <div className="flex flex-wrap items-center gap-2 border-t border-edge-soft p-4">

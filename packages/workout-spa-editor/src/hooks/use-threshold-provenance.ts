@@ -4,12 +4,21 @@
  *
  * The two parts are returned separately because each surface justifies a
  * different control and owns its own copy: the generator says what it writes
- * against, the detail sheet says where its watt ranges came from. Both name the
- * ATHLETE PROFILE as the origin — see `buildThresholdProvenance` for why no
- * per-field source exists to name instead.
+ * against, the detail sheet says what its zone shading is measured against.
  *
- * Returns null when the sport has no primary threshold set; callers render
- * nothing rather than a line with a placeholder value.
+ * NOT what a detail sheet's targets came from. `stepDetail` takes no
+ * thresholds at all — an absolute `@ 250 W` is stored in the KRD at generation
+ * time and rendered verbatim forever, so it reflects whatever the threshold
+ * was THEN. Only the zone classification consumes today's number. Copy that
+ * says otherwise is false the moment an athlete edits their FTP.
+ *
+ * Both surfaces name the ATHLETE PROFILE as the origin — see
+ * `buildThresholdProvenance` for why no per-field source exists to name.
+ *
+ * Returns null when the sport has no primary threshold set, or when the
+ * profile carries no parseable timestamp: callers render nothing rather than
+ * a line with a placeholder, and "never synced" is a coaching-sync concept
+ * this line has no business borrowing.
  */
 import { useUnits } from "../contexts/units-context";
 import { useActiveLocale } from "../i18n/LocaleProvider";
@@ -41,7 +50,7 @@ export function useThresholdProvenance(
   const units = useUnits();
 
   const provenance = buildThresholdProvenance(profile, sport, units);
-  if (!provenance) return null;
+  if (!provenance?.updatedAt) return null;
 
   const relative = formatRelativeTime(provenance.updatedAt, new Date(), locale);
   return {

@@ -1,33 +1,34 @@
 import { useProposedSession } from "../../../hooks/use-proposed-session";
 import { useTranslate } from "../../../i18n/use-translate";
-import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
-import type { ProposalMetric } from "../../molecules/SessionProposalCard";
-import { SessionProposalCard } from "../../molecules/SessionProposalCard";
-import { proposedWorkoutId } from "./build-tool-result-links";
+import type { ProposalMetric } from "../../molecules/SessionProposalCard/SessionProposalCard";
+import { SessionProposalCard } from "../../molecules/SessionProposalCard/SessionProposalCard";
 
-export type ChatWorkoutProposalProps = { message: ChatMessageRecord };
+/** Mounted only where a `create_workout` result really exists, so the live
+    query below runs once per proposal instead of once per transcript row —
+    every write to `workouts` re-runs each subscription. */
+export type ChatWorkoutProposalProps = { workoutId: string };
 
-/** Renders the session a confirmed `create_workout` wrote, with the session
-    already on that date as its before. Nothing for any other tool event. */
-export function ChatWorkoutProposal({ message }: ChatWorkoutProposalProps) {
+/** The session a confirmed `create_workout` wrote, beside the one that was
+    already on that date. */
+export function ChatWorkoutProposal({ workoutId }: ChatWorkoutProposalProps) {
   const t = useTranslate("chat");
-  const workoutId = proposedWorkoutId(message);
-  const session = useProposedSession(workoutId ?? "", t("proposal.untitled"));
+  const session = useProposedSession(workoutId, t("proposal.untitled"));
 
   if (!session) return null;
 
+  const previous = session.previous;
   const metrics: ProposalMetric[] = [
     {
       value: session.duration,
-      was: session.previous
-        ? t("proposal.was", { value: session.previous.duration })
+      comparison: previous
+        ? t("proposal.alreadyThere", { value: previous.duration })
         : undefined,
       label: t("proposal.duration"),
     },
     {
       value: String(session.tss),
-      was: session.previous
-        ? t("proposal.wasTss", { value: session.previous.tss })
+      comparison: previous
+        ? t("proposal.alreadyThere", { value: previous.tss })
         : undefined,
       label: t("proposal.tss"),
     },
@@ -38,8 +39,8 @@ export function ChatWorkoutProposal({ message }: ChatWorkoutProposalProps) {
       <SessionProposalCard
         title={session.title}
         subtitle={
-          session.previous
-            ? t("proposal.landsBeside", { title: session.previous.title })
+          previous
+            ? t("proposal.landsBeside", { title: previous.title })
             : undefined
         }
         metrics={metrics}

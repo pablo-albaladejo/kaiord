@@ -10,7 +10,7 @@
   },
   "structure": {
     "eyebrow": "Estructura · tiempo en zona",
-    "targetsFrom": "Objetivos desde {{threshold}} · de tu perfil de atleta, {{relative}}"
+    "targetsFrom": "Zonas calculadas sobre {{threshold}} · de tu perfil de atleta, {{relative}}"
   },
   "sport": {
     "cycling": "Ciclismo",

@@ -2,10 +2,10 @@
  * useProposedSession — the session a `create_workout` tool call produced, plus
  * the one it landed beside.
  *
- * `doCreateWorkout` persists a fresh record and removes nothing, so the
- * "before" here is whatever session was ALREADY on that date: the earliest
- * other record of the same profile and day that carries a KRD. When the date
- * held nothing else, `previous` is null and callers render no comparison.
+ * `doCreateWorkout` persists a fresh record and removes nothing, so the prior
+ * value here is whatever session was ALREADY on that date when the proposal was
+ * written — never something the proposal replaced. `selectPriorSummary` holds
+ * both constraints that make that true.
  *
  * Reads through Dexie directly, like `use-workout-detail-record` — the
  * component layer may not, which is why this lives in `hooks/`.
@@ -14,9 +14,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
 import { thresholdsForSport } from "../lib/athlete";
+import type { ReviewModel } from "../lib/workout-review";
 import { buildReviewModel } from "../lib/workout-review";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { Profile } from "../types/profile";
+import { selectPriorSummary } from "./select-prior-session";
 import { useActiveProfileLive } from "./use-active-profile-live";
 
 export type ProposedSessionSummary = {
@@ -30,23 +32,22 @@ export type ProposedSession = ProposedSessionSummary & {
   previous: ProposedSessionSummary | null;
 };
 
-const summarize = (
-  record: WorkoutRecord,
-  profile: Profile | null,
-  fallbackTitle: string
-) => {
-  if (!record.krd) return null;
-  const thresholds = thresholdsForSport(profile, record.sport);
-  return buildReviewModel(record.krd, thresholds, fallbackTitle);
-};
+const summarizeWith =
+  (profile: Profile | null, fallbackTitle: string) =>
+  (record: WorkoutRecord): ReviewModel | null => {
+    if (!record.krd) return null;
+    return buildReviewModel(
+      record.krd,
+      thresholdsForSport(profile, record.sport),
+      fallbackTitle
+    );
+  };
 
-const earliestOther = (
-  records: WorkoutRecord[],
-  proposedId: string
-): WorkoutRecord | undefined =>
-  records
-    .filter((record) => record.id !== proposedId && record.krd !== null)
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
+const toSummary = (model: ReviewModel): ProposedSessionSummary => ({
+  title: model.title,
+  duration: model.duration,
+  tss: model.tss,
+});
 
 export function useProposedSession(
   workoutId: string,
@@ -66,21 +67,18 @@ export function useProposedSession(
 
   if (!day) return null;
 
-  const model = summarize(day.proposed, profile, fallbackTitle);
+  const summarize = summarizeWith(profile, fallbackTitle);
+  const model = summarize(day.proposed);
   if (!model) return null;
 
-  const prior = earliestOther(day.sameDay, day.proposed.id);
-  const priorModel = prior ? summarize(prior, profile, fallbackTitle) : null;
-
   return {
-    title: model.title,
-    duration: model.duration,
-    tss: model.tss,
+    ...toSummary(model),
     dist: model.dist,
-    previous: priorModel && {
-      title: priorModel.title,
-      duration: priorModel.duration,
-      tss: priorModel.tss,
-    },
+    previous: selectPriorSummary(
+      day.sameDay,
+      day.proposed,
+      summarize,
+      toSummary
+    ),
   };
 }

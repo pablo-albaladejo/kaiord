@@ -32,6 +32,9 @@ export function LibraryCard({
   /* A template with no classifiable structure gets no zone colour: it has no
      dominant zone, and a neutral bar would claim it does. */
   const zone = dist ? dominantZone(dist) : null;
+  /* `timeInZone` returns a length-5 all-zero array when nothing classifies, so
+     a length check would always pass and render an empty bar plus its gaps. */
+  const hasZones = Boolean(dist?.some((value) => value > 0));
   const meta = [sportLabel, duration, tss === undefined ? null : `${tss} TSS`]
     .filter((part): part is string => Boolean(part))
     .join(" · ");
@@ -59,9 +62,11 @@ export function LibraryCard({
         )}
       </div>
       {meta !== "" && (
-        <p className="mt-1 text-[12px] tabular-nums text-ink-muted">{meta}</p>
+        <span className="mt-1 block text-[12px] tabular-nums text-ink-muted">
+          {meta}
+        </span>
       )}
-      {dist && dist.length > 0 && (
+      {dist && hasZones && (
         <ZoneDist
           dist={dist}
           className="mt-2 max-w-[280px]"

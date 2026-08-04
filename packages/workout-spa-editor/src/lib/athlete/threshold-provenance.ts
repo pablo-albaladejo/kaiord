@@ -50,6 +50,10 @@ export function buildThresholdProvenance(
   const metric = METRIC_KEYS[sport];
   if (!metric) return null;
 
+  /* INVARIANT: `thresholdCandidates` returns candidates BEFORE unset values
+     are filtered, so [0] is always the METRIC_KEYS metric for this sport. If
+     that function ever starts filtering internally, [0] could become the LTHR
+     candidate and this would render "FTP 165 bpm". */
   const thresholds = profile.sportZones[sport]?.thresholds;
   const primary = thresholdCandidates(
     sport,

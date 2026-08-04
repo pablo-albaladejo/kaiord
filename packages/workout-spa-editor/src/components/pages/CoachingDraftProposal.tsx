@@ -4,8 +4,8 @@ import { thresholdsForSport } from "../../lib/athlete";
 import { buildReviewModel } from "../../lib/workout-review";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { KRD } from "../../types/krd";
-import type { ProposalMetric } from "../molecules/SessionProposalCard";
-import { SessionProposalCard } from "../molecules/SessionProposalCard";
+import type { ProposalMetric } from "../molecules/SessionProposalCard/SessionProposalCard";
+import { SessionProposalCard } from "../molecules/SessionProposalCard/SessionProposalCard";
 
 export type CoachingDraftProposalProps = {
   activity: CoachingActivityRecord | undefined;
@@ -33,14 +33,14 @@ export function CoachingDraftProposal({
   const metrics: ProposalMetric[] = [
     {
       value: model.duration,
-      was: activity.duration
+      comparison: activity.duration
         ? t("proposal.coachSaid", { value: activity.duration })
         : undefined,
       label: t("proposal.duration"),
     },
     {
       value: String(model.tss),
-      was:
+      comparison:
         activity.workload === undefined
           ? undefined
           : t("proposal.coachSaid", { value: activity.workload }),

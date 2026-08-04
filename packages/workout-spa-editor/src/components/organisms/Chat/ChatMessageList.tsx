@@ -2,7 +2,10 @@ import { useEffect, useRef } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
-import { buildToolResultLinks } from "./build-tool-result-links";
+import {
+  buildToolResultLinks,
+  proposedWorkoutId,
+} from "./build-tool-result-links";
 import { ChatWorkoutProposal } from "./ChatWorkoutProposal";
 import { ToolResultLinks } from "./ToolResultLinks";
 
@@ -54,6 +57,7 @@ export function ChatMessageList({
       {messages.map((m) => {
         const focused = m.id === focusMessageId;
         const roleKey = ROLE_LABEL_KEY[m.role];
+        const proposalId = proposedWorkoutId(m);
         return (
           <li
             key={m.id}
@@ -65,7 +69,7 @@ export function ChatMessageList({
               {roleKey ? t(roleKey) : m.role}
             </span>
             {m.content}
-            <ChatWorkoutProposal message={m} />
+            {proposalId && <ChatWorkoutProposal workoutId={proposalId} />}
             <ToolResultLinks links={buildToolResultLinks(m, t)} />
           </li>
         );

@@ -80,11 +80,10 @@
   "proposal": {
     "duration": "Duración",
     "tss": "TSS",
-    "was": "antes {{value}}",
-    "wasTss": "antes {{value}} TSS",
     "landsBeside": "aterriza junto a {{title}}",
     "coachSaid": "tu entrenador dijo {{value}}",
     "fromYourCoach": "de tu entrenador",
-    "untitled": "Sesión"
+    "untitled": "Sesión",
+    "alreadyThere": "ya había: {{value}}"
   }
 }
