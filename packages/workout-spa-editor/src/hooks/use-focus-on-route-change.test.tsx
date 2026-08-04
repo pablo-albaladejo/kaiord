@@ -123,4 +123,51 @@ describe("useFocusOnRouteChange", () => {
       expect(focused?.hasAttribute(ROUTE_HEADING_ATTR) ?? false).toBe(false);
     }
   );
+
+  it("should retry when the engine silently drops the first focus", async () => {
+    // Arrange
+    // Reproduces what headless Firefox on Linux does deterministically and
+    // Mobile Safari does intermittently: focus() returns normally, throws
+    // nothing, and activeElement never moves.
+    const realFocus = HTMLElement.prototype.focus;
+    // Armed only after mount: the hook also focuses on the initial pathname,
+    // and a drop consumed there would leave the navigation under test with a
+    // perfectly ordinary focus — a test that passes either way.
+    let dropsLeft = 0;
+    vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
+      this: HTMLElement,
+      options?: FocusOptions
+    ) {
+      if (dropsLeft > 0 && this.hasAttribute(ROUTE_HEADING_ATTR)) {
+        dropsLeft -= 1;
+        return;
+      }
+      realFocus.call(this, options);
+    });
+    const loc = memoryLocation({ path: "/calendar" });
+    const { rerender } = render(
+      <Router hook={loc.hook}>
+        <Harness initial="/calendar" />
+      </Router>
+    );
+    (document.activeElement as HTMLElement | null)?.blur();
+    dropsLeft = 1;
+    act(() => {
+      loc.navigate("/library");
+    });
+
+    // Act
+    rerender(
+      <Router hook={loc.hook}>
+        <Harness initial="/library" />
+      </Router>
+    );
+
+    // Assert
+    await waitFor(() => {
+      const focused = document.activeElement as HTMLElement | null;
+      expect(focused?.hasAttribute(ROUTE_HEADING_ATTR)).toBe(true);
+    });
+    expect(dropsLeft).toBe(0);
+  });
 });

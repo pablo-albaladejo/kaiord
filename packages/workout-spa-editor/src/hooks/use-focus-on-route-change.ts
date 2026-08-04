@@ -37,6 +37,9 @@ const FALLBACK_WARN = "useFocusOnRouteChange: no [data-route-heading]";
 // the original 1500ms budget — bumped to 5000ms to stop the BODY
 // fallback being taken in CI.
 const OBSERVE_TIMEOUT_MS = 5000;
+// Cadence for re-attempting a focus the engine dropped. Short enough that a
+// keyboard user does not notice, long enough not to busy-wait for 5s.
+const RETRY_INTERVAL_MS = 50;
 
 export function useFocusOnRouteChange(): void {
   const [pathname] = useLocation();
@@ -48,6 +51,7 @@ export function useFocusOnRouteChange(): void {
 
     let observer: MutationObserver | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let retryId: ReturnType<typeof setInterval> | null = null;
 
     const focusTarget = (target: HTMLElement) => {
       target.focus({ preventScroll: true });
@@ -57,16 +61,23 @@ export function useFocusOnRouteChange(): void {
       const target = document.querySelector<HTMLElement>(
         ROUTE_HEADING_SELECTOR
       );
-      if (target) {
-        focusTarget(target);
-        return true;
-      }
-      return false;
+      if (!target) return false;
+      focusTarget(target);
+      // Engines silently drop a programmatic focus applied during the
+      // post-navigation settle window — the call returns normally and
+      // activeElement stays put. Reporting success on the element merely
+      // existing retires the retry path on a focus that never landed, so
+      // confirm it before claiming it.
+      return document.activeElement === target;
     };
 
     const cleanup = () => {
       observer?.disconnect();
       observer = null;
+      if (retryId !== null) {
+        clearInterval(retryId);
+        retryId = null;
+      }
       if (timeoutId !== null) {
         clearTimeout(timeoutId);
         timeoutId = null;
@@ -85,6 +96,13 @@ export function useFocusOnRouteChange(): void {
         if (tryFocus()) cleanup();
       });
       observer.observe(document.body, { childList: true, subtree: true });
+
+      // A dropped focus mutates nothing, so the observer alone would wait
+      // for a mutation that never comes. Re-attempt on a timer until the
+      // focus sticks or the budget runs out.
+      retryId = setInterval(() => {
+        if (tryFocus()) cleanup();
+      }, RETRY_INTERVAL_MS);
 
       timeoutId = setTimeout(() => {
         cleanup();
