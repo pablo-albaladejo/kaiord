@@ -103,7 +103,10 @@ describe("buildFtpProvenance", () => {
 
   it.each([
     { label: "no profile at all", profile: null },
-    { label: "a profile row written before per-sport zones existed", profile: {} },
+    {
+      label: "a profile row written before per-sport zones existed",
+      profile: {},
+    },
   ])("should answer rather than throw for $label", ({ profile }) => {
     // Arrange
     const input = profile as Profile | null;

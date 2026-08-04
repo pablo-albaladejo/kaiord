@@ -37,9 +37,7 @@ export function EditorPageHeader({ mode, onBack }: EditorPageHeaderProps) {
           {t(title)}
         </h1>
       </div>
-      <p className="text-sm text-ink-muted">
-        {t(description)}
-      </p>
+      <p className="text-sm text-ink-muted">{t(description)}</p>
     </div>
   );
 }

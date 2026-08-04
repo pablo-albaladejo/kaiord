@@ -275,7 +275,9 @@ describe("SaveButton", () => {
       await user.click(fitOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /download a file/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -307,7 +309,9 @@ describe("SaveButton", () => {
       await user.click(tcxOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /download a file/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -339,7 +343,9 @@ describe("SaveButton", () => {
       await user.click(zwoOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /download a file/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -371,7 +377,9 @@ describe("SaveButton", () => {
       await user.click(fitOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /download a file/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -404,7 +412,9 @@ describe("SaveButton", () => {
       await user.click(tcxOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /download a file/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert

@@ -17,7 +17,11 @@ export const PushFeedback: React.FC<PushFeedbackProps> = ({
 
   if (push.status === "success") {
     return (
-      <button type="button" className="text-xs text-ink-muted" onClick={onReset}>
+      <button
+        type="button"
+        className="text-xs text-ink-muted"
+        onClick={onReset}
+      >
         {t("footer.sent")}
       </button>
     );

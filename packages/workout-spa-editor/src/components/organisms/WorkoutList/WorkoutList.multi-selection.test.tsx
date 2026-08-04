@@ -118,7 +118,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A to see its steps
-      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
+      const blockHeaders = screen.getAllByRole("button", {
+        name: /edit count/i,
+      });
       await user.click(blockHeaders[0]); // Block A (2x)
 
       // Cmd/Ctrl+click on step in Block A (Step 1)
@@ -167,7 +169,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand both blocks
-      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
+      const blockHeaders = screen.getAllByRole("button", {
+        name: /edit count/i,
+      });
       await user.click(blockHeaders[0]); // Block A
       await user.click(blockHeaders[1]); // Block B
 
@@ -301,7 +305,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A
-      const blockAHeader = screen.getAllByRole("button", { name: /edit count/i })[0];
+      const blockAHeader = screen.getAllByRole("button", {
+        name: /edit count/i,
+      })[0];
       await user.click(blockAHeader);
 
       // Cmd/Ctrl+click on main workout step to deselect it
@@ -350,7 +356,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A
-      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
+      const blockHeaders = screen.getAllByRole("button", {
+        name: /edit count/i,
+      });
       await user.click(blockHeaders[0]); // Block A
 
       // Cmd/Ctrl+click on Block A step to deselect it
@@ -407,7 +415,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand both blocks
-      const blockHeaders = screen.getAllByRole("button", { name: /edit count/i });
+      const blockHeaders = screen.getAllByRole("button", {
+        name: /edit count/i,
+      });
       await user.click(blockHeaders[0]); // Block A
       await user.click(blockHeaders[1]); // Block B
 
@@ -468,7 +478,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Expand Block A
-      const blockAHeader = screen.getAllByRole("button", { name: /edit count/i })[0];
+      const blockAHeader = screen.getAllByRole("button", {
+        name: /edit count/i,
+      })[0];
       await user.click(blockAHeader);
 
       // Wait for block to expand and get all Step 1 buttons

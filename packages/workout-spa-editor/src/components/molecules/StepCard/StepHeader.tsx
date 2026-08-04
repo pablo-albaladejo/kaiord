@@ -9,9 +9,7 @@ type StepHeaderProps = {
 export const StepHeader = ({ stepName, intensity }: StepHeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-3">
-      <span className="text-sm font-semibold text-ink-muted">
-        {stepName}
-      </span>
+      <span className="text-sm font-semibold text-ink-muted">{stepName}</span>
       <Badge variant={intensity} size="sm">
         {intensity}
       </Badge>

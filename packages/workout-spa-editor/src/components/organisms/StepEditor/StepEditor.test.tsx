@@ -61,7 +61,9 @@ describe("StepEditor", () => {
 
     // Assert
 
-    expect(screen.getByRole("button", { name: /close the step form/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /close the step form/i })
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });
 
@@ -72,7 +74,9 @@ describe("StepEditor", () => {
     const onSave = vi.fn();
     const onCancel = vi.fn();
     render(<StepEditor step={mockStep} onSave={onSave} onCancel={onCancel} />);
-    const saveButton = screen.getByRole("button", { name: /close the step form/i });
+    const saveButton = screen.getByRole("button", {
+      name: /close the step form/i,
+    });
 
     // Act
 
@@ -135,7 +139,9 @@ describe("StepEditor", () => {
     // Act
 
     render(<StepEditor step={mockStep} onSave={onSave} onCancel={onCancel} />);
-    const saveButton = screen.getByRole("button", { name: /close the step form/i });
+    const saveButton = screen.getByRole("button", {
+      name: /close the step form/i,
+    });
 
     // Assert
     // Initially no errors, button should be enabled.

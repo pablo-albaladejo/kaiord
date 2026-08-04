@@ -49,10 +49,7 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
     async (garminPushId: string) => {
       if (!record) return;
       const withEdits = saveEditedKrd(record, currentWorkout ?? undefined);
-      const updated = transitionToPushed(
-        readyForPush(withEdits),
-        garminPushId
-      );
+      const updated = transitionToPushed(readyForPush(withEdits), garminPushId);
       await persistRecord(updated);
     },
     [record, currentWorkout]

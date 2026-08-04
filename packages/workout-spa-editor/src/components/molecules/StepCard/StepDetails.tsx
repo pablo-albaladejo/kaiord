@@ -20,9 +20,7 @@ export const StepDetails = ({ step }: StepDetailsProps) => {
     <>
       <div className="flex items-center gap-2 mb-2">
         <Icon icon={durationIcon} size="sm" color="secondary" />
-        <span className="text-sm text-ink-body">
-          {formatDuration(step, t)}
-        </span>
+        <span className="text-sm text-ink-body">{formatDuration(step, t)}</span>
       </div>
 
       <div className="flex items-center gap-2 mb-2">

@@ -101,7 +101,9 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Expand Block A to see its steps
-      const blockAHeader = screen.getAllByRole("button", { name: /edit count/i })[0];
+      const blockAHeader = screen.getAllByRole("button", {
+        name: /edit count/i,
+      })[0];
       await user.click(blockAHeader);
 
       // Click on step in Block A (Step 1)
@@ -141,7 +143,9 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Expand Block B to see its steps
-      const blockBHeader = screen.getAllByRole("button", { name: /edit count/i })[0];
+      const blockBHeader = screen.getAllByRole("button", {
+        name: /edit count/i,
+      })[0];
       await user.click(blockBHeader);
 
       // Click on step in Block B (Step 1)

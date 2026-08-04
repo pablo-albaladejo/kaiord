@@ -139,7 +139,9 @@ describe("EditorPage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("editor-state-ribbon")).toBeInTheDocument();
     });
-    expect(screen.queryByRole("button", { name: /accept workout/i })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /accept workout/i })
+    ).toBeNull();
   });
 
   it("should show no-data message for workout without KRD", async () => {
@@ -192,7 +194,9 @@ describe("EditorPage", () => {
     const ribbon = await screen.findByTestId("editor-state-ribbon");
 
     expect(
-      within(ribbon).getByText(/Nothing can reach your watch from this browser/i)
+      within(ribbon).getByText(
+        /Nothing can reach your watch from this browser/i
+      )
     ).toBeInTheDocument();
     expect(
       within(ribbon).getByRole("button", { name: /install the bridge/i })
