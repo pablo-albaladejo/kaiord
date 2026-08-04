@@ -16,6 +16,7 @@
 
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkout } from "./helpers/load-test-workout";
+import { expectToastAutoDismissed } from "./helpers/toast-auto-dismiss";
 
 test.describe("Copy/Paste Functionality", () => {
   test.beforeEach(async ({ page }) => {
@@ -345,7 +346,7 @@ test.describe("Copy/Paste Functionality", () => {
       await expect(notification).toBeVisible();
 
       // Notification should disappear after timeout
-      await expect(notification).not.toBeVisible({ timeout: 10000 });
+      await expectToastAutoDismissed(page, notification);
     });
 
     test("should show notification when pasting step", async ({ page }) => {
@@ -364,7 +365,7 @@ test.describe("Copy/Paste Functionality", () => {
       await expect(notification).toBeVisible();
 
       // Notification should disappear after timeout
-      await expect(notification).not.toBeVisible({ timeout: 10000 });
+      await expectToastAutoDismissed(page, notification);
     });
 
     test("should show error notification when clipboard is empty", async ({
