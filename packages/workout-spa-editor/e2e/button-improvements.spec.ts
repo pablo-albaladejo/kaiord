@@ -129,9 +129,7 @@ test.describe("Editor action row — the three verbs", () => {
 test.describe("Editor action row — mobile", () => {
   test.use({ viewport: { width: MOBILE_VIEWPORT_WIDTH_PX, height: 812 } });
 
-  test("keeps every verb reachable and tappable at 375px", async ({
-    page,
-  }) => {
+  test("keeps every verb reachable and tappable at 375px", async ({ page }) => {
     await loadWorkout(page);
     const { keep, download, discard } = actionRow(page);
 

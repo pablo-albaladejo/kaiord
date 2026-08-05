@@ -14,7 +14,9 @@ export const seedEnabledGarminExportPolicy = async (
 ): Promise<void> => {
   await page.evaluate(
     async ({ pid, bid }) => {
-      type Db = { table: (n: string) => { put: (r: unknown) => Promise<void> } };
+      type Db = {
+        table: (n: string) => { put: (r: unknown) => Promise<void> };
+      };
       const db = (window as unknown as Record<string, unknown>)
         .__KAIORD_DB__ as Db;
       const now = new Date().toISOString();

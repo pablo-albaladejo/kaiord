@@ -34,7 +34,7 @@ test.describe("Workout Library", () => {
     test("should save a workout to library", async ({ page }) => {
       await page.getByTestId("add-step-button").click();
 
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByRole("dialog").waitFor({ state: "visible" });
 
       await page.getByLabel("Workout Name").fill("Test Workout");
@@ -51,7 +51,7 @@ test.describe("Workout Library", () => {
     test("should save workout with all metadata", async ({ page }) => {
       await page.getByTestId("add-step-button").click();
 
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
 
       await page.getByLabel("Workout Name").fill("Complete Workout");
       await page.getByLabel("Tags").fill("intervals, hard");
@@ -69,7 +69,7 @@ test.describe("Workout Library", () => {
     test("should require workout name", async ({ page }) => {
       await page.getByTestId("add-step-button").click();
 
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByRole("dialog").waitFor({ state: "visible" });
 
       const saveButton = page
@@ -86,7 +86,7 @@ test.describe("Workout Library", () => {
       // Arrange — save a workout from the editor; the editor still
       // has an active workout so the page CTA appears.
       await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Load Test");
       await page
         .getByRole("dialog")
@@ -122,7 +122,7 @@ test.describe("Workout Library", () => {
     }) => {
       // Arrange — save a workout, then clear the editor.
       await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Hidden CTA");
       await page
         .getByRole("dialog")
@@ -148,7 +148,7 @@ test.describe("Workout Library", () => {
   test.describe("search and filter (via /library page)", () => {
     test("should search workouts by name", async ({ page }) => {
       await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Morning Run");
       await page
         .getByRole("dialog")
@@ -156,7 +156,7 @@ test.describe("Workout Library", () => {
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Evening Ride");
       await page
         .getByRole("dialog")
@@ -202,7 +202,7 @@ test.describe("Workout Library", () => {
       page,
     }) => {
       await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Test Workout");
       await page
         .getByRole("dialog")
@@ -222,7 +222,7 @@ test.describe("Workout Library", () => {
   test.describe("deleting workouts (via /library page)", () => {
     test("should delete a workout from library", async ({ page }) => {
       await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Delete Me");
       await page
         .getByRole("dialog")
@@ -245,7 +245,7 @@ test.describe("Workout Library", () => {
 
     test("should show confirmation before deleting", async ({ page }) => {
       await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Confirm Delete");
       await page
         .getByRole("dialog")
@@ -264,7 +264,7 @@ test.describe("Workout Library", () => {
 
     test("should cancel delete operation", async ({ page }) => {
       await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
+      await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByLabel("Workout Name").fill("Keep Me");
       await page
         .getByRole("dialog")

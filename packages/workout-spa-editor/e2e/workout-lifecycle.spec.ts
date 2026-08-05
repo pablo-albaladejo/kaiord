@@ -109,10 +109,7 @@ test.describe("Workout Lifecycle", () => {
 
   /** The ribbon renders the send only behind the full ready gate:
       extension + session (the stub) and an enabled export policy. */
-  const openWithReadyGate = async (
-    page: Page,
-    state: string
-  ) => {
+  const openWithReadyGate = async (page: Page, state: string) => {
     const workoutId = crypto.randomUUID();
     await seedEnabledGarminExportPolicy(page, E2E_DEFAULT_PROFILE_ID);
     await seedWorkouts(page, [

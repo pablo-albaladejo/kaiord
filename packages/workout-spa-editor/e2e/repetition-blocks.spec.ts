@@ -139,10 +139,10 @@ test.describe("Repetition Blocks", () => {
     await page.getByTestId("confirm-create-block-button").click();
 
     // Verify repetition block was created
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByText("5x")).toBeVisible();
+    await expect(page.getByText("Repeat 5×")).toBeVisible();
     // Use a more specific selector to avoid matching "12 steps" in stats
     await expect(
       page.getByTestId("repetition-block-card").getByText("2 steps")
@@ -207,7 +207,7 @@ test.describe("Repetition Blocks", () => {
     await expect(page.getByText("Repeat Test")).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
 
     // Click edit button
     await page.getByTestId("edit-count-button").click();
@@ -220,8 +220,8 @@ test.describe("Repetition Blocks", () => {
     await page.getByTestId("save-count-button").click();
 
     // Verify repeat count was updated
-    await expect(page.getByText("7x")).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText("3x")).not.toBeVisible();
+    await expect(page.getByText("Repeat 7×")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("Repeat 3×")).not.toBeVisible();
   });
 
   test("should expand and collapse repetition block", async ({ page }) => {
@@ -557,7 +557,7 @@ test.describe("Repetition Blocks", () => {
     await page.getByTestId("confirm-create-block-button").click();
 
     // Verify block was created
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 5000,
     });
 
@@ -565,7 +565,7 @@ test.describe("Repetition Blocks", () => {
     await page.keyboard.press("Control+Z");
 
     // Verify block is removed and steps are back
-    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).not.toBeVisible({
       timeout: 5000,
     });
     await expect(page.getByText("Step 1")).toBeVisible();
@@ -575,7 +575,7 @@ test.describe("Repetition Blocks", () => {
     await page.keyboard.press("Control+Y");
 
     // Verify block is back
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 5000,
     });
   });
@@ -642,8 +642,8 @@ test.describe("Repetition Blocks - Ungroup", () => {
     });
 
     // Verify repetition block exists
-    await expect(page.getByText("Repeat Block")).toBeVisible();
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
 
     // Wait for block actions trigger to be visible and stable
     const trigger = page.getByTestId("block-actions-trigger");
@@ -658,7 +658,7 @@ test.describe("Repetition Blocks - Ungroup", () => {
     await page.getByRole("menuitem", { name: /ungroup/i }).click();
 
     // Verify repetition block is removed
-    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).not.toBeVisible({
       timeout: 5000,
     });
 
@@ -775,10 +775,10 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     await page.getByTestId("confirm-create-block-button").click();
 
     // Verify block was created
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByText("4x")).toBeVisible();
+    await expect(page.getByText("Repeat 4×")).toBeVisible();
   });
 
   test("should ungroup block with Ctrl+Shift+G", async ({ page }) => {
@@ -830,17 +830,17 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     });
 
     // Verify block exists
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
     // Select the repetition block by clicking its header badge
     // (clicking the card center would hit the step card inside)
-    await page.getByText("Repeat Block").click();
+    await page.getByText(/Repeat \d+×/).click();
 
     // Press Ctrl+Shift+G to ungroup
     await page.keyboard.press("Control+Shift+g");
 
     // Verify block is removed
-    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).not.toBeVisible({
       timeout: 5000,
     });
 
@@ -1103,7 +1103,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await page.getByTestId("save-count-button").click();
 
     // Verify count was updated
-    await expect(page.getByText("5x")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("Repeat 5×")).toBeVisible({ timeout: 5000 });
   });
 
   test("should add step via context menu", async ({ page }) => {
@@ -1226,7 +1226,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     });
 
     // Verify block exists
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
     // Open context menu (force: true to bypass root div pointer interception
     // on Mobile Chrome CI where single-worker execution is slower)
@@ -1250,7 +1250,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await page.waitForTimeout(300);
 
     // Verify block is removed
-    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).not.toBeVisible({
       timeout: 2000,
     });
 
@@ -1272,10 +1272,10 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await page.waitForTimeout(500);
 
     // Verify block is restored
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 2000,
     });
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
   });
 });
 
@@ -1386,10 +1386,10 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.getByTestId("confirm-create-block-button").click();
 
     // Verify repetition block was created
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
 
     // Verify block contains exactly 2 steps (no default step added)
     await expect(
@@ -1480,8 +1480,8 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     });
 
     // Verify initial state - block exists
-    await expect(page.getByText("Repeat Block")).toBeVisible();
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
 
     // Verify initial step count (1 warmup + 2 in block * 3 + 1 cooldown = 8 steps)
     await expect(page.getByText("8 steps")).toBeVisible();
@@ -1508,7 +1508,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.waitForTimeout(500);
 
     // Verify block is removed
-    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).not.toBeVisible({
       timeout: 5000,
     });
 
@@ -1581,8 +1581,8 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     });
 
     // Verify initial state
-    await expect(page.getByText("Repeat Block")).toBeVisible();
-    await expect(page.getByText("4x")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
+    await expect(page.getByText("Repeat 4×")).toBeVisible();
     await expect(
       page.getByTestId("repetition-block-card").getByText("2 steps")
     ).toBeVisible();
@@ -1602,7 +1602,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.waitForTimeout(500);
 
     // Verify block is removed
-    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).not.toBeVisible({
       timeout: 5000,
     });
 
@@ -1610,10 +1610,10 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.keyboard.press("Control+Z");
 
     // Verify block is restored with all original properties
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByText("4x")).toBeVisible();
+    await expect(page.getByText("Repeat 4×")).toBeVisible();
     await expect(
       page.getByTestId("repetition-block-card").getByText("2 steps")
     ).toBeVisible();
@@ -1736,8 +1736,8 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await expect(blocks).toHaveCount(2, { timeout: 5000 });
 
     // Verify the remaining blocks are the first and third (2x and 4x)
-    await expect(blocks.nth(0).getByText("2x")).toBeVisible();
-    await expect(blocks.nth(1).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 2×")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 4×")).toBeVisible();
   });
 
   test("should delete block immediately with toast notification and undo", async ({
@@ -1825,8 +1825,8 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     });
 
     // Verify initial state - block exists
-    await expect(page.getByText("Repeat Block")).toBeVisible();
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
 
     // Get the delete button
     const deleteButton = page.getByTestId("delete-block-button");
@@ -1848,7 +1848,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.waitForTimeout(300);
 
     // Verify block is removed
-    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).not.toBeVisible({
       timeout: 2000,
     });
 
@@ -1871,10 +1871,10 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await page.waitForTimeout(500);
 
     // Verify block is restored
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 2000,
     });
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
 
     // Verify the block still has its steps
     const block = page.getByTestId("repetition-block-card");
@@ -1980,15 +1980,15 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
     await expect(blocks).toHaveCount(3);
 
     // Verify block 1: 2x with 100W
-    await expect(blocks.nth(0).getByText("2x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 2×")).toBeVisible();
     await expect(blocks.nth(0).getByText("100W")).toBeVisible();
 
     // Verify block 2: 3x with 200W (middle block - will be deleted)
-    await expect(blocks.nth(1).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(1).getByText("200W")).toBeVisible();
 
     // Verify block 3: 4x with 300W
-    await expect(blocks.nth(2).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 4×")).toBeVisible();
     await expect(blocks.nth(2).getByText("300W")).toBeVisible();
 
     // Get the delete button for the middle block (block 2)
@@ -2017,26 +2017,26 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
 
     // Requirement 1.2, 1.3: Verify the CORRECT block was deleted (middle block with 200W)
     // Block 1 should still be there: 2x with 100W
-    await expect(blocks.nth(0).getByText("2x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 2×")).toBeVisible();
     await expect(blocks.nth(0).getByText("100W")).toBeVisible();
 
     // Block 3 should still be there: 4x with 300W (now at position 1)
-    await expect(blocks.nth(1).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 4×")).toBeVisible();
     await expect(blocks.nth(1).getByText("300W")).toBeVisible();
 
     // Requirement 1.2: Verify the middle block (3x with 200W) is gone
-    await expect(page.getByText("3x")).not.toBeVisible();
+    await expect(page.getByText("Repeat 3×")).not.toBeVisible();
     await expect(page.getByText("200W")).not.toBeVisible();
 
     // Requirement 1.4: Verify remaining blocks are in correct order
     // First remaining block should be 2x with 100W
     const firstBlock = blocks.nth(0);
-    await expect(firstBlock.getByText("2x")).toBeVisible();
+    await expect(firstBlock.getByText("Repeat 2×")).toBeVisible();
     await expect(firstBlock.getByText("100W")).toBeVisible();
 
     // Second remaining block should be 4x with 300W
     const secondBlock = blocks.nth(1);
-    await expect(secondBlock.getByText("4x")).toBeVisible();
+    await expect(secondBlock.getByText("Repeat 4×")).toBeVisible();
     await expect(secondBlock.getByText("300W")).toBeVisible();
   });
 });
@@ -2172,22 +2172,22 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks).toHaveCount(5);
 
     // Verify initial state - all blocks present with correct content
-    await expect(blocks.nth(0).getByText("2x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 2×")).toBeVisible();
     await expect(blocks.nth(0).getByText("100W")).toBeVisible();
 
-    await expect(blocks.nth(1).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(1).getByText("200W")).toBeVisible();
 
-    await expect(blocks.nth(2).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 4×")).toBeVisible();
     await expect(blocks.nth(2).getByText("300W")).toBeVisible();
 
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
-    await expect(blocks.nth(3).getByText("5x")).toBeVisible();
+    await expect(blocks.nth(3).getByText("Repeat 5×")).toBeVisible();
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("400W")).toBeVisible();
 
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
-    await expect(blocks.nth(4).getByText("6x")).toBeVisible();
+    await expect(blocks.nth(4).getByText("Repeat 6×")).toBeVisible();
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(4).getByText("500W")).toBeVisible();
 
@@ -2214,21 +2214,21 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
 
     // Verify the CORRECT block was deleted by checking remaining content
     // Block 1 (100W) should be gone
-    await expect(page.getByText("2x")).not.toBeVisible();
+    await expect(page.getByText("Repeat 2×")).not.toBeVisible();
     await expect(page.getByText("100W")).not.toBeVisible();
 
     // Remaining blocks should be 3x/200W, 4x/300W, 5x/400W, 6x/500W
-    await expect(blocks.nth(0).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(0).getByText("200W")).toBeVisible();
 
-    await expect(blocks.nth(1).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 4×")).toBeVisible();
     await expect(blocks.nth(1).getByText("300W")).toBeVisible();
 
-    await expect(blocks.nth(2).getByText("5x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 5×")).toBeVisible();
     await expect(blocks.nth(2).getByText("400W")).toBeVisible();
 
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
-    await expect(blocks.nth(3).getByText("6x")).toBeVisible();
+    await expect(blocks.nth(3).getByText("Repeat 6×")).toBeVisible();
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("500W")).toBeVisible();
 
@@ -2255,17 +2255,17 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
 
     // Verify the CORRECT block was deleted by checking remaining content
     // Block 3 (300W) should be gone
-    await expect(page.getByText("4x")).not.toBeVisible();
+    await expect(page.getByText("Repeat 4×")).not.toBeVisible();
     await expect(page.getByText("300W")).not.toBeVisible();
 
     // Remaining blocks should be 3x/200W, 5x/400W, 6x/500W
-    await expect(blocks.nth(0).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(0).getByText("200W")).toBeVisible();
 
-    await expect(blocks.nth(1).getByText("5x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 5×")).toBeVisible();
     await expect(blocks.nth(1).getByText("400W")).toBeVisible();
 
-    await expect(blocks.nth(2).getByText("6x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 6×")).toBeVisible();
     await expect(blocks.nth(2).getByText("500W")).toBeVisible();
 
     // Test 3: Delete the LAST block (6x with 500W, now at position 2)
@@ -2290,14 +2290,14 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
 
     // Verify the CORRECT block was deleted by checking remaining content
     // Block 5 (500W) should be gone
-    await expect(page.getByText("6x")).not.toBeVisible();
+    await expect(page.getByText("Repeat 6×")).not.toBeVisible();
     await expect(page.getByText("500W")).not.toBeVisible();
 
     // Remaining blocks should be 3x/200W, 5x/400W
-    await expect(blocks.nth(0).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(0).getByText("200W")).toBeVisible();
 
-    await expect(blocks.nth(1).getByText("5x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 5×")).toBeVisible();
     await expect(blocks.nth(1).getByText("400W")).toBeVisible();
 
     // Test 4: Undo the last deletion (restore 6x/500W)
@@ -2310,7 +2310,7 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks).toHaveCount(3, { timeout: 5000 });
 
     // Verify the CORRECT block was restored
-    await expect(blocks.nth(2).getByText("6x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 6×")).toBeVisible();
     await expect(blocks.nth(2).getByText("500W")).toBeVisible();
 
     // Test 5: Undo the middle deletion (restore 4x/300W)
@@ -2324,17 +2324,17 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
 
     // Verify the CORRECT block was restored at correct position
     // Order should now be: 3x/200W, 4x/300W, 5x/400W, 6x/500W
-    await expect(blocks.nth(0).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(0).getByText("200W")).toBeVisible();
 
-    await expect(blocks.nth(1).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 4×")).toBeVisible();
     await expect(blocks.nth(1).getByText("300W")).toBeVisible();
 
-    await expect(blocks.nth(2).getByText("5x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 5×")).toBeVisible();
     await expect(blocks.nth(2).getByText("400W")).toBeVisible();
 
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
-    await expect(blocks.nth(3).getByText("6x")).toBeVisible();
+    await expect(blocks.nth(3).getByText("Repeat 6×")).toBeVisible();
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("500W")).toBeVisible();
 
@@ -2348,22 +2348,22 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks).toHaveCount(5, { timeout: 5000 });
 
     // Verify ALL blocks are restored in correct order
-    await expect(blocks.nth(0).getByText("2x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 2×")).toBeVisible();
     await expect(blocks.nth(0).getByText("100W")).toBeVisible();
 
-    await expect(blocks.nth(1).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(1).getByText("200W")).toBeVisible();
 
-    await expect(blocks.nth(2).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 4×")).toBeVisible();
     await expect(blocks.nth(2).getByText("300W")).toBeVisible();
 
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
-    await expect(blocks.nth(3).getByText("5x")).toBeVisible();
+    await expect(blocks.nth(3).getByText("Repeat 5×")).toBeVisible();
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("400W")).toBeVisible();
 
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
-    await expect(blocks.nth(4).getByText("6x")).toBeVisible();
+    await expect(blocks.nth(4).getByText("Repeat 6×")).toBeVisible();
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(4).getByText("500W")).toBeVisible();
 
@@ -2377,21 +2377,21 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     await expect(blocks).toHaveCount(4, { timeout: 5000 });
 
     // Verify the CORRECT block was deleted again (2x/100W)
-    await expect(page.getByText("2x")).not.toBeVisible();
+    await expect(page.getByText("Repeat 2×")).not.toBeVisible();
     await expect(page.getByText("100W")).not.toBeVisible();
 
     // Remaining blocks should be 3x/200W, 4x/300W, 5x/400W, 6x/500W
-    await expect(blocks.nth(0).getByText("3x")).toBeVisible();
+    await expect(blocks.nth(0).getByText("Repeat 3×")).toBeVisible();
     await expect(blocks.nth(0).getByText("200W")).toBeVisible();
 
-    await expect(blocks.nth(1).getByText("4x")).toBeVisible();
+    await expect(blocks.nth(1).getByText("Repeat 4×")).toBeVisible();
     await expect(blocks.nth(1).getByText("300W")).toBeVisible();
 
-    await expect(blocks.nth(2).getByText("5x")).toBeVisible();
+    await expect(blocks.nth(2).getByText("Repeat 5×")).toBeVisible();
     await expect(blocks.nth(2).getByText("400W")).toBeVisible();
 
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
-    await expect(blocks.nth(3).getByText("6x")).toBeVisible();
+    await expect(blocks.nth(3).getByText("Repeat 6×")).toBeVisible();
     // eslint-disable-next-line no-magic-numbers -- Playwright locator index into fixture, not domain-modeled
     await expect(blocks.nth(3).getByText("500W")).toBeVisible();
   });
@@ -2527,7 +2527,7 @@ test.describe("Repetition Blocks - Performance", () => {
     });
 
     // Verify single-level repetition works
-    await expect(page.getByText("3x")).toBeVisible();
+    await expect(page.getByText("Repeat 3×")).toBeVisible();
     await expect(page.getByText("1 step")).toBeVisible();
   });
 });
