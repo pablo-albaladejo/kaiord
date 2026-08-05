@@ -13,7 +13,7 @@ type Props = {
 };
 
 const CAPTION =
-  "text-[10.5px] font-bold uppercase tracking-wider text-ink-muted";
+  "text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted";
 
 /** What the row is read from today: the source, when one is real, its freshness
     and the note the two ambiguous origins need. */

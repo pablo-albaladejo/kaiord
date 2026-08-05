@@ -23,14 +23,14 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
 }) => {
   const t = useTranslate("settings");
   return (
-    <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+    <div className="flex items-center justify-between rounded-lg border border-edge p-3">
       <div>
         <span className="font-medium">{p.label}</span>
-        <span className="ml-2 text-xs text-gray-500">
+        <span className="ml-2 text-xs text-ink-muted">
           {PROVIDER_LABELS[p.type]}
         </span>
         {p.isDefault && (
-          <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+          <span className="ml-2 rounded-full bg-ink-strong px-2.5 py-0.5 text-xs font-medium text-surface">
             {t("providers.default")}
           </span>
         )}

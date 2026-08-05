@@ -31,7 +31,7 @@ export function DataTypeRoutingGroup({
 
   return (
     <div className="space-y-2" data-testid={`routing-group-${group.id}`}>
-      <h3 className="text-[13.5px] font-bold text-ink-strong">
+      <h3 className="text-[13.5px] font-semibold text-ink-strong">
         {t(`routing.groups.${group.id}`)}
       </h3>
       <div className="space-y-2">

@@ -25,11 +25,7 @@ export const ProviderList: React.FC<ProviderListProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
 
   if (providers.length === 0) {
-    return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        {t("providers.empty")}
-      </p>
-    );
+    return <p className="text-sm text-ink-muted">{t("providers.empty")}</p>;
   }
 
   return (

@@ -19,7 +19,7 @@ export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
       {SETTINGS_GROUPS.map((group) => (
         <section key={group.key}>
           <SectionHead title={t(`groups.${group.key}`)} />
-          <div className="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-slate-900 [&>*+*]:border-t [&>*+*]:border-gray-100 dark:[&>*+*]:border-slate-800">
+          <div className="overflow-hidden rounded-2xl bg-surface shadow-sm [&>*+*]:border-t [&>*+*]:border-edge-soft">
             {group.rows.map((row) => (
               <SettingsRow
                 key={row.key}
@@ -40,7 +40,7 @@ export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
           </div>
         </section>
       ))}
-      <p className="px-4 text-center text-xs text-gray-400 dark:text-gray-600">
+      <p className="px-4 text-center text-xs text-ink-muted">
         {SETTINGS_VERSION_LABEL}
       </p>
     </div>
