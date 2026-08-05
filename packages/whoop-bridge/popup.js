@@ -9,7 +9,8 @@
  * The primary CTA is whatever fixes the current state: signing back in at
  * WHOOP when the session is gone, opening the Kaiord editor when data flows.
  * A signed-out session names its consequence — the health types that stop
- * arriving — instead of only reporting the failure.
+ * arriving — instead of only reporting the failure, and once Kaiord has seen
+ * the outage on an earlier open it also names the date its intake stopped.
  *
  * Three states, not two. A captured bearer is NOT the same as a readable
  * bridge: the token lives in chrome.storage.session and outlives the tab it
@@ -18,16 +19,23 @@
  * tab open would describe a bridge whose every read throws, so the popup asks
  * for both signals and names the middle state on its own terms.
  *
+ * Only the signed-out state is folded into the health record. A held bearer
+ * with no tab open is not an outage of the session — the bridge is one click
+ * from reading again — so dating it would put an alarm on a state the user
+ * resolves by opening a tab.
+ *
  * Every consequence line below is a fact the code sustains: nothing in
  * src/application/whoop/** deletes an imported record, so what has already
  * arrived is kept; and the bearer is only ever captured on app.whoop.com, so
  * that is where a lost session is regained.
  *
- * Shared helpers load first from the vendored bridge-popup-utils.js and
- * bridge-popup-shell.js (see popup.html script order).
+ * Shared helpers load first from the vendored bridge-popup-utils.js,
+ * bridge-popup-shell.js and bridge-popup-health.js (see popup.html script
+ * order).
  */
 
-/* global msg, $, relativeAgo, renderStatusBlock, renderChips, renderConsequence, renderSkeleton, renderCtas */
+/* global msg, $, relativeAgo, formatSinceDate, recordProbe, renderStatusBlock,
+   renderChips, renderConsequence, renderSkeleton, renderCtas */
 
 const OPEN_WHOOP_URL = "https://app.whoop.com/";
 const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
@@ -43,6 +51,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   sessionSignedOut: "Session signed out",
   sessionSignedOutCause:
     "Kaiord is not holding a WHOOP session, so nothing is reaching it right now.",
+  sessionExpired: "Session expired",
+  sessionExpiredCause:
+    "Kaiord stopped receiving WHOOP data on $1 and has held no session since.",
   noTab: "No WHOOP tab open",
   noTabCause:
     "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
@@ -71,6 +82,7 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   daysAgo: "$1 days ago",
   openEditor: "Open Kaiord editor",
   signInWhoop: "Sign in to WHOOP",
+  reviewInKaiord: "Review in Kaiord ↗",
   openWhoop: "Open WHOOP ↗",
   refresh: "Refresh",
 };
@@ -89,6 +101,16 @@ const FEED_KEYS = [
 ];
 const CHIPS_SHOWN = 4;
 
+// Every region any resolved state fills. `paused-region` and `chips-region`
+// are an either/or — a state uses one or the other — so the skeleton stands
+// in the chips row and leaves the box region empty rather than reserving
+// height for both at once.
+const SKELETON_REGIONS = [
+  { region: "chips-region", parts: ["caption", "chips"] },
+  { region: "consequence-region", parts: ["line", "line-short"] },
+  { region: "footer-region", parts: ["cta", "secondary"] },
+];
+
 const sendMessage = (message) =>
   new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (res) =>
@@ -103,7 +125,7 @@ const feedChips = (modifier) => {
   }));
   const rest = FEED_KEYS.length - CHIPS_SHOWN;
   if (rest > 0) {
-    chips.push({ label: msg("moreTypes", [String(rest)]), modifier: "muted" });
+    chips.push({ label: msg("moreTypes", [String(rest)]), modifier: "more" });
   }
   return chips;
 };
@@ -112,7 +134,11 @@ const showRefresh = (visible) => {
   $("refresh-btn").classList.toggle("popup-header__refresh--hidden", !visible);
 };
 
-// The paused-chip box only exists in the signed-out state; its warning tint
+const setMarkEstablished = (established) => {
+  $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
+};
+
+// The paused-chip box only exists in the interrupted states; its container
 // comes from `.chips-box`, applied to the region rather than the chips.
 const setPausedBox = (visible) => {
   $("paused-region").className = visible ? "chips-box" : "";
@@ -120,6 +146,7 @@ const setPausedBox = (visible) => {
 
 const renderConnected = (capturedAt) => {
   const ago = capturedAt ? relativeAgo(capturedAt) : null;
+  setMarkEstablished(true);
   renderStatusBlock($, msg, {
     tone: "ok",
     verdictKey: "connected",
@@ -140,10 +167,12 @@ const renderConnected = (capturedAt) => {
 
 /* Bearer held, no tab to run the read in. The fix is opening WHOOP, so that
    is the primary CTA — the same fix-first rule the signed-out state follows,
-   pointed at the other half of what a working bridge needs. */
+   pointed at the other half of what a working bridge needs. The mark stays a
+   dot: the session is intact, so this is not an outage to raise an alert on. */
 const renderNoTab = () => {
+  setMarkEstablished(true);
   renderStatusBlock($, msg, {
-    tone: "warn",
+    tone: "muted",
     verdictKey: "noTab",
     causeKey: "noTabCause",
   });
@@ -167,12 +196,17 @@ const renderNoTab = () => {
    is a browser restart emptying chrome.storage.session — after which there may
    be no WHOOP tab at all, or one still signed in. "Your WHOOP tab is signed
    out" was false in both. What `!connected` actually measures is that the
-   bridge holds no bearer, so that is what the sentence says. */
-const renderSignedOut = () => {
+   bridge holds no bearer, so that is what the sentence says — and once an
+   earlier open has already recorded the outage, from when. */
+const renderSignedOut = (since) => {
+  const dated = since !== null;
+  setMarkEstablished(dated);
   renderStatusBlock($, msg, {
     tone: "warn",
-    verdictKey: "sessionSignedOut",
-    causeKey: "sessionSignedOutCause",
+    mark: dated ? "alert" : "dot",
+    verdictKey: dated ? "sessionExpired" : "sessionSignedOut",
+    causeKey: dated ? "sessionExpiredCause" : "sessionSignedOutCause",
+    causeSubs: dated ? [formatSinceDate(since)] : undefined,
   });
   renderChips($, []);
   setPausedBox(true);
@@ -184,20 +218,22 @@ const renderSignedOut = () => {
   renderCtas($, {
     primaryLabel: msg("signInWhoop"),
     primaryHref: OPEN_WHOOP_URL,
-    secondaryLabel: msg("openEditor"),
+    secondaryLabel: msg("reviewInKaiord"),
     secondaryHref: OPEN_EDITOR_URL,
   });
 };
 
 const refresh = async () => {
   showRefresh(false);
+  setMarkEstablished(false);
   renderStatusBlock($, msg, {
-    tone: "muted",
+    tone: "checking",
     verdictKey: "checking",
     causeKey: "checkingCause",
   });
-  renderSkeleton($);
-  renderConsequence($, []);
+  renderSkeleton($, SKELETON_REGIONS);
+  setPausedBox(false);
+  renderChips($, [], { region: "paused-region" });
   const [statusRes, tabRes] = await Promise.all([
     sendMessage({ action: "status" }),
     sendMessage({ action: "tab-open" }),
@@ -206,7 +242,11 @@ const refresh = async () => {
   // A failed tab probe is treated as "no tab": the read it stands for would
   // fail too, so the cautious state is also the accurate one.
   const tabOpen = tabRes.ok && tabRes.data?.open === true;
-  if (!status.connected) renderSignedOut();
+  // The health record tracks the SESSION, which is what `connected` reports.
+  // A missing tab is not a lapsed session and must not clear or start an
+  // outage, so the probe outcome folded in here is `status.connected` alone.
+  const health = await recordProbe(!!status.connected);
+  if (!status.connected) renderSignedOut(health.since);
   else if (!tabOpen) renderNoTab();
   else renderConnected(status.capturedAt);
   showRefresh(true);

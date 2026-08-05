@@ -6,8 +6,9 @@ export type CardProps = HTMLAttributes<HTMLDivElement> & {
   variant?: CardVariant;
 };
 
-const baseClasses =
-  "rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800";
+/* Role tokens, not the paired slate dialect (#1121): the roles carry both
+   themes, so no `dark:` variant is needed. 16px is the V2 card radius. */
+const baseClasses = "rounded-2xl border border-edge-soft bg-surface";
 
 const variantClasses: Record<CardVariant, string> = {
   default: "",

@@ -10,4 +10,9 @@ export {
   type AthleteSportOption,
   isActiveSport,
 } from "./sports";
+export {
+  deriveThresholdDisagreement,
+  type ThresholdDisagreement,
+} from "./threshold-disagreement";
 export { thresholdsForSport } from "./threshold-for-sport";
+export { type ThresholdProvenance } from "./threshold-provenance";

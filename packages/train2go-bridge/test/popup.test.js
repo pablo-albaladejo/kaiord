@@ -12,11 +12,13 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "bridge-popup-health.js",
   "bridge-popup-snapshot.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
 
 const FRESH_NOW = new Date("2026-05-02T10:00:00Z").getTime();
+const BROKEN_AT_MS = new Date("2026-04-23T08:00:00Z").getTime();
 
 const setupDom = (chromeMock) => {
   const dom = new JSDOM(POPUP_HTML, {
@@ -38,12 +40,21 @@ const setupDom = (chromeMock) => {
 
 const flushAsync = () => new Promise((r) => setTimeout(r, 0));
 
+// The weekly row as [value, label] pairs — asserting the figures structurally
+// keeps the check readable now that they are three elements, not one sentence.
+const readFigures = (dom) =>
+  [...dom.window.document.querySelectorAll(".week__figure")].map((figure) => [
+    figure.querySelector(".week__value").textContent,
+    figure.querySelector(".week__label").textContent,
+  ]);
+
 const buildChromeMock = ({
   pingResponse,
   readWeekResponse,
   storage = {},
+  health,
 } = {}) => {
-  const store = { ...storage };
+  const store = { ...storage, ...(health ? { bridgeHealth: health } : {}) };
   return {
     runtime: {
       sendMessage: vi.fn((msg, cb) => {
@@ -51,6 +62,7 @@ const buildChromeMock = ({
         else if (msg.action === "read-week") cb(readWeekResponse);
         else cb({ ok: false, error: "unknown" });
       }),
+      lastError: undefined,
     },
     storage: {
       local: {
@@ -140,11 +152,14 @@ describe("Train2Go popup", () => {
     expect(
       dom.window.document.querySelector(".cta-secondary").textContent
     ).toBe("Open Train2Go ↗");
-    const rollup =
-      dom.window.document.getElementById("rollup-region").textContent;
-    expect(rollup).toContain("3 sessions planned");
-    expect(rollup).toContain("2 done");
-    expect(rollup).toContain("workload 287");
+    const week = dom.window.document.getElementById("week-region");
+    expect(week.textContent).toContain("This week");
+    // Three scannable figures rather than one sentence to parse.
+    expect(readFigures(dom)).toEqual([
+      ["3", "planned"],
+      ["2", "done"],
+      ["287", "workload"],
+    ]);
     // Completion bar mirrors the same numbers: 2 of 3 done.
     expect(
       dom.window.document.querySelector(".week__bar-fill").style.width
@@ -347,9 +362,11 @@ describe("Train2Go popup", () => {
     const calls = mock.runtime.sendMessage.mock.calls.map((c) => c[0].action);
     expect(calls).toContain("ping");
     expect(calls).not.toContain("read-week");
-    expect(
-      dom.window.document.getElementById("rollup-region").textContent
-    ).toContain("3 sessions planned · 1 done · workload 200");
+    expect(readFigures(dom)).toEqual([
+      ["3", "planned"],
+      ["1", "done"],
+      ["200", "workload"],
+    ]);
   });
 
   it("falls back to read-week when cache is stale", async () => {
@@ -384,9 +401,7 @@ describe("Train2Go popup", () => {
 
     const calls = mock.runtime.sendMessage.mock.calls.map((c) => c[0].action);
     expect(calls).toContain("read-week");
-    expect(
-      dom.window.document.getElementById("rollup-region").textContent
-    ).toContain("1 sessions planned");
+    expect(readFigures(dom)[0]).toEqual(["1", "planned"]);
   });
 
   it("rollup-only failure preserves connected state", async () => {
@@ -411,8 +426,124 @@ describe("Train2Go popup", () => {
         .className.includes("status-block--ok")
     ).toBe(true);
     expect(
-      dom.window.document.getElementById("rollup-region").textContent
+      dom.window.document.getElementById("week-region").textContent
     ).toContain("Rollup unavailable");
     expect(dom.window.document.getElementById("retry-btn")).toBeNull();
+  });
+
+  it("dates the outage once an earlier open already recorded it", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { sessionActive: false } },
+        health: { brokenSince: BROKEN_AT_MS },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Session expired"
+    );
+    expect(doc.getElementById("status-sub").textContent).toBe(
+      "No new plan has reached Kaiord since 23 Apr. Logging back in at Train2Go starts it again."
+    );
+    expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
+      "svg"
+    );
+  });
+
+  it("does not date an outage it has only just noticed", async () => {
+    const mock = buildChromeMock({
+      pingResponse: { ok: true, data: { sessionActive: false } },
+    });
+    const dom = setupDom(mock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    expect(dom.window.document.getElementById("status-text").textContent).toBe(
+      "Session signed out"
+    );
+    expect(mock.__store.bridgeHealth.brokenSince).toBe(FRESH_NOW);
+  });
+
+  // A worker that never answered says nothing about the Train2Go session, so
+  // it must not open an outage the next open would then date.
+  it("does not record a health verdict when a probe phase times out", async () => {
+    const mock = buildChromeMock({
+      pingResponse: { ok: true, data: { sessionActive: true } },
+    });
+    mock.storage.local.get = vi.fn(() => {});
+    const dom = setupDom(mock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await vi.waitFor(
+      () =>
+        expect(
+          dom.window.document.getElementById("status-text").textContent
+        ).toBe("Bridge not responding"),
+      { timeout: 2_500 }
+    );
+
+    expect(mock.__store.bridgeHealth).toBeUndefined();
+  });
+
+  it("clears the outage when the session comes back", async () => {
+    const mock = buildChromeMock({
+      pingResponse: { ok: true, data: { sessionActive: true, userId: 7 } },
+      readWeekResponse: { ok: true, data: { activities: [] } },
+      health: { brokenSince: BROKEN_AT_MS },
+    });
+    const dom = setupDom(mock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    expect(mock.__store.bridgeHealth.brokenSince).toBeUndefined();
+    expect(mock.__store.bridgeHealth.lastOkAt).toBe(FRESH_NOW);
+  });
+
+  it("renders the checking skeleton in every region a resolved state fills", () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { sessionActive: true } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Checking your session…"
+    );
+    // The athlete card, the weekly figures and the notes row are the three
+    // that used to appear out of nowhere when the probe settled.
+    for (const region of [
+      "chips-region",
+      "athlete-region",
+      "week-region",
+      "notes-region",
+      "footer-region",
+    ]) {
+      expect(
+        doc.querySelectorAll(`#${region} .skeleton`).length
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("carries no provider hue in its markup", () => {
+    // Train2Go's #f74464 was one of the five brand-coloured header dots the
+    // V2 repaint removed; the monogram replaced them.
+    expect(POPUP_HTML).not.toContain("--accent");
+    expect(POPUP_HTML).not.toMatch(/#[0-9a-fA-F]{6}/);
+    expect(POPUP_HTML).toContain(">T2</span");
   });
 });

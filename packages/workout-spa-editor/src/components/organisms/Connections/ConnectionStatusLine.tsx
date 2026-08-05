@@ -2,6 +2,7 @@ import type { ConnectionSource } from "../../../application/connections/connecti
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { formatRelativeTime } from "../../../utils/format-relative-time";
+import { AttentionMark } from "../../atoms/AttentionMark";
 import { STATUS_DOT, STATUS_TEXT } from "./connection-card-copy";
 
 type Props = { source: ConnectionSource };
@@ -35,13 +36,17 @@ export function ConnectionStatusLine({ source }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <span
-        className={`flex items-center gap-1.5 text-[12.5px] font-semibold ${STATUS_TEXT[source.status]}`}
+        className={`flex items-center gap-1.5 text-[12.5px] font-medium ${STATUS_TEXT[source.status]}`}
         data-testid={`connection-status-${source.id}`}
       >
-        <span
-          aria-hidden
-          className={`h-[7px] w-[7px] shrink-0 rounded-full ${STATUS_DOT[source.status]}`}
-        />
+        {source.status === "attention" ? (
+          <AttentionMark size="xs" />
+        ) : (
+          <span
+            aria-hidden
+            className={`h-[7px] w-[7px] shrink-0 rounded-full ${STATUS_DOT[source.status]}`}
+          />
+        )}
         {t(`status.${source.status}`)}
       </span>
       {showSync && (
