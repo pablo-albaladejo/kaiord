@@ -25,7 +25,9 @@ export const renderTitleRow = (s: MatchedSession) => (
     <span role="img" aria-label={s.activity.sport.label}>
       {s.activity.sport.icon}
     </span>
-    <span className="min-w-0 flex-1">{actualTitle(s)}</span>
+    <span className="min-w-0 flex-1 line-clamp-2 wrap-anywhere">
+      {actualTitle(s)}
+    </span>
   </>
 );
 
