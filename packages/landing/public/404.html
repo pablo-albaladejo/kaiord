@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Page not found — Kaiord</title>
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#0d0d0d" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <style>
       * {
@@ -12,9 +12,12 @@
         padding: 0;
         box-sizing: border-box;
       }
+      /* Static file: literals below are the resolved dark roles from
+         styles/brand-tokens.css, pinned by
+         scripts/check-root-404-brand-parity.test.mjs. */
       body {
-        background: #0f172a;
-        color: #f8fafc;
+        background: #0d0d0d; /* --bg-page */
+        color: #ffffff; /* --text */
         font-family:
           system-ui,
           -apple-system,
@@ -26,15 +29,17 @@
         text-align: center;
         padding: 2rem;
       }
+      /* Ink at 38px, not brand color at 4rem: whoever lands here needs a
+         way out, not the number shouted. */
       h1 {
-        font-size: 4rem;
-        font-weight: 700;
-        color: #0284c7;
+        font-size: 38px;
+        font-weight: 600;
+        color: #ffffff; /* --text */
         margin-bottom: 0.5rem;
       }
       p {
         font-size: 1.25rem;
-        color: #cbd5e1;
+        color: #d4d4d4; /* --text-secondary */
         margin-bottom: 2rem;
       }
       .links {
@@ -54,15 +59,15 @@
         min-height: 44px;
       }
       .primary {
-        background: #0284c7;
-        color: #f8fafc;
+        background: #ffffff; /* --control */
+        color: #171717; /* --control-ink */
       }
       .secondary {
-        border: 1px solid #334155;
-        color: #cbd5e1;
+        border: 1px solid #444444; /* --border */
+        color: #d4d4d4; /* --text-secondary */
       }
       a:focus-visible {
-        outline: 2px solid #0284c7;
+        outline: 2px solid currentColor;
         outline-offset: 2px;
       }
     </style>
