@@ -1,3 +1,5 @@
+> Completed: 2026-08-04
+
 ## Why
 
 The SPA still ships two guidance surfaces that teach nothing.

@@ -69,7 +69,7 @@ export default function SettingsPage() {
       <h1
         tabIndex={-1}
         {...{ [ROUTE_HEADING_ATTR]: "" }}
-        className="text-xl font-semibold text-gray-900 dark:text-white"
+        className="text-xl font-semibold text-ink-strong"
       >
         {heading}
       </h1>

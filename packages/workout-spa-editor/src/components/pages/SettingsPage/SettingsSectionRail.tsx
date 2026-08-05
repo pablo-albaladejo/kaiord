@@ -19,9 +19,9 @@ export type SettingsSectionRailProps = {
 const RAIL_CLASS = "hidden space-y-4 md:block";
 
 const ENTRY_CLASS =
-  "flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-slate-800";
+  "flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium text-ink-body transition-colors hover:bg-surface-elevated";
 
-const ACTIVE_ENTRY_CLASS = `${ENTRY_CLASS} bg-primary-50 text-gray-900 dark:bg-primary-900/20 dark:text-white`;
+const ACTIVE_ENTRY_CLASS = `${ENTRY_CLASS} bg-surface-elevated text-ink-strong`;
 
 /**
  * The split's section rail. Entries are the sections themselves, not the

@@ -15,7 +15,7 @@ export function ConnectionsUnsupported({ sources }: Props) {
 
   return (
     <section className="space-y-2" data-testid="connections-unsupported">
-      <h2 className="text-[11px] font-bold uppercase tracking-widest text-ink-muted">
+      <h2 className="text-[11px] font-semibold uppercase tracking-widest text-ink-muted">
         {t("unsupported")}
       </h2>
       <p className="text-[12.5px] text-ink-muted">{t("unsupportedHint")}</p>

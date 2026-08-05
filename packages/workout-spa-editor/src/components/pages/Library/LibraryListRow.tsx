@@ -26,7 +26,7 @@ export function LibraryListRow({
   onDelete,
 }: LibraryListRowProps) {
   const t = useTranslate("library");
-  const model = buildLibraryCardModel(template, profile);
+  const model = buildLibraryCardModel(template, profile, t);
 
   return (
     <div className="space-y-2">

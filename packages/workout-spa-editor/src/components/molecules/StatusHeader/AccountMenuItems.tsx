@@ -5,7 +5,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
 import { ThemeToggle } from "../../atoms/ThemeToggle";
 import {
-  ATTENTION_DOT_CLASS,
+  ATTENTION_ICON_CLASS,
   MENU_ITEM_CLASS,
   MENU_SEPARATOR_CLASS,
 } from "./header-menu-styles";
@@ -15,8 +15,9 @@ import { ACCOUNT_ENTRIES } from "./status-entry-defs";
 const DOCS_URL = "https://kaiord.com/docs/";
 
 type AccountMenuItemsProps = {
-  /** The Connections row carries a dot when a source needs attention, and
-      nothing when none does — the same silence rule as the pill. */
+  /** The Connections row carries the alert icon when a source needs
+      attention, and nothing when none does — the same silence rule as the
+      pill. */
   attention: boolean;
 };
 
@@ -38,10 +39,10 @@ export function AccountMenuItems({ attention }: AccountMenuItemsProps) {
           <entry.icon className="h-4 w-4" />
           {t(entry.id)}
           {entry.id === "connections" && attention && (
-            <span
+            <ICON_MAP.alert
               aria-hidden="true"
-              className={ATTENTION_DOT_CLASS}
-              data-testid="account-menu-connections-dot"
+              className={ATTENTION_ICON_CLASS}
+              data-testid="account-menu-connections-attention"
             />
           )}
         </DropdownMenu.Item>

@@ -31,6 +31,20 @@
     "message": "Sign in at trainingpeaks.com once — the bridge mints its token from that session, no password stored.",
     "description": "Status cause sentence explaining how to establish a session."
   },
+  "sessionEnded": {
+    "message": "Session ended",
+    "description": "Status verdict when the TrainingPeaks session cannot mint a token AND an earlier popup open already recorded the outage. Distinct from notSignedIn, which is a setup step still pending rather than something that broke."
+  },
+  "sessionEndedCause": {
+    "message": "Nothing has reached Kaiord since $date$. Sign in at trainingpeaks.com again and the bridge mints a fresh token.",
+    "description": "Dated cause sentence for a session that worked and stopped. Names Kaiord's own intake, which the stored stamp establishes.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  },
   "captionFeeds": {
     "message": "Feeds Kaiord",
     "description": "Caption above the capability chips in the connected state."
@@ -47,13 +61,21 @@
     "message": "Weight ↑ back to TrainingPeaks",
     "description": "Capability chip for the Weight push-back this bridge supports but that no Kaiord export route drives yet; shown dashed under \"Will feed Kaiord\"."
   },
+  "weightManualFallback": {
+    "message": "Weight currently comes from manual entry.",
+    "description": "Consequence line under the dashed chips: names where weight is coming from while the bridge is not connected."
+  },
   "openEditor": {
     "message": "Open Kaiord editor",
     "description": "Footer link that opens the Kaiord editor."
   },
-  "signInTrainingPeaks": {
-    "message": "Sign in to TrainingPeaks",
-    "description": "Primary footer link that fixes a missing TrainingPeaks session."
+  "openTrainingPeaksPrimary": {
+    "message": "Open TrainingPeaks",
+    "description": "Primary footer link whenever the bridge is not connected. It is the fix — the session is established at TrainingPeaks, not in Kaiord — so it outranks the editor link."
+  },
+  "setUpInKaiord": {
+    "message": "Set up in Kaiord ↗",
+    "description": "Secondary footer link while the bridge is not connected. Says set up rather than open: nothing from this source is in the editor yet."
   },
   "openTrainingPeaks": {
     "message": "Open TrainingPeaks ↗",
