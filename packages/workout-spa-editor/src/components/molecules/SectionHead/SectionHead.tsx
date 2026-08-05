@@ -17,14 +17,14 @@ export const SectionHead = forwardRef<HTMLDivElement, SectionHeadProps>(
           .join(" ")}
         {...props}
       >
-        <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-ink-muted m-0">
+        <h3 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-muted m-0">
           {title}
         </h3>
         {action !== undefined && (
           <button
             type="button"
             onClick={onAction}
-            className="text-accent text-[13.5px] font-semibold"
+            className="text-[13px] font-medium text-ink-strong underline underline-offset-2 transition-colors duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] hover:text-ink-body"
           >
             {action}
           </button>

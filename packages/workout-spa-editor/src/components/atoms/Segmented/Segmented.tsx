@@ -29,7 +29,7 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={[
-        "flex gap-1 rounded-[14px] border border-edge bg-surface-deep p-1",
+        "flex gap-1 rounded-xl border border-edge bg-surface-deep p-1",
         className,
       ]
         .filter(Boolean)
@@ -45,9 +45,9 @@ export function Segmented<T extends string>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={[
-              "flex flex-1 items-center justify-center gap-[7px] rounded-[10px] px-1.5 py-[9px] text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+              "flex flex-1 items-center justify-center gap-[7px] rounded-lg px-1.5 py-[9px] text-[13px] font-medium transition-colors duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent",
               active
-                ? "bg-primary-500 text-white"
+                ? "bg-accent text-surface"
                 : "bg-transparent text-ink-muted",
             ].join(" ")}
           >
