@@ -1,5 +1,6 @@
 import { expect, test } from "./fixtures/base";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
+import { expectToastAutoDismissed } from "./helpers/toast-auto-dismiss";
 
 /**
  * E2E Tests: Delete with Undo Flow
@@ -180,7 +181,7 @@ test.describe("Delete with Undo Flow", () => {
     await expect(toast).toBeVisible();
 
     // Wait for notification to auto-dismiss (5 seconds + buffer)
-    await expect(toast).not.toBeVisible({ timeout: 6000 });
+    await expectToastAutoDismissed(page, toast);
 
     // Verify step remains deleted (cannot be undone after auto-dismiss)
     await expect(stepCards).toHaveCount(2);
