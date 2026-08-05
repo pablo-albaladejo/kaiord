@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 const {
   renderStatusBlock,
   renderChips,
+  renderConsequence,
   renderSkeleton,
   renderCtas,
 } = require("../bridge-popup-shell.js");
@@ -19,7 +20,7 @@ const {
 // popup document without loading it.
 const SHELL_HTML = `
   <div id="status" class="status-block status-block--muted">
-    <span class="status-block__dot"></span>
+    <span class="status-block__dot" data-status-mark></span>
     <span class="status-block__body">
       <span class="status-block__verdict" id="status-text"></span>
       <span class="status-block__cause" id="status-sub" hidden></span>
@@ -27,6 +28,7 @@ const SHELL_HTML = `
   </div>
   <div id="chips-region"></div>
   <div id="paused-region"></div>
+  <div id="consequence-region"></div>
   <div id="footer-region"></div>
 `;
 
@@ -104,6 +106,73 @@ describe("bridge-popup-shell (vendored)", () => {
 
       // Assert
       expect($("status").className).toBe("status-block status-block--muted");
+    });
+
+    it("should render a dot as the default mark", () => {
+      // Arrange
+      const options = { verdictKey: "connected" };
+
+      // Act
+      renderStatusBlock($, msg, options);
+
+      // Assert
+      const mark = $("status").querySelector("[data-status-mark]");
+      expect(mark.tagName.toLowerCase()).toBe("span");
+      expect(mark.className).toBe("status-block__dot");
+    });
+
+    it("should render the alert icon when the state needs the user", () => {
+      // Arrange
+      const options = { tone: "warn", mark: "alert", verdictKey: "connected" };
+
+      // Act
+      renderStatusBlock($, msg, options);
+
+      // Assert
+      // The palette has no warning hue, so the alarm has to be carried by a
+      // shape rather than by recolouring the dot.
+      const mark = $("status").querySelector("[data-status-mark]");
+      expect(mark.tagName.toLowerCase()).toBe("svg");
+      expect(mark.getAttribute("class")).toBe("status-block__icon");
+      expect(mark.querySelector("use").getAttribute("href")).toBe("#i-attn");
+    });
+
+    it("should swap the mark rather than accumulate one per render", () => {
+      // Arrange
+      renderStatusBlock($, msg, { mark: "alert", verdictKey: "connected" });
+
+      // Act
+      renderStatusBlock($, msg, { mark: "dot", verdictKey: "connected" });
+
+      // Assert
+      expect($("status").querySelectorAll("[data-status-mark]").length).toBe(1);
+      expect($("status").querySelector(".status-block__icon")).toBeNull();
+    });
+
+    it("should keep the mark ahead of the verdict it qualifies", () => {
+      // Arrange
+      const options = { mark: "alert", verdictKey: "connected" };
+
+      // Act
+      renderStatusBlock($, msg, options);
+
+      // Assert
+      expect($("status").firstElementChild.getAttribute("data-status-mark")).toBe(
+        ""
+      );
+    });
+
+    it("should hide the mark from assistive tech, which reads the sentence", () => {
+      // Arrange
+      const options = { mark: "alert", verdictKey: "connected" };
+
+      // Act
+      renderStatusBlock($, msg, options);
+
+      // Assert
+      expect(
+        $("status").querySelector("[data-status-mark]").getAttribute("aria-hidden")
+      ).toBe("true");
     });
 
     it("should leave verdict and cause announceable instead of labelling the block", () => {
@@ -185,7 +254,7 @@ describe("bridge-popup-shell (vendored)", () => {
   });
 
   describe("renderSkeleton", () => {
-    it("should fill the chips and footer regions with sized placeholders", () => {
+    it("should fill the chips and footer regions by default", () => {
       // Arrange
       const doc = document;
 
@@ -199,12 +268,63 @@ describe("bridge-popup-shell (vendored)", () => {
       expect(doc.querySelectorAll("#chips-region .skeleton--chip").length).toBe(
         3
       );
-      expect(
-        doc.querySelectorAll("#footer-region .skeleton--line").length
-      ).toBe(2);
       expect(doc.querySelectorAll("#footer-region .skeleton--cta").length).toBe(
         1
       );
+      expect(
+        doc.querySelectorAll("#footer-region .skeleton--secondary").length
+      ).toBe(1);
+    });
+
+    it("should fill every region the caller declares", () => {
+      // Arrange
+      const regions = [
+        { region: "chips-region", parts: ["caption", "chips"] },
+        { region: "consequence-region", parts: ["line", "line-short"] },
+        { region: "paused-region", parts: ["block"] },
+        { region: "footer-region", parts: ["cta"] },
+      ];
+
+      // Act
+      renderSkeleton($, regions);
+
+      // Assert
+      // A region left out of the declaration is a region that will pop into
+      // existence when the probe resolves — the reflow this argument exists
+      // to prevent.
+      expect(
+        document.querySelectorAll("#consequence-region .skeleton--line").length
+      ).toBe(2);
+      expect(
+        document.querySelectorAll("#paused-region .skeleton--block").length
+      ).toBe(1);
+      expect(document.querySelectorAll("#footer-region .skeleton").length).toBe(
+        1
+      );
+    });
+
+    it("should skip a declared region the document does not have", () => {
+      // Arrange
+      const regions = [{ region: "no-such-region", parts: ["line"] }];
+
+      // Act
+      const render = () => renderSkeleton($, regions);
+
+      // Assert
+      expect(render).not.toThrow();
+    });
+
+    it("should ignore a part name the shell does not define", () => {
+      // Arrange
+      const regions = [
+        { region: "chips-region", parts: ["caption", "not-a-shape"] },
+      ];
+
+      // Act
+      renderSkeleton($, regions);
+
+      // Assert
+      expect($("chips-region").children.length).toBe(1);
     });
 
     it("should replace any previously rendered content", () => {
@@ -216,6 +336,34 @@ describe("bridge-popup-shell (vendored)", () => {
 
       // Assert
       expect($("chips-region").querySelectorAll(".chip").length).toBe(0);
+    });
+  });
+
+  describe("renderConsequence", () => {
+    it("should render one paragraph per line", () => {
+      // Arrange
+      const lines = ["Everything imported stays.", "Sign in to resume."];
+
+      // Act
+      renderConsequence($, lines);
+
+      // Assert
+      expect(
+        [
+          ...$("consequence-region").querySelectorAll(".consequence__line"),
+        ].map((p) => p.textContent)
+      ).toEqual(lines);
+    });
+
+    it("should clear the region for an empty line list", () => {
+      // Arrange
+      renderConsequence($, ["Something."]);
+
+      // Act
+      renderConsequence($, []);
+
+      // Assert
+      expect($("consequence-region").children.length).toBe(0);
     });
   });
 

@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { applySubs, msg, relativeAgo } = require("../bridge-popup-utils.js");
+const {
+  applySubs,
+  msg,
+  relativeAgo,
+  formatSinceDate,
+} = require("../bridge-popup-utils.js");
 
 const NOW_MS = new Date("2026-05-02T10:00:00Z").getTime();
 
@@ -120,6 +125,45 @@ describe("bridge-popup-utils (vendored)", () => {
 
       // Assert
       expect(out).toBe(expected);
+    });
+  });
+
+  describe("formatSinceDate", () => {
+    it("should render day and short month for the current year", () => {
+      // Arrange
+      const epoch = new Date("2026-04-23T08:00:00Z").getTime();
+
+      // Act
+      const out = formatSinceDate(epoch, NOW_MS);
+
+      // Assert
+      // Day-first: pinned to en-GB rather than the browser locale, because
+      // a US-configured Chrome would otherwise render "Apr 23" into copy the
+      // rest of which is written day-first.
+      expect(out).toBe("23 Apr");
+    });
+
+    it("should append the year when the outage started in an earlier one", () => {
+      // Arrange
+      const epoch = new Date("2025-12-30T08:00:00Z").getTime();
+
+      // Act
+      const out = formatSinceDate(epoch, NOW_MS);
+
+      // Assert
+      // Without the year a fourteen-month-old outage reads as this month's.
+      expect(out).toBe("30 Dec 2025");
+    });
+
+    it("should return null for a stamp that is not a date", () => {
+      // Arrange
+      const epoch = Number.NaN;
+
+      // Act
+      const out = formatSinceDate(epoch, NOW_MS);
+
+      // Assert
+      expect(out).toBeNull();
     });
   });
 });

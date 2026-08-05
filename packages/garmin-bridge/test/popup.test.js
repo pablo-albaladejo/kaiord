@@ -12,11 +12,13 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "bridge-popup-health.js",
   "bridge-popup-snapshot.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
 
 const MOCK_NOW_MS = new Date("2026-05-02T10:00:00Z").getTime();
+const BROKEN_AT_MS = new Date("2026-04-23T08:00:00Z").getTime();
 
 const setupDom = (chromeMock) => {
   const dom = new JSDOM(POPUP_HTML, {
@@ -40,23 +42,34 @@ const setupDom = (chromeMock) => {
 
 const flushAsync = () => new Promise((r) => setTimeout(r, 0));
 
-const buildChromeMock = ({ pingResponse, storage = {} } = {}) => ({
-  runtime: {
-    sendMessage: vi.fn((msg, cb) => {
-      if (msg.action === "ping") cb(pingResponse);
-      else cb({ ok: false, error: "unknown" });
-    }),
-  },
-  storage: {
-    local: {
-      get: vi.fn((keys, cb) => {
-        const out = {};
-        for (const k of keys) out[k] = storage[k];
-        cb(out);
+// A writable in-memory store, so the health record a popup open leaves behind
+// is assertable rather than merely swallowed. `__store` exposes it.
+const buildChromeMock = ({ pingResponse, storage = {}, health } = {}) => {
+  const store = { ...storage, ...(health ? { bridgeHealth: health } : {}) };
+  return {
+    runtime: {
+      sendMessage: vi.fn((msg, cb) => {
+        if (msg.action === "ping") cb(pingResponse);
+        else cb({ ok: false, error: "unknown" });
       }),
+      lastError: undefined,
     },
-  },
-});
+    storage: {
+      local: {
+        get: vi.fn((keys, cb) => {
+          const out = {};
+          for (const k of keys) out[k] = store[k];
+          cb(out);
+        }),
+        set: vi.fn((items, cb) => {
+          Object.assign(store, items);
+          if (cb) cb();
+        }),
+      },
+    },
+    __store: store,
+  };
+};
 
 describe("Garmin popup", () => {
   let originalNow;
@@ -295,6 +308,156 @@ describe("Garmin popup", () => {
     const region = dom.window.document.getElementById("rollup-region");
     expect(region.textContent).toContain("Last push");
     expect(region.textContent).toContain("Pablo");
+    // The one hue the shell spends, and it is spent here because this card
+    // names a real training session rather than a status.
+    const card = region.querySelector(".lastpush");
+    expect(card).not.toBeNull();
+    expect(card.querySelector(".lastpush__meta").textContent).toBe(
+      "Last push · 10 minutes ago"
+    );
+    expect(card.querySelector(".lastpush__title").textContent).toBe("Pablo");
+  });
+
+  it("renders the last-push card without a title when the receipt has no name", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: true } } },
+        storage: {
+          lastPushReceipt: { at: new Date("2026-05-02T09:50:00Z").getTime() },
+        },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const card = dom.window.document.querySelector(".lastpush");
+    expect(card.querySelector(".lastpush__meta")).not.toBeNull();
+    expect(card.querySelector(".lastpush__title")).toBeNull();
+  });
+
+  it("dates the no-access state once an earlier open already recorded it", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+        health: { brokenSince: BROKEN_AT_MS },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    // The verdict does not change: a failure is still not a diagnosis, and
+    // Garmin being unavailable remains one of the two live possibilities.
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "No access to Garmin Connect"
+    );
+    expect(doc.getElementById("status-sub").textContent).toContain(
+      "Kaiord has read nothing from Garmin Connect since 23 Apr."
+    );
+    expect(doc.getElementById("status-sub").textContent).toContain(
+      "Garmin may be temporarily unavailable"
+    );
+    expect(
+      doc.querySelector("[data-status-mark]").tagName.toLowerCase()
+    ).toBe("svg");
+  });
+
+  it("does not date an outage it has only just noticed", async () => {
+    const chromeMock = buildChromeMock({
+      pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+    });
+    const dom = setupDom(chromeMock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-sub").textContent).not.toContain("since");
+    expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
+      "span"
+    );
+    expect(chromeMock.__store.bridgeHealth.brokenSince).toBe(MOCK_NOW_MS);
+  });
+
+  // A phase that never answered says nothing about Garmin, so it must not
+  // open an outage the next open would then date. Driven through the snapshot
+  // read, whose 1 s bound is the shortest of the two timeouts.
+  it("does not record a health verdict when a probe phase times out", async () => {
+    const chromeMock = buildChromeMock({
+      pingResponse: { ok: true, data: { gcApi: { ok: true } } },
+    });
+    chromeMock.storage.local.get = vi.fn(() => {});
+    const dom = setupDom(chromeMock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await vi.waitFor(
+      () =>
+        expect(
+          dom.window.document.getElementById("status-text").textContent
+        ).toBe("Bridge not responding"),
+      { timeout: 2_500 }
+    );
+
+    expect(chromeMock.__store.bridgeHealth).toBeUndefined();
+  });
+
+  it("clears the outage when Garmin access works again", async () => {
+    const chromeMock = buildChromeMock({
+      pingResponse: { ok: true, data: { gcApi: { ok: true } } },
+      health: { brokenSince: BROKEN_AT_MS },
+    });
+    const dom = setupDom(chromeMock);
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    expect(chromeMock.__store.bridgeHealth.brokenSince).toBeUndefined();
+    expect(chromeMock.__store.bridgeHealth.lastOkAt).toBe(MOCK_NOW_MS);
+  });
+
+  it("renders the checking skeleton in every region a resolved state fills", () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: true } } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+
+    const doc = dom.window.document;
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Checking your session…"
+    );
+    // The athlete card and the sync section are the two that used to appear
+    // out of nowhere when the probe settled.
+    for (const region of [
+      "chips-region",
+      "athlete-region",
+      "rollup-region",
+      "footer-region",
+    ]) {
+      expect(
+        doc.querySelectorAll(`#${region} .skeleton`).length
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("carries no provider hue in its markup", () => {
+    // Garmin's #007cc3 was one of the five brand-coloured header dots the V2
+    // repaint removed; the monogram replaced them.
+    expect(POPUP_HTML).not.toContain("--accent");
+    expect(POPUP_HTML).not.toMatch(/#[0-9a-fA-F]{6}/);
+    expect(POPUP_HTML).toContain(">G</span");
   });
 
   it("shows snapshot placeholder when no snapshot exists", async () => {

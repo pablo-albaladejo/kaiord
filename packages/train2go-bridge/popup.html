@@ -5,16 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="popup.css" />
     <title>Kaiord Train2Go Bridge</title>
-    <style>
-      :root {
-        --accent: #f74464;
-        --accent-hover: #d63855;
-      }
-    </style>
   </head>
   <body>
+    <!-- Icon sprite. The shell's renderers reference these by id rather than
+         carrying path data, so geometry lives in one place per bridge instead
+         of inside a master that would have to keep five copies in step. -->
+    <svg aria-hidden="true" style="position: absolute; width: 0; height: 0">
+      <symbol
+        id="i-sync"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+        <path d="M21 3v5h-5" />
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+        <path d="M8 16H3v5" />
+      </symbol>
+      <symbol
+        id="i-attn"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 9v4M12 17h.01" />
+        <path
+          d="M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+        />
+      </symbol>
+    </svg>
+
     <header class="popup-header">
-      <span class="popup-header__dot" aria-hidden="true"></span>
+      <span
+        id="brand-mark"
+        class="popup-header__mark popup-header__mark--muted"
+        aria-hidden="true"
+        >T2</span
+      >
       <h1 class="popup-header__title">Kaiord · Train2Go</h1>
       <button
         id="refresh-btn"
@@ -22,35 +55,42 @@
         aria-label="Refresh"
         type="button"
       >
-        ⟳
+        <svg width="14" height="14" aria-hidden="true">
+          <use href="#i-sync" />
+        </svg>
       </button>
     </header>
 
     <main class="popup-main">
       <div
         id="status"
-        class="status-block status-block--muted"
+        class="status-block status-block--checking"
         role="status"
         aria-live="polite"
       >
-        <span class="status-block__dot" aria-hidden="true"></span>
+        <span
+          class="status-block__dot"
+          data-status-mark
+          aria-hidden="true"
+        ></span>
         <span class="status-block__body">
           <span class="status-block__verdict" id="status-text"
             >Checking your session…</span
           >
-          <span class="status-block__cause" id="status-sub" hidden></span>
+          <span class="status-block__cause tnum" id="status-sub" hidden></span>
         </span>
       </div>
 
       <div id="chips-region"></div>
-      <div id="athlete-region"></div>
-      <div id="rollup-region"></div>
+      <div id="athlete-region" class="tnum"></div>
+      <div id="week-region" class="tnum"></div>
       <div id="notes-region"></div>
       <div id="footer-region"></div>
     </main>
 
     <script src="bridge-popup-utils.js"></script>
     <script src="bridge-popup-shell.js"></script>
+    <script src="bridge-popup-health.js"></script>
     <script src="bridge-popup-snapshot.js"></script>
     <script src="popup.js"></script>
   </body>

@@ -31,6 +31,20 @@
     "message": "Sign in at mytanita.eu once — the bridge reads your export from that session, no password stored.",
     "description": "Status cause sentence explaining how to establish a session."
   },
+  "sessionEnded": {
+    "message": "Session ended",
+    "description": "Status verdict when the MyTANITA session cannot reach the export AND an earlier popup open already recorded the outage. Distinct from notSignedIn, which is a setup step still pending rather than something that broke."
+  },
+  "sessionEndedCause": {
+    "message": "Nothing has reached Kaiord since $date$. Sign in at mytanita.eu again and the bridge picks your export back up.",
+    "description": "Dated cause sentence for a session that worked and stopped. Names Kaiord's own intake, which the stored stamp establishes.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  },
   "captionFeeds": {
     "message": "Feeds Kaiord",
     "description": "Caption above the capability chips in the connected state."
@@ -47,13 +61,21 @@
     "message": "Body Composition",
     "description": "Capability chip for the Body Composition data type imported into Kaiord."
   },
+  "manualFallback": {
+    "message": "Both currently come from manual entry.",
+    "description": "Consequence line under the dashed chips: names where the two types are coming from while the bridge is not connected."
+  },
   "openEditor": {
     "message": "Open Kaiord editor",
     "description": "Footer link that opens the Kaiord editor."
   },
-  "signInTanita": {
-    "message": "Sign in to MyTANITA",
-    "description": "Primary footer link that fixes a missing MyTANITA session."
+  "openTanitaPrimary": {
+    "message": "Open MyTANITA",
+    "description": "Primary footer link whenever the bridge is not connected. It is the fix — the session is established at MyTANITA, not in Kaiord — so it outranks the editor link."
+  },
+  "setUpInKaiord": {
+    "message": "Set up in Kaiord ↗",
+    "description": "Secondary footer link while the bridge is not connected. Says set up rather than open: nothing from this source is in the editor yet."
   },
   "openTanita": {
     "message": "Open MyTANITA ↗",

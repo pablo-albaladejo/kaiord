@@ -6,15 +6,21 @@
  * user's own logged-in session cookie. All logic talks to background.js via
  * internal runtime messages.
  *
- * The primary CTA is whatever fixes the current state: signing in at
- * TrainingPeaks when the session is missing, opening the Kaiord editor when
- * the metrics API is reachable.
+ * The primary CTA is whatever fixes the current state: going to TrainingPeaks
+ * when the session is missing, opening the Kaiord editor when the metrics API
+ * is reachable.
  *
- * Shared helpers load first from the vendored bridge-popup-utils.js and
- * bridge-popup-shell.js (see popup.html script order).
+ * Two shapes of "not signed in", told apart by the stored health record: a
+ * bridge never observed working is still being set up, while one that worked
+ * and stopped is an outage and says since when.
+ *
+ * Shared helpers load first from the vendored bridge-popup-utils.js,
+ * bridge-popup-shell.js and bridge-popup-health.js (see popup.html script
+ * order).
  */
 
-/* global msg, $, renderStatusBlock, renderChips, renderSkeleton, renderCtas */
+/* global msg, $, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
+   renderConsequence, renderSkeleton, renderCtas */
 
 const OPEN_TRAININGPEAKS_URL = "https://app.trainingpeaks.com/";
 const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
@@ -28,12 +34,17 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   notSignedIn: "Not signed in",
   notSignedInCause:
     "Sign in at trainingpeaks.com once — the bridge mints its token from that session, no password stored.",
+  sessionEnded: "Session ended",
+  sessionEndedCause:
+    "Nothing has reached Kaiord since $1. Sign in at trainingpeaks.com again and the bridge mints a fresh token.",
   captionFeeds: "Feeds Kaiord",
   captionWillFeed: "Will feed Kaiord",
   typeWeight: "Weight",
   typeWeightBack: "Weight ↑ back to TrainingPeaks",
+  weightManualFallback: "Weight currently comes from manual entry.",
   openEditor: "Open Kaiord editor",
-  signInTrainingPeaks: "Sign in to TrainingPeaks",
+  openTrainingPeaksPrimary: "Open TrainingPeaks",
+  setUpInKaiord: "Set up in Kaiord ↗",
   openTrainingPeaks: "Open TrainingPeaks ↗",
   refresh: "Refresh",
 };
@@ -50,6 +61,15 @@ globalThis.KAIORD_POPUP_MESSAGES = {
 const FEED_KEYS = ["typeWeight"];
 const FUTURE_KEYS = ["typeWeightBack"];
 
+// Every region any resolved state fills, so the checking layout is the
+// resolved layout's height.
+const SKELETON_REGIONS = [
+  { region: "chips-region", parts: ["caption", "chips"] },
+  { region: "future-region", parts: ["caption", "chips"] },
+  { region: "consequence-region", parts: ["line"] },
+  { region: "footer-region", parts: ["cta", "secondary"] },
+];
+
 const sendMessage = (message) =>
   new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (res) =>
@@ -64,7 +84,12 @@ const showRefresh = (visible) => {
   $("refresh-btn").classList.toggle("popup-header__refresh--hidden", !visible);
 };
 
+const setMarkEstablished = (established) => {
+  $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
+};
+
 const renderConnected = () => {
+  setMarkEstablished(true);
   renderStatusBlock($, msg, {
     tone: "ok",
     verdictKey: "connected",
@@ -75,6 +100,7 @@ const renderConnected = () => {
     caption: msg("captionWillFeed"),
     region: "future-region",
   });
+  renderConsequence($, []);
   renderCtas($, {
     primaryLabel: msg("openEditor"),
     primaryHref: OPEN_EDITOR_URL,
@@ -83,40 +109,46 @@ const renderConnected = () => {
   });
 };
 
-const renderNotSignedIn = () => {
+/* `since` is the outage start Kaiord already knew about, or null when this is
+   the first probe that ever failed. Only the first case may name a date. */
+const renderNotSignedIn = (since) => {
+  const dated = since !== null;
+  setMarkEstablished(dated);
   renderStatusBlock($, msg, {
-    tone: "muted",
-    verdictKey: "notSignedIn",
-    causeKey: "notSignedInCause",
+    tone: dated ? "warn" : "muted",
+    mark: dated ? "alert" : "dot",
+    verdictKey: dated ? "sessionEnded" : "notSignedIn",
+    causeKey: dated ? "sessionEndedCause" : "notSignedInCause",
+    causeSubs: dated ? [formatSinceDate(since)] : undefined,
   });
   // Nothing flows in either direction yet, so one dashed row covers both.
   renderChips($, chipsFor([...FEED_KEYS, ...FUTURE_KEYS], "dashed"), {
     caption: msg("captionWillFeed"),
   });
   renderChips($, [], { region: "future-region" });
+  renderConsequence($, [msg("weightManualFallback")]);
   renderCtas($, {
-    primaryLabel: msg("signInTrainingPeaks"),
+    primaryLabel: msg("openTrainingPeaksPrimary"),
     primaryHref: OPEN_TRAININGPEAKS_URL,
-    secondaryLabel: msg("openEditor"),
+    secondaryLabel: msg("setUpInKaiord"),
     secondaryHref: OPEN_EDITOR_URL,
   });
 };
 
 const refresh = async () => {
   showRefresh(false);
+  setMarkEstablished(false);
   renderStatusBlock($, msg, {
-    tone: "muted",
+    tone: "checking",
     verdictKey: "checking",
     causeKey: "checkingCause",
   });
-  renderSkeleton($);
-  // renderSkeleton owns chips + footer only; drop a stale future row so a
-  // re-check never shows last cycle's content next to a fresh skeleton.
-  renderChips($, [], { region: "future-region" });
+  renderSkeleton($, SKELETON_REGIONS);
   const res = await sendMessage({ action: "checkSession" });
   const authenticated = res.ok ? !!res.data?.authenticated : false;
+  const health = await recordProbe(authenticated);
   if (authenticated) renderConnected();
-  else renderNotSignedIn();
+  else renderNotSignedIn(health.since);
   showRefresh(true);
 };
 

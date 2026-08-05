@@ -31,6 +31,16 @@
     "message": "Kaiord could not read from Garmin Connect. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
     "description": "Status cause sentence for the no-access state. Names both possibilities without asserting either, and keeps the sign-in action meaningful."
   },
+  "noGarminAccessCauseSince": {
+    "message": "Kaiord has read nothing from Garmin Connect since $date$. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
+    "description": "Dated variant of the no-access cause, used once an earlier popup open already recorded the outage. Claims only what the extension can establish — that IT has read nothing since that date — not that Garmin access expired then.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  },
   "bridgeNotResponding": {
     "message": "Bridge not responding",
     "description": "Status verdict when the extension's background worker times out."

@@ -9,11 +9,18 @@
  * The `--kd-*` custom properties below are copied from the `.dark` block of
  * styles/brand-tokens.css so every popup and the web app render the same
  * palette. scripts/check-bridge-popup-tokens-parity.test.mjs fails when a
- * value here diverges from its brand-token source.
+ * value here diverges from its brand-token source. The popups are dark-only:
+ * no light-theme block is specified for them anywhere.
  *
- * `--accent` / `--accent-hover` are the ONLY per-bridge variables: each
- * popup.html sets them in its own <style> block, and they tint the header
- * dot alone. Everything else is shared.
+ * There is no per-bridge colour. The one thing each popup.html sets for
+ * itself is the monogram glyph in the header — initials, not a hue, because
+ * a provider's own brand colour in the corner of a Kaiord popup is an
+ * arbitrary accent competing with nothing.
+ *
+ * The palette has no success green and no warning amber on purpose. A state
+ * that needs the user is an alert icon plus a sentence. The one hue in the
+ * whole shell is `--kd-zone-4`, on the card that names a real training
+ * session.
  *
  * Font sizes are in `px` (not `rem`) because the Chrome popup has its own
  * rendering context independent of the host page's root font.
@@ -29,6 +36,7 @@
   --kd-text-primary: #ffffff;
   --kd-text-secondary: #d4d4d4;
   --kd-text-muted: #909090;
+  --kd-text-disabled: #747474;
 
   /* Interactive fill. Inside the product the brand is ink, so the control
      ramp is what a button paints — and its label takes --kd-control-ink. */
@@ -39,6 +47,13 @@
   /* Borders */
   --kd-border: #444444;
   --kd-border-soft: #303030;
+
+  /* The dominant training zone, on the one card that names a real session.
+     The shell's only hue: no bridge can tell a capability that is broken
+     from one that is merely paused, so no danger ramp is spent here. */
+  --kd-zone-4: #f2b036;
+
+  --kd-ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 * {
@@ -56,22 +71,47 @@ body {
   background: var(--kd-bg-primary);
 }
 
-/* ── Header (3-column grid; reserves a 20x20 slot for the refresh icon
-       so the title row never reflows between checking and resolved). ── */
+/* Numbers line up column-wise and a zero never reads as an O. */
+.tnum {
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* ── Header (3-column grid; the monogram and the refresh icon hold equal
+       22px slots so the title row never reflows between checking and
+       resolved). ── */
 .popup-header {
   display: grid;
-  grid-template-columns: 8px 1fr 20px;
+  grid-template-columns: 22px 1fr 22px;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--kd-border-soft);
 }
 
-.popup-header__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent, var(--kd-control));
+/* The per-bridge variable: initials, set by each popup.html. */
+.popup-header__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--kd-border-soft);
+  color: var(--kd-text-primary);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* One letter can carry a size the two-letter marks cannot. */
+.popup-header__mark--solo {
+  font-size: 11px;
+}
+
+/* Dimmed while the identity is unestablished: still checking, or a bridge
+   that has never once signed in. */
+.popup-header__mark--muted {
+  background: var(--kd-bg-elevated);
+  color: var(--kd-text-muted);
 }
 
 .popup-header__title {
@@ -82,19 +122,21 @@ body {
 }
 
 .popup-header__refresh {
-  width: 20px;
-  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   padding: 0;
   border: none;
   background: transparent;
   color: var(--kd-text-muted);
   cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
+  transition: color 120ms var(--kd-ease);
 }
 
 .popup-header__refresh:hover {
-  color: var(--kd-text-secondary);
+  color: var(--kd-text-primary);
 }
 
 .popup-header__refresh--hidden {
@@ -108,7 +150,7 @@ body {
   padding: 14px 16px;
 }
 
-/* ── Status block: dot + verdict + one cause sentence. Always rendered at
+/* ── Status block: mark + verdict + one cause sentence. Always rendered at
        the same height so resolving a state never reflows the popup. ── */
 .status-block {
   display: flex;
@@ -118,11 +160,21 @@ body {
 
 .status-block__dot {
   flex: none;
-  width: 8px;
-  height: 8px;
-  margin-top: 5px;
-  border-radius: 50%;
-  background: var(--kd-text-muted);
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--kd-text-disabled);
+}
+
+/* The form a state takes when it needs the user. No hue is spent on it:
+   the icon carries the alarm the palette declines to raise in colour. */
+.status-block__icon {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  color: var(--kd-text-primary);
 }
 
 .status-block__body {
@@ -132,44 +184,61 @@ body {
 }
 
 .status-block__verdict {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--kd-text-secondary);
 }
 
 .status-block__cause {
   font-size: 12.5px;
   color: var(--kd-text-muted);
+  text-wrap: pretty;
 }
 
 .status-block--ok .status-block__dot {
-  background: var(--kd-text-muted);
+  background: var(--kd-text-primary);
+  animation: status-pulse 1.8s ease-in-out infinite;
 }
 .status-block--ok .status-block__verdict {
-  color: var(--kd-text-secondary);
+  color: var(--kd-text-primary);
 }
 
-.status-block--warn .status-block__dot {
-  background: var(--kd-text-primary);
-}
 .status-block--warn .status-block__verdict {
   color: var(--kd-text-primary);
 }
 
 .status-block--muted .status-block__dot {
-  background: var(--kd-text-muted);
+  background: var(--kd-text-disabled);
 }
 .status-block--muted .status-block__verdict {
   color: var(--kd-text-secondary);
 }
 
+.status-block--checking .status-block__dot {
+  background: var(--kd-text-disabled);
+  animation: status-pulse 1.2s ease-in-out infinite;
+}
+.status-block--checking .status-block__verdict {
+  color: var(--kd-text-secondary);
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 /* ── Section caption ── */
 .caption {
   margin: 0 0 7px;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: var(--kd-text-muted);
 }
 
@@ -181,25 +250,25 @@ body {
 }
 
 .chip {
-  padding: 3px 8px;
+  padding: 3px 9px;
   border: 1px solid var(--kd-border);
   border-radius: 999px;
   background: var(--kd-bg-elevated);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--kd-text-primary);
 }
 
 /* Data Kaiord pushes back out to the source. */
 .chip--out {
-  border-color: var(--kd-border);
-  background: var(--kd-bg-surface);
+  border-color: var(--kd-border-soft);
+  background: transparent;
   color: var(--kd-text-secondary);
 }
 
 /* Paused: the type is known but nothing is flowing right now. */
 .chip--muted {
   border-color: var(--kd-border);
-  background: var(--kd-bg-surface);
+  background: transparent;
   color: var(--kd-text-muted);
 }
 
@@ -210,39 +279,41 @@ body {
   color: var(--kd-text-muted);
 }
 
-/* Warning-tinted container for the chips of a broken state. */
+/* The types that did not fit the popup width, collapsed into one chip. */
+.chip--more {
+  border-color: var(--kd-border-soft);
+  background: transparent;
+  color: var(--kd-text-muted);
+}
+
+/* Container for the chips of a broken state. */
 .chips-box {
-  padding: 11px 12px;
+  padding: 12px;
   border: 1px solid var(--kd-border);
-  border-radius: 9px;
+  border-radius: 12px;
   background: var(--kd-bg-elevated);
 }
 
 .chips-box .caption {
-  color: var(--kd-text-primary);
+  color: var(--kd-text-secondary);
 }
 
-/* ── Consequence block: what the current state costs, and what ends it.
+/* ── Consequence lines: what the current state costs, and what ends it.
        Prose rather than chips — a chip names a thing that flows, these
-       lines name an outcome. Neutral-bordered, not warning-tinted: the
-       block states facts in every state, including the healthy one, so a
-       tint would cry wolf on a working bridge. ── */
+       lines name an outcome. Unboxed: the block states facts in every
+       state, including the healthy one, so a container would lend the
+       weight of an alert to a sentence that is only ever context. ── */
 .consequence {
-  padding: 10px 12px;
-  border: 1px solid var(--kd-border);
-  border-radius: 9px;
-  background: var(--kd-bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .consequence__line {
   margin: 0;
   font-size: 12px;
-  line-height: 1.45;
-  color: var(--kd-text-secondary);
-}
-
-.consequence__line + .consequence__line {
-  margin-top: 6px;
+  line-height: 1.5;
+  color: var(--kd-text-muted);
 }
 
 /* ── Athlete card grid (2-column micro-grid; switches to single full-width
@@ -250,7 +321,7 @@ body {
 .athlete {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 14px;
+  gap: 5px 14px;
 }
 
 .athlete--single {
@@ -269,25 +340,25 @@ body {
 }
 
 .athlete__value {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .athlete__updated {
   grid-column: 1 / -1;
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--kd-text-muted);
 }
 
 .athlete--placeholder {
   padding: 12px;
   border: 1px dashed var(--kd-border);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
   color: var(--kd-text-muted);
 }
 
-/* ── Rollup line + weekly progress bar ── */
+/* ── Rollup line ── */
 .rollup {
   font-size: 12px;
   color: var(--kd-text-secondary);
@@ -298,40 +369,94 @@ body {
   font-style: italic;
 }
 
+/* ── Last push. The zone-4 edge is one of the shell's two hues, and it is
+       here because this card names a real training session. ── */
+.lastpush {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border-left: 4px solid var(--kd-zone-4);
+  background: var(--kd-bg-elevated);
+}
+
+.lastpush__meta {
+  font-size: 12px;
+  color: var(--kd-text-muted);
+}
+
+.lastpush__title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--kd-text-primary);
+}
+
+/* ── Weekly figures + progress bar ── */
 .week {
   display: flex;
   flex-direction: column;
   gap: 7px;
 }
 
+.week__figures {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.week__figure {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.week__value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--kd-text-primary);
+}
+
+.week__label {
+  font-size: 12px;
+  color: var(--kd-text-muted);
+}
+
 .week__bar {
-  height: 5px;
-  border-radius: 99px;
-  background: var(--kd-bg-surface);
+  height: 6px;
+  border-radius: 999px;
+  background: var(--kd-border-soft);
   overflow: hidden;
 }
 
 .week__bar-fill {
   display: block;
   height: 100%;
-  background: var(--kd-text-secondary);
+  background: var(--kd-text-primary);
 }
 
 /* ── Coach notes (collapsible) ── */
-.notes {
-  border: 1px solid var(--kd-border);
-  border-radius: 9px;
-  background: var(--kd-bg-surface);
-}
-
 .notes__summary {
-  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 11px;
+  border: 1px solid var(--kd-border);
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--kd-text-secondary);
   cursor: pointer;
   list-style: none;
   user-select: none;
+  transition:
+    border-color 120ms var(--kd-ease),
+    color 120ms var(--kd-ease);
+}
+
+.notes__summary:hover {
+  border-color: var(--kd-text-muted);
+  color: var(--kd-text-primary);
 }
 
 .notes__summary::-webkit-details-marker {
@@ -339,11 +464,10 @@ body {
 }
 
 .notes__summary::before {
-  content: "▸ ";
+  content: "▸";
   display: inline-block;
-  margin-right: 4px;
   color: var(--kd-text-muted);
-  transition: transform 0.15s ease;
+  transition: transform 200ms var(--kd-ease);
 }
 
 .notes[open] .notes__summary::before {
@@ -351,9 +475,10 @@ body {
 }
 
 .notes__body {
-  padding: 0 11px 10px;
+  padding: 0 2px;
+  margin-top: 8px;
   font-size: 12px;
-  line-height: 1.45;
+  line-height: 1.55;
   color: var(--kd-text-secondary);
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -365,16 +490,17 @@ body {
 .cta-primary {
   display: block;
   width: 100%;
-  padding: 9px;
+  padding: 10px;
   border: none;
-  border-radius: 9px;
+  border-radius: 8px;
   background: var(--kd-control);
   color: var(--kd-control-ink);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
+  transition: background 120ms var(--kd-ease);
 }
 
 .cta-primary:hover {
@@ -383,33 +509,39 @@ body {
 
 .cta-secondary {
   display: block;
-  margin-top: 8px;
+  margin-top: 9px;
   font-size: 12px;
-  color: var(--kd-text-primary);
+  color: var(--kd-text-secondary);
   text-align: center;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 120ms var(--kd-ease);
 }
 
 .cta-secondary:hover {
-  text-decoration: underline;
+  color: var(--kd-text-primary);
 }
 
 .cta-retry {
   display: block;
   width: 100%;
-  padding: 9px;
-  margin-top: 8px;
+  padding: 10px;
+  margin-top: 9px;
   border: 1px solid var(--kd-border);
-  border-radius: 9px;
-  background: var(--kd-bg-surface);
+  border-radius: 8px;
+  background: transparent;
   color: var(--kd-text-secondary);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
+  transition:
+    border-color 120ms var(--kd-ease),
+    color 120ms var(--kd-ease);
 }
 
 .cta-retry:hover {
-  background: var(--kd-bg-elevated);
+  border-color: var(--kd-text-muted);
+  color: var(--kd-text-primary);
 }
 
 /* ── Checking skeleton, sized to the resolved layout so nothing moves ── */
@@ -426,13 +558,13 @@ body {
 }
 
 .skeleton--caption {
-  height: 11px;
+  height: 12px;
   width: 84px;
   margin-bottom: 7px;
 }
 
 .skeleton--chip {
-  height: 20px;
+  height: 21px;
   border-radius: 999px;
 }
 
@@ -457,8 +589,28 @@ body {
 }
 
 .skeleton--cta {
-  height: 36px;
-  border-radius: 9px;
+  height: 38px;
+  border-radius: 8px;
+}
+
+/* The secondary link under the primary CTA: centred, and the same 9px
+   below it that `.cta-secondary` sits at. */
+.skeleton--secondary {
+  height: 12px;
+  width: 50%;
+  margin: 9px auto 0;
+}
+
+/* Stands in for a bordered box (chips-box, lastpush, the athlete card) so
+   the checking height matches the state that replaces it. */
+.skeleton--block {
+  height: 64px;
+  border-radius: 12px;
+}
+
+.skeleton--block-sm {
+  height: 46px;
+  border-radius: 12px;
 }
 
 @keyframes skeleton-shimmer {
@@ -471,7 +623,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton {
+  .skeleton,
+  .status-block__dot {
     animation: none;
   }
 }

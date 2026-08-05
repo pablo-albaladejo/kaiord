@@ -41,6 +41,20 @@
     "message": "Your Train2Go tab is logged out, so no new plan is reaching Kaiord.",
     "description": "Status cause sentence naming the consequence of a logged-out session."
   },
+  "sessionExpired": {
+    "message": "Session expired",
+    "description": "Status verdict when the Train2Go session is inactive AND an earlier popup open already recorded the outage, so its start date is known."
+  },
+  "sessionExpiredCause": {
+    "message": "No new plan has reached Kaiord since $date$. Logging back in at Train2Go starts it again.",
+    "description": "Dated cause sentence for the signed-out state. Names Kaiord's own intake, which the stored stamp establishes.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  },
   "bridgeNotResponding": {
     "message": "Bridge not responding",
     "description": "Status verdict when the extension's background worker times out."
@@ -93,14 +107,17 @@
     "message": "This week",
     "description": "Caption above the weekly rollup section."
   },
-  "rollupSummary": {
-    "message": "$planned$ sessions planned · $done$ done · workload $workload$",
-    "description": "Weekly rollup line summarising the current training week.",
-    "placeholders": {
-      "planned": { "content": "$1", "example": "5" },
-      "done": { "content": "$2", "example": "3" },
-      "workload": { "content": "$3", "example": "412" }
-    }
+  "weekPlanned": {
+    "message": "planned",
+    "description": "Label under the weekly count of planned sessions. Lower-case: it sits beneath its figure rather than starting a sentence."
+  },
+  "weekDone": {
+    "message": "done",
+    "description": "Label under the weekly count of completed sessions."
+  },
+  "weekWorkload": {
+    "message": "workload",
+    "description": "Label under the weekly workload total."
   },
   "rollupUnavailable": {
     "message": "Rollup unavailable — try again",

@@ -53,6 +53,25 @@ const relativeAgo = (epochMs) => {
   return msg(day === 1 ? "dayAgo" : "daysAgo", [String(day)]);
 };
 
+// The absolute date an outage started, as "23 Jul" — the form the V2 screen
+// specifies. Pinned to en-GB rather than the browser locale because the
+// bridges are English-only by rule (R-BridgeLocalesEnglishOnly): with an
+// undefined locale a US-configured Chrome would render "Jul 23" into copy the
+// rest of which is written day-first.
+//
+// The year is appended only when the outage did not start in the current one,
+// so the common case stays short and a stale one cannot read as recent.
+const formatSinceDate = (epochMs, now = Date.now()) => {
+  const date = new Date(epochMs);
+  if (Number.isNaN(date.getTime())) return null;
+  const sameYear = date.getFullYear() === new Date(now).getFullYear();
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    ...(sameYear ? {} : { year: "numeric" }),
+  }).format(date);
+};
+
 // Appended to the footer so the state's own CTAs stay reachable: a retry is
 // an extra affordance, never a replacement for the fix-first primary link.
 const renderRetry = (onClick) => {
@@ -79,6 +98,7 @@ if (typeof module !== "undefined") {
     $,
     withTimeout,
     relativeAgo,
+    formatSinceDate,
     renderRetry,
   };
 }

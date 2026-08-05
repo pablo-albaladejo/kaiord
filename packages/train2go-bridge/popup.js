@@ -2,9 +2,9 @@
  * Kaiord Train2Go Bridge — Popup
  *
  * Shell layout: status block (verdict + coach line), capability chips,
- * athlete card from cached profile-snapshot, weekly rollup
- * "<N> sessions planned · <M> done · workload <X>" with a completion bar and
- * a 5-minute `lastWeeklyRollup` TTL cache, collapsible coach notes, CTA pair.
+ * athlete card from cached profile-snapshot, weekly figures
+ * (planned / done / workload) over a completion bar with a 5-minute
+ * `lastWeeklyRollup` TTL cache, collapsible coach notes, CTA pair.
  * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s, ping
  * 3 s, rollup 8 s). Retry only appears on user-resolvable failures;
  * rollup-only timeout preserves the connected state.
@@ -13,13 +13,18 @@
  * Train2Go when the session is gone, opening the Kaiord editor when the plan
  * is flowing.
  *
+ * Only the session verdict is folded into the health record. A background
+ * worker that did not answer is inconclusive — it says nothing about whether
+ * the Train2Go session is alive — so it neither starts nor clears an outage.
+ *
  * Shared helpers load first from the vendored bridge-popup-utils.js,
- * bridge-popup-shell.js and bridge-popup-snapshot.js (see popup.html script
- * order).
+ * bridge-popup-shell.js, bridge-popup-health.js and bridge-popup-snapshot.js
+ * (see popup.html script order).
  */
 
-/* global msg, $, withTimeout, renderRetry, renderStatusBlock, renderChips,
-   renderSkeleton, renderCtas, renderAthleteCard */
+/* global msg, $, withTimeout, formatSinceDate, recordProbe, renderRetry,
+   renderStatusBlock, renderChips, renderSkeleton, renderCtas,
+   renderAthleteCard */
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
@@ -39,6 +44,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   sessionSignedOut: "Session signed out",
   sessionSignedOutCause:
     "Your Train2Go tab is logged out, so no new plan is reaching Kaiord.",
+  sessionExpired: "Session expired",
+  sessionExpiredCause:
+    "No new plan has reached Kaiord since $1. Logging back in at Train2Go starts it again.",
   bridgeNotResponding: "Bridge not responding",
   bridgeNotRespondingCause:
     "The extension's background worker did not answer. Try again.",
@@ -54,7 +62,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   labelMaxHr: "Max HR",
   labelWeight: "Weight",
   captionThisWeek: "This week",
-  rollupSummary: "$1 sessions planned · $2 done · workload $3",
+  weekPlanned: "planned",
+  weekDone: "done",
+  weekWorkload: "workload",
   rollupUnavailable: "Rollup unavailable — try again",
   coachNotes: "Coach notes",
   updatedAgo: "Updated $1",
@@ -75,6 +85,16 @@ globalThis.KAIORD_POPUP_MESSAGES = {
 // Managed data types this bridge imports, named exactly as the Connections
 // page names them (@kaiord/core MANAGED_DATA_REGISTRY labels).
 const FEED_KEYS = ["typePlannedSession", "typeTrainingZones"];
+
+// Every region any resolved state fills, so the checking layout is the
+// resolved layout's height.
+const SKELETON_REGIONS = [
+  { region: "chips-region", parts: ["caption", "chips"] },
+  { region: "athlete-region", parts: ["block"] },
+  { region: "week-region", parts: ["caption", "block-sm"] },
+  { region: "notes-region", parts: ["block-sm"] },
+  { region: "footer-region", parts: ["cta", "secondary"] },
+];
 
 const sendMessage = (message) =>
   new Promise((resolve) => {
@@ -132,20 +152,36 @@ const rollupCaption = (region) => {
   region.appendChild(caption);
 };
 
+// One figure of the weekly row: the number carries the weight, the word
+// underneath it stays small. Three of these read at a glance where the old
+// single sentence had to be parsed.
+const weekFigure = (value, labelKey) => {
+  const figure = document.createElement("div");
+  figure.className = "week__figure";
+  const num = document.createElement("span");
+  num.className = "week__value";
+  num.textContent = String(value);
+  const label = document.createElement("span");
+  label.className = "week__label";
+  label.textContent = msg(labelKey);
+  figure.append(num, label);
+  return figure;
+};
+
 const renderRollup = (rollup) => {
-  const region = $("rollup-region");
+  const region = $("week-region");
   region.innerHTML = "";
   if (!rollup) return;
   rollupCaption(region);
   const week = document.createElement("div");
   week.className = "week";
-  const line = document.createElement("div");
-  line.className = "rollup";
-  line.textContent = msg("rollupSummary", [
-    String(rollup.planned),
-    String(rollup.done),
-    String(rollup.workload),
-  ]);
+  const figures = document.createElement("div");
+  figures.className = "week__figures";
+  figures.append(
+    weekFigure(rollup.planned, "weekPlanned"),
+    weekFigure(rollup.done, "weekDone"),
+    weekFigure(rollup.workload, "weekWorkload")
+  );
   const bar = document.createElement("div");
   bar.className = "week__bar";
   const fill = document.createElement("span");
@@ -153,12 +189,12 @@ const renderRollup = (rollup) => {
   const pct = rollup.planned > 0 ? (rollup.done / rollup.planned) * 100 : 0;
   fill.style.width = `${Math.round(pct)}%`;
   bar.appendChild(fill);
-  week.append(line, bar);
+  week.append(figures, bar);
   region.appendChild(week);
 };
 
 const renderRollupUnavailable = () => {
-  const region = $("rollup-region");
+  const region = $("week-region");
   region.innerHTML = "";
   rollupCaption(region);
   const el = document.createElement("div");
@@ -197,10 +233,22 @@ const showRefresh = (visible) => {
   $("refresh-btn").classList.toggle("popup-header__refresh--hidden", !visible);
 };
 
+const setMarkEstablished = (established) => {
+  $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
+};
+
 // Any non-connected state pauses the plan feed, so the chips go muted and the
-// primary CTA becomes the fix rather than the editor link.
-const renderBroken = ({ verdictKey, causeKey }) => {
-  renderStatusBlock($, msg, { tone: "warn", verdictKey, causeKey });
+// primary CTA becomes the fix rather than the editor link. `since` is null for
+// a state the health record cannot date — including every worker timeout,
+// which is inconclusive about the session rather than evidence against it.
+const renderBroken = ({ verdictKey, causeKey, causeSubs, mark = "dot" }) => {
+  renderStatusBlock($, msg, {
+    tone: "warn",
+    mark,
+    verdictKey,
+    causeKey,
+    causeSubs,
+  });
   renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
   renderCtas($, {
     primaryLabel: msg("signInTrain2go"),
@@ -209,6 +257,17 @@ const renderBroken = ({ verdictKey, causeKey }) => {
     secondaryHref: OPEN_EDITOR_URL,
   });
   renderRetry(() => loadPopupData());
+};
+
+const renderSignedOut = (since) => {
+  const dated = since !== null;
+  setMarkEstablished(dated);
+  renderBroken({
+    mark: dated ? "alert" : "dot",
+    verdictKey: dated ? "sessionExpired" : "sessionSignedOut",
+    causeKey: dated ? "sessionExpiredCause" : "sessionSignedOutCause",
+    causeSubs: dated ? [formatSinceDate(since)] : undefined,
+  });
 };
 
 const fetchRollup = async (userId, bypassTtl) => {
@@ -228,6 +287,7 @@ const fetchRollup = async (userId, bypassTtl) => {
 };
 
 const renderConnected = ({ userName, coachName }) => {
+  setMarkEstablished(true);
   renderStatusBlock($, msg, {
     tone: "ok",
     verdictKey: userName ? "connectedAs" : "connected",
@@ -246,12 +306,13 @@ const renderConnected = ({ userName, coachName }) => {
 
 const loadPopupData = async ({ bypassTtl = false } = {}) => {
   showRefresh(false);
+  setMarkEstablished(false);
   renderStatusBlock($, msg, {
-    tone: "muted",
+    tone: "checking",
     verdictKey: "checking",
     causeKey: "checkingCause",
   });
-  renderSkeleton($);
+  renderSkeleton($, SKELETON_REGIONS);
 
   let storage;
   try {
@@ -281,12 +342,11 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
     return;
   }
 
-  if (!ping?.ok || !ping?.data?.sessionActive) {
+  const sessionActive = Boolean(ping?.ok && ping?.data?.sessionActive);
+  const health = await recordProbe(sessionActive);
+  if (!sessionActive) {
     renderAthleteCard(storage.profileSnapshot);
-    renderBroken({
-      verdictKey: "sessionSignedOut",
-      causeKey: "sessionSignedOutCause",
-    });
+    renderSignedOut(health.since);
     return;
   }
 
