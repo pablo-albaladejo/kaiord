@@ -24,8 +24,8 @@ export function CommandPaletteInput({
   const t = useTranslate("palette");
 
   return (
-    <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3 dark:border-slate-800">
-      <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
+    <div className="flex items-center gap-3 border-b border-edge px-4 py-3">
+      <Search className="h-4 w-4 text-ink-muted" aria-hidden="true" />
       <input
         autoFocus
         type="text"

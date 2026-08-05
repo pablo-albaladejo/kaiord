@@ -11,12 +11,12 @@ export function CommandPaletteFooter({
   const t = useTranslate("palette");
 
   return (
-    <div className="flex items-center gap-4 border-t border-gray-200 bg-gray-50 px-4 py-2.5 text-xs text-gray-500 dark:border-slate-800 dark:bg-slate-950 dark:text-gray-400">
+    <div className="flex items-center gap-4 border-t border-edge bg-surface-page px-4 py-2.5 text-xs text-ink-muted">
       <span>{t("footer.run")}</span>
       <button
         type="button"
         onClick={onShowShortcuts}
-        className="rounded hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:text-gray-200"
+        className="rounded hover:text-ink-strong focus:outline-none focus:ring-2 focus:ring-accent"
       >
         {t("footer.shortcuts")}
       </button>
@@ -25,7 +25,7 @@ export function CommandPaletteFooter({
         href={DOCS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-primary-600 hover:underline dark:text-primary-400"
+        className="text-ink-strong hover:underline"
       >
         {t("footer.docs")}
       </a>

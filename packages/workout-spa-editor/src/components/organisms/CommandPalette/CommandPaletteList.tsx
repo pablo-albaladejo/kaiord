@@ -11,7 +11,7 @@ export type CommandPaletteListProps = {
 };
 
 const HEADING =
-  "px-3 pb-1 pt-2 text-[10.5px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400";
+  "px-3 pb-1 pt-2 text-[10.5px] font-semibold uppercase tracking-widest text-ink-muted";
 
 export function CommandPaletteList({
   sections,

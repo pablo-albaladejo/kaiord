@@ -28,7 +28,7 @@ export function HeaderLogo() {
         <BrandMark size={28} core="live" />
       </span>
       <span
-        className="whitespace-nowrap text-xl font-bold text-gray-900 dark:text-white sm:text-2xl"
+        className="whitespace-nowrap text-xl font-semibold tracking-[-0.02em] text-ink-strong sm:text-2xl"
         aria-label="Kaiord Editor"
       >
         Kaiord Editor

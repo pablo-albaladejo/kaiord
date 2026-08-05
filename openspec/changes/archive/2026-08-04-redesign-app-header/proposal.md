@@ -1,3 +1,5 @@
+> Completed: 2026-08-04
+
 ## Why
 
 The app shell's navigation is ten flat destinations over two wrapping rows.
