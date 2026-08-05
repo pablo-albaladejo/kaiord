@@ -13,7 +13,7 @@ export type KeyChipsProps = {
 };
 
 const CHIP =
-  "rounded border border-gray-300 bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200";
+  "rounded-lg border border-edge bg-surface-elevated px-2 py-1 text-xs font-medium text-ink-strong";
 
 export function KeyChips({ def }: KeyChipsProps) {
   const mac = isMacPlatform();
@@ -34,7 +34,7 @@ export function KeyChips({ def }: KeyChipsProps) {
       ))}
       {alias && (
         <>
-          <span className="text-xs text-gray-400 dark:text-gray-500">/</span>
+          <span className="text-xs text-ink-muted">/</span>
           {alias.map((key, index) => (
             <kbd key={index} className={CHIP}>
               {key}

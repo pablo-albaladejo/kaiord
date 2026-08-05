@@ -103,7 +103,7 @@ describe("AccountMenu", () => {
 
     // Assert
     expect(
-      screen.queryByTestId("account-menu-connections-dot")
+      screen.queryByTestId("account-menu-connections-attention")
     ).not.toBeInTheDocument();
   });
 
@@ -118,7 +118,7 @@ describe("AccountMenu", () => {
 
     // Assert
     expect(
-      await screen.findByTestId("account-menu-connections-dot")
+      await screen.findByTestId("account-menu-connections-attention")
     ).toBeInTheDocument();
   });
 

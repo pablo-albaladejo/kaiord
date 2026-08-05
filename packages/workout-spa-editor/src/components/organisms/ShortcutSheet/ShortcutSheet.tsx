@@ -28,18 +28,18 @@ export function ShortcutSheet({ open, onOpenChange }: ShortcutSheetProps) {
         <Dialog.Content
           aria-describedby={undefined}
           data-testid="shortcut-sheet"
-          className="fixed left-[50%] top-[50%] z-50 max-h-[85vh] w-full max-w-3xl translate-x-[-50%] translate-y-[-50%] overflow-y-auto border border-gray-200 bg-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:rounded-xl dark:border-slate-700 dark:bg-slate-900"
+          className="fixed left-[50%] top-[50%] z-50 max-h-[85vh] w-full max-w-3xl translate-x-[-50%] translate-y-[-50%] overflow-y-auto border border-edge bg-surface shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:rounded-2xl"
         >
-          <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-4 dark:border-slate-800">
-            <Dialog.Title className="flex-1 text-base font-bold text-gray-900 dark:text-white">
+          <div className="flex items-center gap-3 border-b border-edge px-5 py-4">
+            <Dialog.Title className="flex-1 text-base font-semibold text-ink-strong">
               {t("shortcuts.heading")}
             </Dialog.Title>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-ink-muted">
               {isMacPlatform() ? "macOS" : "Windows / Linux"}
             </span>
             <Dialog.Close asChild>
               <button
-                className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400"
+                className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-accent"
                 aria-label={tCommon("actions.close")}
               >
                 <X className="h-4 w-4" />

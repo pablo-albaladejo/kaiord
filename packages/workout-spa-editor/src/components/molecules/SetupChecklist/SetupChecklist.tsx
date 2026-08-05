@@ -24,7 +24,7 @@ export function SetupChecklist() {
     <Card className="bg-surface border-edge p-4" data-testid="setup-checklist">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-ink-strong m-0 text-[15px] font-bold">
+          <p className="text-ink-strong m-0 text-[15px] font-semibold">
             {t("checklist.title")}
           </p>
           <p className="text-ink-muted m-0 mt-0.5 text-[13px]">

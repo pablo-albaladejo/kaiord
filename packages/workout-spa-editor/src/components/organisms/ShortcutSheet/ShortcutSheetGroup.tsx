@@ -20,7 +20,7 @@ export function ShortcutSheetGroup({ group }: ShortcutSheetGroupProps) {
     <section aria-labelledby={`shortcut-group-${group}`}>
       <h3
         id={`shortcut-group-${group}`}
-        className="mb-2 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400"
+        className="mb-2 text-xs font-semibold uppercase tracking-widest text-ink-muted"
       >
         {t(`shortcuts.${group}.heading`)}
       </h3>
@@ -28,7 +28,7 @@ export function ShortcutSheetGroup({ group }: ShortcutSheetGroupProps) {
         {SHORTCUT_CATALOG.filter((def) => def.group === group).map((def) => (
           <li
             key={def.id}
-            className="flex items-center justify-between gap-3 text-sm text-gray-700 dark:text-gray-300"
+            className="flex items-center justify-between gap-3 text-sm text-ink-body"
           >
             <span>{t(def.labelKey)}</span>
             <KeyChips def={def} />

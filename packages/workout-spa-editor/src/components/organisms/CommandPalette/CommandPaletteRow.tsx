@@ -22,8 +22,8 @@ export function CommandPaletteRow({
   const t = useTranslate("palette");
   const def = SHORTCUT_CATALOG.find((row) => row.id === command.shortcutId);
   const tone = command.enabled
-    ? "text-gray-800 dark:text-gray-100"
-    : "cursor-not-allowed text-gray-400 dark:text-gray-500";
+    ? "text-ink-strong"
+    : "cursor-not-allowed text-ink-muted";
 
   return (
     <div
@@ -34,16 +34,14 @@ export function CommandPaletteRow({
       data-testid={`command-palette-row-${command.id}`}
       onClick={command.enabled ? onActivate : undefined}
       onMouseEnter={onHover}
-      className={`${ROW_BASE} ${tone} ${
-        active ? "bg-primary-50 dark:bg-primary-900/40" : ""
-      }`}
+      className={`${ROW_BASE} ${tone} ${active ? "bg-surface-elevated" : ""}`}
     >
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="font-semibold">
           {t(command.titleKey, command.titleParams)}
         </span>
         {command.subtitleKey && (
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-ink-muted">
             {t(command.subtitleKey)}
           </span>
         )}

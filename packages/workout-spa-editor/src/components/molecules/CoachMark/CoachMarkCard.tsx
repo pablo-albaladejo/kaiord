@@ -27,16 +27,16 @@ export function CoachMarkCard({
   const def = SHORTCUT_CATALOG.find((row) => row.id === markId);
 
   return (
-    <div className="flex max-w-[330px] flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+    <div className="flex max-w-[330px] flex-col gap-3 rounded-2xl border border-edge bg-surface-elevated p-4 shadow-lg">
       <div>
-        <p className="text-sm font-bold text-gray-900 dark:text-white">
+        <p className="text-sm font-semibold text-ink-strong">
           {t(`marks.${markId}.title`)}
         </p>
-        <p className="mt-1 text-xs leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mt-1 text-xs leading-relaxed text-ink-body">
           {t(`marks.${markId}.body`)}
         </p>
         {def && (
-          <span className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <span className="mt-2 flex items-center gap-2 text-xs text-ink-muted">
             <KeyChips def={def} />
             {t(`marks.${markId}.shortcutHint`)}
           </span>

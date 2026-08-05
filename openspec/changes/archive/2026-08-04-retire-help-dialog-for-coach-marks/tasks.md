@@ -1,3 +1,5 @@
+> Tasks: 37 completed, 0 deferred
+
 ## 1. Anchoring primitives
 
 - [x] 1.1 Create `lib/coach-marks.ts`: `CoachMarkId`, `CoachMarkDef`, the ordered `COACH_MARKS` catalog, `CoachMarkSignals`, `ActiveCoachMark` and `pickCoachMark`, which skips a mark that is dismissed, whose command guard is closed, or whose anchor id is `null`.

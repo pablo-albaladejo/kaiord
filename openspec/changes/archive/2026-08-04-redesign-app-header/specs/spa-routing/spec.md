@@ -145,15 +145,45 @@ A CI guard script SHALL enforce the no-dual-mount invariant by allowlisting whic
 - **WHEN** the user activates the Chat entry in the navigation
 - **THEN** the SPA SHALL navigate to the base-relative URL `/chat`, the chat page SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount as a result of the activation
 
-#### Scenario: Settings is a routed page reached from the account menu
+#### Scenario: Settings and Profile are classified as routed pages
 
-- **WHEN** the user opens the header's account menu and activates Settings
-- **THEN** the SPA SHALL navigate to the base-relative URL `/settings`, the settings page SHALL render with focus on its `[data-route-heading]`, and no modal dialog SHALL mount over the previous route
+- **WHEN** the user opens the header's account menu and activates Settings, or activates the Athlete entry in the navigation bar
+- **THEN** the SPA SHALL navigate to a base-relative URL (`/settings` and `/athlete` respectively), the page surface SHALL render, focus SHALL land on the page's `[data-route-heading]` element, and no modal dialog SHALL mount over the previous route. Neither surface has a modal twin: a settings section is reached by its own URL segment, so it is bookmarkable and linkable — which is what let the three connection surfaces be collapsed into one linkable section rather than into a modal nobody could link to. The account menu is the chrome that reaches Settings, not a surface of its own
 
 #### Scenario: Calendar in-flow template selection uses a narrow picker dialog
 
 - **WHEN** the user opens the calendar's empty-day "Add from Library" flow
 - **THEN** the SPA SHALL open the template picker dialog with the cell's date supplied as a prop, the dialog's accessible name SHALL include the human-readable date (e.g. "Pick a template for Monday, May 4"), the dialog SHALL show a search-only template list (no delete or edit affordances), the URL SHALL NOT navigate away from the calendar route, and on selection the picker SHALL schedule the chosen template for that exact date — without showing any additional date-confirmation dialog — then close itself
+
+#### Scenario: Browser back button closes an open in-flow picker without losing the parent route
+
+- **WHEN** the user is on a routed page (e.g. `/calendar/2026-W18`) with an in-flow picker dialog open and presses the browser back button (or the equivalent gesture on touch devices)
+- **THEN** the picker SHALL close, the parent route SHALL remain mounted, and the URL SHALL NOT change away from the parent route. The parent route's history entry SHALL not be popped by the picker close
+
+#### Scenario: No SPA surface mounts as both a routed page and a header-mounted modal
+
+- **WHEN** the user clicks the header "Library" control on desktop or mobile
+- **THEN** no modal dialog SHALL mount; the action SHALL navigate to the routed page only. Mechanically, a CI guard script SHALL fail the build if the Library content component is imported anywhere outside the page surface and the in-flow picker dialog allowlist
+
+#### Scenario: Route change announces a single label
+
+- **WHEN** the wouter pathname changes (e.g., user navigates from `/calendar` to `/library`)
+- **THEN** the SPA shell's `aria-live="polite"` `aria-atomic="true"` region SHALL update once with a human-readable label of the new route ("Library page", "Daily page", "Calendar page", "New workout", "Edit workout", "Chat page") so assistive technology announces the navigation as a single unit
+
+#### Scenario: Route change moves focus to the page heading
+
+- **WHEN** the wouter pathname changes
+- **THEN** focus SHALL move to the new page's `[data-route-heading]` element on mount, and the focus ring SHALL NOT be visually rendered when the navigation was triggered by a non-keyboard activation (CSS `:focus:not(:focus-visible)` rule)
+
+#### Scenario: Pure query-string changes do not re-announce
+
+- **WHEN** the URL changes only its query string (e.g. `?filter=running`) without changing the pathname
+- **THEN** the announcer label SHALL NOT change and focus SHALL NOT move; assistive technology SHALL receive no announcement about the change
+
+#### Scenario: Initial mount announces the current route
+
+- **WHEN** the SPA loads for the first time at any route (including a deep-linked `/library` or `/workout/:id`)
+- **THEN** the announcer region SHALL emit one announcement matching the loaded route's label, so assistive technology hears the page identity on first load. The page heading text and the announcer label SHOULD be sufficiently distinct (e.g. heading "Library", announcer "Library page") to avoid duplicate reads
 
 ### Requirement: Wellness trends hub is reachable from the header without a primary tab
 

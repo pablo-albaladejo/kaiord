@@ -9,13 +9,17 @@ export const BAR_STYLE: CSSProperties = {
   boxShadow: "var(--glass-shadow)",
 };
 
-/** Raised gradient FAB centered over the bar notch. */
+/**
+ * Raised FAB centered over the bar notch. Flat `--control`, not the old
+ * sky-blue gradient: that hue sat 5° from `--zone-2`, so the create button
+ * was painted the colour that means "easy endurance".
+ */
 export const FAB_STYLE: CSSProperties = {
   width: 58,
   height: 58,
-  background: "linear-gradient(160deg, #38bdf8, #0284c7)",
-  boxShadow:
-    "0 8px 22px rgba(2,132,199,0.4), inset 0 1px 0 rgba(255,255,255,0.3)",
+  background: "var(--control)",
+  color: "var(--control-ink)",
+  boxShadow: "var(--shadow-float)",
 };
 
 /** Width of the central spacer reserved for the FAB notch. */

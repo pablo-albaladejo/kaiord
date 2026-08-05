@@ -3,13 +3,18 @@ import { useLocation } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
+import { ICON_MAP } from "../../atoms/Icon/icon-map";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "./header-menu-styles";
 import type { HeaderAttention } from "./use-header-attention";
 
 const CONNECTIONS_PATH = "/settings/connections";
 
-const PILL_CLASS =
-  "border border-amber-400/40 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400";
+/**
+ * No amber. Amber is Z4 — a warning painted in it competes with the
+ * athlete's own threshold data, so severity is carried by the icon, the
+ * sentence and the panel instead.
+ */
+const PILL_CLASS = "border border-edge bg-surface-elevated text-ink-strong";
 
 type SourceHealthPillProps = {
   /** `null` is the healthy state and renders nothing at all. */
@@ -41,9 +46,9 @@ export function SourceHealthPill({ attention }: SourceHealthPillProps) {
           className={PILL_CLASS}
           data-testid="status-header-source-health"
         >
-          <span
+          <ICON_MAP.alert
             aria-hidden="true"
-            className="h-2 w-2 flex-none rounded-full bg-amber-500"
+            className="h-3.5 w-3.5 flex-none"
           />
           <span className="hidden lg:inline">{attention.title}</span>
         </Button>

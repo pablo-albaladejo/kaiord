@@ -47,10 +47,7 @@ export function CommandPaletteBody({
         }
       />
       {sections.length === 0 ? (
-        <p
-          role="status"
-          className="px-4 py-6 text-sm text-gray-500 dark:text-gray-400"
-        >
+        <p role="status" className="px-4 py-6 text-sm text-ink-muted">
           {t("empty")}
         </p>
       ) : (

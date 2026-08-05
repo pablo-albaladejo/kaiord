@@ -27,7 +27,7 @@ export function SetupChecklistProgress({
       className="bg-surface-elevated mt-3 h-1.5 w-full overflow-hidden rounded-full"
     >
       <div
-        className="h-full rounded-full bg-emerald-400 transition-[width]"
+        className="h-full rounded-full bg-accent transition-[width]"
         style={{ width: `${percent}%` }}
       />
     </div>

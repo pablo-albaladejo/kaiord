@@ -1,3 +1,5 @@
+> Tasks: 48 completed, 0 deferred
+
 ## 1. Nav registry
 
 - [x] 1.1 Move the raw destination table to `routing/nav-rows.ts` (the SPA's `max-lines` is 80, and the table plus the mapping no longer fit in one file).
@@ -65,7 +67,9 @@
 - [x] 8.5 Retarget the six theme-toggle assertions to `data-testid="theme-toggle"`, and the focus-indicator test to the account trigger (the toggle now sits in a Radix `FocusScope`).
 - [x] 8.6 `npx playwright test --list` parses all 47 files / 1794 tests.
 - [x] 8.7 Full chromium suite run locally: 280 passed, 16 skipped, 0 failed.
-- [ ] 8.8 **Regenerate the tracked linux visual baselines** via the `update-visual-baselines` workflow once the branch is pushed. `coaching-sidebar.visual.spec.ts` screenshots the viewport, which includes the header, so both `*-chromium-linux.png` files are now stale. They cannot be produced on macOS.
+- [x] 8.8 **Regenerate the tracked linux visual baselines** via the `update-visual-baselines` workflow once the branch is pushed. `coaching-sidebar.visual.spec.ts` screenshots the viewport, which includes the header, so both `*-chromium-linux.png` files are now stale. They cannot be produced on macOS.
+
+  Done on main, not on this branch: `d42c48bb` (the rebrand-v2 foundation) ran the workflow and rewrote both `*-chromium-linux.png` files, and it landed AFTER the header change `851a979d`. So the tracked baselines already show the one-row header. Verified by `git log -- …-snapshots/`: `f2478134` → `851a979d` → `d42c48bb`, each rewriting both PNGs.
 
 ## 9. Docs
 

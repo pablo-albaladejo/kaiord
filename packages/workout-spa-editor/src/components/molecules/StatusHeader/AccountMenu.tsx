@@ -8,8 +8,11 @@ import { accountInitials } from "./account-initials";
 import { AccountMenuItems } from "./AccountMenuItems";
 import { MENU_CONTENT_CLASS } from "./header-menu-styles";
 
+/* Inside the login the brand is ink, so the avatar is a neutral chip rather
+   than a filled accent: the only tinted pixels in the shell are the mark's
+   live core. */
 const AVATAR_CLASS =
-  "flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-[11px] font-bold text-white";
+  "flex h-7 w-7 items-center justify-center rounded-full bg-edge-soft text-[11px] font-semibold text-ink-strong";
 
 type AccountMenuProps = {
   /** Marks the Connections row. Silent when every source is healthy. */
@@ -37,7 +40,7 @@ export function AccountMenu({ attention }: AccountMenuProps) {
           aria-label={
             name === null ? t("aria.accountEmpty") : t("aria.account", { name })
           }
-          className="rounded-full px-1"
+          className="rounded-full border border-edge px-1"
           data-testid="status-header-account-button"
         >
           <span aria-hidden="true" className={AVATAR_CLASS}>

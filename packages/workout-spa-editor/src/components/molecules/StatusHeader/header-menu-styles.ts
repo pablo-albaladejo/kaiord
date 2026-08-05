@@ -11,14 +11,14 @@ export const MENU_CONTENT_CLASS =
 export const MENU_ITEM_CLASS =
   "flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-body outline-none data-[highlighted]:bg-surface-page data-[highlighted]:text-ink-strong";
 
-export const MENU_LABEL_CLASS =
-  "px-3 py-2 text-xs font-semibold text-ink-muted";
-
 export const MENU_SEPARATOR_CLASS = "my-1 h-px bg-edge-soft";
 
-/** Amber marker, matching the Settings banner's dot. */
-export const ATTENTION_DOT_CLASS =
-  "ml-auto h-2 w-2 flex-none rounded-full bg-amber-500";
+/**
+ * The Connections row's attention marker. An icon rather than a coloured
+ * dot: the palette has no warning hue, so the shape carries the meaning and
+ * the row keeps reading at any contrast.
+ */
+export const ATTENTION_ICON_CLASS = "ml-auto h-3.5 w-3.5 flex-none";
 
 /**
  * Which breakpoint gives an entry its slot in the bar. Applied to a plain
