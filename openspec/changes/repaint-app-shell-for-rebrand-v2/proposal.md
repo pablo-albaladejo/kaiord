@@ -40,7 +40,7 @@ text-ink-strong`, matching the reference: inside the login the brand is ink,
   and the only tinted pixels in the shell are the mark's live core.
 - **The checklist's rail becomes `bg-accent`**, and its done-tick and next-step
   chevron inherit their row's colour instead of asserting `success`/`primary`.
-- **Nine shell files are repainted from raw Tailwind greys to roles** —
+- **Thirteen shell files are repainted from raw Tailwind greys to roles** —
   `LayoutHeader`, `MainLayout`, `HeaderLogo`, `KeyChips`, the six
   `CommandPalette` files, both `ShortcutSheet` files and `CoachMarkCard`.
 - **Card radii go to 16 px** (`sm:rounded-2xl`) on the palette, the shortcut
