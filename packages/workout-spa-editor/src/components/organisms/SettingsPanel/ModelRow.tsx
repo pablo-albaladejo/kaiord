@@ -28,10 +28,8 @@ export const ModelRow: React.FC<ModelRowProps> = ({
     providers.find((p) => p.id === providerId) ?? providers[0];
 
   return (
-    <div className="space-y-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
-      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-        {rowLabel}
-      </p>
+    <div className="space-y-2 rounded-lg border border-edge p-3">
+      <p className="text-sm font-medium text-ink-body">{rowLabel}</p>
       <Input
         label={t("providers.provider")}
         variant="select"

@@ -30,13 +30,13 @@ export const EncryptionSection: React.FC<EncryptionSectionProps> = ({
       {showWarning && (
         <p
           data-testid="plaintext-warning"
-          className="rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200"
+          className="rounded-xl border border-edge bg-surface-elevated p-3 text-sm text-ink-body"
         >
           {t("sync.plaintextWarning")}
         </p>
       )}
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className="text-sm font-medium text-ink-body">
           {t("sync.encryption")}
         </span>
         <Toggle checked={enabled} onCheckedChange={toggle} />

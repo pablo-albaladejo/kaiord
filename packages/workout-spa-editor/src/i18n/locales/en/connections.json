@@ -1,8 +1,8 @@
 {
-  "intro": "Every source you have linked, and what it is sending to Kaiord right now.",
+  "intro": "Every source you have linked, what it is sending right now, and which one wins when two sources report the same thing.",
   "noProfile": "Create an athlete profile to link a data source.",
   "sources": "Sources",
-  "sourcesHint": "Each source carries its own browser bridge and permissions",
+  "sourcesHint": "Bridges and permissions live inside each source",
   "unsupported": "Not available yet",
   "unsupportedHint": "Connecting these needs a server Kaiord does not run.",
   "summary": {

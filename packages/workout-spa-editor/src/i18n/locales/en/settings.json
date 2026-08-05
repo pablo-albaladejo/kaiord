@@ -101,7 +101,7 @@
   },
   "privacy": {
     "information": "Privacy Information",
-    "infoNoServer": "We do not operate a server that stores your credentials. When cross-device sync is on, your saved AI API keys are uploaded to your own Google Drive unless you enable encryption.",
+    "infoNoServer": "Your records sit in this browser, unencrypted — deleting the site data deletes them. Kaiord runs no server that keeps a copy. The only things that leave are what you route to a connection, what you send to your AI provider, and the Drive snapshots if you turn cross-device sync on.",
     "infoGarmin": "Garmin integration uses a browser extension that piggybacks on your existing Garmin Connect session. No credentials leave your browser.",
     "infoTrain2go": "Train2Go import uses a browser extension that reads the coaching plan displayed on Train2Go pages you are already viewing. It does not read your password or authentication tokens.",
     "infoLlmKeys": "LLM API keys are sent directly to the provider (Anthropic, OpenAI, or Google) — Kaiord does not receive or relay this data.",

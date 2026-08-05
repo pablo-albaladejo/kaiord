@@ -26,16 +26,14 @@ export const NotificationsRow = ({
 
   if (permission === "unsupported") {
     return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        {t("notifications.unsupported")}
-      </p>
+      <p className="text-sm text-ink-muted">{t("notifications.unsupported")}</p>
     );
   }
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-900 dark:text-white">
+        <span className="text-sm text-ink-strong">
           {t("notifications.enable")}
         </span>
         <Toggle
@@ -45,9 +43,7 @@ export const NotificationsRow = ({
         />
       </div>
       {permission === "denied" && (
-        <p className="text-sm text-amber-600 dark:text-amber-400">
-          {t("notifications.blocked")}
-        </p>
+        <p className="text-sm text-ink-body">{t("notifications.blocked")}</p>
       )}
     </div>
   );

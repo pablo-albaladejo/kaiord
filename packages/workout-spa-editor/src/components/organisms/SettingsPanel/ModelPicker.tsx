@@ -36,12 +36,12 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
 
   return (
     <div className="w-full">
-      <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+      <label className="mb-1 block text-xs font-medium text-ink-body">
         {t("models.model")}
       </label>
       <select
         data-testid="model-picker-select"
-        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+        className="w-full rounded-lg border border-edge bg-surface px-3 py-1.5 text-sm text-ink-strong"
         value={selectValue}
         onChange={(e) => handleSelect(e.target.value)}
       >
@@ -56,7 +56,7 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
         <input
           data-testid="model-picker-custom"
           aria-label={t("models.customModelIdAriaLabel")}
-          className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="mt-2 w-full rounded-lg border border-edge bg-surface px-3 py-1.5 text-sm text-ink-strong"
           placeholder={t("models.customModelIdPlaceholder")}
           value={value}
           onChange={(e) => onChange(e.target.value)}

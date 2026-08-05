@@ -18,7 +18,10 @@ export type SummaryTile = {
   readonly label: string;
   readonly value: string;
   readonly note?: string;
-  readonly tone?: "plain" | "good" | "warn";
+  /** Only the attention tile can ask for something, and only when it counts
+      more than zero. Coverage says nothing by being high, so it is not
+      marked — silence when all is well. */
+  readonly marked?: boolean;
 };
 
 export type SummaryTileDeps = {
@@ -67,7 +70,6 @@ export const summaryTiles = (
       label: label("covered"),
       value: String(summary.covered),
       note: t("summary.coveredNote", { total: summary.coveredTotal }),
-      tone: summary.covered > 0 ? "good" : "plain",
     },
     {
       id: "attention",
@@ -78,7 +80,7 @@ export const summaryTiles = (
           ? "summary.attentionNote_one"
           : "summary.attentionNote_other"
       ),
-      tone: summary.attention > 0 ? "warn" : "plain",
+      marked: summary.attention > 0,
     },
     {
       id: "lastSync",

@@ -30,7 +30,7 @@ export function ConnectionSummaryRow({ summary }: Props) {
           label={tile.label}
           value={tile.value}
           note={tile.note}
-          tone={tile.tone}
+          marked={tile.marked}
         />
       ))}
     </div>

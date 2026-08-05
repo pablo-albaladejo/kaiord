@@ -1,8 +1,8 @@
 {
-  "intro": "Cada fuente que has vinculado y lo que está enviando a Kaiord ahora mismo.",
+  "intro": "Cada fuente que has vinculado, lo que está enviando ahora mismo y cuál gana cuando dos fuentes informan de lo mismo.",
   "noProfile": "Crea un perfil de atleta para vincular una fuente de datos.",
   "sources": "Fuentes",
-  "sourcesHint": "Cada fuente lleva su propio puente de navegador y sus permisos",
+  "sourcesHint": "Los puentes y los permisos viven dentro de cada fuente",
   "unsupported": "Todavía no disponibles",
   "unsupportedHint": "Conectarlas necesita un servidor que Kaiord no tiene.",
   "summary": {

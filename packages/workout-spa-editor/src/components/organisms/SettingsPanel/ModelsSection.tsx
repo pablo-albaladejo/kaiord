@@ -33,11 +33,7 @@ export const ModelsSection: React.FC = () => {
   const { onSetBinding, onClearBinding } = useAiModelsHandlers();
 
   if (!profileId || providers.length === 0) {
-    return (
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        {t("models.hint")}
-      </p>
-    );
+    return <p className="text-sm text-ink-muted">{t("models.hint")}</p>;
   }
 
   return (

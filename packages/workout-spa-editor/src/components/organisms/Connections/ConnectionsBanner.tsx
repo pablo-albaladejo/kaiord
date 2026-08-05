@@ -1,4 +1,5 @@
 import type { ConnectionConsequence } from "../../../application/connections/connection-consequence";
+import { AttentionMark } from "../../atoms/AttentionMark";
 
 /**
  * Absent consequence renders nothing at all — no container, no placeholder.
@@ -20,12 +21,12 @@ export function ConnectionsBanner({ consequence }: Props) {
       role="status"
       aria-live="polite"
       data-testid="connections-banner"
-      className="flex gap-3 rounded-2xl border border-amber-400/40 bg-amber-50 p-4 dark:bg-amber-950/30"
+      className="flex gap-3 rounded-2xl border border-edge bg-surface-elevated p-4"
     >
-      <span
-        aria-hidden="true"
-        className="mt-1.5 h-2 w-2 flex-none rounded-full bg-amber-500"
-      />
+      {/* The icon carries the alarm the palette no longer does: success and
+          warning hues left the system, so a state that needs the reader says
+          so with a mark and a sentence. */}
+      <AttentionMark className="mt-0.5" />
       <div className="min-w-0 flex-1 space-y-1">
         <p
           className="text-sm font-semibold text-ink-strong"
@@ -34,7 +35,7 @@ export function ConnectionsBanner({ consequence }: Props) {
           {consequence.title}
         </p>
         <p
-          className="text-[12.5px] leading-relaxed text-ink-body"
+          className="text-[12.5px] leading-relaxed text-ink-muted"
           data-testid="connections-banner-detail"
         >
           {consequence.detail}

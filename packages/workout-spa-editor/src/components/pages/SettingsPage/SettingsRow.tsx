@@ -7,7 +7,7 @@ export type SettingsRowProps = {
   /** Locale-independent testid suffix; falls back to the label. */
   testId?: string;
   detail?: string;
-  /** `"attention"` marks the row with an amber dot before the chevron. */
+  /** `"attention"` marks the row with the attention mark before the chevron. */
   status?: "attention";
   to?: string;
   /** External destination opened in a new tab; mutually exclusive with `to`. */
@@ -17,10 +17,12 @@ export type SettingsRowProps = {
   onActivate?: () => void;
 };
 
+/* The corner radii track SettingsGroupList's card: the first and last rows are
+   what the card's own rounding is clipping, so the two must move together. */
 const BASE_CLASS =
-  "flex w-full items-center gap-3 px-4 py-3 text-left first:rounded-t-xl last:rounded-b-xl";
+  "flex w-full items-center gap-3 px-4 py-3 text-left first:rounded-t-2xl last:rounded-b-2xl";
 
-const LINK_CLASS = `${BASE_CLASS} transition-colors hover:bg-gray-50 dark:hover:bg-slate-800`;
+const LINK_CLASS = `${BASE_CLASS} transition-colors hover:bg-surface-elevated`;
 
 export const SettingsRow = ({
   icon,

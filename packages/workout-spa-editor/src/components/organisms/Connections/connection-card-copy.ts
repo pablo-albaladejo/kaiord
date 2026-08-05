@@ -1,21 +1,27 @@
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import type { ConnectionSourceStatus } from "../../../application/connections/connection-source";
 
+/**
+ * Two ink levels, no hues. A source that works is not news, so "connected" is
+ * told from "not connected" by the word rather than by green; `attention` is
+ * the only status that raises its ink, and `ConnectionStatusLine` renders it
+ * with the attention mark instead of a dot.
+ */
 export const STATUS_DOT: Record<ConnectionSourceStatus, string> = {
-  connected: "bg-emerald-500",
-  installed: "bg-accent",
-  checking: "bg-accent animate-pulse",
-  attention: "bg-amber-500",
+  connected: "bg-ink-body",
+  installed: "bg-ink-body",
+  checking: "bg-ink-muted animate-pulse",
+  attention: "bg-ink-strong",
   available: "bg-ink-muted",
-  manual: "bg-accent",
+  manual: "bg-ink-body",
   unsupported: "bg-ink-muted",
 };
 
 export const STATUS_TEXT: Record<ConnectionSourceStatus, string> = {
-  connected: "text-emerald-600 dark:text-emerald-400",
+  connected: "text-ink-body",
   installed: "text-ink-body",
   checking: "text-ink-muted",
-  attention: "text-amber-600 dark:text-amber-400",
+  attention: "text-ink-strong",
   available: "text-ink-muted",
   manual: "text-ink-body",
   unsupported: "text-ink-muted",

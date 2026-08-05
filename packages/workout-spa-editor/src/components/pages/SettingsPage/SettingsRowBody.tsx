@@ -1,4 +1,5 @@
 import { useTranslate } from "../../../i18n/use-translate";
+import { AttentionMark } from "../../atoms/AttentionMark";
 import { Icon, ICON_MAP, type IconName } from "../../atoms/Icon";
 
 export type SettingsRowBodyProps = {
@@ -13,7 +14,8 @@ export type SettingsRowBodyProps = {
 const TILE_CLASS =
   "flex h-7 w-7 items-center justify-center rounded-md bg-primary-600 text-white";
 
-const DOT_CLASS = "h-2 w-2 flex-none rounded-full bg-amber-500";
+/* The row's marker is the same mark the banner uses, not an amber dot: the
+   palette has no warning hue, and the `sr-only` label carries the meaning. */
 
 export const SettingsRowBody = ({
   icon,
@@ -30,21 +32,15 @@ export const SettingsRowBody = ({
       <span className={TILE_CLASS}>
         <Icon icon={ICON_MAP[icon]} size="sm" color="inherit" />
       </span>
-      <span className="min-w-0 flex-1 truncate text-sm text-gray-900 dark:text-white">
+      <span className="min-w-0 flex-1 truncate text-sm text-ink-strong">
         {label}
       </span>
       {detail !== undefined && (
-        <span className="truncate text-sm text-gray-500 dark:text-gray-400">
-          {detail}
-        </span>
+        <span className="truncate text-sm text-ink-muted">{detail}</span>
       )}
       {status === "attention" && (
         <>
-          <span
-            aria-hidden="true"
-            className={DOT_CLASS}
-            data-testid={`${rowTestId}-attention`}
-          />
+          <AttentionMark data-testid={`${rowTestId}-attention`} />
           <span className="sr-only">{t("rowStatus.attention")}</span>
         </>
       )}

@@ -16,23 +16,24 @@ type Props = {
   byDataType: DataFlowsByType;
 };
 
-/* A ring rather than a border tint: `border-edge` and an amber border are the
-   same property at the same specificity, so which one wins would depend on
-   stylesheet order rather than on intent. */
-const ATTENTION_RING = "ring-1 ring-amber-500/40";
+/* Raised rather than tinted. Success and warning hues are not in the palette,
+   so the card that needs the reader separates itself by elevation and by the
+   marked status line inside it — the same pair the banner above uses. */
+const SETTLED = "border-edge-soft bg-surface";
+const ATTENTION = "border-edge bg-surface-elevated";
 
 export function ConnectionSourceCard({ source, profileId, byDataType }: Props) {
   const [open, setOpen] = useState(false);
   const manageable = canDisconnect(source);
   const apiKeyConnect =
     source.mechanism === "api-key" && source.status !== "connected";
-  const ring = source.status === "attention" ? ATTENTION_RING : "";
+  const surface = source.status === "attention" ? ATTENTION : SETTLED;
 
   return (
     <div
       data-testid={`connection-card-${source.id}`}
       data-status={source.status}
-      className={`space-y-3 rounded-2xl border border-edge bg-surface p-4 ${ring}`}
+      className={`space-y-3 rounded-2xl border p-4 ${surface}`}
     >
       <ConnectionCardHeader
         source={source}

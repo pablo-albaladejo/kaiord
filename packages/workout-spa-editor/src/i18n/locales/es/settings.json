@@ -101,7 +101,7 @@
   },
   "privacy": {
     "information": "Información de privacidad",
-    "infoNoServer": "No operamos ningún servidor que almacene tus credenciales. Cuando la sincronización entre dispositivos está activada, tus claves de API de IA guardadas se suben a tu propio Google Drive salvo que actives el cifrado.",
+    "infoNoServer": "Tus registros están en este navegador, sin cifrar: si borras los datos del sitio, los borras. Kaiord no opera ningún servidor que guarde una copia. Lo único que sale es lo que enrutas a una conexión, lo que envías a tu proveedor de IA y las copias en Drive si activas la sincronización entre dispositivos.",
     "infoGarmin": "La integración con Garmin usa una extensión del navegador que se apoya en tu sesión existente de Garmin Connect. Ninguna credencial sale de tu navegador.",
     "infoTrain2go": "La importación de Train2Go usa una extensión del navegador que lee el plan de entrenamiento mostrado en las páginas de Train2Go que ya estás viendo. No lee tu contraseña ni tus tokens de autenticación.",
     "infoLlmKeys": "Las claves de API de LLM se envían directamente al proveedor (Anthropic, OpenAI o Google) — Kaiord no recibe ni retransmite estos datos.",

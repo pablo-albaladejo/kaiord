@@ -27,7 +27,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
   };
 
   return (
-    <div className="space-y-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+    <div className="space-y-3 rounded-lg border border-edge p-4">
       <Input
         label={t("providers.provider")}
         variant="select"

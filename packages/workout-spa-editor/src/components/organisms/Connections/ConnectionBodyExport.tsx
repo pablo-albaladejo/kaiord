@@ -45,9 +45,7 @@ export function ConnectionBodyExport({ sourceId, profileId }: Props) {
         {t(`manage.bodyExportStatus.${status}`)}
       </p>
       {status === "error" && lastError !== null && (
-        <p className="text-[12px] text-red-600 dark:text-red-400">
-          {lastError}
-        </p>
+        <p className="text-[12px] text-[var(--danger-text)]">{lastError}</p>
       )}
     </div>
   );

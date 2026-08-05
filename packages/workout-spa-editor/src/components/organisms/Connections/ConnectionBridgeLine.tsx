@@ -20,18 +20,18 @@ export function ConnectionBridgeLine({ source }: Props) {
   if (source.mechanism !== "bridge") return null;
 
   const detected = source.bridgeDetected;
-  const tone = detected
-    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-    : "border-edge bg-ink-strong/5 text-ink-muted";
+  // A working bridge is not news, so it gets no colour of its own (principle
+  // 2). Detected and missing differ by ink level and by the sentence itself.
+  const tone = detected ? "text-ink-body" : "text-ink-muted";
 
   return (
     <div
       data-testid={`connection-bridge-${source.id}`}
-      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-[12px] ${tone}`}
+      className={`flex items-center gap-2 rounded-xl border border-edge-soft bg-surface-elevated px-3 py-2 text-[12px] ${tone}`}
     >
       <span
         aria-hidden
-        className={`h-1.5 w-1.5 shrink-0 rounded-full ${detected ? "bg-emerald-500" : "bg-ink-muted"}`}
+        className={`h-1.5 w-1.5 shrink-0 rounded-full ${detected ? "bg-ink-body" : "bg-ink-muted"}`}
       />
       {t(bridgeLineKey(source), { name: source.name })}
     </div>

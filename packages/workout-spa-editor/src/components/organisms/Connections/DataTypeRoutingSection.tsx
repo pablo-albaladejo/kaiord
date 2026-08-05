@@ -33,7 +33,7 @@ export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
   return (
     <section className="space-y-3" data-testid="data-type-routing">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-ink-muted">
+        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-ink-muted">
           {t("routing.title")}
         </h2>
         <span className="text-[12.5px] text-ink-muted">

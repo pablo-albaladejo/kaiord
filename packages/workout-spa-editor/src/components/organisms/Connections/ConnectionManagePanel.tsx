@@ -47,7 +47,7 @@ export function ConnectionManagePanel({
           type="button"
           onClick={() => setConfirming(true)}
           data-testid={`connection-disconnect-${source.id}`}
-          className="rounded-lg px-3 py-2 text-[12.5px] font-semibold text-red-600 dark:text-red-400"
+          className="rounded-lg px-3 py-2 text-[12.5px] font-medium text-[var(--danger-text)]"
         >
           {t("manage.disconnect")}
         </button>

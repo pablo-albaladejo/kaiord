@@ -36,7 +36,7 @@ export const ConnectionsTab: React.FC = () => {
       <ConnectionsHealth sources={sources} byDataType={byDataType} />
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-ink-muted">
+          <h2 className="text-[11px] font-semibold uppercase tracking-widest text-ink-muted">
             {t("sources")}
           </h2>
           <span className="text-[12.5px] text-ink-muted">

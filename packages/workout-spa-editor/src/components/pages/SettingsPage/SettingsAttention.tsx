@@ -1,3 +1,4 @@
+import { AttentionMark } from "../../atoms/AttentionMark";
 import { Button } from "../../atoms/Button/Button";
 
 export type SettingsAttentionModel = {
@@ -15,8 +16,10 @@ export type SettingsAttentionProps = {
   variant: "banner" | "chip";
 };
 
+/* Elevation and a mark, not a hue: warning left the palette, so what needs the
+   reader says so with an icon and a sentence. */
 const SHELL_CLASS =
-  "flex gap-3 rounded-xl border border-amber-400/40 bg-amber-50 p-3 dark:bg-amber-950/30";
+  "flex gap-3 rounded-2xl border border-edge bg-surface-elevated p-3";
 
 const VARIANT_CLASS = {
   banner: "items-center",
@@ -38,21 +41,18 @@ export const SettingsAttention = ({
       className={`${SHELL_CLASS} ${VARIANT_CLASS[variant]}`}
       data-testid={`settings-attention-${variant}`}
     >
-      <span
-        aria-hidden="true"
-        className="mt-1 h-2 w-2 flex-none rounded-full bg-amber-500"
-      />
+      <AttentionMark className="mt-0.5" />
       <div className="min-w-0 flex-1">
         <p
           title={attention.title}
-          className="truncate text-sm font-semibold text-gray-900 dark:text-white"
+          className="truncate text-sm font-semibold text-ink-strong"
         >
           {attention.title}
         </p>
         {attention.detail !== undefined && (
           <p
             title={attention.detail}
-            className="truncate text-xs text-gray-600 dark:text-gray-400"
+            className="truncate text-xs text-ink-body"
           >
             {attention.detail}
           </p>
