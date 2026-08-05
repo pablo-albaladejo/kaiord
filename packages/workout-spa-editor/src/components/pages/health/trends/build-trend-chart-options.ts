@@ -18,6 +18,26 @@ const legendFormatter =
   (_u: uPlot, v: number | null | undefined): string =>
     formatPaneValue(metric, v, units, locale);
 
+// A health metric is not a training zone, so the series are told apart by
+// lightness, dash and label — never by hue. The step is the metric's own
+// (see trend-metrics), so it does not shift as metrics are toggled.
+const buildTrendSeries = (
+  metrics: ReadonlyArray<TrendMetricDef>,
+  units: Units,
+  locale: Locale
+): uPlot.Series[] => {
+  const series: uPlot.Series[] = [{}];
+  for (const m of metrics)
+    series.push({
+      label: m.label,
+      scale: m.key,
+      stroke: seriesStroke(m.strokeStep),
+      ...(m.dash ? { dash: m.dash } : {}),
+      value: legendFormatter(m, units, locale),
+    });
+  return series;
+};
+
 export const buildTrendChartOptions = (
   metrics: ReadonlyArray<TrendMetricDef>,
   units: Units = "metric",
@@ -37,18 +57,7 @@ export const buildTrendChartOptions = (
       })
     );
 
-  // A health metric is not a training zone, so the series are told apart by
-  // lightness, dash and label — never by hue. The step is the metric's own
-  // (see trend-metrics), so it does not shift as metrics are toggled.
-  const series: uPlot.Series[] = [{}];
-  for (const m of metrics)
-    series.push({
-      label: m.label,
-      scale: m.key,
-      stroke: seriesStroke(m.strokeStep),
-      ...(m.dash ? { dash: m.dash } : {}),
-      value: legendFormatter(m, units, locale),
-    });
+  const series = buildTrendSeries(metrics, units, locale);
 
   return {
     width: 0,

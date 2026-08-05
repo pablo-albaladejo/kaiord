@@ -8,7 +8,8 @@
  */
 import { useTranslation } from "react-i18next";
 
-import { ALERT_ICON, Icon } from "../../../atoms/Icon";
+import { ALERT_ICON } from "../../../atoms/Icon/alert-icon";
+import { Icon } from "../../../atoms/Icon/Icon";
 
 export type LabAiDraftBannerProps = {
   onDiscard: () => void;

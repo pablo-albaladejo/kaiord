@@ -23,7 +23,7 @@
     "protein": "Proteínas",
     "carbs": "Carbohidratos",
     "fat": "Grasas",
-    "over": "{{macro}} · pasado"
+    "over": "{{macro}} · por encima"
   },
   "logger": {
     "title": "Registrar ingesta",

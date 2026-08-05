@@ -9,11 +9,15 @@ ramp's arc for one of them.
 
 A chart whose series are not training zones SHALL distinguish those series by
 **lightness and label**, never by hue. Series strokes SHALL be drawn from an
-ordered neutral ladder built on the ink roles (`--text`, `--text-secondary`,
-`--text-dim`, `--text-disabled`), resolved from the live document so the ladder
-follows the `.dark` class without the series being rebuilt per theme. Where a
-legend or picker names those series outside the canvas, its swatch SHALL carry
-the same ladder step as the stroke.
+ordered neutral ladder of three ink roles (`--ink-strong`, `--ink-body`,
+`--ink-muted`), resolved from the live document when the chart options are
+built. Three rungs, not four: the next ink role down resolves under the 3:1
+contrast floor WCAG 1.4.11 sets for graphical objects on the light theme. A
+surface with more series than rungs SHALL separate the repeats on a second
+channel (`dash`, point marks, or a separate axis), and no two series SHALL
+share the same (rung, second-channel) pair. Where a legend or picker names
+those series outside the canvas, its swatch SHALL carry the same rung and
+channel as the stroke.
 
 The palette SHALL NOT define a success role or a warning role. A state that
 needs the user SHALL be rendered as an icon plus a phrase naming the state, on
@@ -31,7 +35,7 @@ measured value as bad.
 
 - **GIVEN** a chart whose series are health metrics (sleep, HRV, weight, steps) rather than training zones
 - **WHEN** its series strokes are resolved
-- **THEN** each stroke SHALL be a distinct step of the neutral ink ladder, no two series SHALL share a step, and no stroke SHALL resolve to any `--zone-*` value or to a literal hue
+- **THEN** each stroke SHALL be a rung of the three-step ink ladder, no two series SHALL share the same (rung, second-channel) pair, and no stroke SHALL resolve to any `--zone-*` value or to a literal hue
 
 #### Scenario: The stroke ladder follows the theme
 

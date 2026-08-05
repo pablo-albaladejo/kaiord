@@ -10,7 +10,6 @@ import { HealthPageHeader } from "./HealthPageHeader";
 import { HrvHistoryList } from "./HrvHistoryList";
 import { TodayStressList } from "./TodayStressList";
 
-// The SectionHead caption shape: 13px / 0.08em / uppercase / 600.
 const SECTION_CAPTION =
   "mb-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-muted";
 

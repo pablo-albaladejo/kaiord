@@ -21,7 +21,7 @@
 ## 2. Charts stop using hue
 
 - [x] 2.1 `health/trends/build-trend-chart-options.ts`: drop `STROKE =
-    "#2563eb"`; each metric takes its own fixed ladder step (plus a dash when
+  "#2563eb"`; each metric takes its own fixed ladder step (plus a dash when
       it wraps), so a metric's stroke does not shift as others are toggled.
 - [x] 2.2 `health/labs/charts/build-lab-chart-options.ts`: drop the blue line,
       the red outlier and the three `rgba(37, 99, 235, …)` reference values.
@@ -109,7 +109,8 @@
       track a step and the label gains glyph + word. See design.md D4.
 - [x] 6.2 The over label copy via i18n in both locales.
 - [x] 6.3 `IntakeLoggerForm`: `bg-blue-600 text-white` → the control pair;
-      `text-red-400` error → `text-danger-text`.
+      `text-red-400` validation error → alert icon + phrase on
+      `text-ink-strong` (danger stays reserved for destructive affordances).
 - [x] 6.4 `IntakeEntryRow` / `PresetRow`: `hover:text-red-400` →
       `hover:text-danger-text`.
 - [x] 6.5 `EnergyRollupSummary`: emerald/amber net tones → a lightness step;

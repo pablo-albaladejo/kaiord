@@ -1,5 +1,6 @@
 import { useTranslate } from "../../../i18n/use-translate";
-import { ALERT_ICON, Icon } from "../../atoms/Icon";
+import { ALERT_ICON } from "../../atoms/Icon/alert-icon";
+import { Icon } from "../../atoms/Icon/Icon";
 import type { MacroRing as MacroRingModel } from "./macro-rings-view-model";
 
 const RADIUS = 18;

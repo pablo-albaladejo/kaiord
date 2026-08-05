@@ -6,7 +6,8 @@
 import type { LabFlag } from "@kaiord/core";
 
 import { useTranslate } from "../../../../i18n/use-translate";
-import { ALERT_ICON, Icon } from "../../../atoms/Icon";
+import { ALERT_ICON } from "../../../atoms/Icon/alert-icon";
+import { Icon } from "../../../atoms/Icon/Icon";
 import { LAB_FLAG_STYLES } from "./lab-flag-display";
 
 export const LabFlagBadge = ({ flag }: { flag: LabFlag }) => {

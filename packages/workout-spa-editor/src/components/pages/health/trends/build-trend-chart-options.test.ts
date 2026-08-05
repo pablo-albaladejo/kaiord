@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { seriesStroke } from "../../../charts/uplot-base/series-strokes";
 import { buildTrendChartOptions } from "./build-trend-chart-options";
-import { TREND_METRICS, type TrendMetricDef } from "./trend-metrics";
+import type { TrendMetricDef } from "./trend-metrics";
+import { TREND_METRICS } from "./trend-metrics";
 
 const byKey = (key: TrendMetricDef["key"]): TrendMetricDef =>
   TREND_METRICS.find((m) => m.key === key) as TrendMetricDef;

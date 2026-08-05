@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Card } from "../../atoms/Card";
+import { ALERT_ICON } from "../../atoms/Icon/alert-icon";
+import { Icon } from "../../atoms/Icon/Icon";
 import {
   EMPTY_INTAKE_FIELDS,
   type IntakeLoggerFields as Fields,
@@ -46,7 +48,11 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
       </p>
       <IntakeLoggerFields fields={fields} onChange={setFields} />
       {error !== null && (
-        <p role="alert" className="m-0 mt-2 text-[12px] text-danger-text">
+        <p
+          role="alert"
+          className="m-0 mt-2 flex items-center gap-1.5 text-[12px] text-ink-strong"
+        >
+          <Icon icon={ALERT_ICON} size="xs" color="inherit" />
           {error}
         </p>
       )}
