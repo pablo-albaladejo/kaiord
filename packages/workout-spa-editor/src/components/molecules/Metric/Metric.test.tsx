@@ -22,39 +22,34 @@ describe("Metric", () => {
     expect(label).toBeInTheDocument();
   });
 
-  it.each([
-    {
-      accent: true,
-      value: "185",
-      unit: "bpm",
-      label: "Max HR",
-      expectedClass: "text-accent",
-    },
-    {
-      accent: undefined,
-      value: "95",
-      unit: "rpm",
-      label: "Cadence",
-      expectedClass: "text-ink-strong",
-    },
-  ])(
-    "should color the value $expectedClass when accent is $accent",
-    ({ accent, value, unit, label, expectedClass }) => {
-      // Arrange
+  it("should render the value in the ink role, never an accent", () => {
+    // Arrange
 
-      render(
-        <Metric value={value} unit={unit} label={label} accent={accent} />
-      );
+    render(<Metric value="185" unit="bpm" label="Max HR" />);
 
-      // Act
+    // Act
 
-      const el = screen.getByText(value);
+    const el = screen.getByText("185");
 
-      // Assert
+    // Assert
 
-      expect(el).toHaveClass(expectedClass);
-    }
-  );
+    expect(el).toHaveClass("text-ink-strong");
+    expect(el).not.toHaveClass("text-accent");
+  });
+
+  it("should render the value with tabular slashed-zero figures", () => {
+    // Arrange
+
+    render(<Metric value="268" unit="W" label="FTP" />);
+
+    // Act
+
+    const el = screen.getByText("268");
+
+    // Assert
+
+    expect(el).toHaveClass("[font-variant-numeric:tabular-nums_slashed-zero]");
+  });
 
   it("should render without unit", () => {
     // Arrange

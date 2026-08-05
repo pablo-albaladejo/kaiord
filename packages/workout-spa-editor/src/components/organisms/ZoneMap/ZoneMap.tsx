@@ -1,6 +1,10 @@
 import { forwardRef, type HTMLAttributes } from "react";
 
-import { zoneGradient, type ZoneNumber } from "../../../lib/zone-colors";
+import {
+  zoneGradient,
+  zoneHeight,
+  type ZoneNumber,
+} from "../../../lib/zone-colors";
 import { ZoneMapLegend } from "./ZoneMapLegend";
 
 export type ZoneMapEntry = {
@@ -13,38 +17,46 @@ export type ZoneMapEntry = {
 
 export type ZoneMapProps = HTMLAttributes<HTMLDivElement> & {
   zones: ZoneMapEntry[];
+  /** Optional note between the labels and the legend, e.g. what the two
+      dimensions of a bar mean. */
+  caption?: string;
   className?: string;
 };
 
-function borderRadius(i: number, total: number): string {
-  if (total === 1) return "8px";
-  if (i === 0) return "8px 3px 3px 8px";
-  if (i === total - 1) return "3px 8px 8px 3px";
-  return "3px";
-}
-
+/* The ramp encodes intensity twice: width is the zone's range, height is its
+   intensity. Take the colour away and it still reads — which is why the
+   labels sit BELOW the bars rather than inside them, where they measured
+   2:1 against Z1 and Z5. */
 export const ZoneMap = forwardRef<HTMLDivElement, ZoneMapProps>(
-  ({ zones, className = "", ...props }, ref) => {
+  ({ zones, caption, className = "", ...props }, ref) => {
     return (
       <div ref={ref} className={className} {...props}>
-        <div className="flex gap-[3px] h-[56px] mb-[14px]">
-          {zones.map((z, i) => (
+        <div className="flex items-end gap-[3px] h-[56px]">
+          {zones.map((z) => (
             <div
               key={z.n}
               style={{
                 flex: z.w,
+                height: zoneHeight(z.n),
                 ...zoneGradient(z.n),
-                borderRadius: borderRadius(i, zones.length),
+                borderRadius: "6px 6px 2px 2px",
               }}
-              className="flex items-end justify-center pb-[6px]"
-            >
-              <span className="text-xs font-extrabold text-black/55">
-                Z{z.n}
-              </span>
-            </div>
+            />
           ))}
         </div>
-        <ZoneMapLegend zones={zones} />
+        <div className="flex gap-[3px] mt-[7px] text-xs font-medium text-ink-muted tabular-nums">
+          {zones.map((z) => (
+            <span key={z.n} style={{ flex: z.w }} className="text-center">
+              Z{z.n}
+            </span>
+          ))}
+        </div>
+        {caption !== undefined && (
+          <p className="mt-[9px] text-xs leading-[1.55] text-ink-muted">
+            {caption}
+          </p>
+        )}
+        <ZoneMapLegend zones={zones} className="mt-[14px]" />
       </div>
     );
   }

@@ -28,25 +28,24 @@ describe("Card", () => {
 
       // Assert
 
-      expect(card).toHaveClass("rounded-lg");
+      expect(card).toHaveClass("rounded-2xl");
       expect(card).toHaveClass("border");
-      expect(card).toHaveClass("bg-white");
-      expect(card).toHaveClass("shadow-sm");
+      expect(card).toHaveClass("border-edge-soft");
+      expect(card).toHaveClass("bg-surface");
     });
 
-    it("should apply dark mode classes", () => {
+    it("should carry no paired slate dialect classes", () => {
       // Arrange
 
       render(<Card data-testid="card">Body</Card>);
 
       // Act
 
-      const card = screen.getByTestId("card");
+      const classes = screen.getByTestId("card").className;
 
       // Assert
 
-      expect(card).toHaveClass("dark:border-gray-700");
-      expect(card).toHaveClass("dark:bg-gray-800");
+      expect(classes).not.toMatch(/slate-|gray-|bg-white/);
     });
   });
 

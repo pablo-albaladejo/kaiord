@@ -3,14 +3,35 @@
   "createProfile": "Crear perfil",
   "createProfileTitle": "Crear perfil de atleta",
   "editProfile": "Editar perfil",
+  "edit": "Editar",
   "editThresholds": "Editar umbrales",
-  "thresholds": "Umbrales",
-  "autoZones": "Zonas automáticas",
-  "manualZones": "Zonas manuales",
+  "thresholdsTitle": "Umbrales de {{sport}}",
   "sportAria": "Deporte",
   "zonesTitle": "Zonas de {{sport}}",
   "noThreshold": "Establece un umbral de {{sport}} para ver tus zonas",
-  "zonesBlurb": "Estas zonas alimentan la generación de entrenamientos con IA y cada objetivo que envías a Garmin.",
+  "noThresholds": "Añade tus umbrales de {{sport}}",
+  "zonesReason": "Derivadas de {{metric}} {{value}}. Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
+  "zonesReasonNoThreshold": "Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
+  "zonesEncoding": "El ancho es el rango de la zona; la altura, su intensidad. Quita el color y la rampa se sigue leyendo.",
+  "provenance": {
+    "synced": "{{source}} · {{when}}",
+    "manual": "A mano",
+    "manualSince": "A mano · {{when}}"
+  },
+  "reconcile": {
+    "title": "{{source}} registró {{value}} el {{date}}",
+    "body": "Kaiord sigue usando {{current}}, y tus zonas se derivan de ahí.",
+    "use": "Usar {{value}}",
+    "keep": "Mantener {{value}}"
+  },
+  "autoImport": {
+    "title": "Deja que una fuente conectada actualice estos números",
+    "hint": "Apagado significa que nada sobrescribe un número que escribiste tú."
+  },
+  "connections": {
+    "fedBy": "Este perfil se alimenta de {{source}}",
+    "manage": "Gestionar en Conexiones"
+  },
   "tagline": {
     "cycling": "Ciclista",
     "running": "Corredor",

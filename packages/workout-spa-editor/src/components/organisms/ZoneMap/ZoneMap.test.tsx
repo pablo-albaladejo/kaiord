@@ -25,19 +25,35 @@ describe("ZoneMap", () => {
     expect(bar?.children).toHaveLength(FIXTURE.length);
   });
 
-  it("should render Z labels for each zone in the bar", () => {
+  it("should render Z labels below the bars, not inside them", () => {
     // Arrange
     const zones = FIXTURE;
 
     // Act
-    render(<ZoneMap zones={zones} />);
+    const { container } = render(<ZoneMap zones={zones} />);
 
     // Assert
-    expect(screen.getByText("Z1")).toBeInTheDocument();
-    expect(screen.getByText("Z2")).toBeInTheDocument();
-    expect(screen.getByText("Z3")).toBeInTheDocument();
-    expect(screen.getByText("Z4")).toBeInTheDocument();
-    expect(screen.getByText("Z5")).toBeInTheDocument();
+    const bars = container.querySelector(".flex.gap-\\[3px\\]");
+    expect(bars?.textContent).toBe("");
+    for (const z of FIXTURE) {
+      expect(screen.getByText(`Z${z.n}`)).toBeInTheDocument();
+    }
+  });
+
+  it("should encode intensity as an ascending bar height", () => {
+    // Arrange
+    const zones = FIXTURE;
+
+    // Act
+    const { container } = render(<ZoneMap zones={zones} />);
+
+    // Assert
+    const bars = [
+      ...(container.querySelector(".flex.gap-\\[3px\\]")?.children ?? []),
+    ] as HTMLElement[];
+    const heights = bars.map((bar) => Number.parseFloat(bar.style.height));
+    expect(heights).toStrictEqual([...heights].sort((a, b) => a - b));
+    expect(new Set(heights).size).toBe(FIXTURE.length);
   });
 
   it("should render a legend row for each zone", () => {

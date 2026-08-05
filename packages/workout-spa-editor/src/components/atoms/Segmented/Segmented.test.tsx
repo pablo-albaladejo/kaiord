@@ -47,7 +47,7 @@ describe("Segmented", () => {
 
     // Assert
     expect(running).toHaveAttribute("aria-checked", "true");
-    expect(running).toHaveClass("bg-primary-500");
+    expect(running).toHaveClass("bg-accent");
   });
 
   it("should call onChange with the selected value", () => {

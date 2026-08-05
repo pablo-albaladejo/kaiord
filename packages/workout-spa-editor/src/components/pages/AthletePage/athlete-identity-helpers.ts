@@ -1,5 +1,11 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
-import { ATHLETE_SPORTS } from "../../../lib/athlete";
+import {
+  type ActiveSport,
+  ATHLETE_SPORTS,
+  deriveThresholdMetrics,
+} from "../../../lib/athlete";
+import type { Units } from "../../../lib/units/units";
+import { formatWeightKg } from "../../../lib/units/units";
 import type { Profile } from "../../../types/profile";
 
 const MAX_INITIAL_WORDS = 2;
@@ -15,13 +21,37 @@ export function deriveInitials(name: string): string {
   return letters.join("") || "?";
 }
 
-/** Tagline like "Cyclist · Runner" for sports that have a stored config. */
-export function deriveTagline(
-  profile: Profile,
-  t: Translate = getTranslate("athlete")
-): string {
-  const nouns = ATHLETE_SPORTS.filter(
+const sportNouns = (profile: Profile, t: Translate): string[] =>
+  ATHLETE_SPORTS.filter(
     (sport) => profile.sportZones[sport.value] !== undefined
   ).map((sport) => t(`tagline.${sport.value}`));
-  return nouns.join(" · ") || t("tagline.fallback");
+
+/**
+ * Who this athlete is, in one line: the sports they have configured, the
+ * threshold the active sport's zones derive from, and their body weight.
+ * Each part is omitted when the profile does not carry it — the line states
+ * what is known and claims nothing else.
+ */
+export function deriveTagline(
+  profile: Profile,
+  sport?: ActiveSport,
+  units: Units = "metric",
+  t: Translate = getTranslate("athlete")
+): string {
+  const parts = sportNouns(profile, t);
+  if (parts.length === 0) parts.push(t("tagline.fallback"));
+
+  const primary = sport
+    ? deriveThresholdMetrics(profile, sport, units)[0]
+    : undefined;
+  if (primary) {
+    const value = primary.unit
+      ? `${primary.value} ${primary.unit}`
+      : primary.value;
+    parts.push(`${value} ${primary.label}`);
+  }
+  if (profile.bodyWeight !== undefined) {
+    parts.push(formatWeightKg(profile.bodyWeight, units));
+  }
+  return parts.join(" · ");
 }

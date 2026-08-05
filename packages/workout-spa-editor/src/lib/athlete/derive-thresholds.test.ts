@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { deriveThresholdMetrics } from "./derive-thresholds";
-import { profileWith } from "./test-profile";
+import { profileWith, syncedAccount } from "./test-profile";
 
 const FTP = 265;
 const LTHR = 168;
@@ -10,6 +10,9 @@ const SWIM_CSS_PACE = 98;
 const SWIM_LTHR = 160;
 const CYCLING_METRIC_COUNT = 3;
 const SWIM_METRIC_COUNT = 2;
+const RUN_PACE = 245;
+const SYNCED_AT = "2026-07-31T00:00:00.000Z";
+const NOW = new Date("2026-08-04T00:00:00.000Z");
 
 describe("deriveThresholdMetrics", () => {
   it("should derive FTP, threshold HR and max HR for cycling", () => {
@@ -21,13 +24,8 @@ describe("deriveThresholdMetrics", () => {
 
     // Assert
     expect(metrics).toHaveLength(CYCLING_METRIC_COUNT);
-    expect(metrics[0]).toEqual({
-      value: "265",
-      unit: "W",
-      label: "FTP",
-      accent: true,
-    });
-    expect(metrics[1]).toMatchObject({ label: "Threshold HR", accent: false });
+    expect(metrics[0]).toMatchObject({ value: "265", unit: "W", label: "FTP" });
+    expect(metrics[1]).toMatchObject({ label: "Threshold HR" });
     expect(metrics[2]).toMatchObject({ value: "189", label: "Max HR" });
   });
 
@@ -44,18 +42,17 @@ describe("deriveThresholdMetrics", () => {
 
     // Assert
     expect(metrics).toHaveLength(SWIM_METRIC_COUNT);
-    expect(metrics[0]).toEqual({
+    expect(metrics[0]).toMatchObject({
       value: "1:38",
       unit: "/100m",
       label: "CSS pace",
-      accent: true,
     });
   });
 
   it("should convert running threshold pace to min/mi for imperial units", () => {
     // Arrange
     const profile = profileWith("running", {
-      thresholdPace: 245,
+      thresholdPace: RUN_PACE,
       paceUnit: "min_per_km",
     });
 
@@ -84,7 +81,7 @@ describe("deriveThresholdMetrics", () => {
     expect(metrics[0]).toMatchObject({ value: "1:30", unit: "/100yd" });
   });
 
-  it("should omit unset metrics and accent the first present one", () => {
+  it("should omit unset metrics", () => {
     // Arrange
     const profile = profileWith("cycling", { lthr: LTHR });
 
@@ -93,6 +90,28 @@ describe("deriveThresholdMetrics", () => {
 
     // Assert
     expect(metrics).toHaveLength(1);
-    expect(metrics[0]).toMatchObject({ label: "Threshold HR", accent: true });
+    expect(metrics[0]).toMatchObject({ label: "Threshold HR" });
+  });
+
+  it("should carry the origin of every metric it returns", () => {
+    // Arrange
+    const profile = profileWith("cycling", { ftp: FTP }, MAX_HR, {
+      linkedAccounts: [
+        syncedAccount("train2go", SYNCED_AT, { cyclingFtp: FTP }),
+      ],
+      updatedAt: SYNCED_AT,
+    });
+
+    // Act
+    const metrics = deriveThresholdMetrics(profile, "cycling", "metric", NOW);
+
+    // Assert
+    expect(metrics[0]?.provenance).toStrictEqual({
+      kind: "synced",
+      source: "train2go",
+      at: SYNCED_AT,
+      stale: false,
+    });
+    expect(metrics[1]?.provenance).toMatchObject({ kind: "manual" });
   });
 });

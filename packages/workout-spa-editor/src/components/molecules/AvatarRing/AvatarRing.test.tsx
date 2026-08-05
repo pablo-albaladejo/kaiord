@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { ZONE_BG_CLASSES } from "../../../lib/zone-colors";
 import { AvatarRing } from "./AvatarRing";
+
+const ZONE_TOKEN = /var\(--zone-\d\)/g;
 
 describe("AvatarRing", () => {
   it("should render the initials", () => {
@@ -44,6 +47,22 @@ describe("AvatarRing", () => {
 
     expect(root.style.width).toBe("96px");
     expect(root.style.height).toBe("96px");
+  });
+
+  it("should paint the ring with the zone ramp and no literal colour", () => {
+    // Arrange
+
+    const { container } = render(<AvatarRing initials="ZR" />);
+
+    // Act
+
+    const root = container.firstChild as HTMLElement;
+
+    // Assert
+
+    const referenced = new Set(root.style.background.match(ZONE_TOKEN) ?? []);
+    expect(referenced.size).toBe(ZONE_BG_CLASSES.length);
+    expect(root.style.background).not.toMatch(/#[0-9a-fA-F]{3,6}/);
   });
 
   it("should apply custom className", () => {

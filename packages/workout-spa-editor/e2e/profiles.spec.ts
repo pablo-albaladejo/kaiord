@@ -5,9 +5,14 @@
  * tab: create / delete / switch / import / export multiple profiles,
  * "Saved profiles (N)" list) was removed by the redesign. The active
  * athlete now lives on a single-profile `/athlete` page: identity, a
- * sport segmented control, a Thresholds card (FTP / LTHR via the
- * threshold editor) and a Zone map. `/settings/profile` redirects to
- * `/athlete`.
+ * sport segmented control, a sport-scoped thresholds card (FTP / LTHR via
+ * the threshold editor, each metric carrying where its number came from)
+ * and a zone map under the reason it exists. `/settings/profile` redirects
+ * to `/athlete`.
+ *
+ * Text assertions here lean on `exact`: a threshold's label and value now
+ * also appear inside the identity tagline and the zones reason, so a bare
+ * substring match would hit several elements and trip strict mode.
  *
  * Removed-feature coverage (create/delete/switch/import/export of
  * multiple profiles) is intentionally dropped — see the e2e redesign
@@ -76,8 +81,11 @@ async function gotoAthlete(page: Page) {
   });
 }
 
+// The editor opens from the section head's "Edit" action, not from a
+// full-width button inside the card. `exact` keeps it off the identity
+// block's "Edit profile" control.
 async function openThresholdEditor(page: Page) {
-  await page.getByRole("button", { name: /edit thresholds/i }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
   await expect(
     page.getByRole("dialog", { name: /edit thresholds/i })
   ).toBeVisible();
@@ -99,12 +107,55 @@ test.describe("Athlete page", () => {
     await expect(sport.getByRole("radio", { name: "Cycling" })).toBeVisible();
     await expect(sport.getByRole("radio", { name: "Running" })).toBeVisible();
     await expect(sport.getByRole("radio", { name: "Swim" })).toBeVisible();
-    await expect(page.getByText("Thresholds", { exact: true })).toBeVisible();
-    // The Connections section was retired into /settings/connections; the
-    // Athlete page is identity + thresholds + zones and links nowhere.
+    // Both cards are titled by a sport-scoped section head.
+    await expect(
+      page.getByRole("heading", { name: /cycling thresholds/i })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /cycling zones/i })
+    ).toBeVisible();
+    // The Connections section was retired into /settings/connections; with
+    // no linked account the Athlete page does not even link there.
     await expect(
       page.getByRole("heading", { name: /connections/i })
     ).toHaveCount(0);
+  });
+
+  test("should state the reason for the zones above the map", async ({
+    page,
+  }) => {
+    // Arrange
+    await gotoAthlete(page);
+
+    // Act
+    await openThresholdEditor(page);
+    await page
+      .getByRole("dialog", { name: /edit thresholds/i })
+      .getByLabel(/FTP threshold/i)
+      .fill("300");
+    await page.keyboard.press("Escape");
+
+    // Assert — the reason names the threshold the bands derive from.
+    await expect(page.getByText(/derived from FTP 300 W\./i)).toBeVisible();
+  });
+
+  test("should report a hand-typed threshold as entered by hand", async ({
+    page,
+  }) => {
+    // Arrange — no linked account, so nothing can have synced this value.
+    await gotoAthlete(page);
+
+    // Act
+    await openThresholdEditor(page);
+    await page
+      .getByRole("dialog", { name: /edit thresholds/i })
+      .getByLabel(/FTP threshold/i)
+      .fill("300");
+    await page.keyboard.press("Escape");
+
+    // Assert — provenance is stated, and stays silent about an age it
+    // cannot prove (the profile was written seconds ago).
+    await expect(page.getByText("By hand").first()).toBeVisible();
   });
 
   test("should set the cycling FTP threshold and reflect it on the card", async ({
@@ -121,8 +172,10 @@ test.describe("Athlete page", () => {
     // The editor auto-persists on change; close the dialog.
     await page.keyboard.press("Escape");
 
-    // Assert — the card now shows the FTP metric.
-    await expect(page.getByText("FTP")).toBeVisible();
+    // Assert — the card now shows the FTP metric. `exact` matters: the
+    // identity tagline ("Cyclist · 300 W FTP") and the zones reason
+    // ("Derived from FTP 300 W…") both contain "FTP" too.
+    await expect(page.getByText("FTP", { exact: true })).toBeVisible();
     await expect(page.getByText("300", { exact: true })).toBeVisible();
   });
 
@@ -139,7 +192,7 @@ test.describe("Athlete page", () => {
     await page.keyboard.press("Escape");
 
     // Assert — the Threshold HR metric appears with the new value.
-    await expect(page.getByText("Threshold HR")).toBeVisible();
+    await expect(page.getByText("Threshold HR", { exact: true })).toBeVisible();
     await expect(page.getByText("170", { exact: true })).toBeVisible();
   });
 
@@ -199,7 +252,7 @@ test.describe("Athlete page", () => {
     await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible();
 
     // Assert — the persisted FTP survives the reload (Dexie hydration).
-    await expect(page.getByText("FTP")).toBeVisible();
+    await expect(page.getByText("FTP", { exact: true })).toBeVisible();
     await expect(page.getByText("280", { exact: true })).toBeVisible();
   });
 });
