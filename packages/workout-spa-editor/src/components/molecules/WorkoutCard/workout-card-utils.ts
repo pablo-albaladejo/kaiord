@@ -1,33 +1,27 @@
 /**
  * WorkoutCard Utilities
  *
- * State indicator mapping and sport icon resolution.
+ * Lifecycle emphasis and duration formatting.
+ *
+ * The lifecycle used to be a hue-coded glyph per state (`\u26A0\uFE0F` amber, `\u2605`
+ * green) sitting beside the title, duplicating the lateral border in two hues
+ * the palette no longer carries. It is now a word in a chip, so the only thing
+ * left to decide is whether that word needs the user \u2014 and only two states do.
+ * Everything else stays quiet (principle 2). The word itself comes from the
+ * `calendar.lifecycle` namespace, so it is not English-only.
  */
 
 import type { WorkoutState } from "../../../types/calendar-enums";
+import type { LifecycleChipTone } from "../CardShell/LifecycleChip";
 
-export type StateIndicator = {
-  label: string;
-  symbol: string;
-  className: string;
-};
+/** A raw import cannot reach a watch; a stale one no longer matches its plan. */
+const ATTENTION_STATES: ReadonlySet<WorkoutState> = new Set<WorkoutState>([
+  "raw",
+  "stale",
+]);
 
-const STATE_INDICATORS: Record<WorkoutState, StateIndicator> = {
-  stale: { label: "Stale", symbol: "!", className: "text-orange-500" },
-  modified: { label: "Modified", symbol: "~", className: "text-blue-500" },
-  raw: { label: "Raw", symbol: "\u26A0\uFE0F", className: "text-yellow-500" },
-  structured: {
-    label: "Structured",
-    symbol: "\u25CB",
-    className: "text-gray-500",
-  },
-  ready: { label: "Ready", symbol: "\u2605", className: "text-green-500" },
-  pushed: { label: "Pushed", symbol: "\u2713", className: "text-green-600" },
-  skipped: { label: "Skipped", symbol: "\u2014", className: "text-gray-400" },
-};
-
-export function getStateIndicator(state: WorkoutState): StateIndicator {
-  return STATE_INDICATORS[state];
+export function lifecycleTone(state: WorkoutState): LifecycleChipTone {
+  return ATTENTION_STATES.has(state) ? "attention" : "quiet";
 }
 
 export function formatDuration(seconds: number): string {

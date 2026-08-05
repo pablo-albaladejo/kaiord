@@ -17,7 +17,7 @@ Compositions of atoms with one focused responsibility. Each molecule may know ab
 
 - `BatchProcessingBanner/` — banner for AI batch-conversion progress.
 - `CalendarEmptyStates/` — empty-state placeholders for the calendar grid.
-- `CardShell/` — shared shell for matched-session, workout, and coaching cards.
+- `CardShell/` — shared shell for matched-session, workout, and coaching cards. Owns the 4 px lateral border (the session's dominant training zone, neutral when it has none) and `LifecycleChip`, the word that replaced the hue-coded state glyph.
 - `CoachingCard/` — the largest molecule (52 files). The matched-session dialog + activity dialog, body, shell, executed/linked sections, MatchToPicker, no-workout actions, AI processing overlay, error states, and the hooks driving the coaching-dialog state machine.
 - `ConfirmationModal/` — generic Radix-Dialog confirmation prompt.
 - `CreateRepetitionBlockButton/`, `CreateRepetitionBlockDialog/` — entry points for the create-block flow.
@@ -48,7 +48,10 @@ Compositions of atoms with one focused responsibility. Each molecule may know ab
 - `UndoRedoButtons/` — undo/redo controls.
 - `WorkoutCard/` — calendar-cell card for an unmatched workout.
 - `WorkoutMetadataEditor/` — title + description editor.
+- `WeekStatusBar/` — the calendar's week-level status: done-and-matched / ready-not-pushed / needs-structure in three lightness steps, silent when all three are zero.
 - `WorkoutPreview/` — read-only KRD preview chart.
+- `ZoneDist/` — aggregate time-in-zone bar (sorted Z1→Z5, one height).
+- `ZoneProfileBar/` — the session's shape over time: one bar per contiguous same-zone run, width = duration, height = zone. Caller-supplied pixel height (14 grid / 20 list / 10 library card), so one component serves all three densities.
 
 ## For AI Agents
 

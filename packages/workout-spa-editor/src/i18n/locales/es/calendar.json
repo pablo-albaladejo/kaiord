@@ -32,5 +32,67 @@
   },
   "reschedule": {
     "moveFailed": "No se pudo mover el entrenamiento"
+  },
+  "lifecycle": {
+    "raw": "Sin procesar",
+    "structured": "Estructurada",
+    "ready": "Lista",
+    "pushed": "Enviada",
+    "modified": "Modificada",
+    "stale": "Desactualizada",
+    "skipped": "Omitida"
+  },
+  "weekStatus": {
+    "heading": "Cómo va la semana",
+    "waiting_one": "{{count}} esperando para ir al reloj",
+    "waiting_other": "{{count}} esperando para ir al reloj",
+    "doneAndMatched_one": "{{count}} hecha y emparejada",
+    "doneAndMatched_other": "{{count}} hechas y emparejadas",
+    "readyNotPushed_one": "{{count}} lista, sin enviar",
+    "readyNotPushed_other": "{{count}} listas, sin enviar",
+    "needsStructure_one": "{{count}} sin estructura",
+    "needsStructure_other": "{{count}} sin estructura"
+  },
+  "firstRun": {
+    "heading": "Aquí no hay nada todavía — y nada aparecerá solo",
+    "body": "Kaiord no guarda tu entrenamiento. Lo lee de tus fuentes, lo estructura y lo devuelve a tu reloj. Tres cosas tienen que ser ciertas antes de que esta semana se llene sola.",
+    "manual": "¿No quieres conectar nada aún? Escribe una sesión a mano: todo lo demás sigue funcionando.",
+    "addWorkout": "Añadir entreno",
+    "steps": {
+      "sources": {
+        "title": "Conecta de dónde viene tu entrenamiento",
+        "consequence": "Train2Go para el plan de tu entrenador, Garmin para lo que rodaste de verdad. Sin esto, la semana se queda vacía.",
+        "cta": "Conectar una fuente"
+      },
+      "aiKey": {
+        "title": "Añade tu propia clave de IA",
+        "consequence": "La nota en prosa de tu entrenador se convierte en pasos y objetivos. Tu clave, tu factura, guardada en este navegador.",
+        "cta": "Añadir una clave"
+      },
+      "bridge": {
+        "title": "Instala la extensión puente",
+        "consequence": "Garmin no tiene API pública para entrenos, así que la entrega a tu reloj ocurre en tu navegador. Si la omites, todavía puedes descargar el fichero.",
+        "cta": "Instalar"
+      }
+    }
+  },
+  "emptyWeek": {
+    "headline": "Nada esta semana",
+    "headlineWithDate": "Nada esta semana — tu última sesión fue el {{date}}",
+    "consequence": "O estás entre bloques, o tu entrenador no ha publicado. No hay nada roto.",
+    "goToLatest": "Ir al {{date}}",
+    "addWorkout": "Añadir entreno"
+  },
+  "noAiProvider": {
+    "headline_one": "{{count}} sesión llegó en prosa y se ha quedado así",
+    "headline_other": "{{count}} sesiones llegaron en prosa y se han quedado así",
+    "consequence": "Convertir “4×8 min en umbral” en pasos necesita una clave de IA, y no hay ninguna. Tu reloj no sabe leer prosa.",
+    "cta": "Añadir una clave de IA"
+  },
+  "noBridges": {
+    "headline_one": "{{count}} sesión está lista pero no puede llegar a tu reloj",
+    "headline_other": "{{count}} sesiones están listas pero no pueden llegar a tu reloj",
+    "consequence": "Garmin no tiene API pública para entrenos, así que la extensión puente hace la entrega. Hasta instalarla, descargar el fichero e importarlo a mano es la única vía.",
+    "cta": "Instalar el puente"
   }
 }

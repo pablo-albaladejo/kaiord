@@ -1,83 +1,31 @@
 /**
- * Visual tokens for status and compliance: colour-coded lateral border
- * (the secondary, non-conformant signal channel) plus icon (the WCAG
- * 1.4.1 conformant channel) so colour-blind users get full information.
+ * The card's one graphical channel.
  *
- * Border-colour tokens are chosen to achieve ≥ 3:1 contrast against a
- * white card body per WCAG 1.4.11 (verified by the contrast test).
+ * It carries the session's dominant training zone and nothing else. Lifecycle
+ * is a word in a chip, compliance is a percentage, and both are text — colour
+ * is spent on the only fact text cannot carry. A session with no classifiable
+ * structure keeps the neutral edge, so processing a raw import is literally
+ * what gives its card colour.
+ *
+ * The zone ramp carries a separate row per theme in `styles/brand-tokens.css`,
+ * each verified against its own surface, so there is no per-token contrast
+ * table to maintain here — a frozen hex mirror would render one theme's zones
+ * on the other.
  */
 
-import { Check, Clock, type LucideIcon, Minus } from "lucide-react";
+import type { ZoneNumber } from "../../../lib/zone-colors";
 
-import type { ComplianceBucket } from "../../../application/compliance-bucket";
-import type { WorkoutState } from "../../../types/calendar-enums";
-import type { CoachingActivityStatus } from "../../../types/coaching-activity-record";
+/** Literal per zone so Tailwind can see every class it has to emit. */
+const ZONE_BORDER_CLASSES = [
+  "border-l-zone-1",
+  "border-l-zone-2",
+  "border-l-zone-3",
+  "border-l-zone-4",
+  "border-l-zone-5",
+] as const;
 
-export const statusToColourClass = (status: CoachingActivityStatus): string => {
-  switch (status) {
-    case "pending":
-      return "border-amber-600";
-    case "completed":
-      return "border-emerald-600";
-    case "skipped":
-      return "border-slate-500";
-  }
-};
+const NEUTRAL_BORDER_CLASS = "border-l-edge";
 
-export type StatusIcon = {
-  Component: LucideIcon;
-  label: string;
-};
-
-export const statusToIcon = (status: CoachingActivityStatus): StatusIcon => {
-  switch (status) {
-    case "pending":
-      return { Component: Clock, label: "Pending" };
-    case "completed":
-      return { Component: Check, label: "Completed" };
-    case "skipped":
-      return { Component: Minus, label: "Skipped" };
-  }
-};
-
-/**
- * Workout-state → border colour. Maps the existing 7-state workflow onto
- * the same 3-channel palette as coaching status so cards across variants
- * read consistently. STALE / MODIFIED / RAW collapse to amber (attention
- * needed); STRUCTURED / SKIPPED to neutral slate; READY / PUSHED to
- * emerald (done).
- */
-export const workoutStateToColourClass = (state: WorkoutState): string => {
-  switch (state) {
-    case "stale":
-    case "modified":
-    case "raw":
-      return "border-amber-600";
-    case "structured":
-    case "skipped":
-      return "border-slate-500";
-    case "ready":
-    case "pushed":
-      return "border-emerald-600";
-  }
-};
-
-export const complianceBucketToBorderClass = (
-  bucket: ComplianceBucket
-): string => {
-  switch (bucket) {
-    case "neutral":
-      // slate-500 (NOT slate-400, which fails WCAG 1.4.11 ≥ 3:1 against
-      // a white card body — see contrast.test.ts). Disambiguates from
-      // skipped via the card's status icon, not via colour alone.
-      return "border-slate-500";
-    case "amber":
-      return "border-amber-600";
-    case "mid":
-      // Match the shared CardShell border-l-4 width; only the border-image
-      // gradient distinguishes this bucket from the solid-colour ones.
-      return "border-l-4 border-l-amber-600 [border-image:linear-gradient(to_bottom,theme(colors.amber.600),theme(colors.emerald.600))_1]";
-    case "emerald":
-      return "border-emerald-600";
-  }
-};
+/** Left-edge colour for a session's dominant zone; neutral when unknown. */
+export const zoneBorderClass = (zone: ZoneNumber | null): string =>
+  zone === null ? NEUTRAL_BORDER_CLASS : ZONE_BORDER_CLASSES[zone - 1]!;

@@ -15,7 +15,7 @@ export function DayColumnAddButton({
       type="button"
       data-testid={`empty-day-${date}`}
       aria-label={`Add to ${label.name} ${label.num}`}
-      className="mt-1 flex-1 rounded border border-dashed border-gray-300 text-xs text-muted-foreground transition-colors hover:border-primary-400 hover:text-primary-600 dark:border-gray-600"
+      className="mt-1 flex-1 rounded-lg border border-dashed border-edge text-xs text-ink-muted motion-safe:transition-colors hover:border-edge-strong hover:text-ink-strong"
       onClick={() => onAddClick(date)}
     >
       + Add

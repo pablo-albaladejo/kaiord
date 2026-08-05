@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  structuredKrd,
+  THRESHOLD_STEPS,
+} from "../../../test-utils/zone-profile-fixtures";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { type MatchedSession, MatchedSessionCard } from "./MatchedSessionCard";
@@ -46,6 +50,9 @@ const baseWorkout: WorkoutRecord = {
   modifiedAt: null,
   updatedAt: "2026-04-29T10:00:00.000Z",
 };
+
+const HIGH_COMPLIANCE = 0.95;
+const LOW_COMPLIANCE = 0.3;
 
 const session = (overrides: Partial<MatchedSession> = {}): MatchedSession => ({
   activity: baseActivity,
@@ -111,13 +118,9 @@ describe("MatchedSessionCard", () => {
     expect(screen.getByText("95%")).toBeInTheDocument();
   });
 
-  it.each([
-    { tone: "emerald", score: 0.95, border: "border-emerald-600" },
-    { tone: "amber", score: 0.3, border: "border-amber-600" },
-    { tone: "neutral slate", score: null, border: "border-slate-500" },
-  ] satisfies { tone: string; score: number | null; border: string }[])(
-    "should use a $tone lateral border for a $score compliance score",
-    ({ score, border }) => {
+  it.each([HIGH_COMPLIANCE, LOW_COMPLIANCE, null] satisfies (number | null)[])(
+    "should keep the lateral border off compliance %s",
+    (score) => {
       // Arrange
       render(
         <MatchedSessionCard session={session({ complianceScore: score })} />
@@ -127,9 +130,33 @@ describe("MatchedSessionCard", () => {
       const button = screen.getByTestId("matched-card-train2go:123");
 
       // Assert
-      expect(button.className).toContain(border);
+      expect(button.className).toContain("border-l-edge");
     }
   );
+
+  it("should take the lateral border from the executed session's dominant zone", () => {
+    // Arrange
+    const workout = { ...baseWorkout, krd: structuredKrd(THRESHOLD_STEPS) };
+
+    // Act
+    render(<MatchedSessionCard session={session({ workout })} />);
+
+    // Assert
+    expect(screen.getByTestId("matched-card-train2go:123").className).toContain(
+      "border-l-zone-4"
+    );
+  });
+
+  it("should draw the executed session's zone profile when it has one", () => {
+    // Arrange
+    const workout = { ...baseWorkout, krd: structuredKrd(THRESHOLD_STEPS) };
+
+    // Act
+    render(<MatchedSessionCard session={session({ workout })} />);
+
+    // Assert
+    expect(screen.getByTestId("zone-profile-bar")).toBeInTheDocument();
+  });
 
   it.each([
     {

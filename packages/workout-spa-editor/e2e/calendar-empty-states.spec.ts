@@ -28,14 +28,13 @@ test.describe("Calendar Empty States", () => {
     await clearDexie(page);
   });
 
-  test("should render the week grid without a welcome card when no workouts exist", async ({
+  test("should state what has to be true when the profile has no workouts", async ({
     page,
   }) => {
     // Arrange
-    // PR header-zones-and-picker removed FirstVisitState. The calendar
-    // now relies on the persistent header (`+ New workout`, Library,
-    // Profile) for empty-state discoverability. The week grid still
-    // renders so the user can scan upcoming days.
+    // A true first run used to render nothing at all: every banner was gated
+    // on data existing. The guide is what replaced that silence; the week
+    // grid still renders underneath so the days remain scannable.
 
     // Act
 
@@ -43,9 +42,28 @@ test.describe("Calendar Empty States", () => {
 
     // Assert
 
+    await expect(page.getByTestId("first-run-guide")).toBeVisible();
+    await expect(
+      page.getByText("Nothing here yet — and nothing will appear on its own")
+    ).toBeVisible();
     await expect(page.getByTestId("first-visit-state")).not.toBeAttached();
-    await expect(page.getByText("Welcome to Kaiord")).not.toBeAttached();
     await expect(page.getByTestId("calendar-week-grid")).toBeVisible();
+  });
+
+  test("should not repeat the dependencies the guide already names", async ({
+    page,
+  }) => {
+    // Arrange
+
+    // Act
+
+    await page.reload();
+
+    // Assert
+
+    await expect(page.getByTestId("first-run-guide")).toBeVisible();
+    await expect(page.getByTestId("empty-week-state")).not.toBeAttached();
+    await expect(page.getByTestId("no-bridges-state")).not.toBeAttached();
   });
 
   test("Workouts in other week but not this shows EmptyWeekState", async ({
@@ -60,8 +78,8 @@ test.describe("Calendar Empty States", () => {
 
     // Current week should show EmptyWeekState (not FirstVisitState)
     await expect(page.getByTestId("empty-week-state")).toBeVisible();
-    await expect(page.getByText("No workouts this week")).toBeVisible();
-    await expect(page.getByTestId("first-visit-state")).not.toBeVisible();
+    await expect(page.getByText(/Nothing this week/)).toBeVisible();
+    await expect(page.getByTestId("first-run-guide")).not.toBeAttached();
   });
 
   test('EmptyWeekState "Go to latest" navigates to correct week', async ({
@@ -75,8 +93,10 @@ test.describe("Calendar Empty States", () => {
     ]);
     await page.reload();
 
-    await expect(page.getByTestId("empty-week-state")).toBeVisible();
-    await page.getByRole("button", { name: /Go to latest/i }).click();
+    const banner = page.getByTestId("empty-week-state");
+    await expect(banner).toBeVisible();
+    // Scoped to the banner: the header's nav buttons are also named "Go to …".
+    await banner.getByRole("button", { name: /^Go to / }).click();
     await page.waitForURL(new RegExp(`/calendar/${expectedWeekId}`));
   });
 
@@ -89,8 +109,9 @@ test.describe("Calendar Empty States", () => {
     ]);
     await page.reload();
 
-    await expect(page.getByTestId("empty-week-state")).toBeVisible();
-    await page.getByRole("button", { name: /Add workout/i }).click();
+    const banner = page.getByTestId("empty-week-state");
+    await expect(banner).toBeVisible();
+    await banner.getByRole("button", { name: /Add workout/i }).click();
     await page.waitForURL(/\/workout\/new/);
   });
 });

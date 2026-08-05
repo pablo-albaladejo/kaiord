@@ -29,3 +29,14 @@ export const shortMonthName = (
     month: "short",
     timeZone: "UTC",
   }).format(noonUtc(date));
+
+/** Day and month, for prose that names a date ("your last session was 12 Jul"). */
+export const shortDate = (
+  date: string,
+  locale: Locale = DEFAULT_LOCALE
+): string =>
+  new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(noonUtc(date));

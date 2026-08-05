@@ -50,7 +50,7 @@ describe("WeekStripColumn", () => {
 
     // Assert
     const dot = screen.getByTestId("weekstrip-dot");
-    expect(dot.className).toContain("bg-sky-400");
+    expect(dot.className).toContain("bg-ink-strong");
   });
 
   it("should render an outline dot for an estimated intensity", () => {

@@ -9,15 +9,18 @@
 import type { DaySummary, IntensityBucket } from "./build-week-summary";
 import { DOT_SIZE, durationMarkSize, GLYPH_SIZE } from "./mark-size";
 
+/* Ink at three opacities, not three tints of one hue: the five hues belong to
+   training zones, and the strip's channel here is intensity, not zone. A
+   measured day is filled; an estimated one is only outlined. */
 const FILL: Record<IntensityBucket, string> = {
-  easy: "bg-sky-500/40",
-  moderate: "bg-sky-500/70",
-  hard: "bg-sky-400",
+  easy: "bg-ink-strong/35",
+  moderate: "bg-ink-strong/65",
+  hard: "bg-ink-strong",
 };
 const RING: Record<IntensityBucket, string> = {
-  easy: "border border-sky-500/40",
-  moderate: "border border-sky-500/70",
-  hard: "border border-sky-400",
+  easy: "border border-ink-strong/35",
+  moderate: "border border-ink-strong/65",
+  hard: "border border-ink-strong",
 };
 const OPACITY: Record<IntensityBucket, string> = {
   easy: "opacity-50",

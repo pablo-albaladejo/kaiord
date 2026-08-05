@@ -1,12 +1,16 @@
 /**
  * BatchProcessingBanner - Shows raw workout count and batch action.
  *
+ * This is the calendar's one week-scoped action. The surface is neutral and
+ * the marker is an icon: warning left the palette, and a state that needs the
+ * user says so with a shape and a sentence, not with amber.
+ *
  * During processing, shows progress with cancel button + the
  * spec-required per-workout status breakdown
  * (queued / processing / succeeded / failed).
  */
 
-import { Bot } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 import type { BatchProgress } from "../../../application/batch-processor";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -32,9 +36,12 @@ export function BatchProcessingBanner({
   return (
     <div
       data-testid="batch-processing-banner"
-      className="flex items-center gap-3 rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950"
+      className="flex items-center gap-3 rounded-xl border border-edge bg-surface-elevated p-3.5"
     >
-      <Bot className="h-5 w-5 text-yellow-600" />
+      <TriangleAlert
+        aria-hidden="true"
+        className="h-[18px] w-[18px] shrink-0 text-ink-strong"
+      />
       {isProcessing && progress ? (
         <ProcessingStatus progress={progress} onCancel={onCancel} />
       ) : (
@@ -54,7 +61,7 @@ function IdleStatus({
   const t = useTranslate("coaching");
   return (
     <>
-      <span className="flex-1 text-sm">
+      <span className="flex-1 text-[13px] font-medium tabular-nums text-ink-strong">
         {t(rawCount === 1 ? "batch.rawCount_one" : "batch.rawCount_other", {
           count: rawCount,
         })}
@@ -62,7 +69,7 @@ function IdleStatus({
       <button
         type="button"
         onClick={onProcess}
-        className="rounded-md bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700"
+        className="shrink-0 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-medium text-surface hover:opacity-90"
       >
         {t("batch.processAll")}
       </button>

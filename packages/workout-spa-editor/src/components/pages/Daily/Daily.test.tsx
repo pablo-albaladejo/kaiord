@@ -43,6 +43,27 @@ describe("Daily", () => {
   beforeEach(clearTables);
   afterEach(clearTables);
 
+  it("should lead with the day's session, not with readiness", async () => {
+    // Arrange
+    await db.table<Profile>("profiles").put(PROFILE);
+    await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
+
+    // Act
+    const { container } = renderPage();
+    await waitFor(() =>
+      expect(screen.getByTestId("daily-planned-session")).toBeInTheDocument()
+    );
+
+    // Assert
+    const order = Array.from(
+      container.querySelectorAll(
+        "[data-testid='daily-planned-session'], [data-testid='energy-balance-card'], [data-testid='daily-trends-card']"
+      )
+    ).map((node) => node.getAttribute("data-testid"));
+    expect(order[0]).toBe("daily-planned-session");
+    expect(order.at(-1)).toBe("daily-trends-card");
+  });
+
   it("should render the Today route heading", async () => {
     // Arrange
     await db.table<Profile>("profiles").put(PROFILE);

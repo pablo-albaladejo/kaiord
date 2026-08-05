@@ -45,7 +45,7 @@ test.describe("Workout Lifecycle", () => {
       .locator('[data-testid^="workout-card-"]')
       .first()
       .getByTestId("state-indicator");
-    await expect(indicator).toHaveAttribute("title", "Skipped");
+    await expect(indicator).toHaveText("Skipped");
   });
 
   test("Skipped workout -> open dialog -> Un-skip -> returns to raw", async ({
@@ -74,7 +74,7 @@ test.describe("Workout Lifecycle", () => {
       .locator('[data-testid^="workout-card-"]')
       .first()
       .getByTestId("state-indicator");
-    await expect(indicator).toHaveAttribute("title", "Raw");
+    await expect(indicator).toHaveText("Raw");
   });
 
   test('RAW workout -> click "Process with AI" -> navigates to /workout/{id}', async ({

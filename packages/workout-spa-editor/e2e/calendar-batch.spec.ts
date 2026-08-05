@@ -5,6 +5,7 @@
  */
 
 import { expect, test } from "./fixtures/base";
+import { seedAiProvider } from "./helpers/seed-ai-provider";
 import {
   clearDexie,
   getWeekDates,
@@ -26,6 +27,7 @@ test.describe("Calendar Batch Processing", () => {
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
+    await seedAiProvider(page);
     await seedWorkouts(page, [
       makeRawWorkout(dates[0], "Run 1"),
       makeRawWorkout(dates[1], "Run 2"),
@@ -52,7 +54,7 @@ test.describe("Calendar Batch Processing", () => {
     await expect(page.getByTestId("batch-processing-banner")).not.toBeVisible();
   });
 
-  test('Click "Process all" without AI provider shows warning', async ({
+  test("Raw workouts without an AI provider offer the fix, not a dead end", async ({
     page,
   }) => {
     const dates = getWeekDates();
@@ -61,17 +63,14 @@ test.describe("Calendar Batch Processing", () => {
     await seedWorkouts(page, [makeRawWorkout(dates[0], "Run")]);
     await page.goto(`/calendar/${weekId}`);
 
-    const banner = page.getByTestId("batch-processing-banner");
-    await expect(banner).toBeVisible();
+    // The week gets exactly one action for its raw sessions. With no key the
+    // batch button could only ever fail, so the banner that names the
+    // consequence takes its place (principle 4 — the CTA is the fix).
+    await expect(page.getByTestId("no-ai-provider-state")).toBeVisible();
+    await expect(page.getByTestId("batch-processing-banner")).not.toBeVisible();
 
-    await banner.getByRole("button", { name: /Process all/i }).click();
-
-    // Without an AI provider, the batch handler shows an inline message
-    await expect(
-      page.getByText(
-        "Configure an AI provider in Settings to process workouts."
-      )
-    ).toBeVisible({ timeout: 5000 });
+    await page.getByRole("button", { name: "Add an AI key" }).click();
+    await page.waitForURL(/\/settings\/ai/);
   });
 
   test("Banner disappears when raw workouts are removed from week", async ({
@@ -81,6 +80,7 @@ test.describe("Calendar Batch Processing", () => {
     const weekId = getWeekId(dates[0]);
     const workoutId = crypto.randomUUID();
 
+    await seedAiProvider(page);
     await seedWorkouts(page, [
       { ...makeRawWorkout(dates[0], "Run"), id: workoutId },
     ]);
@@ -106,6 +106,7 @@ test.describe("Calendar Batch Processing", () => {
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
+    await seedAiProvider(page);
     await seedWorkouts(page, [makeRawWorkout(dates[0], "Run")]);
     await page.goto(`/calendar/${weekId}`);
 

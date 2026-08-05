@@ -19,6 +19,9 @@ export type MatchedSession = {
   executed?: readonly WorkoutRecord[];
 };
 
+export const hasFiniteCompliance = (score: number | null): score is number =>
+  score !== null && Number.isFinite(score);
+
 export const formatPercent = (score: number | null): string =>
   score === null ? "compliance unavailable" : `${Math.round(score * 100)}%`;
 

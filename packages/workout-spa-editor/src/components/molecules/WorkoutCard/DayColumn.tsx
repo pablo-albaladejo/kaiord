@@ -28,8 +28,12 @@ export type DayColumnProps = {
   wellnessResolved?: boolean;
 };
 
-const TODAY_BODY_TINT = "bg-primary-50/40 dark:bg-primary-900/20";
-const DROP_RING = "ring-2 ring-primary-500 ring-offset-1";
+/* Today is a surfaced cell with a firmer hairline, not a tinted one: the tint
+   was the retired accent blue at 40%, which reads as a zone-2 wash next to
+   cards whose borders now mean zones. */
+const TODAY_CELL = "border-edge bg-surface";
+const REST_CELL = "border-edge-soft";
+const DROP_RING = "ring-2 ring-accent ring-offset-1";
 
 export function DayColumn({
   date,
@@ -46,7 +50,7 @@ export function DayColumn({
   wellness,
   wellnessResolved = false,
 }: DayColumnProps) {
-  const tint = isToday ? TODAY_BODY_TINT : "";
+  const cell = isToday ? TODAY_CELL : REST_CELL;
   const dropRing = dropTargetActive ? DROP_RING : "";
   return (
     <div
@@ -56,7 +60,7 @@ export function DayColumn({
       data-drop-target={dropTargetActive ? "true" : undefined}
       aria-current={isToday ? "date" : undefined}
       role="group"
-      className={`flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border border-edge p-2 sm:min-w-0 ${tint} ${dropRing}`}
+      className={`flex min-h-[124px] min-w-[140px] flex-1 flex-col rounded-xl border p-2 sm:min-w-0 ${cell} ${dropRing}`}
     >
       <WellnessBand wellness={wellness} resolved={wellnessResolved} />
       <div className="flex flex-1 flex-col gap-1.5">

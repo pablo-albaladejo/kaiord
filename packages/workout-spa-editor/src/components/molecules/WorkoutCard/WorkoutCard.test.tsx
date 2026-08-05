@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  structuredKrd,
+  THRESHOLD_STEPS,
+} from "../../../test-utils/zone-profile-fixtures";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { WorkoutCard } from "./WorkoutCard";
 
@@ -53,7 +57,7 @@ describe("WorkoutCard", () => {
     expect(screen.getByText("running")).toBeInTheDocument();
   });
 
-  it("should show state indicator", () => {
+  it("should say the lifecycle in a word, not a coloured glyph", () => {
     // Arrange
 
     const workout = makeWorkout({ state: "pushed" });
@@ -62,11 +66,11 @@ describe("WorkoutCard", () => {
 
     // Act
 
-    const indicator = screen.getByTestId("state-indicator");
+    const chip = screen.getByTestId("state-indicator");
 
     // Assert
 
-    expect(indicator).toHaveTextContent("\u2713");
+    expect(chip).toHaveTextContent("Pushed");
   });
 
   it("should call onClick when clicked", async () => {
@@ -115,10 +119,10 @@ describe("WorkoutCard", () => {
     expect(screen.getByText("· train2go")).toBeInTheDocument();
   });
 
-  it("should use the lateral border colour driven by state", () => {
+  it("should leave a session with no structure on the neutral edge", () => {
     // Arrange
 
-    const workout = makeWorkout({ state: "pushed" });
+    const workout = makeWorkout({ state: "pushed", krd: null });
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
 
@@ -129,10 +133,48 @@ describe("WorkoutCard", () => {
     // Assert
 
     expect(button.className).toContain("border-l-4");
-    expect(button.className).toContain("border-emerald-600");
+    expect(button.className).toContain("border-l-edge");
   });
 
-  it("should give the state indicator an accessible label", () => {
+  it("should take the lateral border from the session's dominant zone", () => {
+    // Arrange
+
+    const workout = makeWorkout({
+      state: "ready",
+      krd: structuredKrd(THRESHOLD_STEPS),
+    });
+
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Act
+
+    const button = screen.getByTestId("workout-card-w1");
+
+    // Assert
+
+    expect(button.className).toContain("border-l-zone-4");
+  });
+
+  it("should draw the zone profile only when the session has one", () => {
+    // Arrange
+
+    const structured = makeWorkout({ krd: structuredKrd(THRESHOLD_STEPS) });
+
+    // Act
+
+    const { rerender } = render(
+      <WorkoutCard workout={structured} onClick={vi.fn()} />
+    );
+    const withProfile = screen.queryByTestId("zone-profile-bar");
+    rerender(<WorkoutCard workout={makeWorkout()} onClick={vi.fn()} />);
+
+    // Assert
+
+    expect(withProfile).not.toBeNull();
+    expect(screen.queryByTestId("zone-profile-bar")).not.toBeInTheDocument();
+  });
+
+  it("should name the lifecycle in the card's accessible label", () => {
     // Arrange
 
     const workout = makeWorkout({ state: "raw" });
@@ -143,7 +185,9 @@ describe("WorkoutCard", () => {
 
     // Assert
 
-    expect(screen.getByRole("img", { name: "Raw" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Easy run, running, Raw/ })
+    ).toBeInTheDocument();
   });
 
   it("should not show any lifecycle badge for a plain manual workout", () => {

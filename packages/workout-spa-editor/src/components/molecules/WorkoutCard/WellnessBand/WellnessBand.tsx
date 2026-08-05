@@ -30,7 +30,7 @@ export type WellnessBandProps = {
 };
 
 const EMPTY_CLASS =
-  "mb-1.5 flex items-center gap-1 border-b border-gray-200 pb-1.5 text-gray-400 dark:border-slate-700 dark:text-gray-500";
+  "mb-1.5 flex items-center gap-1 border-b border-edge-soft pb-1.5 text-ink-muted";
 
 export function WellnessBand({
   wellness,
@@ -51,7 +51,7 @@ export function WellnessBand({
   return (
     <div
       data-testid="wellness-band"
-      className="mb-1.5 flex flex-wrap gap-1 border-b border-gray-200 pb-1.5 dark:border-slate-700"
+      className="mb-1.5 flex flex-wrap gap-1 border-b border-edge-soft pb-1.5"
     >
       {WELLNESS_BADGE_DEFS.map((def) => {
         const value = wellness[def.metric];

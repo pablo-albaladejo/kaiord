@@ -12,6 +12,7 @@ Custom React hooks. This is where the SPA bridges the persistence layer (Dexie v
 ### Live-query hooks (Dexie → React)
 
 - `use-active-profile-live.ts` / `.test.tsx` — `useLiveQuery` over the active profile id + row.
+- `use-week-dominant-zone.ts` / `.test.ts` — the current week's dominant training zone, for the header mark's `--core-live` (#1118). Answers `null` for a week with nothing the classifier resolves, so the caller declares no custom property and the core inherits ink.
 - `use-profile-by-id-live.ts` / `.test.tsx` — `useLiveQuery` over a specific profile id.
 - `use-profiles-live.ts` / `.test.tsx` — `useLiveQuery` over all profiles.
 - `use-ai-providers-live.ts` / `.test.tsx` — `useLiveQuery` over AI provider configs.

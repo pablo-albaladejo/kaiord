@@ -116,8 +116,7 @@ describe("WellnessBand", () => {
 
     // Assert
     const band = screen.getByTestId("wellness-band");
-    expect(band.className).toContain("border-gray-200");
-    expect(band.className).not.toContain("border-emerald");
+    expect(band.className).toContain("border-edge-soft");
     expect(band.className).not.toContain("border-l-4");
   });
 

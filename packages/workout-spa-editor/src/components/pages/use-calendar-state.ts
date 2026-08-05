@@ -67,8 +67,9 @@ export function useCalendarState() {
   const hasWeekWorkouts = Object.values(data.workoutsByDay).some(
     (w) => w.length > 0
   );
-  const hasReadyWorkouts = Object.values(data.workoutsByDay).some((ws) =>
-    ws.some((w) => w.state === "ready")
+  const readyCount = Object.values(data.workoutsByDay).reduce(
+    (total, ws) => total + ws.filter((w) => w.state === "ready").length,
+    0
   );
 
   return {
@@ -80,7 +81,7 @@ export function useCalendarState() {
     hasAiProvider: aiProviderCount > 0,
     hasAnyWorkouts,
     hasWeekWorkouts,
-    hasReadyWorkouts,
+    readyCount,
     handleGoToLatest,
     handleWorkoutClick,
     setSelectedWorkout,

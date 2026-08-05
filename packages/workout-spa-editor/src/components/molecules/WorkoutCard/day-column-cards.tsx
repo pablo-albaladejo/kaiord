@@ -47,6 +47,7 @@ export function renderDayCards(buckets: DayCardBuckets) {
         <MatchedSessionCard
           key={s.match.id}
           session={s}
+          view={buckets.view}
           density={cardDensity}
           onClick={buckets.onActivityClick}
         />
@@ -55,7 +56,6 @@ export function renderDayCards(buckets: DayCardBuckets) {
         <CoachingActivityCard
           key={a.id}
           activity={a}
-          density={cardDensity}
           onClick={buckets.onActivityClick}
         />
       ))}
@@ -65,12 +65,17 @@ export function renderDayCards(buckets: DayCardBuckets) {
         // persistence call to catch/toast in the first place.
         bindCardDrag && !isProjectedWorkoutRecord(w) ? (
           <div key={w.id} onPointerDown={bindCardDrag(w.id)}>
-            <WorkoutCard workout={w} onClick={buckets.onWorkoutClick} />
+            <WorkoutCard
+              workout={w}
+              view={buckets.view}
+              onClick={buckets.onWorkoutClick}
+            />
           </div>
         ) : (
           <WorkoutCard
             key={w.id}
             workout={w}
+            view={buckets.view}
             onClick={buckets.onWorkoutClick}
           />
         )

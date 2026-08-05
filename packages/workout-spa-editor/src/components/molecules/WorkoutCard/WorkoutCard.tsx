@@ -1,51 +1,62 @@
 /**
  * Compact card for executed workouts on the calendar week view.
  *
- * Visual contract is shared with CoachingActivityCard and
- * MatchedSessionCard via CardShell — the workout `state` drives the
- * lateral border colour (stale/raw → amber, structured/skipped →
- * slate, ready/pushed → emerald) and the existing state symbol stays
- * as the in-row indicator with an accessible label.
+ * Visual contract is shared with CoachingActivityCard and MatchedSessionCard
+ * via CardShell: the 4 px lateral border is the session's dominant training
+ * zone, and a session with no classifiable structure keeps the neutral edge —
+ * "Process all with AI" is what gives a raw card its colour. The lifecycle is
+ * a word in a chip, never the border and never a hue-coded glyph.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { CalendarView } from "../../../types/user-preferences";
 import { CardShell } from "../CardShell/CardShell";
-import { workoutStateToColourClass } from "../CardShell/status-tokens";
+import { LifecycleChip } from "../CardShell/LifecycleChip";
+import { zoneBorderClass } from "../CardShell/status-tokens";
+import { ZONE_BAR_HEIGHT } from "../ZoneProfileBar/zone-bar-height";
+import { ZoneProfileBar } from "../ZoneProfileBar/ZoneProfileBar";
 import { deriveWorkoutLifecycle } from "./session-lifecycle";
 import { SessionLifecycleBadges } from "./SessionLifecycleBadges";
-import { formatDuration, getStateIndicator } from "./workout-card-utils";
+import { useSessionZones } from "./use-session-zones";
+import { formatDuration, lifecycleTone } from "./workout-card-utils";
 
 export type WorkoutCardProps = {
   workout: WorkoutRecord;
+  view?: CalendarView;
   onClick: (workout: WorkoutRecord) => void;
 };
 
-export function WorkoutCard({ workout, onClick }: WorkoutCardProps) {
-  const indicator = getStateIndicator(workout.state);
+export function WorkoutCard({ workout, view, onClick }: WorkoutCardProps) {
+  const t = useTranslate("calendar");
   const title = workout.raw?.title ?? workout.sport;
   const duration = workout.raw?.duration;
   const lifecycle = deriveWorkoutLifecycle(workout);
+  const zones = useSessionZones(workout);
+  const stateLabel = t(`lifecycle.${workout.state}`);
 
   return (
     <CardShell
-      borderClass={workoutStateToColourClass(workout.state)}
-      ariaLabel={`${title}, ${workout.sport}, ${indicator.label}`}
+      borderClass={zoneBorderClass(zones.dominant)}
+      ariaLabel={`${title}, ${workout.sport}, ${stateLabel}`}
       onClick={() => onClick(workout)}
       testId={`workout-card-${workout.id}`}
       originChip={workout.source}
       titleRow={
         <>
-          <span
-            className={indicator.className}
-            data-testid="state-indicator"
-            role="img"
-            aria-label={indicator.label}
-            title={indicator.label}
-          >
-            {indicator.symbol}
-          </span>
           <span className="min-w-0 flex-1">{title}</span>
+          <LifecycleChip
+            label={stateLabel}
+            tone={lifecycleTone(workout.state)}
+            testId="state-indicator"
+          />
         </>
+      }
+      zoneBar={
+        <ZoneProfileBar
+          segments={zones.segments}
+          height={ZONE_BAR_HEIGHT[view ?? "grid"]}
+        />
       }
       metadataRow={
         <>
