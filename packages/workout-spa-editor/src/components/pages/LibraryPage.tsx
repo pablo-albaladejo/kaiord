@@ -88,7 +88,7 @@ export default function LibraryPage() {
           a per-branch header would unmount and drop focus to <body>. */}
       <LibraryHeader count={templates?.length ?? 0} />
       {templates === undefined ? (
-        <div className="flex items-center justify-center p-8 text-slate-400">
+        <div className="flex items-center justify-center p-8 text-ink-muted">
           {t("page.loading")}
         </div>
       ) : (

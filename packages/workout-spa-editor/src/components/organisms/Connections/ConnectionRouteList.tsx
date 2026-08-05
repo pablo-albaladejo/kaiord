@@ -17,7 +17,7 @@ const emptyKey = (detected: boolean): string =>
 function RouteRow({ labelKey, types, detected, t }: RowProps) {
   return (
     <div className="space-y-1">
-      <div className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
         {t(labelKey)}
       </div>
       <div className="text-[13px] leading-relaxed text-ink-body">
