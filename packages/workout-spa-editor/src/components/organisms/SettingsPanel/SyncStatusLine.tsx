@@ -29,10 +29,7 @@ function describe(
 export const SyncStatusLine: React.FC<SyncStatusLineProps> = (props) => {
   const t = useTranslate("settings");
   return (
-    <p
-      data-testid="sync-status"
-      className="text-sm font-medium text-gray-700 dark:text-gray-300"
-    >
+    <p data-testid="sync-status" className="text-sm font-medium text-ink-body">
       {describe(props, t)}
     </p>
   );

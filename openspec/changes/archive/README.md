@@ -7,6 +7,8 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-08-04 | [`redesign-app-header`](./2026-08-04-redesign-app-header/) | The app shell's navigation is ten flat destinations over two wrapping rows. |
+| 2026-08-04 | [`retire-help-dialog-for-coach-marks`](./2026-08-04-retire-help-dialog-for-coach-marks/) | The SPA still ships two guidance surfaces that teach nothing. |
 | 2026-07-29 | [`add-connections-change-source`](./2026-07-29-add-connections-change-source/) | Wave 2a made every routing row answer "where does my sleep data come from", |
 | 2026-07-29 | [`add-connections-data-type-rows`](./2026-07-29-add-connections-data-type-rows/) | The Connections section answers "which sources are linked". It does not answer |
 | 2026-07-29 | [`add-connections-health-summary`](./2026-07-29-add-connections-health-summary/) | add-connections-page shipped the source cards. A reader who opens |

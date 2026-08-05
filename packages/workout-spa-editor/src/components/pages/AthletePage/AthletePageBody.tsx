@@ -11,6 +11,7 @@ import {
 import type { Profile } from "../../../types/profile";
 import { logger } from "../../../utils/logger";
 import { Segmented } from "../../atoms/Segmented";
+import { AthleteConnectionsLink } from "./AthleteConnectionsLink";
 import { AthleteIdentity } from "./AthleteIdentity";
 import { ThresholdCard } from "./ThresholdCard";
 import { defaultSport } from "./use-default-sport";
@@ -20,6 +21,10 @@ type AthletePageBodyProps = {
   profileId: string;
   profile: Profile;
 };
+
+/* `min(380px, 100%)` rather than a bare 380px: on a 390px viewport a bare
+   minimum overflows the track and the grid stops fitting the phone. */
+const COLUMNS = "repeat(auto-fit, minmax(min(380px, 100%), 1fr))";
 
 export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
   const t = useTranslate("athlete");
@@ -47,21 +52,27 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
     ATHLETE_SPORTS.find((option) => option.value === sport)?.label ?? "";
 
   return (
-    <div className="space-y-5 px-4 py-4">
-      <AthleteIdentity profile={profile} />
+    <div className="flex flex-col gap-5 px-4 py-4">
+      <AthleteIdentity profile={profile} sport={sport} />
       <Segmented
         options={[...ATHLETE_SPORTS]}
         value={sport}
         onChange={handleSportChange}
         ariaLabel={t("sportAria")}
       />
-      <ThresholdCard
-        profile={profile}
-        profileId={profileId}
-        sport={sport}
-        sportLabel={sportLabel}
-      />
-      <ZoneMapCard profile={profile} sport={sport} sportLabel={sportLabel} />
+      <div
+        className="grid items-start gap-3.5"
+        style={{ gridTemplateColumns: COLUMNS }}
+      >
+        <ThresholdCard
+          profile={profile}
+          profileId={profileId}
+          sport={sport}
+          sportLabel={sportLabel}
+        />
+        <ZoneMapCard profile={profile} sport={sport} sportLabel={sportLabel} />
+      </div>
+      <AthleteConnectionsLink profile={profile} />
     </div>
   );
 }

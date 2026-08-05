@@ -6,17 +6,17 @@
  */
 import { useState } from "react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { LabParameterChartCard } from "./charts/LabParameterChartCard";
 import { LabLatestValuesList } from "./LabLatestValuesList";
 import { useLabParameterSummariesLive } from "./use-lab-history";
-
-const LOADING = "Loading…";
 
 export const LabLatestValuesSection = ({
   profileId,
 }: {
   profileId: string;
 }) => {
+  const t = useTranslate("labs-ui");
   const summaries = useLabParameterSummariesLive(profileId);
   const [selected, setSelected] = useState<string | null>(null);
   const toggle = (key: string) =>
@@ -24,9 +24,11 @@ export const LabLatestValuesSection = ({
 
   return (
     <section>
-      <h3 className="mb-2 text-sm font-semibold">Latest values</h3>
+      <h3 className="mb-2 text-sm font-semibold text-ink-strong">
+        {t("latest.title")}
+      </h3>
       {summaries === undefined ? (
-        <p className="text-sm text-gray-600">{LOADING}</p>
+        <p className="text-sm text-ink-muted">{t("latest.loading")}</p>
       ) : (
         <LabLatestValuesList
           summaries={summaries}

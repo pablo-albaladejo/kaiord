@@ -5,7 +5,7 @@
  * vendored copy — edit the master and run `pnpm bridge:sync`.
  *
  * The blocks every bridge popup is built from: the status block
- * (dot + verdict + one cause sentence), the capability chips, the
+ * (mark + verdict + one cause sentence), the capability chips, the
  * consequence lines, the fixed-height checking skeleton, and the CTA pair.
  * Loaded from popup.html right after bridge-popup-utils.js.
  *
@@ -14,12 +14,7 @@
  * every renderer callable from a CJS `require` in the bridge test suites.
  */
 
-// The second line keeps `--line` (height) and adds `--line-short` (width);
-// the width modifier alone would render a zero-height bar.
-const KD_SKELETON_LINES = [
-  "skeleton--line",
-  "skeleton--line skeleton--line-short",
-];
+const KD_SVG_NS = "http://www.w3.org/2000/svg";
 
 const kdReplace = (region, nodes) => {
   region.innerHTML = "";
@@ -33,9 +28,39 @@ const kdBlock = (tag, className, text) => {
   return el;
 };
 
-// tone ∈ {ok, warn, muted} — colours the dot and the verdict. `causeKey`
-// is optional: a state with no explainable cause renders the verdict alone
-// and hides the cause line rather than leaving a stale sentence behind.
+// Sprite reference rather than inline path data: each popup.html carries the
+// symbol set, so a master never has to hold geometry it would then have to
+// keep in sync with five copies.
+const kdIcon = (className, symbolId) => {
+  const svg = document.createElementNS(KD_SVG_NS, "svg");
+  svg.setAttribute("class", className);
+  const use = document.createElementNS(KD_SVG_NS, "use");
+  use.setAttribute("href", `#${symbolId}`);
+  svg.appendChild(use);
+  return svg;
+};
+
+// The mark is the leading glyph of the status block. `dot` is the resting
+// form; `alert` is what a state that needs the user takes, because the
+// palette has no warning hue to promote a dot with.
+const kdStatusMark = (mark) =>
+  mark === "alert"
+    ? kdIcon("status-block__icon", "i-attn")
+    : kdBlock("span", "status-block__dot");
+
+const renderStatusMark = (el, mark) => {
+  const previous = el.querySelector("[data-status-mark]");
+  if (previous) previous.remove();
+  const node = kdStatusMark(mark);
+  node.setAttribute("data-status-mark", "");
+  node.setAttribute("aria-hidden", "true");
+  el.insertBefore(node, el.firstChild);
+};
+
+// tone ∈ {ok, warn, muted, checking} — colours the mark and the verdict.
+// mark ∈ {dot, alert}. `causeKey` is optional: a state with no explainable
+// cause renders the verdict alone and hides the cause line rather than
+// leaving a stale sentence behind.
 //
 // Deliberately sets no aria-label on the block: an aria-label would replace
 // its content for assistive tech, announcing the verdict and swallowing the
@@ -43,10 +68,11 @@ const kdBlock = (tag, className, text) => {
 const renderStatusBlock = (
   $,
   msg,
-  { tone = "muted", verdictKey, verdictSubs, causeKey, causeSubs } = {}
+  { tone = "muted", mark = "dot", verdictKey, verdictSubs, causeKey, causeSubs } = {}
 ) => {
   const el = $("status");
   el.className = `status-block status-block--${tone}`;
+  renderStatusMark(el, mark);
   $("status-text").textContent = msg(verdictKey, verdictSubs);
   const cause = $("status-sub");
   if (!cause) return;
@@ -55,7 +81,7 @@ const renderStatusBlock = (
 };
 
 // items: [{ label, modifier? }] — modifier is a `.chip--*` suffix
-// ("out", "muted", "dashed", "danger"). An empty list clears the region.
+// ("out", "muted", "dashed", "more"). An empty list clears the region.
 const renderChips = ($, items, { caption, region = "chips-region" } = {}) => {
   const host = $(region);
   const nodes = [];
@@ -96,21 +122,48 @@ const renderConsequence = (
   kdReplace(host, [box]);
 };
 
-// Placeholders sized to the resolved layout (caption, three chips, two text
-// lines, one CTA) so the popup does not jump when the probe settles.
-const renderSkeleton = ($) => {
-  const chips = kdBlock("div", "chips");
-  for (let i = 0; i < 3; i += 1) {
-    chips.appendChild(kdBlock("span", "skeleton skeleton--chip"));
+// The primitives a skeleton region is composed from. Each stands in for one
+// resolved element at its real height, so a popup that names the right parts
+// gets a checking layout the same height as the state that replaces it.
+const KD_SKELETON_PARTS = {
+  caption: () => kdBlock("div", "skeleton skeleton--caption"),
+  chips: () => {
+    const row = kdBlock("div", "chips");
+    for (let i = 0; i < 3; i += 1) {
+      row.appendChild(kdBlock("span", "skeleton skeleton--chip"));
+    }
+    return row;
+  },
+  line: () => kdBlock("div", "skeleton skeleton--line"),
+  "line-short": () =>
+    kdBlock("div", "skeleton skeleton--line skeleton--line-short"),
+  cta: () => kdBlock("div", "skeleton skeleton--cta"),
+  secondary: () => kdBlock("div", "skeleton skeleton--secondary"),
+  block: () => kdBlock("div", "skeleton skeleton--block"),
+  "block-sm": () => kdBlock("div", "skeleton skeleton--block-sm"),
+};
+
+// The two regions every popup has had since the shell landed. A popup that
+// fills more than these passes its own list; the default keeps a
+// two-region bridge working unchanged.
+const KD_DEFAULT_SKELETON = [
+  { region: "chips-region", parts: ["caption", "chips"] },
+  { region: "footer-region", parts: ["cta", "secondary"] },
+];
+
+// regions: [{ region, parts: [partName] }] — the popup declares which regions
+// it will fill and what each resolves to. Naming a region the popup never
+// fills would leave a placeholder that outlives the probe, so a region absent
+// from the document is skipped rather than created.
+const renderSkeleton = ($, regions = KD_DEFAULT_SKELETON) => {
+  for (const { region, parts } of regions) {
+    const host = $(region);
+    if (!host) continue;
+    kdReplace(
+      host,
+      parts.filter((name) => KD_SKELETON_PARTS[name]).map((name) => KD_SKELETON_PARTS[name]())
+    );
   }
-  kdReplace($("chips-region"), [
-    kdBlock("div", "skeleton skeleton--caption"),
-    chips,
-  ]);
-  kdReplace($("footer-region"), [
-    ...KD_SKELETON_LINES.map((cls) => kdBlock("div", `skeleton ${cls}`)),
-    kdBlock("div", "skeleton skeleton--cta"),
-  ]);
 };
 
 const kdLink = (className, label, href) => {

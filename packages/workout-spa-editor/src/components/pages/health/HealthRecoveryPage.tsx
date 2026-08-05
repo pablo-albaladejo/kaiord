@@ -10,6 +10,9 @@ import { HealthPageHeader } from "./HealthPageHeader";
 import { HrvHistoryList } from "./HrvHistoryList";
 import { TodayStressList } from "./TodayStressList";
 
+const SECTION_CAPTION =
+  "mb-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-muted";
+
 export default function HealthRecoveryPage() {
   const t = useTranslate("health");
   // Computed per render so the window stays current across day rollovers.
@@ -29,13 +32,9 @@ export default function HealthRecoveryPage() {
           today,
         })}
       />
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
-        {t("recovery.hrvHistory")}
-      </h2>
+      <h2 className={SECTION_CAPTION}>{t("recovery.hrvHistory")}</h2>
       <HrvHistoryList loading={hrv === undefined} records={hrv} />
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
-        {t("recovery.stressToday")}
-      </h2>
+      <h2 className={SECTION_CAPTION}>{t("recovery.stressToday")}</h2>
       <TodayStressList loading={stress === undefined} records={stress} />
     </section>
   );

@@ -26,6 +26,7 @@ export type UpdateProfileInput = Partial<
     | "birthDate"
     | "sex"
     | "restingHeartRate"
+    | "maxHeartRate"
     | "activityLevel"
   >
 >;

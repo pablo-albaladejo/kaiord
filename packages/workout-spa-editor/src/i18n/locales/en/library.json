@@ -4,8 +4,8 @@
   },
   "header": {
     "title": "Library",
-    "count_one": "{{count}} workout",
-    "count_other": "{{count}} workouts"
+    "count_one": "{{count}} workout · kept by you",
+    "count_other": "{{count}} workouts · kept by you"
   },
   "search": {
     "placeholder": "Search workouts...",
@@ -15,7 +15,9 @@
     "all": "All",
     "cycling": "Cycling",
     "running": "Running",
-    "swim": "Swim"
+    "swim": "Swim",
+    "strength": "Strength",
+    "generic": "Other"
   },
   "empty": {
     "title": "Your library is empty",
@@ -105,5 +107,10 @@
     "workoutSavedDescription": "\"{{name}}\" has been added to your library",
     "saveFailed": "Save Failed",
     "saveFailedDescription": "Failed to save workout"
+  },
+  "keepHint": {
+    "title": "Anything you keep from the editor lands here",
+    "body": "With its zones and structure intact, ready to drop onto any date.",
+    "action": "Write a new one"
   }
 }

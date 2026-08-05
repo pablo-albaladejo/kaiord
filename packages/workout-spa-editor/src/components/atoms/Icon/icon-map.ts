@@ -3,7 +3,6 @@ import {
   ArrowDown,
   ArrowUp,
   Bell,
-  Bike,
   Calendar,
   CalendarCheck,
   Check,
@@ -13,7 +12,6 @@ import {
   Clock,
   Flame,
   FlaskConical,
-  Footprints,
   Heart,
   HelpCircle,
   LayoutGrid,
@@ -29,29 +27,29 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  TriangleAlert,
   Upload,
   User,
   Utensils,
   Watch,
-  Waves,
   X,
   Zap,
 } from "lucide-react";
+
+import { SPORT_ICONS } from "./sport-icons";
 
 /* Stable semantic names used by the redesign surfaces, mapped to concrete
    lucide-react icons. Screens reference icons by these names (via the
    `IconName` type) so the underlying icon set can change in one place
    without touching every call site. Names mirror the design handoff. */
 export const ICON_MAP = {
+  ...SPORT_ICONS,
   today: CalendarCheck,
   library: LayoutGrid,
   cards: LayoutGrid,
   plus: Plus,
   athlete: User,
   gear: Settings,
-  bike: Bike,
-  run: Footprints,
-  swim: Waves,
   zap: Zap,
   sparkle: Sparkles,
   heart: Heart,
@@ -80,6 +78,9 @@ export const ICON_MAP = {
   chat: MessageCircle,
   labs: FlaskConical,
   help: HelpCircle,
+  /* The palette has no warning hue — amber is Z4. A state that needs the
+     user is said with this icon plus a sentence, never with colour. */
+  alert: TriangleAlert,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICON_MAP;

@@ -5,12 +5,14 @@ import { describe, expect, it, vi } from "vitest";
 import { LibraryCard } from "./LibraryCard";
 
 const DIST = [2, 1, 2, 1, 1];
+/* Weights, not fractions: LibraryCard only asks which is largest. */
+const DIST_Z3_DOMINANT = [1, 2, 100, 1, 0];
 
 describe("LibraryCard", () => {
   it("should render the title", () => {
     // Arrange
     render(
-      <LibraryCard title="Sweet Spot" sport="cycling" onClick={vi.fn()} />
+      <LibraryCard title="Sweet Spot" sportLabel="Cycling" onClick={vi.fn()} />
     );
 
     // Act
@@ -25,7 +27,7 @@ describe("LibraryCard", () => {
     render(
       <LibraryCard
         title="Sweet Spot"
-        sport="cycling"
+        sportLabel="Cycling"
         duration="1:00:00"
         tss={78}
         onClick={vi.fn()}
@@ -36,8 +38,7 @@ describe("LibraryCard", () => {
     const meta = screen.getByText(/78 TSS/);
 
     // Assert
-    expect(screen.getByText("1:00:00")).toBeInTheDocument();
-    expect(meta).toBeInTheDocument();
+    expect(meta).toHaveTextContent("Cycling · 1:00:00 · 78 TSS");
   });
 
   it("should render an optional tag pill", () => {
@@ -45,7 +46,7 @@ describe("LibraryCard", () => {
     render(
       <LibraryCard
         title="Sweet Spot"
-        sport="cycling"
+        sportLabel="Cycling"
         tag="Threshold"
         onClick={vi.fn()}
       />
@@ -63,7 +64,7 @@ describe("LibraryCard", () => {
     const { container } = render(
       <LibraryCard
         title="Sweet Spot"
-        sport="cycling"
+        sportLabel="Cycling"
         dist={DIST}
         onClick={vi.fn()}
       />
@@ -76,12 +77,45 @@ describe("LibraryCard", () => {
     expect(bars.length).toBeGreaterThan(0);
   });
 
+  it("should carry a lateral border in the dominant zone", () => {
+    // Arrange
+    render(
+      <LibraryCard
+        title="Sweet Spot"
+        sportLabel="Cycling"
+        dist={DIST_Z3_DOMINANT}
+        onClick={vi.fn()}
+      />
+    );
+
+    // Act
+    const card = screen.getByTestId("library-card");
+
+    // Assert
+    expect(card.getAttribute("style")).toContain(
+      "border-left: 4px solid var(--zone-3)"
+    );
+  });
+
+  it("should carry no zone border when there is no distribution", () => {
+    // Arrange
+    render(
+      <LibraryCard title="Sweet Spot" sportLabel="Cycling" onClick={vi.fn()} />
+    );
+
+    // Act
+    const card = screen.getByTestId("library-card");
+
+    // Assert
+    expect(card.style.borderLeft).toBe("");
+  });
+
   it("should call onClick when the card is tapped", async () => {
     // Arrange
     const onClick = vi.fn();
     const user = userEvent.setup();
     render(
-      <LibraryCard title="Sweet Spot" sport="cycling" onClick={onClick} />
+      <LibraryCard title="Sweet Spot" sportLabel="Cycling" onClick={onClick} />
     );
 
     // Act

@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 export const Full: Story = {
   args: {
     title: "Sweet Spot Intervals",
-    sport: "cycling",
+    sportLabel: "Cycling",
     duration: "1:00:00",
     tss: 78,
     dist: [0.2, 0.3, 0.3, 0.15, 0.05],
@@ -27,7 +27,7 @@ export const Full: Story = {
 export const NoZones: Story = {
   args: {
     title: "Easy Recovery Spin",
-    sport: "cycling",
+    sportLabel: "Cycling",
     duration: "0:45:00",
     tss: 30,
     onClick: () => undefined,
@@ -37,7 +37,7 @@ export const NoZones: Story = {
 export const Running: Story = {
   args: {
     title: "Tempo Run",
-    sport: "running",
+    sportLabel: "Running",
     duration: "0:40:00",
     tss: 55,
     dist: [0.1, 0.2, 0.5, 0.15, 0.05],
@@ -48,7 +48,7 @@ export const Running: Story = {
 export const MetaOnly: Story = {
   args: {
     title: "Untracked Workout",
-    sport: "swimming",
+    sportLabel: "Swim",
     onClick: () => undefined,
   },
 };

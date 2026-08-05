@@ -1,25 +1,30 @@
 /**
- * Theme-aware axis colors for uPlot charts. Reads the semantic `--ink-muted`
- * / `--edge` custom properties (see src/index.css `:root` / `.dark`) from the
- * live DOM so axis labels, ticks, and grid lines adapt when the `.dark` class
- * toggles on <html>. Series strokes (the blues/reds in build-sparkline.ts,
- * build-lab-chart-options.ts, build-trend-chart-options.ts) stay explicit
- * hex constants on purpose — they're legible on both light and dark surfaces
- * and don't need to shift per theme.
+ * Theme-aware colors for uPlot charts. Reads semantic custom properties (see
+ * src/index.css `:root` / `.dark`) from the live DOM so axis labels, ticks,
+ * grid lines — and, via `series-strokes.ts`, the series themselves — adapt
+ * when the `.dark` class toggles on <html>. Series are told apart by
+ * lightness and label, never by hue: the five hues belong to training zones.
  */
 import type uPlot from "uplot";
 
-// Mirrors the :root defaults in src/index.css. Used when running outside a
-// browser (SSR, non-DOM test runner) or before the stylesheet has loaded.
-const FALLBACK_AXIS_STROKE = "#64748b";
-const FALLBACK_GRID_STROKE = "#e2e8f0";
+// Mirrors the :root (light) values the roles resolve to — --ink-muted is
+// --text-dim (n-600) and --edge is --border (n-300). Used when running
+// outside a browser (SSR, non-DOM test runner) or before the stylesheet has
+// loaded.
+const FALLBACK_AXIS_STROKE = "#747474";
+const FALLBACK_GRID_STROKE = "#d4d4d4";
 
 export type ChartAxisColors = {
   stroke: string;
   grid: string;
 };
 
-const readCssVar = (name: string, fallback: string): string => {
+/**
+ * Resolves one theme custom property off the document root, falling back when
+ * there is no DOM (SSR, non-browser test runner) or the stylesheet has not
+ * loaded yet.
+ */
+export const readThemeColor = (name: string, fallback: string): string => {
   if (
     typeof window === "undefined" ||
     typeof window.getComputedStyle !== "function"
@@ -38,8 +43,8 @@ const readCssVar = (name: string, fallback: string): string => {
  * color) tokens, resolved fresh from the document root at call time.
  */
 export const getChartAxisColors = (): ChartAxisColors => ({
-  stroke: readCssVar("--ink-muted", FALLBACK_AXIS_STROKE),
-  grid: readCssVar("--edge", FALLBACK_GRID_STROKE),
+  stroke: readThemeColor("--ink-muted", FALLBACK_AXIS_STROKE),
+  grid: readThemeColor("--edge", FALLBACK_GRID_STROKE),
 });
 
 /**

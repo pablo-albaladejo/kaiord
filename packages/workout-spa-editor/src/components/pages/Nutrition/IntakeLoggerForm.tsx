@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Card } from "../../atoms/Card";
+import { ALERT_ICON } from "../../atoms/Icon/alert-icon";
+import { Icon } from "../../atoms/Icon/Icon";
 import {
   EMPTY_INTAKE_FIELDS,
   type IntakeLoggerFields as Fields,
@@ -46,7 +48,11 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
       </p>
       <IntakeLoggerFields fields={fields} onChange={setFields} />
       {error !== null && (
-        <p role="alert" className="m-0 mt-2 text-[12px] text-red-400">
+        <p
+          role="alert"
+          className="m-0 mt-2 flex items-center gap-1.5 text-[12px] text-ink-strong"
+        >
+          <Icon icon={ALERT_ICON} size="xs" color="inherit" />
           {error}
         </p>
       )}
@@ -56,7 +62,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
           disabled={!("entry" in result)}
           onClick={handleLog}
           data-testid="intake-log-submit"
-          className="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="flex-1 rounded bg-accent px-4 py-2 text-sm font-semibold text-surface disabled:opacity-50"
         >
           {t("logger.addEntry")}
         </button>

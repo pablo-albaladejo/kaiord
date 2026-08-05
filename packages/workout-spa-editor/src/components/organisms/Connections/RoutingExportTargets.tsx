@@ -14,7 +14,7 @@ export function RoutingExportTargets({ dataType, sentTo }: Props) {
   const t = useTranslate("connections");
   return (
     <div className="flex flex-[1_1_180px] flex-wrap items-center gap-2">
-      <span className="text-[10.5px] font-bold uppercase tracking-wider text-ink-muted">
+      <span className="text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
         {t("routing.sentTo")}
       </span>
       {sentTo.length === 0 ? (
