@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ThemeProvider } from "../../../contexts/ThemeContext";
 import type { SparklinePoint } from "./build-sparkline";
 import { Sparkline } from "./Sparkline";
 
@@ -19,7 +20,7 @@ describe("Sparkline", () => {
     const points = POINTS;
 
     // Act
-    render(<Sparkline points={points} />);
+    render(<Sparkline points={points} />, { wrapper: ThemeProvider });
 
     // Assert
     expect(screen.getByTestId("sparkline")).toBeInTheDocument();
@@ -31,7 +32,7 @@ describe("Sparkline", () => {
     const points: SparklinePoint[] = [];
 
     // Act
-    render(<Sparkline points={points} />);
+    render(<Sparkline points={points} />, { wrapper: ThemeProvider });
 
     // Assert
     expect(screen.queryByTestId("sparkline")).not.toBeInTheDocument();

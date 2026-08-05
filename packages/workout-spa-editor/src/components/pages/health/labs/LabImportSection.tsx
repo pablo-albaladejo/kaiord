@@ -31,24 +31,20 @@ export function LabImportSection({ onDraft }: LabImportSectionProps) {
 
   return (
     <section
-      className="flex flex-col gap-2 rounded border border-gray-200 p-3 dark:border-slate-800"
+      className="flex flex-col gap-2 rounded border border-edge-soft p-3"
       data-testid="lab-import-section"
     >
       <p className="text-sm font-medium">{t("title")}</p>
       {!canImport && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {t("noProviderHint")}
-        </p>
+        <p className="text-sm text-ink-muted">{t("noProviderHint")}</p>
       )}
       {canImport && isRunning && (
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            {t("progress")}
-          </span>
+          <span className="text-sm text-ink-muted">{t("progress")}</span>
           <button
             type="button"
             onClick={cancel}
-            className="text-sm text-gray-500 hover:text-red-600"
+            className="text-sm text-ink-muted hover:text-danger-text"
           >
             {t("cancel")}
           </button>

@@ -28,12 +28,12 @@ export const LabReportRow = ({
     <li
       data-testid="lab-report-row"
       data-report-id={report.id}
-      className="flex items-center justify-between gap-2 rounded border border-gray-200 p-2 text-sm dark:border-slate-800"
+      className="flex items-center justify-between gap-2 rounded border border-edge-soft p-2 text-sm"
     >
       <button type="button" onClick={onToggle} className="flex-1 text-left">
         <span className="font-medium">{report.date}</span>
         {report.labName ? ` · ${report.labName}` : ""}
-        <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">
+        <span className="ml-2 text-xs text-accent">
           {isSelected ? t("report.hide") : t("report.view")}
         </span>
       </button>
@@ -42,14 +42,14 @@ export const LabReportRow = ({
           <button
             type="button"
             onClick={onDelete}
-            className={`${BTN} border-red-300 text-red-700 dark:border-red-800 dark:text-red-300`}
+            className={`${BTN} border-danger-border text-danger-text`}
           >
             {t("report.confirm")}
           </button>
           <button
             type="button"
             onClick={() => setConfirming(false)}
-            className={`${BTN} border-gray-300 dark:border-gray-600`}
+            className={`${BTN} border-edge`}
           >
             {t("report.cancel")}
           </button>
@@ -59,7 +59,7 @@ export const LabReportRow = ({
           type="button"
           aria-label={t("report.deleteAria", { date: report.date })}
           onClick={() => setConfirming(true)}
-          className={`${BTN} border-gray-300 dark:border-gray-600`}
+          className={`${BTN} border-edge`}
         >
           {t("report.delete")}
         </button>

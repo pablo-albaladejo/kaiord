@@ -42,7 +42,7 @@ export const LabHistorySection = ({ profileId }: { profileId: string }) => {
       <section>
         <h3 className="mb-2 text-sm font-semibold">{t("history.reports")}</h3>
         {reports === undefined ? (
-          <p className="text-sm text-gray-600">{t("history.loading")}</p>
+          <p className="text-sm text-ink-muted">{t("history.loading")}</p>
         ) : (
           <LabReportsList
             reports={reports}
