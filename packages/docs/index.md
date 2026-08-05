@@ -19,19 +19,19 @@ Kaiord is an open-source TypeScript framework for reading, writing, and converti
 
 ## Get started in 3 steps
 
-<div class="steps-grid">
-  <div class="step">
-    <div class="step-number">1</div>
-    <h3>Install</h3>
+<!-- A vertical sequence, not a grid: the three steps have incomparable
+     heights (one shell line, six lines of TS, one sentence), and a code
+     line inside a minmax(260px, 1fr) cell sets the cell's min-content
+     width far above 260px — on a 390px phone the grid overflows the
+     page. Full-width code cannot overflow anything. -->
+
+<h3 class="step-head"><span class="step-number">1</span> Install</h3>
 
 ```sh
 pnpm add @kaiord/core @kaiord/fit @kaiord/tcx
 ```
 
-  </div>
-  <div class="step">
-    <div class="step-number">2</div>
-    <h3>Convert</h3>
+<h3 class="step-head"><span class="step-number">2</span> Convert</h3>
 
 ```ts
 import { fromBinary, toText } from "@kaiord/core";
@@ -42,13 +42,9 @@ const krd = await fromBinary(fitBuffer, fitReader);
 const tcx = await toText(krd, tcxWriter);
 ```
 
-  </div>
-  <div class="step">
-    <div class="step-number">3</div>
-    <h3>Done</h3>
-    <p>Your FIT file is now a valid TCX. Use it in any training platform that accepts TCX.</p>
-  </div>
-</div>
+<h3 class="step-head"><span class="step-number">3</span> Done</h3>
+
+Your FIT file is now a valid TCX. Use it in any training platform that accepts TCX.
 
 ## Explore
 
@@ -71,95 +67,6 @@ const tcx = await toText(krd, tcxWriter);
   </a>
 </div>
 
-<style>
-.hero-actions {
-  display: flex;
-  gap: 12px;
-  margin: 24px 0 48px;
-}
-
-.action-btn {
-  display: inline-block;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 15px;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.action-btn:hover {
-  opacity: 0.85;
-}
-
-.action-btn.primary {
-  background: var(--vp-c-brand-1);
-  color: #fff;
-}
-
-.action-btn.secondary {
-  border: 1px solid var(--vp-c-divider);
-  color: var(--vp-c-text-1);
-}
-
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-  margin: 24px 0 48px;
-}
-
-.step {
-  padding: 20px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
-  background: var(--vp-c-bg-soft);
-}
-
-.step-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--vp-c-brand-1);
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin: 24px 0;
-}
-
-.feature-card {
-  display: block;
-  padding: 20px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
-  background: var(--vp-c-bg-soft);
-  text-decoration: none;
-  color: var(--vp-c-text-1);
-  transition: border-color 0.2s;
-}
-
-.feature-card:hover {
-  border-color: var(--vp-c-brand-1);
-}
-
-.feature-card h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
-
-.feature-card p {
-  margin: 0;
-  color: var(--vp-c-text-2);
-  font-size: 14px;
-}
-</style>
+<!-- No <style> here on purpose. A <style> in a .md is global to the whole
+     site with nothing marking it as such; the home's classes live in
+     .vitepress/theme/custom.css, where global is what the file means. -->
