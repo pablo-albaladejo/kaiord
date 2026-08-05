@@ -239,7 +239,7 @@
         <!-- Logo -->
         <a
           href="/"
-          class="flex items-center gap-2 text-lg font-extrabold tracking-tight"
+          class="flex items-center gap-2 text-lg font-semibold tracking-tight"
           aria-label="Kaiord home"
         >
           <svg
@@ -386,10 +386,10 @@
             ></div>
             <div class="relative flex flex-1 flex-col">
               <span
-                class="self-start rounded-full bg-[var(--mkt-brand)]/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.04em] text-[var(--mkt-brand)]"
+                class="self-start rounded-full bg-[var(--mkt-brand)]/15 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.04em] text-[var(--mkt-brand)]"
                 >For athletes</span
               >
-              <h2 class="mt-4 text-[27px] font-bold tracking-[-0.02em]">
+              <h2 class="mt-4 text-[27px] font-semibold tracking-[-0.02em]">
                 Train with Kaiord
               </h2>
               <p
@@ -429,7 +429,7 @@
                               Thursday, May 29
                             </div>
                             <div
-                              class="mb-3 text-[25px] font-bold tracking-[-0.02em]"
+                              class="mb-3 text-[25px] font-semibold tracking-[-0.02em]"
                             >
                               Today
                             </div>
@@ -519,20 +519,20 @@
                                   />
                                 </svg>
                                 <div
-                                  class="absolute inset-0 flex items-center justify-center text-base font-bold"
+                                  class="absolute inset-0 flex items-center justify-center text-base font-semibold"
                                 >
                                   82
                                 </div>
                               </div>
                               <div>
-                                <div class="text-[13.5px] font-bold">
+                                <div class="text-[13.5px] font-semibold">
                                   Good to push today
                                 </div>
                                 <div
                                   class="mt-0.5 text-[11px] text-[var(--text-dim)]"
                                 >
                                   <span
-                                    class="mr-0.5 rounded bg-[var(--mkt-brand)]/15 px-1 py-px align-middle text-[8px] font-bold uppercase tracking-[0.06em] text-[var(--mkt-brand)]"
+                                    class="mr-0.5 rounded bg-[var(--mkt-brand)]/15 px-1 py-px align-middle text-[8px] font-semibold uppercase tracking-[0.06em] text-[var(--mkt-brand)]"
                                     >WHOOP</span
                                   >
                                   Recovery on track — green light.
@@ -564,7 +564,7 @@
                                     </svg>
                                   </div>
                                   <div>
-                                    <div class="text-[14.5px] font-bold">
+                                    <div class="text-[14.5px] font-semibold">
                                       Sweet Spot 3×12
                                     </div>
                                     <div
@@ -727,10 +727,10 @@
             ></div>
             <div class="relative flex flex-1 flex-col">
               <span
-                class="self-start rounded-full bg-[var(--mkt-brand)]/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.04em] text-[var(--mkt-brand)]"
+                class="self-start rounded-full bg-[var(--mkt-brand)]/15 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.04em] text-[var(--mkt-brand)]"
                 >For developers</span
               >
-              <h2 class="mt-4 text-[27px] font-bold tracking-[-0.02em]">
+              <h2 class="mt-4 text-[27px] font-semibold tracking-[-0.02em]">
                 Build with the SDK
               </h2>
               <p
@@ -762,11 +762,11 @@
                   <div class="overflow-x-auto">
                     <pre
                       class="p-4 font-mono text-[13px] leading-[1.7]"
-                    ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-emerald-400">'@kaiord/fit'</span>
-<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ toText, tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-emerald-400">'@kaiord/tcx'</span>
+                    ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/fit'</span>
+<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ toText, tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/tcx'</span>
 
-<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">krd</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-amber-300">fromBinary</span><span class="text-[var(--text-dim)]">(file, fitReader)</span>
-<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">tcx</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-amber-300">toText</span><span class="text-[var(--text-dim)]">(krd, tcxWriter)</span></code></pre>
+<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">krd</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">fromBinary</span><span class="text-[var(--text-dim)]">(file, fitReader)</span>
+<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">tcx</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">toText</span><span class="text-[var(--text-dim)]">(krd, tcxWriter)</span></code></pre>
                   </div>
                 </div>
                 <!-- npm install teaser (static; interactive widget lives in Developers) -->
@@ -810,12 +810,12 @@
         <div class="mx-auto max-w-[1180px]">
           <div class="mb-9 text-center min-[860px]:mb-14">
             <p
-              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--mkt-brand)]"
+              class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--mkt-brand)]"
             >
               For athletes
             </p>
             <h2
-              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+              class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
               Your week is the cockpit.
             </h2>
@@ -862,7 +862,7 @@
                         Thursday, May 29
                       </div>
                       <div
-                        class="mb-3 text-[25px] font-bold tracking-[-0.02em]"
+                        class="mb-3 text-[25px] font-semibold tracking-[-0.02em]"
                       >
                         Today
                       </div>
@@ -952,20 +952,20 @@
                             />
                           </svg>
                           <div
-                            class="absolute inset-0 flex items-center justify-center text-base font-bold"
+                            class="absolute inset-0 flex items-center justify-center text-base font-semibold"
                           >
                             82
                           </div>
                         </div>
                         <div>
-                          <div class="text-[13.5px] font-bold">
+                          <div class="text-[13.5px] font-semibold">
                             Good to push today
                           </div>
                           <div
                             class="mt-0.5 text-[11px] text-[var(--text-dim)]"
                           >
                             <span
-                              class="mr-0.5 rounded bg-[var(--mkt-brand)]/15 px-1 py-px align-middle text-[8px] font-bold uppercase tracking-[0.06em] text-[var(--mkt-brand)]"
+                              class="mr-0.5 rounded bg-[var(--mkt-brand)]/15 px-1 py-px align-middle text-[8px] font-semibold uppercase tracking-[0.06em] text-[var(--mkt-brand)]"
                               >WHOOP</span
                             >
                             Recovery on track — green light.
@@ -997,7 +997,7 @@
                               </svg>
                             </div>
                             <div>
-                              <div class="text-[14.5px] font-bold">
+                              <div class="text-[14.5px] font-semibold">
                                 Sweet Spot 3×12
                               </div>
                               <div
@@ -1151,7 +1151,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Visual workout editor</h3>
+                  <h3 class="text-lg font-semibold">Visual workout editor</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1179,7 +1179,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">
+                  <h3 class="text-lg font-semibold">
                     Session lifecycle at a glance
                   </h3>
                   <p
@@ -1195,7 +1195,7 @@
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
                 >
                   <svg
-                    class="h-5 w-5 text-emerald-400"
+                    class="h-5 w-5 text-[var(--text-dim)]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -1210,7 +1210,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Library &amp; templates</h3>
+                  <h3 class="text-lg font-semibold">Library &amp; templates</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1232,12 +1232,12 @@
         <div class="mx-auto max-w-[1180px]">
           <div class="mb-9 text-center min-[860px]:mb-14">
             <p
-              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--mkt-brand)]"
+              class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--mkt-brand)]"
             >
               Conversational-first
             </p>
             <h2
-              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+              class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
               Don't fill forms. Just say it.
             </h2>
@@ -1272,7 +1272,7 @@
                     Swapped Thursday's Sweet Spot 3×12 for a 45-minute recovery
                     spin and moved the intervals to Saturday.
                     <span
-                      class="mt-2 flex w-fit items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11.5px] font-semibold text-emerald-400"
+                      class="mt-2 flex w-fit items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11.5px] font-semibold text-[var(--text-dim)]"
                     >
                       <svg
                         class="h-3 w-3"
@@ -1314,7 +1314,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Natural-language workouts</h3>
+                  <h3 class="text-lg font-semibold">Natural-language workouts</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1342,7 +1342,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Actions, not just answers</h3>
+                  <h3 class="text-lg font-semibold">Actions, not just answers</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1356,7 +1356,7 @@
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
                 >
                   <svg
-                    class="h-5 w-5 text-emerald-400"
+                    class="h-5 w-5 text-[var(--text-dim)]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -1370,7 +1370,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Your model, your key</h3>
+                  <h3 class="text-lg font-semibold">Your model, your key</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1392,12 +1392,12 @@
         <div class="mx-auto max-w-[1180px]">
           <div class="mb-9 text-center min-[860px]:mb-14">
             <p
-              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-emerald-400"
+              class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
             >
               Health hub
             </p>
             <h2
-              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+              class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
               From sleep score to blood work.
             </h2>
@@ -1433,7 +1433,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Automatic ingestion</h3>
+                  <h3 class="text-lg font-semibold">Automatic ingestion</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1465,7 +1465,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Trends</h3>
+                  <h3 class="text-lg font-semibold">Trends</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1483,7 +1483,7 @@
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
                 >
                   <svg
-                    class="h-5 w-5 text-emerald-400"
+                    class="h-5 w-5 text-[var(--text-dim)]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -1499,7 +1499,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Lab analytics</h3>
+                  <h3 class="text-lg font-semibold">Lab analytics</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1532,7 +1532,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">
+                  <h3 class="text-lg font-semibold">
                     Nutrition &amp; energy balance
                   </h3>
                   <p
@@ -1556,12 +1556,12 @@
         <div class="mx-auto max-w-[1180px]">
           <div class="mb-9 text-center min-[860px]:mb-14">
             <p
-              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--text-dim)]"
+              class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
             >
               The data hub
             </p>
             <h2
-              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+              class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
               You decide where your data flows.
             </h2>
@@ -1590,24 +1590,24 @@
                 >
                   <span></span>
                   <span
-                    class="text-center text-[10.5px] font-bold uppercase tracking-[0.06em] text-[var(--text-dim)]"
+                    class="text-center text-[10.5px] font-semibold uppercase tracking-[0.06em] text-[var(--text-dim)]"
                     >Workouts</span
                   >
                   <span
-                    class="text-center text-[10.5px] font-bold uppercase tracking-[0.06em] text-[var(--text-dim)]"
+                    class="text-center text-[10.5px] font-semibold uppercase tracking-[0.06em] text-[var(--text-dim)]"
                     >Activities</span
                   >
                   <span
-                    class="text-center text-[10.5px] font-bold uppercase tracking-[0.06em] text-[var(--text-dim)]"
+                    class="text-center text-[10.5px] font-semibold uppercase tracking-[0.06em] text-[var(--text-dim)]"
                     >Health</span
                   >
                   <span class="pr-2 text-[12.5px] font-semibold">Garmin</span>
                   <span
-                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-bold text-emerald-400"
+                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-semibold text-[var(--text-dim)]"
                     >✓</span
                   >
                   <span
-                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-bold text-emerald-400"
+                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-semibold text-[var(--text-dim)]"
                     >✓</span
                   >
                   <span
@@ -1624,12 +1624,12 @@
                     >—</span
                   >
                   <span
-                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-bold text-emerald-400"
+                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-semibold text-[var(--text-dim)]"
                     >✓</span
                   >
                   <span class="pr-2 text-[12.5px] font-semibold">Train2Go</span>
                   <span
-                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-bold text-emerald-400"
+                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-semibold text-[var(--text-dim)]"
                     >✓</span
                   >
                   <span
@@ -1642,15 +1642,15 @@
                   >
                   <span class="pr-2 text-[12.5px] font-semibold">Manual</span>
                   <span
-                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-bold text-emerald-400"
+                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-semibold text-[var(--text-dim)]"
                     >✓</span
                   >
                   <span
-                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-bold text-emerald-400"
+                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-semibold text-[var(--text-dim)]"
                     >✓</span
                   >
                   <span
-                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-bold text-emerald-400"
+                    class="flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] py-2 text-sm font-semibold text-[var(--text-dim)]"
                     >✓</span
                   >
                 </div>
@@ -1664,7 +1664,7 @@
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10"
                 >
                   <svg
-                    class="h-5 w-5 text-emerald-400"
+                    class="h-5 w-5 text-[var(--text-dim)]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -1678,7 +1678,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">One-tap Garmin sync</h3>
+                  <h3 class="text-lg font-semibold">One-tap Garmin sync</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1707,7 +1707,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Bridges, not middlemen</h3>
+                  <h3 class="text-lg font-semibold">Bridges, not middlemen</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1737,7 +1737,7 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold">Source priorities</h3>
+                  <h3 class="text-lg font-semibold">Source priorities</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
@@ -1758,12 +1758,12 @@
         <div class="mx-auto max-w-[1180px]">
           <div class="mb-9 text-center min-[860px]:mb-12">
             <p
-              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--text-dim)]"
+              class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
             >
               The hub model
             </p>
             <h2
-              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+              class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
               One hub. Every format.
             </h2>
@@ -1804,7 +1804,7 @@
               class="animate-pulse-slow absolute left-1/2 top-1/2 flex h-[84px] w-[84px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[22px] border-2 border-[var(--mkt-brand)] bg-[color-mix(in_srgb,var(--mkt-brand)_10%,transparent)] shadow-[0_0_40px_color-mix(in_srgb,var(--mkt-brand)_27%,transparent)] min-[860px]:h-24 min-[860px]:w-24"
             >
               <span
-                class="font-mono text-lg font-extrabold text-[var(--mkt-brand)] min-[860px]:text-xl"
+                class="font-mono text-lg font-semibold text-[var(--mkt-brand)] min-[860px]:text-xl"
                 >KRD</span
               >
             </div>
@@ -1833,21 +1833,21 @@
 
             <!-- format chips -->
             <span
-              class="animate-fade-in-right absolute left-1/2 top-0 -translate-x-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              class="animate-fade-in-right absolute left-1/2 top-0 -translate-x-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-semibold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
               >.FIT</span
             >
             <span
-              class="animate-fade-in-left absolute left-0 top-1/2 -translate-y-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              class="animate-fade-in-left absolute left-0 top-1/2 -translate-y-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-semibold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
               style="animation-delay: 0.1s"
               >.TCX</span
             >
             <span
-              class="animate-fade-in-right absolute right-0 top-1/2 -translate-y-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              class="animate-fade-in-right absolute right-0 top-1/2 -translate-y-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-semibold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
               style="animation-delay: 0.2s"
               >.ZWO</span
             >
             <span
-              class="animate-fade-in-left absolute left-1/2 bottom-0 -translate-x-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-bold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
+              class="animate-fade-in-left absolute left-1/2 bottom-0 -translate-x-1/2 rounded-[11px] border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-2 font-mono text-sm font-semibold shadow-[0_6px_18px_rgba(0,0,0,0.3)]"
               style="animation-delay: 0.3s"
               >.GCN</span
             >
@@ -1863,12 +1863,12 @@
         <div class="mx-auto max-w-[1180px]">
           <div class="mb-8 text-center min-[860px]:mb-11">
             <p
-              class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--mkt-brand)]"
+              class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--mkt-brand)]"
             >
               For developers
             </p>
             <h2
-              class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+              class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
               Convert fitness data in 4 lines.
             </h2>
@@ -2004,11 +2004,11 @@
             <div class="overflow-x-auto">
               <pre
                 class="p-4 font-mono text-[13px] leading-[1.7]"
-              ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-emerald-400">'@kaiord/fit'</span>
-<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ toText, tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-emerald-400">'@kaiord/tcx'</span>
+              ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/fit'</span>
+<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ toText, tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/tcx'</span>
 
-<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">krd</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-amber-300">fromBinary</span><span class="text-[var(--text-dim)]">(file, fitReader)</span>
-<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">tcx</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-amber-300">toText</span><span class="text-[var(--text-dim)]">(krd, tcxWriter)</span></code></pre>
+<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">krd</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">fromBinary</span><span class="text-[var(--text-dim)]">(file, fitReader)</span>
+<span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">tcx</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">toText</span><span class="text-[var(--text-dim)]">(krd, tcxWriter)</span></code></pre>
             </div>
           </div>
 
@@ -2016,12 +2016,12 @@
           <div class="grid gap-6 min-[860px]:grid-cols-3">
             <div class="flex items-start gap-3">
               <div
-                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-[var(--mkt-brand)]/10 font-mono text-sm font-bold text-[var(--mkt-brand)]"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-[var(--mkt-brand)]/10 font-mono text-sm font-semibold text-[var(--mkt-brand)]"
               >
                 TS
               </div>
               <div>
-                <h3 class="text-[15.5px] font-bold">TypeScript-first</h3>
+                <h3 class="text-[15.5px] font-semibold">TypeScript-first</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
@@ -2032,12 +2032,12 @@
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-[var(--mkt-brand)]/10 font-mono text-sm font-bold text-[var(--mkt-brand)]"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-[var(--mkt-brand)]/10 font-mono text-sm font-semibold text-[var(--mkt-brand)]"
               >
                 &#x2B21;
               </div>
               <div>
-                <h3 class="text-[15.5px] font-bold">Hexagonal architecture</h3>
+                <h3 class="text-[15.5px] font-semibold">Hexagonal architecture</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
@@ -2047,12 +2047,12 @@
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-emerald-500/10 font-mono text-sm font-bold text-emerald-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-emerald-500/10 font-mono text-sm font-semibold text-[var(--text-dim)]"
               >
                 &#x2699;
               </div>
               <div>
-                <h3 class="text-[15.5px] font-bold">Plugin system</h3>
+                <h3 class="text-[15.5px] font-semibold">Plugin system</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
@@ -2062,12 +2062,12 @@
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-amber-500/10 font-mono text-sm font-bold text-amber-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-amber-500/10 font-mono text-sm font-semibold text-amber-400"
               >
                 &gt;_
               </div>
               <div>
-                <h3 class="text-[15.5px] font-bold">CLI</h3>
+                <h3 class="text-[15.5px] font-semibold">CLI</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
@@ -2077,12 +2077,12 @@
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-pink-500/10 font-mono text-sm font-bold text-pink-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-pink-500/10 font-mono text-sm font-semibold text-pink-400"
               >
                 AI
               </div>
               <div>
-                <h3 class="text-[15.5px] font-bold">MCP server</h3>
+                <h3 class="text-[15.5px] font-semibold">MCP server</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
@@ -2094,12 +2094,12 @@
             </div>
             <div class="flex items-start gap-3">
               <div
-                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-cyan-500/10 font-mono text-sm font-bold text-cyan-400"
+                class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-cyan-500/10 font-mono text-sm font-semibold text-cyan-400"
               >
                 5
               </div>
               <div>
-                <h3 class="text-[15.5px] font-bold">5 format adapters</h3>
+                <h3 class="text-[15.5px] font-semibold">5 format adapters</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
@@ -2146,7 +2146,7 @@
                 Zero infrastructure
               </span>
               <h2
-                class="mt-4 text-2xl font-extrabold tracking-[-0.02em] min-[860px]:text-3xl"
+                class="mt-4 text-2xl font-semibold tracking-[-0.02em] min-[860px]:text-3xl"
               >
                 No servers. No accounts. No cloud.
               </h2>
@@ -2220,12 +2220,12 @@
       >
         <div class="mx-auto max-w-[1180px] text-center">
           <p
-            class="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--text-dim)]"
+            class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
           >
             Open source
           </p>
           <h2
-            class="text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
           >
             Built in the open.
           </h2>
@@ -2241,7 +2241,7 @@
               class="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-5"
             >
               <div
-                class="text-3xl font-extrabold tracking-[-0.02em] text-[var(--mkt-brand)]"
+                class="text-3xl font-semibold tracking-[-0.02em] text-[var(--mkt-brand)]"
               >
                 5
               </div>
@@ -2253,7 +2253,7 @@
               class="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-5"
             >
               <div
-                class="text-3xl font-extrabold tracking-[-0.02em] text-emerald-400"
+                class="text-3xl font-semibold tracking-[-0.02em] text-[var(--text-dim)]"
               >
                 3
               </div>
@@ -2265,7 +2265,7 @@
               class="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-5"
             >
               <div
-                class="text-3xl font-extrabold tracking-[-0.02em] text-[var(--mkt-brand)]"
+                class="text-3xl font-semibold tracking-[-0.02em] text-[var(--mkt-brand)]"
               >
                 MIT
               </div>
@@ -2277,7 +2277,7 @@
               class="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] px-3.5 py-5"
             >
               <div
-                class="text-3xl font-extrabold tracking-[-0.02em] text-amber-400"
+                class="text-3xl font-semibold tracking-[-0.02em] text-amber-400"
               >
                 0
               </div>
@@ -2315,12 +2315,12 @@
       >
         <div class="mx-auto max-w-[760px]">
           <p
-            class="mb-3.5 text-center text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--text-dim)]"
+            class="mb-3.5 text-center text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
           >
             FAQ
           </p>
           <h2
-            class="text-center text-[30px] font-extrabold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
+            class="text-center text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
           >
             Frequently asked questions
           </h2>
@@ -2439,7 +2439,7 @@
           <!-- Logo -->
           <a
             href="/"
-            class="flex items-center gap-2 text-sm font-bold text-[var(--text-dim)]"
+            class="flex items-center gap-2 text-sm font-semibold text-[var(--text-dim)]"
             aria-label="Kaiord home"
           >
             <svg
