@@ -1,7 +1,7 @@
 /**
  * T-25 — GarminPushButton resolver gating.
  *
- * Verifies AC-5: the Garmin push button is gated on
+ * Verifies AC-5: the editor send path is gated on
  * resolveExportPolicies(profileId, 'workout') rather than
  * extensionInstalled alone.
  *
@@ -94,10 +94,10 @@ test.describe("GarminPushButton resolver gating (AC-5)", () => {
     await page.reload();
     await page.waitForURL(/\/workout/, { timeout: 10_000 });
 
-    // Assert — no editor GarminPushButton rendered (no enabled policy).
-    await expect(
-      page.getByRole("button", { name: /push to garmin/i })
-    ).toHaveCount(0);
+    // Assert — the ribbon names the broken link (no enabled policy) and
+    // withholds the send: export-disabled is a stated state now, not a
+    // silently absent button.
+    await expect(page.getByTestId("send-to-garmin-button")).toHaveCount(0);
   });
 
   test("should show the editor push button when an enabled export policy exists", async ({
@@ -124,10 +124,11 @@ test.describe("GarminPushButton resolver gating (AC-5)", () => {
     // Act — open the workout in the editor.
     await page.goto(`/workout/${WORKOUT_ID}`);
 
-    // Assert — the policy-gated editor push button renders.
-    await expect(
-      page.getByRole("button", { name: /push to garmin/i })
-    ).toBeVisible({ timeout: 8_000 });
+    // Assert — the full ready gate (stub extension + session + enabled
+    // policy) puts the one send control on the ribbon.
+    const ribbon = page.getByTestId("editor-state-ribbon");
+    await expect(ribbon).toBeVisible({ timeout: 8_000 });
+    await expect(ribbon.getByTestId("send-to-garmin-button")).toBeVisible();
   });
 
   test("should show the Push to Garmin button on the workout detail page", async ({
@@ -157,7 +158,7 @@ test.describe("GarminPushButton resolver gating (AC-5)", () => {
 
     // Assert — the footer push button is present.
     await expect(
-      page.getByRole("button", { name: /push to garmin/i })
+      page.getByRole("button", { name: /send to garmin/i })
     ).toBeVisible({ timeout: 8_000 });
   });
 });

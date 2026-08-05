@@ -1,12 +1,20 @@
 /**
  * Workout Lifecycle E2E Tests
  *
- * Core workflow: RAW -> skip/process -> structured -> accept -> push.
+ * Core workflow: RAW -> skip/process -> structured -> send. The verb cut
+ * removed the Accept step: sending performs the ready transition as part of
+ * the one send, and the EditorStateRibbon is the only surface that can reach
+ * the watch.
  */
 
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures/base";
+import { installGarminBridgeStub } from "./helpers/garmin-bridge-stub";
+import { seedEnabledGarminExportPolicy } from "./helpers/garmin-ready-gate";
 import {
   clearDexie,
+  E2E_DEFAULT_PROFILE_ID,
   getWeekDates,
   getWeekId,
   makeRawWorkout,
@@ -99,54 +107,80 @@ test.describe("Workout Lifecycle", () => {
     await page.waitForURL(new RegExp(`/workout/${workoutId}`));
   });
 
-  test("STRUCTURED workout in editor shows Accept Workout button", async ({
-    page,
-  }) => {
-    const dates = getWeekDates();
+  /** The ribbon renders the send only behind the full ready gate:
+      extension + session (the stub) and an enabled export policy. */
+  const openWithReadyGate = async (
+    page: Page,
+    state: string
+  ) => {
     const workoutId = crypto.randomUUID();
-
+    await seedEnabledGarminExportPolicy(page, E2E_DEFAULT_PROFILE_ID);
     await seedWorkouts(page, [
-      makeWorkout({ id: workoutId, date: dates[0], state: "structured" }),
+      makeWorkout({ id: workoutId, date: getWeekDates()[0], state }),
     ]);
     await page.goto(`/workout/${workoutId}`);
+    return workoutId;
+  };
 
-    const workflowBar = page.getByTestId("workflow-bar");
-    await expect(workflowBar).toBeVisible();
+  test("STRUCTURED workout offers the send directly, with no Accept step", async ({
+    page,
+  }) => {
+    await installGarminBridgeStub(page);
+    await page.goto("/calendar");
+    await clearDexie(page);
+    await seedDefaultProfile(page);
+    await openWithReadyGate(page, "structured");
+
+    const ribbon = page.getByTestId("editor-state-ribbon");
+    await expect(ribbon).toBeVisible();
+    await expect(ribbon).toContainText("Ready to send to your watch");
+    await expect(ribbon.getByTestId("send-to-garmin-button")).toBeVisible();
+    // The verb cut: accepting is folded into the send.
     await expect(
-      workflowBar.getByRole("button", { name: /Accept Workout/i })
-    ).toBeVisible();
+      page.getByRole("button", { name: /Accept Workout/i })
+    ).toHaveCount(0);
   });
 
-  test("READY workout in editor shows Push to Garmin button", async ({
-    page,
-  }) => {
-    const dates = getWeekDates();
-    const workoutId = crypto.randomUUID();
+  test("READY workout offers the same single send", async ({ page }) => {
+    await installGarminBridgeStub(page);
+    await page.goto("/calendar");
+    await clearDexie(page);
+    await seedDefaultProfile(page);
+    await openWithReadyGate(page, "ready");
 
-    await seedWorkouts(page, [
-      makeWorkout({ id: workoutId, date: dates[0], state: "ready" }),
-    ]);
-    await page.goto(`/workout/${workoutId}`);
-
-    const workflowBar = page.getByTestId("workflow-bar");
-    await expect(workflowBar).toBeVisible();
-    await expect(
-      workflowBar.getByRole("button", { name: /Push to Garmin/i })
-    ).toBeVisible();
+    const ribbon = page.getByTestId("editor-state-ribbon");
+    await expect(ribbon).toBeVisible();
+    await expect(ribbon).toContainText("Ready to send to your watch");
+    await expect(ribbon.getByTestId("send-to-garmin-button")).toBeVisible();
   });
 
-  test("MODIFIED workout in editor shows Modified indicator", async ({
+  test("MODIFIED workout names the staleness and offers the send", async ({
     page,
   }) => {
-    const dates = getWeekDates();
-    const workoutId = crypto.randomUUID();
+    await installGarminBridgeStub(page);
+    await page.goto("/calendar");
+    await clearDexie(page);
+    await seedDefaultProfile(page);
+    await openWithReadyGate(page, "modified");
 
-    await seedWorkouts(page, [
-      makeWorkout({ id: workoutId, date: dates[0], state: "modified" }),
-    ]);
-    await page.goto(`/workout/${workoutId}`);
+    const ribbon = page.getByTestId("editor-state-ribbon");
+    await expect(ribbon).toBeVisible();
+    await expect(ribbon).toContainText(
+      "Your watch still has the version from before these edits"
+    );
+    await expect(ribbon.getByTestId("send-to-garmin-button")).toBeVisible();
+  });
 
-    const workflowBar = page.getByTestId("workflow-bar");
-    await expect(workflowBar).toBeVisible();
+  test("PUSHED workout renders no ribbon: the watch already has this version", async ({
+    page,
+  }) => {
+    await installGarminBridgeStub(page);
+    await page.goto("/calendar");
+    await clearDexie(page);
+    await seedDefaultProfile(page);
+    await openWithReadyGate(page, "pushed");
+
+    await expect(page.getByTestId("editor-canvas")).toBeVisible();
+    await expect(page.getByTestId("editor-state-ribbon")).toHaveCount(0);
   });
 });
