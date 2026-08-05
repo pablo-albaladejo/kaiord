@@ -3,14 +3,35 @@
   "createProfile": "Create profile",
   "createProfileTitle": "Create athlete profile",
   "editProfile": "Edit profile",
+  "edit": "Edit",
   "editThresholds": "Edit thresholds",
-  "thresholds": "Thresholds",
-  "autoZones": "Auto zones",
-  "manualZones": "Manual zones",
+  "thresholdsTitle": "{{sport}} thresholds",
   "sportAria": "Sport",
   "zonesTitle": "{{sport}} zones",
   "noThreshold": "Set a {{sport}} threshold to see your zones",
-  "zonesBlurb": "These zones power AI workout generation and every target you push to Garmin.",
+  "noThresholds": "Add your {{sport}} thresholds",
+  "zonesReason": "Derived from {{metric}} {{value}}. These five bands are what the AI writes workouts against and what your watch receives as targets.",
+  "zonesReasonNoThreshold": "These five bands are what the AI writes workouts against and what your watch receives as targets.",
+  "zonesEncoding": "Width is the zone range; height is its intensity. Take the colour away and the ramp still reads.",
+  "provenance": {
+    "synced": "{{source}} · {{when}}",
+    "manual": "By hand",
+    "manualSince": "By hand · {{when}}"
+  },
+  "reconcile": {
+    "title": "{{source}} recorded {{value}} on {{date}}",
+    "body": "Kaiord is still using {{current}}, and your zones are derived from that.",
+    "use": "Use {{value}}",
+    "keep": "Keep {{value}}"
+  },
+  "autoImport": {
+    "title": "Let a connected source update these numbers",
+    "hint": "Off means nothing overwrites a number you typed yourself."
+  },
+  "connections": {
+    "fedBy": "This profile is fed by {{source}}",
+    "manage": "Manage in Connections"
+  },
   "tagline": {
     "cycling": "Cyclist",
     "running": "Runner",

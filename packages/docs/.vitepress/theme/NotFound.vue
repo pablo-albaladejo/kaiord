@@ -1,20 +1,24 @@
 <script setup lang="ts">
-import { useRouter } from "vitepress";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
-const router = useRouter();
-const query = ref("");
+// The trigger is a button that says what it does, not a fake input: the only
+// way to open VitePress's local search is its keyboard shortcut, and
+// VPLocalSearchBox exposes no API to preload a query. A field that collects
+// text and then drops it promises something it cannot deliver — worse than no
+// field, and this is the page you land on when you already failed to find
+// something.
+const shortcut = ref("⌘ K");
 
-function search() {
-  if (query.value.trim()) {
-    // Trigger VitePress search by dispatching keyboard shortcut
-    const event = new KeyboardEvent("keydown", {
-      key: "k",
-      metaKey: true,
-      bubbles: true,
-    });
-    document.dispatchEvent(event);
+onMounted(() => {
+  if (!/Mac|iPhone|iPad/.test(navigator.platform)) {
+    shortcut.value = "Ctrl K";
   }
+});
+
+function openSearch() {
+  document.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true })
+  );
 }
 </script>
 
@@ -24,24 +28,19 @@ function search() {
       <h1 class="title">404</h1>
       <p class="subtitle">Page not found</p>
       <p class="description">
-        The page you are looking for does not exist or has been moved.
+        It may have moved. The search covers every page, including the API
+        reference.
       </p>
 
-      <div class="search-box">
-        <input
-          v-model="query"
-          type="text"
-          placeholder="Search documentation..."
-          class="search-input"
-          @keydown.enter="search"
-        />
-        <button class="search-btn" @click="search">Search</button>
-      </div>
+      <button class="search-btn" @click="openSearch">
+        Search the documentation
+        <kbd class="kbd">{{ shortcut }}</kbd>
+      </button>
 
       <div class="links">
-        <a href="/docs/" class="link">Docs Home</a>
         <a href="/docs/guide/quick-start" class="link">Quick Start</a>
         <a href="/docs/formats/krd" class="link">Formats</a>
+        <a href="/docs/" class="link">Docs Home</a>
       </div>
     </div>
   </div>
@@ -61,10 +60,12 @@ function search() {
   max-width: 480px;
 }
 
+/* Ink at 38px, not brand color at 4rem: whoever lands here does not need
+   the number shouted — they need a way out. The weight goes on the exit. */
 .title {
-  font-size: 4rem;
-  font-weight: 700;
-  color: var(--vp-c-brand-1);
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
   margin: 0;
   line-height: 1;
 }
@@ -81,40 +82,32 @@ function search() {
   margin: 1rem 0 2rem;
 }
 
-.search-box {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 2rem;
-}
-
-.search-input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
-  font-size: 14px;
-  outline: none;
-}
-
-.search-input:focus {
-  border-color: var(--vp-c-brand-1);
-}
-
 .search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
-  background: var(--vp-c-brand-1);
-  color: #fff;
+  background: var(--control);
+  color: var(--control-ink);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
+  margin-bottom: 2rem;
 }
 
 .search-btn:hover {
   opacity: 0.85;
+}
+
+.kbd {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+  opacity: 0.7;
 }
 
 .links {
@@ -135,6 +128,6 @@ function search() {
 }
 
 .link:hover {
-  border-color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-text-3);
 }
 </style>

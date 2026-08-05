@@ -9,7 +9,8 @@
     "backToCalendar": "Volver al calendario"
   },
   "structure": {
-    "eyebrow": "Estructura · tiempo en zona"
+    "eyebrow": "Estructura · tiempo en zona",
+    "targetsFrom": "Zonas calculadas sobre {{threshold}} · de tu perfil de atleta, {{relative}}"
   },
   "sport": {
     "cycling": "Ciclismo",
@@ -30,7 +31,7 @@
   "summary": {
     "duration": "Duración",
     "tss": "TSS",
-    "load": "Carga"
+    "hardestZone": "Zona más dura"
   },
   "fallbackTitle": "Entrenamiento",
   "stats": {
