@@ -38,7 +38,11 @@ export type CardShellProps = {
 
 const SHELL = [
   "block w-full rounded-xl border border-edge-soft border-l-4 bg-surface",
-  "p-2.5 text-left text-sm hover:border-edge-strong",
+  // Hover strengthens three sides only: `hover:border-edge-strong` would set
+  // all four border colors at :hover specificity and wipe the `border-l-zone-*`
+  // edge — the dominant-zone signal this shell exists to carry.
+  "p-2.5 text-left text-sm hover:border-t-edge-strong",
+  "hover:border-r-edge-strong hover:border-b-edge-strong",
   "motion-safe:transition-colors motion-safe:duration-[--dur-state]",
 ].join(" ");
 
