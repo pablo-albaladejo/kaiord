@@ -59,11 +59,18 @@ export const BRIDGE_CORE_MASTERS = [
     bridges: ALL_BRIDGES,
   },
   // The popup shell — CSS + the status/chips/skeleton/CTA renderers — is one
-  // design for all five bridges; only `--accent` varies, set per-bridge in
-  // popup.html.
+  // design for all five bridges; only the header monogram glyph varies, set
+  // per-bridge in popup.html.
   {
     master: "bridge-popup-shell.js",
     dest: "bridge-popup-shell.js",
+    bridges: ALL_BRIDGES,
+  },
+  // Remembers when a bridge was first observed broken, so the popup can date
+  // the outage instead of only reporting it.
+  {
+    master: "bridge-popup-health.js",
+    dest: "bridge-popup-health.js",
     bridges: ALL_BRIDGES,
   },
   { master: "popup.css", dest: "popup.css", bridges: ALL_BRIDGES },
@@ -90,6 +97,11 @@ export const BRIDGE_CORE_MASTERS = [
   {
     master: "test/bridge-popup-shell.test.js",
     dest: "test/bridge-popup-shell.test.js",
+    bridges: ALL_BRIDGES,
+  },
+  {
+    master: "test/bridge-popup-health.test.js",
+    dest: "test/bridge-popup-health.test.js",
     bridges: ALL_BRIDGES,
   },
   {
