@@ -23,7 +23,7 @@
 import { useUnits } from "../contexts/units-context";
 import { useActiveLocale } from "../i18n/LocaleProvider";
 import { useTranslate } from "../i18n/use-translate";
-import { buildThresholdProvenance } from "../lib/athlete/threshold-provenance";
+import { buildThresholdProvenance } from "../lib/athlete/build-threshold-provenance";
 import type { Profile } from "../types/profile";
 import { formatRelativeTime } from "../utils/format-relative-time";
 

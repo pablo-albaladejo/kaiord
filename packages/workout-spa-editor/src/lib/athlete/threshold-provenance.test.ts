@@ -1,84 +1,144 @@
 import { describe, expect, it } from "vitest";
 
-import { profileWith } from "./test-profile";
-import { buildThresholdProvenance } from "./threshold-provenance";
+import { profileWith, syncedAccount } from "./test-profile";
+import { deriveThresholdProvenance } from "./threshold-provenance";
 
-describe("buildThresholdProvenance", () => {
-  it("should report FTP as the cycling primary threshold", () => {
+const FTP = 268;
+const OTHER_FTP = 250;
+const MAX_HR = 186;
+const SWIM_LTHR = 160;
+const SWIM_CSS = 98;
+
+const NOW = new Date("2026-08-04T00:00:00.000Z");
+const FOUR_DAYS_AGO = "2026-07-31T00:00:00.000Z";
+const THIRTEEN_MONTHS_AGO = "2025-07-01T00:00:00.000Z";
+
+describe("deriveThresholdProvenance", () => {
+  it("should name the account whose last sync matches the stored value", () => {
     // Arrange
-    const profile = profileWith("cycling", { ftp: 268 });
-
-    // Act
-    const provenance = buildThresholdProvenance(profile, "cycling");
-
-    // Assert
-    expect(provenance).toEqual({
-      metric: "ftp",
-      value: "268",
-      unit: "W",
-      updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-    });
-  });
-
-  it("should report threshold pace as the running primary threshold", () => {
-    // Arrange
-    const profile = profileWith("running", {
-      thresholdPace: 245,
-      paceUnit: "min_per_km",
+    const profile = profileWith("cycling", { ftp: FTP }, undefined, {
+      linkedAccounts: [
+        syncedAccount("train2go", FOUR_DAYS_AGO, { cyclingFtp: FTP }),
+      ],
     });
 
     // Act
-    const provenance = buildThresholdProvenance(profile, "running");
+    const provenance = deriveThresholdProvenance(
+      profile,
+      "cycling.thresholds.ftp",
+      FTP,
+      NOW
+    );
 
     // Assert
-    expect(provenance?.metric).toBe("thresholdPace");
-    expect(provenance?.unit).toBe("/km");
+    expect(provenance).toStrictEqual({
+      kind: "synced",
+      source: "train2go",
+      at: FOUR_DAYS_AGO,
+      stale: false,
+    });
   });
 
-  it("should carry the profile's own updatedAt, not a threshold timestamp", () => {
+  it("should report a value edited since the sync as entered by hand", () => {
     // Arrange
-    const profile = {
-      ...profileWith("cycling", { ftp: 268 }),
-      updatedAt: "2026-07-29T10:00:00.000Z",
-    };
+    const profile = profileWith("cycling", { ftp: OTHER_FTP }, undefined, {
+      linkedAccounts: [
+        syncedAccount("train2go", FOUR_DAYS_AGO, { cyclingFtp: FTP }),
+      ],
+      updatedAt: FOUR_DAYS_AGO,
+    });
 
     // Act
-    const provenance = buildThresholdProvenance(profile, "cycling");
+    const provenance = deriveThresholdProvenance(
+      profile,
+      "cycling.thresholds.ftp",
+      OTHER_FTP,
+      NOW
+    );
 
     // Assert
-    expect(provenance?.updatedAt).toEqual(new Date("2026-07-29T10:00:00.000Z"));
+    expect(provenance).toStrictEqual({
+      kind: "manual",
+      since: FOUR_DAYS_AGO,
+      stale: false,
+    });
   });
 
-  it("should return null when the sport has no primary threshold", () => {
+  it("should report a field no snapshot carries as entered by hand", () => {
     // Arrange
-    const profile = profileWith("cycling", {});
+    const profile = profileWith("swimming", { lthr: SWIM_LTHR }, undefined, {
+      linkedAccounts: [
+        syncedAccount("train2go", FOUR_DAYS_AGO, { swimmingCss: SWIM_CSS }),
+      ],
+      updatedAt: FOUR_DAYS_AGO,
+    });
 
     // Act
-    const provenance = buildThresholdProvenance(profile, "cycling");
+    const provenance = deriveThresholdProvenance(
+      profile,
+      "swimming.thresholds.lthr",
+      SWIM_LTHR,
+      NOW
+    );
 
     // Assert
-    expect(provenance).toBeNull();
+    expect(provenance.kind).toBe("manual");
   });
 
-  it("should return null for a sport with no threshold model", () => {
+  it("should report a profile with no linked account as entered by hand", () => {
     // Arrange
-    const profile = profileWith("cycling", { ftp: 268 });
+    const profile = profileWith("cycling", { ftp: FTP });
 
     // Act
-    const provenance = buildThresholdProvenance(profile, "strength");
+    const provenance = deriveThresholdProvenance(
+      profile,
+      "cycling.thresholds.ftp",
+      FTP,
+      NOW
+    );
 
     // Assert
-    expect(provenance).toBeNull();
+    expect(provenance.kind).toBe("manual");
   });
 
-  it("should return null without a profile", () => {
+  it("should flag a synced value older than the staleness window", () => {
     // Arrange
-    const profile = null;
+    const profile = profileWith("cycling", { lthr: MAX_HR }, MAX_HR, {
+      linkedAccounts: [
+        syncedAccount("train2go", THIRTEEN_MONTHS_AGO, {
+          maxHeartRate: MAX_HR,
+        }),
+      ],
+    });
 
     // Act
-    const provenance = buildThresholdProvenance(profile, "cycling");
+    const provenance = deriveThresholdProvenance(
+      profile,
+      "heartRate.max",
+      MAX_HR,
+      NOW
+    );
 
     // Assert
-    expect(provenance).toBeNull();
+    expect(provenance).toMatchObject({ kind: "synced", stale: true });
+  });
+
+  it("should flag a hand-entered value only once the profile proves it old", () => {
+    // Arrange
+    const old = profileWith("cycling", { ftp: FTP }, undefined, {
+      updatedAt: THIRTEEN_MONTHS_AGO,
+    });
+    const recent = profileWith("cycling", { ftp: FTP }, undefined, {
+      updatedAt: FOUR_DAYS_AGO,
+    });
+
+    // Act
+    const field = "cycling.thresholds.ftp" as const;
+    const staleOne = deriveThresholdProvenance(old, field, FTP, NOW);
+    const freshOne = deriveThresholdProvenance(recent, field, FTP, NOW);
+
+    // Assert
+    expect(staleOne).toMatchObject({ kind: "manual", stale: true });
+    expect(freshOne).toMatchObject({ kind: "manual", stale: false });
   });
 });
