@@ -15,8 +15,8 @@ const PURPOSE_LABEL_KEY: Record<UsagePurpose, string> = {
   lab_extraction: "usage.purpose.lab_extraction",
 };
 
-const CELL = "py-2 pr-4 text-gray-900 dark:text-gray-100";
-const SUB_CELL = "py-1 pr-4 text-gray-500 dark:text-gray-400";
+const CELL = "py-2 pr-4 text-ink-strong";
+const SUB_CELL = "py-1 pr-4 text-ink-muted";
 
 const numericCells = (totals: UsageTotals, cls: string) => (
   <>
@@ -34,7 +34,7 @@ export function UsageMonthRow({ row }: { row: MonthUsage }) {
     <>
       <tr
         data-testid={`usage-row-${row.yearMonth}`}
-        className="border-b border-gray-100 font-medium dark:border-gray-800"
+        className="border-b border-edge-soft font-medium"
       >
         <td className={CELL}>{row.yearMonth}</td>
         <td className={CELL} data-testid={`usage-input-${row.yearMonth}`}>
@@ -50,7 +50,7 @@ export function UsageMonthRow({ row }: { row: MonthUsage }) {
         <tr
           key={p}
           data-testid={`usage-purpose-${row.yearMonth}-${p}`}
-          className="border-b border-gray-50 last:border-0 dark:border-gray-900"
+          className="border-b border-edge-soft last:border-0"
         >
           <td className={`${SUB_CELL} pl-6`}>{t(PURPOSE_LABEL_KEY[p])}</td>
           {numericCells(row.byPurpose[p], SUB_CELL)}

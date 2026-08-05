@@ -32,5 +32,67 @@
   },
   "reschedule": {
     "moveFailed": "Could not move workout"
+  },
+  "lifecycle": {
+    "raw": "Raw",
+    "structured": "Structured",
+    "ready": "Ready",
+    "pushed": "Pushed",
+    "modified": "Modified",
+    "stale": "Stale",
+    "skipped": "Skipped"
+  },
+  "weekStatus": {
+    "heading": "Where the week stands",
+    "waiting_one": "{{count}} waiting to go to your watch",
+    "waiting_other": "{{count}} waiting to go to your watch",
+    "doneAndMatched_one": "{{count}} done and matched",
+    "doneAndMatched_other": "{{count}} done and matched",
+    "readyNotPushed_one": "{{count}} ready, not pushed",
+    "readyNotPushed_other": "{{count}} ready, not pushed",
+    "needsStructure_one": "{{count}} needs structure",
+    "needsStructure_other": "{{count}} need structure"
+  },
+  "firstRun": {
+    "heading": "Nothing here yet — and nothing will appear on its own",
+    "body": "Kaiord doesn't hold your training. It reads it from your sources, structures it, and sends it back to your watch. Three things have to be true before this week fills itself.",
+    "manual": "Not ready to connect anything? Write a session by hand — everything else still works.",
+    "addWorkout": "Add workout",
+    "steps": {
+      "sources": {
+        "title": "Connect where your training comes from",
+        "consequence": "Train2Go for your coach's plan, Garmin for what you actually rode. Without this, the week stays empty.",
+        "cta": "Connect a source"
+      },
+      "aiKey": {
+        "title": "Add your own AI key",
+        "consequence": "A coach's note in prose becomes steps and targets. Your key, your bill, stored in this browser.",
+        "cta": "Add a key"
+      },
+      "bridge": {
+        "title": "Install the bridge extension",
+        "consequence": "Garmin has no public API for workouts, so the handover to your watch happens in your browser. Skip it and you can still download the file.",
+        "cta": "Install"
+      }
+    }
+  },
+  "emptyWeek": {
+    "headline": "Nothing this week",
+    "headlineWithDate": "Nothing this week — your last session was {{date}}",
+    "consequence": "Either you're between blocks, or your coach hasn't published. Nothing is broken.",
+    "goToLatest": "Go to {{date}}",
+    "addWorkout": "Add workout"
+  },
+  "noAiProvider": {
+    "headline_one": "{{count}} session arrived as prose and is stuck that way",
+    "headline_other": "{{count}} sessions arrived as prose and are stuck that way",
+    "consequence": "Turning “4×8 min at threshold” into steps needs an AI key, and there isn't one. Your watch can't receive prose.",
+    "cta": "Add an AI key"
+  },
+  "noBridges": {
+    "headline_one": "{{count}} session is ready but can't reach your watch",
+    "headline_other": "{{count}} sessions are ready but can't reach your watch",
+    "consequence": "Garmin has no public API for workouts, so the bridge extension does the handover. Until it's installed, downloading the file and importing it by hand is the only route.",
+    "cta": "Install the bridge"
   }
 }

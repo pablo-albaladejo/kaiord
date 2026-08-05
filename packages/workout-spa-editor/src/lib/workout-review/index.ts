@@ -7,3 +7,9 @@ export { loadLabel } from "./load-label";
 export { buildReviewModel, type ReviewModel } from "./review-model";
 export { type ReviewStepItem, toStepItems } from "./step-items";
 export { timeInZone } from "./time-in-zone";
+export {
+  dominantZone,
+  zoneSeconds,
+  type ZoneSegment,
+  zoneSegments,
+} from "./zone-profile";

@@ -5,7 +5,8 @@
     "title": "Lab analytics",
     "subtitle": "Add a new lab report",
     "loading": "Loading…",
-    "noProfile": "Create an athlete profile first to log lab analytics."
+    "noProfile": "Create an athlete profile first to log lab analytics.",
+    "typedNote": "Labs are the one health surface with no source to sync from — every value here was typed, so it carries the date you entered it rather than a bridge name."
   },
   "form": {
     "addParameter": "Add parameter",
@@ -60,12 +61,18 @@
   "chart": {
     "empty": "No history for this parameter yet.",
     "loading": "Loading…",
-    "evolutionTitle": "{{label}} evolution"
+    "evolutionTitle": "{{label}} evolution",
+    "outOfRange": "Out of range"
   },
   "dashboard": {
     "loading": "Loading…",
     "pinParameters": "Pin parameters",
     "evolutionCharts": "Evolution charts",
     "emptyGrid": "Pin a parameter above to see its evolution chart."
+  },
+  "latest": {
+    "title": "Latest values",
+    "loading": "Loading…",
+    "empty": "No lab parameters recorded yet."
   }
 }

@@ -50,9 +50,9 @@ export function CalendarWeekListDay({
       data-testid={`calendar-list-day-${date}`}
       data-today={isToday ? "true" : undefined}
       aria-current={isToday ? "date" : undefined}
-      className="rounded-lg border border-edge p-3"
+      className={`rounded-2xl border p-3.5 ${isToday ? "border-edge bg-surface" : "border-edge-soft"}`}
     >
-      <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
+      <h2 className="mb-2.5 text-[13px] font-medium text-ink-muted">
         {heading}
         {isToday && (
           <span className="sr-only">{t("weekList.todaySuffix")}</span>
@@ -74,7 +74,7 @@ export function CalendarWeekListDay({
         data-testid={`calendar-list-add-${date}`}
         aria-label={t("weekList.addTo", { date: heading })}
         onClick={() => onAddClick(date)}
-        className="mt-2 w-full rounded border border-dashed border-gray-300 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary-400 hover:text-primary-600 dark:border-gray-600"
+        className="mt-2 w-full rounded-lg border border-dashed border-edge px-3 py-2 text-xs text-ink-muted motion-safe:transition-colors hover:border-edge-strong hover:text-ink-strong"
       >
         {t("weekList.add")}
       </button>

@@ -47,7 +47,7 @@ export function LabEntryForm() {
         <button
           type="button"
           onClick={addRow}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600"
+          className="rounded-lg border border-edge px-3 py-1.5 text-sm font-medium text-ink-body transition-colors hover:border-edge-strong hover:text-ink-strong"
         >
           {t("form.addParameter")}
         </button>
@@ -55,7 +55,7 @@ export function LabEntryForm() {
           type="button"
           disabled={isSaving || !header.date}
           onClick={save}
-          className="rounded bg-blue-600 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded bg-accent px-4 py-1.5 text-sm font-medium text-surface disabled:opacity-50"
         >
           {t("form.save")}
         </button>

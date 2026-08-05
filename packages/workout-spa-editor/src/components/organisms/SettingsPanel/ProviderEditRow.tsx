@@ -21,7 +21,7 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
   const [apiKey, setApiKey] = useState(provider.apiKey);
 
   return (
-    <div className="space-y-2 rounded-lg border border-blue-200 p-3 dark:border-blue-700">
+    <div className="space-y-2 rounded-lg border border-edge-strong p-3">
       <Input
         label={t("providers.label")}
         value={label}

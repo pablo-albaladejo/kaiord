@@ -13,7 +13,7 @@ export const LabReportReview = ({ detail }: { detail: LabReportDetail }) => {
     <div
       data-testid="lab-report-review"
       data-report-id={report.id}
-      className="mt-3 rounded-lg border border-gray-200 p-3 dark:border-slate-800"
+      className="mt-3 rounded-lg border border-edge-soft p-3"
     >
       <div className="mb-2 text-sm font-medium">
         {report.date}
@@ -21,7 +21,7 @@ export const LabReportReview = ({ detail }: { detail: LabReportDetail }) => {
         {report.fasting ? ` · ${t("report.fasting")}` : ""}
       </div>
       {values.length === 0 ? (
-        <p className="text-sm text-gray-600">{t("report.emptyValues")}</p>
+        <p className="text-sm text-ink-muted">{t("report.emptyValues")}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {values.map((value) => (

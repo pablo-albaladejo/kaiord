@@ -39,6 +39,12 @@
  * second block here would only be a chance to diverge.
  */
 :root {
+  /* Nav logo: VitePress defaults to 24px, where the mark's 1.4 radius on a
+     32 viewBox renders at 1.05px — the exact floor assets/AGENTS.md sets
+     ("below 24px, drop radii and nodes"). 28px keeps the hub legible and
+     matches the SPA header. */
+  --vp-nav-logo-height: 28px;
+
   /* Backgrounds — 3 distinct elevation levels */
   --vp-c-bg: var(--bg-page);
   --vp-c-bg-soft: var(--bg-surface);
@@ -173,4 +179,102 @@ textarea:focus-visible,
 select:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Home page (index.md). These live here, not in a <style> block in the .md:
+   a <style> in markdown is global to the whole site with nothing saying so —
+   this file is where global is the stated contract.
+
+   The brand fill is var(--control) with var(--control-ink) on top — both
+   resolve per theme. Never pair a role-driven background with a literal
+   text color: in the dark theme --control IS white, and hardcoded white
+   on it renders 1:1. (Even naming the literal here would trip the
+   no-hex-literals guard — it reads whole .css files, comments included.) */
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0 48px;
+}
+
+.action-btn {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.action-btn:hover {
+  opacity: 0.85;
+}
+
+.action-btn.primary {
+  background: var(--control);
+  color: var(--control-ink);
+}
+
+.action-btn.secondary {
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-1);
+}
+
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* A ring, not a fill: three solid ink discs are a lot of weight for a
+   number the reading order already gives. */
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--vp-c-text-2);
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.feature-card {
+  display: block;
+  padding: 20px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+  text-decoration: none;
+  color: var(--vp-c-text-1);
+  transition: border-color 0.2s;
+}
+
+/* One step up the border scale, not a jump to the strongest tone there is:
+   in the dark theme --vp-c-brand-1 resolves to white. */
+.feature-card:hover {
+  border-color: var(--vp-c-text-3);
+}
+
+.feature-card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--vp-c-text-2);
+  font-size: 14px;
 }

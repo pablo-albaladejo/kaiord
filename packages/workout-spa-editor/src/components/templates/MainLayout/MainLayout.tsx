@@ -16,7 +16,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   useFocusOnRouteChange();
   const routeLabel = useRouteAnnouncerLabel();
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-slate-900">
+    <div className="flex min-h-screen flex-col bg-surface-page">
       <LayoutHeader />
       {/*
         Route announcer.

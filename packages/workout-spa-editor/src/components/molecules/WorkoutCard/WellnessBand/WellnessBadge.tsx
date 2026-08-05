@@ -9,7 +9,7 @@ export type WellnessBadgeProps = {
 };
 
 const badgeClass =
-  "inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700";
+  "inline-flex items-center gap-1 rounded-lg bg-surface-elevated px-1.5 py-0.5 text-xs tabular-nums text-ink-body motion-safe:transition-colors hover:bg-surface-deep hover:text-ink-strong";
 
 export function WellnessBadge({ def, value }: WellnessBadgeProps) {
   return (

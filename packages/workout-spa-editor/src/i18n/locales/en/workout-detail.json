@@ -9,7 +9,8 @@
     "backToCalendar": "Back to calendar"
   },
   "structure": {
-    "eyebrow": "Structure · time in zone"
+    "eyebrow": "Structure · time in zone",
+    "targetsFrom": "Zones shown against {{threshold}} · from your athlete profile, {{relative}}"
   },
   "sport": {
     "cycling": "Cycling",
@@ -30,7 +31,7 @@
   "summary": {
     "duration": "Duration",
     "tss": "TSS",
-    "load": "Load"
+    "hardestZone": "Hardest zone"
   },
   "fallbackTitle": "Workout",
   "stats": {

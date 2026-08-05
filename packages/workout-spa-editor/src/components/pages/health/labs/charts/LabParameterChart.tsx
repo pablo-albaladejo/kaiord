@@ -42,14 +42,14 @@ export const LabParameterChart = ({
   const band = useMemo(() => resolveReferenceBand(values), [values]);
   const data = useMemo(() => buildLabChartData(values, band), [values, band]);
   const options = useMemo(
-    () => buildLabChartOptions(def, band),
-    // resolvedTheme forces a rebuild so axis/grid colors follow the .dark class.
+    () => buildLabChartOptions(def, band, t("chart.outOfRange")),
+    // resolvedTheme forces a rebuild so axis/grid/series colors follow .dark.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [def, band, resolvedTheme]
+    [def, band, resolvedTheme, t]
   );
 
   if (values.length === 0)
-    return <p className="text-sm text-gray-600">{t("chart.empty")}</p>;
+    return <p className="text-sm text-ink-muted">{t("chart.empty")}</p>;
 
   return (
     <div
@@ -59,7 +59,7 @@ export const LabParameterChart = ({
       data-band-kind={band?.kind ?? "none"}
       data-point-count={data[0]?.length ?? 0}
       data-outlier-count={countOutliers(data)}
-      className="rounded-lg border border-gray-200 p-4 dark:border-slate-800"
+      className="rounded-lg border border-edge-soft p-4"
     >
       <UplotChart
         key={parameterKey}

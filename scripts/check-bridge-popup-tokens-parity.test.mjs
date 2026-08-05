@@ -25,11 +25,15 @@ const TOKEN_SOURCES = {
   "--kd-text-primary": "--text",
   "--kd-text-secondary": "--text-secondary",
   "--kd-text-muted": "--text-dim",
+  "--kd-text-disabled": "--text-disabled",
   "--kd-control": "--control",
   "--kd-control-ink": "--control-ink",
   "--kd-control-hover": "--control-hover",
   "--kd-border": "--border",
   "--kd-border-soft": "--border-subtle",
+  // The shell's only hue: zone 4 edges the card that names a real training
+  // session.
+  "--kd-zone-4": "--zone-4",
 };
 
 const readDeclarations = (src, prefix) =>

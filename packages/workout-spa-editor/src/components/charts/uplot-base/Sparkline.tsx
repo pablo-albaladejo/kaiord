@@ -4,6 +4,7 @@
  */
 import { useMemo } from "react";
 
+import { useTheme } from "../../../contexts/ThemeContext";
 import {
   buildSparklineData,
   buildSparklineOptions,
@@ -27,9 +28,13 @@ export const Sparkline = ({
   height = DEFAULT_HEIGHT,
   stroke,
 }: SparklineProps) => {
+  const { resolvedTheme } = useTheme();
   const options = useMemo(
     () => buildSparklineOptions({ width, height, stroke }),
-    [width, height, stroke]
+    // resolvedTheme forces a rebuild so the default stroke follows the ink
+    // ladder across a `.dark` flip.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [width, height, stroke, resolvedTheme]
   );
   const data = useMemo(() => buildSparklineData(points), [points]);
 
