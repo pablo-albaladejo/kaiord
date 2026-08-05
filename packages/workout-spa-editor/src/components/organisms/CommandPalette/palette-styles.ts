@@ -12,7 +12,7 @@
 export const OVERLAY_CLASS = "fixed inset-0 z-50 bg-black/50";
 
 export const CONTENT_CLASS =
-  "fixed left-[50%] top-[15%] z-50 w-full max-w-xl translate-x-[-50%] overflow-hidden border border-gray-200 bg-white shadow-lg sm:rounded-xl dark:border-slate-700 dark:bg-slate-900";
+  "fixed left-[50%] top-[15%] z-50 w-full max-w-xl translate-x-[-50%] overflow-hidden border border-edge bg-surface shadow-lg sm:rounded-2xl";
 
 export const INPUT_CLASS =
-  "flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white";
+  "flex-1 bg-transparent text-sm text-ink-strong outline-none placeholder:text-ink-muted";

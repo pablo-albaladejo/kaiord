@@ -23,7 +23,7 @@ export const LabDashboardSection = ({ profileId }: { profileId: string }) => {
         {t("dashboard.pinParameters")}
       </h3>
       {summaries === undefined ? (
-        <p className="text-sm text-gray-600">{t("dashboard.loading")}</p>
+        <p className="text-sm text-ink-muted">{t("dashboard.loading")}</p>
       ) : (
         <LabLatestValuesList
           summaries={summaries}
@@ -35,7 +35,7 @@ export const LabDashboardSection = ({ profileId }: { profileId: string }) => {
         {t("dashboard.evolutionCharts")}
       </h3>
       {pinned.length === 0 ? (
-        <p className="text-sm text-gray-600">{t("dashboard.emptyGrid")}</p>
+        <p className="text-sm text-ink-muted">{t("dashboard.emptyGrid")}</p>
       ) : (
         <div
           data-testid="lab-dashboard-grid"

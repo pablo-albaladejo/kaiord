@@ -18,6 +18,7 @@ React contexts that scope shared runtime state across the tree. Used for cross-c
 - `coaching-registry-context.tsx` + `coaching-registry-bootstrap.tsx` / `.test.tsx` — the coaching-registry React seam; bootstrap component wires the singleton into the tree.
 - `focus-registry-context.tsx` / `.test.tsx` — the focus-registration store (which DOM elements claim which `ItemId`s).
 - `focus-telemetry-context.tsx` / `.test.tsx` — re-exports the telemetry context from `store/providers` and provides a no-op default.
+- `athlete-zones-context.tsx` / `.test.tsx` — the active `Profile`, published by the Calendar and Daily pages so every card resolves training thresholds from the one live query the page already runs. Answers `null` outside a provider (the consumer degrades to zone/percent-FTP targets) rather than throwing, because cards render in storybook and in unit tests without one.
 - `train2go-zones-sync-context.tsx` — zones-sync orchestration state.
 - `index.ts` — module export surface for the most-used providers (`AnalyticsProvider`, `GarminBridgeProvider`, `SettingsDialogProvider`, `ThemeProvider` + `useTheme`).
 

@@ -1,28 +1,37 @@
-import { Bot } from "lucide-react";
+/**
+ * Raw sessions arrived and there is no key to turn them into steps.
+ *
+ * This is the week's one action when no provider is configured — the batch
+ * banner does not also render, because both are statements about the same raw
+ * count and only one of them can be acted on.
+ */
 import { useLocation } from "wouter";
 
-export function NoAiProviderState() {
+import { pluralKey } from "../../../i18n/plural-key";
+import { useTranslate } from "../../../i18n/use-translate";
+import { BannerButton } from "./banner-buttons";
+import { ConsequenceBanner } from "./ConsequenceBanner";
+
+export type NoAiProviderStateProps = {
+  rawCount: number;
+};
+
+export function NoAiProviderState({ rawCount }: NoAiProviderStateProps) {
+  const t = useTranslate("calendar");
   const [, navigate] = useLocation();
 
   return (
-    <div
-      data-testid="no-ai-provider-state"
-      className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950"
-    >
-      <Bot className="h-5 w-5 text-blue-600" />
-      <div className="flex-1">
-        <p className="text-sm font-medium">No AI provider configured</p>
-        <p className="text-xs text-muted-foreground">
-          Configure an AI provider to auto-process raw workouts.
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={() => navigate("/settings/ai")}
-        className="rounded-md border border-edge px-3 py-1 text-xs hover:bg-gray-50 dark:hover:bg-gray-800"
-      >
-        Configure
-      </button>
-    </div>
+    <ConsequenceBanner
+      testId="no-ai-provider-state"
+      headline={t(pluralKey("noAiProvider.headline", rawCount), {
+        count: rawCount,
+      })}
+      consequence={t("noAiProvider.consequence")}
+      actions={
+        <BannerButton primary onClick={() => navigate("/settings/ai")}>
+          {t("noAiProvider.cta")}
+        </BannerButton>
+      }
+    />
   );
 }

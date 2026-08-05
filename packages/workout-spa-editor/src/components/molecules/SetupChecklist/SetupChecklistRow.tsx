@@ -25,8 +25,10 @@ export function SetupChecklistRow({ item, isNext }: SetupChecklistRowProps) {
   const t = useTranslate("setup");
   const label = (
     <span className="flex items-center gap-2">
+      {/* Done is said by the tick and the strike-through, not by green:
+          success left the palette with warning. */}
       {item.done ? (
-        <Icon icon={ICON_MAP.check} size="sm" color="success" />
+        <Icon icon={ICON_MAP.check} size="sm" color="inherit" />
       ) : (
         <span className="border-edge-strong h-3.5 w-3.5 shrink-0 rounded-full border" />
       )}
@@ -50,7 +52,7 @@ export function SetupChecklistRow({ item, isNext }: SetupChecklistRowProps) {
           {isNext && (
             <span className="text-ink-muted mt-0.5 flex items-center gap-1 pl-6 text-[12px]">
               {t(item.hintKey)}
-              <Icon icon={ICON_MAP.chevR} size="xs" color="primary" />
+              <Icon icon={ICON_MAP.chevR} size="xs" color="inherit" />
             </span>
           )}
         </Link>

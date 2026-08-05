@@ -17,7 +17,7 @@ export function BottomNavFab({ onActivate }: BottomNavFabProps) {
       aria-label={t("a11y.createWorkout")}
       onClick={onActivate}
       style={FAB_STYLE}
-      className="absolute -top-[18px] left-1/2 flex -translate-x-1/2 items-center justify-center rounded-[20px] text-white"
+      className="absolute -top-[11px] left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full"
     >
       <Icon
         icon={ICON_MAP.plus}

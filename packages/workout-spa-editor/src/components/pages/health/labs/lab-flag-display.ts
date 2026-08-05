@@ -1,31 +1,31 @@
 /**
- * Presentation mapping for a `LabFlag` (F3.3). `in`/`low`/`high`/`unknown`
- * each get a badge label + colour classes. `unknown` (missing or unparsable
- * range) is deliberately NOT treated as out-of-range and never highlighted.
+ * Presentation mapping for a `LabFlag` (F3.3).
+ *
+ * A value out of its reference range needs the user, so it says so with a
+ * glyph plus its word on `--text`; a value inside its range, or one with no
+ * range to judge it by, is muted and silent. Nothing here tints: the palette
+ * has no success or warning role, and the danger ramp shares zone 5's hue —
+ * a lab result is not a training zone. `unknown` (missing or unparsable
+ * range) is deliberately NOT treated as out-of-range.
  */
 import type { LabFlag } from "@kaiord/core";
 
-export type LabFlagStyle = { label: string; className: string };
+export type LabFlagStyle = {
+  /** English fallback; surfaces render `t("flag.<flag>")`. */
+  label: string;
+  className: string;
+  /** Whether the badge draws the alert glyph beside its word. */
+  showsGlyph: boolean;
+};
+
+const NEEDS_YOU = "font-medium text-ink-strong";
+const SILENT = "text-ink-muted";
 
 export const LAB_FLAG_STYLES: Record<LabFlag, LabFlagStyle> = {
-  in: {
-    label: "In range",
-    className:
-      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  },
-  low: {
-    label: "Low",
-    className:
-      "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-  },
-  high: {
-    label: "High",
-    className: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  },
-  unknown: {
-    label: "No range",
-    className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-  },
+  in: { label: "In range", className: SILENT, showsGlyph: false },
+  low: { label: "Low", className: NEEDS_YOU, showsGlyph: true },
+  high: { label: "High", className: NEEDS_YOU, showsGlyph: true },
+  unknown: { label: "No range", className: SILENT, showsGlyph: false },
 };
 
 /** Whether a flag marks a value outside its reference range (highlightable). */

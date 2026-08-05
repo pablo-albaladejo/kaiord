@@ -2,12 +2,17 @@ import type { LabValue } from "@kaiord/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ThemeProvider } from "../../../../contexts/ThemeContext";
 import type { LabParameterSummary } from "./build-lab-parameter-summaries";
 import { LabLatestValuesList } from "./LabLatestValuesList";
 
 vi.mock("../../../charts/uplot-base/uplot-chart", () => ({
   UplotChart: () => <div data-testid="uplot-chart-mock" />,
 }));
+
+// The palette has no success or warning role, and the danger ramp shares zone
+// 5's hue — a lab result is not a training zone, so nothing here may tint.
+const HUE = /-(green|amber|red|yellow|emerald|blue|orange)-\d{2,3}/;
 
 const latest = (overrides: Partial<LabValue>): LabValue => ({
   id: "v1",
@@ -44,7 +49,9 @@ describe("LabLatestValuesList", () => {
     ];
 
     // Act
-    render(<LabLatestValuesList summaries={summaries} />);
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     expect(screen.getAllByTestId("lab-parameter-item")).toHaveLength(2);
@@ -56,7 +63,9 @@ describe("LabLatestValuesList", () => {
     const summaries = [summary("creatinine", "high", [100, 200])];
 
     // Act
-    render(<LabLatestValuesList summaries={summaries} />);
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     const item = screen.getByTestId("lab-parameter-item");
@@ -64,12 +73,45 @@ describe("LabLatestValuesList", () => {
     expect(screen.getByTestId("lab-flag-badge")).toHaveTextContent("High");
   });
 
+  it("should name an out-of-range value with a glyph and no tint", () => {
+    // Arrange
+    const summaries = [summary("creatinine", "high", [100, 200])];
+
+    // Act
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
+    const badge = screen.getByTestId("lab-flag-badge");
+
+    // Assert
+    expect(badge.querySelector("svg")).toBeInTheDocument();
+    expect(badge.className).not.toMatch(HUE);
+    expect(screen.getByTestId("lab-parameter-item").className).not.toMatch(HUE);
+  });
+
+  it("should stay silent for an in-range value", () => {
+    // Arrange
+    const summaries = [summary("glucose", "in", [100, 200])];
+
+    // Act
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
+    const badge = screen.getByTestId("lab-flag-badge");
+
+    // Assert
+    expect(badge.querySelector("svg")).not.toBeInTheDocument();
+    expect(badge.className).not.toMatch(HUE);
+  });
+
   it("should show the empty message with no summaries", () => {
     // Arrange
     const summaries: LabParameterSummary[] = [];
 
     // Act
-    render(<LabLatestValuesList summaries={summaries} />);
+    render(<LabLatestValuesList summaries={summaries} />, {
+      wrapper: ThemeProvider,
+    });
 
     // Assert
     expect(

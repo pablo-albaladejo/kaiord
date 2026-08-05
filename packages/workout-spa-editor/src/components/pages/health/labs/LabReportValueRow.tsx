@@ -19,18 +19,16 @@ export const LabReportValueRow = ({ value }: { value: LabValue }) => {
       data-parameter-key={value.parameterKey}
       data-flag={value.flag}
       className={`flex flex-wrap items-center justify-between gap-2 rounded border p-2 text-sm ${
-        isOutOfRange(value.flag)
-          ? "border-red-300 dark:border-red-800"
-          : "border-gray-200 dark:border-slate-800"
+        isOutOfRange(value.flag) ? "border-edge-strong" : "border-edge-soft"
       }`}
     >
       <span className="min-w-0 flex-1 truncate">
         {labParameterLabel(value.parameterKey, locale)}
       </span>
-      <span className="whitespace-nowrap font-mono">
+      <span className="whitespace-nowrap font-medium tabular-nums slashed-zero">
         {value.valueCanonical} {value.unitCanonical}
       </span>
-      <span className="whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">
+      <span className="whitespace-nowrap text-xs text-ink-muted">
         {formatRefRange(value)} · {refSourceLabel(value.refSource)}
       </span>
       <LabFlagBadge flag={value.flag} />

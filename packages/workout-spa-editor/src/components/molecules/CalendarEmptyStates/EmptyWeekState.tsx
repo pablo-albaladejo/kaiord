@@ -1,46 +1,61 @@
 /**
- * EmptyWeekState - No workouts this week, but data exists elsewhere.
+ * This week is empty, but the athlete's history is not.
+ *
+ * The old copy said "No workouts this week", which the seven empty day cells
+ * already said. This one states the fact the cells cannot: when the last
+ * session actually was, and the two readings of a gap — between blocks, or a
+ * coach who has not published.
  */
 
-import { Calendar, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
-import { Button } from "../../atoms/Button/Button";
+import { BannerButton } from "./banner-buttons";
+import { ConsequenceBanner } from "./ConsequenceBanner";
 
 export type EmptyWeekStateProps = {
   /** The rendered week's id, carried on `?week=` so Back returns here. */
   weekId: string;
+  /** Formatted date of the latest session anywhere, when there is one. */
+  latestDate?: string;
   onGoToLatest?: () => void;
 };
 
-export function EmptyWeekState({ weekId, onGoToLatest }: EmptyWeekStateProps) {
+export function EmptyWeekState({
+  weekId,
+  latestDate,
+  onGoToLatest,
+}: EmptyWeekStateProps) {
+  const t = useTranslate("calendar");
   const [, navigate] = useLocation();
 
   return (
-    <div
-      data-testid="empty-week-state"
-      className="flex flex-col items-center gap-4 py-12"
-    >
-      <Calendar className="h-10 w-10 text-muted-foreground" />
-      <p className="text-muted-foreground">No workouts this week</p>
-      <div className="flex gap-3">
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() =>
-            navigate(withOrigin("/workout/new", "calendar", { week: weekId }))
-          }
-        >
-          <Plus className="h-4 w-4" />
-          Add workout
-        </Button>
-        {onGoToLatest && (
-          <Button variant="secondary" size="sm" onClick={onGoToLatest}>
-            Go to latest
-          </Button>
-        )}
-      </div>
-    </div>
+    <ConsequenceBanner
+      testId="empty-week-state"
+      marked={false}
+      headline={
+        latestDate
+          ? t("emptyWeek.headlineWithDate", { date: latestDate })
+          : t("emptyWeek.headline")
+      }
+      consequence={t("emptyWeek.consequence")}
+      actions={
+        <>
+          {onGoToLatest && latestDate && (
+            <BannerButton primary onClick={onGoToLatest}>
+              {t("emptyWeek.goToLatest", { date: latestDate })}
+            </BannerButton>
+          )}
+          <BannerButton
+            onClick={() =>
+              navigate(withOrigin("/workout/new", "calendar", { week: weekId }))
+            }
+          >
+            {t("emptyWeek.addWorkout")}
+          </BannerButton>
+        </>
+      }
+    />
   );
 }

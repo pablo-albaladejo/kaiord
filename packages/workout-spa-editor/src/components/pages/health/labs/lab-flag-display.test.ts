@@ -41,4 +41,27 @@ describe("LAB_FLAG_STYLES", () => {
     // Assert
     expect(complete).toBe(true);
   });
+
+  it("should show the glyph exactly on the out-of-range flags", () => {
+    // Arrange
+    const flags: LabFlag[] = ["in", "low", "high", "unknown"];
+
+    // Act
+    const glyphed = flags.filter((f) => LAB_FLAG_STYLES[f].showsGlyph);
+
+    // Assert
+    expect(glyphed).toEqual(flags.filter(isOutOfRange));
+  });
+
+  it("should tint no flag — the palette has no success or warning role", () => {
+    // Arrange
+    const flags: LabFlag[] = ["in", "low", "high", "unknown"];
+    const hue = /-(green|amber|red|yellow|emerald|blue|orange)-\d{2,3}/;
+
+    // Act
+    const classNames = flags.map((f) => LAB_FLAG_STYLES[f].className);
+
+    // Assert
+    for (const className of classNames) expect(className).not.toMatch(hue);
+  });
 });
