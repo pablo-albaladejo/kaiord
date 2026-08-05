@@ -49,7 +49,9 @@ export function CoachingActivityCard({
           <span role="img" aria-label={activity.sport.label}>
             {activity.sport.icon}
           </span>
-          <span className="min-w-0 flex-1">{activity.title}</span>
+          <span className="min-w-0 flex-1 line-clamp-2 wrap-anywhere">
+            {activity.title}
+          </span>
           <LifecycleChip label={statusLabel} />
         </>
       }

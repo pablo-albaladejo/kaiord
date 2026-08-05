@@ -44,7 +44,9 @@ export function WorkoutCard({ workout, view, onClick }: WorkoutCardProps) {
       originChip={workout.source}
       titleRow={
         <>
-          <span className="min-w-0 flex-1">{title}</span>
+          <span className="min-w-0 flex-1 line-clamp-2 wrap-anywhere">
+            {title}
+          </span>
           <LifecycleChip
             label={stateLabel}
             tone={lifecycleTone(workout.state)}
