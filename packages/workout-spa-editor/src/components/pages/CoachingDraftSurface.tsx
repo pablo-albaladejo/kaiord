@@ -14,6 +14,7 @@ import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { Button } from "../atoms/Button/Button";
 import { CoachingSidebar } from "../organisms/CoachingSidebar/CoachingSidebar";
+import { CoachingDraftProposal } from "./CoachingDraftProposal";
 import { EditorNoData } from "./EditorLoadingState";
 import { EditorPageHeader } from "./EditorPageHeader";
 import { useCoachingDraft } from "./use-coaching-draft";
@@ -45,6 +46,9 @@ export function CoachingDraftSurface({
     <div className="space-y-6">
       <EditorPageHeader mode="new" onBack={onBack} />
       {noStructured && <EditorNoData />}
+      {!noStructured && (
+        <CoachingDraftProposal activity={activity} krd={currentWorkout} />
+      )}
       {!noStructured && (
         <Button
           variant="primary"

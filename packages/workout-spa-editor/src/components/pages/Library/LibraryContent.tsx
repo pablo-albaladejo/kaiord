@@ -6,6 +6,7 @@ import type { WorkoutTemplate } from "../../../types/workout-library";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal";
 import { filterTemplates, type SportFilter } from "./library-filter";
 import { LibraryEmpty } from "./LibraryEmpty";
+import { LibraryKeepHint } from "./LibraryKeepHint";
 import { LibraryListRow } from "./LibraryListRow";
 import { LibrarySearchField } from "./LibrarySearchField";
 import { LibrarySportChips } from "./LibrarySportChips";
@@ -51,19 +52,22 @@ export function LibraryContent({
       {filtered.length === 0 ? (
         <LibraryEmpty isFiltered={isFiltered} />
       ) : (
-        <div className="space-y-3">
-          {filtered.map((t) => (
-            <LibraryListRow
-              key={t.id}
-              template={t}
-              profile={profile}
-              hasCurrentWorkout={hasCurrentWorkout}
-              onLoad={() => onLoad(t)}
-              onSchedule={() => onSchedule(t)}
-              onDelete={() => setDeleteTarget(t)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="space-y-3">
+            {filtered.map((t) => (
+              <LibraryListRow
+                key={t.id}
+                template={t}
+                profile={profile}
+                hasCurrentWorkout={hasCurrentWorkout}
+                onLoad={() => onLoad(t)}
+                onSchedule={() => onSchedule(t)}
+                onDelete={() => setDeleteTarget(t)}
+              />
+            ))}
+          </div>
+          <LibraryKeepHint />
+        </>
       )}
       <ConfirmationModal
         isOpen={deleteTarget !== null}

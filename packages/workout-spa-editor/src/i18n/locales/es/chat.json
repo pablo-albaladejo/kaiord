@@ -76,5 +76,14 @@
     "pending": "Pendiente",
     "completed": "Completado",
     "skipped": "Omitido"
+  },
+  "proposal": {
+    "duration": "Duración",
+    "tss": "TSS",
+    "landsBeside": "aterriza junto a {{title}}",
+    "coachSaid": "tu entrenador dijo {{value}}",
+    "fromYourCoach": "de tu entrenador",
+    "untitled": "Sesión",
+    "alreadyThere": "ya había: {{value}}"
   }
 }

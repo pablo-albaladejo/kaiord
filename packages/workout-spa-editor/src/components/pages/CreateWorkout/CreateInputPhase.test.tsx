@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
+import { profileWith } from "../../../lib/athlete/test-profile";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { CreateInputPhase } from "./CreateInputPhase";
 
@@ -26,6 +27,7 @@ const withRouter = (ui: ReactNode) => {
 const baseProps = {
   sport: "cycling" as const,
   onSportChange: vi.fn(),
+  profile: profileWith("cycling", { ftp: 268 }),
   promptText: "",
   onPromptChange: vi.fn(),
   provider: PROVIDER,
@@ -84,5 +86,30 @@ describe("CreateInputPhase", () => {
 
     // Assert
     expect(screen.getByText(/configure an ai provider/i)).toBeInTheDocument();
+  });
+
+  it("should name the threshold the generation writes against", () => {
+    // Arrange
+    const ui = <CreateInputPhase {...baseProps} />;
+
+    // Act
+    render(withRouter(ui));
+
+    // Assert
+    expect(screen.getByText(/FTP 268 W/)).toBeInTheDocument();
+    expect(screen.getByText(/athlete profile/i)).toBeInTheDocument();
+  });
+
+  it("should omit the threshold line when the sport has none set", () => {
+    // Arrange
+    const ui = (
+      <CreateInputPhase {...baseProps} profile={profileWith("cycling", {})} />
+    );
+
+    // Act
+    render(withRouter(ui));
+
+    // Assert
+    expect(screen.queryByText(/athlete profile/i)).not.toBeInTheDocument();
   });
 });

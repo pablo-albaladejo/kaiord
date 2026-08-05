@@ -57,6 +57,7 @@ export default function CreateWorkout({
         <CreateInputPhase
           sport={sport}
           onSportChange={create.setSport}
+          profile={profile}
           promptText={promptText}
           onPromptChange={create.setPromptText}
           provider={create.provider}

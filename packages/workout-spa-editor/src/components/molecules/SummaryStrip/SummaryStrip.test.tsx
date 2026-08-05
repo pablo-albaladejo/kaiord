@@ -46,6 +46,27 @@ describe("SummaryStrip", () => {
     expect(svgs).toHaveLength(items.length);
   });
 
+  it("should replace the icon with a swatch when the item names a zone", () => {
+    // Arrange
+
+    const zoneItems: SummaryItem[] = [
+      { icon: "flame", value: "Threshold", label: "Hardest zone", zone: 4 },
+    ];
+
+    // Act
+
+    const { container } = render(<SummaryStrip items={zoneItems} />);
+
+    // Assert
+
+    expect(container.querySelectorAll("svg")).toHaveLength(0);
+    expect(
+      screen.getByTestId("summary-zone-swatch").getAttribute("style")
+    ).toContain("var(--zone-4)");
+    expect(screen.getByText("Threshold")).toBeInTheDocument();
+    expect(screen.getByText("Hardest zone")).toBeInTheDocument();
+  });
+
   it("should apply custom className to the root element", () => {
     // Arrange
 

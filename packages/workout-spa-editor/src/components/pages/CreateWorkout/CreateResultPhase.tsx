@@ -1,8 +1,10 @@
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import type { ReviewModel } from "../../../lib/workout-review";
+import { hardestZone } from "../../../lib/workout-review/zone-emphasis";
 import { Button } from "../../atoms/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import type { SummaryItem } from "../../molecules/SummaryStrip";
 import { SummaryStrip } from "../../molecules/SummaryStrip";
 import { ZoneDist } from "../../molecules/ZoneDist";
 import { StepList } from "../../organisms/StepList";
@@ -29,19 +31,20 @@ export function CreateResultPhase({
   onClose,
 }: CreateResultPhaseProps) {
   const t = useTranslate("create-workout");
-  const summary = [
-    {
-      icon: "clock" as const,
-      value: model.duration,
-      label: t("summary.duration"),
-    },
-    {
-      icon: "flame" as const,
-      value: String(model.tss),
-      label: t("summary.tss"),
-    },
-    { icon: "zap" as const, value: model.load, label: t("summary.load") },
+  const tZones = useTranslate("zones");
+  const zone = hardestZone(model.dist);
+  const summary: SummaryItem[] = [
+    { icon: "clock", value: model.duration, label: t("summary.duration") },
+    { icon: "flame", value: String(model.tss), label: t("summary.tss") },
   ];
+  if (zone !== null) {
+    summary.push({
+      icon: "zap",
+      zone,
+      value: tZones(`zoneName.z${zone}`),
+      label: t("summary.hardestZone"),
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4">

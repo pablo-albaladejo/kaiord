@@ -61,5 +61,17 @@
   },
   "empty": {
     "noSportConfig": "No hay configuración de zonas para este deporte."
+  },
+  "zoneName": {
+    "z1": "Recuperación",
+    "z2": "Resistencia",
+    "z3": "Tempo",
+    "z4": "Umbral",
+    "z5": "VO₂ Máx"
+  },
+  "thresholdName": {
+    "ftp": "FTP",
+    "thresholdPace": "Ritmo de umbral",
+    "cssPace": "Ritmo CSS"
   }
 }

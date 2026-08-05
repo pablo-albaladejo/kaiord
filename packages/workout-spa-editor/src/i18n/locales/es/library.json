@@ -4,8 +4,8 @@
   },
   "header": {
     "title": "Biblioteca",
-    "count_one": "{{count}} entrenamiento",
-    "count_other": "{{count}} entrenamientos"
+    "count_one": "{{count}} entrenamiento · guardado por ti",
+    "count_other": "{{count}} entrenamientos · guardados por ti"
   },
   "search": {
     "placeholder": "Buscar entrenamientos...",
@@ -15,7 +15,9 @@
     "all": "Todos",
     "cycling": "Ciclismo",
     "running": "Carrera",
-    "swim": "Natación"
+    "swim": "Natación",
+    "strength": "Fuerza",
+    "generic": "Otro"
   },
   "empty": {
     "title": "Tu biblioteca está vacía",
@@ -105,5 +107,10 @@
     "workoutSavedDescription": "\"{{name}}\" se ha añadido a tu biblioteca",
     "saveFailed": "Error al guardar",
     "saveFailedDescription": "No se pudo guardar el entrenamiento"
+  },
+  "keepHint": {
+    "title": "Todo lo que guardes desde el editor aterriza aquí",
+    "body": "Con sus zonas y su estructura intactas, listo para soltarlo en cualquier fecha.",
+    "action": "Escribe uno nuevo"
   }
 }

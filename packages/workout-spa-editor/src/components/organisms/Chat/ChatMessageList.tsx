@@ -2,11 +2,18 @@ import { useEffect, useRef } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
-import { buildToolResultLinks } from "./build-tool-result-links";
+import {
+  buildToolResultLinks,
+  proposedWorkoutId,
+} from "./build-tool-result-links";
+import { ChatWorkoutProposal } from "./ChatWorkoutProposal";
 import { ToolResultLinks } from "./ToolResultLinks";
 
+/* The user bubble was `bg-sky-600`, five degrees off `--zone-2`: a person's own
+   message was painted the colour that means easy endurance. Inside the login
+   the brand is ink, so the bubble is the interactive fill with ink on top. */
 const ROLE_STYLE: Record<string, string> = {
-  user: "self-end bg-sky-600 text-white",
+  user: "self-end bg-accent text-surface",
   assistant: "self-start bg-surface text-ink-strong",
   tool: "self-start bg-surface-deep text-ink-muted italic",
 };
@@ -50,17 +57,19 @@ export function ChatMessageList({
       {messages.map((m) => {
         const focused = m.id === focusMessageId;
         const roleKey = ROLE_LABEL_KEY[m.role];
+        const proposalId = proposedWorkoutId(m);
         return (
           <li
             key={m.id}
             ref={focused ? focusedRef : undefined}
             data-focused={focused || undefined}
-            className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-[14px] ${ROLE_STYLE[m.role] ?? ROLE_STYLE.assistant} ${focused ? "ring-2 ring-yellow-300" : ""}`}
+            className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-[14px] ${ROLE_STYLE[m.role] ?? ROLE_STYLE.assistant} ${focused ? "ring-2 ring-edge-strong" : ""}`}
           >
             <span className="mb-0.5 block text-[11px] font-semibold opacity-70">
               {roleKey ? t(roleKey) : m.role}
             </span>
             {m.content}
+            {proposalId && <ChatWorkoutProposal workoutId={proposalId} />}
             <ToolResultLinks links={buildToolResultLinks(m, t)} />
           </li>
         );

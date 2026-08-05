@@ -61,5 +61,17 @@
   },
   "empty": {
     "noSportConfig": "No zone configuration for this sport."
+  },
+  "zoneName": {
+    "z1": "Recovery",
+    "z2": "Endurance",
+    "z3": "Tempo",
+    "z4": "Threshold",
+    "z5": "VO₂ Max"
+  },
+  "thresholdName": {
+    "ftp": "FTP",
+    "thresholdPace": "Threshold pace",
+    "cssPace": "CSS pace"
   }
 }

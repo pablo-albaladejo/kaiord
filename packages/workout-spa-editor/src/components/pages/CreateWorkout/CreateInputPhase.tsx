@@ -4,6 +4,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import { ATHLETE_SPORTS } from "../../../lib/athlete";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
+import type { Profile } from "../../../types/profile";
 import { Segmented } from "../../atoms/Segmented";
 import { CreateInputHero } from "./CreateInputHero";
 import { CreateProvidersEmpty } from "./CreateProvidersEmpty";
@@ -13,6 +14,7 @@ import { CreateStartFrom } from "./CreateStartFrom";
 export type CreateInputPhaseProps = {
   sport: ActiveSport;
   onSportChange: (sport: ActiveSport) => void;
+  profile: Profile | null;
   promptText: string;
   onPromptChange: (value: string) => void;
   provider: LlmProviderConfig | null;
@@ -29,6 +31,7 @@ const SPORT_OPTIONS = ATHLETE_SPORTS.map((s) => ({
 export function CreateInputPhase({
   sport,
   onSportChange,
+  profile,
   promptText,
   onPromptChange,
   provider,
@@ -37,8 +40,6 @@ export function CreateInputPhase({
 }: CreateInputPhaseProps) {
   const t = useTranslate("create-workout");
   const [, navigate] = useLocation();
-  const sportLabel =
-    SPORT_OPTIONS.find((o) => o.value === sport)?.label.toLowerCase() ?? "";
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,7 +52,8 @@ export function CreateInputPhase({
       />
       {provider ? (
         <CreateInputHero
-          sportLabel={sportLabel}
+          sport={sport}
+          profile={profile}
           promptText={promptText}
           onPromptChange={onPromptChange}
           onGenerate={onGenerate}
