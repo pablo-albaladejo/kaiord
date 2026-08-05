@@ -7,9 +7,8 @@
  */
 
 import { act, render, waitFor } from "@testing-library/react";
-import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Router } from "wouter";
+import { Router, useLocation } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { ROUTE_HEADING_ATTR } from "../routing/constants";
@@ -33,18 +32,18 @@ function PageWithoutHeading() {
 }
 
 type HarnessProps = {
-  initial: string;
   withHeading?: boolean;
 };
 
-function Harness({ initial, withHeading = true }: HarnessProps) {
+// The label is derived from the router, not from local state: a
+// `useState(initial)` does not re-initialise on rerender, so the heading would
+// keep reading "Calendar" after navigating and an assertion that only checks
+// for `[data-route-heading]` would accept the stale one.
+function Harness({ withHeading = true }: HarnessProps) {
   useFocusOnRouteChange();
-  const [path, setPath] = useState(initial);
+  const [path] = useLocation();
   return (
     <div>
-      <button type="button" onClick={() => setPath("/library")}>
-        go-library
-      </button>
       {withHeading ? (
         <PageWithHeading label={path === "/library" ? "Library" : "Calendar"} />
       ) : (
@@ -74,7 +73,7 @@ describe("useFocusOnRouteChange", () => {
     const loc = memoryLocation({ path: "/calendar" });
     const { rerender } = render(
       <Router hook={loc.hook}>
-        <Harness initial="/calendar" />
+        <Harness />
       </Router>
     );
     act(() => {
@@ -84,7 +83,7 @@ describe("useFocusOnRouteChange", () => {
     // Act
     rerender(
       <Router hook={loc.hook}>
-        <Harness initial="/library" />
+        <Harness />
       </Router>
     );
 
@@ -92,6 +91,7 @@ describe("useFocusOnRouteChange", () => {
     await waitFor(() => {
       const focused = document.activeElement as HTMLElement | null;
       expect(focused?.hasAttribute(ROUTE_HEADING_ATTR)).toBe(true);
+      expect(focused?.textContent).toBe("Library");
     });
   });
 
@@ -106,7 +106,7 @@ describe("useFocusOnRouteChange", () => {
       const { hook } = memoryLocation({ path: "/calendar" });
       render(
         <Router hook={hook}>
-          <Harness initial="/calendar" withHeading={false} />
+          <Harness withHeading={false} />
         </Router>
       );
       await waitFor(
@@ -123,4 +123,52 @@ describe("useFocusOnRouteChange", () => {
       expect(focused?.hasAttribute(ROUTE_HEADING_ATTR) ?? false).toBe(false);
     }
   );
+
+  it("should retry when the engine silently drops the first focus", async () => {
+    // Arrange
+    // Reproduces what headless Firefox on Linux does deterministically and
+    // Mobile Safari does intermittently: focus() returns normally, throws
+    // nothing, and activeElement never moves.
+    const realFocus = HTMLElement.prototype.focus;
+    // Armed only after mount: the hook also focuses on the initial pathname,
+    // and a drop consumed there would leave the navigation under test with a
+    // perfectly ordinary focus — a test that passes either way.
+    let dropsLeft = 0;
+    vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
+      this: HTMLElement,
+      options?: FocusOptions
+    ) {
+      if (dropsLeft > 0 && this.hasAttribute(ROUTE_HEADING_ATTR)) {
+        dropsLeft -= 1;
+        return;
+      }
+      realFocus.call(this, options);
+    });
+    const loc = memoryLocation({ path: "/calendar" });
+    const { rerender } = render(
+      <Router hook={loc.hook}>
+        <Harness />
+      </Router>
+    );
+    (document.activeElement as HTMLElement | null)?.blur();
+    dropsLeft = 1;
+    act(() => {
+      loc.navigate("/library");
+    });
+
+    // Act
+    rerender(
+      <Router hook={loc.hook}>
+        <Harness />
+      </Router>
+    );
+
+    // Assert
+    await waitFor(() => {
+      const focused = document.activeElement as HTMLElement | null;
+      expect(focused?.hasAttribute(ROUTE_HEADING_ATTR)).toBe(true);
+      expect(focused?.textContent).toBe("Library");
+    });
+    expect(dropsLeft).toBe(0);
+  });
 });
