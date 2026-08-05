@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 
 export type WorkoutListContentProps = {
@@ -30,4 +32,5 @@ export type WorkoutListContentProps = {
     parentBlockIndex?: number
   ) => string;
   onAddStep?: () => void;
+  renderAfterItem?: (itemId: string) => ReactNode;
 };

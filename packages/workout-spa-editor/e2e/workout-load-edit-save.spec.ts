@@ -108,7 +108,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     await powerInput.fill("220");
 
     // Save the changes (use exact match to avoid ambiguity)
-    await page.getByRole("button", { name: "Save step changes" }).click();
+    await page.getByRole("button", { name: "Close the step form" }).click();
 
     // Verify the step editor closes
     await expect(page.getByText("Edit Step")).not.toBeVisible({
@@ -121,7 +121,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
 
     // Save the workout
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /save workout/i }).click();
+    await page.getByRole("button", { name: /download a file/i }).click();
     const download = await downloadPromise;
 
     // Verify the download

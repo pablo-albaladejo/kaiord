@@ -3,8 +3,8 @@
  *
  * Buttons toggled by the matched workout's `state`:
  *   - raw       → [Process with AI] [Open editor]
- *   - structured→ [Open editor] [Push to Garmin]
- *   - ready     → [Open editor] [Push to Garmin]
+ *   - structured→ [Open editor] [Send to Garmin]
+ *   - ready     → [Open editor] [Send to Garmin]
  *   - pushed    → [Open editor]
  *   - any other → [Open editor]
  *
@@ -12,7 +12,7 @@
  * (the use case detects the existing workout id and transitions raw →
  * structured in place rather than creating a new record).
  *
- * `[Push to Garmin]` is wired through `CoachingActivityDialog` to
+ * `[Send to Garmin]` is wired through `CoachingActivityDialog` to
  * `useGarminPush(workout)` — see issue #553. The hook accepts the
  * Dexie-backed `WorkoutRecord` directly (Option α) so the dialog
  * pushes the persisted state.

@@ -109,7 +109,7 @@ describe("SaveButton", () => {
   });
 
   describe("rendering", () => {
-    it("should render save button with default text", () => {
+    it("should render the download verb", () => {
       // Arrange
 
       // Act
@@ -117,7 +117,7 @@ describe("SaveButton", () => {
 
       // Assert
       expect(
-        screen.getByRole("button", { name: /save workout/i })
+        screen.getByRole("button", { name: /download a file/i })
       ).toBeInTheDocument();
     });
 
@@ -138,7 +138,7 @@ describe("SaveButton", () => {
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
       const icon = button.querySelector("svg");
 
       // Assert
@@ -152,7 +152,7 @@ describe("SaveButton", () => {
       renderWithToast(
         <SaveButton workout={mockKRD} className="custom-class" />
       );
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
       const container = button.closest(".custom-class");
 
       // Assert
@@ -169,7 +169,7 @@ describe("SaveButton", () => {
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
       await user.click(button);
 
       // Assert
@@ -194,7 +194,7 @@ describe("SaveButton", () => {
       vi.mocked(exportWorkout).mockImplementation(async () => mockBuffer);
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       await user.click(button);
@@ -231,7 +231,7 @@ describe("SaveButton", () => {
       vi.mocked(exportWorkout).mockResolvedValue(mockBuffer);
 
       renderWithToast(<SaveButton workout={workoutWithoutName} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       await user.click(button);
@@ -252,7 +252,7 @@ describe("SaveButton", () => {
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} disabled={true} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
       await user.click(button);
 
       // Assert
@@ -275,7 +275,9 @@ describe("SaveButton", () => {
       await user.click(fitOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /save workout/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -307,7 +309,9 @@ describe("SaveButton", () => {
       await user.click(tcxOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /save workout/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -339,7 +343,9 @@ describe("SaveButton", () => {
       await user.click(zwoOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /save workout/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -371,7 +377,9 @@ describe("SaveButton", () => {
       await user.click(fitOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /save workout/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -404,7 +412,9 @@ describe("SaveButton", () => {
       await user.click(tcxOption);
 
       // Click save button
-      const saveButton = screen.getByRole("button", { name: /save workout/i });
+      const saveButton = screen.getByRole("button", {
+        name: /download a file/i,
+      });
       await user.click(saveButton);
 
       // Assert
@@ -428,7 +438,7 @@ describe("SaveButton", () => {
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
       await user.click(button);
 
       // Assert
@@ -463,7 +473,7 @@ describe("SaveButton", () => {
       });
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       // First attempt fails
@@ -504,7 +514,7 @@ describe("SaveButton", () => {
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} disabled={true} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Assert
       expect(button).toBeDisabled();
@@ -525,7 +535,7 @@ describe("SaveButton", () => {
       );
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       const clickPromise = user.click(button);
@@ -557,7 +567,7 @@ describe("SaveButton", () => {
       );
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       const clickPromise = user.click(button);
@@ -587,7 +597,7 @@ describe("SaveButton", () => {
       );
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       const clickPromise = user.click(button);
@@ -618,7 +628,7 @@ describe("SaveButton", () => {
       );
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       const clickPromise = user.click(button);
@@ -655,7 +665,7 @@ describe("SaveButton", () => {
       );
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       const clickPromise = user.click(button);
@@ -690,7 +700,7 @@ describe("SaveButton", () => {
       );
 
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Act
       const clickPromise = user.click(button);
@@ -717,7 +727,7 @@ describe("SaveButton", () => {
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
 
       // Assert
       expect(button).toBeInTheDocument();
@@ -731,7 +741,7 @@ describe("SaveButton", () => {
 
       // Act
       renderWithToast(<SaveButton workout={mockKRD} />);
-      const button = screen.getByRole("button", { name: /save workout/i });
+      const button = screen.getByRole("button", { name: /download a file/i });
       button.focus();
       await user.keyboard("{Enter}");
 

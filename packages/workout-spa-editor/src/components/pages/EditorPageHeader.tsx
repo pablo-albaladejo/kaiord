@@ -32,14 +32,12 @@ export function EditorPageHeader({ mode, onBack }: EditorPageHeaderProps) {
         <h1
           tabIndex={-1}
           {...{ [ROUTE_HEADING_ATTR]: "" }}
-          className="text-xl font-semibold text-gray-900 dark:text-white"
+          className="text-xl font-semibold text-ink-strong"
         >
           {t(title)}
         </h1>
       </div>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        {t(description)}
-      </p>
+      <p className="text-sm text-ink-muted">{t(description)}</p>
     </div>
   );
 }

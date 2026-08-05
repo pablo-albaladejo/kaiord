@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 
 import type { Workout } from "../../../types/krd";
 import { EditorContextMenu } from "../../organisms/EditorContextMenu";
@@ -49,6 +49,8 @@ type WorkoutStepsListProps = {
   readonly editorRootRef?: RefObject<HTMLDivElement | null>;
   /** Ref to the Add Step button — §7.5 empty-state focus target. */
   readonly addStepButtonRef?: RefObject<HTMLButtonElement | null>;
+  /** The step form, rendered under the row it edits. */
+  readonly renderStepForm?: (itemId: string) => ReactNode;
 };
 
 export function WorkoutStepsList(props: WorkoutStepsListProps) {
@@ -59,18 +61,23 @@ export function WorkoutStepsList(props: WorkoutStepsListProps) {
     addStepButtonRef,
     onCreateRepetitionBlock,
     onCreateEmptyRepetitionBlock,
+    renderStepForm,
     ...workoutListProps
   } = props;
   const hasMultipleSelection = selectedStepIds.length >= 2;
 
+  // No card chrome here any more: `EditorCanvas` owns the one border on
+  // the screen, and the rows sit directly under the chart that indexes them.
   return (
     <EditorContextMenu>
-      <div
-        ref={editorRootRef}
-        data-testid="editor-root"
-        className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-      >
-        <WorkoutList {...workoutListProps} selectedStepIds={selectedStepIds} />
+      <div ref={editorRootRef} data-testid="editor-root">
+        <div className="px-4 py-4 sm:px-[18px]">
+          <WorkoutList
+            {...workoutListProps}
+            selectedStepIds={selectedStepIds}
+            renderAfterItem={renderStepForm}
+          />
+        </div>
         <WorkoutStepsListActions
           hasMultipleSelection={hasMultipleSelection}
           selectedStepCount={selectedStepIds.length}

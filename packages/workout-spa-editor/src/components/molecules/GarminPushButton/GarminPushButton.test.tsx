@@ -1,13 +1,19 @@
+/**
+ * The send control on its own. Whether the watch is reachable at all is
+ * `useGarminGate`'s question, and what the screen says about it is
+ * `EditorStateRibbon`'s — both have their own suites.
+ */
+
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { IntegrationPolicy } from "../../../types/integration-policy";
 import { GarminPushButton } from "./GarminPushButton";
 
 const mockState = {
-  extensionInstalled: false,
-  sessionActive: false,
-  pushing: { status: "idle" as const },
+  extensionInstalled: true,
+  sessionActive: true,
+  pushing: { status: "idle" } as { status: string; message?: string },
   lastError: null as string | null,
   detectExtension: vi.fn(),
   pushWorkout: vi.fn(),
@@ -15,7 +21,7 @@ const mockState = {
   setPushing: vi.fn(),
 };
 
-let mockPolicies: IntegrationPolicy[] = [];
+const push = vi.fn<() => Promise<boolean>>();
 
 vi.mock("../../../contexts", () => ({
   useGarminBridge: () => ({ ...mockState }),
@@ -23,218 +29,96 @@ vi.mock("../../../contexts", () => ({
 }));
 
 vi.mock("dexie-react-hooks", () => ({
-  // Synchronous useLiveQuery test double — unwraps thenables that have already
-  // resolved by attaching a microtask-immediate .then handler. For sync-mocked
-  // use cases (see resolveExportPolicies mock below) this returns the resolved
-  // value; for pending promises it returns undefined, matching the real hook's
-  // initial render state.
-  useLiveQuery: (fn: () => unknown) => {
-    let resolved: unknown;
-    try {
-      const value = fn();
-      if (value !== null && typeof value === "object" && "then" in value) {
-        (value as Promise<unknown>).then((v) => {
-          resolved = v;
-        });
-        return resolved;
-      }
-      return value;
-    } catch {
-      return undefined;
-    }
-  },
+  useLiveQuery: () => undefined,
 }));
 
 vi.mock("../../../adapters/dexie/dexie-database", () => ({
   db: { table: () => ({ get: async () => undefined }) },
 }));
 
-vi.mock("../../../adapters/dexie/dexie-integration-policy-repository", () => ({
-  createDexieIntegrationPolicyRepository: () => ({}),
+vi.mock("./useGarminPush", () => ({
+  useGarminPush: () => ({ push }),
 }));
-
-vi.mock(
-  "../../../application/integration-policy/resolve-export-policies.use-case",
-  () => ({
-    // Synchronous return so the useLiveQuery mock sees a plain array (not a
-    // Promise) and renders the policy-gated UI on the first pass.
-    resolveExportPolicies: () => mockPolicies,
-  })
-);
 
 vi.mock("wouter", () => ({
   useParams: () => ({ id: "workout-1" }),
 }));
 
-const ENABLED_POLICY: IntegrationPolicy = {
-  id: "00000000-0000-0000-0000-000000000001",
-  profileId: "p1",
-  dataType: "workout",
-  bridgeId: "garmin-bridge",
-  direction: "export",
-  mode: "manual",
-  enabled: true,
-  updatedAt: "2026-05-01T00:00:00.000Z",
-};
-
-const DISABLED_POLICY: IntegrationPolicy = {
-  ...ENABLED_POLICY,
-  enabled: false,
-};
-
 describe("GarminPushButton", () => {
   beforeEach(() => {
-    mockState.extensionInstalled = false;
-    mockState.sessionActive = false;
     mockState.pushing = { status: "idle" };
-    mockState.lastError = null;
-    mockPolicies = [];
+    push.mockReset();
+    push.mockResolvedValue(true);
   });
 
-  it.each([
-    {
-      label: "the extension is not installed",
-      extensionInstalled: false,
-      sessionActive: false,
-      policies: [] as IntegrationPolicy[],
-    },
-    {
-      label: "a policy exists but the bridge is not installed",
-      extensionInstalled: false,
-      sessionActive: false,
-      policies: [ENABLED_POLICY],
-    },
-  ])(
-    "should render nothing when $label",
-    ({ extensionInstalled, sessionActive, policies }) => {
-      // Arrange
-      mockState.extensionInstalled = extensionInstalled;
-      mockState.sessionActive = sessionActive;
-      mockPolicies = policies;
-
-      // Act
-      const { container } = render(<GarminPushButton profileId="p1" />);
-
-      // Assert
-      expect(container.innerHTML).toBe("");
-    }
-  );
-
-  it.each([
-    {
-      label: "no workout export policy exists",
-      policies: [] as IntegrationPolicy[],
-    },
-    { label: "the only policy is disabled", policies: [DISABLED_POLICY] },
-    {
-      label: "the only enabled policy targets a different bridge",
-      policies: [{ ...ENABLED_POLICY, bridgeId: "whoop-bridge" }],
-    },
-  ])(
-    "should show a disabled button with a visible cause when $label",
-    ({ policies }) => {
-      // Arrange
-      mockState.extensionInstalled = true;
-      mockState.sessionActive = true;
-      mockPolicies = policies;
-
-      // Act
-      render(<GarminPushButton profileId="p1" />);
-
-      // Assert
-      const button = screen.getByRole("button");
-      expect(button).toBeDisabled();
-      expect(button.textContent).toContain("Garmin (export disabled)");
-    }
-  );
-
-  it("should show disabled button when no session", () => {
+  it("should render the one send verb", () => {
     // Arrange
-
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = false;
-    mockPolicies = [ENABLED_POLICY];
-
-    render(<GarminPushButton profileId="p1" />);
+    render(<GarminPushButton />);
 
     // Act
-
-    const button = screen.getByRole("button");
-
-    // Assert
-
-    expect(button).toBeDisabled();
-    expect(button.textContent).toContain("Garmin (no session)");
-  });
-
-  it("should show send button when session active", () => {
-    // Arrange
-
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
-    mockPolicies = [ENABLED_POLICY];
-
-    render(<GarminPushButton profileId="p1" />);
-
-    // Act
-
-    const button = screen.getByRole("button");
+    const button = screen.getByTestId("send-to-garmin-button");
 
     // Assert
-
     expect(button).not.toBeDisabled();
     expect(button.textContent).toContain("Send to Garmin");
   });
 
-  it("should show success feedback", () => {
+  it("should report the send upward only once the bridge confirms it", async () => {
     // Arrange
+    const onSent = vi.fn();
+    push.mockResolvedValue(true);
+    render(<GarminPushButton onSent={onSent} />);
 
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
+    // Act
+    await userEvent.click(screen.getByTestId("send-to-garmin-button"));
+
+    // Assert
+    expect(onSent).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not report a send the bridge rejected", async () => {
+    // Arrange
+    const onSent = vi.fn();
+    push.mockResolvedValue(false);
+    render(<GarminPushButton onSent={onSent} />);
+
+    // Act
+    await userEvent.click(screen.getByTestId("send-to-garmin-button"));
+
+    // Assert
+    expect(onSent).not.toHaveBeenCalled();
+  });
+
+  it("should disable the button while the send is in flight", () => {
+    // Arrange
+    mockState.pushing = { status: "loading" };
+
+    // Act
+    render(<GarminPushButton />);
+
+    // Assert
+    expect(screen.getByTestId("send-to-garmin-button")).toBeDisabled();
+  });
+
+  it("should say the send arrived in words rather than in colour", () => {
+    // Arrange
     mockState.pushing = { status: "success" };
-    mockPolicies = [ENABLED_POLICY];
 
     // Act
-
-    render(<GarminPushButton profileId="p1" />);
-
-    // Assert
-
-    expect(screen.getByText("Sent to Garmin")).toBeInTheDocument();
-  });
-
-  it("should show error feedback", () => {
-    // Arrange
-
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
-    mockState.pushing = { status: "error", message: "Push failed" };
-    mockPolicies = [ENABLED_POLICY];
-
-    // Act
-
-    render(<GarminPushButton profileId="p1" />);
+    render(<GarminPushButton />);
 
     // Assert
-
-    expect(screen.getByText("Push failed")).toBeInTheDocument();
+    expect(screen.getByText("On your Garmin")).toBeInTheDocument();
   });
 
-  it("should show the push error cause even when a 401/403 redetect flipped the session to inactive (not a silent failure)", () => {
+  it("should surface the failure cause", () => {
     // Arrange
-
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = false;
     mockState.pushing = { status: "error", message: "Push failed: 403" };
-    mockPolicies = [ENABLED_POLICY];
 
     // Act
-
-    render(<GarminPushButton profileId="p1" />);
+    render(<GarminPushButton />);
 
     // Assert
-
     expect(screen.getByText("Push failed: 403")).toBeInTheDocument();
-    expect(screen.getByText("Garmin (no session)")).toBeInTheDocument();
   });
 });

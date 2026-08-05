@@ -25,7 +25,7 @@ export const WorkoutPreviewBar: React.FC<WorkoutPreviewBarProps> = ({
     height={height}
     fill={color}
     opacity={0.85}
-    stroke={isSelected ? "#2563eb" : "transparent"}
+    stroke={isSelected ? "var(--focus-ring)" : "transparent"}
     strokeWidth={isSelected ? 2 : 0}
     role="button"
     tabIndex={0}
@@ -37,6 +37,6 @@ export const WorkoutPreviewBar: React.FC<WorkoutPreviewBarProps> = ({
         onClick();
       }
     }}
-    className="cursor-pointer transition-opacity hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+    className="cursor-pointer transition-opacity hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
   />
 );

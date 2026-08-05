@@ -1,25 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { KRD, Workout } from "../../../types/krd";
 import { WorkoutHeader } from "./WorkoutHeader";
 
-// Mock the child components
-vi.mock("../../molecules/GarminPushButton", () => ({
-  GarminPushButton: () => null,
-}));
-
-vi.mock("../../molecules/SaveButton/SaveButton", () => ({
-  SaveButton: () => <div data-testid="save-button">Save Button</div>,
-}));
-
-vi.mock("../../molecules/SaveToLibraryButton/SaveToLibraryButton", () => ({
-  SaveToLibraryButton: () => (
-    <div data-testid="save-to-library-button">Save To Library Button</div>
-  ),
-}));
+/* The header carries the title and the two controls that act on the whole
+   workout. Keep / Download / Discard moved to `WorkoutActions`, below the
+   canvas, so they have their own suite. */
 
 describe("WorkoutHeader", () => {
   const mockWorkout: Workout = {
@@ -107,18 +96,26 @@ describe("WorkoutHeader", () => {
       ).toBeInTheDocument();
     });
 
-    it("should render save and discard buttons", () => {
+    it("should render undo and redo beside the title", () => {
       // Arrange
 
       // Act
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Assert
-      expect(
-        screen.getByRole("button", {
-          name: /discard workout and return to welcome screen/i,
-        })
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("undo-button")).toBeInTheDocument();
+      expect(screen.getByTestId("redo-button")).toBeInTheDocument();
+    });
+
+    it("should not carry the task-ending verbs any more", () => {
+      // Arrange
+
+      // Act
+      render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
+
+      // Assert
+      expect(screen.queryByTestId("discard-workout-button")).toBeNull();
+      expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();
     });
   });
 
@@ -216,9 +213,7 @@ describe("WorkoutHeader", () => {
         screen.getByRole("button", { name: /edit workout metadata/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", {
-          name: /discard workout and return to welcome screen/i,
-        })
+        screen.getByRole("group", { name: /history controls/i })
       ).toBeInTheDocument();
     });
   });

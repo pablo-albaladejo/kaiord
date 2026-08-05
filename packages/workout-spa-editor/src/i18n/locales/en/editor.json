@@ -10,10 +10,6 @@
     "editTitle": "Edit workout",
     "editDescription": "Refine steps, intervals, and targets."
   },
-  "workflow": {
-    "acceptWorkout": "Accept Workout",
-    "pushToGarmin": "Push to Garmin"
-  },
   "section": {
     "untitledWorkout": "Untitled Workout",
     "sport": "Sport:",
@@ -21,7 +17,7 @@
     "editMetadataTitle": "Edit Workout Metadata"
   },
   "actions": {
-    "discard": "Discard",
+    "discard": "Discard workout",
     "discardAria": "Discard workout and return to welcome screen",
     "addStep": "Add Step",
     "addRepetition": "Add Repetition",
@@ -82,7 +78,6 @@
     "redoAria": "Redo last action"
   },
   "save": {
-    "saveWorkout": "Save Workout",
     "saving": "Saving...",
     "exportProgress": "Export progress: {{progress}}%",
     "savedTitle": "Workout Saved",
@@ -142,10 +137,10 @@
     "editStep": "Edit Step {{n}}",
     "fixErrors": "Please fix the errors above before saving",
     "cancel": "Cancel",
-    "save": "Save",
-    "saveAria": "Save step changes",
+    "save": "Done",
+    "saveAria": "Close the step form",
     "fixErrorsTitle": "Fix validation errors first",
-    "saveTitle": "Save changes"
+    "saveTitle": "Close the step form"
   },
   "firstTimeHints": {
     "dismiss": "Dismiss hints",
@@ -272,5 +267,40 @@
       "lap_swimming": "Lap swimming",
       "open_water": "Open water"
     }
+  },
+  "ribbon": {
+    "sendReady": "Ready to send to your watch",
+    "sendReadyDetail": "Nothing has reached Garmin yet — this is the first send.",
+    "staleHeadline": "Your watch still has the version from before these edits",
+    "staleDetail": "Garmin received an earlier version; you have edited it since.",
+    "noBridgeHeadline": "Nothing can reach your watch from this browser",
+    "noBridgeDetail": "Garmin has no public API for workouts, so the bridge extension does the handover. Without it, downloading the file and importing it by hand is the only route.",
+    "noBridgeAction": "Install the bridge",
+    "exportOffHeadline": "Workouts aren't routed to Garmin",
+    "exportOffDetail": "Nothing has been sent, and nothing will be until you turn that route on. Until then, downloading the file and importing it by hand is the only way through.",
+    "exportOffAction": "Turn on workout export",
+    "noSessionHeadline": "Garmin signed you out, so this can't reach your watch",
+    "noSessionDetail": "The bridge rides your Garmin Connect session, and that session has ended. Sign in again, or download the file and import it by hand.",
+    "noSessionAction": "Sign in to Garmin",
+    "region": "Workout delivery status"
+  },
+  "shape": {
+    "heading": "Shape",
+    "zonesFrom": "Zones from FTP {{ftp}} W · updated {{when}}",
+    "zonesFromNoDate": "Zones from FTP {{ftp}} W",
+    "noThreshold": "No FTP set for {{sport}} — targets can't name where they come from"
+  },
+  "block": {
+    "dragAria": "Drag to reorder block",
+    "collapse": "Collapse block",
+    "expand": "Expand block",
+    "repeat": "Repeat {{count}}×",
+    "steps_one": "{{count}} step",
+    "steps_other": "{{count}} steps",
+    "delete": "Delete repetition block",
+    "editCount": "Edit count",
+    "countAria": "Repeat count",
+    "ungroup": "Ungroup",
+    "deleteShort": "Delete"
   }
 }

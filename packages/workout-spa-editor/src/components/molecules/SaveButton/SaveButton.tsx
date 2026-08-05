@@ -29,6 +29,9 @@ export type SaveButtonProps = {
 
 export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
   const t = useTranslate("editor");
+  // The verb itself lives in `common` — this button is one of three call
+  // sites for it, and they must not be allowed to drift apart again.
+  const verbs = useTranslate("common");
   const {
     saveErrors,
     isSaving,
@@ -43,7 +46,7 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
   const isDisabled = disabled || isSaving;
   const showProgress = isSaving && exportProgress > 0 && exportProgress < 100;
   const icon = isSaving ? (
-    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+    <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
   ) : (
     <Download className="h-4 w-4" />
   );
@@ -61,13 +64,14 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
           className="w-full sm:w-auto"
         />
         <Button
-          variant="primary"
+          variant="secondary"
+          size="sm"
           onClick={handleSave}
           disabled={isDisabled}
           className="w-full sm:w-auto"
         >
           {icon}
-          {isSaving ? t("save.saving") : t("save.saveWorkout")}
+          {isSaving ? t("save.saving") : verbs("verbs.download")}
         </Button>
       </div>
 

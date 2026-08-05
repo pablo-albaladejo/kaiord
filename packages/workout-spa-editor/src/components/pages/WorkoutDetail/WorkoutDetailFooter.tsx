@@ -12,7 +12,7 @@ export type WorkoutDetailFooterProps = {
   onEdit: () => void;
 };
 
-/** Sticky action bar: ghost "Edit" + "Adjust with AI" + "Push to Garmin". */
+/** Sticky action bar: ghost "Edit" + "Adjust with AI" + "Send to Garmin". */
 export function WorkoutDetailFooter({
   workout,
   onEdit,

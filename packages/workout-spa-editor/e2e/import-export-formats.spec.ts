@@ -109,7 +109,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
     // Save workout
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /save workout/i }).click();
+    await page.getByRole("button", { name: /download a file/i }).click();
     const download = await downloadPromise;
 
     // Assert - Correct filename and extension
@@ -144,7 +144,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
     // Save workout
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /save workout/i }).click();
+    await page.getByRole("button", { name: /download a file/i }).click();
     const download = await downloadPromise;
 
     // Assert - Correct filename and extension
@@ -187,7 +187,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
     // Save workout
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /save workout/i }).click();
+    await page.getByRole("button", { name: /download a file/i }).click();
     const download = await downloadPromise;
 
     // Assert - Correct filename and extension
@@ -231,7 +231,7 @@ test.describe("Import/Export Multiple Formats", () => {
     await powerInput.clear();
     await powerInput.fill("250");
 
-    await page.getByRole("button", { name: "Save step changes" }).click();
+    await page.getByRole("button", { name: "Close the step form" }).click();
 
     await expect(page.getByText("Edit Step")).not.toBeVisible({
       timeout: 5000,
@@ -239,7 +239,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
     // Export as KRD
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /save workout/i }).click();
+    await page.getByRole("button", { name: /download a file/i }).click();
     const download = await downloadPromise;
 
     // Assert - Verify edited value persists
@@ -313,7 +313,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
     // Act - Click save button
     const downloadPromise = page.waitForEvent("download");
-    const saveButton = page.getByRole("button", { name: /save workout/i });
+    const saveButton = page.getByRole("button", { name: /download a file/i });
     await saveButton.click();
 
     // Assert - Button shows loading state (may be brief)
@@ -363,7 +363,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
       // Save and verify extension
       const downloadPromise = page.waitForEvent("download");
-      await page.getByRole("button", { name: /save workout/i }).click();
+      await page.getByRole("button", { name: /download a file/i }).click();
       const download = await downloadPromise;
 
       expect(download.suggestedFilename()).toMatch(
@@ -426,7 +426,7 @@ test.describe("Import/Export Multiple Formats", () => {
     await page.keyboard.press("Tab");
 
     // Focus on save button and press Enter
-    const saveButton = page.getByRole("button", { name: /save workout/i });
+    const saveButton = page.getByRole("button", { name: /download a file/i });
     await saveButton.focus();
 
     const downloadPromise = page.waitForEvent("download");
@@ -522,7 +522,7 @@ test.describe("Import/Export Mobile Flow", () => {
 
     // Save workout
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /save workout/i }).click();
+    await page.getByRole("button", { name: /download a file/i }).click();
     const download = await downloadPromise;
 
     // Assert - Correct format on mobile

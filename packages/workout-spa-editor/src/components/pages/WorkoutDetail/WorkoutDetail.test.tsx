@@ -28,7 +28,7 @@ vi.mock("./use-workout-detail-model", () => ({
 }));
 
 vi.mock("../../molecules/PushButton", () => ({
-  PushButton: () => <button type="button">Push to Garmin</button>,
+  PushButton: () => <button type="button">Send to Garmin</button>,
 }));
 
 const ZONE_COUNT = 5;

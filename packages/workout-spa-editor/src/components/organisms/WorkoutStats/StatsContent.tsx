@@ -81,8 +81,8 @@ export const StatsContent: React.FC<StatsContentProps> = ({ stats }) => {
         />
       )}
       {stats.hasOpenSteps && (
-        <div className="mt-3 border-t border-gray-200 pt-2">
-          <p className="text-xs text-gray-500">{t("stats.estimateNote")}</p>
+        <div className="mt-3 border-t border-edge-soft pt-2">
+          <p className="text-xs text-ink-muted">{t("stats.estimateNote")}</p>
         </div>
       )}
     </>

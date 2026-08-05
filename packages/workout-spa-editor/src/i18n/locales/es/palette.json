@@ -61,7 +61,7 @@
       "requires": "No hay nada que rehacer"
     },
     "save": {
-      "title": "Guardar el entrenamiento",
+      "title": "Descargar un archivo",
       "subtitle": "Lo descarga como archivo .krd",
       "requires": "Abre antes un entrenamiento"
     }

@@ -25,7 +25,7 @@ export function WorkoutTitle({ workout, onEdit, titleRef }: WorkoutTitleProps) {
         <h2
           ref={titleRef}
           tabIndex={-1}
-          className="text-2xl font-bold text-gray-900 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-white dark:focus-visible:ring-offset-gray-800"
+          className="text-2xl font-semibold tracking-[-0.02em] text-ink-strong focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-white dark:focus-visible:ring-offset-gray-800"
         >
           {workout.name || t("section.untitledWorkout")}
         </h2>
@@ -40,7 +40,7 @@ export function WorkoutTitle({ workout, onEdit, titleRef }: WorkoutTitleProps) {
           <Edit2 className="h-4 w-4" />
         </Button>
       </div>
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+      <p className="mt-1 text-sm text-ink-muted">
         {t("section.sport")} {humanizeSport(workout.sport)}
         {workout.subSport && ` • ${humanizeSport(workout.subSport)}`}
       </p>

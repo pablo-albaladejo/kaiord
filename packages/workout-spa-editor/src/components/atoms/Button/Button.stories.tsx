@@ -191,7 +191,7 @@ export const RealWorldExamples: Story = {
   render: () => (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <Button variant="primary">Save Workout</Button>
+        <Button variant="primary">Download a file</Button>
         <Button variant="secondary">Cancel</Button>
       </div>
       <div className="flex gap-2">

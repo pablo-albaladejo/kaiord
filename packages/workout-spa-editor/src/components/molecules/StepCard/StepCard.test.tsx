@@ -146,7 +146,10 @@ describe("StepCard", () => {
 
     // Assert
 
-    expect(card).toHaveClass("border-primary-500");
+    // Selection is marked in ink, never in colour: the only hue a step may
+    // carry is the training zone of its own intensity.
+    expect(card).toHaveClass("border-edge-strong");
+    expect(card.className).not.toContain("border-primary-");
   });
 
   it("should format distance duration correctly", () => {
@@ -456,7 +459,9 @@ describe("StepCard", () => {
 
       // Assert
 
-      expect(dragHandle).toHaveClass("text-primary-500");
+      // Being dragged is said in ink, not in brand blue.
+      expect(dragHandle).toHaveClass("text-ink-strong");
+      expect(dragHandle.className).not.toContain("text-primary-");
     });
 
     it("should apply default styles when isDragging is false", () => {

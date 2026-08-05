@@ -25,9 +25,9 @@ export function MultiSelectionHint({
         <Repeat className="mr-2 h-4 w-4" aria-hidden="true" />
         {t("selection.createBlock", { count: selectedStepCount })}
       </Button>
-      <span className="text-xs text-gray-500 dark:text-gray-400">
+      <span className="text-xs text-ink-muted">
         {t("selection.orPress")}{" "}
-        <kbd className="rounded bg-gray-100 px-1 py-0.5 text-xs dark:bg-gray-700">
+        <kbd className="rounded bg-surface-elevated px-1 py-0.5 text-xs">
           {t("selection.ctrlG")}
         </kbd>
       </span>
@@ -38,10 +38,7 @@ export function MultiSelectionHint({
 export function SingleSelectionHint() {
   const t = useTranslate("editor");
   return (
-    <p
-      className="text-xs text-gray-500 dark:text-gray-400"
-      data-testid="selection-hint"
-    >
+    <p className="text-xs text-ink-muted" data-testid="selection-hint">
       {t("selection.ctrlClickHint")}
     </p>
   );

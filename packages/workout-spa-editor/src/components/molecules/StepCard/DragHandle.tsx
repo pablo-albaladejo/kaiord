@@ -15,9 +15,9 @@ export const DragHandle = ({
 }: DragHandleProps) => {
   const t = useTranslate("editor");
   const baseClasses =
-    "absolute left-0 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing touch-none min-h-[44px] min-w-[44px] flex items-center justify-center rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700";
+    "absolute left-0 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing touch-none min-h-[44px] min-w-[44px] flex items-center justify-center rounded transition-colors hover:bg-surface-elevated";
   const colorClasses = isDragging
-    ? "text-primary-500"
+    ? "text-ink-strong"
     : "text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300";
   const classes = [baseClasses, colorClasses, className]
     .filter(Boolean)

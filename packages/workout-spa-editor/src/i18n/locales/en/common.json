@@ -52,5 +52,10 @@
     "noNewDataSince": "No new data since {{date}}",
     "noAccess": "Kaiord cannot read from a source — signing in again may restore it",
     "extensionOutdated": "An extension is out of date — update it to resume"
+  },
+  "verbs": {
+    "send": "Send to Garmin",
+    "keep": "Keep in library",
+    "download": "Download a file"
   }
 }
