@@ -87,7 +87,7 @@ test.describe("Modal Interactions", () => {
     ]);
 
     // Verify block exists
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
     // Wait for block actions trigger to be visible
     const trigger = page.getByTestId("block-actions-trigger");
@@ -112,7 +112,7 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
 
     // Verify block was NOT deleted (action was cancelled)
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
   });
 
   test("should dismiss modal when backdrop is clicked", async ({
@@ -128,7 +128,7 @@ test.describe("Modal Interactions", () => {
     ]);
 
     // Verify block exists
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
     // Wait for block actions trigger to be visible
     const trigger = page.getByTestId("block-actions-trigger");
@@ -154,7 +154,7 @@ test.describe("Modal Interactions", () => {
     await expect(backdrop).not.toBeVisible({ timeout: 5000 });
 
     // Verify block was NOT deleted (action was cancelled)
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
   });
 
   test("should trap focus within modal", async ({ page, isMobile }) => {

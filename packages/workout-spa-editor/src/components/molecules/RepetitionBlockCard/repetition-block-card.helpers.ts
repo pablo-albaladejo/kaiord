@@ -12,12 +12,16 @@ export function buildBlockClasses(
   isDragging: boolean,
   className: string
 ): string {
+  // A repetition is a grouping, not a training zone, so it carries no hue of
+  // its own: an elevated surface and a hairline say "these belong together"
+  // without competing with the steps inside it, which are the only coloured
+  // objects on the screen.
   // `focus-visible:` ring matches StepCard so programmatic focus moves
   // (§7/§8) are visually consistent across item types.
   // `motion-reduce:` disables the color transition when the user has
   // `prefers-reduced-motion: reduce` set.
   const baseClasses =
-    "rounded-lg border-2 border-dashed border-primary-300 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-950/20 p-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 motion-reduce:transition-none";
+    "rounded-xl border border-edge-soft bg-surface-elevated p-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)] motion-reduce:transition-none";
   const draggingClasses = isDragging ? "cursor-grabbing" : "";
   return [baseClasses, draggingClasses, className].filter(Boolean).join(" ");
 }

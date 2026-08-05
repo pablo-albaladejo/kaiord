@@ -36,7 +36,7 @@ describe("SaveToLibraryButton", () => {
       renderWithProviders(<SaveToLibraryButton workout={workout} />);
 
       // Assert
-      const button = screen.getByRole("button", { name: /save to library/i });
+      const button = screen.getByRole("button", { name: /keep in library/i });
       expect(button).toBeInTheDocument();
     });
 
@@ -50,7 +50,7 @@ describe("SaveToLibraryButton", () => {
       );
 
       // Assert
-      const button = screen.getByRole("button", { name: /save to library/i });
+      const button = screen.getByRole("button", { name: /keep in library/i });
       expect(button).toHaveClass("custom-class");
     });
 
@@ -62,7 +62,7 @@ describe("SaveToLibraryButton", () => {
       renderWithProviders(<SaveToLibraryButton workout={workout} />);
 
       // Assert
-      const button = screen.getByRole("button", { name: /save to library/i });
+      const button = screen.getByRole("button", { name: /keep in library/i });
       const icon = button.querySelector("svg");
       expect(icon).toBeInTheDocument();
     });
@@ -77,7 +77,7 @@ describe("SaveToLibraryButton", () => {
 
       // Act
       await user.click(
-        screen.getByRole("button", { name: /save to library/i })
+        screen.getByRole("button", { name: /keep in library/i })
       );
 
       // Assert
@@ -93,7 +93,7 @@ describe("SaveToLibraryButton", () => {
 
       // Act
       await user.click(
-        screen.getByRole("button", { name: /save to library/i })
+        screen.getByRole("button", { name: /keep in library/i })
       );
 
       // Assert
@@ -110,7 +110,7 @@ describe("SaveToLibraryButton", () => {
       renderWithProviders(<SaveToLibraryButton workout={workout} disabled />);
 
       // Assert
-      const button = screen.getByRole("button", { name: /save to library/i });
+      const button = screen.getByRole("button", { name: /keep in library/i });
       expect(button).toBeDisabled();
     });
 
@@ -122,7 +122,7 @@ describe("SaveToLibraryButton", () => {
       renderWithProviders(<SaveToLibraryButton workout={workout} />);
 
       // Assert
-      const button = screen.getByRole("button", { name: /save to library/i });
+      const button = screen.getByRole("button", { name: /keep in library/i });
       expect(button).toBeEnabled();
     });
   });

@@ -49,7 +49,7 @@ describe("AiSuccessActions", () => {
     expect(screen.getByTestId("ai-action-regenerate")).toBeInTheDocument();
     expect(screen.getByTestId("ai-action-edit")).toBeInTheDocument();
     expect(screen.getByTestId("ai-action-discard")).toBeInTheDocument();
-    expect(screen.getByText("Save to Library")).toBeInTheDocument();
+    expect(screen.getByText("Keep in library")).toBeInTheDocument();
   });
 
   it("should call onRegenerate when the Regenerate button is clicked", async () => {
@@ -97,14 +97,14 @@ describe("AiSuccessActions", () => {
     expect(onDiscard).toHaveBeenCalledTimes(1);
   });
 
-  it("should render the Save button labeled with a static title-case 'Save to Library'", () => {
+  it("should render the keep button with the one canonical library verb", () => {
     // Arrange
 
     renderActions();
 
     // Act
 
-    const saveButton = screen.getByRole("button", { name: /Save to Library/i });
+    const saveButton = screen.getByRole("button", { name: /Keep in library/i });
 
     // Assert
 

@@ -23,7 +23,10 @@
   },
   "footer": {
     "edit": "Editar",
-    "adjustWithAi": "Ajustar con IA"
+    "adjustWithAi": "Ajustar con IA",
+    "send": "Enviar a Garmin",
+    "sending": "Enviando…",
+    "sent": "En tu Garmin"
   },
   "summary": {
     "duration": "Duración",

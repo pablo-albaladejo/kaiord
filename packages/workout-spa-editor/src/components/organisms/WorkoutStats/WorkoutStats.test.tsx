@@ -29,7 +29,7 @@ describe("WorkoutStats", () => {
   });
 
   describe("rendering", () => {
-    it("should render workout stats heading", () => {
+    it("should expose the stats as a labelled region inside the canvas", () => {
       // Arrange
 
       const workout = createMockWorkout([
@@ -42,7 +42,9 @@ describe("WorkoutStats", () => {
 
       // Assert
 
-      expect(screen.getByText("Workout Stats")).toBeInTheDocument();
+      expect(
+        screen.getByRole("region", { name: "Workout statistics" })
+      ).toBeInTheDocument();
     });
 
     it("should not render when workout is null", () => {
@@ -372,7 +374,9 @@ describe("WorkoutStats", () => {
 
       // Assert
 
-      expect(screen.getByText("Workout Stats")).toBeInTheDocument();
+      expect(
+        screen.getByRole("region", { name: "Workout statistics" })
+      ).toBeInTheDocument();
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
       expect(screen.getByText("0 steps")).toBeInTheDocument();
     });

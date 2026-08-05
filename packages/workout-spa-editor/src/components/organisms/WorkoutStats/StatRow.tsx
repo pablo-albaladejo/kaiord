@@ -14,8 +14,8 @@ export type StatRowProps = {
 export const StatRow: React.FC<StatRowProps> = ({ label, value }) => {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-gray-600">{label}</span>
-      <span className="text-sm font-medium text-gray-900">{value}</span>
+      <span className="text-sm text-ink-muted">{label}</span>
+      <span className="text-sm font-medium text-ink-strong">{value}</span>
     </div>
   );
 };

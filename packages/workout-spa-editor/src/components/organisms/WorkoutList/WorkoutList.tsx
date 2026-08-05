@@ -55,6 +55,7 @@ export const WorkoutList = (props: WorkoutListProps) => {
             onReorderStepsInBlock={props.onReorderStepsInBlock}
             generateStepId={dnd.generateStepId}
             onAddStep={props.onAddStep}
+            renderAfterItem={props.renderAfterItem}
           />
         </div>
       </SortableContext>

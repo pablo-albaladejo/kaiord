@@ -49,30 +49,30 @@ export const FirstTimeHints: React.FC<FirstTimeHintsProps> = ({
 
   return (
     <div
-      className="mb-4 rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-950"
+      className="mb-4 rounded-xl border border-edge-soft bg-surface-elevated p-4"
       role="status"
       aria-live="polite"
       data-testid="first-time-hints"
     >
       <div className="flex items-start gap-3">
         <Info
-          className="h-5 w-5 flex-shrink-0 text-primary-600 dark:text-primary-400"
+          className="h-5 w-5 flex-shrink-0 text-ink-muted"
           aria-hidden="true"
         />
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
+          <h3 className="text-sm font-semibold text-ink-strong">
             {currentHint && t(`firstTimeHints.${currentHint.id}.title`)}
           </h3>
-          <p className="mt-1 text-sm text-primary-700 dark:text-primary-300">
+          <p className="mt-1 text-sm text-ink-body">
             {currentHint && t(`firstTimeHints.${currentHint.id}.message`)}
           </p>
         </div>
         <button
           onClick={handleDismiss}
-          className="flex-shrink-0 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none dark:ring-offset-gray-950"
+          className="flex-shrink-0 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 focus:ring-offset-[var(--bg-elevated)] disabled:pointer-events-none motion-reduce:transition-none"
           aria-label={t("firstTimeHints.dismiss")}
         >
-          <X className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+          <X className="h-4 w-4 text-ink-muted" />
         </button>
       </div>
 

@@ -55,7 +55,7 @@ describe("MatchedActions", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should render Push to Garmin enabled for structured workouts", () => {
+  it("should render Send to Garmin enabled for structured workouts", () => {
     // Arrange
     const onPushToGarmin = vi.fn();
 
@@ -79,7 +79,7 @@ describe("MatchedActions", () => {
     expect(onPushToGarmin).toHaveBeenCalledTimes(1);
   });
 
-  it("should render Push to Garmin enabled for ready workouts and invoke handler on click", () => {
+  it("should render Send to Garmin enabled for ready workouts and invoke handler on click", () => {
     // Arrange
     const onPushToGarmin = vi.fn();
 
@@ -103,7 +103,7 @@ describe("MatchedActions", () => {
     expect(onPushToGarmin).toHaveBeenCalledTimes(1);
   });
 
-  it("should hide Push to Garmin for pushed workouts", () => {
+  it("should hide Send to Garmin for pushed workouts", () => {
     // Arrange
 
     // Act

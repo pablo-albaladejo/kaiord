@@ -88,7 +88,7 @@ describe("RepetitionBlockCard - Accessibility", () => {
       );
 
       // Act
-      // Click edit button (shows "3x") to enter edit mode
+      // Click the edit-count button to enter edit mode
       const editButton = screen.getByTestId("edit-count-button");
       await user.click(editButton);
 
@@ -205,9 +205,8 @@ describe("RepetitionBlockCard - Accessibility", () => {
 
       // Assert
       // Repeat count should be visible to screen readers
-      // The UI shows "3x" format instead of "repeat 3 times"
-      expect(screen.getByText(/3/)).toBeInTheDocument();
-      expect(screen.getByText(/x/)).toBeInTheDocument();
+      // The chip carries the count; the button is the edit affordance
+      expect(screen.getByText("Repeat 3\u00d7")).toBeInTheDocument();
     });
 
     it("should announce step count within block", () => {
@@ -337,8 +336,8 @@ describe("RepetitionBlockCard - Accessibility", () => {
       });
 
       // Assert
-      // Button should have red/destructive color classes
-      expect(deleteButton.className).toMatch(/text-red|hover:text-red/);
+      // Destruction comes from the one danger ramp, via its role token.
+      expect(deleteButton.className).toMatch(/--danger-text/);
     });
 
     it("should have visible text in all intensity states", () => {
@@ -349,7 +348,7 @@ describe("RepetitionBlockCard - Accessibility", () => {
 
       // Assert
       // Text should be visible
-      expect(screen.getByText(/repeat block/i)).toBeVisible();
+      expect(screen.getByText(/^Repeat \d+\u00d7$/)).toBeVisible();
       expect(screen.getByText(/1 step/i)).toBeVisible();
     });
   });

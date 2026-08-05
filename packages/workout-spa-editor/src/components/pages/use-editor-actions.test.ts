@@ -7,7 +7,11 @@
  *
  * Exercises `useEditorActions` against an in-memory Dexie (fake-
  * indexeddb) and a pre-seeded workout-store to simulate the flow:
- *   load → edit in Zustand → accept/push → persist.
+ *   load → edit in Zustand → send → persist.
+ *
+ * Sending from STRUCTURED also covers the folded-in `structured → ready`
+ * transition: Accept is no longer a decision the user makes, but the state
+ * machine still passes through READY on the way to PUSHED.
  */
 
 import "fake-indexeddb/auto";
@@ -67,7 +71,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     useWorkoutStore.setState({ currentWorkout: null });
   });
 
-  it("should bump modifiedAt via acceptWorkout on STRUCTURED with edits", async () => {
+  it("should bump modifiedAt via pushWorkout on STRUCTURED with edits", async () => {
     // Arrange
 
     const record = makeRecord({ state: "structured" });
@@ -75,7 +79,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
 
     const { result } = renderHook(() => useEditorActions(record));
     await act(async () => {
-      await result.current.acceptWorkout();
+      await result.current.pushWorkout("garmin-abc");
     });
 
     // Act
@@ -84,12 +88,12 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
 
     // Assert
 
-    expect(persisted?.state).toBe("ready");
+    expect(persisted?.state).toBe("pushed");
     expect(persisted?.krd).toEqual(EDITED_KRD);
     expect(persisted?.modifiedAt).not.toBeNull();
   });
 
-  it("should NOT bump modifiedAt via acceptWorkout on STRUCTURED without edits", async () => {
+  it("should NOT bump modifiedAt via pushWorkout on STRUCTURED without edits", async () => {
     // Arrange
 
     const record = makeRecord({ state: "structured" });
@@ -98,7 +102,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
 
     const { result } = renderHook(() => useEditorActions(record));
     await act(async () => {
-      await result.current.acceptWorkout();
+      await result.current.pushWorkout("garmin-abc");
     });
 
     // Act
@@ -107,7 +111,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
 
     // Assert
 
-    expect(persisted?.state).toBe("ready");
+    expect(persisted?.state).toBe("pushed");
     expect(persisted?.modifiedAt).toBeNull();
   });
 

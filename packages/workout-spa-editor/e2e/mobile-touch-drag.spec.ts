@@ -1,4 +1,10 @@
 import { expect, test } from "./fixtures/base";
+import {
+  clearDexie,
+  getWeekDates,
+  makeWorkout,
+  seedWorkouts,
+} from "./helpers/seed-dexie";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 import {
   measureDragPerformance,
@@ -375,7 +381,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await expect(page.getByText("Block Touch Test")).toBeVisible();
 
     // Wait for repetition block to be visible
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
     const blockCard = page.getByTestId("repetition-block-card");
     await expect(blockCard).toBeVisible();
@@ -426,7 +432,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     expect(newBox.height).toBeGreaterThan(100);
 
     // Verify block content is still visible (Repeat Block text)
-    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
   });
 });
 
@@ -574,9 +580,8 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
     const isSelected = await firstStep.getAttribute("data-selected");
     expect(isSelected).toBe("true");
 
-    // Verify selected step has distinct border styling
-    const borderClasses = await firstStep.getAttribute("class");
-    expect(borderClasses).toContain("border-primary-500");
+    // The selected treatment is the data-selected attribute; the repaint
+    // retired the brand-blue border class this used to pin.
 
     // Act - Click on second step to select it
     const secondStep = stepCards.nth(1);
@@ -815,15 +820,25 @@ test.describe("Mobile Touch Drag - Performance", () => {
   test("should maintain performance across multiple touch drag operations", async ({
     page,
   }) => {
-    // Arrange
-    await seedEmptyWorkout(page);
-    const fileInput = page.locator('input[type="file"]');
-    await fileInput.setInputFiles({
-      name: "test-workout.krd",
-      mimeType: "application/json",
-      // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
-      buffer: Buffer.from(JSON.stringify(createTestWorkout(5))),
-    });
+    // Arrange — seeded as PUSHED so the EditorStateRibbon renders nothing:
+    // for a sendable state without a bridge stub the ribbon shows a fix CTA
+    // that navigates to Connections, and a synthetic touch from the drag
+    // sequence can land on it — which is how this test used to end up
+    // measuring gestures against the Settings page.
+    const workoutId = crypto.randomUUID();
+    await page.goto("/calendar");
+    await clearDexie(page);
+    await seedWorkouts(page, [
+      makeWorkout({
+        id: workoutId,
+        date: getWeekDates()[0],
+        sport: "cycling",
+        state: "pushed",
+        // eslint-disable-next-line no-magic-numbers -- Playwright fixture step count, not domain-modeled
+        krd: createTestWorkout(5),
+      }),
+    ]);
+    await page.goto(`/workout/${workoutId}`);
 
     await expect(page.getByText("Test Workout")).toBeVisible();
 
@@ -841,8 +856,15 @@ test.describe("Mobile Touch Drag - Performance", () => {
       );
       results.push(duration);
 
-      // Wait a moment between operations
-      await page.waitForTimeout(100);
+      // Settle on state, not on a pause: the canvas re-renders the list
+      // after a gesture, and starting the next drag mid-re-render detaches
+      // the located node inside touchDrag. Re-resolving all five rows is
+      // the settle point. (No reorder assertion on purpose — this file
+      // documents that touch-drag reorders are unreliable in E2E and the
+      // reordering logic is validated by the keyboard tests; these cases
+      // measure gesture timing only.)
+      // eslint-disable-next-line no-magic-numbers -- fixture row count
+      await expect(stepCards).toHaveCount(5);
     }
 
     // Assert - All operations complete within 3500ms (E2E budget for CI/CD)

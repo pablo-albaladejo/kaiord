@@ -4,7 +4,7 @@
  * Renders workout bars on the canvas.
  */
 
-import { getStepColor } from "./step-colors";
+import { resolveCssColor, resolveStepColor } from "./step-colors";
 
 export function drawWorkoutBars(
   ctx: CanvasRenderingContext2D,
@@ -24,14 +24,13 @@ export function drawWorkoutBars(
     const duration = durations[i];
     if (duration === undefined) continue;
     const barWidth = (duration / totalDuration) * availableWidth;
-    const color = getStepColor(step);
 
     // Draw bar
-    ctx.fillStyle = color;
+    ctx.fillStyle = resolveStepColor(step);
     ctx.fillRect(currentX, padding, barWidth, barHeight);
 
     // Draw border
-    ctx.strokeStyle = "#e5e7eb";
+    ctx.strokeStyle = resolveCssColor("var(--border-subtle)");
     ctx.lineWidth = 1;
     ctx.strokeRect(currentX, padding, barWidth, barHeight);
 

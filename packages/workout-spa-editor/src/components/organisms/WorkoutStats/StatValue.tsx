@@ -21,7 +21,7 @@ export const StatValue: React.FC<StatValueProps> = ({
 }) => {
   const t = useTranslate("workout-detail");
   if (value === null || value === undefined) {
-    return <span className="text-gray-500">{emptyText}</span>;
+    return <span className="text-ink-muted">{emptyText}</span>;
   }
 
   return (
@@ -29,7 +29,7 @@ export const StatValue: React.FC<StatValueProps> = ({
       {value}
       {hasEstimate && (
         <span
-          className="ml-1 text-xs text-gray-500"
+          className="ml-1 text-xs text-ink-muted"
           title={t("stats.estimateIndicatorTitle")}
         >
           *

@@ -104,7 +104,7 @@ describe("WorkoutSection", () => {
 
     // Assert
     expect(
-      screen.getByRole("button", { name: /Save to Library/i })
+      screen.getByRole("button", { name: /Keep in library/i })
     ).toBeInTheDocument();
   });
 
@@ -130,7 +130,7 @@ describe("WorkoutSection", () => {
     // Assert
     expect(screen.getByText(/Edit Step/)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Save step changes/ })
+      screen.getByRole("button", { name: /Close the step form/ })
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Cancel/ })).toBeInTheDocument();
   });

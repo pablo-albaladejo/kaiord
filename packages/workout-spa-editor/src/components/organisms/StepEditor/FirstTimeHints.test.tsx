@@ -77,7 +77,7 @@ describe("FirstTimeHints", () => {
 
       // Assert
 
-      expect(currentDot).toHaveClass("bg-primary-600");
+      expect(currentDot).toHaveClass("bg-ink-strong");
     });
   });
 

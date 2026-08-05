@@ -142,7 +142,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await firstStep.click();
 
     // Verify step is selected
-    await expect(firstStep).toHaveClass(/border-primary-500/);
+    await expect(firstStep).toHaveAttribute("data-selected", "true");
 
     // Move step down using Alt+Down
     await page.keyboard.press("Alt+ArrowDown");
@@ -181,7 +181,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await secondStep.click();
 
     // Verify step is selected
-    await expect(secondStep).toHaveClass(/border-primary-500/);
+    await expect(secondStep).toHaveAttribute("data-selected", "true");
 
     // Move step up using Alt+Up
     await page.keyboard.press("Alt+ArrowUp");
@@ -599,7 +599,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     });
 
     // Wait for repetition block to be visible
-    await expect(page.getByText("Repeat Block")).toBeVisible({
+    await expect(page.getByText(/Repeat \d+×/)).toBeVisible({
       timeout: 5000,
     });
 

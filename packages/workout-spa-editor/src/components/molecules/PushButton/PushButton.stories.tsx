@@ -20,7 +20,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Idle state — the default interactive "Push to Garmin" button. */
+/** Idle state — the default interactive "Send to Garmin" button. */
 export const Idle: Story = {};
 
 /** Full-width idle variant for sticky footers. */

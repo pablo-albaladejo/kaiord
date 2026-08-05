@@ -29,11 +29,11 @@ export function RepetitionBlockContextMenu({
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
-          className="p-1 hover:bg-primary-100 dark:hover:bg-primary-900 rounded transition-colors"
+          className="rounded p-1 transition-colors hover:bg-[var(--bg-sunken)] motion-reduce:transition-none"
           aria-label="Block actions"
           data-testid="block-actions-trigger"
         >
-          <MoreVertical className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <MoreVertical className="h-5 w-5 text-ink-muted" />
         </button>
       </DropdownMenu.Trigger>
 

@@ -11,7 +11,16 @@ export type TouchDragOptions = {
 };
 
 /**
- * Performs a touch drag operation using Playwright's touchscreen API with smooth interpolation
+ * Performs a drag as ONE continuous pointer gesture: press on the source,
+ * interpolated moves, release on the target.
+ *
+ * The list's dnd wiring is a `PointerSensor` with an 8px activation
+ * distance, so a drag only exists to the app as pointerdown → moves →
+ * pointerup on a single pointer. `page.mouse` emits exactly that sequence
+ * on every project, touch-emulated or not. A sequence of independent taps
+ * is NOT a drag: each tap is its own press-and-release, the sensor never
+ * activates, and every interpolated point lands as a click on whatever
+ * control happens to sit under it.
  *
  * @param page - Playwright page object
  * @param source - Source element to drag from
@@ -46,7 +55,8 @@ export async function touchDrag(
   const targetX = targetBox.x + targetBox.width / 2;
   const targetY = targetBox.y + targetBox.height / 2;
 
-  await page.touchscreen.tap(sourceX, sourceY);
+  await page.mouse.move(sourceX, sourceY);
+  await page.mouse.down();
 
   if (longPress) {
     await page.waitForTimeout(longPressDuration);
@@ -57,12 +67,12 @@ export async function touchDrag(
     const currentX = sourceX + (targetX - sourceX) * progress;
     const currentY = sourceY + (targetY - sourceY) * progress;
 
-    await page.touchscreen.tap(currentX, currentY);
+    await page.mouse.move(currentX, currentY);
 
     if (delay > 0 && i < steps) {
       await page.waitForTimeout(delay);
     }
   }
 
-  await page.waitForLoadState("domcontentloaded");
+  await page.mouse.up();
 }

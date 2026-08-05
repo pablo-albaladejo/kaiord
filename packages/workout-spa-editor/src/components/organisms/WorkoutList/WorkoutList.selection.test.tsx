@@ -101,7 +101,9 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Expand Block A to see its steps
-      const blockAHeader = screen.getAllByRole("button", { name: "2x" })[0];
+      const blockAHeader = screen.getAllByRole("button", {
+        name: /edit count/i,
+      })[0];
       await user.click(blockAHeader);
 
       // Click on step in Block A (Step 1)
@@ -141,7 +143,9 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       render(<WorkoutList workout={workout} onStepSelect={onStepSelect} />);
 
       // Expand Block B to see its steps
-      const blockBHeader = screen.getAllByRole("button", { name: "3x" })[0];
+      const blockBHeader = screen.getAllByRole("button", {
+        name: /edit count/i,
+      })[0];
       await user.click(blockBHeader);
 
       // Click on step in Block B (Step 1)
@@ -182,7 +186,7 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       const mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
-      expect(mainWorkoutStep).toHaveClass("border-primary-500");
+      expect(mainWorkoutStep).toHaveClass("border-edge-strong");
 
       // Block steps should not be highlighted (they would have ID "block-1-step-0")
       // Note: We can't easily test this without expanding the block and checking
@@ -211,7 +215,7 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
         name: /Step 1:/,
       })[0];
       // Main workout step should NOT be highlighted
-      expect(mainWorkoutStep).not.toHaveClass("border-primary-500");
+      expect(mainWorkoutStep).not.toHaveClass("border-edge-strong");
     });
   });
 
@@ -240,7 +244,7 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       let mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
-      expect(mainWorkoutStep).toHaveClass("border-primary-500");
+      expect(mainWorkoutStep).toHaveClass("border-edge-strong");
 
       // Act
       // Change selection to block step
@@ -255,7 +259,7 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       // Assert
       // Main workout step should no longer be selected
       mainWorkoutStep = screen.getAllByRole("button", { name: /Step 1:/ })[0];
-      expect(mainWorkoutStep).not.toHaveClass("border-primary-500");
+      expect(mainWorkoutStep).not.toHaveClass("border-edge-strong");
     });
   });
 

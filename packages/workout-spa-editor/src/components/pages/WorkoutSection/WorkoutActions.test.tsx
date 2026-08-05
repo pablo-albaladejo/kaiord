@@ -21,91 +21,104 @@ describe("WorkoutActions", () => {
     },
   };
 
-  const defaultProps = {
-    krd: mockKRD,
-    canUndo: false,
-    canRedo: false,
-    onUndo: vi.fn(),
-    onRedo: vi.fn(),
-    onDiscard: vi.fn(),
-  };
+  const defaultProps = { krd: mockKRD, onDiscard: vi.fn() };
 
-  describe("button layout", () => {
-    it.each([
-      { className: "gap-3" },
-      { className: "flex" },
-      { className: "flex-wrap" },
-    ])("should apply $className class to button container", ({ className }) => {
+  describe("the three verbs", () => {
+    it("should offer keeping and downloading, and nothing that sends", () => {
       // Arrange
-
-      // Act
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
+      // Act
+      const labels = screen
+        .getAllByRole("button")
+        .map((b) => b.textContent ?? "");
+
       // Assert
+      expect(labels.some((l) => l.includes("Keep in library"))).toBe(true);
+      expect(labels.some((l) => l.includes("Download a file"))).toBe(true);
+      expect(labels.some((l) => l.includes("Garmin"))).toBe(false);
+    });
+
+    it("should keep the send path out of this row entirely", () => {
+      // Arrange
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
+
+      // Act
+      const sendButton = screen.queryByTestId("send-to-garmin-button");
+
+      // Assert
+      expect(sendButton).toBeNull();
+    });
+
+    it("should render keep before download", () => {
+      // Arrange
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
+
+      // Act
+      const buttons = screen.getAllByRole("button");
+      const keepIndex = buttons.findIndex((b) =>
+        b.textContent?.includes("Keep in library")
+      );
+      const downloadIndex = buttons.findIndex((b) =>
+        b.textContent?.includes("Download a file")
+      );
+
+      // Assert
+      expect(keepIndex).toBeLessThan(downloadIndex);
+    });
+
+    it("should render discard last", () => {
+      // Arrange
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
+
+      // Act
+      const buttons = screen.getAllByRole("button");
+
+      // Assert
+      expect(buttons[buttons.length - 1]?.textContent).toContain("Discard");
+    });
+  });
+
+  describe("layout", () => {
+    it.each([
+      { className: "flex" },
+      { className: "flex-wrap" },
+      { className: "gap-2.5" },
+    ])("should apply $className to the action row", ({ className }) => {
+      // Arrange
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
+
+      // Act
       const container = screen.getByTestId(
         "discard-workout-button"
       ).parentElement;
 
+      // Assert
       expect(container).toHaveClass(className);
     });
-  });
 
-  describe("button variants", () => {
-    it("should use tertiary variant for discard button", () => {
+    it("should paint discard from the role layer rather than a raw red", () => {
       // Arrange
-
-      // Act
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
-      // Assert
-      const discardButton = screen.getByRole("button", { name: /discard/i });
-
-      expect(discardButton).toHaveClass("text-red-600");
-    });
-  });
-
-  describe("button organization", () => {
-    it("should render save button before library button", () => {
-      // Arrange
-
       // Act
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
+      const discardButton = screen.getByTestId("discard-workout-button");
 
       // Assert
-      const buttons = screen.getAllByRole("button");
-      const saveButtonIndex = buttons.findIndex((btn) =>
-        btn.textContent?.includes("Save")
-      );
-      const libraryButtonIndex = buttons.findIndex((btn) =>
-        btn.textContent?.includes("Library")
-      );
-
-      expect(saveButtonIndex).toBeLessThan(libraryButtonIndex);
-    });
-
-    it("should render discard button last", () => {
-      // Arrange
-
-      // Act
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-      // Assert
-      const buttons = screen.getAllByRole("button");
-      const discardButton = buttons[buttons.length - 1];
-
-      expect(discardButton.textContent).toContain("Discard");
+      expect(discardButton.className).toContain("text-ink-muted");
+      expect(discardButton.className).not.toContain("text-red-");
     });
   });
 
   describe("interactions", () => {
-    it("should call onDiscard when discard button is clicked", async () => {
+    it("should call onDiscard when the discard button is clicked", async () => {
       // Arrange
       const handleDiscard = vi.fn();
       const user = userEvent.setup();
       renderWithProviders(
         <WorkoutActions {...defaultProps} onDiscard={handleDiscard} />
       );
-      const discardButton = screen.getByRole("button", { name: /discard/i });
+      const discardButton = screen.getByTestId("discard-workout-button");
 
       // Act
       await user.click(discardButton);

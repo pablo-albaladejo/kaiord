@@ -5,8 +5,11 @@ import type { KRD } from "../../../types/krd";
 import { WorkoutActions } from "./WorkoutActions";
 
 /**
- * Feature: workout-spa-editor/09-repetition-blocks-and-ui-polish, Property 11: Button capitalization consistency
- * Validates: Requirements 5.7
+ * The capitalization property changed with the verb cut. Title Case was the
+ * old convention ("Save Workout", "Save to Library"); the three verbs are
+ * written as sentences — "Keep in library", "Download a file" — so only the
+ * first word is capitalized, and a mid-label capital now signals a proper
+ * noun (Garmin) rather than a style.
  */
 describe("WorkoutActions - Property Tests", () => {
   const mockKRD: KRD = {
@@ -25,149 +28,68 @@ describe("WorkoutActions - Property Tests", () => {
     },
   };
 
-  const defaultProps = {
-    krd: mockKRD,
-    canUndo: false,
-    canRedo: false,
-    onUndo: () => {},
-    onRedo: () => {},
-    onDiscard: () => {},
-  };
+  const defaultProps = { krd: mockKRD, onDiscard: () => {} };
 
-  /**
-   * Property 11: Button capitalization consistency
-   * For all button labels in the metadata section, the text should follow title case capitalization
-   * (first letter of major words capitalized, minor words like "to" lowercase)
-   */
-  it("should use title case for all button labels", () => {
+  const PROPER_NOUNS = ["Garmin", "FIT", "TCX", "ZWO", "KRD", "AI"];
+
+  it("should start every button label with a capital", () => {
     // Arrange
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Act
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
+    const firstChars = screen
+      .getAllByRole("button")
+      .map((b) => (b.textContent ?? "").trim())
+      .filter((text) => text.length > 0)
+      .map((text) => text[0]);
 
     // Assert
-    const buttons = screen.getAllByRole("button");
-
-    // Define expected button labels in title case
-    const expectedLabels = ["Save Workout", "Save to Library", "Discard"];
-
-    // Minor words that should be lowercase in title case (except when first word)
-    const minorWords = [
-      "to",
-      "a",
-      "an",
-      "the",
-      "and",
-      "or",
-      "but",
-      "for",
-      "of",
-      "in",
-      "on",
-      "at",
-    ];
-
-    // Check that all buttons have title case labels
-    buttons.forEach((button) => {
-      const text = button.textContent || "";
-      const trimmedText = text.trim();
-
-      // Check if this button matches one of our expected labels
-      const matchesExpected = expectedLabels.some((label) =>
-        trimmedText.includes(label)
-      );
-
-      if (matchesExpected) {
-        // Verify it follows title case pattern
-        // Title case: first letter of major words capitalized, minor words lowercase
-        const words = trimmedText.split(/\s+/);
-        words.forEach((word, index) => {
-          if (word.length > 0) {
-            const lowerWord = word.toLowerCase();
-            const firstChar = word[0];
-
-            if (firstChar) {
-              // First word should always be capitalized
-              if (index === 0) {
-                expect(firstChar).toMatch(/[A-Z]/);
-              } else if (minorWords.includes(lowerWord)) {
-                // Minor words should be lowercase (unless first word)
-                expect(firstChar).toMatch(/[a-z]/);
-              } else {
-                // Major words should be capitalized
-                expect(firstChar).toMatch(/[A-Z]/);
-              }
-            }
-          }
-        });
-      }
-    });
+    firstChars.forEach((char) => expect(char).toMatch(/[A-Z]/));
   });
 
-  /**
-   * Additional test: Verify specific button labels are in title case
-   */
-  it("should have 'Save Workout' button in title case", () => {
+  it("should keep every word after the first lowercase unless it is a proper noun", () => {
     // Arrange
-
-    // Act
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
-    const saveButton = screen.getByRole("button", { name: /save workout/i });
+    // Act
+    const tailWords = screen
+      .getAllByRole("button")
+      .map((b) => (b.textContent ?? "").trim())
+      .flatMap((text) => text.split(/\s+/).slice(1))
+      .filter((word) => word.length > 0 && !PROPER_NOUNS.includes(word));
 
     // Assert
-    expect(saveButton.textContent).toContain("Save Workout");
+    tailWords.forEach((word) => expect(word[0]).toMatch(/[a-z]/));
   });
 
-  it("should have 'Save to Library' button in title case", () => {
+  it.each([
+    { label: "Keep in library" },
+    { label: "Download a file" },
+    { label: "Discard workout" },
+  ])("should render $label verbatim", ({ label }) => {
     // Arrange
-
-    // Act
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
-    const libraryButton = screen.getByRole("button", {
-      name: /save to library/i,
-    });
+    // Act
+    const labels = screen
+      .getAllByRole("button")
+      .map((b) => (b.textContent ?? "").trim());
 
     // Assert
-    expect(libraryButton.textContent).toContain("Save to Library");
+    expect(labels.some((text) => text.includes(label))).toBe(true);
   });
 
-  it("should have 'Discard' button in title case", () => {
+  it("should wrap rather than overflow on a narrow viewport", () => {
     // Arrange
-
-    // Act
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
-    const discardButton = screen.getByRole("button", {
-      name: /discard/i,
-    });
-
-    // Assert
-    expect(discardButton.textContent).toContain("Discard");
-  });
-
-  /**
-   * Property 12: Responsive button layout
-   * For any viewport width, buttons in the metadata section should either display horizontally
-   * with proper spacing (desktop) or stack vertically (mobile) without overflow
-   */
-  it("should have responsive layout classes with flex-wrap", () => {
-    // Arrange
-
     // Act
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
-
     const container = screen.getByTestId(
       "discard-workout-button"
     ).parentElement;
 
-    // Flex-wrap allows buttons to flow and wrap naturally
-
     // Assert
     expect(container).toHaveClass("flex-wrap");
-
-    // Proper spacing
-    expect(container).toHaveClass("gap-3");
+    expect(container).toHaveClass("gap-2.5");
   });
 });

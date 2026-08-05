@@ -61,8 +61,8 @@ describe("RepetitionBlockCard", () => {
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert
-      expect(screen.getByText("Repeat Block")).toBeInTheDocument();
-      expect(screen.getByText("3x")).toBeInTheDocument();
+      expect(screen.getByText(/^Repeat \d+\u00d7$/)).toBeInTheDocument();
+      expect(screen.getByText("Repeat 3\u00d7")).toBeInTheDocument();
     });
 
     it("should render step count", () => {
@@ -470,7 +470,7 @@ describe("RepetitionBlockCard", () => {
       const stepCards = screen.getAllByTestId("step-card");
 
       // Assert
-      expect(stepCards[0]).toHaveClass("border-primary-500");
+      expect(stepCards[0]).toHaveClass("border-edge-strong");
     });
   });
 
@@ -539,8 +539,9 @@ describe("RepetitionBlockCard", () => {
       const deleteButton = screen.getByTestId("delete-block-button");
 
       // Assert
-      // Check for red/destructive styling classes
-      expect(deleteButton).toHaveClass("text-red-600");
+      // Destruction comes from the one danger ramp, via its role token.
+      expect(deleteButton.className).toContain("--danger-text");
+      expect(deleteButton.className).not.toContain("text-red-");
     });
   });
 

@@ -176,8 +176,8 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     // Assert
 
     expect(screen.getByText("Step 1")).toBeInTheDocument();
-    expect(screen.getByText("3x")).toBeInTheDocument();
-    expect(screen.getByText("Repeat Block")).toBeInTheDocument();
+    expect(screen.getByText("Repeat 3\u00d7")).toBeInTheDocument();
+    expect(screen.getByText(/^Repeat \d+×$/)).toBeInTheDocument();
   });
 
   it("should maintain accessibility during drag operations", () => {

@@ -1,5 +1,6 @@
 import { Trash2 } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { RepetitionBlock } from "../../../types/krd";
 import { Tooltip } from "../../atoms/Tooltip";
 import { RepetitionBlockContextMenu } from "./RepetitionBlockContextMenu";
@@ -19,18 +20,22 @@ export const RepetitionBlockHeaderRight = ({
   onUngroup,
   onDelete,
 }: RepetitionBlockHeaderRightProps) => {
+  const t = useTranslate("editor");
+  const count = block.steps.length;
+  const deleteLabel = t("block.delete");
+
   return (
     <div className="flex items-center gap-2">
-      <div className="text-sm text-gray-600 dark:text-gray-400">
-        {block.steps.length} {block.steps.length === 1 ? "step" : "steps"}
+      <div className="text-sm text-ink-muted">
+        {t(count === 1 ? "block.steps_one" : "block.steps_other", { count })}
       </div>
 
       {onDelete && (
-        <Tooltip content="Delete repetition block" delayDuration={0}>
+        <Tooltip content={deleteLabel} delayDuration={0}>
           <button
             onClick={onDelete}
-            className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30 rounded transition-colors"
-            aria-label="Delete repetition block"
+            className="rounded p-1 text-ink-muted transition-colors hover:bg-[var(--danger-bg)] hover:text-[var(--danger-text)] motion-reduce:transition-none"
+            aria-label={deleteLabel}
             data-testid="delete-block-button"
           >
             <Trash2 className="h-4 w-4" />

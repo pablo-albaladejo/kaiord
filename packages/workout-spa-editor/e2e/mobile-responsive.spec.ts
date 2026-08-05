@@ -362,51 +362,56 @@ test.describe("Workout Actions Overflow", () => {
   test("should not overflow action buttons at 712px width", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 712, height: 800 });
+    const viewportWidth = 712;
+    await page.setViewportSize({ width: viewportWidth, height: 800 });
     await loadWorkout(page);
 
-    // The workout header card should contain all action buttons
+    // The action row is a bare flex row under the canvas now — there is no
+    // header card to contain it — so the overflow contract is the viewport
+    // itself: every verb fully on screen, no sideways scroll.
+    for (const name of ["Keep in library", "Download a file"]) {
+      const button = page.getByRole("button", { name });
+      await expect(button).toBeVisible();
+      const box = await button.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewportWidth);
+    }
     const discardButton = page.getByTestId("discard-workout-button");
     await expect(discardButton).toBeVisible();
-
-    const headerCard = discardButton
-      .locator("xpath=ancestor::div[contains(@class, 'rounded-lg')]")
-      .first();
-    const headerBox = await headerCard.boundingBox();
     const discardBox = await discardButton.boundingBox();
-
-    expect(headerBox).not.toBeNull();
     expect(discardBox).not.toBeNull();
-
-    // Discard button must be fully inside the header card
-    expect(discardBox!.x).toBeGreaterThanOrEqual(headerBox!.x);
+    expect(discardBox!.x).toBeGreaterThanOrEqual(0);
     expect(discardBox!.x + discardBox!.width).toBeLessThanOrEqual(
-      headerBox!.x + headerBox!.width + 1
+      viewportWidth
     );
   });
 
   test("should not overflow action buttons at 1100px width", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1100, height: 800 });
+    const viewportWidth = 1100;
+    await page.setViewportSize({ width: viewportWidth, height: 800 });
     await loadWorkout(page);
 
+    // The action row is a bare flex row under the canvas now — there is no
+    // header card to contain it — so the overflow contract is the viewport
+    // itself: every verb fully on screen, no sideways scroll.
+    for (const name of ["Keep in library", "Download a file"]) {
+      const button = page.getByRole("button", { name });
+      await expect(button).toBeVisible();
+      const box = await button.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewportWidth);
+    }
     const discardButton = page.getByTestId("discard-workout-button");
     await expect(discardButton).toBeVisible();
-
-    const headerCard = discardButton
-      .locator("xpath=ancestor::div[contains(@class, 'rounded-lg')]")
-      .first();
-    const headerBox = await headerCard.boundingBox();
     const discardBox = await discardButton.boundingBox();
-
-    expect(headerBox).not.toBeNull();
     expect(discardBox).not.toBeNull();
-
-    // Discard button must be fully inside the header card
-    expect(discardBox!.x).toBeGreaterThanOrEqual(headerBox!.x);
+    expect(discardBox!.x).toBeGreaterThanOrEqual(0);
     expect(discardBox!.x + discardBox!.width).toBeLessThanOrEqual(
-      headerBox!.x + headerBox!.width + 1
+      viewportWidth
     );
   });
 });

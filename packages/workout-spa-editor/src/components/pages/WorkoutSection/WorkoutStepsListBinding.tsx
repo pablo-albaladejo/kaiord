@@ -4,7 +4,7 @@
  * `WorkoutSectionInner` stays under the 60-line function limit.
  */
 
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 
 import type { Workout } from "../../../types/krd";
 import type { useWorkoutSectionState } from "./useWorkoutSectionState";
@@ -18,6 +18,7 @@ type WorkoutStepsListBindingProps = {
   state: State;
   editorRootRef: RefObject<HTMLDivElement | null>;
   addStepButtonRef: RefObject<HTMLButtonElement | null>;
+  renderStepForm?: (itemId: string) => ReactNode;
 };
 
 export function WorkoutStepsListBinding({
@@ -26,6 +27,7 @@ export function WorkoutStepsListBinding({
   state,
   editorRootRef,
   addStepButtonRef,
+  renderStepForm,
 }: WorkoutStepsListBindingProps) {
   return (
     <WorkoutStepsList
@@ -54,6 +56,7 @@ export function WorkoutStepsListBinding({
       onDeleteStepInRepetitionBlock={state.handleDeleteStepInRepetitionBlock}
       editorRootRef={editorRootRef}
       addStepButtonRef={addStepButtonRef}
+      renderStepForm={renderStepForm}
     />
   );
 }

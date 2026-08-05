@@ -3,10 +3,13 @@
  *
  * Tests for:
  * - Load workout from calendar by ID
- * - Accept structured workout (structured -> ready)
- * - Push ready workout (ready -> pushed)
  * - Edit pushed workout (pushed -> modified)
- * - Re-push modified workout (modified -> pushed)
+ * - The delivery ribbon, which replaced the Accept / Push / Re-push bar
+ *
+ * The state transitions themselves live in `use-editor-actions.test.ts`.
+ * This harness mounts `GarminBridgeProvider` with no extension present, so
+ * the ribbon here renders the `no-extension` gate — the one that used to
+ * render nothing at all.
  */
 
 import { render, screen, waitFor, within } from "@testing-library/react";
@@ -134,11 +137,11 @@ describe("EditorPage", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByTestId("workflow-bar")).toBeInTheDocument();
+      expect(screen.getByTestId("editor-state-ribbon")).toBeInTheDocument();
     });
     expect(
-      screen.getByRole("button", { name: /accept workout/i })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: /accept workout/i })
+    ).toBeNull();
   });
 
   it("should show no-data message for workout without KRD", async () => {
@@ -159,10 +162,9 @@ describe("EditorPage", () => {
     });
   });
 
-  it("should transition structured -> ready on accept", async () => {
+  it("should never ask a structured workout to be accepted before it can be sent", async () => {
     // Arrange
 
-    const user = userEvent.setup();
     await db.table("workouts").add(makeRecord({ state: "structured" }));
 
     // Act
@@ -171,18 +173,10 @@ describe("EditorPage", () => {
 
     // Assert
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /accept workout/i })
-      ).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByRole("button", { name: /accept workout/i }));
-
-    await waitFor(async () => {
-      const record = await db.table("workouts").get("w-test");
-      expect(record.state).toBe("ready");
-    });
+    await screen.findByTestId("editor-state-ribbon");
+    expect(screen.queryByRole("button", { name: /accept/i })).toBeNull();
+    const record = await db.table("workouts").get("w-test");
+    expect(record.state).toBe("structured");
   });
 
   it("should transition ready -> pushed on push", async () => {
@@ -197,22 +191,21 @@ describe("EditorPage", () => {
 
     // Assert
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /push to garmin/i })
-      ).toBeInTheDocument();
-    });
+    const ribbon = await screen.findByTestId("editor-state-ribbon");
 
-    await user.click(screen.getByRole("button", { name: /push to garmin/i }));
-
-    await waitFor(async () => {
-      const record = await db.table("workouts").get("w-test");
-      expect(record.state).toBe("pushed");
-      expect(record.garminPushId).toBeTruthy();
-    });
+    expect(
+      within(ribbon).getByText(
+        /Nothing can reach your watch from this browser/i
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(ribbon).getByRole("button", { name: /install the bridge/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();
+    expect(user).toBeDefined();
   });
 
-  it("should show modified indicator for modified workouts", async () => {
+  it("should surface the delivery ribbon for modified workouts", async () => {
     // Arrange
 
     await db.table("workouts").add(
@@ -229,14 +222,12 @@ describe("EditorPage", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByTestId("modified-indicator")).toBeInTheDocument();
+      expect(screen.getByTestId("editor-state-ribbon")).toBeInTheDocument();
     });
-    expect(
-      screen.getByRole("button", { name: /re-push to garmin/i })
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /re-push/i })).toBeNull();
   });
 
-  it("should transition modified -> pushed on re-push", async () => {
+  it("should offer the bridge install rather than a dead send on a modified workout", async () => {
     // Arrange
 
     const user = userEvent.setup();
@@ -253,20 +244,12 @@ describe("EditorPage", () => {
 
     // Assert
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /re-push to garmin/i })
-      ).toBeInTheDocument();
-    });
+    const ribbon = await screen.findByTestId("editor-state-ribbon");
 
-    await user.click(
-      screen.getByRole("button", { name: /re-push to garmin/i })
-    );
-
-    await waitFor(async () => {
-      const record = await db.table("workouts").get("w-test");
-      expect(record.state).toBe("pushed");
-    });
+    expect(
+      within(ribbon).getByRole("button", { name: /install the bridge/i })
+    ).toBeInTheDocument();
+    expect(user).toBeDefined();
   });
 
   it("should mount the ImportDropzoneOverlay when navigated with ?action=import", async () => {
@@ -380,7 +363,7 @@ describe("EditorPage", () => {
 
     // Assert
     await waitFor(() => {
-      expect(screen.getByTestId("workflow-bar")).toBeInTheDocument();
+      expect(screen.getByTestId("editor-state-ribbon")).toBeInTheDocument();
     });
     expect(screen.queryByTestId("editor-back-button")).toBeNull();
   });

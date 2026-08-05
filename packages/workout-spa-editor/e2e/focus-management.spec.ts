@@ -168,25 +168,36 @@ test.describe("Focus management — form-field short-circuit", () => {
     await loadFocusFixture(page);
   });
 
-  test("focus does not move away from an active text input during edit", async ({
+  test("focus survives the live store updates typing produces", async ({
     page,
   }) => {
-    // Double-click (or click to expand) a step to open inline editing.
-    await page
-      .getByRole("button", { name: /Warm-up 10 min/i })
-      .dblclick()
-      .catch(() => {
-        // Inline edit may not be triggered by dblclick; skip if unavailable.
-      });
-    const input = page.locator('[data-testid="editor-root"] input').first();
-    if (await input.isVisible()) {
-      await input.focus();
-      // Trigger a mutation that would normally move focus.
-      await focusStep(page, "Interval 1.*Z4 push");
-      // Focus should remain on the input.
-      await expect(page.locator(":focus")).toBe(input);
-    } else {
-      test.skip(true, "Inline editing not triggered — skip form-field guard");
-    }
+    // The predecessor of this test asserted the §7.3 short-circuit by
+    // clicking ANOTHER step while an input held focus — but a real click
+    // moves native focus to the clicked element before any app rule runs,
+    // so its premise could never hold. It also compared two Locators with
+    // toBe (object identity, never true) and only avoided failing because
+    // the inline form was never visible on the old five-card layout, so
+    // its skip branch always ran. Programmatic focus moves are covered by
+    // the is-form-field-focused / use-focus-after-action unit suites.
+    //
+    // What IS honestly assertable end to end is the user story the rule
+    // protects: every keystroke in the in-place form live-updates the
+    // store and re-renders the canvas, and none of those re-renders may
+    // steal the caret mid-typing.
+    await page.getByRole("button", { name: /Warm-up 10 min/i }).click();
+    const input = page
+      .locator('[data-testid="editor-root"] input[type="number"]')
+      .first();
+    await expect(input).toBeVisible();
+
+    await input.click();
+    await expect(input).toBeFocused();
+
+    await input.fill("");
+    await input.pressSequentially("420", { delay: 80 });
+
+    // The store took every keystroke and the caret never moved away.
+    await expect(input).toHaveValue("420");
+    await expect(input).toBeFocused();
   });
 });

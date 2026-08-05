@@ -43,7 +43,7 @@ export const WithWorkoutList: Story = {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             My Workout
           </h2>
-          <button className="btn-primary">Save Workout</button>
+          <button className="btn-primary">Download a file</button>
         </div>
 
         <div className="space-y-3">

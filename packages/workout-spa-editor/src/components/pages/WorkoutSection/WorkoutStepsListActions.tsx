@@ -34,8 +34,10 @@ export function WorkoutStepsListActions({
   const t = useTranslate("editor");
   const hasSingleSelection = selectedStepCount === 1;
 
+  // The canvas footer: a hairline, then the two ways to grow the list.
+  // Left-aligned, because they continue the rows above rather than close them.
   return (
-    <div className="mt-4 flex flex-col items-center gap-2">
+    <div className="flex flex-col gap-2 border-t border-edge-soft px-4 py-3.5 sm:px-[18px]">
       {hasMultipleSelection && (
         <MultiSelectionHint
           selectedStepCount={selectedStepCount}
@@ -43,20 +45,11 @@ export function WorkoutStepsListActions({
         />
       )}
       {hasSingleSelection && <SingleSelectionHint />}
-      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-center">
-        <Button
-          variant="secondary"
-          onClick={onCreateEmptyRepetitionBlock}
-          aria-label={t("actions.addRepetitionAria")}
-          data-testid="create-empty-repetition-block-button"
-          className="w-full sm:w-auto"
-        >
-          <Repeat className="mr-2 h-4 w-4" aria-hidden="true" />
-          {t("actions.addRepetition")}
-        </Button>
+      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
         <Button
           ref={addStepButtonRef}
           variant="secondary"
+          size="sm"
           onClick={onAddStep}
           aria-label={t("actions.addStepAria")}
           data-testid="add-step-button"
@@ -64,6 +57,17 @@ export function WorkoutStepsListActions({
         >
           <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
           {t("actions.addStep")}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onCreateEmptyRepetitionBlock}
+          aria-label={t("actions.addRepetitionAria")}
+          data-testid="create-empty-repetition-block-button"
+          className="w-full sm:w-auto"
+        >
+          <Repeat className="mr-2 h-4 w-4" aria-hidden="true" />
+          {t("actions.addRepetition")}
         </Button>
         {onPasteStep && (
           <PasteButton onPaste={onPasteStep} className="w-full sm:w-auto" />

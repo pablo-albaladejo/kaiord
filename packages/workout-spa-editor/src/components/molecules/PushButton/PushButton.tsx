@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button, type ButtonSize } from "../../atoms/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
@@ -13,11 +14,9 @@ export type PushButtonProps = {
   size?: Extract<ButtonSize, "md" | "lg">;
 };
 
-const DONE_CLASSES =
-  "bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/15";
-
 export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
   ({ workout, full = false, size = "md" }, ref) => {
+    const t = useTranslate("workout-detail");
     const { push } = useGarminPush(workout);
     const [status, setStatus] = useState<PushStatus>("idle");
     const widthClass = full ? "w-full" : "";
@@ -25,24 +24,25 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
     const handlePush = useCallback(async () => {
       setStatus("pushing");
       try {
-        await push();
-        setStatus("done");
+        setStatus((await push()) ? "done" : "idle");
       } catch {
         setStatus("idle");
       }
     }, [push]);
 
+    // Done is stated, not coloured: the emerald pill borrowed a hue that
+    // belongs to zone 3, and success is not part of this palette.
     if (status === "done") {
       return (
         <Button
           ref={ref}
           size={size}
-          variant="soft"
+          variant="secondary"
           disabled
-          className={[DONE_CLASSES, widthClass].filter(Boolean).join(" ")}
+          className={widthClass}
         >
           <Icon icon={ICON_MAP.check} size="sm" color="inherit" />
-          On your Garmin
+          {t("footer.sent")}
         </Button>
       );
     }
@@ -57,7 +57,7 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
           disabled
           className={widthClass}
         >
-          Pushing…
+          {t("footer.sending")}
         </Button>
       );
     }
@@ -71,7 +71,7 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
         className={widthClass}
       >
         <Icon icon={ICON_MAP.watch} size="sm" color="inherit" />
-        Push to Garmin
+        {t("footer.send")}
       </Button>
     );
   }

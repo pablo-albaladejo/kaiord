@@ -2,17 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { getStepColor } from "./step-colors";
 
-const DEFAULT_BLUE = "#3b82f6";
-const BLOCK_PURPLE = "#8b5cf6";
-const WARMUP_GREEN = "#10b981";
-const COOLDOWN_CYAN = "#06b6d4";
-const REST_GRAY = "#6b7280";
-const POWER_RED = "#ef4444";
-const HR_ORANGE = "#f59e0b";
+const ZONE_1 = "var(--zone-1)";
+const ZONE_2 = "var(--zone-2)";
+const ZONE_3 = "var(--zone-3)";
+const ZONE_4 = "var(--zone-4)";
 const REPEAT = 4;
 
 describe("getStepColor", () => {
-  it("should return the default blue for a non-object input", () => {
+  it("should return the mid zone for a non-object input", () => {
     // Arrange
     const step = null;
 
@@ -20,10 +17,10 @@ describe("getStepColor", () => {
     const color = getStepColor(step);
 
     // Assert
-    expect(color).toBe(DEFAULT_BLUE);
+    expect(color).toBe(ZONE_3);
   });
 
-  it("should return purple for a repetition block", () => {
+  it("should return the mid zone for a repetition block", () => {
     // Arrange
     const step = { repeatCount: REPEAT };
 
@@ -31,10 +28,10 @@ describe("getStepColor", () => {
     const color = getStepColor(step);
 
     // Assert
-    expect(color).toBe(BLOCK_PURPLE);
+    expect(color).toBe(ZONE_3);
   });
 
-  it("should return green for a warmup step", () => {
+  it("should return zone 2 for a warmup step", () => {
     // Arrange
     const step = { intensity: "warmup" };
 
@@ -42,46 +39,25 @@ describe("getStepColor", () => {
     const color = getStepColor(step);
 
     // Assert
-    expect(color).toBe(WARMUP_GREEN);
+    expect(color).toBe(ZONE_2);
   });
 
-  it("should return cyan for a cooldown step", () => {
+  it("should return zone 1 for cooldown, rest and recovery steps", () => {
     // Arrange
-    const step = { intensity: "cooldown" };
+    const steps = [
+      { intensity: "cooldown" },
+      { intensity: "rest" },
+      { intensity: "recovery" },
+    ];
 
     // Act
-    const color = getStepColor(step);
+    const colors = steps.map(getStepColor);
 
     // Assert
-    expect(color).toBe(COOLDOWN_CYAN);
+    expect(colors).toEqual([ZONE_1, ZONE_1, ZONE_1]);
   });
 
-  it("should return gray for rest and recovery steps", () => {
-    // Arrange
-    const rest = { intensity: "rest" };
-    const recovery = { intensity: "recovery" };
-
-    // Act
-    const restColor = getStepColor(rest);
-    const recoveryColor = getStepColor(recovery);
-
-    // Assert
-    expect(restColor).toBe(REST_GRAY);
-    expect(recoveryColor).toBe(REST_GRAY);
-  });
-
-  it("should return red for an active power step", () => {
-    // Arrange
-    const step = { intensity: "active", targetType: "power" };
-
-    // Act
-    const color = getStepColor(step);
-
-    // Assert
-    expect(color).toBe(POWER_RED);
-  });
-
-  it("should return orange for an interval heart-rate step", () => {
+  it("should return zone 4 for an interval step", () => {
     // Arrange
     const step = { intensity: "interval", targetType: "heart_rate" };
 
@@ -89,28 +65,30 @@ describe("getStepColor", () => {
     const color = getStepColor(step);
 
     // Assert
-    expect(color).toBe(HR_ORANGE);
+    expect(color).toBe(ZONE_4);
   });
 
-  it("should return the default blue for an active step without a power or HR target", () => {
+  it("should ignore the target type when picking the zone", () => {
     // Arrange
-    const step = { intensity: "active", targetType: "pace" };
+    const power = { intensity: "active", targetType: "power" };
+    const heartRate = { intensity: "active", targetType: "heart_rate" };
+
+    // Act
+    const powerColor = getStepColor(power);
+    const heartRateColor = getStepColor(heartRate);
+
+    // Assert
+    expect(powerColor).toBe(heartRateColor);
+  });
+
+  it("should return the mid zone for an unknown intensity", () => {
+    // Arrange
+    const step = { intensity: "something-else" };
 
     // Act
     const color = getStepColor(step);
 
     // Assert
-    expect(color).toBe(DEFAULT_BLUE);
-  });
-
-  it("should return the default blue for an unknown intensity", () => {
-    // Arrange
-    const step = { intensity: "other" };
-
-    // Act
-    const color = getStepColor(step);
-
-    // Assert
-    expect(color).toBe(DEFAULT_BLUE);
+    expect(color).toBe(ZONE_3);
   });
 });

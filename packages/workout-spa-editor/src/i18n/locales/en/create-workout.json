@@ -24,7 +24,7 @@
     "tapToTune": "Tap any step to fine-tune",
     "timeInZone": "Time in zone",
     "redo": "Redo",
-    "savePush": "Save & push"
+    "savePush": "Send to Garmin"
   },
   "summary": {
     "duration": "Duration",
@@ -76,7 +76,7 @@
   },
   "toast": {
     "generationFailed": "Workout generation failed",
-    "savedAndPushed": "Saved & pushed to Garmin",
+    "savedAndPushed": "Sent to Garmin",
     "savedOnly": "Workout saved"
   }
 }

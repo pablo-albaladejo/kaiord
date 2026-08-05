@@ -23,6 +23,7 @@ export const WorkoutListContent = ({
   onReorderStepsInBlock,
   generateStepId,
   onAddStep,
+  renderAfterItem,
 }: WorkoutListContentProps) => {
   if (workout.steps.length === 0 && onAddStep) {
     return <EmptyWorkoutState onAddStep={onAddStep} />;
@@ -55,6 +56,7 @@ export const WorkoutListContent = ({
               onReorderStepsInBlock,
               generateStepId,
             })}
+            {renderAfterItem?.(itemId)}
           </Fragment>
         );
       })}
