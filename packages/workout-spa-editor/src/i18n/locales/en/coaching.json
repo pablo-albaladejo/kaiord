@@ -103,5 +103,6 @@
     "conversionFailed": "Conversion failed",
     "invalidActivityId": "Invalid activity id",
     "activityNotFound": "Activity not found"
-  }
+  },
+  "effortOf": "Intensity {{n}} of {{max}}"
 }

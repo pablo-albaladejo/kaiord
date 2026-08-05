@@ -11,20 +11,36 @@
  * scoped landmark.
  */
 
+import type { CSSProperties } from "react";
 import { Link } from "wouter";
 
+import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
+import { useWeekDominantZone } from "../../../../hooks/use-week-dominant-zone";
+import { zoneVar } from "../../../../lib/zone-colors";
 import { BrandMark } from "../../../atoms/BrandMark/BrandMark";
 
 export function HeaderLogo() {
+  const active = useActiveProfileLive();
+  const zone = useWeekDominantZone(active?.id ?? null, active?.profile ?? null);
+  const coreLive =
+    zone === null
+      ? undefined
+      : ({ "--core-live": zoneVar(zone) } as CSSProperties);
+
   return (
     <Link
       href="/calendar"
       className="flex shrink-0 items-center gap-3 no-underline"
     >
-      {/* The wrapper is where the runtime will set --core-live to the week's
-          dominant zone. Until that derivation exists the SVG's own fallback
-          renders the core in ink, which is also the empty-week rendering. */}
-      <span className="flex shrink-0 items-center text-ink-strong">
+      {/* The wrapper carries --core-live: the dominant training zone of the
+          week. A week with no calculable zone declares nothing at all, and the
+          core inherits the ink the role layer already holds — the empty case
+          is the absence of a rule, not a rule that paints ink. */}
+      <span
+        data-testid="brand-mark-wrapper"
+        className="flex shrink-0 items-center text-ink-strong"
+        style={coreLive}
+      >
         <BrandMark size={28} core="live" />
       </span>
       <span

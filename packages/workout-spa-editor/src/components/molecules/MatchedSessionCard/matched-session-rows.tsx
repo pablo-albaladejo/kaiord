@@ -2,6 +2,10 @@
  * Per-density row renderers for MatchedSessionCard. Kept separate from
  * the component file so the JSX-heavy parts don't push the top-level
  * component over the per-file line cap.
+ *
+ * The compliance percentage is not repeated here — it is the chip in the
+ * title row, and stating it twice on one card made the metadata row read as
+ * two different numbers.
  */
 
 import { deriveWorkoutLifecycle } from "../WorkoutCard/session-lifecycle";
@@ -9,13 +13,9 @@ import { SessionLifecycleBadges } from "../WorkoutCard/SessionLifecycleBadges";
 import {
   actualDurationText,
   actualTitle,
-  formatPercent,
   type MatchedSession,
   planDurationText,
 } from "./matched-session-text";
-
-const hasFiniteCompliance = (score: number | null): score is number =>
-  score !== null && Number.isFinite(score);
 
 const lifecycleOf = (s: MatchedSession) =>
   deriveWorkoutLifecycle(s.workout, s.executed?.length ?? 0);
@@ -34,11 +34,6 @@ export const renderComfortableMetadata = (s: MatchedSession) => (
     <span className="text-[10px] text-ink-muted">Plan ·</span>
     <span>{planDurationText(s)}</span>
     <SessionLifecycleBadges flags={lifecycleOf(s)} />
-    {hasFiniteCompliance(s.complianceScore) && (
-      <span className="ml-auto text-[10px] text-ink-body">
-        {formatPercent(s.complianceScore)}
-      </span>
-    )}
   </>
 );
 
@@ -53,10 +48,5 @@ export const renderCompactMetadata = (s: MatchedSession) => (
   <>
     <span>{actualDurationText(s)}</span>
     <SessionLifecycleBadges flags={lifecycleOf(s)} />
-    {hasFiniteCompliance(s.complianceScore) && (
-      <span className="ml-auto text-[10px] text-ink-body">
-        {formatPercent(s.complianceScore)}
-      </span>
-    )}
   </>
 );

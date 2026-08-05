@@ -14,7 +14,7 @@ export function ReadinessStat({ metric }: ReadinessStatProps) {
           {metric.value}
         </span>
         {metric.trend !== undefined && (
-          <span className="inline-flex items-center gap-px text-[11px] font-semibold text-emerald-400">
+          <span className="inline-flex items-center gap-px text-[11px] font-medium tabular-nums text-ink-muted">
             <Icon icon={ICON_MAP.arrowUp} size="xs" color="inherit" />
             {metric.trend}
           </span>

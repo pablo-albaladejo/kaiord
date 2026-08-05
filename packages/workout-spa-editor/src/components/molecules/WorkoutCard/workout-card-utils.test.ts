@@ -1,59 +1,49 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDuration, getStateIndicator } from "./workout-card-utils";
+import type { WorkoutState } from "../../../types/calendar-enums";
+import { formatDuration, lifecycleTone } from "./workout-card-utils";
 
 const THIRTY_MINUTES_SECONDS = 1800;
 
 const ONE_HOUR_THIRTY_MINUTES_SECONDS = 5400;
 
-describe("getStateIndicator", () => {
-  it("should return orange indicator for stale", () => {
+const QUIET_STATES: WorkoutState[] = [
+  "structured",
+  "ready",
+  "pushed",
+  "modified",
+  "skipped",
+];
+
+describe("lifecycleTone", () => {
+  it("should raise a raw session, which cannot reach a watch", () => {
     // Arrange
 
     // Act
-
-    const result = getStateIndicator("stale");
+    const tone = lifecycleTone("raw");
 
     // Assert
-
-    expect(result.label).toBe("Stale");
-    expect(result.className).toContain("orange");
+    expect(tone).toBe("attention");
   });
 
-  it("should return check for pushed", () => {
+  it("should raise a stale session, which no longer matches its plan", () => {
     // Arrange
 
     // Act
-
-    const result = getStateIndicator("pushed");
+    const tone = lifecycleTone("stale");
 
     // Assert
-
-    expect(result.symbol).toBe("\u2713");
+    expect(tone).toBe("attention");
   });
 
-  it("should return star for ready", () => {
+  it.each(QUIET_STATES)("should keep %s quiet", (state) => {
     // Arrange
 
     // Act
-
-    const result = getStateIndicator("ready");
-
-    // Assert
-
-    expect(result.symbol).toBe("\u2605");
-  });
-
-  it("should return warning for raw", () => {
-    // Arrange
-
-    // Act
-
-    const result = getStateIndicator("raw");
+    const tone = lifecycleTone(state);
 
     // Assert
-
-    expect(result.symbol).toBe("\u26A0\uFE0F");
+    expect(tone).toBe("quiet");
   });
 });
 

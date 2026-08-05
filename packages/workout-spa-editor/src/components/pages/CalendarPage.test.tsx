@@ -134,7 +134,7 @@ describe("CalendarPage", () => {
     expect(await screen.findByTestId("workout-card-w-mon")).toBeInTheDocument();
   });
 
-  it("should show batch processing banner when raw workouts exist", async () => {
+  it("should replace the batch action with its blocker when no provider exists", async () => {
     // Arrange
 
     await db.table("workouts").add(makeWorkout({ date: "2026-04-07" }));
@@ -149,8 +149,11 @@ describe("CalendarPage", () => {
     // Assert
 
     await waitFor(() => {
-      expect(screen.getByText(/2 raw workouts/)).toBeInTheDocument();
+      expect(screen.getByTestId("no-ai-provider-state")).toBeInTheDocument();
     });
+    expect(
+      screen.queryByTestId("batch-processing-banner")
+    ).not.toBeInTheDocument();
   });
 
   it("should stack multiple workouts per day by createdAt", async () => {
