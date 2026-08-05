@@ -15,7 +15,7 @@ describe("Toggle", () => {
 
     // Assert
     expect(toggle).toHaveAttribute("aria-checked", "true");
-    expect(toggle).toHaveClass("bg-primary-500");
+    expect(toggle).toHaveClass("bg-accent");
   });
 
   it("should render the off state with the elevated track", () => {

@@ -1,5 +1,7 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { ThresholdMetric } from "../../../lib/athlete";
 import { Metric } from "../../molecules/Metric";
+import { ThresholdProvenanceLine } from "./ThresholdProvenanceLine";
 
 type ThresholdMetricsRowProps = {
   metrics: ThresholdMetric[];
@@ -10,29 +12,29 @@ export function ThresholdMetricsRow({
   metrics,
   sportLabel,
 }: ThresholdMetricsRowProps) {
+  const t = useTranslate("athlete");
+
   if (metrics.length === 0) {
     return (
-      <p className="text-[13.5px] text-ink-muted">
-        Add your {sportLabel.toLowerCase()} thresholds
+      <p className="text-[13px] text-ink-muted">
+        {t("noThresholds", { sport: sportLabel.toLowerCase() })}
       </p>
     );
   }
 
   return (
-    <div className="flex">
-      {metrics.map((metric, index) => (
+    <div className="flex gap-3.5">
+      {metrics.map((metric) => (
         <div
           key={metric.label}
-          className={
-            index === 0 ? "flex-1" : "flex-1 border-l border-edge pl-4"
-          }
+          className="flex min-w-0 flex-1 flex-col gap-[5px]"
         >
           <Metric
             value={metric.value}
             unit={metric.unit}
             label={metric.label}
-            accent={metric.accent}
           />
+          <ThresholdProvenanceLine provenance={metric.provenance} />
         </div>
       ))}
     </div>
