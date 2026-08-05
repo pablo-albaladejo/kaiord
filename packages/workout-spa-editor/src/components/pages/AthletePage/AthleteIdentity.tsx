@@ -1,6 +1,8 @@
 import { useState } from "react";
 
+import { useUnits } from "../../../contexts/units-context";
 import { useTranslate } from "../../../i18n/use-translate";
+import type { ActiveSport } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { AvatarRing } from "../../molecules/AvatarRing";
@@ -11,34 +13,36 @@ const AVATAR_SIZE = 56;
 
 type AthleteIdentityProps = {
   profile: Profile;
+  sport: ActiveSport;
 };
 
-export function AthleteIdentity({ profile }: AthleteIdentityProps) {
+export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
   const t = useTranslate("athlete");
+  const units = useUnits();
   const [editing, setEditing] = useState(false);
 
   return (
     <div className="flex items-center gap-3.5">
       <AvatarRing initials={deriveInitials(profile.name)} size={AVATAR_SIZE} />
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[21px] font-bold text-ink-strong">
+        <div className="truncate text-[20px] font-semibold tracking-[-0.024em] text-ink-strong">
           {profile.name}
         </div>
-        <div className="text-[13.5px] text-ink-muted">
-          {deriveTagline(profile, t)}
+        <div className="text-[13px] text-ink-muted tabular-nums">
+          {deriveTagline(profile, sport, units, t)}
         </div>
       </div>
       <button
         type="button"
         aria-label={t("editProfile")}
         onClick={() => setEditing(true)}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-edge bg-ink-strong/5 text-ink-body"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-edge bg-transparent text-ink-body transition-colors duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] hover:border-edge-strong hover:text-ink-strong"
       >
         <Icon
           icon={ICON_MAP.edit}
           size="sm"
           color="inherit"
-          strokeWidth={1.9}
+          strokeWidth={2.25}
         />
       </button>
       <ProfileEditDialog

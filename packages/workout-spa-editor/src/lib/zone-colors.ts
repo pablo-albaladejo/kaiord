@@ -28,6 +28,17 @@ export function zoneVar(zone: ZoneNumber): string {
   return `var(--zone-${zone})`;
 }
 
+/* Bar height as a share of the track, ascending with intensity. No
+   blue→green→amber→red ramp can be lightness-monotonic in sRGB, so zone order
+   is encoded in height as well as hue: with the colour removed the ramp still
+   reads. Index i maps to zone Z(i+1). */
+const ZONE_HEIGHTS = ["34%", "50%", "66%", "82%", "100%"] as const;
+
+/** Bar height for a 1-based zone number, as a CSS percentage. */
+export function zoneHeight(zone: ZoneNumber): string {
+  return ZONE_HEIGHTS[zone - 1]!;
+}
+
 /** Vertical zone gradient (solid top → 80% alpha bottom) with inset top
     highlight, per the design handoff zone-bar treatment. */
 export function zoneGradient(zone: ZoneNumber): {
