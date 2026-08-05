@@ -51,16 +51,17 @@ test.describe("Library flows", () => {
     // receives focus on navigation via useFocusOnRouteChange.
     const heading = page.locator("h1[data-route-heading]");
     await expect(heading).toHaveText("Library");
-    // Headless Firefox on Linux (CI) silently drops a programmatic
-    // element.focus() applied during the post-navigation settle window —
-    // activeElement stays on the trigger button no matter how the focus
-    // is scheduled (rAF, macrotask, MutationObserver), while a focus
-    // applied well after the window sticks. Real headed Firefox, headless
-    // Firefox on macOS, chromium and webkit all focus the heading
-    // correctly, so this is a headless-Linux-Firefox test artifact, not a
-    // user-facing regression. The focus-on-route contract is covered by
-    // the useFocusOnRouteChange unit test (jsdom) and by the chromium /
-    // webkit runs of this assertion. See #635 for the full investigation.
+    // Engines silently drop a programmatic element.focus() applied during
+    // the post-navigation settle window: the call returns normally and
+    // activeElement stays on the trigger button, while a focus applied
+    // well after the window sticks. Headless Firefox on Linux does this
+    // every time; Mobile Safari does it intermittently, which is what made
+    // this assertion flaky rather than merely browser-specific.
+    // useFocusOnRouteChange now confirms the focus landed and re-attempts
+    // until it does, so the drop is absorbed rather than assumed away.
+    // Firefox stays excluded until a main-only e2e run shows it green —
+    // this suite does not run on PRs, so re-enabling it here would be a
+    // guess. See #635 for the original investigation.
     if (browserName !== "firefox") {
       await expect(heading).toBeFocused();
     }
