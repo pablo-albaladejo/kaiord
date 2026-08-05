@@ -33,9 +33,7 @@ export const SyncTab: React.FC = () => {
 
   return (
     <div className="space-y-4" data-testid="sync-tab">
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        {t("sync.description")}
-      </p>
+      <p className="text-sm text-ink-body">{t("sync.description")}</p>
       <SyncStatusLine
         connected={sync.connected}
         status={sync.status}

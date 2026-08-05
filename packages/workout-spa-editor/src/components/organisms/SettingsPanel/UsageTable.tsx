@@ -21,12 +21,12 @@ export function UsageTable({ rows, monthsWindow }: UsageTableProps) {
   const t = useTranslate("settings");
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+      <h3 className="text-base font-semibold text-ink-strong">
         {t("usage.heading", { count: monthsWindow })}
       </h3>
       <table className="w-full text-sm" data-testid="usage-table">
         <thead>
-          <tr className="border-b border-gray-200 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          <tr className="border-b border-edge text-left text-ink-muted">
             <th className="py-2 pr-4 font-medium">{t("usage.month")}</th>
             <th className="py-2 pr-4 font-medium">{t("usage.input")}</th>
             <th className="py-2 pr-4 font-medium">{t("usage.output")}</th>

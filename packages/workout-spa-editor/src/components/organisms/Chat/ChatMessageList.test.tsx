@@ -41,7 +41,7 @@ describe("ChatMessageList", () => {
     // Assert
     const focused = screen.getByText("second").closest("li");
     expect(focused?.getAttribute("data-focused")).toBe("true");
-    expect(focused?.className).toContain("ring-yellow-300");
+    expect(focused?.className).toContain("ring-edge-strong");
     expect(scroll).toHaveBeenCalled();
   });
 
@@ -56,7 +56,7 @@ describe("ChatMessageList", () => {
 
     // Assert
     expect(screen.getByText("first").closest("li")?.className).not.toContain(
-      "ring-yellow-300"
+      "ring-edge-strong"
     );
   });
 

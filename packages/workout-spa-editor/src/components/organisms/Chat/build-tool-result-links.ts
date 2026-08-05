@@ -24,6 +24,14 @@ function isWorkoutToolResult(value: unknown): value is WorkoutToolResult {
   );
 }
 
+/** The workout a confirmed `create_workout` produced, for the surfaces that
+    render it rather than link to it. Null for every other tool event. */
+export function proposedWorkoutId(message: ChatMessageRecord): string | null {
+  if (message.toolName !== "create_workout") return null;
+  if (!isWorkoutToolResult(message.toolResult)) return null;
+  return message.toolResult.workoutId;
+}
+
 export function buildToolResultLinks(
   message: ChatMessageRecord,
   t: Translate = getTranslate("chat")
