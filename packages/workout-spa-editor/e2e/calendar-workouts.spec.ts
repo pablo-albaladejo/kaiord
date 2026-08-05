@@ -254,8 +254,12 @@ test.describe("Calendar Workouts", () => {
     // both set `display`, only one survives the cascade, and when the row
     // carried the clamp it was silently inert — a three-word title in a
     // narrow day column rendered three unclamped lines (the W24 capture).
-    // text-sm line height is 20px; two lines plus rounding slack.
+    // text-sm line height is 20px; two lines plus rounding slack. The lower
+    // bound keeps the guard honest: if a layout change ever lets this title
+    // fit one line, the scenario no longer exercises the clamp and must be
+    // rebuilt, not left passing vacuously.
     const TWO_LINES_MAX_PX = 44;
+    const ONE_LINE_EXCEEDED_MIN_PX = 30;
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -270,6 +274,7 @@ test.describe("Calendar Workouts", () => {
     await expect(title).toBeVisible();
     const box = await title.boundingBox();
     expect(box).not.toBeNull();
+    expect(box!.height).toBeGreaterThan(ONE_LINE_EXCEEDED_MIN_PX);
     expect(box!.height).toBeLessThanOrEqual(TWO_LINES_MAX_PX);
   });
 });
