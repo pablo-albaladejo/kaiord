@@ -7,6 +7,8 @@
 
 import type { Page } from "@playwright/test";
 
+import { toLocalDateString } from "./local-date";
+
 export { makeRawWorkout, makeTemplate, makeWorkout } from "./dexie-factories";
 export { E2E_DEFAULT_PROFILE_ID } from "./e2e-defaults";
 export { seedDefaultProfile } from "./seed-profile";
@@ -82,7 +84,7 @@ export function getWeekDates(weekOffset = 0): string[] {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(mon);
     d.setDate(mon.getDate() + i);
-    return d.toISOString().slice(0, 10);
+    return toLocalDateString(d);
   });
 }
 

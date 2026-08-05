@@ -7,8 +7,11 @@
  * a bare `border-<colour>` following `border-<neutral>` did — spent the card's
  * border on a signal the left edge already carries.
  *
- * Title slot uses `line-clamp-2` — never `truncate` — so the most
- * important field on the card never gets reduced to an ellipsis.
+ * The title span inside `titleRow` carries `line-clamp-2` — never `truncate`,
+ * and never this row: `line-clamp-2` sets `display:-webkit-box`, which
+ * collides with this row's `display:flex`. Only one survives the cascade —
+ * when both rode this div, `flex` won and the clamp was silently inert, so
+ * titles grew unbounded while the class promised two lines.
  *
  * Hover moves the border colour rather than a shadow: one named property at
  * `--dur-state`, never `all`.
@@ -71,7 +74,7 @@ export function CardShell({
       className={`${SHELL} ${borderClass}`}
       onClick={onClick}
     >
-      <div className="flex min-w-0 items-start gap-1.5 line-clamp-2 font-medium text-ink-strong">
+      <div className="flex min-w-0 items-start gap-1.5 font-medium text-ink-strong">
         {titleRow}
       </div>
       {zoneBar ? <div className="mt-1.5">{zoneBar}</div> : null}

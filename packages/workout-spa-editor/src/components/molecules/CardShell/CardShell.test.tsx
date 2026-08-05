@@ -47,9 +47,11 @@ describe("CardShell", () => {
     expect(button.className).toContain("border-emerald-600");
   });
 
-  it("should use line-clamp-2 on the title row", () => {
+  it("should keep the title row clamp-free so flex survives the cascade", () => {
     // Arrange
-
+    // line-clamp-* sets display:-webkit-box, which collides with this row's
+    // display:flex — only one wins the cascade. The clamp belongs on the
+    // title span each variant passes in, never on the row itself.
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -67,7 +69,8 @@ describe("CardShell", () => {
 
     // Assert
 
-    expect(titleContainer?.className).toContain("line-clamp-2");
+    expect(titleContainer?.className).toContain("flex");
+    expect(titleContainer?.className).not.toContain("line-clamp");
   });
 
   it("should render origin chip when provided", () => {

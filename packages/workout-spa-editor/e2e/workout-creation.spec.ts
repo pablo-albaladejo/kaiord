@@ -1,11 +1,11 @@
 import { expect, test } from "./fixtures/base";
 import { buildStructuredCyclingKrd } from "./helpers/build-structured-cycling-krd";
+import { toLocalDateString } from "./helpers/local-date";
 import { clearDexie, getWeekId } from "./helpers/seed-dexie";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 const EXPECTED_STEP_CARDS_AFTER_DUPLICATE = 3;
 const IMMEDIATE_DELETION_GRACE_MS = 300;
-const ISO_DATE_LENGTH = 10;
 
 /**
  * Critical Path: Step Management (Create, Delete, Duplicate)
@@ -223,7 +223,7 @@ test.describe("Create → Save & schedule → calendar landing", () => {
       timeout: 10000,
     });
     await clearDexie(page);
-    const today = new Date().toISOString().slice(0, ISO_DATE_LENGTH);
+    const today = toLocalDateString(new Date());
     const weekId = getWeekId(today);
 
     // Act — author a scratch workout without a date (defaults to today) and save
