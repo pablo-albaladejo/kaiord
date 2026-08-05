@@ -1,17 +1,23 @@
 import { describe, expect, it } from "vitest";
 
+import { seriesStroke } from "../../../charts/uplot-base/series-strokes";
 import { buildTrendChartOptions } from "./build-trend-chart-options";
 import type { TrendMetricDef } from "./trend-metrics";
+import { TREND_METRICS } from "./trend-metrics";
 
-const SLEEP: TrendMetricDef = { key: "sleep", label: "Sleep", unit: "score" };
-const HRV: TrendMetricDef = { key: "hrv", label: "HRV", unit: "ms" };
-const WEIGHT: TrendMetricDef = { key: "weight", label: "Weight", unit: "kg" };
+const byKey = (key: TrendMetricDef["key"]): TrendMetricDef =>
+  TREND_METRICS.find((m) => m.key === key) as TrendMetricDef;
+
+const SLEEP = byKey("sleep");
+const HRV = byKey("hrv");
+const WEIGHT = byKey("weight");
+const STEPS = byKey("steps");
 
 const EXPECTED_AXES_COUNT_3_METRICS = 4; // 1 X + 3 Y
 // Fallback theme colors from chart-theme.ts (no DOM custom properties set in
 // this pure-function test, so getChartAxisColors returns its defaults).
-const AXIS_STROKE = "#64748b";
-const GRID_STROKE = "#e2e8f0";
+const AXIS_STROKE = "#747474";
+const GRID_STROKE = "#d4d4d4";
 
 describe("buildTrendChartOptions", () => {
   it("should produce one X axis plus one Y axis per metric in the input order", () => {
@@ -40,7 +46,7 @@ describe("buildTrendChartOptions", () => {
     expect(ySeriesScales).toEqual(["sleep", "hrv"]);
   });
 
-  it("should render uniform stroke #2563eb on every series", () => {
+  it("should stroke each series with its own step of the neutral ink ladder", () => {
     // Arrange
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV, WEIGHT];
 
@@ -49,7 +55,37 @@ describe("buildTrendChartOptions", () => {
 
     // Assert
     const strokes = (options.series ?? []).slice(1).map((s) => s.stroke);
-    expect(strokes).toEqual(["#2563eb", "#2563eb", "#2563eb"]);
+    expect(strokes).toEqual([
+      seriesStroke(SLEEP.strokeStep),
+      seriesStroke(HRV.strokeStep),
+      seriesStroke(WEIGHT.strokeStep),
+    ]);
+    expect(new Set(strokes).size).toBe(metrics.length);
+  });
+
+  it("should keep a metric's stroke stable when another metric is dropped", () => {
+    // Arrange
+    const metrics: ReadonlyArray<TrendMetricDef> = [WEIGHT];
+
+    // Act
+    const alone = buildTrendChartOptions(metrics);
+    const withOthers = buildTrendChartOptions([SLEEP, HRV, WEIGHT]);
+
+    // Assert
+    expect(alone.series?.[1]?.stroke).toBe(withOthers.series?.[3]?.stroke);
+  });
+
+  it("should dash the series that wraps onto an already-used ladder step", () => {
+    // Arrange
+    const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, STEPS];
+
+    // Act
+    const options = buildTrendChartOptions(metrics);
+
+    // Assert
+    expect(options.series?.[1]?.stroke).toBe(options.series?.[2]?.stroke);
+    expect(options.series?.[1]?.dash).toBeUndefined();
+    expect(options.series?.[2]?.dash).toEqual(STEPS.dash);
   });
 
   it("should pack all Y axes on side 1 (right edge)", () => {

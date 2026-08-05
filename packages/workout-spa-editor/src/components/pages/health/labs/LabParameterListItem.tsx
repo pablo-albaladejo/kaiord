@@ -1,7 +1,8 @@
 /**
  * LabParameterListItem — one row of the F3.1 latest-per-parameter list:
  * label, sparkline of the parameter's history, latest canonical value, and
- * the out-of-range flag (F3.3, highlighted border when low/high).
+ * the out-of-range flag (F3.3). Out-of-range emphasis is a lightness step on
+ * the border, not a hue — the flag itself carries the glyph and the word.
  */
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { Sparkline } from "../../../charts/uplot-base/Sparkline";
@@ -29,13 +30,9 @@ export const LabParameterListItem = ({
       data-testid="lab-parameter-item"
       data-parameter-key={summary.parameterKey}
       data-flag={latest.flag}
-      className={`flex items-center justify-between gap-3 rounded border p-2 text-sm ${
-        selected ? "ring-2 ring-blue-400 " : ""
-      }${
-        outOfRange
-          ? "border-red-300 dark:border-red-800"
-          : "border-gray-200 dark:border-slate-800"
-      }`}
+      className={`flex items-center justify-between gap-3 rounded-xl border bg-surface p-2 text-sm text-ink-body ${
+        selected ? "ring-2 ring-accent " : ""
+      }${outOfRange ? "border-edge-strong" : "border-edge-soft"}`}
     >
       {onSelect ? (
         <button
@@ -51,7 +48,7 @@ export const LabParameterListItem = ({
         <span className="min-w-0 flex-1 truncate">{label}</span>
       )}
       <Sparkline points={points} />
-      <span className="whitespace-nowrap font-mono">
+      <span className="whitespace-nowrap font-medium tabular-nums slashed-zero text-ink-strong">
         {latest.valueCanonical} {latest.unitCanonical}
       </span>
       <LabFlagBadge flag={latest.flag} />

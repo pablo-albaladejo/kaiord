@@ -33,15 +33,17 @@ export default function LabEntryPage() {
         title={t("entry.title")}
         subtitle={t("entry.subtitle")}
       />
-      {loading && <p className="text-sm text-gray-600">{t("entry.loading")}</p>}
+      {loading && (
+        <p className="text-sm text-ink-muted">{t("entry.loading")}</p>
+      )}
       {!loading && !profileId && (
-        <p className="text-sm text-gray-600">{t("entry.noProfile")}</p>
+        <p className="text-sm text-ink-muted">{t("entry.noProfile")}</p>
       )}
       {!loading && profileId && (
         <>
           <div
             role="tablist"
-            className="mb-4 flex gap-2 border-b border-gray-200 dark:border-slate-800"
+            className="mb-4 flex gap-2 border-b border-edge-soft"
           >
             {TABS.map(({ id, labelKey }) => (
               <button
@@ -53,8 +55,8 @@ export default function LabEntryPage() {
                 onClick={() => setTab(id)}
                 className={`px-3 py-1.5 text-sm font-medium ${
                   tab === id
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-600 dark:text-gray-400"
+                    ? "border-b-2 border-accent text-accent"
+                    : "text-ink-muted"
                 }`}
               >
                 {t(labelKey)}
@@ -68,6 +70,9 @@ export default function LabEntryPage() {
             </>
           )}
           {tab === "dashboard" && <LabDashboardSection profileId={profileId} />}
+          <p className="mt-4 text-xs leading-relaxed text-pretty text-ink-muted">
+            {t("entry.typedNote")}
+          </p>
         </>
       )}
     </section>

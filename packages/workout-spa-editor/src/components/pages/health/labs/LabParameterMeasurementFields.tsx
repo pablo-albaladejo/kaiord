@@ -21,7 +21,7 @@ import {
 } from "./lab-row-model";
 
 const FIELD_CLASS =
-  "w-24 rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white";
+  "w-24 rounded-xl border border-edge bg-surface px-2 py-1 text-sm text-ink-strong";
 
 type FieldsProps = {
   row: LabRowState;
@@ -72,7 +72,7 @@ function ValueUnitFields({ row, onChange }: FieldsProps) {
         </datalist>
       )}
       {showPreview && (
-        <span className="text-xs text-gray-600 dark:text-gray-400">
+        <span className="text-xs text-ink-muted">
           ≈ {preview.valueCanonical.toFixed(2)} {preview.unitCanonical}
         </span>
       )}

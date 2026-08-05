@@ -8,7 +8,7 @@ import type { LabReportHeaderInput } from "../../../../application/lab/build-lab
 import { useTranslate } from "../../../../i18n/use-translate";
 
 const FIELD_CLASS =
-  "rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white";
+  "rounded-xl border border-edge bg-surface px-2 py-1 text-sm text-ink-strong";
 
 const Field = ({ label, children }: { label: string; children: ReactNode }) => (
   <label className="flex flex-col gap-1 text-sm">

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { seriesStroke } from "../../../../charts/uplot-base/series-strokes";
 import type { ChartMetricDef } from "../../../../charts/uplot-base/uplot-base";
 import { buildLabChartOptions } from "./build-lab-chart-options";
 import type { ReferenceBand } from "./reference-band";
@@ -15,12 +16,13 @@ const REF_HIGH_IDX = 3;
 const REF_LOW_IDX = 4;
 const EXPECTED_SERIES = 5; // x + line + outliers + 2 band edges
 const EXPECTED_AXES = 2; // x + one y
-const BAND_EDGE = "rgba(37, 99, 235, 0.30)";
-const THRESHOLD_STROKE = "rgba(37, 99, 235, 0.55)";
 // Fallback theme colors from chart-theme.ts (no DOM custom properties set in
-// this pure-function test, so getChartAxisColors returns its defaults).
-const AXIS_STROKE = "#64748b";
-const GRID_STROKE = "#e2e8f0";
+// this pure-function test, so the role reads return their defaults).
+const AXIS_STROKE = "#747474";
+const GRID_STROKE = "#d4d4d4";
+const BAND_EDGE = `color-mix(in oklab, ${GRID_STROKE} 30%, transparent)`;
+const THRESHOLD_STROKE = `color-mix(in oklab, ${GRID_STROKE} 55%, transparent)`;
+const BAND_FILL = `color-mix(in oklab, ${GRID_STROKE} 10%, transparent)`;
 
 describe("buildLabChartOptions", () => {
   it("should key the y scale, axis and value series to the parameter", () => {
@@ -44,8 +46,46 @@ describe("buildLabChartOptions", () => {
 
     // Assert
     expect(options.series).toHaveLength(EXPECTED_SERIES);
-    expect(options.series?.[1]?.stroke).toBe("#2563eb");
-    expect(options.series?.[2]?.stroke).toBe("#dc2626");
+    expect(options.series?.[1]?.stroke).toBe(seriesStroke(1));
+    expect(options.series?.[2]?.stroke).toBe(seriesStroke(0));
+  });
+
+  it("should separate the outliers from the line by lightness, not by hue", () => {
+    // Arrange
+
+    // Act
+    const options = buildLabChartOptions(DEF, BAND);
+    const line = options.series?.[1]?.stroke as string;
+    const outlier = options.series?.[2]?.stroke as string;
+
+    // Assert
+    expect(line).not.toBe(outlier);
+    for (const stroke of [line, outlier]) {
+      const [, r, g, b] = /^#(..)(..)(..)$/.exec(stroke) ?? [];
+      expect(r).toBe(g);
+      expect(g).toBe(b);
+    }
+  });
+
+  it("should label the outlier series with the caller's translated string", () => {
+    // Arrange
+    const label = "Fuera de rango";
+
+    // Act
+    const options = buildLabChartOptions(DEF, BAND, label);
+
+    // Assert
+    expect(options.series?.[2]?.label).toBe(label);
+  });
+
+  it("should fill the band from the hairline role rather than a hue", () => {
+    // Arrange
+
+    // Act
+    const options = buildLabChartOptions(DEF, BAND);
+
+    // Assert
+    expect(options.bands?.[0]?.fill).toBe(BAND_FILL);
   });
 
   it("should draw the outlier series as points only (no connecting line)", () => {

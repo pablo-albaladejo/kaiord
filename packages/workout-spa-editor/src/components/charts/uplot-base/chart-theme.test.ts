@@ -2,9 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getChartAxisColors, themedAxis } from "./chart-theme";
 
-// Mirrors the :root defaults in src/index.css.
-const FALLBACK_STROKE = "#64748b";
-const FALLBACK_GRID = "#e2e8f0";
+// Mirrors the :root values --ink-muted (--text-dim) and --edge (--border)
+// resolve to.
+const FALLBACK_STROKE = "#747474";
+const FALLBACK_GRID = "#d4d4d4";
 
 const stubComputedStyle = (
   values: Record<string, string>

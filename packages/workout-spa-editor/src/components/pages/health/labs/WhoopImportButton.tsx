@@ -16,7 +16,7 @@ export function WhoopImportButton() {
       type="button"
       disabled={whoop.isRunning}
       onClick={() => void whoop.run()}
-      className="self-start rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-gray-600"
+      className="self-start rounded-lg border border-edge px-3 py-1.5 text-sm font-medium text-ink-body transition-colors hover:border-edge-strong hover:text-ink-strong disabled:opacity-50"
     >
       {whoop.isRunning ? t("whoopImporting") : t("whoopButton")}
     </button>

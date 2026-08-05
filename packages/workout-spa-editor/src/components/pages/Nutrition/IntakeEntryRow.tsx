@@ -27,7 +27,7 @@ export function IntakeEntryRow({ entry, onDelete }: IntakeEntryRowProps) {
         type="button"
         onClick={() => onDelete(entry.id)}
         aria-label={t("intake.deleteEntry")}
-        className="text-ink-muted hover:text-red-400"
+        className="text-ink-muted hover:text-danger-text"
       >
         <Icon icon={ICON_MAP.x} size="sm" color="inherit" />
       </button>

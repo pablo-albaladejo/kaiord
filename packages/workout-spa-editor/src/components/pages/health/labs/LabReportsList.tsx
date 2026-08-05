@@ -22,7 +22,7 @@ export const LabReportsList = ({
 }: LabReportsListProps) => {
   const t = useTranslate("labs-ui");
   if (reports.length === 0)
-    return <p className="text-sm text-gray-600">{t("report.emptyList")}</p>;
+    return <p className="text-sm text-ink-muted">{t("report.emptyList")}</p>;
   return (
     <ul data-testid="lab-reports-list" className="flex flex-col gap-2">
       {reports.map((report) => (

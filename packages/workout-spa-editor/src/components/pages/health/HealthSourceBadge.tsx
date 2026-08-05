@@ -12,7 +12,7 @@ type Props = {
 export function HealthSourceBadge({ sourceBridgeId, usedFallback }: Props) {
   const t = useTranslate("health");
   return (
-    <span className="inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-slate-800 dark:text-gray-400">
+    <span className="inline-flex items-center gap-1 rounded bg-surface-elevated px-1.5 py-0.5 text-[11px] font-medium text-ink-muted">
       {healthSourceBadge(sourceBridgeId)}
       {usedFallback && <span title={t("source.fallbackActive")}>↩</span>}
     </span>

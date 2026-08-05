@@ -34,7 +34,7 @@ export function PresetRow({ preset, onApply, onRemove }: PresetRowProps) {
         type="button"
         onClick={() => onRemove(preset.id)}
         aria-label={t("presets.delete")}
-        className="text-ink-muted hover:text-red-400"
+        className="text-ink-muted hover:text-danger-text"
       >
         <Icon icon={ICON_MAP.x} size="sm" color="inherit" />
       </button>

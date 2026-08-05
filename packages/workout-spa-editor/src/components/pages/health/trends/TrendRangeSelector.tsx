@@ -6,10 +6,11 @@ export type TrendRangeSelectorProps = {
   onSelect: (days: TrendRangeDays) => void;
 };
 
-const baseClass = "rounded-md border px-3 py-1 text-sm transition-colors";
-const onClass = "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950";
-const offClass =
-  "border-gray-300 text-gray-600 dark:border-slate-700 dark:text-gray-400";
+// rounded-lg is the 8px control radius; rounded-xl the 12px field radius.
+const baseClass =
+  "rounded-lg px-3 py-1 text-sm font-medium tabular-nums transition-colors";
+const onClass = "bg-accent text-surface";
+const offClass = "text-ink-muted hover:text-ink-strong";
 
 export const TrendRangeSelector = ({
   selected,
@@ -20,7 +21,7 @@ export const TrendRangeSelector = ({
     <div
       role="radiogroup"
       aria-label={t("trends.rangeAria")}
-      className="flex gap-2"
+      className="flex gap-1 self-start rounded-xl border border-edge bg-surface-deep p-1"
       data-testid="trend-range-select"
     >
       {TREND_RANGES.map((r) => {
@@ -34,7 +35,7 @@ export const TrendRangeSelector = ({
             onClick={() => onSelect(r.days)}
             className={`${baseClass} ${isOn ? onClass : offClass}`}
           >
-            {r.label}
+            {t(r.labelKey)}
           </button>
         );
       })}

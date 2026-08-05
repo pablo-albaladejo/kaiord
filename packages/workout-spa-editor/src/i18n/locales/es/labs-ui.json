@@ -5,7 +5,8 @@
     "title": "Analíticas",
     "subtitle": "Añadir un nuevo informe de laboratorio",
     "loading": "Cargando…",
-    "noProfile": "Crea primero un perfil de atleta para registrar analíticas."
+    "noProfile": "Crea primero un perfil de atleta para registrar analíticas.",
+    "typedNote": "Las analíticas son la única superficie de salud sin fuente que sincronizar: cada valor de aquí se escribió a mano, así que lleva la fecha en que lo introdujiste en lugar del nombre de un puente."
   },
   "form": {
     "addParameter": "Añadir parámetro",
@@ -60,12 +61,18 @@
   "chart": {
     "empty": "Aún no hay historial para este parámetro.",
     "loading": "Cargando…",
-    "evolutionTitle": "Evolución de {{label}}"
+    "evolutionTitle": "Evolución de {{label}}",
+    "outOfRange": "Fuera de rango"
   },
   "dashboard": {
     "loading": "Cargando…",
     "pinParameters": "Fijar parámetros",
     "evolutionCharts": "Gráficos de evolución",
     "emptyGrid": "Fija un parámetro arriba para ver su gráfico de evolución."
+  },
+  "latest": {
+    "title": "Últimos valores",
+    "loading": "Cargando…",
+    "empty": "Aún no hay parámetros de laboratorio registrados."
   }
 }

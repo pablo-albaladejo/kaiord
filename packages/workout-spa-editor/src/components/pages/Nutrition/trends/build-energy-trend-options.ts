@@ -8,6 +8,7 @@
 import type uPlot from "uplot";
 
 import { getTranslate, type Translate } from "../../../../i18n/use-translate";
+import { seriesStroke } from "../../../charts/uplot-base/series-strokes";
 import { ENERGY_TREND_METRIC_BY_KEY } from "./energy-trend-metrics";
 import type { EnergyTrendKey } from "./energy-trend-series";
 
@@ -33,7 +34,7 @@ const buildSeries = (
     return {
       label: t(`trends.series.${key}`),
       scale: def.scale,
-      stroke: def.stroke,
+      stroke: seriesStroke(def.strokeStep),
       width: def.width ?? 1,
       ...(def.dash ? { dash: def.dash } : {}),
       spanGaps: false,

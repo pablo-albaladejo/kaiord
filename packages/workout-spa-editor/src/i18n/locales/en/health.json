@@ -11,7 +11,9 @@
     "empty": "No activity recorded today yet.",
     "steps": "Steps",
     "activeKcal": "Active kcal",
-    "restingKcal": "Resting kcal"
+    "restingKcal": "Resting kcal",
+    "feedsNote": "These three feed the expenditure side of your energy balance. Nutrition reads them directly.",
+    "openNutrition": "Open Nutrition"
   },
   "recovery": {
     "title": "Recovery",
@@ -21,12 +23,14 @@
   },
   "sleep": {
     "title": "Sleep",
-    "empty": "No sleep records yet for the last 7 days."
+    "empty": "No sleep records yet for the last 7 days.",
+    "duration": "{{hours}} h {{minutes}} m"
   },
   "weight": {
     "title": "Weight",
     "empty": "No weight records yet for the last 90 days.",
-    "bodyComposition": "Body composition (latest)"
+    "bodyComposition": "Body composition (latest)",
+    "feedsNote": "This weight is what Nutrition uses to back-calculate your maintenance, and what your power-to-weight is computed against."
   },
   "hrv": {
     "empty": "No HRV records yet."
@@ -40,7 +44,9 @@
     "sleep": "Sleep",
     "recovery": "Recovery",
     "weight": "Weight",
-    "activity": "Activity"
+    "activity": "Activity",
+    "trends": "Trends",
+    "labs": "Labs"
   },
   "source": {
     "fallbackActive": "Fallback active"
@@ -54,6 +60,12 @@
       "hrv": "HRV",
       "weight": "Weight",
       "steps": "Steps"
+    },
+    "seriesLegendNote": "Series are told apart by lightness and label, not hue — the five hues in this app belong to training zones, and a health chart is not a zone.",
+    "range": {
+      "d30": "30d",
+      "d90": "90d",
+      "d365": "1y"
     }
   }
 }

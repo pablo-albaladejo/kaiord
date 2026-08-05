@@ -117,6 +117,17 @@
 
   --color-accent: var(--accent);
 
+  /* Destructive affordances. The four --danger* roles already carry
+     per-theme values in both role blocks of styles/brand-tokens.css; these
+     entries are only the Tailwind mapping, so bg-danger / text-danger-text /
+     border-danger-border reach them without an arbitrary value. Reserved for
+     controls that delete or discard — never for marking a measured value bad
+     (danger's hue 25 is zone 5's, and a health surface is not a zone). */
+  --color-danger: var(--danger);
+  --color-danger-text: var(--danger-text);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+
   /* shadcn-style semantic names used across the app; without these the
      utilities emit an undefined var() and the declaration is dropped. */
   --color-muted-foreground: var(--ink-muted);

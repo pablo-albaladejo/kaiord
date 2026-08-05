@@ -11,7 +11,9 @@
     "empty": "No hay actividad registrada hoy todavía.",
     "steps": "Pasos",
     "activeKcal": "kcal activas",
-    "restingKcal": "kcal en reposo"
+    "restingKcal": "kcal en reposo",
+    "feedsNote": "Estos tres alimentan el lado del gasto de tu balance energético. Nutrición los lee directamente.",
+    "openNutrition": "Abrir Nutrición"
   },
   "recovery": {
     "title": "Recuperación",
@@ -21,12 +23,14 @@
   },
   "sleep": {
     "title": "Sueño",
-    "empty": "No hay registros de sueño de los últimos 7 días."
+    "empty": "No hay registros de sueño de los últimos 7 días.",
+    "duration": "{{hours}} h {{minutes}} min"
   },
   "weight": {
     "title": "Peso",
     "empty": "No hay registros de peso de los últimos 90 días.",
-    "bodyComposition": "Composición corporal (última)"
+    "bodyComposition": "Composición corporal (última)",
+    "feedsNote": "Este peso es el que Nutrición usa para recalcular tu mantenimiento, y contra el que se calcula tu relación potencia-peso."
   },
   "hrv": {
     "empty": "No hay registros de VFC todavía."
@@ -40,7 +44,9 @@
     "sleep": "Sueño",
     "recovery": "Recuperación",
     "weight": "Peso",
-    "activity": "Actividad"
+    "activity": "Actividad",
+    "trends": "Tendencias",
+    "labs": "Analíticas"
   },
   "source": {
     "fallbackActive": "Reserva activa"
@@ -54,6 +60,12 @@
       "hrv": "VFC",
       "weight": "Peso",
       "steps": "Pasos"
+    },
+    "seriesLegendNote": "Las series se distinguen por luminosidad y etiqueta, no por tono: los cinco tonos de esta app pertenecen a las zonas de entrenamiento, y un gráfico de salud no es una zona.",
+    "range": {
+      "d30": "30d",
+      "d90": "90d",
+      "d365": "1a"
     }
   }
 }

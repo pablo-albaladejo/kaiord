@@ -7,10 +7,9 @@
  * `selectedKey`, so the same list doubles as the dashboard's parameter
  * picker without changing the F3 single-select detail view.
  */
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { LabParameterSummary } from "./build-lab-parameter-summaries";
 import { LabParameterListItem } from "./LabParameterListItem";
-
-const EMPTY_MSG = "No lab parameters recorded yet.";
 
 export const LabLatestValuesList = ({
   summaries,
@@ -23,8 +22,9 @@ export const LabLatestValuesList = ({
   selectedKey?: string | null;
   selectedKeys?: ReadonlySet<string>;
 }) => {
+  const t = useTranslate("labs-ui");
   if (summaries.length === 0)
-    return <p className="text-sm text-gray-600">{EMPTY_MSG}</p>;
+    return <p className="text-sm text-ink-muted">{t("latest.empty")}</p>;
   return (
     <ul data-testid="lab-latest-values" className="flex flex-col gap-2">
       {summaries.map((summary) => (

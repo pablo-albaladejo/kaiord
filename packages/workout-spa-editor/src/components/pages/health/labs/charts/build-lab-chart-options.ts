@@ -10,22 +10,21 @@
 import type uPlot from "uplot";
 
 import { themedAxis } from "../../../../charts/uplot-base/chart-theme";
+import { seriesStroke } from "../../../../charts/uplot-base/series-strokes";
 import {
   type ChartMetricDef,
   formatOrEmpty,
   timeXScale,
 } from "../../../../charts/uplot-base/uplot-base";
 import type { ReferenceBand } from "./reference-band";
+import { referenceBandStyle } from "./reference-band-style";
 
-// Series strokes stay explicit constants — legible on both light and dark
-// surfaces (see chart-theme.ts). Only axis/grid colors adapt per theme.
-const LINE_STROKE = "#2563eb";
-const OUTLIER_STROKE = "#dc2626";
-const BAND_EDGE = "rgba(37, 99, 235, 0.30)";
-const BAND_FILL = "rgba(37, 99, 235, 0.10)";
-// A one-sided threshold has no fill to carry it, so its edge line is drawn at a
-// stronger alpha than a two-sided band's subtle fill edges.
-const THRESHOLD_STROKE = "rgba(37, 99, 235, 0.55)";
+// A lab value out of range is not a training zone, and the danger ramp shares
+// zone 5's hue — so the outliers are separated from the value line by a
+// lightness step, a point mark and their own legend label, never by red.
+const LINE_STEP = 1;
+const OUTLIER_STEP = 0;
+const OUTLIER_POINT_SIZE = 8;
 const REF_HIGH_IDX = 3;
 const REF_LOW_IDX = 4;
 
@@ -39,13 +38,16 @@ const legendValue =
 
 export const buildLabChartOptions = (
   def: ChartMetricDef,
-  band: ReferenceBand | null
+  band: ReferenceBand | null,
+  outlierLabel = "Out of range"
 ): uPlot.Options => {
   const scales: uPlot.Scales = timeXScale();
   scales[def.key] = { auto: true };
   const value = legendValue(def.unit);
   const isBand = band?.kind === "band";
-  const edgeStroke = band?.kind === "threshold" ? THRESHOLD_STROKE : BAND_EDGE;
+  const lineStroke = seriesStroke(LINE_STEP);
+  const outlierStroke = seriesStroke(OUTLIER_STEP);
+  const { edgeStroke, fill } = referenceBandStyle(band);
 
   return {
     width: 0,
@@ -61,21 +63,19 @@ export const buildLabChartOptions = (
     ],
     series: [
       {},
-      { label: def.label, scale: def.key, stroke: LINE_STROKE, value },
+      { label: def.label, scale: def.key, stroke: lineStroke, value },
       {
-        label: "Out of range",
+        label: outlierLabel,
         scale: def.key,
-        stroke: OUTLIER_STROKE,
+        stroke: outlierStroke,
         paths: noLine,
-        points: { show: true, size: 8, fill: OUTLIER_STROKE },
+        points: { show: true, size: OUTLIER_POINT_SIZE, fill: outlierStroke },
         value,
       },
       { scale: def.key, stroke: edgeStroke, points: { show: false } },
       { scale: def.key, stroke: edgeStroke, points: { show: false } },
     ],
-    bands: isBand
-      ? [{ series: [REF_HIGH_IDX, REF_LOW_IDX], fill: BAND_FILL }]
-      : undefined,
+    bands: isBand ? [{ series: [REF_HIGH_IDX, REF_LOW_IDX], fill }] : undefined,
     legend: { show: true, live: true },
     cursor: { x: true, y: true },
   };

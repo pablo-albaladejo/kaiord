@@ -4,9 +4,13 @@ import { toEnergyRollupView } from "./energy-rollup-view-model";
 
 export type EnergyRollupSummaryProps = { rollup: EnergyRollup };
 
+// A deficit is not good news and a surplus is not bad news — which way the
+// balance went is a fact the word already carries ("1 200 kcal deficit").
+// Emphasis is a lightness step; green and amber would both editorialise and
+// collide with zones 3 and 4.
 const NET_TONE_CLASS: Record<string, string> = {
-  deficit: "text-emerald-400",
-  surplus: "text-amber-400",
+  deficit: "font-medium text-ink-strong",
+  surplus: "font-medium text-ink-strong",
   even: "text-ink-body",
   unknown: "text-ink-muted",
 };

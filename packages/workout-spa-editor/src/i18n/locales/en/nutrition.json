@@ -22,7 +22,8 @@
     "energy": "Energy",
     "protein": "Protein",
     "carbs": "Carbs",
-    "fat": "Fat"
+    "fat": "Fat",
+    "over": "{{macro}} · over"
   },
   "logger": {
     "title": "Log intake",
