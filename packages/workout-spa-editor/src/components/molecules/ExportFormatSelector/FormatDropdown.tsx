@@ -46,7 +46,7 @@ export function FormatDropdown({
 
       {isOpen && (
         <div
-          className="absolute z-10 mt-2 w-full min-w-[240px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg"
+          className="absolute z-50 mt-2 w-full min-w-[240px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg"
           role="menu"
         >
           {formatOptions.map((option, index) => {
