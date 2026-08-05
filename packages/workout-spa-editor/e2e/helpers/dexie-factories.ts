@@ -6,6 +6,7 @@
  */
 
 import { E2E_DEFAULT_PROFILE_ID } from "./e2e-defaults";
+import { toLocalDateString } from "./local-date";
 
 const STEP = {
   stepIndex: 0,
@@ -29,7 +30,7 @@ export function makeWorkout(overrides: Record<string, unknown> = {}) {
   return {
     id: crypto.randomUUID(),
     profileId: E2E_DEFAULT_PROFILE_ID,
-    date: now.slice(0, 10),
+    date: toLocalDateString(new Date()),
     sport: "running",
     source: "kaiord",
     sourceId: null,
