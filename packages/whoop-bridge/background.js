@@ -22,7 +22,7 @@ const WHOOP_DASHBOARD = "https://app.whoop.com/";
 const BRIDGE_MANIFEST = {
   id: "whoop-bridge",
   name: "WHOOP",
-  version: "10.1.0",
+  version: "10.1.1",
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["read:body", "read:sleep", "read:activities"],
 };
