@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures/base";
+import { openBlockActionsMenu } from "./helpers/open-block-actions-menu";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
@@ -645,14 +646,7 @@ test.describe("Repetition Blocks - Ungroup", () => {
     await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
     await expect(page.getByText("Repeat 3×")).toBeVisible();
 
-    // Wait for block actions trigger to be visible and stable
-    const trigger = page.getByTestId("block-actions-trigger");
-    await expect(trigger).toBeVisible({ timeout: 5000 });
-    await trigger.scrollIntoViewIfNeeded();
-
-    // Open context menu (force: true to bypass root div pointer interception
-    // on Mobile Chrome CI where single-worker execution is slower)
-    await trigger.click({ force: true });
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
 
     // Click "Ungroup" option
     await page.getByRole("menuitem", { name: /ungroup/i }).click();
@@ -1084,11 +1078,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
       timeout: 10000,
     });
 
-    // Open context menu (force: true to bypass root div pointer interception
-    // on Mobile Chrome CI where single-worker execution is slower)
-    const editTrigger = page.getByTestId("block-actions-trigger");
-    await editTrigger.scrollIntoViewIfNeeded();
-    await editTrigger.click({ force: true });
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
 
     // Click "Edit Count" option
     await page.getByRole("menuitem", { name: /edit count/i }).click();
@@ -1159,11 +1149,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
       page.getByTestId("repetition-block-card").getByText("1 step")
     ).toBeVisible();
 
-    // Open context menu (force: true to bypass root div pointer interception
-    // on Mobile Chrome CI where single-worker execution is slower)
-    const addTrigger = page.getByTestId("block-actions-trigger");
-    await addTrigger.scrollIntoViewIfNeeded();
-    await addTrigger.click({ force: true });
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
 
     // Click "Add Step" option
     await page.getByRole("menuitem", { name: /add step/i }).click();
@@ -1228,11 +1214,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     // Verify block exists
     await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
-    // Open context menu (force: true to bypass root div pointer interception
-    // on Mobile Chrome CI where single-worker execution is slower)
-    const deleteTrigger = page.getByTestId("block-actions-trigger");
-    await deleteTrigger.scrollIntoViewIfNeeded();
-    await deleteTrigger.click({ force: true });
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
 
     // Click "Delete" option
     await page.getByRole("menuitem", { name: /delete/i }).click();
