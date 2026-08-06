@@ -1,28 +1,11 @@
-import type { Locator } from "@playwright/test";
-
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkoutWithBlocks } from "./helpers/load-test-workout-with-blocks";
+import { openBlockActionsMenu } from "./helpers/open-block-actions-menu";
 
 const WCAG_MIN_TOUCH_TARGET_PX = 44;
 const MOBILE_VIEWPORT_WIDTH_PX = 375;
 const TABLET_VIEWPORT_WIDTH_PX = 768;
 const CENTERING_TOLERANCE_DIGITS = 50;
-
-/**
- * Opens the block actions menu with a real click. The trigger is scrolled to
- * the viewport centre first: minimal scrolling can leave it under the sticky
- * header or the floating bottom nav, and the old `force: true` click there
- * landed on the chrome instead — on mobile it tapped the header's Athlete
- * entry and navigated away, so the menu never opened.
- */
-async function openBlockActionsMenu(trigger: Locator): Promise<void> {
-  await expect(trigger).toBeVisible({ timeout: 5000 });
-  await trigger.evaluate((el) => el.scrollIntoView({ block: "center" }));
-  await trigger.click();
-  await expect(trigger.page().getByRole("menu")).toBeVisible({
-    timeout: 5000,
-  });
-}
 
 /**
  * E2E Tests: Modal Interactions
