@@ -117,6 +117,12 @@
 
   --color-accent: var(--accent);
 
+  /* The primary-action role — bg-action / text-action-ink / ring-action.
+     Hover reads --action-hover via an arbitrary value: one state, one
+     consumer, no scale. */
+  --color-action: var(--action);
+  --color-action-ink: var(--action-ink);
+
   /* Destructive affordances. The four --danger* roles already carry
      per-theme values in both role blocks of styles/brand-tokens.css; these
      entries are only the Tailwind mapping, so bg-danger / text-danger-text /
