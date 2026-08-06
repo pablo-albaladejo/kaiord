@@ -1,5 +1,12 @@
 # @kaiord/workout-spa-editor
 
+## 1.3.1
+
+### Patch Changes
+
+- 016bc77: Move the calendar card title clamp from the flex title row onto the title span. `line-clamp-2` and `flex` both set `display`, so only one survives the cascade — with both on the row, the clamp was silently inert and long titles grew past two lines in narrow day columns. Titles now clamp to two lines beside the state pill and break long words anywhere instead of overflowing.
+- f6ec669: Raise the export format dropdown above the floating bottom nav. The menu sat at `z-10` under the nav's `z-30`, so on mobile the last format options rendered beneath the nav and taps landed on the nav's buttons instead — the repo's chrome/popover convention is `z-50` for open menus and dialogs.
+
 ## 1.3.0
 
 ### Minor Changes
