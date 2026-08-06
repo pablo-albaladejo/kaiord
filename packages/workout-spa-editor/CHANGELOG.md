@@ -1,5 +1,14 @@
 # @kaiord/workout-spa-editor
 
+## 1.3.2
+
+### Patch Changes
+
+- 798014f: Introduce the `--action` product role and the `cta` button variant. Magenta reaches the product for the first time, but only as a role: `--action`/`--action-ink`/`--action-hover` declared in both theme blocks of `styles/brand-tokens.css` (mg-600 over light, mg-400 over dark — the same ramp steps marketing's CTA uses, pinned by test so the two can never drift), mapped into the Tailwind theme, and consumed by a new `cta` Button variant reserved for a surface's single primary action. `primary` and its call sites stay neutral.
+- b07e155: Repaint the chat FAB from raw sky-blue to neutral floating chrome (`bg-surface-elevated` + `border-edge` + `text-ink-strong`) — it is an entry to a route present on every screen, not any surface's primary action, so it gets no magenta. Also extends the marketing-token boundary lint to markdown (prose could smuggle `--mkt-*` into docs unchecked) and clears the two stale `EditorWorkflowBar` references left in docs.
+- 971d8a1: Move workout creation from the header to each route's own action row. The nav registry grows a `page` surface (reachable from the route, not the shell): the header drops its New workout entry and special-casing, and a shared `CreateWorkoutCta` (the `cta` magenta variant, hidden below `md` where the create FAB already covers it) lands on the calendar nav row, the Daily header and the Library filters — each carrying its route's origin so closing the editor returns where creation started. The editor's Send to Garmin and the chat composer's Send switch to the `cta` variant as their surfaces' primary actions; Athlete, Settings and Health deliberately get no magenta.
+- 10a1792: Light the live core from distance-based sessions. Steps prescribed by distance ("1.3 km Z2") declared intensity the zone distribution threw away — a whole week of swims or distance runs read as "no zone data" and the brand core stayed ink. They now contribute seconds estimated from the sport's pace threshold (no threshold → no estimate, never an invented number). Also collapses the two `dominantZone` implementations into one: ties resolve downward everywhere (a 50/50 Z2/Z4 session is an endurance session with a hard block, not a threshold session), so the week core, card borders, library and proposal cards can no longer disagree on the same distribution.
+
 ## 1.3.1
 
 ### Patch Changes
