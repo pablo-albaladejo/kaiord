@@ -17,7 +17,7 @@ export function EntryButton({ entry, active, onClick }: EntryButtonProps) {
   const t = useTranslate("nav");
   const button = (
     <Button
-      variant={entry.variant ?? "tertiary"}
+      variant="tertiary"
       size="sm"
       onClick={onClick}
       aria-label={entry.ariaLabel ? t(`aria.${entry.id}`) : undefined}
@@ -26,9 +26,7 @@ export function EntryButton({ entry, active, onClick }: EntryButtonProps) {
       data-testid={`status-header-${entry.id}-button`}
     >
       <entry.icon className="h-4 w-4" />
-      <span className={entry.id === "new" ? "" : "hidden md:inline"}>
-        {t(entry.id)}
-      </span>
+      <span className="hidden md:inline">{t(entry.id)}</span>
     </Button>
   );
   const wrapper = BAR_WRAPPER_CLASS[entry.barVisibility];

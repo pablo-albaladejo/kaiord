@@ -122,17 +122,19 @@ describe("HeaderNavBar", () => {
     ]);
   });
 
-  it("should hide bottom-nav-duplicated and FAB-covered entries below md", () => {
+  it("should hide bottom-nav-duplicated entries below md", () => {
     // Arrange
     renderAt("/daily");
 
     // Act
     const daily = screen.getByTestId("status-header-daily-button");
-    const newButton = screen.getByTestId("status-header-new-button");
 
     // Assert
     expect(daily.parentElement).toHaveClass("hidden", "md:inline-flex");
-    expect(newButton.parentElement).toHaveClass("hidden", "md:inline-flex");
+    // The FAB-covered create entry left the bar entirely (`page` surface).
+    expect(
+      screen.queryByTestId("status-header-new-button")
+    ).not.toBeInTheDocument();
   });
 
   it("should hold the overflow entries back until lg", () => {

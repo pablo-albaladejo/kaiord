@@ -24,7 +24,11 @@ describe("StatusHeader", () => {
     expect(
       screen.getByTestId("status-header-account-button")
     ).toBeInTheDocument();
-    expect(screen.getByTestId("status-header-new-button")).toBeInTheDocument();
+    // Creation moved to each route's action row (`page` surface) — the
+    // header must not grow the entry back.
+    expect(
+      screen.queryByTestId("status-header-new-button")
+    ).not.toBeInTheDocument();
   });
 
   it("should render the wellness trends entry pointing at the health hub", () => {
@@ -49,18 +53,6 @@ describe("StatusHeader", () => {
     expect(
       screen.getByTestId("status-header-nutrition-button")
     ).toHaveAccessibleName("Open nutrition");
-  });
-
-  it("should label the new-workout button as 'New workout'", () => {
-    // Arrange
-
-    // Act
-    renderWithProviders(<StatusHeader />);
-
-    // Assert
-    expect(screen.getByTestId("status-header-new-button")).toHaveTextContent(
-      "New workout"
-    );
   });
 
   it("should render the zone divider between the nav and the account cluster", () => {

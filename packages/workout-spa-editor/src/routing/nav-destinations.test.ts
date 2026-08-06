@@ -6,12 +6,14 @@ import { NAV_DESTINATIONS, navChildrenOf } from "./nav-destinations";
 
 const BOTTOM_NAV_CAP = 5;
 
-/** The four chromes a destination can be opened from on a desktop viewport. */
+/** The surfaces a destination can be opened from on a desktop viewport —
+    the four shell chromes plus a route's own action row (`page`). */
 const desktopSurfaces = (d: NavDestination): readonly string[] =>
   [
     d.surfaces.bar ? "bar" : null,
     d.surfaces.overflow ? "overflow" : null,
     d.surfaces.accountMenu ? "accountMenu" : null,
+    d.surfaces.page ? "page" : null,
     d.parentId === undefined ? null : `nested:${d.parentId}`,
   ].filter((surface): surface is string => surface !== null);
 

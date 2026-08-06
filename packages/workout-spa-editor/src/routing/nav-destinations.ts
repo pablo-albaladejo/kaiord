@@ -17,6 +17,9 @@ export type NavSurfaces = {
   /** True when the create-workout FAB already covers this destination below
    *  `md` — the header hides it there too, without counting toward the cap. */
   mobileFab: boolean;
+  /** Reachable from its own route's action row instead of the shell chrome —
+   *  the consuming routes each render the CTA (`CreateWorkoutCta`). */
+  page: boolean;
 };
 
 export type NavDestination = {
@@ -45,6 +48,7 @@ const surfacesOf = (
   accountMenu: code === "account",
   bottomNav,
   mobileFab: id === FAB_COVERED,
+  page: code === "page",
 });
 
 /**

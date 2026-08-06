@@ -8,8 +8,10 @@ import type { IconName } from "../components/atoms/Icon/icon-map";
  *   `overflow` the primary header row at `lg`, the "More" menu below it
  *   `account`  the avatar menu — account-level, never a nav-bar entry
  *   `nested`   a child row inside its parent's header dropdown
+ *   `page`     no shell chrome: each consuming route renders the CTA in its
+ *              own action row (below `md` the create FAB still covers it)
  */
-export type NavSurfaceCode = "bar" | "overflow" | "account" | "nested";
+export type NavSurfaceCode = "bar" | "overflow" | "account" | "nested" | "page";
 
 /**
  * `[id, path, ariaLabel, icon, surface, bottomNav, parentId?]`.
@@ -44,7 +46,7 @@ export const NAV_ROWS: readonly NavRow[] = [
   ["labs", "/health/labs", "Open labs", "labs", "nested", false, "trends"],
   ["chat", "/chat", "Open chat assistant", "chat", "overflow", false],
   ["athlete", "/athlete", "Open athlete profile", "athlete", "bar", true],
-  ["new", "/workout/new", undefined, "plus", "bar", false],
+  ["new", "/workout/new", undefined, "plus", "page", false],
   [
     "connections",
     "/settings/connections",

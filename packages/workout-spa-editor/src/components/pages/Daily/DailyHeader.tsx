@@ -1,6 +1,7 @@
 import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import { CreateWorkoutCta } from "../../molecules/CreateWorkoutCta/CreateWorkoutCta";
 
 export type DailyHeaderProps = {
   focusDate: Date;
@@ -49,13 +50,16 @@ export function DailyHeader({
           </button>
         )}
       </div>
-      <button
-        type="button"
-        aria-label={t("header.notifications")}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-ink-strong/5 text-ink-body"
-      >
-        <Icon icon={ICON_MAP.bell} size="md" color="inherit" />
-      </button>
+      <div className="flex items-center gap-2">
+        <CreateWorkoutCta origin="daily" />
+        <button
+          type="button"
+          aria-label={t("header.notifications")}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-ink-strong/5 text-ink-body"
+        >
+          <Icon icon={ICON_MAP.bell} size="md" color="inherit" />
+        </button>
+      </div>
     </header>
   );
 }
