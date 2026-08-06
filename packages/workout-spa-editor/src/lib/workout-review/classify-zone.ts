@@ -47,17 +47,23 @@ function classifyHeartRate(
   return null;
 }
 
+/** Threshold speed in m/s from the sport's pace threshold, or null without one. */
+export function thresholdSpeed(thresholds: SportThresholds): number | null {
+  if (!thresholds.thresholdPace) return null;
+  const metersPerLap =
+    thresholds.paceUnit === "min_per_100m" ? PER_100M_METERS : PER_KM_METERS;
+  return metersPerLap / thresholds.thresholdPace;
+}
+
 function classifyPace(
   value: Target & { type: "pace" },
   thresholds: SportThresholds
 ): ZoneNumber | null {
   const v = value.value;
   if (v.unit === "zone") return clampZone(v.value);
-  if (v.unit === "mps" && thresholds.thresholdPace) {
-    const metersPerLap =
-      thresholds.paceUnit === "min_per_100m" ? PER_100M_METERS : PER_KM_METERS;
-    const thresholdSpeed = metersPerLap / thresholds.thresholdPace;
-    return classifyAscending(PACE_MODEL.bounds, v.value / thresholdSpeed);
+  const speed = thresholdSpeed(thresholds);
+  if (v.unit === "mps" && speed !== null) {
+    return classifyAscending(PACE_MODEL.bounds, v.value / speed);
   }
   return null;
 }
