@@ -3,8 +3,10 @@ import type { ZoneNumber } from "../zone-colors";
 /**
  * Two different questions asked of the same time-in-zone distribution.
  *
- * `dominantZone` answers "what is this session mostly?" and drives the lateral
- * card border. A tie resolves DOWNWARD: a 50/50 split between Z2 and Z4 is an
+ * `dominantZone` answers "what is this session mostly?" — the single origin
+ * for every dominant-zone signal (lateral card border, the week's
+ * `--core-live` brand core, library and proposal cards; re-exported by the
+ * barrel). A tie resolves DOWNWARD: a 50/50 split between Z2 and Z4 is an
  * endurance session with a hard block in it, not a threshold session, and
  * claiming the higher zone would overstate every mixed workout in a list.
  *

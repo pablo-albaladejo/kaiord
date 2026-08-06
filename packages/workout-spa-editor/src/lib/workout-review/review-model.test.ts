@@ -27,6 +27,7 @@ const TOTAL_ROWS = 3;
 const PRECISION = 5;
 const RECOVERY_PCT = 50;
 const VO2_PCT = 115;
+const DISTANCE_METERS = 1000;
 
 const ftpTarget = (value: number): Target => ({
   type: "power",
@@ -143,6 +144,31 @@ describe("workout-review", () => {
     expect(dist).toHaveLength(ZONE_COUNT);
     const sum = dist.reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(1, PRECISION);
+  });
+
+  it("should weight a distance step by its pace-threshold estimate", () => {
+    // Arrange
+    const workout: Workout = {
+      name: "Distance",
+      sport: "running",
+      steps: [
+        {
+          stepIndex: 0,
+          durationType: "distance",
+          duration: { type: "distance", meters: DISTANCE_METERS },
+          targetType: "power",
+          target: ftpTarget(RECOVERY_PCT),
+        },
+      ],
+    };
+
+    // Act
+    const withPace = timeInZone(workout, THRESHOLDS);
+    const withoutPace = timeInZone(workout, { ftp: THRESHOLDS.ftp });
+
+    // Assert
+    expect(withPace[Z1 - 1]).toBeCloseTo(1, PRECISION);
+    expect(withoutPace.every((share) => share === 0)).toBe(true);
   });
 
   it("should estimate a positive TSS", () => {
