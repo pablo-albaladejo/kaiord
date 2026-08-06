@@ -21,7 +21,6 @@ export type EntryDef = {
   icon: ComponentType<{ className?: string }>;
   ariaLabel?: string;
   to: string;
-  variant?: "primary" | "tertiary";
   barVisibility: BarVisibility;
   /** The mobile bottom nav already carries this destination, so the "More"
       menu hides its row below `md` rather than offering it twice. */
@@ -29,12 +28,6 @@ export type EntryDef = {
   /** Rendered as a dropdown under this entry (Labs under Trends). */
   children: readonly EntryDef[];
 };
-
-/** Only the "new workout" entry gets the primary CTA treatment; every other
-    header entry renders as a tertiary nav button. This is a header-only
-    presentation concern, so it stays local instead of living on the neutral
-    nav-destinations registry. */
-const PRIMARY_VARIANT_IDS: ReadonlySet<string> = new Set(["new"]);
 
 const visibilityOf = (destination: NavDestination): BarVisibility => {
   if (destination.surfaces.overflow) return "wide";
@@ -47,7 +40,6 @@ const toEntry = (destination: NavDestination): EntryDef => ({
   icon: ICON_MAP[destination.icon],
   ariaLabel: destination.ariaLabel,
   to: destination.path,
-  variant: PRIMARY_VARIANT_IDS.has(destination.id) ? "primary" : undefined,
   barVisibility: visibilityOf(destination),
   bottomNavCovered: destination.surfaces.bottomNav,
   children: navChildrenOf(destination.id).map(toEntry),

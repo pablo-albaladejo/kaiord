@@ -247,6 +247,28 @@ test.describe("Calendar Workouts", () => {
     await expect(page.getByTestId("library-page")).toBeVisible();
   });
 
+  test("Desktop calendar offers the create CTA in its own action row", async ({
+    page,
+    isMobile,
+  }) => {
+    // The header lost its New workout entry (a `page`-surface destination):
+    // creation lives on the route's own action row now. Below `md` the
+    // floating create FAB covers it, so this contract is desktop-only.
+    test.skip(isMobile === true, "below md the create FAB covers creation");
+    const dates = getWeekDates();
+    const weekId = getWeekId(dates[0]);
+    await page.goto(`/calendar/${weekId}`);
+
+    const cta = page.getByTestId("create-workout-cta");
+    await expect(cta).toBeVisible();
+    await expect(page.getByTestId("status-header-new-button")).toHaveCount(0);
+
+    await cta.click();
+    await page.waitForURL(
+      new RegExp(`/workout/new\\?from=calendar&week=${weekId}`)
+    );
+  });
+
   test("Long raw titles clamp to two lines beside the state pill", async ({
     page,
   }) => {
