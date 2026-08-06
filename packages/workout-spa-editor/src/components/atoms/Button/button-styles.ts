@@ -14,6 +14,10 @@ export const variantClasses: Record<ButtonVariant, string> = {
   ghost:
     "bg-ink-strong/5 text-ink-strong border border-edge hover:bg-ink-strong/10 focus:ring-primary-500 disabled:opacity-60",
   soft: "bg-accent/15 text-accent hover:bg-accent/25 focus:ring-primary-500 disabled:opacity-60",
+  // The product's one magenta: a surface's single primary action (--action
+  // role). `primary` stays neutral — repainting its call sites wholesale is
+  // exactly what the rejected 1a option did wrong.
+  cta: "bg-action text-action-ink hover:bg-[var(--action-hover)] focus:ring-action disabled:opacity-60",
 };
 
 export const sizeClasses: Record<ButtonSize, string> = {
