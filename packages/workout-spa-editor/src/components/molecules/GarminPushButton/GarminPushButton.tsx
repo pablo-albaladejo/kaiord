@@ -39,7 +39,7 @@ export const GarminPushButton: React.FC<{ onSent?: () => void }> = ({
     <div className="flex items-center gap-2">
       <Button
         size="sm"
-        variant="primary"
+        variant="cta"
         onClick={handleSend}
         loading={isLoading}
         disabled={isLoading}

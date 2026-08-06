@@ -6,6 +6,7 @@
 
 import { useTranslate } from "../../../../i18n/use-translate";
 import { Button } from "../../../atoms/Button/Button";
+import { CreateWorkoutCta } from "../../../molecules/CreateWorkoutCta/CreateWorkoutCta";
 import { DifficultyFilter } from "./filters/DifficultyFilter";
 import { SearchInput } from "./filters/SearchInput";
 import { SortBySelect } from "./filters/SortBySelect";
@@ -45,7 +46,12 @@ export function LibraryFilters({
   const t = useTranslate("library");
   return (
     <div className="mb-6 space-y-4">
-      <SearchInput value={searchTerm} onChange={onSearchChange} />
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <SearchInput value={searchTerm} onChange={onSearchChange} />
+        </div>
+        <CreateWorkoutCta origin="library" />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <SportFilter value={sportFilter} onChange={onSportFilterChange} />
