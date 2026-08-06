@@ -1,3 +1,5 @@
+import type { Locator } from "@playwright/test";
+
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkoutWithBlocks } from "./helpers/load-test-workout-with-blocks";
 
@@ -5,6 +7,22 @@ const WCAG_MIN_TOUCH_TARGET_PX = 44;
 const MOBILE_VIEWPORT_WIDTH_PX = 375;
 const TABLET_VIEWPORT_WIDTH_PX = 768;
 const CENTERING_TOLERANCE_DIGITS = 50;
+
+/**
+ * Opens the block actions menu with a real click. The trigger is scrolled to
+ * the viewport centre first: minimal scrolling can leave it under the sticky
+ * header or the floating bottom nav, and the old `force: true` click there
+ * landed on the chrome instead — on mobile it tapped the header's Athlete
+ * entry and navigated away, so the menu never opened.
+ */
+async function openBlockActionsMenu(trigger: Locator): Promise<void> {
+  await expect(trigger).toBeVisible({ timeout: 5000 });
+  await trigger.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await trigger.click();
+  await expect(trigger.page().getByRole("menu")).toBeVisible({
+    timeout: 5000,
+  });
+}
 
 /**
  * E2E Tests: Modal Interactions
@@ -26,10 +44,8 @@ test.describe("Modal Interactions", () => {
 
   test("should display confirmation modal instead of browser alert when deleting block", async ({
     page,
-    isMobile,
   }) => {
     // Requirement 6.1: Display modal dialog instead of browser alert
-    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Modal Test", [{ repeatCount: 3 }]);
@@ -40,20 +56,7 @@ test.describe("Modal Interactions", () => {
       browserAlertShown = true;
     });
 
-    // Wait for block actions trigger to be visible
-    const trigger = page.getByTestId("block-actions-trigger");
-    await expect(trigger).toBeVisible({ timeout: 5000 });
-
-    // Open context menu and click delete (force on mobile to bypass instability)
-    if (isMobile) {
-      await trigger.scrollIntoViewIfNeeded();
-      await trigger.click({ force: true });
-    } else {
-      await trigger.click();
-    }
-
-    // Wait for menu to be visible
-    await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
 
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
@@ -69,12 +72,8 @@ test.describe("Modal Interactions", () => {
     ).toBeVisible();
   });
 
-  test("should dismiss modal when Escape key is pressed", async ({
-    page,
-    isMobile,
-  }) => {
+  test("should dismiss modal when Escape key is pressed", async ({ page }) => {
     // Requirement 6.5: Allow Escape key to dismiss modal
-    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Escape Test", [
@@ -89,17 +88,7 @@ test.describe("Modal Interactions", () => {
     // Verify block exists
     await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
-    // Wait for block actions trigger to be visible
-    const trigger = page.getByTestId("block-actions-trigger");
-    await expect(trigger).toBeVisible({ timeout: 5000 });
-
-    // Open context menu and click delete to show modal (force on mobile)
-    if (isMobile) {
-      await trigger.scrollIntoViewIfNeeded();
-      await trigger.click({ force: true });
-    } else {
-      await trigger.click();
-    }
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -115,12 +104,8 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
   });
 
-  test("should dismiss modal when backdrop is clicked", async ({
-    page,
-    isMobile,
-  }) => {
+  test("should dismiss modal when backdrop is clicked", async ({ page }) => {
     // Requirement 6.5: Allow backdrop click to dismiss modal
-    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Backdrop Test", [
@@ -130,17 +115,7 @@ test.describe("Modal Interactions", () => {
     // Verify block exists
     await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
 
-    // Wait for block actions trigger to be visible
-    const trigger = page.getByTestId("block-actions-trigger");
-    await expect(trigger).toBeVisible({ timeout: 5000 });
-
-    // Open context menu and click delete to show modal (force on mobile)
-    if (isMobile) {
-      await trigger.scrollIntoViewIfNeeded();
-      await trigger.click({ force: true });
-    } else {
-      await trigger.click();
-    }
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -157,26 +132,15 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText(/Repeat \d+×/)).toBeVisible();
   });
 
-  test("should trap focus within modal", async ({ page, isMobile }) => {
+  test("should trap focus within modal", async ({ page }) => {
     // Requirement 6.3: Trap keyboard focus within modal
-    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Focus Trap Test", [
       { repeatCount: 3, sport: "running", targetPace: 4.5 },
     ]);
 
-    // Wait for block actions trigger to be visible
-    const trigger = page.getByTestId("block-actions-trigger");
-    await expect(trigger).toBeVisible({ timeout: 5000 });
-
-    // Open context menu and click delete to show modal (force on mobile)
-    if (isMobile) {
-      await trigger.scrollIntoViewIfNeeded();
-      await trigger.click({ force: true });
-    } else {
-      await trigger.click();
-    }
+    await openBlockActionsMenu(page.getByTestId("block-actions-trigger"));
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -212,10 +176,8 @@ test.describe("Modal Interactions", () => {
 
   test("should prevent background interaction when modal is open", async ({
     page,
-    isMobile,
   }) => {
     // Requirement 6.6: Prevent interaction with background content
-    await page.goto("/workout/new?source=scratch");
 
     // Load a workout with multiple blocks
     await loadTestWorkoutWithBlocks(page, "Background Block Test", [
@@ -227,14 +189,9 @@ test.describe("Modal Interactions", () => {
     const blocks = page.locator('[data-testid="repetition-block-card"]');
     await expect(blocks).toHaveCount(2);
 
-    // Open modal for first block (force on mobile)
-    const trigger = blocks.first().getByTestId("block-actions-trigger");
-    if (isMobile) {
-      await trigger.scrollIntoViewIfNeeded();
-      await trigger.click({ force: true });
-    } else {
-      await trigger.click();
-    }
+    await openBlockActionsMenu(
+      blocks.first().getByTestId("block-actions-trigger")
+    );
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
