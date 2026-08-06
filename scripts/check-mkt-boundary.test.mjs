@@ -160,3 +160,27 @@ test("(m) .vitepress source is scanned, not skipped as tooling noise", () => {
     }
   );
 });
+
+test("(n) markdown is scanned — prose can smuggle the tokens into docs", () => {
+  withTree(
+    {
+      "docs/branding.md": "Use `var(--mkt-cta)` for buttons.\n",
+    },
+    (found) => {
+      assert.deepEqual(
+        found.map((v) => v.file),
+        ["docs/branding.md"]
+      );
+    }
+  );
+});
+
+test("(o) the AGENTS doc that states the boundary is exempt", () => {
+  withTree(
+    {
+      "styles/AGENTS.md":
+        "**Magenta**: `--mkt-brand` / `--mkt-cta` are marketing-only.\n",
+    },
+    (found) => assert.deepEqual(found, [])
+  );
+});

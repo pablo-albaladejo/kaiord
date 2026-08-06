@@ -35,7 +35,8 @@ Page components mounted by Wouter routes in `App.tsx`. Each page composes organi
 ### Editor page
 
 - `EditorPage.tsx` / `.test.tsx` — `/workout/new` and `/workout/:id` entry. Dispatches the new-workout surface via `render-new-workout-surface.tsx`.
-- `EditorBody.tsx`, `EditorWorkflowBar.tsx`, `EditorLoadingState.tsx` — sub-parts.
+- `EditorBody.tsx`, `EditorLoadingState.tsx` — sub-parts. (Send/keep state
+  lives in `organisms/EditorStateRibbon/`, which replaced `EditorWorkflowBar`.)
 - `render-new-workout-surface.tsx` — pure dispatcher that returns `<ScratchEditorSurface />` for `?source=scratch` and `<ImportDropzoneOverlay />` for `?action=import`. The two surfaces live under `organisms/` (see `../organisms/ScratchEditorSurface/`, `../organisms/ImportDropzoneOverlay/`).
 - `use-editor-actions.ts` / `.test.ts` — editor-level action surface.
 - `use-dialog-handlers.ts` — dialog open/close handlers used by `WorkoutSection`.
