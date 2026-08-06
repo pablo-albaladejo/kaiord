@@ -184,3 +184,13 @@ test("(o) the AGENTS doc that states the boundary is exempt", () => {
     (found) => assert.deepEqual(found, [])
   );
 });
+
+test("(p) generated package changelogs may narrate the tokens", () => {
+  withTree(
+    {
+      "packages/workout-spa-editor/CHANGELOG.md":
+        "- Extended the boundary lint so `--mkt-*` cannot reach docs.\n",
+    },
+    (found) => assert.deepEqual(found, [])
+  );
+});
