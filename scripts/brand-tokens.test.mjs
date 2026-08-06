@@ -52,6 +52,19 @@ test("the marketing roles resolve to the magenta baked into the mark", () => {
   assert.equal(readBrandTokenColor("--mkt-cta"), "#d061e9");
 });
 
+test("the product action role rides the same magenta ramp as marketing", () => {
+  // --action is mg-400 in the dark block, exactly --mkt-cta's dark step:
+  // one ramp, two roles, no drift between the login's CTA and the landing's.
+  assert.equal(
+    readBrandTokenColor("--action"),
+    readBrandTokenColor("--mkt-cta")
+  );
+  assert.equal(
+    readBrandTokenColor("--action", BRAND_TOKENS_PATH, "light"),
+    readBrandTokenColor("--mkt-cta", BRAND_TOKENS_PATH, "light")
+  );
+});
+
 test("the light theme is read from :root, not from .dark", () => {
   assert.equal(
     readBrandTokenColor("--text", BRAND_TOKENS_PATH, "light"),

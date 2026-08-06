@@ -125,17 +125,19 @@ describe("LayoutHeader", () => {
       expect(location.history).toContain("/settings");
     });
 
-    it("should navigate to /workout/new when the new-workout button is clicked", async () => {
+    it("should not offer workout creation from the header", () => {
       // Arrange
-      const user = userEvent.setup();
-      const { ui, location } = withRouter(<LayoutHeader />);
+      const { ui } = withRouter(<LayoutHeader />);
       renderWithProviders(ui);
 
       // Act
-      await user.click(screen.getByTestId("status-header-new-button"));
 
       // Assert
-      expect(location.history).toContain("/workout/new");
+      // Creation lives on each route's action row (CreateWorkoutCta);
+      // the header carries navigation only.
+      expect(
+        screen.queryByTestId("status-header-new-button")
+      ).not.toBeInTheDocument();
     });
   });
 

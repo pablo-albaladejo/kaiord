@@ -62,3 +62,30 @@ export const THRESHOLD_STEPS: ZoneStepSpec[] = [
 export const ENDURANCE_STEPS: ZoneStepSpec[] = [
   { percentFtp: PCT_Z2, seconds: LONG_STEP_SECONDS },
 ];
+
+/** A KRD whose only step is distance-based ("1.3 km Z2" style): the target
+    classifies on its own, but weighing it needs a pace threshold. */
+export function distanceKrd(percentFtp: number, meters: number): KRD {
+  const workout: Workout = {
+    name: "Fixture",
+    sport: "cycling",
+    steps: [
+      {
+        stepIndex: 0,
+        durationType: "distance",
+        duration: { type: "distance", meters },
+        targetType: "power",
+        target: {
+          type: "power",
+          value: { unit: "percent_ftp", value: percentFtp },
+        },
+      },
+    ],
+  };
+  return {
+    version: "1.0.0",
+    type: "workout",
+    metadata: { source: "fixture" },
+    extensions: { structured_workout: workout },
+  } as unknown as KRD;
+}

@@ -7,6 +7,7 @@ import type { CalendarView } from "../../types/user-preferences";
 import { formatWeekLabel } from "../../utils/format-week-label";
 import { CalendarViewToggle } from "../molecules/CalendarViewToggle/CalendarViewToggle";
 import { CoachingSyncButton } from "../molecules/CoachingCard/CoachingSyncButton";
+import { CreateWorkoutCta } from "../molecules/CreateWorkoutCta/CreateWorkoutCta";
 import { WeekNavigation } from "../molecules/WorkoutCard/WeekNavigation";
 
 const syncFromFirstDay = <T,>(
@@ -39,6 +40,7 @@ export function CalendarNavRow({
         {view && onViewChange && (
           <CalendarViewToggle view={view} onToggle={onViewChange} />
         )}
+        <CreateWorkoutCta origin="calendar" week={weekId} />
         {coaching.syncSources
           .filter((src) => src.linked)
           .map((src) => (
