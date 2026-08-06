@@ -169,6 +169,11 @@
   --zone-3: var(--z3-light);
   --zone-4: var(--z4-light);
   --zone-5: var(--z5-light);
+  /* The product's one magenta: a surface's single primary action. Any other
+     use is decoration and belongs to no role. */
+  --action: var(--mg-600); /* 6.91:1 with n-0 on top */
+  --action-ink: var(--n-0);
+  --action-hover: var(--mg-700);
   /* Marketing — landing, favicon and OG only. Nothing under /editor may
      reference these; the boundary is held by scripts/check-mkt-boundary.mjs
      grepping for `--mkt-`, not by a separate file. */
@@ -205,6 +210,9 @@
   --zone-3: var(--z3-dark);
   --zone-4: var(--z4-dark);
   --zone-5: var(--z5-dark);
+  --action: var(--mg-400); /* 5.61:1 with n-1100 on top */
+  --action-ink: var(--n-1100);
+  --action-hover: var(--mg-300);
   --mkt-brand: var(--mg-300); /* 8.92:1 over n-1200 */
   --mkt-cta: var(--mg-400); /* 5.61:1 with n-1100 on top */
   --mkt-cta-ink: var(--n-1100);
