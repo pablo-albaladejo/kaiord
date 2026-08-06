@@ -42,8 +42,13 @@ export const MARKETING_PATHS = [
 // This guard and the scripts/ suites that pin the tokens' resolved values name
 // them by necessity — naming the thing you forbid is how a guard is tested.
 const SELF = "scripts/check-mkt-boundary.mjs";
+// styles/AGENTS.md STATES the boundary, so it names the tokens the same way
+// this guard does.
+const RULE_DOC = "styles/AGENTS.md";
 const describesTheRule = (rel) =>
-  rel === SELF || (rel.startsWith("scripts/") && rel.endsWith(".test.mjs"));
+  rel === SELF ||
+  rel === RULE_DOC ||
+  (rel.startsWith("scripts/") && rel.endsWith(".test.mjs"));
 
 const ROOTS = ["packages", "scripts", "styles", "assets", "docs"];
 const SKIP_DIRS = new Set([
@@ -69,6 +74,7 @@ const EXTENSIONS = [
   ".html",
   ".vue",
   ".svg",
+  ".md",
 ];
 
 const MKT_RE = /--mkt-[\w-]*/g;
@@ -77,7 +83,9 @@ const MKT_RE = /--mkt-[\w-]*/g;
 // entry must match exactly, so a `brand-og-card.mjs.ts` cannot inherit the
 // exemption by sharing a prefix with the approved file.
 const isMarketing = (rel) =>
-  MARKETING_PATHS.some((p) => (p.endsWith("/") ? rel.startsWith(p) : rel === p));
+  MARKETING_PATHS.some((p) =>
+    p.endsWith("/") ? rel.startsWith(p) : rel === p
+  );
 
 function walk(dir, visit) {
   let entries;
@@ -87,7 +95,8 @@ function walk(dir, visit) {
     return;
   }
   for (const entry of entries) {
-    const hidden = entry.name.startsWith(".") && !SCANNED_DOT_DIRS.has(entry.name);
+    const hidden =
+      entry.name.startsWith(".") && !SCANNED_DOT_DIRS.has(entry.name);
     if (hidden || SKIP_DIRS.has(entry.name)) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) walk(full, visit);
