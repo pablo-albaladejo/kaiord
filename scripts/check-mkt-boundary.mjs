@@ -45,9 +45,14 @@ const SELF = "scripts/check-mkt-boundary.mjs";
 // styles/AGENTS.md STATES the boundary, so it names the tokens the same way
 // this guard does.
 const RULE_DOC = "styles/AGENTS.md";
+// Generated release notes NARRATE changes ("forbade --mkt- in docs") — they
+// teach nobody to consume the tokens, and changesets writes them without a
+// human in the loop, so flagging them just breaks the release bot's commit.
+const isChangelog = (rel) => rel.endsWith("/CHANGELOG.md");
 const describesTheRule = (rel) =>
   rel === SELF ||
   rel === RULE_DOC ||
+  isChangelog(rel) ||
   (rel.startsWith("scripts/") && rel.endsWith(".test.mjs"));
 
 const ROOTS = ["packages", "scripts", "styles", "assets", "docs"];
