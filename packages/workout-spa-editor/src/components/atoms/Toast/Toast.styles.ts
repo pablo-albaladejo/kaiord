@@ -1,21 +1,38 @@
 import type { ToastVariant } from "./Toast.types";
 
 /**
- * Variant styles for toast notifications
+ * Toast surfaces.
+ *
+ * Only one variant carries a hue. Success and warning left the palette on
+ * purpose: green and amber sat 3–14° from the zone ramp, so a toast painted
+ * with either asserted a training intensity it cannot mean. What a toast
+ * needs to say — what happened, and whether it needs you — is said by its
+ * icon and its sentence (principle 6), on the one neutral surface.
+ *
+ * `error` keeps the danger ramp, the single semantic hue the system has.
  */
 export const variantStyles: Record<ToastVariant, string> = {
-  success:
-    "border-green-500 bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-100",
-  error:
-    "border-red-500 bg-red-50 text-red-900 dark:bg-red-900/20 dark:text-red-100",
-  warning:
-    "border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-100",
-  info: "border-blue-500 bg-blue-50 text-blue-900 dark:bg-blue-900/20 dark:text-blue-100",
+  success: "border-edge bg-surface-elevated text-ink-strong",
+  info: "border-edge bg-surface-elevated text-ink-strong",
+  warning: "border-edge-strong bg-surface-elevated text-ink-strong",
+  error: "border-danger-border bg-danger-bg text-danger-text",
 };
 
 /**
  * Base toast styles
  */
+/**
+ * The icon is what tells the three neutral variants apart now that only
+ * `error` carries a hue — a state says what it is with a glyph and a
+ * sentence, not with a colour the zone ramp already spent.
+ */
+export const variantIcons: Record<ToastVariant, "check" | "info" | "alert"> = {
+  success: "check",
+  info: "info",
+  warning: "alert",
+  error: "alert",
+};
+
 export const baseToastStyles = `
   group pointer-events-auto relative flex w-full items-center justify-center
   space-x-4 overflow-hidden rounded-lg border-2 p-4 pr-8 shadow-lg

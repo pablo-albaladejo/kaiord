@@ -6,20 +6,30 @@ import { Badge } from "./Badge";
 
 describe("Badge", () => {
   describe("variant class map", () => {
-    it.each<[BadgeVariant, string, string]>([
-      ["default", "bg-gray-100", "text-gray-800"],
-      ["warmup", "bg-blue-100", "text-blue-800"],
-      ["active", "bg-red-100", "text-red-800"],
-      ["cooldown", "bg-cyan-100", "text-cyan-800"],
-      ["rest", "bg-gray-100", "text-gray-800"],
-      ["power", "bg-yellow-100", "text-yellow-800"],
-      ["heart_rate", "bg-pink-100", "text-pink-800"],
-      ["cadence", "bg-indigo-100", "text-indigo-800"],
-      ["pace", "bg-teal-100", "text-teal-800"],
-      ["open", "bg-slate-100", "text-slate-800"],
-    ])(
-      "should map the %s variant to its background and text classes",
-      (variant, bg, text) => {
+    // Every variant renders the same neutral chip on purpose: thirteen hues
+    // for intensity and target type competed with the five that mean training
+    // zones, and the chip's own word was always the signal. This pins the
+    // invariant so a hue cannot creep back in one variant at a time.
+    const VARIANTS: BadgeVariant[] = [
+      "default",
+      "warmup",
+      "active",
+      "cooldown",
+      "rest",
+      "recovery",
+      "interval",
+      "other",
+      "power",
+      "heart_rate",
+      "cadence",
+      "pace",
+      "stroke_type",
+      "open",
+    ];
+
+    it.each<[BadgeVariant]>(VARIANTS.map((v) => [v]))(
+      "should render the %s variant as the neutral chip",
+      (variant) => {
         // Arrange
 
         render(<Badge variant={variant}>{variant}</Badge>);
@@ -30,10 +40,29 @@ describe("Badge", () => {
 
         // Assert
 
-        expect(badge).toHaveClass(bg);
-        expect(badge).toHaveClass(text);
+        expect(badge).toHaveClass("bg-surface-elevated");
+        expect(badge).toHaveClass("text-ink-body");
+        expect(badge.className).not.toMatch(
+          /-(blue|red|cyan|green|orange|purple|yellow|pink|indigo|teal|sky|slate|gray)-[0-9]/
+        );
       }
     );
+
+    it("should give every variant the exact same chip classes", () => {
+      // Arrange
+      const rendered = VARIANTS.map((variant) => {
+        const { container } = render(<Badge variant={variant}>x</Badge>);
+        return container.firstElementChild?.className;
+      });
+
+      // Act
+
+      const distinct = new Set(rendered);
+
+      // Assert
+
+      expect(distinct.size).toBe(1);
+    });
   });
 
   describe("size class map", () => {

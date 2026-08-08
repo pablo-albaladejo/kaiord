@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { Toast } from "./Toast";
+import { variantIcons } from "./Toast.styles";
 import { ToastProvider } from "./ToastProvider";
 
 describe("Toast", () => {
@@ -83,14 +84,17 @@ describe("Toast", () => {
   });
 
   describe("variant style map", () => {
+    // Only `error` carries a hue: the danger ramp is the system's one
+    // semantic colour. Success, warning and info share the neutral surface
+    // and are told apart by their icon and their sentence, because green and
+    // amber sat within a few degrees of the zone ramp.
     it.each([
-      ["success", "border-green-500", "bg-green-50"],
-      ["error", "border-red-500", "bg-red-50"],
-      ["warning", "border-yellow-500", "bg-yellow-50"],
-      ["info", "border-blue-500", "bg-blue-50"],
+      ["success", "check"],
+      ["warning", "alert"],
+      ["info", "info"],
     ] as const)(
-      "should map the %s variant to its border and background classes",
-      (variant, border, background) => {
+      "should render the %s variant on the neutral surface with its icon",
+      (variant, icon) => {
         // Arrange
 
         render(
@@ -105,10 +109,33 @@ describe("Toast", () => {
 
         // Assert
 
-        expect(toast).toHaveClass(border);
-        expect(toast).toHaveClass(background);
+        expect(toast).toHaveClass("bg-surface-elevated");
+        expect(toast?.className).not.toMatch(
+          /-(green|yellow|amber|blue|red)-[0-9]/
+        );
+        expect(toast?.querySelector("svg")).not.toBeNull();
+        expect(variantIcons[variant]).toBe(icon);
       }
     );
+
+    it("should keep the danger ramp for the error variant", () => {
+      // Arrange
+
+      render(
+        <ToastProvider>
+          <Toast title="error" variant="error" open={true} />
+        </ToastProvider>
+      );
+
+      // Act
+
+      const toast = screen.getByText("error").closest("li");
+
+      // Assert
+
+      expect(toast).toHaveClass("bg-danger-bg");
+      expect(toast).toHaveClass("border-danger-border");
+    });
 
     it("should default to the info variant styles when none is specified", () => {
       // Arrange
@@ -125,7 +152,8 @@ describe("Toast", () => {
 
       // Assert
 
-      expect(toast).toHaveClass("border-blue-500");
+      expect(toast).toHaveClass("bg-surface-elevated");
+      expect(toast).toHaveClass("border-edge");
     });
   });
 
