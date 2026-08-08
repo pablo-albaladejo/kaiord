@@ -82,7 +82,7 @@ export function GoalSetupForm({
         disabled={isSaving || !("draft" in validation)}
         onClick={handleSubmit}
         data-testid="goal-save"
-        className="mt-1 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="mt-1 rounded bg-primary-600 text-white hover:bg-primary-700 disabled:bg-primary-300 px-4 py-2 text-sm font-medium disabled:opacity-50"
       >
         Save goal
       </button>

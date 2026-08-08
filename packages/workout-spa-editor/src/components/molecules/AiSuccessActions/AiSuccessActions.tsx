@@ -19,7 +19,7 @@ export function AiSuccessActions({
 }: AiSuccessActionsProps) {
   return (
     <div
-      className="flex flex-wrap items-center gap-2 rounded-lg border border-blue-200 bg-white/50 p-3 dark:border-blue-700 dark:bg-gray-800/50"
+      className="flex flex-wrap items-center gap-2 rounded-lg border border-edge bg-surface p-3"
       data-testid="ai-success-actions"
     >
       <Button

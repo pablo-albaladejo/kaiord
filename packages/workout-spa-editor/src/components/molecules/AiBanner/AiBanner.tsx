@@ -27,7 +27,7 @@ export function AiBanner() {
   return (
     <div
       data-testid="ai-banner"
-      className="rounded-lg border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm dark:border-blue-800 dark:from-blue-950/50 dark:to-indigo-950/50"
+      className="rounded-lg border border-edge bg-surface-elevated shadow-sm"
     >
       <button
         type="button"
@@ -36,19 +36,16 @@ export function AiBanner() {
         aria-controls="ai-banner-panel"
         className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
       >
-        <span className="flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-blue-300">
+        <span className="flex items-center gap-2 text-sm font-semibold text-ink-strong">
           <Sparkles className="h-4 w-4" />
           {t("banner.toggle")}
         </span>
         <ChevronDown
-          className={`h-4 w-4 text-blue-600 transition-transform dark:text-blue-400 ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
-        <div
-          id="ai-banner-panel"
-          className="border-t border-blue-200 dark:border-blue-800"
-        >
+        <div id="ai-banner-panel" className="border-t border-edge">
           <Suspense fallback={null}>
             <AiWorkoutInput onSettingsClick={() => navigate("/settings/ai")} />
           </Suspense>
