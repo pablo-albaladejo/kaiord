@@ -3,6 +3,7 @@ import "./index.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 
 import { createUmamiAnalytics } from "./adapters/analytics/umami-analytics";
 import { withEncryption } from "./adapters/cloud-sync/encrypting-cloud-sync";
@@ -26,7 +27,6 @@ import { getDeviceId } from "./lib/cloud-sync/device-id";
 import { getSyncPassphrase } from "./lib/cloud-sync/encryption-runtime";
 import { isEncryptionEnabled } from "./lib/cloud-sync/sync-encryption-pref";
 import { getUmamiWebsiteId } from "./lib/runtime-config";
-import { computeRouterBase } from "./router-base";
 
 // Recover from stale lazy chunks after a deploy: Vite fires `vite:preloadError`
 // when a hashed chunk can no longer be fetched; reload once to pull the fresh
@@ -46,8 +46,6 @@ const cloudSync = withEncryption(createGoogleDriveCloudSync(), {
 });
 const snapshotPort = createDexieSnapshotPort(db);
 
-const routerBase = computeRouterBase(import.meta.env.BASE_URL);
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AnalyticsProvider analytics={analytics}>
@@ -62,7 +60,7 @@ createRoot(document.getElementById("root")!).render(
               <CoachingRegistryBootstrap>
                 <LocaleProvider>
                   <UnitsProvider>
-                    <Router base={routerBase}>
+                    <Router hook={useHashLocation}>
                       <App />
                     </Router>
                   </UnitsProvider>

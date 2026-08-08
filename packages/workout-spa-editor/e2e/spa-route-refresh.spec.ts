@@ -32,7 +32,7 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       cwd: repoRoot,
       env: {
         ...process.env,
-        VITE_BASE_PATH: "/editor/",
+        VITE_BASE_PATH: "/app/",
       },
       stdio: "inherit",
     });
@@ -74,7 +74,7 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
 
     expect(page.url()).toMatch(/\/editor\/calendar\/\d{4}-W\d{2}$/);
     const scriptCount = await page
-      .locator('script[src^="/editor/assets/index-"]')
+      .locator('script[src^="/app/assets/index-"]')
       .count();
     expect(scriptCount).toBeGreaterThan(0);
   });
@@ -168,7 +168,7 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
     // Base-relative (no /editor prefix); the bare-/calendar replace-redirect
     // means the first emitted path may already carry the concrete weekId.
     expect(captured[0]).toMatch(/^\/calendar(\/\d{4}-W\d{2})?$/);
-    expect(captured[0]).not.toBe("/editor/calendar");
+    expect(captured[0]).not.toBe("/app/calendar");
   });
 
   test("Test 5 — garbage path resolves to catch-all", async ({ page }) => {

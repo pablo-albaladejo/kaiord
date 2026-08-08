@@ -703,9 +703,9 @@ describe("bridge privacy surface guard", () => {
       const src = declaring[0];
       const start = src.indexOf("const AUTH_ENDPOINTS = [");
       const end = src.indexOf("]", start);
-      const declared = [
-        ...src.slice(start, end).matchAll(/"([^"\n]+)"/g),
-      ].map((m) => m[1]);
+      const declared = [...src.slice(start, end).matchAll(/"([^"\n]+)"/g)].map(
+        (m) => m[1]
+      );
 
       assert.deepEqual(
         golden[bridge].auth_endpoints,

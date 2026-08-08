@@ -8,7 +8,7 @@ describe("createNoopAnalytics", () => {
     const analytics = createNoopAnalytics();
 
     // Act
-    const pageViewResult = analytics.pageView("/editor/");
+    const pageViewResult = analytics.pageView("/app/");
     const eventWithPropsResult = analytics.event("workout-generated", {
       provider: "claude",
       sport: "cycling",
