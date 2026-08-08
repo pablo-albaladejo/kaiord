@@ -14,7 +14,7 @@
 
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { BRAND_TOKENS_PATH, readBrandTokenColor } from "./brand-tokens.mjs";
 
@@ -65,9 +65,13 @@ export const FROZEN_MIRRORS = [
   },
 ];
 
+/* Anchored to the declaration, not to the name anywhere in the file: an
+   unanchored match reads OLD_FROZEN_SURFACE — or a hex sitting in a comment —
+   as if it were the constant, so the guard would pass while the constant it
+   claims to check had stopped being a literal. */
 const hexOf = (source, constant) => {
   const match = new RegExp(
-    `${constant}\\s*=\\s*["'](#[0-9a-fA-F]{6})["']`
+    `(?:^|\\n)\\s*(?:export\\s+)?const\\s+${constant}\\s*(?::[^=]*)?=\\s*["'](#[0-9a-fA-F]{6})["']`
   ).exec(source);
   return match?.[1]?.toLowerCase() ?? null;
 };
@@ -114,7 +118,7 @@ export function runCheck({
   return violations;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const found = runCheck();
   if (found.length === 0) {
     console.log("✅ Frozen hex mirrors match their roles.");

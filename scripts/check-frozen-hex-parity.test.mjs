@@ -42,7 +42,9 @@ test("(c) a constant that stopped being a hex literal fails", () => {
   withTree(
     { [FIRST.file]: `const ${FIRST.constant} = someRuntimeLookup();\n` },
     (found) => {
-      assert.match(found[0].detail, /no longer a hex literal/);
+      const own = found.filter((v) => v.detail.includes(FIRST.constant));
+      assert.equal(own.length, 1);
+      assert.match(own[0].detail, /no longer a hex literal/);
     }
   );
 });
@@ -52,4 +54,43 @@ test("(d) a mirror whose file disappeared fails instead of passing silently", ()
     assert.equal(found.length, FROZEN_MIRRORS.length);
     assert.match(found[0].detail, /missing file/);
   });
+});
+
+test("(e) a decoy constant sharing the name's tail cannot satisfy the guard", () => {
+  // The real constant stopped being a literal; a look-alike still holds a
+  // matching hex. An unanchored match would read the decoy and pass.
+  withTree(
+    {
+      [FIRST.file]: [
+        `const OLD_${FIRST.constant} = "#f0f0f0";`,
+        `const ${FIRST.constant} = readThemeColor("--bg-elevated");`,
+        "",
+      ].join("\n"),
+    },
+    (found) => {
+      // Assert about THIS constant: canvas-setup carries a second mirror, so
+      // `found[0]` alone is satisfied by the other one's violation and the
+      // case would pass with the unanchored regex it exists to reject.
+      const own = found.filter((v) => v.detail.includes(FIRST.constant));
+      assert.equal(own.length, 1);
+      assert.match(own[0].detail, /no longer a hex literal/);
+    }
+  );
+});
+
+test("(f) a hex inside a comment mentioning the constant does not satisfy it", () => {
+  withTree(
+    {
+      [FIRST.file]: [
+        `// ${FIRST.constant} = "#f0f0f0" was the old value`,
+        `const ${FIRST.constant} = someLookup();`,
+        "",
+      ].join("\n"),
+    },
+    (found) => {
+      const own = found.filter((v) => v.detail.includes(FIRST.constant));
+      assert.equal(own.length, 1);
+      assert.match(own[0].detail, /no longer a hex literal/);
+    }
+  );
 });
