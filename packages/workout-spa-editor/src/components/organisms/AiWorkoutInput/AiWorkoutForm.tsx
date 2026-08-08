@@ -33,7 +33,7 @@ export const AiWorkoutForm: React.FC = () => {
       <textarea
         id="ai-workout-description"
         aria-label={t("form.descriptionLabel")}
-        className="w-full rounded-lg border border-blue-200 bg-white p-4 text-sm shadow-inner placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:border-blue-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:ring-blue-800"
+        className="w-full rounded-lg border border-edge bg-surface p-4 text-sm shadow-inner placeholder:text-ink-muted text-ink-strong focus:border-accent focus:ring-2 focus:ring-accent/40"
         rows={4}
         maxLength={2000}
         placeholder={t("form.placeholder")}
@@ -49,7 +49,7 @@ export const AiWorkoutForm: React.FC = () => {
           onClick={handleGenerate}
           disabled={!text.trim() || isLoading}
           loading={isLoading}
-          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+          variant="primary"
         >
           <Sparkles className="mr-1.5 h-4 w-4" />
           {t("form.generate")}

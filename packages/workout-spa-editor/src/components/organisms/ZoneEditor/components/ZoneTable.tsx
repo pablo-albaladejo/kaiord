@@ -52,7 +52,7 @@ export function ZoneTable({
           type="button"
           onClick={onAddZone}
           className="mt-2 rounded border border-dashed border-gray-300 px-3
-            py-1 text-xs text-gray-500 hover:border-blue-400 hover:text-blue-500
+            py-1 text-xs text-gray-500 hover:border-edge-strong hover:text-ink-strong
             dark:border-gray-600 dark:text-gray-400"
         >
           {t("table.addZone")}
