@@ -39,7 +39,9 @@ describe("CardBadges", () => {
     expect(badge).toBeInTheDocument();
     // Difficulty is a category, not a temperature: the word is the signal.
     expect(badge.className).toContain("bg-surface-elevated");
-    expect(badge.className).not.toMatch(/-(green|yellow|red)-\d/);
+    expect(badge.className).not.toMatch(
+      /-(red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d/
+    );
   });
 
   it("should render the duration badge formatted in minutes only when under one hour", () => {

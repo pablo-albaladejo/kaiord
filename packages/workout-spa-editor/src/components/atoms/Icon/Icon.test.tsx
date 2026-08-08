@@ -80,7 +80,9 @@ describe("Icon", () => {
     rerender(<Icon icon={Heart} color="success" data-testid="icon" />);
     icon = screen.getByTestId("icon");
     expect(icon).toHaveClass("text-ink-strong");
-    expect(icon.className).not.toMatch(/-(green|emerald)-\d/);
+    expect(icon.className).not.toMatch(
+      /-(red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d/
+    );
 
     rerender(<Icon icon={Heart} color="danger" data-testid="icon" />);
     icon = screen.getByTestId("icon");
@@ -89,7 +91,9 @@ describe("Icon", () => {
     rerender(<Icon icon={Heart} color="warning" data-testid="icon" />);
     icon = screen.getByTestId("icon");
     expect(icon).toHaveClass("text-ink-strong");
-    expect(icon.className).not.toMatch(/-(yellow|amber)-\d/);
+    expect(icon.className).not.toMatch(
+      /-(red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d/
+    );
   });
 
   it("should apply custom className", () => {
