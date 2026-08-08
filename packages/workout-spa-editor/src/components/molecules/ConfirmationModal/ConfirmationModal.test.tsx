@@ -104,7 +104,7 @@ describe("ConfirmationModal", () => {
       const confirmButton = screen.getByRole("button", { name: "Delete" });
 
       // Assert
-      expect(confirmButton).toHaveClass("bg-red-600");
+      expect(confirmButton).toHaveClass("bg-danger");
     });
 
     it("should use primary variant for default actions", () => {

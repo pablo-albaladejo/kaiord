@@ -43,7 +43,7 @@ export const TargetPickerRangeFields = ({
       />
       {displayError && (
         <p
-          className="text-sm text-red-600 dark:text-red-400"
+          className="text-sm text-danger-text"
           role="alert"
           id="target-range-error"
         >

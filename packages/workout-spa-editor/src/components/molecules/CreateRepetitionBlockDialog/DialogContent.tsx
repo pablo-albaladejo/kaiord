@@ -44,9 +44,7 @@ export function DialogContent({
           data-testid="repeat-count-input"
           autoFocus
         />
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
+        {error && <p className="text-sm text-danger-text">{error}</p>}
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Minimum: 1 repetition
         </p>

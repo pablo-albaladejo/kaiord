@@ -68,7 +68,7 @@ export function ZoneRow({
           type="button"
           onClick={() => callbacks.onRemove(index)}
           aria-label={t("table.removeZoneAria", { prefix, zone: zone.zone })}
-          className="ml-1 text-xs text-red-500 hover:text-red-700"
+          className="ml-1 text-xs text-danger-text hover:text-danger-text"
         >
           x
         </button>

@@ -17,7 +17,7 @@ export const ErrorActions = ({ onRetry, onDismiss }: ErrorActionsProps) => {
           onClick={onRetry}
           variant="secondary"
           size="sm"
-          className="text-red-700 hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-900"
+          className="text-danger-text hover:bg-danger-bg"
         >
           {t("actions.tryAgain")}
         </Button>
@@ -27,7 +27,7 @@ export const ErrorActions = ({ onRetry, onDismiss }: ErrorActionsProps) => {
           onClick={onDismiss}
           variant="tertiary"
           size="sm"
-          className="text-red-700 hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-900"
+          className="text-danger-text hover:bg-danger-bg"
         >
           {t("actions.dismiss")}
         </Button>

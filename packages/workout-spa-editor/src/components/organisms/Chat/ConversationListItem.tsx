@@ -61,7 +61,7 @@ export function ConversationListItem({
       <button
         type="button"
         aria-label={confirmDelete ? t("item.confirmDelete") : t("item.delete")}
-        className="shrink-0 px-1 text-ink-muted hover:text-red-400"
+        className="shrink-0 px-1 text-ink-muted hover:text-danger-text"
         onClick={() =>
           confirmDelete ? onDelete(conversation.id) : setConfirmDelete(true)
         }

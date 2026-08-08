@@ -28,7 +28,7 @@ describe("Button", () => {
       ["primary", "bg-primary-600"],
       ["secondary", "bg-white"],
       ["tertiary", "bg-transparent"],
-      ["danger", "bg-red-600"],
+      ["danger", "bg-danger"],
       ["cta", "bg-action"],
     ])("should map the %s variant to its background class", (variant, bg) => {
       // Arrange

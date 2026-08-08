@@ -19,7 +19,7 @@ export const getDifficultyColor = (difficulty?: string): string => {
     case "medium":
       return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
     case "hard":
-      return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
+      return "bg-danger-bg text-danger-text";
     default:
       return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
   }

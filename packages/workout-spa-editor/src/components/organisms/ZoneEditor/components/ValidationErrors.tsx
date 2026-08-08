@@ -18,14 +18,14 @@ export function ValidationErrors({ errors }: ValidationErrorsProps) {
   if (errors.length === 0) return null;
 
   return (
-    <div className="rounded-md bg-red-50 p-3 dark:bg-red-900/20">
+    <div className="rounded-md bg-danger-bg p-3">
       <div className="flex items-start gap-2">
-        <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+        <AlertCircle className="h-5 w-5 text-danger-text" />
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
+          <h3 className="text-sm font-medium text-danger-text">
             {t("validation.heading")}
           </h3>
-          <ul className="mt-1 space-y-1 text-sm text-red-700 dark:text-red-300">
+          <ul className="mt-1 space-y-1 text-sm text-danger-text">
             {errors.map((error) => (
               <li key={`${error.zone}-${error.code}`}>
                 {t("validation.zoneLabel", {

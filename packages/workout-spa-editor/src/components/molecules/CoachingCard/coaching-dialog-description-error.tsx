@@ -21,7 +21,7 @@ export const DialogDescriptionError = ({
       data-testid="coaching-dialog-description-error"
       className="space-y-1 text-xs"
     >
-      <p className="italic text-rose-600 dark:text-rose-400">
+      <p className="italic text-danger-text">
         {t(`dialog.descriptionError.${reason}`)}
       </p>
       <button

@@ -38,7 +38,7 @@ export const DialogShell = ({
         <button
           type="button"
           onClick={onApply}
-          className="rounded-md bg-rose-600 px-3 py-1 text-sm text-white hover:bg-rose-700"
+          className="rounded-md bg-danger px-3 py-1 text-sm text-white hover:bg-danger"
         >
           Apply
         </button>

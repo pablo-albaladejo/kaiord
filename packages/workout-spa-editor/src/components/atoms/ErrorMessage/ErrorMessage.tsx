@@ -35,20 +35,16 @@ export const ErrorMessage = ({
 }: ErrorMessageProps) => {
   return (
     <div
-      className={`rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950 ${className}`}
+      className={`rounded-lg border border-danger-border bg-danger-bg p-4 ${className}`}
       role="alert"
       aria-live="assertive"
     >
       <div className="flex items-start gap-3">
         <Icon icon={AlertCircle} size="md" color="danger" aria-hidden="true" />
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-red-800 dark:text-red-200">
-            {title}
-          </h3>
+          <h3 className="text-sm font-semibold text-danger-text">{title}</h3>
           {message && (
-            <p className="mt-1 text-sm text-red-700 dark:text-red-300">
-              {message}
-            </p>
+            <p className="mt-1 text-sm text-danger-text">{message}</p>
           )}
           {validationErrors && (
             <ValidationErrorList errors={validationErrors} />

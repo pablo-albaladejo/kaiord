@@ -51,6 +51,21 @@ afterEach(() => {
 });
 
 describe("check-theme-dialect", () => {
+  test("counts border-danger-border as adaptive, like border-edge", () => {
+    // The danger roles carry a value per theme (da-200 light / da-800 dark),
+    // so a bare `border` paired with one is theme-adaptive. Until the guard
+    // was taught this, migrating red-* pairs onto the role tripped
+    // R-ThemeBareBorder on four files whose theming had just improved.
+    write(
+      "molecules/Danger/Danger.tsx",
+      'export const c = <div className="rounded border border-danger-border bg-danger-bg" />;\n'
+    );
+
+    const violations = runCheck({ srcRoot });
+
+    assert.deepEqual(violations, []);
+  });
+
   test("allowlist ships empty", () => {
     assert.equal(ALLOWLIST.size, 0);
   });

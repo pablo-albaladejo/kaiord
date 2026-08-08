@@ -65,7 +65,7 @@ export const WithWorkoutList: Story = {
                   <button className="rounded px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
                     Edit
                   </button>
-                  <button className="rounded px-2 py-1 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
+                  <button className="rounded px-2 py-1 text-sm text-danger-text hover:bg-danger-bg">
                     Delete
                   </button>
                 </div>

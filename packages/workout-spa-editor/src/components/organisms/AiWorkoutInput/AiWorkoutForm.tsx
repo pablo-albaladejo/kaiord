@@ -56,9 +56,7 @@ export const AiWorkoutForm: React.FC = () => {
         </Button>
       </div>
       {generation.status === "error" && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {generation.message}
-        </p>
+        <p className="text-sm text-danger-text">{generation.message}</p>
       )}
       {isSuccess && <AiSuccessActionsContainer onRegenerate={handleGenerate} />}
     </div>

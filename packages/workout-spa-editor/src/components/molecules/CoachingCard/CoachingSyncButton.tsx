@@ -62,7 +62,7 @@ export function CoachingSyncButton({
         >
           {t("sync.connectTo", { label })}
         </button>
-        {error && <span className="text-xs text-red-500">{error}</span>}
+        {error && <span className="text-xs text-danger-text">{error}</span>}
       </div>
     );
   }

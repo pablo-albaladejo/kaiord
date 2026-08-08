@@ -29,7 +29,7 @@ function DialogHeader({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
       <div className="flex items-center gap-2">
-        <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+        <AlertCircle className="h-5 w-5 text-danger-text" />
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           {t("saveError.title")}
         </h2>
@@ -50,11 +50,11 @@ function DialogHeader({ onClose }: { onClose: () => void }) {
  */
 function ErrorList({ errors }: { errors: Array<ValidationError> }) {
   return (
-    <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+    <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg bg-danger-bg p-3">
       {errors.map((error, index) => (
         <div
           key={index}
-          className="flex items-start gap-2 text-sm text-red-800 dark:text-red-200"
+          className="flex items-start gap-2 text-sm text-danger-text"
         >
           <span className="mt-0.5 flex-shrink-0">•</span>
           <div>
