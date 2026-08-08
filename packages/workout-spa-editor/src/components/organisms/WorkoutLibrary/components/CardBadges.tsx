@@ -20,7 +20,7 @@ export function CardBadges({ sport, difficulty, duration }: CardBadgesProps) {
         {sport}
       </Badge>
       {difficulty && (
-        <Badge className={`text-xs ${getDifficultyColor(difficulty)}`}>
+        <Badge className={`text-xs ${getDifficultyColor()}`}>
           {difficulty}
         </Badge>
       )}

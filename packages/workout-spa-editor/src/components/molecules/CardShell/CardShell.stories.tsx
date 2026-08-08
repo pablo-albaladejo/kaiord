@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Pending: Story = {
   args: {
-    borderClass: "border-amber-600",
+    borderClass: "border-zone-4",
     titleRow: <span className="font-medium">Z2/Z3 técnica</span>,
     metadataRow: <span>45 min</span>,
     originChip: "T2G",
@@ -23,7 +23,7 @@ export const Pending: Story = {
 
 export const Completed: Story = {
   args: {
-    borderClass: "border-emerald-600",
+    borderClass: "border-zone-2",
     titleRow: <span className="font-medium">FTP test</span>,
     metadataRow: <span>1h 0m</span>,
     originChip: "T2G",
@@ -41,7 +41,7 @@ export const Skipped: Story = {
 
 export const LongTitle: Story = {
   args: {
-    borderClass: "border-amber-600",
+    borderClass: "border-zone-4",
     titleRow: (
       <span className="font-medium">
         Z2/Z3 técnica con 4×100 fuerte + drills + recovery cool down

@@ -12,15 +12,9 @@ export const formatDuration = (seconds?: number): string => {
   return `${minutes}m`;
 };
 
-export const getDifficultyColor = (difficulty?: string): string => {
-  switch (difficulty) {
-    case "easy":
-      return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-    case "medium":
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
-    case "hard":
-      return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-    default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400";
-  }
-};
+/* Difficulty is a category, not a temperature. Green/amber/red read as a
+   severity ramp the palette does not have — and the chip already spells the
+   word out, so the hue was decoration competing with the zone ramp. */
+const CHIP = "bg-surface-elevated text-ink-body";
+
+export const getDifficultyColor = (): string => CHIP;
