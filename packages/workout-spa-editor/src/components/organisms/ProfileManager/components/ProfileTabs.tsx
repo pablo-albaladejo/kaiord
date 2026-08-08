@@ -34,7 +34,7 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
           onClick={() => onTabChange(tab.id)}
           className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === tab.id
-              ? "border-b-2 border-blue-600 bg-white text-blue-600 dark:bg-gray-800 dark:text-blue-400"
+              ? "border-b-2 border-accent bg-surface text-accent"
               : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >

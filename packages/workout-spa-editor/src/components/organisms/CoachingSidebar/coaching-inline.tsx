@@ -14,7 +14,7 @@ import { Fragment, type ReactNode } from "react";
 import type { DescriptionInline } from "./format-coaching-description";
 
 const LINK_CLASS =
-  "text-sky-600 underline underline-offset-2 hover:text-sky-500 dark:text-sky-400 break-words";
+  "text-accent underline underline-offset-2 hover:text-accent/80 break-words";
 
 export function renderCoachingInline(
   inline: DescriptionInline,

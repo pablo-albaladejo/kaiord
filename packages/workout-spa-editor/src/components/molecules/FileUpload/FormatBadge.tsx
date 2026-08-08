@@ -7,22 +7,19 @@ type FormatBadgeProps = {
   className?: string;
 };
 
-const formatColors: Record<WorkoutFileFormat, string> = {
-  fit: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  tcx: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  zwo: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  gcn: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-  krd: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
-};
+/* One neutral chip for every format. Five arbitrary hues competed with
+   nothing: the format's name already says which one it is, and the five
+   product hues belong to training zones. */
+const FORMAT_CHIP_CLASS =
+  "bg-surface-elevated text-ink-body border border-edge";
 
 export function FormatBadge({ format, className = "" }: FormatBadgeProps) {
   const t = useTranslate("import");
-  const colorClass = formatColors[format];
   const formatName = getFormatName(format);
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass} ${className}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${FORMAT_CHIP_CLASS} ${className}`}
       role="status"
       aria-label={t("badge.ariaLabel", { format: formatName })}
     >
