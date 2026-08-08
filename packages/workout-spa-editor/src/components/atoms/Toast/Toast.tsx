@@ -3,7 +3,8 @@ import { X } from "lucide-react";
 import { forwardRef } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
-import { baseToastStyles, variantStyles } from "./Toast.styles";
+import { Icon, ICON_MAP } from "../Icon";
+import { baseToastStyles, variantIcons, variantStyles } from "./Toast.styles";
 import type { ToastProps } from "./Toast.types";
 
 export type { ToastProps, ToastVariant } from "./Toast.types";
@@ -39,6 +40,12 @@ export const Toast = forwardRef<HTMLLIElement, ToastProps>(
         duration={duration}
         className={`${baseToastStyles} ${variantStyles[variant]}`}
       >
+        <Icon
+          icon={ICON_MAP[variantIcons[variant]]}
+          size="sm"
+          color="inherit"
+          className="shrink-0"
+        />
         <div className="grid gap-1 flex-1 text-center">
           <ToastPrimitive.Title className="text-sm font-semibold">
             {title}
