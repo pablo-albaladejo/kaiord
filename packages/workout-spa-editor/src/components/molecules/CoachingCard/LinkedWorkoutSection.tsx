@@ -29,7 +29,7 @@ export function LinkedWorkoutSection({
   return (
     <div
       data-testid="linked-workout-section"
-      className="space-y-2 rounded border border-emerald-200 bg-emerald-50/40 p-3 text-sm dark:border-emerald-800 dark:bg-emerald-950/30"
+      className="space-y-2 rounded border border-edge bg-surface-elevated p-3 text-sm"
     >
       <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
         {t("linked.heading")}

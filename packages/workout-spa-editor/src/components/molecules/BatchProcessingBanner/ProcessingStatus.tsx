@@ -57,7 +57,7 @@ export function ProcessingStatus({
         type="button"
         onClick={onCancel}
         aria-label={t("batch.cancelAria")}
-        className="rounded p-1 hover:bg-yellow-100 dark:hover:bg-yellow-900"
+        className="rounded p-1 hover:bg-ink-strong/10"
       >
         <X className="h-4 w-4" />
       </button>

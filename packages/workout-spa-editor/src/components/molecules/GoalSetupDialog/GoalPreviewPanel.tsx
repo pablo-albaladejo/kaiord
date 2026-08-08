@@ -36,7 +36,7 @@ export function GoalPreviewPanel({ preview }: GoalPreviewPanelProps) {
         <p
           role="status"
           data-testid="goal-cap-warning"
-          className="m-0 mt-2 text-[12px] font-medium text-amber-600 dark:text-amber-400"
+          className="m-0 mt-2 text-[12px] font-medium text-ink-strong"
         >
           {preview.overridden ? CAP_OVERRIDDEN_TEXT : CAP_WARNING_TEXT}
         </p>

@@ -34,7 +34,7 @@ export function ZoneIndicator({ sport }: ZoneIndicatorProps) {
 
   if (sportKey && !config) {
     return (
-      <p className="text-xs text-amber-600 dark:text-amber-400">
+      <p className="text-xs text-ink-strong">
         {t("zoneIndicator.noZones", { sport: sportKey, name: profile.name })}
       </p>
     );

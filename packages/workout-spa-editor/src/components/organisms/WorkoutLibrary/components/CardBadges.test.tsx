@@ -28,7 +28,7 @@ describe("CardBadges", () => {
     expect(screen.queryByText(/m$/)).not.toBeInTheDocument();
   });
 
-  it("should render the difficulty badge with the matching color class", () => {
+  it("should render the difficulty badge as a neutral chip", () => {
     // Arrange
 
     // Act
@@ -37,7 +37,11 @@ describe("CardBadges", () => {
     // Assert
     const badge = screen.getByText("medium");
     expect(badge).toBeInTheDocument();
-    expect(badge.className).toContain("bg-yellow-100");
+    // Difficulty is a category, not a temperature: the word is the signal.
+    expect(badge.className).toContain("bg-surface-elevated");
+    expect(badge.className).not.toMatch(
+      /-(red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d/
+    );
   });
 
   it("should render the duration badge formatted in minutes only when under one hour", () => {

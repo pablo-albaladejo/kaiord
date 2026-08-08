@@ -15,7 +15,10 @@ export function SnippetText({ text, ranges }: SnippetTextProps) {
   ranges.forEach(([start, end], index) => {
     if (start > cursor) segments.push(text.slice(cursor, start));
     segments.push(
-      <mark key={index} className="rounded bg-yellow-300 px-0.5 text-black">
+      <mark
+        key={index}
+        className="rounded bg-ink-strong/15 px-0.5 text-ink-strong"
+      >
         {text.slice(start, end)}
       </mark>
     );
