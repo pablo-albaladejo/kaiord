@@ -1,5 +1,14 @@
 # @kaiord/workout-spa-editor
 
+## 1.3.3
+
+### Patch Changes
+
+- e0425d8: Express every destructive affordance through the `danger` role instead of raw Tailwind reds. 137 usages across 32 files named `red-*`/`rose-*` directly — outside the three-layer system entirely, since a component may only ever name a role — and each carried a hand-paired `dark:` variant. The roles already hold a value per theme, so those pairs collapse: `text-red-600 dark:text-red-400` becomes `text-danger-text`, and the diff removes more lines than it adds.
+- 88a8a4e: Retire the chip rainbow from Badge and Toast. Step badges carried thirteen hues across fourteen variants for two unrelated things — a step's intensity and what its target measures — none of which was ever the signal, since the chip says "warmup" or "power" in words; they all become one neutral chip. Toasts keep the danger ramp for `error`, the system's one semantic colour, and put success, warning and info on the neutral surface with a variant icon doing the work green and amber used to: both sat within a few degrees of the zone ramp, so a toast painted with either asserted a training intensity it could not mean.
+- 63e62e6: Retire the accent blue from the feature surfaces it survived in. The AI banner, prompt panel and success strip drop their blue-tinted gradients for neutral elevated surfaces; profile and sport-zone tabs, zone-editor fields, the context menu's focus ring and the coaching inline link all move to the `accent` role; the three remaining raw blue submit buttons take the neutral primary fill; and the five per-format import chips become one neutral chip, since the format's name already says which one it is. The zone editor also stops painting zones with a seven-hue rainbow of its own and reads the canonical `--zone-1..5` ramp. Adds `check-frozen-hex-parity`, which pins every hex a canvas or chart module has to freeze against the role it mirrors — it caught one already-drifted value on its first run.
+- b71bb35: Retire warning amber and success green from the product. Both sat within a few degrees of the training-zone ramp, so any surface painted with them asserted an intensity it could not mean, and the palette dropped them outright. Warning boxes keep the alert icon they already carried and go quiet underneath; inline warnings move to full ink, which is the attention level the chips already use; success surfaces stop announcing themselves at all, since a state that is fine has nothing to say. Difficulty badges stop reading as a green-amber-red severity ramp — the word was always the signal — and the `Icon` atom's `success` and `warning` colours become ink.
+
 ## 1.3.2
 
 ### Patch Changes
