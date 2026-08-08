@@ -6,7 +6,8 @@
  * Light and dark mode share one component tree; the only theme-correct
  * dialects are (a) semantic utilities that resolve through the
  * :root/.dark tokens in packages/workout-spa-editor/src/index.css
- * (bg-surface*, text-ink-*, border-edge*, text-accent, …) and (b) the
+ * (bg-surface*, text-ink-*, border-edge*, border-danger-border,
+ * text-accent, …) and (b) the
  * classic paired dialect (`bg-white … dark:bg-slate-800`). Unconditional
  * dark-slate utilities render dark surfaces / near-white text in BOTH
  * themes, which is exactly the light-mode regression this guard pins.
@@ -68,7 +69,7 @@ const CLASSNAME_LITERAL_RE =
 const BARE_BORDER_RE =
   /(?:^|\s)(?:[a-zA-Z-]+:)*border(?:-[tblrxy])?(?:-[248])?(?=\s|$)/;
 const BORDER_COLOR_RE =
-  /border-(?:[a-z]+-\d{1,3}(?:\/\d+)?|edge(?:-soft)?|accent|primary|white|black|transparent|current|inherit|\[)/;
+  /border-(?:[a-z]+-\d{1,3}(?:\/\d+)?|edge(?:-soft|-strong)?|danger(?:-border)?|accent|primary|white|black|transparent|current|inherit|\[)/;
 
 function safeStat(p) {
   try {

@@ -33,7 +33,7 @@ const colorClasses: Record<IconColor, string> = {
   secondary: "text-gray-500 dark:text-gray-400",
   success: "text-green-600 dark:text-green-400",
   warning: "text-yellow-600 dark:text-yellow-400",
-  danger: "text-red-600 dark:text-red-400",
+  danger: "text-danger-text",
   muted: "text-gray-400 dark:text-gray-600",
   // No color class — inherits currentColor from the parent so composite
   // components can drive icon color via a wrapping `text-*` utility.

@@ -8,7 +8,7 @@ export const variantClasses: Record<ButtonVariant, string> = {
   tertiary:
     "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-primary-500 dark:text-gray-200 dark:hover:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-600",
   danger:
-    "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300",
+    "bg-danger text-white hover:bg-danger focus:ring-danger disabled:bg-danger",
   // Redesign surfaces (dark slate). Ghost = translucent neutral fill with a
   // hairline; soft = accent-on-soft-accent. Both read on the deep page bg.
   ghost:

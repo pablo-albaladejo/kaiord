@@ -55,7 +55,7 @@ export function NoWorkoutButtons(props: NoWorkoutButtonsProps) {
         data-testid="coaching-dialog-ai-process"
         disabled={props.writeInFlight}
         onClick={props.onAiProcess}
-        className="rounded-md bg-rose-600 px-3 py-1 text-sm text-white hover:bg-rose-700 disabled:opacity-50"
+        className="rounded-md bg-danger px-3 py-1 text-sm text-white hover:bg-danger disabled:opacity-50"
       >
         {t("actions.aiProcess")}
       </button>

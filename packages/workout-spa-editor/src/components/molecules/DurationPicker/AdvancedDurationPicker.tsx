@@ -57,7 +57,7 @@ export const AdvancedDurationPicker = ({
       )}
 
       {displayError && (
-        <p className="text-sm text-red-600 dark:text-red-400">{displayError}</p>
+        <p className="text-sm text-danger-text">{displayError}</p>
       )}
     </div>
   );
