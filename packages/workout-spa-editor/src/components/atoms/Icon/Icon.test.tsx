@@ -84,7 +84,7 @@ describe("Icon", () => {
 
     rerender(<Icon icon={Heart} color="danger" data-testid="icon" />);
     icon = screen.getByTestId("icon");
-    expect(icon).toHaveClass("text-red-600", "dark:text-red-400");
+    expect(icon).toHaveClass("text-danger-text");
 
     rerender(<Icon icon={Heart} color="warning" data-testid="icon" />);
     icon = screen.getByTestId("icon");

@@ -13,7 +13,7 @@ export const TargetOpenMessage = ({ error }: TargetOpenMessageProps) => {
         {t("openMessage")}
       </p>
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-danger-text" role="alert">
           {error}
         </p>
       )}

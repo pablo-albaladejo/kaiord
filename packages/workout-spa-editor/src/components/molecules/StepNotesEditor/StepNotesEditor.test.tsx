@@ -145,7 +145,7 @@ describe("StepNotesEditor", () => {
       await user.type(textarea, longText);
 
       // Assert
-      expect(textarea).toHaveClass("border-red-500");
+      expect(textarea).toHaveClass("border-danger-border");
       expect(textarea).toHaveAttribute("aria-invalid", "true");
     });
 
@@ -177,7 +177,7 @@ describe("StepNotesEditor", () => {
       });
 
       // Assert
-      expect(textarea).not.toHaveClass("border-red-500");
+      expect(textarea).not.toHaveClass("border-danger-border");
       expect(textarea).toHaveAttribute("aria-invalid", "false");
     });
   });

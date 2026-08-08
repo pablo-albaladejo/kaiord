@@ -38,7 +38,7 @@ export const DialogMeta = ({ activity }: { activity: CoachingActivity }) => (
     <span>{activity.sport.icon}</span>
     <span>{activity.sport.label}</span>
     {activity.duration && <span>· {activity.duration}</span>}
-    <span className="ml-auto rounded bg-rose-200 px-1 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900 dark:text-rose-300">
+    <span className="ml-auto rounded bg-danger-bg px-1 py-0.5 text-[10px] font-bold text-danger-text">
       {activity.sourceBadge}
     </span>
   </div>

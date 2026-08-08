@@ -41,7 +41,7 @@ export function ZoneCard({
     <div
       className={`rounded-lg border p-4 ${
         hasError
-          ? "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20"
+          ? "border-danger-border bg-danger-bg"
           : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
       }`}
     >

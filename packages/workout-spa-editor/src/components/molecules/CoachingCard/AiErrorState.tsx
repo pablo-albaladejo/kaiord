@@ -22,9 +22,9 @@ export function AiErrorState(props: AiErrorStateProps) {
   return (
     <div
       data-testid="coaching-dialog-ai-error"
-      className="space-y-3 rounded border border-rose-200 bg-rose-50/60 p-3 text-sm dark:border-rose-800 dark:bg-rose-950/30"
+      className="space-y-3 rounded border border-danger-border bg-danger-bg p-3 text-sm"
     >
-      <p className="text-rose-700 dark:text-rose-300">
+      <p className="text-danger-text">
         ⚠ {t("aiError.heading")}: {t(`aiError.${props.reason}`)}
         {props.detail ? ` (${props.detail})` : ""}
       </p>
@@ -54,7 +54,7 @@ export function AiErrorState(props: AiErrorStateProps) {
           type="button"
           data-testid="coaching-dialog-ai-retry"
           onClick={props.onRetry}
-          className="rounded-md bg-rose-600 px-3 py-1 text-xs text-white hover:bg-rose-700"
+          className="rounded-md bg-danger px-3 py-1 text-xs text-white hover:bg-danger"
         >
           {t("actions.retryAi")}
         </button>

@@ -73,7 +73,7 @@ export function GoalSetupForm({
         />
       )}
       {"error" in validation && (
-        <p role="alert" className="m-0 text-[12px] text-red-500">
+        <p role="alert" className="m-0 text-[12px] text-danger-text">
           {validation.error}
         </p>
       )}
