@@ -359,7 +359,7 @@ describe("ConfirmationModal - Accessibility", () => {
       // Assert
       expect(confirmButton).toBeInTheDocument();
       // Button should have danger/destructive styling classes
-      expect(confirmButton.className).toMatch(/bg-red|text-red/);
+      expect(confirmButton.className).toMatch(/bg-danger|text-danger/);
     });
   });
 
@@ -483,7 +483,7 @@ describe("ConfirmationModal - Accessibility", () => {
       const confirmButton = screen.getByRole("button", { name: "Confirm" });
 
       // Assert
-      expect(confirmButton.className).toMatch(/bg-red|text-red/);
+      expect(confirmButton.className).toMatch(/bg-danger|text-danger/);
     });
   });
 

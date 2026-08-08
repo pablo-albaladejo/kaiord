@@ -47,8 +47,11 @@ test.describe("Error Handling", () => {
     // - Chromium: "position N" or "Unexpected token"
     // - Firefox: "line N" or "expected property name"
     // - WebKit: "Expected '}'" or similar
+    // Scoped to the destructive treatment on purpose: the detail has to be
+    // rendered as an error, not merely present somewhere on the page. The
+    // role class replaces the hand-paired light/dark reds it used to name.
     const errorDetail = page
-      .locator(".text-red-700, .text-red-300")
+      .locator(".text-danger-text")
       .getByText(/position|line|unexpected|expected/i);
     await expect(errorDetail.first()).toBeVisible({ timeout: 5000 });
   });

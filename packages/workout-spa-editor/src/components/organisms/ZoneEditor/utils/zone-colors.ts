@@ -9,7 +9,7 @@ const ZONE_COLORS = [
   "bg-green-100 dark:bg-green-900/30",
   "bg-yellow-100 dark:bg-yellow-900/30",
   "bg-orange-100 dark:bg-orange-900/30",
-  "bg-red-100 dark:bg-red-900/30",
+  "bg-danger-bg",
   "bg-purple-100 dark:bg-purple-900/30",
   "bg-pink-100 dark:bg-pink-900/30",
 ] as const;

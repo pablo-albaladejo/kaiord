@@ -208,7 +208,7 @@ export const InButtons: Story = {
         <Icon icon={Save} size="sm" color="success" />
         Save
       </button>
-      <button className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+      <button className="inline-flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-white hover:bg-danger">
         <Icon icon={Trash2} size="sm" color="default" className="text-white" />
         Delete
       </button>

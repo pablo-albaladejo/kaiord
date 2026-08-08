@@ -43,7 +43,7 @@ export function LinkedAccountRow({
             type="button"
             disabled={busy}
             onClick={handleConnect}
-            className="rounded-md bg-rose-600 px-3 py-1 text-sm text-white hover:bg-rose-700 disabled:opacity-50"
+            className="rounded-md bg-danger px-3 py-1 text-sm text-white hover:bg-danger disabled:opacity-50"
           >
             {busy ? "Connecting…" : `Connect ${sourceMeta.label}`}
           </button>

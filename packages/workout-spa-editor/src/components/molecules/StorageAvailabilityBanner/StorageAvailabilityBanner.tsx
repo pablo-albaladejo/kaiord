@@ -20,11 +20,11 @@ export function StorageAvailabilityBanner({ status: injected }: Props = {}) {
     <div
       role="alert"
       data-testid="storage-unavailable-banner"
-      className="flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+      className="flex items-center gap-3 rounded-lg border border-danger-border bg-danger-bg px-4 py-3 text-sm text-danger-text"
     >
       <AlertTriangle
         aria-hidden="true"
-        className="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400"
+        className="h-5 w-5 flex-shrink-0 text-danger-text"
       />
       <span>{STORAGE_UNAVAILABLE_MESSAGE}</span>
     </div>
