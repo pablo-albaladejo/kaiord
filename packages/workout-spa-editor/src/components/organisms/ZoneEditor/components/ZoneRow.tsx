@@ -43,7 +43,7 @@ export function ZoneRow({
     <div
       className={`flex items-center gap-2 rounded px-3 py-1.5 ${getZoneColor(zone.zone)}`}
     >
-      <span className="w-6 text-center text-xs font-bold text-gray-700 dark:text-gray-300">
+      <span className="w-6 text-center text-xs font-bold text-ink-body">
         Z{zone.zone}
       </span>
       <EditableZoneName

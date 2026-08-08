@@ -18,7 +18,7 @@ export function DialogHeader({ profileName, onNameChange }: DialogHeaderProps) {
           value={profileName}
           onChange={(e) => onNameChange(e.target.value)}
           aria-label="Profile name"
-          className="mb-4 w-full border-b border-transparent bg-transparent text-base font-medium text-gray-900 hover:border-gray-300 focus:border-blue-500 focus:outline-none dark:text-white dark:hover:border-gray-600 dark:focus:border-blue-400"
+          className="mb-4 w-full border-b border-transparent bg-transparent text-base font-medium text-gray-900 hover:border-gray-300 focus:border-accent focus:outline-none dark:text-white dark:hover:border-gray-600"
         />
       )}
 

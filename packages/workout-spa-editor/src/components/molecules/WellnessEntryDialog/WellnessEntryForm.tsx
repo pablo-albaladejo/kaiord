@@ -86,7 +86,7 @@ export function WellnessEntryForm({ date, onSaved }: WellnessEntryFormProps) {
         type="button"
         disabled={isSaving}
         onClick={handleSubmit}
-        className="mt-2 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="mt-2 rounded bg-primary-600 text-white hover:bg-primary-700 disabled:bg-primary-300 px-4 py-2 text-sm font-medium disabled:opacity-50"
       >
         Save
       </button>

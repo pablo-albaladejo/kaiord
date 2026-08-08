@@ -74,8 +74,8 @@ export function EditableZoneName({
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
       aria-label={ariaLabel}
-      className="flex-1 rounded border border-blue-400 bg-white px-1
-        text-sm dark:border-blue-500 dark:bg-gray-800"
+      className="flex-1 rounded border border-accent bg-surface px-1
+        text-sm"
     />
   );
 }

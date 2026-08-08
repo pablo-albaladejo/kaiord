@@ -12,8 +12,8 @@ export const AiWorkoutInputEmpty = ({
 }: AiWorkoutInputEmptyProps) => {
   const t = useTranslate("create-workout");
   return (
-    <div className="rounded-lg border border-dashed border-blue-300 bg-white/60 p-5 text-center dark:border-blue-700 dark:bg-gray-800/60">
-      <p className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+    <div className="rounded-lg border border-dashed border-edge bg-surface p-5 text-center">
+      <p className="mb-1 text-sm font-medium text-ink-body">
         {t("providersEmpty.title")}
       </p>
       <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">

@@ -25,7 +25,7 @@ export function WorkoutTitle({ workout, onEdit, titleRef }: WorkoutTitleProps) {
         <h2
           ref={titleRef}
           tabIndex={-1}
-          className="text-2xl font-semibold tracking-[-0.02em] text-ink-strong focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-white dark:focus-visible:ring-offset-gray-800"
+          className="text-2xl font-semibold tracking-[-0.02em] text-ink-strong focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           {workout.name || t("section.untitledWorkout")}
         </h2>

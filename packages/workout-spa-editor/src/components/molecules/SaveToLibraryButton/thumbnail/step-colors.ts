@@ -10,7 +10,7 @@ const VAR_PATTERN = /^var\((--[\w-]+)\)$/;
 
 /** Neutral, theme-agnostic. Used only when there is no document to ask
     (SSR, jsdom without the stylesheet). */
-const UNRESOLVED = "#6b7280";
+const UNRESOLVED = "#747474";
 
 export function resolveCssColor(value: string): string {
   const name = VAR_PATTERN.exec(value)?.[1];

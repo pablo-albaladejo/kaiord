@@ -8,6 +8,13 @@
 
 import type { ThumbnailConfig } from "./types";
 
+/* Frozen on purpose: a thumbnail is a stored artifact, so it must not depend
+   on the theme in force the day it was saved. They are the LIGHT values of
+   `--bg-elevated` and `--text-dim`, and `scripts/check-frozen-hex-parity.mjs`
+   fails the build if the ramp moves under them. */
+const FROZEN_SURFACE = "#f0f0f0";
+const FROZEN_PLACEHOLDER_INK = "#747474";
+
 export function createCanvas(config: ThumbnailConfig): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.width = config.width;
@@ -30,7 +37,7 @@ export function drawBackground(
   width: number,
   height: number
 ): void {
-  ctx.fillStyle = "#f3f4f6";
+  ctx.fillStyle = FROZEN_SURFACE;
   ctx.fillRect(0, 0, width, height);
 }
 
@@ -40,7 +47,7 @@ export function drawPlaceholder(
   height: number,
   text: string
 ): void {
-  ctx.fillStyle = "#9ca3af";
+  ctx.fillStyle = FROZEN_PLACEHOLDER_INK;
   ctx.font = "14px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
