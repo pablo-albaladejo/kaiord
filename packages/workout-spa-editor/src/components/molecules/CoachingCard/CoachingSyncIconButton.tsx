@@ -7,7 +7,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 const IDLE_CLASSES =
   "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800";
 const INACTIVE_CLASSES =
-  "border-amber-400 text-amber-600 hover:bg-amber-50 dark:border-amber-500 dark:text-amber-400 dark:hover:bg-amber-950";
+  "border-edge-strong text-ink-strong hover:bg-ink-strong/10";
 
 export const CoachingSyncIconButton: React.FC<{
   loading: boolean;

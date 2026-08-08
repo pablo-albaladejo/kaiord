@@ -11,7 +11,7 @@ describe("CardShell", () => {
 
     render(
       <CardShell
-        borderClass="border-amber-600"
+        borderClass="border-zone-4"
         titleRow={<span>Z2/Z3 técnica</span>}
         metadataRow={<span>45 min</span>}
         testId="shell-1"
@@ -30,7 +30,7 @@ describe("CardShell", () => {
 
     render(
       <CardShell
-        borderClass="border-emerald-600"
+        borderClass="border-zone-2"
         titleRow={<span>x</span>}
         metadataRow={<span>y</span>}
         testId="shell-2"
@@ -44,7 +44,7 @@ describe("CardShell", () => {
     // Assert
 
     expect(button.className).toContain("border-l-4");
-    expect(button.className).toContain("border-emerald-600");
+    expect(button.className).toContain("border-zone-2");
   });
 
   it("should keep the title row clamp-free so flex survives the cascade", () => {
@@ -54,7 +54,7 @@ describe("CardShell", () => {
     // title span each variant passes in, never on the row itself.
     render(
       <CardShell
-        borderClass="border-amber-600"
+        borderClass="border-zone-4"
         titleRow={<span>title</span>}
         metadataRow={<span>m</span>}
         testId="shell-3"
@@ -80,7 +80,7 @@ describe("CardShell", () => {
 
     render(
       <CardShell
-        borderClass="border-amber-600"
+        borderClass="border-zone-4"
         titleRow={<span>x</span>}
         metadataRow={<span>m</span>}
         originChip="T2G"
@@ -100,7 +100,7 @@ describe("CardShell", () => {
 
     render(
       <CardShell
-        borderClass="border-amber-600"
+        borderClass="border-zone-4"
         titleRow={<span>x</span>}
         metadataRow={<span>m</span>}
         testId="shell-5"
@@ -119,7 +119,7 @@ describe("CardShell", () => {
 
     render(
       <CardShell
-        borderClass="border-amber-600"
+        borderClass="border-zone-4"
         ariaLabel="Matched session: 92% compliance"
         titleRow={<span>x</span>}
         metadataRow={<span>m</span>}
@@ -141,7 +141,7 @@ describe("CardShell", () => {
 
     render(
       <CardShell
-        borderClass="border-emerald-600"
+        borderClass="border-zone-2"
         titleRow={<span>x</span>}
         metadataRow={<span>Plan · 45 min</span>}
         secondaryRow={<span>Actual · 42 min</span>}

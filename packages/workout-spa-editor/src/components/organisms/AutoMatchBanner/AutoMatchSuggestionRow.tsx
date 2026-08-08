@@ -44,7 +44,7 @@ export function AutoMatchSuggestionRow({
         type="button"
         aria-label={t("suggestion.accept")}
         onClick={onAccept}
-        className="rounded p-1 text-emerald-600 hover:bg-emerald-50"
+        className="rounded p-1 text-accent hover:bg-accent/10"
       >
         <Check className="h-4 w-4" />
       </button>

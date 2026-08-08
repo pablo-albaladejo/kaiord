@@ -31,8 +31,8 @@ const colorClasses: Record<IconColor, string> = {
   default: "text-gray-700 dark:text-gray-200",
   primary: "text-primary-600 dark:text-primary-400",
   secondary: "text-gray-500 dark:text-gray-400",
-  success: "text-green-600 dark:text-green-400",
-  warning: "text-yellow-600 dark:text-yellow-400",
+  success: "text-ink-strong",
+  warning: "text-ink-strong",
   danger: "text-danger-text",
   muted: "text-gray-400 dark:text-gray-600",
   // No color class — inherits currentColor from the parent so composite

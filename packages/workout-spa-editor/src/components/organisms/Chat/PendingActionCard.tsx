@@ -28,8 +28,8 @@ export function PendingActionCard({
   const actionKey = ACTION_LABEL_KEY[action.toolName];
   const label = actionKey ? t(actionKey) : action.toolName;
   return (
-    <div className="rounded-2xl border border-amber-600/40 bg-amber-950/20 p-3">
-      <p className="text-[13px] font-semibold text-amber-200">
+    <div className="rounded-2xl border border-edge-strong bg-surface-elevated p-3">
+      <p className="text-[13px] font-semibold text-ink-strong">
         {t("pendingAction.confirm", { action: label })}
       </p>
       <pre className="my-2 overflow-x-auto rounded-lg bg-surface-deep p-2 text-[12px] text-ink-body">

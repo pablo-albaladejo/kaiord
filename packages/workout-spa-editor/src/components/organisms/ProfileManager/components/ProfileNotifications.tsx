@@ -23,7 +23,7 @@ export function ProfileNotifications({
 
       {switchNotification && (
         <div
-          className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400"
+          className="mb-4 rounded-md border border-edge bg-surface-elevated p-3 text-sm text-ink-body"
           role="status"
           aria-live="polite"
         >

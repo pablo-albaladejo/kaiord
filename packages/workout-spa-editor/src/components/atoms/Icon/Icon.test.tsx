@@ -75,17 +75,25 @@ describe("Icon", () => {
     let icon = screen.getByTestId("icon");
     expect(icon).toHaveClass("text-primary-600", "dark:text-primary-400");
 
+    // success and warning left the palette: neither carries a hue, so the
+    // glyph and the sentence beside it are what say which state it is.
     rerender(<Icon icon={Heart} color="success" data-testid="icon" />);
     icon = screen.getByTestId("icon");
-    expect(icon).toHaveClass("text-green-600", "dark:text-green-400");
+    expect(icon).toHaveClass("text-ink-strong");
+    expect(icon.className).not.toMatch(
+      /-(red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d/
+    );
 
     rerender(<Icon icon={Heart} color="danger" data-testid="icon" />);
     icon = screen.getByTestId("icon");
-    expect(icon).toHaveClass("text-danger-text", "");
+    expect(icon).toHaveClass("text-danger-text");
 
     rerender(<Icon icon={Heart} color="warning" data-testid="icon" />);
     icon = screen.getByTestId("icon");
-    expect(icon).toHaveClass("text-yellow-600", "dark:text-yellow-400");
+    expect(icon).toHaveClass("text-ink-strong");
+    expect(icon.className).not.toMatch(
+      /-(red|rose|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d/
+    );
   });
 
   it("should apply custom className", () => {
