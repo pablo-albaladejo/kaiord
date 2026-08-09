@@ -47,7 +47,7 @@ None.
 
 ## Notes
 
-- **Umami tracker shape** — `track(name: string, props?: Record<string, string | number | boolean>)` matches the actual Umami tracker API. The `props` object carries event metadata (e.g., `{ path: "/editor/" }`).
+- **Umami tracker shape** — `track(name: string, props?: Record<string, string | number | boolean>)` matches the actual Umami tracker API. The `props` object carries event metadata (e.g., `{ path: "/app/" }`).
 - **Optional property** — `window.umami?` is optional because the tracker may not be injected (when website id is missing or in non-browser environments).
 
 <!-- MANUAL: -->

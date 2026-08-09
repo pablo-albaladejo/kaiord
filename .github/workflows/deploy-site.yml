@@ -58,7 +58,7 @@ jobs:
 
       - name: Build SPA Editor
         env:
-          VITE_BASE_PATH: /editor/
+          VITE_BASE_PATH: /app/
         run: pnpm --filter @kaiord/workout-spa-editor... build
 
       # Inject the Umami website id at deploy time (runtime config). The
@@ -107,9 +107,9 @@ jobs:
           cp -r packages/landing/dist/* merged-dist/
           cp -r packages/landing/dist/.nojekyll merged-dist/ 2>/dev/null || true
 
-          # Editor at /editor/
-          mkdir -p merged-dist/editor
-          cp -r packages/workout-spa-editor/dist/* merged-dist/editor/
+          # SPA at /app/
+          mkdir -p merged-dist/app
+          cp -r packages/workout-spa-editor/dist/* merged-dist/app/
 
           # Docs at /docs/
           mkdir -p merged-dist/docs
@@ -128,7 +128,7 @@ jobs:
           set -e
           test -f merged-dist/index.html          || { echo "❌ Missing landing index.html"; exit 1; }
           test -f merged-dist/es/index.html       || { echo "❌ Missing landing es/index.html"; exit 1; }
-          test -f merged-dist/editor/index.html    || { echo "❌ Missing editor index.html"; exit 1; }
+          test -f merged-dist/app/index.html       || { echo "❌ Missing app index.html"; exit 1; }
           test -f merged-dist/docs/index.html      || { echo "❌ Missing docs index.html"; exit 1; }
           test -f merged-dist/CNAME                || { echo "❌ Missing CNAME"; exit 1; }
           test -f merged-dist/.nojekyll            || { echo "❌ Missing .nojekyll"; exit 1; }
@@ -150,9 +150,9 @@ jobs:
         run: |
           set -e
           # Build-derived marker so the smoke step survives vite base/assetsDir refactors.
-          MARKER=$(grep -oE 'src="/editor/assets/index-[^"]+\.js"' merged-dist/editor/index.html | head -1)
+          MARKER=$(grep -oE 'src="/app/assets/index-[^"]+\.js"' merged-dist/app/index.html | head -1)
           if [ -z "$MARKER" ]; then
-            echo "❌ Could not extract SPA entry-script marker from editor/index.html"
+            echo "❌ Could not extract SPA entry-script marker from app/index.html"
             exit 1
           fi
           echo "Build marker: $MARKER"
@@ -171,11 +171,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    # P95 = 12s; ceil(P95 × 1.5 / 60) = 1; capped at build-family ceiling 20.
-    # Note: smoke-test retries 10×10s = 100s worst case; if Pages CDN
-    # propagation regresses, raise to 3–5 in a follow-up rather than reverting
-    # the timeout invariant.
-    timeout-minutes: 1
+    # P95 = 12s; ceil(P95 × 1.5 / 60) = 1 — but the P95 only describes the run
+    # where the first smoke attempt succeeds. The retry budget is what the
+    # timeout has to cover, and it is 10 × (15s + 15s + 10s) = 400s worst case:
+    # two curls at --max-time 15 plus the propagation sleep, per attempt. At 1
+    # the job was cancelled exactly when the retries were doing their job, and
+    # slow Pages propagation read as a failed deploy. 7 covers the budget with
+    # room for the deploy step itself, well under the build-family ceiling 20.
+    timeout-minutes: 7
     needs: build
     steps:
       - name: Deploy to GitHub Pages
@@ -193,19 +196,19 @@ jobs:
             exit 1
           fi
           # The deep-route fallback works in two pieces:
-          #   1. /editor/index.html serves the SPA bundle (positive marker)
+          #   1. /app/index.html serves the SPA bundle (positive marker)
           #   2. /404.html carries the rafgraph redirect script that bounces
-          #      /editor/* (and the legacy SPA route allowlist) into /editor/?p=…
+          #      legacy /editor/* (and the root allowlist) into /app/#…
           # We probe both pieces directly. This sidesteps the prior smoke's
-          # design flaw, which fetched /editor/calendar with curl and expected
+          # design flaw, which fetched /app/calendar with curl and expected
           # the SPA bundle in the response body — but that bundle only appears
           # after a JS-driven `window.location.replace` round-trip that curl
           # cannot execute.
           # Pages CDN propagation is eventually consistent; retry up to 10x at 10s.
-          EDITOR_URL="${PAGE_URL%/}/editor/"
+          APP_URL="${PAGE_URL%/}/app/"
           NOT_FOUND_URL="${PAGE_URL%/}/404.html"
           echo "Smoke targets:"
-          echo "  - $EDITOR_URL (expect marker: $MARKER)"
+          echo "  - $APP_URL (expect marker: $MARKER)"
           echo "  - $NOT_FOUND_URL (expect rafgraph redirect script)"
           for i in $(seq 1 10); do
             EDITOR_TMP=$(mktemp)
@@ -213,30 +216,34 @@ jobs:
             # `--http-status` would be cleaner but isn't in older curl; capture
             # the code via -w and the body via -o for portability. -L follows
             # any HTTP-level redirect so we score the final response.
-            EDITOR_CODE=$(curl -sL --max-time 15 -o "$EDITOR_TMP" -w "%{http_code}" "$EDITOR_URL" || echo "000")
-            NOT_FOUND_CODE=$(curl -sL --max-time 15 -o "$NOT_FOUND_TMP" -w "%{http_code}" "$NOT_FOUND_URL" || echo "000")
+            # `|| true` keeps `set -e` from killing the step on a connection
+            # failure so the retry loop still runs. It is NOT `|| echo "000"`:
+            # curl already writes 000 through -w when it never got a response,
+            # so the echo appended a second one and the log read "000000".
+            APP_CODE=$(curl -sL --max-time 15 -o "$EDITOR_TMP" -w "%{http_code}" "$APP_URL" || true)
+            NOT_FOUND_CODE=$(curl -sL --max-time 15 -o "$NOT_FOUND_TMP" -w "%{http_code}" "$NOT_FOUND_URL" || true)
             EDITOR_BODY=$(cat "$EDITOR_TMP" 2>/dev/null || true)
             NOT_FOUND_BODY=$(cat "$NOT_FOUND_TMP" 2>/dev/null || true)
             rm -f "$EDITOR_TMP" "$NOT_FOUND_TMP"
-            EDITOR_OK=0
+            APP_OK=0
             NOT_FOUND_OK=0
-            # /editor/ is the SPA entry — must serve 200 + the bundle marker.
-            [ "$EDITOR_CODE" = "200" ] && echo "$EDITOR_BODY" | grep -qF "$MARKER" && EDITOR_OK=1
+            # /app/ is the SPA entry — must serve 200 + the bundle marker.
+            [ "$APP_CODE" = "200" ] && echo "$EDITOR_BODY" | grep -qF "$MARKER" && APP_OK=1
             # /404.html is itself a real artefact (GitHub Pages serves it as
             # a regular file with status 200); Pages then ALSO uses its body
             # for the not-found fallback. We assert 200 + that the rafgraph
             # guard literal is present so the redirect only fires for
             # SPA-related 404s.
             [ "$NOT_FOUND_CODE" = "200" ] && echo "$NOT_FOUND_BODY" | grep -qF "indexOf('/editor/')" && NOT_FOUND_OK=1
-            if [ "$EDITOR_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ]; then
-              echo "✅ Attempt $i: SPA bundle present at /editor/ (200) AND rafgraph redirect present at /404.html (200)"
+            if [ "$APP_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ]; then
+              echo "✅ Attempt $i: SPA bundle present at /app/ (200) AND rafgraph redirect present at /404.html (200)"
               exit 0
             fi
-            echo "Attempt $i: editor=$EDITOR_OK (code=$EDITOR_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE); retrying in 10s"
+            echo "Attempt $i: app=$APP_OK (code=$APP_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE); retrying in 10s"
             sleep 10
           done
           echo "❌ Smoke failed after 10 retries:"
-          echo "    /editor/ status=$EDITOR_CODE (expect 200), marker present: $EDITOR_OK"
+          echo "    /app/ status=$APP_CODE (expect 200), marker present: $APP_OK"
           echo "    /404.html status=$NOT_FOUND_CODE (expect 200), rafgraph script: $NOT_FOUND_OK"
           exit 1
 

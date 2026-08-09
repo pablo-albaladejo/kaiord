@@ -1,7 +1,8 @@
 // The root 404 (`packages/landing/public/404.html`) is what GitHub Pages
 // serves for EVERY missing URL — Pages supports exactly one 404 document, so
-// deep links into /docs/ and /editor/ land here too, not on the docs theme's
-// NotFound.vue (that component only renders on client-side navigation).
+// deep links into /docs/, and the legacy `/editor/` URLs the bridge still
+// answers, land here too, not on the docs theme's NotFound.vue (that
+// component only renders on client-side navigation).
 //
 // The page is a self-contained static file: it cannot read
 // `styles/brand-tokens.css` at runtime, so its colors are literals. Literals

@@ -26,7 +26,7 @@ const SWITCH = {
 
 // querySelector anchors that survive the Vite build byte-for-byte. The first
 // "/editor/" link is the desktop-nav CTA; the npm link is unique to the footer.
-const HEADER_ANCHOR = 'a[href="/editor/"]';
+const HEADER_ANCHOR = 'a[href="/app/"]';
 const FOOTER_ANCHOR = 'a[href="https://www.npmjs.com/org/kaiord"]';
 
 // Reuse the exact utility classes already present on neighbouring nav/footer

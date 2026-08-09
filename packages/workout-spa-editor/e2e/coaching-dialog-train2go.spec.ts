@@ -17,8 +17,7 @@
  *      role="alert") is NOT rendered anywhere on the page.
  */
 
-import { expect, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures/base";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 

@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures/base";
 import { openAccountMenu } from "./helpers/mobile-menu";
 
 const TOOLTIP_HOVER_DEBOUNCE_MS = 300;

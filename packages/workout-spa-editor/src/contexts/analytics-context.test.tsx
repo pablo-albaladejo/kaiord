@@ -55,9 +55,9 @@ describe("useAnalytics", () => {
 
     // Act
     const { result } = renderHook(() => useAnalytics(), { wrapper });
-    result.current.pageView("/editor/");
+    result.current.pageView("/app/");
 
     // Assert
-    expect(mockAnalytics.pageView).toHaveBeenCalledWith("/editor/");
+    expect(mockAnalytics.pageView).toHaveBeenCalledWith("/app/");
   });
 });

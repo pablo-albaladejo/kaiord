@@ -46,7 +46,7 @@
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
-const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
+const OPEN_EDITOR_URL = "https://kaiord.com/app/";
 const OPEN_GARMIN_URL = "https://connect.garmin.com/modern/";
 
 // English fallback table consumed by the vendored msg() helper.

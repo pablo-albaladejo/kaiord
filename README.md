@@ -1,6 +1,6 @@
 # Kaiord — Open-Source Health & Fitness Data Framework
 
-**[kaiord.com](https://kaiord.com)** | [Editor](https://kaiord.com/editor/) | [npm](https://www.npmjs.com/org/kaiord)
+**[kaiord.com](https://kaiord.com)** | [Editor](https://kaiord.com/app/) | [npm](https://www.npmjs.com/org/kaiord)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -20,13 +20,13 @@ It provides:
 - `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, and **.krd** (Kaiord) files, plus Garmin Connect API integration.
 - `@kaiord/cli`: a command-line tool to convert, validate, and compare files across formats.
 - `@kaiord/mcp`: an MCP server exposing Kaiord tools to AI agents (Claude Desktop, Claude Code, etc.). Published in the [official MCP registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord) as `io.github.pablo-albaladejo/kaiord`.
-- **[Workout Editor](https://kaiord.com/editor/)**: a web application to create and edit workout files visually.
+- **[Workout Editor](https://kaiord.com/app/)**: a web application to create and edit workout files visually.
 
 ---
 
 ## ✨ Features
 
-- **[Visual Workout Editor](https://kaiord.com/editor/)** - Create and edit workouts in your browser
+- **[Visual Workout Editor](https://kaiord.com/app/)** - Create and edit workouts in your browser
 - Unified JSON-based format `.krd` (Kaiord Representation Definition)
 - Schema validation (Zod)
 - Round-trip safe conversions between FIT / TCX / ZWO / GCN / KRD
@@ -62,7 +62,7 @@ It provides:
 
 Kaiord is local-first: your data lives on your device, because there is no Kaiord server to send it to. There are no accounts and no backend.
 
-- **Storage is your browser's IndexedDB.** The [Workout Editor](https://kaiord.com/editor/) persists every workout, template, profile, and setting in a local Dexie.js / IndexedDB database (`new KaiordDatabase()` in [`dexie-database.ts`](./packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts)), and the UI reads it reactively through `useLiveQuery`. Nothing is written to a remote database — see the "Persisted data → Dexie" rule in [State Management](./CLAUDE.md).
+- **Storage is your browser's IndexedDB.** The [Workout Editor](https://kaiord.com/app/) persists every workout, template, profile, and setting in a local Dexie.js / IndexedDB database (`new KaiordDatabase()` in [`dexie-database.ts`](./packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts)), and the UI reads it reactively through `useLiveQuery`. Nothing is written to a remote database — see the "Persisted data → Dexie" rule in [State Management](./CLAUDE.md).
 - **Conversions run entirely on your machine.** FIT / TCX / ZWO / GCN ↔ KRD conversion happens in-process — client-side in the editor ([`import-workout-formats.ts`](./packages/workout-spa-editor/src/utils/import-workout-formats.ts), [`export-workout-formats.ts`](./packages/workout-spa-editor/src/utils/export-workout-formats.ts)) or locally in the [`@kaiord/cli`](./packages/cli). Files never leave your device to be converted.
 - **Sync is opt-in and goes to _your_ cloud.** Data leaves the device only if you connect Google Drive. The [cloud-sync adapter](./packages/workout-spa-editor/src/adapters/cloud-sync) uses the Google Identity Services `drive.appdata` scope, so synced data lands in your own Drive's app folder; the access token lives only in memory for the session and is never persisted by Kaiord.
 - **Integrations use _your_ logged-in session — no credential proxy.** Garmin, WHOOP, and Train2Go connect through browser-extension "bridges" ([`garmin-bridge`](./packages/garmin-bridge), [`whoop-bridge`](./packages/whoop-bridge), [`train2go-bridge`](./packages/train2go-bridge)) that piggyback on your existing browser session. Per [`openspec/specs/adapter-contracts/spec.md`](./openspec/specs/adapter-contracts/spec.md), a bridge "SHALL NOT store, transmit, or manage user credentials"; authentication is "delegated entirely to the browser's cookie jar." No third-party server proxies your credentials or your data.
@@ -108,7 +108,7 @@ kaiord/
 │  ├─ garmin/              → Garmin Connect API adapter
 │  ├─ cli/                 → command-line interface
 │  ├─ mcp/                 → MCP server for AI/LLM integration
-│  └─ workout-spa-editor/  → web application (https://kaiord.com/editor/)
+│  └─ workout-spa-editor/  → web application (https://kaiord.com/app/)
 ├─ docs/   → documentation
 ├─ LICENSE
 ├─ README.md
@@ -121,7 +121,7 @@ kaiord/
 
 ### Try the Web App
 
-**[Launch Workout Editor →](https://kaiord.com/editor/)**
+**[Launch Workout Editor →](https://kaiord.com/app/)**
 
 Create and edit workouts visually in your browser. No installation required.
 
