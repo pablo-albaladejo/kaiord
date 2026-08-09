@@ -30,8 +30,7 @@ const SKIP_FILE = /\.(test|spec|stories)\.(ts|tsx)$/;
 const SOURCE_FILE = /\.(ts|tsx)$/;
 
 /** Matches `from "@ai-sdk/x"`, `import("@ai-sdk/x")`, `require("@ai-sdk/x")`. */
-const AI_SDK_IMPORT =
-  /(?:from|import|require)\s*\(?\s*["']@ai-sdk\/[^"']+["']/;
+const AI_SDK_IMPORT = /(?:from|import|require)\s*\(?\s*["']@ai-sdk\/[^"']+["']/;
 
 const walk = (dir, acc) => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -91,7 +90,9 @@ const main = () => {
     return;
   }
   if (violations.length === 0) {
-    console.log("check-ai-sdk-containment: OK (no @ai-sdk imports outside packages/ai)");
+    console.log(
+      "check-ai-sdk-containment: OK (no @ai-sdk imports outside packages/ai)"
+    );
     return;
   }
   console.error("check-ai-sdk-containment: R-AiSdkContainment violations:");

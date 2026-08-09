@@ -1,5 +1,6 @@
 import type { ErrorInfo } from "react";
 
+import { fragmentPath } from "./fragment-location";
 import type { scrubAnalyticsString } from "./scrub-analytics-string";
 
 export type RouteErrorPayload = {
@@ -15,7 +16,7 @@ export type RouteErrorPayload = {
  * payload shape can be unit-tested independently.
  *
  * Contract per `analytics-port` spec:
- *   - route: window.location.pathname, scrubbed (no truncation)
+ *   - route: the SPA route being rendered, scrubbed (no truncation)
  *   - name: error.name || "Error", scrubbed (no truncation)
  *   - message: error.message, scrubbed and truncated to ≤ 500
  *   - componentStack: info.componentStack, scrubbed and truncated to ≤ 1000
@@ -26,7 +27,14 @@ export function buildRouteErrorPayload(
   scrub: typeof scrubAnalyticsString
 ): RouteErrorPayload {
   return {
-    route: scrub(window.location.pathname),
+    // Read through the router's own reader, not a second parse of the URL.
+    // `location.pathname` is the deploy prefix and nothing else now, so a
+    // payload built from it would name the same route for every error — the
+    // one field this event exists to carry. A hand-rolled fragment parse is
+    // barely better: at `/app/` the hash is empty, and anything that does not
+    // normalise it the way the router does reports a route the app never
+    // rendered.
+    route: scrub(fragmentPath()),
     name: scrub(error.name || "Error"),
     message: scrub(error.message ?? "", 500),
     componentStack: scrub(info.componentStack ?? "", 1000),

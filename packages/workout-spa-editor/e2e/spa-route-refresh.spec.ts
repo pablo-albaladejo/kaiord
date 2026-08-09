@@ -1,125 +1,169 @@
-import { execSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+/**
+ * The contract this suite exists for: a URL that resolves never answers 404
+ * on the way to itself.
+ *
+ * Its previous shape asserted that the URL was *restored* after the host's
+ * error page had already been served and painted — so it passed for months
+ * while every deep link showed a 404 first. Restoration is not the property
+ * that matters; the status code of the first response is. Every test here
+ * counts document responses, and a 404 among them is a failure.
+ */
 
-import { expect, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures/base";
+import { documentStatuses } from "./fixtures/document-statuses";
 import {
-  startStaticPagesServer,
-  type StaticPagesServer,
-} from "./fixtures/static-pages-server";
-
-const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(here, "..", "..", "..");
+  APP_BASE,
+  type MergedDist,
+  startMergedDist,
+} from "./fixtures/merged-dist-server";
 
 const ENABLED = process.env.E2E_PROD_BASE === "1";
+const RENDER_TIMEOUT_MS = 15_000;
+const SETTLED_WEEK = /^#\/calendar\/\d{4}-W\d{2}$/;
 
-test.describe("@spa-route-refresh SPA route refresh", () => {
+test.describe("@spa-route-refresh SPA routes on the static host", () => {
   test.skip(!ENABLED, "Production-base e2e gated behind E2E_PROD_BASE=1");
 
-  let server: StaticPagesServer;
-  let mergedDist: string;
+  let dist: MergedDist;
 
   test.beforeAll(async () => {
-    // The build is website-id-agnostic: the Umami website id is not a Vite
-    // build-time env var. Test 4 exercises the real adapter path by injecting
-    // `window.__KAIORD_CONFIG__` (and a fake `umami` tracker) via
-    // `page.addInitScript` before navigation — matching the deploy-time
-    // runtime-config injection model.
-    execSync("pnpm --filter @kaiord/workout-spa-editor build", {
-      cwd: repoRoot,
-      env: {
-        ...process.env,
-        VITE_BASE_PATH: "/editor/",
-      },
-      stdio: "inherit",
-    });
-
-    mergedDist = mkdtempSync(join(tmpdir(), "merged-dist-"));
-    mkdirSync(join(mergedDist, "editor"), { recursive: true });
-    cpSync(
-      join(repoRoot, "packages/workout-spa-editor/dist"),
-      join(mergedDist, "editor"),
-      { recursive: true }
-    );
-    writeFileSync(
-      join(mergedDist, "404.html"),
-      "<!DOCTYPE html><html><body>404</body></html>"
-    );
-
-    execSync(`node scripts/inject-spa-fallback.mjs ${mergedDist}`, {
-      cwd: repoRoot,
-      stdio: "inherit",
-    });
-
-    server = await startStaticPagesServer(mergedDist);
+    dist = await startMergedDist("routes");
   });
 
   test.afterAll(async () => {
-    if (server) await server.close();
-    if (mergedDist) rmSync(mergedDist, { recursive: true, force: true });
+    if (dist) await dist.close();
   });
 
-  test("Test 1 — direct deep refresh restores URL and SPA bundle", async ({
+  test("answers 200 on the first request to a deep route", async ({ page }) => {
+    const statuses = documentStatuses(page);
+
+    const response = await page.goto(dist.routeUrl("/calendar/2026-W32"), {
+      waitUntil: "load",
+    });
+
+    expect(response?.status()).toBe(200);
+    await expect(page.getByTestId("calendar-page")).toBeVisible({
+      timeout: RENDER_TIMEOUT_MS,
+    });
+    // The requested week, not a catch-all landing.
+    expect(await page.evaluate(() => window.location.hash)).toBe(
+      "#/calendar/2026-W32"
+    );
+    expect(statuses).toEqual([200]);
+    await expect(page.getByTestId("host-404")).toHaveCount(0);
+  });
+
+  test("answers 200 for an unbounded route that cannot be pre-generated", async ({
     page,
   }) => {
-    await page.goto(`${server.url}/editor/calendar`, { waitUntil: "load" });
-    // Bare /calendar is a replace-redirect to the current week since the
-    // /today split, so the restored deep link settles on /editor/calendar/:weekId.
-    await page.waitForFunction(() =>
-      /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname)
-    );
+    // The case a file-per-route build could never cover, and the reason the
+    // route had to leave the path.
+    const statuses = documentStatuses(page);
+    const uuid = "6e3ad6f0-1234-4cdf-9abc-1234567890ab";
 
-    expect(page.url()).toMatch(/\/editor\/calendar\/\d{4}-W\d{2}$/);
-    const scriptCount = await page
-      .locator('script[src^="/editor/assets/index-"]')
+    const response = await page.goto(dist.routeUrl(`/workout/${uuid}`), {
+      waitUntil: "load",
+    });
+
+    expect(response?.status()).toBe(200);
+    expect(statuses).toEqual([200]);
+    expect(await page.evaluate(() => window.location.hash)).toBe(
+      `#/workout/${uuid}`
+    );
+    const shell = await page
+      .locator(`script[src^="${APP_BASE}assets/index-"]`)
       .count();
-    expect(scriptCount).toBeGreaterThan(0);
+    expect(shell).toBeGreaterThan(0);
   });
 
-  test("Test 2 — in-app navigation prefixes URL", async ({ page }) => {
-    await page.goto(`${server.url}/editor/`, { waitUntil: "load" });
-    await page.waitForFunction(
-      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
-      null,
-      {
-        timeout: 15_000,
-      }
-    );
-
-    // Compare on pathname, not the full URL: a base-less regex matches both
-    // `/calendar/...` and `/editor/calendar/...`, which is the opposite of
-    // the distinction this test exists to make.
-    const pathname = new URL(page.url()).pathname;
-    expect(pathname).toMatch(/^\/editor\/calendar\/\d{4}-W\d{2}$/);
-  });
-
-  test("Test 3 — refresh inside SPA stays on the calendar week", async ({
+  test("carries the query inside the fragment, where the app reads it", async ({
     page,
   }) => {
-    await page.goto(`${server.url}/editor/`, { waitUntil: "load" });
-    await page.waitForFunction(
-      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
-      null,
-      {
-        timeout: 15_000,
-      }
-    );
-    await page.reload({ waitUntil: "load" });
-    await page.waitForFunction(
-      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
-      null,
-      {
-        timeout: 15_000,
-      }
+    // The shape none of the first six scenarios exercised, which is how a
+    // router that filed the query somewhere the app does not read passed them
+    // all. `?source=scratch` is what tells `/workout/new` to open the editor
+    // directly instead of the AI Create overlay, so the two surfaces are the
+    // observable difference between "read" and "lost".
+    const statuses = documentStatuses(page);
+
+    const response = await page.goto(
+      dist.routeUrl("/workout/new?source=scratch"),
+      { waitUntil: "load" }
     );
 
-    expect(page.url()).toMatch(/\/editor\/calendar\/\d{4}-W\d{2}$/);
+    expect(response?.status()).toBe(200);
+    expect(statuses).toEqual([200]);
+    await expect(page.getByTestId("scratch-schedule-button")).toBeVisible({
+      timeout: RENDER_TIMEOUT_MS,
+    });
+    await expect(page.getByTestId("create-workout")).toHaveCount(0);
+    expect(await page.evaluate(() => window.location.search)).toBe("");
   });
 
-  test("Test 4 — analytics path remains base-relative", async ({ page }) => {
+  test("keeps the route across a refresh, one document request each time", async ({
+    page,
+  }) => {
+    const statuses = documentStatuses(page);
+
+    await page.goto(dist.routeUrl("/library"), { waitUntil: "load" });
+    await expect(page.getByTestId("library-page")).toBeVisible({
+      timeout: RENDER_TIMEOUT_MS,
+    });
+    await page.reload({ waitUntil: "load" });
+
+    await expect(page.getByTestId("library-page")).toBeVisible({
+      timeout: RENDER_TIMEOUT_MS,
+    });
+    expect(await page.evaluate(() => window.location.hash)).toBe("#/library");
+    expect(statuses).toEqual([200, 200]);
+  });
+
+  test("resolves a malformed route through the catch-all, still 200", async ({
+    page,
+  }) => {
+    const statuses = documentStatuses(page);
+
+    await page.goto(dist.routeUrl("/totally-malformed-path"), {
+      waitUntil: "load",
+    });
+
+    await expect(page.getByTestId("calendar-page")).toBeVisible({
+      timeout: RENDER_TIMEOUT_MS,
+    });
+    expect(await page.evaluate(() => window.location.hash)).toMatch(
+      SETTLED_WEEK
+    );
+    expect(statuses).toEqual([200]);
+  });
+
+  test("bridges a legacy /editor path into the same route", async ({
+    page,
+  }) => {
+    // The one 404 the change does not remove, and cannot: a URL already in the
+    // wild still reaches the host's error page first. What is asserted is that
+    // it costs exactly one bounce and lands on the route it named. That the
+    // error page does not *paint* on the way is a question of where the script
+    // sits in the document, which `scripts/inject-spa-fallback.test.mjs` pins
+    // positionally — a browser cannot be asked what it nearly rendered.
+    const statuses = documentStatuses(page);
+
+    await page.goto(`${dist.server.url}/editor/calendar/2026-W32`, {
+      waitUntil: "load",
+    });
+
+    await expect(page.getByTestId("calendar-page")).toBeVisible({
+      timeout: RENDER_TIMEOUT_MS,
+    });
+    expect(await page.evaluate(() => window.location.pathname)).toBe(APP_BASE);
+    expect(await page.evaluate(() => window.location.hash)).toBe(
+      "#/calendar/2026-W32"
+    );
+    expect(statuses).toEqual([404, 200]);
+  });
+
+  test("reports analytics paths base-relative, without the prefix or the fragment", async ({
+    page,
+  }) => {
     const captured: string[] = [];
     await page.exposeFunction("__captureAnalytics", (path: string) => {
       captured.push(path);
@@ -135,7 +179,10 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       });
       // Plant a fake umami tracker so the production adapter routes track()
       // calls into our capture instead of the network. pageView uses the
-      // payload-modifier form: track(props => ({ ...props, url })).
+      // payload-modifier form: track(props => ({ ...props, url })). The
+      // default it is handed is `location.pathname`, which under hash routing
+      // is the deploy prefix — so an adapter that stopped overriding it would
+      // be caught here rather than silently reporting every view as `/app/`.
       Object.defineProperty(window, "umami", {
         value: {
           track: (
@@ -155,37 +202,20 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       });
     });
 
-    await page.goto(`${server.url}/editor/calendar`, { waitUntil: "load" });
-    await page.waitForFunction(() =>
-      /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname)
-    );
+    await page.goto(dist.routeUrl("/calendar"), { waitUntil: "load" });
+    await expect(page.getByTestId("calendar-page")).toBeVisible({
+      timeout: RENDER_TIMEOUT_MS,
+    });
     // Poll for the pageView event captured via the exposed function — wouter's
     // useEffect-driven emission lands a tick after the route resolves.
     await expect
       .poll(() => captured.length, { timeout: 5000 })
       .toBeGreaterThanOrEqual(1);
 
-    // Base-relative (no /editor prefix); the bare-/calendar replace-redirect
-    // means the first emitted path may already carry the concrete weekId.
+    // Base-relative; the bare-/calendar replace-redirect means the first
+    // emitted path may already carry the concrete weekId.
     expect(captured[0]).toMatch(/^\/calendar(\/\d{4}-W\d{2})?$/);
-    expect(captured[0]).not.toBe("/editor/calendar");
-  });
-
-  test("Test 5 — garbage path resolves to catch-all", async ({ page }) => {
-    await page.goto(
-      `${server.url}/editor/totally-malformed-path-${Date.now()}`,
-      {
-        waitUntil: "load",
-      }
-    );
-    await page.waitForFunction(
-      () => /^\/editor\/calendar\/\d{4}-W\d{2}$/.test(window.location.pathname),
-      null,
-      {
-        timeout: 15_000,
-      }
-    );
-
-    expect(page.url()).toMatch(/\/editor\/calendar\/\d{4}-W\d{2}$/);
+    expect(captured[0]).not.toContain("#");
+    expect(captured[0]).not.toContain(APP_BASE);
   });
 });

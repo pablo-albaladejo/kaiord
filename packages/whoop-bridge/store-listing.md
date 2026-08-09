@@ -20,7 +20,7 @@ Connects the Kaiord workout editor to your WHOOP recovery & sleep data via your 
 
 ## Detailed Description
 
-Kaiord WHOOP Bridge connects the Kaiord workout editor (https://kaiord.com/editor) to your WHOOP account through your existing signed-in app.whoop.com session. No passwords, no developer app, and no API key — the extension rides your own WHOOP login.
+Kaiord WHOOP Bridge connects the Kaiord workout editor (https://kaiord.com/app) to your WHOOP account through your existing signed-in app.whoop.com session. No passwords, no developer app, and no API key — the extension rides your own WHOOP login.
 
 Features:
 • Import recovery, HRV, sleep, vitals, strain, and stress data

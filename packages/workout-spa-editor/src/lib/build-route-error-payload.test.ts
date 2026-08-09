@@ -10,28 +10,34 @@ const STACK_LINE_COUNT = 4;
 import { buildRouteErrorPayload } from "./build-route-error-payload";
 import { scrubAnalyticsString } from "./scrub-analytics-string";
 
-const ORIGINAL_PATHNAME = window.location.pathname;
+const ORIGINAL_LOCATION = window.location;
 
-function setPath(path: string): void {
+// The route lives in the fragment; the pathname is the deploy prefix and
+// nothing else. Both are set, so a regression that reads the wrong one shows
+// up as the prefix rather than as an empty string.
+function setLocation(parts: { pathname?: string; hash?: string }): void {
   Object.defineProperty(window, "location", {
     configurable: true,
-    value: { ...window.location, pathname: path },
+    value: { ...window.location, pathname: "/app/", hash: "", ...parts },
   });
 }
 
 describe("buildRouteErrorPayload", () => {
   beforeEach(() => {
-    setPath("/calendar");
+    setLocation({ hash: "#/calendar" });
   });
 
   afterEach(() => {
-    setPath(ORIGINAL_PATHNAME);
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: ORIGINAL_LOCATION,
+    });
   });
 
   describe("route", () => {
-    it("should use window.location.pathname", () => {
+    it("should read the route from the fragment, not the deploy prefix", () => {
       // Arrange
-      setPath("/calendar/2026-W18");
+      setLocation({ hash: "#/calendar/2026-W18" });
 
       // Act
       const out = buildRouteErrorPayload(
@@ -46,7 +52,7 @@ describe("buildRouteErrorPayload", () => {
 
     it("should scrub UUIDs in the route", () => {
       // Arrange
-      setPath("/workout/6e3ad6f0-1234-4cdf-9abc-1234567890ab");
+      setLocation({ hash: "#/workout/6e3ad6f0-1234-4cdf-9abc-1234567890ab" });
 
       // Act
       const out = buildRouteErrorPayload(
@@ -57,6 +63,39 @@ describe("buildRouteErrorPayload", () => {
 
       // Assert
       expect(out.route).toBe("/workout/<uuid>");
+    });
+
+    it("should report the root route for a bare fragment", () => {
+      // Arrange
+      setLocation({ hash: "#" });
+
+      // Act
+      const out = buildRouteErrorPayload(
+        new Error("x"),
+        { componentStack: "" },
+        scrubAnalyticsString
+      );
+
+      // Assert
+      expect(out.route).toBe("/");
+    });
+
+    it("should report the root route at the deploy prefix with no fragment", () => {
+      // Arrange
+      // What the address bar holds on a cold load of `/app/`: the router
+      // renders `/`, so anything that reported the prefix here would name a
+      // route the app never rendered.
+      setLocation({ pathname: "/app/", hash: "" });
+
+      // Act
+      const out = buildRouteErrorPayload(
+        new Error("x"),
+        { componentStack: "" },
+        scrubAnalyticsString
+      );
+
+      // Assert
+      expect(out.route).toBe("/");
     });
   });
 

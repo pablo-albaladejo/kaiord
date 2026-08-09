@@ -6,6 +6,13 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
+  // The production-base specs serve a real build. It is produced once, here,
+  // because two spec files sharing one `dist/` raced their own `vite build`
+  // calls and died on ENOTEMPTY whenever the workers overlapped.
+  globalSetup:
+    process.env.E2E_PROD_BASE === "1"
+      ? "./e2e/fixtures/prod-base-global-setup.ts"
+      : undefined,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -68,7 +75,14 @@ export default defineConfig({
     },
     {
       name: "Mobile-768",
-      use: { viewport: { width: 768, height: 1024 } },
+      use: {
+        viewport: { width: 768, height: 1024 },
+        // Chromium-backed like the other two chromium projects, and the
+        // copy/paste specs seed the clipboard directly. Without the grant
+        // they fail on `Write permission denied` — invisible until now
+        // because no CI job runs this project.
+        permissions: ["clipboard-read", "clipboard-write"],
+      },
     },
   ],
 

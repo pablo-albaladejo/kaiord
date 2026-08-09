@@ -8,7 +8,7 @@ function trackClicks(selector: string, event: string): void {
 
 export function setupAnalytics() {
   analytics.pageView(window.location.pathname);
-  trackClicks('a[href="/editor/"]', "editor-opened");
+  trackClicks('a[href="/app/"]', "editor-opened");
   trackClicks(
     'a[href^="https://github.com/pablo-albaladejo/kaiord"]',
     "github-opened"

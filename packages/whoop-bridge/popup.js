@@ -38,7 +38,7 @@
    renderChips, renderConsequence, renderSkeleton, renderCtas */
 
 const OPEN_WHOOP_URL = "https://app.whoop.com/";
-const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
+const OPEN_EDITOR_URL = "https://kaiord.com/app/";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {

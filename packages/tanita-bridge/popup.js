@@ -25,7 +25,7 @@
    renderConsequence, renderSkeleton, renderCtas */
 
 const OPEN_TANITA_URL = "https://mytanita.eu/en/user";
-const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
+const OPEN_EDITOR_URL = "https://kaiord.com/app/";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {

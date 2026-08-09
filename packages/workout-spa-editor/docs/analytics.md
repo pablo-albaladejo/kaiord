@@ -13,7 +13,7 @@ src/main.tsx
 
 The adapter (`src/adapters/analytics/umami-analytics.ts`) forwards each `event(name, props)` call to `window.umami.track(name, props)` — the global tracker Umami injects into the page when the website id is present.
 
-Page views are submitted manually. The editor loads the Umami tracker with `data-auto-track="false"` (Umami's automatic History-API tracking would record the full `/editor/…` URL), so `pageView(path)` calls `window.umami.track(props => ({ ...props, url: path }))` with the base-relative wouter path.
+Page views are submitted manually. The SPA loads the Umami tracker with `data-auto-track="false"`, so `pageView(path)` calls `window.umami.track(props => ({ ...props, url: path }))` with the base-relative wouter path. Auto-tracking is not merely noisier here, it is blind: it hooks the History API, and the route lives in the URL fragment, so every view in a session would be recorded as the deploy prefix `/app/`.
 
 When the runtime website id is absent, empty, or still equals the placeholder `__UMAMI_WEBSITE_ID__`, the adapter falls back to `createNoopAnalytics()` from `@kaiord/core` and no events are sent.
 

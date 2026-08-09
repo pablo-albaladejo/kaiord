@@ -28,15 +28,15 @@ const master = () => {
   const svg = read(MASTER);
   return {
     hull: svg.match(/\sd="([^"]+)"/)[1],
-    spokes: [...svg.matchAll(/<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"/g)].map(
-      (m) => [num(m[1]), num(m[2]), num(m[3]), num(m[4])]
-    ),
+    spokes: [
+      ...svg.matchAll(
+        /<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"/g
+      ),
+    ].map((m) => [num(m[1]), num(m[2]), num(m[3]), num(m[4])]),
     // The final circle is the core; the six before it are the outer nodes.
-    circles: [...svg.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"/g)].map((m) => [
-      num(m[1]),
-      num(m[2]),
-      num(m[3]),
-    ]),
+    circles: [
+      ...svg.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"/g),
+    ].map((m) => [num(m[1]), num(m[2]), num(m[3])]),
   };
 };
 
@@ -54,14 +54,14 @@ describe("mark geometry parity", () => {
 
     assert.ok(ts.includes(`"${hull}"`), "MARK_HULL diverged from the master");
 
-    const tsSpokes = [...ts.matchAll(/\[([\d.]+), ([\d.]+), ([\d.]+), ([\d.]+)\]/g)].map((m) =>
-      m.slice(1).map(num)
-    );
+    const tsSpokes = [
+      ...ts.matchAll(/\[([\d.]+), ([\d.]+), ([\d.]+), ([\d.]+)\]/g),
+    ].map((m) => m.slice(1).map(num));
     assert.deepEqual(tsSpokes, spokes, "MARK_SPOKES diverged from the master");
 
     const nodes = circles.slice(0, 6).map(([cx, cy]) => [cx, cy]);
-    const tsNodes = [...ts.matchAll(/^ {2}\[([\d.]+), ([\d.]+)\],$/gm)].map((m) =>
-      m.slice(1).map(num)
+    const tsNodes = [...ts.matchAll(/^ {2}\[([\d.]+), ([\d.]+)\],$/gm)].map(
+      (m) => m.slice(1).map(num)
     );
     assert.deepEqual(tsNodes, nodes, "MARK_NODES diverged from the master");
 
@@ -112,7 +112,10 @@ describe("mark geometry parity", () => {
     const live = read("assets/mark-core-live.svg");
 
     assert.equal(
-      live.replace('fill="var(--core-live, currentColor)"', 'fill="currentColor"'),
+      live.replace(
+        'fill="var(--core-live, currentColor)"',
+        'fill="currentColor"'
+      ),
       plain
     );
   });
@@ -121,8 +124,15 @@ describe("mark geometry parity", () => {
     for (const name of ["assets/favicon.svg", "assets/mark-app-icon.svg"]) {
       const svg = read(name);
       assert.equal(svg.match(/<line/g), null, `${name} still draws spokes`);
-      assert.equal(svg.match(/<circle/g).length, 1, `${name} draws more than the core`);
-      assert.ok(svg.includes(master().hull), `${name} hull diverged from the master`);
+      assert.equal(
+        svg.match(/<circle/g).length,
+        1,
+        `${name} draws more than the core`
+      );
+      assert.ok(
+        svg.includes(master().hull),
+        `${name} hull diverged from the master`
+      );
     }
   });
 });

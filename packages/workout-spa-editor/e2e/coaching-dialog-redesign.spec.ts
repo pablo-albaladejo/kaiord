@@ -35,9 +35,9 @@
  */
 
 import type { Page, Route } from "@playwright/test";
-import { expect, test } from "@playwright/test";
 
 import { mockLlmFailure, mockLlmSuccess } from "./fixtures/api-mocks";
+import { expect, test } from "./fixtures/base";
 import { LLM_CYCLING_RESPONSE } from "./fixtures/llm-responses";
 import {
   getGarminBridgeCallActions,

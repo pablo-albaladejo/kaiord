@@ -31,7 +31,7 @@ const SNAPSHOT_TIMEOUT_MS = 1_000;
 const ROLLUP_TIMEOUT_MS = 8_000;
 const ROLLUP_TTL_MS = 5 * 60 * 1_000;
 
-const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
+const OPEN_EDITOR_URL = "https://kaiord.com/app/";
 const OPEN_TRAIN2GO_URL = "https://app.train2go.com/user/index";
 
 // English fallback table consumed by the vendored msg() helper.

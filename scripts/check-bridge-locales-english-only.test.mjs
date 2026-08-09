@@ -55,8 +55,7 @@ test("every bridge _locales directory contains only English (en)", () => {
   const listed = offenders.slice(0, MAX_LISTED_OFFENDERS);
   const remaining = offenders.length - listed.length;
   const detail =
-    listed.join("\n  ") +
-    (remaining > 0 ? `\n  ...and ${remaining} more` : "");
+    listed.join("\n  ") + (remaining > 0 ? `\n  ...and ${remaining} more` : "");
 
   assert.equal(
     offenders.length,

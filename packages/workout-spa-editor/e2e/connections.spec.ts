@@ -19,7 +19,7 @@
  */
 import type { Page } from "@playwright/test";
 
-import { expect, test } from "./fixtures/base";
+import { appUrl, expect, test } from "./fixtures/base";
 import { installTrain2GoBridgeStub } from "./helpers/train2go-bridge-stub";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
@@ -142,7 +142,9 @@ test.describe("Connections page content", () => {
     // is page-scoped (`page.addInitScript`), so this one boots with no
     // extension at all. That is the user who uninstalls it and comes back.
     const gone = await page.context().newPage();
-    await gone.goto(CONNECTIONS_ROUTE);
+    // `appUrl` by hand: this page comes from the context, so it never passed
+    // through the fixture that translates a route into its address-bar form.
+    await gone.goto(appUrl(CONNECTIONS_ROUTE));
     await expect(gone.getByTestId("connections-tab")).toBeVisible({
       timeout: 15_000,
     });
