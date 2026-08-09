@@ -2,16 +2,23 @@
 
 ### Requirement: SPA route location lives in the URL fragment
 
-The `@kaiord/workout-spa-editor` SPA bootstrap (`packages/workout-spa-editor/src/main.tsx`) SHALL mount wouter with the hash location hook (`useHashLocation` from `wouter/use-hash-location`) rather than a `<Router base>` derived from the deploy prefix.
+The `@kaiord/workout-spa-editor` SPA bootstrap (`packages/workout-spa-editor/src/main.tsx`) SHALL mount wouter with a fragment location hook rather than a `<Router base>` derived from the deploy prefix.
 
 The requirement exists because the SPA is served by a static host that cannot rewrite. A route carried in the path can only answer 200 if a file exists at that path, and the SPA's routes include unbounded ones (`/workout/:id`, `/chat/:conversationId`) that cannot be generated at build time. Carrying the route in the fragment means the browser always requests the deploy prefix itself — a file that exists — so every route resolves in a single 200 response with no redirect and no error page painted on the way.
 
-Vite's `base` continues to govern **asset** URLs; only the route leaves the path. Because the hook owns serialisation, `<Link>`, `navigate()` and `useLocation()` are unaffected at every call site.
+The fragment SHALL carry the **whole** route, query string included, and the router's `searchHook` SHALL read the query from the fragment. Wouter's own `useHashLocation` splits the two — path in the fragment, query in `location.search` — and its navigation writes the search only when the target restates one, so a query outlives the route that set it. The SPA reads `useSearch()` on eight surfaces, including a date; a query that survives a navigation is a wrong day rendered, not a cosmetic difference.
 
-#### Scenario: Wouter is mounted with the hash hook
+Vite's `base` continues to govern **asset** URLs; only the route leaves the path. Because the hook owns serialisation, `<Link>`, `navigate()`, `useLocation()` and `useSearch()` are unaffected at every call site.
+
+#### Scenario: Wouter is mounted with the fragment hook
 
 - **WHEN** `packages/workout-spa-editor/src/main.tsx` is parsed and rendered
-- **THEN** the rendered tree SHALL include a wouter `<Router>` whose `hook` is `useHashLocation`, and SHALL NOT derive a router `base` from `import.meta.env.BASE_URL`
+- **THEN** the rendered tree SHALL include a wouter `<Router>` whose `hook` reads the location from the URL fragment, and SHALL NOT derive a router `base` from `import.meta.env.BASE_URL`
+
+#### Scenario: A navigation drops a query it does not restate
+
+- **WHEN** the app is at a route carrying a query (`/workout/new?date=2026-06-05`) and navigates to a route that states none (`/daily`)
+- **THEN** `useSearch()` SHALL report an empty search, exactly as it would under browser-location routing
 
 #### Scenario: A deep route answers 200 on the first request
 

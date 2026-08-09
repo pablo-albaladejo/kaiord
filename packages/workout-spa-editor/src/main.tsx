@@ -3,7 +3,6 @@ import "./index.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
-import { useHashLocation } from "wouter/use-hash-location";
 
 import { createUmamiAnalytics } from "./adapters/analytics/umami-analytics";
 import { withEncryption } from "./adapters/cloud-sync/encrypting-cloud-sync";
@@ -26,6 +25,7 @@ import { reloadOnceForChunkError } from "./lib/chunk-reload";
 import { getDeviceId } from "./lib/cloud-sync/device-id";
 import { getSyncPassphrase } from "./lib/cloud-sync/encryption-runtime";
 import { isEncryptionEnabled } from "./lib/cloud-sync/sync-encryption-pref";
+import { useFragmentLocation } from "./lib/fragment-location";
 import { getUmamiWebsiteId } from "./lib/runtime-config";
 
 // Recover from stale lazy chunks after a deploy: Vite fires `vite:preloadError`
@@ -60,7 +60,7 @@ createRoot(document.getElementById("root")!).render(
               <CoachingRegistryBootstrap>
                 <LocaleProvider>
                   <UnitsProvider>
-                    <Router hook={useHashLocation}>
+                    <Router hook={useFragmentLocation}>
                       <App />
                     </Router>
                   </UnitsProvider>

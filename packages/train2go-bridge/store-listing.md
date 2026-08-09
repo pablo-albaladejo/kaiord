@@ -10,7 +10,7 @@ Reads training plans from Train2Go coaching platform and bridges them to the Kai
 
 ## Detailed Description
 
-Kaiord Train2Go Bridge reads your training plans from the Train2Go coaching platform (https://app.train2go.com) and bridges them to the Kaiord workout editor (https://kaiord.com/editor). Import structured workouts from your coach directly into Kaiord for editing, conversion, and push to devices.
+Kaiord Train2Go Bridge reads your training plans from the Train2Go coaching platform (https://app.train2go.com) and bridges them to the Kaiord workout editor (https://kaiord.com/app). Import structured workouts from your coach directly into Kaiord for editing, conversion, and push to devices.
 
 Features:
 • Read weekly training plans from Train2Go

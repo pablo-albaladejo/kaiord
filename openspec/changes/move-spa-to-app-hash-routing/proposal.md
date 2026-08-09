@@ -22,7 +22,9 @@ The existing e2e suite is worth naming: `spa-route-refresh.spec.ts` pins five sc
 
 ## What Changes
 
-**The route leaves the path.** Wouter is mounted with `useHashLocation` (`wouter/use-hash-location`, already available in the pinned 3.10) instead of `<Router base>`. The browser requests `/app/`, which is a real file, so every route — including `/app/#/workout/<uuid>` — resolves in one 200 request with no redirect and no flash.
+**The route leaves the path.** Wouter is mounted with a fragment location hook instead of `<Router base>`. The browser requests `/app/`, which is a real file, so every route — including `/app/#/workout/<uuid>` — resolves in one 200 request with no redirect and no flash.
+
+The hook is ours (`src/lib/fragment-location.ts`, ~60 lines) rather than wouter's shipped `useHashLocation`, for one reason found by running the suite against it: wouter keeps the path in the fragment but the query in `location.search`, and its `navigate` writes the search **only when the target restates one**. A query therefore outlives the route that set it — open `/workout/new?date=2026-06-05`, leave for `/daily`, and the stale date arrives with you, rendering the wrong day. The SPA reads `useSearch()` on eight surfaces. Putting the whole route in the fragment, with a matching `searchHook`, keeps navigation semantics identical to the browser location the app was written against.
 
 **`/editor` becomes `/app`.** Vite's `VITE_BASE_PATH`, the merged-dist layout, the landing's links and the five bridge popups follow.
 

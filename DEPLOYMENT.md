@@ -754,7 +754,7 @@ The Workout SPA Editor is automatically deployed to GitHub Pages whenever change
 3. Verifies build artifacts exist
 4. Deploys to GitHub Pages
 
-**Live URL**: https://kaiord.com/editor/
+**Live URL**: https://kaiord.com/app/
 
 ## Automated Deployment
 
@@ -796,7 +796,7 @@ The deployment workflow (`.github/workflows/deploy-spa-editor.yml`) automaticall
 1. **View workflow runs**: Go to [Actions tab](https://github.com/pablo-albaladejo/kaiord/actions)
 2. **Check deployment status**: Look for "Deploy Workout SPA Editor to GitHub Pages" workflow
 3. **View logs**: Click on a workflow run to see detailed logs
-4. **Verify deployment**: Visit https://kaiord.com/editor/
+4. **Verify deployment**: Visit https://kaiord.com/app/
 
 ### Deployment Notifications
 
@@ -842,7 +842,7 @@ The deployment workflow (`.github/workflows/deploy-spa-editor.yml`) automaticall
    - Deployment typically takes 2-3 minutes
 
 5. **Verify deployment**:
-   - Visit https://kaiord.com/editor/
+   - Visit https://kaiord.com/app/
    - Test core functionality (load, edit, save workout)
    - Check browser console for errors
 

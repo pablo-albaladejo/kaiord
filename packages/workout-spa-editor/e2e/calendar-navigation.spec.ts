@@ -89,10 +89,12 @@ test.describe("Calendar Navigation", () => {
     // bare /calendar replace-redirects to the CURRENT week's grid, so the
     // URL must leave the seeded 2026-W15 (a plain week-id pattern would
     // match the starting URL and resolve before the navigation).
+    // The route is in the fragment; `pathname` is the deploy prefix and never
+    // moves, so a predicate reading it would wait out the timeout.
     await page.waitForURL(
       (url) =>
-        /\/calendar\/\d{4}-W\d{2}$/.test(url.pathname) &&
-        !url.pathname.endsWith("/2026-W15")
+        /^#\/calendar\/\d{4}-W\d{2}$/.test(url.hash) &&
+        !url.hash.endsWith("/2026-W15")
     );
     await expect(page.getByTestId("week-navigation")).toBeVisible();
 

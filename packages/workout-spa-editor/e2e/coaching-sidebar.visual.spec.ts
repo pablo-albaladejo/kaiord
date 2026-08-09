@@ -8,8 +8,7 @@
  * Closes #554.
  */
 
-import { expect, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures/base";
 import { clearDexie, getWeekDates } from "./helpers/seed-dexie";
 import { seedMatchedCoachingWorkout } from "./helpers/seed-matched-coaching-workout";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
