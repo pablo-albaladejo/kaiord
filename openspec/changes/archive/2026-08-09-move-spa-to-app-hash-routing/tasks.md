@@ -29,6 +29,6 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Unit + full chromium e2e green
-- [ ] 5.2 Prod-base e2e (`E2E_PROD_BASE=1`) green against the merged artifact
-- [ ] 5.3 After deploy, measure production directly: `/app/`, `/app/#/calendar/<week>` and a `/app/#/workout/<uuid>` all answer 200 with no intermediate request, and a legacy `/editor/*` still lands correctly
+- [x] 5.1 Unit + full chromium e2e green — unit 6488, chromium 302, and the full six-project matrix on `main` (chromium, firefox 284, webkit, Mobile Chrome, Mobile Safari) all green
+- [x] 5.2 Prod-base e2e (`E2E_PROD_BASE=1`) green against the merged artifact — 11/11, and red-proven: reverting the router turns 9 of the 10 red
+- [x] 5.3 After deploy, measure production directly: `/app/`, `/app/#/calendar/<week>` and a `/app/#/workout/<uuid>` all answer 200 with no intermediate request, and a legacy `/editor/*` still lands correctly — 5/5 in a real browser, each with exactly one document response at 200; the legacy path costs its single `[404, 200]` bounce. The redirect script sits at byte 110 of the served `404.html`, with `<body` at 3166 (it was at 3208, behind a `</body>` that closed at 3161)
