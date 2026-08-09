@@ -2,7 +2,7 @@
 
 ### Requirement: Editor tracks route render errors
 
-The system SHALL call `analytics.event('route-error', payload)` when `RouteErrorBoundary.componentDidCatch` is triggered. The payload SHALL contain four string fields, each first scrubbed through a shared `scrubAnalyticsString` helper, then truncated:
+The system SHALL call `analytics.event('route-error', payload)` when `RouteErrorBoundary.componentDidCatch` is triggered. The payload SHALL contain four string fields, each first scrubbed through a shared `scrubAnalyticsString` helper. Two of them are then truncated (`message`, `componentStack`); `route` and `name` are not, because both are bounded by construction — the router owns the route vocabulary and error class names are short:
 
 - `route: string` — **the SPA route that was rendering**, scrubbed; not truncated (route paths are bounded by the router). The route SHALL be read through the router's own location reader, not from `window.location.pathname` and not from a second parse of the URL. Once the route lives in the URL fragment, `pathname` is the deploy prefix for every route, so a payload built from it would report the same value for every error and the field would stop answering the only question it exists to answer. A hand-rolled fragment parse is barely better: at the deploy prefix the fragment is empty, and any reader that does not normalise it exactly as the router does names a route the app never rendered.
 - `name: string` — `error.name` (defaulting to `"Error"` when `error.name` is `undefined`, `null`, or empty), scrubbed; not truncated (error class names are bounded).
