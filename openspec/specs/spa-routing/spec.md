@@ -8,51 +8,6 @@ Routing and surface-classification rules for the SPA editor: how URLs are derive
 
 ## Requirements
 
-### Requirement: SPA router base alignment with Vite deploy base
-
-The `@kaiord/workout-spa-editor` SPA bootstrap (`packages/workout-spa-editor/src/main.tsx`) SHALL wrap `<App />` in wouter's `<Router>` component with a `base` prop derived from `import.meta.env.BASE_URL`. The derivation SHALL strip the trailing slash that Vite always emits, yielding an empty string in dev (`BASE_URL = "/"` → `base = ""`) or a path without trailing slash in production (`BASE_URL = "/editor/"` → `base = "/editor"`).
-
-The strip is centralised in a pure helper `computeRouterBase(baseUrl: string): string` exported from `packages/workout-spa-editor/src/router-base.ts` so the rule is testable without rendering the JSX tree. Vite's `BASE_URL` always begins and ends with `/` (verified in Vite's `resolveBaseUrl`); the helper relies on that invariant and the unit test catches any future divergence.
-
-The requirement exists to prevent a subpath-deployed SPA from emitting URLs that diverge from the deploy path. Without `<Router base>`, wouter's catch-all redirect to the current week's calendar writes `/calendar/<current week>` to the address bar even though the SPA itself is served from `/editor/`. On refresh, GitHub Pages cannot serve `/calendar` because no asset lives at that path, falls back to the landing's blue 404, and the previously-shipped rafgraph fallback (rooted under `cleanup-open-issues-may-2026`, scoped to `/editor/*` paths) does not match. Aligning wouter's base with Vite's deploy base closes this class of bug at the source. The two requirements compose: rafgraph restores the URL pre-mount, then wouter's base resolves the deep route.
-
-A unit test (`packages/workout-spa-editor/src/router-base.test.ts`) SHALL exercise `computeRouterBase` against representative inputs (`/`, `/editor/`, `/a/b/`, ``). An end-to-end test (`packages/workout-spa-editor/e2e/spa-route-refresh.spec.ts`, gated by `E2E_PROD_BASE=1`) SHALL build the SPA with `VITE_BASE_PATH=/editor/`, serve the merged dist via a static file server that returns 404 for unknown paths (no SPA fallback, mimicking GitHub Pages exactly), and verify a deep URL refresh keeps the SPA bundle and the route.
-
-#### Scenario: Wouter is wrapped at SPA bootstrap
-
-- **WHEN** `packages/workout-spa-editor/src/main.tsx` is parsed and rendered
-- **THEN** the rendered tree SHALL include a wouter `<Router base={...}>` wrapping `<App />`, where `base` is the value returned by `computeRouterBase(import.meta.env.BASE_URL)`
-
-#### Scenario: computeRouterBase strips the Vite trailing slash
-
-- **WHEN** `computeRouterBase` is invoked with each of `"/"`, `"/editor/"`, `"/a/b/"`, `""`
-- **THEN** the helper SHALL return `""`, `"/editor"`, `"/a/b"`, `""` respectively
-
-#### Scenario: Production base produces deploy-prefixed URLs
-
-- **WHEN** the SPA is built with `VITE_BASE_PATH=/editor/` and a user navigates from the SPA root to the calendar route
-- **THEN** the address bar SHALL read a URL prefixed with `/editor/` (e.g. `/editor/calendar`), NOT a root-relative URL (`/calendar`)
-
-#### Scenario: Refreshing a deep SPA URL keeps the SPA
-
-- **WHEN** the SPA is served via a static file server that returns 404 for unknown paths (no SPA fallback) and the user refreshes a deep URL such as `/editor/calendar`
-- **THEN** the static host SHALL serve the merged-dist `404.html`, the previously-shipped rafgraph fallback SHALL restore the URL pre-mount (per the existing rafgraph injection helper at `scripts/inject-spa-fallback.mjs`), the SPA's router SHALL strip the configured base before route matching, and the calendar view SHALL re-render — no blue 404 page
-
-#### Scenario: Dev-mode behaviour is unchanged
-
-- **WHEN** the SPA runs under `pnpm dev` (Vite dev server, `BASE_URL = "/"`) and a user navigates to the calendar route
-- **THEN** the address bar SHALL read `/calendar` with no `/editor/` prefix; wouter base resolves to the empty string in dev so this scenario asserts the fix is non-disruptive at the dev path
-
-#### Scenario: Analytics paths remain base-relative
-
-- **WHEN** the SPA runs in production base (`/editor/`) and the user navigates to the calendar route, triggering an analytics page-view event
-- **THEN** the analytics emitter SHALL have been invoked at least once (guards against a future refactor that silently stops emitting page views), AND the captured path SHALL be `/calendar` (the router's base-stripped value), NOT `/editor/calendar`. Existing analytics dashboards see the same paths as before the fix
-
-#### Scenario: Garbage path under the deploy base resolves to the catch-all
-
-- **WHEN** a user requests `/editor/<malformed-path>` directly (cold) on a Pages-equivalent host
-- **THEN** the rafgraph round-trip SHALL restore the URL, the SPA's router SHALL strip the configured base, the SPA's catch-all route SHALL redirect to the default view (current week's calendar), the URL bar SHALL settle at `/editor/calendar/<current week>`, and no infinite redirect loop or XSS SHALL occur (the address bar containing user-supplied characters is treated as a path string by `history.replaceState`, never as HTML)
-
 ### Requirement: SPA surface classification (routed-page vs modal)
 
 Each SPA editor surface (top-level UI region invoked from a header control or
@@ -507,3 +462,61 @@ the moment it arrives.
 - **GIVEN** a bridge with no session prober, which announced itself once and can never report a live session
 - **WHEN** the attention model is derived
 - **THEN** that bridge SHALL NOT be counted, and its own card SHALL read as installed rather than as needing attention
+
+### Requirement: SPA route location lives in the URL fragment
+
+The `@kaiord/workout-spa-editor` SPA bootstrap (`packages/workout-spa-editor/src/main.tsx`) SHALL mount wouter with a fragment location hook rather than a `<Router base>` derived from the deploy prefix.
+
+The requirement exists because the SPA is served by a static host that cannot rewrite. A route carried in the path can only answer 200 if a file exists at that path, and the SPA's routes include unbounded ones (`/workout/:id`, `/chat/:conversationId`) that cannot be generated at build time. Carrying the route in the fragment means the browser always requests the deploy prefix itself — a file that exists — so every route resolves in a single 200 response with no redirect and no error page painted on the way.
+
+The fragment SHALL carry the **whole** route, query string included, and the router's `searchHook` SHALL read the query from the fragment. Wouter's own `useHashLocation` splits the two — path in the fragment, query in `location.search` — and its navigation writes the search only when the target restates one, so a query outlives the route that set it. The SPA reads `useSearch()` on eight surfaces, including a date; a query that survives a navigation is a wrong day rendered, not a cosmetic difference.
+
+Vite's `base` continues to govern **asset** URLs; only the route leaves the path. Because the hook owns serialisation, `<Link>`, `navigate()`, `useLocation()` and `useSearch()` are unaffected at every call site.
+
+#### Scenario: Wouter is mounted with the fragment hook
+
+- **WHEN** `packages/workout-spa-editor/src/main.tsx` is parsed and rendered
+- **THEN** the rendered tree SHALL include a wouter `<Router>` whose `hook` reads the location from the URL fragment, and SHALL NOT derive a router `base` from `import.meta.env.BASE_URL`
+
+#### Scenario: A navigation drops a query it does not restate
+
+- **WHEN** the app is at a route carrying a query (`/workout/new?date=2026-06-05`) and navigates to a route that states none (`/daily`)
+- **THEN** `useSearch()` SHALL report an empty search, exactly as it would under browser-location routing
+
+#### Scenario: A deep route answers 200 on the first request
+
+- **WHEN** a cold request is made to a deep SPA URL on a Pages-equivalent host that returns 404 for unknown paths — including an unbounded route such as `/app/#/workout/<uuid>`
+- **THEN** the host SHALL answer **200** for the requested path, the response SHALL be the SPA shell, and no error page SHALL be served or painted at any point
+
+#### Scenario: Refreshing a deep route keeps the route
+
+- **WHEN** the user refreshes while on a deep route
+- **THEN** the address bar SHALL still read that route, the SPA SHALL render it, and exactly one document request SHALL have been made
+
+#### Scenario: Analytics paths remain base-relative
+
+- **WHEN** the SPA runs at its deploy prefix and the user navigates to the calendar route, triggering an analytics page-view
+- **THEN** the analytics emitter SHALL have been invoked at least once with a base-relative path (`/calendar`), NOT with the deploy prefix and NOT with a fragment marker
+
+#### Scenario: Garbage route resolves to the catch-all
+
+- **WHEN** a malformed route is requested directly (cold)
+- **THEN** the deploy prefix SHALL answer 200, the SPA's catch-all SHALL resolve, and the user SHALL land on the default route
+
+### Requirement: Legacy path URLs bridge into the fragment form
+
+URLs that carry the route in the path (`/editor/<route>`, and the narrow root-level allowlist) SHALL continue to reach the corresponding route, for as long as the site exists.
+
+The bridge is deliberately open-ended rather than a deprecation window. Five published Chrome extensions carry `https://kaiord.com/editor/` in their popups, and their store updates are gated on a review outside this project's control; a bridge with a sunset would break them on a date nobody here chooses. Such URLs are served by the host's `404.html`, so they still cost one error response — what the change removes is the app ever _producing_ one.
+
+The redirect script SHALL be injected into `<head>`, before any visible markup, so a legacy URL never paints an error page before it moves. `scripts/inject-spa-fallback.mjs` SHALL verify the snippet's **position**, not merely its presence: the appended-at-end placement is the state that produced a visible error page on every deep link while the presence check passed.
+
+#### Scenario: A legacy path URL lands on the right route
+
+- **WHEN** `/editor/calendar/2026-W32` is requested cold
+- **THEN** the user SHALL end on the corresponding fragment route with the calendar week rendered
+
+#### Scenario: The injector rejects an appended snippet
+
+- **WHEN** the redirect snippet is appended after the document's visible markup instead of injected into `<head>`
+- **THEN** `inject-spa-fallback` SHALL fail, naming the position rather than reporting the snippet as present

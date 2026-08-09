@@ -304,9 +304,9 @@ The system SHALL call `analytics.event('workout-created', { source: 'manual' })`
 
 ### Requirement: Editor tracks route render errors
 
-The system SHALL call `analytics.event('route-error', payload)` when `RouteErrorBoundary.componentDidCatch` is triggered. The payload SHALL contain four string fields, each first scrubbed through a shared `scrubAnalyticsString` helper, then truncated:
+The system SHALL call `analytics.event('route-error', payload)` when `RouteErrorBoundary.componentDidCatch` is triggered. The payload SHALL contain four string fields, each first scrubbed through a shared `scrubAnalyticsString` helper. Two of them are then truncated (`message`, `componentStack`); `route` and `name` are not, because both are bounded by construction — the router owns the route vocabulary and error class names are short:
 
-- `route: string` — `window.location.pathname` at the time of the error, scrubbed; not truncated (route paths are bounded by the router).
+- `route: string` — **the SPA route that was rendering**, scrubbed; not truncated (route paths are bounded by the router). The route SHALL be read through the router's own location reader, not from `window.location.pathname` and not from a second parse of the URL. Once the route lives in the URL fragment, `pathname` is the deploy prefix for every route, so a payload built from it would report the same value for every error and the field would stop answering the only question it exists to answer. A hand-rolled fragment parse is barely better: at the deploy prefix the fragment is empty, and any reader that does not normalise it exactly as the router does names a route the app never rendered.
 - `name: string` — `error.name` (defaulting to `"Error"` when `error.name` is `undefined`, `null`, or empty), scrubbed; not truncated (error class names are bounded).
 - `message: string` — `error.message` scrubbed and then truncated to ≤ 500 characters (defaulting to the empty string when `error.message` is `undefined`, `null`, or empty).
 - `componentStack: string` — `info.componentStack` scrubbed and then truncated to ≤ 1000 characters (defaulting to the empty string when missing).
@@ -331,7 +331,7 @@ The default `noop` adapter MUST continue to accept this richer payload without b
 
 - **GIVEN** `RouteErrorBoundary` is mounted with a real (non-noop) `analytics` prop
 - **WHEN** a route component throws an `Error("not found: 6e3ad6f0-1234-4cdf-9abc-1234567890ab")` and React invokes `componentDidCatch(error, info)`
-- **THEN** `analytics.event` is called with event name `'route-error'` and a payload whose `message` is `"not found: <uuid>"`, whose `name` is `"Error"`, whose `route` equals `window.location.pathname` (with any UUID/email/Bearer/hex run replaced by its placeholder), and whose `componentStack` equals `info.componentStack` scrubbed and truncated to ≤ 1000 chars
+- **THEN** `analytics.event` is called with event name `'route-error'` and a payload whose `message` is `"not found: <uuid>"`, whose `name` is `"Error"`, whose `route` equals the SPA route being rendered (with any UUID/email/Bearer/hex run replaced by its placeholder), and whose `componentStack` equals `info.componentStack` scrubbed and truncated to ≤ 1000 chars
 
 #### Scenario: Bearer tokens, emails, and long hex runs are scrubbed
 
@@ -352,7 +352,7 @@ The default `noop` adapter MUST continue to accept this richer payload without b
 #### Scenario: Empty / missing fields fall back to safe defaults
 
 - **WHEN** `componentDidCatch` is invoked with an error object whose `name` is `undefined` and `message` is `undefined`, and an `info.componentStack` that is `undefined`
-- **THEN** the payload sent to analytics is `{ route: <scrubbed pathname>, name: "Error", message: "", componentStack: "" }`
+- **THEN** the payload sent to analytics is `{ route: <scrubbed route>, name: "Error", message: "", componentStack: "" }`
 
 #### Scenario: Truncation applies after scrubbing at exact bounds
 
@@ -371,3 +371,18 @@ The default `noop` adapter MUST continue to accept this richer payload without b
 
 - **WHEN** the supplied `analytics.event` implementation throws synchronously while reporting `route-error`
 - **THEN** the error boundary still renders the fallback UI and does not surface a secondary error
+
+#### Scenario: Route error names the failing route, not the deploy prefix
+
+- **WHEN** a render error is caught while the SPA is on a deep route carried in the URL fragment
+- **THEN** the payload's `route` SHALL be that route, NOT the deploy prefix shared by every route
+
+#### Scenario: Two errors on different routes report different routes
+
+- **WHEN** a render error is caught on one route and then on another
+- **THEN** the two payloads SHALL carry different `route` values, which is the property a `pathname`-derived field silently loses once the route moves into the fragment
+
+#### Scenario: An error at the deploy prefix reports the root route
+
+- **WHEN** a render error is caught on a cold load of the deploy prefix, where the fragment is empty
+- **THEN** the payload's `route` SHALL be `/` — the route the router resolved and rendered — and NOT the deploy prefix

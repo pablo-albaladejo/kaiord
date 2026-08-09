@@ -1,3 +1,5 @@
+> Completed: 2026-08-09
+
 ## Why
 
 Every deep URL of the SPA answers **HTTP 404 on the way in**. Measured against production:

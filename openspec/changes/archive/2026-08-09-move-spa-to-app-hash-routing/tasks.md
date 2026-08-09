@@ -29,6 +29,6 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Unit + full chromium e2e green
-- [ ] 5.2 Prod-base e2e (`E2E_PROD_BASE=1`) green against the merged artifact
-- [ ] 5.3 After deploy, measure production directly: `/app/`, `/app/#/calendar/<week>` and a `/app/#/workout/<uuid>` all answer 200 with no intermediate request, and a legacy `/editor/*` still lands correctly
+- [x] 5.1 Unit + full chromium e2e green — unit 6488 and Chromium 302 green. Locally the six-project matrix ran 1700 passed; on `main`, CI's cross-browser workflow runs **five** projects (Chromium, firefox 284, webkit, Mobile Chrome, Mobile Safari), all green. The sixth, `Mobile-768`, is defined in the config but run by no CI job — tracked in #1162
+- [x] 5.2 Prod-base e2e (`E2E_PROD_BASE=1`) green against the merged artifact — 11/11, and red-proven: reverting the router turns 9 of the 10 red
+- [x] 5.3 After deploy, measure production directly: `/app/`, `/app/#/calendar/<week>` and a `/app/#/workout/<uuid>` all answer 200 with no intermediate request, and a legacy `/editor/*` still lands correctly — 5/5 in a real browser. The four fragment-route checks (`/app/`, a calendar week, a workout UUID, and a route carrying a query) each recorded **exactly one document response, status 200**. The fifth is the legacy bridge, which by design records two — `[404, 200]` — and lands on the right fragment route; that bounce is the one cost the change does not remove and cannot, since the host has no file at the legacy path. The redirect script sits at byte 110 of the served `404.html`, with `<body` at 3166 (it was at 3208, behind a `</body>` that closed at 3161)

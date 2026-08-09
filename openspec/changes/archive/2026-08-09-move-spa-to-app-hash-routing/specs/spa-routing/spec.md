@@ -1,4 +1,4 @@
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: SPA route location lives in the URL fragment
 
@@ -39,8 +39,6 @@ Vite's `base` continues to govern **asset** URLs; only the route leaves the path
 
 - **WHEN** a malformed route is requested directly (cold)
 - **THEN** the deploy prefix SHALL answer 200, the SPA's catch-all SHALL resolve, and the user SHALL land on the default route
-
-## ADDED Requirements
 
 ### Requirement: Legacy path URLs bridge into the fragment form
 
