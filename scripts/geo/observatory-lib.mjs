@@ -45,6 +45,26 @@ export const appendJsonl = (file, entry, keyFields = ["date", "source"]) => {
   return true;
 };
 
+// Writes `content` to `path` unless it is unchanged from the file already on
+// disk once `stripPattern` is normalized away in both — used by generated
+// reports whose only line that always changes (a timestamp) would otherwise
+// make every run look like a real content change. Returns whether it wrote.
+export const writeIfChanged = (path, content, stripPattern) => {
+  const normalize = (text) =>
+    stripPattern ? text.replace(stripPattern, "") : text;
+  let existing;
+  try {
+    existing = readFileSync(path, "utf8");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    writeFileSync(path, content);
+    return true;
+  }
+  if (normalize(existing) === normalize(content)) return false;
+  writeFileSync(path, content);
+  return true;
+};
+
 export const writeSnapshot = (name, data) => {
   mkdirSync(snapshotsDir, { recursive: true });
   const file = join(snapshotsDir, `${name}.json`);

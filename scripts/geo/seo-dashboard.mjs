@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 // Renders reports/seo/DASHBOARD.md from the observatory time series so trends
 // are reviewable in the repo (and in the weekly PR diff) without tooling.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   loadQueries,
   readJsonl,
   seoDir,
   timeseriesDir,
+  writeIfChanged,
 } from "./observatory-lib.mjs";
 
 const gsc = readJsonl(join(timeseriesDir, "gsc.jsonl"));
@@ -162,5 +163,16 @@ for (const [name, status] of Object.entries(directoryStatus.directories)) {
 }
 lines.push("");
 
-writeFileSync(join(seoDir, "DASHBOARD.md"), `${lines.join("\n")}\n`);
-console.log(`[dashboard] wrote reports/seo/DASHBOARD.md`);
+// Skip the write when nothing but the timestamp would change — a fresh
+// _Generated line on every run makes the weekly workflow treat a no-op
+// dashboard regeneration as a real metric change and open a noise PR.
+const wrote = writeIfChanged(
+  join(seoDir, "DASHBOARD.md"),
+  `${lines.join("\n")}\n`,
+  /^_Generated .+$/m
+);
+console.log(
+  wrote
+    ? `[dashboard] wrote reports/seo/DASHBOARD.md`
+    : "[dashboard] no content change — leaving reports/seo/DASHBOARD.md untouched"
+);
