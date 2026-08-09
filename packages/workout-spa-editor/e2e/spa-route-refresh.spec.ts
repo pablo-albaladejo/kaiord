@@ -9,9 +9,8 @@
  * counts document responses, and a 404 among them is a failure.
  */
 
-import type { Page } from "@playwright/test";
-
 import { expect, test } from "./fixtures/base";
+import { documentStatuses } from "./fixtures/document-statuses";
 import {
   APP_BASE,
   type MergedDist,
@@ -21,17 +20,6 @@ import {
 const ENABLED = process.env.E2E_PROD_BASE === "1";
 const RENDER_TIMEOUT_MS = 15_000;
 const SETTLED_WEEK = /^#\/calendar\/\d{4}-W\d{2}$/;
-
-/** Statuses of the document responses, in order. Register before navigating. */
-function documentStatuses(page: Page): number[] {
-  const statuses: number[] = [];
-  page.on("response", (response) => {
-    if (response.request().resourceType() === "document") {
-      statuses.push(response.status());
-    }
-  });
-  return statuses;
-}
 
 test.describe("@spa-route-refresh SPA routes on the static host", () => {
   test.skip(!ENABLED, "Production-base e2e gated behind E2E_PROD_BASE=1");

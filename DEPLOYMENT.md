@@ -760,13 +760,13 @@ The Workout SPA Editor is automatically deployed to GitHub Pages whenever change
 
 ### Workflow Triggers
 
-The deployment workflow (`.github/workflows/deploy-spa-editor.yml`) automatically runs when:
+The deployment workflow (`.github/workflows/deploy-site.yml`) automatically runs when:
 
 - **Push to main**: Changes are pushed to the `main` branch
 - **Relevant files changed**:
   - `packages/workout-spa-editor/**` (SPA source files)
   - `packages/core/**` (core package files)
-  - `.github/workflows/deploy-spa-editor.yml` (workflow file)
+  - `.github/workflows/deploy-site.yml` (workflow file)
 - **Manual trigger**: Via GitHub Actions UI (workflow_dispatch)
 
 ### Deployment Process
@@ -820,7 +820,7 @@ The deployment workflow (`.github/workflows/deploy-spa-editor.yml`) automaticall
    # From repository root
    pnpm install --frozen-lockfile
    pnpm --filter @kaiord/core build
-   VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
+   VITE_BASE_PATH="/app/" pnpm --filter @kaiord/workout-spa-editor build
    ```
 
 2. **Verify build**:
@@ -863,7 +863,7 @@ If a deployment introduces critical issues:
    - Click "Re-run all jobs"
 
 3. **Or disable workflow temporarily**:
-   - Edit `.github/workflows/deploy-spa-editor.yml`
+   - Edit `.github/workflows/deploy-site.yml`
    - Comment out the `on:` triggers
    - Push to main
 
@@ -884,7 +884,7 @@ If a deployment introduces critical issues:
    pnpm --filter @kaiord/core build
 
    # Build SPA
-   VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
+   VITE_BASE_PATH="/app/" pnpm --filter @kaiord/workout-spa-editor build
    ```
 
 2. **Verify artifacts**:
@@ -914,17 +914,17 @@ If a deployment introduces critical issues:
    pnpm preview
    ```
 
-   Note: Local preview uses `/` as base path, not `/kaiord/`. To test with the correct base path, use a local server:
+   Note: Local preview uses `/` as base path, not `/app/`. To test with the correct base path, use a local server:
 
    ```bash
    # Using Python
    cd packages/workout-spa-editor/dist
    python3 -m http.server 8000
-   # Visit http://localhost:8000/kaiord/ (note the trailing slash)
+   # Visit http://localhost:8000/app/ (note the trailing slash)
 
    # Using Node.js serve
    npx serve packages/workout-spa-editor/dist -p 8000
-   # Visit http://localhost:8000/kaiord/
+   # Visit http://localhost:8000/app/
    ```
 
 ## Troubleshooting
@@ -971,7 +971,7 @@ pnpm --filter @kaiord/workout-spa-editor build
 
 3. **Verify branch**:
    - Ensure pushing to `main` branch
-   - Check workflow triggers in `.github/workflows/deploy-spa-editor.yml`
+   - Check workflow triggers in `.github/workflows/deploy-site.yml`
 
 #### 3. Assets Fail to Load (404 on CSS/JS)
 
@@ -991,13 +991,13 @@ pnpm --filter @kaiord/workout-spa-editor build
 2. **Verify in index.html**:
 
    ```bash
-   # Should show /kaiord/assets/...
+   # Should show /app/assets/...
    grep 'src="' packages/workout-spa-editor/dist/index.html
    ```
 
 3. **Rebuild with correct base path**:
    ```bash
-   VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
+   VITE_BASE_PATH="/app/" pnpm --filter @kaiord/workout-spa-editor build
    ```
 
 #### 4. Workflow Fails: "Frozen lockfile validation failed"
@@ -1058,10 +1058,10 @@ git push origin main
 1. **Test with correct base path**:
 
    ```bash
-   VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
+   VITE_BASE_PATH="/app/" pnpm --filter @kaiord/workout-spa-editor build
    cd packages/workout-spa-editor/dist
    python3 -m http.server 8000
-   # Visit http://localhost:8000/kaiord/
+   # Visit http://localhost:8000/app/
    ```
 
 2. **Check for hardcoded URLs**:
@@ -1140,10 +1140,10 @@ Required GitHub repository settings:
 
 The deployment workflow uses these environment variables:
 
-| Variable         | Value      | Purpose                            |
-| ---------------- | ---------- | ---------------------------------- |
-| `VITE_BASE_PATH` | `/kaiord/` | Base path for GitHub Pages routing |
-| `NODE_VERSION`   | `20`       | Node.js version for build          |
+| Variable         | Value   | Purpose                            |
+| ---------------- | ------- | ---------------------------------- |
+| `VITE_BASE_PATH` | `/app/` | Base path for GitHub Pages routing |
+| `NODE_VERSION`   | `20`    | Node.js version for build          |
 
 ### Base Path Logic
 
@@ -1160,11 +1160,15 @@ VITE_BASE_PATH: ${{
 - **User/Org page** (`owner.github.io`): Base path = `/`
 - **Project page** (`owner/repo`): Base path = `/repo/`
 
-For this repository (`pablo-albaladejo/kaiord`):
+Neither applies here. The site is served from the custom domain `kaiord.com`
+as one merged artifact, so the prefix is stated explicitly rather than derived
+from the repository name:
 
-- Repository name: `kaiord`
-- Owner: `pablo-albaladejo`
-- Not a user/org page → Base path: `/kaiord/`
+- Base path: `/app/`, set by `VITE_BASE_PATH` in `.github/workflows/deploy-site.yml`
+
+The base path governs **asset** URLs only; the route lives in the URL fragment
+(`/app/#/calendar/2026-W32`) so every deep link resolves in a single 200
+response. See `openspec/specs/spa-routing/spec.md`.
 
 ### Vite Configuration
 
@@ -1195,7 +1199,7 @@ on:
     paths:
       - "packages/workout-spa-editor/**"
       - "packages/core/**"
-      - ".github/workflows/deploy-spa-editor.yml"
+      - ".github/workflows/deploy-site.yml"
   workflow_dispatch: # Allow manual triggering
 
 # Required permissions for GitHub Pages deployment

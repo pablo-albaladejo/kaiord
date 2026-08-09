@@ -10,8 +10,13 @@ import {
   useFragmentLocation,
 } from "./fragment-location";
 
+// The deploy prefix is part of what is under test: the whole point is that the
+// path the host is asked for never moves, so the fixture has to sit on a real
+// prefix rather than the root, where "it did not move" is true for free.
+const DEPLOY_PREFIX = "/app/";
+
 function setFragment(hash: string): void {
-  window.history.replaceState(null, "", hash === "" ? "/" : hash);
+  window.history.replaceState(null, "", `${DEPLOY_PREFIX}${hash}`);
 }
 
 describe("fragmentPath", () => {
@@ -146,7 +151,7 @@ describe("navigateFragment", () => {
 
     // Assert
     // The pathname is what the host is asked for, and it never moves.
-    expect(window.location.pathname).toBe("/");
+    expect(window.location.pathname).toBe(DEPLOY_PREFIX);
   });
 });
 

@@ -30,13 +30,13 @@ The Workout SPA Editor is deployed at: https://kaiord.com/app/
 
 ### Automated Deployment
 
-The deployment workflow (`.github/workflows/deploy-spa-editor.yml`) automatically runs when:
+The deployment workflow (`.github/workflows/deploy-site.yml`) automatically runs when:
 
 - **Push to main**: Changes are pushed to the `main` branch
 - **Relevant files changed**:
   - `packages/workout-spa-editor/**` (SPA source files)
   - `packages/core/**` (core package files)
-  - `.github/workflows/deploy-spa-editor.yml` (workflow file)
+  - `.github/workflows/deploy-site.yml` (workflow file)
 - **Manual trigger**: Via GitHub Actions UI (workflow_dispatch)
 
 ### Deployment Process
@@ -68,11 +68,16 @@ The application automatically configures the base path based on the repository:
 - **User/Organization site** (`username.github.io`): Base path = `/`
 - **Project site** (`username/repo`): Base path = `/repo/`
 
-For this repository (`pablo-albaladejo/kaiord`):
+Neither applies here. The site is served from the custom domain `kaiord.com`
+as one merged artifact — the landing at the root, the app under a prefix, the
+docs under `/docs/` — so the prefix is stated explicitly rather than derived
+from the repository name:
 
-- Repository name: `kaiord`
-- Owner: `pablo-albaladejo`
-- Base path: `/kaiord/`
+- Base path: `/app/`, set by `VITE_BASE_PATH` in `.github/workflows/deploy-site.yml`
+
+Note that the base path governs **asset** URLs only. The route itself lives in
+the URL fragment (`/app/#/calendar/2026-W32`) so that every deep link resolves
+in a single 200 response; see `openspec/specs/spa-routing/spec.md`.
 
 ### Manual Deployment
 
@@ -90,12 +95,12 @@ Test the deployment process locally:
 
 ```bash
 # Build with production base path
-VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
+VITE_BASE_PATH="/app/" pnpm --filter @kaiord/workout-spa-editor build
 
 # Preview locally
 cd packages/workout-spa-editor/dist
 python3 -m http.server 8000
-# Visit http://localhost:8000/kaiord/
+# Visit http://localhost:8000/app/
 ```
 
 ## npm Package Publishing
@@ -498,7 +503,7 @@ When vulnerabilities are found:
 
    ```yaml
    env:
-     VITE_BASE_PATH: /kaiord/
+     VITE_BASE_PATH: /app/
    ```
 
 2. Verify in index.html:
@@ -509,7 +514,7 @@ When vulnerabilities are found:
 
 3. Rebuild with correct base path:
    ```bash
-   VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
+   VITE_BASE_PATH="/app/" pnpm --filter @kaiord/workout-spa-editor build
    ```
 
 #### Build Fails: "Cannot resolve @kaiord/core"

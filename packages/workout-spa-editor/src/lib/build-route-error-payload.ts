@@ -1,5 +1,6 @@
 import type { ErrorInfo } from "react";
 
+import { fragmentPath } from "./fragment-location";
 import type { scrubAnalyticsString } from "./scrub-analytics-string";
 
 export type RouteErrorPayload = {
@@ -20,24 +21,20 @@ export type RouteErrorPayload = {
  *   - message: error.message, scrubbed and truncated to ≤ 500
  *   - componentStack: info.componentStack, scrubbed and truncated to ≤ 1000
  */
-/**
- * The route the SPA is rendering, read from the URL fragment where the router
- * keeps it. `location.pathname` is the deploy prefix and nothing else now, so
- * a payload built from it would name the same route for every error — the one
- * field this event exists to carry.
- */
-function currentRoute(): string {
-  const hash = window.location.hash;
-  return hash.startsWith("#") ? hash.slice(1) || "/" : window.location.pathname;
-}
-
 export function buildRouteErrorPayload(
   error: Error,
   info: ErrorInfo,
   scrub: typeof scrubAnalyticsString
 ): RouteErrorPayload {
   return {
-    route: scrub(currentRoute()),
+    // Read through the router's own reader, not a second parse of the URL.
+    // `location.pathname` is the deploy prefix and nothing else now, so a
+    // payload built from it would name the same route for every error — the
+    // one field this event exists to carry. A hand-rolled fragment parse is
+    // barely better: at `/app/` the hash is empty, and anything that does not
+    // normalise it the way the router does reports a route the app never
+    // rendered.
+    route: scrub(fragmentPath()),
     name: scrub(error.name || "Error"),
     message: scrub(error.message ?? "", 500),
     componentStack: scrub(info.componentStack ?? "", 1000),

@@ -80,10 +80,12 @@ describe("buildRouteErrorPayload", () => {
       expect(out.route).toBe("/");
     });
 
-    it("should fall back to the pathname when there is no fragment", () => {
+    it("should report the root route at the deploy prefix with no fragment", () => {
       // Arrange
-      // A legacy path URL, before the bridge has moved it.
-      setLocation({ pathname: "/editor/library", hash: "" });
+      // What the address bar holds on a cold load of `/app/`: the router
+      // renders `/`, so anything that reported the prefix here would name a
+      // route the app never rendered.
+      setLocation({ pathname: "/app/", hash: "" });
 
       // Act
       const out = buildRouteErrorPayload(
@@ -93,7 +95,7 @@ describe("buildRouteErrorPayload", () => {
       );
 
       // Assert
-      expect(out.route).toBe("/editor/library");
+      expect(out.route).toBe("/");
     });
   });
 

@@ -6,9 +6,8 @@
  * both answer 200, and the page re-renders in place.
  */
 
-import type { Page } from "@playwright/test";
-
 import { expect, test } from "./fixtures/base";
+import { documentStatuses } from "./fixtures/document-statuses";
 import {
   APP_BASE,
   type MergedDist,
@@ -25,16 +24,6 @@ const HEALTH_ROUTES = [
 ] as const;
 
 const RENDER_TIMEOUT_MS = 15_000;
-
-function documentStatuses(page: Page): number[] {
-  const statuses: number[] = [];
-  page.on("response", (response) => {
-    if (response.request().resourceType() === "document") {
-      statuses.push(response.status());
-    }
-  });
-  return statuses;
-}
 
 // Tagged @spa-route-refresh so the production-base CI job
 // (`test:e2e --grep '@spa-route-refresh'`) picks these up.

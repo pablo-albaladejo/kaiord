@@ -171,11 +171,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    # P95 = 12s; ceil(P95 × 1.5 / 60) = 1; capped at build-family ceiling 20.
-    # Note: smoke-test retries 10×10s = 100s worst case; if Pages CDN
-    # propagation regresses, raise to 3–5 in a follow-up rather than reverting
-    # the timeout invariant.
-    timeout-minutes: 1
+    # P95 = 12s; ceil(P95 × 1.5 / 60) = 1 — but the P95 only describes the run
+    # where the first smoke attempt succeeds. The retry budget is what the
+    # timeout has to cover, and it is 10 × (15s + 15s + 10s) = 400s worst case:
+    # two curls at --max-time 15 plus the propagation sleep, per attempt. At 1
+    # the job was cancelled exactly when the retries were doing their job, and
+    # slow Pages propagation read as a failed deploy. 7 covers the budget with
+    # room for the deploy step itself, well under the build-family ceiling 20.
+    timeout-minutes: 7
     needs: build
     steps:
       - name: Deploy to GitHub Pages
@@ -213,8 +216,12 @@ jobs:
             # `--http-status` would be cleaner but isn't in older curl; capture
             # the code via -w and the body via -o for portability. -L follows
             # any HTTP-level redirect so we score the final response.
-            APP_CODE=$(curl -sL --max-time 15 -o "$EDITOR_TMP" -w "%{http_code}" "$APP_URL" || echo "000")
-            NOT_FOUND_CODE=$(curl -sL --max-time 15 -o "$NOT_FOUND_TMP" -w "%{http_code}" "$NOT_FOUND_URL" || echo "000")
+            # `|| true` keeps `set -e` from killing the step on a connection
+            # failure so the retry loop still runs. It is NOT `|| echo "000"`:
+            # curl already writes 000 through -w when it never got a response,
+            # so the echo appended a second one and the log read "000000".
+            APP_CODE=$(curl -sL --max-time 15 -o "$EDITOR_TMP" -w "%{http_code}" "$APP_URL" || true)
+            NOT_FOUND_CODE=$(curl -sL --max-time 15 -o "$NOT_FOUND_TMP" -w "%{http_code}" "$NOT_FOUND_URL" || true)
             EDITOR_BODY=$(cat "$EDITOR_TMP" 2>/dev/null || true)
             NOT_FOUND_BODY=$(cat "$NOT_FOUND_TMP" 2>/dev/null || true)
             rm -f "$EDITOR_TMP" "$NOT_FOUND_TMP"
