@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-08-09 | [`move-spa-to-app-hash-routing`](./2026-08-09-move-spa-to-app-hash-routing/) | Every deep URL of the SPA answers HTTP 404 on the way in. Measured against production: |
 | 2026-08-04 | [`redesign-app-header`](./2026-08-04-redesign-app-header/) | The app shell's navigation is ten flat destinations over two wrapping rows. |
 | 2026-08-04 | [`retire-help-dialog-for-coach-marks`](./2026-08-04-retire-help-dialog-for-coach-marks/) | The SPA still ships two guidance surfaces that teach nothing. |
 | 2026-07-29 | [`add-connections-change-source`](./2026-07-29-add-connections-change-source/) | Wave 2a made every routing row answer "where does my sleep data come from", |
