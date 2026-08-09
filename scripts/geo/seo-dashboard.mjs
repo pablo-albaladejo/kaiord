@@ -162,5 +162,21 @@ for (const [name, status] of Object.entries(directoryStatus.directories)) {
 }
 lines.push("");
 
-writeFileSync(join(seoDir, "DASHBOARD.md"), `${lines.join("\n")}\n`);
-console.log(`[dashboard] wrote reports/seo/DASHBOARD.md`);
+// Skip the write when nothing but the timestamp would change — a fresh
+// _Generated line on every run makes the weekly workflow treat a no-op
+// dashboard regeneration as a real metric change and open a noise PR.
+const dashboardPath = join(seoDir, "DASHBOARD.md");
+const newContent = `${lines.join("\n")}\n`;
+const stripTimestamp = (text) => text.replace(/^_Generated .+$/m, "_Generated_");
+let existing = "";
+try {
+  existing = readFileSync(dashboardPath, "utf8");
+} catch {
+  // No existing dashboard — first run.
+}
+if (existing && stripTimestamp(existing) === stripTimestamp(newContent)) {
+  console.log("[dashboard] no content change — leaving reports/seo/DASHBOARD.md untouched");
+} else {
+  writeFileSync(dashboardPath, newContent);
+  console.log(`[dashboard] wrote reports/seo/DASHBOARD.md`);
+}
