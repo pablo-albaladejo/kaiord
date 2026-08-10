@@ -65,6 +65,8 @@ jobs:
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
+        with:
+          registry-url: "https://registry.npmjs.org"
 
       - name: Create Release PR or Publish
         id: changesets
