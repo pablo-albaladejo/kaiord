@@ -1,15 +1,15 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-08-03 10:57 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-08-10 09:34 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
 | Metric | Current | Target | Source |
 | --- | --- | --- | --- |
-| Pages indexed on Google | — (needs GSC creds) | all pages | gsc.jsonl |
-| Google impressions (7d) | — | growing | gsc.jsonl |
-| Google clicks (7d) | — | growing | gsc.jsonl |
-| Google avg position | — | top 10 on 3+ non-brand queries | gsc.jsonl |
+| Pages indexed on Google | 33/377 | all pages | gsc.jsonl |
+| Google impressions (7d) | 54 | growing | gsc.jsonl |
+| Google clicks (7d) | 4 | growing | gsc.jsonl |
+| Google avg position | 18.4 | top 10 on 3+ non-brand queries | gsc.jsonl |
 | Bing pages in index | — (needs Bing key) | all pages | bing.jsonl |
 | Bing impressions (7d) | — | growing | bing.jsonl |
 | Tracked queries where site appears (DDG/Bing proxy) | 0/12 (=) | 12/12 | serp.jsonl |
@@ -19,28 +19,31 @@ _Generated 2026-08-03 10:57 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 
 | Query | Position | Prev | History (last 5) |
 | --- | --- | --- | --- |
-| kaiord | ABSENT | ABSENT | #1 · · · |
-| fit file converter | ABSENT | ABSENT | · · · · |
-| convert fit to tcx | ABSENT | ABSENT | · · · · |
-| fit to zwo converter | ABSENT | ABSENT | · · · · |
-| workout file converter open source | ABSENT | ABSENT | · · · · |
-| garmin workout file format | ABSENT | ABSENT | · · · · |
-| zwo workout editor | ABSENT | ABSENT | · · · · |
-| typescript fit file parser | ABSENT | ABSENT | · · · · |
-| mcp server fitness workouts | ABSENT | ABSENT | · · · · |
-| garmin connect workout sync chrome extension | ABSENT | ABSENT | · · · · |
-| whoop garmin sync | ABSENT | ABSENT | · · · · |
-| training calendar local first | ABSENT | ABSENT | · · · · |
+| kaiord | ABSENT | ABSENT | #1 · · · · |
+| fit file converter | ABSENT | ABSENT | · · · · · |
+| convert fit to tcx | ABSENT | ABSENT | · · · · · |
+| fit to zwo converter | ABSENT | ABSENT | · · · · · |
+| workout file converter open source | ABSENT | ABSENT | · · · · · |
+| garmin workout file format | ABSENT | ABSENT | · · · · · |
+| zwo workout editor | ABSENT | ABSENT | · · · · · |
+| typescript fit file parser | ABSENT | ABSENT | · · · · · |
+| mcp server fitness workouts | ABSENT | ABSENT | · · · · · |
+| garmin connect workout sync chrome extension | ABSENT | ABSENT | · · · · · |
+| whoop garmin sync | ABSENT | ABSENT | · · · · · |
+| training calendar local first | ABSENT | ABSENT | · · · · · |
 
 ## Top Google queries (latest GSC window)
 
-_No GSC query data yet (needs credentials and impressions)._
+| Query | Clicks | Impressions | Position |
+| --- | --- | --- | --- |
+| keyord1 | 0 | 1 | 70 |
+| zwo file format | 0 | 1 | 34 |
 
 ## AI answer-engine visibility (GEO end-goal)
 
 | Provider | Date | Mentions | Rate | Cited | Top competitors |
 | --- | --- | --- | --- | --- | --- |
-| perplexity | 2026-08-03 | 0/5 | 0 | 0 | fit-file-parser (1), Garmin FIT SDK (1) |
+| perplexity | 2026-08-10 | 0/5 | 0 | 0 | fit-file-parser (1), Garmin FIT SDK (1), python-fitparse (1) |
 
 ## Directory / entity presence (GEO substrate)
 
