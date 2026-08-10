@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-08-10 12:13 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-08-10 13:47 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
@@ -47,13 +47,19 @@ _Generated 2026-08-10 12:13 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 
 ## Directory / entity presence (GEO substrate)
 
-_Last manual check: 2026-07-22. Update `reports/seo/directory-status.json` when a listing goes live._
+_Last manual check: 2026-08-10. Update `reports/seo/directory-status.json` when a listing goes live._
 
-- [x] MCP registry listing (registry.modelcontextprotocol.io) — https://registry.modelcontextprotocol.io
+- [x] MCP registry listing (registry.modelcontextprotocol.io) — https://registry.modelcontextprotocol.io/v0/servers?search=kaiord
 - [ ] mcp.so listing
+- [ ] Smithery.ai listing
 - [ ] awesome-mcp-servers list entry
 - [ ] npm @kaiord/* packages discoverable — https://www.npmjs.com/org/kaiord
-- [ ] GitHub repo topics set (fit, tcx, zwo, garmin, mcp, workout) — https://github.com/pablo-albaladejo/kaiord
-- [ ] Chrome Web Store: Garmin bridge extension
+- [x] GitHub repo topics set (fit, tcx, zwo, garmin, mcp, workout) — https://github.com/pablo-albaladejo/kaiord
+- [x] Chrome Web Store: Garmin bridge extension — https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe
+- [ ] Glama.ai claim — https://glama.ai/mcp/servers/pablo-albaladejo/kaiord
 - [ ] Product Hunt launch
+- [ ] Show HN
+- [ ] Reddit r/selfhosted
+- [ ] Reddit r/Garmin
+- [ ] AlternativeTo listing
 
