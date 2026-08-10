@@ -1,0 +1,2436 @@
+{
+  "entry": {
+    "date": "2026-08-10",
+    "source": "gsc",
+    "window": {
+      "start": "2026-08-01",
+      "end": "2026-08-07"
+    },
+    "clicks": 4,
+    "impressions": 54,
+    "ctr": 0.07407407407407407,
+    "position": 18.4,
+    "indexed": 33,
+    "sitemapUrlCount": 377,
+    "sitemapSubmitted": true,
+    "topQueries": [
+      {
+        "query": "keyord1",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 70
+      },
+      {
+        "query": "zwo file format",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 34
+      }
+    ]
+  },
+  "byQuery": [
+    {
+      "keys": [
+        "keyord1"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 70
+    },
+    {
+      "keys": [
+        "zwo file format"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 34
+    }
+  ],
+  "byPage": [
+    {
+      "keys": [
+        "https://kaiord.com/"
+      ],
+      "clicks": 3,
+      "impressions": 8,
+      "ctr": 0.375,
+      "position": 15.875
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/zwo-to-fit"
+      ],
+      "clicks": 1,
+      "impressions": 6,
+      "ctr": 0.16666666666666666,
+      "position": 13.5
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/"
+      ],
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 5
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/fit-to-garmin"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 8
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/fit-to-tcx"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 23
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/fit-to-zwo"
+      ],
+      "clicks": 0,
+      "impressions": 6,
+      "ctr": 0,
+      "position": 20.166666666666668
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/garmin-to-fit"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 7
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/zwo-to-garmin"
+      ],
+      "clicks": 0,
+      "impressions": 9,
+      "ctr": 0,
+      "position": 8.555555555555555
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/zwo-to-tcx"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/formats/fit.html"
+      ],
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 12.4
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/formats/zwo"
+      ],
+      "clicks": 0,
+      "impressions": 16,
+      "ctr": 0,
+      "position": 28.0625
+    }
+  ],
+  "sitemaps": {
+    "sitemap": [
+      {
+        "path": "https://kaiord.com/sitemap.xml",
+        "lastSubmitted": "2026-08-10T08:24:57.160Z",
+        "isPending": false,
+        "isSitemapsIndex": true,
+        "lastDownloaded": "2026-08-10T08:24:58.073Z",
+        "warnings": "0",
+        "errors": "0",
+        "contents": [
+          {
+            "type": "web",
+            "submitted": "377",
+            "indexed": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "inspections": [
+    {
+      "url": "https://kaiord.com/",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-27T06:58:19Z"
+    },
+    {
+      "url": "https://kaiord.com/es/",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/app/",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/CHANGELOG",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/README",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/cli/",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T19:12:58Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/FitParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/GarminParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/KrdValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/ServiceApiError",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/ServiceAuthError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/TcxParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/TcxValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/ToleranceExceededError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/UnsupportedKrdTypeError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/ZwiftParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/classes/ZwiftValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/aggregateEnergyBalance",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/assembleDayEnergyBalance",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/canonicalHash",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/computeAdaptiveTdee",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/computeBmr",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/computeDailyDelta",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/computeFlag",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/computeMacroTargets",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/computePeriodizedTarget",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/convertBound",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/convertLengthToMeters",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/convertMeasurement",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createConsoleLogger",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createFitParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createGarminParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createKrdValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createNoopAnalytics",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createSchemaValidator",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createServiceApiError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createServiceAuthError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createTcxParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createTcxValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createToleranceChecker",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createUnsupportedKrdTypeError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createWorkoutKRD",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createZwiftParsingError",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/createZwiftValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/customParameterKey",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/deriveExternalId",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/estimateExpectedActivityKcal",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T21:50:52Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/exponentialMovingAverage",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/extractWorkout",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/fingerprintSnapshot",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/fromBinary",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/fromCanonicalValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/fromText",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/getLabParameter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/isCustomParameterKey",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/isHealthFileType",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/isPowerZone",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/isRepetitionBlock",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/metForSport",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/neatFactorForActivityLevel",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/parseRefTextBounds",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/percentFtpToZone",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/resolveAffineUnit",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/resolveDayExpenditure",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/sportCategory",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/toBinary",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/toCanonicalValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/toText",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/validateKrd",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/validateRoundTrip",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/functions/zoneToPercentFtp",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Activity",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T19:51:02Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ActivityLevel",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ActivitySummary",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/AdaptiveTdeeResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/AffineUnit",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T03:45:51Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Analytics",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/AnalyticsEvent",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/AssembleDayEnergyBalanceInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/AuthProvider",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BinaryReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BinaryWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BiologicalSex",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BmrFormula",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BmrInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BmrResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BodyComposition",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/BridgeId",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/CadenceValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/CanonicalMeasurement",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/CatalogFallback",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ComputeAdaptiveTdeeInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ComputeDailyDeltaInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ComputeDailyDeltaResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ComputeFlagInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ComputeMacroTargetsInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ComputePeriodizedTargetInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/DailyWellness",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/DayEnergyBalance",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/DayExpenditureInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/DayExpenditureResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Duration",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/DurationType",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/EmaOptions",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/EmaPoint",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T03:49:30Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/EmaResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/EnergyBalanceRollup",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/EnergyGoal",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Equipment",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ExpectedActivityKcalInput",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ExpenditureSource",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/FileType",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/GoalType",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/HashProjection",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/HealthExtensionPayload",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/HealthFileType",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/HeartRateSeries",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/HeartRateValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/HrvSummary",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Intensity",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRD",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRDEvent",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRDExtensions",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRDLap",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRDLapTrigger",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRDMetadata",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRDRecord",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KRDSession",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/KnownUnit",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabFlag",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabPanel",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabParameter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabProvenance",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabRefRange",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabRefSource",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabReport",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LabValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LengthUnit",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ListOptions",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/LogLevel",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Logger",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/MacroNutrients",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ManagedDataRegistryEntry",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ManagedDataType",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/MealSlot",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/MeasuredWellness",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/PaceValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/PlannedSession",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/PlannedSessionStatus",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/PowerValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/PowerZone",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ProfileSnapshot",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/PushResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/RepetitionBlock",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ResolvedExpenditure",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/SchemaValidator",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Sex",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/SleepRecord",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/SleepStage",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Sport",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/SportCategory",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/StrainSummary",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/StressEpisode",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/StrokeTypeValue",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/SubSport",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/SwimStroke",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Target",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TargetType",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TargetUnit",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TextReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TextWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TokenData",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TokenStore",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ToleranceChecker",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ToleranceConfig",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ToleranceViolation",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TrainingZoneBand",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TrainingZoneSet",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/TrainingZones",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ValidateRoundTrip",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/ValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/VitalsSummary",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/WeightMeasurement",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/Workout",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/WorkoutService",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/WorkoutStep",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/type-aliases/WorkoutSummary",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/BODY_FAT_TOLERANCE_PERCENT",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/CUSTOM_PARAMETER_PREFIX",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/DAILY_KCAL_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/DAILY_STEPS_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/DEFAULT_MET",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/DEFAULT_NEAT_FACTOR",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/DEFAULT_TOLERANCES",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/FIT_TO_SWIM_STROKE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/FLOOR_KCAL",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T03:40:07Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/HEART_RATE_SERIES_BPM_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/HRV_TOLERANCE_MS",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/KCAL_PER_KG_FAT",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/LAB_PARAMETER_CATALOG",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/MANAGED_DATA_REGISTRY",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/MET_TABLE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/MIN_ADAPTIVE_DAYS",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/MUSCLE_SURPLUS_CAP",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/NEAT_FACTOR",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/POWER_ZONES",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/POWER_ZONE_PERCENT_FTP",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T04:48:49Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/SLEEP_STAGE_TOLERANCE_SECONDS",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/SLEEP_TOTAL_DURATION_TOLERANCE_SECONDS",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/STALE_SNAPSHOT_THRESHOLD_DAYS",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/STRAIN_SCORE_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/STRESS_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/SWIM_STROKE_TO_FIT",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/VITALS_RESPIRATORY_RATE_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/VITALS_RESTING_HEART_RATE_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/VITALS_SPO2_TOLERANCE",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/WEIGHT_TOLERANCE_KG",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/activitySchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/activitySummarySchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/bodyCompositionSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/dailyWellnessSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/dayEnergyBalanceSchema",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T08:10:46Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/durationSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/durationTypeSchema",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T04:49:33Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/energyGoalSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/equipmentSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/expenditureSourceSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/fileTypeSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/goalTypeSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/healthExtensionPayloadSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/healthFileTypes",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/heartRateSeriesSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/hrvSummarySchema",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T21:01:29Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/intensitySchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/knownUnitSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdEventSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdExtensionsSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdLapSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdLapTriggerSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdMetadataSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdRecordSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/krdSessionSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labFlagSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labPanelSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labParameterSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labProvenanceSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labRefRangeSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labRefSourceSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labReportSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/labValueSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/lengthUnitSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/macroNutrientsSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/managedDataTypes",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/mealSlotSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/plannedSessionSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/plannedSessionStatusSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/profileSnapshotSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/repetitionBlockSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/sleepRecordSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/sleepStageSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/sportSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/strainSummarySchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/stressEpisodeSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/subSportSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/swimStrokeSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/targetSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/targetTypeSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/targetUnitSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/toleranceConfigSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/toleranceViolationSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/trainingZoneBandSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/trainingZoneSetSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/trainingZonesSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/vitalsSummarySchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/weightMeasurementSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/workoutLikeFileTypes",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/workoutSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/variables/workoutStepSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T19:11:31Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/functions/createFitReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/functions/createFitWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/functions/createGarminFitSdkReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/functions/createGarminFitSdkWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/functions/encodeBodyCompositionFit",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/functions/encodeFitMessages",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/variables/fitReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/variables/fitWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T20:48:48Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/functions/createCookieFetch",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/functions/createFileTokenStore",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/functions/createGarminAuthProvider",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/functions/createGarminConnectClient",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/functions/createMemoryTokenStore",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/functions/createTokenManager",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/GarminConnectClient",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/GarminConnectClientOptions",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/GarminWorkoutClient",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/InitResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/ListOptions",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/PushResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/RetryOptions",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/TokenData",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/TokenReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/TokenStore",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/type-aliases/WorkoutSummary",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T18:53:21Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/functions/createGarminReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/functions/createGarminWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/functions/mapGarminSportToKrd",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/type-aliases/GarminWriterOptions",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/type-aliases/PaceZoneEntry",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/type-aliases/PaceZoneTable",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/variables/garminReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/variables/garminWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/README",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/functions/createServer",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/functions/createStderrLogger",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/functions/detectFormatFromPath",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/functions/formatError",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/functions/formatSuccess",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/type-aliases/FileFormat",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/type-aliases/ToolResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/variables/FORMAT_REGISTRY",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/variables/formatSchema",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/README",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/functions/createFastXmlTcxReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/functions/createFastXmlTcxWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/functions/createTcxReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/functions/createTcxWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/functions/createXsdTcxValidator",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/type-aliases/TcxValidationResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/type-aliases/TcxValidator",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/variables/tcxReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/variables/tcxWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T19:20:14Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/functions/createFastXmlZwiftReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/functions/createFastXmlZwiftWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/functions/createXsdZwiftValidator",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/functions/createZwiftReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/functions/createZwiftValidator",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/functions/createZwiftWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/type-aliases/ZwiftValidationError",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/type-aliases/ZwiftValidationResult",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/type-aliases/ZwiftValidator",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T21:02:48Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/variables/zwiftReader",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/variables/zwiftWriter",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/cli/commands",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/fit-to-garmin",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T10:02:19Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/fit-to-tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T05:21:58Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/fit-to-zwo",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T11:19:56Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/garmin-to-fit",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T06:02:14Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/garmin-to-tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T15:12:07Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/garmin-to-zwo",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T11:01:24Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/tcx-to-fit",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T04:17:32Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/tcx-to-garmin",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T09:18:13Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/tcx-to-zwo",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/zwo-to-fit",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T09:54:56Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/zwo-to-garmin",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T01:12:05Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/zwo-to-tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-21T21:06:13Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/fit",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/gcn",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/krd",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T05:26:14Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-21T09:25:44Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/zwo",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-30T16:05:26Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/architecture",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/contributing",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/getting-started",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-21T04:29:05Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/quick-start",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/testing",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-21T04:02:43Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/why-kaiord",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-07T05:41:14Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/legal/privacy-policy",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/mcp/tools",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    }
+  ]
+}
