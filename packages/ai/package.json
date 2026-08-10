@@ -69,7 +69,7 @@
     "@ai-sdk/anthropic": "^4.0.27",
     "@ai-sdk/google": "^4.0.31",
     "@ai-sdk/openai": "^4.0.27",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^4.1.10",
     "ai": "^7.0.47",
     "tsdown": "^0.22.14",

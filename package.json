@@ -120,7 +120,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@size-limit/esbuild": "^13.0.3",
     "@size-limit/file": "^13.0.3",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "@vitest/eslint-plugin": "^1.6.24",
     "dependency-cruiser": "^18.1.0",
     "eslint": "^10.8.0",
