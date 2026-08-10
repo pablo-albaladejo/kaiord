@@ -26,9 +26,13 @@ jobs:
     name: Collect SEO/GEO metrics
     runs-on: ubuntu-latest
     # Network-bound collectors with widely-spaced requests (SERP + AI probe
-    # sleep between calls); 15m bounds a stuck run well under the family
-    # ceiling. Calibration is a human decision per PR.
-    timeout-minutes: 15
+    # sleep between calls). The GSC collector additionally runs a URL
+    # Inspection call per sitemap entry (250ms floor + real API latency each);
+    # kaiord's docs corpus alone is ~370 URLs, so once GSC credentials exist
+    # that loop can take 10+ minutes on its own. 45m bounds a stuck run well
+    # under the family ceiling while giving the real inspection loop headroom.
+    # Calibration is a human decision per PR.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v7
