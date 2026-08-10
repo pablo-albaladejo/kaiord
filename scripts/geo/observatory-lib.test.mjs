@@ -4,9 +4,46 @@ import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { writeIfChanged } from "./observatory-lib.mjs";
+import { hasTodayEntry, todayIso, writeIfChanged } from "./observatory-lib.mjs";
 
 const STRIP_TIMESTAMP = /^_Generated .+$/m;
+
+describe("hasTodayEntry", () => {
+  it("should return false when the log file does not exist", () => {
+    const dir = mkdtempSync(join(tmpdir(), "hasTodayEntry-"));
+    const missing = join(dir, "gsc.jsonl");
+
+    assert.equal(hasTodayEntry(missing, "gsc"), false);
+    rmSync(dir, { recursive: true });
+  });
+
+  it("should return true when today's date and source both match a row", () => {
+    const dir = mkdtempSync(join(tmpdir(), "hasTodayEntry-"));
+    const log = join(dir, "gsc.jsonl");
+    writeFileSync(log, `${JSON.stringify({ date: todayIso(), source: "gsc" })}\n`);
+
+    assert.equal(hasTodayEntry(log, "gsc"), true);
+    rmSync(dir, { recursive: true });
+  });
+
+  it("should return false when the date matches but the source does not", () => {
+    const dir = mkdtempSync(join(tmpdir(), "hasTodayEntry-"));
+    const log = join(dir, "gsc.jsonl");
+    writeFileSync(log, `${JSON.stringify({ date: todayIso(), source: "bing" })}\n`);
+
+    assert.equal(hasTodayEntry(log, "gsc"), false);
+    rmSync(dir, { recursive: true });
+  });
+
+  it("should return false when the source matches but the date is not today", () => {
+    const dir = mkdtempSync(join(tmpdir(), "hasTodayEntry-"));
+    const log = join(dir, "gsc.jsonl");
+    writeFileSync(log, `${JSON.stringify({ date: "2020-01-01", source: "gsc" })}\n`);
+
+    assert.equal(hasTodayEntry(log, "gsc"), false);
+    rmSync(dir, { recursive: true });
+  });
+});
 
 describe("writeIfChanged", () => {
   it("should write when the target file does not exist yet", () => {
