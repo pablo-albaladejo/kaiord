@@ -1,5 +1,13 @@
 # @kaiord/landing
 
+## 4.2.2
+
+### Patch Changes
+
+- d061d95: Add the Google Search Console site-verification meta tag so kaiord.com can
+  be verified as its own property (previously grouped under a shared,
+  unrelated service account).
+
 ## 4.2.1
 
 ### Patch Changes
