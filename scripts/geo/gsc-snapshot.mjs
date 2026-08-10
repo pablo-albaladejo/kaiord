@@ -17,7 +17,7 @@ import { join } from "node:path";
 import {
   appendJsonl,
   fetchSitemapUrls,
-  readJsonl,
+  hasTodayEntry,
   sleep,
   timeseriesDir,
   todayIso,
@@ -50,7 +50,7 @@ if (!credentials) {
 // docs corpus alone is ~370 URLs) — checking the day's entry already exists
 // BEFORE paying that cost (rather than only at the final appendJsonl) turns a
 // redundant same-day re-run from ~40 minutes into an instant no-op.
-if (readJsonl(gscLogPath).some((row) => row.date === todayIso() && row.source === "gsc")) {
+if (hasTodayEntry(gscLogPath, "gsc")) {
   console.log(`[gsc] already recorded today (${todayIso()}) — skipping.`);
   process.exit(0);
 }
