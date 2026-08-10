@@ -17,6 +17,7 @@ import { join } from "node:path";
 import {
   appendJsonl,
   fetchSitemapUrls,
+  hasTodayEntry,
   sleep,
   timeseriesDir,
   todayIso,
@@ -24,6 +25,7 @@ import {
 } from "./observatory-lib.mjs";
 
 const property = process.env.GSC_PROPERTY ?? "sc-domain:kaiord.com";
+const gscLogPath = join(timeseriesDir, "gsc.jsonl");
 
 const loadCredentials = () => {
   if (process.env.GSC_SERVICE_ACCOUNT_JSON)
@@ -41,6 +43,15 @@ if (!credentials) {
   console.log(
     "[gsc] no credentials (GSC_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS) — skipping. Setup: docs/seo-observatory.md"
   );
+  process.exit(0);
+}
+
+// The URL Inspection loop below costs one API call per sitemap entry (kaiord's
+// docs corpus alone is ~370 URLs) — checking the day's entry already exists
+// BEFORE paying that cost (rather than only at the final appendJsonl) turns a
+// redundant same-day re-run from ~40 minutes into an instant no-op.
+if (hasTodayEntry(gscLogPath, "gsc")) {
+  console.log(`[gsc] already recorded today (${todayIso()}) — skipping.`);
   process.exit(0);
 }
 

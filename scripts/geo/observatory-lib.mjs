@@ -45,6 +45,15 @@ export const appendJsonl = (file, entry, keyFields = ["date", "source"]) => {
   return true;
 };
 
+// True when today's date already has an entry for `source` in `logPath` —
+// lets an expensive collector skip its API work before paying for it, not
+// just before the final appendJsonl. This narrows a same-day duplicate-run
+// window from however long the collector's own work takes down to the gap
+// between two processes' readJsonl calls; pair with a workflow-level
+// `concurrency` group to close that gap too.
+export const hasTodayEntry = (logPath, source) =>
+  readJsonl(logPath).some((row) => row.date === todayIso() && row.source === source);
+
 // Writes `content` to `path` unless it is unchanged from the file already on
 // disk once `stripPattern` is normalized away in both — used by generated
 // reports whose only line that always changes (a timestamp) would otherwise

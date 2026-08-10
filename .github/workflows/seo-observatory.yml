@@ -21,6 +21,16 @@ permissions:
   contents: write
   pull-requests: write
 
+# Serializes runs (queue, don't cancel) so a manual dispatch landing near the
+# scheduled cron waits for the in-flight run instead of racing it — both would
+# otherwise walk the full GSC URL-inspection loop and open duplicate metrics
+# PRs for the same date. cancel-in-progress stays false: cancelling a
+# legitimate in-flight run to make room for a newer one would lose that
+# week's collected data, not just skip a no-op.
+concurrency:
+  group: seo-observatory
+  cancel-in-progress: false
+
 jobs:
   observe:
     name: Collect SEO/GEO metrics
