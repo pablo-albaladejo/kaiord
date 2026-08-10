@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-08-10 09:34 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-08-10 12:13 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
@@ -10,8 +10,8 @@ _Generated 2026-08-10 09:34 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 | Google impressions (7d) | 54 | growing | gsc.jsonl |
 | Google clicks (7d) | 4 | growing | gsc.jsonl |
 | Google avg position | 18.4 | top 10 on 3+ non-brand queries | gsc.jsonl |
-| Bing pages in index | — (needs Bing key) | all pages | bing.jsonl |
-| Bing impressions (7d) | — | growing | bing.jsonl |
+| Bing pages in index | — | all pages | bing.jsonl |
+| Bing impressions (7d) | 0 | growing | bing.jsonl |
 | Tracked queries where site appears (DDG/Bing proxy) | 0/12 (=) | 12/12 | serp.jsonl |
 | AI answer-engine mention rate | perplexity 0 | growing | ai-visibility.jsonl |
 
