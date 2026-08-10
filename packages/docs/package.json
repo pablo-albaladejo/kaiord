@@ -23,14 +23,14 @@
     "@kaiord/mcp": "workspace:*",
     "@kaiord/tcx": "workspace:*",
     "@kaiord/zwo": "workspace:*",
-    "@shikijs/vitepress-twoslash": "^4.4.1",
+    "@shikijs/vitepress-twoslash": "^4.4.2",
     "cspell": "^10.0.1",
-    "oxc-minify": "^0.142.0",
+    "oxc-minify": "^0.143.0",
     "typedoc": "^0.28.20",
     "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "^6.0.3",
     "vitepress": "2.0.0-alpha.18",
     "vitepress-plugin-llms": "^1.13.4",
-    "vue": "^3.5.40"
+    "vue": "^3.5.41"
   }
 }
