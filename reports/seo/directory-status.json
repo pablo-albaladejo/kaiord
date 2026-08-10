@@ -17,8 +17,9 @@
       "note": "appcypher/awesome-mcp-servers was archived by its owner on 2026-08-01 — no longer accepts new entries. Won't-fix; dead."
     },
     "npm @kaiord/* packages discoverable": {
-      "present": true,
-      "url": "https://www.npmjs.com/org/kaiord"
+      "present": false,
+      "url": "https://www.npmjs.com/org/kaiord",
+      "note": "8/11 published (core, cli, fit, tcx, zwo, garmin, mcp, garmin-connect — all live and discoverable via the registry API). tanita, trainingpeaks, and whoop have real non-private package.json entries (v10.1.0) but return 404 from the npm registry — never published."
     },
     "GitHub repo topics set (fit, tcx, zwo, garmin, mcp, workout)": {
       "present": true,

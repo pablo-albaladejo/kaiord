@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-08-10 13:22 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-08-10 13:47 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
@@ -53,7 +53,7 @@ _Last manual check: 2026-08-10. Update `reports/seo/directory-status.json` when 
 - [ ] mcp.so listing
 - [ ] Smithery.ai listing
 - [ ] awesome-mcp-servers list entry
-- [x] npm @kaiord/* packages discoverable — https://www.npmjs.com/org/kaiord
+- [ ] npm @kaiord/* packages discoverable — https://www.npmjs.com/org/kaiord
 - [x] GitHub repo topics set (fit, tcx, zwo, garmin, mcp, workout) — https://github.com/pablo-albaladejo/kaiord
 - [x] Chrome Web Store: Garmin bridge extension — https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe
 - [ ] Glama.ai claim — https://glama.ai/mcp/servers/pablo-albaladejo/kaiord
