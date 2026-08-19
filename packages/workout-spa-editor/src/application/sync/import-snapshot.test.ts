@@ -41,7 +41,11 @@ describe("importSnapshot", () => {
     const port = createInMemorySnapshotPort(state as never);
 
     // Act
-    await importSnapshot({ port, snapshot: snapshot() });
+    await importSnapshot({
+      port,
+      snapshot: snapshot(),
+      now: () => new Date("2026-06-01T00:00:00Z"),
+    });
 
     // Assert
     expect(state.tables.workouts).toEqual([{ id: "w-9" }]);
