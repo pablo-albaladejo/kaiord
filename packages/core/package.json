@@ -33,17 +33,17 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@noble/hashes": "^2.2.0",
+    "@noble/hashes": "^2.3.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.5.0",
-    "@types/node": "^26.1.2",
+    "@faker-js/faker": "^10.6.0",
+    "@types/node": "^26.2.0",
     "@types/rosie": "^0.0.45",
     "@vitest/coverage-v8": "^4.1.10",
     "rosie": "^2.1.1",
     "tsdown": "^0.22.14",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.12",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
