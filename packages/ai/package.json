@@ -49,10 +49,10 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@ai-sdk/anthropic": "^4.0.27",
-    "@ai-sdk/google": "^4.0.31",
-    "@ai-sdk/openai": "^4.0.27",
-    "ai": "^7.0.47"
+    "@ai-sdk/anthropic": "^4.0.39",
+    "@ai-sdk/google": "^4.0.44",
+    "@ai-sdk/openai": "^4.0.41",
+    "ai": "^7.0.66"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -66,14 +66,14 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^4.0.27",
-    "@ai-sdk/google": "^4.0.31",
-    "@ai-sdk/openai": "^4.0.27",
-    "@types/node": "^26.1.2",
+    "@ai-sdk/anthropic": "^4.0.39",
+    "@ai-sdk/google": "^4.0.44",
+    "@ai-sdk/openai": "^4.0.41",
+    "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^4.1.10",
-    "ai": "^7.0.47",
+    "ai": "^7.0.66",
     "tsdown": "^0.22.14",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.12",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
