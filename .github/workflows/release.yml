@@ -79,16 +79,13 @@ jobs:
           version-script: ./scripts/changeset-version.sh
           publish-script: ./scripts/changeset-publish.sh
           github-token: ${{ steps.app-token.outputs.token }}
+          # Single GitHub-release owner: the action (matches the historical
+          # release format — the custom scripts/create-github-releases.js step
+          # always found the release already created and skipped; kept on disk
+          # for manual backfills only).
+          create-github-releases: true
         env:
           NPM_CONFIG_PROVENANCE: true
-
-      - name: Create GitHub Releases
-        if: steps.changesets.outputs.published == 'true'
-        run: node scripts/create-github-releases.js
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.published-packages }}
 
       - name: Summary
         if: steps.changesets.outputs.published == 'true'
