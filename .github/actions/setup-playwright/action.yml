@@ -1,0 +1,43 @@
+name: "Install Playwright browsers with caching"
+description: >-
+  Restores the Playwright browser cache keyed by the installed
+  @playwright/test version and only runs `playwright install --with-deps`
+  on a cache miss. Exists because the apt half of --with-deps depends on
+  the runner's Ubuntu mirror, which has hung e2e jobs until the full
+  45-minute job timeout killed them; on a cache hit nothing touches apt
+  at all (hosted Ubuntu images already ship Chromium's system deps).
+
+inputs:
+  browser:
+    description: "Browser to install"
+    required: false
+    default: "chromium"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Resolve installed Playwright version
+      id: pw-version
+      shell: bash
+      working-directory: packages/workout-spa-editor
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
+
+    # Exact-key only, no restore-keys: browser binaries live in per-revision
+    # directories, so a partial restore from another Playwright version would
+    # report a "hit" while missing the revision this version launches.
+    - name: Restore Playwright browser cache
+      id: pw-cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-${{ inputs.browser }}
+
+    - name: Install Playwright browsers (cache miss)
+      if: steps.pw-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps ${{ inputs.browser }}
+
+    - name: Report cache status
+      shell: bash
+      run: |
+        echo "🎭 Playwright ${{ steps.pw-version.outputs.version }} (${{ inputs.browser }}): ${{ steps.pw-cache.outputs.cache-hit == 'true' && '✅ cache HIT — apt untouched' || '❌ cache MISS — installed with deps' }}"

@@ -833,7 +833,9 @@ jobs:
           expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps chromium
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: chromium
 
       - name: Run Playwright E2E tests (shard ${{ matrix.shard }}/4)
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --shard=${{ matrix.shard }}/4
@@ -869,7 +871,9 @@ jobs:
           expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps chromium
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: chromium
 
       - name: Run production-base SPA route refresh e2e
         env:
