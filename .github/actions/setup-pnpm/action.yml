@@ -29,7 +29,7 @@ runs:
         registry-url: ${{ inputs.registry-url }}
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v6.0.9
+      uses: pnpm/action-setup@v6.0.10
       with:
         version: ${{ inputs.pnpm-version }}
 
