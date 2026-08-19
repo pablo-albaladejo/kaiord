@@ -803,11 +803,38 @@ jobs:
           path: round-trip-output.txt
           retention-days: 30
 
+  # Warms the Playwright browser cache exactly once so a cold key (fresh
+  # Playwright bump) costs ONE apt-exposed install instead of five parallel
+  # ones across the e2e shards. Runs alongside build (which takes longer),
+  # so gating the e2e jobs on it adds no wall-clock. If the mirror hangs
+  # here, this job dies at its own 15-minute cap and the e2e jobs skip —
+  # bounding the worst case far below five 45-minute timeouts.
+  playwright-cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [detect-changes]
+    if: |
+      needs.detect-changes.outputs.should-test == 'true' &&
+      needs.detect-changes.outputs.frontend-changed == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: "22.18.0"
+
+      - name: Warm Playwright browser cache
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: chromium
+
   e2e-frontend:
     runs-on: ubuntu-latest
     # n=13 (<20 successful runs) → fall back to e2e-family ceiling 45.
     timeout-minutes: 45
-    needs: [detect-changes, build]
+    needs: [detect-changes, build, playwright-cache]
     # needs.build.result success check is redundant with default success()
     # over needs:, but kept explicit since this clause uses if: | multi-line
     # and the frontend-changed gate is the load-bearing narrowing.
@@ -833,7 +860,9 @@ jobs:
           expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps chromium
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: chromium
 
       - name: Run Playwright E2E tests (shard ${{ matrix.shard }}/4)
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --shard=${{ matrix.shard }}/4
@@ -850,7 +879,7 @@ jobs:
     runs-on: ubuntu-latest
     # n=13 (<20 successful runs) → fall back to e2e-family ceiling 45.
     timeout-minutes: 45
-    needs: [detect-changes, build]
+    needs: [detect-changes, build, playwright-cache]
     if: |
       needs.detect-changes.outputs.should-test == 'true' &&
       needs.detect-changes.outputs.frontend-changed == 'true'
@@ -869,7 +898,9 @@ jobs:
           expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps chromium
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: chromium
 
       - name: Run production-base SPA route refresh e2e
         env:
