@@ -70,12 +70,16 @@ jobs:
 
       - name: Create Release PR or Publish
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          version: ./scripts/changeset-version.sh
-          publish: ./scripts/changeset-publish.sh
+          # v2 renamed the inputs (version → version-script, publish →
+          # publish-script) and stopped reading GITHUB_TOKEN from the env —
+          # the app token must go through the github-token input, which the
+          # action also injects into the custom scripts' environment.
+          version-script: ./scripts/changeset-version.sh
+          publish-script: ./scripts/changeset-publish.sh
+          github-token: ${{ steps.app-token.outputs.token }}
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: true
 
       - name: Create GitHub Releases
@@ -84,14 +88,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.published-packages }}
 
       - name: Summary
         if: steps.changesets.outputs.published == 'true'
         run: |
           echo "## 📦 Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo '${{ steps.changesets.outputs.publishedPackages }}' | node -e "
+          echo '${{ steps.changesets.outputs.published-packages }}' | node -e "
             const pkgs = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8'));
             for (const p of pkgs) {
               console.log('- ✅ [' + p.name + '@' + p.version + '](https://www.npmjs.com/package/' + p.name + '/v/' + p.version + ')');
