@@ -197,3 +197,7 @@ pnpm clean
 ## 📄 License
 
 MIT - See [LICENSE](../../LICENSE) for details
+
+<!-- CI exercise vehicle: triggers the frontend-changed gate so the new
+     playwright-cache warming job and setup-playwright composite run once
+     end-to-end. This PR is closed after verification, never merged. -->
