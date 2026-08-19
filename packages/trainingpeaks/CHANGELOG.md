@@ -1,5 +1,12 @@
 # @kaiord/trainingpeaks
 
+## 10.1.2
+
+### Patch Changes
+
+- Updated dependencies [4e1e2f7]
+  - @kaiord/core@10.1.2
+
 ## 10.1.0
 
 ### Minor Changes
