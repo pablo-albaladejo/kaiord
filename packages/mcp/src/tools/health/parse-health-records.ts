@@ -4,11 +4,6 @@ import { convertToKrd } from "../convert-to-krd";
 
 const PARSE_FAILURE_LOG = "Skipping health input file (parse failure)";
 
-export type ParsedHealthRecords = {
-  records: KRD[];
-  skipped: number;
-};
-
 /**
  * Parses an array of input file paths into KRDs by delegating to
  * `convertToKrd` per file. Errors on individual files are caught and
@@ -17,7 +12,7 @@ export type ParsedHealthRecords = {
 export const parseHealthRecords = async (
   inputFiles: string[],
   logger: Logger
-): Promise<ParsedHealthRecords> => {
+): Promise<{ records: KRD[]; skipped: number }> => {
   const records: KRD[] = [];
   let skipped = 0;
   for (const file of inputFiles) {
