@@ -29,7 +29,6 @@ export const TOAST_ZONES_SHAPE_MISMATCH =
   "Train2Go returned an unexpected shape — zones not synced";
 export const TOAST_ZONES_UNSUPPORTED =
   "This coaching platform doesn't support zones sync";
-export const LOG_ZONES_SYNC_RUN = "zones-sync.run";
 
 const errorMessage = (e: unknown): string =>
   e instanceof Error ? e.message : String(e);
