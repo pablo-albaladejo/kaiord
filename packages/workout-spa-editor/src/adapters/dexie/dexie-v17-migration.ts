@@ -22,22 +22,6 @@ import type { Transaction } from "dexie";
 import { backfillHealthProvenance } from "./dexie-v17-provenance-backfill";
 import { backfillSyncZonesPolicies } from "./dexie-v17-syncZones-backfill";
 
-const HEALTH_SUFFIX =
-  ", sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]";
-
-export const SCHEMA_V17 = {
-  integrationPolicies:
-    "id, [profileId+dataType+direction], &[profileId+dataType+direction+bridgeId], profileId",
-  exportLedger:
-    "id, &[kaiordRecordId+destinationBridgeId], kaiordRecordId, destinationBridgeId",
-  healthSleep: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
-  healthWeight: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
-  healthHrv: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
-  healthDaily: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
-  healthBodyComposition: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
-  healthStress: `id, profileId, [profileId+date], date${HEALTH_SUFFIX}`,
-} as const;
-
 export const applyV17Upgrade = async (tx: Transaction): Promise<void> => {
   await backfillHealthProvenance(tx);
   await backfillSyncZonesPolicies(tx);

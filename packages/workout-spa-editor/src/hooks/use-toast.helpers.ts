@@ -1,22 +1,6 @@
 import type { ToastItem, ToastOptions } from "./use-toast.types";
 
 /**
- * Create a variant-specific toast helper
- */
-export const createVariantToast =
-  (
-    toast: (options: ToastOptions) => string,
-    variant: ToastOptions["variant"]
-  ) =>
-  (
-    title: string,
-    description?: string,
-    options?: Omit<ToastOptions, "title" | "description" | "variant">
-  ) => {
-    return toast({ title, description, variant, ...options });
-  };
-
-/**
  * Generate a unique ID for a toast
  */
 export const generateToastId = (): string => {
