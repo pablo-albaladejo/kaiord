@@ -1,3 +1,5 @@
+> Completed: 2026-08-05
+
 # Align Connections and Settings with the V2 screens
 
 ## Why

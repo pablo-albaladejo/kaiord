@@ -1,3 +1,5 @@
+> Completed: 2026-08-05
+
 ## Why
 
 The one-row header, the ⌘K palette, the `?` shortcut sheet, the setup

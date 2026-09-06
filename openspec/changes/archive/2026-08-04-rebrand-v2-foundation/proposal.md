@@ -1,3 +1,5 @@
+> Completed: 2026-08-04
+
 # Rebrand V2 · foundation
 
 ## Why

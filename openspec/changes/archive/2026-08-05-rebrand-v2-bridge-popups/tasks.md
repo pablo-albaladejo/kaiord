@@ -11,7 +11,7 @@
       12px at 0.08em/600, chips 12px, CTA 13px/500. Weights stay in
       {400, 500, 600} — the shell's 700s are gone.
 - [x] 1.4 Give every numeric surface `font-variant-numeric: tabular-nums
-    slashed-zero` via a `.tnum` class on the regions that carry figures.
+slashed-zero` via a `.tnum` class on the regions that carry figures.
 - [x] 1.5 Replace the duration-only `transition` declarations with
       property-scoped 120ms `var(--kd-ease)` transitions.
 
@@ -72,7 +72,7 @@
 - [x] 5.2 Add `.chip--more` for the "+N more" collapse chip: no fill,
       `--kd-border-soft`, `--kd-text-muted`; WHOOP's more-chip uses it.
 
-  > Deferred to: the SPA. `.chip--danger` is NOT shipped — the
+  > Not shipped: `.chip--danger` is deliberately absent — the
   > broken-vs-paused distinction the V2 paints it for is routing state no
   > bridge extension can see. See the proposal's "No danger-tinted chip".
 

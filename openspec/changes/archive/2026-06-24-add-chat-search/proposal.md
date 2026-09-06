@@ -1,3 +1,5 @@
+> Completed: 2026-06-24
+
 ## Why
 
 The in-SPA AI chat assistant now keeps distinct per-profile conversations
