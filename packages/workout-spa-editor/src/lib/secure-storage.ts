@@ -28,5 +28,3 @@ export const createSecureStorage = (passphrase: string) => ({
     });
   },
 });
-
-export type SecureStorage = ReturnType<typeof createSecureStorage>;

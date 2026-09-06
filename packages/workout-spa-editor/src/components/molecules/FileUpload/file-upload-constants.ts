@@ -19,8 +19,6 @@ export const SUPPORTED_FILE_TYPES = {
   json: "application/json",
 } as const;
 
-export type SupportedExtension = keyof typeof SUPPORTED_FILE_TYPES;
-
 type FileSizeError = {
   title: string;
   message: string;
