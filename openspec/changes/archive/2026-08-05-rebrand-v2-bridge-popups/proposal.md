@@ -1,3 +1,5 @@
+> Completed: 2026-08-05
+
 # Rebrand V2 · bridge popups
 
 ## Why
