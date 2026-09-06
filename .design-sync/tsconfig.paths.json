@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../packages/workout-spa-editor/src/*"],
+      "./resources": ["./i18n-resources-static.ts"]
+    }
+  }
+}
