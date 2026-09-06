@@ -2,6 +2,14 @@ import "fake-indexeddb/auto";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, configure } from "@testing-library/react";
 import { afterEach, beforeEach, expect, vi } from "vitest";
+import { resetBridgeSingletons } from "./test-utils/reset-bridge-singletons";
+
+// Drop bridge singletons left on `globalThis` by whichever test file last
+// shared this worker. Top-level on purpose: setup files are re-evaluated per
+// test file, before that file's imports run, so the stale instance is gone
+// before anything resolves to it. In `beforeEach` this would be too late —
+// module-level imports have already bound. See #1094.
+resetBridgeSingletons();
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
