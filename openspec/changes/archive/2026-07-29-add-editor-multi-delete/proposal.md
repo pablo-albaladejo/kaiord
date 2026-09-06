@@ -1,3 +1,5 @@
+> Completed: 2026-07-29
+
 ## Why
 
 The workout editor supports multi-selection (`selectedStepIds`, populated by
