@@ -58,7 +58,7 @@ const entry = {
   clicks7d: sum(last7, "Clicks"),
   crawledPages: latestCrawl?.CrawledPages ?? null,
   inIndexPages: latestCrawl?.InIndexPages ?? null,
-  crawlErrors: latestCrawl?.AllOtherCodes ?? null,
+  crawlErrors: latestCrawl?.CrawlErrors ?? null,
   topQueries: [...queries]
     .sort((a, b) => (b.Impressions ?? 0) - (a.Impressions ?? 0))
     .slice(0, 10)
