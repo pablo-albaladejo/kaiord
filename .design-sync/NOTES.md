@@ -100,29 +100,67 @@ regenerate via `buildCmd`; **no app source was changed for any of them**.
   story's decorator wrapped it correctly. `shim: ["/src/contexts/", "/src/i18n/"]`
   forces them onto the bundle global so identity is shared.
 
-## Storybook has no global providers (why 3 components ship floor cards)
+## Storybook's global providers (fixed — was the biggest source of skips)
 
-`.storybook/preview.ts` sets backgrounds and controls but mounts **no providers** —
-no theme, no locale, no units. Any component reading `useTranslate`/`useTheme`
-therefore renders in Storybook only if its own story remembers to wrap it, and
-most do not. Consequences:
+`.storybook/preview` used to set backgrounds and controls but mount **no
+providers** — no theme, no locale, no units. Any component reading
+`useTranslate`/`useTheme` therefore rendered only if its own story remembered to
+wrap it, and most did not, so the reference showed an empty root and the sync had
+nothing to verify a preview against. Notably `.storybook/AGENTS.md` had claimed a
+"theme provider wrap" all along: the documentation described an intent the file
+never implemented.
 
-- Every story of **WorkoutStats** (6), **WorkoutList** (4) and **MainLayout** (4)
-  fails in the repo's own Storybook (`sb-error` — "no storybook root content"),
-  verified with the compare harness after confirming the harness renders Button,
-  Icon, StepCard and ThemeToggle correctly. They are skipped via
-  `cfg.overrides.<Name>.skip` and ship the honest floor card. **They are still
-  fully functional in the bundle** with types and docs — only the preview card is
-  unauthored, because there is no reference render to verify one against.
-- `MainLayout` additionally requires a real `PersistencePort`. Supplying one would
-  pull the Dexie persistence stack into the design tool; not worth it for a card.
-- The sync's own previews DO mount a provider chain (`cfg.provider`:
-  Theme → Locale → Units → GarminBridge), which is what fixed `PushButton`. So
-  previews can render strictly more than Storybook does.
-- **Worth fixing upstream:** adding those providers as global decorators in
-  `.storybook/preview.ts` would repair the repo's Storybook and let all three
-  components get real preview cards on the next sync. Deliberately not done here —
-  it changes Storybook for everyone, which is a repo decision, not a sync one.
+It now mounts `ThemeProvider > LocaleProvider > UnitsProvider >
+GarminBridgeProvider` as a global decorator (`preview.tsx` — `.tsx` because the
+decorator is JSX). This mirrors the sync's own `cfg.provider` chain, so the two
+sides agree by construction rather than by coincidence. A story that wraps itself
+still works: the inner provider wins for its own subtree.
+
+- `MainLayout` is the one component the chain does not rescue: it needs a real
+  `PersistencePort`, which would pull the Dexie persistence stack into Storybook.
+  It keeps its skip and its floor card.
+- Skipped stories are worth re-testing whenever the chain changes — a skip that
+  was justified by a missing provider is not justified once the provider exists.
+  When the chain landed, every skip was removed and the harness was allowed to
+  re-adjudicate; only the ones with a non-provider cause came back.
+- **`cfg.provider` must pin the same theme the decorator pins.** The decorator
+  says `defaultTheme="light"`; `cfg.provider` originally passed no props, so the
+  preview fell back to `ThemeProvider`'s own `"system"` default, resolved through
+  `prefers-color-scheme`. Both panels agree under the headless capture browser, so
+  **the compare loop can never surface this** — but a dark-preferring viewer on
+  claude.ai/design would get dark cards judged against a light-pinned oracle. Same
+  blind-spot class as `[FONT_MISSING]`. Closed with
+  `cfg.provider.props.defaultTheme = "light"`; keep the two in step if either moves.
+
+## Storybook story files are never type-checked (how a nonexistent prop survived)
+
+`tsconfig.json` references `tsconfig.app.json`, `tsconfig.node.json` and
+`tsconfig.e2e.json` — **`tsconfig.storybook.json` is not in the graph** — and
+`tsconfig.app.json` explicitly excludes `src/**/*.stories.tsx`. So `pnpm lint`
+(`tsc -b --noEmit`) never sees a story file, and a story can call a prop the
+component does not have while CI stays green.
+
+That is exactly what had happened: `WorkoutStats` and `WorkoutList` both take a
+`workout` prop, and all 12 of their story args passed `structured_workout`. The
+prop arrived `undefined`, both components hit their null guard, and storybook
+rendered an empty root **with no page error** — which is why it looked like a
+missing provider and was not. Renaming the args fixed it: an HTTP probe of the
+built reference shows `organisms-workoutstats--default` going from root 0 to 629
+characters and `organisms-workoutlist--simple-workout` from 0 to 11976, with a
+Button control unchanged at 374.
+
+**Diagnostic that found it, worth reusing:** serve `sb-reference` over HTTP and
+load `iframe.html?id=<story-id>&viewMode=story` in playwright, then read
+`#storybook-root`'s innerHTML length and any `pageerror`. A `file://` probe returns
+root 0 for _every_ story including working ones — it looks like a total failure and
+is a false negative. Empty root **with** an error means a missing provider; empty
+root **without** one means the component rendered nothing, which points at props.
+
+**Not fixed here, deliberately:** putting `tsconfig.storybook.json` into the
+reference graph would catch this class permanently, but it surfaces **67 existing
+errors**, most of them stories importing from `@storybook/react` when the repo
+installs `@storybook/react-vite` (Storybook 10 dropped the former as a direct
+dependency). That is its own cleanup, not a design-sync change.
 
 ## How to grade these previews (method, not defects)
 
@@ -150,6 +188,32 @@ smaller, and every block-level component looks wider.
   it through the first `@font-face` in `sb-reference/assets/iframe-*.css`
   (relative path, file present) while the second rule's absolute
   `/editor/fonts/...` dead-ends; the bundle ships `fonts/` from `cfg.extraFonts`.
+- **The sheet can hide a real size step.** The storybook crop GROWS with the
+  component (208x76 for a normal button, 238x84 for the large one), so the sheet
+  rescales each row differently and normalises the difference away, while the
+  preview's fixed 900x700 page swallows +8px after shrinking. Compare the _step
+  between two stories on the same side_, measured on raw PNGs — that is how
+  `PushButton`'s `size="lg"` was confirmed real (+30x+8 sb, +31x+8 ds) after
+  looking absent.
+- **Measure the bbox with a threshold, not a raw `getbbox()`.** A soft box-shadow
+  halo adds rows the storybook element crop excludes by construction: `AiBanner`
+  reads 852x52 at threshold 0 and 852x47 at threshold 40, which would otherwise
+  look like a 6px padding delta.
+- **Two bbox signatures worth reusing.** A bbox of `None` means the panel is a
+  single flat colour — the component is _absent_, not small. A bbox whose bottom
+  row equals the last row of the 700px viewport means _clipped_, not restyled;
+  look for a shorter sibling story as the control before calling it a styling bug.
+- **A high pixel-diff percentage is not evidence of a delta.** `SaveButton`
+  `Interactive` differs on 9.47% of pixels yet is a true match: the diff map shows
+  only thin outlines tracing letterforms, which is subpixel text phase. A real
+  delta shows displaced or resized FILLED regions. Render the map before believing
+  the number. Also clamp the diff window with
+  `min(sb.width - sx, ds.width - dx)` — PIL's `crop()` pads out of bounds with
+  black and will manufacture a 75% difference out of padding.
+- **The generated `_preview/<Name>.js` applies story and meta decorators only —
+  never `.storybook/preview.tsx` globals.** `cfg.provider` is the preview-side
+  stand-in for those. The two are independent inputs, which is why they must be
+  kept saying the same thing (see the theme pin above).
 
 ## Known render warns (triaged — a warn NOT listed here is new)
 
@@ -222,10 +286,51 @@ onUngroup/onDelete`, `SaveErrorDialog.onClose/onRetry`, `SectionHead.onAction`,
   `grep -rl "action:" --include="*.stories.tsx" src/components` then check the
   component for `onX &&` / `onX ?` conditional rendering.
 - Skipped as `sb-error` (they do not render in the repo's own storybook):
-  `PushButton` ×3 (needs `GarminBridgeProvider`), `ConfirmationModal` ×6 (Radix
-  portals outside `#storybook-root`, so the reference measures an empty root — the
-  component is fine; only `Interactive`, the closed state, is gradeable),
-  `ZoneDist` Zone1Only, `StepEditor` No Step (returns null with no step).
+  `ConfirmationModal` ×6 (Radix portals outside `#storybook-root`, so the
+  reference measures an empty root — the component is fine; only `Interactive`,
+  the closed state, is gradeable), `ZoneDist` Zone1Only, `StepEditor` No Step
+  (returns null with no step), `WorkoutStats` No Workout (`workout: null`, the
+  component returns null by design), `WorkoutList` Empty Workout.
+  **`PushButton` is no longer on this list** — the global provider chain in
+  `preview.tsx` supplies `GarminBridgeProvider`, and its 3 stories now render and
+  grade on both panels.
+
+## `BottomNav`'s stories are stale — fix them before trusting this component
+
+Graded `close`, and it needs three separate things before it can be honestly
+verified. Two are mechanical, the third is the one that would waste the other two:
+
+1. _Reference side._ The nav is `fixed inset-x-[14px] bottom-[14px]` while the
+   story decorator is `relative h-64`, so storybook's tight crop of the story root
+   excludes it entirely — content bbox `None`, all three sb shots share one hash.
+   A `fixed` element cannot be photographed by a crop of a `relative` ancestor;
+   this needs a story-side decorator change, not a viewport override.
+   (`cfg.overrides.BottomNav.viewport: "390x700"` IS working — the sb shot really
+   is 390 wide, so `md:hidden` is not the blocker.)
+2. _Preview side._ `wouter` is bundled from source into the preview while the
+   component uses the bundle's own copy — two module instances — so the story's
+   `Router`/`memoryLocation` never reaches `useLocation()` and no tab highlights.
+   All three ds shots share one hash. Fix is `cfg.storyImports` deduping wouter
+   onto the bundle instance.
+3. **The stories describe a component that no longer exists.** The docblock says
+   "Four tabs (Today, Library, Athlete, Settings)"; the shipped nav renders **five**
+   tabs and has **no Settings tab at all**. So `SettingsActive` could never
+   highlight anything even with (1) and (2) fixed. Rewrite the stories against the
+   current component first — otherwise the other two fixes buy a verified render
+   of the wrong intent.
+
+## The dark theme is NOT verified
+
+Both outermost providers pin `light` — the storybook decorator by design, and
+`cfg.provider` to match it — so **no `dark:` utility activates anywhere in this
+campaign**. A `match` on `ThemeToggle`'s `Dark Mode` story means "the toggle shows
+the moon while the app is in light mode"; it is not evidence that the dark palette
+renders faithfully. `conventions.md` tells the design agent to pass
+`defaultTheme="dark"` for dark designs, and that path has never been photographed.
+
+Verifying it needs a **second capture axis** (both panels re-captured with the
+chain pinned dark), not a re-grade of the existing shots. Until someone does that,
+treat dark-mode fidelity as unknown rather than good.
 
 ## Re-sync risks (what to watch next time)
 

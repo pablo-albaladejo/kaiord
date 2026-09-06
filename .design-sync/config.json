@@ -9,9 +9,14 @@
   "tsconfig": "../../.design-sync/tsconfig.paths.json",
   "cssEntry": ".design-sync-styles.css",
   "readmeHeader": ".design-sync/conventions.md",
-  "extraFonts": ["../../.design-sync/inter.css"],
+  "extraFonts": [
+    "../../.design-sync/inter.css"
+  ],
   "storyImports": {
-    "shim": ["/src/contexts/", "/src/i18n/"]
+    "shim": [
+      "/src/contexts/",
+      "/src/i18n/"
+    ]
   },
   "provider": {
     "component": "ThemeProvider",
@@ -19,25 +24,25 @@
       "component": "LocaleProvider",
       "inner": {
         "component": "UnitsProvider",
-        "inner": { "component": "GarminBridgeProvider" }
+        "inner": {
+          "component": "GarminBridgeProvider"
+        }
       }
+    },
+    "props": {
+      "defaultTheme": "light"
     }
   },
   "overrides": {
-    "Input": { "cardMode": "column" },
-    "DurationPicker": { "cardMode": "column" },
+    "Input": {
+      "cardMode": "column"
+    },
+    "DurationPicker": {
+      "cardMode": "column"
+    },
     "ConfirmationModal": {
       "cardMode": "single",
-      "primaryStory": "Interactive",
-      "skip": [
-        "molecules-confirmationmodal--default",
-        "molecules-confirmationmodal--destructive",
-        "molecules-confirmationmodal--short-message",
-        "molecules-confirmationmodal--long-message",
-        "molecules-confirmationmodal--discard-changes",
-        "molecules-confirmationmodal--delete-repetition-block",
-        "molecules-confirmationmodal--closed"
-      ]
+      "primaryStory": "Interactive"
     },
     "SaveErrorDialog": {
       "skip": [
@@ -49,16 +54,9 @@
         "molecules-saveerrordialog--interactive"
       ]
     },
-    "BottomNav": { "viewport": "390x700" },
-    "PushButton": {
-      "skip": [
-        "molecules-pushbutton--idle",
-        "molecules-pushbutton--full-width",
-        "molecules-pushbutton--large"
-      ]
+    "BottomNav": {
+      "viewport": "390x700"
     },
-    "ZoneDist": { "skip": ["molecules-zonedist--zone-1-only"] },
-    "StepEditor": { "skip": ["organisms-stepeditor--no-step"] },
     "MainLayout": {
       "skip": [
         "templates-mainlayout--default",
@@ -67,23 +65,19 @@
         "templates-mainlayout--mobile-view"
       ]
     },
+    "WorkoutStats": {
+      "skip": [
+        "organisms-workoutstats--no-workout"
+      ]
+    },
     "WorkoutList": {
       "skip": [
-        "organisms-workoutlist--simple-workout",
-        "organisms-workoutlist--with-repetition-block",
-        "organisms-workoutlist--with-selected-step",
         "organisms-workoutlist--empty-workout"
       ]
     },
-    "WorkoutStats": {
+    "ZoneDist": {
       "skip": [
-        "organisms-workoutstats--default",
-        "organisms-workoutstats--distance-based",
-        "organisms-workoutstats--mixed-durations",
-        "organisms-workoutstats--single-step",
-        "organisms-workoutstats--complex-workout",
-        "organisms-workoutstats--no-workout",
-        "organisms-workoutstats--custom-styling"
+        "molecules-zonedist--zone-1-only"
       ]
     }
   },
