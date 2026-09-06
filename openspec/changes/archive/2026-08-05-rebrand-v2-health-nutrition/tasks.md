@@ -21,7 +21,7 @@
 ## 2. Charts stop using hue
 
 - [x] 2.1 `health/trends/build-trend-chart-options.ts`: drop `STROKE =
-  "#2563eb"`; each metric takes its own fixed ladder step (plus a dash when
+"#2563eb"`; each metric takes its own fixed ladder step (plus a dash when
       it wraps), so a metric's stroke does not shift as others are toggled.
 - [x] 2.2 `health/labs/charts/build-lab-chart-options.ts`: drop the blue line,
       the red outlier and the three `rgba(37, 99, 235, …)` reference values.
