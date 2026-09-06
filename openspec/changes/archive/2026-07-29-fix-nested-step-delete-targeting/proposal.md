@@ -1,3 +1,5 @@
+> Completed: 2026-07-29
+
 ## Why
 
 Deleting a step from inside a repetition block destroyed a different,

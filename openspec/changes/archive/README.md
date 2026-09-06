@@ -8,15 +8,27 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | Date | Change | Summary |
 | ---- | ------ | ------- |
 | 2026-08-09 | [`move-spa-to-app-hash-routing`](./2026-08-09-move-spa-to-app-hash-routing/) | Every deep URL of the SPA answers HTTP 404 on the way in. Measured against production: |
+| 2026-08-06 | [`rebrand-v2-editor-verbs`](./2026-08-06-rebrand-v2-editor-verbs/) | Rebrand V2 · editor canvas and the verb cut |
+| 2026-08-05 | [`align-connections-settings-v2`](./2026-08-05-align-connections-settings-v2/) | Align Connections and Settings with the V2 screens |
+| 2026-08-05 | [`rebrand-v2-athlete`](./2026-08-05-rebrand-v2-athlete/) | Rebrand V2 · Athlete |
+| 2026-08-05 | [`rebrand-v2-bridge-popups`](./2026-08-05-rebrand-v2-bridge-popups/) | Rebrand V2 · bridge popups |
+| 2026-08-05 | [`rebrand-v2-calendar-daily`](./2026-08-05-rebrand-v2-calendar-daily/) | Rebrand V2 · Calendar, Daily and the empty states |
+| 2026-08-05 | [`rebrand-v2-health-nutrition`](./2026-08-05-rebrand-v2-health-nutrition/) | Rebrand V2 · Health and Nutrition |
+| 2026-08-05 | [`rebrand-v2-library-detail-create-chat`](./2026-08-05-rebrand-v2-library-detail-create-chat/) | Rebrand V2 · Library, Workout detail, Create workout, Chat |
+| 2026-08-05 | [`repaint-app-shell-for-rebrand-v2`](./2026-08-05-repaint-app-shell-for-rebrand-v2/) | The one-row header, the ⌘K palette, the ? shortcut sheet, the setup |
+| 2026-08-04 | [`rebrand-v2-foundation`](./2026-08-04-rebrand-v2-foundation/) | Rebrand V2 · foundation |
 | 2026-08-04 | [`redesign-app-header`](./2026-08-04-redesign-app-header/) | The app shell's navigation is ten flat destinations over two wrapping rows. |
 | 2026-08-04 | [`retire-help-dialog-for-coach-marks`](./2026-08-04-retire-help-dialog-for-coach-marks/) | The SPA still ships two guidance surfaces that teach nothing. |
 | 2026-07-29 | [`add-connections-change-source`](./2026-07-29-add-connections-change-source/) | Wave 2a made every routing row answer "where does my sleep data come from", |
 | 2026-07-29 | [`add-connections-data-type-rows`](./2026-07-29-add-connections-data-type-rows/) | The Connections section answers "which sources are linked". It does not answer |
 | 2026-07-29 | [`add-connections-health-summary`](./2026-07-29-add-connections-health-summary/) | add-connections-page shipped the source cards. A reader who opens |
 | 2026-07-29 | [`add-connections-page`](./2026-07-29-add-connections-page/) | A user who wants to know whether Kaiord is receiving their data has to visit |
+| 2026-07-29 | [`add-editor-multi-delete`](./2026-07-29-add-editor-multi-delete/) | The workout editor supports multi-selection (selectedStepIds, populated by |
 | 2026-07-29 | [`add-settings-attention-model`](./2026-07-29-add-settings-attention-model/) | The Settings shell carries two attention surfaces — a banner above the index |
 | 2026-07-29 | [`add-settings-split-shell`](./2026-07-29-add-settings-split-shell/) | Settings answers itself row by row (shipped in add-settings-row-values) but it |
+| 2026-07-29 | [`fix-nested-step-delete-targeting`](./2026-07-29-fix-nested-step-delete-targeting/) | Deleting a step from inside a repetition block destroyed a different, |
 | 2026-07-29 | [`retire-legacy-connection-surfaces`](./2026-07-29-retire-legacy-connection-surfaces/) | add-connections-page, add-connections-data-type-rows, |
+| 2026-07-29 | [`surface-whoop-read-preconditions`](./2026-07-29-surface-whoop-read-preconditions/) | The WHOOP popup can report a healthy, reading bridge while every read it stands |
 | 2026-07-28 | [`add-command-palette`](./2026-07-28-add-command-palette/) | The SPA's editor actions exist twice and are enumerable nowhere. The right-click |
 | 2026-07-28 | [`add-settings-row-values`](./2026-07-28-add-settings-row-values/) | The SPA's Settings index is a list of eleven labels that answer nothing. To find |
 | 2026-07-28 | [`add-setup-checklist`](./2026-07-28-add-setup-checklist/) | First-run guidance in the SPA is a six-step centred modal (OnboardingTutorial) |
@@ -32,6 +44,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | 2026-07-09 | [`add-ai-platform-foundation`](./2026-07-09-add-ai-platform-foundation/) | AI platform foundation (Wave 1) |
 | 2026-07-09 | [`add-lab-extraction-agent`](./2026-07-09-add-lab-extraction-agent/) | Lab-report AI extraction on the agent runtime (Wave 2 kickoff) |
 | 2026-06-27 | [`train2go-coach-links`](./2026-06-27-train2go-coach-links/) | Coach instructions imported from Train2Go — including the YouTube/Dropbox links |
+| 2026-06-24 | [`add-chat-search`](./2026-06-24-add-chat-search/) | The in-SPA AI chat assistant now keeps distinct per-profile conversations |
 | 2026-06-22 | [`energy-balance-tracking`](./2026-06-22-energy-balance-tracking/) | Athletes can already see ingested wellness data (steps, sleep, HRV, weight, and |
 | 2026-06-22 | [`energy-expenditure-activity-factor`](./2026-06-22-energy-expenditure-activity-factor/) | resolveDayExpenditure's predicted path is BMR + expectedActivityKcal. On a |
 | 2026-06-21 | [`add-chat-conversations`](./2026-06-21-add-chat-conversations/) | The in-SPA AI chat at /chat persists exactly one rolling transcript per profile (spa-ai-chat → "Transcript persistence"). A user cannot keep separate threads f… |
