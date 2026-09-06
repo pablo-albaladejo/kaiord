@@ -5,6 +5,15 @@ on:
   schedule:
     - cron: "0 9 * * 1"
 
+  # Every push to main. Without this the audit never observes the branch it
+  # guards: a transitive advisory landing on an already-pinned version (the
+  # fast-uri 4.1.2 case in #1214) changes no manifest, so the paths filter
+  # below never fires and the weekly cron is the only thing that would ever
+  # notice. See #1166.
+  push:
+    branches:
+      - main
+
   # PR with dependency changes
   pull_request:
     paths:
