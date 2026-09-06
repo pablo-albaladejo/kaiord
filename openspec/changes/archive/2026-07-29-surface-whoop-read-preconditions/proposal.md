@@ -1,3 +1,5 @@
+> Completed: 2026-07-29
+
 ## Why
 
 The WHOOP popup can report a healthy, reading bridge while every read it stands

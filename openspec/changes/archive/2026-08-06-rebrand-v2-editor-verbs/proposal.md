@@ -1,3 +1,5 @@
+> Completed: 2026-08-06
+
 # Rebrand V2 · editor canvas and the verb cut
 
 ## Why

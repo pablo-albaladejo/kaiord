@@ -1,3 +1,5 @@
+> Completed: 2026-08-05
+
 # Rebrand V2 · Calendar, Daily and the empty states
 
 ## Why
