@@ -7,6 +7,15 @@ import {
 
 const g = globalThis as unknown as Record<string, unknown>;
 
+// Captured at MODULE LOAD — after setupFiles have run, before any test in
+// this file has. Reading it inside a test would be vacuous: the `afterEach`
+// below, and the first case's own cleanup, delete these keys long before a
+// later case could observe them.
+const KEYS_PRESENT_AT_LOAD = [
+  "__KAIORD_BRIDGE_DISCOVERY__",
+  "__KAIORD_BRIDGE_CONNECTIONS__",
+].filter((key) => key in g);
+
 describe("resetBridgeSingletons", () => {
   it("should delete a singleton left behind by another test file", () => {
     // Arrange — exactly what a worker-sharing sibling leaves on globalThis.
@@ -37,19 +46,21 @@ describe("resetBridgeSingletons", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("should have already run from the setup file before this file's tests", () => {
-    // Arrange — this file imports nothing from adapters/bridge, so nothing
-    // in it can have parked a singleton. Anything present here would have
-    // been inherited from whichever file last shared this worker, which is
-    // the leak #1094 describes. Deterministic: setup files are re-evaluated
-    // before each test file's own imports.
-    const inherited = BRIDGE_SINGLETON_KEYS.filter((key) => key in g);
+  it("should have already cleared the seeded stale singletons", () => {
+    // Arrange — `seed-stale-bridge-singletons.ts` parks a stale marker on
+    // both keys and runs BEFORE `test-setup.ts` (setupFiles are ordered), so
+    // both were definitely present a moment before this module loaded. That
+    // is what stops the assertion being vacuous: on a fresh worker an
+    // "absent" check passes whether or not the cleanup still exists, whereas
+    // with a seed in front of it, removing `resetBridgeSingletons()` from the
+    // setup leaves the marker behind and fails this in every file.
+    const observedAtLoad = KEYS_PRESENT_AT_LOAD;
 
     // Act
-    const actual = inherited;
+    const survivors = observedAtLoad;
 
     // Assert
-    expect(actual).toEqual([]);
+    expect(survivors).toEqual([]);
   });
 
   it("should be a no-op when nothing was parked", () => {
