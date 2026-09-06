@@ -8,17 +8,6 @@ export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 /** Maximum file size for display */
 export const MAX_FILE_SIZE_MB = 10;
 
-/**
- * Supported file extensions and their MIME types
- */
-export const SUPPORTED_FILE_TYPES = {
-  fit: "application/octet-stream",
-  tcx: "application/xml",
-  zwo: "application/xml",
-  krd: "application/json",
-  json: "application/json",
-} as const;
-
 type FileSizeError = {
   title: string;
   message: string;
