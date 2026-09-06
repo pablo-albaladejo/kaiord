@@ -4,17 +4,13 @@ import { createFitParsingError } from "@kaiord/core";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../shared/types";
 
-export type ValidateMessagesOptions = {
-  /** If true, throw on missing critical messages. Default: true */
-  strict?: boolean;
-};
-
 type ValidateMessagesArgs = [
   fileId: unknown,
   workoutMsg: unknown,
   messages: FitMessages,
   logger: Logger,
-  options?: ValidateMessagesOptions,
+  /** options.strict (default true): throw on missing critical messages */
+  options?: { strict?: boolean },
 ];
 
 const checkFileId = (

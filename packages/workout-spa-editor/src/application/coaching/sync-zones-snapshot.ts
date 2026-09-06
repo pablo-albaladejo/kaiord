@@ -35,14 +35,6 @@ export const getSnapshotZones = (
 const BAND_KEY_RE =
   /^(cycling|running|swimming)\.(heartRateZones|powerZones|paceZones)\.(z[1-5])\.(minBpm|maxBpm|minPercent|maxPercent|minPace|maxPace)$/;
 
-const BAND_INDEX: Record<string, number> = {
-  z1: 0,
-  z2: 1,
-  z3: 2,
-  z4: 3,
-  z5: 4,
-};
-
 const BOUND_PROPS: Record<ZoneKind, [string, string]> = {
   heartRateZones: ["minBpm", "maxBpm"],
   powerZones: ["minPercent", "maxPercent"],
@@ -77,9 +69,4 @@ export const tableKeyOfField = (
   const m = BAND_KEY_RE.exec(field);
   if (!m) return null;
   return { sport: m[1] as Sport, kind: m[2] as ZoneKind };
-};
-
-export const bandIndexOfField = (field: FieldKey): number | undefined => {
-  const m = BAND_KEY_RE.exec(field);
-  return m ? BAND_INDEX[m[3] ?? ""] : undefined;
 };
