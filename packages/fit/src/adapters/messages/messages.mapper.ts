@@ -2,7 +2,7 @@ import type { Logger } from "@kaiord/core";
 import type { KRD } from "@kaiord/core";
 import { fileTypeSchema } from "@kaiord/core";
 
-import { createCourseMessages } from "../course";
+import { createCourseMessages } from "../course/course-messages.creator";
 import { groupBodyCompositionMessages } from "../health/body-composition/body-composition-message-grouping";
 import { convertFitToKrdHealthBodyComposition } from "../health/body-composition/fit-to-krd-health-body-composition.converter";
 import { convertKrdToFitHealthBodyCompositionMessages } from "../health/body-composition/krd-health-body-composition-to-fit.converter";
