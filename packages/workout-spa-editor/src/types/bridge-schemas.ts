@@ -23,8 +23,6 @@ export const bridgeCapabilitySchema = z.enum([
   "read:activities",
 ]);
 
-export type BridgeCapability = z.infer<typeof bridgeCapabilitySchema>;
-
 export const bridgeManifestSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -41,8 +39,6 @@ export const bridgeErrorResponseSchema = z.object({
   code: z.string().optional(),
   retryable: z.boolean().optional(),
 });
-
-export type BridgeErrorResponse = z.infer<typeof bridgeErrorResponseSchema>;
 
 export const syncStateSchema = z.object({
   source: z.string(),

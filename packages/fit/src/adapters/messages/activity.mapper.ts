@@ -2,11 +2,11 @@ import type { Logger } from "@kaiord/core";
 import type { KRD } from "@kaiord/core";
 import { fileTypeSchema } from "@kaiord/core";
 
-import { convertFitToKrdEvents } from "../event";
+import { convertFitToKrdEvents } from "../event/fit-to-krd-event.converter";
 import { extractFitExtensions } from "../extensions/extensions.extractor";
 import { convertFitTimeCreatedToIso } from "../health/shared/health-metadata.builder";
 import { convertFitToKrdLaps } from "../lap";
-import { convertFitToKrdRecords } from "../record";
+import { convertFitToKrdRecords } from "../record/fit-to-krd-record.converter";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertFitToKrdSession } from "../session";
 import type { FitMessages } from "../shared/types";
