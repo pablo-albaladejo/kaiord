@@ -84,8 +84,14 @@ module.exports = [
     // as the regression-detection baseline. Bumped to 60 kB when `ai` moved
     // 6 -> 7 (the v7 core adds ~2.2 kB, taking the bundle to ~57.2 kB). Bumped
     // to 63 kB for the `ai` 7.0.14 -> 7.0.34 patch range (bundle now ~60.5 kB),
-    // restoring headroom as the regression-detection baseline.
-    limit: "63 kB",
+    // restoring headroom as the regression-detection baseline. Bumped to 70 kB
+    // for the `ai` 7.0.66 -> 7.0.84 patch range, which measured 66.58 kB in CI
+    // and overran the 63 kB baseline by 3.58 kB (run 33422992966, PR #1211).
+    // Note the 63 kB baseline was down to 0.85 kB of headroom (62.15 kB
+    // measured on main at 7.0.66), which is why a routine patch-range bump
+    // tripped it; 70 kB is sized to survive the next few `ai` patch ranges
+    // rather than to be raised again on the following one.
+    limit: "70 kB",
     import: "*",
     modifyEsbuildConfig: externalize(["zod", "@kaiord/core"]),
   },
