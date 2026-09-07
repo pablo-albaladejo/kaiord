@@ -10,18 +10,20 @@ const announcesAll = {
 };
 
 describe("bridgeRouteTypes", () => {
-  it("should report no export for a bridge whose manifest over-claims", () => {
+  it("should narrow an over-claiming export manifest to the cabled route", () => {
     // Arrange
-    // `trainingpeaks-bridge` announces `write:body`, but the SPA cables no
-    // export for it, so a manifest-derived chip would tell the user Kaiord
-    // pushes data it never pushes.
+    // `trainingpeaks-bridge` announces `write:body` as well as
+    // `write:workouts`, but the SPA cables only the workout push. A
+    // manifest-derived chip would otherwise tell the user Kaiord pushes body
+    // data it never pushes.
     const bridgeId = "trainingpeaks-bridge";
 
     // Act
     const types = bridgeRouteTypes(bridgeId, "export", announcesAll);
 
     // Assert
-    expect(types).toEqual([]);
+    expect(types).toEqual(["workout"]);
+    expect(types).not.toContain("weight");
   });
 
   it("should narrow a shared import token to the routes the SPA serves", () => {
