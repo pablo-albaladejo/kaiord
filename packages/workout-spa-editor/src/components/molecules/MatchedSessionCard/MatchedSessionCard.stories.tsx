@@ -18,6 +18,7 @@ const activity: CoachingActivity = {
 
 const workout: WorkoutRecord = {
   id: "w1",
+  profileId: "profile-1",
   date: "2026-04-29",
   state: "ready",
   source: "train2go",
