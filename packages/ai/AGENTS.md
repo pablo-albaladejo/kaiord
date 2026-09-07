@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-09-07 -->
 
 # @kaiord/ai
 

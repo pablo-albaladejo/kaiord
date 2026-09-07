@@ -41,7 +41,7 @@ export const SINKS = [
     tool: "query_workouts",
     status: "fenced",
     provenance:
-      "workout.name arrives with imported files and platform sync; fenced in summarize-workouts.ts",
+      "workout.name is read from krd.extensions.structured_workout.name. utils/import-workout.ts parses FIT/TCX/ZWO/GCN/KRD uploads into that KRD, so a file supplies the name; fenced in summarize-workouts.ts",
   },
   {
     tool: "query_coaching",

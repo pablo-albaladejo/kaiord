@@ -1,11 +1,11 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-09-07 -->
 
 # src/evals/
 
 ## Purpose
 
-Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (22 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. Evals are manual-trigger only in CI (not part of standard test suite) because they require API keys and incur costs.
+Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (22 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **The runners are INERT in this project**: they obtain a model through `loadEvalModel`, which throws without a provider API key, and this project has none. They have never executed. What runs on every commit is the assertion logic and the fixtures' own structural invariants, neither of which needs a credential.
 
 ## Key Files
 
@@ -13,13 +13,14 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 - `types.ts` — Type definitions: `Benchmark`, `EvalResult`, `EvalReport`, `ZoneCheck`
 - `assertions.ts` — `evaluateBenchmark(benchmark, workout, durationMs)` validates schema, sport, step count, zone ranges
 - `reporter.ts` — Report generation (`createReport`, `formatReport`) with category/language breakdowns; reused as-is by the chat-tool evals (both result shapes carry `id`/`pass`/`errors`/`durationMs`)
-- `run-evals.ts` — CLI entry point: loads Anthropic model, runs all benchmarks, outputs report JSON and markdown
-- `load-anthropic-model.ts` — shared `ANTHROPIC_API_KEY`/`EVAL_MODEL` loader used by both eval CLIs
+- `run-evals.ts` — CLI entry point (inert): would run all benchmarks and output report JSON and markdown
+- `load-eval-model.ts` — shared `EVAL_PROVIDER`/`EVAL_MODEL` loader used by all three eval CLIs; throws without the provider's API key, which is why the CLIs are inert here
+- `benchmark-invariants.ts` — keyless structural checks over `benchmarks.json`; a `zoneCheck` with no bound the comparison can use is rejected
 - `chat-tool-benchmarks.json` — Data Hub hub-conversation scenarios (F6): "where do my planned sessions come from" (read) and "read sleep only from Whoop" (action)
 - `chat-tool-types.ts` — Type definitions: `ChatToolBenchmark`, `ChatToolEvalResult`
 - `chat-tool-fixtures.ts` — local `get_data_routes`/`set_data_route` `ChatTool` fixtures mirroring the real schemas registered in `@kaiord/workout-spa-editor` (hand-kept in sync; that package cannot be a dependency here)
 - `chat-tool-assertions.ts` — `evaluateChatToolBenchmark(benchmark, chatTurnResult, durationMs)`: read scenarios check the expected tool was called and the final answer names the real source; action scenarios check the paused `pendingAction` matches the expected tool + input fields
-- `run-chat-tool-evals.ts` — CLI entry point: loads Anthropic model, runs `createChatAgent` against the hub tool fixtures for each benchmark, outputs report JSON and markdown
+- `run-chat-tool-evals.ts` — CLI entry point (inert): would run `createChatAgent` against the hub tool fixtures for each benchmark
 
 ## Assertions per Benchmark
 
@@ -85,13 +86,13 @@ any threshold on it would be a number that can never fire.
 - **Add a benchmark**: Edit `benchmarks.json`, follow the schema, run `pnpm --filter @kaiord/ai test` to validate
 - **Modify assertions**: Update `assertions.ts` (e.g., change tolerance from 5% to 10%), re-run evals
 - **Customize report**: Edit `reporter.ts` formatting (markdown, JSON structure)
-- **Run locally**: `ANTHROPIC_API_KEY=sk-ant-... pnpm --filter @kaiord/ai eval` (outputs JSON and formatted text)
+- **Run locally**: not possible in this project — the runners need a provider API key it does not have
 - **Add a chat-tool benchmark**: Edit `chat-tool-benchmarks.json`, follow the schema above; if the scenario needs a new fixture answer, extend `chat-tool-fixtures.ts`
-- **Run chat-tool evals locally**: `ANTHROPIC_API_KEY=sk-ant-... pnpm --filter @kaiord/ai eval:chat-tools`
 
 ### Testing Requirements
 
-- `assertions.test.ts`: Unit tests for `evaluateBenchmark`, zone checks, step counting
+- `assertions.test.ts`: Unit tests for `evaluateBenchmark`, zone checks, step counting, and failure attribution by dimension
+- `benchmark-invariants.test.ts`: keyless checks that every `zoneCheck` in the fixture declares a usable bound
 - `reporter.test.ts`: Unit tests for `createReport` grouping and `formatReport` output
 - `chat-tool-assertions.test.ts`: Unit tests for `evaluateChatToolBenchmark` against fabricated `ChatTurnResult` values (no LLM calls)
 - No integration tests for `run-evals.ts` / `run-chat-tool-evals.ts` (CLIs; manually tested)
@@ -112,7 +113,7 @@ any threshold on it would be a number that can never fire.
 - `../index` — `createTextToWorkout`, `createChatAgent`, `ChatTool`, `ChatTurnResult`
 - `./types` / `./chat-tool-types` — Type definitions
 - `./benchmarks.json` / `./chat-tool-benchmarks.json` — Benchmark data
-- `./load-anthropic-model` — shared model loader
+- `./load-eval-model` — shared model loader
 
 ### External
 
