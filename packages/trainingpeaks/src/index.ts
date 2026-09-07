@@ -25,6 +25,23 @@ export {
   TRAININGPEAKS_WEIGHT_UNITS,
 } from "./adapters/converters/krd-to-trainingpeaks-metric.converter";
 
+// Write converter (KRD structured workout → TrainingPeaks workout payload)
+export {
+  krdToTrainingPeaksStructure,
+  krdToTrainingPeaksWorkout,
+  type KrdToTrainingPeaksWorkoutOptions,
+} from "./adapters/converters/krd-to-trainingpeaks-workout.converter";
+export type { TrainingPeaksThresholds } from "./adapters/converters/trainingpeaks-workout-targets";
+export {
+  type TrainingPeaksBlock,
+  type TrainingPeaksIntensityMetric,
+  type TrainingPeaksStep,
+  type TrainingPeaksStructure,
+  trainingPeaksStructureSchema,
+  type TrainingPeaksWorkout,
+  trainingPeaksWorkoutSchema,
+} from "./adapters/schemas/trainingpeaks-workout.schema";
+
 // Schemas, metric-type ids & inferred types
 export {
   TRAININGPEAKS_DEFERRED_METRIC_TYPES,
