@@ -1,10 +1,22 @@
-import type { EvalReport, EvalResult } from "./types";
+import { dimensionRatePercent, tallyByDimension } from "./dimension-outcomes";
+import type {
+  DimensionOutcome,
+  DimensionTally,
+  EvalReport,
+  ReportableResult,
+} from "./types";
 
-export const createReport = (
-  results: Array<EvalResult>,
+const outcomesOf = (results: ReadonlyArray<unknown>): Array<DimensionOutcome> =>
+  results.flatMap((r) => {
+    const carried = (r as { outcomes?: Array<DimensionOutcome> }).outcomes;
+    return Array.isArray(carried) ? carried : [];
+  });
+
+export const createReport = <R extends ReportableResult>(
+  results: Array<R>,
   provider: string,
   model: string
-): EvalReport => {
+): EvalReport<R> => {
   const passed = results.filter((r) => r.pass).length;
   const byCategory = groupBy(results, (r) => r.id.split("-")[0] ?? "other");
   const byLanguage = groupBy(results, (r) => r.id.split("-")[1] ?? "other");
@@ -16,16 +28,26 @@ export const createReport = (
     total: results.length,
     passed,
     failed: results.length - passed,
-    passRate: Math.round((passed / results.length) * 100),
+    passRatePercent: (passed / results.length) * 100,
     results,
     byCategory,
     byLanguage,
+    ...dimensionSection(results),
   };
 };
 
-const groupBy = (
-  results: Array<EvalResult>,
-  keyExtractor: (r: EvalResult) => string
+const dimensionSection = (
+  results: ReadonlyArray<unknown>
+): { byDimension?: Record<string, DimensionTally> } => {
+  const outcomes = outcomesOf(results);
+  return outcomes.length === 0
+    ? {}
+    : { byDimension: tallyByDimension(outcomes) };
+};
+
+const groupBy = <R extends ReportableResult>(
+  results: Array<R>,
+  keyExtractor: (r: R) => string
 ): Record<string, { total: number; passed: number }> => {
   const groups: Record<string, { total: number; passed: number }> = {};
   for (const r of results) {
@@ -41,7 +63,8 @@ export const formatReport = (report: EvalReport): string => {
   const lines: Array<string> = [
     `# Eval Report: ${report.provider} / ${report.model}`,
     `Date: ${report.timestamp}`,
-    `Pass rate: ${report.passRate}% (${report.passed}/${report.total})`,
+    // Rounded here, on the display side only.
+    `Pass rate: ${Math.round(report.passRatePercent)}% (${report.passed}/${report.total})`,
     "",
     "## Results",
   ];
@@ -59,5 +82,22 @@ export const formatReport = (report: EvalReport): string => {
     lines.push(`- ${cat}: ${stats.passed}/${stats.total}`);
   }
 
+  if (report.byDimension) {
+    lines.push("", "## By Dimension");
+    for (const [dim, tally] of Object.entries(report.byDimension)) {
+      lines.push(`- ${dim}: ${formatTally(tally)}`);
+    }
+  }
+
   return lines.join("\n");
+};
+
+const formatTally = (tally: DimensionTally): string => {
+  const rate = dimensionRatePercent(tally);
+  const head =
+    rate === null
+      ? "not measured"
+      : `${tally.passed}/${tally.measured} measured (${Math.round(rate)}%)`;
+  if (tally.unmeasured === 0) return head;
+  return `${head}; ${tally.unmeasured} unmeasured — ${tally.reasons.join("; ")}`;
 };

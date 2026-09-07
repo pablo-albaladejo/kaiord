@@ -78,6 +78,16 @@ const meta = {
       description: "Callback when user cancels or dismisses",
     },
   },
+  args: {
+    isOpen: true,
+    title: "",
+    message: "",
+    confirmLabel: "",
+    cancelLabel: "",
+    onConfirm: () => {},
+    onCancel: () => {},
+    variant: "default",
+  },
 } satisfies Meta<typeof ConfirmationModal>;
 
 export default meta;

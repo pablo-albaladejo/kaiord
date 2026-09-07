@@ -30,13 +30,13 @@
     "@kaiord/garmin": "workspace:^",
     "fetch-cookie": "^3.2.0",
     "oauth-1.0a": "^2.2.6",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
-    "tsdown": "^0.22.14",
-    "tsx": "^4.23.12",
+    "tsdown": "^0.23.0",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
