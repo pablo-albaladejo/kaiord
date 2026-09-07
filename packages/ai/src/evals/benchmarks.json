@@ -152,7 +152,9 @@
     "category": "zones",
     "language": "en",
     "zoneCheck": {
-      "targetType": "power"
+      "targetType": "power",
+      "minValue": 88,
+      "maxValue": 93
     }
   },
   {

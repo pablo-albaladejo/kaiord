@@ -69,7 +69,13 @@ const checkZones = (workout: Workout, benchmark: Benchmark): Array<string> => {
     (s) => s.targetType === zc.targetType && s.intensity === "active"
   );
 
-  if (targetSteps.length === 0) return errors;
+  // A zone check with nothing to check is a failure, not a pass: the model was
+  // asked for active steps of this target type and produced none, and reporting
+  // that as success is the green-that-means-nothing this suite exists to catch.
+  if (targetSteps.length === 0) {
+    errors.push(`No active ${zc.targetType} step to zone-check`);
+    return errors;
+  }
 
   for (const step of targetSteps) {
     const target = step.target as Record<string, unknown> | undefined;
@@ -79,15 +85,16 @@ const checkZones = (workout: Workout, benchmark: Benchmark): Array<string> => {
     const min = (value.min ?? value.value) as number | undefined;
     const max = (value.max ?? value.value) as number | undefined;
 
+    // Presence, not truthiness: a declared bound of 0 is a bound.
     if (
-      zc.minValue &&
+      zc.minValue !== undefined &&
       min !== undefined &&
       min < zc.minValue * (1 - ZONE_TOLERANCE)
     ) {
       errors.push(`Zone low ${min} below expected ${zc.minValue}`);
     }
     if (
-      zc.maxValue &&
+      zc.maxValue !== undefined &&
       max !== undefined &&
       max > zc.maxValue * (1 + ZONE_TOLERANCE)
     ) {

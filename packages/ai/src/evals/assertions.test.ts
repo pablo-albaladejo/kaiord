@@ -271,7 +271,7 @@ describe("evaluateBenchmark", () => {
       expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);
     });
 
-    it("should skip zone check when no active steps match targetType", () => {
+    it("should fail the zone check when no active steps match targetType", () => {
       // Arrange
       const benchmark: Benchmark = {
         ...baseBenchmark,
@@ -290,7 +290,29 @@ describe("evaluateBenchmark", () => {
       );
 
       // Assert
-      expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);
+      expect(result.pass).toBe(false);
+      expect(result.errors).toContain(
+        "No active heart_rate step to zone-check"
+      );
+    });
+
+    it("should honour a declared bound of zero rather than skipping it", () => {
+      // Arrange
+      const benchmark: Benchmark = {
+        ...baseBenchmark,
+        zoneCheck: { targetType: "power", maxValue: 0 },
+      };
+      const workout = createWorkout();
+
+      // Act
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(result.errors.some((e) => e.startsWith("Zone high"))).toBe(true);
     });
   });
 });
