@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import type { ChatTurnResult } from "../index";
 import { EVAL_DURATION_MS_DEFAULT } from "../test-utils/constants";
-import { evaluateChatToolBenchmark } from "./chat-tool-assertions";
+import benchmarks from "./chat-tool-benchmarks.json";
+import {
+  evaluateChatToolBenchmark,
+  expectationFault,
+} from "./chat-tool-assertions";
 import type { ChatToolBenchmark } from "./chat-tool-types";
 
 const readBenchmark: ChatToolBenchmark = {
@@ -248,5 +252,109 @@ describe("evaluateChatToolBenchmark — step limit", () => {
     // Assert
     expect(evalResult.pass).toBe(false);
     expect(evalResult.errors[0]).toContain("step limit");
+  });
+});
+
+describe("expectationFault", () => {
+  const base = {
+    id: "x",
+    userText: "hi",
+    category: "read" as const,
+    expectedTool: "get_data_routes",
+  };
+
+  it("should report no fault when expectations are absent", () => {
+    // Arrange
+    const benchmark = base;
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toBeNull();
+  });
+
+  it("should report no fault when expectations are well formed", () => {
+    // Arrange
+    const benchmark = { ...base, expectedAnswerIncludes: ["train2go"] };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toBeNull();
+  });
+
+  it("should fault when a phrase list arrives as a bare string", () => {
+    // Arrange
+    const benchmark = {
+      ...base,
+      expectedAnswerIncludes: "train2go" as unknown as string[],
+    };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toContain("not an array");
+  });
+
+  it("should fault when an action input arrives as an array", () => {
+    // Arrange
+    const benchmark = {
+      ...base,
+      category: "action" as const,
+      expectedActionInput: [] as unknown as Record<string, unknown>,
+    };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toContain("not an object");
+  });
+
+  it("should fault when a phrase list holds a non-string entry", () => {
+    // Arrange
+    const benchmark = {
+      ...base,
+      expectedAnswerIncludes: [1] as unknown as string[],
+    };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toContain("non-string");
+  });
+});
+
+describe("chat-tool-benchmarks.json", () => {
+  it("should declare every expectation in a shape the scorer understands", () => {
+    // Arrange
+    const fixture = benchmarks as ChatToolBenchmark[];
+
+    // Act
+    const faults = fixture
+      .map((b) => ({ id: b.id, fault: expectationFault(b) }))
+      .filter((f) => f.fault !== null);
+
+    // Assert
+    expect(faults).toEqual([]);
+  });
+
+  it("should declare the expectation its category is scored on", () => {
+    // Arrange
+    const fixture = benchmarks as ChatToolBenchmark[];
+
+    // Act
+    const undeclared = fixture.filter((b) =>
+      b.category === "action"
+        ? b.expectedActionInput === undefined
+        : b.expectedAnswerIncludes === undefined
+    );
+
+    // Assert
+    expect(undeclared.map((b) => b.id)).toEqual([]);
   });
 });

@@ -83,3 +83,51 @@ describe("fenceUntrusted", () => {
     expect(result.endsWith(UNTRUSTED_CLOSE)).toBe(true);
   });
 });
+
+describe("fenceUntrusted absence semantics", () => {
+  it("should return an empty string for an absent field", () => {
+    // Arrange
+    const absent = undefined;
+
+    // Act
+    const result = fenceUntrusted(absent);
+
+    // Assert
+    expect(result).toBe("");
+  });
+
+  it("should return an empty fence for a present but empty field", () => {
+    // Arrange
+    const present = "";
+
+    // Act
+    const result = fenceUntrusted(present);
+
+    // Assert
+    expect(result).toBe(`${UNTRUSTED_OPEN}${UNTRUSTED_CLOSE}`);
+  });
+
+  it("should distinguish an absent field from an empty one", () => {
+    // Arrange
+
+    // Act
+    const absent = fenceUntrusted(null);
+    const empty = fenceUntrusted("");
+
+    // Assert
+    expect(absent).not.toBe(empty);
+  });
+
+  it("should still cap a payload made entirely of delimiters", () => {
+    // Arrange
+    const flood = UNTRUSTED_CLOSE.repeat(OVER_CAP_LENGTH);
+
+    // Act
+    const result = fenceUntrusted(flood);
+
+    // Assert
+    const inner = result.slice(UNTRUSTED_OPEN.length, -UNTRUSTED_CLOSE.length);
+    expect(inner.length).toBeLessThanOrEqual(CAP);
+    expect(occurrences(result, UNTRUSTED_CLOSE)).toBe(1);
+  });
+});

@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { createReport, formatReport } from "./reporter";
 import type { EvalResult } from "./types";
-import { PASS_RATE_FIFTY } from "../test-utils/constants";
+import {
+  PASS_RATE_FIFTY,
+  PASS_RATE_TWO_THIRDS,
+  PASS_RATE_TWO_THIRDS_PRECISION,
+  PASS_RATE_TWO_THIRDS_ROUNDED,
+} from "../test-utils/constants";
 
 const passingResult: EvalResult = {
   id: "cycling-en-001",
@@ -35,7 +40,7 @@ describe("createReport", () => {
     expect(report.total).toBe(2);
     expect(report.passed).toBe(1);
     expect(report.failed).toBe(1);
-    expect(report.passRate).toBe(PASS_RATE_FIFTY);
+    expect(report.passRatePercent).toBe(PASS_RATE_FIFTY);
     expect(report.results).toStrictEqual(results);
   });
 
@@ -47,7 +52,7 @@ describe("createReport", () => {
     const report = createReport(results, "anthropic", "claude");
 
     // Assert
-    expect(report.passRate).toBe(100);
+    expect(report.passRatePercent).toBe(100);
     expect(report.failed).toBe(0);
   });
 
@@ -59,7 +64,41 @@ describe("createReport", () => {
     const report = createReport(results, "openai", "gpt-4");
 
     // Assert
-    expect(report.passRate).toBe(0);
+    expect(report.passRatePercent).toBe(0);
+  });
+
+  it("should store the rate unrounded, so display cannot move a comparison", () => {
+    // Arrange
+    const results = [
+      passingResult,
+      { ...passingResult, id: "cycling-en-002" },
+      failingResult,
+    ];
+
+    // Act
+    const report = createReport(results, "openai", "gpt-4");
+
+    // Assert
+    expect(report.passRatePercent).toBeCloseTo(
+      PASS_RATE_TWO_THIRDS,
+      PASS_RATE_TWO_THIRDS_PRECISION
+    );
+    expect(report.passRatePercent).not.toBe(PASS_RATE_TWO_THIRDS_ROUNDED);
+  });
+
+  it("should round only for display", () => {
+    // Arrange
+    const results = [
+      passingResult,
+      { ...passingResult, id: "cycling-en-002" },
+      failingResult,
+    ];
+
+    // Act
+    const text = formatReport(createReport(results, "openai", "gpt-4"));
+
+    // Assert
+    expect(text).toContain(`Pass rate: ${PASS_RATE_TWO_THIRDS_ROUNDED}% (2/3)`);
   });
 
   it("should group by category from id prefix", () => {

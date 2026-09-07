@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-09-07 -->
 
 # @kaiord/ai
 
@@ -60,7 +60,7 @@ Common operations:
    ```typescript
    import { createTextToWorkout } from "@kaiord/ai";
    const textToWorkout = createTextToWorkout({
-     model: provider("claude-sonnet-4-5-20241022"),
+     model: provider("claude-sonnet-4-5-20250929"),
      maxRetries: 2,
      maxOutputTokens: 4096,
      temperature: 0,

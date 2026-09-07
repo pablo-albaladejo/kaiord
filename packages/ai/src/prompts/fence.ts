@@ -22,8 +22,14 @@ const FENCE_PREFIX = "<<<";
 const NEUTRALIZED_PREFIX = "[fence]";
 const MAX_FIELD_CHARS = 500;
 
+/**
+ * An absent field returns `""` and stays the caller's to represent — usually
+ * as `null`, so the model can tell "no description" from "an empty one". A
+ * field that is present but empty returns an empty fence, which is not the
+ * same value: flattening the two loses a distinction the model can act on.
+ */
 export const fenceUntrusted = (text: string | null | undefined): string => {
-  if (!text) return "";
+  if (text === null || text === undefined) return "";
   const neutralized = text.replaceAll(FENCE_PREFIX, NEUTRALIZED_PREFIX);
   const capped = neutralized.slice(0, MAX_FIELD_CHARS);
   return `${UNTRUSTED_OPEN}${capped}${UNTRUSTED_CLOSE}`;

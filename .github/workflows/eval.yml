@@ -1,4 +1,9 @@
-name: LLM Eval Suite
+# INERT. The eval runners obtain their model through `loadEvalModel`, which
+# throws without a provider API key, and this project has none. Dispatching
+# this workflow can only fail at that throw. It is kept, unwired to any
+# trigger but manual dispatch, so the deployment shape survives if a key ever
+# exists — not because it can run today. Its run history is empty.
+name: LLM Eval Suite (inert — no provider key)
 
 on:
   workflow_dispatch:

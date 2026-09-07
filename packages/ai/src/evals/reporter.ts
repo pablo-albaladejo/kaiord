@@ -1,10 +1,10 @@
-import type { EvalReport, EvalResult } from "./types";
+import type { EvalReport, ReportableResult } from "./types";
 
-export const createReport = (
-  results: Array<EvalResult>,
+export const createReport = <R extends ReportableResult>(
+  results: Array<R>,
   provider: string,
   model: string
-): EvalReport => {
+): EvalReport<R> => {
   const passed = results.filter((r) => r.pass).length;
   const byCategory = groupBy(results, (r) => r.id.split("-")[0] ?? "other");
   const byLanguage = groupBy(results, (r) => r.id.split("-")[1] ?? "other");
@@ -16,16 +16,16 @@ export const createReport = (
     total: results.length,
     passed,
     failed: results.length - passed,
-    passRate: Math.round((passed / results.length) * 100),
+    passRatePercent: (passed / results.length) * 100,
     results,
     byCategory,
     byLanguage,
   };
 };
 
-const groupBy = (
-  results: Array<EvalResult>,
-  keyExtractor: (r: EvalResult) => string
+const groupBy = <R extends ReportableResult>(
+  results: Array<R>,
+  keyExtractor: (r: R) => string
 ): Record<string, { total: number; passed: number }> => {
   const groups: Record<string, { total: number; passed: number }> = {};
   for (const r of results) {
@@ -41,7 +41,8 @@ export const formatReport = (report: EvalReport): string => {
   const lines: Array<string> = [
     `# Eval Report: ${report.provider} / ${report.model}`,
     `Date: ${report.timestamp}`,
-    `Pass rate: ${report.passRate}% (${report.passed}/${report.total})`,
+    // Rounded here, on the display side only.
+    `Pass rate: ${Math.round(report.passRatePercent)}% (${report.passed}/${report.total})`,
     "",
     "## Results",
   ];
