@@ -10,6 +10,7 @@ import type {
   LogHealthMetricInput,
 } from "../../application/chat/tools/chat-tool-deps";
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
+import type { SyncWeekResult } from "../../application/coaching/sync-week";
 import { syncWeek } from "../../application/coaching/sync-week";
 import { saveManualHealthMetric } from "../../application/health/save-manual-health-metric.use-case";
 import { buildWorkoutRecord } from "../../components/pages/CreateWorkout/build-workout-record";
@@ -26,13 +27,22 @@ const sportOf = (krd: KRD, fallback?: string): string => {
   return structured?.sport ?? fallback ?? "running";
 };
 
-export const doSyncCoaching = (
+/**
+ * `SyncWeekResult.error` carries the upstream exception text verbatim — the
+ * coaching bridge's own string. The use case keeps it for the UI and the log,
+ * but an action-tool result crosses into prompt space, so it is dropped here:
+ * `reason` already carries every signal the model can act on.
+ */
+const toModelSafeSync = (result: SyncWeekResult): unknown =>
+  result.ok ? result : { ok: false, reason: result.reason };
+
+export const doSyncCoaching = async (
   persistence: PersistencePort,
   transport: CoachingTransport,
   profileId: string
 ): Promise<unknown> => {
   const weekStart = parseWeekId(getCurrentWeekId())?.start ?? todayIsoDate();
-  return syncWeek(
+  const result = await syncWeek(
     {
       profiles: persistence.profiles,
       coaching: persistence.coaching,
@@ -43,6 +53,7 @@ export const doSyncCoaching = (
     profileId,
     weekStart
   );
+  return toModelSafeSync(result);
 };
 
 export const doCreateWorkout = async (
