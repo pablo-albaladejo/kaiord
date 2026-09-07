@@ -69,7 +69,7 @@
     "ora": "^9.4.1",
     "winston": "^3.19.0",
     "yargs": "^18.1.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.32",
@@ -78,8 +78,8 @@
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.2.0",
     "tmp-promise": "^3.0.3",
-    "tsdown": "^0.22.14",
-    "tsx": "^4.23.12",
+    "tsdown": "^0.23.0",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },

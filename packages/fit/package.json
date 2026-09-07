@@ -27,16 +27,16 @@
   "dependencies": {
     "@garmin/fitsdk": "^21.214.0",
     "@kaiord/core": "workspace:^",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "@types/rosie": "^0.0.45",
     "@vitest/coverage-v8": "^5.0.0",
     "rosie": "^2.1.1",
-    "tsdown": "^0.22.14",
-    "tsx": "^4.23.12",
+    "tsdown": "^0.23.0",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },
