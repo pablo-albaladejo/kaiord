@@ -1,125 +1,142 @@
 ## ADDED Requirements
 
-### Requirement: One threshold unit across every suite
+### Requirement: A suite that cannot execute declares its own inertness
 
-Every eval suite SHALL express its pass floor as a fraction in the closed
-interval `0..1`. A threshold stated as a percentage SHALL be rejected, so that
-the floors of different suites are comparable without conversion.
+An eval suite whose runner cannot obtain a model in this project SHALL state, in
+the runner itself, that it cannot execute, why, and what would change that. Such
+a runner SHALL NOT exit non-zero on the basis of a score, because a comparison
+that cannot run is not a gate and presenting one as a gate is the failure this
+capability exists to prevent.
 
-#### Scenario: The three suites compare on one scale
+The obligation is on the **runner's exit behaviour**, not on any syntactic form
+of it: extracting the comparison to a variable does not satisfy it. A runner
+that CAN obtain a model without a credential is unaffected and MAY gate.
 
-- **GIVEN** the workout-parsing, chat-tool and lab-extraction suites
-- **WHEN** their floors are read side by side
-- **THEN** all three SHALL be fractions in `0..1`, and the numerically smaller floor SHALL be the looser gate
+#### Scenario: An unrunnable runner says so
 
-#### Scenario: A percentage floor is refused
+- **WHEN** a reader opens a runner whose model loader requires a credential the project does not have
+- **THEN** the file SHALL state its inert status and the condition that would lift it
 
-- **WHEN** a criterion declares a `hardRequirement` of `90` alongside an `ideal` expressed as a fraction
-- **THEN** the declaration SHALL be rejected rather than silently compared against a ratio
+#### Scenario: No score decides the exit code of an inert runner
 
-### Requirement: Every threshold names its benchmark and its owner
+- **GIVEN** a runner that obtains its model through a loader requiring a credential the project does not have
+- **WHEN** its exit path is inspected
+- **THEN** no score, rate or threshold comparison SHALL determine the exit code, whether written inline or bound to a variable first
 
-A criterion SHALL declare where its number comes from and who set it. A
-criterion whose benchmark cannot be named SHALL NOT compile, and prose SHALL
-NOT satisfy the field.
+#### Scenario: A keyless runner may still gate
 
-#### Scenario: A floor without a source is not shippable
+- **GIVEN** a runner that obtains everything it needs without a credential
+- **WHEN** it computes a result
+- **THEN** it MAY exit non-zero on that result, and this requirement SHALL NOT be read to forbid it
 
-- **WHEN** a criterion declares a `hardRequirement` with no benchmark identifying the suite, dataset or measurement it derives from
-- **THEN** the declaration SHALL fail to compile
+### Requirement: Benchmark fixtures are validated without a model
 
-#### Scenario: An existing floor is documented
+The structural claims a benchmark fixture makes about itself SHALL be checked by
+a keyless test that runs on every commit. A zone check SHALL declare at least
+one bound **that its comparison can use**; a zone check whose bounds are absent,
+or present but unusable by the comparison that reads them, SHALL be rejected,
+because it asserts nothing while appearing to assert something.
 
-- **GIVEN** the lab-extraction floor, which is defended nowhere today
-- **WHEN** it is declared as a criterion
-- **THEN** it SHALL carry the benchmark it was measured against and the owner who set it
+#### Scenario: A bounds-less zone check fails the build
 
-### Requirement: Gating authority follows the scorer tier
+- **GIVEN** a benchmark whose `zoneCheck` declares neither a minimum nor a maximum
+- **WHEN** the package test suite runs
+- **THEN** it SHALL fail, naming the benchmark
 
-The right to block a release SHALL be bound to how reproducible the scorer is.
-A T1 deterministic scorer MAY gate. A T2 small-classifier scorer MAY gate only
-with a pinned model version. A T3 LLM-judge scorer SHALL NOT gate; it alerts
-and queues a review.
+#### Scenario: A bound the comparison cannot reach is not a bound
 
-#### Scenario: A judge cannot block a build
+- **GIVEN** a `zoneCheck` declaring a bound whose value the reading comparison skips
+- **WHEN** the package test suite runs
+- **THEN** it SHALL fail, and the comparison SHALL test for the bound's presence rather than its truthiness
 
-- **GIVEN** a criterion scored by an LLM judge
-- **WHEN** it declares a `hardRequirement`
-- **THEN** the floor SHALL raise an alert rather than fail the build, because changing the judge's prompt changes the metric
+#### Scenario: Fixture validation needs no credential
 
-#### Scenario: A classifier gates only when pinned
+- **GIVEN** an environment with no provider API key
+- **WHEN** the package test suite runs
+- **THEN** the fixture invariants SHALL still be enforced
 
-- **GIVEN** a criterion scored by a small specialized classifier
-- **WHEN** it declares a `hardRequirement` without a pinned model version
-- **THEN** the declaration SHALL be rejected
+### Requirement: An unmatched assertion is never a silent pass
 
-### Requirement: Cost and latency are criteria, not decoration
+When an assertion finds no subject to evaluate — no step of the target type, no
+row for an expected label — it SHALL report a named failure or an explicitly
+unmeasured result. It SHALL NOT return success by virtue of having found nothing
+to check.
 
-Each suite SHALL report a P90 latency over its cases and the total token usage
-of the run, and both SHALL be declarable as criteria with floors. Latency and
-usage SHALL be reported whether or not a floor is set.
+#### Scenario: No matching steps is not a pass
 
-#### Scenario: Latency is aggregated, not only printed
-
-- **GIVEN** `durationMs` recorded on every eval result
-- **WHEN** a suite finishes
-- **THEN** the report SHALL carry a P90 over the suite's cases
-
-#### Scenario: A run states what it cost
-
-- **WHEN** a suite that calls a real model finishes
-- **THEN** the report SHALL carry the total token usage for the run
+- **GIVEN** a workout containing no active step of the zone check's target type
+- **WHEN** the zone assertion runs
+- **THEN** it SHALL NOT contribute a passing result
 
 ### Requirement: Absence of measurement is a distinct result
 
 An eval result SHALL distinguish "measured and failed" from "never measured".
 The unmeasured state SHALL be a member of the result union carrying a stated
 reason and no score, so it cannot be averaged, summed or compared as though it
-were a score.
+were one.
 
-#### Scenario: An unmeasured criterion cannot inflate a pass rate
+#### Scenario: An unmeasured criterion cannot inflate a rate
 
 - **GIVEN** a criterion that produced no measurement
 - **WHEN** the suite computes its pass rate
-- **THEN** the unmeasured criterion SHALL be excluded from the rate and reported separately with its reason
+- **THEN** the criterion SHALL be excluded from the rate and reported separately with its reason
 
 #### Scenario: Counts are reported as a pair
 
-- **WHEN** a suite reports its results
+- **WHEN** a suite reports results
 - **THEN** it SHALL report how many criteria were measured alongside how many passed
+
+### Requirement: A reported rate names its scale
+
+Any rate this capability reports SHALL carry its scale in the name or the type,
+not in a reader's assumption. A field that is a fraction SHALL NOT be named as
+though it were a percentage, and two rates that a reader may compare SHALL be on
+one scale.
+
+This exists because the suites it governs once carried three floors in two
+scales — two in percent, one as a fraction, with the numerically smaller number
+the looser gate — and because the field feeding them was rounded to an integer
+percentage before the comparison read it, so a display concern and a gate
+concern shared one field.
+
+#### Scenario: A fraction is not named as a percentage
+
+- **GIVEN** a reported value that is a ratio in `0..1`
+- **WHEN** it is named
+- **THEN** the name or type SHALL make the scale explicit, and rounding for display SHALL NOT alter the value any comparison reads
+
+#### Scenario: Two comparable rates share a scale
+
+- **WHEN** a report carries more than one rate a reader may compare
+- **THEN** they SHALL be on the same scale
 
 ### Requirement: A scorer refuses input it does not understand
 
 A scorer SHALL treat malformed input as a harness fault and fail, naming the
-value it received and the shape it expected. Absent expectations SHALL remain a
-clean pass; a malformed expectation SHALL NOT be read as an absent one.
+value received and the shape expected. Genuinely absent expectations SHALL
+remain a clean pass; a malformed expectation SHALL NOT be read as an absent one.
 
 #### Scenario: A reshaped input fails loudly
 
 - **GIVEN** a scorer whose expectations arrive as a scalar where a list is required
 - **WHEN** the scorer runs
-- **THEN** it SHALL fail as a harness fault rather than take its "no expectations" branch and pass
+- **THEN** it SHALL report a harness fault rather than take its "no expectations" branch
 
 #### Scenario: Genuinely absent expectations still pass
 
-- **GIVEN** a case that declares no expectations for a scorer
+- **GIVEN** a case declaring no expectations for a scorer
 - **WHEN** the scorer runs
 - **THEN** it SHALL pass cleanly
 
-### Requirement: The chat-tool suite covers both tool families
+### Requirement: Documented gates match implemented gates
 
-The chat-tool suite SHALL cover every read tool and every action tool exposed
-to the model, asserting the tool called and, for action tools, the paused
-pending action and its input fields. While the suite is too small for a
-fractional floor to discriminate, its gate SHALL require all cases to pass.
+Documentation describing this capability's thresholds SHALL describe gates the
+code implements. A documented threshold with no implementation SHALL be either
+implemented or removed, and SHALL NOT be carried forward by a documentation
+refresh.
 
-#### Scenario: Every exposed tool is represented
+#### Scenario: A documented threshold with no code is settled, not restated
 
-- **WHEN** the chat-tool suite runs
-- **THEN** it SHALL contain at least one case per tool exposed to the model
-
-#### Scenario: A small suite gates on all-pass
-
-- **GIVEN** a suite small enough that one failure crosses any fractional floor
-- **WHEN** its gate is declared
-- **THEN** the gate SHALL be all-pass rather than a fraction that only appears to be a threshold
+- **GIVEN** documentation asserting a per-dimension threshold that no code enforces
+- **WHEN** that documentation is revised
+- **THEN** the threshold SHALL be implemented or the claim removed, and the revision SHALL NOT restate it unchanged

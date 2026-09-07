@@ -1,187 +1,148 @@
-# Design: eval gates and the guardrail layer
+# Design: an eval program with no key
 
-## The two axes, and why both are needed
+> Revision 2. Supersedes the criteria-registry design entirely. The consensus
+> review's six conditions are addressed here and in `tasks.md`.
 
-The framework this change applies cuts an LLM application twice.
+## The premise that decides everything else
 
-**By stage** — six eval layers, each with its own unit under test, ground truth
-and scorer: retrieval, language, guardrails, context, persona, tools. **By
-capability** — four buckets: domain-specific, generation, instruction-following,
-cost and latency. A finding needs both coordinates, because the same red number
-means opposite things depending on which cut it came from: "the model is bad"
-and "the instruction is bad" produce identical output and have opposite fixes.
+There will be no provider API key. `load-eval-model.ts:33` throws without one,
+and all three runners obtain their model through it. So:
 
-Where Kaiord stands on the stage axis, verified against `main`:
+| Lane                                                                  | Cases | Runs?        |
+| --------------------------------------------------------------------- | ----- | ------------ |
+| Assertion + reporter units (`src/evals/*.test.ts`)                    | 40    | every commit |
+| Deterministic runtime lane (`agents/{generate-mode,runtime}.test.ts`) | 10    | every commit |
+| `pnpm eval` (22 workout benchmarks)                                   | —     | **never**    |
+| `pnpm eval:chat-tools` (2 cases)                                      | —     | **never**    |
+| `pnpm eval:labs` (the lab fixture)                                    | —     | **never**    |
 
-| Layer          | Tier | State                                                                                                                                                                                                |
-| -------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 6 · Tools      | T1   | **working** — `chat-tool-assertions.ts` scores the trajectory: which tool was called, and for actions, the paused `pendingAction` input fields                                                       |
-| 3 · Guardrails | T1   | **absent today; this change builds it**                                                                                                                                                              |
-| 2 · Language   | T1   | sliced, never scored — `benchmarks.json` carries `language: en\|es\|mixed` and `reporter.ts` breaks results down by it, but nothing asserts the _reply's_ language. A fixture dimension, not a layer |
-| 1 · Retrieval  | T1   | absent — no RAG in the eval path                                                                                                                                                                     |
-| 4 · Context    | T2   | absent — no authored context or history under test                                                                                                                                                   |
-| 5 · Persona    | T3   | absent, **and correctly so** — Kaiord parses workouts; it has no persona to hold                                                                                                                     |
+Everything this program delivered landed in the first two rows. That is not a
+coincidence to note in passing; it is the design constraint.
 
-Four of six absent is not a failing grade. Kaiord is a structured-output
-product, so the layers that matter are the ones it has. Naming the absences is
-what stops someone reading the suite as broader than it is.
+**The rule this imposes:** a change is worth making only if it can fail without
+a credential. A floor inside an unrunnable runner cannot fail, so it is not a
+threshold — it is a comment with a comparison operator in it.
 
-**The layer numbers are identity, not sequence.** They are ordered by how
-expensive the ground truth is to _obtain_. The order to _work_ in is by scorer
-tier — what a layer costs to run on every change — which is why guardrails
-(T1, truth is a written policy) comes before context (T2, needs an entailment
-classifier).
+## Decision 1 — delete the criteria registry, and do not replace it
 
-## Decision 1 — one unit, and it is the fraction
+The original design built `packages/ai/src/evals/criteria/` and justified it
+solely by import-compatibility with `eval-criteria`, so the module could later
+be swapped one line at a time.
 
-`0..1`, not percent. Three reasons, in order of weight:
+**That justification was written about a package nobody had opened.** Read since:
 
-1. It is the unit two of the three suites would have to move to anyway if a
-   criteria registry validates ranges, because a fraction has a natural bound
-   and a percentage does not.
-2. `passRate >= 90` reads as a gate on a number that happens to be a percentage
-   of something; `>= 0.9` reads as a ratio, which is what it is.
-3. It makes the current mix visibly wrong rather than quietly wrong: `0.7`
-   beside `0.9` is obviously the looser floor, where `0.7` beside `90` is not.
+| Original claim                                     | Upstream                                                                                          |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| "rejects a `hardRequirement` in percent"           | `Unit` includes `"percent"` as first-class on a structured `Threshold`                            |
+| local `owner` required                             | requires `agent`; there is no `owner`                                                             |
+| `tier` as a discriminated union banning a T3 floor | `Tier` is a plain string union; `mayGate()` is runtime and its docstring **permits** declaring T3 |
+| `hasFloor`                                         | `isEnforceable`                                                                                   |
+| every floor must be declared                       | `hardRequirement: Threshold                                                                       | null` — "declared, with no floor agreed yet. That is a valid state" |
+| five modules                                       | `src/domain/` holds two                                                                           |
 
-The migration is mechanical and one-directional: divide the two `90`s by 100,
-leave `0.7` alone.
+The swap was never one line, and the two designs disagree on substance rather
+than naming. But the decisive argument is simpler and does not depend on any of
+that: **a registry exists to govern floors, and this project's floors cannot
+fire.** Governing them well produces nothing.
 
-## Decision 2 — the registry, and where it lives
+**`gate.ts` goes with it.** The consensus review argued to keep it — a runner
+that cannot exit on a bare number is a good invariant. It is, and under a
+different premise I would keep it. Here it constrains three runners that never
+execute, so it fails its own admission test. What survives instead is the
+acceptance check, applied to the tree rather than to a module: no runner may
+carry a floor at all.
 
-The criteria table has an implementation already:
-`github.com/pablo-albaladejo/eval-criteria` — public, MIT, zero runtime
-dependencies, domain-only by construction. Its `defineCriterion` carries
-exactly the fields this change needs (`bucket`, `stage`, `tier`, `benchmark`,
-`hardRequirement`, `ideal`), its `benchmark` field is a discriminated union
-that prose cannot satisfy, and its unit validation rejects a `hardRequirement`
-in percent beside an `ideal` in fractions — which is Kaiord's `90` / `0.7` mix
-exactly.
+## Decision 2 — the fixtures are a specification, so check the specification
 
-**It is not published to npm** (`npm view eval-criteria` returns E404, and the
-repo has been untouched since 2026-08-24). So there are two paths:
+The benchmarks cannot be run, but they can be _validated_. `zones-ftp` is the
+case that shows why this is worth doing: its prompt text reads "3x15min at
+88-93% FTP" and its `zoneCheck` is `{"targetType":"power"}` with no bounds. Both
+comparisons in `assertions.ts:82-95` are guarded on `zc.minValue &&` and
+`zc.maxValue &&`, so for the only power benchmark in the suite the check is
+structurally unreachable. The author had the numbers in the sentence above and
+did not transcribe them.
 
-- **A — publish it first, then depend on it.** Correct long-term: the package
-  was deliberately born outside both consuming repos because a private package
-  can never be consumed by a public one, and that direction only works one way.
-  Costs a release pipeline in another repo before any Kaiord work lands.
-- **B — land the criteria as a local module in `packages/ai/src/evals/criteria/`
-  with the same shape**, and swap the import when the package publishes.
+A keyless test that rejects a bounds-less `zoneCheck` at load turns that from a
+silent hole into a red build, today, with no model involved. The same applies to
+every structural claim the fixtures make about themselves.
 
-**Chosen: B, with A as the follow-up.** The shape is what carries the value —
-a criterion that cannot name its `benchmark` fails to compile — and that
-constraint is enforceable locally today. Blocking Kaiord's gates on a release
-in another repo trades a working gate for a tidier import. The module is
-deliberately import-compatible so the swap is a one-line change per file, and
-the local version does not grow Kaiord-shaped assumptions: no I/O, no model
-calls, no `@kaiord/core` import.
+**This is the shape the whole program should have taken:** the assertions and
+fixtures are code, code can be tested, and testing it needs no credential.
 
-## Decision 3 — unmeasured is a union member, not a flag
+## Decision 3 — inertness is declared, not implied
 
-The obvious design is `{ pass: boolean; score: number; measured: boolean }`.
-It compiles, it merges, and nobody reads it — a flag is optional for the
-consumer, so an unmeasured criterion is averaged into a pass rate by whoever
-forgets.
+Deleting the floors is not enough, because the runners still exist and still
+look like gates. Each states at its head what it is: a specification of good
+output that cannot execute in this project, why (no key), and what would change
+that. A reader who finds `run-evals.ts` should learn its status from the file,
+not from a plan.
 
-Instead:
+**What is kept, and on what grounds** — the three artifacts differ, and one
+argument does not cover all of them:
 
-```ts
-type Unmeasured = { readonly measured: false; readonly reason: string };
-type CriterionResult = ScoreResult | Unmeasured;
-```
+| Artifact                                      | Why it stays                                                                                                                                                                                                                                                                       |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The benchmark fixtures                        | B1/B2 make them keyless-validated: they earn their place by a test                                                                                                                                                                                                                 |
+| `assertions.ts`, `*-checks.ts`, `reporter.ts` | 40 keyless cases cover them; they are live code                                                                                                                                                                                                                                    |
+| The three `run-*.ts`                          | **No keyless value, and no test.** They stay because they are the executable form of the fixture-to-assertion wiring: delete them and the fixtures' contract — which fixture feeds which scorer, in what shape — becomes implicit, recoverable only by reading the tests backwards |
 
-`Unmeasured` **carries no `score`**. That is what makes it hold: it cannot be
-averaged, summed or compared by accident, and anyone who wants a number has to
-decide in code what an absence means. The compiler finds every site, tests
-included.
+That third row is a real cost, honestly priced: three small orchestration files
+with no coverage. It is **not** justified by "a future with a key is cheap to
+re-enter" — this document says there will be no key, and using "never" to delete
+the registry while using "someday" to keep the runners would be having it both
+ways. If the wiring argument does not convince a reviewer, deleting the three
+runners along with the `pnpm eval*` scripts and `eval.yml` is the defensible
+alternative, and nothing else in this change depends on which is chosen.
 
-The aggregate counts `{measured, passed}` separately and prints both, because
-"37 passed" does not mean the same thing over 40 as over 276.
+## Decision 4 — absence and malformation, generalized from #1230
 
-A corollary that is easy to miss: the _tests_ also need to distinguish
-"measured and failed" from "never measured". A helper that throws when a
-criterion was not measured, rather than reading `.pass` off `undefined`.
+`Unmeasured` is a union member carrying a reason and **no `score`**, never a
+boolean flag: a flag compiles and nobody reads it, so an unmeasured criterion
+gets averaged into a rate by whoever forgets. Aggregates count `{measured,
+passed}` separately and print both.
 
-## Decision 4 — malformed is not absent
+A scorer that receives a shape it does not understand reports a **harness
+fault**, distinct from a failing score — folding "I did not understand the
+input" into "the model did badly" reports a number where it should report a
+broken instrument. Both patterns shipped for lab extraction in #1230
+(`lab-extraction-assertions.ts`, exit code 2); this generalizes them to the
+remaining scorers, where `chat-tool-assertions.ts:28,52` still has the
+`?? {}` / `?? []` branches that silently substitute an empty expectation.
 
-Every scorer that accepts a list of expectations has an "if there are no
-expectations, pass" branch. That branch is where a suite goes quietly green: if
-the harness reshapes the scorer's input — variable expansion, batching, a retry
-wrapper — the guard `Array.isArray(x)` returns false, the list reads as empty,
-and the branch returns pass for every case.
+## Decision 5 — containment keeps its guard, and the guard must be able to fail
 
-So the rule is two-sided:
+The containment group is the only one whose value never depended on a suite
+running. Its design is unchanged from revision 1 except for its acceptance.
 
-- **absent** expectations → clean pass, as today;
-- **malformed** input → red, naming the value received and the expected shape.
+The original acceptance was: revert #1225's fix, observe the guard go red,
+restore. That is not executable — reverting a merged commit by hand is a
+one-off ritual no reviewer or CI can repeat, and against the live tree the guard
+is green on its first run and every run after.
 
-This is a scorer-level obligation, not a config one, because the config that
-would prevent the reshape can be overridden by an env var, a per-test override
-or a provider default change. The scorer is the only place the check cannot be
-routed around.
+Replaced by what the test plan already specified correctly: a checked-in
+negative fixture under `mkdtempSync` that fails, a field-outside-the-allowlist
+case asserted as **not** caught (documenting the limit in an executable form),
+a **zero-files-scanned result treated as a fault** — the hole
+`check-ai-sdk-containment.mjs:56` has today, where `catch { return violations }`
+returns green when it cannot read the directory — and a live-tree smoke
+assertion.
 
-## Decision 5 — what the guardrail layer measures
+The guard is a field-name allowlist and cannot see two classes it must not be
+believed to cover: opaque nested payloads (`summarize-health.ts` forwards
+`krd: unknown` verbatim), and externally-authored error text in action-tool
+results — the class that produced the only live channel actually found, in
+`sync-week.ts` with a field named `error` and no summarizer involved. The
+declared sink inventory with a completeness check covers what the guard cannot:
+the guard catches the fields you named, the inventory catches the sinks you
+forgot.
 
-The unit under test is **containment**: can text authored outside the app reach
-the model as anything other than inert data?
+## What this change does not do
 
-Two obligations, both T1 and both keyless:
-
-1. **The fence cannot be terminated by its payload.** Neutralize the `<<<`
-   prefix shared by both delimiters. Deleting the whole delimiter instead is
-   itself exploitable: in `<<</untr` + DELIM + `usted_data>>>` the deletion
-   splices the surrounding halves back into an intact delimiter. The
-   replacement must carry no `<`, so nothing re-forms across a replacement
-   boundary. Already implemented and tested.
-2. **Every externally-authored field reaching a model is fenced.** This is the
-   half that unit tests cannot hold, because the failure is an _omission_ —
-   `summarizeWorkouts` passed `workout.name` through raw for as long as the
-   function existed, while the fence's own docstring claimed the field was
-   covered. A test proves the fields you remembered.
-
-So (2) needs a mechanical guard, in the shape the repo already uses eleven
-times over: a `scripts/check-*.mjs` with a co-located `node:test` suite, run by
-`pnpm test:scripts` in the lint job and by the pre-commit hook.
-
-**The guard's rule, and its known limit.** Every property of a value returned
-from `application/chat/tools/summarize-*.ts` whose type is `string | null` and
-whose name is in a declared set of externally-authored fields (`name`, `title`,
-`description`, `notes`) must be assigned from a `fenceUntrusted(...)` call.
-This is a syntactic check over an allowlist, so it catches the next
-`summarize-*` that forgets a known field and does **not** catch a
-newly-invented field name nobody added to the set. That limit is deliberate:
-the alternative is a taint analysis, and an approximate guard that runs beats a
-precise one that does not exist. The allowlist is the artifact to review when a
-new summarizer lands.
-
-## Decision 6 — growing the chat-tool suite
-
-Two cases prove the harness and cannot catch a regression. At two cases a
-`>= 0.9` gate fails on one failure, which is what an all-pass gate does, so the
-threshold is currently decorative.
-
-The suite grows to cover the two tool _families_ rather than one scenario each:
-every read tool asserted for the tool it should call and the source it should
-name, and every action tool asserted for the paused `pendingAction` and its
-input fields. Twelve tools, so the floor stops being a rounding artifact.
-
-Until it grows, the honest gate is all-pass, not `>= 0.9`.
-
-## What this change deliberately does not do
-
-- **No LLM judge anywhere.** Nothing Kaiord measures needs one: the output is a
-  structured object checked against a schema, not prose checked against a
-  source. A judge would add drift and per-call cost for no signal, and by the
-  tier rule it could not gate anyway.
-- **No schedule on `eval.yml`.** The paid suites cost money per run and the
-  cost has never been measured. Adding the token metric in this change is the
-  prerequisite for that decision; making it is not.
-- **No retrieval, context or persona layers.** They measure stages this product
-  does not have. Six sub-scores over a pipeline nobody has measured once is
-  instrumentation theatre; two layers measured and gated beat six measured and
-  ignored.
-- **No language scorer yet.** The slice exists and is useful for attribution
-  (a red run says "the Spanish cases broke"). Turning it into a layer means
-  asserting the _reply's_ language, which for a structured-output product means
-  deciding what language a workout `name` should be in — a product question
-  that is not settled.
+- No LLM judge. Nothing here needs one, and a judge could not gate anyway.
+- No retrieval, context or persona eval layers. They measure stages this
+  product does not have.
+- No language scorer. The `en|es|mixed` slice is useful for attribution and
+  turning it into a layer means deciding what language a workout name should be
+  in — a product question that is not settled.
+- No growth of the chat-tool suite, and no widening of `eval.yml`. Both feed
+  runners that cannot execute.
