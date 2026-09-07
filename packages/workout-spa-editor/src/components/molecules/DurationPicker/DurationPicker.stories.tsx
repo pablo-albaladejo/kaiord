@@ -28,6 +28,7 @@ const meta = {
       control: { type: "boolean" },
     },
   },
+  args: { value: null, onChange: () => {} },
 } satisfies Meta<typeof DurationPicker>;
 
 export default meta;

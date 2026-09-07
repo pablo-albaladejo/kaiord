@@ -27,6 +27,7 @@ const meta = {
       control: { type: "text" },
     },
   },
+  args: { value: "268", label: "FTP" },
 } satisfies Meta<typeof Metric>;
 
 export default meta;

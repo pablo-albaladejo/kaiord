@@ -85,7 +85,7 @@ const paceStep: WorkoutStep = {
   targetType: "pace",
   target: {
     type: "pace",
-    value: { unit: "min_per_km", value: 5.5 },
+    value: { unit: "mps", value: 3.03 },
   },
   intensity: "active",
 };

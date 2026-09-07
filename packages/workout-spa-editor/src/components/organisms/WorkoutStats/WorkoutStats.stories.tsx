@@ -79,7 +79,7 @@ const distanceBasedWorkout: Workout = {
       targetType: "pace",
       target: {
         type: "pace",
-        value: { unit: "min_per_km", value: 5 },
+        value: { unit: "mps", value: 3.33 },
       },
       intensity: "active",
     },

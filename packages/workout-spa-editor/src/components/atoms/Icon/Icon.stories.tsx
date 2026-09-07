@@ -59,6 +59,7 @@ const meta = {
       description: "Stroke width of the icon",
     },
   },
+  args: { icon: Activity },
 } satisfies Meta<typeof Icon>;
 
 export default meta;

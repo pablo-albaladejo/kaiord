@@ -10,7 +10,7 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
-    structured_workout: {
+    workout: {
       description: "KRD workout object to save",
       control: { type: "object" },
     },
@@ -23,6 +23,7 @@ const meta = {
       control: { type: "text" },
     },
   },
+  args: { workout: { version: "1.0.0", metadata: {}, extensions: {} } as KRD },
 } satisfies Meta<typeof SaveButton>;
 
 export default meta;
@@ -84,7 +85,7 @@ const invalidWorkout = {
  */
 export const Default: Story = {
   args: {
-    structured_workout: validWorkout,
+    workout: validWorkout,
   },
 };
 
@@ -93,7 +94,7 @@ export const Default: Story = {
  */
 export const Disabled: Story = {
   args: {
-    structured_workout: validWorkout,
+    workout: validWorkout,
     disabled: true,
   },
 };
@@ -103,7 +104,7 @@ export const Disabled: Story = {
  */
 export const WithInvalidWorkout: Story = {
   args: {
-    structured_workout: invalidWorkout,
+    workout: invalidWorkout,
   },
 };
 
@@ -112,7 +113,7 @@ export const WithInvalidWorkout: Story = {
  */
 export const CustomStyling: Story = {
   args: {
-    structured_workout: validWorkout,
+    workout: validWorkout,
     className: "w-full",
   },
 };

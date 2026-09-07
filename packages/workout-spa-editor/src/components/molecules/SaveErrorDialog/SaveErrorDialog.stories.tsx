@@ -22,6 +22,7 @@ const meta = {
       action: "retry",
     },
   },
+  args: { errors: [], onClose: () => {}, onRetry: () => {} },
 } satisfies Meta<typeof SaveErrorDialog>;
 
 export default meta;
