@@ -7,7 +7,13 @@
  * being serialized into the prompt. The row list is capped; the aggregates
  * are computed over every record, so a "longest" answer is correct even
  * when the longest workout falls outside the capped list.
+ *
+ * `name` is authored outside the app — it arrives with imported FIT/TCX/ZWO
+ * files and with Garmin sync — so it is fenced as untrusted data, the same
+ * way coach-authored text is.
  */
+import { fenceUntrusted } from "@kaiord/ai/prompts";
+
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { Workout } from "../../../types/krd";
 import { calculateWorkoutStats } from "../../../utils/workout-stats";
@@ -17,6 +23,7 @@ const ROW_BUDGET = 50;
 export type WorkoutSummary = {
   date: string;
   sport: string;
+  /** Fenced untrusted text, or null when the workout has no name. */
   name: string | null;
   state: string;
   durationSeconds: number | null;
@@ -39,7 +46,7 @@ const toSummary = (record: WorkoutRecord): WorkoutSummary => {
   return {
     date: record.date,
     sport: record.sport,
-    name: workout?.name ?? null,
+    name: workout?.name ? fenceUntrusted(workout.name) : null,
     state: record.state,
     durationSeconds: stats.totalDuration,
     distanceMeters: stats.totalDistance,
