@@ -16,7 +16,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 
 const provider = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const textToWorkout = createTextToWorkout({
-  model: provider("claude-sonnet-4-5-20241022"),
+  model: provider("claude-sonnet-4-5-20250929"),
 });
 
 const workout = await textToWorkout("30 minutes easy cycling", {
@@ -34,11 +34,11 @@ The eval suite validates LLM output quality against a curated set of workout des
 # Set your API key
 export ANTHROPIC_API_KEY=sk-ant-...
 
-# Run with default model (claude-sonnet-4-5-20241022)
+# Run with default model (claude-sonnet-4-5-20250929)
 pnpm --filter @kaiord/ai eval
 
 # Run with a specific model
-EVAL_MODEL=claude-sonnet-4-5-20241022 pnpm --filter @kaiord/ai eval
+EVAL_MODEL=claude-sonnet-4-5-20250929 pnpm --filter @kaiord/ai eval
 ```
 
 The eval runner outputs pass/fail per benchmark and saves a JSON report to the working directory.
@@ -57,14 +57,27 @@ The benchmark suite (`src/evals/benchmarks.json`) contains 22 curated workout de
 
 Each benchmark is evaluated against these criteria:
 
-| Assertion         | Threshold     | Description                                                 |
-| ----------------- | ------------- | ----------------------------------------------------------- |
-| Schema validation | 100%          | Output must pass Zod `workoutSchema`                        |
-| Sport correctness | >= 95%        | Detected sport matches expected sport                       |
-| Step count        | per-benchmark | Between `minSteps` and `maxSteps`                           |
-| Zone accuracy     | +/- 5%        | Target values within tolerance when zone checks are defined |
+Every assertion is per-benchmark and binary — `evaluateBenchmark` folds all of
+them into one `pass`. There is no rate across benchmarks, so this table has no
+threshold column to fill: an earlier revision listed 100% and >= 95% here, and
+neither was ever implemented.
 
-The overall pass rate must be >= 90% for the eval to succeed (exit code 0).
+| Assertion         | Dimension | What it checks                                                                                                                                               |
+| ----------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Schema validation | `schema`  | Output must pass Zod `workoutSchema`. A failure short-circuits; no other dimension is evaluated                                                              |
+| Sport correctness | `sport`   | Detected sport matches `expectedSport`, when the benchmark sets one                                                                                          |
+| Step count        | `steps`   | Between `minSteps` and `maxSteps`                                                                                                                            |
+| Zone accuracy     | `zone`    | Active steps of the target type within +/- 5%. A zone check with no matching step **fails**; a check declaring no usable bound is rejected by a keyless test |
+
+Each failure carries the dimension that produced it, so a red result says which
+capability broke rather than only that something did.
+
+**The suite is inert in this project and carries no pass threshold.** Its
+runner needs a provider API key, which this project does not have, so it has
+never executed. The floor it used to declare could not fire, so it was removed
+rather than kept as decoration. What runs on every commit is the assertion
+logic and the fixtures' own structural invariants, neither of which needs a
+credential.
 
 ### Adding New Benchmarks
 

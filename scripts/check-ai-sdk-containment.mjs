@@ -53,7 +53,14 @@ export const runCheck = ({ packagesRoot }) => {
   let packages;
   try {
     packages = readdirSync(packagesRoot, { withFileTypes: true });
-  } catch {
+  } catch (error) {
+    // Green because it could not look is the defect this guard exists to
+    // catch, applied to itself. Report the failure instead of an empty result.
+    violations.push({
+      file: packagesRoot,
+      line: 0,
+      spec: `could not read packages root: ${error.message}`,
+    });
     return violations;
   }
   for (const pkg of packages) {

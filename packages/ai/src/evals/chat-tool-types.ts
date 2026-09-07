@@ -21,5 +21,12 @@ export type ChatToolEvalResult = {
   pass: boolean;
   errors: string[];
   toolCalled?: string;
+  /**
+   * Set when the scorer could not run because its expectations arrived in a
+   * shape it does not understand. A harness fault is not a failing score: the
+   * instrument did not run, and folding the two together reports a number
+   * where it should report a broken instrument.
+   */
+  harnessFault?: string;
   durationMs: number;
 };

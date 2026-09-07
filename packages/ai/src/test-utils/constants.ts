@@ -9,6 +9,10 @@ export const EXPECTED_STEP_COUNT_THREE = 3 as const;
 
 // === Reporter pass rate ===
 export const PASS_RATE_FIFTY = 50 as const;
+// 2 of 3: the stored value keeps the repeating decimal, display rounds it up.
+export const PASS_RATE_TWO_THIRDS = 66.667 as const;
+export const PASS_RATE_TWO_THIRDS_PRECISION = 3 as const;
+export const PASS_RATE_TWO_THIRDS_ROUNDED = 67 as const;
 
 // === AiParsingError attempt counts ===
 export const ATTEMPTS_THREE = 3 as const;
