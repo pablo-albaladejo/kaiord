@@ -16,7 +16,7 @@ export const createReport = <R extends ReportableResult>(
     total: results.length,
     passed,
     failed: results.length - passed,
-    passRate: Math.round((passed / results.length) * 100),
+    passRatePercent: (passed / results.length) * 100,
     results,
     byCategory,
     byLanguage,
@@ -41,7 +41,8 @@ export const formatReport = (report: EvalReport): string => {
   const lines: Array<string> = [
     `# Eval Report: ${report.provider} / ${report.model}`,
     `Date: ${report.timestamp}`,
-    `Pass rate: ${report.passRate}% (${report.passed}/${report.total})`,
+    // Rounded here, on the display side only.
+    `Pass rate: ${Math.round(report.passRatePercent)}% (${report.passed}/${report.total})`,
     "",
     "## Results",
   ];

@@ -57,12 +57,20 @@ The benchmark suite (`src/evals/benchmarks.json`) contains 22 curated workout de
 
 Each benchmark is evaluated against these criteria:
 
-| Assertion         | Threshold     | Description                                                                                                                                                     |
-| ----------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Schema validation | 100%          | Output must pass Zod `workoutSchema`                                                                                                                            |
-| Sport correctness | >= 95%        | Detected sport matches expected sport                                                                                                                           |
-| Step count        | per-benchmark | Between `minSteps` and `maxSteps`                                                                                                                               |
-| Zone accuracy     | +/- 5%        | Active steps of the target type within tolerance. A zone check with no matching step **fails**; a check declaring no usable bound is rejected by a keyless test |
+Every assertion is per-benchmark and binary — `evaluateBenchmark` folds all of
+them into one `pass`. There is no rate across benchmarks, so this table has no
+threshold column to fill: an earlier revision listed 100% and >= 95% here, and
+neither was ever implemented.
+
+| Assertion         | Dimension | What it checks                                                                                                                                               |
+| ----------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Schema validation | `schema`  | Output must pass Zod `workoutSchema`. A failure short-circuits; no other dimension is evaluated                                                              |
+| Sport correctness | `sport`   | Detected sport matches `expectedSport`, when the benchmark sets one                                                                                          |
+| Step count        | `steps`   | Between `minSteps` and `maxSteps`                                                                                                                            |
+| Zone accuracy     | `zone`    | Active steps of the target type within +/- 5%. A zone check with no matching step **fails**; a check declaring no usable bound is rejected by a keyless test |
+
+Each failure carries the dimension that produced it, so a red result says which
+capability broke rather than only that something did.
 
 **The suite is inert in this project and carries no pass threshold.** Its
 runner needs a provider API key, which this project does not have, so it has

@@ -51,7 +51,12 @@ export type EvalReport<R extends ReportableResult = ReportableResult> = {
   total: number;
   passed: number;
   failed: number;
-  passRate: number;
+  /**
+   * Scale in the name, and unrounded: a display concern and a comparison
+   * concern must not share one field. `Math.round` here once made 89.6% read
+   * as 90, which is the wrong side of a 90 floor.
+   */
+  passRatePercent: number;
   results: Array<R>;
   byCategory: Record<string, { total: number; passed: number }>;
   byLanguage: Record<string, { total: number; passed: number }>;
