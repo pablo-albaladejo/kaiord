@@ -1,0 +1,22 @@
+# Keep the build context to what the MCP server image actually needs.
+#
+# Every workspace directory stays in: pnpm reads `packages/*` from
+# pnpm-workspace.yaml before applying --filter, and a missing project makes
+# `--frozen-lockfile` fail. What is excluded here is only ever regenerated
+# inside the image, or is not part of the build at all.
+
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+
+# Local tooling and operational artifacts.
+.omc
+.claude
+.changeset
+.husky
+openspec
+docs

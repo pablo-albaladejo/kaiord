@@ -138,6 +138,19 @@ pnpm kaiord --help
 
 For detailed installation instructions and usage examples, see the **[Getting Started Guide](./docs/getting-started.md)**.
 
+### Run the MCP server in a container
+
+`@kaiord/mcp` also builds as a container image, which is how [Glama](https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord) introspects the tool surface:
+
+```bash
+docker build -t kaiord-mcp .
+docker run --rm -i -v "$PWD:/data" -w /data kaiord-mcp
+```
+
+It speaks MCP over stdio, so run it attached rather than detached. Tools that
+take an `input_file` resolve it inside the container — mount a directory to
+give them files to read.
+
 ---
 
 ## 🚀 CI/CD Pipeline
