@@ -65,6 +65,7 @@ Every non-trivial script ships with a co-located `*.test.mjs` exercised by
 | `inject-spa-fallback.mjs`                                 | Inject rafgraph 404 fallback into deployed SPA.                                       | `.github/workflows/deploy-site.yml`                                           |
 | `it-title-extractor.mjs`                                  | Shared AST extractor for `it()` titles.                                               | `check-test-title-should.mjs`, `measure-it-titles-histogram.mjs` (transitive) |
 | `lint-links.sh`                                           | Lychee link check across project Markdown.                                            | `pnpm lint:links` and `.github/workflows/ci.yml`                              |
+| `mcp-container-smoke.mjs`                                 | Drives a built MCP container over stdio: handshake, tool surface, zwo→krd→validate.   | `.github/workflows/mcp-container.yml`, `pnpm test:scripts`                    |
 | `measure-it-titles-histogram.mjs`                         | Diagnostic histogram of `it()` title prefixes.                                        | `pnpm test:scripts`                                                           |
 | `package-extension.sh`                                    | Package an extension into a Chrome Web Store `.zip`.                                  | `.github/workflows/cws-publish.yml`                                           |
 | `sync-extension-version.mjs`                              | Sync extension `manifest.json` version with package.json.                             | `.github/workflows/cws-publish.yml`                                           |
@@ -91,7 +92,7 @@ tree — keep the format `- \`<filename>\` — When to run: <reason>`.
 | ----------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `lib/`      | Reusable helpers (`find-package-files.mjs`, `strip-jsonc.mjs`) imported by checks.                                      |
 | `cws-api/`  | Chrome Web Store API modules (`auth`, `cli`, `errors`, `poll`, `publish`, `state`, `upload`) imported by `cws-api.mjs`. |
-| `fixtures/` | Test-data JSON consumed by checks (e.g. `bridge-privacy-surface.json`).                                                 |
+| `fixtures/` | Test data and test doubles consumed by checks (e.g. `bridge-privacy-surface.json`, `fake-mcp-server.mjs`).              |
 
 These three folders are excluded from the orphan lint — their files are
 internal-only modules of their parent script.
