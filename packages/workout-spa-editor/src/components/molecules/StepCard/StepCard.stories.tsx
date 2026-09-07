@@ -222,8 +222,8 @@ export const PaceTarget: Story = {
       target: {
         type: "pace",
         value: {
-          unit: "min_per_km",
-          value: 5.5,
+          unit: "mps",
+          value: 3.03,
         },
       },
     },
