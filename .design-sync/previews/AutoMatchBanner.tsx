@@ -109,8 +109,8 @@ export const UnknownDurationScore = () => (
         workoutId: "w-3",
         score: null,
         reasons: [
-          { code: "duration-unknown" },
           { code: "sport-family-match", family: "swimming" },
+          { code: "duration-unknown" },
         ],
       }),
     ]}

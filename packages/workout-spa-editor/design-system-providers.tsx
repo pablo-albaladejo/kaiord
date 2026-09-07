@@ -16,7 +16,8 @@
 // component that genuinely needs persistence gets an owned preview under
 // `.design-sync/previews/` instead, where the cost is one card, not all of them.
 
-import { type ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
