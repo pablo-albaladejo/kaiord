@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { dimensionRatePercent } from "./dimension-outcomes";
 import { createReport, formatReport } from "./reporter";
 import type { EvalResult } from "./types";
 import {
@@ -185,5 +186,121 @@ describe("formatReport", () => {
 
     // Assert
     expect(errorLine).toMatch(/^\s{4}/);
+  });
+});
+
+describe("createReport — dimension tallies", () => {
+  const withOutcomes = (
+    id: string,
+    pass: boolean,
+    outcomes: EvalResult["outcomes"]
+  ): EvalResult => ({ id, pass, errors: [], durationMs: 1, outcomes });
+
+  it("should report measured and passed as a pair", () => {
+    // Arrange
+    const results = [
+      withOutcomes("cycling-en-1", true, [
+        { dimension: "steps", status: "passed" },
+      ]),
+      withOutcomes("cycling-en-2", false, [
+        { dimension: "steps", status: "failed", message: "Too few steps" },
+      ]),
+    ];
+
+    // Act
+    const report = createReport(results, "openai", "gpt-4");
+
+    // Assert
+    expect(report.byDimension?.steps).toMatchObject({
+      measured: 2,
+      passed: 1,
+      unmeasured: 0,
+    });
+  });
+
+  it("should exclude an unmeasured criterion from its dimension's rate", () => {
+    // Arrange
+    const results = [
+      withOutcomes("cycling-en-1", true, [
+        { dimension: "zone", status: "passed" },
+      ]),
+      withOutcomes("cycling-en-2", true, [
+        { dimension: "zone", status: "unmeasured", reason: "no zoneCheck" },
+      ]),
+    ];
+
+    // Act
+    const report = createReport(results, "openai", "gpt-4");
+
+    // Assert
+    expect(report.byDimension?.zone).toMatchObject({
+      measured: 1,
+      passed: 1,
+      unmeasured: 1,
+    });
+    expect(dimensionRatePercent(report.byDimension!.zone!)).toBe(100);
+  });
+
+  it("should have NO rate for a dimension nothing measured", () => {
+    // Arrange
+    const results = [
+      withOutcomes("cycling-en-1", true, [
+        { dimension: "zone", status: "unmeasured", reason: "no zoneCheck" },
+      ]),
+    ];
+
+    // Act
+    const report = createReport(results, "openai", "gpt-4");
+
+    // Assert
+    expect(dimensionRatePercent(report.byDimension!.zone!)).toBeNull();
+  });
+
+  it("should carry the reason an unmeasured dimension was skipped", () => {
+    // Arrange
+    const results = [
+      withOutcomes("cycling-en-1", true, [
+        {
+          dimension: "sport",
+          status: "unmeasured",
+          reason: "benchmark declares no expectedSport",
+        },
+      ]),
+    ];
+
+    // Act
+    const report = createReport(results, "openai", "gpt-4");
+
+    // Assert
+    expect(report.byDimension?.sport?.reasons).toEqual([
+      "benchmark declares no expectedSport",
+    ]);
+  });
+
+  it("should omit the dimension section for results that carry no outcomes", () => {
+    // Arrange
+    const results = [passingResult];
+
+    // Act
+    const report = createReport(results, "openai", "gpt-4");
+
+    // Assert
+    expect(report.byDimension).toBeUndefined();
+  });
+
+  it("should print a not-measured dimension as such, never as a percentage", () => {
+    // Arrange
+    const results = [
+      withOutcomes("cycling-en-1", true, [
+        { dimension: "zone", status: "unmeasured", reason: "no zoneCheck" },
+      ]),
+    ];
+
+    // Act
+    const text = formatReport(createReport(results, "openai", "gpt-4"));
+
+    // Assert
+    expect(text).toContain("zone: not measured");
+    expect(text).not.toContain("zone: 0/0");
   });
 });
