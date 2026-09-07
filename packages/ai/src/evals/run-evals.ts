@@ -48,7 +48,9 @@ const runEvals = async () => {
         id: bench.id,
         pass: false,
         errors: [`Exception: ${msg}`],
-        failures: [{ dimension: "run", message: `Exception: ${msg}` }],
+        outcomes: [
+          { dimension: "run", status: "failed", message: `Exception: ${msg}` },
+        ],
         durationMs: Date.now() - start,
       });
       console.log(`[FAIL] ${bench.id} - Exception: ${msg}`);

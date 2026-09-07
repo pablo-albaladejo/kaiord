@@ -1,69 +1,113 @@
 import { workoutSchema } from "@kaiord/core";
-import type {
-  Benchmark,
-  EvalDimension,
-  EvalFailure,
-  EvalResult,
-} from "./types";
+import {
+  anyFailed,
+  errorsOf,
+  failed,
+  passed,
+  unmeasured,
+} from "./dimension-outcomes";
+import type { Benchmark, DimensionOutcome, EvalResult } from "./types";
 import type { Workout } from "@kaiord/core";
 
 // Eval allows ±5% drift on zone bounds to absorb AI rounding.
 const ZONE_TOLERANCE = 0.05;
+
+const DOWNSTREAM: ReadonlyArray<"sport" | "steps" | "zone"> = [
+  "sport",
+  "steps",
+  "zone",
+];
 
 export const evaluateBenchmark = (
   benchmark: Benchmark,
   workout: Workout,
   durationMs: number
 ): EvalResult => {
-  const failures: Array<EvalFailure> = [];
-  const fail = (dimension: EvalDimension, message: string): void => {
-    failures.push({ dimension, message });
-  };
-
   const schemaResult = workoutSchema.safeParse(workout);
   if (!schemaResult.success) {
+    const message = `Schema validation failed: ${schemaResult.error.message}`;
+    // The short-circuit is stated, not silent: the other dimensions did not
+    // pass, they were never read, and a reader of the report can now tell.
+    const outcomes = [
+      failed("schema", message),
+      ...DOWNSTREAM.map((d) =>
+        unmeasured(
+          d,
+          "schema validation failed, so nothing downstream was read"
+        )
+      ),
+    ];
     return {
       id: benchmark.id,
       pass: false,
-      errors: [`Schema validation failed: ${schemaResult.error.message}`],
-      failures: [
-        {
-          dimension: "schema",
-          message: `Schema validation failed: ${schemaResult.error.message}`,
-        },
-      ],
+      errors: errorsOf(outcomes),
+      outcomes,
       durationMs,
     };
   }
 
-  if (benchmark.expectedSport && workout.sport !== benchmark.expectedSport) {
-    fail(
-      "sport",
-      `Sport mismatch: expected ${benchmark.expectedSport}, got ${workout.sport}`
-    );
-  }
-
   const stepCount = countSteps(workout);
-  if (stepCount < benchmark.minSteps) {
-    fail("steps", `Too few steps: ${stepCount} < ${benchmark.minSteps}`);
-  }
-  if (stepCount > benchmark.maxSteps) {
-    fail("steps", `Too many steps: ${stepCount} > ${benchmark.maxSteps}`);
-  }
-
-  if (benchmark.zoneCheck) {
-    for (const message of checkZones(workout, benchmark)) fail("zone", message);
-  }
+  const outcomes: Array<DimensionOutcome> = [
+    passed("schema"),
+    sportOutcome(benchmark, workout),
+    ...stepOutcomes(benchmark, stepCount),
+    ...zoneOutcomes(benchmark, workout),
+  ];
 
   return {
     id: benchmark.id,
-    pass: failures.length === 0,
-    errors: failures.map((f) => f.message),
-    failures,
+    pass: !anyFailed(outcomes),
+    errors: errorsOf(outcomes),
+    outcomes,
     sport: workout.sport,
     stepCount,
     durationMs,
   };
+};
+
+const sportOutcome = (
+  benchmark: Benchmark,
+  workout: Workout
+): DimensionOutcome => {
+  if (!benchmark.expectedSport) {
+    return unmeasured("sport", "benchmark declares no expectedSport");
+  }
+  return workout.sport === benchmark.expectedSport
+    ? passed("sport")
+    : failed(
+        "sport",
+        `Sport mismatch: expected ${benchmark.expectedSport}, got ${workout.sport}`
+      );
+};
+
+const stepOutcomes = (
+  benchmark: Benchmark,
+  stepCount: number
+): Array<DimensionOutcome> => {
+  if (stepCount < benchmark.minSteps) {
+    return [
+      failed("steps", `Too few steps: ${stepCount} < ${benchmark.minSteps}`),
+    ];
+  }
+  if (stepCount > benchmark.maxSteps) {
+    return [
+      failed("steps", `Too many steps: ${stepCount} > ${benchmark.maxSteps}`),
+    ];
+  }
+  return [passed("steps")];
+};
+
+const zoneOutcomes = (
+  benchmark: Benchmark,
+  workout: Workout
+): Array<DimensionOutcome> => {
+  if (!benchmark.zoneCheck) {
+    return [unmeasured("zone", "benchmark declares no zoneCheck")];
+  }
+  const errors = checkZones(workout, benchmark);
+  return errors.length === 0
+    ? [passed("zone")]
+    : errors.map((message) => failed("zone", message));
 };
 
 const countSteps = (workout: Workout): number =>

@@ -12,16 +12,18 @@ Gate: none. The blocking dependency of revision 1 (#1225) merged as `55b5701d`;
 verify with `git merge-base --is-ancestor 55b5701d origin/main`, not the
 pre-merge branch SHA the earlier draft pinned.
 
-**Status.** Groups A, B, C, D, F and G1 are shipped (#1225, #1227, #1229,
-#1230, #1232). Seven items are open, and each is open for a stated reason
-rather than by omission: E1-E3 are one refactor, not three tasks — the
-`Unmeasured` union has to land before an aggregate can honestly report
-`{measured, passed}`, and E2 cannot be satisfied while `measured` is
-definitionally `total`. C4 and D1b are guards against rot in things already
-fixed, worth having and not blocking. G2 and G3 are documentation whose content
-depends on nothing still in flight. The change stays active until they land;
-archiving it now would file the spec's `Absence of measurement is a distinct
-result` requirement as met, and it is not.
+**Status: complete.** Groups A, B, C, D, F and G1 shipped in #1225, #1227,
+#1229, #1230 and #1232. The last seven items — E1-E3, C4, D1b, G2, G3 — landed
+together, because E1-E3 were one refactor rather than three tasks: the
+`Unmeasured` union had to exist before an aggregate could honestly report
+`{measured, passed}`, and E2 could not be satisfied while `measured` was
+definitionally `total`.
+
+Every item is verified against the tree, not against its own description. G2 is
+the one worth naming: its six files already carried an `Updated: 2026-09-07`
+stamp, and the package-root `AGENTS.md` under that stamp still listed three of
+eight directories. A refreshed date over unrefreshed content is the same defect
+this change exists to remove, one level up.
 
 ## A. Shipped
 
@@ -83,7 +85,7 @@ or an executor takes the cheap one by default:
 - [x] C3. Fix the invalid model id `claude-sonnet-4-5-20241022` in
       `packages/ai/README.md` (3 sites) and `packages/ai/AGENTS.md` (1). It does
       not exist; the real default is `claude-sonnet-4-5-20250929`.
-- [ ] C4. Guard the fix so it does not rot. The repo already freshness-guards
+- [x] C4. Guard the fix so it does not rot. The repo already freshness-guards
       the generated model catalog; a hand-fixed id in prose has no such guard
       and will drift again. Assert that every model id appearing in
       `packages/ai/{README,AGENTS}.md` and in `.github/workflows/eval.yml`
@@ -95,7 +97,7 @@ or an executor takes the cheap one by default:
 - [x] D1. Remove the floors from `run-evals.ts`, `run-chat-tool-evals.ts` and
       `run-lab-extraction-evals.ts`. A comparison that cannot execute is not a
       threshold.
-- [ ] D1b. Enforce it with `scripts/check-no-inert-floors.mjs`, not a grep: a
+- [x] D1b. Enforce it with `scripts/check-no-inert-floors.mjs`, not a grep: a
       runner whose model comes from a credential-requiring loader must not let
       any score decide its exit code. The obvious grep
       (`process\.exit\(.*(>=|<)`) is defeated by
@@ -119,10 +121,10 @@ or an executor takes the cheap one by default:
 
 ## E. Absence and malformation, generalized
 
-- [ ] E1. `Unmeasured` as a union member with a `reason` and no `score`. Let the
+- [x] E1. `Unmeasured` as a union member with a `reason` and no `score`. Let the
       compiler find every site.
-- [ ] E2. Aggregates report `{measured, passed}` as a pair.
-- [ ] E3. A test helper that throws when a criterion was not measured, rather
+- [x] E2. Aggregates report `{measured, passed}` as a pair.
+- [x] E3. A test helper that throws when a criterion was not measured, rather
       than reading `.pass` off `undefined`.
 - [x] E4. Replace `chat-tool-assertions.ts:28,52`'s `?? {}` / `?? []` with a
       harness fault, so a reshaped input fails loudly instead of taking the
@@ -178,10 +180,10 @@ or an executor takes the cheap one by default:
       `proposal.md` claimed they arrive from FIT/TCX/ZWO imports and Garmin
       sync; the provenance trace concluded user-authored. Correct whichever
       document is wrong — an overstated claim in a security spec is a defect.
-- [ ] G2. Refresh the six `AGENTS.md` files under `packages/ai`, all stamped
+- [x] G2. Refresh the six `AGENTS.md` files under `packages/ai`, all stamped
       2026-05-14, none of which mentions `agents/`, `chat/`, `providers/` or
       `observability/`. Separate chore PR.
-- [ ] G3. Record the eval-layer table — which layers exist, which are absent and
+- [x] G3. Record the eval-layer table — which layers exist, which are absent and
       why — after C1 settles what the layer actually gates.
 
 ## Dropped, with reasons
