@@ -57,11 +57,51 @@ const evaluateRead = (
   return { errors, toolCalled: benchmark.expectedTool };
 };
 
+/**
+ * Absent expectations are a clean pass; a malformed one is a harness fault.
+ * The branch that treats "no expectations declared" as success is where a
+ * suite goes quietly green when something reshapes the scorer's input, so a
+ * value of the wrong shape must be loud rather than read as an absence.
+ */
+export const expectationFault = (
+  benchmark: ChatToolBenchmark
+): string | null => {
+  const { expectedActionInput: input, expectedAnswerIncludes: phrases } =
+    benchmark;
+  if (
+    input !== undefined &&
+    (typeof input !== "object" || input === null || Array.isArray(input))
+  ) {
+    return `expectedActionInput is ${describe(input)}, not an object`;
+  }
+  if (phrases !== undefined && !Array.isArray(phrases)) {
+    return `expectedAnswerIncludes is ${describe(phrases)}, not an array`;
+  }
+  if (Array.isArray(phrases) && phrases.some((p) => typeof p !== "string")) {
+    return "expectedAnswerIncludes contains a non-string entry";
+  }
+  return null;
+};
+
+const describe = (value: unknown): string =>
+  Array.isArray(value) ? "an array" : `a ${typeof value}`;
+
 export const evaluateChatToolBenchmark = (
   benchmark: ChatToolBenchmark,
   result: ChatTurnResult,
   durationMs: number
 ): ChatToolEvalResult => {
+  const fault = expectationFault(benchmark);
+  if (fault !== null) {
+    return {
+      id: benchmark.id,
+      pass: false,
+      harnessFault: fault,
+      errors: [`Harness fault: ${fault}`],
+      durationMs,
+    };
+  }
+
   if (result.status === "step_limit") {
     return {
       id: benchmark.id,

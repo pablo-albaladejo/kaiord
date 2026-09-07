@@ -15,24 +15,49 @@ export type Benchmark = {
   zoneCheck?: ZoneCheck;
 };
 
-export type EvalResult = {
+/** The capability a failure is attributed to, so a red result says which one. */
+export type EvalDimension = "schema" | "sport" | "steps" | "zone" | "run";
+
+export type EvalFailure = {
+  dimension: EvalDimension;
+  message: string;
+};
+
+/** The shape the reporter consumes, shared by every suite that reports. */
+export type ReportableResult = {
   id: string;
   pass: boolean;
   errors: Array<string>;
-  sport?: string;
-  stepCount?: number;
   durationMs: number;
 };
 
-export type EvalReport = {
+export type EvalResult = ReportableResult & {
+  /** Same failures as `errors`, each carrying the dimension that produced it. */
+  failures: Array<EvalFailure>;
+  sport?: string;
+  stepCount?: number;
+};
+
+/**
+ * Generic over the result shape so the declared type matches what the runner
+ * actually serializes: the reporter reads only `ReportableResult` fields, but
+ * it stores whatever it was handed, and the saved JSON carries the richer
+ * per-suite fields (`failures`, `harnessFault`) that make a red run readable.
+ */
+export type EvalReport<R extends ReportableResult = ReportableResult> = {
   provider: string;
   model: string;
   timestamp: string;
   total: number;
   passed: number;
   failed: number;
-  passRate: number;
-  results: Array<EvalResult>;
+  /**
+   * Scale in the name, and unrounded: a display concern and a comparison
+   * concern must not share one field. `Math.round` here once made 89.6% read
+   * as 90, which is the wrong side of a 90 floor.
+   */
+  passRatePercent: number;
+  results: Array<R>;
   byCategory: Record<string, { total: number; passed: number }>;
   byLanguage: Record<string, { total: number; passed: number }>;
 };

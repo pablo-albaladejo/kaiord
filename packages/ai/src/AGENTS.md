@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-09-07 -->
 
 # src/
 
@@ -15,10 +15,14 @@ Source root for `@kaiord/ai`. Houses the public API export, type definitions, er
 
 ## Subdirectories
 
-- **`adapters/`** — Core LLM integration and text-to-workout conversion
-- **`evals/`** — Evaluation suite and benchmark reporting
-- **`prompts/`** — System prompt templates and template loader
-- **`test-utils/`** — Shared numeric constants for test fixtures
+- **`agents/`** — Declarative `AgentDefinition` and the generate-mode runtime (multimodal input, validate-and-retry, telemetry per run)
+- **`chat/`** — The multi-step tool-calling chat engine; read tools auto-execute, action tools pause for confirmation
+- **`providers/`** — Provider model instantiation, the generated model catalog, purpose→model resolution
+- **`observability/`** — The redaction-safe telemetry port and its console / ring-buffer sinks
+- **`prompts/`** — The versioned prompt registry, template substitution, and the untrusted-data fence
+- **`adapters/`** — The deprecated `createTextToWorkout` wrapper over the agent runtime, plus input validation and step reindexing
+- **`evals/`** — Assertion logic, fixtures and their invariants. The runners are inert: they need a provider API key this project does not have
+- **`test-utils/`** — Shared numeric constants and `MockLanguageModelV4` helpers
 
 ## For AI Agents
 
@@ -28,7 +32,7 @@ The module tree is:
 
 - Entry point: `index.ts` (3 re-exports)
 - Config/types: `types.ts`, `errors.ts`
-- Implementation: `adapters/`, `evals/`, `prompts/`, `test-utils/`
+- Implementation: `agents/`, `chat/`, `providers/`, `observability/`, `prompts/`, `adapters/`, `evals/`, `test-utils/`
 
 Adding new top-level exports: add to `index.ts` and update `types.ts` if needed.
 

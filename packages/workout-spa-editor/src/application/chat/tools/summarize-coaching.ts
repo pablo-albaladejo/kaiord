@@ -19,8 +19,8 @@ export type CoachingSummaryRow = {
   completionPercent: number | null;
   /** Fenced untrusted text. */
   title: string;
-  /** Fenced untrusted text. */
-  description: string;
+  /** Fenced untrusted text, or null when the activity carries no description. */
+  description: string | null;
 };
 
 export type CoachingSummary = {
@@ -40,7 +40,7 @@ export const summarizeCoaching = (
       status: a.status,
       completionPercent: a.completionPercent ?? null,
       title: fenceUntrusted(a.title),
-      description: fenceUntrusted(a.description),
+      description: a.description == null ? null : fenceUntrusted(a.description),
     })),
   };
 };
