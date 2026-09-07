@@ -16,6 +16,7 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 - `run-evals.ts` — CLI entry point (inert): would run all benchmarks and output report JSON and markdown
 - `load-eval-model.ts` — shared `EVAL_PROVIDER`/`EVAL_MODEL` loader used by all three eval CLIs; throws without the provider's API key, which is why the CLIs are inert here
 - `benchmark-invariants.ts` — keyless structural checks over `benchmarks.json`; a `zoneCheck` with no bound the comparison can use is rejected
+- `dimension-outcomes.ts` — the `passed` / `failed` / `unmeasured` constructors, the per-dimension tally, and `dimensionRatePercent`, which returns `null` rather than a number when nothing was measured
 - `chat-tool-benchmarks.json` — Data Hub hub-conversation scenarios (F6): "where do my planned sessions come from" (read) and "read sleep only from Whoop" (action)
 - `chat-tool-types.ts` — Type definitions: `ChatToolBenchmark`, `ChatToolEvalResult`
 - `chat-tool-fixtures.ts` — local `get_data_routes`/`set_data_route` `ChatTool` fixtures mirroring the real schemas registered in `@kaiord/workout-spa-editor` (hand-kept in sync; that package cannot be a dependency here)
@@ -31,8 +32,40 @@ Each benchmark is evaluated against:
 3. **Step count**: `countSteps(workout)` must be within `[minSteps, maxSteps]` (nested steps in blocks are counted).
 4. **Zone accuracy** (±5% tolerance, optional): if `zoneCheck` is defined, active steps of the target type must fall within `[minValue*0.95, maxValue*1.05]`. A zone check with no matching active step **fails** — it is not skipped.
 
-Each failure carries the dimension that produced it, so a red result says
-which capability broke rather than only that something did.
+Each dimension yields one outcome: `passed`, `failed` with a message, or
+`unmeasured` with a reason. `unmeasured` is a member of the union, not a flag
+beside a score, so there is no field on it a caller could average or compare —
+a criterion nobody measured cannot enter a rate by looking like a zero.
+
+Two dimensions are routinely unmeasured and say so: `sport` when the benchmark
+declares no `expectedSport`, and `zone` when it declares no `zoneCheck`. A
+schema failure marks the other three unmeasured rather than leaving them out,
+so the short-circuit is visible in the report instead of being inferred from
+an absence.
+
+`createReport` tallies `byDimension` as `{measured, passed, unmeasured,
+reasons}` — a pair, never a lone rate, because `passed` is meaningless without
+the `measured` it is out of. A dimension with `measured: 0` has NO rate:
+`dimensionRatePercent` returns `null`, and `formatReport` prints
+"not measured". Tests read outcomes through `expectMeasured`, which throws
+rather than let a case take a verdict off a criterion nobody measured.
+
+## Eval layers
+
+Which layers exist here, and which do not, using the six-layer stage axis:
+
+| Layer                         | Present | Where                                                                                                                                |
+| ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. Unit / component           | yes     | `assertions.test.ts`, `reporter.test.ts`, `chat-tool-assertions.test.ts` — keyless, every commit                                     |
+| 2. Fixture invariants         | yes     | `benchmark-invariants.ts`, the `chat-tool-benchmarks.json` shape tests — the fixtures are a specification, and this checks it        |
+| 3. Guardrails / containment   | yes     | outside this directory: `fence.test.ts` plus the two mechanical guards (`check-untrusted-fields-fenced`, `check-model-facing-sinks`) |
+| 4. End-to-end model behaviour | NO      | needs a provider key; the three runners here are its inert skeleton                                                                  |
+| 5. Human / preference         | NO      | no rater pool, and nothing to rate while layer 4 cannot run                                                                          |
+| 6. Production monitoring      | partial | `observability/` records usage telemetry; no quality signal is fed back                                                              |
+
+Layers 1-3 gate every commit and need no credential. Layer 4 is the boundary:
+everything above it is blocked on the same missing key, so nothing here
+declares a threshold — see below.
 
 **There are no per-dimension thresholds, and there is no overall pass rate
 gate.** Earlier revisions of this file documented a 100% schema threshold and a
