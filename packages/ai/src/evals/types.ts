@@ -38,7 +38,13 @@ export type EvalResult = ReportableResult & {
   stepCount?: number;
 };
 
-export type EvalReport = {
+/**
+ * Generic over the result shape so the declared type matches what the runner
+ * actually serializes: the reporter reads only `ReportableResult` fields, but
+ * it stores whatever it was handed, and the saved JSON carries the richer
+ * per-suite fields (`failures`, `harnessFault`) that make a red run readable.
+ */
+export type EvalReport<R extends ReportableResult = ReportableResult> = {
   provider: string;
   model: string;
   timestamp: string;
@@ -46,7 +52,7 @@ export type EvalReport = {
   passed: number;
   failed: number;
   passRate: number;
-  results: Array<ReportableResult>;
+  results: Array<R>;
   byCategory: Record<string, { total: number; passed: number }>;
   byLanguage: Record<string, { total: number; passed: number }>;
 };

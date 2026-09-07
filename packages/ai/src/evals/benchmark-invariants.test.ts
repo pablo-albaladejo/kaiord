@@ -43,9 +43,20 @@ describe("zoneCheckViolation", () => {
     expect(violation).toContain("no bound");
   });
 
-  it("should reject a bound the reading comparison cannot use", () => {
+  it("should reject a minimum of zero, which no target can fall below", () => {
     // Arrange
     const zc = { targetType: "power", minValue: 0 };
+
+    // Act
+    const violation = zoneCheckViolation(zc);
+
+    // Assert
+    expect(violation).toContain("cannot use");
+  });
+
+  it("should reject a maximum of zero, which every target exceeds", () => {
+    // Arrange
+    const zc = { targetType: "power", maxValue: 0 };
 
     // Act
     const violation = zoneCheckViolation(zc);

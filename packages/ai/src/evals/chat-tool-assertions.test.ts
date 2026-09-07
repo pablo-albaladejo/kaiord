@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ChatTurnResult } from "../index";
 import { EVAL_DURATION_MS_DEFAULT } from "../test-utils/constants";
+import benchmarks from "./chat-tool-benchmarks.json";
 import {
   evaluateChatToolBenchmark,
   expectationFault,
@@ -325,5 +326,35 @@ describe("expectationFault", () => {
 
     // Assert
     expect(fault).toContain("non-string");
+  });
+});
+
+describe("chat-tool-benchmarks.json", () => {
+  it("should declare every expectation in a shape the scorer understands", () => {
+    // Arrange
+    const fixture = benchmarks as ChatToolBenchmark[];
+
+    // Act
+    const faults = fixture
+      .map((b) => ({ id: b.id, fault: expectationFault(b) }))
+      .filter((f) => f.fault !== null);
+
+    // Assert
+    expect(faults).toEqual([]);
+  });
+
+  it("should declare the expectation its category is scored on", () => {
+    // Arrange
+    const fixture = benchmarks as ChatToolBenchmark[];
+
+    // Act
+    const undeclared = fixture.filter((b) =>
+      b.category === "action"
+        ? b.expectedActionInput === undefined
+        : b.expectedAnswerIncludes === undefined
+    );
+
+    // Assert
+    expect(undeclared.map((b) => b.id)).toEqual([]);
   });
 });

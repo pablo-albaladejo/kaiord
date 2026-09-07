@@ -16,7 +16,10 @@
  * behind it.
  */
 import { createChatAgent } from "../index";
-import { evaluateChatToolBenchmark } from "./chat-tool-assertions";
+import {
+  evaluateChatToolBenchmark,
+  expectationFault,
+} from "./chat-tool-assertions";
 import { createHubChatToolFixtures } from "./chat-tool-fixtures";
 import { loadEvalModel } from "./load-eval-model";
 import { createReport, formatReport } from "./reporter";
@@ -31,7 +34,31 @@ const SYSTEM_PROMPT = [
   "confirmation before it runs, so just propose the call.",
 ].join("\n");
 
+/**
+ * Before the credential, not after: a fixture the scorer cannot read is a
+ * broken instrument, and reporting that costs no provider call. It also makes
+ * this the one part of the runner that is reachable here, where there is no key.
+ */
+const faultyBenchmarks = (
+  all: Array<ChatToolBenchmark>
+): Array<{ id: string; fault: string }> =>
+  all.flatMap((b) => {
+    const fault = expectationFault(b);
+    return fault === null ? [] : [{ id: b.id, fault }];
+  });
+
+const reportFaults = (faults: Array<{ id: string; fault: string }>): never => {
+  console.error(`\nHARNESS FAULT in ${faults.length} case(s):`);
+  for (const f of faults) console.error(`  ${f.id}: ${f.fault}`);
+  console.error("Not failing scores — the instrument did not run.");
+  process.exit(2);
+};
+
 const runEvals = async () => {
+  const all = benchmarks as Array<ChatToolBenchmark>;
+  const preflight = faultyBenchmarks(all);
+  if (preflight.length > 0) reportFaults(preflight);
+
   const { model, provider, modelName } = await loadEvalModel();
   const agent = createChatAgent({
     model,
@@ -44,7 +71,7 @@ const runEvals = async () => {
   );
 
   const results: Array<ChatToolEvalResult> = [];
-  for (const bench of benchmarks as Array<ChatToolBenchmark>) {
+  for (const bench of all) {
     const start = Date.now();
     try {
       const turn = await agent.sendTurn([
@@ -67,13 +94,10 @@ const runEvals = async () => {
     }
   }
 
-  const faults = results.filter((r) => r.harnessFault !== undefined);
-  if (faults.length > 0) {
-    console.error(`\nHARNESS FAULT in ${faults.length} case(s):`);
-    for (const f of faults) console.error(`  ${f.id}: ${f.harnessFault}`);
-    console.error("Not failing scores — the instrument did not run.");
-    process.exit(2);
-  }
+  const faults = results.flatMap((r) =>
+    r.harnessFault === undefined ? [] : [{ id: r.id, fault: r.harnessFault }]
+  );
+  if (faults.length > 0) reportFaults(faults);
 
   const report = createReport(results, provider, modelName);
   console.log("\n" + formatReport(report));

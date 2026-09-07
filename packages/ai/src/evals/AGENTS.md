@@ -92,7 +92,8 @@ any threshold on it would be a number that can never fire.
 ### Testing Requirements
 
 - `assertions.test.ts`: Unit tests for `evaluateBenchmark`, zone checks, step counting, and failure attribution by dimension
-- `benchmark-invariants.test.ts`: keyless checks that every `zoneCheck` in the fixture declares a usable bound
+- `benchmark-invariants.test.ts`: keyless checks that every `zoneCheck` in the fixture declares a usable bound. A bound of `0` is rejected in both directions — as a minimum the comparison is `min < 0`, which no target triggers; as a maximum it is `max > 0`, which every target triggers
+- `chat-tool-assertions.test.ts` also scores the shipped `chat-tool-benchmarks.json` itself: every expectation must be in a shape `expectationFault` understands, and each benchmark must declare the expectation its own category is scored on. Without it a fixture could go green by declaring nothing the scorer reads
 - `reporter.test.ts`: Unit tests for `createReport` grouping and `formatReport` output
 - `chat-tool-assertions.test.ts`: Unit tests for `evaluateChatToolBenchmark` against fabricated `ChatTurnResult` values (no LLM calls)
 - No integration tests for `run-evals.ts` / `run-chat-tool-evals.ts` (CLIs; manually tested)
@@ -123,12 +124,11 @@ any threshold on it would be a number that can never fire.
 
 ## File Line Limits
 
-- `types.ts`: 41 lines
-- `assertions.ts`: 90 lines
-- `reporter.ts`: 64 lines
-- `run-evals.ts`: 72 lines
-- `chat-tool-types.ts`, `chat-tool-fixtures.ts`, `chat-tool-assertions.ts`, `run-chat-tool-evals.ts`: same budget as their workout-eval counterparts
-
-Functions: `evaluateBenchmark` ~40 LOC, `checkZones` ~30 LOC, `countSteps` <10 LOC, helpers <20 LOC.
+The budget is the ESLint rule, not a transcript: `max-lines` 100 and
+`max-lines-per-function` 40, both with `skipBlankLines` and `skipComments`. A
+file here can therefore run past 100 physical lines and still be within budget,
+which is why this section states the rule instead of a per-file count — an
+earlier revision listed exact numbers and they went stale the first time a file
+changed.
 
 <!-- MANUAL: -->

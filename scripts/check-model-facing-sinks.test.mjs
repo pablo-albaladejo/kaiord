@@ -53,6 +53,47 @@ test("several tools in one file are all seen", () => {
   assert.ok(names.includes("second_tool"));
 });
 
+test("a tool in a subdirectory is scanned", () => {
+  const dir = sandbox({});
+  mkdirSync(join(dir, "nested"), { recursive: true });
+  writeFileSync(join(dir, "nested", "buried-tool.ts"), tool("buried_tool"));
+  const violations = runCheck({ toolsRoot: dir });
+  rmSync(dir, { recursive: true, force: true });
+  assert.ok(violations.some((v) => v.tool === "buried_tool"));
+});
+
+test("execute written as a method is recognized", () => {
+  const dir = sandbox({
+    "method-form.ts": `
+export const create = () => ({
+  name: "method_form_tool",
+  async execute() { return { ok: true }; },
+});
+`,
+  });
+  const violations = runCheck({ toolsRoot: dir });
+  rmSync(dir, { recursive: true, force: true });
+  assert.ok(violations.some((v) => v.tool === "method_form_tool"));
+});
+
+test("a duplicate declaration fails", () => {
+  const clone = { ...SINKS[0] };
+  SINKS.push(clone);
+  const violations = runCheck({ toolsRoot: LIVE });
+  SINKS.pop();
+  assert.ok(
+    violations.some((v) => v.kind === "duplicate" && v.tool === clone.tool)
+  );
+});
+
+test("an unrecognized status fails", () => {
+  const original = SINKS[0].status;
+  SINKS[0].status = "probably-fine";
+  const violations = runCheck({ toolsRoot: LIVE });
+  SINKS[0].status = original;
+  assert.ok(violations.some((v) => v.kind === "bad-status"));
+});
+
 test("zero files scanned is a fault, not a pass", () => {
   const dir = sandbox({});
   const violations = runCheck({ toolsRoot: dir });

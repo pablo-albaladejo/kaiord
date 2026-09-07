@@ -6,10 +6,12 @@ import type { Benchmark, ZoneCheck } from "./types";
  * fixtures ever face: they are a specification, and this checks the
  * specification.
  *
- * The zone rule exists because a bound the reading comparison skips asserts
- * nothing while looking like an assertion. `checkZones` guards on
- * `zc.minValue &&` / `zc.maxValue &&`, so a bound must be present AND usable —
- * a declared `0` reads as absent there.
+ * The zone rule exists because a bound that cannot discriminate asserts nothing
+ * while looking like an assertion. `checkZones` compares against
+ * `bound * (1 ± ZONE_TOLERANCE)`, and targets are non-negative, so a declared
+ * `0` degenerates in both directions: as a minimum the test is `min < 0`, which
+ * no target can trigger; as a maximum it is `max > 0`, which every positive
+ * target triggers. Neither separates a good answer from a bad one.
  */
 const usableBound = (value: number | undefined): boolean =>
   value !== undefined && Number.isFinite(value) && value !== 0;

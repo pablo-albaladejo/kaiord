@@ -1,10 +1,10 @@
 import type { EvalReport, ReportableResult } from "./types";
 
-export const createReport = (
-  results: Array<ReportableResult>,
+export const createReport = <R extends ReportableResult>(
+  results: Array<R>,
   provider: string,
   model: string
-): EvalReport => {
+): EvalReport<R> => {
   const passed = results.filter((r) => r.pass).length;
   const byCategory = groupBy(results, (r) => r.id.split("-")[0] ?? "other");
   const byLanguage = groupBy(results, (r) => r.id.split("-")[1] ?? "other");
@@ -23,9 +23,9 @@ export const createReport = (
   };
 };
 
-const groupBy = (
-  results: Array<ReportableResult>,
-  keyExtractor: (r: ReportableResult) => string
+const groupBy = <R extends ReportableResult>(
+  results: Array<R>,
+  keyExtractor: (r: R) => string
 ): Record<string, { total: number; passed: number }> => {
   const groups: Record<string, { total: number; passed: number }> = {};
   for (const r of results) {
