@@ -21,10 +21,11 @@ const meta = {
   component: WellnessEntryDialog,
   parameters: { layout: "fullscreen" },
   tags: ["autodocs"],
-  // WellnessEntryForm reads `usePersistence()` / `useToastContext()`
-  // directly (save-wellness use case), neither of which is part of the
-  // global preview.tsx decorator stack, so every story wraps its own
-  // instance seeded by its `loaders`.
+  // WellnessEntryForm reads `usePersistence()` directly (save-wellness use
+  // case). The global stack does provide one, but it is the real Dexie port
+  // shared by every story; wrapping an in-memory instance per story keeps a
+  // save here from landing in the browser's database and leaking into the
+  // next one.
   decorators: [
     (Story, context) => {
       const persistence = context.loaded.persistence as PersistencePort;

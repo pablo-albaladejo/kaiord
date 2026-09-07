@@ -35,10 +35,10 @@ const meta = {
   component: GoalSetupDialog,
   parameters: { layout: "fullscreen" },
   tags: ["autodocs"],
-  // GoalSetupForm reads `usePersistence()` / `useToastContext()` directly
-  // (energy-goal baseline + save), neither of which is part of the global
-  // preview.tsx decorator stack, so every story wraps its own instance
-  // seeded by its `loaders`.
+  // GoalSetupForm reads `usePersistence()` directly (energy-goal baseline +
+  // save). The global stack provides one, but it is the real Dexie port shared
+  // by every story; an in-memory instance per story keeps a save here out of
+  // the browser's database.
   decorators: [
     (Story, context) => {
       const persistence = context.loaded.persistence as PersistencePort;
