@@ -31,7 +31,10 @@ export const InputElement = forwardRef<
       : undefined;
 
   if (variant === "select") {
-    const { options, ...selectProps } = props as SelectInputProps;
+    // `size` is a design token here, not the DOM attribute — `Input` consumes
+    // it and never forwards it, so casting it away keeps the spread honest
+    // instead of putting `size="sm"` on a <select> that wants a number.
+    const { options, ...selectProps } = props as Omit<SelectInputProps, "size">;
     return (
       <select
         ref={ref as Ref<HTMLSelectElement>}
