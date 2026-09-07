@@ -6,6 +6,15 @@
 // coverage-threshold case) and nothing tied those lists to the packages
 // on disk. This guard closes that gap: it derives the bridge list from
 // packages/*-bridge and fails when any enumeration in ci.yml misses one.
+//
+// codecov.yml has the same shape and went stale the same way. Its three
+// bridge enumerations — the default patch exclusion, the informational
+// `bridges` patch check, and the `bridges` flag — listed only garmin and
+// train2go. That stayed invisible for as long as no PR touched another
+// bridge; the first one that did failed `codecov/patch` on Chrome
+// service-worker boilerplate the file itself declares untestable. A
+// prose comment already sat above that list and did not prevent it, so
+// the roster is asserted here instead.
 
 import { strict as assert } from "node:assert";
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -18,6 +27,7 @@ import { parse } from "yaml";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const CI_PATH = join(REPO_ROOT, ".github", "workflows", "ci.yml");
+const CODECOV_PATH = join(REPO_ROOT, "codecov.yml");
 
 const bridgePackages = readdirSync(join(REPO_ROOT, "packages")).filter(
   (name) =>
@@ -27,6 +37,16 @@ const bridgePackages = readdirSync(join(REPO_ROOT, "packages")).filter(
 
 const ciText = readFileSync(CI_PATH, "utf8");
 const workflow = parse(ciText);
+
+const codecov = parse(readFileSync(CODECOV_PATH, "utf8"));
+const patchStatus = codecov.coverage.status.patch;
+// The exclusion list is negated (`!packages/x/**`); the other two are plain.
+const bridgeNames = (paths) =>
+  paths
+    .map((entry) => /packages\/([a-z0-9-]+-bridge)/.exec(entry))
+    .filter(Boolean)
+    .map((match) => match[1])
+    .sort();
 
 const detectChangesSteps = workflow.jobs["detect-changes"].steps;
 const changedFilesStep = detectChangesSteps.find(
@@ -83,6 +103,25 @@ for (const bridge of bridgePackages) {
       thresholdStep.run.includes(bridge),
       `the 'Check coverage threshold' case does not list '${bridge}'; ` +
         `it would be held to the default threshold instead of the bridge one`
+    );
+  });
+}
+
+// codecov.yml — same invariant, different file. All three enumerations must
+// equal the on-disk roster; a bridge missing from the exclusion list is held
+// to the 80% default it was explicitly exempted from.
+const CODECOV_ENUMERATIONS = [
+  ["default patch exclusion", () => patchStatus.default.paths],
+  ["informational 'bridges' patch check", () => patchStatus.bridges.paths],
+  ["'bridges' flag", () => codecov.flags.bridges.paths],
+];
+
+for (const [label, read] of CODECOV_ENUMERATIONS) {
+  test(`codecov.yml: the ${label} lists every bridge package`, () => {
+    assert.deepEqual(
+      bridgeNames(read()),
+      [...bridgePackages].sort(),
+      `codecov.yml's ${label} has drifted from packages/*-bridge`
     );
   });
 }
