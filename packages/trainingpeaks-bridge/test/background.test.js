@@ -8,6 +8,7 @@ const {
   checkSession,
   readMetrics,
   pushWeight,
+  pushWorkout,
   handleAction,
   EXTERNAL_ACTIONS,
 } = require("../background.js");
@@ -31,6 +32,8 @@ const END_DATE = "2026-07-07";
 const TOKEN_URL = "https://tpapi.trainingpeaks.com/users/v3/token";
 const METRICS_URL = `https://tpapi.trainingpeaks.com/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetrics/${START_DATE}/${END_DATE}`;
 const METRIC_WRITE_URL = `https://tpapi.trainingpeaks.com/metrics/v3/athletes/${ATHLETE_ID}/consolidatedtimedmetric`;
+const WORKOUT_WRITE_URL = `https://tpapi.trainingpeaks.com/fitness/v6/athletes/${ATHLETE_ID}/workouts`;
+const HTTP_PAYMENT_REQUIRED = 402;
 
 // A distinctive token value asserted to never reach a console sink.
 const SECRET_TOKEN = "SECRET-ACCESS-TOKEN-9f0a1c";
@@ -120,7 +123,7 @@ describe("background.js", () => {
         name: "TrainingPeaks",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:body", "write:body"],
+        capabilities: ["read:body", "write:body", "write:workouts"],
       };
 
       // Act
@@ -150,6 +153,7 @@ describe("background.js", () => {
         "checkSession",
         "read-metrics",
         "push-weight",
+        "push-workout",
         "open-trainingpeaks",
       ];
 
@@ -391,6 +395,75 @@ describe("background.js", () => {
     });
   });
 
+  describe("push-workout", () => {
+    const workoutPayload = () => ({
+      athleteId: ATHLETE_ID,
+      workoutId: 0,
+      workoutDay: "2026-09-07",
+      title: "Threshold",
+      structure: '{"structure":[]}',
+    });
+
+    it("should POST the workout to the v6 endpoint with a Bearer header", async () => {
+      // Arrange
+      await seedToken("bear");
+      const workout = workoutPayload();
+      fetch.mockResolvedValueOnce(jsonResp({ workoutId: 4242 }));
+
+      // Act
+      const result = await pushWorkout({ workout });
+
+      // Assert
+      expect(result).toEqual({ workoutId: 4242 });
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(WORKOUT_WRITE_URL);
+      expect(init.method).toBe("POST");
+      expect(init.credentials).toBe("omit");
+      expect(init.headers.Authorization).toBe("Bearer bear");
+      expect(init.body).toBe(JSON.stringify(workout));
+    });
+
+    it("should relay structure as the string it was given, never re-encoded", async () => {
+      // Arrange
+      await seedToken("bear");
+      const workout = workoutPayload();
+      fetch.mockResolvedValueOnce(jsonResp({ workoutId: 1 }));
+
+      // Act
+      await pushWorkout({ workout });
+
+      // Assert
+      const body = JSON.parse(fetch.mock.calls[0][1].body);
+      expect(typeof body.structure).toBe("string");
+      expect(body.structure).toBe('{"structure":[]}');
+    });
+
+    it("should explain a 402 as a planning-horizon limit, not a payload error", async () => {
+      // Arrange
+      await seedToken("bear");
+      fetch.mockResolvedValueOnce(
+        jsonResp({}, false, HTTP_PAYMENT_REQUIRED)
+      );
+
+      // Act
+      const attempt = pushWorkout({ workout: workoutPayload() });
+
+      // Assert
+      await expect(attempt).rejects.toThrow(/paid account/);
+    });
+
+    it("should reject a push without a workout payload", async () => {
+      // Arrange
+      const message = { action: "push-workout" };
+
+      // Act
+      const attempt = pushWorkout(message);
+
+      // Assert
+      await expect(attempt).rejects.toThrow("Missing workout payload");
+    });
+  });
+
   describe("checkSession", () => {
     it("should report authenticated and the athlete id on a live session", async () => {
       // Arrange
@@ -407,7 +480,7 @@ describe("background.js", () => {
         name: "TrainingPeaks",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:body", "write:body"],
+        capabilities: ["read:body", "write:body", "write:workouts"],
       });
     });
 

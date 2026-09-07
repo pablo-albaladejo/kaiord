@@ -10,5 +10,5 @@
 globalThis.KAIORD_BRIDGE_IDENTITY = {
   id: "trainingpeaks-bridge",
   name: "TrainingPeaks",
-  capabilities: ["read:body", "write:body"],
+  capabilities: ["read:body", "write:body", "write:workouts"],
 };
