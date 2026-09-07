@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-import { PersistenceProvider } from "@ds-stories/packages/workout-spa-editor/src/contexts/persistence-context";
-import type { PersistencePort } from "@ds-stories/packages/workout-spa-editor/src/ports/persistence-port";
-import { createInMemoryPersistence } from "@ds-stories/packages/workout-spa-editor/src/test-utils/in-memory-persistence";
-import { GoalSetupDialog } from "@ds-stories/packages/workout-spa-editor/src/components/molecules/GoalSetupDialog/GoalSetupDialog";
+import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
+import type { PersistencePort } from "../../packages/workout-spa-editor/src/ports/persistence-port";
+import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
+import { GoalSetupDialog } from "../../packages/workout-spa-editor/src/components/molecules/GoalSetupDialog/GoalSetupDialog";
 
 /**
  * `GoalSetupForm` (rendered inside this dialog) reads `usePersistence()`

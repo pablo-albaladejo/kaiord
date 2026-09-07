@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-import { PersistenceProvider } from "@ds-stories/packages/workout-spa-editor/src/contexts/persistence-context";
-import type { PersistencePort } from "@ds-stories/packages/workout-spa-editor/src/ports/persistence-port";
-import { createInMemoryPersistence } from "@ds-stories/packages/workout-spa-editor/src/test-utils/in-memory-persistence";
-import { WellnessEntryDialog } from "@ds-stories/packages/workout-spa-editor/src/components/molecules/WellnessEntryDialog/WellnessEntryDialog";
+import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
+import type { PersistencePort } from "../../packages/workout-spa-editor/src/ports/persistence-port";
+import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
+import { WellnessEntryDialog } from "../../packages/workout-spa-editor/src/components/molecules/WellnessEntryDialog/WellnessEntryDialog";
 
 /**
  * `WellnessEntryForm` (rendered inside this dialog) reads `usePersistence()`

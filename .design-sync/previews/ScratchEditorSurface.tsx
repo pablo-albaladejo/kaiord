@@ -1,12 +1,12 @@
-import { PersistenceProvider } from "@ds-stories/packages/workout-spa-editor/src/contexts/persistence-context";
-import { createInMemoryPersistence } from "@ds-stories/packages/workout-spa-editor/src/test-utils/in-memory-persistence";
-import { useWorkoutStore } from "@ds-stories/packages/workout-spa-editor/src/store/workout-store";
+import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
+import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
+import { useWorkoutStore } from "../../packages/workout-spa-editor/src/store/workout-store";
 import type {
   KRD,
   RepetitionBlock,
   WorkoutStep,
-} from "@ds-stories/packages/workout-spa-editor/src/types/krd";
-import { ScratchEditorSurface } from "@ds-stories/packages/workout-spa-editor/src/components/organisms/ScratchEditorSurface/ScratchEditorSurface";
+} from "../../packages/workout-spa-editor/src/types/krd";
+import { ScratchEditorSurface } from "../../packages/workout-spa-editor/src/components/organisms/ScratchEditorSurface/ScratchEditorSurface";
 
 /**
  * `ScratchEditorSurface` reads `useWorkoutStore` (a zustand module

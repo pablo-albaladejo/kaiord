@@ -215,3 +215,4 @@ export { DesignSystemProviders } from "./design-system-providers";
 export { ToastProvider } from "./src/components/atoms/Toast/ToastProvider";
 export { useWorkoutStore } from "./src/store/workout-store";
 export { createInMemoryPersistence } from "./src/test-utils/in-memory-persistence";
+export { useGarminBridge } from "./src/contexts/garmin-bridge-context";

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 
-import {
-  type PushState,
-  useGarminBridge,
-} from "@ds-stories/packages/workout-spa-editor/src/contexts";
-import { GarminPushButton } from "@ds-stories/packages/workout-spa-editor/src/components/molecules/GarminPushButton/GarminPushButton";
+// Explicit files, not the directory barrel: the converter's esbuild resolves
+// this path literally and fails with "is a directory".
+import { useGarminBridge } from "../../packages/workout-spa-editor/src/contexts/garmin-bridge-context";
+import type { PushState } from "../../packages/workout-spa-editor/src/contexts/garmin-bridge-types";
+import { GarminPushButton } from "../../packages/workout-spa-editor/src/components/molecules/GarminPushButton/GarminPushButton";
 
 /**
  * `GarminPushButton.stories.tsx` reaches every non-idle state by forcing the

@@ -1,12 +1,23 @@
-import type { KRD } from "@ds-stories/packages/workout-spa-editor/src/types/krd";
-import { SaveToLibraryButton } from "@ds-stories/packages/workout-spa-editor/src/components/molecules/SaveToLibraryButton/SaveToLibraryButton";
+import type { ReactNode } from "react";
+import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
+import type { KRD } from "../../packages/workout-spa-editor/src/types/krd";
+import { SaveToLibraryButton } from "../../packages/workout-spa-editor/src/components/molecules/SaveToLibraryButton/SaveToLibraryButton";
+import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
 
 /**
- * `SaveToLibraryButton` takes no context/store dependency — the only trap
- * here is the prop name and shape (`workout: KRD`, not a `WorkoutRecord`
- * or a bare `Workout`). Fixtures below mirror
- * `SaveToLibraryButton.stories.tsx` exactly.
+ * Two traps here. The prop is `workout: KRD` — not a `WorkoutRecord`, not a
+ * bare `Workout`. And the always-mounted `SaveToLibraryDialog` calls
+ * `useSaveToLibrary()` -> `usePersistence()` unconditionally, even closed, so
+ * without a provider the card throws instead of rendering. The global chain
+ * omits persistence on purpose (the real port opens Dexie and blanks every
+ * card), so an in-memory one is wrapped here. Fixtures mirror
+ * `SaveToLibraryButton.stories.tsx`.
  */
+const persistence = createInMemoryPersistence();
+
+const withPersistence = (node: ReactNode) => (
+  <PersistenceProvider persistence={persistence}>{node}</PersistenceProvider>
+);
 const workout: KRD = {
   version: "1.0",
   type: "structured_workout",
@@ -59,12 +70,11 @@ const emptyWorkout: KRD = {
   },
 };
 
-export const Idle = () => <SaveToLibraryButton workout={workout} />;
+export const Idle = () =>
+  withPersistence(<SaveToLibraryButton workout={workout} />);
 
-export const EmptyWorkout = () => (
-  <SaveToLibraryButton workout={emptyWorkout} />
-);
+export const EmptyWorkout = () =>
+  withPersistence(<SaveToLibraryButton workout={emptyWorkout} />);
 
-export const Disabled = () => (
-  <SaveToLibraryButton workout={workout} disabled />
-);
+export const Disabled = () =>
+  withPersistence(<SaveToLibraryButton workout={workout} disabled />);

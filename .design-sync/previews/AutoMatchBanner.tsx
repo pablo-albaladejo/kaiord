@@ -1,6 +1,6 @@
-import type { MatchSuggestion } from "@ds-stories/packages/workout-spa-editor/src/application/match-suggestion";
-import type { CoachingActivity } from "@ds-stories/packages/workout-spa-editor/src/types/coaching-activity";
-import { AutoMatchBanner } from "@ds-stories/packages/workout-spa-editor/src/components/organisms/AutoMatchBanner/AutoMatchBanner";
+import type { MatchSuggestion } from "../../packages/workout-spa-editor/src/application/match-suggestion";
+import type { CoachingActivity } from "../../packages/workout-spa-editor/src/types/coaching-activity";
+import { AutoMatchBanner } from "../../packages/workout-spa-editor/src/components/organisms/AutoMatchBanner/AutoMatchBanner";
 
 /**
  * `AutoMatchBanner` takes only real props (no context/store dependency), so
@@ -130,8 +130,4 @@ export const RawIdsWithoutResolvers = () => (
     onAccept={noop}
     onReject={noop}
   />
-);
-
-export const NoSuggestions = () => (
-  <AutoMatchBanner suggestions={[]} onAccept={noop} onReject={noop} />
 );

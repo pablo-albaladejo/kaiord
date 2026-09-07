@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
-import { PersistenceProvider } from "@ds-stories/packages/workout-spa-editor/src/contexts/persistence-context";
-import { createInMemoryPersistence } from "@ds-stories/packages/workout-spa-editor/src/test-utils/in-memory-persistence";
-import { useWorkoutStore } from "@ds-stories/packages/workout-spa-editor/src/store/workout-store";
-import { ImportDropzoneOverlay } from "@ds-stories/packages/workout-spa-editor/src/components/organisms/ImportDropzoneOverlay/ImportDropzoneOverlay";
+import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
+import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
+import { useWorkoutStore } from "../../packages/workout-spa-editor/src/store/workout-store";
+import { ImportDropzoneOverlay } from "../../packages/workout-spa-editor/src/components/organisms/ImportDropzoneOverlay/ImportDropzoneOverlay";
 
 /**
  * `ImportDropzoneOverlay` takes no props at all — in the real app it is

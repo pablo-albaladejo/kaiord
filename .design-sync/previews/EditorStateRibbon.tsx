@@ -1,4 +1,4 @@
-import { EditorStateRibbon } from "@ds-stories/packages/workout-spa-editor/src/components/organisms/EditorStateRibbon/EditorStateRibbon";
+import { EditorStateRibbon } from "../../packages/workout-spa-editor/src/components/organisms/EditorStateRibbon/EditorStateRibbon";
 
 /**
  * `EditorStateRibbon.stories.tsx` documents that `extensionInstalled` starts
@@ -12,8 +12,4 @@ import { EditorStateRibbon } from "@ds-stories/packages/workout-spa-editor/src/c
  */
 export const SendableWithNoBridgeInstalled = () => (
   <EditorStateRibbon state="structured" onSent={() => {}} />
-);
-
-export const AlreadyPushedRendersNothing = () => (
-  <EditorStateRibbon state="pushed" onSent={() => {}} />
 );
