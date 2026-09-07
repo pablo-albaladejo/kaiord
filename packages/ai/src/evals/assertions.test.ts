@@ -201,6 +201,76 @@ describe("evaluateBenchmark", () => {
     );
   });
 
+  describe("failure attribution", () => {
+    it("should attribute a sport mismatch to the sport dimension", () => {
+      // Arrange
+      const workout = createWorkout({ sport: "running" });
+
+      // Act
+      const result = evaluateBenchmark(
+        baseBenchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(result.failures.map((f) => f.dimension)).toEqual(["sport"]);
+    });
+
+    it("should attribute a schema failure to the schema dimension", () => {
+      // Arrange
+      const invalid = { name: "Bad" } as unknown as Workout;
+
+      // Act
+      const result = evaluateBenchmark(
+        baseBenchmark,
+        invalid,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(result.failures.map((f) => f.dimension)).toEqual(["schema"]);
+    });
+
+    it("should distinguish a step-count miss from a zone miss", () => {
+      // Arrange
+      const benchmark: Benchmark = {
+        ...baseBenchmark,
+        minSteps: 9,
+        zoneCheck: { targetType: "power", minValue: 220 },
+      };
+      const workout = createWorkout();
+
+      // Act
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(new Set(result.failures.map((f) => f.dimension))).toEqual(
+        new Set(["steps", "zone"])
+      );
+    });
+
+    it("should keep errors and failures describing the same set", () => {
+      // Arrange
+      const benchmark: Benchmark = { ...baseBenchmark, maxSteps: 1 };
+      const workout = createWorkout({ sport: "running" });
+
+      // Act
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(result.errors).toEqual(result.failures.map((f) => f.message));
+    });
+  });
+
   describe("zone checks", () => {
     it("should fail when target min is below expected minValue with 5% tolerance", () => {
       // Arrange

@@ -1,5 +1,10 @@
 import { workoutSchema } from "@kaiord/core";
-import type { Benchmark, EvalResult } from "./types";
+import type {
+  Benchmark,
+  EvalDimension,
+  EvalFailure,
+  EvalResult,
+} from "./types";
 import type { Workout } from "@kaiord/core";
 
 // Eval allows ±5% drift on zone bounds to absorb AI rounding.
@@ -10,7 +15,10 @@ export const evaluateBenchmark = (
   workout: Workout,
   durationMs: number
 ): EvalResult => {
-  const errors: Array<string> = [];
+  const failures: Array<EvalFailure> = [];
+  const fail = (dimension: EvalDimension, message: string): void => {
+    failures.push({ dimension, message });
+  };
 
   const schemaResult = workoutSchema.safeParse(workout);
   if (!schemaResult.success) {
@@ -18,33 +26,40 @@ export const evaluateBenchmark = (
       id: benchmark.id,
       pass: false,
       errors: [`Schema validation failed: ${schemaResult.error.message}`],
+      failures: [
+        {
+          dimension: "schema",
+          message: `Schema validation failed: ${schemaResult.error.message}`,
+        },
+      ],
       durationMs,
     };
   }
 
   if (benchmark.expectedSport && workout.sport !== benchmark.expectedSport) {
-    errors.push(
+    fail(
+      "sport",
       `Sport mismatch: expected ${benchmark.expectedSport}, got ${workout.sport}`
     );
   }
 
   const stepCount = countSteps(workout);
   if (stepCount < benchmark.minSteps) {
-    errors.push(`Too few steps: ${stepCount} < ${benchmark.minSteps}`);
+    fail("steps", `Too few steps: ${stepCount} < ${benchmark.minSteps}`);
   }
   if (stepCount > benchmark.maxSteps) {
-    errors.push(`Too many steps: ${stepCount} > ${benchmark.maxSteps}`);
+    fail("steps", `Too many steps: ${stepCount} > ${benchmark.maxSteps}`);
   }
 
   if (benchmark.zoneCheck) {
-    const zoneErrors = checkZones(workout, benchmark);
-    errors.push(...zoneErrors);
+    for (const message of checkZones(workout, benchmark)) fail("zone", message);
   }
 
   return {
     id: benchmark.id,
-    pass: errors.length === 0,
-    errors,
+    pass: failures.length === 0,
+    errors: failures.map((f) => f.message),
+    failures,
     sport: workout.sport,
     stepCount,
     durationMs,

@@ -1,7 +1,7 @@
-import type { EvalReport, EvalResult } from "./types";
+import type { EvalReport, ReportableResult } from "./types";
 
 export const createReport = (
-  results: Array<EvalResult>,
+  results: Array<ReportableResult>,
   provider: string,
   model: string
 ): EvalReport => {
@@ -24,8 +24,8 @@ export const createReport = (
 };
 
 const groupBy = (
-  results: Array<EvalResult>,
-  keyExtractor: (r: EvalResult) => string
+  results: Array<ReportableResult>,
+  keyExtractor: (r: ReportableResult) => string
 ): Record<string, { total: number; passed: number }> => {
   const groups: Record<string, { total: number; passed: number }> = {};
   for (const r of results) {

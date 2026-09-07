@@ -25,12 +25,20 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 
 Each benchmark is evaluated against:
 
-1. **Schema validation** (100% threshold): Output must pass `workoutSchema` from `@kaiord/core`
-2. **Sport correctness** (≥95% threshold): If `expectedSport` is set, `workout.sport` must match
-3. **Step count** (per-benchmark min/max): `countSteps(workout)` must be within `[minSteps, maxSteps]` (counts nested steps in blocks)
-4. **Zone accuracy** (±5% tolerance, optional): If `zoneCheck` is defined, active steps matching the target type must have values within `[minValue*0.95, maxValue*1.05]`
+1. **Schema validation**: output must pass `workoutSchema` from `@kaiord/core`. A schema failure short-circuits; no other dimension is evaluated.
+2. **Sport correctness**: if `expectedSport` is set, `workout.sport` must match.
+3. **Step count**: `countSteps(workout)` must be within `[minSteps, maxSteps]` (nested steps in blocks are counted).
+4. **Zone accuracy** (±5% tolerance, optional): if `zoneCheck` is defined, active steps of the target type must fall within `[minValue*0.95, maxValue*1.05]`. A zone check with no matching active step **fails** — it is not skipped.
 
-Overall pass rate: ≥90% to exit with code 0; <90% exits with code 1.
+Each failure carries the dimension that produced it, so a red result says
+which capability broke rather than only that something did.
+
+**There are no per-dimension thresholds, and there is no overall pass rate
+gate.** Earlier revisions of this file documented a 100% schema threshold and a
+≥95% sport threshold; neither was ever implemented — `evaluateBenchmark` folds
+every dimension into one binary `pass`. They are not implemented now either,
+deliberately: this suite cannot run in this project (see the runner header), so
+any threshold on it would be a number that can never fire.
 
 ## Benchmark Schema
 

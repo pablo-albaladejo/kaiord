@@ -15,13 +15,27 @@ export type Benchmark = {
   zoneCheck?: ZoneCheck;
 };
 
-export type EvalResult = {
+/** The capability a failure is attributed to, so a red result says which one. */
+export type EvalDimension = "schema" | "sport" | "steps" | "zone" | "run";
+
+export type EvalFailure = {
+  dimension: EvalDimension;
+  message: string;
+};
+
+/** The shape the reporter consumes, shared by every suite that reports. */
+export type ReportableResult = {
   id: string;
   pass: boolean;
   errors: Array<string>;
+  durationMs: number;
+};
+
+export type EvalResult = ReportableResult & {
+  /** Same failures as `errors`, each carrying the dimension that produced it. */
+  failures: Array<EvalFailure>;
   sport?: string;
   stepCount?: number;
-  durationMs: number;
 };
 
 export type EvalReport = {
@@ -32,7 +46,7 @@ export type EvalReport = {
   passed: number;
   failed: number;
   passRate: number;
-  results: Array<EvalResult>;
+  results: Array<ReportableResult>;
   byCategory: Record<string, { total: number; passed: number }>;
   byLanguage: Record<string, { total: number; passed: number }>;
 };
