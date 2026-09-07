@@ -3,7 +3,7 @@
   "pkg": "@kaiord/workout-spa-editor",
   "globalName": "KaiordDesignSystem",
   "shape": "storybook",
-  "storybookConfigDir": "packages/workout-spa-editor/.storybook",
+  "storybookConfigDir": ".design-sync/storybook",
   "storybookStatic": ".design-sync/sb-reference",
   "entry": "packages/workout-spa-editor/design-system.ts",
   "tsconfig": "../../.design-sync/tsconfig.paths.json",
