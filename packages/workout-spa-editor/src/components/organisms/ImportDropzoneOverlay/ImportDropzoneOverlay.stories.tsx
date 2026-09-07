@@ -15,11 +15,11 @@ import { ImportDropzoneOverlay } from "./ImportDropzoneOverlay";
  * story sets below, which also drives the `?date=` / `?from=` behavior
  * `useImportOnLoad` reads via `useSearch()`.
  *
- * It also reads `usePersistence()` and `useToastContext()` unconditionally
- * on every render, and writes to the `useWorkoutStore` zustand singleton
- * on mount (`clearWorkout`) — none of those are part of the global preview
- * decorators, so this story wraps them itself, matching
- * `ImportDropzoneOverlay.test.tsx`'s render harness.
+ * It also reads `usePersistence()` unconditionally on every render and writes
+ * to the `useWorkoutStore` zustand singleton on mount (`clearWorkout`). The
+ * global stack supplies a persistence port, but it is the real Dexie one; this
+ * story wraps its own so an import cannot write to the browser's database,
+ * matching `ImportDropzoneOverlay.test.tsx`'s render harness.
  */
 const meta = {
   title: "Organisms/ImportDropzoneOverlay",

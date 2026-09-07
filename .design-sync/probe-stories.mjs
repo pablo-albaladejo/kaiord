@@ -22,7 +22,9 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // it — so resolve from the package rather than from this file's own directory.
 // It is CommonJS, so require() it: importing the resolved file URL hands back a
 // module whose named exports are not picked up, and `chromium` reads undefined.
-const require = createRequire(join(REPO_ROOT, "packages/workout-spa-editor/package.json"));
+const require = createRequire(
+  join(REPO_ROOT, "packages/workout-spa-editor/package.json")
+);
 const { chromium } = require("@playwright/test");
 
 const STATIC_DIR = process.argv[2];
@@ -51,7 +53,9 @@ const server = createServer(async (req, res) => {
   const file = join(STATIC_DIR, normalize(path === "/" ? "/index.html" : path));
   try {
     const body = await readFile(file);
-    res.writeHead(200, { "content-type": MIME[extname(file)] ?? "application/octet-stream" });
+    res.writeHead(200, {
+      "content-type": MIME[extname(file)] ?? "application/octet-stream",
+    });
     res.end(body);
   } catch {
     res.writeHead(404).end("not found");
@@ -61,7 +65,9 @@ const server = createServer(async (req, res) => {
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const base = `http://127.0.0.1:${server.address().port}`;
 
-const index = JSON.parse(await readFile(join(STATIC_DIR, "index.json"), "utf8"));
+const index = JSON.parse(
+  await readFile(join(STATIC_DIR, "index.json"), "utf8")
+);
 const stories = Object.values(index.entries).filter((e) => e.type === "story");
 
 const browser = await chromium.launch();
@@ -87,10 +93,13 @@ for (const [i, story] of stories.entries()) {
   let verdict = "ok";
   let detail = "";
   try {
-    await page.goto(`${base}/iframe.html?id=${encodeURIComponent(story.id)}&viewMode=story`, {
-      waitUntil: "networkidle",
-      timeout: 20000,
-    });
+    await page.goto(
+      `${base}/iframe.html?id=${encodeURIComponent(story.id)}&viewMode=story`,
+      {
+        waitUntil: "networkidle",
+        timeout: 20000,
+      }
+    );
     // Storybook renders an error panel into the root rather than throwing, so
     // "has children" alone is not enough — check for its marker too.
     const probe = await page.evaluate(() => {
@@ -100,7 +109,9 @@ for (const [i, story] of stories.entries()) {
       // content is NOT under #storybook-root. Counting only the root marks
       // every working dialog as empty — count what the portal added too.
       const portal = [...document.body.children]
-        .filter((el) => el.id !== "storybook-root" && el.id !== "storybook-docs")
+        .filter(
+          (el) => el.id !== "storybook-root" && el.id !== "storybook-docs"
+        )
         .reduce((n, el) => n + (el.innerText ?? "").trim().length, 0);
       return {
         children: root.children.length,
@@ -115,6 +126,11 @@ for (const [i, story] of stories.entries()) {
       verdict = "sb-error";
     } else if (probe.children === 0 && probe.text === 0 && probe.portal === 0) {
       verdict = "empty";
+    } else if (errors.length) {
+      // A story can paint and still be broken — a throwing effect, a failed
+      // play function. Reporting that while exiting 0 makes the probe look
+      // like it passed.
+      verdict = "threw";
     }
     detail = `children=${probe.children} text=${probe.text} portal=${probe.portal}`;
   } catch (e) {
@@ -124,13 +140,23 @@ for (const [i, story] of stories.entries()) {
 
   page.off("pageerror", onError);
   page.off("console", onConsole);
-  results.push({ id: story.id, title: story.title, name: story.name, verdict, detail, errors });
+  results.push({
+    id: story.id,
+    title: story.title,
+    name: story.name,
+    verdict,
+    detail,
+    errors,
+  });
 }
 
 await browser.close();
 server.close();
 
-const byVerdict = results.reduce((a, r) => ((a[r.verdict] = (a[r.verdict] ?? 0) + 1), a), {});
+const byVerdict = results.reduce(
+  (a, r) => ((a[r.verdict] = (a[r.verdict] ?? 0) + 1), a),
+  {}
+);
 console.log(`\n${results.length} stories probed:`, byVerdict);
 
 const bad = results.filter((r) => r.verdict !== "ok");
@@ -143,4 +169,5 @@ if (bad.length) {
 }
 
 if (JSON_OUT) await writeFile(JSON_OUT, JSON.stringify(results, null, 2));
-process.exit(0);
+// Exit non-zero on any bad story, so this can gate rather than just narrate.
+process.exit(bad.length ? 1 : 0);

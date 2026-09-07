@@ -78,8 +78,8 @@ export const TwoHighConfidenceMatches: Story = {
         workoutId: "w-2",
         score: 0.85,
         reasons: [
-          { code: "duration-match", deltaSeconds: 60 },
           { code: "sport-family-match", family: "running" },
+          { code: "duration-match", deltaSeconds: 60 },
         ],
       }),
     ],
