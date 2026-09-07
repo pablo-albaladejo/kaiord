@@ -83,6 +83,9 @@ export default tseslint.config(
       "**/test-results/**",
       "**/.playwright/**",
       "**/.storybook/**",
+      // Same kind of file as `.storybook/`: the sync's own Storybook config,
+      // outside every tsconfig project, so the type-aware parser cannot see it.
+      "**/.storybook-ds/**",
       "**/storybook-static/**",
       "**/test-setup.ts",
       "**/test-utils/**",

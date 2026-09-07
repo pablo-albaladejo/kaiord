@@ -1,9 +1,15 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 
-import base from "../../packages/workout-spa-editor/.storybook/main";
+import base from "../.storybook/main";
 
 /**
  * The Storybook the design-system sync reads from.
+ *
+ * It lives INSIDE the package, not under `.design-sync/`, because the converter
+ * resolves each story as `<storybookConfigDir>/../<importPath>`. From
+ * `.design-sync/storybook` that resolved to `.design-sync/src/...`, which does
+ * not exist, so the preview generator declined every component ("nothing
+ * paired") and 68 cards silently fell back to the typographic floor card.
  *
  * Identical to the app's own config except for which stories it picks up. The
  * converter derives the component set from this build, and there is no config
@@ -34,11 +40,11 @@ const config: StorybookConfig = {
   // lives in the filename pattern itself.
   stories: [
     {
-      directory: "../../packages/workout-spa-editor/src",
+      directory: "../src",
       files: "**/!(SetupChecklist).stories.@(js|jsx|mjs|ts|tsx)",
     },
     {
-      directory: "../../packages/workout-spa-editor/src",
+      directory: "../src",
       files: "**/*.mdx",
     },
   ],
