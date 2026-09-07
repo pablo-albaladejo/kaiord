@@ -17,6 +17,13 @@ openspec/changes/archive/README.md
 openspec/specs/README.md
 scripts/fixtures/bridge-privacy-surface.json
 
+# design-sync generated inputs: the bundle entry and the static i18n registry,
+# both emitted by `.design-sync/gen-*.mjs` (see .design-sync/NOTES.md). The
+# generators write them unformatted; keeping their raw output canonical avoids
+# formatting-only churn every time a component or locale file is added.
+packages/workout-spa-editor/design-system.ts
+.design-sync/i18n-resources-static.ts
+
 # SEO/GEO observatory: script-generated dashboard + append-only time series.
 # The weekly workflow regenerates these without Prettier, so keep the raw
 # `scripts/geo/*.mjs` output canonical and avoid formatting-only churn.

@@ -10,7 +10,7 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
-    structured_workout: {
+    workout: {
       description: "Workout object to display statistics for",
       control: { type: "object" },
     },
@@ -229,7 +229,7 @@ const complexWorkout: Workout = {
  */
 export const Default: Story = {
   args: {
-    structured_workout: timeBasedWorkout,
+    workout: timeBasedWorkout,
   },
 };
 
@@ -238,7 +238,7 @@ export const Default: Story = {
  */
 export const DistanceBased: Story = {
   args: {
-    structured_workout: distanceBasedWorkout,
+    workout: distanceBasedWorkout,
   },
 };
 
@@ -247,7 +247,7 @@ export const DistanceBased: Story = {
  */
 export const MixedDurations: Story = {
   args: {
-    structured_workout: mixedWorkout,
+    workout: mixedWorkout,
   },
 };
 
@@ -256,7 +256,7 @@ export const MixedDurations: Story = {
  */
 export const SingleStep: Story = {
   args: {
-    structured_workout: singleStepWorkout,
+    workout: singleStepWorkout,
   },
 };
 
@@ -265,7 +265,7 @@ export const SingleStep: Story = {
  */
 export const ComplexWorkout: Story = {
   args: {
-    structured_workout: complexWorkout,
+    workout: complexWorkout,
   },
 };
 
@@ -274,7 +274,7 @@ export const ComplexWorkout: Story = {
  */
 export const NoWorkout: Story = {
   args: {
-    structured_workout: null,
+    workout: null,
   },
 };
 
@@ -283,7 +283,7 @@ export const NoWorkout: Story = {
  */
 export const CustomStyling: Story = {
   args: {
-    structured_workout: timeBasedWorkout,
+    workout: timeBasedWorkout,
     className: "max-w-md",
   },
 };

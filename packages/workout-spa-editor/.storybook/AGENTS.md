@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-05-14 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-09-06 -->
 
 # `.storybook/`
 
@@ -9,8 +9,8 @@ Storybook 10 configuration. The SPA uses the `@storybook/react-vite` framework +
 
 ## Key Files
 
-- `main.ts` — Storybook config: stories glob (`../src/**/*.stories.@(js|jsx|mjs|ts|tsx)` + `*.mdx`), `react-vite` framework, `addon-a11y` addon, `react-docgen-typescript` for prop docs.
-- `preview.ts` — global decorators + parameters (theme provider wrap, viewport defaults).
+- `main.ts` — Storybook config: stories glob (`../src/**/*.stories.@(js|jsx|mjs|ts|tsx)` + `*.mdx`), `react-vite` framework, `addon-a11y` addon, `react-docgen` for prop docs. It loads as ESM (the package is `"type": "module"`), so anything CommonJS here needs `createRequire(import.meta.url)`.
+- `preview.tsx` — global decorators + parameters. The decorator wraps every story in `ThemeProvider > LocaleProvider > UnitsProvider > GarminBridgeProvider`; a story that wraps itself still works, because the inner provider wins for its own subtree. It is `.tsx`, not `.ts`, because the decorator is JSX.
 
 ## For AI Agents
 

@@ -1,0 +1,16 @@
+/* Inter is the brand font. The SPA declares it in src/index.css with absolute
+   host paths (/fonts/... in dev, /editor/fonts/... under the production base),
+   which resolve to nothing once the bundle is served from claude.ai/design, so
+   build-css.mjs strips those rules and this file is the single declaration the
+   converter ships. A missing brand font is invisible to the preview-vs-storybook
+   comparison - both panels fall back to the same chromium default - so it has to
+   be closed here rather than caught by grading. */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  size-adjust: 100%;
+  src: url("../packages/workout-spa-editor/public/fonts/inter-var-latin.woff2")
+    format("woff2");
+}

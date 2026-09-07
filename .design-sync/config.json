@@ -1,0 +1,85 @@
+{
+  "projectId": "58f31125-a86b-44c4-92f2-d153cc2457cb",
+  "pkg": "@kaiord/workout-spa-editor",
+  "globalName": "KaiordDesignSystem",
+  "shape": "storybook",
+  "storybookConfigDir": "packages/workout-spa-editor/.storybook",
+  "storybookStatic": ".design-sync/sb-reference",
+  "entry": "packages/workout-spa-editor/design-system.ts",
+  "tsconfig": "../../.design-sync/tsconfig.paths.json",
+  "cssEntry": ".design-sync-styles.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "extraFonts": [
+    "../../.design-sync/inter.css"
+  ],
+  "storyImports": {
+    "shim": [
+      "/src/contexts/",
+      "/src/i18n/"
+    ]
+  },
+  "provider": {
+    "component": "ThemeProvider",
+    "inner": {
+      "component": "LocaleProvider",
+      "inner": {
+        "component": "UnitsProvider",
+        "inner": {
+          "component": "GarminBridgeProvider"
+        }
+      }
+    },
+    "props": {
+      "defaultTheme": "light"
+    }
+  },
+  "overrides": {
+    "Input": {
+      "cardMode": "column"
+    },
+    "DurationPicker": {
+      "cardMode": "column"
+    },
+    "ConfirmationModal": {
+      "cardMode": "single",
+      "primaryStory": "Interactive"
+    },
+    "SaveErrorDialog": {
+      "skip": [
+        "molecules-saveerrordialog--default",
+        "molecules-saveerrordialog--multiple-errors",
+        "molecules-saveerrordialog--nested-path-errors",
+        "molecules-saveerrordialog--many-errors",
+        "molecules-saveerrordialog--errors-without-paths",
+        "molecules-saveerrordialog--interactive"
+      ]
+    },
+    "BottomNav": {
+      "viewport": "390x700"
+    },
+    "MainLayout": {
+      "skip": [
+        "templates-mainlayout--default",
+        "templates-mainlayout--with-workout-list",
+        "templates-mainlayout--empty-state",
+        "templates-mainlayout--mobile-view"
+      ]
+    },
+    "WorkoutStats": {
+      "skip": [
+        "organisms-workoutstats--no-workout"
+      ]
+    },
+    "WorkoutList": {
+      "skip": [
+        "organisms-workoutlist--empty-workout"
+      ]
+    },
+    "ZoneDist": {
+      "skip": [
+        "molecules-zonedist--zone-1-only"
+      ]
+    }
+  },
+  "buildCmd": "pnpm -F \"@kaiord/workout-spa-editor^...\" build && node .design-sync/gen-entry.mjs && node .design-sync/gen-i18n-resources.mjs && node .design-sync/build-css.mjs"
+}
