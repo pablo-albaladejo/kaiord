@@ -1,4 +1,20 @@
 #!/usr/bin/env tsx
+/**
+ * INERT IN THIS PROJECT. This runner obtains its model through
+ * `loadEvalModel`, which throws without a provider API key, and this project
+ * has none — so it cannot execute and never has.
+ *
+ * It is kept as the executable form of the fixture-to-assertion wiring: which
+ * fixture feeds which scorer, in what shape. That contract would otherwise be
+ * implicit, recoverable only by reading the tests backwards. What is checked
+ * on every commit is the assertion logic and the fixtures' own invariants,
+ * which need no credential.
+ *
+ * It carries no pass threshold. A comparison that cannot run is not a gate,
+ * and one dressed as a gate is the failure this suite exists to remove. If a
+ * key ever exists, the floor is a decision to take then, with a measurement
+ * behind it.
+ */
 import { labExtractorAgent, runGenerateAgent } from "../agents";
 import type { LabCheck } from "./lab-extraction-assertions";
 import { scoreLabExtraction } from "./lab-extraction-assertions";
@@ -8,15 +24,6 @@ import {
   SYNTHETIC_LAB_REPORT,
 } from "./lab-extraction-fixture";
 import { loadEvalModel } from "./load-eval-model";
-
-/**
- * A liveness floor, not a quality floor: it asks whether the extractor
- * returned a usable structured reading of the report. Owner: repo maintainer,
- * 2026-09-07. Benchmark: the synthetic fixture in this directory, whose rows
- * are chosen to discriminate (GOT/GPT, decimal commas, three printed range
- * shapes, one uncatalogued parameter). Raise it only against a measured run.
- */
-const PASS_THRESHOLD = 0.7;
 
 const byDimension = (checks: LabCheck[]): Map<string, LabCheck[]> => {
   const map = new Map<string, LabCheck[]>();
@@ -59,7 +66,6 @@ const runEvals = async () => {
   console.log(
     `\n${passed}/${score.checks.length} checks (${Math.round(rate * 100)}%)`
   );
-  process.exit(rate >= PASS_THRESHOLD ? 0 : 1);
 };
 
 runEvals().catch((e) => {

@@ -60,7 +60,7 @@ Common operations:
    ```typescript
    import { createTextToWorkout } from "@kaiord/ai";
    const textToWorkout = createTextToWorkout({
-     model: provider("claude-sonnet-4-5-20241022"),
+     model: provider("claude-sonnet-4-5-20250929"),
      maxRetries: 2,
      maxOutputTokens: 4096,
      temperature: 0,

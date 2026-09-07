@@ -1,4 +1,20 @@
 #!/usr/bin/env tsx
+/**
+ * INERT IN THIS PROJECT. This runner obtains its model through
+ * `loadEvalModel`, which throws without a provider API key, and this project
+ * has none — so it cannot execute and never has.
+ *
+ * It is kept as the executable form of the fixture-to-assertion wiring: which
+ * fixture feeds which scorer, in what shape. That contract would otherwise be
+ * implicit, recoverable only by reading the tests backwards. What is checked
+ * on every commit is the assertion logic and the fixtures' own invariants,
+ * which need no credential.
+ *
+ * It carries no pass threshold. A comparison that cannot run is not a gate,
+ * and one dressed as a gate is the failure this suite exists to remove. If a
+ * key ever exists, the floor is a decision to take then, with a measurement
+ * behind it.
+ */
 import { createTextToWorkout } from "../index";
 import { evaluateBenchmark } from "./assertions";
 import { loadEvalModel } from "./load-eval-model";
@@ -48,8 +64,6 @@ const runEvals = async () => {
   const outPath = path.join(packageDir, `eval-report-${Date.now()}.json`);
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
   console.log(`\nReport saved to ${outPath}`);
-
-  process.exit(report.passRate >= 90 ? 0 : 1);
 };
 
 runEvals().catch((e) => {
