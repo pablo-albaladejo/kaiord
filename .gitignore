@@ -79,3 +79,17 @@ worktrees/
 
 # understand-anything CLI knowledge graph (local tool, not part of repo)
 .understand-anything/
+
+# claude.ai/design sync (see .design-sync/NOTES.md).
+# Committed: .design-sync/{config.json,NOTES.md,conventions.md,gen-entry.mjs,
+# previews/,overrides/} — the inputs a future sync reuses. Everything below is
+# regenerated build output, verification scratch, or a per-clone symlink.
+.ds-sync/
+ds-bundle/
+.design-sync/sb-reference/
+.design-sync/learnings/
+.design-sync/.cache/
+.design-sync/node_modules
+# Compiled by .design-sync/build-css.mjs. Lives inside the package because the
+# converter bounds cfg.cssEntry to the package root.
+packages/workout-spa-editor/.design-sync-styles.css
