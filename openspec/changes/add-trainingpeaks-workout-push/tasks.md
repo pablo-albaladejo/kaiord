@@ -59,7 +59,12 @@
 - [x] 4.3 Changeset.
 - [x] 4.4 Full `pnpm -r test && pnpm -r build && pnpm lint` — all exit 0.
 
-## 5. End-to-end validation (manual, not automatable)
+## 5. End-to-end validation (manual) — NOT EXECUTED, by decision
+
+> Closed 2026-09-07: work on this destination stops here. The steps below are
+> left as a runbook should anyone pick it up, but a Basic account can only reach
+> today and tomorrow, so step 5.4 cannot place a real coaching-plan date without
+> Premium (14-day trial available). See design.md, "Why the work stops here".
 
 - [ ] 5.1 Load `train2go-bridge` and `trainingpeaks-bridge` unpacked; run the
       SPA on `localhost:5173` (both manifests already allow that origin).
