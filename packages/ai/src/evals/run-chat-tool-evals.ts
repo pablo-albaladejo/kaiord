@@ -67,6 +67,14 @@ const runEvals = async () => {
     }
   }
 
+  const faults = results.filter((r) => r.harnessFault !== undefined);
+  if (faults.length > 0) {
+    console.error(`\nHARNESS FAULT in ${faults.length} case(s):`);
+    for (const f of faults) console.error(`  ${f.id}: ${f.harnessFault}`);
+    console.error("Not failing scores — the instrument did not run.");
+    process.exit(2);
+  }
+
   const report = createReport(results, provider, modelName);
   console.log("\n" + formatReport(report));
 

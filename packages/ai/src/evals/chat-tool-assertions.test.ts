@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import type { ChatTurnResult } from "../index";
 import { EVAL_DURATION_MS_DEFAULT } from "../test-utils/constants";
-import { evaluateChatToolBenchmark } from "./chat-tool-assertions";
+import {
+  evaluateChatToolBenchmark,
+  expectationFault,
+} from "./chat-tool-assertions";
 import type { ChatToolBenchmark } from "./chat-tool-types";
 
 const readBenchmark: ChatToolBenchmark = {
@@ -248,5 +251,79 @@ describe("evaluateChatToolBenchmark — step limit", () => {
     // Assert
     expect(evalResult.pass).toBe(false);
     expect(evalResult.errors[0]).toContain("step limit");
+  });
+});
+
+describe("expectationFault", () => {
+  const base = {
+    id: "x",
+    userText: "hi",
+    category: "read" as const,
+    expectedTool: "get_data_routes",
+  };
+
+  it("should report no fault when expectations are absent", () => {
+    // Arrange
+    const benchmark = base;
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toBeNull();
+  });
+
+  it("should report no fault when expectations are well formed", () => {
+    // Arrange
+    const benchmark = { ...base, expectedAnswerIncludes: ["train2go"] };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toBeNull();
+  });
+
+  it("should fault when a phrase list arrives as a bare string", () => {
+    // Arrange
+    const benchmark = {
+      ...base,
+      expectedAnswerIncludes: "train2go" as unknown as string[],
+    };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toContain("not an array");
+  });
+
+  it("should fault when an action input arrives as an array", () => {
+    // Arrange
+    const benchmark = {
+      ...base,
+      category: "action" as const,
+      expectedActionInput: [] as unknown as Record<string, unknown>,
+    };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toContain("not an object");
+  });
+
+  it("should fault when a phrase list holds a non-string entry", () => {
+    // Arrange
+    const benchmark = {
+      ...base,
+      expectedAnswerIncludes: [1] as unknown as string[],
+    };
+
+    // Act
+    const fault = expectationFault(benchmark);
+
+    // Assert
+    expect(fault).toContain("non-string");
   });
 });
