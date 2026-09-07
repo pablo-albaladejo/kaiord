@@ -31,14 +31,14 @@ be swapped one line at a time.
 
 **That justification was written about a package nobody had opened.** Read since:
 
-| Original claim                                     | Upstream                                                                                          |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| "rejects a `hardRequirement` in percent"           | `Unit` includes `"percent"` as first-class on a structured `Threshold`                            |
-| local `owner` required                             | requires `agent`; there is no `owner`                                                             |
-| `tier` as a discriminated union banning a T3 floor | `Tier` is a plain string union; `mayGate()` is runtime and its docstring **permits** declaring T3 |
-| `hasFloor`                                         | `isEnforceable`                                                                                   |
-| every floor must be declared                       | `hardRequirement: Threshold                                                                       | null` — "declared, with no floor agreed yet. That is a valid state" |
-| five modules                                       | `src/domain/` holds two                                                                           |
+| Original claim                                     | Upstream                                                                                           |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| "rejects a `hardRequirement` in percent"           | `Unit` includes `"percent"` as first-class on a structured `Threshold`                             |
+| local `owner` required                             | requires `agent`; there is no `owner`                                                              |
+| `tier` as a discriminated union banning a T3 floor | `Tier` is a plain string union; `mayGate()` is runtime and its docstring **permits** declaring T3  |
+| `hasFloor`                                         | `isEnforceable`                                                                                    |
+| every floor must be declared                       | `hardRequirement: Threshold \| null` — "declared, with no floor agreed yet. That is a valid state" |
+| five modules                                       | `src/domain/` holds two                                                                            |
 
 The swap was never one line, and the two designs disagree on substance rather
 than naming. But the decisive argument is simpler and does not depend on any of
