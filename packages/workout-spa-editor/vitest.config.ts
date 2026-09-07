@@ -12,7 +12,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["./src/test-setup.ts"],
+    setupFiles: [
+      // Order matters: the seeder parks a stale marker on the bridge
+      // singleton keys so the cleanup in test-setup.ts has something to
+      // remove on EVERY file. Without it, asserting the keys are absent
+      // passes vacuously on a fresh worker. See #1094.
+      "./src/test-utils/seed-stale-bridge-singletons.ts",
+      "./src/test-setup.ts",
+    ],
     css: true,
     onConsoleLog(log: string, type: "stdout" | "stderr"): false | void {
       // Suppress act() warnings from Radix UI components (false positives in Node 20.x)
