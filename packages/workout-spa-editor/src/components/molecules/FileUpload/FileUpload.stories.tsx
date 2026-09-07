@@ -56,19 +56,19 @@ export const WithCustomClass: Story = {
 
 export const Interactive: Story = {
   args: {
-    onFileLoad: (krd) => {
+    onFileLoad: fn((krd) => {
       console.log("File loaded:", krd);
       alert(
         `Workout loaded: ${krd.extensions?.structured_workout?.name || "Unnamed"}`
       );
-    },
-    onError: (error, validationErrors) => {
+    }),
+    onError: fn((error, validationErrors) => {
       console.error("Error:", error);
       if (validationErrors) {
         console.error("Validation errors:", validationErrors);
       }
       alert(`Error: ${error}`);
-    },
+    }),
   },
   parameters: {
     docs: {
