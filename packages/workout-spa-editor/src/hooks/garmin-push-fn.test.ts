@@ -7,12 +7,9 @@ const SENTINEL = "garmin-unconfirmed";
 const OVER_CAP = 65;
 
 const pushReturning = (
-  garminWorkoutId: string | undefined
+  garminWorkoutId: string | null
 ): ((gcn: unknown) => Promise<GarminPushOutcome>) =>
-  vi.fn().mockResolvedValue({
-    success: true,
-    garminWorkoutId,
-  } as GarminPushOutcome);
+  vi.fn().mockResolvedValue({ success: true, garminWorkoutId });
 
 describe("buildGarminPushFn", () => {
   it("should pass through an id-shaped value from the bridge", async () => {
@@ -52,7 +49,7 @@ describe("buildGarminPushFn", () => {
 
   it("should keep the sentinel when the bridge echoes no id", async () => {
     // Arrange
-    const pushFn = buildGarminPushFn(pushReturning(undefined));
+    const pushFn = buildGarminPushFn(pushReturning(null));
 
     // Act
     const result = await pushFn({});
