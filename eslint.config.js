@@ -640,5 +640,16 @@ export default tseslint.config(
       "max-lines": "off",
       "simple-import-sort/exports": "off",
     },
+  },
+  {
+    // Owned previews for the claude.ai/design card harness. They are compiled by
+    // the converter's own esbuild, outside the app's type graph, and most are
+    // built from its generated `compose()` wrappers, which map story args
+    // through `any`. They stay linted — a broken import here ships a blank card
+    // — but that one rule cannot be met without rewriting machinery we do not own.
+    files: [".design-sync/previews/*.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
   }
 );
