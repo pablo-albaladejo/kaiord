@@ -15,6 +15,15 @@ export const GARMIN_BRIDGE_ID = "garmin-bridge";
 
 const UNCONFIRMED_EXTERNAL_ID = "garmin-unconfirmed";
 
+/** The bridge echoes this id back from Garmin's response, and it travels on:
+    it is persisted as `garminPushId` and returned to the model by the
+    `push_to_garmin` chat tool. Nothing upstream constrains it, so anything
+    that is not id-shaped is treated as no id at all rather than forwarded. */
+const ID_SHAPE = /^[A-Za-z0-9_-]{1,64}$/;
+
+const asExternalId = (id: string | null | undefined): string =>
+  id && ID_SHAPE.test(id) ? id : UNCONFIRMED_EXTERNAL_ID;
+
 /** Marks a bridge-reported push failure (never rejects on its own): the
     caller's `pushWorkout` resolves `{ success: false }` and records its own
     error state, so the outer catch must not overwrite it with a generic
@@ -23,13 +32,14 @@ export class BridgePushFailedError extends Error {}
 
 /** Wraps a bridge's `pushWorkout` into `executeWorkoutPush`'s `pushFn`
     contract. Falls back to a stable sentinel id when the bridge doesn't
-    echo one back, so a missing id never breaks idempotent re-push keying. */
+    echo one back — or echoes one that is not id-shaped — so neither a
+    missing id nor a malformed one breaks idempotent re-push keying. */
 export const buildGarminPushFn = (
   pushWorkout: (gcn: unknown) => Promise<GarminPushOutcome>
 ): ExecuteWorkoutPushInput["pushFn"] => {
   return async (payload) => {
     const outcome = await pushWorkout(payload);
     if (!outcome.success) throw new BridgePushFailedError();
-    return { externalId: outcome.garminWorkoutId ?? UNCONFIRMED_EXTERNAL_ID };
+    return { externalId: asExternalId(outcome.garminWorkoutId) };
   };
 };
