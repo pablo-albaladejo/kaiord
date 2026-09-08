@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-09-08 | [`harden-ai-evals`](./2026-09-08-harden-ai-evals/) | Move the eval program onto the lanes that can actually run |
 | 2026-08-09 | [`move-spa-to-app-hash-routing`](./2026-08-09-move-spa-to-app-hash-routing/) | Every deep URL of the SPA answers HTTP 404 on the way in. Measured against production: |
 | 2026-08-06 | [`rebrand-v2-editor-verbs`](./2026-08-06-rebrand-v2-editor-verbs/) | Rebrand V2 · editor canvas and the verb cut |
 | 2026-08-05 | [`align-connections-settings-v2`](./2026-08-05-align-connections-settings-v2/) | Align Connections and Settings with the V2 screens |
