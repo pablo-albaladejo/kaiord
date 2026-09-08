@@ -1,3 +1,5 @@
+> Completed: 2026-09-08
+
 # Proposal: Move the eval program onto the lanes that can actually run
 
 > Revision 2 — rewritten after consensus review returned REJECT, and after the
