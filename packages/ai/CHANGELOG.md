@@ -1,5 +1,21 @@
 # @kaiord/ai
 
+## 9.3.2
+
+### Patch Changes
+
+- e99dac0: Distinguish "measured and failed" from "never measured" in the eval suite.
+  `unmeasured` is now a member of the dimension-outcome union carrying a reason
+  and no score, so a criterion nobody measured cannot enter a rate. Reports tally
+  each dimension as `{measured, passed, unmeasured, reasons}`, and a dimension
+  with no measurements has no rate at all rather than 0% or 100%.
+- 55b5701: Stop untrusted text from breaking out of its fence. `fenceUntrusted` now
+  neutralizes the fence delimiters inside the payload before wrapping it, so
+  external text carrying the closing delimiter can no longer end the fence early
+  and land its remainder in trusted prompt space. The replacement carries no
+  `<`, so a delimiter cannot re-form from the neighbours of a neutralized one.
+- cf20f4a: Move the workspace to vitest 5. Dev-dependency only; no runtime behaviour changes.
+
 ## 9.3.1
 
 ### Patch Changes
