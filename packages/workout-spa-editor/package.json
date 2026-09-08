@@ -70,6 +70,7 @@
     "@fast-check/vitest": "^0.4.1",
     "@playwright/test": "^1.62.1",
     "@storybook/addon-a11y": "^10.6.0",
+    "@storybook/react": "^10.6.0",
     "@storybook/react-vite": "^10.6.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",

@@ -363,3 +363,119 @@ treat dark-mode fidelity as unknown rather than good.
   the local playwright cache (1223/1228 were). The converter installs its own
   playwright under `.ds-sync/` and downloaded chromium **1243**; it does not use
   the repo's pin. Nothing to reconcile — the two are independent.
+
+## The card harness is NOT Storybook (the wave-2 lesson, four ways)
+
+Every component here has a story that renders. That says nothing about whether
+its **card** renders. The card mounts the compiled component from
+`window.KaiordDesignSystem` and **ignores story and meta `decorators`
+entirely** — only `.storybook/preview.tsx` globals reach it via `cfg.provider`,
+and even those only because we name a wrapper there. So a component whose story
+leans on a decorator (a Radix provider, a seeded zustand store, an in-memory
+persistence port) renders an empty card while its story is green.
+
+Sixteen components needed an owned preview under `.design-sync/previews/` for
+exactly this reason. That is the intended mechanism, not a workaround.
+
+Three failure modes cost a full validate cycle each (~6 min) before the cause
+was clear. All three surface as the same useless symptom — "root empty":
+
+1. **Side effects at module scope kill the whole bundle.** The first provider
+   wrapper built its ports where the module is evaluated. Opening Dexie there
+   threw at bundle-eval time and left `window.KaiordDesignSystem` with **no
+   components at all** — `85/85 not a component`. Build them on first render.
+2. **Side effects at render kill every card.** With the ports built lazily the
+   bundle came back, but all 85 cards went blank, atoms included:
+   `PersistenceProvider` opens Dexie and `SyncProvider` starts an engine, and
+   those take the harness down globally. `DesignSystemProviders` therefore
+   carries only inert providers (Theme, Toast, Locale, Units, GarminBridge,
+   Router). A component that truly needs persistence gets an owned preview with
+   an **in-memory** port, where the blast radius is one card.
+3. **A symbol missing from the entry looks like an empty card.** Owned previews
+   import by relative path and the converter rewrites those to
+   `window.KaiordDesignSystem.*`. A symbol absent from `design-system.ts`
+   resolves to `undefined` and the preview throws. `ToastProvider`,
+   `useWorkoutStore` and `createInMemoryPersistence` are exported from the entry
+   _solely_ for this — do not remove them as unused.
+
+## Storybook's <body> poisons naive render probes (a bug I shipped)
+
+`.design-sync/probe-stories.mjs` counts portal content because a Radix dialog
+renders outside `#storybook-root`. The first version summed the text of every
+`<body>` child — but Storybook keeps its own furniture there, permanently and
+hidden: `.sb-preparing-docs`, `.sb-nopreview`, `.sb-errordisplay` and an inline
+`<script>`, together **~3232 characters on every page**.
+
+That made every story score as full on chrome alone. It reported "420/420
+render" when the instrument could no longer tell rendering from not: `ChatFab
+--hidden-on-chat-route`, blank by design, reported the same `portal=3232` as the
+visible variant. Real portal content for `AddEntryChooser` is 37 characters.
+
+The probe now excludes Storybook-owned nodes and requires
+`getClientRects().length > 0`. **The honest number is 404 render, 16 blank by
+design, 0 broken** — and the 16 are the states that are meant to say nothing
+(`--closed`, `--nothing-to-process`, `--silent-week`, `--no-suggestions`, …).
+
+What caught it was the converter's validator disagreeing with the probe. When
+two instruments disagree, one of them is broken — do not assume it is theirs.
+
+## Nine components still have no working card
+
+`GoalSetupDialog`, `SaveToLibraryButton`, `SetupChecklist`, `StatusHeader`,
+`WellnessEntryDialog`, `AutoMatchBanner`, `EditorStateRibbon`,
+`ImportDropzoneOverlay`, `ScratchEditorSurface`.
+
+There is no shared cause left — the three above were the shared causes, and they
+are fixed. These need individual debugging. One correction to carry: the agent
+report claimed `SetupChecklist` paints a real "new install" state on an empty
+Dexie. The corrected probe says its only story renders **blank in Storybook
+too**, so that claim was wrong. Verify the other eight the same way rather than
+trusting the report.
+
+### Resolved — the nine had shared causes after all
+
+They did not need individual debugging. Building a diagnostic that loads a built
+card and prints what it throws (instead of the converter's bare "root empty")
+turned each one into a one-line cause, and four causes covered all nine:
+
+1. **`@ds-stories/` used for a component or provider.** That alias resolves
+   straight to disk, bypassing the shim to `window.KaiordDesignSystem`, so the
+   preview mounts a SECOND instance of the module. React context never matches
+   and the card is blank. It is correct **only** for `.stories` modules, whose
+   fixtures we want verbatim. Everything else goes through a relative path.
+   Fixed: GoalSetupDialog, WellnessEntryDialog, ImportDropzoneOverlay,
+   ScratchEditorSurface.
+2. **`gen-entry` only exports PascalCase values** (it assumes a value worth
+   exporting is a component), so a camelCase hook a preview calls falls through
+   and reads `undefined`: "useGarminBridge is not a function". Hooks a preview
+   needs must be listed explicitly.
+3. **`usePersistence` reached through a hook nobody expected.** `StatusHeader`
+   via `useBridgeConnections`, `SaveToLibraryButton` via the always-mounted
+   `SaveToLibraryDialog` -> `useSaveToLibrary`. Both preview files carried a
+   comment asserting the component had no context dependency; both were wrong.
+   An in-memory port in the preview fixes it.
+4. **A cell blank by design makes the whole card read empty.** The card is a
+   grid; `AutoMatchBanner`'s `NoSuggestions` and `EditorStateRibbon`'s
+   `AlreadyPushedRendersNothing` render nothing on purpose. Previews show only
+   the states that paint — the blank ones stay documented in the story.
+
+A directory import also fails outright: the converter's esbuild resolves the
+path literally, so `src/contexts` errors with "is a directory" even though an
+`index.ts` exists. Import the file.
+
+**Keep `.design-sync/probe-stories.mjs`'s sibling diagnostic in mind**: when the
+converter says "root empty", load the built card and read the real error. Every
+round spent guessing before that existed was wasted.
+
+### The one that is genuinely unshowable: `SetupChecklist`
+
+Not a broken preview. `useSetupChecklistFacts` returns `dismissed: true` while
+its `useLiveQuery` is unresolved — deliberately, so the checklist cannot flash
+before the facts arrive; the hook says so in its own comment. With an unseeded
+database it never leaves that state, which is why it renders blank in Storybook
+too (0/1 stories). It reads the raw Dexie singleton, so unlike the two above
+there is no port to inject.
+
+Showing it requires seeding a real active profile into the card origin's
+IndexedDB — a write no other preview performs. Left out of the design system
+instead: an absent component is honest, a blank card is a dead end.
