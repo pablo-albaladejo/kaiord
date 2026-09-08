@@ -7,9 +7,10 @@
  * `tpapi.trainingpeaks.com` directly (see tp-auth.js for the dual transport).
  * No TrainingPeaks tab, content script, or cookie access is involved.
  *
- * Routes SPA ↔ background messages for session probe, metric reads, and the
- * (optional) weight write. Metric JSON is returned raw — parsing lives in
- * `@kaiord/trainingpeaks` and runs SPA-side; this bridge never imports it. The
+ * Routes SPA ↔ background messages for session probe, metric reads, the
+ * (optional) weight write, and the structured-workout write. Metric JSON is
+ * returned raw and workout payloads are relayed as built — both shapes live in
+ * `@kaiord/trainingpeaks` and run SPA-side; this bridge never imports it. The
  * session cookie is never read or exposed; session presence is a boolean only.
  */
 
@@ -21,7 +22,7 @@ const BRIDGE_MANIFEST = {
   name: "TrainingPeaks",
   version: "10.1.1",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["read:body", "write:body"],
+  capabilities: ["read:body", "write:body", "write:workouts"],
 };
 
 // ── Shared envelope/dispatch (vendored bridge-core) ──
@@ -61,9 +62,10 @@ try {
 //
 // Defense-in-depth allowlist (single-physical-line entries, locked by
 // scripts/check-bridge-privacy-surface.mjs): the cookie-only token endpoint,
-// the metric-range read, and the single-metric write. The SPA never supplies a
-// raw path — athlete id / date range are interpolated here — but the bridge
-// still refuses any tpapi request outside this set.
+// the metric-range read, the single-metric write, and the structured-workout
+// write. The SPA never supplies a raw path — athlete id / date range are
+// interpolated here — but the bridge still refuses any tpapi request outside
+// this set.
 // prettier-ignore — each entry MUST stay on one physical line so the privacy
 // surface guard (scripts/check-bridge-privacy-surface.mjs) can extract it.
 // prettier-ignore
@@ -78,6 +80,7 @@ const ALLOWED = [
   { method: "GET", pattern: /^\/users\/v3\/token$/ },
   { method: "GET", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetrics\/[^\/]+\/[^\/]+$/ },
   { method: "POST", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetric$/ },
+  { method: "POST", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts$/ },
 ];
 /* eslint-enable no-useless-escape */
 
@@ -174,6 +177,36 @@ const pushWeight = async (message) => {
   return res.data;
 };
 
+// POST a structured planned workout (built SPA-side by @kaiord/trainingpeaks;
+// its `structure` field is already a JSON string — the API rejects an object).
+// The bridge relays the payload as-is and never inspects it.
+//
+// TrainingPeaks answers 402 for a `workoutDay` beyond the account's planning
+// horizon (one day ahead on a Basic account), evaluated in the ATHLETE's
+// timezone rather than the browser's. That is a subscription limit, not a bad
+// payload, so it is surfaced with its own message instead of a generic failure.
+const pushWorkout = async (message) => {
+  const workout = message.workout;
+  if (!workout) throw new Error("Missing workout payload");
+  const athleteId =
+    message.athleteId ??
+    workout.athleteId ??
+    (await tpAuth.ensureAthleteId(fetch));
+  if (athleteId === null || athleteId === undefined) {
+    throw new Error("Could not resolve TrainingPeaks athlete id");
+  }
+  const path = `/fitness/v6/athletes/${athleteId}/workouts`;
+  const res = await tpFetch(path, "POST", workout);
+  if (res?.status === 402) {
+    throw toBridgeError(
+      "TrainingPeaks refused the date: planning that far ahead needs a paid account",
+      res
+    );
+  }
+  if (!res?.ok) throw toBridgeError("Workout push failed", res);
+  return res.data;
+};
+
 const openTrainingPeaks = async () => {
   await chrome.tabs.create({ url: OPEN_TRAININGPEAKS_URL });
 };
@@ -187,6 +220,8 @@ const handleAction = async (message) => {
       return await readMetrics(message);
     case "push-weight":
       return await pushWeight(message);
+    case "push-workout":
+      return await pushWorkout(message);
     case "open-trainingpeaks":
       await openTrainingPeaks();
       return null;
@@ -204,6 +239,7 @@ const EXTERNAL_ACTIONS = new Set([
   "checkSession",
   "read-metrics",
   "push-weight",
+  "push-workout",
   "open-trainingpeaks",
 ]);
 
@@ -238,6 +274,7 @@ if (typeof module !== "undefined") {
     checkSession,
     readMetrics,
     pushWeight,
+    pushWorkout,
     openTrainingPeaks,
     handleAction,
     dispatch,

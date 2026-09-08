@@ -6,19 +6,28 @@ import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { PushButton } from "../../molecules/PushButton";
+import { TrainingPeaksPushButton } from "../../molecules/TrainingPeaksPushButton/TrainingPeaksPushButton";
+import { useTrainingPeaksGate } from "../../organisms/EditorStateRibbon/use-trainingpeaks-gate";
 
 export type WorkoutDetailFooterProps = {
   workout: WorkoutRecord | undefined;
   onEdit: () => void;
 };
 
-/** Sticky action bar: ghost "Edit" + "Adjust with AI" + "Send to Garmin". */
+/**
+ * Sticky action bar: ghost "Edit" + "Adjust with AI" + "Send to Garmin", plus
+ * "Send to TrainingPeaks" once that destination has an enabled export route.
+ * The TrainingPeaks control is gated rather than always-on because most
+ * profiles never enable it, and an inert button on a destination the athlete
+ * has not connected reads as a broken feature.
+ */
 export function WorkoutDetailFooter({
   workout,
   onEdit,
 }: WorkoutDetailFooterProps) {
   const t = useTranslate("workout-detail");
   const [, navigate] = useLocation();
+  const trainingPeaksGate = useTrainingPeaksGate(workout?.profileId);
   return (
     <div className="sticky bottom-0 -mx-4 flex gap-3 border-t border-edge bg-surface-deep px-4 py-3">
       <Button variant="ghost" onClick={onEdit}>
@@ -37,6 +46,11 @@ export function WorkoutDetailFooter({
       <div className="flex-1">
         <PushButton workout={workout} full />
       </div>
+      {trainingPeaksGate === "ready" && (
+        <div className="flex-1">
+          <TrainingPeaksPushButton workout={workout} full />
+        </div>
+      )}
     </div>
   );
 }

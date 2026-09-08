@@ -239,6 +239,10 @@
       {
         "method": "POST",
         "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetric$"
+      },
+      {
+        "method": "POST",
+        "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts$"
       }
     ],
     "external_actions": [
@@ -246,6 +250,7 @@
       "checkSession",
       "read-metrics",
       "push-weight",
+      "push-workout",
       "open-trainingpeaks"
     ],
     "auth_endpoints": [

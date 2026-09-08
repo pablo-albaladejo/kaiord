@@ -26,7 +26,9 @@
     "adjustWithAi": "Ajustar con IA",
     "send": "Enviar a Garmin",
     "sending": "Enviando…",
-    "sent": "En tu Garmin"
+    "sent": "En tu Garmin",
+    "sendToTrainingPeaks": "Enviar a TrainingPeaks",
+    "sentToTrainingPeaks": "En TrainingPeaks"
   },
   "summary": {
     "duration": "Duración",

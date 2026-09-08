@@ -17,10 +17,21 @@ coverage:
         # mounts) that is awkward to unit-test in isolation. Each has
         # its own dedicated 70% check below — same threshold as the
         # `project` status of those flags.
+        #
+        # EVERY `packages/*-bridge` package belongs here. The list held
+        # only garmin and train2go for as long as no PR touched another
+        # bridge; the first one that did (trainingpeaks) failed
+        # `codecov/patch` on service-worker boilerplate this block
+        # already declares untestable — a stale list, not a coverage
+        # regression. Adding a bridge package means adding it here and
+        # to the `bridges` check and flag below, all three together.
         target: 80%
         paths:
           - "!packages/garmin-bridge/**"
           - "!packages/train2go-bridge/**"
+          - "!packages/trainingpeaks-bridge/**"
+          - "!packages/whoop-bridge/**"
+          - "!packages/tanita-bridge/**"
           - "!packages/workout-spa-editor/**"
       frontend:
         target: 70%
@@ -37,6 +48,9 @@ coverage:
         paths:
           - packages/garmin-bridge/**
           - packages/train2go-bridge/**
+          - packages/trainingpeaks-bridge/**
+          - packages/whoop-bridge/**
+          - packages/tanita-bridge/**
 
 comment:
   layout: "reach,diff,flags,files"
@@ -76,6 +90,9 @@ flags:
     paths:
       - packages/garmin-bridge/
       - packages/train2go-bridge/
+      - packages/trainingpeaks-bridge/
+      - packages/whoop-bridge/
+      - packages/tanita-bridge/
     carryforward: true
 
 bundle_analysis:

@@ -25,9 +25,14 @@ const SUPPORTED_IMPORT_TYPES: Record<string, readonly ManagedDataType[]> = {
   "trainingpeaks-bridge": ["weight"],
 };
 
-/** TrainingPeaks announces `write:body` but the SPA cables no push yet. */
+/**
+ * TrainingPeaks announces `write:body` as well, but the SPA cables only the
+ * workout push; narrowing to `["workout"]` keeps the body route off the
+ * Connections page until something implements it. Per the INVARIANT above this
+ * key must be edited, never deleted — deleting it would unrestrict the bridge.
+ */
 const SUPPORTED_EXPORT_TYPES: Record<string, readonly ManagedDataType[]> = {
-  "trainingpeaks-bridge": [],
+  "trainingpeaks-bridge": ["workout"],
 };
 
 export const bridgeSupportsRoute = (
