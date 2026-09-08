@@ -96,9 +96,20 @@ describe("evaluateBenchmark", () => {
     );
   });
 
-  it("should fail when step count is below minimum", () => {
+  it.each([
+    {
+      label: "is below the minimum",
+      override: { minSteps: 5 },
+      needle: "Too few steps",
+    },
+    {
+      label: "exceeds the maximum",
+      override: { maxSteps: 2 },
+      needle: "Too many steps",
+    },
+  ])("should fail when step count $label", ({ override, needle }) => {
     // Arrange
-    const benchmark: Benchmark = { ...baseBenchmark, minSteps: 5 };
+    const benchmark: Benchmark = { ...baseBenchmark, ...override };
     const workout = createWorkout();
 
     // Act
@@ -110,24 +121,7 @@ describe("evaluateBenchmark", () => {
 
     // Assert
     expect(result.pass).toBe(false);
-    expect(result.errors.some((e) => e.includes("Too few steps"))).toBe(true);
-  });
-
-  it("should fail when step count exceeds maximum", () => {
-    // Arrange
-    const benchmark: Benchmark = { ...baseBenchmark, maxSteps: 2 };
-    const workout = createWorkout();
-
-    // Act
-    const result = evaluateBenchmark(
-      benchmark,
-      workout,
-      EVAL_DURATION_MS_DEFAULT
-    );
-
-    // Assert
-    expect(result.pass).toBe(false);
-    expect(result.errors.some((e) => e.includes("Too many steps"))).toBe(true);
+    expect(result.errors.some((e) => e.includes(needle))).toBe(true);
   });
 
   it("should count repeat block steps correctly", () => {
