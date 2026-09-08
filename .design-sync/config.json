@@ -3,35 +3,18 @@
   "pkg": "@kaiord/workout-spa-editor",
   "globalName": "KaiordDesignSystem",
   "shape": "storybook",
-  "storybookConfigDir": "packages/workout-spa-editor/.storybook",
+  "storybookConfigDir": "packages/workout-spa-editor/.storybook-ds",
   "storybookStatic": ".design-sync/sb-reference",
   "entry": "packages/workout-spa-editor/design-system.ts",
   "tsconfig": "../../.design-sync/tsconfig.paths.json",
   "cssEntry": ".design-sync-styles.css",
   "readmeHeader": ".design-sync/conventions.md",
-  "extraFonts": [
-    "../../.design-sync/inter.css"
-  ],
+  "extraFonts": ["../../.design-sync/inter.css"],
   "storyImports": {
-    "shim": [
-      "/src/contexts/",
-      "/src/i18n/"
-    ]
+    "shim": ["/src/contexts/", "/src/i18n/"]
   },
   "provider": {
-    "component": "ThemeProvider",
-    "inner": {
-      "component": "LocaleProvider",
-      "inner": {
-        "component": "UnitsProvider",
-        "inner": {
-          "component": "GarminBridgeProvider"
-        }
-      }
-    },
-    "props": {
-      "defaultTheme": "light"
-    }
+    "component": "DesignSystemProviders"
   },
   "overrides": {
     "Input": {
@@ -66,19 +49,13 @@
       ]
     },
     "WorkoutStats": {
-      "skip": [
-        "organisms-workoutstats--no-workout"
-      ]
+      "skip": ["organisms-workoutstats--no-workout"]
     },
     "WorkoutList": {
-      "skip": [
-        "organisms-workoutlist--empty-workout"
-      ]
+      "skip": ["organisms-workoutlist--empty-workout"]
     },
     "ZoneDist": {
-      "skip": [
-        "molecules-zonedist--zone-1-only"
-      ]
+      "skip": ["molecules-zonedist--zone-1-only"]
     }
   },
   "buildCmd": "pnpm -F \"@kaiord/workout-spa-editor^...\" build && node .design-sync/gen-entry.mjs && node .design-sync/gen-i18n-resources.mjs && node .design-sync/build-css.mjs"

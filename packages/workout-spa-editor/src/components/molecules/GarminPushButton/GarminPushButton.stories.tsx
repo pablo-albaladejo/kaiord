@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 
-import { type PushState, useGarminBridge } from "../../../contexts";
+import { useGarminBridge } from "../../../contexts";
+import type { PushState } from "../../../contexts";
 import { GarminPushButton } from "./GarminPushButton";
 
 const meta = {

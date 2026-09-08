@@ -33,7 +33,7 @@
     "noUncheckedIndexedAccess": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "design-system.ts"],
+  "include": ["src", "design-system.ts", "design-system-providers.tsx"],
   "exclude": [
     "src/**/*.test.tsx",
     "src/**/*.test.ts",

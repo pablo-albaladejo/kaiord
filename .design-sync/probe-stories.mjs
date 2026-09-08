@@ -108,9 +108,20 @@ for (const [i, story] of stories.entries()) {
       // A Radix dialog renders through a portal attached to <body>, so its
       // content is NOT under #storybook-root. Counting only the root marks
       // every working dialog as empty — count what the portal added too.
+      //
+      // But <body> also carries Storybook's own furniture, permanently and
+      // hidden: `.sb-wrapper` panels (preparing / nopreview / errordisplay) and
+      // an inline <script>. Their combined innerText is ~3200 characters on
+      // EVERY page, so summing all children scored every story as full — a
+      // story that renders nothing looked identical to one that renders. Count
+      // only nodes Storybook does not own, and only ones actually laid out.
       const portal = [...document.body.children]
         .filter(
-          (el) => el.id !== "storybook-root" && el.id !== "storybook-docs"
+          (el) =>
+            !el.id?.startsWith("storybook-") &&
+            el.tagName !== "SCRIPT" &&
+            !el.classList?.contains("sb-wrapper") &&
+            el.getClientRects().length > 0
         )
         .reduce((n, el) => n + (el.innerText ?? "").trim().length, 0);
       return {

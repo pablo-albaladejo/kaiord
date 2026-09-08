@@ -209,3 +209,10 @@ export { SyncProvider } from "./src/contexts/sync-context";
 export { Train2GoZonesSyncProvider } from "./src/contexts/train2go-zones-sync-context";
 export { UnitsProvider } from "./src/contexts/units-context";
 export { LocaleProvider } from "./src/i18n/LocaleProvider";
+
+// provider chain for the card harness
+export { DesignSystemProviders } from "./design-system-providers";
+export { ToastProvider } from "./src/components/atoms/Toast/ToastProvider";
+export { useWorkoutStore } from "./src/store/workout-store";
+export { createInMemoryPersistence } from "./src/test-utils/in-memory-persistence";
+export { useGarminBridge } from "./src/contexts/garmin-bridge-context";

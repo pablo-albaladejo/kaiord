@@ -3,6 +3,15 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.storybook.tsbuildinfo"
   },
-  "include": ["src/**/*.stories.ts", "src/**/*.stories.tsx", ".storybook/**/*"],
+  "include": [
+    "src/**/*.stories.ts",
+    "src/**/*.stories.tsx",
+    ".storybook/**/*",
+    // Ambient declarations (chrome, vite-env, umami, vitest). Story files reach
+    // src/ transitively, but a transitive import does not bring a project's
+    // globals with it — without these the check invents "Cannot find name
+    // 'chrome'" errors in files the app project compiles cleanly.
+    "src/**/*.d.ts"
+  ],
   "exclude": []
 }
