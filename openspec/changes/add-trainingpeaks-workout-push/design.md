@@ -4,9 +4,9 @@ The TrainingPeaks structured-workout API is undocumented. Everything below was
 measured on 2026-09-07 against the athlete's own account: a browser capture of
 the create request, then targeted probes to settle what the capture left open.
 Two probe workouts and two library items were created and all four deleted; the
-calendar was verified clean afterwards.
+calendar was verified clean afterward.
 
-```
+```text
 POST   /fitness/v6/athletes/{athleteId}/workouts               → 200 + created workout
 GET    /fitness/v6/athletes/{athleteId}/workouts/{from}/{to}   → 200
 DELETE /fitness/v6/athletes/{athleteId}/workouts/{workoutId}   → 200

@@ -93,13 +93,27 @@ export const targetToBand = (
   target: Target,
   thresholds: TrainingPeaksThresholds,
   logger: Logger | undefined,
-  context: Record<string, unknown>
+  context: Record<string, unknown>,
+  primaryMetric?: TrainingPeaksIntensityMetric
 ): TargetBand | undefined => {
   const resolved = recipeFor(target, thresholds);
   if (!resolved) {
     logger?.warn(
       `Lossy conversion: dropped ${target.type} target — TrainingPeaks structured workouts carry no such target`,
       context
+    );
+    return undefined;
+  }
+  // The wire format carries ONE `primaryIntensityMetric` for the whole
+  // structure, while every band is a percentage of its own metric's threshold.
+  // A band in a different metric would ship a number TrainingPeaks reads
+  // against the wrong threshold — 85% of max HR silently becoming 85% of FTP.
+  // Dropping it is lossy and says so; sending it is wrong and does not.
+  if (primaryMetric !== undefined && resolved.metric !== primaryMetric) {
+    logger?.warn(
+      `Lossy conversion: dropped ${target.type} target — its ${resolved.metric} ` +
+        `is not the workout's ${primaryMetric}, and TrainingPeaks carries one metric per workout`,
+      { ...context, targetMetric: resolved.metric, primaryMetric }
     );
     return undefined;
   }

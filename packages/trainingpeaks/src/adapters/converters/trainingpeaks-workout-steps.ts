@@ -2,6 +2,7 @@ import type { Intensity, Logger, WorkoutStep } from "@kaiord/core";
 
 import type {
   TrainingPeaksIntensityClass,
+  TrainingPeaksIntensityMetric,
   TrainingPeaksStep,
 } from "../schemas/trainingpeaks-workout.schema";
 import type { TrainingPeaksThresholds } from "./trainingpeaks-workout-targets";
@@ -64,10 +65,17 @@ export const toTrainingPeaksStep = (
   step: WorkoutStep,
   thresholds: TrainingPeaksThresholds,
   logger: Logger | undefined,
-  context: Record<string, unknown>
+  context: Record<string, unknown>,
+  primaryMetric?: TrainingPeaksIntensityMetric
 ): TrainingPeaksStep => {
   const { seconds, open } = toSeconds(step, logger, context);
-  const band = targetToBand(step.target, thresholds, logger, context);
+  const band = targetToBand(
+    step.target,
+    thresholds,
+    logger,
+    context,
+    primaryMetric
+  );
   return {
     name: step.name ?? "",
     length: { value: seconds, unit: "second" },

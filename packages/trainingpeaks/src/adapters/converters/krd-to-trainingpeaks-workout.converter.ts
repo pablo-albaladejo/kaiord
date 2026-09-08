@@ -74,7 +74,8 @@ const resolveIntensityMetric = (
 const toBlocks = (
   workout: Workout,
   thresholds: TrainingPeaksThresholds,
-  logger: Logger | undefined
+  logger: Logger | undefined,
+  primaryMetric: TrainingPeaksIntensityMetric
 ): TrainingPeaksBlock[] => {
   const blocks: TrainingPeaksBlock[] = [];
   let begin = 0;
@@ -82,10 +83,13 @@ const toBlocks = (
     const source = isRepetition(entry) ? entry.steps : [entry];
     const repeatCount = isRepetition(entry) ? entry.repeatCount : 1;
     const steps = source.map((step, stepIndex) =>
-      toTrainingPeaksStep(step, thresholds, logger, {
-        blockIndex: index,
-        stepIndex,
-      })
+      toTrainingPeaksStep(
+        step,
+        thresholds,
+        logger,
+        { blockIndex: index, stepIndex },
+        primaryMetric
+      )
     );
     const oneRound = steps.reduce((sum, step) => sum + step.length.value, 0);
     const end = begin + oneRound * repeatCount;
@@ -108,12 +112,15 @@ export const krdToTrainingPeaksStructure = (
   logger?: Logger
 ): TrainingPeaksStructure => {
   const workout = extractWorkout(krd);
-  const blocks = toBlocks(workout, thresholds, logger);
+  // Resolved once and handed down, because every band is a percentage OF this
+  // metric's threshold and the wire format carries only one of them.
+  const primaryMetric = resolveIntensityMetric(workout, thresholds);
+  const blocks = toBlocks(workout, thresholds, logger, primaryMetric);
   return trainingPeaksStructureSchema.parse({
     structure: blocks,
     polyline: buildPolyline(blocks),
     primaryLengthMetric: "duration",
-    primaryIntensityMetric: resolveIntensityMetric(workout, thresholds),
+    primaryIntensityMetric: primaryMetric,
     primaryIntensityTargetOrRange: "range",
   });
 };

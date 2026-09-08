@@ -223,3 +223,123 @@ describe("krdToTrainingPeaksWorkout", () => {
     );
   });
 });
+
+describe("krdToTrainingPeaksWorkout — mixed target metrics", () => {
+  const HEART_RATE_PERCENT = 85;
+  const mixedWorkout = (): Workout =>
+    ({
+      name: "Mixed metrics",
+      sport: "cycling",
+      steps: [
+        percentFtpStep(
+          0,
+          "Warm up",
+          WARM_UP_SECONDS,
+          WARM_UP_PERCENT_FTP,
+          "warmup"
+        ),
+        {
+          stepIndex: 1,
+          name: "Main",
+          durationType: "time" as const,
+          duration: { type: "time" as const, seconds: WORK_SECONDS },
+          targetType: "heart_rate" as const,
+          target: {
+            type: "heart_rate" as const,
+            value: {
+              unit: "percent_max" as const,
+              value: HEART_RATE_PERCENT,
+            },
+          },
+          intensity: "active" as const,
+        },
+      ],
+    }) as unknown as Workout;
+
+  it("should not send a heart-rate percentage under a percentOfFtp structure", () => {
+    // Arrange
+    const krd = asKrd(mixedWorkout());
+
+    // Act
+    const result = krdToTrainingPeaksWorkout(krd, {
+      athleteId: ATHLETE_ID,
+      workoutDay: WORKOUT_DAY,
+      thresholds: { ftpWatts: CAPTURE_FTP_WATTS, maxHeartRateBpm: 190 },
+    });
+    const structure = JSON.parse(result.structure as unknown as string);
+
+    // Assert
+    expect(structure.primaryIntensityMetric).toBe("percentOfFtp");
+    const sent = structure.structure.flatMap(
+      (b: { steps: unknown[] }) => b.steps
+    );
+    const values = sent.flatMap((s: { targets: { minValue: number }[] }) =>
+      s.targets.map((t) => t.minValue)
+    );
+    expect(values).not.toContain(HEART_RATE_PERCENT);
+  });
+
+  it("should announce the dropped target rather than drop it silently", () => {
+    // Arrange
+    const logger = spyLogger();
+    const krd = asKrd(mixedWorkout());
+
+    // Act
+    krdToTrainingPeaksWorkout(krd, {
+      athleteId: ATHLETE_ID,
+      workoutDay: WORKOUT_DAY,
+      thresholds: { ftpWatts: CAPTURE_FTP_WATTS, maxHeartRateBpm: 190 },
+      logger,
+    });
+
+    // Assert
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining("Lossy conversion: dropped heart_rate target"),
+      expect.objectContaining({
+        targetMetric: "percentOfMaxHr",
+        primaryMetric: "percentOfFtp",
+      })
+    );
+  });
+
+  it("should keep every target when they all share the workout's metric", () => {
+    // Arrange
+    const logger = spyLogger();
+    const krd = asKrd({
+      name: "Single metric",
+      sport: "cycling",
+      steps: [
+        percentFtpStep(
+          0,
+          "Warm up",
+          WARM_UP_SECONDS,
+          WARM_UP_PERCENT_FTP,
+          "warmup"
+        ),
+        percentFtpStep(1, "Work", WORK_SECONDS, WORK_PERCENT_FTP, "active"),
+      ],
+    } as unknown as Workout);
+
+    // Act
+    const result = krdToTrainingPeaksWorkout(krd, {
+      athleteId: ATHLETE_ID,
+      workoutDay: WORKOUT_DAY,
+      thresholds: { ftpWatts: CAPTURE_FTP_WATTS },
+      logger,
+    });
+    const structure = JSON.parse(result.structure as unknown as string);
+
+    // Assert
+    const sent = structure.structure.flatMap(
+      (b: { steps: unknown[] }) => b.steps
+    );
+    const values = sent.flatMap((s: { targets: { minValue: number }[] }) =>
+      s.targets.map((t) => t.minValue)
+    );
+    expect(values).toContain(WORK_PERCENT_FTP);
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      expect.stringContaining("is not the workout's"),
+      expect.anything()
+    );
+  });
+});

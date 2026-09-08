@@ -12,7 +12,7 @@ does not cable.
 #### Scenario: Workout export becomes eligible
 
 - **WHEN** the Connections page resolves export routes for `trainingpeaks-bridge`
-- **THEN** `workout` SHALL be offered and no other data type SHALL be
+- **THEN** `workout` SHALL be offered, and no other data type SHALL be offered for that bridge
 
 ### Requirement: Push is governed by the shared export gate
 

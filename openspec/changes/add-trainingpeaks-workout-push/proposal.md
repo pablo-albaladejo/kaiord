@@ -29,8 +29,8 @@ a block's `length.value` is its **repeat count**, not a duration.
   `@kaiord/trainingpeaks` (today a metrics-only adapter), with a Zod schema
   derived from the capture, a reverse-engineered `polyline` builder pinned
   against real API output, and `Lossy conversion:` warnings for every zone
-  collapsed to a midpoint and every absolute target dropped for want of an
-  athlete threshold.
+  collapsed to a midpoint and every absolute target dropped because no
+  athlete threshold is available.
 - Add a **`push-workout` action** to `trainingpeaks-bridge`, one allowlist
   entry for `POST /fitness/v6/athletes/{id}/workouts`, and `write:workouts` in
   both `BRIDGE_MANIFEST` and `bridge-identity.js`. Refresh the privacy-surface

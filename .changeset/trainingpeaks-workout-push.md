@@ -18,5 +18,12 @@ rejected, though the response returns one), and a block's `length.value` is its
 
 Conversions TrainingPeaks cannot hold announce themselves through the injected
 logger per `spec/conversion-loss-honesty` — zones collapsed to a midpoint,
-absolute targets dropped for want of a threshold, and non-time durations
+absolute targets dropped because no threshold is available, and non-time durations
 replaced by a named placeholder.
+
+A workout whose steps mix target metrics (power then heart rate, say) now drops
+the targets that do not match the workout's primary metric, with a
+`Lossy conversion:` warning naming both. TrainingPeaks carries one
+`primaryIntensityMetric` per workout while each band is a percentage of its own
+threshold, so sending a mismatched band made the platform read, for example,
+85% of max heart rate as 85% of FTP.
