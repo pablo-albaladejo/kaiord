@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const unitKeySchema = z
+const unitKeySchema = z
   .enum(["meter", "kilometer", "mile", "yard", "foot", "kilogram", "pound"])
   .nullable();
 
