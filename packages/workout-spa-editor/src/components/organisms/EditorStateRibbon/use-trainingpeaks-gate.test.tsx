@@ -45,86 +45,68 @@ describe("useTrainingPeaksGate", () => {
     mockPolicies = [];
   });
 
-  it("should report no-extension when the bridge was never discovered", () => {
-    // Arrange
-    mockPolicies = [policy({})];
+  it.each([
+    {
+      scenario: "the bridge was never discovered",
+      discovered: [] as Array<{ bridgeId: string }>,
+      policies: [policy({})],
+      profileId: PROFILE_ID as string | undefined,
+      expected: "no-extension",
+    },
+    {
+      scenario: "only another bridge is present",
+      discovered: [{ bridgeId: "garmin-bridge" }],
+      policies: [policy({})],
+      profileId: PROFILE_ID as string | undefined,
+      expected: "no-extension",
+    },
+    {
+      scenario: "the bridge is present but no policy enables the export",
+      discovered: [{ bridgeId: TP_BRIDGE }],
+      policies: [],
+      profileId: PROFILE_ID as string | undefined,
+      expected: "export-disabled",
+    },
+    {
+      scenario: "the policy exists but is off",
+      discovered: [{ bridgeId: TP_BRIDGE }],
+      policies: [policy({ enabled: false })],
+      profileId: PROFILE_ID as string | undefined,
+      expected: "export-disabled",
+    },
+    {
+      scenario: "the only enabled policy belongs to another bridge",
+      discovered: [{ bridgeId: TP_BRIDGE }],
+      policies: [policy({ bridgeId: "garmin-bridge" })],
+      profileId: PROFILE_ID as string | undefined,
+      expected: "export-disabled",
+    },
+    {
+      scenario: "no profile is given, so no policy resolves",
+      discovered: [{ bridgeId: TP_BRIDGE }],
+      policies: [policy({})],
+      profileId: undefined,
+      expected: "export-disabled",
+    },
+    {
+      scenario: "the bridge is present and the export is enabled",
+      discovered: [{ bridgeId: TP_BRIDGE }],
+      policies: [policy({})],
+      profileId: PROFILE_ID as string | undefined,
+      expected: "ready",
+    },
+  ])(
+    "should report $expected when $scenario",
+    ({ discovered, policies, profileId, expected }) => {
+      // Arrange
+      mockDiscovered = discovered;
+      mockPolicies = policies;
 
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksGate(PROFILE_ID));
+      // Act
+      const { result } = renderHook(() => useTrainingPeaksGate(profileId));
 
-    // Assert
-    expect(result.current).toBe("no-extension");
-  });
-
-  it("should report no-extension when only another bridge is present", () => {
-    // Arrange
-    mockDiscovered = [{ bridgeId: "garmin-bridge" }];
-    mockPolicies = [policy({})];
-
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksGate(PROFILE_ID));
-
-    // Assert
-    expect(result.current).toBe("no-extension");
-  });
-
-  it("should report export-disabled when no policy enables the export", () => {
-    // Arrange
-    mockDiscovered = [{ bridgeId: TP_BRIDGE }];
-    mockPolicies = [];
-
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksGate(PROFILE_ID));
-
-    // Assert
-    expect(result.current).toBe("export-disabled");
-  });
-
-  it("should report export-disabled when the policy exists but is off", () => {
-    // Arrange
-    mockDiscovered = [{ bridgeId: TP_BRIDGE }];
-    mockPolicies = [policy({ enabled: false })];
-
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksGate(PROFILE_ID));
-
-    // Assert
-    expect(result.current).toBe("export-disabled");
-  });
-
-  it("should not accept another bridge's enabled policy as this one's", () => {
-    // Arrange
-    mockDiscovered = [{ bridgeId: TP_BRIDGE }];
-    mockPolicies = [policy({ bridgeId: "garmin-bridge" })];
-
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksGate(PROFILE_ID));
-
-    // Assert
-    expect(result.current).toBe("export-disabled");
-  });
-
-  it("should report ready when the bridge is present and the export is enabled", () => {
-    // Arrange
-    mockDiscovered = [{ bridgeId: TP_BRIDGE }];
-    mockPolicies = [policy({})];
-
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksGate(PROFILE_ID));
-
-    // Assert
-    expect(result.current).toBe("ready");
-  });
-
-  it("should report export-disabled without a profile, since no policy resolves", () => {
-    // Arrange
-    mockDiscovered = [{ bridgeId: TP_BRIDGE }];
-    mockPolicies = [policy({})];
-
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksGate(undefined));
-
-    // Assert
-    expect(result.current).toBe("export-disabled");
-  });
+      // Assert
+      expect(result.current).toBe(expected);
+    }
+  );
 });

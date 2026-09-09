@@ -96,39 +96,33 @@ describe("useTrainingPeaksPush", () => {
     expect(mocks.checkSession).not.toHaveBeenCalled();
   });
 
-  it("should ask the athlete to sign in when the session is not authenticated", async () => {
-    // Arrange
-    mocks.checkSession.mockResolvedValue({ authenticated: false });
+  it.each([
+    {
+      scenario: "the session is not authenticated",
+      session: { authenticated: false },
+    },
+    {
+      scenario: "the session is authenticated but names no athlete",
+      session: { authenticated: true, athleteId: undefined },
+    },
+  ])(
+    "should ask the athlete to sign in when $scenario",
+    async ({ session }) => {
+      // Arrange
+      mocks.checkSession.mockResolvedValue(session);
 
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
-    const outcome = await result.current.push();
+      // Act
+      const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+      const outcome = await result.current.push();
 
-    // Assert
-    expect(outcome).toEqual({
-      ok: false,
-      message: "Sign in to TrainingPeaks and retry",
-    });
-    expect(mocks.executePush).not.toHaveBeenCalled();
-  });
-
-  it("should refuse an authenticated session that names no athlete", async () => {
-    // Arrange
-    mocks.checkSession.mockResolvedValue({
-      authenticated: true,
-      athleteId: undefined,
-    });
-
-    // Act
-    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
-    const outcome = await result.current.push();
-
-    // Assert
-    expect(outcome).toEqual({
-      ok: false,
-      message: "Sign in to TrainingPeaks and retry",
-    });
-  });
+      // Assert
+      expect(outcome).toEqual({
+        ok: false,
+        message: "Sign in to TrainingPeaks and retry",
+      });
+      expect(mocks.executePush).not.toHaveBeenCalled();
+    }
+  );
 
   it("should push and return the created workout id", async () => {
     // Arrange

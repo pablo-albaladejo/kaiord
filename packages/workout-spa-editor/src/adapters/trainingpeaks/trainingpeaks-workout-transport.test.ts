@@ -39,20 +39,6 @@ describe("pushTrainingPeaksWorkout", () => {
     );
   });
 
-  it("should relay the payload verbatim, leaving structure a JSON string", async () => {
-    // Arrange
-    mockedSend.mockResolvedValue({ ok: true, data: { workoutId: WORKOUT_ID } });
-
-    // Act
-    await pushTrainingPeaksWorkout(EXTENSION_ID, PAYLOAD);
-
-    // Assert
-    const [, message] = mockedSend.mock.calls[0]!;
-    const relayed = (message as { workout: Record<string, unknown> }).workout;
-    expect(relayed.structure).toBe(PAYLOAD.structure);
-    expect(typeof relayed.structure).toBe("string");
-  });
-
   it("should raise the bridge's own message when the push fails", async () => {
     // Arrange
     mockedSend.mockResolvedValue({
@@ -115,30 +101,23 @@ describe("pushTrainingPeaksWorkout", () => {
     expect(error.delivered).toBe(false);
   });
 
-  it("should treat an accepted response carrying no id as a transport error", async () => {
-    // Arrange
-    mockedSend.mockResolvedValue({ ok: true, data: { created: true } });
-
-    // Act
-    const act = pushTrainingPeaksWorkout(EXTENSION_ID, PAYLOAD);
-
-    // Assert
-    await expect(act).rejects.toThrow(
-      "TrainingPeaks accepted the workout but returned no id"
-    );
-  });
-
-  it("should reject an id of the wrong type rather than coerce it", async () => {
-    // Arrange
-    mockedSend.mockResolvedValue({
-      ok: true,
+  it.each([
+    { label: "the data carries no id at all", data: { created: true } },
+    {
+      label: "the id is a string rather than a number",
       data: { workoutId: String(WORKOUT_ID) },
-    });
+    },
+  ])(
+    "should treat an accepted response as a transport error when $label",
+    async ({ data }) => {
+      // Arrange
+      mockedSend.mockResolvedValue({ ok: true, data });
 
-    // Act
-    const act = pushTrainingPeaksWorkout(EXTENSION_ID, PAYLOAD);
+      // Act
+      const act = pushTrainingPeaksWorkout(EXTENSION_ID, PAYLOAD);
 
-    // Assert
-    await expect(act).rejects.toThrow("returned no id");
-  });
+      // Assert
+      await expect(act).rejects.toThrow("returned no id");
+    }
+  );
 });

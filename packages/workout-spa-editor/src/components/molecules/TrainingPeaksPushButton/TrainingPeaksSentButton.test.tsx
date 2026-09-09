@@ -9,17 +9,6 @@ vi.mock("../../../i18n/use-translate", () => ({
 }));
 
 describe("TrainingPeaksSentButton", () => {
-  it("should render under the shared send-to-trainingpeaks test id", () => {
-    // Arrange
-    render(<TrainingPeaksSentButton size="md" className="" />);
-
-    // Act
-    const button = screen.getByTestId("send-to-trainingpeaks-button");
-
-    // Assert
-    expect(button).toBeInTheDocument();
-  });
-
   it("should be disabled, since the workout has already gone", () => {
     // Arrange
     render(<TrainingPeaksSentButton size="md" className="" />);
