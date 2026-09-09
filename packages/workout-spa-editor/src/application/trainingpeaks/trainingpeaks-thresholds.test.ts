@@ -20,27 +20,29 @@ const LTHR = 170;
 const MPS_PRECISION = 10;
 
 describe("paceToMetresPerSecond", () => {
-  it("should convert minutes per kilometre to metres per second", () => {
-    // Arrange
-    const pace = FOUR_MINUTES;
+  it.each([
+    {
+      unit: "min_per_km" as const,
+      pace: FOUR_MINUTES,
+      expected: FOUR_MIN_PER_KM_MPS,
+    },
+    {
+      unit: "min_per_100m" as const,
+      pace: NINETY_SECONDS_IN_MINUTES,
+      expected: NINETY_SEC_PER_100M_MPS,
+    },
+  ])(
+    "should convert $unit to metres per second",
+    ({ unit, pace, expected }) => {
+      // Arrange
 
-    // Act
-    const mps = paceToMetresPerSecond(pace, "min_per_km");
+      // Act
+      const mps = paceToMetresPerSecond(pace, unit);
 
-    // Assert
-    expect(mps).toBeCloseTo(FOUR_MIN_PER_KM_MPS, MPS_PRECISION);
-  });
-
-  it("should convert minutes per 100 metres to metres per second", () => {
-    // Arrange
-    const pace = NINETY_SECONDS_IN_MINUTES;
-
-    // Act
-    const mps = paceToMetresPerSecond(pace, "min_per_100m");
-
-    // Assert
-    expect(mps).toBeCloseTo(NINETY_SEC_PER_100M_MPS, MPS_PRECISION);
-  });
+      // Assert
+      expect(mps).toBeCloseTo(expected, MPS_PRECISION);
+    }
+  );
 
   it("should return undefined for a non-positive pace rather than infinity", () => {
     // Arrange
