@@ -23,7 +23,6 @@ describe("bridgeRouteTypes", () => {
 
     // Assert
     expect(types).toEqual(["workout"]);
-    expect(types).not.toContain("weight");
   });
 
   it("should narrow a shared import token to the routes the SPA serves", () => {

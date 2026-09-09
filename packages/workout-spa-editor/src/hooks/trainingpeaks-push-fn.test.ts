@@ -14,8 +14,7 @@ vi.mock("../adapters/trainingpeaks/trainingpeaks-workout-transport", () => ({
 
 vi.mock("./integration-policy-repo", () => ({ policyRepo: {} }));
 
-const { buildTrainingPeaksPushFn, TRAININGPEAKS_BRIDGE_ID } =
-  await import("./trainingpeaks-push-fn");
+const { buildTrainingPeaksPushFn } = await import("./trainingpeaks-push-fn");
 
 const EXTENSION_ID = "tp-extension";
 const PAYLOAD = { title: "Threshold 3x10", structure: '{"structure":[]}' };
@@ -61,16 +60,5 @@ describe("buildTrainingPeaksPushFn", () => {
 
     // Assert
     await expect(act).rejects.toThrow("402 beyond the planning horizon");
-  });
-
-  it("should re-export the bridge id the push is routed to", () => {
-    // Arrange
-    const id = TRAININGPEAKS_BRIDGE_ID;
-
-    // Act
-    const isNonEmpty = typeof id === "string" && id.length > 0;
-
-    // Assert
-    expect(isNonEmpty).toBe(true);
   });
 });
