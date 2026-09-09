@@ -263,9 +263,14 @@ describe("expectationFault", () => {
     expectedTool: "get_data_routes",
   };
 
-  it("should report no fault when expectations are absent", () => {
+  it.each<{ label: string; benchmark: ChatToolBenchmark }>([
+    { label: "expectations are absent", benchmark: base },
+    {
+      label: "expectations are well formed",
+      benchmark: { ...base, expectedAnswerIncludes: ["train2go"] },
+    },
+  ])("should report no fault when $label", ({ benchmark }) => {
     // Arrange
-    const benchmark = base;
 
     // Act
     const fault = expectationFault(benchmark);
@@ -274,58 +279,40 @@ describe("expectationFault", () => {
     expect(fault).toBeNull();
   });
 
-  it("should report no fault when expectations are well formed", () => {
+  it.each<{ label: string; benchmark: ChatToolBenchmark; needle: string }>([
+    {
+      label: "a phrase list arrives as a bare string",
+      benchmark: {
+        ...base,
+        expectedAnswerIncludes: "train2go" as unknown as string[],
+      },
+      needle: "not an array",
+    },
+    {
+      label: "an action input arrives as an array",
+      benchmark: {
+        ...base,
+        category: "action" as const,
+        expectedActionInput: [] as unknown as Record<string, unknown>,
+      },
+      needle: "not an object",
+    },
+    {
+      label: "a phrase list holds a non-string entry",
+      benchmark: {
+        ...base,
+        expectedAnswerIncludes: [1] as unknown as string[],
+      },
+      needle: "non-string",
+    },
+  ])("should fault when $label", ({ benchmark, needle }) => {
     // Arrange
-    const benchmark = { ...base, expectedAnswerIncludes: ["train2go"] };
 
     // Act
     const fault = expectationFault(benchmark);
 
     // Assert
-    expect(fault).toBeNull();
-  });
-
-  it("should fault when a phrase list arrives as a bare string", () => {
-    // Arrange
-    const benchmark = {
-      ...base,
-      expectedAnswerIncludes: "train2go" as unknown as string[],
-    };
-
-    // Act
-    const fault = expectationFault(benchmark);
-
-    // Assert
-    expect(fault).toContain("not an array");
-  });
-
-  it("should fault when an action input arrives as an array", () => {
-    // Arrange
-    const benchmark = {
-      ...base,
-      category: "action" as const,
-      expectedActionInput: [] as unknown as Record<string, unknown>,
-    };
-
-    // Act
-    const fault = expectationFault(benchmark);
-
-    // Assert
-    expect(fault).toContain("not an object");
-  });
-
-  it("should fault when a phrase list holds a non-string entry", () => {
-    // Arrange
-    const benchmark = {
-      ...base,
-      expectedAnswerIncludes: [1] as unknown as string[],
-    };
-
-    // Act
-    const fault = expectationFault(benchmark);
-
-    // Assert
-    expect(fault).toContain("non-string");
+    expect(fault).toContain(needle);
   });
 });
 
