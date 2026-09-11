@@ -1,25 +1,25 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-08-10 14:52 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-08-31 16:05 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
 | Metric | Current | Target | Source |
 | --- | --- | --- | --- |
-| Pages indexed on Google | 33/377 | all pages | gsc.jsonl |
-| Google impressions (7d) | 54 | growing | gsc.jsonl |
-| Google clicks (7d) | 4 | growing | gsc.jsonl |
-| Google avg position | 18.4 | top 10 on 3+ non-brand queries | gsc.jsonl |
+| Pages indexed on Google | 33/377 (=) | all pages | gsc.jsonl |
+| Google impressions (7d) | 84 (+30) | growing | gsc.jsonl |
+| Google clicks (7d) | 3 (-1) | growing | gsc.jsonl |
+| Google avg position | 26.5 (-8.1) | top 10 on 3+ non-brand queries | gsc.jsonl |
 | Bing pages in index | — | all pages | bing.jsonl |
-| Bing impressions (7d) | 0 | growing | bing.jsonl |
+| Bing impressions (7d) | 5 (+5) | growing | bing.jsonl |
 | Tracked queries where site appears (DDG/Bing proxy) | 0/12 (=) | 12/12 | serp.jsonl |
-| AI answer-engine mention rate | perplexity 0 | growing | ai-visibility.jsonl |
+| AI answer-engine mention rate | perplexity 0.2 | growing | ai-visibility.jsonl |
 
 ## Tracked query positions (DDG — Bing-index proxy)
 
 | Query | Position | Prev | History (last 5) |
 | --- | --- | --- | --- |
-| kaiord | ABSENT | ABSENT | #1 · · · · |
+| kaiord | ABSENT | ABSENT | · · · · · |
 | fit file converter | ABSENT | ABSENT | · · · · · |
 | convert fit to tcx | ABSENT | ABSENT | · · · · · |
 | fit to zwo converter | ABSENT | ABSENT | · · · · · |
@@ -36,14 +36,14 @@ _Generated 2026-08-10 14:52 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 
 | Query | Clicks | Impressions | Position |
 | --- | --- | --- | --- |
-| keyord1 | 0 | 1 | 70 |
-| zwo file format | 0 | 1 | 34 |
+| fit file generator | 0 | 2 | 81 |
+| keyord1 | 0 | 1 | 85 |
 
 ## AI answer-engine visibility (GEO end-goal)
 
 | Provider | Date | Mentions | Rate | Cited | Top competitors |
 | --- | --- | --- | --- | --- | --- |
-| perplexity | 2026-08-10 | 0/5 | 0 | 0 | fit-file-parser (1), Garmin FIT SDK (1), python-fitparse (1) |
+| perplexity | 2026-08-31 | 1/5 | 0.2 | 0 | fit-file-parser (1), Garmin FIT SDK (1) |
 
 ## Directory / entity presence (GEO substrate)
 
