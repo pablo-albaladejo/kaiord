@@ -1,0 +1,166 @@
+{
+  "entry": {
+    "date": "2026-08-24",
+    "source": "ai-visibility",
+    "provider": "perplexity",
+    "questions": 5,
+    "kaiordMentions": 1,
+    "mentionRate": 0.2,
+    "citedCount": 0,
+    "topCompetitors": [
+      {
+        "name": "Garmin FIT SDK",
+        "count": 1
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": "convert-fit",
+      "q": "What tools can convert FIT files to TCX or ZWO?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Several tools can convert **FIT to TCX**, and a few also handle **ZWO** output for workout platforms like Zwift.[1][2][4]\n\nFor **FIT → TCX**, the clearest options in the results are:\n\n- **FIT File Tools** — converts FIT to **TCX** (also GPX, JSON, CSV).[1][11]\n- **Sport Calculator FIT to TCX** — browser-based FIT to **TCX** converter.[2]\n- **raacon FIT to TCX** — browser-based converter preserving common activity fields.[3]\n- **Tigge/FIT-to-TCX** — command-line tool that converts FIT files to **TCX**.[4][18]\n- **FitFileLab** — converts between GPX, FIT, and **TCX**.[8]\n- **FitConvert** — converts between FIT, TCX, GPX, and CSV.[13][16]\n- **AI Training Plan FIT File Converter** — converts FIT to **TCX** (and GPX/CSV).[9][10][17]\n- **Neverchill FIT converter** — converts FIT, GPX, and TCX in the browser.[14]\n- **TCX Converter** — desktop tool that can load FIT and export to **TCX**.[20]\n\nFor **FIT → ZWO**, the search results point to **Sport Calculator’s FITZWO** feature, which says it can convert *power-based FIT files to Zwift ZWO workouts*.[2]\n\nIf you want, I can also narrow this down to:\n- the **best free online** option,\n- the **best offline/desktop** option, or\n- tools that preserve **heart rate, cadence, power, and laps** most reliably.",
+      "citations": [
+        "https://www.fitfiletools.com/convert",
+        "https://sport-calculator.com/converters/fit-to-tcx",
+        "https://raacon.no/tools/fit-to-tcx",
+        "https://github.com/Tigge/FIT-to-TCX",
+        "https://numcal.com/fit/fit-to-tcx",
+        "https://numcal.com/fit",
+        "https://github.com/imgrant/fit2tcx",
+        "https://www.fitfilelab.com/",
+        "https://aitrainingplan.app/en/tools/fit-files/",
+        "https://aitrainingplan.app/en/tools/fit-files/fit-to-tcx/",
+        "https://www.fitfiletools.com/",
+        "https://www.101convert.com/convert/fit-to-tcx",
+        "https://www.fitconvert.to/",
+        "https://neverchill.com/tools/fit-converter",
+        "https://aitrainingplan.app/fr/tools/fichiers-fit/convertir-fit-en-tcx/",
+        "https://www.fitconvert.to/articles/how-to-convert-fit-to-tcx",
+        "https://aitrainingplan.app/en/tools/fit-files/fit-file-converter/",
+        "https://github.com/Tigge/FIT-to-TCX/blob/main/README.md",
+        "https://gotoes.org/strava/Combine_GPX_TCX_FIT_Files.php",
+        "https://tcx-converter.software.informer.com/2.0/"
+      ]
+    },
+    {
+      "id": "mcp-workout",
+      "q": "Is there an MCP server for workout files?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Yes — there are several MCP servers for **workout files** and workout data, depending on what you mean by “workout files.” For example, some servers can read or expose **FIT/GPX/TCX activity files** from Garmin/fitness platforms, while others focus on structured workout planning and history rather than raw files.[20][8][1]\n\nA few relevant options:\n\n- **Garmin Health MCP Server**: exposes activity data and an `get_activity_file` tool for workout/activity files such as **FIT/GPX/TCX**.[20]\n- **Shape Calendar Workout MCP Server**: focused on planned/completed workouts and training-load trends, explicitly *not* raw FIT files.[1]\n- **Garmin Connect MCP / Garmin MCP**: connects to Garmin Connect and exposes workouts and other fitness data.[7][13][17]\n- **Hevy MCP Server**: connects to Hevy workout data and provides workout history and progress tools.[5]\n- **fitMCP**: a multi-platform fitness MCP server that can ingest data from Garmin Connect, Strava, Google Fit, and Suunto.[8]\n\nIf you mean **raw workout files** specifically, the closest match in the results is the Garmin Health MCP Server with file access.[20] If you mean **a server that understands workouts as structured training sessions**, Shape Calendar and the Garmin workout-focused servers are better fits.[1][6][12]\n\nIf you want, I can narrow this down to:\n- **Garmin only**\n- **FIT file support**\n- **local/self-hosted only**\n- **Claude Desktop setup**",
+      "citations": [
+        "https://shapecalendar.com/workout-mcp-server",
+        "https://eddmann.com/posts/running-mcps-everywhere-chatting-with-my-workouts/",
+        "https://mcpservers.org/servers/khaoss85/arvo-mcp",
+        "https://lobehub.com/mcp/maphilipps-myhealth-mcp",
+        "https://www.npmjs.com/package/@vreippainen/hevy-mcp-server",
+        "https://mcpmarket.com/server/garmin-workouts",
+        "https://github.com/taxuspt/garmin_mcp",
+        "https://glama.ai/mcp/servers/gzarog/fitMCP",
+        "https://conare.ai/marketplace/mcp/garmin-workouts",
+        "https://www.reddit.com/r/mcp/comments/1uy2nu0/showcase_i_put_an_mcp_server_on_my_ios_workout/",
+        "https://mcpservers.org/servers/leewnsdud/garmin-connect-mcp",
+        "https://mcpservers.org/servers/charlesfrisbee/garmin-workouts-mcp",
+        "https://github.com/Taxuspt/garmin_mcp",
+        "https://github.com/cygnusb/coros-mcp",
+        "https://mcpmarket.com/server/garmin-workouts-1",
+        "https://glama.ai/mcp/servers/st3v/garmin-workouts-mcp",
+        "https://mcpcursor.com/server/garmin-connect-mcp",
+        "https://vibehackers.io/mcp/garmin-workouts-mcp",
+        "https://aiendurance.com/docs/mcp",
+        "https://deepwiki.com/eversonl/garmin-health-mcp-server/1-overview"
+      ]
+    },
+    {
+      "id": "ts-fit-lib",
+      "q": "What open-source library parses Garmin FIT files in TypeScript?",
+      "kaiordMentioned": true,
+      "kaiordCited": false,
+      "competitorsMentioned": [
+        "Garmin FIT SDK"
+      ],
+      "answer": "An open-source TypeScript library that parses Garmin **FIT** files is **`@samijaber/fit-sdk`**, an unofficial TypeScript implementation of Garmin’s FIT file protocol.[1]\n\nIf you want the **official** Garmin JavaScript option, Garmin also publishes **`@garmin/fitsdk`**, which uses ECMAScript modules and supports Node.js and browsers.[3][10]\n\nA third open-source option mentioned in the results is **`fit-decoder`**, a small zero-dependency JavaScript library for parsing `.FIT` files, though the result does not clearly show a TypeScript codebase.[9]",
+      "citations": [
+        "https://github.com/samijaber/fit-sdk",
+        "https://libraries.io/npm/@kaiord%2Fgarmin-connect",
+        "https://github.com/garmin/fit-javascript-sdk",
+        "https://apis.io/apis/garmin/garmin-fit-sdk/",
+        "https://ithub.global.ssl.fastly.net/topics/fit-file",
+        "https://github.com/garmin/fit-python-sdk",
+        "https://forums.garmin.com/developer/fit-sdk/b/news-announcements/posts/the-fit-c-sdk-is-now-available-from-nuget",
+        "https://github.com/garmin/fit-java-sdk",
+        "https://www.npmjs.com/package/fit-decoder/v/1.0.3",
+        "https://developer.garmin.com/fit/",
+        "https://github.com/muktihari/fit",
+        "https://pkg.go.dev/github.com/wOvAN/go-fit",
+        "https://github.laiyagushi.com/topics/fit",
+        "https://developer.garmin.com/fit/cookbook/developer-data/",
+        "https://github.com/garmin/fit-sdk-tools"
+      ]
+    },
+    {
+      "id": "garmin-connect-sync",
+      "q": "How can I sync workouts from Garmin Connect to other platforms?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "You can **sync Garmin Connect workouts to other platforms** by linking Garmin Connect to a supported partner app, then choosing what data to share. Garmin says its platform syncs with many third-party applications, and for app-specific setup you should usually follow the partner service’s connection steps.[3]\n\nCommon ways to do it:\n\n- **Use Garmin Connect’s connected-app integrations** for services like **TrainingPeaks** and **MyFitnessPal**.[10][18]\n- **Link from the other platform** if that service controls the connection flow; Garmin notes that for many integrations, you should check the third-party’s instructions.[3]\n- **Use a bridge app** such as **Health Sync** or similar tools if you want Garmin data sent to platforms Garmin doesn’t support directly, like Google Fit or Samsung Health; one source notes Garmin does not directly allow syncing *into* Garmin from other apps, and Health Sync can move Garmin data out to other apps.[12][20]\n- **Use platform-specific sync services** like TrainerRoad, Final Surge, or TrainingPeaks, which support two-way or one-way sharing with Garmin Connect depending on the service.[1][14][18]\n\nFor a few common destinations:\n\n- **TrainingPeaks:** Garmin Connect Autosync can send completed activities from Garmin to TrainingPeaks, and planned structured workouts from TrainingPeaks to Garmin.[18]\n- **MyFitnessPal:** Garmin Connect can be linked so calorie and activity data sync between the accounts.[10]\n- **Strava and similar apps:** Garmin Connect typically uploads future activities automatically once the accounts are connected, according to third-party setup guides.[5]\n\nIf your goal is to **move completed workouts out of Garmin Connect**, the most reliable path is usually:\n- open the other platform’s app or website,\n- find **Connections / Connected Apps / Apps & Devices**,\n- choose **Garmin Connect**,\n- sign in and authorize access.[10][14][18]\n\nIf you want, I can give you **step-by-step instructions for a specific platform** like Strava, TrainingPeaks, MyFitnessPal, Zwift, or Google Fit.",
+      "citations": [
+        "https://www.trainerroad.com/activity-sync",
+        "https://support.garmin.com/en-US/?faq=Oyqt6jUjOF8L1Rnuc9Sms8",
+        "https://support.garmin.com/en-US/?faq=8L3Z4gEmTk6sXV7ido1Uz6",
+        "https://www.dcrainmaker.com/2021/06/training-trainerroad-sufferfest.html",
+        "https://www.westwaleschronicle.co.uk/blog/2025/06/30/how-to-sync-garmin-with-strava-myfitnesspal-and-other-apps/",
+        "https://the5krunner.com/2026/03/13/garmin-peloton-sync/",
+        "https://www.reddit.com/r/Garmin/comments/cshxgk/any_strength_apps_that_sync_with_garmin_connect/",
+        "https://support.garmin.com/en-US/?faq=tcCwdhjywt9nIwSdeIlIt9",
+        "https://support.garmin.com/en-US/?faq",
+        "https://support.garmin.com/en-US/?faq=Re90uqqOnh30BtqHQYkoa8",
+        "https://www.garmin.com/en-US/blog/general/pre-made-workouts-from-garmin-connect/",
+        "https://forums.garmin.com/apps-software/mobile-apps-web/f/garmin-connect-web/160201/garmin-connect-sync-to-google-fit-and-samsung-health",
+        "https://apps.apple.com/ca/app/garsync/id6476878854?l=fr-CA",
+        "https://blog.finalsurge.com/now-sync-planned-structured-workouts-to-garmin-connect/",
+        "https://support.garmin.com/en-US/?faq=jnm4aY5LM880wNP6LWm1n8",
+        "https://www.trainerroad.com/forum/t/tr-planned-workouts-to-sync-to-garmin-connect-inside/82934/11",
+        "https://apps.apple.com/jp/app/garsync/id6476878854?l=en-US&platform=ipad",
+        "https://help.trainingpeaks.com/hc/en-us/articles/204070854-How-to-Sync-Garmin-Connect-With-TrainingPeaks",
+        "https://apps.apple.com/us/app/lifttrack-strength-training/id6736655105",
+        "https://play.google.com/store/apps/details?id=nl.appyhapps.healthsync&hl=en_US"
+      ]
+    },
+    {
+      "id": "workout-toolkit",
+      "q": "What is the best open-source toolkit for converting and editing workout files?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "There is **no single clearly dominant open-source toolkit** in the provided results that is dedicated specifically to *both converting and editing workout files*; the strongest fit for workout-file conversion appears to be **Workout Converter** from *What’s on Zwift*, while the strongest fit for *editing/managing workouts* is likely **wger** as a broader open-source workout manager.[1][8]\n\nIf your main need is **file conversion**:\n- **Workout Converter** is the most directly relevant result, since it is explicitly described as a workout file converter.[1]\n- The GitHub topic results also show FIT/TCX conversion tools in the ecosystem, but they are not presented as a single comprehensive toolkit for editing plus conversion.[2][12]\n\nIf your main need is **editing or managing workouts**:\n- **wger** is a free/libre/open-source fitness and workout manager, so it is the closest match for creating and editing workout plans rather than converting file formats.[8]\n- **workout-tracker** and **OpenWorkoutTracker** are also open-source workout apps, but the results do not show them as dedicated file-conversion toolkits.[5][18]\n\nSo, based on the results, the best practical answer is:\n- **Best for conversion:** *Workout Converter*.[1]\n- **Best for editing/workout management:** *wger*.[8]\n\nIf you want, I can also narrow this down by the specific workout file format you use, such as **FIT**, **TCX**, **GPX**, or **ZWIFT** files.",
+      "citations": [
+        "https://whatsonzwift.com/convert/workouts",
+        "https://github.com/topics/workout",
+        "https://github.com/Snouzy/workout-cool",
+        "https://pypi.org/project/llm-data-converter/",
+        "https://github.com/jovandeginste/workout-tracker",
+        "https://liftshift.app/ai/",
+        "https://howtoconvert.co/blog/best-open-source-file-converter-apps",
+        "https://github.com/wger-project/wger",
+        "https://forum.intervals.icu/t/fit-file-forge-free-ai-tool-for-instant-garmin-structured-workouts/118588",
+        "https://github.com/ExerciseDB/exercisedb-api",
+        "https://support.buildship.com/m/1400932499860881428",
+        "https://www.dcrainmaker.com/2014/10/heads-resource-rainmaker.html",
+        "https://www.reddit.com/r/selfhosted/comments/12yipuy/file_converters_do_you_know_of_any_i_can_self/",
+        "https://www.linkedin.com/posts/shubhamsaboo_converting-documents-to-llm-ready-text-used-activity-7281874000769658880-BoAo",
+        "https://github.com/topics/pdf-converter",
+        "https://github.com/topics/document-parsing",
+        "https://github.com/topics/pdf-to-text",
+        "https://github.com/msimms/OpenWorkoutTracker",
+        "https://github.com/topics/document-analysis",
+        "https://pypi.org/project/marker-pdf/"
+      ]
+    }
+  ]
+}
