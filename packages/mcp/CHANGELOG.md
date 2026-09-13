@@ -1,5 +1,13 @@
 # @kaiord/mcp
 
+## 10.2.0
+
+### Patch Changes
+
+- 1da8384: Internal code reduction, no behavior change.
+- Updated dependencies [3b3f6be]
+  - @kaiord/fit@10.2.0
+
 ## 10.1.0
 
 ### Patch Changes
