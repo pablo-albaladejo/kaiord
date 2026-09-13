@@ -3,11 +3,7 @@ import type { LabCheck } from "./lab-extraction-checks";
 import { check, checkRow } from "./lab-extraction-checks";
 import type { LabExpectation } from "./lab-extraction-fixture";
 
-export type {
-  LabCheck,
-  LabDimension,
-  LabExtractionRow,
-} from "./lab-extraction-checks";
+export type { LabCheck } from "./lab-extraction-checks";
 export { DIMENSIONS_PER_ROW } from "./lab-extraction-checks";
 
 /**
