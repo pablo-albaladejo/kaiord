@@ -27,10 +27,10 @@
   "dependencies": {
     "@kaiord/core": "workspace:^",
     "fast-xml-parser": "^5.11.1",
-    "zod": "^4.5.4"
+    "zod": "^4.6.2"
   },
   "devDependencies": {
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.5.1",
     "@vitest/coverage-v8": "^5.0.0",
     "tsdown": "^0.23.0",
     "tsx": "^4.23.13",

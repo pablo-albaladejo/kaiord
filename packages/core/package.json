@@ -34,11 +34,11 @@
   },
   "dependencies": {
     "@noble/hashes": "^2.4.0",
-    "zod": "^4.5.4"
+    "zod": "^4.6.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.5.1",
     "@types/rosie": "^0.0.45",
     "@vitest/coverage-v8": "^5.0.0",
     "rosie": "^2.1.1",
