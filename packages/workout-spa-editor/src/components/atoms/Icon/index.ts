@@ -1,4 +1,3 @@
-export { ALERT_ICON } from "./alert-icon";
 export type { IconColor, IconProps, IconSize } from "./Icon";
 export { Icon } from "./Icon";
 export type { IconName } from "./icon-map";
