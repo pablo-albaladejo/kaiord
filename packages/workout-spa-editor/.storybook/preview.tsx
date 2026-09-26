@@ -24,6 +24,12 @@ const persistence = createAppPersistence(db);
 const cloudSync = createGoogleDriveCloudSync();
 const snapshotPort = createDexieSnapshotPort(db);
 
+// The theme every story renders in. Light unless the build sets
+// STORYBOOK_THEME=dark — the design-sync dark verification pass builds its
+// reference that way. One provider decides it: a nested ThemeProvider would
+// lose, because both apply the theme to <html> and the outer effect runs last.
+const THEME = import.meta.env.STORYBOOK_THEME === "dark" ? "dark" : "light";
+
 const preview: Preview = {
   // Global providers. Without these, any component reaching for theme, copy,
   // units or bridge state renders only if its own story remembers to wrap it —
@@ -47,7 +53,7 @@ const preview: Preview = {
             snapshotPort={snapshotPort}
             deviceId="storybook"
           >
-            <ThemeProvider defaultTheme="light">
+            <ThemeProvider defaultTheme={THEME}>
               <ToastContextProvider>
                 <LocaleProvider>
                   <UnitsProvider>
@@ -73,7 +79,7 @@ const preview: Preview = {
       },
     },
     backgrounds: {
-      default: "light",
+      default: THEME,
       values: [
         {
           name: "light",
