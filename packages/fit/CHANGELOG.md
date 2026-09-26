@@ -1,5 +1,11 @@
 # @kaiord/fit
 
+## 10.2.0
+
+### Patch Changes
+
+- 3b3f6be: Internal code reduction, no behavior change.
+
 ## 10.1.2
 
 ### Patch Changes
