@@ -279,20 +279,17 @@ smaller, and every block-level component looks wider.
   machine-deleted and would shadow the fix. `SectionHead` declares `onAction` the
   same way and happens to render identically only because its visible label is a
   separate prop.
-- **The actions-addon gap was swept across the whole roster — `ErrorMessage` is
-  the only component it can affect.** Eight others declare handlers the same way
-  (`Button.onClick`, `ConfirmationModal.onConfirm/onCancel`,
-  `DurationPicker.onChange`, `RepetitionBlockCard.onEditRepeatCount/onAddStep/
-onUngroup/onDelete`, `SaveErrorDialog.onClose/onRetry`, `SectionHead.onAction`,
-  `StepCard.onSelect`, `StepEditor.onSave/onCancel`), but none gates visible UI
-  on the handler being defined. The single conditional render among them,
-  `SectionHead`, keys off `action !== undefined` — the label prop — and merely
-  wires `onAction` to the resulting button's `onClick`. This matters because
-  `[STORY_CAP]` means a defect could hide in an uncaptured tail story; the sweep
-  covers the source, not just the captured stories. **Re-run the sweep when a new
-  story adds `argTypes: { onX: { action: ... } }`:**
-  `grep -rl "action:" --include="*.stories.tsx" src/components` then check the
-  component for `onX &&` / `onX ?` conditional rendering.
+- **The actions-addon gap affects `ErrorMessage` AND `RepetitionBlockCard`.**
+  The first sweep said ErrorMessage only; it was wrong, because it grepped the
+  component's main file while RepetitionBlockCard gates its trash button, menu
+  and "Add Step" in child files (`RepetitionBlockHeaderRight.tsx`,
+  `RepetitionBlockSteps.tsx`). Both now have owned previews that synthesise
+  `() => undefined` for every `argTypes.<prop>.action` left undefined. StepCard
+  also gates `onCopy`/`onDuplicate`/`onDelete`, but its stories declare only
+  `onSelect` as an action, so neither side renders those buttons: consistent.
+  **Re-run the sweep across the whole component directory, not one file:**
+  for each `*.stories.tsx` with `action: "`, grep its directory's `*.tsx` for
+  `{onX &&` / `{onX ?` and keep only the props the stories declare as actions.
 - **`AiWorkoutInput`'s Ready/InProgress/Failed stories need an owned preview.**
   Their provider/runtime state is seeded by a story decorator, which the card
   harness ignores, so every preview shows the "no provider" state while
@@ -638,6 +635,25 @@ body.padding=0`). A plain `100vh` frame is right for centred dialogs, but
 - **Content-box measurements miss pale fills** (disabled buttons, the neutral
   Pill, the off Toggle). A width delta from a measurement is not evidence: crop
   both raws and look at them side by side.
+
+- **Tall components clip at the default 900x700 capture.** Storybook crops at
+  full content height, and the card stops at the fold. Viewports are sized from
+  the storybook PNG heights plus 48px of padding: ZoneEditor and
+  ScratchEditorSurface `900x1600`, WorkoutList `900x800`, StepEditor `900x760`.
+  ScratchEditorSurface's Long Swimming story is 3401px and stays clipped on
+  purpose; a card that tall is useless in the picker.
+- **A scoped `compare.mjs` without `--max-stories` recaptures only the first 6
+  stories**, and the tail keeps stale PNGs from the previous run. When fixing a
+  component, pass its story count (RepetitionBlockCard's fixed tail looked
+  broken until re-run with `--max-stories 9`).
+- **ZoneDist and ZoneProfileBar stories are now `layout: "padded"`.** Their
+  roots are width-less flex rows, and `centered` shrank them to 0px in the
+  reference (the per-component ZoneDist finding above). They are now
+  image-comparable.
+- **Replaying `play` on plain inputs:** focus the element, set the value with
+  `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set`,
+  then dispatch a bubbling `input` event. React picks it up, and the focus ring
+  matches the reference.
 
 ## BottomNav stories rewritten (2026-09-26)
 

@@ -47,7 +47,8 @@
       "skip": ["organisms-workoutstats--no-workout"]
     },
     "WorkoutList": {
-      "skip": ["organisms-workoutlist--empty-workout"]
+      "skip": ["organisms-workoutlist--empty-workout"],
+      "viewport": "900x800"
     },
     "ZoneDist": {
       "skip": ["molecules-zonedist--zone-1-only"]
@@ -77,7 +78,8 @@
       "skip": ["molecules-scheduledatedialog--closed"]
     },
     "StepEditor": {
-      "skip": ["organisms-stepeditor--no-step"]
+      "skip": ["organisms-stepeditor--no-step"],
+      "viewport": "900x760"
     },
     "StorageAvailabilityBanner": {
       "skip": [
@@ -132,6 +134,12 @@
     "ZonesConflictDialog": {
       "cardMode": "single",
       "primaryStory": "ScalarConflicts"
+    },
+    "ZoneEditor": {
+      "viewport": "900x1600"
+    },
+    "ScratchEditorSurface": {
+      "viewport": "900x1600"
     }
   },
   "buildCmd": "pnpm -F \"@kaiord/workout-spa-editor^...\" build && node .design-sync/gen-entry.mjs && node .design-sync/gen-i18n-resources.mjs && node .design-sync/build-css.mjs"
