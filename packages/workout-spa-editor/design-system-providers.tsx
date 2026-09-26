@@ -29,12 +29,18 @@ import { LocaleProvider } from "./src/i18n/LocaleProvider";
 
 export const DesignSystemProviders = ({
   children,
+  path = "/",
 }: {
   children: ReactNode;
+  // The route the card starts on. Components whose active state follows the
+  // route (the nav bars) need it set from here: a preview that brings its own
+  // wouter `Router` gets a second copy of wouter, which the component never
+  // reads, so every route renders identically.
+  path?: string;
 }) => {
   // Navigation stays inside the card rather than moving the host frame. Built
   // on first render, not at module scope, so importing the bundle is inert.
-  const { hook } = useMemo(() => memoryLocation({ path: "/" }), []);
+  const { hook } = useMemo(() => memoryLocation({ path }), [path]);
   return (
     <ThemeProvider defaultTheme="light">
       <ToastContextProvider>

@@ -56,6 +56,74 @@
     },
     "ZoneDist": {
       "skip": ["molecules-zonedist--zone-1-only"]
+    },
+    "AutoMatchBanner": {
+      "skip": ["organisms-automatchbanner--no-suggestions"]
+    },
+    "BatchProcessingBanner": {
+      "skip": ["molecules-batchprocessingbanner--nothing-to-process"]
+    },
+    "ChatFab": {
+      "skip": [
+        "molecules-chatfab--hidden-on-chat-route",
+        "molecules-chatfab--hidden-on-chat-thread-route"
+      ]
+    },
+    "CreateRepetitionBlockButton": {
+      "skip": ["molecules-createrepetitionblockbutton--below-threshold"]
+    },
+    "EditorStateRibbon": {
+      "skip": ["organisms-editorstateribbon--already-pushed-renders-nothing"]
+    },
+    "ScheduleDateDialog": {
+      "cardMode": "single",
+      "skip": ["molecules-scheduledatedialog--closed"]
+    },
+    "StepEditor": {
+      "skip": ["organisms-stepeditor--no-step"]
+    },
+    "StorageAvailabilityBanner": {
+      "skip": [
+        "molecules-storageavailabilitybanner--checking",
+        "molecules-storageavailabilitybanner--ok"
+      ]
+    },
+    "WeekStatusBar": {
+      "skip": ["molecules-weekstatusbar--silent-week"]
+    },
+    "WorkoutPreview": {
+      "skip": ["molecules-workoutpreview--empty-workout"]
+    },
+    "ZoneProfileBar": {
+      "skip": ["molecules-zoneprofilebar--no-structure-yet"]
+    },
+    "AddEntryChooser": {
+      "cardMode": "single"
+    },
+    "BatchCostConfirmation": {
+      "cardMode": "single"
+    },
+    "CommandPalette": {
+      "cardMode": "single"
+    },
+    "ExecutedActivityDialog": {
+      "cardMode": "single"
+    },
+    "GoalSetupDialog": {
+      "cardMode": "single"
+    },
+    "RawWorkoutDialog": {
+      "cardMode": "single"
+    },
+    "ShortcutSheet": {
+      "cardMode": "single"
+    },
+    "Toast": {
+      "cardMode": "single",
+      "primaryStory": "Stack"
+    },
+    "WellnessEntryDialog": {
+      "cardMode": "single"
     }
   },
   "buildCmd": "pnpm -F \"@kaiord/workout-spa-editor^...\" build && node .design-sync/gen-entry.mjs && node .design-sync/gen-i18n-resources.mjs && node .design-sync/build-css.mjs"

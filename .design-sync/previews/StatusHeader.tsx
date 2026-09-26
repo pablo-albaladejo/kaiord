@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
 import { StatusHeader } from "../../packages/workout-spa-editor/src/components/molecules/StatusHeader/StatusHeader";
 import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
@@ -11,15 +13,29 @@ import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src
 // the honest state: no active profile, every source healthy, no pill —
 // "silence when all is well" applies to the header too.
 //
-// The four original stories differ only by which route is active, which comes
-// from a `parameters.route` value a global Storybook decorator interprets.
-// The card harness runs no decorators, so they would render identically here;
-// one is kept.
+// The four stories differ only by which route is active. The route has to be
+// set through the bundle's own `DesignSystemProviders`: importing wouter here
+// would bring a second copy of it, which StatusHeader never reads, and all four
+// cards would show the same tab. It is read off the global rather than imported
+// for the same reason — an import would compile a second copy into this file.
+
+type Providers = (props: { path: string; children: ReactNode }) => ReactNode;
+const Providers: Providers = (props) => {
+  const { DesignSystemProviders } = (window as any).KaiordDesignSystem;
+  return <DesignSystemProviders {...props} />;
+};
 
 const persistence = createInMemoryPersistence();
 
-export const Default = () => (
-  <PersistenceProvider persistence={persistence}>
-    <StatusHeader />
-  </PersistenceProvider>
+const onRoute = (path: string) => () => (
+  <Providers path={path}>
+    <PersistenceProvider persistence={persistence}>
+      <StatusHeader />
+    </PersistenceProvider>
+  </Providers>
 );
+
+export const DailyActive = onRoute("/daily");
+export const CalendarActive = onRoute("/calendar");
+export const LibraryActive = onRoute("/library");
+export const TrendsActive = onRoute("/health");

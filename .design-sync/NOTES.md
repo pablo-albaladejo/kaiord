@@ -479,3 +479,57 @@ there is no port to inject.
 Showing it requires seeding a real active profile into the card origin's
 IndexedDB — a write no other preview performs. Left out of the design system
 instead: an absent component is honest, a blank card is a dead end.
+
+## Overlays read as "did not render" to the comparer (wave 3)
+
+The first full compare reported 53 `sb-error` over 20 components. Two causes,
+neither of them a broken story:
+
+- **40 stories in 11 overlay components** (AddEntryChooser, BatchCostConfirmation,
+  CommandPalette, ConfirmationModal, ExecutedActivityDialog, GoalSetupDialog,
+  RawWorkoutDialog, ScheduleDateDialog, ShortcutSheet, Toast,
+  WellnessEntryDialog). Radix portals into `document.body` and leaves
+  `#storybook-root` empty; the comparer waits for a visible root child and
+  calls its absence `sb-error`. Fixed in `.storybook-ds/preview.tsx` with an
+  anchor, not with `skip` — skipping would have removed every dialog from the
+  design system. Three details, each of which broke the first attempt:
+  - Playwright's `waitForSelector` checks only the **first** match. Toast's
+    first root child is a 0-px-tall viewport wrapper, so the anchor must come
+    **first**, not last.
+  - The comparer screenshots the **root**, not the page. Under
+    `layout: centered` the empty root is a padded square, so the anchor
+    stretches the root over the viewport while nothing else paints in it.
+  - "Paints" means **any descendant**: Tooltip's outer node is a
+    `display: contents` span with no box while its trigger paints; checking only
+    direct children blew Tooltip up to the full viewport.
+    Verified by replaying the comparer's capture at its viewport: 53/53 overlay
+    stories now capture the overlay, 268/268 stories that already captured keep
+    identical dimensions, 0 new failures. The overlays also get
+    `cardMode: "single"` so an open dialog does not paint over sibling cells.
+- **14 stories that return `null` by contract** (the "silence when all is well"
+  states: `NoSuggestions`, `NothingToProcess`, ChatFab's hidden routes,
+  `BelowThreshold`, `AlreadyPushedRendersNothing`, ScheduleDateDialog `Closed`,
+  StepEditor `NoStep`, StorageAvailabilityBanner `Checking`/`Ok`, `SilentWeek`,
+  `EmptyWorkout`, `NoStructureYet`). Each was checked against its story doc or
+  a `return null` in the component. These are `skip`ped: a blank card tells the
+  design agent nothing.
+
+Also found by the same compare, both in owned previews an earlier agent wrote:
+
+- `BatchProcessingBanner.tsx` dropped `SingleRawWorkout` claiming it rendered
+  nothing. It paints (the singular copy branch); restored.
+- `Toast.tsx` exported only `Default`, so none of the five stories could pair
+  once the portal issue was gone. Now one export per story plus `Stack`, the
+  card's `primaryStory`.
+- `StatusHeader` and `BottomNav` collapsed or duplicated their route variants
+  because a preview-level wouter `Router` is a second copy of wouter the
+  component never reads. `DesignSystemProviders` now takes a `path` prop, and
+  both previews read it off `window.KaiordDesignSystem` rather than importing it
+  (an import compiles a second copy again). This is aimed at the "top action
+  for the next sync" in the triage table above, but it only runs in the card
+  harness and is **not yet verified**: the next compare must show the route
+  variants of both components rendering different active tabs.
+
+Still to do on the next run: the driver compares only the first 6 stories of a
+component (`[STORY_CAP]` — Badge 15, Button 14); pass `--max-stories` high
+enough to cover all of them before grading.
