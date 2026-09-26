@@ -30,6 +30,12 @@ distance or duration, or reflects device state.
 root element. To show a dark design, pass `defaultTheme="dark"` — do not
 hand-write dark colors.
 
+**Always paint the page yourself** with a root `bg-surface-page min-h-screen`
+wrapper, as in the example below. Many components have no background of their
+own (brand mark, metrics, section heads, step lists, badges, pills, tooltips),
+so their light-on-dark text only reads when the page under them is dark. Do not
+rely on the host page's background.
+
 ## The styling idiom: Tailwind v4 utilities over semantic roles
 
 This is a Tailwind v4 system, but **the color scale is semantic, not raw**.

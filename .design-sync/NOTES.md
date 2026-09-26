@@ -221,13 +221,19 @@ smaller, and every block-level component looks wider.
   three stories are a closed Radix accordion by design (the story's own doc
   comments say so). The variants differ only in `useAiRuntimeStore` state, which
   has no visual effect while collapsed; storybook renders them identically too.
-- **`[RENDER_THIN]` BottomNav "variants render identically" — triaged, still open.**
-  The nav DOES render now (`viewport: "390x700"`), but the three stories capture
-  byte-identically because the active tab comes from wouter's `useLocation` and
-  the story's `Router` decorator lands in a second copy of wouter. See the
-  per-component finding below; the knob is `cfg.extraEntries` +
-  `cfg.storyImports.shim` for `wouter`. **This is the top action for the next
-  sync.**
+- **`[RENDER_THIN]` BottomNav — resolved, no longer fires.** The rewritten
+  stories and the owned preview route through `DesignSystemProviders`' `path`,
+  so each variant highlights a different tab.
+- **`[RENDER_THIN]` ImportDropzoneOverlay "variants render identically" —
+  legitimate.** Storybook's two stories capture byte-identically too; they differ
+  only in the import entry point, which has no visual.
+- **`[RENDER_THIN]` SwimmingStepEditor and AiWorkoutInput "variants render
+  identically" — false positive.** The check compares text content, and every
+  variant carries the same `<select>` option lists; the variants differ in the
+  selected value and in store state. Their per-story captures differ and every
+  story grades `match`.
+- **`[RENDER_THIN]` WorkoutPreview "paint nothing" — false positive.** It is a
+  text-less SVG bar chart, the same blind spot as BrandMark below.
 - **`[RENDER_THIN]` AiSuccessActions and CreateWorkoutCta "variants render
   identically" — legitimate.** Storybook renders their stories identically too:
   AiSuccessActions' variants differ only in runtime state, CreateWorkoutCta's only
@@ -330,7 +336,7 @@ verified. Two are mechanical, the third is the one that would waste the other tw
    current component first — otherwise the other two fixes buy a verified render
    of the wrong intent.
 
-## The dark theme is NOT verified
+## The dark theme was NOT verified (resolved — see "Dark verification pass")
 
 Both outermost providers pin `light` — the storybook decorator by design, and
 `cfg.provider` to match it — so **no `dark:` utility activates anywhere in this
@@ -670,3 +676,64 @@ The theme is now a parameter on both sides, and light stays the default:
 runs in its own worktree so its grades do not overwrite the light ones in
 `.design-sync/.cache/compare/`. The uploaded bundle is the same for both, because
 the theme is a runtime prop.
+
+**Result (2026-09-26): 83 components, 386 stories, all `match`.** No
+card-vs-storybook difference exists in dark. The three owned previews that nest
+their own `DesignSystemProviders` (StatusHeader, BottomNav, ChatFab) render dark
+too: the nested light provider does not win.
+
+How to rerun it:
+
+- The dark worktree needs its OWN copy of `.ds-sync/`, not a symlink to the
+  light one. In that copy, drop `background:#fff` from the two `body{...}` rules
+  in `lib/emit.mjs`. The harness hard-codes a white page, and a white page is not
+  framing in dark. It hides the app's own `body` rule
+  (`dark:bg-slate-900` = #0f172a, the same color as storybook's dark backdrop).
+  That makes every transparent component look broken. The first dark capture
+  graded StatusHeader against a white page for exactly this reason. Keep the
+  light copy untouched, because the light grades were taken with it.
+- In dark, a light page around a card IS a finding, because it means the class
+  never reached `<html>`.
+
+What the pass found on BOTH sides. These are palette debts in the app itself, not
+sync defects. They are listed so nobody re-hunts them as preview bugs:
+
+- **Two dark ramps are mixed.** Dialog, input and toolbar surfaces are slate
+  (#1e293b/#334155) on a slate-900 page. Cards, panels, CommandPalette and
+  ShortcutSheet are neutral near-black (#171717/#1a1a1a/#262626). The seam shows
+  wherever both meet, for example StepEditor, WorkoutMetadataEditor, PushButton
+  and ExportFormatSelector.
+- **The primary button is weak in dark.** It is charcoal on slate, and reads as
+  secondary next to an outlined Cancel.
+- **Disabled primaries use the light style.** A light-grey fill with a dim label
+  looks brighter than the enabled button (GoalSetupDialog, WellnessEntryDialog
+  Saving, ZoneEditor, CreateRepetitionBlockButton, ScratchEditorSurface).
+- **Hue carries no meaning.**
+  - StatusHeader's active tab looks the same as the inactive ones.
+  - Badge intensities all render the same charcoal pill.
+  - MatchedSessionCard's compliance pill is always grey.
+  - SelectionIndicator's check is grey.
+  - BatchProcessingBanner's warning icon has no amber.
+  - Toast success, warning and info differ only by icon.
+- **Low-contrast details:**
+  - StepCard/StepList "Step N" titles.
+  - AutoMatchBanner's "view all (5)" link.
+  - WeekStatusBar's done segment.
+  - EditorContextMenu's dashed border.
+  - Icon/In Buttons shows a white "Save" button with a white icon.
+- **Many components paint no background of their own:**
+  - BrandMark, AttentionMark, Metric, SectionHead, ReadinessRing.
+  - StepList and the pickers.
+  - WorkoutStats, WorkoutPreview, EmptyWorkoutState.
+  - Tooltip's trigger, Badge, Pill, tertiary Button.
+
+  In dark they read only because the page is dark, which is why `conventions.md`
+  tells designs to paint `bg-surface-page` themselves.
+
+Story or data quirks the pass also noticed (not dark-specific):
+
+- AiWorkoutInput shows "Team Claude ()".
+- The AiBanner pending and success stories look the same as closed.
+- CoachingSidebar markup runs words together.
+- RepetitionBlockCard "Without Delete" still shows the trash icon (the actions
+  addon, see above).
