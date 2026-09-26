@@ -85,6 +85,7 @@ export { StorageAvailabilityBanner } from "./src/components/molecules/StorageAva
 export { SummaryStrip } from "./src/components/molecules/SummaryStrip/SummaryStrip";
 export { SwimmingStepEditor } from "./src/components/molecules/SwimmingStepEditor/SwimmingStepEditor";
 export { TargetPicker } from "./src/components/molecules/TargetPicker/TargetPicker";
+export { TrainingPeaksPushButton } from "./src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton";
 export { UndoRedoButtons } from "./src/components/molecules/UndoRedoButtons/UndoRedoButtons";
 export { WeekStatusBar } from "./src/components/molecules/WeekStatusBar/WeekStatusBar";
 export { WellnessEntryDialog } from "./src/components/molecules/WellnessEntryDialog/WellnessEntryDialog";
@@ -214,5 +215,6 @@ export { LocaleProvider } from "./src/i18n/LocaleProvider";
 export { DesignSystemProviders } from "./design-system-providers";
 export { ToastProvider } from "./src/components/atoms/Toast/ToastProvider";
 export { useWorkoutStore } from "./src/store/workout-store";
+export { useAiRuntimeStore } from "./src/store/ai-runtime-store";
 export { createInMemoryPersistence } from "./src/test-utils/in-memory-persistence";
 export { useGarminBridge } from "./src/contexts/garmin-bridge-context";

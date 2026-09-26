@@ -228,6 +228,14 @@ smaller, and every block-level component looks wider.
   per-component finding below; the knob is `cfg.extraEntries` +
   `cfg.storyImports.shim` for `wouter`. **This is the top action for the next
   sync.**
+- **`[RENDER_THIN]` AiSuccessActions and CreateWorkoutCta "variants render
+  identically" — legitimate.** Storybook renders their stories identically too:
+  AiSuccessActions' variants differ only in runtime state, CreateWorkoutCta's only
+  in navigation target.
+- **`[RENDER_THIN]` BrandMark and SelectionIndicator "paint nothing" — false
+  positive.** Both paint a small SVG (the glyph, the checkmark) that the paint
+  check does not see. SelectionIndicator's grey tile in storybook is a story
+  decorator, which the card harness ignores by design.
 - **`[REFERENCE_STALE?]` on scoped compare runs.** Fires when the bundle changed
   but `sb-reference` did not. Check whether any DS _source_ moved
   (`git status -- packages/workout-spa-editor/src styles/`): converter-input
@@ -285,6 +293,12 @@ onUngroup/onDelete`, `SaveErrorDialog.onClose/onRetry`, `SectionHead.onAction`,
   story adds `argTypes: { onX: { action: ... } }`:**
   `grep -rl "action:" --include="*.stories.tsx" src/components` then check the
   component for `onX &&` / `onX ?` conditional rendering.
+- **`AiWorkoutInput`'s Ready/InProgress/Failed stories need an owned preview.**
+  Their provider/runtime state is seeded by a story decorator, which the card
+  harness ignores, so every preview shows the "no provider" state while
+  storybook shows the form.
+- **`ConfirmationModal` `Closed` is skipped** — `open=false`, blank on both sides
+  by contract, like the other null-render stories.
 - Skipped as `sb-error` (they do not render in the repo's own storybook):
   `ConfirmationModal` ×6 (Radix portals outside `#storybook-root`, so the
   reference measures an empty root — the component is fine; only `Interactive`,
@@ -338,6 +352,15 @@ treat dark-mode fidelity as unknown rather than good.
   contexts or locale files are added or renamed** — `buildCmd` does it, but a bare
   `package-build.mjs` run does not. A component missing from the barrel is
   missing from every synced design, silently.
+- **On a fresh worktree, run the full `buildCmd` before the driver — from the
+  repo root, not the package.** `resync.mjs` does not run `buildCmd`, and
+  `package-build.mjs` silently skips a missing `cfg.cssEntry` (it prints one
+  `! cssEntry ... not found — skipped` line and carries on). The result is a
+  2.1 KB uplot-only `_ds_bundle.css` and every preview unstyled, while the driver
+  and `package-validate` both stay green. Wave-1 grading of 21 components was
+  thrown away on 2026-09-26 for exactly this. Check before grading:
+  `packages/workout-spa-editor/.design-sync-styles.css` exists (~116 KB) and
+  `ds-bundle/_ds_bundle.css` is well over 100 KB.
 - **`.design-sync/tsconfig.paths.json` must stay comment-free** (the converter's
   parser breaks on `/*` inside strings — see above). Adding a comment there
   silently disables `@/*` resolution.
@@ -544,3 +567,90 @@ A review of the anchor raised three more points; two are fixed, one accepted:
 Still to do on the next run: the driver compares only the first 6 stories of a
 component (`[STORY_CAP]` — Badge 15, Button 14); pass `--max-stories` high
 enough to cover all of them before grading.
+
+## Fixed-position components and Radix timing (wave 4, 2026-09-26)
+
+Grading after the CSS fix found three repeatable causes. None is a defect in a
+component.
+
+- **In-place `position: fixed` collapses in the card.** The harness wraps every
+  story in `.ds-single` / `.ds-cell` with `transform: translateZ(0)`
+  (`.ds-sync/lib/emit.mjs`), which makes that wrapper the containing block for
+  `fixed`. A component that renders `fixed inset-0` in place instead of
+  portaling to `document.body` resolves against a wrapper with no in-flow
+  height, and clips above y=0. Hit Toast (Radix Toast viewport),
+  CreateRepetitionBlockDialog, ZonesConflictDialog and ChatFab. It is the same
+  mechanism as the SaveErrorDialog finding above. There is no config knob, and
+  patching `emit.mjs` would be lost at the next re-stage. The fix is an owned
+  preview that wraps the story in `<div style={{ height: "100vh" }}>`, which
+  gives the component the viewport-sized containing block the app gives it.
+  This is the one case where a per-component owned preview for a shared cause is
+  right: the generator will never fix it, so the preview shadows nothing.
+  `cardMode: "single"` alone does not help, because `.ds-single` has the same
+  transform.
+- **Replaying a `play` from a one-shot mount effect races Radix.** Dialog content
+  mounts through `Presence` after the parent's effect has run, so
+  `querySelector` finds nothing and the preview shows the empty state.
+  Hit WellnessEntryDialog (Filled, Saving) and GoalSetupDialog (With Preview,
+  Cap Warning). Poll once per `requestAnimationFrame`, bounded, until the target
+  exists (`whenFormReady` in `WellnessEntryDialog.tsx`).
+- **Store state seeded by a story decorator never reaches the card.** CommandPalette
+  seeds `useWorkoutStore.setState(...)` and AiWorkoutInput seeds its provider and
+  runtime state in decorators. Seed them per export in an owned preview, and reset
+  the state for exports that expect it empty, since exports share one store.
+- **The storybook reference cannot photograph a `fixed` component inside a
+  `relative` frame.** The story root crop excludes it (BottomNav's reference
+  was an empty navy box). The stories now put `transform: translateZ(0)` on the
+  frame so the nav is contained in the crop.
+- **Reading the sheet:** the sheet scales the preview column down, so size
+  differences there are not defects. Tiny components (BrandMark,
+  SelectionIndicator) need the raw PNGs cropped to the bounding box and zoomed.
+  Grade overlay text, not only the frame: seeded-state misses (CommandPalette)
+  show only in the row text.
+- **Legitimate identical variants:** Tooltip's five stories differ only in
+  side/align while the bubble is closed, so they look identical on both sides.
+  Forcing it open would fabricate a state the stories do not show.
+- **StatusHeader's active tab is invisible in both captures, and that is the
+  component's style, not a routing miss.** A DOM probe of the cards shows
+  `aria-current="page"` on Daily, Calendar, Library and Trends respectively. The
+  active style is only `text-accent`, and `--accent` resolves to `--control`,
+  which is close to the label colour. Graded `close`.
+
+- **Height of the viewport frame.** `?story=` captures keep the harness's 24px
+  body padding, and the product card has none (`emit.mjs`: `if(!q)
+body.padding=0`). A plain `100vh` frame is right for centred dialogs, but
+  puts edge-anchored content 24px low in the capture. Toast uses
+  `calc(100vh - <body paddingTop>px)`, read at render, which is exact in both.
+  ChatFab keeps plain `100vh` and sits 24px inside its corner in the graded
+  shot. That is capture framing: never add a negative margin to compensate,
+  because it would break the product card.
+- **A module singleton imported by relative path from an owned preview is a
+  second copy.** It contradicts the comment in `gen-entry.mjs`: seeding
+  `useWorkoutStore` through a relative import left CommandPalette on the
+  empty-editor state. Read stores off `window.KaiordDesignSystem` (type-only
+  import for the type), and export each one from the barrel's extras
+  (`useWorkoutStore`, `useAiRuntimeStore`). ScratchEditorSurface.tsx and
+  ImportDropzoneOverlay.tsx still import the store by path; ImportDropzoneOverlay
+  grades `match` regardless, because its seed is only a reset.
+- **`layout: "centered"` shrink-wraps the storybook side only.** Input, Icon's
+  grid, ThemeToggle `In Header`, BackButton `In Header` and CardShell are
+  full-width in the card. That is framing, not a defect.
+- **Content-box measurements miss pale fills** (disabled buttons, the neutral
+  Pill, the off Toggle). A width delta from a measurement is not evidence: crop
+  both raws and look at them side by side.
+
+## BottomNav stories rewritten (2026-09-26)
+
+The stale-stories section above is resolved. The stories now cover the shipped
+five tabs (Daily, Calendar, Library, Nutrition, Athlete) through the global
+`parameters.route`, and the frame is a containing block for the fixed nav. The
+owned preview mirrors them export for export.
+
+## Dark verification pass
+
+The theme is now a parameter on both sides, and light stays the default:
+`STORYBOOK_THEME=dark` at `storybook build` time, and
+`cfg.provider.props.theme: "dark"` for `DesignSystemProviders`. The dark pass
+runs in its own worktree so its grades do not overwrite the light ones in
+`.design-sync/.cache/compare/`. The uploaded bundle is the same for both, because
+the theme is a runtime prop.

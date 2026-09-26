@@ -56,12 +56,36 @@ function setNativeValue(input: HTMLInputElement, value: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-function fillByLabel(labelText: string, value: string) {
+function findInput(labelText: string): HTMLInputElement | null {
   const label = Array.from(document.querySelectorAll("label")).find(
     (el) => el.textContent?.trim() === labelText
   );
   const input = label?.control;
-  if (input instanceof HTMLInputElement) setNativeValue(input, value);
+  return input instanceof HTMLInputElement ? input : null;
+}
+
+/**
+ * The dialog content mounts through a Radix portal after the parent's effect
+ * has run, and the start-weight baseline resolves asynchronously from the
+ * profile lookup. Poll once per frame (bounded) until the target field exists
+ * AND the baseline is populated, then apply the values.
+ */
+function whenFormReady(values: Record<string, string>, focusLabel: string) {
+  let frames = 0;
+  const tick = () => {
+    const start = findInput("Start weight (kg)");
+    const target = findInput("Target weight (kg)");
+    if (start?.value && target) {
+      for (const [label, value] of Object.entries(values)) {
+        const input = findInput(label);
+        if (input) setNativeValue(input, value);
+      }
+      findInput(focusLabel)?.focus();
+      return;
+    }
+    if (frames++ < 120) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
 const noopOpenChange = () => {};
@@ -111,8 +135,13 @@ export const NoBaselineProfile = () => {
  */
 export const WithPreview = () => {
   useEffect(() => {
-    fillByLabel("Target weight (kg)", "65");
-    fillByLabel("Target date", "2026-09-21");
+    whenFormReady(
+      {
+        "Target weight (kg)": "65",
+        "Target date": "2026-09-21",
+      },
+      "Target date"
+    );
   }, []);
   return <SeededDialog persistence={seedAthleteProfile()} />;
 };
@@ -123,8 +152,13 @@ export const WithPreview = () => {
  */
 export const CapWarning = () => {
   useEffect(() => {
-    fillByLabel("Target weight (kg)", "55");
-    fillByLabel("Target date", "2026-07-21");
+    whenFormReady(
+      {
+        "Target weight (kg)": "55",
+        "Target date": "2026-07-21",
+      },
+      "Target date"
+    );
   }, []);
   return <SeededDialog persistence={seedAthleteProfile()} />;
 };

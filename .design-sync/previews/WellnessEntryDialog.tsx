@@ -36,12 +36,14 @@ function setNativeValue(input: HTMLInputElement, value: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-function fillByLabel(labelText: string, value: string) {
+function fillByLabel(labelText: string, value: string): boolean {
   const label = Array.from(document.querySelectorAll("label")).find(
     (el) => el.textContent?.trim() === labelText
   );
   const input = label?.control;
-  if (input instanceof HTMLInputElement) setNativeValue(input, value);
+  if (!(input instanceof HTMLInputElement)) return false;
+  setNativeValue(input, value);
+  return true;
 }
 
 function clickButton(text: string) {
@@ -49,6 +51,31 @@ function clickButton(text: string) {
     (el) => el.textContent?.trim() === text
   );
   button?.click();
+  // The story's click moves focus to the button, which then disables — no
+  // field keeps the focus ring while the save is in flight.
+  if (document.activeElement instanceof HTMLElement)
+    document.activeElement.blur();
+}
+
+function focusByLabel(labelText: string) {
+  const label = Array.from(document.querySelectorAll("label")).find(
+    (el) => el.textContent?.trim() === labelText
+  );
+  label?.control?.focus();
+}
+
+/**
+ * The dialog content mounts through Radix `Presence` after the parent's
+ * effect has run, so the fields do not exist yet on the first attempt.
+ * Retry once per frame until the first field is found (bounded).
+ */
+function whenFormReady(run: () => void) {
+  let frames = 0;
+  const tick = () => {
+    if (fillByLabel("Weight (kg)", "72")) return run();
+    if (frames++ < 120) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
 const noopOpenChange = () => {};
@@ -73,10 +100,12 @@ export const Default = () => <SeededDialog persistence={seedActiveProfile()} />;
 /** All four metric fields filled in. */
 export const Filled = () => {
   useEffect(() => {
-    fillByLabel("Weight (kg)", "72");
-    fillByLabel("Sleep score", "82");
-    fillByLabel("HRV (ms)", "65");
-    fillByLabel("Steps", "8400");
+    whenFormReady(() => {
+      fillByLabel("Sleep score", "82");
+      fillByLabel("HRV (ms)", "65");
+      fillByLabel("Steps", "8400");
+      focusByLabel("Steps");
+    });
   }, []);
   return <SeededDialog persistence={seedActiveProfile()} />;
 };
@@ -92,8 +121,7 @@ export const Saving = () => {
   persistence.profiles.getActiveId = () => new Promise<string | null>(() => {});
 
   useEffect(() => {
-    fillByLabel("Weight (kg)", "72");
-    clickButton("Save");
+    whenFormReady(() => clickButton("Save"));
   }, []);
 
   return <SeededDialog persistence={persistence} />;

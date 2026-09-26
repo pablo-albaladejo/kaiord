@@ -25,17 +25,12 @@
     },
     "ConfirmationModal": {
       "cardMode": "single",
-      "primaryStory": "Interactive"
+      "primaryStory": "Interactive",
+      "skip": ["molecules-confirmationmodal--closed"]
     },
     "SaveErrorDialog": {
-      "skip": [
-        "molecules-saveerrordialog--default",
-        "molecules-saveerrordialog--multiple-errors",
-        "molecules-saveerrordialog--nested-path-errors",
-        "molecules-saveerrordialog--many-errors",
-        "molecules-saveerrordialog--errors-without-paths",
-        "molecules-saveerrordialog--interactive"
-      ]
+      "cardMode": "single",
+      "primaryStory": "Default"
     },
     "BottomNav": {
       "viewport": "390x700"
@@ -67,7 +62,9 @@
       "skip": [
         "molecules-chatfab--hidden-on-chat-route",
         "molecules-chatfab--hidden-on-chat-thread-route"
-      ]
+      ],
+      "cardMode": "single",
+      "primaryStory": "Visible"
     },
     "CreateRepetitionBlockButton": {
       "skip": ["molecules-createrepetitionblockbutton--below-threshold"]
@@ -124,6 +121,17 @@
     },
     "WellnessEntryDialog": {
       "cardMode": "single"
+    },
+    "Badge": {
+      "cardMode": "column"
+    },
+    "CreateRepetitionBlockDialog": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    },
+    "ZonesConflictDialog": {
+      "cardMode": "single",
+      "primaryStory": "ScalarConflicts"
     }
   },
   "buildCmd": "pnpm -F \"@kaiord/workout-spa-editor^...\" build && node .design-sync/gen-entry.mjs && node .design-sync/gen-i18n-resources.mjs && node .design-sync/build-css.mjs"
