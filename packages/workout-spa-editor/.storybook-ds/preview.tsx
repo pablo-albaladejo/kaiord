@@ -1,5 +1,5 @@
 import type { Decorator, Preview } from "@storybook/react-vite";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import base from "../.storybook/preview";
 
@@ -34,9 +34,27 @@ const OVERLAY_FRAME: Partial<CSSStyleDeclaration> = {
 const paintsSomething = (el: Element) =>
   [...el.getClientRects()].some((r) => r.width > 0 && r.height > 0);
 
+// Text placed straight in the root paints but is no element, so it is checked
+// on its own.
+const hasText = (root: Element) =>
+  [...root.childNodes].some(
+    (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim()
+  );
+
 const Anchor = () => {
   const ref = useRef<HTMLSpanElement>(null);
+  // Not on the first commit: an anchor that paints immediately would release
+  // the comparer's wait before a story that fills in a frame later (a portal
+  // mounting in an effect, a lazy child) has painted anything.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setReady(true));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
   useLayoutEffect(() => {
+    if (!ready) return;
     const anchor = ref.current;
     const root = anchor?.parentElement;
     if (!anchor || !root) return;
@@ -45,22 +63,37 @@ const Anchor = () => {
       // Descendants, not children: a story's outer node may be a
       // `display: contents` wrapper with no box of its own (Tooltip's
       // trigger), while what it wraps paints.
-      const empty = ![...root.querySelectorAll("*")].some(
-        (el) => el !== anchor && paintsSomething(el)
-      );
+      const empty =
+        !hasText(root) &&
+        ![...root.querySelectorAll("*")].some(
+          (el) => el !== anchor && paintsSomething(el)
+        );
       if (original === null) root.removeAttribute("style");
       else root.setAttribute("style", original);
       if (empty) Object.assign(root.style, OVERLAY_FRAME);
     };
     sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(root, { childList: true, subtree: true });
+    // Paint can start without a node being inserted: a class or style flip, or
+    // an image finishing its load. The root's own style is this code's write,
+    // so records on the root itself are ignored — otherwise it would loop.
+    const observer = new MutationObserver((records) => {
+      if (records.some((r) => r.target !== root)) sync();
+    });
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true,
+    });
+    root.addEventListener("load", sync, true);
     return () => {
       observer.disconnect();
+      root.removeEventListener("load", sync, true);
       if (original === null) root.removeAttribute("style");
       else root.setAttribute("style", original);
     };
-  }, []);
+  }, [ready]);
+  if (!ready) return null;
   return (
     <span
       ref={ref}

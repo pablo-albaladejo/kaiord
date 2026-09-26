@@ -530,6 +530,17 @@ Also found by the same compare, both in owned previews an earlier agent wrote:
   harness and is **not yet verified**: the next compare must show the route
   variants of both components rendering different active tabs.
 
+A review of the anchor raised three more points; two are fixed, one accepted:
+
+- It painted on the first commit, releasing the wait before a story that fills
+  in a frame later had painted. It now appears only after two frames.
+- It re-checked only on node insertion; paint that starts from a class/style
+  flip, an image load or bare text in the root was missed. It now also watches
+  attributes and text (ignoring its own writes to the root) and image loads.
+- **Accepted:** a story that regresses to rendering nothing is now captured as a
+  blank viewport instead of `sb-error`. The grader sees that blank side by side
+  with the card, so the regression still surfaces — at grading, not at capture.
+
 Still to do on the next run: the driver compares only the first 6 stories of a
 component (`[STORY_CAP]` — Badge 15, Button 14); pass `--max-stories` high
 enough to cover all of them before grading.
