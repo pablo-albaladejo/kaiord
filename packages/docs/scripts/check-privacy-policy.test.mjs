@@ -116,7 +116,7 @@ test("the old 'no analytics' claim fails the Umami disclosure rule, and only it"
   const v = checkPolicy(src);
 
   assert.deepEqual(v, [
-    "Umami analytics disclosed (cookie-less, anonymous, never user data)",
+    "Umami analytics disclosed (cookie-less, anonymous, never user data, surfaces named)",
   ]);
 });
 

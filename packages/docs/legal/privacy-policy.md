@@ -13,11 +13,11 @@ This privacy policy describes how the Kaiord project ("we", "us") handles data a
 
 ## Data Controller
 
-Kaiord operates no backend that receives, stores, or processes your data. All processing is entirely client-side — on your device, inside your browser. For GDPR purposes there is therefore no Kaiord-operated data controller. The maintainer (Pablo Albaladejo) is the point of contact for privacy inquiries; see the [Contact](#contact) section.
+Kaiord operates no backend that receives, stores, or processes your data. All processing of your workouts, health data and editor state is client-side — on your device, inside your browser. The only other flows are the ones described below: anonymous analytics, and, if you configure them, requests to your chosen AI provider. For GDPR purposes there is therefore no Kaiord-operated data controller. The maintainer (Pablo Albaladejo) is the point of contact for privacy inquiries; see the [Contact](#contact) section.
 
 ## Data Collection
 
-We use Umami, a privacy-friendly, cookie-less analytics tool. It records anonymous page views and product events (e.g. 'workout exported'); never your workouts, health data or API keys. We do not use cookies for tracking.
+We use Umami, a privacy-friendly, cookie-less analytics tool. It records anonymous page views and product events (e.g. 'workout exported'); never your workouts, health data or API keys. Umami runs on the website (kaiord.com), the documentation and the web editor. We do not use cookies for tracking.
 
 All workout-editor state (workouts, templates, sport-zone profiles, AI provider keys, sync state, chat transcripts) is stored locally in your browser via IndexedDB (Dexie). Nothing is sent to a Kaiord-operated server, ever. This local data remains on your device until you remove it: clear AI provider keys via Settings → Privacy → Clear All API Keys, delete individual workouts via the per-workout delete action, clear a conversation via the assistant's Clear conversation action, or clear site data in your browser to remove everything at once.
 

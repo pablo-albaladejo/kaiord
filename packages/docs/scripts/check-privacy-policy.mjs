@@ -176,8 +176,8 @@ export const REQUIRED_RULES = [
     // The site, docs and editor run Umami. A policy saying "no analytics"
     // is false, so the disclosure sentence itself is what this pins.
     label:
-      "Umami analytics disclosed (cookie-less, anonymous, never user data)",
-    re: /We use Umami, a privacy-friendly, cookie-less analytics tool\. It records anonymous page views and product events \(e\.g\. 'workout exported'\); never your workouts, health data or API keys\./,
+      "Umami analytics disclosed (cookie-less, anonymous, never user data, surfaces named)",
+    re: /We use Umami, a privacy-friendly, cookie-less analytics tool\. It records anonymous page views and product events \(e\.g\. 'workout exported'\); never your workouts, health data or API keys\. Umami runs on the website \(kaiord\.com\), the documentation and the web editor\./,
   },
   {
     label: "Data controller scope clarified (no Kaiord-operated controller)",
