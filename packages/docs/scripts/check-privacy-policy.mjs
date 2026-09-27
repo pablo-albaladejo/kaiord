@@ -173,6 +173,13 @@ export const REQUIRED_RULES = [
     re: /\*\*Last updated:\*\*\s+\d{4}-\d{2}-\d{2}/,
   },
   {
+    // The site, docs and editor run Umami. A policy saying "no analytics"
+    // is false, so the disclosure sentence itself is what this pins.
+    label:
+      "Umami analytics disclosed (cookie-less, anonymous, never user data)",
+    re: /We use Umami, a privacy-friendly, cookie-less analytics tool\. It records anonymous page views and product events \(e\.g\. 'workout exported'\); never your workouts, health data or API keys\./,
+  },
+  {
     label: "Data controller scope clarified (no Kaiord-operated controller)",
     re: /no Kaiord-operated data controller/i,
   },

@@ -98,6 +98,32 @@ test("missing Last updated is flagged", () => {
   assert.ok(v.some((r) => r.includes("Last updated")));
 });
 
+// The policy used to say Kaiord collects no analytics while Umami ran on
+// the site, docs and editor. Restoring that sentence must fail the lint.
+const UMAMI_DISCLOSURE =
+  "We use Umami, a privacy-friendly, cookie-less analytics tool. It records anonymous page views and product events (e.g. 'workout exported'); never your workouts, health data or API keys.";
+const OLD_NO_ANALYTICS_CLAIM =
+  "Kaiord does **not** collect any personal data, analytics, or telemetry. We do not use cookies for tracking. We do not use any third-party analytics services.";
+
+test("the old 'no analytics' claim fails the Umami disclosure rule, and only it", () => {
+  const src = POLICY.replace(/^.*We use Umami.*$/m, OLD_NO_ANALYTICS_CLAIM);
+  assert.notEqual(
+    src,
+    POLICY,
+    "the shipped policy has no Umami disclosure line"
+  );
+
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, [
+    "Umami analytics disclosed (cookie-less, anonymous, never user data)",
+  ]);
+});
+
+test("the Umami disclosure is the exact approved sentence", () => {
+  assert.ok(POLICY.includes(UMAMI_DISCLOSURE));
+});
+
 // ---------- every section rule must fail ALONE ----------
 //
 // A rule that only fires once three sibling rules have already fired adds
