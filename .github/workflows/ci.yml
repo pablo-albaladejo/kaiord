@@ -90,6 +90,9 @@ jobs:
               - 'packages/_shared/bridge-core/**'
             frontend:
               - 'packages/workout-spa-editor/**'
+            docs_site:
+              - 'packages/docs/**'
+              - 'packages/landing/**'
             root_deps:
               - 'package.json'
               - 'pnpm-lock.yaml'
@@ -204,6 +207,7 @@ jobs:
              [[ "${{ steps.changed-files.outputs.tanita_bridge_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.bridge_core_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.docs_site_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
             echo "should-test=false" >> $GITHUB_OUTPUT
           else
