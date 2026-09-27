@@ -5,7 +5,7 @@ description: "Convert a Garmin FIT file to TCX in 4 lines of TypeScript using Ka
 
 # Quick Start
 
-By the end of this guide, you'll convert a Garmin FIT file to TCX in 4 lines of TypeScript.
+By the end of this guide, you will convert a Garmin FIT file to TCX in 4 lines of TypeScript.
 
 ## Prerequisites
 
