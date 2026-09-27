@@ -221,13 +221,27 @@ smaller, and every block-level component looks wider.
   three stories are a closed Radix accordion by design (the story's own doc
   comments say so). The variants differ only in `useAiRuntimeStore` state, which
   has no visual effect while collapsed; storybook renders them identically too.
-- **`[RENDER_THIN]` BottomNav "variants render identically" — triaged, still open.**
-  The nav DOES render now (`viewport: "390x700"`), but the three stories capture
-  byte-identically because the active tab comes from wouter's `useLocation` and
-  the story's `Router` decorator lands in a second copy of wouter. See the
-  per-component finding below; the knob is `cfg.extraEntries` +
-  `cfg.storyImports.shim` for `wouter`. **This is the top action for the next
-  sync.**
+- **`[RENDER_THIN]` BottomNav — resolved, no longer fires.** The rewritten
+  stories and the owned preview route through `DesignSystemProviders`' `path`,
+  so each variant highlights a different tab.
+- **`[RENDER_THIN]` ImportDropzoneOverlay "variants render identically" —
+  legitimate.** Storybook's two stories capture byte-identically too; they differ
+  only in the import entry point, which has no visual.
+- **`[RENDER_THIN]` SwimmingStepEditor and AiWorkoutInput "variants render
+  identically" — false positive.** The check compares text content, and every
+  variant carries the same `<select>` option lists; the variants differ in the
+  selected value and in store state. Their per-story captures differ and every
+  story grades `match`.
+- **`[RENDER_THIN]` WorkoutPreview "paint nothing" — false positive.** It is a
+  text-less SVG bar chart, the same blind spot as BrandMark below.
+- **`[RENDER_THIN]` AiSuccessActions and CreateWorkoutCta "variants render
+  identically" — legitimate.** Storybook renders their stories identically too:
+  AiSuccessActions' variants differ only in runtime state, CreateWorkoutCta's only
+  in navigation target.
+- **`[RENDER_THIN]` BrandMark and SelectionIndicator "paint nothing" — false
+  positive.** Both paint a small SVG (the glyph, the checkmark) that the paint
+  check does not see. SelectionIndicator's grey tile in storybook is a story
+  decorator, which the card harness ignores by design.
 - **`[REFERENCE_STALE?]` on scoped compare runs.** Fires when the bundle changed
   but `sb-reference` did not. Check whether any DS _source_ moved
   (`git status -- packages/workout-spa-editor/src styles/`): converter-input
@@ -271,20 +285,23 @@ smaller, and every block-level component looks wider.
   machine-deleted and would shadow the fix. `SectionHead` declares `onAction` the
   same way and happens to render identically only because its visible label is a
   separate prop.
-- **The actions-addon gap was swept across the whole roster — `ErrorMessage` is
-  the only component it can affect.** Eight others declare handlers the same way
-  (`Button.onClick`, `ConfirmationModal.onConfirm/onCancel`,
-  `DurationPicker.onChange`, `RepetitionBlockCard.onEditRepeatCount/onAddStep/
-onUngroup/onDelete`, `SaveErrorDialog.onClose/onRetry`, `SectionHead.onAction`,
-  `StepCard.onSelect`, `StepEditor.onSave/onCancel`), but none gates visible UI
-  on the handler being defined. The single conditional render among them,
-  `SectionHead`, keys off `action !== undefined` — the label prop — and merely
-  wires `onAction` to the resulting button's `onClick`. This matters because
-  `[STORY_CAP]` means a defect could hide in an uncaptured tail story; the sweep
-  covers the source, not just the captured stories. **Re-run the sweep when a new
-  story adds `argTypes: { onX: { action: ... } }`:**
-  `grep -rl "action:" --include="*.stories.tsx" src/components` then check the
-  component for `onX &&` / `onX ?` conditional rendering.
+- **The actions-addon gap affects `ErrorMessage` AND `RepetitionBlockCard`.**
+  The first sweep said ErrorMessage only; it was wrong, because it grepped the
+  component's main file while RepetitionBlockCard gates its trash button, menu
+  and "Add Step" in child files (`RepetitionBlockHeaderRight.tsx`,
+  `RepetitionBlockSteps.tsx`). Both now have owned previews that synthesise
+  `() => undefined` for every `argTypes.<prop>.action` left undefined. StepCard
+  also gates `onCopy`/`onDuplicate`/`onDelete`, but its stories declare only
+  `onSelect` as an action, so neither side renders those buttons: consistent.
+  **Re-run the sweep across the whole component directory, not one file:**
+  for each `*.stories.tsx` with `action: "`, grep its directory's `*.tsx` for
+  `{onX &&` / `{onX ?` and keep only the props the stories declare as actions.
+- **`AiWorkoutInput`'s Ready/InProgress/Failed stories need an owned preview.**
+  Their provider/runtime state is seeded by a story decorator, which the card
+  harness ignores, so every preview shows the "no provider" state while
+  storybook shows the form.
+- **`ConfirmationModal` `Closed` is skipped** — `open=false`, blank on both sides
+  by contract, like the other null-render stories.
 - Skipped as `sb-error` (they do not render in the repo's own storybook):
   `ConfirmationModal` ×6 (Radix portals outside `#storybook-root`, so the
   reference measures an empty root — the component is fine; only `Interactive`,
@@ -319,7 +336,7 @@ verified. Two are mechanical, the third is the one that would waste the other tw
    current component first — otherwise the other two fixes buy a verified render
    of the wrong intent.
 
-## The dark theme is NOT verified
+## The dark theme was NOT verified (resolved — see "Dark verification pass")
 
 Both outermost providers pin `light` — the storybook decorator by design, and
 `cfg.provider` to match it — so **no `dark:` utility activates anywhere in this
@@ -338,6 +355,15 @@ treat dark-mode fidelity as unknown rather than good.
   contexts or locale files are added or renamed** — `buildCmd` does it, but a bare
   `package-build.mjs` run does not. A component missing from the barrel is
   missing from every synced design, silently.
+- **On a fresh worktree, run the full `buildCmd` before the driver — from the
+  repo root, not the package.** `resync.mjs` does not run `buildCmd`, and
+  `package-build.mjs` silently skips a missing `cfg.cssEntry` (it prints one
+  `! cssEntry ... not found — skipped` line and carries on). The result is a
+  2.1 KB uplot-only `_ds_bundle.css` and every preview unstyled, while the driver
+  and `package-validate` both stay green. Wave-1 grading of 21 components was
+  thrown away on 2026-09-26 for exactly this. Check before grading:
+  `packages/workout-spa-editor/.design-sync-styles.css` exists (~116 KB) and
+  `ds-bundle/_ds_bundle.css` is well over 100 KB.
 - **`.design-sync/tsconfig.paths.json` must stay comment-free** (the converter's
   parser breaks on `/*` inside strings — see above). Adding a comment there
   silently disables `@/*` resolution.
@@ -479,3 +505,235 @@ there is no port to inject.
 Showing it requires seeding a real active profile into the card origin's
 IndexedDB — a write no other preview performs. Left out of the design system
 instead: an absent component is honest, a blank card is a dead end.
+
+## Overlays read as "did not render" to the comparer (wave 3)
+
+The first full compare reported 53 `sb-error` over 20 components. Two causes,
+neither of them a broken story:
+
+- **40 stories in 11 overlay components** (AddEntryChooser, BatchCostConfirmation,
+  CommandPalette, ConfirmationModal, ExecutedActivityDialog, GoalSetupDialog,
+  RawWorkoutDialog, ScheduleDateDialog, ShortcutSheet, Toast,
+  WellnessEntryDialog). Radix portals into `document.body` and leaves
+  `#storybook-root` empty; the comparer waits for a visible root child and
+  calls its absence `sb-error`. Fixed in `.storybook-ds/preview.tsx` with an
+  anchor, not with `skip` — skipping would have removed every dialog from the
+  design system. Three details, each of which broke the first attempt:
+  - Playwright's `waitForSelector` checks only the **first** match. Toast's
+    first root child is a 0-px-tall viewport wrapper, so the anchor must come
+    **first**, not last.
+  - The comparer screenshots the **root**, not the page. Under
+    `layout: centered` the empty root is a padded square, so the anchor
+    stretches the root over the viewport while nothing else paints in it.
+  - "Paints" means **any descendant**: Tooltip's outer node is a
+    `display: contents` span with no box while its trigger paints; checking only
+    direct children blew Tooltip up to the full viewport.
+    Verified by replaying the comparer's capture at its viewport: 53/53 overlay
+    stories now capture the overlay, 268/268 stories that already captured keep
+    identical dimensions, 0 new failures. The overlays also get
+    `cardMode: "single"` so an open dialog does not paint over sibling cells.
+- **14 stories that return `null` by contract** (the "silence when all is well"
+  states: `NoSuggestions`, `NothingToProcess`, ChatFab's hidden routes,
+  `BelowThreshold`, `AlreadyPushedRendersNothing`, ScheduleDateDialog `Closed`,
+  StepEditor `NoStep`, StorageAvailabilityBanner `Checking`/`Ok`, `SilentWeek`,
+  `EmptyWorkout`, `NoStructureYet`). Each was checked against its story doc or
+  a `return null` in the component. These are `skip`ped: a blank card tells the
+  design agent nothing.
+
+Also found by the same compare, both in owned previews an earlier agent wrote:
+
+- `BatchProcessingBanner.tsx` dropped `SingleRawWorkout` claiming it rendered
+  nothing. It paints (the singular copy branch); restored.
+- `Toast.tsx` exported only `Default`, so none of the five stories could pair
+  once the portal issue was gone. Now one export per story plus `Stack`, the
+  card's `primaryStory`.
+- `StatusHeader` and `BottomNav` collapsed or duplicated their route variants
+  because a preview-level wouter `Router` is a second copy of wouter the
+  component never reads. `DesignSystemProviders` now takes a `path` prop, and
+  both previews read it off `window.KaiordDesignSystem` rather than importing it
+  (an import compiles a second copy again). This is aimed at the "top action
+  for the next sync" in the triage table above, but it only runs in the card
+  harness and is **not yet verified**: the next compare must show the route
+  variants of both components rendering different active tabs.
+
+A review of the anchor raised three more points; two are fixed, one accepted:
+
+- It painted on the first commit, releasing the wait before a story that fills
+  in a frame later had painted. It now appears only after two frames.
+- It re-checked only on node insertion; paint that starts from a class/style
+  flip, an image load or bare text in the root was missed. It now also watches
+  attributes and text (ignoring its own writes to the root) and image loads.
+- **Accepted:** a story that regresses to rendering nothing is now captured as a
+  blank viewport instead of `sb-error`. The grader sees that blank side by side
+  with the card, so the regression still surfaces — at grading, not at capture.
+
+Still to do on the next run: the driver compares only the first 6 stories of a
+component (`[STORY_CAP]` — Badge 15, Button 14); pass `--max-stories` high
+enough to cover all of them before grading.
+
+## Fixed-position components and Radix timing (wave 4, 2026-09-26)
+
+Grading after the CSS fix found three repeatable causes. None is a defect in a
+component.
+
+- **In-place `position: fixed` collapses in the card.** The harness wraps every
+  story in `.ds-single` / `.ds-cell` with `transform: translateZ(0)`
+  (`.ds-sync/lib/emit.mjs`), which makes that wrapper the containing block for
+  `fixed`. A component that renders `fixed inset-0` in place instead of
+  portaling to `document.body` resolves against a wrapper with no in-flow
+  height, and clips above y=0. Hit Toast (Radix Toast viewport),
+  CreateRepetitionBlockDialog, ZonesConflictDialog and ChatFab. It is the same
+  mechanism as the SaveErrorDialog finding above. There is no config knob, and
+  patching `emit.mjs` would be lost at the next re-stage. The fix is an owned
+  preview that wraps the story in `<div style={{ height: "100vh" }}>`, which
+  gives the component the viewport-sized containing block the app gives it.
+  This is the one case where a per-component owned preview for a shared cause is
+  right: the generator will never fix it, so the preview shadows nothing.
+  `cardMode: "single"` alone does not help, because `.ds-single` has the same
+  transform.
+- **Replaying a `play` from a one-shot mount effect races Radix.** Dialog content
+  mounts through `Presence` after the parent's effect has run, so
+  `querySelector` finds nothing and the preview shows the empty state.
+  Hit WellnessEntryDialog (Filled, Saving) and GoalSetupDialog (With Preview,
+  Cap Warning). Poll once per `requestAnimationFrame`, bounded, until the target
+  exists (`whenFormReady` in `WellnessEntryDialog.tsx`).
+- **Store state seeded by a story decorator never reaches the card.** CommandPalette
+  seeds `useWorkoutStore.setState(...)` and AiWorkoutInput seeds its provider and
+  runtime state in decorators. Seed them per export in an owned preview, and reset
+  the state for exports that expect it empty, since exports share one store.
+- **The storybook reference cannot photograph a `fixed` component inside a
+  `relative` frame.** The story root crop excludes it (BottomNav's reference
+  was an empty navy box). The stories now put `transform: translateZ(0)` on the
+  frame so the nav is contained in the crop.
+- **Reading the sheet:** the sheet scales the preview column down, so size
+  differences there are not defects. Tiny components (BrandMark,
+  SelectionIndicator) need the raw PNGs cropped to the bounding box and zoomed.
+  Grade overlay text, not only the frame: seeded-state misses (CommandPalette)
+  show only in the row text.
+- **Legitimate identical variants:** Tooltip's five stories differ only in
+  side/align while the bubble is closed, so they look identical on both sides.
+  Forcing it open would fabricate a state the stories do not show.
+- **StatusHeader's active tab is invisible in both captures, and that is the
+  component's style, not a routing miss.** A DOM probe of the cards shows
+  `aria-current="page"` on Daily, Calendar, Library and Trends respectively. The
+  active style is only `text-accent`, and `--accent` resolves to `--control`,
+  which is close to the label colour. Graded `close`.
+
+- **Height of the viewport frame.** `?story=` captures keep the harness's 24px
+  body padding, and the product card has none (`emit.mjs`: `if(!q)
+body.padding=0`). A plain `100vh` frame is right for centred dialogs, but
+  puts edge-anchored content 24px low in the capture. Toast uses
+  `calc(100vh - <body paddingTop>px)`, read at render, which is exact in both.
+  ChatFab keeps plain `100vh` and sits 24px inside its corner in the graded
+  shot. That is capture framing: never add a negative margin to compensate,
+  because it would break the product card.
+- **A module singleton imported by relative path from an owned preview is a
+  second copy.** It contradicts the comment in `gen-entry.mjs`: seeding
+  `useWorkoutStore` through a relative import left CommandPalette on the
+  empty-editor state. Read stores off `window.KaiordDesignSystem` (type-only
+  import for the type), and export each one from the barrel's extras
+  (`useWorkoutStore`, `useAiRuntimeStore`). ScratchEditorSurface.tsx and
+  ImportDropzoneOverlay.tsx still import the store by path; ImportDropzoneOverlay
+  grades `match` regardless, because its seed is only a reset.
+- **`layout: "centered"` shrink-wraps the storybook side only.** Input, Icon's
+  grid, ThemeToggle `In Header`, BackButton `In Header` and CardShell are
+  full-width in the card. That is framing, not a defect.
+- **Content-box measurements miss pale fills** (disabled buttons, the neutral
+  Pill, the off Toggle). A width delta from a measurement is not evidence: crop
+  both raws and look at them side by side.
+
+- **Tall components clip at the default 900x700 capture.** Storybook crops at
+  full content height, and the card stops at the fold. Viewports are sized from
+  the storybook PNG heights plus 48px of padding: ZoneEditor and
+  ScratchEditorSurface `900x1600`, WorkoutList `900x800`, StepEditor `900x760`.
+  ScratchEditorSurface's Long Swimming story is 3401px and stays clipped on
+  purpose; a card that tall is useless in the picker.
+- **A scoped `compare.mjs` without `--max-stories` recaptures only the first 6
+  stories**, and the tail keeps stale PNGs from the previous run. When fixing a
+  component, pass its story count (RepetitionBlockCard's fixed tail looked
+  broken until re-run with `--max-stories 9`).
+- **ZoneDist and ZoneProfileBar stories are now `layout: "padded"`.** Their
+  roots are width-less flex rows, and `centered` shrank them to 0px in the
+  reference (the per-component ZoneDist finding above). They are now
+  image-comparable.
+- **Replaying `play` on plain inputs:** focus the element, set the value with
+  `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set`,
+  then dispatch a bubbling `input` event. React picks it up, and the focus ring
+  matches the reference.
+
+## BottomNav stories rewritten (2026-09-26)
+
+The stale-stories section above is resolved. The stories now cover the shipped
+five tabs (Daily, Calendar, Library, Nutrition, Athlete) through the global
+`parameters.route`, and the frame is a containing block for the fixed nav. The
+owned preview mirrors them export for export.
+
+## Dark verification pass
+
+The theme is now a parameter on both sides, and light stays the default:
+`STORYBOOK_THEME=dark` at `storybook build` time, and
+`cfg.provider.props.theme: "dark"` for `DesignSystemProviders`. The dark pass
+runs in its own worktree so its grades do not overwrite the light ones in
+`.design-sync/.cache/compare/`. The uploaded bundle is the same for both, because
+the theme is a runtime prop.
+
+**Result (2026-09-26): 83 components, 386 stories, all `match`.** No
+card-vs-storybook difference exists in dark. The three owned previews that nest
+their own `DesignSystemProviders` (StatusHeader, BottomNav, ChatFab) render dark
+too: the nested light provider does not win.
+
+How to rerun it:
+
+- The dark worktree needs its OWN copy of `.ds-sync/`, not a symlink to the
+  light one. In that copy, drop `background:#fff` from the two `body{...}` rules
+  in `lib/emit.mjs`. The harness hard-codes a white page, and a white page is not
+  framing in dark. It hides the app's own `body` rule
+  (`dark:bg-slate-900` = #0f172a, the same color as storybook's dark backdrop).
+  That makes every transparent component look broken. The first dark capture
+  graded StatusHeader against a white page for exactly this reason. Keep the
+  light copy untouched, because the light grades were taken with it.
+- In dark, a light page around a card IS a finding, because it means the class
+  never reached `<html>`.
+
+What the pass found on BOTH sides. These are palette debts in the app itself, not
+sync defects. They are listed so nobody re-hunts them as preview bugs:
+
+- **Two dark ramps are mixed.** Dialog, input and toolbar surfaces are slate
+  (#1e293b/#334155) on a slate-900 page. Cards, panels, CommandPalette and
+  ShortcutSheet are neutral near-black (#171717/#1a1a1a/#262626). The seam shows
+  wherever both meet, for example StepEditor, WorkoutMetadataEditor, PushButton
+  and ExportFormatSelector.
+- **The primary button is weak in dark.** It is charcoal on slate, and reads as
+  secondary next to an outlined Cancel.
+- **Disabled primaries use the light style.** A light-grey fill with a dim label
+  looks brighter than the enabled button (GoalSetupDialog, WellnessEntryDialog
+  Saving, ZoneEditor, CreateRepetitionBlockButton, ScratchEditorSurface).
+- **Hue carries no meaning.**
+  - StatusHeader's active tab looks the same as the inactive ones.
+  - Badge intensities all render the same charcoal pill.
+  - MatchedSessionCard's compliance pill is always grey.
+  - SelectionIndicator's check is grey.
+  - BatchProcessingBanner's warning icon has no amber.
+  - Toast success, warning and info differ only by icon.
+- **Low-contrast details:**
+  - StepCard/StepList "Step N" titles.
+  - AutoMatchBanner's "view all (5)" link.
+  - WeekStatusBar's done segment.
+  - EditorContextMenu's dashed border.
+  - Icon/In Buttons shows a white "Save" button with a white icon.
+- **Many components paint no background of their own:**
+  - BrandMark, AttentionMark, Metric, SectionHead, ReadinessRing.
+  - StepList and the pickers.
+  - WorkoutStats, WorkoutPreview, EmptyWorkoutState.
+  - Tooltip's trigger, Badge, Pill, tertiary Button.
+
+  In dark they read only because the page is dark, which is why `conventions.md`
+  tells designs to paint `bg-surface-page` themselves.
+
+Story or data quirks the pass also noticed (not dark-specific):
+
+- AiWorkoutInput shows "Team Claude ()".
+- The AiBanner pending and success stories look the same as closed.
+- CoachingSidebar markup runs words together.
+- RepetitionBlockCard "Without Delete" still shows the trash icon (the actions
+  addon, see above).

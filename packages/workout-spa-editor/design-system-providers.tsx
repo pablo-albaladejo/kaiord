@@ -29,14 +29,25 @@ import { LocaleProvider } from "./src/i18n/LocaleProvider";
 
 export const DesignSystemProviders = ({
   children,
+  path = "/",
+  theme = "light",
 }: {
   children: ReactNode;
+  // Light by default. `cfg.provider` passes `{ "theme": "dark" }` for the
+  // dark verification pass; one provider decides, since a nested
+  // ThemeProvider loses to the outer one on <html>.
+  theme?: "light" | "dark";
+  // The route the card starts on. Components whose active state follows the
+  // route (the nav bars) need it set from here: a preview that brings its own
+  // wouter `Router` gets a second copy of wouter, which the component never
+  // reads, so every route renders identically.
+  path?: string;
 }) => {
   // Navigation stays inside the card rather than moving the host frame. Built
   // on first render, not at module scope, so importing the bundle is inert.
-  const { hook } = useMemo(() => memoryLocation({ path: "/" }), []);
+  const { hook } = useMemo(() => memoryLocation({ path }), [path]);
   return (
-    <ThemeProvider defaultTheme="light">
+    <ThemeProvider defaultTheme={theme}>
       <ToastContextProvider>
         <LocaleProvider>
           <UnitsProvider>
