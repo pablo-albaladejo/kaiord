@@ -1,11 +1,12 @@
 import * as React from "react";
 import * as S from "@ds-stories/packages/workout-spa-editor/src/components/molecules/BatchProcessingBanner/BatchProcessingBanner.stories";
 
-// `NothingToProcess` and `SingleRawWorkout` are dropped here: the surface is
-// neutral and renders nothing at all rather than an empty shell when there is
+// `NothingToProcess` is dropped here (and skipped in config.json): the
+// surface renders nothing at all rather than an empty shell when there is
 // nothing raw and nothing running (see BatchProcessingBanner.stories.tsx) —
 // "silence when all is well" is correct, not broken, but it isn't worth a
-// card. Only the states that actually paint are kept.
+// card. `SingleRawWorkout` does paint — it is the singular copy branch — and
+// is kept.
 
 function compose(S: any, key: string) {
   const meta: any = S.default ?? {};
@@ -62,6 +63,10 @@ function compose(S: any, key: string) {
 export const ReadyToProcess = /* Ready To Process */ compose(
   S,
   "ReadyToProcess"
+);
+export const SingleRawWorkout = /* Single Raw Workout */ compose(
+  S,
+  "SingleRawWorkout"
 );
 export const Processing = /* Processing */ compose(S, "Processing");
 export const ProcessingWithFailures = /* Processing With Failures */ compose(

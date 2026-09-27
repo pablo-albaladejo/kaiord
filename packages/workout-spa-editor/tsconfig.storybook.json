@@ -7,6 +7,7 @@
     "src/**/*.stories.ts",
     "src/**/*.stories.tsx",
     ".storybook/**/*",
+    ".storybook-ds/**/*",
     // Ambient declarations (chrome, vite-env, umami, vitest). Story files reach
     // src/ transitively, but a transitive import does not bring a project's
     // globals with it — without these the check invents "Cannot find name

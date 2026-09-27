@@ -5,8 +5,10 @@ import { ZoneDist } from "./ZoneDist";
 const meta = {
   title: "Molecules/ZoneDist",
   component: ZoneDist,
+  // Padded, not centered: the root is a width-less flex row whose segments
+  // only grow, so a centered (shrink-wrapped) story root is 0px wide.
   parameters: {
-    layout: "centered",
+    layout: "padded",
   },
   tags: ["autodocs"],
   argTypes: {

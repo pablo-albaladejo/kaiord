@@ -35,7 +35,9 @@ const VO2MAX_SEGMENTS: ZoneSegment[] = [
 const meta = {
   title: "Molecules/ZoneProfileBar",
   component: ZoneProfileBar,
-  parameters: { layout: "centered" },
+  // Padded, not centered: the root is a width-less flex row, so a centered
+  // (shrink-wrapped) story root is 0px wide.
+  parameters: { layout: "padded" },
   tags: ["autodocs"],
 } satisfies Meta<typeof ZoneProfileBar>;
 

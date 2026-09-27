@@ -1,6 +1,8 @@
+import { useState } from "react";
+
 import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
 import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
-import { useWorkoutStore } from "../../packages/workout-spa-editor/src/store/workout-store";
+import type { useWorkoutStore as UseWorkoutStore } from "../../packages/workout-spa-editor/src/store/workout-store";
 import type {
   KRD,
   RepetitionBlock,
@@ -9,6 +11,9 @@ import type {
 import { ScratchEditorSurface } from "../../packages/workout-spa-editor/src/components/organisms/ScratchEditorSurface/ScratchEditorSurface";
 
 /**
+ * The store must be the bundle's own singleton: a source import compiles a
+ * second zustand copy the surface never reads, so read it off the global.
+ *
  * `ScratchEditorSurface` reads `useWorkoutStore` (a zustand module
  * singleton) directly, plus `usePersistence()`/`useToastContext()` via
  * `ScratchScheduleButton` -> `usePersistScratch`. `DesignSystemProviders`
@@ -191,18 +196,26 @@ const longSwimmingWorkout: KRD = {
   },
 };
 
+const useWorkoutStore = (
+  window as unknown as {
+    KaiordDesignSystem: { useWorkoutStore: typeof UseWorkoutStore };
+  }
+).KaiordDesignSystem.useWorkoutStore;
+
 function Scenario({ date, workout }: { date: string | null; workout?: KRD }) {
-  // Module-singleton store: reset to a known, unseeded state so every
-  // card starts clean regardless of what another card left behind.
-  useWorkoutStore.setState({
-    currentWorkout: null,
-    undoHistory: [],
-    historyIndex: -1,
-    selectedStepId: null,
-    selectedStepIds: [],
-    isEditing: false,
+  // Reset to a known, unseeded state so every card starts clean regardless of
+  // what another card left behind; seed once, before the surface first reads.
+  useState(() => {
+    useWorkoutStore.setState({
+      currentWorkout: null,
+      undoHistory: [],
+      historyIndex: -1,
+      selectedStepId: null,
+      selectedStepIds: [],
+      isEditing: false,
+    });
+    if (workout) useWorkoutStore.getState().loadWorkout(workout);
   });
-  if (workout) useWorkoutStore.getState().loadWorkout(workout);
   return (
     <PersistenceProvider persistence={createInMemoryPersistence()}>
       <ScratchEditorSurface date={date} />
