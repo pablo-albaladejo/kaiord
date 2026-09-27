@@ -19,8 +19,11 @@ import { fileURLToPath } from "node:url";
 import {
   BRIDGE_REGISTRY,
   checkBridgeCoverage,
+  checkLandingPrivacyRedirect,
   checkManifestPermissions,
+  checkNoAnalyticsClaim,
   checkPolicy,
+  DOCS_POLICY_PATH,
   checkSidebar,
   discoverBridgePackages,
   isDirectInvocation,
@@ -122,6 +125,80 @@ test("the old 'no analytics' claim fails the Umami disclosure rule, and only it"
 
 test("the Umami disclosure is the exact approved sentence", () => {
   assert.ok(POLICY.includes(UMAMI_DISCLOSURE));
+});
+
+test("the shipped policy makes no 'no analytics' claim outside the bridge sections", () => {
+  assert.deepEqual(checkNoAnalyticsClaim(POLICY), []);
+});
+
+test("a leftover 'no analytics' sentence fails even next to the Umami disclosure", () => {
+  const src = POLICY.replace(
+    "We do not use cookies for tracking.",
+    "We do not use cookies for tracking. Kaiord does **not** collect any personal data, analytics, or telemetry."
+  );
+  assert.notEqual(src, POLICY);
+  assert.deepEqual(checkPolicy(src), [], "the disclosure rule alone passes");
+
+  const v = checkNoAnalyticsClaim(src);
+
+  assert.equal(v.length, 1, v.join(" | "));
+  assert.match(v[0], /"No analytics" claim outside the bridge sections/);
+});
+
+test("'We use no analytics' is caught too, and 'anonymous analytics' is not", () => {
+  const withDenial = `${POLICY}\n## Other\n\nWe use no analytics, advertising, or fingerprinting.\n`;
+  const withAnonymous = `${POLICY}\n## Other\n\nIt sends anonymous analytics events.\n`;
+
+  const denial = checkNoAnalyticsClaim(withDenial);
+  const anonymous = checkNoAnalyticsClaim(withAnonymous);
+
+  assert.equal(denial.length, 1, denial.join(" | "));
+  assert.deepEqual(anonymous, []);
+});
+
+test("the bridge sections' 'No Telemetry' bullets are exempt", () => {
+  // They mention analytics and are true for the extensions.
+  const body = sectionBody(POLICY, GARMIN);
+  assert.match(body, /No Telemetry[^.]*analytics/);
+
+  const v = checkNoAnalyticsClaim(POLICY);
+
+  assert.deepEqual(v, []);
+});
+
+// ---------- kaiord.com/privacy/ only forwards to the docs policy ----------
+
+const LANDING_PRIVACY_HTML = readFileSync(
+  join(REPO_ROOT, "packages/landing/public/privacy/index.html"),
+  "utf8"
+);
+
+test("the shipped landing privacy page is a redirect to the docs policy", () => {
+  assert.deepEqual(checkLandingPrivacyRedirect(LANDING_PRIVACY_HTML), []);
+  assert.match(LANDING_PRIVACY_HTML, new RegExp(DOCS_POLICY_PATH));
+});
+
+test("landing privacy copy claiming 'no analytics' fails", () => {
+  const html = LANDING_PRIVACY_HTML.replace(
+    "</main>",
+    "<p>We use no analytics, advertising, or fingerprinting of any kind.</p></main>"
+  );
+
+  const v = checkLandingPrivacyRedirect(html);
+
+  assert.equal(v.length, 1, v.join(" | "));
+  assert.match(v[0], /"no analytics" claim/);
+});
+
+test("a landing privacy page without the redirect fails on each missing part", () => {
+  const html = "<html><body><p>Our policy.</p></body></html>";
+
+  const v = checkLandingPrivacyRedirect(html);
+
+  assert.equal(v.length, 3, v.join(" | "));
+  assert.ok(v.some((r) => r.includes("canonical")));
+  assert.ok(v.some((r) => r.includes("meta refresh")));
+  assert.ok(v.some((r) => r.includes("visible link")));
 });
 
 // ---------- every section rule must fail ALONE ----------
