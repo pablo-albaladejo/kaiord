@@ -22,7 +22,6 @@ export const useSyncCallback = (
     async (profileId: string, weekStart: string) => {
       a.event("coaching.sync.invoked", {
         source: t.source,
-        profileId,
         trigger: "manual",
       });
       const startedAt = Date.now();
@@ -37,7 +36,7 @@ export const useSyncCallback = (
         profileId,
         weekStart
       );
-      emitSyncResult(a, t.source, profileId, result, Date.now() - startedAt);
+      emitSyncResult(a, t.source, result, Date.now() - startedAt);
       if (
         result.ok &&
         runZonesSync &&
@@ -66,7 +65,7 @@ export const useConnectCallback = (
         profileId,
         ctrl.signal
       );
-      emitLinkResult(a, t.source, profileId, r);
+      emitLinkResult(a, t.source, r);
       if (
         r.ok &&
         runZonesSync &&

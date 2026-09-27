@@ -1,7 +1,7 @@
 /**
  * Telemetry helpers for coaching action callbacks.
- * PII-free payloads (per spec §12). `profileId` is local-only opaque
- * identifier and IS included so the profile dimension is queryable.
+ * PII-free payloads (per spec §12). No profile identifier is sent: even
+ * a local-only id is a stable per-person key once it reaches Umami.
  *
  * Internal AttemptLinkResult/SyncWeekResult `reason` enums are normalized
  * to a documented telemetry taxonomy so internal renames don't leak.
@@ -38,14 +38,12 @@ const LINK_FAILURE_KIND = (reason: string): string => {
 export const emitSyncResult = (
   analytics: Analytics,
   source: string,
-  profileId: string,
   result: SyncWeekResult,
   durationMs: number
 ): void => {
   if (result.ok) {
     analytics.event("coaching.sync.success", {
       source,
-      profileId,
       activityCount: result.activityCount,
       orphansDeleted: result.orphansDeleted,
       durationMs,
@@ -53,7 +51,6 @@ export const emitSyncResult = (
   } else {
     analytics.event("coaching.sync.failure", {
       source,
-      profileId,
       errorKind: SYNC_FAILURE_KIND(result.reason),
       isAutoSync: false,
     });
@@ -63,24 +60,21 @@ export const emitSyncResult = (
 export const emitLinkResult = (
   analytics: Analytics,
   source: string,
-  profileId: string,
   result: AttemptLinkResult
 ): void => {
   if (result.ok) {
-    analytics.event("coaching.link.success", { source, profileId });
+    analytics.event("coaching.link.success", { source });
     return;
   }
   if (result.reason === "aborted") {
     analytics.event("coaching.link.abort", {
       source,
-      profileId,
       reason: "user-cancelled",
     });
     return;
   }
   analytics.event("coaching.link.failure", {
     source,
-    profileId,
     errorKind: LINK_FAILURE_KIND(result.reason),
   });
 };

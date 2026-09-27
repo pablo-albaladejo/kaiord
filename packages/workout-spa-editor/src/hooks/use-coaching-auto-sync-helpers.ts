@@ -40,14 +40,12 @@ export const runSourceSync = async (
     if (!isStale(row?.lastSyncedAt, now)) return "skipped";
     analytics.event("coaching.sync.invoked", {
       source: src.id,
-      profileId,
       trigger,
     });
     await src.sync(weekStart);
     if (src.error) {
       analytics.event("coaching.sync.failure", {
         source: src.id,
-        profileId,
         errorKind: "transport-error",
         isAutoSync: true,
       });
@@ -58,7 +56,6 @@ export const runSourceSync = async (
     // Silent; raw exception text never reaches telemetry.
     analytics.event("coaching.sync.failure", {
       source: src.id,
-      profileId,
       errorKind: "transport-error",
       isAutoSync: true,
     });

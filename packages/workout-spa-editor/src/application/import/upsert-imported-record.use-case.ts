@@ -49,7 +49,6 @@ export const upsertImportedRecord = async (
 
   if (existing) {
     analytics?.event("import_completed", {
-      profileId: input.profileId,
       dataType: input.dataType,
       bridgeId: input.sourceBridgeId,
       durationMs: Date.now() - t0,
@@ -73,7 +72,6 @@ export const upsertImportedRecord = async (
   });
 
   analytics?.event("import_completed", {
-    profileId: input.profileId,
     dataType: input.dataType,
     bridgeId: input.sourceBridgeId,
     durationMs: Date.now() - t0,

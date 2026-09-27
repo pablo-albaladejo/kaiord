@@ -48,7 +48,6 @@ export const upsertIntegrationPolicy = async (
           ? "mode_changed"
           : "enabled";
     const baseProps = {
-      profileId: input.profileId,
       dataType: input.dataType,
       direction: input.direction,
       bridgeId: input.bridgeId,
@@ -72,7 +71,6 @@ export const upsertIntegrationPolicy = async (
   await deps.policyRepo.put(row);
 
   deps.analytics?.event("integration_policy.toggled", {
-    profileId: input.profileId,
     dataType: input.dataType,
     direction: input.direction,
     bridgeId: input.bridgeId,
