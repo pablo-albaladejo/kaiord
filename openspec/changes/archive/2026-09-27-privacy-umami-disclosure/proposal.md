@@ -1,3 +1,5 @@
+> Completed: 2026-09-27
+
 # Proposal: Disclose Umami analytics in the privacy policy
 
 ## Why

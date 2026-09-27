@@ -1,4 +1,4 @@
-> Synced: 2026-06-14 (add-spa-ai-chatbot)
+> Synced: 2026-09-27 (privacy-umami-disclosure)
 
 # Privacy Policy
 
@@ -22,7 +22,7 @@ The docs site SHALL include a privacy policy page at `/legal/privacy-policy`. Th
 The privacy policy SHALL cover the following topics:
 
 - **Data controller identity**: The policy SHALL state that Kaiord operates no backend and that processing is entirely client-side, so there is no Kaiord-operated data controller beyond the user
-- **Data collection**: The project does NOT collect personal data, analytics, or telemetry
+- **Data collection**: The policy SHALL disclose that the website, docs and web editor use Umami, a cookie-less analytics tool that records anonymous page views and product events (e.g. 'workout exported'), and that it never records the user's workouts, health data or API keys. The policy SHALL state that no cookies are used for tracking. The Chrome extensions include no telemetry (see each extension's section)
 - **Client-side storage disclosure**: The policy SHALL state that workout-editor state (workouts, templates, profiles, AI provider keys, sync state, chat transcripts) is stored locally in the user's browser via IndexedDB / Dexie, and that nothing is sent to a Kaiord-operated server
 - **LLM provider data flow**: The policy SHALL disclose that, when the user configures AI features, prompts and workout content are sent directly from the browser to the chosen LLM provider (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service, and that Kaiord does not receive or relay this data. For the chat assistant specifically, the policy SHALL disclose that summaries of the user's locally stored history — including workout, coaching, and health data (e.g. sleep) — are sent to the configured provider only when the user converses with the assistant, and never in the background. The policy SHALL also state that chat transcripts are stored locally and, when the user enables cross-device sync, are included in the sync snapshot stored in the user's own cloud storage — never on a Kaiord-operated server
 - **Garmin Bridge extension data handling**: The Garmin Bridge extension mints an OAuth token from the user's existing Garmin sign-in session (service ticket → OAuth1 → OAuth2) and stores it in `chrome.storage.local` so it can call Garmin's API on the user's behalf across service-worker restarts; the token is sent only to Garmin as a Bearer credential and never to a Kaiord-operated server. No password is entered or seen by the extension. With the user's action it may also upload a body-composition measurement (weight plus derived metrics such as body-fat percentage) to Garmin Connect as a FIT file, declaring the `write:body` capability; it only ever sends data the user supplies from the editor and never reads the user's Garmin body-composition history
@@ -34,7 +34,7 @@ The privacy policy SHALL cover the following topics:
 - **Exhaustive credential-path disclosure**: For each extension, the policy SHALL enumerate **every** path by which a credential or personal datum enters or leaves the extension, not merely a representative one. A section in which every individual sentence is true but a capture, storage, derivation, or egress path is omitted SHALL be treated as a policy violation of the same severity as a false statement
 - **Permission disclosure symmetry**: Each extension's section SHALL name the `permissions` its manifest declares and SHALL state which credential-adjacent permissions it does NOT declare (at minimum `cookies`, and the request-mutation permissions `webRequestBlocking` / `declarativeNetRequest*`). Where an extension declares a permission that grants direct credential access — today only `webRequest` on `@kaiord/whoop-bridge` — the policy SHALL say so explicitly and SHALL describe the read-only nature of its use
 - **No password handling**: No extension reads, stores, or transmits user passwords. The Garmin Bridge stores an OAuth token minted from the user's own session locally (see Garmin Bridge data handling) and sends it only to Garmin; no extension transmits credentials to a Kaiord-operated server
-- **No third-party sharing**: No data is shared with third parties beyond the user-configured LLM provider disclosed above
+- **No third-party sharing**: No data is shared with third parties beyond the user-configured LLM provider and the anonymous Umami analytics disclosed above
 - **Communication scope**: Each extension only communicates with its declared hosts (`connect.garmin.com`, `connectapi.garmin.com`, `sso.garmin.com` / `app.train2go.com` / `mytanita.eu` / `tpapi.trainingpeaks.com` / `app.whoop.com`, `api.prod.whoop.com`) and allowed Kaiord origins. The Kaiord-origin channel (`externally_connectable`) SHALL be described as one-way inbound (editor → extension)
 - **Runtime discovery disclosure**: The policy SHALL disclose the announce-only content script injected into SPA origins (`https://*.kaiord.com/*` in production, additionally `http://localhost/*` in development) and SHALL state that the script only posts a fixed announcement object via `window.postMessage`, does not read SPA DOM / cookies / storage / network, and does not modify the page
 - **Localhost dev disclosure**: The policy SHALL disclose that local-development manifests additionally accept messages from `http://localhost:5173` / `http://localhost:5174` via `externally_connectable`, that the announce content script injects on `http://localhost/*`, and SHALL state that these development-only matches are stripped from the production manifest before CWS submission
@@ -51,7 +51,21 @@ The privacy policy SHALL cover the following topics:
 #### Scenario: Policy states no data collection
 
 - **WHEN** the privacy policy is read
-- **THEN** it SHALL explicitly state that no personal data, analytics, or telemetry is collected
+- **THEN** it SHALL state that no personal data is collected server-side
+- **AND** it SHALL NOT claim that no analytics are collected, because anonymous analytics are (see "Policy discloses anonymous analytics")
+
+#### Scenario: Policy discloses anonymous analytics
+
+- **WHEN** the privacy policy is read
+- **THEN** it SHALL state that Umami, a cookie-less analytics tool, records anonymous page views and product events on the website, docs and web editor
+- **AND** it SHALL state that the analytics never record the user's workouts, health data or API keys
+- **AND** it SHALL NOT claim that Kaiord collects no analytics
+
+#### Scenario: Restoring the "no analytics" claim fails the policy lint
+
+- **GIVEN** the policy's Umami disclosure is replaced with the former sentence stating that Kaiord does not collect any personal data, analytics, or telemetry
+- **WHEN** `pnpm -C packages/docs lint:privacy-policy` runs
+- **THEN** it SHALL fail, reporting the missing Umami analytics disclosure
 
 #### Scenario: Policy describes Garmin Bridge data handling
 
