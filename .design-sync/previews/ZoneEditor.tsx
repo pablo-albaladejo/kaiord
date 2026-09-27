@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { ComponentProps } from "react";
 
 import * as S from "@ds-stories/packages/workout-spa-editor/src/components/organisms/ZoneEditor/ZoneEditor.stories";
@@ -22,9 +22,12 @@ function setNativeValue(input: HTMLInputElement, value: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-/** Zone 1's max input: the first control labelled "Max %". */
-function findZoneOneMax(): HTMLInputElement | null {
-  const label = Array.from(document.querySelectorAll("label")).find((el) =>
+/**
+ * Zone 1's max input: the first control labelled "Max %" inside `root`.
+ * Scoped because a multi-story card mounts several editors side by side.
+ */
+function findZoneOneMax(root: HTMLElement): HTMLInputElement | null {
+  const label = Array.from(root.querySelectorAll("label")).find((el) =>
     /max %/i.test(el.textContent ?? "")
   );
   const control = label?.control;
@@ -32,10 +35,13 @@ function findZoneOneMax(): HTMLInputElement | null {
 }
 
 /** Poll per frame (bounded) until the rows have mounted, then act. */
-function whenZonesReady(run: (input: HTMLInputElement) => void) {
+function whenZonesReady(
+  root: HTMLElement,
+  run: (input: HTMLInputElement) => void
+) {
   let frames = 0;
   const tick = () => {
-    const input = findZoneOneMax();
+    const input = findZoneOneMax(root);
     if (input) return run(input);
     if (frames++ < 120) requestAnimationFrame(tick);
   };
@@ -57,12 +63,19 @@ export const HeartRateZonesWithoutLthr = () => (
 
 /** Story `play` clears zone 1's max, then types 0 — max below min. */
 export const ValidationError = () => {
+  const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    whenZonesReady((input) => {
+    const root = rootRef.current;
+    if (!root) return;
+    whenZonesReady(root, (input) => {
       input.focus();
       setNativeValue(input, "");
       setNativeValue(input, "0");
     });
   }, []);
-  return <ZoneEditor {...argsOf(S.ValidationError)} />;
+  return (
+    <div ref={rootRef} style={{ display: "contents" }}>
+      <ZoneEditor {...argsOf(S.ValidationError)} />
+    </div>
+  );
 };
