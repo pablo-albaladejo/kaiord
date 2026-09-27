@@ -1,3 +1,5 @@
+> Completed: 2026-09-27
+
 # Proposal: Keep per-person identifiers out of Umami
 
 ## Why
