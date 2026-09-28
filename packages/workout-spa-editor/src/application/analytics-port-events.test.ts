@@ -145,7 +145,6 @@ describe("analytics-port events — integration_policy.toggled", () => {
     );
     expect(toggled).toBeDefined();
     expect(toggled?.props).toMatchObject({
-      profileId: PROFILE_ID,
       dataType: "weight",
       direction: "import",
       bridgeId: "garmin-bridge",
@@ -242,7 +241,6 @@ describe("analytics-port events — import_completed", () => {
     const ev = analytics.events.find((e) => e.name === "import_completed");
     expect(ev).toBeDefined();
     expect(ev?.props).toMatchObject({
-      profileId: PROFILE_ID,
       dataType: "weight",
       bridgeId: "garmin-bridge",
       outcome: "inserted",

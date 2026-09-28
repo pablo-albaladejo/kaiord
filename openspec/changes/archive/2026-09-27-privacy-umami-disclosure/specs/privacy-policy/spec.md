@@ -1,21 +1,4 @@
-> Synced: 2026-09-27 (privacy-umami-disclosure)
-
-# Privacy Policy
-
-## Purpose
-
-Public privacy-policy content and coverage requirements across every Kaiord surface that handles user data (website, docs, workout editor, garmin-bridge, train2go-bridge, tanita-bridge, trainingpeaks-bridge, whoop-bridge).
-
-## Requirements
-
-### Requirement: Privacy policy page
-
-The docs site SHALL include a privacy policy page at `/legal/privacy-policy`. The page SHALL be a VitePress markdown file at `packages/docs/legal/privacy-policy.md`.
-
-#### Scenario: Privacy policy is accessible
-
-- **WHEN** a user navigates to `https://kaiord.com/docs/legal/privacy-policy`
-- **THEN** the privacy policy page SHALL render with the full policy text
+## MODIFIED Requirements
 
 ### Requirement: Privacy policy content
 
@@ -157,12 +140,3 @@ The privacy policy SHALL cover the following topics:
 
 - **WHEN** the `pnpm -C packages/docs lint:privacy-policy` command runs in CI
 - **THEN** it SHALL verify that the policy file contains all the required disclosures listed in this spec and fail the build if any are missing
-
-### Requirement: Privacy policy navigation
-
-The privacy policy page SHALL be accessible from the docs site navigation. It SHALL appear in a "Legal" section in the sidebar.
-
-#### Scenario: Privacy policy appears in sidebar
-
-- **WHEN** a user browses the docs site
-- **THEN** a "Legal" section SHALL appear in the sidebar with a "Privacy Policy" link
