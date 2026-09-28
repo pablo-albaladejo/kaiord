@@ -2,6 +2,7 @@ import type {
   KRD,
   ListOptions,
   Logger,
+  PushOptions,
   PushResult,
   WorkoutService,
   WorkoutSummary,
@@ -9,6 +10,7 @@ import type {
 import {
   createConsoleLogger,
   createServiceApiError,
+  MissingFtpError,
   toText,
 } from "@kaiord/core";
 import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
@@ -28,11 +30,15 @@ export type GarminWorkoutClient = WorkoutService;
 const pushWorkout = async (
   krd: KRD,
   httpClient: GarminHttpClient,
-  garminWriter: ReturnType<typeof createGarminWriter>,
-  log: Logger
+  log: Logger,
+  options?: PushOptions
 ): Promise<PushResult> => {
   try {
     log.info("Pushing workout to Garmin Connect");
+    const garminWriter = createGarminWriter({
+      logger: log,
+      ftpWatts: options?.ftpWatts,
+    });
     const gcnJson = await toText(krd, garminWriter, log);
     const payload = JSON.parse(gcnJson) as Record<string, unknown>;
     const raw = await httpClient.post<unknown>(
@@ -46,6 +52,7 @@ const pushWorkout = async (
       url: garminWorkoutWebUrl(result.workoutId),
     };
   } catch (error) {
+    if (error instanceof MissingFtpError) throw error;
     throw createServiceApiError("Failed to push workout", undefined, error);
   }
 };
@@ -78,11 +85,10 @@ export const createGarminWorkoutService = (
   logger?: Logger
 ): GarminWorkoutClient => {
   const log = logger ?? createConsoleLogger();
-  const garminWriter = createGarminWriter(log);
   const garminReader = createGarminReader(log);
 
   return {
-    push: (krd) => pushWorkout(krd, httpClient, garminWriter, log),
+    push: (krd, opts) => pushWorkout(krd, httpClient, log, opts),
     pull: (id) => pullWorkout(id, httpClient, garminReader, log),
     list: (opts) => listWorkouts(httpClient, log, opts),
     remove: (id) => removeWorkout(id, httpClient, log),

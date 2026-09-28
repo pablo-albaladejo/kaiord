@@ -1,4 +1,5 @@
 import type { KRD, Logger } from "@kaiord/core";
+import { MissingFtpError } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
 import type { GarminHttpClient } from "../http/types";
@@ -41,6 +42,40 @@ const sampleKrd: KRD = {
       ],
     },
   },
+};
+
+const FTP_W = 250;
+const SWEET_SPOT_PCT = 85;
+const SWEET_SPOT_W = 213;
+
+type GcnPayload = {
+  workoutSegments: [
+    { workoutSteps: [{ targetValueOne: number; targetValueTwo: number }] },
+  ];
+};
+
+const withPercentFtpStep = (krd: KRD): KRD => {
+  const workout = krd.extensions?.structured_workout as {
+    steps: Array<Record<string, unknown>>;
+  };
+  return {
+    ...krd,
+    extensions: {
+      structured_workout: {
+        ...workout,
+        steps: [
+          {
+            ...workout.steps[0],
+            targetType: "power",
+            target: {
+              type: "power",
+              value: { unit: "percent_ftp", value: SWEET_SPOT_PCT },
+            },
+          },
+        ],
+      },
+    },
+  };
 };
 
 describe("createGarminWorkoutService", () => {
@@ -91,6 +126,36 @@ describe("createGarminWorkoutService", () => {
       `${WORKOUT_URL}/workout`,
       expect.any(Object)
     );
+  });
+
+  it("should resolve percent_ftp power targets with the push ftpWatts option", async () => {
+    // Arrange
+    const httpClient = createMockHttpClient();
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+    const krd = withPercentFtpStep(sampleKrd);
+
+    // Act
+    await service.push(krd, { ftpWatts: FTP_W });
+
+    // Assert
+    const payload = vi.mocked(httpClient.post).mock.calls[0][1] as GcnPayload;
+    const step = payload.workoutSegments[0].workoutSteps[0];
+    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+  });
+
+  it("should reject with MissingFtpError before calling Garmin when no FTP is given", async () => {
+    // Arrange
+    const httpClient = createMockHttpClient();
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+    const krd = withPercentFtpStep(sampleKrd);
+
+    // Act
+    const push = service.push(krd);
+
+    // Assert
+    await expect(push).rejects.toBeInstanceOf(MissingFtpError);
+    expect(httpClient.post).not.toHaveBeenCalled();
   });
 
   it("should throw a ServiceApiError when push fails", async () => {
