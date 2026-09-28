@@ -231,12 +231,9 @@ jobs:
             --base indexnow/base/landing.xml indexnow/base/docs.xml \
             --old indexnow/live-landing.xml indexnow/live-docs.xml \
             --new merged-dist/sitemap-landing.xml merged-dist/docs/sitemap.xml \
+            --keep indexnow/built/landing.xml indexnow/built/docs.xml \
             --out indexnow/urls.txt
           cat indexnow/urls.txt
-          # The next baseline, saved by the indexnow job only if it submits.
-          mkdir -p indexnow/built
-          cp merged-dist/sitemap-landing.xml indexnow/built/landing.xml
-          cp merged-dist/docs/sitemap.xml indexnow/built/docs.xml
 
       - name: Upload IndexNow URL list
         uses: actions/upload-artifact@v7
@@ -407,13 +404,25 @@ jobs:
         run: node scripts/geo/indexnow.mjs submit indexnow/urls.txt
 
       # Only a submit that succeeded (or had nothing to send) moves the
-      # comparison point; after a failure the next deploy resends these URLs.
+      # comparison point, and only if the diff had one: without a baseline or
+      # a live sitemap it keeps no candidate (indexnow/built is absent), so
+      # the next deploy still compares from before the changes it skipped.
+      # After a failed submit the next deploy resends these URLs.
       - name: Keep these sitemaps as the next baseline
+        id: promote
         if: steps.submit.outputs.result == 'ok' || steps.submit.outputs.result == 'skipped'
-        run: mv indexnow/built indexnow/base
+        run: |
+          set -e
+          if [ ! -f indexnow/built/landing.xml ] || [ ! -f indexnow/built/docs.xml ]; then
+            echo "No comparison point this deploy; the baseline stays where it was."
+            exit 0
+          fi
+          rm -rf indexnow/base
+          mv indexnow/built indexnow/base
+          echo "saved=true" >> "$GITHUB_OUTPUT"
 
       - name: Save the baseline
-        if: steps.submit.outputs.result == 'ok' || steps.submit.outputs.result == 'skipped'
+        if: steps.promote.outputs.saved == 'true'
         uses: actions/cache/save@v6
         with:
           path: indexnow/base
