@@ -7,7 +7,7 @@ description: "Free, in-browser converter for FIT, TCX, ZWO, and Garmin Connect w
 
 Convert workout files between **FIT**, **TCX**, **ZWO** (Zwift), and **Garmin
 Connect** formats — free, in your browser, with no account and no file upload.
-Drop a file into the [Kaiord Editor](https://kaiord.com/editor/) and download
+Drop a file into the [Kaiord Editor](https://kaiord.com/app/) and download
 the result. Developers can script the same conversions with the
 [CLI](/cli/commands) or the [TypeScript SDK](/guide/quick-start).
 
@@ -30,7 +30,7 @@ format is detected from the file extension.
 
 ## Three ways to convert
 
-1. **Editor** — [kaiord.com/editor](https://kaiord.com/editor/). Drag & drop a
+1. **Editor** — [kaiord.com/app](https://kaiord.com/app/). Drag & drop a
    file, pick the target format, download. Nothing leaves your browser.
 2. **CLI** — `kaiord convert -i workout.fit -o workout.zwo`. Formats are
    detected from the extensions. See the [CLI reference](/cli/commands#convert).
