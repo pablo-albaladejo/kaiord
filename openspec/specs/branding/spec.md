@@ -33,7 +33,7 @@ The project SHALL have a favicon derived from the logo symbol (without wordmark)
 
 #### Scenario: Favicon displays in browser tab
 
-- **WHEN** a user opens `kaiord.com` or `kaiord.com/editor/`
+- **WHEN** a user opens `kaiord.com` or `kaiord.com/app/`
 - **THEN** the browser tab SHALL display the Kaiord favicon instead of the default Vite icon
 
 #### Scenario: Apple touch icon
@@ -52,7 +52,7 @@ Both the landing page and the editor SHALL include Open Graph meta tags for soci
 
 #### Scenario: Editor shared on social media
 
-- **WHEN** a user shares `kaiord.com/editor/`
+- **WHEN** a user shares `kaiord.com/app/`
 - **THEN** the preview SHALL show "Kaiord Editor" as title with appropriate description
 
 ### Requirement: Twitter Card meta tags

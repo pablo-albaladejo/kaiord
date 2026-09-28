@@ -8,6 +8,7 @@
  *   updated   — stale committed row, re-POST and update the ledger
  */
 import type { ExportLedgerRepository } from "./export-ledger-repository.port";
+import { commitByKey } from "./record-export-commit";
 import type { RecordExportResult } from "./record-export-post";
 
 export const handleConstraintResult = async (
@@ -39,12 +40,12 @@ export const handleConstraintResult = async (
     return { ledgerId: existing.id, outcome: "lost-race" };
   }
 
-  // Stale committed row — update remote then update ledger.
+  // Stale committed row — update remote, then commit by natural key.
   const { externalId } = await postFn(payload);
-  await ledgerRepo.update(existing.id, {
+  const ledgerId = await commitByKey(ledgerRepo, existing, {
     destinationExternalId: externalId,
     contentHash,
     exportedAt: now,
   });
-  return { ledgerId: existing.id, outcome: "updated", externalId };
+  return { ledgerId, outcome: "updated", externalId };
 };

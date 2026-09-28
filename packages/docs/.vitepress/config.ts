@@ -3,6 +3,13 @@ import llmstxt from "vitepress-plugin-llms";
 import type { HeadConfig, TransformContext } from "vitepress";
 
 import { buildStaticHead } from "./head-config.mjs";
+import {
+  apiSourcePaths,
+  gitLastmod,
+  hasFullHistory,
+  isNoindexPath,
+  isNoindexUrl,
+} from "./indexing.mjs";
 
 const SITE_URL = "https://kaiord.com";
 const DOCS_BASE = "/docs/";
@@ -24,34 +31,54 @@ const AUTHOR = {
   github: "https://github.com/pablo-albaladejo",
 };
 
-function buildJsonLd(
-  pageData: { relativePath: string; title: string; description: string },
-  isHome: boolean
-): string[] {
-  const pageUrl = pageCanonicalUrl(pageData.relativePath);
-  const segments = pageData.relativePath
+// A crumb links the page that actually serves its path. A segment with no
+// page of its own (`api/core/type-aliases/`) gets no crumb: its URL is a 404,
+// and `scripts/check-site-links.mjs` rejects any link to one.
+function breadcrumbItems(relativePath: string, pages: ReadonlySet<string>) {
+  const segments = relativePath
     .replace(/\.md$/, "")
-    .replace(/\/index$/, "")
+    .replace(/(^|\/)index$/, "")
     .split("/")
     .filter(Boolean);
+  const crumbs = [{ name: "Docs", item: `${SITE_URL}${DOCS_BASE}` }];
+  segments.forEach((seg, i) => {
+    const prefix = segments.slice(0, i + 1).join("/");
+    const page =
+      i === segments.length - 1
+        ? relativePath
+        : [`${prefix}.md`, `${prefix}/index.md`, `${prefix}/README.md`].find(
+            (candidate) => pages.has(candidate)
+          );
+    const item = page && pageCanonicalUrl(page);
+    if (item && item !== crumbs[crumbs.length - 1].item) {
+      const name =
+        seg === "api" ? "API" : seg.charAt(0).toUpperCase() + seg.slice(1);
+      crumbs.push({ name: name.replace(/-/g, " "), item });
+    }
+  });
+  return crumbs.map((crumb, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    ...crumb,
+  }));
+}
+
+function buildJsonLd(
+  pageData: {
+    relativePath: string;
+    title: string;
+    description: string;
+    lastUpdated?: number;
+  },
+  isHome: boolean,
+  pages: ReadonlySet<string>
+): string[] {
+  const pageUrl = pageCanonicalUrl(pageData.relativePath);
 
   const breadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Docs",
-        item: `${SITE_URL}${DOCS_BASE}`,
-      },
-      ...segments.map((seg, i) => ({
-        "@type": "ListItem",
-        position: i + 2,
-        name: seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " "),
-        item: `${SITE_URL}${DOCS_BASE}${segments.slice(0, i + 1).join("/")}/`,
-      })),
-    ],
+    itemListElement: breadcrumbItems(pageData.relativePath, pages),
   };
 
   const results = [JSON.stringify(breadcrumb)];
@@ -79,6 +106,9 @@ function buildJsonLd(
       headline: pageData.title,
       description: pageData.description,
       url: pageUrl,
+      ...(pageData.lastUpdated
+        ? { dateModified: new Date(pageData.lastUpdated).toISOString() }
+        : {}),
       author: {
         "@type": "Person",
         name: AUTHOR.name,
@@ -91,6 +121,41 @@ function buildJsonLd(
   return results;
 }
 
+// A shallow clone answers HEAD's date for every file, so "last updated"
+// would be the same wrong date everywhere: without full history, dates are
+// left out (and REQUIRE_FULL_HISTORY=1 makes that an error instead).
+const FULL_HISTORY = hasFullHistory();
+
+// `siteConfig.pages` is the same array for every page of a build; build the
+// lookup Set once per build instead of once per page.
+const pageSets = new WeakMap<string[], ReadonlySet<string>>();
+function pageSet(pages: string[]): ReadonlySet<string> {
+  let set = pageSets.get(pages);
+  if (!set) {
+    set = new Set(pages);
+    pageSets.set(pages, set);
+  }
+  return set;
+}
+
+type SitemapItem = { url: string; lastmod?: string | number };
+
+// Only indexable pages are listed. VitePress dates tracked pages from git;
+// the generated (gitignored) API entry pages are dated by their package
+// sources instead.
+function sitemapItems(items: SitemapItem[]): SitemapItem[] {
+  const kept = items.filter((item) => !isNoindexUrl(item.url));
+  const packages = kept
+    .map((item) => item.url.match(/^api\/([^/]+)\//)?.[1])
+    .filter((pkg): pkg is string => Boolean(pkg));
+  return kept.map((item) => {
+    if (!FULL_HISTORY) return { url: item.url };
+    if (!/^api(\/|$)/.test(item.url)) return item;
+    const lastmod = gitLastmod(apiSourcePaths(item.url, packages));
+    return lastmod ? { ...item, lastmod } : { url: item.url };
+  });
+}
+
 const config = {
   lang: "en",
   title: "Kaiord",
@@ -101,7 +166,9 @@ const config = {
   // AGENTS.md files are agent-facing documentation, not part of the public
   // docs site. Exclude them from the VitePress build (dead-link checking,
   // sitemap, llmstxt) but keep them on disk for AI agents to read.
-  srcExclude: ["**/AGENTS.md"],
+  // README.md and CHANGELOG.md at the docs root are package files, not docs
+  // pages; root-anchored so the generated `api/<pkg>/README.md` indexes stay.
+  srcExclude: ["**/AGENTS.md", "README.md", "CHANGELOG.md"],
 
   head: buildStaticHead({
     docsBase: DOCS_BASE,
@@ -114,7 +181,10 @@ const config = {
   // (kaiord.com/CHANGELOG instead of kaiord.com/docs/CHANGELOG).
   sitemap: {
     hostname: `${SITE_URL}${DOCS_BASE}`,
+    transformItems: sitemapItems,
   },
+
+  lastUpdated: FULL_HISTORY,
 
   // Extensionless URLs (GitHub Pages resolves /page to page.html). Cleaner
   // canonical URLs for search engines and AI-agent citations; the .html
@@ -222,6 +292,8 @@ const config = {
       provider: "local",
     },
 
+    lastUpdated: { text: "Last updated" },
+
     outline: {
       level: [2, 3],
       label: "On this page",
@@ -264,7 +336,7 @@ const config = {
     plugins: [...llmstxt()],
   },
 
-  transformHead({ pageData }: TransformContext) {
+  transformHead({ pageData, siteConfig }: TransformContext) {
     const head: HeadConfig[] = [];
     const isHome = pageData.relativePath === "index.md";
 
@@ -272,6 +344,10 @@ const config = {
       "link",
       { rel: "canonical", href: pageCanonicalUrl(pageData.relativePath) },
     ]);
+
+    if (isNoindexPath(pageData.relativePath)) {
+      head.push(["meta", { name: "robots", content: "noindex,follow" }]);
+    }
 
     if (pageData.frontmatter.title) {
       head.push([
@@ -294,8 +370,10 @@ const config = {
         relativePath: pageData.relativePath,
         title: pageData.frontmatter.title || pageData.title,
         description: pageData.frontmatter.description || pageData.description,
+        lastUpdated: pageData.lastUpdated,
       },
-      isHome
+      isHome,
+      pageSet(siteConfig.pages)
     );
 
     for (const block of jsonLdBlocks) {
