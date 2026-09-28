@@ -14,6 +14,10 @@
  *   every id its queue knew in `supersedes` (the entry exists, its id is
  *   unknown); `ambiguous` may or may not have created it and leaves
  *   `uncertain{previous}`.
+ * - post / commit: the same push split at the POST, so a sync or another
+ *   device's T5 can land in between. `post-*` claims (`attempting`, its
+ *   `supersedes` read from the queue now), marks it posted and mints the
+ *   id; `commit` merges its `Placed` into whatever the row holds by then.
  * - drain: sends every `retire` id and writes `gone`.
  * - abandon: every `retire` id failed three times (it stays on Garmin).
  * - dismiss: the athlete removes the lowest abandoned entry that is not the
@@ -68,6 +72,15 @@ type World = {
   pushes: number[];
   /** How many of `DATES` the pushes cycle through. */
   dates: number;
+  /** A device's POST that has not committed yet. */
+  inflight: (Inflight | null)[];
+};
+type Inflight = {
+  id: string;
+  date: string;
+  ok: boolean;
+  known: string[];
+  previous?: Placement;
 };
 type Step = { device: number; op: string };
 
@@ -210,6 +223,59 @@ function push(world: World, device: number, outcome: string) {
   world.devices[device] = stamp(world, device, next);
 }
 
+function post(world: World, device: number, ok: boolean) {
+  const row = world.devices[device];
+  const current = placementOf(row);
+  if (current?.kind === "uncertain" || current?.kind === "attempting") return;
+  const date = DATES[world.pushes[device]++ % world.dates];
+  const id = String(world.nextId++);
+  world.calendar.push({ id, date });
+  const previous =
+    current?.kind === "scheduled" || current?.kind === "unconfirmed"
+      ? current
+      : undefined;
+  const known = queueOf(row).map((e) => e.workoutScheduleId);
+  world.inflight[device] = { id, date, ok, known, previous };
+  const claimed = stamp(world, device, row);
+  const attempting = {
+    kind: "attempting",
+    workoutId: W,
+    date,
+    at: claimed.updatedAt,
+    posted: true,
+    ...(previous ? { previous } : {}),
+    supersedes: known,
+  };
+  world.devices[device] = { ...claimed, placement: attempting };
+}
+
+/** The commit, as the guard-failed path does it: merge our `Placed` into the
+    row as it is now (equal to a plain write when nothing changed). */
+function commit(world: World, device: number) {
+  const done = world.inflight[device];
+  if (!done) return;
+  world.inflight[device] = null;
+  const row = world.devices[device];
+  const placed = done.ok
+    ? scheduled(done.id, done.date)
+    : {
+        kind: "unconfirmed",
+        workoutId: W,
+        date: done.date,
+        supersedes: done.known,
+      };
+  const writes = [
+    ...(done.ok ? [entry(done.id, done.date, "keep")] : []),
+    ...retirePrevious(done.previous),
+  ];
+  const ours = stamp(
+    world,
+    device,
+    withQueue({ ...row, placement: placed }, writes)
+  );
+  world.devices[device] = hookMerge(row, ours);
+}
+
 function t5(world: World, device: number, readOk: boolean) {
   const row = world.devices[device];
   const current = placementOf(row);
@@ -309,6 +375,9 @@ function apply(world: World, { device, op }: Step): string | undefined {
   else if (op === "t5-read-fails") t5(world, device, false);
   else if (op === "abandon") abandon(world, device);
   else if (op === "dismiss") dismiss(world, device);
+  else if (op === "post-ok") post(world, device, true);
+  else if (op === "post-no-id") post(world, device, false);
+  else if (op === "commit") commit(world, device);
   else push(world, device, op.slice("push-".length));
 }
 
@@ -408,6 +477,7 @@ const world = (
   nextId,
   pushes: [0, 0, 0],
   dates,
+  inflight: [null, null, null],
 });
 
 /** A fresh world with `script` already applied. */
@@ -458,6 +528,14 @@ const unionWorld = scripted(
   ],
   2
 );
+
+/** B's POST to D1 was lost (`uncertain`); C (clock ahead) has POSTed to D1
+    with no id and not committed yet, so B's T5 can adopt C's entry, sync
+    and move on before C commits. */
+const claimWorld = scripted([
+  { device: 1, op: "push-ambiguous-lost" },
+  { device: 2, op: "post-no-id" },
+]);
 
 /** The round-1 shape: stateless queue entries, normalized to `held`. */
 const legacyWorld = (): World =>
@@ -548,6 +626,18 @@ const SCENARIOS: Scenario[] = [
     seed: unionWorld,
     alphabet: [...steps(["sync", "drain"]), ...steps(["push-no-id"], [1])],
     depth: 4,
+  },
+  {
+    name: "a sync between the POST and the commit",
+    seed: claimWorld,
+    alphabet: [
+      // No mid-path drains: every leaf settles, which drains, and the
+      // other scenarios drain mid-path.
+      ...steps(["commit", "sync"], [2]),
+      ...steps(["t5", "push-ok", "sync"], [1]),
+      ...steps(["sync"], [0]),
+    ],
+    depth: 5,
   },
   {
     name: "abandoned and dismissed entries",

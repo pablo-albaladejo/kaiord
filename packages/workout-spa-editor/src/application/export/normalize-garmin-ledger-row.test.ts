@@ -116,6 +116,28 @@ describe("normalizeGarminLedgerRow", () => {
     }
   );
 
+  it("should store a canonical supersedes on an attempting claim", () => {
+    // Arrange
+    const placement = {
+      kind: "attempting",
+      workoutId: "1707805999",
+      date: "2026-09-27",
+      at: "2026-09-26T08:00:00.000Z",
+      posted: true,
+    };
+    const claimed = garminRow({
+      placement: { ...placement, supersedes: ["9", "10", "9"] },
+    });
+
+    // Act
+    const legacy = normalizeGarminLedgerRow(garminRow({ placement }));
+    const next = normalizeGarminLedgerRow(claimed);
+
+    // Assert
+    expect(legacy.placement).toEqual({ ...placement, supersedes: [] });
+    expect(next.placement).toEqual({ ...placement, supersedes: ["9", "10"] });
+  });
+
   it("should keep the scheduled placement and previous ids, replacing a legacy entry", () => {
     // Arrange
     const placed = (id: string) => ({

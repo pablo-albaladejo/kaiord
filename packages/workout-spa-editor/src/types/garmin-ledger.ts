@@ -53,16 +53,19 @@ const scheduledSchema = z.object({
 export const canonicalScheduleIds = <T extends string>(ids: T[]): T[] =>
   [...new Set(ids)].sort((x, y) => x.length - y.length || (x < y ? -1 : 1));
 
-/** `supersedes`: the ids the row knew when it committed this id-less entry,
-    so none of them is it (design §3.9). Absent (legacy, adoption) = `[]`. */
+/** The queue ids read when the attempt was claimed, before its POST, so
+    none of them is the entry it creates (design §3.9). An id-less commit
+    copies it from `attempting`. Absent (legacy, adoption) = `[]`. */
+const supersedesSchema = z
+  .array(garminScheduleIdSchema)
+  .transform(canonicalScheduleIds)
+  .default([]);
+
 const unconfirmedPlacedSchema = z.object({
   kind: z.literal("unconfirmed"),
   workoutId: garminWorkoutIdSchema,
   date: calendarDate,
-  supersedes: z
-    .array(garminScheduleIdSchema)
-    .transform(canonicalScheduleIds)
-    .default([]),
+  supersedes: supersedesSchema,
 });
 
 export const garminPlacedSchema = z.discriminatedUnion("kind", [
@@ -81,6 +84,7 @@ export const garminPlacementSchema = z.discriminatedUnion("kind", [
     at: z.iso.datetime(),
     posted: z.boolean(),
     previous: garminPlacedSchema.optional(),
+    supersedes: supersedesSchema,
   }),
   z.object({
     kind: z.literal("uncertain"),
