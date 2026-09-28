@@ -90,7 +90,7 @@
       Put the eligibility in a pure function (`abandoned` and not `gone`,
       never `held`, never the current `Placed` or `previous`) and test that
       a `held` entry is not eligible. An `unconfirmed`
-      commit records `supersedes` (every queue id at the commit);
+      commit records the claim's `supersedes` (design §3.3);
       "It's in Garmin" and A3-false adoptions record `[]`.
 - [ ] 6.3 E2E stub: numeric ids, an in-memory calendar, `calendar-find`,
       `features`, failure injection and delays.
@@ -100,7 +100,12 @@
       `previous` becomes `retire`), seen held ids stay `held`, unseen ones
       `gone`; several matches →
       `duplicate-left` with states unchanged; the drain sends only
-      `retire` ids and writes `gone` on 204 or a verified 404.
+      `retire` ids and writes `gone` on 204 or a verified 404. The claim
+      records `supersedes` on `attempting` (the queue ids it reads) and an
+      id-less commit copies it. Test: a sync that imports another
+      device's adoption of the new entry between the POST and the commit
+      leaves that entry unlisted. "It's in Garmin" is offered only when no
+      non-`keep` entry shares the `uncertain`'s workout and date.
 - [ ] 6.5 Carried over from T4:
   - AC-17's "0 schedule calls" half (a failed library push makes no
     calendar call) needs this pipeline; test it here.
