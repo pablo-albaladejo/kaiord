@@ -213,16 +213,20 @@ const pushWorkout = async (gcn) => {
 // calendar entries. So a write whose outcome is unknown must be told apart
 // from one that never left, and nothing may start a write the SPA has
 // already given up waiting for. Each action therefore runs under one hard
-// deadline D from handler entry, delivered as an abort signal through
-// `fetchImpl` into every hop (refresh, mint, 401 re-mint, both attempts) and
-// raced against the token lifecycle (a joined mint included — see
-// garmin-oauth.js `raceAbort`). No write starts after SEND_CUTOFF_MS.
+// deadline D from handler entry, delivered as an abort signal on the
+// request itself and raced against the token lifecycle — a joined mint
+// included, see garmin-oauth.js `connectapiFetch`. The lifecycle runs on the
+// untimed `fetch`, so a mint other callers join is never aborted by this
+// caller's deadline. No write starts after SEND_CUTOFF_MS.
+//
+// D stays below the ~30 s Chrome gives a pending fetch in an MV3 service
+// worker, so the bridge, not Chrome, decides how a hung write ends.
 //
 // The vendored envelope has no `code` field, so the outcome travels in
 // `error`: DEADLINE_BEFORE_SEND (definite — nothing reached Garmin) or
 // DEADLINE_EXCEEDED (ambiguous — sent, then aborted; no status).
-const CALENDAR_DEADLINE_MS = 30000;
-const CALENDAR_SEND_CUTOFF_MS = 20000;
+const CALENDAR_DEADLINE_MS = 25000;
+const CALENDAR_SEND_CUTOFF_MS = 15000;
 const DEADLINE_BEFORE_SEND = "deadline-before-send";
 const DEADLINE_EXCEEDED = "deadline-exceeded";
 const SCHEDULE_PATH_PREFIX = "/workout-service/schedule/";
@@ -253,12 +257,12 @@ const deadlineError = (code) => {
 
 const calendarWrite = async (path, method, body) => {
   if (!isAllowed(method, path)) {
-    return { ok: false, error: "Blocked: disallowed path or method" };
+    throw refusal("Blocked: disallowed path or method");
   }
-  const startedAt = Date.now();
+  const startedAt = performance.now();
   const controller = new AbortController();
   const timer = setTimeout(
-    () => controller.abort(new Error(DEADLINE_EXCEEDED)),
+    () => controller.abort(new DOMException(DEADLINE_EXCEEDED, "AbortError")),
     CALENDAR_DEADLINE_MS
   );
   const writeUrl = `${garminOAuth.CONNECTAPI}${path}`;
@@ -269,7 +273,7 @@ const calendarWrite = async (path, method, body) => {
   const fetchImpl = async (url, init = {}) => {
     const isWrite = url === writeUrl;
     if (isWrite) {
-      if (Date.now() - startedAt >= CALENDAR_SEND_CUTOFF_MS) {
+      if (performance.now() - startedAt >= CALENDAR_SEND_CUTOFF_MS) {
         cutOff = true;
         throw deadlineError(DEADLINE_BEFORE_SEND);
       }
@@ -280,17 +284,14 @@ const calendarWrite = async (path, method, body) => {
     return res;
   };
   try {
-    return await garminOAuth.connectapiFetch(
-      path,
-      method,
-      body,
-      fetchImpl,
-      controller.signal
-    );
+    return await garminOAuth.connectapiFetch(path, method, body, fetchImpl, {
+      signal: controller.signal,
+      tokenFetchImpl: fetch,
+    });
   } catch (e) {
-    if (cutOff || (controller.signal.aborted && !sent)) {
-      throw deadlineError(DEADLINE_BEFORE_SEND);
-    }
+    // Nothing sent: any abort — ours or not — is definite.
+    const aborted = controller.signal.aborted || garminOAuth.isAbortError(e);
+    if (cutOff || (aborted && !sent)) throw deadlineError(DEADLINE_BEFORE_SEND);
     if (controller.signal.aborted) throw deadlineError(DEADLINE_EXCEEDED);
     throw e;
   } finally {

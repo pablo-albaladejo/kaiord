@@ -376,28 +376,30 @@ describe("garmin-oauth.js", () => {
   describe("raceAbort", () => {
     it("should settle with the promise when no signal is given", async () => {
       // Arrange
-      const work = Promise.resolve("token");
+      const start = () => Promise.resolve("token");
 
       // Act
-      const result = await garminOAuth.raceAbort(work, undefined);
+      const result = await garminOAuth.raceAbort(start, undefined);
 
       // Assert
       expect(result).toBe("token");
     });
 
-    it("should reject at once with the reason of an already-aborted signal", async () => {
+    it("should reject with the reason of an already-aborted signal without starting the work", async () => {
       // Arrange
       const controller = new AbortController();
       const reason = new Error("deadline");
       controller.abort(reason);
+      const start = vi.fn(() => Promise.reject(new Error("unhandled")));
 
       // Act
       const error = await garminOAuth
-        .raceAbort(new Promise(() => {}), controller.signal)
+        .raceAbort(start, controller.signal)
         .catch((e) => e);
 
       // Assert
       expect(error).toBe(reason);
+      expect(start).not.toHaveBeenCalled();
     });
 
     it("should reject when the signal aborts while the promise is pending", async () => {
@@ -405,7 +407,7 @@ describe("garmin-oauth.js", () => {
       const controller = new AbortController();
       const reason = new Error("deadline");
       const raced = garminOAuth
-        .raceAbort(new Promise(() => {}), controller.signal)
+        .raceAbort(() => new Promise(() => {}), controller.signal)
         .catch((e) => e);
 
       // Act
@@ -431,13 +433,9 @@ describe("garmin-oauth.js", () => {
       const controller = new AbortController();
       const reason = new Error("deadline");
       const joined = garminOAuth
-        .connectapiFetch(
-          "/workout-service/workouts",
-          "GET",
-          undefined,
-          fetch,
-          controller.signal
-        )
+        .connectapiFetch("/workout-service/workouts", "GET", undefined, fetch, {
+          signal: controller.signal,
+        })
         .catch((e) => e);
 
       // Act
@@ -448,6 +446,49 @@ describe("garmin-oauth.js", () => {
       expect(fetch).toHaveBeenCalledTimes(1);
       release(textResp("<html>no ticket</html>"));
       expect((await starter).needsReauth).toBe(true);
+    });
+
+    it("should run the token lifecycle on the untimed fetch, never the deadline one", async () => {
+      // Arrange
+      queueMint("minted");
+      fetch.mockResolvedValueOnce(jsonResp([]));
+      const timedFetch = vi.fn((url, init) => fetch(url, init));
+
+      // Act
+      const res = await garminOAuth.connectapiFetch(
+        "/workout-service/workouts",
+        "GET",
+        undefined,
+        timedFetch,
+        { signal: new AbortController().signal, tokenFetchImpl: fetch }
+      );
+
+      // Assert
+      expect(res.ok).toBe(true);
+      expect(timedFetch).toHaveBeenCalledTimes(1);
+      expect(timedFetch.mock.calls[0][0]).toBe(
+        "https://connectapi.garmin.com/workout-service/workouts"
+      );
+      expect(fetch).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe("ensureToken with an aborted refresh", () => {
+    it("should rethrow the abort instead of re-minting from the session", async () => {
+      // Arrange
+      await garminOAuth.saveTokens({
+        oauth1: { oauth_token: "t", oauth_token_secret: "s" },
+        oauth2: { access_token: "old", expires_at: nowSec() - 10 },
+      });
+      const reason = new DOMException("deadline", "AbortError");
+      fetch.mockRejectedValueOnce(reason);
+
+      // Act
+      const error = await garminOAuth.ensureToken(fetch).catch((e) => e);
+
+      // Assert
+      expect(error).toBe(reason);
+      expect(fetch).toHaveBeenCalledTimes(1);
     });
   });
 

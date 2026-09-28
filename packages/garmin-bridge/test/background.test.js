@@ -18,6 +18,8 @@ const {
   isIsoDate,
   CALENDAR_DEADLINE_MS,
   CALENDAR_SEND_CUTOFF_MS,
+  DEADLINE_BEFORE_SEND,
+  DEADLINE_EXCEEDED,
 } = require("../background.js");
 const pkg = require("../package.json");
 
@@ -894,34 +896,148 @@ describe("background.js", () => {
     );
   });
 
+  describe("calendar write outcomes without a deadline", () => {
+    const scheduleVia = async () => {
+      const sendResponse = vi.fn();
+      externalCb(
+        { action: "schedule", workoutId: "1707805999", date: "2026-09-29" },
+        SPA_SENDER,
+        sendResponse
+      );
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+      return sendResponse.mock.calls[0][0];
+    };
+
+    afterEach(() => {
+      fetch.mockReset();
+    });
+
+    it("should answer a 2xx whose body fails to parse with no status and no definite refusal", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.reject(new SyntaxError("Unexpected end of JSON")),
+      });
+
+      // Act
+      const envelope = await scheduleVia();
+
+      // Assert
+      expect(envelope.ok).toBe(false);
+      expect(envelope.status).toBeUndefined();
+      expect(envelope.retryable).not.toBe(false);
+      expect(envelope.needsReauth).toBeUndefined();
+    });
+
+    it("should answer a network failure on the POST with no status and no definite refusal", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+
+      // Act
+      const envelope = await scheduleVia();
+
+      // Assert
+      expect(envelope).toEqual({
+        ok: false,
+        protocolVersion: 1,
+        error: "Failed to fetch",
+      });
+    });
+
+    it("should keep a 5xx status on a failed schedule", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(textResp("busy", false, 503));
+
+      // Act
+      const envelope = await scheduleVia();
+
+      // Assert
+      expect(envelope).toEqual({
+        ok: false,
+        protocolVersion: 1,
+        error: "Schedule failed: 503",
+        status: 503,
+      });
+    });
+  });
+
   describe("calendar action deadline", () => {
+    // Every hung request is recorded so teardown can settle it: a mint runs
+    // on the untimed fetch and would otherwise stay in flight into the next
+    // test, which would join it.
+    let hung = [];
     // A fetch that never answers but, like the real one, rejects with the
     // signal's reason when its request is aborted.
     const hungFetch = (_url, init = {}) =>
-      new Promise((_resolve, reject) => {
+      new Promise((resolve, reject) => {
+        hung.push({ resolve, reject });
         init.signal?.addEventListener("abort", () =>
           reject(init.signal.reason)
         );
       });
+    const isSso = (url) => url.startsWith("https://sso.garmin.com/");
+    const isSchedule = (url) => url.includes("/workout-service/schedule/");
     const posts = () =>
       fetch.mock.calls.filter(
-        ([url, init]) =>
-          url.includes("/workout-service/schedule/") && init?.method === "POST"
+        ([url, init]) => isSchedule(url) && init?.method === "POST"
       );
+    const ssoCalls = () => fetch.mock.calls.filter(([url]) => isSso(url));
     const settle = (promise) =>
       promise.then(
         () => null,
         (e) => e
       );
+    const tracked = (promise) => {
+      const state = { done: false, value: undefined };
+      state.promise = promise.then(
+        (value) => Object.assign(state, { done: true, value }),
+        (value) => Object.assign(state, { done: true, value })
+      );
+      return state;
+    };
+    const ticketResp = () => textResp("<html>...ticket=ST-9-ABCdef...</html>");
+    // The rest of a successful mint after the ticket hop.
+    const mintTail = (url) =>
+      url.includes("/preauthorized")
+        ? Promise.resolve(textResp("oauth_token=T&oauth_token_secret=S"))
+        : Promise.resolve(jsonResp({ access_token: "new", expires_in: 3600 }));
+    const stubSigning = () => {
+      vi.spyOn(globalThis.crypto.subtle, "importKey").mockResolvedValue({});
+      vi.spyOn(globalThis.crypto.subtle, "sign").mockResolvedValue(
+        new Uint8Array(20).buffer
+      );
+    };
 
     beforeEach(() => {
-      vi.useFakeTimers();
+      hung = [];
+      vi.useFakeTimers({
+        toFake: ["setTimeout", "clearTimeout", "Date", "performance"],
+      });
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+      hung.forEach(({ reject }) => reject(new TypeError("teardown")));
+      await vi.advanceTimersByTimeAsync(0);
       vi.useRealTimers();
       vi.restoreAllMocks();
       fetch.mockReset();
+    });
+
+    it("should use a deadline below Chrome's 30 s pending-fetch limit", () => {
+      // Arrange
+      const chromeFetchLimitMs = 30000;
+
+      // Act
+      const margin = chromeFetchLimitMs - CALENDAR_DEADLINE_MS;
+
+      // Assert
+      expect(CALENDAR_DEADLINE_MS).toBe(25000);
+      expect(CALENDAR_SEND_CUTOFF_MS).toBe(15000);
+      expect(margin).toBeGreaterThan(0);
     });
 
     it("should end by D with no POST when a mint hop hangs", async () => {
@@ -934,7 +1050,7 @@ describe("background.js", () => {
       const error = await outcome;
 
       // Assert
-      expect(error.message).toBe("deadline-before-send");
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
       expect(error.retryable).toBe(true);
       expect(error.status).toBeUndefined();
       expect(posts()).toHaveLength(0);
@@ -942,10 +1058,7 @@ describe("background.js", () => {
 
     it("should refuse to start the POST once the send cut-off has passed", async () => {
       // Arrange
-      vi.spyOn(globalThis.crypto.subtle, "importKey").mockResolvedValue({});
-      vi.spyOn(globalThis.crypto.subtle, "sign").mockResolvedValue(
-        new Uint8Array(20).buffer
-      );
+      stubSigning();
       chrome.storage.local.set({
         garminOAuth1: { oauth_token: "t", oauth_token_secret: "s" },
         garminOAuth2: { access_token: "old", expires_at: 0 },
@@ -968,19 +1081,40 @@ describe("background.js", () => {
       const error = await outcome;
 
       // Assert
-      expect(error.message).toBe("deadline-before-send");
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
       expect(posts()).toHaveLength(0);
+    });
+
+    it("should refuse the retry POST after a 401 once the send cut-off has passed", async () => {
+      // Arrange
+      stubSigning();
+      seedTokens();
+      const lateTicket = CALENDAR_SEND_CUTOFF_MS + 1000;
+      fetch.mockImplementation((url) => {
+        if (isSchedule(url)) {
+          return Promise.resolve(textResp("Unauthorized", false, 401));
+        }
+        if (isSso(url)) {
+          return new Promise((resolve) =>
+            setTimeout(() => resolve(ticketResp()), lateTicket)
+          );
+        }
+        return mintTail(url);
+      });
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(lateTicket);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(posts()).toHaveLength(1);
     });
 
     it("should still end by D when it joins another caller's untimed mint", async () => {
       // Arrange
-      let release;
-      fetch.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            release = resolve;
-          })
-      );
+      fetch.mockImplementation(hungFetch);
       const starter = settle(handleAction({ action: "list" }));
       await vi.advanceTimersByTimeAsync(0);
       const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
@@ -990,17 +1124,67 @@ describe("background.js", () => {
       const error = await outcome;
 
       // Assert
-      expect(error.message).toBe("deadline-before-send");
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
       expect(fetch).toHaveBeenCalledTimes(1);
-      release(textResp("<html>no ticket</html>"));
+      hung[0].resolve(textResp("<html>no ticket</html>"));
       expect((await starter).needsReauth).toBe(true);
+    });
+
+    it("should end by D when a 401 re-mint joins an untimed mint started by list", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation((url, init) => {
+        if (isSso(url)) return hungFetch(url, init);
+        return Promise.resolve(textResp("Unauthorized", false, 401));
+      });
+      const starter = settle(handleAction({ action: "list" }));
+      await vi.advanceTimersByTimeAsync(0);
+      const outcome = tracked(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+
+      // Assert
+      expect(outcome.done).toBe(true);
+      expect(outcome.value.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(posts()).toHaveLength(1);
+      expect(ssoCalls()).toHaveLength(1);
+      hung[0].resolve(textResp("<html>no ticket</html>"));
+      expect((await starter).needsReauth).toBe(true);
+    });
+
+    it("should not fail a caller that joined the mint a calendar action started", async () => {
+      // Arrange
+      stubSigning();
+      fetch.mockImplementation((url, init) => {
+        if (isSso(url)) return hungFetch(url, init);
+        if (url.includes("/workout-service/workouts")) {
+          return Promise.resolve(jsonResp([{ workoutId: 7 }]));
+        }
+        return mintTail(url);
+      });
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+      await vi.advanceTimersByTimeAsync(0);
+      const joiner = settle(handleAction({ action: "list" }));
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+
+      // Act
+      hung[0].resolve(ticketResp());
+      await vi.advanceTimersByTimeAsync(0);
+
+      // Assert
+      expect((await outcome).message).toBe(DEADLINE_BEFORE_SEND);
+      expect(await joiner).toBeNull();
+      expect(ssoCalls()).toHaveLength(1);
+      expect(ssoCalls()[0][1].signal).toBeUndefined();
+      expect(posts()).toHaveLength(0);
     });
 
     it("should end by D with at most one POST when a 401 is followed by a hung re-mint", async () => {
       // Arrange
       seedTokens();
       fetch.mockImplementation((url, init) =>
-        url.includes("/workout-service/schedule/")
+        isSchedule(url)
           ? Promise.resolve(textResp("Unauthorized", false, 401))
           : hungFetch(url, init)
       );
@@ -1011,8 +1195,34 @@ describe("background.js", () => {
       const error = await outcome;
 
       // Assert
-      expect(error.message).toBe("deadline-before-send");
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
       expect(posts()).toHaveLength(1);
+    });
+
+    it("should answer an ambiguous deadline when the retry POST after a 401 re-mint hangs", async () => {
+      // Arrange
+      stubSigning();
+      seedTokens();
+      let postCount = 0;
+      fetch.mockImplementation((url, init) => {
+        if (isSchedule(url)) {
+          postCount += 1;
+          return postCount === 1
+            ? Promise.resolve(textResp("Unauthorized", false, 401))
+            : hungFetch(url, init);
+        }
+        return isSso(url) ? Promise.resolve(ticketResp()) : mintTail(url);
+      });
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_EXCEEDED);
+      expect(error.status).toBeUndefined();
+      expect(posts()).toHaveLength(2);
     });
 
     it("should answer an ambiguous deadline with no status when the POST hangs after it was sent", async () => {
@@ -1035,7 +1245,7 @@ describe("background.js", () => {
       expect(sendResponse).toHaveBeenCalledWith({
         ok: false,
         protocolVersion: 1,
-        error: "deadline-exceeded",
+        error: DEADLINE_EXCEEDED,
         retryable: true,
       });
     });
