@@ -18,6 +18,7 @@ on:
       - "scripts/emit-legacy-editor-page.mjs"
       - "scripts/check-site-links.mjs"
       - "scripts/lib/site-links-resolve.mjs"
+      - "scripts/lib/site-links-scan.mjs"
   workflow_dispatch:
 
 permissions:
@@ -34,8 +35,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # P95 = 118s; ceil(P95 × 1.5 / 60) = 3; capped at build-family ceiling 20.
-    # The legacy /editor/ page + site-link check add 0.03s + 0.12s (measured
-    # locally over the merged artifact): ceil((118 + 0.15) × 1.5 / 60) = 3.
+    # The added guards cost < 1s: the CI "Site guards" step (the same link
+    # check plus the docs tests) ran 12:14:22 → 12:14:22 in run 36420377432
+    # (PR #1267, same runner class), and the emitter only writes one file.
+    # ceil((118 + 1) × 1.5 / 60) = 3.
     timeout-minutes: 3
     outputs:
       spa_marker: ${{ steps.spa_marker.outputs.marker }}
@@ -197,7 +200,9 @@ jobs:
     # propagation sleep, per attempt. At 1 the job was cancelled exactly when
     # the retries were doing their job, and slow Pages propagation read as a
     # failed deploy. 10 covers the budget with room for the deploy step
-    # itself, well under the build-family ceiling 20.
+    # itself, well under the build-family ceiling 20. Each further smoke probe
+    # (one more curl at --max-time 15 per attempt) adds 10 × 15s = 150s to the
+    # worst case; recompute this budget when adding one.
     timeout-minutes: 10
     needs: build
     steps:
