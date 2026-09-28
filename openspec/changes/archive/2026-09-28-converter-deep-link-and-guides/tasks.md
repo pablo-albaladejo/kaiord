@@ -14,11 +14,13 @@
 
 - [x] 2.1 Scope callout and deep links on the 12 converter pages and the
       index; "Workouts vs. activities" section.
-- [x] 2.2 Four athlete guides in EN and ES; `es/index.md`.
+- [x] 2.2 Three athlete guides in EN and ES; `es/index.md`. Zwift-to-Garmin
+      guide deferred to #1279.
 - [x] 2.3 `es` locale, `i18nRouting: false`, athlete sidebar, hreflang from
       `HREFLANG_PAIRS`.
-- [x] 2.4 Guards: switcher anchors in `check-site-links`, `<html lang>` and
-      hreflang in the dist test, pairs on disk, Spanish cspell.
+- [x] 2.4 Guards: switcher anchors (and their presence on every docs page) in
+      `check-site-links`, `<html lang>` and hreflang in the dist test, no
+      `CONFIRMAR` in the dist, pairs on disk, Spanish cspell.
 
 ## 3. Landing
 

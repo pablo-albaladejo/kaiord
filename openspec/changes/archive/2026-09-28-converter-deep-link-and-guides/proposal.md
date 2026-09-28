@@ -23,16 +23,21 @@ landing page already is.
   parameters render a format picker. The page is lazy and listed in
   `FORBIDDEN_LAZY_SOURCES` so the initial-JS budget holds.
 - Docs: each converter page opens with a scope callout and links its own
-  deep link; the converters index gains "Workouts vs. activities". Four
+  deep link; the converters index gains "Workouts vs. activities". Three
   athlete guides in English and Spanish (`guide/<slug>` and
-  `es/guide/<slug>`): Zwift to Garmin, AI planning with your own key, WHOOP
-  recovery in the plan, and a sourced comparison with TrainingPeaks,
-  intervals.icu and Garmin Connect.
+  `es/guide/<slug>`): AI planning with your own key, WHOOP recovery in the
+  plan, and a sourced comparison with TrainingPeaks, intervals.icu and
+  Garmin Connect. The Zwift-to-Garmin guide is deferred to issue #1279 (the
+  Garmin writer stores % FTP power as watts); the ZWO/FIT to Garmin pages
+  state that known issue.
 - Docs i18n: an `es` locale whose root is a real page (`es/index.md`),
   `i18nRouting: false` so the language switcher never links a missing
-  `/es/<path>`, and hreflang en/es/x-default on the four pairs from
+  `/es/<path>`, and hreflang en/es/x-default on the three pairs from
   `HREFLANG_PAIRS` in `indexing.mjs`.
-- Guards: `check-site-links` checks the switcher anchors; the dist
+- Guards: `check-site-links` checks the switcher anchors and, under
+  `REQUIRE_DOCS_DIST=1`, fails when a docs page renders none;
+  `dist-no-placeholders.test.mjs` fails if `CONFIRMAR` ships in a page, a
+  `.md` mirror or `llms-full.txt`; the dist
   uniqueness test checks `<html lang>` and hreflang per page;
   `indexing.test.mjs` checks every pair exists on disk; cspell checks `es/**`
   with a Spanish dictionary.

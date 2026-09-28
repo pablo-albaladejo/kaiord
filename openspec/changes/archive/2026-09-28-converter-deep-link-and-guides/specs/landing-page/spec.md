@@ -7,9 +7,9 @@ The landing page SHALL link the athlete guides of the docs site from a "Guides f
 #### Scenario: English page links the English guides
 
 - **WHEN** a visitor opens `https://kaiord.com/`
-- **THEN** the guides section links `https://kaiord.com/docs/guide/<slug>` for each of the four guides
+- **THEN** the guides section links `https://kaiord.com/docs/guide/<slug>` for each of the three guides
 
 #### Scenario: Spanish page links the Spanish guides
 
 - **WHEN** a visitor opens `https://kaiord.com/es/`
-- **THEN** the guides section links `https://kaiord.com/docs/es/guide/<slug>` for each of the four guides
+- **THEN** the guides section links `https://kaiord.com/docs/es/guide/<slug>` for each of the three guides

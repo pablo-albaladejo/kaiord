@@ -2,7 +2,7 @@
 
 ### Requirement: Converter deep link route
 
-The SPA SHALL serve a `/convert` route whose parameters come from the URL fragment query (`#/convert?from=<source>&to=<target>`, read with wouter `useSearch()`). Valid sources SHALL be `fit`, `tcx`, `zwo` and `gcn` (with `garmin` accepted as an alias of `gcn`); valid targets SHALL be the same plus `krd`; a pair whose source equals its target SHALL be invalid. The route SHALL be wrapped by the same first-run `guard` as the other routes and SHALL work on a cold visit. The page SHALL convert one file held in local component state and offer it as a download: it MUST NOT write the editor's workout store and MUST NOT persist anything (workouts, templates or calendar entries). The page SHALL be lazily loaded so it stays out of the initial JS.
+The SPA SHALL serve a `/convert` route whose parameters come from the URL fragment query (`#/convert?from=<source>&to=<target>`, read with wouter `useSearch()`). Valid sources SHALL be `fit`, `tcx`, `zwo` and `gcn` (with `garmin` accepted as an alias of `gcn`); valid targets SHALL be the same plus `krd`; a pair whose source equals its target SHALL be invalid. The route SHALL be wrapped by the same route error boundary (`guard` in `AppRoutes`, a `RouteErrorBoundary`) as the other routes and SHALL work on a cold visit. The page SHALL convert one file held in local component state and offer it as a download: it MUST NOT write the editor's workout store and MUST NOT persist anything (workouts, templates or calendar entries). The page SHALL be lazily loaded so it stays out of the initial JS.
 
 #### Scenario: Cold visit converts a file
 
