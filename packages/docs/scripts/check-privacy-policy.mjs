@@ -561,11 +561,15 @@ export function checkPolicy(src, rules = REQUIRED_RULES) {
 }
 
 // A "no analytics" claim is false while Umami runs, and requiring the
-// disclosure does not stop a stale denial surviving next to it. `\b` keeps
+// disclosure does not stop a stale denial surviving next to it. Any
+// negation ("no", "not", "without", "never", "n't") followed by "analytics"
+// in the same sentence counts: "we do not use analytics", "don't collect
+// analytics", "without analytics", "not ... any analytics". `\b` keeps
 // "anonymous analytics" from matching on its "no". Bridge sections are
 // exempt: their "No Telemetry" bullets describe the extensions, which
 // really have none.
-export const NO_ANALYTICS_CLAIM = /\b(no|not collect any)\b[^.]*analytics/i;
+export const NO_ANALYTICS_CLAIM =
+  /(?:\b(?:no|not|without|never)\b|n['’]t\b)[^.]*\banalytics\b/i;
 const BRIDGE_HEADING = /^## Kaiord .+ Bridge Extension$/;
 
 export function checkNoAnalyticsClaim(src) {

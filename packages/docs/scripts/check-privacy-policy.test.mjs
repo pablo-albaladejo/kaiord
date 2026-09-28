@@ -157,6 +157,39 @@ test("'We use no analytics' is caught too, and 'anonymous analytics' is not", ()
   assert.deepEqual(anonymous, []);
 });
 
+for (const denial of [
+  "We do not use analytics.",
+  "We do not collect analytics.",
+  "We don't use analytics or telemetry.",
+  "We don’t collect any analytics.",
+  "Kaiord runs without analytics.",
+  "We do not run any third-party analytics.",
+  "Kaiord does **not** collect any personal data, analytics, or telemetry.",
+  "We never use analytics.",
+]) {
+  test(`the denial "${denial}" is caught outside the bridge sections`, () => {
+    const src = `${POLICY}\n## Other\n\n${denial}\n`;
+
+    const v = checkNoAnalyticsClaim(src);
+
+    assert.equal(v.length, 1, v.join(" | "));
+  });
+}
+
+for (const truthful of [
+  "It sends anonymous analytics events.",
+  "We use Umami, a privacy-friendly, cookie-less analytics tool.",
+  "Analytics never include your workouts.",
+]) {
+  test(`the true statement "${truthful}" is not flagged`, () => {
+    const src = `${POLICY}\n## Other\n\n${truthful}\n`;
+
+    const v = checkNoAnalyticsClaim(src);
+
+    assert.deepEqual(v, []);
+  });
+}
+
 test("the bridge sections' 'No Telemetry' bullets are exempt", () => {
   // They mention analytics and are true for the extensions.
   const body = sectionBody(POLICY, GARMIN);
