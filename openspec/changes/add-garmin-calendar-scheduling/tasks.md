@@ -31,12 +31,14 @@
 - [x] 3.2 Add the `schedule` and `unschedule` actions with input validation
       before any fetch (ids `^\d+$`, a real `YYYY-MM-DD` date) and add them to
       `EXTERNAL_ACTIONS` (AC-4, AC-5).
-- [x] 3.3 Run both actions under the per-action deadline: `D` = 30 s from
-      handler entry injected into every hop through `fetchImpl`, no write
-      started after `D_START` = 20 s (`deadline-before-send`), and an abort
-      after the send answered with no status (AC-4 a, c, d).
-- [x] 3.4 In `garmin-oauth.js`, race the token lifecycle, a joined
-      `mintInFlight` included, against the deadline signal (AC-4 b).
+- [x] 3.3 Run both actions under the per-action deadline: `D` = 25 s from
+      handler entry on the call's own requests, no write started after
+      `D_START` = 15 s (`deadline-before-send`), and an abort after the send
+      answered with no status (AC-4 a, c, d).
+- [x] 3.4 In `garmin-oauth.js`, run the token lifecycle on the untimed fetch
+      and race only the caller's wait, a joined `mintInFlight` included,
+      against the deadline signal, so no joiner is failed by another caller's
+      deadline (AC-4 b).
 - [x] 3.5 Add `features: ["calendar-write-v1"]` to the ping data (AC-9).
 - [x] 3.6 Tests in `test/background.test.js` and `test/garmin-oauth.test.js`.
 - [x] 3.7 Refresh the privacy-surface golden (+2 paths, +2 actions) and

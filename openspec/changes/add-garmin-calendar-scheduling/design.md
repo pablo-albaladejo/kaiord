@@ -45,15 +45,16 @@ were only observed in the web app, never verified against the API the bridge
 calls. They are **unverified** until T0b records the evidence here; nothing in
 task group 4 starts before that.
 
-| #   | Assumption                                                                           | If false                                                                                   |
-| --- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| A1  | Items from `GET /calendar-service/year/{Y}/month/{M}` carry the library `workoutId`. | Drop `calendar-find`. Resolution falls back to a human; a DELETE 404 becomes inconclusive. |
-| A2  | Items carry a `YYYY-MM-DD` date.                                                     | Map the field that T0b records.                                                            |
-| A3  | Some item field equals the `workoutScheduleId`.                                      | Use the conservative count rules in §3.4: a count of 0 ⇒ `uncertain`.                      |
-| A4  | The month parameter is 0-based.                                                      | Flip the constant (unit-tested).                                                           |
-| A5  | A write is visible to a read within `SETTLE_MS`.                                     | Raise `SETTLE_MS`; the gate still holds.                                                   |
-| A6  | Train2Go keeps the `sourceId` when a coach moves a session.                          | The move arrives as delete + create; document it as a limitation.                          |
-| A7  | A DELETE on an already-deleted entry returns 404.                                    | The read disambiguates.                                                                    |
+| #   | Assumption                                                                                              | If false                                                                                                                                                                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Items from `GET /calendar-service/year/{Y}/month/{M}` carry the library `workoutId`.                    | Drop `calendar-find`. Resolution falls back to a human; a DELETE 404 becomes inconclusive.                                                                                                                                                                                                                    |
+| A2  | Items carry a `YYYY-MM-DD` date.                                                                        | Map the field that T0b records.                                                                                                                                                                                                                                                                               |
+| A3  | Some item field equals the `workoutScheduleId`.                                                         | Use the conservative count rules in §3.4: a count of 0 ⇒ `uncertain`.                                                                                                                                                                                                                                         |
+| A4  | The month parameter is 0-based.                                                                         | Flip the constant (unit-tested).                                                                                                                                                                                                                                                                              |
+| A5  | A write is visible to a read within `SETTLE_MS`.                                                        | Raise `SETTLE_MS`; the gate still holds.                                                                                                                                                                                                                                                                      |
+| A6  | Train2Go keeps the `sourceId` when a coach moves a session.                                             | The move arrives as delete + create; document it as a limitation.                                                                                                                                                                                                                                             |
+| A7  | A DELETE on an already-deleted entry returns 404.                                                       | The read disambiguates.                                                                                                                                                                                                                                                                                       |
+| A8  | A 401 on the schedule POST means Garmin did not process it. **Unverified live; T0b does not cover it.** | A 401 could hide a created entry. The bridge would have to stop treating a 401 write as not sent, so a hung re-mint after it answers `deadline-exceeded` (ambiguous) and a `needsReauth` after a 401 retry becomes ambiguous too; the SPA then resolves with `calendar-find` instead of restoring `previous`. |
 
 If A1 is false, `calendar-find` and the `calendar-find-v1` feature are dropped
 from this change: the action list in the `garmin-bridge` delta shrinks to 10,
@@ -275,24 +276,27 @@ When the guard fails, the outcome depends on what happened to the row:
 
 ### 3.4 Deadline, classifier and resolve
 
-**Service-worker deadline (MUST-A, S3, S4).** Each new action creates `signal = AbortSignal.timeout(D_MS)` at handler entry, with `D_MS = 30 s`.
+**Service-worker deadline (MUST-A, S3, S4).** Each new action creates a deadline `signal` at handler entry, with `D_MS = 25 s`. `D_MS` stays below the ~30 s Chrome allows a pending fetch in an MV3 service worker, so the bridge, not Chrome, decides how a hung call ends.
 
-- The action passes a `fetchImpl` that injects `signal` into every hop: the exchange, the mint hops, the 401 re-mint and both call attempts.
-- It races `ensureToken`/`refreshToken`, including a joined `mintInFlight`, against `signal`.
-- It refuses to start the POST once `entry + D_START_MS` (20 s) has passed. It then answers `{code:"deadline-before-send", retryable:true}`, which counts as a definite failure: nothing was sent.
+- The action passes a `fetchImpl` that injects `signal` into its own request attempts (both attempts of the call).
+- The token lifecycle (the exchange, the mint hops, the 401 re-mint) runs on the **untimed** `fetch`, and only this caller's wait for it is raced against `signal`, a joined `mintInFlight` included. A mint that other callers can join is never aborted by one caller's deadline, so a joiner is never failed with an error that is not its own. An aborted refresh is rethrown, never turned into a session re-mint.
+- It refuses to start the POST once `entry + D_START_MS` (15 s, measured with `performance.now()`) has passed. It then answers `{error:"deadline-before-send", retryable:true}`, which counts as a definite failure: nothing was sent.
 
-Timeouts on the SPA side:
+Timeouts on the SPA side, with `SETTLE_MS` = 3 s (A5):
 
-- `SPA_ACTION_TIMEOUT_MS` = `D_MS` + 5 s = 35 s. The generic 15 s timeout is unchanged for other actions.
-- `POST_GATE_MS` = `D_MS` + `SETTLE_MS` + 10 s = 43 s.
+- `SPA_ACTION_TIMEOUT_MS` = `D_MS` + 5 s = 30 s. It must exceed `D_MS` plus a margin for message delivery, so the bridge's own answer, definite or ambiguous, normally arrives before the SPA gives up. The generic 15 s timeout is unchanged for other actions.
+- `POST_GATE_MS` = `D_MS` + `SETTLE_MS` + 10 s = 38 s. It must exceed `D_MS` (the latest a sent POST can still be in flight from the bridge) plus `SETTLE_MS` (write-to-read visibility) plus a margin for message delivery and for a server that commits a request after the client aborted it. An absence read that starts after the gate sees any POST of this attempt that Garmin committed.
+- The ordering therefore holds: `D_START_MS` (15 s) < `D_MS` (25 s) < `SPA_ACTION_TIMEOUT_MS` (30 s) < `SPA_ACTION_TIMEOUT_MS` + `SETTLE_MS` (33 s) < `POST_GATE_MS` (38 s).
 
 **Classifier**
 
-| Class             | Cases                                                                                                                             |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **definite-fail** | validation or guard reject; Garmin 400, 403, 404 or 409; 401 with `needsReauth`; `deadline-before-send`                           |
-| **ambiguous**     | `delivered:false`; SPA timeout; `context invalidated`; no status, including a deadline abort after the send; 500, 502, 503 or 504 |
-| **ok**            | 2xx                                                                                                                               |
+| Class             | Cases                                                                                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **definite-fail** | Garmin 400, 403, 404 or 409; `needsReauth`, with or without a status; no status with `retryable === false` (validation or guard refusal); `deadline-before-send` |
+| **ambiguous**     | `delivered:false`; SPA timeout; `context invalidated`; any other answer with no status, including `deadline-exceeded`; 500, 502, 503 or 504                      |
+
+Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only before a write was sent (a mint that failed in `getToken`) or after a 401 retry, whose write Garmin refused (A8). And nothing that could have been sent carries `retryable: false`: only input validation and guard refusals do, and both happen before any fetch.
+| **ok** | 2xx |
 
 **Resolve.** Runs on `attempting{workoutId, date, at, posted:true, previous}`.
 
@@ -327,13 +331,13 @@ Timeouts on the SPA side:
 
 **`unschedule` outcomes**
 
-| Outcome                            | Action                                                          |
-| ---------------------------------- | --------------------------------------------------------------- |
-| 204                                | dequeue                                                         |
-| 401                                | keep; do not count the attempt                                  |
-| 404, A3 true                       | dequeue if the id is absent from a find; otherwise `attempts++` |
-| 404, A3 false                      | inconclusive: `attempts++`                                      |
-| anything else, including ambiguous | `attempts++`                                                    |
+| Outcome                              | Action                                                          |
+| ------------------------------------ | --------------------------------------------------------------- |
+| 204                                  | dequeue                                                         |
+| 401, or no status with `needsReauth` | keep; do not count the attempt                                  |
+| 404, A3 true                         | dequeue if the id is absent from a find; otherwise `attempts++` |
+| 404, A3 false                        | inconclusive: `attempts++`                                      |
+| anything else, including ambiguous   | `attempts++`                                                    |
 
 **Abandoned entries**
 
@@ -487,13 +491,27 @@ These refine §3.4 and §3.6 where the plan met the real code.
   `401` was refused before Garmin processed it, so a hung re-mint that runs
   into `D` afterwards still answers `deadline-before-send`. Any other write
   that left the service worker makes a later abort ambiguous.
+- **The token lifecycle is untimed; only the wait is bounded.** The deadline
+  signal rides on the call's own request attempts. Refresh, mint and 401
+  re-mint run on the plain `fetch`, and `raceAbort(() => …, signal)` bounds
+  only this caller's wait. A calendar action that starts a mint therefore
+  leaves it running for anyone who joined it, exactly as a joined mint is left
+  running for its starter. `raceAbort` takes a thunk and checks
+  `signal.aborted` first, so an already-expired deadline starts nothing. An
+  abort during the refresh exchange is rethrown rather than treated as a dead
+  OAuth1 token.
+- **Any abort before the send is `deadline-before-send`**, whatever its
+  reason, and a disallowed path throws a `retryable: false` refusal, never an
+  error with no status that the SPA would read as ambiguous.
 - **`D_START` gates every write attempt**, including the retry after a 401 and
   the `unschedule` DELETE. For a DELETE the cut-off changes nothing about
   correctness (any failure is `attempts++`), and one rule is simpler to test
   than two.
 - **The deadline is an `AbortController` fired by `setTimeout(D_MS)`**, not
   `AbortSignal.timeout`. The behaviour is the same; the timer is the one fake
-  timers control, and it is cleared when the action settles.
+  timers control, and it is cleared when the action settles. Its abort reason
+  is a `DOMException` named `AbortError`. The cut-off is measured with
+  `performance.now()`, which a wall-clock change cannot move.
 - **`schedule` returns `{ workoutScheduleId }` only**, as a digit string or
   `null`. Garmin's response also carries the whole workout; the bridge drops
   it (the SPA already has it) and converts the number to the string form the

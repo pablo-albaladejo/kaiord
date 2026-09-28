@@ -60,7 +60,7 @@ Every external message SHALL be origin-pinned and action-allowlisted by the vend
 
 All responses SHALL use the shape `{ ok: boolean, protocolVersion?: number, data?: unknown, error?: string }`, and `ping` SHALL include `protocolVersion: 1` (bumped only when the message contract changes).
 
-The `ping` response `data` envelope SHALL contain the full `BridgeManifest` fields (`id: "garmin-bridge"`, `name: "Garmin Connect"`, `version`, `protocolVersion: 1`, `capabilities`) alongside the session-status fields `authenticated` (boolean) and `gcApi` (the result envelope of the probing read), and the `features` list (see Requirement: Calendar feature flags in the ping response). The upstream Garmin response SHALL be NESTED under `gcApi` rather than spread into the envelope, so no key it carries can reach the identity level at all. That nesting — not a precedence rule — is what prevents an upstream response from spoofing the bridge identity: this handler builds its result by spreading the manifest first and then assigning the status fields, so there is no collision surface, and if one were introduced by spreading the response afterwards the later spread would win. The SPA validates `response.data` against `bridgeManifestSchema`, which strips the session-status fields so both consumers coexist.
+The `ping` response `data` envelope SHALL contain the full `BridgeManifest` fields (`id: "garmin-bridge"`, `name: "Garmin Connect"`, `version`, `protocolVersion: 1`, `capabilities`) alongside the session-status fields `authenticated` (boolean) and `gcApi` (the result envelope of the probing read), and the `features` list (see Requirement: Calendar feature flags in the ping response). The upstream Garmin response SHALL be NESTED under `gcApi` rather than spread into the envelope, so no key it carries can reach the identity level at all. That nesting — not a precedence rule — is what prevents an upstream response from spoofing the bridge identity: this handler builds its result by spreading the manifest first and then assigning the status fields, so there is no collision surface, and if one were introduced by spreading the response afterwards the later spread would win. The SPA validates `response.data` against `bridgeManifestSchema`, which strips the session-status fields so both consumers coexist; for the same reason the SPA SHALL read `features` from the raw `response.data`, never from the parsed manifest.
 
 #### Scenario: SPA pings the extension
 
@@ -120,9 +120,9 @@ The POST is not idempotent — two identical calls create two calendar entries (
 
 ### Requirement: Per-action deadline for calendar actions
 
-Each calendar action SHALL run under one hard deadline `D` of 30 seconds measured from handler entry. The deadline SHALL be delivered as an abort signal injected through `fetchImpl` into every network hop the action causes: the OAuth2 refresh exchange, the three mint hops, the 401 re-mint, and both attempts of the data call. The token lifecycle — `ensureToken`, the re-mint, and a `mintInFlight` promise joined from another caller whose fetches carry no signal — SHALL be raced against the same signal, so a caller that joins someone else's mint still ends by `D`.
+Each calendar action SHALL run under one hard deadline `D` of 25 seconds measured from handler entry, below the ~30 s Chrome allows a pending fetch in an MV3 service worker. The deadline SHALL be delivered as an abort signal injected through `fetchImpl` into both attempts of the call itself. The token lifecycle — the OAuth2 refresh exchange, the three mint hops and the 401 re-mint — SHALL run on the untimed `fetch`, and this caller's wait for it, a `mintInFlight` promise joined from another caller included, SHALL be raced against the signal, so the action still ends by `D`. A mint that other callers can join SHALL NOT be aborted by one caller's deadline, and a caller that joined a mint a calendar action started SHALL NOT fail with that action's deadline error. An aborted refresh exchange SHALL be rethrown, not turned into a session re-mint.
 
-No write SHALL start once `D_START` (20 seconds after entry) has passed. An action that ends before its write was sent — because `D_START` passed, or because `D` fired during the token lifecycle — SHALL answer `error: "deadline-before-send"` with `retryable: true` and no `status`; it is a definite failure, because nothing reached Garmin. A write refused with 401 counts as not sent. An action aborted by `D` after its write was sent SHALL answer `error: "deadline-exceeded"` with no `status`, which the SPA classifies as ambiguous. The code travels in `error` because the vendored envelope has no `code` field.
+No write SHALL start once `D_START` (15 seconds after entry, measured on a monotonic clock) has passed. An action that ends before its write was sent — because `D_START` passed, or because any abort, whatever its reason, ended the token lifecycle — SHALL answer `error: "deadline-before-send"` with `retryable: true` and no `status`; it is a definite failure, because nothing reached Garmin. A write refused with 401 counts as not sent. An action aborted by `D` after its write was sent SHALL answer `error: "deadline-exceeded"` with no `status`, which the SPA classifies as ambiguous. The code travels in `error` because the vendored envelope has no `code` field.
 
 The deadline and its signal plumbing SHALL live in the bridge-owned `background.js` and `garmin-oauth.js`; the vendored `bearer-fetch.js` SHALL NOT change.
 
@@ -138,6 +138,12 @@ The deadline and its signal plumbing SHALL live in the bridge-owned `background.
 - **WHEN** `schedule` joins that mint
 - **THEN** it SHALL still answer by `D`
 
+#### Scenario: A joiner of a calendar action's mint is not failed by its deadline
+
+- **GIVEN** `schedule` started a mint whose first hop is slow, and `list` joined it
+- **WHEN** `D` fires, and the mint then completes
+- **THEN** `schedule` SHALL answer `deadline-before-send` and `list` SHALL succeed with the minted token
+
 #### Scenario: A 401 followed by a hung re-mint makes at most one POST
 
 - **WHEN** the POST answers 401 and the re-mint never answers
@@ -150,7 +156,7 @@ The deadline and its signal plumbing SHALL live in the bridge-owned `background.
 
 ### Requirement: Calendar feature flags in the ping response
 
-The `ping` data SHALL carry a `features` array naming the calendar contracts this bridge build supports: `calendar-write-v1` for `schedule`/`unschedule` under the deadline, and `calendar-find-v1` for `calendar-find`. `features` is separate from `capabilities`: it SHALL NOT be added to `BRIDGE_MANIFEST` or `bridge-identity.js`, whose `capabilities` stay `["write:workouts", "read:activities", "write:body"]`. The SPA SHALL treat a missing `features` as `[]`, which is how it recognises an older bridge.
+The `ping` data SHALL carry a `features` array naming the calendar contracts this bridge build supports: `calendar-write-v1` for `schedule`/`unschedule` under the deadline, and `calendar-find-v1` for `calendar-find`. `features` is separate from `capabilities`: it SHALL NOT be added to `BRIDGE_MANIFEST` or `bridge-identity.js`, whose `capabilities` stay `["write:workouts", "read:activities", "write:body"]`. The SPA SHALL read `features` from the raw ping `response.data`, because `bridgeManifestSchema` strips keys it does not know, and SHALL treat a missing `features` as `[]`, which is how it recognises an older bridge.
 
 #### Scenario: A current bridge advertises its calendar features
 
