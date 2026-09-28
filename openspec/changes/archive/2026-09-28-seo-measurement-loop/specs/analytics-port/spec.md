@@ -26,5 +26,5 @@ The system SHALL call `analytics.event` on the following user interactions in `@
 
 #### Scenario: Store link that is not a listing
 
-- **WHEN** a user clicks a `chromewebstore.google.com` link whose path is not `/detail/<slug>/<id>` (for example `/detail/<slug>` with no id)
+- **WHEN** a user clicks a `chromewebstore.google.com` link whose path is not `/detail/<slug>/<id>` (for example `/detail/<slug>` with no id, or `/detail/<slug>/<id>/extra` with surplus segments)
 - **THEN** `analytics.event('extension-install-clicked', { extension: 'unknown' })` is called

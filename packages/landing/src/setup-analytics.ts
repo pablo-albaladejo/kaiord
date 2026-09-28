@@ -16,8 +16,8 @@ function trackClicks(
 // Chrome Web Store listing URLs are /detail/<slug>/<id>: only the public
 // listing slug is sent, never the id or anything about the visitor.
 export function extensionSlug(link: HTMLAnchorElement): AnalyticsEvent {
-  const [, section, slug, id] = new URL(link.href).pathname.split("/");
-  const listing = section === "detail" && slug && id;
+  const [, section, slug, id, ...rest] = new URL(link.href).pathname.split("/");
+  const listing = section === "detail" && slug && id && rest.length === 0;
   return { extension: listing ? slug : "unknown" };
 }
 
