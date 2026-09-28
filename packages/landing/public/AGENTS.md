@@ -15,6 +15,7 @@ Static assets served by Vite during development and included in the production b
 - **`og-image.png`** — Open Graph image. Used by social platforms (Twitter, Facebook, LinkedIn) when sharing the link.
 - **`robots.txt`** — SEO directive for search engines. Allows all crawlers.
 - **`sitemap.xml`** — Sitemap index pointing at `/sitemap-landing.xml` and `/docs/sitemap.xml`. `sitemap-landing.xml` is not here: `scripts/build-sitemap.mjs` generates it into `dist/` at build, with a git `<lastmod>` per URL.
+- **`<32 hex>.txt`** — IndexNow key file; its content is the key (public by design, it proves ownership). `scripts/geo/indexnow.mjs` finds it and `deploy-site.yml` submits changed URLs with it. Rotate by replacing the file.
 - **`404.html`** — Custom 404 error page. Deployed to GitHub Pages as fallback.
 - **`CNAME`** — GitHub Pages configuration. Points subdomain to kaiord.com.
 - **`.nojekyll`** — Disables Jekyll processing on GitHub Pages. Forces direct HTML serving.

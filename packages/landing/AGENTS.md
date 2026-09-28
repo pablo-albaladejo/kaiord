@@ -13,7 +13,7 @@ Marketing landing page for kaiord.com — a static single-page site built with V
 - **`src/main.ts`** - Entrypoint. Manages package manager tabs (desktop WAI-ARIA tabs with arrow key navigation + mobile select), copy-to-clipboard, smooth anchor link scrolling, and analytics initialization.
 - **`src/main.css`** - Tailwind imports + custom animations (fade-in-left, fade-in-right, pulse-slow). Imports shared brand tokens from `styles/brand-tokens.css`. Focus-visible ring styling unified across landing/docs/editor.
 - **`src/analytics.ts`** - Creates the Umami analytics client, conditionally noop when no website id.
-- **`src/setup-analytics.ts`** - Wires up analytics: tracks page views and click events (editor-opened, docs-opened, github-opened) on link selectors.
+- **`src/setup-analytics.ts`** - Wires up analytics: tracks page views and click events (editor-opened, docs-opened, github-opened, extension-install-clicked with the Chrome Web Store listing slug) on link selectors.
 - **`vite.config.ts`** - Defines `conditionalUmami` plugin: strips UMAMI markers if no website id, otherwise inlines website id in the script tag.
 - **`src/adapters/analytics/umami-analytics.ts`** - Factory to create Analytics from core, wraps window.umami with error handling.
 - **`src/adapters/analytics/umami-analytics.test.ts`** - vitest tests for website id falsy, tracker available, tracker absent, and track throwing.

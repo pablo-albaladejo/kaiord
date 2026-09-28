@@ -19,6 +19,7 @@ on:
       - "scripts/check-site-links.mjs"
       - "scripts/lib/site-links-resolve.mjs"
       - "scripts/lib/site-links-scan.mjs"
+      - "scripts/geo/indexnow.mjs"
   workflow_dispatch:
 
 permissions:
@@ -43,8 +44,18 @@ jobs:
     # same runner class): checkout 3s vs 2s at depth 1 (+1s); "Build all
     # packages" 39s vs 46s (VitePress lastUpdated and the per-page git log add
     # no measurable time); the docs indexing guard runs inside "Site guards",
-    # 1s. ceil((118 + 1 + 1 + 1) × 1.5 / 60) = 3.
-    timeout-minutes: 3
+    # 1s. ceil((118 + 1 + 1 + 1) × 1.5 / 60) = ceil(3.03) = 4, not the 3
+    # written here before (an arithmetic slip; the first post-merge run,
+    # 36438339968, took 122s).
+    # IndexNow (PR C5): fetching both live sitemaps took 0.04-0.48s
+    # (`time curl -sf https://kaiord.com/sitemap-landing.xml
+    # https://kaiord.com/docs/sitemap.xml`, 3 runs), the diff is in-memory
+    # over 40 URLs (< 1s), and uploading one small file costs at most what
+    # "Upload build artifacts" took for all the dists in CI run 36429027033
+    # (2s). Restoring the baseline cache: 1s (actions/cache/restore@v6 in
+    # metrics-gate run 34876830956).
+    # ceil((122 + 0.5 + 1 + 2 + 1) × 1.5 / 60) = ceil(3.16) = 4.
+    timeout-minutes: 4
     outputs:
       spa_marker: ${{ steps.spa_marker.outputs.marker }}
     steps:
@@ -168,6 +179,9 @@ jobs:
           test -f merged-dist/llms.txt             || { echo "❌ Missing llms.txt"; exit 1; }
           test -f merged-dist/docs/llms.txt        || { echo "❌ Missing docs/llms.txt"; exit 1; }
           test -f merged-dist/docs/llms-full.txt   || { echo "❌ Missing docs/llms-full.txt"; exit 1; }
+          # IndexNow proves ownership by fetching /<key>.txt, whose body is the key.
+          KEY=$(node scripts/geo/indexnow.mjs key)
+          [ "$(cat "merged-dist/$KEY.txt" 2>/dev/null)" = "$KEY" ] || { echo "❌ Missing IndexNow key file $KEY.txt"; exit 1; }
           echo "✅ All required files present in merged artifact"
 
       - name: Inject SPA route fallback
@@ -186,6 +200,50 @@ jobs:
         env:
           REQUIRE_DOCS_DIST: "1"
         run: node scripts/check-site-links.mjs --merged merged-dist
+
+      # The sitemaps of the last deploy whose IndexNow submit succeeded, saved
+      # by the indexnow job. Diffing against them (not the live ones) resends
+      # what a failed fetch or submit missed. Absent (first run, or evicted
+      # after 7 days unused), the diff falls back to the live sitemaps.
+      - name: Restore the last submitted sitemaps (IndexNow)
+        uses: actions/cache/restore@v6
+        with:
+          path: indexnow/base
+          key: indexnow-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: indexnow-baseline-
+
+      # The URLs this deploy changes, by <loc> and <lastmod>, against the
+      # last submitted sitemaps or else the live ones. Each set counts only if
+      # every file is present and non-empty; with neither, the diff skips with
+      # a warning instead of submitting the whole site. The list is submitted
+      # after deploy by the indexnow job, once the new pages and the key file
+      # are live.
+      - name: List URLs changed since the last submit (IndexNow)
+        run: |
+          set -e
+          mkdir -p indexnow
+          for pair in "sitemap-landing.xml landing" "docs/sitemap.xml docs"; do
+            set -- $pair
+            curl -sf --max-time 15 -o "indexnow/live-$2.xml" "https://kaiord.com/$1" \
+              || { rm -f "indexnow/live-$2.xml"; echo "::warning::Could not fetch the live /$1"; }
+          done
+          node scripts/geo/indexnow.mjs diff \
+            --base indexnow/base/landing.xml indexnow/base/docs.xml \
+            --old indexnow/live-landing.xml indexnow/live-docs.xml \
+            --new merged-dist/sitemap-landing.xml merged-dist/docs/sitemap.xml \
+            --keep indexnow/built/landing.xml indexnow/built/docs.xml \
+            --out indexnow/urls.txt
+          cat indexnow/urls.txt
+
+      - name: Upload IndexNow URL list
+        uses: actions/upload-artifact@v7
+        with:
+          name: indexnow-urls
+          path: |
+            indexnow/urls.txt
+            indexnow/built/
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Capture SPA build marker
         id: spa_marker
@@ -307,3 +365,65 @@ jobs:
 
       # Rollback: use workflow_dispatch on last known-good main commit SHA,
       # or revert the breaking commit on main.
+
+  # Tells IndexNow engines (Bing, which feeds Copilot and ChatGPT search;
+  # Yandex; Seznam; Naver) which URLs this deploy changed. Runs only after the
+  # smoke passed, so the pages and the key file are live. An empty list logs
+  # "nothing changed, skipping"; a non-200/202 answer, or a request aborted
+  # after 20s, is a warning. continue-on-error keeps a checkout or artifact
+  # hiccup here from turning a deploy that already succeeded red.
+  indexnow:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    continue-on-error: true
+    permissions:
+      contents: read
+    # Set up job 1s + Checkout 4s (run 36438339968) + Setup Node 3s (run
+    # 34855248940) + artifact download 2s (run 30488840105) + the POST, which
+    # the script aborts at 20s + saving the baseline cache 1s (the same
+    # actions/cache/save@v6 in metrics-gate run 33353793245) + post-checkout
+    # 1s = 32s worst case; ceil(32 x 1.5 / 60) = 1.
+    timeout-minutes: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Download IndexNow URL list
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-urls
+          path: indexnow
+
+      - name: Submit changed URLs to IndexNow
+        id: submit
+        run: node scripts/geo/indexnow.mjs submit indexnow/urls.txt
+
+      # Only a submit that succeeded (or had nothing to send) moves the
+      # comparison point, and only if the diff had one: without a baseline or
+      # a live sitemap it keeps no candidate (indexnow/built is absent), so
+      # the next deploy still compares from before the changes it skipped.
+      # After a failed submit the next deploy resends these URLs.
+      - name: Keep these sitemaps as the next baseline
+        id: promote
+        if: steps.submit.outputs.result == 'ok' || steps.submit.outputs.result == 'skipped'
+        run: |
+          set -e
+          if [ ! -f indexnow/built/landing.xml ] || [ ! -f indexnow/built/docs.xml ]; then
+            echo "No comparison point this deploy; the baseline stays where it was."
+            exit 0
+          fi
+          rm -rf indexnow/base
+          mv indexnow/built indexnow/base
+          echo "saved=true" >> "$GITHUB_OUTPUT"
+
+      - name: Save the baseline
+        if: steps.promote.outputs.saved == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: indexnow/base
+          key: indexnow-baseline-${{ github.run_id }}-${{ github.run_attempt }}

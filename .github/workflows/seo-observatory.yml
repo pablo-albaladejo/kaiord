@@ -1,12 +1,23 @@
 # Weekly SEO/GEO measurement for kaiord.com.
 #
 # Collectors write time series to reports/seo/timeseries/*.jsonl and this
-# workflow opens a metrics PR with the refreshed dashboard for the owner to
-# review (reviewing the DASHBOARD.md diff IS the weekly SEO review). Every
-# collector no-ops gracefully when its secret is missing:
+# workflow keeps ONE rolling metrics PR (branch auto/seo-observatory) with the
+# refreshed dashboard for the owner to review (reviewing the DASHBOARD.md diff
+# IS the weekly SEO review). Each run starts from main; while the rolling PR is
+# open (same repository only, never a fork: scripts/geo/rolling-pr.mjs) it
+# merges the weeks already on the branch (scripts/geo/union-timeseries.mjs:
+# main wins per (date, source, provider), the branch adds only what main
+# lacks). A PR closed unmerged, or a deleted branch, restarts from main.
+# It then collects this week, pushes the branch and updates the open PR or
+# opens one. Every collector no-ops gracefully when its secret is missing:
 #   GSC_SERVICE_ACCOUNT_JSON   Google Search Console (service account)
 #   BING_WEBMASTER_API_KEY     Bing Webmaster Tools
 #   PERPLEXITY_API_KEY         Perplexity (AI answer-engine visibility)
+# SEO_OBSERVATORY_PR_TOKEN is REQUIRED (the run fails without it): a push made
+# with GITHUB_TOKEN does not trigger pull_request workflows, so the PR's
+# required checks would stay pending and it could never merge. It is read by
+# the publish step only: checkout does not persist it, so no collector or
+# merge step can.
 # The DDG SERP snapshot needs no secret and always runs. The collectors are
 # stdlib-only Node scripts, so no pnpm install / workspace build is required.
 name: SEO Observatory
@@ -17,14 +28,16 @@ on:
     - cron: "37 7 * * 1"
   workflow_dispatch:
 
+# The PAT does every write (push + PR); the workflow token only reads (the
+# repository, and the open PRs to find the rolling one).
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 # Serializes runs (queue, don't cancel) so a manual dispatch landing near the
 # scheduled cron waits for the in-flight run instead of racing it — both would
-# otherwise walk the full GSC URL-inspection loop and open duplicate metrics
-# PRs for the same date. cancel-in-progress stays false: cancelling a
+# otherwise walk the full GSC URL-inspection loop and race each other's push
+# to the rolling branch. cancel-in-progress stays false: cancelling a
 # legitimate in-flight run to make room for a newer one would lose that
 # week's collected data, not just skip a no-op.
 concurrency:
@@ -35,22 +48,80 @@ jobs:
   observe:
     name: Collect SEO/GEO metrics
     runs-on: ubuntu-latest
-    # Network-bound collectors with widely-spaced requests (SERP + AI probe
-    # sleep between calls). The GSC collector additionally runs a URL
-    # Inspection call per sitemap entry (250ms floor + real API latency each);
-    # kaiord's docs corpus alone is ~370 URLs, so once GSC credentials exist
-    # that loop can take 10+ minutes on its own. 45m bounds a stuck run well
-    # under the family ceiling while giving the real inspection loop headroom.
-    # Calibration is a human decision per PR.
-    timeout-minutes: 45
+    # Network-bound collectors with widely-spaced requests. The GSC URL
+    # Inspection loop dominates: 2471-2599s in runs 34128612052, 34855248940
+    # and 35612637770, whose jobs took 2540-2676s against the old 45-minute
+    # (2700s) bound. The AI probe took 28-30s for 5 questions (~6s each incl.
+    # the 1s sleep); the 20-prompt panel adds ~120s. The restore fetch and the
+    # artifact upload add ~10s. ceil((2676 + 120 + 10) x 1.5 / 60) = 71. The
+    # calibration families (lint 10 / build 20 / test 30 / e2e 45) have no
+    # network family; this exceeds even the largest, e2e's 45, on purpose,
+    # because the old 45-minute bound was already only 24s from cutting the
+    # real inspection loop.
+    # Recompute after the first runs on the smaller sitemap: GSC now inspects
+    # about 40 URLs instead of 377 (PR #1268), so the loop, and this bound,
+    # should drop by roughly an order of magnitude.
+    timeout-minutes: 71
     steps:
+      - name: Require the PR token
+        env:
+          PAT: ${{ secrets.SEO_OBSERVATORY_PR_TOKEN }}
+        run: |
+          if [ -z "$PAT" ]; then
+            echo "::error::SEO_OBSERVATORY_PR_TOKEN is required (GITHUB_TOKEN pushes do not trigger synchronize; checks would stay pending)"
+            exit 1
+          fi
+
+      # Full history so the rolling branch can be read. The repository is
+      # public, so fetching needs no credential; persist-credentials: false
+      # keeps any token out of .git/config, where every later step (and every
+      # collector) could read it.
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
+
+      # restore=true only while the rolling PR (this repository's, never a
+      # fork's) is open; lease = the branch's SHA, or empty when it is absent.
+      - name: Plan the rolling-branch restore
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/geo/rolling-pr.mjs plan >> "$GITHUB_OUTPUT"
+
+      # Weeks already on the open rolling PR but not yet merged into main are
+      # merged into the working tree, so rebuilding the branch from main below
+      # never drops them.
+      - name: Restore rolling data
+        if: steps.plan.outputs.restore == 'true'
+        run: |
+          set -e
+          git fetch origin +refs/heads/auto/seo-observatory:refs/remotes/origin/auto/seo-observatory
+          node scripts/geo/union-timeseries.mjs --branch origin/auto/seo-observatory
+
+      # The reports/seo/ tree before any collector runs (main plus the
+      # restored weeks), as a commit object outside every branch. The publish
+      # retry takes from this run only what is newer than it.
+      - name: Mark the state before collection
+        id: before
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: |
+          set -e
+          export GIT_INDEX_FILE="$RUNNER_TEMP/before.index"
+          git read-tree HEAD
+          git add -A reports/seo/
+          TREE=$(git write-tree)
+          echo "sha=$(git commit-tree "$TREE" -p HEAD -m 'before collection')" >> "$GITHUB_OUTPUT"
 
       - name: Google Search Console snapshot
         env:
@@ -80,32 +151,88 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No metric changes this week."
+            echo "No metric changes against main."
           fi
 
-      - name: Open metrics PR
+      # The week's data survives a failed push: the artifact holds it.
+      - name: Keep this week's data
+        if: steps.detect.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: seo-observatory-${{ github.run_id }}
+          path: reports/seo/
+          retention-days: 90
+
+      # One branch, one PR. The branch is rebuilt from main each week (so it
+      # always merges cleanly) and carries every unmerged week via the restore
+      # above. --force-with-lease pins the SHA read by the plan step (empty =
+      # the branch must not exist yet), so a concurrent push is never
+      # overwritten blindly. If the push is refused, the retry plans again
+      # (the PR may have been closed, or the branch deleted, meanwhile),
+      # rebuilds the branch on the current main, merges the rolling branch
+      # only if its PR is still open, adds this run's records (those newer
+      # than the pre-collection mark) and pushes once more. The PAT reaches
+      # git only through a one-shot extraheader, never .git/config; the plan
+      # uses the read-only workflow token, and the merge and dashboard
+      # re-runs are started without either token.
+      - name: Publish the rolling metrics PR
         if: steps.detect.outputs.changed == 'true'
         env:
-          # A PAT makes the weekly PR user-authored, so pull_request workflows,
-          # the required changeset check, and code-owner review behave like on
-          # any normal PR. With github.token the PR's workflow runs are held in
-          # an approval-required state, so required checks sit pending and the
-          # PR cannot merge without manual intervention.
-          GH_TOKEN: ${{ secrets.SEO_OBSERVATORY_PR_TOKEN || secrets.GITHUB_TOKEN }}
+          PAT: ${{ secrets.SEO_OBSERVATORY_PR_TOKEN }}
+          GH_TOKEN: ${{ secrets.SEO_OBSERVATORY_PR_TOKEN }}
+          READ_TOKEN: ${{ github.token }}
+          LEASE: ${{ steps.plan.outputs.lease }}
+          BEFORE: ${{ steps.before.outputs.sha }}
         run: |
-          BRANCH="auto/seo-observatory-${{ github.run_id }}"
+          set -euo pipefail
+          BRANCH="auto/seo-observatory"
+          AUTH=$(printf 'x-access-token:%s' "$PAT" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          push() {
+            git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" \
+              push --force-with-lease="$BRANCH:$LEASE" origin "HEAD:refs/heads/$BRANCH"
+          }
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
+          git checkout -B "$BRANCH"
           git add reports/seo/
           git commit -m "chore(seo): weekly SEO/GEO observatory snapshot"
-          git push origin "$BRANCH"
-          gh label create seo --color 0e8a16 --description "SEO/GEO observatory" 2>/dev/null || true
-          gh label create automated --color ededed --description "Automated PR" 2>/dev/null || true
-          gh pr create \
-            --base main \
-            --head "$BRANCH" \
-            --title "chore(seo): weekly SEO/GEO observatory snapshot" \
-            --body "Automated weekly snapshot from the SEO/GEO observatory (\`.github/workflows/seo-observatory.yml\`). Review \`reports/seo/DASHBOARD.md\` in this diff for week-over-week movement; raw data lands in \`reports/seo/timeseries/\` and \`reports/seo/snapshots/\`." \
-            --label seo \
-            --label automated
+          if ! push; then
+            echo "::warning::$BRANCH changed during the run; rebuilding on the current main and retrying once"
+            OURS=$(git rev-parse HEAD)
+            git fetch origin main
+            PLAN=$(GH_TOKEN="$READ_TOKEN" env -u PAT node scripts/geo/rolling-pr.mjs plan)
+            echo "$PLAN"
+            LEASE=$(sed -n 's/^lease=//p' <<<"$PLAN")
+            git checkout -B "$BRANCH" origin/main
+            if grep -qx 'restore=true' <<<"$PLAN"; then
+              git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+              env -u PAT -u GH_TOKEN node scripts/geo/union-timeseries.mjs --branch "origin/$BRANCH"
+            fi
+            env -u PAT -u GH_TOKEN node scripts/geo/union-timeseries.mjs --branch "$OURS" --since "$BEFORE"
+            env -u PAT -u GH_TOKEN node scripts/geo/seo-dashboard.mjs
+            git add -A reports/seo/
+            if git diff --cached --quiet; then
+              echo "Nothing of this run is missing from main; nothing to publish."
+              exit 0
+            fi
+            git commit -m "chore(seo): weekly SEO/GEO observatory snapshot"
+            push
+          fi
+          BODY="Rolling snapshot from the SEO/GEO observatory (\`.github/workflows/seo-observatory.yml\`), last updated $(date -u +%Y-%m-%d) by run ${{ github.run_id }}. While this PR is open, each week's run rebuilds this branch from \`main\` and merges every week not yet merged, so merging it at any time loses nothing; closing it unmerged discards its weeks. Review \`reports/seo/DASHBOARD.md\` in this diff; raw data lands in \`reports/seo/timeseries/\` and \`reports/seo/snapshots/\`."
+          N=$(node scripts/geo/rolling-pr.mjs find)
+          if [ -n "$N" ]; then
+            gh pr edit "$N" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+            echo "Updated PR #$N"
+          else
+            gh label create seo --repo "$GITHUB_REPOSITORY" --color 0e8a16 --description "SEO/GEO observatory" 2>/dev/null || true
+            gh label create automated --repo "$GITHUB_REPOSITORY" --color ededed --description "Automated PR" 2>/dev/null || true
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore(seo): weekly SEO/GEO observatory snapshot" \
+              --body "$BODY" \
+              --label seo \
+              --label automated
+          fi
