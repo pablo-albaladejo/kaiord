@@ -2,7 +2,10 @@ import { useSearch } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
-import { parseConvertParams } from "../../../routing/convert-params";
+import {
+  parseConvertParams,
+  partialConvertParams,
+} from "../../../routing/convert-params";
 import { ConvertFlow } from "./ConvertFlow";
 import { ConvertFormatPicker } from "./ConvertFormatPicker";
 import { formatLabel } from "./format-labels";
@@ -16,7 +19,8 @@ import { formatLabel } from "./format-labels";
  */
 export default function ConvertPage() {
   const t = useTranslate("editor");
-  const pair = parseConvertParams(useSearch());
+  const search = useSearch();
+  const pair = parseConvertParams(search);
   const heading = pair
     ? t("convert.heading", {
         from: formatLabel(pair.from),
@@ -42,7 +46,7 @@ export default function ConvertPage() {
       {pair ? (
         <ConvertFlow key={`${pair.from}-${pair.to}`} pair={pair} />
       ) : (
-        <ConvertFormatPicker />
+        <ConvertFormatPicker initial={partialConvertParams(search)} />
       )}
     </div>
   );

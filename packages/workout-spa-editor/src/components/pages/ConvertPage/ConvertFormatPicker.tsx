@@ -6,6 +6,7 @@ import {
   CONVERT_SOURCES,
   CONVERT_TARGETS,
   convertHref,
+  type ConvertPair,
 } from "../../../routing/convert-params";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { sizeClasses, variantClasses } from "../../atoms/Button/button-styles";
@@ -48,11 +49,20 @@ function FormatSelect({
   );
 }
 
-/** Shown when the deep link carries no valid pair: pick one, then continue. */
-export function ConvertFormatPicker() {
+type ConvertFormatPickerProps = { initial?: Partial<ConvertPair> };
+
+/**
+ * Shown when the deep link carries no valid pair: pick one, then continue.
+ * A side the link got right is kept.
+ */
+export function ConvertFormatPicker({
+  initial = {},
+}: ConvertFormatPickerProps) {
   const t = useTranslate("editor");
-  const [from, setFrom] = useState<WorkoutFileFormat>("zwo");
-  const [to, setTo] = useState<WorkoutFileFormat>("fit");
+  const [from, setFrom] = useState<WorkoutFileFormat>(initial.from ?? "zwo");
+  const [to, setTo] = useState<WorkoutFileFormat>(
+    initial.to ?? (initial.from === "fit" ? "zwo" : "fit")
+  );
   const valid = from !== to;
 
   return (
@@ -74,6 +84,14 @@ export function ConvertFormatPicker() {
           onChange={setTo}
         />
       </div>
+      {!valid && (
+        <p
+          className="m-0 text-sm text-ink-muted"
+          data-testid="convert-same-format"
+        >
+          {t("convert.sameFormat")}
+        </p>
+      )}
       {valid && (
         <Link
           href={convertHref({ from, to })}

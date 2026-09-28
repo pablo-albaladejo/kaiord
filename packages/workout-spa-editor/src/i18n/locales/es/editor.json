@@ -312,6 +312,7 @@
     "to": "A",
     "continue": "Continuar",
     "chooseFile": "1. Elige tu archivo {{from}}",
-    "download": "2. Descárgalo como {{to}}"
+    "download": "2. Descárgalo como {{to}}",
+    "sameFormat": "Elige dos formatos distintos."
   }
 }

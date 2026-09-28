@@ -32,14 +32,33 @@ const toFormat = (raw: string | null): WorkoutFileFormat | null => {
   return isValidFormat(format) ? format : null;
 };
 
-export function parseConvertParams(search: string): ConvertPair | null {
+/** Each side of the link that is valid on its own, to seed the picker. */
+export function partialConvertParams(search: string): Partial<ConvertPair> {
   const params = new URLSearchParams(search);
   const from = toFormat(params.get("from"));
   const to = toFormat(params.get("to"));
-  if (from === null || to === null) return null;
-  if (!CONVERT_SOURCES.includes(from) || from === to) return null;
+  return {
+    ...(from && CONVERT_SOURCES.includes(from) ? { from } : {}),
+    ...(to ? { to } : {}),
+  };
+}
+
+export function parseConvertParams(search: string): ConvertPair | null {
+  const { from, to } = partialConvertParams(search);
+  if (!from || !to || from === to) return null;
   return { from, to };
 }
+
+// Garmin Connect workouts are saved as JSON; `.gcn` is Kaiord's own name.
+const ACCEPT: Record<WorkoutFileFormat, string> = {
+  fit: ".fit",
+  tcx: ".tcx",
+  zwo: ".zwo",
+  gcn: ".json,.gcn",
+  krd: ".krd,.json",
+};
+
+export const acceptFor = (from: WorkoutFileFormat): string => ACCEPT[from];
 
 export const convertHref = ({ from, to }: ConvertPair): string =>
   `/convert?from=${from}&to=${to}`;

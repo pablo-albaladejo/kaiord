@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { useTranslate } from "../../../i18n/use-translate";
-import type { ConvertPair } from "../../../routing/convert-params";
+import { acceptFor, type ConvertPair } from "../../../routing/convert-params";
 import type { KRD } from "../../../types/krd";
 import { FileUpload } from "../../molecules/FileUpload/FileUpload";
 import { ConvertExport } from "./ConvertExport";
@@ -26,6 +26,7 @@ export function ConvertFlow({ pair }: ConvertFlowProps) {
           {t("convert.chooseFile", { from: formatLabel(pair.from) })}
         </h2>
         <FileUpload
+          accept={acceptFor(pair.from)}
           onFileLoad={setKrd}
           onImported={(format) =>
             analytics.event("workout-imported", { format })
