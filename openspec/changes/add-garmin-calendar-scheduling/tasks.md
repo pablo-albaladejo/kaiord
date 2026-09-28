@@ -104,6 +104,15 @@
   - A legacy row with `library: unconfirmed` and an equal hash is
     `skipped` forever; the placement path needs a way out (set
     `forceRepush`, or treat `unconfirmed` as not pushed for placement).
+  - A rolled-back claim must not make a stale row newer: when a failed or
+    definite push restores the placement and queue to their pre-claim
+    value, restore the pre-claim `updatedAt` too, so the rollback is a
+    no-op for the merge order. PR-2's `mutateByKey` cannot express this:
+    its no-op (a row deep-equal to the current one) compares against the
+    claimed row, and any other result is stamped `now`. Extend the
+    contract here (for example, `fn` returns the captured pre-claim row
+    and the repository stores it verbatim when the current row is still
+    the claim it wrote).
 
 ## 7. Follow the coach (T6, PR-4)
 

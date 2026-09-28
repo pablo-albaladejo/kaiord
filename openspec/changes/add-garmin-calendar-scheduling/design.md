@@ -210,6 +210,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - matching a coach's delete + recreate
 - cleaning up superseded library workouts
 - library duplicates from cross-device `[U]` pushes
+- a conditional write on cloud sync: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write; an atomic `If-Match` closes the crossed-retire residual (§3.9)
 
 ## Design (normative)
 
@@ -552,7 +553,7 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 - Every sync is an atomic read–merge–write of the single cloud row: the cloud row only grows, so the first merge that sees a pair decides it and every later merge inherits the `retire`.
 - T5 retires only the `uncertain`'s `previous`, together with the `keep` of the id it just adopted. It never retires a `held` id: `held` ids are legacy, unverified, and another device may still hold one as a verified `keep` (the implementation's exhaustive check found exactly that crossed pair when T5 retired seen `held` ids). A seen `held` id therefore stays a duplicate on the calendar until the athlete removes it — legacy data only, none in production.
 
-Known residual: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts`), a check-then-write, not an atomic `If-Match`. Two syncs inside that window lose one update. A crossed pair needs two such lost updates on the same record around one pair decision. Enforcing `If-Match` closes it (follow-up).
+Known residual: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts`), a check-then-write, not an atomic `If-Match`. Two syncs inside that window lose one update. A crossed pair needs two such lost updates on the same record around one pair decision. Enforcing `If-Match` closes it (see Follow-ups); this change does not touch the adapter.
 
 **Invariant:** no id whose state is not `keep` ever becomes the merged `Placed`, and only `retire` ids are ever sent to `unschedule`.
 
