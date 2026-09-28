@@ -153,7 +153,7 @@ The docs site SHALL generate an `llms.txt` file at build time using `vitepress-p
 
 ### Requirement: Per-page SEO
 
-Every documentation page SHALL include a `<title>`, `<meta name="description">`, `og:title`, `og:description`, `og:image`, and `<link rel="canonical">` via VitePress frontmatter and the `transformHead` hook. The `<html>` element SHALL include `lang="en"`. TypeDoc symbol pages (`/docs/api/<pkg>/<kind>/<symbol>`) SHALL carry `<meta name="robots" content="noindex,follow">`; the API root (`/docs/api/`) and each package index (`api/<pkg>/README`, or `api/<pkg>/` for placeholders) SHALL stay indexable, and the package indexes SHALL have a title and description of their own. Title and description SHALL be unique across the indexable pages. The package `README.md` and `CHANGELOG.md` at the docs root SHALL NOT be built as pages. Noindex pages SHALL stay linked and in `llms-full.txt`.
+Every documentation page SHALL include a `<title>`, `<meta name="description">`, `og:title`, `og:description`, `og:image`, and `<link rel="canonical">` via VitePress frontmatter and the `transformHead` hook. The `<html>` element SHALL include `lang="en"`, except pages under `/docs/es/`, which SHALL include `lang="es"` (see "ES locale for guides with hreflang"). TypeDoc symbol pages (`/docs/api/<pkg>/<kind>/<symbol>`) SHALL carry `<meta name="robots" content="noindex,follow">`; the API root (`/docs/api/`) and each package index (`api/<pkg>/README`, or `api/<pkg>/` for placeholders) SHALL stay indexable, and the package indexes SHALL have a title and description of their own. Title and description SHALL be unique across the indexable pages. The package `README.md` and `CHANGELOG.md` at the docs root SHALL NOT be built as pages. Noindex pages SHALL stay linked and in `llms-full.txt`.
 
 #### Scenario: Meta tags present
 
@@ -172,7 +172,7 @@ Every documentation page SHALL include a `<title>`, `<meta name="description">`,
 
 #### Scenario: Lang attribute
 
-- **WHEN** any doc page is rendered
+- **WHEN** any doc page outside `/docs/es/` is rendered
 - **THEN** the `<html>` element SHALL include `lang="en"`
 
 #### Scenario: Guarded over the build

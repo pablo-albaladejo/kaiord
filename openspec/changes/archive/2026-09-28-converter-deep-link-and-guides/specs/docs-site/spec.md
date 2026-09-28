@@ -19,6 +19,35 @@ The docs site SHALL include manually written guides migrated from existing docum
 - **WHEN** a reader opens `/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin`
 - **THEN** the table SHALL carry its "as of" date and every claim about another product SHALL carry a footnote to its source
 
+### Requirement: Per-page SEO
+
+Every documentation page SHALL include a `<title>`, `<meta name="description">`, `og:title`, `og:description`, `og:image`, and `<link rel="canonical">` via VitePress frontmatter and the `transformHead` hook. The `<html>` element SHALL include `lang="en"`, except pages under `/docs/es/`, which SHALL include `lang="es"` (see "ES locale for guides with hreflang"). TypeDoc symbol pages (`/docs/api/<pkg>/<kind>/<symbol>`) SHALL carry `<meta name="robots" content="noindex,follow">`; the API root (`/docs/api/`) and each package index (`api/<pkg>/README`, or `api/<pkg>/` for placeholders) SHALL stay indexable, and the package indexes SHALL have a title and description of their own. Title and description SHALL be unique across the indexable pages. The package `README.md` and `CHANGELOG.md` at the docs root SHALL NOT be built as pages. Noindex pages SHALL stay linked and in `llms-full.txt`.
+
+#### Scenario: Meta tags present
+
+- **WHEN** any indexable doc page is rendered
+- **THEN** it SHALL have a title and meta description no other indexable page shares, and per-page OG title/description — not generic or empty
+
+#### Scenario: API symbol pages are noindex
+
+- **WHEN** a TypeDoc symbol page such as `/docs/api/core/functions/fromBinary` is rendered
+- **THEN** it SHALL carry `<meta name="robots" content="noindex,follow">`, and `/docs/api/core/README` SHALL NOT
+
+#### Scenario: Package files are not pages
+
+- **WHEN** the docs are built
+- **THEN** `/docs/README` and `/docs/CHANGELOG` SHALL NOT exist
+
+#### Scenario: Lang attribute
+
+- **WHEN** any doc page outside `/docs/es/` is rendered
+- **THEN** the `<html>` element SHALL include `lang="en"`
+
+#### Scenario: Guarded over the build
+
+- **WHEN** `packages/docs/scripts/dist-seo-uniqueness.test.mjs` runs with `REQUIRE_DOCS_DIST=1` (CI `build` job and deploy)
+- **THEN** it SHALL fail if a page's `noindex` disagrees with the predicate, or two indexable pages share a title or description
+
 ## ADDED Requirements
 
 ### Requirement: ES locale for guides with hreflang
