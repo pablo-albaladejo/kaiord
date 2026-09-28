@@ -17,6 +17,7 @@ import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
 import { clearDexie, makeWorkout, seedWorkouts } from "./helpers/seed-dexie";
+import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const EVENTS_KEY = "__E2E_UMAMI_EVENTS__";
 const fixture = (path: string) =>
@@ -120,16 +121,6 @@ test.describe("Converter deep link", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/calendar");
-    await clearDexie(page);
-    const workout = makeWorkout({ sport: "cycling" });
-    await seedWorkouts(page, [workout]);
-    await page.goto(`/workout/${workout.id}`);
-    await expect(page.locator("[data-route-heading]")).toBeAttached();
-    const before = {
-      counts: await dexieCounts(page),
-      krd: await storedKrd(page, workout.id),
-    };
     const storeName = () =>
       page.evaluate(() => {
         const w = window as unknown as Record<string, unknown>;
@@ -141,6 +132,20 @@ test.describe("Converter deep link", () => {
           key === "id" ? undefined : value
         );
       });
+    await page.goto("/calendar");
+    await waitForDexieReady(page);
+    await clearDexie(page);
+    const workout = makeWorkout({ sport: "cycling" }); // krd named "Test"
+    await seedWorkouts(page, [workout]);
+    await page.goto(`/workout/${workout.id}`);
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
+    // The editor loads the workout into the store after the route mounts;
+    // capturing before that would compare "null" with "null".
+    await expect.poll(storeName).toContain('"Test"');
+    const before = {
+      counts: await dexieCounts(page),
+      krd: await storedKrd(page, workout.id),
+    };
     const openWorkout = await storeName();
 
     // Act — same-document navigation: the editor store stays alive.
