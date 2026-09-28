@@ -48,7 +48,7 @@ search results cut them mid-sentence.
 - New `packages/landing/scripts/build-sitemap.mjs` generates
   `dist/sitemap-landing.xml` at build with a git `<lastmod>` per URL; the
   static `public/sitemap-landing.xml` is deleted.
-- Landing descriptions: EN 153 and ES 158 characters.
+- Landing descriptions: EN 156 and ES 160 characters.
 - Guards: `packages/docs/scripts/dist-seo-uniqueness.test.mjs` (over the
   built dist: noindex matches the predicate, unique titles and descriptions
   across indexable pages, sitemap ⇄ indexable pages, and with

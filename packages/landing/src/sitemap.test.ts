@@ -79,6 +79,17 @@ describe("landing sitemap", () => {
     expect(build).toThrow(/no commit dates https:\/\/kaiord.com\//);
   });
 
+  it("should date the ES page from its locale build script too", () => {
+    // Arrange
+    const es = PAGES.find((page) => page.loc === "https://kaiord.com/es/");
+
+    // Act
+    const sources = es?.sources ?? [];
+
+    // Assert
+    expect(sources).toContain("packages/landing/scripts/build-locales.mjs");
+  });
+
   it("should read shallowness and dates through the injected git", () => {
     // Arrange
     const calls: string[][] = [];
@@ -100,6 +111,8 @@ describe("landing sitemap", () => {
       "--format=%at",
       "--",
       "packages/landing/src",
+      ":(exclude,glob)**/*.test.*",
+      ":(exclude,glob)**/*.stories.*",
     ]);
   });
 

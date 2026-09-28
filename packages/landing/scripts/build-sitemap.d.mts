@@ -9,6 +9,7 @@ export type GitProvider = {
   lastCommitDate(paths: string[]): string | null;
 };
 export declare const PAGES: SitemapPage[];
+export declare const NON_CONTENT_PATHSPECS: string[];
 export declare function createGitProvider(
   git?: (args: string[]) => string | null
 ): GitProvider;

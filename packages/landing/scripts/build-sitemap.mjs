@@ -25,7 +25,11 @@ export const PAGES = [
   {
     loc: `${ORIGIN}/es/`,
     priority: "0.9",
-    sources: [...LANDING, "packages/landing/i18n"],
+    sources: [
+      ...LANDING,
+      "packages/landing/i18n",
+      "packages/landing/scripts/build-locales.mjs",
+    ],
     alternates: true,
   },
   {
@@ -36,6 +40,13 @@ export const PAGES = [
       "packages/workout-spa-editor/src",
     ],
   },
+];
+
+// Tests and stories do not change what a page shows; a commit touching only
+// them must not move its `lastmod`.
+export const NON_CONTENT_PATHSPECS = [
+  ":(exclude,glob)**/*.test.*",
+  ":(exclude,glob)**/*.stories.*",
 ];
 
 const runGit = (args) => {
@@ -49,7 +60,14 @@ export function createGitProvider(git = runGit) {
     isShallow: () => git(["rev-parse", "--is-shallow-repository"]) !== "false",
     lastCommitDate(paths) {
       const seconds = Number.parseInt(
-        git(["log", "-1", "--format=%at", "--", ...paths]) ?? "",
+        git([
+          "log",
+          "-1",
+          "--format=%at",
+          "--",
+          ...paths,
+          ...NON_CONTENT_PATHSPECS,
+        ]) ?? "",
         10
       );
       return seconds > 0 ? new Date(seconds * 1000).toISOString() : null;
