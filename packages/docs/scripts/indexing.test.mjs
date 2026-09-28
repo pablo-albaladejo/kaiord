@@ -103,7 +103,8 @@ test("a path no commit touched has no lastmod", () => {
   assert.equal(gitLastmod(["nowhere"], { git, env: {} }), null);
 });
 
-// The CI `lint` job checks out at depth 1; there the skip names the reason.
+// Skipped, with the reason, in any shallow clone (the CI jobs that run this
+// suite check out with fetch-depth 0).
 const history = gitHistoryStatus();
 test(
   "this checkout dates a real path",
@@ -116,15 +117,43 @@ test(
   }
 );
 
-test("an API entry page is dated by its package sources", () => {
+test("an API entry page is dated by its package sources and the generator", () => {
   const packages = ["core", "fit"];
+  const extra = [
+    "packages/docs/scripts/generate-api-docs.mjs",
+    ":(exclude,glob)**/*.test.*",
+    ":(exclude,glob)**/*.stories.*",
+  ];
 
   assert.deepEqual(apiSourcePaths("api/core/README", packages), [
     "packages/core/src",
+    ...extra,
   ]);
-  assert.deepEqual(apiSourcePaths("api/cli/", packages), ["packages/cli/src"]);
+  assert.deepEqual(apiSourcePaths("api/cli/", packages), [
+    "packages/cli/src",
+    ...extra,
+  ]);
   assert.deepEqual(apiSourcePaths("api/", packages), [
     "packages/core/src",
     "packages/fit/src",
+    ...extra,
+  ]);
+});
+
+test("gitLastmod passes the test/story exclusions through to git log", () => {
+  const calls = [];
+  const git = (args) => {
+    calls.push(args);
+    return args[0] === "rev-parse" ? "false" : "1767225600";
+  };
+
+  gitLastmod(apiSourcePaths("api/core/README", ["core"]), { git, env: {} });
+
+  const log = calls.find((args) => args[0] === "log");
+  assert.deepEqual(log.slice(log.indexOf("--") + 1), [
+    "packages/core/src",
+    "packages/docs/scripts/generate-api-docs.mjs",
+    ":(exclude,glob)**/*.test.*",
+    ":(exclude,glob)**/*.stories.*",
   ]);
 });

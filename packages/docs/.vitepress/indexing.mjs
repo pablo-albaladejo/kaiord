@@ -6,6 +6,7 @@
 
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
+import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -96,14 +97,26 @@ export function gitLastmod(paths, { git = runGit, env = process.env } = {}) {
   return seconds > 0 ? new Date(seconds * 1000).toISOString() : null;
 }
 
+// Tests and stories do not change what a page documents; a commit touching
+// only them must not move its `lastmod`.
+export const NON_CONTENT_PATHSPECS = [
+  ":(exclude,glob)**/*.test.*",
+  ":(exclude,glob)**/*.stories.*",
+];
+
 /**
- * The source an API entry page is generated from: `api/<pkg>/…` comes from
- * `packages/<pkg>/src`, and `api/` itself lists every package.
+ * The git pathspecs an API entry page is generated from: `api/<pkg>/…` comes
+ * from `packages/<pkg>/src`, `api/` itself lists every package, and the
+ * generator shapes them all. Tests and stories are excluded.
  *
  * @param {string} url a sitemap item url for an indexable API page
  * @param {string[]} packages the documented package names
  */
 export function apiSourcePaths(url, packages) {
   const pkg = normalizePath(url.replace(DOCS_URL_PREFIX, "")).split("/")[1];
-  return (pkg ? [pkg] : packages).map((name) => `packages/${name}/src`);
+  return [
+    ...(pkg ? [pkg] : packages).map((name) => `packages/${name}/src`),
+    "packages/docs/scripts/generate-api-docs.mjs",
+    ...NON_CONTENT_PATHSPECS,
+  ];
 }
