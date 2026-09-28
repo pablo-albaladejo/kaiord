@@ -188,6 +188,26 @@ nothing changed, skipping`; otherwise one POST to `api.indexnow.org` and
   baseline stays put, so the next deploy still covers those changes. The job is
   `continue-on-error`, so it never turns a deploy red.
 
+## SPA initial-JS budget
+
+Lighthouse scores vary from run to run and from machine to machine, so CI
+enforces bytes instead. `pnpm size:spa` (`scripts/check-spa-initial-js.mjs`)
+reads the SPA's `dist/index.html` and sums the gzip size of the entry
+`<script type="module">` and every `<link rel="modulepreload">`: everything the
+browser fetches before the first route renders. Lazy route chunks do not
+count. It fails when the sum passes `SPA_INITIAL_JS_BUDGET_KB` or when
+`dist/index.html` is missing. `--report` lists each file, largest first.
+
+- It runs in the CI `size-limit` job, after `pnpm size`, over the SPA build
+  from the `build` job.
+- **Kill switch:** `vars.SIZE_LIMIT_BOT_ENABLED=false` skips the whole
+  `size-limit` job, so it turns off `size:spa` as well as `pnpm size`.
+- **Raising the budget:** only with evidence. Build the SPA, run
+  `node scripts/check-spa-initial-js.mjs packages/workout-spa-editor/dist
+--report`, record the total and what grew, and set the budget to the new
+  total x 1.05 in the same PR, with the Lighthouse mobile median for
+  `/app/` (3 runs) before and after.
+
 ## Configuration
 
 `reports/seo/queries.json` holds the tracked query set:

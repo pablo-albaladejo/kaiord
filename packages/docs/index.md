@@ -5,7 +5,7 @@ description: "Open-source health & fitness data framework for TypeScript. Conver
 ---
 
 <script setup>
-import { VPHomeHero, VPHomeFeatures } from 'vitepress/theme'
+import { VPHomeHero, VPHomeFeatures } from 'vitepress/theme-without-fonts'
 </script>
 
 # One framework. Every fitness format.

@@ -98,6 +98,7 @@
     "arch:check": "depcruise packages/*/src --config .dependency-cruiser.cjs",
     "dead-code": "knip",
     "size": "size-limit",
+    "size:spa": "node scripts/check-spa-initial-js.mjs packages/workout-spa-editor/dist",
     "duplication": "jscpd packages/*/src",
     "metrics": "node .github/scripts/collect-metrics.js",
     "metrics:compare": "node .github/scripts/compare-metrics.js",
