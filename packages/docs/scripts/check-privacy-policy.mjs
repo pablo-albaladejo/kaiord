@@ -586,6 +586,30 @@ export function checkNoAnalyticsClaim(src) {
   return violations;
 }
 
+// The text a browser would render, found in a single left-to-right pass
+// the way its tokenizer does: `<!--` runs to the next `-->`, a `<` that
+// opens a tag runs to the next `>`, and any other `<` is literal text. One
+// pass, so markup that only becomes a tag or comment after another is
+// removed (`<<!---->!-- x -->`) stays text, as it does in the browser.
+export function visibleText(html, tagReplacement = " ") {
+  let out = "";
+  let i = 0;
+  while (i < html.length) {
+    if (html.startsWith("<!--", i)) {
+      const end = html.indexOf("-->", i + 4);
+      i = end === -1 ? html.length : end + 3;
+    } else if (html[i] === "<" && /[a-zA-Z/!?]/.test(html[i + 1] ?? "")) {
+      const end = html.indexOf(">", i + 1);
+      i = end === -1 ? html.length : end + 1;
+      out += tagReplacement;
+    } else {
+      out += html[i];
+      i += 1;
+    }
+  }
+  return out;
+}
+
 // The landing page at kaiord.com/privacy/ used to carry its own, stale copy
 // of the policy ("We use no analytics…"). It may only forward to the docs.
 export function checkLandingPrivacyRedirect(html) {
@@ -606,8 +630,11 @@ export function checkLandingPrivacyRedirect(html) {
   for (const [re, what] of checks) {
     if (!re.test(html)) violations.push(`${where}: missing ${what}`);
   }
-  const text = html.replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]+>/g, " ");
-  const match = text.match(NO_ANALYTICS_CLAIM);
+  // A tag may split a word (`n<b>o</b>`) or separate two (`no<br>analytics`),
+  // so the claim is checked against both joinings.
+  const match =
+    visibleText(html, "").match(NO_ANALYTICS_CLAIM) ??
+    visibleText(html, " ").match(NO_ANALYTICS_CLAIM);
   if (match) {
     violations.push(`${where}: "no analytics" claim: "${match[0].trim()}"`);
   }

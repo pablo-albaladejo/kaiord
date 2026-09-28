@@ -20,6 +20,7 @@ import {
   BRIDGE_REGISTRY,
   checkBridgeCoverage,
   checkLandingPrivacyRedirect,
+  visibleText,
   checkManifestPermissions,
   checkNoAnalyticsClaim,
   checkPolicy,
@@ -188,6 +189,37 @@ test("landing privacy copy claiming 'no analytics' fails", () => {
 
   assert.equal(v.length, 1, v.join(" | "));
   assert.match(v[0], /"no analytics" claim/);
+});
+
+for (const [label, hidden] of [
+  // A regex strip removes `<!---->` first, which turns the rest into a
+  // comment and strips it too; a browser renders "<!-- no analytics -->".
+  [
+    "a comment split by an empty comment",
+    "<<!---->!-- We use no analytics -->",
+  ],
+  ["a tag nested inside a tag name", "<scr<b>ipt>We use no analytics</p>"],
+  ["a word split by inline markup", "We use n<b>o</b> analytics."],
+  ["words separated only by a tag", "We use no<br>analytics."],
+]) {
+  test(`a 'no analytics' claim hidden by ${label} is still detected`, () => {
+    const html = LANDING_PRIVACY_HTML.replace(
+      "</main>",
+      `<p>${hidden}</p></main>`
+    );
+
+    const v = checkLandingPrivacyRedirect(html);
+
+    assert.equal(v.length, 1, v.join(" | "));
+    assert.match(v[0], /"no analytics" claim/);
+  });
+}
+
+test("visibleText renders what a browser would, in one pass", () => {
+  assert.equal(visibleText("<<!---->!-- x -->", ""), "<!-- x -->");
+  assert.equal(visibleText("a<!-- b -->c<i>d</i>", ""), "acd");
+  assert.equal(visibleText("1 < 2 <b>x</b>", " "), "1 < 2  x ");
+  assert.equal(visibleText("<p>unterminated <!-- tail", ""), "unterminated ");
 });
 
 test("a landing privacy page without the redirect fails on each missing part", () => {
