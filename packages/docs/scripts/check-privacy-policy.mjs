@@ -31,6 +31,17 @@ const VITEPRESS_CONFIG = join(
   ".vitepress",
   "config.ts"
 );
+// kaiord.com/privacy/ — kept answering 200 for store listings that may still
+// link it, but it must only forward to the docs policy.
+const LANDING_PRIVACY = join(
+  REPO_ROOT,
+  "packages",
+  "landing",
+  "public",
+  "privacy",
+  "index.html"
+);
+export const DOCS_POLICY_PATH = "/docs/legal/privacy-policy";
 
 // Per-extension policy section headings. A rule carrying `section` is
 // matched ONLY against that section's body (heading line exclusive, up to
@@ -171,6 +182,13 @@ export const REQUIRED_RULES = [
   {
     label: "Last updated date in YYYY-MM-DD format",
     re: /\*\*Last updated:\*\*\s+\d{4}-\d{2}-\d{2}/,
+  },
+  {
+    // The site, docs and editor run Umami. A policy saying "no analytics"
+    // is false, so the disclosure sentence itself is what this pins.
+    label:
+      "Umami analytics disclosed (cookie-less, anonymous, never user data, surfaces named)",
+    re: /We use Umami, a privacy-friendly, cookie-less analytics tool\. It records anonymous page views and product events \(e\.g\. 'workout exported'\); never your workouts, health data or API keys\. Umami runs on the website \(kaiord\.com\), the documentation and the web editor\./,
   },
   {
     label: "Data controller scope clarified (no Kaiord-operated controller)",
@@ -542,6 +560,109 @@ export function checkPolicy(src, rules = REQUIRED_RULES) {
   return violations;
 }
 
+// A "no analytics" claim is false while Umami runs, and requiring the
+// disclosure does not stop a stale denial surviving next to it. Any
+// negation ("no", "not", "without", "never", "n't") followed by "analytics"
+// in the same sentence counts: "we do not use analytics", "don't collect
+// analytics", "without analytics", "not ... any analytics". `\b` keeps
+// "anonymous analytics" from matching on its "no". Bridge sections are
+// exempt: their "No Telemetry" bullets describe the extensions, which
+// really have none.
+export const NO_ANALYTICS_CLAIM =
+  /(?:\b(?:no|not|without|never)\b|n['’]t\b)[^.]*\banalytics\b/i;
+const BRIDGE_HEADING = /^## Kaiord .+ Bridge Extension$/;
+
+export function checkNoAnalyticsClaim(src) {
+  const violations = [];
+  let inBridge = false;
+  for (const line of src.split("\n")) {
+    if (/^## /.test(line)) inBridge = BRIDGE_HEADING.test(line.trimEnd());
+    if (inBridge) continue;
+    // Emphasis is stripped first: the original claim read "does **not**
+    // collect any … analytics", which the bare regex does not match.
+    const match = line.replace(/[*_]/g, "").match(NO_ANALYTICS_CLAIM);
+    if (match) {
+      violations.push(
+        `"No analytics" claim outside the bridge sections — Umami runs on the site, docs and editor: "${match[0]}"`
+      );
+    }
+  }
+  return violations;
+}
+
+// The text a browser would render, found in a single left-to-right pass
+// the way its tokenizer does: `<!--` runs to the next `-->`, a `<` that
+// opens a tag runs to the next `>`, and any other `<` is literal text. One
+// pass, so markup that only becomes a tag or comment after another is
+// removed (`<<!---->!-- x -->`) stays text, as it does in the browser.
+export function visibleText(html, tagReplacement = " ") {
+  let out = "";
+  let i = 0;
+  while (i < html.length) {
+    if (html.startsWith("<!--", i)) {
+      const end = html.indexOf("-->", i + 4);
+      i = end === -1 ? html.length : end + 3;
+    } else if (html[i] === "<" && /[a-zA-Z/!?]/.test(html[i + 1] ?? "")) {
+      const end = html.indexOf(">", i + 1);
+      i = end === -1 ? html.length : end + 1;
+      out += tagReplacement;
+    } else {
+      out += html[i];
+      i += 1;
+    }
+  }
+  return out;
+}
+
+// The markup with every `<!-- ... -->` removed, in one left-to-right pass
+// so removing one comment can never form another.
+export function withoutComments(html) {
+  let out = "";
+  let i = 0;
+  while (i < html.length) {
+    const start = html.indexOf("<!--", i);
+    if (start === -1) return out + html.slice(i);
+    out += html.slice(i, start);
+    const end = html.indexOf("-->", start + 4);
+    i = end === -1 ? html.length : end + 3;
+  }
+  return out;
+}
+
+// The landing page at kaiord.com/privacy/ used to carry its own, stale copy
+// of the policy ("We use no analytics…"). It may only forward to the docs.
+export function checkLandingPrivacyRedirect(html) {
+  const violations = [];
+  const where = "packages/landing/public/privacy/index.html";
+  const target = DOCS_POLICY_PATH.replaceAll("/", "\\/");
+  const checks = [
+    [
+      new RegExp(`<link rel="canonical" href="https://kaiord\\.com${target}"`),
+      "canonical link to the docs policy",
+    ],
+    [
+      new RegExp(`<meta http-equiv="refresh" content="0; url=${target}"`),
+      "meta refresh 0 to the docs policy",
+    ],
+    [new RegExp(`<a href="${target}"`), "visible link to the docs policy"],
+  ];
+  // A commented-out element does nothing in the browser, so it must not
+  // satisfy the check.
+  const active = withoutComments(html);
+  for (const [re, what] of checks) {
+    if (!re.test(active)) violations.push(`${where}: missing ${what}`);
+  }
+  // A tag may split a word (`n<b>o</b>`) or separate two (`no<br>analytics`),
+  // so the claim is checked against both joinings.
+  const match =
+    visibleText(html, "").match(NO_ANALYTICS_CLAIM) ??
+    visibleText(html, " ").match(NO_ANALYTICS_CLAIM);
+  if (match) {
+    violations.push(`${where}: "no analytics" claim: "${match[0].trim()}"`);
+  }
+  return violations;
+}
+
 // Every `packages/*-bridge` on disk, sorted. Same derivation the CI-coverage
 // and locales guards already use.
 export function discoverBridgePackages(repoRoot = REPO_ROOT) {
@@ -723,7 +844,17 @@ function main() {
   const bridges = discoverBridgePackages();
   const all = [];
   all.push(...checkPolicy(policySrc));
+  all.push(...checkNoAnalyticsClaim(policySrc));
   all.push(...checkBridgeCoverage(policySrc, bridges));
+  if (existsSync(LANDING_PRIVACY)) {
+    all.push(
+      ...checkLandingPrivacyRedirect(readFileSync(LANDING_PRIVACY, "utf8"))
+    );
+  } else {
+    all.push(
+      `${LANDING_PRIVACY} not found — kaiord.com/privacy/ must keep answering 200`
+    );
+  }
   for (const bridge of bridges) {
     const entry = BRIDGE_REGISTRY[bridge];
     // An unregistered bridge is already reported by checkBridgeCoverage,

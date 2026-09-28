@@ -29,7 +29,7 @@ const SUCCESS_DURATION_MS = 120;
 const FAILURE_DURATION_MS = 99;
 
 describe("emitSyncResult", () => {
-  it("should emit coaching.sync.success with profileId, counts, duration on ok", () => {
+  it("should emit coaching.sync.success with counts and duration on ok, without profileId", () => {
     // Arrange
     const a = makeAnalytics();
 
@@ -37,7 +37,6 @@ describe("emitSyncResult", () => {
     emitSyncResult(
       a,
       "train2go",
-      "p1",
       { ok: true, activityCount: 5, orphansDeleted: 1 },
       SUCCESS_DURATION_MS
     );
@@ -45,7 +44,6 @@ describe("emitSyncResult", () => {
     // Assert
     expect(a.event).toHaveBeenCalledWith("coaching.sync.success", {
       source: "train2go",
-      profileId: "p1",
       activityCount: 5,
       orphansDeleted: 1,
       durationMs: SUCCESS_DURATION_MS,
@@ -61,7 +59,6 @@ describe("emitSyncResult", () => {
     emitSyncResult(
       a,
       "train2go",
-      "p1",
       { ok: false, reason: "session-expired" },
       FAILURE_DURATION_MS
     );
@@ -69,7 +66,6 @@ describe("emitSyncResult", () => {
     // Assert
     expect(a.event).toHaveBeenCalledWith("coaching.sync.failure", {
       source: "train2go",
-      profileId: "p1",
       errorKind: "session-expired",
       isAutoSync: false,
     });
@@ -78,17 +74,16 @@ describe("emitSyncResult", () => {
 });
 
 describe("emitLinkResult", () => {
-  it("should emit coaching.link.success with profileId on ok", () => {
+  it("should emit coaching.link.success without profileId on ok", () => {
     // Arrange
     const a = makeAnalytics();
 
     // Act
-    emitLinkResult(a, "train2go", "p1", { ok: true });
+    emitLinkResult(a, "train2go", { ok: true });
 
     // Assert
     expect(a.event).toHaveBeenCalledWith("coaching.link.success", {
       source: "train2go",
-      profileId: "p1",
     });
     assertNoPII(a);
   });
@@ -98,12 +93,11 @@ describe("emitLinkResult", () => {
     const a = makeAnalytics();
 
     // Act
-    emitLinkResult(a, "train2go", "p1", { ok: false, reason: "aborted" });
+    emitLinkResult(a, "train2go", { ok: false, reason: "aborted" });
 
     // Assert
     expect(a.event).toHaveBeenCalledWith("coaching.link.abort", {
       source: "train2go",
-      profileId: "p1",
       reason: "user-cancelled",
     });
     assertNoPII(a);
@@ -120,12 +114,11 @@ describe("emitLinkResult", () => {
       const a = makeAnalytics();
 
       // Act
-      emitLinkResult(a, "train2go", "p1", { ok: false, reason });
+      emitLinkResult(a, "train2go", { ok: false, reason });
 
       // Assert
       expect(a.event).toHaveBeenCalledWith("coaching.link.failure", {
         source: "train2go",
-        profileId: "p1",
         errorKind: reason,
       });
       assertNoPII(a);

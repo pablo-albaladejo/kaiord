@@ -97,7 +97,6 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     // Assert
     expect(analytics.event).toHaveBeenCalledWith("coaching.sync.failure", {
       source: "train2go",
-      profileId: "p1",
       errorKind: "transport-error",
       isAutoSync: true,
     });
@@ -125,7 +124,6 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     // Assert
     expect(analytics.event).toHaveBeenCalledWith("coaching.sync.failure", {
       source: "train2go",
-      profileId: "p1",
       errorKind: "transport-error",
       isAutoSync: true,
     });
@@ -149,7 +147,6 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     // Assert
     expect(analytics.event).toHaveBeenCalledWith("coaching.sync.invoked", {
       source: "train2go",
-      profileId: "p1",
       trigger: "auto-week-change",
     });
   });

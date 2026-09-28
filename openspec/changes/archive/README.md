@@ -7,6 +7,8 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-09-27 | [`analytics-redact-identifiers`](./2026-09-27-analytics-redact-identifiers/) | Keep per-person identifiers out of Umami |
+| 2026-09-27 | [`privacy-umami-disclosure`](./2026-09-27-privacy-umami-disclosure/) | Disclose Umami analytics in the privacy policy |
 | 2026-09-08 | [`harden-ai-evals`](./2026-09-08-harden-ai-evals/) | Move the eval program onto the lanes that can actually run |
 | 2026-08-09 | [`move-spa-to-app-hash-routing`](./2026-08-09-move-spa-to-app-hash-routing/) | Every deep URL of the SPA answers HTTP 404 on the way in. Measured against production: |
 | 2026-08-06 | [`rebrand-v2-editor-verbs`](./2026-08-06-rebrand-v2-editor-verbs/) | Rebrand V2 · editor canvas and the verb cut |

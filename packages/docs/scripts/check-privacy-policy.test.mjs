@@ -19,8 +19,13 @@ import { fileURLToPath } from "node:url";
 import {
   BRIDGE_REGISTRY,
   checkBridgeCoverage,
+  checkLandingPrivacyRedirect,
+  visibleText,
+  withoutComments,
   checkManifestPermissions,
+  checkNoAnalyticsClaim,
   checkPolicy,
+  DOCS_POLICY_PATH,
   checkSidebar,
   discoverBridgePackages,
   isDirectInvocation,
@@ -96,6 +101,192 @@ test("missing Last updated is flagged", () => {
   const src = POLICY.replace(/\*\*Last updated:\*\*\s+\d{4}-\d{2}-\d{2}/, "");
   const v = checkPolicy(src);
   assert.ok(v.some((r) => r.includes("Last updated")));
+});
+
+// The policy used to say Kaiord collects no analytics while Umami ran on
+// the site, docs and editor. Restoring that sentence must fail the lint.
+const UMAMI_DISCLOSURE =
+  "We use Umami, a privacy-friendly, cookie-less analytics tool. It records anonymous page views and product events (e.g. 'workout exported'); never your workouts, health data or API keys.";
+const OLD_NO_ANALYTICS_CLAIM =
+  "Kaiord does **not** collect any personal data, analytics, or telemetry. We do not use cookies for tracking. We do not use any third-party analytics services.";
+
+test("the old 'no analytics' claim fails the Umami disclosure rule, and only it", () => {
+  const src = POLICY.replace(/^.*We use Umami.*$/m, OLD_NO_ANALYTICS_CLAIM);
+  assert.notEqual(
+    src,
+    POLICY,
+    "the shipped policy has no Umami disclosure line"
+  );
+
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, [
+    "Umami analytics disclosed (cookie-less, anonymous, never user data, surfaces named)",
+  ]);
+});
+
+test("the Umami disclosure is the exact approved sentence", () => {
+  assert.ok(POLICY.includes(UMAMI_DISCLOSURE));
+});
+
+test("the shipped policy makes no 'no analytics' claim outside the bridge sections", () => {
+  assert.deepEqual(checkNoAnalyticsClaim(POLICY), []);
+});
+
+test("a leftover 'no analytics' sentence fails even next to the Umami disclosure", () => {
+  const src = POLICY.replace(
+    "We do not use cookies for tracking.",
+    "We do not use cookies for tracking. Kaiord does **not** collect any personal data, analytics, or telemetry."
+  );
+  assert.notEqual(src, POLICY);
+  assert.deepEqual(checkPolicy(src), [], "the disclosure rule alone passes");
+
+  const v = checkNoAnalyticsClaim(src);
+
+  assert.equal(v.length, 1, v.join(" | "));
+  assert.match(v[0], /"No analytics" claim outside the bridge sections/);
+});
+
+test("'We use no analytics' is caught too, and 'anonymous analytics' is not", () => {
+  const withDenial = `${POLICY}\n## Other\n\nWe use no analytics, advertising, or fingerprinting.\n`;
+  const withAnonymous = `${POLICY}\n## Other\n\nIt sends anonymous analytics events.\n`;
+
+  const denial = checkNoAnalyticsClaim(withDenial);
+  const anonymous = checkNoAnalyticsClaim(withAnonymous);
+
+  assert.equal(denial.length, 1, denial.join(" | "));
+  assert.deepEqual(anonymous, []);
+});
+
+for (const denial of [
+  "We do not use analytics.",
+  "We do not collect analytics.",
+  "We don't use analytics or telemetry.",
+  "We don’t collect any analytics.",
+  "Kaiord runs without analytics.",
+  "We do not run any third-party analytics.",
+  "Kaiord does **not** collect any personal data, analytics, or telemetry.",
+  "We never use analytics.",
+]) {
+  test(`the denial "${denial}" is caught outside the bridge sections`, () => {
+    const src = `${POLICY}\n## Other\n\n${denial}\n`;
+
+    const v = checkNoAnalyticsClaim(src);
+
+    assert.equal(v.length, 1, v.join(" | "));
+  });
+}
+
+for (const truthful of [
+  "It sends anonymous analytics events.",
+  "We use Umami, a privacy-friendly, cookie-less analytics tool.",
+  "Analytics never include your workouts.",
+]) {
+  test(`the true statement "${truthful}" is not flagged`, () => {
+    const src = `${POLICY}\n## Other\n\n${truthful}\n`;
+
+    const v = checkNoAnalyticsClaim(src);
+
+    assert.deepEqual(v, []);
+  });
+}
+
+test("the bridge sections' 'No Telemetry' bullets are exempt", () => {
+  // They mention analytics and are true for the extensions.
+  const body = sectionBody(POLICY, GARMIN);
+  assert.match(body, /No Telemetry[^.]*analytics/);
+
+  const v = checkNoAnalyticsClaim(POLICY);
+
+  assert.deepEqual(v, []);
+});
+
+// ---------- kaiord.com/privacy/ only forwards to the docs policy ----------
+
+const LANDING_PRIVACY_HTML = readFileSync(
+  join(REPO_ROOT, "packages/landing/public/privacy/index.html"),
+  "utf8"
+);
+
+test("the shipped landing privacy page is a redirect to the docs policy", () => {
+  assert.deepEqual(checkLandingPrivacyRedirect(LANDING_PRIVACY_HTML), []);
+  assert.match(LANDING_PRIVACY_HTML, new RegExp(DOCS_POLICY_PATH));
+});
+
+test("landing privacy copy claiming 'no analytics' fails", () => {
+  const html = LANDING_PRIVACY_HTML.replace(
+    "</main>",
+    "<p>We use no analytics, advertising, or fingerprinting of any kind.</p></main>"
+  );
+
+  const v = checkLandingPrivacyRedirect(html);
+
+  assert.equal(v.length, 1, v.join(" | "));
+  assert.match(v[0], /"no analytics" claim/);
+});
+
+for (const [label, hidden] of [
+  // A regex strip removes `<!---->` first, which turns the rest into a
+  // comment and strips it too; a browser renders "<!-- no analytics -->".
+  [
+    "a comment split by an empty comment",
+    "<<!---->!-- We use no analytics -->",
+  ],
+  ["a tag nested inside a tag name", "<scr<b>ipt>We use no analytics</p>"],
+  ["a word split by inline markup", "We use n<b>o</b> analytics."],
+  ["words separated only by a tag", "We use no<br>analytics."],
+]) {
+  test(`a 'no analytics' claim hidden by ${label} is still detected`, () => {
+    const html = LANDING_PRIVACY_HTML.replace(
+      "</main>",
+      `<p>${hidden}</p></main>`
+    );
+
+    const v = checkLandingPrivacyRedirect(html);
+
+    assert.equal(v.length, 1, v.join(" | "));
+    assert.match(v[0], /"no analytics" claim/);
+  });
+}
+
+test("a redirect whose canonical, refresh and link are all commented out fails", () => {
+  const html = `<!doctype html><html><head><title>Privacy</title>
+<!-- <link rel="canonical" href="https://kaiord.com/docs/legal/privacy-policy" /> -->
+<!-- <meta http-equiv="refresh" content="0; url=/docs/legal/privacy-policy" /> -->
+</head><body><p>Moved.
+<!-- <a href="/docs/legal/privacy-policy">policy</a> -->
+</p></body></html>`;
+
+  const v = checkLandingPrivacyRedirect(html);
+
+  assert.equal(v.length, 3, v.join(" | "));
+  assert.ok(v.some((r) => r.includes("canonical")));
+  assert.ok(v.some((r) => r.includes("meta refresh")));
+  assert.ok(v.some((r) => r.includes("visible link")));
+});
+
+test("withoutComments removes comments in one pass", () => {
+  assert.equal(withoutComments("a<!-- b -->c"), "ac");
+  assert.equal(withoutComments("<<!---->!-- x -->"), "<!-- x -->");
+  assert.equal(withoutComments("a<!-- unterminated"), "a");
+});
+
+test("visibleText renders what a browser would, in one pass", () => {
+  assert.equal(visibleText("<<!---->!-- x -->", ""), "<!-- x -->");
+  assert.equal(visibleText("a<!-- b -->c<i>d</i>", ""), "acd");
+  assert.equal(visibleText("1 < 2 <b>x</b>", " "), "1 < 2  x ");
+  assert.equal(visibleText("<p>unterminated <!-- tail", ""), "unterminated ");
+});
+
+test("a landing privacy page without the redirect fails on each missing part", () => {
+  const html = "<html><body><p>Our policy.</p></body></html>";
+
+  const v = checkLandingPrivacyRedirect(html);
+
+  assert.equal(v.length, 3, v.join(" | "));
+  assert.ok(v.some((r) => r.includes("canonical")));
+  assert.ok(v.some((r) => r.includes("meta refresh")));
+  assert.ok(v.some((r) => r.includes("visible link")));
 });
 
 // ---------- every section rule must fail ALONE ----------

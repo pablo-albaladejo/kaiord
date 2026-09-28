@@ -13,10 +13,7 @@ export const useExpandCallback = (
 ) =>
   useCallback(
     async (profileId: string, date: string) => {
-      a.event("coaching.expand_day.invoked", {
-        source: t.source,
-        profileId,
-      });
+      a.event("coaching.expand_day.invoked", { source: t.source });
       return expandDay(
         {
           profiles: p.profiles,
