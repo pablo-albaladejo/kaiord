@@ -49,13 +49,22 @@ const TANITA = row("b0000000-0000-4000-8000-000000000005", {
   destinationExternalId: "garmin-body-composition",
 });
 
+/** A v35 row a buggy or older writer could have left behind. */
+const MALFORMED = {
+  ...row("b0000000-0000-4000-8000-000000000006", {}),
+  library: "x",
+  removalQueue: {},
+  placement: { kind: "scheduled", workoutScheduleId: "stub", date: "soon" },
+  forceRepush: "yes",
+};
+
 const seedV35 = async (name: string): Promise<void> => {
   const older = new Dexie(name);
   older.version(SEED_VERSION).stores(SCHEMAS.v35);
   await older.open();
   await older
     .table("exportLedger")
-    .bulkAdd([CONFIRMED, PENDING, SENTINEL, TRAININGPEAKS, TANITA]);
+    .bulkAdd([CONFIRMED, PENDING, SENTINEL, TRAININGPEAKS, TANITA, MALFORMED]);
   older.close();
 };
 
@@ -126,5 +135,20 @@ describe("Dexie Garmin ledger (v36) migration", () => {
 
     // Assert
     expect(byId.get(seeded.id)).toStrictEqual(seeded);
+  });
+
+  it("should open and clean a malformed Garmin row", async () => {
+    // Arrange
+    await seedV35(name);
+
+    // Act
+    const { version, byId } = await upgrade(name);
+
+    // Assert
+    expect(version).toBe(SCHEMA_HEAD);
+    expect(byId.get(MALFORMED.id)).toStrictEqual({
+      ...row(MALFORMED.id, {}),
+      library: { kind: "confirmed", workoutId: "1707805999" },
+    });
   });
 });

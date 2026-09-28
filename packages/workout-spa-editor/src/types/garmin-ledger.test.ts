@@ -11,8 +11,8 @@ import {
   parseGarminWorkoutId,
 } from "./garmin-ledger";
 
-// Vitest runs every spa-editor suite from the package root.
-const PACKAGE_ROOT = process.cwd();
+const PACKAGE_ROOT = join(import.meta.dirname, "../..");
+const TSC_TIMEOUT_MS = 30_000;
 
 describe("Garmin branded ids", () => {
   it.each(["1", "1707805999", "90000000000000001"])(
@@ -47,56 +47,64 @@ describe("Garmin branded ids", () => {
     expect(ids).toEqual([undefined, undefined]);
   });
 
-  it("should fail tsc when a GarminWorkoutId is passed where a GarminScheduleId is expected", () => {
-    // Arrange
-    const dir = mkdtempSync(join(tmpdir(), "kaiord-brand-check-"));
-    const module = join(PACKAGE_ROOT, "src/types/garmin-ledger");
-    writeFileSync(
-      join(dir, "check.ts"),
-      [
-        `import { parseGarminScheduleId, parseGarminWorkoutId } from "${module}";`,
-        `import type { GarminScheduleId, GarminWorkoutId } from "${module}";`,
-        `const workoutId = parseGarminWorkoutId("1") as GarminWorkoutId;`,
-        `const scheduleId = parseGarminScheduleId("2") as GarminScheduleId;`,
-        `export const sameBrand: GarminWorkoutId = workoutId;`,
-        `// @ts-expect-error a workout id is not a schedule id`,
-        `export const wrongSchedule: GarminScheduleId = workoutId;`,
-        `// @ts-expect-error a schedule id is not a workout id`,
-        `export const wrongWorkout: GarminWorkoutId = scheduleId;`,
-        `// @ts-expect-error a bare string is not an id`,
-        `export const bare: GarminScheduleId = "3";`,
-      ].join("\n")
-    );
-    writeFileSync(
-      join(dir, "tsconfig.json"),
-      JSON.stringify({
-        extends: join(PACKAGE_ROOT, "tsconfig.app.json"),
-        compilerOptions: { incremental: false, types: [] },
-        include: [],
-        files: ["check.ts"],
-      })
-    );
-    const tsc = join(PACKAGE_ROOT, "node_modules/.bin/tsc");
+  it(
+    "should fail tsc when a GarminWorkoutId is passed where a GarminScheduleId is expected",
+    () => {
+      // Arrange
+      const dir = mkdtempSync(join(tmpdir(), "kaiord-brand-check-"));
+      const module = join(PACKAGE_ROOT, "src/types/garmin-ledger");
+      writeFileSync(
+        join(dir, "check.ts"),
+        [
+          `import { parseGarminScheduleId, parseGarminWorkoutId } from "${module}";`,
+          `import type { GarminScheduleId, GarminWorkoutId } from "${module}";`,
+          `const workoutId = parseGarminWorkoutId("1") as GarminWorkoutId;`,
+          `const scheduleId = parseGarminScheduleId("2") as GarminScheduleId;`,
+          `export const sameBrand: GarminWorkoutId = workoutId;`,
+          `// @ts-expect-error a workout id is not a schedule id`,
+          `export const wrongSchedule: GarminScheduleId = workoutId;`,
+          `// @ts-expect-error a schedule id is not a workout id`,
+          `export const wrongWorkout: GarminWorkoutId = scheduleId;`,
+          `// @ts-expect-error a bare string is not an id`,
+          `export const bare: GarminScheduleId = "3";`,
+        ].join("\n")
+      );
+      writeFileSync(
+        join(dir, "tsconfig.json"),
+        JSON.stringify({
+          extends: join(PACKAGE_ROOT, "tsconfig.app.json"),
+          compilerOptions: { incremental: false, types: [] },
+          include: [],
+          files: ["check.ts"],
+        })
+      );
+      const tsc = join(PACKAGE_ROOT, "node_modules/.bin/tsc");
 
-    // Act
-    const run = () => {
-      try {
-        execFileSync(tsc, ["-p", join(dir, "tsconfig.json")], {
-          encoding: "utf8",
-        });
-        return "";
-      } catch (error) {
-        return String((error as { stdout?: unknown }).stdout);
-      } finally {
-        rmSync(dir, { recursive: true, force: true });
-      }
-    };
-    const diagnostics = run();
+      // Act
+      const run = () => {
+        try {
+          const stdout = execFileSync(tsc, ["-p", join(dir, "tsconfig.json")], {
+            encoding: "utf8",
+            timeout: TSC_TIMEOUT_MS,
+          });
+          return { status: 0, stdout };
+        } catch (error) {
+          const failed = error as { status?: unknown; stdout?: unknown };
+          return { status: failed.status, stdout: String(failed.stdout) };
+        } finally {
+          rmSync(dir, { recursive: true, force: true });
+        }
+      };
+      const result = run();
 
-    // Assert
-    // An unused @ts-expect-error (brands that collapsed) fails with TS2578.
-    expect(diagnostics).toBe("");
-  });
+      // Assert
+      // Brands that collapsed leave an unused @ts-expect-error (TS2578) and a
+      // non-zero status with diagnostics; a crash or a timeout is a non-zero
+      // (or null) status too, so only a clean compile passes.
+      expect(result).toEqual({ status: 0, stdout: "" });
+    },
+    TSC_TIMEOUT_MS
+  );
 });
 
 describe("garminPlacementSchema", () => {
