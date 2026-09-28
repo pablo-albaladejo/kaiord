@@ -34,26 +34,31 @@
     {
       "id": "convert-fit",
       "lang": "en",
+      "core": true,
       "q": "What tools can convert FIT files to TCX or ZWO?"
     },
     {
       "id": "mcp-workout",
       "lang": "en",
+      "core": true,
       "q": "Is there an MCP server for workout files?"
     },
     {
       "id": "ts-fit-lib",
       "lang": "en",
+      "core": true,
       "q": "What open-source library parses Garmin FIT files in TypeScript?"
     },
     {
       "id": "garmin-connect-sync",
       "lang": "en",
+      "core": true,
       "q": "How can I sync workouts from Garmin Connect to other platforms?"
     },
     {
       "id": "workout-toolkit",
       "lang": "en",
+      "core": true,
       "q": "What is the best open-source toolkit for converting and editing workout files?"
     },
     {
@@ -108,8 +113,18 @@
       "lang": "es",
       "q": "Servidor MCP para entrenamientos de Garmin."
     },
-    { "id": "panel-07-en", "lang": "en", "q": "What is Kaiord?" },
-    { "id": "panel-07-es", "lang": "es", "q": "¿Qué es Kaiord?" },
+    {
+      "id": "panel-07-en",
+      "lang": "en",
+      "brand": true,
+      "q": "What is Kaiord?"
+    },
+    {
+      "id": "panel-07-es",
+      "lang": "es",
+      "brand": true,
+      "q": "¿Qué es Kaiord?"
+    },
     {
       "id": "panel-08-en",
       "lang": "en",

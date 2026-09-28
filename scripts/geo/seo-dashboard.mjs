@@ -35,6 +35,17 @@ const delta = (current, prior) => {
 const ratio = (num, den) =>
   den === 0 ? "—" : String(Number((num / den).toFixed(2)));
 
+// The KPI rate: the 5 core prompts. Rows from before the panel were measured
+// on exactly those 5, so their overall rate IS the core rate.
+export const coreRate = (row) => row.core?.mentionRate ?? row.mentionRate;
+
+export const KPI_DENOMINATORS = [
+  "## KPI denominators",
+  "",
+  '_Since 2026-09-28:_ the AI mention-rate KPI is the **core** rate, over the 5 prompts every week has been measured on since 2026-07-22 (`core: true` in `queries.json`), so it stays comparable. The weekly table\'s **Rate** covers the whole panel. Brand prompts (`brand: true`, "What is Kaiord?") are left out of every rate: the question names kaiord.',
+  "",
+];
+
 // J3/J4: the probe runs weekly; this rolls its rows up per provider and
 // calendar month, newest first, so month-over-month movement (and the EN/ES
 // halves of the panel, from `byLang`) is readable at a glance.
@@ -56,7 +67,11 @@ export function monthlyAiVisibility(rows, months = 12) {
     g.questions += row.questions ?? 0;
     g.mentions += row.kaiordMentions ?? 0;
     g.cited += row.citedCount ?? 0;
-    for (const [lang, v] of Object.entries(row.byLang ?? {})) {
+    // Rows from before the EN/ES panel (no byLang) asked English prompts only.
+    const byLang = row.byLang ?? {
+      en: { questions: row.questions, kaiordMentions: row.kaiordMentions },
+    };
+    for (const [lang, v] of Object.entries(byLang)) {
       g.byLang[lang] ??= { questions: 0, mentions: 0 };
       g.byLang[lang].questions += v.questions ?? 0;
       g.byLang[lang].mentions += v.kaiordMentions ?? 0;
@@ -152,9 +167,10 @@ export function renderDashboard({
     `| Tracked queries where site appears (DDG/Bing proxy) | ${s ? `${s.found}/${s.queries}${delta(s.found, sPrev?.found)}` : "—"} | ${serpQueries.length}/${serpQueries.length} | serp.jsonl |`
   );
   lines.push(
-    `| AI answer-engine mention rate | ${aiRows.length === 0 ? "— (needs Perplexity/OpenAI key)" : aiRows.map((r) => `${r.provider} ${r.mentionRate ?? "—"}`).join(", ")} | growing | ai-visibility.jsonl |`
+    `| AI answer-engine mention rate (core 5 prompts) | ${aiRows.length === 0 ? "— (needs Perplexity/OpenAI key)" : aiRows.map((r) => `${r.provider} ${fmt(coreRate(r))}`).join(", ")} | growing | ai-visibility.jsonl |`
   );
   lines.push("");
+  lines.push(...KPI_DENOMINATORS);
 
   lines.push("## Tracked query positions (DDG — Bing-index proxy)");
   lines.push("");
@@ -205,15 +221,15 @@ export function renderDashboard({
     );
   } else {
     lines.push(
-      "| Provider | Date | Mentions | Rate | Cited | Top competitors |"
+      "| Provider | Date | Mentions | Rate | Core rate | Cited | Top competitors |"
     );
-    lines.push("| --- | --- | --- | --- | --- | --- |");
+    lines.push("| --- | --- | --- | --- | --- | --- | --- |");
     for (const r of aiRows) {
       const comp = (r.topCompetitors ?? [])
         .map((c) => `${c.name} (${c.count})`)
         .join(", ");
       lines.push(
-        `| ${r.provider} | ${r.date} | ${r.kaiordMentions}/${r.questions} | ${fmt(r.mentionRate)} | ${r.citedCount} | ${comp || "—"} |`
+        `| ${r.provider} | ${r.date} | ${r.kaiordMentions}/${r.questions} | ${fmt(r.mentionRate)} | ${fmt(coreRate(r))} | ${r.citedCount} | ${comp || "—"} |`
       );
     }
   }

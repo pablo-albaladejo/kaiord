@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { loadQueries } from "./observatory-lib.mjs";
 import {
+  coreRate,
   monthlyAiVisibility,
   renderDashboard,
   renderMonthlyAiVisibility,
@@ -71,6 +72,28 @@ describe("monthlyAiVisibility", () => {
     });
   });
 
+  it("should count a legacy row without byLang as English", () => {
+    // Arrange
+    const rows = [
+      probe("2026-09-14", "perplexity", 5, 1),
+      probe("2026-09-28", "perplexity", 18, 2, {
+        byLang: {
+          en: { questions: 9, kaiordMentions: 2 },
+          es: { questions: 9, kaiordMentions: 0 },
+        },
+      }),
+    ];
+
+    // Act
+    const [september] = monthlyAiVisibility(rows);
+
+    // Assert
+    assert.deepEqual(september.byLang, {
+      en: { questions: 14, mentions: 3 },
+      es: { questions: 9, mentions: 0 },
+    });
+  });
+
   it("should keep only the most recent months", () => {
     // Arrange
     const rows = ["2026-07-01", "2026-08-01", "2026-09-01"].map((d) =>
@@ -102,7 +125,7 @@ describe("renderMonthlyAiVisibility", () => {
     // Assert
     assert.equal(lines[0], "## Monthly AI visibility");
     assert.ok(
-      lines.includes("| 2026-09 | perplexity | 2 | 1/10 | 0.1 | 0 | — | — |")
+      lines.includes("| 2026-09 | perplexity | 2 | 1/10 | 0.1 | 0 | 1/10 | — |")
     );
   });
 
@@ -126,7 +149,9 @@ describe("renderDashboard", () => {
       gsc: [],
       bing: [],
       serp: [],
-      aiVisibility: [probe("2026-09-21", "perplexity", 5, 1)],
+      aiVisibility: [
+        probe("2026-09-21", "perplexity", 5, 1, { mentionRate: 0.2 }),
+      ],
       serpQueries: [],
       directoryStatus: { checkedAt: "2026-09-28", directories: {} },
       now: new Date("2026-09-28T10:00:00Z"),
@@ -137,10 +162,42 @@ describe("renderDashboard", () => {
 
     // Assert
     assert.match(markdown, /^_Generated 2026-09-28 10:00 UTC/m);
+    assert.match(markdown, /## KPI denominators\n\n_Since 2026-09-28:_/);
+    assert.match(
+      markdown,
+      /\| AI answer-engine mention rate \(core 5 prompts\) \| perplexity 0\.2 \|/
+    );
     assert.match(
       markdown,
       /## Monthly AI visibility\n\n\| Month \| Provider[^\n]*\n[^\n]*\n\| 2026-09 \| perplexity \| 1 \| 1\/5 \| 0\.2 \|/
     );
+  });
+});
+
+describe("coreRate", () => {
+  it("should use the core rate, not the whole-panel rate", () => {
+    // Arrange
+    const row = probe("2026-10-05", "perplexity", 18, 9, {
+      mentionRate: 0.5,
+      core: { questions: 5, kaiordMentions: 1, mentionRate: 0.2 },
+    });
+
+    // Act
+    const rate = coreRate(row);
+
+    // Assert
+    assert.equal(rate, 0.2);
+  });
+
+  it("should read a pre-panel row's rate as its core rate", () => {
+    // Arrange
+    const row = probe("2026-09-21", "perplexity", 5, 1, { mentionRate: 0.2 });
+
+    // Act
+    const rate = coreRate(row);
+
+    // Assert
+    assert.equal(rate, 0.2);
   });
 });
 
@@ -178,6 +235,26 @@ describe("queries.json AI panel", () => {
     // Assert
     assert.equal(ids.size, aiQuestions.length);
     assert.equal(questions.size, aiQuestions.length);
+  });
+
+  it("should flag the brand prompts and the 5 original core prompts", () => {
+    // Arrange
+    const ids = (flag) =>
+      aiQuestions.filter((q) => q[flag] === true).map((q) => q.id);
+
+    // Act
+    const brand = ids("brand");
+    const core = ids("core");
+
+    // Assert
+    assert.deepEqual(brand, ["panel-07-en", "panel-07-es"]);
+    assert.deepEqual(core, [
+      "convert-fit",
+      "mcp-workout",
+      "ts-fit-lib",
+      "garmin-connect-sync",
+      "workout-toolkit",
+    ]);
   });
 
   it("should give every question a language the probe can split on", () => {

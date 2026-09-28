@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-09-28 14:55 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-09-28 15:34 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
@@ -13,7 +13,11 @@ _Generated 2026-09-28 14:55 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 | Bing pages in index | — | all pages | bing.jsonl |
 | Bing impressions (7d) | 20 (+10) | growing | bing.jsonl |
 | Tracked queries where site appears (DDG/Bing proxy) | 0/12 (=) | 12/12 | serp.jsonl |
-| AI answer-engine mention rate | perplexity 0.2 | growing | ai-visibility.jsonl |
+| AI answer-engine mention rate (core 5 prompts) | perplexity 0.2 | growing | ai-visibility.jsonl |
+
+## KPI denominators
+
+_Since 2026-09-28:_ the AI mention-rate KPI is the **core** rate, over the 5 prompts every week has been measured on since 2026-07-22 (`core: true` in `queries.json`), so it stays comparable. The weekly table's **Rate** covers the whole panel. Brand prompts (`brand: true`, "What is Kaiord?") are left out of every rate: the question names kaiord.
 
 ## Tracked query positions (DDG — Bing-index proxy)
 
@@ -41,17 +45,17 @@ _Generated 2026-09-28 14:55 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 
 ## AI answer-engine visibility (GEO end-goal)
 
-| Provider | Date | Mentions | Rate | Cited | Top competitors |
-| --- | --- | --- | --- | --- | --- |
-| perplexity | 2026-09-21 | 1/5 | 0.2 | 0 | Garmin FIT SDK (2), GoldenCheetah (1) |
+| Provider | Date | Mentions | Rate | Core rate | Cited | Top competitors |
+| --- | --- | --- | --- | --- | --- | --- |
+| perplexity | 2026-09-21 | 1/5 | 0.2 | 0.2 | 0 | Garmin FIT SDK (2), GoldenCheetah (1) |
 
-## Monthly AI visibility (prompt panel)
+## Monthly AI visibility
 
 | Month | Provider | Runs | Mentions | Rate | Cited | EN | ES |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-09 | perplexity | 3 | 2/15 | 0.13 | 0 | — | — |
-| 2026-08 | perplexity | 4 | 2/20 | 0.1 | 0 | — | — |
-| 2026-07 | perplexity | 3 | 0/15 | 0 | 0 | — | — |
+| 2026-09 | perplexity | 3 | 2/15 | 0.13 | 0 | 2/15 | — |
+| 2026-08 | perplexity | 4 | 2/20 | 0.1 | 0 | 2/20 | — |
+| 2026-07 | perplexity | 3 | 0/15 | 0 | 0 | 0/15 | — |
 
 ## Directory / entity presence (GEO substrate)
 

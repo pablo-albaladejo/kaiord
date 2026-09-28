@@ -5,16 +5,20 @@
 //
 //   node scripts/geo/union-timeseries.mjs --branch origin/auto/seo-observatory
 //
-// timeseries/*.jsonl are append-only, and every unmerged branch holds a
-// different week, so neither side can simply win:
-//   - union of both files: a line only on the working tree (main) survives,
-//     a line only on the branch survives, an identical line is kept once;
-//   - stable sort by the record's `date`, then by first appearance (the
-//     working tree's lines come before the branch's);
-//   - a line that is not JSON is kept verbatim, after the dated lines, and
-//     reported (a ::warning:: in Actions) so it gets fixed by hand;
+// Every record is one measurement, identified by (date, source, provider):
+//   - main wins: a record main already has (even a corrected one) is kept as
+//     main has it, and the branch's copy of that key is dropped, so a line
+//     fixed on main never comes back from the branch;
+//   - the branch contributes only the keys main does not have (the weeks
+//     collected since the rolling PR was opened);
+//   - stable sort by the record's `date`, then by first appearance (main's
+//     lines come before the branch's);
+//   - a line that is not JSON has no key: it is kept verbatim (once), after
+//     the dated lines, and reported (a ::warning:: in Actions);
 //   - snapshots/*.json that exist only on the branch are copied in; a
 //     snapshot already in the working tree is never overwritten.
+// Whether to read the branch at all is decided by rolling-pr.mjs: a branch
+// whose PR was closed unmerged is not restored.
 // A ref with no timeseries file at all is an error, not a no-op: that is a
 // wrong ref, and silently merging nothing would lose the data it was meant
 // to carry.
@@ -31,32 +35,44 @@ const SNAPSHOTS = "reports/seo/snapshots";
 const splitLines = (text) =>
   text.split("\n").filter((line) => line.trim() !== "");
 
-const dateOf = (line) => {
+const parse = (line) => {
   try {
     const record = JSON.parse(line);
-    return record !== null && typeof record.date === "string"
-      ? record.date
-      : null;
+    return record !== null && typeof record.date === "string" ? record : null;
   } catch {
     return null;
   }
 };
 
+const keyOf = (record) =>
+  [record.date, record.source ?? "", record.provider ?? ""].join("\u0000");
+
 export function unionLines(mainLines, branchLines) {
-  const seen = new Set();
-  const ordered = [];
-  for (const line of [...mainLines, ...branchLines]) {
-    if (seen.has(line)) continue;
-    seen.add(line);
-    ordered.push(line);
+  const mainKeys = new Set();
+  for (const line of mainLines) {
+    const record = parse(line);
+    if (record !== null) mainKeys.add(keyOf(record));
   }
+  const seenLines = new Set();
+  const seenBranchKeys = new Set();
   const dated = [];
   const malformed = [];
-  for (const line of ordered) {
-    const date = dateOf(line);
-    if (date === null) malformed.push(line);
-    else dated.push({ line, date });
-  }
+  const take = (line, fromBranch) => {
+    if (seenLines.has(line)) return;
+    const record = parse(line);
+    if (record === null) {
+      seenLines.add(line);
+      malformed.push(line);
+      return;
+    }
+    const key = keyOf(record);
+    if (fromBranch && (mainKeys.has(key) || seenBranchKeys.has(key))) return;
+    if (fromBranch) seenBranchKeys.add(key);
+    seenLines.add(line);
+    dated.push({ line, date: record.date });
+  };
+  for (const line of mainLines) take(line, false);
+  for (const line of branchLines) take(line, true);
   // Array.prototype.sort is stable, so equal dates keep first appearance.
   dated.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   return { lines: [...dated.map((d) => d.line), ...malformed], malformed };

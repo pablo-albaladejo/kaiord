@@ -114,6 +114,7 @@ export async function submit({
   key,
   fetch = globalThis.fetch,
   log = console,
+  timeoutMs = 20_000,
 }) {
   if (urls.length === 0) {
     log.log("IndexNow: nothing changed, skipping");
@@ -130,6 +131,9 @@ export async function submit({
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify(body),
+      // A hung endpoint must not hold the job until its timeout: the abort
+      // rejects the fetch, and the catch below turns it into a warning.
+      signal: AbortSignal.timeout(timeoutMs),
     });
     log.log(`IndexNow ${response.status} for ${urls.length} URL(s)`);
     if (response.status === 200 || response.status === 202) return "ok";

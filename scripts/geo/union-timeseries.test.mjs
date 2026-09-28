@@ -83,6 +83,32 @@ describe("unionLines", () => {
     assert.equal(lines.length, 2);
   });
 
+  it("should let main win when it corrected a line the branch still holds", () => {
+    // Arrange
+    const corrected = row("2026-09-14", { clicks: 7 });
+    const superseded = row("2026-09-14", { clicks: 6 });
+    const newWeek = row("2026-09-21", { clicks: 9 });
+
+    // Act
+    const { lines } = unionLines([corrected], [superseded, newWeek]);
+
+    // Assert
+    assert.deepEqual(lines, [corrected, newWeek]);
+  });
+
+  it("should take one branch line per key main does not have", () => {
+    // Arrange
+    const first = row("2026-09-21", { provider: "perplexity", n: 1 });
+    const second = row("2026-09-21", { provider: "perplexity", n: 2 });
+    const otherProvider = row("2026-09-21", { provider: "openai" });
+
+    // Act
+    const { lines } = unionLines([], [first, second, otherProvider]);
+
+    // Assert
+    assert.deepEqual(lines, [first, otherProvider]);
+  });
+
   it("should sort by date and keep first appearance for equal dates", () => {
     // Arrange
     const a = row("2026-09-07", { provider: "a" });

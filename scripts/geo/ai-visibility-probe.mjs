@@ -15,6 +15,7 @@ import {
   todayIso,
   writeSnapshot,
 } from "./observatory-lib.mjs";
+import { summarizeRuns } from "./ai-visibility-summary.mjs";
 
 const askPerplexity = async (question) => {
   const response = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -123,39 +124,13 @@ for (const provider of providers) {
     await sleep(1000);
   }
 
-  const answered = runs.filter((r) => r.error === undefined);
-  const mentions = answered.filter((r) => r.kaiordMentioned).length;
-  const competitorCounts = {};
-  for (const run of answered) {
-    for (const name of run.competitorsMentioned ?? []) {
-      competitorCounts[name] = (competitorCounts[name] ?? 0) + 1;
-    }
-  }
-  // Per-language split, so the EN and ES halves of the audit panel can be
-  // read apart in the dashboard's monthly view.
-  const byLang = {};
-  for (const run of answered) {
-    byLang[run.lang] ??= { questions: 0, kaiordMentions: 0 };
-    byLang[run.lang].questions += 1;
-    if (run.kaiordMentioned) byLang[run.lang].kaiordMentions += 1;
-  }
-  const entry = {
+  const entry = summarizeRuns({
+    runs,
+    questions: aiQuestions,
     date: todayIso(),
-    source: "ai-visibility",
     provider: provider.name,
-    questions: answered.length,
-    kaiordMentions: mentions,
-    mentionRate:
-      answered.length === 0
-        ? null
-        : Number((mentions / answered.length).toFixed(2)),
-    citedCount: answered.filter((r) => r.kaiordCited).length,
-    byLang,
-    topCompetitors: Object.entries(competitorCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([name, count]) => ({ name, count })),
-  };
+  });
+  const answered = runs.filter((r) => r.error === undefined);
 
   writeSnapshot(`ai-visibility-${provider.name}-${todayIso()}`, {
     entry,
@@ -168,6 +143,8 @@ for (const provider of providers) {
   );
   console.log(
     `[ai-visibility] ${provider.name} ${appended ? "recorded" : "already recorded today"}: ` +
-      `${mentions}/${answered.length} answers mention kaiord`
+      `${entry.kaiordMentions}/${entry.questions} answers mention kaiord ` +
+      `(core ${entry.core.kaiordMentions}/${entry.core.questions}, ` +
+      `${answered.length - entry.questions} brand prompt(s) apart)`
   );
 }

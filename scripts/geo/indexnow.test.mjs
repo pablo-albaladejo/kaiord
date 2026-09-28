@@ -293,6 +293,51 @@ describe("submit", () => {
     assert.match(log.lines.warn[0], /^::warning::IndexNow answered 403/);
   });
 
+  it(
+    "should abort a request that hangs and warn instead",
+    { timeout: 2000 },
+    async () => {
+      // Arrange
+      const log = quiet();
+      const hanging = (_url, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(init.signal.reason)
+          );
+        });
+
+      // Act
+      const result = await submit({
+        urls: ["https://kaiord.com/"],
+        key: KEY,
+        fetch: hanging,
+        log,
+        timeoutMs: 20,
+      });
+
+      // Assert
+      assert.equal(result, "warned");
+      assert.match(log.lines.warn[0], /^::warning::IndexNow request failed/);
+    }
+  );
+
+  it("should bound the real request at 20 seconds by default", async () => {
+    // Arrange
+    const { calls, fetch } = recordingFetch(200);
+
+    // Act
+    await submit({
+      urls: ["https://kaiord.com/"],
+      key: KEY,
+      fetch,
+      log: quiet(),
+    });
+
+    // Assert
+    assert.ok(calls[0].init.signal instanceof AbortSignal);
+    assert.equal(calls[0].init.signal.aborted, false);
+  });
+
   it("should warn, not fail, on a network error", async () => {
     // Arrange
     const log = quiet();

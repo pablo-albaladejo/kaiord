@@ -29,6 +29,7 @@ ranking signals and whether AI answers actually mention or cite kaiord.
 | `gsc-snapshot.mjs`        | Google Search Console API    | `GSC_SERVICE_ACCOUNT_JSON`               | ⏳ later  |
 | `seo-dashboard.mjs`       | the time series above        | nothing                                  | ✅ yes    |
 | `union-timeseries.mjs`    | another ref's `reports/seo/` | nothing (git)                            | ✅ yes    |
+| `rolling-pr.mjs`          | GitHub pulls API             | `gh` token (workflow's)                  | ✅ yes    |
 
 Every collector **no-ops gracefully when its credential is absent**, so the
 weekly workflow is green from day one. kaiord has no GSC property and is likely
@@ -61,22 +62,40 @@ node scripts/geo/seo-dashboard.mjs          # regenerate reports/seo/DASHBOARD.m
 There is **one** metrics PR, from the fixed branch `auto/seo-observatory`,
 labeled `seo` / `automated`. Each run:
 
-1. checks out `main` with the PR token and full history;
-2. if the branch exists, union-merges its data into the working tree with
-   `scripts/geo/union-timeseries.mjs --branch origin/auto/seo-observatory`;
-3. runs the collectors and regenerates the dashboard;
-4. recreates the branch from `main` with the result, pushes it with
-   `--force-with-lease` pinned to the SHA it read, and updates the open PR's
-   body, or opens the PR if none is open.
+1. checks out `main` with full history and `persist-credentials: false` (the
+   repository is public, so reading needs no credential);
+2. `scripts/geo/rolling-pr.mjs plan` reads the branch SHA and looks for the
+   open rolling PR with the workflow token. Only a PR whose head is the branch
+   **in this repository** counts: a fork can open a PR from a branch with the
+   same name, and `gh pr list --head` would match it;
+3. only while that PR is open, merges the branch's data into the working tree
+   with `scripts/geo/union-timeseries.mjs --branch origin/auto/seo-observatory`.
+   A PR closed unmerged means its data was rejected, and a deleted branch has
+   nothing to restore: in both cases the run starts from `main`, so rejected
+   weeks do not come back every week;
+4. runs the collectors, regenerates the dashboard, and uploads `reports/seo/`
+   as the run's artifact (`seo-observatory-<run id>`, 90 days), so a week's
+   data survives a failed push;
+5. recreates the branch from `main` with the result and pushes it with
+   `--force-with-lease` pinned to the SHA from step 2 (empty when the branch
+   does not exist). If the branch moved meanwhile, it is re-fetched, merged
+   again and the push retried once. Then it updates the open PR's body, or
+   opens the PR if none is open.
+
+`SEO_OBSERVATORY_PR_TOKEN` is read by the publish step only, and reaches git
+as a one-shot `http.extraheader`, never `.git/config`: no collector and no
+merge step can read it.
 
 So the PR always merges cleanly, holds every week not yet on `main`, and can be
 merged at any time; the next run starts a new PR from the same branch.
 
-Union semantics (`union-timeseries.mjs`, tested in
-`union-timeseries.test.mjs`): `timeseries/*.jsonl` become the union of both
-sides — a line only on `main` survives, a line only on the branch survives, an
-identical line is kept once — stably sorted by the record's `date`. A line
-that is not JSON is kept verbatim at the end and reported as a `::warning::`.
+Merge semantics (`union-timeseries.mjs`, tested in
+`union-timeseries.test.mjs`): each `timeseries/*.jsonl` record is one
+measurement, identified by `(date, source, provider)`. **Main wins**: a record
+`main` already has is kept as `main` has it, even when the branch holds an older
+copy, so a line corrected on `main` never comes back. The branch adds only the
+keys `main` lacks. The result is stably sorted by `date`. A line that is not
+JSON is kept verbatim at the end and reported as a `::warning::`.
 `snapshots/*.json` missing on `main` are copied from the branch; one already on
 `main` is never overwritten. A ref without any timeseries file is an error.
 
@@ -101,6 +120,17 @@ dropped from 374 to 37 URLs (API symbol pages became `noindex,follow`; PR
 on. The ratio jumps without any indexing change: compare `indexed` counts, not
 ratios, across that date.
 
+**AI mention rate (2026-09-28).** The brand prompts (`brand: true` in
+`queries.json`: `panel-07-en`/`-es`, "What is Kaiord?") name kaiord in the
+question, so every answer mentions it. They are counted apart (`brand` in each
+row) and left out of `questions`, `kaiordMentions`, `mentionRate`,
+`citedCount` and `byLang`. `mentionRate` covers the rest of the panel. The
+dashboard's KPI row uses `core.mentionRate`: the 5 `core: true` prompts every
+row since 2026-07-22 was measured on, so the KPI stays comparable across the
+panel's arrival (for rows from before it, the overall rate is the core rate).
+Rows without `byLang` asked English prompts only and count as EN in the
+monthly view.
+
 ## AI visibility panel (J3/J4)
 
 `aiQuestions` in `reports/seo/queries.json` holds the original five discovery
@@ -109,9 +139,9 @@ questions plus the audit's 10-prompt panel in English and Spanish
 records it per run and a `byLang` split per entry. The dashboard's "Monthly AI
 visibility" section rolls the weekly probe rows up per provider and month,
 with the EN and ES halves. The questions are asked once each by the same
-probe: there is no second pipeline. Note that `panel-07` ("What is Kaiord?")
-names the brand, so it always counts as a mention; read it for what the answer
-says, not for the rate.
+probe: there is no second pipeline. `panel-07` ("What is Kaiord?") names the
+brand, so it is left out of every rate (see "KPI denominators"); read its
+answers for what they say.
 
 Visits that AI assistants send are read in Umami, not here: see
 [`reports/seo/umami-ai-referrers.md`](../reports/seo/umami-ai-referrers.md).
@@ -132,8 +162,9 @@ ignores IndexNow and reads the sitemap `lastmod`.
   the whole site.
 - `indexnow` job, after the deploy smoke: an empty list logs `IndexNow:
 nothing changed, skipping`; otherwise one POST to `api.indexnow.org` and
-  `IndexNow <status> for <n> URL(s)`. 200/202 succeed; any other status is a
-  warning, never a failed deploy.
+  `IndexNow <status> for <n> URL(s)`. 200/202 succeed; any other status, or a
+  request aborted after 20s, is a warning. The job is `continue-on-error`, so
+  it never turns a deploy red.
 
 ## Configuration
 
@@ -165,7 +196,7 @@ until its secret exists):
    `BING_WEBMASTER_API_KEY` (Settings → API access).
 4. **Rolling PR token (required)** — `SEO_OBSERVATORY_PR_TOKEN`, a
    fine-grained PAT scoped to this repo with _Contents_ and _Pull requests_
-   write. The workflow checks out, pushes and edits the PR with it, and
+   write. The workflow pushes and edits the PR with it (publish step only), and
    **fails on its first step when it is missing**. A push made with the
    default `github.token` does not trigger `pull_request` workflows, so the
    PR's required checks would stay pending and it could never merge (the
