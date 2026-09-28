@@ -35,6 +35,10 @@ export const convertYargsConfig = {
         choices: FORMAT_CODES,
         description: t("options.convert.outputFormat"),
       })
+      .option("ftp", {
+        type: "number" as const,
+        description: t("options.convert.ftp"),
+      })
       .example("$0 convert -i workout.fit -o workout.krd", "Convert FIT to KRD")
       .example("$0 convert -i workout.krd -o workout.fit", "Convert KRD to FIT")
       .example(

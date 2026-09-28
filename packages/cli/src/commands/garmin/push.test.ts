@@ -24,6 +24,7 @@ const createMockLogger = (): Logger => ({
 });
 
 const HTTP_SERVICE_UNAVAILABLE = 503;
+const FTP_W = 250;
 
 const mockKrd = { version: "1.0" } as unknown as KRD;
 const mockPushResult = {
@@ -58,7 +59,9 @@ describe("pushCommand", () => {
       undefined,
       logger
     );
-    expect(mockService.push).toHaveBeenCalledWith(mockKrd);
+    expect(mockService.push).toHaveBeenCalledWith(mockKrd, {
+      ftpWatts: undefined,
+    });
     expect(logger.info).toHaveBeenCalledWith(
       "Workout pushed to Garmin Connect",
       {
@@ -67,6 +70,30 @@ describe("pushCommand", () => {
         url: "https://connect.garmin.com/modern/workout/123",
       }
     );
+  });
+
+  it("should forward --ftp to the push as ftpWatts", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const mockService = { push: vi.fn().mockResolvedValue(mockPushResult) };
+    const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
+    vi.mocked(createCliGarminClient).mockResolvedValue({
+      auth: mockAuth,
+      service: mockService,
+    } as never);
+    vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
+
+    // Act
+    const result = await pushCommand(
+      { input: "workout.zwo", ftp: FTP_W },
+      logger
+    );
+
+    // Assert
+    expect(result).toBe(ExitCode.SUCCESS);
+    expect(mockService.push).toHaveBeenCalledWith(mockKrd, {
+      ftpWatts: FTP_W,
+    });
   });
 
   it("should output JSON when --json flag is set", async () => {

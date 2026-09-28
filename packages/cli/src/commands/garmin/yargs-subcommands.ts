@@ -88,6 +88,10 @@ export const pushSubcommand = {
         type: "string" as const,
         choices: FORMAT_CODES,
         description: t("options.garminPush.inputFormat"),
+      })
+      .option("ftp", {
+        type: "number" as const,
+        description: t("options.garminPush.ftp"),
       }),
   handler: async (argv: Record<string, unknown>) => {
     const logger = await buildLogger(argv);
