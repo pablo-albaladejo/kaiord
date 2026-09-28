@@ -16,6 +16,10 @@
 //       least one URL. With neither, it skips with a ::warning:: and an empty
 //       list, so a flaky fetch never submits the whole site. A NEW sitemap
 //       without any <loc> is a broken build and fails.
+//       --keep <file…> (one per --new) copies the built sitemaps there as the
+//       next baseline candidate, but only when a comparison point existed: a
+//       skipped diff must not let the next deploy start after the changes it
+//       never compared.
 //   node scripts/geo/indexnow.mjs submit <urls.txt>
 //       Empty list: "nothing changed, skipping". Otherwise POSTs to
 //       api.indexnow.org and logs "IndexNow <status>"; 200/202 are success,
@@ -23,7 +27,9 @@
 //       Writes result=ok|skipped|warned to $GITHUB_OUTPUT when it is set.
 import {
   appendFileSync,
+  copyFileSync,
   existsSync,
+  mkdirSync,
   readdirSync,
   readFileSync,
   writeFileSync,
@@ -130,7 +136,7 @@ export function diffFiles({
     log.warn(
       "::warning::IndexNow: the live sitemap could not be read; skipping this deploy"
     );
-    return [];
+    return null;
   }
   log.log(
     "IndexNow: no last submitted sitemaps; diffing against the live ones"
@@ -193,13 +199,23 @@ async function main(argv) {
   } else if (command === "diff") {
     const [out] = listArg(argv, "--out");
     if (!out) throw new Error("diff needs --out <file>");
+    const newFiles = listArg(argv, "--new");
+    const keep = listArg(argv, "--keep");
+    if (keep.length !== 0 && keep.length !== newFiles.length)
+      throw new Error("diff needs one --keep file per --new sitemap");
     const urls = diffFiles({
       baseFiles: listArg(argv, "--base"),
       oldFiles: listArg(argv, "--old"),
-      newFiles: listArg(argv, "--new"),
+      newFiles,
     });
-    writeFileSync(out, urls.map((u) => `${u}\n`).join(""));
-    console.log(`IndexNow: ${urls.length} changed URL(s) -> ${out}`);
+    writeFileSync(out, (urls ?? []).map((u) => `${u}\n`).join(""));
+    if (urls !== null) {
+      keep.forEach((file, i) => {
+        mkdirSync(dirname(file), { recursive: true });
+        copyFileSync(newFiles[i], file);
+      });
+    }
+    console.log(`IndexNow: ${urls?.length ?? 0} changed URL(s) -> ${out}`);
   } else if (command === "submit" && argv[1]) {
     const urls = readFileSync(argv[1], "utf8").split("\n").filter(Boolean);
     const result = await submit({ urls, key: findKey() });
@@ -207,7 +223,7 @@ async function main(argv) {
       appendFileSync(process.env.GITHUB_OUTPUT, `result=${result}\n`);
   } else {
     throw new Error(
-      "usage: indexnow.mjs key | diff [--base …] --old … --new … --out f | submit f"
+      "usage: indexnow.mjs key | diff [--base …] --old … --new … [--keep …] --out f | submit f"
     );
   }
 }

@@ -1,7 +1,13 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -171,7 +177,7 @@ describe("diffFiles", () => {
       });
 
       // Assert
-      assert.deepEqual(urls, []);
+      assert.equal(urls, null);
       assert.match(log.lines.warn[0], /^::warning::IndexNow: the live sitemap/);
     });
   });
@@ -287,7 +293,7 @@ describe("diffFiles", () => {
       });
 
       // Assert
-      assert.deepEqual(urls, []);
+      assert.equal(urls, null);
       assert.match(log.lines.warn[0], /^::warning::IndexNow: the live sitemap/);
     });
   });
@@ -501,6 +507,63 @@ describe("the submit command", () => {
         readFileSync(join(dir, "output.txt"), "utf8"),
         "result=skipped\n"
       );
+    });
+  });
+});
+
+describe("the diff command", () => {
+  const diffCli = (dir, oldFile) =>
+    execFileSync(process.execPath, [
+      join(import.meta.dirname, "indexnow.mjs"),
+      "diff",
+      "--base",
+      join(dir, "base.xml"),
+      "--old",
+      join(dir, oldFile),
+      "--new",
+      join(dir, "new.xml"),
+      "--keep",
+      join(dir, "built", "landing.xml"),
+      "--out",
+      join(dir, "urls.txt"),
+    ]);
+
+  it("should keep the built sitemap as the next baseline after a real comparison", () => {
+    // Arrange
+    const built = sitemap([["https://kaiord.com/a", "2"]]);
+    const files = {
+      "live.xml": sitemap([["https://kaiord.com/a", "1"]]),
+      "new.xml": built,
+    };
+
+    withDir(files, (dir) => {
+      // Act
+      diffCli(dir, "live.xml");
+
+      // Assert
+      assert.equal(
+        readFileSync(join(dir, "urls.txt"), "utf8"),
+        "https://kaiord.com/a\n"
+      );
+      assert.equal(
+        readFileSync(join(dir, "built", "landing.xml"), "utf8"),
+        built
+      );
+    });
+  });
+
+  it("should not offer a baseline when there was nothing to compare against", () => {
+    // Arrange: no baseline and the live fetch failed. Keeping the built
+    // sitemap would let the next deploy start after changes never sent.
+    const files = { "new.xml": sitemap([["https://kaiord.com/a", "2"]]) };
+
+    withDir(files, (dir) => {
+      // Act
+      diffCli(dir, "missing.xml");
+
+      // Assert
+      assert.equal(readFileSync(join(dir, "urls.txt"), "utf8"), "");
+      assert.equal(existsSync(join(dir, "built")), false);
     });
   });
 });

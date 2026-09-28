@@ -177,13 +177,15 @@ ignores IndexNow and reads the sitemap `lastmod`.
   days unused) it diffs against the live sitemaps, fetched from kaiord.com. A
   set counts only if every file is present and lists at least one URL; with
   neither, the deploy skips with a warning rather than submit the whole site.
-  It uploads the list and the built sitemaps.
+  It uploads the list and, only when it had a comparison point, the built
+  sitemaps as the next baseline candidate (`--keep`).
 - `indexnow` job, after the deploy smoke: an empty list logs `IndexNow:
 nothing changed, skipping`; otherwise one POST to `api.indexnow.org` and
   `IndexNow <status> for <n> URL(s)`. 200/202 succeed; any other status, or a
   request aborted after 20s, is a warning. Only a success, or nothing to
-  send, saves the built sitemaps as the next baseline; after a warning the
-  baseline stays put and the next deploy resends these URLs. The job is
+  send, saves that candidate as the next baseline, replacing the old one;
+  after a warning, or a deploy that had nothing to compare against, the
+  baseline stays put, so the next deploy still covers those changes. The job is
   `continue-on-error`, so it never turns a deploy red.
 
 ## Configuration
