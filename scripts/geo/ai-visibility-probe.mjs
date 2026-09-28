@@ -97,7 +97,7 @@ const isKaiordUrl = (value) => {
 
 for (const provider of providers) {
   const runs = [];
-  for (const { id, q } of aiQuestions) {
+  for (const { id, q, lang = "en" } of aiQuestions) {
     try {
       const { answer, citations } = await provider.ask(q);
       const haystack = `${answer}\n${citations.join("\n")}`.toLowerCase();
@@ -106,6 +106,7 @@ for (const provider of providers) {
         .map((c) => c.name);
       runs.push({
         id,
+        lang,
         q,
         kaiordMentioned: haystack.includes("kaiord"),
         kaiordCited: citations.some(isKaiordUrl),
@@ -117,7 +118,7 @@ for (const provider of providers) {
       console.warn(
         `[ai-visibility] ${provider.name} failed for "${q}": ${error.message}`
       );
-      runs.push({ id, q, error: error.message });
+      runs.push({ id, lang, q, error: error.message });
     }
     await sleep(1000);
   }
@@ -130,6 +131,14 @@ for (const provider of providers) {
       competitorCounts[name] = (competitorCounts[name] ?? 0) + 1;
     }
   }
+  // Per-language split, so the EN and ES halves of the audit panel can be
+  // read apart in the dashboard's monthly view.
+  const byLang = {};
+  for (const run of answered) {
+    byLang[run.lang] ??= { questions: 0, kaiordMentions: 0 };
+    byLang[run.lang].questions += 1;
+    if (run.kaiordMentioned) byLang[run.lang].kaiordMentions += 1;
+  }
   const entry = {
     date: todayIso(),
     source: "ai-visibility",
@@ -141,6 +150,7 @@ for (const provider of providers) {
         ? null
         : Number((mentions / answered.length).toFixed(2)),
     citedCount: answered.filter((r) => r.kaiordCited).length,
+    byLang,
     topCompetitors: Object.entries(competitorCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)

@@ -33,20 +33,112 @@
   "aiQuestions": [
     {
       "id": "convert-fit",
+      "lang": "en",
       "q": "What tools can convert FIT files to TCX or ZWO?"
     },
-    { "id": "mcp-workout", "q": "Is there an MCP server for workout files?" },
+    {
+      "id": "mcp-workout",
+      "lang": "en",
+      "q": "Is there an MCP server for workout files?"
+    },
     {
       "id": "ts-fit-lib",
+      "lang": "en",
       "q": "What open-source library parses Garmin FIT files in TypeScript?"
     },
     {
       "id": "garmin-connect-sync",
+      "lang": "en",
       "q": "How can I sync workouts from Garmin Connect to other platforms?"
     },
     {
       "id": "workout-toolkit",
+      "lang": "en",
       "q": "What is the best open-source toolkit for converting and editing workout files?"
+    },
+    {
+      "id": "panel-01-en",
+      "lang": "en",
+      "q": "How do I send a Zwift workout to my Garmin?"
+    },
+    {
+      "id": "panel-01-es",
+      "lang": "es",
+      "q": "¿Cómo envío un entrenamiento de Zwift a mi Garmin?"
+    },
+    { "id": "panel-02-en", "lang": "en", "q": "Convert ZWO to FIT." },
+    { "id": "panel-02-es", "lang": "es", "q": "Convertir ZWO a FIT." },
+    {
+      "id": "panel-03-en",
+      "lang": "en",
+      "q": "Free open-source alternative to TrainingPeaks."
+    },
+    {
+      "id": "panel-03-es",
+      "lang": "es",
+      "q": "Alternativa gratuita y open source a TrainingPeaks."
+    },
+    {
+      "id": "panel-04-en",
+      "lang": "en",
+      "q": "AI training planner that syncs with Garmin and WHOOP."
+    },
+    {
+      "id": "panel-04-es",
+      "lang": "es",
+      "q": "Planificador de entrenamiento con IA que se sincronice con Garmin y WHOOP."
+    },
+    {
+      "id": "panel-05-en",
+      "lang": "en",
+      "q": "TypeScript library to read and write FIT workout files."
+    },
+    {
+      "id": "panel-05-es",
+      "lang": "es",
+      "q": "Librería de TypeScript para leer y escribir archivos de entrenamiento FIT."
+    },
+    {
+      "id": "panel-06-en",
+      "lang": "en",
+      "q": "MCP server for Garmin workouts."
+    },
+    {
+      "id": "panel-06-es",
+      "lang": "es",
+      "q": "Servidor MCP para entrenamientos de Garmin."
+    },
+    { "id": "panel-07-en", "lang": "en", "q": "What is Kaiord?" },
+    { "id": "panel-07-es", "lang": "es", "q": "¿Qué es Kaiord?" },
+    {
+      "id": "panel-08-en",
+      "lang": "en",
+      "q": "Convert a Zwift workout to Garmin."
+    },
+    {
+      "id": "panel-08-es",
+      "lang": "es",
+      "q": "Convertir un entrenamiento de Zwift a Garmin."
+    },
+    {
+      "id": "panel-09-en",
+      "lang": "en",
+      "q": "Free AI training planner with no account."
+    },
+    {
+      "id": "panel-09-es",
+      "lang": "es",
+      "q": "Planificador de entrenamiento con IA gratis y sin cuenta."
+    },
+    {
+      "id": "panel-10-en",
+      "lang": "en",
+      "q": "Local-first fitness app that keeps data in the browser."
+    },
+    {
+      "id": "panel-10-es",
+      "lang": "es",
+      "q": "App de fitness local-first que guarda los datos en el navegador."
     }
   ],
   "competitors": [
