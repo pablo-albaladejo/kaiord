@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 const {
   PROTOCOL_VERSION,
   BRIDGE_MANIFEST,
+  BRIDGE_FEATURES,
   EXTERNAL_ACTIONS,
   handleAction,
   isAllowed,
@@ -13,6 +14,13 @@ const {
   toUint8Array,
   logSwallowed,
   TELEMETRY_KEY,
+  scheduleWorkout,
+  findCalendarEntries,
+  isIsoDate,
+  CALENDAR_DEADLINE_MS,
+  CALENDAR_SEND_CUTOFF_MS,
+  DEADLINE_BEFORE_SEND,
+  DEADLINE_EXCEEDED,
 } = require("../background.js");
 const pkg = require("../package.json");
 
@@ -157,6 +165,57 @@ describe("background.js", () => {
     it("should allow POST to the FIT upload endpoint with and without the /.fit suffix", () => {
       expect(isAllowed("POST", "/upload-service/upload")).toBe(true);
       expect(isAllowed("POST", "/upload-service/upload/.fit")).toBe(true);
+    });
+
+    it("should allow POST and DELETE on a digits-only calendar schedule path", () => {
+      // Arrange
+      const path = "/workout-service/schedule/1790718680";
+
+      // Act
+      const allowed = [isAllowed("POST", path), isAllowed("DELETE", path)];
+
+      // Assert
+      expect(allowed).toEqual([true, true]);
+    });
+
+    it("should allow GET on a calendar month path only", () => {
+      // Arrange
+      const path = "/calendar-service/year/2026/month/9";
+
+      // Act
+      const allowed = [
+        isAllowed("GET", path),
+        isAllowed("POST", path),
+        isAllowed("DELETE", path),
+      ];
+
+      // Assert
+      expect(allowed).toEqual([true, false, false]);
+    });
+
+    it.each([
+      ["GET", "/calendar-service/year/26/month/9"],
+      ["GET", "/calendar-service/year/2026/month/123"],
+      ["GET", "/calendar-service/year/2026/month/9?start=1"],
+      ["GET", "/calendar-service/year/2026/month/9/day/1"],
+      ["GET", "/calendar-service/year/2026"],
+      ["GET", "/workout-service/schedule/1790718680"],
+      ["PUT", "/workout-service/schedule/1790718680"],
+      ["POST", "/workout-service/schedule/abc"],
+      ["POST", "/workout-service/schedule/"],
+      ["POST", "/workout-service/schedule/1/2"],
+      ["POST", "/workout-service/schedule/1?x=1"],
+      ["DELETE", "/workout-service/schedule/1%2F2"],
+      ["DELETE", "/workout-service/workout/123"],
+    ])("should reject %s %s on the calendar surface", (method, path) => {
+      // Arrange
+      // (method and path come from the table)
+
+      // Act
+      const allowed = isAllowed(method, path);
+
+      // Assert
+      expect(allowed).toBe(false);
     });
 
     it("should deny upload look-alike paths and non-POST methods on the upload endpoint", () => {
@@ -314,6 +373,26 @@ describe("background.js", () => {
       });
     });
 
+    it("should report the calendar feature flags outside the manifest", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(jsonResp([]));
+
+      // Act
+      const result = await checkSession();
+
+      // Assert
+      expect(result.features).toEqual([
+        "calendar-write-v1",
+        "calendar-find-v1",
+      ]);
+      expect(BRIDGE_FEATURES).toEqual([
+        "calendar-write-v1",
+        "calendar-find-v1",
+      ]);
+      expect(BRIDGE_MANIFEST).not.toHaveProperty("features");
+    });
+
     it("reports not-authenticated when there is no session to mint from", async () => {
       // No stored tokens → mint from session → SSO page has no ticket.
       fetch.mockResolvedValue(textResp("<html><form>sign in</form></html>"));
@@ -355,6 +434,7 @@ describe("background.js", () => {
           version: pkg.version,
           protocolVersion: 1,
           capabilities: ["write:workouts", "read:activities", "write:body"],
+          features: ["calendar-write-v1", "calendar-find-v1"],
           authenticated: true,
           gcApi: { ok: true, status: 200, data: [{ workoutId: 1 }] },
         },
@@ -428,9 +508,7 @@ describe("background.js", () => {
 
       expect(result).toEqual({ workoutId: 123 });
       const [url, init] = fetch.mock.calls[0];
-      expect(url).toBe(
-        "https://connectapi.garmin.com/workout-service/workout"
-      );
+      expect(url).toBe("https://connectapi.garmin.com/workout-service/workout");
       expect(init.method).toBe("POST");
       expect(init.body).toBe(JSON.stringify(gcn));
     });
@@ -597,9 +675,10 @@ describe("background.js", () => {
       seedTokens();
       let release;
       fetch.mockImplementationOnce(
-        () => new Promise((resolve) => {
-          release = () => resolve(jsonResp([]));
-        })
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve(jsonResp([]));
+          })
       );
 
       const first = listActivities();
@@ -659,6 +738,9 @@ describe("background.js", () => {
         "open-garmin",
         "profile-snapshot",
         "profile-snapshot-clear",
+        "schedule",
+        "unschedule",
+        "calendar-find",
       ];
 
       // Act
@@ -693,6 +775,783 @@ describe("background.js", () => {
       expect(log).toHaveLength(25);
       expect(log[0].cause).toBe("err-5");
       expect(log[24].cause).toBe("err-29");
+    });
+  });
+
+  describe("calendar placement actions", () => {
+    const SCHEDULE_URL =
+      "https://connectapi.garmin.com/workout-service/schedule/1707805999";
+    const noContent = () => ({
+      ok: true,
+      status: 204,
+      json: () => Promise.reject(new Error("no body")),
+      text: () => Promise.resolve(""),
+    });
+
+    afterEach(() => {
+      fetch.mockReset();
+    });
+
+    it("should POST the date and return only the schedule id as a digit string", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(
+        jsonResp({ workoutScheduleId: 1790718680, workout: { workoutId: 1 } })
+      );
+
+      // Act
+      const result = await handleAction({
+        action: "schedule",
+        workoutId: "1707805999",
+        date: "2026-09-29",
+      });
+
+      // Assert
+      expect(result).toEqual({ workoutScheduleId: "1790718680" });
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(SCHEDULE_URL);
+      expect(init.method).toBe("POST");
+      expect(init.body).toBe(JSON.stringify({ date: "2026-09-29" }));
+      expect(init.headers.Authorization).toBe("Bearer bear");
+      expect(init.credentials).toBe("omit");
+    });
+
+    it("should return a null schedule id when a 2xx carries no usable id", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(jsonResp({ workout: { workoutId: 1 } }));
+
+      // Act
+      const result = await scheduleWorkout("1707805999", "2026-09-29");
+
+      // Assert
+      expect(result).toEqual({ workoutScheduleId: null });
+    });
+
+    it("should keep the 404 status Garmin returns for an unknown workout id", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(textResp("Not Found", false, 404));
+
+      // Act
+      const error = await scheduleWorkout("1", "2026-09-29").catch((e) => e);
+
+      // Assert
+      expect(error.message).toBe("Schedule failed: 404");
+      expect(error.status).toBe(404);
+    });
+
+    it.each([
+      [{ action: "schedule", workoutId: "12a", date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: 1707805999, date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: "../1", date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: "01707805999", date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: "0", date: "2026-09-29" }],
+      [{ action: "unschedule", scheduleId: "01790718680" }],
+      [{ action: "schedule", workoutId: "1", date: "2026-02-30" }],
+      [{ action: "schedule", workoutId: "1", date: "2026-9-29" }],
+      [{ action: "schedule", workoutId: "1" }],
+      [{ action: "unschedule", scheduleId: "" }],
+      [{ action: "unschedule", scheduleId: "1/2" }],
+      [{ action: "unschedule" }],
+    ])("should refuse invalid input %j before any fetch", async (message) => {
+      // Arrange
+      seedTokens();
+
+      // Act
+      const error = await handleAction(message).catch((e) => e);
+
+      // Assert
+      expect(error.message).toMatch(/^Invalid /);
+      expect(error.retryable).toBe(false);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("should accept only real calendar dates", () => {
+      // Arrange
+      const dates = ["2028-02-29", "2026-02-29", "2026-13-01", "2026-12-31"];
+
+      // Act
+      const valid = dates.map(isIsoDate);
+
+      // Assert
+      expect(valid).toEqual([true, false, false, true]);
+    });
+
+    it("should DELETE the schedule id and map a 204 to null", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(noContent());
+
+      // Act
+      const result = await handleAction({
+        action: "unschedule",
+        scheduleId: "1790718680",
+      });
+
+      // Assert
+      expect(result).toBeNull();
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(
+        "https://connectapi.garmin.com/workout-service/schedule/1790718680"
+      );
+      expect(init.method).toBe("DELETE");
+      expect(init.body).toBeUndefined();
+    });
+
+    it.each([404, 500])(
+      "should keep the %s status of a failed unschedule through the envelope",
+      async (status) => {
+        // Arrange
+        seedTokens();
+        fetch.mockResolvedValueOnce(textResp("err", false, status));
+        const sendResponse = vi.fn();
+
+        // Act
+        externalCb(
+          { action: "unschedule", scheduleId: "1790718680" },
+          SPA_SENDER,
+          sendResponse
+        );
+        await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+        // Assert
+        expect(sendResponse).toHaveBeenCalledWith({
+          ok: false,
+          protocolVersion: 1,
+          error: `Unschedule failed: ${status}`,
+          status,
+        });
+      }
+    );
+  });
+
+  describe("calendar write outcomes without a deadline", () => {
+    const scheduleVia = async () => {
+      const sendResponse = vi.fn();
+      externalCb(
+        { action: "schedule", workoutId: "1707805999", date: "2026-09-29" },
+        SPA_SENDER,
+        sendResponse
+      );
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+      return sendResponse.mock.calls[0][0];
+    };
+
+    afterEach(() => {
+      fetch.mockReset();
+    });
+
+    it("should answer a 2xx whose body fails to parse with no status and no definite refusal", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.reject(new SyntaxError("Unexpected end of JSON")),
+      });
+
+      // Act
+      const envelope = await scheduleVia();
+
+      // Assert
+      expect(envelope.ok).toBe(false);
+      expect(envelope.status).toBeUndefined();
+      expect(envelope.retryable).not.toBe(false);
+      expect(envelope.needsReauth).toBeUndefined();
+    });
+
+    it("should answer a network failure on the POST with no status and no definite refusal", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+
+      // Act
+      const envelope = await scheduleVia();
+
+      // Assert
+      expect(envelope).toEqual({
+        ok: false,
+        protocolVersion: 1,
+        error: "Failed to fetch",
+      });
+    });
+
+    it("should keep a 5xx status on a failed schedule", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(textResp("busy", false, 503));
+
+      // Act
+      const envelope = await scheduleVia();
+
+      // Assert
+      expect(envelope).toEqual({
+        ok: false,
+        protocolVersion: 1,
+        error: "Schedule failed: 503",
+        status: 503,
+      });
+    });
+  });
+
+  describe("calendar-find", () => {
+    // Shaped on the live T0b capture: numeric ids, `itemType`, a
+    // `YYYY-MM-DD` date, and many other keys that must not leave the SW.
+    const item = (overrides) => ({
+      id: 1792409369,
+      groupId: null,
+      trainingPlanId: 0,
+      itemType: "workout",
+      activityTypeId: null,
+      date: "2026-10-06",
+      sportTypeKey: "running",
+      workoutId: 1711500235,
+      protectedWorkoutSchedule: false,
+      title: "Tempo 5k",
+      workoutUuid: null,
+      ...overrides,
+    });
+    const monthResp = (calendarItems) =>
+      jsonResp({ year: 2026, month: 9, calendarItems });
+
+    afterEach(() => {
+      fetch.mockReset();
+    });
+
+    it("should request the 0-based month of the date and return only the workout's entries as strings", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(
+        monthResp([
+          item(),
+          item({ id: 1792409370, date: "2026-10-20" }),
+          item({ id: 1792409371, workoutId: 999 }),
+          item({
+            id: 5,
+            itemType: "activity",
+            workoutId: 1711500235,
+            title: "Morning Run",
+            distance: 10000,
+          }),
+          item({ id: 6, itemType: "race", workoutId: null }),
+        ])
+      );
+
+      // Act
+      const result = await handleAction({
+        action: "calendar-find",
+        workoutId: "1711500235",
+        date: "2026-10-06",
+      });
+
+      // Assert
+      expect(fetch.mock.calls[0][0]).toBe(
+        "https://connectapi.garmin.com/calendar-service/year/2026/month/9"
+      );
+      expect(fetch.mock.calls[0][1].method).toBe("GET");
+      expect(result).toEqual([
+        { workoutScheduleId: "1792409369", date: "2026-10-06" },
+        { workoutScheduleId: "1792409370", date: "2026-10-20" },
+      ]);
+    });
+
+    it.each([
+      ["2026-01-31", "year/2026/month/0"],
+      ["2026-09-29", "year/2026/month/8"],
+      ["2026-12-01", "year/2026/month/11"],
+    ])("should map %s to %s", async (date, suffix) => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(monthResp([]));
+
+      // Act
+      await findCalendarEntries("1711500235", date);
+
+      // Assert
+      expect(fetch.mock.calls[0][0]).toBe(
+        `https://connectapi.garmin.com/calendar-service/${suffix}`
+      );
+    });
+
+    it("should answer found-none as an empty list", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(monthResp([item({ workoutId: 1 })]));
+
+      // Act
+      const result = await findCalendarEntries("1711500235", "2026-10-06");
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+    it("should return a null schedule id for an entry whose id is unusable", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(monthResp([item({ id: null })]));
+
+      // Act
+      const result = await findCalendarEntries("1711500235", "2026-10-06");
+
+      // Assert
+      expect(result).toEqual([{ workoutScheduleId: null, date: "2026-10-06" }]);
+    });
+
+    it.each([
+      ["no calendarItems", { year: 2026, month: 9 }],
+      ["a non-array calendarItems", { calendarItems: {} }],
+      ["a null body", null],
+    ])("should fail the read, not report none, on %s", async (_label, body) => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(jsonResp(body));
+
+      // Act
+      const error = await findCalendarEntries("1711500235", "2026-10-06").catch(
+        (e) => e
+      );
+
+      // Assert
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(
+        "Calendar read returned an unexpected payload"
+      );
+      expect(error.retryable).toBe(true);
+      expect(error.status).toBeUndefined();
+    });
+
+    it("should fail the read when a matching entry has no usable date", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(
+        monthResp([item({ date: "2026-10-06T00:00" })])
+      );
+
+      // Act
+      const error = await findCalendarEntries("1711500235", "2026-10-06").catch(
+        (e) => e
+      );
+
+      // Assert
+      expect(error.message).toBe(
+        "Calendar read returned an unexpected payload"
+      );
+    });
+
+    it("should keep the status of a failed read through the envelope", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(textResp("busy", false, 503));
+      const sendResponse = vi.fn();
+
+      // Act
+      externalCb(
+        {
+          action: "calendar-find",
+          workoutId: "1711500235",
+          date: "2026-10-06",
+        },
+        SPA_SENDER,
+        sendResponse
+      );
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      // Assert
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: false,
+        protocolVersion: 1,
+        error: "Calendar read failed: 503",
+        status: 503,
+      });
+    });
+
+    it.each([
+      [{ action: "calendar-find", workoutId: "12a", date: "2026-10-06" }],
+      [
+        {
+          action: "calendar-find",
+          workoutId: "01711500235",
+          date: "2026-10-06",
+        },
+      ],
+      [{ action: "calendar-find", workoutId: 1711500235, date: "2026-10-06" }],
+      [{ action: "calendar-find", workoutId: "1", date: "2026-02-30" }],
+      [{ action: "calendar-find", workoutId: "1" }],
+    ])("should refuse invalid input %j before any fetch", async (message) => {
+      // Arrange
+      seedTokens();
+
+      // Act
+      const error = await handleAction(message).catch((e) => e);
+
+      // Assert
+      expect(error.message).toMatch(/^Invalid /);
+      expect(error.retryable).toBe(false);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("calendar action deadline", () => {
+    // Every hung request is recorded so teardown can settle it: a mint runs
+    // on the untimed fetch and would otherwise stay in flight into the next
+    // test, which would join it.
+    let hung = [];
+    // A fetch that never answers but, like the real one, rejects with the
+    // signal's reason when its request is aborted.
+    const hungFetch = (_url, init = {}) =>
+      new Promise((resolve, reject) => {
+        hung.push({ resolve, reject });
+        init.signal?.addEventListener("abort", () =>
+          reject(init.signal.reason)
+        );
+      });
+    const isSso = (url) => url.startsWith("https://sso.garmin.com/");
+    const isSchedule = (url) => url.includes("/workout-service/schedule/");
+    const posts = () =>
+      fetch.mock.calls.filter(
+        ([url, init]) => isSchedule(url) && init?.method === "POST"
+      );
+    const ssoCalls = () => fetch.mock.calls.filter(([url]) => isSso(url));
+    const settle = (promise) =>
+      promise.then(
+        () => null,
+        (e) => e
+      );
+    const tracked = (promise) => {
+      const state = { done: false, value: undefined };
+      state.promise = promise.then(
+        (value) => Object.assign(state, { done: true, value }),
+        (value) => Object.assign(state, { done: true, value })
+      );
+      return state;
+    };
+    const ticketResp = () => textResp("<html>...ticket=ST-9-ABCdef...</html>");
+    // The rest of a successful mint after the ticket hop.
+    const mintTail = (url) =>
+      url.includes("/preauthorized")
+        ? Promise.resolve(textResp("oauth_token=T&oauth_token_secret=S"))
+        : Promise.resolve(jsonResp({ access_token: "new", expires_in: 3600 }));
+    const stubSigning = () => {
+      vi.spyOn(globalThis.crypto.subtle, "importKey").mockResolvedValue({});
+      vi.spyOn(globalThis.crypto.subtle, "sign").mockResolvedValue(
+        new Uint8Array(20).buffer
+      );
+    };
+
+    beforeEach(() => {
+      hung = [];
+      vi.useFakeTimers({
+        toFake: ["setTimeout", "clearTimeout", "Date", "performance"],
+      });
+    });
+
+    afterEach(async () => {
+      hung.forEach(({ reject }) => reject(new TypeError("teardown")));
+      await vi.advanceTimersByTimeAsync(0);
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+      fetch.mockReset();
+    });
+
+    it("should use a deadline below Chrome's 30 s pending-fetch limit", () => {
+      // Arrange
+      const chromeFetchLimitMs = 30000;
+
+      // Act
+      const margin = chromeFetchLimitMs - CALENDAR_DEADLINE_MS;
+
+      // Assert
+      expect(CALENDAR_DEADLINE_MS).toBe(25000);
+      expect(CALENDAR_SEND_CUTOFF_MS).toBe(15000);
+      expect(margin).toBeGreaterThan(0);
+    });
+
+    it("should end by D with no POST when a mint hop hangs", async () => {
+      // Arrange
+      fetch.mockImplementation(hungFetch);
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(error.retryable).toBe(true);
+      expect(error.status).toBeUndefined();
+      expect(posts()).toHaveLength(0);
+    });
+
+    it("should answer deadline-before-send when the token lifecycle aborts on its own", async () => {
+      // Arrange
+      fetch.mockRejectedValueOnce(new DOMException("aborted", "AbortError"));
+
+      // Act
+      const error = await settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(error.retryable).toBe(true);
+      expect(posts()).toHaveLength(0);
+    });
+
+    it("should refuse to start the POST once the send cut-off has passed", async () => {
+      // Arrange
+      stubSigning();
+      chrome.storage.local.set({
+        garminOAuth1: { oauth_token: "t", oauth_token_secret: "s" },
+        garminOAuth2: { access_token: "old", expires_at: 0 },
+      });
+      const lateRefresh = CALENDAR_SEND_CUTOFF_MS + 5000;
+      fetch.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve(jsonResp({ access_token: "new", expires_in: 3600 })),
+              lateRefresh
+            )
+          )
+      );
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(lateRefresh);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(posts()).toHaveLength(0);
+    });
+
+    it("should refuse the retry POST after a 401 once the send cut-off has passed", async () => {
+      // Arrange
+      stubSigning();
+      seedTokens();
+      const lateTicket = CALENDAR_SEND_CUTOFF_MS + 1000;
+      fetch.mockImplementation((url) => {
+        if (isSchedule(url)) {
+          return Promise.resolve(textResp("Unauthorized", false, 401));
+        }
+        if (isSso(url)) {
+          return new Promise((resolve) =>
+            setTimeout(() => resolve(ticketResp()), lateTicket)
+          );
+        }
+        return mintTail(url);
+      });
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(lateTicket);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(posts()).toHaveLength(1);
+    });
+
+    it("should still end by D when it joins another caller's untimed mint", async () => {
+      // Arrange
+      fetch.mockImplementation(hungFetch);
+      const starter = settle(handleAction({ action: "list" }));
+      await vi.advanceTimersByTimeAsync(0);
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(fetch).toHaveBeenCalledTimes(1);
+      hung[0].resolve(textResp("<html>no ticket</html>"));
+      expect((await starter).needsReauth).toBe(true);
+    });
+
+    it("should end by D when a 401 re-mint joins an untimed mint started by list", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation((url, init) => {
+        if (isSso(url)) return hungFetch(url, init);
+        return Promise.resolve(textResp("Unauthorized", false, 401));
+      });
+      const starter = settle(handleAction({ action: "list" }));
+      await vi.advanceTimersByTimeAsync(0);
+      const outcome = tracked(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+
+      // Assert
+      expect(outcome.done).toBe(true);
+      expect(outcome.value.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(posts()).toHaveLength(1);
+      expect(ssoCalls()).toHaveLength(1);
+      hung[0].resolve(textResp("<html>no ticket</html>"));
+      expect((await starter).needsReauth).toBe(true);
+    });
+
+    it("should not fail a caller that joined the mint a calendar action started", async () => {
+      // Arrange
+      stubSigning();
+      fetch.mockImplementation((url, init) => {
+        if (isSso(url)) return hungFetch(url, init);
+        if (url.includes("/workout-service/workouts")) {
+          return Promise.resolve(jsonResp([{ workoutId: 7 }]));
+        }
+        return mintTail(url);
+      });
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+      await vi.advanceTimersByTimeAsync(0);
+      const joiner = settle(handleAction({ action: "list" }));
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+
+      // Act
+      hung[0].resolve(ticketResp());
+      await vi.advanceTimersByTimeAsync(0);
+
+      // Assert
+      expect((await outcome).message).toBe(DEADLINE_BEFORE_SEND);
+      expect(await joiner).toBeNull();
+      expect(ssoCalls()).toHaveLength(1);
+      expect(ssoCalls()[0][1].signal).toBeUndefined();
+      expect(posts()).toHaveLength(0);
+    });
+
+    it("should end by D with at most one POST when a 401 is followed by a hung re-mint", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation((url, init) =>
+        isSchedule(url)
+          ? Promise.resolve(textResp("Unauthorized", false, 401))
+          : hungFetch(url, init)
+      );
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(posts()).toHaveLength(1);
+    });
+
+    it("should answer an ambiguous deadline when the retry POST after a 401 re-mint hangs", async () => {
+      // Arrange
+      stubSigning();
+      seedTokens();
+      let postCount = 0;
+      fetch.mockImplementation((url, init) => {
+        if (isSchedule(url)) {
+          postCount += 1;
+          return postCount === 1
+            ? Promise.resolve(textResp("Unauthorized", false, 401))
+            : hungFetch(url, init);
+        }
+        return isSso(url) ? Promise.resolve(ticketResp()) : mintTail(url);
+      });
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_EXCEEDED);
+      expect(error.status).toBeUndefined();
+      expect(posts()).toHaveLength(2);
+    });
+
+    it("should answer an ambiguous deadline with no status when the POST hangs after it was sent", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation(hungFetch);
+      const sendResponse = vi.fn();
+      externalCb(
+        { action: "schedule", workoutId: "1707805999", date: "2026-09-29" },
+        SPA_SENDER,
+        sendResponse
+      );
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+
+      // Assert
+      expect(posts()).toHaveLength(1);
+      expect(posts()[0][1].signal.aborted).toBe(true);
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: false,
+        protocolVersion: 1,
+        error: DEADLINE_EXCEEDED,
+        retryable: true,
+      });
+    });
+
+    it("should end a hung calendar read by D with no status", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation(hungFetch);
+      const outcome = settle(findCalendarEntries("1711500235", "2026-10-06"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_EXCEEDED);
+      expect(error.status).toBeUndefined();
+      expect(fetch.mock.calls[0][1].signal.aborted).toBe(true);
+    });
+
+    it("should not apply the send cut-off to the calendar read", async () => {
+      // Arrange
+      chrome.storage.local.set({
+        garminOAuth1: { oauth_token: "t", oauth_token_secret: "s" },
+        garminOAuth2: { access_token: "old", expires_at: 0 },
+      });
+      stubSigning();
+      const lateRefresh = CALENDAR_SEND_CUTOFF_MS + 5000;
+      fetch.mockImplementation((url) =>
+        url.includes("/calendar-service/")
+          ? Promise.resolve(jsonResp({ calendarItems: [] }))
+          : new Promise((resolve) =>
+              setTimeout(
+                () =>
+                  resolve(jsonResp({ access_token: "new", expires_in: 3600 })),
+                lateRefresh
+              )
+            )
+      );
+      const outcome = findCalendarEntries("1711500235", "2026-10-06");
+
+      // Act
+      await vi.advanceTimersByTimeAsync(lateRefresh);
+
+      // Assert
+      expect(await outcome).toEqual([]);
+    });
+
+    it("should not answer before D while the POST is still in flight", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation(hungFetch);
+      const sendResponse = vi.fn();
+      externalCb(
+        { action: "schedule", workoutId: "1707805999", date: "2026-09-29" },
+        SPA_SENDER,
+        sendResponse
+      );
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS - 1);
+
+      // Assert
+      expect(sendResponse).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1);
+      expect(sendResponse).toHaveBeenCalled();
     });
   });
 });
