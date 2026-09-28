@@ -62,7 +62,8 @@
 ## 5. Ledger model and Phase 1 (T4, PR-2)
 
 - [x] 5.1 Ledger types and branded ids (`GarminWorkoutId`,
-      `GarminScheduleId`) in `SPA/types/export-ledger.ts` (AC-16).
+      `GarminScheduleId`) in `SPA/types/garmin-ledger.ts`, the optional fields
+      on `SPA/types/export-ledger.ts` (AC-16).
 - [x] 5.2 `buildCommitPatch` as the only `commitByKey` patch on both paths;
       `handleConstraintResult` checks `pending`, then `forceRepush`, then the
       hash (AC-10, AC-11).
@@ -87,6 +88,19 @@
       (AC-35).
 - [ ] 6.3 E2E stub: numeric ids, an in-memory calendar, `calendar-find`,
       `features`, failure injection and delays.
+- [ ] 6.4 Resolve `uncertain` with `held` ids (design §3.9): one
+      `calendar-find` match adopted and its held entry removed, the other
+      seen held ids re-queued, unseen ones dropped; several matches →
+      `duplicate-left` with held kept; the drain never sends a held id.
+- [ ] 6.5 Carried over from T4:
+  - AC-17's "0 schedule calls" half (a failed library push makes no
+    calendar call) needs this pipeline; test it here.
+  - `PENDING_TTL_MS` is 5 min: a quiet bulk push must never sit longer
+    than that between the pending claim and the commit, or it must refresh
+    the pending stamp, else another run recovers it and pushes twice.
+  - A legacy row with `library: unconfirmed` and an equal hash is
+    `skipped` forever; the placement path needs a way out (set
+    `forceRepush`, or treat `unconfirmed` as not pushed for placement).
 
 ## 7. Follow the coach (T6, PR-4)
 

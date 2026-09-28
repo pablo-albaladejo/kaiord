@@ -68,13 +68,21 @@ A `schedule` 404 for a library id from an earlier push SHALL set `forceRepush` a
 
 ### Requirement: Removal queue for superseded calendar entries
 
-Superseded schedule ids SHALL be kept in the ledger row's `removalQueue` and drained after every commit. `unschedule` outcomes: 204 dequeues; 401, or an answer with no status and `needsReauth`, keeps the entry without counting the attempt; 404 dequeues only when a `calendar-find` shows the id absent (otherwise `attempts++`); anything else, ambiguous included, is `attempts++`. After 3 attempts an entry SHALL be `abandoned`, re-checked on each push of its record, and dismissible by the athlete ("I removed it") with 0 calls. An id equal to the current `Placed` or to `attempting.previous` SHALL never be sent to `unschedule` and SHALL be dropped from the queue.
+Superseded schedule ids SHALL be kept in the ledger row's `removalQueue` and drained after every commit. `unschedule` outcomes: 204 dequeues; 401, or an answer with no status and `needsReauth`, keeps the entry without counting the attempt; 404 dequeues only when a `calendar-find` shows the id absent (otherwise `attempts++`); anything else, ambiguous included, is `attempts++`. After 3 attempts an entry SHALL be `abandoned`, re-checked on each push of its record, and dismissible by the athlete ("I removed it") with 0 calls. An id equal to the current `Placed` or to `attempting.previous` SHALL never be sent to `unschedule` and SHALL be dropped from the queue. A `held` entry SHALL never be sent to `unschedule`.
+
+An `uncertain` placement with `held` entries SHALL be resolved by `calendar-find` for its workout over the dates of the `uncertain` and of the held entries: exactly one match SHALL be adopted as the `Placed` and its held entry removed, the other held ids that the read sees for that workout SHALL become normal queued entries, and held ids it does not see SHALL be dropped; several matches SHALL return `duplicate-left` with the held ids kept; no match or a failed read SHALL take the normal `uncertain` path with the held ids kept.
 
 #### Scenario: The current placement is never deleted
 
 - **GIVEN** a queue that, after a merge, contains the id of the current `Placed`
 - **WHEN** the queue is drained
 - **THEN** that id SHALL be dropped without an `unschedule` call
+
+#### Scenario: Held ids are resolved by reading the calendar
+
+- **GIVEN** an `uncertain` placement with S1 and S2 `held`, and a `calendar-find` that returns only S2
+- **WHEN** the record is pushed
+- **THEN** S2 SHALL become the `Placed`, S1 SHALL be dropped from the queue, and no `unschedule` SHALL be issued for either
 
 ### Requirement: Push result and capability detection
 
