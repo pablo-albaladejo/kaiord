@@ -26,23 +26,23 @@
 
 ## 3. Bridge write verbs and deadline (T2, PR-1)
 
-- [ ] 3.1 Add the `POST` and `DELETE` `/workout-service/schedule/<digits>`
+- [x] 3.1 Add the `POST` and `DELETE` `/workout-service/schedule/<digits>`
       allowlist entries, one physical line each (AC-3).
-- [ ] 3.2 Add the `schedule` and `unschedule` actions with input validation
+- [x] 3.2 Add the `schedule` and `unschedule` actions with input validation
       before any fetch (ids `^\d+$`, a real `YYYY-MM-DD` date) and add them to
       `EXTERNAL_ACTIONS` (AC-4, AC-5).
-- [ ] 3.3 Run both actions under the per-action deadline: `D` = 30 s from
+- [x] 3.3 Run both actions under the per-action deadline: `D` = 30 s from
       handler entry injected into every hop through `fetchImpl`, no write
       started after `D_START` = 20 s (`deadline-before-send`), and an abort
       after the send answered with no status (AC-4 a, c, d).
-- [ ] 3.4 In `garmin-oauth.js`, race the token lifecycle, a joined
+- [x] 3.4 In `garmin-oauth.js`, race the token lifecycle, a joined
       `mintInFlight` included, against the deadline signal (AC-4 b).
-- [ ] 3.5 Add `features: ["calendar-write-v1"]` to the ping data (AC-9).
-- [ ] 3.6 Tests in `test/background.test.js` and `test/garmin-oauth.test.js`.
-- [ ] 3.7 Refresh the privacy-surface golden (+2 paths, +2 actions) and
+- [x] 3.5 Add `features: ["calendar-write-v1"]` to the ping data (AC-9).
+- [x] 3.6 Tests in `test/background.test.js` and `test/garmin-oauth.test.js`.
+- [x] 3.7 Refresh the privacy-surface golden (+2 paths, +2 actions) and
       disclose the calendar write and delete in `privacy-justification.md` and
       `store-listing.md` (AC-6).
-- [ ] 3.8 Update `packages/garmin-bridge/AGENTS.md`; add a minor changeset for
+- [x] 3.8 Update `packages/garmin-bridge/AGENTS.md`; add a minor changeset for
       `@kaiord/garmin-bridge`.
 
 ## 4. Bridge calendar read (T3, PR-1, after T0b)

@@ -373,6 +373,84 @@ describe("garmin-oauth.js", () => {
     });
   });
 
+  describe("raceAbort", () => {
+    it("should settle with the promise when no signal is given", async () => {
+      // Arrange
+      const work = Promise.resolve("token");
+
+      // Act
+      const result = await garminOAuth.raceAbort(work, undefined);
+
+      // Assert
+      expect(result).toBe("token");
+    });
+
+    it("should reject at once with the reason of an already-aborted signal", async () => {
+      // Arrange
+      const controller = new AbortController();
+      const reason = new Error("deadline");
+      controller.abort(reason);
+
+      // Act
+      const error = await garminOAuth
+        .raceAbort(new Promise(() => {}), controller.signal)
+        .catch((e) => e);
+
+      // Assert
+      expect(error).toBe(reason);
+    });
+
+    it("should reject when the signal aborts while the promise is pending", async () => {
+      // Arrange
+      const controller = new AbortController();
+      const reason = new Error("deadline");
+      const raced = garminOAuth
+        .raceAbort(new Promise(() => {}), controller.signal)
+        .catch((e) => e);
+
+      // Act
+      controller.abort(reason);
+
+      // Assert
+      expect(await raced).toBe(reason);
+    });
+  });
+
+  describe("connectapiFetch with a deadline signal", () => {
+    it("should stop waiting on a joined mint when the signal aborts, leaving the mint to its starter", async () => {
+      // Arrange
+      let release;
+      fetch.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            release = resolve;
+          })
+      );
+      const starter = garminOAuth.ensureToken(fetch).catch((e) => e);
+      await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+      const controller = new AbortController();
+      const reason = new Error("deadline");
+      const joined = garminOAuth
+        .connectapiFetch(
+          "/workout-service/workouts",
+          "GET",
+          undefined,
+          fetch,
+          controller.signal
+        )
+        .catch((e) => e);
+
+      // Act
+      controller.abort(reason);
+
+      // Assert
+      expect(await joined).toBe(reason);
+      expect(fetch).toHaveBeenCalledTimes(1);
+      release(textResp("<html>no ticket</html>"));
+      expect((await starter).needsReauth).toBe(true);
+    });
+  });
+
   describe("connectapiUpload", () => {
     it("should POST a FormData body with Bearer auth, no cookies, and no JSON content-type", async () => {
       // Arrange

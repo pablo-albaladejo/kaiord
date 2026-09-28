@@ -294,21 +294,40 @@ const accessTokenAfterEnsure = async (fetchImpl) =>
 const accessTokenAfterMint = async (fetchImpl) =>
   (await mintAndSave(fetchImpl)).oauth2.access_token;
 
+// Settle with `promise`, or reject with the signal's reason as soon as it
+// aborts. Injecting the signal through `fetchImpl` is not enough on its own:
+// a caller that JOINS `mintInFlight` awaits a mint built with the first
+// caller's fetch, which never sees this signal. Racing stops this caller
+// waiting; the joined mint keeps running for whoever started it.
+const raceAbort = (promise, signal) => {
+  if (!signal) return promise;
+  if (signal.aborted) return Promise.reject(signal.reason);
+  return new Promise((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+    void promise
+      .then(resolve, reject)
+      .finally(() => signal.removeEventListener("abort", onAbort));
+  });
+};
+
 /**
  * The bridge's Garmin JSON call surface. Returns the same envelope the old
  * content-script relay did: { ok, status, data } | { ok:false, status, body }.
  * A 401 (token rejected despite not being expired) triggers one re-mint and
  * retry; a still-401 retry surfaces `needsReauth` so the SPA can prompt a
- * Garmin re-login.
+ * Garmin re-login. An optional `signal` bounds the token lifecycle (refresh,
+ * mint, re-mint — a joined mint included); the caller bounds the fetches by
+ * injecting the same signal through `fetchImpl`.
  */
-const connectapiFetch = (path, method, body, fetchImpl) =>
+const connectapiFetch = (path, method, body, fetchImpl, signal) =>
   bearerCore().bearerRequest({
     baseUrl: CONNECTAPI,
     path,
     method,
     body,
-    getToken: accessTokenAfterEnsure,
-    refreshToken: accessTokenAfterMint,
+    getToken: (f) => raceAbort(accessTokenAfterEnsure(f), signal),
+    refreshToken: (f) => raceAbort(accessTokenAfterMint(f), signal),
     fetchImpl,
   });
 
@@ -343,6 +362,7 @@ const api = {
   clearTokens,
   isOAuth2Expired,
   ensureToken,
+  raceAbort,
   connectapiFetch,
   connectapiUpload,
 };

@@ -10,6 +10,12 @@
 const PROTOCOL_VERSION = 1;
 const GARMIN_DASHBOARD = "https://connect.garmin.com/modern/";
 
+// Contracts this build supports beyond its capabilities, reported by ping.
+// Kept out of BRIDGE_MANIFEST: capabilities are a closed enum held in
+// lockstep with bridge-identity.js, and an older bridge is recognised by
+// the ABSENCE of a flag here.
+const BRIDGE_FEATURES = ["calendar-write-v1"];
+
 const BRIDGE_MANIFEST = {
   id: "garmin-bridge",
   name: "Garmin Connect",
@@ -128,6 +134,11 @@ const ALLOWED = [
     method: "GET",
     pattern: /^\/activitylist-service\/activities\/search\/activities(\?.*)?$/,
   },
+  // Calendar placement: POST places a library workout (by workoutId) on a
+  // date; DELETE removes one calendar entry (by workoutScheduleId). Digits
+  // only — no query string, no sub-path. Library workouts are never deleted.
+  { method: "POST", pattern: /^\/workout-service\/schedule\/\d+$/ },
+  { method: "DELETE", pattern: /^\/workout-service\/schedule\/\d+$/ },
 ];
 
 const isAllowed = (method, path) =>
@@ -157,7 +168,7 @@ const garminFetch = async (path, method, body) => {
  * id/version from the upstream API cannot spoof the manifest.
  */
 const checkSession = async () => {
-  const results = { ...BRIDGE_MANIFEST };
+  const results = { ...BRIDGE_MANIFEST, features: [...BRIDGE_FEATURES] };
   try {
     const res = await garminFetch(
       "/workout-service/workouts?start=0&limit=1",
@@ -194,6 +205,129 @@ const pushWorkout = async (gcn) => {
   const res = await garminFetch("/workout-service/workout", "POST", gcn);
   if (!res?.ok) throw toBridgeError("Push failed", res);
   return res.data;
+};
+
+// ── Calendar placement (schedule / unschedule) ──
+//
+// The schedule POST is NOT idempotent: two identical calls make two
+// calendar entries. So a write whose outcome is unknown must be told apart
+// from one that never left, and nothing may start a write the SPA has
+// already given up waiting for. Each action therefore runs under one hard
+// deadline D from handler entry, delivered as an abort signal through
+// `fetchImpl` into every hop (refresh, mint, 401 re-mint, both attempts) and
+// raced against the token lifecycle (a joined mint included — see
+// garmin-oauth.js `raceAbort`). No write starts after SEND_CUTOFF_MS.
+//
+// The vendored envelope has no `code` field, so the outcome travels in
+// `error`: DEADLINE_BEFORE_SEND (definite — nothing reached Garmin) or
+// DEADLINE_EXCEEDED (ambiguous — sent, then aborted; no status).
+const CALENDAR_DEADLINE_MS = 30000;
+const CALENDAR_SEND_CUTOFF_MS = 20000;
+const DEADLINE_BEFORE_SEND = "deadline-before-send";
+const DEADLINE_EXCEEDED = "deadline-exceeded";
+const SCHEDULE_PATH_PREFIX = "/workout-service/schedule/";
+
+const GARMIN_ID = /^\d+$/;
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+const isGarminId = (v) => typeof v === "string" && GARMIN_ID.test(v);
+
+// A real calendar date, not merely the shape (rejects 2026-02-30).
+const isIsoDate = (v) => {
+  if (typeof v !== "string" || !ISO_DATE.test(v)) return false;
+  const ms = Date.parse(`${v}T00:00:00Z`);
+  return !Number.isNaN(ms) && new Date(ms).toISOString().slice(0, 10) === v;
+};
+
+const refusal = (message) => {
+  const err = new Error(message);
+  err.retryable = false;
+  return err;
+};
+
+const deadlineError = (code) => {
+  const err = new Error(code);
+  err.retryable = true;
+  return err;
+};
+
+const calendarWrite = async (path, method, body) => {
+  if (!isAllowed(method, path)) {
+    return { ok: false, error: "Blocked: disallowed path or method" };
+  }
+  const startedAt = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new Error(DEADLINE_EXCEEDED)),
+    CALENDAR_DEADLINE_MS
+  );
+  const writeUrl = `${garminOAuth.CONNECTAPI}${path}`;
+  // `sent`: a write left without a definitive refusal. A 401 means Garmin
+  // rejected the token before processing the write, so it resets it.
+  let sent = false;
+  let cutOff = false;
+  const fetchImpl = async (url, init = {}) => {
+    const isWrite = url === writeUrl;
+    if (isWrite) {
+      if (Date.now() - startedAt >= CALENDAR_SEND_CUTOFF_MS) {
+        cutOff = true;
+        throw deadlineError(DEADLINE_BEFORE_SEND);
+      }
+      sent = true;
+    }
+    const res = await fetch(url, { ...init, signal: controller.signal });
+    if (isWrite && res.status === 401) sent = false;
+    return res;
+  };
+  try {
+    return await garminOAuth.connectapiFetch(
+      path,
+      method,
+      body,
+      fetchImpl,
+      controller.signal
+    );
+  } catch (e) {
+    if (cutOff || (controller.signal.aborted && !sent)) {
+      throw deadlineError(DEADLINE_BEFORE_SEND);
+    }
+    if (controller.signal.aborted) throw deadlineError(DEADLINE_EXCEEDED);
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+// Garmin answers a numeric id; the SPA's branded ids are digit strings.
+const toScheduleId = (v) => {
+  if (typeof v === "number" && Number.isSafeInteger(v) && v >= 0) {
+    return String(v);
+  }
+  return isGarminId(v) ? v : null;
+};
+
+// Returns only the schedule id (null when a 2xx carries none) — the rest of
+// Garmin's response (the whole workout) is not relayed.
+const scheduleWorkout = async (workoutId, date) => {
+  if (!isGarminId(workoutId)) throw refusal("Invalid workoutId");
+  if (!isIsoDate(date)) throw refusal("Invalid date");
+  const res = await calendarWrite(
+    `${SCHEDULE_PATH_PREFIX}${workoutId}`,
+    "POST",
+    { date }
+  );
+  if (!res?.ok) throw toBridgeError("Schedule failed", res);
+  return { workoutScheduleId: toScheduleId(res.data?.workoutScheduleId) };
+};
+
+const unscheduleWorkout = async (scheduleId) => {
+  if (!isGarminId(scheduleId)) throw refusal("Invalid scheduleId");
+  const res = await calendarWrite(
+    `${SCHEDULE_PATH_PREFIX}${scheduleId}`,
+    "DELETE"
+  );
+  if (!res?.ok) throw toBridgeError("Unschedule failed", res);
+  return null;
 };
 
 // ── Body-composition upload (multipart FIT) ──
@@ -366,6 +500,10 @@ const handleAction = async (message) => {
     case "push-body-composition":
       if (!message.fit) throw new Error("Missing fit payload");
       return await pushBodyComposition(message.fit);
+    case "schedule":
+      return await scheduleWorkout(message.workoutId, message.date);
+    case "unschedule":
+      return await unscheduleWorkout(message.scheduleId);
     case "open-garmin":
       await openGarmin();
       return null;
@@ -392,6 +530,8 @@ const EXTERNAL_ACTIONS = new Set([
   "open-garmin",
   "profile-snapshot",
   "profile-snapshot-clear",
+  "schedule",
+  "unschedule",
 ]);
 
 const dispatch = bridgeEnvelope.createDispatch({
@@ -418,6 +558,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
+    BRIDGE_FEATURES,
     EXTERNAL_ACTIONS,
     ALLOWED,
     isAllowed,
@@ -431,6 +572,13 @@ if (typeof module !== "undefined") {
     fetchActivitiesWithBackoff,
     isActivitiesPullDisabled,
     pushWorkout,
+    scheduleWorkout,
+    unscheduleWorkout,
+    isIsoDate,
+    CALENDAR_DEADLINE_MS,
+    CALENDAR_SEND_CUTOFF_MS,
+    DEADLINE_BEFORE_SEND,
+    DEADLINE_EXCEEDED,
     pushBodyComposition,
     toUint8Array,
     UPLOAD_PATH,

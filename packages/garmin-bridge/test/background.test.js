@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 const {
   PROTOCOL_VERSION,
   BRIDGE_MANIFEST,
+  BRIDGE_FEATURES,
   EXTERNAL_ACTIONS,
   handleAction,
   isAllowed,
@@ -13,6 +14,10 @@ const {
   toUint8Array,
   logSwallowed,
   TELEMETRY_KEY,
+  scheduleWorkout,
+  isIsoDate,
+  CALENDAR_DEADLINE_MS,
+  CALENDAR_SEND_CUTOFF_MS,
 } = require("../background.js");
 const pkg = require("../package.json");
 
@@ -157,6 +162,37 @@ describe("background.js", () => {
     it("should allow POST to the FIT upload endpoint with and without the /.fit suffix", () => {
       expect(isAllowed("POST", "/upload-service/upload")).toBe(true);
       expect(isAllowed("POST", "/upload-service/upload/.fit")).toBe(true);
+    });
+
+    it("should allow POST and DELETE on a digits-only calendar schedule path", () => {
+      // Arrange
+      const path = "/workout-service/schedule/1790718680";
+
+      // Act
+      const allowed = [isAllowed("POST", path), isAllowed("DELETE", path)];
+
+      // Assert
+      expect(allowed).toEqual([true, true]);
+    });
+
+    it.each([
+      ["GET", "/workout-service/schedule/1790718680"],
+      ["PUT", "/workout-service/schedule/1790718680"],
+      ["POST", "/workout-service/schedule/abc"],
+      ["POST", "/workout-service/schedule/"],
+      ["POST", "/workout-service/schedule/1/2"],
+      ["POST", "/workout-service/schedule/1?x=1"],
+      ["DELETE", "/workout-service/schedule/1%2F2"],
+      ["DELETE", "/workout-service/workout/123"],
+    ])("should reject %s %s on the calendar surface", (method, path) => {
+      // Arrange
+      // (method and path come from the table)
+
+      // Act
+      const allowed = isAllowed(method, path);
+
+      // Assert
+      expect(allowed).toBe(false);
     });
 
     it("should deny upload look-alike paths and non-POST methods on the upload endpoint", () => {
@@ -314,6 +350,20 @@ describe("background.js", () => {
       });
     });
 
+    it("should report the calendar feature flags outside the manifest", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(jsonResp([]));
+
+      // Act
+      const result = await checkSession();
+
+      // Assert
+      expect(result.features).toEqual(["calendar-write-v1"]);
+      expect(BRIDGE_FEATURES).toEqual(["calendar-write-v1"]);
+      expect(BRIDGE_MANIFEST).not.toHaveProperty("features");
+    });
+
     it("reports not-authenticated when there is no session to mint from", async () => {
       // No stored tokens → mint from session → SSO page has no ticket.
       fetch.mockResolvedValue(textResp("<html><form>sign in</form></html>"));
@@ -355,6 +405,7 @@ describe("background.js", () => {
           version: pkg.version,
           protocolVersion: 1,
           capabilities: ["write:workouts", "read:activities", "write:body"],
+          features: ["calendar-write-v1"],
           authenticated: true,
           gcApi: { ok: true, status: 200, data: [{ workoutId: 1 }] },
         },
@@ -659,6 +710,8 @@ describe("background.js", () => {
         "open-garmin",
         "profile-snapshot",
         "profile-snapshot-clear",
+        "schedule",
+        "unschedule",
       ];
 
       // Act
@@ -693,6 +746,318 @@ describe("background.js", () => {
       expect(log).toHaveLength(25);
       expect(log[0].cause).toBe("err-5");
       expect(log[24].cause).toBe("err-29");
+    });
+  });
+
+  describe("calendar placement actions", () => {
+    const SCHEDULE_URL =
+      "https://connectapi.garmin.com/workout-service/schedule/1707805999";
+    const noContent = () => ({
+      ok: true,
+      status: 204,
+      json: () => Promise.reject(new Error("no body")),
+      text: () => Promise.resolve(""),
+    });
+
+    afterEach(() => {
+      fetch.mockReset();
+    });
+
+    it("should POST the date and return only the schedule id as a digit string", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(
+        jsonResp({ workoutScheduleId: 1790718680, workout: { workoutId: 1 } })
+      );
+
+      // Act
+      const result = await handleAction({
+        action: "schedule",
+        workoutId: "1707805999",
+        date: "2026-09-29",
+      });
+
+      // Assert
+      expect(result).toEqual({ workoutScheduleId: "1790718680" });
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(SCHEDULE_URL);
+      expect(init.method).toBe("POST");
+      expect(init.body).toBe(JSON.stringify({ date: "2026-09-29" }));
+      expect(init.headers.Authorization).toBe("Bearer bear");
+      expect(init.credentials).toBe("omit");
+    });
+
+    it("should return a null schedule id when a 2xx carries no usable id", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(jsonResp({ workout: { workoutId: 1 } }));
+
+      // Act
+      const result = await scheduleWorkout("1707805999", "2026-09-29");
+
+      // Assert
+      expect(result).toEqual({ workoutScheduleId: null });
+    });
+
+    it("should keep the 404 status Garmin returns for an unknown workout id", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(textResp("Not Found", false, 404));
+
+      // Act
+      const error = await scheduleWorkout("1", "2026-09-29").catch((e) => e);
+
+      // Assert
+      expect(error.message).toBe("Schedule failed: 404");
+      expect(error.status).toBe(404);
+    });
+
+    it.each([
+      [{ action: "schedule", workoutId: "12a", date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: 1707805999, date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: "../1", date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: "1", date: "2026-02-30" }],
+      [{ action: "schedule", workoutId: "1", date: "2026-9-29" }],
+      [{ action: "schedule", workoutId: "1" }],
+      [{ action: "unschedule", scheduleId: "" }],
+      [{ action: "unschedule", scheduleId: "1/2" }],
+      [{ action: "unschedule" }],
+    ])("should refuse invalid input %j before any fetch", async (message) => {
+      // Arrange
+      seedTokens();
+
+      // Act
+      const error = await handleAction(message).catch((e) => e);
+
+      // Assert
+      expect(error.message).toMatch(/^Invalid /);
+      expect(error.retryable).toBe(false);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("should accept only real calendar dates", () => {
+      // Arrange
+      const dates = ["2028-02-29", "2026-02-29", "2026-13-01", "2026-12-31"];
+
+      // Act
+      const valid = dates.map(isIsoDate);
+
+      // Assert
+      expect(valid).toEqual([true, false, false, true]);
+    });
+
+    it("should DELETE the schedule id and map a 204 to null", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(noContent());
+
+      // Act
+      const result = await handleAction({
+        action: "unschedule",
+        scheduleId: "1790718680",
+      });
+
+      // Assert
+      expect(result).toBeNull();
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(
+        "https://connectapi.garmin.com/workout-service/schedule/1790718680"
+      );
+      expect(init.method).toBe("DELETE");
+      expect(init.body).toBeUndefined();
+    });
+
+    it.each([404, 500])(
+      "should keep the %s status of a failed unschedule through the envelope",
+      async (status) => {
+        // Arrange
+        seedTokens();
+        fetch.mockResolvedValueOnce(textResp("err", false, status));
+        const sendResponse = vi.fn();
+
+        // Act
+        externalCb(
+          { action: "unschedule", scheduleId: "1790718680" },
+          SPA_SENDER,
+          sendResponse
+        );
+        await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+        // Assert
+        expect(sendResponse).toHaveBeenCalledWith({
+          ok: false,
+          protocolVersion: 1,
+          error: `Unschedule failed: ${status}`,
+          status,
+        });
+      }
+    );
+  });
+
+  describe("calendar action deadline", () => {
+    // A fetch that never answers but, like the real one, rejects with the
+    // signal's reason when its request is aborted.
+    const hungFetch = (_url, init = {}) =>
+      new Promise((_resolve, reject) => {
+        init.signal?.addEventListener("abort", () =>
+          reject(init.signal.reason)
+        );
+      });
+    const posts = () =>
+      fetch.mock.calls.filter(
+        ([url, init]) =>
+          url.includes("/workout-service/schedule/") && init?.method === "POST"
+      );
+    const settle = (promise) =>
+      promise.then(
+        () => null,
+        (e) => e
+      );
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+      fetch.mockReset();
+    });
+
+    it("should end by D with no POST when a mint hop hangs", async () => {
+      // Arrange
+      fetch.mockImplementation(hungFetch);
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe("deadline-before-send");
+      expect(error.retryable).toBe(true);
+      expect(error.status).toBeUndefined();
+      expect(posts()).toHaveLength(0);
+    });
+
+    it("should refuse to start the POST once the send cut-off has passed", async () => {
+      // Arrange
+      vi.spyOn(globalThis.crypto.subtle, "importKey").mockResolvedValue({});
+      vi.spyOn(globalThis.crypto.subtle, "sign").mockResolvedValue(
+        new Uint8Array(20).buffer
+      );
+      chrome.storage.local.set({
+        garminOAuth1: { oauth_token: "t", oauth_token_secret: "s" },
+        garminOAuth2: { access_token: "old", expires_at: 0 },
+      });
+      const lateRefresh = CALENDAR_SEND_CUTOFF_MS + 5000;
+      fetch.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve(jsonResp({ access_token: "new", expires_in: 3600 })),
+              lateRefresh
+            )
+          )
+      );
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(lateRefresh);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe("deadline-before-send");
+      expect(posts()).toHaveLength(0);
+    });
+
+    it("should still end by D when it joins another caller's untimed mint", async () => {
+      // Arrange
+      let release;
+      fetch.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            release = resolve;
+          })
+      );
+      const starter = settle(handleAction({ action: "list" }));
+      await vi.advanceTimersByTimeAsync(0);
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe("deadline-before-send");
+      expect(fetch).toHaveBeenCalledTimes(1);
+      release(textResp("<html>no ticket</html>"));
+      expect((await starter).needsReauth).toBe(true);
+    });
+
+    it("should end by D with at most one POST when a 401 is followed by a hung re-mint", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation((url, init) =>
+        url.includes("/workout-service/schedule/")
+          ? Promise.resolve(textResp("Unauthorized", false, 401))
+          : hungFetch(url, init)
+      );
+      const outcome = settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe("deadline-before-send");
+      expect(posts()).toHaveLength(1);
+    });
+
+    it("should answer an ambiguous deadline with no status when the POST hangs after it was sent", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation(hungFetch);
+      const sendResponse = vi.fn();
+      externalCb(
+        { action: "schedule", workoutId: "1707805999", date: "2026-09-29" },
+        SPA_SENDER,
+        sendResponse
+      );
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+
+      // Assert
+      expect(posts()).toHaveLength(1);
+      expect(posts()[0][1].signal.aborted).toBe(true);
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: false,
+        protocolVersion: 1,
+        error: "deadline-exceeded",
+        retryable: true,
+      });
+    });
+
+    it("should not answer before D while the POST is still in flight", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation(hungFetch);
+      const sendResponse = vi.fn();
+      externalCb(
+        { action: "schedule", workoutId: "1707805999", date: "2026-09-29" },
+        SPA_SENDER,
+        sendResponse
+      );
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS - 1);
+
+      // Assert
+      expect(sendResponse).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1);
+      expect(sendResponse).toHaveBeenCalled();
     });
   });
 });
