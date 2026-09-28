@@ -251,7 +251,7 @@ Payload shape:
 
 The system SHALL call `analytics.pageView(path)` every time the wouter location changes inside the editor SPA, so that navigations to `/calendar`, `/library`, `/workout/new`, and `/workout/:id` are recorded as page views in Umami. Because the editor disables Umami auto-tracking (`data-auto-track="false"`), these page views are submitted manually by the adapter with the base-relative path as the `url`.
 
-A path segment that names one of the user's own records SHALL be replaced by its route pattern before the Umami adapter submits the `url`: `/workout/<id>` becomes `/workout/:id`, `/workout/view/<id>` becomes `/workout/view/:id` and `/chat/<id>` becomes `/chat/:conversationId`; the query string and fragment are dropped. `analytics.pageView` still receives the concrete path; the redaction happens in the adapter, and the submitted `url` stays base-relative. Static segments such as `/workout/new` and `/calendar/<ISO week>` are not record ids and are submitted unchanged.
+A path segment that names one of the user's own records SHALL be replaced by its route pattern before the Umami adapter submits the `url`: `/workout/<id>` becomes `/workout/:id`, `/workout/view/<id>` becomes `/workout/view/:id` and `/chat/<id>` becomes `/chat/:conversationId`; the query string and fragment are dropped. `analytics.pageView` still receives the concrete path; the redaction happens in the adapter, and the submitted `url` stays base-relative. Static segments such as `/workout/new` and `/calendar/<ISO week>` are not record ids and are submitted unchanged. The redaction is an allowlist of the router's routes: a path that matches no known route is submitted as `/unknown`, never verbatim, and a `/calendar/` or `/settings/` segment that is not an ISO week or a known settings section becomes `:weekId` or `:section`.
 
 #### Scenario: Initial route fires a page view on mount
 
@@ -268,6 +268,11 @@ A path segment that names one of the user's own records SHALL be replaced by its
 - **WHEN** the user navigates to `/workout/abc123`
 - **THEN** `analytics.pageView('/workout/abc123')` is called with the concrete path
 - **AND** the Umami adapter submits `/workout/:id` as the page-view `url`, so the record id never reaches Umami
+
+#### Scenario: Unknown path is not forwarded verbatim
+
+- **WHEN** the location is `/other/alice@example.com`, which matches no route
+- **THEN** the Umami adapter submits `/unknown` as the page-view `url`
 
 ### Requirement: Editor tracks file imports
 

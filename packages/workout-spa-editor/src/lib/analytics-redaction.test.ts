@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   redactAnalyticsPath,
   stripIdentifyingProps,
+  UNKNOWN_PATH,
 } from "./analytics-redaction";
 
 const UUID = "6e3ad6f0-1234-4cdf-9abc-1234567890ab";
@@ -14,6 +15,9 @@ describe("redactAnalyticsPath", () => {
     { path: `/workout/view/${UUID}`, expected: "/workout/view/:id" },
     { path: `/chat/${UUID}`, expected: "/chat/:conversationId" },
     { path: `/workout/${UUID}?origin=coaching`, expected: "/workout/:id" },
+    { path: `/workout/${UUID}/`, expected: "/workout/:id" },
+    { path: "/calendar/alice@example.com", expected: "/calendar/:weekId" },
+    { path: "/settings/alice@example.com", expected: "/settings/:section" },
   ])("should replace the record id in $path", ({ path, expected }) => {
     // Arrange
 
@@ -33,6 +37,10 @@ describe("redactAnalyticsPath", () => {
     "/chat",
     "/health/sleep",
     "/settings/privacy",
+    "/settings/profile",
+    "/health",
+    "/daily",
+    "/",
   ])("should keep %s unchanged and base-relative", (path) => {
     // Arrange
 
@@ -41,6 +49,24 @@ describe("redactAnalyticsPath", () => {
 
     // Assert
     expect(result).toBe(path);
+  });
+});
+
+describe("redactAnalyticsPath on paths outside the route table", () => {
+  it.each([
+    "/other/alice@example.com",
+    "/alice@example.com",
+    "/health/alice@example.com",
+    `/${UUID}/settings`,
+  ])("should collapse %s to the unknown marker", (path) => {
+    // Arrange
+
+    // Act
+    const result = redactAnalyticsPath(path);
+
+    // Assert
+    expect(result).toBe(UNKNOWN_PATH);
+    expect(result).not.toContain("alice");
   });
 });
 
