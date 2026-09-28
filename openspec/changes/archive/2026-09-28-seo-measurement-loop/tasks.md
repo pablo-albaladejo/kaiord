@@ -2,12 +2,15 @@
 
 ## 1. Rolling observatory PR
 
-- [x] 1.1 `scripts/geo/union-timeseries.mjs` and its tests (a line only on
-      main survives; a line only on the branch survives; duplicates kept once;
-      malformed lines kept and reported; snapshots never overwritten).
-- [x] 1.2 `seo-observatory.yml`: PAT required with a loud failure, full-history
-      PAT checkout, union with the rolling branch, one fixed branch and PR
-      (updated when open), `--force-with-lease` pinned to the SHA read.
+- [x] 1.1 `scripts/geo/union-timeseries.mjs` and its tests (records keyed by
+      `(date, source, provider)`, main wins, the branch adds only missing
+      keys; malformed lines kept and reported; snapshots never overwritten).
+- [x] 1.2 `seo-observatory.yml`: PAT required with a loud failure, checkout
+      without persisted credentials, PAT only in the publish step; restore only
+      while this repository's rolling PR is open (`scripts/geo/rolling-pr.mjs`,
+      forks ignored); artifact of `reports/seo/` before the push;
+      `--force-with-lease` pinned to the SHA read, retried once after a
+      re-merge; one fixed branch and PR (updated when open).
 - [x] 1.3 Union-merge the open weekly PRs (#1200, #1208, #1231, #1251, #1257)
       into `reports/seo/` and regenerate the dashboard.
 
@@ -28,8 +31,11 @@
 ## 4. AI visibility panel
 
 - [x] 4.1 The audit's 10 panel prompts in EN and ES in `queries.json`, `lang`
-      passed through the probe (`byLang` per entry).
-- [x] 4.2 "Monthly AI visibility" in the dashboard, with tests.
+      passed through the probe (`byLang` per entry). Brand prompts
+      (`brand: true`) are kept out of every rate; the KPI uses the core rate
+      over the 5 original `core: true` prompts.
+- [x] 4.2 "Monthly AI visibility" and a dated "KPI denominators" note in the
+      dashboard, with tests.
 
 ## 5. Spec
 

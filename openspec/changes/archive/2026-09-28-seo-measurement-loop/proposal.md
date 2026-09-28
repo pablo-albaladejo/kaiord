@@ -22,14 +22,18 @@ developer, EN and ES) was not measured, and the dashboard had no monthly view.
 
 ## What Changes
 
-- `scripts/geo/union-timeseries.mjs` union-merges another ref's
-  `reports/seo/` into the working tree without losing a line from either side.
-  The five open weekly PRs were merged with it in this change.
+- `scripts/geo/union-timeseries.mjs` merges another ref's `reports/seo/` into
+  the working tree: records keyed by `(date, source, provider)`, main wins,
+  the branch adds only what main lacks. The five open weekly PRs were merged
+  with it in this change.
 - `seo-observatory.yml` keeps one rolling PR on the fixed branch
   `auto/seo-observatory`: it requires `SEO_OBSERVATORY_PR_TOKEN` (fails
-  otherwise), unions the branch's data before collecting, rebuilds the branch
-  from `main`, force-pushes with a lease, and edits the open PR or opens one.
-  The workflow token drops to `contents: read`.
+  otherwise) and reads it in the publish step only; it restores the branch's
+  data only while this repository's rolling PR is open
+  (`scripts/geo/rolling-pr.mjs`, fork PRs ignored), rebuilds the branch from
+  `main`, keeps the week as an artifact, force-pushes with a lease (retried
+  once after a re-merge), and edits the open PR or opens one. The workflow
+  token drops to `contents: read` and `pull-requests: read`.
 - IndexNow: a key file at the landing root, and `scripts/geo/indexnow.mjs`.
   The deploy build diffs the live sitemaps against the built ones; a new
   `indexnow` job submits the changed URLs after the smoke, logs the status,
@@ -38,10 +42,13 @@ developer, EN and ES) was not measured, and the dashboard had no monthly view.
 - AI referrers: `reports/seo/umami-ai-referrers.md` documents a saved Umami
   report over the referrer and UTM data Umami already records. No new event.
 - `queries.json` adds the 10 panel prompts in EN and ES; the probe records
-  `lang` and a `byLang` split; the dashboard gains "Monthly AI visibility".
+  `lang` and a `byLang` split; brand prompts stay out of every rate and the
+  KPI uses a core rate over the 5 original prompts; the dashboard gains
+  "Monthly AI visibility" and a dated "KPI denominators" note.
 - The privacy policy already discloses "anonymous page views and product
-  events" (2026-09-27); an install click with a listing slug is such an
-  event, so it is unchanged.
+  events"; an install click with a listing slug is such an event. It gains
+  one sentence: Umami also records the referring site and UTM campaign tags,
+  with no personal data.
 
 ## Impact
 
