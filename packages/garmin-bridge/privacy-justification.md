@@ -30,6 +30,10 @@ This document explains why each Chrome extension permission is required, for Chr
 
 **Why**: Exchange the ticket for an OAuth token and make the actual workout/activity API calls with `Authorization: Bearer` — this is Garmin's API host.
 
+**Calendar write and delete**: When the user places workouts on their Garmin Connect calendar from Kaiord, the extension calls two calendar endpoints on this host. `POST /workout-service/schedule/{workoutId}` places a library workout on a date, sending only that date. `DELETE /workout-service/schedule/{workoutScheduleId}` removes one calendar entry. Kaiord calls it only with the id Garmin returned for an entry Kaiord placed and has since replaced (for example after the workout moved to another day); the extension itself enforces that both paths carry a numeric id only, through an allowlist in the service worker, and neither path can delete a library workout.
+
+**Calendar read**: To confirm whether a placement it could not confirm reached Garmin, Kaiord asks the extension about one workout, and the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of the user's calendar; the extension keeps only the entries of that one workout, and passes back only each entry's id and date. Every other calendar item (activities, races, other workouts, titles, metrics) is discarded inside the extension and never reaches Kaiord.
+
 ## externally_connectable
 
 ### `http://localhost:5173/*`, `http://localhost:5174/*`
@@ -44,5 +48,7 @@ This document explains why each Chrome extension permission is required, for Chr
 
 - **No passwords**: The extension never reads, stores, or transmits the user's Garmin password. It reuses the browser's existing signed-in session to mint a token.
 - **Tokens stay local**: OAuth tokens live in `chrome.storage.local` on the user's device and are sent only to Garmin (`connectapi.garmin.com`) as a Bearer credential.
+- **Calendar changes only on the user's action**: The extension writes to or deletes from the Garmin calendar only when the user pushes or sends workouts from Kaiord, and Kaiord asks it to delete only entries Kaiord placed; the extension accepts nothing but a numeric calendar-entry id for a delete. From Garmin's answer to a placement it passes back only the new entry's id, never the rest of the response.
+- **Calendar reads filtered on the device**: When Kaiord checks one workout's calendar entries, the extension reads that month from Garmin and passes back only that workout's entry ids and dates; the rest of the calendar stays in the extension.
 - **No external communication**: The extension talks only to Garmin hosts and the allowed Kaiord SPA origins (via `externally_connectable`). No third-party servers.
 - **No analytics or tracking**: No telemetry of any kind leaves the device.

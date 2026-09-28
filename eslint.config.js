@@ -582,6 +582,7 @@ export default tseslint.config(
         FormData: "readonly",
         Blob: "readonly",
         AbortController: "readonly",
+        DOMException: "readonly",
         XMLHttpRequest: "readonly",
         URL: "readonly",
         URLSearchParams: "readonly",
@@ -591,6 +592,7 @@ export default tseslint.config(
         btoa: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
+        performance: "readonly",
         // Bridge source files end with a guarded
         // `if (typeof module !== "undefined") module.exports = …` so their
         // pure helpers can be required by the vitest suites. Chrome never

@@ -55,6 +55,18 @@
       {
         "method": "GET",
         "pattern": "^\\/activitylist-service\\/activities\\/search\\/activities(\\?.*)?$"
+      },
+      {
+        "method": "POST",
+        "pattern": "^\\/workout-service\\/schedule\\/\\d+$"
+      },
+      {
+        "method": "DELETE",
+        "pattern": "^\\/workout-service\\/schedule\\/\\d+$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/calendar-service\\/year\\/\\d{4}\\/month\\/\\d{1,2}$"
       }
     ],
     "external_actions": [
@@ -65,7 +77,10 @@
       "push-body-composition",
       "open-garmin",
       "profile-snapshot",
-      "profile-snapshot-clear"
+      "profile-snapshot-clear",
+      "schedule",
+      "unschedule",
+      "calendar-find"
     ],
     "auth_endpoints": [
       "https://sso.garmin.com/sso/signin",
