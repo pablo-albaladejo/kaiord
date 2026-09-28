@@ -148,3 +148,93 @@ describe("importSnapshot", () => {
     ]);
   });
 });
+
+describe("importSnapshot — exportLedger live merge (in-memory port)", () => {
+  it("should keep untombstoned live ledger rows and drop tombstoned ones", async () => {
+    // Arrange
+    const ledgerRow = (id: string) => ({
+      id,
+      kaiordRecordId: `rec-${id}`,
+      destinationBridgeId: "garmin-bridge",
+      destinationExternalId: `ext-${id}`,
+      exportedAt: "2026-09-01T00:00:00.000Z",
+    });
+    const state = {
+      schemaVersion: 19,
+      tables: {
+        exportLedger: [ledgerRow("kept"), ledgerRow("gone")] as unknown[],
+        workouts: [{ id: "stale" }] as unknown[],
+      },
+      tombstones: [],
+    };
+    const port = createInMemorySnapshotPort(state);
+    const incoming: Snapshot = {
+      ...snapshot(),
+      tables: { exportLedger: [ledgerRow("new")], workouts: [] },
+      tombstones: [
+        {
+          table: "exportLedger",
+          id: "gone",
+          deletedAt: "2026-09-02T00:00:00Z",
+        },
+      ],
+    };
+
+    // Act
+    await importSnapshot({
+      port,
+      snapshot: incoming,
+      now: () => new Date("2026-09-03T00:00:00Z"),
+    });
+
+    // Assert
+    const ids = (state.tables.exportLedger as Array<{ id: string }>).map(
+      (r) => r.id
+    );
+    expect(ids.sort()).toEqual(["kept", "new"]);
+    expect(state.tables.workouts).toEqual([]);
+  });
+});
+
+describe("importSnapshot — live tombstones", () => {
+  it("should keep a tombstone written after the export and suppress its row", async () => {
+    // Arrange
+    const late = {
+      table: "exportLedger",
+      id: "late",
+      deletedAt: "2026-09-02T00:00:00.000Z",
+    };
+    const state = {
+      schemaVersion: 19,
+      tables: { exportLedger: [] as unknown[] },
+      tombstones: [late],
+    };
+    const port = createInMemorySnapshotPort(state);
+    const stale: Snapshot = {
+      ...snapshot(),
+      tables: {
+        exportLedger: [
+          {
+            id: "late",
+            kaiordRecordId: "rec-late",
+            destinationBridgeId: "garmin-bridge",
+            destinationExternalId: "pending",
+            exportedAt: "2026-09-01T00:00:00.000Z",
+          },
+        ],
+      },
+      tombstones: [],
+    };
+
+    // Act
+    await importSnapshot({
+      port,
+      snapshot: stale,
+      now: () => new Date("2026-09-03T00:00:00Z"),
+    });
+
+    // Assert
+    expect(state.tables.exportLedger).toEqual([]);
+    expect(state.tombstones).toEqual([late]);
+  });
+});
