@@ -463,7 +463,7 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 **Analytics** (no ids, dates or names)
 
 - `garmin-synced` counts as a success when the result is neither `failed` nor `uncertain`.
-- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, bridge-outdated, deadline-before-send, insecure-context.
+- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, schedule-rejected, needs-reauth, library-push-failed, no-export-route, deadline-before-send (a `failed` result), and bridge-outdated, insecure-context (a `library-only` one); see "Pipeline details settled in T5".
 - `garmin-calendar-bulk{counts}`
 
 ### 3.9 Normalization and merge (on top of T0c, delivered by #1265)
@@ -665,3 +665,72 @@ These refine §3.4 and §3.6 where the plan met the real code.
   `capabilities` is a closed enum in the SPA's `bridgeManifestSchema`. The
   calendar flags are a separate list the SPA reads from the ping data;
   `capabilities` and `bridge-identity.js` do not change.
+
+## Pipeline details settled in T5
+
+These fill gaps the plan left open, each by the rule "never a gap, worst case
+a duplicate". None changes an invariant of §3.3–§3.9.
+
+- **An unresolved attempt stays `attempting{posted: true}`.** When the
+  resolve of §3.4 ends without an adoption (no `calendar-find-v1`, a failed
+  read, an A3-false count of 0), the result is `uncertain` but the row keeps
+  `attempting{posted: true, at}`: that is the exact state (a POST may exist,
+  sent at `at`), the merge already ranks it with `uncertain` (§3.9 rule 4),
+  and "Send anyway" needs `at` for its gate. The next push resolves it again
+  before any POST. An `uncertain` placement in a row comes only from the
+  merge (rule 3) or legacy data; it holds no POST of this device, so "Send
+  anyway" on it claims a fresh attempt at once (a duplicate at worst).
+- **One POST per run.** A run sends `schedule` at most once. The gate's
+  re-POST (§3.4) happens only on a leftover `attempting{posted: true}` whose
+  absence read started after `at + POST_GATE_MS`; an ambiguous answer in the
+  same run is never followed by a second POST.
+- **A leftover attempt for another date** (the workout moved while an attempt
+  was pending) is resolved first; a resolution that lands a `Placed` is then
+  claimed again for the desired date in the same run, a move.
+- **The library guard is the way out of a legacy `unconfirmed` library.** A
+  row whose `library` is not `confirmed` (legacy `unconfirmed`, whose equal
+  hash Phase 1 would skip forever) returns
+  `failed{library-id-unknown, retryable: true}` with 0 calendar calls and
+  sets `forceRepush` in the same guarded write, so the next push re-creates
+  the library workout through the ledger's `updated` path (1 library push, a
+  library duplicate at worst).
+- **A rolled-back claim restores the pre-claim row verbatim.** `mutateByKey`'s
+  `fn` may return `restoreLedgerRow(row)` instead of a row. The repository
+  then stores that row as it is, `updatedAt` included (no stamp; a row
+  deep-equal to the current one is still a no-op). The pipeline returns it
+  only when the current row is byte-identical to the last row this run wrote,
+  so the rollback of a definite failure is invisible to the merge order;
+  otherwise (another writer touched the row) it restores `previous` with a
+  normal, stamped write. The gate's re-POST has no pre-claim row and always
+  restores normally. The port gains no method.
+- **The pending window.** Phase 1's `pending` row lives only across the
+  library POST, whose SPA timeout (15 s) is far below `PENDING_TTL_MS`
+  (5 min); placement starts after the library commit, so no wait of Phase 2
+  (the lock, `SETTLE_MS`, the gate) ever holds a `pending` row.
+- **The `reason` enum**, closed: `busy`, `settling`, `record-deleted`,
+  `guard-failed` (the row changed after a failed or ambiguous POST),
+  `library-missing`, `library-id-unknown`, `schedule-endpoint`,
+  `deadline-before-send`, and three §3.3 left unnamed: `schedule-rejected`
+  (Garmin 400, 403 or 409, or a bridge refusal with `retryable: false`),
+  `needs-reauth` (a `needsReauth` answer) and `library-push-failed` (Phase 1
+  failed), plus `no-export-route` (Phase 1 found no active route). The
+  `library-only` reasons stay `insecure-context` and `bridge-outdated`.
+- **`duplicate-left`** is returned when the run ends with a `retire` entry
+  still in the queue (a failed or abandoned delete), when a resolve adopted
+  the lowest of several candidates, or when a move superseded an
+  `unconfirmed` `Placed` (its entry has no id to delete). The result names
+  the dates of the entries left behind.
+- **Drain order.** The drain sends each non-abandoned `retire` entry once per
+  run, in ascending id order, and stops at the first answer that needs
+  re-authentication. An abandoned entry is never sent again: it is re-checked
+  by `calendar-find` and written `gone` only when an A3 read of its date
+  lacks its id.
+- **The T5 read** calls `calendar-find` once per distinct (workout, month)
+  among the `uncertain` and its `held` entries; any failed read fails the
+  whole resolution (no state change). An entry with no id counts as a match
+  but proves nothing: a single id-less match is adopted as `unconfirmed`
+  with `supersedes: []` under the "It's in Garmin" guard, and no `held` id
+  is written `gone` from a read that lacks ids.
+- **Record-deleted warning.** `failed{record-deleted}` carries the attempted
+  date when the POST succeeded or was ambiguous, so the UI can say an entry
+  may remain in Garmin on that date.
