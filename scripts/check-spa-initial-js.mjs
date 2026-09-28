@@ -46,21 +46,29 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/new-workout-route.tsx",
 ];
 
-/** The `sources` list of a chunk's sourcemap, or [] when there is none. */
-function mapSources(jsFile) {
+// The entry chunk MUST have a sourcemap: a static import of a seam gets
+// inlined there, and treating a missing map as "no sources" would switch
+// the forbidden-source check off silently (for example if build.sourcemap
+// were turned off) while the byte budget kept passing. Other initial files
+// may lack one: rolldown emits map-less chunks that hold no app source
+// (the preload helper, one-line re-export facades).
+/** The `sources` list of a chunk's sourcemap ([] if optional and absent). */
+function mapSources(jsFile, required) {
   const mapFile = `${jsFile}.map`;
-  if (!existsSync(mapFile)) return [];
-  try {
-    const sources = JSON.parse(readFileSync(mapFile, "utf8")).sources;
-    return Array.isArray(sources) ? sources : [];
-  } catch {
-    return [];
+  if (!existsSync(mapFile)) {
+    if (!required) return [];
+    throw new Error(`sourcemap ${mapFile} not found: is build.sourcemap on?`);
   }
+  const sources = JSON.parse(readFileSync(mapFile, "utf8")).sources;
+  if (!Array.isArray(sources)) {
+    throw new Error(`sourcemap ${mapFile} has no sources list`);
+  }
+  return sources;
 }
 
 /** Forbidden lazy-seam sources bundled into this chunk, if any. */
-function forbiddenSources(jsFile) {
-  const sources = mapSources(jsFile).map((s) => s.replace(/\\/g, "/"));
+function forbiddenSources(jsFile, isEntry) {
+  const sources = mapSources(jsFile, isEntry).map((s) => s.replace(/\\/g, "/"));
   return FORBIDDEN_LAZY_SOURCES.filter((forbidden) =>
     sources.some((source) => source.endsWith(forbidden))
   );
@@ -80,6 +88,10 @@ function attrValue(tag, name) {
 
 /** Paths (as written in the HTML) of the entry script and modulepreloads. */
 export function initialScripts(html) {
+  return initialTags(html).map((t) => t.url);
+}
+
+function initialTags(html) {
   const out = [];
   for (const [tag, name] of html.matchAll(ATTR)) {
     const src = attrValue(tag, "src");
@@ -89,15 +101,15 @@ export function initialScripts(html) {
       attrValue(tag, "type")?.toLowerCase() === "module" &&
       src
     ) {
-      out.push(src);
+      out.push({ url: src, entry: true });
     } else if (
       attrValue(tag, "rel")?.toLowerCase() === "modulepreload" &&
       href
     ) {
-      out.push(href);
+      out.push({ url: href, entry: false });
     }
   }
-  return out.filter((p) => !/^https?:\/\//.test(p));
+  return out.filter((t) => !/^https?:\/\//.test(t.url));
 }
 
 /** Resolve `/app/assets/x.js` or `/assets/x.js` to a file inside dist. */
@@ -117,20 +129,20 @@ export function measureInitialJs(dist) {
       `${index} is missing: build the SPA first (pnpm --filter @kaiord/workout-spa-editor build)`
     );
   }
-  const urls = initialScripts(readFileSync(index, "utf8"));
-  if (urls.length === 0) {
+  const tags = initialTags(readFileSync(index, "utf8"));
+  if (!tags.some((t) => t.entry)) {
     throw new Error(
       `no <script type="module" src> entry found in ${index}: the build is broken`
     );
   }
-  const files = urls.map((url) => {
+  const files = tags.map(({ url, entry }) => {
     const path = resolveInDist(dist, url);
     const bytes = readFileSync(path);
     return {
       url,
       raw: bytes.length,
       gzip: gzipSync(bytes, { level: 9 }).length,
-      forbidden: forbiddenSources(path),
+      forbidden: forbiddenSources(path, entry),
     };
   });
   const gzip = files.reduce((sum, f) => sum + f.gzip, 0);

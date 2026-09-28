@@ -41,6 +41,19 @@ describe("check-spa-initial-js", () => {
       "console.log('entry');\n".repeat(50)
     );
     writeFileSync(join(dist, "assets", "vendor-b.js"), "export const b = 1;\n");
+    for (const [file, source] of [
+      ["index-a.js", "src/main.tsx"],
+      ["vendor-b.js", "node_modules/react/index.js"],
+    ]) {
+      writeFileSync(
+        join(dist, "assets", `${file}.map`),
+        JSON.stringify({
+          version: 3,
+          sources: [`../../${source}`],
+          mappings: "",
+        })
+      );
+    }
     writeFileSync(
       join(dist, "assets", "lazy-route.js"),
       randomBytes(400 * 1024)
@@ -154,6 +167,35 @@ describe("check-spa-initial-js", () => {
       assert.match(result.stderr, new RegExp(source.replace(/[./]/g, "\\$&")));
     });
   }
+
+  it("fails when the entry chunk has no sourcemap", () => {
+    rmSync(join(dist, "assets", "index-a.js.map"));
+
+    const result = run(dist);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /index-a\.js\.map not found/);
+  });
+
+  it("tolerates a map-less bundler chunk among the modulepreloads", () => {
+    rmSync(join(dist, "assets", "vendor-b.js.map"));
+
+    const result = run(dist);
+
+    assert.equal(result.status, 0, result.stderr);
+  });
+
+  it("throws when index.html only has modulepreloads and no entry script", () => {
+    writeFileSync(
+      join(dist, "index.html"),
+      `<link rel="modulepreload" href="/assets/vendor-b.js">`
+    );
+
+    const result = run(dist);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /no <script type="module" src> entry found/);
+  });
 
   it("passes when the entry sourcemap has no forbidden sources", () => {
     writeFileSync(
