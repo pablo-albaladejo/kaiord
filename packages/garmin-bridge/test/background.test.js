@@ -15,6 +15,7 @@ const {
   logSwallowed,
   TELEMETRY_KEY,
   scheduleWorkout,
+  findCalendarEntries,
   isIsoDate,
   CALENDAR_DEADLINE_MS,
   CALENDAR_SEND_CUTOFF_MS,
@@ -177,7 +178,27 @@ describe("background.js", () => {
       expect(allowed).toEqual([true, true]);
     });
 
+    it("should allow GET on a calendar month path only", () => {
+      // Arrange
+      const path = "/calendar-service/year/2026/month/9";
+
+      // Act
+      const allowed = [
+        isAllowed("GET", path),
+        isAllowed("POST", path),
+        isAllowed("DELETE", path),
+      ];
+
+      // Assert
+      expect(allowed).toEqual([true, false, false]);
+    });
+
     it.each([
+      ["GET", "/calendar-service/year/26/month/9"],
+      ["GET", "/calendar-service/year/2026/month/123"],
+      ["GET", "/calendar-service/year/2026/month/9?start=1"],
+      ["GET", "/calendar-service/year/2026/month/9/day/1"],
+      ["GET", "/calendar-service/year/2026"],
       ["GET", "/workout-service/schedule/1790718680"],
       ["PUT", "/workout-service/schedule/1790718680"],
       ["POST", "/workout-service/schedule/abc"],
@@ -361,8 +382,14 @@ describe("background.js", () => {
       const result = await checkSession();
 
       // Assert
-      expect(result.features).toEqual(["calendar-write-v1"]);
-      expect(BRIDGE_FEATURES).toEqual(["calendar-write-v1"]);
+      expect(result.features).toEqual([
+        "calendar-write-v1",
+        "calendar-find-v1",
+      ]);
+      expect(BRIDGE_FEATURES).toEqual([
+        "calendar-write-v1",
+        "calendar-find-v1",
+      ]);
       expect(BRIDGE_MANIFEST).not.toHaveProperty("features");
     });
 
@@ -407,7 +434,7 @@ describe("background.js", () => {
           version: pkg.version,
           protocolVersion: 1,
           capabilities: ["write:workouts", "read:activities", "write:body"],
-          features: ["calendar-write-v1"],
+          features: ["calendar-write-v1", "calendar-find-v1"],
           authenticated: true,
           gcApi: { ok: true, status: 200, data: [{ workoutId: 1 }] },
         },
@@ -481,9 +508,7 @@ describe("background.js", () => {
 
       expect(result).toEqual({ workoutId: 123 });
       const [url, init] = fetch.mock.calls[0];
-      expect(url).toBe(
-        "https://connectapi.garmin.com/workout-service/workout"
-      );
+      expect(url).toBe("https://connectapi.garmin.com/workout-service/workout");
       expect(init.method).toBe("POST");
       expect(init.body).toBe(JSON.stringify(gcn));
     });
@@ -650,9 +675,10 @@ describe("background.js", () => {
       seedTokens();
       let release;
       fetch.mockImplementationOnce(
-        () => new Promise((resolve) => {
-          release = () => resolve(jsonResp([]));
-        })
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve(jsonResp([]));
+          })
       );
 
       const first = listActivities();
@@ -714,6 +740,7 @@ describe("background.js", () => {
         "profile-snapshot-clear",
         "schedule",
         "unschedule",
+        "calendar-find",
       ];
 
       // Act
@@ -962,6 +989,196 @@ describe("background.js", () => {
         error: "Schedule failed: 503",
         status: 503,
       });
+    });
+  });
+
+  describe("calendar-find", () => {
+    // Shaped on the live T0b capture: numeric ids, `itemType`, a
+    // `YYYY-MM-DD` date, and many other keys that must not leave the SW.
+    const item = (overrides) => ({
+      id: 1792409369,
+      groupId: null,
+      trainingPlanId: 0,
+      itemType: "workout",
+      activityTypeId: null,
+      date: "2026-10-06",
+      sportTypeKey: "running",
+      workoutId: 1711500235,
+      protectedWorkoutSchedule: false,
+      title: "Tempo 5k",
+      workoutUuid: null,
+      ...overrides,
+    });
+    const monthResp = (calendarItems) =>
+      jsonResp({ year: 2026, month: 9, calendarItems });
+
+    afterEach(() => {
+      fetch.mockReset();
+    });
+
+    it("should request the 0-based month of the date and return only the workout's entries as strings", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(
+        monthResp([
+          item(),
+          item({ id: 1792409370, date: "2026-10-20" }),
+          item({ id: 1792409371, workoutId: 999 }),
+          item({
+            id: 5,
+            itemType: "activity",
+            workoutId: 1711500235,
+            title: "Morning Run",
+            distance: 10000,
+          }),
+          item({ id: 6, itemType: "race", workoutId: null }),
+        ])
+      );
+
+      // Act
+      const result = await handleAction({
+        action: "calendar-find",
+        workoutId: "1711500235",
+        date: "2026-10-06",
+      });
+
+      // Assert
+      expect(fetch.mock.calls[0][0]).toBe(
+        "https://connectapi.garmin.com/calendar-service/year/2026/month/9"
+      );
+      expect(fetch.mock.calls[0][1].method).toBe("GET");
+      expect(result).toEqual([
+        { workoutScheduleId: "1792409369", date: "2026-10-06" },
+        { workoutScheduleId: "1792409370", date: "2026-10-20" },
+      ]);
+    });
+
+    it.each([
+      ["2026-01-31", "year/2026/month/0"],
+      ["2026-09-29", "year/2026/month/8"],
+      ["2026-12-01", "year/2026/month/11"],
+    ])("should map %s to %s", async (date, suffix) => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(monthResp([]));
+
+      // Act
+      await findCalendarEntries("1711500235", date);
+
+      // Assert
+      expect(fetch.mock.calls[0][0]).toBe(
+        `https://connectapi.garmin.com/calendar-service/${suffix}`
+      );
+    });
+
+    it("should answer found-none as an empty list", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(monthResp([item({ workoutId: 1 })]));
+
+      // Act
+      const result = await findCalendarEntries("1711500235", "2026-10-06");
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+    it("should return a null schedule id for an entry whose id is unusable", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(monthResp([item({ id: null })]));
+
+      // Act
+      const result = await findCalendarEntries("1711500235", "2026-10-06");
+
+      // Assert
+      expect(result).toEqual([{ workoutScheduleId: null, date: "2026-10-06" }]);
+    });
+
+    it.each([
+      ["no calendarItems", { year: 2026, month: 9 }],
+      ["a non-array calendarItems", { calendarItems: {} }],
+      ["a null body", null],
+    ])("should fail the read, not report none, on %s", async (_label, body) => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(jsonResp(body));
+
+      // Act
+      const error = await findCalendarEntries("1711500235", "2026-10-06").catch(
+        (e) => e
+      );
+
+      // Assert
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(
+        "Calendar read returned an unexpected payload"
+      );
+      expect(error.retryable).toBe(true);
+      expect(error.status).toBeUndefined();
+    });
+
+    it("should fail the read when a matching entry has no usable date", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(
+        monthResp([item({ date: "2026-10-06T00:00" })])
+      );
+
+      // Act
+      const error = await findCalendarEntries("1711500235", "2026-10-06").catch(
+        (e) => e
+      );
+
+      // Assert
+      expect(error.message).toBe(
+        "Calendar read returned an unexpected payload"
+      );
+    });
+
+    it("should keep the status of a failed read through the envelope", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockResolvedValueOnce(textResp("busy", false, 503));
+      const sendResponse = vi.fn();
+
+      // Act
+      externalCb(
+        {
+          action: "calendar-find",
+          workoutId: "1711500235",
+          date: "2026-10-06",
+        },
+        SPA_SENDER,
+        sendResponse
+      );
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      // Assert
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: false,
+        protocolVersion: 1,
+        error: "Calendar read failed: 503",
+        status: 503,
+      });
+    });
+
+    it.each([
+      [{ action: "calendar-find", workoutId: "12a", date: "2026-10-06" }],
+      [{ action: "calendar-find", workoutId: 1711500235, date: "2026-10-06" }],
+      [{ action: "calendar-find", workoutId: "1", date: "2026-02-30" }],
+      [{ action: "calendar-find", workoutId: "1" }],
+    ])("should refuse invalid input %j before any fetch", async (message) => {
+      // Arrange
+      seedTokens();
+
+      // Act
+      const error = await handleAction(message).catch((e) => e);
+
+      // Assert
+      expect(error.message).toMatch(/^Invalid /);
+      expect(error.retryable).toBe(false);
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
@@ -1248,6 +1465,50 @@ describe("background.js", () => {
         error: DEADLINE_EXCEEDED,
         retryable: true,
       });
+    });
+
+    it("should end a hung calendar read by D with no status", async () => {
+      // Arrange
+      seedTokens();
+      fetch.mockImplementation(hungFetch);
+      const outcome = settle(findCalendarEntries("1711500235", "2026-10-06"));
+
+      // Act
+      await vi.advanceTimersByTimeAsync(CALENDAR_DEADLINE_MS);
+      const error = await outcome;
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_EXCEEDED);
+      expect(error.status).toBeUndefined();
+      expect(fetch.mock.calls[0][1].signal.aborted).toBe(true);
+    });
+
+    it("should not apply the send cut-off to the calendar read", async () => {
+      // Arrange
+      chrome.storage.local.set({
+        garminOAuth1: { oauth_token: "t", oauth_token_secret: "s" },
+        garminOAuth2: { access_token: "old", expires_at: 0 },
+      });
+      stubSigning();
+      const lateRefresh = CALENDAR_SEND_CUTOFF_MS + 5000;
+      fetch.mockImplementation((url) =>
+        url.includes("/calendar-service/")
+          ? Promise.resolve(jsonResp({ calendarItems: [] }))
+          : new Promise((resolve) =>
+              setTimeout(
+                () =>
+                  resolve(jsonResp({ access_token: "new", expires_in: 3600 })),
+                lateRefresh
+              )
+            )
+      );
+      const outcome = findCalendarEntries("1711500235", "2026-10-06");
+
+      // Act
+      await vi.advanceTimersByTimeAsync(lateRefresh);
+
+      // Assert
+      expect(await outcome).toEqual([]);
     });
 
     it("should not answer before D while the POST is still in flight", async () => {

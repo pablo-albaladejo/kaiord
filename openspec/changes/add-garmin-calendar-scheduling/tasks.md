@@ -50,13 +50,13 @@
 
 ## 4. Bridge calendar read (T3, PR-1, after T0b)
 
-- [ ] 4.1 Add the `GET /calendar-service/year/<yyyy>/month/<m>` allowlist
+- [x] 4.1 Add the `GET /calendar-service/year/<yyyy>/month/<m>` allowlist
       entry and the `calendar-find{workoutId, date}` action, returning only
       `[{workoutScheduleId | null, date}]` for the target workout (AC-7).
-- [ ] 4.2 Map the date to the month parameter with the base T0b records
+- [x] 4.2 Map the date to the month parameter with the base T0b records
       (A4; a September date requests `month/8` if 0-based) (AC-8).
-- [ ] 4.3 Add `calendar-find-v1` to `features` (AC-9).
-- [ ] 4.4 Tests with a mixed month fixture; refresh the golden (+1 path,
+- [x] 4.3 Add `calendar-find-v1` to `features` (AC-9).
+- [x] 4.4 Tests with a mixed month fixture; refresh the golden (+1 path,
       +1 action) and disclose the read in the CWS documents (AC-6).
 
 ## 5. Ledger model and Phase 1 (T4, PR-2)

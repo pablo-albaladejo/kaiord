@@ -63,6 +63,10 @@
       {
         "method": "DELETE",
         "pattern": "^\\/workout-service\\/schedule\\/\\d+$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/calendar-service\\/year\\/\\d{4}\\/month\\/\\d{1,2}$"
       }
     ],
     "external_actions": [
@@ -75,7 +79,8 @@
       "profile-snapshot",
       "profile-snapshot-clear",
       "schedule",
-      "unschedule"
+      "unschedule",
+      "calendar-find"
     ],
     "auth_endpoints": [
       "https://sso.garmin.com/sso/signin",
