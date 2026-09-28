@@ -32,3 +32,6 @@
 
 - [x] 4.1 MODIFY `landing-page`, `branding` and `spa-routing` as listed in the
       proposal.
+- [x] 4.2 Correct the remaining stale `landing-page` statements: nav and hero
+      CTAs, `robots.txt`, the 404 page's bridge script, and the deploy
+      artifact list.

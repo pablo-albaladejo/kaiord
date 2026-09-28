@@ -50,7 +50,13 @@ served at /editor/ path", `branding` favicon and social-sharing scenarios).
 ## Impact
 
 - Affected specs: `landing-page` (RENAMED "SPA editor served at /editor/
-  path" to "SPA editor served at /app/ path", and MODIFIED), `branding` (MODIFIED "Favicon", "Open Graph meta tags"),
+  path" to "SPA editor served at /app/ path", and MODIFIED; also MODIFIED
+  "Sticky navigation" and "Hero with audience fork" (CTAs link `/app/`), "SEO
+  fundamentals" (`robots.txt` allows everything, and `/editor/` stays
+  crawlable so its canonical is read), "Branded 404 page" (it links `/app/`
+  and carries the legacy bridge script) and "Unified deployment with
+  verification" (`app/index.html` is the editor; `editor/index.html` is the
+  legacy page)), `branding` (MODIFIED "Favicon", "Open Graph meta tags"),
   `spa-routing` (MODIFIED "Legacy path URLs bridge into the fragment form",
   one scenario added).
 - Clients without JavaScript land on `/app/` without the query string: a
