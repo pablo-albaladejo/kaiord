@@ -8,7 +8,7 @@ description: "Convert a Garmin FIT workout to Garmin Connect format (GCN JSON) a
 Turn a **Garmin FIT** workout into the **Garmin Connect** workout format (GCN
 JSON) so a session from a FIT file can live in your Garmin Connect account and
 sync to your watch or head unit. Use the free, in-browser
-[Kaiord Editor](https://kaiord.com/editor/) (no account, no upload), or the
+[Kaiord Editor](https://kaiord.com/app/) (no account, no upload), or the
 [CLI](/cli/commands#convert) and [TypeScript SDK](/guide/quick-start).
 Conversions go through Kaiord's canonical [KRD format](/formats/krd) and stay
 within round-trip tolerances (time ±1 s, power ±1 W, heart rate ±1 bpm, cadence
@@ -18,7 +18,7 @@ within round-trip tolerances (time ±1 s, power ±1 W, heart rate ±1 bpm, caden
 
 ### 1. Editor (drag & drop)
 
-Open [kaiord.com/editor](https://kaiord.com/editor/), drop your `.fit` file,
+Open [kaiord.com/app](https://kaiord.com/app/), drop your `.fit` file,
 choose **Garmin (GCN)** as the export format, and download the result. To send
 it straight to your account, use the Editor's Garmin sync (backed by the
 `garmin-bridge` extension).
