@@ -9,6 +9,14 @@ import {
 } from "../tests/helpers/mcp-test-client";
 import { loadKrdFixtureRaw } from "../tests/helpers/test-fixtures";
 
+const FTP_W = 250;
+const SWEET_SPOT_W = 213;
+const PERCENT_FTP_ZWO = `<workout_file><name>ftp test</name><sportType>bike</sportType><workout>
+<SteadyState Duration="600" Power="0.85"/>
+</workout></workout_file>`;
+
+type GcnStep = { targetValueOne: number; targetValueTwo: number };
+
 describe("kaiord_convert", () => {
   let tmpDir: string;
 
@@ -97,5 +105,51 @@ describe("kaiord_convert", () => {
     // Assert
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("Written to:");
+  });
+
+  it("should resolve %FTP power targets to watts for GCN output with ftp", async () => {
+    // Arrange
+    const client = await createTestClient();
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_convert",
+      arguments: {
+        input_content: PERCENT_FTP_ZWO,
+        input_format: "zwo",
+        output_format: "gcn",
+        ftp: FTP_W,
+      },
+    })) as McpToolResult;
+
+    // Assert
+    expect(result.isError).toBeUndefined();
+    const gcn = JSON.parse(result.content[0].text) as {
+      workoutSegments: [{ workoutSteps: [GcnStep] }];
+    };
+    const step = gcn.workoutSegments[0].workoutSteps[0];
+    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+  });
+
+  it("should return a missing-ftp error for %FTP GCN output without ftp", async () => {
+    // Arrange
+    const client = await createTestClient();
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_convert",
+      arguments: {
+        input_content: PERCENT_FTP_ZWO,
+        input_format: "zwo",
+        output_format: "gcn",
+      },
+    })) as McpToolResult & {
+      structuredContent?: { error: { type: string } };
+    };
+
+    // Assert
+    expect(result.isError).toBe(true);
+    expect(result.structuredContent?.error.type).toBe("missing-ftp");
   });
 });
