@@ -1,0 +1,36 @@
+# Tasks
+
+## 1. Rolling observatory PR
+
+- [x] 1.1 `scripts/geo/union-timeseries.mjs` and its tests (a line only on
+      main survives; a line only on the branch survives; duplicates kept once;
+      malformed lines kept and reported; snapshots never overwritten).
+- [x] 1.2 `seo-observatory.yml`: PAT required with a loud failure, full-history
+      PAT checkout, union with the rolling branch, one fixed branch and PR
+      (updated when open), `--force-with-lease` pinned to the SHA read.
+- [x] 1.3 Union-merge the open weekly PRs (#1200, #1208, #1231, #1251, #1257)
+      into `reports/seo/` and regenerate the dashboard.
+
+## 2. IndexNow
+
+- [x] 2.1 Key file at the landing root; `scripts/geo/indexnow.mjs` (key, diff,
+      submit) with tests on an injected fetch.
+- [x] 2.2 Deploy: verify the key file, diff live vs built sitemaps, submit
+      after the smoke in a separate `indexnow` job; build timeout recomputed.
+
+## 3. Analytics
+
+- [x] 3.1 Landing `extension-install-clicked` with a slug-only payload, tested
+      against the real landing markup.
+- [x] 3.2 `reports/seo/umami-ai-referrers.md`: the saved Umami report for AI
+      referrers (no new event).
+
+## 4. AI visibility panel
+
+- [x] 4.1 The audit's 10 panel prompts in EN and ES in `queries.json`, `lang`
+      passed through the probe (`byLang` per entry).
+- [x] 4.2 "Monthly AI visibility" in the dashboard, with tests.
+
+## 5. Spec
+
+- [x] 5.1 MODIFY `analytics-port` "Landing tracks key funnel events".
