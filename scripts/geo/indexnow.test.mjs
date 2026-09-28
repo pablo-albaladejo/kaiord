@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -166,6 +167,122 @@ describe("diffFiles", () => {
       const urls = diffFiles({
         oldFiles: [join(dir, "missing.xml")],
         newFiles: [join(dir, "new.xml")],
+        log,
+      });
+
+      // Assert
+      assert.deepEqual(urls, []);
+      assert.match(log.lines.warn[0], /^::warning::IndexNow: the live sitemap/);
+    });
+  });
+
+  it("should resend what a failed submit missed by diffing against the last submitted sitemaps", () => {
+    // Arrange: /a changed two deploys ago; that deploy's submit failed, so
+    // the live sitemap already has it and a live diff would find nothing.
+    const files = {
+      "base.xml": sitemap([
+        ["https://kaiord.com/a", "1"],
+        ["https://kaiord.com/b", "1"],
+      ]),
+      "live.xml": sitemap([
+        ["https://kaiord.com/a", "2"],
+        ["https://kaiord.com/b", "1"],
+      ]),
+      "new.xml": sitemap([
+        ["https://kaiord.com/a", "2"],
+        ["https://kaiord.com/b", "3"],
+      ]),
+    };
+
+    withDir(files, (dir) => {
+      // Act
+      const urls = diffFiles({
+        baseFiles: [join(dir, "base.xml")],
+        oldFiles: [join(dir, "live.xml")],
+        newFiles: [join(dir, "new.xml")],
+        log: quiet(),
+      });
+
+      // Assert
+      assert.deepEqual(urls, ["https://kaiord.com/a", "https://kaiord.com/b"]);
+    });
+  });
+
+  it("should still diff when the live fetch failed but a baseline exists", () => {
+    // Arrange
+    const files = {
+      "base.xml": sitemap([["https://kaiord.com/a", "1"]]),
+      "new.xml": sitemap([
+        ["https://kaiord.com/a", "1"],
+        ["https://kaiord.com/c", "1"],
+      ]),
+    };
+
+    withDir(files, (dir) => {
+      // Act
+      const urls = diffFiles({
+        baseFiles: [join(dir, "base.xml")],
+        oldFiles: [join(dir, "missing.xml")],
+        newFiles: [join(dir, "new.xml")],
+        log: quiet(),
+      });
+
+      // Assert
+      assert.deepEqual(urls, ["https://kaiord.com/c"]);
+    });
+  });
+
+  it("should fall back to the live sitemaps when the baseline is partial", () => {
+    // Arrange: the docs half of the baseline is missing; using the rest
+    // would make every docs URL look new.
+    const docs = [
+      ["https://kaiord.com/docs/x", "1"],
+      ["https://kaiord.com/docs/y", "1"],
+    ];
+    const files = {
+      "base-landing.xml": sitemap([["https://kaiord.com/", "1"]]),
+      "live-landing.xml": sitemap([["https://kaiord.com/", "1"]]),
+      "live-docs.xml": sitemap(docs),
+      "new-landing.xml": sitemap([["https://kaiord.com/", "2"]]),
+      "new-docs.xml": sitemap(docs),
+    };
+
+    withDir(files, (dir) => {
+      // Act
+      const urls = diffFiles({
+        baseFiles: [join(dir, "base-landing.xml"), join(dir, "base-docs.xml")],
+        oldFiles: [join(dir, "live-landing.xml"), join(dir, "live-docs.xml")],
+        newFiles: [join(dir, "new-landing.xml"), join(dir, "new-docs.xml")],
+        log: quiet(),
+      });
+
+      // Assert
+      assert.deepEqual(urls, ["https://kaiord.com/"]);
+    });
+  });
+
+  it("should skip, not submit the site, when neither comparison point is complete", () => {
+    // Arrange: an empty baseline file and one empty live file.
+    const docs = [
+      ["https://kaiord.com/docs/x", "1"],
+      ["https://kaiord.com/docs/y", "1"],
+    ];
+    const files = {
+      "base-landing.xml": "<urlset></urlset>",
+      "base-docs.xml": sitemap(docs),
+      "live-landing.xml": sitemap([["https://kaiord.com/", "1"]]),
+      "live-docs.xml": "",
+      "new-landing.xml": sitemap([["https://kaiord.com/", "1"]]),
+      "new-docs.xml": sitemap(docs),
+    };
+    const log = quiet();
+
+    withDir(files, (dir) => {
+      // Act
+      const urls = diffFiles({
+        baseFiles: [join(dir, "base-landing.xml"), join(dir, "base-docs.xml")],
+        oldFiles: [join(dir, "live-landing.xml"), join(dir, "live-docs.xml")],
+        newFiles: [join(dir, "new-landing.xml"), join(dir, "new-docs.xml")],
         log,
       });
 
@@ -361,6 +478,30 @@ describe("submit", () => {
     // Assert
     assert.equal(result, "warned");
     assert.match(log.lines.warn[0], /ECONNRESET/);
+  });
+});
+
+describe("the submit command", () => {
+  it("should report its result to the workflow so only a success advances the baseline", () => {
+    // Arrange: an empty list never reaches the network.
+    withDir({ "urls.txt": "", "output.txt": "" }, (dir) => {
+      // Act
+      execFileSync(
+        process.execPath,
+        [
+          join(import.meta.dirname, "indexnow.mjs"),
+          "submit",
+          join(dir, "urls.txt"),
+        ],
+        { env: { ...process.env, GITHUB_OUTPUT: join(dir, "output.txt") } }
+      );
+
+      // Assert
+      assert.equal(
+        readFileSync(join(dir, "output.txt"), "utf8"),
+        "result=skipped\n"
+      );
+    });
   });
 });
 

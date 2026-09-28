@@ -19,6 +19,13 @@
 //     snapshot already in the working tree is never overwritten.
 // Whether to read the branch at all is decided by rolling-pr.mjs: a branch
 // whose PR was closed unmerged is not restored.
+//
+//   node scripts/geo/union-timeseries.mjs --branch <ref> --since <before>
+//
+// takes from <ref> only what <before> does not have: the records and
+// snapshots collected after <before>. The publish retry uses it to carry this
+// run's week onto a fresh main without the rolling weeks it restored earlier,
+// which may belong to a PR closed in the meantime.
 // A ref with no timeseries file at all is an error, not a no-op: that is a
 // wrong ref, and silently merging nothing would lose the data it was meant
 // to carry.
@@ -47,8 +54,8 @@ const parse = (line) => {
 const keyOf = (record) =>
   [record.date, record.source ?? "", record.provider ?? ""].join("\u0000");
 
-export function unionLines(mainLines, branchLines) {
-  const mainKeys = new Set();
+export function unionLines(mainLines, branchLines, excludeKeys = new Set()) {
+  const mainKeys = new Set(excludeKeys);
   for (const line of mainLines) {
     const record = parse(line);
     if (record !== null) mainKeys.add(keyOf(record));
@@ -81,12 +88,35 @@ export function unionLines(mainLines, branchLines) {
 const defaultGit = (args) =>
   execFileSync("git", args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
 
-// Applies `ref`'s observatory data onto the working tree at `root`.
+const keysOf = (lines) => {
+  const keys = new Set();
+  for (const line of lines) {
+    const record = parse(line);
+    if (record !== null) keys.add(keyOf(record));
+  }
+  return keys;
+};
+
+// Applies `ref`'s observatory data onto the working tree at `root`, leaving
+// out whatever `since` (a ref, optional) already had.
 // `git(args)` returns stdout (injected by the tests).
-export function applyBranch({ ref, root, git = defaultGit, log = console }) {
-  const list = (dir) =>
-    splitLines(git(["ls-tree", "-r", "--name-only", ref, "--", `${dir}/`]));
+export function applyBranch({
+  ref,
+  since,
+  root,
+  git = defaultGit,
+  log = console,
+}) {
+  const listAt = (at, dir) =>
+    splitLines(git(["ls-tree", "-r", "--name-only", at, "--", `${dir}/`]));
+  const list = (dir) => listAt(ref, dir);
   const show = (path) => git(["show", `${ref}:${path}`]);
+  const sinceSeries = new Set(since ? listAt(since, TIMESERIES) : []);
+  const sinceSnapshots = new Set(since ? listAt(since, SNAPSHOTS) : []);
+  const sinceKeys = (path) =>
+    sinceSeries.has(path)
+      ? keysOf(splitLines(git(["show", `${since}:${path}`])))
+      : new Set();
 
   const seriesPaths = list(TIMESERIES).filter((p) => p.endsWith(".jsonl"));
   if (seriesPaths.length === 0) {
@@ -99,7 +129,11 @@ export function applyBranch({ ref, root, git = defaultGit, log = console }) {
     const mainLines = existsSync(target)
       ? splitLines(readFileSync(target, "utf8"))
       : [];
-    const { lines, malformed } = unionLines(mainLines, splitLines(show(path)));
+    const { lines, malformed } = unionLines(
+      mainLines,
+      splitLines(show(path)),
+      sinceKeys(path)
+    );
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, `${lines.join("\n")}\n`);
     report.series.push({ path, before: mainLines.length, after: lines.length });
@@ -108,7 +142,7 @@ export function applyBranch({ ref, root, git = defaultGit, log = console }) {
 
   for (const path of list(SNAPSHOTS)) {
     const target = join(root, path);
-    if (existsSync(target)) continue;
+    if (existsSync(target) || sinceSnapshots.has(path)) continue;
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, show(path));
     report.snapshotsCopied.push(path);
@@ -126,13 +160,15 @@ const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
   const at = process.argv.indexOf("--branch");
   const ref = at === -1 ? undefined : process.argv[at + 1];
-  if (!ref) {
-    console.error("usage: union-timeseries.mjs --branch <ref>");
+  const sinceAt = process.argv.indexOf("--since");
+  const since = sinceAt === -1 ? undefined : process.argv[sinceAt + 1];
+  if (!ref || (sinceAt !== -1 && !since)) {
+    console.error("usage: union-timeseries.mjs --branch <ref> [--since <ref>]");
     process.exit(2);
   }
   const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
   try {
-    const report = applyBranch({ ref, root });
+    const report = applyBranch({ ref, since, root });
     for (const s of report.series) {
       console.log(`[union] ${s.path}: ${s.before} -> ${s.after} lines`);
     }

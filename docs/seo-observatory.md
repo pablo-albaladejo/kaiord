@@ -78,9 +78,13 @@ labeled `seo` / `automated`. Each run:
    data survives a failed push;
 5. recreates the branch from `main` with the result and pushes it with
    `--force-with-lease` pinned to the SHA from step 2 (empty when the branch
-   does not exist). If the branch moved meanwhile, it is re-fetched, merged
-   again and the push retried once. Then it updates the open PR's body, or
-   opens the PR if none is open.
+   does not exist). If the push is refused (the branch moved, or was deleted,
+   or its PR closed meanwhile), the run plans again, rebuilds the branch on
+   the current `main`, merges the rolling branch only if its PR is still open,
+   adds this run's own records (those newer than a mark taken before the
+   collectors ran: `union-timeseries.mjs --branch <ours> --since <mark>`), and
+   pushes once more. Then it updates the open PR's body, or opens the PR if
+   none is open.
 
 `SEO_OBSERVATORY_PR_TOKEN` is read by the publish step only, and reaches git
 as a one-shot `http.extraheader`, never `.git/config`: no collector and no
@@ -131,6 +135,15 @@ panel's arrival (for rows from before it, the overall rate is the core rate).
 Rows without `byLang` asked English prompts only and count as EN in the
 monthly view.
 
+**What "mentioned" means.** A run is `kaiordMentioned` when its answer text or
+any of its cited URLs contains "kaiord", the same test the probe applies to
+competitors. An answer that only cites a `@kaiord/*` package page (for example
+on libraries.io) therefore counts: that happened for `ts-fit-lib` on
+2026-08-24, 2026-08-31 and 2026-09-14. `kaiordCited` is narrower, a
+`kaiord.com` URL among the citations. The raw answers and citations stay in
+each snapshot, so a text-only rate can be recomputed from them if the
+definition ever changes; it would then have to change for competitors too.
+
 ## AI visibility panel (J3/J4)
 
 `aiQuestions` in `reports/seo/queries.json` holds the original five discovery
@@ -155,16 +168,23 @@ ignores IndexNow and reads the sitemap `lastmod`.
 - The key is `packages/landing/public/<key>.txt`, whose content is the key. It
   is public by design: serving it at `https://kaiord.com/<key>.txt` proves
   ownership. Rotate it by replacing the file (a new `openssl rand -hex 16`).
-- `deploy-site.yml` build job: fetches the live `sitemap-landing.xml` and
-  `docs/sitemap.xml`, diffs them against the built ones by `<loc>` and
-  `<lastmod>` (added, removed and re-dated URLs), and uploads the list. If a
-  live sitemap cannot be fetched it skips with a warning rather than submit
-  the whole site.
+- `deploy-site.yml` build job: diffs the built `sitemap-landing.xml` and
+  `docs/sitemap.xml` by `<loc>` and `<lastmod>` (added, removed and re-dated
+  URLs) against the **baseline**: the sitemaps of the last deploy whose
+  submit succeeded, kept in the Actions cache (`indexnow-baseline-*`). URLs a
+  failed fetch or a failed submit missed are therefore sent by the next
+  deploy. Without a baseline (the first run, or the cache evicted after 7
+  days unused) it diffs against the live sitemaps, fetched from kaiord.com. A
+  set counts only if every file is present and lists at least one URL; with
+  neither, the deploy skips with a warning rather than submit the whole site.
+  It uploads the list and the built sitemaps.
 - `indexnow` job, after the deploy smoke: an empty list logs `IndexNow:
 nothing changed, skipping`; otherwise one POST to `api.indexnow.org` and
   `IndexNow <status> for <n> URL(s)`. 200/202 succeed; any other status, or a
-  request aborted after 20s, is a warning. The job is `continue-on-error`, so
-  it never turns a deploy red.
+  request aborted after 20s, is a warning. Only a success, or nothing to
+  send, saves the built sitemaps as the next baseline; after a warning the
+  baseline stays put and the next deploy resends these URLs. The job is
+  `continue-on-error`, so it never turns a deploy red.
 
 ## Configuration
 

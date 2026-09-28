@@ -24,7 +24,8 @@ filter by URL path when you need one surface.
 
 ChatGPT adds `?utm_source=chatgpt.com` to the links it cites, and some browsers
 strip the referrer, so the UTM filter catches visits the referrer filter
-misses. Count each visit once: both conditions can match the same visit.
+misses. Both conditions can match the same visit, so the two reports overlap
+(see the weekly read below).
 
 ## Create it once (owner)
 
@@ -46,7 +47,12 @@ filter as a segment.
 
 With the weekly observatory PR (`reports/seo/DASHBOARD.md`):
 
-- AI referrer visits (sum of both reports, this week vs last);
+- AI referrer visits, this week vs last, as **two separate counts**: the
+  `AI referrers` total and the `AI referrers (UTM)` total. Do not add them up.
+  A ChatGPT visit that keeps its referrer also carries `utm_source=chatgpt.com`,
+  so it is in both, and neither report can say which visits overlap. For a
+  single ChatGPT figure, take the larger of its two counts: that is a floor,
+  not a total;
 - the landing pages they reached (`/`, `/docs/convert/*`, `/app/`);
 - whether they led to a product event (`editor-opened`,
   `extension-install-clicked`, `workout-exported`) in the same session.

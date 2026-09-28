@@ -53,9 +53,14 @@ jobs:
     # and 35612637770, whose jobs took 2540-2676s against the old 45-minute
     # (2700s) bound. The AI probe took 28-30s for 5 questions (~6s each incl.
     # the 1s sleep); the 20-prompt panel adds ~120s. The restore fetch and the
-    # artifact upload add ~10s. ceil((2676 + 120 + 10) x 1.5 / 60) = 71. This
-    # exceeds the 45-minute network family ceiling on purpose: the ceiling was
-    # already 24s from cutting the real inspection loop.
+    # artifact upload add ~10s. ceil((2676 + 120 + 10) x 1.5 / 60) = 71. The
+    # calibration families (lint 10 / build 20 / test 30 / e2e 45) have no
+    # network family; this exceeds even the largest, e2e's 45, on purpose,
+    # because the old 45-minute bound was already only 24s from cutting the
+    # real inspection loop.
+    # Recompute after the first runs on the smaller sitemap: GSC now inspects
+    # about 40 URLs instead of 377 (PR #1268), so the loop, and this bound,
+    # should drop by roughly an order of magnitude.
     timeout-minutes: 71
     steps:
       - name: Require the PR token
@@ -99,6 +104,24 @@ jobs:
           set -e
           git fetch origin +refs/heads/auto/seo-observatory:refs/remotes/origin/auto/seo-observatory
           node scripts/geo/union-timeseries.mjs --branch origin/auto/seo-observatory
+
+      # The reports/seo/ tree before any collector runs (main plus the
+      # restored weeks), as a commit object outside every branch. The publish
+      # retry takes from this run only what is newer than it.
+      - name: Mark the state before collection
+        id: before
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: |
+          set -e
+          export GIT_INDEX_FILE="$RUNNER_TEMP/before.index"
+          git read-tree HEAD
+          git add -A reports/seo/
+          TREE=$(git write-tree)
+          echo "sha=$(git commit-tree "$TREE" -p HEAD -m 'before collection')" >> "$GITHUB_OUTPUT"
 
       - name: Google Search Console snapshot
         env:
@@ -144,16 +167,22 @@ jobs:
       # always merges cleanly) and carries every unmerged week via the restore
       # above. --force-with-lease pins the SHA read by the plan step (empty =
       # the branch must not exist yet), so a concurrent push is never
-      # overwritten blindly: if the branch moved, it is re-fetched, merged
-      # again and the push retried once. The PAT reaches git only through a
-      # one-shot extraheader, never .git/config; the merge and dashboard
-      # re-runs are started without it.
+      # overwritten blindly. If the push is refused, the retry plans again
+      # (the PR may have been closed, or the branch deleted, meanwhile),
+      # rebuilds the branch on the current main, merges the rolling branch
+      # only if its PR is still open, adds this run's records (those newer
+      # than the pre-collection mark) and pushes once more. The PAT reaches
+      # git only through a one-shot extraheader, never .git/config; the plan
+      # uses the read-only workflow token, and the merge and dashboard
+      # re-runs are started without either token.
       - name: Publish the rolling metrics PR
         if: steps.detect.outputs.changed == 'true'
         env:
           PAT: ${{ secrets.SEO_OBSERVATORY_PR_TOKEN }}
           GH_TOKEN: ${{ secrets.SEO_OBSERVATORY_PR_TOKEN }}
+          READ_TOKEN: ${{ github.token }}
           LEASE: ${{ steps.plan.outputs.lease }}
+          BEFORE: ${{ steps.before.outputs.sha }}
         run: |
           set -euo pipefail
           BRANCH="auto/seo-observatory"
@@ -169,15 +198,25 @@ jobs:
           git add reports/seo/
           git commit -m "chore(seo): weekly SEO/GEO observatory snapshot"
           if ! push; then
-            echo "::warning::$BRANCH moved during the run; re-fetching, merging it again and retrying once"
-            LEASE=$(git ls-remote --heads origin "refs/heads/$BRANCH" | cut -f1)
-            if [ -n "$LEASE" ]; then
+            echo "::warning::$BRANCH changed during the run; rebuilding on the current main and retrying once"
+            OURS=$(git rev-parse HEAD)
+            git fetch origin main
+            PLAN=$(GH_TOKEN="$READ_TOKEN" env -u PAT node scripts/geo/rolling-pr.mjs plan)
+            echo "$PLAN"
+            LEASE=$(sed -n 's/^lease=//p' <<<"$PLAN")
+            git checkout -B "$BRANCH" origin/main
+            if grep -qx 'restore=true' <<<"$PLAN"; then
               git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
               env -u PAT -u GH_TOKEN node scripts/geo/union-timeseries.mjs --branch "origin/$BRANCH"
-              env -u PAT -u GH_TOKEN node scripts/geo/seo-dashboard.mjs
-              git add reports/seo/
-              git commit --amend --no-edit
             fi
+            env -u PAT -u GH_TOKEN node scripts/geo/union-timeseries.mjs --branch "$OURS" --since "$BEFORE"
+            env -u PAT -u GH_TOKEN node scripts/geo/seo-dashboard.mjs
+            git add -A reports/seo/
+            if git diff --cached --quiet; then
+              echo "Nothing of this run is missing from main; nothing to publish."
+              exit 0
+            fi
+            git commit -m "chore(seo): weekly SEO/GEO observatory snapshot"
             push
           fi
           BODY="Rolling snapshot from the SEO/GEO observatory (\`.github/workflows/seo-observatory.yml\`), last updated $(date -u +%Y-%m-%d) by run ${{ github.run_id }}. While this PR is open, each week's run rebuilds this branch from \`main\` and merges every week not yet merged, so merging it at any time loses nothing; closing it unmerged discards its weeks. Review \`reports/seo/DASHBOARD.md\` in this diff; raw data lands in \`reports/seo/timeseries/\` and \`reports/seo/snapshots/\`."

@@ -7,17 +7,27 @@
 //       Prints the key. The key file is packages/landing/public/<key>.txt,
 //       whose content is the key itself (public by design: serving it at the
 //       site root is how IndexNow proves ownership). Rotate by replacing it.
-//   node scripts/geo/indexnow.mjs diff --old <live.xml…> --new <built.xml…> --out <urls.txt>
+//   node scripts/geo/indexnow.mjs diff [--base <submitted.xml…>] --old <live.xml…> --new <built.xml…> --out <urls.txt>
 //       Writes the kaiord.com URLs added, removed, or whose <lastmod>
-//       changed. A missing or empty OLD sitemap (the live fetch failed) skips
-//       with a ::warning:: and an empty list, so a flaky fetch never submits
-//       the whole site. A NEW sitemap without any <loc> is a broken build and
-//       fails.
+//       changed. The comparison point is BASE (the sitemaps of the last
+//       deploy whose submit succeeded), so URLs a failed fetch or submit
+//       missed are sent again; without a complete BASE it is OLD (the live
+//       sitemaps). A set is complete only if every file exists and lists at
+//       least one URL. With neither, it skips with a ::warning:: and an empty
+//       list, so a flaky fetch never submits the whole site. A NEW sitemap
+//       without any <loc> is a broken build and fails.
 //   node scripts/geo/indexnow.mjs submit <urls.txt>
 //       Empty list: "nothing changed, skipping". Otherwise POSTs to
 //       api.indexnow.org and logs "IndexNow <status>"; 200/202 are success,
 //       anything else (or a network error) is a ::warning::, never a failure.
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+//       Writes result=ok|skipped|warned to $GITHUB_OUTPUT when it is set.
+import {
+  appendFileSync,
+  existsSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -91,21 +101,40 @@ const readAll = (files) => {
   return merged;
 };
 
-export function diffFiles({ oldFiles, newFiles, log = console }) {
+// Every file present and non-empty, or nothing: half a comparison point
+// would make the other half of the site look new.
+const readComplete = (files) => {
+  if (files.length === 0 || files.some((f) => !existsSync(f))) return null;
+  const maps = files.map((f) => parseSitemap(readFileSync(f, "utf8")));
+  return maps.some((m) => m.size === 0) ? null : readAll(files);
+};
+
+export function diffFiles({
+  baseFiles = [],
+  oldFiles,
+  newFiles,
+  log = console,
+}) {
   if (newFiles.length === 0)
     throw new Error("diff needs at least one --new sitemap");
   const fresh = readAll(newFiles);
   if (fresh.size === 0)
     throw new Error(`no <url><loc> in ${newFiles.join(", ")}`);
-  const unavailable =
-    oldFiles.length === 0 || oldFiles.some((f) => !existsSync(f));
-  const live = unavailable ? new Map() : readAll(oldFiles);
-  if (unavailable || live.size === 0) {
+  const base = readComplete(baseFiles);
+  if (base) {
+    log.log("IndexNow: diffing against the last submitted sitemaps");
+    return diffSitemaps(base, fresh);
+  }
+  const live = readComplete(oldFiles);
+  if (!live) {
     log.warn(
       "::warning::IndexNow: the live sitemap could not be read; skipping this deploy"
     );
     return [];
   }
+  log.log(
+    "IndexNow: no last submitted sitemaps; diffing against the live ones"
+  );
   return diffSitemaps(live, fresh);
 }
 
@@ -165,6 +194,7 @@ async function main(argv) {
     const [out] = listArg(argv, "--out");
     if (!out) throw new Error("diff needs --out <file>");
     const urls = diffFiles({
+      baseFiles: listArg(argv, "--base"),
       oldFiles: listArg(argv, "--old"),
       newFiles: listArg(argv, "--new"),
     });
@@ -172,10 +202,12 @@ async function main(argv) {
     console.log(`IndexNow: ${urls.length} changed URL(s) -> ${out}`);
   } else if (command === "submit" && argv[1]) {
     const urls = readFileSync(argv[1], "utf8").split("\n").filter(Boolean);
-    await submit({ urls, key: findKey() });
+    const result = await submit({ urls, key: findKey() });
+    if (process.env.GITHUB_OUTPUT)
+      appendFileSync(process.env.GITHUB_OUTPUT, `result=${result}\n`);
   } else {
     throw new Error(
-      "usage: indexnow.mjs key | diff --old … --new … --out f | submit f"
+      "usage: indexnow.mjs key | diff [--base …] --old … --new … --out f | submit f"
     );
   }
 }

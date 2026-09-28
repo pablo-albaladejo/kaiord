@@ -165,6 +165,10 @@ describe("renderDashboard", () => {
     assert.match(markdown, /## KPI denominators\n\n_Since 2026-09-28:_/);
     assert.match(
       markdown,
+      /_Mentioned_ means the answer text \*\*or one of its cited URLs\*\*/
+    );
+    assert.match(
+      markdown,
       /\| AI answer-engine mention rate \(core 5 prompts\) \| perplexity 0\.2 \|/
     );
     assert.match(
@@ -198,6 +202,20 @@ describe("coreRate", () => {
 
     // Assert
     assert.equal(rate, 0.2);
+  });
+
+  it("should keep a null core rate when every core prompt failed", () => {
+    // Arrange
+    const row = probe("2026-10-05", "perplexity", 13, 4, {
+      mentionRate: 0.31,
+      core: { questions: 0, kaiordMentions: 0, mentionRate: null },
+    });
+
+    // Act
+    const rate = coreRate(row);
+
+    // Assert
+    assert.equal(rate, null);
   });
 });
 

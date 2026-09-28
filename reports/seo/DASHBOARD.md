@@ -1,6 +1,6 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-09-28 15:34 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-09-28 16:08 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
@@ -18,6 +18,8 @@ _Generated 2026-09-28 15:34 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit 
 ## KPI denominators
 
 _Since 2026-09-28:_ the AI mention-rate KPI is the **core** rate, over the 5 prompts every week has been measured on since 2026-07-22 (`core: true` in `queries.json`), so it stays comparable. The weekly table's **Rate** covers the whole panel. Brand prompts (`brand: true`, "What is Kaiord?") are left out of every rate: the question names kaiord.
+
+_Mentioned_ means the answer text **or one of its cited URLs** names kaiord (the same test as for competitors), so an answer that only cites a `@kaiord/*` package page counts. _Cited_ is narrower: a `kaiord.com` URL among the citations.
 
 ## Tracked query positions (DDG — Bing-index proxy)
 

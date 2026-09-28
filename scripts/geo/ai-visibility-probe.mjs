@@ -101,6 +101,9 @@ for (const provider of providers) {
   for (const { id, q, lang = "en" } of aiQuestions) {
     try {
       const { answer, citations } = await provider.ask(q);
+      // "Mentioned" (kaiord and competitors alike) means the answer text OR a
+      // cited URL names it; "cited" is only a kaiord.com URL. Changing this
+      // for one side would bias the kaiord-vs-competitor comparison.
       const haystack = `${answer}\n${citations.join("\n")}`.toLowerCase();
       const competitorsMentioned = competitors
         .filter((c) => c.match.some((token) => haystack.includes(token)))

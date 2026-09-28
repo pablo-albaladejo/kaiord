@@ -35,14 +35,18 @@ const delta = (current, prior) => {
 const ratio = (num, den) =>
   den === 0 ? "—" : String(Number((num / den).toFixed(2)));
 
-// The KPI rate: the 5 core prompts. Rows from before the panel were measured
-// on exactly those 5, so their overall rate IS the core rate.
-export const coreRate = (row) => row.core?.mentionRate ?? row.mentionRate;
+// The KPI rate: the 5 core prompts. Rows from before the panel (no `core`)
+// were measured on exactly those 5, so their overall rate IS the core rate.
+// A row whose core prompts all failed keeps `null`, never the panel rate.
+export const coreRate = (row) =>
+  row.core === undefined ? row.mentionRate : row.core.mentionRate;
 
 export const KPI_DENOMINATORS = [
   "## KPI denominators",
   "",
   '_Since 2026-09-28:_ the AI mention-rate KPI is the **core** rate, over the 5 prompts every week has been measured on since 2026-07-22 (`core: true` in `queries.json`), so it stays comparable. The weekly table\'s **Rate** covers the whole panel. Brand prompts (`brand: true`, "What is Kaiord?") are left out of every rate: the question names kaiord.',
+  "",
+  "_Mentioned_ means the answer text **or one of its cited URLs** names kaiord (the same test as for competitors), so an answer that only cites a `@kaiord/*` package page counts. _Cited_ is narrower: a `kaiord.com` URL among the citations.",
   "",
 ];
 

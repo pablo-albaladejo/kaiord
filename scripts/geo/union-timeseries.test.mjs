@@ -33,6 +33,23 @@ const fakeGit = (ref, tree) => (args) => {
   throw new Error(`unexpected git ${args.join(" ")}`);
 };
 
+// The same, serving several refs: { ref: { path: content } }.
+const fakeRefs = (trees) => (args) => {
+  if (args[0] === "ls-tree") {
+    const [ref, dir] = [args.at(-3), args.at(-1)];
+    return Object.keys(trees[ref])
+      .filter((p) => p.startsWith(dir))
+      .join("\n");
+  }
+  if (args[0] === "show") {
+    const [ref, path] = args[1].split(/:(.*)/s);
+    if (!(path in trees[ref]))
+      throw new Error(`fatal: path '${path}' does not exist`);
+    return trees[ref][path];
+  }
+  throw new Error(`unexpected git ${args.join(" ")}`);
+};
+
 const silent = { warn: () => {} };
 
 const withRoot = (files, fn) => {
@@ -238,6 +255,64 @@ describe("applyBranch", () => {
         () => applyBranch({ ref: "r", root, git, log: silent }),
         /has no reports\/seo\/timeseries\/\*\.jsonl/
       );
+    });
+  });
+});
+
+describe("applyBranch --since", () => {
+  const SERIES = "reports/seo/timeseries/gsc.jsonl";
+  const SNAP = "reports/seo/snapshots";
+
+  it("should carry only this run's week onto a fresh main, not the weeks it restored", () => {
+    // Arrange: the run restored 09-14 from a rolling PR that was closed
+    // before its push, then collected 09-28. Main moved on to hold 09-21.
+    const restored = row("2026-09-14");
+    const week = row("2026-09-28");
+    const newMain = row("2026-09-21");
+    const git = fakeRefs({
+      before: {
+        [SERIES]: `${restored}\n`,
+        [`${SNAP}/gsc-2026-09-14.json`]: "{}",
+      },
+      ours: {
+        [SERIES]: `${restored}\n${week}\n`,
+        [`${SNAP}/gsc-2026-09-14.json`]: "{}",
+        [`${SNAP}/gsc-2026-09-28.json`]: "{}",
+      },
+    });
+
+    withRoot({ [SERIES]: `${newMain}\n` }, (root) => {
+      // Act
+      const report = applyBranch({
+        ref: "ours",
+        since: "before",
+        root,
+        git,
+        log: silent,
+      });
+
+      // Assert
+      const merged = readFileSync(join(root, SERIES), "utf8");
+      assert.equal(merged, `${newMain}\n${week}\n`);
+      assert.deepEqual(report.snapshotsCopied, [`${SNAP}/gsc-2026-09-28.json`]);
+    });
+  });
+
+  it("should take every record when the series did not exist before", () => {
+    // Arrange
+    const week = row("2026-09-28", { source: "bing" });
+    const BING = "reports/seo/timeseries/bing.jsonl";
+    const git = fakeRefs({
+      before: { [SERIES]: `${row("2026-09-14")}\n` },
+      ours: { [SERIES]: `${row("2026-09-14")}\n`, [BING]: `${week}\n` },
+    });
+
+    withRoot({}, (root) => {
+      // Act
+      applyBranch({ ref: "ours", since: "before", root, git, log: silent });
+
+      // Assert
+      assert.equal(readFileSync(join(root, BING), "utf8"), `${week}\n`);
     });
   });
 });
