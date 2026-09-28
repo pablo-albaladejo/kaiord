@@ -21,6 +21,7 @@ import {
   checkBridgeCoverage,
   checkLandingPrivacyRedirect,
   visibleText,
+  withoutComments,
   checkManifestPermissions,
   checkNoAnalyticsClaim,
   checkPolicy,
@@ -247,6 +248,28 @@ for (const [label, hidden] of [
     assert.match(v[0], /"no analytics" claim/);
   });
 }
+
+test("a redirect whose canonical, refresh and link are all commented out fails", () => {
+  const html = `<!doctype html><html><head><title>Privacy</title>
+<!-- <link rel="canonical" href="https://kaiord.com/docs/legal/privacy-policy" /> -->
+<!-- <meta http-equiv="refresh" content="0; url=/docs/legal/privacy-policy" /> -->
+</head><body><p>Moved.
+<!-- <a href="/docs/legal/privacy-policy">policy</a> -->
+</p></body></html>`;
+
+  const v = checkLandingPrivacyRedirect(html);
+
+  assert.equal(v.length, 3, v.join(" | "));
+  assert.ok(v.some((r) => r.includes("canonical")));
+  assert.ok(v.some((r) => r.includes("meta refresh")));
+  assert.ok(v.some((r) => r.includes("visible link")));
+});
+
+test("withoutComments removes comments in one pass", () => {
+  assert.equal(withoutComments("a<!-- b -->c"), "ac");
+  assert.equal(withoutComments("<<!---->!-- x -->"), "<!-- x -->");
+  assert.equal(withoutComments("a<!-- unterminated"), "a");
+});
 
 test("visibleText renders what a browser would, in one pass", () => {
   assert.equal(visibleText("<<!---->!-- x -->", ""), "<!-- x -->");

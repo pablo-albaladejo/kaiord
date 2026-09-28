@@ -614,6 +614,21 @@ export function visibleText(html, tagReplacement = " ") {
   return out;
 }
 
+// The markup with every `<!-- ... -->` removed, in one left-to-right pass
+// so removing one comment can never form another.
+export function withoutComments(html) {
+  let out = "";
+  let i = 0;
+  while (i < html.length) {
+    const start = html.indexOf("<!--", i);
+    if (start === -1) return out + html.slice(i);
+    out += html.slice(i, start);
+    const end = html.indexOf("-->", start + 4);
+    i = end === -1 ? html.length : end + 3;
+  }
+  return out;
+}
+
 // The landing page at kaiord.com/privacy/ used to carry its own, stale copy
 // of the policy ("We use no analytics…"). It may only forward to the docs.
 export function checkLandingPrivacyRedirect(html) {
@@ -631,8 +646,11 @@ export function checkLandingPrivacyRedirect(html) {
     ],
     [new RegExp(`<a href="${target}"`), "visible link to the docs policy"],
   ];
+  // A commented-out element does nothing in the browser, so it must not
+  // satisfy the check.
+  const active = withoutComments(html);
   for (const [re, what] of checks) {
-    if (!re.test(html)) violations.push(`${where}: missing ${what}`);
+    if (!re.test(active)) violations.push(`${where}: missing ${what}`);
   }
   // A tag may split a word (`n<b>o</b>`) or separate two (`no<br>analytics`),
   // so the claim is checked against both joinings.
