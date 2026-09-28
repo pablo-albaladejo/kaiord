@@ -65,10 +65,12 @@ describe("normalizeGarminLedgerRow", () => {
 
   it("should drop an invalid queue entry and keep the valid ones", () => {
     // Arrange
+    const retired = { ...QUEUED, state: "retire" };
     const row = garminRow({
       removalQueue: [
-        QUEUED,
-        { ...QUEUED, workoutScheduleId: "stub-garmin-id" },
+        retired,
+        { ...retired, workoutScheduleId: "stub-garmin-id" },
+        { ...retired, workoutScheduleId: "556", state: "normal" },
       ],
     });
 
@@ -76,24 +78,65 @@ describe("normalizeGarminLedgerRow", () => {
     const next = normalizeGarminLedgerRow(row);
 
     // Assert
-    expect(next.removalQueue).toEqual([QUEUED]);
+    expect(next.removalQueue).toEqual([retired]);
   });
 
-  it("should keep a held queue entry and drop one whose held is not true", () => {
+  it("should hold a legacy queue entry that carries no state", () => {
     // Arrange
-    const held = { ...QUEUED, held: true };
+    const row = garminRow({ removalQueue: [{ ...QUEUED, held: true }] });
+
+    // Act
+    const next = normalizeGarminLedgerRow(row);
+
+    // Assert
+    expect(next.removalQueue).toEqual([{ ...QUEUED, state: "held" }]);
+  });
+
+  it("should keep the scheduled placement and previous ids, replacing a legacy entry", () => {
+    // Arrange
+    const placed = (id: string) => ({
+      kind: "scheduled",
+      workoutScheduleId: id,
+      workoutId: "1707805999",
+      date: "2026-09-27",
+    });
     const row = garminRow({
-      removalQueue: [
-        held,
-        { ...QUEUED, workoutScheduleId: "556", held: false },
-      ],
+      placement: {
+        kind: "uncertain",
+        workoutId: "1707805999",
+        date: "2026-09-28",
+        previous: placed("555"),
+      },
+      removalQueue: [QUEUED],
     });
 
     // Act
     const next = normalizeGarminLedgerRow(row);
 
     // Assert
-    expect(next.removalQueue).toEqual([held]);
+    expect(next.removalQueue).toEqual([
+      { ...QUEUED, attempts: 0, state: "keep" },
+    ]);
+  });
+
+  it("should never lower a placement id's stated state to keep", () => {
+    // Arrange
+    const gone = { ...QUEUED, state: "gone" };
+    const row = garminRow({
+      placement: {
+        kind: "scheduled",
+        workoutScheduleId: "555",
+        workoutId: "1707805999",
+        date: "2026-09-27",
+      },
+      removalQueue: [gone],
+    });
+
+    // Act
+    const next = normalizeGarminLedgerRow(row);
+
+    // Assert
+    expect(next.removalQueue).toEqual([gone]);
   });
 
   it("should drop an invalid placement and a forceRepush that is not true", () => {

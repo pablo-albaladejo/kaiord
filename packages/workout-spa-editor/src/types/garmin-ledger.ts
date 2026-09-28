@@ -33,7 +33,7 @@ export const parseGarminScheduleId = (
   return parsed.success ? parsed.data : undefined;
 };
 
-const calendarDate = z.iso.date();
+export const calendarDate = z.iso.date();
 
 export const garminLibraryStateSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("confirmed"), workoutId: garminWorkoutIdSchema }),
@@ -80,20 +80,6 @@ export const garminPlacementSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 export type GarminPlacement = z.infer<typeof garminPlacementSchema>;
-
-export const garminRemovalEntrySchema = z.object({
-  workoutScheduleId: garminScheduleIdSchema,
-  workoutId: garminWorkoutIdSchema,
-  date: calendarDate,
-  attempts: z.number().int().nonnegative(),
-  abandoned: z.boolean(),
-  /** A tainted id kept by the merge: it may be the entry the other device
-      still treats as current, so it never becomes the merged `Placed` and
-      is never sent to `unschedule`. Only the `uncertain` resolution clears
-      it. Absent on a normal (deletable) entry. */
-  held: z.literal(true).optional(),
-});
-export type GarminRemovalEntry = z.infer<typeof garminRemovalEntrySchema>;
 
 export const isGarminPlaced = (
   placement: GarminPlacement | undefined

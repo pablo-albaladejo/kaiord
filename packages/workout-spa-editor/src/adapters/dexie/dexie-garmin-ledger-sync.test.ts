@@ -1,11 +1,12 @@
 /**
  * AC-15(f) — the Garmin-aware ledger merge runs through the T0c row-merge
  * hook on a real two-device cloud sync, for rows committed on the created
- * and on the updated path. Device A holds `Placed S2` with `S1` queued;
+ * and on the updated path. Device A holds `Placed S2` with S1 retired;
  * device B, newer, still holds `Placed S1`. Both devices must converge on
- * `Placed S2` with `S1` queued (the review-3 D repro), never on `S1`.
- * When each device has queued the other's entry, both must settle on the
- * same `uncertain` row with both ids held — never flipping, never deleting.
+ * `Placed S2` with S1 `retire` (the review-3 D repro), never on `S1`.
+ * When A adopted S2 by `calendar-find` while B still holds the stale
+ * `uncertain` with both ids `held`, both must settle on the adoption (H2) —
+ * never flipping back, and with only S1 drainable.
  */
 import "fake-indexeddb/auto";
 
@@ -18,10 +19,10 @@ import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sy
 import type { ExportLedgerEntry } from "../../types/export-ledger";
 import {
   type GarminPlacement,
-  type GarminRemovalEntry,
   parseGarminScheduleId,
   parseGarminWorkoutId,
 } from "../../types/garmin-ledger";
+import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
@@ -40,12 +41,17 @@ const scheduled = (id: string, date: string): GarminPlacement => ({
   workoutId: WORKOUT_ID,
   date,
 });
-const queued = (id: string, date: string): GarminRemovalEntry => ({
+const entry = (
+  id: string,
+  date: string,
+  state: GarminRemovalEntry["state"]
+): GarminRemovalEntry => ({
   workoutScheduleId: parseGarminScheduleId(id)!,
   workoutId: WORKOUT_ID,
   date,
   attempts: 0,
   abandoned: false,
+  state,
 });
 
 const dbName = (device: string) =>
@@ -100,17 +106,18 @@ describe("Garmin export-ledger cross-device sync", () => {
   });
 
   it.each<Path>(["created", "updated"])(
-    "should converge on the unqueued Placed for rows committed on the %s path",
+    "should converge on the live Placed for rows committed on the %s path",
     async (path) => {
       // Arrange
       vi.setSystemTime(A_WRITES_AT);
       const outcomeA = await pushAndPlace(dbA, path, {
         placement: scheduled("2", D2),
-        removalQueue: [queued("1", D1)],
+        removalQueue: [entry("1", D1, "retire"), entry("2", D2, "keep")],
       });
       vi.setSystemTime(B_WRITES_AT);
       const outcomeB = await pushAndPlace(dbB, path, {
         placement: scheduled("1", D1),
+        removalQueue: [entry("1", D1, "keep")],
       });
       const cloud = createInMemoryCloudSyncPort({
         authenticated: true,
@@ -136,23 +143,26 @@ describe("Garmin export-ledger cross-device sync", () => {
       const [rowB] = await dbB.table("exportLedger").toArray();
       expect(rowA).toStrictEqual(rowB);
       expect(rowA.placement).toEqual(scheduled("2", D2));
-      expect(rowA.removalQueue).toEqual([queued("1", D1)]);
+      expect(rowA.removalQueue).toEqual([
+        entry("1", D1, "retire"),
+        entry("2", D2, "keep"),
+      ]);
     }
   );
 
   it.each<Path>(["created", "updated"])(
-    "should settle on uncertain and unschedule nothing when every Placed is queued, on the %s path",
+    "should keep an adoption against a newer stale uncertain, on the %s path",
     async (path) => {
       // Arrange
       vi.setSystemTime(A_WRITES_AT);
       await pushAndPlace(dbA, path, {
         placement: scheduled("2", D2),
-        removalQueue: [queued("1", D1)],
+        removalQueue: [entry("1", D1, "retire"), entry("2", D2, "keep")],
       });
       vi.setSystemTime(B_WRITES_AT);
       await pushAndPlace(dbB, path, {
-        placement: scheduled("1", D1),
-        removalQueue: [queued("2", D2)],
+        placement: { kind: "uncertain", workoutId: WORKOUT_ID, date: D2 },
+        removalQueue: [entry("1", D1, "held"), entry("2", D2, "held")],
       });
       const cloud = createInMemoryCloudSyncPort({
         authenticated: true,
@@ -175,15 +185,11 @@ describe("Garmin export-ledger cross-device sync", () => {
       const [rowA] = await dbA.table("exportLedger").toArray();
       const [rowB] = await dbB.table("exportLedger").toArray();
       expect(rowA).toStrictEqual(rowB);
-      expect(rowA.placement.kind).toBe("uncertain");
-      const unscheduled = (rowA.removalQueue as GarminRemovalEntry[])
-        .filter((entry) => !entry.held)
-        .map((entry) => entry.workoutScheduleId);
-      expect(unscheduled).toEqual([]);
-      expect(rowA.removalQueue).toEqual([
-        { ...queued("1", D1), held: true },
-        { ...queued("2", D2), held: true },
-      ]);
+      expect(rowA.placement).toEqual(scheduled("2", D2));
+      const drainable = (rowA.removalQueue as GarminRemovalEntry[])
+        .filter((e) => e.state === "retire")
+        .map((e) => e.workoutScheduleId);
+      expect(drainable).toEqual(["1"]);
     }
   );
 });

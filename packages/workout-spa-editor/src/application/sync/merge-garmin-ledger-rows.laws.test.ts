@@ -1,210 +1,525 @@
 /**
- * AC-15 — the algebraic laws the sync relies on. `syncWithCloud` merges
- * twice (snapshot merge, then each device's live row against that result),
- * so the real operation is `merge(x, merge(x, y))`: the merge must be
- * symmetric, idempotent and absorbing. Pairwise supersession cannot be
- * associative (a two-row merge must queue its loser without seeing a third
- * row), so three devices are held to safety — no gap, the merged Placed is
- * never drained — and to convergence under sequential cloud syncs.
- * Checked over every AC-15 fixture, the all-queued one included, and every
- * pair and triple of them (the same record, as after T0c's dedupe).
+ * AC-15 — the laws the cloud sync relies on, checked on the rows that
+ * consistent histories actually produce.
+ *
+ * A world is one Garmin calendar (the truth: which schedule ids are live),
+ * three devices and the single cloud row. Every order of the steps in a
+ * scenario's alphabet is enumerated up to a bounded depth (depth-first, the
+ * world cloned at each node), so no interleaving is hand-picked. Each step
+ * is what the pipeline does to the ledger:
+ *
+ * - push: a `schedule` POST at the next date. `ok` commits the new id `keep`
+ *   and retires a `scheduled` previous; `no-id` commits `unconfirmed` (the
+ *   entry exists, its id is unknown); `ambiguous` may or may not have created
+ *   it and leaves `uncertain{previous}`.
+ * - drain: sends every `retire` id and writes `gone`.
+ * - sync: `syncWithCloud` through the `exportLedger` hook (normalize, then
+ *   the snapshot merge, then the live merge).
+ * - t5: the `uncertain` resolution by `calendar-find`, or a failed read: one
+ *   match is adopted `keep` (a `scheduled` previous retires), unseen `held`
+ *   ids become `gone`, seen ones stay `held`.
+ *
+ * Safety is checked after every step: a drain never sends the device's own
+ * `Placed` or `previous`, and never empties a calendar that had a live
+ * entry. At every leaf the devices sync and drain until nothing changes, and
+ * must converge on one row whose `Placed`, if any, is live. The rows met on
+ * the way form the pool for symmetry, idempotence and absorption.
  */
 import { describe, expect, it } from "vitest";
 
-import { mergeGarminLedgerRows as merge } from "./merge-garmin-ledger-rows";
+import { normalizeGarminLedgerRow } from "../export/normalize-garmin-ledger-row";
+import { mergeGarminLedgerRows } from "./merge-garmin-ledger-rows";
+import { mergeTableRows } from "./merge-table-rows";
 
 type Row = Record<string, unknown>;
+type Placement = {
+  kind: string;
+  workoutScheduleId?: string;
+  workoutId?: string;
+  date: string;
+  previous?: Placement;
+};
+type Entry = {
+  workoutScheduleId: string;
+  workoutId: string;
+  date: string;
+  attempts: number;
+  abandoned: boolean;
+  state?: string;
+};
+type Live = { id: string; date: string };
+type World = {
+  calendar: Live[];
+  devices: Row[];
+  cloud?: Row;
+  tick: number;
+  nextId: number;
+  /** Pushes per device: each device walks the same dates, so its first
+      push lands on the same date as another device's first push. */
+  pushes: number[];
+};
+type Step = { device: number; op: string };
 
 const W = "1707805999";
-const D1 = "2026-09-29";
-const D2 = "2026-09-30";
-const T1 = "2026-09-27T08:00:00.000Z";
-const T2 = "2026-09-28T08:00:00.000Z";
+const DATES = ["2026-09-29", "2026-09-30", "2026-10-01"];
+const DEVICES = ["A", "B", "C"];
+/** Device C's clock runs a day ahead: its writes always look newer. */
+const DAY_MS = 86_400_000;
+const MINUTE_MS = 60_000;
+const SAMPLE_SIZE = 5;
+const SKEW_MS = [0, 0, DAY_MS];
+const EPOCH_MS = Date.parse("2026-09-28T08:00:00.000Z");
 
-const scheduled = (id: string, date: string) => ({
+const scheduled = (id: string, date: string): Placement => ({
   kind: "scheduled",
   workoutScheduleId: id,
   workoutId: W,
   date,
 });
-const queued = (id: string, date: string, attempts = 0, abandoned = false) => ({
+const entry = (id: string, date: string, state: string, extra: Row = {}) => ({
   workoutScheduleId: id,
   workoutId: W,
   date,
-  attempts,
-  abandoned,
-});
-const attempting = (date: string, posted: boolean, extra: Row = {}) => ({
-  kind: "attempting",
-  workoutId: W,
-  date,
-  at: T2,
-  posted,
+  attempts: 0,
+  abandoned: false,
+  state,
   ...extra,
 });
-
-const row = (id: string, updatedAt: string, garmin: Row = {}): Row => ({
-  id,
+/** A round-1 queue entry: no `state`. */
+const legacy = (id: string, date: string) => ({
+  workoutScheduleId: id,
+  workoutId: W,
+  date,
+  attempts: 0,
+  abandoned: false,
+});
+const baseRow = (device: number, garmin: Row = {}): Row => ({
+  id: `id-${DEVICES[device]}`,
   kaiordRecordId: "a0000000-0000-4000-8000-000000000001",
   dataType: "workout",
   destinationBridgeId: "garmin-bridge",
   destinationExternalId: W,
   contentHash: "hash",
-  exportedAt: T1,
-  updatedAt,
+  exportedAt: "2026-09-01T00:00:00.000Z",
+  updatedAt: "2026-09-01T00:00:00.000Z",
   library: { kind: "confirmed", workoutId: W },
   ...garmin,
 });
 
-const POOL: Record<string, Row> = {
-  "D repro A": row("id-a", T1, {
-    placement: scheduled("2", D2),
-    removalQueue: [queued("1", D1)],
-  }),
-  "D repro B": row("id-b", T2, { placement: scheduled("1", D1) }),
-  "all-queued B": row("id-b", T2, {
-    placement: scheduled("1", D1),
-    removalQueue: [queued("2", D2)],
-  }),
-  "older Placed S1": row("id-c", T1, { placement: scheduled("1", D1) }),
-  "newer Placed S2": row("id-d", T2, { placement: scheduled("2", D2) }),
-  "attempting posted": row("id-e", T2, { placement: attempting(D2, true) }),
-  "attempting with previous": row("id-f", T1, {
-    placement: attempting(D2, true, { previous: scheduled("1", D1) }),
-    removalQueue: [queued("3", D1)],
-  }),
-  "in flight": row("id-g", T2, {
-    placement: attempting(D2, false),
-    removalQueue: [queued("3", D1, 2, true)],
-  }),
-  forced: row("id-h", T1, { forceRepush: true }),
-  "unconfirmed library": row("id-i", T2, { library: { kind: "unconfirmed" } }),
-  "adopted unconfirmed": row("id-j", T2, {
-    placement: { kind: "unconfirmed", workoutId: W, date: D1 },
-  }),
-  "queue only": row("id-k", T1, { removalQueue: [queued("1", D1)] }),
-  pending: row("id-l", T2, { destinationExternalId: "pending" }),
-  "unparsable stamp": row("id-a", "garbage"),
-  "short stamp": row("id-a", "2026-09-28T08:00:00Z"),
+/** Memoized: the enumeration repeats the same merges many times over. */
+const merges = new Map<string, Row>();
+const hookMerge = (x: Row, y: Row) => {
+  const key = JSON.stringify([x, y]);
+  let merged = merges.get(key);
+  if (!merged) {
+    merged = mergeTableRows("exportLedger", [x, y], new Map())[0];
+    merges.set(key, merged);
+  }
+  return structuredClone(merged);
+};
+const placementOf = (r?: Row) => r?.placement as Placement | undefined;
+const queueOf = (r?: Row) => (r?.removalQueue as Entry[] | undefined) ?? [];
+
+// ---- the pipeline, as seen by the ledger ---------------------------------
+
+const stamp = (world: World, device: number, row: Row): Row => {
+  world.tick++;
+  const at = EPOCH_MS + world.tick * MINUTE_MS + SKEW_MS[device];
+  return { ...row, updatedAt: new Date(at).toISOString() };
 };
 
-const names = Object.keys(POOL);
-const pairs = names.flatMap((x) => names.map((y) => [x, y] as const));
-const triples = pairs.flatMap(([x, y]) => names.map((z) => [x, y, z] as const));
+const STATES = ["held", "keep", "retire", "gone"];
+const rank = (e?: Entry) => (e ? STATES.indexOf(e.state ?? "held") : -1);
 
-describe("mergeGarminLedgerRows laws", () => {
-  it.each(names)("should be idempotent for %s", (x) => {
-    // Arrange
-    const a = POOL[x];
+/** The pipeline's writes: each raises its id's state, never lowers it. */
+const withQueue = (row: Row, add: Entry[]): Row => {
+  const byId = new Map(queueOf(row).map((e) => [e.workoutScheduleId, e]));
+  for (const e of add) {
+    const seen = byId.get(e.workoutScheduleId);
+    byId.set(e.workoutScheduleId, {
+      ...(rank(e) > rank(seen) ? e : seen!),
+      attempts: Math.max(e.attempts, seen?.attempts ?? 0),
+      abandoned: e.abandoned || !!seen?.abandoned,
+    });
+  }
+  const sorted = [...byId.values()].sort(
+    (x, y) =>
+      x.workoutScheduleId.length - y.workoutScheduleId.length ||
+      (x.workoutScheduleId < y.workoutScheduleId ? -1 : 1)
+  );
+  return { ...row, removalQueue: sorted };
+};
 
-    // Act
-    const merged = merge(a, a);
+const retirePrevious = (previous?: Placement) =>
+  previous?.kind === "scheduled" && previous.workoutScheduleId
+    ? [entry(previous.workoutScheduleId, previous.date, "retire")]
+    : [];
 
-    // Assert
-    expect(merged).toStrictEqual(a);
-  });
+function push(world: World, device: number, outcome: string) {
+  const row = world.devices[device];
+  const current = placementOf(row);
+  if (current?.kind === "uncertain") return; // the pipeline asks T5 first
+  const date = DATES[world.pushes[device]++ % DATES.length];
+  const id = String(world.nextId++);
+  const created = outcome !== "ambiguous-lost";
+  if (created) world.calendar.push({ id, date });
+  const previous =
+    current?.kind === "scheduled" || current?.kind === "unconfirmed"
+      ? current
+      : undefined;
+  let next: Row;
+  if (outcome === "ok")
+    next = withQueue({ ...row, placement: scheduled(id, date) }, [
+      entry(id, date, "keep"),
+      ...retirePrevious(previous),
+    ]);
+  else if (outcome === "no-id")
+    next = withQueue(
+      { ...row, placement: { kind: "unconfirmed", workoutId: W, date } },
+      retirePrevious(previous)
+    );
+  else
+    next = {
+      ...row,
+      placement: {
+        kind: "uncertain",
+        workoutId: W,
+        date,
+        ...(previous ? { previous } : {}),
+      },
+    };
+  world.devices[device] = stamp(world, device, next);
+}
 
-  it.each(pairs)("should be symmetric for %s with %s", (x, y) => {
-    // Arrange
-    const [a, b] = [POOL[x], POOL[y]];
+function t5(world: World, device: number, readOk: boolean) {
+  const row = world.devices[device];
+  const current = placementOf(row);
+  if (current?.kind !== "uncertain" || !readOk) return;
+  const states = new Map(queueOf(row).map((e) => [e.workoutScheduleId, e]));
+  const matches = world.calendar.filter(
+    (c) =>
+      c.date === current.date &&
+      ["held", "keep", undefined].includes(states.get(c.id)?.state)
+  );
+  if (matches.length !== 1) return; // several → duplicate-left; none → UI
+  const [adopted] = matches;
+  const live = new Set(world.calendar.map((c) => c.id));
+  const held = queueOf(row).filter((e) => e.state === "held");
+  const writes = [
+    entry(adopted.id, adopted.date, "keep"),
+    ...retirePrevious(current.previous).filter(
+      (e) => e.workoutScheduleId !== adopted.id
+    ),
+    ...held
+      .filter((e) => !live.has(e.workoutScheduleId))
+      .map((e) => entry(e.workoutScheduleId, e.date, "gone")),
+  ];
+  const next = withQueue(
+    { ...row, placement: scheduled(adopted.id, adopted.date) },
+    writes
+  );
+  world.devices[device] = stamp(world, device, next);
+}
 
-    // Act
-    const ab = merge(a, b);
+/** Returns a safety violation, if any. */
+function drain(world: World, device: number): string | undefined {
+  const row = world.devices[device];
+  const own = placementOf(row);
+  const ownIds = [own?.workoutScheduleId, own?.previous?.workoutScheduleId];
+  const retired = queueOf(row).filter((e) => e.state === "retire");
+  if (retired.length === 0) return;
+  for (const e of retired)
+    if (ownIds.includes(e.workoutScheduleId))
+      return `${DEVICES[device]} drains its own Placed ${e.workoutScheduleId}`;
+  const hadLive = world.calendar.length > 0;
+  const ids = new Set(retired.map((e) => e.workoutScheduleId));
+  world.calendar = world.calendar.filter((c) => !ids.has(c.id));
+  const writes = retired.map((e) =>
+    entry(e.workoutScheduleId, e.date, "gone", {
+      attempts: e.attempts,
+      abandoned: e.abandoned,
+    })
+  );
+  world.devices[device] = stamp(world, device, withQueue(row, writes));
+  if (hadLive && world.calendar.length === 0)
+    return `${DEVICES[device]}'s drain empties the calendar`;
+}
 
-    // Assert
-    expect(merge(b, a)).toStrictEqual(ab);
-  });
+function sync(world: World, device: number) {
+  const local = world.devices[device];
+  const snapshot = world.cloud ? hookMerge(local, world.cloud) : local;
+  world.devices[device] = hookMerge(local, snapshot);
+  world.cloud = snapshot;
+}
 
-  it.each(pairs)("should absorb a re-merge for %s with %s", (x, y) => {
-    // Arrange
-    const [a, b] = [POOL[x], POOL[y]];
-    const ab = merge(a, b);
+function apply(world: World, { device, op }: Step): string | undefined {
+  if (op === "sync") sync(world, device);
+  else if (op === "drain") return drain(world, device);
+  else if (op === "t5") t5(world, device, true);
+  else if (op === "t5-read-fails") t5(world, device, false);
+  else push(world, device, op.slice("push-".length));
+}
 
-    // Act
-    const reMerged = [merge(a, ab), merge(ab, b), merge(ab, ab)];
+// ---- enumeration ----------------------------------------------------------
 
-    // Assert
-    for (const r of reMerged) expect(r).toStrictEqual(ab);
-  });
+const clone = (w: World): World => structuredClone(w);
+const MAX_SETTLE_ROUNDS = 6;
 
-  it.each(triples)(
-    "should leave no gap and never drain the merged Placed for %s, %s and %s",
-    (x, y, z) => {
+/** Every device syncs and drains, round after round, until nothing moves. */
+function settle(world: World): string | undefined {
+  for (let round = 0; round < MAX_SETTLE_ROUNDS; round++) {
+    const before = JSON.stringify(world);
+    for (let d = 0; d < DEVICES.length; d++) {
+      sync(world, d);
+      const violation = drain(world, d);
+      if (violation) return `${violation} while settling`;
+    }
+    if (JSON.stringify(world) === before) return converged(world);
+  }
+  return "never converges";
+}
+
+function converged(world: World): string | undefined {
+  const [first] = world.devices;
+  if (world.devices.some((r) => JSON.stringify(r) !== JSON.stringify(first)))
+    return "devices disagree after settling";
+  const p = placementOf(first);
+  const live = (c: Live) =>
+    p?.kind === "scheduled" ? c.id === p.workoutScheduleId : c.date === p?.date;
+  if (
+    (p?.kind === "scheduled" || p?.kind === "unconfirmed") &&
+    !world.calendar.some(live)
+  )
+    return `settles on a dead Placed ${JSON.stringify(p)}`;
+}
+
+type Scenario = {
+  name: string;
+  seed: () => World;
+  alphabet: Step[];
+  depth: number;
+};
+
+const steps = (ops: string[], devices = [0, 1, 2]): Step[] =>
+  devices.flatMap((device) => ops.map((op) => ({ device, op })));
+
+const label = (path: Step[]) =>
+  path.map((s) => `${DEVICES[s.device]}:${s.op}`).join(" ");
+
+/** Explores every path; returns the failures and the rows met. */
+function explore(s: Scenario) {
+  const failures: string[] = [];
+  const pairs = new Map<string, [Row, Row]>();
+  /** Every pair of rows that co-exist in one world: the pairs a sync can
+      actually meet. */
+  const collect = (w: World) => {
+    const rows = [...w.devices, w.cloud].flatMap((raw) =>
+      raw ? [normalizeGarminLedgerRow(raw)] : []
+    );
+    for (const x of rows)
+      for (const y of rows) pairs.set(JSON.stringify([x, y]), [x, y]);
+  };
+  const seen = new Set<string>();
+  const visit = (world: World, path: Step[]) => {
+    // The same world with the same depth left explores the same subtree.
+    const key = `${path.length}\u0000${JSON.stringify(world)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    collect(world);
+    const settled = clone(world);
+    const end = settle(settled);
+    collect(settled);
+    if (end) failures.push(`${label(path)} → ${end}`);
+    if (path.length === s.depth) return;
+    for (const step of s.alphabet) {
+      const next = clone(world);
+      const violation = apply(next, step);
+      if (violation) failures.push(`${label([...path, step])} → ${violation}`);
+      else visit(next, [...path, step]);
+    }
+  };
+  visit(s.seed(), []);
+  return { failures, pairs: [...pairs.values()] };
+}
+
+// ---- scenarios ------------------------------------------------------------
+
+const world = (devices: Row[], calendar: Live[], nextId = 100): World => ({
+  calendar,
+  devices,
+  tick: 0,
+  nextId,
+  pushes: [0, 0, 0],
+});
+
+/** A fresh world with `script` already applied. */
+const scripted = (script: Step[]) => (): World => {
+  const w = world(
+    [0, 1, 2].map((d) => baseRow(d)),
+    []
+  );
+  for (const step of script) apply(w, step);
+  return w;
+};
+
+/** A pushes and everyone syncs; then C goes offline while A moves the
+    workout and drains, and B pushes concurrently. */
+const staleWorld = scripted([
+  { device: 0, op: "push-ok" },
+  { device: 0, op: "sync" },
+  { device: 1, op: "sync" },
+  { device: 2, op: "sync" },
+  { device: 0, op: "push-ok" },
+  { device: 0, op: "drain" },
+  { device: 0, op: "sync" },
+  { device: 1, op: "push-ok" },
+]);
+
+/** C (clock ahead) pushes and gets no id; B's concurrent push to the same
+    date is ambiguous and created nothing, so B's T5 adopts C's entry. */
+const adoptedWorld = scripted([
+  { device: 2, op: "push-no-id" },
+  { device: 1, op: "push-ambiguous-lost" },
+  { device: 1, op: "t5" },
+]);
+
+/** The round-1 shape: stateless queue entries, normalized to `held`. */
+const legacyWorld = (): World =>
+  world(
+    [
+      baseRow(0, {
+        placement: scheduled("2", DATES[1]),
+        removalQueue: [legacy("1", DATES[0])],
+      }),
+      baseRow(1, {
+        updatedAt: "2026-09-02T00:00:00.000Z",
+        placement: scheduled("1", DATES[0]),
+      }),
+      baseRow(2, {
+        placement: { kind: "uncertain", workoutId: W, date: DATES[1] },
+        removalQueue: [
+          legacy("1", DATES[0]),
+          legacy("2", DATES[1]),
+          legacy("3", DATES[2]),
+        ],
+      }),
+    ],
+    [
+      { id: "1", date: DATES[0] },
+      { id: "2", date: DATES[1] },
+    ]
+  );
+
+const SCENARIOS: Scenario[] = [
+  {
+    name: "concurrent pushes from scratch",
+    seed: () =>
+      world(
+        [0, 1, 2].map((d) => baseRow(d)),
+        []
+      ),
+    alphabet: steps(["push-ok", "sync", "drain"]),
+    depth: 5,
+  },
+  {
+    name: "a stale offline device after moves and drains",
+    seed: staleWorld,
+    alphabet: steps(["push-ok", "sync", "drain"]),
+    depth: 4,
+  },
+  {
+    name: "ambiguous and id-less pushes resolved by T5",
+    seed: () =>
+      world(
+        [0, 1, 2].map((d) => baseRow(d)),
+        []
+      ),
+    alphabet: [
+      ...steps(
+        ["push-ok", "push-no-id", "push-ambiguous", "push-ambiguous-lost"],
+        [0, 1]
+      ),
+      ...steps(["sync", "drain", "t5", "t5-read-fails"], [0, 1, 2]),
+    ],
+    depth: 4,
+  },
+  {
+    name: "an id-less entry adopted by another device",
+    seed: adoptedWorld,
+    alphabet: steps(["push-ok", "sync", "drain"]),
+    depth: 5,
+  },
+  {
+    name: "legacy rows (review-3 D, probe3 and the normal<keep repro)",
+    seed: legacyWorld,
+    alphabet: [
+      ...steps(["sync", "drain", "t5", "t5-read-fails"]),
+      ...steps(["push-ok"], [2]),
+    ],
+    depth: 4,
+  },
+];
+
+// ---- laws -----------------------------------------------------------------
+
+/** Normalized, and its own `Placed` is not tainted by its own queue. */
+const wellFormed = (r: Row) => {
+  const p = placementOf(r);
+  const q = queueOf(r);
+  if (p?.kind === "scheduled")
+    return q.every(
+      (e) => e.workoutScheduleId !== p.workoutScheduleId || e.state === "keep"
+    );
+  if (p?.kind === "unconfirmed")
+    return q.every(
+      (e) =>
+        e.date !== p.date || e.workoutId !== p.workoutId || e.state === "keep"
+    );
+  return true;
+};
+
+describe("mergeGarminLedgerRows laws over enumerated histories", () => {
+  const explored = SCENARIOS.map((s) => ({ s, ...explore(s) }));
+
+  it.each(explored.map((e) => [e.s.name, e] as const))(
+    "should stay safe and converge on every interleaving of %s",
+    (_name, { failures }) => {
       // Arrange
-      const [a, b, c] = [POOL[x], POOL[y], POOL[z]];
+      const sample = failures.slice(0, SAMPLE_SIZE);
 
       // Act
-      const groupings = [merge(merge(a, b), c), merge(a, merge(b, c))];
+      const count = failures.length;
 
       // Assert
-      for (const merged of groupings) {
-        const left = drain(calendarOf([a, b, c]), merged);
-        const current = merged.placement as Placement | undefined;
-        if (current?.workoutScheduleId)
-          expect(left).toContain(current.workoutScheduleId);
-        if ([a, b, c].some(holdsPlaced) && current?.kind !== "unconfirmed")
-          expect(left.length).toBeGreaterThan(0);
-      }
+      expect({ count, sample }).toEqual({ count: 0, sample: [] });
     }
   );
 
-  it.each(triples)(
-    "should converge once %s, %s and %s sync through the cloud in turn",
-    (x, y, z) => {
+  it.each(explored.map((e) => [e.s.name, e.pairs] as const))(
+    "should be symmetric, idempotent and absorbing over the rows of %s",
+    (_name, pairs) => {
       // Arrange
-      const devices = [POOL[x], POOL[y], POOL[z]];
-      let cloud: Row | undefined;
+      const broken: string[] = [];
+      const merge = mergeGarminLedgerRows;
+      const same = (x: Row, y: Row) => JSON.stringify(x) === JSON.stringify(y);
 
       // Act
-      let rounds = 0;
-      let changed = true;
-      while (changed && rounds < MAX_SYNC_ROUNDS) {
-        const before = JSON.stringify([devices, cloud]);
-        devices.forEach((local, i) => {
-          const snapshot = cloud ? merge(local, cloud) : local;
-          devices[i] = merge(local, snapshot);
-          cloud = snapshot;
-        });
-        changed = JSON.stringify([devices, cloud]) !== before;
-        rounds++;
+      for (const [x, y] of pairs) {
+        if (x === y && wellFormed(x) && !same(merge(x, x), x))
+          broken.push("idempotence");
+        const xy = merge(x, y);
+        if (!same(xy, merge(y, x))) broken.push("symmetry");
+        if (!same(merge(x, xy), xy) || !same(merge(xy, y), xy))
+          broken.push("absorption");
       }
 
       // Assert
-      expect(changed).toBe(false);
-      for (const device of devices) expect(device).toStrictEqual(cloud);
+      expect({ pairs: pairs.length > 0, broken: [...new Set(broken)] }).toEqual(
+        {
+          pairs: true,
+          broken: [],
+        }
+      );
     }
   );
 });
-
-/** Two rounds reach the fixpoint; one more proves nothing still moves. */
-const MAX_SYNC_ROUNDS = 4;
-
-type Placement = { kind: string; workoutScheduleId?: string };
-
-/** A row that holds a live calendar entry: a gap is losing all of them. */
-const holdsPlaced = (r: Row) => {
-  const kind = (r.placement as Placement | undefined)?.kind;
-  return kind === "scheduled" || kind === "unconfirmed";
-};
-
-/** Every calendar entry the inputs know of: each Placed schedule id and
-    each queued id (queued entries may still be on Garmin). */
-function calendarOf(rows: Row[]): Set<string> {
-  const ids = new Set<string>();
-  for (const r of rows) {
-    const p = r.placement as { workoutScheduleId?: string } | undefined;
-    if (p?.workoutScheduleId) ids.add(p.workoutScheduleId);
-    for (const e of (r.removalQueue as Queued[] | undefined) ?? [])
-      ids.add(e.workoutScheduleId);
-  }
-  return ids;
-}
-
-type Queued = { workoutScheduleId: string; held?: true };
-
-/** What the drain would leave: every id minus the queued, non-held ones. */
-function drain(calendar: Set<string>, merged: Row): string[] {
-  for (const e of (merged.removalQueue as Queued[] | undefined) ?? [])
-    if (!e.held) calendar.delete(e.workoutScheduleId);
-  return [...calendar];
-}

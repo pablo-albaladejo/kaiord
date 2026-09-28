@@ -374,7 +374,7 @@ describe("createDexieSnapshotPort Garmin ledger normalization", () => {
     expect(twice[0]).toHaveProperty("library", { kind: "unconfirmed" });
   });
 
-  it("should drop a queue entry whose schedule id is not Garmin-shaped", async () => {
+  it("should drop a queue entry whose schedule id is not Garmin-shaped and hold a legacy one", async () => {
     // Arrange
     const snapshot = snapshotAt(SCHEMA_HEAD, [
       {
@@ -387,6 +387,8 @@ describe("createDexieSnapshotPort Garmin ledger normalization", () => {
     const rows = await importAndRead(snapshot);
 
     // Assert
-    expect(rows[0]).toHaveProperty("removalQueue", [QUEUED]);
+    expect(rows[0]).toHaveProperty("removalQueue", [
+      { ...QUEUED, state: "held" },
+    ]);
   });
 });

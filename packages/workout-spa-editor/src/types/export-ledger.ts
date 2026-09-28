@@ -4,8 +4,8 @@ import { z } from "zod";
 import {
   garminLibraryStateSchema,
   garminPlacementSchema,
-  garminRemovalEntrySchema,
 } from "./garmin-ledger";
+import { garminRemovalEntrySchema } from "./garmin-removal-entry";
 
 export const exportLedgerEntrySchema = z.object({
   id: z.string().uuid(),

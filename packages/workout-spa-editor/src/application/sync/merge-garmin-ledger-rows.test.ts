@@ -21,12 +21,25 @@ const scheduled = (id: string, date: string) => ({
   workoutId: W,
   date,
 });
-const queued = (id: string, date: string, attempts = 0, abandoned = false) => ({
+type State = "held" | "keep" | "retire" | "gone";
+const entry = (
+  id: string,
+  date: string,
+  state: State,
+  attempts = 0,
+  abandoned = false
+) => ({
   workoutScheduleId: id,
   workoutId: W,
   date,
   attempts,
   abandoned,
+  state,
+});
+const unconfirmed = (date: string) => ({
+  kind: "unconfirmed",
+  workoutId: W,
+  date,
 });
 
 const row = (id: string, updatedAt: string, garmin: Row = {}): Row => ({
@@ -49,23 +62,26 @@ const mergeBothWays = (a: Row, b: Row) => {
   return ab;
 };
 
-type Queued = { workoutScheduleId: string; held?: true };
+type Queued = { workoutScheduleId: string; state: State };
 
-/** What the drain would unschedule: every queued id that is not held. */
+/** What the drain would unschedule: every `retire` id. */
 const drain = (calendar: Map<string, string>, merged: Row) => {
   for (const e of (merged.removalQueue as Queued[] | undefined) ?? [])
-    if (!e.held) calendar.delete(e.workoutScheduleId);
+    if (e.state === "retire") calendar.delete(e.workoutScheduleId);
   return [...calendar.values()].sort();
 };
 
 describe("mergeGarminLedgerRows", () => {
-  it("should keep the unqueued Placed and leave one calendar entry in the review-3 D repro", () => {
+  it("should keep the live Placed and leave one calendar entry in the review-3 D repro", () => {
     // Arrange
     const deviceA = row("id-a", OLDER_AT, {
       placement: scheduled("2", D2),
-      removalQueue: [queued("1", D1)],
+      removalQueue: [entry("1", D1, "retire"), entry("2", D2, "keep")],
     });
-    const deviceB = row("id-b", NEWER_AT, { placement: scheduled("1", D1) });
+    const deviceB = row("id-b", NEWER_AT, {
+      placement: scheduled("1", D1),
+      removalQueue: [entry("1", D1, "keep")],
+    });
     const calendar = new Map([
       ["1", D1],
       ["2", D2],
@@ -76,26 +92,52 @@ describe("mergeGarminLedgerRows", () => {
 
     // Assert
     expect(merged.placement).toEqual(scheduled("2", D2));
-    expect(merged.removalQueue).toEqual([queued("1", D1)]);
+    expect(merged.removalQueue).toEqual([
+      entry("1", D1, "retire"),
+      entry("2", D2, "keep"),
+    ]);
     expect(drain(calendar, merged)).toEqual([D2]);
   });
 
-  it("should queue the older of two unqueued Placed entries", () => {
+  it("should retire the older of two live Placed entries", () => {
     // Arrange
-    const older = row("id-a", OLDER_AT, { placement: scheduled("1", D1) });
-    const newer = row("id-b", NEWER_AT, { placement: scheduled("2", D2) });
+    const older = row("id-a", OLDER_AT, {
+      placement: scheduled("1", D1),
+      removalQueue: [entry("1", D1, "keep")],
+    });
+    const newer = row("id-b", NEWER_AT, {
+      placement: scheduled("2", D2),
+      removalQueue: [entry("2", D2, "keep")],
+    });
 
     // Act
     const merged = mergeBothWays(older, newer);
 
     // Assert
     expect(merged.placement).toEqual(scheduled("2", D2));
-    expect(merged.removalQueue).toEqual([queued("1", D1)]);
+    expect(merged.removalQueue).toEqual([
+      entry("1", D1, "retire"),
+      entry("2", D2, "keep"),
+    ]);
+  });
+
+  it("should write the merged Placed keep when a row does not carry it", () => {
+    // Arrange
+    const bare = row("id-a", OLDER_AT, { placement: scheduled("1", D1) });
+
+    // Act
+    const merged = mergeBothWays(bare, bare);
+
+    // Assert
+    expect(merged.removalQueue).toEqual([entry("1", D1, "keep")]);
   });
 
   it("should let a Placed beat a newer attempting", () => {
     // Arrange
-    const placed = row("id-a", OLDER_AT, { placement: scheduled("1", D1) });
+    const placed = row("id-a", OLDER_AT, {
+      placement: scheduled("1", D1),
+      removalQueue: [entry("1", D1, "keep")],
+    });
     const attempting = row("id-b", NEWER_AT, {
       placement: {
         kind: "attempting",
@@ -113,7 +155,7 @@ describe("mergeGarminLedgerRows", () => {
     expect(merged.placement).toEqual(scheduled("1", D1));
   });
 
-  it("should never queue the merged Placed or the merged previous", () => {
+  it("should never lower a state nor remove an entry", () => {
     // Arrange
     const attempting = row("id-a", OLDER_AT, {
       placement: {
@@ -124,7 +166,7 @@ describe("mergeGarminLedgerRows", () => {
         posted: true,
         previous: scheduled("1", D1),
       },
-      removalQueue: [queued("1", D1), queued("3", D1)],
+      removalQueue: [entry("1", D1, "keep"), entry("3", D1, "retire", 1)],
     });
     const inFlight = row("id-b", NEWER_AT, {
       placement: {
@@ -134,7 +176,7 @@ describe("mergeGarminLedgerRows", () => {
         at: NEWER_AT,
         posted: false,
       },
-      removalQueue: [queued("3", D1, 2, true)],
+      removalQueue: [entry("3", D1, "gone", 0, true)],
     });
 
     // Act
@@ -145,7 +187,10 @@ describe("mergeGarminLedgerRows", () => {
       kind: "attempting",
       posted: true,
     });
-    expect(merged.removalQueue).toEqual([queued("3", D1, 2, true)]);
+    expect(merged.removalQueue).toEqual([
+      entry("1", D1, "keep"),
+      entry("3", D1, "gone", 1, true),
+    ]);
   });
 
   it("should take library and forceRepush only from the newer row", () => {
@@ -162,23 +207,71 @@ describe("mergeGarminLedgerRows", () => {
     expect(merged.updatedAt).toBe(NEWER_AT);
   });
 
-  it("should merge to uncertain when every Placed is queued, holding both ids", () => {
+  it("should keep the uncertain and drain nothing when a stale Placed is gone elsewhere", () => {
     // Arrange
-    const deviceA = row("id-a", OLDER_AT, {
-      placement: scheduled("2", D2),
-      removalQueue: [queued("1", D1)],
+    const stale = row("id-a", NEWER_AT, {
+      placement: scheduled("100", D2),
+      removalQueue: [entry("100", D2, "keep")],
     });
-    const deviceB = row("id-b", NEWER_AT, {
-      placement: scheduled("1", D1),
-      removalQueue: [queued("2", D2)],
+    const cloud = row("id-b", OLDER_AT, {
+      placement: { kind: "uncertain", workoutId: W, date: D2 },
+      removalQueue: [
+        entry("1", D1, "held"),
+        entry("2", D1, "held"),
+        entry("100", D2, "gone"),
+      ],
     });
     const calendar = new Map([
       ["1", D1],
-      ["2", D2],
+      ["2", D1],
     ]);
 
     // Act
-    const merged = mergeBothWays(deviceA, deviceB);
+    const merged = mergeBothWays(stale, cloud);
+
+    // Assert
+    expect(merged.placement).toEqual(cloud.placement);
+    expect(merged.removalQueue).toEqual(cloud.removalQueue);
+    expect(drain(calendar, merged)).toEqual([D1, D1]);
+  });
+
+  it("should keep an in-flight state over a tainted Placed and absorb a re-merge", () => {
+    // Arrange
+    const stale = row("id-a", OLDER_AT, {
+      placement: scheduled("100", D1),
+      removalQueue: [entry("100", D1, "keep")],
+    });
+    const moving = row("id-b", NEWER_AT, {
+      placement: {
+        kind: "uncertain",
+        workoutId: W,
+        date: D1,
+        previous: scheduled("102", D2),
+      },
+      removalQueue: [entry("100", D1, "retire"), entry("102", D2, "keep")],
+    });
+
+    // Act
+    const merged = mergeBothWays(stale, moving);
+
+    // Assert
+    expect(merged.placement).toEqual(moving.placement);
+    expect(mergeGarminLedgerRows(merged, moving)).toStrictEqual(merged);
+    expect(mergeGarminLedgerRows(stale, merged)).toStrictEqual(merged);
+  });
+
+  it("should target the maximum of all entries when none is held", () => {
+    // Arrange
+    const stale = row("id-a", NEWER_AT, {
+      placement: scheduled("1", D1),
+      removalQueue: [entry("1", D1, "keep")],
+    });
+    const drained = row("id-b", OLDER_AT, {
+      removalQueue: [entry("1", D1, "gone"), entry("2", D2, "retire")],
+    });
+
+    // Act
+    const merged = mergeBothWays(stale, drained);
 
     // Assert
     expect(merged.placement).toEqual({
@@ -186,24 +279,17 @@ describe("mergeGarminLedgerRows", () => {
       workoutId: W,
       date: D2,
     });
-    expect(merged.removalQueue).toEqual([
-      { ...queued("1", D1), held: true },
-      { ...queued("2", D2), held: true },
-    ]);
-    expect(drain(calendar, merged)).toEqual([D1, D2]);
   });
 
-  it("should not let an unconfirmed Placed that may be a queued entry win", () => {
+  it("should not let an unconfirmed Placed that may be a held entry win", () => {
     // Arrange
-    const adopted = row("id-a", NEWER_AT, {
-      placement: { kind: "unconfirmed", workoutId: W, date: D1 },
-    });
-    const superseding = row("id-b", OLDER_AT, {
-      removalQueue: [queued("1", D1)],
+    const adopted = row("id-a", NEWER_AT, { placement: unconfirmed(D1) });
+    const legacy = row("id-b", OLDER_AT, {
+      removalQueue: [entry("1", D1, "held")],
     });
 
     // Act
-    const merged = mergeBothWays(adopted, superseding);
+    const merged = mergeBothWays(adopted, legacy);
 
     // Assert
     expect(merged.placement).toEqual({
@@ -211,17 +297,54 @@ describe("mergeGarminLedgerRows", () => {
       workoutId: W,
       date: D1,
     });
-    expect(merged.removalQueue).toEqual([{ ...queued("1", D1), held: true }]);
+    expect(merged.removalQueue).toEqual([entry("1", D1, "held")]);
   });
 
-  it("should let a free Placed beat an unconfirmed one that matches a queued entry", () => {
+  it("should not let an unconfirmed Placed that may be a drained entry win", () => {
     // Arrange
-    const adopted = row("id-a", NEWER_AT, {
-      placement: { kind: "unconfirmed", workoutId: W, date: D1 },
+    const stale = row("id-a", NEWER_AT, { placement: unconfirmed(D1) });
+    const cloud = row("id-b", OLDER_AT, {
+      placement: scheduled("3", D2),
+      removalQueue: [entry("1", D1, "gone"), entry("3", D2, "keep")],
     });
+
+    // Act
+    const merged = mergeBothWays(stale, cloud);
+
+    // Assert
+    expect(merged.placement).toEqual(scheduled("3", D2));
+    expect(merged.removalQueue).toEqual(cloud.removalQueue);
+  });
+
+  it("should let an unconfirmed Placed that matches only a keep entry win", () => {
+    // Arrange
+    const adopted = row("id-a", NEWER_AT, { placement: unconfirmed(D1) });
+    const attempting = row("id-b", OLDER_AT, {
+      placement: {
+        kind: "attempting",
+        workoutId: W,
+        date: D2,
+        at: OLDER_AT,
+        posted: false,
+        previous: scheduled("1", D1),
+      },
+      removalQueue: [entry("1", D1, "keep")],
+    });
+
+    // Act
+    const merged = mergeBothWays(adopted, attempting);
+
+    // Assert
+    expect(merged.placement).toEqual(unconfirmed(D1));
+    expect(merged.removalQueue).toEqual([entry("1", D1, "keep")]);
+  });
+
+  it("should let a live Placed beat an unconfirmed one that matches a retired entry", () => {
+    // Arrange
+    const adopted = row("id-a", NEWER_AT, { placement: unconfirmed(D1) });
     const moved = row("id-b", OLDER_AT, {
       placement: scheduled("2", D2),
-      removalQueue: [queued("1", D1)],
+      removalQueue: [entry("1", D1, "retire"), entry("2", D2, "keep")],
     });
 
     // Act
@@ -229,7 +352,7 @@ describe("mergeGarminLedgerRows", () => {
 
     // Assert
     expect(merged.placement).toEqual(scheduled("2", D2));
-    expect(merged.removalQueue).toEqual([queued("1", D1)]);
+    expect(merged.removalQueue).toEqual(moved.removalQueue);
   });
 
   it.each([
@@ -254,17 +377,18 @@ describe("mergeGarminLedgerRows", () => {
 
   it("should keep the scheduled side when both rows hold the same entry", () => {
     // Arrange
-    const known = row("id-a", OLDER_AT, { placement: scheduled("1", D1) });
-    const adopted = row("id-b", NEWER_AT, {
-      placement: { kind: "unconfirmed", workoutId: W, date: D1 },
+    const known = row("id-a", OLDER_AT, {
+      placement: scheduled("1", D1),
+      removalQueue: [entry("1", D1, "keep")],
     });
+    const adopted = row("id-b", NEWER_AT, { placement: unconfirmed(D1) });
 
     // Act
     const merged = mergeBothWays(known, adopted);
 
     // Assert
     expect(merged.placement).toEqual(scheduled("1", D1));
-    expect(merged).not.toHaveProperty("removalQueue");
+    expect(merged.removalQueue).toEqual([entry("1", D1, "keep")]);
   });
 
   it("should let a committed row beat a newer pending one whole", () => {
@@ -289,6 +413,9 @@ describe("mergeGarminLedgerRows", () => {
 
     // Assert
     expect(merged).toStrictEqual(mergeGarminLedgerRows(older, newer));
-    expect(merged?.removalQueue).toEqual([queued("1", D1)]);
+    expect(merged?.removalQueue).toEqual([
+      entry("1", D1, "retire"),
+      entry("2", D2, "keep"),
+    ]);
   });
 });
