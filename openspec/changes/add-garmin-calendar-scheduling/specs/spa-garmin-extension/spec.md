@@ -4,7 +4,7 @@
 
 Every Garmin push entry point SHALL call `pushWorkoutToGarminCalendar(deps, record)`, which runs the existing governed library push (Phase 1) and then places the workout on its date in the Garmin calendar (Phase 2).
 
-Phase 2 SHALL diff the desired placement (library workout id, workout date) against the persisted one and, when they differ: persist `attempting{posted, at, previous}`; mark it `posted` and call `schedule`; commit the returned `workoutScheduleId`; and only then queue and `unschedule` the superseded entry. A superseded entry SHALL be deleted only after its replacement has committed (create first, delete after), so a failure leaves a duplicate and never a gap. The pipeline SHALL NOT delete any Garmin library workout.
+Phase 2 SHALL diff the desired placement (library workout id, workout date) against the persisted one and, when they differ: persist `attempting{posted, at, previous}`; mark it `posted` and call `schedule`; commit the returned `workoutScheduleId` as `keep` and the superseded id as `retire` in the same write; and only then `unschedule` the superseded entry. A superseded entry SHALL be deleted only after its replacement has committed (create first, delete after), so a failure leaves a duplicate and never a gap. The pipeline SHALL NOT delete any Garmin library workout.
 
 A pre-flight SHALL run before any call. Without `navigator.locks` (a non-secure context) the push SHALL run Phase 1 exactly as today, skip placement, and return `library-only{reason:"insecure-context"}`. Without the `calendar-write-v1` feature it SHALL do the same and return `library-only{reason:"bridge-outdated"}`. Neither is a failure: the UI SHALL show the workout as in the library with no date, in the warning tone and never the error tone, and for `bridge-outdated` SHALL offer one action that opens the extension's store page.
 
@@ -14,7 +14,7 @@ The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplic
 
 - **GIVEN** a workout already placed on D1 whose content is unchanged
 - **WHEN** its date becomes D2 and the athlete pushes
-- **THEN** the pipeline SHALL make 0 library pushes and 1 `schedule` call, persist the new placement and queue the old id before calling `unschedule`, and return `moved` with 1 entry at D2
+- **THEN** the pipeline SHALL make 0 library pushes and 1 `schedule` call, persist the new placement and write the old id `retire` before calling `unschedule`, and return `moved` with 1 entry at D2
 
 #### Scenario: An unchanged re-push makes no calls
 
@@ -25,7 +25,7 @@ The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplic
 #### Scenario: A failed delete leaves a reported duplicate
 
 - **WHEN** the `unschedule` of a superseded entry fails with 500, 403 or a timeout
-- **THEN** both entries SHALL remain, the old id SHALL stay queued with `attempts: 1`, and the result SHALL be `duplicate-left` with the UI naming the old date
+- **THEN** both entries SHALL remain, the old id SHALL stay `retire` with `attempts: 1`, and the result SHALL be `duplicate-left` with the UI naming the old date
 
 #### Scenario: No Web Locks keeps today's library push
 
@@ -68,21 +68,21 @@ A `schedule` 404 for a library id from an earlier push SHALL set `forceRepush` a
 
 ### Requirement: Removal queue for superseded calendar entries
 
-Superseded schedule ids SHALL be kept in the ledger row's `removalQueue` and drained after every commit. `unschedule` outcomes: 204 dequeues; 401, or an answer with no status and `needsReauth`, keeps the entry without counting the attempt; 404 dequeues only when a `calendar-find` shows the id absent (otherwise `attempts++`); anything else, ambiguous included, is `attempts++`. After 3 attempts an entry SHALL be `abandoned`, re-checked on each push of its record, and dismissible by the athlete ("I removed it") with 0 calls. An id equal to the current `Placed` or to `attempting.previous` SHALL never be sent to `unschedule` and SHALL be dropped from the queue. A `held` entry SHALL never be sent to `unschedule`.
+Every schedule id the pipeline learns SHALL be written to the ledger row's `removalQueue` with a state on `held < keep < retire < gone` (spa-persistence-port), and no entry SHALL ever be removed or lowered. A commit SHALL write the new id `keep` and a superseded `scheduled` `previous` `retire`, in the same write. Only `retire` entries SHALL be drained, after every commit. `unschedule` outcomes: 204 writes `gone`; 401, or an answer with no status and `needsReauth`, keeps the entry without counting the attempt; 404 writes `gone` only when a `calendar-find` shows the id absent (otherwise `attempts++`); anything else, ambiguous included, is `attempts++`. After 3 attempts an entry SHALL be `abandoned`, re-checked on each push of its record, and dismissible by the athlete ("I removed it", which writes `gone`) with 0 calls. An id equal to the current `Placed` or to `attempting.previous` SHALL never be sent to `unschedule`. A `held`, `keep` or `gone` entry SHALL never be sent to `unschedule`.
 
-An `uncertain` placement with `held` entries SHALL be resolved by `calendar-find` for its workout over the dates of the `uncertain` and of the held entries: exactly one match SHALL be adopted as the `Placed` and its held entry removed, the other held ids that the read sees for that workout SHALL become normal queued entries, and held ids it does not see SHALL be dropped; several matches SHALL return `duplicate-left` with the held ids kept; no match or a failed read SHALL take the normal `uncertain` path with the held ids kept.
+An `uncertain` placement SHALL be resolved by `calendar-find` for its workout over the dates of the `uncertain` and of its `held` entries. Exactly one match SHALL be adopted as the `Placed` and written `keep`; the other `held` ids that the read sees for that workout SHALL be written `retire`; `held` ids it does not see SHALL be written `gone`. Several matches SHALL return `duplicate-left` with every state unchanged. No match or a failed read SHALL take the normal `uncertain` path with every state unchanged.
 
 #### Scenario: The current placement is never deleted
 
-- **GIVEN** a queue that, after a merge, contains the id of the current `Placed`
+- **GIVEN** a queue that, after a merge, holds the id of the current `Placed` or of `attempting.previous`
 - **WHEN** the queue is drained
-- **THEN** that id SHALL be dropped without an `unschedule` call
+- **THEN** that id SHALL not be sent to `unschedule`, whatever its state
 
 #### Scenario: Held ids are resolved by reading the calendar
 
-- **GIVEN** an `uncertain` placement with S1 and S2 `held`, and a `calendar-find` that returns only S2
+- **GIVEN** an `uncertain` placement with S1, S2 and S3 `held`, and a `calendar-find` that returns S2 at the `uncertain` date and S1 at another date
 - **WHEN** the record is pushed
-- **THEN** S2 SHALL become the `Placed`, S1 SHALL be dropped from the queue, and no `unschedule` SHALL be issued for either
+- **THEN** S2 SHALL become the `Placed` and `keep`, S1 SHALL become `retire`, S3 SHALL become `gone`, and only S1 SHALL be sent to `unschedule`
 
 ### Requirement: Push result and capability detection
 

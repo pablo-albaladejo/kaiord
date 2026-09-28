@@ -88,10 +88,12 @@
       (AC-35).
 - [ ] 6.3 E2E stub: numeric ids, an in-memory calendar, `calendar-find`,
       `features`, failure injection and delays.
-- [ ] 6.4 Resolve `uncertain` with `held` ids (design §3.9): one
-      `calendar-find` match adopted and its held entry removed, the other
-      seen held ids re-queued, unseen ones dropped; several matches →
-      `duplicate-left` with held kept; the drain never sends a held id.
+- [ ] 6.4 Resolve `uncertain` through the ledger state lattice (design
+      §3.9): commits write the new id `keep` and the superseded one
+      `retire`; one `calendar-find` match is adopted `keep`, the other seen
+      held ids become `retire`, unseen ones `gone`; several matches →
+      `duplicate-left` with states unchanged; the drain sends only
+      `retire` ids and writes `gone` on 204 or a verified 404.
 - [ ] 6.5 Carried over from T4:
   - AC-17's "0 schedule calls" half (a failed library push makes no
     calendar call) needs this pipeline; test it here.
