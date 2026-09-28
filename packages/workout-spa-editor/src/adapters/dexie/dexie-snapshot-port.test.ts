@@ -10,7 +10,9 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { exportSnapshot } from "../../application/sync/export-snapshot";
 import { importSnapshot } from "../../application/sync/import-snapshot";
+import { mergeSnapshots } from "../../application/sync/merge-snapshots";
 import { decrypt, encrypt } from "../../lib/crypto";
+import type { Snapshot } from "../../types/snapshot";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
@@ -23,9 +25,10 @@ const PASSPHRASE = "kaiord-spa-v1";
 // (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded, v31 added
 // the lab-analytics stores (`labReports`, `labValues`, included), v33 dropped
 // the legacy `usage` store, making `usageEvents` the synced usage source, v34
-// added the healthStrain + healthVitals stores (included), and v35 added the
-// healthHeartRateSeries store (included).
-const SCHEMA_HEAD = 35;
+// added the healthStrain + healthVitals stores (included), v35 added the
+// healthHeartRateSeries store (included), and v36 normalized Garmin ledger rows
+// (no store change).
+const SCHEMA_HEAD = 36;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -267,6 +270,125 @@ describe("createDexieSnapshotPort", () => {
     // Assert
     expect(listed).toEqual([
       { table: "workouts", id: "gone", deletedAt: "2026-05-20T00:00:00Z" },
+    ]);
+  });
+});
+
+// The last schema before Garmin ledger rows carried an explicit library.
+const PRE_LEDGER_VERSION = 35;
+
+const LEGACY_GARMIN_ROW = {
+  id: "b0000000-0000-4000-8000-000000000001",
+  kaiordRecordId: "a0000000-0000-4000-8000-000000000001",
+  dataType: "workout",
+  destinationBridgeId: "garmin-bridge",
+  destinationExternalId: "1707805999",
+  contentHash: "hash",
+  exportedAt: "2026-09-01T08:00:00.000Z",
+  updatedAt: "2026-09-01T08:00:00.000Z",
+};
+
+const QUEUED = {
+  workoutScheduleId: "555",
+  workoutId: "1707805999",
+  date: "2026-09-27",
+  attempts: 0,
+  abandoned: false,
+};
+
+const snapshotAt = (
+  schemaVersion: number,
+  rows: ReadonlyArray<unknown>,
+  exportedAt = "2026-09-02T00:00:00.000Z"
+): Snapshot => ({
+  manifest: { schemaVersion, deviceId: "dev-x", exportedAt, encrypted: false },
+  tables: { exportLedger: rows },
+  tombstones: [],
+});
+
+describe("createDexieSnapshotPort Garmin ledger normalization", () => {
+  let name: string;
+  let db: KaiordDatabase;
+
+  beforeEach(async () => {
+    name = dbName();
+    db = new KaiordDatabase(name);
+    await db.open();
+  });
+
+  afterEach(async () => {
+    db.close();
+    await Dexie.delete(name);
+  });
+
+  const importAndRead = async (snapshot: Snapshot) => {
+    await importSnapshot({ port: createDexieSnapshotPort(db), snapshot });
+    return db.table("exportLedger").toArray();
+  };
+
+  it("should normalize a legacy row brought in by a v35 snapshot", async () => {
+    // Arrange
+    const snapshot = snapshotAt(PRE_LEDGER_VERSION, [LEGACY_GARMIN_ROW]);
+
+    // Act
+    const rows = await importAndRead(snapshot);
+
+    // Assert
+    expect(rows).toEqual([
+      {
+        ...LEGACY_GARMIN_ROW,
+        library: { kind: "confirmed", workoutId: "1707805999" },
+      },
+    ]);
+  });
+
+  it("should normalize a legacy row inside a merged snapshot carrying the newer manifest", async () => {
+    // Arrange
+    const legacy = snapshotAt(PRE_LEDGER_VERSION, [LEGACY_GARMIN_ROW]);
+    const current = snapshotAt(SCHEMA_HEAD, [], "2026-09-03T00:00:00.000Z");
+    const merged = mergeSnapshots(current, legacy);
+
+    // Act
+    const rows = await importAndRead(merged);
+
+    // Assert
+    expect(merged.manifest.schemaVersion).toBe(SCHEMA_HEAD);
+    expect(rows[0]).toHaveProperty("library", {
+      kind: "confirmed",
+      workoutId: "1707805999",
+    });
+  });
+
+  it("should reach the same rows when the same snapshot is imported twice", async () => {
+    // Arrange
+    const snapshot = snapshotAt(PRE_LEDGER_VERSION, [
+      { ...LEGACY_GARMIN_ROW, destinationExternalId: "garmin-unconfirmed" },
+    ]);
+    const once = await importAndRead(snapshot);
+
+    // Act
+    const twice = await importAndRead(snapshot);
+
+    // Assert
+    expect(twice).toStrictEqual(once);
+    expect(twice[0]).toHaveProperty("library", { kind: "unconfirmed" });
+  });
+
+  it("should drop a queue entry whose schedule id is not Garmin-shaped and hold a legacy one", async () => {
+    // Arrange
+    const snapshot = snapshotAt(SCHEMA_HEAD, [
+      {
+        ...LEGACY_GARMIN_ROW,
+        removalQueue: [QUEUED, { ...QUEUED, workoutScheduleId: "0" }],
+      },
+    ]);
+
+    // Act
+    const rows = await importAndRead(snapshot);
+
+    // Assert
+    expect(rows[0]).toHaveProperty("removalQueue", [
+      { ...QUEUED, state: "held" },
     ]);
   });
 });
