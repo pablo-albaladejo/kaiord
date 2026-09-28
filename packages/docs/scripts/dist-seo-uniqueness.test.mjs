@@ -43,6 +43,21 @@ function htmlFiles(dir) {
 
 const attr = (html, re) => html.match(re)?.[1];
 
+const docsUrlOf = (path) =>
+  DOCS_URL +
+  path.replace(/(^|\/)index\.(html|md)$/, "$1").replace(/\.(html|md)$/, "");
+
+/**
+ * Each alternate a page must declare, as `"<hreflang>=<href>"`: `es` points
+ * at the Spanish twin, `en` and `x-default` at the English page.
+ */
+export function expectedHreflangs(pagePath) {
+  const pair = hreflangPair(pagePath.replace(/\.html$/, ".md"));
+  if (!pair) return [];
+  const en = docsUrlOf(pair.en);
+  return [`en=${en}`, `es=${docsUrlOf(pair.es)}`, `x-default=${en}`];
+}
+
 /** One record per built page (VitePress's 404 page is not a page). */
 export function readPages(dist) {
   return htmlFiles(dist)
@@ -52,16 +67,17 @@ export function readPages(dist) {
       const html = readFileSync(join(dist, path), "utf8");
       return {
         path,
-        url:
-          DOCS_URL +
-          path.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, ""),
+        url: docsUrlOf(path),
         noindex: /<meta name="robots" content="noindex/.test(html),
         title: attr(html, /<title>([^<]*)<\/title>/),
         description: attr(html, /<meta name="description" content="([^"]*)"/),
         dateModified: attr(html, /"dateModified":"([^"]+)"/),
         lang: attr(html, /<html[^>]* lang="([^"]*)"/),
-        hreflangs: [...html.matchAll(/<link [^>]*hreflang="([^"]+)"/g)]
-          .map(([, lang]) => lang)
+        hreflangs: [...html.matchAll(/<link [^>]*hreflang="[^"]*"[^>]*>/g)]
+          .map(([link]) => {
+            const lang = attr(link, /hreflang="([^"]*)"/);
+            return `${lang}=${attr(link, / href="([^"]*)"/)}`;
+          })
           .sort(),
       };
     });
@@ -115,8 +131,7 @@ export function indexingProblems(pages, sitemap, { requireHistory }) {
         `${page.path}: <html lang="${page.lang}">, expected "${lang}"`
       );
     }
-    const md = page.path.replace(/\.html$/, ".md");
-    const expected = hreflangPair(md) ? ["en", "es", "x-default"] : [];
+    const expected = expectedHreflangs(page.path);
     if (page.hreflangs.join() !== expected.join()) {
       problems.push(
         `${page.path}: hreflang [${page.hreflangs}], expected [${expected}]`
@@ -187,9 +202,7 @@ const page = (path, extra = {}) => ({
   description: `Description of ${path}`,
   dateModified: "2026-09-01T00:00:00.000Z",
   lang: path.startsWith("es/") ? "es" : "en",
-  hreflangs: hreflangPair(path.replace(/\.html$/, ".md"))
-    ? ["en", "es", "x-default"]
-    : [],
+  hreflangs: expectedHreflangs(path),
   ...extra,
 });
 const site = Array.from({ length: MIN_INDEXABLE }, (_, i) =>
@@ -360,5 +373,26 @@ test("guard fails when a paired page lacks hreflang, or an unpaired one has it",
   assert.match(
     problems.join("\n"),
     /quick-start\.html: hreflang \[en,es,x-default\], expected \[\]/
+  );
+});
+
+test("guard fails when an alternate link points at the wrong page", () => {
+  const [en, , xDefault] = expectedHreflangs(
+    "guide/whoop-recovery-in-plan.html"
+  );
+  const pages = [
+    ...site,
+    page("guide/whoop-recovery-in-plan.html", {
+      hreflangs: [en, en.replace("en=", "es="), xDefault],
+    }),
+  ];
+
+  const problems = indexingProblems(pages, sitemapOf(pages), {
+    requireHistory: false,
+  });
+
+  assert.match(
+    problems.join("\n"),
+    /whoop-recovery-in-plan\.html: hreflang .*es=https:\/\/kaiord\.com\/docs\/guide\/whoop-recovery-in-plan,.*expected .*es=https:\/\/kaiord\.com\/docs\/es\/guide\/whoop-recovery-in-plan/
   );
 });
