@@ -88,11 +88,15 @@ function sourceFiles(dir) {
 test("no page or theme file imports the VitePress bundled fonts", () => {
   // A single `from "vitepress/theme"` anywhere (index.md did) pulls in the
   // 16 bundled Inter subsets, whatever theme/index.ts extends.
+  // Bare (`import "vitepress/theme"`) and dynamic (`import("vitepress/theme")`)
+  // imports pull in the bundled fonts too, not just `from "vitepress/theme"`.
+  // The quoted literal alone is enough: "vitepress/theme-without-fonts" has
+  // extra characters before its closing quote, so it never matches.
   const self = fileURLToPath(import.meta.url);
   const offenders = sourceFiles(DOCS).filter(
     (file) =>
       file !== self &&
-      /from\s+["']vitepress\/theme["']/.test(readFileSync(file, "utf8"))
+      /["']vitepress\/theme["']/.test(readFileSync(file, "utf8"))
   );
   assert.deepEqual(
     offenders.map((file) => relative(DOCS, file)),
@@ -103,6 +107,17 @@ test("no page or theme file imports the VitePress bundled fonts", () => {
     "utf8"
   );
   assert.match(theme, /from\s+["']vitepress\/theme-without-fonts["']/);
+});
+
+test("the bundled-theme pattern catches bare and dynamic imports too", () => {
+  const pattern = /["']vitepress\/theme["']/;
+  assert.match('import "vitepress/theme";', pattern);
+  assert.match('await import("vitepress/theme")', pattern);
+  assert.match("import DefaultTheme from 'vitepress/theme';", pattern);
+  assert.doesNotMatch(
+    'import Theme from "vitepress/theme-without-fonts";',
+    pattern
+  );
 });
 
 test("the font preload and the @font-face src name the same file", () => {
