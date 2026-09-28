@@ -604,13 +604,21 @@ jobs:
     # propagates the skip to consumers via their own needs:[..., build].
     if: github.actor != 'github-actions[bot]' && needs.detect-changes.outputs.should-test == 'true'
     steps:
+      # Full history: the docs and landing sitemaps date each page from its
+      # last commit. At depth 1 every path would answer HEAD's date, so
+      # REQUIRE_FULL_HISTORY=1 below turns a shallow checkout into an error
+      # instead of a sitemap of identical dates.
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
 
       - name: Build all packages
+        env:
+          REQUIRE_FULL_HISTORY: "1"
         run: pnpm -r build
 
       # The only job that holds all three site builds (landing, SPA, docs):
@@ -620,6 +628,7 @@ jobs:
       - name: Site guards
         env:
           REQUIRE_DOCS_DIST: "1"
+          REQUIRE_FULL_HISTORY: "1"
         run: |
           node scripts/check-site-links.mjs --landing packages/landing/dist --app packages/workout-spa-editor/dist --docs packages/docs/.vitepress/dist
           node --test packages/docs/scripts/*.test.mjs
