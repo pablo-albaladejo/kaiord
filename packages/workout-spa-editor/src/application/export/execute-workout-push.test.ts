@@ -4,7 +4,10 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import type { ExportLedgerEntry } from "../../types/export-ledger";
+import {
+  type ExportLedgerEntry,
+  resolveLedgerMutation,
+} from "../../types/export-ledger";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 import {
   executeWorkoutPush,
@@ -53,13 +56,20 @@ const makeLedgerRepo = (): ExportLedgerRepository & {
       naturalKeyIndex.set(key, entry.id);
       return { ok: true };
     },
-    update: async (id, patch) => {
-      const existing = store.get(id);
-      if (existing) store.set(id, { ...existing, ...patch });
+    mutateByKey: async (key, fn) => {
+      const k = naturalKey(key.kaiordRecordId, key.destinationBridgeId);
+      const id = naturalKeyIndex.get(k);
+      const current = id ? store.get(id) : undefined;
+      const next = resolveLedgerMutation(current, fn, new Date().toISOString());
+      if (!next) return current;
+      if (current) store.delete(current.id);
+      store.set(next.id, next);
+      naturalKeyIndex.set(k, next.id);
+      return next;
     },
-    deleteById: async (id) => {
+    rollbackPending: async (id) => {
       const entry = store.get(id);
-      if (entry) {
+      if (entry?.destinationExternalId === "pending") {
         naturalKeyIndex.delete(
           naturalKey(entry.kaiordRecordId, entry.destinationBridgeId)
         );

@@ -7,7 +7,7 @@ description: "Convert a TCX (Training Center XML) workout to a Zwift ZWO file �
 
 Turn a **TCX** (Training Center XML) workout into a **Zwift ZWO** file so a plan
 exported from a training platform can run in Zwift. Use the free, in-browser
-[Kaiord Editor](https://kaiord.com/editor/) (no account, no upload), or the
+[Kaiord Editor](https://kaiord.com/app/) (no account, no upload), or the
 [CLI](/cli/commands#convert) and [TypeScript SDK](/guide/quick-start).
 Conversions go through Kaiord's canonical [KRD format](/formats/krd) and stay
 within round-trip tolerances (time ±1 s).
@@ -16,7 +16,7 @@ within round-trip tolerances (time ±1 s).
 
 ### 1. Editor (drag & drop)
 
-Open [kaiord.com/editor](https://kaiord.com/editor/), drop your `.tcx` file,
+Open [kaiord.com/app](https://kaiord.com/app/), drop your `.tcx` file,
 choose **ZWO** as the export format, and download `workout.zwo`.
 
 ### 2. CLI

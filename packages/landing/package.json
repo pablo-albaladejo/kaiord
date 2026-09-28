@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/build-locales.mjs",
+    "build": "vite build && node scripts/build-locales.mjs && node scripts/build-sitemap.mjs",
     "i18n:extract": "node scripts/extract-strings.mjs",
     "preview": "vite preview",
     "test": "vitest --run",

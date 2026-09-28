@@ -14,7 +14,7 @@ Static assets served by Vite during development and included in the production b
 - **`apple-touch-icon.png`** — iOS home screen icon. Apple devices load this when bookmarking or adding to home screen.
 - **`og-image.png`** — Open Graph image. Used by social platforms (Twitter, Facebook, LinkedIn) when sharing the link.
 - **`robots.txt`** — SEO directive for search engines. Allows all crawlers.
-- **`sitemap.xml`** — XML sitemap for search engines. Lists the single landing page (/).
+- **`sitemap.xml`** — Sitemap index pointing at `/sitemap-landing.xml` and `/docs/sitemap.xml`. `sitemap-landing.xml` is not here: `scripts/build-sitemap.mjs` generates it into `dist/` at build, with a git `<lastmod>` per URL.
 - **`404.html`** — Custom 404 error page. Deployed to GitHub Pages as fallback.
 - **`CNAME`** — GitHub Pages configuration. Points subdomain to kaiord.com.
 - **`.nojekyll`** — Disables Jekyll processing on GitHub Pages. Forces direct HTML serving.
@@ -60,7 +60,7 @@ None.
 
 - **GitHub Pages deployment** — `.nojekyll` and `CNAME` are GitHub-specific. Landing page is deployed to `pablo-albaladejo/kaiord` GitHub Pages at the custom domain `kaiord.com`.
 - **OG image** — 1200x630px PNG optimized for social platforms. Kaiord branding.
-- **Sitemap** — minimal; only the single landing page. Tools may crawl anyway, but proper sitemap helps.
+- **Sitemap** — the index here is static; the landing sitemap (`/`, `/es/`, `/app/`) is generated at build so its `<lastmod>` dates are real.
 - **Apple touch icon** — 180x180px PNG (Apple's standard). iOS adds rounded corners and shine effect automatically.
 
 <!-- MANUAL: -->
