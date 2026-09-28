@@ -52,22 +52,29 @@ await writeFile("workout.gcn", gcn);
 
 ## What survives the conversion
 
-| Data                 | FIT           | Garmin Connect (GCN)  | Result                             |
-| -------------------- | ------------- | --------------------- | ---------------------------------- |
-| Step order & names   | workout steps | workout steps         | Preserved                          |
-| Time durations       | seconds       | time durations        | Preserved (±1 s)                   |
-| Distance durations   | meters        | distance durations    | Preserved                          |
-| Power targets        | watts / zone  | watts / power zone    | Preserved (±1 W; zones map across) |
-| Heart-rate targets   | bpm / zone    | bpm / heart-rate zone | Preserved (±1 bpm)                 |
-| Cadence targets      | rpm           | rpm                   | Preserved (±1 rpm)                 |
-| Speed / pace targets | m/s           | m/s                   | Preserved                          |
-| Repeats / intervals  | repeat steps  | repeat blocks         | Preserved                          |
-| Developer fields     | custom fields | —                     | Preserved under `extensions.fit`   |
+| Data                 | FIT           | Garmin Connect (GCN)  | Result                               |
+| -------------------- | ------------- | --------------------- | ------------------------------------ |
+| Step order & names   | workout steps | workout steps         | Preserved                            |
+| Time durations       | seconds       | time durations        | Preserved (±1 s)                     |
+| Distance durations   | meters        | distance durations    | Preserved                            |
+| Power targets        | watts / zone  | watts / power zone    | Preserved (±1 W; zones map across)   |
+| % FTP power targets  | % FTP         | watts                 | Converted using your FTP (see below) |
+| Heart-rate targets   | bpm / zone    | bpm / heart-rate zone | Preserved (±1 bpm)                   |
+| Cadence targets      | rpm           | rpm                   | Preserved (±1 rpm)                   |
+| Speed / pace targets | m/s           | m/s                   | Preserved                            |
+| Repeats / intervals  | repeat steps  | repeat blocks         | Preserved                            |
+| Developer fields     | custom fields | —                     | Preserved under `extensions.fit`     |
 
-FIT and Garmin Connect are both Garmin-native, watt-based formats, so this is
-one of the highest-fidelity conversions Kaiord does — no assumed FTP is needed.
+FIT and Garmin Connect are both Garmin-native formats, so this is one of the
+highest-fidelity conversions Kaiord does.
 
 ## Gotchas
+
+**% FTP power targets need your FTP.** A FIT workout can store power as % FTP,
+but Garmin Connect workouts store watts, so those targets are converted with
+your FTP (watts = round(% × FTP)). Set your FTP in **Athlete** in the Editor, or
+pass `--ftp <watts>` to `kaiord convert` / `kaiord garmin push`. Without one the
+conversion stops with an error rather than guessing.
 
 **FIT file vs. Garmin Connect JSON.** A `.fit` file is Garmin's on-device binary
 format; a `.gcn` file is Garmin Connect's workout JSON. They are not the same
