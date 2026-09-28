@@ -5,9 +5,14 @@ description: "Convert a Garmin FIT workout to a TCX (Training Center XML) file �
 
 # Convert FIT to TCX
 
+::: info Scope
+Converts structured workouts (steps and targets), not recorded activities.
+See [Workouts vs. activities](/convert/#workouts-vs-activities).
+:::
+
 Turn a **Garmin FIT** workout into a **TCX** (Training Center XML) file — the
 format most training platforms accept for import. Use the free, in-browser
-[Kaiord Editor](https://kaiord.com/app/) (no account, no upload), or the
+[Kaiord Editor](https://kaiord.com/app/#/convert?from=fit&to=tcx) (no account, no upload), or the
 [CLI](/cli/commands#convert) and [TypeScript SDK](/guide/quick-start).
 Conversions go through Kaiord's canonical [KRD format](/formats/krd) and stay
 within round-trip tolerances (time ±1 s, heart rate ±1 bpm, cadence ±1 rpm).
@@ -16,7 +21,7 @@ within round-trip tolerances (time ±1 s, heart rate ±1 bpm, cadence ±1 rpm).
 
 ### 1. Editor (drag & drop)
 
-Open [kaiord.com/app](https://kaiord.com/app/), drop your `.fit` file,
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=fit&to=tcx), drop your `.fit` file,
 choose **TCX** as the export format, and download `workout.tcx`.
 
 ### 2. CLI

@@ -5,9 +5,14 @@ description: "Convert a Garmin FIT workout to a Zwift ZWO file — free and in-b
 
 # Convert FIT to ZWO
 
+::: info Scope
+Converts structured workouts (steps and targets), not recorded activities.
+See [Workouts vs. activities](/convert/#workouts-vs-activities).
+:::
+
 Turn a **Garmin FIT** workout into a **Zwift ZWO** file so a structured session
 from your head unit or coach can run in Zwift. The fastest way is the free,
-in-browser [Kaiord Editor](https://kaiord.com/app/) — no account and no file
+in-browser [Kaiord Editor](https://kaiord.com/app/#/convert?from=fit&to=zwo) — no account and no file
 upload. Developers can use the [CLI](/cli/commands#convert) or the
 [TypeScript SDK](/guide/quick-start). Every conversion goes through Kaiord's
 canonical [KRD format](/formats/krd), so values stay within round-trip
@@ -17,7 +22,7 @@ tolerances (time ±1 s, power ±1 W or ±1 % FTP).
 
 ### 1. Editor (drag & drop)
 
-Open [kaiord.com/app](https://kaiord.com/app/), drop your `.fit` file,
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=fit&to=zwo), drop your `.fit` file,
 choose **ZWO** as the export format, and download `workout.zwo`. Everything runs
 locally in your browser.
 

@@ -5,9 +5,14 @@ description: "Convert a Garmin Connect workout to a Zwift ZWO file — free and 
 
 # Convert Garmin to ZWO
 
+::: info Scope
+Converts structured workouts (steps and targets), not recorded activities.
+See [Workouts vs. activities](/convert/#workouts-vs-activities).
+:::
+
 Take a **Garmin Connect** workout (GCN JSON) into a **Zwift ZWO** file so a plan
 from Garmin can run in Zwift. Use the free, in-browser
-[Kaiord Editor](https://kaiord.com/app/) (no account, no upload), or the
+[Kaiord Editor](https://kaiord.com/app/#/convert?from=garmin&to=zwo) (no account, no upload), or the
 [CLI](/cli/commands#convert) and [TypeScript SDK](/guide/quick-start).
 Conversions go through Kaiord's canonical [KRD format](/formats/krd) and stay
 within round-trip tolerances (time ±1 s, power ±1 W or ±1 % FTP).
@@ -16,7 +21,7 @@ within round-trip tolerances (time ±1 s, power ±1 W or ±1 % FTP).
 
 ### 1. Editor (drag & drop)
 
-Open [kaiord.com/app](https://kaiord.com/app/), drop your Garmin Connect
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=garmin&to=zwo), drop your Garmin Connect
 workout file, choose **ZWO** as the export format, and download `workout.zwo`.
 
 ### 2. CLI
