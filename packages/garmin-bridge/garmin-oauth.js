@@ -238,6 +238,9 @@ const isOAuth2Expired = (oauth2) =>
   typeof oauth2.expires_at !== "number" ||
   oauth2.expires_at - EXPIRY_SKEW_SEC <= nowSec();
 
+const isAbortError = (e) =>
+  e?.name === "AbortError" || e?.name === "TimeoutError";
+
 // Single-flight the 3-hop mint so a cold-start stampede (ping + snapshot +
 // activities firing at once) does not run it three times.
 let mintInFlight = null;
@@ -266,7 +269,10 @@ const ensureToken = async (fetchImpl) => {
       const refreshed = { oauth1: tokens.oauth1, oauth2 };
       await saveTokens(refreshed);
       return refreshed;
-    } catch {
+    } catch (e) {
+      // An aborted refresh says nothing about the OAuth1 token: re-minting
+      // from the session would start a mint on a caller that gave up.
+      if (isAbortError(e)) throw e;
       return mintAndSave(fetchImpl); // OAuth1 dead → re-mint from session
     }
   }
@@ -294,21 +300,54 @@ const accessTokenAfterEnsure = async (fetchImpl) =>
 const accessTokenAfterMint = async (fetchImpl) =>
   (await mintAndSave(fetchImpl)).oauth2.access_token;
 
+// Settle with the promise `start()` returns, or reject with the signal's
+// reason as soon as it aborts. Injecting the signal through `fetchImpl` is
+// not enough on its own: a caller that JOINS `mintInFlight` awaits a mint
+// built with the first caller's fetch, which never sees this signal. Racing
+// stops this caller waiting; the mint keeps running for its other waiters.
+// `start` is a thunk so an already-aborted signal starts nothing.
+const raceAbort = (start, signal) => {
+  if (!signal) return start();
+  if (signal.aborted) return Promise.reject(signal.reason);
+  const promise = start();
+  return new Promise((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+    void promise
+      .then(resolve, reject)
+      .finally(() => signal.removeEventListener("abort", onAbort));
+  });
+};
+
 /**
  * The bridge's Garmin JSON call surface. Returns the same envelope the old
  * content-script relay did: { ok, status, data } | { ok:false, status, body }.
  * A 401 (token rejected despite not being expired) triggers one re-mint and
  * retry; a still-401 retry surfaces `needsReauth` so the SPA can prompt a
  * Garmin re-login.
+ *
+ * With a deadline `signal`, `fetchImpl` carries it and bounds the request
+ * itself, while the token lifecycle (refresh, mint, re-mint) runs on the
+ * untimed `tokenFetchImpl` and only this caller's wait is raced against the
+ * signal. A mint other callers can join must never see one caller's
+ * deadline: aborting it would fail them with an error that is not theirs.
  */
-const connectapiFetch = (path, method, body, fetchImpl) =>
+const connectapiFetch = (
+  path,
+  method,
+  body,
+  fetchImpl,
+  { signal, tokenFetchImpl = fetchImpl } = {}
+) =>
   bearerCore().bearerRequest({
     baseUrl: CONNECTAPI,
     path,
     method,
     body,
-    getToken: accessTokenAfterEnsure,
-    refreshToken: accessTokenAfterMint,
+    getToken: () =>
+      raceAbort(() => accessTokenAfterEnsure(tokenFetchImpl), signal),
+    refreshToken: () =>
+      raceAbort(() => accessTokenAfterMint(tokenFetchImpl), signal),
     fetchImpl,
   });
 
@@ -343,6 +382,8 @@ const api = {
   clearTokens,
   isOAuth2Expired,
   ensureToken,
+  isAbortError,
+  raceAbort,
   connectapiFetch,
   connectapiUpload,
 };

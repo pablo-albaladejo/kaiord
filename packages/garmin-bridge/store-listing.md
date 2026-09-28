@@ -14,6 +14,7 @@ Kaiord Garmin Bridge connects the Kaiord workout editor (https://kaiord.com/app)
 
 Features:
 • Push structured workouts from the Kaiord editor directly to Garmin Connect
+• Place pushed workouts on their day in your Garmin Connect calendar, and move them when the date changes (the extension adds the new calendar entry first, then removes the old one it placed)
 • List your existing Garmin Connect workouts
 • Session status indicator in the popup
 
