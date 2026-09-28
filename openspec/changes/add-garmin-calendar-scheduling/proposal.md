@@ -37,7 +37,7 @@ duplicates the session.
   reading Garmin, and returns a `PlacementResult`. Every Garmin push entry
   point goes through it.
 - **Send week**: a calendar action that places every eligible workout of the
-  visible week, continues past failures, and offers "Retry failed".
+  visible week, continues past failures, and offers "Retry" (retryable failures, plus library-only items once an outdated bridge is updated).
 - **Follow the coach**: a Train2Go sync that sees the coach moved a session
   moves the Kaiord workout's date, against a `coachDate` baseline every
   builder sets.

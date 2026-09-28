@@ -153,7 +153,7 @@ Kaiord places workouts on the Garmin Connect calendar in two phases. Both run in
 - Tabs are serialized by the lock.
 - Devices are not serialized. A cross-device race ends in a duplicate that the merge heals: a queued id is never merged as `Placed`, and the merged queue excludes the merged `Placed`.
 
-**Bulk "Send week"** runs the same pipeline over the visible week. "Retry failed" re-runs only the retryable failures.
+**Bulk "Send week"** runs the same pipeline over the visible week. "Retry" re-runs only the retryable failures and, once the bridge is updated, the `library-only{bridge-outdated}` items.
 
 **Coach moves.** When a Train2Go sync sees that the coach changed a session's date, it moves `WorkoutRecord.date`.
 
@@ -262,8 +262,8 @@ Repository port changes:
 
 **0. Pre-flight** (0 calls if it fails)
 
-- No `navigator.locks` → **library-only**. Phase 1 runs exactly as it does today, placement is skipped, and the result is `library-only` (not `failed`). The UI names the reason: the calendar needs HTTPS or a supported browser. Web Locks exist only in secure contexts, so plain-HTTP LAN dev keeps today's library push.
-- No `calendar-write-v1` capability → `failed:bridge-outdated`.
+- No `navigator.locks` → **library-only**. Phase 1 runs exactly as it does today, placement is skipped, and the result is `library-only{reason:"insecure-context"}` (not `failed`). The UI names the reason: the calendar needs HTTPS or a supported browser. Web Locks exist only in secure contexts, so plain-HTTP LAN dev keeps today's library push.
+- No `calendar-write-v1` capability → **library-only**, reason `bridge-outdated`. Phase 1 runs and placement is skipped, as above. Failing the push would throw away work that can be done, and in bulk it would fill the summary with red for something that is neither the athlete's fault nor the workout's; a silent library push would break the promise that the workout is on its date. So the UI shows the workout in the warning tone as "in your library, no date", with one action to update the extension (one notice per bulk run). Chrome updates extensions on its own within hours, so this state is rare and short-lived and gets no further UI. After the update, a re-push finds the content hash unchanged, makes 0 library pushes and only places the date.
 
 **1. Lock**
 
@@ -330,7 +330,7 @@ When the guard fails, the outcome depends on what happened to the row:
 
 - If T0c cannot deliver this, the fallback residual is an untracked duplicate, never a gap: the skip rule applies and `previous` is deleted only after a new `Placed` commits. It is recorded in R4.
 
-**9. Result:** `scheduled | moved | unchanged | duplicate-left | uncertain | library-only | failed{reason, retryable, retryAfter?}`.
+**9. Result:** `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason: insecure-context | bridge-outdated} | failed{reason, retryable, retryAfter?}`.
 
 ### 3.4 Deadline, classifier and resolve
 
@@ -439,11 +439,11 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 - Takes the lock separately for each item.
 - Can be cancelled between items.
 
-**Pre-flight (once per run):** export route, Web Locks, `calendar-write-v1`.
+**Pre-flight (once per run):** export route, Web Locks. A missing `calendar-write-v1` does not stop the run: each eligible item ends `library-only{bridge-outdated}`.
 
-**Statuses (7):** `scheduled`, `moved`, `unchanged`, `duplicate-left`, `uncertain`, `not-eligible`, `failed`. `library-only` cannot occur in bulk, because the bulk pre-flight requires Web Locks.
+**Statuses (8):** `scheduled`, `moved`, `unchanged`, `duplicate-left`, `uncertain`, `library-only`, `not-eligible`, `failed`. `library-only` can only be `bridge-outdated` in bulk, because the bulk pre-flight requires Web Locks. It is shown in the warning tone, counted apart from the failures, and explained by one notice per run.
 
-**"Retry failed"** re-runs only the retryable failures whose `retryAfter` has passed.
+**"Retry"** re-runs only the retryable failures whose `retryAfter` has passed and, once the bridge reports `calendar-write-v1`, the `library-only{bridge-outdated}` items.
 
 ### 3.8 Entry points and UI
 
@@ -456,7 +456,7 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 **Analytics** (no ids, dates or names)
 
 - `garmin-synced` counts as a success when the result is neither `failed` nor `uncertain`.
-- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, bridge-outdated, deadline-before-send, library-only.
+- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, bridge-outdated, deadline-before-send, insecure-context.
 - `garmin-calendar-bulk{counts}`
 
 ### 3.9 Normalization and merge (on top of T0c, delivered by #1265)

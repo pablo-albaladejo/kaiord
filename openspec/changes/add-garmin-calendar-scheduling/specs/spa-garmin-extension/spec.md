@@ -6,9 +6,9 @@ Every Garmin push entry point SHALL call `pushWorkoutToGarminCalendar(deps, reco
 
 Phase 2 SHALL diff the desired placement (library workout id, workout date) against the persisted one and, when they differ: persist `attempting{posted, at, previous}`; mark it `posted` and call `schedule`; commit the returned `workoutScheduleId`; and only then queue and `unschedule` the superseded entry. A superseded entry SHALL be deleted only after its replacement has committed (create first, delete after), so a failure leaves a duplicate and never a gap. The pipeline SHALL NOT delete any Garmin library workout.
 
-A pre-flight SHALL run before any call. Without `navigator.locks` (a non-secure context) the push SHALL run Phase 1 exactly as today, skip placement, and return `library-only` (not a failure). Without the `calendar-write-v1` feature it SHALL return `failed:bridge-outdated` with 0 library pushes.
+A pre-flight SHALL run before any call. Without `navigator.locks` (a non-secure context) the push SHALL run Phase 1 exactly as today, skip placement, and return `library-only{reason:"insecure-context"}`. Without the `calendar-write-v1` feature it SHALL do the same and return `library-only{reason:"bridge-outdated"}`. Neither is a failure: the UI SHALL show the workout as in the library with no date, in the warning tone and never the error tone, and for `bridge-outdated` SHALL offer one action that opens the extension's store page.
 
-The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplicate-left | uncertain | library-only | failed{reason, retryable, retryAfter?}`.
+The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason} | failed{reason, retryable, retryAfter?}`, with `library-only` reasons `insecure-context | bridge-outdated`.
 
 #### Scenario: A date-only move places first and removes after
 
@@ -31,7 +31,7 @@ The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplic
 
 - **GIVEN** `navigator.locks` is unavailable
 - **WHEN** the athlete pushes
-- **THEN** the pipeline SHALL make 1 library push and 0 calendar calls and return `library-only`
+- **THEN** the pipeline SHALL make 1 library push and 0 calendar calls and return `library-only{reason:"insecure-context"}`
 
 ### Requirement: One Web Lock per record serializes placement across tabs
 
@@ -84,4 +84,11 @@ Superseded schedule ids SHALL be kept in the ledger row's `removalQueue` and dra
 
 - **GIVEN** a ping response with no `features`
 - **WHEN** the athlete pushes
-- **THEN** detection SHALL record `features: []` and the push SHALL return `failed:bridge-outdated` with 0 library pushes
+- **THEN** detection SHALL record `features: []`, and the push SHALL make 1 library push and 0 calendar calls and return `library-only{reason:"bridge-outdated"}`
+- **AND** the UI SHALL show the workout as in the library with no date, in the warning tone, with one action that opens the extension's store page
+
+#### Scenario: Pushing again after the update only places the date
+
+- **GIVEN** a workout that returned `library-only{reason:"bridge-outdated"}` and whose content has not changed
+- **WHEN** the bridge now reports `calendar-write-v1` and the athlete pushes again
+- **THEN** the pipeline SHALL make 0 library pushes and 1 `schedule` call, and return `scheduled`
