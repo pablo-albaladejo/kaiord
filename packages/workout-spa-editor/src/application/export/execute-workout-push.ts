@@ -21,6 +21,7 @@ import type { ManagedDataType } from "@kaiord/core";
 import type { IntegrationPolicyDeps } from "../integration-policy/integration-policy-deps";
 import { resolveExportPolicies } from "../integration-policy/resolve-export-policies.use-case";
 import type {
+  ExportPushFn,
   RecordExportDeps,
   RecordExportResult,
 } from "./record-export.use-case";
@@ -46,7 +47,8 @@ export type ExecuteWorkoutPushInput = {
   kaiordRecordId: string;
   destinationBridgeId: string;
   payload: Record<string, unknown>;
-  pushFn: (payload: Record<string, unknown>) => Promise<{ externalId: string }>;
+  /** Resolves `{externalId, library?}`; a Garmin push reports `library`. */
+  pushFn: ExportPushFn;
 };
 
 export const executeWorkoutPush = async (

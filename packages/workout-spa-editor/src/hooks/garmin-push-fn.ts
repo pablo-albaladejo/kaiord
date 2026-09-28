@@ -8,6 +8,9 @@ import { db } from "../adapters/dexie/dexie-database";
 import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-export-ledger-repository";
 import type { ExecuteWorkoutPushInput } from "../application/export/execute-workout-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
+import { parseGarminWorkoutId } from "../types/garmin-ledger";
+import { executePush } from "./garmin-bridge-operations";
+import { getGarminExtensionId } from "./use-garmin-bridge-action-helpers";
 
 export { policyRepo } from "./integration-policy-repo";
 export const ledgerRepo = createDexieExportLedgerRepository(db);
@@ -33,13 +36,32 @@ export class BridgePushFailedError extends Error {}
 /** Wraps a bridge's `pushWorkout` into `executeWorkoutPush`'s `pushFn`
     contract. Falls back to a stable sentinel id when the bridge doesn't
     echo one back — or echoes one that is not id-shaped — so neither a
-    missing id nor a malformed one breaks idempotent re-push keying. */
+    missing id nor a malformed one breaks idempotent re-push keying.
+    `library` is the explicit verdict on the echo: `confirmed` only for a
+    Garmin-shaped workout id, `unconfirmed` for anything else. */
 export const buildGarminPushFn = (
   pushWorkout: (gcn: unknown) => Promise<GarminPushOutcome>
 ): ExecuteWorkoutPushInput["pushFn"] => {
   return async (payload) => {
     const outcome = await pushWorkout(payload);
     if (!outcome.success) throw new BridgePushFailedError();
-    return { externalId: asExternalId(outcome.garminWorkoutId) };
+    const workoutId = parseGarminWorkoutId(outcome.garminWorkoutId);
+    return {
+      externalId: asExternalId(outcome.garminWorkoutId),
+      library: workoutId
+        ? { kind: "confirmed", workoutId }
+        : { kind: "unconfirmed" },
+    };
   };
+};
+
+/** A `pushWorkout` for bulk sends: maps the bridge push to a
+    `GarminPushOutcome` without touching the global push UI state
+    (`setPushing`), which belongs to the single-workout push button. */
+export const pushQuiet = async (gcn: unknown): Promise<GarminPushOutcome> => {
+  const result = await executePush(getGarminExtensionId(), gcn);
+  if (result.status !== "success") {
+    return { success: false, garminWorkoutId: null };
+  }
+  return { success: true, garminWorkoutId: result.garminWorkoutId };
 };
