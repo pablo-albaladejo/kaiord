@@ -102,17 +102,17 @@ schedule POST. No credential was recorded; the test entry was deleted (204).
   The service worker therefore keeps only `itemType === "workout"` items of
   the requested `workoutId`, and only their `id` and `date`.
 
+- **Envelope key.** The month response holds its items in a
+  `calendarItems` array: the probe read `calendarItems` and found the new
+  item there, the only one for that workout on that day. A payload without
+  that array still fails the read instead of answering an empty list.
+
 Not covered by T0b, and still unverified:
 
 - **A7.** The capture deleted a live entry (204); a DELETE of an
   already-deleted entry was not tried. Its fallback (the read disambiguates)
   is available because A1 and A3 hold.
 - **A8.** A 401 on the schedule POST was not provoked.
-- **The month envelope key.** The capture recorded the items but not the
-  name of the array holding them. The bridge reads `calendarItems`, this
-  endpoint's known shape; a payload without that array fails the read instead
-  of answering an empty list, so a wrong key degrades to `uncertain`, never
-  to a re-POST. The manual E2E (task 9.4) confirms it.
 
 If A1 is false, `calendar-find` and the `calendar-find-v1` feature are dropped
 from this change: the action list in the `garmin-bridge` delta shrinks to 10,
