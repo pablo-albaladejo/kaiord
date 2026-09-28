@@ -1,0 +1,552 @@
+{
+  "entry": {
+    "date": "2026-09-28",
+    "source": "gsc",
+    "window": {
+      "start": "2026-09-19",
+      "end": "2026-09-25"
+    },
+    "clicks": 7,
+    "impressions": 60,
+    "ctr": 0.11666666666666667,
+    "position": 6.8,
+    "indexed": 24,
+    "sitemapUrlCount": 40,
+    "sitemapSubmitted": true,
+    "topQueries": [
+      {
+        "query": "fit file format",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 80
+      },
+      {
+        "query": "fit format",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 25
+      },
+      {
+        "query": "is it free?",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 1
+      },
+      {
+        "query": "keyord1",
+        "clicks": 0,
+        "impressions": 1,
+        "position": 71
+      }
+    ]
+  },
+  "byQuery": [
+    {
+      "keys": [
+        "fit file format"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 80
+    },
+    {
+      "keys": [
+        "fit format"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 25
+    },
+    {
+      "keys": [
+        "is it free?"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "keyord1"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 71
+    }
+  ],
+  "byPage": [
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/zwo-to-fit"
+      ],
+      "clicks": 2,
+      "impressions": 9,
+      "ctr": 0.2222222222222222,
+      "position": 5.666666666666667
+    },
+    {
+      "keys": [
+        "https://kaiord.com/"
+      ],
+      "clicks": 1,
+      "impressions": 19,
+      "ctr": 0.05263157894736842,
+      "position": 5.7368421052631575
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/"
+      ],
+      "clicks": 1,
+      "impressions": 2,
+      "ctr": 0.5,
+      "position": 4.5
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/fit-to-zwo"
+      ],
+      "clicks": 1,
+      "impressions": 5,
+      "ctr": 0.2,
+      "position": 3.2
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/garmin-to-fit"
+      ],
+      "clicks": 1,
+      "impressions": 5,
+      "ctr": 0.2,
+      "position": 5.2
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/zwo-to-garmin"
+      ],
+      "clicks": 1,
+      "impressions": 5,
+      "ctr": 0.2,
+      "position": 2.2
+    },
+    {
+      "keys": [
+        "https://kaiord.com/#data-hub"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://kaiord.com/#developers"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://kaiord.com/#features"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://kaiord.com/#health"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://kaiord.com/app/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/api/core/variables/durationTypeSchema"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 7
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/fit-to-garmin"
+      ],
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 6.4
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/fit-to-tcx"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 4.5
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/tcx-to-fit"
+      ],
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 6
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/tcx-to-garmin"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 6.5
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/convert/zwo-to-tcx"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 10
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/formats/fit.html"
+      ],
+      "clicks": 0,
+      "impressions": 8,
+      "ctr": 0,
+      "position": 18.375
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/formats/krd"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 4
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/formats/tcx"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 4
+    },
+    {
+      "keys": [
+        "https://kaiord.com/docs/formats/zwo"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
+    },
+    {
+      "keys": [
+        "https://kaiord.com/es/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    }
+  ],
+  "sitemaps": {
+    "sitemap": [
+      {
+        "path": "https://kaiord.com/sitemap.xml",
+        "lastSubmitted": "2026-08-10T08:24:57.160Z",
+        "isPending": false,
+        "isSitemapsIndex": true,
+        "lastDownloaded": "2026-09-23T09:15:11.529Z",
+        "warnings": "0",
+        "errors": "0",
+        "contents": [
+          {
+            "type": "web",
+            "submitted": "377",
+            "indexed": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "inspections": [
+    {
+      "url": "https://kaiord.com/",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-27T13:47:31Z"
+    },
+    {
+      "url": "https://kaiord.com/es/",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-28T05:00:54Z"
+    },
+    {
+      "url": "https://kaiord.com/app/",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/cli/",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/core/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-30T03:34:31Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/fit/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T19:11:31Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin-connect/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T20:48:48Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/garmin/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-22T14:22:23Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/api/",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/mcp/README",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/tcx/README",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/api/zwo/README",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-25T19:20:14Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/cli/commands",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/fit-to-garmin",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-27T09:29:35Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/fit-to-tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T05:21:58Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/fit-to-zwo",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-30T02:22:47Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/garmin-to-fit",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-14T12:26:56Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/garmin-to-tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T15:12:07Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/garmin-to-zwo",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-11T09:03:54Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/tcx-to-fit",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T04:17:32Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/tcx-to-garmin",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-11T08:43:49Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/tcx-to-zwo",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/zwo-to-fit",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-26T12:12:20Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/zwo-to-garmin",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-22T01:12:05Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/convert/zwo-to-tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-21T21:06:13Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/fit",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/gcn",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/krd",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-29T04:58:04Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/tcx",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-21T09:25:44Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/formats/zwo",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-30T16:05:26Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/architecture",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/contributing",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/getting-started",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-22T21:58:39Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/quick-start",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/testing",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-05T16:01:44Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/guide/why-kaiord",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-07T05:41:14Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/",
+      "verdict": "NEUTRAL",
+      "coverageState": "Crawled - currently not indexed",
+      "lastCrawlTime": "2026-09-27T13:56:37Z"
+    },
+    {
+      "url": "https://kaiord.com/docs/legal/privacy-policy",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null
+    },
+    {
+      "url": "https://kaiord.com/docs/mcp/tools",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null
+    }
+  ]
+}
