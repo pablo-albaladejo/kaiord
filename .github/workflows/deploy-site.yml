@@ -15,6 +15,10 @@ on:
       - "styles/**"
       - ".github/workflows/deploy-site.yml"
       - "scripts/inject-spa-fallback.mjs"
+      - "scripts/emit-legacy-editor-page.mjs"
+      - "scripts/check-site-links.mjs"
+      - "scripts/lib/site-links-resolve.mjs"
+      - "scripts/lib/site-links-scan.mjs"
   workflow_dispatch:
 
 permissions:
@@ -31,6 +35,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # P95 = 118s; ceil(P95 × 1.5 / 60) = 3; capped at build-family ceiling 20.
+    # The added guards cost < 1s: the CI "Site guards" step (the same link
+    # check plus the docs tests) ran 12:14:22 → 12:14:22 in run 36420377432
+    # (PR #1267, same runner class), and the emitter only writes one file.
+    # ceil((118 + 1) × 1.5 / 60) = 3.
     timeout-minutes: 3
     outputs:
       spa_marker: ${{ steps.spa_marker.outputs.marker }}
@@ -145,6 +153,20 @@ jobs:
       - name: Inject SPA route fallback
         run: node scripts/inject-spa-fallback.mjs merged-dist
 
+      # A real 200 page for the bare /editor/ URL (canonical to /app/). It
+      # refuses to run without the bridge above, and leaves every deeper
+      # /editor/<route> path to it.
+      - name: Emit legacy /editor/ page
+        run: |
+          set -e
+          node scripts/emit-legacy-editor-page.mjs merged-dist
+          test -f merged-dist/editor/index.html || { echo "❌ Missing editor/index.html"; exit 1; }
+
+      - name: Check site links
+        env:
+          REQUIRE_DOCS_DIST: "1"
+        run: node scripts/check-site-links.mjs --merged merged-dist
+
       - name: Capture SPA build marker
         id: spa_marker
         run: |
@@ -173,12 +195,15 @@ jobs:
     runs-on: ubuntu-latest
     # P95 = 12s; ceil(P95 × 1.5 / 60) = 1 — but the P95 only describes the run
     # where the first smoke attempt succeeds. The retry budget is what the
-    # timeout has to cover, and it is 10 × (15s + 15s + 10s) = 400s worst case:
-    # two curls at --max-time 15 plus the propagation sleep, per attempt. At 1
-    # the job was cancelled exactly when the retries were doing their job, and
-    # slow Pages propagation read as a failed deploy. 7 covers the budget with
-    # room for the deploy step itself, well under the build-family ceiling 20.
-    timeout-minutes: 7
+    # timeout has to cover, and it is 10 × (15s + 15s + 15s + 10s) = 550s worst
+    # case: three curls at --max-time 15 (/app/, /404.html, /editor/) plus the
+    # propagation sleep, per attempt. At 1 the job was cancelled exactly when
+    # the retries were doing their job, and slow Pages propagation read as a
+    # failed deploy. 10 covers the budget with room for the deploy step
+    # itself, well under the build-family ceiling 20. Each further smoke probe
+    # (one more curl at --max-time 15 per attempt) adds 10 × 15s = 150s to the
+    # worst case; recompute this budget when adding one.
+    timeout-minutes: 10
     needs: build
     steps:
       - name: Deploy to GitHub Pages
@@ -207,12 +232,16 @@ jobs:
           # Pages CDN propagation is eventually consistent; retry up to 10x at 10s.
           APP_URL="${PAGE_URL%/}/app/"
           NOT_FOUND_URL="${PAGE_URL%/}/404.html"
+          LEGACY_URL="${PAGE_URL%/}/editor/"
+          CANONICAL='rel="canonical" href="https://kaiord.com/app/"'
           echo "Smoke targets:"
           echo "  - $APP_URL (expect marker: $MARKER)"
           echo "  - $NOT_FOUND_URL (expect rafgraph redirect script)"
+          echo "  - $LEGACY_URL (expect 200 + canonical to /app/)"
           for i in $(seq 1 10); do
             EDITOR_TMP=$(mktemp)
             NOT_FOUND_TMP=$(mktemp)
+            LEGACY_TMP=$(mktemp)
             # `--http-status` would be cleaner but isn't in older curl; capture
             # the code via -w and the body via -o for portability. -L follows
             # any HTTP-level redirect so we score the final response.
@@ -222,11 +251,16 @@ jobs:
             # so the echo appended a second one and the log read "000000".
             APP_CODE=$(curl -sL --max-time 15 -o "$EDITOR_TMP" -w "%{http_code}" "$APP_URL" || true)
             NOT_FOUND_CODE=$(curl -sL --max-time 15 -o "$NOT_FOUND_TMP" -w "%{http_code}" "$NOT_FOUND_URL" || true)
+            # No -L: /editor/ itself must answer 200. Following a redirect
+            # would score whatever it points at instead.
+            LEGACY_CODE=$(curl -s --max-time 15 -o "$LEGACY_TMP" -w "%{http_code}" "$LEGACY_URL" || true)
             EDITOR_BODY=$(cat "$EDITOR_TMP" 2>/dev/null || true)
             NOT_FOUND_BODY=$(cat "$NOT_FOUND_TMP" 2>/dev/null || true)
-            rm -f "$EDITOR_TMP" "$NOT_FOUND_TMP"
+            LEGACY_BODY=$(cat "$LEGACY_TMP" 2>/dev/null || true)
+            rm -f "$EDITOR_TMP" "$NOT_FOUND_TMP" "$LEGACY_TMP"
             APP_OK=0
             NOT_FOUND_OK=0
+            LEGACY_OK=0
             # /app/ is the SPA entry — must serve 200 + the bundle marker.
             [ "$APP_CODE" = "200" ] && echo "$EDITOR_BODY" | grep -qF "$MARKER" && APP_OK=1
             # /404.html is itself a real artefact (GitHub Pages serves it as
@@ -235,16 +269,20 @@ jobs:
             # guard literal is present so the redirect only fires for
             # SPA-related 404s.
             [ "$NOT_FOUND_CODE" = "200" ] && echo "$NOT_FOUND_BODY" | grep -qF "indexOf('/editor/')" && NOT_FOUND_OK=1
-            if [ "$APP_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ]; then
-              echo "✅ Attempt $i: SPA bundle present at /app/ (200) AND rafgraph redirect present at /404.html (200)"
+            # The bare /editor/ URL is a real page (crawlers see 200, not the
+            # 404 the bridge answers with), canonical to /app/.
+            [ "$LEGACY_CODE" = "200" ] && echo "$LEGACY_BODY" | grep -qF "$CANONICAL" && LEGACY_OK=1
+            if [ "$APP_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ] && [ "$LEGACY_OK" = "1" ]; then
+              echo "✅ Attempt $i: SPA bundle present at /app/ (200), rafgraph redirect present at /404.html (200), /editor/ canonical to /app/ (200)"
               exit 0
             fi
-            echo "Attempt $i: app=$APP_OK (code=$APP_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE); retrying in 10s"
+            echo "Attempt $i: app=$APP_OK (code=$APP_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE) editor=$LEGACY_OK (code=$LEGACY_CODE); retrying in 10s"
             sleep 10
           done
           echo "❌ Smoke failed after 10 retries:"
           echo "    /app/ status=$APP_CODE (expect 200), marker present: $APP_OK"
           echo "    /404.html status=$NOT_FOUND_CODE (expect 200), rafgraph script: $NOT_FOUND_OK"
+          echo "    /editor/ status=$LEGACY_CODE (expect 200), canonical to /app/: $LEGACY_OK"
           exit 1
 
       # Rollback: use workflow_dispatch on last known-good main commit SHA,

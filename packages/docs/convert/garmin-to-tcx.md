@@ -7,7 +7,7 @@ description: "Convert a Garmin Connect workout (GCN JSON) to a TCX (Training Cen
 
 Take a **Garmin Connect** workout (GCN JSON) into a **TCX** (Training Center XML)
 file so a plan from Garmin can import into another training platform. Use the
-free, in-browser [Kaiord Editor](https://kaiord.com/editor/) (no account, no
+free, in-browser [Kaiord Editor](https://kaiord.com/app/) (no account, no
 upload), or the [CLI](/cli/commands#convert) and
 [TypeScript SDK](/guide/quick-start). Conversions go through Kaiord's canonical
 [KRD format](/formats/krd) and stay within round-trip tolerances (time ±1 s,
@@ -17,7 +17,7 @@ heart rate ±1 bpm, cadence ±1 rpm).
 
 ### 1. Editor (drag & drop)
 
-Open [kaiord.com/editor](https://kaiord.com/editor/), drop your Garmin Connect
+Open [kaiord.com/app](https://kaiord.com/app/), drop your Garmin Connect
 workout file, choose **TCX** as the export format, and download `workout.tcx`.
 
 ### 2. CLI

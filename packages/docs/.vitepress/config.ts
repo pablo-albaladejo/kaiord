@@ -23,34 +23,48 @@ const AUTHOR = {
   github: "https://github.com/pablo-albaladejo",
 };
 
-function buildJsonLd(
-  pageData: { relativePath: string; title: string; description: string },
-  isHome: boolean
-): string[] {
-  const pageUrl = pageCanonicalUrl(pageData.relativePath);
-  const segments = pageData.relativePath
+// A crumb links the page that actually serves its path. A segment with no
+// page of its own (`api/core/type-aliases/`) gets no crumb: its URL is a 404,
+// and `scripts/check-site-links.mjs` rejects any link to one.
+function breadcrumbItems(relativePath: string, pages: ReadonlySet<string>) {
+  const segments = relativePath
     .replace(/\.md$/, "")
-    .replace(/\/index$/, "")
+    .replace(/(^|\/)index$/, "")
     .split("/")
     .filter(Boolean);
+  const crumbs = [{ name: "Docs", item: `${SITE_URL}${DOCS_BASE}` }];
+  segments.forEach((seg, i) => {
+    const prefix = segments.slice(0, i + 1).join("/");
+    const page =
+      i === segments.length - 1
+        ? relativePath
+        : [`${prefix}.md`, `${prefix}/index.md`, `${prefix}/README.md`].find(
+            (candidate) => pages.has(candidate)
+          );
+    const item = page && pageCanonicalUrl(page);
+    if (item && item !== crumbs[crumbs.length - 1].item) {
+      const name = seg.charAt(0).toUpperCase() + seg.slice(1);
+      crumbs.push({ name: name.replace(/-/g, " "), item });
+    }
+  });
+  return crumbs.map((crumb, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    ...crumb,
+  }));
+}
+
+function buildJsonLd(
+  pageData: { relativePath: string; title: string; description: string },
+  isHome: boolean,
+  pages: ReadonlySet<string>
+): string[] {
+  const pageUrl = pageCanonicalUrl(pageData.relativePath);
 
   const breadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Docs",
-        item: `${SITE_URL}${DOCS_BASE}`,
-      },
-      ...segments.map((seg, i) => ({
-        "@type": "ListItem",
-        position: i + 2,
-        name: seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " "),
-        item: `${SITE_URL}${DOCS_BASE}${segments.slice(0, i + 1).join("/")}/`,
-      })),
-    ],
+    itemListElement: breadcrumbItems(pageData.relativePath, pages),
   };
 
   const results = [JSON.stringify(breadcrumb)];
@@ -263,7 +277,7 @@ const config = {
     plugins: [...llmstxt()],
   },
 
-  transformHead({ pageData }: TransformContext) {
+  transformHead({ pageData, siteConfig }: TransformContext) {
     const head: HeadConfig[] = [];
     const isHome = pageData.relativePath === "index.md";
 
@@ -294,7 +308,8 @@ const config = {
         title: pageData.frontmatter.title || pageData.title,
         description: pageData.frontmatter.description || pageData.description,
       },
-      isHome
+      isHome,
+      new Set(siteConfig.pages)
     );
 
     for (const block of jsonLdBlocks) {

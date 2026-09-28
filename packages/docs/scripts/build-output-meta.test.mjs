@@ -2,10 +2,10 @@
 // contains the `<meta name="theme-color">` tag with the exact value parsed
 // from the shared `--bg-page` token.
 //
-// Skipped when `dist/` does not exist (local runs without a prior build).
-// CI runs `pnpm -r build` before `pnpm lint` (via lint:specs), so this
-// fires post-build and catches divergence in the rendered artifact — not
-// just the config shape.
+// Skipped when `dist/` does not exist (local runs, and the CI `lint` job,
+// whose build artifacts carry only `packages/*/dist`), unless
+// REQUIRE_DOCS_DIST=1: the CI `build` job sets it after `pnpm -r build`, so
+// a missing docs build there fails instead of skipping silently.
 
 import { strict as assert } from "node:assert";
 import { existsSync, readFileSync } from "node:fs";
@@ -20,7 +20,12 @@ const INDEX_HTML = resolve(__dirname, "..", ".vitepress", "dist", "index.html");
 
 test(
   "rendered index.html contains theme-color meta with the token value",
-  { skip: !existsSync(INDEX_HTML) && "dist/ not built" },
+  {
+    skip:
+      !existsSync(INDEX_HTML) &&
+      process.env.REQUIRE_DOCS_DIST !== "1" &&
+      "dist/ not built (set REQUIRE_DOCS_DIST=1 to require it)",
+  },
   () => {
     const html = readFileSync(INDEX_HTML, "utf8");
     const expected = readBrandTokenColor("--bg-page");
