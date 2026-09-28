@@ -12,6 +12,10 @@
  * device converges on the same row regardless of pull order. Pure, no I/O.
  */
 
+import { isGarminWorkoutLedgerRow } from "../../types/export-ledger";
+import { normalizeGarminLedgerRow } from "../export/normalize-garmin-ledger-row";
+import { ledgerClock, mergeExportLedgerRows } from "./merge-export-ledger-rows";
+import { mergeGarminLedgerRows } from "./merge-garmin-ledger-rows";
 import { recordClock, recordKey } from "./merge-record-key";
 
 type Row = Record<string, unknown>;
@@ -23,53 +27,34 @@ export type RowMergeHook = {
   merge: (a: Row, b: Row) => Row;
   /** Row clock for tombstone suppression; defaults to `recordClock`. */
   clock?: (row: Row) => number;
+  /**
+   * Shape-based, idempotent clean-up applied to every row of the table before
+   * keying, in both the snapshot merge and the live import merge, so a row
+   * from an older app version is normalized whatever its manifest version.
+   */
+  normalize?: (row: Row) => Row;
 };
 
-const stampMs = (stamp: unknown): number => {
-  if (typeof stamp !== "string") return 0;
-  const ms = Date.parse(stamp);
-  return Number.isNaN(ms) ? 0 : ms;
-};
+/** Garmin workout rows merge by supersession (MUST-D); every other ledger
+    row keeps the plain total order. Both sides share the natural key, so
+    they share the destination and data type. */
+const mergeLedgerRows = (a: Row, b: Row): Row =>
+  isGarminWorkoutLedgerRow(a) && isGarminWorkoutLedgerRow(b)
+    ? mergeGarminLedgerRows(a, b)
+    : mergeExportLedgerRows(a, b);
 
 /**
- * Ledger clock: the later of `updatedAt` and `exportedAt`, so a row written by
- * an app version that predates `updatedAt` (and so bumps only `exportedAt`)
- * still reads as newer than its stale stamped copy.
- */
-const ledgerClock = (row: Row): number =>
-  Math.max(stampMs(row.updatedAt), stampMs(row.exportedAt));
-
-const isCommitted = (row: Row) => row.destinationExternalId !== "pending";
-
-/**
- * A committed row beats a `"pending"` one whatever their clocks — a pending
- * row is an in-flight POST that may still fail, and letting it win would
- * discard the destination id another device already committed. Then the
- * newer clock wins, then the lexicographically smaller `id`, then the smaller
- * serialisation (same id and clock, divergent content) — a total order,
- * hence symmetric.
- */
-export function mergeExportLedgerRows(a: Row, b: Row): Row {
-  if (isCommitted(a) !== isCommitted(b)) return isCommitted(a) ? a : b;
-  const clockDiff = ledgerClock(a) - ledgerClock(b);
-  if (clockDiff !== 0) return clockDiff > 0 ? a : b;
-  const idA = String(a.id);
-  const idB = String(b.id);
-  if (idA !== idB) return idA < idB ? a : b;
-  return JSON.stringify(a) <= JSON.stringify(b) ? a : b;
-}
-
-/**
- * Registry of natural-key merge hooks, one entry per table. The
- * `exportLedger` entry is the contract later destination-specific merges
- * (e.g. Garmin rows) replace — keep it a single entry.
+ * Registry of natural-key merge hooks, one entry per table. Destination-
+ * specific ledger merges (Garmin workout rows) dispatch inside the single
+ * `exportLedger` entry — keep it a single entry.
  */
 export const ROW_MERGE_HOOKS: Readonly<Record<string, RowMergeHook>> = {
   exportLedger: {
     key: (row) =>
       `${String(row.kaiordRecordId ?? "")}\u0000${String(row.destinationBridgeId ?? "")}`,
-    merge: mergeExportLedgerRows,
+    merge: mergeLedgerRows,
     clock: ledgerClock,
+    normalize: normalizeGarminLedgerRow,
   },
 };
 

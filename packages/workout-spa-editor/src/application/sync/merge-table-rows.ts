@@ -45,14 +45,20 @@ const isSuppressed = (
   return deletedAt !== undefined && rowClock(table, row) <= deletedAt;
 };
 
-/** Merge rows of one table by merge key, dropping tombstone-suppressed rows. */
+/**
+ * Merge rows of one table by merge key, dropping tombstone-suppressed rows.
+ * Every row first goes through the table hook's `normalize`, if any, so rows
+ * from an older app version fold in their current shape.
+ */
 export function mergeTableRows(
   table: string,
   rows: ReadonlyArray<Row>,
   deletes: Map<string, number>
 ): Row[] {
+  const normalize = rowMergeHookFor(table)?.normalize ?? ((row: Row) => row);
   const byKey = new Map<string, Row>();
-  for (const row of rows) {
+  for (const raw of rows) {
+    const row = normalize(raw);
     if (isSuppressed(table, row, deletes)) continue;
     const k = rowMergeKey(table, row);
     const current = byKey.get(k);

@@ -197,6 +197,10 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - A cross-device race can leave a duplicate, never a gap. The duplicate is untracked when a merge drops an ambiguous `attempting`.
 - The ledger gains `library`, `placement`, `removalQueue` and `forceRepush`, plus a shape normalizer and a merge hook.
 - Placement requires Web Locks, which exist only in secure contexts. Without them the push is library-only (today's behaviour).
+- Dexie v36 is a data-only bump (the store schema is v35's), but the snapshot manifest carries v36: a device still on v35 rejects the newer snapshot ("Snapshot schema v36 is newer than this app") until it updates. Release note: update every device.
+- A cross-device conflict whose `Placed`s are all tainted resolves to `uncertain` with no state change: every entry stays on the calendar (a duplicate at worst) until the next push resolves it with `calendar-find`.
+- The removal queue is a grow-only map of tombstones: an entry is never removed, only its state rises. It grows by a handful of ids per record (one per move plus adoptions), which is accepted.
+- Legacy queue entries without a state are normalized to `held` (§3.9), so they are never drained until a `calendar-find` verifies them: duplicates at worst.
 
 ### Follow-ups
 
@@ -206,12 +210,13 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - matching a coach's delete + recreate
 - cleaning up superseded library workouts
 - library duplicates from cross-device `[U]` pushes
+- a conditional write on cloud sync: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write, and `syncWithCloud` imports its merge before the push that may be rejected (`sync-with-cloud.ts:34-38`); an atomic `If-Match` closes the first; importing only after an accepted push closes the second, and that is the half that matters: one ordinary rejected push already reaches a crossed pair (§3.9)
 
 ## Design (normative)
 
 ### 3.1 Ledger model
 
-Location: `SPA/types/export-ledger.ts`. Applies to Garmin rows; every field is optional.
+Location: the fields on `SPA/types/export-ledger.ts`, the branded ids and tagged unions in `SPA/types/garmin-ledger.ts` (kept apart for the 80-line cap). Applies to Garmin rows; every field is optional.
 
 ```ts
 type GarminWorkoutId  = string & { readonly __b: "GarminWorkoutId" };   // ^[1-9]\d*$ via parseGarminWorkoutId
@@ -219,11 +224,13 @@ type GarminScheduleId = string & { readonly __b: "GarminScheduleId" };  // ^[1-9
 library?: { kind: "confirmed"; workoutId } | { kind: "unconfirmed" } | { kind: "missing"; workoutId }
 forceRepush?: true
 placement?: Placed
-  | { kind: "attempting"; workoutId; date; at: string; posted: boolean; previous?: Placed }
+  | { kind: "attempting"; workoutId; date; at: string; posted: boolean; previous?: Placed;
+      supersedes: GarminScheduleId[] }  // the queue ids read at the claim; sorted, unique; §3.9
   | { kind: "uncertain";  workoutId; date; previous?: Placed }
 type Placed = { kind: "scheduled"; workoutScheduleId: GarminScheduleId; workoutId; date }
-            | { kind: "unconfirmed"; workoutId; date }
-removalQueue?: { workoutScheduleId: GarminScheduleId; workoutId; date; attempts: number; abandoned: boolean }[]
+            | { kind: "unconfirmed"; workoutId; date; supersedes: GarminScheduleId[] }  // sorted, unique; §3.9
+removalQueue?: { workoutScheduleId: GarminScheduleId; workoutId; date; attempts: number; abandoned: boolean;
+                  state: "held" | "keep" | "retire" | "gone" }[]   // grow-only, one entry per id (§3.9)
 ```
 
 Repository port changes:
@@ -280,7 +287,7 @@ Repository port changes:
 **4. Claim** (`mutateByKey`). Branch on the current placement:
 
 - A `Placed` equal to the desired placement → drain (§3.5) → `unchanged`.
-- An `attempting{posted:false}`, no placement, or a different `Placed` → write `attempting{desired, at:now, posted:false, previous: current Placed}`. If the current state is already `attempting`, keep its `previous`.
+- An `attempting{posted:false}`, no placement, or a different `Placed` → write `attempting{desired, at:now, posted:false, previous: current Placed, supersedes}`, where `supersedes` is every id in the queue this claim reads, sorted. If the current state is already `attempting`, keep its `previous`. The list is taken here, before the POST mints an id, never later (§3.9).
 - An `attempting{posted:true}` → **resolve** (§3.4) before any POST. This is a leftover from a closed tab or a crashed service worker.
 - `uncertain` → return `uncertain`, unless the user chose an action (§3.4).
 
@@ -297,8 +304,8 @@ Repository port changes:
 
 **7. Commit** (`mutateByKey`, guarded)
 
-- Write `scheduled`, or `unconfirmed` when Garmin returned no id.
-- If `previous` was `scheduled`, add it to the removal queue.
+- Write `scheduled` with its id `keep`, or `unconfirmed` when Garmin returned no id. An `unconfirmed` commit copies `supersedes` from the claim's `attempting`; an id first learned between the claim and the commit (a sync can land after the POST) is never listed (§3.9).
+- If `previous` was `scheduled`, write its id `retire` in the same write.
 
 **8. Drain** the removal queue (§3.5). Every queue write is guarded.
 
@@ -313,7 +320,7 @@ Repository port changes:
 Therefore every write inside the lock is its own `rw` transaction that re-reads the row by natural key, then applies a guard:
 
 - **While `attempting`**: the row exists and its placement is `attempting` with the expected `at`. At the step-5 guard, the expected `at` is the one written by the claim (step 4). At step 6, step 7 and the resolve writes, it is the `at` that step 5 rewrote.
-- **After the commit** (step 8 and its queue writes): the row exists and its `Placed` still carries **our `workoutScheduleId`** (by id; for an `unconfirmed` commit, the same workoutId and date). The drain removes **only its own queue id** from the re-read row. It never writes the whole row, so concurrent queue additions survive.
+- **After the commit** (step 8 and its queue writes): the row exists and its `Placed` still carries **our `workoutScheduleId`** (by id; for an `unconfirmed` commit, the same workoutId and date). The drain writes **only its own queue id's state** on the re-read row. It never writes the whole row, so concurrent queue additions survive.
 
 When the guard fails, the outcome depends on what happened to the row:
 
@@ -368,8 +375,8 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
   - None → go to the gate.
 - **When A3 is false (MUST-C)**, let `n` be the number of entries at that date.
   - `n = 0` → `uncertain`. Never re-POST on a count.
-  - `n ≥ 1`, and no queued entry has the same (workoutId, date) → adopt as `unconfirmed`. If `n > 1`, the result is `duplicate-left` with no id.
-  - `n ≥ 1`, and a queued entry has the same (workoutId, date) → `uncertain`.
+  - `n ≥ 1`, and no entry in a state other than `keep` has the same (workoutId, date) → adopt as `unconfirmed` with `supersedes: []` (the adopted entry may be a known one). If `n > 1`, the result is `duplicate-left` with no id.
+  - `n ≥ 1`, and an entry in a state other than `keep` has the same (workoutId, date) → `uncertain`.
 
 **Gate (A3 true only).**
 
@@ -380,28 +387,28 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 
 **Human actions on `uncertain`.**
 
-- "It's in Garmin" → `unconfirmed`.
+- "It's in Garmin" → `unconfirmed` with `supersedes: []`: the entry the athlete sees may be a known id. Offered only when no entry in a state other than `keep` shares the `uncertain`'s workoutId and date; otherwise the new `unconfirmed` would be tainted at once, so the row stays `uncertain` for T5 or "Send anyway".
 - "Send anyway" → POST, allowed only after `at + POST_GATE_MS`.
 
 ### 3.5 Removal queue
 
-**Skip rule.** An entry whose id equals the current `Placed` or `attempting.previous` is never sent to `unschedule`. It is dropped from the queue as a merge artefact (MUST-D, defence in depth).
+**Drainable = `retire`.** Only `retire` entries are sent to `unschedule`; `held`, `keep` and `gone` never are (§3.9). **Skip rule** (defence in depth): an entry whose id equals the current `Placed` or `attempting.previous` is never sent to `unschedule`, whatever its state. No entry is ever removed from the queue.
 
 **`unschedule` outcomes**
 
-| Outcome                              | Action                                                          |
-| ------------------------------------ | --------------------------------------------------------------- |
-| 204                                  | dequeue                                                         |
-| 401, or no status with `needsReauth` | keep; do not count the attempt                                  |
-| 404, A3 true                         | dequeue if the id is absent from a find; otherwise `attempts++` |
-| 404, A3 false                        | inconclusive: `attempts++`                                      |
-| anything else, including ambiguous   | `attempts++`                                                    |
+| Outcome                              | Action                                                         |
+| ------------------------------------ | -------------------------------------------------------------- |
+| 204                                  | write `gone`                                                   |
+| 401, or no status with `needsReauth` | keep; do not count the attempt                                 |
+| 404, A3 true                         | `gone` if the id is absent from a find; otherwise `attempts++` |
+| 404, A3 false                        | inconclusive: `attempts++`                                     |
+| anything else, including ambiguous   | `attempts++`                                                   |
 
 **Abandoned entries**
 
 - After 3 attempts, an entry becomes `abandoned`.
-- An abandoned entry is re-checked with `calendar-find` on each push of its record. If A3 shows it absent, it is dequeued.
-- The user can clear it with "I removed it" (dismiss).
+- An abandoned entry is re-checked with `calendar-find` on each push of its record. If A3 shows it absent, it is written `gone`.
+- The user can clear it with "I removed it" (dismiss), which writes `gone`. Only an `abandoned` entry is dismissable; a `held` one never is (§3.9).
 
 **`duplicate-left`** is returned iff this run created or kept a queue entry.
 
@@ -481,38 +488,111 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 - It is shape-based and idempotent.
 - It derives `library` once, from `^[1-9]\d*$`.
 - It Zod-parses the row and drops any invalid parts.
+- A queue entry with no `state` (legacy) becomes `held`, and the id of a `scheduled` placement or `previous` becomes `keep` unless the queue already gives it a state (a stateless entry for that id is replaced: the old skip rule treated it as a merge artefact).
 - It runs in two places: the Dexie v36 upgrade, and inside `SnapshotPort.importTables` as the per-table normalizer for `exportLedger`, whatever the manifest version.
+
+**The id-state lattice** (review round 2). The removal queue is a grow-only map from schedule id to a state on
+
+```
+held  <  keep  <  retire  <  gone
+```
+
+- `held`: an id nobody has verified (legacy data). Never the merged `Placed`, never drained.
+- `keep`: verified live and current: written by a commit (a 2xx `schedule` with an id) or by a `calendar-find` adoption.
+- `retire`: verified superseded after having been `keep`. The only drainable state.
+- `gone`: a tombstone: drained with 204 or a verified 404, dismissed, or verified absent by `calendar-find`. Never drained, never `Placed`.
+
+Garmin schedule ids are unique and never reused, so one monotone state per id is sound. Every writer only raises a state, and the merge joins by `max`; nothing is ever removed, so no re-merge can resurrect an id (the H2 livelock) and a drained id keeps its taint (the H1 gap). Every drainable state ranks above `keep`, so joining a verified-live `keep` with a stale copy never makes it drainable, and joining a drain decision with a stale `keep` never un-drains it. `held` ranks below `keep` so that a verification by any device wins over the unverified legacy mark.
+
+**Transitions** (every one only raises the state; absent counts as below `held`):
+
+| Event                               | Writes                                                                                                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Normalization (v36, import)         | legacy stateless entry → `held`; the id of a `scheduled` placement or `previous` → `keep` when absent/stateless; an `unconfirmed` or `attempting` with no `supersedes` → `[]` |
+| Commit (§3.3 step 7)                | new id → `keep`; superseded `scheduled` `previous` → `retire` (one write)                                                                                                     |
+| Merge, two different free `Placed`s | winner → `keep`; `scheduled` loser → `retire`                                                                                                                                 |
+| Merge, every `Placed` tainted       | nothing (no state is below `held`)                                                                                                                                            |
+| T5, exactly one match               | adopted id → `keep`; a `scheduled` `previous` → `retire`; `held` ids the read sees stay `held`; unseen → `gone`                                                               |
+| T5, several matches / none / failed | nothing                                                                                                                                                                       |
+| Drain: 204, or 404 verified absent  | `retire` → `gone`                                                                                                                                                             |
+| Dismiss ("I removed it")            | `abandoned` entry → `gone` (never a `held` one)                                                                                                                               |
+| Merge join                          | per id: `max(state)`, `max(attempts)`, OR of `abandoned`                                                                                                                      |
 
 **`mergeGarminLedgerRows(a, b)` (MUST-D)**
 
-1. Let `S` be the union of both queues' ids. The candidates are each row's `Placed` whose id is not in `S`. A `Placed` with kind `unconfirmed` has no id, so it is never in `S`.
-2. Pick the merged `Placed`:
-   - Two candidates with different ids → take the one from the row with the newer `updatedAt`, and queue the other.
+1. The merged queue is the join of both queues (table above), emitted in ascending id order.
+2. A `Placed` is **tainted** when it may not be live:
+   - a `scheduled` whose id's merged state is not `keep` (`held`, `retire` or `gone`); an absent id is not tainted;
+   - an `unconfirmed` (no id) when an entry with its `workoutId` and `date` has a merged state other than `keep`: it may be that entry, and `gone` counts too, else a drained entry would lose its taint once drained, exactly H1. A `keep` match is a live known id, so it does not taint. **Exception:** an entry listed in the placement's `supersedes` that is `retire` or `gone` does not taint — see "Causal context for `unconfirmed`" below. A listed `held` entry still taints.
+
+   The candidates are the untainted `Placed`s.
+
+3. Pick the merged `Placed`:
+   - Two `unconfirmed` for the same workout and date are one placement whose `supersedes` is the sorted **union** of both; it is tested for taint as one (before choosing).
+   - The same entry on both sides (same id, or same workout and date when one side is `unconfirmed`) → keep the side that knows its schedule id, else the newer.
+   - Two different candidates → the newer row's by the hook's total order wins; a `scheduled` loser is written `retire` (an `unconfirmed` loser has no id and is dropped: a duplicate at worst, never a gap).
    - One candidate → it wins.
-   - No candidate: every `Placed` present is queued, so none of them can be trusted to still exist on Garmin. The merged placement is `{kind:"uncertain", workoutId, date}` with no `previous`, taking `workoutId` and `date` from the newest row holding a `Placed`, by the hook's total order (`updatedAt`, then `id`, then serialisation), so both devices converge. Every one of those `Placed` ids is removed from the merged queue, so none of them is ever deleted: the worst case is an untracked duplicate, never a gap. The next push resolves it through the normal `uncertain` path, which with A1 and A3 verified is `calendar-find`: one match is adopted, several are `duplicate-left`, and there is never a blind re-POST.
+   - The merged `Placed`'s id is written `keep` (a no-op for a well-formed row).
+   - No candidate, no in-flight state (rule 4), but a `Placed` exists → `{kind:"uncertain", workoutId, date}` with no `previous`; no state changes.
 
-   **Invariant:** no id in either queue ever becomes the merged `Placed`. The rule is symmetric: `merge(a, b)` equals `merge(b, a)`, because the candidates, `S` and the total order do not depend on argument order.
+   **The `uncertain` target rule.** `workoutId` and `date` come from the maximum `held` entry — latest `date`, then larger `workoutId`, then larger `workoutScheduleId`. With no `held` entry the same maximum is taken over **all** entries. Either way it is a function of the merged queue alone, which every re-merge reproduces, so the rule is absorbing. Rejected: "the newest row holding a `Placed`" — the re-merge sees a snapshot that holds the `uncertain`, not a `Placed`, and picks differently.
 
-3. If neither row has a `Placed`, keep an `attempting` or `uncertain`, preferring `posted:true`.
-   - An `attempting` never beats a `Placed`.
-   - Dropping an `attempting{posted:true}` is the documented residual: a possibly untracked duplicate, never a gap.
-4. The merged queue is the union by id, minus the merged `Placed` id and the merged `attempting.previous` id. It keeps `max(attempts)` and ORs `abandoned`.
+4. If no `Placed` is a candidate, keep an `attempting` or `uncertain` of either row, preferring `posted:true`, before synthesizing the `uncertain` of rule 3: the re-merge with a snapshot that holds that in-flight state must reproduce it (absorption). An `attempting` never beats a `Placed`; dropping an `attempting{posted:true}` is the documented residual (an untracked duplicate, never a gap).
 5. `library` and `forceRepush` come only from the newer row (S2).
-6. `updatedAt` is the max of the two.
+6. `updatedAt` is the later of the two by the ledger clock's own parse (unparsable = 0), ties broken by the larger string, so equal instants spelled differently still merge symmetrically.
+
+**Why no release on merge** (round 2, H1). Round 1 cleared `held` when a free `Placed` won. "Free" only meant "in no queue", and a drained id left the queue, so a stale device's `Placed` S100, already drained elsewhere, won and released S1 and S2 for draining: a gap. With tombstones S100 is `gone` in the cloud and stays tainted, and `held` leaves only through a calendar-verified T5 resolution.
+
+**Causal context for `unconfirmed`** (round 3, L). Tainting by (workoutId, date) alone taints a device's own fresh placement: place S1 on D1, move to S2 on D2, drain S1 (`gone`), then an id-less push back to D1 gives `{unconfirmed D1, queue [S1 D1 gone, S2 D2 retire]}`, and `merge(x, x)` is `uncertain` — idempotence broken on a reachable row, and if `calendar-find` never returns an id it stays `uncertain` forever. So an `unconfirmed` records `supersedes`, every id its row knew when the attempt was **claimed**, before the POST, and a listed `retire` / `gone` entry does not taint it.
+
+- **Why the claim, not the commit.** A sync can land between the POST and the commit. Device B's T5 can adopt the freshly minted entry m as `keep` and sync; a commit-time list would then include m. When B later moves (m → `retire`), A's `unconfirmed` is untainted, newer, and wins, so B's new entry R retires too, and draining m and R empties the calendar. A list read at the claim cannot contain m, which did not exist yet.
+
+- **Why a listed id is never the placement's own entry.** Ids are unique and minted by the POST; the list was taken before the POST that created the entry, so the entry's id cannot be on it. A listed id is another entry, already superseded or dead, and its state says nothing about this one. An unlisted non-`keep` entry at the same workout and date still taints: that is the concurrent case (another device adopted and later retired the very entry this row pushed without learning its id).
+- **Only a committed POST lists ids.** An adoption ("It's in Garmin", or an A3-false `calendar-find` adoption) may be adopting a known entry, so it records `supersedes: []`; a legacy `unconfirmed` normalizes to `[]`. Both are the conservative round-2 rule.
+- **Why the union on merge is safe.** Two `unconfirmed` rows for the same workout and date stand for one or more entries, each listed by nobody who created it. Take the latest-created of those entries: every list was taken before its creator's POST, so no list — and therefore not the union — contains it. If the union placement is untainted, that entry is `keep` or absent, so no device drains it and the merged `Placed` stands for a live entry. The union only grows, so a re-merge reproduces it (absorbing), and a row whose list is a subset is tainted whenever the union is (monotone).
+
+**Absent id = free** (P3b). A stale device C, newer by clock skew, holds `Placed S100` (`keep`) and meets a live S5 whose row never saw S100. Both are candidates; C's row is newer, so S100 wins and S5 retires. That is no gap: if S100 is live, it remains. If S100 is dead, some device deleted it, and a device deletes only a `retire` id, written in the same write as the `keep` of the replacement it committed. That replacement stays live (only `retire` is drained), and once its row syncs, S100 is `gone` there, so S100 is tainted and the replacement wins.
+
+**Legacy entries → `held`** (fail-safe). A stateless entry cannot be proven superseded by a verified live entry, so it is never drained until `calendar-find` verifies it; the cost is a duplicate until T5. Mapping them to `retire` instead would drain an id whose superseder may be dead (the round-2 `normal < keep` repro: an old device drains S1 while another device's newer, verified S1 wins the merge). In production no row carries a `removalQueue` yet — T4 is the first writer — so both choices are equivalent there; `held` is the default for anything unproven.
+
+**Adoption is gap-free.** T5 adopts only an id `calendar-find` just saw live, and the only id it retires is the `uncertain`'s own `scheduled` `previous`, superseded by the adopted id in the same write (the commit rule). `held` ids it sees stay `held`: never drained, never `Placed`. Another device can outrank the adoption only with a newer verified `keep` (then that one wins the merge and the adopted id is retired behind a live entry) or by a drain of a `retire` id, which the adoption never wrote for the adopted id.
+
+**Crossed retire is unreachable** (assumption and argument). A crossed pair — one row with S1 `retire` / S2 `keep` and another with S2 `retire` / S1 `keep` — would let both devices drain, a gap. It cannot arise under these assumptions:
+
+- Ids are unique and never reused.
+- `retire` is only ever written together with the `keep` of its superseder, in one write (commit, merge loser, T5).
+- A commit retires only in favour of an id it just created, so no earlier decision can have seen that id.
+- Every sync is an atomic read–merge–write of the single cloud row: the cloud row only grows, so the first merge that sees a pair decides it and every later merge inherits the `retire`.
+- T5 retires only the `uncertain`'s `previous`, together with the `keep` of the id it just adopted. It never retires a `held` id: `held` ids are legacy, unverified, and another device may still hold one as a verified `keep` (the implementation's exhaustive check found exactly that crossed pair when T5 retired seen `held` ids). A seen `held` id therefore stays a duplicate on the calendar until the athlete removes it — legacy data only, none in production.
+
+Known residuals, both breaking the atomic-sync assumption: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write, not an atomic `If-Match`, so two syncs inside that window lose one update; and `syncWithCloud` imports its merge into the device before a push that may be rejected (`sync-with-cloud.ts:34-38`), so the device acts on a merge the cloud never received. One ordinary rejected push suffices for a crossed pair through that second window — for example, on legacy `held` data, `B:sync A:sync C:t5 C:sync-rejected` lets C's drain empty the calendar. Importing only after an accepted push is therefore the part of the follow-up that matters; `If-Match` closes the first window. This change touches neither.
+
+**Dismiss covers abandoned entries only.** "I removed it" is offered for an `abandoned` entry and writes `gone`; a `held` entry is never dismissable from the app and leaves only through a calendar-verified T5 resolution. A `held` id may be another device's verified `Placed`: dismissing it would let the athlete's removal cross with that device's supersession and empty the calendar (the exhaustive check found 30 such paths in the legacy scenario). `held` exists only in legacy-shaped data, which production does not have, so the rule costs nothing real and removes a gap class the ledger would otherwise cause itself. A hand deletion in Garmin stays the athlete's own act.
+
+**Invariant:** no id whose state is not `keep` ever becomes the merged `Placed`, and only `retire` ids are ever sent to `unschedule`.
+
+**Laws** (property-tested). Symmetric, idempotent on well-formed rows (normalized, and whose own `Placed` is not tainted by its own queue), absorbing (`merge(x, merge(x, y)) = merge(x, y)` and `merge(merge(x, y), y) = merge(x, y)`). The pool is the set of rows produced by scripted, consistent histories — three devices, one offline for several steps, concurrent pushes of the same record, a drain while another device is stale, and T5 resolutions with one match, several matches and a failed read — with every order of sync, push and drain steps enumerated up to a bounded depth. The laws, idempotence included, are checked with no well-formedness filter — every row the explored histories produce is well-formed; that is a checked fact of the model, not a claim about every row the pipeline could write — over every pair of rows that co-exist in one reachable world (the devices' rows and the cloud row at the same step); rows from unrelated histories can hold contradictory verified states for one id and are not a meaningful input. Pairwise supersession cannot be associative, so the histories are also checked for **safety** after every step (a drain never leaves a record with a live entry without one, and no device drains its own `Placed`) and for **convergence** once all devices sync.
+
+**Resolving `uncertain` (T5).** The next push of the record resolves it with `calendar-find` for the workout, over the dates of the `uncertain` and of its `held` entries:
+
+- A **match** is an entry at the `uncertain`'s date whose id is not `retire` or `gone`; the entries seen at the `held` dates decide only which `held` ids are seen.
+- Exactly one match → adopt it as the `Placed`, `keep`; a `scheduled` `previous` of the `uncertain` → `retire`. `held` ids the read sees stay `held` (see the crossed-retire argument); `held` ids it does not see → `gone`.
+- Several matches → `duplicate-left`; no state changes.
+- No match, or the read fails → the normal `uncertain` path (the athlete decides); no state changes.
 
 **Review-3 D repro**
 
-- Device A has `Placed S2` with queue `[S1]`. Device B has `Placed S1` and is newer.
-- The merge gives `Placed S2` with queue `[S1]`.
+- Device A has `Placed S2` (S2 `keep`, S1 `retire`). Device B has `Placed S1` (S1 `keep`) and is newer.
+- The merge gives `Placed S2` with S1 `retire` (S1 is tainted).
 - The drain deletes S1, leaving one entry, at D2.
 
 ### 3.10 `recordExport` caller audit
 
-| Caller                               | Effect                                                                                                     |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `executeWorkoutPush` → Garmin        | The feature.                                                                                               |
-| `executeWorkoutPush` → TrainingPeaks | Only the reorder, plus `buildCommitPatch` with no `library`. Rows are identical apart from `updatedAt`.    |
-| Tanita `:81`                         | Only the reorder. Harmless: the caller already treats `lost-race` as not posted. A reorder test pins this. |
+| Caller                               | Effect                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `executeWorkoutPush` → Garmin        | The feature.                                                                                                                                                                                                                                                                                                                                                 |
+| `executeWorkoutPush` → TrainingPeaks | Only the reorder, plus `buildCommitPatch` with no `library`. Rows are identical apart from `updatedAt`.                                                                                                                                                                                                                                                      |
+| Tanita `:81`                         | The reorder: harmless, since the caller already treats `lost-race` as not posted (a reorder test pins this). Stale-pending recovery also applies: a Tanita row left `pending` for more than `PENDING_TTL_MS` with an equal hash is now re-uploaded instead of skipped forever — a possible duplicate measurement on Garmin, the duplicate-over-gap residual. |
 
 ### 3.11 Follow the coach
 

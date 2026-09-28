@@ -8,12 +8,13 @@ import {
 } from "./record-export-analytics";
 import { handleConstraintResult } from "./record-export-constraint";
 import {
+  type ExportPushFn,
   postAndCommit,
   type RecordExportOutcome,
   type RecordExportResult,
 } from "./record-export-post";
 
-export type { RecordExportOutcome, RecordExportResult };
+export type { ExportPushFn, RecordExportOutcome, RecordExportResult };
 
 export type RecordExportDeps = {
   ledgerRepo: ExportLedgerRepository;
@@ -25,7 +26,7 @@ export type RecordExportInput = {
   dataType: ManagedDataType;
   destinationBridgeId: string;
   payload: Record<string, unknown>;
-  postFn: (payload: Record<string, unknown>) => Promise<{ externalId: string }>;
+  postFn: ExportPushFn;
 };
 
 export const recordExport = async (
@@ -51,15 +52,15 @@ export const recordExport = async (
   };
   const insertResult = await ledgerRepo.insertPending(pending);
   if (!insertResult.ok) {
-    const result = await handleConstraintResult(
+    const result = await handleConstraintResult({
       ledgerRepo,
       kaiordRecordId,
       destinationBridgeId,
       contentHash,
       payload,
       postFn,
-      now
-    );
+      now,
+    });
     await emitExportAnalytics(
       deps.analytics,
       ledgerRepo,

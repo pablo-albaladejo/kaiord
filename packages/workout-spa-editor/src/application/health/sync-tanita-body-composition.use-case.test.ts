@@ -146,6 +146,33 @@ describe("syncTanitaBodyComposition", () => {
     expect(ledgerRows).toHaveLength(EXPECTED_MEASUREMENTS);
   });
 
+  it("should not upload a measurement whose equal-hash row is still pending on another run", async () => {
+    // Arrange
+    const seeded = makeDeps();
+    await seedExportPolicy(seeded.policyRepo);
+    await syncTanitaBodyComposition(seeded, { profileId: PROFILE_ID });
+    await db.table("exportLedger").toCollection().modify({
+      destinationExternalId: "pending",
+      exportedAt: new Date().toISOString(),
+    });
+    const pendingRows = await db.table("exportLedger").toArray();
+    const rerun = makeDeps();
+
+    // Act
+    const result = await syncTanitaBodyComposition(rerun, {
+      profileId: PROFILE_ID,
+    });
+
+    // Assert
+    expect(result).toEqual({
+      ok: true,
+      uploaded: 0,
+      skipped: EXPECTED_MEASUREMENTS,
+    });
+    expect(rerun.push).not.toHaveBeenCalled();
+    expect(await db.table("exportLedger").toArray()).toStrictEqual(pendingRows);
+  });
+
   it("should drive the phase callback through reading, parsing, encoding, and uploading", async () => {
     // Arrange
     const deps = makeDeps();

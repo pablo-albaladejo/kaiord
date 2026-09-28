@@ -92,7 +92,7 @@ export const SINKS = [
     tool: "push_to_garmin",
     status: "clean",
     provenance:
-      "garminPushId is echoed from the Garmin bridge and validated to an id shape at the source before it is persisted or returned",
+      "garminPushId is the Garmin-confirmed library workout id (parsed to ^[1-9]\\d*$ at the source) or null; error codes are app-authored literals",
   },
   {
     tool: "set_data_route",
