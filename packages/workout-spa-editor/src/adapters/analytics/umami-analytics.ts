@@ -3,7 +3,7 @@ import { createNoopAnalytics } from "@kaiord/core";
 
 import {
   redactAnalyticsPath,
-  stripIdentifyingProps,
+  scrubEventProps,
 } from "../../lib/analytics-redaction";
 import type { UmamiTracker } from "../../types/umami";
 
@@ -34,8 +34,6 @@ export const createUmamiAnalytics = (
         tracker.track((props) => ({ ...props, url: redactAnalyticsPath(path) }))
       ),
     event: (name: string, props?: AnalyticsEvent) =>
-      withTracker((tracker) =>
-        tracker.track(name, stripIdentifyingProps(props))
-      ),
+      withTracker((tracker) => tracker.track(name, scrubEventProps(props))),
   };
 };

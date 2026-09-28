@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   redactAnalyticsPath,
-  stripIdentifyingProps,
+  scrubEventProps,
   UNKNOWN_PATH,
 } from "./analytics-redaction";
 
@@ -70,23 +70,44 @@ describe("redactAnalyticsPath on paths outside the route table", () => {
   });
 });
 
-describe("stripIdentifyingProps", () => {
+describe("scrubEventProps", () => {
   it("should drop profileId and keep every other field", () => {
     // Arrange
     const props = { source: "train2go", profileId: "p1", durationMs: 12 };
 
     // Act
-    const result = stripIdentifyingProps(props);
+    const result = scrubEventProps(props);
 
     // Assert
     expect(result).toEqual({ source: "train2go", durationMs: 12 });
+  });
+
+  it("should scrub PII out of string values and leave other types alone", () => {
+    // Arrange
+    const props = {
+      source: "alice@example.com",
+      reason: `failed for ${UUID}`,
+      count: 3,
+      ok: true,
+    };
+
+    // Act
+    const result = scrubEventProps(props);
+
+    // Assert
+    expect(result).toEqual({
+      source: "<email>",
+      reason: "failed for <uuid>",
+      count: 3,
+      ok: true,
+    });
   });
 
   it("should pass an absent payload through", () => {
     // Arrange
 
     // Act
-    const result = stripIdentifyingProps(undefined);
+    const result = scrubEventProps(undefined);
 
     // Assert
     expect(result).toBeUndefined();

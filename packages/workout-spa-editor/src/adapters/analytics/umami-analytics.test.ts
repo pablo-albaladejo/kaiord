@@ -91,6 +91,22 @@ describe("createUmamiAnalytics", () => {
       expect(sent).not.toContain("local-profile-1");
     });
 
+    it("should scrub an email out of an event property before umami sees it", () => {
+      // Arrange
+      const analytics = createUmamiAnalytics("test-website-id");
+
+      // Act
+      analytics.event("coaching.sync.invoked", {
+        source: "alice@example.com",
+      });
+
+      // Assert
+      expect(track).toHaveBeenCalledWith("coaching.sync.invoked", {
+        source: "<email>",
+      });
+      expect(JSON.stringify(track.mock.calls)).not.toContain("alice");
+    });
+
     it("should submit the route pattern, not the record id, as the page URL", () => {
       // Arrange
       const analytics = createUmamiAnalytics("test-website-id");

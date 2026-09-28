@@ -1,5 +1,7 @@
 import type { AnalyticsEvent } from "@kaiord/core";
 
+import { scrubAnalyticsString } from "./scrub-analytics-string";
+
 // Allowlist mirroring AppRoutes.tsx and HealthSubRouter. A path that
 // matches none of these is reported as UNKNOWN_PATH: an unmatched path is
 // arbitrary text (a typo, a pasted link, an email) and is never forwarded.
@@ -55,10 +57,6 @@ const DYNAMIC_ROUTES: ReadonlyArray<[RegExp, (segment: string) => string]> = [
 
 export const UNKNOWN_PATH = "/unknown";
 
-// Keys that identify a person rather than describe an action. Stripped at
-// the sink so a call site that forgets cannot send them.
-const IDENTIFYING_KEYS: ReadonlySet<string> = new Set(["profileId"]);
-
 export const redactAnalyticsPath = (path: string): string => {
   const bare = path.replace(/[?#][\s\S]*$/, "");
   const normalized =
@@ -71,11 +69,21 @@ export const redactAnalyticsPath = (path: string): string => {
   return UNKNOWN_PATH;
 };
 
-export const stripIdentifyingProps = (
+// Keys that identify a person rather than describe an action are dropped,
+// and every string value goes through the shared PII scrubber, so a call
+// site that forgets cannot send a profile id, an email or a token.
+const IDENTIFYING_KEYS: ReadonlySet<string> = new Set(["profileId"]);
+
+export const scrubEventProps = (
   props: AnalyticsEvent | undefined
 ): AnalyticsEvent | undefined => {
   if (!props) return props;
   return Object.fromEntries(
-    Object.entries(props).filter(([key]) => !IDENTIFYING_KEYS.has(key))
+    Object.entries(props)
+      .filter(([key]) => !IDENTIFYING_KEYS.has(key))
+      .map(([key, value]) => [
+        key,
+        typeof value === "string" ? scrubAnalyticsString(value) : value,
+      ])
   );
 };

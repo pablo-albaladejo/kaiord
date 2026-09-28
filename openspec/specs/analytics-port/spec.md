@@ -47,13 +47,14 @@ The two consumer packages differ in how they submit page views:
 - `@kaiord/landing` loads the Umami tracker with automatic tracking ON (a static multi-page site), so `pageView` is a no-op — submitting one would double-count the auto-tracked view.
 - `@kaiord/workout-spa-editor` loads the tracker with `data-auto-track="false"` (client-side wouter routes), so `pageView(path)` forwards to `window.umami.track` using the payload-modifier form to set the base-relative `url`, with record ids replaced by their route pattern (see "Editor tracks SPA route changes as page views").
 
-Both packages forward `event(name, props)` to `window.umami.track(name, props)`. The editor adapter first removes a `profileId` key from `props`, so no per-person identifier reaches Umami whatever the call site passes.
+Both packages forward `event(name, props)` to `window.umami.track(name, props)`. The editor adapter first removes a `profileId` key from `props` and passes every string value through `scrubAnalyticsString` (UUIDs, emails, bearer tokens, long hex and base64url runs become placeholders), so no per-person identifier reaches Umami whatever the call site passes.
 
 #### Scenario: Event is sent when the tracker is available
 
 - **WHEN** `event('workout-generated', { sport: 'cycling' })` is called and `window.umami` is present
 - **THEN** the adapter calls `window.umami.track` with the event name and properties
 - **AND** on the editor adapter, a `profileId` property passed by the caller is not forwarded
+- **AND** on the editor adapter, a string property such as `{ source: 'alice@example.com' }` is forwarded as `{ source: '<email>' }`
 
 #### Scenario: Editor pageView is forwarded via the payload modifier
 
