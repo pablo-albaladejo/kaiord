@@ -352,9 +352,9 @@ Timeouts on the SPA side, with `SETTLE_MS` = 3 s (A5):
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **definite-fail** | Garmin 400, 403, 404 or 409; `needsReauth`, with or without a status; no status with `retryable === false` (validation or guard refusal); `deadline-before-send` |
 | **ambiguous**     | `delivered:false`; SPA timeout; `context invalidated`; any other answer with no status, including `deadline-exceeded`; 500, 502, 503 or 504                      |
+| **ok**            | 2xx                                                                                                                                                              |
 
 Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only before a write was sent (a mint that failed in `getToken`) or after a 401 retry, whose write Garmin refused (A8). And nothing that could have been sent carries `retryable: false`: only input validation and guard refusals do, and both happen before any fetch.
-| **ok** | 2xx |
 
 **Resolve.** Runs on `attempting{workoutId, date, at, posted:true, previous}`.
 
@@ -489,7 +489,10 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 2. Pick the merged `Placed`:
    - Two candidates with different ids → take the one from the row with the newer `updatedAt`, and queue the other.
    - One candidate → it wins.
-   - No candidate (pathological) → keep the newer row's `Placed` and remove it from the queue. There is never a gap.
+   - No candidate: every `Placed` present is queued, so none of them can be trusted to still exist on Garmin. The merged placement is `{kind:"uncertain", workoutId, date}` with no `previous`, taking `workoutId` and `date` from the newest row holding a `Placed`, by the hook's total order (`updatedAt`, then `id`, then serialisation), so both devices converge. Every one of those `Placed` ids is removed from the merged queue, so none of them is ever deleted: the worst case is an untracked duplicate, never a gap. The next push resolves it through the normal `uncertain` path, which with A1 and A3 verified is `calendar-find`: one match is adopted, several are `duplicate-left`, and there is never a blind re-POST.
+
+   **Invariant:** no id in either queue ever becomes the merged `Placed`. The rule is symmetric: `merge(a, b)` equals `merge(b, a)`, because the candidates, `S` and the total order do not depend on argument order.
+
 3. If neither row has a `Placed`, keep an `attempting` or `uncertain`, preferring `posted:true`.
    - An `attempting` never beats a `Placed`.
    - Dropping an `attempting{posted:true}` is the documented residual: a possibly untracked duplicate, never a gap.

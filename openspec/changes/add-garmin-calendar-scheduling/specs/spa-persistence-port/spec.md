@@ -41,10 +41,17 @@ Dexie v36 SHALL upgrade existing Garmin ledger rows with `normalizeGarminLedgerR
 
 The `exportLedger` entry of `ROW_MERGE_HOOKS` (delivered by #1265) SHALL be replaced by a Garmin-aware merge: Garmin rows SHALL merge through `mergeGarminLedgerRows`, every other destination SHALL keep `mergeExportLedgerRows`. The merge SHALL remain symmetric, as the hook contract requires. For Garmin rows, supersession SHALL beat the clock:
 
-1. An id in either row's `removalQueue` SHALL never become the merged `Placed`. Of the remaining `Placed` candidates with different ids, the newer row's wins and the other is queued; with no candidate, the newer row's `Placed` is kept and removed from the queue, so there is never a gap.
+1. An id in either row's `removalQueue` SHALL never become the merged `Placed`. Of the remaining `Placed` candidates with different ids, the newer row's wins and the other is queued. When no candidate remains because every `Placed` present is queued, the merged placement SHALL be `{ kind: "uncertain", workoutId, date }` with no `previous`, taking `workoutId` and `date` from the newest row holding a `Placed` by the hook's total order, and every one of those `Placed` ids SHALL be removed from the merged queue, so none of them is ever sent to `unschedule`. The worst case is an untracked duplicate, never a gap; the next push resolves the `uncertain` placement through `calendar-find`, adopting one match or returning `duplicate-left` for several, never re-POSTing blindly.
 2. An `attempting` or `uncertain` SHALL survive only when neither row has a `Placed`, preferring `posted: true`.
 3. The merged queue SHALL be the union by id, minus the merged `Placed` id and `attempting.previous` id, keeping the maximum `attempts` and OR-ing `abandoned`.
 4. `library` and `forceRepush` SHALL come only from the newer row, and `updatedAt` SHALL be the later of the two.
+
+#### Scenario: Placements that are all queued merge to uncertain
+
+- **GIVEN** device A holds `Placed S2` with queue `[S1]` and device B holds `Placed S1` with queue `[S2]`
+- **WHEN** the rows merge, in either argument order
+- **THEN** the result SHALL be `uncertain` with the `workoutId` and `date` of the newer row, no `previous`, and neither S1 nor S2 in the queue
+- **AND** `merge(a, b)` SHALL equal `merge(b, a)`, and no `unschedule` SHALL be issued for S1 or S2
 
 #### Scenario: A superseded placement never wins the merge
 
