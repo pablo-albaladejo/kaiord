@@ -85,11 +85,11 @@
 - [ ] 6.2 Wiring and UI: `garmin-calendar-operations` with the per-action
       timeout, detection `features`, `useGarminPush`, EditorPage,
       `do-push-to-garmin`, and the result / uncertain / dismiss UI in en and es
-      (AC-35). Dismiss ("I removed it", writes `gone`) must cover `held`
-      entries as well as abandoned ones: a seen `held` id is a durable
-      legacy duplicate that only the athlete can clear; its copy warns
-      that the entry may be the current placement on another device
-      (design §3.9, held-dismiss residual). An `unconfirmed`
+      (AC-35). Dismiss ("I removed it", writes `gone`) covers `abandoned`
+      entries only; a `held` entry is never dismissable (design §3.9).
+      Put the eligibility in a pure function (`abandoned` and not `gone`,
+      never `held`, never the current `Placed` or `previous`) and test that
+      a `held` entry is not eligible. An `unconfirmed`
       commit records `supersedes` (every queue id at the commit);
       "It's in Garmin" and A3-false adoptions record `[]`.
 - [ ] 6.3 E2E stub: numeric ids, an in-memory calendar, `calendar-find`,

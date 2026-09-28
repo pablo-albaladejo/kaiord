@@ -407,7 +407,7 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 
 - After 3 attempts, an entry becomes `abandoned`.
 - An abandoned entry is re-checked with `calendar-find` on each push of its record. If A3 shows it absent, it is written `gone`.
-- The user can clear it with "I removed it" (dismiss), which writes `gone`.
+- The user can clear it with "I removed it" (dismiss), which writes `gone`. Only an `abandoned` entry is dismissable; a `held` one never is (§3.9).
 
 **`duplicate-left`** is returned iff this run created or kept a queue entry.
 
@@ -514,7 +514,7 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 | T5, exactly one match               | adopted id → `keep`; a `scheduled` `previous` → `retire`; `held` ids the read sees stay `held`; unseen → `gone`                                               |
 | T5, several matches / none / failed | nothing                                                                                                                                                       |
 | Drain: 204, or 404 verified absent  | `retire` → `gone`                                                                                                                                             |
-| Dismiss ("I removed it")            | → `gone`                                                                                                                                                      |
+| Dismiss ("I removed it")            | `abandoned` entry → `gone` (never a `held` one)                                                                                                               |
 | Merge join                          | per id: `max(state)`, `max(attempts)`, OR of `abandoned`                                                                                                      |
 
 **`mergeGarminLedgerRows(a, b)` (MUST-D)**
@@ -564,7 +564,7 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 
 Known residuals, both breaking the atomic-sync assumption: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write, not an atomic `If-Match`, so two syncs inside that window lose one update; and `syncWithCloud` imports its merge into the device before a push that may be rejected (`sync-with-cloud.ts:34-38`), so for a moment the device holds a merge the cloud never received. A crossed pair needs two such lost updates on the same record around one pair decision. Enforcing `If-Match` closes it (see Follow-ups); this change does not touch the adapter.
 
-Residual of dismissing a `held` entry (legacy only): "I removed it" on a `held` id records an athlete's own deletion. If another device has concurrently made that id its verified `Placed` and retired the entry this device keeps, the two removals cross exactly like a manual deletion in Garmin, and the calendar can end empty. The ledger cannot prevent a hand deletion; the dismiss UI must say that the entry may be the current placement on another device. The exhaustive check models dismiss of a `held` entry only for true duplicates (no row holds it `keep`); unrestricted, it finds these crossings (30 paths in the legacy scenario).
+**Dismiss covers abandoned entries only.** "I removed it" is offered for an `abandoned` entry and writes `gone`; a `held` entry is never dismissable from the app and leaves only through a calendar-verified T5 resolution. A `held` id may be another device's verified `Placed`: dismissing it would let the athlete's removal cross with that device's supersession and empty the calendar (the exhaustive check found 30 such paths in the legacy scenario). `held` exists only in legacy-shaped data, which production does not have, so the rule costs nothing real and removes a gap class the ledger would otherwise cause itself. A hand deletion in Garmin stays the athlete's own act.
 
 **Invariant:** no id whose state is not `keep` ever becomes the merged `Placed`, and only `retire` ids are ever sent to `unschedule`.
 
