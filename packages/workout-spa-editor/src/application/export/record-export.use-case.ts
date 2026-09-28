@@ -46,6 +46,7 @@ export const recordExport = async (
     destinationExternalId: "pending",
     contentHash,
     exportedAt: now,
+    updatedAt: now,
   };
   const insertResult = await ledgerRepo.insertPending(pending);
   if (!insertResult.ok) {

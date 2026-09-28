@@ -44,9 +44,11 @@ export const postAndCommit = async (
     );
     throw postErr;
   }
+  const committedAt = new Date().toISOString();
   await ledgerRepo.update(input.ledgerId, {
     destinationExternalId: externalId,
-    exportedAt: new Date().toISOString(),
+    exportedAt: committedAt,
+    updatedAt: committedAt,
   });
   await emitExportAnalytics(
     analytics,

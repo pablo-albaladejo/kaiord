@@ -221,3 +221,86 @@ describe("mergeSnapshots — tombstones", () => {
     ]);
   });
 });
+
+describe("mergeSnapshots — exportLedger natural key", () => {
+  const ledgerRow = (id: string, updatedAt: string) => ({
+    id,
+    kaiordRecordId: "rec-1",
+    destinationBridgeId: "garmin-bridge",
+    destinationExternalId: `ext-${id}`,
+    exportedAt: updatedAt,
+    updatedAt,
+  });
+
+  it("should keep one row per natural key across different ids", () => {
+    // Arrange
+    const newer = ledgerRow("id-b", "2026-09-02T00:00:00.000Z");
+    const local = snap("2026-09-03T00:00:00Z", {
+      exportLedger: [ledgerRow("id-a", "2026-09-01T00:00:00.000Z")],
+    });
+    const remote = snap("2026-09-03T00:00:00Z", { exportLedger: [newer] });
+
+    // Act
+    const merged = [
+      mergeSnapshots(local, remote),
+      mergeSnapshots(remote, local),
+    ];
+
+    // Assert
+    expect(rows("exportLedger", merged[0])).toEqual([newer]);
+    expect(rows("exportLedger", merged[1])).toEqual([newer]);
+  });
+
+  it("should suppress a tombstoned survivor by its id", () => {
+    // Arrange
+    const local = snap(
+      "2026-09-03T00:00:00Z",
+      { exportLedger: [ledgerRow("id-a", "2026-09-01T00:00:00.000Z")] },
+      [{ table: "exportLedger", id: "id-a", deletedAt: "2026-09-02T00:00:00Z" }]
+    );
+    const remote = snap("2026-09-03T00:00:00Z", { exportLedger: [] });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    expect(rows("exportLedger", merged)).toEqual([]);
+  });
+});
+
+describe("mergeSnapshots — tombstone × pairwise merge order", () => {
+  const T1 = "2026-09-01T00:00:00.000Z";
+  const T2 = "2026-09-02T00:00:00.000Z";
+  const T3 = "2026-09-03T00:00:00.000Z";
+  const ledgerRow = (id: string, updatedAt: string) => ({
+    id,
+    kaiordRecordId: "rec-1",
+    destinationBridgeId: "garmin-bridge",
+    destinationExternalId: `ext-${id}`,
+    exportedAt: updatedAt,
+    updatedAt,
+  });
+
+  it("should be transiently order-dependent when the winner is tombstoned later", () => {
+    // Arrange
+    // A holds the newer row X, B its older sibling Y, C only X's tombstone.
+    const a = snap(T3, { exportLedger: [ledgerRow("x", T2)] });
+    const b = snap(T3, { exportLedger: [ledgerRow("y", T1)] });
+    const c = snap(T3, { exportLedger: [] }, [
+      { table: "exportLedger", id: "x", deletedAt: T3 },
+    ]);
+
+    // Act
+    const xFirst = mergeSnapshots(mergeSnapshots(a, b), c);
+    const tombstoneFirst = mergeSnapshots(mergeSnapshots(b, c), a);
+
+    // Assert
+    // Merging A×B before the tombstone drops Y; B still holding Y lets its
+    // next sync (live import keeps Y) bring it back — convergence, not loss.
+    expect(rows("exportLedger", xFirst)).toEqual([]);
+    expect(rows("exportLedger", tombstoneFirst)).toEqual([ledgerRow("y", T1)]);
+    expect(rows("exportLedger", mergeSnapshots(xFirst, b))).toEqual([
+      ledgerRow("y", T1),
+    ]);
+  });
+});

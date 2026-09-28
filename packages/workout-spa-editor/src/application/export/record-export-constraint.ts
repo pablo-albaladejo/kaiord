@@ -45,6 +45,7 @@ export const handleConstraintResult = async (
     destinationExternalId: externalId,
     contentHash,
     exportedAt: now,
+    updatedAt: now,
   });
   return { ledgerId: existing.id, outcome: "updated", externalId };
 };

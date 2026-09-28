@@ -2,7 +2,7 @@
  * Tests for recordExport use case — the insert-pending → POST → UPDATE protocol.
  * Uses in-memory port mocks — no Dexie dependency.
  */
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ExportLedgerEntry } from "../../types/export-ledger";
 import type {
@@ -196,5 +196,71 @@ describe("recordExport", () => {
     // Assert
     expect(postFn).not.toHaveBeenCalled();
     expect(result.outcome).toBe("lost-race");
+  });
+});
+
+describe("recordExport — updatedAt stamps", () => {
+  // The pending insert and the commit happen at different instants, so a
+  // missing restamp leaves `updatedAt` behind `exportedAt` and the assertions
+  // below tell each write site apart.
+  const T1 = new Date("2026-09-01T00:00:00.000Z");
+  const T2 = new Date("2026-09-02T00:00:00.000Z");
+  const T3 = new Date("2026-09-03T00:00:00.000Z");
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(T1);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const input = (
+    payload: Record<string, unknown>,
+    externalId: string,
+    postAt: Date
+  ) => ({
+    kaiordRecordId: KAIO_ID,
+    dataType: "weight" as const,
+    destinationBridgeId: DEST_BRIDGE,
+    payload,
+    postFn: async () => {
+      vi.setSystemTime(postAt);
+      return { externalId };
+    },
+  });
+
+  it("should stamp the pending insert and restamp the commit on create", async () => {
+    // Arrange
+    const ledgerRepo = makeRepo();
+    const insertPending = vi.spyOn(ledgerRepo, "insertPending");
+
+    // Act
+    await recordExport({ ledgerRepo }, input(PAYLOAD, "ext-001", T2));
+
+    // Assert
+    expect(insertPending.mock.calls[0]?.[0].updatedAt).toBe(T1.toISOString());
+    const entry = [...ledgerRepo.store.values()][0];
+    expect(entry?.exportedAt).toBe(T2.toISOString());
+    expect(entry?.updatedAt).toBe(T2.toISOString());
+  });
+
+  it("should restamp updatedAt when a stale committed row is updated", async () => {
+    // Arrange
+    const ledgerRepo = makeRepo();
+    await recordExport({ ledgerRepo }, input(PAYLOAD, "ext-001", T1));
+    vi.setSystemTime(T3);
+
+    // Act
+    await recordExport(
+      { ledgerRepo },
+      input({ weightKilograms: 80 }, "ext-002", T3)
+    );
+
+    // Assert
+    const entry = [...ledgerRepo.store.values()][0];
+    expect(entry?.exportedAt).toBe(T3.toISOString());
+    expect(entry?.updatedAt).toBe(T3.toISOString());
   });
 });

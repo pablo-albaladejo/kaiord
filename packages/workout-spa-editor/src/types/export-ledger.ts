@@ -9,5 +9,8 @@ export const exportLedgerEntrySchema = z.object({
   destinationExternalId: z.string().min(1),
   contentHash: z.string().min(1),
   exportedAt: z.iso.datetime(),
+  // Cross-device merge clock, stamped on every ledger write. Optional: rows
+  // written before it existed fall back to `exportedAt` (merge-row-hooks).
+  updatedAt: z.iso.datetime().optional(),
 });
 export type ExportLedgerEntry = z.infer<typeof exportLedgerEntrySchema>;
