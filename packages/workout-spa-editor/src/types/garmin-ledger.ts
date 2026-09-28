@@ -87,6 +87,11 @@ export const garminRemovalEntrySchema = z.object({
   date: calendarDate,
   attempts: z.number().int().nonnegative(),
   abandoned: z.boolean(),
+  /** A tainted id kept by the merge: it may be the entry the other device
+      still treats as current, so it never becomes the merged `Placed` and
+      is never sent to `unschedule`. Only the `uncertain` resolution clears
+      it. Absent on a normal (deletable) entry. */
+  held: z.literal(true).optional(),
 });
 export type GarminRemovalEntry = z.infer<typeof garminRemovalEntrySchema>;
 

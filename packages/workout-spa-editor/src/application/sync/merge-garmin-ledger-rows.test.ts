@@ -49,11 +49,13 @@ const mergeBothWays = (a: Row, b: Row) => {
   return ab;
 };
 
+type Queued = { workoutScheduleId: string; held?: true };
+
+/** What the drain would unschedule: every queued id that is not held. */
 const drain = (calendar: Map<string, string>, merged: Row) => {
-  for (const e of (merged.removalQueue as { workoutScheduleId: string }[]) ??
-    [])
-    calendar.delete(e.workoutScheduleId);
-  return [...calendar.values()];
+  for (const e of (merged.removalQueue as Queued[] | undefined) ?? [])
+    if (!e.held) calendar.delete(e.workoutScheduleId);
+  return [...calendar.values()].sort();
 };
 
 describe("mergeGarminLedgerRows", () => {
@@ -160,7 +162,7 @@ describe("mergeGarminLedgerRows", () => {
     expect(merged.updatedAt).toBe(NEWER_AT);
   });
 
-  it("should merge to uncertain when every Placed is queued, deleting neither", () => {
+  it("should merge to uncertain when every Placed is queued, holding both ids", () => {
     // Arrange
     const deviceA = row("id-a", OLDER_AT, {
       placement: scheduled("2", D2),
@@ -170,6 +172,10 @@ describe("mergeGarminLedgerRows", () => {
       placement: scheduled("1", D1),
       removalQueue: [queued("2", D2)],
     });
+    const calendar = new Map([
+      ["1", D1],
+      ["2", D2],
+    ]);
 
     // Act
     const merged = mergeBothWays(deviceA, deviceB);
@@ -178,9 +184,72 @@ describe("mergeGarminLedgerRows", () => {
     expect(merged.placement).toEqual({
       kind: "uncertain",
       workoutId: W,
+      date: D2,
+    });
+    expect(merged.removalQueue).toEqual([
+      { ...queued("1", D1), held: true },
+      { ...queued("2", D2), held: true },
+    ]);
+    expect(drain(calendar, merged)).toEqual([D1, D2]);
+  });
+
+  it("should not let an unconfirmed Placed that may be a queued entry win", () => {
+    // Arrange
+    const adopted = row("id-a", NEWER_AT, {
+      placement: { kind: "unconfirmed", workoutId: W, date: D1 },
+    });
+    const superseding = row("id-b", OLDER_AT, {
+      removalQueue: [queued("1", D1)],
+    });
+
+    // Act
+    const merged = mergeBothWays(adopted, superseding);
+
+    // Assert
+    expect(merged.placement).toEqual({
+      kind: "uncertain",
+      workoutId: W,
       date: D1,
     });
-    expect(merged.removalQueue).toEqual([]);
+    expect(merged.removalQueue).toEqual([{ ...queued("1", D1), held: true }]);
+  });
+
+  it("should let a free Placed beat an unconfirmed one that matches a queued entry", () => {
+    // Arrange
+    const adopted = row("id-a", NEWER_AT, {
+      placement: { kind: "unconfirmed", workoutId: W, date: D1 },
+    });
+    const moved = row("id-b", OLDER_AT, {
+      placement: scheduled("2", D2),
+      removalQueue: [queued("1", D1)],
+    });
+
+    // Act
+    const merged = mergeBothWays(adopted, moved);
+
+    // Assert
+    expect(merged.placement).toEqual(scheduled("2", D2));
+    expect(merged.removalQueue).toEqual([queued("1", D1)]);
+  });
+
+  it.each([
+    [
+      "an equal instant spelled differently",
+      "2026-09-28T08:00:00Z",
+      "2026-09-28T08:00:00.000Z",
+    ],
+    ["an unparsable stamp", "garbage", "2026-09-28T08:00:00.000Z"],
+    ["two unparsable stamps", "garbage", "rubbish"],
+  ])("should join updatedAt symmetrically for %s", (_label, x, y) => {
+    // Arrange
+    const a = row("id-a", x);
+    const b = row("id-a", y);
+
+    // Act
+    const merged = mergeBothWays(a, b);
+
+    // Assert
+    expect([x, y]).toContain(merged.updatedAt);
   });
 
   it("should keep the scheduled side when both rows hold the same entry", () => {

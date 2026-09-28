@@ -13,18 +13,28 @@ import type { ExportLedgerEntry } from "../../types/export-ledger";
 import {
   isCommittedLedgerRow,
   mergeExportLedgerRows,
+  stampMs,
 } from "./merge-export-ledger-rows";
 import { mergeGarminPlacement } from "./merge-garmin-placement";
 
 type Row = Record<string, unknown>;
 
+/** The later stamp by the ledger clock's own parse (unparsable = 0); an
+    equal instant in a different spelling, or two unparsable stamps, is
+    broken by the larger string — a total order, hence symmetric. */
 const laterStamp = (x: unknown, y: unknown): unknown => {
-  if (typeof x !== "string") return y;
-  if (typeof y !== "string") return x;
-  return Date.parse(y) > Date.parse(x) ? y : x;
+  const diff = stampMs(x) - stampMs(y);
+  if (diff !== 0) return diff > 0 ? x : y;
+  const sx = typeof x === "string" ? x : "";
+  const sy = typeof y === "string" ? y : "";
+  if (sx !== sy) return sx > sy ? x : y;
+  return x ?? y;
 };
 
 export function mergeGarminLedgerRows(a: Row, b: Row): Row {
+  // A pending row is an in-flight library POST: Phase 1 never writes
+  // `placement` or `removalQueue` on it (placement starts after the commit),
+  // so returning the committed row whole loses no Garmin state.
   const committedA = isCommittedLedgerRow(a);
   if (committedA !== isCommittedLedgerRow(b)) return committedA ? a : b;
   const newer = mergeExportLedgerRows(a, b);

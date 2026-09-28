@@ -7,7 +7,7 @@
 
 type Row = Record<string, unknown>;
 
-const stampMs = (stamp: unknown): number => {
+export const stampMs = (stamp: unknown): number => {
   if (typeof stamp !== "string") return 0;
   const ms = Date.parse(stamp);
   return Number.isNaN(ms) ? 0 : ms;

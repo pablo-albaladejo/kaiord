@@ -79,6 +79,23 @@ describe("normalizeGarminLedgerRow", () => {
     expect(next.removalQueue).toEqual([QUEUED]);
   });
 
+  it("should keep a held queue entry and drop one whose held is not true", () => {
+    // Arrange
+    const held = { ...QUEUED, held: true };
+    const row = garminRow({
+      removalQueue: [
+        held,
+        { ...QUEUED, workoutScheduleId: "556", held: false },
+      ],
+    });
+
+    // Act
+    const next = normalizeGarminLedgerRow(row);
+
+    // Assert
+    expect(next.removalQueue).toEqual([held]);
+  });
+
   it("should drop an invalid placement and a forceRepush that is not true", () => {
     // Arrange
     const row = garminRow({

@@ -4,6 +4,8 @@
  * and on the updated path. Device A holds `Placed S2` with `S1` queued;
  * device B, newer, still holds `Placed S1`. Both devices must converge on
  * `Placed S2` with `S1` queued (the review-3 D repro), never on `S1`.
+ * When each device has queued the other's entry, both must settle on the
+ * same `uncertain` row with both ids held — never flipping, never deleting.
  */
 import "fake-indexeddb/auto";
 
@@ -137,4 +139,61 @@ describe("Garmin export-ledger cross-device sync", () => {
       expect(rowA.removalQueue).toEqual([queued("1", D1)]);
     }
   );
+
+  it.each<Path>(["created", "updated"])(
+    "should settle on uncertain and unschedule nothing when every Placed is queued, on the %s path",
+    async (path) => {
+      // Arrange
+      vi.setSystemTime(A_WRITES_AT);
+      await pushAndPlace(dbA, path, {
+        placement: scheduled("2", D2),
+        removalQueue: [queued("1", D1)],
+      });
+      vi.setSystemTime(B_WRITES_AT);
+      await pushAndPlace(dbB, path, {
+        placement: scheduled("1", D1),
+        removalQueue: [queued("2", D2)],
+      });
+      const cloud = createInMemoryCloudSyncPort({
+        authenticated: true,
+        snapshot: null,
+        revision: null,
+        pushCount: 0,
+      });
+      const sync = (db: KaiordDatabase, deviceId: string) =>
+        syncWithCloud({
+          cloud,
+          snapshotPort: createDexieSnapshotPort(db),
+          deviceId,
+        });
+
+      // Act
+      for (const [db, deviceId] of SYNC_ORDER(dbA, dbB))
+        await sync(db, deviceId);
+
+      // Assert
+      const [rowA] = await dbA.table("exportLedger").toArray();
+      const [rowB] = await dbB.table("exportLedger").toArray();
+      expect(rowA).toStrictEqual(rowB);
+      expect(rowA.placement.kind).toBe("uncertain");
+      const unscheduled = (rowA.removalQueue as GarminRemovalEntry[])
+        .filter((entry) => !entry.held)
+        .map((entry) => entry.workoutScheduleId);
+      expect(unscheduled).toEqual([]);
+      expect(rowA.removalQueue).toEqual([
+        { ...queued("1", D1), held: true },
+        { ...queued("2", D2), held: true },
+      ]);
+    }
+  );
 });
+
+/** A → B → A, then one more full round: the rows must already be stable. */
+const SYNC_ORDER = (a: KaiordDatabase, b: KaiordDatabase) =>
+  [
+    [a, "dev-a"],
+    [b, "dev-b"],
+    [a, "dev-a"],
+    [b, "dev-b"],
+    [a, "dev-a"],
+  ] as const;
