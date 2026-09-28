@@ -1,10 +1,16 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
-import { brokenReason, linksIn } from "./lib/site-links-resolve.mjs";
+import {
+  checkSiteLinks,
+  mountsFromArgs,
+  requiredIndexes,
+} from "./lib/site-links-scan.mjs";
+
+export { checkSiteLinks, mountsFromArgs };
 
 // Every absolute `kaiord.com` link shipped in the built site must resolve.
 //
@@ -19,7 +25,8 @@ import { brokenReason, linksIn } from "./lib/site-links-resolve.mjs";
 // Usage:
 //   node scripts/check-site-links.mjs --landing <dir> --app <dir> --docs <dir>
 //   node scripts/check-site-links.mjs --merged <dir>
-// With REQUIRE_DOCS_DIST=1 a missing dist fails the check; otherwise it is
+// With REQUIRE_DOCS_DIST=1 a dist without its index.html, or a run that
+// scans no file or checks no link, fails; otherwise a missing dist is
 // skipped with a reason (local runs without a prior build).
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -27,42 +34,6 @@ const SEGMENTS_JSON = join(
   REPO_ROOT,
   "packages/workout-spa-editor/src/routing/route-segments.json"
 );
-const SCANNED = /(\.html|\.md|^llms[^/]*\.txt)$/;
-
-function* walk(dir) {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) yield* walk(full);
-    else if (SCANNED.test(entry.name)) yield full;
-  }
-}
-
-/** Returns `{ file, link, reason }` for every broken kaiord.com link. */
-export function checkSiteLinks({ mounts, segments }) {
-  const ordered = [...mounts].sort((a, b) => b.prefix.length - a.prefix.length);
-  const problems = [];
-  const seenFiles = new Set();
-  for (const { dir } of ordered) {
-    for (const file of walk(dir)) {
-      if (seenFiles.has(file)) continue;
-      seenFiles.add(file);
-      for (const link of new Set(linksIn(readFileSync(file, "utf8")))) {
-        const reason = brokenReason(ordered, segments, link);
-        if (reason) problems.push({ file, link, reason });
-      }
-    }
-  }
-  return problems;
-}
-
-export function mountsFromArgs(values) {
-  if (values.merged) return [{ prefix: "/", dir: resolve(values.merged) }];
-  return [
-    { prefix: "/", dir: values.landing },
-    { prefix: "/app/", dir: values.app },
-    { prefix: "/docs/", dir: values.docs },
-  ].map((m) => ({ ...m, dir: m.dir && resolve(m.dir) }));
-}
 
 function main() {
   const { values } = parseArgs({
@@ -84,13 +55,30 @@ function main() {
     console.log(`⏭️  Site links skipped, dist not built: ${list.join(", ")}`);
     return;
   }
+  const strict = process.env.REQUIRE_DOCS_DIST === "1";
+  const noIndex = requiredIndexes(mounts).filter((f) => !existsSync(f));
+  if (strict && noIndex.length > 0) {
+    console.error(`❌ Site dist incomplete, missing: ${noIndex.join(", ")}`);
+    process.exit(1);
+  }
   const segments = JSON.parse(readFileSync(SEGMENTS_JSON, "utf8"));
-  const problems = checkSiteLinks({ mounts, segments });
+  const { problems, filesScanned, linksChecked } = checkSiteLinks({
+    mounts,
+    segments,
+  });
   for (const { file, link, reason } of problems) {
     console.error(`❌ ${relative(process.cwd(), file)}: ${link} ${reason}`);
   }
   if (problems.length > 0) process.exit(1);
-  console.log("✅ Every absolute kaiord.com link resolves");
+  if (strict && (filesScanned === 0 || linksChecked === 0)) {
+    console.error(
+      `❌ Scanned ${filesScanned} files and ${linksChecked} links: nothing was checked`
+    );
+    process.exit(1);
+  }
+  console.log(
+    `✅ Every kaiord.com link resolves (${linksChecked} links in ${filesScanned} files)`
+  );
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();

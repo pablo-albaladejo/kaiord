@@ -11,11 +11,12 @@ one place.
 
 ## Key Files
 
-| File                     | Description                                                                                                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `find-package-files.mjs` | Enumerate files under `packages/**` honoring `.gitignore` and `node_modules` exclusion. Used by every guard that walks the workspace.                             |
-| `strip-jsonc.mjs`        | Strip comments/trailing commas so `JSON.parse` can consume `.json` files that have JSONC syntax (e.g. `tsconfig.json`, `.changeset/config.json`).                 |
-| `site-links-resolve.mjs` | GitHub Pages path resolution and link extraction for `check-site-links.mjs`. Split out to keep the guard under 100 lines; covered by `check-site-links.test.mjs`. |
+| File                     | Description                                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `find-package-files.mjs` | Enumerate files under `packages/**` honoring `.gitignore` and `node_modules` exclusion. Used by every guard that walks the workspace.                                             |
+| `strip-jsonc.mjs`        | Strip comments/trailing commas so `JSON.parse` can consume `.json` files that have JSONC syntax (e.g. `tsconfig.json`, `.changeset/config.json`).                                 |
+| `site-links-resolve.mjs` | GitHub Pages path resolution and link extraction for `check-site-links.mjs`. Split out to keep the guard under 100 lines; covered by `check-site-links.test.mjs`.                 |
+| `site-links-scan.mjs`    | Walks the built site (`*.html`, `*.md`, `llms*.txt`, `sitemap*.xml`, `robots.txt`) for `check-site-links.mjs` and counts what it checked; covered by `check-site-links.test.mjs`. |
 
 ## For AI Agents
 

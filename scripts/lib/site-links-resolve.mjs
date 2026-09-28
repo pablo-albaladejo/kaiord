@@ -35,6 +35,17 @@ export function pathExists(mounts, pathname) {
   );
 }
 
+export const LEGACY_EDITOR_REASON =
+  "links the legacy /editor/ path; link https://kaiord.com/app/ instead";
+
+// Root-relative hrefs never carry the host, so the absolute-URL scan above
+// cannot see them; in built HTML an `href="/editor…"` is the same 404.
+const ROOT_RELATIVE_EDITOR_HREF = /\bhref=["'](\/editor(?:[/?#][^"']*)?)["']/g;
+
+export function editorHrefsIn(html) {
+  return [...html.matchAll(ROOT_RELATIVE_EDITOR_HREF)].map((m) => m[1]);
+}
+
 const trimTrailingPunctuation = (url) => url.replace(/[.,;:!?]+$/, "");
 
 export function linksIn(text) {
@@ -42,6 +53,8 @@ export function linksIn(text) {
     trimTrailingPunctuation(m[0].replace(/&amp;/g, "&"))
   );
 }
+
+const SPA_PATHS = new Set(["/app", "/app/", "/app/index.html"]);
 
 /**
  * Returns the reason a kaiord.com link is broken, or null when it resolves.
@@ -51,13 +64,13 @@ export function brokenReason(mounts, segments, link) {
   const url = new URL(link);
   const { pathname, hash } = url;
   if (pathname === "/editor" || pathname.startsWith("/editor/")) {
-    return "links the legacy /editor/ path; link https://kaiord.com/app/ instead";
+    return LEGACY_EDITOR_REASON;
   }
   if (!pathExists(mounts, pathname)) {
     return `no page is served at ${pathname}`;
   }
-  const isApp = pathname === "/app/" || pathname === "/app/index.html";
-  if (isApp && hash.startsWith("#/")) {
+  // Pages redirects /app to /app/ and keeps the fragment.
+  if (SPA_PATHS.has(pathname) && hash.startsWith("#/")) {
     const segment = hash.slice(2).split(/[/?#]/)[0];
     if (segment !== "" && !segments.includes(segment)) {
       return `SPA route "/${segment}" is not in route-segments.json`;

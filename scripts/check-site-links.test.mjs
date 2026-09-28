@@ -37,11 +37,20 @@ describe("check-site-links", () => {
 
   const reasons = () =>
     checkSiteLinks({ mounts, segments: SEGMENTS })
-      .map((p) => p.reason)
+      .problems.map((p) => p.reason)
       .sort();
 
+  const runCli = (args) =>
+    spawnSync(process.execPath, [SCRIPT, ...args], {
+      env: { ...process.env, REQUIRE_DOCS_DIST: "1" },
+      encoding: "utf8",
+    });
+
   it("accepts a site whose links all resolve", () => {
-    assert.deepEqual(checkSiteLinks({ mounts, segments: SEGMENTS }), []);
+    const result = checkSiteLinks({ mounts, segments: SEGMENTS });
+
+    assert.deepEqual(result.problems, []);
+    assert.ok(result.filesScanned > 0 && result.linksChecked > 0);
   });
 
   it("rejects a content link to the legacy /editor/ path", () => {
@@ -98,9 +107,83 @@ describe("check-site-links", () => {
       checkSiteLinks({
         mounts: mountsFromArgs({ merged }),
         segments: SEGMENTS,
-      }),
+      }).problems,
       []
     );
+  });
+
+  it("treats /app without a trailing slash as the SPA", () => {
+    // Pages redirects /app to /app/ and keeps the fragment, so a deep link
+    // written without the slash reaches the same router.
+    addDocsPage("bare.html", "https://kaiord.com/app#/bogus");
+
+    assert.deepEqual(reasons(), [
+      'SPA route "/bogus" is not in route-segments.json',
+    ]);
+  });
+
+  it("rejects a root-relative /editor link in built HTML", () => {
+    // An absolute-URL scan cannot see href="/editor/…", which lands on the
+    // same 404 for crawlers.
+    writeFileSync(
+      join(dir, "landing", "cta.html"),
+      '<a href="/editor/calendar">Open</a><a href="/app/">ok</a>'
+    );
+
+    assert.deepEqual(reasons(), [
+      "links the legacy /editor/ path; link https://kaiord.com/app/ instead",
+    ]);
+  });
+
+  it("checks links in sitemaps and robots.txt", () => {
+    writeFileSync(
+      join(dir, "landing", "sitemap.xml"),
+      "<urlset><url><loc>https://kaiord.com/docs/gone</loc></url></urlset>"
+    );
+    writeFileSync(
+      join(dir, "landing", "robots.txt"),
+      "Sitemap: https://kaiord.com/sitemap-missing.xml\n"
+    );
+
+    assert.deepEqual(reasons(), [
+      "no page is served at /docs/gone",
+      "no page is served at /sitemap-missing.xml",
+    ]);
+  });
+
+  it("fails under REQUIRE_DOCS_DIST=1 when the dists are empty", () => {
+    // An existing but empty directory scanned zero files and passed.
+    const empty = join(dir, "empty");
+    mkdirSync(join(empty, "app"), { recursive: true });
+    mkdirSync(join(empty, "docs"));
+
+    const split = runCli([
+      "--landing",
+      empty,
+      "--app",
+      join(empty, "app"),
+      "--docs",
+      join(empty, "docs"),
+    ]);
+    const merged = runCli(["--merged", empty]);
+
+    assert.equal(split.status, 1);
+    assert.match(split.stderr, /index\.html/);
+    assert.equal(merged.status, 1);
+    assert.match(merged.stderr, /index\.html/);
+  });
+
+  it("fails under REQUIRE_DOCS_DIST=1 when no link is checked", () => {
+    const bare = join(dir, "bare");
+    for (const sub of ["", "app", "docs"]) {
+      mkdirSync(join(bare, sub), { recursive: true });
+      writeFileSync(join(bare, sub, "index.html"), "<p>no links</p>");
+    }
+
+    const result = runCli(["--merged", bare]);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /0 links/);
   });
 
   it("extracts links from prose without trailing punctuation or entities", () => {
