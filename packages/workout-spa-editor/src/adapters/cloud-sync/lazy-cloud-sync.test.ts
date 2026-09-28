@@ -46,6 +46,30 @@ describe("createLazyCloudSync", () => {
     expect(port.isAuthenticated()).toBe(true);
   });
 
+  it("should load once when called concurrently before the load resolves", async () => {
+    // Arrange
+    const inner = fakePort();
+    let resolveLoad: (port: CloudSyncPort) => void = () => {};
+    const load = vi.fn(
+      () =>
+        new Promise<CloudSyncPort>((resolve) => {
+          resolveLoad = resolve;
+        })
+    );
+    const port = createLazyCloudSync(load);
+
+    // Act
+    const first = port.pull();
+    const second = port.authenticate();
+    resolveLoad(inner);
+    await Promise.all([first, second]);
+
+    // Assert
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(inner.pull).toHaveBeenCalledTimes(1);
+    expect(inner.authenticate).toHaveBeenCalledTimes(1);
+  });
+
   it("should retry the load after a failed one", async () => {
     // Arrange
     const inner = fakePort();
