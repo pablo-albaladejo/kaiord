@@ -61,18 +61,18 @@
 
 ## 5. Ledger model and Phase 1 (T4, PR-2)
 
-- [ ] 5.1 Ledger types and branded ids (`GarminWorkoutId`,
+- [x] 5.1 Ledger types and branded ids (`GarminWorkoutId`,
       `GarminScheduleId`) in `SPA/types/export-ledger.ts` (AC-16).
-- [ ] 5.2 `buildCommitPatch` as the only `commitByKey` patch on both paths;
+- [x] 5.2 `buildCommitPatch` as the only `commitByKey` patch on both paths;
       `handleConstraintResult` checks `pending`, then `forceRepush`, then the
       hash (AC-10, AC-11).
-- [ ] 5.3 Stale-pending recovery (`PENDING_TTL_MS`), `pushQuiet`, and
+- [x] 5.3 Stale-pending recovery (`PENDING_TTL_MS`), `pushQuiet`, and
       `do-push-to-garmin` persisting only a confirmed id (AC-17).
-- [ ] 5.4 `normalizeGarminLedgerRow`, the Dexie v36 upgrade, and an optional
+- [x] 5.4 `normalizeGarminLedgerRow`, the Dexie v36 upgrade, and an optional
       `normalize` on `RowMergeHook` applied on import (AC-13, AC-14).
-- [ ] 5.5 `mergeGarminLedgerRows`, replacing the `exportLedger` entry of
+- [x] 5.5 `mergeGarminLedgerRows`, replacing the `exportLedger` entry of
       `ROW_MERGE_HOOKS`; symmetric, supersession before clock (AC-15).
-- [ ] 5.6 Verify `mutateByKey` stamping for the new fields (AC-12).
+- [x] 5.6 Verify `mutateByKey` stamping for the new fields (AC-12).
 
 ## 6. Placement pipeline, detection and stub (T5, PR-3)
 
