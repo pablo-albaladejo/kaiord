@@ -299,11 +299,16 @@ describe("submit", () => {
     async () => {
       // Arrange
       const log = quiet();
+      // AbortSignal.timeout's timer is unref'd: a real request's socket is
+      // what keeps the process alive until it fires. This fake holds a
+      // ref'd timer in its place, or the event loop drains first (Node 22).
       const hanging = (_url, init) =>
         new Promise((_resolve, reject) => {
-          init?.signal?.addEventListener("abort", () =>
-            reject(init.signal.reason)
-          );
+          const socket = setTimeout(() => {}, 5000);
+          init?.signal?.addEventListener("abort", () => {
+            clearTimeout(socket);
+            reject(init.signal.reason);
+          });
         });
 
       // Act
