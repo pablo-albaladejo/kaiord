@@ -90,8 +90,9 @@
       `features`, failure injection and delays.
 - [ ] 6.4 Resolve `uncertain` through the ledger state lattice (design
       §3.9): commits write the new id `keep` and the superseded one
-      `retire`; one `calendar-find` match is adopted `keep`, the other seen
-      held ids become `retire`, unseen ones `gone`; several matches →
+      `retire`; one `calendar-find` match is adopted `keep` (a `scheduled`
+      `previous` becomes `retire`), seen held ids stay `held`, unseen ones
+      `gone`; several matches →
       `duplicate-left` with states unchanged; the drain sends only
       `retire` ids and writes `gone` on 204 or a verified 404.
 - [ ] 6.5 Carried over from T4:

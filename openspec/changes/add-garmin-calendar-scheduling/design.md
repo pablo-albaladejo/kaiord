@@ -510,7 +510,7 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 | Commit (§3.3 step 7)                | new id → `keep`; superseded `scheduled` `previous` → `retire` (one write)                                       |
 | Merge, two different free `Placed`s | winner → `keep`; `scheduled` loser → `retire`                                                                   |
 | Merge, every `Placed` tainted       | nothing (no state is below `held`)                                                                              |
-| T5, exactly one match               | adopted id → `keep`; other `held` ids the read sees for the workout → `retire`; unseen `held` ids → `gone`      |
+| T5, exactly one match               | adopted id → `keep`; a `scheduled` `previous` → `retire`; `held` ids the read sees stay `held`; unseen → `gone` |
 | T5, several matches / none / failed | nothing                                                                                                         |
 | Drain: 204, or 404 verified absent  | `retire` → `gone`                                                                                               |
 | Dismiss ("I removed it")            | → `gone`                                                                                                        |
@@ -530,11 +530,11 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
    - Two different candidates → the newer row's by the hook's total order wins; a `scheduled` loser is written `retire` (an `unconfirmed` loser has no id and is dropped: a duplicate at worst, never a gap).
    - One candidate → it wins.
    - The merged `Placed`'s id is written `keep` (a no-op for a well-formed row).
-   - No candidate, but a `Placed` exists → `{kind:"uncertain", workoutId, date}` with no `previous`; no state changes.
+   - No candidate, no in-flight state (rule 4), but a `Placed` exists → `{kind:"uncertain", workoutId, date}` with no `previous`; no state changes.
 
    **The `uncertain` target rule.** `workoutId` and `date` come from the maximum `held` entry — latest `date`, then larger `workoutId`, then larger `workoutScheduleId`. With no `held` entry the same maximum is taken over **all** entries. Either way it is a function of the merged queue alone, which every re-merge reproduces, so the rule is absorbing. Rejected: "the newest row holding a `Placed`" — the re-merge sees a snapshot that holds the `uncertain`, not a `Placed`, and picks differently.
 
-4. If neither row has a `Placed`, keep an `attempting` or `uncertain`, preferring `posted:true`. An `attempting` never beats a `Placed`; dropping an `attempting{posted:true}` is the documented residual (an untracked duplicate, never a gap).
+4. If no `Placed` is a candidate, keep an `attempting` or `uncertain` of either row, preferring `posted:true`, before synthesizing the `uncertain` of rule 3: the re-merge with a snapshot that holds that in-flight state must reproduce it (absorption). An `attempting` never beats a `Placed`; dropping an `attempting{posted:true}` is the documented residual (an untracked duplicate, never a gap).
 5. `library` and `forceRepush` come only from the newer row (S2).
 6. `updatedAt` is the later of the two by the ledger clock's own parse (unparsable = 0), ties broken by the larger string, so equal instants spelled differently still merge symmetrically.
 
@@ -542,7 +542,7 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 
 **Legacy entries → `held`** (fail-safe). A stateless entry cannot be proven superseded by a verified live entry, so it is never drained until `calendar-find` verifies it; the cost is a duplicate until T5. Mapping them to `retire` instead would drain an id whose superseder may be dead (the round-2 `normal < keep` repro: an old device drains S1 while another device's newer, verified S1 wins the merge). In production no row carries a `removalQueue` yet — T4 is the first writer — so both choices are equivalent there; `held` is the default for anything unproven.
 
-**Adoption is gap-free.** T5 adopts only an id `calendar-find` just saw live, and it retires only `held` ids, which no device drains before this write. Another device can outrank the adoption only with a newer verified `keep` (then that one wins the merge and the adopted id is retired behind a live entry) or by a drain of a `retire` id, which the adoption never wrote for the adopted id.
+**Adoption is gap-free.** T5 adopts only an id `calendar-find` just saw live, and the only id it retires is the `uncertain`'s own `scheduled` `previous`, superseded by the adopted id in the same write (the commit rule). `held` ids it sees stay `held`: never drained, never `Placed`. Another device can outrank the adoption only with a newer verified `keep` (then that one wins the merge and the adopted id is retired behind a live entry) or by a drain of a `retire` id, which the adoption never wrote for the adopted id.
 
 **Crossed retire is unreachable** (assumption and argument). A crossed pair — one row with S1 `retire` / S2 `keep` and another with S2 `retire` / S1 `keep` — would let both devices drain, a gap. It cannot arise under these assumptions:
 
@@ -550,17 +550,17 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 - `retire` is only ever written together with the `keep` of its superseder, in one write (commit, merge loser, T5).
 - A commit retires only in favour of an id it just created, so no earlier decision can have seen that id.
 - Every sync is an atomic read–merge–write of the single cloud row: the cloud row only grows, so the first merge that sees a pair decides it and every later merge inherits the `retire`.
-- `held` exists only from legacy normalization (none in production), and T5 retires only `held` ids.
+- T5 retires only the `uncertain`'s `previous`, together with the `keep` of the id it just adopted. It never retires a `held` id: `held` ids are legacy, unverified, and another device may still hold one as a verified `keep` (the implementation's exhaustive check found exactly that crossed pair when T5 retired seen `held` ids). A seen `held` id therefore stays a duplicate on the calendar until the athlete removes it — legacy data only, none in production.
 
 Known residual: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts`), a check-then-write, not an atomic `If-Match`. Two syncs inside that window lose one update. A crossed pair needs two such lost updates on the same record around one pair decision. Enforcing `If-Match` closes it (follow-up).
 
 **Invariant:** no id whose state is not `keep` ever becomes the merged `Placed`, and only `retire` ids are ever sent to `unschedule`.
 
-**Laws** (property-tested). Symmetric, idempotent on well-formed rows (normalized, and whose own `Placed` is not tainted by its own queue), absorbing (`merge(x, merge(x, y)) = merge(x, y)` and `merge(merge(x, y), y) = merge(x, y)`). The pool is the set of rows produced by scripted, consistent histories — three devices, one offline for several steps, concurrent pushes of the same record, a drain while another device is stale, and T5 resolutions with one match, several matches and a failed read — with every order of sync, push and drain steps enumerated up to a bounded depth. Pairwise supersession cannot be associative, so the histories are also checked for **safety** after every step (a drain never leaves a record with a live entry without one, and no device drains its own `Placed`) and for **convergence** once all devices sync.
+**Laws** (property-tested). Symmetric, idempotent on well-formed rows (normalized, and whose own `Placed` is not tainted by its own queue), absorbing (`merge(x, merge(x, y)) = merge(x, y)` and `merge(merge(x, y), y) = merge(x, y)`). The pool is the set of rows produced by scripted, consistent histories — three devices, one offline for several steps, concurrent pushes of the same record, a drain while another device is stale, and T5 resolutions with one match, several matches and a failed read — with every order of sync, push and drain steps enumerated up to a bounded depth. The laws are checked over every pair of rows that co-exist in one reachable world (the devices' rows and the cloud row at the same step); rows from unrelated histories can hold contradictory verified states for one id and are not a meaningful input. Pairwise supersession cannot be associative, so the histories are also checked for **safety** after every step (a drain never leaves a record with a live entry without one, and no device drains its own `Placed`) and for **convergence** once all devices sync.
 
 **Resolving `uncertain` (T5).** The next push of the record resolves it with `calendar-find` for the workout, over the dates of the `uncertain` and of its `held` entries:
 
-- Exactly one match → adopt it as the `Placed`, `keep`. The other `held` ids the read sees for that workout → `retire`; `held` ids it does not see → `gone`.
+- Exactly one match → adopt it as the `Placed`, `keep`; a `scheduled` `previous` of the `uncertain` → `retire`. `held` ids the read sees stay `held` (see the crossed-retire argument); `held` ids it does not see → `gone`.
 - Several matches → `duplicate-left`; no state changes.
 - No match, or the read fails → the normal `uncertain` path (the athlete decides); no state changes.
 
