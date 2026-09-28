@@ -24,6 +24,27 @@ Key facts:
 - [Kaiord Garmin Bridge (Chrome extension)](https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe):
   one-tap sync of Kaiord workouts into Garmin Connect
 
+## Guides for athletes
+
+- [Zwift workouts on your Garmin](https://kaiord.com/docs/guide/zwift-to-garmin):
+  convert a .zwo to FIT in the browser, or send it to Garmin Connect
+- [Plan your training with AI using your own API key](https://kaiord.com/docs/guide/ai-planning-byok):
+  the in-browser assistant with your own Anthropic, OpenAI or Google key
+- [WHOOP recovery in your training plan](https://kaiord.com/docs/guide/whoop-recovery-in-plan):
+  recovery, HRV and sleep next to your planned workouts
+- [Kaiord vs TrainingPeaks, intervals.icu and Garmin Connect](https://kaiord.com/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin):
+  a sourced comparison of price, workout builder, Garmin sync and data
+- [Guías en español](https://kaiord.com/docs/es/): the same four guides in
+  Spanish
+- [Entrenamientos de Zwift en tu Garmin](https://kaiord.com/docs/es/guide/zwift-to-garmin):
+  Spanish version of the Zwift-to-Garmin guide
+- [Planifica tu entrenamiento con IA y tu propia clave de API](https://kaiord.com/docs/es/guide/ai-planning-byok):
+  Spanish version of the AI planning guide
+- [La recuperación de WHOOP en tu plan de entrenamiento](https://kaiord.com/docs/es/guide/whoop-recovery-in-plan):
+  Spanish version of the WHOOP recovery guide
+- [Kaiord frente a TrainingPeaks, intervals.icu y Garmin Connect](https://kaiord.com/docs/es/guide/kaiord-vs-trainingpeaks-intervals-garmin):
+  Spanish version of the comparison
+
 ## Documentation
 
 - [Docs home](https://kaiord.com/docs/): guides, format specs, API reference
