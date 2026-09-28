@@ -8,16 +8,21 @@ import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { createSaveHandler } from "./save-handler";
 
 /**
- * Custom hook for save functionality with format selection
+ * Custom hook for save functionality with format selection.
+ * `initialFormat` preselects the export format (the converter deep link
+ * passes its `to`); the user can still change it.
  */
-export function useSaveWorkout(workout: KRD) {
+export function useSaveWorkout(
+  workout: KRD,
+  initialFormat: WorkoutFileFormat = "krd"
+) {
   const [saveErrors, setSaveErrors] = useState<Array<ValidationError> | null>(
     null
   );
   const [isSaving, setIsSaving] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [selectedFormat, setSelectedFormat] =
-    useState<WorkoutFileFormat>("krd");
+    useState<WorkoutFileFormat>(initialFormat);
   const toast = useToast();
   const { success, error: showError } = toast;
   const analytics = useAnalytics();

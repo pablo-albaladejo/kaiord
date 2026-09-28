@@ -302,5 +302,16 @@
     "countAria": "Repeat count",
     "ungroup": "Ungroup",
     "deleteShort": "Delete"
+  },
+  "convert": {
+    "heading": "Convert {{from}} to {{to}}",
+    "pickerHeading": "Convert a workout file",
+    "pickerIntro": "Pick the format you have and the one you need.",
+    "scope": "Converts structured workouts (steps and targets), not recorded activities. The file never leaves your browser, and nothing is saved to your calendar or library.",
+    "from": "From",
+    "to": "To",
+    "continue": "Continue",
+    "chooseFile": "1. Choose your {{from}} file",
+    "download": "2. Download it as {{to}}"
   }
 }
