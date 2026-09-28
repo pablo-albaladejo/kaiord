@@ -6,6 +6,7 @@ import {
   editorHrefsIn,
   LEGACY_EDITOR_REASON,
   linksIn,
+  switcherHrefsIn,
 } from "./site-links-resolve.mjs";
 
 // Walks the built site for `check-site-links.mjs`: which files are read, and
@@ -40,8 +41,23 @@ export function checkSiteLinks({ mounts, segments }) {
       for (const link of hrefs) {
         problems.push({ file, link, reason: LEGACY_EDITOR_REASON });
       }
+      const switcher = file.endsWith(".html") ? switcherHrefsIn(text) : [];
+      for (const href of switcher) {
+        const reason = brokenReason(
+          ordered,
+          segments,
+          `https://kaiord.com${href}`
+        );
+        if (reason) {
+          problems.push({
+            file,
+            link: href,
+            reason: `language switcher: ${reason}`,
+          });
+        }
+      }
       const links = new Set(linksIn(text));
-      linksChecked += links.size + hrefs.length;
+      linksChecked += links.size + hrefs.length + switcher.length;
       for (const link of links) {
         const reason = brokenReason(ordered, segments, link);
         if (reason) problems.push({ file, link, reason });

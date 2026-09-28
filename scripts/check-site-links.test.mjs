@@ -92,6 +92,19 @@ describe("check-site-links", () => {
     ]);
   });
 
+  it("rejects a language switcher pointing at an untranslated page", () => {
+    // VitePress's default switcher links "/es/<same path>", a 404 on every
+    // page without a Spanish translation (i18nRouting must stay false).
+    writeFileSync(
+      join(dir, "docs", "switcher.html"),
+      '<a class="VPLink link" href="/docs/es/guide/quick-start" rel="alternate" lang="es" hreflang="es">Español</a>'
+    );
+
+    assert.deepEqual(reasons(), [
+      "language switcher: no page is served at /docs/es/guide/quick-start",
+    ]);
+  });
+
   it("resolves a merged tree the same way as the three dists", () => {
     const merged = join(dir, "merged");
     cpSync(join(dir, "landing"), merged, { recursive: true });
