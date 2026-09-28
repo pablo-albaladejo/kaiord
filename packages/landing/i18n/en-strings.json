@@ -22,7 +22,6 @@
   "Chrome Extension",
   "Clean boundaries. Domain never depends on infrastructure.",
   "Conversational-first",
-  "Convert a .zwo to FIT in the browser, or send it to Garmin Connect.",
   "Convert between FIT, TCX, ZWO & Garmin in 4 lines of TypeScript. Strategy pattern, your adapters.",
   "Convert files from your terminal. Pipe-friendly.",
   "Convert fitness data in 4 lines.",
@@ -135,6 +134,5 @@
   "Your model, your key",
   "Your training cockpit.",
   "Your week is the cockpit.",
-  "Zero infrastructure",
-  "Zwift workouts on your Garmin"
+  "Zero infrastructure"
 ]

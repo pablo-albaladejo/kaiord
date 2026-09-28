@@ -175,7 +175,7 @@ const assertDocumentStructure = (html, outFile) => {
 // A link whose target has a Spanish page carries it in `data-es-href`: the
 // Spanish build points there, the English build keeps `href`. Neither page
 // ships the attribute.
-const applyLocaleHrefs = (root, lang) => {
+export const applyLocaleHrefs = (root, lang) => {
   for (const el of root.querySelectorAll("[data-es-href]")) {
     if (lang === "es") el.setAttribute("href", el.getAttribute("data-es-href"));
     el.removeAttribute("data-es-href");
@@ -232,4 +232,4 @@ const main = () => {
   console.log(`build-locales: wrote ${esFile} (es + hreflang + switcher)`);
 };
 
-main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();
