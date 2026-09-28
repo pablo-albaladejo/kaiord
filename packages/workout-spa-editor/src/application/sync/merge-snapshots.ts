@@ -3,6 +3,8 @@
  *
  * Merges a local and remote `Snapshot` per table, per record (keyed by
  * primary key) keeping the side whose `updatedAt`/`createdAt` is newer.
+ * Tables with a natural-key hook (`ROW_MERGE_HOOKS`, e.g. `exportLedger`)
+ * are keyed and merged by that hook instead.
  * Timestampless tables (`meta`) merge whole-record using the manifest
  * `exportedAt`. Tombstones are unioned (newest `deletedAt` per key) and
  * suppress any record whose clock is older. No Drive or Dexie dependency —
@@ -10,27 +12,14 @@
  */
 
 import type { Snapshot } from "../../types/snapshot";
-import {
-  recordClock,
-  recordKey,
-  TIMESTAMPLESS_TABLES,
-} from "./merge-record-key";
-import {
-  tombstoneClocks,
-  tombstoneKey,
-  unionTombstones,
-} from "./merge-tombstones";
+import { TIMESTAMPLESS_TABLES } from "./merge-record-key";
+import { mergeTableRows } from "./merge-table-rows";
+import { tombstoneClocks, unionTombstones } from "./merge-tombstones";
 
 type Row = Record<string, unknown>;
 
 const asRows = (rows: ReadonlyArray<unknown> | undefined): Row[] =>
   (rows ?? []) as Row[];
-
-function pickByClock(a: Row | undefined, b: Row | undefined): Row | undefined {
-  if (!a) return b;
-  if (!b) return a;
-  return recordClock(b) > recordClock(a) ? b : a;
-}
 
 function mergeTable(
   table: string,
@@ -41,19 +30,7 @@ function mergeTable(
 ): Row[] {
   if (TIMESTAMPLESS_TABLES.has(table))
     return asRows(localNewer ? local : remote);
-  const byKey = new Map<string, Row>();
-  for (const row of [...asRows(local), ...asRows(remote)]) {
-    const k = recordKey(table, row);
-    byKey.set(k, pickByClock(byKey.get(k), row) as Row);
-  }
-  return [...byKey.values()].filter((row) => {
-    // Tombstones are keyed by `[table+id]`; only id-keyed rows can be
-    // suppressed, so non-id tables (which are never tombstoned) pass through.
-    const id = row.id;
-    if (typeof id !== "string") return true;
-    const deletedAt = deletes.get(tombstoneKey(table, id));
-    return deletedAt === undefined || recordClock(row) > deletedAt;
-  });
+  return mergeTableRows(table, [...asRows(local), ...asRows(remote)], deletes);
 }
 
 export function mergeSnapshots(local: Snapshot, remote: Snapshot): Snapshot {

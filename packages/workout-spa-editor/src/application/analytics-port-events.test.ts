@@ -11,7 +11,10 @@
 import type { Analytics } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ExportLedgerEntry } from "../types/export-ledger";
+import {
+  type ExportLedgerEntry,
+  resolveLedgerMutation,
+} from "../types/export-ledger";
 import type {
   ExportLedgerRepository,
   InsertPendingResult,
@@ -57,8 +60,8 @@ const makeLedgerRepo = (
 ): ExportLedgerRepository => ({
   findByNaturalKey: async () => undefined,
   insertPending: async (): Promise<InsertPendingResult> => ({ ok: true }),
-  update: async () => undefined,
-  deleteById: async () => undefined,
+  mutateByKey: async (_key, fn) => fn(undefined),
+  rollbackPending: async () => undefined,
   countByDataType: async () => 1,
   ...overrides,
 });
@@ -79,13 +82,20 @@ const makeStatefulLedgerRepo = (): ExportLedgerRepository => {
       keyIndex.set(key, entry.id);
       return { ok: true };
     },
-    update: async (id, patch) => {
-      const existing = store.get(id);
-      if (existing) store.set(id, { ...existing, ...patch });
+    mutateByKey: async (key, fn) => {
+      const k = nk(key.kaiordRecordId, key.destinationBridgeId);
+      const id = keyIndex.get(k);
+      const current = id ? store.get(id) : undefined;
+      const next = resolveLedgerMutation(current, fn, new Date().toISOString());
+      if (!next) return current;
+      if (current) store.delete(current.id);
+      store.set(next.id, next);
+      keyIndex.set(k, next.id);
+      return next;
     },
-    deleteById: async (id) => {
+    rollbackPending: async (id) => {
       const entry = store.get(id);
-      if (entry) {
+      if (entry?.destinationExternalId === "pending") {
         keyIndex.delete(nk(entry.kaiordRecordId, entry.destinationBridgeId));
         store.delete(id);
       }

@@ -77,13 +77,17 @@ export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
       return out;
     },
 
-    importTables: async (tables: SnapshotTables) => {
+    importTables: async (tables: SnapshotTables, { liveMerge }) => {
       const scope = dataTables();
       await scoped.transaction("rw", scope, async () => {
         for (const table of scope) {
+          let rows = tables[table.name] ?? [];
+          // Read the live rows inside this rw transaction so a write that
+          // landed after the snapshot was exported is merged, not wiped.
+          const merge = liveMerge(table.name);
+          if (merge) rows = merge(await table.toArray(), rows);
           await table.clear();
-          const rows = tables[table.name];
-          if (rows && rows.length > 0) await table.bulkPut([...rows]);
+          if (rows.length > 0) await table.bulkPut([...rows]);
         }
       });
     },

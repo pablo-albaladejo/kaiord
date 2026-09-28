@@ -13,6 +13,16 @@
 
 import type { SnapshotTables, Tombstone } from "../types/snapshot";
 
+/** Per-table live-row merge for `importTables`; `undefined` → replace. */
+export type LiveRowMerge = (
+  table: string
+) =>
+  | ((
+      live: ReadonlyArray<unknown>,
+      incoming: ReadonlyArray<unknown>
+    ) => unknown[])
+  | undefined;
+
 export type SnapshotPort = {
   /**
    * Run `scope` inside a single database transaction spanning all
@@ -27,8 +37,17 @@ export type SnapshotPort = {
   schemaVersion: () => Promise<number>;
   /** Dump every table's rows, keyed by table name. */
   exportTables: () => Promise<SnapshotTables>;
-  /** Clear every table, then restore the provided rows. */
-  importTables: (tables: SnapshotTables) => Promise<void>;
+  /**
+   * Restore the provided rows. For each table the adapter asks
+   * `options.liveMerge(table)`: when it returns a merge function, the adapter
+   * reads the table's LIVE rows inside its read-write transaction and writes
+   * `merge(live, incoming)` instead, so a write made after the snapshot was
+   * exported is not wiped. Otherwise the table is cleared, then restored.
+   */
+  importTables: (
+    tables: SnapshotTables,
+    options: { liveMerge: LiveRowMerge }
+  ) => Promise<void>;
   /** Read every tombstone row. */
   listTombstones: () => Promise<Tombstone[]>;
   /** Clear the tombstones table, then write the provided tombstones. */

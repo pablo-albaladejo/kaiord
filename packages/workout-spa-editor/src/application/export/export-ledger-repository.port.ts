@@ -16,7 +16,25 @@ export type ExportLedgerRepository = {
     destinationBridgeId: string;
   }) => Promise<ExportLedgerEntry | undefined>;
   insertPending: (entry: ExportLedgerEntry) => Promise<InsertPendingResult>;
-  update: (id: string, patch: Partial<ExportLedgerEntry>) => Promise<void>;
-  deleteById: (id: string) => Promise<void>;
+  /**
+   * Read-modify-write of the row holding `key`, in its own read-write
+   * transaction that re-reads the row by natural key (never by ledger id —
+   * after a cloud-sync dedupe the surviving row may carry another device's
+   * id). No owner, no compare-and-swap. `fn` receives `undefined` when the
+   * row is absent and returns the row to store, or `undefined` to write
+   * nothing. `updatedAt` is stamped only when `fn` actually changed the row
+   * (deep-equal); a no-op leaves it byte-identical. Resolves to the row held
+   * afterwards.
+   */
+  mutateByKey: (
+    key: { kaiordRecordId: string; destinationBridgeId: string },
+    fn: (row: ExportLedgerEntry | undefined) => ExportLedgerEntry | undefined
+  ) => Promise<ExportLedgerEntry | undefined>;
+  /**
+   * Failed-POST rollback: deletes (and tombstones) the row with `id` only if
+   * it still exists and is still pending. A row another device committed
+   * under the same id meanwhile is left untouched.
+   */
+  rollbackPending: (id: string) => Promise<void>;
   countByDataType: (dataType: string) => Promise<number>;
 };

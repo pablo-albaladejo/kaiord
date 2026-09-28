@@ -32,10 +32,16 @@ export function createInMemorySnapshotPort(
       return out;
     },
 
-    importTables: async (tables: SnapshotTables) => {
-      for (const name of Object.keys(state.tables)) state.tables[name] = [];
-      for (const [name, rows] of Object.entries(tables)) {
-        state.tables[name] = [...rows];
+    // Mirrors the Dexie adapter: natural-key tables merge with live rows.
+    importTables: async (tables: SnapshotTables, { liveMerge }) => {
+      const live = { ...state.tables };
+      for (const name of new Set([
+        ...Object.keys(live),
+        ...Object.keys(tables),
+      ])) {
+        const rows = tables[name] ?? [];
+        const merge = liveMerge(name);
+        state.tables[name] = merge ? merge(live[name] ?? [], rows) : [...rows];
       }
     },
 
