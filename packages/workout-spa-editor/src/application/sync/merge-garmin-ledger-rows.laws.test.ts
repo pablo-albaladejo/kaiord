@@ -16,12 +16,9 @@
  *   `uncertain{previous}`.
  * - drain: sends every `retire` id and writes `gone`.
  * - abandon: every `retire` id failed three times (it stays on Garmin).
- * - dismiss: the athlete removes the lowest abandoned or `held` entry that
- *   is not the device's own `Placed` / `previous`, and says so (`gone`). A
- *   `held` one only when it is a true duplicate — no row anywhere holds it
- *   `keep`: deleting another device's verified `Placed` by hand is an
- *   external deletion the ledger cannot prevent (it crosses with that
- *   device's supersession exactly like deleting it in Garmin directly).
+ * - dismiss: the athlete removes the lowest abandoned entry that is not the
+ *   device's own `Placed` / `previous`, and says so (`gone`). A `held`
+ *   entry is never dismissable (design §3.9).
  * - sync: `syncWithCloud` through the `exportLedger` hook (normalize, then
  *   the snapshot merge, then the live merge).
  * - t5: the `uncertain` resolution by `calendar-find` over the `uncertain`'s
@@ -286,20 +283,9 @@ function dismiss(world: World, device: number) {
   const row = world.devices[device];
   const own = placementOf(row);
   const ownIds = [own?.workoutScheduleId, own?.previous?.workoutScheduleId];
-  const verified = new Set(
-    [...world.devices, world.cloud].flatMap((r) =>
-      queueOf(r && normalizeGarminLedgerRow(r))
-        .filter((e) => e.state === "keep")
-        .map((e) => e.workoutScheduleId)
-    )
-  );
-  const duplicate = (e: Entry) =>
-    e.abandoned || (e.state === "held" && !verified.has(e.workoutScheduleId));
   const target = queueOf(row).find(
     (e) =>
-      duplicate(e) &&
-      e.state !== "gone" &&
-      !ownIds.includes(e.workoutScheduleId)
+      e.abandoned && e.state !== "gone" && !ownIds.includes(e.workoutScheduleId)
   );
   if (!target) return;
   world.calendar = world.calendar.filter(
@@ -457,6 +443,22 @@ const adoptedWorld = scripted([
   { device: 1, op: "t5" },
 ]);
 
+/** A moves S100 (D1) to S101 (D2), drains S100 and pushes back to D1 with
+    no id; C saw only S100 and pushes to D1 with no id too: two id-less
+    placements for one date with different known ids, merged by union. */
+const unionWorld = scripted(
+  [
+    { device: 0, op: "push-ok" },
+    { device: 0, op: "sync" },
+    { device: 2, op: "sync" },
+    { device: 0, op: "push-ok" },
+    { device: 0, op: "drain" },
+    { device: 0, op: "push-no-id" },
+    { device: 2, op: "push-no-id" },
+  ],
+  2
+);
+
 /** The round-1 shape: stateless queue entries, normalized to `held`. */
 const legacyWorld = (): World =>
   world(
@@ -542,6 +544,12 @@ const SCENARIOS: Scenario[] = [
     depth: 5,
   },
   {
+    name: "two id-less pushes for one date with different known ids",
+    seed: unionWorld,
+    alphabet: [...steps(["sync", "drain"]), ...steps(["push-no-id"], [1])],
+    depth: 4,
+  },
+  {
     name: "abandoned and dismissed entries",
     seed: staleWorld,
     alphabet: [
@@ -570,6 +578,26 @@ describe("mergeGarminLedgerRows laws over enumerated histories", () => {
       expect({ count, sample }).toEqual({ count: 0, sample: [] });
     }
   );
+
+  it("should meet two id-less placements for one date with different known ids", () => {
+    // Arrange
+    const { pairs } = explored.find((e) => e.s.name.startsWith("two id-less"))!;
+    const differ = ([x, y]: [Row, Row]) => {
+      const [p, q] = [placementOf(x), placementOf(y)];
+      return (
+        p?.kind === "unconfirmed" &&
+        q?.kind === "unconfirmed" &&
+        p.date === q.date &&
+        JSON.stringify(p.supersedes) !== JSON.stringify(q.supersedes)
+      );
+    };
+
+    // Act
+    const met = pairs.filter(differ).length;
+
+    // Assert
+    expect(met).toBeGreaterThan(0);
+  });
 
   it.each(explored.map((e) => [e.s.name, e.pairs] as const))(
     "should be symmetric, idempotent and absorbing over the rows of %s",
