@@ -13,7 +13,7 @@ TypeScript source files for the landing page. Includes the main entry point, CSS
 - **`install-widget.ts`** (101 LOC) — Developer install widget: package-manager tabs (WAI-ARIA roving tabindex, arrow keys), mobile `<select>` mirror, copy button, and smooth scrolling.
 - **`main.css`** (86 LOC) — Tailwind directives + custom animations. Imports brand tokens. Defines fade-in-left, fade-in-right, pulse-slow animations. Unified focus-visible ring styling.
 - **`analytics.ts`** (5 LOC) — Creates Umami analytics client, conditionally noop.
-- **`setup-analytics.ts`** (36 LOC) — Wires up analytics: pageView on load, click handlers for editor/docs/github links, and `extension-install-clicked` (`{ extension: <listing slug> }`) on Chrome Web Store links.
+- **`setup-analytics.ts`** (37 LOC) — Wires up analytics: pageView on load, click handlers for editor/docs/github links, and `extension-install-clicked` (`{ extension: <listing slug> }`) on Chrome Web Store links.
 
 ## Subdirectories
 

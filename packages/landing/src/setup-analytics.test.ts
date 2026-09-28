@@ -15,6 +15,7 @@ function mountLinks(): void {
   document.body.innerHTML = `
     <a id="cws" href="${CWS}">Install</a>
     <a id="cws-odd" href="https://chromewebstore.google.com/category/extensions">Store</a>
+    <a id="cws-no-id" href="https://chromewebstore.google.com/detail/example">Store</a>
     <a id="app" href="/app/">Open</a>`;
 }
 
@@ -50,6 +51,20 @@ describe("setupAnalytics", () => {
 
     // Act
     click("cws-odd");
+
+    // Assert
+    expect(event).toHaveBeenCalledWith("extension-install-clicked", {
+      extension: "unknown",
+    });
+  });
+
+  it("should send unknown for a detail path that has no listing id", () => {
+    // Arrange
+    mountLinks();
+    setupAnalytics();
+
+    // Act
+    click("cws-no-id");
 
     // Assert
     expect(event).toHaveBeenCalledWith("extension-install-clicked", {
