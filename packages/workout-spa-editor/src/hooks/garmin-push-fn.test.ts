@@ -9,6 +9,8 @@ vi.mock("./use-garmin-bridge-action-helpers", () => ({
   runPush: vi.fn(),
 }));
 
+import { recordExport } from "../application/export/record-export.use-case";
+import { createInMemoryExportLedgerRepository } from "../test-utils/in-memory-export-ledger-repository";
 import { executePush } from "./garmin-bridge-operations";
 import { buildGarminPushFn, pushQuiet } from "./garmin-push-fn";
 import { runPush } from "./use-garmin-bridge-action-helpers";
@@ -22,6 +24,28 @@ const pushReturning = (
   vi.fn().mockResolvedValue({ success: true, garminWorkoutId });
 
 describe("buildGarminPushFn", () => {
+  it('should store the sentinel, never "pending", when the bridge echoes "pending"', async () => {
+    // Arrange
+    const ledgerRepo = createInMemoryExportLedgerRepository();
+
+    // Act
+    await recordExport(
+      { ledgerRepo },
+      {
+        kaiordRecordId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        dataType: "workout",
+        destinationBridgeId: "garmin-bridge",
+        payload: { workoutName: "Intervals" },
+        postFn: buildGarminPushFn(pushReturning("pending")),
+      }
+    );
+
+    // Assert
+    const [row] = [...ledgerRepo.store.values()];
+    expect(row?.destinationExternalId).toBe(SENTINEL);
+    expect(row?.library).toEqual({ kind: "unconfirmed" });
+  });
+
   it("should pass through an id-shaped value from the bridge", async () => {
     // Arrange
     const pushFn = buildGarminPushFn(pushReturning("123456789"));

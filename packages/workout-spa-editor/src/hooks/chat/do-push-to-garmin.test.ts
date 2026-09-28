@@ -102,7 +102,7 @@ describe("doPushToGarmin", () => {
     );
   });
 
-  it("should report push_failed and persist nothing when the push lost a race to a pending row", async () => {
+  it("should report push_in_progress and persist nothing when the push lost a race to a pending row", async () => {
     // Arrange
     mockLedgerOutcome = { ledgerId: "ledger-1", outcome: "lost-race" };
     const { persistence, put } = makePersistence(makeRecord());
@@ -112,22 +112,19 @@ describe("doPushToGarmin", () => {
     const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
 
     // Assert
-    expect(result).toEqual({ error: "push_failed" });
+    expect(result).toEqual({ error: "push_in_progress" });
     expect(put).not.toHaveBeenCalled();
   });
 
-  it('should never persist "pending" as the push id', async () => {
+  it('should never persist "pending" as the push id when the bridge echoes it', async () => {
     // Arrange
-    mockLedgerOutcome = {
-      ledgerId: "ledger-1",
-      outcome: "skipped",
-      externalId: "pending",
-      library: { kind: "unconfirmed" },
-    };
     const { persistence, put } = makePersistence(makeRecord());
+    const pushWorkout = vi
+      .fn()
+      .mockResolvedValue({ success: true, garminWorkoutId: "pending" });
 
     // Act
-    const result = await doPushToGarmin(persistence, vi.fn(), "workout-1");
+    const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
 
     // Assert
     expect(result).toEqual({ workoutId: "workout-1", garminPushId: null });
