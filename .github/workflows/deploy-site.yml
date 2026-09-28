@@ -131,12 +131,13 @@ jobs:
         run: pnpm --filter @kaiord/docs... build
 
       # noindex ⇄ sitemap agreement, unique titles/descriptions, and real
-      # (not all-identical) lastmods, over the docs build about to ship.
+      # (not all-identical) lastmods, over the docs build about to ship; and
+      # exactly one font file, the one the docs preload.
       - name: Docs indexing guard
         env:
           REQUIRE_DOCS_DIST: "1"
           REQUIRE_FULL_HISTORY: "1"
-        run: node --test packages/docs/scripts/dist-seo-uniqueness.test.mjs
+        run: node --test packages/docs/scripts/dist-seo-uniqueness.test.mjs packages/docs/scripts/single-font.test.mjs
 
       - name: Merge dist outputs
         run: |
@@ -179,6 +180,7 @@ jobs:
           test -f merged-dist/llms.txt             || { echo "❌ Missing llms.txt"; exit 1; }
           test -f merged-dist/docs/llms.txt        || { echo "❌ Missing docs/llms.txt"; exit 1; }
           test -f merged-dist/docs/llms-full.txt   || { echo "❌ Missing docs/llms-full.txt"; exit 1; }
+          test -f merged-dist/docs/fonts/inter-var-latin.woff2 || { echo "❌ Missing docs/fonts/inter-var-latin.woff2"; exit 1; }
           # IndexNow proves ownership by fetching /<key>.txt, whose body is the key.
           KEY=$(node scripts/geo/indexnow.mjs key)
           [ "$(cat "merged-dist/$KEY.txt" 2>/dev/null)" = "$KEY" ] || { echo "❌ Missing IndexNow key file $KEY.txt"; exit 1; }
@@ -281,7 +283,11 @@ jobs:
     # itself, well under the build-family ceiling 20. Each further smoke probe
     # (one more curl at --max-time 15 per attempt) adds 10 × 15s = 150s to the
     # worst case; recompute this budget when adding one.
-    timeout-minutes: 10
+    # The docs font probe (/docs/fonts/inter-var-latin.woff2) is the fourth:
+    # 10 × (4 × 15s + 10s) = 700s, plus the deploy step (15s in run
+    # 36466754090: "Deploy to GitHub Pages" 18:41:24 → 18:41:39; smoke 1s)
+    # = 715s → ceil(715 / 60) = 12, +1 of room = 13.
+    timeout-minutes: 13
     needs: build
     steps:
       - name: Deploy to GitHub Pages
@@ -311,11 +317,13 @@ jobs:
           APP_URL="${PAGE_URL%/}/app/"
           NOT_FOUND_URL="${PAGE_URL%/}/404.html"
           LEGACY_URL="${PAGE_URL%/}/editor/"
+          FONT_URL="${PAGE_URL%/}/docs/fonts/inter-var-latin.woff2"
           CANONICAL='rel="canonical" href="https://kaiord.com/app/"'
           echo "Smoke targets:"
           echo "  - $APP_URL (expect marker: $MARKER)"
           echo "  - $NOT_FOUND_URL (expect rafgraph redirect script)"
           echo "  - $LEGACY_URL (expect 200 + canonical to /app/)"
+          echo "  - $FONT_URL (expect 200: the docs preload it)"
           for i in $(seq 1 10); do
             EDITOR_TMP=$(mktemp)
             NOT_FOUND_TMP=$(mktemp)
@@ -332,6 +340,9 @@ jobs:
             # No -L: /editor/ itself must answer 200. Following a redirect
             # would score whatever it points at instead.
             LEGACY_CODE=$(curl -s --max-time 15 -o "$LEGACY_TMP" -w "%{http_code}" "$LEGACY_URL" || true)
+            # The docs preload this font on every page; a 404 here is the
+            # wasted request single-font.test.mjs guards against in the build.
+            FONT_CODE=$(curl -sI -o /dev/null -w "%{http_code}" --max-time 15 "$FONT_URL" || true)
             EDITOR_BODY=$(cat "$EDITOR_TMP" 2>/dev/null || true)
             NOT_FOUND_BODY=$(cat "$NOT_FOUND_TMP" 2>/dev/null || true)
             LEGACY_BODY=$(cat "$LEGACY_TMP" 2>/dev/null || true)
@@ -350,17 +361,18 @@ jobs:
             # The bare /editor/ URL is a real page (crawlers see 200, not the
             # 404 the bridge answers with), canonical to /app/.
             [ "$LEGACY_CODE" = "200" ] && echo "$LEGACY_BODY" | grep -qF "$CANONICAL" && LEGACY_OK=1
-            if [ "$APP_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ] && [ "$LEGACY_OK" = "1" ]; then
-              echo "✅ Attempt $i: SPA bundle present at /app/ (200), rafgraph redirect present at /404.html (200), /editor/ canonical to /app/ (200)"
+            if [ "$APP_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ] && [ "$LEGACY_OK" = "1" ] && [ "$FONT_CODE" = "200" ]; then
+              echo "✅ Attempt $i: SPA bundle present at /app/ (200), rafgraph redirect present at /404.html (200), /editor/ canonical to /app/ (200), docs font (200)"
               exit 0
             fi
-            echo "Attempt $i: app=$APP_OK (code=$APP_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE) editor=$LEGACY_OK (code=$LEGACY_CODE); retrying in 10s"
+            echo "Attempt $i: app=$APP_OK (code=$APP_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE) editor=$LEGACY_OK (code=$LEGACY_CODE) font=$FONT_CODE; retrying in 10s"
             sleep 10
           done
           echo "❌ Smoke failed after 10 retries:"
           echo "    /app/ status=$APP_CODE (expect 200), marker present: $APP_OK"
           echo "    /404.html status=$NOT_FOUND_CODE (expect 200), rafgraph script: $NOT_FOUND_OK"
           echo "    /editor/ status=$LEGACY_CODE (expect 200), canonical to /app/: $LEGACY_OK"
+          echo "    /docs/fonts/inter-var-latin.woff2 status=$FONT_CODE (expect 200)"
           exit 1
 
       # Rollback: use workflow_dispatch on last known-good main commit SHA,
