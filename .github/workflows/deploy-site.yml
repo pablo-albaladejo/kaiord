@@ -351,14 +351,20 @@ jobs:
   # Tells IndexNow engines (Bing, which feeds Copilot and ChatGPT search;
   # Yandex; Seznam; Naver) which URLs this deploy changed. Runs only after the
   # smoke passed, so the pages and the key file are live. An empty list logs
-  # "nothing changed, skipping"; a non-200/202 answer is a warning, never a
-  # failed deploy.
+  # "nothing changed, skipping"; a non-200/202 answer, or a request aborted
+  # after 20s, is a warning. continue-on-error keeps a checkout or artifact
+  # hiccup here from turning a deploy that already succeeded red.
   indexnow:
     runs-on: ubuntu-latest
     needs: [build, deploy]
-    # One POST with a 40-URL body plus checkout and an artifact download:
-    # well under a minute. 2 bounds a hung request without cutting a slow one.
-    timeout-minutes: 2
+    continue-on-error: true
+    permissions:
+      contents: read
+    # Set up job 1s + Checkout 4s (run 36438339968) + Setup Node 3s (run
+    # 34855248940) + artifact download 2s (run 30488840105) + the POST, which
+    # the script aborts at 20s + post-checkout 1s = 31s worst case;
+    # ceil(31 x 1.5 / 60) = 1.
+    timeout-minutes: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v7
