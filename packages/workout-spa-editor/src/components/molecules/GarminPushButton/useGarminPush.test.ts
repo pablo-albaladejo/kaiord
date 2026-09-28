@@ -1,7 +1,10 @@
+import { createMissingFtpError } from "@kaiord/core";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GarminBridgeState } from "../../../contexts";
+import { getTranslate } from "../../../i18n/use-translate";
+import { profileWith } from "../../../lib/athlete/test-profile";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
 
@@ -93,6 +96,14 @@ vi.mock("../../../application/export/record-export.use-case", () => ({
 
 import { useGarminPush } from "./useGarminPush";
 
+const FTP_W = 250;
+const CYCLING_KRD = {
+  version: "1.0",
+  type: "structured_workout",
+  metadata: { created: "2026-05-14T08:00:00.000Z", sport: "cycling" },
+  extensions: { structured_workout: { sport: "cycling", steps: [] } },
+} as unknown as WorkoutRecord["krd"];
+
 // A stub KRD payload that exportGcnWorkout will receive verbatim.
 const KRD_STUB = { name: "test workout" } as unknown;
 
@@ -149,7 +160,7 @@ describe("useGarminPush", () => {
     });
 
     // Assert
-    expect(mockExportGcnWorkout).toHaveBeenCalledWith(KRD_STUB);
+    expect(mockExportGcnWorkout).toHaveBeenCalledWith(KRD_STUB, undefined);
     expect(mockPushWorkout).toHaveBeenCalledWith(gcn);
   });
 
@@ -179,6 +190,43 @@ describe("useGarminPush", () => {
     // Assert
     expect(mockExportGcnWorkout).not.toHaveBeenCalled();
     expect(mockPushWorkout).not.toHaveBeenCalled();
+  });
+
+  it("should resolve %FTP targets with the workout owner's profile FTP", async () => {
+    // Arrange
+    mockGet.mockResolvedValue(profileWith("cycling", { ftp: FTP_W }));
+    const workout = makeWorkout({ krd: CYCLING_KRD });
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockGet).toHaveBeenCalledWith("profile-1");
+    expect(mockExportGcnWorkout).toHaveBeenCalledWith(CYCLING_KRD, FTP_W);
+  });
+
+  it("should show the missing-FTP message and not push when the FTP is missing", async () => {
+    // Arrange
+    mockExportGcnWorkout.mockRejectedValue(createMissingFtpError("garmin"));
+    const workout = makeWorkout({ krd: CYCLING_KRD });
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    let pushed: boolean | undefined;
+    await act(async () => {
+      pushed = await result.current.push();
+    });
+
+    // Assert
+    expect(pushed).toBe(false);
+    expect(mockPushWorkout).not.toHaveBeenCalled();
+    expect(mockSetPushing).toHaveBeenCalledWith({
+      status: "error",
+      message: getTranslate("workout-detail")("footer.missingFtp"),
+    });
   });
 
   it("should set error when exportGcnWorkout throws an Error", async () => {

@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useToast } from "../../../hooks/use-toast";
 import { useTranslate } from "../../../i18n/use-translate";
+import { ftpForWorkout } from "../../../lib/athlete";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { createSaveHandler } from "./save-handler";
@@ -22,6 +24,7 @@ export function useSaveWorkout(workout: KRD) {
   const { success, error: showError } = toast;
   const analytics = useAnalytics();
   const t = useTranslate("editor");
+  const activeProfile = useActiveProfileLive();
 
   const handleSave = createSaveHandler(
     workout,
@@ -32,7 +35,8 @@ export function useSaveWorkout(workout: KRD) {
     success,
     showError,
     (format) => analytics.event("workout-exported", { format }),
-    t
+    t,
+    ftpForWorkout(activeProfile?.profile, workout)
   );
 
   const clearErrors = () => setSaveErrors(null);

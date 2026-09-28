@@ -1,8 +1,12 @@
+import { createMissingFtpError } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { profileWith } from "../../lib/athlete/test-profile";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { IntegrationPolicy } from "../../types/integration-policy";
+import type { Profile } from "../../types/profile";
+import { exportGcnWorkout } from "../../utils/export-workout-formats";
 
 vi.mock("../../utils/export-workout-formats", () => ({
   exportGcnWorkout: vi.fn().mockResolvedValue({ gcn: "payload" }),
@@ -64,13 +68,23 @@ const makeRecord = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
     ...overrides,
   }) as unknown as WorkoutRecord;
 
-const makePersistence = (record: WorkoutRecord | undefined) => {
+const makePersistence = (
+  record: WorkoutRecord | undefined,
+  profile?: Profile
+) => {
   const put = vi.fn();
   const persistence = {
     workouts: { getById: vi.fn().mockResolvedValue(record), put },
+    profiles: { getById: vi.fn().mockResolvedValue(profile) },
   } as unknown as PersistencePort;
   return { persistence, put };
 };
+
+const FTP_W = 250;
+const CYCLING_KRD = {
+  metadata: { sport: "cycling" },
+  extensions: { structured_workout: { sport: "cycling", steps: [] } },
+} as unknown as WorkoutRecord["krd"];
 
 describe("doPushToGarmin", () => {
   beforeEach(() => {
@@ -172,6 +186,45 @@ describe("doPushToGarmin", () => {
     // Assert
     expect(result).toEqual(
       expect.objectContaining({ error: "no_active_export_route" })
+    );
+    expect(pushWorkout).not.toHaveBeenCalled();
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it("should export with the workout owner's FTP for its sport", async () => {
+    // Arrange
+    const profile = profileWith("cycling", { ftp: FTP_W });
+    const record = makeRecord({ krd: CYCLING_KRD });
+    const { persistence } = makePersistence(record, profile);
+    const pushWorkout = vi
+      .fn()
+      .mockResolvedValue({ success: true, garminWorkoutId: "gw-9" });
+
+    // Act
+    await doPushToGarmin(persistence, pushWorkout, "workout-1");
+
+    // Assert
+    expect(persistence.profiles.getById).toHaveBeenCalledWith("profile-1");
+    expect(exportGcnWorkout).toHaveBeenCalledWith(CYCLING_KRD, FTP_W);
+  });
+
+  it("should report missing_ftp and never push when the export needs an FTP", async () => {
+    // Arrange
+    vi.mocked(exportGcnWorkout).mockRejectedValueOnce(
+      createMissingFtpError("garmin")
+    );
+    const { persistence, put } = makePersistence(makeRecord());
+    const pushWorkout = vi.fn();
+
+    // Act
+    const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
+
+    // Assert
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: "missing_ftp",
+        message: expect.stringContaining("FTP"),
+      })
     );
     expect(pushWorkout).not.toHaveBeenCalled();
     expect(put).not.toHaveBeenCalled();

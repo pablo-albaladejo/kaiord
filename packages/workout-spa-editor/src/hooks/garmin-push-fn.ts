@@ -6,11 +6,14 @@
  */
 import { db } from "../adapters/dexie/dexie-database";
 import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-export-ledger-repository";
+import { createDexieProfileRepository } from "../adapters/dexie/dexie-profile-repository";
 import type { ExecuteWorkoutPushInput } from "../application/export/execute-workout-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 
 export { policyRepo } from "./integration-policy-repo";
 export const ledgerRepo = createDexieExportLedgerRepository(db);
+/** Read-only here: the push reads the workout owner's FTP from it. */
+export const profileRepo = createDexieProfileRepository(db);
 export const GARMIN_BRIDGE_ID = "garmin-bridge";
 
 const UNCONFIRMED_EXTERNAL_ID = "garmin-unconfirmed";

@@ -83,7 +83,8 @@
     "savedTitle": "Workout Saved",
     "savedDescription": "\"{{name}}\" has been saved as {{format}}",
     "exportFailedTitle": "Export Failed",
-    "exportFailedFallback": "Failed to export workout"
+    "exportFailedFallback": "Failed to export workout",
+    "missingFtp": "This workout has %FTP power targets. Set your FTP in Athlete to convert them to watts for Garmin."
   },
   "saveError": {
     "title": "Save Failed",

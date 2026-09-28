@@ -83,7 +83,8 @@
     "savedTitle": "Entreno guardado",
     "savedDescription": "«{{name}}» se ha guardado como {{format}}",
     "exportFailedTitle": "Error de exportación",
-    "exportFailedFallback": "No se pudo exportar el entreno"
+    "exportFailedFallback": "No se pudo exportar el entreno",
+    "missingFtp": "Este entreno tiene objetivos de potencia en %FTP. Configura tu FTP en Atleta para convertirlos a vatios para Garmin."
   },
   "saveError": {
     "title": "Error al guardar",

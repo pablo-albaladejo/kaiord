@@ -64,19 +64,25 @@ export const exportZwoFile = async (
   return buffer;
 };
 
-export const exportGcnWorkout = async (krd: KRD): Promise<unknown> => {
-  const { garminWriter } = await import("@kaiord/garmin");
-  const gcnString = await toText(krd, garminWriter);
+/** `ftpWatts` resolves `percent_ftp` power targets; without it such a
+    workout rejects with `MissingFtpError` rather than writing % as watts. */
+export const exportGcnWorkout = async (
+  krd: KRD,
+  ftpWatts?: number
+): Promise<unknown> => {
+  const { createGarminWriter } = await import("@kaiord/garmin");
+  const gcnString = await toText(krd, createGarminWriter({ ftpWatts }));
   return JSON.parse(gcnString) as unknown;
 };
 
 export const exportGcnFile = async (
   krd: KRD,
-  onProgress?: ExportProgressCallback
+  onProgress?: ExportProgressCallback,
+  ftpWatts?: number
 ): Promise<Uint8Array> => {
   onProgress?.(50);
-  const { garminWriter } = await import("@kaiord/garmin");
-  const gcnString = await toText(krd, garminWriter);
+  const { createGarminWriter } = await import("@kaiord/garmin");
+  const gcnString = await toText(krd, createGarminWriter({ ftpWatts }));
   const buffer = new TextEncoder().encode(gcnString);
   onProgress?.(100);
   return buffer;

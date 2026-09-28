@@ -35,7 +35,8 @@ export type ExportProgressCallback = (progress: number) => void;
 export const exportWorkout = async (
   krd: KRD,
   format: WorkoutFileFormat,
-  onProgress?: ExportProgressCallback
+  onProgress?: ExportProgressCallback,
+  ftpWatts?: number
 ): Promise<Uint8Array> => {
   try {
     onProgress?.(10);
@@ -55,7 +56,7 @@ export const exportWorkout = async (
     } else if (format === "zwo") {
       buffer = await exportZwoFile(portable, onProgress);
     } else if (format === "gcn") {
-      buffer = await exportGcnFile(portable, onProgress);
+      buffer = await exportGcnFile(portable, onProgress, ftpWatts);
     } else {
       throw new ExportError(`Unsupported format: ${format}`, format);
     }

@@ -1,3 +1,4 @@
+import { MissingFtpError } from "@kaiord/core";
 import { useCallback } from "react";
 
 import { executeWorkoutPush } from "../../../application/export/execute-workout-push";
@@ -8,9 +9,17 @@ import {
   GARMIN_BRIDGE_ID,
   ledgerRepo,
   policyRepo,
+  profileRepo,
 } from "../../../hooks/garmin-push-fn";
+import { useTranslate } from "../../../i18n/use-translate";
+import { ftpForWorkout } from "../../../lib/athlete";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
+
+const pushErrorMessage = (error: unknown, missingFtp: string): string => {
+  if (error instanceof MissingFtpError) return missingFtp;
+  return error instanceof Error ? error.message : "Conversion failed";
+};
 
 /**
  * Pushes a persisted workout to Garmin Connect.
@@ -39,12 +48,15 @@ import { exportGcnWorkout } from "../../../utils/export-workout-formats";
 export const useGarminPush = (workout: WorkoutRecord | undefined) => {
   const { pushWorkout, setPushing, sessionActive } = useGarminBridge();
   const analytics = useAnalytics();
+  const t = useTranslate("workout-detail");
 
   const push = useCallback(async (): Promise<boolean> => {
     if (!workout?.krd || !sessionActive) return false;
 
     try {
-      const gcn = await exportGcnWorkout(workout.krd);
+      const profile = await profileRepo.getById(workout.profileId);
+      const ftp = ftpForWorkout(profile, workout.krd);
+      const gcn = await exportGcnWorkout(workout.krd, ftp);
       await executeWorkoutPush(
         { policyRepo, ledgerRepo },
         {
@@ -60,12 +72,11 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
     } catch (error: unknown) {
       analytics.event("garmin-synced", { result: "failure" });
       if (error instanceof BridgePushFailedError) return false;
-      const message =
-        error instanceof Error ? error.message : "Conversion failed";
+      const message = pushErrorMessage(error, t("footer.missingFtp"));
       setPushing({ status: "error", message });
       return false;
     }
-  }, [workout, sessionActive, pushWorkout, setPushing, analytics]);
+  }, [workout, sessionActive, pushWorkout, setPushing, analytics, t]);
 
   return { push };
 };
