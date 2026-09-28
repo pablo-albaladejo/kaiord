@@ -80,14 +80,14 @@ const REVIEWED_EXCEPTIONS: Record<string, string> = {
 const OFF_PORT_TABLES: Record<string, string> = {
   // `exportLedger` (Dexie v17) is written by `createDexieExportLedgerRepository`,
   // never exposed on the port. THREE delete sites: the failed-POST rollback in
-  // `record-export-post.ts` goes through the repo's `deleteById`, which
+  // `record-export-post.ts` goes through the repo's `rollbackPending`, which
   // hand-tombstones (a resurrected pending row would read as a lost race on
   // every device forever). The Dexie `deleting` hook in
   // `dexie-export-ledger-cascade.ts` (source record removed) and
   // `sweepOrphanLedgerEntries` (disaster-recovery orphan scan) are
   // reconciliation deletes and deliberately do not tombstone.
   exportLedger:
-    "off-port repo; rollback hand-tombstoned by deleteById, cascade hook + " +
+    "off-port repo; rollback hand-tombstoned by rollbackPending, cascade hook + " +
     "orphan sweep untombstoned (reconciliation)",
   // Key/value app metadata (active profile id, one-shot cleanup flags, the AI
   // custom prompt). Merged whole-record by manifest clock via

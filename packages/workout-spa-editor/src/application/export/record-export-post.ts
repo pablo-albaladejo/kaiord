@@ -36,7 +36,7 @@ export const postAndCommit = async (
   try {
     ({ externalId } = await input.postFn(input.payload));
   } catch (postErr) {
-    await ledgerRepo.deleteById(input.pending.id);
+    await ledgerRepo.rollbackPending(input.pending.id);
     await emitExportAnalytics(
       analytics,
       ledgerRepo,

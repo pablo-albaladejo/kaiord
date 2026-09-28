@@ -110,4 +110,82 @@ describe("createDexieExportLedgerRepository — mutateByKey", () => {
     expect(absent).toBeUndefined();
     expect(await db.table("exportLedger").toArray()).toEqual([row()]);
   });
+
+  it("should replace the key's row when fn returns a new id", async () => {
+    // Arrange
+    await db.table("exportLedger").add(row());
+    const repo = createDexieExportLedgerRepository(db);
+    const newId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+
+    // Act
+    const after = await repo.mutateByKey(KEY, (current) =>
+      current ? { ...current, id: newId } : current
+    );
+
+    // Assert
+    const rows = (await db
+      .table("exportLedger")
+      .toArray()) as Array<ExportLedgerEntry>;
+    expect(rows.map((r) => r.id)).toEqual([newId]);
+    expect(after?.id).toBe(newId);
+    expect(await db.table("tombstones").count()).toBe(0);
+  });
+});
+
+describe("createDexieExportLedgerRepository — rollbackPending", () => {
+  let db: KaiordDatabase;
+
+  beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(T2);
+    db = new KaiordDatabase(`kaiord-test-ledger-rollback-${Math.random()}`);
+    await db.open();
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    db.close();
+    await Dexie.delete(db.name);
+  });
+
+  it("should leave a committed row with the same id untouched", async () => {
+    // Arrange
+    await db.table("exportLedger").add(row());
+    const repo = createDexieExportLedgerRepository(db);
+
+    // Act
+    await repo.rollbackPending(row().id);
+
+    // Assert
+    expect(await db.table("exportLedger").toArray()).toEqual([row()]);
+    expect(await db.table("tombstones").count()).toBe(0);
+  });
+
+  it("should delete and tombstone a pending row", async () => {
+    // Arrange
+    const pending = { ...row(), destinationExternalId: "pending" };
+    await db.table("exportLedger").add(pending);
+    const repo = createDexieExportLedgerRepository(db);
+
+    // Act
+    await repo.rollbackPending(pending.id);
+
+    // Assert
+    expect(await db.table("exportLedger").count()).toBe(0);
+    expect(await db.table("tombstones").toArray()).toEqual([
+      { table: "exportLedger", id: pending.id, deletedAt: T2.toISOString() },
+    ]);
+  });
+
+  it("should do nothing when the row is absent", async () => {
+    // Arrange
+    const repo = createDexieExportLedgerRepository(db);
+
+    // Act
+    await repo.rollbackPending(row().id);
+
+    // Assert
+    expect(await db.table("exportLedger").count()).toBe(0);
+    expect(await db.table("tombstones").count()).toBe(0);
+  });
 });

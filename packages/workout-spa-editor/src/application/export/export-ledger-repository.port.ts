@@ -30,6 +30,11 @@ export type ExportLedgerRepository = {
     key: { kaiordRecordId: string; destinationBridgeId: string },
     fn: (row: ExportLedgerEntry | undefined) => ExportLedgerEntry | undefined
   ) => Promise<ExportLedgerEntry | undefined>;
-  deleteById: (id: string) => Promise<void>;
+  /**
+   * Failed-POST rollback: deletes (and tombstones) the row with `id` only if
+   * it still exists and is still pending. A row another device committed
+   * under the same id meanwhile is left untouched.
+   */
+  rollbackPending: (id: string) => Promise<void>;
   countByDataType: (dataType: string) => Promise<number>;
 };

@@ -199,7 +199,7 @@ describe("export-ledger cross-device sync", () => {
     const port = createDexieSnapshotPort(dbA);
     const stale = await exportSnapshot({ port, deviceId: "dev-a" });
     vi.setSystemTime(LATE_WRITE_AT);
-    await repo.deleteById(pendingId);
+    await repo.rollbackPending(pendingId);
     const cloud = createInMemoryCloudSyncPort({
       authenticated: true,
       snapshot: stale,

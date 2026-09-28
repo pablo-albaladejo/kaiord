@@ -4,8 +4,8 @@
  * insertPending catches Dexie ConstraintError on the unique
  * [kaiordRecordId+destinationBridgeId] index and maps it to
  * { ok: false; reason: 'constraint' } so use cases never depend
- * on Dexie error types (R-AppDexieImport rule). `deleteById` tombstones
- * the row so the delete propagates through cloud sync.
+ * on Dexie error types (R-AppDexieImport rule). `rollbackPending`
+ * tombstones the row so the delete propagates through cloud sync.
  */
 import type {
   ExportLedgerRepository,
@@ -64,6 +64,11 @@ export const createDexieExportLedgerRepository = (
     await tx(db)("rw", [db.table("exportLedger")], async () => {
       const current = await findByKey(db, key);
       const next = resolveLedgerMutation(current, fn, new Date().toISOString());
+      // An id change is not a user delete: drop the old id untombstoned so the
+      // put cannot hit the unique natural-key index. Other devices still
+      // holding the old id converge through the natural-key fold on sync.
+      if (current && next && next.id !== current.id)
+        await db.table("exportLedger").delete(current.id);
       if (next) await db.table("exportLedger").put(next);
       after = next ?? current;
     });
@@ -73,15 +78,17 @@ export const createDexieExportLedgerRepository = (
   // Failed-POST rollback of this device's own pending row: tombstone it in
   // the same transaction, or a snapshot exported before the rollback would
   // resurrect it as a "pending" row that every device reads as a lost race.
+  // A row that is gone or already committed (another device's POST landed on
+  // the same id via sync) is left alone: deleting it would lose that id.
   // The cascade hook and orphan sweep delete without tombstoning on purpose
   // (reconciliation, not intent — see with-tombstones.ts).
-  deleteById: async (id: string) => {
+  rollbackPending: async (id: string) => {
     const ledger = db.table("exportLedger");
     const tombstones = db.table("tombstones");
     await tx(db)("rw", [ledger, tombstones], async () => {
-      const existed = (await ledger.get(id)) !== undefined;
+      const row = (await ledger.get(id)) as ExportLedgerEntry | undefined;
+      if (row?.destinationExternalId !== "pending") return;
       await ledger.delete(id);
-      if (!existed) return;
       const deletedAt = new Date().toISOString();
       await tombstones.put({ table: "exportLedger", id, deletedAt });
     });

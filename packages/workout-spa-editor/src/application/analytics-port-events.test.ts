@@ -61,7 +61,7 @@ const makeLedgerRepo = (
   findByNaturalKey: async () => undefined,
   insertPending: async (): Promise<InsertPendingResult> => ({ ok: true }),
   mutateByKey: async (_key, fn) => fn(undefined),
-  deleteById: async () => undefined,
+  rollbackPending: async () => undefined,
   countByDataType: async () => 1,
   ...overrides,
 });
@@ -93,9 +93,9 @@ const makeStatefulLedgerRepo = (): ExportLedgerRepository => {
       keyIndex.set(k, next.id);
       return next;
     },
-    deleteById: async (id) => {
+    rollbackPending: async (id) => {
       const entry = store.get(id);
-      if (entry) {
+      if (entry?.destinationExternalId === "pending") {
         keyIndex.delete(nk(entry.kaiordRecordId, entry.destinationBridgeId));
         store.delete(id);
       }

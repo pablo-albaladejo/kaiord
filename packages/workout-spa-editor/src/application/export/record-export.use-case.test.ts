@@ -52,9 +52,9 @@ const makeRepo = (): ExportLedgerRepository & {
       naturalKeyIndex.set(k, next.id);
       return next;
     },
-    deleteById: async (id) => {
+    rollbackPending: async (id) => {
       const entry = store.get(id);
-      if (entry) {
+      if (entry?.destinationExternalId === "pending") {
         naturalKeyIndex.delete(
           naturalKey(entry.kaiordRecordId, entry.destinationBridgeId)
         );
