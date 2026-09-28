@@ -165,13 +165,21 @@ The `ping` data SHALL carry a `features` array naming the calendar contracts thi
 
 ### Requirement: Calendar read filtered in the service worker
 
-The extension SHALL expose `calendar-find{workoutId, date}`, a read-only action that fetches the calendar month containing `date` (`GET /calendar-service/year/{Y}/month/{M}`) and returns only `[{ workoutScheduleId: string | null, date: "YYYY-MM-DD" }]` for the entries of `workoutId`. Every other entry of the month SHALL be discarded inside the service worker and SHALL NOT reach the SPA. Inputs SHALL be validated as for `schedule`, and the action SHALL run under the per-action deadline.
+The extension SHALL expose `calendar-find{workoutId, date}`, a read-only action that fetches the calendar month containing `date` (`GET /calendar-service/year/{Y}/month/{M}`) and returns only `[{ workoutScheduleId: string | null, date: "YYYY-MM-DD" }]` for the items with `itemType: "workout"` whose `workoutId` is `workoutId`. `workoutScheduleId` is the item's numeric `id` as a digit string (`null` when unusable), and the numeric `workoutId` SHALL be compared as a digit string. Every other item of the month, and every other field of a kept item, SHALL be discarded inside the service worker and SHALL NOT reach the SPA. Inputs SHALL be validated as for `schedule`, and the action SHALL run under the per-action deadline, without the send cut-off, which gates writes only.
 
-This requirement rests on assumptions A1–A5 in `design.md`, observed only in the Garmin web app and **not yet verified** against the API the bridge calls; the live capture T0b settles them before any code. A1: items carry the library `workoutId`. A2: items carry a `YYYY-MM-DD` date. A3: some item field equals the `workoutScheduleId` (when false, `workoutScheduleId` is `null` in every entry and the SPA applies its count rules). A4: the month parameter is 0-based. A5: a write is visible to a read within `SETTLE_MS`. If A1 is false, this requirement, the `calendar-find` action, its allowlist entry and `calendar-find-v1` SHALL be removed from this change before it is archived.
+A read that cannot be trusted SHALL fail rather than answer an empty list, so the SPA can tell "read failed" from "found none": a non-2xx answer SHALL be thrown with its `status`; a 2xx payload without a `calendarItems` array, or with a matching item whose `date` is not a real `YYYY-MM-DD` date, SHALL be thrown with no `status` and `retryable: true`; a deadline abort SHALL answer as for the other calendar actions. An empty list SHALL mean only that a well-formed month held no item of that workout.
+
+This requirement rests on assumptions A1–A5 in `design.md`, verified by the live capture T0b on 2026-09-28: items carry the library `workoutId` (A1) and a `YYYY-MM-DD` `date` (A2), the item `id` equals the `workoutScheduleId` the POST returned (A3), the month parameter is 0-based (A4), and a write was visible to a read after 294 ms, well within `SETTLE_MS` (A5).
+
+#### Scenario: A malformed month fails the read
+
+- **GIVEN** Garmin answers 2xx with a body that has no `calendarItems` array
+- **WHEN** the SPA sends `calendar-find`
+- **THEN** the bridge SHALL answer `{ ok: false }` with no `status`, never an empty list
 
 #### Scenario: Only the target workout's entries are returned
 
-- **GIVEN** a month holding entries of several workouts
+- **GIVEN** a month holding entries of several workouts, and activities and other item types
 - **WHEN** the SPA sends `{ action: "calendar-find", workoutId: "1707805999", date: "2026-09-29" }`
 - **THEN** the bridge SHALL return exactly the `{ workoutScheduleId, date }` pairs whose workout is `1707805999`
 

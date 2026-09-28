@@ -17,12 +17,13 @@
 
 ## 2. Live capture gate (T0b, PR-1)
 
-- [ ] 2.1 Capture `GET /calendar-service/year/{Y}/month/{M}` and record in
+- [x] 2.1 Capture `GET /calendar-service/year/{Y}/month/{M}` and record in
       `design.md`, for A1–A5 and A7: the field names, the month base, one
       redacted item and the measured write-to-read lag. No token is stored;
       test entities are deleted afterwards (AC-1).
-- [ ] 2.2 If A1 is false, drop task group 4, the `calendar-find` requirement
-      and the eleventh external action from the `garmin-bridge` delta.
+- [x] 2.2 If A1 is false, drop task group 4, the `calendar-find` requirement
+      and the eleventh external action from the `garmin-bridge` delta. Not
+      needed: A1 holds (T0b, 2026-09-28).
 
 ## 3. Bridge write verbs and deadline (T2, PR-1)
 

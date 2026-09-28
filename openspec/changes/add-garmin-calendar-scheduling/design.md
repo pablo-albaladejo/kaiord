@@ -40,10 +40,10 @@ Measured facts:
 
 ## Assumptions (checked by gate T0b; A6 is checked in the manual E2E)
 
-The calendar **read** (`calendar-find`, task group 4) rests on assumptions that
-were only observed in the web app, never verified against the API the bridge
-calls. They are **unverified** until T0b records the evidence here; nothing in
-task group 4 starts before that.
+The calendar **read** (`calendar-find`, task group 4) rests on assumptions
+that were first observed only in the web app. T0b captured them live on
+2026-09-28 (evidence below): A1–A5 hold, so `calendar-find` stays. A6 is
+checked in the manual E2E; A7 and A8 remain unverified.
 
 | #   | Assumption                                                                                              | If false                                                                                                                                                                                                                                                                                                      |
 | --- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -55,6 +55,64 @@ task group 4 starts before that.
 | A6  | Train2Go keeps the `sourceId` when a coach moves a session.                                             | The move arrives as delete + create; document it as a limitation.                                                                                                                                                                                                                                             |
 | A7  | A DELETE on an already-deleted entry returns 404.                                                       | The read disambiguates.                                                                                                                                                                                                                                                                                       |
 | A8  | A 401 on the schedule POST means Garmin did not process it. **Unverified live; T0b does not cover it.** | A 401 could hide a created entry. The bridge would have to stop treating a 401 write as not sent, so a hung re-mint after it answers `deadline-exceeded` (ambiguous) and a `needsReauth` after a 401 retry becomes ambiguous too; the SPA then resolves with `calendar-find` instead of restoring `previous`. |
+
+### T0b evidence (live capture, 2026-09-28)
+
+Captured from the DevTools console on `connect.garmin.com` through `/gc-api`,
+the web app's cookie-and-CSRF mapping of connectapi
+(`/gc-api/calendar-service/year/2026/month/9` ↔ connectapi
+`/calendar-service/year/{Y}/month/{M}`). The bridge calls connectapi with a
+Bearer token, the same mapping already proven for the workout create and the
+schedule POST. No credential was recorded; the test entry was deleted (204).
+
+- **Write:** `POST /workout-service/schedule/{workoutId}` with
+  `{"date":"2026-10-06"}` answered 200 with `workoutScheduleId: 1792409369`.
+- **A1 — holds.** Each workout item carries `workoutId`.
+- **A2 — holds.** Each item carries `date` as `"YYYY-MM-DD"`.
+- **A3 — holds.** The item's `id` equals the `workoutScheduleId` the POST
+  returned, so the find is id-based and the count rules of §3.4 stay a
+  fallback only.
+- **A4 — holds.** Months are 0-based: October 2026 is `month/9`.
+- **A5 — holds.** The new entry was visible on the first poll, 294 ms after the
+  POST answered. `SETTLE_MS` stays 3 s, about ten times the measured lag, and
+  the timing ordering of §3.4 holds with it and `D_MS` = 25 s. One schedule
+  produced exactly one item for that workout on that day.
+- **Ids are JSON numbers.** Both `id` and `workoutId` arrive as numbers while
+  Kaiord stores digit strings, so the service worker converts them to strings
+  before comparing or returning them.
+- **Item shape.** An item has 70 keys, most of them for activities, races,
+  badges and training plans (`title`, `distance`, `averageHR`, `calories`,
+  `location`…). A redacted workout item:
+
+  ```json
+  {
+    "id": 1792409369,
+    "groupId": null,
+    "trainingPlanId": 0,
+    "itemType": "workout",
+    "activityTypeId": null,
+    "date": "2026-10-06",
+    "sportTypeKey": "running",
+    "workoutId": 1711500235,
+    "protectedWorkoutSchedule": false,
+    "workoutUuid": null
+  }
+  ```
+
+  The service worker therefore keeps only `itemType === "workout"` items of
+  the requested `workoutId`, and only their `id` and `date`.
+
+Not covered by T0b, and still unverified:
+
+- **A7.** The capture deleted a live entry (204); a DELETE of an
+  already-deleted entry was not tried. Its fallback (the read disambiguates)
+  is available because A1 and A3 hold.
+- **A8.** A 401 on the schedule POST was not provoked.
+- **The month envelope key.** The capture recorded the items but not the
+  name of the array holding them. The bridge reads `calendarItems`, this
+  endpoint's known shape; a payload without that array fails the read instead
+  of answering an empty list, so a wrong key degrades to `uncertain`, never
+  to a re-POST. The manual E2E (task 9.4) confirms it.
 
 If A1 is false, `calendar-find` and the `calendar-find-v1` feature are dropped
 from this change: the action list in the `garmin-bridge` delta shrinks to 10,
