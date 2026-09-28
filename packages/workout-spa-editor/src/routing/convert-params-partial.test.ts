@@ -24,6 +24,6 @@ describe("acceptFor", () => {
     const accepts = sources.map(acceptFor);
 
     // Assert
-    expect(accepts).toEqual([".fit", ".tcx", ".zwo", ".json,.gcn"]);
+    expect(accepts).toEqual([".fit", ".tcx", ".zwo", ".gcn"]);
   });
 });

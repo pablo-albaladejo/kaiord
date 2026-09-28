@@ -13,11 +13,22 @@ type ConvertFlowProps = { pair: ConvertPair };
 /**
  * Upload → download with the pair preselected. The parsed workout lives only
  * in this component's state: no `handleFileLoad`, no store, no persistence.
+ * A file of another format, or one that fails to load, clears it, so the
+ * download never offers a stale or mislabelled workout.
  */
 export function ConvertFlow({ pair }: ConvertFlowProps) {
   const t = useTranslate("editor");
   const analytics = useAnalytics();
   const [krd, setKrd] = useState<KRD | null>(null);
+  const [wrongFormat, setWrongFormat] = useState(false);
+
+  // Fires right after `onFileLoad` in the same tick, so React batches both.
+  const checkImported = (format: string) => {
+    const matches = format === pair.from;
+    setWrongFormat(!matches);
+    if (!matches) return setKrd(null);
+    analytics.event("workout-imported", { format });
+  };
 
   return (
     <div className="flex flex-col gap-4" data-testid="convert-flow">
@@ -28,15 +39,23 @@ export function ConvertFlow({ pair }: ConvertFlowProps) {
         <FileUpload
           accept={acceptFor(pair.from)}
           onFileLoad={setKrd}
-          onImported={(format) =>
-            analytics.event("workout-imported", { format })
-          }
+          onError={() => setKrd(null)}
+          onImported={checkImported}
         />
+        {wrongFormat && (
+          <p
+            role="alert"
+            className="m-0 text-sm text-danger-text"
+            data-testid="convert-wrong-format"
+          >
+            {t("convert.wrongFormat", { from: formatLabel(pair.from) })}
+          </p>
+        )}
       </section>
       {krd && (
         <section className="flex flex-col gap-2">
           <h2 className="m-0 text-sm font-semibold text-ink-strong">
-            {t("convert.download", { to: formatLabel(pair.to) })}
+            {t("convert.download")}
           </h2>
           <ConvertExport workout={krd} format={pair.to} />
         </section>

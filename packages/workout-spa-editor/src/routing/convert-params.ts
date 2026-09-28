@@ -49,12 +49,13 @@ export function parseConvertParams(search: string): ConvertPair | null {
   return { from, to };
 }
 
-// Garmin Connect workouts are saved as JSON; `.gcn` is Kaiord's own name.
+// A `.json` file is always imported as KRD, so a Garmin Connect workout must
+// be a `.gcn` file.
 const ACCEPT: Record<WorkoutFileFormat, string> = {
   fit: ".fit",
   tcx: ".tcx",
   zwo: ".zwo",
-  gcn: ".json,.gcn",
+  gcn: ".gcn",
   krd: ".krd,.json",
 };
 

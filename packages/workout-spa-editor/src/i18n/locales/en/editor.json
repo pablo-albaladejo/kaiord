@@ -312,7 +312,8 @@
     "to": "To",
     "continue": "Continue",
     "chooseFile": "1. Choose your {{from}} file",
-    "download": "2. Download it as {{to}}",
-    "sameFormat": "Pick two different formats."
+    "download": "2. Download it (change the format if you need to)",
+    "sameFormat": "Pick two different formats.",
+    "wrongFormat": "That is not a {{from}} file. Choose a {{from}} file, or pick another format."
   }
 }
