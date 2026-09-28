@@ -9,8 +9,10 @@
       without persisted credentials, PAT only in the publish step; restore only
       while this repository's rolling PR is open (`scripts/geo/rolling-pr.mjs`,
       forks ignored); artifact of `reports/seo/` before the push;
-      `--force-with-lease` pinned to the SHA read, retried once after a
-      re-merge; one fixed branch and PR (updated when open).
+      `--force-with-lease` pinned to the SHA read; on a refusal, plan again
+      and rebuild on the current `main` (rolling weeks only while the PR is
+      open, this run's records via `union-timeseries.mjs --since`), then
+      retry once; one fixed branch and PR (updated when open).
 - [x] 1.3 Union-merge the open weekly PRs (#1200, #1208, #1231, #1251, #1257)
       into `reports/seo/` and regenerate the dashboard.
 
@@ -18,8 +20,10 @@
 
 - [x] 2.1 Key file at the landing root; `scripts/geo/indexnow.mjs` (key, diff,
       submit) with tests on an injected fetch.
-- [x] 2.2 Deploy: verify the key file, diff live vs built sitemaps, submit
-      after the smoke in a separate `indexnow` job; build timeout recomputed.
+- [x] 2.2 Deploy: verify the key file, diff the built sitemaps against the
+      last submitted ones (cached; live as fallback, skip when neither is
+      complete), submit after the smoke in a separate `indexnow` job, and
+      save the baseline only on success; timeouts recomputed.
 
 ## 3. Analytics
 

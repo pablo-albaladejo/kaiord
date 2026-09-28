@@ -31,13 +31,17 @@ developer, EN and ES) was not measured, and the dashboard had no monthly view.
   otherwise) and reads it in the publish step only; it restores the branch's
   data only while this repository's rolling PR is open
   (`scripts/geo/rolling-pr.mjs`, fork PRs ignored), rebuilds the branch from
-  `main`, keeps the week as an artifact, force-pushes with a lease (retried
-  once after a re-merge), and edits the open PR or opens one. The workflow
+  `main`, keeps the week as an artifact, force-pushes with a lease (on a
+  refusal it plans again and rebuilds on the current `main` with only this
+  run's records plus the rolling weeks of a still-open PR, then retries
+  once), and edits the open PR or opens one. The workflow
   token drops to `contents: read` and `pull-requests: read`.
 - IndexNow: a key file at the landing root, and `scripts/geo/indexnow.mjs`.
-  The deploy build diffs the live sitemaps against the built ones; a new
-  `indexnow` job submits the changed URLs after the smoke, logs the status,
-  skips when nothing changed and only warns on errors.
+  The deploy build diffs the built sitemaps against those of the last
+  successful submit (Actions cache), else the live ones, and skips when
+  neither is complete; a new `indexnow` job submits the changed URLs after
+  the smoke, logs the status, skips when nothing changed, only warns on
+  errors, and advances the baseline only on success.
 - Landing: `extension-install-clicked` with `{ extension: <slug> }`.
 - AI referrers: `reports/seo/umami-ai-referrers.md` documents a saved Umami
   report over the referrer and UTM data Umami already records. No new event.
