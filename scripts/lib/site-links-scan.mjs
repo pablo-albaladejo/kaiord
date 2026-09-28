@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve, sep } from "node:path";
 
 import {
   brokenReason,
@@ -23,15 +23,28 @@ function* walk(dir) {
   }
 }
 
+// Every VitePress page renders the language switcher except its 404 page; a
+// docs page without one means the switcher scan saw nothing to check.
+function docsDirOf(mounts) {
+  const docs = mounts.find((m) => m.prefix === "/docs/");
+  if (docs) return docs.dir;
+  const root = mounts.find((m) => m.prefix === "/");
+  return root && join(root.dir, "docs");
+}
+
 /**
  * `problems` holds `{ file, link, reason }` for every broken kaiord.com link;
- * the counts let the caller refuse a run that checked nothing.
+ * the counts let the caller refuse a run that checked nothing, and
+ * `pagesWithoutSwitcher` lists docs pages whose switcher went unchecked.
  */
 export function checkSiteLinks({ mounts, segments }) {
   const ordered = [...mounts].sort((a, b) => b.prefix.length - a.prefix.length);
+  const docsDir = docsDirOf(mounts);
   const problems = [];
+  const pagesWithoutSwitcher = [];
   const seenFiles = new Set();
   let linksChecked = 0;
+  let switchersChecked = 0;
   for (const { dir } of ordered) {
     for (const file of walk(dir)) {
       if (seenFiles.has(file)) continue;
@@ -42,6 +55,13 @@ export function checkSiteLinks({ mounts, segments }) {
         problems.push({ file, link, reason: LEGACY_EDITOR_REASON });
       }
       const switcher = file.endsWith(".html") ? switcherHrefsIn(text) : [];
+      switchersChecked += switcher.length;
+      const isDocsPage =
+        docsDir &&
+        file.startsWith(docsDir + sep) &&
+        file.endsWith(".html") &&
+        basename(file) !== "404.html";
+      if (isDocsPage && switcher.length === 0) pagesWithoutSwitcher.push(file);
       for (const href of switcher) {
         const reason = brokenReason(
           ordered,
@@ -64,7 +84,13 @@ export function checkSiteLinks({ mounts, segments }) {
       }
     }
   }
-  return { problems, filesScanned: seenFiles.size, linksChecked };
+  return {
+    problems,
+    filesScanned: seenFiles.size,
+    linksChecked,
+    switchersChecked,
+    pagesWithoutSwitcher,
+  };
 }
 
 /** The entry page each dist must contain for the check to mean anything. */

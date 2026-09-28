@@ -105,6 +105,40 @@ describe("check-site-links", () => {
     ]);
   });
 
+  it("passes under REQUIRE_DOCS_DIST=1 when every docs page has a switcher", () => {
+    const result = runCli([
+      "--landing",
+      join(dir, "landing"),
+      "--app",
+      join(dir, "app"),
+      "--docs",
+      join(dir, "docs"),
+    ]);
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /language-switcher links/);
+  });
+
+  it("fails under REQUIRE_DOCS_DIST=1 when a docs page renders no switcher", () => {
+    // A switcher the scan cannot see is a switcher nobody checks: a VitePress
+    // markup change would silently turn the switcher guard green.
+    writeFileSync(join(dir, "docs", "bare.html"), "<p>no switcher</p>");
+    writeFileSync(join(dir, "docs", "404.html"), "<p>not found</p>");
+
+    const split = runCli([
+      "--landing",
+      join(dir, "landing"),
+      "--app",
+      join(dir, "app"),
+      "--docs",
+      join(dir, "docs"),
+    ]);
+
+    assert.equal(split.status, 1);
+    assert.match(split.stderr, /1 docs pages render no language switcher/);
+    assert.match(split.stderr, /bare\.html/);
+  });
+
   it("resolves a merged tree the same way as the three dists", () => {
     const merged = join(dir, "merged");
     cpSync(join(dir, "landing"), merged, { recursive: true });

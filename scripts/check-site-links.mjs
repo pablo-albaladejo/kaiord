@@ -25,8 +25,9 @@ export { checkSiteLinks, mountsFromArgs };
 // Usage:
 //   node scripts/check-site-links.mjs --landing <dir> --app <dir> --docs <dir>
 //   node scripts/check-site-links.mjs --merged <dir>
-// With REQUIRE_DOCS_DIST=1 a dist without its index.html, or a run that
-// scans no file or checks no link, fails; otherwise a missing dist is
+// With REQUIRE_DOCS_DIST=1 a dist without its index.html, a run that scans
+// no file or checks no link, or a docs page (other than 404) whose language
+// switcher the scan did not find, fails; otherwise a missing dist is
 // skipped with a reason (local runs without a prior build).
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -62,7 +63,13 @@ function main() {
     process.exit(1);
   }
   const segments = JSON.parse(readFileSync(SEGMENTS_JSON, "utf8"));
-  const { problems, filesScanned, linksChecked } = checkSiteLinks({
+  const {
+    problems,
+    filesScanned,
+    linksChecked,
+    switchersChecked,
+    pagesWithoutSwitcher,
+  } = checkSiteLinks({
     mounts,
     segments,
   });
@@ -76,8 +83,18 @@ function main() {
     );
     process.exit(1);
   }
+  if (strict && pagesWithoutSwitcher.length > 0) {
+    const shown = pagesWithoutSwitcher
+      .slice(0, 5)
+      .map((f) => relative(process.cwd(), f));
+    console.error(
+      `❌ ${pagesWithoutSwitcher.length} docs pages render no language switcher ` +
+        `(${switchersChecked} switcher links checked), e.g. ${shown.join(", ")}`
+    );
+    process.exit(1);
+  }
   console.log(
-    `✅ Every kaiord.com link resolves (${linksChecked} links in ${filesScanned} files)`
+    `✅ Every kaiord.com link resolves (${linksChecked} links, ${switchersChecked} language-switcher links, in ${filesScanned} files)`
   );
 }
 
