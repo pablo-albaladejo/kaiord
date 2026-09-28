@@ -23,7 +23,8 @@
 - [x] 2.2 Deploy: verify the key file, diff the built sitemaps against the
       last submitted ones (cached; live as fallback, skip when neither is
       complete), submit after the smoke in a separate `indexnow` job, and
-      save the baseline only on success; timeouts recomputed.
+      save the baseline only on success and only after a real comparison;
+      timeouts recomputed.
 
 ## 3. Analytics
 
