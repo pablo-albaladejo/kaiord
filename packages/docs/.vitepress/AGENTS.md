@@ -11,6 +11,7 @@ VitePress configuration and theme customization. Houses the site config, routing
 
 - `config.ts` — Central VitePress configuration: base path, site title, description, nav/sidebar structure, SEO head transforms (JSON-LD breadcrumbs, OpenGraph), appearance, themeConfig, Markdown extensions (Shikijs twoslash), Vite build settings
 - `head-config.mjs` — Factory function to build static `<head>` metadata (charsets, fonts, prefetch)
+- `indexing.mjs` — Which pages are indexable (`isNoindexPath`/`isNoindexUrl`, shared by `transformHead` and `sitemap.transformItems`) and git dates for `lastmod` (`gitLastmod`, `hasFullHistory`: no dates in a shallow clone, an error under `REQUIRE_FULL_HISTORY=1`)
 - `brand-tokens.mjs` — CSS custom property definitions for design tokens (colors, spacing, typography)
 - `public/` — VitePress-local static assets (separate from `../public/`)
 - `theme/` — Custom Vue theme components and styling
@@ -37,6 +38,8 @@ VitePress configuration and theme customization. Houses the site config, routing
 
 - **Tests in `../scripts/`**:
   - `head-config.test.mjs` — Validates `head-config.mjs` output (presence of required tags, charsets, etc.)
+  - `indexing.test.mjs` — Validates the noindex predicate and the shallow-clone rules of `indexing.mjs`
+  - `dist-seo-uniqueness.test.mjs` — Over the built dist (with `REQUIRE_DOCS_DIST=1`): noindex matches the predicate, titles/descriptions are unique, the sitemap lists exactly the indexable pages, and (with `REQUIRE_FULL_HISTORY=1`) the lastmods are present and not all identical
   - `brand-tokens.test.mjs` — Validates `brand-tokens.mjs` exports (all tokens are CSS-valid)
 - **VitePress build**: `pnpm --filter @kaiord/docs build` must complete without warnings or errors.
 - **Link validation**: After changes to `config.ts` sidebar/nav, run build and verify no broken links.

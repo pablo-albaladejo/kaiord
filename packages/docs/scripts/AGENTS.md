@@ -18,6 +18,8 @@ Build and lint utilities for the documentation site. Includes TypeDoc API genera
 - `head-config.mjs` — Factory for static HTML head metadata
 - `head-config.test.mjs` — Test suite for head config (covered by `pnpm test`)
 - `build-output-meta.test.mjs` — Validates VitePress build output metadata (covered by `pnpm test`)
+- `indexing.test.mjs` — Tests `.vitepress/indexing.mjs` (noindex predicate, git `lastmod`, shallow-clone handling)
+- `dist-seo-uniqueness.test.mjs` — Indexing guard over the built dist (noindex, unique titles/descriptions, sitemap ⇄ indexable pages, lastmods); reads the dist only with `REQUIRE_DOCS_DIST=1`
 - `no-hex-literals.test.mjs` — Lints CSS for hardcoded hex colors; enforces use of CSS custom properties (covered by `pnpm test`)
 - `generate-og-image.mjs` — (Legacy) Open Graph image generator
 

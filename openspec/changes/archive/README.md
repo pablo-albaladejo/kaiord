@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-09-28 | [`docs-indexing-hygiene`](./2026-09-28-docs-indexing-hygiene/) | Index only the docs pages worth indexing, and date them from git |
 | 2026-09-28 | [`fix-legacy-editor-links`](./2026-09-28-fix-legacy-editor-links/) | Stop linking the legacy /editor/ path, and serve it a 200 page |
 | 2026-09-27 | [`analytics-redact-identifiers`](./2026-09-27-analytics-redact-identifiers/) | Keep per-person identifiers out of Umami |
 | 2026-09-27 | [`privacy-umami-disclosure`](./2026-09-27-privacy-umami-disclosure/) | Disclose Umami analytics in the privacy policy |

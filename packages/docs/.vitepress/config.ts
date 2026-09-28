@@ -3,6 +3,13 @@ import llmstxt from "vitepress-plugin-llms";
 import type { HeadConfig, TransformContext } from "vitepress";
 
 import { buildStaticHead } from "./head-config.mjs";
+import {
+  apiSourcePaths,
+  gitLastmod,
+  hasFullHistory,
+  isNoindexPath,
+  isNoindexUrl,
+} from "./indexing.mjs";
 
 const SITE_URL = "https://kaiord.com";
 const DOCS_BASE = "/docs/";
@@ -43,7 +50,8 @@ function breadcrumbItems(relativePath: string, pages: ReadonlySet<string>) {
           );
     const item = page && pageCanonicalUrl(page);
     if (item && item !== crumbs[crumbs.length - 1].item) {
-      const name = seg.charAt(0).toUpperCase() + seg.slice(1);
+      const name =
+        seg === "api" ? "API" : seg.charAt(0).toUpperCase() + seg.slice(1);
       crumbs.push({ name: name.replace(/-/g, " "), item });
     }
   });
@@ -55,7 +63,12 @@ function breadcrumbItems(relativePath: string, pages: ReadonlySet<string>) {
 }
 
 function buildJsonLd(
-  pageData: { relativePath: string; title: string; description: string },
+  pageData: {
+    relativePath: string;
+    title: string;
+    description: string;
+    lastUpdated?: number;
+  },
   isHome: boolean,
   pages: ReadonlySet<string>
 ): string[] {
@@ -92,6 +105,9 @@ function buildJsonLd(
       headline: pageData.title,
       description: pageData.description,
       url: pageUrl,
+      ...(pageData.lastUpdated
+        ? { dateModified: new Date(pageData.lastUpdated).toISOString() }
+        : {}),
       author: {
         "@type": "Person",
         name: AUTHOR.name,
@@ -104,6 +120,41 @@ function buildJsonLd(
   return results;
 }
 
+// A shallow clone answers HEAD's date for every file, so "last updated"
+// would be the same wrong date everywhere: without full history, dates are
+// left out (and REQUIRE_FULL_HISTORY=1 makes that an error instead).
+const FULL_HISTORY = hasFullHistory();
+
+// `siteConfig.pages` is the same array for every page of a build; build the
+// lookup Set once per build instead of once per page.
+const pageSets = new WeakMap<string[], ReadonlySet<string>>();
+function pageSet(pages: string[]): ReadonlySet<string> {
+  let set = pageSets.get(pages);
+  if (!set) {
+    set = new Set(pages);
+    pageSets.set(pages, set);
+  }
+  return set;
+}
+
+type SitemapItem = { url: string; lastmod?: string | number };
+
+// Only indexable pages are listed. VitePress dates tracked pages from git;
+// the generated (gitignored) API entry pages are dated by their package
+// sources instead.
+function sitemapItems(items: SitemapItem[]): SitemapItem[] {
+  const kept = items.filter((item) => !isNoindexUrl(item.url));
+  const packages = kept
+    .map((item) => item.url.match(/^api\/([^/]+)\//)?.[1])
+    .filter((pkg): pkg is string => Boolean(pkg));
+  return kept.map((item) => {
+    if (!FULL_HISTORY) return { url: item.url };
+    if (!/^api(\/|$)/.test(item.url)) return item;
+    const lastmod = gitLastmod(apiSourcePaths(item.url, packages));
+    return lastmod ? { ...item, lastmod } : { url: item.url };
+  });
+}
+
 const config = {
   lang: "en",
   title: "Kaiord",
@@ -114,7 +165,9 @@ const config = {
   // AGENTS.md files are agent-facing documentation, not part of the public
   // docs site. Exclude them from the VitePress build (dead-link checking,
   // sitemap, llmstxt) but keep them on disk for AI agents to read.
-  srcExclude: ["**/AGENTS.md"],
+  // README.md and CHANGELOG.md at the docs root are package files, not docs
+  // pages; root-anchored so the generated `api/<pkg>/README.md` indexes stay.
+  srcExclude: ["**/AGENTS.md", "README.md", "CHANGELOG.md"],
 
   head: buildStaticHead({
     docsBase: DOCS_BASE,
@@ -127,7 +180,10 @@ const config = {
   // (kaiord.com/CHANGELOG instead of kaiord.com/docs/CHANGELOG).
   sitemap: {
     hostname: `${SITE_URL}${DOCS_BASE}`,
+    transformItems: sitemapItems,
   },
+
+  lastUpdated: FULL_HISTORY,
 
   // Extensionless URLs (GitHub Pages resolves /page to page.html). Cleaner
   // canonical URLs for search engines and AI-agent citations; the .html
@@ -235,6 +291,8 @@ const config = {
       provider: "local",
     },
 
+    lastUpdated: { text: "Last updated" },
+
     outline: {
       level: [2, 3],
       label: "On this page",
@@ -286,6 +344,10 @@ const config = {
       { rel: "canonical", href: pageCanonicalUrl(pageData.relativePath) },
     ]);
 
+    if (isNoindexPath(pageData.relativePath)) {
+      head.push(["meta", { name: "robots", content: "noindex,follow" }]);
+    }
+
     if (pageData.frontmatter.title) {
       head.push([
         "meta",
@@ -307,9 +369,10 @@ const config = {
         relativePath: pageData.relativePath,
         title: pageData.frontmatter.title || pageData.title,
         description: pageData.frontmatter.description || pageData.description,
+        lastUpdated: pageData.lastUpdated,
       },
       isHome,
-      new Set(siteConfig.pages)
+      pageSet(siteConfig.pages)
     );
 
     for (const block of jsonLdBlocks) {
