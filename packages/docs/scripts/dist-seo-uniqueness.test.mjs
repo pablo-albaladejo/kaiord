@@ -313,8 +313,8 @@ test("guard fails on missing or all-identical lastmods when history is required"
 test("guard passes a translated EN/ES pair with lang and hreflang", () => {
   const pages = [
     ...site,
-    page("guide/zwift-to-garmin.html"),
-    page("es/guide/zwift-to-garmin.html"),
+    page("guide/whoop-recovery-in-plan.html"),
+    page("es/guide/whoop-recovery-in-plan.html"),
   ];
 
   const problems = indexingProblems(pages, sitemapOf(pages), {
@@ -328,7 +328,7 @@ test("guard fails when a page declares the wrong <html lang>", () => {
   const pages = [
     ...site,
     page("guide/quick-start.html", { lang: "es" }),
-    page("es/guide/zwift-to-garmin.html", { lang: "en" }),
+    page("es/guide/whoop-recovery-in-plan.html", { lang: "en" }),
   ];
 
   const problems = indexingProblems(pages, sitemapOf(pages), {
@@ -338,14 +338,14 @@ test("guard fails when a page declares the wrong <html lang>", () => {
   assert.match(problems.join("\n"), /quick-start\.html: <html lang="es">/);
   assert.match(
     problems.join("\n"),
-    /es\/guide\/zwift-to-garmin\.html: <html lang="en">/
+    /es\/guide\/whoop-recovery-in-plan\.html: <html lang="en">/
   );
 });
 
 test("guard fails when a paired page lacks hreflang, or an unpaired one has it", () => {
   const pages = [
     ...site,
-    page("es/guide/zwift-to-garmin.html", { hreflangs: ["en"] }),
+    page("es/guide/whoop-recovery-in-plan.html", { hreflangs: ["en"] }),
     page("guide/quick-start.html", { hreflangs: ["en", "es", "x-default"] }),
   ];
 
@@ -353,7 +353,10 @@ test("guard fails when a paired page lacks hreflang, or an unpaired one has it",
     requireHistory: false,
   });
 
-  assert.match(problems.join("\n"), /zwift-to-garmin\.html: hreflang \[en\]/);
+  assert.match(
+    problems.join("\n"),
+    /whoop-recovery-in-plan\.html: hreflang \[en\]/
+  );
   assert.match(
     problems.join("\n"),
     /quick-start\.html: hreflang \[en,es,x-default\], expected \[\]/

@@ -19,10 +19,10 @@ within round-trip tolerances (time ±1 s, heart rate ±1 bpm, cadence ±1 rpm).
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=tcx&to=fit), drop your `.tcx` file,
-choose **FIT** as the export format, and download `workout.fit`.
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=tcx&to=fit), choose your `.tcx` file
+(**FIT** is already selected as the export format), and download `workout.fit`.
 
 ### 2. CLI
 

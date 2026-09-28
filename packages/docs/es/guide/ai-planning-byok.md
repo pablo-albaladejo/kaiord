@@ -40,7 +40,9 @@ Las conversaciones se guardan por perfil en tu navegador y se pueden buscar.
 
 ## Privacidad y coste
 
-- Tu clave y tus conversaciones se guardan en tu navegador (IndexedDB). La
+- Tu clave y tus conversaciones se guardan en tu navegador (IndexedDB), y
+  tus datos se quedan ahí salvo que actives la sincronización con Google
+  Drive. La
   [política de privacidad](/legal/privacy-policy) (en inglés) describe qué se
   envía: tus mensajes, y resúmenes de los datos que lee el asistente, van desde
   tu navegador al proveedor que configuraste, solo mientras chateas.
@@ -61,6 +63,5 @@ archivos; no accede al calendario ni a los datos de salud guardados en la app.
 
 ## Relacionado
 
-- [Entrenamientos de Zwift en tu Garmin](/es/guide/zwift-to-garmin)
 - [La recuperación de WHOOP en tu plan de entrenamiento](/es/guide/whoop-recovery-in-plan)
 - [Kaiord frente a TrainingPeaks, intervals.icu y Garmin Connect](/es/guide/kaiord-vs-trainingpeaks-intervals-garmin)

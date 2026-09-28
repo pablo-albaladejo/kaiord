@@ -20,10 +20,10 @@ tolerances (time ±1 s, power ±1 W or ±1 % FTP).
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=fit&to=zwo), drop your `.fit` file,
-choose **ZWO** as the export format, and download `workout.zwo`. Everything runs
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=fit&to=zwo), choose your `.fit` file
+(**ZWO** is already selected as the export format), and download `workout.zwo`. Everything runs
 locally in your browser.
 
 ### 2. CLI

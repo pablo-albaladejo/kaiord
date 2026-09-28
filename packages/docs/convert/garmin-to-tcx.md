@@ -20,10 +20,10 @@ heart rate ±1 bpm, cadence ±1 rpm).
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=garmin&to=tcx), drop your Garmin Connect
-workout file, choose **TCX** as the export format, and download `workout.tcx`.
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=garmin&to=tcx), choose your Garmin Connect workout file
+(**TCX** is already selected as the export format), and download `workout.tcx`.
 
 ### 2. CLI
 

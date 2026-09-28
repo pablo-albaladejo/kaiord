@@ -20,10 +20,10 @@ within round-trip tolerances (time ±1 s, heart rate ±1 bpm, cadence ±1 rpm).
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=tcx&to=garmin), drop your `.tcx` file,
-choose **Garmin (GCN)** as the export format, and download the result. To send
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=tcx&to=garmin), choose your `.tcx` file
+(**GCN** is already selected as the export format), and download the result. To send
 it straight to your watch, use the Editor's Garmin sync (backed by the
 `garmin-bridge` extension).
 

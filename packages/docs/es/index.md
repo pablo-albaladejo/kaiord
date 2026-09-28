@@ -1,6 +1,6 @@
 ---
 title: "Guías de Kaiord para deportistas"
-description: "Guías en español para usar Kaiord: entrenamientos de Zwift en Garmin, planificación con IA y tu propia clave, recuperación de WHOOP y comparación con otras plataformas."
+description: "Guías en español para usar Kaiord: planificación con IA y tu propia clave, recuperación de WHOOP y comparación con otras plataformas."
 ---
 
 # Guías de Kaiord para deportistas
@@ -10,8 +10,6 @@ funciona en tu navegador, sin cuenta. Estas guías explican cómo usarlo en el
 día a día. El resto de la documentación (formatos, CLI, SDK y servidor MCP)
 está [en inglés](/).
 
-- [Entrenamientos de Zwift en tu Garmin](/es/guide/zwift-to-garmin): convierte
-  un `.zwo` a FIT o envíalo a Garmin Connect.
 - [Planifica tu entrenamiento con IA y tu propia clave de API](/es/guide/ai-planning-byok):
   genera y ajusta sesiones con Anthropic, OpenAI o Google.
 - [La recuperación de WHOOP en tu plan de entrenamiento](/es/guide/whoop-recovery-in-plan):

@@ -40,7 +40,7 @@ servidor que lo reciba; consulta la
 
 ## Dónde aparece la recuperación
 
-- **Diario**: la tarjeta de disposición combina tu puntuación de recuperación
+- **Diario**: la tarjeta de preparación combina tu puntuación de recuperación
   (VFC) y tu puntuación de sueño, junto a las sesiones planificadas para hoy.
 - **Salud → Recuperación**: 90 días de historial de VFC.
 - **Calendario**: tus entrenamientos planificados de la semana, con las
@@ -63,4 +63,3 @@ El asistente necesita tu propia clave de un proveedor de IA; consulta
 ## Relacionado
 
 - [Kaiord frente a TrainingPeaks, intervals.icu y Garmin Connect](/es/guide/kaiord-vs-trainingpeaks-intervals-garmin)
-- [Entrenamientos de Zwift en tu Garmin](/es/guide/zwift-to-garmin)

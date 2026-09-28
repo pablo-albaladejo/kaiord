@@ -59,4 +59,3 @@ The assistant needs your own AI provider key; see
 ## Related
 
 - [Kaiord vs TrainingPeaks, intervals.icu and Garmin Connect](/guide/kaiord-vs-trainingpeaks-intervals-garmin)
-- [Zwift workouts on your Garmin](/guide/zwift-to-garmin)

@@ -173,7 +173,7 @@ test("should find both pages of every hreflang pair on disk", () => {
   const missing = paths.filter((path) => !existsSync(resolve(DOCS_ROOT, path)));
 
   // Assert
-  assert.ok(HREFLANG_PAIRS.length >= 4, "the four athlete guides are paired");
+  assert.ok(HREFLANG_PAIRS.length >= 3, "the athlete guides are paired");
   assert.deepEqual(missing, []);
 });
 

@@ -12,7 +12,7 @@ See [Workouts vs. activities](#workouts-vs-activities).
 
 Convert workout files between **FIT**, **TCX**, **ZWO** (Zwift), and **Garmin
 Connect** formats — free, in your browser, with no account and no file upload.
-Drop a file into the [Kaiord Editor](https://kaiord.com/app/#/convert) and download
+Choose a file in the [Kaiord Editor](https://kaiord.com/app/#/convert) and download
 the result. Developers can script the same conversions with the
 [CLI](/cli/commands) or the [TypeScript SDK](/guide/quick-start).
 
@@ -35,7 +35,7 @@ format is detected from the file extension.
 
 ## Three ways to convert
 
-1. **Editor** — [kaiord.com/app](https://kaiord.com/app/#/convert). Drag & drop a
+1. **Editor** — [kaiord.com/app](https://kaiord.com/app/#/convert). Choose a
    file, pick the target format, download. Nothing leaves your browser.
 2. **CLI** — `kaiord convert -i workout.fit -o workout.zwo`. Formats are
    detected from the extensions. See the [CLI reference](/cli/commands#convert).
@@ -68,6 +68,10 @@ and the gotchas that matter for that direction. In short:
   native equivalent.
 - **Garmin Connect (GCN)** covers power, heart rate, speed, and cadence in
   watts/bpm/rpm, plus calorie durations.
+  Known issue: power targets in % FTP (every ZWO target, and FIT targets
+  stored as % FTP) currently arrive in Garmin Connect as watts with the same
+  number; the fix is tracked in
+  [issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279).
 
 Format-specific data that has no target-side equivalent is preserved under the
 KRD `extensions` object so it can survive a later round-trip.

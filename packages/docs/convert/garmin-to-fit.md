@@ -21,10 +21,10 @@ within round-trip tolerances (time ±1 s, power ±1 W, heart rate ±1 bpm, caden
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=garmin&to=fit), drop your Garmin Connect
-workout file, choose **FIT** as the export format, and download `workout.fit`.
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=garmin&to=fit), choose your Garmin Connect workout file
+(**FIT** is already selected as the export format), and download `workout.fit`.
 
 ### 2. CLI
 

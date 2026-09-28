@@ -76,7 +76,6 @@
     "trainingpeaks",
     "tpapi",
     "tpAuth",
-    "CONFIRMAR",
     "MSSD",
     "tpwb",
     "ivgc",
@@ -96,8 +95,12 @@
   "patterns": [
     {
       "name": "es-crosslink",
-      "pattern": "/_Leer en espa\u00f1ol: .*_/"
+      "pattern": "/_Leer en español: .*_/"
+    },
+    {
+      "name": "footnote-label",
+      "pattern": "/\\[\\^[a-z0-9-]+\\]/"
     }
   ],
-  "ignoreRegExpList": ["es-crosslink"]
+  "ignoreRegExpList": ["es-crosslink", "footnote-label"]
 }

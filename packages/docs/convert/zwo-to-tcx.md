@@ -19,10 +19,10 @@ within round-trip tolerances (time ±1 s, cadence ±1 rpm).
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=zwo&to=tcx), drop your `.zwo` file,
-choose **TCX** as the export format, and download `workout.tcx`.
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=zwo&to=tcx), choose your `.zwo` file
+(**TCX** is already selected as the export format), and download `workout.tcx`.
 
 ### 2. CLI
 

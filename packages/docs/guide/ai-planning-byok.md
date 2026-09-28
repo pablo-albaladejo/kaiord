@@ -39,7 +39,8 @@ Conversations are stored per profile in your browser and are searchable.
 
 ## Privacy and cost
 
-- Your key and your conversations are stored in your browser (IndexedDB).
+- Your key and your conversations are stored in your browser (IndexedDB),
+  and your data stays there unless you turn on Google Drive sync.
   Kaiord's [privacy policy](/legal/privacy-policy) describes what is sent: your
   prompts, and summaries of the data the assistant reads, go from your browser
   to the provider you configured, only while you are chatting.
@@ -59,6 +60,5 @@ calendar or health data stored in the web app.
 
 ## Related
 
-- [Zwift workouts on your Garmin](/guide/zwift-to-garmin)
 - [WHOOP recovery in your training plan](/guide/whoop-recovery-in-plan)
 - [Kaiord vs TrainingPeaks, intervals.icu and Garmin Connect](/guide/kaiord-vs-trainingpeaks-intervals-garmin)

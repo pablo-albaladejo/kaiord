@@ -20,10 +20,10 @@ power ±1 W or ±1 % FTP).
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=zwo&to=fit), drop your `.zwo` file,
-choose **FIT** as the export format, and download `workout.fit`. It runs
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=zwo&to=fit), choose your `.zwo` file
+(**FIT** is already selected as the export format), and download `workout.fit`. It runs
 entirely in your browser.
 
 ### 2. CLI

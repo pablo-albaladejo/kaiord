@@ -7,7 +7,8 @@ description: "Una comparación honesta y con fuentes de Kaiord con TrainingPeaks
 
 TrainingPeaks, intervals.icu y Garmin Connect son plataformas consolidadas.
 Kaiord es un proyecto de código abierto joven y con otro planteamiento: se
-ejecuta en tu navegador, guarda tus datos ahí y no necesita cuenta. Esta página
+ejecuta en tu navegador, guarda tus datos ahí (salvo que actives la
+sincronización con Google Drive) y no necesita cuenta. Esta página
 compara lo que ofrece cada uno, con una fuente para cada afirmación sobre otro
 producto. Los precios y los planes cambian; revisa las páginas enlazadas antes
 de decidir.
@@ -16,15 +17,15 @@ _Read in English: [Kaiord vs TrainingPeaks, intervals.icu and Garmin Connect](/g
 
 ## De un vistazo (a fecha de 2026-09-28)
 
-|                                             | Kaiord                                                         | TrainingPeaks                                                                          | intervals.icu                                            | Garmin Connect                                   |
-| ------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------ |
-| Precio                                      | Gratis, licencia MIT                                           | Premium 19,95 US$/mes o 134,99 US$/año [^tp]; nivel Basic gratuito [CONFIRMAR: fuente] | Gratis; plan opcional de apoyo de 4 US$/mes [^iv]        | Gratis; Connect+ opcional por 6,99 US$/mes [^gc] |
-| Editor de entrenamientos estructurados      | Sí                                                             | Sí [^tpwb]                                                                             | Sí, en el nivel gratuito [^iv]                           | Sí [^gcwb]                                       |
-| Enviar entrenamientos planificados a Garmin | Sí, con la extensión Garmin Bridge                             | Figura como función Premium: "Sync planned workouts to your device" [^tp]              | Sí, "Upload planned workouts" [^ivgc] [CONFIRMAR: nivel] | Sí, de forma nativa [^gcsend]                    |
-| Exportar el entrenamiento a archivo         | FIT, TCX, ZWO, Garmin Connect, KRD                             | [CONFIRMAR: formatos y fuente]                                                         | [CONFIRMAR: formatos y fuente]                           | [CONFIRMAR: formatos y fuente]                   |
-| IA                                          | Con tu propia clave (Anthropic, OpenAI, Google)                | [CONFIRMAR]                                                                            | [CONFIRMAR]                                              | "Active Intelligence" en Connect+ [^gc]          |
-| Cuenta y datos                              | Sin cuenta; los datos se quedan en tu navegador                | [CONFIRMAR: fuente]                                                                    | [CONFIRMAR: fuente]                                      | [CONFIRMAR: fuente]                              |
-| Código fuente                               | Abierto ([GitHub](https://github.com/pablo-albaladejo/kaiord)) | [CONFIRMAR: fuente]                                                                    | [CONFIRMAR: fuente]                                      | [CONFIRMAR: fuente]                              |
+|                                             | Kaiord                                                                                               | TrainingPeaks                                                                                                                                                                                              | intervals.icu                                                                                                     | Garmin Connect                                                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Precio                                      | Gratis, licencia MIT                                                                                 | Premium 19,95 US$/mes o 134,99 US$/año [^tp]; el nivel Basic gratuito permite registrar entrenamientos y seguir planes asignados, pero no crear ni programar tus propios entrenamientos futuros [^tpbasic] | Gratis; plan opcional de apoyo de 4 US$/mes [^iv]                                                                 | Gratis; Connect+ opcional por 6,99 US$/mes o 69,99 US$/año [^gc] [^gcdcr]                                         |
+| Editor de entrenamientos estructurados      | Sí                                                                                                   | Sí [^tpwb]                                                                                                                                                                                                 | Sí, en el nivel gratuito [^iv]                                                                                    | Sí [^gcwb]                                                                                                        |
+| Enviar entrenamientos planificados a Garmin | Sí, con la extensión Garmin Bridge                                                                   | Figura como función Premium: "Sync planned workouts to your device" [^tp]                                                                                                                                  | Sí, "Upload planned workouts" [^ivgc], en el nivel gratuito [^iv]                                                 | Sí, de forma nativa [^gcsend]                                                                                     |
+| Exportar el entrenamiento a archivo         | FIT, TCX, ZWO, Garmin Connect, KRD                                                                   | FIT, ZWO, ERG o MRC, según el tipo de entrenamiento [^tpexport]                                                                                                                                            | FIT, ZWO, ERG, MRC [^ivwb]                                                                                        | No descarga archivos de entrenamientos planificados; los envía a tu dispositivo vinculado [^gcsend]               |
+| IA                                          | Con tu propia clave (Anthropic, OpenAI, Google)                                                      | AI Workout Generator (de texto a entrenamiento estructurado), para entrenadores, solo en la app web [^tpai]                                                                                                | Sin función de IA propia; hay apps de terceros que usan su API abierta                                            | "Active Intelligence" en Connect+ [^gc]                                                                           |
+| Cuenta y datos                              | Sin cuenta; los datos se quedan en tu navegador salvo que actives la sincronización con Google Drive | Requiere cuenta; nube de TrainingPeaks [^tptou]                                                                                                                                                            | Requiere cuenta; servidores en la UE (Alemania y Finlandia) [^ivprivacy]                                          | Requiere cuenta de Garmin; servidores en EE. UU., Reino Unido o Australia (China continental: China) [^gcprivacy] |
+| Código fuente                               | Abierto ([GitHub](https://github.com/pablo-albaladejo/kaiord))                                       | Propietario [^tptou]                                                                                                                                                                                       | Propietario (algunas herramientas auxiliares son de código abierto en [GitHub](https://github.com/intervals-icu)) | Propietario [^gcdev]                                                                                              |
 
 La columna de Kaiord se puede comprobar en su
 [política de privacidad](/legal/privacy-policy) (en inglés) y en su código
@@ -48,7 +49,8 @@ fuente.
 
 - **Sin cuenta, datos locales.** No se envía nada a un servidor de Kaiord; la
   app guarda tu plan, tus entrenamientos y tus registros de salud en el
-  navegador.
+  navegador, y ahí se quedan salvo que actives la sincronización con Google
+  Drive.
 - **Conversión de formatos.** Cualquier entrenamiento se puede exportar a FIT,
   TCX, ZWO, JSON de Garmin Connect y KRD, y las mismas conversiones están
   disponibles como [CLI](/cli/commands), [SDK de TypeScript](/guide/quick-start)
@@ -61,8 +63,8 @@ fuente.
 
 Kaiord no tiene por qué sustituir nada. Puedes crear un entrenamiento en Kaiord
 y [exportarlo](/convert/) (en inglés) como un archivo que otra plataforma
-importe, o [llevar un entrenamiento de Zwift a Garmin](/es/guide/zwift-to-garmin).
-Hoy Kaiord no se sincroniza con intervals.icu.
+importe. Puedes guardar una clave de API de intervals.icu en **Conexiones**,
+pero todavía no se sincroniza ningún dato con intervals.icu.
 
 ## Fuentes
 
@@ -70,16 +72,34 @@ Consultadas el 2026-09-28.
 
 [^tp]: TrainingPeaks, [Pricing for athletes](https://www.trainingpeaks.com/pricing/for-athletes/).
 
+[^tpbasic]: TrainingPeaks, [TrainingPeaks Basic vs Premium: Exactly What You Get](https://www.trainingpeaks.com/blog/what-you-get-with-trainingpeaks-premium/).
+
+[^tpexport]: Centro de ayuda de TrainingPeaks, [Structured Workout Export FAQs](https://help.trainingpeaks.com/hc/en-us/articles/115001844087-Structured-Workout-Export-FAQs).
+
+[^tpai]: Centro de ayuda de TrainingPeaks, [Structured Workout Builder](https://help.trainingpeaks.com/hc/en-us/articles/235164967-Structured-Workout-Builder).
+
+[^tptou]: TrainingPeaks, [Terms of Use](https://www.trainingpeaks.com/static-files/trainingpeaks-terms-of-use.pdf).
+
 [^tpwb]: TrainingPeaks, [Introducing the TrainingPeaks Workout Builder](https://www.trainingpeaks.com/learn/articles/introducing-trainingpeaks-workout-builder/).
 
 [^iv]: intervals.icu, [Pricing](https://www.intervals.icu/pricing/).
 
+[^ivwb]: intervals.icu, [Workout Builder](https://www.intervals.icu/features/workout-builder/).
+
+[^ivprivacy]: intervals.icu, [Privacy Policy](https://intervals.icu/privacy-policy.html).
+
 [^ivgc]: Anuncio en el foro de intervals.icu, [Upload planned workouts to Garmin Connect](https://forum.intervals.icu/t/upload-planned-workouts-to-garmin-connect/1521).
 
-[^gc]: Garmin, [Elevate your health and fitness goals with Garmin Connect+](https://www.garmin.com/en-US/newsroom/press-release/wearables-health/elevate-your-health-and-fitness-goals-with-garmin-connect/) (precio de lanzamiento; "All existing features and data in Garmin Connect will remain free").
+[^gc]: Garmin, [Elevate your health and fitness goals with Garmin Connect+](https://www.garmin.com/en-US/newsroom/press-release/wearables-health/elevate-your-health-and-fitness-goals-with-garmin-connect/) ("All existing features and data in Garmin Connect will remain free").
+
+[^gcdcr]: DC Rainmaker, [Garmin Connect+ Subscription Walkthrough](https://www.dcrainmaker.com/2025/03/garmin-connect-plus-subscription-walkthrough.html).
 
 [^gcwb]: Soporte de Garmin, [Creating a Custom Workout in Garmin Connect](https://support.garmin.com/en-US/?faq=wZ52AaLbLG2GC1Lxu2l4k7).
 
 [^gcsend]: Soporte de Garmin, [How to Send Workouts to a Garmin Device](https://support.garmin.com/en-US/?faq=Oyqt6jUjOF8L1Rnuc9Sms8).
 
 [^gcapp]: Garmin, [Garmin Connect Mobile App](https://www.garmin.com/en-US/p/125677/).
+
+[^gcprivacy]: Garmin, [Garmin Connect Privacy Policy](https://www.garmin.com/en-US/privacy/connect/policy/).
+
+[^gcdev]: Garmin, [Garmin Connect Developer Program Agreement](https://www8.garmin.com/en-US/GARMINCONNECTDEVELOPERPROGRAMAGREEMENT/GARMINCONNECTDEVELOPERPROGRAMAGREEMENT_EN.pdf).
