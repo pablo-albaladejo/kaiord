@@ -7,7 +7,7 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-09-27
+**Last updated:** 2026-09-28
 
 This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
@@ -17,7 +17,7 @@ Kaiord operates no backend that receives, stores, or processes your data. All pr
 
 ## Data Collection
 
-We use Umami, a privacy-friendly, cookie-less analytics tool. It records anonymous page views and product events (e.g. 'workout exported'); never your workouts, health data or API keys. Umami runs on the website (kaiord.com), the documentation and the web editor. We do not use cookies for tracking.
+We use Umami, a privacy-friendly, cookie-less analytics tool. It records anonymous page views and product events (e.g. 'workout exported'); never your workouts, health data or API keys. Umami runs on the website (kaiord.com), the documentation and the web editor. With each page view it also records the referring site and any UTM campaign tags in the link you followed, with no personal data. We do not use cookies for tracking.
 
 All workout-editor state (workouts, templates, sport-zone profiles, AI provider keys, sync state, chat transcripts) is stored locally in your browser via IndexedDB (Dexie). Nothing is sent to a Kaiord-operated server, ever. This local data remains on your device until you remove it: clear AI provider keys via Settings → Privacy → Clear All API Keys, delete individual workouts via the per-workout delete action, clear a conversation via the assistant's Clear conversation action, or clear site data in your browser to remove everything at once.
 

@@ -15,6 +15,7 @@ import {
   todayIso,
   writeSnapshot,
 } from "./observatory-lib.mjs";
+import { summarizeRuns } from "./ai-visibility-summary.mjs";
 
 const askPerplexity = async (question) => {
   const response = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -97,15 +98,19 @@ const isKaiordUrl = (value) => {
 
 for (const provider of providers) {
   const runs = [];
-  for (const { id, q } of aiQuestions) {
+  for (const { id, q, lang = "en" } of aiQuestions) {
     try {
       const { answer, citations } = await provider.ask(q);
+      // "Mentioned" (kaiord and competitors alike) means the answer text OR a
+      // cited URL names it; "cited" is only a kaiord.com URL. Changing this
+      // for one side would bias the kaiord-vs-competitor comparison.
       const haystack = `${answer}\n${citations.join("\n")}`.toLowerCase();
       const competitorsMentioned = competitors
         .filter((c) => c.match.some((token) => haystack.includes(token)))
         .map((c) => c.name);
       runs.push({
         id,
+        lang,
         q,
         kaiordMentioned: haystack.includes("kaiord"),
         kaiordCited: citations.some(isKaiordUrl),
@@ -117,35 +122,18 @@ for (const provider of providers) {
       console.warn(
         `[ai-visibility] ${provider.name} failed for "${q}": ${error.message}`
       );
-      runs.push({ id, q, error: error.message });
+      runs.push({ id, lang, q, error: error.message });
     }
     await sleep(1000);
   }
 
-  const answered = runs.filter((r) => r.error === undefined);
-  const mentions = answered.filter((r) => r.kaiordMentioned).length;
-  const competitorCounts = {};
-  for (const run of answered) {
-    for (const name of run.competitorsMentioned ?? []) {
-      competitorCounts[name] = (competitorCounts[name] ?? 0) + 1;
-    }
-  }
-  const entry = {
+  const entry = summarizeRuns({
+    runs,
+    questions: aiQuestions,
     date: todayIso(),
-    source: "ai-visibility",
     provider: provider.name,
-    questions: answered.length,
-    kaiordMentions: mentions,
-    mentionRate:
-      answered.length === 0
-        ? null
-        : Number((mentions / answered.length).toFixed(2)),
-    citedCount: answered.filter((r) => r.kaiordCited).length,
-    topCompetitors: Object.entries(competitorCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([name, count]) => ({ name, count })),
-  };
+  });
+  const answered = runs.filter((r) => r.error === undefined);
 
   writeSnapshot(`ai-visibility-${provider.name}-${todayIso()}`, {
     entry,
@@ -158,6 +146,8 @@ for (const provider of providers) {
   );
   console.log(
     `[ai-visibility] ${provider.name} ${appended ? "recorded" : "already recorded today"}: ` +
-      `${mentions}/${answered.length} answers mention kaiord`
+      `${entry.kaiordMentions}/${entry.questions} answers mention kaiord ` +
+      `(core ${entry.core.kaiordMentions}/${entry.core.questions}, ` +
+      `${answered.length - entry.questions} brand prompt(s) apart)`
   );
 }
