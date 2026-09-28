@@ -128,10 +128,10 @@ describe("export-ledger cross-device sync", () => {
     const before = await ledgerRows(dbA);
     const [updated] = before;
     const lateUpdate = LATE_WRITE_AT.toISOString();
-    await repo.update(updated.id, {
-      destinationExternalId: "garmin-late",
-      updatedAt: lateUpdate,
-    });
+    vi.setSystemTime(LATE_WRITE_AT);
+    await repo.mutateByKey(updated, (row) =>
+      row ? { ...row, destinationExternalId: "garmin-late" } : row
+    );
     const created = { ...updated, id: crypto.randomUUID() };
     await repo.insertPending({
       ...created,

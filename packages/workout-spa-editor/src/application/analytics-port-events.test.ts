@@ -60,7 +60,6 @@ const makeLedgerRepo = (
 ): ExportLedgerRepository => ({
   findByNaturalKey: async () => undefined,
   insertPending: async (): Promise<InsertPendingResult> => ({ ok: true }),
-  update: async () => undefined,
   mutateByKey: async (_key, fn) => fn(undefined),
   deleteById: async () => undefined,
   countByDataType: async () => 1,
@@ -82,10 +81,6 @@ const makeStatefulLedgerRepo = (): ExportLedgerRepository => {
       store.set(entry.id, entry);
       keyIndex.set(key, entry.id);
       return { ok: true };
-    },
-    update: async (id, patch) => {
-      const existing = store.get(id);
-      if (existing) store.set(id, { ...existing, ...patch });
     },
     mutateByKey: async (key, fn) => {
       const k = nk(key.kaiordRecordId, key.destinationBridgeId);

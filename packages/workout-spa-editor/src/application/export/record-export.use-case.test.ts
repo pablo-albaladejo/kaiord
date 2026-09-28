@@ -41,10 +41,6 @@ const makeRepo = (): ExportLedgerRepository & {
       naturalKeyIndex.set(key, entry.id);
       return { ok: true };
     },
-    update: async (id, patch) => {
-      const existing = store.get(id);
-      if (existing) store.set(id, { ...existing, ...patch });
-    },
     mutateByKey: async (key, fn) => {
       const k = naturalKey(key.kaiordRecordId, key.destinationBridgeId);
       const id = naturalKeyIndex.get(k);

@@ -16,7 +16,6 @@ export type ExportLedgerRepository = {
     destinationBridgeId: string;
   }) => Promise<ExportLedgerEntry | undefined>;
   insertPending: (entry: ExportLedgerEntry) => Promise<InsertPendingResult>;
-  update: (id: string, patch: Partial<ExportLedgerEntry>) => Promise<void>;
   /**
    * Read-modify-write of the row holding `key`, in its own read-write
    * transaction that re-reads the row by natural key (never by ledger id —

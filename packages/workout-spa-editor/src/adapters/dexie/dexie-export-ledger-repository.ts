@@ -59,10 +59,6 @@ export const createDexieExportLedgerRepository = (
     }
   },
 
-  update: async (id: string, patch: Partial<ExportLedgerEntry>) => {
-    await db.table("exportLedger").update(id, patch);
-  },
-
   mutateByKey: async (key, fn) => {
     let after: ExportLedgerEntry | undefined;
     await tx(db)("rw", [db.table("exportLedger")], async () => {
