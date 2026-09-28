@@ -18,3 +18,13 @@ export const CreateWorkout = lazy(
 export const SettingsPage = lazy(
   () => import("./components/pages/SettingsPage/SettingsPage")
 );
+// Route dispatchers kept out of the entry graph: both only render lazy pages,
+// so loading them eagerly just adds their import chains to the initial JS.
+export const HealthSubRouter = lazy(() =>
+  import("./components/pages/health/health-routes").then((m) => ({
+    default: m.HealthSubRouter,
+  }))
+);
+export const NewWorkoutRoute = lazy(() =>
+  import("./new-workout-route").then((m) => ({ default: m.NewWorkoutRoute }))
+);

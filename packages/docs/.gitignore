@@ -1,2 +1,5 @@
 # Auto-generated API reference (rebuilt at build time by TypeDoc)
 api/
+
+# Brand font copied from styles/fonts/ at build (scripts/copy-brand-font.mjs)
+public/fonts/

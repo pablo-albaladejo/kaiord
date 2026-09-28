@@ -477,10 +477,15 @@ jobs:
   # node-version-invariant so the matrix used by `lint`/`test` would
   # only duplicate work without adding signal.
   #
+  # Also enforces the SPA initial-JS budget (`pnpm size:spa`,
+  # scripts/check-spa-initial-js.mjs): the gzip of the entry script plus
+  # every modulepreload in the SPA's dist/index.html.
+  #
   # Kill-switch: `vars.SIZE_LIMIT_BOT_ENABLED` repository variable. Set
   # it to the string `false` via the GitHub UI (Settings → Variables)
   # to disable the gate without a code change, mirroring the precedent
-  # set by `vars.CI_ISSUE_BOT_ENABLED`.
+  # set by `vars.CI_ISSUE_BOT_ENABLED`. It gates the whole job, so it
+  # switches off BOTH `pnpm size` and `pnpm size:spa`.
   size-limit:
     runs-on: ubuntu-latest
     # Lint-family job (bundle-size measurement on prebuilt artifacts) → ceiling 10 minutes.
@@ -500,9 +505,14 @@ jobs:
 
       - name: Consume build artifacts
         uses: ./.github/actions/consume-build-artifacts
+        with:
+          expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Run size-limit
         run: pnpm size
+
+      - name: SPA initial-JS budget
+        run: pnpm size:spa
 
   test:
     runs-on: ubuntu-latest

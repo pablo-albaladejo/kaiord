@@ -5,8 +5,9 @@
   "description": "VitePress documentation site for Kaiord",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/copy-brand-font.mjs",
     "dev": "vitepress dev",
-    "build": "node scripts/generate-api-docs.mjs && vitepress build",
+    "build": "node scripts/copy-brand-font.mjs && node scripts/generate-api-docs.mjs && vitepress build",
     "preview": "vitepress preview",
     "lint": "prettier --check . && cspell --no-progress \"**/*.md\" --exclude api/ && pnpm lint:privacy-policy",
     "lint:fix": "prettier --write .",
