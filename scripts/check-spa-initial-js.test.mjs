@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 
 import {
   checkBudget,
+  FORBIDDEN_LAZY_SOURCES,
   initialScripts,
   SPA_INITIAL_JS_BUDGET_KB,
 } from "./check-spa-initial-js.mjs";
@@ -87,5 +88,86 @@ describe("check-spa-initial-js", () => {
     rmSync(join(dist, "assets", "vendor-b.js"));
 
     assert.throws(() => checkBudget(dist), /vendor-b\.js not found/);
+  });
+
+  it("resolves the entry and modulepreloads under the root base path", () => {
+    // CI builds the SPA without VITE_BASE_PATH, so dist/index.html links
+    // assets at the root ("/assets/...") rather than "/app/assets/...".
+    writeFileSync(
+      join(dist, "index.html"),
+      `<!doctype html><html><head>
+<script type="module" crossorigin src="/assets/index-a.js"></script>
+<link rel="modulepreload" crossorigin href="/assets/vendor-b.js">
+</head><body></body></html>`
+    );
+
+    const result = run(dist);
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /across 2 files/);
+  });
+
+  it("accepts unquoted and single-quoted attribute values", () => {
+    const html = `<script type=module src=/assets/index-a.js></script>
+<link rel='modulepreload' href='/assets/vendor-b.js'>`;
+
+    assert.deepEqual(initialScripts(html), [
+      "/assets/index-a.js",
+      "/assets/vendor-b.js",
+    ]);
+  });
+
+  it("throws when index.html has no recognisable module-script entry", () => {
+    writeFileSync(
+      join(dist, "index.html"),
+      `<!doctype html><html><head>
+<link rel="stylesheet" href="/assets/index-c.css">
+</head><body></body></html>`
+    );
+
+    const result = run(dist);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /no <script type="module" src> entry found/);
+  });
+
+  for (const source of FORBIDDEN_LAZY_SOURCES) {
+    it(`fails when a lazy-seam source (${source}) is bundled into an initial file`, () => {
+      // A static import doesn't necessarily create a new, separately named
+      // chunk (rolldown may inline it into an already-initial chunk), so
+      // the check reads the initial files' sourcemaps instead of matching
+      // chunk filenames.
+      writeFileSync(
+        join(dist, "assets", "index-a.js.map"),
+        JSON.stringify({
+          version: 3,
+          sources: ["../../src/main.tsx", `../../${source}`],
+          names: [],
+          mappings: "",
+        })
+      );
+
+      const result = run(dist);
+
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /forbidden lazy-seam source/);
+      assert.match(result.stderr, new RegExp(source.replace(/[./]/g, "\\$&")));
+    });
+  }
+
+  it("passes when the entry sourcemap has no forbidden sources", () => {
+    writeFileSync(
+      join(dist, "assets", "index-a.js.map"),
+      JSON.stringify({
+        version: 3,
+        sources: ["../../src/main.tsx", "../../src/App.tsx"],
+        names: [],
+        mappings: "",
+      })
+    );
+
+    const result = run(dist);
+
+    assert.equal(result.status, 0, result.stderr);
   });
 });
