@@ -1,6 +1,10 @@
 import type { Analytics, AnalyticsEvent } from "@kaiord/core";
 import { createNoopAnalytics } from "@kaiord/core";
 
+import {
+  redactAnalyticsPath,
+  scrubEventProps,
+} from "../../lib/analytics-redaction";
 import type { UmamiTracker } from "../../types/umami";
 
 type WindowWithUmami = Window & typeof globalThis & { umami?: UmamiTracker };
@@ -23,12 +27,13 @@ export const createUmamiAnalytics = (
 
   return {
     // index.html loads the tracker with data-auto-track="false", so page
-    // views are submitted manually with the wouter path as the URL.
+    // views are submitted manually with the wouter path as the URL — with
+    // record ids replaced by their route pattern.
     pageView: (path) =>
       withTracker((tracker) =>
-        tracker.track((props) => ({ ...props, url: path }))
+        tracker.track((props) => ({ ...props, url: redactAnalyticsPath(path) }))
       ),
     event: (name: string, props?: AnalyticsEvent) =>
-      withTracker((tracker) => tracker.track(name, props)),
+      withTracker((tracker) => tracker.track(name, scrubEventProps(props))),
   };
 };

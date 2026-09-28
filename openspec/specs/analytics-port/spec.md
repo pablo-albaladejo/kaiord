@@ -1,4 +1,4 @@
-> Synced: 2026-07-11
+> Synced: 2026-09-27 (analytics-redact-identifiers)
 
 # Analytics Port & Adapter
 
@@ -45,14 +45,16 @@ The system SHALL provide `createUmamiAnalytics(websiteId: string | undefined): A
 The two consumer packages differ in how they submit page views:
 
 - `@kaiord/landing` loads the Umami tracker with automatic tracking ON (a static multi-page site), so `pageView` is a no-op — submitting one would double-count the auto-tracked view.
-- `@kaiord/workout-spa-editor` loads the tracker with `data-auto-track="false"` (client-side wouter routes), so `pageView(path)` forwards to `window.umami.track` using the payload-modifier form to set the base-relative `url`.
+- `@kaiord/workout-spa-editor` loads the tracker with `data-auto-track="false"` (client-side wouter routes), so `pageView(path)` forwards to `window.umami.track` using the payload-modifier form to set the base-relative `url`, with record ids replaced by their route pattern (see "Editor tracks SPA route changes as page views").
 
-Both packages forward `event(name, props)` to `window.umami.track(name, props)`.
+Both packages forward `event(name, props)` to `window.umami.track(name, props)`. The editor adapter first removes a `profileId` key from `props` and passes every string value through `scrubAnalyticsString` (UUIDs, emails, bearer tokens, long hex and base64url runs become placeholders), so no per-person identifier reaches Umami whatever the call site passes.
 
 #### Scenario: Event is sent when the tracker is available
 
 - **WHEN** `event('workout-generated', { sport: 'cycling' })` is called and `window.umami` is present
 - **THEN** the adapter calls `window.umami.track` with the event name and properties
+- **AND** on the editor adapter, a `profileId` property passed by the caller is not forwarded
+- **AND** on the editor adapter, a string property such as `{ source: 'alice@example.com' }` is forwarded as `{ source: '<email>' }`
 
 #### Scenario: Editor pageView is forwarded via the payload modifier
 
@@ -80,8 +82,6 @@ Both packages forward `event(name, props)` to `window.umami.track(name, props)`.
 - **THEN** the returned adapter is functionally equivalent to `createNoopAnalytics()` — no network requests, no console errors
 
 Note: each consumer package (`@kaiord/landing` and `@kaiord/workout-spa-editor`) has its own independent adapter implementation and test suite verifying these scenarios.
-
----
 
 ### Requirement: Editor injects analytics via React Context
 
@@ -126,6 +126,8 @@ The system SHALL call `analytics.event` at the following moments in `@kaiord/wor
 
 Three new integration lifecycle events and one gauge are also added. All new events use the existing `analytics.event(name, props)` port. All payload fields MUST comply with the R-PIIInterpolation rule — no biometric values, no user-entered metric values, no record content. Only structural metadata (data type, bridge id, direction, outcome, duration) is permitted.
 
+No event payload SHALL carry `profileId` or any other per-person identifier: a stable local id sent with every event links a person's whole event history in the analytics store. Call sites SHALL NOT pass it, and the Umami adapter SHALL strip a `profileId` key before calling `umami.track`, so a call site that forgets cannot send it.
+
 #### Scenario: App mount triggers editor-loaded event
 
 - **WHEN** the editor SPA mounts for the first time
@@ -154,7 +156,6 @@ Payload shape:
 
 ```ts
 {
-  profileId: string;        // active profile id
   dataType: ManagedDataType;
   direction: 'import' | 'export';
   bridgeId: string;         // BridgeId of the affected row
@@ -171,7 +172,6 @@ Payload shape:
 
 ```ts
 {
-  profileId: string;
   dataType: ManagedDataType;
   sourceBridgeId: string;
   durationMs: number;
@@ -187,7 +187,6 @@ Payload shape:
 
 ```ts
 {
-  profileId: string;
   dataType: ManagedDataType;
   destinationBridgeId: string;
   durationMs: number;
@@ -211,8 +210,9 @@ Payload shape:
 #### Scenario: integration_policy.toggled fires on add
 
 - **WHEN** the user adds a source row for `(dataType: 'weight', bridgeId: 'garmin-bridge', direction: 'import')` in the Data Flows section
-- **THEN** `analytics.event('integration_policy.toggled', { profileId, dataType: 'weight', direction: 'import', bridgeId: 'garmin-bridge', action: 'added' })` is called
+- **THEN** `analytics.event('integration_policy.toggled', { dataType: 'weight', direction: 'import', bridgeId: 'garmin-bridge', action: 'added' })` is called
 - **AND** no biometric payload value appears in any field of the event properties
+- **AND** the event properties contain no `profileId`
 
 #### Scenario: integration_policy.toggled fires on disable
 
@@ -245,13 +245,14 @@ Payload shape:
 
 - **WHEN** any of the four new events is emitted
 - **THEN** no field in the event properties SHALL contain a biometric value, a user-entered metric value, or any content from the health/workout records being imported or exported
+- **AND** no event properties SHALL contain `profileId`, even when the call site passes it to `analytics.event`
 - **AND** the existing R-PIIInterpolation static guard (enforced by `scripts/check-no-pii-leakage.mjs`) SHALL remain green for every call site emitting these events
-
----
 
 ### Requirement: Editor tracks SPA route changes as page views
 
 The system SHALL call `analytics.pageView(path)` every time the wouter location changes inside the editor SPA, so that navigations to `/calendar`, `/library`, `/workout/new`, and `/workout/:id` are recorded as page views in Umami. Because the editor disables Umami auto-tracking (`data-auto-track="false"`), these page views are submitted manually by the adapter with the base-relative path as the `url`.
+
+A path segment that names one of the user's own records SHALL be replaced by its route pattern before the Umami adapter submits the `url`: `/workout/<id>` becomes `/workout/:id`, `/workout/view/<id>` becomes `/workout/view/:id` and `/chat/<id>` becomes `/chat/:conversationId`; the query string and fragment are dropped. `analytics.pageView` still receives the concrete path; the redaction happens in the adapter, and the submitted `url` stays base-relative. Static segments such as `/workout/new` and `/calendar/<ISO week>` are not record ids and are submitted unchanged. The redaction is an allowlist of the router's routes: a path that matches no known route is submitted as `/unknown`, never verbatim, and a `/calendar/` or `/settings/` segment that is not an ISO week or a known settings section becomes `:weekId` or `:section`.
 
 #### Scenario: Initial route fires a page view on mount
 
@@ -266,9 +267,13 @@ The system SHALL call `analytics.pageView(path)` every time the wouter location 
 #### Scenario: Dynamic route segment is included in page view path
 
 - **WHEN** the user navigates to `/workout/abc123`
-- **THEN** `analytics.pageView('/workout/abc123')` is called with the full path including the ID
+- **THEN** `analytics.pageView('/workout/abc123')` is called with the concrete path
+- **AND** the Umami adapter submits `/workout/:id` as the page-view `url`, so the record id never reaches Umami
 
----
+#### Scenario: Unknown path is not forwarded verbatim
+
+- **WHEN** the location is `/other/alice@example.com`, which matches no route
+- **THEN** the Umami adapter submits `/unknown` as the page-view `url`
 
 ### Requirement: Editor tracks file imports
 
