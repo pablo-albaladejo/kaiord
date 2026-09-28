@@ -52,7 +52,9 @@ jobs:
     # https://kaiord.com/docs/sitemap.xml`, 3 runs), the diff is in-memory
     # over 40 URLs (< 1s), and uploading one small file costs at most what
     # "Upload build artifacts" took for all the dists in CI run 36429027033
-    # (2s). ceil((122 + 0.5 + 1 + 2) × 1.5 / 60) = ceil(3.14) = 4.
+    # (2s). Restoring the baseline cache: 1s (actions/cache/restore@v6 in
+    # metrics-gate run 34876830956).
+    # ceil((122 + 0.5 + 1 + 2 + 1) × 1.5 / 60) = ceil(3.16) = 4.
     timeout-minutes: 4
     outputs:
       spa_marker: ${{ steps.spa_marker.outputs.marker }}
@@ -199,12 +201,24 @@ jobs:
           REQUIRE_DOCS_DIST: "1"
         run: node scripts/check-site-links.mjs --merged merged-dist
 
-      # The URLs this deploy changes: the live sitemaps (what engines have
-      # now) against the built ones, by <loc> and <lastmod>. A failed fetch
-      # leaves no live file, and the diff then skips with a warning instead
-      # of submitting the whole site. The list is submitted after deploy by
-      # the indexnow job, once the new pages and the key file are live.
-      - name: List URLs changed since the live deploy (IndexNow)
+      # The sitemaps of the last deploy whose IndexNow submit succeeded, saved
+      # by the indexnow job. Diffing against them (not the live ones) resends
+      # what a failed fetch or submit missed. Absent (first run, or evicted
+      # after 7 days unused), the diff falls back to the live sitemaps.
+      - name: Restore the last submitted sitemaps (IndexNow)
+        uses: actions/cache/restore@v6
+        with:
+          path: indexnow/base
+          key: indexnow-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: indexnow-baseline-
+
+      # The URLs this deploy changes, by <loc> and <lastmod>, against the
+      # last submitted sitemaps or else the live ones. Each set counts only if
+      # every file is present and non-empty; with neither, the diff skips with
+      # a warning instead of submitting the whole site. The list is submitted
+      # after deploy by the indexnow job, once the new pages and the key file
+      # are live.
+      - name: List URLs changed since the last submit (IndexNow)
         run: |
           set -e
           mkdir -p indexnow
@@ -214,16 +228,23 @@ jobs:
               || { rm -f "indexnow/live-$2.xml"; echo "::warning::Could not fetch the live /$1"; }
           done
           node scripts/geo/indexnow.mjs diff \
+            --base indexnow/base/landing.xml indexnow/base/docs.xml \
             --old indexnow/live-landing.xml indexnow/live-docs.xml \
             --new merged-dist/sitemap-landing.xml merged-dist/docs/sitemap.xml \
             --out indexnow/urls.txt
           cat indexnow/urls.txt
+          # The next baseline, saved by the indexnow job only if it submits.
+          mkdir -p indexnow/built
+          cp merged-dist/sitemap-landing.xml indexnow/built/landing.xml
+          cp merged-dist/docs/sitemap.xml indexnow/built/docs.xml
 
       - name: Upload IndexNow URL list
         uses: actions/upload-artifact@v7
         with:
           name: indexnow-urls
-          path: indexnow/urls.txt
+          path: |
+            indexnow/urls.txt
+            indexnow/built/
           if-no-files-found: error
           retention-days: 1
 
@@ -362,8 +383,9 @@ jobs:
       contents: read
     # Set up job 1s + Checkout 4s (run 36438339968) + Setup Node 3s (run
     # 34855248940) + artifact download 2s (run 30488840105) + the POST, which
-    # the script aborts at 20s + post-checkout 1s = 31s worst case;
-    # ceil(31 x 1.5 / 60) = 1.
+    # the script aborts at 20s + saving the baseline cache 1s (the same
+    # actions/cache/save@v6 in metrics-gate run 33353793245) + post-checkout
+    # 1s = 32s worst case; ceil(32 x 1.5 / 60) = 1.
     timeout-minutes: 1
     steps:
       - name: Checkout
@@ -381,4 +403,18 @@ jobs:
           path: indexnow
 
       - name: Submit changed URLs to IndexNow
+        id: submit
         run: node scripts/geo/indexnow.mjs submit indexnow/urls.txt
+
+      # Only a submit that succeeded (or had nothing to send) moves the
+      # comparison point; after a failure the next deploy resends these URLs.
+      - name: Keep these sitemaps as the next baseline
+        if: steps.submit.outputs.result == 'ok' || steps.submit.outputs.result == 'skipped'
+        run: mv indexnow/built indexnow/base
+
+      - name: Save the baseline
+        if: steps.submit.outputs.result == 'ok' || steps.submit.outputs.result == 'skipped'
+        uses: actions/cache/save@v6
+        with:
+          path: indexnow/base
+          key: indexnow-baseline-${{ github.run_id }}-${{ github.run_attempt }}
