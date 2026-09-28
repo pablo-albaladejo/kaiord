@@ -5,8 +5,7 @@ import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
 
 import { createUmamiAnalytics } from "./adapters/analytics/umami-analytics";
-import { withEncryption } from "./adapters/cloud-sync/encrypting-cloud-sync";
-import { createGoogleDriveCloudSync } from "./adapters/cloud-sync/google-drive-cloud-sync-adapter";
+import { createLazyCloudSync } from "./adapters/cloud-sync/lazy-cloud-sync";
 import { createAppPersistence } from "./adapters/create-app-persistence";
 import { db } from "./adapters/dexie/dexie-database";
 import { createDexieSnapshotPort } from "./adapters/dexie/dexie-snapshot-port";
@@ -23,8 +22,6 @@ import { UnitsProvider } from "./contexts/units-context";
 import { LocaleProvider } from "./i18n/LocaleProvider";
 import { reloadOnceForChunkError } from "./lib/chunk-reload";
 import { getDeviceId } from "./lib/cloud-sync/device-id";
-import { getSyncPassphrase } from "./lib/cloud-sync/encryption-runtime";
-import { isEncryptionEnabled } from "./lib/cloud-sync/sync-encryption-pref";
 import { useFragmentLocation } from "./lib/fragment-location";
 import { getUmamiWebsiteId } from "./lib/runtime-config";
 
@@ -40,10 +37,12 @@ const analytics = createUmamiAnalytics(getUmamiWebsiteId());
 
 const persistence = createAppPersistence(db);
 
-const cloudSync = withEncryption(createGoogleDriveCloudSync(), {
-  isEnabled: isEncryptionEnabled,
-  getPassphrase: getSyncPassphrase,
-});
+// Drive + encryption load on first sync use, outside the initial JS.
+const cloudSync = createLazyCloudSync(() =>
+  import("./adapters/cloud-sync/create-app-cloud-sync").then((m) =>
+    m.createAppCloudSync()
+  )
+);
 const snapshotPort = createDexieSnapshotPort(db);
 
 createRoot(document.getElementById("root")!).render(

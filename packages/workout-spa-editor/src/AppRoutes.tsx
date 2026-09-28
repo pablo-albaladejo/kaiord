@@ -5,19 +5,19 @@ import { Redirect, Route, Switch } from "wouter";
 
 import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
-import { HealthSubRouter } from "./components/pages/health/health-routes";
 import {
   AthletePage,
   CalendarPage,
   ChatPage,
   DailyPage,
   EditorPage,
+  HealthSubRouter,
   LibraryPage,
+  NewWorkoutRoute,
   NutritionPage,
   SettingsPage,
   WorkoutDetail,
 } from "./lazy-pages";
-import { NewWorkoutRoute } from "./new-workout-route";
 import { LegacyTodayRedirect } from "./routing/legacy-today-redirect";
 import { getCurrentWeekId } from "./utils/week-utils";
 
@@ -72,7 +72,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
             page — see `retiredSectionTarget`. */}
         <Route path="/settings/:section?">{guard(<SettingsPage />)}</Route>
         <Route path="/health/*?">
-          <HealthSubRouter analytics={analytics} />
+          {guard(<HealthSubRouter analytics={analytics} />)}
         </Route>
         <Route>
           {/* Unknown routes settle on the default view (calendar). */}
