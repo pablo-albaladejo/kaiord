@@ -42,8 +42,11 @@ export function findKey(dir = PUBLIC_DIR) {
   return keys[0];
 }
 
+const ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
+
+// One pass, so a decoded "&" is never read again: "&amp;lt;" is "&lt;".
 const decode = (text) =>
-  text.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  text.replace(/&(amp|lt|gt|quot|apos);/g, (_, name) => ENTITIES[name]);
 
 // loc -> lastmod ("" when the entry has none).
 export function parseSitemap(xml) {

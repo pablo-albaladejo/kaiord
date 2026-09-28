@@ -65,6 +65,17 @@ describe("parseSitemap", () => {
       ]
     );
   });
+
+  it("should decode each entity once so an escaped ampersand stays literal", () => {
+    // Arrange
+    const xml = sitemap([["https://kaiord.com/q?a=&amp;lt;b&amp;amp;", "1"]]);
+
+    // Act
+    const [loc] = parseSitemap(xml).keys();
+
+    // Assert
+    assert.equal(loc, "https://kaiord.com/q?a=&lt;b&amp;");
+  });
 });
 
 describe("diffSitemaps", () => {
