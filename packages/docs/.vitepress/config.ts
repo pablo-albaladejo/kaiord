@@ -19,7 +19,8 @@ function pageCanonicalUrl(relativePath: string): string {
 
 const AUTHOR = {
   name: "Pablo Albaladejo",
-  linkedin: "https://www.linkedin.com/in/pabloalbaladejomestre",
+  linkedin:
+    "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai",
   github: "https://github.com/pablo-albaladejo",
 };
 
