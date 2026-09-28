@@ -43,8 +43,13 @@ jobs:
     outputs:
       spa_marker: ${{ steps.spa_marker.outputs.marker }}
     steps:
+      # Full history: the sitemaps date each page from its last commit (a
+      # depth-1 clone would date every page HEAD). REQUIRE_FULL_HISTORY=1 on
+      # the builds and guards makes a shallow checkout fail the deploy.
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
@@ -62,6 +67,7 @@ jobs:
       - name: Build Landing Page
         env:
           VITE_UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
+          REQUIRE_FULL_HISTORY: "1"
         run: pnpm --filter @kaiord/landing... build
 
       - name: Build SPA Editor
@@ -105,7 +111,16 @@ jobs:
       - name: Build Docs
         env:
           UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
+          REQUIRE_FULL_HISTORY: "1"
         run: pnpm --filter @kaiord/docs... build
+
+      # noindex ⇄ sitemap agreement, unique titles/descriptions, and real
+      # (not all-identical) lastmods, over the docs build about to ship.
+      - name: Docs indexing guard
+        env:
+          REQUIRE_DOCS_DIST: "1"
+          REQUIRE_FULL_HISTORY: "1"
+        run: node --test packages/docs/scripts/dist-seo-uniqueness.test.mjs
 
       - name: Merge dist outputs
         run: |
