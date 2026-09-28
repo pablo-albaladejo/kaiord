@@ -96,7 +96,7 @@ The extension SHALL expose `schedule{workoutId, date}` and `unschedule{scheduleI
 
 - `schedule` SHALL `POST /workout-service/schedule/{workoutId}` with the JSON body `{"date":"YYYY-MM-DD"}` and SHALL return only `{ workoutScheduleId }`: Garmin's numeric root `workoutScheduleId` as a digit string, or `null` when a 2xx carries no usable id. It SHALL NOT relay the rest of Garmin's response.
 - `unschedule` SHALL `DELETE /workout-service/schedule/{scheduleId}` and SHALL return `null` on a 2xx (Garmin answers 204).
-- Both SHALL validate their inputs before any fetch: ids SHALL be strings matching `^\d+$`, and `date` SHALL be a real calendar date in `YYYY-MM-DD`. An invalid input SHALL be refused with `retryable: false` and SHALL make no network request.
+- Both SHALL validate their inputs before any fetch: ids SHALL be strings matching `^[1-9]\d*$`, and `date` SHALL be a real calendar date in `YYYY-MM-DD`. An invalid input SHALL be refused with `retryable: false` and SHALL make no network request.
 - A non-2xx answer SHALL be thrown with its HTTP `status` intact (for example 404 for an unknown workout id on `schedule`, or for an already-removed entry on `unschedule`), and a 401 that survives the re-mint SHALL carry `needsReauth`.
 
 The POST is not idempotent — two identical calls create two calendar entries (Phase 0) — so the bridge SHALL NOT retry a `schedule` on its own. Deciding whether a failed or ambiguous `schedule` may be repeated is the SPA's job (spec `spa-garmin-extension`).

@@ -2,7 +2,7 @@
 
 ### Requirement: Garmin export-ledger placement model
 
-Garmin rows of the `exportLedger` table SHALL be able to carry four optional fields, typed as tagged unions with branded ids (`GarminWorkoutId`, `GarminScheduleId`, both `^\d+$`, built only through their parsers so one cannot be passed where the other is expected):
+Garmin rows of the `exportLedger` table SHALL be able to carry four optional fields, typed as tagged unions with branded ids (`GarminWorkoutId`, `GarminScheduleId`, both `^[1-9]\d*$`, built only through their parsers so one cannot be passed where the other is expected):
 
 - `library`: `{ kind: "confirmed"; workoutId } | { kind: "unconfirmed" } | { kind: "missing"; workoutId }`
 - `forceRepush`: `true`
@@ -24,7 +24,7 @@ Every pipeline read and write SHALL address the row by its natural key `[kaiordR
 
 ### Requirement: Dexie v36 migration and import normalization of Garmin ledger rows
 
-Dexie v36 SHALL upgrade existing Garmin ledger rows with `normalizeGarminLedgerRow`, a shape-based, idempotent function: a `destinationExternalId` matching `^\d+$` becomes `library: confirmed`; `pending` or `garmin-unconfirmed` becomes `library: unconfirmed`; invalid parts (for example a malformed queue id) are dropped after a schema parse. Rows of other destinations SHALL be untouched. The same function SHALL run on every `exportLedger` row a snapshot import brings in, through an optional `normalize` on the table's `RowMergeHook`, whatever the snapshot's manifest version, so a legacy row synced from an older device is normalized too.
+Dexie v36 SHALL upgrade existing Garmin ledger rows with `normalizeGarminLedgerRow`, a shape-based, idempotent function: a `destinationExternalId` matching `^[1-9]\d*$` becomes `library: confirmed`; `pending` or `garmin-unconfirmed` becomes `library: unconfirmed`; invalid parts (for example a malformed queue id) are dropped after a schema parse. Rows of other destinations SHALL be untouched. The same function SHALL run on every `exportLedger` row a snapshot import brings in, through an optional `normalize` on the table's `RowMergeHook`, whatever the snapshot's manifest version, so a legacy row synced from an older device is normalized too.
 
 #### Scenario: A v35 row is upgraded
 

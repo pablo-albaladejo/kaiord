@@ -20,7 +20,7 @@ Measured facts:
 - A workout id that does not exist answers **404**.
 - After a DELETE of every schedule id, the day holds 0 entries.
 - Ids are numeric (`workoutId` `1707805999`, `workoutScheduleId` `1790718680`),
-  so both match `^\d+$`.
+  so both match `^[1-9]\d*$`.
 - No manifest or host-permission change is needed: `connectapi.garmin.com/*`
   and `write:workouts` are already declared.
 
@@ -214,8 +214,8 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 Location: `SPA/types/export-ledger.ts`. Applies to Garmin rows; every field is optional.
 
 ```ts
-type GarminWorkoutId  = string & { readonly __b: "GarminWorkoutId" };   // ^\d+$ via parseGarminWorkoutId
-type GarminScheduleId = string & { readonly __b: "GarminScheduleId" };  // ^\d+$ via parseGarminScheduleId
+type GarminWorkoutId  = string & { readonly __b: "GarminWorkoutId" };   // ^[1-9]\d*$ via parseGarminWorkoutId
+type GarminScheduleId = string & { readonly __b: "GarminScheduleId" };  // ^[1-9]\d*$ via parseGarminScheduleId
 library?: { kind: "confirmed"; workoutId } | { kind: "unconfirmed" } | { kind: "missing"; workoutId }
 forceRepush?: true
 placement?: Placed
@@ -479,7 +479,7 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 **`normalizeGarminLedgerRow`**
 
 - It is shape-based and idempotent.
-- It derives `library` once, from `^\d+$`.
+- It derives `library` once, from `^[1-9]\d*$`.
 - It Zod-parses the row and drops any invalid parts.
 - It runs in two places: the Dexie v36 upgrade, and inside `SnapshotPort.importTables` as the per-table normalizer for `exportLedger`, whatever the manifest version.
 

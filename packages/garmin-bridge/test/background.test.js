@@ -845,6 +845,9 @@ describe("background.js", () => {
       [{ action: "schedule", workoutId: "12a", date: "2026-09-29" }],
       [{ action: "schedule", workoutId: 1707805999, date: "2026-09-29" }],
       [{ action: "schedule", workoutId: "../1", date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: "01707805999", date: "2026-09-29" }],
+      [{ action: "schedule", workoutId: "0", date: "2026-09-29" }],
+      [{ action: "unschedule", scheduleId: "01790718680" }],
       [{ action: "schedule", workoutId: "1", date: "2026-02-30" }],
       [{ action: "schedule", workoutId: "1", date: "2026-9-29" }],
       [{ action: "schedule", workoutId: "1" }],
@@ -1165,6 +1168,13 @@ describe("background.js", () => {
 
     it.each([
       [{ action: "calendar-find", workoutId: "12a", date: "2026-10-06" }],
+      [
+        {
+          action: "calendar-find",
+          workoutId: "01711500235",
+          date: "2026-10-06",
+        },
+      ],
       [{ action: "calendar-find", workoutId: 1711500235, date: "2026-10-06" }],
       [{ action: "calendar-find", workoutId: "1", date: "2026-02-30" }],
       [{ action: "calendar-find", workoutId: "1" }],
@@ -1270,6 +1280,19 @@ describe("background.js", () => {
       expect(error.message).toBe(DEADLINE_BEFORE_SEND);
       expect(error.retryable).toBe(true);
       expect(error.status).toBeUndefined();
+      expect(posts()).toHaveLength(0);
+    });
+
+    it("should answer deadline-before-send when the token lifecycle aborts on its own", async () => {
+      // Arrange
+      fetch.mockRejectedValueOnce(new DOMException("aborted", "AbortError"));
+
+      // Act
+      const error = await settle(scheduleWorkout("1707805999", "2026-09-29"));
+
+      // Assert
+      expect(error.message).toBe(DEADLINE_BEFORE_SEND);
+      expect(error.retryable).toBe(true);
       expect(posts()).toHaveLength(0);
     });
 

@@ -30,7 +30,7 @@
 - [x] 3.1 Add the `POST` and `DELETE` `/workout-service/schedule/<digits>`
       allowlist entries, one physical line each (AC-3).
 - [x] 3.2 Add the `schedule` and `unschedule` actions with input validation
-      before any fetch (ids `^\d+$`, a real `YYYY-MM-DD` date) and add them to
+      before any fetch (ids `^[1-9]\d*$`, a real `YYYY-MM-DD` date) and add them to
       `EXTERNAL_ACTIONS` (AC-4, AC-5).
 - [x] 3.3 Run both actions under the per-action deadline: `D` = 25 s from
       handler entry on the call's own requests, no write started after

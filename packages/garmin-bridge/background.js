@@ -237,7 +237,9 @@ const DEADLINE_BEFORE_SEND = "deadline-before-send";
 const DEADLINE_EXCEEDED = "deadline-exceeded";
 const SCHEDULE_PATH_PREFIX = "/workout-service/schedule/";
 
-const GARMIN_ID = /^\d+$/;
+// Canonical decimal ids only: Garmin ids are positive and carry no leading
+// zero, and calendar-find compares them as String(number).
+const GARMIN_ID = /^[1-9]\d*$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const isGarminId = (v) => typeof v === "string" && GARMIN_ID.test(v);
@@ -310,7 +312,7 @@ const calendarCall = async (path, method, body) => {
 
 // Garmin answers a numeric id; the SPA's branded ids are digit strings.
 const toScheduleId = (v) => {
-  if (typeof v === "number" && Number.isSafeInteger(v) && v >= 0) {
+  if (typeof v === "number" && Number.isSafeInteger(v) && v > 0) {
     return String(v);
   }
   return isGarminId(v) ? v : null;
