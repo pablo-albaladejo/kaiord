@@ -4,7 +4,10 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ExportLedgerEntry } from "../../types/export-ledger";
+import {
+  type ExportLedgerEntry,
+  resolveLedgerMutation,
+} from "../../types/export-ledger";
 import type {
   ExportLedgerRepository,
   InsertPendingResult,
@@ -41,6 +44,17 @@ const makeRepo = (): ExportLedgerRepository & {
     update: async (id, patch) => {
       const existing = store.get(id);
       if (existing) store.set(id, { ...existing, ...patch });
+    },
+    mutateByKey: async (key, fn) => {
+      const k = naturalKey(key.kaiordRecordId, key.destinationBridgeId);
+      const id = naturalKeyIndex.get(k);
+      const current = id ? store.get(id) : undefined;
+      const next = resolveLedgerMutation(current, fn, new Date().toISOString());
+      if (!next) return current;
+      if (current) store.delete(current.id);
+      store.set(next.id, next);
+      naturalKeyIndex.set(k, next.id);
+      return next;
     },
     deleteById: async (id) => {
       const entry = store.get(id);

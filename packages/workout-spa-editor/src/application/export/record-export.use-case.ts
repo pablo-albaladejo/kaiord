@@ -1,5 +1,6 @@
 import type { Analytics, ManagedDataType } from "@kaiord/core";
 
+import type { ExportLedgerEntry } from "../../types/export-ledger";
 import type { ExportLedgerRepository } from "./export-ledger-repository.port";
 import {
   computeExportHash,
@@ -38,7 +39,7 @@ export const recordExport = async (
   const ledgerId = crypto.randomUUID();
   const now = new Date().toISOString();
   const t0 = Date.now();
-  const pending = {
+  const pending: ExportLedgerEntry = {
     id: ledgerId,
     kaiordRecordId,
     dataType,
@@ -69,15 +70,15 @@ export const recordExport = async (
     );
     return result;
   }
-  const externalId = await postAndCommit({
+  const committed = await postAndCommit({
     ledgerRepo,
     analytics: deps.analytics,
     dataType,
     destinationBridgeId,
-    ledgerId,
+    pending,
     payload,
     postFn,
     t0,
   });
-  return { ledgerId, outcome: "created", externalId };
+  return { ...committed, outcome: "created" };
 };
