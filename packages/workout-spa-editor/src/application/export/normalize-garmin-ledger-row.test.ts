@@ -92,6 +92,30 @@ describe("normalizeGarminLedgerRow", () => {
     expect(next.removalQueue).toEqual([{ ...QUEUED, state: "held" }]);
   });
 
+  it.each([
+    ["a legacy placement with no list", undefined, []],
+    ["an unsorted list with a repeat", ["20", "3", "20"], ["3", "20"]],
+  ])(
+    "should store a canonical supersedes for %s",
+    (_label, supersedes, expected) => {
+      // Arrange
+      const placement = {
+        kind: "unconfirmed",
+        workoutId: "1707805999",
+        date: "2026-09-27",
+        ...(supersedes ? { supersedes } : {}),
+      };
+      const row = garminRow({ placement });
+
+      // Act
+      const next = normalizeGarminLedgerRow(row);
+
+      // Assert
+      expect(next.placement).toEqual({ ...placement, supersedes: expected });
+      expect(normalizeGarminLedgerRow(next)).toEqual(next);
+    }
+  );
+
   it("should keep the scheduled placement and previous ids, replacing a legacy entry", () => {
     // Arrange
     const placed = (id: string) => ({

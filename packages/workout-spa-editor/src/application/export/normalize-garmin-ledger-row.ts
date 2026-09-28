@@ -9,7 +9,9 @@
  *   (`"pending"`, the `"garmin-unconfirmed"` sentinel) is `unconfirmed`.
  *   After that only `library` is read, never the overloaded external id.
  * - Every Garmin field is schema-parsed; an invalid part is dropped (a
- *   malformed queue entry is removed, the rest of the queue kept).
+ *   malformed queue entry is removed, the rest of the queue kept). The
+ *   parsed placement is stored, so an `unconfirmed` with no `supersedes`
+ *   (legacy) gets `[]` and every list is sorted and unique.
  * - A queue entry with no `state` (legacy) is `held`: unverified, so never
  *   drained. The id of a `scheduled` placement or `previous` is `keep`
  *   unless the queue already gives it a state. The queue is joined by id
@@ -91,8 +93,9 @@ export function normalizeGarminLedgerRow<T extends Row | ExportLedgerEntry>(
   const next: Row = { ...source, library: deriveLibrary(source) };
   if (source.forceRepush !== true) delete next.forceRepush;
   const placement = garminPlacementSchema.safeParse(source.placement);
-  if (!placement.success) delete next.placement;
   const livePlacement = placement.success ? placement.data : undefined;
+  if (livePlacement) next.placement = livePlacement;
+  else delete next.placement;
   const raw = Array.isArray(source.removalQueue) ? source.removalQueue : [];
   const queue = normalizeQueue(raw, livePlacement);
   if (queue.length > 0 || Array.isArray(source.removalQueue))

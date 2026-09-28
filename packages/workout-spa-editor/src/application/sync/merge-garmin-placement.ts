@@ -12,11 +12,14 @@
  * - When no `Placed` is free, an in-flight `attempting` / `uncertain` of
  *   either row survives; failing that the merge is `uncertain`. No state
  *   changes: nothing drainable is added, so no drain can leave a gap.
+ * - Two `unconfirmed` for one workout and date merge with the union of their
+ *   `supersedes`; a listed `retire` / `gone` entry never taints them.
  * - A superseded `unconfirmed` Placed has no id to retire and is dropped:
  *   the worst case is an untracked duplicate, never a gap.
  */
 import type { ExportLedgerEntry } from "../../types/export-ledger";
 import {
+  canonicalScheduleIds,
   type GarminPlaced,
   type GarminPlacement,
   isGarminPlaced,
@@ -47,6 +50,19 @@ const sameEntry = (x: GarminPlaced, y: GarminPlaced) =>
     ? x.workoutScheduleId === y.workoutScheduleId
     : x.workoutId === y.workoutId && x.date === y.date;
 
+/** Two `unconfirmed` for the same workout and date are one placement: the
+    union of both `supersedes` (design §3.9), tested for taint as one. */
+const unite = (n?: GarminPlaced, o?: GarminPlaced) =>
+  n?.kind === "unconfirmed" && o?.kind === "unconfirmed" && sameEntry(n, o)
+    ? [
+        {
+          ...n,
+          supersedes: canonicalScheduleIds([...n.supersedes, ...o.supersedes]),
+        },
+        undefined,
+      ]
+    : [n, o];
+
 /** Neither row is placed: keep an in-flight state, `posted: true` and
     `uncertain` (either may exist on Garmin) over `posted: false`. */
 const pickInFlight = (n?: GarminPlacement, o?: GarminPlacement) => {
@@ -57,7 +73,7 @@ const pickInFlight = (n?: GarminPlacement, o?: GarminPlacement) => {
 
 /** Picks the merged placement; raises the loser to `retire` in `queue`. */
 const choose = (newer: Ledger, older: Ledger, queue: Queue) => {
-  const placed = [placedOf(newer), placedOf(older)];
+  const placed = unite(placedOf(newer), placedOf(older));
   const [candN, candO] = placed.map((p) =>
     p && !isTainted(p, queue) ? p : undefined
   );

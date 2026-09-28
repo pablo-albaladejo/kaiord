@@ -36,10 +36,11 @@ const entry = (
   abandoned,
   state,
 });
-const unconfirmed = (date: string) => ({
+const unconfirmed = (date: string, supersedes: string[] = []) => ({
   kind: "unconfirmed",
   workoutId: W,
   date,
+  supersedes,
 });
 
 const row = (id: string, updatedAt: string, garmin: Row = {}): Row => ({
@@ -353,6 +354,63 @@ describe("mergeGarminLedgerRows", () => {
     // Assert
     expect(merged.placement).toEqual(scheduled("2", D2));
     expect(merged.removalQueue).toEqual(moved.removalQueue);
+  });
+
+  it("should let a listed retired or drained entry never taint an id-less placement", () => {
+    // Arrange
+    const back = row("id-a", NEWER_AT, {
+      placement: unconfirmed(D1, ["1", "2"]),
+      removalQueue: [entry("1", D1, "gone"), entry("2", D2, "retire")],
+    });
+    const stale = row("id-b", OLDER_AT, {
+      placement: scheduled("2", D2),
+      removalQueue: [entry("1", D1, "gone"), entry("2", D2, "keep")],
+    });
+
+    // Act
+    const self = mergeGarminLedgerRows(back, back);
+    const merged = mergeBothWays(back, stale);
+
+    // Assert
+    expect(self).toEqual(back);
+    expect(merged.placement).toEqual(unconfirmed(D1, ["1", "2"]));
+  });
+
+  it("should still let a listed held entry taint an id-less placement", () => {
+    // Arrange
+    const back = row("id-a", NEWER_AT, {
+      placement: unconfirmed(D1, ["1"]),
+      removalQueue: [entry("1", D1, "held")],
+    });
+
+    // Act
+    const merged = mergeGarminLedgerRows(back, back);
+
+    // Assert
+    expect(merged.placement).toEqual({
+      kind: "uncertain",
+      workoutId: W,
+      date: D1,
+    });
+  });
+
+  it("should merge two id-less placements for one date with the union of their supersedes", () => {
+    // Arrange
+    const a = row("id-a", NEWER_AT, {
+      placement: unconfirmed(D1, ["2"]),
+      removalQueue: [entry("1", D1, "gone"), entry("2", D2, "retire")],
+    });
+    const b = row("id-b", OLDER_AT, {
+      placement: unconfirmed(D1, ["1"]),
+      removalQueue: [entry("1", D1, "gone")],
+    });
+
+    // Act
+    const merged = mergeBothWays(a, b);
+
+    // Assert
+    expect(merged.placement).toEqual(unconfirmed(D1, ["1", "2"]));
+    expect(mergeGarminLedgerRows(a, merged)).toEqual(merged);
   });
 
   it.each([

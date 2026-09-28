@@ -49,10 +49,20 @@ const scheduledSchema = z.object({
   date: calendarDate,
 });
 
+/** Sorted and unique, so equal lists serialise equally (merge laws). */
+export const canonicalScheduleIds = <T extends string>(ids: T[]): T[] =>
+  [...new Set(ids)].sort((x, y) => x.length - y.length || (x < y ? -1 : 1));
+
+/** `supersedes`: the ids the row knew when it committed this id-less entry,
+    so none of them is it (design §3.9). Absent (legacy, adoption) = `[]`. */
 const unconfirmedPlacedSchema = z.object({
   kind: z.literal("unconfirmed"),
   workoutId: garminWorkoutIdSchema,
   date: calendarDate,
+  supersedes: z
+    .array(garminScheduleIdSchema)
+    .transform(canonicalScheduleIds)
+    .default([]),
 });
 
 export const garminPlacedSchema = z.discriminatedUnion("kind", [

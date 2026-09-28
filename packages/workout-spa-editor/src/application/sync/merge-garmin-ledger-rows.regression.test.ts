@@ -167,4 +167,28 @@ describe("mergeGarminLedgerRows round-2 regressions", () => {
     expect(a.row).toStrictEqual(b.row);
     expect(calendar).toContain(placedId(a.row));
   });
+
+  it("should keep a device's own id-less placement back at an earlier date (L)", () => {
+    // Arrange
+    const x = row("id-a", "2026-09-28T08:00:00.000Z", {
+      placement: {
+        kind: "unconfirmed",
+        workoutId: W,
+        date: D1,
+        supersedes: ["1", "2"],
+      },
+      removalQueue: [
+        { ...legacy("1", D1), state: "gone" },
+        { ...legacy("2", D2), state: "retire" },
+      ],
+    });
+
+    // Act
+    const self = merge(x, x);
+    const again = merge(x, self);
+
+    // Assert
+    expect(self).toStrictEqual(x);
+    expect(again).toStrictEqual(x);
+  });
 });

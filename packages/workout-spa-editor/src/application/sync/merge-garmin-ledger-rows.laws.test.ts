@@ -8,22 +8,33 @@
  * world cloned at each node), so no interleaving is hand-picked. Each step
  * is what the pipeline does to the ledger:
  *
- * - push: a `schedule` POST at the next date. `ok` commits the new id `keep`
- *   and retires a `scheduled` previous; `no-id` commits `unconfirmed` (the
- *   entry exists, its id is unknown); `ambiguous` may or may not have created
- *   it and leaves `uncertain{previous}`.
+ * - push: a `schedule` POST at the next date (cycling through the scenario's
+ *   dates, so a device can move back). `ok` commits the new id `keep` and
+ *   retires a `scheduled` previous; `no-id` commits `unconfirmed` listing
+ *   every id its queue knew in `supersedes` (the entry exists, its id is
+ *   unknown); `ambiguous` may or may not have created it and leaves
+ *   `uncertain{previous}`.
  * - drain: sends every `retire` id and writes `gone`.
+ * - abandon: every `retire` id failed three times (it stays on Garmin).
+ * - dismiss: the athlete removes the lowest abandoned or `held` entry that
+ *   is not the device's own `Placed` / `previous`, and says so (`gone`). A
+ *   `held` one only when it is a true duplicate — no row anywhere holds it
+ *   `keep`: deleting another device's verified `Placed` by hand is an
+ *   external deletion the ledger cannot prevent (it crosses with that
+ *   device's supersession exactly like deleting it in Garmin directly).
  * - sync: `syncWithCloud` through the `exportLedger` hook (normalize, then
  *   the snapshot merge, then the live merge).
- * - t5: the `uncertain` resolution by `calendar-find`, or a failed read: one
- *   match is adopted `keep` (a `scheduled` previous retires), unseen `held`
- *   ids become `gone`, seen ones stay `held`.
+ * - t5: the `uncertain` resolution by `calendar-find` over the `uncertain`'s
+ *   date and every `held` entry's date, or a failed read: one match at the
+ *   `uncertain`'s date is adopted `keep` (a `scheduled` previous retires),
+ *   unseen `held` ids become `gone`, seen ones stay `held`.
  *
  * Safety is checked after every step: a drain never sends the device's own
  * `Placed` or `previous`, and never empties a calendar that had a live
  * entry. At every leaf the devices sync and drain until nothing changes, and
  * must converge on one row whose `Placed`, if any, is live. The rows met on
- * the way form the pool for symmetry, idempotence and absorption.
+ * the way form the pool for symmetry, idempotence and absorption, with no
+ * well-formedness filter: every row checked is one the pipeline produced.
  */
 import { describe, expect, it } from "vitest";
 
@@ -37,6 +48,7 @@ type Placement = {
   workoutScheduleId?: string;
   workoutId?: string;
   date: string;
+  supersedes?: string[];
   previous?: Placement;
 };
 type Entry = {
@@ -57,6 +69,8 @@ type World = {
   /** Pushes per device: each device walks the same dates, so its first
       push lands on the same date as another device's first push. */
   pushes: number[];
+  /** How many of `DATES` the pushes cycle through. */
+  dates: number;
 };
 type Step = { device: number; op: string };
 
@@ -159,7 +173,7 @@ function push(world: World, device: number, outcome: string) {
   const row = world.devices[device];
   const current = placementOf(row);
   if (current?.kind === "uncertain") return; // the pipeline asks T5 first
-  const date = DATES[world.pushes[device]++ % DATES.length];
+  const date = DATES[world.pushes[device]++ % world.dates];
   const id = String(world.nextId++);
   const created = outcome !== "ambiguous-lost";
   if (created) world.calendar.push({ id, date });
@@ -175,7 +189,15 @@ function push(world: World, device: number, outcome: string) {
     ]);
   else if (outcome === "no-id")
     next = withQueue(
-      { ...row, placement: { kind: "unconfirmed", workoutId: W, date } },
+      {
+        ...row,
+        placement: {
+          kind: "unconfirmed",
+          workoutId: W,
+          date,
+          supersedes: queueOf(row).map((e) => e.workoutScheduleId),
+        },
+      },
       retirePrevious(previous)
     );
   else
@@ -196,15 +218,17 @@ function t5(world: World, device: number, readOk: boolean) {
   const current = placementOf(row);
   if (current?.kind !== "uncertain" || !readOk) return;
   const states = new Map(queueOf(row).map((e) => [e.workoutScheduleId, e]));
-  const matches = world.calendar.filter(
+  const held = queueOf(row).filter((e) => e.state === "held");
+  const dates = new Set([current.date, ...held.map((e) => e.date)]);
+  const read = world.calendar.filter((c) => dates.has(c.date));
+  const matches = read.filter(
     (c) =>
       c.date === current.date &&
       ["held", "keep", undefined].includes(states.get(c.id)?.state)
   );
   if (matches.length !== 1) return; // several → duplicate-left; none → UI
   const [adopted] = matches;
-  const live = new Set(world.calendar.map((c) => c.id));
-  const held = queueOf(row).filter((e) => e.state === "held");
+  const live = new Set(read.map((c) => c.id));
   const writes = [
     entry(adopted.id, adopted.date, "keep"),
     ...retirePrevious(current.previous).filter(
@@ -245,6 +269,46 @@ function drain(world: World, device: number): string | undefined {
     return `${DEVICES[device]}'s drain empties the calendar`;
 }
 
+function abandon(world: World, device: number) {
+  const row = world.devices[device];
+  const retired = queueOf(row).filter((e) => e.state === "retire");
+  if (retired.length === 0) return;
+  const writes = retired.map((e) =>
+    entry(e.workoutScheduleId, e.date, "retire", {
+      attempts: 3,
+      abandoned: true,
+    })
+  );
+  world.devices[device] = stamp(world, device, withQueue(row, writes));
+}
+
+function dismiss(world: World, device: number) {
+  const row = world.devices[device];
+  const own = placementOf(row);
+  const ownIds = [own?.workoutScheduleId, own?.previous?.workoutScheduleId];
+  const verified = new Set(
+    [...world.devices, world.cloud].flatMap((r) =>
+      queueOf(r && normalizeGarminLedgerRow(r))
+        .filter((e) => e.state === "keep")
+        .map((e) => e.workoutScheduleId)
+    )
+  );
+  const duplicate = (e: Entry) =>
+    e.abandoned || (e.state === "held" && !verified.has(e.workoutScheduleId));
+  const target = queueOf(row).find(
+    (e) =>
+      duplicate(e) &&
+      e.state !== "gone" &&
+      !ownIds.includes(e.workoutScheduleId)
+  );
+  if (!target) return;
+  world.calendar = world.calendar.filter(
+    (c) => c.id !== target.workoutScheduleId
+  );
+  const write = entry(target.workoutScheduleId, target.date, "gone");
+  world.devices[device] = stamp(world, device, withQueue(row, [write]));
+}
+
 function sync(world: World, device: number) {
   const local = world.devices[device];
   const snapshot = world.cloud ? hookMerge(local, world.cloud) : local;
@@ -257,6 +321,8 @@ function apply(world: World, { device, op }: Step): string | undefined {
   else if (op === "drain") return drain(world, device);
   else if (op === "t5") t5(world, device, true);
   else if (op === "t5-read-fails") t5(world, device, false);
+  else if (op === "abandon") abandon(world, device);
+  else if (op === "dismiss") dismiss(world, device);
   else push(world, device, op.slice("push-".length));
 }
 
@@ -344,19 +410,27 @@ function explore(s: Scenario) {
 
 // ---- scenarios ------------------------------------------------------------
 
-const world = (devices: Row[], calendar: Live[], nextId = 100): World => ({
+const world = (
+  devices: Row[],
+  calendar: Live[],
+  nextId = 100,
+  dates = DATES.length
+): World => ({
   calendar,
   devices,
   tick: 0,
   nextId,
   pushes: [0, 0, 0],
+  dates,
 });
 
 /** A fresh world with `script` already applied. */
-const scripted = (script: Step[]) => (): World => {
+const scripted = (script: Step[], dates?: number) => (): World => {
   const w = world(
     [0, 1, 2].map((d) => baseRow(d)),
-    []
+    [],
+    100,
+    dates
   );
   for (const step of script) apply(w, step);
   return w;
@@ -437,7 +511,7 @@ const SCENARIOS: Scenario[] = [
     alphabet: [
       ...steps(
         ["push-ok", "push-no-id", "push-ambiguous", "push-ambiguous-lost"],
-        [0, 1]
+        [0, 2]
       ),
       ...steps(["sync", "drain", "t5", "t5-read-fails"], [0, 1, 2]),
     ],
@@ -453,30 +527,32 @@ const SCENARIOS: Scenario[] = [
     name: "legacy rows (review-3 D, probe3 and the normal<keep repro)",
     seed: legacyWorld,
     alphabet: [
-      ...steps(["sync", "drain", "t5", "t5-read-fails"]),
+      ...steps(["sync", "drain", "t5", "t5-read-fails", "dismiss"]),
       ...steps(["push-ok"], [2]),
+    ],
+    depth: 4,
+  },
+  {
+    name: "moves back to an earlier date (round-3 L)",
+    seed: scripted([], 2),
+    alphabet: [
+      ...steps(["push-ok", "push-no-id"], [0, 2]),
+      ...steps(["sync", "drain"]),
+    ],
+    depth: 5,
+  },
+  {
+    name: "abandoned and dismissed entries",
+    seed: staleWorld,
+    alphabet: [
+      ...steps(["push-ok", "push-no-id"], [0, 2]),
+      ...steps(["sync", "drain", "abandon", "dismiss"]),
     ],
     depth: 4,
   },
 ];
 
 // ---- laws -----------------------------------------------------------------
-
-/** Normalized, and its own `Placed` is not tainted by its own queue. */
-const wellFormed = (r: Row) => {
-  const p = placementOf(r);
-  const q = queueOf(r);
-  if (p?.kind === "scheduled")
-    return q.every(
-      (e) => e.workoutScheduleId !== p.workoutScheduleId || e.state === "keep"
-    );
-  if (p?.kind === "unconfirmed")
-    return q.every(
-      (e) =>
-        e.date !== p.date || e.workoutId !== p.workoutId || e.state === "keep"
-    );
-  return true;
-};
 
 describe("mergeGarminLedgerRows laws over enumerated histories", () => {
   const explored = SCENARIOS.map((s) => ({ s, ...explore(s) }));
@@ -505,8 +581,7 @@ describe("mergeGarminLedgerRows laws over enumerated histories", () => {
 
       // Act
       for (const [x, y] of pairs) {
-        if (x === y && wellFormed(x) && !same(merge(x, x), x))
-          broken.push("idempotence");
+        if (x === y && !same(merge(x, x), x)) broken.push("idempotence");
         const xy = merge(x, y);
         if (!same(xy, merge(y, x))) broken.push("symmetry");
         if (!same(merge(x, xy), xy) || !same(merge(xy, y), xy))

@@ -51,15 +51,24 @@ export const joinQueues = (
 
 /** A `Placed` that may not be live: a `scheduled` whose id is not `keep`,
     or an `unconfirmed` (no id) whose workout and date match an entry that
-    is not `keep` — `gone` included, else a drained id loses its taint. */
+    is not `keep` — `gone` included, else a drained id loses its taint —
+    unless that entry is a `retire` / `gone` one its `supersedes` lists: an
+    id known before the placement's entry existed is another entry. */
 export const isTainted = (p: GarminPlaced, queue: Queue): boolean => {
   if (p.kind === "scheduled") {
     const state = queue.get(p.workoutScheduleId)?.state;
     return state !== undefined && state !== "keep";
   }
+  const listed = new Set<string>(p.supersedes);
+  const superseded = (e: GarminRemovalEntry) =>
+    listed.has(e.workoutScheduleId) &&
+    (e.state === "retire" || e.state === "gone");
   return [...queue.values()].some(
     (e) =>
-      e.workoutId === p.workoutId && e.date === p.date && e.state !== "keep"
+      e.workoutId === p.workoutId &&
+      e.date === p.date &&
+      e.state !== "keep" &&
+      !superseded(e)
   );
 };
 
